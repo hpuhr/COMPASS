@@ -47,10 +47,10 @@ MainLoadWidget::MainLoadWidget() : QWidget()
 
     QVBoxLayout* left_layout = new QVBoxLayout();
 
-    DBInterfaceInfoWidget* interface_widget = COMPASS::instance().interface().infoWidget();
-    interface_widget->setFrameStyle(QFrame::Panel | QFrame::Raised);
-    interface_widget->setLineWidth(frame_width);
-    left_layout->addWidget(interface_widget);
+//    DBInterfaceInfoWidget* interface_widget = COMPASS::instance().interface().infoWidget();
+//    interface_widget->setFrameStyle(QFrame::Panel | QFrame::Raised);
+//    interface_widget->setLineWidth(frame_width);
+//    left_layout->addWidget(interface_widget);
 
     DBObjectManagerLoadWidget* objman_widget = COMPASS::instance().objectManager().loadWidget();
     objman_widget->setFrameStyle(QFrame::Panel | QFrame::Raised);

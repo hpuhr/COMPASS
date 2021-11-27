@@ -22,7 +22,7 @@
 #include "dbcommand.h"
 #include "dbcommandlist.h"
 #include "sqliteconnection.h"
-#include "dbinterfaceinfowidget.h"
+//#include "dbinterfaceinfowidget.h"
 #include "dbobject.h"
 #include "dbobjectmanager.h"
 #include "dbovariable.h"
@@ -74,55 +74,55 @@ DBInterface::~DBInterface()
     logdbg << "DBInterface: desctructor: end";
 }
 
-void DBInterface::databaseOpenend()
-{
-    loginf << "DBInterface: databaseOpenend";
+//void DBInterface::databaseOpenend()
+//{
+//    loginf << "DBInterface: databaseOpenend";
 
-    updateTableInfo();
+//    updateTableInfo();
 
-    if (!existsPropertiesTable())
-        createPropertiesTable();
+//    if (!existsPropertiesTable())
+//        createPropertiesTable();
 
-    loadProperties();
+//    loadProperties();
 
-    if (!existsSectorsTable())
-        createSectorsTable();
+//    if (!existsSectorsTable())
+//        createSectorsTable();
 
-    COMPASS::instance().evaluationManager().loadSectors(); // init done in mainwindow
+//    COMPASS::instance().evaluationManager().loadSectors(); // init done in mainwindow
 
-    COMPASS::instance().objectManager().databaseOpenendSlot();
-}
+//    COMPASS::instance().objectManager().databaseOpenendSlot();
+//}
 
-void DBInterface::databaseContentChanged()
-{
-    loginf << "DBInterface: databaseContentChanged";
+//void DBInterface::databaseContentChanged()
+//{
+//    loginf << "DBInterface: databaseContentChanged";
 
-    updateTableInfo();
+//    updateTableInfo();
 
-    emit databaseContentChangedSignal();
-}
+//    emit databaseContentChangedSignal();
+//}
 
-void DBInterface::closeConnection()
-{
-    QMutexLocker locker(&connection_mutex_);
+//void DBInterface::closeConnection()
+//{
+//    QMutexLocker locker(&connection_mutex_);
 
-    if (properties_loaded_)  // false if database not opened
-        saveProperties();
+//    if (properties_loaded_)  // false if database not opened
+//        saveProperties();
 
-    logdbg << "DBInterface: closeConnection";
-    assert (db_connection_);
-    db_connection_->disconnect();
+//    logdbg << "DBInterface: closeConnection";
+//    assert (db_connection_);
+//    db_connection_->disconnect();
 
 
-    if (info_widget_)
-    {
-        delete info_widget_;
-        info_widget_ = nullptr;
-    }
+//    if (info_widget_)
+//    {
+//        delete info_widget_;
+//        info_widget_ = nullptr;
+//    }
 
-    table_info_.clear();
-    logdbg << "DBInterface: closeConnection: done";
-}
+//    table_info_.clear();
+//    logdbg << "DBInterface: closeConnection: done";
+//}
 
 void DBInterface::updateTableInfo()
 {
@@ -136,16 +136,16 @@ void DBInterface::updateTableInfo()
     loginf << "DBInterface: updateTableInfo: found " << table_info_.size() << " tables";
 }
 
-DBInterfaceInfoWidget* DBInterface::infoWidget()
-{
-    if (!info_widget_)
-    {
-        info_widget_ = new DBInterfaceInfoWidget(*this);
-    }
+//DBInterfaceInfoWidget* DBInterface::infoWidget()
+//{
+//    if (!info_widget_)
+//    {
+//        info_widget_ = new DBInterfaceInfoWidget(*this);
+//    }
 
-    assert(info_widget_);
-    return info_widget_;
-}
+//    assert(info_widget_);
+//    return info_widget_;
+//}
 
 //QWidget* DBInterface::connectionWidget()
 //{
@@ -165,6 +165,16 @@ void DBInterface::openDBFile(const std::string& filename)
     assert (db_connection_);
     db_connection_->openFile(filename);
 
+    updateTableInfo();
+
+    if (!existsPropertiesTable())
+        createPropertiesTable();
+
+    loadProperties();
+
+    if (!existsSectorsTable())
+        createSectorsTable();
+
     emit databaseOpenedSignal();
 
     loginf << "DBInterface: openDBFile: done";
@@ -174,8 +184,20 @@ void DBInterface::closeDBFile()
 {
     loginf << "DBInterface: closeDBFile";
 
-    assert (db_connection_);
-    db_connection_->disconnect();
+    {
+        QMutexLocker locker(&connection_mutex_);
+
+        if (properties_loaded_)  // false if database not opened
+            saveProperties();
+
+        assert (db_connection_);
+        db_connection_->disconnect();
+
+        properties_loaded_ = false;
+
+        properties_.clear();
+        table_info_.clear();
+    }
 
     emit databaseClosedSignal();
 }

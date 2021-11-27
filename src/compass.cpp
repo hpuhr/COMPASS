@@ -30,6 +30,7 @@
 #include "viewmanager.h"
 #include "evaluationmanager.h"
 #include "mainwindow.h"
+#include "files.h"
 
 #include <qobject.h>
 
@@ -37,6 +38,7 @@
 
 using namespace std;
 using namespace nlohmann;
+using namespace Utils;
 
 COMPASS::COMPASS() : Configurable("COMPASS", "COMPASS0", 0, "compass.json")
 {
@@ -58,14 +60,20 @@ COMPASS::COMPASS() : Configurable("COMPASS", "COMPASS0", 0, "compass.json")
     assert(view_manager_);
     assert(eval_manager_);
 
-    QObject::connect(db_interface_.get(), &DBInterface::databaseContentChangedSignal,
-                     dbo_manager_.get(), &DBObjectManager::databaseContentChangedSlot,
-                     Qt::QueuedConnection);
+//    QObject::connect(db_interface_.get(), &DBInterface::databaseContentChangedSignal,
+//                     dbo_manager_.get(), &DBObjectManager::databaseContentChangedSlot,
+//                     Qt::QueuedConnection);
 
-    QObject::connect(dbo_manager_.get(), &DBObjectManager::dbObjectsChangedSignal,
-                     task_manager_.get(), &TaskManager::dbObjectsChangedSlot);
-    QObject::connect(dbo_manager_.get(), &DBObjectManager::schemaChangedSignal, task_manager_.get(),
-                     &TaskManager::schemaChangedSlot);
+//    QObject::connect(dbo_manager_.get(), &DBObjectManager::dbObjectsChangedSignal,
+//                     task_manager_.get(), &TaskManager::dbObjectsChangedSlot);
+//    QObject::connect(dbo_manager_.get(), &DBObjectManager::schemaChangedSignal, task_manager_.get(),
+//                     &TaskManager::schemaChangedSlot);
+
+    QObject::connect(db_interface_.get(), &DBInterface::databaseOpenedSignal,
+                     eval_manager_.get(), &EvaluationManager::databaseOpenedSlot);
+
+    QObject::connect(db_interface_.get(), &DBInterface::databaseClosedSignal,
+                     eval_manager_.get(), &EvaluationManager::databaseClosedSlot);
 
     dbo_manager_->updateSchemaInformationSlot();
 
@@ -177,21 +185,53 @@ void COMPASS::checkSubConfigurables()
     }
 }
 
-void COMPASS::openDBFile(const std::string& file_name)
+void COMPASS::openDBFile(const std::string& filename)
 {
+    loginf << "COMPASS: openDBFile: opening file '" << filename << "'";
+
     assert (!db_opened_);
     assert (db_interface_);
 
-    last_db_filename_ = file_name;
+    assert (Files::fileExists(filename));
 
-    db_interface_->openDBFile(file_name);
+    last_db_filename_ = filename;
+
+    db_interface_->openDBFile(filename);
     assert (db_interface_->dbOpen());
+
+    addDBFileToLost(filename);
+
+    db_opened_ = true;
+}
+
+void COMPASS::createNewDBFile(const std::string& filename)
+{
+    loginf << "COMPASS: createNewDBFile: creating new file '" << filename << "'";
+
+    assert (!db_opened_);
+    assert (db_interface_);
+
+    if (Files::fileExists(filename))
+    {
+        // confirmation already done by dialog
+        loginf << "COMPASS: createNewDBFile: deleting pre-existing file '" << filename << "'";
+        Files::deleteFile(filename);
+    }
+
+    last_db_filename_ = filename;
+
+    db_interface_->openDBFile(filename);
+    assert (db_interface_->dbOpen());
+
+    addDBFileToLost(filename);
 
     db_opened_ = true;
 }
 
 void COMPASS::closeDB()
 {
+    loginf << "COMPASS: closeDB: closing db file '" << last_db_filename_ << "'";
+
     assert (db_opened_);
 
     db_interface_->closeDBFile();
@@ -269,9 +309,6 @@ void COMPASS::shutdown()
     view_manager_->close();
     view_manager_ = nullptr;
 
-    assert(db_interface_);
-    db_interface_->closeConnection();  // removes connection widgets, needs to be before
-
     assert(dbo_manager_);
     dbo_manager_ = nullptr;
 
@@ -279,11 +316,16 @@ void COMPASS::shutdown()
     task_manager_->shutdown();
     task_manager_ = nullptr;
 
-    assert(db_interface_);
-    db_interface_ = nullptr;
-
     assert(filter_manager_);
     filter_manager_ = nullptr;
+
+    assert(db_interface_);
+
+    if (db_interface_->dbOpen())
+        db_interface_->closeDBFile();
+
+    db_interface_ = nullptr;
+
 
     //main_window_ = nullptr;
 
@@ -314,5 +356,21 @@ std::vector<std::string> COMPASS::dbFileList() const
 void COMPASS::clearDBFileList()
 {
     db_file_list_.clear();
+}
+
+void COMPASS::addDBFileToLost(const std::string filename)
+{
+    vector<string> tmp_list = db_file_list_.get<std::vector<string>>();
+
+    if (find(tmp_list.begin(), tmp_list.end(), filename) == tmp_list.end())
+    {
+        loginf << "COMPASS: addDBFileToLost: adding filename '" << filename << "'";
+
+        tmp_list.push_back(filename);
+
+        sort(tmp_list.begin(), tmp_list.end());
+
+        db_file_list_ = tmp_list;
+    }
 }
 

@@ -46,7 +46,7 @@ class DBObject;
 class DBODataSource;
 class DBResult;
 class DBTableInfo;
-class DBInterfaceInfoWidget;
+//class DBInterfaceInfoWidget;
 class Job;
 class BufferWriter;
 class Sector;
@@ -75,22 +75,20 @@ public:
     /// @brief Destructor
     virtual ~DBInterface();
 
-    void databaseOpenend();
-    void databaseContentChanged();
-    void closeConnection();
+    //void databaseOpenend();
+    //void databaseContentChanged();
 
-    void updateTableInfo();
 
     virtual void generateSubConfigurable(const std::string& class_id,
                                          const std::string& instance_id);
 
     std::vector<std::string> getDatabases();
 
-    DBInterfaceInfoWidget* infoWidget();
+    //DBInterfaceInfoWidget* infoWidget();
 
     //QWidget* connectionWidget();
 
-    void openDBFile(const std::string& file_name);
+    void openDBFile(const std::string& filename);
     void closeDBFile();
     bool dbOpen();
 
@@ -187,7 +185,7 @@ protected:
 
     SQLGenerator sql_generator_;
 
-    DBInterfaceInfoWidget* info_widget_{nullptr};
+    //DBInterfaceInfoWidget* info_widget_{nullptr};
 
     std::map<std::string, DBTableInfo> table_info_;
 
@@ -203,6 +201,9 @@ protected:
 
     void loadProperties();
     void saveProperties();
+
+    void updateTableInfo();
+    //void closeConnection();
 
 };
 

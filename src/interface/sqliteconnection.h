@@ -51,9 +51,6 @@ class SQLiteConnection : public QObject, public Configurable
 {
     Q_OBJECT
 
-signals:
-    void connectedSignal();
-
 public:
     SQLiteConnection(const std::string& class_id, const std::string& instance_id,
                      DBInterface* interface);

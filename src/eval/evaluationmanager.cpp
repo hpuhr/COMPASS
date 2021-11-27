@@ -496,6 +496,23 @@ std::string EvaluationManager::getCannotEvaluateComment()
     return "Please activate at least one requirement group";
 }
 
+void EvaluationManager::databaseOpenedSlot()
+{
+    loginf << "EvaluationManager: databaseOpenedSlot";
+
+    assert (!sectors_loaded_);
+    loadSectors();
+}
+
+void EvaluationManager::databaseClosedSlot()
+{
+    loginf << "EvaluationManager: databaseClosedSlot";
+
+    sector_layers_.clear();
+
+    sectors_loaded_ = false;
+}
+
 void EvaluationManager::newDataSlot(DBObject& object)
 {
     loginf << "EvaluationManager: newDataSlot: obj " << object.name() << " buffer size " << object.data()->size();

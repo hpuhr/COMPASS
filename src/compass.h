@@ -50,8 +50,8 @@ public:
     virtual void generateSubConfigurable(const std::string& class_id,
                                          const std::string& instance_id);
 
-    void openDBFile(const std::string& file_name);
-    void createNewDBFile(const std::string& file_name);
+    void openDBFile(const std::string& filename);
+    void createNewDBFile(const std::string& filename);
     bool dbOpened();
     void closeDB();
 
@@ -97,6 +97,7 @@ public:
     std::string lastDbFilename() const;
     std::vector<std::string> dbFileList() const;
     void clearDBFileList();
+    void addDBFileToLost(const std::string filename);
 };
 
 #endif /* COMPASS_H_ */

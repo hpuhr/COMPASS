@@ -36,6 +36,7 @@
 #include "evaluationmanager.h"
 
 #include <QApplication>
+#include <QFileDialog>
 #include <QCloseEvent>
 #include <QSettings>
 #include <QStackedWidget>
@@ -213,7 +214,7 @@ void MainWindow::updateMenus()
     {
         QAction* file_act = new QAction(fn_it.c_str());
         file_act->setData(fn_it.c_str());
-        connect(file_act, &QAction::triggered, this, &MainWindow::openExistingDBSlot);
+        connect(file_act, &QAction::triggered, this, &MainWindow::openRecentDBSlot);
         open_recent_menu_->addAction(file_act);
     }
     open_recent_menu_->setDisabled(recent_file_list.size() == 0);
@@ -250,26 +251,63 @@ void MainWindow::showViewPointsTab()
 void MainWindow::newDBSlot()
 {
     loginf << "MainWindow: newDBSlot";
+
+    string filename = QFileDialog::getSaveFileName(this, "New SQLite3 File").toStdString();
+
+    if (filename.size() > 0)
+    {
+        COMPASS::instance().createNewDBFile(filename);
+
+        updateMenus();
+    }
 }
 
 void MainWindow::openExistingDBSlot()
 {
     loginf << "MainWindow: openExistingDBSlot";
+
+    string filename = QFileDialog::getOpenFileName(this, "Add SQLite3 File").toStdString();
+
+    if (filename.size() > 0)
+    {
+        COMPASS::instance().openDBFile(filename);
+
+        updateMenus();
+    }
 }
 
 void MainWindow::openRecentDBSlot()
 {
     loginf << "MainWindow: openRecentDBSlot";
+
+    QAction* action = dynamic_cast<QAction*> (QObject::sender());
+    assert (action);
+
+    string filename = action->data().toString().toStdString();
+
+    assert (filename.size());
+
+    COMPASS::instance().openDBFile(filename);
+
+    updateMenus();
 }
 
 void MainWindow::clearExistingDBsSlot()
 {
     loginf << "MainWindow: clearExistingDBsSlot";
+
+    COMPASS::instance().clearDBFileList();
+
+    updateMenus();
 }
 
 void MainWindow::closeDBSlot()
 {
     loginf << "MainWindow: closeDBSlot";
+
+    COMPASS::instance().closeDB();
+
+    updateMenus();
 }
 
 void MainWindow::saveConfigSlot()

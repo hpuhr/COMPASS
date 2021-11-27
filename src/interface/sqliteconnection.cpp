@@ -82,10 +82,10 @@ void SQLiteConnection::openFile(const std::string& file_name)
 
     db_opened_ = true;
 
-    interface_.databaseOpenend();
-    interface_.databaseContentChanged();
+//    interface_.databaseOpenend();
+//    interface_.databaseContentChanged();
 
-    emit connectedSignal();
+    //emit connectedSignal();
 
 //    if (info_widget_)
 //        info_widget_->updateSlot();

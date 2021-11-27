@@ -720,8 +720,8 @@ void GPSTrailImportTask::insertDoneSlot(DBObject& object)
 
     COMPASS::instance().interface().setProperty(DONE_PROPERTY_NAME, "1");
 
-    COMPASS::instance().interface().databaseContentChanged();
-    object.updateToDatabaseContent();
+//    COMPASS::instance().interface().databaseContentChanged();
+//    object.updateToDatabaseContent();
 
     QMessageBox msg_box;
 

@@ -52,6 +52,10 @@ signals:
     void resultsChangedSignal();
 
 public slots:
+
+    void databaseOpenedSlot();
+    void databaseClosedSlot();
+
     void newDataSlot(DBObject& object);
     void loadingDoneSlot(DBObject& object);
 
@@ -80,7 +84,6 @@ public:
     EvaluationManagerWidget* widget();
 
     bool sectorsLoaded() const;
-    void loadSectors();
 
     bool hasSectorLayer (const std::string& layer_name);
     //void renameSectorLayer (const std::string& name, const std::string& new_name);
@@ -329,8 +332,6 @@ public:
     double resultDetailZoom() const;
     void resultDetailZoom(double result_detail_zoom);
 
-
-
 protected:
     COMPASS& compass_;
 
@@ -460,6 +461,8 @@ protected:
         std::tuple<bool, unsigned int, unsigned int>>> adsb_info_;
 
     virtual void checkSubConfigurables() override;
+
+    void loadSectors();
 
     void updateReferenceDBO();
     void updateReferenceDataSources();
