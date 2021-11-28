@@ -46,8 +46,8 @@ class Task : public QObject
 
     std::string name() const { return name_; }
 
-    virtual TaskWidget* widget() = 0;
-    virtual void deleteWidget() = 0;
+//    virtual TaskWidget* widget() = 0;
+//    virtual void deleteWidget() = 0;
 
     bool guiOnly() const { return gui_only_; }
 

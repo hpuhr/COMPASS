@@ -460,15 +460,15 @@ void ViewPointsImportTask::import ()
                     return;
                 }
 
-                ASTERIXImportTaskWidget* asterix_import_task_widget =
-                        dynamic_cast<ASTERIXImportTaskWidget*>(asterix_importer_task.widget());
-                assert(asterix_import_task_widget);
+//                ASTERIXImportTaskWidget* asterix_import_task_widget =
+//                        dynamic_cast<ASTERIXImportTaskWidget*>(asterix_importer_task.widget());
+//                assert(asterix_import_task_widget);
 
-                asterix_import_task_widget->addFile(filename);
-                asterix_import_task_widget->selectFile(filename);
+//                asterix_import_task_widget->addFile(filename);
+//                asterix_import_task_widget->selectFile(filename);
 
-                ASTERIXOverrideWidget* asterix_override_widget = asterix_import_task_widget->overrideWidget();
-                assert (asterix_override_widget);
+//                ASTERIXOverrideWidget* asterix_override_widget = asterix_import_task_widget->overrideWidget();
+//                assert (asterix_override_widget);
 
                 TODO_ASSERT
 
@@ -563,7 +563,7 @@ void ViewPointsImportTask::import ()
 //                    loginf << "ViewPointsImportTask: import: override information not set";
 //                    asterix_importer_task.overrideActive(false);
 //                }
-                asterix_override_widget->updateSlot();
+//                asterix_override_widget->updateSlot();
 
                 assert(asterix_importer_task.canRun());
                 asterix_importer_task.showDoneSummary(false);

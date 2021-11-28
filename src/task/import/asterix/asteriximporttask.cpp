@@ -30,7 +30,7 @@
 #include "files.h"
 #include "jobmanager.h"
 #include "logger.h"
-//#include "postprocesstask.h"
+#include "asteriximportrecordingtaskdialog.h"
 #include "radarplotpositioncalculatortask.h"
 #include "savedfile.h"
 #include "stringconv.h"
@@ -295,18 +295,25 @@ void ASTERIXImportTask::checkSubConfigurables()
     }
 }
 
-TaskWidget* ASTERIXImportTask::widget()
+ASTERIXImportRecordingTaskDialog* ASTERIXImportTask::dialog()
 {
-    if (!widget_)
+    if (!dialog_)
     {
-        widget_.reset(new ASTERIXImportTaskWidget(*this));
+        dialog_.reset(new ASTERIXImportRecordingTaskDialog(*this));
 
-        connect(&task_manager_, &TaskManager::expertModeChangedSignal, widget_.get(),
-                &ASTERIXImportTaskWidget::expertModeChangedSlot);
+        connect(dialog_.get(), &ASTERIXImportRecordingTaskDialog::testTmportSignal,
+                this, &ASTERIXImportTask::dialogTestImportSlot);
+
+        connect(dialog_.get(), &ASTERIXImportRecordingTaskDialog::importSignal,
+                this, &ASTERIXImportTask::dialogImportSlot);
+
+        connect(dialog_.get(), &ASTERIXImportRecordingTaskDialog::cancelSignal,
+                this, &ASTERIXImportTask::dialogCancelSlot);
     }
 
-    assert(widget_);
-    return widget_.get();
+    assert(dialog_);
+    return dialog_.get();
+
 }
 
 void ASTERIXImportTask::refreshjASTERIX()
@@ -348,8 +355,8 @@ void ASTERIXImportTask::addFile(const std::string& filename)
 
     emit statusChangedSignal(name_);
 
-    if (widget_)
-        widget_->updateFileListSlot();
+//    if (widget_)
+//        widget_->updateFileListSlot();
 }
 
 void ASTERIXImportTask::removeCurrentFilename()
@@ -369,8 +376,8 @@ void ASTERIXImportTask::removeCurrentFilename()
 
     emit statusChangedSignal(name_);
 
-    if (widget_)
-        widget_->updateFileListSlot();
+//    if (widget_)
+//        widget_->updateFileListSlot();
 }
 
 void ASTERIXImportTask::removeAllFiles ()
@@ -387,8 +394,8 @@ void ASTERIXImportTask::removeAllFiles ()
 
     emit statusChangedSignal(name_);
 
-    if (widget_)
-        widget_->updateFileListSlot();
+//    if (widget_)
+//        widget_->updateFileListSlot();
 }
 
 void ASTERIXImportTask::currentFilename(const std::string& filename)
@@ -401,6 +408,9 @@ void ASTERIXImportTask::currentFilename(const std::string& filename)
 
     if (!had_filename)  // not on re-select
         emit statusChangedSignal(name_);
+
+    if (dialog_)
+        dialog_->updateButtons();
 }
 
 const std::string& ASTERIXImportTask::currentFraming() const { return current_framing_; }
@@ -587,8 +597,8 @@ void ASTERIXImportTask::limitRAM(bool limit_ram)
         jASTERIX::data_block_chunk_size = unlimited_chunk_size;
     }
 
-    if (widget_)
-        widget_->updateLimitRAM();
+//    if (widget_)
+//        widget_->updateLimitRAM();
 }
 
 bool ASTERIXImportTask::checkPrerequisites()
@@ -717,8 +727,6 @@ void ASTERIXImportTask::overrideTodOffset(float value)
 //    }
 //}
 
-void ASTERIXImportTask::deleteWidget() { widget_.reset(nullptr); }
-
 bool ASTERIXImportTask::canImportFile()
 {
     if (!current_filename_.size())
@@ -800,8 +808,8 @@ void ASTERIXImportTask::run(bool test) // , bool create_mapping_stubs
         task_manager_.appendInfo("ASTERIXImportTask: import of file '" + current_filename_ +
                                  "' started");
 
-    if (widget_)
-        widget_->runStarted();
+//    if (widget_)
+//        widget_->runStarted();
 
     assert(canImportFile());
 
@@ -907,6 +915,37 @@ void ASTERIXImportTask::run(bool test) // , bool create_mapping_stubs
     JobManager::instance().addBlockingJob(decode_job_);
 
     return;
+}
+
+void ASTERIXImportTask::dialogImportSlot()
+{
+    loginf << "ASTERIXImportTask: dialogImportSlot";
+
+    assert (dialog_);
+    dialog_->hide();
+
+    assert (canRun());
+    run (false);
+}
+
+void ASTERIXImportTask::dialogTestImportSlot()
+{
+    loginf << "ASTERIXImportTask: dialogImportSlot";
+
+    assert (dialog_);
+    dialog_->hide();
+
+    assert (canRun());
+
+    run (true);
+}
+
+void ASTERIXImportTask::dialogCancelSlot()
+{
+    loginf << "ASTERIXImportTask: dialogCancelSlot";
+
+    assert (dialog_);
+    dialog_->hide();
 }
 
 void ASTERIXImportTask::decodeASTERIXDoneSlot()
@@ -1101,8 +1140,8 @@ void ASTERIXImportTask::insertData(std::map<std::string, std::shared_ptr<Buffer>
 
             //            DBObject& db_object = parser_it.second->dbObject();
 
-//            std::string data_source_var_name = "DS ID"; //parser_it.second->dataSourceVariableName();
-//            assert(data_source_var_name.size());
+            //            std::string data_source_var_name = "DS ID"; //parser_it.second->dataSourceVariableName();
+            //            assert(data_source_var_name.size());
 
             //DBOVariableSet set = parser_it.second->variableList();
             assert (!dbo_variable_sets_.count(dbo_name));  // add variables
@@ -1244,8 +1283,8 @@ void ASTERIXImportTask::checkAllDone()
 
         logdbg << "ASTERIXImportTask: checkAllDone: widget done";
 
-        assert(widget_);
-        widget_->runDone();
+//        assert(widget_);
+//        widget_->runDone();
 
         logdbg << "ASTERIXImportTask: checkAllDone: dbo content";
 

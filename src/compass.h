@@ -97,7 +97,7 @@ public:
     std::string lastDbFilename() const;
     std::vector<std::string> dbFileList() const;
     void clearDBFileList();
-    void addDBFileToLost(const std::string filename);
+    void addDBFileToList(const std::string filename);
 };
 
 #endif /* COMPASS_H_ */

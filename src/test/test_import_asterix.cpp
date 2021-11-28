@@ -115,22 +115,22 @@ TEST_CASE("COMPASS Import ASTERIX", "[COMPASS]")
     REQUIRE(task_manager_widget->getCurrentTaskName() == asterix_import_task.name());
     REQUIRE(asterix_import_task.isRecommended());
 
-    asterix_import_task.currentFraming("ioss");
-    ASTERIXImportTaskWidget* asterix_import_task_widget =
-        dynamic_cast<ASTERIXImportTaskWidget*>(asterix_import_task.widget());
-    REQUIRE(asterix_import_task_widget);
+//    asterix_import_task.currentFraming("ioss");
+//    ASTERIXImportTaskWidget* asterix_import_task_widget =
+//        dynamic_cast<ASTERIXImportTaskWidget*>(asterix_import_task.widget());
+//    REQUIRE(asterix_import_task_widget);
 
-    asterix_import_task_widget->addFile(recording_filename);
+//    asterix_import_task_widget->addFile(recording_filename);
 
-    REQUIRE(asterix_import_task.canRun());
-    asterix_import_task.showDoneSummary(false);
+//    REQUIRE(asterix_import_task.canRun());
+//    asterix_import_task.showDoneSummary(false);
 
-    task_manager_widget->runCurrentTaskSlot();
+//    task_manager_widget->runCurrentTaskSlot();
 
-    QThread::msleep(100);
+//    QThread::msleep(100);
 
-    while (client.hasPendingEvents() || !asterix_import_task.done())
-        client.processEvents();
+//    while (client.hasPendingEvents() || !asterix_import_task.done())
+//        client.processEvents();
 
     TODO_ASSERT
 

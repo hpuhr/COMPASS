@@ -40,7 +40,7 @@ using namespace std;
 
 ASTERIXImportTaskWidget::ASTERIXImportTaskWidget(ASTERIXImportTask& task, QWidget* parent,
                                                  Qt::WindowFlags f)
-    : TaskWidget(parent, f), task_(task)
+    : QWidget(parent, f), task_(task)
 {
     main_layout_ = new QHBoxLayout();
 
@@ -52,8 +52,6 @@ ASTERIXImportTaskWidget::ASTERIXImportTaskWidget(ASTERIXImportTask& task, QWidge
     addASTERIXConfigTab();
     addOverrideTab();
     addMappingsTab();
-
-    expertModeChangedSlot();
 
     setLayout(main_layout_);
 }
@@ -117,11 +115,6 @@ void ASTERIXImportTaskWidget::addMainTab()
         connect(limit_ram_check_, &QCheckBox::clicked, this,
                 &ASTERIXImportTaskWidget::limitRAMChangedSlot);
         main_tab_layout->addWidget(limit_ram_check_);
-
-        test_button_ = new QPushButton("Test Import");
-        connect(test_button_, &QPushButton::clicked, this,
-                &ASTERIXImportTaskWidget::testImportSlot);
-        main_tab_layout->addWidget(test_button_);
     }
 
     QWidget* main_tab_widget = new QWidget();
@@ -393,27 +386,25 @@ void ASTERIXImportTaskWidget::limitRAMChangedSlot()
     task_.limitRAM(box->checkState() == Qt::Checked);
 }
 
-void ASTERIXImportTaskWidget::expertModeChangedSlot() {}
-
 void ASTERIXImportTaskWidget::updateLimitRAM()
 {
     assert(limit_ram_check_);
     limit_ram_check_->setChecked(task_.limitRAM());
 }
 
-void ASTERIXImportTaskWidget::runStarted()
-{
-    loginf << "ASTERIXImportTaskWidget: runStarted";
+//void ASTERIXImportTaskWidget::runStarted()
+//{
+//    loginf << "ASTERIXImportTaskWidget: runStarted";
 
-    test_button_->setDisabled(true);
-}
+//    test_button_->setDisabled(true);
+//}
 
-void ASTERIXImportTaskWidget::runDone()
-{
-    loginf << "ASTERIXImportTaskWidget: runDone";
+//void ASTERIXImportTaskWidget::runDone()
+//{
+//    loginf << "ASTERIXImportTaskWidget: runDone";
 
-    test_button_->setDisabled(false);
-}
+//    test_button_->setDisabled(false);
+//}
 
 ASTERIXOverrideWidget* ASTERIXImportTaskWidget::overrideWidget() const
 {

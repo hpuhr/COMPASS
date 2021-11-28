@@ -61,6 +61,8 @@ class MainWindow : public QMainWindow
     void quitWOConfigSlot();
     void quitSlot();
 
+    void importAsterixRecordingSlot();
+
     //void startSlot();
 
     // void keyPressEvent ( QKeyEvent * event );
@@ -89,10 +91,16 @@ protected:
 
     bool save_configuration_{true};
 
+    // menu
+
+    // file menu
     QAction* new_db_action_ {nullptr};
     QAction* open_existng_action_ {nullptr};
     QMenu* open_recent_menu_ {nullptr};
     QAction* close_db_action_ {nullptr};
+
+    // import menu
+    QMenu* import_menu_ {nullptr};
 
     void createMenus ();
     void updateMenus();

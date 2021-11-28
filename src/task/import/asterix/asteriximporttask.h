@@ -39,6 +39,7 @@ class ASTERIXImportTaskWidget;
 class ASTERIXCategoryConfig;
 class ASTERIXStatusDialog;
 class SavedFile;
+class ASTERIXImportRecordingTaskDialog;
 
 namespace jASTERIX
 {
@@ -50,6 +51,10 @@ class ASTERIXImportTask : public Task, public Configurable
     Q_OBJECT
 
   public slots:
+    void dialogImportSlot();
+    void dialogTestImportSlot();
+    void dialogCancelSlot();
+
     void decodeASTERIXDoneSlot();
     void decodeASTERIXObsoleteSlot();
     void addDecodedASTERIXSlot();
@@ -67,8 +72,7 @@ class ASTERIXImportTask : public Task, public Configurable
                       TaskManager& task_manager);
     virtual ~ASTERIXImportTask();
 
-    virtual TaskWidget* widget();
-    virtual void deleteWidget();
+    ASTERIXImportRecordingTaskDialog* dialog();
 
     virtual void generateSubConfigurable(const std::string& class_id,
                                          const std::string& instance_id);
@@ -154,7 +158,8 @@ class ASTERIXImportTask : public Task, public Configurable
     bool test_{false};
     //bool create_mapping_stubs_{false};
 
-    std::unique_ptr<ASTERIXImportTaskWidget> widget_;
+    //std::unique_ptr<TaskWidget> widget_;
+    std::unique_ptr<ASTERIXImportRecordingTaskDialog> dialog_;
 
     std::map<unsigned int, ASTERIXCategoryConfig> category_configs_;
 

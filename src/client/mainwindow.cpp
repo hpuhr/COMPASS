@@ -33,6 +33,8 @@
 #include "taskmanagerwidget.h"
 #include "viewmanager.h"
 #include "viewpointswidget.h"
+#include "asteriximporttask.h"
+#include "asteriximportrecordingtaskdialog.h"
 #include "evaluationmanager.h"
 
 #include <QApplication>
@@ -197,6 +199,16 @@ void MainWindow::createMenus ()
     connect(quit_act, &QAction::triggered, this, &MainWindow::quitSlot);
     file_menu->addAction(quit_act);
 
+
+    // import menu
+
+    import_menu_ = menuBar()->addMenu(tr("&Import"));
+
+    QAction* import_ast_file_action = new QAction(tr("&ASTERIX Recording"));
+    import_ast_file_action->setShortcut(tr("Ctrl+A"));
+    import_ast_file_action->setStatusTip(tr("Import ASTERIX Recording File"));
+    connect(import_ast_file_action, &QAction::triggered, this, &MainWindow::importAsterixRecordingSlot);
+    import_menu_->addAction(import_ast_file_action);
 }
 
 void MainWindow::updateMenus()
@@ -205,6 +217,8 @@ void MainWindow::updateMenus()
     assert (open_existng_action_);
     assert (open_recent_menu_);
     assert (close_db_action_);
+
+    assert (import_menu_);
 
     open_recent_menu_->clear();
 
@@ -225,6 +239,8 @@ void MainWindow::updateMenus()
     open_existng_action_->setDisabled(db_open);
     open_recent_menu_->setDisabled(db_open);
     close_db_action_->setDisabled(!db_open);
+
+    import_menu_->setDisabled(!db_open);
 }
 
 void MainWindow::disableConfigurationSaving()
@@ -335,6 +351,14 @@ void MainWindow::quitSlot()
 
     QApplication::quit();
 }
+
+void MainWindow::importAsterixRecordingSlot()
+{
+    loginf << "MainWindow: importAsterixRecordingSlot";
+
+    COMPASS::instance().taskManager().asterixImporterTask().dialog()->show();
+}
+
 
 //void MainWindow::startSlot()
 //{

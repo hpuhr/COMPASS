@@ -192,14 +192,12 @@ void COMPASS::openDBFile(const std::string& filename)
     assert (!db_opened_);
     assert (db_interface_);
 
-    assert (Files::fileExists(filename));
-
     last_db_filename_ = filename;
 
     db_interface_->openDBFile(filename);
     assert (db_interface_->dbOpen());
 
-    addDBFileToLost(filename);
+    addDBFileToList(filename);
 
     db_opened_ = true;
 }
@@ -223,7 +221,7 @@ void COMPASS::createNewDBFile(const std::string& filename)
     db_interface_->openDBFile(filename);
     assert (db_interface_->dbOpen());
 
-    addDBFileToLost(filename);
+    addDBFileToList(filename);
 
     db_opened_ = true;
 }
@@ -326,7 +324,6 @@ void COMPASS::shutdown()
 
     db_interface_ = nullptr;
 
-
     //main_window_ = nullptr;
 
     shut_down_ = true;
@@ -358,7 +355,7 @@ void COMPASS::clearDBFileList()
     db_file_list_.clear();
 }
 
-void COMPASS::addDBFileToLost(const std::string filename)
+void COMPASS::addDBFileToList(const std::string filename)
 {
     vector<string> tmp_list = db_file_list_.get<std::vector<string>>();
 

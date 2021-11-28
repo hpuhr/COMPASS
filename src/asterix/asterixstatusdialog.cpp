@@ -16,6 +16,8 @@
  */
 
 #include "asterixstatusdialog.h"
+#include "logger.h"
+#include "stringconv.h"
 
 #include <QGridLayout>
 #include <QHBoxLayout>
@@ -24,9 +26,6 @@
 #include <QVBoxLayout>
 
 #include <iomanip>
-
-#include "logger.h"
-#include "stringconv.h"
 
 using namespace std;
 using namespace Utils;
