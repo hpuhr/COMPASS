@@ -80,8 +80,11 @@ public:
     bool usedInMetaVariable(const DBOVariable& variable);
 
     bool hasDataSource(unsigned int ds_id);
+    bool canAddNewDataSourceFromConfig (unsigned int ds_id);
     void addNewDataSource (unsigned int ds_id);
     DBContent::DBDataSource& dataSource(unsigned int ds_id);
+    const std::vector<std::unique_ptr<DBContent::DBDataSource>>& dataSources() const;
+
     void saveDBDataSources();
 
     virtual void generateSubConfigurable(const std::string& class_id,
@@ -134,6 +137,7 @@ public:
     bool isOtherDBObjectPostProcessing(DBObject& object);
 
     bool loadInProgress() const;
+
 
 protected:
     COMPASS& compass_;

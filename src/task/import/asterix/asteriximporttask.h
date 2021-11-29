@@ -28,6 +28,7 @@
 #include "configurable.h"
 #include "json.hpp"
 #include "asterixjsonmappingjob.h"
+#include "asterixpostprocessjob.h"
 #include "jsonmappingstubsjob.h"
 #include "asterixjsonparsingschema.h"
 #include "task.h"
@@ -62,6 +63,9 @@ class ASTERIXImportTask : public Task, public Configurable
     void mapJSONDoneSlot();
     void mapJSONObsoleteSlot();
 
+    void postprocessDoneSlot();
+    void postprocessObsoleteSlot();
+
     void insertProgressSlot(float percent);
     void insertDoneSlot(DBObject& object);
 
@@ -83,7 +87,7 @@ class ASTERIXImportTask : public Task, public Configurable
     bool canImportFile();
     virtual bool canRun();
     virtual void run();
-    void run(bool test); // , bool create_mapping_stubs
+    void run(bool test);
 
     const std::map<std::string, SavedFile*>& fileList() { return file_list_; }
     bool hasFile(const std::string& filename) { return file_list_.count(filename) > 0; }
@@ -140,11 +144,6 @@ class ASTERIXImportTask : public Task, public Configurable
     float overrideTodOffset() const;
     void overrideTodOffset(float value);
 
-//    bool hasParser(unsigned int cat);
-//    std::string getPossibleMappings (unsigned int cat);
-//    std::string getActiveMapping (unsigned int cat);
-//    void setActiveMapping (unsigned int cat, const std::string& mapping_name);
-
   protected:
     bool debug_jasterix_;
     bool limit_ram_;
@@ -156,9 +155,7 @@ class ASTERIXImportTask : public Task, public Configurable
     std::string current_framing_;
 
     bool test_{false};
-    //bool create_mapping_stubs_{false};
 
-    //std::unique_ptr<TaskWidget> widget_;
     std::unique_ptr<ASTERIXImportRecordingTaskDialog> dialog_;
 
     std::map<unsigned int, ASTERIXCategoryConfig> category_configs_;
@@ -168,10 +165,8 @@ class ASTERIXImportTask : public Task, public Configurable
     std::shared_ptr<ASTERIXDecodeJob> decode_job_;
 
     std::shared_ptr<ASTERIXJSONMappingJob> json_map_job_;
-    // std::deque <std::shared_ptr <JSONMappingJob>> json_map_jobs_;
-    // std::mutex map_jobs_mutex_;
-    // bool waiting_for_map_ {false};
-    //std::shared_ptr<JSONMappingStubsJob> json_map_stub_job_;
+
+    std::shared_ptr<ASTERIXPostprocessJob> postprocess_job_;
 
     bool error_{false};
     std::string error_message_;

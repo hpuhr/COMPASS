@@ -56,9 +56,6 @@ using namespace std;
 const unsigned int unlimited_chunk_size = 10000;
 const unsigned int limited_chunk_size = 5000;
 
-// const unsigned int unlimited_num_json_jobs_ = 2;
-// const unsigned int limited_num_json_jobs_ = 1;
-
 const std::string DONE_PROPERTY_NAME = "asterix_data_imported";
 
 const float ram_threshold = 4.0;
@@ -261,25 +258,6 @@ void ASTERIXImportTask::asterixDecoderConfig(const std::string& asterix_decoder_
 
             category_configs_.at(cat).spf(spf_ed);
         }
-
-        //        if (cat_cfg.contains("mapping"))
-        //        {
-        //            if (!cat_cfg.at("mapping").is_string())
-        //                throw runtime_error("ASTERIXImportTask: asterixDecoderConfig: cat "+to_string(cat)
-        //                                    +" mapping is not a string");
-
-        //            string mapping = cat_cfg.at("mapping");
-
-        //            std::vector<std::string> mappings = getPossibleMappings (cat);
-
-        //            if (std::find(mappings.begin(), mappings.end(), mapping) == mappings.end())
-        //                throw runtime_error ("ASTERIXImportTask: unknown mapping '"+mapping+"'");
-
-        //            loginf << "ASTERIXImportTask: asterixDecoderConfig: setting cat " << cat
-        //                   << " mapping '" << mapping << "'";
-
-        //             setActiveMapping (cat, mapping);
-        //        }
     }
 
 }
@@ -354,9 +332,6 @@ void ASTERIXImportTask::addFile(const std::string& filename)
     current_filename_ = filename;
 
     emit statusChangedSignal(name_);
-
-//    if (widget_)
-//        widget_->updateFileListSlot();
 }
 
 void ASTERIXImportTask::removeCurrentFilename()
@@ -375,9 +350,6 @@ void ASTERIXImportTask::removeCurrentFilename()
     current_filename_ = "";
 
     emit statusChangedSignal(name_);
-
-//    if (widget_)
-//        widget_->updateFileListSlot();
 }
 
 void ASTERIXImportTask::removeAllFiles ()
@@ -393,9 +365,6 @@ void ASTERIXImportTask::removeAllFiles ()
     current_filename_ = "";
 
     emit statusChangedSignal(name_);
-
-//    if (widget_)
-//        widget_->updateFileListSlot();
 }
 
 void ASTERIXImportTask::currentFilename(const std::string& filename)
@@ -596,9 +565,6 @@ void ASTERIXImportTask::limitRAM(bool limit_ram)
         jASTERIX::frame_chunk_size = unlimited_chunk_size;
         jASTERIX::data_block_chunk_size = unlimited_chunk_size;
     }
-
-//    if (widget_)
-//        widget_->updateLimitRAM();
 }
 
 bool ASTERIXImportTask::checkPrerequisites()
@@ -679,54 +645,6 @@ void ASTERIXImportTask::overrideTodOffset(float value)
     post_process_.override_tod_offset_ = value;
 }
 
-//std::vector<std::string> ASTERIXImportTask::getPossibleMappings (unsigned int cat)
-//{
-//    std::vector<std::string> list;
-
-//    list.push_back(""); // no mapping
-
-//    assert (schema_);
-
-//    for (auto& par_it : schema_->parsers())
-//    {
-//        if (par_it.second->category() == cat) // if same, add
-//           list.push_back(String::categoryString(par_it.first));
-//    }
-
-//    return list;
-//}
-
-//std::string ASTERIXImportTask::getActiveMapping (unsigned int cat)
-//{
-//    assert (schema_);
-
-//    for (auto& par_it : schema_->parsers())
-//    {
-//        if (par_it.second->category() == cat) // if same, add
-//           return String::categoryString(par_it.first);
-//    }
-
-
-//    // none found
-//    return "";
-//}
-
-//void ASTERIXImportTask::setActiveMapping (unsigned int cat, const std::string& mapping_name)
-//{
-//    loginf << "ASTERIXImportTask: setActiveMapping: cat " << cat << " mapping '" << mapping_name << "'";
-
-//    assert (schema_);
-
-//    std::string tmp_str;
-//    unsigned int tmp_cat;
-
-//    for (auto& par_it : schema_->parsers())
-//    {
-//        if (par_it.second->category() == cat) // if same, change
-//            par_it.second->active(par_it.first == mapping_name);
-//    }
-//}
-
 bool ASTERIXImportTask::canImportFile()
 {
     if (!current_filename_.size())
@@ -752,7 +670,6 @@ void ASTERIXImportTask::run()
 void ASTERIXImportTask::run(bool test) // , bool create_mapping_stubs
 {
     test_ = test;
-    //create_mapping_stubs_ = create_mapping_stubs;
 
     done_ = false; // since can be run multiple times
     num_radar_inserted_ = 0;
@@ -760,7 +677,6 @@ void ASTERIXImportTask::run(bool test) // , bool create_mapping_stubs
     float free_ram = System::getFreeRAMinGB();
 
     loginf << "ASTERIXImportTask: run: filename " << current_filename_ << " test " << test_
-              //<< " create stubs " << create_mapping_stubs_
            << " free RAM " << free_ram << " GB";
 
     if (free_ram < ram_threshold && !limit_ram_)
@@ -801,15 +717,9 @@ void ASTERIXImportTask::run(bool test) // , bool create_mapping_stubs
     if (test_)
         task_manager_.appendInfo("ASTERIXImportTask: test import of file '" + current_filename_ +
                                  "' started");
-    //    else if (create_mapping_stubs_)
-    //        task_manager_.appendInfo("ASTERIXImportTask: create mappings stubs using file '" +
-    //                                 current_filename_ + "' started");
     else
         task_manager_.appendInfo("ASTERIXImportTask: import of file '" + current_filename_ +
                                  "' started");
-
-//    if (widget_)
-//        widget_->runStarted();
 
     assert(canImportFile());
 
@@ -894,8 +804,6 @@ void ASTERIXImportTask::run(bool test) // , bool create_mapping_stubs
         jasterix_->category(cat_it.first)->setCurrentEdition(cat_it.second.edition());
         jasterix_->category(cat_it.first)->setCurrentREFEdition(cat_it.second.ref());
         jasterix_->category(cat_it.first)->setCurrentSPFEdition(cat_it.second.spf());
-
-        // TODO mapping?
     }
 
     loginf << "ASTERIXImportTask: run: starting decode job";
@@ -1004,11 +912,7 @@ void ASTERIXImportTask::addDecodedASTERIXSlot()
 
     status_widget_->show();
 
-    std::unique_ptr<nlohmann::json> extracted_data = std::move(decode_job_->extractedData());
-
-    //        map_jobs_mutex_.lock();
-    //        json_map_jobs_.push_back(json_map_job);
-    //        map_jobs_mutex_.unlock();
+    std::unique_ptr<nlohmann::json> extracted_data {decode_job_->extractedData()};
 
     while (json_map_job_)  // only one can exist at a time
     {
@@ -1056,31 +960,28 @@ void ASTERIXImportTask::mapJSONDoneSlot()
     logdbg << "ASTERIXImportTask: mapJSONDoneSlot";
 
     assert(status_widget_);
-
-    //    JSONMappingJob* map_job = static_cast<JSONMappingJob*>(sender());
-    //    std::shared_ptr<JSONMappingJob> queued_map_job;
-
-    //    map_jobs_mutex_.lock();
-    //    waiting_for_map_ = true;
-
     assert(json_map_job_);
-
-    //    queued_map_job = json_map_jobs_.front();
-    //    json_map_jobs_.pop_front();
-
-    //    map_jobs_mutex_.unlock();
-    //    waiting_for_map_ = false;
-
-    //    assert (queued_map_job.get() == map_job);
 
     status_widget_->addNumMapped(json_map_job_->numMapped());
     status_widget_->addNumNotMapped(json_map_job_->numNotMapped());
     status_widget_->addMappedCounts(json_map_job_->categoryMappedCounts());
     status_widget_->addNumCreated(json_map_job_->numCreated());
 
-    std::map<std::string, std::shared_ptr<Buffer>> job_buffers =
-            std::move(json_map_job_->buffers());
+    std::map<std::string, std::shared_ptr<Buffer>> job_buffers {json_map_job_->buffers()};
     json_map_job_ = nullptr;
+
+    if (!test_)
+    {
+        postprocess_job_ =
+                make_shared<ASTERIXPostprocessJob>(std::move(job_buffers));
+
+        connect(postprocess_job_.get(), &ASTERIXPostprocessJob::obsoleteSignal, this,
+                &ASTERIXImportTask::postprocessObsoleteSlot, Qt::QueuedConnection);
+        connect(postprocess_job_.get(), &ASTERIXPostprocessJob::doneSignal, this,
+                &ASTERIXImportTask::postprocessDoneSlot, Qt::QueuedConnection);
+
+        JobManager::instance().addNonBlockingJob(postprocess_job_);
+    }
 
     if (decode_job_)
     {
@@ -1095,8 +996,6 @@ void ASTERIXImportTask::mapJSONDoneSlot()
         checkAllDone();
         return;
     }
-
-    insertData(std::move(job_buffers));
 }
 
 void ASTERIXImportTask::mapJSONObsoleteSlot()
@@ -1105,24 +1004,30 @@ void ASTERIXImportTask::mapJSONObsoleteSlot()
     // TODO
 }
 
-//void ASTERIXImportTask::mapStubsDoneSlot()
-//{
-//    logdbg << "ASTERIXImportTask: mapStubsDoneSlot";
+void ASTERIXImportTask::postprocessDoneSlot()
+{
+    loginf << "ASTERIXImportTask: postprocessDoneSlot";
 
-//    JSONMappingStubsJob* map_stubs_job = static_cast<JSONMappingStubsJob*>(sender());
-//    assert(json_map_stub_job_.get() == map_stubs_job);
+    assert (postprocess_job_);
 
-//    json_map_stub_job_ = nullptr;
+    std::map<std::string, std::shared_ptr<Buffer>> job_buffers {postprocess_job_->buffers()};
+    postprocess_job_ = nullptr;
 
-//    schema_->updateMappings();
+    if (decode_job_)
+    {
+        if (maxLoadReached())
+            decode_job_->pause();
+        else
+            decode_job_->unpause();
+    }
 
-//    checkAllDone();
-//}
-//void ASTERIXImportTask::mapStubsObsoleteSlot()
-//{
-//    logdbg << "ASTERIXImportTask: mapStubsObsoleteSlot";
-//    json_map_stub_job_ = nullptr;
-//}
+    insertData(std::move(job_buffers));
+}
+
+void ASTERIXImportTask::postprocessObsoleteSlot()
+{
+    postprocess_job_ = nullptr;
+}
 
 void ASTERIXImportTask::insertData(std::map<std::string, std::shared_ptr<Buffer>> job_buffers)
 {
@@ -1138,23 +1043,8 @@ void ASTERIXImportTask::insertData(std::map<std::string, std::shared_ptr<Buffer>
         {
             std::string dbo_name = parser_it.second->dbObject().name();
 
-            //            DBObject& db_object = parser_it.second->dbObject();
-
-            //            std::string data_source_var_name = "DS ID"; //parser_it.second->dataSourceVariableName();
-            //            assert(data_source_var_name.size());
-
-            //DBOVariableSet set = parser_it.second->variableList();
             assert (!dbo_variable_sets_.count(dbo_name));  // add variables
             dbo_variable_sets_[dbo_name] = parser_it.second->variableList();
-
-            //std::get<1>(dbo_variable_sets_.at(dbo_name)).add(set);
-
-            //            {
-            //                //assert(std::get<0>(dbo_variable_sets_.at(dbo_name)) == data_source_var_name);
-
-            //            }
-            //            else  // create it
-            //                dbo_variable_sets_[dbo_name] = std::make_tuple(data_source_var_name, set);
         }
     }
 
@@ -1166,8 +1056,6 @@ void ASTERIXImportTask::insertData(std::map<std::string, std::shared_ptr<Buffer>
     }
 
     waiting_for_insert_ = false;
-
-    //bool has_sac_sic = false;
 
     assert(schema_);
 
@@ -1260,7 +1148,6 @@ void ASTERIXImportTask::checkAllDone()
 {
     logdbg << "ASTERIXImportTask: checkAllDone: all done " << all_done_ << " decode "
            << (decode_job_ == nullptr)
-              //<< " wait map " << !waiting_for_map_
            << " map job " << (json_map_job_ == nullptr)
            << " wait insert " << !waiting_for_insert_
            << " insert active " << (insert_active_ == 0);
@@ -1280,11 +1167,6 @@ void ASTERIXImportTask::checkAllDone()
         logdbg << "ASTERIXImportTask: checkAllDone: refresh";
 
         refreshjASTERIX();
-
-        logdbg << "ASTERIXImportTask: checkAllDone: widget done";
-
-//        assert(widget_);
-//        widget_->runDone();
 
         logdbg << "ASTERIXImportTask: checkAllDone: dbo content";
 
@@ -1310,8 +1192,6 @@ void ASTERIXImportTask::checkAllDone()
             task_manager_.appendSuccess("ASTERIXImportTask: import done after " +
                                         status_widget_->elapsedTimeStr());
         }
-
-        //test_ = false;  // set again by widget
 
         if (!show_done_summary_)
         {

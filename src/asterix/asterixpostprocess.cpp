@@ -20,6 +20,7 @@
 #include "global.h"
 #include "logger.h"
 #include "stringconv.h"
+#include "number.h"
 
 using namespace Utils;
 using namespace nlohmann;
@@ -44,7 +45,7 @@ void ASTERIXPostProcess::postProcess(unsigned int category, nlohmann::json& reco
         assert (record.at("010").contains("SIC"));
         sic = record.at("010").at("SIC");
 
-        record["ds_id"] = sac * 256 + sic;
+        record["ds_id"] = Number::dsIdFrom(sac, sic);
     }
 
     if (category == 1)  // CAT001 coversion hack
@@ -669,7 +670,7 @@ void ASTERIXPostProcess::postProcessCAT062(int sac, int sic, nlohmann::json& rec
         {
             record.at("010").at("SAC") = override_sac_new_;
             record.at("010").at("SIC") = override_sic_new_;
-            record["ds_id"] = override_sac_new_ * 256 + override_sic_new_;
+            record["ds_id"] = record["ds_id"] = Number::dsIdFrom(override_sac_new_, override_sic_new_);
         }
 
         if (record.contains("070") && record.at("070").contains("Time Of Track Information"))

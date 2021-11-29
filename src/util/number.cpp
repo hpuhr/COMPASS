@@ -54,7 +54,7 @@ unsigned int sacFromDsId (unsigned int ds_id)
 }
 unsigned int sicFromDsId (unsigned int ds_id)
 {
-    return ds_id & 255;
+    return ds_id % 255;
 }
 
 }  // namespace Number

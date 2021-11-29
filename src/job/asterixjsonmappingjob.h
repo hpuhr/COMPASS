@@ -1,11 +1,11 @@
 #ifndef ASTERIXJSONMAPPINGJOB_H
 #define ASTERIXJSONMAPPINGJOB_H
 
-#include <memory>
-#include <vector>
-
 #include "job.h"
 #include "json.hpp"
+
+#include <memory>
+#include <vector>
 
 class ASTERIXJSONParser;
 class Buffer;
@@ -19,7 +19,7 @@ class ASTERIXJSONMappingJob : public Job
     // json obj moved, mappings referenced
     virtual ~ASTERIXJSONMappingJob();
 
-    virtual void run();
+    virtual void run() override;
 
     size_t numMapped() const;
     size_t numNotMapped() const;

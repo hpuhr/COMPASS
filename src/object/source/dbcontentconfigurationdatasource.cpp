@@ -112,7 +112,10 @@ DBDataSource* ConfigurationDataSource::getAsNewDBDS()
     if (has_short_name_)
         new_ds->shortName(short_name_);
 
-    new_ds->info(info_);
+    new_ds->info(info_.dump());
+
+    loginf << "ConfigurationDataSource: getAsNewDBDS: name " << new_ds->name()
+            << " sac/sic " << new_ds->sac() << "/" << new_ds->sic();
 
     return new_ds;
 }

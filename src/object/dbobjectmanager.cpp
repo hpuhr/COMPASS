@@ -527,6 +527,14 @@ void DBObjectManager::saveDBDataSources()
     db_interface.saveDataSources(db_data_sources_);
 }
 
+bool DBObjectManager::canAddNewDataSourceFromConfig (unsigned int ds_id)
+{
+    if (hasDataSource(ds_id))
+        return false;
+
+    return hasConfigDataSource(Number::sacFromDsId(ds_id), Number::sicFromDsId(ds_id));
+}
+
 bool DBObjectManager::hasDataSource(unsigned int ds_id)
 {
     return find_if(db_data_sources_.begin(), db_data_sources_.end(),
@@ -536,10 +544,14 @@ bool DBObjectManager::hasDataSource(unsigned int ds_id)
 
 void DBObjectManager::addNewDataSource (unsigned int ds_id)
 {
+    loginf << "DBObjectManager: addNewDataSource: ds_id " << ds_id;
+
     assert (!hasDataSource(ds_id));
 
     if (hasConfigDataSource(Number::sacFromDsId(ds_id), Number::sicFromDsId(ds_id)))
     {
+        loginf << "DBObjectManager: addNewDataSource: ds_id " << ds_id << " from config";
+
         DBContent::ConfigurationDataSource& cfg_ds = getConfigDataSource(
                     Number::sacFromDsId(ds_id), Number::sicFromDsId(ds_id));
 
@@ -547,6 +559,8 @@ void DBObjectManager::addNewDataSource (unsigned int ds_id)
     }
     else
     {
+        loginf << "DBObjectManager: addNewDataSource: ds_id " << ds_id << " create new";
+
         DBContent::DBDataSource* new_ds = new DBContent::DBDataSource();
         new_ds->id(ds_id);
         new_ds->sac(Number::sacFromDsId(ds_id));
@@ -557,6 +571,8 @@ void DBObjectManager::addNewDataSource (unsigned int ds_id)
     }
 
     assert (hasDataSource(ds_id));
+
+    loginf << "DBObjectManager: addNewDataSource: ds_id " << ds_id << " done";
 }
 
 DBContent::DBDataSource& DBObjectManager::dataSource(unsigned int ds_id)
@@ -686,3 +702,8 @@ bool DBObjectManager::isOtherDBObjectPostProcessing(DBObject& object)
 }
 
 bool DBObjectManager::loadInProgress() const { return load_in_progress_; }
+
+const std::vector<std::unique_ptr<DBContent::DBDataSource>>& DBObjectManager::dataSources() const
+{
+    return db_data_sources_;
+}
