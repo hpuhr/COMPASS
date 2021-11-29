@@ -27,7 +27,7 @@ class QPushButton;
 class QVBoxLayout;
 class QCheckBox;
 
-class FilterManagerWidget : public QFrame
+class FilterManagerWidget : public QWidget
 {
     Q_OBJECT
 

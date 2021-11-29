@@ -10,14 +10,14 @@ DataSourceBase::DataSourceBase()
 
 }
 
-std::string DataSourceBase::dbContentType() const
+std::string DataSourceBase::dsType() const
 {
-    return db_content_type_;
+    return ds_type_;
 }
 
-void DataSourceBase::dbContentType(const std::string &db_content_type)
+void DataSourceBase::dsType(const std::string& ds_type)
 {
-    db_content_type_ = db_content_type;
+    ds_type_ = ds_type;
 }
 
 unsigned int DataSourceBase::sac() const

@@ -8,7 +8,7 @@ namespace DBContent {
 const std::string DBDataSource::table_name_{"data_sources"};
 
 const Property DBDataSource::id_column_{"ds_id", PropertyDataType::UINT};
-const Property DBDataSource::db_content_type_column_{"db_content_type", PropertyDataType::STRING};
+const Property DBDataSource::ds_type_column_{"ds_type", PropertyDataType::STRING};
 const Property DBDataSource::sac_column_{"sac", PropertyDataType::UINT};
 const Property DBDataSource::sic_column_{"sic", PropertyDataType::UINT};
 const Property DBDataSource::name_column_{"name", PropertyDataType::STRING};

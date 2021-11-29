@@ -132,7 +132,7 @@ shared_ptr<DBCommand> SQLGenerator::getDataSourcesSelectCommand()
 
     PropertyList list;
     list.addProperty(DBDataSource::id_column_);
-    list.addProperty(DBDataSource::db_content_type_column_);
+    list.addProperty(DBDataSource::ds_type_column_);
     list.addProperty(DBDataSource::sac_column_);
     list.addProperty(DBDataSource::sic_column_);
     list.addProperty(DBDataSource::name_column_);

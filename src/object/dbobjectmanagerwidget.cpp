@@ -47,9 +47,6 @@ DBObjectManagerWidget::DBObjectManagerWidget(DBObjectManager& object_manager)
     // unsigned int frame_width = FRAME_SIZE;
     setContentsMargins(0, 0, 0, 0);
 
-    //    setFrameStyle(QFrame::Panel | QFrame::Raised);
-    //    setLineWidth(frame_width);
-
     QFont font_bold;
     font_bold.setBold(true);
 
@@ -62,7 +59,7 @@ DBObjectManagerWidget::DBObjectManagerWidget(DBObjectManager& object_manager)
 
     QFrame* dob_frame = new QFrame();
     dob_frame->setFrameStyle(QFrame::Panel | QFrame::Raised);
-    dob_frame->setLineWidth(FRAME_SIZE);
+    dob_frame->setLineWidth(1);
 
     dbobjects_grid_ = new QGridLayout();
     updateDBOsSlot();
@@ -89,7 +86,7 @@ DBObjectManagerWidget::DBObjectManagerWidget(DBObjectManager& object_manager)
 
     QFrame* meta_frame = new QFrame();
     meta_frame->setFrameStyle(QFrame::Panel | QFrame::Raised);
-    meta_frame->setLineWidth(FRAME_SIZE);
+    meta_frame->setLineWidth(1);
 
     meta_variables_grid_ = new QGridLayout();
     updateMetaVariablesSlot();

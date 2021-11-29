@@ -13,7 +13,7 @@ public:
     static const std::string table_name_;
 
     const static Property id_column_;
-    const static Property db_content_type_column_;
+    const static Property ds_type_column_;
     const static Property sac_column_;
     const static Property sic_column_;
     const static Property name_column_;

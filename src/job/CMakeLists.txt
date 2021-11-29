@@ -7,7 +7,6 @@ target_sources(compass
     PUBLIC
         "${CMAKE_CURRENT_LIST_DIR}/job.h"
         "${CMAKE_CURRENT_LIST_DIR}/jobmanager.h"
-        "${CMAKE_CURRENT_LIST_DIR}/jobmanagerwidget.h"
         "${CMAKE_CURRENT_LIST_DIR}/dboreaddbjob.h"
         "${CMAKE_CURRENT_LIST_DIR}/allbuffercsvexportjob.h"
         "${CMAKE_CURRENT_LIST_DIR}/buffercsvexportjob.h"
@@ -35,7 +34,6 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/insertbufferdbjob.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/updatebufferdbjob.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/jobmanager.cpp"
-        "${CMAKE_CURRENT_LIST_DIR}/jobmanagerwidget.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/readjsonfilejob.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/jsonparsejob.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/jsonmappingjob.cpp"

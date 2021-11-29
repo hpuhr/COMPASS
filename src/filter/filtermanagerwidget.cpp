@@ -36,23 +36,15 @@
 
 FilterManagerWidget::FilterManagerWidget(FilterManager& filter_manager, QWidget* parent,
                                          Qt::WindowFlags f)
-    : QFrame(parent),
+    : QWidget(parent),
       filter_manager_(filter_manager),
       filter_generator_widget_(nullptr),
       add_button_(nullptr)
 {
-    unsigned int frame_width = FRAME_SIZE;
     QFont font_bold;
     font_bold.setBold(true);
 
-    setFrameStyle(QFrame::Panel | QFrame::Raised);
-    setLineWidth(frame_width);
-
     QVBoxLayout* layout = new QVBoxLayout();
-
-    QLabel* filter_label = new QLabel(tr("Filters"));
-    filter_label->setFont(font_bold);
-    layout->addWidget(filter_label);
 
     // use filters stuff
     filters_check_ = new QCheckBox("Use Filters");

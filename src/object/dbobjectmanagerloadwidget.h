@@ -24,62 +24,43 @@
 class DBObject;
 class DBObjectWidget;
 class DBObjectManager;
-//class DBOVariableSelectionWidget;
 
-class QVBoxLayout;
+class QGridLayout;
 class QPushButton;
 class QCheckBox;
 class QLineEdit;
 class QLabel;
 
-/**
- * @brief Shows all DBObjects, allows editing and adding new ones
- */
-class DBObjectManagerLoadWidget : public QFrame
+class DBObjectManagerLoadWidget : public QWidget
 {
     Q_OBJECT
 
   public slots:
-    /// @brief Called when the order-by variable was changed
-    //void orderVariableChanged();
-    /// @brief Called when the use order checkbox is un/checked
-    //void toggleUseOrder();
-    /// @brief Called when order ascending checkbox is un/checked
-    //void toggleOrderAscending();
 
     void toggleUseLimit();
-    /// @brief Called when limit minimum is changed
     void limitMinChanged();
-    /// @brief Called when limit maximum is changed
     void limitMaxChanged();
 
     void loadButtonSlot();
-    void updateSlot();
+    void update();
 
   public:
-    /// @brief Constructor
     DBObjectManagerLoadWidget(DBObjectManager& object_manager);
-    /// @brief Destructor
     virtual ~DBObjectManagerLoadWidget();
 
     void loadingDone();
 
   private:
     DBObjectManager& object_manager_;
-    QVBoxLayout* info_layout_{nullptr};
+
+    std::map<std::string, QGridLayout*> type_layouts_; // dbcontent type -> layout
 
     QLabel* associations_label_{nullptr};
 
-    //QCheckBox* order_check_{nullptr};
-    //QCheckBox* order_ascending_check_{nullptr};
-    /// Order-by variable selection widget
-    //DBOVariableSelectionWidget* order_variable_widget_{nullptr};
     QCheckBox* limit_check_{nullptr};
 
     QWidget* limit_widget_{nullptr};
-    /// Limit minimum edit field
     QLineEdit* limit_min_edit_{nullptr};
-    /// Limit maximum edit field
     QLineEdit* limit_max_edit_{nullptr};
 
     QPushButton* load_button_{nullptr};

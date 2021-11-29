@@ -7,11 +7,9 @@ target_sources(compass
     PUBLIC
         "${CMAKE_CURRENT_LIST_DIR}/client.h"
         "${CMAKE_CURRENT_LIST_DIR}/mainwindow.h"
-        "${CMAKE_CURRENT_LIST_DIR}/mainloadwidget.h"
     PRIVATE
         "${CMAKE_CURRENT_LIST_DIR}/client.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/mainwindow.cpp"
-        "${CMAKE_CURRENT_LIST_DIR}/mainloadwidget.cpp"
 )
 
 add_executable ( compass_client "${CMAKE_CURRENT_LIST_DIR}/main.cpp")

@@ -43,7 +43,7 @@ using namespace std;
 using namespace Utils;
 using namespace DBContent;
 
-const std::vector<std::string> DBObjectManager::db_content_types_ {"Radar", "MLAT", "ADSB", "Tracker", "RefTraj"};
+const std::vector<std::string> DBObjectManager::data_source_types_ {"Radar", "MLAT", "ADSB", "Tracker", "RefTraj"};
 
 DBObjectManager::DBObjectManager(const std::string& class_id, const std::string& instance_id,
                                  COMPASS* compass)
@@ -452,7 +452,7 @@ void DBObjectManager::databaseContentChangedSlot()
     QApplication::restoreOverrideCursor();
 
     if (load_widget_)
-        load_widget_->updateSlot();
+        load_widget_->update();
 
     emit dbObjectsChangedSignal();
 
@@ -649,7 +649,7 @@ void DBObjectManager::setAssociationsDataSource(const std::string& dbo, const st
     associations_ds_ = data_source_name;
 
     if (load_widget_)
-        loadWidget()->updateSlot();
+        loadWidget()->update();
 }
 
 void DBObjectManager::setAssociationsByAll()
@@ -663,7 +663,7 @@ void DBObjectManager::setAssociationsByAll()
     associations_ds_ = "";
 
     if (load_widget_)
-        loadWidget()->updateSlot();
+        loadWidget()->update();
 }
 
 void DBObjectManager::removeAssociations()
@@ -680,7 +680,7 @@ void DBObjectManager::removeAssociations()
         dbo_it.second->clearAssociations();
 
     if (load_widget_)
-        loadWidget()->updateSlot();
+        loadWidget()->update();
 }
 
 bool DBObjectManager::hasAssociationsDataSource() const

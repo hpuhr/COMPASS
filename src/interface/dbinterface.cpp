@@ -412,7 +412,7 @@ std::vector<std::unique_ptr<DBContent::DBDataSource>> DBInterface::getDataSource
     using namespace DBContent;
 
     assert(buffer->properties().hasProperty(DBDataSource::id_column_));
-    assert(buffer->properties().hasProperty(DBDataSource::db_content_type_column_));
+    assert(buffer->properties().hasProperty(DBDataSource::ds_type_column_));
     assert(buffer->properties().hasProperty(DBDataSource::sac_column_));
     assert(buffer->properties().hasProperty(DBDataSource::sic_column_));
     assert(buffer->properties().hasProperty(DBDataSource::name_column_));
@@ -431,7 +431,7 @@ std::vector<std::unique_ptr<DBContent::DBDataSource>> DBInterface::getDataSource
             continue;
         }
 
-        if (buffer->get<string>(DBDataSource::db_content_type_column_.name()).isNull(cnt))
+        if (buffer->get<string>(DBDataSource::ds_type_column_.name()).isNull(cnt))
         {
             logerr << "DBInterface: getDataSources: data source cnt " << cnt
                    << " has NULL content type, will be omitted";
@@ -462,7 +462,7 @@ std::vector<std::unique_ptr<DBContent::DBDataSource>> DBInterface::getDataSource
         std::unique_ptr<DBContent::DBDataSource> src;
 
         src->id(buffer->get<unsigned int>(DBDataSource::id_column_.name()).get(cnt));
-        src->dbContentType(buffer->get<string>(DBDataSource::db_content_type_column_.name()).get(cnt));
+        src->dsType(buffer->get<string>(DBDataSource::ds_type_column_.name()).get(cnt));
         src->sac(buffer->get<unsigned int>(DBDataSource::sac_column_.name()).get(cnt));
         src->sic(buffer->get<unsigned int>(DBDataSource::sic_column_.name()).get(cnt));
         src->name(buffer->get<string>(DBDataSource::name_column_.name()).get(cnt));
@@ -492,7 +492,7 @@ void DBInterface::saveDataSources(const std::vector<std::unique_ptr<DBContent::D
 
     PropertyList list;
     list.addProperty(DBDataSource::id_column_);
-    list.addProperty(DBDataSource::db_content_type_column_);
+    list.addProperty(DBDataSource::ds_type_column_);
     list.addProperty(DBDataSource::sac_column_);
     list.addProperty(DBDataSource::sic_column_);
     list.addProperty(DBDataSource::name_column_);
@@ -506,7 +506,7 @@ void DBInterface::saveDataSources(const std::vector<std::unique_ptr<DBContent::D
     for (auto& ds_it : data_sources)
     {
         buffer->get<unsigned int>(DBDataSource::id_column_.name()).set(cnt, ds_it->id());
-        buffer->get<string>(DBDataSource::db_content_type_column_.name()).set(cnt, ds_it->dbContentType());
+        buffer->get<string>(DBDataSource::ds_type_column_.name()).set(cnt, ds_it->dsType());
         buffer->get<unsigned int>(DBDataSource::sac_column_.name()).set(cnt, ds_it->sac());
         buffer->get<unsigned int>(DBDataSource::sic_column_.name()).set(cnt, ds_it->sic());
         buffer->get<string>(DBDataSource::name_column_.name()).set(cnt, ds_it->name());

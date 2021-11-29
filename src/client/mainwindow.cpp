@@ -22,12 +22,13 @@
 #include "configurationmanager.h"
 #include "dbobject.h"
 #include "dbobjectmanager.h"
+#include "dbobjectmanagerloadwidget.h"
 #include "files.h"
 #include "filtermanager.h"
+#include "filtermanagerwidget.h"
 #include "global.h"
-#include "jobmanager.h"
+//#include "jobmanager.h"
 #include "logger.h"
-#include "mainloadwidget.h"
 #include "stringconv.h"
 #include "taskmanager.h"
 #include "taskmanagerwidget.h"
@@ -36,6 +37,7 @@
 #include "asteriximporttask.h"
 #include "asteriximportrecordingtaskdialog.h"
 #include "evaluationmanager.h"
+#include "compass.h"
 
 #include <QApplication>
 #include <QFileDialog>
@@ -65,8 +67,8 @@ MainWindow::MainWindow()
 
     setMinimumSize(QSize(1200, 900));
 
-    QIcon atsdb_icon(Files::getIconFilepath("ats.png").c_str());
-    setWindowIcon(atsdb_icon);  // for the glory of the empire
+    QIcon ats_icon(Files::getIconFilepath("ats.png").c_str());
+    setWindowIcon(ats_icon);  // for the glory of the empire
 
     QSettings settings("COMPASS", "Client");
     restoreGeometry(settings.value("MainWindow/geometry").toByteArray());
@@ -84,31 +86,15 @@ MainWindow::MainWindow()
 
     tab_widget_ = new QTabWidget();
 
-    //    TaskManager& task_man = COMPASS::instance().taskManager();
-
-    //    task_manager_widget_ = task_man.widget();
-    //    tab_widget_->addTab(task_manager_widget_, "Tasks");
-
-    //    connect(&task_man, &TaskManager::startInspectionSignal, this, &MainWindow::startSlot);
-    //    connect(&task_man, &TaskManager::quitRequestedSignal, this, &MainWindow::quitRequestedSlot, Qt::QueuedConnection);
-
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
-    // management widget
-    management_widget_ = new MainLoadWidget();
-
-    assert(management_widget_);
-    tab_widget_->addTab(management_widget_, "Load");
+    tab_widget_->addTab(COMPASS::instance().objectManager().loadWidget(), "Data Sources");
+    tab_widget_->addTab(COMPASS::instance().filterManager().widget(), "Filters");
 
     COMPASS::instance().evaluationManager().init(tab_widget_); // adds eval widget
     COMPASS::instance().viewManager().init(tab_widget_); // adds view points widget and view container
 
     tab_widget_->setCurrentIndex(0);
-
-    //emit JobManager::instance().databaseIdle();  // to enable ViewManager add button, slightly HACKY
-
-    //    msg_box->close();
-    //    delete msg_box;
 
     QApplication::restoreOverrideCursor();
 
@@ -123,11 +109,6 @@ MainWindow::MainWindow()
     add_view_button_->setToolTip(tr("Add view"));
     connect(add_view_button_, &QPushButton::clicked, this, &MainWindow::showAddViewMenuSlot);
     tab_widget_->setCornerWidget(add_view_button_);
-
-    //add_view_button_->setDisabled(true);
-
-    //    QObject::connect(this, &MainWindow::startedSignal, &COMPASS::instance().filterManager(),
-    //                     &FilterManager::startedSlot);
 
     createMenus ();
     updateMenus ();

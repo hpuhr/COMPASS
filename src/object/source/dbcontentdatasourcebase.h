@@ -13,8 +13,8 @@ class DataSourceBase
 public:
     DataSourceBase();
 
-    std::string dbContentType() const;
-    void dbContentType(const std::string& db_content_type);
+    std::string dsType() const;
+    void dsType(const std::string& ds_type);
 
     unsigned int sac() const;
     void sac(unsigned int sac);
@@ -35,7 +35,7 @@ public:
     std::string infoStr();
 
 protected:
-    std::string db_content_type_;
+    std::string ds_type_;
 
     unsigned int sac_{0};
     unsigned int sic_{0};

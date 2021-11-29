@@ -17,23 +17,23 @@ ConfigurationDataSource::ConfigurationDataSource(const std::string& class_id, co
                                                  DBObjectManager& dbo_manager)
     : Configurable(class_id, instance_id, &dbo_manager)
 {
-    registerParameter("db_content_type", &db_content_type_, "");
+    registerParameter("ds_type", &ds_type_, "");
     registerParameter("sac", &sac_, 0);
     registerParameter("sic", &sic_, 0);
 
-    assert (db_content_type_.size());
+    assert (ds_type_.size());
 
-    if (find(DBObjectManager::db_content_types_.begin(),
-             DBObjectManager::db_content_types_.end(), db_content_type_)
-        == DBObjectManager::db_content_types_.end())
+    if (find(DBObjectManager::data_source_types_.begin(),
+             DBObjectManager::data_source_types_.end(), ds_type_)
+        == DBObjectManager::data_source_types_.end())
     {
-        logerr << "ConfigurationDataSource: sac/sic " << sac_ << sic_ << " db_content_type '" << db_content_type_
+        logerr << "ConfigurationDataSource: sac/sic " << sac_ << sic_ << " ds_type '" << ds_type_
                << "' unknown";
     }
 
-    assert (find(DBObjectManager::db_content_types_.begin(),
-                 DBObjectManager::db_content_types_.end(), db_content_type_)
-            != DBObjectManager::db_content_types_.end());
+    assert (find(DBObjectManager::data_source_types_.begin(),
+                 DBObjectManager::data_source_types_.end(), ds_type_)
+            != DBObjectManager::data_source_types_.end());
 
     registerParameter("name", &name_, "");
     registerParameter("has_short_name", &has_short_name_, false);
@@ -57,7 +57,7 @@ json ConfigurationDataSource::getAsJSON()
 {
     json j;
 
-    j["db_content_type"] = db_content_type_;
+    j["ds_type"] = ds_type_;
 
     j["sac"] = sac_;
     j["sic"] = sic_;
@@ -75,7 +75,7 @@ json ConfigurationDataSource::getAsJSON()
 
 void ConfigurationDataSource::setFromJSON(json& j)
 {
-    j["db_content_type"] = db_content_type_;
+    j["ds_type"] = ds_type_;
 
     j["sac"] = sac_;
     j["sic"] = sic_;
@@ -87,7 +87,7 @@ void ConfigurationDataSource::setFromJSON(json& j)
 
     j["info"] = info_;
 
-    db_content_type_ = j.at("db_content_type");
+    ds_type_ = j.at("ds_type");
 
     sac_ = j.at("sac");
     sic_ = j.at("sic");

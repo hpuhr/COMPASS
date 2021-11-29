@@ -23,7 +23,6 @@
 #include <QThreadPool>
 
 #include "job.h"
-#include "jobmanagerwidget.h"
 #include "logger.h"
 #include "stringconv.h"
 
@@ -31,9 +30,7 @@ using namespace Utils;
 
 JobManager::JobManager()
     : Configurable("JobManager", "JobManager0", 0, "threads.json"),
-      stop_requested_(false),
-      stopped_(false),
-      widget_(nullptr)
+      stop_requested_(false), stopped_(false)
 {
     logdbg << "JobManager: constructor";
 }
@@ -45,7 +42,6 @@ void JobManager::addBlockingJob(std::shared_ptr<Job> job)
     logdbg << "JobManager: addJob: " << job->name() << " num " << blocking_jobs_.unsafe_size();
 
     blocking_jobs_.push(job);  // only add, do not start
-    updateWidget();
 }
 
 void JobManager::addNonBlockingJob(std::shared_ptr<Job> job)
@@ -55,15 +51,11 @@ void JobManager::addNonBlockingJob(std::shared_ptr<Job> job)
 
     non_blocking_jobs_.push(job);  // add and start
     QThreadPool::globalInstance()->start(job.get());
-
-    updateWidget();
 }
 
 void JobManager::addDBJob(std::shared_ptr<Job> job)
 {
     queued_db_jobs_.push(job);
-
-    updateWidget();
 
     emit databaseBusy();
 }
@@ -111,9 +103,6 @@ void JobManager::run()
 
         if (!stop_requested_ && changed_ && !hasDBJobs())
             emit databaseIdle();
-
-        if (!stop_requested_ && changed_)
-            updateWidget(really_update_widget_);
 
         // QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
         msleep(1);
@@ -298,12 +287,6 @@ void JobManager::shutdown()
         msleep(1000);
     }
 
-    if (widget_)
-    {
-        delete widget_;
-        widget_ = nullptr;
-    }
-
     assert(!active_blocking_job_);
     assert(blocking_jobs_.empty());
 
@@ -314,18 +297,6 @@ void JobManager::shutdown()
     assert(queued_db_jobs_.empty());
 
     loginf << "JobManager: shutdown: done";
-}
-
-JobManagerWidget* JobManager::widget()
-{
-    if (!widget_)
-    {
-        widget_ = new JobManagerWidget(*this);
-        last_update_time_ = boost::posix_time::microsec_clock::local_time();
-    }
-
-    assert(widget_);
-    return widget_;
 }
 
 unsigned int JobManager::numBlockingJobs()
@@ -348,17 +319,3 @@ unsigned int JobManager::numJobs() { return numBlockingJobs() + numNonBlockingJo
 
 int JobManager::numThreads() { return QThreadPool::globalInstance()->activeThreadCount(); }
 
-void JobManager::updateWidget(bool really)
-{
-    if (widget_)
-    {
-        boost::posix_time::ptime current_time = boost::posix_time::microsec_clock::local_time();
-        boost::posix_time::time_duration diff = current_time - last_update_time_;
-
-        if (diff.total_milliseconds() > 500 || really)
-        {
-            widget_->updateSlot();
-            last_update_time_ = current_time;
-        }
-    }
-}

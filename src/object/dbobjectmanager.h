@@ -58,7 +58,7 @@ signals:
     void allLoadingDoneSignal();
 
 public:
-    const static std::vector<std::string> db_content_types_;
+    const static std::vector<std::string> data_source_types_;
 
     DBObjectManager(const std::string& class_id, const std::string& instance_id, COMPASS* compass);
 

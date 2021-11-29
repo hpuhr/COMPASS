@@ -22,8 +22,6 @@
 
 #include "global.h"
 
-//#include "JobOrderer.h"
-
 class QPushButton;
 class QTabWidget;
 class QCheckBox;
@@ -36,14 +34,6 @@ class DBSchemaManagerWidget;
 class DBObjectManagerWidget;
 class MainLoadWidget;
 
-/**
- * @brief Main window which embeds all other components
- *
- * When started, allows management of database connection and schema. When database is opened,
- * a stack widget is used to display the main widget with further components.
- *
- * Also handles shutdown behavior using the closeEvent() function.
- */
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -63,17 +53,11 @@ class MainWindow : public QMainWindow
 
     void importAsterixRecordingSlot();
 
-    //void startSlot();
-
-    // void keyPressEvent ( QKeyEvent * event );
-
     void quitRequestedSlot();
     void showAddViewMenuSlot();
 
   public:
-    /// @brief Constructor
     MainWindow();
-    /// @brief Destructor
     virtual ~MainWindow();
 
     void disableConfigurationSaving();
@@ -82,10 +66,7 @@ class MainWindow : public QMainWindow
 
 protected:
     bool started_ {false};
-    /// Widget stack for startup to usage switch
     QTabWidget* tab_widget_{nullptr};
-
-    MainLoadWidget* management_widget_{nullptr};
 
     QPushButton* add_view_button_{nullptr};
 
