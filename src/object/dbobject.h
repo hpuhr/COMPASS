@@ -172,7 +172,7 @@ class DBObject : public QObject, public Configurable
 
 protected:
     COMPASS& compass_;
-    DBObjectManager& manager_;
+    DBObjectManager& dbo_manager_;
     std::string name_;
     std::string info_;
     std::string db_table_name_;

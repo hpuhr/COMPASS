@@ -88,7 +88,7 @@ public:
 
     //QWidget* connectionWidget();
 
-    void openDBFile(const std::string& filename);
+    void openDBFile(const std::string& filename, bool overwrite);
     void closeDBFile();
     bool dbOpen();
 
@@ -98,12 +98,14 @@ public:
 
     SQLiteConnection& connection();
 
-    bool hasDataSources();
+    bool existsDataSourcesTable();
+    void createDataSourcesTable();
     std::vector<std::unique_ptr<DBContent::DBDataSource>> getDataSources();
     void saveDataSources(const std::vector<std::unique_ptr<DBContent::DBDataSource>>& data_sources);
     // clears previous and saves new ones
 
-    void insertBuffer(const DBObject& dbobject, std::shared_ptr<Buffer> buffer);
+    // insert data and create associated data sources
+    void insertBuffer(DBObject& db_object, std::shared_ptr<Buffer> buffer);
     void insertBuffer(const std::string& table_name, std::shared_ptr<Buffer> buffer);
 
     //    bool checkUpdateBuffer(DBObject& object, DBOVariable& key_var, DBOVariableSet& list,

@@ -78,6 +78,7 @@ class NullableVector
     NullableVector<T>& operator*=(double factor);
 
     std::set<T> distinctValues(unsigned int index = 0);
+    std::map<T, unsigned int> distinctValuesWithCounts(unsigned int index = 0);
     std::tuple<bool,T,T> minMaxValues(unsigned int index = 0); // set, min, max
 
     std::map<T, std::vector<unsigned int>> distinctValuesWithIndexes(unsigned int from_index,
@@ -549,6 +550,27 @@ std::set<T> NullableVector<T>::distinctValues(unsigned int index)
             value = data_.at(index);
             if (values.count(value) == 0)
                 values.insert(value);
+        }
+    }
+
+    return values;
+}
+
+template <class T>
+std::map<T, unsigned int> NullableVector<T>::distinctValuesWithCounts(unsigned int index)
+{
+    logdbg << "NullableVector " << property_.name() << ": distinctValuesWithCounts";
+
+    std::map<T, unsigned int> values;
+
+    T value;
+
+    for (; index < data_.size(); ++index)
+    {
+        if (!isNull(index))  // not for null
+        {
+            value = data_.at(index);
+            values[value] += 1;
         }
     }
 

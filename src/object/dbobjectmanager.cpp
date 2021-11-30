@@ -73,17 +73,8 @@ DBObjectManager::~DBObjectManager()
         delete it.second;
     meta_variables_.clear();
 
-    if (widget_)
-    {
-        delete widget_;
-        widget_ = nullptr;
-    }
-
-    if (load_widget_)
-    {
-        delete load_widget_;
-        load_widget_ = nullptr;
-    }
+    widget_ = nullptr;
+    load_widget_ = nullptr;
 }
 
 void DBObjectManager::generateSubConfigurable(const std::string& class_id,
@@ -199,7 +190,7 @@ DBObjectManagerWidget* DBObjectManager::widget()
 {
     if (!widget_)
     {
-        widget_ = new DBObjectManagerWidget(*this);
+        widget_.reset(new DBObjectManagerWidget(*this));
         // connect (this, SIGNAL(databaseContentChangedSignal), widget_, SLOT(updateDBOsSlot));
 
         //        if (locked_)
@@ -207,18 +198,18 @@ DBObjectManagerWidget* DBObjectManager::widget()
     }
 
     assert(widget_);
-    return widget_;
+    return widget_.get();
 }
 
 DBObjectManagerLoadWidget* DBObjectManager::loadWidget()
 {
     if (!load_widget_)
     {
-        load_widget_ = new DBObjectManagerLoadWidget(*this);
+        load_widget_.reset(new DBObjectManagerLoadWidget(*this));
     }
 
     assert(load_widget_);
-    return load_widget_;
+    return load_widget_.get();
 }
 
 bool DBObjectManager::useLimit() const { return use_limit_; }
@@ -416,40 +407,45 @@ void DBObjectManager::updateSchemaInformationSlot()
     emit schemaChangedSignal();
 }
 
-void DBObjectManager::databaseOpenendSlot()
+void DBObjectManager::databaseOpenedSlot()
 {
+    loginf << "DBObjectManager: databaseOpenedSlot";
+
     loadDBDataSources();
+
+    if (load_widget_)
+        load_widget_->update();
 }
 
 void DBObjectManager::databaseContentChangedSlot()
 {
     // emit databaseContentChangedSignal();
 
-    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+//    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
-    loginf << "DBObjectManager: databaseContentChangedSlot";
+//    loginf << "DBObjectManager: databaseContentChangedSlot";
 
-    if (COMPASS::instance().interface().hasProperty("associations_generated"))
-    {
-        assert(COMPASS::instance().interface().hasProperty("associations_dbo"));
-        assert(COMPASS::instance().interface().hasProperty("associations_ds"));
+//    if (COMPASS::instance().interface().hasProperty("associations_generated"))
+//    {
+//        assert(COMPASS::instance().interface().hasProperty("associations_dbo"));
+//        assert(COMPASS::instance().interface().hasProperty("associations_ds"));
 
-        has_associations_ =
-                COMPASS::instance().interface().getProperty("associations_generated") == "1";
-        associations_dbo_ = COMPASS::instance().interface().getProperty("associations_dbo");
-        associations_ds_ = COMPASS::instance().interface().getProperty("associations_ds");
-    }
-    else
-    {
-        has_associations_ = false;
-        associations_dbo_ = "";
-        associations_ds_ = "";
-    }
+//        has_associations_ =
+//                COMPASS::instance().interface().getProperty("associations_generated") == "1";
+//        associations_dbo_ = COMPASS::instance().interface().getProperty("associations_dbo");
+//        associations_ds_ = COMPASS::instance().interface().getProperty("associations_ds");
+//    }
+//    else
+//    {
+//        has_associations_ = false;
+//        associations_dbo_ = "";
+//        associations_ds_ = "";
+//    }
 
-    for (auto& object : objects_)
-        object.second->updateToDatabaseContent();
+//    for (auto& object : objects_)
+//        object.second->updateToDatabaseContent();
 
-    QApplication::restoreOverrideCursor();
+//    QApplication::restoreOverrideCursor();
 
     if (load_widget_)
         load_widget_->update();
@@ -517,8 +513,20 @@ void DBObjectManager::loadDBDataSources()
 
     DBInterface& db_interface = COMPASS::instance().interface();
 
-    if (db_interface.hasDataSources())
+    if (db_interface.existsDataSourcesTable())
+    {
         db_data_sources_ = db_interface.getDataSources();
+        sortDBDataSources();
+    }
+}
+
+void DBObjectManager::sortDBDataSources()
+{
+    sort(db_data_sources_.begin(), db_data_sources_.end(),
+         [](const std::unique_ptr<DBContent::DBDataSource>& a, const std::unique_ptr<DBContent::DBDataSource>& b) -> bool
+    {
+        return a->name() > b->name();
+    });
 }
 
 void DBObjectManager::saveDBDataSources()
@@ -556,6 +564,7 @@ void DBObjectManager::addNewDataSource (unsigned int ds_id)
                     Number::sacFromDsId(ds_id), Number::sicFromDsId(ds_id));
 
         db_data_sources_.emplace_back(move(cfg_ds.getAsNewDBDS()));
+        sortDBDataSources();
     }
     else
     {
@@ -568,6 +577,7 @@ void DBObjectManager::addNewDataSource (unsigned int ds_id)
         new_ds->name(to_string(ds_id));
 
         db_data_sources_.emplace_back(move(new_ds));
+        sortDBDataSources();
     }
 
     assert (hasDataSource(ds_id));
@@ -580,7 +590,7 @@ DBContent::DBDataSource& DBObjectManager::dataSource(unsigned int ds_id)
     assert (hasDataSource(ds_id));
 
     return *find_if(db_data_sources_.begin(), db_data_sources_.end(),
-                   [ds_id] (const std::unique_ptr<DBContent::DBDataSource>& s)
+                    [ds_id] (const std::unique_ptr<DBContent::DBDataSource>& s)
     { return Number::dsIdFrom(s->sac(), s->sic()) == ds_id; } )->get();
 }
 

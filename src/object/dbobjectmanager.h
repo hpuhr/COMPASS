@@ -46,7 +46,8 @@ public slots:
     // void schemaLockedSlot ();
     void loadSlot();
     void updateSchemaInformationSlot();
-    void databaseOpenendSlot();
+
+    void databaseOpenedSlot();
     void databaseContentChangedSlot();
     void loadingDoneSlot(DBObject& object);
 
@@ -166,8 +167,8 @@ protected:
     std::vector<std::unique_ptr<DBContent::ConfigurationDataSource>> config_data_sources_;
     std::vector<std::unique_ptr<DBContent::DBDataSource>> db_data_sources_;
 
-    DBObjectManagerWidget* widget_{nullptr};
-    DBObjectManagerLoadWidget* load_widget_{nullptr};
+    std::unique_ptr<DBObjectManagerWidget> widget_;
+    std::unique_ptr<DBObjectManagerLoadWidget> load_widget_;
 
     virtual void checkSubConfigurables();
     void finishLoading();
@@ -176,6 +177,7 @@ protected:
     DBContent::ConfigurationDataSource& getConfigDataSource (unsigned int sac, unsigned int sic);
 
     void loadDBDataSources();
+    void sortDBDataSources();
 };
 
 #endif /* DBOBJECTMANAGER_H_ */

@@ -42,16 +42,16 @@ class DBObjectManagerLoadWidget : public QWidget
     void limitMaxChanged();
 
     void loadButtonSlot();
-    void update();
 
   public:
     DBObjectManagerLoadWidget(DBObjectManager& object_manager);
     virtual ~DBObjectManagerLoadWidget();
 
+    void update();
     void loadingDone();
 
   private:
-    DBObjectManager& object_manager_;
+    DBObjectManager& dbo_manager_;
 
     std::map<std::string, QGridLayout*> type_layouts_; // dbcontent type -> layout
 

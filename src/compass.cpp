@@ -70,6 +70,9 @@ COMPASS::COMPASS() : Configurable("COMPASS", "COMPASS0", 0, "compass.json")
 //                     &TaskManager::schemaChangedSlot);
 
     QObject::connect(db_interface_.get(), &DBInterface::databaseOpenedSignal,
+                     dbo_manager_.get(), &DBObjectManager::databaseOpenedSlot);
+
+    QObject::connect(db_interface_.get(), &DBInterface::databaseOpenedSignal,
                      eval_manager_.get(), &EvaluationManager::databaseOpenedSlot);
 
     QObject::connect(db_interface_.get(), &DBInterface::databaseClosedSignal,
@@ -194,7 +197,7 @@ void COMPASS::openDBFile(const std::string& filename)
 
     last_db_filename_ = filename;
 
-    db_interface_->openDBFile(filename);
+    db_interface_->openDBFile(filename, false);
     assert (db_interface_->dbOpen());
 
     addDBFileToList(filename);
@@ -218,7 +221,7 @@ void COMPASS::createNewDBFile(const std::string& filename)
 
     last_db_filename_ = filename;
 
-    db_interface_->openDBFile(filename);
+    db_interface_->openDBFile(filename, true);
     assert (db_interface_->dbOpen());
 
     addDBFileToList(filename);
@@ -296,6 +299,10 @@ void COMPASS::shutdown()
         return;
     }
 
+    assert(dbo_manager_);
+    dbo_manager_->saveDBDataSources();
+    dbo_manager_ = nullptr;
+
     JobManager::instance().shutdown();
     ProjectionManager::instance().shutdown();
 
@@ -306,9 +313,6 @@ void COMPASS::shutdown()
     assert(view_manager_);
     view_manager_->close();
     view_manager_ = nullptr;
-
-    assert(dbo_manager_);
-    dbo_manager_ = nullptr;
 
     assert(task_manager_);
     task_manager_->shutdown();

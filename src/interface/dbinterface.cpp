@@ -153,9 +153,9 @@ void DBInterface::updateTableInfo()
 //    return db_connection_->widget();
 //}
 
-void DBInterface::openDBFile(const std::string& filename)
+void DBInterface::openDBFile(const std::string& filename, bool overwrite)
 {
-    if (Files::fileExists(filename))
+    if (overwrite && Files::fileExists(filename))
     {
         loginf << "DBInterface: openDBFile: deleting pre-existing file '" << filename << "'";
         Files::deleteFile(filename);
@@ -171,6 +171,9 @@ void DBInterface::openDBFile(const std::string& filename)
         createPropertiesTable();
 
     loadProperties();
+
+    if (!existsDataSourcesTable())
+        createDataSourcesTable();
 
     if (!existsSectorsTable())
         createSectorsTable();
@@ -388,9 +391,19 @@ std::tuple<bool, unsigned int, unsigned int>>> DBInterface::queryADSBInfo()
     return data;
 }
 
-bool DBInterface::hasDataSources()
+bool DBInterface::existsDataSourcesTable()
 {
     return existsTable(DBContent::DBDataSource::table_name_);
+}
+
+void DBInterface::createDataSourcesTable()
+{
+    assert(!existsDataSourcesTable());
+    connection_mutex_.lock();
+    db_connection_->executeSQL(sql_generator_.getTableDataSourcesCreateStatement());
+    connection_mutex_.unlock();
+
+    updateTableInfo();
 }
 
 std::vector<std::unique_ptr<DBContent::DBDataSource>> DBInterface::getDataSources()
@@ -459,7 +472,7 @@ std::vector<std::unique_ptr<DBContent::DBDataSource>> DBInterface::getDataSource
             continue;
         }
 
-        std::unique_ptr<DBContent::DBDataSource> src;
+        std::unique_ptr<DBContent::DBDataSource> src {new DBContent::DBDataSource()};
 
         src->id(buffer->get<unsigned int>(DBDataSource::id_column_.name()).get(cnt));
         src->dsType(buffer->get<string>(DBDataSource::ds_type_column_.name()).get(cnt));
@@ -519,6 +532,8 @@ void DBInterface::saveDataSources(const std::vector<std::unique_ptr<DBContent::D
 
         ++cnt;
     }
+
+    loginf << "DBInterface: saveDataSources: buffer size " << buffer->size();
 
     insertBuffer(DBDataSource::table_name_, buffer);
 
@@ -1029,15 +1044,42 @@ void DBInterface::deleteAllSectors()
 ////    return ret;
 //}
 
-void DBInterface::insertBuffer(const DBObject& dbobject, std::shared_ptr<Buffer> buffer)
+void DBInterface::insertBuffer(DBObject& db_object, std::shared_ptr<Buffer> buffer)
 {
-    logdbg << "DBInterface: insertBuffer: dbo " << dbobject.name() << " buffer size "
+    logdbg << "DBInterface: insertBuffer: dbo " << db_object.name() << " buffer size "
            << buffer->size();
 
-    if (!existsTable(dbobject.dbTableName()))
-        createTable(dbobject);
+    if (!existsTable(db_object.dbTableName()))
+        createTable(db_object);
 
-    insertBuffer(dbobject.dbTableName(), buffer);
+    const string datasource_var_str {"DS ID"};
+    assert (db_object.hasVariable(datasource_var_str));
+
+    DBOVariable& datasource_var = db_object.variable(datasource_var_str);
+    assert (datasource_var.dataType() == PropertyDataType::UINT);
+
+    string datasource_col_str = datasource_var.dbColumnName();
+    assert (buffer->has<unsigned int>(datasource_col_str));
+
+    NullableVector<unsigned int>& datasource_vec = buffer->get<unsigned int>(datasource_col_str);
+
+    DBObjectManager& dbo_man = COMPASS::instance().objectManager();
+
+    // check if data sources exist, create if not
+    for (auto ds_id_it : datasource_vec.distinctValuesWithCounts())
+    {
+        if (!dbo_man.hasDataSource(ds_id_it.first))
+        {
+            if(dbo_man.canAddNewDataSourceFromConfig(ds_id_it.first))
+                logwrn << "DBInterface: insertBuffer: creating unknown ds id " << ds_id_it.first;
+
+            dbo_man.addNewDataSource(ds_id_it.first);
+        }
+
+        dbo_man.dataSource(ds_id_it.first).addNumInserted(db_object.name(), ds_id_it.second);
+    }
+
+    insertBuffer(db_object.dbTableName(), buffer);
 }
 
 void DBInterface::insertBuffer(const string& table_name, shared_ptr<Buffer> buffer)

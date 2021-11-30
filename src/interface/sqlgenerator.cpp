@@ -38,6 +38,7 @@
 
 using namespace Utils;
 using namespace std;
+using namespace DBContent;
 
 SQLGenerator::SQLGenerator(DBInterface& db_interface) : db_interface_(db_interface)
 {
@@ -53,6 +54,20 @@ SQLGenerator::SQLGenerator(DBInterface& db_interface) : db_interface_(db_interfa
     ss << "CREATE TABLE " << TABLE_NAME_PROPERTIES
        << "(id VARCHAR(255), value TEXT, PRIMARY KEY (id));";
     table_properties_create_statement_ = ss.str();
+    ss.str(string());
+
+    ss << "CREATE TABLE " << DBDataSource::table_name_ << "("
+        << DBDataSource::id_column_.name() << " "  << DBDataSource::id_column_.dbDataTypeString() << ", "
+        << DBDataSource::ds_type_column_.name() << " "  << DBDataSource::ds_type_column_.dbDataTypeString() << ", "
+        << DBDataSource::sac_column_.name() << " "  << DBDataSource::sac_column_.dbDataTypeString() << ", "
+        << DBDataSource::sic_column_.name() << " "  << DBDataSource::sic_column_.dbDataTypeString() << ", "
+        << DBDataSource::name_column_.name() << " "  << DBDataSource::name_column_.dbDataTypeString() << ", "
+        << DBDataSource::short_name_.name() << " "  << DBDataSource::short_name_.dbDataTypeString() << ", "
+        << DBDataSource::info_column_.name() << " "  << DBDataSource::info_column_.dbDataTypeString() << ", "
+        << DBDataSource::counts_column_.name() << " "  << DBDataSource::counts_column_.dbDataTypeString() << ", "
+        << "PRIMARY KEY (" << DBDataSource::id_column_.name() << ")"
+        << ");";
+    table_data_sources_create_statement_ = ss.str();
     ss.str(string());
 
     ss << "CREATE TABLE " << TABLE_NAME_SECTORS
@@ -411,6 +426,11 @@ string SQLGenerator::getSelectNullCount (const string& table_name, const vector<
 string SQLGenerator::getTablePropertiesCreateStatement()
 {
     return table_properties_create_statement_;
+}
+
+std::string SQLGenerator::getTableDataSourcesCreateStatement()
+{
+    return table_data_sources_create_statement_;
 }
 
 string SQLGenerator::getTableSectorsCreateStatement()

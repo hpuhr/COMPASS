@@ -59,6 +59,7 @@ class SQLGenerator
 
     //std::string getTableMinMaxCreateStatement();
     std::string getTablePropertiesCreateStatement();
+    std::string getTableDataSourcesCreateStatement();
     std::string getTableSectorsCreateStatement();
     std::string getTableViewPointsCreateStatement();
     std::string getDeleteStatement (const std::string& table, const std::string& filter);
@@ -90,6 +91,7 @@ class SQLGenerator
 
     //std::string table_minmax_create_statement_;
     std::string table_properties_create_statement_;
+    std::string table_data_sources_create_statement_;
     std::string table_sectors_create_statement_;
     std::string table_view_points_create_statement_;
 

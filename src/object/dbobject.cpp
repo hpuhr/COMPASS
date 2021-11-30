@@ -53,7 +53,7 @@ DBObject::DBObject(COMPASS& compass, const string& class_id, const string& insta
     : Configurable(class_id, instance_id, manager,
                    "db_object_" + boost::algorithm::to_lower_copy(instance_id) + ".json"),
       compass_(compass),
-      manager_(*manager)
+      dbo_manager_(*manager)
 {
     registerParameter("name", &name_, "Undefined");
     registerParameter("info", &info_, "");
@@ -461,8 +461,8 @@ void DBObject::doDataSourcesBeforeInsert (shared_ptr<Buffer> buffer)
 
     for (auto& ds_id_cnt : ds_id_counts)
     {
-        if (!manager_.hasDataSource(ds_id_cnt.first))
-            manager_.addNewDataSource(ds_id_cnt.first);
+        if (!dbo_manager_.hasDataSource(ds_id_cnt.first))
+            dbo_manager_.addNewDataSource(ds_id_cnt.first);
 
         // TODO add record count
 
@@ -479,6 +479,8 @@ void DBObject::insertDoneSlot()
     insert_job_ = nullptr;
 
     emit insertDoneSignal(*this);
+
+    dbo_manager_.databaseContentChangedSlot();
 }
 
 void DBObject::updateData(DBOVariable& key_var, DBOVariableSet& list,
@@ -678,7 +680,7 @@ void DBObject::finalizeReadJobDoneSlot()
     // read job or finalize jobs exist
 
     // check if other is still loading
-    if (manager_.isOtherDBObjectPostProcessing(*this))
+    if (dbo_manager_.isOtherDBObjectPostProcessing(*this))
     {
         logdbg << "DBObject: " << name_
                << " finalizeReadJobDoneSlot: delaying new data since other is loading";
@@ -752,7 +754,7 @@ bool DBObject::existsInDB() const
 
 void DBObject::loadAssociationsIfRequired()
 {
-    if (manager_.hasAssociations() && !associations_loaded_)
+    if (dbo_manager_.hasAssociations() && !associations_loaded_)
     {
         shared_ptr<DBOReadAssociationsJob> read_job =
                 make_shared<DBOReadAssociationsJob>(*this);

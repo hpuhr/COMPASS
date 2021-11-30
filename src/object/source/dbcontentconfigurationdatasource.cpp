@@ -105,6 +105,7 @@ DBDataSource* ConfigurationDataSource::getAsNewDBDS()
 {
     DBContent::DBDataSource* new_ds = new DBContent::DBDataSource();
     new_ds->id(Number::dsIdFrom(sac_, sic_));
+    new_ds->dsType(ds_type_);
     new_ds->sac(sac_);
     new_ds->sic(sic_);
     new_ds->name(name_);

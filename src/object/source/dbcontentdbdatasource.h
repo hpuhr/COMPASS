@@ -24,9 +24,10 @@ public:
     DBDataSource();
     virtual ~DBDataSource();
 
-    void counts (const std::string& counts);
-    nlohmann::json& counts(); // for direct use, "cat048"->uint
+    void counts (const std::string& counts); // only for init
     std::string countsStr();
+    const std::map<std::string, unsigned int>& countsMap() const;
+    void addNumInserted(const std::string& db_content, unsigned int num);
 
 //    virtual nlohmann::json getAsJSON();
 //    virtual void setFromJSON(nlohmann::json& j);
@@ -38,6 +39,8 @@ protected:
     unsigned int id_{0};
 
     nlohmann::json counts_;
+
+    std::map<std::string, unsigned int> counts_map_;
 };
 
 } // namespace DBContent

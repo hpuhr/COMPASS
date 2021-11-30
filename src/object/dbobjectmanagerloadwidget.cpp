@@ -35,10 +35,11 @@
 #include "stringconv.h"
 #include "viewmanager.h"
 
+using namespace std;
 using namespace Utils::String;
 
 DBObjectManagerLoadWidget::DBObjectManagerLoadWidget(DBObjectManager& object_manager)
-    : object_manager_(object_manager)
+    : dbo_manager_(object_manager)
 {
     QFont font_bold;
     font_bold.setBold(true);
@@ -51,7 +52,45 @@ DBObjectManagerLoadWidget::DBObjectManagerLoadWidget(DBObjectManager& object_man
 
     // data sources, per type
 
+    QGridLayout* dstypes_lay = new QGridLayout();
 
+    unsigned int row = 0, col = 0;
+    for (auto& dstyp_it : DBObjectManager::data_source_types_)
+    {
+        QVBoxLayout* lay = new QVBoxLayout();
+
+        QLabel* dstyp_label = new QLabel(dstyp_it.c_str());
+        dstyp_label->setFont(font_bold);
+
+        lay->addWidget(dstyp_label);
+
+        QGridLayout* dstyp_lay = new QGridLayout();
+        type_layouts_[dstyp_it] = dstyp_lay;
+        lay->addLayout(dstyp_lay);
+
+        // void addLayout(QLayout *, int row, int column, int rowSpan, int columnSpan, Qt::Alignment = Qt::Alignment());
+        if (dstyp_it == "Radar") // span 2 rows
+        {
+            dstypes_lay->addLayout(lay, row, col, 2, 1, Qt::AlignLeft);
+            row += 1; // to step into next col
+        }
+        else
+            dstypes_lay->addLayout(lay, row, col, 1, 1, Qt::AlignLeft);
+
+        // increment
+        if (row == 1)
+        {
+            row = 0;
+            ++col;
+        }
+        else
+        {
+            ++row;
+        }
+    }
+
+    main_layout->addLayout(dstypes_lay);
+    update();
 
     // associations
 
@@ -62,7 +101,7 @@ DBObjectManagerLoadWidget::DBObjectManagerLoadWidget(DBObjectManager& object_man
     assoc_layout->addWidget(assoc_label, 0, 0);
 
     associations_label_ = new QLabel();
-    associations_label_->setAlignment(Qt::AlignRight);
+    associations_label_->setAlignment(Qt::AlignTop | Qt::AlignLeft);
     assoc_layout->addWidget(associations_label_, 0, 1);
 
     main_layout->addLayout(assoc_layout);
@@ -72,7 +111,7 @@ DBObjectManagerLoadWidget::DBObjectManagerLoadWidget(DBObjectManager& object_man
     main_layout->addStretch();
 
     // limit stuff
-    bool use_limit = object_manager_.useLimit();
+    bool use_limit = dbo_manager_.useLimit();
     limit_check_ = new QCheckBox("Use Limit");
     limit_check_->setChecked(use_limit);
     connect(limit_check_, &QCheckBox::clicked, this, &DBObjectManagerLoadWidget::toggleUseLimit);
@@ -87,7 +126,7 @@ DBObjectManagerLoadWidget::DBObjectManagerLoadWidget(DBObjectManager& object_man
     limit_layout->addWidget(new QLabel("Limit Min"), 0, 0);
 
     limit_min_edit_ = new QLineEdit();
-    limit_min_edit_->setText(std::to_string(object_manager_.limitMin()).c_str());
+    limit_min_edit_->setText(std::to_string(dbo_manager_.limitMin()).c_str());
     limit_min_edit_->setEnabled(use_limit);
     connect(limit_min_edit_, SIGNAL(textChanged(QString)), this, SLOT(limitMinChanged()));
     limit_layout->addWidget(limit_min_edit_, 0, 1);
@@ -95,14 +134,14 @@ DBObjectManagerLoadWidget::DBObjectManagerLoadWidget(DBObjectManager& object_man
     limit_layout->addWidget(new QLabel("Limit Max"), 1, 0);
 
     limit_max_edit_ = new QLineEdit();
-    limit_max_edit_->setText(std::to_string(object_manager_.limitMax()).c_str());
+    limit_max_edit_->setText(std::to_string(dbo_manager_.limitMax()).c_str());
     limit_max_edit_->setEnabled(use_limit);
     connect(limit_max_edit_, SIGNAL(textChanged(QString)), this, SLOT(limitMaxChanged()));
     limit_layout->addWidget(limit_max_edit_, 1, 1);
 
     limit_widget_->setLayout(limit_layout);
 
-    if (!object_manager_.useLimit())
+    if (!dbo_manager_.useLimit())
         limit_widget_->hide();
 
     bottom_layout->addWidget(limit_widget_);
@@ -131,7 +170,7 @@ void DBObjectManagerLoadWidget::toggleUseLimit()
 
     bool checked = limit_check_->checkState() == Qt::Checked;
     logdbg << "DBObjectManagerLoadWidget: toggleUseLimit: setting use limit to " << checked;
-    object_manager_.useLimit(checked);
+    dbo_manager_.useLimit(checked);
 
     if (checked)
         limit_widget_->show();
@@ -150,7 +189,7 @@ void DBObjectManagerLoadWidget::limitMinChanged()
         return;
 
     unsigned int min = std::stoul(limit_min_edit_->text().toStdString());
-    object_manager_.limitMin(min);
+    dbo_manager_.limitMin(min);
 }
 void DBObjectManagerLoadWidget::limitMaxChanged()
 {
@@ -160,7 +199,7 @@ void DBObjectManagerLoadWidget::limitMaxChanged()
         return;
 
     unsigned int max = std::stoul(limit_max_edit_->text().toStdString());
-    object_manager_.limitMax(max);
+    dbo_manager_.limitMax(max);
 }
 
 void DBObjectManagerLoadWidget::loadButtonSlot()
@@ -182,14 +221,14 @@ void DBObjectManagerLoadWidget::loadButtonSlot()
     if (loading_)
     {
         load_button_->setDisabled(true);
-        object_manager_.quitLoading();
+        dbo_manager_.quitLoading();
         return;
     }
 
     loading_ = true;
     load_button_->setText("Stop");
 
-    object_manager_.loadSlot();
+    dbo_manager_.loadSlot();
 }
 
 void DBObjectManagerLoadWidget::loadingDone()
@@ -201,29 +240,67 @@ void DBObjectManagerLoadWidget::loadingDone()
 
 void DBObjectManagerLoadWidget::update()
 {
-//    QLayoutItem* item;
-//    while ((item = info_layout_->takeAt(0)) != nullptr)
-//    {
-//        info_layout_->removeItem(item);
-//    }
+    loginf << "DBObjectManagerLoadWidget: update: num data sources " << dbo_manager_.dataSources().size()
+           << " num lay " << type_layouts_.size();
 
-//    for (auto& obj_it : object_manager_)
-//    {
-//        info_layout_->addWidget(obj_it.second->infoWidget());
-//    }
-
-    assert(associations_label_);
-    if (object_manager_.hasAssociations())
+    for (auto& dstype_it : type_layouts_)
     {
-        if (object_manager_.hasAssociationsDataSource())
+        string dstype = dstype_it.first;
+        QGridLayout* lay = dstype_it.second;
+
+        // remove all previous
+        while (QLayoutItem* item = lay->takeAt(0))
         {
-            std::string tmp = "From " + object_manager_.associationsDBObject() + ":" +
-                              object_manager_.associationsDataSourceName();
-            associations_label_->setText(tmp.c_str());
+            assert(!item->layout()); // otherwise the layout will leak
+            delete item->widget();
+            delete item;
         }
-        else
-            associations_label_->setText("All");
+
+        unsigned int row = 0;
+        for (const auto& ds_it : dbo_manager_.dataSources())
+        {
+            //loginf << row << " '" << ds_it->dsType() << "' '" << dstype << "'";
+
+            if (ds_it->dsType() != dstype)
+                continue;
+
+            lay->addWidget(new QLabel(ds_it->name().c_str()), row, 0, 2, 1, Qt::AlignTop | Qt::AlignLeft);
+            ++row;
+
+            for (auto& cnt_it : ds_it->countsMap())
+            {
+                lay->addWidget(new QLabel(cnt_it.first.c_str()), row, 1, Qt::AlignTop | Qt::AlignRight);
+                lay->addWidget(new QLabel(QString::number(cnt_it.second)), row, 2, Qt::AlignTop | Qt::AlignRight);
+                ++row;
+            }
+        }
+
     }
-    else
-        associations_label_->setText("None");
+
+
+    //    QLayoutItem* item;
+    //    while ((item = info_layout_->takeAt(0)) != nullptr)
+    //    {
+    //        info_layout_->removeItem(item);
+    //    }
+
+    //    for (auto& obj_it : object_manager_)
+    //    {
+    //        info_layout_->addWidget(obj_it.second->infoWidget());
+    //    }
+
+//    assert(associations_label_);
+//    if (dbo_manager_.hasAssociations())
+//    {
+//        if (dbo_manager_.hasAssociationsDataSource())
+//        {
+//            std::string tmp = "From " + dbo_manager_.associationsDBObject() + ":" +
+//                    dbo_manager_.associationsDataSourceName();
+//            associations_label_->setText(tmp.c_str());
+//        }
+//        else
+//            associations_label_->setText("All");
+//    }
+//    else
+//        associations_label_->setText("None");
 }

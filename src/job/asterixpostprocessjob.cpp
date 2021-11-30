@@ -81,26 +81,26 @@ void ASTERIXPostprocessJob::run()
         assert (db_object.hasVariable(latitude_var_str));
         assert (db_object.hasVariable(longitude_var_str));
 
-        DBOVariable& datasource_var_ = db_object.variable(datasource_var_str);
-        DBOVariable& range_var_ = db_object.variable(range_var_str);
-        DBOVariable& azimuth_var_ = db_object.variable(azimuth_var_str);
-        DBOVariable& altitude_var_ = db_object.variable(altitude_var_str);
-        DBOVariable& latitude_var_ = db_object.variable(latitude_var_str);
-        DBOVariable& longitude_var_ = db_object.variable(longitude_var_str);
+        DBOVariable& datasource_var = db_object.variable(datasource_var_str);
+        DBOVariable& range_var = db_object.variable(range_var_str);
+        DBOVariable& azimuth_var = db_object.variable(azimuth_var_str);
+        DBOVariable& altitude_var = db_object.variable(altitude_var_str);
+        DBOVariable& latitude_var = db_object.variable(latitude_var_str);
+        DBOVariable& longitude_var = db_object.variable(longitude_var_str);
 
-        datasource_col_str = datasource_var_.dbColumnName();
-        range_col_str = range_var_.dbColumnName();
-        azimuth_col_str = azimuth_var_.dbColumnName();
-        altitude_col_str = altitude_var_.dbColumnName();
-        latitude_col_str = latitude_var_.dbColumnName();
-        longitude_col_str = longitude_var_.dbColumnName();
+        datasource_col_str = datasource_var.dbColumnName();
+        range_col_str = range_var.dbColumnName();
+        azimuth_col_str = azimuth_var.dbColumnName();
+        altitude_col_str = altitude_var.dbColumnName();
+        latitude_col_str = latitude_var.dbColumnName();
+        longitude_col_str = longitude_var.dbColumnName();
 
-        assert (datasource_var_.dataType() == PropertyDataType::UINT);
-        assert (range_var_.dataType() == PropertyDataType::DOUBLE);
-        assert (azimuth_var_.dataType() == PropertyDataType::DOUBLE);
-        assert (altitude_var_.dataType() == PropertyDataType::FLOAT);
-        assert (latitude_var_.dataType() == PropertyDataType::DOUBLE);
-        assert (longitude_var_.dataType() == PropertyDataType::DOUBLE);
+        assert (datasource_var.dataType() == PropertyDataType::UINT);
+        assert (range_var.dataType() == PropertyDataType::DOUBLE);
+        assert (azimuth_var.dataType() == PropertyDataType::DOUBLE);
+        assert (altitude_var.dataType() == PropertyDataType::FLOAT);
+        assert (latitude_var.dataType() == PropertyDataType::DOUBLE);
+        assert (longitude_var.dataType() == PropertyDataType::DOUBLE);
 
         assert (buffer->has<unsigned int>(datasource_col_str));
         assert (buffer->has<double>(range_col_str));

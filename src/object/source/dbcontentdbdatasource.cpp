@@ -29,16 +29,25 @@ DBDataSource::~DBDataSource()
 void DBDataSource::counts (const std::string& counts)
 {
     counts_ = json::parse(counts);
-}
 
-nlohmann::json& DBDataSource::counts()
-{
-    return counts_;
+    counts_map_ = counts_.get<std::map<std::string, unsigned int>>();
 }
 
 std::string DBDataSource::countsStr()
 {
     return counts_.dump();
+}
+
+const std::map<std::string, unsigned int>& DBDataSource::countsMap() const
+{
+    return counts_map_;
+}
+
+void DBDataSource::addNumInserted(const std::string& db_content, unsigned int num)
+{
+    counts_map_[db_content] += num;
+
+    counts_ = counts_map_;
 }
 
 //json DBDataSource::getAsJSON()
@@ -66,5 +75,7 @@ void DBDataSource::id(unsigned int id)
 {
     id_ = id;
 }
+
+
 
 } // namespace DBContent
