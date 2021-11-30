@@ -2532,7 +2532,7 @@
             },
             "DBOVariableTrackerds_id0": {
                 "parameters": {
-                    "data_type_str": "INT",
+                    "data_type_str": "UINT",
                     "db_column_name": "ds_id",
                     "dbo_name": "CAT062",
                     "description": "Data Source Identifier",

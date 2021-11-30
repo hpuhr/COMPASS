@@ -1404,6 +1404,34 @@
                     "unit": "Degree"
                 }
             },
+            "DBOVariableRadarpos_lat_deg0": {
+                "parameters": {
+                    "data_type_str": "DOUBLE",
+                    "db_column_name": "latitude",
+                    "dbo_name": "CAT048",
+                    "description": "Calculated from 040.RHO/040.THETA \n\nPosition in WGS-84 Coordinates\nRange -90 <= latitude <= 90 deg.",
+                    "dimension": "Angle",
+                    "is_key": false,
+                    "name": "Latitude",
+                    "representation_str": "STANDARD",
+                    "short_name": "Lat",
+                    "unit": "Degree"
+                }
+            },
+            "DBOVariableRadarpos_lon_deg0": {
+                "parameters": {
+                    "data_type_str": "DOUBLE",
+                    "db_column_name": "longitude",
+                    "dbo_name": "CAT048",
+                    "description": "Calculated from 040.RHO/040.THETA \n\nPosition in WGS-84 Coordinates\nRange -90 <= latitude <= 90 deg.",
+                    "dimension": "Angle",
+                    "is_key": false,
+                    "name": "Longitude",
+                    "representation_str": "STANDARD",
+                    "short_name": "Lon",
+                    "unit": "Degree"
+                }
+            },
             "DBOVariableRadarpos_range_nm0": {
                 "parameters": {
                     "data_type_str": "DOUBLE",
