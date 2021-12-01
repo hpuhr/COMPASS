@@ -77,7 +77,13 @@ class DBObject : public QObject, public Configurable
     void updateDoneSlot();
 
   public:
-    static const std::string var_name_datasource_id_;
+    static const Property var_datasource_id_;
+    static const Property var_latitude_;
+    static const Property var_longitude_;
+
+    static const Property var_radar_range_;
+    static const Property var_radar_azimuth_;
+    static const Property var_radar_altitude_;
 
     DBObject(COMPASS& compass, const std::string& class_id, const std::string& instance_id,
              DBObjectManager* manager);
@@ -211,6 +217,8 @@ protected:
     std::string associationsTableName();
 
     void sortContent();
+
+    void checkStaticVariable(const Property& property);
 
 };
 

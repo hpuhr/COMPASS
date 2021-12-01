@@ -53,6 +53,8 @@ class MainWindow : public QMainWindow
 
     void importAsterixRecordingSlot();
 
+    void configureMetaVariablesSlot();
+
     void quitRequestedSlot();
     void showAddViewMenuSlot();
 

@@ -46,7 +46,14 @@
 using namespace std;
 using namespace Utils;
 
-const std::string DBObject::var_name_datasource_id_ {"DS ID"};
+
+const Property DBObject::var_datasource_id_ {"DS ID", PropertyDataType::UINT};
+const Property DBObject::var_latitude_ {"Latitude", PropertyDataType::DOUBLE};
+const Property DBObject::var_longitude_ {"Longitude", PropertyDataType::DOUBLE};
+
+const Property DBObject::var_radar_range_ {"Range", PropertyDataType::DOUBLE};
+const Property DBObject::var_radar_azimuth_ {"Azimuth", PropertyDataType::DOUBLE};
+const Property DBObject::var_radar_altitude_ {"Mode C Code", PropertyDataType::FLOAT};
 
 DBObject::DBObject(COMPASS& compass, const string& class_id, const string& instance_id,
                    DBObjectManager* manager)
@@ -73,6 +80,17 @@ DBObject::DBObject(COMPASS& compass, const string& class_id, const string& insta
 
     logdbg << "DBObject: constructor: created with instance_id " << instanceId() << " name "
            << name_;
+
+    checkStaticVariable(DBObject::var_datasource_id_);
+    checkStaticVariable(DBObject::var_latitude_);
+    checkStaticVariable(DBObject::var_longitude_);
+
+    if (name_ == "CAT001" || name_ == "CAT048")
+    {
+        checkStaticVariable(DBObject::var_radar_range_);
+        checkStaticVariable(DBObject::var_radar_azimuth_);
+        checkStaticVariable(DBObject::var_radar_altitude_);
+    }
 }
 
 DBObject::~DBObject()
@@ -866,5 +884,15 @@ void DBObject::sortContent()
     {
         return a->name() > b->name();
     });
+}
+
+void DBObject::checkStaticVariable(const Property& property)
+{
+    if (!hasVariable(property.name()))
+        logwrn << "DBObject: checkStaticVariable: " << name_ << " has no variable " << property.name();
+    else if (variable(property.name()).dataType() != property.dataType())
+        logwrn << "DBObject: checkStaticVariable: " << name_ << " variable " << property.name()
+               << " has wrong data type (" << variable(property.name()).dataTypeString()
+               << " insteaf of " << property.dataTypeString() << ")";
 }
 

@@ -23,6 +23,7 @@
 #include "dbobject.h"
 #include "dbobjectmanager.h"
 #include "dbobjectmanagerloadwidget.h"
+#include "metadbovariableconfigurationdialog.h"
 #include "files.h"
 #include "filtermanager.h"
 #include "filtermanagerwidget.h"
@@ -190,6 +191,15 @@ void MainWindow::createMenus ()
     import_ast_file_action->setStatusTip(tr("Import ASTERIX Recording File"));
     connect(import_ast_file_action, &QAction::triggered, this, &MainWindow::importAsterixRecordingSlot);
     import_menu_->addAction(import_ast_file_action);
+
+    // configuration
+    QMenu* config_menu = menuBar()->addMenu(tr("&Configuration"));
+
+    // db operations
+    QAction* meta_action = new QAction(tr("Meta Variables"));
+    meta_action->setStatusTip(tr("Configure Meta Variables"));
+    connect(meta_action, &QAction::triggered, this, &MainWindow::configureMetaVariablesSlot);
+    config_menu->addAction(meta_action);
 }
 
 void MainWindow::updateMenus()
@@ -340,6 +350,12 @@ void MainWindow::importAsterixRecordingSlot()
     COMPASS::instance().taskManager().asterixImporterTask().dialog()->show();
 }
 
+void MainWindow::configureMetaVariablesSlot()
+{
+    loginf << "MainWindow: configureMetaVariablesSlot";
+
+    COMPASS::instance().objectManager().metaVariableConfigdialog()->show();
+}
 
 //void MainWindow::startSlot()
 //{

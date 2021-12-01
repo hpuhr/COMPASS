@@ -499,6 +499,8 @@ void DBInterface::saveDataSources(const std::vector<std::unique_ptr<DBContent::D
 {
     loginf << "DBInterface: saveDataSources: num " << data_sources.size();
 
+    assert (dbOpen());
+
     using namespace DBContent;
 
     clearTableContent(DBDataSource::table_name_);
@@ -1052,10 +1054,9 @@ void DBInterface::insertBuffer(DBObject& db_object, std::shared_ptr<Buffer> buff
     if (!existsTable(db_object.dbTableName()))
         createTable(db_object);
 
-    const string datasource_var_str {"DS ID"};
-    assert (db_object.hasVariable(datasource_var_str));
+    assert (db_object.hasVariable(DBObject::var_datasource_id_.name()));
 
-    DBOVariable& datasource_var = db_object.variable(datasource_var_str);
+    DBOVariable& datasource_var = db_object.variable(DBObject::var_datasource_id_.name());
     assert (datasource_var.dataType() == PropertyDataType::UINT);
 
     string datasource_col_str = datasource_var.dbColumnName();

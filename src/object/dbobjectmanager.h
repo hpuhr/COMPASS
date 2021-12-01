@@ -33,6 +33,7 @@ class COMPASS;
 class DBObject;
 class DBObjectManagerWidget;
 class DBObjectManagerLoadWidget;
+class MetaDBOVariableConfigurationDialog;
 class DBOVariable;
 class MetaDBOVariable;
 class DBOVariableSet;
@@ -50,6 +51,7 @@ public slots:
     void databaseOpenedSlot();
     void databaseContentChangedSlot();
     void loadingDoneSlot(DBObject& object);
+    void metaDialogOKSlot();
 
 signals:
     void dbObjectsChangedSignal();
@@ -139,6 +141,7 @@ public:
 
     bool loadInProgress() const;
 
+    MetaDBOVariableConfigurationDialog* metaVariableConfigdialog();
 
 protected:
     COMPASS& compass_;
@@ -169,6 +172,8 @@ protected:
 
     std::unique_ptr<DBObjectManagerWidget> widget_;
     std::unique_ptr<DBObjectManagerLoadWidget> load_widget_;
+
+    std::unique_ptr<MetaDBOVariableConfigurationDialog> meta_cfg_dialog_;
 
     virtual void checkSubConfigurables();
     void finishLoading();

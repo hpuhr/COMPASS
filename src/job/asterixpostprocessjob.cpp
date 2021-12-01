@@ -27,13 +27,6 @@ void ASTERIXPostprocessJob::run()
 
     string dbo_name;
 
-    const string datasource_var_str {"DS ID"};
-    const string range_var_str {"Range"}; // "Nautical Mile"
-    const string azimuth_var_str {"Azimuth"};  // Deg
-    const string altitude_var_str {"Mode C Code"};  // ft
-    const string latitude_var_str {"Latitude"};
-    const string longitude_var_str {"Longitude"};
-
     string datasource_col_str;
     string range_col_str;
     string azimuth_col_str;
@@ -74,19 +67,19 @@ void ASTERIXPostprocessJob::run()
         assert (dbo_man.existsObject(dbo_name));
         DBObject& db_object = dbo_man.object(dbo_name);
 
-        assert (db_object.hasVariable(datasource_var_str));
-        assert (db_object.hasVariable(range_var_str));
-        assert (db_object.hasVariable(azimuth_var_str));
-        assert (db_object.hasVariable(altitude_var_str));
-        assert (db_object.hasVariable(latitude_var_str));
-        assert (db_object.hasVariable(longitude_var_str));
+        assert (db_object.hasVariable(DBObject::var_datasource_id_.name()));
+        assert (db_object.hasVariable(DBObject::var_radar_range_.name()));
+        assert (db_object.hasVariable(DBObject::var_radar_azimuth_.name()));
+        assert (db_object.hasVariable(DBObject::var_radar_altitude_.name()));
+        assert (db_object.hasVariable(DBObject::var_latitude_.name()));
+        assert (db_object.hasVariable(DBObject::var_longitude_.name()));
 
-        DBOVariable& datasource_var = db_object.variable(datasource_var_str);
-        DBOVariable& range_var = db_object.variable(range_var_str);
-        DBOVariable& azimuth_var = db_object.variable(azimuth_var_str);
-        DBOVariable& altitude_var = db_object.variable(altitude_var_str);
-        DBOVariable& latitude_var = db_object.variable(latitude_var_str);
-        DBOVariable& longitude_var = db_object.variable(longitude_var_str);
+        DBOVariable& datasource_var = db_object.variable(DBObject::var_datasource_id_.name());
+        DBOVariable& range_var = db_object.variable(DBObject::var_radar_range_.name());
+        DBOVariable& azimuth_var = db_object.variable(DBObject::var_radar_azimuth_.name());
+        DBOVariable& altitude_var = db_object.variable(DBObject::var_radar_altitude_.name());
+        DBOVariable& latitude_var = db_object.variable(DBObject::var_latitude_.name());
+        DBOVariable& longitude_var = db_object.variable(DBObject::var_longitude_.name());
 
         datasource_col_str = datasource_var.dbColumnName();
         range_col_str = range_var.dbColumnName();

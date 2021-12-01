@@ -33,6 +33,7 @@
 #include "evaluationmanager.h"
 #include "filtermanager.h"
 #include "util/number.h"
+#include "metadbovariableconfigurationdialog.h"
 
 #include <QApplication>
 #include <QMessageBox>
@@ -54,7 +55,7 @@ DBObjectManager::DBObjectManager(const std::string& class_id, const std::string&
     registerParameter("use_order", &use_order_, false);
     registerParameter("use_order_ascending", &use_order_ascending_, false);
     registerParameter("order_variable_dbo_name", &order_variable_dbo_name_, "");
-    registerParameter("order_variable__name", &order_variable_name_, "");
+    registerParameter("order_variable_name", &order_variable_name_, "");
 
     registerParameter("use_limit", &use_limit_, false);
     registerParameter("limit_min", &limit_min_, 0);
@@ -475,6 +476,12 @@ void DBObjectManager::loadingDoneSlot(DBObject& object)
         logdbg << "DBObjectManager: loadingDoneSlot: not done";
 }
 
+void DBObjectManager::metaDialogOKSlot()
+{
+    assert (meta_cfg_dialog_);
+    meta_cfg_dialog_->hide();
+}
+
 void DBObjectManager::finishLoading()
 {
     loginf << "DBObjectManager: loadingDoneSlot: all done";
@@ -532,6 +539,8 @@ void DBObjectManager::sortDBDataSources()
 void DBObjectManager::saveDBDataSources()
 {
     DBInterface& db_interface = COMPASS::instance().interface();
+
+    assert(db_interface.dbOpen());
     db_interface.saveDataSources(db_data_sources_);
 }
 
@@ -716,4 +725,18 @@ bool DBObjectManager::loadInProgress() const { return load_in_progress_; }
 const std::vector<std::unique_ptr<DBContent::DBDataSource>>& DBObjectManager::dataSources() const
 {
     return db_data_sources_;
+}
+
+MetaDBOVariableConfigurationDialog* DBObjectManager::metaVariableConfigdialog()
+{
+    if (!meta_cfg_dialog_)
+    {
+        meta_cfg_dialog_.reset(new MetaDBOVariableConfigurationDialog(*this));
+
+        connect(meta_cfg_dialog_.get(), &MetaDBOVariableConfigurationDialog::okSignal,
+                this, &DBObjectManager::metaDialogOKSlot);
+    }
+
+    assert(meta_cfg_dialog_);
+    return meta_cfg_dialog_.get();
 }

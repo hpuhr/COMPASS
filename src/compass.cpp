@@ -235,6 +235,8 @@ void COMPASS::closeDB()
 
     assert (db_opened_);
 
+    dbo_manager_->saveDBDataSources();
+
     db_interface_->closeDBFile();
     assert (!db_interface_->dbOpen());
 
@@ -298,9 +300,11 @@ void COMPASS::shutdown()
         logerr << "COMPASS: already shut down";
         return;
     }
+    assert(db_interface_);
 
     assert(dbo_manager_);
-    dbo_manager_->saveDBDataSources();
+    if (db_interface_->dbOpen())
+        dbo_manager_->saveDBDataSources();
     dbo_manager_ = nullptr;
 
     JobManager::instance().shutdown();
@@ -320,8 +324,6 @@ void COMPASS::shutdown()
 
     assert(filter_manager_);
     filter_manager_ = nullptr;
-
-    assert(db_interface_);
 
     if (db_interface_->dbOpen())
         db_interface_->closeDBFile();
