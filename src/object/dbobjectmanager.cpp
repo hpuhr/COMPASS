@@ -525,7 +525,7 @@ void DBObjectManager::sortDBDataSources()
     sort(db_data_sources_.begin(), db_data_sources_.end(),
          [](const std::unique_ptr<DBContent::DBDataSource>& a, const std::unique_ptr<DBContent::DBDataSource>& b) -> bool
     {
-        return a->name() > b->name();
+        return a->name() < b->name();
     });
 }
 

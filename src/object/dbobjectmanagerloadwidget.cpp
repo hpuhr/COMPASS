@@ -46,50 +46,52 @@ DBObjectManagerLoadWidget::DBObjectManagerLoadWidget(DBObjectManager& object_man
 
     QVBoxLayout* main_layout = new QVBoxLayout();
 
-    QLabel* main_label = new QLabel("Database Objects");
-    main_label->setFont(font_bold);
-    main_layout->addWidget(main_label);
+//    QLabel* main_label = new QLabel("Database Objects");
+//    main_label->setFont(font_bold);
+//    main_layout->addWidget(main_label);
 
     // data sources, per type
 
-    QGridLayout* dstypes_lay = new QGridLayout();
+    type_layout_ = new QGridLayout();
 
-    unsigned int row = 0, col = 0;
-    for (auto& dstyp_it : DBObjectManager::data_source_types_)
-    {
-        QVBoxLayout* lay = new QVBoxLayout();
+//    QGridLayout* dstypes_lay = new QGridLayout();
 
-        QLabel* dstyp_label = new QLabel(dstyp_it.c_str());
-        dstyp_label->setFont(font_bold);
+//    unsigned int row = 0, col = 0;
+//    for (auto& dstyp_it : DBObjectManager::data_source_types_)
+//    {
+//        QVBoxLayout* lay = new QVBoxLayout();
 
-        lay->addWidget(dstyp_label);
+//        QLabel* dstyp_label = new QLabel(dstyp_it.c_str());
+//        dstyp_label->setFont(font_bold);
 
-        QGridLayout* dstyp_lay = new QGridLayout();
-        type_layouts_[dstyp_it] = dstyp_lay;
-        lay->addLayout(dstyp_lay);
+//        lay->addWidget(dstyp_label);
 
-        // void addLayout(QLayout *, int row, int column, int rowSpan, int columnSpan, Qt::Alignment = Qt::Alignment());
-        if (dstyp_it == "Radar") // span 2 rows
-        {
-            dstypes_lay->addLayout(lay, row, col, 2, 1, Qt::AlignLeft);
-            row += 1; // to step into next col
-        }
-        else
-            dstypes_lay->addLayout(lay, row, col, 1, 1, Qt::AlignLeft);
+//        QGridLayout* dstyp_lay = new QGridLayout();
+//        type_layouts_[dstyp_it] = dstyp_lay;
+//        lay->addLayout(dstyp_lay);
 
-        // increment
-        if (row == 1)
-        {
-            row = 0;
-            ++col;
-        }
-        else
-        {
-            ++row;
-        }
-    }
+//        // void addLayout(QLayout *, int row, int column, int rowSpan, int columnSpan, Qt::Alignment = Qt::Alignment());
+//        if (dstyp_it == "Radar") // span 2 rows
+//        {
+//            dstypes_lay->addLayout(lay, row, col, 2, 1, Qt::AlignLeft);
+//            row += 1; // to step into next col
+//        }
+//        else
+//            dstypes_lay->addLayout(lay, row, col, 1, 1, Qt::AlignLeft);
 
-    main_layout->addLayout(dstypes_lay);
+//        // increment
+//        if (row == 1)
+//        {
+//            row = 0;
+//            ++col;
+//        }
+//        else
+//        {
+//            ++row;
+//        }
+//    }
+
+    main_layout->addLayout(type_layout_);
     update();
 
     // associations
@@ -240,41 +242,71 @@ void DBObjectManagerLoadWidget::loadingDone()
 
 void DBObjectManagerLoadWidget::update()
 {
-    loginf << "DBObjectManagerLoadWidget: update: num data sources " << dbo_manager_.dataSources().size()
-           << " num lay " << type_layouts_.size();
+    loginf << "DBObjectManagerLoadWidget: update: num data sources " << dbo_manager_.dataSources().size();
 
-    for (auto& dstype_it : type_layouts_)
+    // remove all previous
+    while (QLayoutItem* item = type_layout_->takeAt(0))
     {
-        string dstype = dstype_it.first;
-        QGridLayout* lay = dstype_it.second;
+        assert(!item->layout()); // otherwise the layout will leak
+        delete item->widget();
+        delete item;
+    }
 
-        // remove all previous
-        while (QLayoutItem* item = lay->takeAt(0))
+    QFont font_bold;
+    font_bold.setBold(true);
+
+    unsigned int row = 0;
+    unsigned int col_start = 0;
+    unsigned int num_col_per_dstype = 5; // add 1 for spacing
+    unsigned int dstype_col = 0;
+    unsigned int dstyp_cnt = 0;
+
+    for (auto& dstype_it : DBObjectManager::data_source_types_)
+    {
+        loginf << "DBObjectManagerLoadWidget: update: typ " << dstype_it << " cnt " << dstyp_cnt;
+
+        if (dstype_it == "MLAT" || dstype_it == "Tracker")  // break into next column
         {
-            assert(!item->layout()); // otherwise the layout will leak
-            delete item->widget();
-            delete item;
+            row = 0;
+            dstype_col++;
+            col_start = dstype_col * num_col_per_dstype;
         }
 
-        unsigned int row = 0;
+        QCheckBox* dstyp_box = new QCheckBox(dstype_it.c_str());
+        dstyp_box->setFont(font_bold);
+
+        type_layout_->addWidget(dstyp_box, row, col_start, 1, num_col_per_dstype, Qt::AlignTop | Qt::AlignLeft);
+
+        ++row;
+
         for (const auto& ds_it : dbo_manager_.dataSources())
         {
             //loginf << row << " '" << ds_it->dsType() << "' '" << dstype << "'";
 
-            if (ds_it->dsType() != dstype)
+            if (ds_it->dsType() != dstype_it)
                 continue;
 
-            lay->addWidget(new QLabel(ds_it->name().c_str()), row, 0, 2, 1, Qt::AlignTop | Qt::AlignLeft);
+            QCheckBox* ds_box = new QCheckBox(ds_it->name().c_str());
+
+            type_layout_->addWidget(ds_box, row, col_start, 1, num_col_per_dstype-1,
+                                    Qt::AlignTop | Qt::AlignLeft);
             ++row;
 
             for (auto& cnt_it : ds_it->countsMap())
             {
-                lay->addWidget(new QLabel(cnt_it.first.c_str()), row, 1, Qt::AlignTop | Qt::AlignRight);
-                lay->addWidget(new QLabel(QString::number(cnt_it.second)), row, 2, Qt::AlignTop | Qt::AlignRight);
+                QCheckBox* dbcont_box = new QCheckBox(cnt_it.first.c_str());
+
+                type_layout_->addWidget(dbcont_box, row, col_start+1,
+                                        Qt::AlignTop | Qt::AlignRight);
+                type_layout_->addWidget(new QLabel(QString::number(cnt_it.second)), row, col_start+2,
+                                        Qt::AlignTop | Qt::AlignRight);
+                type_layout_->addWidget(new QLabel(QString::number(0)), row, col_start+3,
+                                        Qt::AlignTop | Qt::AlignRight);
                 ++row;
             }
         }
 
+        dstyp_cnt++;
     }
 
 

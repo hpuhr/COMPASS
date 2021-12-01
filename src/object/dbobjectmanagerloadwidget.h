@@ -53,7 +53,9 @@ class DBObjectManagerLoadWidget : public QWidget
   private:
     DBObjectManager& dbo_manager_;
 
-    std::map<std::string, QGridLayout*> type_layouts_; // dbcontent type -> layout
+    QGridLayout* type_layout_{nullptr};
+
+    //std::map<std::string, QGridLayout*> type_layouts_; // dbcontent type -> layout
 
     QLabel* associations_label_{nullptr};
 
