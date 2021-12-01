@@ -23,7 +23,7 @@ MetaDBOVariableConfigurationDialog::MetaDBOVariableConfigurationDialog(DBObjectM
 
     setModal(true);
 
-    setMinimumSize(QSize(600, 800));
+    setMinimumSize(QSize(800, 600));
 
     QFont font_bold;
     font_bold.setBold(true);

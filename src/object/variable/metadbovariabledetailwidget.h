@@ -5,12 +5,22 @@
 
 class DBObjectManager;
 class MetaDBOVariable;
+class DBOVariableSelectionWidget;
+
+class QLineEdit;
+class QTextEdit;
+class QPushButton;
 
 class MetaDBOVariableDetailWidget : public QWidget
 {
     Q_OBJECT
 
 public slots:
+    void nameEditedSlot(const QString& name);
+    void commentEditedSlot();
+    void variableChangedSlot();
+
+    void deleteVariableSlot();
 
 public:
     MetaDBOVariableDetailWidget(DBObjectManager& dbo_man, QWidget* parent = nullptr);
@@ -22,6 +32,13 @@ private:
 
     bool has_current_entry_ {false};
     MetaDBOVariable* meta_var_ {nullptr};
+
+    QLineEdit* name_edit_{nullptr};
+    QTextEdit* description_edit_{nullptr};
+
+    std::map<std::string, DBOVariableSelectionWidget*> selection_widgets_; // db content -> var select
+
+    QPushButton* delete_button_ {nullptr};
 };
 
 #endif // METADBOVARIABLEDETAILWIDGET_H
