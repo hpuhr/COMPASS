@@ -125,15 +125,15 @@ void DBOVariableSelectionWidget::updateMenuEntries()
         if (show_meta_variables_)
         {
             QMenu* meta_menu = menu_.addMenu(QString::fromStdString(META_OBJECT_NAME));
-            for (auto meta_it : COMPASS::instance().objectManager().metaVariables())
+            for (auto& meta_it : COMPASS::instance().objectManager().metaVariables())
             {
-                if (show_data_types_only_ && !showDataType(meta_it.second->dataType()))
+                if (show_data_types_only_ && !showDataType(meta_it->dataType()))
                     continue;
 
-                QAction* action = meta_menu->addAction(QString::fromStdString(meta_it.first));
+                QAction* action = meta_menu->addAction(QString::fromStdString(meta_it->name()));
 
                 QVariantMap vmap;
-                vmap.insert(QString::fromStdString(meta_it.first),
+                vmap.insert(QString::fromStdString(meta_it->name()),
                             QVariant(QString::fromStdString(META_OBJECT_NAME)));
                 action->setData(QVariant(vmap));
             }

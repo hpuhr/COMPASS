@@ -78,7 +78,7 @@ public:
     bool existsMetaVariable(const std::string& var_name);
     MetaDBOVariable& metaVariable(const std::string& var_name);
     void deleteMetaVariable(const std::string& var_name);
-    std::map<std::string, MetaDBOVariable*>& metaVariables() { return meta_variables_; }
+    const std::vector<std::unique_ptr<MetaDBOVariable>>& metaVariables() { return meta_variables_; }
 
     bool usedInMetaVariable(const DBOVariable& variable);
 
@@ -165,7 +165,7 @@ protected:
 
     /// Container with all DBOs (DBO name -> DBO pointer)
     std::map<std::string, DBObject*> objects_;
-    std::map<std::string, MetaDBOVariable*> meta_variables_;
+    std::vector<std::unique_ptr<MetaDBOVariable>> meta_variables_;
 
     std::vector<std::unique_ptr<DBContent::ConfigurationDataSource>> config_data_sources_;
     std::vector<std::unique_ptr<DBContent::DBDataSource>> db_data_sources_;

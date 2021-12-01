@@ -16,18 +16,18 @@
  */
 
 #include "dbovariableorderedsetwidget.h"
+#include "compass.h"
+#include "dbobject.h"
+#include "dbobjectmanager.h"
+#include "metadbovariable.h"
+#include "files.h"
+#include "global.h"
 
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QListWidget>
 #include <QPushButton>
 #include <QVBoxLayout>
-
-#include "compass.h"
-#include "dbobject.h"
-#include "dbobjectmanager.h"
-#include "files.h"
-#include "global.h"
 
 using namespace Utils;
 
@@ -114,12 +114,12 @@ void DBOVariableOrderedSetWidget::updateMenuEntries()
     menu_.clear();
 
     QMenu* meta_menu = menu_.addMenu(QString::fromStdString(META_OBJECT_NAME));
-    for (auto meta_it : COMPASS::instance().objectManager().metaVariables())
+    for (auto& meta_it : COMPASS::instance().objectManager().metaVariables())
     {
-        QAction* action = meta_menu->addAction(QString::fromStdString(meta_it.first));
+        QAction* action = meta_menu->addAction(QString::fromStdString(meta_it->name()));
 
         QVariantMap vmap;
-        vmap.insert(QString::fromStdString(meta_it.first),
+        vmap.insert(QString::fromStdString(meta_it->name()),
                     QVariant(QString::fromStdString(META_OBJECT_NAME)));
         action->setData(QVariant(vmap));
     }

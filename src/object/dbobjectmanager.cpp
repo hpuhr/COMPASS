@@ -70,8 +70,6 @@ DBObjectManager::~DBObjectManager()
         delete it.second;
     objects_.clear();
 
-    for (auto it : meta_variables_)
-        delete it.second;
     meta_variables_.clear();
 
     widget_ = nullptr;
@@ -98,9 +96,9 @@ void DBObjectManager::generateSubConfigurable(const std::string& class_id,
         MetaDBOVariable* meta_var = new MetaDBOVariable(class_id, instance_id, this);
         logdbg << "DBObjectManager: generateSubConfigurable: adding meta var type "
                << meta_var->name();
-        assert(meta_variables_.find(meta_var->name()) == meta_variables_.end());
-        meta_variables_.insert(
-                    std::pair<std::string, MetaDBOVariable*>(meta_var->name(), meta_var));
+
+        assert(!existsMetaVariable(meta_var->name()));
+        meta_variables_.emplace_back(meta_var);
     }
     else if (class_id.compare("DBContentConfigurationDataSource") == 0)
     {
@@ -158,30 +156,42 @@ bool DBObjectManager::hasData()
 
 bool DBObjectManager::existsMetaVariable(const std::string& var_name)
 {
-    return (meta_variables_.find(var_name) != meta_variables_.end());
+    return std::find_if(meta_variables_.begin(), meta_variables_.end(),
+                        [var_name](const std::unique_ptr<MetaDBOVariable>& var) -> bool { return var->name() == var_name; })
+            != meta_variables_.end();
 }
 
 MetaDBOVariable& DBObjectManager::metaVariable(const std::string& var_name)
 {
     logdbg << "DBObjectManager: metaVariable: name " << var_name;
 
-    assert(meta_variables_.find(var_name) != meta_variables_.end());
+    assert(existsMetaVariable(var_name));
 
-    return *meta_variables_.at(var_name);
+    auto it = std::find_if(meta_variables_.begin(), meta_variables_.end(),
+                           [var_name](const std::unique_ptr<MetaDBOVariable>& var) -> bool { return var->name() == var_name; });
+
+    assert (it != meta_variables_.end());
+
+    return *it->get();
 }
 
 void DBObjectManager::deleteMetaVariable(const std::string& var_name)
 {
     logdbg << "DBObjectManager: deleteMetaVariable: name " << var_name;
     assert(existsMetaVariable(var_name));
-    delete meta_variables_.at(var_name);
-    meta_variables_.erase(var_name);
+
+    auto it = std::find_if(meta_variables_.begin(), meta_variables_.end(),
+                           [var_name](const std::unique_ptr<MetaDBOVariable>& var) -> bool { return var->name() == var_name; });
+
+    assert (it != meta_variables_.end());
+
+    meta_variables_.erase(it);
 }
 
 bool DBObjectManager::usedInMetaVariable(const DBOVariable& variable)
 {
     for (auto& meta_it : meta_variables_)
-        if (meta_it.second->uses(variable))
+        if (meta_it->uses(variable))
             return true;
 
     return false;

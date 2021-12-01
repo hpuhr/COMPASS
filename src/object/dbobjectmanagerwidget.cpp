@@ -414,16 +414,16 @@ void DBObjectManagerWidget::updateMetaVariablesSlot()
 
     unsigned int row = 1;
 
-    auto meta_variables = object_manager_.metaVariables();
-
-    for (auto it = meta_variables.begin(); it != meta_variables.end(); it++)
+    for (auto& var_it : object_manager_.metaVariables())
     {
-        QLabel* name = new QLabel(it->second->name().c_str());
+        assert (var_it.get());
+
+        QLabel* name = new QLabel(var_it->name().c_str());
         meta_variables_grid_->addWidget(name, row, 0);
 
         QLabel* datatype = new QLabel();
-        if (it->second->hasVariables())
-            datatype->setText(it->second->dataTypeString().c_str());
+        if (var_it->hasVariables())
+            datatype->setText(var_it->dataTypeString().c_str());
         meta_variables_grid_->addWidget(datatype, row, 1);
 
         QPushButton* edit = new QPushButton();
@@ -434,7 +434,7 @@ void DBObjectManagerWidget::updateMetaVariablesSlot()
         // edit->setDisabled(!active || !unlocked_);
         connect(edit, SIGNAL(clicked()), this, SLOT(editMetaVariableSlot()));
         meta_variables_grid_->addWidget(edit, row, 2);
-        edit_meta_buttons_[edit] = it->second;
+        edit_meta_buttons_[edit] = var_it.get();
 
         QPushButton* del = new QPushButton();
         del->setIcon(del_icon);
@@ -444,7 +444,7 @@ void DBObjectManagerWidget::updateMetaVariablesSlot()
         // del->setDisabled(!unlocked_);
         connect(del, SIGNAL(clicked()), this, SLOT(deleteMetaVariableSlot()));
         meta_variables_grid_->addWidget(del, row, 3);
-        delete_meta_buttons_[del] = it->second;
+        delete_meta_buttons_[del] = var_it.get();
 
         row++;
     }

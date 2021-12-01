@@ -18,6 +18,7 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/metadbovariable.h"
         "${CMAKE_CURRENT_LIST_DIR}/metadbovariablewidget.h"
         "${CMAKE_CURRENT_LIST_DIR}/metadbovariableconfigurationdialog.h"
+        "${CMAKE_CURRENT_LIST_DIR}/metadbovariabledetailwidget.h"
     PRIVATE
         "${CMAKE_CURRENT_LIST_DIR}/dbovariable.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/dbovariablewidget.cpp"
@@ -30,6 +31,7 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/metadbovariable.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/metadbovariablewidget.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/metadbovariableconfigurationdialog.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/metadbovariabledetailwidget.cpp"
 )
 
 

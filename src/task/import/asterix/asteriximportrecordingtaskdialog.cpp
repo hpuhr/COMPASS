@@ -11,6 +11,7 @@
 ASTERIXImportRecordingTaskDialog::ASTERIXImportRecordingTaskDialog(ASTERIXImportTask& task)
 : QDialog(), task_(task)
 {
+    setWindowTitle("Import ASTERIX Recording");
     setWindowFlags(Qt::Window | Qt::WindowTitleHint | Qt::CustomizeWindowHint);
 
     setModal(true);

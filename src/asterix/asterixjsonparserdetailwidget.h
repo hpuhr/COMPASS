@@ -44,7 +44,7 @@ signals:
 
 
 public:
-    explicit ASTERIXJSONParserDetailWidget(ASTERIXJSONParser& parser, QWidget *parent = nullptr);
+    explicit ASTERIXJSONParserDetailWidget(ASTERIXJSONParser& parser, QWidget* parent = nullptr);
 
 private:
     ASTERIXJSONParser& parser_;

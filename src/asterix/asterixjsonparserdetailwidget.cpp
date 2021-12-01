@@ -26,7 +26,7 @@
 using namespace std;
 using namespace Utils;
 
-ASTERIXJSONParserDetailWidget::ASTERIXJSONParserDetailWidget(ASTERIXJSONParser& parser, QWidget *parent)
+ASTERIXJSONParserDetailWidget::ASTERIXJSONParserDetailWidget(ASTERIXJSONParser& parser, QWidget* parent)
     : QWidget(parent), parser_(parser)
 {
     QVBoxLayout* main_layout = new QVBoxLayout();
