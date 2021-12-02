@@ -50,6 +50,8 @@ public slots:
 
     void databaseOpenedSlot();
     void databaseContentChangedSlot();
+    void databaseClosedSlot();
+
     void loadingDoneSlot(DBObject& object);
     void metaDialogOKSlot();
 

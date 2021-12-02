@@ -35,6 +35,7 @@ class DBInterface;
 class DBOReadDBJob : public Job
 {
     Q_OBJECT
+
   signals:
     void intermediateSignal(std::shared_ptr<Buffer> buffer);
 

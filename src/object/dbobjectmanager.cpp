@@ -62,6 +62,8 @@ DBObjectManager::DBObjectManager(const std::string& class_id, const std::string&
     registerParameter("limit_max", &limit_max_, 100000);
 
     createSubConfigurables();
+
+    qRegisterMetaType<std::shared_ptr<Buffer>>("std::shared_ptr<Buffer>"); // for dbo read job
 }
 
 DBObjectManager::~DBObjectManager()
@@ -378,6 +380,13 @@ void DBObjectManager::loadSlot()
 
     for (auto& object : objects_)
     {
+        loginf << "DBObjectManager: loadSlot: object " << object.first
+               << " loadable " << object.second->loadable()
+               << " wanted " << object.second->loadingWanted();
+
+        if (object.first == "RefTraj")
+            continue;
+
         if (object.second->loadable() && object.second->loadingWanted())
         {
             loginf << "DBObjectManager: loadSlot: loading object " << object.first;
@@ -401,6 +410,9 @@ void DBObjectManager::loadSlot()
             }
 
             DBOVariable* variable = nullptr;
+
+            assert (hasOrderVariable() || hasOrderMetaVariable());
+
             if (hasOrderVariable())
                 variable = &orderVariable();
             if (hasOrderMetaVariable())
@@ -442,12 +454,28 @@ void DBObjectManager::databaseOpenedSlot()
 
     loadDBDataSources();
 
+    for (auto& object : objects_)
+        object.second->databaseOpenedSlot();
+
+    if (load_widget_)
+        load_widget_->update();
+}
+
+void DBObjectManager::databaseClosedSlot()
+{
+    db_data_sources_.clear();
+
+    for (auto& object : objects_)
+        object.second->databaseClosedSlot();
+
     if (load_widget_)
         load_widget_->update();
 }
 
 void DBObjectManager::databaseContentChangedSlot()
 {
+    loginf << "DBObjectManager: databaseContentChangedSlot";
+
     // emit databaseContentChangedSignal();
 
     //    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
@@ -481,7 +509,6 @@ void DBObjectManager::databaseContentChangedSlot()
 
     emit dbObjectsChangedSignal();
 
-    loginf << "DBObjectManager: databaseContentChangedSlot: done";
 }
 
 void DBObjectManager::loadingDoneSlot(DBObject& object)

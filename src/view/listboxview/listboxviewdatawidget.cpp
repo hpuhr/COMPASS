@@ -43,8 +43,6 @@ ListBoxViewDataWidget::ListBoxViewDataWidget(ListBoxView* view, ListBoxViewDataS
 
     for (auto& obj_it : COMPASS::instance().objectManager())
     {
-        if (obj_it.second->hasData())
-        {
             if (!all_buffer_table_widget_)
             {
                 all_buffer_table_widget_ = new AllBufferTableWidget(*view_, *data_source_);
@@ -71,7 +69,6 @@ ListBoxViewDataWidget::ListBoxViewDataWidget(ListBoxView* view, ListBoxViewDataS
                     &BufferTableWidget::usePresentationSlot);
             connect(this, &ListBoxViewDataWidget::showAssociationsSignal, buffer_table,
                     &BufferTableWidget::showAssociationsSlot);
-        }
     }
 
     setLayout(layout);

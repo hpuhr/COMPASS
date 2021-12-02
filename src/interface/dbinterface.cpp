@@ -1054,9 +1054,9 @@ void DBInterface::insertBuffer(DBObject& db_object, std::shared_ptr<Buffer> buff
     if (!existsTable(db_object.dbTableName()))
         createTable(db_object);
 
-    assert (db_object.hasVariable(DBObject::var_datasource_id_.name()));
+    assert (db_object.hasVariable(DBObject::meta_var_datasource_id_.name()));
 
-    DBOVariable& datasource_var = db_object.variable(DBObject::var_datasource_id_.name());
+    DBOVariable& datasource_var = db_object.variable(DBObject::meta_var_datasource_id_.name());
     assert (datasource_var.dataType() == PropertyDataType::UINT);
 
     string datasource_col_str = datasource_var.dbColumnName();

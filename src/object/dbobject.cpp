@@ -46,8 +46,15 @@
 using namespace std;
 using namespace Utils;
 
+const Property DBObject::meta_var_rec_num_id_ {"Record Number", PropertyDataType::UINT};
+const Property DBObject::meta_var_datasource_id_ {"DS ID", PropertyDataType::UINT};
+const Property DBObject::meta_var_tod_id_ {"Time of Day", PropertyDataType::FLOAT};
+const Property DBObject::meta_var_m3a_id_ {"Mode 3/A Code", PropertyDataType::UINT};
+const Property DBObject::meta_var_ta_id_ {"Aircraft Address", PropertyDataType::UINT};
+const Property DBObject::meta_var_ti_id_ {"Aircraft Identification", PropertyDataType::STRING};
+const Property DBObject::meta_var_mc_id_ {"Mode C Code", PropertyDataType::FLOAT};
+const Property DBObject::meta_var_track_num_id_ {"Track Number", PropertyDataType::UINT};;
 
-const Property DBObject::var_datasource_id_ {"DS ID", PropertyDataType::UINT};
 const Property DBObject::var_latitude_ {"Latitude", PropertyDataType::DOUBLE};
 const Property DBObject::var_longitude_ {"Longitude", PropertyDataType::DOUBLE};
 
@@ -76,12 +83,10 @@ DBObject::DBObject(COMPASS& compass, const string& class_id, const string& insta
 
     sortContent();
 
-    qRegisterMetaType<shared_ptr<Buffer>>("shared_ptr<Buffer>");
-
     logdbg << "DBObject: constructor: created with instance_id " << instanceId() << " name "
            << name_;
 
-    checkStaticVariable(DBObject::var_datasource_id_);
+    checkStaticVariable(DBObject::meta_var_datasource_id_);
     checkStaticVariable(DBObject::var_latitude_);
     checkStaticVariable(DBObject::var_longitude_);
 
@@ -370,16 +375,17 @@ void DBObject::load(DBOVariableSet& read_set, string custom_filter_clause,
     //    DBInterface &db_interface, DBObject &dbobject, DBOVariableSet read_list, string
     //    custom_filter_clause, DBOVariable *order, const string &limit_str
 
-    read_job_ = shared_ptr<DBOReadDBJob>(new DBOReadDBJob(
-                                                  COMPASS::instance().interface(), *this, read_set, custom_filter_clause, filtered_variables,
-                                                  use_order, order_variable, use_order_ascending, limit_str));
+    read_job_ = shared_ptr<DBOReadDBJob>(
+                new DBOReadDBJob(
+                    COMPASS::instance().interface(), *this, read_set, custom_filter_clause, filtered_variables,
+                    use_order, order_variable, use_order_ascending, limit_str));
 
-    connect(read_job_.get(), SIGNAL(intermediateSignal(shared_ptr<Buffer>)), this,
-            SLOT(readJobIntermediateSlot(shared_ptr<Buffer>)), Qt::QueuedConnection);
-    connect(read_job_.get(), SIGNAL(obsoleteSignal()), this, SLOT(readJobObsoleteSlot()),
-            Qt::QueuedConnection);
-    connect(read_job_.get(), SIGNAL(doneSignal()), this, SLOT(readJobDoneSlot()),
-            Qt::QueuedConnection);
+    connect(read_job_.get(), &DBOReadDBJob::intermediateSignal,
+            this, &DBObject::readJobIntermediateSlot, Qt::QueuedConnection);
+    connect(read_job_.get(),  &DBOReadDBJob::obsoleteSignal,
+            this, &DBObject::readJobObsoleteSlot, Qt::QueuedConnection);
+    connect(read_job_.get(), &DBOReadDBJob::doneSignal,
+            this, &DBObject::readJobDoneSlot, Qt::QueuedConnection);
 
     if (info_widget_)
         info_widget_->updateSlot();
@@ -410,10 +416,13 @@ void DBObject::clearData()
 
 void DBObject::insertData(DBOVariableSet& list, shared_ptr<Buffer> buffer, bool emit_change)
 {
-    logdbg << "DBObject " << name_ << ": insertData: list " << list.getSize()
+    loginf << "DBObject " << name_ << ": insertData: list " << list.getSize()
            << " buffer " << buffer->size();
 
     assert(!insert_job_);
+
+    // transform variable names from dbovars to dbcolumns
+    buffer->transformVariables(list, false);
 
     insert_job_ = make_shared<InsertBufferDBJob>(COMPASS::instance().interface(), *this, buffer,
                                                       emit_change);
@@ -718,9 +727,9 @@ void DBObject::finalizeReadJobDoneSlot()
     return;
 }
 
-void DBObject::updateToDatabaseContent()
+void DBObject::databaseOpenedSlot()
 {
-    loginf << "DBObject " << name_ << ": updateToDatabaseContent";
+    loginf << "DBObject " << name_ << ": databaseOpenedSlot";
 
     string associations_table_name = associationsTableName();
 
@@ -729,14 +738,26 @@ void DBObject::updateToDatabaseContent()
     if (is_loadable_)
         count_ = COMPASS::instance().interface().count(db_table_name_);
 
-    logdbg << "DBObject: " << name_ << " updateToDatabaseContent: table " << db_table_name_
+    logdbg << "DBObject: " << name_ << " databaseOpenedSlot: table " << db_table_name_
            << " count " << count_;
 
     if (info_widget_)
         info_widget_->updateSlot();
 
-    loginf << "DBObject: " << name_ << " updateToDatabaseContent: done, loadable " << is_loadable_
+    loginf << "DBObject: " << name_ << " databaseOpenedSlot: done, loadable " << is_loadable_
            << " count " << count_;
+}
+
+void DBObject::databaseClosedSlot()
+{
+    loginf << "DBObject: databaseClosedSlot";
+
+    is_loadable_ = false;
+    count_ = 0;
+
+    if (info_widget_)
+        info_widget_->updateSlot();
+
 }
 
 string DBObject::dbTableName() const

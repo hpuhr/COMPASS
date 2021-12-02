@@ -242,7 +242,7 @@ void DBObjectManagerLoadWidget::loadingDone()
 
 void DBObjectManagerLoadWidget::update()
 {
-    loginf << "DBObjectManagerLoadWidget: update: num data sources " << dbo_manager_.dataSources().size();
+    logdbg << "DBObjectManagerLoadWidget: update: num data sources " << dbo_manager_.dataSources().size();
 
     // remove all previous
     while (QLayoutItem* item = type_layout_->takeAt(0))
@@ -263,7 +263,7 @@ void DBObjectManagerLoadWidget::update()
 
     for (auto& dstype_it : DBObjectManager::data_source_types_)
     {
-        loginf << "DBObjectManagerLoadWidget: update: typ " << dstype_it << " cnt " << dstyp_cnt;
+        logdbg << "DBObjectManagerLoadWidget: update: typ " << dstype_it << " cnt " << dstyp_cnt;
 
         if (dstype_it == "MLAT" || dstype_it == "Tracker")  // break into next column
         {

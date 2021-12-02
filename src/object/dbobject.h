@@ -65,6 +65,10 @@ class DBObject : public QObject, public Configurable
     void labelDefinitionChangedSignal();
 
   public slots:
+    void databaseOpenedSlot();
+    void databaseClosedSlot();
+
+
     void readJobIntermediateSlot(std::shared_ptr<Buffer> buffer);
     void readJobObsoleteSlot();
     void readJobDoneSlot();
@@ -77,7 +81,14 @@ class DBObject : public QObject, public Configurable
     void updateDoneSlot();
 
   public:
-    static const Property var_datasource_id_;
+    static const Property meta_var_rec_num_id_;
+    static const Property meta_var_datasource_id_;
+    static const Property meta_var_tod_id_;
+    static const Property meta_var_m3a_id_;
+    static const Property meta_var_ta_id_;
+    static const Property meta_var_ti_id_;
+    static const Property meta_var_mc_id_;
+    static const Property meta_var_track_num_id_;
     static const Property var_latitude_;
     static const Property var_longitude_;
 
@@ -172,7 +183,6 @@ class DBObject : public QObject, public Configurable
     void clearAssociations();
     void saveAssociations();
 
-    void updateToDatabaseContent();
 
     std::string dbTableName() const;
 
@@ -186,7 +196,7 @@ protected:
     bool constructor_active_ {false};
 
     bool is_loadable_{false};  // loadable on its own
-    bool loading_wanted_{false};
+    bool loading_wanted_{true}; // TODO HACK
     size_t count_{0};
 
     std::unique_ptr<DBOLabelDefinition> label_definition_;

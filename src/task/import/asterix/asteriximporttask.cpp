@@ -1037,6 +1037,8 @@ void ASTERIXImportTask::insertData(std::map<std::string, std::shared_ptr<Buffer>
 
     assert(status_widget_);
 
+    DBObjectManager& object_manager = COMPASS::instance().objectManager();
+
     if (!dbo_variable_sets_.size())  // initialize if empty
     {
         for (auto& parser_it : *schema_)
@@ -1045,6 +1047,23 @@ void ASTERIXImportTask::insertData(std::map<std::string, std::shared_ptr<Buffer>
 
             assert (!dbo_variable_sets_.count(dbo_name));  // add variables
             dbo_variable_sets_[dbo_name] = parser_it.second->variableList();
+        }
+
+        // insert latitude/longitude for cat001, cat048
+
+        for (auto& dbo_name_it : {"CAT001", "CAT048"})
+        {
+            assert (object_manager.existsObject(dbo_name_it));
+            DBObject& db_object = object_manager.object(dbo_name_it);
+
+            assert (db_object.hasVariable(DBObject::var_latitude_.name()));
+            assert (db_object.hasVariable(DBObject::var_longitude_.name()));
+
+            DBOVariable& latitude_var = db_object.variable(DBObject::var_latitude_.name());
+            DBOVariable& longitude_var = db_object.variable(DBObject::var_longitude_.name());
+
+            dbo_variable_sets_[dbo_name_it].add(latitude_var);
+            dbo_variable_sets_[dbo_name_it].add(longitude_var);
         }
     }
 
@@ -1058,8 +1077,6 @@ void ASTERIXImportTask::insertData(std::map<std::string, std::shared_ptr<Buffer>
     waiting_for_insert_ = false;
 
     assert(schema_);
-
-    DBObjectManager& object_manager = COMPASS::instance().objectManager();
 
     for (auto& buf_it : job_buffers)
     {

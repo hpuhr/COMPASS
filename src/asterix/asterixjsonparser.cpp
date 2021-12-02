@@ -279,7 +279,7 @@ void ASTERIXJSONParser::initialize()
 
             mapping.initializeIfRequired();
 
-            list_.addProperty(mapping.variable().dbColumnName(), mapping.variable().dataType());
+            list_.addProperty(mapping.variable().name(), mapping.variable().dataType());
             var_list_.add(mapping.variable());
         }
 
@@ -339,7 +339,7 @@ bool ASTERIXJSONParser::parseTargetReport(const nlohmann::json& tr, Buffer& buff
                                           size_t row_cnt) const
 {
     PropertyDataType data_type;
-    std::string current_var_dbcol_name;
+    std::string current_var_name;
 
     bool mandatory_missing{false};
 
@@ -357,105 +357,105 @@ bool ASTERIXJSONParser::parseTargetReport(const nlohmann::json& tr, Buffer& buff
         {
 
             data_type = map_it.variable().dataType();
-            current_var_dbcol_name = map_it.variable().dbColumnName();
+            current_var_name = map_it.variable().name();
 
             switch (data_type)
             {
             case PropertyDataType::BOOL:
             {
-                logdbg << "ASTERIXJSONParser: parseTargetReport: bool " << current_var_dbcol_name
+                logdbg << "ASTERIXJSONParser: parseTargetReport: bool " << current_var_name
                        << " format '" << map_it.jsonValueFormat() << "'";
-                assert(buffer.has<bool>(current_var_dbcol_name));
+                assert(buffer.has<bool>(current_var_name));
                 mandatory_missing =
-                        map_it.findAndSetValue(tr, buffer.get<bool>(current_var_dbcol_name), row_cnt);
+                        map_it.findAndSetValue(tr, buffer.get<bool>(current_var_name), row_cnt);
 
                 break;
             }
             case PropertyDataType::CHAR:
             {
-                logdbg << "ASTERIXJSONParser: parseTargetReport: char " << current_var_dbcol_name
+                logdbg << "ASTERIXJSONParser: parseTargetReport: char " << current_var_name
                        << " format '" << map_it.jsonValueFormat() << "'";
-                assert(buffer.has<char>(current_var_dbcol_name));
+                assert(buffer.has<char>(current_var_name));
                 mandatory_missing =
-                        map_it.findAndSetValue(tr, buffer.get<char>(current_var_dbcol_name), row_cnt);
+                        map_it.findAndSetValue(tr, buffer.get<char>(current_var_name), row_cnt);
 
                 break;
             }
             case PropertyDataType::UCHAR:
             {
-                logdbg << "ASTERIXJSONParser: parseTargetReport: uchar " << current_var_dbcol_name
+                logdbg << "ASTERIXJSONParser: parseTargetReport: uchar " << current_var_name
                        << " format '" << map_it.jsonValueFormat() << "'";
-                assert(buffer.has<unsigned char>(current_var_dbcol_name));
+                assert(buffer.has<unsigned char>(current_var_name));
                 mandatory_missing = map_it.findAndSetValue(
-                            tr, buffer.get<unsigned char>(current_var_dbcol_name), row_cnt);
+                            tr, buffer.get<unsigned char>(current_var_name), row_cnt);
 
                 break;
             }
             case PropertyDataType::INT:
             {
-                logdbg << "ASTERIXJSONParser: parseTargetReport: int " << current_var_dbcol_name
+                logdbg << "ASTERIXJSONParser: parseTargetReport: int " << current_var_name
                        << " format '" << map_it.jsonValueFormat() << "'";
-                assert(buffer.has<int>(current_var_dbcol_name));
+                assert(buffer.has<int>(current_var_name));
                 mandatory_missing =
-                        map_it.findAndSetValue(tr, buffer.get<int>(current_var_dbcol_name), row_cnt);
+                        map_it.findAndSetValue(tr, buffer.get<int>(current_var_name), row_cnt);
 
                 break;
             }
             case PropertyDataType::UINT:
             {
-                logdbg << "ASTERIXJSONParser: parseTargetReport: uint " << current_var_dbcol_name
+                logdbg << "ASTERIXJSONParser: parseTargetReport: uint " << current_var_name
                        << " format '" << map_it.jsonValueFormat() << "'";
-                assert(buffer.has<unsigned int>(current_var_dbcol_name));
+                assert(buffer.has<unsigned int>(current_var_name));
                 mandatory_missing =
-                        map_it.findAndSetValue(tr, buffer.get<unsigned int>(current_var_dbcol_name), row_cnt);
+                        map_it.findAndSetValue(tr, buffer.get<unsigned int>(current_var_name), row_cnt);
 
                 break;
             }
             case PropertyDataType::LONGINT:
             {
-                logdbg << "ASTERIXJSONParser: parseTargetReport: long " << current_var_dbcol_name
+                logdbg << "ASTERIXJSONParser: parseTargetReport: long " << current_var_name
                        << " format '" << map_it.jsonValueFormat() << "'";
-                assert(buffer.has<long int>(current_var_dbcol_name));
+                assert(buffer.has<long int>(current_var_name));
                 mandatory_missing =
-                        map_it.findAndSetValue(tr, buffer.get<long int>(current_var_dbcol_name), row_cnt);
+                        map_it.findAndSetValue(tr, buffer.get<long int>(current_var_name), row_cnt);
 
                 break;
             }
             case PropertyDataType::ULONGINT:
             {
-                logdbg << "ASTERIXJSONParser: parseTargetReport: ulong " << current_var_dbcol_name
+                logdbg << "ASTERIXJSONParser: parseTargetReport: ulong " << current_var_name
                        << " format '" << map_it.jsonValueFormat() << "'";
-                assert(buffer.has<unsigned long>(current_var_dbcol_name));
+                assert(buffer.has<unsigned long>(current_var_name));
                 mandatory_missing = map_it.findAndSetValue(
-                            tr, buffer.get<unsigned long>(current_var_dbcol_name), row_cnt);
+                            tr, buffer.get<unsigned long>(current_var_name), row_cnt);
 
                 break;
             }
             case PropertyDataType::FLOAT:
             {
-                logdbg << "ASTERIXJSONParser: parseTargetReport: float " << current_var_dbcol_name
+                logdbg << "ASTERIXJSONParser: parseTargetReport: float " << current_var_name
                        << " format '" << map_it.jsonValueFormat() << "'";
-                assert(buffer.has<float>(current_var_dbcol_name));
+                assert(buffer.has<float>(current_var_name));
                 mandatory_missing =
-                        map_it.findAndSetValue(tr, buffer.get<float>(current_var_dbcol_name), row_cnt);
+                        map_it.findAndSetValue(tr, buffer.get<float>(current_var_name), row_cnt);
 
                 break;
             }
             case PropertyDataType::DOUBLE:
             {
-                logdbg << "ASTERIXJSONParser: parseTargetReport: double " << current_var_dbcol_name
+                logdbg << "ASTERIXJSONParser: parseTargetReport: double " << current_var_name
                        << " format '" << map_it.jsonValueFormat() << "'";
-                assert(buffer.has<double>(current_var_dbcol_name));
+                assert(buffer.has<double>(current_var_name));
                 mandatory_missing =
-                        map_it.findAndSetValue(tr, buffer.get<double>(current_var_dbcol_name), row_cnt);
+                        map_it.findAndSetValue(tr, buffer.get<double>(current_var_name), row_cnt);
 
                 break;
             }
             case PropertyDataType::STRING:
             {
-                logdbg << "ASTERIXJSONParser: parseTargetReport: string " << current_var_dbcol_name
+                logdbg << "ASTERIXJSONParser: parseTargetReport: string " << current_var_name
                        << " format '" << map_it.jsonValueFormat() << "'";
-                assert(buffer.has<std::string>(current_var_dbcol_name));
+                assert(buffer.has<std::string>(current_var_name));
 
                 //                if (buffer.dboName() == "Tracker" && current_var_name == "ground_bit")
                 //                {
@@ -467,7 +467,7 @@ bool ASTERIXJSONParser::parseTargetReport(const nlohmann::json& tr, Buffer& buff
                 //                }
                 //                else
                 mandatory_missing =
-                        map_it.findAndSetValue(tr, buffer.get<std::string>(current_var_dbcol_name), row_cnt);
+                        map_it.findAndSetValue(tr, buffer.get<std::string>(current_var_name), row_cnt);
 
                 break;
             }
@@ -491,7 +491,7 @@ bool ASTERIXJSONParser::parseTargetReport(const nlohmann::json& tr, Buffer& buff
         {
             // TODO make configurable
             logdbg << "ASTERIXJSONParser '" << name_ << "': parseTargetReport: mandatory variable '"
-                     << current_var_dbcol_name << "' missing in: \n"
+                     << current_var_name << "' missing in: \n"
                      << tr.dump(4);
             break;
         }
@@ -609,7 +609,7 @@ void ASTERIXJSONParser::removeMapping(unsigned int index)
     if (mapping.active() && mapping.initialized() && mapping.hasVariable())
     {
         if (list_.hasProperty(mapping.dboVariableName()))
-            list_.removeProperty(mapping.variable().dbColumnName());
+            list_.removeProperty(mapping.variable().name());
 
         if (var_list_.hasVariable(mapping.variable()))
             var_list_.removeVariable(mapping.variable());
@@ -646,13 +646,13 @@ void ASTERIXJSONParser::setMappingActive(JSONDataMapping& mapping, bool active)
 
     if (active)
     {
-        list_.addProperty(mapping.variable().dbColumnName(), mapping.variable().dataType());
+        list_.addProperty(mapping.variable().name(), mapping.variable().dataType());
         var_list_.add(mapping.variable());
     }
     else if (mapping.hasVariable())  // remove if was added
     {
-        if (list_.hasProperty(mapping.variable().dbColumnName()))
-            list_.removeProperty(mapping.variable().dbColumnName());
+        if (list_.hasProperty(mapping.variable().name()))
+            list_.removeProperty(mapping.variable().name());
 
         if (var_list_.hasVariable(mapping.variable()))
             var_list_.removeVariable(mapping.variable());

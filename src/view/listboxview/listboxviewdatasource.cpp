@@ -301,16 +301,16 @@ void ListBoxViewDataSource::addDefaultVariables (DBOVariableOrderedSet& set)
 {
     DBObjectManager& obj_man = COMPASS::instance().objectManager();
 
-    if (obj_man.existsMetaVariable("rec_num"))
-        set.add(obj_man.metaVariable("rec_num"));
+    if (obj_man.existsMetaVariable(DBObject::meta_var_rec_num_id_.name()))
+        set.add(obj_man.metaVariable(DBObject::meta_var_rec_num_id_.name()));
 
     //        Time of Day
-    if (obj_man.existsMetaVariable("tod"))
-        set.add(obj_man.metaVariable("tod"));
+    if (obj_man.existsMetaVariable(DBObject::meta_var_tod_id_.name()))
+        set.add(obj_man.metaVariable(DBObject::meta_var_tod_id_.name()));
 
     //        Datasource
-    if (obj_man.existsMetaVariable("ds_id"))
-        set.add(obj_man.metaVariable("ds_id"));
+    if (obj_man.existsMetaVariable(DBObject::meta_var_datasource_id_.name()))
+        set.add(obj_man.metaVariable(DBObject::meta_var_datasource_id_.name()));
 
     //        Lat/Long
 //        if (obj_man.existsMetaVariable("pos_lat_deg"))
@@ -319,24 +319,24 @@ void ListBoxViewDataSource::addDefaultVariables (DBOVariableOrderedSet& set)
 //            set.add(obj_man.metaVariable("pos_long_deg"));
 
     //        Mode 3/A code
-    if (obj_man.existsMetaVariable("mode3a_code"))
-        set.add(obj_man.metaVariable("mode3a_code"));
+    if (obj_man.existsMetaVariable(DBObject::meta_var_m3a_id_.name()))
+        set.add(obj_man.metaVariable(DBObject::meta_var_m3a_id_.name()));
 
     //        Mode S TA
-    if (obj_man.existsMetaVariable("target_addr"))
-        set.add(obj_man.metaVariable("target_addr"));
+    if (obj_man.existsMetaVariable(DBObject::meta_var_ta_id_.name()))
+        set.add(obj_man.metaVariable(DBObject::meta_var_ta_id_.name()));
 
     //        Mode S Callsign
-    if (obj_man.existsMetaVariable("callsign"))
-        set.add(obj_man.metaVariable("callsign"));
+    if (obj_man.existsMetaVariable(DBObject::meta_var_ti_id_.name()))
+        set.add(obj_man.metaVariable(DBObject::meta_var_ti_id_.name()));
 
     //        Mode C
-    if (obj_man.existsMetaVariable("modec_code_ft"))
-        set.add(obj_man.metaVariable("modec_code_ft"));
+    if (obj_man.existsMetaVariable(DBObject::meta_var_mc_id_.name()))
+        set.add(obj_man.metaVariable(DBObject::meta_var_mc_id_.name()));
 
     //        Track Number
-    if (obj_man.existsMetaVariable("track_num"))
-        set.add(obj_man.metaVariable("track_num"));
+    if (obj_man.existsMetaVariable(DBObject::meta_var_track_num_id_.name()))
+        set.add(obj_man.metaVariable(DBObject::meta_var_track_num_id_.name()));
 }
 
 void ListBoxViewDataSource::loadingStartedSlot()

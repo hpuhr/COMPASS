@@ -517,7 +517,7 @@ void AllBufferTableModel::updateTimeIndexes()
                    << " data, last index " << buffer_index << " size " << buf_it.second->size();
 
             DBObjectManager& object_manager = COMPASS::instance().objectManager();
-            const DBOVariable& tod_var = object_manager.metaVariable("tod").getFor(dbo_name);
+            const DBOVariable& tod_var = object_manager.metaVariable(DBObject::meta_var_tod_id_.name()).getFor(dbo_name);
             assert(buf_it.second->has<float>(tod_var.name()));
             NullableVector<float>& tods = buf_it.second->get<float>(tod_var.name());
 

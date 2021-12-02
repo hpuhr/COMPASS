@@ -1,4 +1,4 @@
-#include "asterixpostprocessjob.h"
+﻿#include "asterixpostprocessjob.h"
 #include "dbobjectmanager.h"
 #include "dbobject.h"
 #include "buffer.h"
@@ -27,12 +27,12 @@ void ASTERIXPostprocessJob::run()
 
     string dbo_name;
 
-    string datasource_col_str;
-    string range_col_str;
-    string azimuth_col_str;
-    string altitude_col_str;
-    string latitude_col_str;
-    string longitude_col_str;
+    string datasource_var_name;
+    string range_var_name;
+    string azimuth_var_name;
+    string altitude_var_name;
+    string latitude_var_name;
+    string longitude_var_name;
 
     DBObjectManager& dbo_man = COMPASS::instance().objectManager();
     ProjectionManager& proj_man = ProjectionManager::instance();
@@ -67,26 +67,26 @@ void ASTERIXPostprocessJob::run()
         assert (dbo_man.existsObject(dbo_name));
         DBObject& db_object = dbo_man.object(dbo_name);
 
-        assert (db_object.hasVariable(DBObject::var_datasource_id_.name()));
+        assert (db_object.hasVariable(DBObject::meta_var_datasource_id_.name()));
         assert (db_object.hasVariable(DBObject::var_radar_range_.name()));
         assert (db_object.hasVariable(DBObject::var_radar_azimuth_.name()));
         assert (db_object.hasVariable(DBObject::var_radar_altitude_.name()));
         assert (db_object.hasVariable(DBObject::var_latitude_.name()));
         assert (db_object.hasVariable(DBObject::var_longitude_.name()));
 
-        DBOVariable& datasource_var = db_object.variable(DBObject::var_datasource_id_.name());
+        DBOVariable& datasource_var = db_object.variable(DBObject::meta_var_datasource_id_.name());
         DBOVariable& range_var = db_object.variable(DBObject::var_radar_range_.name());
         DBOVariable& azimuth_var = db_object.variable(DBObject::var_radar_azimuth_.name());
         DBOVariable& altitude_var = db_object.variable(DBObject::var_radar_altitude_.name());
         DBOVariable& latitude_var = db_object.variable(DBObject::var_latitude_.name());
         DBOVariable& longitude_var = db_object.variable(DBObject::var_longitude_.name());
 
-        datasource_col_str = datasource_var.dbColumnName();
-        range_col_str = range_var.dbColumnName();
-        azimuth_col_str = azimuth_var.dbColumnName();
-        altitude_col_str = altitude_var.dbColumnName();
-        latitude_col_str = latitude_var.dbColumnName();
-        longitude_col_str = longitude_var.dbColumnName();
+        datasource_var_name = datasource_var.name();
+        range_var_name = range_var.name();
+        azimuth_var_name = azimuth_var.name();
+        altitude_var_name = altitude_var.name();
+        latitude_var_name = latitude_var.name();
+        longitude_var_name = longitude_var.name();
 
         assert (datasource_var.dataType() == PropertyDataType::UINT);
         assert (range_var.dataType() == PropertyDataType::DOUBLE);
@@ -95,24 +95,24 @@ void ASTERIXPostprocessJob::run()
         assert (latitude_var.dataType() == PropertyDataType::DOUBLE);
         assert (longitude_var.dataType() == PropertyDataType::DOUBLE);
 
-        assert (buffer->has<unsigned int>(datasource_col_str));
-        assert (buffer->has<double>(range_col_str));
-        assert (buffer->has<double>(azimuth_col_str));
-        assert (buffer->has<float>(altitude_col_str));
-        assert (!buffer->has<double>(latitude_col_str));
-        assert (!buffer->has<double>(longitude_col_str));
+        assert (buffer->has<unsigned int>(datasource_var_name));
+        assert (buffer->has<double>(range_var_name));
+        assert (buffer->has<double>(azimuth_var_name));
+        assert (buffer->has<float>(altitude_var_name));
+        assert (!buffer->has<double>(latitude_var_name));
+        assert (!buffer->has<double>(longitude_var_name));
 
-        buffer->addProperty(latitude_col_str, PropertyDataType::DOUBLE);
-        buffer->addProperty(longitude_col_str, PropertyDataType::DOUBLE);
+        buffer->addProperty(latitude_var_name, PropertyDataType::DOUBLE);
+        buffer->addProperty(longitude_var_name, PropertyDataType::DOUBLE);
 
         transformation_errors = 0;
 
-        NullableVector<unsigned int>& datasource_vec = buffer->get<unsigned int>(datasource_col_str);
-        NullableVector<double>& range_vec = buffer->get<double>(range_col_str);
-        NullableVector<double>& azimuth_vec = buffer->get<double>(azimuth_col_str);
-        NullableVector<float>& altitude_vec = buffer->get<float>(altitude_col_str);
-        NullableVector<double>& latitude_vec = buffer->get<double>(latitude_col_str);
-        NullableVector<double>& longitude_vec = buffer->get<double>(longitude_col_str);
+        NullableVector<unsigned int>& datasource_vec = buffer->get<unsigned int>(datasource_var_name);
+        NullableVector<double>& range_vec = buffer->get<double>(range_var_name);
+        NullableVector<double>& azimuth_vec = buffer->get<double>(azimuth_var_name);
+        NullableVector<float>& altitude_vec = buffer->get<float>(altitude_var_name);
+        NullableVector<double>& latitude_vec = buffer->get<double>(latitude_var_name);
+        NullableVector<double>& longitude_vec = buffer->get<double>(longitude_var_name);
 
 
         // set up projections

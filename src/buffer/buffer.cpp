@@ -281,307 +281,122 @@ bool Buffer::isNone(const Property& property, unsigned int row_cnt)
     }
 }
 
-//void Buffer::transformVariables(DBOVariableSet& list, bool tc2dbovar)
-//{
-//    // TODO add proper data type conversion
-//    vector<DBOVariable*>& variables = list.getSet();
-//    string db_column_name;
+void Buffer::transformVariables(DBOVariableSet& list, bool dbcol2dbovar)
+{
+    logdbg << "Buffer: transformVariables: dbo '" << dbo_name_ << "' dbcol2dbovar " << dbcol2dbovar;
 
-//    for (auto var_it : variables)
-//    {
-//        logdbg << "Buffer: transformVariables: variable " << var_it->name()
-//               << " has representation " << var_it->representationString();
+    vector<DBOVariable*>& variables = list.getSet();
+    string variable_name;
+    string db_column_name;
 
-//        db_column_name = var_it->dbColumnName();
+    string current_var_name;
+    string transformed_var_name;
 
-//        logdbg << "Buffer: transformVariables: db column " << var_it->dbColumnName();
+    for (auto var_it : variables)
+    {
+        logdbg << "Buffer: transformVariables: variable " << var_it->name() << " db column " << db_column_name;
 
-//        PropertyDataType data_type = var_it->dataType();
+        variable_name = var_it->name();
+        db_column_name = var_it->dbColumnName();
 
-//        if (tc2dbovar)
-//        {
-//            if (!properties_.hasProperty(db_column_name))
-//            {
-//                logerr << "Buffer: transformVariables: property '" << db_column_name << "' not found";
-//                continue;
-//            }
+        PropertyDataType data_type = var_it->dataType();
 
-//            assert(properties_.get(db_column_name).dataType() == var_it->dataType());
-//        }
-//        else
-//        {
-//            if (!properties_.hasProperty(var_it->name()))
-//            {
-//                logerr << "Buffer: transformVariables: variable '" << var_it->name() << "' not found";
-//                continue;
-//            }
+        if (dbcol2dbovar)
+        {
+            if (!properties_.hasProperty(db_column_name))
+            {
+                logerr << "Buffer: transformVariables: property '" << db_column_name << "' not found";
+                continue;
+            }
 
-//            assert(properties_.hasProperty(var_it->name()));
+            assert(properties_.hasProperty(db_column_name));
+            assert(properties_.get(db_column_name).dataType() == var_it->dataType());
 
-//            logdbg << "Buffer: transformVariables: var " << var_it->name() << " col "
-//                   << column.name() << " prop dt "
-//                   << Property::asString(properties_.get(var_it->name()).dataType()) << " col dt "
-//                   << Property::asString(column.propertyType());
-//            // TODO HACK
-//            // assert (properties_.get(var_it->name()).dataType() == column.propertyType());
-//            current_var_name = var_it->name();
-//            transformed_var_name = column.name();
-//        }
+            current_var_name = db_column_name;
+            transformed_var_name = variable_name;
+        }
+        else
+        {
+            if (!properties_.hasProperty(var_it->name()))
+            {
+                logerr << "Buffer: transformVariables: variable '" << variable_name << "' not found";
+                continue;
+            }
 
-//        if (column.dataFormat() != "")  // do format conversion stuff
-//        {
-//            logdbg << "Buffer: transformVariables: column " << column.name()
-//                   << " has to-be-removed format " << column.dataFormat();
+            assert(properties_.hasProperty(variable_name));
+            assert(properties_.get(variable_name).dataType() == var_it->dataType());
 
-//            switch (data_type)
-//            {
-//                case PropertyDataType::CHAR:
-//                {
-//                    assert(has<char>(current_var_name));
-//                    NullableVector<char>& array_list = get<char>(current_var_name);
-//                    array_list.convertToStandardFormat(column.dataFormat());
-//                    break;
-//                }
-//                case PropertyDataType::UCHAR:
-//                {
-//                    assert(has<unsigned char>(current_var_name));
-//                    NullableVector<unsigned char>& array_list =
-//                        get<unsigned char>(current_var_name);
-//                    array_list.convertToStandardFormat(column.dataFormat());
-//                    break;
-//                }
-//                case PropertyDataType::INT:
-//                {
-//                    assert(has<int>(current_var_name));
-//                    NullableVector<int>& array_list = get<int>(current_var_name);
-//                    array_list.convertToStandardFormat(column.dataFormat());
-//                    break;
-//                }
-//                case PropertyDataType::UINT:
-//                {
-//                    assert(has<unsigned int>(current_var_name));
-//                    NullableVector<unsigned int>& array_list = get<unsigned int>(current_var_name);
-//                    array_list.convertToStandardFormat(column.dataFormat());
-//                    break;
-//                }
-//                case PropertyDataType::LONGINT:
-//                {
-//                    assert(has<long int>(current_var_name));
-//                    NullableVector<long int>& array_list = get<long int>(current_var_name);
-//                    array_list.convertToStandardFormat(column.dataFormat());
-//                    break;
-//                }
-//                case PropertyDataType::ULONGINT:
-//                {
-//                    assert(has<unsigned long>(current_var_name));
-//                    NullableVector<unsigned long>& array_list =
-//                        get<unsigned long>(current_var_name);
-//                    array_list.convertToStandardFormat(column.dataFormat());
-//                    break;
-//                }
-//                default:
-//                    logerr << "Buffer: transformVariables: format conversion impossible for "
-//                              "property type "
-//                           << Property::asString(data_type);
-//                    throw runtime_error(
-//                        "Buffer: transformVariables: impossible property type " +
-//                        Property::asString(data_type));
-//            }
-//        }
+            current_var_name = variable_name;
+            transformed_var_name = db_column_name;
+        }
 
-//        if (column.dimension() != var_it->dimension())
-//            logwrn << "Buffer: transformVariables:: variable " << var_it->name()
-//                   << " has differing dimensions " << column.dimension() << " "
-//                   << var_it->dimension();
-//        else if (column.unit() != var_it->unit())  // do unit conversion stuff
-//        {
-//            logdbg << "Buffer: transformVariables: variable " << var_it->name()
-//                   << " of same dimension has different units " << column.unit() << " "
-//                   << var_it->unit();
+        // rename to reflect dbo variable
+        if (current_var_name != transformed_var_name)
+        {
+            logdbg << "Buffer: transformVariables: renaming variable " << current_var_name
+                   << " to variable name " << transformed_var_name;
 
-//            if (!UnitManager::instance().hasDimension(var_it->dimension()))
-//            {
-//                logerr << "Buffer: transformVariables: unknown dimension '" << var_it->dimension()
-//                       << "'";
-//                throw runtime_error("Buffer: transformVariables: unknown dimension '" +
-//                                         var_it->dimension() + "'");
-//            }
-
-//            const Dimension& dimension = UnitManager::instance().dimension(var_it->dimension());
-//            double factor;
-
-//            if (!dimension.hasUnit(column.unit()))
-//                logerr << "Buffer: transformVariables: dimension '" << var_it->dimension()
-//                       << "' has unknown unit '" << column.unit() << "'";
-
-//            if (!dimension.hasUnit(var_it->unit()))
-//                logerr << "Buffer: transformVariables: dimension '" << var_it->dimension()
-//                       << "' has unknown unit '" << var_it->unit() << "'";
-
-//            if (tc2dbovar)
-//                factor = dimension.getFactor(column.unit(), var_it->unit());
-//            else
-//                factor = dimension.getFactor(var_it->unit(), column.unit());
-
-//            logdbg << "Buffer: transformVariables: correct unit transformation with factor "
-//                   << factor;
-
-//            switch (data_type)
-//            {
-//                case PropertyDataType::BOOL:
-//                {
-//                    assert(has<bool>(current_var_name));
-//                    NullableVector<bool>& array_list = get<bool>(current_var_name);
-//                    logwrn
-//                        << "Buffer: transformVariables: double multiplication of boolean variable "
-//                        << var_it->name();
-//                    array_list *= factor;
-//                    break;
-//                }
-//                case PropertyDataType::CHAR:
-//                {
-//                    assert(has<char>(current_var_name));
-//                    NullableVector<char>& array_list = get<char>(current_var_name);
-//                    logwrn << "Buffer: transformVariables: double multiplication of char variable "
-//                           << var_it->name();
-//                    array_list *= factor;
-//                    break;
-//                }
-//                case PropertyDataType::UCHAR:
-//                {
-//                    assert(has<unsigned char>(current_var_name));
-//                    NullableVector<unsigned char>& array_list =
-//                        get<unsigned char>(current_var_name);
-//                    logwrn << "Buffer: transformVariables: double multiplication of unsigned char "
-//                              "variable "
-//                           << var_it->name();
-//                    array_list *= factor;
-//                    break;
-//                }
-//                case PropertyDataType::INT:
-//                {
-//                    assert(has<int>(current_var_name));
-//                    NullableVector<int>& array_list = get<int>(current_var_name);
-//                    loginf << "JsonMapping: transformBuffer: double multiplication of int variable "
-//                           << current_var_name << " factor " << factor;
-//                    array_list *= factor;
-//                    break;
-//                }
-//                case PropertyDataType::UINT:
-//                {
-//                    assert(has<unsigned int>(current_var_name));
-//                    NullableVector<unsigned int>& array_list = get<unsigned int>(current_var_name);
-//                    array_list *= factor;
-//                    break;
-//                }
-//                case PropertyDataType::LONGINT:
-//                {
-//                    assert(has<long int>(current_var_name));
-//                    NullableVector<long int>& array_list = get<long int>(current_var_name);
-//                    array_list *= factor;
-//                    break;
-//                }
-//                case PropertyDataType::ULONGINT:
-//                {
-//                    assert(has<unsigned long>(current_var_name));
-//                    NullableVector<unsigned long>& array_list =
-//                        get<unsigned long>(current_var_name);
-//                    array_list *= factor;
-//                    break;
-//                }
-//                case PropertyDataType::FLOAT:
-//                {
-//                    assert(has<float>(current_var_name));
-//                    NullableVector<float>& array_list = get<float>(current_var_name);
-//                    array_list *= factor;
-//                    break;
-//                }
-//                case PropertyDataType::DOUBLE:
-//                {
-//                    assert(has<double>(current_var_name));
-//                    NullableVector<double>& array_list = get<double>(current_var_name);
-//                    array_list *= factor;
-//                    break;
-//                }
-//                case PropertyDataType::STRING:
-//                    logerr << "Buffer: transformVariables: unit transformation for string variable "
-//                           << var_it->name() << " impossible";
-//                    break;
-//                default:
-//                    logerr << "Buffer: transformVariables: unknown property type "
-//                           << Property::asString(data_type);
-//                    throw runtime_error("Buffer: transformVariables: unknown property type " +
-//                                             Property::asString(data_type));
-//            }
-//        }
-
-//        // rename to reflect dbo variable
-//        if (current_var_name != transformed_var_name)
-//        {
-//            logdbg << "Buffer: transformVariables: renaming variable " << current_var_name
-//                   << " to variable name " << transformed_var_name;
-
-//            switch (data_type)
-//            {
-//                case PropertyDataType::BOOL:
-//                {
-//                    rename<bool>(current_var_name, transformed_var_name);
-//                    break;
-//                }
-//                case PropertyDataType::CHAR:
-//                {
-//                    rename<char>(current_var_name, transformed_var_name);
-//                    break;
-//                }
-//                case PropertyDataType::UCHAR:
-//                {
-//                    rename<unsigned char>(current_var_name, transformed_var_name);
-//                    break;
-//                }
-//                case PropertyDataType::INT:
-//                {
-//                    rename<int>(current_var_name, transformed_var_name);
-//                    break;
-//                }
-//                case PropertyDataType::UINT:
-//                {
-//                    rename<unsigned int>(current_var_name, transformed_var_name);
-//                    break;
-//                }
-//                case PropertyDataType::LONGINT:
-//                {
-//                    rename<long int>(current_var_name, transformed_var_name);
-//                    break;
-//                }
-//                case PropertyDataType::ULONGINT:
-//                {
-//                    rename<unsigned long int>(current_var_name, transformed_var_name);
-//                    break;
-//                }
-//                case PropertyDataType::FLOAT:
-//                {
-//                    rename<float>(current_var_name, transformed_var_name);
-//                    break;
-//                }
-//                case PropertyDataType::DOUBLE:
-//                {
-//                    rename<double>(current_var_name, transformed_var_name);
-//                    break;
-//                }
-//                case PropertyDataType::STRING:
-//                {
-//                    rename<string>(current_var_name, transformed_var_name);
-//                    break;
-//                }
-//                default:
-//                    logerr << "Buffer: transformVariables: unknown property type "
-//                           << Property::asString(data_type);
-//                    throw runtime_error("Buffer: transformVariables: unknown property type " +
-//                                             Property::asString(data_type));
-//            }
-//        }
-//    }
-//}
+            switch (data_type)
+            {
+                case PropertyDataType::BOOL:
+                {
+                    rename<bool>(current_var_name, transformed_var_name);
+                    break;
+                }
+                case PropertyDataType::CHAR:
+                {
+                    rename<char>(current_var_name, transformed_var_name);
+                    break;
+                }
+                case PropertyDataType::UCHAR:
+                {
+                    rename<unsigned char>(current_var_name, transformed_var_name);
+                    break;
+                }
+                case PropertyDataType::INT:
+                {
+                    rename<int>(current_var_name, transformed_var_name);
+                    break;
+                }
+                case PropertyDataType::UINT:
+                {
+                    rename<unsigned int>(current_var_name, transformed_var_name);
+                    break;
+                }
+                case PropertyDataType::LONGINT:
+                {
+                    rename<long int>(current_var_name, transformed_var_name);
+                    break;
+                }
+                case PropertyDataType::ULONGINT:
+                {
+                    rename<unsigned long int>(current_var_name, transformed_var_name);
+                    break;
+                }
+                case PropertyDataType::FLOAT:
+                {
+                    rename<float>(current_var_name, transformed_var_name);
+                    break;
+                }
+                case PropertyDataType::DOUBLE:
+                {
+                    rename<double>(current_var_name, transformed_var_name);
+                    break;
+                }
+                case PropertyDataType::STRING:
+                {
+                    rename<string>(current_var_name, transformed_var_name);
+                    break;
+                }
+                default:
+                    logerr << "Buffer: transformVariables: unknown property type "
+                           << Property::asString(data_type);
+                    throw runtime_error("Buffer: transformVariables: unknown property type " +
+                                             Property::asString(data_type));
+            }
+        }
+    }
+}
 
 shared_ptr<Buffer> Buffer::getPartialCopy(const PropertyList& partial_properties)
 {

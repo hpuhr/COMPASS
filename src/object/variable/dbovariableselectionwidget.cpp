@@ -109,7 +109,8 @@ void DBOVariableSelectionWidget::updateMenuEntries()
             if (show_data_types_only_ && !showDataType(var_it->dataType()))
                 continue;
 
-            QAction* action = menu_.addAction(QString::fromStdString(var_it->name()));
+            QAction* action = menu_.addAction(var_it->name().c_str());
+            action->setToolTip(var_it->description().c_str());
 
             QVariantMap vmap;
             vmap.insert(QString::fromStdString(var_it->name()),
@@ -128,6 +129,7 @@ void DBOVariableSelectionWidget::updateMenuEntries()
                     continue;
 
                 QAction* action = meta_menu->addAction(QString::fromStdString(meta_it->name()));
+                action->setToolTip(meta_it->description().c_str());
 
                 QVariantMap vmap;
                 vmap.insert(QString::fromStdString(meta_it->name()),
@@ -149,6 +151,7 @@ void DBOVariableSelectionWidget::updateMenuEntries()
                     continue;
 
                 QAction* action = m2->addAction(QString::fromStdString(var_it->name()));
+                action->setToolTip(var_it->description().c_str());
 
                 QVariantMap vmap;
                 vmap.insert(QString::fromStdString(var_it->name()),
