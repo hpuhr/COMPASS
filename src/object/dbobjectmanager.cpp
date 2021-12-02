@@ -175,6 +175,18 @@ MetaDBOVariable& DBObjectManager::metaVariable(const std::string& var_name)
     return *it->get();
 }
 
+void DBObjectManager::renameMetaVariable(const std::string& old_var_name, const std::string& new_var_name)
+{
+    assert(existsMetaVariable(old_var_name));
+    metaVariable(old_var_name).name(new_var_name);
+
+    if (meta_cfg_dialog_)
+    {
+        meta_cfg_dialog_->updateList();
+        meta_cfg_dialog_->selectMetaVariable(new_var_name);
+    }
+}
+
 void DBObjectManager::deleteMetaVariable(const std::string& var_name)
 {
     logdbg << "DBObjectManager: deleteMetaVariable: name " << var_name;
@@ -186,6 +198,12 @@ void DBObjectManager::deleteMetaVariable(const std::string& var_name)
     assert (it != meta_variables_.end());
 
     meta_variables_.erase(it);
+
+    if (meta_cfg_dialog_)
+    {
+        meta_cfg_dialog_->updateList();
+        meta_cfg_dialog_->clearDetails();
+    }
 }
 
 bool DBObjectManager::usedInMetaVariable(const DBOVariable& variable)
@@ -432,31 +450,31 @@ void DBObjectManager::databaseContentChangedSlot()
 {
     // emit databaseContentChangedSignal();
 
-//    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+    //    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
-//    loginf << "DBObjectManager: databaseContentChangedSlot";
+    //    loginf << "DBObjectManager: databaseContentChangedSlot";
 
-//    if (COMPASS::instance().interface().hasProperty("associations_generated"))
-//    {
-//        assert(COMPASS::instance().interface().hasProperty("associations_dbo"));
-//        assert(COMPASS::instance().interface().hasProperty("associations_ds"));
+    //    if (COMPASS::instance().interface().hasProperty("associations_generated"))
+    //    {
+    //        assert(COMPASS::instance().interface().hasProperty("associations_dbo"));
+    //        assert(COMPASS::instance().interface().hasProperty("associations_ds"));
 
-//        has_associations_ =
-//                COMPASS::instance().interface().getProperty("associations_generated") == "1";
-//        associations_dbo_ = COMPASS::instance().interface().getProperty("associations_dbo");
-//        associations_ds_ = COMPASS::instance().interface().getProperty("associations_ds");
-//    }
-//    else
-//    {
-//        has_associations_ = false;
-//        associations_dbo_ = "";
-//        associations_ds_ = "";
-//    }
+    //        has_associations_ =
+    //                COMPASS::instance().interface().getProperty("associations_generated") == "1";
+    //        associations_dbo_ = COMPASS::instance().interface().getProperty("associations_dbo");
+    //        associations_ds_ = COMPASS::instance().interface().getProperty("associations_ds");
+    //    }
+    //    else
+    //    {
+    //        has_associations_ = false;
+    //        associations_dbo_ = "";
+    //        associations_ds_ = "";
+    //    }
 
-//    for (auto& object : objects_)
-//        object.second->updateToDatabaseContent();
+    //    for (auto& object : objects_)
+    //        object.second->updateToDatabaseContent();
 
-//    QApplication::restoreOverrideCursor();
+    //    QApplication::restoreOverrideCursor();
 
     if (load_widget_)
         load_widget_->update();

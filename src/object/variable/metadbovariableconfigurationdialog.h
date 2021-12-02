@@ -28,6 +28,8 @@ public:
     virtual ~MetaDBOVariableConfigurationDialog();
 
     void updateList();
+    void selectMetaVariable (const std::string& name);
+    void clearDetails();
 
 protected:
     DBObjectManager& dbo_man_;

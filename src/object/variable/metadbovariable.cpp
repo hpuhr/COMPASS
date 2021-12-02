@@ -32,7 +32,6 @@ MetaDBOVariable::MetaDBOVariable(const std::string& class_id, const std::string&
       widget_(nullptr)
 {
     registerParameter("name", &name_, "");
-    registerParameter("description", &description_, "");
 
     // DBOVAR LOWERCASE HACK
     // boost::algorithm::to_lower(name_);
@@ -40,6 +39,8 @@ MetaDBOVariable::MetaDBOVariable(const std::string& class_id, const std::string&
     assert(name_.size() > 0);
 
     createSubConfigurables();
+
+    updateDescription();
 }
 
 MetaDBOVariable::~MetaDBOVariable()
@@ -121,6 +122,8 @@ void MetaDBOVariable::removeVariable(const std::string& dbo_name)
     delete definitions_.at(dbo_name);
     definitions_.erase(dbo_name);
     variables_.erase(dbo_name);
+
+    updateDescription();
 }
 
 void MetaDBOVariable::addVariable(const std::string& dbo_name, const std::string& dbovariable_name)
@@ -136,6 +139,8 @@ void MetaDBOVariable::addVariable(const std::string& dbo_name, const std::string
     config.addParameterString("dbo_name", dbo_name);
     config.addParameterString("dbo_variable_name", dbovariable_name);
     generateSubConfigurable("DBOVariableDefinition", instance_id);
+
+    updateDescription();
 }
 
 bool MetaDBOVariable::uses(const DBOVariable& variable)
@@ -187,8 +192,6 @@ std::string MetaDBOVariable::name() const { return name_; }
 void MetaDBOVariable::name(const std::string& name) { name_ = name; }
 
 std::string MetaDBOVariable::description() const { return description_; }
-
-void MetaDBOVariable::description(const std::string& description) { description_ = description; }
 
 PropertyDataType MetaDBOVariable::dataType() const
 {
@@ -303,3 +306,15 @@ void MetaDBOVariable::removeOutdatedVariables()
             ++var_it;
     }
 }
+
+void MetaDBOVariable::updateDescription()
+{
+    description_ = "";
+
+    for (auto& variable_it : variables_)
+    {
+        description_ += "For " + variable_it.first + ":\n";
+        description_ += variable_it.second.description() + "\n\n";
+    }
+}
+

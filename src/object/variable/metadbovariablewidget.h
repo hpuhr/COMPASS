@@ -30,9 +30,6 @@ class MetaDBOVariable;
 class QGridLayout;
 class DBOVariableSelectionWidget;
 
-/**
- * @brief Edit widget for a DBObject
- */
 class MetaDBOVariableWidget : public QWidget
 {
     Q_OBJECT
@@ -41,30 +38,22 @@ class MetaDBOVariableWidget : public QWidget
     void metaVariableChangedSignal();
 
   public slots:
-    /// @brief Changes DBO name
     void editNameSlot();
-    /// @brief Changes DBO info
-    void editDescriptionSlot();
     void subVariableChangedSlot();
 
     void updateSlot();
 
   public:
-    /// @brief Constructor
     MetaDBOVariableWidget(MetaDBOVariable& variable, QWidget* parent = 0, Qt::WindowFlags f = 0);
-    /// @brief Destructor
     virtual ~MetaDBOVariableWidget();
 
     void lock();
     void unlock();
 
   private:
-    /// @brief DBObject to be managed
     MetaDBOVariable& variable_;
 
-    /// @brief DBOVariable name
     QLineEdit* name_edit_{nullptr};
-    /// @brief DBOVariable info
     QLineEdit* description_edit_{nullptr};
 
     QGridLayout* grid_layout_{nullptr};

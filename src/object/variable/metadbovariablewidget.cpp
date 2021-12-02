@@ -69,7 +69,7 @@ MetaDBOVariableWidget::MetaDBOVariableWidget(MetaDBOVariable& variable, QWidget*
     properties_layout->addWidget(description_label, row, 0);
 
     description_edit_ = new QLineEdit(variable_.description().c_str());
-    connect(description_edit_, SIGNAL(returnPressed()), this, SLOT(editDescriptionSlot()));
+    description_edit_->setReadOnly(true);
     properties_layout->addWidget(description_edit_, row, 1);
     row++;
 
@@ -117,17 +117,6 @@ void MetaDBOVariableWidget::editNameSlot()
     std::string text = name_edit_->text().toStdString();
     assert(text.size() > 0);
     variable_.name(text);
-
-    emit metaVariableChangedSignal();
-}
-void MetaDBOVariableWidget::editDescriptionSlot()
-{
-    logdbg << "MetaDBOVariableWidget: editDescriptionSlot";
-    assert(description_edit_);
-
-    std::string text = description_edit_->text().toStdString();
-    assert(text.size() > 0);
-    variable_.description(text);
 
     emit metaVariableChangedSignal();
 }

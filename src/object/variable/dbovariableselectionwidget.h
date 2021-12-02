@@ -23,55 +23,36 @@
 #include <QFrame>
 #include <QMenu>
 
-class QPushButton;
-class QLabel;
 class DBOVariable;
+class DBObjectManager;
 class MetaDBOVariable;
 
-// typedef struct {
-//    std::string id;
-//    unsigned int dbo_type;
-//} SelectionId;
 
-/**
- * @brief Widget for selection of a DBOVariable
- *
- * Selection is made using a context menu (which is triggered by a button), definition of the
- * variable is shown in two QLineEdit fields. Provides getter and setter methods for access.
- */
+class QPushButton;
+class QLabel;
+
 class DBOVariableSelectionWidget : public QFrame
 {
     Q_OBJECT
 
   protected slots:
-    /// @brief Slot for menu triggered action
     void triggerSlot(QAction* action);
-    /// @brief Slot for show menu
     void showMenuSlot();
 
   signals:
-    /// @brief Signal if variable was changed
     void selectionChanged();
 
   public:
-    /// @brief Constructor without variable
     DBOVariableSelectionWidget(bool h_box = true, QWidget* parent = nullptr);
-    /// @brief Destructor
     ~DBOVariableSelectionWidget();
 
-    /// @brief Returns if a variable is selected
     bool hasVariable() const { return variable_selected_; }
-    /// @brief Return selected variable
     DBOVariable& selectedVariable() const;
-    /// @brief Sets the selected variable
     void selectedVariable(DBOVariable& variable);
     void selectEmptyVariable();
 
-    /// @brief Returns if a variable is selected
     bool hasMetaVariable() const { return meta_variable_selected_; }
-    /// @brief Return selected variable
     MetaDBOVariable& selectedMetaVariable() const;
-    /// @brief Sets the selected variable
     void selectedMetaVariable(MetaDBOVariable& variable);
 
     bool showMetaVariables() const;
@@ -97,11 +78,10 @@ class DBOVariableSelectionWidget : public QFrame
     void updateMenuEntries();
 
   private:
-    /// Variable type information
+    DBObjectManager& dbo_man_;
+
     QLabel* object_label_{nullptr};
-    /// Variable name information
     QLabel* variable_label_{nullptr};
-    /// Context menu for variable selection
     QMenu menu_;
 
     bool variable_selected_{false};
@@ -118,9 +98,8 @@ class DBOVariableSelectionWidget : public QFrame
     bool show_data_types_only_{false};
     std::vector<PropertyDataType> only_data_types_;
 
-    /// @brief Updates selection menu entries
-
     bool showDataType(PropertyDataType type);
+    void updateToolTip();
 };
 
 #endif  // DBOVARIABLESELECTIONWIDGET_H

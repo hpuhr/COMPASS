@@ -34,7 +34,8 @@
 using namespace Utils;
 using namespace std;
 
-DBOVariableSelectionWidget::DBOVariableSelectionWidget(bool h_box, QWidget* parent) : QFrame(parent)
+DBOVariableSelectionWidget::DBOVariableSelectionWidget(bool h_box, QWidget* parent)
+    : QFrame(parent), dbo_man_(COMPASS::instance().objectManager())
 {
     setFrameStyle(QFrame::Panel | QFrame::Sunken);
     setLineWidth(1);
@@ -85,12 +86,8 @@ DBOVariableSelectionWidget::DBOVariableSelectionWidget(bool h_box, QWidget* pare
     updateMenuEntries();
 }
 
-/*
- */
 DBOVariableSelectionWidget::~DBOVariableSelectionWidget() {}
 
-/*
- */
 void DBOVariableSelectionWidget::updateMenuEntries()
 {
     menu_.clear();
@@ -105,9 +102,9 @@ void DBOVariableSelectionWidget::updateMenuEntries()
 
     if (show_dbo_only_)
     {
-        assert(COMPASS::instance().objectManager().existsObject(only_dbo_name_));
+        assert(dbo_man_.existsObject(only_dbo_name_));
 
-        for (auto& var_it : COMPASS::instance().objectManager().object(only_dbo_name_).variables())
+        for (auto& var_it : dbo_man_.object(only_dbo_name_).variables())
         {
             if (show_data_types_only_ && !showDataType(var_it->dataType()))
                 continue;
@@ -125,7 +122,7 @@ void DBOVariableSelectionWidget::updateMenuEntries()
         if (show_meta_variables_)
         {
             QMenu* meta_menu = menu_.addMenu(QString::fromStdString(META_OBJECT_NAME));
-            for (auto& meta_it : COMPASS::instance().objectManager().metaVariables())
+            for (auto& meta_it : dbo_man_.metaVariables())
             {
                 if (show_data_types_only_ && !showDataType(meta_it->dataType()))
                     continue;
@@ -142,7 +139,7 @@ void DBOVariableSelectionWidget::updateMenuEntries()
         if (show_meta_variables_only_)
             return;
 
-        for (auto& object_it : COMPASS::instance().objectManager())
+        for (auto& object_it : dbo_man_)
         {
             QMenu* m2 = menu_.addMenu(QString::fromStdString(object_it.first));
 
@@ -167,12 +164,18 @@ bool DBOVariableSelectionWidget::showDataType(PropertyDataType type)
     return std::find(only_data_types_.begin(), only_data_types_.end(), type) != only_data_types_.end();
 }
 
-/*
- */
+void DBOVariableSelectionWidget::updateToolTip()
+{
+    if (hasVariable())
+        setToolTip(selectedVariable().description().c_str());
+    else if (hasMetaVariable())
+        setToolTip(selectedMetaVariable().description().c_str());
+    else
+        setToolTip("");
+}
+
 void DBOVariableSelectionWidget::showMenuSlot() { menu_.exec(QCursor::pos()); }
 
-/*
- */
 void DBOVariableSelectionWidget::triggerSlot(QAction* action)
 {
     assert(object_label_);
@@ -196,7 +199,7 @@ void DBOVariableSelectionWidget::triggerSlot(QAction* action)
         }
         else
         {
-            assert(COMPASS::instance().objectManager().object(obj_name).hasVariable(var_name));
+            assert(dbo_man_.object(obj_name).hasVariable(var_name));
 
             meta_variable_selected_ = false;
             variable_selected_ = true;
@@ -208,6 +211,8 @@ void DBOVariableSelectionWidget::triggerSlot(QAction* action)
 
     loginf << "DBOVariableSelectionWidget: triggerSlot: obj " << obj_name.c_str() << " var "
            << var_name.c_str();
+
+    updateToolTip();
 
     emit selectionChanged();
 }
@@ -222,6 +227,8 @@ void DBOVariableSelectionWidget::selectedVariable(DBOVariable& variable)
 
     variable_selected_ = true;
     meta_variable_selected_ = false;
+
+    updateToolTip();
 }
 
 void DBOVariableSelectionWidget::selectEmptyVariable()
@@ -236,10 +243,10 @@ void DBOVariableSelectionWidget::selectEmptyVariable()
 
     variable_selected_ = false;
     meta_variable_selected_ = false;
+
+    updateToolTip();
 }
 
-/*
- */
 DBOVariable& DBOVariableSelectionWidget::selectedVariable() const
 {
     assert(object_label_);
@@ -249,9 +256,9 @@ DBOVariable& DBOVariableSelectionWidget::selectedVariable() const
     std::string obj_name = object_label_->text().toStdString();
     std::string var_name = variable_label_->text().toStdString();
 
-    assert(COMPASS::instance().objectManager().object(obj_name).hasVariable(var_name));
+    assert(dbo_man_.object(obj_name).hasVariable(var_name));
 
-    return COMPASS::instance().objectManager().object(obj_name).variable(var_name);
+    return dbo_man_.object(obj_name).variable(var_name);
 }
 
 void DBOVariableSelectionWidget::selectedMetaVariable(MetaDBOVariable& variable)
@@ -264,10 +271,10 @@ void DBOVariableSelectionWidget::selectedMetaVariable(MetaDBOVariable& variable)
 
     variable_selected_ = false;
     meta_variable_selected_ = true;
+
+    updateToolTip();
 }
 
-/*
- */
 MetaDBOVariable& DBOVariableSelectionWidget::selectedMetaVariable() const
 {
     assert(object_label_);
@@ -278,9 +285,9 @@ MetaDBOVariable& DBOVariableSelectionWidget::selectedMetaVariable() const
     std::string var_name = variable_label_->text().toStdString();
 
     assert(obj_name == META_OBJECT_NAME);
-    assert(COMPASS::instance().objectManager().existsMetaVariable(var_name));
+    assert(dbo_man_.existsMetaVariable(var_name));
 
-    return COMPASS::instance().objectManager().metaVariable(var_name);
+    return dbo_man_.metaVariable(var_name);
 }
 
 void DBOVariableSelectionWidget::showDBOOnly(const std::string& only_dbo_name)

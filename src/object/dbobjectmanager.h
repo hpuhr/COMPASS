@@ -1,4 +1,4 @@
-/*
+    /*
  * This file is part of OpenATS COMPASS.
  *
  * COMPASS is free software: you can redistribute it and/or modify
@@ -77,10 +77,13 @@ public:
 
     bool existsMetaVariable(const std::string& var_name);
     MetaDBOVariable& metaVariable(const std::string& var_name);
+    void renameMetaVariable(const std::string& old_var_name, const std::string& new_var_name);
     void deleteMetaVariable(const std::string& var_name);
     const std::vector<std::unique_ptr<MetaDBOVariable>>& metaVariables() { return meta_variables_; }
 
     bool usedInMetaVariable(const DBOVariable& variable);
+    MetaDBOVariableConfigurationDialog* metaVariableConfigdialog();
+
 
     bool hasDataSource(unsigned int ds_id);
     bool canAddNewDataSourceFromConfig (unsigned int ds_id);
@@ -141,7 +144,6 @@ public:
 
     bool loadInProgress() const;
 
-    MetaDBOVariableConfigurationDialog* metaVariableConfigdialog();
 
 protected:
     COMPASS& compass_;

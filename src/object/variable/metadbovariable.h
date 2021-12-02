@@ -59,7 +59,6 @@ class MetaDBOVariable : public Configurable
     void name(const std::string& name);
 
     std::string description() const;
-    void description(const std::string& description);
 
 //    std::string getMinString() const;
 //    std::string getMaxString() const;
@@ -83,10 +82,11 @@ class MetaDBOVariable : public Configurable
 
     bool locked_{false};
 
-    std::map<std::string, DBOVariableDefinition*> definitions_;
-    std::map<std::string, DBOVariable&> variables_;
+    std::map<std::string, DBOVariableDefinition*> definitions_; // dbo name -> def
+    std::map<std::string, DBOVariable&> variables_; // dbo name -> var
 
     virtual void checkSubConfigurables();
+    void updateDescription();
 };
 
 #endif  // METADBOVARIABLE_H

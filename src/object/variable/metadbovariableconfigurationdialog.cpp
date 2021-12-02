@@ -102,6 +102,19 @@ void MetaDBOVariableConfigurationDialog::updateList()
     }
 }
 
+void MetaDBOVariableConfigurationDialog::selectMetaVariable (const std::string& name)
+{
+    assert (list_widget_->findItems(name.c_str(), Qt::MatchExactly).size() == 1);
+    list_widget_->setCurrentItem(list_widget_->findItems(name.c_str(), Qt::MatchExactly).at(0));
+}
+
+
+void MetaDBOVariableConfigurationDialog::clearDetails()
+{
+    assert (detail_widget_);
+    detail_widget_->clear();
+}
+
 void MetaDBOVariableConfigurationDialog::itemSelectedSlot(const QString& text)
 {
     string item_name = text.toStdString();
@@ -110,9 +123,15 @@ void MetaDBOVariableConfigurationDialog::itemSelectedSlot(const QString& text)
 
     assert (detail_widget_);
 
-    assert (dbo_man_.existsMetaVariable(item_name));
-
-    detail_widget_->show(dbo_man_.metaVariable(item_name));
+    if (!item_name.size())
+    {
+        detail_widget_->clear();
+    }
+    else
+    {
+        assert (dbo_man_.existsMetaVariable(item_name));
+        detail_widget_->show(dbo_man_.metaVariable(item_name));
+    }
 }
 
 void MetaDBOVariableConfigurationDialog::addAllMetaVariablesSlot()

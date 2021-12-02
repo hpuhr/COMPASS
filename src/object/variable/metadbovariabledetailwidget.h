@@ -16,8 +16,7 @@ class MetaDBOVariableDetailWidget : public QWidget
     Q_OBJECT
 
 public slots:
-    void nameEditedSlot(const QString& name);
-    void commentEditedSlot();
+    void nameEditedSlot();
     void variableChangedSlot();
 
     void deleteVariableSlot();
@@ -26,6 +25,7 @@ public:
     MetaDBOVariableDetailWidget(DBObjectManager& dbo_man, QWidget* parent = nullptr);
 
     void show (MetaDBOVariable& meta_var);
+    void clear();
 
 private:
     DBObjectManager& dbo_man_;
