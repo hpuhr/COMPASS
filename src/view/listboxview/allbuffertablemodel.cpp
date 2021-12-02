@@ -300,7 +300,7 @@ QVariant AllBufferTableModel::data(const QModelIndex& index, int role) const
             else if (data_type == PropertyDataType::UINT)
             {
                 assert(buffer->has<unsigned int>(property_name));
-                null = buffer->get<unsigned int>(properties.at(col).name()).isNull(buffer_index);
+                null = buffer->get<unsigned int>(property_name).isNull(buffer_index);
                 if (!null)
                 {
                     if (use_presentation_)

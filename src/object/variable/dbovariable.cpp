@@ -736,45 +736,21 @@ std::string DBOVariable::getDataSourcesAsString(const std::string& value) const
 {
     assert(db_object_);
 
-    TODO_ASSERT
+    DBObjectManager& dbo_man = COMPASS::instance().objectManager();
 
+    unsigned int ds_id = stoi(value);
 
-//    if (db_object_->hasDataSources())
-//    {
-//        for (auto ds_it = db_object_->dsBegin(); ds_it != db_object_->dsEnd(); ++ds_it)
-//        {
-//            if (std::to_string(ds_it->first) == value)
-//            {
-//                if (ds_it->second.hasShortName())
-//                    return ds_it->second.shortName();
-//                else
-//                    return ds_it->second.name();
-//            }
-//        }
-//        // not found, return original
-//    }
+    if (dbo_man.hasDataSource(ds_id))
+    {
+        DBContent::DBDataSource& ds = dbo_man.dataSource(ds_id);
 
-//    // search for data sources in other dbos
-//    for (auto& dbo_it : COMPASS::instance().objectManager())
-//    {
-//        if (dbo_it.second->hasDataSources())
-//        {
-//            for (auto ds_it = dbo_it.second->dsBegin(); ds_it != dbo_it.second->dsEnd(); ++ds_it)
-//            {
-//                if (std::to_string(ds_it->first) == value)
-//                {
-//                    if (ds_it->second.hasShortName())
-//                        return ds_it->second.shortName();
-//                    else
-//                        return ds_it->second.name();
-//                }
-//            }
-//            // not found, return original
-//        }
-//    }
+        if (ds.hasShortName())
+            return ds.shortName();
+        else
+            return ds.name();
+    }
 
     // has no datasources, return original
-    //loginf << "DBOVariable: getDataSourcesAsString: ds '" << value << "' not found";
 
     return value;
 }
