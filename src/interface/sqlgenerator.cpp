@@ -118,14 +118,7 @@ string SQLGenerator::getCreateTableStatement(const DBObject& object)
         data_type = var_it->dbDataTypeString();
 
         if (var_it->isKey())
-        {
-            if (data_type == "int")  // mysql defaults autoincrement
-                ss << " INTEGER PRIMARY KEY AUTOINCREMENT";
-            else
-                ss << " " << data_type << " PRIMARY KEY";
-
-            ss << " NOT NULL";
-        }
+            ss << " INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL";
         else
             ss << " " << data_type;
 
