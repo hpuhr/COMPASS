@@ -4,6 +4,7 @@
         "limit_min": 0,
         "order_variable__name": "tod",
         "order_variable_dbo_name": "Meta",
+        "order_variable_name": "",
         "use_filters": false,
         "use_limit": false,
         "use_order": true,
@@ -45,7 +46,7 @@
         "DBContentConfigurationDataSource": {
             "DBContentConfigurationDataSourceADSB0": {
                 "parameters": {
-                    "db_content_type": "ADSB",
+                    "ds_type": "ADSB",
                     "has_short_name": true,
                     "info": {},
                     "name": "AWAM-ADS-B",
@@ -56,7 +57,7 @@
             },
             "DBContentConfigurationDataSourceADSB1": {
                 "parameters": {
-                    "db_content_type": "ADSB",
+                    "ds_type": "ADSB",
                     "has_short_name": false,
                     "info": {},
                     "name": "KITYRA",
@@ -67,7 +68,7 @@
             },
             "DBContentConfigurationDataSourceMLAT0": {
                 "parameters": {
-                    "db_content_type": "MLAT",
+                    "ds_type": "MLAT",
                     "has_short_name": true,
                     "info": {},
                     "name": "AWAM-VIE",
@@ -78,7 +79,7 @@
             },
             "DBContentConfigurationDataSourceMLAT1": {
                 "parameters": {
-                    "db_content_type": "MLAT",
+                    "ds_type": "MLAT",
                     "has_short_name": true,
                     "info": {},
                     "name": "AWAM-LNZ",
@@ -89,7 +90,7 @@
             },
             "DBContentConfigurationDataSourceMLAT2": {
                 "parameters": {
-                    "db_content_type": "MLAT",
+                    "ds_type": "MLAT",
                     "has_short_name": true,
                     "info": {},
                     "name": "AWAM-SBG",
@@ -100,7 +101,7 @@
             },
             "DBContentConfigurationDataSourceMLAT3": {
                 "parameters": {
-                    "db_content_type": "MLAT",
+                    "ds_type": "MLAT",
                     "has_short_name": true,
                     "info": {},
                     "name": "AWAM-IN",
@@ -111,7 +112,7 @@
             },
             "DBContentConfigurationDataSourceMLAT4": {
                 "parameters": {
-                    "db_content_type": "MLAT",
+                    "ds_type": "MLAT",
                     "has_short_name": true,
                     "info": {},
                     "name": "AWAM-KFT",
@@ -122,7 +123,7 @@
             },
             "DBContentConfigurationDataSourceMLAT5": {
                 "parameters": {
-                    "db_content_type": "MLAT",
+                    "ds_type": "MLAT",
                     "has_short_name": true,
                     "info": {},
                     "name": "AWAM-GRZ",
@@ -133,7 +134,7 @@
             },
             "DBContentConfigurationDataSourceMLAT6": {
                 "parameters": {
-                    "db_content_type": "MLAT",
+                    "ds_type": "MLAT",
                     "has_short_name": true,
                     "info": {},
                     "name": "AWAM-LOWER-WEST",
@@ -144,7 +145,7 @@
             },
             "DBContentConfigurationDataSourceMLAT7": {
                 "parameters": {
-                    "db_content_type": "MLAT",
+                    "ds_type": "MLAT",
                     "has_short_name": true,
                     "info": {},
                     "name": "AWAM-LOWER-EAST",
@@ -155,7 +156,7 @@
             },
             "DBContentConfigurationDataSourceMLAT8": {
                 "parameters": {
-                    "db_content_type": "MLAT",
+                    "ds_type": "MLAT",
                     "has_short_name": true,
                     "info": {},
                     "name": "AWAM-UPPER",
@@ -166,7 +167,7 @@
             },
             "DBContentConfigurationDataSourceMLAT9": {
                 "parameters": {
-                    "db_content_type": "MLAT",
+                    "ds_type": "MLAT",
                     "has_short_name": true,
                     "info": {},
                     "name": "AWAM-GND",
@@ -177,7 +178,7 @@
             },
             "DBContentConfigurationDataSourceRadar0": {
                 "parameters": {
-                    "db_content_type": "Radar",
+                    "ds_type": "Radar",
                     "has_short_name": true,
                     "info": {
                         "altitude": 667.0,
@@ -192,7 +193,7 @@
             },
             "DBContentConfigurationDataSourceRadar1": {
                 "parameters": {
-                    "db_content_type": "Radar",
+                    "ds_type": "Radar",
                     "has_short_name": true,
                     "info": {
                         "altitude": 323.0,
@@ -207,7 +208,7 @@
             },
             "DBContentConfigurationDataSourceRadar10": {
                 "parameters": {
-                    "db_content_type": "Radar",
+                    "ds_type": "Radar",
                     "has_short_name": true,
                     "info": {
                         "altitude": 280.0,
@@ -222,7 +223,7 @@
             },
             "DBContentConfigurationDataSourceRadar11": {
                 "parameters": {
-                    "db_content_type": "Radar",
+                    "ds_type": "Radar",
                     "has_short_name": true,
                     "info": {
                         "altitude": 880.0,
@@ -237,7 +238,7 @@
             },
             "DBContentConfigurationDataSourceRadar12": {
                 "parameters": {
-                    "db_content_type": "Radar",
+                    "ds_type": "Radar",
                     "has_short_name": true,
                     "info": {
                         "altitude": 587.0,
@@ -252,7 +253,7 @@
             },
             "DBContentConfigurationDataSourceRadar13": {
                 "parameters": {
-                    "db_content_type": "Radar",
+                    "ds_type": "Radar",
                     "has_short_name": true,
                     "info": {
                         "altitude": 410.0,
@@ -267,7 +268,7 @@
             },
             "DBContentConfigurationDataSourceRadar14": {
                 "parameters": {
-                    "db_content_type": "Radar",
+                    "ds_type": "Radar",
                     "has_short_name": true,
                     "info": {
                         "altitude": 183.0,
@@ -282,7 +283,7 @@
             },
             "DBContentConfigurationDataSourceRadar15": {
                 "parameters": {
-                    "db_content_type": "Radar",
+                    "ds_type": "Radar",
                     "has_short_name": true,
                     "info": {
                         "altitude": 183.0,
@@ -297,7 +298,7 @@
             },
             "DBContentConfigurationDataSourceRadar16": {
                 "parameters": {
-                    "db_content_type": "Radar",
+                    "ds_type": "Radar",
                     "has_short_name": true,
                     "info": {
                         "altitude": 497.0,
@@ -312,7 +313,7 @@
             },
             "DBContentConfigurationDataSourceRadar17": {
                 "parameters": {
-                    "db_content_type": "Radar",
+                    "ds_type": "Radar",
                     "has_sac": true,
                     "has_short_name": true,
                     "info": {
@@ -328,7 +329,7 @@
             },
             "DBContentConfigurationDataSourceRadar18": {
                 "parameters": {
-                    "db_content_type": "Radar",
+                    "ds_type": "Radar",
                     "has_short_name": true,
                     "info": {
                         "altitude": 220.0,
@@ -343,7 +344,7 @@
             },
             "DBContentConfigurationDataSourceRadar19": {
                 "parameters": {
-                    "db_content_type": "Radar",
+                    "ds_type": "Radar",
                     "has_short_name": true,
                     "info": {
                         "altitude": 91.0,
@@ -358,7 +359,7 @@
             },
             "DBContentConfigurationDataSourceRadar2": {
                 "parameters": {
-                    "db_content_type": "Radar",
+                    "ds_type": "Radar",
                     "has_short_name": true,
                     "info": {
                         "altitude": 226.0,
@@ -373,7 +374,7 @@
             },
             "DBContentConfigurationDataSourceRadar20": {
                 "parameters": {
-                    "db_content_type": "Radar",
+                    "ds_type": "Radar",
                     "has_short_name": true,
                     "info": {
                         "altitude": 309.0,
@@ -388,7 +389,7 @@
             },
             "DBContentConfigurationDataSourceRadar21": {
                 "parameters": {
-                    "db_content_type": "Radar",
+                    "ds_type": "Radar",
                     "has_short_name": true,
                     "info": {
                         "altitude": 110.0,
@@ -403,7 +404,7 @@
             },
             "DBContentConfigurationDataSourceRadar22": {
                 "parameters": {
-                    "db_content_type": "Radar",
+                    "ds_type": "Radar",
                     "has_short_name": true,
                     "info": {
                         "altitude": 250.0,
@@ -418,7 +419,7 @@
             },
             "DBContentConfigurationDataSourceRadar3": {
                 "parameters": {
-                    "db_content_type": "Radar",
+                    "ds_type": "Radar",
                     "has_short_name": true,
                     "info": {
                         "altitude": 2203.0,
@@ -433,7 +434,7 @@
             },
             "DBContentConfigurationDataSourceRadar4": {
                 "parameters": {
-                    "db_content_type": "Radar",
+                    "ds_type": "Radar",
                     "has_short_name": true,
                     "info": {
                         "altitude": 672.0,
@@ -448,7 +449,7 @@
             },
             "DBContentConfigurationDataSourceRadar5": {
                 "parameters": {
-                    "db_content_type": "Radar",
+                    "ds_type": "Radar",
                     "has_short_name": true,
                     "info": {
                         "altitude": 461.0,
@@ -463,7 +464,7 @@
             },
             "DBContentConfigurationDataSourceRadar6": {
                 "parameters": {
-                    "db_content_type": "Radar",
+                    "ds_type": "Radar",
                     "has_short_name": true,
                     "info": {
                         "altitude": 821.0,
@@ -478,7 +479,7 @@
             },
             "DBContentConfigurationDataSourceRadar7": {
                 "parameters": {
-                    "db_content_type": "Radar",
+                    "ds_type": "Radar",
                     "has_short_name": true,
                     "info": {
                         "altitude": 859.0,
@@ -493,7 +494,7 @@
             },
             "DBContentConfigurationDataSourceRadar8": {
                 "parameters": {
-                    "db_content_type": "Radar",
+                    "ds_type": "Radar",
                     "has_short_name": true,
                     "info": {
                         "altitude": 461.0,
@@ -508,7 +509,7 @@
             },
             "DBContentConfigurationDataSourceRadar9": {
                 "parameters": {
-                    "db_content_type": "Radar",
+                    "ds_type": "Radar",
                     "has_short_name": true,
                     "info": {
                         "altitude": 870.0,
@@ -523,7 +524,7 @@
             },
             "DBContentConfigurationDataSourceRefTraj0": {
                 "parameters": {
-                    "db_content_type": "RefTraj",
+                    "ds_type": "RefTraj",
                     "has_short_name": false,
                     "info": {},
                     "name": "GPS Trail",
@@ -534,7 +535,7 @@
             },
             "DBContentConfigurationDataSourceTracker0": {
                 "parameters": {
-                    "db_content_type": "Tracker",
+                    "ds_type": "Tracker",
                     "has_short_name": false,
                     "info": {},
                     "name": "MSTS",
@@ -545,7 +546,7 @@
             },
             "DBContentConfigurationDataSourceTracker1": {
                 "parameters": {
-                    "db_content_type": "Tracker",
+                    "ds_type": "Tracker",
                     "has_short_name": false,
                     "info": {},
                     "name": "ARTAS",
@@ -556,7 +557,7 @@
             },
             "DBContentConfigurationDataSourceTracker2": {
                 "parameters": {
-                    "db_content_type": "Tracker",
+                    "ds_type": "Tracker",
                     "has_short_name": false,
                     "info": {},
                     "name": "MRTS",
@@ -567,7 +568,7 @@
             },
             "DBContentConfigurationDataSourceTracker3": {
                 "parameters": {
-                    "db_content_type": "Tracker",
+                    "ds_type": "Tracker",
                     "has_short_name": false,
                     "info": {},
                     "name": "ARTAS_OPS",
@@ -578,7 +579,7 @@
             },
             "DBContentConfigurationDataSourceTracker4": {
                 "parameters": {
-                    "db_content_type": "Tracker",
+                    "ds_type": "Tracker",
                     "has_short_name": false,
                     "info": {},
                     "name": "ARTAS_NEW",
@@ -589,773 +590,1375 @@
             }
         },
         "MetaDBOVariable": {
-            "MetaDBOVariableacas_aircraft_identification0": {
+            "MetaDBOVariableARTAS Hash0": {
                 "parameters": {
-                    "description": "",
-                    "name": "acas_aircraft_identification"
+                    "name": "ARTAS Hash"
                 },
                 "sub_configs": {
                     "DBOVariableDefinition": {
-                        "DBOVariableDefinitionMLATacas_aircraft_identification0": {
+                        "DBOVariableDefinitionCAT001ARTAS Hash0": {
                             "parameters": {
-                                "dbo_name": "MLAT",
-                                "dbo_variable_name": "acas_aircraft_identification"
+                                "dbo_name": "CAT001",
+                                "dbo_variable_name": "ARTAS Hash"
                             }
                         },
-                        "DBOVariableDefinitionRadaracas_aircraft_identification0": {
+                        "DBOVariableDefinitionCAT020ARTAS Hash0": {
                             "parameters": {
-                                "dbo_name": "Radar",
-                                "dbo_variable_name": "acas_aircraft_identification"
+                                "dbo_name": "CAT020",
+                                "dbo_variable_name": "ARTAS Hash"
+                            }
+                        },
+                        "DBOVariableDefinitionCAT021ARTAS Hash0": {
+                            "parameters": {
+                                "dbo_name": "CAT021",
+                                "dbo_variable_name": "ARTAS Hash"
+                            }
+                        },
+                        "DBOVariableDefinitionCAT048ARTAS Hash0": {
+                            "parameters": {
+                                "dbo_name": "CAT048",
+                                "dbo_variable_name": "ARTAS Hash"
                             }
                         }
                     }
                 }
             },
-            "MetaDBOVariableacas_alt_capability_ft0": {
+            "MetaDBOVariableAircraft Address0": {
                 "parameters": {
-                    "description": "",
-                    "name": "acas_alt_capability_ft"
+                    "name": "Aircraft Address"
                 },
                 "sub_configs": {
                     "DBOVariableDefinition": {
-                        "DBOVariableDefinitionMLATacas_alt_capability_ft0": {
+                        "DBOVariableDefinitionCAT020Aircraft Address0": {
                             "parameters": {
-                                "dbo_name": "MLAT",
-                                "dbo_variable_name": "acas_alt_capability_ft"
+                                "dbo_name": "CAT020",
+                                "dbo_variable_name": "Aircraft Address"
                             }
                         },
-                        "DBOVariableDefinitionRadaracas_alt_capability_ft0": {
+                        "DBOVariableDefinitionCAT021Aircraft Address0": {
                             "parameters": {
-                                "dbo_name": "Radar",
-                                "dbo_variable_name": "acas_alt_capability_ft"
+                                "dbo_name": "CAT021",
+                                "dbo_variable_name": "Aircraft Address"
+                            }
+                        },
+                        "DBOVariableDefinitionCAT048Aircraft Address0": {
+                            "parameters": {
+                                "dbo_name": "CAT048",
+                                "dbo_variable_name": "Aircraft Address"
+                            }
+                        },
+                        "DBOVariableDefinitionCAT062Aircraft Address0": {
+                            "parameters": {
+                                "dbo_name": "CAT062",
+                                "dbo_variable_name": "Aircraft Address"
                             }
                         }
                     }
                 }
             },
-            "MetaDBOVariableacas_bds_1_a0": {
+            "MetaDBOVariableAircraft Identification0": {
                 "parameters": {
-                    "description": "",
-                    "name": "acas_bds_1_a"
+                    "name": "Aircraft Identification"
                 },
                 "sub_configs": {
                     "DBOVariableDefinition": {
-                        "DBOVariableDefinitionMLATacas_bds_1_a0": {
+                        "DBOVariableDefinitionCAT020Aircraft Identification0": {
                             "parameters": {
-                                "dbo_name": "MLAT",
-                                "dbo_variable_name": "acas_bds_1_a"
+                                "dbo_name": "CAT020",
+                                "dbo_variable_name": "Aircraft Identification"
                             }
                         },
-                        "DBOVariableDefinitionRadaracas_bds_1_a0": {
+                        "DBOVariableDefinitionCAT021Aircraft Identification0": {
                             "parameters": {
-                                "dbo_name": "Radar",
-                                "dbo_variable_name": "acas_bds_1_a"
+                                "dbo_name": "CAT021",
+                                "dbo_variable_name": "Aircraft Identification"
+                            }
+                        },
+                        "DBOVariableDefinitionCAT048Aircraft Identification0": {
+                            "parameters": {
+                                "dbo_name": "CAT048",
+                                "dbo_variable_name": "Aircraft Identification"
+                            }
+                        },
+                        "DBOVariableDefinitionCAT062Aircraft Identification0": {
+                            "parameters": {
+                                "dbo_name": "CAT062",
+                                "dbo_variable_name": "Aircraft Identification"
                             }
                         }
                     }
                 }
             },
-            "MetaDBOVariableacas_bds_1_b0": {
+            "MetaDBOVariableAzimuth0": {
                 "parameters": {
-                    "description": "",
-                    "name": "acas_bds_1_b"
+                    "name": "Azimuth"
                 },
                 "sub_configs": {
                     "DBOVariableDefinition": {
-                        "DBOVariableDefinitionMLATacas_bds_1_b0": {
+                        "DBOVariableDefinitionCAT001Azimuth0": {
                             "parameters": {
-                                "dbo_name": "MLAT",
-                                "dbo_variable_name": "acas_bds_1_b"
+                                "dbo_name": "CAT001",
+                                "dbo_variable_name": "Azimuth"
                             }
                         },
-                        "DBOVariableDefinitionRadaracas_bds_1_b0": {
+                        "DBOVariableDefinitionCAT048Azimuth0": {
                             "parameters": {
-                                "dbo_name": "Radar",
-                                "dbo_variable_name": "acas_bds_1_b"
+                                "dbo_name": "CAT048",
+                                "dbo_variable_name": "Azimuth"
                             }
                         }
                     }
                 }
             },
-            "MetaDBOVariableacas_comm_capability0": {
+            "MetaDBOVariableDS ID0": {
                 "parameters": {
-                    "description": "",
-                    "name": "acas_comm_capability"
+                    "name": "DS ID"
                 },
                 "sub_configs": {
                     "DBOVariableDefinition": {
-                        "DBOVariableDefinitionMLATacas_comm_capability0": {
+                        "DBOVariableDefinitionCAT001DS ID0": {
                             "parameters": {
-                                "dbo_name": "MLAT",
-                                "dbo_variable_name": "acas_comm_capability"
+                                "dbo_name": "CAT001",
+                                "dbo_variable_name": "DS ID"
                             }
                         },
-                        "DBOVariableDefinitionRadaracas_comm_capability0": {
+                        "DBOVariableDefinitionCAT020DS ID0": {
                             "parameters": {
-                                "dbo_name": "Radar",
-                                "dbo_variable_name": "acas_comm_capability"
+                                "dbo_name": "CAT020",
+                                "dbo_variable_name": "DS ID"
+                            }
+                        },
+                        "DBOVariableDefinitionCAT021DS ID0": {
+                            "parameters": {
+                                "dbo_name": "CAT021",
+                                "dbo_variable_name": "DS ID"
+                            }
+                        },
+                        "DBOVariableDefinitionCAT048DS ID0": {
+                            "parameters": {
+                                "dbo_name": "CAT048",
+                                "dbo_variable_name": "DS ID"
+                            }
+                        },
+                        "DBOVariableDefinitionCAT062DS ID0": {
+                            "parameters": {
+                                "dbo_name": "CAT062",
+                                "dbo_variable_name": "DS ID"
                             }
                         }
                     }
                 }
             },
-            "MetaDBOVariableacas_flight_status0": {
+            "MetaDBOVariableFFT0": {
                 "parameters": {
-                    "description": "",
-                    "name": "acas_flight_status"
+                    "name": "FFT"
                 },
                 "sub_configs": {
                     "DBOVariableDefinition": {
-                        "DBOVariableDefinitionMLATacas_flight_status0": {
+                        "DBOVariableDefinitionCAT001FFT0": {
                             "parameters": {
-                                "dbo_name": "MLAT",
-                                "dbo_variable_name": "acas_flight_status"
+                                "dbo_name": "CAT001",
+                                "dbo_variable_name": "FFT"
                             }
                         },
-                        "DBOVariableDefinitionRadaracas_flight_status0": {
+                        "DBOVariableDefinitionCAT020FFT0": {
                             "parameters": {
-                                "dbo_name": "Radar",
-                                "dbo_variable_name": "acas_flight_status"
+                                "dbo_name": "CAT020",
+                                "dbo_variable_name": "FFT"
+                            }
+                        },
+                        "DBOVariableDefinitionCAT021FFT0": {
+                            "parameters": {
+                                "dbo_name": "CAT021",
+                                "dbo_variable_name": "FFT"
+                            }
+                        },
+                        "DBOVariableDefinitionCAT048FFT0": {
+                            "parameters": {
+                                "dbo_name": "CAT048",
+                                "dbo_variable_name": "FFT"
                             }
                         }
                     }
                 }
             },
-            "MetaDBOVariableacas_modes_service0": {
+            "MetaDBOVariableFlight Status0": {
                 "parameters": {
-                    "description": "",
-                    "name": "acas_modes_service"
+                    "name": "Flight Status"
                 },
                 "sub_configs": {
                     "DBOVariableDefinition": {
-                        "DBOVariableDefinitionMLATacas_modes_service0": {
+                        "DBOVariableDefinitionCAT020Flight Status0": {
                             "parameters": {
-                                "dbo_name": "MLAT",
-                                "dbo_variable_name": "acas_modes_service"
+                                "dbo_name": "CAT020",
+                                "dbo_variable_name": "Flight Status"
                             }
                         },
-                        "DBOVariableDefinitionRadaracas_modes_service0": {
+                        "DBOVariableDefinitionCAT048Flight Status0": {
                             "parameters": {
-                                "dbo_name": "Radar",
-                                "dbo_variable_name": "acas_modes_service"
+                                "dbo_name": "CAT048",
+                                "dbo_variable_name": "Flight Status"
                             }
                         }
                     }
                 }
             },
-            "MetaDBOVariablealt_baro_ft0": {
+            "MetaDBOVariableGround Bit0": {
                 "parameters": {
-                    "description": "",
-                    "name": "alt_baro_ft"
+                    "name": "Ground Bit"
                 },
                 "sub_configs": {
                     "DBOVariableDefinition": {
-                        "DBOVariableDefinitionADSBalt_baro_ft0": {
+                        "DBOVariableDefinitionCAT020Ground Bit0": {
                             "parameters": {
-                                "dbo_name": "ADSB",
-                                "dbo_variable_name": "alt_baro_ft"
+                                "dbo_name": "CAT020",
+                                "dbo_variable_name": "Ground Bit"
                             }
                         },
-                        "DBOVariableDefinitionMLATalt_baro_ft0": {
+                        "DBOVariableDefinitionCAT021Ground Bit0": {
                             "parameters": {
-                                "dbo_name": "MLAT",
-                                "dbo_variable_name": "alt_baro_ft"
-                            }
-                        },
-                        "DBOVariableDefinitionRadaralt_baro_ft0": {
-                            "parameters": {
-                                "dbo_name": "Radar",
-                                "dbo_variable_name": "alt_baro_ft"
-                            }
-                        },
-                        "DBOVariableDefinitionRefTrajalt_baro_ft0": {
-                            "parameters": {
-                                "dbo_name": "RefTraj",
-                                "dbo_variable_name": "alt_baro_ft"
-                            }
-                        },
-                        "DBOVariableDefinitionTrackeralt_baro_ft0": {
-                            "parameters": {
-                                "dbo_name": "Tracker",
-                                "dbo_variable_name": "alt_baro_ft"
+                                "dbo_name": "CAT021",
+                                "dbo_variable_name": "Ground Bit"
                             }
                         }
                     }
                 }
             },
-            "MetaDBOVariablealt_baro_g0": {
+            "MetaDBOVariableLatitude StdDev0": {
                 "parameters": {
-                    "description": "",
-                    "name": "alt_baro_g"
+                    "name": "Latitude StdDev"
                 },
                 "sub_configs": {
                     "DBOVariableDefinition": {
-                        "DBOVariableDefinitionMLATalt_baro_g0": {
+                        "DBOVariableDefinitionCAT020Latitude StdDev0": {
                             "parameters": {
-                                "dbo_name": "MLAT",
-                                "dbo_variable_name": "alt_baro_g"
+                                "dbo_name": "CAT020",
+                                "dbo_variable_name": "Latitude StdDev"
                             }
                         },
-                        "DBOVariableDefinitionRadaralt_baro_g0": {
+                        "DBOVariableDefinitionCAT062Latitude StdDev0": {
                             "parameters": {
-                                "dbo_name": "Radar",
-                                "dbo_variable_name": "alt_baro_g"
+                                "dbo_name": "CAT062",
+                                "dbo_variable_name": "Latitude StdDev"
                             }
                         }
                     }
                 }
             },
-            "MetaDBOVariablealt_baro_v0": {
+            "MetaDBOVariableLatitude0": {
                 "parameters": {
-                    "description": "",
-                    "name": "alt_baro_v"
+                    "name": "Latitude"
                 },
                 "sub_configs": {
                     "DBOVariableDefinition": {
-                        "DBOVariableDefinitionMLATalt_baro_v0": {
+                        "DBOVariableDefinitionCAT001Latitude0": {
                             "parameters": {
-                                "dbo_name": "MLAT",
-                                "dbo_variable_name": "alt_baro_v"
+                                "dbo_name": "CAT001",
+                                "dbo_variable_name": "Latitude"
                             }
                         },
-                        "DBOVariableDefinitionRadaralt_baro_v0": {
+                        "DBOVariableDefinitionCAT020Latitude0": {
                             "parameters": {
-                                "dbo_name": "Radar",
-                                "dbo_variable_name": "alt_baro_v"
+                                "dbo_name": "CAT020",
+                                "dbo_variable_name": "Latitude"
+                            }
+                        },
+                        "DBOVariableDefinitionCAT021Latitude0": {
+                            "parameters": {
+                                "dbo_name": "CAT021",
+                                "dbo_variable_name": "Latitude"
+                            }
+                        },
+                        "DBOVariableDefinitionCAT048Latitude0": {
+                            "parameters": {
+                                "dbo_name": "CAT048",
+                                "dbo_variable_name": "Latitude"
+                            }
+                        },
+                        "DBOVariableDefinitionCAT062Latitude0": {
+                            "parameters": {
+                                "dbo_name": "CAT062",
+                                "dbo_variable_name": "Latitude"
                             }
                         }
                     }
                 }
             },
-            "MetaDBOVariablealt_geo_ft0": {
+            "MetaDBOVariableLongitude StdDev0": {
                 "parameters": {
-                    "description": "",
-                    "name": "alt_geo_ft"
+                    "name": "Longitude StdDev"
                 },
                 "sub_configs": {
                     "DBOVariableDefinition": {
-                        "DBOVariableDefinitionADSBalt_geo_ft0": {
+                        "DBOVariableDefinitionCAT020Longitude StdDev0": {
                             "parameters": {
-                                "dbo_name": "ADSB",
-                                "dbo_variable_name": "alt_geo_ft"
+                                "dbo_name": "CAT020",
+                                "dbo_variable_name": "Longitude StdDev"
                             }
                         },
-                        "DBOVariableDefinitionRefTrajalt_geo_ft0": {
+                        "DBOVariableDefinitionCAT062Longitude StdDev0": {
                             "parameters": {
-                                "dbo_name": "RefTraj",
-                                "dbo_variable_name": "alt_geo_ft"
-                            }
-                        },
-                        "DBOVariableDefinitionTrackeralt_geo_ft0": {
-                            "parameters": {
-                                "dbo_name": "Tracker",
-                                "dbo_variable_name": "alt_geo_ft"
+                                "dbo_name": "CAT062",
+                                "dbo_variable_name": "Longitude StdDev"
                             }
                         }
                     }
                 }
             },
-            "MetaDBOVariablecalc_alt_geo_ft0": {
+            "MetaDBOVariableLongitude0": {
                 "parameters": {
-                    "description": "",
-                    "name": "calc_alt_geo_ft"
+                    "name": "Longitude"
                 },
                 "sub_configs": {
                     "DBOVariableDefinition": {
-                        "DBOVariableDefinitionADSBcalc_alt_geo_ft0": {
+                        "DBOVariableDefinitionCAT001Longitude0": {
                             "parameters": {
-                                "dbo_name": "ADSB",
-                                "dbo_variable_name": "calc_alt_geo_ft"
+                                "dbo_name": "CAT001",
+                                "dbo_variable_name": "Longitude"
                             }
                         },
-                        "DBOVariableDefinitionMLATcalc_alt_geo_ft0": {
+                        "DBOVariableDefinitionCAT020Longitude0": {
                             "parameters": {
-                                "dbo_name": "MLAT",
-                                "dbo_variable_name": "calc_alt_geo_ft"
+                                "dbo_name": "CAT020",
+                                "dbo_variable_name": "Longitude"
                             }
                         },
-                        "DBOVariableDefinitionRadarcalc_alt_geo_ft0": {
+                        "DBOVariableDefinitionCAT021Longitude0": {
                             "parameters": {
-                                "dbo_name": "Radar",
-                                "dbo_variable_name": "calc_alt_geo_ft"
+                                "dbo_name": "CAT021",
+                                "dbo_variable_name": "Longitude"
                             }
                         },
-                        "DBOVariableDefinitionTrackercalc_alt_geo_ft0": {
+                        "DBOVariableDefinitionCAT048Longitude0": {
                             "parameters": {
-                                "dbo_name": "Tracker",
-                                "dbo_variable_name": "calc_alt_geo_ft"
+                                "dbo_name": "CAT048",
+                                "dbo_variable_name": "Longitude"
+                            }
+                        },
+                        "DBOVariableDefinitionCAT062Longitude0": {
+                            "parameters": {
+                                "dbo_name": "CAT062",
+                                "dbo_variable_name": "Longitude"
                             }
                         }
                     }
                 }
             },
-            "MetaDBOVariablecalc_vertical_rate_ftm0": {
+            "MetaDBOVariableMilitary Emergency0": {
                 "parameters": {
-                    "description": "",
-                    "name": "calc_vertical_rate_ftm"
+                    "name": "Military Emergency"
                 },
                 "sub_configs": {
                     "DBOVariableDefinition": {
-                        "DBOVariableDefinitionRefTrajcalc_vertical_rate_ftm0": {
+                        "DBOVariableDefinitionCAT001Military Emergency0": {
                             "parameters": {
-                                "dbo_name": "RefTraj",
-                                "dbo_variable_name": "calc_vertical_rate_ftm"
+                                "dbo_name": "CAT001",
+                                "dbo_variable_name": "Military Emergency"
                             }
                         },
-                        "DBOVariableDefinitionTrackercalc_vertical_rate_ftm0": {
+                        "DBOVariableDefinitionCAT048Military Emergency0": {
                             "parameters": {
-                                "dbo_name": "Tracker",
-                                "dbo_variable_name": "calc_vertical_rate_ftm"
+                                "dbo_name": "CAT048",
+                                "dbo_variable_name": "Military Emergency"
+                            }
+                        },
+                        "DBOVariableDefinitionCAT062Military Emergency0": {
+                            "parameters": {
+                                "dbo_name": "CAT062",
+                                "dbo_variable_name": "Military Emergency"
                             }
                         }
                     }
                 }
             },
-            "MetaDBOVariablecallsign0": {
+            "MetaDBOVariableMilitary Identification0": {
                 "parameters": {
-                    "description": "",
-                    "name": "callsign"
+                    "name": "Military Identification"
                 },
                 "sub_configs": {
                     "DBOVariableDefinition": {
-                        "DBOVariableDefinitionADSBcallsign0": {
+                        "DBOVariableDefinitionCAT001Military Identification0": {
                             "parameters": {
-                                "dbo_name": "ADSB",
-                                "dbo_variable_name": "callsign"
+                                "dbo_name": "CAT001",
+                                "dbo_variable_name": "Military Identification"
                             }
                         },
-                        "DBOVariableDefinitionMLATcallsign0": {
+                        "DBOVariableDefinitionCAT048Military Identification0": {
                             "parameters": {
-                                "dbo_name": "MLAT",
-                                "dbo_variable_name": "callsign"
+                                "dbo_name": "CAT048",
+                                "dbo_variable_name": "Military Identification"
                             }
                         },
-                        "DBOVariableDefinitionRadarcallsign0": {
+                        "DBOVariableDefinitionCAT062Military Identification0": {
                             "parameters": {
-                                "dbo_name": "Radar",
-                                "dbo_variable_name": "callsign"
-                            }
-                        },
-                        "DBOVariableDefinitionRefTrajcallsign0": {
-                            "parameters": {
-                                "dbo_name": "RefTraj",
-                                "dbo_variable_name": "callsign"
-                            }
-                        },
-                        "DBOVariableDefinitionTrackercallsign0": {
-                            "parameters": {
-                                "dbo_name": "Tracker",
-                                "dbo_variable_name": "callsign"
+                                "dbo_name": "CAT062",
+                                "dbo_variable_name": "Military Identification"
                             }
                         }
                     }
                 }
             },
-            "MetaDBOVariablecat0": {
+            "MetaDBOVariableMode 3/A Age0": {
                 "parameters": {
-                    "description": "",
-                    "name": "cat"
+                    "name": "Mode 3/A Age"
                 },
                 "sub_configs": {
                     "DBOVariableDefinition": {
-                        "DBOVariableDefinitionADSBcat0": {
+                        "DBOVariableDefinitionCAT021Mode 3/A Age0": {
                             "parameters": {
-                                "dbo_name": "ADSB",
-                                "dbo_variable_name": "cat"
+                                "dbo_name": "CAT021",
+                                "dbo_variable_name": "Mode 3/A Age"
                             }
                         },
-                        "DBOVariableDefinitionMLATcat0": {
+                        "DBOVariableDefinitionCAT062Mode 3/A Age0": {
                             "parameters": {
-                                "dbo_name": "MLAT",
-                                "dbo_variable_name": "cat"
-                            }
-                        },
-                        "DBOVariableDefinitionRadarcat0": {
-                            "parameters": {
-                                "dbo_name": "Radar",
-                                "dbo_variable_name": "cat"
-                            }
-                        },
-                        "DBOVariableDefinitionTrackercat0": {
-                            "parameters": {
-                                "dbo_name": "Tracker",
-                                "dbo_variable_name": "cat"
+                                "dbo_name": "CAT062",
+                                "dbo_variable_name": "Mode 3/A Age"
                             }
                         }
                     }
                 }
             },
-            "MetaDBOVariablecivil_emergency0": {
+            "MetaDBOVariableMode 3/A Code0": {
                 "parameters": {
-                    "description": "",
-                    "name": "civil_emergency"
+                    "name": "Mode 3/A Code"
                 },
                 "sub_configs": {
                     "DBOVariableDefinition": {
-                        "DBOVariableDefinitionRadarcivil_emergency0": {
+                        "DBOVariableDefinitionCAT001Mode 3/A Code0": {
                             "parameters": {
-                                "dbo_name": "Radar",
-                                "dbo_variable_name": "civil_emergency"
+                                "dbo_name": "CAT001",
+                                "dbo_variable_name": "Mode 3/A Code"
                             }
                         },
-                        "DBOVariableDefinitionRefTrajcivil_emergency0": {
+                        "DBOVariableDefinitionCAT020Mode 3/A Code0": {
                             "parameters": {
-                                "dbo_name": "RefTraj",
-                                "dbo_variable_name": "civil_emergency"
+                                "dbo_name": "CAT020",
+                                "dbo_variable_name": "Mode 3/A Code"
                             }
                         },
-                        "DBOVariableDefinitionTrackercivil_emergency0": {
+                        "DBOVariableDefinitionCAT021Mode 3/A Code0": {
                             "parameters": {
-                                "dbo_name": "Tracker",
-                                "dbo_variable_name": "civil_emergency"
+                                "dbo_name": "CAT021",
+                                "dbo_variable_name": "Mode 3/A Code"
+                            }
+                        },
+                        "DBOVariableDefinitionCAT048Mode 3/A Code0": {
+                            "parameters": {
+                                "dbo_name": "CAT048",
+                                "dbo_variable_name": "Mode 3/A Code"
+                            }
+                        },
+                        "DBOVariableDefinitionCAT062Mode 3/A Code0": {
+                            "parameters": {
+                                "dbo_name": "CAT062",
+                                "dbo_variable_name": "Mode 3/A Code"
                             }
                         }
                     }
                 }
             },
-            "MetaDBOVariabledetection_type0": {
+            "MetaDBOVariableMode 3/A Garbled0": {
                 "parameters": {
-                    "description": "",
-                    "name": "detection_type"
+                    "name": "Mode 3/A Garbled"
                 },
                 "sub_configs": {
                     "DBOVariableDefinition": {
-                        "DBOVariableDefinitionRadardetection_type0": {
+                        "DBOVariableDefinitionCAT001Mode 3/A Garbled0": {
                             "parameters": {
-                                "dbo_name": "Radar",
-                                "dbo_variable_name": "detection_type"
+                                "dbo_name": "CAT001",
+                                "dbo_variable_name": "Mode 3/A Garbled"
                             }
                         },
-                        "DBOVariableDefinitionTrackerdetection_type0": {
+                        "DBOVariableDefinitionCAT020Mode 3/A Garbled0": {
                             "parameters": {
-                                "dbo_name": "Tracker",
-                                "dbo_variable_name": "detection_type"
+                                "dbo_name": "CAT020",
+                                "dbo_variable_name": "Mode 3/A Garbled"
+                            }
+                        },
+                        "DBOVariableDefinitionCAT021Mode 3/A Garbled0": {
+                            "parameters": {
+                                "dbo_name": "CAT021",
+                                "dbo_variable_name": "Mode 3/A Garbled"
+                            }
+                        },
+                        "DBOVariableDefinitionCAT048Mode 3/A Garbled0": {
+                            "parameters": {
+                                "dbo_name": "CAT048",
+                                "dbo_variable_name": "Mode 3/A Garbled"
+                            }
+                        },
+                        "DBOVariableDefinitionCAT062Mode 3/A Garbled0": {
+                            "parameters": {
+                                "dbo_name": "CAT062",
+                                "dbo_variable_name": "Mode 3/A Garbled"
                             }
                         }
                     }
                 }
             },
-            "MetaDBOVariabledisplay_state0": {
+            "MetaDBOVariableMode 3/A Smoothed0": {
                 "parameters": {
-                    "description": "",
-                    "name": "display_state"
+                    "name": "Mode 3/A Smoothed"
                 },
                 "sub_configs": {
                     "DBOVariableDefinition": {
-                        "DBOVariableDefinitionADSBdisplay_state0": {
+                        "DBOVariableDefinitionCAT001Mode 3/A Smoothed0": {
                             "parameters": {
-                                "dbo_name": "ADSB",
-                                "dbo_variable_name": "display_state"
+                                "dbo_name": "CAT001",
+                                "dbo_variable_name": "Mode 3/A Smoothed"
                             }
                         },
-                        "DBOVariableDefinitionMLATdisplay_state0": {
+                        "DBOVariableDefinitionCAT020Mode 3/A Smoothed0": {
                             "parameters": {
-                                "dbo_name": "MLAT",
-                                "dbo_variable_name": "display_state"
+                                "dbo_name": "CAT020",
+                                "dbo_variable_name": "Mode 3/A Smoothed"
                             }
                         },
-                        "DBOVariableDefinitionRadardisplay_state0": {
+                        "DBOVariableDefinitionCAT021Mode 3/A Smoothed0": {
                             "parameters": {
-                                "dbo_name": "Radar",
-                                "dbo_variable_name": "display_state"
+                                "dbo_name": "CAT021",
+                                "dbo_variable_name": "Mode 3/A Smoothed"
                             }
                         },
-                        "DBOVariableDefinitionTrackerdisplay_state0": {
+                        "DBOVariableDefinitionCAT048Mode 3/A Smoothed0": {
                             "parameters": {
-                                "dbo_name": "Tracker",
-                                "dbo_variable_name": "display_state"
+                                "dbo_name": "CAT048",
+                                "dbo_variable_name": "Mode 3/A Smoothed"
                             }
                         }
                     }
                 }
             },
-            "MetaDBOVariabledom_posix0": {
+            "MetaDBOVariableMode 3/A Valid0": {
                 "parameters": {
-                    "description": "",
-                    "name": "dom_posix"
+                    "name": "Mode 3/A Valid"
                 },
                 "sub_configs": {
                     "DBOVariableDefinition": {
-                        "DBOVariableDefinitionADSBdom_posix0": {
+                        "DBOVariableDefinitionCAT001Mode 3/A Valid0": {
                             "parameters": {
-                                "dbo_name": "ADSB",
-                                "dbo_variable_name": "dom_posix"
+                                "dbo_name": "CAT001",
+                                "dbo_variable_name": "Mode 3/A Valid"
                             }
                         },
-                        "DBOVariableDefinitionMLATdom_posix0": {
+                        "DBOVariableDefinitionCAT020Mode 3/A Valid0": {
                             "parameters": {
-                                "dbo_name": "MLAT",
-                                "dbo_variable_name": "dom_posix"
+                                "dbo_name": "CAT020",
+                                "dbo_variable_name": "Mode 3/A Valid"
                             }
                         },
-                        "DBOVariableDefinitionRadardom_posix0": {
+                        "DBOVariableDefinitionCAT021Mode 3/A Valid0": {
                             "parameters": {
-                                "dbo_name": "Radar",
-                                "dbo_variable_name": "dom_posix"
+                                "dbo_name": "CAT021",
+                                "dbo_variable_name": "Mode 3/A Valid"
                             }
                         },
-                        "DBOVariableDefinitionTrackerdom_posix0": {
+                        "DBOVariableDefinitionCAT048Mode 3/A Valid0": {
                             "parameters": {
-                                "dbo_name": "Tracker",
-                                "dbo_variable_name": "dom_posix"
+                                "dbo_name": "CAT048",
+                                "dbo_variable_name": "Mode 3/A Valid"
+                            }
+                        },
+                        "DBOVariableDefinitionCAT062Mode 3/A Valid0": {
+                            "parameters": {
+                                "dbo_name": "CAT062",
+                                "dbo_variable_name": "Mode 3/A Valid"
                             }
                         }
                     }
                 }
             },
-            "MetaDBOVariableds_id0": {
+            "MetaDBOVariableMode C Code0": {
                 "parameters": {
-                    "description": "",
-                    "name": "ds_id"
+                    "name": "Mode C Code"
                 },
                 "sub_configs": {
                     "DBOVariableDefinition": {
-                        "DBOVariableDefinitionADSBds_id0": {
+                        "DBOVariableDefinitionCAT001Mode C Code0": {
                             "parameters": {
-                                "dbo_name": "ADSB",
-                                "dbo_variable_name": "ds_id"
+                                "dbo_name": "CAT001",
+                                "dbo_variable_name": "Mode C Code"
                             }
                         },
-                        "DBOVariableDefinitionMLATds_id0": {
+                        "DBOVariableDefinitionCAT020Mode C Code0": {
                             "parameters": {
-                                "dbo_name": "MLAT",
-                                "dbo_variable_name": "ds_id"
+                                "dbo_name": "CAT020",
+                                "dbo_variable_name": "Mode C Code"
                             }
                         },
-                        "DBOVariableDefinitionRadards_id0": {
+                        "DBOVariableDefinitionCAT021Mode C Code0": {
                             "parameters": {
-                                "dbo_name": "Radar",
-                                "dbo_variable_name": "ds_id"
+                                "dbo_name": "CAT021",
+                                "dbo_variable_name": "Mode C Code"
                             }
                         },
-                        "DBOVariableDefinitionRefTrajds_id0": {
+                        "DBOVariableDefinitionCAT048Mode C Code0": {
                             "parameters": {
-                                "dbo_name": "RefTraj",
-                                "dbo_variable_name": "ds_id"
-                            }
-                        },
-                        "DBOVariableDefinitionTrackerds_id0": {
-                            "parameters": {
-                                "dbo_name": "Tracker",
-                                "dbo_variable_name": "ds_id"
+                                "dbo_name": "CAT048",
+                                "dbo_variable_name": "Mode C Code"
                             }
                         }
                     }
                 }
             },
-            "MetaDBOVariablefrom_fft0": {
+            "MetaDBOVariableMode C Garbled0": {
                 "parameters": {
-                    "description": "",
-                    "name": "from_fft"
+                    "name": "Mode C Garbled"
                 },
                 "sub_configs": {
                     "DBOVariableDefinition": {
-                        "DBOVariableDefinitionADSBfrom_fft0": {
+                        "DBOVariableDefinitionCAT001Mode C Garbled0": {
                             "parameters": {
-                                "dbo_name": "ADSB",
-                                "dbo_variable_name": "from_fft"
+                                "dbo_name": "CAT001",
+                                "dbo_variable_name": "Mode C Garbled"
                             }
                         },
-                        "DBOVariableDefinitionRadarfrom_fft0": {
+                        "DBOVariableDefinitionCAT020Mode C Garbled0": {
                             "parameters": {
-                                "dbo_name": "Radar",
-                                "dbo_variable_name": "from_fft"
+                                "dbo_name": "CAT020",
+                                "dbo_variable_name": "Mode C Garbled"
+                            }
+                        },
+                        "DBOVariableDefinitionCAT048Mode C Garbled0": {
+                            "parameters": {
+                                "dbo_name": "CAT048",
+                                "dbo_variable_name": "Mode C Garbled"
                             }
                         }
                     }
                 }
             },
-            "MetaDBOVariablegeo_area_mask0": {
+            "MetaDBOVariableMode C Valid0": {
                 "parameters": {
-                    "description": "",
-                    "name": "geo_area_mask"
+                    "name": "Mode C Valid"
                 },
                 "sub_configs": {
                     "DBOVariableDefinition": {
-                        "DBOVariableDefinitionADSBgeo_area_mask0": {
+                        "DBOVariableDefinitionCAT001Mode C Valid0": {
                             "parameters": {
-                                "dbo_name": "ADSB",
-                                "dbo_variable_name": "geo_area_mask"
+                                "dbo_name": "CAT001",
+                                "dbo_variable_name": "Mode C Valid"
                             }
                         },
-                        "DBOVariableDefinitionMLATgeo_area_mask0": {
+                        "DBOVariableDefinitionCAT020Mode C Valid0": {
                             "parameters": {
-                                "dbo_name": "MLAT",
-                                "dbo_variable_name": "geo_area_mask"
+                                "dbo_name": "CAT020",
+                                "dbo_variable_name": "Mode C Valid"
                             }
                         },
-                        "DBOVariableDefinitionRadargeo_area_mask0": {
+                        "DBOVariableDefinitionCAT048Mode C Valid0": {
                             "parameters": {
-                                "dbo_name": "Radar",
-                                "dbo_variable_name": "geo_area_mask"
-                            }
-                        },
-                        "DBOVariableDefinitionTrackergeo_area_mask0": {
-                            "parameters": {
-                                "dbo_name": "Tracker",
-                                "dbo_variable_name": "geo_area_mask"
+                                "dbo_name": "CAT048",
+                                "dbo_variable_name": "Mode C Valid"
                             }
                         }
                     }
                 }
             },
-            "MetaDBOVariableground_bit0": {
+            "MetaDBOVariableMode S Specific Service Capability0": {
                 "parameters": {
-                    "description": "",
-                    "name": "ground_bit"
+                    "name": "Mode S Specific Service Capability"
                 },
                 "sub_configs": {
                     "DBOVariableDefinition": {
-                        "DBOVariableDefinitionADSBground_bit0": {
+                        "DBOVariableDefinitionCAT020Mode S Specific Service Capability0": {
                             "parameters": {
-                                "dbo_name": "ADSB",
-                                "dbo_variable_name": "ground_bit"
+                                "dbo_name": "CAT020",
+                                "dbo_variable_name": "Mode S Specific Service Capability"
                             }
                         },
-                        "DBOVariableDefinitionMLATground_bit0": {
+                        "DBOVariableDefinitionCAT048Mode S Specific Service Capability0": {
                             "parameters": {
-                                "dbo_name": "MLAT",
-                                "dbo_variable_name": "ground_bit"
-                            }
-                        },
-                        "DBOVariableDefinitionRadarground_bit0": {
-                            "parameters": {
-                                "dbo_name": "Radar",
-                                "dbo_variable_name": "ground_bit"
-                            }
-                        },
-                        "DBOVariableDefinitionTrackerground_bit0": {
-                            "parameters": {
-                                "dbo_name": "Tracker",
-                                "dbo_variable_name": "ground_bit"
+                                "dbo_name": "CAT048",
+                                "dbo_variable_name": "Mode S Specific Service Capability"
                             }
                         }
                     }
                 }
             },
-            "MetaDBOVariablegroundspeed_kt0": {
+            "MetaDBOVariableRDP Chain0": {
                 "parameters": {
-                    "description": "",
-                    "name": "groundspeed_kt"
+                    "name": "RDP Chain"
                 },
                 "sub_configs": {
                     "DBOVariableDefinition": {
-                        "DBOVariableDefinitionADSBgroundspeed_kt0": {
+                        "DBOVariableDefinitionCAT001RDP Chain0": {
                             "parameters": {
-                                "dbo_name": "ADSB",
-                                "dbo_variable_name": "groundspeed_kt"
+                                "dbo_name": "CAT001",
+                                "dbo_variable_name": "RDP Chain"
                             }
                         },
-                        "DBOVariableDefinitionRefTrajgroundspeed_kt0": {
+                        "DBOVariableDefinitionCAT048RDP Chain0": {
                             "parameters": {
-                                "dbo_name": "RefTraj",
-                                "dbo_variable_name": "groundspeed_kt"
-                            }
-                        },
-                        "DBOVariableDefinitionTrackergroundspeed_kt0": {
-                            "parameters": {
-                                "dbo_name": "Tracker",
-                                "dbo_variable_name": "groundspeed_kt"
+                                "dbo_name": "CAT048",
+                                "dbo_variable_name": "RDP Chain"
                             }
                         }
                     }
                 }
             },
-            "MetaDBOVariablehash_code0": {
+            "MetaDBOVariableRange0": {
                 "parameters": {
-                    "description": "",
-                    "name": "hash_code"
+                    "name": "Range"
                 },
                 "sub_configs": {
                     "DBOVariableDefinition": {
-                        "DBOVariableDefinitionADSBhash_code0": {
+                        "DBOVariableDefinitionCAT001Range0": {
                             "parameters": {
-                                "dbo_name": "ADSB",
-                                "dbo_variable_name": "hash_code"
+                                "dbo_name": "CAT001",
+                                "dbo_variable_name": "Range"
                             }
                         },
-                        "DBOVariableDefinitionMLAThash_code0": {
+                        "DBOVariableDefinitionCAT048Range0": {
                             "parameters": {
-                                "dbo_name": "MLAT",
-                                "dbo_variable_name": "hash_code"
-                            }
-                        },
-                        "DBOVariableDefinitionRadarhash_code0": {
-                            "parameters": {
-                                "dbo_name": "Radar",
-                                "dbo_variable_name": "hash_code"
-                            }
-                        },
-                        "DBOVariableDefinitionTrackerhash_code0": {
-                            "parameters": {
-                                "dbo_name": "Tracker",
-                                "dbo_variable_name": "hash_code"
+                                "dbo_name": "CAT048",
+                                "dbo_variable_name": "Range"
                             }
                         }
                     }
                 }
             },
-            "MetaDBOVariableheading_deg0": {
+            "MetaDBOVariableSAC0": {
                 "parameters": {
-                    "description": "",
-                    "name": "heading_deg"
+                    "name": "SAC"
                 },
                 "sub_configs": {
                     "DBOVariableDefinition": {
-                        "DBOVariableDefinitionRefTrajheading_deg0": {
+                        "DBOVariableDefinitionCAT001SAC0": {
                             "parameters": {
-                                "dbo_name": "RefTraj",
-                                "dbo_variable_name": "heading_deg"
+                                "dbo_name": "CAT001",
+                                "dbo_variable_name": "SAC"
                             }
                         },
-                        "DBOVariableDefinitionTrackerheading_deg0": {
+                        "DBOVariableDefinitionCAT020SAC0": {
                             "parameters": {
-                                "dbo_name": "Tracker",
-                                "dbo_variable_name": "heading_deg"
+                                "dbo_name": "CAT020",
+                                "dbo_variable_name": "SAC"
+                            }
+                        },
+                        "DBOVariableDefinitionCAT021SAC0": {
+                            "parameters": {
+                                "dbo_name": "CAT021",
+                                "dbo_variable_name": "SAC"
+                            }
+                        },
+                        "DBOVariableDefinitionCAT048SAC0": {
+                            "parameters": {
+                                "dbo_name": "CAT048",
+                                "dbo_variable_name": "SAC"
+                            }
+                        },
+                        "DBOVariableDefinitionCAT062SAC0": {
+                            "parameters": {
+                                "dbo_name": "CAT062",
+                                "dbo_variable_name": "SAC"
                             }
                         }
                     }
                 }
             },
-            "MetaDBOVariableheight_3d_ft0": {
+            "MetaDBOVariableSIC0": {
                 "parameters": {
-                    "description": "",
-                    "name": "height_3d_ft"
+                    "name": "SIC"
                 },
                 "sub_configs": {
                     "DBOVariableDefinition": {
-                        "DBOVariableDefinitionMLATheight_3d_ft0": {
+                        "DBOVariableDefinitionCAT001SIC0": {
                             "parameters": {
-                                "dbo_name": "MLAT",
-                                "dbo_variable_name": "height_3d_ft"
+                                "dbo_name": "CAT001",
+                                "dbo_variable_name": "SIC"
                             }
                         },
-                        "DBOVariableDefinitionRadarheight_3d_ft0": {
+                        "DBOVariableDefinitionCAT020SIC0": {
                             "parameters": {
-                                "dbo_name": "Radar",
-                                "dbo_variable_name": "height_3d_ft"
+                                "dbo_name": "CAT020",
+                                "dbo_variable_name": "SIC"
+                            }
+                        },
+                        "DBOVariableDefinitionCAT021SIC0": {
+                            "parameters": {
+                                "dbo_name": "CAT021",
+                                "dbo_variable_name": "SIC"
+                            }
+                        },
+                        "DBOVariableDefinitionCAT048SIC0": {
+                            "parameters": {
+                                "dbo_name": "CAT048",
+                                "dbo_variable_name": "SIC"
+                            }
+                        },
+                        "DBOVariableDefinitionCAT062SIC0": {
+                            "parameters": {
+                                "dbo_name": "CAT062",
+                                "dbo_variable_name": "SIC"
                             }
                         }
                     }
                 }
             },
-            "MetaDBOVariableic_code0": {
+            "MetaDBOVariableSPI0": {
                 "parameters": {
-                    "description": "",
-                    "name": "ic_code"
+                    "name": "SPI"
                 },
                 "sub_configs": {
                     "DBOVariableDefinition": {
-                        "DBOVariableDefinitionRadaric_code0": {
+                        "DBOVariableDefinitionCAT001SPI0": {
                             "parameters": {
-                                "dbo_name": "Radar",
-                                "dbo_variable_name": "ic_code"
+                                "dbo_name": "CAT001",
+                                "dbo_variable_name": "SPI"
                             }
                         },
-                        "DBOVariableDefinitionTrackeric_code0": {
+                        "DBOVariableDefinitionCAT020SPI0": {
                             "parameters": {
-                                "dbo_name": "Tracker",
-                                "dbo_variable_name": "ic_code"
+                                "dbo_name": "CAT020",
+                                "dbo_variable_name": "SPI"
+                            }
+                        },
+                        "DBOVariableDefinitionCAT021SPI0": {
+                            "parameters": {
+                                "dbo_name": "CAT021",
+                                "dbo_variable_name": "SPI"
+                            }
+                        },
+                        "DBOVariableDefinitionCAT048SPI0": {
+                            "parameters": {
+                                "dbo_name": "CAT048",
+                                "dbo_variable_name": "SPI"
+                            }
+                        },
+                        "DBOVariableDefinitionCAT062SPI0": {
+                            "parameters": {
+                                "dbo_name": "CAT062",
+                                "dbo_variable_name": "SPI"
+                            }
+                        }
+                    }
+                }
+            },
+            "MetaDBOVariableService Identification0": {
+                "parameters": {
+                    "name": "Service Identification"
+                },
+                "sub_configs": {
+                    "DBOVariableDefinition": {
+                        "DBOVariableDefinitionCAT021Service Identification0": {
+                            "parameters": {
+                                "dbo_name": "CAT021",
+                                "dbo_variable_name": "Service Identification"
+                            }
+                        },
+                        "DBOVariableDefinitionCAT062Service Identification0": {
+                            "parameters": {
+                                "dbo_name": "CAT062",
+                                "dbo_variable_name": "Service Identification"
+                            }
+                        }
+                    }
+                }
+            },
+            "MetaDBOVariableSimulated0": {
+                "parameters": {
+                    "name": "Simulated"
+                },
+                "sub_configs": {
+                    "DBOVariableDefinition": {
+                        "DBOVariableDefinitionCAT001Simulated0": {
+                            "parameters": {
+                                "dbo_name": "CAT001",
+                                "dbo_variable_name": "Simulated"
+                            }
+                        },
+                        "DBOVariableDefinitionCAT020Simulated0": {
+                            "parameters": {
+                                "dbo_name": "CAT020",
+                                "dbo_variable_name": "Simulated"
+                            }
+                        },
+                        "DBOVariableDefinitionCAT021Simulated0": {
+                            "parameters": {
+                                "dbo_name": "CAT021",
+                                "dbo_variable_name": "Simulated"
+                            }
+                        },
+                        "DBOVariableDefinitionCAT048Simulated0": {
+                            "parameters": {
+                                "dbo_name": "CAT048",
+                                "dbo_variable_name": "Simulated"
+                            }
+                        },
+                        "DBOVariableDefinitionCAT062Simulated0": {
+                            "parameters": {
+                                "dbo_name": "CAT062",
+                                "dbo_variable_name": "Simulated"
+                            }
+                        }
+                    }
+                }
+            },
+            "MetaDBOVariableTest0": {
+                "parameters": {
+                    "name": "Test"
+                },
+                "sub_configs": {
+                    "DBOVariableDefinition": {
+                        "DBOVariableDefinitionCAT001Test0": {
+                            "parameters": {
+                                "dbo_name": "CAT001",
+                                "dbo_variable_name": "Test"
+                            }
+                        },
+                        "DBOVariableDefinitionCAT020Test0": {
+                            "parameters": {
+                                "dbo_name": "CAT020",
+                                "dbo_variable_name": "Test"
+                            }
+                        },
+                        "DBOVariableDefinitionCAT021Test0": {
+                            "parameters": {
+                                "dbo_name": "CAT021",
+                                "dbo_variable_name": "Test"
+                            }
+                        },
+                        "DBOVariableDefinitionCAT048Test0": {
+                            "parameters": {
+                                "dbo_name": "CAT048",
+                                "dbo_variable_name": "Test"
+                            }
+                        }
+                    }
+                }
+            },
+            "MetaDBOVariableTime of Day0": {
+                "parameters": {
+                    "name": "Time of Day"
+                },
+                "sub_configs": {
+                    "DBOVariableDefinition": {
+                        "DBOVariableDefinitionCAT001Time of Day0": {
+                            "parameters": {
+                                "dbo_name": "CAT001",
+                                "dbo_variable_name": "Time of Day"
+                            }
+                        },
+                        "DBOVariableDefinitionCAT020Time of Day0": {
+                            "parameters": {
+                                "dbo_name": "CAT020",
+                                "dbo_variable_name": "Time of Day"
+                            }
+                        },
+                        "DBOVariableDefinitionCAT021Time of Day0": {
+                            "parameters": {
+                                "dbo_name": "CAT021",
+                                "dbo_variable_name": "Time of Day"
+                            }
+                        },
+                        "DBOVariableDefinitionCAT048Time of Day0": {
+                            "parameters": {
+                                "dbo_name": "CAT048",
+                                "dbo_variable_name": "Time of Day"
+                            }
+                        },
+                        "DBOVariableDefinitionCAT062Time of Day0": {
+                            "parameters": {
+                                "dbo_name": "CAT062",
+                                "dbo_variable_name": "Time of Day"
+                            }
+                        }
+                    }
+                }
+            },
+            "MetaDBOVariableTrack Angle0": {
+                "parameters": {
+                    "name": "Track Angle"
+                },
+                "sub_configs": {
+                    "DBOVariableDefinition": {
+                        "DBOVariableDefinitionCAT001Track Angle0": {
+                            "parameters": {
+                                "dbo_name": "CAT001",
+                                "dbo_variable_name": "Track Angle"
+                            }
+                        },
+                        "DBOVariableDefinitionCAT021Track Angle0": {
+                            "parameters": {
+                                "dbo_name": "CAT021",
+                                "dbo_variable_name": "Track Angle"
+                            }
+                        },
+                        "DBOVariableDefinitionCAT048Track Angle0": {
+                            "parameters": {
+                                "dbo_name": "CAT048",
+                                "dbo_variable_name": "Track Angle"
+                            }
+                        }
+                    }
+                }
+            },
+            "MetaDBOVariableTrack Climbing/Descending0": {
+                "parameters": {
+                    "name": "Track Climbing/Descending"
+                },
+                "sub_configs": {
+                    "DBOVariableDefinition": {
+                        "DBOVariableDefinitionCAT020Track Climbing/Descending0": {
+                            "parameters": {
+                                "dbo_name": "CAT020",
+                                "dbo_variable_name": "Track Climbing/Descending"
+                            }
+                        },
+                        "DBOVariableDefinitionCAT048Track Climbing/Descending0": {
+                            "parameters": {
+                                "dbo_name": "CAT048",
+                                "dbo_variable_name": "Track Climbing/Descending"
+                            }
+                        }
+                    }
+                }
+            },
+            "MetaDBOVariableTrack Confirmed0": {
+                "parameters": {
+                    "name": "Track Confirmed"
+                },
+                "sub_configs": {
+                    "DBOVariableDefinition": {
+                        "DBOVariableDefinitionCAT001Track Confirmed0": {
+                            "parameters": {
+                                "dbo_name": "CAT001",
+                                "dbo_variable_name": "Track Confirmed"
+                            }
+                        },
+                        "DBOVariableDefinitionCAT020Track Confirmed0": {
+                            "parameters": {
+                                "dbo_name": "CAT020",
+                                "dbo_variable_name": "Track Confirmed"
+                            }
+                        },
+                        "DBOVariableDefinitionCAT048Track Confirmed0": {
+                            "parameters": {
+                                "dbo_name": "CAT048",
+                                "dbo_variable_name": "Track Confirmed"
+                            }
+                        }
+                    }
+                }
+            },
+            "MetaDBOVariableTrack Doubtful0": {
+                "parameters": {
+                    "name": "Track Doubtful"
+                },
+                "sub_configs": {
+                    "DBOVariableDefinition": {
+                        "DBOVariableDefinitionCAT001Track Doubtful0": {
+                            "parameters": {
+                                "dbo_name": "CAT001",
+                                "dbo_variable_name": "Track Doubtful"
+                            }
+                        },
+                        "DBOVariableDefinitionCAT048Track Doubtful0": {
+                            "parameters": {
+                                "dbo_name": "CAT048",
+                                "dbo_variable_name": "Track Doubtful"
+                            }
+                        }
+                    }
+                }
+            },
+            "MetaDBOVariableTrack End0": {
+                "parameters": {
+                    "name": "Track End"
+                },
+                "sub_configs": {
+                    "DBOVariableDefinition": {
+                        "DBOVariableDefinitionCAT001Track End0": {
+                            "parameters": {
+                                "dbo_name": "CAT001",
+                                "dbo_variable_name": "Track End"
+                            }
+                        },
+                        "DBOVariableDefinitionCAT020Track End0": {
+                            "parameters": {
+                                "dbo_name": "CAT020",
+                                "dbo_variable_name": "Track End"
+                            }
+                        },
+                        "DBOVariableDefinitionCAT048Track End0": {
+                            "parameters": {
+                                "dbo_name": "CAT048",
+                                "dbo_variable_name": "Track End"
+                            }
+                        },
+                        "DBOVariableDefinitionCAT062Track End0": {
+                            "parameters": {
+                                "dbo_name": "CAT062",
+                                "dbo_variable_name": "Track End"
+                            }
+                        }
+                    }
+                }
+            },
+            "MetaDBOVariableTrack Ghost Target0": {
+                "parameters": {
+                    "name": "Track Ghost Target"
+                },
+                "sub_configs": {
+                    "DBOVariableDefinition": {
+                        "DBOVariableDefinitionCAT001Track Ghost Target0": {
+                            "parameters": {
+                                "dbo_name": "CAT001",
+                                "dbo_variable_name": "Track Ghost Target"
+                            }
+                        },
+                        "DBOVariableDefinitionCAT020Track Ghost Target0": {
+                            "parameters": {
+                                "dbo_name": "CAT020",
+                                "dbo_variable_name": "Track Ghost Target"
+                            }
+                        },
+                        "DBOVariableDefinitionCAT048Track Ghost Target0": {
+                            "parameters": {
+                                "dbo_name": "CAT048",
+                                "dbo_variable_name": "Track Ghost Target"
+                            }
+                        }
+                    }
+                }
+            },
+            "MetaDBOVariableTrack Groundspeed0": {
+                "parameters": {
+                    "name": "Track Groundspeed"
+                },
+                "sub_configs": {
+                    "DBOVariableDefinition": {
+                        "DBOVariableDefinitionCAT001Track Groundspeed0": {
+                            "parameters": {
+                                "dbo_name": "CAT001",
+                                "dbo_variable_name": "Track Groundspeed"
+                            }
+                        },
+                        "DBOVariableDefinitionCAT048Track Groundspeed0": {
+                            "parameters": {
+                                "dbo_name": "CAT048",
+                                "dbo_variable_name": "Track Groundspeed"
+                            }
+                        }
+                    }
+                }
+            },
+            "MetaDBOVariableTrack Horizontal Manoeuvre0": {
+                "parameters": {
+                    "name": "Track Horizontal Manoeuvre"
+                },
+                "sub_configs": {
+                    "DBOVariableDefinition": {
+                        "DBOVariableDefinitionCAT001Track Horizontal Manoeuvre0": {
+                            "parameters": {
+                                "dbo_name": "CAT001",
+                                "dbo_variable_name": "Track Horizontal Manoeuvre"
+                            }
+                        },
+                        "DBOVariableDefinitionCAT020Track Horizontal Manoeuvre0": {
+                            "parameters": {
+                                "dbo_name": "CAT020",
+                                "dbo_variable_name": "Track Horizontal Manoeuvre"
+                            }
+                        },
+                        "DBOVariableDefinitionCAT048Track Horizontal Manoeuvre0": {
+                            "parameters": {
+                                "dbo_name": "CAT048",
+                                "dbo_variable_name": "Track Horizontal Manoeuvre"
+                            }
+                        }
+                    }
+                }
+            },
+            "MetaDBOVariableTrack Number0": {
+                "parameters": {
+                    "name": "Track Number"
+                },
+                "sub_configs": {
+                    "DBOVariableDefinition": {
+                        "DBOVariableDefinitionCAT001Track Number0": {
+                            "parameters": {
+                                "dbo_name": "CAT001",
+                                "dbo_variable_name": "Track Number"
+                            }
+                        },
+                        "DBOVariableDefinitionCAT021Track Number0": {
+                            "parameters": {
+                                "dbo_name": "CAT021",
+                                "dbo_variable_name": "Track Number"
+                            }
+                        },
+                        "DBOVariableDefinitionCAT048Track Number0": {
+                            "parameters": {
+                                "dbo_name": "CAT048",
+                                "dbo_variable_name": "Track Number"
+                            }
+                        },
+                        "DBOVariableDefinitionCAT062Track Number0": {
+                            "parameters": {
+                                "dbo_name": "CAT062",
+                                "dbo_variable_name": "Track Number"
+                            }
+                        }
+                    }
+                }
+            },
+            "MetaDBOVariableTrack Sensor Types0": {
+                "parameters": {
+                    "name": "Track Sensor Types"
+                },
+                "sub_configs": {
+                    "DBOVariableDefinition": {
+                        "DBOVariableDefinitionCAT001Track Sensor Types0": {
+                            "parameters": {
+                                "dbo_name": "CAT001",
+                                "dbo_variable_name": "Track Sensor Types"
+                            }
+                        },
+                        "DBOVariableDefinitionCAT048Track Sensor Types0": {
+                            "parameters": {
+                                "dbo_name": "CAT048",
+                                "dbo_variable_name": "Track Sensor Types"
+                            }
+                        }
+                    }
+                }
+            },
+            "MetaDBOVariableTransponder Com. Capability0": {
+                "parameters": {
+                    "name": "Transponder Com. Capability"
+                },
+                "sub_configs": {
+                    "DBOVariableDefinition": {
+                        "DBOVariableDefinitionCAT020Transponder Com. Capability0": {
+                            "parameters": {
+                                "dbo_name": "CAT020",
+                                "dbo_variable_name": "Transponder Com. Capability"
+                            }
+                        },
+                        "DBOVariableDefinitionCAT048Transponder Com. Capability0": {
+                            "parameters": {
+                                "dbo_name": "CAT048",
+                                "dbo_variable_name": "Transponder Com. Capability"
+                            }
+                        }
+                    }
+                }
+            },
+            "MetaDBOVariableType0": {
+                "parameters": {
+                    "name": "Type"
+                },
+                "sub_configs": {
+                    "DBOVariableDefinition": {
+                        "DBOVariableDefinitionCAT001Type0": {
+                            "parameters": {
+                                "dbo_name": "CAT001",
+                                "dbo_variable_name": "Type"
+                            }
+                        },
+                        "DBOVariableDefinitionCAT048Type0": {
+                            "parameters": {
+                                "dbo_name": "CAT048",
+                                "dbo_variable_name": "Type"
+                            }
+                        }
+                    }
+                }
+            },
+            "MetaDBOVariableX StdDev0": {
+                "parameters": {
+                    "name": "X StdDev"
+                },
+                "sub_configs": {
+                    "DBOVariableDefinition": {
+                        "DBOVariableDefinitionCAT020X StdDev0": {
+                            "parameters": {
+                                "dbo_name": "CAT020",
+                                "dbo_variable_name": "X StdDev"
+                            }
+                        },
+                        "DBOVariableDefinitionCAT062X StdDev0": {
+                            "parameters": {
+                                "dbo_name": "CAT062",
+                                "dbo_variable_name": "X StdDev"
+                            }
+                        }
+                    }
+                }
+            },
+            "MetaDBOVariableX0": {
+                "parameters": {
+                    "name": "X"
+                },
+                "sub_configs": {
+                    "DBOVariableDefinition": {
+                        "DBOVariableDefinitionCAT001X0": {
+                            "parameters": {
+                                "dbo_name": "CAT001",
+                                "dbo_variable_name": "X"
+                            }
+                        },
+                        "DBOVariableDefinitionCAT020X0": {
+                            "parameters": {
+                                "dbo_name": "CAT020",
+                                "dbo_variable_name": "X"
+                            }
+                        },
+                        "DBOVariableDefinitionCAT048X0": {
+                            "parameters": {
+                                "dbo_name": "CAT048",
+                                "dbo_variable_name": "X"
+                            }
+                        }
+                    }
+                }
+            },
+            "MetaDBOVariableY StdDev0": {
+                "parameters": {
+                    "name": "Y StdDev"
+                },
+                "sub_configs": {
+                    "DBOVariableDefinition": {
+                        "DBOVariableDefinitionCAT020Y StdDev0": {
+                            "parameters": {
+                                "dbo_name": "CAT020",
+                                "dbo_variable_name": "Y StdDev"
+                            }
+                        },
+                        "DBOVariableDefinitionCAT062Y StdDev0": {
+                            "parameters": {
+                                "dbo_name": "CAT062",
+                                "dbo_variable_name": "Y StdDev"
+                            }
+                        }
+                    }
+                }
+            },
+            "MetaDBOVariableY0": {
+                "parameters": {
+                    "name": "Y"
+                },
+                "sub_configs": {
+                    "DBOVariableDefinition": {
+                        "DBOVariableDefinitionCAT001Y0": {
+                            "parameters": {
+                                "dbo_name": "CAT001",
+                                "dbo_variable_name": "Y"
+                            }
+                        },
+                        "DBOVariableDefinitionCAT020Y0": {
+                            "parameters": {
+                                "dbo_name": "CAT020",
+                                "dbo_variable_name": "Y"
+                            }
+                        },
+                        "DBOVariableDefinitionCAT048Y0": {
+                            "parameters": {
+                                "dbo_name": "CAT048",
+                                "dbo_variable_name": "Y"
                             }
                         }
                     }
@@ -1363,1015 +1966,32 @@
             },
             "MetaDBOVariableline_id0": {
                 "parameters": {
-                    "description": "",
                     "name": "line_id"
                 },
                 "sub_configs": {
                     "DBOVariableDefinition": {
-                        "DBOVariableDefinitionADSBline_id0": {
+                        "DBOVariableDefinitionCAT001line_id0": {
                             "parameters": {
-                                "dbo_name": "ADSB",
+                                "dbo_name": "CAT001",
                                 "dbo_variable_name": "line_id"
                             }
                         },
-                        "DBOVariableDefinitionMLATline_id0": {
+                        "DBOVariableDefinitionCAT020line_id0": {
                             "parameters": {
-                                "dbo_name": "MLAT",
+                                "dbo_name": "CAT020",
                                 "dbo_variable_name": "line_id"
                             }
                         },
-                        "DBOVariableDefinitionRadarline_id0": {
+                        "DBOVariableDefinitionCAT021line_id0": {
                             "parameters": {
-                                "dbo_name": "Radar",
+                                "dbo_name": "CAT021",
                                 "dbo_variable_name": "line_id"
                             }
                         },
-                        "DBOVariableDefinitionTrackerline_id0": {
+                        "DBOVariableDefinitionCAT048line_id0": {
                             "parameters": {
-                                "dbo_name": "Tracker",
+                                "dbo_name": "CAT048",
                                 "dbo_variable_name": "line_id"
-                            }
-                        }
-                    }
-                }
-            },
-            "MetaDBOVariablemas_track_num0": {
-                "parameters": {
-                    "description": "",
-                    "name": "mas_track_num"
-                },
-                "sub_configs": {
-                    "DBOVariableDefinition": {
-                        "DBOVariableDefinitionMLATmas_track_num0": {
-                            "parameters": {
-                                "dbo_name": "MLAT",
-                                "dbo_variable_name": "mas_track_num"
-                            }
-                        },
-                        "DBOVariableDefinitionRadarmas_track_num0": {
-                            "parameters": {
-                                "dbo_name": "Radar",
-                                "dbo_variable_name": "mas_track_num"
-                            }
-                        },
-                        "DBOVariableDefinitionTrackermas_track_num0": {
-                            "parameters": {
-                                "dbo_name": "Tracker",
-                                "dbo_variable_name": "mas_track_num"
-                            }
-                        }
-                    }
-                }
-            },
-            "MetaDBOVariablemil_emergency0": {
-                "parameters": {
-                    "description": "",
-                    "name": "mil_emergency"
-                },
-                "sub_configs": {
-                    "DBOVariableDefinition": {
-                        "DBOVariableDefinitionRadarmil_emergency0": {
-                            "parameters": {
-                                "dbo_name": "Radar",
-                                "dbo_variable_name": "mil_emergency"
-                            }
-                        },
-                        "DBOVariableDefinitionRefTrajmil_emergency0": {
-                            "parameters": {
-                                "dbo_name": "RefTraj",
-                                "dbo_variable_name": "mil_emergency"
-                            }
-                        },
-                        "DBOVariableDefinitionTrackermil_emergency0": {
-                            "parameters": {
-                                "dbo_name": "Tracker",
-                                "dbo_variable_name": "mil_emergency"
-                            }
-                        }
-                    }
-                }
-            },
-            "MetaDBOVariablemode1_code0": {
-                "parameters": {
-                    "description": "",
-                    "name": "mode1_code"
-                },
-                "sub_configs": {
-                    "DBOVariableDefinition": {
-                        "DBOVariableDefinitionMLATmode1_code0": {
-                            "parameters": {
-                                "dbo_name": "MLAT",
-                                "dbo_variable_name": "mode1_code"
-                            }
-                        },
-                        "DBOVariableDefinitionRadarmode1_code0": {
-                            "parameters": {
-                                "dbo_name": "Radar",
-                                "dbo_variable_name": "mode1_code"
-                            }
-                        }
-                    }
-                }
-            },
-            "MetaDBOVariablemode1_g0": {
-                "parameters": {
-                    "description": "",
-                    "name": "mode1_g"
-                },
-                "sub_configs": {
-                    "DBOVariableDefinition": {
-                        "DBOVariableDefinitionMLATmode1_g0": {
-                            "parameters": {
-                                "dbo_name": "MLAT",
-                                "dbo_variable_name": "mode1_g"
-                            }
-                        },
-                        "DBOVariableDefinitionRadarmode1_g0": {
-                            "parameters": {
-                                "dbo_name": "Radar",
-                                "dbo_variable_name": "mode1_g"
-                            }
-                        }
-                    }
-                }
-            },
-            "MetaDBOVariablemode1_smo0": {
-                "parameters": {
-                    "description": "",
-                    "name": "mode1_smo"
-                },
-                "sub_configs": {
-                    "DBOVariableDefinition": {
-                        "DBOVariableDefinitionMLATmode1_smo0": {
-                            "parameters": {
-                                "dbo_name": "MLAT",
-                                "dbo_variable_name": "mode1_smo"
-                            }
-                        },
-                        "DBOVariableDefinitionRadarmode1_smo0": {
-                            "parameters": {
-                                "dbo_name": "Radar",
-                                "dbo_variable_name": "mode1_smo"
-                            }
-                        }
-                    }
-                }
-            },
-            "MetaDBOVariablemode1_v0": {
-                "parameters": {
-                    "description": "",
-                    "name": "mode1_v"
-                },
-                "sub_configs": {
-                    "DBOVariableDefinition": {
-                        "DBOVariableDefinitionMLATmode1_v0": {
-                            "parameters": {
-                                "dbo_name": "MLAT",
-                                "dbo_variable_name": "mode1_v"
-                            }
-                        },
-                        "DBOVariableDefinitionRadarmode1_v0": {
-                            "parameters": {
-                                "dbo_name": "Radar",
-                                "dbo_variable_name": "mode1_v"
-                            }
-                        }
-                    }
-                }
-            },
-            "MetaDBOVariablemode2_code0": {
-                "parameters": {
-                    "description": "",
-                    "name": "mode2_code"
-                },
-                "sub_configs": {
-                    "DBOVariableDefinition": {
-                        "DBOVariableDefinitionMLATmode2_code0": {
-                            "parameters": {
-                                "dbo_name": "MLAT",
-                                "dbo_variable_name": "mode2_code"
-                            }
-                        },
-                        "DBOVariableDefinitionRadarmode2_code0": {
-                            "parameters": {
-                                "dbo_name": "Radar",
-                                "dbo_variable_name": "mode2_code"
-                            }
-                        }
-                    }
-                }
-            },
-            "MetaDBOVariablemode2_g0": {
-                "parameters": {
-                    "description": "",
-                    "name": "mode2_g"
-                },
-                "sub_configs": {
-                    "DBOVariableDefinition": {
-                        "DBOVariableDefinitionMLATmode2_g0": {
-                            "parameters": {
-                                "dbo_name": "MLAT",
-                                "dbo_variable_name": "mode2_g"
-                            }
-                        },
-                        "DBOVariableDefinitionRadarmode2_g0": {
-                            "parameters": {
-                                "dbo_name": "Radar",
-                                "dbo_variable_name": "mode2_g"
-                            }
-                        }
-                    }
-                }
-            },
-            "MetaDBOVariablemode2_smo0": {
-                "parameters": {
-                    "description": "",
-                    "name": "mode2_smo"
-                },
-                "sub_configs": {
-                    "DBOVariableDefinition": {
-                        "DBOVariableDefinitionMLATmode2_smo0": {
-                            "parameters": {
-                                "dbo_name": "MLAT",
-                                "dbo_variable_name": "mode2_smo"
-                            }
-                        },
-                        "DBOVariableDefinitionRadarmode2_smo0": {
-                            "parameters": {
-                                "dbo_name": "Radar",
-                                "dbo_variable_name": "mode2_smo"
-                            }
-                        }
-                    }
-                }
-            },
-            "MetaDBOVariablemode2_v0": {
-                "parameters": {
-                    "description": "",
-                    "name": "mode2_v"
-                },
-                "sub_configs": {
-                    "DBOVariableDefinition": {
-                        "DBOVariableDefinitionMLATmode2_v0": {
-                            "parameters": {
-                                "dbo_name": "MLAT",
-                                "dbo_variable_name": "mode2_v"
-                            }
-                        },
-                        "DBOVariableDefinitionRadarmode2_v0": {
-                            "parameters": {
-                                "dbo_name": "Radar",
-                                "dbo_variable_name": "mode2_v"
-                            }
-                        }
-                    }
-                }
-            },
-            "MetaDBOVariablemode3a_code0": {
-                "parameters": {
-                    "description": "",
-                    "name": "mode3a_code"
-                },
-                "sub_configs": {
-                    "DBOVariableDefinition": {
-                        "DBOVariableDefinitionADSBmode3a_code0": {
-                            "parameters": {
-                                "dbo_name": "ADSB",
-                                "dbo_variable_name": "mode3a_code"
-                            }
-                        },
-                        "DBOVariableDefinitionMLATmode3a_code0": {
-                            "parameters": {
-                                "dbo_name": "MLAT",
-                                "dbo_variable_name": "mode3a_code"
-                            }
-                        },
-                        "DBOVariableDefinitionRadarmode3a_code0": {
-                            "parameters": {
-                                "dbo_name": "Radar",
-                                "dbo_variable_name": "mode3a_code"
-                            }
-                        },
-                        "DBOVariableDefinitionRefTrajmode3a_code0": {
-                            "parameters": {
-                                "dbo_name": "RefTraj",
-                                "dbo_variable_name": "mode3a_code"
-                            }
-                        },
-                        "DBOVariableDefinitionTrackermode3a_code0": {
-                            "parameters": {
-                                "dbo_name": "Tracker",
-                                "dbo_variable_name": "mode3a_code"
-                            }
-                        }
-                    }
-                }
-            },
-            "MetaDBOVariablemode3a_g0": {
-                "parameters": {
-                    "description": "",
-                    "name": "mode3a_g"
-                },
-                "sub_configs": {
-                    "DBOVariableDefinition": {
-                        "DBOVariableDefinitionMLATmode3a_g0": {
-                            "parameters": {
-                                "dbo_name": "MLAT",
-                                "dbo_variable_name": "mode3a_g"
-                            }
-                        },
-                        "DBOVariableDefinitionRadarmode3a_g0": {
-                            "parameters": {
-                                "dbo_name": "Radar",
-                                "dbo_variable_name": "mode3a_g"
-                            }
-                        },
-                        "DBOVariableDefinitionTrackermode3a_g0": {
-                            "parameters": {
-                                "dbo_name": "Tracker",
-                                "dbo_variable_name": "mode3a_g"
-                            }
-                        }
-                    }
-                }
-            },
-            "MetaDBOVariablemode3a_smo0": {
-                "parameters": {
-                    "description": "",
-                    "name": "mode3a_smo"
-                },
-                "sub_configs": {
-                    "DBOVariableDefinition": {
-                        "DBOVariableDefinitionMLATmode3a_smo0": {
-                            "parameters": {
-                                "dbo_name": "MLAT",
-                                "dbo_variable_name": "mode3a_smo"
-                            }
-                        },
-                        "DBOVariableDefinitionRadarmode3a_smo0": {
-                            "parameters": {
-                                "dbo_name": "Radar",
-                                "dbo_variable_name": "mode3a_smo"
-                            }
-                        }
-                    }
-                }
-            },
-            "MetaDBOVariablemode3a_v0": {
-                "parameters": {
-                    "description": "",
-                    "name": "mode3a_v"
-                },
-                "sub_configs": {
-                    "DBOVariableDefinition": {
-                        "DBOVariableDefinitionMLATmode3a_v0": {
-                            "parameters": {
-                                "dbo_name": "MLAT",
-                                "dbo_variable_name": "mode3a_v"
-                            }
-                        },
-                        "DBOVariableDefinitionRadarmode3a_v0": {
-                            "parameters": {
-                                "dbo_name": "Radar",
-                                "dbo_variable_name": "mode3a_v"
-                            }
-                        },
-                        "DBOVariableDefinitionTrackermode3a_v0": {
-                            "parameters": {
-                                "dbo_name": "Tracker",
-                                "dbo_variable_name": "mode3a_v"
-                            }
-                        }
-                    }
-                }
-            },
-            "MetaDBOVariablemodec_code_ft0": {
-                "parameters": {
-                    "description": "",
-                    "name": "modec_code_ft"
-                },
-                "sub_configs": {
-                    "DBOVariableDefinition": {
-                        "DBOVariableDefinitionADSBalt_baro_ft0": {
-                            "parameters": {
-                                "dbo_name": "ADSB",
-                                "dbo_variable_name": "alt_baro_ft"
-                            }
-                        },
-                        "DBOVariableDefinitionMLATflight_level_ft0": {
-                            "parameters": {
-                                "dbo_name": "MLAT",
-                                "dbo_variable_name": "flight_level_ft"
-                            }
-                        },
-                        "DBOVariableDefinitionRadarmodec_code_ft0": {
-                            "parameters": {
-                                "dbo_name": "Radar",
-                                "dbo_variable_name": "modec_code_ft"
-                            }
-                        },
-                        "DBOVariableDefinitionRefTrajmodec_code_ft0": {
-                            "parameters": {
-                                "dbo_name": "RefTraj",
-                                "dbo_variable_name": "modec_code_ft"
-                            }
-                        },
-                        "DBOVariableDefinitionTrackermodec_code_ft0": {
-                            "parameters": {
-                                "dbo_name": "Tracker",
-                                "dbo_variable_name": "modec_code_ft"
-                            }
-                        }
-                    }
-                }
-            },
-            "MetaDBOVariablemodec_g0": {
-                "parameters": {
-                    "description": "",
-                    "name": "modec_g"
-                },
-                "sub_configs": {
-                    "DBOVariableDefinition": {
-                        "DBOVariableDefinitionRadarmodec_g0": {
-                            "parameters": {
-                                "dbo_name": "Radar",
-                                "dbo_variable_name": "modec_g"
-                            }
-                        },
-                        "DBOVariableDefinitionTrackermodec_g0": {
-                            "parameters": {
-                                "dbo_name": "Tracker",
-                                "dbo_variable_name": "modec_g"
-                            }
-                        }
-                    }
-                }
-            },
-            "MetaDBOVariablemodec_v0": {
-                "parameters": {
-                    "description": "",
-                    "name": "modec_v"
-                },
-                "sub_configs": {
-                    "DBOVariableDefinition": {
-                        "DBOVariableDefinitionRadarmodec_v0": {
-                            "parameters": {
-                                "dbo_name": "Radar",
-                                "dbo_variable_name": "modec_v"
-                            }
-                        },
-                        "DBOVariableDefinitionTrackermodec_v0": {
-                            "parameters": {
-                                "dbo_name": "Tracker",
-                                "dbo_variable_name": "modec_v"
-                            }
-                        }
-                    }
-                }
-            },
-            "MetaDBOVariablemodes_mb_data0": {
-                "parameters": {
-                    "description": "",
-                    "name": "modes_mb_data"
-                },
-                "sub_configs": {
-                    "DBOVariableDefinition": {
-                        "DBOVariableDefinitionMLATmodes_mb_data0": {
-                            "parameters": {
-                                "dbo_name": "MLAT",
-                                "dbo_variable_name": "modes_mb_data"
-                            }
-                        },
-                        "DBOVariableDefinitionRadarmodes_mb_data0": {
-                            "parameters": {
-                                "dbo_name": "Radar",
-                                "dbo_variable_name": "modes_mb_data"
-                            }
-                        },
-                        "DBOVariableDefinitionTrackermodes_mb_data0": {
-                            "parameters": {
-                                "dbo_name": "Tracker",
-                                "dbo_variable_name": "modes_mb_data"
-                            }
-                        }
-                    }
-                }
-            },
-            "MetaDBOVariablemof_long0": {
-                "parameters": {
-                    "description": "",
-                    "name": "mof_long"
-                },
-                "sub_configs": {
-                    "DBOVariableDefinition": {
-                        "DBOVariableDefinitionRefTrajmof_long0": {
-                            "parameters": {
-                                "dbo_name": "RefTraj",
-                                "dbo_variable_name": "mof_long"
-                            }
-                        },
-                        "DBOVariableDefinitionTrackermof_long0": {
-                            "parameters": {
-                                "dbo_name": "Tracker",
-                                "dbo_variable_name": "mof_long"
-                            }
-                        }
-                    }
-                }
-            },
-            "MetaDBOVariablemof_trans0": {
-                "parameters": {
-                    "description": "",
-                    "name": "mof_trans"
-                },
-                "sub_configs": {
-                    "DBOVariableDefinition": {
-                        "DBOVariableDefinitionRefTrajmof_trans0": {
-                            "parameters": {
-                                "dbo_name": "RefTraj",
-                                "dbo_variable_name": "mof_trans"
-                            }
-                        },
-                        "DBOVariableDefinitionTrackermof_trans0": {
-                            "parameters": {
-                                "dbo_name": "Tracker",
-                                "dbo_variable_name": "mof_trans"
-                            }
-                        }
-                    }
-                }
-            },
-            "MetaDBOVariablemof_vert0": {
-                "parameters": {
-                    "description": "",
-                    "name": "mof_vert"
-                },
-                "sub_configs": {
-                    "DBOVariableDefinition": {
-                        "DBOVariableDefinitionRefTrajmof_vert0": {
-                            "parameters": {
-                                "dbo_name": "RefTraj",
-                                "dbo_variable_name": "mof_vert"
-                            }
-                        },
-                        "DBOVariableDefinitionTrackermof_vert0": {
-                            "parameters": {
-                                "dbo_name": "Tracker",
-                                "dbo_variable_name": "mof_vert"
-                            }
-                        }
-                    }
-                }
-            },
-            "MetaDBOVariablemsg_fmt0": {
-                "parameters": {
-                    "description": "",
-                    "name": "msg_fmt"
-                },
-                "sub_configs": {
-                    "DBOVariableDefinition": {
-                        "DBOVariableDefinitionMLATmsg_fmt0": {
-                            "parameters": {
-                                "dbo_name": "MLAT",
-                                "dbo_variable_name": "msg_fmt"
-                            }
-                        },
-                        "DBOVariableDefinitionRadarmsg_fmt0": {
-                            "parameters": {
-                                "dbo_name": "Radar",
-                                "dbo_variable_name": "msg_fmt"
-                            }
-                        },
-                        "DBOVariableDefinitionTrackermsg_fmt0": {
-                            "parameters": {
-                                "dbo_name": "Tracker",
-                                "dbo_variable_name": "msg_fmt"
-                            }
-                        }
-                    }
-                }
-            },
-            "MetaDBOVariablepos_lat_deg0": {
-                "parameters": {
-                    "description": "",
-                    "name": "pos_lat_deg"
-                },
-                "sub_configs": {
-                    "DBOVariableDefinition": {
-                        "DBOVariableDefinitionADSBpos_lat_deg0": {
-                            "parameters": {
-                                "dbo_name": "ADSB",
-                                "dbo_variable_name": "pos_lat_deg"
-                            }
-                        },
-                        "DBOVariableDefinitionMLATpos_lat_deg0": {
-                            "parameters": {
-                                "dbo_name": "MLAT",
-                                "dbo_variable_name": "pos_lat_deg"
-                            }
-                        },
-                        "DBOVariableDefinitionRadarpos_lat_deg0": {
-                            "parameters": {
-                                "dbo_name": "Radar",
-                                "dbo_variable_name": "pos_lat_deg"
-                            }
-                        },
-                        "DBOVariableDefinitionRefTrajpos_lat_deg0": {
-                            "parameters": {
-                                "dbo_name": "RefTraj",
-                                "dbo_variable_name": "pos_lat_deg"
-                            }
-                        },
-                        "DBOVariableDefinitionTrackerpos_lat_deg0": {
-                            "parameters": {
-                                "dbo_name": "Tracker",
-                                "dbo_variable_name": "pos_lat_deg"
-                            }
-                        }
-                    }
-                }
-            },
-            "MetaDBOVariablepos_lat_deg_calc0": {
-                "parameters": {
-                    "description": "",
-                    "name": "pos_lat_deg_calc"
-                },
-                "sub_configs": {
-                    "DBOVariableDefinition": {
-                        "DBOVariableDefinitionMLATpos_lat_deg_calc0": {
-                            "parameters": {
-                                "dbo_name": "MLAT",
-                                "dbo_variable_name": "pos_lat_deg_calc"
-                            }
-                        },
-                        "DBOVariableDefinitionTrackerpos_lat_deg_calc0": {
-                            "parameters": {
-                                "dbo_name": "Tracker",
-                                "dbo_variable_name": "pos_lat_deg_calc"
-                            }
-                        }
-                    }
-                }
-            },
-            "MetaDBOVariablepos_local_x_nm0": {
-                "parameters": {
-                    "description": "",
-                    "name": "pos_local_x_nm"
-                },
-                "sub_configs": {
-                    "DBOVariableDefinition": {
-                        "DBOVariableDefinitionMLATpos_local_x_nm0": {
-                            "parameters": {
-                                "dbo_name": "MLAT",
-                                "dbo_variable_name": "pos_local_x_nm"
-                            }
-                        },
-                        "DBOVariableDefinitionRadarpos_local_x_nm0": {
-                            "parameters": {
-                                "dbo_name": "Radar",
-                                "dbo_variable_name": "pos_local_x_nm"
-                            }
-                        },
-                        "DBOVariableDefinitionTrackerpos_local_x_nm0": {
-                            "parameters": {
-                                "dbo_name": "Tracker",
-                                "dbo_variable_name": "pos_local_x_nm"
-                            }
-                        }
-                    }
-                }
-            },
-            "MetaDBOVariablepos_local_x_nm_calc0": {
-                "parameters": {
-                    "description": "",
-                    "name": "pos_local_x_nm_calc"
-                },
-                "sub_configs": {
-                    "DBOVariableDefinition": {
-                        "DBOVariableDefinitionMLATpos_local_x_nm_calc0": {
-                            "parameters": {
-                                "dbo_name": "MLAT",
-                                "dbo_variable_name": "pos_local_x_nm_calc"
-                            }
-                        },
-                        "DBOVariableDefinitionRadarpos_local_x_nm_calc0": {
-                            "parameters": {
-                                "dbo_name": "Radar",
-                                "dbo_variable_name": "pos_local_x_nm_calc"
-                            }
-                        },
-                        "DBOVariableDefinitionTrackerpos_local_x_nm_calc0": {
-                            "parameters": {
-                                "dbo_name": "Tracker",
-                                "dbo_variable_name": "pos_local_x_nm_calc"
-                            }
-                        }
-                    }
-                }
-            },
-            "MetaDBOVariablepos_local_y_nm0": {
-                "parameters": {
-                    "description": "",
-                    "name": "pos_local_y_nm"
-                },
-                "sub_configs": {
-                    "DBOVariableDefinition": {
-                        "DBOVariableDefinitionMLATpos_local_y_nm0": {
-                            "parameters": {
-                                "dbo_name": "MLAT",
-                                "dbo_variable_name": "pos_local_y_nm"
-                            }
-                        },
-                        "DBOVariableDefinitionRadarpos_local_y_nm0": {
-                            "parameters": {
-                                "dbo_name": "Radar",
-                                "dbo_variable_name": "pos_local_y_nm"
-                            }
-                        },
-                        "DBOVariableDefinitionTrackerpos_local_y_nm0": {
-                            "parameters": {
-                                "dbo_name": "Tracker",
-                                "dbo_variable_name": "pos_local_y_nm"
-                            }
-                        }
-                    }
-                }
-            },
-            "MetaDBOVariablepos_local_y_nm_calc0": {
-                "parameters": {
-                    "description": "",
-                    "name": "pos_local_y_nm_calc"
-                },
-                "sub_configs": {
-                    "DBOVariableDefinition": {
-                        "DBOVariableDefinitionMLATpos_local_y_nm_calc0": {
-                            "parameters": {
-                                "dbo_name": "MLAT",
-                                "dbo_variable_name": "pos_local_y_nm_calc"
-                            }
-                        },
-                        "DBOVariableDefinitionRadarpos_local_y_nm_calc0": {
-                            "parameters": {
-                                "dbo_name": "Radar",
-                                "dbo_variable_name": "pos_local_y_nm_calc"
-                            }
-                        },
-                        "DBOVariableDefinitionTrackerpos_local_y_nm_calc0": {
-                            "parameters": {
-                                "dbo_name": "Tracker",
-                                "dbo_variable_name": "pos_local_y_nm_calc"
-                            }
-                        }
-                    }
-                }
-            },
-            "MetaDBOVariablepos_long_deg0": {
-                "parameters": {
-                    "description": "",
-                    "name": "pos_long_deg"
-                },
-                "sub_configs": {
-                    "DBOVariableDefinition": {
-                        "DBOVariableDefinitionADSBpos_long_deg0": {
-                            "parameters": {
-                                "dbo_name": "ADSB",
-                                "dbo_variable_name": "pos_long_deg"
-                            }
-                        },
-                        "DBOVariableDefinitionMLATpos_long_deg0": {
-                            "parameters": {
-                                "dbo_name": "MLAT",
-                                "dbo_variable_name": "pos_long_deg"
-                            }
-                        },
-                        "DBOVariableDefinitionRadarpos_long_deg0": {
-                            "parameters": {
-                                "dbo_name": "Radar",
-                                "dbo_variable_name": "pos_long_deg"
-                            }
-                        },
-                        "DBOVariableDefinitionRefTrajpos_long_deg0": {
-                            "parameters": {
-                                "dbo_name": "RefTraj",
-                                "dbo_variable_name": "pos_long_deg"
-                            }
-                        },
-                        "DBOVariableDefinitionTrackerpos_long_deg0": {
-                            "parameters": {
-                                "dbo_name": "Tracker",
-                                "dbo_variable_name": "pos_long_deg"
-                            }
-                        }
-                    }
-                }
-            },
-            "MetaDBOVariablepos_long_deg_calc0": {
-                "parameters": {
-                    "description": "",
-                    "name": "pos_long_deg_calc"
-                },
-                "sub_configs": {
-                    "DBOVariableDefinition": {
-                        "DBOVariableDefinitionMLATpos_long_deg_calc0": {
-                            "parameters": {
-                                "dbo_name": "MLAT",
-                                "dbo_variable_name": "pos_long_deg_calc"
-                            }
-                        },
-                        "DBOVariableDefinitionTrackerpos_long_deg_calc0": {
-                            "parameters": {
-                                "dbo_name": "Tracker",
-                                "dbo_variable_name": "pos_long_deg_calc"
-                            }
-                        }
-                    }
-                }
-            },
-            "MetaDBOVariablepos_std_dev_lat_deg0": {
-                "parameters": {
-                    "description": "",
-                    "name": "pos_std_dev_lat_deg"
-                },
-                "sub_configs": {
-                    "DBOVariableDefinition": {
-                        "DBOVariableDefinitionMLATpos_std_dev_lat_deg0": {
-                            "parameters": {
-                                "dbo_name": "MLAT",
-                                "dbo_variable_name": "pos_std_dev_lat_deg"
-                            }
-                        },
-                        "DBOVariableDefinitionRefTrajpos_std_dev_lat_deg0": {
-                            "parameters": {
-                                "dbo_name": "RefTraj",
-                                "dbo_variable_name": "pos_std_dev_lat_deg"
-                            }
-                        }
-                    }
-                }
-            },
-            "MetaDBOVariablepos_std_dev_latlong_corr_coeff0": {
-                "parameters": {
-                    "description": "",
-                    "name": "pos_std_dev_latlong_corr_coeff"
-                },
-                "sub_configs": {
-                    "DBOVariableDefinition": {
-                        "DBOVariableDefinitionMLATpos_std_dev_latlong_corr_coeff0": {
-                            "parameters": {
-                                "dbo_name": "MLAT",
-                                "dbo_variable_name": "pos_std_dev_latlong_corr_coeff"
-                            }
-                        },
-                        "DBOVariableDefinitionRefTrajpos_std_dev_latlong_corr_coeff0": {
-                            "parameters": {
-                                "dbo_name": "RefTraj",
-                                "dbo_variable_name": "pos_std_dev_latlong_corr_coeff"
-                            }
-                        }
-                    }
-                }
-            },
-            "MetaDBOVariablepos_std_dev_long_deg0": {
-                "parameters": {
-                    "description": "",
-                    "name": "pos_std_dev_long_deg"
-                },
-                "sub_configs": {
-                    "DBOVariableDefinition": {
-                        "DBOVariableDefinitionMLATpos_std_dev_long_deg0": {
-                            "parameters": {
-                                "dbo_name": "MLAT",
-                                "dbo_variable_name": "pos_std_dev_long_deg"
-                            }
-                        },
-                        "DBOVariableDefinitionRefTrajpos_std_dev_long_deg0": {
-                            "parameters": {
-                                "dbo_name": "RefTraj",
-                                "dbo_variable_name": "pos_std_dev_long_deg"
-                            }
-                        }
-                    }
-                }
-            },
-            "MetaDBOVariablepos_sys_x_nm0": {
-                "parameters": {
-                    "description": "",
-                    "name": "pos_sys_x_nm"
-                },
-                "sub_configs": {
-                    "DBOVariableDefinition": {
-                        "DBOVariableDefinitionADSBpos_sys_x_nm0": {
-                            "parameters": {
-                                "dbo_name": "ADSB",
-                                "dbo_variable_name": "pos_sys_x_nm"
-                            }
-                        },
-                        "DBOVariableDefinitionMLATpos_sys_x_nm0": {
-                            "parameters": {
-                                "dbo_name": "MLAT",
-                                "dbo_variable_name": "pos_sys_x_nm"
-                            }
-                        },
-                        "DBOVariableDefinitionRadarpos_sys_x_nm0": {
-                            "parameters": {
-                                "dbo_name": "Radar",
-                                "dbo_variable_name": "pos_sys_x_nm"
-                            }
-                        },
-                        "DBOVariableDefinitionTrackerpos_sys_x_nm0": {
-                            "parameters": {
-                                "dbo_name": "Tracker",
-                                "dbo_variable_name": "pos_sys_x_nm"
-                            }
-                        }
-                    }
-                }
-            },
-            "MetaDBOVariablepos_sys_y_nm0": {
-                "parameters": {
-                    "description": "",
-                    "name": "pos_sys_y_nm"
-                },
-                "sub_configs": {
-                    "DBOVariableDefinition": {
-                        "DBOVariableDefinitionADSBpos_sys_y_nm0": {
-                            "parameters": {
-                                "dbo_name": "ADSB",
-                                "dbo_variable_name": "pos_sys_y_nm"
-                            }
-                        },
-                        "DBOVariableDefinitionMLATpos_sys_y_nm0": {
-                            "parameters": {
-                                "dbo_name": "MLAT",
-                                "dbo_variable_name": "pos_sys_y_nm"
-                            }
-                        },
-                        "DBOVariableDefinitionRadarpos_sys_y_nm0": {
-                            "parameters": {
-                                "dbo_name": "Radar",
-                                "dbo_variable_name": "pos_sys_y_nm"
-                            }
-                        },
-                        "DBOVariableDefinitionTrackerpos_sys_y_nm0": {
-                            "parameters": {
-                                "dbo_name": "Tracker",
-                                "dbo_variable_name": "pos_sys_y_nm"
-                            }
-                        }
-                    }
-                }
-            },
-            "MetaDBOVariableraw_msg0": {
-                "parameters": {
-                    "description": "",
-                    "name": "raw_msg"
-                },
-                "sub_configs": {
-                    "DBOVariableDefinition": {
-                        "DBOVariableDefinitionADSBraw_msg0": {
-                            "parameters": {
-                                "dbo_name": "ADSB",
-                                "dbo_variable_name": "raw_msg"
-                            }
-                        },
-                        "DBOVariableDefinitionMLATraw_msg0": {
-                            "parameters": {
-                                "dbo_name": "MLAT",
-                                "dbo_variable_name": "raw_msg"
-                            }
-                        },
-                        "DBOVariableDefinitionRadarraw_msg0": {
-                            "parameters": {
-                                "dbo_name": "Radar",
-                                "dbo_variable_name": "raw_msg"
-                            }
-                        },
-                        "DBOVariableDefinitionTrackerraw_msg0": {
-                            "parameters": {
-                                "dbo_name": "Tracker",
-                                "dbo_variable_name": "raw_msg"
-                            }
-                        }
-                    }
-                }
-            },
-            "MetaDBOVariablerdp_chain0": {
-                "parameters": {
-                    "description": "",
-                    "name": "rdp_chain"
-                },
-                "sub_configs": {
-                    "DBOVariableDefinition": {
-                        "DBOVariableDefinitionMLATrdp_chain0": {
-                            "parameters": {
-                                "dbo_name": "MLAT",
-                                "dbo_variable_name": "rdp_chain"
-                            }
-                        },
-                        "DBOVariableDefinitionRadarrdp_chain0": {
-                            "parameters": {
-                                "dbo_name": "Radar",
-                                "dbo_variable_name": "rdp_chain"
                             }
                         }
                     }
@@ -2379,26 +1999,37 @@
             },
             "MetaDBOVariablerec_num0": {
                 "parameters": {
-                    "description": "",
                     "name": "rec_num"
                 },
                 "sub_configs": {
                     "DBOVariableDefinition": {
-                        "DBOVariableDefinitionADSBrec_num0": {
+                        "DBOVariableDefinitionCAT001rec_num0": {
                             "parameters": {
-                                "dbo_name": "ADSB",
+                                "dbo_name": "CAT001",
                                 "dbo_variable_name": "rec_num"
                             }
                         },
-                        "DBOVariableDefinitionMLATrec_num0": {
+                        "DBOVariableDefinitionCAT020rec_num0": {
                             "parameters": {
-                                "dbo_name": "MLAT",
+                                "dbo_name": "CAT020",
                                 "dbo_variable_name": "rec_num"
                             }
                         },
-                        "DBOVariableDefinitionRadarrec_num0": {
+                        "DBOVariableDefinitionCAT021rec_num0": {
                             "parameters": {
-                                "dbo_name": "Radar",
+                                "dbo_name": "CAT021",
+                                "dbo_variable_name": "rec_num"
+                            }
+                        },
+                        "DBOVariableDefinitionCAT048rec_num0": {
+                            "parameters": {
+                                "dbo_name": "CAT048",
+                                "dbo_variable_name": "rec_num"
+                            }
+                        },
+                        "DBOVariableDefinitionCAT062rec_num0": {
+                            "parameters": {
+                                "dbo_name": "CAT062",
                                 "dbo_variable_name": "rec_num"
                             }
                         },
@@ -2406,650 +2037,6 @@
                             "parameters": {
                                 "dbo_name": "RefTraj",
                                 "dbo_variable_name": "rec_num"
-                            }
-                        },
-                        "DBOVariableDefinitionTrackerrec_num0": {
-                            "parameters": {
-                                "dbo_name": "Tracker",
-                                "dbo_variable_name": "rec_num"
-                            }
-                        }
-                    }
-                }
-            },
-            "MetaDBOVariablerec_time_ms0": {
-                "parameters": {
-                    "description": "",
-                    "name": "rec_time_ms"
-                },
-                "sub_configs": {
-                    "DBOVariableDefinition": {
-                        "DBOVariableDefinitionADSBrec_time_ms0": {
-                            "parameters": {
-                                "dbo_name": "ADSB",
-                                "dbo_variable_name": "rec_time_ms"
-                            }
-                        },
-                        "DBOVariableDefinitionMLATrec_time_ms0": {
-                            "parameters": {
-                                "dbo_name": "MLAT",
-                                "dbo_variable_name": "rec_time_ms"
-                            }
-                        },
-                        "DBOVariableDefinitionRadarrec_time_ms0": {
-                            "parameters": {
-                                "dbo_name": "Radar",
-                                "dbo_variable_name": "rec_time_ms"
-                            }
-                        },
-                        "DBOVariableDefinitionTrackerrec_time_ms0": {
-                            "parameters": {
-                                "dbo_name": "Tracker",
-                                "dbo_variable_name": "rec_time_ms"
-                            }
-                        }
-                    }
-                }
-            },
-            "MetaDBOVariablerec_time_posix0": {
-                "parameters": {
-                    "description": "",
-                    "name": "rec_time_posix"
-                },
-                "sub_configs": {
-                    "DBOVariableDefinition": {
-                        "DBOVariableDefinitionADSBrec_time_posix0": {
-                            "parameters": {
-                                "dbo_name": "ADSB",
-                                "dbo_variable_name": "rec_time_posix"
-                            }
-                        },
-                        "DBOVariableDefinitionMLATrec_time_posix0": {
-                            "parameters": {
-                                "dbo_name": "MLAT",
-                                "dbo_variable_name": "rec_time_posix"
-                            }
-                        },
-                        "DBOVariableDefinitionRadarrec_time_posix0": {
-                            "parameters": {
-                                "dbo_name": "Radar",
-                                "dbo_variable_name": "rec_time_posix"
-                            }
-                        },
-                        "DBOVariableDefinitionTrackerrec_time_posix0": {
-                            "parameters": {
-                                "dbo_name": "Tracker",
-                                "dbo_variable_name": "rec_time_posix"
-                            }
-                        }
-                    }
-                }
-            },
-            "MetaDBOVariablereport_type0": {
-                "parameters": {
-                    "description": "",
-                    "name": "report_type"
-                },
-                "sub_configs": {
-                    "DBOVariableDefinition": {
-                        "DBOVariableDefinitionADSBreport_type0": {
-                            "parameters": {
-                                "dbo_name": "ADSB",
-                                "dbo_variable_name": "report_type"
-                            }
-                        },
-                        "DBOVariableDefinitionMLATreport_type0": {
-                            "parameters": {
-                                "dbo_name": "MLAT",
-                                "dbo_variable_name": "report_type"
-                            }
-                        },
-                        "DBOVariableDefinitionRadarreport_type0": {
-                            "parameters": {
-                                "dbo_name": "Radar",
-                                "dbo_variable_name": "report_type"
-                            }
-                        },
-                        "DBOVariableDefinitionTrackerreport_type0": {
-                            "parameters": {
-                                "dbo_name": "Tracker",
-                                "dbo_variable_name": "report_type"
-                            }
-                        }
-                    }
-                }
-            },
-            "MetaDBOVariablesac0": {
-                "parameters": {
-                    "description": "",
-                    "name": "sac"
-                },
-                "sub_configs": {
-                    "DBOVariableDefinition": {
-                        "DBOVariableDefinitionADSBsac0": {
-                            "parameters": {
-                                "dbo_name": "ADSB",
-                                "dbo_variable_name": "sac"
-                            }
-                        },
-                        "DBOVariableDefinitionMLATsac0": {
-                            "parameters": {
-                                "dbo_name": "MLAT",
-                                "dbo_variable_name": "sac"
-                            }
-                        },
-                        "DBOVariableDefinitionRadarsac0": {
-                            "parameters": {
-                                "dbo_name": "Radar",
-                                "dbo_variable_name": "sac"
-                            }
-                        },
-                        "DBOVariableDefinitionRefTrajsac0": {
-                            "parameters": {
-                                "dbo_name": "RefTraj",
-                                "dbo_variable_name": "sac"
-                            }
-                        },
-                        "DBOVariableDefinitionTrackersac0": {
-                            "parameters": {
-                                "dbo_name": "Tracker",
-                                "dbo_variable_name": "sac"
-                            }
-                        }
-                    }
-                }
-            },
-            "MetaDBOVariablesic0": {
-                "parameters": {
-                    "description": "",
-                    "name": "sic"
-                },
-                "sub_configs": {
-                    "DBOVariableDefinition": {
-                        "DBOVariableDefinitionADSBsic0": {
-                            "parameters": {
-                                "dbo_name": "ADSB",
-                                "dbo_variable_name": "sic"
-                            }
-                        },
-                        "DBOVariableDefinitionMLATsic0": {
-                            "parameters": {
-                                "dbo_name": "MLAT",
-                                "dbo_variable_name": "sic"
-                            }
-                        },
-                        "DBOVariableDefinitionRadarsic0": {
-                            "parameters": {
-                                "dbo_name": "Radar",
-                                "dbo_variable_name": "sic"
-                            }
-                        },
-                        "DBOVariableDefinitionRefTrajsic0": {
-                            "parameters": {
-                                "dbo_name": "RefTraj",
-                                "dbo_variable_name": "sic"
-                            }
-                        },
-                        "DBOVariableDefinitionTrackersic0": {
-                            "parameters": {
-                                "dbo_name": "Tracker",
-                                "dbo_variable_name": "sic"
-                            }
-                        }
-                    }
-                }
-            },
-            "MetaDBOVariablesimulated_target0": {
-                "parameters": {
-                    "description": "",
-                    "name": "simulated_target"
-                },
-                "sub_configs": {
-                    "DBOVariableDefinition": {
-                        "DBOVariableDefinitionADSBsimulated_target0": {
-                            "parameters": {
-                                "dbo_name": "ADSB",
-                                "dbo_variable_name": "simulated_target"
-                            }
-                        },
-                        "DBOVariableDefinitionMLATsimulated_target0": {
-                            "parameters": {
-                                "dbo_name": "MLAT",
-                                "dbo_variable_name": "simulated_target"
-                            }
-                        },
-                        "DBOVariableDefinitionRadarsimulated_target0": {
-                            "parameters": {
-                                "dbo_name": "Radar",
-                                "dbo_variable_name": "simulated_target"
-                            }
-                        },
-                        "DBOVariableDefinitionTrackersimulated_target0": {
-                            "parameters": {
-                                "dbo_name": "Tracker",
-                                "dbo_variable_name": "simulated_target"
-                            }
-                        }
-                    }
-                }
-            },
-            "MetaDBOVariablespi0": {
-                "parameters": {
-                    "description": "",
-                    "name": "spi"
-                },
-                "sub_configs": {
-                    "DBOVariableDefinition": {
-                        "DBOVariableDefinitionADSBspi0": {
-                            "parameters": {
-                                "dbo_name": "ADSB",
-                                "dbo_variable_name": "spi"
-                            }
-                        },
-                        "DBOVariableDefinitionMLATspi0": {
-                            "parameters": {
-                                "dbo_name": "MLAT",
-                                "dbo_variable_name": "spi"
-                            }
-                        },
-                        "DBOVariableDefinitionRadarspi0": {
-                            "parameters": {
-                                "dbo_name": "Radar",
-                                "dbo_variable_name": "spi"
-                            }
-                        },
-                        "DBOVariableDefinitionRefTrajspi0": {
-                            "parameters": {
-                                "dbo_name": "RefTraj",
-                                "dbo_variable_name": "spi"
-                            }
-                        },
-                        "DBOVariableDefinitionTrackerspi0": {
-                            "parameters": {
-                                "dbo_name": "Tracker",
-                                "dbo_variable_name": "spi"
-                            }
-                        }
-                    }
-                }
-            },
-            "MetaDBOVariabletarget_addr0": {
-                "parameters": {
-                    "description": "",
-                    "name": "target_addr"
-                },
-                "sub_configs": {
-                    "DBOVariableDefinition": {
-                        "DBOVariableDefinitionADSBtarget_addr0": {
-                            "parameters": {
-                                "dbo_name": "ADSB",
-                                "dbo_variable_name": "target_addr"
-                            }
-                        },
-                        "DBOVariableDefinitionMLATtarget_addr0": {
-                            "parameters": {
-                                "dbo_name": "MLAT",
-                                "dbo_variable_name": "target_addr"
-                            }
-                        },
-                        "DBOVariableDefinitionRadartarget_addr0": {
-                            "parameters": {
-                                "dbo_name": "Radar",
-                                "dbo_variable_name": "target_addr"
-                            }
-                        },
-                        "DBOVariableDefinitionRefTrajtarget_addr0": {
-                            "parameters": {
-                                "dbo_name": "RefTraj",
-                                "dbo_variable_name": "target_addr"
-                            }
-                        },
-                        "DBOVariableDefinitionTrackertarget_addr0": {
-                            "parameters": {
-                                "dbo_name": "Tracker",
-                                "dbo_variable_name": "target_addr"
-                            }
-                        }
-                    }
-                }
-            },
-            "MetaDBOVariabletest_target0": {
-                "parameters": {
-                    "description": "",
-                    "name": "test_target"
-                },
-                "sub_configs": {
-                    "DBOVariableDefinition": {
-                        "DBOVariableDefinitionADSBtest_target0": {
-                            "parameters": {
-                                "dbo_name": "ADSB",
-                                "dbo_variable_name": "test_target"
-                            }
-                        },
-                        "DBOVariableDefinitionMLATtest_target0": {
-                            "parameters": {
-                                "dbo_name": "MLAT",
-                                "dbo_variable_name": "test_target"
-                            }
-                        },
-                        "DBOVariableDefinitionRadartest_target0": {
-                            "parameters": {
-                                "dbo_name": "Radar",
-                                "dbo_variable_name": "test_target"
-                            }
-                        }
-                    }
-                }
-            },
-            "MetaDBOVariabletod0": {
-                "parameters": {
-                    "description": "",
-                    "name": "tod"
-                },
-                "sub_configs": {
-                    "DBOVariableDefinition": {
-                        "DBOVariableDefinitionADSBtod0": {
-                            "parameters": {
-                                "dbo_name": "ADSB",
-                                "dbo_variable_name": "tod"
-                            }
-                        },
-                        "DBOVariableDefinitionMLATtod0": {
-                            "parameters": {
-                                "dbo_name": "MLAT",
-                                "dbo_variable_name": "tod"
-                            }
-                        },
-                        "DBOVariableDefinitionRadartod0": {
-                            "parameters": {
-                                "dbo_name": "Radar",
-                                "dbo_variable_name": "tod"
-                            }
-                        },
-                        "DBOVariableDefinitionRefTrajtod0": {
-                            "parameters": {
-                                "dbo_name": "RefTraj",
-                                "dbo_variable_name": "tod"
-                            }
-                        },
-                        "DBOVariableDefinitionTrackertod0": {
-                            "parameters": {
-                                "dbo_name": "Tracker",
-                                "dbo_variable_name": "tod"
-                            }
-                        }
-                    }
-                }
-            },
-            "MetaDBOVariabletod_calculated0": {
-                "parameters": {
-                    "description": "",
-                    "name": "tod_calculated"
-                },
-                "sub_configs": {
-                    "DBOVariableDefinition": {
-                        "DBOVariableDefinitionADSBtod_calculated0": {
-                            "parameters": {
-                                "dbo_name": "ADSB",
-                                "dbo_variable_name": "tod_calculated"
-                            }
-                        },
-                        "DBOVariableDefinitionMLATtod_calculated0": {
-                            "parameters": {
-                                "dbo_name": "MLAT",
-                                "dbo_variable_name": "tod_calculated"
-                            }
-                        },
-                        "DBOVariableDefinitionRadartod_calculated0": {
-                            "parameters": {
-                                "dbo_name": "Radar",
-                                "dbo_variable_name": "tod_calculated"
-                            }
-                        },
-                        "DBOVariableDefinitionTrackertod_calculated0": {
-                            "parameters": {
-                                "dbo_name": "Tracker",
-                                "dbo_variable_name": "tod_calculated"
-                            }
-                        }
-                    }
-                }
-            },
-            "MetaDBOVariabletrack_climb_desc_mode0": {
-                "parameters": {
-                    "description": "",
-                    "name": "track_climb_desc_mode"
-                },
-                "sub_configs": {
-                    "DBOVariableDefinition": {
-                        "DBOVariableDefinitionMLATtrack_climb_desc_mode0": {
-                            "parameters": {
-                                "dbo_name": "MLAT",
-                                "dbo_variable_name": "track_climb_desc_mode"
-                            }
-                        },
-                        "DBOVariableDefinitionRadartrack_climb_desc_mode0": {
-                            "parameters": {
-                                "dbo_name": "Radar",
-                                "dbo_variable_name": "track_climb_desc_mode"
-                            }
-                        }
-                    }
-                }
-            },
-            "MetaDBOVariabletrack_coasted0": {
-                "parameters": {
-                    "description": "",
-                    "name": "track_coasted"
-                },
-                "sub_configs": {
-                    "DBOVariableDefinition": {
-                        "DBOVariableDefinitionMLATtrack_coasted0": {
-                            "parameters": {
-                                "dbo_name": "MLAT",
-                                "dbo_variable_name": "track_coasted"
-                            }
-                        },
-                        "DBOVariableDefinitionTrackertrack_coasted0": {
-                            "parameters": {
-                                "dbo_name": "Tracker",
-                                "dbo_variable_name": "track_coasted"
-                            }
-                        }
-                    }
-                }
-            },
-            "MetaDBOVariabletrack_confirmed0": {
-                "parameters": {
-                    "description": "",
-                    "name": "track_confirmed"
-                },
-                "sub_configs": {
-                    "DBOVariableDefinition": {
-                        "DBOVariableDefinitionMLATtrack_confirmed0": {
-                            "parameters": {
-                                "dbo_name": "MLAT",
-                                "dbo_variable_name": "track_confirmed"
-                            }
-                        },
-                        "DBOVariableDefinitionRadartrack_confirmed0": {
-                            "parameters": {
-                                "dbo_name": "Radar",
-                                "dbo_variable_name": "track_confirmed"
-                            }
-                        },
-                        "DBOVariableDefinitionTrackertrack_confirmed0": {
-                            "parameters": {
-                                "dbo_name": "Tracker",
-                                "dbo_variable_name": "track_confirmed"
-                            }
-                        }
-                    }
-                }
-            },
-            "MetaDBOVariabletrack_created0": {
-                "parameters": {
-                    "description": "",
-                    "name": "track_created"
-                },
-                "sub_configs": {
-                    "DBOVariableDefinition": {
-                        "DBOVariableDefinitionRefTrajtrack_created0": {
-                            "parameters": {
-                                "dbo_name": "RefTraj",
-                                "dbo_variable_name": "track_created"
-                            }
-                        },
-                        "DBOVariableDefinitionTrackertrack_created0": {
-                            "parameters": {
-                                "dbo_name": "Tracker",
-                                "dbo_variable_name": "track_created"
-                            }
-                        }
-                    }
-                }
-            },
-            "MetaDBOVariabletrack_end0": {
-                "parameters": {
-                    "description": "",
-                    "name": "track_end"
-                },
-                "sub_configs": {
-                    "DBOVariableDefinition": {
-                        "DBOVariableDefinitionMLATtrack_end0": {
-                            "parameters": {
-                                "dbo_name": "MLAT",
-                                "dbo_variable_name": "track_end"
-                            }
-                        },
-                        "DBOVariableDefinitionRadartrack_end0": {
-                            "parameters": {
-                                "dbo_name": "Radar",
-                                "dbo_variable_name": "track_end"
-                            }
-                        },
-                        "DBOVariableDefinitionRefTrajtrack_end0": {
-                            "parameters": {
-                                "dbo_name": "RefTraj",
-                                "dbo_variable_name": "track_end"
-                            }
-                        },
-                        "DBOVariableDefinitionTrackertrack_end0": {
-                            "parameters": {
-                                "dbo_name": "Tracker",
-                                "dbo_variable_name": "track_end"
-                            }
-                        }
-                    }
-                }
-            },
-            "MetaDBOVariabletrack_ghost_target0": {
-                "parameters": {
-                    "description": "",
-                    "name": "track_ghost_target"
-                },
-                "sub_configs": {
-                    "DBOVariableDefinition": {
-                        "DBOVariableDefinitionMLATtrack_ghost_target0": {
-                            "parameters": {
-                                "dbo_name": "MLAT",
-                                "dbo_variable_name": "track_ghost_target"
-                            }
-                        },
-                        "DBOVariableDefinitionRadartrack_ghost_target0": {
-                            "parameters": {
-                                "dbo_name": "Radar",
-                                "dbo_variable_name": "track_ghost_target"
-                            }
-                        }
-                    }
-                }
-            },
-            "MetaDBOVariabletrack_manoeuvre_hori0": {
-                "parameters": {
-                    "description": "",
-                    "name": "track_manoeuvre_hori"
-                },
-                "sub_configs": {
-                    "DBOVariableDefinition": {
-                        "DBOVariableDefinitionMLATtrack_manoeuvre_hori0": {
-                            "parameters": {
-                                "dbo_name": "MLAT",
-                                "dbo_variable_name": "track_manoeuvre_hori"
-                            }
-                        },
-                        "DBOVariableDefinitionRadartrack_manoeuvre_hori0": {
-                            "parameters": {
-                                "dbo_name": "Radar",
-                                "dbo_variable_name": "track_manoeuvre_hori"
-                            }
-                        },
-                        "DBOVariableDefinitionRefTrajmanoeuvre_hori0": {
-                            "parameters": {
-                                "dbo_name": "RefTraj",
-                                "dbo_variable_name": "manoeuvre_hori"
-                            }
-                        }
-                    }
-                }
-            },
-            "MetaDBOVariabletrack_num0": {
-                "parameters": {
-                    "description": "",
-                    "name": "track_num"
-                },
-                "sub_configs": {
-                    "DBOVariableDefinition": {
-                        "DBOVariableDefinitionMLATtrack_num0": {
-                            "parameters": {
-                                "dbo_name": "MLAT",
-                                "dbo_variable_name": "track_num"
-                            }
-                        },
-                        "DBOVariableDefinitionRadartrack_num0": {
-                            "parameters": {
-                                "dbo_name": "Radar",
-                                "dbo_variable_name": "track_num"
-                            }
-                        },
-                        "DBOVariableDefinitionRefTrajtrack_num0": {
-                            "parameters": {
-                                "dbo_name": "RefTraj",
-                                "dbo_variable_name": "track_num"
-                            }
-                        },
-                        "DBOVariableDefinitionTrackertrack_num0": {
-                            "parameters": {
-                                "dbo_name": "Tracker",
-                                "dbo_variable_name": "track_num"
-                            }
-                        }
-                    }
-                }
-            },
-            "MetaDBOVariableturnrate_degps0": {
-                "parameters": {
-                    "description": "",
-                    "name": "turnrate_degps"
-                },
-                "sub_configs": {
-                    "DBOVariableDefinition": {
-                        "DBOVariableDefinitionADSBturnrate_degps0": {
-                            "parameters": {
-                                "dbo_name": "ADSB",
-                                "dbo_variable_name": "turnrate_degps"
-                            }
-                        },
-                        "DBOVariableDefinitionRefTrajturnrate_degps0": {
-                            "parameters": {
-                                "dbo_name": "RefTraj",
-                                "dbo_variable_name": "turnrate_degps"
-                            }
-                        },
-                        "DBOVariableDefinitionTrackerturnrate_degps0": {
-                            "parameters": {
-                                "dbo_name": "Tracker",
-                                "dbo_variable_name": "turnrate_degps"
                             }
                         }
                     }

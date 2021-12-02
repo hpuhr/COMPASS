@@ -1016,6 +1016,19 @@
                     "unit": ""
                 }
             },
+            "DBOVariable15": {
+                "parameters": {
+                    "data_type_str": "BOOL",
+                    "db_column_name": "track",
+                    "description": "From 020.TYP\n\n0 Plot\n1 Track",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Track",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
             "DBOVariable3": {
                 "parameters": {
                     "data_type_str": "DOUBLE",

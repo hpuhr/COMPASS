@@ -604,7 +604,7 @@
                     "append_value": false,
                     "comment": "Type number, value 0",
                     "db_object_name": "CAT001",
-                    "dbovariable_name": "Type",
+                    "dbovariable_name": "Track",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
