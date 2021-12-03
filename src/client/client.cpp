@@ -25,6 +25,7 @@
 #include "logger.h"
 #include "stringconv.h"
 #include "taskmanager.h"
+#include "mainwindow.h"
 
 #include <QApplication>
 #include <QMessageBox>
@@ -81,25 +82,25 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
 
     std::string create_new_sqlite3_db_filename;
     std::string open_sqlite3_db_filename;
-    std::string import_view_points_filename;
+//    std::string import_view_points_filename;
 #if USE_JASTERIX
     std::string import_asterix_filename;
-    std::string asterix_framing;
-    std::string asterix_decoder_cfg;
+//    std::string asterix_framing;
+//    std::string asterix_decoder_cfg;
 #endif
-    std::string import_json_filename;
-    std::string import_json_schema;
-    std::string import_gps_trail_filename;
-    std::string import_sectors_filename;
+//    std::string import_json_filename;
+//    std::string import_json_schema;
+//    std::string import_gps_trail_filename;
+//    std::string import_sectors_filename;
 
-    bool auto_process {false};
-    bool associate_data {false};
+//    bool auto_process {false};
+//    bool associate_data {false};
 
-    bool start {false};
+//    bool start {false};
     bool load_data {false};
-    std::string export_view_points_report_filename;
-    bool evaluate {false};
-    std::string export_eval_report_filename;
+//    std::string export_view_points_report_filename;
+//    bool evaluate {false};
+//    std::string export_eval_report_filename;
     bool quit {false};
 
     po::options_description desc("Allowed options");
@@ -109,34 +110,34 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
              "creates and opens new SQLite3 database with given filename, e.g. '/data/file1.db'")
             ("open_sqlite3_db", po::value<std::string>(&open_sqlite3_db_filename),
              "opens existing SQLite3 database with given filename, e.g. '/data/file1.db'")
-            ("import_view_points", po::value<std::string>(&import_view_points_filename),
-             "imports view points JSON file with given filename, e.g. '/data/file1.json'")
+//            ("import_view_points", po::value<std::string>(&import_view_points_filename),
+//             "imports view points JSON file with given filename, e.g. '/data/file1.json'")
         #if USE_JASTERIX
             ("import_asterix", po::value<std::string>(&import_asterix_filename),
              "imports ASTERIX file with given filename, e.g. '/data/file1.ff'")
-            ("asterix_framing", po::value<std::string>(&asterix_framing),
-             "sets ASTERIX framing, e.g. 'none', 'ioss', 'ioss_seq', 'rff'")
-            ("asterix_decoder_cfg", po::value<std::string>(&asterix_decoder_cfg),
-             "sets ASTERIX decoder config using JSON string, e.g. ''{\"10\":{\"edition\":\"0.31\"}}''"
-             " (including one pair of single quotes)")
+//            ("asterix_framing", po::value<std::string>(&asterix_framing),
+//             "sets ASTERIX framing, e.g. 'none', 'ioss', 'ioss_seq', 'rff'")
+//            ("asterix_decoder_cfg", po::value<std::string>(&asterix_decoder_cfg),
+//             "sets ASTERIX decoder config using JSON string, e.g. ''{\"10\":{\"edition\":\"0.31\"}}''"
+//             " (including one pair of single quotes)")
         #endif
-            ("import_json", po::value<std::string>(&import_json_filename),
-             "imports JSON file with given filename, e.g. '/data/file1.json'")
-            ("json_schema", po::value<std::string>(&import_json_schema),
-             "JSON file import schema, e.g. 'jASTERIX', 'OpenSkyNetwork', 'ADSBExchange', 'SDDL'")
-            ("import_gps_trail", po::value<std::string>(&import_gps_trail_filename),
-             "imports gps trail NMEA with given filename, e.g. '/data/file2.txt'")
-            ("import_sectors_json", po::value<std::string>(&import_sectors_filename),
-             "imports exported sectors JSON with given filename, e.g. '/data/sectors.json'")
-            ("auto_process", po::bool_switch(&auto_process), "start automatic processing of imported data")
-            ("associate_data", po::bool_switch(&associate_data), "associate target reports")
-            ("start", po::bool_switch(&start), "start after finishing previous steps")
+//            ("import_json", po::value<std::string>(&import_json_filename),
+//             "imports JSON file with given filename, e.g. '/data/file1.json'")
+//            ("json_schema", po::value<std::string>(&import_json_schema),
+//             "JSON file import schema, e.g. 'jASTERIX', 'OpenSkyNetwork', 'ADSBExchange', 'SDDL'")
+//            ("import_gps_trail", po::value<std::string>(&import_gps_trail_filename),
+//             "imports gps trail NMEA with given filename, e.g. '/data/file2.txt'")
+//            ("import_sectors_json", po::value<std::string>(&import_sectors_filename),
+//             "imports exported sectors JSON with given filename, e.g. '/data/sectors.json'")
+//            ("auto_process", po::bool_switch(&auto_process), "start automatic processing of imported data")
+//            ("associate_data", po::bool_switch(&associate_data), "associate target reports")
+//            ("start", po::bool_switch(&start), "start after finishing previous steps")
             ("load_data", po::bool_switch(&load_data), "load data after start")
-            ("export_view_points_report", po::value<std::string>(&export_view_points_report_filename),
-             "export view points report after start with given filename, e.g. '/data/db2/report.tex")
-            ("evaluate", po::bool_switch(&evaluate), "run evaluation")
-            ("export_eval_report", po::value<std::string>(&export_eval_report_filename),
-             "export evaluation report after start with given filename, e.g. '/data/eval_db2/report.tex")
+//            ("export_view_points_report", po::value<std::string>(&export_view_points_report_filename),
+//             "export view points report after start with given filename, e.g. '/data/db2/report.tex")
+//            ("evaluate", po::bool_switch(&evaluate), "run evaluation")
+//            ("export_eval_report", po::value<std::string>(&export_eval_report_filename),
+//             "export evaluation report after start with given filename, e.g. '/data/eval_db2/report.tex")
             ("quit", po::bool_switch(&quit), "quit after finishing all previous steps");
 
     try
@@ -163,26 +164,26 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
     if (quit_requested_)
         return;
 
-    if (import_json_filename.size() && !import_json_schema.size())
-    {
-        loginf << "COMPASSClient: schema name must be set for JSON import";
-        return;
-    }
+//    if (import_json_filename.size() && !import_json_schema.size())
+//    {
+//        loginf << "COMPASSClient: schema name must be set for JSON import";
+//        return;
+//    }
 
     loginf << "COMPASSClient: started with " << std::thread::hardware_concurrency() << " threads";
 
-//    TaskManager& task_man = COMPASS::instance().taskManager();
+    MainWindow& main_window = COMPASS::instance().mainWindow();
 
-//    if (create_new_sqlite3_db_filename.size())
-//        task_man.createAndOpenNewSqlite3DB(create_new_sqlite3_db_filename);
+    if (create_new_sqlite3_db_filename.size())
+        main_window.createAndOpenNewSqlite3DB(create_new_sqlite3_db_filename);
 
-//    if (open_sqlite3_db_filename.size())
-//        task_man.openSqlite3DB(open_sqlite3_db_filename);
+    if (open_sqlite3_db_filename.size())
+        main_window.openSqlite3DB(open_sqlite3_db_filename);
 
 //    if (import_view_points_filename.size())
 //        task_man.importViewPointsFile(import_view_points_filename);
 
-//#if USE_JASTERIX
+#if USE_JASTERIX
 //    try
 //    {
 //        if (asterix_framing.size())
@@ -206,9 +207,9 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
 //        return;
 //    }
 
-//    if (import_asterix_filename.size())
-//        task_man.importASTERIXFile(import_asterix_filename);
-//#endif
+    if (import_asterix_filename.size())
+        main_window.importASTERIXFile(import_asterix_filename);
+#endif
 
 //    if (import_json_filename.size())
 //        task_man.importJSONFile(import_json_filename, import_json_schema);
@@ -228,8 +229,8 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
 //    if (start)
 //        task_man.start(start);
 
-//    if (load_data)
-//        task_man.loadData(load_data);
+    if (load_data)
+        main_window.loadData(load_data);
 
 //    if (export_view_points_report_filename.size())
 //        task_man.exportViewPointsReportFile(export_view_points_report_filename);
@@ -240,8 +241,8 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
 //    if (export_eval_report_filename.size())
 //        task_man.exportEvalReportFile(export_eval_report_filename);
 
-//    if (quit)
-//        task_man.quit(quit);
+    if (quit)
+        main_window.quit(quit);
 
 }
 

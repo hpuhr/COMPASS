@@ -38,7 +38,7 @@ class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
-  private slots:
+private slots:
 
     void newDBSlot();
     void openExistingDBSlot();
@@ -58,13 +58,31 @@ class MainWindow : public QMainWindow
     void quitRequestedSlot();
     void showAddViewMenuSlot();
 
-  public:
+public:
     MainWindow();
     virtual ~MainWindow();
 
     void disableConfigurationSaving();
     void showEvaluationTab();
     void showViewPointsTab();
+
+    void createAndOpenNewSqlite3DB(const std::string& filename);
+    void openSqlite3DB(const std::string& filename);
+
+#if USE_JASTERIX
+    void importASTERIXFile(const std::string& filename);
+    //    void asterixFraming(const std::string& asterix_framing);
+    //    void asterixDecoderConfig(const std::string& asterix_decoder_cfg);
+    //    bool asterixOptionsSet() const;
+    //    void setAsterixOptions();
+#endif
+
+    void loadData(bool value);
+    void quit(bool value);
+    bool quitNeeded();
+
+    bool automaticTasksDefined() const;
+    void performAutomaticTasks ();
 
 protected:
     bool started_ {false};
@@ -73,6 +91,26 @@ protected:
     QPushButton* add_view_button_{nullptr};
 
     bool save_configuration_{true};
+
+    // command line defined tasks
+    bool automatic_tasks_defined_ {false};
+    bool sqlite3_create_new_db_ {false};
+    std::string sqlite3_create_new_db_filename_;
+
+    bool sqlite3_open_db_ {false};
+    std::string sqlite3_open_db_filename_;
+
+#if USE_JASTERIX
+    bool asterix_import_file_ {false};
+    std::string asterix_import_filename_;
+    //    bool set_asterix_framing_ {false};
+    //    std::string asterix_framing_;
+    //    bool set_asterix_decoder_cfg_ {false};
+    //    std::string asterix_decoder_cfg_;
+#endif
+
+    bool load_data_ {false};
+    bool quit_ {false};
 
     // menu
 

@@ -71,15 +71,15 @@ void ASTERIXPostprocessJob::run()
         assert (db_object.hasVariable(DBObject::var_radar_range_.name()));
         assert (db_object.hasVariable(DBObject::var_radar_azimuth_.name()));
         assert (db_object.hasVariable(DBObject::var_radar_altitude_.name()));
-        assert (db_object.hasVariable(DBObject::var_latitude_.name()));
-        assert (db_object.hasVariable(DBObject::var_longitude_.name()));
+        assert (db_object.hasVariable(DBObject::meta_var_latitude_.name()));
+        assert (db_object.hasVariable(DBObject::meta_var_longitude_.name()));
 
         DBOVariable& datasource_var = db_object.variable(DBObject::meta_var_datasource_id_.name());
         DBOVariable& range_var = db_object.variable(DBObject::var_radar_range_.name());
         DBOVariable& azimuth_var = db_object.variable(DBObject::var_radar_azimuth_.name());
         DBOVariable& altitude_var = db_object.variable(DBObject::var_radar_altitude_.name());
-        DBOVariable& latitude_var = db_object.variable(DBObject::var_latitude_.name());
-        DBOVariable& longitude_var = db_object.variable(DBObject::var_longitude_.name());
+        DBOVariable& latitude_var = db_object.variable(DBObject::meta_var_latitude_.name());
+        DBOVariable& longitude_var = db_object.variable(DBObject::meta_var_longitude_.name());
 
         datasource_var_name = datasource_var.name();
         range_var_name = range_var.name();

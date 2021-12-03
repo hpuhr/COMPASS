@@ -1056,11 +1056,11 @@ void ASTERIXImportTask::insertData(std::map<std::string, std::shared_ptr<Buffer>
             assert (object_manager.existsObject(dbo_name_it));
             DBObject& db_object = object_manager.object(dbo_name_it);
 
-            assert (db_object.hasVariable(DBObject::var_latitude_.name()));
-            assert (db_object.hasVariable(DBObject::var_longitude_.name()));
+            assert (db_object.hasVariable(DBObject::meta_var_latitude_.name()));
+            assert (db_object.hasVariable(DBObject::meta_var_longitude_.name()));
 
-            DBOVariable& latitude_var = db_object.variable(DBObject::var_latitude_.name());
-            DBOVariable& longitude_var = db_object.variable(DBObject::var_longitude_.name());
+            DBOVariable& latitude_var = db_object.variable(DBObject::meta_var_latitude_.name());
+            DBOVariable& longitude_var = db_object.variable(DBObject::meta_var_longitude_.name());
 
             dbo_variable_sets_[dbo_name_it].add(latitude_var);
             dbo_variable_sets_[dbo_name_it].add(longitude_var);
@@ -1169,8 +1169,8 @@ void ASTERIXImportTask::checkAllDone()
            << " wait insert " << !waiting_for_insert_
            << " insert active " << (insert_active_ == 0);
 
-    if (!all_done_ && decode_job_ == nullptr && json_map_job_ == nullptr &&
-            !waiting_for_insert_ && insert_active_ == 0)
+    if (!all_done_ && decode_job_ == nullptr && json_map_job_ == nullptr && postprocess_job_ == nullptr
+            && !waiting_for_insert_ && insert_active_ == 0)
     {
         loginf << "ASTERIXImportTask: checkAllDone: setting all done";
 
@@ -1178,6 +1178,7 @@ void ASTERIXImportTask::checkAllDone()
         status_widget_->setDone();
 
         all_done_ = true;
+        done_ = true; // why was this not set?
 
         QApplication::restoreOverrideCursor();
 

@@ -55,8 +55,8 @@ const Property DBObject::meta_var_ti_id_ {"Aircraft Identification", PropertyDat
 const Property DBObject::meta_var_mc_id_ {"Mode C Code", PropertyDataType::FLOAT};
 const Property DBObject::meta_var_track_num_id_ {"Track Number", PropertyDataType::UINT};;
 
-const Property DBObject::var_latitude_ {"Latitude", PropertyDataType::DOUBLE};
-const Property DBObject::var_longitude_ {"Longitude", PropertyDataType::DOUBLE};
+const Property DBObject::meta_var_latitude_ {"Latitude", PropertyDataType::DOUBLE};
+const Property DBObject::meta_var_longitude_ {"Longitude", PropertyDataType::DOUBLE};
 
 const Property DBObject::var_radar_range_ {"Range", PropertyDataType::DOUBLE};
 const Property DBObject::var_radar_azimuth_ {"Azimuth", PropertyDataType::DOUBLE};
@@ -87,8 +87,8 @@ DBObject::DBObject(COMPASS& compass, const string& class_id, const string& insta
            << name_;
 
     checkStaticVariable(DBObject::meta_var_datasource_id_);
-    checkStaticVariable(DBObject::var_latitude_);
-    checkStaticVariable(DBObject::var_longitude_);
+    checkStaticVariable(DBObject::meta_var_latitude_);
+    checkStaticVariable(DBObject::meta_var_longitude_);
 
     if (name_ == "CAT001" || name_ == "CAT048")
     {
@@ -506,6 +506,8 @@ void DBObject::insertDoneSlot()
     insert_job_ = nullptr;
 
     emit insertDoneSignal(*this);
+
+    is_loadable_ = true;
 
     dbo_manager_.databaseContentChangedSlot();
 }

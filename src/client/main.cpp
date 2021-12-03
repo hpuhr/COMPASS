@@ -37,15 +37,18 @@ int main(int argc, char** argv)
 
         COMPASS::instance().mainWindow().show();
 
-//        if (COMPASS::instance().taskManager().automaticTasksDefined())
-//        {
+        if (COMPASS::instance().mainWindow().automaticTasksDefined())
+        {
 //            QThread::msleep(10);
 
 //            while (QCoreApplication::hasPendingEvents())
 //                QCoreApplication::processEvents();
 
-//            COMPASS::instance().taskManager().performAutomaticTasks();
-//        }
+            COMPASS::instance().mainWindow().performAutomaticTasks();
+
+            if (COMPASS::instance().mainWindow().quitNeeded())
+                return 0;
+        }
 
         return client.exec();
     }

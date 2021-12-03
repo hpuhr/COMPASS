@@ -89,8 +89,8 @@ class DBObject : public QObject, public Configurable
     static const Property meta_var_ti_id_;
     static const Property meta_var_mc_id_;
     static const Property meta_var_track_num_id_;
-    static const Property var_latitude_;
-    static const Property var_longitude_;
+    static const Property meta_var_latitude_;
+    static const Property meta_var_longitude_;
 
     static const Property var_radar_range_;
     static const Property var_radar_azimuth_;
