@@ -16,7 +16,7 @@ ASTERIXImportRecordingTaskDialog::ASTERIXImportRecordingTaskDialog(ASTERIXImport
 
     setModal(true);
 
-    setMinimumSize(QSize(600, 800));
+    setMinimumSize(QSize(1000, 800));
 
     QFont font_bold;
     font_bold.setBold(true);
