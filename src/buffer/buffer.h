@@ -81,6 +81,9 @@ class Buffer
     const PropertyList& properties();
     void printProperties();
 
+    void sortByProperty(const Property& property);
+
+
     // Returns boolean indicating if any data was ever written.
     bool firstWrite();
 

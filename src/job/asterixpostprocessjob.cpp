@@ -6,9 +6,14 @@
 #include "projectionmanager.h"
 #include "projection.h"
 #include "json.hpp"
+#include "metadbovariable.h"
+#include "stringconv.h"
+
+#include "boost/date_time/posix_time/posix_time.hpp"
 
 using namespace std;
 using namespace nlohmann;
+using namespace Utils;
 
 ASTERIXPostprocessJob::ASTERIXPostprocessJob(map<string, shared_ptr<Buffer>> buffers)
     : Job("ASTERIXPostprocessJob"),
@@ -33,6 +38,8 @@ void ASTERIXPostprocessJob::run()
     string altitude_var_name;
     string latitude_var_name;
     string longitude_var_name;
+
+    // do radar position projection
 
     DBObjectManager& dbo_man = COMPASS::instance().objectManager();
     ProjectionManager& proj_man = ProjectionManager::instance();
@@ -141,7 +148,7 @@ void ASTERIXPostprocessJob::run()
                         && data_source.info().contains("altitude"))
                 {
                     loginf << "ASTERIXPostprocessJob: run: adding ds " << data_source.id()
-                           << "lat/long " << (double) data_source.info().at("latitude") << "," <<
+                           << " lat/long " << (double) data_source.info().at("latitude") << "," <<
                               (double) data_source.info().at("longitude")
                            << " alt " << (double) data_source.info().at("altitude");
 
@@ -205,6 +212,34 @@ void ASTERIXPostprocessJob::run()
             longitude_vec.set(cnt, lon);
         }
     }
+
+    // do first buffer sorting
+
+    loginf << "ASTERIXPostprocessJob: run: sorting buffers";
+
+    boost::posix_time::ptime start_time = boost::posix_time::microsec_clock::local_time();
+
+    for (auto& buf_it : buffers_)
+    {
+        logdbg << "ASTERIXPostprocessJob: run: sorting buffer " << buf_it.first;
+
+        assert (dbo_man.existsMetaVariable(DBObject::meta_var_tod_id_.name()));
+        assert (dbo_man.metaVariable(DBObject::meta_var_tod_id_.name()).existsIn(buf_it.first));
+
+        DBOVariable& tod_var = dbo_man.metaVariable(DBObject::meta_var_tod_id_.name()).getFor(buf_it.first);
+
+        Property prop {tod_var.name(), tod_var.dataType()};
+
+        logdbg << "ASTERIXPostprocessJob: run: sorting by variable " << prop.name() << " " << prop.dataTypeString();
+
+        assert (buf_it.second->hasProperty(prop));
+
+        buf_it.second->sortByProperty(prop);
+    }
+
+    boost::posix_time::time_duration time_diff = boost::posix_time::microsec_clock::local_time() - start_time;
+    double ms = time_diff.total_milliseconds();
+    loginf << "UGA Buffer sort took " << String::timeStringFromDouble(ms / 1000.0, true);
 
     done_ = true;
 }

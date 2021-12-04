@@ -39,6 +39,7 @@
 #include "updatebufferdbjob.h"
 #include "viewmanager.h"
 #include "util/number.h"
+#include "metadbovariable.h"
 
 #include <algorithm>
 #include <boost/algorithm/string.hpp>
@@ -534,7 +535,7 @@ void DBObject::insertDoneSlot()
 
     for (auto& prop_it : buffer_properties_to_be_removed)
     {
-        loginf << "DBObject " << name_ << ": insertDoneSlot: deleting property " << prop_it.name();
+        logdbg << "DBObject " << name_ << ": insertDoneSlot: deleting property " << prop_it.name();
         buffer->deleteProperty(prop_it);
     }
 
@@ -547,7 +548,22 @@ void DBObject::insertDoneSlot()
     if (!data_)
         data_ = buffer;
     else
+    {
         data_->seizeBuffer(*buffer.get());
+
+        // sort again, will repeat target reports
+
+        assert (dbo_manager_.existsMetaVariable(DBObject::meta_var_tod_id_.name()));
+        assert (dbo_manager_.metaVariable(DBObject::meta_var_tod_id_.name()).existsIn(name_));
+
+        DBOVariable& tod_var = dbo_manager_.metaVariable(DBObject::meta_var_tod_id_.name()).getFor(name_);
+
+        Property prop {tod_var.name(), tod_var.dataType()};
+
+        assert (data_->hasProperty(prop));
+
+        data_->sortByProperty(prop);
+    }
 
     data_->printProperties();
 

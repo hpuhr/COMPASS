@@ -251,12 +251,108 @@ void Buffer::deleteProperty(const Property& property)
         assert (!has<string>(property.name()));
         break;
     default:
-        logerr << "Buffer::deleteProperty: unknown property type "
+        logerr << "Buffer: deleteProperty: unknown property type "
                    << Property::asString(property.dataType());
         throw runtime_error(
-                    "Buffer::deleteProperty: unknown property type " +
+                    "Buffer: deleteProperty: unknown property type " +
                     Property::asString(property.dataType()));
     }
+}
+
+void Buffer::sortByProperty(const Property& property)
+{
+    loginf << "Buffer: sortByProperty: name " << property.name();
+
+    std::vector<std::size_t> perm;
+
+    switch (property.dataType())
+    {
+    case PropertyDataType::BOOL:
+        perm = get<bool> (property.name()).sortPermutation();
+        break;
+    case PropertyDataType::CHAR:
+        perm = get<char> (property.name()).sortPermutation();
+        break;
+    case PropertyDataType::UCHAR:
+        perm = get<unsigned char> (property.name()).sortPermutation();
+        break;
+    case PropertyDataType::INT:
+        perm = get<int> (property.name()).sortPermutation();
+        break;
+    case PropertyDataType::UINT:
+        perm = get<unsigned int> (property.name()).sortPermutation();
+        break;
+    case PropertyDataType::LONGINT:
+        perm = get<long int> (property.name()).sortPermutation();
+        break;
+    case PropertyDataType::ULONGINT:
+        perm = get<unsigned long int> (property.name()).sortPermutation();
+        break;
+    case PropertyDataType::FLOAT:
+        perm = get<float> (property.name()).sortPermutation();
+        break;
+    case PropertyDataType::DOUBLE:
+        perm = get<double> (property.name()).sortPermutation();
+        break;
+    case PropertyDataType::STRING:
+        perm = get<string> (property.name()).sortPermutation();
+        break;
+    default:
+        logerr << "Buffer: sortByProperty: unknown property type "
+                   << Property::asString(property.dataType());
+        throw runtime_error(
+                    "Buffer: sortByProperty: unknown property type " +
+                    Property::asString(property.dataType()));
+    }
+
+    assert (perm.size() == data_size_);
+
+    for (auto& prop_it : properties_.properties())
+    {
+        loginf << "Buffer: sortByProperty: sorting name " << prop_it.name();
+
+        switch (prop_it.dataType())
+        {
+        case PropertyDataType::BOOL:
+            get<bool> (prop_it.name()).sortByPermutation(perm);
+            break;
+        case PropertyDataType::CHAR:
+            get<char> (prop_it.name()).sortByPermutation(perm);
+            break;
+        case PropertyDataType::UCHAR:
+            get<unsigned char> (prop_it.name()).sortByPermutation(perm);
+            break;
+        case PropertyDataType::INT:
+            get<int> (prop_it.name()).sortByPermutation(perm);
+            break;
+        case PropertyDataType::UINT:
+            get<unsigned int> (prop_it.name()).sortByPermutation(perm);
+            break;
+        case PropertyDataType::LONGINT:
+            get<long int> (prop_it.name()).sortByPermutation(perm);
+            break;
+        case PropertyDataType::ULONGINT:
+            get<unsigned long int> (prop_it.name()).sortByPermutation(perm);
+            break;
+        case PropertyDataType::FLOAT:
+            get<float> (prop_it.name()).sortByPermutation(perm);
+            break;
+        case PropertyDataType::DOUBLE:
+            get<double> (prop_it.name()).sortByPermutation(perm);
+            break;
+        case PropertyDataType::STRING:
+            get<string> (prop_it.name()).sortByPermutation(perm);
+            break;
+        default:
+            logerr << "Buffer: sortByProperty: unknown property type "
+                       << Property::asString(property.dataType());
+            throw runtime_error(
+                        "Buffer: sortByProperty: unknown property type " +
+                        Property::asString(property.dataType()));
+        }
+    }
+
+    loginf << "Buffer: sortByProperty: name " << property.name() << " done";
 }
 
 void Buffer::seizeBuffer(Buffer& org_buffer)
