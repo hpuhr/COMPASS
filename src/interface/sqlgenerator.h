@@ -50,6 +50,8 @@ class SQLGenerator
     std::shared_ptr<DBCommand> getDataSourcesSelectCommand();
 
     //std::shared_ptr<DBCommand> getDistinctDataSourcesSelectCommand(DBObject& object);
+    std::shared_ptr<DBCommand> getMaxRecordNumberCommand(const std::string& table_name,
+                                                         const std::string& rec_num_col_name);
     std::shared_ptr<DBCommand> getADSBInfoCommand(DBObject& adsb_obj);
 
     std::string getCreateAssociationTableStatement(const std::string& table_name);

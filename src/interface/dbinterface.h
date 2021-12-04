@@ -164,6 +164,7 @@ public:
     std::shared_ptr<DBResult> queryMinMaxNormalForTable(const std::string& table_name);
 
     std::set<int> queryActiveSensorNumbers(DBObject& object);
+    unsigned int getMaxRecordNumber(DBObject& object);
 
     std::map<unsigned int, std::tuple<std::set<unsigned int>, std::tuple<bool, unsigned int, unsigned int>,
     std::tuple<bool, unsigned int, unsigned int>>> queryADSBInfo();

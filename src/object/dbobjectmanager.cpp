@@ -453,6 +453,7 @@ void DBObjectManager::databaseOpenedSlot()
     loginf << "DBObjectManager: databaseOpenedSlot";
 
     loadDBDataSources();
+    loadMaxRecordNumber();
 
     for (auto& object : objects_)
         object.second->databaseOpenedSlot();
@@ -464,6 +465,9 @@ void DBObjectManager::databaseOpenedSlot()
 void DBObjectManager::databaseClosedSlot()
 {
     db_data_sources_.clear();
+
+    max_rec_num_ = 0;
+    has_max_rec_num_ = false;
 
     for (auto& object : objects_)
         object.second->databaseClosedSlot();
@@ -776,6 +780,37 @@ bool DBObjectManager::isOtherDBObjectPostProcessing(DBObject& object)
 }
 
 bool DBObjectManager::loadInProgress() const { return load_in_progress_; }
+
+unsigned int DBObjectManager::maxRecordNumber() const
+{
+    assert (has_max_rec_num_);
+    return max_rec_num_;
+}
+
+void DBObjectManager::maxRecordNumber(unsigned int value)
+{
+    loginf << "DBObjectManager: maxRecordNumber: " << value;
+
+    max_rec_num_ = value;
+    has_max_rec_num_ = true;
+}
+
+void DBObjectManager::loadMaxRecordNumber()
+{
+    assert (COMPASS::instance().interface().dbOpen());
+
+    max_rec_num_ = 0;
+
+    for (auto& obj_it : objects_)
+    {
+        if (obj_it.second->existsInDB())
+            max_rec_num_ = max(COMPASS::instance().interface().getMaxRecordNumber(*obj_it.second), max_rec_num_);
+    }
+
+    has_max_rec_num_ = true;
+
+    loginf << "DBObjectManager: loadMaxRecordNumber: " << max_rec_num_;
+}
 
 const std::vector<std::unique_ptr<DBContent::DBDataSource>>& DBObjectManager::dataSources() const
 {

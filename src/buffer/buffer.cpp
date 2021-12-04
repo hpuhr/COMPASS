@@ -91,6 +91,21 @@ Buffer::~Buffer()
     logdbg << "Buffer: destructor: end";
 }
 
+bool Buffer::hasProperty(const Property& property)
+{
+    if (properties_.hasProperty(property.name()))
+    {
+        if (properties_.get(property.name()).dataType() != property.dataType())
+            logwrn << "Buffer: hasProperty: property '" << property.name()
+                   << " has same name but different data types (" << properties_.get(property.name()).dataTypeString()
+                   << ", " << property.dataTypeString() << ")";
+
+        return true;
+    }
+
+    return false;
+}
+
 /**
  * \param id Unique property identifier
  * \param type Property data type
@@ -174,7 +189,74 @@ void Buffer::addProperty(string id, PropertyDataType type)
 
 void Buffer::addProperty(const Property& property)
 {
+    assert (!hasProperty(property));
+
     addProperty(property.name(), property.dataType());
+
+    assert (hasProperty(property));
+}
+
+void Buffer::deleteProperty(const Property& property)
+{
+    switch (property.dataType())
+    {
+    case PropertyDataType::BOOL:
+        assert (has<bool>(property.name()));
+        remove<bool> (property.name());
+        assert (!has<bool>(property.name()));
+        break;
+    case PropertyDataType::CHAR:
+        assert (has<char>(property.name()));
+        remove<char> (property.name());
+        assert (!has<char>(property.name()));
+        break;
+    case PropertyDataType::UCHAR:
+        assert (has<unsigned char>(property.name()));
+        remove<unsigned char> (property.name());
+        assert (!has<unsigned char>(property.name()));
+        break;
+    case PropertyDataType::INT:
+        assert (has<int>(property.name()));
+        remove<int> (property.name());
+        assert (!has<int>(property.name()));
+        break;
+    case PropertyDataType::UINT:
+        assert (has<unsigned int>(property.name()));
+        remove<unsigned int> (property.name());
+        assert (!has<unsigned int>(property.name()));
+        break;
+    case PropertyDataType::LONGINT:
+        assert (has<long int>(property.name()));
+        remove<long int> (property.name());
+        assert (!has<long int>(property.name()));
+        break;
+    case PropertyDataType::ULONGINT:
+        assert (has<unsigned long int>(property.name()));
+        remove<unsigned long int> (property.name());
+        assert (!has<unsigned long int>(property.name()));
+        break;
+    case PropertyDataType::FLOAT:
+        assert (has<float>(property.name()));
+        remove<float> (property.name());
+        assert (!has<float>(property.name()));
+        break;
+    case PropertyDataType::DOUBLE:
+        assert (has<double>(property.name()));
+        remove<double> (property.name());
+        assert (!has<double>(property.name()));
+        break;
+    case PropertyDataType::STRING:
+        assert (has<string>(property.name()));
+        remove<string> (property.name());
+        assert (!has<string>(property.name()));
+        break;
+    default:
+        logerr << "Buffer::deleteProperty: unknown property type "
+                   << Property::asString(property.dataType());
+        throw runtime_error(
+                    "Buffer::deleteProperty: unknown property type " +
+                    Property::asString(property.dataType()));
+    }
 }
 
 void Buffer::seizeBuffer(Buffer& org_buffer)
@@ -233,6 +315,12 @@ void Buffer::cutToSize(size_t size)
 }
 
 const PropertyList& Buffer::properties() { return properties_; }
+
+void Buffer::printProperties()
+{
+    for (const auto& prop_it : properties_.properties())
+        loginf << "'" << prop_it.name() << "' " << prop_it.dataTypeString();
+}
 
 bool Buffer::firstWrite() { return data_size_ == 0; }
 

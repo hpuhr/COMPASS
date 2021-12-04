@@ -146,6 +146,9 @@ public:
 
     bool loadInProgress() const;
 
+    bool hasMaxRecordNumber() const { return has_max_rec_num_; }
+    unsigned int maxRecordNumber() const;
+    void maxRecordNumber(unsigned int value);
 
 protected:
     COMPASS& compass_;
@@ -164,6 +167,9 @@ protected:
     bool has_associations_{false};
     std::string associations_dbo_;
     std::string associations_ds_;
+
+    bool has_max_rec_num_ {false};
+    unsigned int max_rec_num_ {0};
 
     bool load_in_progress_{false};
 
@@ -187,6 +193,7 @@ protected:
 
     void loadDBDataSources();
     void sortDBDataSources();
+    void loadMaxRecordNumber();
 };
 
 #endif /* DBOBJECTMANAGER_H_ */

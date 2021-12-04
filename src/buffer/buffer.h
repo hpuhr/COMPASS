@@ -60,42 +60,36 @@ struct Index<T, std::tuple<U, Types...>>
 
 #include "json.hpp"
 
-/**
- * @brief Fast, dynamic data container
- *
- * Encapsulates general data storage with access functions with maximum efficiency.
- * Performs basic checks, allocates new data when space is needed, but NOT thread-safe.
- *
- */
 class Buffer
 {
     template <class T>
     friend class NullableVector;
 
   public:
-    /// @brief Default constructor.
     Buffer();
-    /// @brief Constructor.
     Buffer(PropertyList properties, const std::string& dbo_name = "");
-    /// @brief Desctructor.
     virtual ~Buffer();
 
-    /// @brief Adds all containers of org_buffer and removes them from org_buffer.
+    // Adds all containers of org_buffer and removes them from org_buffer.
     void seizeBuffer(Buffer& org_buffer);
 
-    /// @brief Adds an additional property.
+    bool hasProperty(const Property& property);
     void addProperty(std::string id, PropertyDataType type);
     void addProperty(const Property& property);
+    void deleteProperty(const Property& property);
 
-    /// @brief Returns boolean indicating if any data was ever written.
+    const PropertyList& properties();
+    void printProperties();
+
+    // Returns boolean indicating if any data was ever written.
     bool firstWrite();
 
-    /// @brief Returns boolean indicating if buffer is the last of one DB operation.
+    // Returns boolean indicating if buffer is the last of one DB operation.
     bool lastOne() { return last_one_; }
-    /// @brief Sets if buffer is the last one of one DB operation.
+    // Sets if buffer is the last one of one DB operation.
     void lastOne(bool last_one) { last_one_ = last_one; }
 
-    /// @brief Returns the buffers id
+    // Returns the buffers id
     unsigned int id() const { return id_; }
 
     template <typename T>
@@ -107,12 +101,9 @@ class Buffer
     template <typename T>
     void rename(const std::string& id, const std::string& id_new);
 
-    /// @brief  Returns current size
+    // Returns current size
     size_t size();
     void cutToSize(size_t size);
-
-    /// @brief Returns PropertyList
-    const PropertyList& properties();
 
     /// @brief Returns DBO type
     const std::string& dboName() { return dbo_name_; }
@@ -130,17 +121,16 @@ class Buffer
     nlohmann::json asJSON();
 
   protected:
-    /// Unique buffer id, copied when getting shallow copies
+    // Unique buffer id, copied when getting shallow copies
     unsigned int id_;
-    /// List of all properties
+    // List of all properties
     PropertyList properties_;
-    /// DBO type
     std::string dbo_name_;
 
     ArrayListMapTupel array_list_tuple_;
     size_t data_size_{0};
 
-    /// Flag indicating if buffer is the last of a DB operation
+    // Flag indicating if buffer is the last of a DB operation
     bool last_one_;
 
     static unsigned int ids_;
@@ -152,6 +142,9 @@ class Buffer
     void renameArrayListMapEntry(const std::string& id, const std::string& id_new);
     template <typename T>
     void seizeArrayListMap(Buffer& org_buffer);
+
+    template <typename T>
+    void remove(const std::string& id);
 };
 
 #include "nullablevector.h"
@@ -186,6 +179,16 @@ void Buffer::rename(const std::string& id, const std::string& id_new)
     Property old_property = properties_.get(id);
     properties_.removeProperty(id);
     properties_.addProperty(id_new, old_property.dataType());
+}
+
+template <typename T>
+void Buffer::remove(const std::string& id)
+{
+    assert(getArrayListMap<T>().count(id) == 1);
+    assert(properties_.hasProperty(id));
+
+    getArrayListMap<T>().erase(id);
+    properties_.removeProperty(id);
 }
 
 // private stuff

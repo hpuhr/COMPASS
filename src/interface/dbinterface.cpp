@@ -39,6 +39,7 @@
 #include "sectorlayer.h"
 #include "evaluationmanager.h"
 #include "dbcontentdbdatasource.h"
+#include "metadbovariable.h"
 
 #include <QApplication>
 #include <QMessageBox>
@@ -302,39 +303,74 @@ set<int> DBInterface::queryActiveSensorNumbers(DBObject& object)
 
     assert (false); // TODO
 
-//    assert(object.existsInDB());
+    //    assert(object.existsInDB());
 
-//    QMutexLocker locker(&connection_mutex_);
+    //    QMutexLocker locker(&connection_mutex_);
 
-//    string local_key_dbovar = object.currentDataSourceDefinition().localKey();
-//    assert(object.hasVariable(local_key_dbovar));
-//    const DBTableColumn& local_key_col = object.variable(local_key_dbovar).currentDBColumn();
+    //    string local_key_dbovar = object.currentDataSourceDefinition().localKey();
+    //    assert(object.hasVariable(local_key_dbovar));
+    //    const DBTableColumn& local_key_col = object.variable(local_key_dbovar).currentDBColumn();
 
-//    set<int> data;
+    //    set<int> data;
 
-//    shared_ptr<DBCommand> command = sql_generator_.getDistinctDataSourcesSelectCommand(object);
+    //    shared_ptr<DBCommand> command = sql_generator_.getDistinctDataSourcesSelectCommand(object);
 
-//    shared_ptr<DBResult> result = current_connection_->execute(*command);
+    //    shared_ptr<DBResult> result = current_connection_->execute(*command);
 
-//    assert(result->containsData());
+    //    assert(result->containsData());
 
-//    shared_ptr<Buffer> buffer = result->buffer();
-//    for (unsigned int cnt = 0; cnt < buffer->size(); cnt++)
-//    {
-//        if (buffer->get<int>(local_key_col.name()).isNull(cnt))
-//        {
-//            logwrn << "DBInterface: queryActiveSensorNumbers: object " << object.name()
-//                   << " has NULL ds_id's, which will be omitted";
-//        }
-//        else
-//        {
-//            int tmp = buffer->get<int>(local_key_col.name()).get(cnt);
-//            data.insert(tmp);
-//        }
-//    }
+    //    shared_ptr<Buffer> buffer = result->buffer();
+    //    for (unsigned int cnt = 0; cnt < buffer->size(); cnt++)
+    //    {
+    //        if (buffer->get<int>(local_key_col.name()).isNull(cnt))
+    //        {
+    //            logwrn << "DBInterface: queryActiveSensorNumbers: object " << object.name()
+    //                   << " has NULL ds_id's, which will be omitted";
+    //        }
+    //        else
+    //        {
+    //            int tmp = buffer->get<int>(local_key_col.name()).get(cnt);
+    //            data.insert(tmp);
+    //        }
+    //    }
 
-//    logdbg << "DBInterface: queryActiveSensorNumbers: done";
-//    return data;
+    //    logdbg << "DBInterface: queryActiveSensorNumbers: done";
+    //    return data;
+}
+
+unsigned int DBInterface::getMaxRecordNumber(DBObject& object)
+{
+    assert (dbOpen());
+    assert(object.existsInDB());
+
+    assert (COMPASS::instance().objectManager().existsMetaVariable(DBObject::meta_var_rec_num_id_.name()));
+    assert (COMPASS::instance().objectManager().metaVariable(
+                DBObject::meta_var_rec_num_id_.name()).existsIn(object.name()));
+
+    DBOVariable& rec_num_var = COMPASS::instance().objectManager().metaVariable(
+                DBObject::meta_var_rec_num_id_.name()).getFor(object.name());
+
+    assert (object.hasVariable(rec_num_var.name()));
+
+    QMutexLocker locker(&connection_mutex_);
+
+    shared_ptr<DBCommand> command = sql_generator_.getMaxRecordNumberCommand(object.dbTableName(),
+                                                                             rec_num_var.dbColumnName());
+
+    shared_ptr<DBResult> result = db_connection_->execute(*command);
+
+    assert(result->containsData());
+
+    shared_ptr<Buffer> buffer = result->buffer();
+
+    if (!buffer->size())
+    {
+        logwrn << "DBInterface: getMaxRecordNumber: no max record number found";
+        return 0;
+    }
+
+    assert (!buffer->get<unsigned int>(rec_num_var.dbColumnName()).isNull(0));
+    return buffer->get<unsigned int>(rec_num_var.dbColumnName()).get(0);
 }
 
 
@@ -348,7 +384,7 @@ std::tuple<bool, unsigned int, unsigned int>>> DBInterface::queryADSBInfo()
     QMutexLocker locker(&connection_mutex_);
 
     std::map<unsigned int, std::tuple<std::set<unsigned int>, std::tuple<bool, unsigned int, unsigned int>,
-    std::tuple<bool, unsigned int, unsigned int>>> data;
+            std::tuple<bool, unsigned int, unsigned int>>> data;
 
     shared_ptr<DBCommand> command = sql_generator_.getADSBInfoCommand(object);
 
@@ -924,7 +960,7 @@ void DBInterface::deleteViewPoint(const unsigned int id)
 {
     QMutexLocker locker(&connection_mutex_);
     db_connection_->executeSQL(sql_generator_.getDeleteStatement(TABLE_NAME_VIEWPOINTS,
-                                                                      "id="+to_string(id)));
+                                                                 "id="+to_string(id)));
 }
 
 void DBInterface::deleteAllViewPoints()
@@ -1051,33 +1087,66 @@ void DBInterface::insertBuffer(DBObject& db_object, std::shared_ptr<Buffer> buff
     logdbg << "DBInterface: insertBuffer: dbo " << db_object.name() << " buffer size "
            << buffer->size();
 
+    // create table if required
     if (!existsTable(db_object.dbTableName()))
         createTable(db_object);
 
-    assert (db_object.hasVariable(DBObject::meta_var_datasource_id_.name()));
 
-    DBOVariable& datasource_var = db_object.variable(DBObject::meta_var_datasource_id_.name());
-    assert (datasource_var.dataType() == PropertyDataType::UINT);
-
-    string datasource_col_str = datasource_var.dbColumnName();
-    assert (buffer->has<unsigned int>(datasource_col_str));
-
-    NullableVector<unsigned int>& datasource_vec = buffer->get<unsigned int>(datasource_col_str);
-
-    DBObjectManager& dbo_man = COMPASS::instance().objectManager();
-
-    // check if data sources exist, create if not
-    for (auto ds_id_it : datasource_vec.distinctValuesWithCounts())
+    // create data sources
     {
-        if (!dbo_man.hasDataSource(ds_id_it.first))
-        {
-            if(dbo_man.canAddNewDataSourceFromConfig(ds_id_it.first))
-                logwrn << "DBInterface: insertBuffer: creating unknown ds id " << ds_id_it.first;
+        assert (db_object.hasVariable(DBObject::meta_var_datasource_id_.name()));
 
-            dbo_man.addNewDataSource(ds_id_it.first);
+        DBOVariable& datasource_var = db_object.variable(DBObject::meta_var_datasource_id_.name());
+        assert (datasource_var.dataType() == PropertyDataType::UINT);
+
+        string datasource_col_str = datasource_var.dbColumnName();
+        assert (buffer->has<unsigned int>(datasource_col_str));
+
+        NullableVector<unsigned int>& datasource_vec = buffer->get<unsigned int>(datasource_col_str);
+
+        DBObjectManager& dbo_man = COMPASS::instance().objectManager();
+
+        // check if data sources exist, create if not
+        for (auto ds_id_it : datasource_vec.distinctValuesWithCounts())
+        {
+            if (!dbo_man.hasDataSource(ds_id_it.first))
+            {
+                if(dbo_man.canAddNewDataSourceFromConfig(ds_id_it.first))
+                    logwrn << "DBInterface: insertBuffer: creating unknown ds id " << ds_id_it.first;
+
+                dbo_man.addNewDataSource(ds_id_it.first);
+            }
+
+            dbo_man.dataSource(ds_id_it.first).addNumInserted(db_object.name(), ds_id_it.second);
+        }
+    }
+
+    // create record numbers & and store new max rec num
+    {
+        assert (db_object.hasVariable(DBObject::meta_var_rec_num_id_.name()));
+
+        DBOVariable& rec_num_var = db_object.variable(DBObject::meta_var_rec_num_id_.name());
+        assert (rec_num_var.dataType() == PropertyDataType::UINT);
+
+        string rec_num_col_str = rec_num_var.dbColumnName();
+        assert (!buffer->has<unsigned int>(rec_num_col_str));
+
+        buffer->addProperty(rec_num_col_str, PropertyDataType::UINT);
+
+        assert (COMPASS::instance().objectManager().hasMaxRecordNumber());
+        unsigned int max_rec_num = COMPASS::instance().objectManager().maxRecordNumber();
+
+        NullableVector<unsigned int>& rec_num_vec = buffer->get<unsigned int>(rec_num_col_str);
+
+        unsigned int buffer_size = buffer->size();
+
+        for (unsigned int cnt=0; cnt < buffer_size; ++cnt)
+        {
+            ++max_rec_num;
+            rec_num_vec.set(cnt, max_rec_num);
         }
 
-        dbo_man.dataSource(ds_id_it.first).addNumInserted(db_object.name(), ds_id_it.second);
+        COMPASS::instance().objectManager().maxRecordNumber(max_rec_num);
     }
 
     insertBuffer(db_object.dbTableName(), buffer);
@@ -1213,15 +1282,15 @@ void DBInterface::updateBuffer(const std::string& table_name, const std::string&
     assert(buffer);
 
     // TODO check
-//    const PropertyList& properties = buffer->properties();
+    //    const PropertyList& properties = buffer->properties();
 
-//    for (unsigned int cnt = 0; cnt < properties.size(); cnt++)
-//    {
-//        if (!table.hasColumn(properties.at(cnt).name()))
-//            throw runtime_error("DBInterface: updateBuffer: column '" +
-//                                properties.at(cnt).name() + "' does not exist in table " +
-//                                table.name());
-//    }
+    //    for (unsigned int cnt = 0; cnt < properties.size(); cnt++)
+    //    {
+    //        if (!table.hasColumn(properties.at(cnt).name()))
+    //            throw runtime_error("DBInterface: updateBuffer: column '" +
+    //                                properties.at(cnt).name() + "' does not exist in table " +
+    //                                table.name());
+    //    }
 
     string bind_statement =
             sql_generator_.createDBUpdateStringBind(buffer, key_col, table_name);
@@ -1346,13 +1415,13 @@ shared_ptr<DBResult> DBInterface::queryMinMaxNormalForTable(const std::string& t
     assert (false); // TODO
 
     //    QMutexLocker locker(&connection_mutex_);
-//    logdbg << "DBInterface: queryMinMaxForTable: getting command";
-//    shared_ptr<DBCommand> command = sql_generator_.getTableSelectMinMaxNormalStatement(table);
+    //    logdbg << "DBInterface: queryMinMaxForTable: getting command";
+    //    shared_ptr<DBCommand> command = sql_generator_.getTableSelectMinMaxNormalStatement(table);
 
-//    // loginf  << "DBInterface: queryMinMaxForTable: executing command '" <<
-//    // command->getCommandString() << "'";
-//    shared_ptr<DBResult> result = current_connection_->execute(*command);
-//    return result;
+    //    // loginf  << "DBInterface: queryMinMaxForTable: executing command '" <<
+    //    // command->getCommandString() << "'";
+    //    shared_ptr<DBResult> result = current_connection_->execute(*command);
+    //    return result;
 }
 
 void DBInterface::insertBindStatementUpdateForCurrentIndex(shared_ptr<Buffer> buffer,
@@ -1421,7 +1490,7 @@ void DBInterface::insertBindStatementUpdateForCurrentIndex(shared_ptr<Buffer> bu
             break;
         case PropertyDataType::DOUBLE:
             db_connection_->bindVariable(index_cnt,
-                                              buffer->get<double>(property.name()).get(row));
+                                         buffer->get<double>(property.name()).get(row));
             break;
         case PropertyDataType::STRING:
 

@@ -204,3 +204,30 @@ bool DBOVariableSet::hasVariable(const DBOVariable& variable)
     return find(set_.begin(), set_.end(), &variable) != set_.end();
 }
 
+bool DBOVariableSet::hasDBColumnName(const std::string& db_column_name)
+{
+    for (auto var_it : set_)
+    {
+        if (var_it->dbColumnName() == db_column_name)
+            return true;
+    }
+
+    return false;
+}
+
+unsigned int DBOVariableSet::getVariableWithDBColumnName(const std::string& db_column_name)
+{
+    assert(hasDBColumnName(db_column_name));
+
+    unsigned int cnt = 0;
+    for (auto var_it : set_)
+    {
+        if (var_it->dbColumnName() == db_column_name)
+            return cnt;
+
+        ++cnt;
+    }
+
+    assert(false);
+}
+

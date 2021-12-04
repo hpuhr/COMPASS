@@ -37,6 +37,7 @@
 #include "stringconv.h"
 #include "taskmanager.h"
 #include "updatebufferdbjob.h"
+#include "viewmanager.h"
 #include "util/number.h"
 
 #include <algorithm>
@@ -501,7 +502,11 @@ void DBObject::insertProgressSlot(float percent) { emit insertProgressSignal(per
 
 void DBObject::insertDoneSlot()
 {
+    loginf << "DBObject " << name_ << ": insertDoneSlot";
+
     assert(insert_job_);
+
+    std::shared_ptr<Buffer> buffer = insert_job_->buffer(); // buffer properties match db column names
 
     insert_job_ = nullptr;
 
@@ -510,6 +515,39 @@ void DBObject::insertDoneSlot()
     is_loadable_ = true;
 
     dbo_manager_.databaseContentChangedSlot();
+
+    // add buffer to be able to distribute to views
+
+//    DBOVariableSet read_set = COMPASS::instance().viewManager().getReadSet(name_);
+//    vector<Property> buffer_properties_to_be_removed;
+
+//    // remove all unused
+//    for (const auto& prop_it : buffer->properties().properties())
+//    {
+//        if (!read_set.hasDBColumnName(prop_it.name()))
+//            buffer_properties_to_be_removed.push_back(prop_it); // remove it later
+//    }
+
+//    for (auto& prop_it : buffer_properties_to_be_removed)
+//    {
+//        loginf << "DBObject " << name_ << ": insertDoneSlot: deleting property " << prop_it.name();
+//        buffer->deleteProperty(prop_it);
+//    }
+
+//    // change db column names to dbo var names
+//    buffer->transformVariables(read_set, true);
+
+//    if (!data_)
+//        data_ = buffer;
+//    else
+//        data_->seizeBuffer(*buffer.get());
+
+//    data_->printProperties();
+
+//    if (info_widget_)
+//        info_widget_->updateSlot();
+
+//    emit newDataSignal(*this);
 }
 
 void DBObject::updateData(DBOVariable& key_var, DBOVariableSet& list,

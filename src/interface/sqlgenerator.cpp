@@ -118,7 +118,7 @@ string SQLGenerator::getCreateTableStatement(const DBObject& object)
         data_type = var_it->dbDataTypeString();
 
         if (var_it->isKey())
-            ss << " INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL";
+            ss << " INTEGER PRIMARY KEY NOT NULL"; // AUTOINCREMENT
         else
             ss << " " << data_type;
 
@@ -199,6 +199,28 @@ shared_ptr<DBCommand> SQLGenerator::getDataSourcesSelectCommand()
 
 //    //    return getSelectCommand(object.currentMetaTable(), columns, true);
 //}
+
+std::shared_ptr<DBCommand> SQLGenerator::getMaxRecordNumberCommand(const std::string& table_name,
+                                                                   const std::string& rec_num_col_name)
+{
+    PropertyList list;
+    list.addProperty(rec_num_col_name, PropertyDataType::UINT);
+
+    shared_ptr<DBCommand> command = make_shared<DBCommand>(DBCommand());
+
+    stringstream ss;
+
+    ss << "SELECT MAX(" << rec_num_col_name;
+
+    ss << ") FROM ";
+
+    ss << table_name << ";";
+
+    command->set(ss.str());
+    command->list(list);
+
+    return command;
+}
 
 shared_ptr<DBCommand> SQLGenerator::getADSBInfoCommand(DBObject& adsb_obj)
 {

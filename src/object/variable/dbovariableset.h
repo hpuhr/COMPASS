@@ -59,6 +59,8 @@ class DBOVariableSet
     void clear();
     /// @brief Returns if given variable is in the set
     bool hasVariable(const DBOVariable& variable);
+    bool hasDBColumnName(const std::string& db_column_name);
+    unsigned int getVariableWithDBColumnName(const std::string& db_column_name);
 
     DBOVariableSet& operator=(const DBOVariableSet& source);
     // DBOVariableSet *clone ();
