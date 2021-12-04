@@ -47,6 +47,7 @@ class MetaDBOVariable : public Configurable
     DBOVariable& getFor(const std::string& dbo_name);
     /// @brief Return variable identifier in DBO of type
     std::string getNameFor(const std::string& dbo_name);
+    void set(DBOVariable& var);
 
     void removeVariable(const std::string& dbo_name);
     /// @brief Sets sub-variable name for DBO of type

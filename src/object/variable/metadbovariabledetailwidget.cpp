@@ -133,7 +133,12 @@ void MetaDBOVariableDetailWidget::variableChangedSlot()
     if (!has_current_entry_)
         return;
 
-    TODO_ASSERT
+    DBOVariableSelectionWidget* sel_widget = dynamic_cast<DBOVariableSelectionWidget*>(QObject::sender());
+    assert (sel_widget);
+    assert (sel_widget->hasVariable());
+
+    assert (meta_var_);
+    meta_var_->set(sel_widget->selectedVariable());
 }
 
 void MetaDBOVariableDetailWidget::deleteVariableSlot()

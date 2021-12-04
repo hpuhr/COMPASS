@@ -25,6 +25,8 @@
 #include "dbovariable.h"
 #include "metadbovariablewidget.h"
 
+using namespace std;
+
 MetaDBOVariable::MetaDBOVariable(const std::string& class_id, const std::string& instance_id,
                                  DBObjectManager* object_manager)
     : Configurable(class_id, instance_id, object_manager),
@@ -113,6 +115,18 @@ std::string MetaDBOVariable::getNameFor(const std::string& dbo_name)
 {
     assert(existsIn(dbo_name));
     return variables_.at(dbo_name).name();
+}
+
+void MetaDBOVariable::set(DBOVariable& var)
+{
+    string dbo_name = var.dbObject().name();
+
+    loginf << "MetaDBOVariable " << name_ << ": set: dbo " << dbo_name << " name " << var.name();
+
+    if (existsIn(dbo_name))
+        removeVariable(dbo_name);
+
+    addVariable(dbo_name, var.name());
 }
 
 void MetaDBOVariable::removeVariable(const std::string& dbo_name)
@@ -313,7 +327,7 @@ void MetaDBOVariable::updateDescription()
 
     for (auto& variable_it : variables_)
     {
-        description_ += "For " + variable_it.first + ":\n";
+        description_ += "For " + variable_it.first +" ("+ variable_it.second.dataTypeString()+"):\n";
         description_ += variable_it.second.description() + "\n\n";
     }
 }
