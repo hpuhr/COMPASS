@@ -63,6 +63,8 @@ const Property DBObject::var_radar_range_ {"Range", PropertyDataType::DOUBLE};
 const Property DBObject::var_radar_azimuth_ {"Azimuth", PropertyDataType::DOUBLE};
 const Property DBObject::var_radar_altitude_ {"Mode C Code", PropertyDataType::FLOAT};
 
+const Property DBObject::selected_var {"selected", PropertyDataType::BOOL};
+
 DBObject::DBObject(COMPASS& compass, const string& class_id, const string& instance_id,
                    DBObjectManager* manager)
     : Configurable(class_id, instance_id, manager,
@@ -516,38 +518,43 @@ void DBObject::insertDoneSlot()
 
     dbo_manager_.databaseContentChangedSlot();
 
+    assert (existsInDB()); // check
+
     // add buffer to be able to distribute to views
 
-//    DBOVariableSet read_set = COMPASS::instance().viewManager().getReadSet(name_);
-//    vector<Property> buffer_properties_to_be_removed;
+    DBOVariableSet read_set = COMPASS::instance().viewManager().getReadSet(name_);
+    vector<Property> buffer_properties_to_be_removed;
 
-//    // remove all unused
-//    for (const auto& prop_it : buffer->properties().properties())
-//    {
-//        if (!read_set.hasDBColumnName(prop_it.name()))
-//            buffer_properties_to_be_removed.push_back(prop_it); // remove it later
-//    }
+    // remove all unused
+    for (const auto& prop_it : buffer->properties().properties())
+    {
+        if (!read_set.hasDBColumnName(prop_it.name()))
+            buffer_properties_to_be_removed.push_back(prop_it); // remove it later
+    }
 
-//    for (auto& prop_it : buffer_properties_to_be_removed)
-//    {
-//        loginf << "DBObject " << name_ << ": insertDoneSlot: deleting property " << prop_it.name();
-//        buffer->deleteProperty(prop_it);
-//    }
+    for (auto& prop_it : buffer_properties_to_be_removed)
+    {
+        loginf << "DBObject " << name_ << ": insertDoneSlot: deleting property " << prop_it.name();
+        buffer->deleteProperty(prop_it);
+    }
 
-//    // change db column names to dbo var names
-//    buffer->transformVariables(read_set, true);
+    // change db column names to dbo var names
+    buffer->transformVariables(read_set, true);
 
-//    if (!data_)
-//        data_ = buffer;
-//    else
-//        data_->seizeBuffer(*buffer.get());
+    // add selection flags
+    buffer->addProperty(DBObject::selected_var);
 
-//    data_->printProperties();
+    if (!data_)
+        data_ = buffer;
+    else
+        data_->seizeBuffer(*buffer.get());
 
-//    if (info_widget_)
-//        info_widget_->updateSlot();
+    data_->printProperties();
 
-//    emit newDataSignal(*this);
+    if (info_widget_)
+        info_widget_->updateSlot();
+
+    emit newDataSignal(*this);
 }
 
 void DBObject::updateData(DBOVariable& key_var, DBOVariableSet& list,
@@ -828,7 +835,7 @@ size_t DBObject::loadedCount()
 
 bool DBObject::existsInDB() const
 {
-    return COMPASS::instance().interface().tableInfo().count(db_table_name_) > 0;
+    return COMPASS::instance().interface().existsTable(db_table_name_);
 }
 
 void DBObject::loadAssociationsIfRequired()

@@ -41,7 +41,7 @@ void FinalizeDBOReadJob::run()
     buffer_->transformVariables(read_list_, true);
 
     // add boolean to indicate selection
-    buffer_->addProperty("selected", PropertyDataType::BOOL);
+    buffer_->addProperty(DBObject::selected_var);
 
     logdbg << "FinalizeDBOReadJob: run: done";
     done_ = true;

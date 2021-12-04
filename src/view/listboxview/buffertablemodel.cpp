@@ -146,12 +146,12 @@ QVariant BufferTableModel::data(const QModelIndex& index, int role) const
     {
         if (col == 0)  // selected special case
         {
-            assert(buffer_->has<bool>("selected"));
+            assert(buffer_->has<bool>(DBObject::selected_var.name()));
 
-            if (buffer_->get<bool>("selected").isNull(buffer_index))
+            if (buffer_->get<bool>(DBObject::selected_var.name()).isNull(buffer_index))
                 return Qt::Unchecked;
 
-            if (buffer_->get<bool>("selected").get(buffer_index))
+            if (buffer_->get<bool>(DBObject::selected_var.name()).get(buffer_index))
                 return Qt::Checked;
             else
                 return Qt::Unchecked;
@@ -373,17 +373,17 @@ bool BufferTableModel::setData(const QModelIndex& index, const QVariant& value, 
         unsigned int buffer_index = row_indexes_.at(index.row());
 
         assert(buffer_);
-        assert(buffer_->has<bool>("selected"));
+        assert(buffer_->has<bool>(DBObject::selected_var.name()));
 
         if (value == Qt::Checked)
         {
             loginf << "BufferTableModel: setData: checked row index" << buffer_index;
-            buffer_->get<bool>("selected").set(buffer_index, true);
+            buffer_->get<bool>(DBObject::selected_var.name()).set(buffer_index, true);
         }
         else
         {
             loginf << "BufferTableModel: setData: unchecked row index " << buffer_index;
-            buffer_->get<bool>("selected").set(buffer_index, false);
+            buffer_->get<bool>(DBObject::selected_var.name()).set(buffer_index, false);
         }
         assert(table_widget_);
         table_widget_->view().emitSelectionChange();
@@ -435,8 +435,8 @@ void BufferTableModel::updateRows()
     unsigned int buffer_index{0};  // index in buffer
     unsigned int buffer_size = buffer_->size();
 
-    assert(buffer_->has<bool>("selected"));
-    NullableVector<bool> selected_vec = buffer_->get<bool>("selected");
+    assert(buffer_->has<bool>(DBObject::selected_var.name()));
+    NullableVector<bool> selected_vec = buffer_->get<bool>(DBObject::selected_var.name());
 
     if (row_indexes_.size())  // get last processed index
     {

@@ -511,7 +511,7 @@ void DBObjectManager::databaseContentChangedSlot()
     if (load_widget_)
         load_widget_->update();
 
-    emit dbObjectsChangedSignal();
+    //emit dbObjectsChangedSignal();
 
 }
 

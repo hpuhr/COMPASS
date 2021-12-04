@@ -341,8 +341,8 @@ void ViewManager::doViewPointAfterLoad ()
 
         if (buffer)
         {
-            assert(buffer->has<bool>("selected"));
-            NullableVector<bool>& selected_vec = buffer->get<bool>("selected");
+            assert(buffer->has<bool>(DBObject::selected_var.name()));
+            NullableVector<bool>& selected_vec = buffer->get<bool>(DBObject::selected_var.name());
 
             assert(buffer->has<float>(tod_var.name()));
             NullableVector<float>& tods = buffer->get<float>(tod_var.name());
@@ -422,8 +422,8 @@ void ViewManager::selectTimeWindow(float time_min, float time_max)
 
         if (buffer)
         {
-            assert(buffer->has<bool>("selected"));
-            NullableVector<bool>& selected_vec = buffer->get<bool>("selected");
+            assert(buffer->has<bool>(DBObject::selected_var.name()));
+            NullableVector<bool>& selected_vec = buffer->get<bool>(DBObject::selected_var.name());
 
             assert(buffer->has<float>(tod_var.name()));
             NullableVector<float>& tods = buffer->get<float>(tod_var.name());

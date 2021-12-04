@@ -143,12 +143,12 @@ QVariant AllBufferTableModel::data(const QModelIndex& index, int role) const
     {
         if (col == 0)  // selected special case
         {
-            assert(buffer->has<bool>("selected"));
+            assert(buffer->has<bool>(DBObject::selected_var.name()));
 
-            if (buffer->get<bool>("selected").isNull(buffer_index))
+            if (buffer->get<bool>(DBObject::selected_var.name()).isNull(buffer_index))
                 return Qt::Unchecked;
 
-            if (buffer->get<bool>("selected").get(buffer_index))
+            if (buffer->get<bool>(DBObject::selected_var.name()).get(buffer_index))
                 return Qt::Checked;
             else
                 return Qt::Unchecked;
@@ -407,17 +407,17 @@ bool AllBufferTableModel::setData(const QModelIndex& index, const QVariant& valu
         std::shared_ptr<Buffer> buffer = buffers_.at(dbo_name);
 
         assert(buffer);
-        assert(buffer->has<bool>("selected"));
+        assert(buffer->has<bool>(DBObject::selected_var.name()));
 
         if (value == Qt::Checked)
         {
             logdbg << "AllBufferTableModel: setData: checked row index" << buffer_index;
-            buffer->get<bool>("selected").set(buffer_index, true);
+            buffer->get<bool>(DBObject::selected_var.name()).set(buffer_index, true);
         }
         else
         {
             logdbg << "AllBufferTableModel: setData: unchecked row index " << buffer_index;
-            buffer->get<bool>("selected").set(buffer_index, false);
+            buffer->get<bool>(DBObject::selected_var.name()).set(buffer_index, false);
         }
         assert(table_widget_);
         table_widget_->view().emitSelectionChange();
@@ -521,8 +521,8 @@ void AllBufferTableModel::updateTimeIndexes()
             assert(buf_it.second->has<float>(tod_var.name()));
             NullableVector<float>& tods = buf_it.second->get<float>(tod_var.name());
 
-            assert(buf_it.second->has<bool>("selected"));
-            NullableVector<bool> selected_vec = buf_it.second->get<bool>("selected");
+            assert(buf_it.second->has<bool>(DBObject::selected_var.name()));
+            NullableVector<bool> selected_vec = buf_it.second->get<bool>(DBObject::selected_var.name());
 
             for (; buffer_index < buffer_size; ++buffer_index)
             {
@@ -666,11 +666,11 @@ std::pair<int,int> AllBufferTableModel::getSelectedRows()
 
         std::shared_ptr<Buffer> buffer = buffers_.at(dbo_name);
 
-        assert(buffer->has<bool>("selected"));
-        if (buffer->get<bool>("selected").isNull(buffer_index))
+        assert(buffer->has<bool>(DBObject::selected_var.name()));
+        if (buffer->get<bool>(DBObject::selected_var.name()).isNull(buffer_index))
             continue;
 
-        if (buffer->get<bool>("selected").get(buffer_index))
+        if (buffer->get<bool>(DBObject::selected_var.name()).get(buffer_index))
         {
             if (first_row == -1)
                 first_row = cnt;

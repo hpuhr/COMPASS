@@ -80,8 +80,8 @@ void BufferCSVExportJob::run()
         }
         output_file << ss.str() << "\n";
 
-        assert(buffer_->has<bool>("selected"));
-        NullableVector<bool> selected_vec = buffer_->get<bool>("selected");
+        assert(buffer_->has<bool>(DBObject::selected_var.name()));
+        NullableVector<bool> selected_vec = buffer_->get<bool>(DBObject::selected_var.name());
 
         assert(buffer_->has<int>("rec_num"));
         NullableVector<int> rec_num_vec = buffer_->get<int>("rec_num");

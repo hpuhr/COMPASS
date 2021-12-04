@@ -195,10 +195,10 @@ void ScatterPlotViewDataWidget::updateDataSlot(DBObject& object, std::shared_ptr
         loginf << "ScatterPlotViewDataWidget: updateDataSlot: updating data";
 
         // add selected flags & rec_nums
-        assert (buffer->has<bool>("selected"));
+        assert (buffer->has<bool>(DBObject::selected_var.name()));
         assert (buffer->has<int>("rec_num"));
 
-        NullableVector<bool>& selected_vec = buffer->get<bool>("selected");
+        NullableVector<bool>& selected_vec = buffer->get<bool>(DBObject::selected_var.name());
         NullableVector<int>& rec_num_vec = buffer->get<int>("rec_num");
 
         std::vector<bool>& selected_data = selected_values_[dbo_name];
@@ -286,8 +286,8 @@ void ScatterPlotViewDataWidget::invertSelectionSlot()
 
     for (auto& buf_it : buffers_)
     {
-        assert (buf_it.second->has<bool>("selected"));
-        NullableVector<bool>& selected_vec = buf_it.second->get<bool>("selected");
+        assert (buf_it.second->has<bool>(DBObject::selected_var.name()));
+        NullableVector<bool>& selected_vec = buf_it.second->get<bool>(DBObject::selected_var.name());
 
         for (unsigned int cnt=0; cnt < buf_it.second->size(); ++cnt)
         {
@@ -307,8 +307,8 @@ void ScatterPlotViewDataWidget::clearSelectionSlot()
 
     for (auto& buf_it : buffers_)
     {
-        assert (buf_it.second->has<bool>("selected"));
-        NullableVector<bool>& selected_vec = buf_it.second->get<bool>("selected");
+        assert (buf_it.second->has<bool>(DBObject::selected_var.name()));
+        NullableVector<bool>& selected_vec = buf_it.second->get<bool>(DBObject::selected_var.name());
 
         for (unsigned int cnt=0; cnt < buf_it.second->size(); ++cnt)
             selected_vec.set(cnt, false);
@@ -1170,10 +1170,10 @@ void ScatterPlotViewDataWidget::updateFromAllData()
 
         if (canUpdateFromDataX(buf_it.first) && canUpdateFromDataY(buf_it.first))
         {
-            assert (buf_it.second->has<bool>("selected"));
+            assert (buf_it.second->has<bool>(DBObject::selected_var.name()));
             assert (buf_it.second->has<int>("rec_num"));
 
-            NullableVector<bool>& selected_vec = buf_it.second->get<bool>("selected");
+            NullableVector<bool>& selected_vec = buf_it.second->get<bool>(DBObject::selected_var.name());
             NullableVector<int>& rec_num_vec = buf_it.second->get<int>("rec_num");
 
             std::vector<bool>& selected_data = selected_values_[buf_it.first];
@@ -1390,8 +1390,8 @@ void ScatterPlotViewDataWidget::selectData (double x_min, double x_max, double y
     unsigned int sel_cnt = 0;
     for (auto& buf_it : buffers_)
     {
-        assert (buf_it.second->has<bool>("selected"));
-        NullableVector<bool>& selected_vec = buf_it.second->get<bool>("selected");
+        assert (buf_it.second->has<bool>(DBObject::selected_var.name()));
+        NullableVector<bool>& selected_vec = buf_it.second->get<bool>(DBObject::selected_var.name());
 
         assert (buf_it.second->has<int>("rec_num"));
         NullableVector<int>& rec_num_vec = buf_it.second->get<int>("rec_num");

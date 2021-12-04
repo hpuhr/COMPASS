@@ -96,6 +96,8 @@ class DBObject : public QObject, public Configurable
     static const Property var_radar_azimuth_;
     static const Property var_radar_altitude_;
 
+    static const Property selected_var;
+
     DBObject(COMPASS& compass, const std::string& class_id, const std::string& instance_id,
              DBObjectManager* manager);
     virtual ~DBObject();
