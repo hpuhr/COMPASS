@@ -723,21 +723,21 @@ void ASTERIXImportTask::run(bool test) // , bool create_mapping_stubs
 
     assert(canImportFile());
 
-    if (status_widget_)
-    {
-        logwrn << "ASTERIXImportTask: run: status widget still active";
-        status_widget_ = nullptr;
-    }
-    assert(!status_widget_);
+//    if (status_widget_)
+//    {
+//        logwrn << "ASTERIXImportTask: run: status widget still active";
+//        status_widget_ = nullptr;
+//    }
+//    assert(!status_widget_);
 
-    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+//    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
-    status_widget_ = nullptr;
+//    status_widget_ = nullptr;
 
-    status_widget_.reset(new ASTERIXStatusDialog(current_filename_, test_));
-    connect(status_widget_.get(), &ASTERIXStatusDialog::closeSignal, this,
-            &ASTERIXImportTask::closeStatusDialogSlot);
-    status_widget_->markStartTime();
+//    status_widget_.reset(new ASTERIXStatusDialog(current_filename_, test_));
+//    connect(status_widget_.get(), &ASTERIXStatusDialog::closeSignal, this,
+//            &ASTERIXImportTask::closeStatusDialogSlot);
+//    status_widget_->markStartTime();
 
     insert_active_ = 0;
 
@@ -878,16 +878,16 @@ void ASTERIXImportTask::decodeASTERIXDoneSlot()
         msgBox.setIcon(QMessageBox::Warning);
         msgBox.exec();
     }
-    assert(status_widget_);
+//    assert(status_widget_);
 
-    if (status_widget_->numErrors())
-        task_manager_.appendError(
-                    "ASTERIXImportTask: " + std::to_string(status_widget_->numErrors()) +
-                    " decoding errors occured");
+//    if (status_widget_->numErrors())
+//        task_manager_.appendError(
+//                    "ASTERIXImportTask: " + std::to_string(status_widget_->numErrors()) +
+//                    " decoding errors occured");
 
-    task_manager_.appendInfo("ASTERIXImportTask: decoding done with " +
-                             std::to_string(status_widget_->numFrames()) + " frames, " +
-                             std::to_string(status_widget_->numRecords()) + " records");
+//    task_manager_.appendInfo("ASTERIXImportTask: decoding done with " +
+//                             std::to_string(status_widget_->numFrames()) + " frames, " +
+//                             std::to_string(status_widget_->numRecords()) + " records");
 
     decode_job_ = nullptr;
 
@@ -904,20 +904,20 @@ void ASTERIXImportTask::addDecodedASTERIXSlot()
     loginf << "ASTERIXImportTask: addDecodedASTERIX";
 
     assert(decode_job_);
-    assert(status_widget_);
+    //assert(status_widget_);
 
     current_framing_ = ""; // TODO HACK
 
     logdbg << "ASTERIXImportTask: addDecodedASTERIX: errors " << decode_job_->numErrors();
 
-    status_widget_->numFrames(jasterix_->numFrames());
-    status_widget_->numRecords(jasterix_->numRecords());
-    status_widget_->numErrors(jasterix_->numErrors());
-    status_widget_->setCategoryCounts(decode_job_->categoryCounts());
+//    status_widget_->numFrames(jasterix_->numFrames());
+//    status_widget_->numRecords(jasterix_->numRecords());
+//    status_widget_->numErrors(jasterix_->numErrors());
+//    status_widget_->setCategoryCounts(decode_job_->categoryCounts());
 
     loginf << "ASTERIXImportTask: addDecodedASTERIX: num records " << jasterix_->numRecords();
 
-    status_widget_->show();
+//    status_widget_->show();
 
     std::unique_ptr<nlohmann::json> extracted_data {decode_job_->extractedData()};
 
@@ -966,13 +966,13 @@ void ASTERIXImportTask::mapJSONDoneSlot()
 {
     loginf << "ASTERIXImportTask: mapJSONDoneSlot";
 
-    assert(status_widget_);
+//    assert(status_widget_);
     assert(json_map_job_);
 
-    status_widget_->addNumMapped(json_map_job_->numMapped());
-    status_widget_->addNumNotMapped(json_map_job_->numNotMapped());
-    status_widget_->addMappedCounts(json_map_job_->categoryMappedCounts());
-    status_widget_->addNumCreated(json_map_job_->numCreated());
+//    status_widget_->addNumMapped(json_map_job_->numMapped());
+//    status_widget_->addNumNotMapped(json_map_job_->numNotMapped());
+//    status_widget_->addMappedCounts(json_map_job_->categoryMappedCounts());
+//    status_widget_->addNumCreated(json_map_job_->numCreated());
 
     std::map<std::string, std::shared_ptr<Buffer>> job_buffers {json_map_job_->buffers()};
     json_map_job_ = nullptr;
@@ -1047,7 +1047,7 @@ void ASTERIXImportTask::insertData(std::map<std::string, std::shared_ptr<Buffer>
 
     assert (!test_);
 
-    assert(status_widget_);
+    //assert(status_widget_);
 
     DBObjectManager& object_manager = COMPASS::instance().objectManager();
 
@@ -1119,7 +1119,7 @@ void ASTERIXImportTask::insertData(std::map<std::string, std::shared_ptr<Buffer>
         DBOVariableSet& set = dbo_variable_sets_.at(dbo_name);
         db_object.insertData(set, buffer, false);
 
-        status_widget_->addNumInserted(db_object.name(), buffer->size());
+        //status_widget_->addNumInserted(db_object.name(), buffer->size());
 
         if (db_object.name() == "Radar")
             num_radar_inserted_ += buffer->size(); // store for later check
@@ -1189,8 +1189,8 @@ void ASTERIXImportTask::checkAllDone()
     {
         loginf << "ASTERIXImportTask: checkAllDone: setting all done";
 
-        assert(status_widget_);
-        status_widget_->setDone();
+//        assert(status_widget_);
+//        status_widget_->setDone();
 
         all_done_ = true;
         done_ = true; // why was this not set?
@@ -1206,32 +1206,32 @@ void ASTERIXImportTask::checkAllDone()
         if (!test_)
             emit COMPASS::instance().interface().databaseContentChangedSignal();
 
-        task_manager_.appendInfo("ASTERIXImportTask: inserted " +
-                                 std::to_string(status_widget_->numRecordsInserted()) +
-                                 " records, rate " + status_widget_->recordsInsertedRateStr());
+//        task_manager_.appendInfo("ASTERIXImportTask: inserted " +
+//                                 std::to_string(status_widget_->numRecordsInserted()) +
+//                                 " records, rate " + status_widget_->recordsInsertedRateStr());
 
-        for (auto& db_cnt_it : status_widget_->dboInsertedCounts())
-            task_manager_.appendInfo("ASTERIXImportTask: inserted " +
-                                     std::to_string(db_cnt_it.second) + " " + db_cnt_it.first +
-                                     " records");
+//        for (auto& db_cnt_it : status_widget_->dboInsertedCounts())
+//            task_manager_.appendInfo("ASTERIXImportTask: inserted " +
+//                                     std::to_string(db_cnt_it.second) + " " + db_cnt_it.first +
+//                                     " records");
 
         logdbg << "ASTERIXImportTask: checkAllDone: status logging";
 
-        if (test_)
-            task_manager_.appendSuccess("ASTERIXImportTask: import test done after " +
-                                        status_widget_->elapsedTimeStr());
-        else
-        {
-            task_manager_.appendSuccess("ASTERIXImportTask: import done after " +
-                                        status_widget_->elapsedTimeStr());
-        }
+//        if (test_)
+//            task_manager_.appendSuccess("ASTERIXImportTask: import test done after " +
+//                                        status_widget_->elapsedTimeStr());
+//        else
+//        {
+//            task_manager_.appendSuccess("ASTERIXImportTask: import done after " +
+//                                        status_widget_->elapsedTimeStr());
+//        }
 
         if (!show_done_summary_)
         {
             logdbg << "ASTERIXImportTask: checkAllDone: deleting status widget";
 
-            status_widget_->close();
-            status_widget_ = nullptr;
+//            status_widget_->close();
+//            status_widget_ = nullptr;
         }
     }
 
@@ -1242,9 +1242,9 @@ void ASTERIXImportTask::closeStatusDialogSlot()
 {
     loginf << "ASTERIXImportTask: closeStatusDialogSlot";
 
-    assert(status_widget_);
-    status_widget_->close();
-    status_widget_ = nullptr;
+//    assert(status_widget_);
+//    status_widget_->close();
+//    status_widget_ = nullptr;
 
     loginf << "ASTERIXImportTask: closeStatusDialogSlot: done";
 }

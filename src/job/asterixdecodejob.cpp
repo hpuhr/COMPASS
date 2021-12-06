@@ -175,7 +175,7 @@ void ASTERIXDecodeJob::doUDPStreamDecoding()
         this->jasterix_callback(std::move(data), num_frames, num_records, numErrors);
     };
 
-    while (1)
+    while (!obsolete_)
     {
         for (auto& socket_it : sockets)
         {

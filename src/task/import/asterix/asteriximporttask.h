@@ -171,7 +171,7 @@ class ASTERIXImportTask : public Task, public Configurable
     bool error_{false};
     std::string error_message_;
 
-    std::unique_ptr<ASTERIXStatusDialog> status_widget_;
+    //std::unique_ptr<ASTERIXStatusDialog> status_widget_;
 
     bool waiting_for_insert_{false};
     size_t insert_active_{0};
