@@ -810,8 +810,11 @@ void ASTERIXImportTask::run(bool test) // , bool create_mapping_stubs
 
     assert(decode_job_ == nullptr);
 
-    decode_job_ = make_shared<ASTERIXDecodeJob>(*this, current_filename_, current_framing_, test_,
-                                                post_process_);
+    decode_job_ = make_shared<ASTERIXDecodeJob>(*this, test_, post_process_);
+
+    //decode_job_->setDecodeFile(current_filename_, current_framing_);
+
+    decode_job_->setDecodeUDPStreams({});
 
     connect(decode_job_.get(), &ASTERIXDecodeJob::obsoleteSignal, this,
             &ASTERIXImportTask::decodeASTERIXObsoleteSlot, Qt::QueuedConnection);
@@ -898,10 +901,12 @@ void ASTERIXImportTask::decodeASTERIXObsoleteSlot()
 
 void ASTERIXImportTask::addDecodedASTERIXSlot()
 {
-    logdbg << "ASTERIXImportTask: addDecodedASTERIX";
+    loginf << "ASTERIXImportTask: addDecodedASTERIX";
 
     assert(decode_job_);
     assert(status_widget_);
+
+    current_framing_ = ""; // TODO HACK
 
     logdbg << "ASTERIXImportTask: addDecodedASTERIX: errors " << decode_job_->numErrors();
 
@@ -909,6 +914,8 @@ void ASTERIXImportTask::addDecodedASTERIXSlot()
     status_widget_->numRecords(jasterix_->numRecords());
     status_widget_->numErrors(jasterix_->numErrors());
     status_widget_->setCategoryCounts(decode_job_->categoryCounts());
+
+    loginf << "ASTERIXImportTask: addDecodedASTERIX: num records " << jasterix_->numRecords();
 
     status_widget_->show();
 
@@ -957,7 +964,7 @@ void ASTERIXImportTask::addDecodedASTERIXSlot()
 
 void ASTERIXImportTask::mapJSONDoneSlot()
 {
-    logdbg << "ASTERIXImportTask: mapJSONDoneSlot";
+    loginf << "ASTERIXImportTask: mapJSONDoneSlot";
 
     assert(status_widget_);
     assert(json_map_job_);
@@ -969,6 +976,11 @@ void ASTERIXImportTask::mapJSONDoneSlot()
 
     std::map<std::string, std::shared_ptr<Buffer>> job_buffers {json_map_job_->buffers()};
     json_map_job_ = nullptr;
+
+    loginf << "ASTERIXImportTask: mapJSONDoneSlot: num buffers " << job_buffers.size();
+
+    if (!job_buffers.size())
+        return;
 
     if (!test_)
     {
@@ -1031,7 +1043,7 @@ void ASTERIXImportTask::postprocessObsoleteSlot()
 
 void ASTERIXImportTask::insertData(std::map<std::string, std::shared_ptr<Buffer>> job_buffers)
 {
-    logdbg << "ASTERIXImportTask: insertData: inserting into database";
+    loginf << "ASTERIXImportTask: insertData: inserting " << job_buffers.size() << " into database";
 
     assert (!test_);
 
@@ -1081,6 +1093,9 @@ void ASTERIXImportTask::insertData(std::map<std::string, std::shared_ptr<Buffer>
     for (auto& buf_it : job_buffers)
     {
         std::string dbo_name = buf_it.first;
+
+        loginf << "ASTERIXImportTask: insertData: inserting " << dbo_name << " into database";
+
         assert(dbo_variable_sets_.count(dbo_name));
         std::shared_ptr<Buffer> buffer = buf_it.second;
 

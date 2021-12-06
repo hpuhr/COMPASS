@@ -4,6 +4,8 @@
 #include "job.h"
 #include "json.hpp"
 
+#include <boost/asio.hpp>
+
 #include <memory>
 #include <vector>
 

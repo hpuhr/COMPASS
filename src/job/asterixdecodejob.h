@@ -33,9 +33,13 @@ class ASTERIXDecodeJob : public Job
     void decodedASTERIXSignal();
 
   public:
-    ASTERIXDecodeJob(ASTERIXImportTask& task, const std::string& filename,
-                     const std::string& framing, bool test, ASTERIXPostProcess& post_process);
+    ASTERIXDecodeJob(ASTERIXImportTask& task, bool test, ASTERIXPostProcess& post_process);
     virtual ~ASTERIXDecodeJob();
+
+    void setDecodeFile (const std::string& filename,
+                        const std::string& framing);
+
+    void setDecodeUDPStreams (const std::vector<std::string>& udp_ips); // includes ips
 
     virtual void run();
 
@@ -55,10 +59,15 @@ class ASTERIXDecodeJob : public Job
 
   private:
     ASTERIXImportTask& task_;
-    std::string filename_;
-    std::string framing_;
     bool test_{false};
     ASTERIXPostProcess& post_process_;
+
+    bool decode_file_ {false};
+    std::string filename_;
+    std::string framing_;
+
+    bool decode_udp_streams_ {false};
+    std::vector<std::string> udp_ips_;
 
     volatile bool pause_{false};
 
@@ -72,6 +81,9 @@ class ASTERIXDecodeJob : public Job
     std::unique_ptr<nlohmann::json> extracted_data_;
 
     std::map<unsigned int, size_t> category_counts_;
+
+    void doFileDecoding();
+    void doUDPStreamDecoding();
 
     void jasterix_callback(std::unique_ptr<nlohmann::json> data, size_t num_frames,
                            size_t num_records, size_t numErrors);

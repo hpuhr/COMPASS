@@ -624,7 +624,7 @@ std::map<T, std::vector<unsigned int>> NullableVector<T>::distinctValuesWithInde
 
     if (BUFFER_PEDANTIC_CHECKING)
     {
-        assert(to_index);
+        assert(from_index <= to_index);
         assert(from_index < buffer_.data_size_);
         assert(to_index < buffer_.data_size_);
         assert(data_.size() <= buffer_.data_size_);
@@ -692,7 +692,7 @@ std::vector<unsigned int> NullableVector<T>::nullValueIndexes(unsigned int from_
 
     if (BUFFER_PEDANTIC_CHECKING)
     {
-        assert(to_index);
+        assert(from_index <= to_index);
         assert(from_index < buffer_.data_size_);
         assert(to_index < buffer_.data_size_);
         assert(data_.size() <= buffer_.data_size_);
