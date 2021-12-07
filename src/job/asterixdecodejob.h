@@ -20,11 +20,18 @@
 
 #include <functional>
 
+#include <boost/asio.hpp>
+#include <boost/array.hpp>
+#include <boost/interprocess/sync/interprocess_semaphore.hpp>
+#include "boost/date_time/posix_time/posix_time.hpp"
+
 #include "job.h"
 #include "json.hpp"
 
 class ASTERIXImportTask;
 class ASTERIXPostProcess;
+
+const unsigned int MAX_READ_SIZE=1024*1024;
 
 class ASTERIXDecodeJob : public Job
 {
@@ -78,12 +85,26 @@ class ASTERIXDecodeJob : public Job
     bool error_{false};
     std::string error_message_;
 
+    boost::interprocess::interprocess_semaphore receive_semaphore_;
+
+    std::vector<boost::asio::ip::udp::socket> sockets_;
+    std::vector<boost::asio::ip::udp::endpoint> end_points_;
+    std::vector<boost::array<char, MAX_READ_SIZE>> recv_buffers_;
+    unsigned int read_socket_num_;
+    size_t read_bytes_;
+
+    boost::array<char, MAX_READ_SIZE> receive_buffer_;
+    size_t receive_buffer_size_ {0};
+    boost::posix_time::ptime last_receive_decode_time_;
+
     std::unique_ptr<nlohmann::json> extracted_data_;
 
     std::map<unsigned int, size_t> category_counts_;
 
     void doFileDecoding();
     void doUDPStreamDecoding();
+
+    void handleReceive(unsigned int socket_num, const boost::system::error_code& error, size_t bytes_transferred);
 
     void jasterix_callback(std::unique_ptr<nlohmann::json> data, size_t num_frames,
                            size_t num_records, size_t numErrors);

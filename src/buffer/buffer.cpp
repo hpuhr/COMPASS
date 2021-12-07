@@ -261,7 +261,7 @@ void Buffer::deleteProperty(const Property& property)
 
 void Buffer::sortByProperty(const Property& property)
 {
-    loginf << "Buffer: sortByProperty: name " << property.name();
+    logdbg << "Buffer: sortByProperty: name " << property.name();
 
     std::vector<std::size_t> perm;
 
@@ -309,7 +309,7 @@ void Buffer::sortByProperty(const Property& property)
 
     for (auto& prop_it : properties_.properties())
     {
-        loginf << "Buffer: sortByProperty: sorting name " << prop_it.name();
+        logdbg << "Buffer: sortByProperty: sorting name " << prop_it.name();
 
         switch (prop_it.dataType())
         {
@@ -352,7 +352,7 @@ void Buffer::sortByProperty(const Property& property)
         }
     }
 
-    loginf << "Buffer: sortByProperty: name " << property.name() << " done";
+    logdbg << "Buffer: sortByProperty: name " << property.name() << " done";
 }
 
 void Buffer::seizeBuffer(Buffer& org_buffer)

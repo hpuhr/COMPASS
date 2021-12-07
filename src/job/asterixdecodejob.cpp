@@ -21,24 +21,25 @@
 #include "logger.h"
 #include "stringconv.h"
 
-
 #include <jasterix/jasterix.h>
 
 #include <QThread>
-#include <memory>
 
-#include <boost/asio.hpp>
-#include <boost/array.hpp>
+#include <boost/bind.hpp>
+#include <boost/thread.hpp>
+
+#include <memory>
 
 using namespace nlohmann;
 using namespace Utils;
+using namespace std;
 
 ASTERIXDecodeJob::ASTERIXDecodeJob(ASTERIXImportTask& task, bool test,
                                    ASTERIXPostProcess& post_process)
     : Job("ASTERIXDecodeJob"),
       task_(task),
       test_(test),
-      post_process_(post_process)
+      post_process_(post_process), receive_semaphore_(0)
 {
     logdbg << "ASTERIXDecodeJob: ctor";
 }
@@ -119,84 +120,219 @@ void ASTERIXDecodeJob::doFileDecoding()
 
 void ASTERIXDecodeJob::doUDPStreamDecoding()
 {
+    loginf << "ASTERIXDecodeJob: doUDPStreamDecoding";
+
     assert (decode_udp_streams_);
 
     const unsigned int BUF_SIZE {1024*1024};
 
-    //        UDP_OUTPUT 200 $ETHOUT 224.9.3.252 15201   \
-    //        FILTER_SACSIC 100 200 120 1 \
-    //        UDP_OUTPUT 202 $ETHOUT 224.9.2.252 15205   \
-    //        FILTER_SACSIC 100 202 120 3    \
-    //        UDP_OUTPUT 203 $ETHOUT 224.9.2.252 15203   \
-    //        FILTER_SACSIC 100 203 120 2   \
-    //        UDP_OUTPUT 206 $ETHOUT 224.9.2.252 15207   \
-    //        FILTER_SACSIC 100 206 120 4    \
-    //        UDP_OUTPUT 208 $ETHOUT 224.9.2.252 15211   \
-    //        FILTER_SACSIC 100 208 34 11   \
-    //        UDP_OUTPUT 210 $ETHOUT 224.9.2.252 15213   \
-    //        FILTER_SACSIC 100 210 2 1   \
-    //        UDP_OUTPUT 212 $ETHOUT 224.9.2.252 15215   \
+//    UDP_OUTPUT 200 $ETHOUT 224.9.2.252 15080   \
+//    FILTER_SACSIC 100 200 50 80 \
+//    UDP_OUTPUT 202 $ETHOUT 224.9.2.252 15070   \
+//    FILTER_SACSIC 100 202 50 70    \
+//    UDP_OUTPUT 203 $ETHOUT 224.9.2.252 15071   \
+//    FILTER_SACSIC 100 203 50 71    \
+//     UDP_OUTPUT 204 $ETHOUT 224.9.2.252 15072   \
+//    FILTER_SACSIC 100 204 50 72    \
+//    UDP_OUTPUT 205 $ETHOUT 224.9.2.252 15073   \
+//    FILTER_SACSIC 100 205 50 73    \
+//    UDP_OUTPUT 206 $ETHOUT 224.9.2.252 15074   \
+//    FILTER_SACSIC 100 206 50 74    \
+//    UDP_OUTPUT 207 $ETHOUT 224.9.2.252 15075   \
+//    FILTER_SACSIC 100 207 50 75    \
+//    UDP_OUTPUT 208 $ETHOUT 224.9.2.252 15076   \
+//    FILTER_SACSIC 100 208 50 76    \
+//    UDP_OUTPUT 209 $ETHOUT 224.9.2.252 15077   \
+//    FILTER_SACSIC 100 209 50 77    \
+//    UDP_OUTPUT 210 $ETHOUT 224.9.2.252 15078   \
+//    FILTER_SACSIC 100 210 50 78    \
+//    UDP_OUTPUT 211 $ETHOUT 224.9.2.252 15081   \
+//    FILTER_SACSIC 100 211 50 81    \
+//
 
     std::vector <std::pair<std::string, unsigned int>> ips_and_ports;
-    ips_and_ports.push_back({"224.9.3.252", 15201});
-    ips_and_ports.push_back({"224.9.2.252", 15205});
-    ips_and_ports.push_back({"224.9.2.252", 15203});
-    ips_and_ports.push_back({"224.9.2.252", 15207});
-    ips_and_ports.push_back({"224.9.2.252", 15211});
-    ips_and_ports.push_back({"224.9.2.252", 15213});
-    ips_and_ports.push_back({"224.9.2.252", 15215});
+    ips_and_ports.push_back({"224.9.2.252", 15080});
+    //ips_and_ports.push_back({"224.9.2.252", 15070});
+//    ips_and_ports.push_back({"224.9.2.252", 15071});
+//    ips_and_ports.push_back({"224.9.2.252", 15072});
+//    ips_and_ports.push_back({"224.9.2.252", 15073});
+//    ips_and_ports.push_back({"224.9.2.252", 15074});
+//    ips_and_ports.push_back({"224.9.2.252", 15075});
+//    ips_and_ports.push_back({"224.9.2.252", 15076});
+//    ips_and_ports.push_back({"224.9.2.252", 15077});
+    ips_and_ports.push_back({"224.9.2.252", 15078});
+//    ips_and_ports.push_back({"224.9.2.252", 15081});
+//    ips_and_ports.push_back({"224.9.2.252", 150240});
 
-    std::vector<boost::asio::ip::udp::socket> sockets;
+    //std::vector<boost::asio::ip::udp::socket> sockets;
 
     boost::asio::io_service io_service;
-    boost::asio::ip::udp::endpoint sender_endpoint;
+    //boost::asio::ip::udp::endpoint sender_endpoint;
 
-
+    unsigned int socket_cnt = 0;
     for (auto& ip_port_it : ips_and_ports)
     {
-        sockets.push_back(boost::asio::ip::udp::socket (io_service));
+        sockets_.push_back(boost::asio::ip::udp::socket (io_service));
         // Create the socket so that multiple may be bound to the same address.
-        sockets.back().open(boost::asio::ip::udp::v4());
-        sockets.back().set_option(boost::asio::ip::udp::socket::reuse_address(true));
+        sockets_.back().open(boost::asio::ip::udp::v4());
+        sockets_.back().set_option(boost::asio::ip::udp::socket::reuse_address(true));
 
-        sockets.back().bind(
-                    boost::asio::ip::udp::endpoint(boost::asio::ip::address::from_string(ip_port_it.first), ip_port_it.second));
+        end_points_.push_back(
+                    boost::asio::ip::udp::endpoint (
+                        boost::asio::ip::address::from_string(ip_port_it.first), ip_port_it.second));
+
+        sockets_.back().bind(end_points_.back());
 
         // Join the multicast group.
-        sockets.back().set_option(
+        sockets_.back().set_option(
                     boost::asio::ip::multicast::join_group(boost::asio::ip::address::from_string(ip_port_it.first)));
+
+        recv_buffers_.push_back(boost::array<char, MAX_READ_SIZE>());
+
+        sockets_.back().async_receive_from(
+            boost::asio::buffer(recv_buffers_.at(socket_cnt)),
+                    end_points_.back(),
+            boost::bind(&ASTERIXDecodeJob::handleReceive, this,
+              socket_cnt,
+              boost::asio::placeholders::error,
+              boost::asio::placeholders::bytes_transferred));
+
+        ++socket_cnt;
     }
 
+    last_receive_decode_time_ =  boost::posix_time::microsec_clock::local_time();
 
-    boost::array<unsigned char, BUF_SIZE> recv_buf;
+    loginf << "doing io service";
+
+    //io_service.run();
+
+    //boost::thread(boost::bind(&boost::asio::io_service::run, &io_service));
+    //ros::spin();
+
+    shared_ptr<boost::asio::io_service::work> work(new boost::asio::io_service::work(io_service));
+    //boost::thread t(&boost::asio::io_service::run, &io_service);
+    boost::thread t(boost::bind(&boost::asio::io_service::run, &io_service));
+    t.detach();
+
+    loginf << "doing wait";
+
+//    std::ostringstream ss;
+//    ss << std::hex << std::uppercase << std::setfill('0');
 
     auto callback = [this](std::unique_ptr<nlohmann::json> data, size_t num_frames,
             size_t num_records, size_t numErrors) {
         this->jasterix_callback(std::move(data), num_frames, num_records, numErrors);
     };
 
-    while (!obsolete_)
+    while (1)
     {
-        for (auto& socket_it : sockets)
+        receive_semaphore_.wait();
+
+//        ss.str("");
+
+//        for(unsigned int cnt=0; cnt < read_bytes_; ++cnt) {
+//            ss << std::setw(1) << (unsigned int) recv_buffers_.at(read_socket_num_).at(cnt);
+//        }
+
+//        std::cout << ss.str() << std::endl;
+
+        loginf << " processing socket " << read_socket_num_ << " bytes " << read_bytes_;
+
+        //assert (read_socket_num_ < recv_buffers_.size());
+
+        if ((boost::posix_time::microsec_clock::local_time() - last_receive_decode_time_).total_milliseconds() > 1000)
         {
+            last_receive_decode_time_ = boost::posix_time::microsec_clock::local_time();
 
-            size_t len = socket_it.receive_from(boost::asio::buffer(recv_buf), sender_endpoint);
-
-            std::ostringstream ss;
-
-            ss << std::hex << std::uppercase << std::setfill('0');
-            for(unsigned int cnt=0; cnt < len; ++cnt) {
-                ss << std::setw(1) << (unsigned int) recv_buf.at(cnt);
-            }
-
-            std::string result = ss.str();
-            std::cout << result << std::endl;
-
-            task_.jASTERIX()->decodeData((char*) recv_buf.data(), len, callback);
+            task_.jASTERIX()->decodeData((char*) receive_buffer_.data(), receive_buffer_size_, callback);
+            receive_buffer_size_ = 0;
         }
 
-        //std::cout.write(recv_buf.data(), len);
+        //std::cout.write(recv_buffers_.at(0).data(), read_bytes_);
     }
+
+//    boost::array<unsigned char, BUF_SIZE> recv_buf;
+
+//    auto callback = [this](std::unique_ptr<nlohmann::json> data, size_t num_frames,
+//            size_t num_records, size_t numErrors) {
+//        this->jasterix_callback(std::move(data), num_frames, num_records, numErrors);
+//    };
+
+//    while (1) // !obsolete
+//    {
+//        for (auto& socket_it : sockets)
+//        {
+
+//            size_t len = socket_it.receive_from(boost::asio::buffer(recv_buf), sender_endpoint);
+
+//            std::ostringstream ss;
+
+//            ss << std::hex << std::uppercase << std::setfill('0');
+//            for(unsigned int cnt=0; cnt < len; ++cnt) {
+//                ss << std::setw(1) << (unsigned int) recv_buf.at(cnt);
+//            }
+
+//            std::string result = ss.str();
+//            std::cout << result << std::endl;
+
+//            task_.jASTERIX()->decodeData((char*) recv_buf.data(), len, callback);
+//        }
+
+//        //std::cout.write(recv_buf.data(), len);
+//    }
+
+    loginf << "ASTERIXDecodeJob: doUDPStreamDecoding: done";
+}
+
+void ASTERIXDecodeJob::handleReceive(unsigned int socket_num, const boost::system::error_code& error,
+                                     size_t bytes_transferred)
+{
+    loginf << "ASTERIXDecodeJob: handleReceive: socket " << socket_num << " bytes " << bytes_transferred;
+
+    assert (bytes_transferred < MAX_READ_SIZE);
+    assert (bytes_transferred + receive_buffer_size_ < MAX_READ_SIZE);
+
+    receive_semaphore_.post();
+
+//        << std::string(recv_buffers_.at(socket_num).begin(), recv_buffers_.at(socket_num).begin()+bytes_transferred)
+//        << "'\n";
+
+//    auto callback = [this](std::unique_ptr<nlohmann::json> data, size_t num_frames,
+//            size_t num_records, size_t numErrors) {
+//        this->jasterix_callback(std::move(data), num_frames, num_records, numErrors);
+//    };
+
+//    task_.jASTERIX()->decodeData((char*) recv_buffers_.at(socket_num).data(), bytes_transferred, callback);
+
+    // collect data in receive buffer
+    for (unsigned int cnt=0; cnt < bytes_transferred; ++cnt)
+        receive_buffer_[receive_buffer_size_+cnt] = recv_buffers_.at(socket_num)[cnt];
+    receive_buffer_size_ += bytes_transferred;
+
+    //read_buffer_ = recv_buffers_.at(socket_num);
+
+    if (!error || error == boost::asio::error::message_size)
+    {
+        loginf << "ASTERIXDecodeJob: handleReceive: new receive";
+
+        assert (socket_num < sockets_.size());
+        assert (socket_num < recv_buffers_.size());
+        assert (socket_num < end_points_.size());
+
+        sockets_.at(socket_num).async_receive_from(
+            boost::asio::buffer(recv_buffers_.at(socket_num)),
+                    end_points_.at(socket_num),
+            boost::bind(&ASTERIXDecodeJob::handleReceive, this,
+              socket_num,
+              boost::asio::placeholders::error,
+              boost::asio::placeholders::bytes_transferred));
+    }
+
+    read_bytes_ = bytes_transferred;
+    read_socket_num_ = socket_num;
+
+    logdbg << "ASTERIXDecodeJob: handleReceive: done";
+
 }
 
 void ASTERIXDecodeJob::jasterix_callback(std::unique_ptr<nlohmann::json> data, size_t num_frames,
@@ -208,7 +344,7 @@ void ASTERIXDecodeJob::jasterix_callback(std::unique_ptr<nlohmann::json> data, s
         return;
     }
 
-    loginf << "ASTERIXDecodeJob: jasterix_callback: data '" << data->dump(2) << "'";
+    //loginf << "ASTERIXDecodeJob: jasterix_callback: data '" << data->dump(2) << "'";
 
     assert(!extracted_data_);
     extracted_data_ = std::move(data);

@@ -799,8 +799,8 @@ void ASTERIXImportTask::run(bool test) // , bool create_mapping_stubs
         //        loginf << "ASTERIXImportTask: importFile: setting cat " <<  cat_it.first
         //               << " decode flag " << cat_it.second.decode();
         jasterix_->setDecodeCategory(cat_it.first, cat_it.second.decode());
-        //        loginf << "ASTERIXImportTask: importFile: setting cat " <<  cat_it.first
-        //               << " edition " << cat_it.second.edition();
+                loginf << "ASTERIXImportTask: run: setting cat " <<  cat_it.first
+                       << " edition " << cat_it.second.edition();
         jasterix_->category(cat_it.first)->setCurrentEdition(cat_it.second.edition());
         jasterix_->category(cat_it.first)->setCurrentREFEdition(cat_it.second.ref());
         jasterix_->category(cat_it.first)->setCurrentSPFEdition(cat_it.second.spf());
