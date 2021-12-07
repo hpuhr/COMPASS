@@ -23,7 +23,8 @@
 #include <boost/asio.hpp>
 #include <boost/array.hpp>
 #include <boost/interprocess/sync/interprocess_semaphore.hpp>
-#include "boost/date_time/posix_time/posix_time.hpp"
+#include <boost/date_time/posix_time/posix_time.hpp>
+#include <boost/thread/mutex.hpp>
 
 #include "job.h"
 #include "json.hpp"
@@ -89,10 +90,17 @@ class ASTERIXDecodeJob : public Job
 
     std::vector<boost::asio::ip::udp::socket> sockets_;
     std::vector<boost::asio::ip::udp::endpoint> end_points_;
-    std::vector<boost::array<char, MAX_READ_SIZE>> recv_buffers_;
-    unsigned int read_socket_num_;
-    size_t read_bytes_;
+    std::vector<boost::array<char, MAX_READ_SIZE>> recv_arrays_;
+    //std::vector<boost::asio::mutable_buffer> recv_buffers_;
 
+//    bool read_set_ {false};
+//    unsigned int read_socket_num_;
+//    size_t read_bytes_;
+
+    bool error_occured_ {false};
+    boost::system::error_code error_code_;
+
+    boost::mutex receive_buffer_mutex_;
     boost::array<char, MAX_READ_SIZE> receive_buffer_;
     size_t receive_buffer_size_ {0};
     boost::posix_time::ptime last_receive_decode_time_;

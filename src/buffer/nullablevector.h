@@ -730,9 +730,6 @@ std::vector<unsigned int> NullableVector<T>::nullValueIndexes(
     {
         if (isNull(index))  // not for null
         {
-            if (BUFFER_PEDANTIC_CHECKING)
-                assert(index < data_.size());
-
             ret_indexes.push_back(index);
         }
     }
