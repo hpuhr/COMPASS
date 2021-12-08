@@ -67,7 +67,17 @@ class DBObjectManagerLoadWidget : public QWidget
 
     QPushButton* load_button_{nullptr};
 
+    std::map<std::string, QCheckBox*> ds_type_boxes_;
+
+    std::map<std::string, QCheckBox*> ds_boxes_; // ds name -> load box
+    std::map<std::string, std::map<std::string, QCheckBox*>> ds_content_boxes_; // ds name -> (cont, label)
+    std::map<std::string, std::map<std::string, QLabel*>> ds_content_loaded_labels_; // ds name -> (cont, label)
+    std::map<std::string, std::map<std::string, QLabel*>> ds_content_total_labels_; // ds name -> (cont, label)
+
     bool loading_{false};
+
+    void clearAndCreateContent();
+    void updateExistingContent();
 };
 
 #endif /* DBOBJECTMANAGERINFOWIDGET_H_ */

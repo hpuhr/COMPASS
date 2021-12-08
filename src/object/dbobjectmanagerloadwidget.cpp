@@ -244,70 +244,40 @@ void DBObjectManagerLoadWidget::update()
 {
     logdbg << "DBObjectManagerLoadWidget: update: num data sources " << dbo_manager_.dataSources().size();
 
-    // remove all previous
-    while (QLayoutItem* item = type_layout_->takeAt(0))
+    bool clear_required = false;
+
+    for (const auto& ds_it : dbo_manager_.dataSources())
     {
-        assert(!item->layout()); // otherwise the layout will leak
-        delete item->widget();
-        delete item;
-    }
+        if (clear_required)
+            break;
 
-    QFont font_bold;
-    font_bold.setBold(true);
-
-    unsigned int row = 0;
-    unsigned int col_start = 0;
-    unsigned int num_col_per_dstype = 5; // add 1 for spacing
-    unsigned int dstype_col = 0;
-    unsigned int dstyp_cnt = 0;
-
-    for (auto& dstype_it : DBObjectManager::data_source_types_)
-    {
-        logdbg << "DBObjectManagerLoadWidget: update: typ " << dstype_it << " cnt " << dstyp_cnt;
-
-        if (dstype_it == "MLAT" || dstype_it == "Tracker")  // break into next column
+        if (!ds_boxes_.count(ds_it->name()))
         {
-            row = 0;
-            dstype_col++;
-            col_start = dstype_col * num_col_per_dstype;
+            loginf << "DBObjectManagerLoadWidget: update: ds_box " << ds_it->name() << " missing ";
+
+            clear_required = true;
+            break;
         }
 
-        QCheckBox* dstyp_box = new QCheckBox(dstype_it.c_str());
-        dstyp_box->setFont(font_bold);
+        // check content widget exist
 
-        type_layout_->addWidget(dstyp_box, row, col_start, 1, num_col_per_dstype, Qt::AlignTop | Qt::AlignLeft);
-
-        ++row;
-
-        for (const auto& ds_it : dbo_manager_.dataSources())
+        for (auto& cnt_it : ds_it->countsMap())
         {
-            //loginf << row << " '" << ds_it->dsType() << "' '" << dstype << "'";
-
-            if (ds_it->dsType() != dstype_it)
-                continue;
-
-            QCheckBox* ds_box = new QCheckBox(ds_it->name().c_str());
-
-            type_layout_->addWidget(ds_box, row, col_start, 1, num_col_per_dstype-1,
-                                    Qt::AlignTop | Qt::AlignLeft);
-            ++row;
-
-            for (auto& cnt_it : ds_it->countsMap())
+            if (!ds_content_boxes_.count(ds_it->name()) || !ds_content_boxes_.at(ds_it->name()).count(cnt_it.first))
             {
-                QCheckBox* dbcont_box = new QCheckBox(cnt_it.first.c_str());
+                loginf << "DBObjectManagerLoadWidget: update: ds_content_boxes " << cnt_it.first << " missing ";
 
-                type_layout_->addWidget(dbcont_box, row, col_start+1,
-                                        Qt::AlignTop | Qt::AlignRight);
-                type_layout_->addWidget(new QLabel(QString::number(cnt_it.second)), row, col_start+2,
-                                        Qt::AlignTop | Qt::AlignRight);
-                type_layout_->addWidget(new QLabel(QString::number(0)), row, col_start+3,
-                                        Qt::AlignTop | Qt::AlignRight);
-                ++row;
+                clear_required = true;
+                break;
             }
         }
 
-        dstyp_cnt++;
     }
+
+    if (clear_required)
+        clearAndCreateContent();
+    else
+        updateExistingContent();
 
 
     //    QLayoutItem* item;
@@ -336,3 +306,156 @@ void DBObjectManagerLoadWidget::update()
 //    else
 //        associations_label_->setText("None");
 }
+
+void DBObjectManagerLoadWidget::clearAndCreateContent()
+{
+    loginf << "DBObjectManagerLoadWidget: clearAndCreateContent";
+
+    // remove all previous
+    while (QLayoutItem* item = type_layout_->takeAt(0))
+    {
+        assert(!item->layout()); // otherwise the layout will leak
+        delete item->widget();
+        delete item;
+    }
+
+    ds_type_boxes_.clear();
+    ds_boxes_.clear();
+    ds_content_boxes_.clear();
+    ds_content_loaded_labels_.clear();
+    ds_content_total_labels_.clear();
+
+    QFont font_bold;
+    font_bold.setBold(true);
+
+    unsigned int row = 0;
+    unsigned int col_start = 0;
+    unsigned int num_col_per_dstype = 5; // add 1 for spacing
+    unsigned int dstype_col = 0;
+    unsigned int dstyp_cnt = 0;
+
+    string ds_name;
+    string ds_content_name;
+
+    for (auto& ds_type_name : DBObjectManager::data_source_types_)
+    {
+        logdbg << "DBObjectManagerLoadWidget: clearAndCreateContent: typ " << ds_type_name << " cnt " << dstyp_cnt;
+
+        if (ds_type_name == "MLAT" || ds_type_name == "Tracker")  // break into next column
+        {
+            row = 0;
+            dstype_col++;
+            col_start = dstype_col * num_col_per_dstype;
+        }
+
+        QCheckBox* dstyp_box = new QCheckBox(ds_type_name.c_str());
+        dstyp_box->setFont(font_bold);
+
+        type_layout_->addWidget(dstyp_box, row, col_start, 1, num_col_per_dstype, Qt::AlignTop | Qt::AlignLeft);
+
+        assert (!ds_type_boxes_.count(ds_type_name));
+        ds_type_boxes_[ds_type_name] = dstyp_box;
+
+        ++row;
+
+        for (const auto& ds_it : dbo_manager_.dataSources())
+        {
+            //loginf << row << " '" << ds_it->dsType() << "' '" << dstype << "'";
+
+            if (ds_it->dsType() != ds_type_name)
+                continue;
+
+            ds_name = ds_it->name();
+
+            QCheckBox* ds_box = new QCheckBox(ds_name.c_str());
+
+            type_layout_->addWidget(ds_box, row, col_start, 1, num_col_per_dstype-1,
+                                    Qt::AlignTop | Qt::AlignLeft);
+
+            assert (!ds_boxes_.count(ds_name));
+            ds_boxes_[ds_name] = ds_box;
+
+            ++row;
+
+            for (auto& cnt_it : ds_it->countsMap())
+            {
+                ds_content_name = cnt_it.first;
+
+                // content checkbox
+
+                QCheckBox* dbcont_box = new QCheckBox(ds_content_name.c_str());
+
+                type_layout_->addWidget(dbcont_box, row, col_start+1,
+                                        Qt::AlignTop | Qt::AlignRight);
+
+                assert (!ds_content_boxes_.count(ds_name) || !ds_content_boxes_.at(ds_name).count(ds_content_name));
+                ds_content_boxes_[ds_name][ds_content_name] = dbcont_box;
+
+                // ds content loaded label
+
+                QLabel* ds_content_loaded_label = new QLabel(QString::number(cnt_it.second));
+
+                type_layout_->addWidget(ds_content_loaded_label, row, col_start+2,
+                                        Qt::AlignTop | Qt::AlignRight);
+
+                assert (!ds_content_loaded_labels_.count(ds_name)
+                        || !ds_content_loaded_labels_.at(ds_name).count(ds_content_name));
+                ds_content_loaded_labels_[ds_name][ds_content_name] = ds_content_loaded_label;
+
+                // ds content total label
+
+                QLabel* ds_content_total_label = new QLabel(QString::number(0));
+
+                type_layout_->addWidget(ds_content_total_label, row, col_start+3,
+                                        Qt::AlignTop | Qt::AlignRight);
+
+                assert (!ds_content_total_labels_.count(ds_name)
+                        || !ds_content_total_labels_.at(ds_name).count(ds_content_name));
+                ds_content_total_labels_[ds_name][ds_content_name] = ds_content_total_label;
+                ++row;
+            }
+        }
+
+        dstyp_cnt++;
+    }
+}
+
+void DBObjectManagerLoadWidget::updateExistingContent()
+{
+    loginf << "DBObjectManagerLoadWidget: updateExistingContent";
+
+    string ds_name;
+    string ds_content_name;
+
+    for (const auto& ds_it : dbo_manager_.dataSources())
+    {
+        //loginf << row << " '" << ds_it->dsType() << "' '" << dstype << "'";
+
+        ds_name = ds_it->name();
+
+        assert (ds_boxes_.count(ds_name));
+        // ds_boxes_[ds_name] // checkbox
+
+        for (auto& cnt_it : ds_it->countsMap())
+        {
+            ds_content_name = cnt_it.first;
+
+            // content checkbox
+
+            assert (ds_content_boxes_.count(ds_name) && ds_content_boxes_.at(ds_name).count(ds_content_name));
+            // ds_content_boxes_[ds_name][ds_content_name] content checkbox
+
+            // ds content loaded label
+            assert (ds_content_loaded_labels_.count(ds_name)
+                    && ds_content_loaded_labels_.at(ds_name).count(ds_content_name));
+            ds_content_loaded_labels_[ds_name][ds_content_name]->setText(QString::number(cnt_it.second));
+
+            // ds content total label
+
+            assert (ds_content_total_labels_.count(ds_name)
+                    && ds_content_total_labels_.at(ds_name).count(ds_content_name));
+            ds_content_total_labels_[ds_name][ds_content_name]->setText(QString::number(0));
+        }
+    }
+}
+
