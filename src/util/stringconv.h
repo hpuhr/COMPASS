@@ -363,6 +363,25 @@ inline std::string latexString(std::string str)
     return str;
 }
 
+inline std::string ipFromString(const std::string& name)
+{
+    // string like "224.9.2.252:15040"
+
+    std::vector<std::string> parts = split(name, ':');
+    assert (parts.size() == 2);
+    return parts.at(0);
+}
+
+inline unsigned int portFromString(const std::string& name)
+{
+    // string like "224.9.2.252:15040"
+
+    std::vector<std::string> parts = split(name, ':');
+    assert (parts.size() == 2);
+    return stoi(parts.at(1));
+}
+
+
 }  // namespace String
 
 // template <typename T> std::string formatBinaryString (T val)

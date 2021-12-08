@@ -131,14 +131,20 @@ void ASTERIXDecodeJob::setDecodeFile (const std::string& filename,
 }
 
 
-void ASTERIXDecodeJob::setDecodeUDPStreams (const std::vector<std::string>& udp_ips)
+void ASTERIXDecodeJob::setDecodeUDPStreams (
+        const std::map<unsigned int, std::vector <std::pair<std::string, unsigned int>>>& ds_lines)
 {
-    udp_ips_ = udp_ips;
+    ds_lines_ = ds_lines;
 
     loginf << "ASTERIXDecodeJob: setDecodeUDPStreams: streams:";
 
-    for (auto& udp_it : udp_ips_)
-        loginf << "\t" << udp_it;
+    for (auto& ds_it : ds_lines_)
+    {
+        loginf << ds_it.first << ":";
+
+        for (auto& line_it : ds_it.second)
+            loginf << "\t" << line_it.first << ":" << line_it.second;
+    }
 
     decode_udp_streams_ = true;
     assert (!decode_file_);
@@ -220,19 +226,19 @@ void ASTERIXDecodeJob::doUDPStreamDecoding()
     //    FILTER_SACSIC 100 211 50 81    \
     //
 
-    std::vector <std::pair<std::string, unsigned int>> ips_and_ports;
-    ips_and_ports.push_back({"224.9.2.252", 15080});
-    ips_and_ports.push_back({"224.9.2.252", 15070});
-    ips_and_ports.push_back({"224.9.2.252", 15071});
-    ips_and_ports.push_back({"224.9.2.252", 15072});
-    ips_and_ports.push_back({"224.9.2.252", 15073});
-    ips_and_ports.push_back({"224.9.2.252", 15074});
-    ips_and_ports.push_back({"224.9.2.252", 15075});
-    ips_and_ports.push_back({"224.9.2.252", 15076});
-    ips_and_ports.push_back({"224.9.2.252", 15077});
-    ips_and_ports.push_back({"224.9.2.252", 15078});
-    ips_and_ports.push_back({"224.9.2.252", 15081});
-    ips_and_ports.push_back({"224.9.2.252", 150240});
+//    std::vector <std::pair<std::string, unsigned int>> ips_and_ports;
+//    ips_and_ports.push_back({"224.9.2.252", 15080});
+//    ips_and_ports.push_back({"224.9.2.252", 15070});
+//    ips_and_ports.push_back({"224.9.2.252", 15071});
+//    ips_and_ports.push_back({"224.9.2.252", 15072});
+//    ips_and_ports.push_back({"224.9.2.252", 15073});
+//    ips_and_ports.push_back({"224.9.2.252", 15074});
+//    ips_and_ports.push_back({"224.9.2.252", 15075});
+//    ips_and_ports.push_back({"224.9.2.252", 15076});
+//    ips_and_ports.push_back({"224.9.2.252", 15077});
+//    ips_and_ports.push_back({"224.9.2.252", 15078});
+//    ips_and_ports.push_back({"224.9.2.252", 15081});
+//    ips_and_ports.push_back({"224.9.2.252", 150240});
 
 
     boost::asio::io_context io_context;
@@ -243,13 +249,26 @@ void ASTERIXDecodeJob::doUDPStreamDecoding()
 
     vector<unique_ptr<server>> servers;
 
-    for (auto& ip_port_it : ips_and_ports)
+    for (auto& ds_it : ds_lines_)
     {
-        loginf << "creating server " << ip_port_it.first << ":" << ip_port_it.second;
-        servers.emplace_back(new server(io_context, ip_port_it.first, ip_port_it.second, data_callback));
+        //loginf << ds_it.first << ":";
 
-        //server s(io_context, atoi(argv[1]));
+        for (auto& line_it : ds_it.second)
+        {
+            loginf << "ASTERIXDecodeJob: doUDPStreamDecoding: setting up ds_id " << ds_it.first
+                    << " ip " << line_it.first << ":" << line_it.second;
+            servers.emplace_back(new server(io_context, line_it.first, line_it.second, data_callback));
+        }
+
     }
+
+//    for (auto& ip_port_it : ips_and_ports)
+//    {
+//        loginf << "creating server " << ip_port_it.first << ":" << ip_port_it.second;
+//        servers.emplace_back(new server(io_context, ip_port_it.first, ip_port_it.second, data_callback));
+
+//        //server s(io_context, atoi(argv[1]));
+//    }
 
     //    server s1(io_context, "224.9.2.252", 15080);
     //    server s2(io_context, "224.9.2.252", 15078);

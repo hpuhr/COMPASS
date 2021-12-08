@@ -92,6 +92,7 @@ public:
     void addNewDataSource (unsigned int ds_id);
     DBContent::DBDataSource& dataSource(unsigned int ds_id);
     const std::vector<std::unique_ptr<DBContent::DBDataSource>>& dataSources() const;
+    std::map<unsigned int, std::vector <std::pair<std::string, unsigned int>>> getNetworkLines(); //ds_id -> (ip, port)
 
     void saveDBDataSources();
 

@@ -814,7 +814,8 @@ void ASTERIXImportTask::run(bool test) // , bool create_mapping_stubs
 
     //decode_job_->setDecodeFile(current_filename_, current_framing_);
 
-    decode_job_->setDecodeUDPStreams({});
+    decode_job_->setDecodeUDPStreams(COMPASS::instance().objectManager().getNetworkLines());
+
 
     connect(decode_job_.get(), &ASTERIXDecodeJob::obsoleteSignal, this,
             &ASTERIXImportTask::decodeASTERIXObsoleteSlot, Qt::QueuedConnection);

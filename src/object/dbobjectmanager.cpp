@@ -28,12 +28,14 @@
 #include "logger.h"
 #include "metadbovariable.h"
 #include "stringconv.h"
+#include "number.h"
 #include "viewmanager.h"
 #include "jobmanager.h"
 #include "evaluationmanager.h"
 #include "filtermanager.h"
 #include "util/number.h"
 #include "metadbovariableconfigurationdialog.h"
+#include "json.hpp"
 
 #include <QApplication>
 #include <QMessageBox>
@@ -43,6 +45,7 @@
 using namespace std;
 using namespace Utils;
 using namespace DBContent;
+using namespace nlohmann;
 
 const std::vector<std::string> DBObjectManager::data_source_types_ {"Radar", "MLAT", "ADSB", "Tracker", "RefTraj"};
 
@@ -816,6 +819,64 @@ const std::vector<std::unique_ptr<DBContent::DBDataSource>>& DBObjectManager::da
 {
     return db_data_sources_;
 }
+
+std::map<unsigned int, std::vector <std::pair<std::string, unsigned int>>> DBObjectManager::getNetworkLines()
+{
+    //ds_id -> (ip, port)
+    std::map<unsigned int, std::vector <std::pair<std::string, unsigned int>>> lines;
+
+    string line_address;
+    string ip;
+    unsigned int port;
+
+    for (auto& ds_it : config_data_sources_)
+    {
+        if (ds_it->info().contains("network_lines"))
+        {
+            json& network_lines = ds_it->info().at("network_lines");
+            assert (network_lines.is_array());
+
+            for (auto& line_it : network_lines.get<json::array_t>())  // iterate over array
+            {
+                assert (line_it.is_primitive());
+                assert (line_it.is_string());
+
+                line_address = line_it;
+
+                ip = String::ipFromString(line_address);
+                port = String::portFromString(line_address);
+
+                lines[Number::dsIdFrom(ds_it->sac(), ds_it->sic())].push_back({ip, port});
+            }
+        }
+    }
+
+    for (auto& ds_it : db_data_sources_) // should be same
+    {
+        if (ds_it->info().contains("network_lines"))
+        {
+            json& network_lines = ds_it->info().at("network_lines");
+            assert (network_lines.is_array());
+
+            for (auto& line_it : network_lines.get<json::array_t>())  // iterate over array
+            {
+                assert (line_it.is_primitive());
+                assert (line_it.is_string());
+
+                line_address = line_it;
+
+                ip = String::ipFromString(line_address);
+                port = String::portFromString(line_address);
+
+                lines[Number::dsIdFrom(ds_it->sac(), ds_it->sic())].push_back({ip, port});
+            }
+        }
+    }
+
+    return lines;
+}
+
+
 
 MetaDBOVariableConfigurationDialog* DBObjectManager::metaVariableConfigdialog()
 {

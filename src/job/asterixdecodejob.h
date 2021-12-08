@@ -47,7 +47,9 @@ class ASTERIXDecodeJob : public Job
     void setDecodeFile (const std::string& filename,
                         const std::string& framing);
 
-    void setDecodeUDPStreams (const std::vector<std::string>& udp_ips); // includes ips
+    void setDecodeUDPStreams (
+            const std::map<unsigned int, std::vector <std::pair<std::string, unsigned int>>>& ds_lines);
+    // ds_id -> (ip,port)
 
     virtual void run();
 
@@ -63,7 +65,7 @@ class ASTERIXDecodeJob : public Job
 
     std::map<unsigned int, size_t> categoryCounts() const;
 
-    std::unique_ptr<nlohmann::json> extractedData() { return std::move(extracted_data_); }
+    std::unique_ptr<nlohmann::json> extractedData() { return std::move(extracted_data_); } // ds_id -> (ip,port)
 
   private:
     ASTERIXImportTask& task_;
@@ -75,7 +77,7 @@ class ASTERIXDecodeJob : public Job
     std::string framing_;
 
     bool decode_udp_streams_ {false};
-    std::vector<std::string> udp_ips_;
+    std::map<unsigned int, std::vector <std::pair<std::string, unsigned int>>> ds_lines_;
 
     volatile bool pause_{false};
 
