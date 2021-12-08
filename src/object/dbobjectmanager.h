@@ -92,7 +92,7 @@ public:
 
     bool hasDataSource(unsigned int ds_id);
     bool canAddNewDataSourceFromConfig (unsigned int ds_id);
-    void addNewDataSource (unsigned int ds_id);
+    void addNewDataSource (unsigned int ds_id); // be sure not to call from different thread
     DBContent::DBDataSource& dataSource(unsigned int ds_id);
     const std::vector<std::unique_ptr<DBContent::DBDataSource>>& dataSources() const;
 
