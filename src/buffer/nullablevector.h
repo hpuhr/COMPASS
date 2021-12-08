@@ -865,7 +865,7 @@ std::vector<std::size_t> NullableVector<T>::sortPermutation()
 {
     //assert (isNeverNull());
 
-    loginf << "UGA sortPermutation data size " << buffer_.size();
+    //loginf << "UGA sortPermutation data size " << buffer_.size();
 
     if (data_.size() < buffer_.size())
         resizeDataTo(buffer_.size());

@@ -87,11 +87,15 @@ public:
     MetaDBOVariableConfigurationDialog* metaVariableConfigdialog();
 
 
+    bool hasConfigDataSource(unsigned int ds_id);
+    DBContent::ConfigurationDataSource& configDataSource(unsigned int ds_id);
+
     bool hasDataSource(unsigned int ds_id);
     bool canAddNewDataSourceFromConfig (unsigned int ds_id);
     void addNewDataSource (unsigned int ds_id);
     DBContent::DBDataSource& dataSource(unsigned int ds_id);
     const std::vector<std::unique_ptr<DBContent::DBDataSource>>& dataSources() const;
+
     std::map<unsigned int, std::vector <std::pair<std::string, unsigned int>>> getNetworkLines(); //ds_id -> (ip, port)
 
     void saveDBDataSources();
@@ -188,9 +192,6 @@ protected:
 
     virtual void checkSubConfigurables();
     void finishLoading();
-
-    bool hasConfigDataSource (unsigned int sac, unsigned int sic);
-    DBContent::ConfigurationDataSource& getConfigDataSource (unsigned int sac, unsigned int sic);
 
     void loadDBDataSources();
     void sortDBDataSources();

@@ -428,6 +428,8 @@ void DBObject::insertData(DBOVariableSet& list, shared_ptr<Buffer> buffer, bool 
     // transform variable names from dbovars to dbcolumns
     buffer->transformVariables(list, false);
 
+    doDataSourcesBeforeInsert(buffer);
+
     insert_job_ = make_shared<InsertBufferDBJob>(COMPASS::instance().interface(), *this, buffer,
                                                       emit_change);
 
@@ -443,60 +445,69 @@ void DBObject::insertData(DBOVariableSet& list, shared_ptr<Buffer> buffer, bool 
 
 void DBObject::doDataSourcesBeforeInsert (shared_ptr<Buffer> buffer)
 {
-    logdbg << "DBObject " << name_ << ": doDataSourcesBeforeInsert";
+    loginf << "DBObject " << name_ << ": doDataSourcesBeforeInsert";
 
-    bool has_sac_sic = hasVariable("sac") && hasVariable("sic") &&
-            buffer->has<unsigned char>("sac") && buffer->has<unsigned char>("sic");
+    //    bool has_sac_sic = hasVariable("sac") && hasVariable("sic") &&
+    //            buffer->has<unsigned char>("sac") && buffer->has<unsigned char>("sic");
 
-    logdbg << "DBObject " << name_ << ": doDataSourcesBeforeInsert: has sac/sic "
-           << has_sac_sic << " buffer size " << buffer->size();
+    //    logdbg << "DBObject " << name_ << ": doDataSourcesBeforeInsert: has sac/sic "
+    //           << has_sac_sic << " buffer size " << buffer->size();
 
-    assert (has_sac_sic);
+    //    assert (has_sac_sic);
 
-    NullableVector<unsigned char>& sac_vec = buffer->get<unsigned char>("sac");
-    NullableVector<unsigned char>& sic_vec = buffer->get<unsigned char>("sic");
+    //    NullableVector<unsigned char>& sac_vec = buffer->get<unsigned char>("sac");
+    //    NullableVector<unsigned char>& sic_vec = buffer->get<unsigned char>("sic");
 
-    string data_source_var_name = "ds_id";
+    //    string data_source_var_name = "ds_id";
 
-    // getting key list and distinct values
-    assert(buffer->properties().hasProperty(data_source_var_name));
-    assert(buffer->properties().get(data_source_var_name).dataType() == PropertyDataType::INT);
+    //    // getting key list and distinct values
+    //    assert(buffer->properties().hasProperty(data_source_var_name));
+    //    assert(buffer->properties().get(data_source_var_name).dataType() == PropertyDataType::INT);
 
-    assert(buffer->has<int>(data_source_var_name));
+    //    assert(buffer->has<int>(data_source_var_name));
 
-    NullableVector<int>& data_source_key_vec = buffer->get<int>(data_source_var_name);
+    //    NullableVector<int>& data_source_key_vec = buffer->get<int>(data_source_var_name);
 
-    set<int> data_source_keys = data_source_key_vec.distinctValues();
+    //    set<int> data_source_keys = data_source_key_vec.distinctValues();
 
-    map<int, unsigned int> ds_id_counts;  // keyvar->count
-    // collect sac/sics
+    //    map<int, unsigned int> ds_id_counts;  // keyvar->count
+    //    // collect sac/sics
 
-    size_t bufsize = buffer->size();
+    //    size_t bufsize = buffer->size();
 
+    //    unsigned int key_val, sac, sic;
 
-    unsigned int key_val, sac, sic;
+    //    for (unsigned int cnt = 0; cnt < bufsize; ++cnt)
+    //    {
+    //        assert(!data_source_key_vec.isNull(cnt));
+    //        key_val = data_source_key_vec.get(cnt);
 
-    for (unsigned int cnt = 0; cnt < bufsize; ++cnt)
-    {
-        assert(!data_source_key_vec.isNull(cnt));
-        key_val = data_source_key_vec.get(cnt);
+    //        assert(!sac_vec.isNull(cnt) && !sic_vec.isNull(cnt));
+    //        sac = sac_vec.get(cnt);
+    //        sic = sic_vec.get(cnt);
 
-        assert(!sac_vec.isNull(cnt) && !sic_vec.isNull(cnt));
-        sac = sac_vec.get(cnt);
-        sic = sic_vec.get(cnt);
+    //        assert (Number::dsIdFrom(sac, sic) == key_val); // must be same
 
-        assert (Number::dsIdFrom(sac, sic) == key_val); // must be same
+    //        ++ds_id_counts[key_val];
+    //    }
 
-        ++ds_id_counts[key_val];
-    }
+    assert (hasVariable(DBObject::meta_var_datasource_id_.name()));
 
-    for (auto& ds_id_cnt : ds_id_counts)
+    DBOVariable& datasource_var = variable(DBObject::meta_var_datasource_id_.name());
+    assert (datasource_var.dataType() == PropertyDataType::UINT);
+
+    string datasource_col_str = datasource_var.dbColumnName();
+    assert (buffer->has<unsigned int>(datasource_col_str));
+
+    NullableVector<unsigned int>& datasource_vec = buffer->get<unsigned int>(datasource_col_str);
+
+    for (auto& ds_id_cnt : datasource_vec.distinctValuesWithCounts())
     {
         if (!dbo_manager_.hasDataSource(ds_id_cnt.first))
             dbo_manager_.addNewDataSource(ds_id_cnt.first);
 
-        // TODO add record count
-
+        // add record count
+        dbo_manager_.dataSource(ds_id_cnt.first).addNumInserted(name_, ds_id_cnt.second);
     }
 }
 
@@ -565,7 +576,7 @@ void DBObject::insertDoneSlot()
         data_->sortByProperty(prop);
     }
 
-    data_->printProperties();
+    //data_->printProperties();
 
     if (info_widget_)
         info_widget_->updateSlot();

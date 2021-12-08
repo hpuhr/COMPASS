@@ -360,12 +360,12 @@ void DBObjectManagerLoadWidget::clearAndCreateContent()
 
         for (const auto& ds_it : dbo_manager_.dataSources())
         {
-            //loginf << row << " '" << ds_it->dsType() << "' '" << dstype << "'";
-
             if (ds_it->dsType() != ds_type_name)
                 continue;
 
             ds_name = ds_it->name();
+            loginf << "DBObjectManagerLoadWidget: clearAndCreateContent: create '"
+                   << ds_it->dsType() << "' '" << ds_name << "'";
 
             QCheckBox* ds_box = new QCheckBox(ds_name.c_str());
 

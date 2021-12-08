@@ -1091,35 +1091,35 @@ void DBInterface::insertBuffer(DBObject& db_object, std::shared_ptr<Buffer> buff
     if (!existsTable(db_object.dbTableName()))
         createTable(db_object);
 
+    // create data sources and counts done in DBObject::doDataSourcesBeforeInsert
+    //
+//    {
+//        assert (db_object.hasVariable(DBObject::meta_var_datasource_id_.name()));
 
-    // create data sources
-    {
-        assert (db_object.hasVariable(DBObject::meta_var_datasource_id_.name()));
+//        DBOVariable& datasource_var = db_object.variable(DBObject::meta_var_datasource_id_.name());
+//        assert (datasource_var.dataType() == PropertyDataType::UINT);
 
-        DBOVariable& datasource_var = db_object.variable(DBObject::meta_var_datasource_id_.name());
-        assert (datasource_var.dataType() == PropertyDataType::UINT);
+//        string datasource_col_str = datasource_var.dbColumnName();
+//        assert (buffer->has<unsigned int>(datasource_col_str));
 
-        string datasource_col_str = datasource_var.dbColumnName();
-        assert (buffer->has<unsigned int>(datasource_col_str));
+//        NullableVector<unsigned int>& datasource_vec = buffer->get<unsigned int>(datasource_col_str);
 
-        NullableVector<unsigned int>& datasource_vec = buffer->get<unsigned int>(datasource_col_str);
+//        DBObjectManager& dbo_man = COMPASS::instance().objectManager();
 
-        DBObjectManager& dbo_man = COMPASS::instance().objectManager();
+//        // check if data sources exist, create if not
+//        for (auto ds_id_it : datasource_vec.distinctValuesWithCounts())
+//        {
+//            if (!dbo_man.hasDataSource(ds_id_it.first))
+//            {
+//                if(dbo_man.canAddNewDataSourceFromConfig(ds_id_it.first))
+//                    logwrn << "DBInterface: insertBuffer: creating unknown ds id " << ds_id_it.first;
 
-        // check if data sources exist, create if not
-        for (auto ds_id_it : datasource_vec.distinctValuesWithCounts())
-        {
-            if (!dbo_man.hasDataSource(ds_id_it.first))
-            {
-                if(dbo_man.canAddNewDataSourceFromConfig(ds_id_it.first))
-                    logwrn << "DBInterface: insertBuffer: creating unknown ds id " << ds_id_it.first;
+//                dbo_man.addNewDataSource(ds_id_it.first);
+//            }
 
-                dbo_man.addNewDataSource(ds_id_it.first);
-            }
-
-            dbo_man.dataSource(ds_id_it.first).addNumInserted(db_object.name(), ds_id_it.second);
-        }
-    }
+//            dbo_man.dataSource(ds_id_it.first).addNumInserted(db_object.name(), ds_id_it.second);
+//        }
+//    }
 
     // create record numbers & and store new max rec num
     {

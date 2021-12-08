@@ -128,37 +128,64 @@ void ASTERIXPostprocessJob::run()
         {
             if (!projection.hasCoordinateSystem(ds_id_it))
             {
-                if (!dbo_man.hasDataSource(ds_id_it))
+                assert (dbo_man.hasConfigDataSource(ds_id_it)
+                        || dbo_man.hasDataSource(ds_id_it)); // creation done after in doDataSourcesBeforeInsert
+
+                //                if (!dbo_man.hasDataSource(ds_id_it))
+                //                {
+                //                    if(dbo_man.canAddNewDataSourceFromConfig(ds_id_it))
+                //                        dbo_man.addNewDataSource(ds_id_it);
+                //                    else
+                //                    {
+                //                        logerr << "ASTERIXPostprocessJob: run: ds id " << ds_id_it << " unknown";
+                //                        continue;
+                //                    }
+                //                }
+
+                //                assert (dbo_man.hasDataSource(ds_id_it));
+
+                if (dbo_man.hasConfigDataSource(ds_id_it))
                 {
-                    if(dbo_man.canAddNewDataSourceFromConfig(ds_id_it))
-                        dbo_man.addNewDataSource(ds_id_it);
-                    else
+                    DBContent::ConfigurationDataSource& data_source = dbo_man.configDataSource(ds_id_it);
+
+                    if (data_source.info().contains("latitude")
+                            && data_source.info().contains("longitude")
+                            && data_source.info().contains("altitude"))
                     {
-                        logerr << "ASTERIXPostprocessJob: run: ds id " << ds_id_it << " unknown";
-                        continue;
+                        loginf << "ASTERIXPostprocessJob: run: adding proj ds " << ds_id_it
+                               << " lat/long " << (double) data_source.info().at("latitude") << "," <<
+                                  (double) data_source.info().at("longitude")
+                               << " alt " << (double) data_source.info().at("altitude");
+
+                        projection.addCoordinateSystem(ds_id_it, data_source.info().at("latitude"),
+                                                       data_source.info().at("longitude"),
+                                                       data_source.info().at("altitude"));
                     }
+                    else
+                        logerr << "ASTERIXPostprocessJob: run: config ds " << data_source.name()
+                               << " defined but missing position info";
                 }
-
-                assert (dbo_man.hasDataSource(ds_id_it));
-
-                DBContent::DBDataSource& data_source = dbo_man.dataSource(ds_id_it);
-
-                if (data_source.info().contains("latitude")
-                        && data_source.info().contains("longitude")
-                        && data_source.info().contains("altitude"))
+                else if (dbo_man.hasDataSource(ds_id_it))
                 {
-                    loginf << "ASTERIXPostprocessJob: run: adding ds " << data_source.id()
-                           << " lat/long " << (double) data_source.info().at("latitude") << "," <<
-                              (double) data_source.info().at("longitude")
-                           << " alt " << (double) data_source.info().at("altitude");
+                    DBContent::DBDataSource& data_source = dbo_man.dataSource(ds_id_it);
 
-                    projection.addCoordinateSystem(data_source.id(), data_source.info().at("latitude"),
-                                                   data_source.info().at("longitude"),
-                                                   data_source.info().at("altitude"));
+                    if (data_source.info().contains("latitude")
+                            && data_source.info().contains("longitude")
+                            && data_source.info().contains("altitude"))
+                    {
+                        loginf << "ASTERIXPostprocessJob: run: adding proj ds " << data_source.id()
+                               << " lat/long " << (double) data_source.info().at("latitude") << "," <<
+                                  (double) data_source.info().at("longitude")
+                               << " alt " << (double) data_source.info().at("altitude");
+
+                        projection.addCoordinateSystem(data_source.id(), data_source.info().at("latitude"),
+                                                       data_source.info().at("longitude"),
+                                                       data_source.info().at("altitude"));
+                    }
+                    else
+                        logerr << "ASTERIXPostprocessJob: run: ds " << data_source.name()
+                               << " defined but missing position info";
                 }
-                else
-                    logerr << "ASTERIXPostprocessJob: run: ds " << data_source.name()
-                           << " defined but missing position info";
             }
 
         }

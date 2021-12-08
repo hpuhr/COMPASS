@@ -68,7 +68,6 @@ class DBObject : public QObject, public Configurable
     void databaseOpenedSlot();
     void databaseClosedSlot();
 
-
     void readJobIntermediateSlot(std::shared_ptr<Buffer> buffer);
     void readJobObsoleteSlot();
     void readJobDoneSlot();

@@ -111,7 +111,7 @@ void DBObjectManager::generateSubConfigurable(const std::string& class_id,
         loginf << "DBObjectManager: generateSubConfigurable: adding config ds "
                << ds->name() << " sac/sic " <<  ds->sac() << "/" << ds->sic();
 
-        assert (!hasConfigDataSource(ds->sac(), ds->sic()));
+        assert (!hasConfigDataSource(Number::dsIdFrom(ds->sac(), ds->sic())));
         config_data_sources_.emplace_back(move(ds));
     }
     else
@@ -559,17 +559,23 @@ void DBObjectManager::finishLoading()
     QApplication::restoreOverrideCursor();
 }
 
-bool DBObjectManager::hasConfigDataSource (unsigned int sac, unsigned int sic)
+bool DBObjectManager::hasConfigDataSource (unsigned int ds_id)
 {
+    unsigned int sac = Number::sacFromDsId(ds_id);
+    unsigned int sic = Number::sicFromDsId(ds_id);
+
     return find_if(config_data_sources_.begin(), config_data_sources_.end(),
                    [sac,sic] (const std::unique_ptr<DBContent::ConfigurationDataSource>& s)
     { return s->sac() == sac && s->sic() == sic; } ) != config_data_sources_.end();
 
 }
 
-DBContent::ConfigurationDataSource& DBObjectManager::getConfigDataSource (unsigned int sac, unsigned int sic)
+DBContent::ConfigurationDataSource& DBObjectManager::configDataSource (unsigned int ds_id)
 {
-    assert (hasConfigDataSource(sac, sic));
+    assert (hasConfigDataSource(ds_id));
+
+    unsigned int sac = Number::sacFromDsId(ds_id);
+    unsigned int sic = Number::sicFromDsId(ds_id);
 
     return *find_if(config_data_sources_.begin(), config_data_sources_.end(),
                     [sac,sic] (const std::unique_ptr<DBContent::ConfigurationDataSource>& s)
@@ -611,7 +617,7 @@ bool DBObjectManager::canAddNewDataSourceFromConfig (unsigned int ds_id)
     if (hasDataSource(ds_id))
         return false;
 
-    return hasConfigDataSource(Number::sacFromDsId(ds_id), Number::sicFromDsId(ds_id));
+    return hasConfigDataSource(ds_id);
 }
 
 bool DBObjectManager::hasDataSource(unsigned int ds_id)
@@ -627,12 +633,11 @@ void DBObjectManager::addNewDataSource (unsigned int ds_id)
 
     assert (!hasDataSource(ds_id));
 
-    if (hasConfigDataSource(Number::sacFromDsId(ds_id), Number::sicFromDsId(ds_id)))
+    if (hasConfigDataSource(ds_id))
     {
         loginf << "DBObjectManager: addNewDataSource: ds_id " << ds_id << " from config";
 
-        DBContent::ConfigurationDataSource& cfg_ds = getConfigDataSource(
-                    Number::sacFromDsId(ds_id), Number::sicFromDsId(ds_id));
+        DBContent::ConfigurationDataSource& cfg_ds = configDataSource(ds_id);
 
         db_data_sources_.emplace_back(move(cfg_ds.getAsNewDBDS()));
         sortDBDataSources();
