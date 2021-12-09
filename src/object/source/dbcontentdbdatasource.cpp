@@ -38,7 +38,7 @@ std::string DBDataSource::countsStr()
     return counts_.dump();
 }
 
-const std::map<std::string, unsigned int>& DBDataSource::countsMap() const
+const std::map<std::string, unsigned int>& DBDataSource::numInsertedMap() const
 {
     return counts_map_;
 }
@@ -48,6 +48,24 @@ void DBDataSource::addNumInserted(const std::string& db_content, unsigned int nu
     counts_map_[db_content] += num;
 
     counts_ = counts_map_;
+}
+
+void DBDataSource::addNumLoaded(const std::string& db_content, unsigned int num)
+{
+    num_loaded_[db_content] += num;
+}
+
+unsigned int DBDataSource::numLoaded (const std::string& db_content)
+{
+    if (num_loaded_.count(db_content))
+        return num_loaded_.at(db_content);
+    else
+        return 0;
+}
+
+void DBDataSource::clearNumLoaded()
+{
+    num_loaded_.clear();
 }
 
 //json DBDataSource::getAsJSON()

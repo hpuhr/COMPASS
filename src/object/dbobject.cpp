@@ -464,6 +464,7 @@ void DBObject::doDataSourcesBeforeInsert (shared_ptr<Buffer> buffer)
 
         // add record count
         dbo_manager_.dataSource(ds_id_cnt.first).addNumInserted(name_, ds_id_cnt.second);
+        dbo_manager_.dataSource(ds_id_cnt.first).addNumLoaded(name_, ds_id_cnt.second); // because propagated after
     }
 }
 

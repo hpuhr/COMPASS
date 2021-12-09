@@ -261,7 +261,7 @@ void DBObjectManagerLoadWidget::update()
 
         // check content widget exist
 
-        for (auto& cnt_it : ds_it->countsMap())
+        for (auto& cnt_it : ds_it->numInsertedMap())
         {
             if (!ds_content_boxes_.count(ds_it->name()) || !ds_content_boxes_.at(ds_it->name()).count(cnt_it.first))
             {
@@ -377,7 +377,7 @@ void DBObjectManagerLoadWidget::clearAndCreateContent()
 
             ++row;
 
-            for (auto& cnt_it : ds_it->countsMap())
+            for (auto& cnt_it : ds_it->numInsertedMap())
             {
                 ds_content_name = cnt_it.first;
 
@@ -393,7 +393,7 @@ void DBObjectManagerLoadWidget::clearAndCreateContent()
 
                 // ds content loaded label
 
-                QLabel* ds_content_loaded_label = new QLabel(QString::number(cnt_it.second));
+                QLabel* ds_content_loaded_label = new QLabel(QString::number(ds_it->numLoaded(ds_content_name)));
 
                 type_layout_->addWidget(ds_content_loaded_label, row, col_start+2,
                                         Qt::AlignTop | Qt::AlignRight);
@@ -402,9 +402,9 @@ void DBObjectManagerLoadWidget::clearAndCreateContent()
                         || !ds_content_loaded_labels_.at(ds_name).count(ds_content_name));
                 ds_content_loaded_labels_[ds_name][ds_content_name] = ds_content_loaded_label;
 
-                // ds content total label
+                // ds content num inserted label
 
-                QLabel* ds_content_total_label = new QLabel(QString::number(0));
+                QLabel* ds_content_total_label = new QLabel(QString::number(cnt_it.second));
 
                 type_layout_->addWidget(ds_content_total_label, row, col_start+3,
                                         Qt::AlignTop | Qt::AlignRight);
@@ -436,7 +436,7 @@ void DBObjectManagerLoadWidget::updateExistingContent()
         assert (ds_boxes_.count(ds_name));
         // ds_boxes_[ds_name] // checkbox
 
-        for (auto& cnt_it : ds_it->countsMap())
+        for (auto& cnt_it : ds_it->numInsertedMap())
         {
             ds_content_name = cnt_it.first;
 
@@ -448,13 +448,14 @@ void DBObjectManagerLoadWidget::updateExistingContent()
             // ds content loaded label
             assert (ds_content_loaded_labels_.count(ds_name)
                     && ds_content_loaded_labels_.at(ds_name).count(ds_content_name));
-            ds_content_loaded_labels_[ds_name][ds_content_name]->setText(QString::number(cnt_it.second));
+            ds_content_loaded_labels_[ds_name][ds_content_name]->setText(
+                        QString::number(ds_it->numLoaded(ds_content_name)));
 
             // ds content total label
 
             assert (ds_content_total_labels_.count(ds_name)
                     && ds_content_total_labels_.at(ds_name).count(ds_content_name));
-            ds_content_total_labels_[ds_name][ds_content_name]->setText(QString::number(0));
+            ds_content_total_labels_[ds_name][ds_content_name]->setText(QString::number(cnt_it.second));
         }
     }
 }

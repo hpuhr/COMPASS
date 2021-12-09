@@ -26,8 +26,13 @@ public:
 
     void counts (const std::string& counts); // only for init
     std::string countsStr();
-    const std::map<std::string, unsigned int>& countsMap() const;
+    const std::map<std::string, unsigned int>& numInsertedMap() const;
+
     void addNumInserted(const std::string& db_content, unsigned int num);
+
+    void addNumLoaded(const std::string& db_content, unsigned int num);
+    unsigned int numLoaded (const std::string& db_content);
+    void clearNumLoaded();
 
 //    virtual nlohmann::json getAsJSON();
 //    virtual void setFromJSON(nlohmann::json& j);
@@ -40,6 +45,7 @@ protected:
 
     nlohmann::json counts_;
 
+    std::map<std::string, unsigned int> num_loaded_;
     std::map<std::string, unsigned int> counts_map_;
 };
 
