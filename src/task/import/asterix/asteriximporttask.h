@@ -87,6 +87,7 @@ class ASTERIXImportTask : public Task, public Configurable
     bool canImportFile();
     virtual bool canRun();
     virtual void run();
+    virtual void stop() override;
     void run(bool test);
 
     const std::map<std::string, SavedFile*>& fileList() { return file_list_; }

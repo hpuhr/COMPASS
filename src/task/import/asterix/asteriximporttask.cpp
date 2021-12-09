@@ -667,6 +667,25 @@ void ASTERIXImportTask::run()
     run (false);
 }
 
+void ASTERIXImportTask::stop()
+{
+    loginf << "ASTERIXImportTask: stop";
+
+    if (decode_job_)
+        decode_job_->setObsolete();
+
+    if (json_map_job_)
+        json_map_job_->setObsolete();
+
+    if (postprocess_job_)
+        postprocess_job_->setObsolete();
+
+    stopped_ = true;
+    done_ = true;
+
+    loginf << "ASTERIXImportTask: stop done";
+}
+
 void ASTERIXImportTask::run(bool test) // , bool create_mapping_stubs
 {
     test_ = test;
@@ -866,6 +885,12 @@ void ASTERIXImportTask::decodeASTERIXDoneSlot()
 
     assert(decode_job_);
 
+    if (stopped_)
+    {
+        decode_job_ = nullptr;
+        return;
+    }
+
     if (decode_job_->error())
     {
         loginf << "ASTERIXImportTask: decodeASTERIXDoneSlot: error";
@@ -905,6 +930,10 @@ void ASTERIXImportTask::addDecodedASTERIXSlot()
     loginf << "ASTERIXImportTask: addDecodedASTERIX";
 
     assert(decode_job_);
+
+    if (stopped_)
+        return;
+
     //assert(status_widget_);
 
     current_framing_ = ""; // TODO HACK
@@ -967,6 +996,12 @@ void ASTERIXImportTask::mapJSONDoneSlot()
 {
     loginf << "ASTERIXImportTask: mapJSONDoneSlot";
 
+    if (stopped_)
+    {
+        json_map_job_ = nullptr;
+        return;
+    }
+
 //    assert(status_widget_);
     assert(json_map_job_);
 
@@ -1014,7 +1049,10 @@ void ASTERIXImportTask::mapJSONDoneSlot()
 void ASTERIXImportTask::mapJSONObsoleteSlot()
 {
     logdbg << "ASTERIXImportTask: mapJSONObsoleteSlot";
-    // TODO
+
+    if (stopped_)
+        json_map_job_ = nullptr;
+
 }
 
 void ASTERIXImportTask::postprocessDoneSlot()
@@ -1022,6 +1060,12 @@ void ASTERIXImportTask::postprocessDoneSlot()
     loginf << "ASTERIXImportTask: postprocessDoneSlot";
 
     assert (postprocess_job_);
+
+    if (stopped_)
+    {
+        postprocess_job_ = nullptr;
+        return;
+    }
 
     std::map<std::string, std::shared_ptr<Buffer>> job_buffers {postprocess_job_->buffers()};
     postprocess_job_ = nullptr;
@@ -1045,6 +1089,9 @@ void ASTERIXImportTask::postprocessObsoleteSlot()
 void ASTERIXImportTask::insertData(std::map<std::string, std::shared_ptr<Buffer>> job_buffers)
 {
     loginf << "ASTERIXImportTask: insertData: inserting " << job_buffers.size() << " into database";
+
+    if (stopped_)
+        return;
 
     assert (!test_);
 

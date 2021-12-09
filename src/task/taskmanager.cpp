@@ -367,6 +367,7 @@ void TaskManager::shutdown()
     manage_dbobjects_task_ = nullptr;
 
 #if USE_JASTERIX
+    asterix_importer_task_->stop(); // stops if active
     asterix_importer_task_ = nullptr;
 #endif
 

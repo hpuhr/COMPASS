@@ -261,9 +261,15 @@ void JobManager::shutdown()
          ++job_it)
         (*job_it)->setObsolete();
 
+    if (active_blocking_job_)
+        active_blocking_job_->setObsolete();
+
     for (auto job_it = blocking_jobs_.unsafe_begin(); job_it != blocking_jobs_.unsafe_end();
          ++job_it)
         (*job_it)->setObsolete();
+
+    if (active_non_blocking_job_)
+        active_non_blocking_job_->setObsolete();
 
     for (auto job_it = non_blocking_jobs_.unsafe_begin(); job_it != non_blocking_jobs_.unsafe_end();
          ++job_it)

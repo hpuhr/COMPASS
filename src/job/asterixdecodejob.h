@@ -52,6 +52,7 @@ class ASTERIXDecodeJob : public Job
     // ds_id -> (ip,port)
 
     virtual void run();
+    virtual void setObsolete() override;
 
     size_t numFrames() const;
     size_t numRecords() const;

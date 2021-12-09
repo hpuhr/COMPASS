@@ -63,6 +63,7 @@ class Task : public QObject
     bool done() const { return done_; }
 
     virtual void run() { assert(!gui_only_); }  // to be overriden by tasks that can run
+    virtual void stop() { stopped_= true; } // should also set done_, stopped_ only to be set after shutdown
 
     TaskManager& manager() const { return task_manager_; }
 
@@ -77,6 +78,7 @@ class Task : public QObject
     std::string gui_name_;
     bool gui_only_{false};
     bool expert_only_{false};
+    bool stopped_ {false};
     bool done_{false};
     bool show_done_summary_{true};
 

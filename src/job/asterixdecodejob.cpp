@@ -28,6 +28,8 @@
 #include <boost/bind.hpp>
 #include <boost/thread.hpp>
 #include <boost/interprocess/sync/scoped_lock.hpp>
+#include <chrono>
+#include <thread>
 
 
 #include <memory>
@@ -172,6 +174,13 @@ void ASTERIXDecodeJob::run()
     logdbg << "ASTERIXDecodeJob: run: done";
 }
 
+void ASTERIXDecodeJob::setObsolete()
+{
+    Job::setObsolete();
+
+    receive_semaphore_.post(); // wake up loop
+}
+
 void ASTERIXDecodeJob::doFileDecoding()
 {
     assert (decode_file_);
@@ -226,19 +235,19 @@ void ASTERIXDecodeJob::doUDPStreamDecoding()
     //    FILTER_SACSIC 100 211 50 81    \
     //
 
-//    std::vector <std::pair<std::string, unsigned int>> ips_and_ports;
-//    ips_and_ports.push_back({"224.9.2.252", 15080});
-//    ips_and_ports.push_back({"224.9.2.252", 15070});
-//    ips_and_ports.push_back({"224.9.2.252", 15071});
-//    ips_and_ports.push_back({"224.9.2.252", 15072});
-//    ips_and_ports.push_back({"224.9.2.252", 15073});
-//    ips_and_ports.push_back({"224.9.2.252", 15074});
-//    ips_and_ports.push_back({"224.9.2.252", 15075});
-//    ips_and_ports.push_back({"224.9.2.252", 15076});
-//    ips_and_ports.push_back({"224.9.2.252", 15077});
-//    ips_and_ports.push_back({"224.9.2.252", 15078});
-//    ips_and_ports.push_back({"224.9.2.252", 15081});
-//    ips_and_ports.push_back({"224.9.2.252", 150240});
+    //    std::vector <std::pair<std::string, unsigned int>> ips_and_ports;
+    //    ips_and_ports.push_back({"224.9.2.252", 15080});
+    //    ips_and_ports.push_back({"224.9.2.252", 15070});
+    //    ips_and_ports.push_back({"224.9.2.252", 15071});
+    //    ips_and_ports.push_back({"224.9.2.252", 15072});
+    //    ips_and_ports.push_back({"224.9.2.252", 15073});
+    //    ips_and_ports.push_back({"224.9.2.252", 15074});
+    //    ips_and_ports.push_back({"224.9.2.252", 15075});
+    //    ips_and_ports.push_back({"224.9.2.252", 15076});
+    //    ips_and_ports.push_back({"224.9.2.252", 15077});
+    //    ips_and_ports.push_back({"224.9.2.252", 15078});
+    //    ips_and_ports.push_back({"224.9.2.252", 15081});
+    //    ips_and_ports.push_back({"224.9.2.252", 150240});
 
 
     boost::asio::io_context io_context;
@@ -256,25 +265,25 @@ void ASTERIXDecodeJob::doUDPStreamDecoding()
         for (auto& line_it : ds_it.second)
         {
             loginf << "ASTERIXDecodeJob: doUDPStreamDecoding: setting up ds_id " << ds_it.first
-                    << " ip " << line_it.first << ":" << line_it.second;
+                   << " ip " << line_it.first << ":" << line_it.second;
             servers.emplace_back(new server(io_context, line_it.first, line_it.second, data_callback));
         }
 
     }
 
-//    for (auto& ip_port_it : ips_and_ports)
-//    {
-//        loginf << "creating server " << ip_port_it.first << ":" << ip_port_it.second;
-//        servers.emplace_back(new server(io_context, ip_port_it.first, ip_port_it.second, data_callback));
+    //    for (auto& ip_port_it : ips_and_ports)
+    //    {
+    //        loginf << "creating server " << ip_port_it.first << ":" << ip_port_it.second;
+    //        servers.emplace_back(new server(io_context, ip_port_it.first, ip_port_it.second, data_callback));
 
-//        //server s(io_context, atoi(argv[1]));
-//    }
+    //        //server s(io_context, atoi(argv[1]));
+    //    }
 
     //    server s1(io_context, "224.9.2.252", 15080);
     //    server s2(io_context, "224.9.2.252", 15078);
     //    server s3(io_context, "224.9.2.252", 150240);
 
-    loginf << "running iocontext";
+    loginf << "ASTERIXDecodeJob: doUDPStreamDecoding: running iocontext";
 
     boost::thread t(boost::bind(&boost::asio::io_context::run, &io_context));
     t.detach();
@@ -292,13 +301,20 @@ void ASTERIXDecodeJob::doUDPStreamDecoding()
     {
         receive_semaphore_.wait();
 
+        //loginf << "ASTERIXDecodeJob: doUDPStreamDecoding: woke up";
+
+        if (obsolete_)
+            break;
+
         {
             boost::mutex::scoped_lock lock(receive_buffer_mutex_);
 
             if (receive_buffer_size_
-                    && (boost::posix_time::microsec_clock::local_time() - last_receive_decode_time_).total_milliseconds() > 1000)
+                    && (boost::posix_time::microsec_clock::local_time()
+                        - last_receive_decode_time_).total_milliseconds() > 1000)
             {
-                loginf << "processing buffer size " << receive_buffer_size_ << " max " << MAX_READ_SIZE;
+                loginf << "ASTERIXDecodeJob: doUDPStreamDecoding: processing buffer size "
+                       << receive_buffer_size_ << " max " << MAX_READ_SIZE;
 
                 boost::array<char, MAX_READ_SIZE> tmp_buffer = receive_buffer_;
                 size_t tmp_buffer_size = receive_buffer_size_;
@@ -315,7 +331,19 @@ void ASTERIXDecodeJob::doUDPStreamDecoding()
         }
     }
 
-    loginf << "running iocontext done";
+    loginf << "ASTERIXDecodeJob: doUDPStreamDecoding: shutting down iocontext";
+
+    io_context.stop();
+
+//    loginf << "ASTERIXDecodeJob: doUDPStreamDecoding: sleeping";
+
+//    std::this_thread::sleep_for(std::chrono::milliseconds(100));;
+    assert (io_context.stopped());
+
+    //loginf << "ASTERIXDecodeJob: doUDPStreamDecoding: joinable " << t.joinable();
+    t.timed_join(100);
+
+    //pthread_cancel(t.native_handle());
 
     //    boost::asio::io_service io_service;
 
@@ -384,8 +412,7 @@ void ASTERIXDecodeJob::doUDPStreamDecoding()
 
     //    }
 
-    //    io_service.stop();
-    //    pthread_cancel(t.native_handle());
+    //done_ = true; // done set in outer run function
 
     loginf << "ASTERIXDecodeJob: doUDPStreamDecoding: done";
 }
@@ -451,6 +478,9 @@ void ASTERIXDecodeJob::doUDPStreamDecoding()
 
 void ASTERIXDecodeJob::storeReceivedData (const std::string& sender_id, const char* data, unsigned int length)
 {
+    if (obsolete_)
+        return;
+
     boost::mutex::scoped_lock lock(receive_buffer_mutex_);
 
     assert (length + receive_buffer_size_ < MAX_READ_SIZE);
@@ -468,6 +498,9 @@ void ASTERIXDecodeJob::storeReceivedData (const std::string& sender_id, const ch
 void ASTERIXDecodeJob::jasterix_callback(std::unique_ptr<nlohmann::json> data, size_t num_frames,
                                          size_t num_records, size_t num_errors)
 {
+    if (obsolete_)
+        return;
+
     if (error_)
     {
         loginf << "ASTERIXDecodeJob: jasterix_callback: errors state";

@@ -440,11 +440,11 @@ void MainWindow::performAutomaticTasks ()
 
         ast_import_task.run(false); // no test
 
-        while (!ast_import_task.done())
-        {
-            QCoreApplication::processEvents();
-            QThread::msleep(1);
-        }
+//        while (!ast_import_task.done())
+//        {
+//            QCoreApplication::processEvents();
+//            QThread::msleep(1);
+//        }
     }
 #endif
 

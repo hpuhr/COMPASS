@@ -18,8 +18,11 @@
 #ifndef JOB_H_
 #define JOB_H_
 
+#include "logger.h"
+
 #include <QObject>
 #include <QRunnable>
+
 #include <memory>
 
 /**
@@ -52,7 +55,11 @@ class Job : public QObject, public QRunnable
     bool done() { return done_; }
     void emitDone() { emit doneSignal(); }
     // @brief Sets obsolete flag
-    void setObsolete() { obsolete_ = true; }
+    virtual void setObsolete() {
+
+        loginf << "Job: " << name_ << ": setObsolete";
+        obsolete_ = true;
+    }
     // @brief Returns obsolete flag
     bool obsolete() { return obsolete_; }
     void emitObsolete() { emit doneSignal(); }
@@ -66,7 +73,7 @@ class Job : public QObject, public QRunnable
     /// Done flag
     bool done_{false};
     /// Obsolete flag
-    bool obsolete_{false};
+    volatile bool obsolete_{false};
 
     virtual void setDone() { done_ = true; }
 };

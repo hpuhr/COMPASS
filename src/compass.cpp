@@ -301,6 +301,11 @@ void COMPASS::shutdown()
         logerr << "COMPASS: already shut down";
         return;
     }
+
+    assert(task_manager_);
+    task_manager_->shutdown();
+    task_manager_ = nullptr;
+
     assert(db_interface_);
 
     assert(dbo_manager_);
@@ -318,10 +323,6 @@ void COMPASS::shutdown()
     assert(view_manager_);
     view_manager_->close();
     view_manager_ = nullptr;
-
-    assert(task_manager_);
-    task_manager_->shutdown();
-    task_manager_ = nullptr;
 
     assert(filter_manager_);
     filter_manager_ = nullptr;
