@@ -85,6 +85,7 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
 //    std::string import_view_points_filename;
 #if USE_JASTERIX
     std::string import_asterix_filename;
+    bool import_asterix_network {false};
 //    std::string asterix_framing;
 //    std::string asterix_decoder_cfg;
 #endif
@@ -113,8 +114,10 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
 //            ("import_view_points", po::value<std::string>(&import_view_points_filename),
 //             "imports view points JSON file with given filename, e.g. '/data/file1.json'")
         #if USE_JASTERIX
-            ("import_asterix", po::value<std::string>(&import_asterix_filename),
+            ("import_asterix_file", po::value<std::string>(&import_asterix_filename),
              "imports ASTERIX file with given filename, e.g. '/data/file1.ff'")
+            ("import_asterix_network", po::bool_switch(&import_asterix_network),
+             "imports ASTERIX from defined network UDP streams")
 //            ("asterix_framing", po::value<std::string>(&asterix_framing),
 //             "sets ASTERIX framing, e.g. 'none', 'ioss', 'ioss_seq', 'rff'")
 //            ("asterix_decoder_cfg", po::value<std::string>(&asterix_decoder_cfg),
@@ -160,6 +163,12 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
     }
 
     checkAndSetupConfig();
+
+    if (import_asterix_filename.size() && import_asterix_network)
+    {
+        logerr << "COMPASSClient: unable to import both ASTERIX file and from network at the same time";
+        return;
+    }
 
     if (quit_requested_)
         return;
@@ -209,6 +218,8 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
 
     if (import_asterix_filename.size())
         main_window.importASTERIXFile(import_asterix_filename);
+    else if (import_asterix_network)
+        main_window.importASTERIXFromNetwork();
 #endif
 
 //    if (import_json_filename.size())

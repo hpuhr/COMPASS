@@ -71,6 +71,7 @@ public:
 
 #if USE_JASTERIX
     void importASTERIXFile(const std::string& filename);
+    void importASTERIXFromNetwork();
     //    void asterixFraming(const std::string& asterix_framing);
     //    void asterixDecoderConfig(const std::string& asterix_decoder_cfg);
     //    bool asterixOptionsSet() const;
@@ -103,6 +104,7 @@ protected:
 #if USE_JASTERIX
     bool asterix_import_file_ {false};
     std::string asterix_import_filename_;
+    bool asterix_import_network_ {false};
     //    bool set_asterix_framing_ {false};
     //    std::string asterix_framing_;
     //    bool set_asterix_decoder_cfg_ {false};

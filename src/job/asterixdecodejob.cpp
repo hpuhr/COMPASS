@@ -58,7 +58,7 @@ public:
         //loginf << "ctor: first async rec";
 
         socket_.async_receive_from(
-                    boost::asio::buffer(data_, max_length), sender_endpoint_,
+                    boost::asio::buffer(data_, MAX_UDP_READ_SIZE), sender_endpoint_,
                     boost::bind(&UDPReceiver::handle_receive_from, this,
                                 boost::asio::placeholders::error,
                                 boost::asio::placeholders::bytes_transferred));
@@ -80,7 +80,7 @@ public:
         }
 
         socket_.async_receive_from(
-                    boost::asio::buffer(data_, max_length), sender_endpoint_,
+                    boost::asio::buffer(data_, MAX_UDP_READ_SIZE), sender_endpoint_,
                     boost::bind(&UDPReceiver::handle_receive_from, this,
                                 boost::asio::placeholders::error,
                                 boost::asio::placeholders::bytes_transferred));
@@ -94,8 +94,8 @@ private:
     unsigned int port_;
 
     std::function<void(const std::string&, const char*, unsigned int)> data_callback_;
-    enum { max_length = 512*1024 };
-    char data_[max_length];
+    //enum { max_length = MAX_READ_SIZE };
+    char data_[MAX_UDP_READ_SIZE];
 };
 
 ASTERIXDecodeJob::ASTERIXDecodeJob(ASTERIXImportTask& task, bool test,
@@ -173,6 +173,8 @@ void ASTERIXDecodeJob::setObsolete()
 
 void ASTERIXDecodeJob::doFileDecoding()
 {
+    loginf << "ASTERIXDecodeJob: doFileDecoding: file '" << filename_ << "' framing '" << framing_ << "'";
+
     assert (decode_file_);
 
     auto callback = [this](std::unique_ptr<nlohmann::json> data, size_t num_frames,
@@ -252,9 +254,11 @@ void ASTERIXDecodeJob::doUDPStreamDecoding()
                         - last_receive_decode_time_).total_milliseconds() > 1000)
             {
                 loginf << "ASTERIXDecodeJob: doUDPStreamDecoding: processing buffer size "
-                       << receive_buffer_size_ << " max " << MAX_READ_SIZE;
+                       << receive_buffer_size_ << " max " << MAX_ALL_RECEIVE_SIZE;
 
-                boost::array<char, MAX_READ_SIZE> tmp_buffer = receive_buffer_;
+                assert (receive_buffer_size_ <= MAX_ALL_RECEIVE_SIZE);
+
+                boost::array<char, MAX_ALL_RECEIVE_SIZE> tmp_buffer = receive_buffer_;
                 size_t tmp_buffer_size = receive_buffer_size_;
 
                 receive_buffer_size_ = 0;
@@ -286,9 +290,13 @@ void ASTERIXDecodeJob::storeReceivedData (const std::string& sender_id, const ch
     if (obsolete_)
         return;
 
-    boost::mutex::scoped_lock lock(receive_buffer_mutex_);
+    if (length + receive_buffer_size_ >= MAX_ALL_RECEIVE_SIZE)
+    {
+        logerr << "ASTERIXDecodeJob: storeReceivedData: overload, too much data in buffer";
+        return;
+    }
 
-    assert (length + receive_buffer_size_ < MAX_READ_SIZE);
+    boost::mutex::scoped_lock lock(receive_buffer_mutex_);
 
     for (unsigned int cnt=0; cnt < length; ++cnt)
         receive_buffer_.at(receive_buffer_size_+cnt) = data[cnt];
@@ -313,6 +321,7 @@ void ASTERIXDecodeJob::jasterix_callback(std::unique_ptr<nlohmann::json> data, s
     }
 
     //loginf << "ASTERIXDecodeJob: jasterix_callback: data '" << data->dump(2) << "'";
+    //loginf << "ASTERIXDecodeJob: jasterix_callback: framing '" << framing_ << "'";
 
     assert(!extracted_data_);
     extracted_data_ = std::move(data);

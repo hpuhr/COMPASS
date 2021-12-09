@@ -81,7 +81,7 @@ class ASTERIXImportTask : public Task, public Configurable
     virtual void generateSubConfigurable(const std::string& class_id,
                                          const std::string& instance_id);
 
-    void asterixFraming(const std::string& asterix_framing);
+    void asterixFileFraming(const std::string& asterix_framing);
     void asterixDecoderConfig(const std::string& asterix_decoder_cfg);
 
     bool canImportFile();
@@ -95,8 +95,12 @@ class ASTERIXImportTask : public Task, public Configurable
     void addFile(const std::string& filename);
     void removeCurrentFilename();
     void removeAllFiles ();
-    void currentFilename(const std::string& filename);
-    const std::string& currentFilename() { return current_filename_; }
+
+    void importFilename(const std::string& filename);
+    const std::string& importFilename() { return current_filename_; }
+
+    void importNetwork();
+    bool isImportNetwork();
 
     std::shared_ptr<jASTERIX::jASTERIX> jASTERIX() { return jasterix_; }
     void refreshjASTERIX();
@@ -151,9 +155,11 @@ class ASTERIXImportTask : public Task, public Configurable
     std::shared_ptr<jASTERIX::jASTERIX> jasterix_;
     ASTERIXPostProcess post_process_;
 
+    bool import_file_ {false}; // false = network, true file
+
     std::map<std::string, SavedFile*> file_list_;
     std::string current_filename_;
-    std::string current_framing_;
+    std::string current_file_framing_;
 
     bool test_{false};
 

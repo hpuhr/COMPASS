@@ -32,7 +32,8 @@
 class ASTERIXImportTask;
 class ASTERIXPostProcess;
 
-const unsigned int MAX_READ_SIZE=1024*1024;
+const unsigned int MAX_UDP_READ_SIZE=1024*1024;
+const unsigned int MAX_ALL_RECEIVE_SIZE=1024*1024; // increase leads to segmentation?
 
 class ASTERIXDecodeJob : public Job
 {
@@ -51,7 +52,7 @@ class ASTERIXDecodeJob : public Job
             const std::map<unsigned int, std::vector <std::pair<std::string, unsigned int>>>& ds_lines);
     // ds_id -> (ip,port)
 
-    virtual void run();
+    virtual void run() override;
     virtual void setObsolete() override;
 
     size_t numFrames() const;
@@ -99,7 +100,7 @@ class ASTERIXDecodeJob : public Job
 //    boost::system::error_code error_code_;
 
     boost::mutex receive_buffer_mutex_;
-    boost::array<char, MAX_READ_SIZE> receive_buffer_;
+    boost::array<char, MAX_ALL_RECEIVE_SIZE> receive_buffer_;
     size_t receive_buffer_size_ {0};
     boost::posix_time::ptime last_receive_decode_time_;
 

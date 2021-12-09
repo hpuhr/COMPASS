@@ -538,7 +538,7 @@ void TaskManager::setAsterixOptions()
     assert (asterixOptionsSet());
 
     if (set_asterix_framing_)
-        asterixImporterTask().asterixFraming(asterix_framing_);
+        asterixImporterTask().asterixFileFraming(asterix_framing_);
 
     if (set_asterix_decoder_cfg_)
         asterixImporterTask().asterixDecoderConfig(asterix_decoder_cfg_);

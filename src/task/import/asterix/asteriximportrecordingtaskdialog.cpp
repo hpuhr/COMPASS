@@ -59,8 +59,16 @@ void ASTERIXImportRecordingTaskDialog::updateButtons()
     assert (import_button_);
     assert (test_button_);
 
-    import_button_->setDisabled(!task_.canRun());
-    import_button_->setDisabled(!task_.canRun());
+    if (task_.isImportNetwork()) // import from network
+    {
+        import_button_->setDisabled(!task_.canRun());
+        test_button_->setDisabled(true);
+    }
+    else // import file
+    {
+        import_button_->setDisabled(!task_.canRun());
+        test_button_->setDisabled(!task_.canRun());
+    }
 }
 
 void ASTERIXImportRecordingTaskDialog::testImportClickedSlot()

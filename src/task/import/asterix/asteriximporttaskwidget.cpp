@@ -203,7 +203,7 @@ void ASTERIXImportTaskWidget::addFile(const std::string& filename)
 void ASTERIXImportTaskWidget::selectFile(const std::string& filename)
 {
     assert(task_.hasFile(filename));
-    task_.currentFilename(filename);
+    task_.importFilename(filename);
 
     QList<QListWidgetItem*> items = file_list_->findItems(filename.c_str(), Qt::MatchExactly);
     assert (items.size() > 0);
@@ -219,7 +219,7 @@ void ASTERIXImportTaskWidget::deleteFileSlot()
 {
     loginf << "ASTERIXImportTaskWidget: deleteFileSlot";
 
-    if (!file_list_->currentItem() || !task_.currentFilename().size())
+    if (!file_list_->currentItem() || !task_.importFilename().size())
     {
         QMessageBox m_warning(QMessageBox::Warning, "ASTERIX File Deletion Failed",
                               "Please select a file in the list.", QMessageBox::Ok);
@@ -227,8 +227,8 @@ void ASTERIXImportTaskWidget::deleteFileSlot()
         return;
     }
 
-    assert(task_.currentFilename().size());
-    assert(task_.hasFile(task_.currentFilename()));
+    assert(task_.importFilename().size());
+    assert(task_.hasFile(task_.importFilename()));
     task_.removeCurrentFilename();
 }
 
@@ -245,7 +245,7 @@ void ASTERIXImportTaskWidget::selectedFileSlot()
 
     QString filename = file_list_->currentItem()->text();
     assert(task_.hasFile(filename.toStdString()));
-    task_.currentFilename(filename.toStdString());
+    task_.importFilename(filename.toStdString());
 }
 
 void ASTERIXImportTaskWidget::updateFileListSlot()
@@ -257,7 +257,7 @@ void ASTERIXImportTaskWidget::updateFileListSlot()
     for (auto it : task_.fileList())
     {
         QListWidgetItem* item = new QListWidgetItem(tr(it.first.c_str()), file_list_);
-        if (it.first == task_.currentFilename())
+        if (it.first == task_.importFilename())
             file_list_->setCurrentItem(item);
     }
 }

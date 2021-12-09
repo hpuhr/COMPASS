@@ -283,6 +283,13 @@ void MainWindow::importASTERIXFile(const std::string& filename)
     asterix_import_file_ = true;
     asterix_import_filename_ = filename;
 }
+
+void MainWindow::importASTERIXFromNetwork()
+{
+    automatic_tasks_defined_ = true;
+    asterix_import_network_ = true;
+}
+
 #endif
 
 void MainWindow::loadData(bool value)
@@ -416,6 +423,8 @@ void MainWindow::performAutomaticTasks ()
 //    }
 
 #if USE_JASTERIX
+    assert (!(asterix_import_file_ && asterix_import_network_)); // check done in client
+
     if (asterix_import_file_)
     {
         loginf << "MainWindow: performAutomaticTasks: importing ASTERIX file '"
@@ -433,18 +442,26 @@ void MainWindow::performAutomaticTasks ()
         if (!ast_import_task.hasFile(asterix_import_filename_))
             ast_import_task.addFile(asterix_import_filename_);
 
-        ast_import_task.currentFilename(asterix_import_filename_);
+        ast_import_task.importFilename(asterix_import_filename_);
 
         assert(ast_import_task.canRun());
         ast_import_task.showDoneSummary(false);
 
         ast_import_task.run(false); // no test
+    }
 
-//        while (!ast_import_task.done())
-//        {
-//            QCoreApplication::processEvents();
-//            QThread::msleep(1);
-//        }
+    if (asterix_import_network_)
+    {
+        loginf << "MainWindow: performAutomaticTasks: importing ASTERIX from network";
+
+        ASTERIXImportTask& ast_import_task = COMPASS::instance().taskManager().asterixImporterTask();
+
+        ast_import_task.importNetwork();
+
+        assert(ast_import_task.canRun());
+        ast_import_task.showDoneSummary(false);
+
+        ast_import_task.run(false); // no test
     }
 #endif
 

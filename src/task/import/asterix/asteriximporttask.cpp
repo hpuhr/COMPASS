@@ -69,8 +69,7 @@ ASTERIXImportTask::ASTERIXImportTask(const std::string& class_id, const std::str
 
     registerParameter("debug_jasterix", &debug_jasterix_, false);
     registerParameter("limit_ram", &limit_ram_, false);
-    registerParameter("current_filename", &current_filename_, "");
-    registerParameter("current_framing", &current_framing_, "");
+    registerParameter("current_file_framing", &current_file_framing_, "");
 
     registerParameter("override_sac_org", &post_process_.override_sac_org_, 0);
     registerParameter("override_sic_org", &post_process_.override_sic_org_, 0);
@@ -101,10 +100,10 @@ ASTERIXImportTask::ASTERIXImportTask(const std::string& class_id, const std::str
     createSubConfigurables();
 
     std::vector<std::string> framings = jasterix_->framings();
-    if (std::find(framings.begin(), framings.end(), current_framing_) == framings.end())
+    if (std::find(framings.begin(), framings.end(), current_file_framing_) == framings.end())
     {
         loginf << "ASTERIXImportTask: constructor: resetting to no framing";
-        current_framing_ = "";
+        current_file_framing_ = "";
     }
 }
 
@@ -165,7 +164,7 @@ void ASTERIXImportTask::generateSubConfigurable(const std::string& class_id,
                                  class_id);
 }
 
-void ASTERIXImportTask::asterixFraming(const std::string& asterix_framing)
+void ASTERIXImportTask::asterixFileFraming(const std::string& asterix_framing)
 {
     loginf << "ASTERIXImportTask: asterixFraming: framing '" << asterix_framing << "'";
 
@@ -176,7 +175,7 @@ void ASTERIXImportTask::asterixFraming(const std::string& asterix_framing)
             && std::find(framings.begin(), framings.end(), asterix_framing) == framings.end())
         throw runtime_error ("ASTERIXImportTask: unknown framing '"+asterix_framing+"'");
 
-    current_framing_ = asterix_framing;
+    current_file_framing_ = asterix_framing;
 }
 
 void ASTERIXImportTask::asterixDecoderConfig(const std::string& asterix_decoder_cfg)
@@ -306,10 +305,10 @@ void ASTERIXImportTask::refreshjASTERIX()
                                                      debug_jasterix_, true);
 
     std::vector<std::string> framings = jasterix_->framings();
-    if (std::find(framings.begin(), framings.end(), current_framing_) == framings.end())
+    if (std::find(framings.begin(), framings.end(), current_file_framing_) == framings.end())
     {
         loginf << "ASTERIXImportTask: refreshjASTERIX: resetting to no framing";
-        current_framing_ = "";
+        current_file_framing_ = "";
     }
 }
 
@@ -367,26 +366,37 @@ void ASTERIXImportTask::removeAllFiles ()
     emit statusChangedSignal(name_);
 }
 
-void ASTERIXImportTask::currentFilename(const std::string& filename)
+void ASTERIXImportTask::importFilename(const std::string& filename)
 {
     loginf << "ASTERIXImportTask: currentFilename: filename '" << filename << "'";
 
-    bool had_filename = canImportFile();
-
     current_filename_ = filename;
+    import_file_ = true;
 
-    if (!had_filename)  // not on re-select
-        emit statusChangedSignal(name_);
 
     if (dialog_)
         dialog_->updateButtons();
 }
 
-const std::string& ASTERIXImportTask::currentFraming() const { return current_framing_; }
+void ASTERIXImportTask::importNetwork()
+{
+    current_filename_ = "";
+    import_file_ = false;
+
+    if (dialog_)
+        dialog_->updateButtons();
+}
+
+bool ASTERIXImportTask::isImportNetwork()
+{
+    return !import_file_;
+}
+
+const std::string& ASTERIXImportTask::currentFraming() const { return current_file_framing_; }
 
 void ASTERIXImportTask::currentFraming(const std::string& current_framing)
 {
-    current_framing_ = current_framing;
+    current_file_framing_ = current_framing;
 }
 
 bool ASTERIXImportTask::hasConfiguratonFor(unsigned int category)
@@ -660,7 +670,13 @@ bool ASTERIXImportTask::canImportFile()
     return true;
 }
 
-bool ASTERIXImportTask::canRun() { return canImportFile(); }
+bool ASTERIXImportTask::canRun()
+{
+    if (import_file_)
+        return canImportFile(); // set file exists
+    else
+        return COMPASS::instance().objectManager().getNetworkLines().size(); // there are network lines defined
+}
 
 void ASTERIXImportTask::run()
 {
@@ -740,7 +756,7 @@ void ASTERIXImportTask::run(bool test) // , bool create_mapping_stubs
         task_manager_.appendInfo("ASTERIXImportTask: import of file '" + current_filename_ +
                                  "' started");
 
-    assert(canImportFile());
+    assert(canRun());
 
 //    if (status_widget_)
 //    {
@@ -831,9 +847,10 @@ void ASTERIXImportTask::run(bool test) // , bool create_mapping_stubs
 
     decode_job_ = make_shared<ASTERIXDecodeJob>(*this, test_, post_process_);
 
-    //decode_job_->setDecodeFile(current_filename_, current_framing_);
-
-    decode_job_->setDecodeUDPStreams(COMPASS::instance().objectManager().getNetworkLines());
+    if (import_file_)
+        decode_job_->setDecodeFile(current_filename_, current_file_framing_); // do file import
+    else
+        decode_job_->setDecodeUDPStreams(COMPASS::instance().objectManager().getNetworkLines()); // record from network
 
 
     connect(decode_job_.get(), &ASTERIXDecodeJob::obsoleteSignal, this,
@@ -936,8 +953,6 @@ void ASTERIXImportTask::addDecodedASTERIXSlot()
 
     //assert(status_widget_);
 
-    current_framing_ = ""; // TODO HACK
-
     logdbg << "ASTERIXImportTask: addDecodedASTERIX: errors " << decode_job_->numErrors();
 
 //    status_widget_->numFrames(jasterix_->numFrames());
@@ -966,7 +981,7 @@ void ASTERIXImportTask::addDecodedASTERIXSlot()
 
     std::vector<std::string> keys;
 
-    if (current_framing_ == "")
+    if (current_file_framing_ == "" || !import_file_) // force netto when doing network import
         keys = {"data_blocks", "content", "records"};
     else
         keys = {"frames", "content", "data_blocks", "content", "records"};
