@@ -1,4 +1,4 @@
-#include "asteriximportrecordingtaskdialog.h"
+#include "asteriximporttaskdialog.h"
 #include "asteriximporttaskwidget.h"
 #include "asteriximporttask.h"
 
@@ -8,7 +8,7 @@
 #include <QPushButton>
 #include <QVBoxLayout>
 
-ASTERIXImportRecordingTaskDialog::ASTERIXImportRecordingTaskDialog(ASTERIXImportTask& task)
+ASTERIXImportTaskDialog::ASTERIXImportTaskDialog(ASTERIXImportTask& task)
 : QDialog(), task_(task)
 {
     setWindowTitle("Import ASTERIX Recording");
@@ -32,19 +32,19 @@ ASTERIXImportRecordingTaskDialog::ASTERIXImportRecordingTaskDialog(ASTERIXImport
     QHBoxLayout* button_layout = new QHBoxLayout();
 
     cancel_button_ = new QPushButton("Cancel");
-    connect(cancel_button_, &QPushButton::clicked, this, &ASTERIXImportRecordingTaskDialog::cancelClickedSlot);
+    connect(cancel_button_, &QPushButton::clicked, this, &ASTERIXImportTaskDialog::cancelClickedSlot);
     button_layout->addWidget(cancel_button_);
 
     button_layout->addStretch();
 
     test_button_ = new QPushButton("Test Import");
-    connect(test_button_, &QPushButton::clicked, this, &ASTERIXImportRecordingTaskDialog::testImportClickedSlot);
+    connect(test_button_, &QPushButton::clicked, this, &ASTERIXImportTaskDialog::testImportClickedSlot);
     button_layout->addWidget(test_button_);
 
     button_layout->addStretch();
 
     import_button_ = new QPushButton("Import");
-    connect(import_button_, &QPushButton::clicked, this, &ASTERIXImportRecordingTaskDialog::importClickedSlot);
+    connect(import_button_, &QPushButton::clicked, this, &ASTERIXImportTaskDialog::importClickedSlot);
     button_layout->addWidget(import_button_);
 
     main_layout->addLayout(button_layout);
@@ -54,7 +54,7 @@ ASTERIXImportRecordingTaskDialog::ASTERIXImportRecordingTaskDialog(ASTERIXImport
     update();
 }
 
-void ASTERIXImportRecordingTaskDialog::updateButtons()
+void ASTERIXImportTaskDialog::updateButtons()
 {
     assert (import_button_);
     assert (test_button_);
@@ -71,18 +71,18 @@ void ASTERIXImportRecordingTaskDialog::updateButtons()
     }
 }
 
-void ASTERIXImportRecordingTaskDialog::testImportClickedSlot()
+void ASTERIXImportTaskDialog::testImportClickedSlot()
 {
     emit testTmportSignal();
 }
 
 
-void ASTERIXImportRecordingTaskDialog::importClickedSlot()
+void ASTERIXImportTaskDialog::importClickedSlot()
 {
     emit importSignal();
 }
 
-void ASTERIXImportRecordingTaskDialog::cancelClickedSlot()
+void ASTERIXImportTaskDialog::cancelClickedSlot()
 {
     emit cancelSignal();
 }

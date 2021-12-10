@@ -35,17 +35,17 @@ class QComboBox;
 class QStackedWidget;
 class QCheckBox;
 class QTabWidget;
+class QLabel;
 
 class ASTERIXImportTaskWidget : public QWidget
 {
     Q_OBJECT
 
   public slots:
-    void addFileSlot();
-    void deleteFileSlot();
-    void deleteAllFilesSlot();
-    void selectedFileSlot();
-    void updateFileListSlot();
+    //void addFileSlot();
+    //void deleteFileSlot();
+    //void selectedFileSlot();
+    //void updateFileListSlot();
 
     void addParserSlot();
     void removeObjectParserSlot();
@@ -61,8 +61,9 @@ class ASTERIXImportTaskWidget : public QWidget
     ASTERIXImportTaskWidget(ASTERIXImportTask& task, QWidget* parent=0, Qt::WindowFlags f=0);
     virtual ~ASTERIXImportTaskWidget();
 
-    void addFile(const std::string& filename);
-    void selectFile(const std::string& filename);
+    //void addFile(const std::string& filename);
+    //void selectFile(const std::string& filename);
+    //void deleteAllFiles();
 
     void updateLimitRAM();
 
@@ -78,10 +79,11 @@ protected:
 
     QTabWidget* tab_widget_{nullptr};
 
-    QListWidget* file_list_{nullptr};
-    QPushButton* add_file_button_{nullptr};
-    QPushButton* delete_file_button_{nullptr};
-    QPushButton* delete_all_files_button_{nullptr};
+//    QLabel* source_label_ {nullptr};
+//    QListWidget* file_list_{nullptr};
+//    QPushButton* add_file_button_{nullptr};
+//    QPushButton* delete_file_button_{nullptr};
+//    QPushButton* delete_all_files_button_{nullptr};
 
     QComboBox* object_parser_box_{nullptr};
     QPushButton* add_object_parser_button_{nullptr};

@@ -65,41 +65,61 @@ void ASTERIXImportTaskWidget::addMainTab()
 
     QVBoxLayout* main_tab_layout = new QVBoxLayout();
 
-    // file stuff
+    // source stuff
     {
-        QVBoxLayout* files_layout = new QVBoxLayout();
+        QVBoxLayout* source_layout = new QVBoxLayout();
 
-        QLabel* files_label = new QLabel("File Selection");
-        files_label->setFont(font_bold);
-        files_layout->addWidget(files_label);
+        if (task_.isImportNetwork())
+        {
+            loginf << "ASTERIXImportTaskWidget: addMainTab: is network import";
 
-        file_list_ = new QListWidget();
-        file_list_->setWordWrap(true);
-        file_list_->setTextElideMode(Qt::ElideNone);
-        file_list_->setSelectionBehavior(QAbstractItemView::SelectItems);
-        file_list_->setSelectionMode(QAbstractItemView::SingleSelection);
-        connect(file_list_, SIGNAL(itemClicked(QListWidgetItem*)), this, SLOT(selectedFileSlot()));
+            QLabel* source_label = new QLabel("Network");
+            source_label->setFont(font_bold);
+            source_layout->addWidget(source_label);
+        }
+        else
+        {
+            loginf << "ASTERIXImportTaskWidget: addMainTab: is file import";
 
-        updateFileListSlot();
-        files_layout->addWidget(file_list_);
+            QLabel* source_label = new QLabel("File");
+            source_label->setFont(font_bold);
+            source_layout->addWidget(source_label);
 
-        QHBoxLayout* button_layout = new QHBoxLayout();
+            QLabel* file_label = new QLabel(task_.importFilename().c_str());
+            source_layout->addWidget(file_label);
+        }
 
-        add_file_button_ = new QPushButton("Add");
-        connect(add_file_button_, &QPushButton::clicked, this, &ASTERIXImportTaskWidget::addFileSlot);
-        button_layout->addWidget(add_file_button_);
+//        QLabel* files_label = new QLabel("File Selection");
+//        files_label->setFont(font_bold);
+//        files_layout->addWidget(files_label);
 
-        delete_file_button_ = new QPushButton("Remove");
-        connect(delete_file_button_, &QPushButton::clicked, this, &ASTERIXImportTaskWidget::deleteFileSlot);
-        button_layout->addWidget(delete_file_button_);
+//        file_list_ = new QListWidget();
+//        file_list_->setWordWrap(true);
+//        file_list_->setTextElideMode(Qt::ElideNone);
+//        file_list_->setSelectionBehavior(QAbstractItemView::SelectItems);
+//        file_list_->setSelectionMode(QAbstractItemView::SingleSelection);
+//        connect(file_list_, SIGNAL(itemClicked(QListWidgetItem*)), this, SLOT(selectedFileSlot()));
 
-        delete_all_files_button_ = new QPushButton("Remove All");
-        connect(delete_all_files_button_, &QPushButton::clicked, this, &ASTERIXImportTaskWidget::deleteAllFilesSlot);
-        button_layout->addWidget(delete_all_files_button_);
+//        updateFileListSlot();
+//        files_layout->addWidget(file_list_);
 
-        files_layout->addLayout(button_layout);
+//        QHBoxLayout* button_layout = new QHBoxLayout();
 
-        main_tab_layout->addLayout(files_layout);
+//        add_file_button_ = new QPushButton("Add");
+//        connect(add_file_button_, &QPushButton::clicked, this, &ASTERIXImportTaskWidget::addFileSlot);
+//        button_layout->addWidget(add_file_button_);
+
+//        delete_file_button_ = new QPushButton("Remove");
+//        connect(delete_file_button_, &QPushButton::clicked, this, &ASTERIXImportTaskWidget::deleteFileSlot);
+//        button_layout->addWidget(delete_file_button_);
+
+//        delete_all_files_button_ = new QPushButton("Remove All");
+//        connect(delete_all_files_button_, &QPushButton::clicked, this, &ASTERIXImportTaskWidget::deleteAllFilesSlot);
+//        button_layout->addWidget(delete_all_files_button_);
+
+//        files_layout->addLayout(button_layout);
+
+        main_tab_layout->addLayout(source_layout);
     }
 
     // final stuff
@@ -179,88 +199,88 @@ void ASTERIXImportTaskWidget::addMappingsTab()
 
 ASTERIXImportTaskWidget::~ASTERIXImportTaskWidget() { config_widget_ = nullptr; }
 
-void ASTERIXImportTaskWidget::addFileSlot()
-{
-    QFileDialog dialog(this);
-    dialog.setWindowTitle("Add ASTERIX File(s)");
-    // dialog.setDirectory(QDir::homePath());
-    dialog.setFileMode(QFileDialog::ExistingFiles);
-    // dialog.setNameFilter(trUtf8("Splits (*.000 *.001)"));
-    QStringList fileNames;
-    if (dialog.exec())
-    {
-        for (auto& filename : dialog.selectedFiles())
-            addFile(filename.toStdString());
-    }
-}
+//void ASTERIXImportTaskWidget::addFileSlot()
+//{
+//    QFileDialog dialog(this);
+//    dialog.setWindowTitle("Add ASTERIX File(s)");
+//    // dialog.setDirectory(QDir::homePath());
+//    dialog.setFileMode(QFileDialog::ExistingFiles);
+//    // dialog.setNameFilter(trUtf8("Splits (*.000 *.001)"));
+//    QStringList fileNames;
+//    if (dialog.exec())
+//    {
+//        for (auto& filename : dialog.selectedFiles())
+//            addFile(filename.toStdString());
+//    }
+//}
 
-void ASTERIXImportTaskWidget::addFile(const std::string& filename)
-{
-    if (!task_.hasFile(filename))
-        task_.addFile(filename);
-}
+//void ASTERIXImportTaskWidget::addFile(const std::string& filename)
+//{
+//    if (!task_.hasFile(filename))
+//        task_.addFile(filename);
+//}
 
-void ASTERIXImportTaskWidget::selectFile(const std::string& filename)
-{
-    assert(task_.hasFile(filename));
-    task_.importFilename(filename);
+//void ASTERIXImportTaskWidget::selectFile(const std::string& filename)
+//{
+//    assert(task_.hasFile(filename));
+//    task_.importFilename(filename);
 
-    QList<QListWidgetItem*> items = file_list_->findItems(filename.c_str(), Qt::MatchExactly);
-    assert (items.size() > 0);
+//    QList<QListWidgetItem*> items = file_list_->findItems(filename.c_str(), Qt::MatchExactly);
+//    assert (items.size() > 0);
 
-    for (auto item_it : items)
-    {
-        assert (item_it);
-        file_list_->setCurrentItem(item_it);
-    }
-}
+//    for (auto item_it : items)
+//    {
+//        assert (item_it);
+//        file_list_->setCurrentItem(item_it);
+//    }
+//}
 
-void ASTERIXImportTaskWidget::deleteFileSlot()
-{
-    loginf << "ASTERIXImportTaskWidget: deleteFileSlot";
+//void ASTERIXImportTaskWidget::deleteFileSlot()
+//{
+//    loginf << "ASTERIXImportTaskWidget: deleteFileSlot";
 
-    if (!file_list_->currentItem() || !task_.importFilename().size())
-    {
-        QMessageBox m_warning(QMessageBox::Warning, "ASTERIX File Deletion Failed",
-                              "Please select a file in the list.", QMessageBox::Ok);
-        m_warning.exec();
-        return;
-    }
+//    if (!file_list_->currentItem() || !task_.importFilename().size())
+//    {
+//        QMessageBox m_warning(QMessageBox::Warning, "ASTERIX File Deletion Failed",
+//                              "Please select a file in the list.", QMessageBox::Ok);
+//        m_warning.exec();
+//        return;
+//    }
 
-    assert(task_.importFilename().size());
-    assert(task_.hasFile(task_.importFilename()));
-    task_.removeCurrentFilename();
-}
+//    assert(task_.importFilename().size());
+//    assert(task_.hasFile(task_.importFilename()));
+//    task_.removeCurrentFilename();
+//}
 
-void ASTERIXImportTaskWidget::deleteAllFilesSlot()
-{
-    loginf << "ASTERIXImportTaskWidget: deleteAllFilesSlot";
-    task_.removeAllFiles();
-}
+//void ASTERIXImportTaskWidget::deleteAllFiles()
+//{
+//    loginf << "ASTERIXImportTaskWidget: deleteAllFiles";
+//    task_.removeAllFiles();
+//}
 
-void ASTERIXImportTaskWidget::selectedFileSlot()
-{
-    loginf << "ASTERIXImportTaskWidget: selectedFileSlot";
-    assert(file_list_->currentItem());
+//void ASTERIXImportTaskWidget::selectedFileSlot()
+//{
+//    loginf << "ASTERIXImportTaskWidget: selectedFileSlot";
+//    assert(file_list_->currentItem());
 
-    QString filename = file_list_->currentItem()->text();
-    assert(task_.hasFile(filename.toStdString()));
-    task_.importFilename(filename.toStdString());
-}
+//    QString filename = file_list_->currentItem()->text();
+//    assert(task_.hasFile(filename.toStdString()));
+//    task_.importFilename(filename.toStdString());
+//}
 
-void ASTERIXImportTaskWidget::updateFileListSlot()
-{
-    assert(file_list_);
+//void ASTERIXImportTaskWidget::updateFileListSlot()
+//{
+//    assert(file_list_);
 
-    file_list_->clear();
+//    file_list_->clear();
 
-    for (auto it : task_.fileList())
-    {
-        QListWidgetItem* item = new QListWidgetItem(tr(it.first.c_str()), file_list_);
-        if (it.first == task_.importFilename())
-            file_list_->setCurrentItem(item);
-    }
-}
+//    for (auto it : task_.fileList())
+//    {
+//        QListWidgetItem* item = new QListWidgetItem(tr(it.first.c_str()), file_list_);
+//        if (it.first == task_.importFilename())
+//            file_list_->setCurrentItem(item);
+//    }
+//}
 
 void ASTERIXImportTaskWidget::addParserSlot()
 {

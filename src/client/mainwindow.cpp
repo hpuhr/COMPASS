@@ -35,10 +35,13 @@
 #include "taskmanagerwidget.h"
 #include "viewmanager.h"
 #include "viewpointswidget.h"
-#include "asteriximporttask.h"
-#include "asteriximportrecordingtaskdialog.h"
 #include "evaluationmanager.h"
 #include "compass.h"
+
+#if USE_JASTERIX
+#include "asteriximporttask.h"
+#include "asteriximporttaskdialog.h"
+#endif
 
 #include <QApplication>
 #include <QFileDialog>
@@ -135,20 +138,20 @@ void MainWindow::createMenus ()
     connect(new_db_action_, &QAction::triggered, this, &MainWindow::newDBSlot);
     file_menu->addAction(new_db_action_);
 
-    open_existng_action_ = new QAction(tr("&Open"));
-    open_existng_action_->setShortcuts(QKeySequence::Open);
-    open_existng_action_->setStatusTip(tr("Open an existing database"));
-    connect(open_existng_action_, &QAction::triggered, this, &MainWindow::openExistingDBSlot);
-    file_menu->addAction(open_existng_action_);
+    open_existing_db_action_ = new QAction(tr("&Open"));
+    open_existing_db_action_->setShortcuts(QKeySequence::Open);
+    open_existing_db_action_->setStatusTip(tr("Open an existing database"));
+    connect(open_existing_db_action_, &QAction::triggered, this, &MainWindow::openExistingDBSlot);
+    file_menu->addAction(open_existing_db_action_);
 
-    open_recent_menu_ = file_menu->addMenu("Open Recent");
-    open_recent_menu_->setStatusTip(tr("Open a recent database"));
+    open_recent_db_menu_ = file_menu->addMenu("Open Recent");
+    open_recent_db_menu_->setStatusTip(tr("Open a recent database"));
 
-    open_recent_menu_->addSeparator();
+    open_recent_db_menu_->addSeparator();
 
     QAction* clear_act = new QAction("Clear");
     connect(clear_act, &QAction::triggered, this, &MainWindow::clearExistingDBsSlot);
-    open_recent_menu_->addAction(clear_act);
+    open_recent_db_menu_->addAction(clear_act);
 
     close_db_action_ = new QAction(tr("&Close"));
     close_db_action_->setShortcut(tr("Ctrl+C"));
@@ -187,11 +190,22 @@ void MainWindow::createMenus ()
 
     import_menu_ = menuBar()->addMenu(tr("&Import"));
 
+#if USE_JASTERIX
     QAction* import_ast_file_action = new QAction(tr("&ASTERIX Recording"));
     import_ast_file_action->setShortcut(tr("Ctrl+A"));
     import_ast_file_action->setStatusTip(tr("Import ASTERIX Recording File"));
     connect(import_ast_file_action, &QAction::triggered, this, &MainWindow::importAsterixRecordingSlot);
     import_menu_->addAction(import_ast_file_action);
+
+    import_recent_asterix_menu_ = file_menu->addMenu("Recent ASTERIX Recording");
+    import_recent_asterix_menu_->setStatusTip(tr("Import a recent ASTERIX Recording File"));
+    import_menu_->addMenu(import_recent_asterix_menu_);
+
+    QAction* import_ast_net_action = new QAction(tr("ASTERIX From Network"));
+    import_ast_net_action->setStatusTip(tr("Import ASTERIX From Network"));
+    connect(import_ast_net_action, &QAction::triggered, this, &MainWindow::importAsterixFromNetworkSlot);
+    import_menu_->addAction(import_ast_net_action);
+#endif
 
     // configuration
     QMenu* config_menu = menuBar()->addMenu(tr("&Configuration"));
@@ -206,14 +220,15 @@ void MainWindow::createMenus ()
 void MainWindow::updateMenus()
 {
     assert (new_db_action_);
-    assert (open_existng_action_);
-    assert (open_recent_menu_);
+    assert (open_existing_db_action_);
+    assert (open_recent_db_menu_);
     assert (close_db_action_);
 
     assert (import_menu_);
 
-    open_recent_menu_->clear();
+    open_recent_db_menu_->clear();
 
+    // recent db files
     vector<string> recent_file_list = COMPASS::instance().dbFileList();
 
     for (auto& fn_it : recent_file_list)
@@ -221,18 +236,36 @@ void MainWindow::updateMenus()
         QAction* file_act = new QAction(fn_it.c_str());
         file_act->setData(fn_it.c_str());
         connect(file_act, &QAction::triggered, this, &MainWindow::openRecentDBSlot);
-        open_recent_menu_->addAction(file_act);
+        open_recent_db_menu_->addAction(file_act);
     }
-    open_recent_menu_->setDisabled(recent_file_list.size() == 0);
+    open_recent_db_menu_->setDisabled(recent_file_list.size() == 0);
 
     bool db_open = COMPASS::instance().dbOpened();
 
     new_db_action_->setDisabled(db_open);
-    open_existng_action_->setDisabled(db_open);
-    open_recent_menu_->setDisabled(db_open);
+    open_existing_db_action_->setDisabled(db_open);
+    open_recent_db_menu_->setDisabled(db_open);
     close_db_action_->setDisabled(!db_open);
 
-    import_menu_->setDisabled(!db_open);
+    import_menu_->setDisabled(!db_open || COMPASS::instance().taskManager().asterixImporterTask().isRunning());
+
+#if USE_JASTERIX
+    assert (import_recent_asterix_menu_);
+
+    import_recent_asterix_menu_->clear();
+
+    vector<string> recent_ast_list =  COMPASS::instance().taskManager().asterixImporterTask().fileList();
+
+    for (auto& fn_it : recent_ast_list)
+    {
+        QAction* file_act = new QAction(fn_it.c_str());
+        file_act->setData(fn_it.c_str());
+        connect(file_act, &QAction::triggered, this, &MainWindow::importRecentAsterixRecordingSlot);
+        import_recent_asterix_menu_->addAction(file_act);
+    }
+    import_recent_asterix_menu_->setDisabled(recent_ast_list.size() == 0);
+
+#endif
 }
 
 void MainWindow::disableConfigurationSaving()
@@ -439,8 +472,8 @@ void MainWindow::performAutomaticTasks ()
 
         ASTERIXImportTask& ast_import_task = COMPASS::instance().taskManager().asterixImporterTask();
 
-        if (!ast_import_task.hasFile(asterix_import_filename_))
-            ast_import_task.addFile(asterix_import_filename_);
+//        if (!ast_import_task.hasFile(asterix_import_filename_))
+//            ast_import_task.addFile(asterix_import_filename_);
 
         ast_import_task.importFilename(asterix_import_filename_);
 
@@ -961,6 +994,42 @@ void MainWindow::quitSlot()
 void MainWindow::importAsterixRecordingSlot()
 {
     loginf << "MainWindow: importAsterixRecordingSlot";
+
+    string filename = QFileDialog::getOpenFileName(this, "Import ASTERIX File").toStdString();
+
+    if (filename.size() > 0)
+    {
+        COMPASS::instance().taskManager().asterixImporterTask().importFilename(filename); // also adds
+
+        updateMenus();
+
+        COMPASS::instance().taskManager().asterixImporterTask().dialog()->show();
+    }
+}
+
+void MainWindow::importRecentAsterixRecordingSlot()
+{
+    loginf << "MainWindow: importRecentAsterixRecordingSlot";
+
+    QAction* action = dynamic_cast<QAction*> (QObject::sender());
+    assert (action);
+
+    string filename = action->data().toString().toStdString();
+
+    assert (filename.size());
+
+    COMPASS::instance().taskManager().asterixImporterTask().importFilename(filename); // also adds
+
+    updateMenus();
+
+    COMPASS::instance().taskManager().asterixImporterTask().dialog()->show();
+}
+
+void MainWindow::importAsterixFromNetworkSlot()
+{
+    loginf << "MainWindow: importAsterixFromNetworkSlot";
+
+    COMPASS::instance().taskManager().asterixImporterTask().importNetwork();
 
     COMPASS::instance().taskManager().asterixImporterTask().dialog()->show();
 }

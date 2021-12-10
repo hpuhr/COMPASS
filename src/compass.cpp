@@ -369,7 +369,7 @@ void COMPASS::addDBFileToList(const std::string filename)
 
     if (find(tmp_list.begin(), tmp_list.end(), filename) == tmp_list.end())
     {
-        loginf << "COMPASS: addDBFileToLost: adding filename '" << filename << "'";
+        loginf << "COMPASS: addDBFileToList: adding filename '" << filename << "'";
 
         tmp_list.push_back(filename);
 

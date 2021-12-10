@@ -39,8 +39,7 @@ class TaskManager;
 class ASTERIXImportTaskWidget;
 class ASTERIXCategoryConfig;
 class ASTERIXStatusDialog;
-class SavedFile;
-class ASTERIXImportRecordingTaskDialog;
+class ASTERIXImportTaskDialog;
 
 namespace jASTERIX
 {
@@ -76,7 +75,7 @@ class ASTERIXImportTask : public Task, public Configurable
                       TaskManager& task_manager);
     virtual ~ASTERIXImportTask();
 
-    ASTERIXImportRecordingTaskDialog* dialog();
+    ASTERIXImportTaskDialog* dialog();
 
     virtual void generateSubConfigurable(const std::string& class_id,
                                          const std::string& instance_id);
@@ -89,12 +88,11 @@ class ASTERIXImportTask : public Task, public Configurable
     virtual void run();
     virtual void stop() override;
     void run(bool test);
+    bool isRunning() const;
 
-    const std::map<std::string, SavedFile*>& fileList() { return file_list_; }
-    bool hasFile(const std::string& filename) { return file_list_.count(filename) > 0; }
+    std::vector<std::string> fileList();
     void addFile(const std::string& filename);
-    void removeCurrentFilename();
-    void removeAllFiles ();
+    void clearFileList ();
 
     void importFilename(const std::string& filename);
     const std::string& importFilename() { return current_filename_; }
@@ -149,7 +147,7 @@ class ASTERIXImportTask : public Task, public Configurable
     float overrideTodOffset() const;
     void overrideTodOffset(float value);
 
-  protected:
+protected:
     bool debug_jasterix_;
     bool limit_ram_;
     std::shared_ptr<jASTERIX::jASTERIX> jasterix_;
@@ -157,13 +155,16 @@ class ASTERIXImportTask : public Task, public Configurable
 
     bool import_file_ {false}; // false = network, true file
 
-    std::map<std::string, SavedFile*> file_list_;
+    nlohmann::json file_list_;
     std::string current_filename_;
     std::string current_file_framing_;
 
     bool test_{false};
 
-    std::unique_ptr<ASTERIXImportRecordingTaskDialog> dialog_;
+    bool running_ {false};
+    boost::posix_time::ptime start_time_;
+
+    std::unique_ptr<ASTERIXImportTaskDialog> dialog_;
 
     std::map<unsigned int, ASTERIXCategoryConfig> category_configs_;
 
@@ -174,6 +175,9 @@ class ASTERIXImportTask : public Task, public Configurable
     std::shared_ptr<ASTERIXJSONMappingJob> json_map_job_;
 
     std::shared_ptr<ASTERIXPostprocessJob> postprocess_job_;
+
+    std::map<std::string, std::shared_ptr<Buffer>> buffer_cache_; // to be used for file import
+    boost::posix_time::ptime last_insert_time_;
 
     bool error_{false};
     std::string error_message_;

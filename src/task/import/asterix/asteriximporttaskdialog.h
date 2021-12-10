@@ -1,5 +1,5 @@
-#ifndef ASTERIXIMPORTRECORDINGTASKDIALOG_H
-#define ASTERIXIMPORTRECORDINGTASKDIALOG_H
+#ifndef ASTERIXIMPORTTASKDIALOG_H
+#define ASTERIXIMPORTTASKDIALOG_H
 
 #include <QDialog>
 
@@ -8,7 +8,7 @@ class ASTERIXImportTaskWidget;
 
 class QPushButton;
 
-class ASTERIXImportRecordingTaskDialog : public QDialog
+class ASTERIXImportTaskDialog : public QDialog
 {
     Q_OBJECT
 
@@ -23,7 +23,7 @@ public slots:
     void cancelClickedSlot();
 
 public:
-    explicit ASTERIXImportRecordingTaskDialog(ASTERIXImportTask& task);
+    explicit ASTERIXImportTaskDialog(ASTERIXImportTask& task);
 
     void updateButtons();
 
@@ -37,4 +37,4 @@ protected:
     QPushButton* test_button_{nullptr};
 };
 
-#endif // ASTERIXIMPORTRECORDINGTASKDIALOG_H
+#endif // ASTERIXIMPORTTASKDIALOG_H

@@ -51,7 +51,11 @@ private slots:
     void quitWOConfigSlot();
     void quitSlot();
 
+#if USE_JASTERIX
     void importAsterixRecordingSlot();
+    void importRecentAsterixRecordingSlot();
+    void importAsterixFromNetworkSlot();
+#endif
 
     void configureMetaVariablesSlot();
 
@@ -84,6 +88,8 @@ public:
 
     bool automaticTasksDefined() const;
     void performAutomaticTasks ();
+
+    void updateMenus();
 
 protected:
     bool started_ {false};
@@ -118,15 +124,18 @@ protected:
 
     // file menu
     QAction* new_db_action_ {nullptr};
-    QAction* open_existng_action_ {nullptr};
-    QMenu* open_recent_menu_ {nullptr};
+    QAction* open_existing_db_action_ {nullptr};
+    QMenu* open_recent_db_menu_ {nullptr};
     QAction* close_db_action_ {nullptr};
 
     // import menu
     QMenu* import_menu_ {nullptr};
 
+#if USE_JASTERIX
+    QMenu* import_recent_asterix_menu_ {nullptr};
+#endif
+
     void createMenus ();
-    void updateMenus();
 
     /// @brief Called when application closes
     void closeEvent(QCloseEvent* event);

@@ -30,13 +30,13 @@
 #include "files.h"
 #include "jobmanager.h"
 #include "logger.h"
-#include "asteriximportrecordingtaskdialog.h"
+#include "asteriximporttaskdialog.h"
 #include "radarplotpositioncalculatortask.h"
-#include "savedfile.h"
 #include "stringconv.h"
 #include "system.h"
 #include "taskmanager.h"
 #include "taskmanagerwidget.h"
+#include "mainwindow.h"
 
 #include <jasterix/category.h>
 #include <jasterix/edition.h>
@@ -69,6 +69,8 @@ ASTERIXImportTask::ASTERIXImportTask(const std::string& class_id, const std::str
 
     registerParameter("debug_jasterix", &debug_jasterix_, false);
     registerParameter("limit_ram", &limit_ram_, false);
+
+    registerParameter("file_list", &file_list_, json::array());
     registerParameter("current_file_framing", &current_file_framing_, "");
 
     registerParameter("override_sac_org", &post_process_.override_sac_org_, 0);
@@ -109,22 +111,12 @@ ASTERIXImportTask::ASTERIXImportTask(const std::string& class_id, const std::str
 
 ASTERIXImportTask::~ASTERIXImportTask()
 {
-    for (auto it : file_list_)
-        delete it.second;
-
-    file_list_.clear();
 }
 
 void ASTERIXImportTask::generateSubConfigurable(const std::string& class_id,
                                                 const std::string& instance_id)
 {
-    if (class_id == "ASTERIXFile")
-    {
-        SavedFile* file = new SavedFile(class_id, instance_id, this);
-        assert(file_list_.count(file->name()) == 0);
-        file_list_.insert(std::pair<std::string, SavedFile*>(file->name(), file));
-    }
-    else if (class_id == "ASTERIXCategoryConfig")
+    if (class_id == "ASTERIXCategoryConfig")
     {
         unsigned int category = configuration()
                 .getSubConfiguration(class_id, instance_id)
@@ -272,19 +264,19 @@ void ASTERIXImportTask::checkSubConfigurables()
     }
 }
 
-ASTERIXImportRecordingTaskDialog* ASTERIXImportTask::dialog()
+ASTERIXImportTaskDialog* ASTERIXImportTask::dialog()
 {
     if (!dialog_)
     {
-        dialog_.reset(new ASTERIXImportRecordingTaskDialog(*this));
+        dialog_.reset(new ASTERIXImportTaskDialog(*this));
 
-        connect(dialog_.get(), &ASTERIXImportRecordingTaskDialog::testTmportSignal,
+        connect(dialog_.get(), &ASTERIXImportTaskDialog::testTmportSignal,
                 this, &ASTERIXImportTask::dialogTestImportSlot);
 
-        connect(dialog_.get(), &ASTERIXImportRecordingTaskDialog::importSignal,
+        connect(dialog_.get(), &ASTERIXImportTaskDialog::importSignal,
                 this, &ASTERIXImportTask::dialogImportSlot);
 
-        connect(dialog_.get(), &ASTERIXImportRecordingTaskDialog::cancelSignal,
+        connect(dialog_.get(), &ASTERIXImportTaskDialog::cancelSignal,
                 this, &ASTERIXImportTask::dialogCancelSlot);
     }
 
@@ -312,58 +304,36 @@ void ASTERIXImportTask::refreshjASTERIX()
     }
 }
 
+std::vector<std::string> ASTERIXImportTask::fileList()
+{
+    return file_list_.get<std::vector<string>>();
+}
+
 void ASTERIXImportTask::addFile(const std::string& filename)
 {
     loginf << "ASTERIXImportTask: addFile: filename '" << filename << "'";
 
-    if (file_list_.count(filename) != 0)
-        throw std::invalid_argument("ASTERIXImportTask: addFile: name '" + filename +
-                                    "' already in use");
+    vector<string> tmp_list = file_list_.get<std::vector<string>>();
 
-    std::string instancename = filename;
-    instancename.erase(std::remove(instancename.begin(), instancename.end(), '/'),
-                       instancename.end());
+    if (find(tmp_list.begin(), tmp_list.end(), filename) == tmp_list.end())
+    {
+        loginf << "ASTERIXImportTask: addFile: adding filename '" << filename << "'";
 
-    Configuration& config = addNewSubConfiguration("ASTERIXFile", "ASTERIXFile" + instancename);
-    config.addParameterString("name", filename);
-    generateSubConfigurable("ASTERIXFile", "ASTERIXFile" + instancename);
+        tmp_list.push_back(filename);
 
-    current_filename_ = filename;
+        sort(tmp_list.begin(), tmp_list.end());
 
-    emit statusChangedSignal(name_);
-}
-
-void ASTERIXImportTask::removeCurrentFilename()
-{
-    loginf << "ASTERIXImportTask: removeCurrentFilename: filename '" << current_filename_ << "'";
-
-    assert(current_filename_.size());
-    assert(hasFile(current_filename_));
-
-    if (file_list_.count(current_filename_) != 1)
-        throw std::invalid_argument("ASTERIXImportTask: removeCurrentFilename: name '" +
-                                    current_filename_ + "' not in use");
-
-    delete file_list_.at(current_filename_);
-    file_list_.erase(current_filename_);
-    current_filename_ = "";
+        file_list_ = tmp_list;
+    }
 
     emit statusChangedSignal(name_);
 }
 
-void ASTERIXImportTask::removeAllFiles ()
+void ASTERIXImportTask::clearFileList ()
 {
     loginf << "ASTERIXImportTask: removeAllFiles";
 
-    while (file_list_.size())
-    {
-        delete file_list_.begin()->second;
-        file_list_.erase(file_list_.begin());
-    }
-
-    current_filename_ = "";
-
-    emit statusChangedSignal(name_);
+    file_list_.clear();
 }
 
 void ASTERIXImportTask::importFilename(const std::string& filename)
@@ -373,6 +343,7 @@ void ASTERIXImportTask::importFilename(const std::string& filename)
     current_filename_ = filename;
     import_file_ = true;
 
+    addFile(filename);
 
     if (dialog_)
         dialog_->updateButtons();
@@ -380,6 +351,8 @@ void ASTERIXImportTask::importFilename(const std::string& filename)
 
 void ASTERIXImportTask::importNetwork()
 {
+    loginf << "ASTERIXImportTask: importNetwork";
+
     current_filename_ = "";
     import_file_ = false;
 
@@ -655,6 +628,11 @@ void ASTERIXImportTask::overrideTodOffset(float value)
     post_process_.override_tod_offset_ = value;
 }
 
+bool ASTERIXImportTask::isRunning() const
+{
+    return running_;
+}
+
 bool ASTERIXImportTask::canImportFile()
 {
     if (!current_filename_.size())
@@ -698,6 +676,7 @@ void ASTERIXImportTask::stop()
 
     stopped_ = true;
     done_ = true;
+    running_ = false;
 
     loginf << "ASTERIXImportTask: stop done";
 }
@@ -706,8 +685,15 @@ void ASTERIXImportTask::run(bool test) // , bool create_mapping_stubs
 {
     test_ = test;
 
+    assert (!running_);
+
+    running_ = true;
     done_ = false; // since can be run multiple times
     num_radar_inserted_ = 0;
+
+    start_time_ = boost::posix_time::microsec_clock::local_time();
+
+    last_insert_time_ = boost::posix_time::microsec_clock::local_time();
 
     float free_ram = System::getFreeRAMinGB();
 
@@ -1093,7 +1079,36 @@ void ASTERIXImportTask::postprocessDoneSlot()
             decode_job_->unpause();
     }
 
-    insertData(std::move(job_buffers));
+    if (import_file_) // cache and insert only if time elapsed
+    {
+        // merge into existing buffers
+
+        for (auto& buf_it : job_buffers)
+        {
+            if (!buffer_cache_.count(buf_it.first)) // set if first
+                buffer_cache_[buf_it.first] = buf_it.second;
+            else // append by seize if existing
+                buffer_cache_.at(buf_it.first)->seizeBuffer(*buf_it.second.get());
+        }
+
+        job_buffers.clear();
+
+        // insert if time elapsed or all other jobs are done
+        if ((boost::posix_time::microsec_clock::local_time() - last_insert_time_).total_milliseconds() > 2000
+                || (decode_job_ == nullptr && json_map_job_ == nullptr && postprocess_job_ == nullptr))
+        {
+            loginf << "ASTERIXImportTask: postprocessDoneSlot: doing file insert";
+
+            last_insert_time_ = boost::posix_time::microsec_clock::local_time();
+
+            std::map<std::string, std::shared_ptr<Buffer>> buffer_cache_cpy = move(buffer_cache_);
+            buffer_cache_.clear(); // to be safe
+
+            insertData(std::move(buffer_cache_cpy));
+        }
+    }
+    else // insert immediately for network
+        insertData(std::move(job_buffers));
 }
 
 void ASTERIXImportTask::postprocessObsoleteSlot()
@@ -1257,6 +1272,13 @@ void ASTERIXImportTask::checkAllDone()
 
         all_done_ = true;
         done_ = true; // why was this not set?
+        running_ = false;
+
+        boost::posix_time::time_duration time_diff = boost::posix_time::microsec_clock::local_time() - start_time_;
+        loginf << "ASTERIXImportTask: checkAllDone: import done after "
+               << String::timeStringFromDouble(time_diff.total_milliseconds() / 1000.0, false);
+
+        COMPASS::instance().mainWindow().updateMenus(); // re-enable import menu
 
         QApplication::restoreOverrideCursor();
 
