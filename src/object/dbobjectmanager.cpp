@@ -67,10 +67,14 @@ DBObjectManager::DBObjectManager(const std::string& class_id, const std::string&
     createSubConfigurables();
 
     qRegisterMetaType<std::shared_ptr<Buffer>>("std::shared_ptr<Buffer>"); // for dbo read job
+    // for signal about new data
+    qRegisterMetaType<std::map<std::string, std::shared_ptr<Buffer>>>("std::map<std::string, std::shared_ptr<Buffer>>");
 }
 
 DBObjectManager::~DBObjectManager()
 {
+    data_.clear();
+
     for (auto it : objects_)
         delete it.second;
     objects_.clear();
@@ -92,9 +96,6 @@ void DBObjectManager::generateSubConfigurable(const std::string& class_id,
         loginf << "DBObjectManager: generateSubConfigurable: adding object type " << object->name();
         assert(!objects_.count(object->name()));
         objects_[object->name()] = object;
-
-        connect(object, &DBObject::loadingDoneSignal, this, &DBObjectManager::loadingDoneSlot);
-        // TODO what if generation after db opening?
     }
     else if (class_id.compare("MetaDBOVariable") == 0)
     {
@@ -319,9 +320,11 @@ void DBObjectManager::clearOrderVariable()
     order_variable_name_ = "";
 }
 
-void DBObjectManager::loadSlot()
+void DBObjectManager::startLoading()
 {
     logdbg << "DBObjectManager: loadSlot";
+
+    data_.clear();
 
     load_in_progress_ = true;
 
@@ -432,6 +435,36 @@ void DBObjectManager::loadSlot()
         finishLoading();
 }
 
+void DBObjectManager::addLoadedData(std::map<std::string, std::shared_ptr<Buffer>> data)
+{
+    loginf << "DBObjectManager: addLoadedData";
+
+    // newest data batch has been finalized, ready to be added
+
+    // add buffers to data
+
+    bool something_changed = false;
+
+    for (auto& buf_it : data)
+    {
+        if (!buf_it.second->size())
+        {
+            logerr << "DBObjectManager: addLoadedData: buffer dbo " << buf_it.first << " with 0 size";
+            continue;
+        }
+
+        if (data_.count(buf_it.first))
+            data_.at(buf_it.first)->seizeBuffer(*buf_it.second.get());
+        else
+            data_[buf_it.first] = move(buf_it.second);
+
+        something_changed = true;
+    }
+
+    if (something_changed)
+        emit loadedDataSignal(data_, false);
+}
+
 void DBObjectManager::quitLoading()
 {
     loginf << "DBObjectManager: quitLoading";
@@ -509,7 +542,7 @@ void DBObjectManager::databaseContentChangedSlot()
 
 }
 
-void DBObjectManager::loadingDoneSlot(DBObject& object)
+void DBObjectManager::loadingDone(DBObject& object)
 {
     bool done = true;
 
@@ -542,7 +575,7 @@ void DBObjectManager::finishLoading()
 
     COMPASS::instance().viewManager().doViewPointAfterLoad();
 
-    emit allLoadingDoneSignal();
+    emit loadingDoneSignal();
 
     if (load_widget_)
         load_widget_->loadingDone();

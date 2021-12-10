@@ -53,8 +53,8 @@ class DBObject : public QObject, public Configurable
     Q_OBJECT
 
   signals:
-    void newDataSignal(DBObject& object);
-    void loadingDoneSignal(DBObject& object);
+//    void newDataSignal(DBObject& object);
+//    void loadingDoneSignal(DBObject& object);
 
     void insertProgressSignal(float percent);
     void insertDoneSignal(DBObject& object);

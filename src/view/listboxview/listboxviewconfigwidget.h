@@ -62,7 +62,6 @@ class ListBoxViewConfigWidget : public QWidget
 
   signals:
     void exportSignal(bool overwrite);
-    void reloadRequestedSignal();  // reload from database
 
   public:
     /// @brief Constructor

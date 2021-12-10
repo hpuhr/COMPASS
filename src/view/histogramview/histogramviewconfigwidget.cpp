@@ -16,6 +16,7 @@
  */
 
 #include "histogramviewconfigwidget.h"
+#include "compass.h"
 #include "dbobjectmanager.h"
 #include "dbovariableselectionwidget.h"
 #include "histogramview.h"
@@ -255,7 +256,7 @@ void HistogramViewConfigWidget::setStatus (const std::string& status, bool visib
 
 void HistogramViewConfigWidget::reloadRequestedSlot()
 {
-    emit reloadRequestedSignal();
+    COMPASS::instance().objectManager().startLoading();
 }
 
 void HistogramViewConfigWidget::loadingStartedSlot()

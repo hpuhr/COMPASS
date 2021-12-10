@@ -242,7 +242,7 @@ void ViewManager::setCurrentViewPoint (const ViewableDataConfig* viewable)
 
     emit showViewPointSignal(current_viewable_);
 
-    COMPASS::instance().objectManager().loadSlot();
+    COMPASS::instance().objectManager().startLoading();
 }
 
 
@@ -604,6 +604,24 @@ void ViewManager::selectionChangedSlot()
     loginf << "ViewManager: selectionChangedSlot";
     emit selectionChangedSignal();
 }
+
+void ViewManager::loadingStartedSlot()
+{
+    loginf << "ViewManager: loadingStartedSlot";
+}
+
+// all data contained, also new one. requires_reset true indicates that all shown info should be re-created,
+// e.g. when data in the beginning was removed, or order of previously emitted data was changed, etc.
+void ViewManager::loadedDataSlot (const std::map<std::string, std::shared_ptr<Buffer>>& data, bool requires_reset)
+{
+    loginf << "ViewManager: loadedDataSlot";
+}
+
+void ViewManager::loadingDoneSlot() // emitted when all dbos have finished loading
+{
+    loginf << "ViewManager: loadingDoneSlot";
+}
+
 
 // void ViewManager::saveViewAsTemplate (View *view, std::string template_name)
 //{

@@ -16,6 +16,7 @@
  */
 
 #include "scatterplotviewconfigwidget.h"
+#include "compass.h"
 #include "dbobjectmanager.h"
 #include "dbovariableselectionwidget.h"
 #include "scatterplotview.h"
@@ -196,7 +197,7 @@ void ScatterPlotViewConfigWidget::selectedVariableYChangedSlot()
 
 void ScatterPlotViewConfigWidget::reloadRequestedSlot()
 {
-    emit reloadRequestedSignal();
+    COMPASS::instance().objectManager().startLoading();
 }
 
 void ScatterPlotViewConfigWidget::loadingStartedSlot()

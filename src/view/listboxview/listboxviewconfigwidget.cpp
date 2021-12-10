@@ -16,6 +16,7 @@
  */
 
 #include "listboxviewconfigwidget.h"
+#include "compass.h"
 #include "dbobjectmanager.h"
 #include "dbovariableorderedsetwidget.h"
 #include "listboxview.h"
@@ -419,7 +420,8 @@ void ListBoxViewConfigWidget::reloadWantedSlot()
 void ListBoxViewConfigWidget::reloadRequestedSlot()
 {
     assert(reload_needed_);
-    emit reloadRequestedSignal();
+
+    COMPASS::instance().objectManager().startLoading();
     reload_needed_ = false;
 
     updateUpdateButton();

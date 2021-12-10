@@ -445,7 +445,7 @@ void EvaluationManager::loadData ()
 
     needs_additional_variables_ = true;
 
-    object_man.loadSlot();
+    object_man.startLoading();
 
     needs_additional_variables_ = false;
 

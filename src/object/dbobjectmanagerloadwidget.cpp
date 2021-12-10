@@ -230,7 +230,7 @@ void DBObjectManagerLoadWidget::loadButtonSlot()
     loading_ = true;
     load_button_->setText("Stop");
 
-    dbo_manager_.loadSlot();
+    dbo_manager_.startLoading();
 }
 
 void DBObjectManagerLoadWidget::loadingDone()

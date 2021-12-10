@@ -760,7 +760,7 @@ void MainWindow::performAutomaticTasks ()
 
         DBObjectManager& obj_man = COMPASS::instance().objectManager();
 
-        obj_man.loadSlot();
+        obj_man.startLoading();
 
         while (obj_man.loadInProgress())
         {

@@ -192,7 +192,7 @@ TEST_CASE("COMPASS Import ASTERIX", "[COMPASS]")
     QThread::msleep(100);  // delay
 
     DBObjectManager& object_manager = COMPASS::instance().objectManager();
-    object_manager.loadSlot();
+    object_manager.startLoading();
 
     while (client.hasPendingEvents() || object_manager.loadInProgress())
         client.processEvents();

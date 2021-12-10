@@ -52,10 +52,6 @@ class HistogramViewConfigWidget : public QWidget
     void reloadRequestedSlot();
     void loadingStartedSlot();
 
-  signals:
-    //void exportSignal(bool overwrite);
-    void reloadRequestedSignal();  // reload from database
-
   public:
     HistogramViewConfigWidget(HistogramView* view, QWidget* parent = nullptr);
     virtual ~HistogramViewConfigWidget();

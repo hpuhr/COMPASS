@@ -71,8 +71,8 @@ bool ListBoxView::init()
     assert(data_source_);
 
     DBObjectManager& object_man = COMPASS::instance().objectManager();
-    connect(&object_man, &DBObjectManager::allLoadingDoneSignal, this, &ListBoxView::allLoadingDoneSlot);
-    connect(&object_man, &DBObjectManager::allLoadingDoneSignal,
+    connect(&object_man, &DBObjectManager::loadingDoneSignal, this, &ListBoxView::allLoadingDoneSlot);
+    connect(&object_man, &DBObjectManager::loadingDoneSignal,
             widget_->getDataWidget(), &ListBoxViewDataWidget::loadingDoneSlot);
 
     connect(data_source_, &ListBoxViewDataSource::loadingStartedSignal, widget_->getDataWidget(),
@@ -85,8 +85,6 @@ bool ListBoxView::init()
     connect(widget_->getDataWidget(), &ListBoxViewDataWidget::exportDoneSignal,
             widget_->configWidget(), &ListBoxViewConfigWidget::exportDoneSlot);
 
-    connect(widget_->configWidget(), &ListBoxViewConfigWidget::reloadRequestedSignal,
-            &COMPASS::instance().objectManager(), &DBObjectManager::loadSlot);
     connect(data_source_, &ListBoxViewDataSource::loadingStartedSignal, widget_->configWidget(),
             &ListBoxViewConfigWidget::loadingStartedSlot);
 

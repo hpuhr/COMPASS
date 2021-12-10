@@ -72,7 +72,7 @@ bool HistogramView::init()
     assert(data_source_);
 
     DBObjectManager& object_man = COMPASS::instance().objectManager();
-    connect(&object_man, &DBObjectManager::allLoadingDoneSignal, this, &HistogramView::allLoadingDoneSlot);
+    connect(&object_man, &DBObjectManager::loadingDoneSignal, this, &HistogramView::allLoadingDoneSlot);
 
     connect(data_source_, &HistogramViewDataSource::loadingStartedSignal, widget_->getDataWidget(),
             &HistogramViewDataWidget::loadingStartedSlot);
@@ -84,8 +84,6 @@ bool HistogramView::init()
 //    connect(widget_->getDataWidget(), &HistogramViewDataWidget::exportDoneSignal,
 //            widget_->configWidget(), &HistogramViewConfigWidget::exportDoneSlot);
 
-    connect(widget_->configWidget(), &HistogramViewConfigWidget::reloadRequestedSignal,
-            &COMPASS::instance().objectManager(), &DBObjectManager::loadSlot);
     connect(data_source_, &HistogramViewDataSource::loadingStartedSignal, widget_->configWidget(),
             &HistogramViewConfigWidget::loadingStartedSlot);
 

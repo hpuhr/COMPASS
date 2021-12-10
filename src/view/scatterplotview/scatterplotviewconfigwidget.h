@@ -46,9 +46,6 @@ class ScatterPlotViewConfigWidget : public QWidget
     void reloadRequestedSlot();
     void loadingStartedSlot();
 
-  signals:
-    void reloadRequestedSignal();  // reload from database
-
   public:
     ScatterPlotViewConfigWidget(ScatterPlotView* view, QWidget* parent = nullptr);
     virtual ~ScatterPlotViewConfigWidget();

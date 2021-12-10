@@ -69,6 +69,7 @@ COMPASS::COMPASS() : Configurable("COMPASS", "COMPASS0", 0, "compass.json")
 //    QObject::connect(dbo_manager_.get(), &DBObjectManager::schemaChangedSignal, task_manager_.get(),
 //                     &TaskManager::schemaChangedSlot);
 
+    // database opending
     QObject::connect(db_interface_.get(), &DBInterface::databaseOpenedSignal,
                      dbo_manager_.get(), &DBObjectManager::databaseOpenedSlot);
     QObject::connect(db_interface_.get(), &DBInterface::databaseClosedSignal,
@@ -78,6 +79,14 @@ COMPASS::COMPASS() : Configurable("COMPASS", "COMPASS0", 0, "compass.json")
                      eval_manager_.get(), &EvaluationManager::databaseOpenedSlot);
     QObject::connect(db_interface_.get(), &DBInterface::databaseClosedSignal,
                      eval_manager_.get(), &EvaluationManager::databaseClosedSlot);
+
+    // data exchange
+    QObject::connect(dbo_manager_.get(), &DBObjectManager::loadingStartedSignal,
+                     view_manager_.get(), &ViewManager::loadingStartedSlot);
+    QObject::connect(dbo_manager_.get(), &DBObjectManager::loadedDataSignal,
+                     view_manager_.get(), &ViewManager::loadedDataSlot);
+    QObject::connect(dbo_manager_.get(), &DBObjectManager::loadingDoneSignal,
+                     view_manager_.get(), &ViewManager::loadingDoneSlot);
 
     logdbg << "COMPASS: constructor: end";
 }

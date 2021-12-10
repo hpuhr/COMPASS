@@ -538,7 +538,9 @@ void DBObject::insertDoneSlot()
     if (info_widget_)
         info_widget_->updateSlot();
 
-    emit newDataSignal(*this);
+    TODO_ASSERT
+
+    //emit newDataSignal(*this);
 }
 
 void DBObject::updateData(DBOVariable& key_var, DBOVariableSet& list,
@@ -629,11 +631,7 @@ void DBObject::readJobIntermediateSlot(shared_ptr<Buffer> buffer)
 
     DBOReadDBJob* sender = dynamic_cast<DBOReadDBJob*>(QObject::sender());
 
-    if (!sender)
-    {
-        logwrn << "DBObject: readJobIntermediateSlot: null sender, event on the loose";
-        return;
-    }
+    assert (sender);
     assert(sender == read_job_.get());
 
     vector<DBOVariable*>& variables = sender->readList().getSet();
@@ -668,11 +666,6 @@ void DBObject::readJobObsoleteSlot()
     logdbg << "DBObject: " << name_ << " readJobObsoleteSlot";
     read_job_ = nullptr;
     read_job_data_.clear();
-
-    if (info_widget_)
-        info_widget_->updateSlot();
-
-    emit loadingDoneSignal(*this);
 }
 
 void DBObject::readJobDoneSlot()
@@ -683,10 +676,10 @@ void DBObject::readJobDoneSlot()
     if (info_widget_)
         info_widget_->updateSlot();
 
-    if (!isLoading())
+    if (!isLoading()) // also no more finalize jobs
     {
         loginf << "DBObject: " << name_ << " readJobDoneSlot: done";
-        emit loadingDoneSignal(*this);
+        dbo_manager_.loadingDone(*this);
     }
 }
 
@@ -716,22 +709,22 @@ void DBObject::finalizeReadJobDoneSlot()
     }
     assert(found);
 
-    if (!data_)
-        data_ = buffer;
-    else
-        data_->seizeBuffer(*buffer.get());
+//    if (!data_)
+//        data_ = buffer;
+//    else
+//        data_->seizeBuffer(*buffer.get());
 
-    logdbg << "DBObject: " << name_ << " finalizeReadJobDoneSlot: got buffer with size "
-           << data_->size();
+//    logdbg << "DBObject: " << name_ << " finalizeReadJobDoneSlot: got buffer with size "
+//           << data_->size();
 
-    if (info_widget_)
-        info_widget_->updateSlot();
+//    if (info_widget_)
+//        info_widget_->updateSlot();
 
-    if (!isLoading())  // should be last one
+    if (!isLoading())  // is last one
     {
-        emit newDataSignal(*this);
+        dbo_manager_.addLoadedData({{name_, buffer}});
         loginf << "DBObject: " << name_ << " finalizeReadJobDoneSlot: loading done";
-        emit loadingDoneSignal(*this);
+        dbo_manager_.loadingDone(*this);
         return;
     }
 
@@ -754,7 +747,7 @@ void DBObject::finalizeReadJobDoneSlot()
     }
 
     // exact data from read job or finalize jobs still active
-    emit newDataSignal(*this);
+    dbo_manager_.addLoadedData({{name_, buffer}});
     return;
 }
 

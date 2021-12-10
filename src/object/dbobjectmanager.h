@@ -23,11 +23,12 @@
 #include "dbcontentdbdatasource.h"
 #include "global.h"
 #include "singleton.h"
-
+#include "buffer.h"
 
 #include <qobject.h>
 
 #include <vector>
+#include <memory>
 
 class COMPASS;
 class DBObject;
@@ -44,8 +45,6 @@ class DBObjectManager : public QObject, public Configurable
     Q_OBJECT
 
 public slots:
-    void loadSlot();
-    void loadingDoneSlot(DBObject& object);
 
     void databaseOpenedSlot();
     void databaseContentChangedSlot();
@@ -56,13 +55,20 @@ public slots:
 signals:
     void dbObjectsChangedSignal();
 
-    void loadingStartedSignal();
-    void allLoadingDoneSignal();
+    void loadingStartedSignal(); // emitted when load has been started
+    // all data contained, also new one. requires_reset true indicates that all shown info should be re-created,
+    // e.g. when data in the beginning was removed, or order of previously emitted data was changed, etc.
+    void loadedDataSignal (const std::map<std::string, std::shared_ptr<Buffer>>& data, bool requires_reset);
+    void loadingDoneSignal(); // emitted when all dbos have finished loading
 
 public:
     const static std::vector<std::string> data_source_types_;
 
     DBObjectManager(const std::string& class_id, const std::string& instance_id, COMPASS* compass);
+    virtual ~DBObjectManager();
+
+    virtual void generateSubConfigurable(const std::string& class_id,
+                                         const std::string& instance_id);
 
     bool existsObject(const std::string& dbo_name);
     DBObject& object(const std::string& dbo_name);
@@ -97,10 +103,10 @@ public:
 
     void saveDBDataSources();
 
-    virtual void generateSubConfigurable(const std::string& class_id,
-                                         const std::string& instance_id);
-
-    virtual ~DBObjectManager();
+    void startLoading();
+    void addLoadedData(std::map<std::string, std::shared_ptr<Buffer>> data);
+    void loadingDone(DBObject& object); // to be called by dbo when it's loading is finished
+    bool loadInProgress() const;
 
     DBObjectManagerWidget* widget();
     DBObjectManagerLoadWidget* loadWidget();
@@ -128,12 +134,7 @@ public:
     void orderMetaVariable(MetaDBOVariable& variable);
     void clearOrderVariable();
 
-    //    void lock ();
-    //    void unlock ();
-
     void quitLoading();
-
-    //void removeDependenciesForSchema(const std::string& schema_name);
 
     bool hasAssociations() const;
     void setAssociationsDataSource(const std::string& dbo, const std::string& data_source_name);
@@ -145,8 +146,6 @@ public:
     std::string associationsDataSourceName() const;
 
     bool isOtherDBObjectPostProcessing(DBObject& object);
-
-    bool loadInProgress() const;
 
     bool hasMaxRecordNumber() const { return has_max_rec_num_; }
     unsigned int maxRecordNumber() const;
@@ -164,14 +163,14 @@ protected:
     unsigned int limit_min_{0};
     unsigned int limit_max_{100000};
 
-    bool locked_{false};
-
     bool has_associations_{false};
     std::string associations_dbo_;
     std::string associations_ds_;
 
     bool has_max_rec_num_ {false};
     unsigned int max_rec_num_ {0};
+
+    std::map<std::string, std::shared_ptr<Buffer>> data_;
 
     bool load_in_progress_{false};
 

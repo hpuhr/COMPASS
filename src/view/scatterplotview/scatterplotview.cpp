@@ -78,7 +78,7 @@ bool ScatterPlotView::init()
     assert(data_source_);
 
     DBObjectManager& object_man = COMPASS::instance().objectManager();
-    connect(&object_man, &DBObjectManager::allLoadingDoneSignal, this, &ScatterPlotView::allLoadingDoneSlot);
+    connect(&object_man, &DBObjectManager::loadingDoneSignal, this, &ScatterPlotView::allLoadingDoneSlot);
 
     connect(data_source_, &ScatterPlotViewDataSource::loadingStartedSignal, widget_->getDataWidget(),
             &ScatterPlotViewDataWidget::loadingStartedSlot);
@@ -90,8 +90,6 @@ bool ScatterPlotView::init()
 //    connect(widget_->getDataWidget(), &ScatterPlotViewDataWidget::exportDoneSignal,
 //            widget_->configWidget(), &ScatterPlotViewConfigWidget::exportDoneSlot);
 
-    connect(widget_->configWidget(), &ScatterPlotViewConfigWidget::reloadRequestedSignal,
-            &COMPASS::instance().objectManager(), &DBObjectManager::loadSlot);
     connect(data_source_, &ScatterPlotViewDataSource::loadingStartedSignal, widget_->configWidget(),
             &ScatterPlotViewConfigWidget::loadingStartedSlot);
 
