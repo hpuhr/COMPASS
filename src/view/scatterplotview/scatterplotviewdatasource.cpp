@@ -39,20 +39,20 @@ using namespace nlohmann;
 ScatterPlotViewDataSource::ScatterPlotViewDataSource(const std::string& class_id,
                                              const std::string& instance_id, Configurable* parent)
     : QObject(),
-      Configurable(class_id, instance_id, parent),
-      selection_entries_(ViewSelection::getInstance().getEntries())
+      Configurable(class_id, instance_id, parent)
+//      selection_entries_(ViewSelection::getInstance().getEntries())
 {
     // registerParameter ("use_selection", &use_selection_, true);
 
-    connect(&COMPASS::instance().objectManager(), SIGNAL(loadingStartedSignal()), this,
-            SLOT(loadingStartedSlot()));
+    connect(&COMPASS::instance().objectManager(), &DBObjectManager::loadingStartedSignal,
+            this, &ScatterPlotViewDataSource::loadingStartedSlot);
 
     for (auto& obj_it : COMPASS::instance().objectManager())
     {
-        connect(obj_it.second, SIGNAL(newDataSignal(DBObject&)), this,
-                SLOT(newDataSlot(DBObject&)));
-        connect(obj_it.second, SIGNAL(loadingDoneSignal(DBObject&)), this,
-                SLOT(loadingDoneSlot(DBObject&)));
+        connect(obj_it.second, &DBObject::newDataSignal,
+                this, &ScatterPlotViewDataSource::newDataSlot);
+        connect(obj_it.second, &DBObject::loadingDoneSignal,
+                this,  &ScatterPlotViewDataSource::loadingDoneSlot);
     }
 
     createSubConfigurables();

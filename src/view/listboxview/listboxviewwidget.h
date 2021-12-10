@@ -18,7 +18,6 @@
 #ifndef LISTBOXVIEWWIDGET_H_
 #define LISTBOXVIEWWIDGET_H_
 
-#include "eventprocessor.h"
 #include "viewwidget.h"
 
 class ListBoxView;
@@ -42,8 +41,6 @@ class ListBoxViewWidget : public ViewWidget
                       Configurable* config_parent, ListBoxView* view, QWidget* parent = NULL);
     /// @brief Destructor
     virtual ~ListBoxViewWidget();
-
-    virtual void updateView();
 
     /// @brief Toggles visibility of the config widget
     void toggleConfigWidget();

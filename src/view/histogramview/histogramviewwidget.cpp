@@ -92,7 +92,6 @@ HistogramViewWidget::HistogramViewWidget(const std::string& class_id, const std:
     setFocusPolicy(Qt::StrongFocus);
 
     // connect stuff here
-    // connect( config_widget_, SIGNAL(variableChanged()), this, SLOT(variableChangedSlot()) );
 
 //    connect(tool_widget_, &HistogramViewDataToolWidget::toolChangedSignal, data_widget_,
 //            &HistogramViewDataWidget::toolChangedSlot);
@@ -113,10 +112,6 @@ HistogramViewWidget::~HistogramViewWidget()
     QSettings settings("COMPASS", instanceId().c_str());
     settings.setValue("mainSplitterSizes", main_splitter_->saveState());
 }
-
-/*
- */
-void HistogramViewWidget::updateView() {}
 
 /*
  */

@@ -21,9 +21,8 @@
 #include <QWidget>
 
 #include "configurable.h"
-#include "viewselection.h"
 
-class EventProcessor;
+//class EventProcessor;
 class View;
 
 /**
@@ -48,28 +47,28 @@ class ViewWidget : public QWidget, public Configurable
     virtual ~ViewWidget();
 
     /// @brief Updates the display (only the display, the OGRE render window e.g.)
-    virtual void updateView() = 0;
+//    virtual void updateView() = 0;
 
-    void setEventProcessor(EventProcessor* ep);
-    /// @brief Returns the view widget's event processor
-    EventProcessor* getEventProcessor() { return event_processor_; }
+//    void setEventProcessor(EventProcessor* ep);
+//    /// @brief Returns the view widget's event processor
+//    EventProcessor* getEventProcessor() { return event_processor_; }
 
-    virtual void mousePressEvent(QMouseEvent* e);
-    virtual void mouseReleaseEvent(QMouseEvent* e);
-    virtual void mouseMoveEvent(QMouseEvent* e);
-    virtual void wheelEvent(QWheelEvent* e);
-    virtual void keyPressEvent(QKeyEvent* e);
-    virtual void keyReleaseEvent(QKeyEvent* e);
-    virtual void mouseDoubleClickEvent(QMouseEvent* e);
+//    virtual void mousePressEvent(QMouseEvent* e);
+//    virtual void mouseReleaseEvent(QMouseEvent* e);
+//    virtual void mouseMoveEvent(QMouseEvent* e);
+//    virtual void wheelEvent(QWheelEvent* e);
+//    virtual void keyPressEvent(QKeyEvent* e);
+//    virtual void keyReleaseEvent(QKeyEvent* e);
+//    virtual void mouseDoubleClickEvent(QMouseEvent* e);
 
     View* getView() { return view_; }
 
   signals:
-    void itemsSelected(ViewSelectionEntries& entries);
+    //void itemsSelected(ViewSelectionEntries& entries);
 
   protected:
     /// The widget's event processor
-    EventProcessor* event_processor_;
+    //EventProcessor* event_processor_;
     /// The view the widget is part of
     View* view_;
 };

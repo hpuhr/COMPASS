@@ -28,7 +28,6 @@
 #include "scatterplotviewdatawidget.h"
 #include "scatterplotviewwidget.h"
 #include "logger.h"
-#include "viewselection.h"
 #include "latexvisitor.h"
 
 using namespace std;

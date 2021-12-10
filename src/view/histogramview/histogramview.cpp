@@ -28,7 +28,6 @@
 #include "histogramviewdatawidget.h"
 #include "histogramviewwidget.h"
 #include "logger.h"
-#include "viewselection.h"
 #include "latexvisitor.h"
 #include "evaluationmanager.h"
 

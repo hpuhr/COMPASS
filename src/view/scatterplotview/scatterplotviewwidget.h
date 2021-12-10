@@ -18,7 +18,6 @@
 #ifndef SCATTERPLOTVIEWWIDGET_H_
 #define SCATTERPLOTVIEWWIDGET_H_
 
-#include "eventprocessor.h"
 #include "viewwidget.h"
 
 class ScatterPlotView;
@@ -37,8 +36,6 @@ class ScatterPlotViewWidget : public ViewWidget
                       Configurable* config_parent, ScatterPlotView* view, QWidget* parent = NULL);
     /// @brief Destructor
     virtual ~ScatterPlotViewWidget();
-
-    virtual void updateView();
 
     /// @brief Toggles visibility of the config widget
     void toggleConfigWidget();

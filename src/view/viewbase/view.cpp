@@ -19,7 +19,7 @@
 #include "logger.h"
 #include "viewcontainer.h"
 #include "viewmanager.h"
-#include "viewmodel.h"
+//#include "viewmodel.h"
 #include "viewwidget.h"
 #include "viewpoint.h"
 #include "compass.h"
@@ -41,7 +41,7 @@ View::View(const std::string& class_id, const std::string& instance_id, ViewCont
            ViewManager& view_manager)
     : Configurable(class_id, instance_id, container),
       view_manager_(view_manager),
-      model_(nullptr),
+//      model_(nullptr),
       widget_(nullptr),
       container_(container)
 {
@@ -66,8 +66,8 @@ Just deleting a view is totally feasible and will remove the view from its ViewC
 View::~View()
 {
     // delete model
-    if (model_)
-        delete model_;
+//    if (model_)
+//        delete model_;
 
     // unregister from manager
     if (view_manager_.isRegistered(this))
@@ -125,12 +125,12 @@ unsigned int View::getInstanceKey()
 Should only be called once to set the model.
 @param model The view's model.
  */
-void View::setModel(ViewModel* model)
-{
-    if (model_)
-        throw std::runtime_error("View: setModel: Model already set.");
-    model_ = model;
-}
+//void View::setModel(ViewModel* model)
+//{
+//    if (model_)
+//        throw std::runtime_error("View: setModel: Model already set.");
+//    model_ = model;
+//}
 
 /**
 @brief Sets the view's widget.
@@ -140,7 +140,7 @@ Should only be called once to set the widget.
  */
 void View::setWidget(ViewWidget* widget)
 {
-    if (model_)
+    if (widget_)
         throw std::runtime_error("View: setWidget: Widget already set.");
 
     widget_ = widget;

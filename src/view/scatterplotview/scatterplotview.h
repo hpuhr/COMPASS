@@ -19,7 +19,6 @@
 #define SCATTERPLOTVIEW_H_
 
 #include "view.h"
-#include "viewselection.h"
 
 class ScatterPlotViewWidget;
 class ScatterPlotViewDataSource;

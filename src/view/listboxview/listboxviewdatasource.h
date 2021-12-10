@@ -22,7 +22,7 @@
 #include "configurable.h"
 #include "dbovariable.h"
 #include "dbovariableorderedset.h"
-#include "viewselection.h"
+//#include "viewselection.h"
 
 #include <QObject>
 
@@ -88,7 +88,7 @@ protected:
     std::map<std::string, std::unique_ptr<DBOVariableOrderedSet>> sets_;
 
     /// Selected DBObject records
-    ViewSelectionEntries& selection_entries_;
+    //ViewSelectionEntries& selection_entries_;
 
     std::vector<std::pair<std::string, std::string>> temporary_added_variables_; // not persisted, DBO->varname
 

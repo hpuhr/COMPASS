@@ -19,7 +19,6 @@
 #define HISTOGRAMVIEW_H_
 
 #include "view.h"
-#include "viewselection.h"
 
 class HistogramViewWidget;
 class HistogramViewDataSource;

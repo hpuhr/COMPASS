@@ -24,7 +24,6 @@
 #include "configurable.h"
 #include "dbovariable.h"
 #include "dbovariableorderedset.h"
-#include "viewselection.h"
 
 class Job;
 class ViewableDataConfig;
@@ -66,7 +65,7 @@ class HistogramViewDataSource : public QObject, public Configurable
     DBOVariableOrderedSet* set_{nullptr};
 
     /// Selected DBObject records
-    ViewSelectionEntries& selection_entries_;
+    //ViewSelectionEntries& selection_entries_;
 
     std::vector<std::pair<std::string, std::string>> temporary_added_variables_; // not persisted, DBO->varname
 

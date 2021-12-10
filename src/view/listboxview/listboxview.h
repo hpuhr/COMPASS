@@ -19,7 +19,6 @@
 #define LISTBOXVIEW_H_
 
 #include "view.h"
-#include "viewselection.h"
 #include "listboxviewdatasource.h"
 
 class ListBoxViewWidget;

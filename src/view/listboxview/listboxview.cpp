@@ -26,7 +26,6 @@
 #include "listboxviewdatawidget.h"
 #include "listboxviewwidget.h"
 #include "logger.h"
-#include "viewselection.h"
 #include "latexvisitor.h"
 
 ListBoxView::ListBoxView(const std::string& class_id, const std::string& instance_id,

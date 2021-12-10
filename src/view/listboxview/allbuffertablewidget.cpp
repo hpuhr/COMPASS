@@ -26,7 +26,6 @@
 #include "dbovariableset.h"
 #include "listboxviewdatasource.h"
 #include "logger.h"
-#include "viewselection.h"
 
 #include <QApplication>
 #include <QClipboard>
@@ -55,7 +54,8 @@ AllBufferTableWidget::AllBufferTableWidget(ListBoxView& view, ListBoxViewDataSou
     model_ = new AllBufferTableModel(this, data_source_);
     table_->setModel(model_);
 
-    connect(model_, SIGNAL(exportDoneSignal(bool)), this, SLOT(exportDoneSlot(bool)));
+    connect(model_, &AllBufferTableModel::exportDoneSignal,
+            this, &AllBufferTableWidget::exportDoneSlot);
 
     layout->addWidget(table_);
     table_->show();

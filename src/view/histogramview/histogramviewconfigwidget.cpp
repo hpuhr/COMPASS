@@ -124,10 +124,6 @@ HistogramViewConfigWidget::HistogramViewConfigWidget(HistogramView* view, QWidge
                 &HistogramViewConfigWidget::toggleLogScale);
         cfg_layout->addWidget(log_check_);
 
-        //    export_button_ = new QPushButton("Export");
-        //    connect(export_button_, SIGNAL(clicked(bool)), this, SLOT(exportSlot()));
-        //    vlayout->addWidget(export_button_);
-
         cfg_layout->addStretch();
 
         cfg_widget->setLayout(cfg_layout);

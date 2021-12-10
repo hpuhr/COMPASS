@@ -41,17 +41,20 @@ const string DEFAULT_SET_NAME {"Default"};
 ListBoxViewDataSource::ListBoxViewDataSource(const std::string& class_id,
                                              const std::string& instance_id, Configurable* parent)
     : QObject(),
-      Configurable(class_id, instance_id, parent),
-      selection_entries_(ViewSelection::getInstance().getEntries())
+      Configurable(class_id, instance_id, parent)
+      //selection_entries_(ViewSelection::getInstance().getEntries())
 {
     registerParameter ("current_set_name", &current_set_name_, DEFAULT_SET_NAME);
 
-    connect(&COMPASS::instance().objectManager(), SIGNAL(loadingStartedSignal()), this, SLOT(loadingStartedSlot()));
+    connect(&COMPASS::instance().objectManager(), &DBObjectManager::loadingStartedSignal,
+            this, &ListBoxViewDataSource::loadingStartedSlot);
 
     for (auto& obj_it : COMPASS::instance().objectManager())
     {
-        connect(obj_it.second, SIGNAL(newDataSignal(DBObject&)), this, SLOT(newDataSlot(DBObject&)));
-        connect(obj_it.second, SIGNAL(loadingDoneSignal(DBObject&)), this, SLOT(loadingDoneSlot(DBObject&)));
+        connect(obj_it.second, &DBObject::newDataSignal,
+                this, &ListBoxViewDataSource::newDataSlot);
+        connect(obj_it.second, &DBObject::loadingDoneSignal,
+                this,  &ListBoxViewDataSource::loadingDoneSlot);
     }
 
     createSubConfigurables();

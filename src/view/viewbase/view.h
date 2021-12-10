@@ -25,7 +25,7 @@
 #include "viewcontainerwidget.h"
 
 class ViewContainer;
-class ViewModel;
+//class ViewModel;
 class ViewWidget;
 class QQWidget;
 class Workflow;
@@ -87,7 +87,7 @@ class View : public QObject, public Configurable
     /// @brief Returns the view's widget, override this method in derived classes.
     ViewWidget* getWidget() { return widget_; }
     /// @brief Returns the view's model, override this method in derived classes.
-    ViewModel* getModel() { return model_; }
+    //ViewModel* getModel() { return model_; }
 
     void showInTabWidget();
 
@@ -102,7 +102,7 @@ class View : public QObject, public Configurable
     ViewManager& view_manager_;
 
     /// The view's model
-    ViewModel* model_;
+    //ViewModel* model_;
     /// The view's widget
     ViewWidget* widget_;
     /// The ViewContainerWidget the view is currently embedded in
@@ -113,7 +113,7 @@ class View : public QObject, public Configurable
     // bool selection_change_emitted_ {false};
 
     void constructWidget();
-    void setModel(ViewModel* model);
+    //void setModel(ViewModel* model);
     void setWidget(ViewWidget* widget);
 
     virtual void updateSelection() = 0;
