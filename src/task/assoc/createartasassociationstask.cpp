@@ -310,10 +310,12 @@ void CreateARTASAssociationsTask::run()
             continue;
 
         DBOVariableSet read_set = getReadSetFor(dbo_it.first);
-        connect(dbo_it.second, &DBObject::newDataSignal, this,
-                &CreateARTASAssociationsTask::newDataSlot);
-        connect(dbo_it.second, &DBObject::loadingDoneSignal, this,
-                &CreateARTASAssociationsTask::loadingDoneSlot);
+        TODO_ASSERT
+
+//        connect(dbo_it.second, &DBObject::newDataSignal, this,
+//                &CreateARTASAssociationsTask::newDataSlot);
+//        connect(dbo_it.second, &DBObject::loadingDoneSignal, this,
+//                &CreateARTASAssociationsTask::loadingDoneSlot);
 
         if (dbo_it.first == "Tracker")
         {
@@ -370,9 +372,11 @@ void CreateARTASAssociationsTask::loadingDoneSlot(DBObject& object)
 {
     loginf << "CreateARTASAssociationsTask: loadingDoneSlot: object " << object.name();
 
-    disconnect(&object, &DBObject::newDataSignal, this, &CreateARTASAssociationsTask::newDataSlot);
-    disconnect(&object, &DBObject::loadingDoneSignal, this,
-               &CreateARTASAssociationsTask::loadingDoneSlot);
+    TODO_ASSERT
+
+//    disconnect(&object, &DBObject::newDataSignal, this, &CreateARTASAssociationsTask::newDataSlot);
+//    disconnect(&object, &DBObject::loadingDoneSignal, this,
+//               &CreateARTASAssociationsTask::loadingDoneSlot);
 
     dbo_loading_done_flags_.at(object.name()) = true;
 

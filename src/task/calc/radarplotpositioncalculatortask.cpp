@@ -382,12 +382,14 @@ void RadarPlotPositionCalculatorTask::run()
     read_set.add(*latitude_var_);
     read_set.add(*longitude_var_);
 
-    connect(db_object_, &DBObject::newDataSignal, this,
-            &RadarPlotPositionCalculatorTask::newDataSlot);
-    connect(db_object_, &DBObject::loadingDoneSignal, this,
-            &RadarPlotPositionCalculatorTask::loadingDoneSlot);
+    TODO_ASSERT
 
-    db_object_->load(read_set, false, false, nullptr, false);  //"0,100000"
+//    connect(db_object_, &DBObject::newDataSignal, this,
+//            &RadarPlotPositionCalculatorTask::newDataSlot);
+//    connect(db_object_, &DBObject::loadingDoneSignal, this,
+//            &RadarPlotPositionCalculatorTask::loadingDoneSlot);
+
+//    db_object_->load(read_set, false, false, nullptr, false);  //"0,100000"
 }
 
 void RadarPlotPositionCalculatorTask::newDataSlot(DBObject& object)
@@ -410,10 +412,12 @@ void RadarPlotPositionCalculatorTask::loadingDoneSlot(DBObject& object)
 {
     loginf << "RadarPlotPositionCalculatorTask: loadingDoneSlot: starting calculation";
 
-    disconnect(db_object_, &DBObject::newDataSignal, this,
-               &RadarPlotPositionCalculatorTask::newDataSlot);
-    disconnect(db_object_, &DBObject::loadingDoneSignal, this,
-               &RadarPlotPositionCalculatorTask::loadingDoneSlot);
+    TODO_ASSERT
+
+//    disconnect(db_object_, &DBObject::newDataSignal, this,
+//               &RadarPlotPositionCalculatorTask::newDataSlot);
+//    disconnect(db_object_, &DBObject::loadingDoneSignal, this,
+//               &RadarPlotPositionCalculatorTask::loadingDoneSlot);
 
     //
     //    std::pair<unsigned char, unsigned char> sac_sic_key;

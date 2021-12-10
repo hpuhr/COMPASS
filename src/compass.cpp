@@ -79,8 +79,6 @@ COMPASS::COMPASS() : Configurable("COMPASS", "COMPASS0", 0, "compass.json")
     QObject::connect(db_interface_.get(), &DBInterface::databaseClosedSignal,
                      eval_manager_.get(), &EvaluationManager::databaseClosedSlot);
 
-    dbo_manager_->updateSchemaInformationSlot();
-
     logdbg << "COMPASS: constructor: end";
 }
 

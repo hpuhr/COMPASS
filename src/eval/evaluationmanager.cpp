@@ -424,8 +424,9 @@ void EvaluationManager::loadData ()
         assert (object_man.existsObject(dbo_name_ref_));
         DBObject& dbo_ref = object_man.object(dbo_name_ref_);
 
-        connect(&dbo_ref, &DBObject::newDataSignal, this, &EvaluationManager::newDataSlot);
-        connect(&dbo_ref, &DBObject::loadingDoneSignal, this, &EvaluationManager::loadingDoneSlot);
+        TODO_ASSERT
+//        connect(&dbo_ref, &DBObject::newDataSignal, this, &EvaluationManager::newDataSlot);
+//        connect(&dbo_ref, &DBObject::loadingDoneSignal, this, &EvaluationManager::loadingDoneSlot);
     }
 
     // test data
@@ -435,8 +436,10 @@ void EvaluationManager::loadData ()
         assert (object_man.existsObject(dbo_name_tst_));
         DBObject& dbo_tst = object_man.object(dbo_name_tst_);
 
-        connect(&dbo_tst, &DBObject::newDataSignal, this, &EvaluationManager::newDataSlot);
-        connect(&dbo_tst, &DBObject::loadingDoneSignal, this, &EvaluationManager::loadingDoneSlot);
+        TODO_ASSERT
+
+//        connect(&dbo_tst, &DBObject::newDataSignal, this, &EvaluationManager::newDataSlot);
+//        connect(&dbo_tst, &DBObject::loadingDoneSignal, this, &EvaluationManager::loadingDoneSlot);
 
     }
 
@@ -527,8 +530,10 @@ void EvaluationManager::loadingDoneSlot(DBObject& object)
     {
         DBObject& dbo_ref = object_man.object(dbo_name_ref_);
 
-        disconnect(&dbo_ref, &DBObject::newDataSignal, this, &EvaluationManager::newDataSlot);
-        disconnect(&dbo_ref, &DBObject::loadingDoneSignal, this, &EvaluationManager::loadingDoneSlot);
+        TODO_ASSERT
+
+//        disconnect(&dbo_ref, &DBObject::newDataSignal, this, &EvaluationManager::newDataSlot);
+//        disconnect(&dbo_ref, &DBObject::loadingDoneSignal, this, &EvaluationManager::loadingDoneSlot);
 
         data_.addReferenceData(dbo_ref, object.data());
 
@@ -541,8 +546,10 @@ void EvaluationManager::loadingDoneSlot(DBObject& object)
 
         if (dbo_name_ref_ != dbo_name_tst_) // otherwise already disconnected
         {
-            disconnect(&dbo_tst, &DBObject::newDataSignal, this, &EvaluationManager::newDataSlot);
-            disconnect(&dbo_tst, &DBObject::loadingDoneSignal, this, &EvaluationManager::loadingDoneSlot);
+            TODO_ASSERT
+
+//            disconnect(&dbo_tst, &DBObject::newDataSignal, this, &EvaluationManager::newDataSlot);
+//            disconnect(&dbo_tst, &DBObject::loadingDoneSignal, this, &EvaluationManager::loadingDoneSlot);
         }
 
         data_.addTestData(dbo_tst, object.data());

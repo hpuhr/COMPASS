@@ -225,10 +225,6 @@ DBObjectManagerWidget* DBObjectManager::widget()
     if (!widget_)
     {
         widget_.reset(new DBObjectManagerWidget(*this));
-        // connect (this, SIGNAL(databaseContentChangedSignal), widget_, SLOT(updateDBOsSlot));
-
-        //        if (locked_)
-        //            widget_->lock ();
     }
 
     assert(widget_);
@@ -444,11 +440,6 @@ void DBObjectManager::quitLoading()
         object.second->quitLoading();
 
     load_in_progress_ = true;  // TODO
-}
-
-void DBObjectManager::updateSchemaInformationSlot()
-{
-    emit schemaChangedSignal();
 }
 
 void DBObjectManager::databaseOpenedSlot()
@@ -671,55 +662,6 @@ DBContent::DBDataSource& DBObjectManager::dataSource(unsigned int ds_id)
 }
 
 
-//void DBObjectManager::removeDependenciesForSchema(const std::string& schema_name)
-//{
-//    loginf << "DBObjectManager: removeDependenciesForSchema: " << schema_name;
-
-//    loginf << "DBObjectManager: removeDependenciesForSchema: cleaning dbos";
-
-//    for (auto obj_it = objects_.begin(); obj_it != objects_.end();)
-//    {
-//        const std::map<std::string, DBOSchemaMetaTableDefinition>& meta_tables =
-//            obj_it->second->metaTables();
-
-//        if (meta_tables.size() == 1 && meta_tables.count(schema_name) == 1)
-//        {
-//            loginf << "DBObjectManager: removeDependenciesForSchema: dbo " << obj_it->first
-//                   << " exists only in schema to be removed, deleting";
-//            delete obj_it->second;
-//            objects_.erase(obj_it++);
-//        }
-//        else
-//        {
-//            obj_it->second->removeDependenciesForSchema(schema_name);
-//            ++obj_it;
-//        }
-//    }
-//    loginf << "DBObjectManager: removeDependenciesForSchema: cleaning meta variables";
-
-//    for (auto meta_it = meta_variables_.begin(); meta_it != meta_variables_.end();)
-//    {
-//        meta_it->second->removeOutdatedVariables();
-
-//        if (!meta_it->second->hasVariables())
-//        {
-//            loginf << "DBObjectManager: removeDependenciesForSchema: removing meta var "
-//                   << meta_it->first;
-//            delete meta_it->second;
-//            meta_variables_.erase(meta_it++);
-//        }
-//        else
-//            ++meta_it;
-//    }
-
-//    if (widget_)
-//    {
-//        widget_->updateDBOsSlot();
-//        widget_->updateMetaVariablesSlot();
-//    }
-
-//    emit updateSchemaInformationSlot();
-//}
 
 bool DBObjectManager::hasAssociations() const { return has_associations_; }
 

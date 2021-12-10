@@ -261,10 +261,13 @@ void CreateAssociationsTask::run()
             continue;
 
         DBOVariableSet read_set = getReadSetFor(dbo_it.first);
-        connect(dbo_it.second, &DBObject::newDataSignal, this,
-                &CreateAssociationsTask::newDataSlot);
-        connect(dbo_it.second, &DBObject::loadingDoneSignal, this,
-                &CreateAssociationsTask::loadingDoneSlot);
+
+        TODO_ASSERT
+
+//        connect(dbo_it.second, &DBObject::newDataSignal, this,
+//                &CreateAssociationsTask::newDataSlot);
+//        connect(dbo_it.second, &DBObject::loadingDoneSignal, this,
+//                &CreateAssociationsTask::loadingDoneSlot);
 
         dbo_it.second->load(read_set, false, true, &tod_var_->getFor(dbo_it.first), true);
 
@@ -479,9 +482,11 @@ void CreateAssociationsTask::loadingDoneSlot(DBObject& object)
 {
     loginf << "CreateAssociationsTask: loadingDoneSlot: object " << object.name();
 
-    disconnect(&object, &DBObject::newDataSignal, this, &CreateAssociationsTask::newDataSlot);
-    disconnect(&object, &DBObject::loadingDoneSignal, this,
-               &CreateAssociationsTask::loadingDoneSlot);
+    TODO_ASSERT
+
+//    disconnect(&object, &DBObject::newDataSignal, this, &CreateAssociationsTask::newDataSlot);
+//    disconnect(&object, &DBObject::loadingDoneSignal, this,
+//               &CreateAssociationsTask::loadingDoneSlot);
 
     dbo_loading_done_flags_.at(object.name()) = true;
 

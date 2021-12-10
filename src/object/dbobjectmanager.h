@@ -44,20 +44,17 @@ class DBObjectManager : public QObject, public Configurable
     Q_OBJECT
 
 public slots:
-    // void schemaLockedSlot ();
     void loadSlot();
-    void updateSchemaInformationSlot();
+    void loadingDoneSlot(DBObject& object);
 
     void databaseOpenedSlot();
     void databaseContentChangedSlot();
     void databaseClosedSlot();
 
-    void loadingDoneSlot(DBObject& object);
     void metaDialogOKSlot();
 
 signals:
     void dbObjectsChangedSignal();
-    void schemaChangedSignal();
 
     void loadingStartedSignal();
     void allLoadingDoneSignal();
