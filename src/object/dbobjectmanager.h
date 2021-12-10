@@ -151,6 +151,8 @@ public:
     unsigned int maxRecordNumber() const;
     void maxRecordNumber(unsigned int value);
 
+    const std::map<std::string, std::shared_ptr<Buffer>>& data() const;
+
 protected:
     COMPASS& compass_;
 

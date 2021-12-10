@@ -608,6 +608,9 @@ void ViewManager::selectionChangedSlot()
 void ViewManager::loadingStartedSlot()
 {
     loginf << "ViewManager: loadingStartedSlot";
+
+    for (auto& view_it : views_)
+        view_it.second->loadingStarted();
 }
 
 // all data contained, also new one. requires_reset true indicates that all shown info should be re-created,
@@ -615,11 +618,17 @@ void ViewManager::loadingStartedSlot()
 void ViewManager::loadedDataSlot (const std::map<std::string, std::shared_ptr<Buffer>>& data, bool requires_reset)
 {
     loginf << "ViewManager: loadedDataSlot";
+
+    for (auto& view_it : views_)
+        view_it.second->loadedData(data, requires_reset);
 }
 
 void ViewManager::loadingDoneSlot() // emitted when all dbos have finished loading
 {
     loginf << "ViewManager: loadingDoneSlot";
+
+    for (auto& view_it : views_)
+        view_it.second->loadingDone();
 }
 
 

@@ -778,6 +778,11 @@ void DBObjectManager::maxRecordNumber(unsigned int value)
     has_max_rec_num_ = true;
 }
 
+const std::map<std::string, std::shared_ptr<Buffer>>& DBObjectManager::data() const
+{
+    return data_;
+}
+
 void DBObjectManager::loadMaxRecordNumber()
 {
     assert (COMPASS::instance().interface().dbOpen());

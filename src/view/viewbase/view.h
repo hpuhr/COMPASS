@@ -18,14 +18,17 @@
 #ifndef VIEW_H
 #define VIEW_H
 
-#include <QObject>
-
 #include "configurable.h"
 #include "dbovariableset.h"
 #include "viewcontainerwidget.h"
+#include "buffer.h"
+
+#include <QObject>
+
+#include <memory>
+#include <map>
 
 class ViewContainer;
-//class ViewModel;
 class ViewWidget;
 class QQWidget;
 class Workflow;
@@ -51,13 +54,6 @@ class View : public QObject, public Configurable
     Q_OBJECT
 
   signals:
-    /// @brief Signals that loading has started in the view
-    void loadingStarted();
-    /// @brief Signals that loading has finished in the view
-    void loadingFinished();
-    /// @brief Signals the current loading time
-    void loadingTime(double s);
-
     void selectionChangedSignal();  // do not emit manually, call emitSelectionChange()
 
   public slots:
@@ -70,13 +66,11 @@ class View : public QObject, public Configurable
          ViewManager& view_manager);
     virtual ~View();
 
-    /// @brief Starts immediate (e.g. through generators) or deferred (e.g. buffer driven) redraw
-    virtual void update(bool atOnce = false) = 0;
-    /// @brief Clears the views data
-    virtual void clearData() = 0;
     virtual bool init();
-    /// @brief Returns the view type as a string
-    virtual std::string viewType() const { return "View"; }
+
+    virtual void loadingStarted()=0;
+    virtual void loadedData(const std::map<std::string, std::shared_ptr<Buffer>>& data, bool requires_reset)=0;
+    virtual void loadingDone()=0;
 
     unsigned int getKey();
     const std::string& getName() const;

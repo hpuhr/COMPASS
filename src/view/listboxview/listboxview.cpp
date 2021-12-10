@@ -58,10 +58,6 @@ ListBoxView::~ListBoxView()
     }
 }
 
-void ListBoxView::update(bool atOnce) {}
-
-void ListBoxView::clearData() {}
-
 bool ListBoxView::init()
 {
     View::init();
@@ -101,6 +97,22 @@ bool ListBoxView::init()
 
     return true;
 }
+
+void ListBoxView::loadingStarted()
+{
+    loginf << "OSGView: loadingStarted";
+}
+
+void ListBoxView::loadedData(const std::map<std::string, std::shared_ptr<Buffer>>& data, bool requires_reset)
+{
+    loginf << "ListBoxView: loadedData";
+}
+
+void ListBoxView::loadingDone()
+{
+    loginf << "ListBoxView: loadingDone";
+}
+
 
 void ListBoxView::generateSubConfigurable(const std::string& class_id,
                                           const std::string& instance_id)

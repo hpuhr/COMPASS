@@ -65,10 +65,6 @@ ScatterPlotView::~ScatterPlotView()
     loginf << "ScatterPlotView: dtor: done";
 }
 
-void ScatterPlotView::update(bool atOnce) {}
-
-void ScatterPlotView::clearData() {}
-
 bool ScatterPlotView::init()
 {
     View::init();
@@ -105,6 +101,21 @@ bool ScatterPlotView::init()
     //    widget_->getDataWidget()->showAssociationsSlot(show_associations_);
 
     return true;
+}
+
+void ScatterPlotView::loadingStarted()
+{
+    loginf << "ScatterPlotView: loadingStarted";
+}
+
+void ScatterPlotView::loadedData(const std::map<std::string, std::shared_ptr<Buffer>>& data, bool requires_reset)
+{
+    loginf << "ScatterPlotView: loadedData";
+}
+
+void ScatterPlotView::loadingDone()
+{
+    loginf << "ScatterPlotView: loadingDone";
 }
 
 void ScatterPlotView::generateSubConfigurable(const std::string& class_id,

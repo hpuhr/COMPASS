@@ -59,10 +59,6 @@ HistogramView::~HistogramView()
     }
 }
 
-void HistogramView::update(bool atOnce) {}
-
-void HistogramView::clearData() {}
-
 bool HistogramView::init()
 {
     View::init();
@@ -103,6 +99,21 @@ bool HistogramView::init()
             this, &HistogramView::resultsChangedSlot);
 
     return true;
+}
+
+void HistogramView::loadingStarted()
+{
+    loginf << "HistogramView: loadingStarted";
+}
+
+void HistogramView::loadedData(const std::map<std::string, std::shared_ptr<Buffer>>& data, bool requires_reset)
+{
+    loginf << "HistogramView: loadedData";
+}
+
+void HistogramView::loadingDone()
+{
+    loginf << "HistogramView: loadingDone";
 }
 
 void HistogramView::generateSubConfigurable(const std::string& class_id,
