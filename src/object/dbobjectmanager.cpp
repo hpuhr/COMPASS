@@ -927,7 +927,7 @@ void DBObjectManager::finishInserting()
             auto minmax = tod_vec.minMaxValues();
             assert (get<0>(minmax)); // there is minmax
 
-            float min_tod = get<2>(minmax) - 10.0; // max - 10 sec
+            float min_tod = get<2>(minmax) - 300.0; // max - 10 sec
             assert (min_tod > 0); // does not work for midnight crossings
 
             loginf << "DBObjectManager: finishInserting: min_tod " << String::timeStringFromDouble(min_tod)

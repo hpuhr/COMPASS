@@ -36,7 +36,7 @@
 
 //#include "boost/lexical_cast.hpp"
 
-const bool BUFFER_PEDANTIC_CHECKING = true;
+const bool BUFFER_PEDANTIC_CHECKING = false;
 
 /**
  * @brief Template List of fixed-size arrays to be used in Buffer classes.
