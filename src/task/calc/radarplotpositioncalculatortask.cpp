@@ -450,284 +450,286 @@ void RadarPlotPositionCalculatorTask::loadingDoneSlot(DBObject& object)
     loginf << "RadarPlotPositionCalculatorTask: loadingDoneSlot: projection method '"
            << projection.name() << "'";
 
-    std::shared_ptr<Buffer> read_buffer = db_object_->data();
-    unsigned int read_size = read_buffer->size();
-    assert(read_size);
-
-    //    std::string latitude_var_dbname = latitude_var_->currentDBColumn().name();
-    //    std::string longitude_var_dbname = longitude_var_->currentDBColumn().name();
-    //    std::string keyvar_var_dbname = key_var_->currentDBColumn().name();
-
-    PropertyList update_buffer_list;
-    update_buffer_list.addProperty(latitude_var_str_, PropertyDataType::DOUBLE);
-    update_buffer_list.addProperty(longitude_var_str_, PropertyDataType::DOUBLE);
-    update_buffer_list.addProperty(key_var_str_, PropertyDataType::INT);
-
-    std::shared_ptr<Buffer> update_buffer =
-        std::make_shared<Buffer>(update_buffer_list, db_object_->name());
-
-    int rec_num;
-    int sensor_id;
-    // unsigned char sac, sic;
-    // bool has_position;
-    double pos_azm_deg;
-    double pos_azm_rad;
-    double pos_range_nm;
-    double pos_range_m;
-    double altitude_ft;
-    // double altitude_m;
-    bool has_altitude;
-    // double altitude_angle;
-
     TODO_ASSERT
-    //assert(db_object_->hasDataSources());
 
-    //    std::pair<unsigned char, unsigned char> sac_sic_key;
-    // double sys_x, sys_y;
-    double lat, lon;
-    unsigned int update_cnt = 0;
+    //std::shared_ptr<Buffer> read_buffer = db_object_->data();
+//    unsigned int read_size = read_buffer->size();
+//    assert(read_size);
 
-    // double x1, y1, z1;
-    // VecB pos;
+//    //    std::string latitude_var_dbname = latitude_var_->currentDBColumn().name();
+//    //    std::string longitude_var_dbname = longitude_var_->currentDBColumn().name();
+//    //    std::string keyvar_var_dbname = key_var_->currentDBColumn().name();
 
-    assert(msg_box_);
-    float done_percent;
-    std::string msg;
+//    PropertyList update_buffer_list;
+//    update_buffer_list.addProperty(latitude_var_str_, PropertyDataType::DOUBLE);
+//    update_buffer_list.addProperty(longitude_var_str_, PropertyDataType::DOUBLE);
+//    update_buffer_list.addProperty(key_var_str_, PropertyDataType::INT);
 
-    loginf << "RadarPlotPositionCalculatorTask: loadingDoneSlot: writing update_buffer";
-    bool ret;
+//    std::shared_ptr<Buffer> update_buffer =
+//        std::make_shared<Buffer>(update_buffer_list, db_object_->name());
 
-    size_t transformation_errors = 0;
+//    int rec_num;
+//    int sensor_id;
+//    // unsigned char sac, sic;
+//    // bool has_position;
+//    double pos_azm_deg;
+//    double pos_azm_rad;
+//    double pos_range_nm;
+//    double pos_range_m;
+//    double altitude_ft;
+//    // double altitude_m;
+//    bool has_altitude;
+//    // double altitude_angle;
 
-    for (unsigned int cnt = 0; cnt < read_size; cnt++)
-    {
-        if (cnt % 50000 == 0 && target_report_count_ != 0)
-        {
-            done_percent = 100.0 * cnt / target_report_count_;
-            msg =
-                "Processing object data: " + String::doubleToStringPrecision(done_percent, 2) + "%";
-            msg_box_->setText(msg.c_str());
+//    TODO_ASSERT
+//    //assert(db_object_->hasDataSources());
 
-            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
-        }
+//    //    std::pair<unsigned char, unsigned char> sac_sic_key;
+//    // double sys_x, sys_y;
+//    double lat, lon;
+//    unsigned int update_cnt = 0;
 
-        if (read_buffer->get<int>(key_var_str_).isNull(cnt))
-        {
-            logerr << "RadarPlotPositionCalculatorTask: loadingDoneSlot: key null";
-            continue;
-        }
-        rec_num = read_buffer->get<int>(key_var_str_).get(cnt);
+//    // double x1, y1, z1;
+//    // VecB pos;
 
-        if (read_buffer->get<int>(datasource_var_str_).isNull(cnt))
-        {
-            logerr << "RadarPlotPositionCalculatorTask: loadingDoneSlot: data source null";
-            continue;
-        }
-        sensor_id = read_buffer->get<int>(datasource_var_str_).get(cnt);
+//    assert(msg_box_);
+//    float done_percent;
+//    std::string msg;
 
-        // sac = *((unsigned char*)adresses->at(1));
-        // sic = *((unsigned char*)adresses->at(2));
+//    loginf << "RadarPlotPositionCalculatorTask: loadingDoneSlot: writing update_buffer";
+//    bool ret;
 
-        if (read_buffer->get<double>(azimuth_var_str_).isNull(cnt) ||
-            read_buffer->get<double>(range_var_str_).isNull(cnt))
-        {
-            logdbg << "RadarPlotPositionCalculatorTask: loadingDoneSlot: position null";
-            continue;
-        }
+//    size_t transformation_errors = 0;
 
-        pos_azm_deg = read_buffer->get<double>(azimuth_var_str_).get(cnt);
-        pos_range_nm = read_buffer->get<double>(range_var_str_).get(cnt);
-
-        has_altitude = !read_buffer->get<int>(altitude_var_str_).isNull(cnt);
-        if (has_altitude)
-            altitude_ft = read_buffer->get<int>(altitude_var_str_).get(cnt);
-        else
-            altitude_ft = 0.0;  // has to assumed in projection later on
-
-        TODO_ASSERT
-//        if (!db_object_->hasDataSource(sensor_id))
+//    for (unsigned int cnt = 0; cnt < read_size; cnt++)
+//    {
+//        if (cnt % 50000 == 0 && target_report_count_ != 0)
 //        {
-//            logerr << "RadarPlotPositionCalculatorTask: loadingDoneSlot: sensor id " << sensor_id
-//                   << " unkown";
+//            done_percent = 100.0 * cnt / target_report_count_;
+//            msg =
+//                "Processing object data: " + String::doubleToStringPrecision(done_percent, 2) + "%";
+//            msg_box_->setText(msg.c_str());
+
+//            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+//        }
+
+//        if (read_buffer->get<int>(key_var_str_).isNull(cnt))
+//        {
+//            logerr << "RadarPlotPositionCalculatorTask: loadingDoneSlot: key null";
+//            continue;
+//        }
+//        rec_num = read_buffer->get<int>(key_var_str_).get(cnt);
+
+//        if (read_buffer->get<int>(datasource_var_str_).isNull(cnt))
+//        {
+//            logerr << "RadarPlotPositionCalculatorTask: loadingDoneSlot: data source null";
+//            continue;
+//        }
+//        sensor_id = read_buffer->get<int>(datasource_var_str_).get(cnt);
+
+//        // sac = *((unsigned char*)adresses->at(1));
+//        // sic = *((unsigned char*)adresses->at(2));
+
+//        if (read_buffer->get<double>(azimuth_var_str_).isNull(cnt) ||
+//            read_buffer->get<double>(range_var_str_).isNull(cnt))
+//        {
+//            logdbg << "RadarPlotPositionCalculatorTask: loadingDoneSlot: position null";
+//            continue;
+//        }
+
+//        pos_azm_deg = read_buffer->get<double>(azimuth_var_str_).get(cnt);
+//        pos_range_nm = read_buffer->get<double>(range_var_str_).get(cnt);
+
+//        has_altitude = !read_buffer->get<int>(altitude_var_str_).isNull(cnt);
+//        if (has_altitude)
+//            altitude_ft = read_buffer->get<int>(altitude_var_str_).get(cnt);
+//        else
+//            altitude_ft = 0.0;  // has to assumed in projection later on
+
+//        TODO_ASSERT
+////        if (!db_object_->hasDataSource(sensor_id))
+////        {
+////            logerr << "RadarPlotPositionCalculatorTask: loadingDoneSlot: sensor id " << sensor_id
+////                   << " unkown";
+////            transformation_errors++;
+////            continue;
+////        }
+
+////        DBODataSource& data_source = db_object_->getDataSource(sensor_id);
+
+////        if (!data_source.hasLatitude() || !data_source.hasLongitude())
+////        {
+////            transformation_errors++;
+////            continue;
+////        }
+
+//        pos_azm_rad = pos_azm_deg * DEG2RAD;
+
+//        pos_range_m = 1852.0 * pos_range_nm;
+
+//        // altitude_m = 0.3048 * altitude_ft;
+
+//        //        if (use_ogr_proj)
+//        //        {
+//        //            ret = data_source.calculateOGRSystemCoordinates(pos_azm_rad, pos_range_m,
+//        //            has_altitude, altitude_ft,
+//        //                                                            sys_x, sys_y);
+//        //            if (ret)
+//        //                ret = proj_man.ogrCart2Geo(sys_x, sys_y, lat, lon);
+//        //        }
+
+//        //        if (use_sdl_proj)
+//        //        {
+//        //            t_CPos grs_pos;
+
+//        //            ret = data_source.calculateSDLGRSCoordinates(pos_azm_rad, pos_range_m,
+//        //            has_altitude, altitude_ft, grs_pos); if (ret)
+//        //            {
+//        //                t_GPos geo_pos;
+
+//        //                ret = proj_man.sdlGRS2Geo(grs_pos, geo_pos);
+
+//        //                if (ret)
+//        //                {
+//        //                    lat = geo_pos.latitude * RAD2DEG;
+//        //                    lon = geo_pos.longitude * RAD2DEG;
+//        //                    //lat = geo_pos.latitude; what to do with altitude?
+//        //                }
+//        //            }
+//        //        }
+
+//        //        if (use_rs2g_proj)
+//        //        {
+//        ////            float rho; // (m)
+//        ////            float theta; // (deg)
+
+//        //            x1 = pos_range_m * sin(pos_azm_rad);
+//        //            y1 = pos_range_m * cos(pos_azm_rad);
+
+//        //            if (has_altitude)
+//        //                z1 = altitude_ft * FT2M;
+//        //            else
+//        //                z1 = -1000.0;
+
+//        //            logdbg << "local x " << x1 << " y " << y1 << " z " << z1;
+
+//        //            ret = data_source.calculateRadSlt2Geocentric(x1, y1, z1, pos);
+//        //            if (ret)
+//        //            {
+//        //                logdbg << "geoc x " << pos[0] << " y " << pos[1] << " z " << pos[2];
+
+//        //                ret = geocentric2Geodesic(pos);
+
+//        //                lat = pos [0];
+//        //                lon = pos [1];
+
+//        //                logdbg << "geod x " << pos[0] << " y " << pos[1];
+//        //                //what to do with altitude?
+//        //            }
+//        //        }
+
+//        TODO_ASSERT
+////        if (!projection.hasCoordinateSystem(data_source.id()))
+////        {
+////            assert(data_source.hasLatitude());
+////            assert(data_source.hasLongitude());
+////            assert(data_source.hasAltitude());
+////            projection.addCoordinateSystem(data_source.id(), data_source.latitude(),
+////                                           data_source.longitude(), data_source.altitude());
+////        }
+
+////        ret = projection.polarToWGS84(data_source.id(), pos_azm_rad, pos_range_m, has_altitude,
+////                                      altitude_ft, lat, lon);
+
+//        if (!ret)
+//        {
 //            transformation_errors++;
 //            continue;
 //        }
 
-//        DBODataSource& data_source = db_object_->getDataSource(sensor_id);
+//        update_buffer->get<double>(latitude_var_str_).set(update_cnt, lat);
+//        update_buffer->get<double>(longitude_var_str_).set(update_cnt, lon);
+//        update_buffer->get<int>(key_var_str_).set(update_cnt, rec_num);
+//        update_cnt++;
 
-//        if (!data_source.hasLatitude() || !data_source.hasLongitude())
+//        // loginf << "uga cnt " << update_cnt << " rec_num " << rec_num << " lat " << lat << " long
+//        // " << lon;
+//    }
+
+//    loginf << "RadarPlotPositionCalculatorTask: loadingDoneSlot: update_buffer size "
+//           << update_buffer->size() << ", " << transformation_errors << " transformation errors";
+
+//    msg_box_->close();
+//    delete msg_box_;
+//    msg_box_ = nullptr;
+
+//    if (!update_buffer->size())
+//    {
+//        std::string text =
+//            "There were " + std::to_string(transformation_errors) +
+//            " skipped coordinates with transformation errors, no data available for insertion.";
+
+//        QMessageBox msgBox;
+//        msgBox.setText(text.c_str());
+//        msgBox.exec();
+
+//        return;
+//    }
+
+//    if (transformation_errors)
+//    {
+//        QApplication::restoreOverrideCursor();
+
+//        QMessageBox::StandardButton reply;
+
+//        std::string question =
+//            "There were " + std::to_string(transformation_errors) +
+//            " skipped coordinates with transformation errors, " +
+//            std::to_string(update_buffer->size()) +
+//            " coordinates were projected correctly. Do you want to insert the data?";
+
+//        reply = QMessageBox::question(nullptr, "Insert Data", question.c_str(),
+//                                      QMessageBox::Yes | QMessageBox::No);
+
+//        if (reply == QMessageBox::No)
 //        {
-//            transformation_errors++;
-//            continue;
+//            loginf
+//                << "RadarPlotPositionCalculatorTask: loadingDoneSlot: aborted by user because of "
+//                   "transformation errors";
+//            task_manager_.appendInfo(
+//                "RadarPlotPositionCalculatorTask: aborted by user because of "
+//                "transformation errors");
+//            return;
 //        }
+//        else
+//            task_manager_.appendWarning(
+//                "RadarPlotPositionCalculatorTask: continued by user ignoring" +
+//                std::to_string(transformation_errors) + " transformation errors");
 
-        pos_azm_rad = pos_azm_deg * DEG2RAD;
+//        QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+//    }
+//    else
+//        task_manager_.appendInfo("RadarPlotPositionCalculatorTask: no transformation errors");
 
-        pos_range_m = 1852.0 * pos_range_nm;
+//    msg_box_ = new QMessageBox;
+//    assert(msg_box_);
+//    msg_box_->setWindowTitle("Calculating Radar Plot Positions");
+//    msg = "Writing object data";
+//    msg_box_->setText(msg.c_str());
+//    msg_box_->setStandardButtons(QMessageBox::NoButton);
+//    msg_box_->show();
 
-        // altitude_m = 0.3048 * altitude_ft;
+//    DBOVariableSet list;
+//    list.add(*latitude_var_);
+//    list.add(*longitude_var_);
+//    list.add(*key_var_);
 
-        //        if (use_ogr_proj)
-        //        {
-        //            ret = data_source.calculateOGRSystemCoordinates(pos_azm_rad, pos_range_m,
-        //            has_altitude, altitude_ft,
-        //                                                            sys_x, sys_y);
-        //            if (ret)
-        //                ret = proj_man.ogrCart2Geo(sys_x, sys_y, lat, lon);
-        //        }
+//    db_object_->updateData(*key_var_, list, update_buffer);
 
-        //        if (use_sdl_proj)
-        //        {
-        //            t_CPos grs_pos;
-
-        //            ret = data_source.calculateSDLGRSCoordinates(pos_azm_rad, pos_range_m,
-        //            has_altitude, altitude_ft, grs_pos); if (ret)
-        //            {
-        //                t_GPos geo_pos;
-
-        //                ret = proj_man.sdlGRS2Geo(grs_pos, geo_pos);
-
-        //                if (ret)
-        //                {
-        //                    lat = geo_pos.latitude * RAD2DEG;
-        //                    lon = geo_pos.longitude * RAD2DEG;
-        //                    //lat = geo_pos.latitude; what to do with altitude?
-        //                }
-        //            }
-        //        }
-
-        //        if (use_rs2g_proj)
-        //        {
-        ////            float rho; // (m)
-        ////            float theta; // (deg)
-
-        //            x1 = pos_range_m * sin(pos_azm_rad);
-        //            y1 = pos_range_m * cos(pos_azm_rad);
-
-        //            if (has_altitude)
-        //                z1 = altitude_ft * FT2M;
-        //            else
-        //                z1 = -1000.0;
-
-        //            logdbg << "local x " << x1 << " y " << y1 << " z " << z1;
-
-        //            ret = data_source.calculateRadSlt2Geocentric(x1, y1, z1, pos);
-        //            if (ret)
-        //            {
-        //                logdbg << "geoc x " << pos[0] << " y " << pos[1] << " z " << pos[2];
-
-        //                ret = geocentric2Geodesic(pos);
-
-        //                lat = pos [0];
-        //                lon = pos [1];
-
-        //                logdbg << "geod x " << pos[0] << " y " << pos[1];
-        //                //what to do with altitude?
-        //            }
-        //        }
-
-        TODO_ASSERT
-//        if (!projection.hasCoordinateSystem(data_source.id()))
-//        {
-//            assert(data_source.hasLatitude());
-//            assert(data_source.hasLongitude());
-//            assert(data_source.hasAltitude());
-//            projection.addCoordinateSystem(data_source.id(), data_source.latitude(),
-//                                           data_source.longitude(), data_source.altitude());
-//        }
-
-//        ret = projection.polarToWGS84(data_source.id(), pos_azm_rad, pos_range_m, has_altitude,
-//                                      altitude_ft, lat, lon);
-
-        if (!ret)
-        {
-            transformation_errors++;
-            continue;
-        }
-
-        update_buffer->get<double>(latitude_var_str_).set(update_cnt, lat);
-        update_buffer->get<double>(longitude_var_str_).set(update_cnt, lon);
-        update_buffer->get<int>(key_var_str_).set(update_cnt, rec_num);
-        update_cnt++;
-
-        // loginf << "uga cnt " << update_cnt << " rec_num " << rec_num << " lat " << lat << " long
-        // " << lon;
-    }
-
-    loginf << "RadarPlotPositionCalculatorTask: loadingDoneSlot: update_buffer size "
-           << update_buffer->size() << ", " << transformation_errors << " transformation errors";
-
-    msg_box_->close();
-    delete msg_box_;
-    msg_box_ = nullptr;
-
-    if (!update_buffer->size())
-    {
-        std::string text =
-            "There were " + std::to_string(transformation_errors) +
-            " skipped coordinates with transformation errors, no data available for insertion.";
-
-        QMessageBox msgBox;
-        msgBox.setText(text.c_str());
-        msgBox.exec();
-
-        return;
-    }
-
-    if (transformation_errors)
-    {
-        QApplication::restoreOverrideCursor();
-
-        QMessageBox::StandardButton reply;
-
-        std::string question =
-            "There were " + std::to_string(transformation_errors) +
-            " skipped coordinates with transformation errors, " +
-            std::to_string(update_buffer->size()) +
-            " coordinates were projected correctly. Do you want to insert the data?";
-
-        reply = QMessageBox::question(nullptr, "Insert Data", question.c_str(),
-                                      QMessageBox::Yes | QMessageBox::No);
-
-        if (reply == QMessageBox::No)
-        {
-            loginf
-                << "RadarPlotPositionCalculatorTask: loadingDoneSlot: aborted by user because of "
-                   "transformation errors";
-            task_manager_.appendInfo(
-                "RadarPlotPositionCalculatorTask: aborted by user because of "
-                "transformation errors");
-            return;
-        }
-        else
-            task_manager_.appendWarning(
-                "RadarPlotPositionCalculatorTask: continued by user ignoring" +
-                std::to_string(transformation_errors) + " transformation errors");
-
-        QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-    }
-    else
-        task_manager_.appendInfo("RadarPlotPositionCalculatorTask: no transformation errors");
-
-    msg_box_ = new QMessageBox;
-    assert(msg_box_);
-    msg_box_->setWindowTitle("Calculating Radar Plot Positions");
-    msg = "Writing object data";
-    msg_box_->setText(msg.c_str());
-    msg_box_->setStandardButtons(QMessageBox::NoButton);
-    msg_box_->show();
-
-    DBOVariableSet list;
-    list.add(*latitude_var_);
-    list.add(*longitude_var_);
-    list.add(*key_var_);
-
-    db_object_->updateData(*key_var_, list, update_buffer);
-
-    connect(db_object_, &DBObject::updateDoneSignal, this,
-            &RadarPlotPositionCalculatorTask::updateDoneSlot);
-    connect(db_object_, &DBObject::updateProgressSignal, this,
-            &RadarPlotPositionCalculatorTask::updateProgressSlot);
+//    connect(db_object_, &DBObject::updateDoneSignal, this,
+//            &RadarPlotPositionCalculatorTask::updateDoneSlot);
+//    connect(db_object_, &DBObject::updateProgressSignal, this,
+//            &RadarPlotPositionCalculatorTask::updateProgressSlot);
 
     loginf << "RadarPlotPositionCalculatorTask: loadingDoneSlot: end";
 }
@@ -756,7 +758,7 @@ void RadarPlotPositionCalculatorTask::updateDoneSlot(DBObject& object)
     msg_box_ = nullptr;
 
     job_ptr_ = nullptr;
-    db_object_->clearData();
+//    db_object_->clearData();
 
     stop_time_ = boost::posix_time::microsec_clock::local_time();
     boost::posix_time::time_duration time_diff = stop_time_ - start_time_;

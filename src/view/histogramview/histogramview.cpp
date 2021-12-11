@@ -70,18 +70,18 @@ bool HistogramView::init()
     DBObjectManager& object_man = COMPASS::instance().objectManager();
     connect(&object_man, &DBObjectManager::loadingDoneSignal, this, &HistogramView::allLoadingDoneSlot);
 
-    connect(data_source_, &HistogramViewDataSource::loadingStartedSignal, widget_->getDataWidget(),
-            &HistogramViewDataWidget::loadingStartedSlot);
-    connect(data_source_, &HistogramViewDataSource::updateDataSignal, widget_->getDataWidget(),
-            &HistogramViewDataWidget::updateDataSlot);
+//    connect(data_source_, &HistogramViewDataSource::loadingStartedSignal, widget_->getDataWidget(),
+//            &HistogramViewDataWidget::loadingStartedSlot);
+//    connect(data_source_, &HistogramViewDataSource::updateDataSignal, widget_->getDataWidget(),
+//            &HistogramViewDataWidget::updateDataSlot);
 
 //    connect(widget_->configWidget(), &HistogramViewConfigWidget::exportSignal,
 //            widget_->getDataWidget(), &HistogramViewDataWidget::exportDataSlot);
 //    connect(widget_->getDataWidget(), &HistogramViewDataWidget::exportDoneSignal,
 //            widget_->configWidget(), &HistogramViewConfigWidget::exportDoneSlot);
 
-    connect(data_source_, &HistogramViewDataSource::loadingStartedSignal, widget_->configWidget(),
-            &HistogramViewConfigWidget::loadingStartedSlot);
+//    connect(data_source_, &HistogramViewDataSource::loadingStartedSignal, widget_->configWidget(),
+//            &HistogramViewConfigWidget::loadingStartedSlot);
 
     //    connect(this, &HistogramView::showOnlySelectedSignal, widget_->getDataWidget(),
     //            &HistogramViewDataWidget::showOnlySelectedSlot);

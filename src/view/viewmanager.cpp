@@ -337,10 +337,10 @@ void ViewManager::doViewPointAfterLoad ()
 //        const DBOVariable& longitude_var =
 //                object_manager.metaVariable("pos_long_deg").getFor(dbo_name);
 
-        std::shared_ptr<Buffer> buffer = dbo_it.second->data();
-
-        if (buffer)
+        if (object_manager.data().count(dbo_it.first))
         {
+            std::shared_ptr<Buffer> buffer = object_manager.data().at(dbo_it.first);
+
             assert(buffer->has<bool>(DBObject::selected_var.name()));
             NullableVector<bool>& selected_vec = buffer->get<bool>(DBObject::selected_var.name());
 
@@ -418,10 +418,10 @@ void ViewManager::selectTimeWindow(float time_min, float time_max)
 
         const DBOVariable& tod_var = object_manager.metaVariable("tod").getFor(dbo_name);
 
-        std::shared_ptr<Buffer> buffer = dbo_it.second->data();
-
-        if (buffer)
+        if (object_manager.data().count(dbo_it.first))
         {
+            std::shared_ptr<Buffer> buffer = object_manager.data().at(dbo_it.first);
+
             assert(buffer->has<bool>(DBObject::selected_var.name()));
             NullableVector<bool>& selected_vec = buffer->get<bool>(DBObject::selected_var.name());
 

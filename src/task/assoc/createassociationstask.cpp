@@ -510,18 +510,20 @@ void CreateAssociationsTask::loadingDoneSlot(DBObject& object)
 
         DBObjectManager& object_man = COMPASS::instance().objectManager();
 
-        for (auto& dbo_it : object_man)
-        {
-            if (!dbo_it.second->hasData())
-                continue;
+        TODO_ASSERT
 
-            buffers[dbo_it.first] = dbo_it.second->data();
+//        for (auto& dbo_it : object_man)
+//        {
+//            if (!dbo_it.second->hasData())
+//                continue;
 
-            loginf << "CreateAssociationsTask: loadingDoneSlot: object " << object.name()
-                   << " data " << buffers[dbo_it.first]->size();
+//            buffers[dbo_it.first] = dbo_it.second->data();
 
-            dbo_it.second->clearData();
-        }
+//            loginf << "CreateAssociationsTask: loadingDoneSlot: object " << object.name()
+//                   << " data " << buffers[dbo_it.first]->size();
+
+//            dbo_it.second->clearData();
+//        }
 
         create_job_ = std::make_shared<CreateAssociationsJob>(
                     *this, COMPASS::instance().interface(), buffers);

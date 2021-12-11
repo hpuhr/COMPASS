@@ -518,67 +518,69 @@ void EvaluationManager::databaseClosedSlot()
 
 void EvaluationManager::newDataSlot(DBObject& object)
 {
-    loginf << "EvaluationManager: newDataSlot: obj " << object.name() << " buffer size " << object.data()->size();
+    //loginf << "EvaluationManager: newDataSlot: obj " << object.name() << " buffer size " << object.data()->size();
 }
 void EvaluationManager::loadingDoneSlot(DBObject& object)
 {
-    loginf << "EvaluationManager: loadingDoneSlot: obj " << object.name() << " buffer size " << object.data()->size();
+    TODO_ASSERT
 
-    DBObjectManager& object_man = COMPASS::instance().objectManager();
+//    loginf << "EvaluationManager: loadingDoneSlot: obj " << object.name() << " buffer size " << object.data()->size();
 
-    if (object.name() == dbo_name_ref_)
-    {
-        DBObject& dbo_ref = object_man.object(dbo_name_ref_);
+//    DBObjectManager& object_man = COMPASS::instance().objectManager();
 
-        TODO_ASSERT
+//    if (object.name() == dbo_name_ref_)
+//    {
+//        DBObject& dbo_ref = object_man.object(dbo_name_ref_);
 
-//        disconnect(&dbo_ref, &DBObject::newDataSignal, this, &EvaluationManager::newDataSlot);
-//        disconnect(&dbo_ref, &DBObject::loadingDoneSignal, this, &EvaluationManager::loadingDoneSlot);
+//        TODO_ASSERT
 
-        data_.addReferenceData(dbo_ref, object.data());
+////        disconnect(&dbo_ref, &DBObject::newDataSignal, this, &EvaluationManager::newDataSlot);
+////        disconnect(&dbo_ref, &DBObject::loadingDoneSignal, this, &EvaluationManager::loadingDoneSlot);
 
-        reference_data_loaded_ = true;
-    }
+//        data_.addReferenceData(dbo_ref, object.data());
 
-    if (object.name() == dbo_name_tst_)
-    {
-        DBObject& dbo_tst = object_man.object(dbo_name_tst_);
+//        reference_data_loaded_ = true;
+//    }
 
-        if (dbo_name_ref_ != dbo_name_tst_) // otherwise already disconnected
-        {
-            TODO_ASSERT
+//    if (object.name() == dbo_name_tst_)
+//    {
+//        DBObject& dbo_tst = object_man.object(dbo_name_tst_);
 
-//            disconnect(&dbo_tst, &DBObject::newDataSignal, this, &EvaluationManager::newDataSlot);
-//            disconnect(&dbo_tst, &DBObject::loadingDoneSignal, this, &EvaluationManager::loadingDoneSlot);
-        }
+//        if (dbo_name_ref_ != dbo_name_tst_) // otherwise already disconnected
+//        {
+//            TODO_ASSERT
 
-        data_.addTestData(dbo_tst, object.data());
+////            disconnect(&dbo_tst, &DBObject::newDataSignal, this, &EvaluationManager::newDataSlot);
+////            disconnect(&dbo_tst, &DBObject::loadingDoneSignal, this, &EvaluationManager::loadingDoneSlot);
+//        }
 
-        test_data_loaded_ = true;
-    }
+//        data_.addTestData(dbo_tst, object.data());
 
-    bool data_loaded_tmp = reference_data_loaded_ && test_data_loaded_;
+//        test_data_loaded_ = true;
+//    }
 
-    loginf << "EvaluationManager: loadingDoneSlot: data loaded " << data_loaded_;
+//    bool data_loaded_tmp = reference_data_loaded_ && test_data_loaded_;
 
-    if (data_loaded_tmp)
-    {
-        loginf << "EvaluationManager: loadingDoneSlot: finalizing";
+//    loginf << "EvaluationManager: loadingDoneSlot: data loaded " << data_loaded_;
 
-        boost::posix_time::ptime start_time = boost::posix_time::microsec_clock::local_time();
+//    if (data_loaded_tmp)
+//    {
+//        loginf << "EvaluationManager: loadingDoneSlot: finalizing";
 
-        data_.finalize();
+//        boost::posix_time::ptime start_time = boost::posix_time::microsec_clock::local_time();
 
-        boost::posix_time::time_duration time_diff =  boost::posix_time::microsec_clock::local_time() - start_time;
+//        data_.finalize();
 
-        loginf << "EvaluationManager: loadingDoneSlot: finalize done "
-               << String::timeStringFromDouble(time_diff.total_milliseconds() / 1000.0, true);
-    }
+//        boost::posix_time::time_duration time_diff =  boost::posix_time::microsec_clock::local_time() - start_time;
 
-    data_loaded_ = data_loaded_tmp;
+//        loginf << "EvaluationManager: loadingDoneSlot: finalize done "
+//               << String::timeStringFromDouble(time_diff.total_milliseconds() / 1000.0, true);
+//    }
 
-    if (widget_)
-        widget_->updateButtons();
+//    data_loaded_ = data_loaded_tmp;
+
+//    if (widget_)
+//        widget_->updateButtons();
 }
 
 void EvaluationManager::evaluate ()

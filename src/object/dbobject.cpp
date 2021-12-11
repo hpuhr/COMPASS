@@ -374,8 +374,6 @@ void DBObject::load(DBOVariableSet& read_set, string custom_filter_clause,
         JobManager::instance().cancelJob(job_it);
     finalize_jobs_.clear();
 
-    clearData();
-
     //    DBInterface &db_interface, DBObject &dbobject, DBOVariableSet read_list, string
     //    custom_filter_clause, DBOVariable *order, const string &limit_str
 
@@ -405,18 +403,18 @@ void DBObject::quitLoading()
     }
 }
 
-void DBObject::clearData()
-{
-    logdbg << "DBObject " << name_ << ": clearData";
+//void DBObject::clearData()
+//{
+//    logdbg << "DBObject " << name_ << ": clearData";
 
-    if (data_)
-    {
-        data_ = nullptr;
+//    if (data_)
+//    {
+//        data_ = nullptr;
 
-        if (info_widget_)
-            info_widget_->updateSlot();
-    }
-}
+//        if (info_widget_)
+//            info_widget_->updateSlot();
+//    }
+//}
 
 void DBObject::insertData(shared_ptr<Buffer> buffer)
 {
@@ -653,6 +651,7 @@ void DBObject::finalizeReadJobDoneSlot()
     }
 
     shared_ptr<Buffer> buffer = sender->buffer();
+    assert (buffer);
 
     bool found = false;
     for (auto final_it : finalize_jobs_)
@@ -696,7 +695,7 @@ void DBObject::finalizeReadJobDoneSlot()
     }
 
     // check if more data can immediately loaded from read job
-    if (read_job_ && data_->size() < read_job_->rowCount())
+    if (read_job_)
     {
         logdbg << "DBObject: " << name_
                << " finalizeReadJobDoneSlot: delaying new data since more data can be read";
@@ -763,8 +762,8 @@ size_t DBObject::count() { return count_; }
 
 size_t DBObject::loadedCount()
 {
-    if (data_)
-        return data_->size();
+    if (dbo_manager_.data().count(name_))
+        return dbo_manager_.data().at(name_)->size();
     else
         return 0;
 }

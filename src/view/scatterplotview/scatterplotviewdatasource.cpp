@@ -193,23 +193,4 @@ void ScatterPlotViewDataSource::removeTemporaryVariable (const std::string& dbo_
     }
 }
 
-void ScatterPlotViewDataSource::loadingStartedSlot()
-{
-    logdbg << "ScatterPlotViewDataSource: loadingStartedSlot";
-    emit loadingStartedSignal();
-}
 
-void ScatterPlotViewDataSource::newDataSlot(DBObject& object)
-{
-    logdbg << "ScatterPlotViewDataSource: newDataSlot: object " << object.name();
-
-    std::shared_ptr<Buffer> buffer = object.data();
-    assert(buffer);
-
-    emit updateDataSignal(object, buffer);
-}
-
-void ScatterPlotViewDataSource::loadingDoneSlot(DBObject& object)
-{
-    logdbg << "ScatterPlotViewDataSource: loadingDoneSlot: object " << object.name();
-}

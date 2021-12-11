@@ -397,11 +397,13 @@ void CreateARTASAssociationsTask::loadingDoneSlot(DBObject& object)
 
         DBObjectManager& object_man = COMPASS::instance().objectManager();
 
-        for (auto& dbo_it : object_man)
-        {
-            buffers[dbo_it.first] = dbo_it.second->data();
-            dbo_it.second->clearData();
-        }
+        TODO_ASSERT
+
+//        for (auto& dbo_it : object_man)
+//        {
+//            buffers[dbo_it.first] = dbo_it.second->data();
+//            dbo_it.second->clearData();
+//        }
 
         create_job_ = std::make_shared<CreateARTASAssociationsJob>(
             *this, COMPASS::instance().interface(), buffers);

@@ -32,12 +32,8 @@ class HistogramViewDataSource : public QObject, public Configurable
 {
     Q_OBJECT
   public slots:
-    void loadingStartedSlot();
-    void newDataSlot(DBObject& object);
-    void loadingDoneSlot(DBObject& object);
 
   signals:
-    void loadingStartedSignal();
     /// @brief Emitted when resulting buffer was delivered
     void updateDataSignal(DBObject& object, std::shared_ptr<Buffer> buffer);
 

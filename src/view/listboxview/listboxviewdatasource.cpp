@@ -330,27 +330,6 @@ void ListBoxViewDataSource::addDefaultVariables (DBOVariableOrderedSet& set)
         set.add(obj_man.metaVariable(DBObject::meta_var_track_num_id_.name()));
 }
 
-void ListBoxViewDataSource::loadingStartedSlot()
-{
-    logdbg << "ListBoxViewDataSource: loadingStartedSlot";
-    emit loadingStartedSignal();
-}
-
-void ListBoxViewDataSource::newDataSlot(DBObject& object)
-{
-    logdbg << "ListBoxViewDataSource: newDataSlot: object " << object.name();
-
-    std::shared_ptr<Buffer> buffer = object.data();
-    assert(buffer);
-
-    emit updateDataSignal(object, buffer);
-}
-
-void ListBoxViewDataSource::loadingDoneSlot(DBObject& object)
-{
-    logdbg << "ListBoxViewDataSource: loadingDoneSlot: object " << object.name();
-}
-
 void ListBoxViewDataSource::setChangedSlot()
 {
     emit setChangedSignal();

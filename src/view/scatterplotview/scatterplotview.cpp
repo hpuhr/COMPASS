@@ -76,18 +76,18 @@ bool ScatterPlotView::init()
     DBObjectManager& object_man = COMPASS::instance().objectManager();
     connect(&object_man, &DBObjectManager::loadingDoneSignal, this, &ScatterPlotView::allLoadingDoneSlot);
 
-    connect(data_source_, &ScatterPlotViewDataSource::loadingStartedSignal, widget_->getDataWidget(),
-            &ScatterPlotViewDataWidget::loadingStartedSlot);
-    connect(data_source_, &ScatterPlotViewDataSource::updateDataSignal, widget_->getDataWidget(),
-            &ScatterPlotViewDataWidget::updateDataSlot);
+//    connect(data_source_, &ScatterPlotViewDataSource::loadingStartedSignal, widget_->getDataWidget(),
+//            &ScatterPlotViewDataWidget::loadingStartedSlot);
+//    connect(data_source_, &ScatterPlotViewDataSource::updateDataSignal, widget_->getDataWidget(),
+//            &ScatterPlotViewDataWidget::updateDataSlot);
 
 //    connect(widget_->configWidget(), &ScatterPlotViewConfigWidget::exportSignal,
 //            widget_->getDataWidget(), &ScatterPlotViewDataWidget::exportDataSlot);
 //    connect(widget_->getDataWidget(), &ScatterPlotViewDataWidget::exportDoneSignal,
 //            widget_->configWidget(), &ScatterPlotViewConfigWidget::exportDoneSlot);
 
-    connect(data_source_, &ScatterPlotViewDataSource::loadingStartedSignal, widget_->configWidget(),
-            &ScatterPlotViewConfigWidget::loadingStartedSlot);
+//    connect(data_source_, &ScatterPlotViewDataSource::loadingStartedSignal, widget_->configWidget(),
+//            &ScatterPlotViewConfigWidget::loadingStartedSlot);
 
     //    connect(this, &ScatterPlotView::showOnlySelectedSignal, widget_->getDataWidget(),
     //            &ScatterPlotViewDataWidget::showOnlySelectedSlot);

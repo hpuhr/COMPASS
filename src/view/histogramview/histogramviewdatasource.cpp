@@ -193,23 +193,3 @@ void HistogramViewDataSource::removeTemporaryVariable (const std::string& dbo_na
     }
 }
 
-void HistogramViewDataSource::loadingStartedSlot()
-{
-    logdbg << "HistogramViewDataSource: loadingStartedSlot";
-    emit loadingStartedSignal();
-}
-
-void HistogramViewDataSource::newDataSlot(DBObject& object)
-{
-    logdbg << "HistogramViewDataSource: newDataSlot: object " << object.name();
-
-    std::shared_ptr<Buffer> buffer = object.data();
-    assert(buffer);
-
-    emit updateDataSignal(object, buffer);
-}
-
-void HistogramViewDataSource::loadingDoneSlot(DBObject& object)
-{
-    logdbg << "HistogramViewDataSource: loadingDoneSlot: object " << object.name();
-}

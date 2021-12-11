@@ -71,18 +71,18 @@ bool ListBoxView::init()
     connect(&object_man, &DBObjectManager::loadingDoneSignal,
             widget_->getDataWidget(), &ListBoxViewDataWidget::loadingDoneSlot);
 
-    connect(data_source_, &ListBoxViewDataSource::loadingStartedSignal, widget_->getDataWidget(),
-            &ListBoxViewDataWidget::loadingStartedSlot);
-    connect(data_source_, &ListBoxViewDataSource::updateDataSignal, widget_->getDataWidget(),
-            &ListBoxViewDataWidget::updateDataSlot);
+//    connect(data_source_, &ListBoxViewDataSource::loadingStartedSignal, widget_->getDataWidget(),
+//            &ListBoxViewDataWidget::loadingStartedSlot);
+//    connect(data_source_, &ListBoxViewDataSource::updateDataSignal, widget_->getDataWidget(),
+//            &ListBoxViewDataWidget::updateDataSlot);
 
     connect(widget_->configWidget(), &ListBoxViewConfigWidget::exportSignal,
             widget_->getDataWidget(), &ListBoxViewDataWidget::exportDataSlot);
     connect(widget_->getDataWidget(), &ListBoxViewDataWidget::exportDoneSignal,
             widget_->configWidget(), &ListBoxViewConfigWidget::exportDoneSlot);
 
-    connect(data_source_, &ListBoxViewDataSource::loadingStartedSignal, widget_->configWidget(),
-            &ListBoxViewConfigWidget::loadingStartedSlot);
+//    connect(data_source_, &ListBoxViewDataSource::loadingStartedSignal, widget_->configWidget(),
+//            &ListBoxViewConfigWidget::loadingStartedSlot);
 
     connect(this, &ListBoxView::showOnlySelectedSignal, widget_->getDataWidget(),
             &ListBoxViewDataWidget::showOnlySelectedSlot);

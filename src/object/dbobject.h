@@ -143,7 +143,7 @@ class DBObject : public QObject, public Configurable
               DBOVariable* order_variable, bool use_order_ascending,
               const std::string& limit_str = "");
     void quitLoading();
-    void clearData();
+    //void clearData();
 
     void insertData(std::shared_ptr<Buffer> buffer);
     void updateData(DBOVariable& key_var, DBOVariableSet& list, std::shared_ptr<Buffer> buffer);
@@ -171,7 +171,7 @@ class DBObject : public QObject, public Configurable
     DBObjectInfoWidget* infoWidget();
     DBOLabelDefinitionWidget* labelDefinitionWidget();
 
-    std::shared_ptr<Buffer> data() { return data_; }
+    //std::shared_ptr<Buffer> data() { return data_; }
 
     bool existsInDB() const;
 
@@ -210,7 +210,7 @@ protected:
     std::shared_ptr<InsertBufferDBJob> insert_job_{nullptr};
     std::shared_ptr<UpdateBufferDBJob> update_job_{nullptr};
 
-    std::shared_ptr<Buffer> data_;
+    //std::shared_ptr<Buffer> data_;
 
     /// Container with all variables (variable identifier -> variable pointer)
     std::vector<std::unique_ptr<DBOVariable>> variables_;

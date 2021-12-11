@@ -342,7 +342,7 @@ void DBObjectManager::startLoading()
 
     for (auto& object : objects_)
     {
-        object.second->clearData();  // clear previous data
+        //object.second->clearData();  // clear previous data
 
         msg_box->setText(("Processing DBObject "+object.first).c_str());
 
