@@ -355,6 +355,16 @@ MainWindow& COMPASS::mainWindow()
     return *main_window_;
 }
 
+bool COMPASS::liveMode() const
+{
+    return live_mode_;
+}
+
+void COMPASS::liveMode(bool live_mode)
+{
+    live_mode_ = live_mode;
+}
+
 std::string COMPASS::lastDbFilename() const
 {
     return last_db_filename_;

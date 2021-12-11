@@ -687,6 +687,9 @@ void ASTERIXImportTask::run(bool test) // , bool create_mapping_stubs
 
     assert (!running_);
 
+    if (!import_file_)
+        COMPASS::instance().liveMode(true); // set live mode
+
     running_ = true;
     done_ = false; // since can be run multiple times
     //num_radar_inserted_ = 0;

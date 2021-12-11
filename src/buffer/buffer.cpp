@@ -410,6 +410,86 @@ void Buffer::cutToSize(size_t size)
     data_size_ = size;
 }
 
+void Buffer::cutUpToIndex(size_t index) // everything up to index is removed
+{
+    if (BUFFER_PEDANTIC_CHECKING)
+    {
+        assert (index < data_size_);
+
+        for (auto& it : getArrayListMap<bool>())
+            assert (it.second->size() <= data_size_);
+        for (auto& it : getArrayListMap<char>())
+            assert (it.second->size() <= data_size_);
+        for (auto& it : getArrayListMap<unsigned char>())
+            assert (it.second->size() <= data_size_);
+        for (auto& it : getArrayListMap<int>())
+            assert (it.second->size() <= data_size_);
+        for (auto& it : getArrayListMap<unsigned int>())
+            assert (it.second->size() <= data_size_);
+        for (auto& it : getArrayListMap<long int>())
+            assert (it.second->size() <= data_size_);
+        for (auto& it : getArrayListMap<unsigned long int>())
+            assert (it.second->size() <= data_size_);
+        for (auto& it : getArrayListMap<float>())
+            assert (it.second->size() <= data_size_);
+        for (auto& it : getArrayListMap<double>())
+            assert (it.second->size() <= data_size_);
+        for (auto& it : getArrayListMap<string>())
+            assert (it.second->size() <= data_size_);
+
+        loginf << "Buffer: cutUpToIndex: index " << index << " data_size_ " << data_size_;
+    }
+
+    for (auto& it : getArrayListMap<bool>())
+        it.second->cutUpToIndex(index);
+    for (auto& it : getArrayListMap<char>())
+        it.second->cutUpToIndex(index);
+    for (auto& it : getArrayListMap<unsigned char>())
+        it.second->cutUpToIndex(index);
+    for (auto& it : getArrayListMap<int>())
+        it.second->cutUpToIndex(index);
+    for (auto& it : getArrayListMap<unsigned int>())
+        it.second->cutUpToIndex(index);
+    for (auto& it : getArrayListMap<long int>())
+        it.second->cutUpToIndex(index);
+    for (auto& it : getArrayListMap<unsigned long int>())
+        it.second->cutUpToIndex(index);
+    for (auto& it : getArrayListMap<float>())
+        it.second->cutUpToIndex(index);
+    for (auto& it : getArrayListMap<double>())
+        it.second->cutUpToIndex(index);
+    for (auto& it : getArrayListMap<string>())
+        it.second->cutUpToIndex(index);
+
+    data_size_ -= index+1;
+
+    if (BUFFER_PEDANTIC_CHECKING)
+    {
+        loginf << "Buffer: cutUpToIndex: after cut index " << index << " data_size_ " << data_size_;
+
+        for (auto& it : getArrayListMap<bool>())
+            assert (it.second->size() <= data_size_);
+        for (auto& it : getArrayListMap<char>())
+            assert (it.second->size() <= data_size_);
+        for (auto& it : getArrayListMap<unsigned char>())
+            assert (it.second->size() <= data_size_);
+        for (auto& it : getArrayListMap<int>())
+            assert (it.second->size() <= data_size_);
+        for (auto& it : getArrayListMap<unsigned int>())
+            assert (it.second->size() <= data_size_);
+        for (auto& it : getArrayListMap<long int>())
+            assert (it.second->size() <= data_size_);
+        for (auto& it : getArrayListMap<unsigned long int>())
+            assert (it.second->size() <= data_size_);
+        for (auto& it : getArrayListMap<float>())
+            assert (it.second->size() <= data_size_);
+        for (auto& it : getArrayListMap<double>())
+            assert (it.second->size() <= data_size_);
+        for (auto& it : getArrayListMap<string>())
+            assert (it.second->size() <= data_size_);
+    }
+}
+
 const PropertyList& Buffer::properties() { return properties_; }
 
 void Buffer::printProperties()

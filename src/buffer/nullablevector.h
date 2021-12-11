@@ -128,6 +128,7 @@ private:
     void addData(NullableVector<T>& other);
     void copyData(NullableVector<T>& other);
     void cutToSize(unsigned int size);
+    void cutUpToIndex(unsigned int index); // everything up to index is removed
 
     /// @brief Constructor, only for friend Buffer
     NullableVector(Property& property, Buffer& buffer);
@@ -809,6 +810,40 @@ void NullableVector<T>::cutToSize(unsigned int size)
         data_.pop_back();
 
     // size set in Buffer::cutToSize
+}
+
+template <class T>
+void NullableVector<T>::cutUpToIndex(unsigned int index) // everything up to index is removed
+{
+    if (BUFFER_PEDANTIC_CHECKING)
+    {
+        loginf << "NullableVector: cutUpToIndex: index " << index << " data_size " << data_.size()
+               << " null_size " << null_flags_.size();
+    }
+
+    if (null_flags_.size())
+    {
+        if (index < null_flags_.size())
+            null_flags_.erase(null_flags_.begin(), null_flags_.begin() + index + 1);
+        else
+            null_flags_.clear(); // would have been removed
+    }
+
+    if (data_.size())
+    {
+        if (index < data_.size())
+            data_.erase(data_.begin(), data_.begin() + index + 1); // takes number of elements
+        else
+            data_.clear(); // would have been removed
+    }
+
+    if (BUFFER_PEDANTIC_CHECKING)
+    {
+        loginf << "NullableVector: cutUpToIndex: after erase index " << index << " data_size " << data_.size()
+               << " null_size " << null_flags_.size();
+    }
+
+    // size set in Buffer::cutUpToIndex
 }
 
 template <class T>

@@ -242,31 +242,31 @@ void ASTERIXPostprocessJob::run()
 
     // do first buffer sorting
 
-    loginf << "ASTERIXPostprocessJob: run: sorting buffers";
+//    loginf << "ASTERIXPostprocessJob: run: sorting buffers";
 
-    boost::posix_time::ptime start_time = boost::posix_time::microsec_clock::local_time();
+//    boost::posix_time::ptime start_time = boost::posix_time::microsec_clock::local_time();
 
-    for (auto& buf_it : buffers_)
-    {
-        logdbg << "ASTERIXPostprocessJob: run: sorting buffer " << buf_it.first;
+//    for (auto& buf_it : buffers_)
+//    {
+//        logdbg << "ASTERIXPostprocessJob: run: sorting buffer " << buf_it.first;
 
-        assert (dbo_man.existsMetaVariable(DBObject::meta_var_tod_id_.name()));
-        assert (dbo_man.metaVariable(DBObject::meta_var_tod_id_.name()).existsIn(buf_it.first));
+//        assert (dbo_man.existsMetaVariable(DBObject::meta_var_tod_id_.name()));
+//        assert (dbo_man.metaVariable(DBObject::meta_var_tod_id_.name()).existsIn(buf_it.first));
 
-        DBOVariable& tod_var = dbo_man.metaVariable(DBObject::meta_var_tod_id_.name()).getFor(buf_it.first);
+//        DBOVariable& tod_var = dbo_man.metaVariable(DBObject::meta_var_tod_id_.name()).getFor(buf_it.first);
 
-        Property prop {tod_var.name(), tod_var.dataType()};
+//        Property prop {tod_var.name(), tod_var.dataType()};
 
-        logdbg << "ASTERIXPostprocessJob: run: sorting by variable " << prop.name() << " " << prop.dataTypeString();
+//        logdbg << "ASTERIXPostprocessJob: run: sorting by variable " << prop.name() << " " << prop.dataTypeString();
 
-        assert (buf_it.second->hasProperty(prop));
+//        assert (buf_it.second->hasProperty(prop));
 
-        buf_it.second->sortByProperty(prop);
-    }
+//        buf_it.second->sortByProperty(prop);
+//    }
 
-    boost::posix_time::time_duration time_diff = boost::posix_time::microsec_clock::local_time() - start_time;
-    double ms = time_diff.total_milliseconds();
-    loginf << "UGA Buffer sort took " << String::timeStringFromDouble(ms / 1000.0, true);
+//    boost::posix_time::time_duration time_diff = boost::posix_time::microsec_clock::local_time() - start_time;
+//    double ms = time_diff.total_milliseconds();
+//    loginf << "UGA Buffer sort took " << String::timeStringFromDouble(ms / 1000.0, true);
 
     done_ = true;
 }

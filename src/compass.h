@@ -82,6 +82,8 @@ protected:
     std::string last_db_filename_;
     nlohmann::json db_file_list_;
 
+    bool live_mode_ {false};
+
     virtual void checkSubConfigurables();
 
     MainWindow* main_window_;
@@ -98,6 +100,9 @@ public:
     std::vector<std::string> dbFileList() const;
     void clearDBFileList();
     void addDBFileToList(const std::string filename);
+
+    bool liveMode() const;
+    void liveMode(bool live_mode);
 };
 
 #endif /* COMPASS_H_ */

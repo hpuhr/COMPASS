@@ -41,11 +41,49 @@
 #include <QMessageBox>
 
 #include <algorithm>
+#include <chrono>
 
 using namespace std;
 using namespace Utils;
 using namespace DBContent;
 using namespace nlohmann;
+
+// move to somewhere else?
+//double secondsSinceMidnightLocal ()
+//{
+
+//    using namespace boost::posix_time;
+
+//    auto p_time = microsec_clock::universal_time (); // UTC.
+//    return p_time.time_of_day().total_milliseconds() / 1000.0;
+
+////    auto now = std::chrono::system_clock::now(); // system_clock
+////    time_t tnow = std::chrono::system_clock::to_time_t(now);
+
+////    loginf << " now is " << std::ctime(&tnow);
+
+////    //tm *date = std::localtime(&tnow); // local
+////    tm *date = std::gmtime(&tnow); // utc
+////    date->tm_hour = 0;
+////    date->tm_min = 0;
+////    date->tm_sec = 0;
+////    auto midnight = std::chrono::system_clock::from_time_t(std::mktime(date));
+
+////    double tod = std::chrono::duration<double>(now-midnight).count();
+
+//////    auto now = std::chrono::system_clock::now();
+//////    auto today = floor<days>(now);
+//////    auto tod = duration_cast<seconds>(now - today);
+
+////    using namespace std::chrono;
+////    using namespace std;
+////    using days = duration<int, ratio<86400>>;
+////    seconds last_midnight =
+////        time_point_cast<days>(system_clock::now()).time_since_epoch();
+////    loginf << "UGA " <<  last_midnight.count() << String::timeStringFromDouble(last_midnight.count());
+
+////    return tod;
+//}
 
 const std::vector<std::string> DBObjectManager::data_source_types_ {"Radar", "MLAT", "ADSB", "Tracker", "RefTraj"};
 
@@ -816,9 +854,13 @@ void DBObjectManager::finishInserting()
 
     // add inserted to loaded data
 
+    boost::posix_time::ptime start_time = boost::posix_time::microsec_clock::local_time();
+    assert (existsMetaVariable(DBObject::meta_var_tod_id_.name()));
+
     {
         for (auto& buf_it : insert_data_)
         {
+
             DBOVariableSet read_set = COMPASS::instance().viewManager().getReadSet(buf_it.first);
             vector<Property> buffer_properties_to_be_removed;
 
@@ -848,29 +890,80 @@ void DBObjectManager::finishInserting()
             {
                 data_.at(buf_it.first)->seizeBuffer(*buf_it.second.get());
 
-                // sort again, will repeat target reports
-
-                assert (existsMetaVariable(DBObject::meta_var_tod_id_.name()));
+                // sort by tod
                 assert (metaVariable(DBObject::meta_var_tod_id_.name()).existsIn(buf_it.first));
 
                 DBOVariable& tod_var = metaVariable(DBObject::meta_var_tod_id_.name()).getFor(buf_it.first);
 
-                Property prop {tod_var.name(), tod_var.dataType()};
+                Property tod_prop {tod_var.name(), tod_var.dataType()};
 
-                assert (data_.at(buf_it.first)->hasProperty(prop));
+                assert (data_.at(buf_it.first)->hasProperty(tod_prop));
 
-                data_.at(buf_it.first)->sortByProperty(prop);
+                data_.at(buf_it.first)->sortByProperty(tod_prop);
             }
         }
     }
 
     insert_data_.clear();
 
+    if (COMPASS::instance().liveMode()) // do tod cleanup
+    {
+        unsigned int buffer_size;
+
+        for (auto& buf_it : data_)
+        {
+            buffer_size = buf_it.second->size();
+
+            assert (metaVariable(DBObject::meta_var_tod_id_.name()).existsIn(buf_it.first));
+
+            DBOVariable& tod_var = metaVariable(DBObject::meta_var_tod_id_.name()).getFor(buf_it.first);
+
+            Property tod_prop {tod_var.name(), tod_var.dataType()};
+
+            assert (data_.at(buf_it.first)->hasProperty(tod_prop));
+
+            NullableVector<float>& tod_vec = buf_it.second->get<float>(tod_var.name());
+
+            auto minmax = tod_vec.minMaxValues();
+            assert (get<0>(minmax)); // there is minmax
+
+            float min_tod = get<2>(minmax) - 10.0; // max - 10 sec
+            assert (min_tod > 0); // does not work for midnight crossings
+
+            loginf << "DBObjectManager: finishInserting: min_tod " << String::timeStringFromDouble(min_tod)
+                   << " data min " << String::timeStringFromDouble(get<1>(minmax))
+                   << " data max " << String::timeStringFromDouble(get<2>(minmax));
+
+            unsigned int index=0;
+            for (; index < buffer_size; ++index)
+            {
+                if (!tod_vec.isNull(index) && tod_vec.get(index) > min_tod)
+                {
+                    loginf << "DBObjectManager: finishInserting: found cutoff tod index " << index;
+                    break;
+                }
+            }
+
+            if (index)
+            {
+                index--; // cut at previous
+
+                loginf << "DBObjectManager: finishInserting: cutting up to index " << index;
+                assert (index < buffer_size);
+                buf_it.second->cutUpToIndex(index);
+            }
+        }
+    }
+
     if (load_widget_)
         load_widget_->update();
 
     loginf << "DBObjectManager: finishInserting: distributing data";
     emit loadedDataSignal(data_, true);
+
+    boost::posix_time::time_duration time_diff = boost::posix_time::microsec_clock::local_time() - start_time;
+    loginf << "DBObjectManager: finishInserting: processing took "
+        << String::timeStringFromDouble(time_diff.total_milliseconds() / 1000.0, true);
 }
 
 
