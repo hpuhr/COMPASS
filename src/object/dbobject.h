@@ -56,8 +56,8 @@ class DBObject : public QObject, public Configurable
 //    void newDataSignal(DBObject& object);
 //    void loadingDoneSignal(DBObject& object);
 
-    void insertProgressSignal(float percent);
-    void insertDoneSignal(DBObject& object);
+//    void insertProgressSignal(float percent);
+//    void insertDoneSignal(DBObject& object);
 
     void updateProgressSignal(float percent);
     void updateDoneSignal(DBObject& object);
@@ -73,7 +73,7 @@ class DBObject : public QObject, public Configurable
     void readJobDoneSlot();
     void finalizeReadJobDoneSlot();
 
-    void insertProgressSlot(float percent);
+    //void insertProgressSlot(float percent);
     void insertDoneSlot();
 
     void updateProgressSlot(float percent);
@@ -145,12 +145,13 @@ class DBObject : public QObject, public Configurable
     void quitLoading();
     void clearData();
 
-    void insertData(DBOVariableSet& list, std::shared_ptr<Buffer> buffer, bool emit_change = true);
+    void insertData(std::shared_ptr<Buffer> buffer);
     void updateData(DBOVariable& key_var, DBOVariableSet& list, std::shared_ptr<Buffer> buffer);
 
     std::map<int, std::string> loadLabelData(std::vector<int> rec_nums, int break_item_cnt);
 
     bool isLoading();
+    bool isInserting();
     bool isPostProcessing();
     bool hasData();
     size_t count();

@@ -692,12 +692,14 @@ void GPSTrailImportTask::run()
 
     loginf << "GPSTrailImportTask: run: inserting data";
 
-    connect(&reftraj_obj, &DBObject::insertDoneSignal, this, &GPSTrailImportTask::insertDoneSlot,
-            Qt::UniqueConnection);
-    connect(&reftraj_obj, &DBObject::insertProgressSignal, this,
-            &GPSTrailImportTask::insertProgressSlot, Qt::UniqueConnection);
+//    connect(&reftraj_obj, &DBObject::insertDoneSignal, this, &GPSTrailImportTask::insertDoneSlot,
+//            Qt::UniqueConnection);
+//    connect(&reftraj_obj, &DBObject::insertProgressSignal, this,
+//            &GPSTrailImportTask::insertProgressSlot, Qt::UniqueConnection);
 
-    reftraj_obj.insertData(var_set, buffer_, false);
+    TODO_ASSERT
+
+    //reftraj_obj.insertData(var_set, buffer_, false);
 }
 
 void GPSTrailImportTask::insertProgressSlot(float percent)

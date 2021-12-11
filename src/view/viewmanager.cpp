@@ -617,10 +617,12 @@ void ViewManager::loadingStartedSlot()
 // e.g. when data in the beginning was removed, or order of previously emitted data was changed, etc.
 void ViewManager::loadedDataSlot (const std::map<std::string, std::shared_ptr<Buffer>>& data, bool requires_reset)
 {
-    loginf << "ViewManager: loadedDataSlot";
+    loginf << "ViewManager: loadedDataSlot: reset " << requires_reset;
 
     for (auto& view_it : views_)
         view_it.second->loadedData(data, requires_reset);
+
+    loginf << "ViewManager: loadedDataSlot: done";
 }
 
 void ViewManager::loadingDoneSlot() // emitted when all dbos have finished loading

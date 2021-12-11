@@ -65,8 +65,8 @@ class ASTERIXImportTask : public Task, public Configurable
     void postprocessDoneSlot();
     void postprocessObsoleteSlot();
 
-    void insertProgressSlot(float percent);
-    void insertDoneSlot(DBObject& object);
+//    void insertProgressSlot(float percent);
+    void insertDoneSlot();
 
     void closeStatusDialogSlot();
 
@@ -185,12 +185,12 @@ protected:
     //std::unique_ptr<ASTERIXStatusDialog> status_widget_;
 
     bool waiting_for_insert_{false};
-    size_t insert_active_{0};
+    bool insert_active_{false};
 
-    std::map<std::string, DBOVariableSet> dbo_variable_sets_;
+    //std::map<std::string, DBOVariableSet> dbo_variable_sets_;
     std::set<int> added_data_sources_;
 
-    unsigned int num_radar_inserted_ {0};
+    //unsigned int num_radar_inserted_ {0};
 
     bool all_done_{false};
 

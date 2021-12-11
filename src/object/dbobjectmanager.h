@@ -60,6 +60,7 @@ signals:
     // e.g. when data in the beginning was removed, or order of previously emitted data was changed, etc.
     void loadedDataSignal (const std::map<std::string, std::shared_ptr<Buffer>>& data, bool requires_reset);
     void loadingDoneSignal(); // emitted when all dbos have finished loading
+    void insertDoneSignal(); // emitted when all dbos have finished loading
 
 public:
     const static std::vector<std::string> data_source_types_;
@@ -108,6 +109,10 @@ public:
     void loadingDone(DBObject& object); // to be called by dbo when it's loading is finished
     bool loadInProgress() const;
 
+    void insertData(std::map<std::string, std::shared_ptr<Buffer>> data);
+    void insertDone(DBObject& object); // to be called by dbo when it's insert is finished
+    bool insertInProgress() const;
+
     DBObjectManagerWidget* widget();
     DBObjectManagerLoadWidget* loadWidget();
 
@@ -153,6 +158,7 @@ public:
 
     const std::map<std::string, std::shared_ptr<Buffer>>& data() const;
 
+
 protected:
     COMPASS& compass_;
 
@@ -174,7 +180,10 @@ protected:
 
     std::map<std::string, std::shared_ptr<Buffer>> data_;
 
+    std::map<std::string, std::shared_ptr<Buffer>> insert_data_;
+
     bool load_in_progress_{false};
+    bool insert_in_progress_{false};
 
     /// Container with all DBOs (DBO name -> DBO pointer)
     std::map<std::string, DBObject*> objects_;
@@ -190,6 +199,7 @@ protected:
 
     virtual void checkSubConfigurables();
     void finishLoading();
+    void finishInserting();
 
     void loadDBDataSources();
     void sortDBDataSources();

@@ -689,7 +689,7 @@ void ASTERIXImportTask::run(bool test) // , bool create_mapping_stubs
 
     running_ = true;
     done_ = false; // since can be run multiple times
-    num_radar_inserted_ = 0;
+    //num_radar_inserted_ = 0;
 
     start_time_ = boost::posix_time::microsec_clock::local_time();
 
@@ -760,7 +760,7 @@ void ASTERIXImportTask::run(bool test) // , bool create_mapping_stubs
 //            &ASTERIXImportTask::closeStatusDialogSlot);
 //    status_widget_->markStartTime();
 
-    insert_active_ = 0;
+    insert_active_ = false;
 
     all_done_ = false;
 
@@ -930,7 +930,7 @@ void ASTERIXImportTask::decodeASTERIXObsoleteSlot()
 
 void ASTERIXImportTask::addDecodedASTERIXSlot()
 {
-    loginf << "ASTERIXImportTask: addDecodedASTERIX";
+    loginf << "ASTERIXImportTask: addDecodedASTERIXSlot";
 
     assert(decode_job_);
 
@@ -939,14 +939,14 @@ void ASTERIXImportTask::addDecodedASTERIXSlot()
 
     //assert(status_widget_);
 
-    logdbg << "ASTERIXImportTask: addDecodedASTERIX: errors " << decode_job_->numErrors();
+    logdbg << "ASTERIXImportTask: addDecodedASTERIXSlot: errors " << decode_job_->numErrors();
 
 //    status_widget_->numFrames(jasterix_->numFrames());
 //    status_widget_->numRecords(jasterix_->numRecords());
 //    status_widget_->numErrors(jasterix_->numErrors());
 //    status_widget_->setCategoryCounts(decode_job_->categoryCounts());
 
-    loginf << "ASTERIXImportTask: addDecodedASTERIX: num records " << jasterix_->numRecords();
+    loginf << "ASTERIXImportTask: addDecodedASTERIXSlot: num records " << jasterix_->numRecords();
 
 //    status_widget_->show();
 
@@ -1058,7 +1058,7 @@ void ASTERIXImportTask::mapJSONObsoleteSlot()
 
 void ASTERIXImportTask::postprocessDoneSlot()
 {
-    loginf << "ASTERIXImportTask: postprocessDoneSlot";
+    loginf << "ASTERIXImportTask: postprocessDoneSlot: import_file " << import_file_;
 
     assert (postprocess_job_);
 
@@ -1108,7 +1108,11 @@ void ASTERIXImportTask::postprocessDoneSlot()
         }
     }
     else // insert immediately for network
+    {
+        loginf << "ASTERIXImportTask: postprocessDoneSlot: doing network insert";
+
         insertData(std::move(job_buffers));
+    }
 }
 
 void ASTERIXImportTask::postprocessObsoleteSlot()
@@ -1129,95 +1133,104 @@ void ASTERIXImportTask::insertData(std::map<std::string, std::shared_ptr<Buffer>
 
     DBObjectManager& object_manager = COMPASS::instance().objectManager();
 
-    if (!dbo_variable_sets_.size())  // initialize if empty
-    {
-        for (auto& parser_it : *schema_)
-        {
-            std::string dbo_name = parser_it.second->dbObject().name();
+//    if (!dbo_variable_sets_.size())  // initialize if empty
+//    {
+//        for (auto& parser_it : *schema_)
+//        {
+//            std::string dbo_name = parser_it.second->dbObject().name();
 
-            assert (!dbo_variable_sets_.count(dbo_name));  // add variables
-            dbo_variable_sets_[dbo_name] = parser_it.second->variableList();
-        }
+//            assert (!dbo_variable_sets_.count(dbo_name));  // add variables
+//            dbo_variable_sets_[dbo_name] = parser_it.second->variableList();
+//        }
 
-        // insert latitude/longitude for cat001, cat048
+//        // insert latitude/longitude for cat001, cat048
 
-        for (auto& dbo_name_it : {"CAT001", "CAT048"})
-        {
-            assert (object_manager.existsObject(dbo_name_it));
-            DBObject& db_object = object_manager.object(dbo_name_it);
+//        for (auto& dbo_name_it : {"CAT001", "CAT048"})
+//        {
+//            assert (object_manager.existsObject(dbo_name_it));
+//            DBObject& db_object = object_manager.object(dbo_name_it);
 
-            assert (db_object.hasVariable(DBObject::meta_var_latitude_.name()));
-            assert (db_object.hasVariable(DBObject::meta_var_longitude_.name()));
+//            assert (db_object.hasVariable(DBObject::meta_var_latitude_.name()));
+//            assert (db_object.hasVariable(DBObject::meta_var_longitude_.name()));
 
-            DBOVariable& latitude_var = db_object.variable(DBObject::meta_var_latitude_.name());
-            DBOVariable& longitude_var = db_object.variable(DBObject::meta_var_longitude_.name());
+//            DBOVariable& latitude_var = db_object.variable(DBObject::meta_var_latitude_.name());
+//            DBOVariable& longitude_var = db_object.variable(DBObject::meta_var_longitude_.name());
 
-            dbo_variable_sets_[dbo_name_it].add(latitude_var);
-            dbo_variable_sets_[dbo_name_it].add(longitude_var);
-        }
-    }
+//            dbo_variable_sets_[dbo_name_it].add(latitude_var);
+//            dbo_variable_sets_[dbo_name_it].add(longitude_var);
+//        }
+//    }
 
     while (insert_active_)
     {
+        //loginf << "ASTERIXImportTask: insertData: waiting for insert";
         waiting_for_insert_ = true;
         QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
         QThread::msleep(1);
     }
 
+    //loginf << "ASTERIXImportTask: insertData: no more waiting for insert";
     waiting_for_insert_ = false;
 
     assert(schema_);
 
-    for (auto& buf_it : job_buffers)
-    {
-        std::string dbo_name = buf_it.first;
+    insert_active_ = true;
 
-        loginf << "ASTERIXImportTask: insertData: inserting " << dbo_name << " into database";
+    connect(&object_manager, &DBObjectManager::insertDoneSignal,
+            this, &ASTERIXImportTask::insertDoneSlot, Qt::UniqueConnection);
 
-        assert(dbo_variable_sets_.count(dbo_name));
-        std::shared_ptr<Buffer> buffer = buf_it.second;
+    object_manager.insertData(job_buffers);
 
-        if (!buffer->size())
-        {
-            loginf << "ASTERIXImportTask: insertData: dbo " << buf_it.first
-                   << " with empty buffer";
-            continue;
-        }
+//    for (auto& buf_it : job_buffers)
+//    {
+//        std::string dbo_name = buf_it.first;
 
-        assert(object_manager.existsObject(dbo_name));
-        DBObject& db_object = object_manager.object(dbo_name);
+//        loginf << "ASTERIXImportTask: insertData: inserting " << dbo_name << " into database";
 
-        ++insert_active_;
+//        //assert(dbo_variable_sets_.count(dbo_name));
+//        std::shared_ptr<Buffer> buffer = buf_it.second;
 
-        connect(&db_object, &DBObject::insertDoneSignal, this, &ASTERIXImportTask::insertDoneSlot,
-                Qt::UniqueConnection);
-        connect(&db_object, &DBObject::insertProgressSignal, this,
-                &ASTERIXImportTask::insertProgressSlot, Qt::UniqueConnection);
+//        if (!buffer->size())
+//        {
+//            loginf << "ASTERIXImportTask: insertData: dbo " << buf_it.first
+//                   << " with empty buffer";
+//            continue;
+//        }
 
-        DBOVariableSet& set = dbo_variable_sets_.at(dbo_name);
-        db_object.insertData(set, buffer, false);
+//        assert(object_manager.existsObject(dbo_name));
+//        DBObject& db_object = object_manager.object(dbo_name);
 
-        //status_widget_->addNumInserted(db_object.name(), buffer->size());
+//        ++insert_active_;
 
-        if (db_object.name() == "Radar")
-            num_radar_inserted_ += buffer->size(); // store for later check
-    }
+//        connect(&db_object, &DBObject::insertDoneSignal, this, &ASTERIXImportTask::insertDoneSlot,
+//                Qt::UniqueConnection);
+//        connect(&db_object, &DBObject::insertProgressSignal, this,
+//                &ASTERIXImportTask::insertProgressSlot, Qt::UniqueConnection);
+
+//        //DBOVariableSet& set = dbo_variable_sets_.at(dbo_name);
+//        db_object.insertData(buffer);
+
+//        //status_widget_->addNumInserted(db_object.name(), buffer->size());
+
+//        if (db_object.name() == "Radar")
+//            num_radar_inserted_ += buffer->size(); // store for later check
+//    }
 
     checkAllDone();
 
     logdbg << "JSONImporterTask: insertData: done";
 }
 
-void ASTERIXImportTask::insertProgressSlot(float percent)
-{
-    logdbg << "ASTERIXImportTask: insertProgressSlot: " << String::percentToString(percent)
-           << "%";
-}
+//void ASTERIXImportTask::insertProgressSlot(float percent)
+//{
+//    logdbg << "ASTERIXImportTask: insertProgressSlot: " << String::percentToString(percent)
+//           << "%";
+//}
 
-void ASTERIXImportTask::insertDoneSlot(DBObject& object)
+void ASTERIXImportTask::insertDoneSlot()
 {
-    logdbg << "ASTERIXImportTask: insertDoneSlot";
-    --insert_active_;
+    loginf << "ASTERIXImportTask: insertDoneSlot";
+    insert_active_ = false;
 
     bool test = test_; // test_ cleared by checkAllDone
 
@@ -1227,43 +1240,50 @@ void ASTERIXImportTask::insertDoneSlot(DBObject& object)
 
     if (all_done_ && !test)
     {
-        logdbg << "ASTERIXImportTask: insertDoneSlot: finalizing";
+        loginf << "ASTERIXImportTask: insertDoneSlot: finalizing";
 
         // in case data was imported, clear other task done properties
-        if (num_radar_inserted_)
-        {
-            bool has_null_positions = COMPASS::instance().interface().areColumnsNull(
-                        COMPASS::instance().objectManager().object("Radar").dbTableName(),
-                        {"pos_lat_deg","pos_long_deg"});
+//        if (num_radar_inserted_)
+//        {
+//            bool has_null_positions = COMPASS::instance().interface().areColumnsNull(
+//                        COMPASS::instance().objectManager().object("Radar").dbTableName(),
+//                        {"pos_lat_deg","pos_long_deg"});
 
-            loginf << "ASTERIXImportTask: insertDoneSlot: radar has null positions " << has_null_positions;
+//            loginf << "ASTERIXImportTask: insertDoneSlot: radar has null positions " << has_null_positions;
 
-            COMPASS::instance().interface().setProperty(
-                        RadarPlotPositionCalculatorTask::DONE_PROPERTY_NAME, to_string(!has_null_positions));
-        }
+//            COMPASS::instance().interface().setProperty(
+//                        RadarPlotPositionCalculatorTask::DONE_PROPERTY_NAME, to_string(!has_null_positions));
+//        }
 
-        //COMPASS::instance().interface().setProperty(PostProcessTask::DONE_PROPERTY_NAME, "0");
-        COMPASS::instance().interface().setProperty(
-                    CreateARTASAssociationsTask::DONE_PROPERTY_NAME, "0");
+//        //COMPASS::instance().interface().setProperty(PostProcessTask::DONE_PROPERTY_NAME, "0");
+//        COMPASS::instance().interface().setProperty(
+//                    CreateARTASAssociationsTask::DONE_PROPERTY_NAME, "0");
 
-        COMPASS::instance().interface().setProperty(DONE_PROPERTY_NAME, "1");
+//        COMPASS::instance().interface().setProperty(DONE_PROPERTY_NAME, "1");
+
+        disconnect(&COMPASS::instance().objectManager(), &DBObjectManager::insertDoneSignal,
+                this, &ASTERIXImportTask::insertDoneSlot);
 
         emit doneSignal(name_);
     }
+
+    if (decode_job_)
+        decode_job_->unpause();
 
     logdbg << "ASTERIXImportTask: insertDoneSlot: done";
 }
 
 void ASTERIXImportTask::checkAllDone()
 {
-    logdbg << "ASTERIXImportTask: checkAllDone: all done " << all_done_ << " decode "
-           << (decode_job_ == nullptr)
-           << " map job " << (json_map_job_ == nullptr)
-           << " wait insert " << !waiting_for_insert_
-           << " insert active " << (insert_active_ == 0);
+    loginf << "ASTERIXImportTask: checkAllDone: all done " << all_done_ << " decode "
+           << (decode_job_ != nullptr)
+           << " map job " << (json_map_job_ != nullptr)
+           << " post job " << (postprocess_job_ != nullptr)
+           << " wait insert " << waiting_for_insert_
+           << " insert active " << insert_active_;
 
     if (!all_done_ && decode_job_ == nullptr && json_map_job_ == nullptr && postprocess_job_ == nullptr
-            && !waiting_for_insert_ && insert_active_ == 0)
+            && !waiting_for_insert_ && !insert_active_)
     {
         loginf << "ASTERIXImportTask: checkAllDone: setting all done";
 
@@ -1336,7 +1356,7 @@ void ASTERIXImportTask::closeStatusDialogSlot()
 
 bool ASTERIXImportTask::maxLoadReached()
 {
-    return insert_active_ >= 2;
+    return insert_active_ && postprocess_job_ && json_map_job_; // full
 
     //    if (limit_ram_)
     //        return json_map_jobs_.size() > limited_num_json_jobs_;

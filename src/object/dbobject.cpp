@@ -418,10 +418,17 @@ void DBObject::clearData()
     }
 }
 
-void DBObject::insertData(DBOVariableSet& list, shared_ptr<Buffer> buffer, bool emit_change)
+void DBObject::insertData(shared_ptr<Buffer> buffer)
 {
-    loginf << "DBObject " << name_ << ": insertData: list " << list.getSize()
-           << " buffer " << buffer->size();
+    loginf << "DBObject " << name_ << ": insertData: buffer " << buffer->size();
+
+    DBOVariableSet list;
+
+    for (auto prop_it : buffer->properties().properties())
+    {
+        assert (hasVariable(prop_it.name()));
+        list.add(variable(prop_it.name()));
+    }
 
     assert(!insert_job_);
 
@@ -431,12 +438,12 @@ void DBObject::insertData(DBOVariableSet& list, shared_ptr<Buffer> buffer, bool 
     doDataSourcesBeforeInsert(buffer);
 
     insert_job_ = make_shared<InsertBufferDBJob>(COMPASS::instance().interface(), *this, buffer,
-                                                      emit_change);
+                                                      false);
 
     connect(insert_job_.get(), &InsertBufferDBJob::doneSignal, this, &DBObject::insertDoneSlot,
             Qt::QueuedConnection);
-    connect(insert_job_.get(), &InsertBufferDBJob::insertProgressSignal, this,
-            &DBObject::insertProgressSlot, Qt::QueuedConnection);
+//    connect(insert_job_.get(), &InsertBufferDBJob::insertProgressSignal, this,
+//            &DBObject::insertProgressSlot, Qt::QueuedConnection);
 
     JobManager::instance().addDBJob(insert_job_);
 
@@ -469,7 +476,7 @@ void DBObject::doDataSourcesBeforeInsert (shared_ptr<Buffer> buffer)
 }
 
 
-void DBObject::insertProgressSlot(float percent) { emit insertProgressSignal(percent); }
+//void DBObject::insertProgressSlot(float percent) { emit insertProgressSignal(percent); }
 
 void DBObject::insertDoneSlot()
 {
@@ -477,70 +484,20 @@ void DBObject::insertDoneSlot()
 
     assert(insert_job_);
 
-    std::shared_ptr<Buffer> buffer = insert_job_->buffer(); // buffer properties match db column names
+    //std::shared_ptr<Buffer> buffer = insert_job_->buffer(); // buffer properties match db column names
 
     insert_job_ = nullptr;
 
-    emit insertDoneSignal(*this);
+    dbo_manager_.insertDone(*this);
 
     is_loadable_ = true;
 
-    dbo_manager_.databaseContentChangedSlot();
+    //dbo_manager_.databaseContentChangedSlot();
 
     assert (existsInDB()); // check
 
-    // add buffer to be able to distribute to views
-
-    DBOVariableSet read_set = COMPASS::instance().viewManager().getReadSet(name_);
-    vector<Property> buffer_properties_to_be_removed;
-
-    // remove all unused
-    for (const auto& prop_it : buffer->properties().properties())
-    {
-        if (!read_set.hasDBColumnName(prop_it.name()))
-            buffer_properties_to_be_removed.push_back(prop_it); // remove it later
-    }
-
-    for (auto& prop_it : buffer_properties_to_be_removed)
-    {
-        logdbg << "DBObject " << name_ << ": insertDoneSlot: deleting property " << prop_it.name();
-        buffer->deleteProperty(prop_it);
-    }
-
-    // change db column names to dbo var names
-    buffer->transformVariables(read_set, true);
-
-    // add selection flags
-    buffer->addProperty(DBObject::selected_var);
-
-    if (!data_)
-        data_ = buffer;
-    else
-    {
-        data_->seizeBuffer(*buffer.get());
-
-        // sort again, will repeat target reports
-
-        assert (dbo_manager_.existsMetaVariable(DBObject::meta_var_tod_id_.name()));
-        assert (dbo_manager_.metaVariable(DBObject::meta_var_tod_id_.name()).existsIn(name_));
-
-        DBOVariable& tod_var = dbo_manager_.metaVariable(DBObject::meta_var_tod_id_.name()).getFor(name_);
-
-        Property prop {tod_var.name(), tod_var.dataType()};
-
-        assert (data_->hasProperty(prop));
-
-        data_->sortByProperty(prop);
-    }
-
-    //data_->printProperties();
-
     if (info_widget_)
         info_widget_->updateSlot();
-
-    TODO_ASSERT
-
-    //emit newDataSignal(*this);
 }
 
 void DBObject::updateData(DBOVariable& key_var, DBOVariableSet& list,
@@ -794,7 +751,9 @@ bool DBObject::associationsLoaded() const
     return associations_loaded_;
 }
 
-bool DBObject::isLoading() { return read_job_ || finalize_jobs_.size(); }
+bool DBObject::isLoading() { return read_job_ != nullptr || finalize_jobs_.size(); }
+
+bool DBObject::isInserting() { return insert_job_ != nullptr; }
 
 bool DBObject::isPostProcessing() { return finalize_jobs_.size(); }
 

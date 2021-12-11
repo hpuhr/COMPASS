@@ -570,7 +570,7 @@ void DBObjectManager::metaDialogOKSlot()
 
 void DBObjectManager::finishLoading()
 {
-    loginf << "DBObjectManager: loadingDoneSlot: all done";
+    loginf << "DBObjectManager: finishLoading: all done";
     load_in_progress_ = false;
 
     COMPASS::instance().viewManager().doViewPointAfterLoad();
@@ -762,7 +762,117 @@ bool DBObjectManager::isOtherDBObjectPostProcessing(DBObject& object)
     return false;
 }
 
-bool DBObjectManager::loadInProgress() const { return load_in_progress_; }
+bool DBObjectManager::loadInProgress() const
+{
+    return load_in_progress_;
+}
+
+void DBObjectManager::insertData(std::map<std::string, std::shared_ptr<Buffer>> data)
+{
+    loginf << "DBObjectManager: insertData";
+
+    assert (!load_in_progress_);
+    assert (!insert_in_progress_);
+    assert (!insert_data_.size());
+
+    insert_in_progress_ = true;
+
+    insert_data_ = data;
+
+    for (auto& buf_it : insert_data_)
+    {
+        assert(existsObject(buf_it.first));
+        object(buf_it.first).insertData(buf_it.second);
+    }
+}
+
+void DBObjectManager::insertDone(DBObject& object)
+{
+    bool done = true;
+
+    for (auto& object_it : objects_)
+    {
+        if (object_it.second->isInserting())
+        {
+            logdbg << "DBObjectManager: insertDone: " << object_it.first << " still inserting";
+            done = false;
+            break;
+        }
+    }
+
+    if (done)
+        finishInserting();
+    else
+        logdbg << "DBObjectManager: insertDone: not done";
+}
+
+void DBObjectManager::finishInserting()
+{
+    loginf << "DBObjectManager: finishInserting: all done";
+
+    insert_in_progress_ = false;
+
+    emit insertDoneSignal();
+
+    // add inserted to loaded data
+
+    {
+        for (auto& buf_it : insert_data_)
+        {
+            DBOVariableSet read_set = COMPASS::instance().viewManager().getReadSet(buf_it.first);
+            vector<Property> buffer_properties_to_be_removed;
+
+            // remove all unused
+            for (const auto& prop_it : buf_it.second->properties().properties())
+            {
+                if (!read_set.hasDBColumnName(prop_it.name()))
+                    buffer_properties_to_be_removed.push_back(prop_it); // remove it later
+            }
+
+            for (auto& prop_it : buffer_properties_to_be_removed)
+            {
+                logdbg << "DBObjectManager: finishInserting: deleting property " << prop_it.name();
+                buf_it.second->deleteProperty(prop_it);
+            }
+
+            // change db column names to dbo var names
+            buf_it.second->transformVariables(read_set, true);
+
+            // add selection flags
+            buf_it.second->addProperty(DBObject::selected_var);
+
+            // add buffer to be able to distribute to views
+            if (!data_.count(buf_it.first))
+                data_[buf_it.first] = buf_it.second;
+            else
+            {
+                data_.at(buf_it.first)->seizeBuffer(*buf_it.second.get());
+
+                // sort again, will repeat target reports
+
+                assert (existsMetaVariable(DBObject::meta_var_tod_id_.name()));
+                assert (metaVariable(DBObject::meta_var_tod_id_.name()).existsIn(buf_it.first));
+
+                DBOVariable& tod_var = metaVariable(DBObject::meta_var_tod_id_.name()).getFor(buf_it.first);
+
+                Property prop {tod_var.name(), tod_var.dataType()};
+
+                assert (data_.at(buf_it.first)->hasProperty(prop));
+
+                data_.at(buf_it.first)->sortByProperty(prop);
+            }
+        }
+    }
+
+    insert_data_.clear();
+
+    if (load_widget_)
+        load_widget_->update();
+
+    loginf << "DBObjectManager: finishInserting: distributing data";
+    emit loadedDataSignal(data_, true);
+}
+
 
 unsigned int DBObjectManager::maxRecordNumber() const
 {
@@ -781,6 +891,11 @@ void DBObjectManager::maxRecordNumber(unsigned int value)
 const std::map<std::string, std::shared_ptr<Buffer>>& DBObjectManager::data() const
 {
     return data_;
+}
+
+bool DBObjectManager::insertInProgress() const
+{
+    return insert_in_progress_;
 }
 
 void DBObjectManager::loadMaxRecordNumber()
