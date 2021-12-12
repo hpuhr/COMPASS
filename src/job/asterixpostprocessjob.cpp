@@ -15,9 +15,9 @@ using namespace std;
 using namespace nlohmann;
 using namespace Utils;
 
-ASTERIXPostprocessJob::ASTERIXPostprocessJob(map<string, shared_ptr<Buffer>> buffers)
+ASTERIXPostprocessJob::ASTERIXPostprocessJob(map<string, shared_ptr<Buffer>> buffers, bool do_timestamp_checks)
     : Job("ASTERIXPostprocessJob"),
-      buffers_(move(buffers))
+      buffers_(move(buffers)), do_timestamp_checks_(do_timestamp_checks)
 {
 
 }
@@ -29,6 +29,71 @@ void ASTERIXPostprocessJob::run()
     loginf << "ASTERIXPostprocessJob: run: num buffers " << buffers_.size();
 
     started_ = true;
+
+    if (do_timestamp_checks_)
+        doFutureTimestampsCheck();
+
+    doRadarPlotPositionCalculations();
+
+//    boost::posix_time::time_duration time_diff = boost::posix_time::microsec_clock::local_time() - start_time;
+//    double ms = time_diff.total_milliseconds();
+//    loginf << "UGA Buffer sort took " << String::timeStringFromDouble(ms / 1000.0, true);
+
+    done_ = true;
+}
+
+void ASTERIXPostprocessJob::doFutureTimestampsCheck()
+{
+    DBObjectManager& obj_man = COMPASS::instance().objectManager();
+
+    unsigned int buffer_size;
+
+    using namespace boost::posix_time;
+
+    auto p_time = microsec_clock::universal_time (); // UTC.
+    double tod_now_utc = (p_time.time_of_day().total_milliseconds() / 1000.0) - 3600.0 + 1.0; // up to 1 sec ok
+
+    for (auto& buf_it : buffers_)
+    {
+        buffer_size = buf_it.second->size();
+
+        assert (obj_man.metaVariable(DBObject::meta_var_tod_id_.name()).existsIn(buf_it.first));
+
+        DBOVariable& tod_var = obj_man.metaVariable(DBObject::meta_var_tod_id_.name()).getFor(buf_it.first);
+
+        Property tod_prop {tod_var.name(), tod_var.dataType()};
+
+        assert (buf_it.second->hasProperty(tod_prop));
+
+        NullableVector<float>& tod_vec = buf_it.second->get<float>(tod_var.name());
+
+        for (unsigned int index=0; index < buffer_size; ++index)
+        {
+            if (!tod_vec.isNull(index) && tod_vec.get(index) > tod_now_utc)
+            {
+                logwrn << "ASTERIXPostprocessJob: doFutureTimestampsCheck: doing " << buf_it.first
+                       << " cutoff tod index " << index
+                       << " tod " << String::timeStringFromDouble(tod_vec.get(index));
+
+                buf_it.second->cutToSize(index);
+
+                break;
+            }
+        }
+    }
+
+    // remove empty buffers
+
+    std::map<std::string, std::shared_ptr<Buffer>> tmp_data = buffers_;
+
+    for (auto& buf_it : tmp_data)
+        if (!buf_it.second->size())
+            buffers_.erase(buf_it.first);
+}
+
+void ASTERIXPostprocessJob::doRadarPlotPositionCalculations()
+{
+    // radar calculations
 
     string dbo_name;
 
@@ -264,9 +329,4 @@ void ASTERIXPostprocessJob::run()
 //        buf_it.second->sortByProperty(prop);
 //    }
 
-//    boost::posix_time::time_duration time_diff = boost::posix_time::microsec_clock::local_time() - start_time;
-//    double ms = time_diff.total_milliseconds();
-//    loginf << "UGA Buffer sort took " << String::timeStringFromDouble(ms / 1000.0, true);
-
-    done_ = true;
 }

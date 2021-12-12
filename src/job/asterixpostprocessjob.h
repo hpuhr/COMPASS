@@ -12,7 +12,7 @@ class Buffer;
 class ASTERIXPostprocessJob : public Job
 {
 public:
-    ASTERIXPostprocessJob(std::map<std::string, std::shared_ptr<Buffer>> buffers);
+    ASTERIXPostprocessJob(std::map<std::string, std::shared_ptr<Buffer>> buffers, bool do_timestamp_checks);
 
     virtual ~ASTERIXPostprocessJob();
 
@@ -22,6 +22,10 @@ public:
 
 private:
     std::map<std::string, std::shared_ptr<Buffer>> buffers_;
+     bool do_timestamp_checks_;
+
+    void doFutureTimestampsCheck();
+    void doRadarPlotPositionCalculations();
 };
 
 #endif // ASTERIXPOSTPROCESSJOB_H

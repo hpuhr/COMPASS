@@ -1025,7 +1025,8 @@ void ASTERIXImportTask::mapJSONDoneSlot()
     if (!test_)
     {
         postprocess_job_ =
-                make_shared<ASTERIXPostprocessJob>(std::move(job_buffers));
+                make_shared<ASTERIXPostprocessJob>(std::move(job_buffers), !import_file_);
+        // check for future when net import
 
         connect(postprocess_job_.get(), &ASTERIXPostprocessJob::obsoleteSignal, this,
                 &ASTERIXImportTask::postprocessObsoleteSlot, Qt::QueuedConnection);

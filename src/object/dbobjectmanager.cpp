@@ -49,13 +49,12 @@ using namespace DBContent;
 using namespace nlohmann;
 
 // move to somewhere else?
-//double secondsSinceMidnightLocal ()
-//{
+double secondsSinceMidnighUTC ()
+{
+    using namespace boost::posix_time;
 
-//    using namespace boost::posix_time;
-
-//    auto p_time = microsec_clock::universal_time (); // UTC.
-//    return p_time.time_of_day().total_milliseconds() / 1000.0;
+    auto p_time = microsec_clock::universal_time (); // UTC.
+    return (p_time.time_of_day().total_milliseconds() / 1000.0) - 3600.0;
 
 ////    auto now = std::chrono::system_clock::now(); // system_clock
 ////    time_t tnow = std::chrono::system_clock::to_time_t(now);
@@ -82,8 +81,8 @@ using namespace nlohmann;
 ////        time_point_cast<days>(system_clock::now()).time_since_epoch();
 ////    loginf << "UGA " <<  last_midnight.count() << String::timeStringFromDouble(last_midnight.count());
 
-////    return tod;
-//}
+//    return tod;
+}
 
 const std::vector<std::string> DBObjectManager::data_source_types_ {"Radar", "MLAT", "ADSB", "Tracker", "RefTraj"};
 
@@ -910,48 +909,51 @@ void DBObjectManager::finishInserting()
     {
         unsigned int buffer_size;
 
-        bool max_time_set = false;
-        float min_tod_found, max_tod_found;
+//        bool max_time_set = false;
+//        float min_tod_found, max_tod_found;
 
-        for (auto& buf_it : data_)
-        {
-            assert (metaVariable(DBObject::meta_var_tod_id_.name()).existsIn(buf_it.first));
+        float max_time = secondsSinceMidnighUTC();
 
-            DBOVariable& tod_var = metaVariable(DBObject::meta_var_tod_id_.name()).getFor(buf_it.first);
+//        for (auto& buf_it : data_)
+//        {
+//            assert (metaVariable(DBObject::meta_var_tod_id_.name()).existsIn(buf_it.first));
 
-            Property tod_prop {tod_var.name(), tod_var.dataType()};
+//            DBOVariable& tod_var = metaVariable(DBObject::meta_var_tod_id_.name()).getFor(buf_it.first);
 
-            assert (data_.at(buf_it.first)->hasProperty(tod_prop));
+//            Property tod_prop {tod_var.name(), tod_var.dataType()};
 
-            NullableVector<float>& tod_vec = buf_it.second->get<float>(tod_var.name());
+//            assert (data_.at(buf_it.first)->hasProperty(tod_prop));
 
-            auto minmax = tod_vec.minMaxValues();
-            assert (get<0>(minmax)); // there is minmax
+//            NullableVector<float>& tod_vec = buf_it.second->get<float>(tod_var.name());
 
-            if (max_time_set)
-            {
-                min_tod_found = min(min_tod_found, get<1>(minmax));
-                max_tod_found = max(max_tod_found, get<2>(minmax));
-            }
-            else
-            {
-                min_tod_found = get<1>(minmax);
-                max_tod_found = get<2>(minmax);
-                max_time_set = true;
-            }
-        }
+//            auto minmax = tod_vec.minMaxValues();
+//            assert (get<0>(minmax)); // there is minmax
 
-        if (max_time_set) // cut to size
-        {
-            float min_tod = max_tod_found - 300.0; // max - 5min
+//            if (max_time_set)
+//            {
+//                min_tod_found = min(min_tod_found, get<1>(minmax));
+//                max_tod_found = max(max_tod_found, get<2>(minmax));
+//            }
+//            else
+//            {
+//                min_tod_found = get<1>(minmax);
+//                max_tod_found = get<2>(minmax);
+//                max_time_set = true;
+//            }
+//        }
+
+//        if (max_time_set) // cut to size
+//        {
+            float min_tod = max_time - 60.0; // max - 5min
             assert (min_tod > 0); // does not work for midnight crossings
 
             loginf << "DBObjectManager: finishInserting: min_tod " << String::timeStringFromDouble(min_tod)
-                   << " data min " << String::timeStringFromDouble(min_tod_found)
-                   << " data max " << String::timeStringFromDouble(max_tod_found);
+                   //<< " data min " << String::timeStringFromDouble(min_tod_found)
+                   << " data max " << String::timeStringFromDouble(max_time);
+                   //<< " utc " << String::timeStringFromDouble(secondsSinceMidnighUTC());
 
-            if (min_tod > min_tod_found) // cut indexes
-            {
+//            if (min_tod > min_tod_found) // cut indexes
+//            {
                 for (auto& buf_it : data_)
                 {
                     buffer_size = buf_it.second->size();
@@ -967,28 +969,42 @@ void DBObjectManager::finishInserting()
                     NullableVector<float>& tod_vec = buf_it.second->get<float>(tod_var.name());
 
                     unsigned int index=0;
+
                     for (; index < buffer_size; ++index)
                     {
                         if (!tod_vec.isNull(index) && tod_vec.get(index) > min_tod)
                         {
-                            loginf << "DBObjectManager: finishInserting: found cutoff tod index " << index;
+                            loginf << "DBObjectManager: finishInserting: found " << buf_it.first
+                                   << " cutoff tod index " << index
+                                   << " tod " << String::timeStringFromDouble(tod_vec.get(index));
                             break;
                         }
                     }
 
-                    if (index)
+                    if (index) // index found
                     {
                         index--; // cut at previous
 
-                        loginf << "DBObjectManager: finishInserting: cutting up to index " << index;
+                        loginf << "DBObjectManager: finishInserting: cutting " << buf_it.first
+                               << " up to index " << index
+                               << " total size " << buffer_size;
                         assert (index < buffer_size);
                         buf_it.second->cutUpToIndex(index);
                     }
                 }
-            }
-        }
-        else
-            logwrn << "DBObjectManager: finishInserting: no viable time found in live mode";
+//            }
+//        }
+//        else
+//            logwrn << "DBObjectManager: finishInserting: no viable time found in live mode";
+
+        // remove empty buffers
+
+        std::map<std::string, std::shared_ptr<Buffer>> tmp_data = data_;
+
+        for (auto& buf_it : tmp_data)
+            if (!buf_it.second->size())
+                data_.erase(buf_it.first);
+
     }
 
     if (load_widget_)
