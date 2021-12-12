@@ -944,10 +944,10 @@ void DBObjectManager::finishInserting()
 
 //        if (max_time_set) // cut to size
 //        {
-            float min_tod = max_time - 60.0; // max - 5min
+            float min_tod = max_time - 300.0; // max - 5min
             assert (min_tod > 0); // does not work for midnight crossings
 
-            loginf << "DBObjectManager: finishInserting: min_tod " << String::timeStringFromDouble(min_tod)
+            logdbg << "DBObjectManager: finishInserting: min_tod " << String::timeStringFromDouble(min_tod)
                    //<< " data min " << String::timeStringFromDouble(min_tod_found)
                    << " data max " << String::timeStringFromDouble(max_time);
                    //<< " utc " << String::timeStringFromDouble(secondsSinceMidnighUTC());
@@ -974,7 +974,7 @@ void DBObjectManager::finishInserting()
                     {
                         if (!tod_vec.isNull(index) && tod_vec.get(index) > min_tod)
                         {
-                            loginf << "DBObjectManager: finishInserting: found " << buf_it.first
+                            logdbg << "DBObjectManager: finishInserting: found " << buf_it.first
                                    << " cutoff tod index " << index
                                    << " tod " << String::timeStringFromDouble(tod_vec.get(index));
                             break;
@@ -985,7 +985,7 @@ void DBObjectManager::finishInserting()
                     {
                         index--; // cut at previous
 
-                        loginf << "DBObjectManager: finishInserting: cutting " << buf_it.first
+                        logdbg << "DBObjectManager: finishInserting: cutting " << buf_it.first
                                << " up to index " << index
                                << " total size " << buffer_size;
                         assert (index < buffer_size);
@@ -1010,7 +1010,7 @@ void DBObjectManager::finishInserting()
     if (load_widget_)
         load_widget_->update();
 
-    loginf << "DBObjectManager: finishInserting: distributing data";
+    logdbg << "DBObjectManager: finishInserting: distributing data";
     emit loadedDataSignal(data_, true);
 
     boost::posix_time::time_duration time_diff = boost::posix_time::microsec_clock::local_time() - start_time;
@@ -1027,7 +1027,7 @@ unsigned int DBObjectManager::maxRecordNumber() const
 
 void DBObjectManager::maxRecordNumber(unsigned int value)
 {
-    loginf << "DBObjectManager: maxRecordNumber: " << value;
+    logdbg << "DBObjectManager: maxRecordNumber: " << value;
 
     max_rec_num_ = value;
     has_max_rec_num_ = true;

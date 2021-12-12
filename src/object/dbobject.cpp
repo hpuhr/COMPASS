@@ -478,7 +478,7 @@ void DBObject::doDataSourcesBeforeInsert (shared_ptr<Buffer> buffer)
 
 void DBObject::insertDoneSlot()
 {
-    loginf << "DBObject " << name_ << ": insertDoneSlot";
+    logdbg << "DBObject " << name_ << ": insertDoneSlot";
 
     assert(insert_job_);
 
