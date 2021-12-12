@@ -910,10 +910,11 @@ void DBObjectManager::finishInserting()
     {
         unsigned int buffer_size;
 
+        bool max_time_set = false;
+        float min_tod_found, max_tod_found;
+
         for (auto& buf_it : data_)
         {
-            buffer_size = buf_it.second->size();
-
             assert (metaVariable(DBObject::meta_var_tod_id_.name()).existsIn(buf_it.first));
 
             DBOVariable& tod_var = metaVariable(DBObject::meta_var_tod_id_.name()).getFor(buf_it.first);
@@ -927,32 +928,67 @@ void DBObjectManager::finishInserting()
             auto minmax = tod_vec.minMaxValues();
             assert (get<0>(minmax)); // there is minmax
 
-            float min_tod = get<2>(minmax) - 300.0; // max - 10 sec
+            if (max_time_set)
+            {
+                min_tod_found = min(min_tod_found, get<1>(minmax));
+                max_tod_found = max(max_tod_found, get<2>(minmax));
+            }
+            else
+            {
+                min_tod_found = get<1>(minmax);
+                max_tod_found = get<2>(minmax);
+                max_time_set = true;
+            }
+        }
+
+        if (max_time_set) // cut to size
+        {
+            float min_tod = max_tod_found - 300.0; // max - 5min
             assert (min_tod > 0); // does not work for midnight crossings
 
             loginf << "DBObjectManager: finishInserting: min_tod " << String::timeStringFromDouble(min_tod)
-                   << " data min " << String::timeStringFromDouble(get<1>(minmax))
-                   << " data max " << String::timeStringFromDouble(get<2>(minmax));
+                   << " data min " << String::timeStringFromDouble(min_tod_found)
+                   << " data max " << String::timeStringFromDouble(max_tod_found);
 
-            unsigned int index=0;
-            for (; index < buffer_size; ++index)
+            if (min_tod > min_tod_found) // cut indexes
             {
-                if (!tod_vec.isNull(index) && tod_vec.get(index) > min_tod)
+                for (auto& buf_it : data_)
                 {
-                    loginf << "DBObjectManager: finishInserting: found cutoff tod index " << index;
-                    break;
+                    buffer_size = buf_it.second->size();
+
+                    assert (metaVariable(DBObject::meta_var_tod_id_.name()).existsIn(buf_it.first));
+
+                    DBOVariable& tod_var = metaVariable(DBObject::meta_var_tod_id_.name()).getFor(buf_it.first);
+
+                    Property tod_prop {tod_var.name(), tod_var.dataType()};
+
+                    assert (data_.at(buf_it.first)->hasProperty(tod_prop));
+
+                    NullableVector<float>& tod_vec = buf_it.second->get<float>(tod_var.name());
+
+                    unsigned int index=0;
+                    for (; index < buffer_size; ++index)
+                    {
+                        if (!tod_vec.isNull(index) && tod_vec.get(index) > min_tod)
+                        {
+                            loginf << "DBObjectManager: finishInserting: found cutoff tod index " << index;
+                            break;
+                        }
+                    }
+
+                    if (index)
+                    {
+                        index--; // cut at previous
+
+                        loginf << "DBObjectManager: finishInserting: cutting up to index " << index;
+                        assert (index < buffer_size);
+                        buf_it.second->cutUpToIndex(index);
+                    }
                 }
             }
-
-            if (index)
-            {
-                index--; // cut at previous
-
-                loginf << "DBObjectManager: finishInserting: cutting up to index " << index;
-                assert (index < buffer_size);
-                buf_it.second->cutUpToIndex(index);
-            }
         }
+        else
+            logwrn << "DBObjectManager: finishInserting: no viable time found in live mode";
     }
 
     if (load_widget_)

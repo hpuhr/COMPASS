@@ -64,12 +64,17 @@ void ViewManager::init(QTabWidget* tab_widget)
     assert(tab_widget);
     assert(!main_tab_widget_);
     assert(!initialized_);
+
     main_tab_widget_ = tab_widget;
+
+    connect (&COMPASS::instance(), &COMPASS::switchLiveModeSignal,
+             this, &ViewManager::switchLiveModeSlot);
+
+    // view point stuff
 
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
     view_points_widget_ = new ViewPointsWidget(*this);
-    //view_points_widget_->setAutoFillBackground(true);
 
     QApplication::restoreOverrideCursor();
 
@@ -631,6 +636,14 @@ void ViewManager::loadingDoneSlot() // emitted when all dbos have finished loadi
 
     for (auto& view_it : views_)
         view_it.second->loadingDone();
+}
+
+void ViewManager::switchLiveModeSlot (bool live_mode)
+{
+    loginf << "ViewManager: switchLiveModeSlot: live_mode " << live_mode;
+
+    for (auto& view_it : views_)
+        view_it.second->switchLiveMode(live_mode);
 }
 
 

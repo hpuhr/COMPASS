@@ -54,6 +54,8 @@ class ViewManager : public QObject, public Configurable
     void loadedDataSlot (const std::map<std::string, std::shared_ptr<Buffer>>& data, bool requires_reset);
     void loadingDoneSlot(); // emitted when all dbos have finished loading
 
+    void switchLiveModeSlot (bool live_mode);
+
   public:
     ViewManager(const std::string& class_id, const std::string& instance_id, COMPASS* compass);
     virtual ~ViewManager();

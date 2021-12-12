@@ -44,6 +44,9 @@ class COMPASS : public QObject, public Configurable, public Singleton
 {
     Q_OBJECT
 
+signals:
+    void switchLiveModeSignal (bool live_mode);
+
 public:
     virtual ~COMPASS();
 

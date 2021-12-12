@@ -362,7 +362,11 @@ bool COMPASS::liveMode() const
 
 void COMPASS::liveMode(bool live_mode)
 {
+    loginf << "COMPASS: liveMode: live_mode " << live_mode;
+
     live_mode_ = live_mode;
+
+    emit switchLiveModeSignal(live_mode_);
 }
 
 std::string COMPASS::lastDbFilename() const
