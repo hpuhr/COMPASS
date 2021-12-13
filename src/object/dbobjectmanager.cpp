@@ -1074,6 +1074,8 @@ std::map<unsigned int, std::vector <std::pair<std::string, unsigned int>>> DBObj
     string ip;
     unsigned int port;
 
+    set<string> existing_lines; // to check
+
     for (auto& ds_it : config_data_sources_)
     {
         if (ds_it->info().contains("network_lines"))
@@ -1091,7 +1093,18 @@ std::map<unsigned int, std::vector <std::pair<std::string, unsigned int>>> DBObj
                 ip = String::ipFromString(line_address);
                 port = String::portFromString(line_address);
 
-                lines[Number::dsIdFrom(ds_it->sac(), ds_it->sic())].push_back({ip, port});
+                if (existing_lines.count(ip+":"+to_string(port)))
+                {
+                    logwrn << "DBObjectManager: getNetworkLines: source " << ds_it->name()
+                           << " line " << ip << ":" << port
+                           << " already in use";
+                }
+                else
+                    lines[Number::dsIdFrom(ds_it->sac(), ds_it->sic())].push_back({ip, port});
+
+                existing_lines.insert(ip+":"+to_string(port));
+
+                break; // TODO only parse one for now
             }
         }
     }
