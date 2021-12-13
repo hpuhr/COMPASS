@@ -122,6 +122,8 @@ void ASTERIXImportTaskWidget::addMainTab()
         main_tab_layout->addLayout(source_layout);
     }
 
+    main_tab_layout->addStretch();
+
     // final stuff
     {
         debug_check_ = new QCheckBox("Debug in Console");
