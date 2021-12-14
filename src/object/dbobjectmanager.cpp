@@ -57,32 +57,32 @@ double secondsSinceMidnightUTC ()
     auto p_time = microsec_clock::universal_time (); // UTC.
     return (p_time.time_of_day().total_milliseconds() / 1000.0);
 
-////    auto now = std::chrono::system_clock::now(); // system_clock
-////    time_t tnow = std::chrono::system_clock::to_time_t(now);
+    ////    auto now = std::chrono::system_clock::now(); // system_clock
+    ////    time_t tnow = std::chrono::system_clock::to_time_t(now);
 
-////    loginf << " now is " << std::ctime(&tnow);
+    ////    loginf << " now is " << std::ctime(&tnow);
 
-////    //tm *date = std::localtime(&tnow); // local
-////    tm *date = std::gmtime(&tnow); // utc
-////    date->tm_hour = 0;
-////    date->tm_min = 0;
-////    date->tm_sec = 0;
-////    auto midnight = std::chrono::system_clock::from_time_t(std::mktime(date));
+    ////    //tm *date = std::localtime(&tnow); // local
+    ////    tm *date = std::gmtime(&tnow); // utc
+    ////    date->tm_hour = 0;
+    ////    date->tm_min = 0;
+    ////    date->tm_sec = 0;
+    ////    auto midnight = std::chrono::system_clock::from_time_t(std::mktime(date));
 
-////    double tod = std::chrono::duration<double>(now-midnight).count();
+    ////    double tod = std::chrono::duration<double>(now-midnight).count();
 
-//////    auto now = std::chrono::system_clock::now();
-//////    auto today = floor<days>(now);
-//////    auto tod = duration_cast<seconds>(now - today);
+    //////    auto now = std::chrono::system_clock::now();
+    //////    auto today = floor<days>(now);
+    //////    auto tod = duration_cast<seconds>(now - today);
 
-////    using namespace std::chrono;
-////    using namespace std;
-////    using days = duration<int, ratio<86400>>;
-////    seconds last_midnight =
-////        time_point_cast<days>(system_clock::now()).time_since_epoch();
-////    loginf << "UGA " <<  last_midnight.count() << String::timeStringFromDouble(last_midnight.count());
+    ////    using namespace std::chrono;
+    ////    using namespace std;
+    ////    using days = duration<int, ratio<86400>>;
+    ////    seconds last_midnight =
+    ////        time_point_cast<days>(system_clock::now()).time_since_epoch();
+    ////    loginf << "UGA " <<  last_midnight.count() << String::timeStringFromDouble(last_midnight.count());
 
-//    return tod;
+    //    return tod;
 }
 
 const std::vector<std::string> DBObjectManager::data_source_types_ {"Radar", "MLAT", "ADSB", "Tracker", "RefTraj"};
@@ -954,60 +954,52 @@ void DBObjectManager::finishInserting()
             loginf << "DBObjectManager: finishInserting: data time min " << String::timeStringFromDouble(min_tod_found)
                    << " max " << String::timeStringFromDouble(max_tod_found);
 
-//        if (max_time_set) // cut to size
-//        {
-            float min_tod = max_time - 300.0; // max - 5min
-            assert (min_tod > 0); // does not work for midnight crossings
+        float min_tod = max_time - 300.0; // max - 5min
+        assert (min_tod > 0); // does not work for midnight crossings
 
-            loginf << "DBObjectManager: finishInserting: min_tod " << String::timeStringFromDouble(min_tod)
-                   //<< " data min " << String::timeStringFromDouble(min_tod_found)
-                   << " data max " << String::timeStringFromDouble(max_time);
-                   //<< " utc " << String::timeStringFromDouble(secondsSinceMidnighUTC());
+        loginf << "DBObjectManager: finishInserting: min_tod " << String::timeStringFromDouble(min_tod)
+                  //<< " data min " << String::timeStringFromDouble(min_tod_found)
+               << " data max " << String::timeStringFromDouble(max_time);
+        //<< " utc " << String::timeStringFromDouble(secondsSinceMidnighUTC());
 
-//            if (min_tod > min_tod_found) // cut indexes
-//            {
-                for (auto& buf_it : data_)
+        for (auto& buf_it : data_)
+        {
+            buffer_size = buf_it.second->size();
+
+            assert (metaVariable(DBObject::meta_var_tod_id_.name()).existsIn(buf_it.first));
+
+            DBOVariable& tod_var = metaVariable(DBObject::meta_var_tod_id_.name()).getFor(buf_it.first);
+
+            Property tod_prop {tod_var.name(), tod_var.dataType()};
+
+            assert (data_.at(buf_it.first)->hasProperty(tod_prop));
+
+            NullableVector<float>& tod_vec = buf_it.second->get<float>(tod_var.name());
+
+            unsigned int index=0;
+
+            for (; index < buffer_size; ++index)
+            {
+                if (!tod_vec.isNull(index) && tod_vec.get(index) > min_tod)
                 {
-                    buffer_size = buf_it.second->size();
-
-                    assert (metaVariable(DBObject::meta_var_tod_id_.name()).existsIn(buf_it.first));
-
-                    DBOVariable& tod_var = metaVariable(DBObject::meta_var_tod_id_.name()).getFor(buf_it.first);
-
-                    Property tod_prop {tod_var.name(), tod_var.dataType()};
-
-                    assert (data_.at(buf_it.first)->hasProperty(tod_prop));
-
-                    NullableVector<float>& tod_vec = buf_it.second->get<float>(tod_var.name());
-
-                    unsigned int index=0;
-
-                    for (; index < buffer_size; ++index)
-                    {
-                        if (!tod_vec.isNull(index) && tod_vec.get(index) > min_tod)
-                        {
-                            logdbg << "DBObjectManager: finishInserting: found " << buf_it.first
-                                   << " cutoff tod index " << index
-                                   << " tod " << String::timeStringFromDouble(tod_vec.get(index));
-                            break;
-                        }
-                    }
-
-                    if (index) // index found
-                    {
-                        index--; // cut at previous
-
-                        logdbg << "DBObjectManager: finishInserting: cutting " << buf_it.first
-                               << " up to index " << index
-                               << " total size " << buffer_size;
-                        assert (index < buffer_size);
-                        buf_it.second->cutUpToIndex(index);
-                    }
+                    logdbg << "DBObjectManager: finishInserting: found " << buf_it.first
+                           << " cutoff tod index " << index
+                           << " tod " << String::timeStringFromDouble(tod_vec.get(index));
+                    break;
                 }
-//            }
-//        }
-//        else
-//            logwrn << "DBObjectManager: finishInserting: no viable time found in live mode";
+            }
+
+            if (index) // index found
+            {
+                index--; // cut at previous
+
+                logdbg << "DBObjectManager: finishInserting: cutting " << buf_it.first
+                       << " up to index " << index
+                       << " total size " << buffer_size;
+                assert (index < buffer_size);
+                buf_it.second->cutUpToIndex(index);
+            }
+        }
 
         // remove empty buffers
 
@@ -1023,7 +1015,9 @@ void DBObjectManager::finishInserting()
         load_widget_->update();
 
     logdbg << "DBObjectManager: finishInserting: distributing data";
-    emit loadedDataSignal(data_, true);
+
+    if (data_.size())
+        emit loadedDataSignal(data_, true);
 
     boost::posix_time::time_duration time_diff = boost::posix_time::microsec_clock::local_time() - start_time;
     loginf << "DBObjectManager: finishInserting: processing took "
