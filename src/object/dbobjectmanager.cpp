@@ -18,6 +18,7 @@
 #include "dbobjectmanager.h"
 
 #include "compass.h"
+#include "mainwindow.h"
 #include "configurationmanager.h"
 #include "dbinterface.h"
 #include "dbobject.h"
@@ -49,12 +50,12 @@ using namespace DBContent;
 using namespace nlohmann;
 
 // move to somewhere else?
-double secondsSinceMidnighUTC ()
+double secondsSinceMidnightUTC ()
 {
     using namespace boost::posix_time;
 
     auto p_time = microsec_clock::universal_time (); // UTC.
-    return (p_time.time_of_day().total_milliseconds() / 1000.0) - 3600.0;
+    return (p_time.time_of_day().total_milliseconds() / 1000.0);
 
 ////    auto now = std::chrono::system_clock::now(); // system_clock
 ////    time_t tnow = std::chrono::system_clock::to_time_t(now);
@@ -909,45 +910,56 @@ void DBObjectManager::finishInserting()
     {
         unsigned int buffer_size;
 
-//        bool max_time_set = false;
-//        float min_tod_found, max_tod_found;
+        bool max_time_set = false;
+        float min_tod_found, max_tod_found;
 
-        float max_time = secondsSinceMidnighUTC();
+        float max_time = secondsSinceMidnightUTC();
 
-//        for (auto& buf_it : data_)
-//        {
-//            assert (metaVariable(DBObject::meta_var_tod_id_.name()).existsIn(buf_it.first));
+        float time_offset = COMPASS::instance().mainWindow().importASTERIXFromNetworkTimeOffset();
 
-//            DBOVariable& tod_var = metaVariable(DBObject::meta_var_tod_id_.name()).getFor(buf_it.first);
+        loginf << "DBObjectManager: finishInserting: max_time " << String::timeStringFromDouble(max_time)
+               << " time offset " << String::timeStringFromDouble(time_offset);
 
-//            Property tod_prop {tod_var.name(), tod_var.dataType()};
+        max_time += time_offset;
 
-//            assert (data_.at(buf_it.first)->hasProperty(tod_prop));
+        for (auto& buf_it : data_)
+        {
+            assert (metaVariable(DBObject::meta_var_tod_id_.name()).existsIn(buf_it.first));
 
-//            NullableVector<float>& tod_vec = buf_it.second->get<float>(tod_var.name());
+            DBOVariable& tod_var = metaVariable(DBObject::meta_var_tod_id_.name()).getFor(buf_it.first);
 
-//            auto minmax = tod_vec.minMaxValues();
-//            assert (get<0>(minmax)); // there is minmax
+            Property tod_prop {tod_var.name(), tod_var.dataType()};
 
-//            if (max_time_set)
-//            {
-//                min_tod_found = min(min_tod_found, get<1>(minmax));
-//                max_tod_found = max(max_tod_found, get<2>(minmax));
-//            }
-//            else
-//            {
-//                min_tod_found = get<1>(minmax);
-//                max_tod_found = get<2>(minmax);
-//                max_time_set = true;
-//            }
-//        }
+            assert (data_.at(buf_it.first)->hasProperty(tod_prop));
+
+            NullableVector<float>& tod_vec = buf_it.second->get<float>(tod_var.name());
+
+            auto minmax = tod_vec.minMaxValues();
+            assert (get<0>(minmax)); // there is minmax
+
+            if (max_time_set)
+            {
+                min_tod_found = min(min_tod_found, get<1>(minmax));
+                max_tod_found = max(max_tod_found, get<2>(minmax));
+            }
+            else
+            {
+                min_tod_found = get<1>(minmax);
+                max_tod_found = get<2>(minmax);
+                max_time_set = true;
+            }
+        }
+
+        if (max_time_set)
+            loginf << "DBObjectManager: finishInserting: data time min " << String::timeStringFromDouble(min_tod_found)
+                   << " max " << String::timeStringFromDouble(max_tod_found);
 
 //        if (max_time_set) // cut to size
 //        {
             float min_tod = max_time - 300.0; // max - 5min
             assert (min_tod > 0); // does not work for midnight crossings
 
-            logdbg << "DBObjectManager: finishInserting: min_tod " << String::timeStringFromDouble(min_tod)
+            loginf << "DBObjectManager: finishInserting: min_tod " << String::timeStringFromDouble(min_tod)
                    //<< " data min " << String::timeStringFromDouble(min_tod_found)
                    << " data max " << String::timeStringFromDouble(max_time);
                    //<< " utc " << String::timeStringFromDouble(secondsSinceMidnighUTC());

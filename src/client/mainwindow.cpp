@@ -319,8 +319,22 @@ void MainWindow::importASTERIXFile(const std::string& filename)
 
 void MainWindow::importASTERIXFromNetwork()
 {
+    loginf << "MainWindow: importASTERIXFromNetwork";
+
     automatic_tasks_defined_ = true;
     asterix_import_network_ = true;
+}
+
+void MainWindow::importASTERIXFromNetworkTimeOffset(float value)
+{
+    loginf << "MainWindow: importASTERIXFromNetworkTimeOffset: offset " << String::timeStringFromDouble(value);
+
+    asterix_import_network_time_offset_ = value;
+}
+
+float MainWindow::importASTERIXFromNetworkTimeOffset()
+{
+    return asterix_import_network_time_offset_;
 }
 
 #endif

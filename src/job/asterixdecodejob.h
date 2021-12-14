@@ -81,6 +81,8 @@ class ASTERIXDecodeJob : public Job
     bool decode_udp_streams_ {false};
     std::map<unsigned int, std::vector <std::pair<std::string, unsigned int>>> ds_lines_;
 
+    float network_time_offset_ {0};
+
     volatile bool pause_{false};
 
     size_t num_frames_{0};

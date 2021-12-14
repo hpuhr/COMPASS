@@ -20,6 +20,8 @@
 #include "json.h"
 #include "logger.h"
 #include "stringconv.h"
+#include "compass.h"
+#include "mainwindow.h"
 
 #include <jasterix/jasterix.h>
 

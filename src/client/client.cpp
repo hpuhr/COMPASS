@@ -86,6 +86,7 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
 #if USE_JASTERIX
     std::string import_asterix_filename;
     bool import_asterix_network {false};
+    std::string import_asterix_network_time_offset;
 //    std::string asterix_framing;
 //    std::string asterix_decoder_cfg;
 #endif
@@ -118,6 +119,8 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
              "imports ASTERIX file with given filename, e.g. '/data/file1.ff'")
             ("import_asterix_network", po::bool_switch(&import_asterix_network),
              "imports ASTERIX from defined network UDP streams")
+            ("import_asterix_network_time_offset", po::value<std::string>(&import_asterix_network_time_offset),
+             "imports used time offset during ASTERIX network import, in HH:MM:SS.ZZZ'")
 //            ("asterix_framing", po::value<std::string>(&asterix_framing),
 //             "sets ASTERIX framing, e.g. 'none', 'ioss', 'ioss_seq', 'rff'")
 //            ("asterix_decoder_cfg", po::value<std::string>(&asterix_decoder_cfg),
@@ -220,6 +223,9 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
         main_window.importASTERIXFile(import_asterix_filename);
     else if (import_asterix_network)
         main_window.importASTERIXFromNetwork();
+
+    if (import_asterix_network_time_offset.size())
+        main_window.importASTERIXFromNetworkTimeOffset(String::timeFromString(import_asterix_network_time_offset));
 #endif
 
 //    if (import_json_filename.size())

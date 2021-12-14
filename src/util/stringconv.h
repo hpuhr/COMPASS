@@ -152,8 +152,17 @@ inline double timeFromString(std::string time_str, bool* ok=nullptr)
     }
 
     time = std::stod(chunks[0]) * 3600.0;
-    time += std::stod(chunks[1]) * 60.0;
-    time += std::stod(chunks[2]);
+
+    if (time >= 0)
+    {
+        time += std::stod(chunks[1]) * 60.0;
+        time += std::stod(chunks[2]);
+    }
+    else
+    {
+        time -= std::stod(chunks[1]) * 60.0;
+        time -= std::stod(chunks[2]);
+    }
 
     if (ok)
         *ok = true;
