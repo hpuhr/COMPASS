@@ -16,15 +16,6 @@
  */
 
 #include "dbobjectmanagerloadwidget.h"
-
-#include <QCheckBox>
-#include <QGridLayout>
-#include <QLabel>
-#include <QLineEdit>
-#include <QMessageBox>
-#include <QPushButton>
-#include <QVBoxLayout>
-
 #include "compass.h"
 #include "dbobject.h"
 #include "dbobjectinfowidget.h"
@@ -34,8 +25,20 @@
 #include "global.h"
 #include "stringconv.h"
 #include "viewmanager.h"
+#include "number.h"
+
+#include <QCheckBox>
+#include <QGridLayout>
+#include <QLabel>
+#include <QLineEdit>
+#include <QMessageBox>
+#include <QPushButton>
+#include <QVBoxLayout>
+
+
 
 using namespace std;
+using namespace Utils;
 using namespace Utils::String;
 
 DBObjectManagerLoadWidget::DBObjectManagerLoadWidget(DBObjectManager& object_manager)
@@ -258,10 +261,12 @@ void DBObjectManagerLoadWidget::update()
             clear_required = true;
             break;
         }
-
         // check content widget exist
 
-        for (auto& cnt_it : ds_it->numInsertedMap())
+        if (!ds_it->hasActiveNumInserted()) // no data
+            continue;
+
+        for (auto& cnt_it : ds_it->activeNumInsertedMap())
         {
             if (!ds_content_boxes_.count(ds_it->name()) || !ds_content_boxes_.at(ds_it->name()).count(cnt_it.first))
             {
@@ -334,8 +339,17 @@ void DBObjectManagerLoadWidget::clearAndCreateContent()
     unsigned int dstype_col = 0;
     unsigned int dstyp_cnt = 0;
 
+    unsigned int ds_id;
     string ds_name;
     string ds_content_name;
+
+    unsigned int button_size = 24;
+
+    //ds_id -> (ip, port)
+    std::map<unsigned int, std::vector <std::pair<std::string, unsigned int>>> net_lines =
+            COMPASS::instance().objectManager().getNetworkLines();
+
+    string tooltip;
 
     for (auto& ds_type_name : DBObjectManager::data_source_types_)
     {
@@ -363,27 +377,64 @@ void DBObjectManagerLoadWidget::clearAndCreateContent()
             if (ds_it->dsType() != ds_type_name)
                 continue;
 
+            ds_id = Number::dsIdFrom(ds_it->sac(), ds_it->sic());
             ds_name = ds_it->name();
             loginf << "DBObjectManagerLoadWidget: clearAndCreateContent: create '"
                    << ds_it->dsType() << "' '" << ds_name << "'";
 
             QCheckBox* ds_box = new QCheckBox(ds_name.c_str());
 
-            type_layout_->addWidget(ds_box, row, col_start, 1, num_col_per_dstype-1,
+            type_layout_->addWidget(ds_box, row, col_start, 1, 2, //num_col_per_dstype-1,
                                     Qt::AlignTop | Qt::AlignLeft);
 
             assert (!ds_boxes_.count(ds_name));
             ds_boxes_[ds_name] = ds_box;
 
+            // Line Buttons
+            if (net_lines.count(ds_id))
+            {
+                QHBoxLayout* button_lay = new QHBoxLayout();
+
+                for (unsigned int line_cnt = 0; line_cnt < net_lines.at(ds_id).size(); ++line_cnt)
+                {
+                    QPushButton* button = new QPushButton ("L"+QString::number(line_cnt+1));
+                    button->setFixedSize(button_size,button_size);
+                    button->setCheckable(true);
+                    button->setDown(line_cnt == 0);
+
+                    QPalette pal = button->palette();
+
+                    if (line_cnt == 0)
+                        pal.setColor(QPalette::Button, QColor(Qt::green));
+                    else
+                        pal.setColor(QPalette::Button, QColor(Qt::yellow));
+
+                    button->setAutoFillBackground(true);
+                    button->setPalette(pal);
+                    button->update();
+                    //button->setDisabled(line_cnt != 0);
+
+                    tooltip = net_lines.at(ds_id).at(line_cnt).first+":"
+                                 +to_string(net_lines.at(ds_id).at(line_cnt).second);
+
+                    button->setToolTip(tooltip.c_str());
+
+                    button_lay->addWidget(button);
+                }
+
+                type_layout_->addLayout(button_lay, row, col_start+3, // 2 for start
+                                        Qt::AlignTop | Qt::AlignRight);
+            }
+
             ++row;
 
-            for (auto& cnt_it : ds_it->numInsertedMap())
+            for (auto& cnt_it : ds_it->activeNumInsertedMap())
             {
                 ds_content_name = cnt_it.first;
 
                 // content checkbox
 
-                QCheckBox* dbcont_box = new QCheckBox(ds_content_name.c_str());
+                QLabel* dbcont_box = new QLabel(ds_content_name.c_str());
 
                 type_layout_->addWidget(dbcont_box, row, col_start+1,
                                         Qt::AlignTop | Qt::AlignRight);
@@ -393,7 +444,7 @@ void DBObjectManagerLoadWidget::clearAndCreateContent()
 
                 // ds content loaded label
 
-                QLabel* ds_content_loaded_label = new QLabel(QString::number(ds_it->numLoaded(ds_content_name)));
+                QLabel* ds_content_loaded_label = new QLabel(QString::number(ds_it->activeNumLoaded(ds_content_name)));
 
                 type_layout_->addWidget(ds_content_loaded_label, row, col_start+2,
                                         Qt::AlignTop | Qt::AlignRight);
@@ -436,7 +487,7 @@ void DBObjectManagerLoadWidget::updateExistingContent()
         assert (ds_boxes_.count(ds_name));
         // ds_boxes_[ds_name] // checkbox
 
-        for (auto& cnt_it : ds_it->numInsertedMap())
+        for (auto& cnt_it : ds_it->activeNumInsertedMap())
         {
             ds_content_name = cnt_it.first;
 
@@ -449,7 +500,7 @@ void DBObjectManagerLoadWidget::updateExistingContent()
             assert (ds_content_loaded_labels_.count(ds_name)
                     && ds_content_loaded_labels_.at(ds_name).count(ds_content_name));
             ds_content_loaded_labels_[ds_name][ds_content_name]->setText(
-                        QString::number(ds_it->numLoaded(ds_content_name)));
+                        QString::number(ds_it->activeNumLoaded(ds_content_name)));
 
             // ds content total label
 

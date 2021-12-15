@@ -471,8 +471,8 @@ void DBObject::doDataSourcesBeforeInsert (shared_ptr<Buffer> buffer)
             dbo_manager_.addNewDataSource(ds_id_cnt.first);
 
         // add record count
-        dbo_manager_.dataSource(ds_id_cnt.first).addNumInserted(name_, ds_id_cnt.second);
-        dbo_manager_.dataSource(ds_id_cnt.first).addNumLoaded(name_, ds_id_cnt.second); // because propagated after
+        dbo_manager_.dataSource(ds_id_cnt.first).addNumInserted(0, name_, ds_id_cnt.second); // TODO HACK LINE ID
+        dbo_manager_.dataSource(ds_id_cnt.first).addNumLoaded(0, name_, ds_id_cnt.second); // because propagated after
     }
 }
 

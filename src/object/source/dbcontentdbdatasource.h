@@ -26,12 +26,13 @@ public:
 
     void counts (const std::string& counts); // only for init
     std::string countsStr();
-    const std::map<std::string, unsigned int>& numInsertedMap() const;
+    bool hasActiveNumInserted() const;
+    const std::map<std::string, unsigned int>& activeNumInsertedMap() const;
 
-    void addNumInserted(const std::string& db_content, unsigned int num);
+    void addNumInserted(unsigned int line_id, const std::string& db_content, unsigned int num);
 
-    void addNumLoaded(const std::string& db_content, unsigned int num);
-    unsigned int numLoaded (const std::string& db_content);
+    void addNumLoaded(unsigned int line_id, const std::string& db_content, unsigned int num);
+    unsigned int activeNumLoaded (const std::string& db_content);
     void clearNumLoaded();
 
 //    virtual nlohmann::json getAsJSON();
@@ -40,13 +41,18 @@ public:
     unsigned int id() const;
     void id(unsigned int id);
 
+    unsigned int activeLine() const;
+    void activeLine(unsigned int active_line);
+
 protected:
     unsigned int id_{0};
 
+    unsigned int active_line_ {0};
+
     nlohmann::json counts_;
 
-    std::map<std::string, unsigned int> num_loaded_;
-    std::map<std::string, unsigned int> counts_map_;
+    std::map<unsigned int, std::map<std::string, unsigned int>> num_loaded_;
+    std::map<unsigned int, std::map<std::string, unsigned int>> counts_map_;
 };
 
 } // namespace DBContent

@@ -70,7 +70,7 @@ class DBObjectManagerLoadWidget : public QWidget
     std::map<std::string, QCheckBox*> ds_type_boxes_;
 
     std::map<std::string, QCheckBox*> ds_boxes_; // ds name -> load box
-    std::map<std::string, std::map<std::string, QCheckBox*>> ds_content_boxes_; // ds name -> (cont, label)
+    std::map<std::string, std::map<std::string, QLabel*>> ds_content_boxes_; // ds name -> (cont, label)
     std::map<std::string, std::map<std::string, QLabel*>> ds_content_loaded_labels_; // ds name -> (cont, label)
     std::map<std::string, std::map<std::string, QLabel*>> ds_content_total_labels_; // ds name -> (cont, label)
 

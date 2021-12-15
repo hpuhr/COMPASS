@@ -30,7 +30,7 @@ void DBDataSource::counts (const std::string& counts)
 {
     counts_ = json::parse(counts);
 
-    counts_map_ = counts_.get<std::map<std::string, unsigned int>>();
+    counts_map_ = counts_.get<std::map<unsigned int, std::map<std::string, unsigned int>>>();
 }
 
 std::string DBDataSource::countsStr()
@@ -38,27 +38,33 @@ std::string DBDataSource::countsStr()
     return counts_.dump();
 }
 
-const std::map<std::string, unsigned int>& DBDataSource::numInsertedMap() const
+bool DBDataSource::hasActiveNumInserted() const
 {
-    return counts_map_;
+    return counts_map_.count(active_line_);
 }
 
-void DBDataSource::addNumInserted(const std::string& db_content, unsigned int num)
+const std::map<std::string, unsigned int>& DBDataSource::activeNumInsertedMap() const
 {
-    counts_map_[db_content] += num;
+    assert (hasActiveNumInserted());
+    return counts_map_.at(active_line_);
+}
+
+void DBDataSource::addNumInserted(unsigned int line_id, const std::string& db_content, unsigned int num)
+{
+    counts_map_[line_id][db_content] += num;
 
     counts_ = counts_map_;
 }
 
-void DBDataSource::addNumLoaded(const std::string& db_content, unsigned int num)
+void DBDataSource::addNumLoaded(unsigned int line_id, const std::string& db_content, unsigned int num)
 {
-    num_loaded_[db_content] += num;
+    num_loaded_[line_id][db_content] += num;
 }
 
-unsigned int DBDataSource::numLoaded (const std::string& db_content)
+unsigned int DBDataSource::activeNumLoaded (const std::string& db_content)
 {
-    if (num_loaded_.count(db_content))
-        return num_loaded_.at(db_content);
+    if (num_loaded_.count(active_line_) && num_loaded_.at(active_line_).count(db_content))
+        return num_loaded_.at(active_line_).at(db_content);
     else
         return 0;
 }
@@ -92,6 +98,18 @@ unsigned int DBDataSource::id() const
 void DBDataSource::id(unsigned int id)
 {
     id_ = id;
+}
+
+unsigned int DBDataSource::activeLine() const
+{
+    return active_line_;
+}
+
+void DBDataSource::activeLine(unsigned int active_line)
+{
+    loginf << "DBDataSource: activeLine: num " << active_line;
+
+    active_line_ = active_line;
 }
 
 

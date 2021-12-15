@@ -269,6 +269,8 @@ void ASTERIXDecodeJob::doUDPStreamDecoding()
                    << " ip " << ip << ":" << port;
 
             udp_receivers.emplace_back(new UDPReceiver(io_context, ip, port, data_callback));
+
+            continue; // HACK only do first line
         }
     }
 

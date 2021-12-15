@@ -1125,32 +1125,32 @@ std::map<unsigned int, std::vector <std::pair<std::string, unsigned int>>> DBObj
 
                 existing_lines.insert(ip+":"+to_string(port));
 
-                break; // TODO only parse one for now
+                //break; // TODO only parse one for now
             }
         }
     }
 
-    for (auto& ds_it : db_data_sources_) // should be same
-    {
-        if (ds_it->info().contains("network_lines"))
-        {
-            json& network_lines = ds_it->info().at("network_lines");
-            assert (network_lines.is_array());
+//    for (auto& ds_it : db_data_sources_) // should be same
+//    {
+//        if (ds_it->info().contains("network_lines"))
+//        {
+//            json& network_lines = ds_it->info().at("network_lines");
+//            assert (network_lines.is_array());
 
-            for (auto& line_it : network_lines.get<json::array_t>())  // iterate over array
-            {
-                assert (line_it.is_primitive());
-                assert (line_it.is_string());
+//            for (auto& line_it : network_lines.get<json::array_t>())  // iterate over array
+//            {
+//                assert (line_it.is_primitive());
+//                assert (line_it.is_string());
 
-                line_address = line_it;
+//                line_address = line_it;
 
-                ip = String::ipFromString(line_address);
-                port = String::portFromString(line_address);
+//                ip = String::ipFromString(line_address);
+//                port = String::portFromString(line_address);
 
-                lines[Number::dsIdFrom(ds_it->sac(), ds_it->sic())].push_back({ip, port});
-            }
-        }
-    }
+//                lines[Number::dsIdFrom(ds_it->sac(), ds_it->sic())].push_back({ip, port});
+//            }
+//        }
+//    }
 
     return lines;
 }
