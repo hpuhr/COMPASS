@@ -857,164 +857,11 @@ void DBObjectManager::finishInserting()
     boost::posix_time::ptime start_time = boost::posix_time::microsec_clock::local_time();
     assert (existsMetaVariable(DBObject::meta_var_tod_id_.name()));
 
-    {
-        for (auto& buf_it : insert_data_)
-        {
-
-            DBOVariableSet read_set = COMPASS::instance().viewManager().getReadSet(buf_it.first);
-            vector<Property> buffer_properties_to_be_removed;
-
-            // remove all unused
-            for (const auto& prop_it : buf_it.second->properties().properties())
-            {
-                if (!read_set.hasDBColumnName(prop_it.name()))
-                    buffer_properties_to_be_removed.push_back(prop_it); // remove it later
-            }
-
-            for (auto& prop_it : buffer_properties_to_be_removed)
-            {
-                logdbg << "DBObjectManager: finishInserting: deleting property " << prop_it.name();
-                buf_it.second->deleteProperty(prop_it);
-            }
-
-            // change db column names to dbo var names
-            buf_it.second->transformVariables(read_set, true);
-
-            // add selection flags
-            buf_it.second->addProperty(DBObject::selected_var);
-
-            // add buffer to be able to distribute to views
-            if (!data_.count(buf_it.first))
-                data_[buf_it.first] = buf_it.second;
-            else
-            {
-                data_.at(buf_it.first)->seizeBuffer(*buf_it.second.get());
-
-                // sort by tod
-                assert (metaVariable(DBObject::meta_var_tod_id_.name()).existsIn(buf_it.first));
-
-                DBOVariable& tod_var = metaVariable(DBObject::meta_var_tod_id_.name()).getFor(buf_it.first);
-
-                Property tod_prop {tod_var.name(), tod_var.dataType()};
-
-                assert (data_.at(buf_it.first)->hasProperty(tod_prop));
-
-                data_.at(buf_it.first)->sortByProperty(tod_prop);
-            }
-        }
-    }
-
-    insert_data_.clear();
+    addInsertedDataToChache();
 
     if (COMPASS::instance().liveMode()) // do tod cleanup
     {
-        unsigned int buffer_size;
-
-        bool max_time_set = false;
-        float min_tod_found, max_tod_found;
-
-        float max_time = secondsSinceMidnightUTC();
-
-        float time_offset = COMPASS::instance().mainWindow().importASTERIXFromNetworkTimeOffset();
-
-        loginf << "DBObjectManager: finishInserting: max_time " << String::timeStringFromDouble(max_time)
-               << " time offset " << String::timeStringFromDouble(time_offset);
-
-        max_time += time_offset;
-
-        for (auto& buf_it : data_)
-        {
-            assert (metaVariable(DBObject::meta_var_tod_id_.name()).existsIn(buf_it.first));
-
-            DBOVariable& tod_var = metaVariable(DBObject::meta_var_tod_id_.name()).getFor(buf_it.first);
-
-            Property tod_prop {tod_var.name(), tod_var.dataType()};
-
-            if(buf_it.second->hasProperty(tod_prop))
-            {
-                NullableVector<float>& tod_vec = buf_it.second->get<float>(tod_var.name());
-
-                auto minmax = tod_vec.minMaxValues();
-                assert (get<0>(minmax)); // there is minmax
-
-                if (max_time_set)
-                {
-                    min_tod_found = min(min_tod_found, get<1>(minmax));
-                    max_tod_found = max(max_tod_found, get<2>(minmax));
-                }
-                else
-                {
-                    min_tod_found = get<1>(minmax);
-                    max_tod_found = get<2>(minmax);
-                    max_time_set = true;
-                }
-            }
-            else
-                logwrn << "DBObjectManager: finishInserting: buffer " << buf_it.first << " has not tod for min/max";
-        }
-
-        if (max_time_set)
-            loginf << "DBObjectManager: finishInserting: data time min " << String::timeStringFromDouble(min_tod_found)
-                   << " max " << String::timeStringFromDouble(max_tod_found);
-
-        float min_tod = max_time - 300.0; // max - 5min
-        assert (min_tod > 0); // does not work for midnight crossings
-
-        loginf << "DBObjectManager: finishInserting: min_tod " << String::timeStringFromDouble(min_tod)
-                  //<< " data min " << String::timeStringFromDouble(min_tod_found)
-               << " data max " << String::timeStringFromDouble(max_time);
-        //<< " utc " << String::timeStringFromDouble(secondsSinceMidnighUTC());
-
-        for (auto& buf_it : data_)
-        {
-            buffer_size = buf_it.second->size();
-
-            assert (metaVariable(DBObject::meta_var_tod_id_.name()).existsIn(buf_it.first));
-
-            DBOVariable& tod_var = metaVariable(DBObject::meta_var_tod_id_.name()).getFor(buf_it.first);
-
-            Property tod_prop {tod_var.name(), tod_var.dataType()};
-
-            if (buf_it.second->hasProperty(tod_prop))
-            {
-                NullableVector<float>& tod_vec = buf_it.second->get<float>(tod_var.name());
-
-                unsigned int index=0;
-
-                for (; index < buffer_size; ++index)
-                {
-                    if (!tod_vec.isNull(index) && tod_vec.get(index) > min_tod)
-                    {
-                        logdbg << "DBObjectManager: finishInserting: found " << buf_it.first
-                               << " cutoff tod index " << index
-                               << " tod " << String::timeStringFromDouble(tod_vec.get(index));
-                        break;
-                    }
-                }
-
-                if (index) // index found
-                {
-                    index--; // cut at previous
-
-                    logdbg << "DBObjectManager: finishInserting: cutting " << buf_it.first
-                           << " up to index " << index
-                           << " total size " << buffer_size;
-                    assert (index < buffer_size);
-                    buf_it.second->cutUpToIndex(index);
-                }
-            }
-            else
-                logwrn << "DBObjectManager: finishInserting: buffer " << buf_it.first << " has not tod for cutoff";
-        }
-
-        // remove empty buffers
-
-        std::map<std::string, std::shared_ptr<Buffer>> tmp_data = data_;
-
-        for (auto& buf_it : tmp_data)
-            if (!buf_it.second->size())
-                data_.erase(buf_it.first);
-
+        cutCachedData();
     }
 
     if (load_widget_)
@@ -1028,6 +875,168 @@ void DBObjectManager::finishInserting()
     boost::posix_time::time_duration time_diff = boost::posix_time::microsec_clock::local_time() - start_time;
     loginf << "DBObjectManager: finishInserting: processing took "
         << String::timeStringFromDouble(time_diff.total_milliseconds() / 1000.0, true);
+}
+
+void DBObjectManager::addInsertedDataToChache()
+{
+    loginf << "DBObjectManager: addInsertedDataToChache";
+
+    for (auto& buf_it : insert_data_)
+    {
+
+        DBOVariableSet read_set = COMPASS::instance().viewManager().getReadSet(buf_it.first);
+        vector<Property> buffer_properties_to_be_removed;
+
+        // remove all unused
+        for (const auto& prop_it : buf_it.second->properties().properties())
+        {
+            if (!read_set.hasDBColumnName(prop_it.name()))
+                buffer_properties_to_be_removed.push_back(prop_it); // remove it later
+        }
+
+        for (auto& prop_it : buffer_properties_to_be_removed)
+        {
+            logdbg << "DBObjectManager: addInsertedDataToChache: deleting property " << prop_it.name();
+            buf_it.second->deleteProperty(prop_it);
+        }
+
+        // change db column names to dbo var names
+        buf_it.second->transformVariables(read_set, true);
+
+        // add selection flags
+        buf_it.second->addProperty(DBObject::selected_var);
+
+        // add buffer to be able to distribute to views
+        if (!data_.count(buf_it.first))
+            data_[buf_it.first] = buf_it.second;
+        else
+        {
+            data_.at(buf_it.first)->seizeBuffer(*buf_it.second.get());
+
+            // sort by tod
+            assert (metaVariable(DBObject::meta_var_tod_id_.name()).existsIn(buf_it.first));
+
+            DBOVariable& tod_var = metaVariable(DBObject::meta_var_tod_id_.name()).getFor(buf_it.first);
+
+            Property tod_prop {tod_var.name(), tod_var.dataType()};
+
+            assert (data_.at(buf_it.first)->hasProperty(tod_prop));
+
+            data_.at(buf_it.first)->sortByProperty(tod_prop);
+        }
+    }
+
+    insert_data_.clear();
+}
+
+void DBObjectManager::cutCachedData()
+{
+    unsigned int buffer_size;
+
+    bool max_time_set = false;
+    float min_tod_found, max_tod_found;
+
+    float max_time = secondsSinceMidnightUTC();
+
+    float time_offset = COMPASS::instance().mainWindow().importASTERIXFromNetworkTimeOffset();
+
+    loginf << "DBObjectManager: cutCachedData: max_time " << String::timeStringFromDouble(max_time)
+           << " time offset " << String::timeStringFromDouble(time_offset);
+
+    max_time += time_offset;
+
+    for (auto& buf_it : data_)
+    {
+        assert (metaVariable(DBObject::meta_var_tod_id_.name()).existsIn(buf_it.first));
+
+        DBOVariable& tod_var = metaVariable(DBObject::meta_var_tod_id_.name()).getFor(buf_it.first);
+
+        Property tod_prop {tod_var.name(), tod_var.dataType()};
+
+        if(buf_it.second->hasProperty(tod_prop))
+        {
+            NullableVector<float>& tod_vec = buf_it.second->get<float>(tod_var.name());
+
+            auto minmax = tod_vec.minMaxValues();
+            assert (get<0>(minmax)); // there is minmax
+
+            if (max_time_set)
+            {
+                min_tod_found = min(min_tod_found, get<1>(minmax));
+                max_tod_found = max(max_tod_found, get<2>(minmax));
+            }
+            else
+            {
+                min_tod_found = get<1>(minmax);
+                max_tod_found = get<2>(minmax);
+                max_time_set = true;
+            }
+        }
+        else
+            logwrn << "DBObjectManager: cutCachedData: buffer " << buf_it.first << " has not tod for min/max";
+    }
+
+    if (max_time_set)
+        loginf << "DBObjectManager: cutCachedData: data time min " << String::timeStringFromDouble(min_tod_found)
+               << " max " << String::timeStringFromDouble(max_tod_found);
+
+    float min_tod = max_time - 300.0; // max - 5min
+    assert (min_tod > 0); // does not work for midnight crossings
+
+    loginf << "DBObjectManager: cutCachedData: min_tod " << String::timeStringFromDouble(min_tod)
+              //<< " data min " << String::timeStringFromDouble(min_tod_found)
+           << " data max " << String::timeStringFromDouble(max_time);
+    //<< " utc " << String::timeStringFromDouble(secondsSinceMidnighUTC());
+
+    for (auto& buf_it : data_)
+    {
+        buffer_size = buf_it.second->size();
+
+        assert (metaVariable(DBObject::meta_var_tod_id_.name()).existsIn(buf_it.first));
+
+        DBOVariable& tod_var = metaVariable(DBObject::meta_var_tod_id_.name()).getFor(buf_it.first);
+
+        Property tod_prop {tod_var.name(), tod_var.dataType()};
+
+        if (buf_it.second->hasProperty(tod_prop))
+        {
+            NullableVector<float>& tod_vec = buf_it.second->get<float>(tod_var.name());
+
+            unsigned int index=0;
+
+            for (; index < buffer_size; ++index)
+            {
+                if (!tod_vec.isNull(index) && tod_vec.get(index) > min_tod)
+                {
+                    logdbg << "DBObjectManager: cutCachedData: found " << buf_it.first
+                           << " cutoff tod index " << index
+                           << " tod " << String::timeStringFromDouble(tod_vec.get(index));
+                    break;
+                }
+            }
+
+            if (index) // index found
+            {
+                index--; // cut at previous
+
+                logdbg << "DBObjectManager: cutCachedData: cutting " << buf_it.first
+                       << " up to index " << index
+                       << " total size " << buffer_size;
+                assert (index < buffer_size);
+                buf_it.second->cutUpToIndex(index);
+            }
+        }
+        else
+            logwrn << "DBObjectManager: cutCachedData: buffer " << buf_it.first << " has not tod for cutoff";
+    }
+
+    // remove empty buffers
+
+    std::map<std::string, std::shared_ptr<Buffer>> tmp_data = data_;
+
+    for (auto& buf_it : tmp_data)
+        if (!buf_it.second->size())
+            data_.erase(buf_it.first);
 }
 
 

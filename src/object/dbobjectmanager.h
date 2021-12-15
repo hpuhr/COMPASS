@@ -201,6 +201,9 @@ protected:
     void finishLoading();
     void finishInserting();
 
+    void addInsertedDataToChache();
+    void cutCachedData();
+
     void loadDBDataSources();
     void sortDBDataSources();
     void loadMaxRecordNumber();
