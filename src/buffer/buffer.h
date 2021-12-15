@@ -109,6 +109,7 @@ class Buffer
     void cutToSize(size_t size);
 
     void cutUpToIndex(size_t index); // everything up to index is removed
+    void removeIndexes(const std::vector<size_t>& indexes_to_remove); // must be sorted
 
     /// @brief Returns DBO type
     const std::string& dboName() { return dbo_name_; }

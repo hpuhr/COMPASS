@@ -54,6 +54,7 @@ public:
 
     /// @brief Sets all elements to false
     void clear();
+    void clearData(); // removes all data
 
     /// @brief Returns const reference to a specific value
     const T get(unsigned int index);
@@ -129,6 +130,7 @@ private:
     void copyData(NullableVector<T>& other);
     void cutToSize(unsigned int size);
     void cutUpToIndex(unsigned int index); // everything up to index is removed
+    void removeIndexes(const std::vector<size_t>& indexes_to_remove); // must be sorted
 
     /// @brief Constructor, only for friend Buffer
     NullableVector(Property& property, Buffer& buffer);
@@ -146,6 +148,13 @@ void NullableVector<T>::clear()
     logdbg << "NullableVector " << property_.name() << ": clear";
     std::fill(data_.begin(), data_.end(), T());
     std::fill(null_flags_.begin(), null_flags_.end(), true);
+}
+
+template <class T>
+void NullableVector<T>::clearData() // removes all data
+{
+    data_.clear();
+    null_flags_.clear();
 }
 
 template <class T>
@@ -844,6 +853,19 @@ void NullableVector<T>::cutUpToIndex(unsigned int index) // everything up to ind
     }
 
     // size set in Buffer::cutUpToIndex
+}
+
+template <class T>
+void NullableVector<T>::removeIndexes(const std::vector<size_t>& indexes_to_remove)
+{
+    for (auto index_it = indexes_to_remove.rbegin(); index_it != indexes_to_remove.rend(); ++index_it)
+    {
+        if (*index_it < null_flags_.size())
+            null_flags_.erase(null_flags_.begin() + *index_it);
+
+        if (*index_it < data_.size())
+            data_.erase(data_.begin() + *index_it);
+    }
 }
 
 template <class T>

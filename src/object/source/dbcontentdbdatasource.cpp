@@ -112,6 +112,18 @@ void DBDataSource::activeLine(unsigned int active_line)
     active_line_ = active_line;
 }
 
+bool DBDataSource::loadingWanted() const
+{
+    return loading_wanted_;
+}
+
+void DBDataSource::loadingWanted(bool loading_wanted)
+{
+    loginf << "DBDataSource: loadingWanted: ds " << name_ << " wanted " << loading_wanted;
+
+    loading_wanted_ = loading_wanted;
+}
+
 
 
 } // namespace DBContent

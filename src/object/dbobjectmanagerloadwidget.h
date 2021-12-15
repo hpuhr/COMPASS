@@ -37,6 +37,9 @@ class DBObjectManagerLoadWidget : public QWidget
 
   public slots:
 
+    void loadDSTypeChangedSlot();
+    void loadDSChangedSlot();
+
     void toggleUseLimit();
     void limitMinChanged();
     void limitMaxChanged();

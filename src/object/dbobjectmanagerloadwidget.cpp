@@ -166,6 +166,36 @@ DBObjectManagerLoadWidget::DBObjectManagerLoadWidget(DBObjectManager& object_man
 
 DBObjectManagerLoadWidget::~DBObjectManagerLoadWidget() {}
 
+
+void DBObjectManagerLoadWidget::loadDSTypeChangedSlot()
+{
+    QCheckBox* box = dynamic_cast<QCheckBox*>(QObject::sender());
+    assert (box);
+
+    string ds_type_name =box->property("DSType").toString().toStdString();
+
+    bool load = box->checkState() == Qt::Checked;
+
+    loginf << "DBObjectManagerLoadWidget: loadDSTypeChangedSlot: ds_type " << ds_type_name << " load " << load;
+
+    COMPASS::instance().objectManager().dsTypeLoadingWanted(ds_type_name, load);
+}
+
+void DBObjectManagerLoadWidget::loadDSChangedSlot()
+{
+    QCheckBox* box = dynamic_cast<QCheckBox*>(QObject::sender());
+    assert (box);
+
+    unsigned int ds_id = box->property("DS ID").toUInt();
+
+    bool load = box->checkState() == Qt::Checked;
+
+    loginf << "DBObjectManagerLoadWidget: loadDSChangedSlot: ds_id " << ds_id << " load " << load;
+
+    COMPASS::instance().objectManager().dataSource(ds_id).loadingWanted(load);
+}
+
+
 void DBObjectManagerLoadWidget::toggleUseLimit()
 {
     assert(limit_check_);
@@ -351,6 +381,9 @@ void DBObjectManagerLoadWidget::clearAndCreateContent()
 
     string tooltip;
 
+    DBObjectManager& dbo_man = COMPASS::instance().objectManager();
+    bool ds_found;
+
     for (auto& ds_type_name : DBObjectManager::data_source_types_)
     {
         logdbg << "DBObjectManagerLoadWidget: clearAndCreateContent: typ " << ds_type_name << " cnt " << dstyp_cnt;
@@ -364,6 +397,11 @@ void DBObjectManagerLoadWidget::clearAndCreateContent()
 
         QCheckBox* dstyp_box = new QCheckBox(ds_type_name.c_str());
         dstyp_box->setFont(font_bold);
+        dstyp_box->setChecked(dbo_man.dsTypeLoadingWanted(ds_type_name));
+        dstyp_box->setProperty("DSType", ds_type_name.c_str());
+
+        connect(dstyp_box, &QCheckBox::clicked, this,
+                &DBObjectManagerLoadWidget::loadDSTypeChangedSlot);
 
         type_layout_->addWidget(dstyp_box, row, col_start, 1, num_col_per_dstype, Qt::AlignTop | Qt::AlignLeft);
 
@@ -372,10 +410,14 @@ void DBObjectManagerLoadWidget::clearAndCreateContent()
 
         ++row;
 
+        ds_found = false;
+
         for (const auto& ds_it : dbo_manager_.dataSources())
         {
             if (ds_it->dsType() != ds_type_name)
                 continue;
+
+            ds_found = true;
 
             ds_id = Number::dsIdFrom(ds_it->sac(), ds_it->sic());
             ds_name = ds_it->name();
@@ -383,6 +425,11 @@ void DBObjectManagerLoadWidget::clearAndCreateContent()
                    << ds_it->dsType() << "' '" << ds_name << "'";
 
             QCheckBox* ds_box = new QCheckBox(ds_name.c_str());
+            ds_box->setChecked(ds_it->loadingWanted());
+            ds_box->setProperty("DS ID", ds_id);
+
+            connect(ds_box, &QCheckBox::clicked, this,
+                    &DBObjectManagerLoadWidget::loadDSChangedSlot);
 
             type_layout_->addWidget(ds_box, row, col_start, 1, 2, //num_col_per_dstype-1,
                                     Qt::AlignTop | Qt::AlignLeft);
@@ -465,6 +512,12 @@ void DBObjectManagerLoadWidget::clearAndCreateContent()
                 ds_content_total_labels_[ds_name][ds_content_name] = ds_content_total_label;
                 ++row;
             }
+        }
+
+        if (!ds_found)
+        {
+            dstyp_box->setChecked(false);
+            dstyp_box->setDisabled(true);
         }
 
         dstyp_cnt++;

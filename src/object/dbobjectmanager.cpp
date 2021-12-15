@@ -862,6 +862,7 @@ void DBObjectManager::finishInserting()
     if (COMPASS::instance().liveMode()) // do tod cleanup
     {
         cutCachedData();
+        filterDataSources();
     }
 
     if (load_widget_)
@@ -927,6 +928,57 @@ void DBObjectManager::addInsertedDataToChache()
     }
 
     insert_data_.clear();
+}
+
+void DBObjectManager::filterDataSources()
+{
+    set<unsigned int> wanted_data_sources;
+
+    for (auto& ds_it : db_data_sources_)
+    {
+        if (dsTypeLoadingWanted(ds_it->dsType()) && ds_it->loadingWanted())
+           wanted_data_sources.insert(ds_it->id());
+    }
+
+    unsigned int buffer_size;
+    vector<size_t> indexes_to_remove;
+
+    for (auto& buf_it : data_)
+    {
+        assert (metaVariable(DBObject::meta_var_datasource_id_.name()).existsIn(buf_it.first));
+
+        DBOVariable& ds_id_var = metaVariable(DBObject::meta_var_datasource_id_.name()).getFor(buf_it.first);
+
+        Property ds_id_prop {ds_id_var.name(), ds_id_var.dataType()};
+        assert (buf_it.second->hasProperty(ds_id_prop));
+
+        NullableVector<unsigned int>& ds_id_vec = buf_it.second->get<unsigned int>(ds_id_var.name());
+
+        buffer_size = buf_it.second->size();
+
+        indexes_to_remove.clear();
+        //assert (ds_id_vec.isNeverNull()); TODO why asserts?
+
+        for (unsigned int index=0; index < buffer_size; ++index)
+        {
+            assert (!ds_id_vec.isNull(index));
+
+            if (!wanted_data_sources.count(ds_id_vec.get(index)))
+                indexes_to_remove.push_back(index);
+        }
+
+        loginf << "DBObjectManager: filterDataSources: in " << buf_it.first << " remove "
+               << indexes_to_remove.size() << " of " << buffer_size;
+
+        buf_it.second->removeIndexes(indexes_to_remove);
+    }
+
+    // remove empty buffers
+    std::map<std::string, std::shared_ptr<Buffer>> tmp_data = data_;
+
+    for (auto& buf_it : tmp_data)
+        if (!buf_it.second->size())
+            data_.erase(buf_it.first);
 }
 
 void DBObjectManager::cutCachedData()
@@ -1031,7 +1083,6 @@ void DBObjectManager::cutCachedData()
     }
 
     // remove empty buffers
-
     std::map<std::string, std::shared_ptr<Buffer>> tmp_data = data_;
 
     for (auto& buf_it : tmp_data)
@@ -1057,6 +1108,21 @@ void DBObjectManager::maxRecordNumber(unsigned int value)
 const std::map<std::string, std::shared_ptr<Buffer>>& DBObjectManager::data() const
 {
     return data_;
+}
+
+void DBObjectManager::dsTypeLoadingWanted (const std::string& ds_type, bool wanted)
+{
+    loginf << "DBObjectManager: dsTypeLoadingWanted: ds_type " << ds_type << " wanted " << wanted;
+
+    ds_type_loading_wanted_[ds_type] = wanted;
+}
+
+bool DBObjectManager::dsTypeLoadingWanted (const std::string& ds_type)
+{
+    if (!ds_type_loading_wanted_.count(ds_type))
+        return true;
+
+    return ds_type_loading_wanted_.at(ds_type);
 }
 
 bool DBObjectManager::insertInProgress() const

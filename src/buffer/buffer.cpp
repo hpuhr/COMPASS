@@ -490,6 +490,112 @@ void Buffer::cutUpToIndex(size_t index) // everything up to index is removed
     }
 }
 
+void Buffer::removeIndexes(const std::vector<size_t>& indexes_to_remove)
+{
+    if (BUFFER_PEDANTIC_CHECKING)
+    {
+        assert (indexes_to_remove.size() <= data_size_);
+
+        for (auto& it : getArrayListMap<bool>())
+            assert (it.second->size() <= data_size_);
+        for (auto& it : getArrayListMap<char>())
+            assert (it.second->size() <= data_size_);
+        for (auto& it : getArrayListMap<unsigned char>())
+            assert (it.second->size() <= data_size_);
+        for (auto& it : getArrayListMap<int>())
+            assert (it.second->size() <= data_size_);
+        for (auto& it : getArrayListMap<unsigned int>())
+            assert (it.second->size() <= data_size_);
+        for (auto& it : getArrayListMap<long int>())
+            assert (it.second->size() <= data_size_);
+        for (auto& it : getArrayListMap<unsigned long int>())
+            assert (it.second->size() <= data_size_);
+        for (auto& it : getArrayListMap<float>())
+            assert (it.second->size() <= data_size_);
+        for (auto& it : getArrayListMap<double>())
+            assert (it.second->size() <= data_size_);
+        for (auto& it : getArrayListMap<string>())
+            assert (it.second->size() <= data_size_);
+
+        loginf << "Buffer: removeIndexes: indexes " << indexes_to_remove.size() << " data_size_ " << data_size_;
+    }
+
+    if (indexes_to_remove.size() == data_size_)
+    {
+        for (auto& it : getArrayListMap<bool>())
+            it.second->clearData();
+        for (auto& it : getArrayListMap<char>())
+            it.second->clearData();
+        for (auto& it : getArrayListMap<unsigned char>())
+            it.second->clearData();
+        for (auto& it : getArrayListMap<int>())
+            it.second->clearData();
+        for (auto& it : getArrayListMap<unsigned int>())
+            it.second->clearData();
+        for (auto& it : getArrayListMap<long int>())
+            it.second->clearData();
+        for (auto& it : getArrayListMap<unsigned long int>())
+            it.second->clearData();
+        for (auto& it : getArrayListMap<float>())
+            it.second->clearData();
+        for (auto& it : getArrayListMap<double>())
+            it.second->clearData();
+        for (auto& it : getArrayListMap<string>())
+            it.second->clearData();
+    }
+    else
+    {
+        for (auto& it : getArrayListMap<bool>())
+            it.second->removeIndexes(indexes_to_remove);
+        for (auto& it : getArrayListMap<char>())
+            it.second->removeIndexes(indexes_to_remove);
+        for (auto& it : getArrayListMap<unsigned char>())
+            it.second->removeIndexes(indexes_to_remove);
+        for (auto& it : getArrayListMap<int>())
+            it.second->removeIndexes(indexes_to_remove);
+        for (auto& it : getArrayListMap<unsigned int>())
+            it.second->removeIndexes(indexes_to_remove);
+        for (auto& it : getArrayListMap<long int>())
+            it.second->removeIndexes(indexes_to_remove);
+        for (auto& it : getArrayListMap<unsigned long int>())
+            it.second->removeIndexes(indexes_to_remove);
+        for (auto& it : getArrayListMap<float>())
+            it.second->removeIndexes(indexes_to_remove);
+        for (auto& it : getArrayListMap<double>())
+            it.second->removeIndexes(indexes_to_remove);
+        for (auto& it : getArrayListMap<string>())
+            it.second->removeIndexes(indexes_to_remove);
+    }
+
+    data_size_ -= indexes_to_remove.size();
+
+    if (BUFFER_PEDANTIC_CHECKING)
+    {
+        loginf << "Buffer: removeIndexes: after cut indexes " << indexes_to_remove.size() << " data_size_ " << data_size_;
+
+        for (auto& it : getArrayListMap<bool>())
+            assert (it.second->size() <= data_size_);
+        for (auto& it : getArrayListMap<char>())
+            assert (it.second->size() <= data_size_);
+        for (auto& it : getArrayListMap<unsigned char>())
+            assert (it.second->size() <= data_size_);
+        for (auto& it : getArrayListMap<int>())
+            assert (it.second->size() <= data_size_);
+        for (auto& it : getArrayListMap<unsigned int>())
+            assert (it.second->size() <= data_size_);
+        for (auto& it : getArrayListMap<long int>())
+            assert (it.second->size() <= data_size_);
+        for (auto& it : getArrayListMap<unsigned long int>())
+            assert (it.second->size() <= data_size_);
+        for (auto& it : getArrayListMap<float>())
+            assert (it.second->size() <= data_size_);
+        for (auto& it : getArrayListMap<double>())
+            assert (it.second->size() <= data_size_);
+        for (auto& it : getArrayListMap<string>())
+            assert (it.second->size() <= data_size_);
+    }
+}
+
 const PropertyList& Buffer::properties() { return properties_; }
 
 void Buffer::printProperties()

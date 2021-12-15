@@ -158,9 +158,13 @@ public:
 
     const std::map<std::string, std::shared_ptr<Buffer>>& data() const;
 
+    void dsTypeLoadingWanted (const std::string& ds_type, bool wanted);
+    bool dsTypeLoadingWanted (const std::string& ds_type);
 
 protected:
     COMPASS& compass_;
+
+    std::map<std::string, bool> ds_type_loading_wanted_;
 
     bool use_order_{false};
     bool use_order_ascending_{false};
@@ -202,6 +206,7 @@ protected:
     void finishInserting();
 
     void addInsertedDataToChache();
+    void filterDataSources();
     void cutCachedData();
 
     void loadDBDataSources();

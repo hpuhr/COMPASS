@@ -44,10 +44,15 @@ public:
     unsigned int activeLine() const;
     void activeLine(unsigned int active_line);
 
+    bool loadingWanted() const;
+    void loadingWanted(bool loading_wanted);
+
 protected:
     unsigned int id_{0};
 
     unsigned int active_line_ {0};
+
+    bool loading_wanted_ {true};
 
     nlohmann::json counts_;
 
