@@ -3,6 +3,7 @@
 #include "dbobject.h"
 #include "buffer.h"
 #include "compass.h"
+#include "mainwindow.h"
 #include "projectionmanager.h"
 #include "projection.h"
 #include "json.hpp"
@@ -19,7 +20,7 @@ ASTERIXPostprocessJob::ASTERIXPostprocessJob(map<string, shared_ptr<Buffer>> buf
     : Job("ASTERIXPostprocessJob"),
       buffers_(move(buffers)), do_timestamp_checks_(do_timestamp_checks)
 {
-
+    network_time_offset_ = COMPASS::instance().mainWindow().importASTERIXFromNetworkTimeOffset();
 }
 
 ASTERIXPostprocessJob::~ASTERIXPostprocessJob() { logdbg << "ASTERIXPostprocessJob: dtor"; }
@@ -35,9 +36,9 @@ void ASTERIXPostprocessJob::run()
 
     doRadarPlotPositionCalculations();
 
-//    boost::posix_time::time_duration time_diff = boost::posix_time::microsec_clock::local_time() - start_time;
-//    double ms = time_diff.total_milliseconds();
-//    loginf << "UGA Buffer sort took " << String::timeStringFromDouble(ms / 1000.0, true);
+    //    boost::posix_time::time_duration time_diff = boost::posix_time::microsec_clock::local_time() - start_time;
+    //    double ms = time_diff.total_milliseconds();
+    //    loginf << "UGA Buffer sort took " << String::timeStringFromDouble(ms / 1000.0, true);
 
     done_ = true;
 }
@@ -51,7 +52,11 @@ void ASTERIXPostprocessJob::doFutureTimestampsCheck()
     using namespace boost::posix_time;
 
     auto p_time = microsec_clock::universal_time (); // UTC.
-    double tod_now_utc = (p_time.time_of_day().total_milliseconds() / 1000.0) - 3600.0 + 1.0; // up to 1 sec ok
+
+    double tod_now_utc = (p_time.time_of_day().total_milliseconds() / 1000.0) + network_time_offset_ + 1.0; // up to 1 sec ok
+
+    loginf << "ASTERIXPostprocessJob: doFutureTimestampsCheck: maximum time is "
+           << String::timeStringFromDouble(tod_now_utc);
 
     for (auto& buf_it : buffers_)
     {
@@ -66,6 +71,14 @@ void ASTERIXPostprocessJob::doFutureTimestampsCheck()
         assert (buf_it.second->hasProperty(tod_prop));
 
         NullableVector<float>& tod_vec = buf_it.second->get<float>(tod_var.name());
+
+        std::tuple<bool,float,float> min_max_tod = tod_vec.minMaxValues();
+
+        if (get<0>(min_max_tod))
+            loginf << "ASTERIXPostprocessJob: doFutureTimestampsCheck: " << buf_it.first
+                   << " min tod " << String::timeStringFromDouble(get<1>(min_max_tod))
+                   << " max " << String::timeStringFromDouble(get<2>(min_max_tod));
+
 
         for (unsigned int index=0; index < buffer_size; ++index)
         {
@@ -307,26 +320,26 @@ void ASTERIXPostprocessJob::doRadarPlotPositionCalculations()
 
     // do first buffer sorting
 
-//    loginf << "ASTERIXPostprocessJob: run: sorting buffers";
+    //    loginf << "ASTERIXPostprocessJob: run: sorting buffers";
 
-//    boost::posix_time::ptime start_time = boost::posix_time::microsec_clock::local_time();
+    //    boost::posix_time::ptime start_time = boost::posix_time::microsec_clock::local_time();
 
-//    for (auto& buf_it : buffers_)
-//    {
-//        logdbg << "ASTERIXPostprocessJob: run: sorting buffer " << buf_it.first;
+    //    for (auto& buf_it : buffers_)
+    //    {
+    //        logdbg << "ASTERIXPostprocessJob: run: sorting buffer " << buf_it.first;
 
-//        assert (dbo_man.existsMetaVariable(DBObject::meta_var_tod_id_.name()));
-//        assert (dbo_man.metaVariable(DBObject::meta_var_tod_id_.name()).existsIn(buf_it.first));
+    //        assert (dbo_man.existsMetaVariable(DBObject::meta_var_tod_id_.name()));
+    //        assert (dbo_man.metaVariable(DBObject::meta_var_tod_id_.name()).existsIn(buf_it.first));
 
-//        DBOVariable& tod_var = dbo_man.metaVariable(DBObject::meta_var_tod_id_.name()).getFor(buf_it.first);
+    //        DBOVariable& tod_var = dbo_man.metaVariable(DBObject::meta_var_tod_id_.name()).getFor(buf_it.first);
 
-//        Property prop {tod_var.name(), tod_var.dataType()};
+    //        Property prop {tod_var.name(), tod_var.dataType()};
 
-//        logdbg << "ASTERIXPostprocessJob: run: sorting by variable " << prop.name() << " " << prop.dataTypeString();
+    //        logdbg << "ASTERIXPostprocessJob: run: sorting by variable " << prop.name() << " " << prop.dataTypeString();
 
-//        assert (buf_it.second->hasProperty(prop));
+    //        assert (buf_it.second->hasProperty(prop));
 
-//        buf_it.second->sortByProperty(prop);
-//    }
+    //        buf_it.second->sortByProperty(prop);
+    //    }
 
 }

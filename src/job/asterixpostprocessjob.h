@@ -22,7 +22,9 @@ public:
 
 private:
     std::map<std::string, std::shared_ptr<Buffer>> buffers_;
-     bool do_timestamp_checks_;
+    bool do_timestamp_checks_;
+
+    float network_time_offset_ {0};
 
     void doFutureTimestampsCheck();
     void doRadarPlotPositionCalculations();

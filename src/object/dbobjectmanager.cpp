@@ -930,24 +930,27 @@ void DBObjectManager::finishInserting()
 
             Property tod_prop {tod_var.name(), tod_var.dataType()};
 
-            assert (data_.at(buf_it.first)->hasProperty(tod_prop));
-
-            NullableVector<float>& tod_vec = buf_it.second->get<float>(tod_var.name());
-
-            auto minmax = tod_vec.minMaxValues();
-            assert (get<0>(minmax)); // there is minmax
-
-            if (max_time_set)
+            if(buf_it.second->hasProperty(tod_prop))
             {
-                min_tod_found = min(min_tod_found, get<1>(minmax));
-                max_tod_found = max(max_tod_found, get<2>(minmax));
+                NullableVector<float>& tod_vec = buf_it.second->get<float>(tod_var.name());
+
+                auto minmax = tod_vec.minMaxValues();
+                assert (get<0>(minmax)); // there is minmax
+
+                if (max_time_set)
+                {
+                    min_tod_found = min(min_tod_found, get<1>(minmax));
+                    max_tod_found = max(max_tod_found, get<2>(minmax));
+                }
+                else
+                {
+                    min_tod_found = get<1>(minmax);
+                    max_tod_found = get<2>(minmax);
+                    max_time_set = true;
+                }
             }
             else
-            {
-                min_tod_found = get<1>(minmax);
-                max_tod_found = get<2>(minmax);
-                max_time_set = true;
-            }
+                logwrn << "DBObjectManager: finishInserting: buffer " << buf_it.first << " has not tod for min/max";
         }
 
         if (max_time_set)
@@ -972,33 +975,36 @@ void DBObjectManager::finishInserting()
 
             Property tod_prop {tod_var.name(), tod_var.dataType()};
 
-            assert (data_.at(buf_it.first)->hasProperty(tod_prop));
-
-            NullableVector<float>& tod_vec = buf_it.second->get<float>(tod_var.name());
-
-            unsigned int index=0;
-
-            for (; index < buffer_size; ++index)
+            if (buf_it.second->hasProperty(tod_prop))
             {
-                if (!tod_vec.isNull(index) && tod_vec.get(index) > min_tod)
+                NullableVector<float>& tod_vec = buf_it.second->get<float>(tod_var.name());
+
+                unsigned int index=0;
+
+                for (; index < buffer_size; ++index)
                 {
-                    logdbg << "DBObjectManager: finishInserting: found " << buf_it.first
-                           << " cutoff tod index " << index
-                           << " tod " << String::timeStringFromDouble(tod_vec.get(index));
-                    break;
+                    if (!tod_vec.isNull(index) && tod_vec.get(index) > min_tod)
+                    {
+                        logdbg << "DBObjectManager: finishInserting: found " << buf_it.first
+                               << " cutoff tod index " << index
+                               << " tod " << String::timeStringFromDouble(tod_vec.get(index));
+                        break;
+                    }
+                }
+
+                if (index) // index found
+                {
+                    index--; // cut at previous
+
+                    logdbg << "DBObjectManager: finishInserting: cutting " << buf_it.first
+                           << " up to index " << index
+                           << " total size " << buffer_size;
+                    assert (index < buffer_size);
+                    buf_it.second->cutUpToIndex(index);
                 }
             }
-
-            if (index) // index found
-            {
-                index--; // cut at previous
-
-                logdbg << "DBObjectManager: finishInserting: cutting " << buf_it.first
-                       << " up to index " << index
-                       << " total size " << buffer_size;
-                assert (index < buffer_size);
-                buf_it.second->cutUpToIndex(index);
-            }
+            else
+                logwrn << "DBObjectManager: finishInserting: buffer " << buf_it.first << " has not tod for cutoff";
         }
 
         // remove empty buffers

@@ -60,6 +60,8 @@ const Property DBObject::meta_var_track_num_id_ {"Track Number", PropertyDataTyp
 const Property DBObject::meta_var_latitude_ {"Latitude", PropertyDataType::DOUBLE};
 const Property DBObject::meta_var_longitude_ {"Longitude", PropertyDataType::DOUBLE};
 
+const Property DBObject::meta_var_detection_type_ {"Type", PropertyDataType::UCHAR};
+
 const Property DBObject::var_radar_range_ {"Range", PropertyDataType::DOUBLE};
 const Property DBObject::var_radar_azimuth_ {"Azimuth", PropertyDataType::DOUBLE};
 const Property DBObject::var_radar_altitude_ {"Mode C Code", PropertyDataType::FLOAT};
