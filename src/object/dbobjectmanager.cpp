@@ -430,7 +430,7 @@ void DBObjectManager::startLoading()
         if (object.second->loadable() && object.second->loadingWanted())
         {
             loginf << "DBObjectManager: loadSlot: loading object " << object.first;
-            DBOVariableSet read_set = view_man.getReadSet(object.first);
+            DBOVariableSet read_set = view_man.getReadSet(object.first); // TODO add required vars for processing
 
             if (eval_man.needsAdditionalVariables())
                 eval_man.addVariables(object.first, read_set);

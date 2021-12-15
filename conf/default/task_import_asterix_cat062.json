@@ -2150,6 +2150,22 @@
                     "unit": ""
                 }
             },
+            "JSONDataMapping260": {
+                "parameters": {
+                    "active": true,
+                    "append_value": false,
+                    "comment": "Line Identifer",
+                    "db_object_name": "CAT062",
+                    "dbovariable_name": "Line ID",
+                    "dimension": "",
+                    "format_data_type": "",
+                    "in_array": false,
+                    "json_key": "line_id",
+                    "json_value_format": "",
+                    "mandatory": false,
+                    "unit": ""
+                }
+            },
             "JSONDataMapping27": {
                 "parameters": {
                     "active": true,

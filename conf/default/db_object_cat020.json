@@ -1742,7 +1742,7 @@
                     "description": "Communication line ID",
                     "dimension": "",
                     "is_key": false,
-                    "name": "line_id",
+                    "name": "Line ID",
                     "representation_str": "STANDARD",
                     "short_name": "",
                     "unit": ""
@@ -2017,12 +2017,12 @@
             "DBOVariableMLATrec_num0": {
                 "parameters": {
                     "data_type_str": "UINT",
-                    "db_column_name": "rec_num",
+                    "db_column_name": "record_number",
                     "dbo_name": "CAT020",
                     "description": "ascending record number",
                     "dimension": "",
-                    "is_key": false,
-                    "name": "rec_num",
+                    "is_key": true,
+                    "name": "Record Number",
                     "representation_str": "STANDARD",
                     "short_name": "",
                     "unit": ""

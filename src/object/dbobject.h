@@ -82,6 +82,7 @@ class DBObject : public QObject, public Configurable
   public:
     static const Property meta_var_rec_num_id_;
     static const Property meta_var_datasource_id_;
+    static const Property meta_var_line_id_;
     static const Property meta_var_tod_id_;
     static const Property meta_var_m3a_id_;
     static const Property meta_var_ta_id_;

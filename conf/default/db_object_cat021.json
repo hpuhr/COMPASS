@@ -2109,7 +2109,7 @@
                 "parameters": {
                     "data_type_str": "FLOAT",
                     "db_column_name": "time_of_day",
-                    "description": "From 030.Time of Day\n\nTime of applicability (measurement) of the reported position, in the form of elapsed time since last midnight, expressed as UTC.\n\nOutdated.",
+                    "description": "From 030.Time of Day\n\nTime of applicability (measurement) of the reported position, in the form of elapsed time since last midnight, expressed as UTC.\n\nOutdated in Edition 0.26, uses ToA Poistion data for compatibility until correct timestamp is used",
                     "dimension": "Time",
                     "is_key": false,
                     "name": "Time of Day",
@@ -2677,7 +2677,7 @@
                     "description": "Communication line ID",
                     "dimension": "",
                     "is_key": false,
-                    "name": "line_id",
+                    "name": "Line ID",
                     "representation_str": "STANDARD",
                     "short_name": "",
                     "unit": ""
@@ -2868,12 +2868,12 @@
             "DBOVariableADSBrec_num0": {
                 "parameters": {
                     "data_type_str": "UINT",
-                    "db_column_name": "rec_num",
+                    "db_column_name": "record_number",
                     "dbo_name": "CAT021",
                     "description": "Ascending record number",
                     "dimension": "",
-                    "is_key": false,
-                    "name": "rec_num",
+                    "is_key": true,
+                    "name": "Record Number",
                     "representation_str": "STANDARD",
                     "short_name": "",
                     "unit": ""

@@ -50,6 +50,7 @@ using namespace Utils;
 
 const Property DBObject::meta_var_rec_num_id_ {"Record Number", PropertyDataType::UINT};
 const Property DBObject::meta_var_datasource_id_ {"DS ID", PropertyDataType::UINT};
+const Property DBObject::meta_var_line_id_ {"Line ID", PropertyDataType::UINT};
 const Property DBObject::meta_var_tod_id_ {"Time of Day", PropertyDataType::FLOAT};
 const Property DBObject::meta_var_m3a_id_ {"Mode 3/A Code", PropertyDataType::UINT};
 const Property DBObject::meta_var_ta_id_ {"Aircraft Address", PropertyDataType::UINT};

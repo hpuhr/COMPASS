@@ -2574,13 +2574,13 @@
             },
             "DBOVariableTrackerline_id0": {
                 "parameters": {
-                    "data_type_str": "INT",
+                    "data_type_str": "UINT",
                     "db_column_name": "line_id",
                     "dbo_name": "CAT062",
                     "description": "COMMUNICATION LINE ID determines the origin of the record, see table COMMS",
                     "dimension": "",
                     "is_key": false,
-                    "name": "line_id",
+                    "name": "Line ID",
                     "representation_str": "STANDARD",
                     "short_name": "",
                     "unit": ""
@@ -2938,13 +2938,13 @@
             },
             "DBOVariableTrackerrec_num0": {
                 "parameters": {
-                    "data_type_str": "INT",
-                    "db_column_name": "rec_num",
+                    "data_type_str": "UINT",
+                    "db_column_name": "record_number",
                     "dbo_name": "CAT062",
                     "description": "Unique record id starting with 0 on every new recording",
                     "dimension": "",
-                    "is_key": false,
-                    "name": "rec_num",
+                    "is_key": true,
+                    "name": "Record Number",
                     "representation_str": "STANDARD",
                     "short_name": "",
                     "unit": ""
