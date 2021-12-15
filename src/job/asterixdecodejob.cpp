@@ -272,44 +272,6 @@ void ASTERIXDecodeJob::doUDPStreamDecoding()
         }
     }
 
-
-//    map<unsigned int, unique_ptr<UDPReceiver>> udp_receivers; // port -> sender ip
-
-//    for (auto& ds_it : ds_lines_)
-//    {
-//        //loginf << ds_it.first << ":";
-
-//        for (auto& line_it : ds_it.second)
-//        {
-//            ip = line_it.first;
-//            port = line_it.second;
-
-//            loginf << "ASTERIXDecodeJob: doUDPStreamDecoding: setting up ds_id " << ds_it.first
-//                   << " ip " << ip << ":" << port;
-
-//            if (!udp_receivers.count(port))
-//            {
-//                loginf << "ASTERIXDecodeJob: doUDPStreamDecoding: adding new port listener for " << port;
-//                udp_receivers[port].reset(new UDPReceiver(io_context, port, data_callback));
-//            }
-
-//            loginf << "ASTERIXDecodeJob: doUDPStreamDecoding: adding new sender ip " << ip
-//                   << " for " << port;
-//            udp_receivers.at(port)->addSenderIp(ip);
-//        }
-//    }
-
-//    loginf << "ASTERIXDecodeJob: doUDPStreamDecoding: starting receive";
-
-//    for (auto& udp_rec_it : udp_receivers)
-//    {
-//        udp_rec_it.second->startReceive();
-//    }
-
-//    loginf << "ASTERIXDecodeJob: doUDPStreamDecoding: setting up ds_id " << ds_it.first
-//           << " ip " << line_it.first << ":" << line_it.second;
-//    servers.emplace_back(new UDPReceiver(io_context, line_it.first, line_it.second, data_callback));
-
     loginf << "ASTERIXDecodeJob: doUDPStreamDecoding: running iocontext";
 
     //io_context.run();
@@ -433,6 +395,7 @@ void ASTERIXDecodeJob::jasterix_callback(std::unique_ptr<nlohmann::json> data, s
     };
 
     auto process_lambda = [this, &category](nlohmann::json& record) {
+        record["line_id"] = 0; // TODO Line HACK
         post_process_.postProcess(category, record);
     };
 

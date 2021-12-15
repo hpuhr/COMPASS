@@ -2,9 +2,8 @@
     "parameters": {
         "limit_max": 1000000,
         "limit_min": 0,
-        "order_variable__name": "tod",
         "order_variable_dbo_name": "Meta",
-        "order_variable_name": "",
+        "order_variable_name": "Time of Day",
         "use_filters": false,
         "use_limit": false,
         "use_order": true,
@@ -48,30 +47,29 @@
                 "parameters": {
                     "ds_type": "ADSB",
                     "has_short_name": true,
-                    "info": {},
-                    "name": "AWAM-ADS-B",
+                    "info": {
+                        "network_lines": [
+                            "239.192.31.24:8600",
+                            "239.192.31.25:8600"
+                        ]
+                    },
+                    "name": "AWAM ADSB",
                     "sac": 50,
                     "short_name": "WADS",
                     "sic": 80
-                }
-            },
-            "DBContentConfigurationDataSourceADSB1": {
-                "parameters": {
-                    "ds_type": "ADSB",
-                    "has_short_name": false,
-                    "info": {},
-                    "name": "KITYRA",
-                    "sac": 2,
-                    "short_name": "",
-                    "sic": 37
                 }
             },
             "DBContentConfigurationDataSourceMLAT0": {
                 "parameters": {
                     "ds_type": "MLAT",
                     "has_short_name": true,
-                    "info": {},
-                    "name": "AWAM-VIE",
+                    "info": {
+                        "network_lines": [
+                            "239.192.21.24:8600",
+                            "239.192.21.25:8600"
+                        ]
+                    },
+                    "name": "AWAM VIE",
                     "sac": 50,
                     "short_name": "WVIE",
                     "sic": 70
@@ -81,8 +79,13 @@
                 "parameters": {
                     "ds_type": "MLAT",
                     "has_short_name": true,
-                    "info": {},
-                    "name": "AWAM-LNZ",
+                    "info": {
+                        "network_lines": [
+                            "239.192.22.24:8600",
+                            "239.192.22.25:8600"
+                        ]
+                    },
+                    "name": "AWAM LNZ",
                     "sac": 50,
                     "short_name": "WLNZ",
                     "sic": 71
@@ -92,8 +95,13 @@
                 "parameters": {
                     "ds_type": "MLAT",
                     "has_short_name": true,
-                    "info": {},
-                    "name": "AWAM-SBG",
+                    "info": {
+                        "network_lines": [
+                            "239.192.23.24:8600",
+                            "239.192.23.25:8600"
+                        ]
+                    },
+                    "name": "AWAM SBG",
                     "sac": 50,
                     "short_name": "WSBG",
                     "sic": 72
@@ -103,8 +111,13 @@
                 "parameters": {
                     "ds_type": "MLAT",
                     "has_short_name": true,
-                    "info": {},
-                    "name": "AWAM-IN",
+                    "info": {
+                        "network_lines": [
+                            "239.192.24.24:8600",
+                            "239.192.24.25:8600"
+                        ]
+                    },
+                    "name": "AWAM INN",
                     "sac": 50,
                     "short_name": "WINN",
                     "sic": 73
@@ -114,8 +127,13 @@
                 "parameters": {
                     "ds_type": "MLAT",
                     "has_short_name": true,
-                    "info": {},
-                    "name": "AWAM-KFT",
+                    "info": {
+                        "network_lines": [
+                            "239.192.25.24:8600",
+                            "239.192.25.25:8600"
+                        ]
+                    },
+                    "name": "AWAM KFT",
                     "sac": 50,
                     "short_name": "WKFT",
                     "sic": 74
@@ -125,8 +143,13 @@
                 "parameters": {
                     "ds_type": "MLAT",
                     "has_short_name": true,
-                    "info": {},
-                    "name": "AWAM-GRZ",
+                    "info": {
+                        "network_lines": [
+                            "239.192.26.24:8600",
+                            "239.192.26.25:8600"
+                        ]
+                    },
+                    "name": "AWAM GRZ",
                     "sac": 50,
                     "short_name": "WGRZ",
                     "sic": 75
@@ -136,8 +159,13 @@
                 "parameters": {
                     "ds_type": "MLAT",
                     "has_short_name": true,
-                    "info": {},
-                    "name": "AWAM-LOWER-WEST",
+                    "info": {
+                        "network_lines": [
+                            "239.192.27.24:8600",
+                            "239.192.27.25:8600"
+                        ]
+                    },
+                    "name": "AWAM West",
                     "sac": 50,
                     "short_name": "WWES",
                     "sic": 76
@@ -147,8 +175,13 @@
                 "parameters": {
                     "ds_type": "MLAT",
                     "has_short_name": true,
-                    "info": {},
-                    "name": "AWAM-LOWER-EAST",
+                    "info": {
+                        "network_lines": [
+                            "239.192.28.24:8600",
+                            "239.192.28.25:8600"
+                        ]
+                    },
+                    "name": "AWAM East",
                     "sac": 50,
                     "short_name": "WEAS",
                     "sic": 77
@@ -158,8 +191,13 @@
                 "parameters": {
                     "ds_type": "MLAT",
                     "has_short_name": true,
-                    "info": {},
-                    "name": "AWAM-UPPER",
+                    "info": {
+                        "network_lines": [
+                            "239.192.29.24:8600",
+                            "239.192.29.25:8600"
+                        ]
+                    },
+                    "name": "AWAM Upper",
                     "sac": 50,
                     "short_name": "WUPP",
                     "sic": 78
@@ -169,8 +207,13 @@
                 "parameters": {
                     "ds_type": "MLAT",
                     "has_short_name": true,
-                    "info": {},
-                    "name": "AWAM-GND",
+                    "info": {
+                        "network_lines": [
+                            "239.192.32.24:8600",
+                            "239.192.32.25:8600"
+                        ]
+                    },
+                    "name": "AWAM GND",
                     "sac": 50,
                     "short_name": "WGND",
                     "sic": 81
@@ -183,11 +226,15 @@
                     "info": {
                         "altitude": 667.0,
                         "latitude": 48.2607138,
-                        "longitude": 17.1632861
+                        "longitude": 17.1632861,
+                        "network_lines": [
+                            "239.192.9.18:8600",
+                            "239.192.9.15:8600"
+                        ]
                     },
-                    "name": "Velky Javornik",
+                    "name": "Javornik",
                     "sac": 48,
-                    "short_name": "Jav",
+                    "short_name": "JAV",
                     "sic": 1
                 }
             },
@@ -198,11 +245,17 @@
                     "info": {
                         "altitude": 323.0,
                         "latitude": 48.2390277777778,
-                        "longitude": 14.1821888888889
+                        "longitude": 14.1821888888889,
+                        "network_lines": [
+                            "239.192.5.18:8600",
+                            "239.192.5.14:8600",
+                            "239.192.5.15:8600",
+                            "239.192.5.21:8600"
+                        ]
                     },
-                    "name": "Linz",
+                    "name": "Linz Mode-S",
                     "sac": 50,
-                    "short_name": "LNZ1",
+                    "short_name": "LNZ",
                     "sic": 0
                 }
             },
@@ -213,11 +266,17 @@
                     "info": {
                         "altitude": 280.0,
                         "latitude": 48.1043694444,
-                        "longitude": 16.560975
+                        "longitude": 16.560975,
+                        "network_lines": [
+                            "239.192.4.18:8600",
+                            "239.192.4.14:8600",
+                            "239.192.4.15:8600",
+                            "239.192.4.21:8600"
+                        ]
                     },
-                    "name": "Schwechat",
+                    "name": "Wien Schwechat",
                     "sac": 50,
-                    "short_name": "Vie",
+                    "short_name": "VIE",
                     "sic": 11
                 }
             },
@@ -228,11 +287,15 @@
                     "info": {
                         "altitude": 880.0,
                         "latitude": 49.6596444444,
-                        "longitude": 16.1333916667
+                        "longitude": 16.1333916667,
+                        "network_lines": [
+                            "239.192.8.18:8600",
+                            "239.192.8.15:8600"
+                        ]
                     },
                     "name": "Bukop",
                     "sac": 49,
-                    "short_name": "Buk",
+                    "short_name": "BUK",
                     "sic": 144
                 }
             },
@@ -243,7 +306,10 @@
                     "info": {
                         "altitude": 587.0,
                         "latitude": 48.5769972222,
-                        "longitude": 16.3956305556
+                        "longitude": 16.3956305556,
+                        "network_lines": [
+                            "224.9.2.252:15009"
+                        ]
                     },
                     "name": "Buschberg",
                     "sac": 50,
@@ -258,103 +324,15 @@
                     "info": {
                         "altitude": 410.0,
                         "latitude": 46.9866777778,
-                        "longitude": 15.4319916667
+                        "longitude": 15.4319916667,
+                        "network_lines": [
+                            "224.9.2.252:15012"
+                        ]
                     },
                     "name": "Graz",
                     "sac": 50,
                     "short_name": "Grz",
                     "sic": 12
-                }
-            },
-            "DBContentConfigurationDataSourceRadar14": {
-                "parameters": {
-                    "ds_type": "Radar",
-                    "has_short_name": true,
-                    "info": {
-                        "altitude": 183.0,
-                        "latitude": 48.12258625,
-                        "longitude": 16.5616853611
-                    },
-                    "name": "SMR-Nord",
-                    "sac": 50,
-                    "short_name": "SMRN",
-                    "sic": 101
-                }
-            },
-            "DBContentConfigurationDataSourceRadar15": {
-                "parameters": {
-                    "ds_type": "Radar",
-                    "has_short_name": true,
-                    "info": {
-                        "altitude": 183.0,
-                        "latitude": 48.12925,
-                        "longitude": 16.536783
-                    },
-                    "name": "SMR-West",
-                    "sac": 50,
-                    "short_name": "SMRW",
-                    "sic": 103
-                }
-            },
-            "DBContentConfigurationDataSourceRadar16": {
-                "parameters": {
-                    "ds_type": "Radar",
-                    "has_short_name": true,
-                    "info": {
-                        "altitude": 497.0,
-                        "latitude": 36.2277444444,
-                        "longitude": 22.9405888889
-                    },
-                    "name": "Kityra",
-                    "sac": 2,
-                    "short_name": "KI",
-                    "sic": 1
-                }
-            },
-            "DBContentConfigurationDataSourceRadar17": {
-                "parameters": {
-                    "ds_type": "Radar",
-                    "has_sac": true,
-                    "has_short_name": true,
-                    "info": {
-                        "altitude": 1146.0,
-                        "latitude": 38.7078527778,
-                        "longitude": 20.6491083333
-                    },
-                    "name": "Lefkas",
-                    "sac": 2,
-                    "short_name": "LE",
-                    "sic": 2
-                }
-            },
-            "DBContentConfigurationDataSourceRadar18": {
-                "parameters": {
-                    "ds_type": "Radar",
-                    "has_short_name": true,
-                    "info": {
-                        "altitude": 220.0,
-                        "latitude": 38.7079361111,
-                        "longitude": 13.1772833333
-                    },
-                    "name": "Ustica",
-                    "sac": 34,
-                    "short_name": "US",
-                    "sic": 11
-                }
-            },
-            "DBContentConfigurationDataSourceRadar19": {
-                "parameters": {
-                    "ds_type": "Radar",
-                    "has_short_name": true,
-                    "info": {
-                        "altitude": 91.0,
-                        "latitude": 35.8519444444,
-                        "longitude": 14.4719444444
-                    },
-                    "name": "Luqa",
-                    "sac": 120,
-                    "short_name": "LQ",
-                    "sic": 1
                 }
             },
             "DBContentConfigurationDataSourceRadar2": {
@@ -364,57 +342,18 @@
                     "info": {
                         "altitude": 226.0,
                         "latitude": 48.1005611111111,
-                        "longitude": 16.5778083333333
+                        "longitude": 16.5778083333333,
+                        "network_lines": [
+                            "239.192.13.18:8600",
+                            "239.192.13.14:8600",
+                            "239.192.13.15:8600",
+                            "239.192.13.21:8600"
+                        ]
                     },
-                    "name": "ViennaModeS",
+                    "name": "Wien Mode-S",
                     "sac": 50,
-                    "short_name": "VIMS",
+                    "short_name": "VIS",
                     "sic": 13
-                }
-            },
-            "DBContentConfigurationDataSourceRadar20": {
-                "parameters": {
-                    "ds_type": "Radar",
-                    "has_short_name": true,
-                    "info": {
-                        "altitude": 309.0,
-                        "latitude": 35.852375,
-                        "longitude": 14.3816361111
-                    },
-                    "name": "Dingli",
-                    "sac": 120,
-                    "short_name": "DG",
-                    "sic": 2
-                }
-            },
-            "DBContentConfigurationDataSourceRadar21": {
-                "parameters": {
-                    "ds_type": "Radar",
-                    "has_short_name": true,
-                    "info": {
-                        "altitude": 110.0,
-                        "latitude": 35.8214916667,
-                        "longitude": 14.5048222222
-                    },
-                    "name": "Hal-Far",
-                    "sac": 120,
-                    "short_name": "HF",
-                    "sic": 3
-                }
-            },
-            "DBContentConfigurationDataSourceRadar22": {
-                "parameters": {
-                    "ds_type": "Radar",
-                    "has_short_name": true,
-                    "info": {
-                        "altitude": 250.0,
-                        "latitude": 35.8419694444,
-                        "longitude": 14.4155555556
-                    },
-                    "name": "Fawwara",
-                    "sac": 120,
-                    "short_name": "FW",
-                    "sic": 4
                 }
             },
             "DBContentConfigurationDataSourceRadar3": {
@@ -424,11 +363,17 @@
                     "info": {
                         "altitude": 2203.0,
                         "latitude": 46.7871083333,
-                        "longitude": 14.9713333333
+                        "longitude": 14.9713333333,
+                        "network_lines": [
+                            "239.192.2.18:8600",
+                            "239.192.2.14:8600",
+                            "239.192.2.15:8600",
+                            "239.192.2.21:8600"
+                        ]
                     },
-                    "name": "ModeS_Koralpe",
+                    "name": "Koralpe Mode-S",
                     "sac": 50,
-                    "short_name": "Kor",
+                    "short_name": "KOR",
                     "sic": 20
                 }
             },
@@ -439,11 +384,17 @@
                     "info": {
                         "altitude": 672.0,
                         "latitude": 47.1798611111111,
-                        "longitude": 14.7498611111111
+                        "longitude": 14.7498611111111,
+                        "network_lines": [
+                            "239.192.12.18:8600",
+                            "239.192.12.14:8600",
+                            "239.192.12.15:8600",
+                            "239.192.12.21:8600"
+                        ]
                     },
                     "name": "Zeltweg",
                     "sac": 50,
-                    "short_name": "ZWG1",
+                    "short_name": "ZWG",
                     "sic": 48
                 }
             },
@@ -454,11 +405,15 @@
                     "info": {
                         "altitude": 461.0,
                         "latitude": 48.311075,
-                        "longitude": 11.8144611111111
+                        "longitude": 11.8144611111111,
+                        "network_lines": [
+                            "239.192.11.18:8600",
+                            "239.192.11.15:8600"
+                        ]
                     },
-                    "name": "MunichSouth",
+                    "name": "Munich South",
                     "sac": 98,
-                    "short_name": "MUSA",
+                    "short_name": "MUS",
                     "sic": 16
                 }
             },
@@ -469,11 +424,15 @@
                     "info": {
                         "altitude": 821.0,
                         "latitude": 45.9309333333,
-                        "longitude": 14.2981333333
+                        "longitude": 14.2981333333,
+                        "network_lines": [
+                            "239.192.10.18:8600",
+                            "239.192.10.15:8600"
+                        ]
                     },
                     "name": "Vrhnika",
                     "sac": 147,
-                    "short_name": "Vrh",
+                    "short_name": "VRH",
                     "sic": 9
                 }
             },
@@ -484,11 +443,17 @@
                     "info": {
                         "altitude": 859.0,
                         "latitude": 48.4708583333,
-                        "longitude": 13.6853194444
+                        "longitude": 13.6853194444,
+                        "network_lines": [
+                            "239.192.7.18:8600",
+                            "239.192.7.14:8600",
+                            "239.192.7.15:8600",
+                            "239.192.7.21:8600"
+                        ]
                     },
-                    "name": "Feichtberg",
+                    "name": "Feichtberg Mode-S",
                     "sac": 50,
-                    "short_name": "Fei",
+                    "short_name": "FEI",
                     "sic": 10
                 }
             },
@@ -499,11 +464,15 @@
                     "info": {
                         "altitude": 461.0,
                         "latitude": 48.3822916666667,
-                        "longitude": 11.8014277777778
+                        "longitude": 11.8014277777778,
+                        "network_lines": [
+                            "239.192.3.18:8600",
+                            "239.192.3.15:8600"
+                        ]
                     },
-                    "name": "MunichNord",
+                    "name": "Munich Nord",
                     "sac": 98,
-                    "short_name": "MUN1",
+                    "short_name": "MUN",
                     "sic": 15
                 }
             },
@@ -514,78 +483,33 @@
                     "info": {
                         "altitude": 870.0,
                         "latitude": 47.9181333333333,
-                        "longitude": 13.0046166666667
+                        "longitude": 13.0046166666667,
+                        "network_lines": [
+                            "239.192.6.18:8600",
+                            "239.192.6.14:8600",
+                            "239.192.6.15:8600",
+                            "239.192.6.21:8600"
+                        ]
                     },
                     "name": "Salzburg",
                     "sac": 50,
-                    "short_name": "SBG1",
+                    "short_name": "SBG",
                     "sic": 7
-                }
-            },
-            "DBContentConfigurationDataSourceRefTraj0": {
-                "parameters": {
-                    "ds_type": "RefTraj",
-                    "has_short_name": false,
-                    "info": {},
-                    "name": "GPS Trail",
-                    "sac": 0,
-                    "short_name": "",
-                    "sic": 1
-                }
-            },
-            "DBContentConfigurationDataSourceTracker0": {
-                "parameters": {
-                    "ds_type": "Tracker",
-                    "has_short_name": false,
-                    "info": {},
-                    "name": "MSTS",
-                    "sac": 50,
-                    "short_name": "",
-                    "sic": 244
                 }
             },
             "DBContentConfigurationDataSourceTracker1": {
                 "parameters": {
                     "ds_type": "Tracker",
                     "has_short_name": false,
-                    "info": {},
+                    "info": {
+                        "network_lines": [
+                            "239.204.0.8:8602"
+                        ]
+                    },
                     "name": "ARTAS",
                     "sac": 50,
                     "short_name": "",
                     "sic": 240
-                }
-            },
-            "DBContentConfigurationDataSourceTracker2": {
-                "parameters": {
-                    "ds_type": "Tracker",
-                    "has_short_name": false,
-                    "info": {},
-                    "name": "MRTS",
-                    "sac": 120,
-                    "short_name": "",
-                    "sic": 49
-                }
-            },
-            "DBContentConfigurationDataSourceTracker3": {
-                "parameters": {
-                    "ds_type": "Tracker",
-                    "has_short_name": false,
-                    "info": {},
-                    "name": "ARTAS_OPS",
-                    "sac": 120,
-                    "short_name": "",
-                    "sic": 50
-                }
-            },
-            "DBContentConfigurationDataSourceTracker4": {
-                "parameters": {
-                    "ds_type": "Tracker",
-                    "has_short_name": false,
-                    "info": {},
-                    "name": "ARTAS_NEW",
-                    "sac": 120,
-                    "short_name": "",
-                    "sic": 52
                 }
             }
         },
@@ -1198,6 +1122,12 @@
                                 "dbo_name": "CAT048",
                                 "dbo_variable_name": "Mode C Code"
                             }
+                        },
+                        "DBOVariableDefinitionCAT062Mode C Code LM0": {
+                            "parameters": {
+                                "dbo_name": "CAT062",
+                                "dbo_variable_name": "Mode C Code LM"
+                            }
                         }
                     }
                 }
@@ -1225,6 +1155,12 @@
                                 "dbo_name": "CAT048",
                                 "dbo_variable_name": "Mode C Garbled"
                             }
+                        },
+                        "DBOVariableDefinitionCAT062Mode C Garbled LM0": {
+                            "parameters": {
+                                "dbo_name": "CAT062",
+                                "dbo_variable_name": "Mode C Garbled LM"
+                            }
                         }
                     }
                 }
@@ -1251,6 +1187,12 @@
                             "parameters": {
                                 "dbo_name": "CAT048",
                                 "dbo_variable_name": "Mode C Valid"
+                            }
+                        },
+                        "DBOVariableDefinitionCAT062Mode C Valid LM0": {
+                            "parameters": {
+                                "dbo_name": "CAT062",
+                                "dbo_variable_name": "Mode C Valid LM"
                             }
                         }
                     }
@@ -1864,6 +1806,12 @@
                                 "dbo_name": "CAT048",
                                 "dbo_variable_name": "Type"
                             }
+                        },
+                        "DBOVariableDefinitionCAT062Type LM0": {
+                            "parameters": {
+                                "dbo_name": "CAT062",
+                                "dbo_variable_name": "Type LM"
+                            }
                         }
                     }
                 }
@@ -1966,32 +1914,38 @@
             },
             "MetaDBOVariableline_id0": {
                 "parameters": {
-                    "name": "line_id"
+                    "name": "Line ID"
                 },
                 "sub_configs": {
                     "DBOVariableDefinition": {
-                        "DBOVariableDefinitionCAT001line_id0": {
+                        "DBOVariableDefinitionCAT001Line ID0": {
                             "parameters": {
                                 "dbo_name": "CAT001",
-                                "dbo_variable_name": "line_id"
+                                "dbo_variable_name": "Line ID"
                             }
                         },
-                        "DBOVariableDefinitionCAT020line_id0": {
+                        "DBOVariableDefinitionCAT020Line ID0": {
                             "parameters": {
                                 "dbo_name": "CAT020",
-                                "dbo_variable_name": "line_id"
+                                "dbo_variable_name": "Line ID"
                             }
                         },
-                        "DBOVariableDefinitionCAT021line_id0": {
+                        "DBOVariableDefinitionCAT021Line ID0": {
                             "parameters": {
                                 "dbo_name": "CAT021",
-                                "dbo_variable_name": "line_id"
+                                "dbo_variable_name": "Line ID"
                             }
                         },
-                        "DBOVariableDefinitionCAT048line_id0": {
+                        "DBOVariableDefinitionCAT048Line ID0": {
                             "parameters": {
                                 "dbo_name": "CAT048",
-                                "dbo_variable_name": "line_id"
+                                "dbo_variable_name": "Line ID"
+                            }
+                        },
+                        "DBOVariableDefinitionCAT062Line ID0": {
+                            "parameters": {
+                                "dbo_name": "CAT062",
+                                "dbo_variable_name": "Line ID"
                             }
                         }
                     }
@@ -1999,38 +1953,38 @@
             },
             "MetaDBOVariablerec_num0": {
                 "parameters": {
-                    "name": "rec_num"
+                    "name": "Record Number"
                 },
                 "sub_configs": {
                     "DBOVariableDefinition": {
                         "DBOVariableDefinitionCAT001rec_num0": {
                             "parameters": {
                                 "dbo_name": "CAT001",
-                                "dbo_variable_name": "rec_num"
+                                "dbo_variable_name": "Record Number"
                             }
                         },
                         "DBOVariableDefinitionCAT020rec_num0": {
                             "parameters": {
                                 "dbo_name": "CAT020",
-                                "dbo_variable_name": "rec_num"
+                                "dbo_variable_name": "Record Number"
                             }
                         },
                         "DBOVariableDefinitionCAT021rec_num0": {
                             "parameters": {
                                 "dbo_name": "CAT021",
-                                "dbo_variable_name": "rec_num"
+                                "dbo_variable_name": "Record Number"
                             }
                         },
                         "DBOVariableDefinitionCAT048rec_num0": {
                             "parameters": {
                                 "dbo_name": "CAT048",
-                                "dbo_variable_name": "rec_num"
+                                "dbo_variable_name": "Record Number"
                             }
                         },
                         "DBOVariableDefinitionCAT062rec_num0": {
                             "parameters": {
                                 "dbo_name": "CAT062",
-                                "dbo_variable_name": "rec_num"
+                                "dbo_variable_name": "Record Number"
                             }
                         },
                         "DBOVariableDefinitionRefTrajrec_num0": {
