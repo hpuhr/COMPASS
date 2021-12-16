@@ -104,6 +104,9 @@ DBObjectManager::DBObjectManager(const std::string& class_id, const std::string&
 
     createSubConfigurables();
 
+    for (auto& dbo_it : objects_)
+        dbo_it.second->checkLabelDefinitions();
+
     qRegisterMetaType<std::shared_ptr<Buffer>>("std::shared_ptr<Buffer>"); // for dbo read job
     // for signal about new data
     qRegisterMetaType<std::map<std::string, std::shared_ptr<Buffer>>>("std::map<std::string, std::shared_ptr<Buffer>>");

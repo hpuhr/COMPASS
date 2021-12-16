@@ -150,7 +150,7 @@ class DBObject : public QObject, public Configurable
     void insertData(std::shared_ptr<Buffer> buffer);
     void updateData(DBOVariable& key_var, DBOVariableSet& list, std::shared_ptr<Buffer> buffer);
 
-    std::map<int, std::string> loadLabelData(std::vector<int> rec_nums, int break_item_cnt);
+    std::map<unsigned int, std::string> loadLabelData(std::vector<unsigned int> rec_nums, int break_item_cnt);
 
     bool isLoading();
     bool isInserting();
@@ -189,6 +189,8 @@ class DBObject : public QObject, public Configurable
 
 
     std::string dbTableName() const;
+
+    void checkLabelDefinitions();
 
 protected:
     COMPASS& compass_;

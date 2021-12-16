@@ -16,16 +16,20 @@
  */
 
 #include "dbolabeldefinition.h"
-
-#include <iostream>
-#include <string>
-
 #include "buffer.h"
 #include "dbobject.h"
 #include "dbolabeldefinitionwidget.h"
 #include "dbovariable.h"
 #include "global.h"
 #include "propertylist.h"
+#include "compass.h"
+#include "dbobjectmanager.h"
+#include "metadbovariable.h"
+
+#include <iostream>
+#include <string>
+
+using namespace std;
 
 DBOLabelEntry::DBOLabelEntry(const std::string& class_id, const std::string& instance_id,
                              DBOLabelDefinition* parent)
@@ -79,11 +83,9 @@ void DBOLabelEntry::suffix(const std::string& suffix)
 }
 
 DBOLabelDefinition::DBOLabelDefinition(const std::string& class_id, const std::string& instance_id,
-                                       DBObject* parent)
-    : Configurable(class_id, instance_id, parent), db_object_(parent)
+                                       DBObject* parent, DBObjectManager& dbo_man)
+    : Configurable(class_id, instance_id, parent), db_object_(*parent), dbo_man_(dbo_man)
 {
-    assert(db_object_);
-
     createSubConfigurables();
 }
 
@@ -118,22 +120,24 @@ void DBOLabelDefinition::updateReadList()
     {
         if (it.second->show())
         {
-            assert(db_object_->hasVariable(it.second->variableName()));
-            read_list_.add(db_object_->variable(it.second->variableName()));
+            assert(db_object_.hasVariable(it.second->variableName()));
+            read_list_.add(db_object_.variable(it.second->variableName()));
         }
     }
 }
 
-void DBOLabelDefinition::checkLabelDefintions()
+void DBOLabelDefinition::checkLabelDefinitions()
 {
-    assert(db_object_);
+    loginf << "DBOLabelDefinition: checkLabelDefinitions: dbo " << db_object_.name();
 
     std::string variable_name;
     bool show = false;
     std::string prefix;
     std::string suffix;
 
-    for (auto& var_it : db_object_->variables())
+    string dbo_name = db_object_.name();
+
+    for (auto& var_it : db_object_.variables())
     {
         if (entries_.find(var_it->name()) == entries_.end())
         {
@@ -144,26 +148,56 @@ void DBOLabelDefinition::checkLabelDefintions()
 
             logdbg << "DBOLabelDefinition: checkSubConfigurables: new var " << variable_name;
 
-            if (variable_name == "tod")
+            if (dbo_man_.metaVariable(DBObject::meta_var_datasource_id_.name()).existsIn(dbo_name)
+                    && variable_name == dbo_man_.metaVariable(
+                        DBObject::meta_var_datasource_id_.name()).getFor(dbo_name).name())
+            {
+                show = true;
+                prefix = "S ";
+            }
+            else if (dbo_man_.metaVariable(DBObject::meta_var_tod_id_.name()).existsIn(dbo_name)
+                    && variable_name == dbo_man_.metaVariable(
+                        DBObject::meta_var_tod_id_.name()).getFor(dbo_name).name())
             {
                 show = true;
                 prefix = "T ";
             }
-            else if (variable_name == "mode3a_code")
+            else if (dbo_man_.metaVariable(DBObject::meta_var_m3a_id_.name()).existsIn(dbo_name)
+                     && variable_name == dbo_man_.metaVariable(
+                         DBObject::meta_var_m3a_id_.name()).getFor(dbo_name).name())
             {
                 show = true;
                 prefix = "A ";
             }
-            else if (variable_name == "modec_code_ft")
+            else if (dbo_man_.metaVariable(DBObject::meta_var_ta_id_.name()).existsIn(dbo_name)
+                     && variable_name == dbo_man_.metaVariable(
+                         DBObject::meta_var_ta_id_.name()).getFor(dbo_name).name())
+            {
+                show = true;
+                prefix = "AA ";
+            }
+            else if (dbo_man_.metaVariable(DBObject::meta_var_ti_id_.name()).existsIn(dbo_name)
+                     && variable_name == dbo_man_.metaVariable(
+                         DBObject::meta_var_ti_id_.name()).getFor(dbo_name).name())
+            {
+                show = true;
+                prefix = "ID ";
+            }
+            else if (dbo_man_.metaVariable(DBObject::meta_var_track_num_id_.name()).existsIn(dbo_name)
+                     && variable_name == dbo_man_.metaVariable(
+                         DBObject::meta_var_track_num_id_.name()).getFor(dbo_name).name())
+            {
+                show = true;
+                prefix = "TN ";
+            }
+            else if (dbo_man_.metaVariable(DBObject::meta_var_mc_id_.name()).existsIn(dbo_name)
+                     && variable_name == dbo_man_.metaVariable(
+                         DBObject::meta_var_mc_id_.name()).getFor(dbo_name).name())
             {
                 show = true;
                 prefix = "C ";
             }
-            else if (variable_name == "rec_num")
-            {
-                show = true;
-                prefix = "R ";
-            }
+
             std::string instance_id = "LabelEntry" + variable_name + "0";
 
             Configuration& configuration = addNewSubConfiguration("LabelEntry", instance_id);
@@ -194,9 +228,7 @@ void DBOLabelDefinition::generateSubConfigurable(const std::string& class_id,
 
 void DBOLabelDefinition::checkSubConfigurables()
 {
-    logdbg << "DBOLabelDefinition: checkSubConfigurables: object " << db_object_->name();
-
-    checkLabelDefintions();
+    logdbg << "DBOLabelDefinition: checkSubConfigurables: object " << db_object_.name();
 }
 DBOLabelEntry& DBOLabelDefinition::entry(const std::string& variable_name)
 {
@@ -207,7 +239,7 @@ DBOLabelDefinitionWidget* DBOLabelDefinition::widget()
 {
     if (!widget_)
     {
-        checkLabelDefintions();
+        //checkLabelDefinitions();
 
         widget_ = new DBOLabelDefinitionWidget(this);
         assert(widget_);
@@ -215,7 +247,7 @@ DBOLabelDefinitionWidget* DBOLabelDefinition::widget()
     return widget_;
 }
 
-std::map<int, std::string> DBOLabelDefinition::generateLabels(std::vector<int> rec_nums,
+std::map<unsigned int, std::string> DBOLabelDefinition::generateLabels(std::vector<unsigned int> rec_nums,
                                                               std::shared_ptr<Buffer> buffer,
                                                               int break_item_cnt)
 {
@@ -225,10 +257,20 @@ std::map<int, std::string> DBOLabelDefinition::generateLabels(std::vector<int> r
     assert(buffer->size() == rec_nums.size());
 
     // check and insert strings for with rec_num
-    std::map<int, std::string> labels;
+    std::map<unsigned int, std::string> labels;
 
-    std::map<int, size_t> rec_num_to_index;
-    NullableVector<int>& rec_num_list = buffer->get<int>("rec_num");
+    DBObjectManager& dbo_man_ = COMPASS::instance().objectManager();
+
+    string dbo_name = db_object_.name();
+
+    assert (dbo_man_.existsMetaVariable(DBObject::meta_var_rec_num_id_.name()));
+    assert (dbo_man_.metaVariable(DBObject::meta_var_rec_num_id_.name()).existsIn(dbo_name));
+
+    DBOVariable& rec_num_var = dbo_man_.metaVariable(DBObject::meta_var_rec_num_id_.name()).getFor(dbo_name);
+
+    std::map<unsigned int, size_t> rec_num_to_index;
+    NullableVector<unsigned int>& rec_num_list = buffer->get<unsigned int>(rec_num_var.dbColumnName());
+
     for (size_t cnt = 0; cnt < rec_num_list.size(); cnt++)
     {
         assert(!rec_num_list.isNull(cnt));
@@ -238,6 +280,7 @@ std::map<int, std::string> DBOLabelDefinition::generateLabels(std::vector<int> r
     }
 
     PropertyDataType data_type;
+    string db_col_name;
     std::string value_str;
     DBOLabelEntry* entry;
     bool null;
@@ -246,6 +289,7 @@ std::map<int, std::string> DBOLabelDefinition::generateLabels(std::vector<int> r
     for (DBOVariable* variable : read_list_.getSet())
     {
         data_type = variable->dataType();
+        db_col_name = variable->dbColumnName();
         value_str = NULL_STRING;
         entry = entries_[variable->name()];
         assert(entry);
@@ -259,107 +303,107 @@ std::map<int, std::string> DBOLabelDefinition::generateLabels(std::vector<int> r
 
             if (data_type == PropertyDataType::BOOL)
             {
-                assert(buffer->has<bool>(variable->name()));
-                null = buffer->get<bool>(variable->name()).isNull(buffer_index);
+                assert(buffer->has<bool>(db_col_name));
+                null = buffer->get<bool>(db_col_name).isNull(buffer_index);
                 if (!null)
                 {
                     value_str = variable->getRepresentationStringFromValue(
-                        buffer->get<bool>(variable->name()).getAsString(buffer_index));
+                        buffer->get<bool>(db_col_name).getAsString(buffer_index));
                 }
             }
             else if (data_type == PropertyDataType::CHAR)
             {
-                assert(buffer->has<char>(variable->name()));
-                null = buffer->get<char>(variable->name()).isNull(buffer_index);
+                assert(buffer->has<char>(db_col_name));
+                null = buffer->get<char>(db_col_name).isNull(buffer_index);
                 if (!null)
                 {
                     value_str = variable->getRepresentationStringFromValue(
-                        buffer->get<char>(variable->name()).getAsString(buffer_index));
+                        buffer->get<char>(db_col_name).getAsString(buffer_index));
                 }
             }
             else if (data_type == PropertyDataType::UCHAR)
             {
-                assert(buffer->has<unsigned char>(variable->name()));
-                null = buffer->get<unsigned char>(variable->name()).isNull(buffer_index);
+                assert(buffer->has<unsigned char>(db_col_name));
+                null = buffer->get<unsigned char>(db_col_name).isNull(buffer_index);
                 if (!null)
                 {
                     value_str = variable->getRepresentationStringFromValue(
-                        buffer->get<unsigned char>(variable->name()).getAsString(buffer_index));
+                        buffer->get<unsigned char>(db_col_name).getAsString(buffer_index));
                 }
             }
             else if (data_type == PropertyDataType::INT)
             {
-                assert(buffer->has<int>(variable->name()));
-                null = buffer->get<int>(variable->name()).isNull(buffer_index);
+                assert(buffer->has<int>(db_col_name));
+                null = buffer->get<int>(db_col_name).isNull(buffer_index);
                 if (!null)
                 {
                     value_str = variable->getRepresentationStringFromValue(
-                        buffer->get<int>(variable->name()).getAsString(buffer_index));
+                        buffer->get<int>(db_col_name).getAsString(buffer_index));
                 }
             }
             else if (data_type == PropertyDataType::UINT)
             {
-                assert(buffer->has<unsigned int>(variable->name()));
-                null = buffer->get<unsigned int>(variable->name()).isNull(buffer_index);
+                assert(buffer->has<unsigned int>(db_col_name));
+                null = buffer->get<unsigned int>(db_col_name).isNull(buffer_index);
                 if (!null)
                 {
                     value_str = variable->getRepresentationStringFromValue(
-                        buffer->get<unsigned int>(variable->name()).getAsString(buffer_index));
+                        buffer->get<unsigned int>(db_col_name).getAsString(buffer_index));
                 }
             }
             else if (data_type == PropertyDataType::LONGINT)
             {
-                assert(buffer->has<long int>(variable->name()));
-                null = buffer->get<long int>(variable->name()).isNull(buffer_index);
+                assert(buffer->has<long int>(db_col_name));
+                null = buffer->get<long int>(db_col_name).isNull(buffer_index);
                 if (!null)
                 {
                     value_str = variable->getRepresentationStringFromValue(
-                        buffer->get<long int>(variable->name()).getAsString(buffer_index));
+                        buffer->get<long int>(db_col_name).getAsString(buffer_index));
                 }
             }
             else if (data_type == PropertyDataType::ULONGINT)
             {
-                assert(buffer->has<unsigned long int>(variable->name()));
-                null = buffer->get<unsigned long int>(variable->name()).isNull(buffer_index);
+                assert(buffer->has<unsigned long int>(db_col_name));
+                null = buffer->get<unsigned long int>(db_col_name).isNull(buffer_index);
                 if (!null)
                 {
                     value_str = variable->getRepresentationStringFromValue(
-                        buffer->get<unsigned long int>(variable->name()).getAsString(buffer_index));
+                        buffer->get<unsigned long int>(db_col_name).getAsString(buffer_index));
                 }
             }
             else if (data_type == PropertyDataType::FLOAT)
             {
-                assert(buffer->has<float>(variable->name()));
-                null = buffer->get<float>(variable->name()).isNull(buffer_index);
+                assert(buffer->has<float>(db_col_name));
+                null = buffer->get<float>(db_col_name).isNull(buffer_index);
                 if (!null)
                 {
                     value_str = variable->getRepresentationStringFromValue(
-                        buffer->get<float>(variable->name()).getAsString(buffer_index));
+                        buffer->get<float>(db_col_name).getAsString(buffer_index));
                 }
             }
             else if (data_type == PropertyDataType::DOUBLE)
             {
-                assert(buffer->has<double>(variable->name()));
-                null = buffer->get<double>(variable->name()).isNull(buffer_index);
+                assert(buffer->has<double>(db_col_name));
+                null = buffer->get<double>(db_col_name).isNull(buffer_index);
                 if (!null)
                 {
                     value_str = variable->getRepresentationStringFromValue(
-                        buffer->get<double>(variable->name()).getAsString(buffer_index));
+                        buffer->get<double>(db_col_name).getAsString(buffer_index));
                 }
             }
             else if (data_type == PropertyDataType::STRING)
             {
-                assert(buffer->has<std::string>(variable->name()));
-                null = buffer->get<std::string>(variable->name()).isNull(buffer_index);
+                assert(buffer->has<std::string>(db_col_name));
+                null = buffer->get<std::string>(db_col_name).isNull(buffer_index);
                 if (!null)
                 {
                     value_str = variable->getRepresentationStringFromValue(
-                        buffer->get<std::string>(variable->name()).getAsString(buffer_index));
+                        buffer->get<std::string>(db_col_name).getAsString(buffer_index));
                 }
             }
             else
                 throw std::domain_error(
-                    "DBOLabelDefinition::generateLabels: unknown property data type");
+                    "DBOLabelDefinition: generateLabels: unknown property data type");
 
             if (!null)
             {
@@ -391,7 +435,5 @@ std::map<int, std::string> DBOLabelDefinition::generateLabels(std::vector<int> r
 
 void DBOLabelDefinition::labelDefinitionChangedSlot()
 {
-    assert(db_object_);
-
-    emit db_object_->labelDefinitionChangedSignal();
+    emit db_object_.labelDefinitionChangedSignal();
 }

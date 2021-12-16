@@ -129,7 +129,7 @@ void DBObject::generateSubConfigurable(const string& class_id, const string& ins
     else if (class_id == "DBOLabelDefinition")
     {
         assert(!label_definition_);
-        label_definition_.reset(new DBOLabelDefinition(class_id, instance_id, this));
+        label_definition_.reset(new DBOLabelDefinition(class_id, instance_id, this, dbo_manager_));
     }
     else
         throw runtime_error("DBObject: generateSubConfigurable: unknown class_id " + class_id);
@@ -528,7 +528,7 @@ void DBObject::updateDoneSlot()
     emit updateDoneSignal(*this);
 }
 
-map<int, string> DBObject::loadLabelData(vector<int> rec_nums, int break_item_cnt)
+map<unsigned int, string> DBObject::loadLabelData(vector<unsigned int> rec_nums, int break_item_cnt)
 {
     assert(is_loadable_);
     assert(existsInDB());
@@ -536,10 +536,14 @@ map<int, string> DBObject::loadLabelData(vector<int> rec_nums, int break_item_cn
     string custom_filter_clause;
     bool first = true;
 
-    // TODO rework to key variable
-    assert(hasVariable("rec_num"));
+    assert (dbo_manager_.existsMetaVariable(DBObject::meta_var_rec_num_id_.name()));
+    assert (dbo_manager_.metaVariable(DBObject::meta_var_rec_num_id_.name()).existsIn(name_));
 
-    custom_filter_clause = variable("rec_num").dbColumnIdentifier() + " in (";
+    DBOVariable& rec_num_var = dbo_manager_.metaVariable(DBObject::meta_var_rec_num_id_.name()).getFor(name_);
+
+    // TODO rework to key variable
+
+    custom_filter_clause = rec_num_var.dbColumnName() + " in (";
     for (auto& rec_num : rec_nums)
     {
         if (first)
@@ -553,8 +557,8 @@ map<int, string> DBObject::loadLabelData(vector<int> rec_nums, int break_item_cn
 
     DBOVariableSet read_list = label_definition_->readList();
 
-    if (!read_list.hasVariable(variable("rec_num")))
-        read_list.add(variable("rec_num"));
+    if (!read_list.hasVariable(rec_num_var))
+        read_list.add(rec_num_var);
 
     boost::posix_time::ptime start_time = boost::posix_time::microsec_clock::local_time();
 
@@ -571,7 +575,7 @@ map<int, string> DBObject::loadLabelData(vector<int> rec_nums, int break_item_cn
 
     assert(buffer->size() == rec_nums.size());
 
-    map<int, string> labels =
+    map<unsigned int, string> labels =
             label_definition_->generateLabels(rec_nums, buffer, break_item_cnt);
 
     boost::posix_time::ptime stop_time = boost::posix_time::microsec_clock::local_time();
@@ -746,6 +750,12 @@ void DBObject::databaseClosedSlot()
 string DBObject::dbTableName() const
 {
     return db_table_name_;
+}
+
+void DBObject::checkLabelDefinitions()
+{
+    assert (label_definition_);
+    label_definition_->checkLabelDefinitions();
 }
 
 bool DBObject::associationsLoaded() const

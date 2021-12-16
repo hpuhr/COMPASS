@@ -462,7 +462,12 @@ void DBObjectManagerLoadWidget::clearAndCreateContent()
                     button->update();
                     //button->setDisabled(line_cnt != 0);
 
-                    tooltip = net_lines.at(ds_id).at(line_cnt).first+":"
+                    if (line_cnt == 0)
+                        tooltip = "Connected";
+                    else
+                        tooltip = "Not Connected";
+
+                    tooltip += "\nIP: "+net_lines.at(ds_id).at(line_cnt).first+":"
                                  +to_string(net_lines.at(ds_id).at(line_cnt).second);
 
                     button->setToolTip(tooltip.c_str());

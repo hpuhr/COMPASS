@@ -64,6 +64,7 @@ class DBOLabelEntry : public QObject, public Configurable
 
 class DBOLabelDefinitionWidget;
 class Buffer;
+class DBObjectManager;
 
 class DBOLabelDefinition : public QObject, public Configurable
 {
@@ -74,7 +75,7 @@ class DBOLabelDefinition : public QObject, public Configurable
 
   public:
     DBOLabelDefinition(const std::string& class_id, const std::string& instance_id,
-                       DBObject* parent);
+                       DBObject* parent, DBObjectManager& dbo_man);
     virtual ~DBOLabelDefinition();
 
     DBOVariableSet& readList();
@@ -82,18 +83,19 @@ class DBOLabelDefinition : public QObject, public Configurable
     DBOLabelEntry& entry(const std::string& variable_name);
 
     void updateReadList();
-    void checkLabelDefintions();
+    void checkLabelDefinitions();
 
     virtual void generateSubConfigurable(const std::string& class_id,
                                          const std::string& instance_id);
 
     DBOLabelDefinitionWidget* widget();
 
-    std::map<int, std::string> generateLabels(std::vector<int> rec_nums,
-                                              std::shared_ptr<Buffer> buffer, int break_item_cnt);
+    std::map<unsigned int, std::string> generateLabels(std::vector<unsigned int> rec_nums,
+                                                       std::shared_ptr<Buffer> buffer, int break_item_cnt);
 
   protected:
-    DBObject* db_object_{nullptr};
+    DBObject& db_object_;
+    DBObjectManager& dbo_man_;
     std::map<std::string, DBOLabelEntry*> entries_;  // varname -> labelentry
 
     DBOVariableSet read_list_;
