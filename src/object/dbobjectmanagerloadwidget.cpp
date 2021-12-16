@@ -349,8 +349,9 @@ void DBObjectManagerLoadWidget::clearAndCreateContent()
     // remove all previous
     while (QLayoutItem* item = type_layout_->takeAt(0))
     {
-        assert(!item->layout()); // otherwise the layout will leak
-        delete item->widget();
+        if (item->widget())
+            delete item->widget();
+
         delete item;
     }
 

@@ -47,6 +47,12 @@ void ASTERIXJSONMappingJob::run()
     auto process_lambda = [this](nlohmann::json& record) {
         //loginf << "UGA '" << record.dump(4) << "'";
 
+        if (this->obsolete_)
+        {
+            done_ = true;
+            return;
+        }
+
         unsigned int category{0};
         assert (record.contains("category"));
 
