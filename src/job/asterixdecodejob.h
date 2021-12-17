@@ -91,6 +91,7 @@ class ASTERIXDecodeJob : public Job
     std::string error_message_;
 
     boost::interprocess::interprocess_semaphore receive_semaphore_;
+    std::unique_ptr<boost::array<char, MAX_ALL_RECEIVE_SIZE>> receive_buffer_copy_;
 
 //    std::vector<boost::asio::ip::udp::socket> sockets_;
 //    std::vector<boost::asio::ip::udp::endpoint> end_points_;
@@ -100,7 +101,7 @@ class ASTERIXDecodeJob : public Job
 //    boost::system::error_code error_code_;
 
     boost::mutex receive_buffer_mutex_;
-    boost::array<char, MAX_ALL_RECEIVE_SIZE>* receive_buffer_ {nullptr};
+    std::unique_ptr<boost::array<char, MAX_ALL_RECEIVE_SIZE>> receive_buffer_;
     size_t receive_buffer_size_ {0};
     boost::posix_time::ptime last_receive_decode_time_;
 

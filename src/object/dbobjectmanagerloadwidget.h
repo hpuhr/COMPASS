@@ -40,9 +40,9 @@ class DBObjectManagerLoadWidget : public QWidget
     void loadDSTypeChangedSlot();
     void loadDSChangedSlot();
 
-    void toggleUseLimit();
-    void limitMinChanged();
-    void limitMaxChanged();
+//    void toggleUseLimit();
+//    void limitMinChanged();
+//    void limitMaxChanged();
 
     void loadButtonSlot();
 
@@ -56,17 +56,19 @@ class DBObjectManagerLoadWidget : public QWidget
   private:
     DBObjectManager& dbo_manager_;
 
+    bool show_counts_ {false};
+
     QGridLayout* type_layout_{nullptr};
 
     //std::map<std::string, QGridLayout*> type_layouts_; // dbcontent type -> layout
 
-    QLabel* associations_label_{nullptr};
+    //QLabel* associations_label_{nullptr};
 
-    QCheckBox* limit_check_{nullptr};
+    //QCheckBox* limit_check_{nullptr};
 
-    QWidget* limit_widget_{nullptr};
-    QLineEdit* limit_min_edit_{nullptr};
-    QLineEdit* limit_max_edit_{nullptr};
+//    QWidget* limit_widget_{nullptr};
+//    QLineEdit* limit_min_edit_{nullptr};
+//    QLineEdit* limit_max_edit_{nullptr};
 
     QPushButton* load_button_{nullptr};
 

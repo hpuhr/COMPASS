@@ -1074,7 +1074,7 @@ void DBObjectManager::cutCachedData()
             {
                 index--; // cut at previous
 
-                logdbg << "DBObjectManager: cutCachedData: cutting " << buf_it.first
+                loginf << "DBObjectManager: cutCachedData: cutting " << buf_it.first
                        << " up to index " << index
                        << " total size " << buffer_size;
                 assert (index < buffer_size);

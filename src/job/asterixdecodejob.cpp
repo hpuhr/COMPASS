@@ -147,7 +147,7 @@ ASTERIXDecodeJob::ASTERIXDecodeJob(ASTERIXImportTask& task, bool test,
 {
     logdbg << "ASTERIXDecodeJob: ctor";
 
-    receive_buffer_ = new boost::array<char, MAX_ALL_RECEIVE_SIZE>();
+    receive_buffer_.reset(new boost::array<char, MAX_ALL_RECEIVE_SIZE>());
 }
 
 ASTERIXDecodeJob::~ASTERIXDecodeJob() { logdbg << "ASTERIXDecodeJob: dtor"; }
@@ -308,8 +308,11 @@ void ASTERIXDecodeJob::doUDPStreamDecoding()
 
                 assert (receive_buffer_size_ <= MAX_ALL_RECEIVE_SIZE);
 
-                boost::array<char, MAX_ALL_RECEIVE_SIZE>* tmp_buffer = new boost::array<char, MAX_ALL_RECEIVE_SIZE>();
-                *tmp_buffer = *receive_buffer_;
+                if (!receive_buffer_copy_)
+                    receive_buffer_copy_.reset(new boost::array<char, MAX_ALL_RECEIVE_SIZE>());
+
+                //boost::array<char, MAX_ALL_RECEIVE_SIZE>* tmp_buffer = new boost::array<char, MAX_ALL_RECEIVE_SIZE>();
+                *receive_buffer_copy_ = *receive_buffer_;
                 size_t tmp_buffer_size = receive_buffer_size_;
 
                 receive_buffer_size_ = 0;
@@ -318,8 +321,7 @@ void ASTERIXDecodeJob::doUDPStreamDecoding()
 
                 last_receive_decode_time_ = boost::posix_time::microsec_clock::local_time();
 
-                task_.jASTERIX()->decodeData((char*) tmp_buffer->data(), tmp_buffer_size, callback);
-
+                task_.jASTERIX()->decodeData((char*) receive_buffer_copy_->data(), tmp_buffer_size, callback);
             }
         }
     }

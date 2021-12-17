@@ -49,107 +49,107 @@ DBObjectManagerLoadWidget::DBObjectManagerLoadWidget(DBObjectManager& object_man
 
     QVBoxLayout* main_layout = new QVBoxLayout();
 
-//    QLabel* main_label = new QLabel("Database Objects");
-//    main_label->setFont(font_bold);
-//    main_layout->addWidget(main_label);
+    //    QLabel* main_label = new QLabel("Database Objects");
+    //    main_label->setFont(font_bold);
+    //    main_layout->addWidget(main_label);
 
     // data sources, per type
 
     type_layout_ = new QGridLayout();
 
-//    QGridLayout* dstypes_lay = new QGridLayout();
+    //    QGridLayout* dstypes_lay = new QGridLayout();
 
-//    unsigned int row = 0, col = 0;
-//    for (auto& dstyp_it : DBObjectManager::data_source_types_)
-//    {
-//        QVBoxLayout* lay = new QVBoxLayout();
+    //    unsigned int row = 0, col = 0;
+    //    for (auto& dstyp_it : DBObjectManager::data_source_types_)
+    //    {
+    //        QVBoxLayout* lay = new QVBoxLayout();
 
-//        QLabel* dstyp_label = new QLabel(dstyp_it.c_str());
-//        dstyp_label->setFont(font_bold);
+    //        QLabel* dstyp_label = new QLabel(dstyp_it.c_str());
+    //        dstyp_label->setFont(font_bold);
 
-//        lay->addWidget(dstyp_label);
+    //        lay->addWidget(dstyp_label);
 
-//        QGridLayout* dstyp_lay = new QGridLayout();
-//        type_layouts_[dstyp_it] = dstyp_lay;
-//        lay->addLayout(dstyp_lay);
+    //        QGridLayout* dstyp_lay = new QGridLayout();
+    //        type_layouts_[dstyp_it] = dstyp_lay;
+    //        lay->addLayout(dstyp_lay);
 
-//        // void addLayout(QLayout *, int row, int column, int rowSpan, int columnSpan, Qt::Alignment = Qt::Alignment());
-//        if (dstyp_it == "Radar") // span 2 rows
-//        {
-//            dstypes_lay->addLayout(lay, row, col, 2, 1, Qt::AlignLeft);
-//            row += 1; // to step into next col
-//        }
-//        else
-//            dstypes_lay->addLayout(lay, row, col, 1, 1, Qt::AlignLeft);
+    //        // void addLayout(QLayout *, int row, int column, int rowSpan, int columnSpan, Qt::Alignment = Qt::Alignment());
+    //        if (dstyp_it == "Radar") // span 2 rows
+    //        {
+    //            dstypes_lay->addLayout(lay, row, col, 2, 1, Qt::AlignLeft);
+    //            row += 1; // to step into next col
+    //        }
+    //        else
+    //            dstypes_lay->addLayout(lay, row, col, 1, 1, Qt::AlignLeft);
 
-//        // increment
-//        if (row == 1)
-//        {
-//            row = 0;
-//            ++col;
-//        }
-//        else
-//        {
-//            ++row;
-//        }
-//    }
+    //        // increment
+    //        if (row == 1)
+    //        {
+    //            row = 0;
+    //            ++col;
+    //        }
+    //        else
+    //        {
+    //            ++row;
+    //        }
+    //    }
 
     main_layout->addLayout(type_layout_);
     update();
 
     // associations
 
-    QGridLayout* assoc_layout = new QGridLayout();
+//    QGridLayout* assoc_layout = new QGridLayout();
 
-    QLabel* assoc_label = new QLabel("Associations");
-    assoc_label->setFont(font_bold);
-    assoc_layout->addWidget(assoc_label, 0, 0);
+//    QLabel* assoc_label = new QLabel("Associations");
+//    assoc_label->setFont(font_bold);
+//    assoc_layout->addWidget(assoc_label, 0, 0);
 
-    associations_label_ = new QLabel();
-    associations_label_->setAlignment(Qt::AlignTop | Qt::AlignLeft);
-    assoc_layout->addWidget(associations_label_, 0, 1);
+//    associations_label_ = new QLabel();
+//    associations_label_->setAlignment(Qt::AlignTop | Qt::AlignLeft);
+//    assoc_layout->addWidget(associations_label_, 0, 1);
 
-    main_layout->addLayout(assoc_layout);
+//    main_layout->addLayout(assoc_layout);
 
-    update();
+//    update();
 
-    main_layout->addStretch();
+//    main_layout->addStretch();
 
-    // limit stuff
-    bool use_limit = dbo_manager_.useLimit();
-    limit_check_ = new QCheckBox("Use Limit");
-    limit_check_->setChecked(use_limit);
-    connect(limit_check_, &QCheckBox::clicked, this, &DBObjectManagerLoadWidget::toggleUseLimit);
-    main_layout->addWidget(limit_check_);
+//    // limit stuff
+//    bool use_limit = dbo_manager_.useLimit();
+//    limit_check_ = new QCheckBox("Use Limit");
+//    limit_check_->setChecked(use_limit);
+//    connect(limit_check_, &QCheckBox::clicked, this, &DBObjectManagerLoadWidget::toggleUseLimit);
+//    main_layout->addWidget(limit_check_);
 
 
     QHBoxLayout* bottom_layout = new QHBoxLayout();
 
-    limit_widget_ = new QWidget();
+//    limit_widget_ = new QWidget();
 
-    QGridLayout* limit_layout = new QGridLayout();
-    limit_layout->addWidget(new QLabel("Limit Min"), 0, 0);
+//    QGridLayout* limit_layout = new QGridLayout();
+//    limit_layout->addWidget(new QLabel("Limit Min"), 0, 0);
 
-    limit_min_edit_ = new QLineEdit();
-    limit_min_edit_->setText(std::to_string(dbo_manager_.limitMin()).c_str());
-    limit_min_edit_->setEnabled(use_limit);
-    connect(limit_min_edit_, SIGNAL(textChanged(QString)), this, SLOT(limitMinChanged()));
-    limit_layout->addWidget(limit_min_edit_, 0, 1);
+//    limit_min_edit_ = new QLineEdit();
+//    limit_min_edit_->setText(std::to_string(dbo_manager_.limitMin()).c_str());
+//    limit_min_edit_->setEnabled(use_limit);
+//    connect(limit_min_edit_, SIGNAL(textChanged(QString)), this, SLOT(limitMinChanged()));
+//    limit_layout->addWidget(limit_min_edit_, 0, 1);
 
-    limit_layout->addWidget(new QLabel("Limit Max"), 1, 0);
+//    limit_layout->addWidget(new QLabel("Limit Max"), 1, 0);
 
-    limit_max_edit_ = new QLineEdit();
-    limit_max_edit_->setText(std::to_string(dbo_manager_.limitMax()).c_str());
-    limit_max_edit_->setEnabled(use_limit);
-    connect(limit_max_edit_, SIGNAL(textChanged(QString)), this, SLOT(limitMaxChanged()));
-    limit_layout->addWidget(limit_max_edit_, 1, 1);
+//    limit_max_edit_ = new QLineEdit();
+//    limit_max_edit_->setText(std::to_string(dbo_manager_.limitMax()).c_str());
+//    limit_max_edit_->setEnabled(use_limit);
+//    connect(limit_max_edit_, SIGNAL(textChanged(QString)), this, SLOT(limitMaxChanged()));
+//    limit_layout->addWidget(limit_max_edit_, 1, 1);
 
-    limit_widget_->setLayout(limit_layout);
+//    limit_widget_->setLayout(limit_layout);
 
-    if (!dbo_manager_.useLimit())
-        limit_widget_->hide();
+//    if (!dbo_manager_.useLimit())
+//        limit_widget_->hide();
 
-    bottom_layout->addWidget(limit_widget_);
+//    bottom_layout->addWidget(limit_widget_);
 
     // load
 
@@ -196,46 +196,46 @@ void DBObjectManagerLoadWidget::loadDSChangedSlot()
 }
 
 
-void DBObjectManagerLoadWidget::toggleUseLimit()
-{
-    assert(limit_check_);
-    assert(limit_widget_);
-    assert(limit_min_edit_);
-    assert(limit_max_edit_);
+//void DBObjectManagerLoadWidget::toggleUseLimit()
+//{
+//    assert(limit_check_);
+//    assert(limit_widget_);
+//    assert(limit_min_edit_);
+//    assert(limit_max_edit_);
 
-    bool checked = limit_check_->checkState() == Qt::Checked;
-    logdbg << "DBObjectManagerLoadWidget: toggleUseLimit: setting use limit to " << checked;
-    dbo_manager_.useLimit(checked);
+//    bool checked = limit_check_->checkState() == Qt::Checked;
+//    logdbg << "DBObjectManagerLoadWidget: toggleUseLimit: setting use limit to " << checked;
+//    dbo_manager_.useLimit(checked);
 
-    if (checked)
-        limit_widget_->show();
-    else
-        limit_widget_->hide();
+//    if (checked)
+//        limit_widget_->show();
+//    else
+//        limit_widget_->hide();
 
-    limit_min_edit_->setEnabled(checked);
-    limit_max_edit_->setEnabled(checked);
-}
+//    limit_min_edit_->setEnabled(checked);
+//    limit_max_edit_->setEnabled(checked);
+//}
 
-void DBObjectManagerLoadWidget::limitMinChanged()
-{
-    assert(limit_min_edit_);
+//void DBObjectManagerLoadWidget::limitMinChanged()
+//{
+//    assert(limit_min_edit_);
 
-    if (limit_min_edit_->text().size() == 0)
-        return;
+//    if (limit_min_edit_->text().size() == 0)
+//        return;
 
-    unsigned int min = std::stoul(limit_min_edit_->text().toStdString());
-    dbo_manager_.limitMin(min);
-}
-void DBObjectManagerLoadWidget::limitMaxChanged()
-{
-    assert(limit_max_edit_);
+//    unsigned int min = std::stoul(limit_min_edit_->text().toStdString());
+//    dbo_manager_.limitMin(min);
+//}
+//void DBObjectManagerLoadWidget::limitMaxChanged()
+//{
+//    assert(limit_max_edit_);
 
-    if (limit_max_edit_->text().size() == 0)
-        return;
+//    if (limit_max_edit_->text().size() == 0)
+//        return;
 
-    unsigned int max = std::stoul(limit_max_edit_->text().toStdString());
-    dbo_manager_.limitMax(max);
-}
+//    unsigned int max = std::stoul(limit_max_edit_->text().toStdString());
+//    dbo_manager_.limitMax(max);
+//}
 
 void DBObjectManagerLoadWidget::loadButtonSlot()
 {
@@ -281,9 +281,6 @@ void DBObjectManagerLoadWidget::update()
 
     for (const auto& ds_it : dbo_manager_.dataSources())
     {
-        if (clear_required)
-            break;
-
         if (!ds_boxes_.count(ds_it->name()))
         {
             loginf << "DBObjectManagerLoadWidget: update: ds_box " << ds_it->name() << " missing ";
@@ -293,7 +290,7 @@ void DBObjectManagerLoadWidget::update()
         }
         // check content widget exist
 
-        if (!ds_it->hasActiveNumInserted()) // no data
+        if (!show_counts_ || !ds_it->hasActiveNumInserted()) // no counts or no data
             continue;
 
         for (auto& cnt_it : ds_it->activeNumInsertedMap())
@@ -326,20 +323,20 @@ void DBObjectManagerLoadWidget::update()
     //        info_layout_->addWidget(obj_it.second->infoWidget());
     //    }
 
-//    assert(associations_label_);
-//    if (dbo_manager_.hasAssociations())
-//    {
-//        if (dbo_manager_.hasAssociationsDataSource())
-//        {
-//            std::string tmp = "From " + dbo_manager_.associationsDBObject() + ":" +
-//                    dbo_manager_.associationsDataSourceName();
-//            associations_label_->setText(tmp.c_str());
-//        }
-//        else
-//            associations_label_->setText("All");
-//    }
-//    else
-//        associations_label_->setText("None");
+    //    assert(associations_label_);
+    //    if (dbo_manager_.hasAssociations())
+    //    {
+    //        if (dbo_manager_.hasAssociationsDataSource())
+    //        {
+    //            std::string tmp = "From " + dbo_manager_.associationsDBObject() + ":" +
+    //                    dbo_manager_.associationsDataSourceName();
+    //            associations_label_->setText(tmp.c_str());
+    //        }
+    //        else
+    //            associations_label_->setText("All");
+    //    }
+    //    else
+    //        associations_label_->setText("None");
 }
 
 void DBObjectManagerLoadWidget::clearAndCreateContent()
@@ -349,6 +346,17 @@ void DBObjectManagerLoadWidget::clearAndCreateContent()
     // remove all previous
     while (QLayoutItem* item = type_layout_->takeAt(0))
     {
+        if (item->layout())
+        {
+            while (QLayoutItem* item2 = item->layout()->takeAt(0))
+            {
+                if (item2->widget())
+                    delete item2->widget();
+
+                delete item2;
+            }
+        }
+
         if (item->widget())
             delete item->widget();
 
@@ -374,7 +382,7 @@ void DBObjectManagerLoadWidget::clearAndCreateContent()
     string ds_name;
     string ds_content_name;
 
-    unsigned int button_size = 24;
+    unsigned int button_size = 28;
 
     //ds_id -> (ip, port)
     std::map<unsigned int, std::vector <std::pair<std::string, unsigned int>>> net_lines =
@@ -476,47 +484,50 @@ void DBObjectManagerLoadWidget::clearAndCreateContent()
                 }
 
                 type_layout_->addLayout(button_lay, row, col_start+3, // 2 for start
-                                        Qt::AlignTop | Qt::AlignRight);
+                                        Qt::AlignTop | Qt::AlignLeft);
             }
 
             ++row;
 
-            for (auto& cnt_it : ds_it->activeNumInsertedMap())
+            if (show_counts_)
             {
-                ds_content_name = cnt_it.first;
+                for (auto& cnt_it : ds_it->activeNumInsertedMap())
+                {
+                    ds_content_name = cnt_it.first;
 
-                // content checkbox
+                    // content checkbox
 
-                QLabel* dbcont_box = new QLabel(ds_content_name.c_str());
+                    QLabel* dbcont_box = new QLabel(ds_content_name.c_str());
 
-                type_layout_->addWidget(dbcont_box, row, col_start+1,
-                                        Qt::AlignTop | Qt::AlignRight);
+                    type_layout_->addWidget(dbcont_box, row, col_start+1,
+                                            Qt::AlignTop | Qt::AlignRight);
 
-                assert (!ds_content_boxes_.count(ds_name) || !ds_content_boxes_.at(ds_name).count(ds_content_name));
-                ds_content_boxes_[ds_name][ds_content_name] = dbcont_box;
+                    assert (!ds_content_boxes_.count(ds_name) || !ds_content_boxes_.at(ds_name).count(ds_content_name));
+                    ds_content_boxes_[ds_name][ds_content_name] = dbcont_box;
 
-                // ds content loaded label
+                    // ds content loaded label
 
-                QLabel* ds_content_loaded_label = new QLabel(QString::number(ds_it->activeNumLoaded(ds_content_name)));
+                    QLabel* ds_content_loaded_label = new QLabel(QString::number(ds_it->activeNumLoaded(ds_content_name)));
 
-                type_layout_->addWidget(ds_content_loaded_label, row, col_start+2,
-                                        Qt::AlignTop | Qt::AlignRight);
+                    type_layout_->addWidget(ds_content_loaded_label, row, col_start+2,
+                                            Qt::AlignTop | Qt::AlignRight);
 
-                assert (!ds_content_loaded_labels_.count(ds_name)
-                        || !ds_content_loaded_labels_.at(ds_name).count(ds_content_name));
-                ds_content_loaded_labels_[ds_name][ds_content_name] = ds_content_loaded_label;
+                    assert (!ds_content_loaded_labels_.count(ds_name)
+                            || !ds_content_loaded_labels_.at(ds_name).count(ds_content_name));
+                    ds_content_loaded_labels_[ds_name][ds_content_name] = ds_content_loaded_label;
 
-                // ds content num inserted label
+                    // ds content num inserted label
 
-                QLabel* ds_content_total_label = new QLabel(QString::number(cnt_it.second));
+                    QLabel* ds_content_total_label = new QLabel(QString::number(cnt_it.second));
 
-                type_layout_->addWidget(ds_content_total_label, row, col_start+3,
-                                        Qt::AlignTop | Qt::AlignRight);
+                    type_layout_->addWidget(ds_content_total_label, row, col_start+3,
+                                            Qt::AlignTop | Qt::AlignRight);
 
-                assert (!ds_content_total_labels_.count(ds_name)
-                        || !ds_content_total_labels_.at(ds_name).count(ds_content_name));
-                ds_content_total_labels_[ds_name][ds_content_name] = ds_content_total_label;
-                ++row;
+                    assert (!ds_content_total_labels_.count(ds_name)
+                            || !ds_content_total_labels_.at(ds_name).count(ds_content_name));
+                    ds_content_total_labels_[ds_name][ds_content_name] = ds_content_total_label;
+                    ++row;
+                }
             }
         }
 
@@ -537,35 +548,38 @@ void DBObjectManagerLoadWidget::updateExistingContent()
     string ds_name;
     string ds_content_name;
 
-    for (const auto& ds_it : dbo_manager_.dataSources())
+    if (show_counts_)
     {
-        //loginf << row << " '" << ds_it->dsType() << "' '" << dstype << "'";
-
-        ds_name = ds_it->name();
-
-        assert (ds_boxes_.count(ds_name));
-        // ds_boxes_[ds_name] // checkbox
-
-        for (auto& cnt_it : ds_it->activeNumInsertedMap())
+        for (const auto& ds_it : dbo_manager_.dataSources())
         {
-            ds_content_name = cnt_it.first;
+            //loginf << row << " '" << ds_it->dsType() << "' '" << dstype << "'";
 
-            // content checkbox
+            ds_name = ds_it->name();
 
-            assert (ds_content_boxes_.count(ds_name) && ds_content_boxes_.at(ds_name).count(ds_content_name));
-            // ds_content_boxes_[ds_name][ds_content_name] content checkbox
+            assert (ds_boxes_.count(ds_name));
+            // ds_boxes_[ds_name] // checkbox
 
-            // ds content loaded label
-            assert (ds_content_loaded_labels_.count(ds_name)
-                    && ds_content_loaded_labels_.at(ds_name).count(ds_content_name));
-            ds_content_loaded_labels_[ds_name][ds_content_name]->setText(
-                        QString::number(ds_it->activeNumLoaded(ds_content_name)));
+            for (auto& cnt_it : ds_it->activeNumInsertedMap())
+            {
+                ds_content_name = cnt_it.first;
 
-            // ds content total label
+                // content checkbox
 
-            assert (ds_content_total_labels_.count(ds_name)
-                    && ds_content_total_labels_.at(ds_name).count(ds_content_name));
-            ds_content_total_labels_[ds_name][ds_content_name]->setText(QString::number(cnt_it.second));
+                assert (ds_content_boxes_.count(ds_name) && ds_content_boxes_.at(ds_name).count(ds_content_name));
+                // ds_content_boxes_[ds_name][ds_content_name] content checkbox
+
+                // ds content loaded label
+                assert (ds_content_loaded_labels_.count(ds_name)
+                        && ds_content_loaded_labels_.at(ds_name).count(ds_content_name));
+                ds_content_loaded_labels_[ds_name][ds_content_name]->setText(
+                            QString::number(ds_it->activeNumLoaded(ds_content_name)));
+
+                // ds content total label
+
+                assert (ds_content_total_labels_.count(ds_name)
+                        && ds_content_total_labels_.at(ds_name).count(ds_content_name));
+                ds_content_total_labels_[ds_name][ds_content_name]->setText(QString::number(cnt_it.second));
+            }
         }
     }
 }
