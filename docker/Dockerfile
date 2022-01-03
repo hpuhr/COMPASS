@@ -109,12 +109,32 @@ RUN cd osgQt-Qt4/build && make install
 
 RUN apt-get install libgeos++-dev -y
 
-RUN wget https://github.com/gwaldron/osgearth/archive/osgearth-2.10.2.zip
-RUN unzip osgearth-2.10.2.zip
-RUN mkdir osgearth-osgearth-2.10.2/build
-RUN cd osgearth-osgearth-2.10.2/build && cmake -DCMAKE_INSTALL_PREFIX=/usr -DOSGEARTH_USE_QT=TRUE -DDESIRED_QT_VERSION=5 -DCMAKE_BUILD_TYPE=Release ..
-RUN cd osgearth-osgearth-2.10.2/build && make -j 16
-RUN cd osgearth-osgearth-2.10.2/build && make install
+#RUN apt-get install libprotobuf-dev protobuf-compiler libglew-dev -y
+
+RUN apt-get install autoconf automake libtool curl -y
+
+RUN wget https://github.com/protocolbuffers/protobuf/releases/download/v3.19.1/protobuf-cpp-3.19.1.zip
+RUN unzip protobuf-cpp-3.19.1.zip
+RUN cd protobuf-3.19.1 && ./autogen.sh
+RUN cd protobuf-3.19.1 && ./configure
+RUN cd protobuf-3.19.1 && make
+RUN cd protobuf-3.19.1 && make check
+RUN cd protobuf-3.19.1 && make install
+RUN cd protobuf-3.19.1 && ldconfig # refresh shared library cache.
+
+RUN echo 'if(PROTOBUF_FOUND)' >> /usr/share/cmake-3.2/Modules/FindProtobuf.cmake
+RUN echo '    set(Protobuf_FOUND ${PROTOBUF_FOUND})' >> /usr/share/cmake-3.2/Modules/FindProtobuf.cmake
+RUN echo '    set(Protobuf_PROTOC_EXECUTABLE ${PROTOBUF_PROTOC_EXECUTABLE})' >> /usr/share/cmake-3.2/Modules/FindProtobuf.cmake
+RUN echo '    set(Protobuf_INCLUDE_DIR ${PROTOBUF_INCLUDE_DIR})    ' >> /usr/share/cmake-3.2/Modules/FindProtobuf.cmake
+RUN echo '    set(Protobuf_LIBRARIES ${PROTOBUF_LIBRARIES})    ' >> /usr/share/cmake-3.2/Modules/FindProtobuf.cmake
+RUN echo 'endif()' >> /usr/share/cmake-3.2/Modules/FindProtobuf.cmake
+
+RUN wget https://github.com/gwaldron/osgearth/archive/osgearth-3.2.zip
+RUN unzip osgearth-3.2.zip
+RUN mkdir osgearth-osgearth-3.2/build
+RUN cd osgearth-osgearth-3.2/build && cmake -DCMAKE_CXX_FLAGS=-std=c++11 -DOSGEARTH_BUILD_TESTS=OFF -DOSGEARTH_BUILD_EXAMPLES=OFF -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release ..
+RUN cd osgearth-osgearth-3.2/build && make -j 16
+RUN cd osgearth-osgearth-3.2/build && make install
 
 #RUN wget https://github.com/gwaldron/osgearth/archive/osgearth-2.10.2.zip
 #RUN unzip osgearth-2.10.2.zip
