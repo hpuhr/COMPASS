@@ -123,6 +123,13 @@ std::string getIconFilepath(const std::string& filename)
     return filepath;
 }
 
+std::string getImageFilepath(const std::string& filename)
+{
+    std::string filepath = HOME_DATA_DIRECTORY + "images/" + filename;
+    verifyFileExists(filepath);
+    return filepath;
+}
+
 void deleteFile(const std::string& filename)
 {
     QFile file(filename.c_str());

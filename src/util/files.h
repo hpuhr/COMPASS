@@ -49,6 +49,7 @@ bool copyRecursively(const std::string& source_folder, const std::string& dest_f
 QStringList getFilesInDirectory(const std::string& path);
 
 std::string getIconFilepath(const std::string& filename);
+std::string getImageFilepath(const std::string& filename);
 
 void deleteFile(const std::string& filename);
 void deleteFolder(const std::string& path);

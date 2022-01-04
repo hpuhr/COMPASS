@@ -30,6 +30,8 @@ class Client : public QApplication
 
     bool quitRequested() const;
 
+    void run ();
+
   private:
     std::string system_install_path_;
     bool quit_requested_{false};

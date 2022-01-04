@@ -30,9 +30,11 @@
 #include <QApplication>
 #include <QMessageBox>
 #include <QSurfaceFormat>
+#include <QSplashScreen>
 
 #include <boost/filesystem.hpp>
 #include <boost/program_options.hpp>
+#include "boost/date_time/posix_time/posix_time.hpp"
 
 #include <string>
 #include <locale.h>
@@ -182,15 +184,38 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
 //        return;
 //    }
 
+
+
+}
+
+void Client::run ()
+{
     loginf << "COMPASSClient: started with " << std::thread::hardware_concurrency() << " threads";
 
+    QPixmap pixmap(Files::getImageFilepath("logo.png").c_str());
+    QSplashScreen splash(pixmap);
+    splash.show();
+
+    boost::posix_time::ptime start_time = boost::posix_time::microsec_clock::local_time();
+
+    while ((boost::posix_time::microsec_clock::local_time() - start_time).total_milliseconds() < 50)
+    {
+        QCoreApplication::processEvents();
+    }
+
     MainWindow& main_window = COMPASS::instance().mainWindow();
+    splash.raise();
 
-    if (create_new_sqlite3_db_filename.size())
-        main_window.createAndOpenNewSqlite3DB(create_new_sqlite3_db_filename);
+    main_window.show();
+    splash.raise();
 
-    if (open_sqlite3_db_filename.size())
-        main_window.openSqlite3DB(open_sqlite3_db_filename);
+    splash.finish(&main_window);
+
+//    if (create_new_sqlite3_db_filename.size())
+//        main_window.createAndOpenNewSqlite3DB(create_new_sqlite3_db_filename);
+
+//    if (open_sqlite3_db_filename.size())
+//        main_window.openSqlite3DB(open_sqlite3_db_filename);
 
 //    if (import_view_points_filename.size())
 //        task_man.importViewPointsFile(import_view_points_filename);
@@ -219,13 +244,13 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
 //        return;
 //    }
 
-    if (import_asterix_filename.size())
-        main_window.importASTERIXFile(import_asterix_filename);
-    else if (import_asterix_network)
-        main_window.importASTERIXFromNetwork();
+//    if (import_asterix_filename.size())
+//        main_window.importASTERIXFile(import_asterix_filename);
+//    else if (import_asterix_network)
+//        main_window.importASTERIXFromNetwork();
 
-    if (import_asterix_network_time_offset.size())
-        main_window.importASTERIXFromNetworkTimeOffset(String::timeFromString(import_asterix_network_time_offset));
+//    if (import_asterix_network_time_offset.size())
+//        main_window.importASTERIXFromNetworkTimeOffset(String::timeFromString(import_asterix_network_time_offset));
 #endif
 
 //    if (import_json_filename.size())
@@ -246,8 +271,8 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
 //    if (start)
 //        task_man.start(start);
 
-    if (load_data)
-        main_window.loadData(load_data);
+//    if (load_data)
+//        main_window.loadData(load_data);
 
 //    if (export_view_points_report_filename.size())
 //        task_man.exportViewPointsReportFile(export_view_points_report_filename);
@@ -258,9 +283,8 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
 //    if (export_eval_report_filename.size())
 //        task_man.exportEvalReportFile(export_eval_report_filename);
 
-    if (quit)
-        main_window.quit(quit);
-
+//    if (quit)
+//        main_window.quit(quit);
 }
 
 Client::~Client()
