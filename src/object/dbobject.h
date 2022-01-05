@@ -211,6 +211,7 @@ protected:
     std::vector<std::shared_ptr<Buffer>> read_job_data_;
     std::vector<std::shared_ptr<FinalizeDBOReadJob>> finalize_jobs_;
 
+    bool insert_active_ {false};
     std::shared_ptr<InsertBufferDBJob> insert_job_{nullptr};
     std::shared_ptr<UpdateBufferDBJob> update_job_{nullptr};
 

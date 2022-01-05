@@ -423,6 +423,9 @@ void DBObject::insertData(shared_ptr<Buffer> buffer)
 {
     loginf << "DBObject " << name_ << ": insertData: buffer " << buffer->size();
 
+    assert (!insert_active_);
+    insert_active_ = true;
+
     DBOVariableSet list;
 
     for (auto prop_it : buffer->properties().properties())
@@ -438,8 +441,7 @@ void DBObject::insertData(shared_ptr<Buffer> buffer)
 
     doDataSourcesBeforeInsert(buffer);
 
-    insert_job_ = make_shared<InsertBufferDBJob>(COMPASS::instance().interface(), *this, buffer,
-                                                      false);
+    insert_job_ = make_shared<InsertBufferDBJob>(COMPASS::instance().interface(), *this, buffer, false);
 
     connect(insert_job_.get(), &InsertBufferDBJob::doneSignal, this, &DBObject::insertDoneSlot,
             Qt::QueuedConnection);
@@ -488,6 +490,7 @@ void DBObject::insertDoneSlot()
     //std::shared_ptr<Buffer> buffer = insert_job_->buffer(); // buffer properties match db column names
 
     insert_job_ = nullptr;
+    insert_active_ = false;
 
     dbo_manager_.insertDone(*this);
 
@@ -501,8 +504,7 @@ void DBObject::insertDoneSlot()
         info_widget_->updateSlot();
 }
 
-void DBObject::updateData(DBOVariable& key_var, DBOVariableSet& list,
-                          shared_ptr<Buffer> buffer)
+void DBObject::updateData(DBOVariable& key_var, DBOVariableSet& list, shared_ptr<Buffer> buffer)
 {
     assert(!update_job_);
 
@@ -589,7 +591,7 @@ map<unsigned int, string> DBObject::loadLabelData(vector<unsigned int> rec_nums,
 void DBObject::readJobIntermediateSlot(shared_ptr<Buffer> buffer)
 {
     assert(buffer);
-    logdbg << "DBObject: " << name_ << " readJobIntermediateSlot: buffer size " << buffer->size();
+    loginf << "DBObject: " << name_ << " readJobIntermediateSlot: buffer size " << buffer->size();
 
     DBOReadDBJob* sender = dynamic_cast<DBOReadDBJob*>(QObject::sender());
 
@@ -683,34 +685,33 @@ void DBObject::finalizeReadJobDoneSlot()
 //    if (info_widget_)
 //        info_widget_->updateSlot();
 
-    if (!isLoading())  // is last one
-    {
-        dbo_manager_.addLoadedData({{name_, buffer}});
-        loginf << "DBObject: " << name_ << " finalizeReadJobDoneSlot: loading done";
-        dbo_manager_.loadingDone(*this);
-        return;
-    }
-
     // read job or finalize jobs exist
 
     // check if other is still loading
-    if (dbo_manager_.isOtherDBObjectPostProcessing(*this))
-    {
-        logdbg << "DBObject: " << name_
-               << " finalizeReadJobDoneSlot: delaying new data since other is loading";
-        return;
-    }
+//    if (dbo_manager_.isOtherDBObjectPostProcessing(*this))
+//    {
+//        loginf << "DBObject: " << name_
+//               << " finalizeReadJobDoneSlot: delaying new data since other is loading";
+//        return;
+//    }
 
     // check if more data can immediately loaded from read job
-    if (read_job_)
-    {
-        logdbg << "DBObject: " << name_
-               << " finalizeReadJobDoneSlot: delaying new data since more data can be read";
-        return;
-    }
+//    if (read_job_)
+//    {
+//        loginf << "DBObject: " << name_
+//               << " finalizeReadJobDoneSlot: delaying new data since more data can be read";
+//        return;
+//    }
 
     // exact data from read job or finalize jobs still active
     dbo_manager_.addLoadedData({{name_, buffer}});
+
+    if (!isLoading())  // is last one
+    {
+        loginf << "DBObject: " << name_ << " finalizeReadJobDoneSlot: loading done";
+        dbo_manager_.loadingDone(*this);
+    }
+
     return;
 }
 
@@ -765,7 +766,7 @@ bool DBObject::associationsLoaded() const
 
 bool DBObject::isLoading() { return read_job_ != nullptr || finalize_jobs_.size(); }
 
-bool DBObject::isInserting() { return insert_job_ != nullptr; }
+bool DBObject::isInserting() { return insert_active_; }
 
 bool DBObject::isPostProcessing() { return finalize_jobs_.size(); }
 

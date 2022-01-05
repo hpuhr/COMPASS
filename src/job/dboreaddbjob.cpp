@@ -82,6 +82,8 @@ void DBOReadDBJob::run()
         logdbg << "DBOReadDBJob: run: " << dbobject_.name() << ": intermediate signal, #buffers "
                << cnt << " last one " << buffer->lastOne();
         row_count_ += buffer->size();
+
+        loginf << "DBOReadDBJob: run: " << dbobject_.name() << ": emitting intermediate read, size " << row_count_;
         emit intermediateSignal(buffer);
 
         if (buffer->lastOne())

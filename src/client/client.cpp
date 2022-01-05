@@ -82,16 +82,6 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
     //    format.setSamples(8);
     // QSurfaceFormat::setDefaultFormat(format);
 
-    std::string create_new_sqlite3_db_filename;
-    std::string open_sqlite3_db_filename;
-//    std::string import_view_points_filename;
-#if USE_JASTERIX
-    std::string import_asterix_filename;
-    bool import_asterix_network {false};
-    std::string import_asterix_network_time_offset;
-//    std::string asterix_framing;
-//    std::string asterix_decoder_cfg;
-#endif
 //    std::string import_json_filename;
 //    std::string import_json_schema;
 //    std::string import_gps_trail_filename;
@@ -110,18 +100,18 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
     po::options_description desc("Allowed options");
     desc.add_options()("help", "produce help message")
             ("reset,r", po::bool_switch(&config_and_data_copy_wanted_) ,"reset user configuration and data")
-            ("create_new_sqlite3_db", po::value<std::string>(&create_new_sqlite3_db_filename),
+            ("create_new_sqlite3_db", po::value<std::string>(&create_new_sqlite3_db_filename_),
              "creates and opens new SQLite3 database with given filename, e.g. '/data/file1.db'")
-            ("open_sqlite3_db", po::value<std::string>(&open_sqlite3_db_filename),
+            ("open_sqlite3_db", po::value<std::string>(&open_sqlite3_db_filename_),
              "opens existing SQLite3 database with given filename, e.g. '/data/file1.db'")
 //            ("import_view_points", po::value<std::string>(&import_view_points_filename),
 //             "imports view points JSON file with given filename, e.g. '/data/file1.json'")
         #if USE_JASTERIX
-            ("import_asterix_file", po::value<std::string>(&import_asterix_filename),
+            ("import_asterix_file", po::value<std::string>(&import_asterix_filename_),
              "imports ASTERIX file with given filename, e.g. '/data/file1.ff'")
-            ("import_asterix_network", po::bool_switch(&import_asterix_network),
+            ("import_asterix_network", po::bool_switch(&import_asterix_network_),
              "imports ASTERIX from defined network UDP streams")
-            ("import_asterix_network_time_offset", po::value<std::string>(&import_asterix_network_time_offset),
+            ("import_asterix_network_time_offset", po::value<std::string>(&import_asterix_network_time_offset_),
              "imports used time offset during ASTERIX network import, in HH:MM:SS.ZZZ'")
 //            ("asterix_framing", po::value<std::string>(&asterix_framing),
 //             "sets ASTERIX framing, e.g. 'none', 'ioss', 'ioss_seq', 'rff'")
@@ -169,7 +159,7 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
 
     checkAndSetupConfig();
 
-    if (import_asterix_filename.size() && import_asterix_network)
+    if (import_asterix_filename_.size() && import_asterix_network_)
     {
         logerr << "COMPASSClient: unable to import both ASTERIX file and from network at the same time";
         return;
@@ -211,11 +201,11 @@ void Client::run ()
 
     splash.finish(&main_window);
 
-//    if (create_new_sqlite3_db_filename.size())
-//        main_window.createAndOpenNewSqlite3DB(create_new_sqlite3_db_filename);
+    if (create_new_sqlite3_db_filename_.size())
+        main_window.createAndOpenNewSqlite3DB(create_new_sqlite3_db_filename_);
 
-//    if (open_sqlite3_db_filename.size())
-//        main_window.openSqlite3DB(open_sqlite3_db_filename);
+    if (open_sqlite3_db_filename_.size())
+        main_window.openSqlite3DB(open_sqlite3_db_filename_);
 
 //    if (import_view_points_filename.size())
 //        task_man.importViewPointsFile(import_view_points_filename);
@@ -244,13 +234,13 @@ void Client::run ()
 //        return;
 //    }
 
-//    if (import_asterix_filename.size())
-//        main_window.importASTERIXFile(import_asterix_filename);
-//    else if (import_asterix_network)
-//        main_window.importASTERIXFromNetwork();
+    if (import_asterix_filename_.size())
+        main_window.importASTERIXFile(import_asterix_filename_);
+    else if (import_asterix_network_)
+        main_window.importASTERIXFromNetwork();
 
-//    if (import_asterix_network_time_offset.size())
-//        main_window.importASTERIXFromNetworkTimeOffset(String::timeFromString(import_asterix_network_time_offset));
+    if (import_asterix_network_time_offset_.size())
+        main_window.importASTERIXFromNetworkTimeOffset(String::timeFromString(import_asterix_network_time_offset_));
 #endif
 
 //    if (import_json_filename.size())

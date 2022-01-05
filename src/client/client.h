@@ -18,11 +18,13 @@
 #ifndef CLIENT_H_
 #define CLIENT_H_
 
+#include "global.h"
+
 #include <QApplication>
 
 class Client : public QApplication
 {
-  public:
+public:
     Client(int& argc, char** argv);
     virtual ~Client();
 
@@ -32,12 +34,24 @@ class Client : public QApplication
 
     void run ();
 
-  private:
+private:
+
     std::string system_install_path_;
     bool quit_requested_{false};
 
     bool home_subdir_deletion_wanted_{false};
     bool config_and_data_copy_wanted_{false};
+
+    std::string create_new_sqlite3_db_filename_;
+    std::string open_sqlite3_db_filename_;
+    //    std::string import_view_points_filename;
+#if USE_JASTERIX
+    std::string import_asterix_filename_;
+    bool import_asterix_network_ {false};
+    std::string import_asterix_network_time_offset_;
+    //    std::string asterix_framing;
+    //    std::string asterix_decoder_cfg;
+#endif
 
     void checkAndSetupConfig();
 
@@ -46,9 +60,6 @@ class Client : public QApplication
 
     void deleteCompleteHomeSubDir();
     void copyConfigurationAndData();
-
-  protected:
-
 };
 
 #endif /* CLIENT_H_ */
