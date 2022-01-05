@@ -873,21 +873,23 @@ void DBObjectManager::finishInserting()
     boost::posix_time::ptime start_time = boost::posix_time::microsec_clock::local_time();
     assert (existsMetaVariable(DBObject::meta_var_tod_id_.name()));
 
-    addInsertedDataToChache();
-
     if (COMPASS::instance().liveMode()) // do tod cleanup
     {
+        addInsertedDataToChache();
+
         cutCachedData();
         filterDataSources();
+
+        logdbg << "DBObjectManager: finishInserting: distributing data";
+
+        if (data_.size())
+            emit loadedDataSignal(data_, true);
     }
+    else
+        insert_data_.clear();
 
     if (load_widget_)
         load_widget_->update();
-
-    logdbg << "DBObjectManager: finishInserting: distributing data";
-
-    if (data_.size())
-        emit loadedDataSignal(data_, true);
 
     boost::posix_time::time_duration time_diff = boost::posix_time::microsec_clock::local_time() - start_time;
     loginf << "DBObjectManager: finishInserting: processing took "
