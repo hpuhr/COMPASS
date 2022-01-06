@@ -132,7 +132,7 @@ MainWindow::MainWindow()
     bottom_widget->setMaximumHeight(40);
 
     QHBoxLayout* bottom_layout = new QHBoxLayout();
-    //bottom_layout->setContentsMargins(0, 0, 0, 0);
+    bottom_layout->setContentsMargins(2, 2, 2, 2);
 
     db_label_ = new QLabel();
     bottom_layout->addWidget(db_label_);
@@ -144,10 +144,18 @@ MainWindow::MainWindow()
 
     bottom_layout->addStretch();
 
-    // add status & load button
+    // add status & button
     load_button_ = new QPushButton("Load");
     connect(load_button_, &QPushButton::clicked, this, &MainWindow::loadButtonSlot);
     bottom_layout->addWidget(load_button_);
+
+    live_pause_button_ = new QPushButton("Pause");
+    connect(live_pause_button_, &QPushButton::clicked, this, &MainWindow::livePauseSlot);
+    bottom_layout->addWidget(live_pause_button_);
+
+    live_stop_button_ = new QPushButton("Stop");
+    connect(live_stop_button_, &QPushButton::clicked, this, &MainWindow::liveStopSlot);
+    bottom_layout->addWidget(live_stop_button_);
 
     bottom_widget->setLayout(bottom_layout);
 
@@ -250,9 +258,8 @@ void MainWindow::createMenus ()
     connect(import_ast_file_action, &QAction::triggered, this, &MainWindow::importAsterixRecordingSlot);
     import_menu_->addAction(import_ast_file_action);
 
-    import_recent_asterix_menu_ = file_menu->addMenu("Recent ASTERIX Recording");
+    import_recent_asterix_menu_ = import_menu_->addMenu("Recent ASTERIX Recording");
     import_recent_asterix_menu_->setStatusTip(tr("Import a recent ASTERIX Recording File"));
-    import_menu_->addMenu(import_recent_asterix_menu_);
 
     QAction* import_ast_net_action = new QAction(tr("ASTERIX From Network"));
     import_ast_net_action->setStatusTip(tr("Import ASTERIX From Network"));
@@ -333,16 +340,42 @@ void MainWindow::updateBottomWidget()
         db_label_->setText("No Database");
 
     assert (status_label_);
-    status_label_->setText(COMPASS::instance().appModeStr().c_str());
+    status_label_->setText(compass.appModeStr().c_str());
 
     assert (load_button_);
+    assert (live_pause_button_);
+    assert (live_stop_button_);
+
+    AppMode app_mode = compass.appMode();
 
     if (!compass.dbOpened())
+    {
         load_button_->setHidden(true);
-    else if (COMPASS::instance().appMode() != AppMode::Offline)
-        load_button_->setHidden(true);
-    else
+        live_pause_button_->setHidden(true);
+        live_stop_button_->setHidden(true);
+    }
+    else if (app_mode == AppMode::Offline)
+    {
         load_button_->setHidden(false);
+        live_pause_button_->setHidden(true);
+        live_stop_button_->setHidden(true);
+    }
+    else if (app_mode == AppMode::LivePaused)
+    {
+        load_button_->setHidden(true);
+        live_pause_button_->setHidden(false);
+        live_pause_button_->setText("Resume");
+        live_stop_button_->setHidden(true);
+    }
+    else if (app_mode == AppMode::LiveRunning)
+    {
+        load_button_->setHidden(true);
+        live_pause_button_->setHidden(false);
+        live_pause_button_->setText("Pause");
+        live_stop_button_->setHidden(false);
+    }
+    else
+        logerr << "MainWindow: updateBottomWidget: unknown app mode " << (unsigned int) COMPASS::instance().appMode();
 }
 
 void MainWindow::disableConfigurationSaving()
@@ -1252,6 +1285,16 @@ void MainWindow::loadingDoneSlot()
     loading_ = false;
     load_button_->setText("Load");
     load_button_->setDisabled(false);
+}
+
+void MainWindow::livePauseSlot()
+{
+    loginf << "MainWindow: livePauseSlot";
+}
+
+void MainWindow::liveStopSlot()
+{
+    loginf << "MainWindow: liveStopSlot";
 }
 
 void MainWindow::closeEvent(QCloseEvent* event)

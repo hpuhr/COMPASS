@@ -56,6 +56,9 @@ private slots:
     void loadButtonSlot();
     void loadingDoneSlot();
 
+    void livePauseSlot();
+    void liveStopSlot();
+
 #if USE_JASTERIX
     void importAsterixRecordingSlot();
     void importRecentAsterixRecordingSlot();
@@ -152,6 +155,9 @@ protected:
     QLabel* db_label_{nullptr};
     QLabel* status_label_{nullptr};
     QPushButton* load_button_{nullptr};
+
+    QPushButton* live_pause_button_{nullptr};
+    QPushButton* live_stop_button_{nullptr};
 
     void createMenus ();
 
