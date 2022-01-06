@@ -18,10 +18,12 @@
 #ifndef MAINWINDOW_H_
 #define MAINWINDOW_H_
 
+#include "global.h"
+#include "appmode.h"
+
 #include <QMainWindow>
 
-#include "global.h"
-
+class QLabel;
 class QPushButton;
 class QTabWidget;
 class QCheckBox;
@@ -51,6 +53,9 @@ private slots:
     void quitWOConfigSlot();
     void quitSlot();
 
+    void loadButtonSlot();
+    void loadingDoneSlot();
+
 #if USE_JASTERIX
     void importAsterixRecordingSlot();
     void importRecentAsterixRecordingSlot();
@@ -61,6 +66,8 @@ private slots:
 
     void quitRequestedSlot();
     void showAddViewMenuSlot();
+
+    void appModeSwitchSlot (AppMode app_mode);
 
 public:
     MainWindow();
@@ -93,6 +100,7 @@ public:
     void performAutomaticTasks ();
 
     void updateMenus();
+    void updateBottomWidget();
 
 protected:
     bool started_ {false};
@@ -138,6 +146,12 @@ protected:
 #if USE_JASTERIX
     QMenu* import_recent_asterix_menu_ {nullptr};
 #endif
+
+    bool loading_{false};
+
+    QLabel* db_label_{nullptr};
+    QLabel* status_label_{nullptr};
+    QPushButton* load_button_{nullptr};
 
     void createMenus ();
 

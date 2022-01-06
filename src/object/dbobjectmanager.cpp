@@ -273,11 +273,11 @@ DBObjectManagerWidget* DBObjectManager::widget()
     return widget_.get();
 }
 
-DBObjectManagerLoadWidget* DBObjectManager::loadWidget()
+DBObjectManagerDataSourcesWidget* DBObjectManager::loadWidget()
 {
     if (!load_widget_)
     {
-        load_widget_.reset(new DBObjectManagerLoadWidget(*this));
+        load_widget_.reset(new DBObjectManagerDataSourcesWidget(*this));
     }
 
     assert(load_widget_);
@@ -630,9 +630,6 @@ void DBObjectManager::finishLoading()
     COMPASS::instance().viewManager().doViewPointAfterLoad();
 
     emit loadingDoneSignal();
-
-    if (load_widget_)
-        load_widget_->loadingDone();
 
     QApplication::restoreOverrideCursor();
 }

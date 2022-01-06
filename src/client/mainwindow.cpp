@@ -55,6 +55,8 @@
 #include <QMenu>
 #include <QMenuBar>
 #include <QThread>
+#include <QVBoxLayout>
+#include <QLabel>
 
 using namespace Utils;
 using namespace std;
@@ -89,6 +91,15 @@ MainWindow::MainWindow()
 
     QWidget::setWindowTitle(title.c_str());
 
+    QWidget* main_widget = new QWidget();
+
+    QVBoxLayout* main_layout = new QVBoxLayout();
+    main_layout->setContentsMargins(0, 0, 0, 0);
+
+    main_widget->setLayout(main_layout);
+
+    // initialize tabs
+
     tab_widget_ = new QTabWidget();
 
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
@@ -103,8 +114,6 @@ MainWindow::MainWindow()
 
     QApplication::restoreOverrideCursor();
 
-    setCentralWidget(tab_widget_);
-
     tab_widget_->setCurrentIndex(0);
 
     add_view_button_ = new QPushButton();
@@ -115,8 +124,52 @@ MainWindow::MainWindow()
     connect(add_view_button_, &QPushButton::clicked, this, &MainWindow::showAddViewMenuSlot);
     tab_widget_->setCornerWidget(add_view_button_);
 
+    main_layout->addWidget(tab_widget_);
+
+    // bottom widget
+
+    QWidget* bottom_widget = new QWidget();
+    bottom_widget->setMaximumHeight(40);
+
+    QHBoxLayout* bottom_layout = new QHBoxLayout();
+    //bottom_layout->setContentsMargins(0, 0, 0, 0);
+
+    db_label_ = new QLabel();
+    bottom_layout->addWidget(db_label_);
+
+    bottom_layout->addStretch();
+
+    status_label_ = new QLabel();
+    bottom_layout->addWidget(status_label_);
+
+    bottom_layout->addStretch();
+
+    // add status & load button
+    load_button_ = new QPushButton("Load");
+    connect(load_button_, &QPushButton::clicked, this, &MainWindow::loadButtonSlot);
+    bottom_layout->addWidget(load_button_);
+
+    bottom_widget->setLayout(bottom_layout);
+
+    updateBottomWidget();
+
+    main_layout->addWidget(bottom_widget);
+
+    setCentralWidget(main_widget);
+
+    // do menus
+
     createMenus ();
     updateMenus ();
+
+
+    // do signal slots
+
+    connect (&COMPASS::instance(), &COMPASS::appModeSwitchSignal,
+             this, &MainWindow::appModeSwitchSlot);
+
+    QObject::connect(&COMPASS::instance().objectManager(), &DBObjectManager::loadingDoneSignal,
+                     this, &MainWindow::loadingDoneSlot);
 }
 
 MainWindow::~MainWindow()
@@ -268,6 +321,30 @@ void MainWindow::updateMenus()
 #endif
 }
 
+void MainWindow::updateBottomWidget()
+{
+    COMPASS& compass = COMPASS::instance();
+
+    assert (db_label_);
+
+    if (compass.dbOpened())
+        db_label_->setText(("DB: "+compass.lastDbFilename()).c_str());
+    else
+        db_label_->setText("No Database");
+
+    assert (status_label_);
+    status_label_->setText(COMPASS::instance().appModeStr().c_str());
+
+    assert (load_button_);
+
+    if (!compass.dbOpened())
+        load_button_->setHidden(true);
+    else if (COMPASS::instance().appMode() != AppMode::Offline)
+        load_button_->setHidden(true);
+    else
+        load_button_->setHidden(false);
+}
+
 void MainWindow::disableConfigurationSaving()
 {
     logdbg << "MainWindow: disableConfigurationSaving";
@@ -392,6 +469,7 @@ void MainWindow::performAutomaticTasks ()
 
         COMPASS::instance().openDBFile(sqlite3_create_new_db_filename_);
 
+        updateBottomWidget();
         updateMenus();
     }
     else if (sqlite3_open_db_)
@@ -408,6 +486,7 @@ void MainWindow::performAutomaticTasks ()
 
         COMPASS::instance().openDBFile(sqlite3_open_db_filename_);
 
+        updateBottomWidget();
         updateMenus();
     }
 
@@ -927,6 +1006,7 @@ void MainWindow::newDBSlot()
     {
         COMPASS::instance().createNewDBFile(filename);
 
+        updateBottomWidget();
         updateMenus();
     }
 }
@@ -941,6 +1021,7 @@ void MainWindow::openExistingDBSlot()
     {
         COMPASS::instance().openDBFile(filename);
 
+        updateBottomWidget();
         updateMenus();
     }
 }
@@ -958,6 +1039,7 @@ void MainWindow::openRecentDBSlot()
 
     COMPASS::instance().openDBFile(filename);
 
+    updateBottomWidget();
     updateMenus();
 }
 
@@ -967,6 +1049,7 @@ void MainWindow::clearExistingDBsSlot()
 
     COMPASS::instance().clearDBFileList();
 
+    updateBottomWidget();
     updateMenus();
 }
 
@@ -976,6 +1059,7 @@ void MainWindow::closeDBSlot()
 
     COMPASS::instance().closeDB();
 
+    updateBottomWidget();
     updateMenus();
 }
 
@@ -1120,6 +1204,54 @@ void MainWindow::showAddViewMenuSlot()
 {
     loginf << "MainWindow: showAddViewMenuSlot";
     COMPASS::instance().viewManager().showMainViewContainerAddView();
+}
+
+void MainWindow::appModeSwitchSlot (AppMode app_mode)
+{
+    loginf << "MainWindow: appModeSwitch: app_mode " << COMPASS::instance().appModeStr();
+
+    updateBottomWidget();
+    updateMenus();
+}
+
+void MainWindow::loadButtonSlot()
+{
+    loginf << "MainWindow: loadButtonSlot";
+
+    if (COMPASS::instance().viewManager().getViews().size() == 0)
+    {
+        QMessageBox m_warning(QMessageBox::Warning, "Loading Not Possible",
+                              "There are no Views active, so loading is not possible.",
+                              QMessageBox::Ok);
+
+        m_warning.exec();
+        return;
+    }
+
+    assert(load_button_);
+
+    if (loading_)
+    {
+        load_button_->setDisabled(true);
+        COMPASS::instance().objectManager().quitLoading();
+        return;
+    }
+
+    loading_ = true;
+    load_button_->setText("Stop");
+
+    COMPASS::instance().objectManager().startLoading();
+}
+
+void MainWindow::loadingDoneSlot()
+{
+    loginf << "MainWindow: loadingDoneSlot";
+
+    assert (load_button_);
+
+    loading_ = false;
+    load_button_->setText("Load");
+    load_button_->setDisabled(false);
 }
 
 void MainWindow::closeEvent(QCloseEvent* event)

@@ -33,7 +33,7 @@
 class COMPASS;
 class DBObject;
 class DBObjectManagerWidget;
-class DBObjectManagerLoadWidget;
+class DBObjectManagerDataSourcesWidget;
 class MetaDBOVariableConfigurationDialog;
 class DBOVariable;
 class MetaDBOVariable;
@@ -114,7 +114,7 @@ public:
     bool insertInProgress() const;
 
     DBObjectManagerWidget* widget();
-    DBObjectManagerLoadWidget* loadWidget();
+    DBObjectManagerDataSourcesWidget* loadWidget();
 
     bool useLimit() const;
     void useLimit(bool useLimit);
@@ -197,7 +197,7 @@ protected:
     std::vector<std::unique_ptr<DBContent::DBDataSource>> db_data_sources_;
 
     std::unique_ptr<DBObjectManagerWidget> widget_;
-    std::unique_ptr<DBObjectManagerLoadWidget> load_widget_;
+    std::unique_ptr<DBObjectManagerDataSourcesWidget> load_widget_;
 
     std::unique_ptr<MetaDBOVariableConfigurationDialog> meta_cfg_dialog_;
 

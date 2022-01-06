@@ -31,46 +31,27 @@ class QCheckBox;
 class QLineEdit;
 class QLabel;
 
-class DBObjectManagerLoadWidget : public QWidget
+class DBObjectManagerDataSourcesWidget : public QWidget
 {
     Q_OBJECT
 
-  public slots:
-
+public slots:
     void loadDSTypeChangedSlot();
     void loadDSChangedSlot();
 
-//    void toggleUseLimit();
-//    void limitMinChanged();
-//    void limitMaxChanged();
-
-    void loadButtonSlot();
-
-  public:
-    DBObjectManagerLoadWidget(DBObjectManager& object_manager);
-    virtual ~DBObjectManagerLoadWidget();
+public:
+    DBObjectManagerDataSourcesWidget(DBObjectManager& object_manager);
+    virtual ~DBObjectManagerDataSourcesWidget();
 
     void update();
     void loadingDone();
 
-  private:
+private:
     DBObjectManager& dbo_manager_;
 
     bool show_counts_ {false};
 
     QGridLayout* type_layout_{nullptr};
-
-    //std::map<std::string, QGridLayout*> type_layouts_; // dbcontent type -> layout
-
-    //QLabel* associations_label_{nullptr};
-
-    //QCheckBox* limit_check_{nullptr};
-
-//    QWidget* limit_widget_{nullptr};
-//    QLineEdit* limit_min_edit_{nullptr};
-//    QLineEdit* limit_max_edit_{nullptr};
-
-    QPushButton* load_button_{nullptr};
 
     std::map<std::string, QCheckBox*> ds_type_boxes_;
 
@@ -78,8 +59,6 @@ class DBObjectManagerLoadWidget : public QWidget
     std::map<std::string, std::map<std::string, QLabel*>> ds_content_boxes_; // ds name -> (cont, label)
     std::map<std::string, std::map<std::string, QLabel*>> ds_content_loaded_labels_; // ds name -> (cont, label)
     std::map<std::string, std::map<std::string, QLabel*>> ds_content_total_labels_; // ds name -> (cont, label)
-
-    bool loading_{false};
 
     void clearAndCreateContent();
     void updateExistingContent();

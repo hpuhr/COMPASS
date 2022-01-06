@@ -35,13 +35,11 @@
 #include <QPushButton>
 #include <QVBoxLayout>
 
-
-
 using namespace std;
 using namespace Utils;
 using namespace Utils::String;
 
-DBObjectManagerLoadWidget::DBObjectManagerLoadWidget(DBObjectManager& object_manager)
+DBObjectManagerDataSourcesWidget::DBObjectManagerDataSourcesWidget(DBObjectManager& object_manager)
     : dbo_manager_(object_manager)
 {
     QFont font_bold;
@@ -49,50 +47,9 @@ DBObjectManagerLoadWidget::DBObjectManagerLoadWidget(DBObjectManager& object_man
 
     QVBoxLayout* main_layout = new QVBoxLayout();
 
-    //    QLabel* main_label = new QLabel("Database Objects");
-    //    main_label->setFont(font_bold);
-    //    main_layout->addWidget(main_label);
-
     // data sources, per type
 
     type_layout_ = new QGridLayout();
-
-    //    QGridLayout* dstypes_lay = new QGridLayout();
-
-    //    unsigned int row = 0, col = 0;
-    //    for (auto& dstyp_it : DBObjectManager::data_source_types_)
-    //    {
-    //        QVBoxLayout* lay = new QVBoxLayout();
-
-    //        QLabel* dstyp_label = new QLabel(dstyp_it.c_str());
-    //        dstyp_label->setFont(font_bold);
-
-    //        lay->addWidget(dstyp_label);
-
-    //        QGridLayout* dstyp_lay = new QGridLayout();
-    //        type_layouts_[dstyp_it] = dstyp_lay;
-    //        lay->addLayout(dstyp_lay);
-
-    //        // void addLayout(QLayout *, int row, int column, int rowSpan, int columnSpan, Qt::Alignment = Qt::Alignment());
-    //        if (dstyp_it == "Radar") // span 2 rows
-    //        {
-    //            dstypes_lay->addLayout(lay, row, col, 2, 1, Qt::AlignLeft);
-    //            row += 1; // to step into next col
-    //        }
-    //        else
-    //            dstypes_lay->addLayout(lay, row, col, 1, 1, Qt::AlignLeft);
-
-    //        // increment
-    //        if (row == 1)
-    //        {
-    //            row = 0;
-    //            ++col;
-    //        }
-    //        else
-    //        {
-    //            ++row;
-    //        }
-    //    }
 
     main_layout->addLayout(type_layout_);
     update();
@@ -125,49 +82,18 @@ DBObjectManagerLoadWidget::DBObjectManagerLoadWidget(DBObjectManager& object_man
 
     QHBoxLayout* bottom_layout = new QHBoxLayout();
 
-//    limit_widget_ = new QWidget();
-
-//    QGridLayout* limit_layout = new QGridLayout();
-//    limit_layout->addWidget(new QLabel("Limit Min"), 0, 0);
-
-//    limit_min_edit_ = new QLineEdit();
-//    limit_min_edit_->setText(std::to_string(dbo_manager_.limitMin()).c_str());
-//    limit_min_edit_->setEnabled(use_limit);
-//    connect(limit_min_edit_, SIGNAL(textChanged(QString)), this, SLOT(limitMinChanged()));
-//    limit_layout->addWidget(limit_min_edit_, 0, 1);
-
-//    limit_layout->addWidget(new QLabel("Limit Max"), 1, 0);
-
-//    limit_max_edit_ = new QLineEdit();
-//    limit_max_edit_->setText(std::to_string(dbo_manager_.limitMax()).c_str());
-//    limit_max_edit_->setEnabled(use_limit);
-//    connect(limit_max_edit_, SIGNAL(textChanged(QString)), this, SLOT(limitMaxChanged()));
-//    limit_layout->addWidget(limit_max_edit_, 1, 1);
-
-//    limit_widget_->setLayout(limit_layout);
-
-//    if (!dbo_manager_.useLimit())
-//        limit_widget_->hide();
-
-//    bottom_layout->addWidget(limit_widget_);
-
-    // load
 
     bottom_layout->addStretch();
-
-    load_button_ = new QPushButton("Load");
-    connect(load_button_, &QPushButton::clicked, this, &DBObjectManagerLoadWidget::loadButtonSlot);
-    bottom_layout->addWidget(load_button_);
 
     main_layout->addLayout(bottom_layout);
 
     setLayout(main_layout);
 }
 
-DBObjectManagerLoadWidget::~DBObjectManagerLoadWidget() {}
+DBObjectManagerDataSourcesWidget::~DBObjectManagerDataSourcesWidget() {}
 
 
-void DBObjectManagerLoadWidget::loadDSTypeChangedSlot()
+void DBObjectManagerDataSourcesWidget::loadDSTypeChangedSlot()
 {
     QCheckBox* box = dynamic_cast<QCheckBox*>(QObject::sender());
     assert (box);
@@ -181,7 +107,7 @@ void DBObjectManagerLoadWidget::loadDSTypeChangedSlot()
     COMPASS::instance().objectManager().dsTypeLoadingWanted(ds_type_name, load);
 }
 
-void DBObjectManagerLoadWidget::loadDSChangedSlot()
+void DBObjectManagerDataSourcesWidget::loadDSChangedSlot()
 {
     QCheckBox* box = dynamic_cast<QCheckBox*>(QObject::sender());
     assert (box);
@@ -237,43 +163,7 @@ void DBObjectManagerLoadWidget::loadDSChangedSlot()
 //    dbo_manager_.limitMax(max);
 //}
 
-void DBObjectManagerLoadWidget::loadButtonSlot()
-{
-    loginf << "DBObjectManagerLoadWidget: loadButtonSlot";
-
-    if (COMPASS::instance().viewManager().getViews().size() == 0)
-    {
-        QMessageBox m_warning(QMessageBox::Warning, "Loading Not Possible",
-                              "There are no Views active, so loading is not possible.",
-                              QMessageBox::Ok);
-
-        m_warning.exec();
-        return;
-    }
-
-    assert(load_button_);
-
-    if (loading_)
-    {
-        load_button_->setDisabled(true);
-        dbo_manager_.quitLoading();
-        return;
-    }
-
-    loading_ = true;
-    load_button_->setText("Stop");
-
-    dbo_manager_.startLoading();
-}
-
-void DBObjectManagerLoadWidget::loadingDone()
-{
-    loading_ = false;
-    load_button_->setText("Load");
-    load_button_->setDisabled(false);
-}
-
-void DBObjectManagerLoadWidget::update()
+void DBObjectManagerDataSourcesWidget::update()
 {
     logdbg << "DBObjectManagerLoadWidget: update: num data sources " << dbo_manager_.dataSources().size();
 
@@ -339,7 +229,7 @@ void DBObjectManagerLoadWidget::update()
     //        associations_label_->setText("None");
 }
 
-void DBObjectManagerLoadWidget::clearAndCreateContent()
+void DBObjectManagerDataSourcesWidget::clearAndCreateContent()
 {
     loginf << "DBObjectManagerLoadWidget: clearAndCreateContent";
 
@@ -410,7 +300,7 @@ void DBObjectManagerLoadWidget::clearAndCreateContent()
         dstyp_box->setProperty("DSType", ds_type_name.c_str());
 
         connect(dstyp_box, &QCheckBox::clicked, this,
-                &DBObjectManagerLoadWidget::loadDSTypeChangedSlot);
+                &DBObjectManagerDataSourcesWidget::loadDSTypeChangedSlot);
 
         type_layout_->addWidget(dstyp_box, row, col_start, 1, num_col_per_dstype, Qt::AlignTop | Qt::AlignLeft);
 
@@ -438,7 +328,7 @@ void DBObjectManagerLoadWidget::clearAndCreateContent()
             ds_box->setProperty("DS ID", ds_id);
 
             connect(ds_box, &QCheckBox::clicked, this,
-                    &DBObjectManagerLoadWidget::loadDSChangedSlot);
+                    &DBObjectManagerDataSourcesWidget::loadDSChangedSlot);
 
             type_layout_->addWidget(ds_box, row, col_start, 1, 2, //num_col_per_dstype-1,
                                     Qt::AlignTop | Qt::AlignLeft);
@@ -541,7 +431,7 @@ void DBObjectManagerLoadWidget::clearAndCreateContent()
     }
 }
 
-void DBObjectManagerLoadWidget::updateExistingContent()
+void DBObjectManagerDataSourcesWidget::updateExistingContent()
 {
     loginf << "DBObjectManagerLoadWidget: updateExistingContent";
 
