@@ -22,6 +22,7 @@
 #include "propertylist.h"
 #include "singleton.h"
 #include "json.hpp"
+#include "appmode.h"
 
 #include <QObject>
 
@@ -45,7 +46,7 @@ class COMPASS : public QObject, public Configurable, public Singleton
     Q_OBJECT
 
 signals:
-    void switchLiveModeSignal (bool live_mode);
+    void appModeSwitchSignal (AppMode app_mode);
 
 public:
     virtual ~COMPASS();
@@ -74,6 +75,8 @@ protected:
     bool db_opened_{false};
     bool shut_down_{false};
 
+    AppMode app_mode_ {AppMode::Offline};
+
     std::unique_ptr<SimpleConfig> simple_config_;
     std::unique_ptr<DBInterface> db_interface_;
     std::unique_ptr<DBObjectManager> dbo_manager_;
@@ -84,8 +87,6 @@ protected:
 
     std::string last_db_filename_;
     nlohmann::json db_file_list_;
-
-    bool live_mode_ {false};
 
     virtual void checkSubConfigurables();
 
@@ -104,8 +105,11 @@ public:
     void clearDBFileList();
     void addDBFileToList(const std::string filename);
 
-    bool liveMode() const;
-    void liveMode(bool live_mode);
+    AppMode appMode() const;
+    void appMode(const AppMode& app_mode);
+    std::string appModeStr() const;
+
+    static const std::map<AppMode, std::string>& appModes2Strings();
 };
 
 #endif /* COMPASS_H_ */

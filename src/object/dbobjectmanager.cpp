@@ -873,7 +873,7 @@ void DBObjectManager::finishInserting()
     boost::posix_time::ptime start_time = boost::posix_time::microsec_clock::local_time();
     assert (existsMetaVariable(DBObject::meta_var_tod_id_.name()));
 
-    if (COMPASS::instance().liveMode()) // do tod cleanup
+    if (COMPASS::instance().appMode() == AppMode::LiveRunning) // do tod cleanup
     {
         addInsertedDataToChache();
 

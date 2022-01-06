@@ -67,8 +67,8 @@ void ViewManager::init(QTabWidget* tab_widget)
 
     main_tab_widget_ = tab_widget;
 
-    connect (&COMPASS::instance(), &COMPASS::switchLiveModeSignal,
-             this, &ViewManager::switchLiveModeSlot);
+    connect (&COMPASS::instance(), &COMPASS::appModeSwitchSignal,
+             this, &ViewManager::appModeSwitchSlot);
 
     // view point stuff
 
@@ -638,12 +638,12 @@ void ViewManager::loadingDoneSlot() // emitted when all dbos have finished loadi
         view_it.second->loadingDone();
 }
 
-void ViewManager::switchLiveModeSlot (bool live_mode)
+void ViewManager::appModeSwitchSlot (AppMode app_mode)
 {
-    loginf << "ViewManager: switchLiveModeSlot: live_mode " << live_mode;
+    loginf << "ViewManager: appModeSwitchSlot: app_mode " << COMPASS::instance().appModeStr();
 
     for (auto& view_it : views_)
-        view_it.second->switchLiveMode(live_mode);
+        view_it.second->appModeSwitch(app_mode);
 }
 
 

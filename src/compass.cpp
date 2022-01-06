@@ -88,6 +88,8 @@ COMPASS::COMPASS() : Configurable("COMPASS", "COMPASS0", 0, "compass.json")
     QObject::connect(dbo_manager_.get(), &DBObjectManager::loadingDoneSignal,
                      view_manager_.get(), &ViewManager::loadingDoneSlot);
 
+    qRegisterMetaType<AppMode>("AppMode");
+
     logdbg << "COMPASS: constructor: end";
 }
 
@@ -355,18 +357,43 @@ MainWindow& COMPASS::mainWindow()
     return *main_window_;
 }
 
-bool COMPASS::liveMode() const
+AppMode COMPASS::appMode() const
 {
-    return live_mode_;
+    return app_mode_;
 }
 
-void COMPASS::liveMode(bool live_mode)
+void COMPASS::appMode(const AppMode& app_mode)
 {
-    loginf << "COMPASS: liveMode: live_mode " << live_mode;
+    if (app_mode_ != app_mode)
+    {
+        app_mode_ = app_mode;
 
-    live_mode_ = live_mode;
+        loginf << "COMPASS: appMode: app_mode " << appModeStr();
 
-    emit switchLiveModeSignal(live_mode_);
+        emit appModeSwitchSignal(app_mode_);
+    }
+}
+
+std::string COMPASS::appModeStr() const
+{
+    if (!appModes2Strings().count(app_mode_))
+    {
+        std::cout << "COMPASS: appModeStr: unkown type " << (unsigned int) app_mode_ << std::endl;
+        logerr << "COMPASS: appModeStr: unkown type " << (unsigned int) app_mode_;
+    }
+
+    assert(appModes2Strings().count(app_mode_) > 0);
+    return appModes2Strings().at(app_mode_);
+}
+
+const std::map<AppMode, std::string>& COMPASS::appModes2Strings()
+{
+    static const auto* map = new std::map<AppMode, std::string>
+        {{AppMode::Offline, "Offline Mode"},
+        {AppMode::LiveRunning, "Live Mode: Running"},
+        {AppMode::LivePaused, "Live Mode: Paused"}};
+
+    return *map;
 }
 
 std::string COMPASS::lastDbFilename() const

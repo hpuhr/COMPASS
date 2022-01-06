@@ -22,6 +22,7 @@
 #include "dbovariableset.h"
 #include "viewcontainerwidget.h"
 #include "buffer.h"
+#include "appmode.h"
 
 #include <QObject>
 
@@ -72,7 +73,7 @@ class View : public QObject, public Configurable
     virtual void loadedData(const std::map<std::string, std::shared_ptr<Buffer>>& data, bool requires_reset)=0;
     virtual void loadingDone()=0;
 
-    virtual void switchLiveMode (bool live_mode) {};
+    virtual void appModeSwitch (AppMode app_mode) {};
 
     unsigned int getKey();
     const std::string& getName() const;

@@ -44,11 +44,11 @@ enum class PropertyDataType
  */
 class Property
 {
-  protected:
+protected:
     /// @brief Default constructor. Use only if members are overwritten.
     Property() {}
 
-  public:
+public:
     /// @brief Constructor
     Property(std::string id, PropertyDataType type);
     /// @brief Destructor
@@ -75,7 +75,7 @@ class Property
     static const std::map<PropertyDataType, std::string>& dbDataTypes2Strings();
     static const std::map<std::string, PropertyDataType>& strings2DataTypes();
 
-  protected:
+protected:
     /// Data type
     PropertyDataType data_type_;
     std::string data_type_str_;
@@ -83,8 +83,8 @@ class Property
     std::string name_;
 
     /// Mappings from PropertyDataType to strings, and back.
-//    static const std::map<PropertyDataType, std::string> data_types_2_strings_;
-//    static const std::map<std::string, PropertyDataType> strings_2_data_types_;
+    //    static const std::map<PropertyDataType, std::string> data_types_2_strings_;
+    //    static const std::map<std::string, PropertyDataType> strings_2_data_types_;
 };
 
 #endif /* PROPERTY_H_ */

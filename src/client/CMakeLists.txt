@@ -7,6 +7,7 @@ target_sources(compass
     PUBLIC
         "${CMAKE_CURRENT_LIST_DIR}/client.h"
         "${CMAKE_CURRENT_LIST_DIR}/mainwindow.h"
+        "${CMAKE_CURRENT_LIST_DIR}/appmode.h"
     PRIVATE
         "${CMAKE_CURRENT_LIST_DIR}/client.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/mainwindow.cpp"
