@@ -68,7 +68,7 @@ find_package(TBB REQUIRED)
 message("  TBB_INCLUDE_DIRS: ${TBB_INCLUDE_DIRS}")
 message("  TBB_LIBRARIES: ${TBB_LIBRARIES}")
 
-find_package ( jASTERIX )
+find_package ( jASTERIX REQUIRED)
 message("  jASTERIX found: ${jASTERIX_FOUND}")
 message("  jASTERIX_INCLUDE_DIR: ${jASTERIX_INCLUDE_DIR}")
 message("  jASTERIX_LIBRARIES: ${jASTERIX_LIBRARIES}")

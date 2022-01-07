@@ -106,7 +106,6 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
              "opens existing SQLite3 database with given filename, e.g. '/data/file1.db'")
 //            ("import_view_points", po::value<std::string>(&import_view_points_filename),
 //             "imports view points JSON file with given filename, e.g. '/data/file1.json'")
-        #if USE_JASTERIX
             ("import_asterix_file", po::value<std::string>(&import_asterix_filename_),
              "imports ASTERIX file with given filename, e.g. '/data/file1.ff'")
             ("import_asterix_network", po::bool_switch(&import_asterix_network_),
@@ -118,7 +117,6 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
 //            ("asterix_decoder_cfg", po::value<std::string>(&asterix_decoder_cfg),
 //             "sets ASTERIX decoder config using JSON string, e.g. ''{\"10\":{\"edition\":\"0.31\"}}''"
 //             " (including one pair of single quotes)")
-        #endif
 //            ("import_json", po::value<std::string>(&import_json_filename),
 //             "imports JSON file with given filename, e.g. '/data/file1.json'")
 //            ("json_schema", po::value<std::string>(&import_json_schema),
@@ -210,7 +208,6 @@ void Client::run ()
 //    if (import_view_points_filename.size())
 //        task_man.importViewPointsFile(import_view_points_filename);
 
-#if USE_JASTERIX
 //    try
 //    {
 //        if (asterix_framing.size())
@@ -241,7 +238,6 @@ void Client::run ()
 
     if (import_asterix_network_time_offset_.size())
         main_window.importASTERIXFromNetworkTimeOffset(String::timeFromString(import_asterix_network_time_offset_));
-#endif
 
 //    if (import_json_filename.size())
 //        task_man.importJSONFile(import_json_filename, import_json_schema);

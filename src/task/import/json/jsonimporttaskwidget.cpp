@@ -369,9 +369,7 @@ void JSONImportTaskWidget::updateSchemasBox()
 
     schema_box_->clear();
 
-#if USE_JASTERIX
     schema_box_->addItem("jASTERIX");
-#endif
 
     for (auto& schema_it : task_)
     {
@@ -392,7 +390,6 @@ void JSONImportTaskWidget::updateToCurrentSchema()
 {
     updateParserBox();
 
-#if USE_JASTERIX
     if (task_.currentSchemaName() == "jASTERIX")
     {
         parser_label_->setText("Editing Only Possible in Import ASTERIX Task");
@@ -411,7 +408,6 @@ void JSONImportTaskWidget::updateToCurrentSchema()
         delete_object_parser_button_->setDisabled(false);
         object_parser_widget_->setDisabled(false);
     }
-#endif
 }
 
 void JSONImportTaskWidget::addObjectParserSlot()
@@ -541,10 +537,8 @@ void JSONImportTaskWidget::updateParserBox()
 
     if (task_.hasCurrentSchema())
     {
-#if USE_JASTERIX
         if (task_.currentSchemaName() == "jASTERIX")
             return;
-#endif
 
         loginf << "JSONImportTaskWidget: updateParserBox: current schema " << task_.currentSchema().name();
 

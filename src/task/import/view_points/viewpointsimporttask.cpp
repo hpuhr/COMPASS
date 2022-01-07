@@ -30,11 +30,9 @@
 #include "savedfile.h"
 #include "global.h"
 
-#if USE_JASTERIX
 #include "asteriximporttask.h"
 #include "asteriximporttaskwidget.h"
 #include "asterixoverridewidget.h"
-#endif
 
 //#include "managedatasourcestask.h"
 
@@ -429,7 +427,6 @@ void ViewPointsImportTask::import ()
                 std::string name = ds_it.at("name");
                 std::string filename = ds_it.at("filename");
 
-#if USE_JASTERIX
                 loginf << "ViewPointsImportTask: import: importing dataset '" << name << "' file '" << filename << "'";
 
                 if (!Files::fileExists(filename))
@@ -579,9 +576,6 @@ void ViewPointsImportTask::import ()
                 }
 
                 loginf << "ViewPointsImportTask: import: importing dataset '" << name << "' done";
-#else
-                logerr<< "ViewPointsImportTask: import: importing of datasets not possible with missing jasterix";
-#endif
 
             }
 

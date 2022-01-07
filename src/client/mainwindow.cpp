@@ -38,10 +38,8 @@
 #include "evaluationmanager.h"
 #include "compass.h"
 
-#if USE_JASTERIX
 #include "asteriximporttask.h"
 #include "asteriximporttaskdialog.h"
-#endif
 
 #include <QApplication>
 #include <QFileDialog>
@@ -251,7 +249,6 @@ void MainWindow::createMenus ()
 
     import_menu_ = menuBar()->addMenu(tr("&Import"));
 
-#if USE_JASTERIX
     QAction* import_ast_file_action = new QAction(tr("&ASTERIX Recording"));
     import_ast_file_action->setShortcut(tr("Ctrl+A"));
     import_ast_file_action->setStatusTip(tr("Import ASTERIX Recording File"));
@@ -265,7 +262,6 @@ void MainWindow::createMenus ()
     import_ast_net_action->setStatusTip(tr("Import ASTERIX From Network"));
     connect(import_ast_net_action, &QAction::triggered, this, &MainWindow::importAsterixFromNetworkSlot);
     import_menu_->addAction(import_ast_net_action);
-#endif
 
     // configuration
     QMenu* config_menu = menuBar()->addMenu(tr("&Configuration"));
@@ -309,7 +305,6 @@ void MainWindow::updateMenus()
 
     import_menu_->setDisabled(!db_open || COMPASS::instance().taskManager().asterixImporterTask().isRunning());
 
-#if USE_JASTERIX
     assert (import_recent_asterix_menu_);
 
     import_recent_asterix_menu_->clear();
@@ -325,7 +320,6 @@ void MainWindow::updateMenus()
     }
     import_recent_asterix_menu_->setDisabled(recent_ast_list.size() == 0);
 
-#endif
 }
 
 void MainWindow::updateBottomWidget()
@@ -417,7 +411,6 @@ void MainWindow::openSqlite3DB(const std::string& filename)
     sqlite3_open_db_filename_ = filename;
 }
 
-#if USE_JASTERIX
 void MainWindow::importASTERIXFile(const std::string& filename)
 {
     loginf << "MainWindow: asterixImportFile: filename '" << filename << "'";
@@ -447,7 +440,6 @@ float MainWindow::importASTERIXFromNetworkTimeOffset()
     return asterix_import_network_time_offset_;
 }
 
-#endif
 
 void MainWindow::loadData(bool value)
 {
@@ -581,7 +573,6 @@ void MainWindow::performAutomaticTasks ()
 //        }
 //    }
 
-#if USE_JASTERIX
     assert (!(asterix_import_file_ && asterix_import_network_)); // check done in client
 
     if (asterix_import_file_)
@@ -622,7 +613,6 @@ void MainWindow::performAutomaticTasks ()
 
         ast_import_task.run(false); // no test
     }
-#endif
 
 ////    if (json_import_file_)
 ////    {
@@ -1290,11 +1280,15 @@ void MainWindow::loadingDoneSlot()
 void MainWindow::livePauseSlot()
 {
     loginf << "MainWindow: livePauseSlot";
+
+    TODO_ASSERT
 }
 
 void MainWindow::liveStopSlot()
 {
     loginf << "MainWindow: liveStopSlot";
+
+
 }
 
 void MainWindow::closeEvent(QCloseEvent* event)

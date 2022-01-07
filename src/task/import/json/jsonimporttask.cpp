@@ -35,10 +35,7 @@
 #include "savedfile.h"
 #include "stringconv.h"
 #include "taskmanager.h"
-
-#if USE_JASTERIX
 #include "asteriximporttask.h"
-#endif
 
 #include <QApplication>
 #include <QCoreApplication>
@@ -202,10 +199,8 @@ void JSONImportTask::currentFilename(const std::string& filename)
 
 bool JSONImportTask::hasSchema(const std::string& name)
 {
-#if USE_JASTERIX
     if (name == "jASTERIX")
         return true;
-#endif
 
     return schemas_.count(name) > 0;
 }
@@ -215,10 +210,8 @@ bool JSONImportTask::hasCurrentSchema()
     if (!current_schema_.size())
         return false;
 
-#if USE_JASTERIX
     if (current_schema_ == "jASTERIX")
         return true;
-#endif
 
     return schemas_.count(current_schema_) > 0;
 }
@@ -227,23 +220,17 @@ JSONParsingSchema& JSONImportTask::currentSchema()
 {
     assert(hasCurrentSchema());
 
-#if USE_JASTERIX
     if (current_schema_ == "jASTERIX")
         return *task_manager_.asterixImporterTask().schema();
     else
         return schemas_.at(current_schema_);
-#else
-    return schemas_.at(current_schema_);
-#endif
 }
 
 void JSONImportTask::removeCurrentSchema()
 {
     assert(hasCurrentSchema());
 
-#if USE_JASTERIX
     assert (current_schema_ != "jASTERIX");
-#endif
 
     schemas_.erase(current_schema_);
     assert(!hasCurrentSchema());
@@ -318,10 +305,8 @@ bool JSONImportTask::canImportFile()
     if (!current_schema_.size())
         return false;
 
-#if USE_JASTERIX
     if (current_schema_ == "jASTERIX")
         return true;
-#endif
 
     if (!schemas_.count(current_schema_))
     {
@@ -378,14 +363,10 @@ void JSONImportTask::run()
 
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
-#if USE_JASTERIX
     if (current_schema_ == "jASTERIX")
         read_json_job_ = std::make_shared<ReadJSONFileJob>(current_filename_, 1);
     else
         read_json_job_ = std::make_shared<ReadJSONFileJob>(current_filename_, num_objects_chunk);
-#else
-    read_json_job_ = std::make_shared<ReadJSONFileJob>(current_filename_, num_objects_chunk);
-#endif
 
     connect(read_json_job_.get(), &ReadJSONFileJob::readJSONFilePartSignal, this,
             &JSONImportTask::addReadJSONSlot, Qt::QueuedConnection);
@@ -487,7 +468,6 @@ void JSONImportTask::parseJSONDoneSlot()
 
     std::vector<std::string> keys;
 
-#if USE_JASTERIX
     if (current_schema_ == "jASTERIX")
     {
         //loginf << "UGA '" << json_objects->dump(4) << "'";
@@ -512,13 +492,6 @@ void JSONImportTask::parseJSONDoneSlot()
         size_t count = json_objects->at("data").size();
         logdbg << "JSONImporterTask: parseJSONDoneSlot: " << count << " parsed objects";
     }
-#else
-    assert(json_objects->contains("data")); // always written in data array
-    keys = {"data"};
-
-    size_t count = json_objects->at("data").size();
-    logdbg << "JSONImporterTask: parseJSONDoneSlot: " << count << " parsed objects";
-#endif
 
     //loginf << "UGA3";
 

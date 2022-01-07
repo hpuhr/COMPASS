@@ -45,13 +45,11 @@ private:
     std::string create_new_sqlite3_db_filename_;
     std::string open_sqlite3_db_filename_;
     //    std::string import_view_points_filename;
-#if USE_JASTERIX
     std::string import_asterix_filename_;
     bool import_asterix_network_ {false};
     std::string import_asterix_network_time_offset_;
     //    std::string asterix_framing;
     //    std::string asterix_decoder_cfg;
-#endif
 
     void checkAndSetupConfig();
 

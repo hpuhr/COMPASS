@@ -57,10 +57,8 @@
 #include "eval/results/report/pdfgeneratordialog.h"
 #include "mainwindow.h"
 
-#if USE_JASTERIX
 #include "asteriximporttask.h"
 #include "asteriximporttaskwidget.h"
-#endif
 
 #include <cassert>
 
@@ -81,16 +79,11 @@ TaskManager::TaskManager(const std::string& class_id, const std::string& instanc
     createSubConfigurables();
 
     task_list_ = {"DatabaseOpenTask", "ManageSchemaTask",
-                  "ManageDBObjectsTask"};  // defines order of tasks
-
-#if USE_JASTERIX
-    task_list_.push_back("ASTERIXImportTask");
-#endif
-
-    task_list_.insert(task_list_.end(), {"ViewPointsImportTask", "GPSTrailImportTask", // "MySQLDBImportTask","JSONImportTask",
-                                         "ManageSectorsTask", // "ManageDataSourcesTask",
-                                         "RadarPlotPositionCalculatorTask", //"PostProcessTask",
-                                         "CreateAssociationsTask", "CreateARTASAssociationsTask"});
+                  "ManageDBObjectsTask", "ASTERIXImportTask",
+                  "ViewPointsImportTask", "GPSTrailImportTask", // "MySQLDBImportTask","JSONImportTask",
+                  "ManageSectorsTask", // "ManageDataSourcesTask",
+                  "RadarPlotPositionCalculatorTask", //"PostProcessTask",
+                  "CreateAssociationsTask", "CreateARTASAssociationsTask"};  // defines order of tasks
 
     for (auto& task_it : task_list_)  // check that all tasks in list exist
         assert(tasks_.count(task_it));
@@ -122,7 +115,6 @@ void TaskManager::generateSubConfigurable(const std::string& class_id,
         assert(manage_dbobjects_task_);
         addTask(class_id, manage_dbobjects_task_.get());
     }
-#if USE_JASTERIX
     else if (class_id.compare("ASTERIXImportTask") == 0)
     {
         assert(!asterix_importer_task_);
@@ -130,7 +122,6 @@ void TaskManager::generateSubConfigurable(const std::string& class_id,
         assert(asterix_importer_task_);
         addTask(class_id, asterix_importer_task_.get());
     }
-#endif
     else if (class_id.compare("ViewPointsImportTask") == 0)
     {
         assert(!view_points_import_task_);
@@ -231,13 +222,11 @@ void TaskManager::checkSubConfigurables()
         assert(manage_dbobjects_task_);
     }
 
-#if USE_JASTERIX
     if (!asterix_importer_task_)
     {
         generateSubConfigurable("ASTERIXImportTask", "ASTERIXImportTask0");
         assert(asterix_importer_task_);
     }
-#endif
 
     if (!view_points_import_task_)
     {
@@ -366,10 +355,8 @@ void TaskManager::shutdown()
     manage_schema_task_ = nullptr;
     manage_dbobjects_task_ = nullptr;
 
-#if USE_JASTERIX
     asterix_importer_task_->stop(); // stops if active
     asterix_importer_task_ = nullptr;
-#endif
 
     view_points_import_task_ = nullptr;
     //json_import_task_ = nullptr;
@@ -449,13 +436,11 @@ ManageSectorsTask& TaskManager::manageSectorsTask() const
     return *manage_sectors_task_;
 }
 
-#if USE_JASTERIX
 ASTERIXImportTask& TaskManager::asterixImporterTask() const
 {
     assert(asterix_importer_task_);
     return *asterix_importer_task_;
 }
-#endif
 
 ViewPointsImportTask& TaskManager::viewPointsImportTask() const
 {
@@ -518,7 +503,6 @@ void TaskManager::openSqlite3DB(const std::string& filename)
     sqlite3_open_db_filename_ = filename;
 }
 
-#if USE_JASTERIX
 void TaskManager::importASTERIXFile(const std::string& filename)
 {
     loginf << "TaskManager: asterixImportFile: filename '" << filename << "'";
@@ -555,8 +539,6 @@ void TaskManager::asterixDecoderConfig(const std::string& asterix_decoder_cfg)
     asterix_decoder_cfg_ = asterix_decoder_cfg;
     set_asterix_decoder_cfg_ = true;
 }
-
-#endif
 
 void TaskManager::importJSONFile(const std::string& filename, const std::string& schema)
 {

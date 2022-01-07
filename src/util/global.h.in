@@ -45,7 +45,6 @@ static const double KNOTS2M_S = 1852.0 / 3600.0; // knots to metres per second
 
 //std::string my_var = "@MY_VAR@";
 #define USE_EXPERIMENTAL_SOURCE @EXPERIMENTAL_SRC@
-#define USE_JASTERIX @jASTERIX_FOUND@
 
 #define TODO_ASSERT assert(false);
 

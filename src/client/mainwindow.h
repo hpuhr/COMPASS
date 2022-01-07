@@ -59,11 +59,9 @@ private slots:
     void livePauseSlot();
     void liveStopSlot();
 
-#if USE_JASTERIX
     void importAsterixRecordingSlot();
     void importRecentAsterixRecordingSlot();
     void importAsterixFromNetworkSlot();
-#endif
 
     void configureMetaVariablesSlot();
 
@@ -83,7 +81,6 @@ public:
     void createAndOpenNewSqlite3DB(const std::string& filename);
     void openSqlite3DB(const std::string& filename);
 
-#if USE_JASTERIX
     void importASTERIXFile(const std::string& filename);
     void importASTERIXFromNetwork();
     void importASTERIXFromNetworkTimeOffset(float value);
@@ -93,7 +90,6 @@ public:
     //    void asterixDecoderConfig(const std::string& asterix_decoder_cfg);
     //    bool asterixOptionsSet() const;
     //    void setAsterixOptions();
-#endif
 
     void loadData(bool value);
     void quit(bool value);
@@ -121,7 +117,6 @@ protected:
     bool sqlite3_open_db_ {false};
     std::string sqlite3_open_db_filename_;
 
-#if USE_JASTERIX
     bool asterix_import_file_ {false};
     std::string asterix_import_filename_;
     bool asterix_import_network_ {false};
@@ -130,7 +125,6 @@ protected:
     //    std::string asterix_framing_;
     //    bool set_asterix_decoder_cfg_ {false};
     //    std::string asterix_decoder_cfg_;
-#endif
 
     bool load_data_ {false};
     bool quit_ {false};
@@ -146,9 +140,7 @@ protected:
     // import menu
     QMenu* import_menu_ {nullptr};
 
-#if USE_JASTERIX
     QMenu* import_recent_asterix_menu_ {nullptr};
-#endif
 
     bool loading_{false};
 
