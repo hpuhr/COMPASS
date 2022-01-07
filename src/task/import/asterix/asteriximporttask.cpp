@@ -47,6 +47,8 @@
 #include <QCoreApplication>
 #include <QMessageBox>
 #include <QThread>
+#include <QProgressDialog>
+
 #include <algorithm>
 
 using namespace Utils;
@@ -111,6 +113,7 @@ ASTERIXImportTask::ASTERIXImportTask(const std::string& class_id, const std::str
 
 ASTERIXImportTask::~ASTERIXImportTask()
 {
+    loginf << "ASTERIXImportTask: destructor";
 }
 
 void ASTERIXImportTask::generateSubConfigurable(const std::string& class_id,
@@ -954,16 +957,44 @@ void ASTERIXImportTask::addDecodedASTERIXSlot()
 
 //    status_widget_->show();
 
+    if (import_file_)
+    {
+        if (!file_progress_dialog_)
+        {
+            file_progress_dialog_.reset(
+                        new QProgressDialog(("File '"+current_filename_+"'").c_str(), "Abort", 0, 100));
+            file_progress_dialog_->setWindowTitle("Importing ASTERIX Recording");
+            file_progress_dialog_->setWindowModality(Qt::WindowModal);
+        }
+
+        file_progress_dialog_->setValue(decode_job_->getFileDecodingProgress());
+
+        if (file_progress_dialog_->wasCanceled())
+        {
+            stop();
+            return;
+        }
+    }
+
     std::unique_ptr<nlohmann::json> extracted_data {decode_job_->extractedData()};
 
-    while (json_map_job_)  // only one can exist at a time
+    while (json_map_job_ && !stopped_)  // only one can exist at a time
     {
         if (decode_job_)
             decode_job_->pause();
 
+        if (stopped_)
+            return;
+
         QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
         QThread::msleep(1);
+
+        if (stopped_)
+            return;
     }
+
+    if (stopped_)
+        return;
 
     assert(!json_map_job_);
 
@@ -1065,13 +1096,13 @@ void ASTERIXImportTask::postprocessDoneSlot()
 {
     loginf << "ASTERIXImportTask: postprocessDoneSlot: import_file " << import_file_;
 
-    assert (postprocess_job_);
-
     if (stopped_)
     {
         postprocess_job_ = nullptr;
         return;
     }
+
+    assert (postprocess_job_);
 
     std::map<std::string, std::shared_ptr<Buffer>> job_buffers {postprocess_job_->buffers()};
     postprocess_job_ = nullptr;
@@ -1166,13 +1197,20 @@ void ASTERIXImportTask::insertData(std::map<std::string, std::shared_ptr<Buffer>
 //        }
 //    }
 
-    while (insert_active_)
+    while (insert_active_ && !stopped_)
     {
         //loginf << "ASTERIXImportTask: insertData: waiting for insert";
         waiting_for_insert_ = true;
+
         QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
         QThread::msleep(1);
+
+        if (stopped_)
+            return;
     }
+
+    if (stopped_)
+        return;
 
     //loginf << "ASTERIXImportTask: insertData: no more waiting for insert";
     waiting_for_insert_ = false;
@@ -1294,6 +1332,11 @@ void ASTERIXImportTask::checkAllDone()
 
 //        assert(status_widget_);
 //        status_widget_->setDone();
+
+        if (import_file_ && file_progress_dialog_)
+        {
+            file_progress_dialog_ = nullptr;
+        }
 
         all_done_ = true;
         done_ = true; // why was this not set?

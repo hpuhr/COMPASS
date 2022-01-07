@@ -43,6 +43,7 @@ namespace Utils
 namespace Files
 {
 bool fileExists(const std::string& path);
+size_t fileSize(const std::string& path);
 void verifyFileExists(const std::string& path);
 bool directoryExists(const std::string& path);
 bool copyRecursively(const std::string& source_folder, const std::string& dest_folder);

@@ -22,6 +22,7 @@
 #include "stringconv.h"
 #include "compass.h"
 #include "mainwindow.h"
+#include "util/files.h"
 
 #include <jasterix/jasterix.h>
 
@@ -160,6 +161,9 @@ void ASTERIXDecodeJob::setDecodeFile (const std::string& filename,
     filename_ = filename;
     framing_ = framing;
 
+    assert (Files::fileExists(filename));
+    file_size_ = Files::fileSize(filename);
+
     decode_file_ = true;
     assert (!decode_udp_streams_);
 }
@@ -209,9 +213,14 @@ void ASTERIXDecodeJob::run()
 
 void ASTERIXDecodeJob::setObsolete()
 {
+    loginf << "ASTERIXDecodeJob: setObsolete";
+
     Job::setObsolete();
 
-    receive_semaphore_.post(); // wake up loop
+    if (decode_file_)
+        task_.jASTERIX()->stopFileDecoding();
+    else
+        receive_semaphore_.post(); // wake up loop
 }
 
 void ASTERIXDecodeJob::doFileDecoding()
@@ -404,6 +413,8 @@ void ASTERIXDecodeJob::jasterix_callback(std::unique_ptr<nlohmann::json> data, s
         post_process_.postProcess(category, record);
     };
 
+    max_index_ = 0;
+
     if (framing_ == "")
     {
         assert(extracted_data_->contains("data_blocks"));
@@ -421,6 +432,11 @@ void ASTERIXDecodeJob::jasterix_callback(std::unique_ptr<nlohmann::json> data, s
             }
 
             category = data_block.at("category");
+
+            assert (data_block.contains("content"));
+            assert(data_block.at("content").is_object());
+            assert (data_block.at("content").contains("index"));
+            max_index_ = data_block.at("content").at("index");
 
             if (category == 1)
                 checkCAT001SacSics(data_block);
@@ -443,6 +459,10 @@ void ASTERIXDecodeJob::jasterix_callback(std::unique_ptr<nlohmann::json> data, s
                 continue;
 
             assert(frame.at("content").is_object());
+
+            assert(frame.at("content").is_object());
+            assert (frame.at("content").contains("index"));
+            max_index_ = frame.at("content").at("index");
 
             if (!frame.at("content").contains("data_blocks"))  // frame with errors
                 continue;
@@ -468,6 +488,10 @@ void ASTERIXDecodeJob::jasterix_callback(std::unique_ptr<nlohmann::json> data, s
             }
         }
     }
+
+    if (decode_file_ && file_size_)
+        logdbg << "ASTERIXDecodeJob: jasterix_callback: max_index " << max_index_
+               << " perc " <<  String::percentToString((float) max_index_/(float) file_size_);
 
     while (pause_)  // block decoder until unpaused
         QThread::msleep(1);
@@ -495,6 +519,13 @@ void ASTERIXDecodeJob::countRecord(unsigned int category, nlohmann::json& record
 }
 
 std::map<unsigned int, size_t> ASTERIXDecodeJob::categoryCounts() const { return category_counts_; }
+
+float ASTERIXDecodeJob::getFileDecodingProgress() const
+{
+    assert (decode_file_ && file_size_);
+
+    return 100.0 * (float) max_index_/(float) file_size_;
+}
 
 size_t ASTERIXDecodeJob::numErrors() const { return num_errors_; }
 

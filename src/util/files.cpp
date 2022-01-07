@@ -39,6 +39,13 @@ bool fileExists(const std::string& path)
     return check_file.exists() && check_file.isFile();
 }
 
+size_t fileSize(const std::string& path)
+{
+    verifyFileExists(path);
+
+    return boost::filesystem::file_size(path);
+}
+
 void verifyFileExists(const std::string& path)
 {
     if (!fileExists(path))

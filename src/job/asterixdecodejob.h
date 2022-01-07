@@ -69,6 +69,8 @@ class ASTERIXDecodeJob : public Job
 
     std::unique_ptr<nlohmann::json> extractedData() { return std::move(extracted_data_); } // ds_id -> (ip,port)
 
+    float getFileDecodingProgress() const;
+
   private:
     ASTERIXImportTask& task_;
     bool test_{false};
@@ -86,6 +88,9 @@ class ASTERIXDecodeJob : public Job
     size_t num_frames_{0};
     size_t num_records_{0};
     size_t num_errors_{0};
+
+    size_t file_size_{0};
+    size_t max_index_{0};
 
     bool error_{false};
     std::string error_message_;

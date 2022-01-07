@@ -18,11 +18,6 @@
 #ifndef ASTERIXIMPORTTASK_H
 #define ASTERIXIMPORTTASK_H
 
-#include <QObject>
-#include <deque>
-#include <memory>
-#include <mutex>
-
 #include "asterixdecodejob.h"
 #include "asterixpostprocess.h"
 #include "configurable.h"
@@ -33,13 +28,23 @@
 #include "asterixjsonparsingschema.h"
 #include "task.h"
 
+#include <QObject>
+
+#include <deque>
+#include <memory>
+#include <mutex>
+
+
 //#include <tbb/concurrent_queue.h>
 
 class TaskManager;
+
 class ASTERIXImportTaskWidget;
 class ASTERIXCategoryConfig;
 class ASTERIXStatusDialog;
 class ASTERIXImportTaskDialog;
+
+class QProgressDialog;
 
 namespace jASTERIX
 {
@@ -78,14 +83,14 @@ class ASTERIXImportTask : public Task, public Configurable
     ASTERIXImportTaskDialog* dialog();
 
     virtual void generateSubConfigurable(const std::string& class_id,
-                                         const std::string& instance_id);
+                                         const std::string& instance_id) override;
 
     void asterixFileFraming(const std::string& asterix_framing);
     void asterixDecoderConfig(const std::string& asterix_decoder_cfg);
 
     bool canImportFile();
-    virtual bool canRun();
-    virtual void run();
+    virtual bool canRun() override;
+    virtual void run() override;
     virtual void stop() override;
     void run(bool test);
     bool isRunning() const;
@@ -163,6 +168,7 @@ protected:
 
     bool running_ {false};
     boost::posix_time::ptime start_time_;
+    std::unique_ptr<QProgressDialog> file_progress_dialog_;
 
     std::unique_ptr<ASTERIXImportTaskDialog> dialog_;
 
@@ -194,7 +200,7 @@ protected:
 
     bool all_done_{false};
 
-    virtual void checkSubConfigurables();
+    virtual void checkSubConfigurables() override;
 
     void insertData(std::map<std::string, std::shared_ptr<Buffer>> job_buffers);
     void checkAllDone();
