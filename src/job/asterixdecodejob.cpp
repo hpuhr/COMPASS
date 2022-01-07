@@ -199,7 +199,8 @@ void ASTERIXDecodeJob::run()
     else if (decode_udp_streams_)
         doUDPStreamDecoding();
 
-    assert(extracted_data_ == nullptr);
+    if (!obsolete_)
+        assert(extracted_data_ == nullptr);
 
     done_ = true;
 

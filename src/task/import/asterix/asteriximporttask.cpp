@@ -889,13 +889,14 @@ void ASTERIXImportTask::decodeASTERIXDoneSlot()
 {
     loginf << "ASTERIXImportTask: decodeASTERIXDoneSlot";
 
-    assert(decode_job_);
 
     if (stopped_)
     {
         decode_job_ = nullptr;
         return;
     }
+
+    assert(decode_job_);
 
     if (decode_job_->error())
     {
@@ -935,10 +936,10 @@ void ASTERIXImportTask::addDecodedASTERIXSlot()
 {
     loginf << "ASTERIXImportTask: addDecodedASTERIXSlot";
 
-    assert(decode_job_);
-
     if (stopped_)
         return;
+
+    assert(decode_job_);
 
     //assert(status_widget_);
 
