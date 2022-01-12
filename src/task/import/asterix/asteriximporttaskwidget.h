@@ -42,33 +42,21 @@ class ASTERIXImportTaskWidget : public QWidget
     Q_OBJECT
 
   public slots:
-    //void addFileSlot();
-    //void deleteFileSlot();
-    //void selectedFileSlot();
-    //void updateFileListSlot();
-
     void addParserSlot();
     void removeObjectParserSlot();
     void selectedObjectParserSlot(const QString& text);
+
+    void fileLineIDEditSlot(const QString& text);
 
     void debugChangedSlot();
     void limitRAMChangedSlot();
     void testImportSlot();
 
-    //void expertModeChangedSlot();
-
   public:
     ASTERIXImportTaskWidget(ASTERIXImportTask& task, QWidget* parent=0, Qt::WindowFlags f=0);
     virtual ~ASTERIXImportTaskWidget();
 
-    //void addFile(const std::string& filename);
-    //void selectFile(const std::string& filename);
-    //void deleteAllFiles();
-
     void updateLimitRAM();
-
-//    void runStarted();
-//    void runDone();
 
     ASTERIXOverrideWidget* overrideWidget() const;
 
@@ -78,12 +66,6 @@ protected:
     QHBoxLayout* main_layout_{nullptr};
 
     QTabWidget* tab_widget_{nullptr};
-
-//    QLabel* source_label_ {nullptr};
-//    QListWidget* file_list_{nullptr};
-//    QPushButton* add_file_button_{nullptr};
-//    QPushButton* delete_file_button_{nullptr};
-//    QPushButton* delete_all_files_button_{nullptr};
 
     QComboBox* object_parser_box_{nullptr};
     QPushButton* add_object_parser_button_{nullptr};

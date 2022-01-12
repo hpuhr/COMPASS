@@ -631,6 +631,18 @@ void ASTERIXImportTask::overrideTodOffset(float value)
     post_process_.override_tod_offset_ = value;
 }
 
+unsigned int ASTERIXImportTask::fileLineID() const
+{
+    return file_line_id_;
+}
+
+void ASTERIXImportTask::fileLineID(unsigned int value)
+{
+    loginf << "ASTERIXImportTask: fileLineID: value " << value;
+
+    file_line_id_ = value;
+}
+
 bool ASTERIXImportTask::isRunning() const
 {
     return running_;
@@ -640,7 +652,7 @@ bool ASTERIXImportTask::canImportFile()
 {
     if (!current_filename_.size())
         return false;
-
+    
     if (!Files::fileExists(current_filename_))
     {
         loginf << "ASTERIXImportTask: canImportFile: not possible since file '"
@@ -678,8 +690,8 @@ void ASTERIXImportTask::stop()
         postprocess_job_->setObsolete();
 
     stopped_ = true;
-    done_ = true;
-    running_ = false;
+//    done_ = true;
+//    running_ = false;
 
     loginf << "ASTERIXImportTask: stop done";
 }
@@ -896,6 +908,9 @@ void ASTERIXImportTask::decodeASTERIXDoneSlot()
     if (stopped_)
     {
         decode_job_ = nullptr;
+
+        checkAllDone();
+
         return;
     }
 
@@ -940,7 +955,10 @@ void ASTERIXImportTask::addDecodedASTERIXSlot()
     loginf << "ASTERIXImportTask: addDecodedASTERIXSlot";
 
     if (stopped_)
+    {
+        checkAllDone();
         return;
+    }
 
     assert(decode_job_);
 
@@ -1035,6 +1053,9 @@ void ASTERIXImportTask::mapJSONDoneSlot()
     if (stopped_)
     {
         json_map_job_ = nullptr;
+
+        checkAllDone();
+
         return;
     }
 
@@ -1088,7 +1109,11 @@ void ASTERIXImportTask::mapJSONObsoleteSlot()
     logdbg << "ASTERIXImportTask: mapJSONObsoleteSlot";
 
     if (stopped_)
+    {
         json_map_job_ = nullptr;
+
+        checkAllDone();
+    }
 
 }
 
@@ -1099,6 +1124,9 @@ void ASTERIXImportTask::postprocessDoneSlot()
     if (stopped_)
     {
         postprocess_job_ = nullptr;
+
+        checkAllDone();
+
         return;
     }
 
@@ -1161,7 +1189,10 @@ void ASTERIXImportTask::insertData(std::map<std::string, std::shared_ptr<Buffer>
     loginf << "ASTERIXImportTask: insertData: inserting " << job_buffers.size() << " into database";
 
     if (stopped_)
+    {
+        checkAllDone();
         return;
+    }
 
     assert (!test_);
 
@@ -1206,11 +1237,17 @@ void ASTERIXImportTask::insertData(std::map<std::string, std::shared_ptr<Buffer>
         QThread::msleep(1);
 
         if (stopped_)
+        {
+            checkAllDone();
             return;
+        }
     }
 
     if (stopped_)
+    {
+        checkAllDone();
         return;
+    }
 
     //loginf << "ASTERIXImportTask: insertData: no more waiting for insert";
     waiting_for_insert_ = false;

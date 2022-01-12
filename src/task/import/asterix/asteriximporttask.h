@@ -130,9 +130,9 @@ class ASTERIXImportTask : public Task, public Configurable
     bool limitRAM() const;
     void limitRAM(bool value);
 
-    virtual bool checkPrerequisites();
-    virtual bool isRecommended();
-    virtual bool isRequired();
+    virtual bool checkPrerequisites() override;
+    virtual bool isRecommended() override;
+    virtual bool isRequired() override;
 
     bool overrideActive() const;
     void overrideActive(bool value);
@@ -152,6 +152,9 @@ class ASTERIXImportTask : public Task, public Configurable
     float overrideTodOffset() const;
     void overrideTodOffset(float value);
 
+    unsigned int fileLineID() const;
+    void fileLineID(unsigned int value);
+
 protected:
     bool debug_jasterix_;
     bool limit_ram_;
@@ -163,6 +166,7 @@ protected:
     nlohmann::json file_list_;
     std::string current_filename_;
     std::string current_file_framing_;
+    unsigned int file_line_id_ {0};
 
     bool test_{false};
 

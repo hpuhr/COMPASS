@@ -47,59 +47,28 @@ class UDPReceiver
 {
 public:
     UDPReceiver(boost::asio::io_context& io_context, const std::string& sender_ip, unsigned int port,
-                std::function<void(const std::string&, const char*, unsigned int)> data_callback)
-        : socket_endpoint_(boost::asio::ip::address::from_string(sender_ip), port), // INADDR_ANY boost::asio::ip::udp::v4()
-          socket_(io_context), // , boost::asio::ip::udp::endpoint(boost::asio::ip::udp::v4(), port)
-          //sender_id_(sender_ip+":"+to_string(sender_port)),
-          //sender_ip_(sender_ip), port_(port),
+                std::function<void(const char*, unsigned int)> data_callback) // const std::string&,
+        : socket_endpoint_(boost::asio::ip::address::from_string(sender_ip), port),
+          socket_(io_context),
           data_callback_(data_callback)
     {
-        //loginf << "UGA " << sender_ip;
-
         data_ = new char[MAX_UDP_READ_SIZE];
-
-        //loginf << "UGA0";
 
         //loginf << "ctor: " << sender_ip_ << ":" << port_;
         socket_.open(socket_endpoint_.protocol());
 
-//        socket_.set_option(boost::asio::socket_base::send_buffer_size(MAX_UDP_READ_SIZE));
-//        socket_.set_option(boost::asio::socket_base::receive_buffer_size(MAX_UDP_READ_SIZE));
         socket_.set_option(boost::asio::ip::udp::socket::reuse_address(true));
         socket_.bind(socket_endpoint_);
 
-        //loginf << "UGA1";
-
         socket_.set_option(boost::asio::ip::multicast::join_group(
                                boost::asio::ip::address::from_string(sender_ip)));
-
-        //loginf << "UGA2";
 
         socket_.async_receive_from(
                     boost::asio::buffer(data_, MAX_UDP_READ_SIZE), sender_endpoint_,
                     boost::bind(&UDPReceiver::handle_receive_from, this,
                                 boost::asio::placeholders::error,
                                 boost::asio::placeholders::bytes_transferred));
-
-        //loginf << "UGA3";
-
-        //loginf << "ctor: first async rec";
     }
-
-//    void addSenderIp (const std::string& sender_ip)
-//    {
-//        socket_.set_option(boost::asio::ip::multicast::join_group(
-//                               boost::asio::ip::address::from_string(sender_ip)));
-//    }
-
-//    void startReceive()
-//    {
-//        socket_.async_receive_from(
-//                    boost::asio::buffer(data_, MAX_UDP_READ_SIZE), sender_endpoint_,
-//                    boost::bind(&UDPReceiver::handle_receive_from, this,
-//                                boost::asio::placeholders::error,
-//                                boost::asio::placeholders::bytes_transferred));
-//    }
 
     void handle_receive_from(const boost::system::error_code& error,
                              size_t bytes_recvd)
@@ -115,8 +84,8 @@ public:
         }
         else
         {
-            data_callback_(sender_endpoint_.address().to_string()+":"+to_string(sender_endpoint_.port()),
-                           data_, bytes_recvd);
+            //sender_endpoint_.address().to_string()+":"+to_string(sender_endpoint_.port()),
+            data_callback_(data_, bytes_recvd);
         }
 
         socket_.async_receive_from(
@@ -130,12 +99,8 @@ private:
     boost::asio::ip::udp::endpoint socket_endpoint_;
     boost::asio::ip::udp::endpoint sender_endpoint_;
     boost::asio::ip::udp::socket socket_;
-    //string sender_id_;
-    //string sender_ip_;
-    //unsigned int port_;
 
-    std::function<void(const std::string&, const char*, unsigned int)> data_callback_;
-    //enum { max_length = MAX_READ_SIZE };
+    std::function<void(const char*, unsigned int)> data_callback_; // const std::string&,
     char* data_ {nullptr};
 };
 
@@ -159,6 +124,7 @@ void ASTERIXDecodeJob::setDecodeFile (const std::string& filename,
     loginf << "ASTERIXDecodeJob: setDecodeFile: file '" << filename << "' framing '" << framing << "'";
 
     filename_ = filename;
+    file_line_id_ = task_.fileLineID();
     framing_ = framing;
 
     assert (Files::fileExists(filename));
@@ -257,8 +223,9 @@ void ASTERIXDecodeJob::doUDPStreamDecoding()
 
     boost::asio::io_context io_context;
 
-    auto data_callback = [this](const std::string& sender_id, const char* data, unsigned int length) {
-        this->storeReceivedData(sender_id, data, length);
+    //const std::string& sender_id,
+    auto data_callback = [this](const char* data, unsigned int length) {
+        this->storeReceivedData(data, length);
     };
 
     string ip;
@@ -286,7 +253,6 @@ void ASTERIXDecodeJob::doUDPStreamDecoding()
 
     loginf << "ASTERIXDecodeJob: doUDPStreamDecoding: running iocontext";
 
-    //io_context.run();
     boost::thread t(boost::bind(&boost::asio::io_context::run, &io_context));
     t.detach();
 
@@ -300,8 +266,6 @@ void ASTERIXDecodeJob::doUDPStreamDecoding()
     while (!obsolete_)
     {
         receive_semaphore_.wait();
-
-        //loginf << "ASTERIXDecodeJob: doUDPStreamDecoding: woke up";
 
         if (obsolete_)
             break;
@@ -321,7 +285,6 @@ void ASTERIXDecodeJob::doUDPStreamDecoding()
                 if (!receive_buffer_copy_)
                     receive_buffer_copy_.reset(new boost::array<char, MAX_ALL_RECEIVE_SIZE>());
 
-                //boost::array<char, MAX_ALL_RECEIVE_SIZE>* tmp_buffer = new boost::array<char, MAX_ALL_RECEIVE_SIZE>();
                 *receive_buffer_copy_ = *receive_buffer_;
                 size_t tmp_buffer_size = receive_buffer_size_;
 
@@ -348,7 +311,7 @@ void ASTERIXDecodeJob::doUDPStreamDecoding()
     loginf << "ASTERIXDecodeJob: doUDPStreamDecoding: done";
 }
 
-void ASTERIXDecodeJob::storeReceivedData (const std::string& sender_id, const char* data, unsigned int length)
+void ASTERIXDecodeJob::storeReceivedData (const char* data, unsigned int length) // const std::string& sender_id,
 {
     if (obsolete_)
         return;
@@ -409,7 +372,7 @@ void ASTERIXDecodeJob::jasterix_callback(std::unique_ptr<nlohmann::json> data, s
     };
 
     auto process_lambda = [this, &category](nlohmann::json& record) {
-        record["line_id"] = 0; // TODO Line HACK
+        record["line_id"] = file_line_id_;
         post_process_.postProcess(category, record);
     };
 

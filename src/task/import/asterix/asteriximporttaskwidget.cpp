@@ -87,37 +87,17 @@ void ASTERIXImportTaskWidget::addMainTab()
 
             QLabel* file_label = new QLabel(task_.importFilename().c_str());
             source_layout->addWidget(file_label);
+
+            QLabel* line_label = new QLabel("Line ID");
+            source_layout->addWidget(line_label);
+
+            QComboBox* file_line_box = new QComboBox();
+            file_line_box->addItems({"1", "2", "3", "4"});
+
+            connect(file_line_box, &QComboBox::currentTextChanged,
+                    this, &ASTERIXImportTaskWidget::fileLineIDEditSlot);
+            source_layout->addWidget(file_line_box);
         }
-
-//        QLabel* files_label = new QLabel("File Selection");
-//        files_label->setFont(font_bold);
-//        files_layout->addWidget(files_label);
-
-//        file_list_ = new QListWidget();
-//        file_list_->setWordWrap(true);
-//        file_list_->setTextElideMode(Qt::ElideNone);
-//        file_list_->setSelectionBehavior(QAbstractItemView::SelectItems);
-//        file_list_->setSelectionMode(QAbstractItemView::SingleSelection);
-//        connect(file_list_, SIGNAL(itemClicked(QListWidgetItem*)), this, SLOT(selectedFileSlot()));
-
-//        updateFileListSlot();
-//        files_layout->addWidget(file_list_);
-
-//        QHBoxLayout* button_layout = new QHBoxLayout();
-
-//        add_file_button_ = new QPushButton("Add");
-//        connect(add_file_button_, &QPushButton::clicked, this, &ASTERIXImportTaskWidget::addFileSlot);
-//        button_layout->addWidget(add_file_button_);
-
-//        delete_file_button_ = new QPushButton("Remove");
-//        connect(delete_file_button_, &QPushButton::clicked, this, &ASTERIXImportTaskWidget::deleteFileSlot);
-//        button_layout->addWidget(delete_file_button_);
-
-//        delete_all_files_button_ = new QPushButton("Remove All");
-//        connect(delete_all_files_button_, &QPushButton::clicked, this, &ASTERIXImportTaskWidget::deleteAllFilesSlot);
-//        button_layout->addWidget(delete_all_files_button_);
-
-//        files_layout->addLayout(button_layout);
 
         main_tab_layout->addLayout(source_layout);
     }
@@ -374,6 +354,22 @@ void ASTERIXImportTaskWidget::selectedObjectParserSlot(const QString& text)
         object_parser_widget_->addWidget(task_.schema()->parser(cat).widget());
 
     object_parser_widget_->setCurrentWidget(task_.schema()->parser(cat).widget());
+}
+
+
+void ASTERIXImportTaskWidget::fileLineIDEditSlot(const QString& text)
+{
+    loginf << "ASTERIXImportTaskWidget: fileLineIDEditSlot: value '" << text.toStdString() << "'";
+
+    bool ok;
+
+    unsigned int line_id = text.toUInt(&ok);
+
+    assert (ok);
+
+    assert (line_id > 0 && line_id <= 4);
+
+    task_.fileLineID(line_id-1);
 }
 
 void ASTERIXImportTaskWidget::updateParserBox()

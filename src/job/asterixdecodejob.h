@@ -78,6 +78,7 @@ class ASTERIXDecodeJob : public Job
 
     bool decode_file_ {false};
     std::string filename_;
+    unsigned int file_line_id_;
     std::string framing_;
 
     bool decode_udp_streams_ {false};
@@ -98,13 +99,6 @@ class ASTERIXDecodeJob : public Job
     boost::interprocess::interprocess_semaphore receive_semaphore_;
     std::unique_ptr<boost::array<char, MAX_ALL_RECEIVE_SIZE>> receive_buffer_copy_;
 
-//    std::vector<boost::asio::ip::udp::socket> sockets_;
-//    std::vector<boost::asio::ip::udp::endpoint> end_points_;
-    //std::vector<boost::array<char, MAX_READ_SIZE>> recv_arrays_;
-
-//    bool error_occured_ {false};
-//    boost::system::error_code error_code_;
-
     boost::mutex receive_buffer_mutex_;
     std::unique_ptr<boost::array<char, MAX_ALL_RECEIVE_SIZE>> receive_buffer_;
     size_t receive_buffer_size_ {0};
@@ -117,8 +111,7 @@ class ASTERIXDecodeJob : public Job
     void doFileDecoding();
     void doUDPStreamDecoding();
 
-    //void handleReceive(unsigned int socket_num, const boost::system::error_code& error, size_t bytes_transferred);
-    void storeReceivedData (const std::string& sender_id, const char* data, unsigned int length);
+    void storeReceivedData (const char* data, unsigned int length);
 
     void jasterix_callback(std::unique_ptr<nlohmann::json> data, size_t num_frames,
                            size_t num_records, size_t numErrors);
