@@ -281,15 +281,6 @@ DBOLabelDefinitionWidget* DBObject::labelDefinitionWidget()
     return label_definition_->widget();
 }
 
-void DBObject::loadingWanted(bool wanted)
-{
-    if (loading_wanted_ != wanted)
-    {
-        loading_wanted_ = wanted;
-
-    }
-}
-
 void DBObject::load(DBOVariableSet& read_set, bool use_filters, bool use_order,
                     DBOVariable* order_variable, bool use_order_ascending,
                     const string& limit_str)
@@ -408,8 +399,8 @@ void DBObject::doDataSourcesBeforeInsert (shared_ptr<Buffer> buffer)
             dbo_manager_.addNewDataSource(ds_id_cnt.first);
 
         // add record count
-        dbo_manager_.dataSource(ds_id_cnt.first).addNumInserted(0, name_, ds_id_cnt.second); // TODO HACK LINE ID
-        dbo_manager_.dataSource(ds_id_cnt.first).addNumLoaded(0, name_, ds_id_cnt.second); // because propagated after
+        dbo_manager_.dataSource(ds_id_cnt.first).addNumInserted(name_, 0, ds_id_cnt.second); // TODO HACK LINE ID
+        dbo_manager_.dataSource(ds_id_cnt.first).addNumLoaded(name_, 0, ds_id_cnt.second); // because propagated after
     }
 }
 

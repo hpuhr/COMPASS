@@ -179,10 +179,10 @@ void DBObjectManagerDataSourcesWidget::update()
         }
         // check content widget exist
 
-        if (!show_counts_ || !ds_it->hasActiveNumInserted()) // no counts or no data
+        if (!show_counts_ || !ds_it->hasNumInserted()) // no counts or no data
             continue;
 
-        for (auto& cnt_it : ds_it->activeNumInsertedMap())
+        for (auto& cnt_it : ds_it->numInsertedSummedLinesMap())
         {
             if (!ds_content_boxes_.count(ds_it->name()) || !ds_content_boxes_.at(ds_it->name()).count(cnt_it.first))
             {
@@ -380,7 +380,7 @@ void DBObjectManagerDataSourcesWidget::clearAndCreateContent()
 
             if (show_counts_)
             {
-                for (auto& cnt_it : ds_it->activeNumInsertedMap())
+                for (auto& cnt_it : ds_it->numInsertedSummedLinesMap())
                 {
                     ds_content_name = cnt_it.first;
 
@@ -396,7 +396,7 @@ void DBObjectManagerDataSourcesWidget::clearAndCreateContent()
 
                     // ds content loaded label
 
-                    QLabel* ds_content_loaded_label = new QLabel(QString::number(ds_it->activeNumLoaded(ds_content_name)));
+                    QLabel* ds_content_loaded_label = new QLabel(QString::number(ds_it->numLoaded(ds_content_name)));
 
                     type_layout_->addWidget(ds_content_loaded_label, row, col_start+2,
                                             Qt::AlignTop | Qt::AlignRight);
@@ -448,7 +448,7 @@ void DBObjectManagerDataSourcesWidget::updateExistingContent()
             assert (ds_boxes_.count(ds_name));
             // ds_boxes_[ds_name] // checkbox
 
-            for (auto& cnt_it : ds_it->activeNumInsertedMap())
+            for (auto& cnt_it : ds_it->numInsertedSummedLinesMap())
             {
                 ds_content_name = cnt_it.first;
 
@@ -461,7 +461,7 @@ void DBObjectManagerDataSourcesWidget::updateExistingContent()
                 assert (ds_content_loaded_labels_.count(ds_name)
                         && ds_content_loaded_labels_.at(ds_name).count(ds_content_name));
                 ds_content_loaded_labels_[ds_name][ds_content_name]->setText(
-                            QString::number(ds_it->activeNumLoaded(ds_content_name)));
+                            QString::number(ds_it->numLoaded(ds_content_name)));
 
                 // ds content total label
 

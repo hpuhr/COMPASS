@@ -116,9 +116,6 @@ class DBObject : public QObject, public Configurable
 
     bool loadable() const { return is_loadable_; }
 
-    void loadingWanted(bool wanted);
-    bool loadingWanted() { return loading_wanted_; }
-
     void load(DBOVariableSet& read_set, bool use_filters, bool use_order,
               DBOVariable* order_variable, bool use_order_ascending,
               const std::string& limit_str = "");
@@ -178,11 +175,11 @@ protected:
     std::string name_;
     std::string info_;
     std::string db_table_name_;
+    std::string ds_type_;
 
     bool constructor_active_ {false};
 
     bool is_loadable_{false};  // loadable on its own
-    bool loading_wanted_{true}; // TODO HACK
     size_t count_{0};
 
     std::unique_ptr<DBOLabelDefinition> label_definition_;

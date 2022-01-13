@@ -361,6 +361,17 @@ void DBObjectManager::clearOrderVariable()
     order_variable_name_ = "";
 }
 
+bool DBObjectManager::loadingWanted (const std::string& dbo_name)
+{
+    for (auto& ds_it : db_data_sources_)
+    {
+        if (dsTypeLoadingWanted(ds_it->dsType()) && ds_it->loadingWanted() && ds_it->hasNumInserted(dbo_name))
+            return true;
+    }
+
+    return false;
+}
+
 void DBObjectManager::load()
 {
     logdbg << "DBObjectManager: loadSlot";
@@ -392,12 +403,12 @@ void DBObjectManager::load()
     {
         loginf << "DBObjectManager: loadSlot: object " << object.first
                << " loadable " << object.second->loadable()
-               << " ds type wanted " << object.second->loadingWanted();
+               << " loading wanted " << loadingWanted(object.first);
 
         if (object.first == "RefTraj")
             continue;
 
-        if (object.second->loadable() && object.second->loadingWanted())
+        if (object.second->loadable() && loadingWanted(object.first))
         {
             loginf << "DBObjectManager: loadSlot: loading object " << object.first;
             DBOVariableSet read_set = view_man.getReadSet(object.first); // TODO add required vars for processing

@@ -104,6 +104,8 @@ public:
 
     void saveDBDataSources();
 
+    bool loadingWanted (const std::string& dbo_name);
+
     void load();
     void addLoadedData(std::map<std::string, std::shared_ptr<Buffer>> data);
     void loadingDone(DBObject& object); // to be called by dbo when it's loading is finished
