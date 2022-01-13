@@ -105,6 +105,8 @@ public:
     void saveDBDataSources();
 
     bool loadingWanted (const std::string& dbo_name);
+    bool hasDSFilter (const std::string& dbo_name);
+    std::vector<unsigned int> unfilteredDS (const std::string& dbo_name); // DS IDs
 
     void load();
     void addLoadedData(std::map<std::string, std::shared_ptr<Buffer>> data);

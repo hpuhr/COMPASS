@@ -285,25 +285,59 @@ void DBObject::load(DBOVariableSet& read_set, bool use_filters, bool use_order,
                     DBOVariable* order_variable, bool use_order_ascending,
                     const string& limit_str)
 {
+    assert(is_loadable_);
+    assert(existsInDB());
+
     string custom_filter_clause;
     vector<DBOVariable*> filtered_variables;
 
+    if (dbo_manager_.hasDSFilter(name_))
+    {
+        vector<unsigned int> ds_ids_to_load = dbo_manager_.unfilteredDS(name_);
+        assert (ds_ids_to_load.size());
+
+        assert (hasVariable(DBObject::meta_var_datasource_id_.name()));
+
+        DBOVariable& datasource_var = variable(DBObject::meta_var_datasource_id_.name());
+        assert (datasource_var.dataType() == PropertyDataType::UINT);
+
+        // add to filtered vars
+        filtered_variables.push_back(&datasource_var);
+
+        custom_filter_clause = datasource_var.dbColumnName() + " IN (";
+
+        for (auto ds_id_it = ds_ids_to_load.begin(); ds_id_it != ds_ids_to_load.end(); ++ds_id_it)
+        {
+            if (ds_id_it != ds_ids_to_load.begin())
+                custom_filter_clause += ",";
+
+            custom_filter_clause += to_string(*ds_id_it);
+        }
+
+        custom_filter_clause += ")";
+    }
+
     if (use_filters)
     {
-        custom_filter_clause =
+        if (custom_filter_clause.size())
+            custom_filter_clause += " AND";
+
+        custom_filter_clause +=
                 COMPASS::instance().filterManager().getSQLCondition(name_, filtered_variables);
     }
 
-    load(read_set, custom_filter_clause, filtered_variables, use_order, order_variable,
-         use_order_ascending, limit_str);
+    loginf << "DBObject: load: filter '" << custom_filter_clause << "'";
+
+    loadFiltered(read_set, custom_filter_clause, filtered_variables, use_order, order_variable,
+                 use_order_ascending, limit_str);
 }
 
-void DBObject::load(DBOVariableSet& read_set, string custom_filter_clause,
+void DBObject::loadFiltered(DBOVariableSet& read_set, string custom_filter_clause,
                     vector<DBOVariable*> filtered_variables, bool use_order,
                     DBOVariable* order_variable, bool use_order_ascending,
                     const string& limit_str)
 {
-    logdbg << "DBObject: load: name " << name_ << " loadable " << is_loadable_;
+    logdbg << "DBObject: loadFiltered: name " << name_ << " loadable " << is_loadable_;
 
     assert(is_loadable_);
     assert(existsInDB());

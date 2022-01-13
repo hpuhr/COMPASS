@@ -49,13 +49,13 @@ class DBObject : public QObject, public Configurable
 {
     Q_OBJECT
 
-  signals:
+signals:
     void updateProgressSignal(float percent);
     void updateDoneSignal(DBObject& object);
 
     void labelDefinitionChangedSignal();
 
-  public slots:
+public slots:
     void databaseOpenedSlot();
     void databaseClosedSlot();
 
@@ -69,7 +69,7 @@ class DBObject : public QObject, public Configurable
     void updateProgressSlot(float percent);
     void updateDoneSlot();
 
-  public:
+public:
     static const Property meta_var_rec_num_id_;
     static const Property meta_var_datasource_id_;
     static const Property meta_var_line_id_;
@@ -118,11 +118,11 @@ class DBObject : public QObject, public Configurable
 
     void load(DBOVariableSet& read_set, bool use_filters, bool use_order,
               DBOVariable* order_variable, bool use_order_ascending,
-              const std::string& limit_str = "");
-    void load(DBOVariableSet& read_set, std::string custom_filter_clause,
-              std::vector<DBOVariable*> filtered_variables, bool use_order,
-              DBOVariable* order_variable, bool use_order_ascending,
-              const std::string& limit_str = "");
+              const std::string& limit_str = ""); // main load function
+    void loadFiltered(DBOVariableSet& read_set, std::string custom_filter_clause,
+                      std::vector<DBOVariable*> filtered_variables, bool use_order,
+                      DBOVariable* order_variable, bool use_order_ascending,
+                      const std::string& limit_str = ""); // load function for custom filtering
     void quitLoading();
 
     void insertData(std::shared_ptr<Buffer> buffer);

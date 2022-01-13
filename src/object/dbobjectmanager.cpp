@@ -372,6 +372,35 @@ bool DBObjectManager::loadingWanted (const std::string& dbo_name)
     return false;
 }
 
+bool DBObjectManager::hasDSFilter (const std::string& dbo_name)
+{
+    for (auto& ds_it : db_data_sources_)
+    {
+        if (dsTypeLoadingWanted(ds_it->dsType()) && !ds_it->loadingWanted() && ds_it->hasNumInserted(dbo_name))
+            return true;
+    }
+
+    return false;
+}
+
+std::vector<unsigned int> DBObjectManager::unfilteredDS (const std::string& dbo_name)
+{
+    assert (hasDSFilter(dbo_name));
+
+    std::vector<unsigned int> ds_ids;
+
+    for (auto& ds_it : db_data_sources_)
+    {
+        if (dsTypeLoadingWanted(ds_it->dsType()) && ds_it->loadingWanted() && ds_it->hasNumInserted(dbo_name))
+            ds_ids.push_back(ds_it->id());
+    }
+
+    assert (ds_ids.size());
+
+    return ds_ids;
+}
+
+
 void DBObjectManager::load()
 {
     logdbg << "DBObjectManager: loadSlot";
@@ -418,7 +447,7 @@ void DBObjectManager::load()
 
             if (read_set.getSize() == 0)
             {
-                loginf << "DBObjectManager: loadSlot: skipping loading of object " << object.first
+                logwrn << "DBObjectManager: loadSlot: skipping loading of object " << object.first
                        << " since an empty read list was detected";
                 continue;
             }
