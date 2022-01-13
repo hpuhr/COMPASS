@@ -24,7 +24,10 @@ ASTERIXJSONMappingJob::ASTERIXJSONMappingJob(std::unique_ptr<nlohmann::json> dat
     logdbg << "ASTERIXJSONMappingJob: ctor";
 }
 
-ASTERIXJSONMappingJob::~ASTERIXJSONMappingJob() { logdbg << "ASTERIXJSONMappingJob: dtor"; }
+ASTERIXJSONMappingJob::~ASTERIXJSONMappingJob()
+{
+    logdbg << "ASTERIXJSONMappingJob: dtor";
+}
 
 void ASTERIXJSONMappingJob::run()
 {
@@ -48,10 +51,7 @@ void ASTERIXJSONMappingJob::run()
         //loginf << "UGA '" << record.dump(4) << "'";
 
         if (this->obsolete_)
-        {
-            done_ = true;
             return;
-        }
 
         unsigned int category{0};
         assert (record.contains("category"));
@@ -69,8 +69,10 @@ void ASTERIXJSONMappingJob::run()
         string dbo_name = parser->dbObjectName();
 
         logdbg << "ASTERIXJSONMappingJob: run: mapping json: cat " << category;
+
         std::shared_ptr<Buffer>& buffer = buffers_.at(dbo_name);
         assert(buffer);
+
         try
         {
             logdbg << "ASTERIXJSONMappingJob: run: obj " << dbo_name << " parsing JSON";

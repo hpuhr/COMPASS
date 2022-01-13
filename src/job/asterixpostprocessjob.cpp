@@ -27,7 +27,7 @@ ASTERIXPostprocessJob::~ASTERIXPostprocessJob() { logdbg << "ASTERIXPostprocessJ
 
 void ASTERIXPostprocessJob::run()
 {
-    loginf << "ASTERIXPostprocessJob: run: num buffers " << buffers_.size();
+    logdbg << "ASTERIXPostprocessJob: run: num buffers " << buffers_.size();
 
     started_ = true;
 

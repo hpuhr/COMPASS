@@ -126,15 +126,15 @@ void JobManager::handleBlockingJobs()
 {
     if (active_blocking_job_)  // see if active one exists, finalize if possible
     {
-        if (active_blocking_job_->obsolete() || active_blocking_job_->done())
+        if (active_blocking_job_->done())
         {
-            if (active_blocking_job_->obsolete())
-            {
-                logdbg << "JobManager: run: flushing obsolete blocking job";
+//            if (active_blocking_job_->obsolete())
+//            {
+//                logdbg << "JobManager: run: flushing obsolete blocking job";
 
-                if (!stop_requested_)
-                    active_blocking_job_->emitObsolete();
-            }
+//                if (!stop_requested_)
+//                    active_blocking_job_->emitObsolete();
+//            }
 
             logdbg << "JobManager: run: flushing blocking done job";
 
@@ -167,16 +167,15 @@ void JobManager::handleNonBlockingJobs()
     {
         if (active_non_blocking_job_)  // see if active one exists
         {
-            if (active_non_blocking_job_->obsolete() ||
-                active_non_blocking_job_->done())  // can be finalized
+            if (active_non_blocking_job_->done())  // can be finalized
             {
-                if (active_non_blocking_job_->obsolete())
-                {
-                    logdbg << "JobManager: run: flushing obsolete non-blocking job";
+//                if (active_non_blocking_job_->obsolete())
+//                {
+//                    logdbg << "JobManager: run: flushing obsolete non-blocking job";
 
-                    if (!stop_requested_)
-                        active_non_blocking_job_->emitObsolete();
-                }
+//                    if (!stop_requested_)
+//                        active_non_blocking_job_->emitObsolete();
+//                }
 
                 logdbg << "JobManager: run: flushing non-blocking done job";
 
@@ -213,15 +212,15 @@ void JobManager::handleDBJobs()
 {
     if (active_db_job_)  // see if active one exists
     {
-        if (active_db_job_->obsolete() || active_db_job_->done())
+        if (active_db_job_->done())
         {
-            if (active_db_job_->obsolete())
-            {
-                logdbg << "JobManager: run: flushing obsolete non-blocking job";
+//            if (active_db_job_->obsolete())
+//            {
+//                logdbg << "JobManager: run: flushing obsolete non-blocking job";
 
-                if (!stop_requested_)
-                    active_db_job_->emitObsolete();
-            }
+//                if (!stop_requested_)
+//                    active_db_job_->emitObsolete();
+//            }
 
             logdbg << "JobManager: run: flushing non-blocking done job";
 

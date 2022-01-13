@@ -40,7 +40,11 @@ JSONMappingJob::JSONMappingJob(std::unique_ptr<nlohmann::json> data,
     logdbg << "JSONMappingJob: ctor";
 }
 
-JSONMappingJob::~JSONMappingJob() { logdbg << "JSONMappingJob: dtor"; }
+JSONMappingJob::~JSONMappingJob()
+{
+    loginf << "JSONMappingJob: dtor";
+    assert (done_);
+}
 
 void JSONMappingJob::run()
 {
@@ -121,10 +125,21 @@ void JSONMappingJob::run()
         }
     };
 
+    if (obsolete_)
+    {
+        done_ = true;
+        return;
+    }
     assert(data_);
     logdbg << "JSONMappingJob: run: applying JSON function";
     JSON::applyFunctionToValues(*data_.get(), data_record_keys_, data_record_keys_.begin(),
                                 process_lambda, false);
+
+    if (obsolete_)
+    {
+        done_ = true;
+        return;
+    }
 
     std::map<std::string, std::shared_ptr<Buffer>> not_empty_buffers;
 

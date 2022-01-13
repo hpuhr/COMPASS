@@ -62,7 +62,7 @@ class Job : public QObject, public QRunnable
     }
     // @brief Returns obsolete flag
     bool obsolete() { return obsolete_; }
-    void emitObsolete() { emit doneSignal(); }
+    //void emitObsolete() { emit doneSignal(); }
 
     const std::string& name() { return name_; }
 
@@ -75,7 +75,7 @@ class Job : public QObject, public QRunnable
     /// Obsolete flag
     volatile bool obsolete_{false};
 
-    virtual void setDone() { done_ = true; }
+    //virtual void setDone() { done_ = true; }
 };
 
 #endif /* JOB_H_ */

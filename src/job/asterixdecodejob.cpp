@@ -116,7 +116,11 @@ ASTERIXDecodeJob::ASTERIXDecodeJob(ASTERIXImportTask& task, bool test,
     receive_buffer_.reset(new boost::array<char, MAX_ALL_RECEIVE_SIZE>());
 }
 
-ASTERIXDecodeJob::~ASTERIXDecodeJob() { logdbg << "ASTERIXDecodeJob: dtor"; }
+ASTERIXDecodeJob::~ASTERIXDecodeJob()
+{
+    loginf << "ASTERIXDecodeJob: dtor";
+    assert (done_);
+}
 
 void ASTERIXDecodeJob::setDecodeFile (const std::string& filename,
                                       const std::string& framing)
@@ -158,11 +162,12 @@ void ASTERIXDecodeJob::setDecodeUDPStreams (
 
 void ASTERIXDecodeJob::run()
 {
-    logdbg << "ASTERIXDecodeJob: run";
+    loginf << "ASTERIXDecodeJob: run";
 
     assert (decode_file_ || decode_udp_streams_);
 
     started_ = true;
+    done_ = false;
 
     if (decode_file_)
         doFileDecoding();
@@ -174,7 +179,7 @@ void ASTERIXDecodeJob::run()
 
     done_ = true;
 
-    logdbg << "ASTERIXDecodeJob: run: done";
+    loginf << "ASTERIXDecodeJob: run: done";
 }
 
 void ASTERIXDecodeJob::setObsolete()
@@ -456,15 +461,18 @@ void ASTERIXDecodeJob::jasterix_callback(std::unique_ptr<nlohmann::json> data, s
         logdbg << "ASTERIXDecodeJob: jasterix_callback: max_index " << max_index_
                << " perc " <<  String::percentToString((float) max_index_/(float) file_size_);
 
-    while (pause_)  // block decoder until unpaused
+    while (!obsolete_ && pause_)  // block decoder until unpaused
         QThread::msleep(1);
 
     emit decodedASTERIXSignal();
 
-    while (extracted_data_)  // block decoder until extracted records have been moved out
+    while (!obsolete_ && extracted_data_)  // block decoder until extracted records have been moved out
         QThread::msleep(1);
 
-    assert(!extracted_data_);
+    if (!obsolete_)
+        assert(!extracted_data_);
+    else
+        extracted_data_ = nullptr;
 }
 
 size_t ASTERIXDecodeJob::numFrames() const { return num_frames_; }
