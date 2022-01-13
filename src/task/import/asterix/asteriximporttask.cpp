@@ -37,6 +37,7 @@
 #include "taskmanager.h"
 #include "taskmanagerwidget.h"
 #include "mainwindow.h"
+#include "stringconv.h"
 
 #include <jasterix/category.h>
 #include <jasterix/edition.h>
@@ -1013,6 +1014,16 @@ void ASTERIXImportTask::addDecodedASTERIXSlot()
         }
 
         file_progress_dialog_->setValue(decode_job_->getFileDecodingProgress());
+
+        string text = "File '"+current_filename_+"'";
+        string rec_text = "\n\nRecords/s: "+to_string((unsigned int) decode_job_->getRecordsPerSecond());
+        string rem_text = "Remaining: "+String::timeStringFromDouble(decode_job_->getRemainingTime(), false);
+
+        int num_filler = text.size() - rec_text.size() - rem_text.size();
+        if (num_filler < 1)
+            num_filler = 1;
+
+        file_progress_dialog_->setLabelText((text + rec_text + std::string(num_filler, ' ') + rem_text).c_str());
 
         if (file_progress_dialog_->wasCanceled())
         {

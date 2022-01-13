@@ -166,6 +166,8 @@ void ASTERIXDecodeJob::run()
 
     assert (decode_file_ || decode_udp_streams_);
 
+    start_time_ = boost::posix_time::microsec_clock::local_time();;
+
     started_ = true;
     done_ = false;
 
@@ -486,6 +488,7 @@ void ASTERIXDecodeJob::countRecord(unsigned int category, nlohmann::json& record
     logdbg << "ASTERIXDecodeJob: countRecord: cat " << category << " record '" << record.dump(4)
            << "'";
 
+    count_total_++;
     category_counts_[category] += 1;
 }
 
@@ -496,6 +499,34 @@ float ASTERIXDecodeJob::getFileDecodingProgress() const
     assert (decode_file_ && file_size_);
 
     return 100.0 * (float) max_index_/(float) file_size_;
+}
+
+float ASTERIXDecodeJob::getRecordsPerSecond() const
+{
+    float elapsed_s = (float )(boost::posix_time::microsec_clock::local_time()
+                               - start_time_).total_milliseconds()/1000.0;
+
+    return (float) count_total_ / elapsed_s;
+}
+
+float ASTERIXDecodeJob::getRemainingTime() const
+{
+    assert (decode_file_ && file_size_);
+
+    size_t remaining_rec = file_size_ - max_index_;
+
+    float elapsed_s = (float )(boost::posix_time::microsec_clock::local_time()
+                               - start_time_).total_milliseconds()/1000.0;
+
+    float index_per_s = (float) max_index_ / elapsed_s;
+
+    return (float) remaining_rec / index_per_s;
+}
+
+
+size_t ASTERIXDecodeJob::countTotal() const
+{
+    return count_total_;
 }
 
 size_t ASTERIXDecodeJob::numErrors() const { return num_errors_; }
