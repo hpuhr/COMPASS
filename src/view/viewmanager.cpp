@@ -247,7 +247,7 @@ void ViewManager::setCurrentViewPoint (const ViewableDataConfig* viewable)
 
     emit showViewPointSignal(current_viewable_);
 
-    COMPASS::instance().objectManager().startLoading();
+    COMPASS::instance().objectManager().load();
 }
 
 

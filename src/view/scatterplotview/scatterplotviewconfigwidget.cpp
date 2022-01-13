@@ -197,7 +197,7 @@ void ScatterPlotViewConfigWidget::selectedVariableYChangedSlot()
 
 void ScatterPlotViewConfigWidget::reloadRequestedSlot()
 {
-    COMPASS::instance().objectManager().startLoading();
+    COMPASS::instance().objectManager().load();
 }
 
 void ScatterPlotViewConfigWidget::loadingStartedSlot()

@@ -361,7 +361,7 @@ void DBObjectManager::clearOrderVariable()
     order_variable_name_ = "";
 }
 
-void DBObjectManager::startLoading()
+void DBObjectManager::load()
 {
     logdbg << "DBObjectManager: loadSlot";
 
@@ -374,39 +374,6 @@ void DBObjectManager::startLoading()
     loginf << "DBObjectManager: loadSlot: loading associations";
 
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-
-    QMessageBox* msg_box = new QMessageBox();
-    msg_box->setWindowTitle("Loading Associations");
-    msg_box->setStandardButtons(QMessageBox::NoButton);
-
-    bool shown = false;
-
-    for (auto& object : objects_)
-    {
-        //object.second->clearData();  // clear previous data
-
-        msg_box->setText(("Processing DBObject "+object.first).c_str());
-
-        if (has_associations_ && object.second->loadable() && !object.second->associationsLoaded())
-        {
-            if (!shown)
-            {
-                msg_box->show();
-                shown = true;
-            }
-
-            object.second->loadAssociationsIfRequired();
-
-            while (!object.second->associationsLoaded())
-            {
-                QCoreApplication::processEvents();
-                QThread::msleep(1);
-            }
-        }
-    }
-
-    msg_box->close();
-    delete msg_box;
 
     while (JobManager::instance().hasDBJobs())
     {
@@ -425,7 +392,7 @@ void DBObjectManager::startLoading()
     {
         loginf << "DBObjectManager: loadSlot: object " << object.first
                << " loadable " << object.second->loadable()
-               << " wanted " << object.second->loadingWanted();
+               << " ds type wanted " << object.second->loadingWanted();
 
         if (object.first == "RefTraj")
             continue;

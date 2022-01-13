@@ -10,7 +10,6 @@ target_sources(compass
     PUBLIC
         "${CMAKE_CURRENT_LIST_DIR}/dbobject.h"
         "${CMAKE_CURRENT_LIST_DIR}/dbobjectwidget.h"
-        "${CMAKE_CURRENT_LIST_DIR}/dbobjectinfowidget.h"
         "${CMAKE_CURRENT_LIST_DIR}/dbobjectcombobox.h"
         "${CMAKE_CURRENT_LIST_DIR}/dbobjectmanager.h"
         "${CMAKE_CURRENT_LIST_DIR}/dbobjectmanagerwidget.h"
@@ -23,7 +22,6 @@ target_sources(compass
     PRIVATE
         "${CMAKE_CURRENT_LIST_DIR}/dbobject.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/dbobjectwidget.cpp"
-        "${CMAKE_CURRENT_LIST_DIR}/dbobjectinfowidget.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/dbobjectmanager.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/dbobjectmanagerwidget.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/dbobjectmanagerloadwidget.cpp"

@@ -27,7 +27,6 @@
 #include "dbobject.h"
 #include "dbobjectmanager.h"
 #include "dbobjectmanagerloadwidget.h"
-#include "dbobjectinfowidget.h"
 #include "sector.h"
 #include "metadbovariable.h"
 #include "dbovariable.h"
@@ -225,11 +224,14 @@ void EvaluationManager::loadData ()
     data_.clear();
 
     // set if load for dbos
-    for (auto& obj_it : object_man)
-    {
-        obj_it.second->infoWidget()->setLoad(obj_it.first == dbo_name_ref_
-                                             || obj_it.first == dbo_name_tst_);
-    }
+
+    TODO_ASSERT
+
+//    for (auto& obj_it : object_man)
+//    {
+//        obj_it.second->infoWidget()->setLoad(obj_it.first == dbo_name_ref_
+//                                             || obj_it.first == dbo_name_tst_);
+//    }
 
     // set ref data sources filters
 
@@ -445,7 +447,7 @@ void EvaluationManager::loadData ()
 
     needs_additional_variables_ = true;
 
-    object_man.startLoading();
+    object_man.load();
 
     needs_additional_variables_ = false;
 

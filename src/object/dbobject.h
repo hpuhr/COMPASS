@@ -20,8 +20,6 @@
 
 #include "configurable.h"
 #include "dboassociationcollection.h"
-//#include "dbodatasource.h"
-//#include "dbodatasourcedefinition.h"
 #include "dbovariable.h"
 #include "dbovariableset.h"
 #include "global.h"
@@ -36,7 +34,6 @@ class COMPASS;
 class PropertyList;
 
 class DBObjectWidget;
-class DBObjectInfoWidget;
 class Buffer;
 class Job;
 class DBOReadDBJob;
@@ -53,12 +50,6 @@ class DBObject : public QObject, public Configurable
     Q_OBJECT
 
   signals:
-//    void newDataSignal(DBObject& object);
-//    void loadingDoneSignal(DBObject& object);
-
-//    void insertProgressSignal(float percent);
-//    void insertDoneSignal(DBObject& object);
-
     void updateProgressSignal(float percent);
     void updateDoneSignal(DBObject& object);
 
@@ -73,7 +64,6 @@ class DBObject : public QObject, public Configurable
     void readJobDoneSlot();
     void finalizeReadJobDoneSlot();
 
-    //void insertProgressSlot(float percent);
     void insertDoneSlot();
 
     void updateProgressSlot(float percent);
@@ -112,14 +102,6 @@ class DBObject : public QObject, public Configurable
 
     bool hasVariableDBColumnName(const std::string& name) const;
 
-//    using DBOVariableIterator = typename std::vector<std::unique_ptr<DBOVariable>>::iterator;
-//    DBOVariableIterator begin() { return variables_.begin(); }
-//    DBOVariableIterator end() { return variables_.end(); }
-
-//    using const_DBOVariableIterator = typename std::vector<std::unique_ptr<DBOVariable>>::const_iterator;
-//    const_DBOVariableIterator cbegin() const { return variables_.cbegin(); }
-//    const_DBOVariableIterator cend() const { return variables_.cend(); }
-
     size_t numVariables() const { return variables_.size(); }
 
     const std::string& name() const { return name_; }
@@ -145,7 +127,6 @@ class DBObject : public QObject, public Configurable
               DBOVariable* order_variable, bool use_order_ascending,
               const std::string& limit_str = "");
     void quitLoading();
-    //void clearData();
 
     void insertData(std::shared_ptr<Buffer> buffer);
     void updateData(DBOVariable& key_var, DBOVariableSet& list, std::shared_ptr<Buffer> buffer);
@@ -170,14 +151,13 @@ class DBObject : public QObject, public Configurable
     DBObjectWidget* widget();
     void closeWidget();
 
-    DBObjectInfoWidget* infoWidget();
     DBOLabelDefinitionWidget* labelDefinitionWidget();
 
     //std::shared_ptr<Buffer> data() { return data_; }
 
     bool existsInDB() const;
 
-    // association stuff
+    // association stuff, outdated
     void loadAssociationsIfRequired();  // starts loading job if required
     void loadAssociations();            // actually loads associations, should be called from job
     bool associationsLoaded() const;
@@ -215,13 +195,10 @@ protected:
     std::shared_ptr<InsertBufferDBJob> insert_job_{nullptr};
     std::shared_ptr<UpdateBufferDBJob> update_job_{nullptr};
 
-    //std::shared_ptr<Buffer> data_;
-
     /// Container with all variables (variable identifier -> variable pointer)
     std::vector<std::unique_ptr<DBOVariable>> variables_;
 
     std::unique_ptr<DBObjectWidget> widget_;
-    std::unique_ptr<DBObjectInfoWidget> info_widget_;
 
     bool associations_changed_{false};
     bool associations_loaded_{false};

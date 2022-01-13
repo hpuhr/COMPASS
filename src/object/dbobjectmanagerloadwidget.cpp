@@ -18,7 +18,6 @@
 #include "dbobjectmanagerloadwidget.h"
 #include "compass.h"
 #include "dbobject.h"
-#include "dbobjectinfowidget.h"
 #include "dbobjectmanager.h"
 #include "dbovariable.h"
 #include "dbovariableselectionwidget.h"

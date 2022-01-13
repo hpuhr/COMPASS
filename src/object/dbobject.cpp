@@ -20,7 +20,6 @@
 #include "compass.h"
 #include "buffer.h"
 #include "dbinterface.h"
-#include "dbobjectinfowidget.h"
 #include "dbobjectmanager.h"
 #include "dbobjectwidget.h"
 #include "dbolabeldefinition.h"
@@ -276,55 +275,11 @@ DBObjectWidget* DBObject::widget()
 
 void DBObject::closeWidget() { widget_ = nullptr; }
 
-DBObjectInfoWidget* DBObject::infoWidget()
-{
-    if (!info_widget_)
-    {
-        info_widget_.reset(new DBObjectInfoWidget(*this));
-        assert(info_widget_);
-    }
-
-    return info_widget_.get();  // needed for qt integration, not pretty
-}
-
 DBOLabelDefinitionWidget* DBObject::labelDefinitionWidget()
 {
     assert(label_definition_);
     return label_definition_->widget();
 }
-
-//void DBObject::schemaChangedSlot()
-//{
-//    loginf << "DBObject: schemaChangedSlot";
-
-//    if (compass_.schemaManager().hasCurrentSchema())
-//    {
-//        DBSchema& schema = compass_.schemaManager().getCurrentSchema();
-
-//        if (!hasMetaTable(schema.name()))
-//        {
-//            logwrn << "DBObject: schemaChangedSlot: object " << name_
-//                   << " has not main meta table for current schema";
-//            current_meta_table_ = nullptr;
-//            associations_table_name_ = "";
-
-//            return;
-//        }
-
-//        string meta_table_name = meta_table_definitions_.at(schema.name()).metaTable();
-//        assert(schema.hasMetaTable(meta_table_name));
-//        current_meta_table_ = &schema.metaTable(meta_table_name);
-
-//        associations_table_name_ = current_meta_table_->mainTableName() + "_assoc";
-//    }
-//    else
-//    {
-//        current_meta_table_ = nullptr;
-//        associations_table_name_ = "";
-//    }
-
-//    updateToDatabaseContent();
-//}
 
 void DBObject::loadingWanted(bool wanted)
 {
@@ -332,8 +287,6 @@ void DBObject::loadingWanted(bool wanted)
     {
         loading_wanted_ = wanted;
 
-        if (info_widget_)
-            info_widget_->updateSlot();
     }
 }
 
@@ -392,9 +345,6 @@ void DBObject::load(DBOVariableSet& read_set, string custom_filter_clause,
     connect(read_job_.get(), &DBOReadDBJob::doneSignal,
             this, &DBObject::readJobDoneSlot, Qt::QueuedConnection);
 
-    if (info_widget_)
-        info_widget_->updateSlot();
-
     JobManager::instance().addDBJob(read_job_);
 }
 
@@ -405,19 +355,6 @@ void DBObject::quitLoading()
         read_job_->setObsolete();
     }
 }
-
-//void DBObject::clearData()
-//{
-//    logdbg << "DBObject " << name_ << ": clearData";
-
-//    if (data_)
-//    {
-//        data_ = nullptr;
-
-//        if (info_widget_)
-//            info_widget_->updateSlot();
-//    }
-//}
 
 void DBObject::insertData(shared_ptr<Buffer> buffer)
 {
@@ -445,8 +382,6 @@ void DBObject::insertData(shared_ptr<Buffer> buffer)
 
     connect(insert_job_.get(), &InsertBufferDBJob::doneSignal, this, &DBObject::insertDoneSlot,
             Qt::QueuedConnection);
-//    connect(insert_job_.get(), &InsertBufferDBJob::insertProgressSignal, this,
-//            &DBObject::insertProgressSlot, Qt::QueuedConnection);
 
     JobManager::instance().addDBJob(insert_job_);
 
@@ -479,15 +414,11 @@ void DBObject::doDataSourcesBeforeInsert (shared_ptr<Buffer> buffer)
 }
 
 
-//void DBObject::insertProgressSlot(float percent) { emit insertProgressSignal(percent); }
-
 void DBObject::insertDoneSlot()
 {
     logdbg << "DBObject " << name_ << ": insertDoneSlot";
 
     assert(insert_job_);
-
-    //std::shared_ptr<Buffer> buffer = insert_job_->buffer(); // buffer properties match db column names
 
     insert_job_ = nullptr;
     insert_active_ = false;
@@ -499,9 +430,6 @@ void DBObject::insertDoneSlot()
     //dbo_manager_.databaseContentChangedSlot();
 
     assert (existsInDB()); // check
-
-    if (info_widget_)
-        info_widget_->updateSlot();
 }
 
 void DBObject::updateData(DBOVariable& key_var, DBOVariableSet& list, shared_ptr<Buffer> buffer)
@@ -542,8 +470,6 @@ map<unsigned int, string> DBObject::loadLabelData(vector<unsigned int> rec_nums,
     assert (dbo_manager_.metaVariable(DBObject::meta_var_rec_num_id_.name()).existsIn(name_));
 
     DBOVariable& rec_num_var = dbo_manager_.metaVariable(DBObject::meta_var_rec_num_id_.name()).getFor(name_);
-
-    // TODO rework to key variable
 
     custom_filter_clause = rec_num_var.dbColumnName() + " in (";
     for (auto& rec_num : rec_nums)
@@ -621,8 +547,6 @@ void DBObject::readJobIntermediateSlot(shared_ptr<Buffer> buffer)
 
     JobManager::instance().addBlockingJob(job_ptr);
 
-    if (info_widget_)
-        info_widget_->updateSlot();
 }
 
 void DBObject::readJobObsoleteSlot()
@@ -636,9 +560,6 @@ void DBObject::readJobDoneSlot()
 {
     logdbg << "DBObject: " << name_ << " readJobDoneSlot";
     read_job_ = nullptr;
-
-    if (info_widget_)
-        info_widget_->updateSlot();
 
     if (!isLoading()) // also no more finalize jobs
     {
@@ -674,36 +595,7 @@ void DBObject::finalizeReadJobDoneSlot()
     }
     assert(found);
 
-//    if (!data_)
-//        data_ = buffer;
-//    else
-//        data_->seizeBuffer(*buffer.get());
-
-//    logdbg << "DBObject: " << name_ << " finalizeReadJobDoneSlot: got buffer with size "
-//           << data_->size();
-
-//    if (info_widget_)
-//        info_widget_->updateSlot();
-
-    // read job or finalize jobs exist
-
-    // check if other is still loading
-//    if (dbo_manager_.isOtherDBObjectPostProcessing(*this))
-//    {
-//        loginf << "DBObject: " << name_
-//               << " finalizeReadJobDoneSlot: delaying new data since other is loading";
-//        return;
-//    }
-
-    // check if more data can immediately loaded from read job
-//    if (read_job_)
-//    {
-//        loginf << "DBObject: " << name_
-//               << " finalizeReadJobDoneSlot: delaying new data since more data can be read";
-//        return;
-//    }
-
-    // exact data from read job or finalize jobs still active
+    // add loaded data
     dbo_manager_.addLoadedData({{name_, buffer}});
 
     if (!isLoading())  // is last one
@@ -728,12 +620,6 @@ void DBObject::databaseOpenedSlot()
 
     logdbg << "DBObject: " << name_ << " databaseOpenedSlot: table " << db_table_name_
            << " count " << count_;
-
-    if (info_widget_)
-        info_widget_->updateSlot();
-
-    loginf << "DBObject: " << name_ << " databaseOpenedSlot: done, loadable " << is_loadable_
-           << " count " << count_;
 }
 
 void DBObject::databaseClosedSlot()
@@ -742,10 +628,6 @@ void DBObject::databaseClosedSlot()
 
     is_loadable_ = false;
     count_ = 0;
-
-    if (info_widget_)
-        info_widget_->updateSlot();
-
 }
 
 string DBObject::dbTableName() const

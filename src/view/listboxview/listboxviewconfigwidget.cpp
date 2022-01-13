@@ -421,7 +421,7 @@ void ListBoxViewConfigWidget::reloadRequestedSlot()
 {
     assert(reload_needed_);
 
-    COMPASS::instance().objectManager().startLoading();
+    COMPASS::instance().objectManager().load();
     reload_needed_ = false;
 
     updateUpdateButton();

@@ -878,7 +878,7 @@ void MainWindow::performAutomaticTasks ()
 
         DBObjectManager& obj_man = COMPASS::instance().objectManager();
 
-        obj_man.startLoading();
+        obj_man.load();
 
         while (obj_man.loadInProgress())
         {
@@ -1265,7 +1265,7 @@ void MainWindow::loadButtonSlot()
     loading_ = true;
     load_button_->setText("Stop");
 
-    COMPASS::instance().objectManager().startLoading();
+    COMPASS::instance().objectManager().load();
 }
 
 void MainWindow::loadingDoneSlot()

@@ -256,7 +256,7 @@ void HistogramViewConfigWidget::setStatus (const std::string& status, bool visib
 
 void HistogramViewConfigWidget::reloadRequestedSlot()
 {
-    COMPASS::instance().objectManager().startLoading();
+    COMPASS::instance().objectManager().load();
 }
 
 void HistogramViewConfigWidget::loadingStartedSlot()
