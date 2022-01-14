@@ -272,11 +272,13 @@ void FilterEditWidget::updateConditionsGrid()
         conditions_delete_buttons_[del] = (*it);
         conditions_grid_->addWidget(del, row, 0);
 
-        DBOVariableSelectionWidget* var_select = new DBOVariableSelectionWidget(true);
-        var_select->selectedVariable(*(*it)->getVariable());
-        conditions_grid_->addWidget(var_select, row, 1);
-        connect(var_select, SIGNAL(selectionChanged()), this, SLOT(changedConditionVariable()));
-        conditions_variable_selects_[var_select] = (*it);
+        TODO_ASSERT
+
+//        DBOVariableSelectionWidget* var_select = new DBOVariableSelectionWidget(true);
+//        var_select->selectedVariable(*(*it)->getVariable());
+//        conditions_grid_->addWidget(var_select, row, 1);
+//        connect(var_select, SIGNAL(selectionChanged()), this, SLOT(changedConditionVariable()));
+//        conditions_variable_selects_[var_select] = (*it);
 
         QCheckBox* absolute = new QCheckBox();
         absolute->setChecked((*it)->getAbsoluteValue());
@@ -334,9 +336,11 @@ void FilterEditWidget::changedName()
 
 void FilterEditWidget::changedConditionVariable()
 {
-    DBOVariableSelectionWidget* source = (DBOVariableSelectionWidget*)sender();
-    assert(conditions_variable_selects_.find(source) != conditions_variable_selects_.end());
-    conditions_variable_selects_[source]->setVariable(&source->selectedVariable());
+//    DBOVariableSelectionWidget* source = (DBOVariableSelectionWidget*)sender();
+//    assert(conditions_variable_selects_.find(source) != conditions_variable_selects_.end());
+//    conditions_variable_selects_[source]->setVariable(&source->selectedVariable());
+
+    TODO_ASSERT
 }
 
 void FilterEditWidget::changedABS()

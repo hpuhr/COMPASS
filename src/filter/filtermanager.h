@@ -89,8 +89,6 @@ public:
     void setConfigInViewPoint (nlohmann::json& data);
     void disableAllFilters ();
 
-    DataSourcesFilter* getDataSourcesFilter (const std::string& dbo_name);
-
 protected:
     /// Database definition, resets if changed
     std::string db_id_;

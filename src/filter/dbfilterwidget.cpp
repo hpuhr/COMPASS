@@ -102,8 +102,8 @@ DBFilterWidget::DBFilterWidget(const std::string& class_id, const std::string& i
     main_layout->addWidget(child_);
     setLayout(main_layout);
 
-    connect(this, SIGNAL(deleteFilterSignal(DBFilter*)), &COMPASS::instance().filterManager(),
-            SLOT(deleteFilterSlot(DBFilter*)), Qt::QueuedConnection);
+//    connect(this, SIGNAL(deleteFilterSignal(DBFilter*)), &COMPASS::instance().filterManager(),
+//            SLOT(deleteFilterSlot(DBFilter*)), Qt::QueuedConnection);
     createMenu();
 
     update();

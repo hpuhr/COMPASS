@@ -38,9 +38,6 @@
 using namespace Utils;
 using namespace std;
 
-/**
- * Initializes members, registers parameters, create GUI elements.
- */
 DBFilterCondition::DBFilterCondition(const std::string& class_id, const std::string& instance_id,
                                      DBFilter* filter_parent)
     : Configurable(class_id, instance_id, filter_parent), filter_parent_(filter_parent)
@@ -48,43 +45,20 @@ DBFilterCondition::DBFilterCondition(const std::string& class_id, const std::str
     registerParameter("operator", &operator_, ">");
     registerParameter("op_and", &op_and_, true);
     registerParameter("absolute_value", &absolute_value_, false);
+
     registerParameter("variable_dbo_name", &variable_dbo_name_, "");
     registerParameter("variable_name", &variable_name_, "");
-    //registerParameter("variable_name", &variable_name_, "");
+
     registerParameter("display_instance_id", &display_instance_id_, false);
 
     // DBOVAR LOWERCASE HACK
     // boost::algorithm::to_lower(variable_name_);
 
-    if (variable_dbo_name_ == META_OBJECT_NAME)
-    {
-        if (!COMPASS::instance().objectManager().existsMetaVariable(variable_name_))
-            throw std::runtime_error("DBFilterCondition: constructor: meta dbo variable '" +
-                                     variable_name_ + "' does not exist");
-        meta_variable_ = &COMPASS::instance().objectManager().metaVariable(variable_name_);
-        assert(meta_variable_);
-    }
-    else
-    {
-        if (!COMPASS::instance().objectManager().existsObject(variable_dbo_name_) ||
-                !COMPASS::instance()
-                .objectManager()
-                .object(variable_dbo_name_)
-                .hasVariable(variable_name_))
-            throw std::runtime_error("DBFilterCondition: constructor: dbo variable '" +
-                                     variable_name_ + "' does not exist");
-
-        variable_ =
-                &COMPASS::instance().objectManager().object(variable_dbo_name_).variable(variable_name_);
-
-        assert(variable_);
-    }
-
     registerParameter("reset_value", &reset_value_, std::string(""));
     registerParameter("value", &value_, "");
 
-    if (usable_)
-        value_invalid_ = checkValueInvalid(value_);
+//    if (usable_)
+//        value_invalid_ = checkValueInvalid(value_);
 
     loginf << "DBFilterCondition: DBFilterCondition: " << instance_id << " value " << value_
            << " usable " << usable_ << " invalid " << value_invalid_;
@@ -126,10 +100,7 @@ bool DBFilterCondition::filters(const std::string& dbo_name)
 {
     assert(usable_);
 
-    if (meta_variable_)
-        return meta_variable_->existsIn(dbo_name);
-    else
-        return variable_dbo_name_ == dbo_name;
+    return hasVariable(dbo_name);
 }
 
 std::string DBFilterCondition::getConditionString(const std::string& dbo_name, bool& first,
@@ -149,22 +120,13 @@ std::string DBFilterCondition::getConditionString(const std::string& dbo_name, b
         variable_suffix = variable_suffix + ")";
     }
 
-    assert(variable_ || meta_variable_);
+    assert (hasVariable(dbo_name));
 
-    DBOVariable* variable = nullptr;
+    DBOVariable& var {variable(dbo_name)};
 
-    if (meta_variable_)
-    {
-        assert(meta_variable_->existsIn(dbo_name));
-
-        variable = &meta_variable_->getFor(dbo_name);
-    }
-    else
-        variable = variable_;
-
-    //const DBTableColumn& column = variable->currentDBColumn();
-    std::string db_column_name = variable->dbColumnName();
-    std::string db_table_name = variable->dbTableName();
+    //const DBTableColumn& column = var.currentDBColumn();
+    std::string db_column_name = var.dbColumnName();
+    std::string db_table_name = var.dbTableName();
 
     if (!first)
     {
@@ -178,7 +140,7 @@ std::string DBFilterCondition::getConditionString(const std::string& dbo_name, b
     string val_str;
     bool null_contained;
 
-    tie(val_str, null_contained) = getTransformedValue(value_, variable);
+    tie(val_str, null_contained) = getTransformedValue(value_, &var);
 
     if (null_contained)
     {
@@ -201,9 +163,9 @@ std::string DBFilterCondition::getConditionString(const std::string& dbo_name, b
         ss << " " << operator_ << val_str;
     }
 
-    if (find(filtered_variables.begin(), filtered_variables.end(), variable) ==
+    if (find(filtered_variables.begin(), filtered_variables.end(), &var) ==
             filtered_variables.end())
-        filtered_variables.push_back(variable);
+        filtered_variables.push_back(&var);
 
     if (ss.str().size())
         loginf << "DBFilterCondition " << instanceId() << ": getConditionString: '" << ss.str()
@@ -247,24 +209,62 @@ void DBFilterCondition::valueChanged()
                     " rgb(200, 200, 200); }");
 }
 
-/**
- * Sets the variable if required, sets the variable_name_ and calls reset.
- */
-void DBFilterCondition::setVariable(DBOVariable* variable)
+std::string DBFilterCondition::getVariableName() const
 {
-    if (variable != variable_)
+    return variable_name_;
+}
+
+void DBFilterCondition::setVariableName(const std::string& variable_name)
+{
+    loginf << "DBFilterCondition: setVariableName: name '" << variable_name << "'";
+
+    if (variable_name != variable_name_)
     {
-        variable_ = variable;
-        variable_name_ = variable_->name();
+        variable_name_ = variable_name;
 
         reset();
     }
 }
 
+bool DBFilterCondition::hasVariable (const std::string& dbo_name)
+{
+    DBObjectManager& dbo_man = COMPASS::instance().objectManager();
+
+    if (variable_dbo_name_ == META_OBJECT_NAME)
+    {
+        if (!dbo_man.existsMetaVariable(variable_name_))
+            return false;
+
+        return dbo_man.metaVariable(variable_name_).existsIn(dbo_name);
+    }
+    else
+    {
+        if (dbo_name != variable_dbo_name_)
+            return false;
+
+        if (!dbo_man.existsObject(variable_dbo_name_))
+            return false;
+
+        return dbo_man.object(variable_dbo_name_).hasVariable(variable_name_);
+    }
+}
+
+
+DBOVariable& DBFilterCondition::variable (const std::string& dbo_name)
+{
+    assert (hasVariable(dbo_name));
+
+    DBObjectManager& dbo_man = COMPASS::instance().objectManager();
+
+    if (variable_dbo_name_ == META_OBJECT_NAME)
+        return dbo_man.metaVariable(variable_name_).getFor(dbo_name);
+    else
+         return dbo_man.object(variable_dbo_name_).variable(variable_name_);
+}
+
+
 void DBFilterCondition::update()
 {
-    assert(variable_ || meta_variable_);
-
     if (display_instance_id_)
         label_->setText(tr((instanceId() + " " + operator_).c_str()));
     else
@@ -335,7 +335,6 @@ bool DBFilterCondition::getDisplayInstanceId() const
 
 bool DBFilterCondition::checkValueInvalid(const std::string& new_value)
 {
-    assert(variable_ || meta_variable_);
     assert(usable_);
 
     std::vector<DBOVariable*> variables;
@@ -346,13 +345,20 @@ bool DBFilterCondition::checkValueInvalid(const std::string& new_value)
         return true;
     }
 
-    if (meta_variable_)
+    if (variable_dbo_name_ == META_OBJECT_NAME)
     {
-        for (auto var_it : meta_variable_->variables())
+         DBObjectManager& dbo_man = COMPASS::instance().objectManager();
+
+        assert (dbo_man.existsMetaVariable(variable_name_));
+
+        for (auto var_it : dbo_man.metaVariable(variable_name_).variables())
             variables.push_back(&var_it.second);
     }
     else
-        variables.push_back(variable_);
+    {
+        assert (hasVariable(variable_dbo_name_));
+        variables.push_back(&variable(variable_dbo_name_));
+    }
 
     bool invalid = true;
 
@@ -376,6 +382,7 @@ bool DBFilterCondition::checkValueInvalid(const std::string& new_value)
     {
         logdbg << "DBFilterCondition: checkValueInvalid: exception thrown";
     }
+
     return invalid;
 }
 
@@ -425,7 +432,7 @@ std::pair<std::string, bool> DBFilterCondition::getTransformedValue(const std::s
 //        else if (column.dataFormat() == "octal")
 //            value_str = String::octStringFromInt(std::stoi(value_str));
 //        else
-//            logwrn << "DBFilterCondition: getTransformedValue: variable '" << variable->name()
+//            logwrn << "DBFilterCondition: getTransformedValue: variable '" << var.name()
 //                   << "' unknown format '" << column.dataFormat() << "'";
 
 //        logdbg << "DBFilterCondition: getTransformedValue: data format transformed value string "

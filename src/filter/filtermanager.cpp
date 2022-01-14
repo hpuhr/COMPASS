@@ -19,7 +19,6 @@
 
 #include "compass.h"
 #include "configurationmanager.h"
-#include "datasourcesfilter.h"
 #include "sqliteconnection.h"
 #include "dbfilter.h"
 #include "dbinterface.h"
@@ -46,6 +45,8 @@ FilterManager::FilterManager(const std::string& class_id, const std::string& ins
 
     registerParameter("use_filters", &use_filters_, false);
     registerParameter("db_id", &db_id_, "");
+
+    createSubConfigurables();
 }
 
 FilterManager::~FilterManager()
@@ -121,45 +122,6 @@ void FilterManager::generateSubConfigurable(const std::string& class_id,
         else
             filters_.push_back(filter);
     }
-    else if (class_id == "DataSourcesFilter")
-    {
-        try
-        {
-            if (hasSubConfigurable(class_id, instance_id))
-            {
-                logerr << "FilterManager: generateSubConfigurable: data sources filter "
-                       << instance_id << " already present";
-                return;
-            }
-            std::string dbo_name = configuration()
-                    .getSubConfiguration(class_id, instance_id)
-                    .getParameterConfigValueString("dbo_name");
-
-            if (!checkDBObject(dbo_name))
-            {
-                loginf << "FilterManager: generateSubConfigurable: disabling data sources filter "
-                       << instance_id << " for failed check dbobject '" << dbo_name << "'";
-                return;
-            }
-
-            DataSourcesFilter* filter = new DataSourcesFilter(class_id, instance_id, this);
-            if (filter->disabled())
-            {
-                loginf << "FilterManager: generateSubConfigurable: deleting disabled data source "
-                          "filter for object "
-                       << filter->dbObjectName();
-                delete filter;
-            }
-            else
-                filters_.push_back(filter);
-        }
-        catch (const std::exception& e)
-        {
-            loginf << "FilterManager: generateSubConfigurable: data source filter exception '"
-                   << e.what() << "', deleting";
-            configuration().removeSubConfiguration(class_id, instance_id);
-        }
-    }
     else if (class_id == "UTNFilter")
     {
         try
@@ -217,92 +179,36 @@ bool FilterManager::checkDBObject (const std::string& dbo_name)
 
     DBObject& object = COMPASS::instance().objectManager().object(dbo_name);
 
-    TODO_ASSERT
-
-//    if (!object.hasCurrentDataSourceDefinition())
-//    {
-//        loginf << "FilterManager: checkDBObject: failed because of missing data source definition in '"
-//               << dbo_name << "'";
-//        return false;
-//    }
-
-//    if (!object.hasDataSources())
-//    {
-//        loginf << "FilterManager: checkDBObject: failed because of missing data sources";
-//        return false;
-//    }
-
-//    if (!object.existsInDB())
-//    {
-//        loginf << "FilterManager: checkDBObject: failed because of empty dbobject '" << dbo_name << "'";
-//        return false;
-//    }
+    if (!object.existsInDB())
+    {
+        loginf << "FilterManager: checkDBObject: failed because of empty dbobject '" << dbo_name << "'";
+        return false;
+    }
 
     return true;
 }
 
 void FilterManager::checkSubConfigurables()
 {
-    // watch those sensors
-    for (auto& obj_it : COMPASS::instance().objectManager())
-    {
-        TODO_ASSERT
-
-        // !obj_it.second->hasCurrentDataSourceDefinition() ||
-//        if (!obj_it.second->hasDataSources() || !obj_it.second->existsInDB())
-//            continue;
-
-        bool exists = false;
-        for (auto fil_it : filters_)
-        {
-            DataSourcesFilter* sensor_filter = dynamic_cast<DataSourcesFilter*>(fil_it);
-            if (sensor_filter && sensor_filter->dbObjectName() == obj_it.first)
-            {
-                exists = true;
-                break;
-            }
-        }
-
-        if (exists)
-            continue;
-
-        loginf << "FilterManager: checkSubConfigurables: generating sensor filter for "
-               << obj_it.first;
-
-        std::string instance_id = obj_it.second->name() + " Data Sources";
-
-        if (configuration().hasSubConfiguration("DataSourcesFilter", instance_id))
-        {
-            loginf << "FilterManager: checkSubConfigurables: unable to create sensor filter for "
-                   << obj_it.first << " with instance_id " << instance_id;
-            continue;
-        }
-        Configuration& ds_filter_configuration =
-                addNewSubConfiguration("DataSourcesFilter", instance_id);
-
-        ds_filter_configuration.addParameterString("dbo_name", obj_it.first);
-        generateSubConfigurable("DataSourcesFilter", instance_id);
-    }
-
     // check for UTN filter
 
-    string classid = "UTNFilter";
+//    string classid = "UTNFilter";
 
-    if (std::find_if(filters_.begin(), filters_.end(),
-                     [&classid](const DBFilter* x) { return x->classId() == classid;}) == filters_.end())
-    { // not UTN filter
-        addNewSubConfiguration(classid, classid+"0");
-        generateSubConfigurable(classid, classid+"0");
-    }
+//    if (std::find_if(filters_.begin(), filters_.end(),
+//                     [&classid](const DBFilter* x) { return x->classId() == classid;}) == filters_.end())
+//    { // not UTN filter
+//        addNewSubConfiguration(classid, classid+"0");
+//        generateSubConfigurable(classid, classid+"0");
+//    }
 
-    classid = "ADSBQualityFilter";
+//    classid = "ADSBQualityFilter";
 
-    if (std::find_if(filters_.begin(), filters_.end(),
-                     [&classid](const DBFilter* x) { return x->classId() == classid;}) == filters_.end())
-    { // not UTN filter
-        addNewSubConfiguration(classid, classid+"0");
-        generateSubConfigurable(classid, classid+"0");
-    }
+//    if (std::find_if(filters_.begin(), filters_.end(),
+//                     [&classid](const DBFilter* x) { return x->classId() == classid;}) == filters_.end())
+//    { // not UTN filter
+//        addNewSubConfiguration(classid, classid+"0");
+//        generateSubConfigurable(classid, classid+"0");
+//    }
 }
 
 std::string FilterManager::getSQLCondition(const std::string& dbo_name,
@@ -521,16 +427,3 @@ void FilterManager::disableAllFilters ()
             fil_it->setActive(false);
 }
 
-DataSourcesFilter* FilterManager::getDataSourcesFilter (const std::string& dbo_name)
-{
-    for (auto fil_it : filters_)
-    {
-        DataSourcesFilter* ds_fil = dynamic_cast<DataSourcesFilter*>(fil_it);
-
-        if (ds_fil && ds_fil->dbObjectName() == dbo_name)
-            return ds_fil;
-    }
-
-    logerr << "FilterManager: getDataSourcesFilter: data source filter not found for " << dbo_name;
-    throw std::runtime_error ("FilterManager: getDataSourcesFilter: data source filter not found for " + dbo_name);
-}

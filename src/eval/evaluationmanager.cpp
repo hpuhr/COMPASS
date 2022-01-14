@@ -32,8 +32,7 @@
 #include "dbovariable.h"
 #include "buffer.h"
 #include "filtermanager.h"
-#include "datasourcesfilter.h"
-#include "datasourcesfilterwidget.h"
+#include "dbfilter.h"
 #include "viewabledataconfig.h"
 #include "viewmanager.h"
 #include "stringconv.h"
@@ -238,48 +237,48 @@ void EvaluationManager::loadData ()
 
     fil_man.disableAllFilters();
 
-    if (dbo_name_ref_ != dbo_name_tst_)
-    {
-        {
-            DataSourcesFilter* ref_filter = fil_man.getDataSourcesFilter(dbo_name_ref_);
-            ref_filter->setActive(true);
+//    if (dbo_name_ref_ != dbo_name_tst_)
+//    {
+//        {
+//            DataSourcesFilter* ref_filter = fil_man.getDataSourcesFilter(dbo_name_ref_);
+//            ref_filter->setActive(true);
 
-            for (auto& fil_ds_it : ref_filter->dataSources())
-            {
-                assert (data_sources_ref_.count(fil_ds_it.first));
-                fil_ds_it.second.setActive(data_sources_ref_.at(fil_ds_it.first).isActive());
-            }
+//            for (auto& fil_ds_it : ref_filter->dataSources())
+//            {
+//                assert (data_sources_ref_.count(fil_ds_it.first));
+//                fil_ds_it.second.setActive(data_sources_ref_.at(fil_ds_it.first).isActive());
+//            }
 
-            ref_filter->widget()->update();
-        }
+//            ref_filter->widget()->update();
+//        }
 
-        {
-            DataSourcesFilter* tst_filter = fil_man.getDataSourcesFilter(dbo_name_tst_);
-            tst_filter->setActive(true);
+//        {
+//            DataSourcesFilter* tst_filter = fil_man.getDataSourcesFilter(dbo_name_tst_);
+//            tst_filter->setActive(true);
 
-            for (auto& fil_ds_it : tst_filter->dataSources())
-            {
-                assert (data_sources_tst_.count(fil_ds_it.first));
-                fil_ds_it.second.setActive(data_sources_tst_.at(fil_ds_it.first).isActive());
-            }
+//            for (auto& fil_ds_it : tst_filter->dataSources())
+//            {
+//                assert (data_sources_tst_.count(fil_ds_it.first));
+//                fil_ds_it.second.setActive(data_sources_tst_.at(fil_ds_it.first).isActive());
+//            }
 
-            tst_filter->widget()->update();
-        }
-    }
-    else // same ref / tst dbo
-    {
-        DataSourcesFilter* filter = fil_man.getDataSourcesFilter(dbo_name_ref_);
-        filter->setActive(true);
+//            tst_filter->widget()->update();
+//        }
+//    }
+//    else // same ref / tst dbo
+//    {
+//        DataSourcesFilter* filter = fil_man.getDataSourcesFilter(dbo_name_ref_);
+//        filter->setActive(true);
 
-        for (auto& fil_ds_it : filter->dataSources())
-        {
-            assert (data_sources_tst_.count(fil_ds_it.first));
-            fil_ds_it.second.setActive(data_sources_ref_.at(fil_ds_it.first).isActive()
-                                       || data_sources_tst_.at(fil_ds_it.first).isActive());
-        }
+//        for (auto& fil_ds_it : filter->dataSources())
+//        {
+//            assert (data_sources_tst_.count(fil_ds_it.first));
+//            fil_ds_it.second.setActive(data_sources_ref_.at(fil_ds_it.first).isActive()
+//                                       || data_sources_tst_.at(fil_ds_it.first).isActive());
+//        }
 
-        filter->widget()->update();
-    }
+//        filter->widget()->update();
+//    }
 
     // position data
     if (load_only_sector_data_ && hasCurrentStandard())
