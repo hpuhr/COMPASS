@@ -100,9 +100,9 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
     po::options_description desc("Allowed options");
     desc.add_options()("help", "produce help message")
             ("reset,r", po::bool_switch(&config_and_data_copy_wanted_) ,"reset user configuration and data")
-            ("create_new_sqlite3_db", po::value<std::string>(&create_new_sqlite3_db_filename_),
+            ("create_db", po::value<std::string>(&create_new_sqlite3_db_filename_),
              "creates and opens new SQLite3 database with given filename, e.g. '/data/file1.db'")
-            ("open_sqlite3_db", po::value<std::string>(&open_sqlite3_db_filename_),
+            ("open_db", po::value<std::string>(&open_sqlite3_db_filename_),
              "opens existing SQLite3 database with given filename, e.g. '/data/file1.db'")
 //            ("import_view_points", po::value<std::string>(&import_view_points_filename),
 //             "imports view points JSON file with given filename, e.g. '/data/file1.json'")
