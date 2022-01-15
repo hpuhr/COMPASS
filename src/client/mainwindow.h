@@ -33,7 +33,7 @@ class QAction;
 
 class DBSelectionWidget;
 class DBSchemaManagerWidget;
-class DBObjectManagerWidget;
+class DBContentManagerWidget;
 class MainLoadWidget;
 
 class MainWindow : public QMainWindow

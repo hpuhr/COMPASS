@@ -14,7 +14,7 @@
 
 using namespace std;
 
-MetaDBOVariableConfigurationDialog::MetaDBOVariableConfigurationDialog(DBObjectManager& dbo_man)
+MetaDBOVariableConfigurationDialog::MetaDBOVariableConfigurationDialog(DBContentManager& dbo_man)
     : QDialog(), dbo_man_(dbo_man)
 {
 

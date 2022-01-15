@@ -21,9 +21,9 @@
 #include <QWidget>
 #include <map>
 
-class DBObject;
-class DBObjectWidget;
-class DBObjectManager;
+class DBContent;
+class DBContentWidget;
+class DBContentManager;
 class MetaDBOVariable;
 class MetaDBOVariableWidget;
 class QGridLayout;
@@ -35,7 +35,7 @@ class QComboBox;
 /**
  * @brief Shows all DBObjects, allows editing and adding new ones
  */
-class DBObjectManagerWidget : public QWidget
+class DBContentManagerWidget: public QWidget
 {
     Q_OBJECT
 
@@ -62,15 +62,15 @@ class DBObjectManagerWidget : public QWidget
 
   public:
     /// @brief Constructor
-    DBObjectManagerWidget(DBObjectManager& object_manager);
+    DBContentManagerWidget(DBContentManager& object_manager);
     /// @brief Destructor
-    virtual ~DBObjectManagerWidget();
+    virtual ~DBContentManagerWidget();
 
     //    void lock ();
     //    void unlock ();
 
   private:
-    DBObjectManager& object_manager_;
+    DBContentManager& object_manager_;
 
     /// Grid with all DBObjects
     QGridLayout* dbobjects_grid_{nullptr};
@@ -84,12 +84,12 @@ class DBObjectManagerWidget : public QWidget
     QPushButton* add_metavar_button_{nullptr};
 
     /// Container with DBO edit buttons
-    std::map<QPushButton*, DBObject*> edit_dbo_buttons_;
+    std::map<QPushButton*, DBContent*> edit_dbo_buttons_;
     /// Container with DBO edit buttons
-    std::map<QPushButton*, DBObject*> delete_dbo_buttons_;
+    std::map<QPushButton*, DBContent*> delete_dbo_buttons_;
 
     /// Container with already existing edit DBO widgets
-    std::map<DBObject*, DBObjectWidget*> edit_dbo_widgets_;
+    std::map<DBContent*, DBContentWidget*> edit_dbo_widgets_;
 
     std::map<QPushButton*, MetaDBOVariable*> edit_meta_buttons_;
     /// Container with DBO edit buttons

@@ -257,7 +257,7 @@ bool RadarPlotPositionCalculatorTask::isRecommended()
 
 bool RadarPlotPositionCalculatorTask::isRequired() { return false; }
 
-void RadarPlotPositionCalculatorTask::checkAndSetVariable(std::string& name_str, DBOVariable** var)
+void RadarPlotPositionCalculatorTask::checkAndSetVariable(std::string& name_str, DBContentVariable** var)
 {
     // TODO rework to only asserting, check must be done before
     if (db_object_)
@@ -293,7 +293,7 @@ bool RadarPlotPositionCalculatorTask::canRun()
     if (!COMPASS::instance().objectManager().existsObject(db_object_str_))
         return false;
 
-    DBObject& object = COMPASS::instance().objectManager().object(db_object_str_);
+    DBContent& object = COMPASS::instance().objectManager().object(db_object_str_);
 
     if (!object.loadable())
         return false;
@@ -325,7 +325,7 @@ void RadarPlotPositionCalculatorTask::run()
 
     start_time_ = boost::posix_time::microsec_clock::local_time();
 
-    DBObjectManager& obj_man = COMPASS::instance().objectManager();
+    DBContentManager& obj_man = COMPASS::instance().objectManager();
 
     calculating_ = true;
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
@@ -373,7 +373,7 @@ void RadarPlotPositionCalculatorTask::run()
     assert(latitude_var_);
     assert(longitude_var_);
 
-    DBOVariableSet read_set;
+    DBContentVariableSet read_set;
     read_set.add(*key_var_);
     read_set.add(*datasource_var_);
     read_set.add(*range_var_);
@@ -392,7 +392,7 @@ void RadarPlotPositionCalculatorTask::run()
 //    db_object_->load(read_set, false, false, nullptr, false);  //"0,100000"
 }
 
-void RadarPlotPositionCalculatorTask::newDataSlot(DBObject& object)
+void RadarPlotPositionCalculatorTask::newDataSlot(DBContent& object)
 {
     if (target_report_count_ != 0)
     {
@@ -408,7 +408,7 @@ void RadarPlotPositionCalculatorTask::newDataSlot(DBObject& object)
     }
 }
 
-void RadarPlotPositionCalculatorTask::loadingDoneSlot(DBObject& object)
+void RadarPlotPositionCalculatorTask::loadingDoneSlot(DBContent& object)
 {
     loginf << "RadarPlotPositionCalculatorTask: loadingDoneSlot: starting calculation";
 
@@ -743,13 +743,13 @@ void RadarPlotPositionCalculatorTask::updateProgressSlot(float percent)
     msg_box_->setText(msg.c_str());
 }
 
-void RadarPlotPositionCalculatorTask::updateDoneSlot(DBObject& object)
+void RadarPlotPositionCalculatorTask::updateDoneSlot(DBContent& object)
 {
     loginf << "RadarPlotPositionCalculatorTask: updateDoneSlot";
 
-    disconnect(db_object_, &DBObject::updateDoneSignal, this,
+    disconnect(db_object_, &DBContent::updateDoneSignal, this,
                &RadarPlotPositionCalculatorTask::updateDoneSlot);
-    disconnect(db_object_, &DBObject::updateProgressSignal, this,
+    disconnect(db_object_, &DBContent::updateProgressSignal, this,
                &RadarPlotPositionCalculatorTask::updateProgressSlot);
 
     assert(msg_box_);

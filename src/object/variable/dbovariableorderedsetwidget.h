@@ -29,7 +29,7 @@ class QListWidget;
 /**
  * @brief Widget representation of a DBOVariableOrderedSet
  */
-class DBOVariableOrderedSetWidget : public QWidget
+class DBContentVariableOrderedSetWidget : public QWidget
 {
     Q_OBJECT
 
@@ -51,10 +51,10 @@ class DBOVariableOrderedSetWidget : public QWidget
 
   public:
     /// @brief Constructor
-    DBOVariableOrderedSetWidget(DBOVariableOrderedSet& set, QWidget* parent = 0,
+    DBContentVariableOrderedSetWidget(DBOVariableOrderedSet& set, QWidget* parent = 0,
                                 Qt::WindowFlags f = 0);
     /// @brief Destructor
-    virtual ~DBOVariableOrderedSetWidget();
+    virtual ~DBContentVariableOrderedSetWidget();
 
   protected:
     /// Represented set

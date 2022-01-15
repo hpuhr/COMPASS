@@ -28,7 +28,7 @@ class QTextEdit;
 
 class MetaDBOVariable;
 class QGridLayout;
-class DBOVariableSelectionWidget;
+class DBContentVariableSelectionWidget;
 
 class MetaDBOVariableWidget : public QWidget
 {
@@ -60,7 +60,7 @@ class MetaDBOVariableWidget : public QWidget
 
     bool locked_{false};
 
-    std::map<DBOVariableSelectionWidget*, std::string> selection_widgets_;
+    std::map<DBContentVariableSelectionWidget*, std::string> selection_widgets_;
 };
 
 #endif /* METADBOVARIABLEWIDGET_H_ */

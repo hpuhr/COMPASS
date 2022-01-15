@@ -24,7 +24,7 @@
 
 #include "dbovariable.h"
 
-DBOLabelDefinitionWidget::DBOLabelDefinitionWidget(DBOLabelDefinition* definition)
+DBContentLabelDefinitionWidget::DBContentLabelDefinitionWidget(DBOLabelDefinition* definition)
     : QWidget(), definition_(definition)  //, entries_ (definition->getEntries())
 {
     assert(definition_);
@@ -72,9 +72,9 @@ DBOLabelDefinitionWidget::DBOLabelDefinitionWidget(DBOLabelDefinition* definitio
     // target_->show();
 }
 
-DBOLabelDefinitionWidget::~DBOLabelDefinitionWidget() {}
+DBContentLabelDefinitionWidget::~DBContentLabelDefinitionWidget() {}
 
-void DBOLabelDefinitionWidget::cellChangedSlot(int row, int column)
+void DBContentLabelDefinitionWidget::cellChangedSlot(int row, int column)
 {
     logdbg << "DBOLabelDefinitionWidget: cellChangedSlot: row  " << row << " col " << column;
 
@@ -108,7 +108,7 @@ void DBOLabelDefinitionWidget::cellChangedSlot(int row, int column)
     definition_->updateReadList();
 }
 
-void DBOLabelDefinitionWidget::setTable()
+void DBContentLabelDefinitionWidget::setTable()
 {
     int row = 0;
 

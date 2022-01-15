@@ -58,10 +58,10 @@ void DBOVariableOrderedSet::generateSubConfigurable(const std::string& class_id,
 
     if (class_id.compare("DBOVariableOrderDefinition") == 0)
     {
-        DBOVariableOrderDefinition* definition =
-            new DBOVariableOrderDefinition(class_id, instance_id, this);
+        DBContentVariableOrderDefinition* definition =
+            new DBContentVariableOrderDefinition(class_id, instance_id, this);
 
-        DBObjectManager& manager = COMPASS::instance().objectManager();
+        DBContentManager& manager = COMPASS::instance().objectManager();
 
         if (definition->dboName() == META_OBJECT_NAME)
         {
@@ -85,7 +85,7 @@ void DBOVariableOrderedSet::generateSubConfigurable(const std::string& class_id,
         unsigned int index_new = definition->getIndex();
         assert(variable_definitions_.find(index_new) == variable_definitions_.end());
         variable_definitions_.insert(
-            std::pair<unsigned int, DBOVariableOrderDefinition*>(index_new, definition));
+            std::pair<unsigned int, DBContentVariableOrderDefinition*>(index_new, definition));
     }
     else
         throw std::runtime_error(
@@ -94,7 +94,7 @@ void DBOVariableOrderedSet::generateSubConfigurable(const std::string& class_id,
 
 void DBOVariableOrderedSet::checkSubConfigurables() {}
 
-void DBOVariableOrderedSet::add(DBOVariable& var)
+void DBOVariableOrderedSet::add(DBContentVariable& var)
 {
     if (!hasVariable(var))
     {
@@ -193,7 +193,7 @@ void DBOVariableOrderedSet::removeVariableAt(unsigned int index)
     assert(variable_definitions_.count(index) == 1);
 
     // unsigned int tmp_i = variable_definitions_.at(index);
-    DBOVariableOrderDefinition* tmp = variable_definitions_.at(index);
+    DBContentVariableOrderDefinition* tmp = variable_definitions_.at(index);
     variable_definitions_.erase(index);
 
     delete tmp;
@@ -203,7 +203,7 @@ void DBOVariableOrderedSet::removeVariableAt(unsigned int index)
     emit setChangedSignal();
 }
 
-void DBOVariableOrderedSet::removeVariable(const DBOVariable& variable)
+void DBOVariableOrderedSet::removeVariable(const DBContentVariable& variable)
 {
     assert (hasVariable(variable));
 
@@ -240,7 +240,7 @@ void DBOVariableOrderedSet::removeMetaVariable(const MetaDBOVariable& variable)
 
 void DBOVariableOrderedSet::reorderVariables ()
 {
-    std::map<unsigned int, DBOVariableOrderDefinition*> new_variable_definitions;
+    std::map<unsigned int, DBContentVariableOrderDefinition*> new_variable_definitions;
 
     unsigned int key{0};
 
@@ -301,13 +301,13 @@ void DBOVariableOrderedSet::moveVariableDown(unsigned int index)
     emit setChangedSignal();
 }
 
-DBOVariableSet DBOVariableOrderedSet::getFor(const std::string& dbo_name)
+DBContentVariableSet DBOVariableOrderedSet::getFor(const std::string& dbo_name)
 {
     loginf << "DBOVariableOrderedSet: getFor: type " << dbo_name;
 
-    DBObjectManager& manager = COMPASS::instance().objectManager();
-    DBOVariableSet type_set;
-    std::map<unsigned int, DBOVariableOrderDefinition*>::iterator it;
+    DBContentManager& manager = COMPASS::instance().objectManager();
+    DBContentVariableSet type_set;
+    std::map<unsigned int, DBContentVariableOrderDefinition*>::iterator it;
 
     for (it = variable_definitions_.begin(); it != variable_definitions_.end(); it++)
     {
@@ -328,13 +328,13 @@ DBOVariableSet DBOVariableOrderedSet::getFor(const std::string& dbo_name)
     return type_set;
 }
 
-DBOVariableSet DBOVariableOrderedSet::getExistingInDBFor(const std::string& dbo_name)
+DBContentVariableSet DBOVariableOrderedSet::getExistingInDBFor(const std::string& dbo_name)
 {
     logdbg << "DBOVariableOrderedSet: getExistingInDBFor: type " << dbo_name;
 
-    DBObjectManager& manager = COMPASS::instance().objectManager();
-    DBOVariableSet type_set;
-    std::map<unsigned int, DBOVariableOrderDefinition*>::iterator it;
+    DBContentManager& manager = COMPASS::instance().objectManager();
+    DBContentVariableSet type_set;
+    std::map<unsigned int, DBContentVariableOrderDefinition*>::iterator it;
 
     for (it = variable_definitions_.begin(); it != variable_definitions_.end(); it++)
     {
@@ -370,7 +370,7 @@ DBOVariableSet DBOVariableOrderedSet::getExistingInDBFor(const std::string& dbo_
 //  return type_set;
 //}
 
-DBOVariableOrderDefinition& DBOVariableOrderedSet::variableDefinition(unsigned int index) const
+DBContentVariableOrderDefinition& DBOVariableOrderedSet::variableDefinition(unsigned int index) const
 {
     assert(index < variable_definitions_.size());
     return *variable_definitions_.at(index);
@@ -387,7 +387,7 @@ DBOVariableOrderDefinition& DBOVariableOrderedSet::variableDefinition(unsigned i
 //    }
 //}
 
-bool DBOVariableOrderedSet::hasVariable(const DBOVariable& variable) const
+bool DBOVariableOrderedSet::hasVariable(const DBContentVariable& variable) const
 {
     for (auto it : variable_definitions_)
         if (it.second->variableName() == variable.name() &&
@@ -435,11 +435,11 @@ bool DBOVariableOrderedSet::hasVariable(const std::string& dbo_name, const std::
 //  return list;
 //}
 
-DBOVariableOrderedSetWidget* DBOVariableOrderedSet::widget()
+DBContentVariableOrderedSetWidget* DBOVariableOrderedSet::widget()
 {
     if (!widget_)
     {
-        widget_ = new DBOVariableOrderedSetWidget(*this);
+        widget_ = new DBContentVariableOrderedSetWidget(*this);
         connect(this, SIGNAL(setChangedSignal()), widget_, SLOT(updateVariableListSlot()));
     }
 

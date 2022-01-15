@@ -27,7 +27,7 @@
 #include "logger.h"
 #include "nullablevector.h"
 
-class DBOVariable;
+class DBContentVariable;
 class JSONObjectParser;
 
 class JSONDataMapping : public Configurable
@@ -65,7 +65,7 @@ class JSONDataMapping : public Configurable
     bool canBeActive() const;
 
     bool hasVariable() { return variable_ != nullptr; }
-    DBOVariable& variable() const;
+    DBContentVariable& variable() const;
 
     bool mandatory() const;
     void mandatory(bool mandatory);
@@ -108,7 +108,7 @@ class JSONDataMapping : public Configurable
 
     std::string db_object_name_;
     std::string dbovariable_name_;
-    DBOVariable* variable_{nullptr};
+    DBContentVariable* variable_{nullptr};
 
     bool mandatory_{false};
 

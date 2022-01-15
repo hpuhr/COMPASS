@@ -28,12 +28,12 @@
 #include "dbobjectcombobox.h"
 #include "textfielddoublevalidator.h"
 
-class SelectDBObjectDialog : public QDialog
+class SelectDBContentDialog : public QDialog
 {
     Q_OBJECT
 
   public:
-    SelectDBObjectDialog()
+    SelectDBContentDialog()
     {
         setMinimumWidth(300);
 
@@ -42,7 +42,7 @@ class SelectDBObjectDialog : public QDialog
         cat_edit_ = new QLineEdit("Category"); // TODO validate to uint´
         main_layout->addWidget(cat_edit_);
 
-        object_box_ = new DBObjectComboBox(false);
+        object_box_ = new DBContentComboBox(false);
         main_layout->addWidget(object_box_);
 
         QDialogButtonBox* button_box =
@@ -71,7 +71,7 @@ class SelectDBObjectDialog : public QDialog
 
   protected:
     QLineEdit* cat_edit_{nullptr};
-    DBObjectComboBox* object_box_{nullptr};
+    DBContentComboBox* object_box_{nullptr};
 };
 
 #endif  // SELECTDBOBJECTDIALOG_H

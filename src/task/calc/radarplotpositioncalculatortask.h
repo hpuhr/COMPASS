@@ -26,8 +26,8 @@
 #include "task.h"
 
 class Buffer;
-class DBObject;
-class DBOVariable;
+class DBContent;
+class DBContentVariable;
 class RadarPlotPositionCalculatorTaskWidget;
 class TaskManager;
 class UpdateBufferDBJob;
@@ -39,11 +39,11 @@ class RadarPlotPositionCalculatorTask : public Task, public Configurable
     Q_OBJECT
 
   public slots:
-    void newDataSlot(DBObject& object);
-    void loadingDoneSlot(DBObject& object);
+    void newDataSlot(DBContent& object);
+    void loadingDoneSlot(DBContent& object);
 
     void updateProgressSlot(float percent);
-    void updateDoneSlot(DBObject& object);
+    void updateDoneSlot(DBContent& object);
 
   public:
     RadarPlotPositionCalculatorTask(const std::string& class_id, const std::string& instance_id,
@@ -91,28 +91,28 @@ class RadarPlotPositionCalculatorTask : public Task, public Configurable
 
   protected:
     std::string db_object_str_;
-    DBObject* db_object_{nullptr};
+    DBContent* db_object_{nullptr};
 
     std::string key_var_str_;
-    DBOVariable* key_var_{nullptr};
+    DBContentVariable* key_var_{nullptr};
 
     std::string datasource_var_str_;
-    DBOVariable* datasource_var_{nullptr};
+    DBContentVariable* datasource_var_{nullptr};
 
     std::string range_var_str_;
-    DBOVariable* range_var_{nullptr};
+    DBContentVariable* range_var_{nullptr};
 
     std::string azimuth_var_str_;
-    DBOVariable* azimuth_var_{nullptr};
+    DBContentVariable* azimuth_var_{nullptr};
 
     std::string altitude_var_str_;
-    DBOVariable* altitude_var_{nullptr};
+    DBContentVariable* altitude_var_{nullptr};
 
     std::string latitude_var_str_;
-    DBOVariable* latitude_var_{nullptr};
+    DBContentVariable* latitude_var_{nullptr};
 
     std::string longitude_var_str_;
-    DBOVariable* longitude_var_{nullptr};
+    DBContentVariable* longitude_var_{nullptr};
 
     std::shared_ptr<UpdateBufferDBJob> job_ptr_;
 
@@ -128,7 +128,7 @@ class RadarPlotPositionCalculatorTask : public Task, public Configurable
     QMessageBox* msg_box_{nullptr};
     size_t target_report_count_{0};
 
-    void checkAndSetVariable(std::string& name_str, DBOVariable** var);
+    void checkAndSetVariable(std::string& name_str, DBContentVariable** var);
 };
 
 #endif /* RADARPLOTPOSITIONCALCULATOR_H_ */

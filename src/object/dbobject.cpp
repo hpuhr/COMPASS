@@ -47,29 +47,29 @@
 using namespace std;
 using namespace Utils;
 
-const Property DBObject::meta_var_rec_num_id_ {"Record Number", PropertyDataType::UINT};
-const Property DBObject::meta_var_datasource_id_ {"DS ID", PropertyDataType::UINT};
-const Property DBObject::meta_var_line_id_ {"Line ID", PropertyDataType::UINT};
-const Property DBObject::meta_var_tod_id_ {"Time of Day", PropertyDataType::FLOAT};
-const Property DBObject::meta_var_m3a_id_ {"Mode 3/A Code", PropertyDataType::UINT};
-const Property DBObject::meta_var_ta_id_ {"Aircraft Address", PropertyDataType::UINT};
-const Property DBObject::meta_var_ti_id_ {"Aircraft Identification", PropertyDataType::STRING};
-const Property DBObject::meta_var_mc_id_ {"Mode C Code", PropertyDataType::FLOAT};
-const Property DBObject::meta_var_track_num_id_ {"Track Number", PropertyDataType::UINT};;
+const Property DBContent::meta_var_rec_num_id_ {"Record Number", PropertyDataType::UINT};
+const Property DBContent::meta_var_datasource_id_ {"DS ID", PropertyDataType::UINT};
+const Property DBContent::meta_var_line_id_ {"Line ID", PropertyDataType::UINT};
+const Property DBContent::meta_var_tod_id_ {"Time of Day", PropertyDataType::FLOAT};
+const Property DBContent::meta_var_m3a_id_ {"Mode 3/A Code", PropertyDataType::UINT};
+const Property DBContent::meta_var_ta_id_ {"Aircraft Address", PropertyDataType::UINT};
+const Property DBContent::meta_var_ti_id_ {"Aircraft Identification", PropertyDataType::STRING};
+const Property DBContent::meta_var_mc_id_ {"Mode C Code", PropertyDataType::FLOAT};
+const Property DBContent::meta_var_track_num_id_ {"Track Number", PropertyDataType::UINT};;
 
-const Property DBObject::meta_var_latitude_ {"Latitude", PropertyDataType::DOUBLE};
-const Property DBObject::meta_var_longitude_ {"Longitude", PropertyDataType::DOUBLE};
+const Property DBContent::meta_var_latitude_ {"Latitude", PropertyDataType::DOUBLE};
+const Property DBContent::meta_var_longitude_ {"Longitude", PropertyDataType::DOUBLE};
 
-const Property DBObject::meta_var_detection_type_ {"Type", PropertyDataType::UCHAR};
+const Property DBContent::meta_var_detection_type_ {"Type", PropertyDataType::UCHAR};
 
-const Property DBObject::var_radar_range_ {"Range", PropertyDataType::DOUBLE};
-const Property DBObject::var_radar_azimuth_ {"Azimuth", PropertyDataType::DOUBLE};
-const Property DBObject::var_radar_altitude_ {"Mode C Code", PropertyDataType::FLOAT};
+const Property DBContent::var_radar_range_ {"Range", PropertyDataType::DOUBLE};
+const Property DBContent::var_radar_azimuth_ {"Azimuth", PropertyDataType::DOUBLE};
+const Property DBContent::var_radar_altitude_ {"Mode C Code", PropertyDataType::FLOAT};
 
-const Property DBObject::selected_var {"selected", PropertyDataType::BOOL};
+const Property DBContent::selected_var {"selected", PropertyDataType::BOOL};
 
-DBObject::DBObject(COMPASS& compass, const string& class_id, const string& instance_id,
-                   DBObjectManager* manager)
+DBContent::DBContent(COMPASS& compass, const string& class_id, const string& instance_id,
+                   DBContentManager* manager)
     : Configurable(class_id, instance_id, manager,
                    "db_object_" + boost::algorithm::to_lower_copy(instance_id) + ".json"),
       compass_(compass),
@@ -92,24 +92,24 @@ DBObject::DBObject(COMPASS& compass, const string& class_id, const string& insta
     logdbg << "DBObject: constructor: created with instance_id " << instanceId() << " name "
            << name_;
 
-    checkStaticVariable(DBObject::meta_var_datasource_id_);
-    checkStaticVariable(DBObject::meta_var_latitude_);
-    checkStaticVariable(DBObject::meta_var_longitude_);
+    checkStaticVariable(DBContent::meta_var_datasource_id_);
+    checkStaticVariable(DBContent::meta_var_latitude_);
+    checkStaticVariable(DBContent::meta_var_longitude_);
 
     if (name_ == "CAT001" || name_ == "CAT048")
     {
-        checkStaticVariable(DBObject::var_radar_range_);
-        checkStaticVariable(DBObject::var_radar_azimuth_);
-        checkStaticVariable(DBObject::var_radar_altitude_);
+        checkStaticVariable(DBContent::var_radar_range_);
+        checkStaticVariable(DBContent::var_radar_azimuth_);
+        checkStaticVariable(DBContent::var_radar_altitude_);
     }
 }
 
-DBObject::~DBObject()
+DBContent::~DBContent()
 {
     logdbg << "DBObject: dtor: " << name_;
 }
 
-void DBObject::generateSubConfigurable(const string& class_id, const string& instance_id)
+void DBContent::generateSubConfigurable(const string& class_id, const string& instance_id)
 {
     logdbg << "DBObject: generateSubConfigurable: generating variable " << instance_id;
     if (class_id == "DBOVariable")
@@ -123,7 +123,7 @@ void DBObject::generateSubConfigurable(const string& class_id, const string& ins
         logdbg << "DBObject: generateSubConfigurable: generating variable " << instance_id
                << " with name " << var_name;
 
-        variables_.emplace_back(new DBOVariable(class_id, instance_id, this));
+        variables_.emplace_back(new DBContentVariable(class_id, instance_id, this));
     }
     else if (class_id == "DBOLabelDefinition")
     {
@@ -137,7 +137,7 @@ void DBObject::generateSubConfigurable(const string& class_id, const string& ins
         sortContent();
 }
 
-void DBObject::checkSubConfigurables()
+void DBContent::checkSubConfigurables()
 {
     // nothing to see here
 
@@ -148,22 +148,22 @@ void DBObject::checkSubConfigurables()
     }
 }
 
-bool DBObject::hasVariable(const string& name) const
+bool DBContent::hasVariable(const string& name) const
 {
     auto iter = find_if(variables_.begin(), variables_.end(),
-    [name](const unique_ptr<DBOVariable>& var) { return var->name() == name;});
+    [name](const unique_ptr<DBContentVariable>& var) { return var->name() == name;});
 
     return iter != variables_.end();
 
     //return variables_.find(name) != variables_.end();
 }
 
-DBOVariable& DBObject::variable(const string& name)
+DBContentVariable& DBContent::variable(const string& name)
 {
     assert(hasVariable(name));
 
     auto iter = find_if(variables_.begin(), variables_.end(),
-    [name](const unique_ptr<DBOVariable>& var) { return var->name() == name;});
+    [name](const unique_ptr<DBContentVariable>& var) { return var->name() == name;});
 
     assert (iter != variables_.end());
     assert (iter->get());
@@ -171,7 +171,7 @@ DBOVariable& DBObject::variable(const string& name)
     return *iter->get();
 }
 
-void DBObject::renameVariable(const string& name, const string& new_name)
+void DBContent::renameVariable(const string& name, const string& new_name)
 {
     loginf << "DBObject: renameVariable: name " << name << " new_name " << new_name;
 
@@ -189,36 +189,36 @@ void DBObject::renameVariable(const string& name, const string& new_name)
 
 }
 
-void DBObject::deleteVariable(const string& name)
+void DBContent::deleteVariable(const string& name)
 {
     assert(hasVariable(name));
 
     auto iter = find_if(variables_.begin(), variables_.end(),
-    [name](const unique_ptr<DBOVariable>& var) { return var->name() == name;});
+    [name](const unique_ptr<DBContentVariable>& var) { return var->name() == name;});
     assert (iter != variables_.end());
 
     variables_.erase(iter);
     assert(!hasVariable(name));
 }
 
-bool DBObject::hasVariableDBColumnName(const std::string& name) const
+bool DBContent::hasVariableDBColumnName(const std::string& name) const
 {
     auto iter = find_if(variables_.begin(), variables_.end(),
-    [name](const unique_ptr<DBOVariable>& var) { return var->dbColumnName() == name;});
+    [name](const unique_ptr<DBContentVariable>& var) { return var->dbColumnName() == name;});
 
     logdbg << "DBObject: hasVariableDBColumnName: name '" << name << "' " << (iter != variables_.end());
 
     return iter != variables_.end();
 }
 
-string DBObject::associationsTableName()
+string DBContent::associationsTableName()
 {
     assert (db_table_name_.size());
     return db_table_name_ + "_assoc";
 }
 
 
-bool DBObject::hasKeyVariable()
+bool DBContent::hasKeyVariable()
 {
     for (auto& var_it : variables_)
         if (var_it->isKey())
@@ -227,7 +227,7 @@ bool DBObject::hasKeyVariable()
     return false;
 }
 
-DBOVariable& DBObject::getKeyVariable()
+DBContentVariable& DBContent::getKeyVariable()
 {
     assert(hasKeyVariable());
 
@@ -242,7 +242,7 @@ DBOVariable& DBObject::getKeyVariable()
     throw runtime_error("DBObject: getKeyVariable: no key variable found");
 }
 
-string DBObject::status()
+string DBContent::status()
 {
     if (read_job_)
     {
@@ -262,43 +262,43 @@ string DBObject::status()
         return "Idle";
 }
 
-DBObjectWidget* DBObject::widget()
+DBContentWidget* DBContent::widget()
 {
     if (!widget_)
     {
-        widget_.reset(new DBObjectWidget(this));
+        widget_.reset(new DBContentWidget(this));
         assert(widget_);
     }
 
     return widget_.get();  // needed for qt integration, not pretty
 }
 
-void DBObject::closeWidget() { widget_ = nullptr; }
+void DBContent::closeWidget() { widget_ = nullptr; }
 
-DBOLabelDefinitionWidget* DBObject::labelDefinitionWidget()
+DBContentLabelDefinitionWidget* DBContent::labelDefinitionWidget()
 {
     assert(label_definition_);
     return label_definition_->widget();
 }
 
-void DBObject::load(DBOVariableSet& read_set, bool use_filters, bool use_order,
-                    DBOVariable* order_variable, bool use_order_ascending,
+void DBContent::load(DBContentVariableSet& read_set, bool use_filters, bool use_order,
+                    DBContentVariable* order_variable, bool use_order_ascending,
                     const string& limit_str)
 {
     assert(is_loadable_);
     assert(existsInDB());
 
     string custom_filter_clause;
-    vector<DBOVariable*> filtered_variables;
+    vector<DBContentVariable*> filtered_variables;
 
     if (dbo_manager_.hasDSFilter(name_))
     {
         vector<unsigned int> ds_ids_to_load = dbo_manager_.unfilteredDS(name_);
         assert (ds_ids_to_load.size());
 
-        assert (hasVariable(DBObject::meta_var_datasource_id_.name()));
+        assert (hasVariable(DBContent::meta_var_datasource_id_.name()));
 
-        DBOVariable& datasource_var = variable(DBObject::meta_var_datasource_id_.name());
+        DBContentVariable& datasource_var = variable(DBContent::meta_var_datasource_id_.name());
         assert (datasource_var.dataType() == PropertyDataType::UINT);
 
         // add to filtered vars
@@ -332,9 +332,9 @@ void DBObject::load(DBOVariableSet& read_set, bool use_filters, bool use_order,
                  use_order_ascending, limit_str);
 }
 
-void DBObject::loadFiltered(DBOVariableSet& read_set, string custom_filter_clause,
-                    vector<DBOVariable*> filtered_variables, bool use_order,
-                    DBOVariable* order_variable, bool use_order_ascending,
+void DBContent::loadFiltered(DBContentVariableSet& read_set, string custom_filter_clause,
+                    vector<DBContentVariable*> filtered_variables, bool use_order,
+                    DBContentVariable* order_variable, bool use_order_ascending,
                     const string& limit_str)
 {
     logdbg << "DBObject: loadFiltered: name " << name_ << " loadable " << is_loadable_;
@@ -364,16 +364,16 @@ void DBObject::loadFiltered(DBOVariableSet& read_set, string custom_filter_claus
                     use_order, order_variable, use_order_ascending, limit_str));
 
     connect(read_job_.get(), &DBOReadDBJob::intermediateSignal,
-            this, &DBObject::readJobIntermediateSlot, Qt::QueuedConnection);
+            this, &DBContent::readJobIntermediateSlot, Qt::QueuedConnection);
     connect(read_job_.get(),  &DBOReadDBJob::obsoleteSignal,
-            this, &DBObject::readJobObsoleteSlot, Qt::QueuedConnection);
+            this, &DBContent::readJobObsoleteSlot, Qt::QueuedConnection);
     connect(read_job_.get(), &DBOReadDBJob::doneSignal,
-            this, &DBObject::readJobDoneSlot, Qt::QueuedConnection);
+            this, &DBContent::readJobDoneSlot, Qt::QueuedConnection);
 
     JobManager::instance().addDBJob(read_job_);
 }
 
-void DBObject::quitLoading()
+void DBContent::quitLoading()
 {
     if (read_job_)
     {
@@ -381,14 +381,14 @@ void DBObject::quitLoading()
     }
 }
 
-void DBObject::insertData(shared_ptr<Buffer> buffer)
+void DBContent::insertData(shared_ptr<Buffer> buffer)
 {
     loginf << "DBObject " << name_ << ": insertData: buffer " << buffer->size();
 
     assert (!insert_active_);
     insert_active_ = true;
 
-    DBOVariableSet list;
+    DBContentVariableSet list;
 
     for (auto prop_it : buffer->properties().properties())
     {
@@ -405,7 +405,7 @@ void DBObject::insertData(shared_ptr<Buffer> buffer)
 
     insert_job_ = make_shared<InsertBufferDBJob>(COMPASS::instance().interface(), *this, buffer, false);
 
-    connect(insert_job_.get(), &InsertBufferDBJob::doneSignal, this, &DBObject::insertDoneSlot,
+    connect(insert_job_.get(), &InsertBufferDBJob::doneSignal, this, &DBContent::insertDoneSlot,
             Qt::QueuedConnection);
 
     JobManager::instance().addDBJob(insert_job_);
@@ -413,13 +413,13 @@ void DBObject::insertData(shared_ptr<Buffer> buffer)
     logdbg << "DBObject: insertData: end";
 }
 
-void DBObject::doDataSourcesBeforeInsert (shared_ptr<Buffer> buffer)
+void DBContent::doDataSourcesBeforeInsert (shared_ptr<Buffer> buffer)
 {
     logdbg << "DBObject " << name_ << ": doDataSourcesBeforeInsert";
 
-    assert (hasVariable(DBObject::meta_var_datasource_id_.name()));
+    assert (hasVariable(DBContent::meta_var_datasource_id_.name()));
 
-    DBOVariable& datasource_var = variable(DBObject::meta_var_datasource_id_.name());
+    DBContentVariable& datasource_var = variable(DBContent::meta_var_datasource_id_.name());
     assert (datasource_var.dataType() == PropertyDataType::UINT);
 
     string datasource_col_str = datasource_var.dbColumnName();
@@ -439,7 +439,7 @@ void DBObject::doDataSourcesBeforeInsert (shared_ptr<Buffer> buffer)
 }
 
 
-void DBObject::insertDoneSlot()
+void DBContent::insertDoneSlot()
 {
     logdbg << "DBObject " << name_ << ": insertDoneSlot";
 
@@ -457,7 +457,7 @@ void DBObject::insertDoneSlot()
     assert (existsInDB()); // check
 }
 
-void DBObject::updateData(DBOVariable& key_var, DBOVariableSet& list, shared_ptr<Buffer> buffer)
+void DBContent::updateData(DBContentVariable& key_var, DBContentVariableSet& list, shared_ptr<Buffer> buffer)
 {
     assert(!update_job_);
 
@@ -466,24 +466,24 @@ void DBObject::updateData(DBOVariable& key_var, DBOVariableSet& list, shared_ptr
     update_job_ =
             make_shared<UpdateBufferDBJob>(COMPASS::instance().interface(), *this, key_var, buffer);
 
-    connect(update_job_.get(), &UpdateBufferDBJob::doneSignal, this, &DBObject::updateDoneSlot,
+    connect(update_job_.get(), &UpdateBufferDBJob::doneSignal, this, &DBContent::updateDoneSlot,
             Qt::QueuedConnection);
     connect(update_job_.get(), &UpdateBufferDBJob::updateProgressSignal, this,
-            &DBObject::updateProgressSlot, Qt::QueuedConnection);
+            &DBContent::updateProgressSlot, Qt::QueuedConnection);
 
     JobManager::instance().addDBJob(update_job_);
 }
 
-void DBObject::updateProgressSlot(float percent) { emit updateProgressSignal(percent); }
+void DBContent::updateProgressSlot(float percent) { emit updateProgressSignal(percent); }
 
-void DBObject::updateDoneSlot()
+void DBContent::updateDoneSlot()
 {
     update_job_ = nullptr;
 
     emit updateDoneSignal(*this);
 }
 
-map<unsigned int, string> DBObject::loadLabelData(vector<unsigned int> rec_nums, int break_item_cnt)
+map<unsigned int, string> DBContent::loadLabelData(vector<unsigned int> rec_nums, int break_item_cnt)
 {
     assert(is_loadable_);
     assert(existsInDB());
@@ -491,10 +491,10 @@ map<unsigned int, string> DBObject::loadLabelData(vector<unsigned int> rec_nums,
     string custom_filter_clause;
     bool first = true;
 
-    assert (dbo_manager_.existsMetaVariable(DBObject::meta_var_rec_num_id_.name()));
-    assert (dbo_manager_.metaVariable(DBObject::meta_var_rec_num_id_.name()).existsIn(name_));
+    assert (dbo_manager_.existsMetaVariable(DBContent::meta_var_rec_num_id_.name()));
+    assert (dbo_manager_.metaVariable(DBContent::meta_var_rec_num_id_.name()).existsIn(name_));
 
-    DBOVariable& rec_num_var = dbo_manager_.metaVariable(DBObject::meta_var_rec_num_id_.name()).getFor(name_);
+    DBContentVariable& rec_num_var = dbo_manager_.metaVariable(DBContent::meta_var_rec_num_id_.name()).getFor(name_);
 
     custom_filter_clause = rec_num_var.dbColumnName() + " in (";
     for (auto& rec_num : rec_nums)
@@ -508,7 +508,7 @@ map<unsigned int, string> DBObject::loadLabelData(vector<unsigned int> rec_nums,
     }
     custom_filter_clause += ")";
 
-    DBOVariableSet read_list = label_definition_->readList();
+    DBContentVariableSet read_list = label_definition_->readList();
 
     if (!read_list.hasVariable(rec_num_var))
         read_list.add(rec_num_var);
@@ -539,7 +539,7 @@ map<unsigned int, string> DBObject::loadLabelData(vector<unsigned int> rec_nums,
     return labels;
 }
 
-void DBObject::readJobIntermediateSlot(shared_ptr<Buffer> buffer)
+void DBContent::readJobIntermediateSlot(shared_ptr<Buffer> buffer)
 {
     assert(buffer);
     loginf << "DBObject: " << name_ << " readJobIntermediateSlot: buffer size " << buffer->size();
@@ -549,7 +549,7 @@ void DBObject::readJobIntermediateSlot(shared_ptr<Buffer> buffer)
     assert (sender);
     assert(sender == read_job_.get());
 
-    vector<DBOVariable*>& variables = sender->readList().getSet();
+    vector<DBContentVariable*>& variables = sender->readList().getSet();
     const PropertyList& properties = buffer->properties();
 
     for (auto var_it : variables)
@@ -574,14 +574,14 @@ void DBObject::readJobIntermediateSlot(shared_ptr<Buffer> buffer)
 
 }
 
-void DBObject::readJobObsoleteSlot()
+void DBContent::readJobObsoleteSlot()
 {
     logdbg << "DBObject: " << name_ << " readJobObsoleteSlot";
     read_job_ = nullptr;
     read_job_data_.clear();
 }
 
-void DBObject::readJobDoneSlot()
+void DBContent::readJobDoneSlot()
 {
     logdbg << "DBObject: " << name_ << " readJobDoneSlot";
     read_job_ = nullptr;
@@ -593,7 +593,7 @@ void DBObject::readJobDoneSlot()
     }
 }
 
-void DBObject::finalizeReadJobDoneSlot()
+void DBContent::finalizeReadJobDoneSlot()
 {
     logdbg << "DBObject: " << name_ << " finalizeReadJobDoneSlot";
 
@@ -632,7 +632,7 @@ void DBObject::finalizeReadJobDoneSlot()
     return;
 }
 
-void DBObject::databaseOpenedSlot()
+void DBContent::databaseOpenedSlot()
 {
     loginf << "DBObject " << name_ << ": databaseOpenedSlot";
 
@@ -647,7 +647,7 @@ void DBObject::databaseOpenedSlot()
            << " count " << count_;
 }
 
-void DBObject::databaseClosedSlot()
+void DBContent::databaseClosedSlot()
 {
     loginf << "DBObject: databaseClosedSlot";
 
@@ -655,33 +655,33 @@ void DBObject::databaseClosedSlot()
     count_ = 0;
 }
 
-string DBObject::dbTableName() const
+string DBContent::dbTableName() const
 {
     return db_table_name_;
 }
 
-void DBObject::checkLabelDefinitions()
+void DBContent::checkLabelDefinitions()
 {
     assert (label_definition_);
     label_definition_->checkLabelDefinitions();
 }
 
-bool DBObject::associationsLoaded() const
+bool DBContent::associationsLoaded() const
 {
     return associations_loaded_;
 }
 
-bool DBObject::isLoading() { return read_job_ != nullptr || finalize_jobs_.size(); }
+bool DBContent::isLoading() { return read_job_ != nullptr || finalize_jobs_.size(); }
 
-bool DBObject::isInserting() { return insert_active_; }
+bool DBContent::isInserting() { return insert_active_; }
 
-bool DBObject::isPostProcessing() { return finalize_jobs_.size(); }
+bool DBContent::isPostProcessing() { return finalize_jobs_.size(); }
 
-bool DBObject::hasData() { return count_ > 0; }
+bool DBContent::hasData() { return count_ > 0; }
 
-size_t DBObject::count() { return count_; }
+size_t DBContent::count() { return count_; }
 
-size_t DBObject::loadedCount()
+size_t DBContent::loadedCount()
 {
     if (dbo_manager_.data().count(name_))
         return dbo_manager_.data().at(name_)->size();
@@ -689,12 +689,12 @@ size_t DBObject::loadedCount()
         return 0;
 }
 
-bool DBObject::existsInDB() const
+bool DBContent::existsInDB() const
 {
     return COMPASS::instance().interface().existsTable(db_table_name_);
 }
 
-void DBObject::loadAssociationsIfRequired()
+void DBContent::loadAssociationsIfRequired()
 {
     if (dbo_manager_.hasAssociations() && !associations_loaded_)
     {
@@ -704,7 +704,7 @@ void DBObject::loadAssociationsIfRequired()
     }
 }
 
-void DBObject::loadAssociations()
+void DBContent::loadAssociations()
 {
     loginf << "DBObject " << name_ << ": loadAssociations";
 
@@ -734,23 +734,23 @@ void DBObject::loadAssociations()
            << " associactions done (" << String::doubleToStringPrecision(load_time, 2) << " s).";
 }
 
-bool DBObject::hasAssociations() { return associations_.size() > 0; }
+bool DBContent::hasAssociations() { return associations_.size() > 0; }
 
-void DBObject::addAssociation(unsigned int rec_num, unsigned int utn, bool has_src, unsigned int src_rec_num)
+void DBContent::addAssociation(unsigned int rec_num, unsigned int utn, bool has_src, unsigned int src_rec_num)
 {
     associations_.add(rec_num, DBOAssociationEntry(utn, has_src, src_rec_num));
     associations_changed_ = true;
     associations_loaded_ = true;
 }
 
-void DBObject::clearAssociations()
+void DBContent::clearAssociations()
 {
     associations_.clear();
     associations_changed_ = true;
     associations_loaded_ = false;
 }
 
-void DBObject::saveAssociations()
+void DBContent::saveAssociations()
 {
     loginf << "DBObject " << name_ << ": saveAssociations";
 
@@ -801,16 +801,16 @@ void DBObject::saveAssociations()
     loginf << "DBObject " << name_ << ": saveAssociations: done";
 }
 
-void DBObject::sortContent()
+void DBContent::sortContent()
 {
     sort(variables_.begin(), variables_.end(),
-        [](const std::unique_ptr<DBOVariable>& a, const std::unique_ptr<DBOVariable>& b) -> bool
+        [](const std::unique_ptr<DBContentVariable>& a, const std::unique_ptr<DBContentVariable>& b) -> bool
     {
         return a->name() > b->name();
     });
 }
 
-void DBObject::checkStaticVariable(const Property& property)
+void DBContent::checkStaticVariable(const Property& property)
 {
     if (!hasVariable(property.name()))
         logwrn << "DBObject: checkStaticVariable: " << name_ << " has no variable " << property.name();

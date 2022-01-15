@@ -23,7 +23,7 @@
 class CreateARTASAssociationsTask;
 class QPushButton;
 class DBODataSourceSelectionComboBox;
-class DBOVariableSelectionWidget;
+class DBContentVariableSelectionWidget;
 class QLineEdit;
 class QCheckBox;
 
@@ -60,15 +60,15 @@ class CreateARTASAssociationsTaskWidget : public TaskWidget
     CreateARTASAssociationsTask& task_;
 
     //DBODataSourceSelectionComboBox* ds_combo_{nullptr};
-    DBOVariableSelectionWidget* ds_id_box_{nullptr};
-    DBOVariableSelectionWidget* track_num_box_{nullptr};
-    DBOVariableSelectionWidget* track_begin_box_{nullptr};
-    DBOVariableSelectionWidget* track_end_box_{nullptr};
-    DBOVariableSelectionWidget* track_coasting_box_{nullptr};
+    DBContentVariableSelectionWidget* ds_id_box_{nullptr};
+    DBContentVariableSelectionWidget* track_num_box_{nullptr};
+    DBContentVariableSelectionWidget* track_begin_box_{nullptr};
+    DBContentVariableSelectionWidget* track_end_box_{nullptr};
+    DBContentVariableSelectionWidget* track_coasting_box_{nullptr};
 
-    DBOVariableSelectionWidget* key_box_{nullptr};
-    DBOVariableSelectionWidget* hash_box_{nullptr};
-    DBOVariableSelectionWidget* tod_box_{nullptr};
+    DBContentVariableSelectionWidget* key_box_{nullptr};
+    DBContentVariableSelectionWidget* hash_box_{nullptr};
+    DBContentVariableSelectionWidget* tod_box_{nullptr};
 
     QLineEdit* end_track_time_edit_{nullptr};
 

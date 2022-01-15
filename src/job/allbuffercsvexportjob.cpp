@@ -94,7 +94,7 @@ void AllBufferCSVExportJob::run()
         output_file << ss.str() << "\n";
 
         // write the data
-        DBObjectManager& manager = COMPASS::instance().objectManager();
+        DBContentManager& manager = COMPASS::instance().objectManager();
 
         for (auto& row_index_it : row_indexes_)
         {
@@ -110,8 +110,8 @@ void AllBufferCSVExportJob::run()
 
             assert(buffer_index < buffer->size());
 
-            assert(buffer->has<bool>(DBObject::selected_var.name()));
-            NullableVector<bool>& selected_vec = buffer->get<bool>(DBObject::selected_var.name());
+            assert(buffer->has<bool>(DBContent::selected_var.name()));
+            NullableVector<bool>& selected_vec = buffer->get<bool>(DBContent::selected_var.name());
 
             assert(buffer->has<int>("rec_num"));
             NullableVector<int>& rec_num_vec = buffer->get<int>("rec_num");
@@ -172,7 +172,7 @@ void AllBufferCSVExportJob::run()
                     assert(manager.object(dbo_name).hasVariable(variable_name));
                 }
 
-                DBOVariable& variable = (variable_dbo_name == META_OBJECT_NAME)
+                DBContentVariable& variable = (variable_dbo_name == META_OBJECT_NAME)
                                             ? manager.metaVariable(variable_name).getFor(dbo_name)
                                             : manager.object(dbo_name).variable(variable_name);
 

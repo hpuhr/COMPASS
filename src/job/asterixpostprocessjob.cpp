@@ -45,7 +45,7 @@ void ASTERIXPostprocessJob::run()
 
 void ASTERIXPostprocessJob::doFutureTimestampsCheck()
 {
-    DBObjectManager& obj_man = COMPASS::instance().objectManager();
+    DBContentManager& obj_man = COMPASS::instance().objectManager();
 
     unsigned int buffer_size;
 
@@ -62,9 +62,9 @@ void ASTERIXPostprocessJob::doFutureTimestampsCheck()
     {
         buffer_size = buf_it.second->size();
 
-        assert (obj_man.metaVariable(DBObject::meta_var_tod_id_.name()).existsIn(buf_it.first));
+        assert (obj_man.metaVariable(DBContent::meta_var_tod_id_.name()).existsIn(buf_it.first));
 
-        DBOVariable& tod_var = obj_man.metaVariable(DBObject::meta_var_tod_id_.name()).getFor(buf_it.first);
+        DBContentVariable& tod_var = obj_man.metaVariable(DBContent::meta_var_tod_id_.name()).getFor(buf_it.first);
 
         Property tod_prop {tod_var.name(), tod_var.dataType()};
 
@@ -119,7 +119,7 @@ void ASTERIXPostprocessJob::doRadarPlotPositionCalculations()
 
     // do radar position projection
 
-    DBObjectManager& dbo_man = COMPASS::instance().objectManager();
+    DBContentManager& dbo_man = COMPASS::instance().objectManager();
     ProjectionManager& proj_man = ProjectionManager::instance();
 
     assert(proj_man.hasCurrentProjection());
@@ -150,21 +150,21 @@ void ASTERIXPostprocessJob::doRadarPlotPositionCalculations()
         assert(buffer_size);
 
         assert (dbo_man.existsObject(dbo_name));
-        DBObject& db_object = dbo_man.object(dbo_name);
+        DBContent& db_object = dbo_man.object(dbo_name);
 
-        assert (db_object.hasVariable(DBObject::meta_var_datasource_id_.name()));
-        assert (db_object.hasVariable(DBObject::var_radar_range_.name()));
-        assert (db_object.hasVariable(DBObject::var_radar_azimuth_.name()));
-        assert (db_object.hasVariable(DBObject::var_radar_altitude_.name()));
-        assert (db_object.hasVariable(DBObject::meta_var_latitude_.name()));
-        assert (db_object.hasVariable(DBObject::meta_var_longitude_.name()));
+        assert (db_object.hasVariable(DBContent::meta_var_datasource_id_.name()));
+        assert (db_object.hasVariable(DBContent::var_radar_range_.name()));
+        assert (db_object.hasVariable(DBContent::var_radar_azimuth_.name()));
+        assert (db_object.hasVariable(DBContent::var_radar_altitude_.name()));
+        assert (db_object.hasVariable(DBContent::meta_var_latitude_.name()));
+        assert (db_object.hasVariable(DBContent::meta_var_longitude_.name()));
 
-        DBOVariable& datasource_var = db_object.variable(DBObject::meta_var_datasource_id_.name());
-        DBOVariable& range_var = db_object.variable(DBObject::var_radar_range_.name());
-        DBOVariable& azimuth_var = db_object.variable(DBObject::var_radar_azimuth_.name());
-        DBOVariable& altitude_var = db_object.variable(DBObject::var_radar_altitude_.name());
-        DBOVariable& latitude_var = db_object.variable(DBObject::meta_var_latitude_.name());
-        DBOVariable& longitude_var = db_object.variable(DBObject::meta_var_longitude_.name());
+        DBContentVariable& datasource_var = db_object.variable(DBContent::meta_var_datasource_id_.name());
+        DBContentVariable& range_var = db_object.variable(DBContent::var_radar_range_.name());
+        DBContentVariable& azimuth_var = db_object.variable(DBContent::var_radar_azimuth_.name());
+        DBContentVariable& altitude_var = db_object.variable(DBContent::var_radar_altitude_.name());
+        DBContentVariable& latitude_var = db_object.variable(DBContent::meta_var_latitude_.name());
+        DBContentVariable& longitude_var = db_object.variable(DBContent::meta_var_longitude_.name());
 
         datasource_var_name = datasource_var.name();
         range_var_name = range_var.name();
@@ -224,7 +224,7 @@ void ASTERIXPostprocessJob::doRadarPlotPositionCalculations()
 
                 if (dbo_man.hasConfigDataSource(ds_id_it))
                 {
-                    DBContent::ConfigurationDataSource& data_source = dbo_man.configDataSource(ds_id_it);
+                    ConfigurationDataSource& data_source = dbo_man.configDataSource(ds_id_it);
 
                     if (data_source.info().contains("latitude")
                             && data_source.info().contains("longitude")
@@ -245,7 +245,7 @@ void ASTERIXPostprocessJob::doRadarPlotPositionCalculations()
                 }
                 else if (dbo_man.hasDataSource(ds_id_it))
                 {
-                    DBContent::DBDataSource& data_source = dbo_man.dataSource(ds_id_it);
+                    DBDataSource& data_source = dbo_man.dataSource(ds_id_it);
 
                     if (data_source.info().contains("latitude")
                             && data_source.info().contains("longitude")

@@ -31,9 +31,9 @@
 
 class TaskManager;
 class CreateARTASAssociationsTaskWidget;
-class DBOVariable;
+class DBContentVariable;
 class MetaDBOVariable;
-class DBObject;
+class DBContent;
 class Buffer;
 
 class CreateARTASAssociationsTask : public Task, public Configurable
@@ -44,8 +44,8 @@ public slots:
     void createDoneSlot();
     void createObsoleteSlot();
 
-    void newDataSlot(DBObject& object);
-    void loadingDoneSlot(DBObject& object);
+    void newDataSlot(DBContent& object);
+    void loadingDoneSlot(DBContent& object);
 
     void associationStatusSlot(QString status);
     void saveAssociationsQuestionSlot(QString question_str);
@@ -65,7 +65,7 @@ public:
 
     std::string trackerDsIdVarStr() const;
     void trackerDsIdVarStr(const std::string& var_str);
-    DBOVariable* trackerDsIdVar() const;
+    DBContentVariable* trackerDsIdVar() const;
 
     std::string trackerTrackNumVarStr() const;
     void trackerTrackNumVarStr(const std::string& var_str);
@@ -140,19 +140,19 @@ protected:
     std::string current_data_source_name_;
 
     std::string tracker_ds_id_var_str_;
-    DBOVariable* tracker_ds_id_var_{nullptr};
+    DBContentVariable* tracker_ds_id_var_{nullptr};
 
     std::string tracker_track_num_var_str_;
-    DBOVariable* tracker_track_num_var_{nullptr};
+    DBContentVariable* tracker_track_num_var_{nullptr};
 
     std::string tracker_track_begin_var_str_;
-    DBOVariable* tracker_track_begin_var_{nullptr};
+    DBContentVariable* tracker_track_begin_var_{nullptr};
 
     std::string tracker_track_end_var_str_;
-    DBOVariable* tracker_track_end_var_{nullptr};
+    DBContentVariable* tracker_track_end_var_{nullptr};
 
     std::string tracker_track_coasting_var_str_;
-    DBOVariable* tracker_track_coasting_var_{nullptr};
+    DBContentVariable* tracker_track_coasting_var_{nullptr};
 
     std::string key_var_str_;
     MetaDBOVariable* key_var_{nullptr};
@@ -202,10 +202,10 @@ protected:
     std::shared_ptr<CreateARTASAssociationsJob> create_job_;
     bool create_job_done_{false};
 
-    void checkAndSetVariable(std::string& name_str, DBOVariable** var);
+    void checkAndSetVariable(std::string& name_str, DBContentVariable** var);
     void checkAndSetMetaVariable(std::string& name_str, MetaDBOVariable** var);
 
-    DBOVariableSet getReadSetFor(const std::string& dbo_name);
+    DBContentVariableSet getReadSetFor(const std::string& dbo_name);
 };
 
 #endif  // CREATEARTASASSOCIATIONSTASK_H

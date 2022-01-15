@@ -30,7 +30,7 @@ class DBFilter;
 class DataSourcesFilter;
 class COMPASS;
 class FilterManagerWidget;
-class DBOVariable;
+class DBContentVariable;
 class ViewableDataConfig;
 
 /**
@@ -71,7 +71,7 @@ public:
 
     /// @brief Returns the SQL condition for a DBO and sets all used variable names
     std::string getSQLCondition(const std::string& dbo_name,
-                                std::vector<DBOVariable*>& filtered_variables);
+                                std::vector<DBContentVariable*>& filtered_variables);
 
     /// @brief Returns number of existing filters
     unsigned int getNumFilters();

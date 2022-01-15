@@ -144,7 +144,7 @@ bool CreateAssociationsTask::checkPrerequisites()
 //        return false;
 
     // check if hash var exists in all data
-    DBObjectManager& object_man = COMPASS::instance().objectManager();
+    DBContentManager& object_man = COMPASS::instance().objectManager();
 
     logdbg << "CreateAssociationsTask: checkPrerequisites: tracker hashes";
     assert (object_man.existsObject("Tracker"));
@@ -168,7 +168,7 @@ bool CreateAssociationsTask::isRecommended()
 
 bool CreateAssociationsTask::canRun()
 {
-    DBObjectManager& object_man = COMPASS::instance().objectManager();
+    DBContentManager& object_man = COMPASS::instance().objectManager();
 
     logdbg << "CreateAssociationsTask: canRun: tracker " << object_man.existsObject("Tracker");
 
@@ -253,14 +253,14 @@ void CreateAssociationsTask::run()
     checkAndSetMetaVariable(latitude_var_str_, &latitude_var_);
     checkAndSetMetaVariable(longitude_var_str_, &longitude_var_);
 
-    DBObjectManager& object_man = COMPASS::instance().objectManager();
+    DBContentManager& object_man = COMPASS::instance().objectManager();
 
     for (auto& dbo_it : object_man)
     {
         if (!dbo_it.second->hasData())
             continue;
 
-        DBOVariableSet read_set = getReadSetFor(dbo_it.first);
+        DBContentVariableSet read_set = getReadSetFor(dbo_it.first);
 
         TODO_ASSERT
 
@@ -474,11 +474,11 @@ void CreateAssociationsTask::contMaxDistanceAcceptableTracker(double cont_max_di
     cont_max_distance_acceptable_tracker_ = cont_max_distance_acceptable_tracker;
 }
 
-void CreateAssociationsTask::newDataSlot(DBObject& object)
+void CreateAssociationsTask::newDataSlot(DBContent& object)
 {
 }
 
-void CreateAssociationsTask::loadingDoneSlot(DBObject& object)
+void CreateAssociationsTask::loadingDoneSlot(DBContent& object)
 {
     loginf << "CreateAssociationsTask: loadingDoneSlot: object " << object.name();
 
@@ -508,7 +508,7 @@ void CreateAssociationsTask::loadingDoneSlot(DBObject& object)
 
         std::map<std::string, std::shared_ptr<Buffer>> buffers;
 
-        DBObjectManager& object_man = COMPASS::instance().objectManager();
+        DBContentManager& object_man = COMPASS::instance().objectManager();
 
         TODO_ASSERT
 
@@ -662,7 +662,7 @@ MetaDBOVariable* CreateAssociationsTask::longitudeVar() const
 void CreateAssociationsTask::checkAndSetMetaVariable(std::string& name_str,
                                                      MetaDBOVariable** var)
 {
-    DBObjectManager& object_man = COMPASS::instance().objectManager();
+    DBContentManager& object_man = COMPASS::instance().objectManager();
 
     if (!object_man.existsMetaVariable(name_str))
     {
@@ -680,9 +680,9 @@ void CreateAssociationsTask::checkAndSetMetaVariable(std::string& name_str,
     }
 }
 
-DBOVariableSet CreateAssociationsTask::getReadSetFor(const std::string& dbo_name)
+DBContentVariableSet CreateAssociationsTask::getReadSetFor(const std::string& dbo_name)
 {
-    DBOVariableSet read_set;
+    DBContentVariableSet read_set;
 
     assert(key_var_);
     assert(key_var_->existsIn(dbo_name));

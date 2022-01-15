@@ -3,9 +3,9 @@
 
 #include <QWidget>
 
-class DBObjectManager;
+class DBContentManager;
 class MetaDBOVariable;
-class DBOVariableSelectionWidget;
+class DBContentVariableSelectionWidget;
 
 class QLineEdit;
 class QTextEdit;
@@ -22,13 +22,13 @@ public slots:
     void deleteVariableSlot();
 
 public:
-    MetaDBOVariableDetailWidget(DBObjectManager& dbo_man, QWidget* parent = nullptr);
+    MetaDBOVariableDetailWidget(DBContentManager& dbo_man, QWidget* parent = nullptr);
 
     void show (MetaDBOVariable& meta_var);
     void clear();
 
 private:
-    DBObjectManager& dbo_man_;
+    DBContentManager& dbo_man_;
 
     bool has_current_entry_ {false};
     MetaDBOVariable* meta_var_ {nullptr};
@@ -36,7 +36,7 @@ private:
     QLineEdit* name_edit_{nullptr};
     QTextEdit* description_edit_{nullptr};
 
-    std::map<std::string, DBOVariableSelectionWidget*> selection_widgets_; // db content -> var select
+    std::map<std::string, DBContentVariableSelectionWidget*> selection_widgets_; // db content -> var select
 
     QPushButton* delete_button_ {nullptr};
 };

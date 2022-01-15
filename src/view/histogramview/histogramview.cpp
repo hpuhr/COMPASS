@@ -67,8 +67,8 @@ bool HistogramView::init()
 
     assert(data_source_);
 
-    DBObjectManager& object_man = COMPASS::instance().objectManager();
-    connect(&object_man, &DBObjectManager::loadingDoneSignal, this, &HistogramView::allLoadingDoneSlot);
+    DBContentManager& object_man = COMPASS::instance().objectManager();
+    connect(&object_man, &DBContentManager::loadingDoneSignal, this, &HistogramView::allLoadingDoneSlot);
 
 //    connect(data_source_, &HistogramViewDataSource::loadingStartedSignal, widget_->getDataWidget(),
 //            &HistogramViewDataWidget::loadingStartedSlot);
@@ -155,11 +155,11 @@ HistogramViewDataWidget* HistogramView::getDataWidget()
     return widget_->getDataWidget();
 }
 
-DBOVariableSet HistogramView::getSet(const std::string& dbo_name)
+DBContentVariableSet HistogramView::getSet(const std::string& dbo_name)
 {
     assert(data_source_);
 
-    DBOVariableSet set = data_source_->getSet()->getExistingInDBFor(dbo_name);
+    DBContentVariableSet set = data_source_->getSet()->getExistingInDBFor(dbo_name);
 
     if (hasDataVar())
     {
@@ -216,7 +216,7 @@ bool HistogramView::isDataVarMeta ()
     return data_var_dbo_ == META_OBJECT_NAME;
 }
 
-DBOVariable& HistogramView::dataVar()
+DBContentVariable& HistogramView::dataVar()
 {
     assert (hasDataVar());
     assert (!isDataVarMeta());
@@ -225,7 +225,7 @@ DBOVariable& HistogramView::dataVar()
     return COMPASS::instance().objectManager().object(data_var_dbo_).variable(data_var_name_);
 }
 
-void HistogramView::dataVar (DBOVariable& var)
+void HistogramView::dataVar (DBContentVariable& var)
 {
     loginf << "HistogramView: dataVar: dbo " << var.dboName() << " name " << var.name();
 

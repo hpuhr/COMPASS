@@ -104,7 +104,7 @@ bool DBFilterCondition::filters(const std::string& dbo_name)
 }
 
 std::string DBFilterCondition::getConditionString(const std::string& dbo_name, bool& first,
-                                                  std::vector<DBOVariable*>& filtered_variables)
+                                                  std::vector<DBContentVariable*>& filtered_variables)
 {
     logdbg << "DBFilterCondition: getConditionString: object " << dbo_name << " first " << first;
     assert(usable_);
@@ -122,7 +122,7 @@ std::string DBFilterCondition::getConditionString(const std::string& dbo_name, b
 
     assert (hasVariable(dbo_name));
 
-    DBOVariable& var {variable(dbo_name)};
+    DBContentVariable& var {variable(dbo_name)};
 
     //const DBTableColumn& column = var.currentDBColumn();
     std::string db_column_name = var.dbColumnName();
@@ -228,7 +228,7 @@ void DBFilterCondition::setVariableName(const std::string& variable_name)
 
 bool DBFilterCondition::hasVariable (const std::string& dbo_name)
 {
-    DBObjectManager& dbo_man = COMPASS::instance().objectManager();
+    DBContentManager& dbo_man = COMPASS::instance().objectManager();
 
     if (variable_dbo_name_ == META_OBJECT_NAME)
     {
@@ -250,11 +250,11 @@ bool DBFilterCondition::hasVariable (const std::string& dbo_name)
 }
 
 
-DBOVariable& DBFilterCondition::variable (const std::string& dbo_name)
+DBContentVariable& DBFilterCondition::variable (const std::string& dbo_name)
 {
     assert (hasVariable(dbo_name));
 
-    DBObjectManager& dbo_man = COMPASS::instance().objectManager();
+    DBContentManager& dbo_man = COMPASS::instance().objectManager();
 
     if (variable_dbo_name_ == META_OBJECT_NAME)
         return dbo_man.metaVariable(variable_name_).getFor(dbo_name);
@@ -337,7 +337,7 @@ bool DBFilterCondition::checkValueInvalid(const std::string& new_value)
 {
     assert(usable_);
 
-    std::vector<DBOVariable*> variables;
+    std::vector<DBContentVariable*> variables;
 
     if (new_value.size() == 0)
     {
@@ -347,7 +347,7 @@ bool DBFilterCondition::checkValueInvalid(const std::string& new_value)
 
     if (variable_dbo_name_ == META_OBJECT_NAME)
     {
-         DBObjectManager& dbo_man = COMPASS::instance().objectManager();
+         DBContentManager& dbo_man = COMPASS::instance().objectManager();
 
         assert (dbo_man.existsMetaVariable(variable_name_));
 
@@ -387,7 +387,7 @@ bool DBFilterCondition::checkValueInvalid(const std::string& new_value)
 }
 
 std::pair<std::string, bool> DBFilterCondition::getTransformedValue(const std::string& untransformed_value,
-                                                                    DBOVariable* variable)
+                                                                    DBContentVariable* variable)
 {
     assert(variable);
 
@@ -417,7 +417,7 @@ std::pair<std::string, bool> DBFilterCondition::getTransformedValue(const std::s
     {
         value_str = value_it;
 
-        if (variable->representation() != DBOVariable::Representation::STANDARD)
+        if (variable->representation() != DBContentVariable::Representation::STANDARD)
             value_str =
                     variable->getValueStringFromRepresentation(value_str);  // fix representation
 

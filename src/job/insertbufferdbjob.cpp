@@ -26,7 +26,7 @@
 
 using namespace Utils::String;
 
-InsertBufferDBJob::InsertBufferDBJob(DBInterface& db_interface, DBObject& dbobject,
+InsertBufferDBJob::InsertBufferDBJob(DBInterface& db_interface, DBContent& dbobject,
                                      std::shared_ptr<Buffer> buffer, bool emit_change)
     : Job("InsertBufferDBJob"),
       db_interface_(db_interface),

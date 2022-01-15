@@ -22,7 +22,7 @@
 
 using namespace std;
 
-DBOVariableCreateDialog::DBOVariableCreateDialog(DBObject& object, const std::string name,
+DBContentVariableCreateDialog::DBContentVariableCreateDialog(DBContent& object, const std::string name,
                                                  const std::string description,
                                                  QWidget* parent, Qt::WindowFlags f)
     : QDialog(parent, f), object_(object)
@@ -43,12 +43,12 @@ DBOVariableCreateDialog::DBOVariableCreateDialog(DBObject& object, const std::st
     name_ = name;
 
     name_edit_ = new QLineEdit(name_.c_str());
-    connect(name_edit_, &QLineEdit::textChanged, this, &DBOVariableCreateDialog::nameChangedSlot);
+    connect(name_edit_, &QLineEdit::textChanged, this, &DBContentVariableCreateDialog::nameChangedSlot);
     form_layout->addRow("Name", name_edit_);
 
     //    QLineEdit* short_name_edit_ {nullptr};
     short_name_edit_ = new QLineEdit();
-    connect(short_name_edit_, &QLineEdit::textChanged, this, &DBOVariableCreateDialog::shortNameChangedSlot);
+    connect(short_name_edit_, &QLineEdit::textChanged, this, &DBContentVariableCreateDialog::shortNameChangedSlot);
     form_layout->addRow("Short Name", short_name_edit_);
 
     //    QTextEdit* description_edit_ {nullptr};
@@ -60,12 +60,12 @@ DBOVariableCreateDialog::DBOVariableCreateDialog(DBObject& object, const std::st
     //description_edit_->setWordWrapMode(QTextOption::WrapMode::WrapAnywhere);
 
     connect(description_edit_, &QTextEdit::textChanged, this,
-            &DBOVariableCreateDialog::commentChangedSlot);
+            &DBContentVariableCreateDialog::commentChangedSlot);
 
     form_layout->addRow("Comment", description_edit_);
 
     //    DBOVariableDataTypeComboBox* type_combo_ {nullptr};
-    type_combo_ = new DBOVariableDataTypeComboBox(data_type_, data_type_str_);
+    type_combo_ = new DBContentVariableDataTypeComboBox(data_type_, data_type_str_);
     form_layout->addRow("Data Type", type_combo_);
 
     //    UnitSelectionWidget* unit_sel_ {nullptr};
@@ -91,7 +91,7 @@ DBOVariableCreateDialog::DBOVariableCreateDialog(DBObject& object, const std::st
 
     db_column_edit_ = new QLineEdit(db_column_name_.c_str());
 
-    connect(db_column_edit_, &QLineEdit::textChanged, this, &DBOVariableCreateDialog::dbColumnChangedSlot);
+    connect(db_column_edit_, &QLineEdit::textChanged, this, &DBContentVariableCreateDialog::dbColumnChangedSlot);
     form_layout->addRow("DBColumn", db_column_edit_);
 
     main_layout->addLayout(form_layout);
@@ -103,13 +103,13 @@ DBOVariableCreateDialog::DBOVariableCreateDialog(DBObject& object, const std::st
     QHBoxLayout* button_layout = new QHBoxLayout();
 
     cancel_button_ = new QPushButton("Cancel");
-    connect(cancel_button_, &QPushButton::clicked, this, &DBOVariableCreateDialog::reject);
+    connect(cancel_button_, &QPushButton::clicked, this, &DBContentVariableCreateDialog::reject);
     button_layout->addWidget(cancel_button_);
 
     button_layout->addStretch();
 
     ok_button_ = new QPushButton("OK");
-    connect(ok_button_, &QPushButton::clicked, this, &DBOVariableCreateDialog::accept);
+    connect(ok_button_, &QPushButton::clicked, this, &DBContentVariableCreateDialog::accept);
     button_layout->addWidget(ok_button_);
 
     main_layout->addLayout(button_layout);
@@ -125,47 +125,47 @@ DBOVariableCreateDialog::DBOVariableCreateDialog(DBObject& object, const std::st
     checkSettings();
 }
 
-std::string DBOVariableCreateDialog::name() const
+std::string DBContentVariableCreateDialog::name() const
 {
     return name_;
 }
 
-std::string DBOVariableCreateDialog::shortName() const
+std::string DBContentVariableCreateDialog::shortName() const
 {
     return short_name_;
 }
 
-std::string DBOVariableCreateDialog::dataTypeStr() const
+std::string DBContentVariableCreateDialog::dataTypeStr() const
 {
     return Property::asString(data_type_);
 }
 
-std::string DBOVariableCreateDialog::dimension() const
+std::string DBContentVariableCreateDialog::dimension() const
 {
     return dimension_;
 }
 
-std::string DBOVariableCreateDialog::unit() const
+std::string DBContentVariableCreateDialog::unit() const
 {
     return unit_;
 }
 
-std::string DBOVariableCreateDialog::representationStr() const
+std::string DBContentVariableCreateDialog::representationStr() const
 {
     return representation_str_;
 }
 
-std::string DBOVariableCreateDialog::description() const
+std::string DBContentVariableCreateDialog::description() const
 {
     return description_;
 }
 
-std::string DBOVariableCreateDialog::dbColumnName() const
+std::string DBContentVariableCreateDialog::dbColumnName() const
 {
     return db_column_name_;
 }
 
-void DBOVariableCreateDialog::nameChangedSlot(const QString& name)
+void DBContentVariableCreateDialog::nameChangedSlot(const QString& name)
 {
     loginf << "DBOVariableCreateDialog: nameChangedSlot: name '" << name.toStdString() << "'";
 
@@ -189,19 +189,19 @@ void DBOVariableCreateDialog::nameChangedSlot(const QString& name)
     checkSettings();
 }
 
-void DBOVariableCreateDialog::shortNameChangedSlot(const QString& name)
+void DBContentVariableCreateDialog::shortNameChangedSlot(const QString& name)
 {
     short_name_ = name.toStdString();
 }
 
-void DBOVariableCreateDialog::commentChangedSlot()
+void DBContentVariableCreateDialog::commentChangedSlot()
 {
     assert (description_edit_);
 
     description_ = description_edit_->document()->toPlainText().toStdString();
 }
 
-void DBOVariableCreateDialog::dbColumnChangedSlot(const QString& name)
+void DBContentVariableCreateDialog::dbColumnChangedSlot(const QString& name)
 {
     loginf << "DBOVariableCreateDialog: dbColumnChangedSlot: name '" << name.toStdString() << "'";
 
@@ -223,7 +223,7 @@ void DBOVariableCreateDialog::dbColumnChangedSlot(const QString& name)
     checkSettings();
 }
 
-void DBOVariableCreateDialog::checkSettings()
+void DBContentVariableCreateDialog::checkSettings()
 {
     assert (name_edit_);
     assert (db_column_edit_);

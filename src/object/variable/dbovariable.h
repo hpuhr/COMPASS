@@ -28,10 +28,10 @@
 #include "stringconv.h"
 
 class DBTableColumn;
-class DBObject;
-class DBOVariableWidget;
+class DBContent;
+class DBContentVariableWidget;
 
-class DBOVariable : public QObject, public Property, public Configurable
+class DBContentVariable : public QObject, public Property, public Configurable
 {
     Q_OBJECT
   public:
@@ -53,15 +53,15 @@ class DBOVariable : public QObject, public Property, public Configurable
     }
 
     /// @brief Constructor
-    DBOVariable(const std::string& class_id, const std::string& instance_id, DBObject* parent);
+    DBContentVariable(const std::string& class_id, const std::string& instance_id, DBContent* parent);
     //DBOVariable() = default;
     /// @brief Move constructor
     //DBOVariable& operator=(DBOVariable&& other);
     /// @brief Desctructor
-    virtual ~DBOVariable();
+    virtual ~DBContentVariable();
 
     /// @brief Comparison operator
-    bool operator==(const DBOVariable& var);
+    bool operator==(const DBContentVariable& var);
 
     /// @brief Prints information for debugging
     void print();
@@ -74,7 +74,7 @@ class DBOVariable : public QObject, public Property, public Configurable
     /// @brief Sets variable identifier
     void name(const std::string& name);
 
-    DBObject& object() const;
+    DBContent& object() const;
     const std::string& dboName() const;
 
     /// @brief Returns variable description
@@ -101,7 +101,7 @@ class DBOVariable : public QObject, public Property, public Configurable
     std::string& unit() { return unit_; }
     std::string dimensionUnitStr();
 
-    DBObject& dbObject() const
+    DBContent& dbObject() const
     {
         assert(db_object_);
         return *db_object_;
@@ -112,7 +112,7 @@ class DBOVariable : public QObject, public Property, public Configurable
 //    std::string getMinStringRepresentation();
 //    std::string getMaxStringRepresentation();
 
-    DBOVariableWidget* widget();
+    DBContentVariableWidget* widget();
 
     Representation representation() const;
     Representation& representationRef() { return representation_; } // have to take care of representation_str
@@ -123,28 +123,28 @@ class DBOVariable : public QObject, public Property, public Configurable
     template <typename T>
     std::string getAsSpecialRepresentationString(T value) const
     {
-        assert(representation_ != DBOVariable::Representation::STANDARD);
+        assert(representation_ != DBContentVariable::Representation::STANDARD);
 
         std::ostringstream out;
         try
         {
-            if (representation_ == DBOVariable::Representation::SECONDS_TO_TIME)
+            if (representation_ == DBContentVariable::Representation::SECONDS_TO_TIME)
             {
                 return Utils::String::timeStringFromDouble(value);
             }
-            else if (representation_ == DBOVariable::Representation::DEC_TO_OCTAL)
+            else if (representation_ == DBContentVariable::Representation::DEC_TO_OCTAL)
             {
                 out << std::oct << std::setfill('0') << std::setw(4) << value;
             }
-            else if (representation_ == DBOVariable::Representation::DEC_TO_HEX)
+            else if (representation_ == DBContentVariable::Representation::DEC_TO_HEX)
             {
                 out << std::uppercase << std::hex << std::setfill('0') << std::setw(6) << value;
             }
-            else if (representation_ == DBOVariable::Representation::FEET_TO_FLIGHTLEVEL)
+            else if (representation_ == DBContentVariable::Representation::FEET_TO_FLIGHTLEVEL)
             {
                 out << value / 100.0;
             }
-            else if (representation_ == DBOVariable::Representation::DATA_SRC_NAME)
+            else if (representation_ == DBContentVariable::Representation::DATA_SRC_NAME)
             {
                 return getDataSourcesAsString(std::to_string(value));
             }
@@ -186,7 +186,7 @@ private:
     static std::map<Representation, std::string> representation_2_string_;
     static std::map<std::string, Representation> string_2_representation_;
 
-    DBObject* db_object_{nullptr};
+    DBContent* db_object_{nullptr};
 
     std::string short_name_;
     /// Value representation type, based on enum STRING_REPRESENTATION
@@ -208,7 +208,7 @@ private:
 //    /// Maximum as string
 //    std::string max_;
 
-    DBOVariableWidget* widget_{nullptr};
+    DBContentVariableWidget* widget_{nullptr};
 
     std::string getDataSourcesAsString(const std::string& value) const;
 
@@ -217,6 +217,6 @@ private:
     //void setMinMax();
 };
 
-Q_DECLARE_METATYPE(DBOVariable*)
+Q_DECLARE_METATYPE(DBContentVariable*)
 
 #endif /* DBOVARIABLE_H_ */

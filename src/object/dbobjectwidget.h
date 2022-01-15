@@ -28,17 +28,17 @@ class QGridLayout;
 class QPushButton;
 class QTextEdit;
 
-class DBObject;
+class DBContent;
 class DBODataSourceDefinition;
-class DBOVariable;
+class DBContentVariable;
 class DBSchemaSelectionComboBox;
-class DBOVariableDataTypeComboBox;
+class DBContentVariableDataTypeComboBox;
 class StringRepresentationComboBox;
 
 /**
  * @brief Edit widget for a DBObject
  */
-class DBObjectWidget : public QWidget
+class DBContentWidget : public QWidget
 {
     Q_OBJECT
 
@@ -61,11 +61,11 @@ class DBObjectWidget : public QWidget
     void showLabelDefinitionWidgetSlot();
 
   public:
-    DBObjectWidget(DBObject* object, QWidget* parent = 0, Qt::WindowFlags f = 0);
-    virtual ~DBObjectWidget();
+    DBContentWidget(DBContent* object, QWidget* parent = 0, Qt::WindowFlags f = 0);
+    virtual ~DBContentWidget();
 
   private:
-    DBObject* object_{nullptr};
+    DBContent* object_{nullptr};
 
     QLineEdit* name_edit_{nullptr};
     QLineEdit* info_edit_{nullptr};

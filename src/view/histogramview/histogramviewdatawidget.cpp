@@ -209,7 +209,7 @@ void HistogramViewDataWidget::loadingStartedSlot()
     updateChart();
 }
 
-void HistogramViewDataWidget::updateDataSlot(DBObject& object, std::shared_ptr<Buffer> buffer)
+void HistogramViewDataWidget::updateDataSlot(DBContent& object, std::shared_ptr<Buffer> buffer)
 {
     logdbg << "HistogramViewDataWidget: updateDataSlot: start";
 
@@ -235,7 +235,7 @@ void HistogramViewDataWidget::updateFromData(std::string dbo_name)
     assert (buffers_.count(dbo_name));
     Buffer* buffer = buffers_.at(dbo_name).get();
 
-    DBOVariable* data_var {nullptr};
+    DBContentVariable* data_var {nullptr};
 
     if (!view_->hasDataVar())
     {
@@ -266,8 +266,8 @@ void HistogramViewDataWidget::updateFromData(std::string dbo_name)
     PropertyDataType data_type = data_var->dataType();
     string current_var_name = data_var->name();
 
-    assert (buffer->has<bool>(DBObject::selected_var.name()));
-    NullableVector<bool>& selected_vec = buffer->get<bool>(DBObject::selected_var.name());
+    assert (buffer->has<bool>(DBContent::selected_var.name()));
+    NullableVector<bool>& selected_vec = buffer->get<bool>(DBContent::selected_var.name());
 
     switch (data_type)
     {
@@ -1547,7 +1547,7 @@ void HistogramViewDataWidget::calculateGlobalMinMax()
         Buffer* buffer = buf_it.second.get();
         string dbo_name = buf_it.first;
 
-        DBOVariable* data_var {nullptr};
+        DBContentVariable* data_var {nullptr};
 
         if (!view_->hasDataVar())
             continue;
@@ -2027,7 +2027,7 @@ void HistogramViewDataWidget::rectangleSelectedSlot (unsigned int index1, unsign
 
     loginf << "HistogramViewDataWidget: rectangleSelectedSlot: val_min " << val_min << " val_max " << val_max;
 
-    DBOVariable* data_var {nullptr};
+    DBContentVariable* data_var {nullptr};
 
     if (!view_->hasDataVar())
     {
@@ -2062,8 +2062,8 @@ void HistogramViewDataWidget::rectangleSelectedSlot (unsigned int index1, unsign
         PropertyDataType data_type = data_var->dataType();
         string current_var_name = data_var->name();
 
-        assert (buf_it.second->has<bool>(DBObject::selected_var.name()));
-        NullableVector<bool>& selected_vec = buf_it.second->get<bool>(DBObject::selected_var.name());
+        assert (buf_it.second->has<bool>(DBContent::selected_var.name()));
+        NullableVector<bool>& selected_vec = buf_it.second->get<bool>(DBContent::selected_var.name());
 
         shared_ptr<Buffer> buffer = buf_it.second;
 
@@ -2255,8 +2255,8 @@ void HistogramViewDataWidget::invertSelectionSlot()
 
     for (auto& buf_it : buffers_)
     {
-        assert (buf_it.second->has<bool>(DBObject::selected_var.name()));
-        NullableVector<bool>& selected_vec = buf_it.second->get<bool>(DBObject::selected_var.name());
+        assert (buf_it.second->has<bool>(DBContent::selected_var.name()));
+        NullableVector<bool>& selected_vec = buf_it.second->get<bool>(DBContent::selected_var.name());
 
         for (unsigned int cnt=0; cnt < buf_it.second->size(); ++cnt)
         {
@@ -2276,8 +2276,8 @@ void HistogramViewDataWidget::clearSelectionSlot()
 
     for (auto& buf_it : buffers_)
     {
-        assert (buf_it.second->has<bool>(DBObject::selected_var.name()));
-        NullableVector<bool>& selected_vec = buf_it.second->get<bool>(DBObject::selected_var.name());
+        assert (buf_it.second->has<bool>(DBContent::selected_var.name()));
+        NullableVector<bool>& selected_vec = buf_it.second->get<bool>(DBContent::selected_var.name());
 
         for (unsigned int cnt=0; cnt < buf_it.second->size(); ++cnt)
             selected_vec.set(cnt, false);

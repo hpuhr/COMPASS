@@ -26,7 +26,7 @@
 #include <unordered_map>
 #include <vector>
 
-class DBOVariableSet;
+class DBContentVariableSet;
 
 template <class T>
 class NullableVector;
@@ -119,7 +119,7 @@ class Buffer
 
     bool isNone(const Property& property, unsigned int row_cnt);
 
-    void transformVariables(DBOVariableSet& list,
+    void transformVariables(DBContentVariableSet& list,
                             bool dbcol2dbovar);  // tc2dbovar true for db col -> dbo var, false dbo var -> db column
 
     std::shared_ptr<Buffer> getPartialCopy(const PropertyList& partial_properties);

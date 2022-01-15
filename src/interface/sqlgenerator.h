@@ -26,7 +26,7 @@ class Buffer;
 class DBCommand;
 class DBCommandList;
 class DBInterface;
-class DBObject;
+class DBContent;
 
 class SQLGenerator
 {
@@ -34,14 +34,14 @@ class SQLGenerator
     SQLGenerator(DBInterface& db_interface);
     virtual ~SQLGenerator();
 
-    std::string getCreateTableStatement(const DBObject& object);
+    std::string getCreateTableStatement(const DBContent& object);
     std::string insertDBUpdateStringBind(std::shared_ptr<Buffer> buffer, std::string table_name);
     std::string createDBUpdateStringBind(std::shared_ptr<Buffer> buffer,
                                          const std::string& key_col_name, std::string table_name);
 
     std::shared_ptr<DBCommand> getSelectCommand(
-        const DBObject& object, DBOVariableSet read_list, const std::string& filter, bool use_order = false,
-        DBOVariable* order_variable = nullptr, bool use_order_ascending = false,
+        const DBContent& object, DBContentVariableSet read_list, const std::string& filter, bool use_order = false,
+        DBContentVariable* order_variable = nullptr, bool use_order_ascending = false,
         const std::string& limit = "");
 
 //    std::shared_ptr<DBCommand> getSelectCommand(const DBObject& object,
@@ -52,7 +52,7 @@ class SQLGenerator
     //std::shared_ptr<DBCommand> getDistinctDataSourcesSelectCommand(DBObject& object);
     std::shared_ptr<DBCommand> getMaxRecordNumberCommand(const std::string& table_name,
                                                          const std::string& rec_num_col_name);
-    std::shared_ptr<DBCommand> getADSBInfoCommand(DBObject& adsb_obj);
+    std::shared_ptr<DBCommand> getADSBInfoCommand(DBContent& adsb_obj);
 
     std::string getCreateAssociationTableStatement(const std::string& table_name);
     std::shared_ptr<DBCommand> getSelectAssociationsCommand(const std::string& table_name);
@@ -86,7 +86,7 @@ class SQLGenerator
                                           const std::string& layer_name, const std::string& json);
     std::string getSelectAllSectorsStatement();
 
-    std::shared_ptr<DBCommand> getTableSelectMinMaxNormalStatement(const DBObject& object);
+    std::shared_ptr<DBCommand> getTableSelectMinMaxNormalStatement(const DBContent& object);
 
   protected:
     DBInterface& db_interface_;

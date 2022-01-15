@@ -60,7 +60,7 @@ bool UTNFilter::filters(const std::string& dbo_type)
 }
 
 std::string UTNFilter::getConditionString(const std::string& dbo_name, bool& first,
-                                          std::vector<DBOVariable*>& filtered_variables)
+                                          std::vector<DBContentVariable*>& filtered_variables)
 {
     logdbg << "UTNFilter: getConditionString: dbo " << dbo_name << " active " << active_;
 
@@ -71,10 +71,10 @@ std::string UTNFilter::getConditionString(const std::string& dbo_name, bool& fir
 
     if (active_)
     {
-        DBObjectManager& obj_man = COMPASS::instance().objectManager();
+        DBContentManager& obj_man = COMPASS::instance().objectManager();
         assert (obj_man.existsObject(dbo_name));
 
-        DBObject& object = obj_man.object(dbo_name);
+        DBContent& object = obj_man.object(dbo_name);
 
         if (!object.hasAssociations())
         {

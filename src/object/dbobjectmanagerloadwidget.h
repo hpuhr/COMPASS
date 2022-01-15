@@ -21,9 +21,9 @@
 #include <QFrame>
 #include <map>
 
-class DBObject;
-class DBObjectWidget;
-class DBObjectManager;
+class DBContent;
+class DBContentWidget;
+class DBContentManager;
 
 class QGridLayout;
 class QPushButton;
@@ -31,7 +31,7 @@ class QCheckBox;
 class QLineEdit;
 class QLabel;
 
-class DBObjectManagerDataSourcesWidget : public QWidget
+class DBContentManagerDataSourcesWidget : public QWidget
 {
     Q_OBJECT
 
@@ -40,14 +40,14 @@ public slots:
     void loadDSChangedSlot();
 
 public:
-    DBObjectManagerDataSourcesWidget(DBObjectManager& object_manager);
-    virtual ~DBObjectManagerDataSourcesWidget();
+    DBContentManagerDataSourcesWidget(DBContentManager& object_manager);
+    virtual ~DBContentManagerDataSourcesWidget();
 
     void update();
     void loadingDone();
 
 private:
-    DBObjectManager& dbo_manager_;
+    DBContentManager& dbo_manager_;
 
     bool show_counts_ {false};
 

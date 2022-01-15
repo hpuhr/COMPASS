@@ -33,25 +33,25 @@
 class COMPASS;
 class PropertyList;
 
-class DBObjectWidget;
+class DBContentWidget;
 class Buffer;
 class Job;
 class DBOReadDBJob;
 class InsertBufferDBJob;
 class UpdateBufferDBJob;
 class FinalizeDBOReadJob;
-class DBOVariableSet;
+class DBContentVariableSet;
 class DBOLabelDefinition;
-class DBOLabelDefinitionWidget;
-class DBObjectManager;
+class DBContentLabelDefinitionWidget;
+class DBContentManager;
 
-class DBObject : public QObject, public Configurable
+class DBContent : public QObject, public Configurable
 {
     Q_OBJECT
 
 signals:
     void updateProgressSignal(float percent);
-    void updateDoneSignal(DBObject& object);
+    void updateDoneSignal(DBContent& object);
 
     void labelDefinitionChangedSignal();
 
@@ -89,16 +89,16 @@ public:
 
     static const Property selected_var;
 
-    DBObject(COMPASS& compass, const std::string& class_id, const std::string& instance_id,
-             DBObjectManager* manager);
-    virtual ~DBObject();
+    DBContent(COMPASS& compass, const std::string& class_id, const std::string& instance_id,
+             DBContentManager* manager);
+    virtual ~DBContent();
 
     bool hasVariable(const std::string& name) const;
-    DBOVariable& variable(const std::string& name);
+    DBContentVariable& variable(const std::string& name);
     void renameVariable(const std::string& name, const std::string& new_name);
     void deleteVariable(const std::string& name);
 
-    const std::vector<std::unique_ptr<DBOVariable>>& variables() const { return variables_; }
+    const std::vector<std::unique_ptr<DBContentVariable>>& variables() const { return variables_; }
 
     bool hasVariableDBColumnName(const std::string& name) const;
 
@@ -116,17 +116,17 @@ public:
 
     bool loadable() const { return is_loadable_; }
 
-    void load(DBOVariableSet& read_set, bool use_filters, bool use_order,
-              DBOVariable* order_variable, bool use_order_ascending,
+    void load(DBContentVariableSet& read_set, bool use_filters, bool use_order,
+              DBContentVariable* order_variable, bool use_order_ascending,
               const std::string& limit_str = ""); // main load function
-    void loadFiltered(DBOVariableSet& read_set, std::string custom_filter_clause,
-                      std::vector<DBOVariable*> filtered_variables, bool use_order,
-                      DBOVariable* order_variable, bool use_order_ascending,
+    void loadFiltered(DBContentVariableSet& read_set, std::string custom_filter_clause,
+                      std::vector<DBContentVariable*> filtered_variables, bool use_order,
+                      DBContentVariable* order_variable, bool use_order_ascending,
                       const std::string& limit_str = ""); // load function for custom filtering
     void quitLoading();
 
     void insertData(std::shared_ptr<Buffer> buffer);
-    void updateData(DBOVariable& key_var, DBOVariableSet& list, std::shared_ptr<Buffer> buffer);
+    void updateData(DBContentVariable& key_var, DBContentVariableSet& list, std::shared_ptr<Buffer> buffer);
 
     std::map<unsigned int, std::string> loadLabelData(std::vector<unsigned int> rec_nums, int break_item_cnt);
 
@@ -141,14 +141,14 @@ public:
                                          const std::string& instance_id);
 
     bool hasKeyVariable();
-    DBOVariable& getKeyVariable();
+    DBContentVariable& getKeyVariable();
 
     std::string status();
 
-    DBObjectWidget* widget();
+    DBContentWidget* widget();
     void closeWidget();
 
-    DBOLabelDefinitionWidget* labelDefinitionWidget();
+    DBContentLabelDefinitionWidget* labelDefinitionWidget();
 
     //std::shared_ptr<Buffer> data() { return data_; }
 
@@ -171,7 +171,7 @@ public:
 
 protected:
     COMPASS& compass_;
-    DBObjectManager& dbo_manager_;
+    DBContentManager& dbo_manager_;
     std::string name_;
     std::string info_;
     std::string db_table_name_;
@@ -193,9 +193,9 @@ protected:
     std::shared_ptr<UpdateBufferDBJob> update_job_{nullptr};
 
     /// Container with all variables (variable identifier -> variable pointer)
-    std::vector<std::unique_ptr<DBOVariable>> variables_;
+    std::vector<std::unique_ptr<DBContentVariable>> variables_;
 
-    std::unique_ptr<DBObjectWidget> widget_;
+    std::unique_ptr<DBContentWidget> widget_;
 
     bool associations_changed_{false};
     bool associations_loaded_{false};

@@ -78,7 +78,7 @@ void HistogramViewDataSource::checkSubConfigurables()
         generateSubConfigurable("DBOVariableOrderedSet", "DBOVariableOrderedSet0");
         assert(set_);
 
-        DBObjectManager& obj_man = COMPASS::instance().objectManager();
+        DBContentManager& obj_man = COMPASS::instance().objectManager();
 
         if (obj_man.existsMetaVariable("rec_num"))
             set_->add(obj_man.metaVariable("rec_num"));
@@ -138,7 +138,7 @@ void HistogramViewDataSource::showViewPoint (const ViewableDataConfig* vp)
 
 bool HistogramViewDataSource::addTemporaryVariable (const std::string& dbo_name, const std::string& var_name)
 {
-    DBObjectManager& obj_man = COMPASS::instance().objectManager();
+    DBContentManager& obj_man = COMPASS::instance().objectManager();
 
     if (dbo_name == META_OBJECT_NAME)
     {
@@ -155,10 +155,10 @@ bool HistogramViewDataSource::addTemporaryVariable (const std::string& dbo_name,
     else
     {
         assert (obj_man.existsObject(dbo_name));
-        DBObject& obj = obj_man.object(dbo_name);
+        DBContent& obj = obj_man.object(dbo_name);
 
         assert (obj.hasVariable(var_name));
-        DBOVariable& var = obj.variable(var_name);
+        DBContentVariable& var = obj.variable(var_name);
 
         if (!set_->hasVariable(var))
         {
@@ -172,7 +172,7 @@ bool HistogramViewDataSource::addTemporaryVariable (const std::string& dbo_name,
 
 void HistogramViewDataSource::removeTemporaryVariable (const std::string& dbo_name, const std::string& var_name)
 {
-    DBObjectManager& obj_man = COMPASS::instance().objectManager();
+    DBContentManager& obj_man = COMPASS::instance().objectManager();
 
     if (dbo_name == META_OBJECT_NAME)
     {
@@ -184,10 +184,10 @@ void HistogramViewDataSource::removeTemporaryVariable (const std::string& dbo_na
     else
     {
         assert (obj_man.existsObject(dbo_name));
-        DBObject& obj = obj_man.object(dbo_name);
+        DBContent& obj = obj_man.object(dbo_name);
 
         assert (obj.hasVariable(var_name));
-        DBOVariable& var = obj.variable(var_name);
+        DBContentVariable& var = obj.variable(var_name);
         assert (set_->hasVariable(var));
         set_->removeVariable(var);
     }

@@ -34,8 +34,8 @@
 
 class COMPASS;
 class EvaluationStandard;
-class DBObject;
-class DBOVariableSet;
+class DBContent;
+class DBContentVariableSet;
 
 class QWidget;
 class QTabWidget;
@@ -56,8 +56,8 @@ public slots:
     void databaseOpenedSlot();
     void databaseClosedSlot();
 
-    void newDataSlot(DBObject& object);
-    void loadingDoneSlot(DBObject& object);
+    void newDataSlot(DBContent& object);
+    void loadingDoneSlot(DBContent& object);
 
 public:
     EvaluationManager(const std::string& class_id, const std::string& instance_id, COMPASS* compass);
@@ -76,7 +76,7 @@ public:
     void close();
 
     bool needsAdditionalVariables ();
-    void addVariables (const std::string dbo_name, DBOVariableSet& read_set);
+    void addVariables (const std::string dbo_name, DBContentVariableSet& read_set);
 
     virtual void generateSubConfigurable(const std::string& class_id,
                                          const std::string& instance_id) override;

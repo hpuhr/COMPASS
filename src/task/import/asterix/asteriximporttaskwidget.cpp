@@ -275,7 +275,7 @@ void ASTERIXImportTaskWidget::addParserSlot()
         return;
     }
 
-    SelectDBObjectDialog dialog;
+    SelectDBContentDialog dialog;
 
     int ret = dialog.exec();
 

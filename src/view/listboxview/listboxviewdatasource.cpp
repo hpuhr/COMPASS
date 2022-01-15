@@ -227,7 +227,7 @@ void ListBoxViewDataSource::currentSetName(const std::string& current_set_name)
 
 bool ListBoxViewDataSource::addTemporaryVariable (const std::string& dbo_name, const std::string& var_name)
 {
-    DBObjectManager& obj_man = COMPASS::instance().objectManager();
+    DBContentManager& obj_man = COMPASS::instance().objectManager();
     
     assert (hasCurrentSet());
     if (dbo_name == META_OBJECT_NAME)
@@ -245,10 +245,10 @@ bool ListBoxViewDataSource::addTemporaryVariable (const std::string& dbo_name, c
     else
     {
         assert (obj_man.existsObject(dbo_name));
-        DBObject& obj = obj_man.object(dbo_name);
+        DBContent& obj = obj_man.object(dbo_name);
 
         assert (obj.hasVariable(var_name));
-        DBOVariable& var = obj.variable(var_name);
+        DBContentVariable& var = obj.variable(var_name);
 
         if (!getSet()->hasVariable(var))
         {
@@ -267,7 +267,7 @@ void ListBoxViewDataSource::removeTemporaryVariable (const std::string& dbo_name
 //    assert (el != temporary_added_variables_.end());
 //    temporary_added_variables_.erase(el);
 
-    DBObjectManager& obj_man = COMPASS::instance().objectManager();
+    DBContentManager& obj_man = COMPASS::instance().objectManager();
 
     if (dbo_name == META_OBJECT_NAME)
     {
@@ -279,10 +279,10 @@ void ListBoxViewDataSource::removeTemporaryVariable (const std::string& dbo_name
     else
     {
         assert (obj_man.existsObject(dbo_name));
-        DBObject& obj = obj_man.object(dbo_name);
+        DBContent& obj = obj_man.object(dbo_name);
 
         assert (obj.hasVariable(var_name));
-        DBOVariable& var = obj.variable(var_name);
+        DBContentVariable& var = obj.variable(var_name);
         assert (getSet()->hasVariable(var));
         getSet()->removeVariable(var);
     }
@@ -290,18 +290,18 @@ void ListBoxViewDataSource::removeTemporaryVariable (const std::string& dbo_name
 
 void ListBoxViewDataSource::addDefaultVariables (DBOVariableOrderedSet& set)
 {
-    DBObjectManager& obj_man = COMPASS::instance().objectManager();
+    DBContentManager& obj_man = COMPASS::instance().objectManager();
 
-    if (obj_man.existsMetaVariable(DBObject::meta_var_rec_num_id_.name()))
-        set.add(obj_man.metaVariable(DBObject::meta_var_rec_num_id_.name()));
+    if (obj_man.existsMetaVariable(DBContent::meta_var_rec_num_id_.name()))
+        set.add(obj_man.metaVariable(DBContent::meta_var_rec_num_id_.name()));
 
     //        Time of Day
-    if (obj_man.existsMetaVariable(DBObject::meta_var_tod_id_.name()))
-        set.add(obj_man.metaVariable(DBObject::meta_var_tod_id_.name()));
+    if (obj_man.existsMetaVariable(DBContent::meta_var_tod_id_.name()))
+        set.add(obj_man.metaVariable(DBContent::meta_var_tod_id_.name()));
 
     //        Datasource
-    if (obj_man.existsMetaVariable(DBObject::meta_var_datasource_id_.name()))
-        set.add(obj_man.metaVariable(DBObject::meta_var_datasource_id_.name()));
+    if (obj_man.existsMetaVariable(DBContent::meta_var_datasource_id_.name()))
+        set.add(obj_man.metaVariable(DBContent::meta_var_datasource_id_.name()));
 
     //        Lat/Long
 //        if (obj_man.existsMetaVariable("pos_lat_deg"))
@@ -310,24 +310,24 @@ void ListBoxViewDataSource::addDefaultVariables (DBOVariableOrderedSet& set)
 //            set.add(obj_man.metaVariable("pos_long_deg"));
 
     //        Mode 3/A code
-    if (obj_man.existsMetaVariable(DBObject::meta_var_m3a_id_.name()))
-        set.add(obj_man.metaVariable(DBObject::meta_var_m3a_id_.name()));
+    if (obj_man.existsMetaVariable(DBContent::meta_var_m3a_id_.name()))
+        set.add(obj_man.metaVariable(DBContent::meta_var_m3a_id_.name()));
 
     //        Mode S TA
-    if (obj_man.existsMetaVariable(DBObject::meta_var_ta_id_.name()))
-        set.add(obj_man.metaVariable(DBObject::meta_var_ta_id_.name()));
+    if (obj_man.existsMetaVariable(DBContent::meta_var_ta_id_.name()))
+        set.add(obj_man.metaVariable(DBContent::meta_var_ta_id_.name()));
 
     //        Mode S Callsign
-    if (obj_man.existsMetaVariable(DBObject::meta_var_ti_id_.name()))
-        set.add(obj_man.metaVariable(DBObject::meta_var_ti_id_.name()));
+    if (obj_man.existsMetaVariable(DBContent::meta_var_ti_id_.name()))
+        set.add(obj_man.metaVariable(DBContent::meta_var_ti_id_.name()));
 
     //        Mode C
-    if (obj_man.existsMetaVariable(DBObject::meta_var_mc_id_.name()))
-        set.add(obj_man.metaVariable(DBObject::meta_var_mc_id_.name()));
+    if (obj_man.existsMetaVariable(DBContent::meta_var_mc_id_.name()))
+        set.add(obj_man.metaVariable(DBContent::meta_var_mc_id_.name()));
 
     //        Track Number
-    if (obj_man.existsMetaVariable(DBObject::meta_var_track_num_id_.name()))
-        set.add(obj_man.metaVariable(DBObject::meta_var_track_num_id_.name()));
+    if (obj_man.existsMetaVariable(DBContent::meta_var_track_num_id_.name()))
+        set.add(obj_man.metaVariable(DBContent::meta_var_track_num_id_.name()));
 }
 
 void ListBoxViewDataSource::setChangedSlot()

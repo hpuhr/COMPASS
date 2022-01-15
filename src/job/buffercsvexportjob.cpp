@@ -26,7 +26,7 @@
 #include "dbovariable.h"
 
 BufferCSVExportJob::BufferCSVExportJob(std::shared_ptr<Buffer> buffer,
-                                       const DBOVariableSet& read_set, const std::string& file_name,
+                                       const DBContentVariableSet& read_set, const std::string& file_name,
                                        bool overwrite, bool only_selected, bool use_presentation,
                                        bool show_associations)
     : Job("BufferCSVExportJob"),
@@ -80,8 +80,8 @@ void BufferCSVExportJob::run()
         }
         output_file << ss.str() << "\n";
 
-        assert(buffer_->has<bool>(DBObject::selected_var.name()));
-        NullableVector<bool> selected_vec = buffer_->get<bool>(DBObject::selected_var.name());
+        assert(buffer_->has<bool>(DBContent::selected_var.name()));
+        NullableVector<bool> selected_vec = buffer_->get<bool>(DBContent::selected_var.name());
 
         assert(buffer_->has<int>("rec_num"));
         NullableVector<int> rec_num_vec = buffer_->get<int>("rec_num");
@@ -89,7 +89,7 @@ void BufferCSVExportJob::run()
         std::string dbo_name = buffer_->dboName();
         assert(dbo_name.size());
 
-        DBObjectManager& manager = COMPASS::instance().objectManager();
+        DBContentManager& manager = COMPASS::instance().objectManager();
 
         for (; row < buffer_size; ++row)
         {
@@ -117,7 +117,7 @@ void BufferCSVExportJob::run()
             {
                 value_str = "";
 
-                DBOVariable& variable = read_set_.getVariable(col);
+                DBContentVariable& variable = read_set_.getVariable(col);
                 PropertyDataType data_type = variable.dataType();
 
                 std::string property_name = variable.name();

@@ -37,7 +37,7 @@
 
 
 class EvaluationManager;
-class DBObject;
+class DBContent;
 class Buffer;
 
 struct target_tag
@@ -98,8 +98,8 @@ class EvaluationData : public QAbstractItemModel
 public:
     EvaluationData(EvaluationManager& eval_man);
 
-    void addReferenceData (DBObject& object, std::shared_ptr<Buffer> buffer);
-    void addTestData (DBObject& object, std::shared_ptr<Buffer> buffer);
+    void addReferenceData (DBContent& object, std::shared_ptr<Buffer> buffer);
+    void addTestData (DBContent& object, std::shared_ptr<Buffer> buffer);
     void finalize ();
 
     bool hasTargetData (unsigned int utn);

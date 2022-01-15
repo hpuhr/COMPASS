@@ -18,8 +18,8 @@
 #include <memory>
 #include <string>
 
-class DBObject;
-class DBOVariable;
+class DBContent;
+class DBContentVariable;
 class Buffer;
 class ASTERIXImportTask;
 
@@ -42,7 +42,7 @@ public:
     ASTERIXJSONParser(const std::string& class_id, const std::string& instance_id,
                       Configurable* parent, ASTERIXImportTask& task);
 
-    DBObject& dbObject() const;
+    DBContent& dbObject() const;
 
     MappingIterator begin() { return data_mappings_.begin(); }
     MappingIterator end() { return data_mappings_.end(); }
@@ -53,7 +53,7 @@ public:
     bool parseJSON(nlohmann::json& j, Buffer& buffer) const;
     void createMappingStubs(nlohmann::json& j);
 
-    const DBOVariableSet& variableList() const;
+    const DBContentVariableSet& variableList() const;
 
     bool initialized() const { return initialized_; }
     void initialize();
@@ -125,7 +125,7 @@ private:
 
     jASTERIX::CategoryItemInfo item_info_;
 
-    DBOVariableSet var_list_;
+    DBContentVariableSet var_list_;
 
     bool initialized_{false};
 

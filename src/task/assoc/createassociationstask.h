@@ -31,9 +31,9 @@
 
 class TaskManager;
 class CreateAssociationsTaskWidget;
-class DBOVariable;
+class DBContentVariable;
 class MetaDBOVariable;
-class DBObject;
+class DBContent;
 class Buffer;
 class CreateAssociationsJob;
 
@@ -45,8 +45,8 @@ public slots:
     void createDoneSlot();
     void createObsoleteSlot();
 
-    void newDataSlot(DBObject& object);
-    void loadingDoneSlot(DBObject& object);
+    void newDataSlot(DBContent& object);
+    void loadingDoneSlot(DBContent& object);
 
     void associationStatusSlot(QString status);
 
@@ -213,7 +213,7 @@ protected:
 
     void checkAndSetMetaVariable(std::string& name_str, MetaDBOVariable** var);
 
-    DBOVariableSet getReadSetFor(const std::string& dbo_name);
+    DBContentVariableSet getReadSetFor(const std::string& dbo_name);
 };
 
 #endif // CREATEASSOCIATIONSTASK_H

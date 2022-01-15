@@ -5,8 +5,8 @@
 
 #include <QDialog>
 
-class DBOVariable;
-class DBOVariableDataTypeComboBox;
+class DBContentVariable;
+class DBContentVariableDataTypeComboBox;
 class UnitSelectionWidget;
 class StringRepresentationComboBox;
 
@@ -15,7 +15,7 @@ class QCheckBox;
 class QPushButton;
 class QTextEdit;
 
-class DBOVariableCreateDialog : public QDialog
+class DBContentVariableCreateDialog : public QDialog
 {
     Q_OBJECT
 
@@ -26,7 +26,7 @@ public slots:
     void dbColumnChangedSlot(const QString& name);
 
 public:
-    DBOVariableCreateDialog(DBObject& object, const std::string name="",
+    DBContentVariableCreateDialog(DBContent& object, const std::string name="",
                             const std::string description="",
                             QWidget* parent = nullptr, Qt::WindowFlags f = 0);
 
@@ -47,12 +47,12 @@ public:
     std::string dbColumnName() const;
 
 protected:
-    DBObject& object_;
+    DBContent& object_;
 
     QLineEdit* name_edit_ {nullptr};
     QLineEdit* short_name_edit_ {nullptr};
     QTextEdit* description_edit_ {nullptr};
-    DBOVariableDataTypeComboBox* type_combo_ {nullptr};
+    DBContentVariableDataTypeComboBox* type_combo_ {nullptr};
     UnitSelectionWidget* unit_sel_ {nullptr};
     StringRepresentationComboBox* representation_box_ {nullptr};
     QLineEdit* db_column_edit_ {nullptr};
@@ -72,7 +72,7 @@ protected:
     std::string dimension_;
     std::string unit_;
 
-    DBOVariable::Representation representation_ {DBOVariable::Representation::STANDARD};
+    DBContentVariable::Representation representation_ {DBContentVariable::Representation::STANDARD};
     std::string representation_str_ {"STANDARD"};
 
     std::string description_;

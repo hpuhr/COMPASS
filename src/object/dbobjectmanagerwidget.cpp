@@ -41,7 +41,7 @@
 
 using namespace Utils;
 
-DBObjectManagerWidget::DBObjectManagerWidget(DBObjectManager& object_manager)
+DBContentManagerWidget::DBContentManagerWidget(DBContentManager& object_manager)
     : object_manager_(object_manager)
 {
     // unsigned int frame_width = FRAME_SIZE;
@@ -108,7 +108,7 @@ DBObjectManagerWidget::DBObjectManagerWidget(DBObjectManager& object_manager)
     // lock();
 }
 
-DBObjectManagerWidget::~DBObjectManagerWidget()
+DBContentManagerWidget::~DBContentManagerWidget()
 {
     edit_dbo_buttons_.clear();
     delete_dbo_buttons_.clear();
@@ -152,7 +152,7 @@ DBObjectManagerWidget::~DBObjectManagerWidget()
 //    loginf << "DBObjectManagerWidget: databaseOpenedSlot";
 //}
 
-void DBObjectManagerWidget::addDBOSlot()
+void DBContentManagerWidget::addDBOSlot()
 {
 //    if (!schema_manager_.hasCurrentSchema())
 //    {
@@ -186,17 +186,17 @@ void DBObjectManagerWidget::addDBOSlot()
     }
 }
 
-void DBObjectManagerWidget::changedDBOSlot() { updateDBOsSlot(); }
+void DBContentManagerWidget::changedDBOSlot() { updateDBOsSlot(); }
 
-void DBObjectManagerWidget::editDBOSlot()
+void DBContentManagerWidget::editDBOSlot()
 {
     assert(edit_dbo_buttons_.find((QPushButton*)sender()) != edit_dbo_buttons_.end());
 
-    DBObject* object = edit_dbo_buttons_[(QPushButton*)sender()];
+    DBContent* object = edit_dbo_buttons_[(QPushButton*)sender()];
 
     if (edit_dbo_widgets_.find(object) == edit_dbo_widgets_.end())
     {
-        DBObjectWidget* widget = object->widget();
+        DBContentWidget* widget = object->widget();
         connect(widget, SIGNAL(changedDBOSignal()), this, SLOT(changedDBOSlot()));
         edit_dbo_widgets_[object] = widget;
     }
@@ -204,17 +204,17 @@ void DBObjectManagerWidget::editDBOSlot()
         edit_dbo_widgets_[object]->show();
 }
 
-void DBObjectManagerWidget::deleteDBOSlot()
+void DBContentManagerWidget::deleteDBOSlot()
 {
     assert(delete_dbo_buttons_.find((QPushButton*)sender()) != delete_dbo_buttons_.end());
 
-    DBObject* object = delete_dbo_buttons_[(QPushButton*)sender()];
+    DBContent* object = delete_dbo_buttons_[(QPushButton*)sender()];
     object_manager_.deleteObject(object->name());
 
     updateDBOsSlot();
 }
 
-void DBObjectManagerWidget::updateDBOsSlot()
+void DBContentManagerWidget::updateDBOsSlot()
 {
     assert(dbobjects_grid_);
 
@@ -283,9 +283,9 @@ void DBObjectManagerWidget::updateDBOsSlot()
     }
 }
 
-void DBObjectManagerWidget::addMetaVariableSlot() {}
+void DBContentManagerWidget::addMetaVariableSlot() {}
 
-void DBObjectManagerWidget::editMetaVariableSlot()
+void DBContentManagerWidget::editMetaVariableSlot()
 {
     assert(edit_meta_buttons_.find((QPushButton*)sender()) != edit_meta_buttons_.end());
 
@@ -301,7 +301,7 @@ void DBObjectManagerWidget::editMetaVariableSlot()
         edit_meta_widgets_[meta_var]->show();
 }
 
-void DBObjectManagerWidget::deleteMetaVariableSlot()
+void DBContentManagerWidget::deleteMetaVariableSlot()
 {
     assert(delete_meta_buttons_.find((QPushButton*)sender()) != delete_meta_buttons_.end());
 
@@ -311,7 +311,7 @@ void DBObjectManagerWidget::deleteMetaVariableSlot()
     updateMetaVariablesSlot();
 }
 
-void DBObjectManagerWidget::addAllMetaVariablesSlot()
+void DBContentManagerWidget::addAllMetaVariablesSlot()
 {
     std::vector<std::string> found_dbos;
 
@@ -383,7 +383,7 @@ void DBObjectManagerWidget::addAllMetaVariablesSlot()
         updateMetaVariablesSlot();
 }
 
-void DBObjectManagerWidget::updateMetaVariablesSlot()
+void DBContentManagerWidget::updateMetaVariablesSlot()
 {
     assert(meta_variables_grid_);
 

@@ -40,7 +40,7 @@
 
 using namespace Utils;
 
-DBOVariableWidget::DBOVariableWidget(DBOVariable& variable, QWidget* parent, Qt::WindowFlags f)
+DBContentVariableWidget::DBContentVariableWidget(DBContentVariable& variable, QWidget* parent, Qt::WindowFlags f)
     : QWidget(parent, f), variable_(&variable)
 {
     setMinimumSize(QSize(800, 600));
@@ -80,7 +80,7 @@ DBOVariableWidget::DBOVariableWidget(DBOVariable& variable, QWidget* parent, Qt:
     QLabel* type_label = new QLabel("Data Type");
     properties_layout_->addWidget(type_label, row, 0);
 
-    type_combo_ = new DBOVariableDataTypeComboBox(variable_->dataTypeRef(), variable_->dataTypeStringRef());
+    type_combo_ = new DBContentVariableDataTypeComboBox(variable_->dataTypeRef(), variable_->dataTypeStringRef());
     properties_layout_->addWidget(type_combo_, row, 1);
     row++;
 
@@ -106,9 +106,9 @@ DBOVariableWidget::DBOVariableWidget(DBOVariable& variable, QWidget* parent, Qt:
     show();
 }
 
-DBOVariableWidget::~DBOVariableWidget() {}
+DBContentVariableWidget::~DBContentVariableWidget() {}
 
-void DBOVariableWidget::lock()
+void DBContentVariableWidget::lock()
 {
     if (locked_)
         return;
@@ -122,7 +122,7 @@ void DBOVariableWidget::lock()
     locked_ = true;
 }
 
-void DBOVariableWidget::unlock()
+void DBContentVariableWidget::unlock()
 {
     if (!locked_)
         return;
@@ -136,14 +136,14 @@ void DBOVariableWidget::unlock()
     locked_ = false;
 }
 
-void DBOVariableWidget::setVariable(DBOVariable& variable)
+void DBContentVariableWidget::setVariable(DBContentVariable& variable)
 {
     variable_ = &variable;
 
     update();
 }
 
-void DBOVariableWidget::update()
+void DBContentVariableWidget::update()
 {
     name_edit_->setText(variable_->name().c_str());
     description_edit_->setText(variable_->description().c_str());
@@ -153,7 +153,7 @@ void DBOVariableWidget::update()
     unit_sel_->update(variable_->dimension(), variable_->unit());
 }
 
-void DBOVariableWidget::editNameSlot()
+void DBContentVariableWidget::editNameSlot()
 {
     logdbg << "DBOVariableWidget: editName";
     assert(name_edit_);
@@ -163,7 +163,7 @@ void DBOVariableWidget::editNameSlot()
     variable_->name(text);
     emit dboVariableChangedSignal();
 }
-void DBOVariableWidget::editDescriptionSlot()
+void DBContentVariableWidget::editDescriptionSlot()
 {
     logdbg << "DBOVariableWidget: editDescriptionSlot";
     assert(description_edit_);

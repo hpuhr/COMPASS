@@ -24,7 +24,7 @@
 #include "dbovariableset.h"
 
 class Buffer;
-class DBObject;
+class DBContent;
 class AllBufferCSVExportJob;
 class ListBoxViewDataSource;
 class AllBufferTableWidget;

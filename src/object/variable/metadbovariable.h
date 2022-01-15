@@ -30,7 +30,7 @@ class MetaDBOVariable : public Configurable
 {
   public:
     MetaDBOVariable(const std::string& class_id, const std::string& instance_id,
-                    DBObjectManager* object_manager);
+                    DBContentManager* object_manager);
     virtual ~MetaDBOVariable();
 
     virtual void generateSubConfigurable(const std::string& class_id,
@@ -39,22 +39,22 @@ class MetaDBOVariable : public Configurable
     bool hasVariables() const { return variables_.size() > 0; }
     PropertyDataType dataType() const;
     const std::string& dataTypeString() const;
-    DBOVariable::Representation representation();
+    DBContentVariable::Representation representation();
 
     /// @brief Return if variable exist in DBO of type
     bool existsIn(const std::string& dbo_name);
     /// @brief Returns variable existing in DBO of type
-    DBOVariable& getFor(const std::string& dbo_name);
+    DBContentVariable& getFor(const std::string& dbo_name);
     /// @brief Return variable identifier in DBO of type
     std::string getNameFor(const std::string& dbo_name);
-    void set(DBOVariable& var);
+    void set(DBContentVariable& var);
 
     void removeVariable(const std::string& dbo_name);
     /// @brief Sets sub-variable name for DBO of type
     void addVariable(const std::string& dbo_name, const std::string& dbovariable_name);
 
-    const std::map<std::string, DBOVariable&>& variables() { return variables_; }
-    bool uses(const DBOVariable& variable);
+    const std::map<std::string, DBContentVariable&>& variables() { return variables_; }
+    bool uses(const DBContentVariable& variable);
 
     std::string name() const;
     void name(const std::string& name);
@@ -77,14 +77,14 @@ class MetaDBOVariable : public Configurable
     std::string name_;
     std::string description_;
 
-    DBObjectManager& object_manager_;
+    DBContentManager& object_manager_;
 
     MetaDBOVariableWidget* widget_;
 
     bool locked_{false};
 
-    std::map<std::string, DBOVariableDefinition*> definitions_; // dbo name -> def
-    std::map<std::string, DBOVariable&> variables_; // dbo name -> var
+    std::map<std::string, DBContentVariableDefinition*> definitions_; // dbo name -> def
+    std::map<std::string, DBContentVariable&> variables_; // dbo name -> var
 
     virtual void checkSubConfigurables();
     void updateDescription();

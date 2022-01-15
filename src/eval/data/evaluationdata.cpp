@@ -44,7 +44,7 @@ EvaluationData::EvaluationData(EvaluationManager& eval_man)
 
 }
 
-void EvaluationData::addReferenceData (DBObject& object, std::shared_ptr<Buffer> buffer)
+void EvaluationData::addReferenceData (DBContent& object, std::shared_ptr<Buffer> buffer)
 {
     loginf << "EvaluationData: addReferenceData: dbo " << object.name() << " size " << buffer->size();
 
@@ -60,7 +60,7 @@ void EvaluationData::addReferenceData (DBObject& object, std::shared_ptr<Buffer>
     ref_buffer_ = buffer;
 
     // preset variable names
-    DBObjectManager& object_manager = COMPASS::instance().objectManager();
+    DBContentManager& object_manager = COMPASS::instance().objectManager();
 
     string dbo_name = ref_buffer_->dboName();
 
@@ -185,7 +185,7 @@ void EvaluationData::addReferenceData (DBObject& object, std::shared_ptr<Buffer>
            << " num_skipped " << num_skipped;
 }
 
-void EvaluationData::addTestData (DBObject& object, std::shared_ptr<Buffer> buffer)
+void EvaluationData::addTestData (DBContent& object, std::shared_ptr<Buffer> buffer)
 {
     loginf << "EvaluationData: addTestData: dbo " << object.name() << " size " << buffer->size();
 
@@ -200,7 +200,7 @@ void EvaluationData::addTestData (DBObject& object, std::shared_ptr<Buffer> buff
     assert (!tst_buffer_);
     tst_buffer_ = buffer;
 
-    DBObjectManager& object_manager = COMPASS::instance().objectManager();
+    DBContentManager& object_manager = COMPASS::instance().objectManager();
 
     string dbo_name = tst_buffer_->dboName();
 

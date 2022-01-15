@@ -109,7 +109,7 @@ void JSONObjectParser::generateSubConfigurable(const std::string& class_id,
         throw std::runtime_error("JSONObjectParser: generateSubConfigurable: unknown class_id " + class_id);
 }
 
-DBObject& JSONObjectParser::dbObject() const
+DBContent& JSONObjectParser::dbObject() const
 {
     assert(db_object_);
     return *db_object_;
@@ -147,7 +147,7 @@ void JSONObjectParser::initialize()
 {
     assert(!db_object_);
 
-    DBObjectManager& obj_man = COMPASS::instance().objectManager();
+    DBContentManager& obj_man = COMPASS::instance().objectManager();
 
     if (!obj_man.existsObject(db_object_name_))
         logwrn << "JSONObjectParser: initialize: dbobject '" << db_object_name_
@@ -856,7 +856,7 @@ void JSONObjectParser::transformBuffer(Buffer& buffer, size_t index) const
     //}
 }
 
-const DBOVariableSet& JSONObjectParser::variableList() const { return var_list_; }
+const DBContentVariableSet& JSONObjectParser::variableList() const { return var_list_; }
 
 bool JSONObjectParser::overrideDataSource() const { return override_data_source_; }
 

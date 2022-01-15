@@ -4,8 +4,6 @@
 #include "dbcontentdatasourcebase.h"
 #include "property.h"
 
-namespace DBContent {
-
 class DBDataSource : public DataSourceBase
 {
 public:
@@ -61,7 +59,5 @@ protected:
     std::map<std::string, std::map<unsigned int, unsigned int>> num_loaded_; // db_content -> line id -> count
     std::map<std::string, std::map<unsigned int, unsigned int>> counts_map_; // db_content -> line id -> count
 };
-
-} // namespace DBContent
 
 #endif // DBCONTENT_DBDATASOURCE_H

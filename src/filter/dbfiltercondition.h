@@ -26,7 +26,7 @@
 class QWidget;
 class QLineEdit;
 class QLabel;
-class DBOVariable;
+class DBContentVariable;
 class MetaDBOVariable;
 
 class DBFilter;
@@ -49,7 +49,7 @@ public:
     void invert();
     bool filters(const std::string& dbo_name);
     std::string getConditionString(const std::string& dbo_name, bool& first,
-                                   std::vector<DBOVariable*>& filtered_variables);
+                                   std::vector<DBContentVariable*>& filtered_variables);
 
     QWidget* getWidget()
     {
@@ -66,7 +66,7 @@ public:
     void setVariableName(const std::string& variable_name);
 
     bool hasVariable (const std::string& dbo_name);
-    DBOVariable& variable (const std::string& dbo_name);
+    DBContentVariable& variable (const std::string& dbo_name);
 
     bool getAbsoluteValue() { return absolute_value_; }
     void setAbsoluteValue(bool abs) { absolute_value_ = abs; }
@@ -108,7 +108,7 @@ private:
     QLabel* label_{nullptr};
 
     // transformed val, null contained
-    std::pair<std::string, bool> getTransformedValue(const std::string& untransformed_value, DBOVariable* variable);
+    std::pair<std::string, bool> getTransformedValue(const std::string& untransformed_value, DBContentVariable* variable);
     bool checkValueInvalid(const std::string& new_value);
 };
 

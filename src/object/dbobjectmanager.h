@@ -31,16 +31,16 @@
 #include <memory>
 
 class COMPASS;
-class DBObject;
-class DBObjectManagerWidget;
-class DBObjectManagerDataSourcesWidget;
+class DBContent;
+class DBContentManagerWidget;
+class DBContentManagerDataSourcesWidget;
 class MetaDBOVariableConfigurationDialog;
-class DBOVariable;
+class DBContentVariable;
 class MetaDBOVariable;
-class DBOVariableSet;
+class DBContentVariableSet;
 class DBSchemaManager;
 
-class DBObjectManager : public QObject, public Configurable
+class DBContentManager : public QObject, public Configurable
 {
     Q_OBJECT
 
@@ -65,18 +65,18 @@ signals:
 public:
     const static std::vector<std::string> data_source_types_;
 
-    DBObjectManager(const std::string& class_id, const std::string& instance_id, COMPASS* compass);
-    virtual ~DBObjectManager();
+    DBContentManager(const std::string& class_id, const std::string& instance_id, COMPASS* compass);
+    virtual ~DBContentManager();
 
     virtual void generateSubConfigurable(const std::string& class_id,
                                          const std::string& instance_id);
 
     bool existsObject(const std::string& dbo_name);
-    DBObject& object(const std::string& dbo_name);
+    DBContent& object(const std::string& dbo_name);
     void deleteObject(const std::string& dbo_name);
     bool hasData();
 
-    using DBObjectIterator = typename std::map<std::string, DBObject*>::iterator;
+    using DBObjectIterator = typename std::map<std::string, DBContent*>::iterator;
     DBObjectIterator begin() { return objects_.begin(); }
     DBObjectIterator end() { return objects_.end(); }
     size_t size() { return objects_.size(); }
@@ -87,18 +87,18 @@ public:
     void deleteMetaVariable(const std::string& var_name);
     const std::vector<std::unique_ptr<MetaDBOVariable>>& metaVariables() { return meta_variables_; }
 
-    bool usedInMetaVariable(const DBOVariable& variable);
+    bool usedInMetaVariable(const DBContentVariable& variable);
     MetaDBOVariableConfigurationDialog* metaVariableConfigdialog();
 
 
     bool hasConfigDataSource(unsigned int ds_id);
-    DBContent::ConfigurationDataSource& configDataSource(unsigned int ds_id);
+    ConfigurationDataSource& configDataSource(unsigned int ds_id);
 
     bool hasDataSource(unsigned int ds_id);
     bool canAddNewDataSourceFromConfig (unsigned int ds_id);
     void addNewDataSource (unsigned int ds_id); // be sure not to call from different thread
-    DBContent::DBDataSource& dataSource(unsigned int ds_id);
-    const std::vector<std::unique_ptr<DBContent::DBDataSource>>& dataSources() const;
+    DBDataSource& dataSource(unsigned int ds_id);
+    const std::vector<std::unique_ptr<DBDataSource>>& dataSources() const;
 
     std::map<unsigned int, std::vector <std::pair<std::string, unsigned int>>> getNetworkLines(); //ds_id -> (ip, port)
 
@@ -110,15 +110,15 @@ public:
 
     void load();
     void addLoadedData(std::map<std::string, std::shared_ptr<Buffer>> data);
-    void loadingDone(DBObject& object); // to be called by dbo when it's loading is finished
+    void loadingDone(DBContent& object); // to be called by dbo when it's loading is finished
     bool loadInProgress() const;
 
     void insertData(std::map<std::string, std::shared_ptr<Buffer>> data);
-    void insertDone(DBObject& object); // to be called by dbo when it's insert is finished
+    void insertDone(DBContent& object); // to be called by dbo when it's insert is finished
     bool insertInProgress() const;
 
-    DBObjectManagerWidget* widget();
-    DBObjectManagerDataSourcesWidget* loadWidget();
+    DBContentManagerWidget* widget();
+    DBContentManagerDataSourcesWidget* loadWidget();
 
     bool useLimit() const;
     void useLimit(bool useLimit);
@@ -136,8 +136,8 @@ public:
     void useOrderAscending(bool useOrderAscending);
 
     bool hasOrderVariable();
-    DBOVariable& orderVariable();
-    void orderVariable(DBOVariable& variable);
+    DBContentVariable& orderVariable();
+    void orderVariable(DBContentVariable& variable);
     bool hasOrderMetaVariable();
     MetaDBOVariable& orderMetaVariable();
     void orderMetaVariable(MetaDBOVariable& variable);
@@ -154,7 +154,7 @@ public:
     std::string associationsDBObject() const;
     std::string associationsDataSourceName() const;
 
-    bool isOtherDBObjectPostProcessing(DBObject& object);
+    bool isOtherDBObjectPostProcessing(DBContent& object);
 
     bool hasMaxRecordNumber() const { return has_max_rec_num_; }
     unsigned int maxRecordNumber() const;
@@ -194,14 +194,14 @@ protected:
     bool insert_in_progress_{false};
 
     /// Container with all DBOs (DBO name -> DBO pointer)
-    std::map<std::string, DBObject*> objects_;
+    std::map<std::string, DBContent*> objects_;
     std::vector<std::unique_ptr<MetaDBOVariable>> meta_variables_;
 
-    std::vector<std::unique_ptr<DBContent::ConfigurationDataSource>> config_data_sources_;
-    std::vector<std::unique_ptr<DBContent::DBDataSource>> db_data_sources_;
+    std::vector<std::unique_ptr<ConfigurationDataSource>> config_data_sources_;
+    std::vector<std::unique_ptr<DBDataSource>> db_data_sources_;
 
-    std::unique_ptr<DBObjectManagerWidget> widget_;
-    std::unique_ptr<DBObjectManagerDataSourcesWidget> load_widget_;
+    std::unique_ptr<DBContentManagerWidget> widget_;
+    std::unique_ptr<DBContentManagerDataSourcesWidget> load_widget_;
 
     std::unique_ptr<MetaDBOVariableConfigurationDialog> meta_cfg_dialog_;
 

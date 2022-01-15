@@ -35,7 +35,7 @@ class HistogramViewDataSource : public QObject, public Configurable
 
   signals:
     /// @brief Emitted when resulting buffer was delivered
-    void updateDataSignal(DBObject& object, std::shared_ptr<Buffer> buffer);
+    void updateDataSignal(DBContent& object, std::shared_ptr<Buffer> buffer);
 
   public:
     /// @brief Constructor

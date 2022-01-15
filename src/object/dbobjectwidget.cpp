@@ -49,7 +49,7 @@
 
 using namespace Utils;
 
-DBObjectWidget::DBObjectWidget(DBObject* object, QWidget* parent,
+DBContentWidget::DBContentWidget(DBContent* object, QWidget* parent,
                                Qt::WindowFlags f)
     : QWidget(parent, f), object_(object)
 {
@@ -90,21 +90,21 @@ DBObjectWidget::DBObjectWidget(DBObject* object, QWidget* parent,
         grid_layout->addWidget(name_label, 0, 0);
 
         name_edit_ = new QLineEdit(object_->name().c_str());
-        connect(name_edit_, &QLineEdit::returnPressed, this, &DBObjectWidget::editNameSlot);
+        connect(name_edit_, &QLineEdit::returnPressed, this, &DBContentWidget::editNameSlot);
         grid_layout->addWidget(name_edit_, 0, 1);
 
         QLabel* info_label = new QLabel("Description");
         grid_layout->addWidget(info_label, 1, 0);
 
         info_edit_ = new QLineEdit(object_->info().c_str());
-        connect(info_edit_, &QLineEdit::returnPressed, this, &DBObjectWidget::editInfoSlot);
+        connect(info_edit_, &QLineEdit::returnPressed, this, &DBContentWidget::editInfoSlot);
         grid_layout->addWidget(info_edit_, 1, 1);
 
         properties_layout->addLayout(grid_layout);
 
         edit_label_button_ = new QPushButton("Edit Label Definition");
         connect(edit_label_button_, &QPushButton::clicked, this,
-                &DBObjectWidget::showLabelDefinitionWidgetSlot);
+                &DBContentWidget::showLabelDefinitionWidgetSlot);
         properties_layout->addWidget(edit_label_button_);
 
         properties_frame->setLayout(properties_layout);
@@ -185,9 +185,9 @@ DBObjectWidget::DBObjectWidget(DBObject* object, QWidget* parent,
     show();
 }
 
-DBObjectWidget::~DBObjectWidget() {}
+DBContentWidget::~DBContentWidget() {}
 
-void DBObjectWidget::editNameSlot()
+void DBContentWidget::editNameSlot()
 {
     logdbg << "DBObjectWidget: editName";
     assert(name_edit_);
@@ -198,7 +198,7 @@ void DBObjectWidget::editNameSlot()
     object_->name(text);
     emit changedDBOSignal();
 }
-void DBObjectWidget::editInfoSlot()
+void DBContentWidget::editInfoSlot()
 {
     logdbg << "DBObjectWidget: editInfo";
     assert(info_edit_);
@@ -210,7 +210,7 @@ void DBObjectWidget::editInfoSlot()
     emit changedDBOSignal();
 }
 
-void DBObjectWidget::editDBOVariableNameSlot()
+void DBContentWidget::editDBOVariableNameSlot()
 {
     logdbg << "DBObjectWidget: editDBOVariableNameSlot";
 
@@ -219,7 +219,7 @@ void DBObjectWidget::editDBOVariableNameSlot()
 
     std::string new_name = edit->text().toStdString();
 
-    DBOVariable* variable = edit->property("variable").value<DBOVariable*>();
+    DBContentVariable* variable = edit->property("variable").value<DBContentVariable*>();
     assert(variable);
     assert(object_->hasVariable(variable->name()));
 
@@ -236,27 +236,27 @@ void DBObjectWidget::editDBOVariableNameSlot()
     object_->renameVariable(variable->name(), new_name);
 }
 
-void DBObjectWidget::editDBOVariableDescriptionSlot()
+void DBContentWidget::editDBOVariableDescriptionSlot()
 {
     logdbg << "DBObjectWidget: editDBOVariableDescriptionSlot";
 
     QLineEdit* edit = static_cast<QLineEdit*>(sender());
     assert(edit);
 
-    DBOVariable* variable = edit->property("variable").value<DBOVariable*>();
+    DBContentVariable* variable = edit->property("variable").value<DBContentVariable*>();
     assert(variable);
 
     variable->description(edit->text().toStdString());
 }
 
-void DBObjectWidget::editDBOVariableDBColumnSlot(const QString& text)
+void DBContentWidget::editDBOVariableDBColumnSlot(const QString& text)
 {
     logdbg << "DBObjectWidget: editDBOVariableDBColumnSlot";
 
     assert (false); // TODO
 }
 
-void DBObjectWidget::deleteDBOVarSlot()
+void DBContentWidget::deleteDBOVarSlot()
 {
     logdbg << "DBObjectWidget: deleteDBOVar";
 
@@ -265,14 +265,14 @@ void DBObjectWidget::deleteDBOVarSlot()
 
     QVariant data = button->property("variable");
 
-    DBOVariable* variable = data.value<DBOVariable*>();
+    DBContentVariable* variable = data.value<DBContentVariable*>();
     assert(variable);
     object_->deleteVariable(variable->name());
 
     updateDBOVarsGridSlot();
 }
 
-void DBObjectWidget::updateDataSourcesGridSlot()
+void DBContentWidget::updateDataSourcesGridSlot()
 {
     logdbg << "DBObjectWidget: updateDataSourcesGrid";
     assert(object_);
@@ -308,13 +308,13 @@ void DBObjectWidget::updateDataSourcesGridSlot()
 
 }
 
-void DBObjectWidget::showLabelDefinitionWidgetSlot()
+void DBContentWidget::showLabelDefinitionWidgetSlot()
 {
     assert(object_);
     object_->labelDefinitionWidget()->show();
 }
 
-void DBObjectWidget::updateDBOVarsGridSlot()
+void DBContentWidget::updateDBOVarsGridSlot()
 {
     logdbg << "DBObjectWidget: updateDBOVarsGrid";
     assert(object_);
@@ -380,7 +380,7 @@ void DBObjectWidget::updateDBOVarsGridSlot()
         row++;
         col = 0;
 
-        DBOVariable& variable = *var_it.get();
+        DBContentVariable& variable = *var_it.get();
 
         // QVariant data = QVariant(qMetaTypeId<QObject*>(), var_it.second);
         // QVariant data = QVariant::fromValue(dynamic_cast<QObject*>(var_it.second));
@@ -405,7 +405,7 @@ void DBObjectWidget::updateDBOVarsGridSlot()
         dbovars_grid_->addWidget(description_edit, row, col);
 
         col++;
-        DBOVariableDataTypeComboBox* type_combo = new DBOVariableDataTypeComboBox(
+        DBContentVariableDataTypeComboBox* type_combo = new DBContentVariableDataTypeComboBox(
                     variable.dataTypeRef(), variable.dataTypeStringRef());
         dbovars_grid_->addWidget(type_combo, row, col);
 

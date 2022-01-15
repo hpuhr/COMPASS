@@ -39,7 +39,7 @@
 
 // using namespace Utils;
 
-BufferTableWidget::BufferTableWidget(DBObject& object, ListBoxView& view,
+BufferTableWidget::BufferTableWidget(DBContent& object, ListBoxView& view,
                                      ListBoxViewDataSource& data_source, QWidget* parent,
                                      Qt::WindowFlags f)
     : QWidget(parent, f), object_(object), view_(view), data_source_(data_source)

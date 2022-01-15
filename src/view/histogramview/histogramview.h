@@ -24,7 +24,7 @@ class HistogramViewWidget;
 class HistogramViewDataSource;
 class HistogramViewDataWidget;
 
-class DBOVariable;
+class DBContentVariable;
 class MetaDBOVariable;
 
 class HistogramView : public View
@@ -67,7 +67,7 @@ class HistogramView : public View
 
     HistogramViewDataWidget* getDataWidget();
 
-    virtual DBOVariableSet getSet(const std::string& dbo_name) override;
+    virtual DBContentVariableSet getSet(const std::string& dbo_name) override;
 
     virtual void accept(LatexVisitor& v) override;
 
@@ -76,8 +76,8 @@ class HistogramView : public View
 
     bool hasDataVar ();
     bool isDataVarMeta ();
-    DBOVariable& dataVar();
-    void dataVar (DBOVariable& var);
+    DBContentVariable& dataVar();
+    void dataVar (DBContentVariable& var);
 
     MetaDBOVariable& metaDataVar();
     void metaDataVar (MetaDBOVariable& var);

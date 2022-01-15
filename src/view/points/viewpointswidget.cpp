@@ -116,10 +116,10 @@ ViewPointsWidget::ViewPointsWidget(ViewManager& view_manager)
 
     setLayout(main_layout);
 
-    DBObjectManager& dbo_man = COMPASS::instance().objectManager();
+    DBContentManager& dbo_man = COMPASS::instance().objectManager();
 
-    connect (&dbo_man, &DBObjectManager::loadingStartedSignal, this, &ViewPointsWidget::loadingStartedSlot);
-    connect (&dbo_man, &DBObjectManager::loadingDoneSignal, this, &ViewPointsWidget::allLoadingDoneSlot);
+    connect (&dbo_man, &DBContentManager::loadingStartedSignal, this, &ViewPointsWidget::loadingStartedSlot);
+    connect (&dbo_man, &DBContentManager::loadingDoneSignal, this, &ViewPointsWidget::allLoadingDoneSlot);
 
     // shortcuts
     {

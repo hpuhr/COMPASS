@@ -23,15 +23,15 @@
 #include <QFrame>
 #include <QMenu>
 
-class DBOVariable;
-class DBObjectManager;
+class DBContentVariable;
+class DBContentManager;
 class MetaDBOVariable;
 
 
 class QPushButton;
 class QLabel;
 
-class DBOVariableSelectionWidget : public QFrame
+class DBContentVariableSelectionWidget : public QFrame
 {
     Q_OBJECT
 
@@ -43,12 +43,12 @@ class DBOVariableSelectionWidget : public QFrame
     void selectionChanged();
 
   public:
-    DBOVariableSelectionWidget(bool h_box = true, QWidget* parent = nullptr);
-    ~DBOVariableSelectionWidget();
+    DBContentVariableSelectionWidget(bool h_box = true, QWidget* parent = nullptr);
+    ~DBContentVariableSelectionWidget();
 
     bool hasVariable() const { return variable_selected_; }
-    DBOVariable& selectedVariable() const;
-    void selectedVariable(DBOVariable& variable);
+    DBContentVariable& selectedVariable() const;
+    void selectedVariable(DBContentVariable& variable);
     void selectEmptyVariable();
 
     bool hasMetaVariable() const { return meta_variable_selected_; }
@@ -78,7 +78,7 @@ class DBOVariableSelectionWidget : public QFrame
     void updateMenuEntries();
 
   private:
-    DBObjectManager& dbo_man_;
+    DBContentManager& dbo_man_;
 
     QLabel* object_label_{nullptr};
     QLabel* variable_label_{nullptr};

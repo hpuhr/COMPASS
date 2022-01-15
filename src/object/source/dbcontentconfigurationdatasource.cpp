@@ -10,11 +10,8 @@ using namespace std;
 using namespace nlohmann;
 using namespace Utils;
 
-namespace DBContent
-{
-
 ConfigurationDataSource::ConfigurationDataSource(const std::string& class_id, const std::string& instance_id,
-                                                 DBObjectManager& dbo_manager)
+                                                 DBContentManager& dbo_manager)
     : Configurable(class_id, instance_id, &dbo_manager)
 {
     registerParameter("ds_type", &ds_type_, "");
@@ -23,17 +20,17 @@ ConfigurationDataSource::ConfigurationDataSource(const std::string& class_id, co
 
     assert (ds_type_.size());
 
-    if (find(DBObjectManager::data_source_types_.begin(),
-             DBObjectManager::data_source_types_.end(), ds_type_)
-        == DBObjectManager::data_source_types_.end())
+    if (find(DBContentManager::data_source_types_.begin(),
+             DBContentManager::data_source_types_.end(), ds_type_)
+        == DBContentManager::data_source_types_.end())
     {
         logerr << "ConfigurationDataSource: sac/sic " << sac_ << sic_ << " ds_type '" << ds_type_
                << "' unknown";
     }
 
-    assert (find(DBObjectManager::data_source_types_.begin(),
-                 DBObjectManager::data_source_types_.end(), ds_type_)
-            != DBObjectManager::data_source_types_.end());
+    assert (find(DBContentManager::data_source_types_.begin(),
+                 DBContentManager::data_source_types_.end(), ds_type_)
+            != DBContentManager::data_source_types_.end());
 
     registerParameter("name", &name_, "");
     registerParameter("has_short_name", &has_short_name_, false);
@@ -103,7 +100,7 @@ void ConfigurationDataSource::setFromJSON(json& j)
 
 DBDataSource* ConfigurationDataSource::getAsNewDBDS()
 {
-    DBContent::DBDataSource* new_ds = new DBContent::DBDataSource();
+    DBDataSource* new_ds = new DBDataSource();
     new_ds->id(Number::dsIdFrom(sac_, sic_));
     new_ds->dsType(ds_type_);
     new_ds->sac(sac_);
@@ -121,5 +118,3 @@ DBDataSource* ConfigurationDataSource::getAsNewDBDS()
     return new_ds;
 }
 
-
-}

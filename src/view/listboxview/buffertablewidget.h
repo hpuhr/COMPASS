@@ -29,8 +29,8 @@ class QTableView;
 class BufferTableModel;
 class QStringList;
 class Buffer;
-class DBOVariableSet;
-class DBObject;
+class DBContentVariableSet;
+class DBContent;
 class ListBoxView;
 class ListBoxViewDataSource;
 
@@ -62,7 +62,7 @@ class BufferTableWidget : public QWidget
 
   public:
     /// @brief Constructor
-    BufferTableWidget(DBObject& object, ListBoxView& view, ListBoxViewDataSource& data_source,
+    BufferTableWidget(DBContent& object, ListBoxView& view, ListBoxViewDataSource& data_source,
                       QWidget* parent = 0, Qt::WindowFlags f = 0);
     /// @brief Destructor
     virtual ~BufferTableWidget();
@@ -78,7 +78,7 @@ class BufferTableWidget : public QWidget
     void resizeColumns();
 
   protected:
-    DBObject& object_;
+    DBContent& object_;
     ListBoxView& view_;
     ListBoxViewDataSource& data_source_;
     /// Table with items

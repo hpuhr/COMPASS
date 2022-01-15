@@ -66,9 +66,9 @@ bool ListBoxView::init()
 
     assert(data_source_);
 
-    DBObjectManager& object_man = COMPASS::instance().objectManager();
-    connect(&object_man, &DBObjectManager::loadingDoneSignal, this, &ListBoxView::allLoadingDoneSlot);
-    connect(&object_man, &DBObjectManager::loadingDoneSignal,
+    DBContentManager& object_man = COMPASS::instance().objectManager();
+    connect(&object_man, &DBContentManager::loadingDoneSignal, this, &ListBoxView::allLoadingDoneSlot);
+    connect(&object_man, &DBContentManager::loadingDoneSignal,
             widget_->getDataWidget(), &ListBoxViewDataWidget::loadingDoneSlot);
 
 //    connect(data_source_, &ListBoxViewDataSource::loadingStartedSignal, widget_->getDataWidget(),
@@ -153,7 +153,7 @@ ListBoxViewDataWidget* ListBoxView::getDataWidget()
     return widget_->getDataWidget();
 }
 
-DBOVariableSet ListBoxView::getSet(const std::string& dbo_name)
+DBContentVariableSet ListBoxView::getSet(const std::string& dbo_name)
 {
     assert(data_source_);
 

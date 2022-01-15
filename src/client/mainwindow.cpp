@@ -174,7 +174,7 @@ MainWindow::MainWindow()
     connect (&COMPASS::instance(), &COMPASS::appModeSwitchSignal,
              this, &MainWindow::appModeSwitchSlot);
 
-    QObject::connect(&COMPASS::instance().objectManager(), &DBObjectManager::loadingDoneSignal,
+    QObject::connect(&COMPASS::instance().objectManager(), &DBContentManager::loadingDoneSignal,
                      this, &MainWindow::loadingDoneSlot);
 }
 
@@ -876,7 +876,7 @@ void MainWindow::performAutomaticTasks ()
     {
         loginf << "MainWindow: performAutomaticTasks: loading data";
 
-        DBObjectManager& obj_man = COMPASS::instance().objectManager();
+        DBContentManager& obj_man = COMPASS::instance().objectManager();
 
         obj_man.load();
 

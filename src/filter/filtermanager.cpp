@@ -177,7 +177,7 @@ bool FilterManager::checkDBObject (const std::string& dbo_name)
         return false;
     }
 
-    DBObject& object = COMPASS::instance().objectManager().object(dbo_name);
+    DBContent& object = COMPASS::instance().objectManager().object(dbo_name);
 
     if (!object.existsInDB())
     {
@@ -212,7 +212,7 @@ void FilterManager::checkSubConfigurables()
 }
 
 std::string FilterManager::getSQLCondition(const std::string& dbo_name,
-                                           std::vector<DBOVariable*>& filtered_variables)
+                                           std::vector<DBContentVariable*>& filtered_variables)
 {
     assert(COMPASS::instance().objectManager().object(dbo_name).loadable());
 
@@ -299,7 +299,7 @@ void FilterManager::showViewPointSlot (const ViewableDataConfig* vp)
 
     const json& data = vp->data();
 
-    DBObjectManager& obj_man = COMPASS::instance().objectManager();
+    DBContentManager& obj_man = COMPASS::instance().objectManager();
 
     TODO_ASSERT
 
@@ -353,7 +353,7 @@ void FilterManager::setConfigInViewPoint (nlohmann::json& data)
 {
     loginf << "FilterManager: setConfigInViewPoint";
 
-    DBObjectManager& obj_man = COMPASS::instance().objectManager();
+    DBContentManager& obj_man = COMPASS::instance().objectManager();
 
     data["db_objects"] = json::array();
     json& db_objects = data["db_objects"];

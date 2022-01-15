@@ -203,7 +203,7 @@ void EvaluationManager::loadData ()
 
     // actually load
 
-    DBObjectManager& object_man = COMPASS::instance().objectManager();
+    DBContentManager& object_man = COMPASS::instance().objectManager();
 
     // load adsb mops versions in a hacky way
     if (object_man.object("ADSB").hasData() && !has_adsb_info_)
@@ -423,7 +423,7 @@ void EvaluationManager::loadData ()
     // reference data
     {
         assert (object_man.existsObject(dbo_name_ref_));
-        DBObject& dbo_ref = object_man.object(dbo_name_ref_);
+        DBContent& dbo_ref = object_man.object(dbo_name_ref_);
 
         TODO_ASSERT
 //        connect(&dbo_ref, &DBObject::newDataSignal, this, &EvaluationManager::newDataSlot);
@@ -435,7 +435,7 @@ void EvaluationManager::loadData ()
     if (dbo_name_ref_ != dbo_name_tst_) // otherwise already connected
     {
         assert (object_man.existsObject(dbo_name_tst_));
-        DBObject& dbo_tst = object_man.object(dbo_name_tst_);
+        DBContent& dbo_tst = object_man.object(dbo_name_tst_);
 
         TODO_ASSERT
 
@@ -517,11 +517,11 @@ void EvaluationManager::databaseClosedSlot()
     sectors_loaded_ = false;
 }
 
-void EvaluationManager::newDataSlot(DBObject& object)
+void EvaluationManager::newDataSlot(DBContent& object)
 {
     //loginf << "EvaluationManager: newDataSlot: obj " << object.name() << " buffer size " << object.data()->size();
 }
-void EvaluationManager::loadingDoneSlot(DBObject& object)
+void EvaluationManager::loadingDoneSlot(DBContent& object)
 {
     TODO_ASSERT
 
@@ -648,13 +648,13 @@ bool EvaluationManager::needsAdditionalVariables ()
     return needs_additional_variables_;
 }
 
-void EvaluationManager::addVariables (const std::string dbo_name, DBOVariableSet& read_set)
+void EvaluationManager::addVariables (const std::string dbo_name, DBContentVariableSet& read_set)
 {
     loginf << "EvaluationManager: addVariables: dbo_name " << dbo_name;
 
     // TODO add required variables from standard requirements
 
-    DBObjectManager& object_man = COMPASS::instance().objectManager();
+    DBContentManager& object_man = COMPASS::instance().objectManager();
 
     read_set.add(object_man.metaVariable("rec_num").getFor(dbo_name));
     read_set.add(object_man.metaVariable("ds_id").getFor(dbo_name));
@@ -687,7 +687,7 @@ void EvaluationManager::addVariables (const std::string dbo_name, DBOVariableSet
     if (object_man.metaVariable("track_num").existsIn(dbo_name))
         read_set.add(object_man.metaVariable("track_num").getFor(dbo_name));
 
-    DBObject& db_object = object_man.object(dbo_name);
+    DBContent& db_object = object_man.object(dbo_name);
 
     // ground bit
     if (object_man.metaVariable("ground_bit").existsIn(dbo_name))
@@ -1350,7 +1350,7 @@ void EvaluationManager::updateReferenceDBO()
     if (!hasValidReferenceDBO())
         return;
 
-    DBObject& object = COMPASS::instance().objectManager().object(dbo_name_ref_);
+    DBContent& object = COMPASS::instance().objectManager().object(dbo_name_ref_);
 
     return;
 
@@ -1433,7 +1433,7 @@ void EvaluationManager::updateTestDBO()
 
     return;
 
-    DBObject& object = COMPASS::instance().objectManager().object(dbo_name_tst_);
+    DBContent& object = COMPASS::instance().objectManager().object(dbo_name_tst_);
 
     TODO_ASSERT
 
@@ -1452,7 +1452,7 @@ void EvaluationManager::updateTestDataSources()
 
     return;
 
-    DBObject& object = COMPASS::instance().objectManager().object(dbo_name_tst_);
+    DBContent& object = COMPASS::instance().objectManager().object(dbo_name_tst_);
 
     TODO_ASSERT
 
@@ -1861,7 +1861,7 @@ void EvaluationManager::filterUTNs ()
 
     update_results_ = false;
 
-    DBObjectManager& dbo_man = COMPASS::instance().objectManager();
+    DBContentManager& dbo_man = COMPASS::instance().objectManager();
 
     map<string, set<unsigned int>> associated_utns;
 

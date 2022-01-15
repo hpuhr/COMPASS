@@ -123,8 +123,8 @@ void MetaDBOVariableWidget::editNameSlot()
 
 void MetaDBOVariableWidget::subVariableChangedSlot()
 {
-    DBOVariableSelectionWidget* var_sel =
-        dynamic_cast<DBOVariableSelectionWidget*>(QObject::sender());
+    DBContentVariableSelectionWidget* var_sel =
+        dynamic_cast<DBContentVariableSelectionWidget*>(QObject::sender());
     assert(var_sel);
     assert(!var_sel->hasMetaVariable());
     assert(selection_widgets_.count(var_sel) > 0);
@@ -137,7 +137,7 @@ void MetaDBOVariableWidget::subVariableChangedSlot()
     if (var_sel->hasVariable())
     {
         assert(!variable_.existsIn(obj_name));
-        DBOVariable& variable = var_sel->selectedVariable();
+        DBContentVariable& variable = var_sel->selectedVariable();
         variable_.addVariable(obj_name, variable.name());
     }
 }
@@ -161,7 +161,7 @@ void MetaDBOVariableWidget::updateSlot()
     {
         grid_layout_->addWidget(new QLabel(obj_it.first.c_str()), row, 0);
 
-        DBOVariableSelectionWidget* var_sel = new DBOVariableSelectionWidget(true);
+        DBContentVariableSelectionWidget* var_sel = new DBContentVariableSelectionWidget(true);
         var_sel->showDBOOnly(obj_it.first);
 
         if (variable_.existsIn(obj_it.first))

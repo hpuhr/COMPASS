@@ -67,7 +67,7 @@ void CreateARTASAssociationsJob::run()
 
     loginf << "CreateARTASAssociationsJob: run: clearing associations";
 
-    DBObjectManager& object_man = COMPASS::instance().objectManager();
+    DBContentManager& object_man = COMPASS::instance().objectManager();
 
     object_man.removeAssociations();
 
@@ -360,8 +360,8 @@ void CreateARTASAssociationsJob::createARTASAssociations()
 {
     loginf << "CreateARTASAssociationsJob: createARTASAssociations";
 
-    DBObjectManager& object_man = COMPASS::instance().objectManager();
-    DBObject& tracker_object = object_man.object(tracker_dbo_name_);
+    DBContentManager& object_man = COMPASS::instance().objectManager();
+    DBContent& tracker_object = object_man.object(tracker_dbo_name_);
 
     for (auto& ut_it : finished_tracks_)                    // utn -> UAT
         for (auto& assoc_it : ut_it.second.rec_nums_tris_)  // rec_num -> tri
@@ -373,7 +373,7 @@ void CreateARTASAssociationsJob::createSensorAssociations()
     loginf << "CreateARTASAssociationsJob: createSensorAssociations";
     // for each rec_num + tri, find sensor hash + rec_num
 
-    DBObjectManager& object_man = COMPASS::instance().objectManager();
+    DBContentManager& object_man = COMPASS::instance().objectManager();
 
     for (auto& dbo_it : object_man)
     {
@@ -580,7 +580,7 @@ bool CreateARTASAssociationsJob::isTimeAtBeginningOrEnd(float tod_track)
            (fabs(last_track_tod_ - tod_track) <= misses_acceptable_time_);
 }
 
-void CreateARTASAssociationsJob::createSensorHashes(DBObject& object)
+void CreateARTASAssociationsJob::createSensorHashes(DBContent& object)
 {
     loginf << "CreateARTASAssociationsJob: createSensorHashes: object " << object.name();
 
@@ -598,9 +598,9 @@ void CreateARTASAssociationsJob::createSensorHashes(DBObject& object)
     MetaDBOVariable* hash_meta_var = task_.hashVar();
     MetaDBOVariable* tod_meta_var = task_.todVar();
 
-    DBOVariable& key_var = key_meta_var->getFor(dbo_name);
-    DBOVariable& hash_var = hash_meta_var->getFor(dbo_name);
-    DBOVariable& tod_var = tod_meta_var->getFor(dbo_name);
+    DBContentVariable& key_var = key_meta_var->getFor(dbo_name);
+    DBContentVariable& hash_var = hash_meta_var->getFor(dbo_name);
+    DBContentVariable& tod_var = tod_meta_var->getFor(dbo_name);
 
     assert(buffer->has<int>(key_var.name()));
     assert(buffer->has<std::string>(hash_var.name()));

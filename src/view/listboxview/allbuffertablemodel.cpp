@@ -143,12 +143,12 @@ QVariant AllBufferTableModel::data(const QModelIndex& index, int role) const
     {
         if (col == 0)  // selected special case
         {
-            assert(buffer->has<bool>(DBObject::selected_var.name()));
+            assert(buffer->has<bool>(DBContent::selected_var.name()));
 
-            if (buffer->get<bool>(DBObject::selected_var.name()).isNull(buffer_index))
+            if (buffer->get<bool>(DBContent::selected_var.name()).isNull(buffer_index))
                 return Qt::Unchecked;
 
-            if (buffer->get<bool>(DBObject::selected_var.name()).get(buffer_index))
+            if (buffer->get<bool>(DBContent::selected_var.name()).get(buffer_index))
                 return Qt::Checked;
             else
                 return Qt::Unchecked;
@@ -180,7 +180,7 @@ QVariant AllBufferTableModel::data(const QModelIndex& index, int role) const
         {
             if (col == 2)
             {
-                DBObjectManager& manager = COMPASS::instance().objectManager();
+                DBContentManager& manager = COMPASS::instance().objectManager();
                 const DBOAssociationCollection& associations =
                     manager.object(dbo_name).associations();
 
@@ -210,7 +210,7 @@ QVariant AllBufferTableModel::data(const QModelIndex& index, int role) const
         std::string variable_dbo_name = data_source_.getSet()->variableDefinition(col).dboName();
         std::string variable_name = data_source_.getSet()->variableDefinition(col).variableName();
 
-        DBObjectManager& manager = COMPASS::instance().objectManager();
+        DBContentManager& manager = COMPASS::instance().objectManager();
 
         // check if data & variables exist
         if (variable_dbo_name == META_OBJECT_NAME)
@@ -228,7 +228,7 @@ QVariant AllBufferTableModel::data(const QModelIndex& index, int role) const
             assert(manager.object(dbo_name).hasVariable(variable_name));
         }
 
-        DBOVariable& variable = (variable_dbo_name == META_OBJECT_NAME)
+        DBContentVariable& variable = (variable_dbo_name == META_OBJECT_NAME)
                                     ? manager.metaVariable(variable_name).getFor(dbo_name)
                                     : manager.object(dbo_name).variable(variable_name);
         PropertyDataType data_type = variable.dataType();
@@ -407,17 +407,17 @@ bool AllBufferTableModel::setData(const QModelIndex& index, const QVariant& valu
         std::shared_ptr<Buffer> buffer = buffers_.at(dbo_name);
 
         assert(buffer);
-        assert(buffer->has<bool>(DBObject::selected_var.name()));
+        assert(buffer->has<bool>(DBContent::selected_var.name()));
 
         if (value == Qt::Checked)
         {
             logdbg << "AllBufferTableModel: setData: checked row index" << buffer_index;
-            buffer->get<bool>(DBObject::selected_var.name()).set(buffer_index, true);
+            buffer->get<bool>(DBContent::selected_var.name()).set(buffer_index, true);
         }
         else
         {
             logdbg << "AllBufferTableModel: setData: unchecked row index " << buffer_index;
-            buffer->get<bool>(DBObject::selected_var.name()).set(buffer_index, false);
+            buffer->get<bool>(DBContent::selected_var.name()).set(buffer_index, false);
         }
         assert(table_widget_);
         table_widget_->view().emitSelectionChange();
@@ -516,13 +516,13 @@ void AllBufferTableModel::updateTimeIndexes()
             logdbg << "AllBufferTableModel: updateTimeIndexes: new " << dbo_name
                    << " data, last index " << buffer_index << " size " << buf_it.second->size();
 
-            DBObjectManager& object_manager = COMPASS::instance().objectManager();
-            const DBOVariable& tod_var = object_manager.metaVariable(DBObject::meta_var_tod_id_.name()).getFor(dbo_name);
+            DBContentManager& object_manager = COMPASS::instance().objectManager();
+            const DBContentVariable& tod_var = object_manager.metaVariable(DBContent::meta_var_tod_id_.name()).getFor(dbo_name);
             assert(buf_it.second->has<float>(tod_var.name()));
             NullableVector<float>& tods = buf_it.second->get<float>(tod_var.name());
 
-            assert(buf_it.second->has<bool>(DBObject::selected_var.name()));
-            NullableVector<bool> selected_vec = buf_it.second->get<bool>(DBObject::selected_var.name());
+            assert(buf_it.second->has<bool>(DBContent::selected_var.name()));
+            NullableVector<bool> selected_vec = buf_it.second->get<bool>(DBContent::selected_var.name());
 
             for (; buffer_index < buffer_size; ++buffer_index)
             {
@@ -666,11 +666,11 @@ std::pair<int,int> AllBufferTableModel::getSelectedRows()
 
         std::shared_ptr<Buffer> buffer = buffers_.at(dbo_name);
 
-        assert(buffer->has<bool>(DBObject::selected_var.name()));
-        if (buffer->get<bool>(DBObject::selected_var.name()).isNull(buffer_index))
+        assert(buffer->has<bool>(DBContent::selected_var.name()));
+        if (buffer->get<bool>(DBContent::selected_var.name()).isNull(buffer_index))
             continue;
 
-        if (buffer->get<bool>(DBObject::selected_var.name()).get(buffer_index))
+        if (buffer->get<bool>(DBContent::selected_var.name()).get(buffer_index))
         {
             if (first_row == -1)
                 first_row = cnt;

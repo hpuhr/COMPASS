@@ -22,7 +22,7 @@
 #include "global.h"
 #include "job.h"
 
-class DBObject;
+class DBContent;
 class Buffer;
 
 /**
@@ -33,7 +33,7 @@ class Buffer;
 class FinalizeDBOReadJob : public Job
 {
   public:
-    FinalizeDBOReadJob(DBObject& dbobject, DBOVariableSet& read_list,
+    FinalizeDBOReadJob(DBContent& dbobject, DBContentVariableSet& read_list,
                        std::shared_ptr<Buffer> buffer);
     virtual ~FinalizeDBOReadJob();
 
@@ -46,8 +46,8 @@ class FinalizeDBOReadJob : public Job
     }
 
   protected:
-    DBObject& dbobject_;
-    DBOVariableSet read_list_;
+    DBContent& dbobject_;
+    DBContentVariableSet read_list_;
     std::shared_ptr<Buffer> buffer_;
 };
 

@@ -270,7 +270,7 @@ bool DBInterface::existsTable(const string& table_name)
     return table_info_.count(table_name) == 1;
 }
 
-void DBInterface::createTable(const DBObject& object)
+void DBInterface::createTable(const DBContent& object)
 {
     loginf << "DBInterface: createTable: obj " << object.name();
     if (existsTable(object.dbTableName()))
@@ -297,7 +297,7 @@ void DBInterface::createTable(const DBObject& object)
 
 bool DBInterface::existsPropertiesTable() { return existsTable(TABLE_NAME_PROPERTIES); }
 
-set<int> DBInterface::queryActiveSensorNumbers(DBObject& object)
+set<int> DBInterface::queryActiveSensorNumbers(DBContent& object)
 {
     logdbg << "DBInterface: queryActiveSensorNumbers: start";
 
@@ -338,17 +338,17 @@ set<int> DBInterface::queryActiveSensorNumbers(DBObject& object)
     //    return data;
 }
 
-unsigned int DBInterface::getMaxRecordNumber(DBObject& object)
+unsigned int DBInterface::getMaxRecordNumber(DBContent& object)
 {
     assert (dbOpen());
     assert(object.existsInDB());
 
-    assert (COMPASS::instance().objectManager().existsMetaVariable(DBObject::meta_var_rec_num_id_.name()));
+    assert (COMPASS::instance().objectManager().existsMetaVariable(DBContent::meta_var_rec_num_id_.name()));
     assert (COMPASS::instance().objectManager().metaVariable(
-                DBObject::meta_var_rec_num_id_.name()).existsIn(object.name()));
+                DBContent::meta_var_rec_num_id_.name()).existsIn(object.name()));
 
-    DBOVariable& rec_num_var = COMPASS::instance().objectManager().metaVariable(
-                DBObject::meta_var_rec_num_id_.name()).getFor(object.name());
+    DBContentVariable& rec_num_var = COMPASS::instance().objectManager().metaVariable(
+                DBContent::meta_var_rec_num_id_.name()).getFor(object.name());
 
     assert (object.hasVariable(rec_num_var.name()));
 
@@ -377,7 +377,7 @@ unsigned int DBInterface::getMaxRecordNumber(DBObject& object)
 std::map<unsigned int, std::tuple<std::set<unsigned int>, std::tuple<bool, unsigned int, unsigned int>,
 std::tuple<bool, unsigned int, unsigned int>>> DBInterface::queryADSBInfo()
 {
-    DBObject& object = COMPASS::instance().objectManager().object("ADSB");
+    DBContent& object = COMPASS::instance().objectManager().object("ADSB");
 
     assert(object.existsInDB());
 
@@ -429,7 +429,7 @@ std::tuple<bool, unsigned int, unsigned int>>> DBInterface::queryADSBInfo()
 
 bool DBInterface::existsDataSourcesTable()
 {
-    return existsTable(DBContent::DBDataSource::table_name_);
+    return existsTable(DBDataSource::table_name_);
 }
 
 void DBInterface::createDataSourcesTable()
@@ -442,7 +442,7 @@ void DBInterface::createDataSourcesTable()
     updateTableInfo();
 }
 
-std::vector<std::unique_ptr<DBContent::DBDataSource>> DBInterface::getDataSources()
+std::vector<std::unique_ptr<DBDataSource>> DBInterface::getDataSources()
 {
     logdbg << "DBInterface: getDataSources: start";
 
@@ -458,8 +458,6 @@ std::vector<std::unique_ptr<DBContent::DBDataSource>> DBInterface::getDataSource
 
     logdbg << "DBInterface: getDataSources: json '" << buffer->asJSON().dump(4) << "'";
 
-    using namespace DBContent;
-
     assert(buffer->properties().hasProperty(DBDataSource::id_column_));
     assert(buffer->properties().hasProperty(DBDataSource::ds_type_column_));
     assert(buffer->properties().hasProperty(DBDataSource::sac_column_));
@@ -469,7 +467,7 @@ std::vector<std::unique_ptr<DBContent::DBDataSource>> DBInterface::getDataSource
     assert(buffer->properties().hasProperty(DBDataSource::info_column_));
     assert(buffer->properties().hasProperty(DBDataSource::counts_column_));
 
-    std::vector<std::unique_ptr<DBContent::DBDataSource>> sources;
+    std::vector<std::unique_ptr<DBDataSource>> sources;
 
     for (unsigned cnt = 0; cnt < buffer->size(); cnt++)
     {
@@ -508,7 +506,7 @@ std::vector<std::unique_ptr<DBContent::DBDataSource>> DBInterface::getDataSource
             continue;
         }
 
-        std::unique_ptr<DBContent::DBDataSource> src {new DBContent::DBDataSource()};
+        std::unique_ptr<DBDataSource> src {new DBDataSource()};
 
         src->id(buffer->get<unsigned int>(DBDataSource::id_column_.name()).get(cnt));
         src->dsType(buffer->get<string>(DBDataSource::ds_type_column_.name()).get(cnt));
@@ -531,13 +529,11 @@ std::vector<std::unique_ptr<DBContent::DBDataSource>> DBInterface::getDataSource
     return sources;
 }
 
-void DBInterface::saveDataSources(const std::vector<std::unique_ptr<DBContent::DBDataSource>>& data_sources)
+void DBInterface::saveDataSources(const std::vector<std::unique_ptr<DBDataSource>>& data_sources)
 {
     loginf << "DBInterface: saveDataSources: num " << data_sources.size();
 
     assert (dbOpen());
-
-    using namespace DBContent;
 
     clearTableContent(DBDataSource::table_name_);
 
@@ -1082,7 +1078,7 @@ void DBInterface::deleteAllSectors()
 ////    return ret;
 //}
 
-void DBInterface::insertBuffer(DBObject& db_object, std::shared_ptr<Buffer> buffer)
+void DBInterface::insertBuffer(DBContent& db_object, std::shared_ptr<Buffer> buffer)
 {
     logdbg << "DBInterface: insertBuffer: dbo " << db_object.name() << " buffer size "
            << buffer->size();
@@ -1095,9 +1091,9 @@ void DBInterface::insertBuffer(DBObject& db_object, std::shared_ptr<Buffer> buff
 
     // create record numbers & and store new max rec num
     {
-        assert (db_object.hasVariable(DBObject::meta_var_rec_num_id_.name()));
+        assert (db_object.hasVariable(DBContent::meta_var_rec_num_id_.name()));
 
-        DBOVariable& rec_num_var = db_object.variable(DBObject::meta_var_rec_num_id_.name());
+        DBContentVariable& rec_num_var = db_object.variable(DBContent::meta_var_rec_num_id_.name());
         assert (rec_num_var.dataType() == PropertyDataType::UINT);
 
         string rec_num_col_str = rec_num_var.dbColumnName();
@@ -1291,10 +1287,10 @@ void DBInterface::updateBuffer(const std::string& table_name, const std::string&
     db_connection_->finalizeBindStatement();
 }
 
-void DBInterface::prepareRead(const DBObject& dbobject, DBOVariableSet read_list,
+void DBInterface::prepareRead(const DBContent& dbobject, DBContentVariableSet read_list,
                               string custom_filter_clause,
-                              vector<DBOVariable*> filtered_variables, bool use_order,
-                              DBOVariable* order_variable, bool use_order_ascending,
+                              vector<DBContentVariable*> filtered_variables, bool use_order,
+                              DBContentVariable* order_variable, bool use_order_ascending,
                               const string& limit)
 {
     assert(db_connection_);
@@ -1315,7 +1311,7 @@ void DBInterface::prepareRead(const DBObject& dbobject, DBOVariableSet read_list
  * Retrieves result from connection stepPreparedCommand, calls activateKeySearch on buffer and
  * returns it.
  */
-shared_ptr<Buffer> DBInterface::readDataChunk(const DBObject& dbobject)
+shared_ptr<Buffer> DBInterface::readDataChunk(const DBContent& dbobject)
 {
     // locked by prepareRead
     assert(db_connection_);
@@ -1346,7 +1342,7 @@ shared_ptr<Buffer> DBInterface::readDataChunk(const DBObject& dbobject)
     return buffer;
 }
 
-void DBInterface::finalizeReadStatement(const DBObject& dbobject)
+void DBInterface::finalizeReadStatement(const DBContent& dbobject)
 {
     connection_mutex_.unlock();
     assert(db_connection_);

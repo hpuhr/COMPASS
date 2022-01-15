@@ -26,7 +26,7 @@
 #include "dbovariableset.h"
 //#include "DBObjectManager.h"
 
-class DBObject;
+class DBContent;
 class DBOLabelDefinition;
 
 class DBOLabelEntry : public QObject, public Configurable
@@ -62,9 +62,9 @@ class DBOLabelEntry : public QObject, public Configurable
     virtual void checkSubConfigurables() {}
 };
 
-class DBOLabelDefinitionWidget;
+class DBContentLabelDefinitionWidget;
 class Buffer;
-class DBObjectManager;
+class DBContentManager;
 
 class DBOLabelDefinition : public QObject, public Configurable
 {
@@ -75,10 +75,10 @@ class DBOLabelDefinition : public QObject, public Configurable
 
   public:
     DBOLabelDefinition(const std::string& class_id, const std::string& instance_id,
-                       DBObject* parent, DBObjectManager& dbo_man);
+                       DBContent* parent, DBContentManager& dbo_man);
     virtual ~DBOLabelDefinition();
 
-    DBOVariableSet& readList();
+    DBContentVariableSet& readList();
     const std::map<std::string, DBOLabelEntry*>& entries() { return entries_; }
     DBOLabelEntry& entry(const std::string& variable_name);
 
@@ -88,19 +88,19 @@ class DBOLabelDefinition : public QObject, public Configurable
     virtual void generateSubConfigurable(const std::string& class_id,
                                          const std::string& instance_id);
 
-    DBOLabelDefinitionWidget* widget();
+    DBContentLabelDefinitionWidget* widget();
 
     std::map<unsigned int, std::string> generateLabels(std::vector<unsigned int> rec_nums,
                                                        std::shared_ptr<Buffer> buffer, int break_item_cnt);
 
   protected:
-    DBObject& db_object_;
-    DBObjectManager& dbo_man_;
+    DBContent& db_object_;
+    DBContentManager& dbo_man_;
     std::map<std::string, DBOLabelEntry*> entries_;  // varname -> labelentry
 
-    DBOVariableSet read_list_;
+    DBContentVariableSet read_list_;
 
-    DBOLabelDefinitionWidget* widget_{nullptr};
+    DBContentLabelDefinitionWidget* widget_{nullptr};
 
     virtual void checkSubConfigurables();
 };

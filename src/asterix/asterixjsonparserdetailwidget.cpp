@@ -118,13 +118,13 @@ ASTERIXJSONParserDetailWidget::ASTERIXJSONParserDetailWidget(ASTERIXJSONParser& 
     form_layout->addRow(dbovar_label);
 
     //    DBOVariableSelectionWidget* dbo_var_sel_ {nullptr};
-    dbo_var_sel_ = new DBOVariableSelectionWidget();
+    dbo_var_sel_ = new DBContentVariableSelectionWidget();
     dbo_var_sel_->showMetaVariables(false);
     dbo_var_sel_->showDBOOnly(parser_.dbObjectName());
     dbo_var_sel_->showEmptyVariable(true);
     dbo_var_sel_->setDisabled(true);
 
-    connect(dbo_var_sel_, &DBOVariableSelectionWidget::selectionChanged,
+    connect(dbo_var_sel_, &DBContentVariableSelectionWidget::selectionChanged,
             this, &ASTERIXJSONParserDetailWidget::mappingDBOVariableChangedSlot);
     form_layout->addRow("Name", dbo_var_sel_);
 
@@ -565,7 +565,7 @@ void ASTERIXJSONParserDetailWidget::createNewDBVariableSlot()
         name = *parts.rbegin();
 
 
-    DBOVariableCreateDialog dialog (parser_.dbObject(), name, description, this);
+    DBContentVariableCreateDialog dialog (parser_.dbObject(), name, description, this);
 
     int ret = dialog.exec();
 
@@ -710,7 +710,7 @@ void ASTERIXJSONParserDetailWidget::editDBVariableSlot()
 
     assert (dbo_var_sel_->hasVariable());
 
-    DBOVariableEditDialog dialog (dbo_var_sel_->selectedVariable(), this);
+    DBContentVariableEditDialog dialog (dbo_var_sel_->selectedVariable(), this);
 
     string current_var_name = dbo_var_sel_->selectedVariable().name();
 

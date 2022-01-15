@@ -1197,7 +1197,7 @@ void ASTERIXImportTask::insertData(std::map<std::string, std::shared_ptr<Buffer>
 
     assert (!test_);
 
-    DBObjectManager& object_manager = COMPASS::instance().objectManager();
+    DBContentManager& object_manager = COMPASS::instance().objectManager();
 
     while (insert_active_ && !stopped_)
     {
@@ -1230,7 +1230,7 @@ void ASTERIXImportTask::insertData(std::map<std::string, std::shared_ptr<Buffer>
 
     insert_active_ = true;
 
-    connect(&object_manager, &DBObjectManager::insertDoneSignal,
+    connect(&object_manager, &DBContentManager::insertDoneSignal,
             this, &ASTERIXImportTask::insertDoneSlot, Qt::UniqueConnection);
 
     object_manager.insertData(job_buffers);
@@ -1255,7 +1255,7 @@ void ASTERIXImportTask::insertDoneSlot()
     {
         logdbg << "ASTERIXImportTask: insertDoneSlot: finalizing";
 
-        disconnect(&COMPASS::instance().objectManager(), &DBObjectManager::insertDoneSignal,
+        disconnect(&COMPASS::instance().objectManager(), &DBContentManager::insertDoneSignal,
                    this, &ASTERIXImportTask::insertDoneSlot);
 
         emit doneSignal(name_);

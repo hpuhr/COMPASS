@@ -31,7 +31,7 @@
 
 using namespace Utils;
 
-DBOVariableOrderedSetWidget::DBOVariableOrderedSetWidget(DBOVariableOrderedSet& set,
+DBContentVariableOrderedSetWidget::DBContentVariableOrderedSetWidget(DBOVariableOrderedSet& set,
                                                          QWidget* parent, Qt::WindowFlags f)
     : QWidget(parent, f), set_(set)
 {
@@ -62,7 +62,7 @@ DBOVariableOrderedSetWidget::DBOVariableOrderedSetWidget(DBOVariableOrderedSet& 
         up->setFixedSize(UI_ICON_SIZE);
         up->setFlat(UI_ICON_BUTTON_FLAT);
         up->setToolTip(tr("Move variable up"));
-        connect(up, &QPushButton::clicked, this, &DBOVariableOrderedSetWidget::moveUpSlot);
+        connect(up, &QPushButton::clicked, this, &DBContentVariableOrderedSetWidget::moveUpSlot);
 
         vupdown_layout->addWidget(up);
 
@@ -73,7 +73,7 @@ DBOVariableOrderedSetWidget::DBOVariableOrderedSetWidget(DBOVariableOrderedSet& 
         down->setFixedSize(UI_ICON_SIZE);
         down->setFlat(UI_ICON_BUTTON_FLAT);
         down->setToolTip(tr("Move variable down"));
-        connect(down, &QPushButton::clicked, this, &DBOVariableOrderedSetWidget::moveDownSlot);
+        connect(down, &QPushButton::clicked, this, &DBContentVariableOrderedSetWidget::moveDownSlot);
 
         vupdown_layout->addWidget(down);
 
@@ -89,27 +89,27 @@ DBOVariableOrderedSetWidget::DBOVariableOrderedSetWidget(DBOVariableOrderedSet& 
         QPushButton* remove_button = new QPushButton();
         remove_button->setText("Remove");
         connect(remove_button, &QPushButton::clicked, this,
-                &DBOVariableOrderedSetWidget::removeSlot);
+                &DBContentVariableOrderedSetWidget::removeSlot);
         button_layout->addWidget(remove_button);
 
         QPushButton* add_button = new QPushButton();
         add_button->setText("Add");
         connect(add_button, &QPushButton::clicked, this,
-                &DBOVariableOrderedSetWidget::showMenuSlot);
+                &DBContentVariableOrderedSetWidget::showMenuSlot);
         button_layout->addWidget(add_button);
 
         main_layout->addLayout(button_layout);
     }
 
-    connect(&menu_, &QMenu::triggered, this, &DBOVariableOrderedSetWidget::triggerSlot);
+    connect(&menu_, &QMenu::triggered, this, &DBContentVariableOrderedSetWidget::triggerSlot);
 
     setLayout(main_layout);
     updateMenuEntries();
 }
 
-DBOVariableOrderedSetWidget::~DBOVariableOrderedSetWidget() {}
+DBContentVariableOrderedSetWidget::~DBContentVariableOrderedSetWidget() {}
 
-void DBOVariableOrderedSetWidget::updateMenuEntries()
+void DBContentVariableOrderedSetWidget::updateMenuEntries()
 {
     menu_.clear();
 
@@ -140,17 +140,17 @@ void DBOVariableOrderedSetWidget::updateMenuEntries()
     }
 }
 
-void DBOVariableOrderedSetWidget::showMenuSlot() { menu_.exec(QCursor::pos()); }
+void DBContentVariableOrderedSetWidget::showMenuSlot() { menu_.exec(QCursor::pos()); }
 
 /*
  */
-void DBOVariableOrderedSetWidget::triggerSlot(QAction* action)
+void DBContentVariableOrderedSetWidget::triggerSlot(QAction* action)
 {
     QVariantMap vmap = action->data().toMap();
     std::string var_name = vmap.begin().key().toStdString();
     std::string obj_name = vmap.begin().value().toString().toStdString();
 
-    DBObjectManager& manager = COMPASS::instance().objectManager();
+    DBContentManager& manager = COMPASS::instance().objectManager();
 
     if (obj_name == META_OBJECT_NAME)
     {
@@ -165,7 +165,7 @@ void DBOVariableOrderedSetWidget::triggerSlot(QAction* action)
     }
 }
 
-void DBOVariableOrderedSetWidget::removeSlot()
+void DBContentVariableOrderedSetWidget::removeSlot()
 {
     assert(list_widget_);
     int index = list_widget_->currentRow();
@@ -179,7 +179,7 @@ void DBOVariableOrderedSetWidget::removeSlot()
     current_index_ = -1;
 }
 
-void DBOVariableOrderedSetWidget::moveUpSlot()
+void DBContentVariableOrderedSetWidget::moveUpSlot()
 {
     assert(list_widget_);
     int index = list_widget_->currentRow();
@@ -193,7 +193,7 @@ void DBOVariableOrderedSetWidget::moveUpSlot()
     current_index_ = index - 1;
     list_widget_->setCurrentRow(current_index_);
 }
-void DBOVariableOrderedSetWidget::moveDownSlot()
+void DBContentVariableOrderedSetWidget::moveDownSlot()
 {
     assert(list_widget_);
     int index = list_widget_->currentRow();
@@ -208,7 +208,7 @@ void DBOVariableOrderedSetWidget::moveDownSlot()
     list_widget_->setCurrentRow(current_index_);
 }
 
-void DBOVariableOrderedSetWidget::updateVariableListSlot()
+void DBContentVariableOrderedSetWidget::updateVariableListSlot()
 {
     logdbg << "DBOVariableOrderedSetWidget: updateVariableListSlot";
 
@@ -218,11 +218,11 @@ void DBOVariableOrderedSetWidget::updateVariableListSlot()
 
     logdbg << "DBOVariableOrderedSetWidget: updateVariableListSlot: clear done";
 
-    const std::map<unsigned int, DBOVariableOrderDefinition*>& variables = set_.definitions();
-    std::map<unsigned int, DBOVariableOrderDefinition*>::const_iterator it;
+    const std::map<unsigned int, DBContentVariableOrderDefinition*>& variables = set_.definitions();
+    std::map<unsigned int, DBContentVariableOrderDefinition*>::const_iterator it;
 
-    DBObjectManager& manager = COMPASS::instance().objectManager();
-    DBOVariableOrderDefinition* def = nullptr;
+    DBContentManager& manager = COMPASS::instance().objectManager();
+    DBContentVariableOrderDefinition* def = nullptr;
 
     for (it = variables.begin(); it != variables.end(); it++)
     {

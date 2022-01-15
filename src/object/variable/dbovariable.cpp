@@ -32,30 +32,30 @@
 
 using namespace Utils;
 
-std::map<DBOVariable::Representation, std::string> DBOVariable::representation_2_string_{
-    {DBOVariable::Representation::STANDARD, "STANDARD"},
-    {DBOVariable::Representation::SECONDS_TO_TIME, "SECONDS_TO_TIME"},
-    {DBOVariable::Representation::DEC_TO_OCTAL, "DEC_TO_OCTAL"},
-    {DBOVariable::Representation::DEC_TO_HEX, "DEC_TO_HEX"},
-    {DBOVariable::Representation::FEET_TO_FLIGHTLEVEL, "FEET_TO_FLIGHTLEVEL"},
-    {DBOVariable::Representation::DATA_SRC_NAME, "DATA_SRC_NAME"}};
+std::map<DBContentVariable::Representation, std::string> DBContentVariable::representation_2_string_{
+    {DBContentVariable::Representation::STANDARD, "STANDARD"},
+    {DBContentVariable::Representation::SECONDS_TO_TIME, "SECONDS_TO_TIME"},
+    {DBContentVariable::Representation::DEC_TO_OCTAL, "DEC_TO_OCTAL"},
+    {DBContentVariable::Representation::DEC_TO_HEX, "DEC_TO_HEX"},
+    {DBContentVariable::Representation::FEET_TO_FLIGHTLEVEL, "FEET_TO_FLIGHTLEVEL"},
+    {DBContentVariable::Representation::DATA_SRC_NAME, "DATA_SRC_NAME"}};
 
-std::map<std::string, DBOVariable::Representation> DBOVariable::string_2_representation_{
-    {"STANDARD", DBOVariable::Representation::STANDARD},
-    {"SECONDS_TO_TIME", DBOVariable::Representation::SECONDS_TO_TIME},
-    {"DEC_TO_OCTAL", DBOVariable::Representation::DEC_TO_OCTAL},
-    {"DEC_TO_HEX", DBOVariable::Representation::DEC_TO_HEX},
-    {"FEET_TO_FLIGHTLEVEL", DBOVariable::Representation::FEET_TO_FLIGHTLEVEL},
-    {"DATA_SRC_NAME", DBOVariable::Representation::DATA_SRC_NAME}};
+std::map<std::string, DBContentVariable::Representation> DBContentVariable::string_2_representation_{
+    {"STANDARD", DBContentVariable::Representation::STANDARD},
+    {"SECONDS_TO_TIME", DBContentVariable::Representation::SECONDS_TO_TIME},
+    {"DEC_TO_OCTAL", DBContentVariable::Representation::DEC_TO_OCTAL},
+    {"DEC_TO_HEX", DBContentVariable::Representation::DEC_TO_HEX},
+    {"FEET_TO_FLIGHTLEVEL", DBContentVariable::Representation::FEET_TO_FLIGHTLEVEL},
+    {"DATA_SRC_NAME", DBContentVariable::Representation::DATA_SRC_NAME}};
 
-DBOVariable::Representation DBOVariable::stringToRepresentation(
+DBContentVariable::Representation DBContentVariable::stringToRepresentation(
     const std::string& representation_str)
 {
     assert(string_2_representation_.count(representation_str) == 1);
     return string_2_representation_.at(representation_str);
 }
 
-std::string DBOVariable::representationToString(Representation representation)
+std::string DBContentVariable::representationToString(Representation representation)
 {
     assert(representation_2_string_.count(representation) == 1);
     return representation_2_string_.at(representation);
@@ -63,8 +63,8 @@ std::string DBOVariable::representationToString(Representation representation)
 
 //#include <boost/algorithm/string.hpp>
 
-DBOVariable::DBOVariable(const std::string& class_id, const std::string& instance_id,
-                         DBObject* parent)
+DBContentVariable::DBContentVariable(const std::string& class_id, const std::string& instance_id,
+                         DBContent* parent)
     : Property(), Configurable(class_id, instance_id, parent), db_object_(parent)
 {
     registerParameter("name", &name_, "");
@@ -163,7 +163,7 @@ DBOVariable::DBOVariable(const std::string& class_id, const std::string& instanc
 //    return static_cast<DBOVariable&>(Configurable::operator=(std::move(other)));
 //}
 
-DBOVariable::~DBOVariable()
+DBContentVariable::~DBContentVariable()
 {
     if (widget_)
     {
@@ -172,7 +172,7 @@ DBOVariable::~DBOVariable()
     }
 }
 
-void DBOVariable::generateSubConfigurable(const std::string& class_id,
+void DBContentVariable::generateSubConfigurable(const std::string& class_id,
                                           const std::string& instance_id)
 {
     //"variable_identifier": "sd_ads.ALT_REPORTING_CAPABILITY_FT"
@@ -192,7 +192,7 @@ void DBOVariable::generateSubConfigurable(const std::string& class_id,
                                      class_id);
 }
 
-bool DBOVariable::operator==(const DBOVariable& var)
+bool DBContentVariable::operator==(const DBContentVariable& var)
 {
     if (dboName() != var.dboName())
         return false;
@@ -204,7 +204,7 @@ bool DBOVariable::operator==(const DBOVariable& var)
     return true;
 }
 
-void DBOVariable::print()
+void DBContentVariable::print()
 {
     loginf << "DBOVariable: print: dbo " << Configurable::parent().instanceId() << " id " << name_
            << " data type " << data_type_str_;
@@ -212,23 +212,23 @@ void DBOVariable::print()
 
 
 
-void DBOVariable::checkSubConfigurables()
+void DBContentVariable::checkSubConfigurables()
 {
 }
 
-DBObject& DBOVariable::object() const
+DBContent& DBContentVariable::object() const
 {
     assert(db_object_);
     return *db_object_;
 }
 
-const std::string& DBOVariable::dboName() const
+const std::string& DBContentVariable::dboName() const
 {
     assert(db_object_);
     return db_object_->name();
 }
 
-void DBOVariable::name(const std::string& name)
+void DBContentVariable::name(const std::string& name)
 {
     loginf << "DBOVariable: name: old " << name_ << " new " << name;
     name_ = name;
@@ -240,23 +240,23 @@ void DBOVariable::name(const std::string& name)
 //    return db_object_->currentMetaTable();
 //}
 
-std::string DBOVariable::dbColumnName() const
+std::string DBContentVariable::dbColumnName() const
 {
     return db_column_name_;
 }
 
-void DBOVariable::dbColumnName(const std::string& value)
+void DBContentVariable::dbColumnName(const std::string& value)
 {
     db_column_name_ = value;
 }
 
-std::string DBOVariable::dbTableName() const
+std::string DBContentVariable::dbTableName() const
 {
     assert (db_object_);
     return db_object_->dbTableName();
 }
 
-std::string DBOVariable::dbColumnIdentifier() const
+std::string DBContentVariable::dbColumnIdentifier() const
 {
     return dbTableName()+":"+dbColumnName();
 }
@@ -327,7 +327,7 @@ std::string DBOVariable::dbColumnIdentifier() const
 //        return getRepresentationStringFromValue(getMaxString());
 //}
 
-std::string DBOVariable::dimensionUnitStr()
+std::string DBContentVariable::dimensionUnitStr()
 {
     if (dimension_.size())
         return dimension_ + ":" + unit_;
@@ -335,28 +335,28 @@ std::string DBOVariable::dimensionUnitStr()
         return "";
 }
 
-DBOVariableWidget* DBOVariable::widget()
+DBContentVariableWidget* DBContentVariable::widget()
 {
     if (!widget_)
     {
-        widget_ = new DBOVariableWidget(*this);
+        widget_ = new DBContentVariableWidget(*this);
         assert(widget_);
     }
 
     return widget_;
 }
 
-DBOVariable::Representation DBOVariable::representation() const { return representation_; }
+DBContentVariable::Representation DBContentVariable::representation() const { return representation_; }
 
-const std::string& DBOVariable::representationString() const { return representation_str_; }
+const std::string& DBContentVariable::representationString() const { return representation_str_; }
 
-void DBOVariable::representation(const DBOVariable::Representation& representation)
+void DBContentVariable::representation(const DBContentVariable::Representation& representation)
 {
     representation_str_ = representationToString(representation);
     representation_ = representation;
 }
 
-std::string DBOVariable::getRepresentationStringFromValue(const std::string& value_str) const
+std::string DBContentVariable::getRepresentationStringFromValue(const std::string& value_str) const
 {
     logdbg << "DBOVariable: getRepresentationStringFromValue: value " << value_str << " data_type "
            << Property::asString(data_type_) << " representation "
@@ -365,7 +365,7 @@ std::string DBOVariable::getRepresentationStringFromValue(const std::string& val
     if (value_str == NULL_STRING)
         return value_str;
 
-    if (representation_ == DBOVariable::Representation::STANDARD)
+    if (representation_ == DBContentVariable::Representation::STANDARD)
         return value_str;
 
     switch (data_type_)
@@ -428,31 +428,31 @@ std::string DBOVariable::getRepresentationStringFromValue(const std::string& val
     }
 }
 
-std::string DBOVariable::getValueStringFromRepresentation(
+std::string DBContentVariable::getValueStringFromRepresentation(
     const std::string& representation_str) const
 {
     if (representation_str == NULL_STRING)
         return representation_str;
 
-    assert(representation_ != DBOVariable::Representation::STANDARD);
+    assert(representation_ != DBContentVariable::Representation::STANDARD);
 
-    if (representation_ == DBOVariable::Representation::SECONDS_TO_TIME)
+    if (representation_ == DBContentVariable::Representation::SECONDS_TO_TIME)
     {
         return String::getValueString(Utils::String::timeFromString(representation_str));
     }
-    else if (representation_ == DBOVariable::Representation::DEC_TO_OCTAL)
+    else if (representation_ == DBContentVariable::Representation::DEC_TO_OCTAL)
     {
         return String::getValueString(Utils::String::intFromOctalString(representation_str));
     }
-    else if (representation_ == DBOVariable::Representation::DEC_TO_HEX)
+    else if (representation_ == DBContentVariable::Representation::DEC_TO_HEX)
     {
         return String::getValueString(Utils::String::intFromHexString(representation_str));
     }
-    else if (representation_ == DBOVariable::Representation::FEET_TO_FLIGHTLEVEL)
+    else if (representation_ == DBContentVariable::Representation::FEET_TO_FLIGHTLEVEL)
     {
         return String::getValueString(std::stod(representation_str) * 100.0);
     }
-    else if (representation_ == DBOVariable::Representation::DATA_SRC_NAME)
+    else if (representation_ == DBContentVariable::Representation::DATA_SRC_NAME)
     {
         assert(db_object_);
 
@@ -483,7 +483,7 @@ std::string DBOVariable::getValueStringFromRepresentation(
     }
 }
 
-std::string DBOVariable::multiplyString(const std::string& value_str, double factor) const
+std::string DBContentVariable::multiplyString(const std::string& value_str, double factor) const
 {
     logdbg << "DBOVariable: multiplyString: value " << value_str << " factor " << factor
            << " data_type " << Property::asString(data_type_);
@@ -573,7 +573,7 @@ std::string DBOVariable::multiplyString(const std::string& value_str, double fac
     return return_string;
 }
 
-const std::string& DBOVariable::getLargerValueString(const std::string& value_a_str,
+const std::string& DBContentVariable::getLargerValueString(const std::string& value_a_str,
                                                      const std::string& value_b_str) const
 {
     logdbg << "DBOVariable: getLargerValueString: value a " << value_a_str << " b " << value_b_str
@@ -640,7 +640,7 @@ const std::string& DBOVariable::getLargerValueString(const std::string& value_a_
     }
 }
 
-const std::string& DBOVariable::getSmallerValueString(const std::string& value_a_str,
+const std::string& DBContentVariable::getSmallerValueString(const std::string& value_a_str,
                                                       const std::string& value_b_str) const
 {
     logdbg << "DBOVariable: getSmallerValueString: value a " << value_a_str << " b " << value_b_str
@@ -707,42 +707,42 @@ const std::string& DBOVariable::getSmallerValueString(const std::string& value_a
     }
 }
 
-bool DBOVariable::hasShortName() const
+bool DBContentVariable::hasShortName() const
 {
     return short_name_.size();
 }
 
-std::string DBOVariable::shortName() const
+std::string DBContentVariable::shortName() const
 {
     return short_name_;
 }
 
-void DBOVariable::shortName(const std::string& short_name)
+void DBContentVariable::shortName(const std::string& short_name)
 {
     short_name_ = short_name;
 }
 
-bool DBOVariable::isKey() const
+bool DBContentVariable::isKey() const
 {
     return is_key_;
 }
 
-void DBOVariable::isKey(bool value)
+void DBContentVariable::isKey(bool value)
 {
     is_key_ = value;
 }
 
-std::string DBOVariable::getDataSourcesAsString(const std::string& value) const
+std::string DBContentVariable::getDataSourcesAsString(const std::string& value) const
 {
     assert(db_object_);
 
-    DBObjectManager& dbo_man = COMPASS::instance().objectManager();
+    DBContentManager& dbo_man = COMPASS::instance().objectManager();
 
     unsigned int ds_id = stoi(value);
 
     if (dbo_man.hasDataSource(ds_id))
     {
-        DBContent::DBDataSource& ds = dbo_man.dataSource(ds_id);
+        DBDataSource& ds = dbo_man.dataSource(ds_id);
 
         if (ds.hasShortName())
             return ds.shortName();

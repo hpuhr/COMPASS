@@ -23,7 +23,7 @@
 #include "dbobject.h"
 #include "dbovariableset.h"
 
-FinalizeDBOReadJob::FinalizeDBOReadJob(DBObject& dbobject, DBOVariableSet& read_list,
+FinalizeDBOReadJob::FinalizeDBOReadJob(DBContent& dbobject, DBContentVariableSet& read_list,
                                        std::shared_ptr<Buffer> buffer)
     : Job("FinalizeDBOReadJob"), dbobject_(dbobject), read_list_(read_list), buffer_(buffer)
 {
@@ -41,7 +41,7 @@ void FinalizeDBOReadJob::run()
     buffer_->transformVariables(read_list_, true);
 
     // add boolean to indicate selection
-    buffer_->addProperty(DBObject::selected_var);
+    buffer_->addProperty(DBContent::selected_var);
 
     logdbg << "FinalizeDBOReadJob: run: done";
     done_ = true;

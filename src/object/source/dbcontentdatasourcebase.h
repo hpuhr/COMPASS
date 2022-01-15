@@ -6,8 +6,6 @@
 #include <string>
 
 
-namespace DBContent {
-
 class DataSourceBase
 {
 public:
@@ -47,7 +45,5 @@ protected:
 
     nlohmann::json info_;
 };
-
-} // namespace DBContent
 
 #endif // DBCONTENT_DATASOURCEBASE_H

@@ -160,12 +160,12 @@ void JSONDataMapping::inArray(bool in_array) { in_array_ = in_array; }
 
 void JSONDataMapping::check()
 {
-    DBObjectManager& obj_man = COMPASS::instance().objectManager();
+    DBContentManager& obj_man = COMPASS::instance().objectManager();
 
     if (db_object_name_.size() && !obj_man.existsObject(db_object_name_))
         assert (false);
 
-    DBObject& db_object = obj_man.object(db_object_name_);
+    DBContent& db_object = obj_man.object(db_object_name_);
 
     if (dbovariable_name_.size() && !db_object.hasVariable(dbovariable_name_))
         dbovariable_name_ = "";
@@ -176,7 +176,7 @@ void JSONDataMapping::check()
     }
 }
 
-DBOVariable& JSONDataMapping::variable() const
+DBContentVariable& JSONDataMapping::variable() const
 {
     assert(initialized_);
     assert(variable_);
@@ -282,7 +282,7 @@ void JSONDataMapping::initialize()
 
     assert(!initialized_);
 
-    DBObjectManager& obj_man = COMPASS::instance().objectManager();
+    DBContentManager& obj_man = COMPASS::instance().objectManager();
 
     if (db_object_name_.size() && !obj_man.existsObject(db_object_name_))
         logwrn << "JSONDataMapping: initialize: dbobject '" << db_object_name_

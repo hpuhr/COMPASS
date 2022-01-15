@@ -22,7 +22,7 @@
 
 #include "dbovariable.h"
 
-class DBOVariableOrderedSetWidget;
+class DBContentVariableOrderedSetWidget;
 class ListBoxView;
 
 class QComboBox;

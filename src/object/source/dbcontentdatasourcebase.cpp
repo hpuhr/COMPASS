@@ -3,8 +3,6 @@
 
 using namespace nlohmann;
 
-namespace DBContent {
-
 DataSourceBase::DataSourceBase()
 {
 
@@ -88,5 +86,3 @@ std::string DataSourceBase::infoStr()
 
 
 
-
-} // namespace DBContent

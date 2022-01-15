@@ -3,8 +3,8 @@
 
 #include <QDialog>
 
-class DBOVariable;
-class DBOVariableDataTypeComboBox;
+class DBContentVariable;
+class DBContentVariableDataTypeComboBox;
 class UnitSelectionWidget;
 class StringRepresentationComboBox;
 
@@ -13,7 +13,7 @@ class QCheckBox;
 class QPushButton;
 class QTextEdit;
 
-class DBOVariableEditDialog : public QDialog
+class DBContentVariableEditDialog : public QDialog
 {
     Q_OBJECT
 
@@ -26,19 +26,19 @@ public slots:
     void doneSlot();
 
 public:
-    DBOVariableEditDialog(DBOVariable& variable, QWidget* parent = nullptr, Qt::WindowFlags f = 0);
+    DBContentVariableEditDialog(DBContentVariable& variable, QWidget* parent = nullptr, Qt::WindowFlags f = 0);
 
     bool variableEdited() const;
 
-    DBOVariable &variable() const;
+    DBContentVariable &variable() const;
 
 protected:
-    DBOVariable& variable_;
+    DBContentVariable& variable_;
 
     QLineEdit* name_edit_ {nullptr};
     QLineEdit* short_name_edit_ {nullptr};
     QTextEdit* description_edit_ {nullptr};
-    DBOVariableDataTypeComboBox* type_combo_ {nullptr};
+    DBContentVariableDataTypeComboBox* type_combo_ {nullptr};
     UnitSelectionWidget* unit_sel_ {nullptr};
     StringRepresentationComboBox* representation_box_ {nullptr};
     QLineEdit* db_column_edit_ {nullptr};

@@ -252,7 +252,7 @@ void JSONObjectParserWidget::updateMappingsGrid()
         comment_edit->setProperty("mapping", data);
         mappings_grid_->addWidget(comment_edit, row, 2);
 
-        DBOVariableSelectionWidget* var_sel = new DBOVariableSelectionWidget();
+        DBContentVariableSelectionWidget* var_sel = new DBContentVariableSelectionWidget();
         var_sel->showMetaVariables(false);
         var_sel->showDBOOnly(map_it.second.second->dbObjectName());
         var_sel->showEmptyVariable(true);
@@ -439,7 +439,7 @@ void JSONObjectParserWidget::mappingDBOVariableChangedSlot()
 {
     loginf << "JSONObjectParserWidget: mappingDBOVariableChangedSlot";
 
-    DBOVariableSelectionWidget* var_widget = static_cast<DBOVariableSelectionWidget*>(sender());
+    DBContentVariableSelectionWidget* var_widget = static_cast<DBContentVariableSelectionWidget*>(sender());
     assert(var_widget);
     QVariant data = var_widget->property("mapping");
     // unsigned int row = var_widget->property("row").toUInt();

@@ -30,8 +30,8 @@
 #include <memory>
 #include <string>
 
-class DBObject;
-class DBOVariable;
+class DBContent;
+class DBContentVariable;
 class Buffer;
 
 class JSONObjectParser : public Configurable
@@ -47,7 +47,7 @@ class JSONObjectParser : public Configurable
     /// @brief Move constructor
     JSONObjectParser& operator=(JSONObjectParser&& other);
 
-    DBObject& dbObject() const;
+    DBContent& dbObject() const;
 
     std::string JSONKey() const;
     void JSONKey(const std::string& json_key);
@@ -69,7 +69,7 @@ class JSONObjectParser : public Configurable
     bool parseJSON(nlohmann::json& j, Buffer& buffer) const;
     void createMappingStubs(nlohmann::json& j);
 
-    const DBOVariableSet& variableList() const;
+    const DBContentVariableSet& variableList() const;
 
     bool overrideDataSource() const;
     void overrideDataSource(bool override);
@@ -105,7 +105,7 @@ private:
     bool active_ {true};
 
     std::string db_object_name_;
-    DBObject* db_object_{nullptr};
+    DBContent* db_object_{nullptr};
 
     std::string json_container_key_;  // location of container with target report data
     std::string json_key_;            // * for all
@@ -113,7 +113,7 @@ private:
 
     std::vector<std::string> json_values_vector_;
 
-    DBOVariableSet var_list_;
+    DBContentVariableSet var_list_;
 
     bool override_data_source_{false};
     std::string data_source_variable_name_;

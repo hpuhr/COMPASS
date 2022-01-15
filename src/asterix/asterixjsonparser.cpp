@@ -252,10 +252,10 @@ const std::vector<std::string>& ASTERIXJSONParser::notAddedJSONKeys() const
     return not_added_json_keys_;
 }
 
-DBObject& ASTERIXJSONParser::dbObject() const
+DBContent& ASTERIXJSONParser::dbObject() const
 {
 
-    DBObjectManager& obj_man = COMPASS::instance().objectManager();
+    DBContentManager& obj_man = COMPASS::instance().objectManager();
 
     if (!obj_man.existsObject(db_object_name_))
         throw runtime_error ("ASTERIXJSONParser: dbObject: dbobject '" + db_object_name_+ "' does not exist");
@@ -621,7 +621,7 @@ void ASTERIXJSONParser::removeMapping(unsigned int index)
     logdbg << "ASTERIXJSONParser: removeMapping: size " << data_mappings_.size();
 }
 
-const DBOVariableSet& ASTERIXJSONParser::variableList() const { return var_list_; }
+const DBContentVariableSet& ASTERIXJSONParser::variableList() const { return var_list_; }
 
 ASTERIXJSONParserWidget* ASTERIXJSONParser::widget()
 {

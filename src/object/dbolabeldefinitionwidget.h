@@ -26,7 +26,7 @@
 class QTableWidget;
 class QTableWidgetItem;
 
-class DBOLabelDefinitionWidget : public QWidget
+class DBContentLabelDefinitionWidget : public QWidget
 {
     Q_OBJECT
 
@@ -34,8 +34,8 @@ class DBOLabelDefinitionWidget : public QWidget
     void cellChangedSlot(int row, int column);
 
   public:
-    DBOLabelDefinitionWidget(DBOLabelDefinition* definition);
-    virtual ~DBOLabelDefinitionWidget();
+    DBContentLabelDefinitionWidget(DBOLabelDefinition* definition);
+    virtual ~DBContentLabelDefinitionWidget();
 
   private:
     bool seperate_window_;

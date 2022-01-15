@@ -65,7 +65,7 @@ HistogramViewConfigWidget::HistogramViewConfigWidget(HistogramView* view, QWidge
                 &HistogramViewConfigWidget::showSelectedVariableDataSlot);
         cfg_layout->addWidget(selected_var_check_);
 
-        select_var_ = new DBOVariableSelectionWidget();
+        select_var_ = new DBContentVariableSelectionWidget();
         select_var_->showMetaVariables(true);
         select_var_->showDataTypesOnly({PropertyDataType::BOOL,
                                         PropertyDataType::CHAR,
@@ -83,7 +83,7 @@ HistogramViewConfigWidget::HistogramViewConfigWidget(HistogramView* view, QWidge
             else
                 select_var_->selectedVariable(view_->dataVar());
         }
-        connect(select_var_, &DBOVariableSelectionWidget::selectionChanged, this,
+        connect(select_var_, &DBContentVariableSelectionWidget::selectionChanged, this,
                 &HistogramViewConfigWidget::selectedVariableChangedSlot);
         cfg_layout->addWidget(select_var_);
 

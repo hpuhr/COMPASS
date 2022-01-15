@@ -23,7 +23,7 @@
 class CreateARTASAssociationsTask;
 class DBInterface;
 class Buffer;
-class DBObject;
+class DBContent;
 
 struct UniqueARTASTrack
 {
@@ -103,7 +103,7 @@ class CreateARTASAssociationsJob : public Job
     void createUTNS();
     void createARTASAssociations();
     void createSensorAssociations();
-    void createSensorHashes(DBObject& object);
+    void createSensorHashes(DBContent& object);
 
     std::map<unsigned int, unsigned int> track_rec_num_utns_;  // track rec num -> utn
 

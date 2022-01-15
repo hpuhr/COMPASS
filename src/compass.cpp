@@ -71,9 +71,9 @@ COMPASS::COMPASS() : Configurable("COMPASS", "COMPASS0", 0, "compass.json")
 
     // database opending
     QObject::connect(db_interface_.get(), &DBInterface::databaseOpenedSignal,
-                     dbo_manager_.get(), &DBObjectManager::databaseOpenedSlot);
+                     dbo_manager_.get(), &DBContentManager::databaseOpenedSlot);
     QObject::connect(db_interface_.get(), &DBInterface::databaseClosedSignal,
-                     dbo_manager_.get(), &DBObjectManager::databaseClosedSlot);
+                     dbo_manager_.get(), &DBContentManager::databaseClosedSlot);
 
     QObject::connect(db_interface_.get(), &DBInterface::databaseOpenedSignal,
                      filter_manager_.get(), &FilterManager::databaseOpenedSlot);
@@ -86,11 +86,11 @@ COMPASS::COMPASS() : Configurable("COMPASS", "COMPASS0", 0, "compass.json")
                      eval_manager_.get(), &EvaluationManager::databaseClosedSlot);
 
     // data exchange
-    QObject::connect(dbo_manager_.get(), &DBObjectManager::loadingStartedSignal,
+    QObject::connect(dbo_manager_.get(), &DBContentManager::loadingStartedSignal,
                      view_manager_.get(), &ViewManager::loadingStartedSlot);
-    QObject::connect(dbo_manager_.get(), &DBObjectManager::loadedDataSignal,
+    QObject::connect(dbo_manager_.get(), &DBContentManager::loadedDataSignal,
                      view_manager_.get(), &ViewManager::loadedDataSlot);
-    QObject::connect(dbo_manager_.get(), &DBObjectManager::loadingDoneSignal,
+    QObject::connect(dbo_manager_.get(), &DBContentManager::loadingDoneSignal,
                      view_manager_.get(), &ViewManager::loadingDoneSlot);
 
     qRegisterMetaType<AppMode>("AppMode");
@@ -131,7 +131,7 @@ void COMPASS::generateSubConfigurable(const std::string& class_id, const std::st
     else if (class_id == "DBObjectManager")
     {
         assert(!dbo_manager_);
-        dbo_manager_.reset(new DBObjectManager(class_id, instance_id, this));
+        dbo_manager_.reset(new DBContentManager(class_id, instance_id, this));
         assert(dbo_manager_);
     }
     else if (class_id == "FilterManager")
@@ -265,7 +265,7 @@ DBInterface& COMPASS::interface()
     return *db_interface_;
 }
 
-DBObjectManager& COMPASS::objectManager()
+DBContentManager& COMPASS::objectManager()
 {
     assert(dbo_manager_);
     return *dbo_manager_;

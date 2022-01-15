@@ -33,7 +33,7 @@
 
 
 class DBInterface;
-class DBObjectManager;
+class DBContentManager;
 class FilterManager;
 class TaskManager;
 class ViewManager;
@@ -60,7 +60,7 @@ public:
     void closeDB();
 
     DBInterface& interface();
-    DBObjectManager& objectManager();
+    DBContentManager& objectManager();
     FilterManager& filterManager();
     TaskManager& taskManager();
     ViewManager& viewManager();
@@ -79,7 +79,7 @@ protected:
 
     std::unique_ptr<SimpleConfig> simple_config_;
     std::unique_ptr<DBInterface> db_interface_;
-    std::unique_ptr<DBObjectManager> dbo_manager_;
+    std::unique_ptr<DBContentManager> dbo_manager_;
     std::unique_ptr<FilterManager> filter_manager_;
     std::unique_ptr<TaskManager> task_manager_;
     std::unique_ptr<ViewManager> view_manager_;

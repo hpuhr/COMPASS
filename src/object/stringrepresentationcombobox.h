@@ -43,16 +43,16 @@ class StringRepresentationComboBox : public QComboBox
         loginf << "StringRepresentationComboBox: changed " << currentText().toStdString();
 
         representation_ = representation();
-        representation_str_ = DBOVariable::representationToString(representation_);
+        representation_str_ = DBContentVariable::representationToString(representation_);
     }
 
   public:
     /// @brief Constructor
-    StringRepresentationComboBox(DBOVariable::Representation& representation, std::string& representation_str,
+    StringRepresentationComboBox(DBContentVariable::Representation& representation, std::string& representation_str,
                                  QWidget* parent = 0)
         : QComboBox(parent), representation_(representation), representation_str_(representation_str)
     {
-        for (auto it : DBOVariable::Representations())
+        for (auto it : DBContentVariable::Representations())
             addItem(it.second.c_str());
 
         update();
@@ -66,10 +66,10 @@ class StringRepresentationComboBox : public QComboBox
     virtual ~StringRepresentationComboBox() {}
 
     /// @brief Returns the currently selected representation
-    DBOVariable::Representation representation()
+    DBContentVariable::Representation representation()
     {
         std::string text = currentText().toStdString();
-        return DBOVariable::stringToRepresentation(text);
+        return DBContentVariable::stringToRepresentation(text);
     }
 
     /// @brief Sets the currently selected representation
@@ -78,7 +78,7 @@ class StringRepresentationComboBox : public QComboBox
 //        setCurrentText(DBOVariable::representationToString(representation).c_str());
 //    }
 
-    void setRepresentation(DBOVariable::Representation& representation,
+    void setRepresentation(DBContentVariable::Representation& representation,
                            std::string& representation_str)
     {
         representation_ = representation;
@@ -89,12 +89,12 @@ class StringRepresentationComboBox : public QComboBox
 
   protected:
     /// Used variable
-    DBOVariable::Representation& representation_;
+    DBContentVariable::Representation& representation_;
     std::string& representation_str_;
 
     void update()
     {
-        setCurrentText(DBOVariable::representationToString(representation_).c_str());
+        setCurrentText(DBContentVariable::representationToString(representation_).c_str());
     }
 };
 

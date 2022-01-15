@@ -5,7 +5,7 @@
 
 #include <QWidget>
 
-class DBOVariableSelectionWidget;
+class DBContentVariableSelectionWidget;
 
 class UnitSelectionWidget;
 class DataTypeFormatSelectionWidget;
@@ -64,7 +64,7 @@ private:
     UnitSelectionWidget* unit_sel_ {nullptr};
     DataTypeFormatSelectionWidget* data_format_widget_ {nullptr};
 
-    DBOVariableSelectionWidget* dbo_var_sel_ {nullptr};
+    DBContentVariableSelectionWidget* dbo_var_sel_ {nullptr};
 
     QTextEdit* dbo_var_comment_edit_ {nullptr};
 

@@ -38,7 +38,7 @@ using namespace std;
 using namespace Utils;
 using namespace Utils::String;
 
-DBObjectManagerDataSourcesWidget::DBObjectManagerDataSourcesWidget(DBObjectManager& object_manager)
+DBContentManagerDataSourcesWidget::DBContentManagerDataSourcesWidget(DBContentManager& object_manager)
     : dbo_manager_(object_manager)
 {
     QFont font_bold;
@@ -89,10 +89,10 @@ DBObjectManagerDataSourcesWidget::DBObjectManagerDataSourcesWidget(DBObjectManag
     setLayout(main_layout);
 }
 
-DBObjectManagerDataSourcesWidget::~DBObjectManagerDataSourcesWidget() {}
+DBContentManagerDataSourcesWidget::~DBContentManagerDataSourcesWidget() {}
 
 
-void DBObjectManagerDataSourcesWidget::loadDSTypeChangedSlot()
+void DBContentManagerDataSourcesWidget::loadDSTypeChangedSlot()
 {
     QCheckBox* box = dynamic_cast<QCheckBox*>(QObject::sender());
     assert (box);
@@ -106,7 +106,7 @@ void DBObjectManagerDataSourcesWidget::loadDSTypeChangedSlot()
     COMPASS::instance().objectManager().dsTypeLoadingWanted(ds_type_name, load);
 }
 
-void DBObjectManagerDataSourcesWidget::loadDSChangedSlot()
+void DBContentManagerDataSourcesWidget::loadDSChangedSlot()
 {
     QCheckBox* box = dynamic_cast<QCheckBox*>(QObject::sender());
     assert (box);
@@ -162,7 +162,7 @@ void DBObjectManagerDataSourcesWidget::loadDSChangedSlot()
 //    dbo_manager_.limitMax(max);
 //}
 
-void DBObjectManagerDataSourcesWidget::update()
+void DBContentManagerDataSourcesWidget::update()
 {
     logdbg << "DBObjectManagerLoadWidget: update: num data sources " << dbo_manager_.dataSources().size();
 
@@ -228,7 +228,7 @@ void DBObjectManagerDataSourcesWidget::update()
     //        associations_label_->setText("None");
 }
 
-void DBObjectManagerDataSourcesWidget::clearAndCreateContent()
+void DBContentManagerDataSourcesWidget::clearAndCreateContent()
 {
     loginf << "DBObjectManagerLoadWidget: clearAndCreateContent";
 
@@ -279,10 +279,10 @@ void DBObjectManagerDataSourcesWidget::clearAndCreateContent()
 
     string tooltip;
 
-    DBObjectManager& dbo_man = COMPASS::instance().objectManager();
+    DBContentManager& dbo_man = COMPASS::instance().objectManager();
     bool ds_found;
 
-    for (auto& ds_type_name : DBObjectManager::data_source_types_)
+    for (auto& ds_type_name : DBContentManager::data_source_types_)
     {
         logdbg << "DBObjectManagerLoadWidget: clearAndCreateContent: typ " << ds_type_name << " cnt " << dstyp_cnt;
 
@@ -299,7 +299,7 @@ void DBObjectManagerDataSourcesWidget::clearAndCreateContent()
         dstyp_box->setProperty("DSType", ds_type_name.c_str());
 
         connect(dstyp_box, &QCheckBox::clicked, this,
-                &DBObjectManagerDataSourcesWidget::loadDSTypeChangedSlot);
+                &DBContentManagerDataSourcesWidget::loadDSTypeChangedSlot);
 
         type_layout_->addWidget(dstyp_box, row, col_start, 1, num_col_per_dstype, Qt::AlignTop | Qt::AlignLeft);
 
@@ -327,7 +327,7 @@ void DBObjectManagerDataSourcesWidget::clearAndCreateContent()
             ds_box->setProperty("DS ID", ds_id);
 
             connect(ds_box, &QCheckBox::clicked, this,
-                    &DBObjectManagerDataSourcesWidget::loadDSChangedSlot);
+                    &DBContentManagerDataSourcesWidget::loadDSChangedSlot);
 
             type_layout_->addWidget(ds_box, row, col_start, 1, 2, //num_col_per_dstype-1,
                                     Qt::AlignTop | Qt::AlignLeft);
@@ -430,7 +430,7 @@ void DBObjectManagerDataSourcesWidget::clearAndCreateContent()
     }
 }
 
-void DBObjectManagerDataSourcesWidget::updateExistingContent()
+void DBContentManagerDataSourcesWidget::updateExistingContent()
 {
     loginf << "DBObjectManagerLoadWidget: updateExistingContent";
 

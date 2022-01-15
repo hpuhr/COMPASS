@@ -19,7 +19,7 @@
 
 #include "dbobject.h"
 
-DBOReadAssociationsJob::DBOReadAssociationsJob(DBObject& dbobject)
+DBOReadAssociationsJob::DBOReadAssociationsJob(DBContent& dbobject)
     : Job("DBOReadAssociationsJob"), dbobject_(dbobject)
 {
     assert(dbobject_.existsInDB());

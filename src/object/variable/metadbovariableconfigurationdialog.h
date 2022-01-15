@@ -4,7 +4,7 @@
 #include <QDialog>
 #include <QListWidget>
 
-class DBObjectManager;
+class DBContentManager;
 class MetaDBOVariableDetailWidget;
 
 class QSplitter;
@@ -24,7 +24,7 @@ public slots:
     void addAllMetaVariablesSlot();
 
 public:
-    MetaDBOVariableConfigurationDialog(DBObjectManager& dbo_man);
+    MetaDBOVariableConfigurationDialog(DBContentManager& dbo_man);
     virtual ~MetaDBOVariableConfigurationDialog();
 
     void updateList();
@@ -32,7 +32,7 @@ public:
     void clearDetails();
 
 protected:
-    DBObjectManager& dbo_man_;
+    DBContentManager& dbo_man_;
 
     QSplitter* splitter_{nullptr};
 

@@ -25,20 +25,15 @@
 #include "dbobjectmanager.h"
 #include "global.h"
 
-/**
- *  @brief Property data type selection for a DBOVariable
- */
-class DBObjectComboBox : public QComboBox
+class DBContentComboBox : public QComboBox
 {
     Q_OBJECT
 
   signals:
-    /// @brief Emitted if type was changed
     void changedObject();
 
   public:
-    /// @brief Constructor
-    DBObjectComboBox(bool allow_meta, QWidget* parent = 0)
+    DBContentComboBox(bool allow_meta, QWidget* parent = 0)
         : QComboBox(parent), allow_meta_(allow_meta)
     {
         assert(COMPASS::instance().objectManager().size());
@@ -53,13 +48,10 @@ class DBObjectComboBox : public QComboBox
         setCurrentIndex(0);
         connect(this, SIGNAL(activated(const QString&)), this, SIGNAL(changedObject()));
     }
-    /// @brief Destructor
-    virtual ~DBObjectComboBox() {}
+    virtual ~DBContentComboBox() {}
 
-    /// @brief Returns the currently selected data type
     std::string getObjectName() { return currentText().toStdString(); }
 
-    /// @brief Sets the currently selected data type
     void setObjectName(const std::string& object_name)
     {
         int index = findText(QString(object_name.c_str()));

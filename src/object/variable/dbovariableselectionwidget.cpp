@@ -34,7 +34,7 @@
 using namespace Utils;
 using namespace std;
 
-DBOVariableSelectionWidget::DBOVariableSelectionWidget(bool h_box, QWidget* parent)
+DBContentVariableSelectionWidget::DBContentVariableSelectionWidget(bool h_box, QWidget* parent)
     : QFrame(parent), dbo_man_(COMPASS::instance().objectManager())
 {
     setFrameStyle(QFrame::Panel | QFrame::Sunken);
@@ -86,9 +86,9 @@ DBOVariableSelectionWidget::DBOVariableSelectionWidget(bool h_box, QWidget* pare
     updateMenuEntries();
 }
 
-DBOVariableSelectionWidget::~DBOVariableSelectionWidget() {}
+DBContentVariableSelectionWidget::~DBContentVariableSelectionWidget() {}
 
-void DBOVariableSelectionWidget::updateMenuEntries()
+void DBContentVariableSelectionWidget::updateMenuEntries()
 {
     menu_.clear();
 
@@ -162,12 +162,12 @@ void DBOVariableSelectionWidget::updateMenuEntries()
     }
 }
 
-bool DBOVariableSelectionWidget::showDataType(PropertyDataType type)
+bool DBContentVariableSelectionWidget::showDataType(PropertyDataType type)
 {
     return std::find(only_data_types_.begin(), only_data_types_.end(), type) != only_data_types_.end();
 }
 
-void DBOVariableSelectionWidget::updateToolTip()
+void DBContentVariableSelectionWidget::updateToolTip()
 {
     if (hasVariable())
         setToolTip(selectedVariable().description().c_str());
@@ -177,9 +177,9 @@ void DBOVariableSelectionWidget::updateToolTip()
         setToolTip("");
 }
 
-void DBOVariableSelectionWidget::showMenuSlot() { menu_.exec(QCursor::pos()); }
+void DBContentVariableSelectionWidget::showMenuSlot() { menu_.exec(QCursor::pos()); }
 
-void DBOVariableSelectionWidget::triggerSlot(QAction* action)
+void DBContentVariableSelectionWidget::triggerSlot(QAction* action)
 {
     assert(object_label_);
     assert(variable_label_);
@@ -220,7 +220,7 @@ void DBOVariableSelectionWidget::triggerSlot(QAction* action)
     emit selectionChanged();
 }
 
-void DBOVariableSelectionWidget::selectedVariable(DBOVariable& variable)
+void DBContentVariableSelectionWidget::selectedVariable(DBContentVariable& variable)
 {
     assert(object_label_);
     assert(variable_label_);
@@ -234,7 +234,7 @@ void DBOVariableSelectionWidget::selectedVariable(DBOVariable& variable)
     updateToolTip();
 }
 
-void DBOVariableSelectionWidget::selectEmptyVariable()
+void DBContentVariableSelectionWidget::selectEmptyVariable()
 {
     assert (show_empty_variable_);
 
@@ -250,7 +250,7 @@ void DBOVariableSelectionWidget::selectEmptyVariable()
     updateToolTip();
 }
 
-DBOVariable& DBOVariableSelectionWidget::selectedVariable() const
+DBContentVariable& DBContentVariableSelectionWidget::selectedVariable() const
 {
     assert(object_label_);
     assert(variable_label_);
@@ -264,7 +264,7 @@ DBOVariable& DBOVariableSelectionWidget::selectedVariable() const
     return dbo_man_.object(obj_name).variable(var_name);
 }
 
-void DBOVariableSelectionWidget::selectedMetaVariable(MetaDBOVariable& variable)
+void DBContentVariableSelectionWidget::selectedMetaVariable(MetaDBOVariable& variable)
 {
     assert(object_label_);
     assert(variable_label_);
@@ -278,7 +278,7 @@ void DBOVariableSelectionWidget::selectedMetaVariable(MetaDBOVariable& variable)
     updateToolTip();
 }
 
-MetaDBOVariable& DBOVariableSelectionWidget::selectedMetaVariable() const
+MetaDBOVariable& DBContentVariableSelectionWidget::selectedMetaVariable() const
 {
     assert(object_label_);
     assert(variable_label_);
@@ -293,7 +293,7 @@ MetaDBOVariable& DBOVariableSelectionWidget::selectedMetaVariable() const
     return dbo_man_.metaVariable(var_name);
 }
 
-void DBOVariableSelectionWidget::showDBOOnly(const std::string& only_dbo_name)
+void DBContentVariableSelectionWidget::showDBOOnly(const std::string& only_dbo_name)
 {
     show_dbo_only_ = true;
     only_dbo_name_ = only_dbo_name;
@@ -304,7 +304,7 @@ void DBOVariableSelectionWidget::showDBOOnly(const std::string& only_dbo_name)
     updateMenuEntries();
 }
 
-void DBOVariableSelectionWidget::disableShowDBOOnly()
+void DBContentVariableSelectionWidget::disableShowDBOOnly()
 {
     show_dbo_only_ = false;
     only_dbo_name_ = "";
@@ -315,18 +315,18 @@ void DBOVariableSelectionWidget::disableShowDBOOnly()
     updateMenuEntries();
 }
 
-std::string DBOVariableSelectionWidget::onlyDBOName() const { return only_dbo_name_; }
+std::string DBContentVariableSelectionWidget::onlyDBOName() const { return only_dbo_name_; }
 
-bool DBOVariableSelectionWidget::showEmptyVariable() const { return show_empty_variable_; }
+bool DBContentVariableSelectionWidget::showEmptyVariable() const { return show_empty_variable_; }
 
-void DBOVariableSelectionWidget::showEmptyVariable(bool show_empty_variable)
+void DBContentVariableSelectionWidget::showEmptyVariable(bool show_empty_variable)
 {
     show_empty_variable_ = show_empty_variable;
 
     updateMenuEntries();
 }
 
-void DBOVariableSelectionWidget::showDataTypesOnly(const std::vector<PropertyDataType>& only_data_types)
+void DBContentVariableSelectionWidget::showDataTypesOnly(const std::vector<PropertyDataType>& only_data_types)
 {
     only_data_types_ = only_data_types;
     show_data_types_only_ = true;
@@ -334,14 +334,14 @@ void DBOVariableSelectionWidget::showDataTypesOnly(const std::vector<PropertyDat
     updateMenuEntries();
 }
 
-void DBOVariableSelectionWidget::disableShowDataTypesOnly()
+void DBContentVariableSelectionWidget::disableShowDataTypesOnly()
 {
     show_data_types_only_ = false;
 }
 
-bool DBOVariableSelectionWidget::showMetaVariablesOnly() const { return show_meta_variables_only_; }
+bool DBContentVariableSelectionWidget::showMetaVariablesOnly() const { return show_meta_variables_only_; }
 
-void DBOVariableSelectionWidget::showMetaVariablesOnly(bool show_meta_variables_only)
+void DBContentVariableSelectionWidget::showMetaVariablesOnly(bool show_meta_variables_only)
 {
     show_meta_variables_only_ = show_meta_variables_only;
 
@@ -351,9 +351,9 @@ void DBOVariableSelectionWidget::showMetaVariablesOnly(bool show_meta_variables_
     updateMenuEntries();
 }
 
-bool DBOVariableSelectionWidget::showMetaVariables() const { return show_meta_variables_; }
+bool DBContentVariableSelectionWidget::showMetaVariables() const { return show_meta_variables_; }
 
-void DBOVariableSelectionWidget::showMetaVariables(bool show_meta_variables)
+void DBContentVariableSelectionWidget::showMetaVariables(bool show_meta_variables)
 {
     show_meta_variables_ = show_meta_variables;
     updateMenuEntries();

@@ -12,7 +12,7 @@
 
 using namespace std;
 
-MetaDBOVariableDetailWidget::MetaDBOVariableDetailWidget(DBObjectManager& dbo_man, QWidget *parent)
+MetaDBOVariableDetailWidget::MetaDBOVariableDetailWidget(DBContentManager& dbo_man, QWidget *parent)
     : QWidget(parent), dbo_man_(dbo_man)
 {
     QVBoxLayout* main_layout = new QVBoxLayout();
@@ -33,11 +33,11 @@ MetaDBOVariableDetailWidget::MetaDBOVariableDetailWidget(DBObjectManager& dbo_ma
 
     for (auto dbcont_it = dbo_man_.begin(); dbcont_it != dbo_man_.end(); ++dbcont_it)
     {
-        DBOVariableSelectionWidget* var_sel = new DBOVariableSelectionWidget(true);
+        DBContentVariableSelectionWidget* var_sel = new DBContentVariableSelectionWidget(true);
         var_sel->showDBOOnly(dbcont_it->first);
         var_sel->setProperty("DBObject", dbcont_it->first.c_str());
 
-        connect(var_sel, &DBOVariableSelectionWidget::selectionChanged,
+        connect(var_sel, &DBContentVariableSelectionWidget::selectionChanged,
                 this, &MetaDBOVariableDetailWidget::variableChangedSlot);
 
         var_sel->setDisabled(true);
@@ -133,7 +133,7 @@ void MetaDBOVariableDetailWidget::variableChangedSlot()
     if (!has_current_entry_)
         return;
 
-    DBOVariableSelectionWidget* sel_widget = dynamic_cast<DBOVariableSelectionWidget*>(QObject::sender());
+    DBContentVariableSelectionWidget* sel_widget = dynamic_cast<DBContentVariableSelectionWidget*>(QObject::sender());
     assert (sel_widget);
     assert (sel_widget->hasVariable());
 

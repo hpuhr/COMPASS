@@ -209,10 +209,10 @@ void ViewManager::checkSubConfigurables()
     }
 }
 
-DBOVariableSet ViewManager::getReadSet(const std::string& dbo_name)
+DBContentVariableSet ViewManager::getReadSet(const std::string& dbo_name)
 {
-    DBOVariableSet read_set;
-    DBOVariableSet read_set_tmp;
+    DBContentVariableSet read_set;
+    DBContentVariableSet read_set_tmp;
 
     for (auto view_it : views_)
     {
@@ -313,7 +313,7 @@ void ViewManager::doViewPointAfterLoad ()
         loginf << "ViewManager: doViewPointAfterLoad: time window min " << time_min << " max " << time_max;
     }
 
-    DBObjectManager& object_manager = COMPASS::instance().objectManager();
+    DBContentManager& object_manager = COMPASS::instance().objectManager();
 
     if (!object_manager.existsMetaVariable("tod") ||
             !object_manager.existsMetaVariable("pos_lat_deg") ||
@@ -336,7 +336,7 @@ void ViewManager::doViewPointAfterLoad ()
             continue;
         }
 
-        const DBOVariable& tod_var = object_manager.metaVariable("tod").getFor(dbo_name);
+        const DBContentVariable& tod_var = object_manager.metaVariable("tod").getFor(dbo_name);
 //        const DBOVariable& latitude_var =
 //                object_manager.metaVariable("pos_lat_deg").getFor(dbo_name);
 //        const DBOVariable& longitude_var =
@@ -346,8 +346,8 @@ void ViewManager::doViewPointAfterLoad ()
         {
             std::shared_ptr<Buffer> buffer = object_manager.data().at(dbo_it.first);
 
-            assert(buffer->has<bool>(DBObject::selected_var.name()));
-            NullableVector<bool>& selected_vec = buffer->get<bool>(DBObject::selected_var.name());
+            assert(buffer->has<bool>(DBContent::selected_var.name()));
+            NullableVector<bool>& selected_vec = buffer->get<bool>(DBContent::selected_var.name());
 
             assert(buffer->has<float>(tod_var.name()));
             NullableVector<float>& tods = buffer->get<float>(tod_var.name());
@@ -402,7 +402,7 @@ void ViewManager::selectTimeWindow(float time_min, float time_max)
 {
     loginf << "ViewManager: selectTimeWindow: time_min " << time_min << " time_max " << time_max;
 
-    DBObjectManager& object_manager = COMPASS::instance().objectManager();
+    DBContentManager& object_manager = COMPASS::instance().objectManager();
 
     if (!object_manager.existsMetaVariable("tod"))
     {
@@ -421,14 +421,14 @@ void ViewManager::selectTimeWindow(float time_min, float time_max)
             continue;
         }
 
-        const DBOVariable& tod_var = object_manager.metaVariable("tod").getFor(dbo_name);
+        const DBContentVariable& tod_var = object_manager.metaVariable("tod").getFor(dbo_name);
 
         if (object_manager.data().count(dbo_it.first))
         {
             std::shared_ptr<Buffer> buffer = object_manager.data().at(dbo_it.first);
 
-            assert(buffer->has<bool>(DBObject::selected_var.name()));
-            NullableVector<bool>& selected_vec = buffer->get<bool>(DBObject::selected_var.name());
+            assert(buffer->has<bool>(DBContent::selected_var.name()));
+            NullableVector<bool>& selected_vec = buffer->get<bool>(DBContent::selected_var.name());
 
             assert(buffer->has<float>(tod_var.name()));
             NullableVector<float>& tods = buffer->get<float>(tod_var.name());

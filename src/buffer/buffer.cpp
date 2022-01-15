@@ -651,11 +651,11 @@ bool Buffer::isNone(const Property& property, unsigned int row_cnt)
     }
 }
 
-void Buffer::transformVariables(DBOVariableSet& list, bool dbcol2dbovar)
+void Buffer::transformVariables(DBContentVariableSet& list, bool dbcol2dbovar)
 {
     logdbg << "Buffer: transformVariables: dbo '" << dbo_name_ << "' dbcol2dbovar " << dbcol2dbovar;
 
-    vector<DBOVariable*>& variables = list.getSet();
+    vector<DBContentVariable*>& variables = list.getSet();
     string variable_name;
     string db_column_name;
 

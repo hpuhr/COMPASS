@@ -26,8 +26,8 @@
 
 using namespace Utils::String;
 
-UpdateBufferDBJob::UpdateBufferDBJob(DBInterface& db_interface, DBObject& dbobject,
-                                     DBOVariable& key_var, std::shared_ptr<Buffer> buffer)
+UpdateBufferDBJob::UpdateBufferDBJob(DBInterface& db_interface, DBContent& dbobject,
+                                     DBContentVariable& key_var, std::shared_ptr<Buffer> buffer)
     : Job("UpdateBufferDBJob"),
       db_interface_(db_interface),
       dbobject_(dbobject),

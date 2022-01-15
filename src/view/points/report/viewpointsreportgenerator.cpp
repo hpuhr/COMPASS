@@ -166,7 +166,7 @@ void ViewPointsReportGenerator::run ()
             vp_ids = vp_widget->viewedViewPoints();
 
         string status_str, elapsed_time_str, remaining_time_str;
-        DBObjectManager& obj_man = COMPASS::instance().objectManager();
+        DBContentManager& obj_man = COMPASS::instance().objectManager();
 
         unsigned int vp_cnt = 0;
         unsigned int vp_size = vp_ids.size();

@@ -3,8 +3,6 @@
 
 using namespace nlohmann;
 
-namespace DBContent {
-
 const std::string DBDataSource::table_name_{"data_sources"};
 
 const Property DBDataSource::id_column_{"ds_id", PropertyDataType::UINT};
@@ -141,5 +139,3 @@ void DBDataSource::loadingWanted(bool loading_wanted)
 }
 
 
-
-} // namespace DBContent

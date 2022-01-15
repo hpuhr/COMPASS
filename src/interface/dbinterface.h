@@ -40,10 +40,11 @@ class COMPASS;
 class Buffer;
 class BufferWriter;
 class SQLiteConnection;
-class DBOVariable;
+class DBContentVariable;
 class QProgressDialog;
-class DBObject;
+class DBContent;
 class DBODataSource;
+class DBDataSource;
 class DBResult;
 class DBTableInfo;
 //class DBInterfaceInfoWidget;
@@ -55,10 +56,7 @@ class SectorLayer;
 class SQLGenerator;
 class QWidget;
 
-namespace DBContent
-{
-class DBDataSource;
-}
+
 
 class DBInterface : public QObject, public Configurable
 {
@@ -100,12 +98,12 @@ public:
 
     bool existsDataSourcesTable();
     void createDataSourcesTable();
-    std::vector<std::unique_ptr<DBContent::DBDataSource>> getDataSources();
-    void saveDataSources(const std::vector<std::unique_ptr<DBContent::DBDataSource>>& data_sources);
+    std::vector<std::unique_ptr<DBDataSource>> getDataSources();
+    void saveDataSources(const std::vector<std::unique_ptr<DBDataSource>>& data_sources);
     // clears previous and saves new ones
 
     // insert data and create associated data sources
-    void insertBuffer(DBObject& db_object, std::shared_ptr<Buffer> buffer);
+    void insertBuffer(DBContent& db_object, std::shared_ptr<Buffer> buffer);
     void insertBuffer(const std::string& table_name, std::shared_ptr<Buffer> buffer);
 
     //    bool checkUpdateBuffer(DBObject& object, DBOVariable& key_var, DBOVariableSet& list,
@@ -116,13 +114,13 @@ public:
     void updateBuffer(const std::string& table_name, const std::string& key_col, std::shared_ptr<Buffer> buffer,
                       int from_index = -1, int to_index = -1);  // no indexes means full buffer
 
-    void prepareRead(const DBObject& dbobject, DBOVariableSet read_list,
-                     std::string custom_filter_clause, std::vector<DBOVariable*> filtered_variables,
-                     bool use_order = false, DBOVariable* order_variable = nullptr,
+    void prepareRead(const DBContent& dbobject, DBContentVariableSet read_list,
+                     std::string custom_filter_clause, std::vector<DBContentVariable*> filtered_variables,
+                     bool use_order = false, DBContentVariable* order_variable = nullptr,
                      bool use_order_ascending = false, const std::string& limit = "");
 
-    std::shared_ptr<Buffer> readDataChunk(const DBObject& dbobject);
-    void finalizeReadStatement(const DBObject& dbobject);
+    std::shared_ptr<Buffer> readDataChunk(const DBContent& dbobject);
+    void finalizeReadStatement(const DBContent& dbobject);
 
     size_t count(const std::string& table);
 
@@ -133,7 +131,7 @@ public:
     bool hasProperty(const std::string& id);
 
     bool existsTable(const std::string& table_name);
-    void createTable(const DBObject& object);
+    void createTable(const DBContent& object);
     //    bool existsMinMaxTable();
     //    void createMinMaxTable();
     //    std::pair<std::string, std::string> getMinMaxString(const DBOVariable& var);
@@ -163,8 +161,8 @@ public:
 
     std::shared_ptr<DBResult> queryMinMaxNormalForTable(const std::string& table_name);
 
-    std::set<int> queryActiveSensorNumbers(DBObject& object);
-    unsigned int getMaxRecordNumber(DBObject& object);
+    std::set<int> queryActiveSensorNumbers(DBContent& object);
+    unsigned int getMaxRecordNumber(DBContent& object);
 
     std::map<unsigned int, std::tuple<std::set<unsigned int>, std::tuple<bool, unsigned int, unsigned int>,
     std::tuple<bool, unsigned int, unsigned int>>> queryADSBInfo();

@@ -509,11 +509,11 @@ void GPSTrailImportTask::run()
     assert (gps_fixes_.size());
     assert (!buffer_);
 
-    DBObjectManager& obj_man = COMPASS::instance().objectManager();
+    DBContentManager& obj_man = COMPASS::instance().objectManager();
 
     assert (obj_man.existsObject("RefTraj"));
 
-    DBObject& reftraj_obj = obj_man.object("RefTraj");
+    DBContent& reftraj_obj = obj_man.object("RefTraj");
 
     assert (reftraj_obj.hasVariable("sac"));
     assert (reftraj_obj.hasVariable("sic"));
@@ -531,22 +531,22 @@ void GPSTrailImportTask::run()
 
     loginf << "GPSTrailImportTask: run: getting variables";
 
-    DBOVariable& sac_var = reftraj_obj.variable("sac");
-    DBOVariable& sic_var = reftraj_obj.variable("sic");
-    DBOVariable& ds_id_var = reftraj_obj.variable("ds_id");
-    DBOVariable& tod_var = reftraj_obj.variable("tod");
-    DBOVariable& lat_var = reftraj_obj.variable("pos_lat_deg");
-    DBOVariable& long_var = reftraj_obj.variable("pos_long_deg");
+    DBContentVariable& sac_var = reftraj_obj.variable("sac");
+    DBContentVariable& sic_var = reftraj_obj.variable("sic");
+    DBContentVariable& ds_id_var = reftraj_obj.variable("ds_id");
+    DBContentVariable& tod_var = reftraj_obj.variable("tod");
+    DBContentVariable& lat_var = reftraj_obj.variable("pos_lat_deg");
+    DBContentVariable& long_var = reftraj_obj.variable("pos_long_deg");
 
-    DBOVariable& m3a_var = reftraj_obj.variable("mode3a_code");
-    DBOVariable& ta_var = reftraj_obj.variable("target_addr");
-    DBOVariable& cs_var = reftraj_obj.variable("callsign");
+    DBContentVariable& m3a_var = reftraj_obj.variable("mode3a_code");
+    DBContentVariable& ta_var = reftraj_obj.variable("target_addr");
+    DBContentVariable& cs_var = reftraj_obj.variable("callsign");
 
-    DBOVariable& head_var = reftraj_obj.variable("heading_deg");
-    DBOVariable& spd_var = reftraj_obj.variable("groundspeed_kt");
+    DBContentVariable& head_var = reftraj_obj.variable("heading_deg");
+    DBContentVariable& spd_var = reftraj_obj.variable("groundspeed_kt");
 
 
-    DBOVariableSet var_set;
+    DBContentVariableSet var_set;
 
     var_set.add(sac_var);
     var_set.add(sic_var);
@@ -707,7 +707,7 @@ void GPSTrailImportTask::insertProgressSlot(float percent)
     loginf << "GPSTrailImportTask: insertProgressSlot: percent " << percent;
 }
 
-void GPSTrailImportTask::insertDoneSlot(DBObject& object)
+void GPSTrailImportTask::insertDoneSlot(DBContent& object)
 {
     loginf << "GPSTrailImportTask: insertDoneSlot";
 

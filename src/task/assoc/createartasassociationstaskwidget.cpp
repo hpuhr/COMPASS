@@ -68,35 +68,35 @@ CreateARTASAssociationsTaskWidget::CreateARTASAssociationsTaskWidget(
         // tracker vars
         row_cnt++;
         grid->addWidget(new QLabel("Tracker Data Source ID Variable"), row_cnt, 0);
-        ds_id_box_ = new DBOVariableSelectionWidget();
+        ds_id_box_ = new DBContentVariableSelectionWidget();
         ds_id_box_->showDBOOnly("Tracker");
         connect(ds_id_box_, SIGNAL(selectionChanged()), this, SLOT(anyVariableChangedSlot()));
         grid->addWidget(ds_id_box_, row_cnt, 1);
 
         row_cnt++;
         grid->addWidget(new QLabel("Tracker Track Number Variable"), row_cnt, 0);
-        track_num_box_ = new DBOVariableSelectionWidget();
+        track_num_box_ = new DBContentVariableSelectionWidget();
         track_num_box_->showDBOOnly("Tracker");
         connect(track_num_box_, SIGNAL(selectionChanged()), this, SLOT(anyVariableChangedSlot()));
         grid->addWidget(track_num_box_, row_cnt, 1);
 
         row_cnt++;
         grid->addWidget(new QLabel("Tracker Track Begin Variable"), row_cnt, 0);
-        track_begin_box_ = new DBOVariableSelectionWidget();
+        track_begin_box_ = new DBContentVariableSelectionWidget();
         track_begin_box_->showDBOOnly("Tracker");
         connect(track_begin_box_, SIGNAL(selectionChanged()), this, SLOT(anyVariableChangedSlot()));
         grid->addWidget(track_begin_box_, row_cnt, 1);
 
         row_cnt++;
         grid->addWidget(new QLabel("Tracker Track Number Variable"), row_cnt, 0);
-        track_end_box_ = new DBOVariableSelectionWidget();
+        track_end_box_ = new DBContentVariableSelectionWidget();
         track_end_box_->showDBOOnly("Tracker");
         connect(track_end_box_, SIGNAL(selectionChanged()), this, SLOT(anyVariableChangedSlot()));
         grid->addWidget(track_end_box_, row_cnt, 1);
 
         row_cnt++;
         grid->addWidget(new QLabel("Tracker Track Coasting Variable"), row_cnt, 0);
-        track_coasting_box_ = new DBOVariableSelectionWidget();
+        track_coasting_box_ = new DBContentVariableSelectionWidget();
         track_coasting_box_->showDBOOnly("Tracker");
         connect(track_coasting_box_, SIGNAL(selectionChanged()), this,
                 SLOT(anyVariableChangedSlot()));
@@ -105,7 +105,7 @@ CreateARTASAssociationsTaskWidget::CreateARTASAssociationsTaskWidget(
         // meta key var
         row_cnt++;
         grid->addWidget(new QLabel("Key Meta Variable"), row_cnt, 0);
-        key_box_ = new DBOVariableSelectionWidget();
+        key_box_ = new DBContentVariableSelectionWidget();
         key_box_->showMetaVariablesOnly(true);
         connect(key_box_, SIGNAL(selectionChanged()), this, SLOT(anyVariableChangedSlot()));
         grid->addWidget(key_box_, row_cnt, 1);
@@ -113,7 +113,7 @@ CreateARTASAssociationsTaskWidget::CreateARTASAssociationsTaskWidget(
         // meta hash var
         row_cnt++;
         grid->addWidget(new QLabel("Hash Meta Variable"), row_cnt, 0);
-        hash_box_ = new DBOVariableSelectionWidget();
+        hash_box_ = new DBContentVariableSelectionWidget();
         hash_box_->showMetaVariablesOnly(true);
         connect(hash_box_, SIGNAL(selectionChanged()), this, SLOT(anyVariableChangedSlot()));
         grid->addWidget(hash_box_, row_cnt, 1);
@@ -121,7 +121,7 @@ CreateARTASAssociationsTaskWidget::CreateARTASAssociationsTaskWidget(
         // meta tod var
         row_cnt++;
         grid->addWidget(new QLabel("Time-of-day Meta Variable"), row_cnt, 0);
-        tod_box_ = new DBOVariableSelectionWidget();
+        tod_box_ = new DBContentVariableSelectionWidget();
         tod_box_->showMetaVariablesOnly(true);
         connect(tod_box_, SIGNAL(selectionChanged()), this, SLOT(anyVariableChangedSlot()));
         grid->addWidget(tod_box_, row_cnt, 1);
@@ -246,9 +246,9 @@ void CreateARTASAssociationsTaskWidget::update()
 //    if (ds_combo_->getDSName() != task_.currentDataSourceName())
 //        task_.currentDataSourceName(ds_combo_->getDSName());
 
-    DBObjectManager& object_man = COMPASS::instance().objectManager();
+    DBContentManager& object_man = COMPASS::instance().objectManager();
 
-    DBObject& track_object = object_man.object("Tracker");
+    DBContent& track_object = object_man.object("Tracker");
 
     // tracker vats
     assert(ds_id_box_);

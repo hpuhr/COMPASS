@@ -26,8 +26,8 @@ class QComboBox;
 class QPushButton;
 class QTextEdit;
 
-class DBOVariable;
-class DBOVariableDataTypeComboBox;
+class DBContentVariable;
+class DBContentVariableDataTypeComboBox;
 class StringRepresentationComboBox;
 class UnitSelectionWidget;
 class QGridLayout;
@@ -35,7 +35,7 @@ class QGridLayout;
 /**
  * @brief Edit widget for a DBObject
  */
-class DBOVariableWidget : public QWidget
+class DBContentVariableWidget : public QWidget
 {
     Q_OBJECT
 
@@ -51,19 +51,19 @@ class DBOVariableWidget : public QWidget
 
   public:
     /// @brief Constructor
-    DBOVariableWidget(DBOVariable& variable, QWidget* parent = 0, Qt::WindowFlags f = 0);
+    DBContentVariableWidget(DBContentVariable& variable, QWidget* parent = 0, Qt::WindowFlags f = 0);
     /// @brief Destructor
-    virtual ~DBOVariableWidget();
+    virtual ~DBContentVariableWidget();
 
     void lock();
     void unlock();
 
-    void setVariable(DBOVariable& variable);
+    void setVariable(DBContentVariable& variable);
     void update();
 
   private:
     /// @brief DBObject to be managed
-    DBOVariable* variable_{nullptr};
+    DBContentVariable* variable_{nullptr};
     QGridLayout* properties_layout_{nullptr};
 
     bool locked_{false};
@@ -72,7 +72,7 @@ class DBOVariableWidget : public QWidget
     QLineEdit* name_edit_{nullptr};
     /// @brief DBOVariable info
     QLineEdit* description_edit_{nullptr};
-    DBOVariableDataTypeComboBox* type_combo_{nullptr};
+    DBContentVariableDataTypeComboBox* type_combo_{nullptr};
     StringRepresentationComboBox* representation_box_{nullptr};
     UnitSelectionWidget* unit_sel_{nullptr};
 };

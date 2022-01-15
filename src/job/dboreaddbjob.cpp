@@ -24,10 +24,10 @@
 #include "logger.h"
 #include "propertylist.h"
 
-DBOReadDBJob::DBOReadDBJob(DBInterface& db_interface, DBObject& dbobject, DBOVariableSet read_list,
+DBOReadDBJob::DBOReadDBJob(DBInterface& db_interface, DBContent& dbobject, DBContentVariableSet read_list,
                            std::string custom_filter_clause,
-                           std::vector<DBOVariable*> filtered_variables, bool use_order,
-                           DBOVariable* order_variable, bool use_order_ascending,
+                           std::vector<DBContentVariable*> filtered_variables, bool use_order,
+                           DBContentVariable* order_variable, bool use_order_ascending,
                            const std::string& limit_str)
     : Job("DBOReadDBJob"),
       db_interface_(db_interface),

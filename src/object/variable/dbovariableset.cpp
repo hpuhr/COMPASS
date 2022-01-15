@@ -22,11 +22,11 @@
 #include "dbobject.h"
 #include "dbovariable.h"
 
-DBOVariableSet::DBOVariableSet() { changed_ = false; }
+DBContentVariableSet::DBContentVariableSet() { changed_ = false; }
 
-DBOVariableSet::~DBOVariableSet() {}
+DBContentVariableSet::~DBContentVariableSet() {}
 
-bool DBOVariableSet::add(DBOVariable& var)
+bool DBContentVariableSet::add(DBContentVariable& var)
 {
     if (find(set_.begin(), set_.end(), &var) == set_.end())
     {
@@ -37,21 +37,21 @@ bool DBOVariableSet::add(DBOVariable& var)
     return false;
 }
 
-bool DBOVariableSet::add(const DBOVariable& var)
+bool DBContentVariableSet::add(const DBContentVariable& var)
 {
     if (find(set_.begin(), set_.end(), &var) == set_.end())
     {
-        set_.push_back((DBOVariable*)(&var));  // TODO this is ugly
+        set_.push_back((DBContentVariable*)(&var));  // TODO this is ugly
         changed_ = true;
         return true;
     }
     return false;
 }
 
-bool DBOVariableSet::add(DBOVariableSet& set)
+bool DBContentVariableSet::add(DBContentVariableSet& set)
 {
-    std::vector<DBOVariable*>& setset = set.getSet();
-    std::vector<DBOVariable*>::iterator it;
+    std::vector<DBContentVariable*>& setset = set.getSet();
+    std::vector<DBContentVariable*>::iterator it;
 
     bool added = false;
 
@@ -93,7 +93,7 @@ bool DBOVariableSet::add(DBOVariableSet& set)
 //  return added;
 //}
 
-void DBOVariableSet::removeVariableAt(unsigned int index)
+void DBContentVariableSet::removeVariableAt(unsigned int index)
 {
     assert(index < set_.size());
 
@@ -102,7 +102,7 @@ void DBOVariableSet::removeVariableAt(unsigned int index)
     changed_ = true;
 }
 
-void DBOVariableSet::removeVariable(const DBOVariable& var)
+void DBContentVariableSet::removeVariable(const DBContentVariable& var)
 {
     set_.erase(std::remove(set_.begin(), set_.end(), &var), set_.end());
 }
@@ -127,7 +127,7 @@ void DBOVariableSet::removeVariable(const DBOVariable& var)
 //  return type_set;
 //}
 
-DBOVariableSet& DBOVariableSet::operator=(const DBOVariableSet& source)
+DBContentVariableSet& DBContentVariableSet::operator=(const DBContentVariableSet& source)
 {
     logdbg << "DBOVariableSet: copy constructor";
 
@@ -136,7 +136,7 @@ DBOVariableSet& DBOVariableSet::operator=(const DBOVariableSet& source)
 
     set_.clear();
 
-    std::vector<DBOVariable*>::const_iterator it;
+    std::vector<DBContentVariable*>::const_iterator it;
 
     logdbg << "DBOVariableSet: copy constructor: copying " << source.set_.size() << " elements";
 
@@ -149,21 +149,21 @@ DBOVariableSet& DBOVariableSet::operator=(const DBOVariableSet& source)
     return *this;
 }
 
-DBOVariable& DBOVariableSet::getVariable(unsigned int index) const
+DBContentVariable& DBContentVariableSet::getVariable(unsigned int index) const
 {
     assert(index < set_.size());
     return *set_.at(index);
 }
 
-bool DBOVariableSet::intersect(DBOVariableSet& set)
+bool DBContentVariableSet::intersect(DBContentVariableSet& set)
 {
-    std::vector<DBOVariable*> org_set = set_;
+    std::vector<DBContentVariable*> org_set = set_;
     set_.clear();
     bool added = false;
 
-    std::vector<DBOVariable*>& setset = set.getSet();
-    std::vector<DBOVariable*>::iterator it;
-    std::vector<DBOVariable*>::iterator it2;
+    std::vector<DBContentVariable*>& setset = set.getSet();
+    std::vector<DBContentVariable*>::iterator it;
+    std::vector<DBContentVariable*>::iterator it2;
 
     for (it = org_set.begin(); it != org_set.end(); it++)  // traverse original list
     {
@@ -182,10 +182,10 @@ bool DBOVariableSet::intersect(DBOVariableSet& set)
     return added;
 }
 
-void DBOVariableSet::print()
+void DBContentVariableSet::print()
 {
     logdbg << "DBOVariableSet: print: size" << set_.size() << " changed " << changed_;
-    std::vector<DBOVariable*>::iterator it;
+    std::vector<DBContentVariable*>::iterator it;
 
     for (it = set_.begin(); it != set_.end(); it++)
     {
@@ -193,18 +193,18 @@ void DBOVariableSet::print()
     }
 }
 
-void DBOVariableSet::clear()
+void DBContentVariableSet::clear()
 {
     set_.clear();
     changed_ = true;
 }
 
-bool DBOVariableSet::hasVariable(const DBOVariable& variable)
+bool DBContentVariableSet::hasVariable(const DBContentVariable& variable)
 {
     return find(set_.begin(), set_.end(), &variable) != set_.end();
 }
 
-bool DBOVariableSet::hasDBColumnName(const std::string& db_column_name)
+bool DBContentVariableSet::hasDBColumnName(const std::string& db_column_name)
 {
     for (auto var_it : set_)
     {
@@ -215,7 +215,7 @@ bool DBOVariableSet::hasDBColumnName(const std::string& db_column_name)
     return false;
 }
 
-unsigned int DBOVariableSet::getVariableWithDBColumnName(const std::string& db_column_name)
+unsigned int DBContentVariableSet::getVariableWithDBColumnName(const std::string& db_column_name)
 {
     assert(hasDBColumnName(db_column_name));
 

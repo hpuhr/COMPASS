@@ -105,7 +105,7 @@ void ListBoxViewDataWidget::loadingStartedSlot()
         buffer_table.second->clear();
 }
 
-void ListBoxViewDataWidget::updateDataSlot(DBObject& object, std::shared_ptr<Buffer> buffer)
+void ListBoxViewDataWidget::updateDataSlot(DBContent& object, std::shared_ptr<Buffer> buffer)
 {
     logdbg << "ListBoxViewDataWidget: updateTables: start";
 

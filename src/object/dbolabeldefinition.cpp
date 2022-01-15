@@ -83,7 +83,7 @@ void DBOLabelEntry::suffix(const std::string& suffix)
 }
 
 DBOLabelDefinition::DBOLabelDefinition(const std::string& class_id, const std::string& instance_id,
-                                       DBObject* parent, DBObjectManager& dbo_man)
+                                       DBContent* parent, DBContentManager& dbo_man)
     : Configurable(class_id, instance_id, parent), db_object_(*parent), dbo_man_(dbo_man)
 {
     createSubConfigurables();
@@ -106,7 +106,7 @@ DBOLabelDefinition::~DBOLabelDefinition()
     read_list_.clear();
 }
 
-DBOVariableSet& DBOLabelDefinition::readList()
+DBContentVariableSet& DBOLabelDefinition::readList()
 {
     updateReadList();
     return read_list_;
@@ -148,51 +148,51 @@ void DBOLabelDefinition::checkLabelDefinitions()
 
             logdbg << "DBOLabelDefinition: checkSubConfigurables: new var " << variable_name;
 
-            if (dbo_man_.metaVariable(DBObject::meta_var_datasource_id_.name()).existsIn(dbo_name)
+            if (dbo_man_.metaVariable(DBContent::meta_var_datasource_id_.name()).existsIn(dbo_name)
                     && variable_name == dbo_man_.metaVariable(
-                        DBObject::meta_var_datasource_id_.name()).getFor(dbo_name).name())
+                        DBContent::meta_var_datasource_id_.name()).getFor(dbo_name).name())
             {
                 show = true;
                 prefix = "S ";
             }
-            else if (dbo_man_.metaVariable(DBObject::meta_var_tod_id_.name()).existsIn(dbo_name)
+            else if (dbo_man_.metaVariable(DBContent::meta_var_tod_id_.name()).existsIn(dbo_name)
                     && variable_name == dbo_man_.metaVariable(
-                        DBObject::meta_var_tod_id_.name()).getFor(dbo_name).name())
+                        DBContent::meta_var_tod_id_.name()).getFor(dbo_name).name())
             {
                 show = true;
                 prefix = "T ";
             }
-            else if (dbo_man_.metaVariable(DBObject::meta_var_m3a_id_.name()).existsIn(dbo_name)
+            else if (dbo_man_.metaVariable(DBContent::meta_var_m3a_id_.name()).existsIn(dbo_name)
                      && variable_name == dbo_man_.metaVariable(
-                         DBObject::meta_var_m3a_id_.name()).getFor(dbo_name).name())
+                         DBContent::meta_var_m3a_id_.name()).getFor(dbo_name).name())
             {
                 show = true;
                 prefix = "A ";
             }
-            else if (dbo_man_.metaVariable(DBObject::meta_var_ta_id_.name()).existsIn(dbo_name)
+            else if (dbo_man_.metaVariable(DBContent::meta_var_ta_id_.name()).existsIn(dbo_name)
                      && variable_name == dbo_man_.metaVariable(
-                         DBObject::meta_var_ta_id_.name()).getFor(dbo_name).name())
+                         DBContent::meta_var_ta_id_.name()).getFor(dbo_name).name())
             {
                 show = true;
                 prefix = "AA ";
             }
-            else if (dbo_man_.metaVariable(DBObject::meta_var_ti_id_.name()).existsIn(dbo_name)
+            else if (dbo_man_.metaVariable(DBContent::meta_var_ti_id_.name()).existsIn(dbo_name)
                      && variable_name == dbo_man_.metaVariable(
-                         DBObject::meta_var_ti_id_.name()).getFor(dbo_name).name())
+                         DBContent::meta_var_ti_id_.name()).getFor(dbo_name).name())
             {
                 show = true;
                 prefix = "ID ";
             }
-            else if (dbo_man_.metaVariable(DBObject::meta_var_track_num_id_.name()).existsIn(dbo_name)
+            else if (dbo_man_.metaVariable(DBContent::meta_var_track_num_id_.name()).existsIn(dbo_name)
                      && variable_name == dbo_man_.metaVariable(
-                         DBObject::meta_var_track_num_id_.name()).getFor(dbo_name).name())
+                         DBContent::meta_var_track_num_id_.name()).getFor(dbo_name).name())
             {
                 show = true;
                 prefix = "TN ";
             }
-            else if (dbo_man_.metaVariable(DBObject::meta_var_mc_id_.name()).existsIn(dbo_name)
+            else if (dbo_man_.metaVariable(DBContent::meta_var_mc_id_.name()).existsIn(dbo_name)
                      && variable_name == dbo_man_.metaVariable(
-                         DBObject::meta_var_mc_id_.name()).getFor(dbo_name).name())
+                         DBContent::meta_var_mc_id_.name()).getFor(dbo_name).name())
             {
                 show = true;
                 prefix = "C ";
@@ -235,13 +235,13 @@ DBOLabelEntry& DBOLabelDefinition::entry(const std::string& variable_name)
     return *entries_.at(variable_name);
 }
 
-DBOLabelDefinitionWidget* DBOLabelDefinition::widget()
+DBContentLabelDefinitionWidget* DBOLabelDefinition::widget()
 {
     if (!widget_)
     {
         //checkLabelDefinitions();
 
-        widget_ = new DBOLabelDefinitionWidget(this);
+        widget_ = new DBContentLabelDefinitionWidget(this);
         assert(widget_);
     }
     return widget_;
@@ -259,14 +259,14 @@ std::map<unsigned int, std::string> DBOLabelDefinition::generateLabels(std::vect
     // check and insert strings for with rec_num
     std::map<unsigned int, std::string> labels;
 
-    DBObjectManager& dbo_man_ = COMPASS::instance().objectManager();
+    DBContentManager& dbo_man_ = COMPASS::instance().objectManager();
 
     string dbo_name = db_object_.name();
 
-    assert (dbo_man_.existsMetaVariable(DBObject::meta_var_rec_num_id_.name()));
-    assert (dbo_man_.metaVariable(DBObject::meta_var_rec_num_id_.name()).existsIn(dbo_name));
+    assert (dbo_man_.existsMetaVariable(DBContent::meta_var_rec_num_id_.name()));
+    assert (dbo_man_.metaVariable(DBContent::meta_var_rec_num_id_.name()).existsIn(dbo_name));
 
-    DBOVariable& rec_num_var = dbo_man_.metaVariable(DBObject::meta_var_rec_num_id_.name()).getFor(dbo_name);
+    DBContentVariable& rec_num_var = dbo_man_.metaVariable(DBContent::meta_var_rec_num_id_.name()).getFor(dbo_name);
 
     std::map<unsigned int, size_t> rec_num_to_index;
     NullableVector<unsigned int>& rec_num_list = buffer->get<unsigned int>(rec_num_var.dbColumnName());
@@ -286,7 +286,7 @@ std::map<unsigned int, std::string> DBOLabelDefinition::generateLabels(std::vect
     bool null;
 
     int var_count = 0;
-    for (DBOVariable* variable : read_list_.getSet())
+    for (DBContentVariable* variable : read_list_.getSet())
     {
         data_type = variable->dataType();
         db_col_name = variable->dbColumnName();

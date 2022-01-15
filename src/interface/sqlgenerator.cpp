@@ -38,7 +38,6 @@
 
 using namespace Utils;
 using namespace std;
-using namespace DBContent;
 
 SQLGenerator::SQLGenerator(DBInterface& db_interface) : db_interface_(db_interface)
 {
@@ -83,7 +82,7 @@ SQLGenerator::SQLGenerator(DBInterface& db_interface) : db_interface_(db_interfa
 
 SQLGenerator::~SQLGenerator() {}
 
-string SQLGenerator::getCreateTableStatement(const DBObject& object)
+string SQLGenerator::getCreateTableStatement(const DBContent& object)
 {
     stringstream ss;
 
@@ -136,8 +135,6 @@ string SQLGenerator::getCreateTableStatement(const DBObject& object)
 
 shared_ptr<DBCommand> SQLGenerator::getDataSourcesSelectCommand()
 {
-    using namespace DBContent;
-
     PropertyList list;
     list.addProperty(DBDataSource::id_column_);
     list.addProperty(DBDataSource::ds_type_column_);
@@ -222,7 +219,7 @@ std::shared_ptr<DBCommand> SQLGenerator::getMaxRecordNumberCommand(const std::st
     return command;
 }
 
-shared_ptr<DBCommand> SQLGenerator::getADSBInfoCommand(DBObject& adsb_obj)
+shared_ptr<DBCommand> SQLGenerator::getADSBInfoCommand(DBContent& adsb_obj)
 {
 
     PropertyList list;
@@ -287,7 +284,7 @@ string SQLGenerator::getCountStatement(const string& table)
     return "SELECT COUNT(*) FROM " + table + ";";
 }
 
-shared_ptr<DBCommand> SQLGenerator::getTableSelectMinMaxNormalStatement(const DBObject& object)
+shared_ptr<DBCommand> SQLGenerator::getTableSelectMinMaxNormalStatement(const DBContent& object)
 {
     logdbg << "SQLGenerator: getTableSelectMinMaxNormalStatement: start for table " << object.dbTableName();
 
@@ -555,8 +552,8 @@ string SQLGenerator::createDBUpdateStringBind(shared_ptr<Buffer> buffer,
 
 
 shared_ptr<DBCommand> SQLGenerator::getSelectCommand(
-        const DBObject& object, DBOVariableSet read_list, const string& filter, bool use_order,
-        DBOVariable* order_variable, bool use_order_ascending, const string& limit)
+        const DBContent& object, DBContentVariableSet read_list, const string& filter, bool use_order,
+        DBContentVariable* order_variable, bool use_order_ascending, const string& limit)
 {
     logdbg << "SQLGenerator: getSelectCommand: dbo " << object.name()
            << " read list size " << read_list.getSize();
@@ -579,7 +576,7 @@ shared_ptr<DBCommand> SQLGenerator::getSelectCommand(
     for (auto var_it : read_list.getSet())
         // look what tables are needed for loaded variables and add variables to sql query
     {
-        DBOVariable* variable = var_it;
+        DBContentVariable* variable = var_it;
 
         if (!first)
             ss << ", ";

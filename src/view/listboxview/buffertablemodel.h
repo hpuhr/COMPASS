@@ -24,7 +24,7 @@
 #include "dbovariableset.h"
 
 class Buffer;
-class DBObject;
+class DBContent;
 class BufferCSVExportJob;
 class ListBoxViewDataSource;
 class BufferTableWidget;
@@ -42,7 +42,7 @@ class BufferTableModel : public QAbstractTableModel
     void exportJobDoneSlot();
 
   public:
-    BufferTableModel(BufferTableWidget* table_widget, DBObject& object,
+    BufferTableModel(BufferTableWidget* table_widget, DBContent& object,
                      ListBoxViewDataSource& data_source);
     virtual ~BufferTableModel();
 
@@ -68,11 +68,11 @@ class BufferTableModel : public QAbstractTableModel
 
   protected:
     BufferTableWidget* table_widget_{nullptr};
-    DBObject& object_;
+    DBContent& object_;
     ListBoxViewDataSource& data_source_;
 
     std::shared_ptr<Buffer> buffer_;
-    DBOVariableSet read_set_;
+    DBContentVariableSet read_set_;
 
     std::shared_ptr<BufferCSVExportJob> export_job_;
 

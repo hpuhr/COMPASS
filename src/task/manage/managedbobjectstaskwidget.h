@@ -21,7 +21,7 @@
 #include <taskwidget.h>
 
 class ManageDBObjectsTask;
-class DBObjectManagerWidget;
+class DBContentManagerWidget;
 
 class ManageDBObjectsTaskWidget : public TaskWidget
 {
@@ -36,7 +36,7 @@ class ManageDBObjectsTaskWidget : public TaskWidget
   protected:
     ManageDBObjectsTask& task_;
 
-    DBObjectManagerWidget* object_manager_widget_{nullptr};
+    DBContentManagerWidget* object_manager_widget_{nullptr};
 };
 
 #endif  // MANAGEDBOBJECTSTASKWIDGET_H
