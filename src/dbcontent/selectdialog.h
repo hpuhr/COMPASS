@@ -28,6 +28,9 @@
 #include "dbcontent/dbcontentcombobox.h"
 #include "textfielddoublevalidator.h"
 
+namespace dbContent
+{
+
 class SelectDBContentDialog : public QDialog
 {
     Q_OBJECT
@@ -73,5 +76,7 @@ class SelectDBContentDialog : public QDialog
     QLineEdit* cat_edit_{nullptr};
     DBContentComboBox* object_box_{nullptr};
 };
+
+}
 
 #endif  // SELECTDBOBJECTDIALOG_H

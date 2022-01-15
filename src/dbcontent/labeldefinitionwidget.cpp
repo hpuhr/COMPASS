@@ -15,7 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "dbolabeldefinitionwidget.h"
+#include "dbcontent/labeldefinitionwidget.h"
 
 #include <QLabel>
 #include <QTableWidget>
@@ -24,7 +24,10 @@
 
 #include "dbovariable.h"
 
-DBContentLabelDefinitionWidget::DBContentLabelDefinitionWidget(DBOLabelDefinition* definition)
+namespace dbContent
+{
+
+LabelDefinitionWidget::LabelDefinitionWidget(LabelDefinition* definition)
     : QWidget(), definition_(definition)  //, entries_ (definition->getEntries())
 {
     assert(definition_);
@@ -72,23 +75,23 @@ DBContentLabelDefinitionWidget::DBContentLabelDefinitionWidget(DBOLabelDefinitio
     // target_->show();
 }
 
-DBContentLabelDefinitionWidget::~DBContentLabelDefinitionWidget() {}
+LabelDefinitionWidget::~LabelDefinitionWidget() {}
 
-void DBContentLabelDefinitionWidget::cellChangedSlot(int row, int column)
+void LabelDefinitionWidget::cellChangedSlot(int row, int column)
 {
     logdbg << "DBOLabelDefinitionWidget: cellChangedSlot: row  " << row << " col " << column;
 
     QTableWidgetItem* item = table_->item(row, column);
     assert(item);
 
-    const std::map<std::string, DBOLabelEntry*>& entries = definition_->entries();
+    const std::map<std::string, LabelEntry*>& entries = definition_->entries();
 
     assert(row < static_cast<int>(entries.size()));
 
     auto it = entries.begin();
     std::advance(it, row);
     std::string variable_name = it->first;
-    DBOLabelEntry& entry = definition_->entry(variable_name);
+    LabelEntry& entry = definition_->entry(variable_name);
 
     if (column == 0)
     {
@@ -108,11 +111,11 @@ void DBContentLabelDefinitionWidget::cellChangedSlot(int row, int column)
     definition_->updateReadList();
 }
 
-void DBContentLabelDefinitionWidget::setTable()
+void LabelDefinitionWidget::setTable()
 {
     int row = 0;
 
-    const std::map<std::string, DBOLabelEntry*>& entries = definition_->entries();
+    const std::map<std::string, LabelEntry*>& entries = definition_->entries();
 
     table_->setRowCount(entries.size());
 
@@ -153,4 +156,6 @@ void DBContentLabelDefinitionWidget::setTable()
         row++;
     }
     table_->resizeColumnsToContents();
+}
+
 }

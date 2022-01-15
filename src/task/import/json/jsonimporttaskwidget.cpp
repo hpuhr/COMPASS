@@ -26,7 +26,7 @@
 #include "jsonimporttask.h"
 #include "jsonparsingschema.h"
 #include "logger.h"
-#include "selectdbobjectdialog.h"
+#include "dbcontent/selectdialog.h"
 #include "stringconv.h"
 
 #include <QCheckBox>

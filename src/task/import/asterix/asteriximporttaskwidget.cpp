@@ -20,7 +20,7 @@
 #include "asteriximporttask.h"
 #include "asterixoverridewidget.h"
 #include "logger.h"
-#include "selectdbobjectdialog.h"
+#include "dbcontent/selectdialog.h"
 
 #include <QCheckBox>
 #include <QComboBox>
@@ -275,7 +275,7 @@ void ASTERIXImportTaskWidget::addParserSlot()
         return;
     }
 
-    SelectDBContentDialog dialog;
+    dbContent::SelectDBContentDialog dialog;
 
     int ret = dialog.exec();
 

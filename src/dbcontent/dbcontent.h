@@ -41,9 +41,13 @@ class InsertBufferDBJob;
 class UpdateBufferDBJob;
 class FinalizeDBOReadJob;
 class DBContentVariableSet;
-class DBOLabelDefinition;
-class DBContentLabelDefinitionWidget;
 class DBContentManager;
+
+namespace dbContent
+{
+class LabelDefinition;
+class LabelDefinitionWidget;
+}
 
 class DBContent : public QObject, public Configurable
 {
@@ -148,7 +152,7 @@ public:
     DBContentWidget* widget();
     void closeWidget();
 
-    DBContentLabelDefinitionWidget* labelDefinitionWidget();
+    dbContent::LabelDefinitionWidget* labelDefinitionWidget();
 
     //std::shared_ptr<Buffer> data() { return data_; }
 
@@ -182,7 +186,7 @@ protected:
     bool is_loadable_{false};  // loadable on its own
     size_t count_{0};
 
-    std::unique_ptr<DBOLabelDefinition> label_definition_;
+    std::unique_ptr<dbContent::LabelDefinition> label_definition_;
 
     std::shared_ptr<DBOReadDBJob> read_job_{nullptr};
     std::vector<std::shared_ptr<Buffer>> read_job_data_;

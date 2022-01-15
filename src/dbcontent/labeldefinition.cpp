@@ -15,10 +15,10 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "dbolabeldefinition.h"
+#include "dbcontent/labeldefinition.h"
 #include "buffer.h"
 #include "dbcontent/dbcontent.h"
-#include "dbolabeldefinitionwidget.h"
+#include "dbcontent/labeldefinitionwidget.h"
 #include "dbovariable.h"
 #include "global.h"
 #include "propertylist.h"
@@ -31,8 +31,11 @@
 
 using namespace std;
 
-DBOLabelEntry::DBOLabelEntry(const std::string& class_id, const std::string& instance_id,
-                             DBOLabelDefinition* parent)
+namespace dbContent
+{
+
+LabelEntry::LabelEntry(const std::string& class_id, const std::string& instance_id,
+                       LabelDefinition* parent)
     : Configurable(class_id, instance_id, parent), def_parent_(parent)
 {
     registerParameter("variable_name", &variable_name_, "");
@@ -43,18 +46,18 @@ DBOLabelEntry::DBOLabelEntry(const std::string& class_id, const std::string& ins
     createSubConfigurables();
 }
 
-DBOLabelEntry::~DBOLabelEntry() {}
+LabelEntry::~LabelEntry() {}
 
-std::string DBOLabelEntry::variableName() const { return variable_name_; }
+std::string LabelEntry::variableName() const { return variable_name_; }
 
-void DBOLabelEntry::variableName(const std::string& variable_name)
+void LabelEntry::variableName(const std::string& variable_name)
 {
     variable_name_ = variable_name;
 }
 
-bool DBOLabelEntry::show() const { return show_; }
+bool LabelEntry::show() const { return show_; }
 
-void DBOLabelEntry::show(bool show)
+void LabelEntry::show(bool show)
 {
     show_ = show;
 
@@ -62,9 +65,9 @@ void DBOLabelEntry::show(bool show)
     def_parent_->labelDefinitionChangedSlot();
 }
 
-std::string DBOLabelEntry::prefix() const { return prefix_; }
+std::string LabelEntry::prefix() const { return prefix_; }
 
-void DBOLabelEntry::prefix(const std::string& prefix)
+void LabelEntry::prefix(const std::string& prefix)
 {
     prefix_ = prefix;
 
@@ -72,9 +75,9 @@ void DBOLabelEntry::prefix(const std::string& prefix)
     def_parent_->labelDefinitionChangedSlot();
 }
 
-std::string DBOLabelEntry::suffix() const { return suffix_; }
+std::string LabelEntry::suffix() const { return suffix_; }
 
-void DBOLabelEntry::suffix(const std::string& suffix)
+void LabelEntry::suffix(const std::string& suffix)
 {
     suffix_ = suffix;
 
@@ -82,14 +85,14 @@ void DBOLabelEntry::suffix(const std::string& suffix)
     def_parent_->labelDefinitionChangedSlot();
 }
 
-DBOLabelDefinition::DBOLabelDefinition(const std::string& class_id, const std::string& instance_id,
-                                       DBContent* parent, DBContentManager& dbo_man)
+LabelDefinition::LabelDefinition(const std::string& class_id, const std::string& instance_id,
+                                 DBContent* parent, DBContentManager& dbo_man)
     : Configurable(class_id, instance_id, parent), db_object_(*parent), dbo_man_(dbo_man)
 {
     createSubConfigurables();
 }
 
-DBOLabelDefinition::~DBOLabelDefinition()
+LabelDefinition::~LabelDefinition()
 {
     if (widget_)
     {
@@ -106,13 +109,13 @@ DBOLabelDefinition::~DBOLabelDefinition()
     read_list_.clear();
 }
 
-DBContentVariableSet& DBOLabelDefinition::readList()
+DBContentVariableSet& LabelDefinition::readList()
 {
     updateReadList();
     return read_list_;
 }
 
-void DBOLabelDefinition::updateReadList()
+void LabelDefinition::updateReadList()
 {
     read_list_.clear();
 
@@ -126,7 +129,7 @@ void DBOLabelDefinition::updateReadList()
     }
 }
 
-void DBOLabelDefinition::checkLabelDefinitions()
+void LabelDefinition::checkLabelDefinitions()
 {
     loginf << "DBOLabelDefinition: checkLabelDefinitions: dbo " << db_object_.name();
 
@@ -156,8 +159,8 @@ void DBOLabelDefinition::checkLabelDefinitions()
                 prefix = "S ";
             }
             else if (dbo_man_.metaVariable(DBContent::meta_var_tod_id_.name()).existsIn(dbo_name)
-                    && variable_name == dbo_man_.metaVariable(
-                        DBContent::meta_var_tod_id_.name()).getFor(dbo_name).name())
+                     && variable_name == dbo_man_.metaVariable(
+                         DBContent::meta_var_tod_id_.name()).getFor(dbo_name).name())
             {
                 show = true;
                 prefix = "T ";
@@ -210,14 +213,14 @@ void DBOLabelDefinition::checkLabelDefinitions()
     }
 }
 
-void DBOLabelDefinition::generateSubConfigurable(const std::string& class_id,
-                                                 const std::string& instance_id)
+void LabelDefinition::generateSubConfigurable(const std::string& class_id,
+                                              const std::string& instance_id)
 {
     if (class_id == "LabelEntry")
     {
         logdbg << "DBOLabelDefinition: generateSubConfigurable: instance_id " << instance_id;
 
-        DBOLabelEntry* entry = new DBOLabelEntry(class_id, instance_id, this);
+        LabelEntry* entry = new LabelEntry(class_id, instance_id, this);
         assert(entries_.find(entry->variableName()) == entries_.end());
         entries_[entry->variableName()] = entry;
     }
@@ -226,30 +229,30 @@ void DBOLabelDefinition::generateSubConfigurable(const std::string& class_id,
                                  class_id);
 }
 
-void DBOLabelDefinition::checkSubConfigurables()
+void LabelDefinition::checkSubConfigurables()
 {
     logdbg << "DBOLabelDefinition: checkSubConfigurables: object " << db_object_.name();
 }
-DBOLabelEntry& DBOLabelDefinition::entry(const std::string& variable_name)
+LabelEntry& LabelDefinition::entry(const std::string& variable_name)
 {
     return *entries_.at(variable_name);
 }
 
-DBContentLabelDefinitionWidget* DBOLabelDefinition::widget()
+LabelDefinitionWidget* LabelDefinition::widget()
 {
     if (!widget_)
     {
         //checkLabelDefinitions();
 
-        widget_ = new DBContentLabelDefinitionWidget(this);
+        widget_ = new LabelDefinitionWidget(this);
         assert(widget_);
     }
     return widget_;
 }
 
-std::map<unsigned int, std::string> DBOLabelDefinition::generateLabels(std::vector<unsigned int> rec_nums,
-                                                              std::shared_ptr<Buffer> buffer,
-                                                              int break_item_cnt)
+std::map<unsigned int, std::string> LabelDefinition::generateLabels(std::vector<unsigned int> rec_nums,
+                                                                    std::shared_ptr<Buffer> buffer,
+                                                                    int break_item_cnt)
 {
     const PropertyList& buffer_properties = buffer->properties();
     assert(buffer_properties.size() >= read_list_.getSize());
@@ -282,7 +285,7 @@ std::map<unsigned int, std::string> DBOLabelDefinition::generateLabels(std::vect
     PropertyDataType data_type;
     string db_col_name;
     std::string value_str;
-    DBOLabelEntry* entry;
+    LabelEntry* entry;
     bool null;
 
     int var_count = 0;
@@ -308,7 +311,7 @@ std::map<unsigned int, std::string> DBOLabelDefinition::generateLabels(std::vect
                 if (!null)
                 {
                     value_str = variable->getRepresentationStringFromValue(
-                        buffer->get<bool>(db_col_name).getAsString(buffer_index));
+                                buffer->get<bool>(db_col_name).getAsString(buffer_index));
                 }
             }
             else if (data_type == PropertyDataType::CHAR)
@@ -318,7 +321,7 @@ std::map<unsigned int, std::string> DBOLabelDefinition::generateLabels(std::vect
                 if (!null)
                 {
                     value_str = variable->getRepresentationStringFromValue(
-                        buffer->get<char>(db_col_name).getAsString(buffer_index));
+                                buffer->get<char>(db_col_name).getAsString(buffer_index));
                 }
             }
             else if (data_type == PropertyDataType::UCHAR)
@@ -328,7 +331,7 @@ std::map<unsigned int, std::string> DBOLabelDefinition::generateLabels(std::vect
                 if (!null)
                 {
                     value_str = variable->getRepresentationStringFromValue(
-                        buffer->get<unsigned char>(db_col_name).getAsString(buffer_index));
+                                buffer->get<unsigned char>(db_col_name).getAsString(buffer_index));
                 }
             }
             else if (data_type == PropertyDataType::INT)
@@ -338,7 +341,7 @@ std::map<unsigned int, std::string> DBOLabelDefinition::generateLabels(std::vect
                 if (!null)
                 {
                     value_str = variable->getRepresentationStringFromValue(
-                        buffer->get<int>(db_col_name).getAsString(buffer_index));
+                                buffer->get<int>(db_col_name).getAsString(buffer_index));
                 }
             }
             else if (data_type == PropertyDataType::UINT)
@@ -348,7 +351,7 @@ std::map<unsigned int, std::string> DBOLabelDefinition::generateLabels(std::vect
                 if (!null)
                 {
                     value_str = variable->getRepresentationStringFromValue(
-                        buffer->get<unsigned int>(db_col_name).getAsString(buffer_index));
+                                buffer->get<unsigned int>(db_col_name).getAsString(buffer_index));
                 }
             }
             else if (data_type == PropertyDataType::LONGINT)
@@ -358,7 +361,7 @@ std::map<unsigned int, std::string> DBOLabelDefinition::generateLabels(std::vect
                 if (!null)
                 {
                     value_str = variable->getRepresentationStringFromValue(
-                        buffer->get<long int>(db_col_name).getAsString(buffer_index));
+                                buffer->get<long int>(db_col_name).getAsString(buffer_index));
                 }
             }
             else if (data_type == PropertyDataType::ULONGINT)
@@ -368,7 +371,7 @@ std::map<unsigned int, std::string> DBOLabelDefinition::generateLabels(std::vect
                 if (!null)
                 {
                     value_str = variable->getRepresentationStringFromValue(
-                        buffer->get<unsigned long int>(db_col_name).getAsString(buffer_index));
+                                buffer->get<unsigned long int>(db_col_name).getAsString(buffer_index));
                 }
             }
             else if (data_type == PropertyDataType::FLOAT)
@@ -378,7 +381,7 @@ std::map<unsigned int, std::string> DBOLabelDefinition::generateLabels(std::vect
                 if (!null)
                 {
                     value_str = variable->getRepresentationStringFromValue(
-                        buffer->get<float>(db_col_name).getAsString(buffer_index));
+                                buffer->get<float>(db_col_name).getAsString(buffer_index));
                 }
             }
             else if (data_type == PropertyDataType::DOUBLE)
@@ -388,7 +391,7 @@ std::map<unsigned int, std::string> DBOLabelDefinition::generateLabels(std::vect
                 if (!null)
                 {
                     value_str = variable->getRepresentationStringFromValue(
-                        buffer->get<double>(db_col_name).getAsString(buffer_index));
+                                buffer->get<double>(db_col_name).getAsString(buffer_index));
                 }
             }
             else if (data_type == PropertyDataType::STRING)
@@ -398,12 +401,12 @@ std::map<unsigned int, std::string> DBOLabelDefinition::generateLabels(std::vect
                 if (!null)
                 {
                     value_str = variable->getRepresentationStringFromValue(
-                        buffer->get<std::string>(db_col_name).getAsString(buffer_index));
+                                buffer->get<std::string>(db_col_name).getAsString(buffer_index));
                 }
             }
             else
                 throw std::domain_error(
-                    "DBOLabelDefinition: generateLabels: unknown property data type");
+                        "DBOLabelDefinition: generateLabels: unknown property data type");
 
             if (!null)
             {
@@ -433,7 +436,9 @@ std::map<unsigned int, std::string> DBOLabelDefinition::generateLabels(std::vect
     return labels;
 }
 
-void DBOLabelDefinition::labelDefinitionChangedSlot()
+void LabelDefinition::labelDefinitionChangedSlot()
 {
     emit db_object_.labelDefinitionChangedSignal();
+}
+
 }

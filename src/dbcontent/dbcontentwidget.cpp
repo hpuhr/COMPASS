@@ -23,7 +23,7 @@
 #include "dbcontent/dbcontent.h"
 //#include "dbodatasourcedefinitionwidget.h"
 //#include "dboeditdatasourceswidget.h"
-#include "dbolabeldefinitionwidget.h"
+#include "dbcontent/labeldefinitionwidget.h"
 #include "dbovariable.h"
 #include "dbovariabledatatypecombobox.h"
 #include "dbovariablewidget.h"
@@ -303,14 +303,12 @@ void DBContentWidget::updateDataSourcesGridSlot()
 
     QIcon edit_icon(Files::getIconFilepath("edit.png").c_str());
     QIcon del_icon(Files::getIconFilepath("delete.png").c_str());
-
-    unsigned int row = 1;
-
 }
 
 void DBContentWidget::showLabelDefinitionWidgetSlot()
 {
     assert(object_);
+
     object_->labelDefinitionWidget()->show();
 }
 

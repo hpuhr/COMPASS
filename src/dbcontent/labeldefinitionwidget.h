@@ -21,12 +21,15 @@
 #include <QStringList>
 #include <QWidget>
 
-#include "dbolabeldefinition.h"
+#include "dbcontent/labeldefinition.h"
 
 class QTableWidget;
 class QTableWidgetItem;
 
-class DBContentLabelDefinitionWidget : public QWidget
+namespace dbContent
+{
+
+class LabelDefinitionWidget : public QWidget
 {
     Q_OBJECT
 
@@ -34,13 +37,13 @@ class DBContentLabelDefinitionWidget : public QWidget
     void cellChangedSlot(int row, int column);
 
   public:
-    DBContentLabelDefinitionWidget(DBOLabelDefinition* definition);
-    virtual ~DBContentLabelDefinitionWidget();
+    LabelDefinitionWidget(LabelDefinition* definition);
+    virtual ~LabelDefinitionWidget();
 
   private:
     bool seperate_window_;
     // QWidget *target_;
-    DBOLabelDefinition* definition_;
+    LabelDefinition* definition_;
     QTableWidget* table_;
     // std::map <std::string, DBOLabelEntry *> &entries_;
     QStringList list_;
@@ -49,5 +52,7 @@ class DBContentLabelDefinitionWidget : public QWidget
 
     void setTable();
 };
+
+}
 
 #endif  // DBOLABELDEFINITIONWIDGET_H

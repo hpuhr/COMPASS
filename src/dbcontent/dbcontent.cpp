@@ -22,8 +22,8 @@
 #include "dbinterface.h"
 #include "dbcontent/dbcontentmanager.h"
 #include "dbcontent/dbcontentwidget.h"
-#include "dbolabeldefinition.h"
-#include "dbolabeldefinitionwidget.h"
+#include "dbcontent/labeldefinition.h"
+#include "dbcontent/labeldefinitionwidget.h"
 #include "dboreadassociationsjob.h"
 #include "dboreaddbjob.h"
 #include "dbovariable.h"
@@ -128,7 +128,7 @@ void DBContent::generateSubConfigurable(const string& class_id, const string& in
     else if (class_id == "DBOLabelDefinition")
     {
         assert(!label_definition_);
-        label_definition_.reset(new DBOLabelDefinition(class_id, instance_id, this, dbo_manager_));
+        label_definition_.reset(new dbContent::LabelDefinition(class_id, instance_id, this, dbo_manager_));
     }
     else
         throw runtime_error("DBObject: generateSubConfigurable: unknown class_id " + class_id);
@@ -275,7 +275,7 @@ DBContentWidget* DBContent::widget()
 
 void DBContent::closeWidget() { widget_ = nullptr; }
 
-DBContentLabelDefinitionWidget* DBContent::labelDefinitionWidget()
+dbContent::LabelDefinitionWidget* DBContent::labelDefinitionWidget()
 {
     assert(label_definition_);
     return label_definition_->widget();
