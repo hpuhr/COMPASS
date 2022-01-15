@@ -18,7 +18,7 @@
 #include "dboeditdatasourceaction.h"
 
 #include "compass.h"
-#include "dbobject.h"
+#include "dbcontent/dbcontent.h"
 #include "logger.h"
 #include "managedatasourcestask.h"
 #include "stringconv.h"

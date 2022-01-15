@@ -30,7 +30,7 @@
 #include "compass.h"
 #include "configuration.h"
 #include "configurationmanager.h"
-#include "dbobject.h"
+#include "dbcontent/dbcontent.h"
 #include "dbovariable.h"
 #include "dbovariabledatatypecombobox.h"
 #include "logger.h"

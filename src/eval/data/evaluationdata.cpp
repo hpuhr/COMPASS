@@ -18,13 +18,13 @@
 #include "evaluationdata.h"
 #include "evaluationdatawidget.h"
 #include "evaluationmanager.h"
-#include "dbobject.h"
+#include "dbcontent/dbcontent.h"
 #include "dbovariable.h"
 #include "metadbovariable.h"
 #include "buffer.h"
 #include "stringconv.h"
 #include "compass.h"
-#include "dbobjectmanager.h"
+#include "dbcontent/dbcontentmanager.h"
 
 #include <QApplication>
 #include <QThread>

@@ -27,7 +27,7 @@
 #include <QTableWidget>
 #include <QVBoxLayout>
 
-#include "dbobject.h"
+#include "dbcontent/dbcontent.h"
 #include "dboeditdatasourceactionoptionswidget.h"
 #include "files.h"
 #include "managedatasourcestask.h"

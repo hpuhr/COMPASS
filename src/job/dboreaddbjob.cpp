@@ -19,7 +19,7 @@
 
 #include "buffer.h"
 #include "dbinterface.h"
-#include "dbobject.h"
+#include "dbcontent/dbcontent.h"
 #include "dbovariable.h"
 #include "logger.h"
 #include "propertylist.h"

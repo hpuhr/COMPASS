@@ -17,13 +17,13 @@
 
 #include "dbolabeldefinition.h"
 #include "buffer.h"
-#include "dbobject.h"
+#include "dbcontent/dbcontent.h"
 #include "dbolabeldefinitionwidget.h"
 #include "dbovariable.h"
 #include "global.h"
 #include "propertylist.h"
 #include "compass.h"
-#include "dbobjectmanager.h"
+#include "dbcontent/dbcontentmanager.h"
 #include "metadbovariable.h"
 
 #include <iostream>

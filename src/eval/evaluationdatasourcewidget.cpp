@@ -18,7 +18,7 @@
 #include "evaluationdatasourcewidget.h"
 #include "logger.h"
 #include "activedatasource.h"
-#include "dbobjectcombobox.h"
+#include "dbcontent/dbcontentcombobox.h"
 
 #include <QLabel>
 #include <QCheckBox>

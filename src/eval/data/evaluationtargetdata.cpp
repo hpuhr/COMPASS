@@ -22,7 +22,7 @@
 #include "dbovariable.h"
 #include "metadbovariable.h"
 #include "compass.h"
-#include "dbobjectmanager.h"
+#include "dbcontent/dbcontentmanager.h"
 #include "evaluationmanager.h"
 //#include "projection/transformation.h"
 

@@ -38,7 +38,7 @@
 #include "eval/results/report/sectioncontenttext.h"
 #include "eval/results/report/sectioncontentfigure.h"
 #include "compass.h"
-#include "dbobjectmanager.h"
+#include "dbcontent/dbcontentmanager.h"
 #include "viewmanager.h"
 #include "files.h"
 

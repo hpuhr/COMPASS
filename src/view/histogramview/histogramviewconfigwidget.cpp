@@ -17,7 +17,7 @@
 
 #include "histogramviewconfigwidget.h"
 #include "compass.h"
-#include "dbobjectmanager.h"
+#include "dbcontent/dbcontentmanager.h"
 #include "dbovariableselectionwidget.h"
 #include "histogramview.h"
 #include "histogramviewdatasource.h"

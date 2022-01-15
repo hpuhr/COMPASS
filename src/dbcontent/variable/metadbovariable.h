@@ -19,7 +19,7 @@
 #define METADBOVARIABLE_H
 
 #include "configurable.h"
-#include "dbobjectmanager.h"
+#include "dbcontent/dbcontentmanager.h"
 #include "dbovariable.h"
 #include "dbovariabledefinition.h"
 #include "stringconv.h"

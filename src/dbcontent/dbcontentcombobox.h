@@ -21,8 +21,8 @@
 #include <QComboBox>
 
 #include "compass.h"
-#include "dbobject.h"
-#include "dbobjectmanager.h"
+#include "dbcontent/dbcontent.h"
+#include "dbcontent/dbcontentmanager.h"
 #include "global.h"
 
 class DBContentComboBox : public QComboBox

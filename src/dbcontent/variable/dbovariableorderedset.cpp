@@ -21,8 +21,8 @@
 
 #include "compass.h"
 #include "configurationmanager.h"
-#include "dbobject.h"
-#include "dbobjectmanager.h"
+#include "dbcontent/dbcontent.h"
+#include "dbcontent/dbcontentmanager.h"
 #include "dbovariable.h"
 #include "dbovariableorderedsetwidget.h"
 #include "dbovariableset.h"

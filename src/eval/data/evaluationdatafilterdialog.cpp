@@ -2,8 +2,8 @@
 #include "evaluationdata.h"
 #include "evaluationmanager.h"
 #include "compass.h"
-#include "dbobjectmanager.h"
-#include "dbobject.h"
+#include "dbcontent/dbcontentmanager.h"
+#include "dbcontent/dbcontent.h"
 #include "logger.h"
 
 #include <QHBoxLayout>

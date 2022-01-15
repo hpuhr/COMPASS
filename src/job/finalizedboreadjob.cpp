@@ -20,7 +20,7 @@
 #include <QThread>
 
 #include "buffer.h"
-#include "dbobject.h"
+#include "dbcontent/dbcontent.h"
 #include "dbovariableset.h"
 
 FinalizeDBOReadJob::FinalizeDBOReadJob(DBContent& dbobject, DBContentVariableSet& read_list,

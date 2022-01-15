@@ -25,7 +25,7 @@
 #include <QLabel>
 #include <QLineEdit>
 
-#include "dbobjectcombobox.h"
+#include "dbcontent/dbcontentcombobox.h"
 #include "textfielddoublevalidator.h"
 
 class SelectDBContentDialog : public QDialog

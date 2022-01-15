@@ -20,7 +20,7 @@
 #include "boost/date_time/posix_time/posix_time.hpp"
 #include "buffer.h"
 #include "dbinterface.h"
-#include "dbobject.h"
+#include "dbcontent/dbcontent.h"
 #include "dbovariable.h"
 #include "stringconv.h"
 

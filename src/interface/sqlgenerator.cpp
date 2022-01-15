@@ -22,7 +22,7 @@
 #include "dbcommandlist.h"
 #include "sqliteconnection.h"
 #include "dbinterface.h"
-#include "dbobject.h"
+#include "dbcontent/dbcontent.h"
 #include "dbovariable.h"
 #include "filtermanager.h"
 #include "logger.h"

@@ -17,7 +17,7 @@
 
 #include "storeddbodatasource.h"
 
-#include "dbobject.h"
+#include "dbcontent/dbcontent.h"
 #include "dbodatasource.h"
 #include "json.hpp"
 #include "managedatasourcestask.h"

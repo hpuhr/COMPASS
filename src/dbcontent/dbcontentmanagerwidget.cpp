@@ -15,14 +15,14 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "dbobjectmanagerwidget.h"
+#include "dbcontent/dbcontentmanagerwidget.h"
 
 #include "compass.h"
 #include "configuration.h"
 #include "configurationmanager.h"
-#include "dbobject.h"
-#include "dbobjectmanager.h"
-#include "dbobjectwidget.h"
+#include "dbcontent/dbcontent.h"
+#include "dbcontent/dbcontentmanager.h"
+#include "dbcontent/dbcontentwidget.h"
 #include "dbovariable.h"
 #include "files.h"
 #include "global.h"

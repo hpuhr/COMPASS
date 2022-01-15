@@ -20,8 +20,8 @@
 #include <QApplication>
 
 #include "compass.h"
-#include "dbobjectmanager.h"
-#include "dbobject.h"
+#include "dbcontent/dbcontentmanager.h"
+#include "dbcontent/dbcontent.h"
 #include "metadbovariable.h"
 #include "scatterplotviewconfigwidget.h"
 #include "scatterplotviewdatasource.h"

@@ -18,8 +18,8 @@
 #include "utnfilter.h"
 #include "compass.h"
 #include "utnfilterwidget.h"
-#include "dbobject.h"
-#include "dbobjectmanager.h"
+#include "dbcontent/dbcontent.h"
+#include "dbcontent/dbcontentmanager.h"
 #include "logger.h"
 #include "stringconv.h"
 

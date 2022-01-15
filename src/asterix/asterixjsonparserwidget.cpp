@@ -1,7 +1,7 @@
 #include "asterixjsonparserwidget.h"
 #include "asterixjsonparserdetailwidget.h"
 #include "asterixjsonparser.h"
-#include "dbobject.h"
+#include "dbcontent/dbcontent.h"
 #include "dbovariable.h"
 #include "logger.h"
 

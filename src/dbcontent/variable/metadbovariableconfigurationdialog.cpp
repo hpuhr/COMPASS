@@ -1,8 +1,8 @@
 #include "metadbovariableconfigurationdialog.h"
 #include "metadbovariable.h"
 #include "metadbovariabledetailwidget.h"
-#include "dbobjectmanager.h"
-#include "dbobject.h"
+#include "dbcontent/dbcontentmanager.h"
+#include "dbcontent/dbcontent.h"
 
 #include <QGridLayout>
 #include <QHBoxLayout>

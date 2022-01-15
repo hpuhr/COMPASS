@@ -18,9 +18,9 @@
 #include "jsonimporttaskwidget.h"
 
 #include "compass.h"
-#include "dbobject.h"
-#include "dbobjectcombobox.h"
-#include "dbobjectmanager.h"
+#include "dbcontent/dbcontent.h"
+#include "dbcontent/dbcontentcombobox.h"
+#include "dbcontent/dbcontentmanager.h"
 #include "dbovariable.h"
 #include "dbovariableselectionwidget.h"
 #include "jsonimporttask.h"

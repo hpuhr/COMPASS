@@ -24,8 +24,8 @@
 #include <QVBoxLayout>
 
 #include "compass.h"
-#include "dbobjectcombobox.h"
-#include "dbobjectmanager.h"
+#include "dbcontent/dbcontentcombobox.h"
+#include "dbcontent/dbcontentmanager.h"
 #include "dbovariable.h"
 #include "dbovariableselectionwidget.h"
 #include "logger.h"

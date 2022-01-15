@@ -24,7 +24,7 @@
 #include "viewpoint.h"
 #include "logger.h"
 #include "stringconv.h"
-#include "dbobjectmanager.h"
+#include "dbcontent/dbcontentmanager.h"
 #include "compass.h"
 #include "global.h"
 #include "dbinterface.h"

@@ -1,6 +1,6 @@
 #include "dbcontentconfigurationdatasource.h"
 #include "dbcontentdbdatasource.h"
-#include "dbobjectmanager.h"
+#include "dbcontent/dbcontentmanager.h"
 #include "logger.h"
 #include "util/number.h"
 

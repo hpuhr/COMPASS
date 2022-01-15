@@ -17,7 +17,7 @@
 
 #include "listboxviewconfigwidget.h"
 #include "compass.h"
-#include "dbobjectmanager.h"
+#include "dbcontent/dbcontentmanager.h"
 #include "dbovariableorderedsetwidget.h"
 #include "listboxview.h"
 #include "listboxviewdatasource.h"

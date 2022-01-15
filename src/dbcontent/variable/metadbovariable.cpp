@@ -20,8 +20,8 @@
 #include "metadbovariable.h"
 
 #include "compass.h"
-#include "dbobject.h"
-#include "dbobjectmanager.h"
+#include "dbcontent/dbcontent.h"
+#include "dbcontent/dbcontentmanager.h"
 #include "dbovariable.h"
 #include "metadbovariablewidget.h"
 

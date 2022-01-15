@@ -21,7 +21,7 @@
 #include "logger.h"
 #include "viewpointstablemodel.h"
 #include "compass.h"
-#include "dbobjectmanager.h"
+#include "dbcontent/dbcontentmanager.h"
 #include "viewpointstoolwidget.h"
 #include "viewpointsreportgenerator.h"
 #include "viewpointsreportgeneratordialog.h"

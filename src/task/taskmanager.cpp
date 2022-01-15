@@ -22,7 +22,7 @@
 #include "createartasassociationstaskwidget.h"
 #include "databaseopentask.h"
 #include "databaseopentaskwidget.h"
-#include "dbobjectmanager.h"
+#include "dbcontent/dbcontentmanager.h"
 //#include "dboeditdatasourceswidget.h"
 //#include "jsonimporttask.h"
 //#include "jsonimporttaskwidget.h"

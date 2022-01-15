@@ -17,7 +17,7 @@
 
 #include "scatterplotviewconfigwidget.h"
 #include "compass.h"
-#include "dbobjectmanager.h"
+#include "dbcontent/dbcontentmanager.h"
 #include "dbovariableselectionwidget.h"
 #include "scatterplotview.h"
 #include "scatterplotviewdatasource.h"

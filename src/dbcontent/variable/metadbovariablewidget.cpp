@@ -26,8 +26,8 @@
 
 #include "compass.h"
 #include "configuration.h"
-#include "dbobject.h"
-#include "dbobjectmanager.h"
+#include "dbcontent/dbcontent.h"
+#include "dbcontent/dbcontentmanager.h"
 #include "dbovariableselectionwidget.h"
 #include "logger.h"
 #include "metadbovariable.h"

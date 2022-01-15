@@ -25,8 +25,8 @@
 #include "compass.h"
 #include "buffer.h"
 #include "buffertablewidget.h"
-#include "dbobject.h"
-#include "dbobjectmanager.h"
+#include "dbcontent/dbcontent.h"
+#include "dbcontent/dbcontentmanager.h"
 #include "listboxviewdatasource.h"
 #include "logger.h"
 

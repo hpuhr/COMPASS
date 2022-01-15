@@ -17,7 +17,7 @@
 
 #include "dboreadassociationsjob.h"
 
-#include "dbobject.h"
+#include "dbcontent/dbcontent.h"
 
 DBOReadAssociationsJob::DBOReadAssociationsJob(DBContent& dbobject)
     : Job("DBOReadAssociationsJob"), dbobject_(dbobject)

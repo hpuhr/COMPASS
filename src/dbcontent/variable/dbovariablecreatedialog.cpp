@@ -4,7 +4,7 @@
 #include "stringrepresentationcombobox.h"
 #include "unitselectionwidget.h"
 #include "stringconv.h"
-#include "dbobject.h"
+#include "dbcontent/dbcontent.h"
 #include "logger.h"
 
 #include <QLineEdit>

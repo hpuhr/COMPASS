@@ -19,7 +19,7 @@
 
 #include <algorithm>
 
-#include "dbobject.h"
+#include "dbcontent/dbcontent.h"
 #include "dbovariable.h"
 
 DBContentVariableSet::DBContentVariableSet() { changed_ = false; }

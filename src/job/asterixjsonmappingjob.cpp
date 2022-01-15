@@ -2,7 +2,7 @@
 #include "asterixjsonparser.h"
 
 #include "buffer.h"
-#include "dbobject.h"
+#include "dbcontent/dbcontent.h"
 #include "json.h"
 #include "jsonobjectparser.h"
 #include "logger.h"

@@ -20,7 +20,7 @@
 #include <QApplication>
 
 #include "compass.h"
-#include "dbobjectmanager.h"
+#include "dbcontent/dbcontentmanager.h"
 #include "listboxviewconfigwidget.h"
 #include "listboxviewdatasource.h"
 #include "listboxviewdatawidget.h"

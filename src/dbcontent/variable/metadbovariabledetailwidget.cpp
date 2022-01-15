@@ -1,6 +1,6 @@
 #include "metadbovariabledetailwidget.h"
 #include "metadbovariable.h"
-#include "dbobjectmanager.h"
+#include "dbcontent/dbcontentmanager.h"
 #include "dbovariableselectionwidget.h"
 #include "logger.h"
 

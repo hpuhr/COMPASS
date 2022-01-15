@@ -22,8 +22,8 @@
 #include <QVBoxLayout>
 
 #include "compass.h"
-#include "dbobjectmanager.h"
-#include "dbobjectmanagerwidget.h"
+#include "dbcontent/dbcontentmanager.h"
+#include "dbcontent/dbcontentmanagerwidget.h"
 
 ManageDBObjectsTaskWidget::ManageDBObjectsTaskWidget(ManageDBObjectsTask& task, QWidget* parent)
     : TaskWidget(parent), task_(task)
