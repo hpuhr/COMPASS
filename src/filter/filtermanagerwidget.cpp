@@ -53,25 +53,26 @@ FilterManagerWidget::FilterManagerWidget(FilterManager& filter_manager, QWidget*
 
     layout->addSpacing(15);
 
-    //QHBoxLayout* filter_layout = new QHBoxLayout();
-
+    // add two filter columns
     QHBoxLayout* ds_filter_parent_layout = new QHBoxLayout();
 
-    QVBoxLayout* ds_filter_layout0_parent = new QVBoxLayout();
-    ds_filter_layout0_ = new QVBoxLayout();
-    ds_filter_layout0_parent->addLayout(ds_filter_layout0_);
-    ds_filter_layout0_parent->addStretch();
+    {
+        QVBoxLayout* ds_filter_layout0_parent = new QVBoxLayout();
+        ds_filter_layout0_ = new QVBoxLayout();
+        ds_filter_layout0_parent->addLayout(ds_filter_layout0_);
+        ds_filter_layout0_parent->addStretch();
 
-    QVBoxLayout* ds_filter_layout1_parent = new QVBoxLayout();
-    ds_filter_layout1_ = new QVBoxLayout();
-    ds_filter_layout1_parent->addLayout(ds_filter_layout1_);
-    ds_filter_layout1_parent->addStretch();
+        ds_filter_parent_layout->addLayout(ds_filter_layout0_parent);
+    }
 
-    ds_filter_parent_layout->addLayout(ds_filter_layout0_parent);
-    ds_filter_parent_layout->addLayout(ds_filter_layout1_parent);
-//    ds_filter_parent_layout->addStretch();
+    {
+        QVBoxLayout* ds_filter_layout1_parent = new QVBoxLayout();
+        ds_filter_layout1_ = new QVBoxLayout();
+        ds_filter_layout1_parent->addLayout(ds_filter_layout1_);
+        ds_filter_layout1_parent->addStretch();
 
-    //filter_layout->addLayout(ds_filter_layout_);
+        ds_filter_parent_layout->addLayout(ds_filter_layout1_parent);
+    }
 
     layout->addLayout(ds_filter_parent_layout);
 
