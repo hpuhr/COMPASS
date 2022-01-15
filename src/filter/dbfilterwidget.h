@@ -90,28 +90,20 @@ class DBFilterWidget : public QFrame, public Configurable
     }
 
   protected:
-    /// DBFilter that is represented by this widget
     DBFilter& filter_;
-    /// Visibility flag
+
     bool visible_;
-    /// Child widget from DBFilter
-    QWidget* child_;
-    /// Visibility checkbox
-    QCheckBox* visible_checkbox_;
-    /// Active checkbox
-    QCheckBox* active_checkbox_;
-    // QCheckBox *and_checkbox_;
-    // QCheckBox *invert_checkbox_;
-    /// Manage filter button
-    QPushButton* manage_button_;
+    QWidget* child_ {nullptr}; // Child widget from DBFilter
 
-    /// Layout for child widget
-    QVBoxLayout* child_layout_;
+    QCheckBox* visible_checkbox_ {nullptr};
+    QCheckBox* active_checkbox_ {nullptr};
 
-    /// Filter management menu
+    QPushButton* manage_button_ {nullptr};
+
+    QVBoxLayout* child_layout_ {nullptr};
+
     QMenu menu_;
 
-    /// Creates the menu_
     void createMenu();
 };
 

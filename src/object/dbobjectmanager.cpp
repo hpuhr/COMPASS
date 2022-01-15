@@ -564,44 +564,44 @@ void DBObjectManager::databaseClosedSlot()
         load_widget_->update();
 }
 
-void DBObjectManager::databaseContentChangedSlot()
-{
-    loginf << "DBObjectManager: databaseContentChangedSlot";
+//void DBObjectManager::databaseContentChangedSlot()
+//{
+//    loginf << "DBObjectManager: databaseContentChangedSlot";
 
-    // emit databaseContentChangedSignal();
+//    // emit databaseContentChangedSignal();
 
-    //    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+//    //    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
-    //    loginf << "DBObjectManager: databaseContentChangedSlot";
+//    //    loginf << "DBObjectManager: databaseContentChangedSlot";
 
-    //    if (COMPASS::instance().interface().hasProperty("associations_generated"))
-    //    {
-    //        assert(COMPASS::instance().interface().hasProperty("associations_dbo"));
-    //        assert(COMPASS::instance().interface().hasProperty("associations_ds"));
+//    //    if (COMPASS::instance().interface().hasProperty("associations_generated"))
+//    //    {
+//    //        assert(COMPASS::instance().interface().hasProperty("associations_dbo"));
+//    //        assert(COMPASS::instance().interface().hasProperty("associations_ds"));
 
-    //        has_associations_ =
-    //                COMPASS::instance().interface().getProperty("associations_generated") == "1";
-    //        associations_dbo_ = COMPASS::instance().interface().getProperty("associations_dbo");
-    //        associations_ds_ = COMPASS::instance().interface().getProperty("associations_ds");
-    //    }
-    //    else
-    //    {
-    //        has_associations_ = false;
-    //        associations_dbo_ = "";
-    //        associations_ds_ = "";
-    //    }
+//    //        has_associations_ =
+//    //                COMPASS::instance().interface().getProperty("associations_generated") == "1";
+//    //        associations_dbo_ = COMPASS::instance().interface().getProperty("associations_dbo");
+//    //        associations_ds_ = COMPASS::instance().interface().getProperty("associations_ds");
+//    //    }
+//    //    else
+//    //    {
+//    //        has_associations_ = false;
+//    //        associations_dbo_ = "";
+//    //        associations_ds_ = "";
+//    //    }
 
-    //    for (auto& object : objects_)
-    //        object.second->updateToDatabaseContent();
+//    //    for (auto& object : objects_)
+//    //        object.second->updateToDatabaseContent();
 
-    //    QApplication::restoreOverrideCursor();
+//    //    QApplication::restoreOverrideCursor();
 
-    if (load_widget_)
-        load_widget_->update();
+//    if (load_widget_)
+//        load_widget_->update();
 
-    //emit dbObjectsChangedSignal();
+//    //emit dbObjectsChangedSignal();
 
-}
+//}
 
 void DBObjectManager::loadingDone(DBObject& object)
 {

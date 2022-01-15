@@ -54,8 +54,9 @@ class FilterManagerWidget : public QWidget
 
     FilterGeneratorWidget* filter_generator_widget_;
 
-    QCheckBox* filters_check_{nullptr};
-    QVBoxLayout* ds_filter_layout_;
+    QCheckBox* filters_check_ {nullptr};
+    QVBoxLayout* ds_filter_layout0_ {nullptr};
+    QVBoxLayout* ds_filter_layout1_ {nullptr};
 
     QPushButton* add_button_;
 };

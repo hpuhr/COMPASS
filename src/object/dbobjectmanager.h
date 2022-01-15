@@ -47,7 +47,7 @@ class DBObjectManager : public QObject, public Configurable
 public slots:
 
     void databaseOpenedSlot();
-    void databaseContentChangedSlot();
+    //void databaseContentChangedSlot();
     void databaseClosedSlot();
 
     void metaDialogOKSlot();

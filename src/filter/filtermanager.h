@@ -49,6 +49,10 @@ signals:
     void changedFiltersSignal();
 
 public slots:
+
+    void databaseOpenedSlot();
+    void databaseClosedSlot();
+
     //void startedSlot();
     void deleteFilterSlot(DBFilter* filter);
 

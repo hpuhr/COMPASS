@@ -38,13 +38,7 @@ using namespace Utils;
  */
 DBFilterWidget::DBFilterWidget(const std::string& class_id, const std::string& instance_id,
                                DBFilter& filter)
-    : QFrame(),
-      Configurable(class_id, instance_id, &filter),
-      filter_(filter),
-      visible_checkbox_(0),
-      active_checkbox_(0),
-      manage_button_(0),
-      child_layout_(0)
+    : QFrame(), Configurable(class_id, instance_id, &filter), filter_(filter)
 {
     logdbg << "DBFilterWidget: constructor";
 
@@ -54,7 +48,8 @@ DBFilterWidget::DBFilterWidget(const std::string& class_id, const std::string& i
     main_layout->setContentsMargins(1, 1, 1, 1);
     main_layout->setSpacing(1);
 
-    setFrameStyle(QFrame::Panel | QFrame::Raised);
+    setFrameStyle(QFrame::Panel | QFrame::Sunken);
+//    setLineWidth(0);
 
     QHBoxLayout* config_layout = new QHBoxLayout();
     config_layout->setContentsMargins(1, 1, 1, 1);
@@ -100,6 +95,8 @@ DBFilterWidget::DBFilterWidget(const std::string& class_id, const std::string& i
     child_->setLayout(child_layout_);
 
     main_layout->addWidget(child_);
+
+    main_layout->addStretch();
     setLayout(main_layout);
 
 //    connect(this, SIGNAL(deleteFilterSignal(DBFilter*)), &COMPASS::instance().filterManager(),

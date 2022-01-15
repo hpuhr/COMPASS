@@ -51,17 +51,29 @@ FilterManagerWidget::FilterManagerWidget(FilterManager& filter_manager, QWidget*
     connect(filters_check_, &QCheckBox::clicked, this, &FilterManagerWidget::toggleUseFilters);
     layout->addWidget(filters_check_);
 
-    QHBoxLayout* filter_layout = new QHBoxLayout();
+    layout->addSpacing(15);
 
-    QVBoxLayout* ds_filter_parent_layout = new QVBoxLayout();
-    ds_filter_layout_ = new QVBoxLayout();
+    //QHBoxLayout* filter_layout = new QHBoxLayout();
 
-    ds_filter_parent_layout->addLayout(ds_filter_layout_);
-    ds_filter_parent_layout->addStretch();
+    QHBoxLayout* ds_filter_parent_layout = new QHBoxLayout();
 
-    filter_layout->addLayout(ds_filter_parent_layout);
+    QVBoxLayout* ds_filter_layout0_parent = new QVBoxLayout();
+    ds_filter_layout0_ = new QVBoxLayout();
+    ds_filter_layout0_parent->addLayout(ds_filter_layout0_);
+    ds_filter_layout0_parent->addStretch();
 
-    layout->addLayout(filter_layout);
+    QVBoxLayout* ds_filter_layout1_parent = new QVBoxLayout();
+    ds_filter_layout1_ = new QVBoxLayout();
+    ds_filter_layout1_parent->addLayout(ds_filter_layout1_);
+    ds_filter_layout1_parent->addStretch();
+
+    ds_filter_parent_layout->addLayout(ds_filter_layout0_parent);
+    ds_filter_parent_layout->addLayout(ds_filter_layout1_parent);
+//    ds_filter_parent_layout->addStretch();
+
+    //filter_layout->addLayout(ds_filter_layout_);
+
+    layout->addLayout(ds_filter_parent_layout);
 
     layout->addStretch();
 
@@ -117,18 +129,32 @@ void FilterManagerWidget::addFilterSlot()
 
 void FilterManagerWidget::updateFiltersSlot()
 {
-    assert(ds_filter_layout_);
+    assert(ds_filter_layout0_);
 
     QLayoutItem* child;
-    while ((child = ds_filter_layout_->takeAt(0)) != 0)
-        ds_filter_layout_->removeItem(child);
+    while ((child = ds_filter_layout0_->takeAt(0)))
+        ds_filter_layout0_->removeItem(child);
+
+    assert(ds_filter_layout1_);
+
+    while ((child = ds_filter_layout1_->takeAt(0)))
+        ds_filter_layout1_->removeItem(child);
 
     std::vector<DBFilter*>& filters = filter_manager_.filters();
+
+    unsigned int num_filters_break = filters.size() / 2;
+    unsigned int cnt = 0;
+
     for (auto it : filters)
     {
         loginf << "FilterManagerWidget: updateFiltersSlot: filter " << it->getName();
 
-        ds_filter_layout_->addWidget(it->widget());
+        if (cnt < num_filters_break)
+            ds_filter_layout0_->addWidget(it->widget());
+        else
+            ds_filter_layout1_->addWidget(it->widget());
+
+        ++cnt;
     }
 }
 

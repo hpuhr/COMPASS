@@ -51,9 +51,9 @@ DBInterfaceInfoWidget::DBInterfaceInfoWidget(DBInterface& interface, QWidget* pa
 
 DBInterfaceInfoWidget::~DBInterfaceInfoWidget() {}
 
-void DBInterfaceInfoWidget::databaseContentChangedSlot()
-{
-    assert(layout_);
-    //layout_->addWidget(interface_.connection().infoWidget());
-    //layout_->addStretch();
-}
+//void DBInterfaceInfoWidget::databaseContentChangedSlot()
+//{
+//    assert(layout_);
+//    //layout_->addWidget(interface_.connection().infoWidget());
+//    //layout_->addStretch();
+//}

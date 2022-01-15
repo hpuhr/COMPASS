@@ -399,6 +399,22 @@ FilterManagerWidget* FilterManager::widget()
     return widget_;
 }
 
+void FilterManager::databaseOpenedSlot()
+{
+    loginf << "FilterManager: databaseOpenedSlot";
+
+    if (widget_)
+        widget_->setDisabled(false);
+}
+
+void FilterManager::databaseClosedSlot()
+{
+    loginf << "FilterManager: databaseClosedSlot";
+
+    if (widget_)
+        widget_->setDisabled(true);
+}
+
 //void FilterManager::startedSlot()
 //{
 //    loginf << "FilterManager: startedSlot";
