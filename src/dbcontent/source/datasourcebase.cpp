@@ -1,7 +1,11 @@
-#include "dbcontentdatasourcebase.h"
+#include "dbcontent/source/datasourcebase.h"
 #include "logger.h"
 
 using namespace nlohmann;
+
+namespace dbContent
+{
+
 
 DataSourceBase::DataSourceBase()
 {
@@ -84,5 +88,5 @@ std::string DataSourceBase::infoStr()
     return info_.dump();
 }
 
-
+}
 

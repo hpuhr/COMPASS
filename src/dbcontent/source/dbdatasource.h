@@ -1,8 +1,12 @@
 #ifndef DBCONTENT_DBDATASOURCE_H
 #define DBCONTENT_DBDATASOURCE_H
 
-#include "dbcontentdatasourcebase.h"
+#include "dbcontent/source/datasourcebase.h"
 #include "property.h"
+
+namespace dbContent
+{
+
 
 class DBDataSource : public DataSourceBase
 {
@@ -59,5 +63,7 @@ protected:
     std::map<std::string, std::map<unsigned int, unsigned int>> num_loaded_; // db_content -> line id -> count
     std::map<std::string, std::map<unsigned int, unsigned int>> counts_map_; // db_content -> line id -> count
 };
+
+}
 
 #endif // DBCONTENT_DBDATASOURCE_H

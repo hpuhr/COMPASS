@@ -38,7 +38,7 @@
 #include "sector.h"
 #include "sectorlayer.h"
 #include "evaluationmanager.h"
-#include "dbcontentdbdatasource.h"
+#include "dbcontent/source/dbdatasource.h"
 #include "metadbovariable.h"
 
 #include <QApplication>
@@ -429,7 +429,7 @@ std::tuple<bool, unsigned int, unsigned int>>> DBInterface::queryADSBInfo()
 
 bool DBInterface::existsDataSourcesTable()
 {
-    return existsTable(DBDataSource::table_name_);
+    return existsTable(dbContent::DBDataSource::table_name_);
 }
 
 void DBInterface::createDataSourcesTable()
@@ -442,9 +442,11 @@ void DBInterface::createDataSourcesTable()
     updateTableInfo();
 }
 
-std::vector<std::unique_ptr<DBDataSource>> DBInterface::getDataSources()
+std::vector<std::unique_ptr<dbContent::DBDataSource>> DBInterface::getDataSources()
 {
     logdbg << "DBInterface: getDataSources: start";
+
+    using namespace dbContent;
 
     QMutexLocker locker(&connection_mutex_);
 
@@ -529,9 +531,11 @@ std::vector<std::unique_ptr<DBDataSource>> DBInterface::getDataSources()
     return sources;
 }
 
-void DBInterface::saveDataSources(const std::vector<std::unique_ptr<DBDataSource>>& data_sources)
+void DBInterface::saveDataSources(const std::vector<std::unique_ptr<dbContent::DBDataSource>>& data_sources)
 {
     loginf << "DBInterface: saveDataSources: num " << data_sources.size();
+
+    using namespace dbContent;
 
     assert (dbOpen());
 

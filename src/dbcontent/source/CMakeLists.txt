@@ -5,13 +5,13 @@ include_directories (
 
 target_sources(compass
     PUBLIC
-        "${CMAKE_CURRENT_LIST_DIR}/dbcontentdatasourcebase.h"
-        "${CMAKE_CURRENT_LIST_DIR}/dbcontentconfigurationdatasource.h"
-        "${CMAKE_CURRENT_LIST_DIR}/dbcontentdbdatasource.h"
+        "${CMAKE_CURRENT_LIST_DIR}/datasourcebase.h"
+        "${CMAKE_CURRENT_LIST_DIR}/configurationdatasource.h"
+        "${CMAKE_CURRENT_LIST_DIR}/dbdatasource.h"
     PRIVATE
-        "${CMAKE_CURRENT_LIST_DIR}/dbcontentdatasourcebase.cpp"
-        "${CMAKE_CURRENT_LIST_DIR}/dbcontentconfigurationdatasource.cpp"
-        "${CMAKE_CURRENT_LIST_DIR}/dbcontentdbdatasource.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/datasourcebase.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/configurationdatasource.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/dbdatasource.cpp"
 )
 
 

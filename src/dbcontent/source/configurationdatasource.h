@@ -1,10 +1,13 @@
 #ifndef DBCONTENTCONFIGURATIONDATASOURCE_H
 #define DBCONTENTCONFIGURATIONDATASOURCE_H
 
-#include "dbcontentdatasourcebase.h"
+#include "dbcontent/source/datasourcebase.h"
 #include "configurable.h"
 
 class DBContentManager;
+
+namespace dbContent
+{
 
 class DBDataSource;
 
@@ -24,5 +27,7 @@ public:
 protected:
     virtual void checkSubConfigurables() {}
 };
+
+}
 
 #endif // DBCONTENTCONFIGURATIONDATASOURCE_H

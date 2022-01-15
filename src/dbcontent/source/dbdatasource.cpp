@@ -1,7 +1,11 @@
-#include "dbcontentdbdatasource.h"
+#include "dbcontent/source/dbdatasource.h"
 #include "logger.h"
 
 using namespace nlohmann;
+
+namespace dbContent
+{
+
 
 const std::string DBDataSource::table_name_{"data_sources"};
 
@@ -139,3 +143,4 @@ void DBDataSource::loadingWanted(bool loading_wanted)
 }
 
 
+}

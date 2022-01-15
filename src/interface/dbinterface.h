@@ -44,7 +44,6 @@ class DBContentVariable;
 class QProgressDialog;
 class DBContent;
 class DBODataSource;
-class DBDataSource;
 class DBResult;
 class DBTableInfo;
 //class DBInterfaceInfoWidget;
@@ -56,7 +55,10 @@ class SectorLayer;
 class SQLGenerator;
 class QWidget;
 
-
+namespace dbContent
+{
+class DBDataSource;
+}
 
 class DBInterface : public QObject, public Configurable
 {
@@ -98,8 +100,8 @@ public:
 
     bool existsDataSourcesTable();
     void createDataSourcesTable();
-    std::vector<std::unique_ptr<DBDataSource>> getDataSources();
-    void saveDataSources(const std::vector<std::unique_ptr<DBDataSource>>& data_sources);
+    std::vector<std::unique_ptr<dbContent::DBDataSource>> getDataSources();
+    void saveDataSources(const std::vector<std::unique_ptr<dbContent::DBDataSource>>& data_sources);
     // clears previous and saves new ones
 
     // insert data and create associated data sources

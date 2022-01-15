@@ -224,7 +224,7 @@ void ASTERIXPostprocessJob::doRadarPlotPositionCalculations()
 
                 if (dbo_man.hasConfigDataSource(ds_id_it))
                 {
-                    ConfigurationDataSource& data_source = dbo_man.configDataSource(ds_id_it);
+                    dbContent::ConfigurationDataSource& data_source = dbo_man.configDataSource(ds_id_it);
 
                     if (data_source.info().contains("latitude")
                             && data_source.info().contains("longitude")
@@ -245,7 +245,7 @@ void ASTERIXPostprocessJob::doRadarPlotPositionCalculations()
                 }
                 else if (dbo_man.hasDataSource(ds_id_it))
                 {
-                    DBDataSource& data_source = dbo_man.dataSource(ds_id_it);
+                    dbContent::DBDataSource& data_source = dbo_man.dataSource(ds_id_it);
 
                     if (data_source.info().contains("latitude")
                             && data_source.info().contains("longitude")

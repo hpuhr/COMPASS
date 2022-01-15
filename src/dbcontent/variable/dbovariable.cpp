@@ -742,7 +742,7 @@ std::string DBContentVariable::getDataSourcesAsString(const std::string& value) 
 
     if (dbo_man.hasDataSource(ds_id))
     {
-        DBDataSource& ds = dbo_man.dataSource(ds_id);
+        dbContent::DBDataSource& ds = dbo_man.dataSource(ds_id);
 
         if (ds.hasShortName())
             return ds.shortName();

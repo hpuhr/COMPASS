@@ -148,7 +148,8 @@ void DBContentManager::generateSubConfigurable(const std::string& class_id,
     }
     else if (class_id.compare("DBContentConfigurationDataSource") == 0)
     {
-        unique_ptr<ConfigurationDataSource> ds {new ConfigurationDataSource(class_id, instance_id, *this)};
+        unique_ptr<dbContent::ConfigurationDataSource> ds {
+            new dbContent::ConfigurationDataSource(class_id, instance_id, *this)};
         loginf << "DBObjectManager: generateSubConfigurable: adding config ds "
                << ds->name() << " sac/sic " <<  ds->sac() << "/" << ds->sic();
 
@@ -646,12 +647,12 @@ bool DBContentManager::hasConfigDataSource (unsigned int ds_id)
     unsigned int sic = Number::sicFromDsId(ds_id);
 
     return find_if(config_data_sources_.begin(), config_data_sources_.end(),
-                   [sac,sic] (const std::unique_ptr<ConfigurationDataSource>& s)
+                   [sac,sic] (const std::unique_ptr<dbContent::ConfigurationDataSource>& s)
     { return s->sac() == sac && s->sic() == sic; } ) != config_data_sources_.end();
 
 }
 
-ConfigurationDataSource& DBContentManager::configDataSource (unsigned int ds_id)
+dbContent::ConfigurationDataSource& DBContentManager::configDataSource (unsigned int ds_id)
 {
     assert (hasConfigDataSource(ds_id));
 
@@ -659,7 +660,7 @@ ConfigurationDataSource& DBContentManager::configDataSource (unsigned int ds_id)
     unsigned int sic = Number::sicFromDsId(ds_id);
 
     return *find_if(config_data_sources_.begin(), config_data_sources_.end(),
-                    [sac,sic] (const std::unique_ptr<ConfigurationDataSource>& s)
+                    [sac,sic] (const std::unique_ptr<dbContent::ConfigurationDataSource>& s)
     { return s->sac() == sac && s->sic() == sic; } )->get();
 }
 
@@ -679,7 +680,8 @@ void DBContentManager::loadDBDataSources()
 void DBContentManager::sortDBDataSources()
 {
     sort(db_data_sources_.begin(), db_data_sources_.end(),
-         [](const std::unique_ptr<DBDataSource>& a, const std::unique_ptr<DBDataSource>& b) -> bool
+         [](const std::unique_ptr<dbContent::DBDataSource>& a,
+         const std::unique_ptr<dbContent::DBDataSource>& b) -> bool
     {
         return a->name() < b->name();
     });
@@ -704,7 +706,7 @@ bool DBContentManager::canAddNewDataSourceFromConfig (unsigned int ds_id)
 bool DBContentManager::hasDataSource(unsigned int ds_id)
 {
     return find_if(db_data_sources_.begin(), db_data_sources_.end(),
-                   [ds_id] (const std::unique_ptr<DBDataSource>& s)
+                   [ds_id] (const std::unique_ptr<dbContent::DBDataSource>& s)
     { return Number::dsIdFrom(s->sac(), s->sic()) == ds_id; } ) != db_data_sources_.end();
 }
 
@@ -718,7 +720,7 @@ void DBContentManager::addNewDataSource (unsigned int ds_id)
     {
         loginf << "DBObjectManager: addNewDataSource: ds_id " << ds_id << " from config";
 
-        ConfigurationDataSource& cfg_ds = configDataSource(ds_id);
+        dbContent::ConfigurationDataSource& cfg_ds = configDataSource(ds_id);
 
         db_data_sources_.emplace_back(move(cfg_ds.getAsNewDBDS()));
         sortDBDataSources();
@@ -727,7 +729,7 @@ void DBContentManager::addNewDataSource (unsigned int ds_id)
     {
         loginf << "DBObjectManager: addNewDataSource: ds_id " << ds_id << " create new";
 
-        DBDataSource* new_ds = new DBDataSource();
+        dbContent::DBDataSource* new_ds = new dbContent::DBDataSource();
         new_ds->id(ds_id);
         new_ds->sac(Number::sacFromDsId(ds_id));
         new_ds->sic(Number::sicFromDsId(ds_id));
@@ -742,12 +744,12 @@ void DBContentManager::addNewDataSource (unsigned int ds_id)
     loginf << "DBObjectManager: addNewDataSource: ds_id " << ds_id << " done";
 }
 
-DBDataSource& DBContentManager::dataSource(unsigned int ds_id)
+dbContent::DBDataSource& DBContentManager::dataSource(unsigned int ds_id)
 {
     assert (hasDataSource(ds_id));
 
     return *find_if(db_data_sources_.begin(), db_data_sources_.end(),
-                    [ds_id] (const std::unique_ptr<DBDataSource>& s)
+                    [ds_id] (const std::unique_ptr<dbContent::DBDataSource>& s)
     { return Number::dsIdFrom(s->sac(), s->sic()) == ds_id; } )->get();
 }
 
@@ -1168,7 +1170,7 @@ void DBContentManager::loadMaxRecordNumber()
     loginf << "DBObjectManager: loadMaxRecordNumber: " << max_rec_num_;
 }
 
-const std::vector<std::unique_ptr<DBDataSource>>& DBContentManager::dataSources() const
+const std::vector<std::unique_ptr<dbContent::DBDataSource>>& DBContentManager::dataSources() const
 {
     return db_data_sources_;
 }

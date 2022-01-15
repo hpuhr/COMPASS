@@ -1,5 +1,5 @@
-#include "dbcontentconfigurationdatasource.h"
-#include "dbcontentdbdatasource.h"
+#include "dbcontent/source/configurationdatasource.h"
+#include "dbcontent/source/dbdatasource.h"
 #include "dbcontent/dbcontentmanager.h"
 #include "logger.h"
 #include "util/number.h"
@@ -9,6 +9,10 @@
 using namespace std;
 using namespace nlohmann;
 using namespace Utils;
+
+namespace dbContent
+{
+
 
 ConfigurationDataSource::ConfigurationDataSource(const std::string& class_id, const std::string& instance_id,
                                                  DBContentManager& dbo_manager)
@@ -118,3 +122,4 @@ DBDataSource* ConfigurationDataSource::getAsNewDBDS()
     return new_ds;
 }
 
+}

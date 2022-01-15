@@ -19,8 +19,8 @@
 #define DBOBJECTMANAGER_H_
 
 #include "configurable.h"
-#include "dbcontentconfigurationdatasource.h"
-#include "dbcontentdbdatasource.h"
+#include "dbcontent/source/configurationdatasource.h"
+#include "dbcontent/source/dbdatasource.h"
 #include "global.h"
 #include "singleton.h"
 #include "buffer.h"
@@ -92,13 +92,13 @@ public:
 
 
     bool hasConfigDataSource(unsigned int ds_id);
-    ConfigurationDataSource& configDataSource(unsigned int ds_id);
+    dbContent::ConfigurationDataSource& configDataSource(unsigned int ds_id);
 
     bool hasDataSource(unsigned int ds_id);
     bool canAddNewDataSourceFromConfig (unsigned int ds_id);
     void addNewDataSource (unsigned int ds_id); // be sure not to call from different thread
-    DBDataSource& dataSource(unsigned int ds_id);
-    const std::vector<std::unique_ptr<DBDataSource>>& dataSources() const;
+    dbContent::DBDataSource& dataSource(unsigned int ds_id);
+    const std::vector<std::unique_ptr<dbContent::DBDataSource>>& dataSources() const;
 
     std::map<unsigned int, std::vector <std::pair<std::string, unsigned int>>> getNetworkLines(); //ds_id -> (ip, port)
 
@@ -197,8 +197,8 @@ protected:
     std::map<std::string, DBContent*> objects_;
     std::vector<std::unique_ptr<MetaDBOVariable>> meta_variables_;
 
-    std::vector<std::unique_ptr<ConfigurationDataSource>> config_data_sources_;
-    std::vector<std::unique_ptr<DBDataSource>> db_data_sources_;
+    std::vector<std::unique_ptr<dbContent::ConfigurationDataSource>> config_data_sources_;
+    std::vector<std::unique_ptr<dbContent::DBDataSource>> db_data_sources_;
 
     std::unique_ptr<DBContentManagerWidget> widget_;
     std::unique_ptr<DBContentManagerDataSourcesWidget> load_widget_;

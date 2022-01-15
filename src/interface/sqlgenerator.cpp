@@ -28,7 +28,7 @@
 #include "logger.h"
 #include "propertylist.h"
 #include "stringconv.h"
-#include "dbcontentdbdatasource.h"
+#include "dbcontent/source/dbdatasource.h"
 
 #include <algorithm>
 #include <iomanip>
@@ -41,6 +41,8 @@ using namespace std;
 
 SQLGenerator::SQLGenerator(DBInterface& db_interface) : db_interface_(db_interface)
 {
+    using namespace dbContent;
+
     stringstream ss;
 
     //    ss << "CREATE TABLE " << TABLE_NAME_MINMAX
@@ -135,6 +137,8 @@ string SQLGenerator::getCreateTableStatement(const DBContent& object)
 
 shared_ptr<DBCommand> SQLGenerator::getDataSourcesSelectCommand()
 {
+    using namespace dbContent;
+
     PropertyList list;
     list.addProperty(DBDataSource::id_column_);
     list.addProperty(DBDataSource::ds_type_column_);
