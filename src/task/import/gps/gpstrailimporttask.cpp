@@ -531,6 +531,8 @@ void GPSTrailImportTask::run()
 
     loginf << "GPSTrailImportTask: run: getting variables";
 
+    using namespace dbContent;
+
     DBContentVariable& sac_var = reftraj_obj.variable("sac");
     DBContentVariable& sic_var = reftraj_obj.variable("sic");
     DBContentVariable& ds_id_var = reftraj_obj.variable("ds_id");

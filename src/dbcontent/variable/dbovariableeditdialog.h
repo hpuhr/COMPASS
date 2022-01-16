@@ -3,8 +3,6 @@
 
 #include <QDialog>
 
-class DBContentVariable;
-class DBContentVariableDataTypeComboBox;
 class UnitSelectionWidget;
 class StringRepresentationComboBox;
 
@@ -12,6 +10,12 @@ class QLineEdit;
 class QCheckBox;
 class QPushButton;
 class QTextEdit;
+
+namespace dbContent
+{
+
+class DBContentVariable;
+class DBContentVariableDataTypeComboBox;
 
 class DBContentVariableEditDialog : public QDialog
 {
@@ -51,5 +55,6 @@ protected:
     bool variable_edited_ {false};
 };
 
+}
 
 #endif // DBOVARIABLE_EDITDIALOG_H

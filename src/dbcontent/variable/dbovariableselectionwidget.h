@@ -23,13 +23,16 @@
 #include <QFrame>
 #include <QMenu>
 
-class DBContentVariable;
-class DBContentManager;
-class MetaDBOVariable;
-
-
 class QPushButton;
 class QLabel;
+
+class DBContentManager;
+
+namespace dbContent
+{
+
+class DBContentVariable;
+class MetaDBOVariable;
 
 class DBContentVariableSelectionWidget : public QFrame
 {
@@ -101,5 +104,7 @@ class DBContentVariableSelectionWidget : public QFrame
     bool showDataType(PropertyDataType type);
     void updateToolTip();
 };
+
+}
 
 #endif  // DBOVARIABLESELECTIONWIDGET_H

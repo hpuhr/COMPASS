@@ -594,6 +594,8 @@ void CreateARTASAssociationsJob::createSensorHashes(DBContent& object)
     std::shared_ptr<Buffer> buffer = buffers_.at(dbo_name);
     size_t buffer_size = buffer->size();
 
+    using namespace dbContent;
+
     MetaDBOVariable* key_meta_var = task_.keyVar();
     MetaDBOVariable* hash_meta_var = task_.hashVar();
     MetaDBOVariable* tod_meta_var = task_.todVar();

@@ -31,6 +31,7 @@
 #include "latexvisitor.h"
 
 using namespace std;
+using namespace dbContent;
 
 ScatterPlotView::ScatterPlotView(const std::string& class_id, const std::string& instance_id,
                              ViewContainer* w, ViewManager& view_manager)

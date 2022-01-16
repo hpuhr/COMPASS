@@ -31,10 +31,14 @@
 
 class TaskManager;
 class CreateARTASAssociationsTaskWidget;
-class DBContentVariable;
-class MetaDBOVariable;
+
 class DBContent;
 class Buffer;
+
+namespace dbContent {
+class DBContentVariable;
+class MetaDBOVariable;
+}
 
 class CreateARTASAssociationsTask : public Task, public Configurable
 {
@@ -65,7 +69,7 @@ public:
 
     std::string trackerDsIdVarStr() const;
     void trackerDsIdVarStr(const std::string& var_str);
-    DBContentVariable* trackerDsIdVar() const;
+    dbContent::DBContentVariable* trackerDsIdVar() const;
 
     std::string trackerTrackNumVarStr() const;
     void trackerTrackNumVarStr(const std::string& var_str);
@@ -88,11 +92,11 @@ public:
     std::string todVarStr() const;
     void todVarStr(const std::string& todVarStr);
 
-    MetaDBOVariable* keyVar() const;
+    dbContent::MetaDBOVariable* keyVar() const;
 
-    MetaDBOVariable* hashVar() const;
+    dbContent::MetaDBOVariable* hashVar() const;
 
-    MetaDBOVariable* todVar() const;
+    dbContent::MetaDBOVariable* todVar() const;
 
     float endTrackTime() const;
     void endTrackTime(float end_track_time);
@@ -140,29 +144,29 @@ protected:
     std::string current_data_source_name_;
 
     std::string tracker_ds_id_var_str_;
-    DBContentVariable* tracker_ds_id_var_{nullptr};
+    dbContent::DBContentVariable* tracker_ds_id_var_{nullptr};
 
     std::string tracker_track_num_var_str_;
-    DBContentVariable* tracker_track_num_var_{nullptr};
+    dbContent::DBContentVariable* tracker_track_num_var_{nullptr};
 
     std::string tracker_track_begin_var_str_;
-    DBContentVariable* tracker_track_begin_var_{nullptr};
+    dbContent::DBContentVariable* tracker_track_begin_var_{nullptr};
 
     std::string tracker_track_end_var_str_;
-    DBContentVariable* tracker_track_end_var_{nullptr};
+    dbContent::DBContentVariable* tracker_track_end_var_{nullptr};
 
     std::string tracker_track_coasting_var_str_;
-    DBContentVariable* tracker_track_coasting_var_{nullptr};
+    dbContent::DBContentVariable* tracker_track_coasting_var_{nullptr};
 
     std::string key_var_str_;
-    MetaDBOVariable* key_var_{nullptr};
+    dbContent::MetaDBOVariable* key_var_{nullptr};
 
     // contains artas md5 for target reports, tris for tracker
     std::string hash_var_str_;
-    MetaDBOVariable* hash_var_{nullptr};
+    dbContent::MetaDBOVariable* hash_var_{nullptr};
 
     std::string tod_var_str_;
-    MetaDBOVariable* tod_var_{nullptr};
+    dbContent::MetaDBOVariable* tod_var_{nullptr};
 
     boost::posix_time::ptime start_time_;
     boost::posix_time::ptime stop_time_;
@@ -202,10 +206,10 @@ protected:
     std::shared_ptr<CreateARTASAssociationsJob> create_job_;
     bool create_job_done_{false};
 
-    void checkAndSetVariable(std::string& name_str, DBContentVariable** var);
-    void checkAndSetMetaVariable(std::string& name_str, MetaDBOVariable** var);
+    void checkAndSetVariable(std::string& name_str, dbContent::DBContentVariable** var);
+    void checkAndSetMetaVariable(std::string& name_str, dbContent::MetaDBOVariable** var);
 
-    DBContentVariableSet getReadSetFor(const std::string& dbo_name);
+    dbContent::DBContentVariableSet getReadSetFor(const std::string& dbo_name);
 };
 
 #endif  // CREATEARTASASSOCIATIONSTASK_H

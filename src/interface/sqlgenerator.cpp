@@ -34,10 +34,9 @@
 #include <iomanip>
 #include <string>
 
-
-
 using namespace Utils;
 using namespace std;
+using namespace dbContent;
 
 SQLGenerator::SQLGenerator(DBInterface& db_interface) : db_interface_(db_interface)
 {

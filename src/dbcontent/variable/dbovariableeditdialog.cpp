@@ -21,6 +21,9 @@
 
 using namespace std;
 
+namespace dbContent
+{
+
 DBContentVariableEditDialog::DBContentVariableEditDialog(DBContentVariable& variable, QWidget* parent, Qt::WindowFlags f)
     : QDialog(parent, f), variable_(variable)
 {
@@ -205,4 +208,6 @@ void DBContentVariableEditDialog::doneSlot()
     loginf << "DBOVariableEditDialog: doneSlot";
 
     accept();
+}
+
 }

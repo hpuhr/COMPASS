@@ -35,6 +35,7 @@
 
 using namespace std;
 using namespace nlohmann;
+using namespace dbContent;
 
 const string DEFAULT_SET_NAME {"Default"};
 

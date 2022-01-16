@@ -40,6 +40,7 @@
 
 using namespace std;
 using namespace Utils;
+using namespace dbContent;
 
 const std::string CreateAssociationsTask::DONE_PROPERTY_NAME = "associations_created";
 

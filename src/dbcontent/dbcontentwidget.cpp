@@ -46,8 +46,8 @@
 
 #include <boost/algorithm/string.hpp>
 
-
 using namespace Utils;
+using namespace dbContent;
 
 DBContentWidget::DBContentWidget(DBContent* object, QWidget* parent,
                                Qt::WindowFlags f)

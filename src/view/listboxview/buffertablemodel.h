@@ -72,7 +72,7 @@ class BufferTableModel : public QAbstractTableModel
     ListBoxViewDataSource& data_source_;
 
     std::shared_ptr<Buffer> buffer_;
-    DBContentVariableSet read_set_;
+    dbContent::DBContentVariableSet read_set_;
 
     std::shared_ptr<BufferCSVExportJob> export_job_;
 

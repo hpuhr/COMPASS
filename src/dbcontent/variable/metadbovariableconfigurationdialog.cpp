@@ -14,6 +14,9 @@
 
 using namespace std;
 
+namespace dbContent
+{
+
 MetaDBOVariableConfigurationDialog::MetaDBOVariableConfigurationDialog(DBContentManager& dbo_man)
     : QDialog(), dbo_man_(dbo_man)
 {
@@ -209,4 +212,6 @@ void MetaDBOVariableConfigurationDialog::addAllMetaVariablesSlot()
 void MetaDBOVariableConfigurationDialog::okClickedSlot()
 {
     emit okSignal();
+}
+
 }

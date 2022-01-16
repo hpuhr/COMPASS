@@ -24,8 +24,13 @@
 class DBContent;
 class DBContentWidget;
 class DBContentManager;
+
+namespace dbContent
+{
 class MetaDBOVariable;
 class MetaDBOVariableWidget;
+}
+
 class QGridLayout;
 class QScrollArea;
 class QPushButton;
@@ -91,10 +96,10 @@ class DBContentManagerWidget: public QWidget
     /// Container with already existing edit DBO widgets
     std::map<DBContent*, DBContentWidget*> edit_dbo_widgets_;
 
-    std::map<QPushButton*, MetaDBOVariable*> edit_meta_buttons_;
+    std::map<QPushButton*, dbContent::MetaDBOVariable*> edit_meta_buttons_;
     /// Container with DBO edit buttons
-    std::map<QPushButton*, MetaDBOVariable*> delete_meta_buttons_;
-    std::map<MetaDBOVariable*, MetaDBOVariableWidget*> edit_meta_widgets_;
+    std::map<QPushButton*, dbContent::MetaDBOVariable*> delete_meta_buttons_;
+    std::map<dbContent::MetaDBOVariable*, dbContent::MetaDBOVariableWidget*> edit_meta_widgets_;
 };
 
 #endif /* DBOBJECTMANAGERWIDGET_H_ */

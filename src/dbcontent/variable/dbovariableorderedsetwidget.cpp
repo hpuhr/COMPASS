@@ -31,6 +31,9 @@
 
 using namespace Utils;
 
+namespace dbContent
+{
+
 DBContentVariableOrderedSetWidget::DBContentVariableOrderedSetWidget(DBOVariableOrderedSet& set,
                                                          QWidget* parent, Qt::WindowFlags f)
     : QWidget(parent, f), set_(set)
@@ -244,4 +247,6 @@ void DBContentVariableOrderedSetWidget::updateVariableListSlot()
         list_widget_->setCurrentRow(current_index_);
         current_index_ = -1;
     }
+}
+
 }

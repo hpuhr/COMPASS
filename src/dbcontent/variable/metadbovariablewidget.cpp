@@ -35,6 +35,9 @@
 
 using namespace Utils;
 
+namespace dbContent
+{
+
 MetaDBOVariableWidget::MetaDBOVariableWidget(MetaDBOVariable& variable, QWidget* parent,
                                              Qt::WindowFlags f)
     : QWidget(parent, f), variable_(variable)
@@ -173,4 +176,6 @@ void MetaDBOVariableWidget::updateSlot()
         grid_layout_->addWidget(var_sel, row, 1);
         row++;
     }
+}
+
 }

@@ -47,6 +47,7 @@
 using namespace std;
 using namespace Utils;
 using namespace nlohmann;
+using namespace dbContent;
 
 // move to somewhere else?
 double secondsSinceMidnightUTC ()

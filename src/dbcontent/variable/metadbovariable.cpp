@@ -27,6 +27,9 @@
 
 using namespace std;
 
+namespace dbContent
+{
+
 MetaDBOVariable::MetaDBOVariable(const std::string& class_id, const std::string& instance_id,
                                  DBContentManager* object_manager)
     : Configurable(class_id, instance_id, object_manager),
@@ -346,3 +349,4 @@ void MetaDBOVariable::updateDescription()
     }
 }
 
+}

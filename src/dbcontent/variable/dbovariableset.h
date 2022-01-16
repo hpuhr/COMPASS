@@ -20,16 +20,12 @@
 
 #include "propertylist.h"
 
+namespace dbContent
+{
+
 class DBContentVariable;
 
-/**
- * @brief Set of DBOVariables
- *
- * Set with DBOVariables, which can only be added once (set), and have no specific order.
- *
- * \todo check meta variable in add
- * \todo return bool change on add
- */
+
 class DBContentVariableSet
 {
   public:
@@ -83,5 +79,7 @@ class DBContentVariableSet
     /// Change occurred flag
     bool changed_;
 };
+
+}
 
 #endif /* DBOVARIABLESET_H_ */

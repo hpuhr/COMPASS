@@ -648,7 +648,7 @@ bool EvaluationManager::needsAdditionalVariables ()
     return needs_additional_variables_;
 }
 
-void EvaluationManager::addVariables (const std::string dbo_name, DBContentVariableSet& read_set)
+void EvaluationManager::addVariables (const std::string dbo_name, dbContent::DBContentVariableSet& read_set)
 {
     loginf << "EvaluationManager: addVariables: dbo_name " << dbo_name;
 

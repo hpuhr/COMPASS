@@ -5,6 +5,9 @@
 
 #include "configurable.h"
 
+namespace dbContent
+{
+
 class DBContentVariableDefinition : public Configurable
 {
   public:
@@ -47,5 +50,7 @@ class DBContentVariableDefinition : public Configurable
     std::string dbo_name_;
     std::string dbo_variable_name_;
 };
+
+}
 
 #endif // DBOVARIABLEDEFINITION_H

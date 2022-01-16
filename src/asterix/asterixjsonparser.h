@@ -19,7 +19,6 @@
 #include <string>
 
 class DBContent;
-class DBContentVariable;
 class Buffer;
 class ASTERIXImportTask;
 
@@ -53,7 +52,7 @@ public:
     bool parseJSON(nlohmann::json& j, Buffer& buffer) const;
     void createMappingStubs(nlohmann::json& j);
 
-    const DBContentVariableSet& variableList() const;
+    const dbContent::DBContentVariableSet& variableList() const;
 
     bool initialized() const { return initialized_; }
     void initialize();
@@ -125,7 +124,7 @@ private:
 
     jASTERIX::CategoryItemInfo item_info_;
 
-    DBContentVariableSet var_list_;
+    dbContent::DBContentVariableSet var_list_;
 
     bool initialized_{false};
 

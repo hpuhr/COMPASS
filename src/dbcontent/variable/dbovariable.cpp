@@ -32,6 +32,9 @@
 
 using namespace Utils;
 
+namespace dbContent
+{
+
 std::map<DBContentVariable::Representation, std::string> DBContentVariable::representation_2_string_{
     {DBContentVariable::Representation::STANDARD, "STANDARD"},
     {DBContentVariable::Representation::SECONDS_TO_TIME, "SECONDS_TO_TIME"},
@@ -753,4 +756,6 @@ std::string DBContentVariable::getDataSourcesAsString(const std::string& value) 
     // has no datasources, return original
 
     return value;
+}
+
 }

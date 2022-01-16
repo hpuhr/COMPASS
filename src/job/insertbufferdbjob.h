@@ -27,7 +27,6 @@
 class Buffer;
 class DBContent;
 class DBInterface;
-class DBContentVariable;
 class DBTable;
 
 /**

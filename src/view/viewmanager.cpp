@@ -209,10 +209,10 @@ void ViewManager::checkSubConfigurables()
     }
 }
 
-DBContentVariableSet ViewManager::getReadSet(const std::string& dbo_name)
+dbContent::DBContentVariableSet ViewManager::getReadSet(const std::string& dbo_name)
 {
-    DBContentVariableSet read_set;
-    DBContentVariableSet read_set_tmp;
+    dbContent::DBContentVariableSet read_set;
+    dbContent::DBContentVariableSet read_set_tmp;
 
     for (auto view_it : views_)
     {
@@ -336,7 +336,7 @@ void ViewManager::doViewPointAfterLoad ()
             continue;
         }
 
-        const DBContentVariable& tod_var = object_manager.metaVariable("tod").getFor(dbo_name);
+        const dbContent::DBContentVariable& tod_var = object_manager.metaVariable("tod").getFor(dbo_name);
 //        const DBOVariable& latitude_var =
 //                object_manager.metaVariable("pos_lat_deg").getFor(dbo_name);
 //        const DBOVariable& longitude_var =
@@ -421,7 +421,7 @@ void ViewManager::selectTimeWindow(float time_min, float time_max)
             continue;
         }
 
-        const DBContentVariable& tod_var = object_manager.metaVariable("tod").getFor(dbo_name);
+        const dbContent::DBContentVariable& tod_var = object_manager.metaVariable("tod").getFor(dbo_name);
 
         if (object_manager.data().count(dbo_it.first))
         {

@@ -46,6 +46,7 @@
 
 using namespace std;
 using namespace Utils;
+using namespace dbContent;
 
 const Property DBContent::meta_var_rec_num_id_ {"Record Number", PropertyDataType::UINT};
 const Property DBContent::meta_var_datasource_id_ {"DS ID", PropertyDataType::UINT};

@@ -40,13 +40,13 @@ class DBOReadDBJob;
 class InsertBufferDBJob;
 class UpdateBufferDBJob;
 class FinalizeDBOReadJob;
-class DBContentVariableSet;
 class DBContentManager;
 
 namespace dbContent
 {
 class LabelDefinition;
 class LabelDefinitionWidget;
+class DBContentVariableSet;
 }
 
 class DBContent : public QObject, public Configurable
@@ -98,11 +98,11 @@ public:
     virtual ~DBContent();
 
     bool hasVariable(const std::string& name) const;
-    DBContentVariable& variable(const std::string& name);
+    dbContent::DBContentVariable& variable(const std::string& name);
     void renameVariable(const std::string& name, const std::string& new_name);
     void deleteVariable(const std::string& name);
 
-    const std::vector<std::unique_ptr<DBContentVariable>>& variables() const { return variables_; }
+    const std::vector<std::unique_ptr<dbContent::DBContentVariable>>& variables() const { return variables_; }
 
     bool hasVariableDBColumnName(const std::string& name) const;
 
@@ -120,17 +120,18 @@ public:
 
     bool loadable() const { return is_loadable_; }
 
-    void load(DBContentVariableSet& read_set, bool use_filters, bool use_order,
-              DBContentVariable* order_variable, bool use_order_ascending,
+    void load(dbContent::DBContentVariableSet& read_set, bool use_filters, bool use_order,
+              dbContent::DBContentVariable* order_variable, bool use_order_ascending,
               const std::string& limit_str = ""); // main load function
-    void loadFiltered(DBContentVariableSet& read_set, std::string custom_filter_clause,
-                      std::vector<DBContentVariable*> filtered_variables, bool use_order,
-                      DBContentVariable* order_variable, bool use_order_ascending,
+    void loadFiltered(dbContent::DBContentVariableSet& read_set, std::string custom_filter_clause,
+                      std::vector<dbContent::DBContentVariable*> filtered_variables, bool use_order,
+                      dbContent::DBContentVariable* order_variable, bool use_order_ascending,
                       const std::string& limit_str = ""); // load function for custom filtering
     void quitLoading();
 
     void insertData(std::shared_ptr<Buffer> buffer);
-    void updateData(DBContentVariable& key_var, DBContentVariableSet& list, std::shared_ptr<Buffer> buffer);
+    void updateData(dbContent::DBContentVariable& key_var, dbContent::DBContentVariableSet& list,
+                    std::shared_ptr<Buffer> buffer);
 
     std::map<unsigned int, std::string> loadLabelData(std::vector<unsigned int> rec_nums, int break_item_cnt);
 
@@ -145,7 +146,7 @@ public:
                                          const std::string& instance_id);
 
     bool hasKeyVariable();
-    DBContentVariable& getKeyVariable();
+    dbContent::DBContentVariable& getKeyVariable();
 
     std::string status();
 
@@ -197,7 +198,7 @@ protected:
     std::shared_ptr<UpdateBufferDBJob> update_job_{nullptr};
 
     /// Container with all variables (variable identifier -> variable pointer)
-    std::vector<std::unique_ptr<DBContentVariable>> variables_;
+    std::vector<std::unique_ptr<dbContent::DBContentVariable>> variables_;
 
     std::unique_ptr<DBContentWidget> widget_;
 

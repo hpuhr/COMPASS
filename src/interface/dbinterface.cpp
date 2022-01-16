@@ -52,7 +52,7 @@
 
 using namespace Utils;
 using namespace std;
-//using namespace nlohmann;
+using namespace dbContent;
 
 DBInterface::DBInterface(string class_id, string instance_id, COMPASS* compass)
     : Configurable(class_id, instance_id, compass), sql_generator_(*this)

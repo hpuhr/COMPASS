@@ -72,7 +72,7 @@ void FilterGeneratorWidget::createGUIElements()
     QGridLayout* condition_layout = new QGridLayout();
 
     QVBoxLayout* var_layout = new QVBoxLayout();
-    condition_variable_widget_ = new DBContentVariableSelectionWidget();
+    condition_variable_widget_ = new dbContent::DBContentVariableSelectionWidget();
     condition_variable_widget_->showMetaVariables(true);
     condition_variable_widget_->showEmptyVariable(false);
     var_layout->addWidget(condition_variable_widget_);
@@ -215,14 +215,14 @@ void FilterGeneratorWidget::addCondition()
 
     if (condition_variable_widget_->hasVariable())
     {
-        const DBContentVariable& var = condition_variable_widget_->selectedVariable();
+        const dbContent::DBContentVariable& var = condition_variable_widget_->selectedVariable();
         data_condition.variable_name_ = var.name();
         data_condition.variable_dbo_type_ = var.dboName();
     }
     else
     {
         assert(condition_variable_widget_->hasMetaVariable());
-        MetaDBOVariable& var = condition_variable_widget_->selectedMetaVariable();
+        dbContent::MetaDBOVariable& var = condition_variable_widget_->selectedMetaVariable();
         data_condition.variable_name_ = var.name();
         data_condition.variable_dbo_type_ = META_OBJECT_NAME;
     }

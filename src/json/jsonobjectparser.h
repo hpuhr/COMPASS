@@ -30,9 +30,15 @@
 #include <memory>
 #include <string>
 
-class DBContent;
-class DBContentVariable;
 class Buffer;
+class DBContent;
+
+namespace dbContent {
+
+class DBContentVariable;
+
+}
+
 
 class JSONObjectParser : public Configurable
 {
@@ -69,7 +75,7 @@ class JSONObjectParser : public Configurable
     bool parseJSON(nlohmann::json& j, Buffer& buffer) const;
     void createMappingStubs(nlohmann::json& j);
 
-    const DBContentVariableSet& variableList() const;
+    const dbContent::DBContentVariableSet& variableList() const;
 
     bool overrideDataSource() const;
     void overrideDataSource(bool override);
@@ -113,7 +119,7 @@ private:
 
     std::vector<std::string> json_values_vector_;
 
-    DBContentVariableSet var_list_;
+    dbContent::DBContentVariableSet var_list_;
 
     bool override_data_source_{false};
     std::string data_source_variable_name_;

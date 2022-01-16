@@ -67,9 +67,9 @@ class ListBoxViewDataSource : public QObject, public Configurable
     void currentSetName(const std::string& current_set_name);
 
     /// @brief Returns variable read list
-    DBOVariableOrderedSet* getSet();
+    dbContent::DBOVariableOrderedSet* getSet();
 
-    const std::map<std::string, std::unique_ptr<DBOVariableOrderedSet>>& getSets();
+    const std::map<std::string, std::unique_ptr<dbContent::DBOVariableOrderedSet>>& getSets();
 
     void unshowViewPoint (const ViewableDataConfig* vp); // vp can be nullptr
     void showViewPoint (const ViewableDataConfig* vp);
@@ -79,7 +79,7 @@ protected:
 
     /// Variable read list
     //DBOVariableOrderedSet* set_{nullptr};
-    std::map<std::string, std::unique_ptr<DBOVariableOrderedSet>> sets_;
+    std::map<std::string, std::unique_ptr<dbContent::DBOVariableOrderedSet>> sets_;
 
     /// Selected DBObject records
     //ViewSelectionEntries& selection_entries_;
@@ -91,7 +91,7 @@ protected:
     bool addTemporaryVariable (const std::string& dbo_name, const std::string& var_name); // only to set, true of added
     void removeTemporaryVariable (const std::string& dbo_name, const std::string& var_name); // only to set
 
-    void addDefaultVariables (DBOVariableOrderedSet& set);
+    void addDefaultVariables (dbContent::DBOVariableOrderedSet& set);
 };
 
 #endif /* LISTBOXVIEWDATASOURCE_H_ */

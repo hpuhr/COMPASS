@@ -79,7 +79,7 @@ bool ADSBQualityFilter::filters(const std::string& dbo_type)
 }
 
 std::string ADSBQualityFilter::getConditionString(const std::string& dbo_name, bool& first,
-                                                  std::vector<DBContentVariable*>& filtered_variables)
+                                                  std::vector<dbContent::DBContentVariable*>& filtered_variables)
 {
     logdbg << "ADSBQualityFilter: getConditionString: dbo " << dbo_name << " active " << active_;
 

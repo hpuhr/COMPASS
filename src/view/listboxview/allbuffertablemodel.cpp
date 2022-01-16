@@ -228,7 +228,7 @@ QVariant AllBufferTableModel::data(const QModelIndex& index, int role) const
             assert(manager.object(dbo_name).hasVariable(variable_name));
         }
 
-        DBContentVariable& variable = (variable_dbo_name == META_OBJECT_NAME)
+        dbContent::DBContentVariable& variable = (variable_dbo_name == META_OBJECT_NAME)
                                     ? manager.metaVariable(variable_name).getFor(dbo_name)
                                     : manager.object(dbo_name).variable(variable_name);
         PropertyDataType data_type = variable.dataType();
@@ -517,7 +517,9 @@ void AllBufferTableModel::updateTimeIndexes()
                    << " data, last index " << buffer_index << " size " << buf_it.second->size();
 
             DBContentManager& object_manager = COMPASS::instance().objectManager();
-            const DBContentVariable& tod_var = object_manager.metaVariable(DBContent::meta_var_tod_id_.name()).getFor(dbo_name);
+            const dbContent::DBContentVariable& tod_var =
+                    object_manager.metaVariable(DBContent::meta_var_tod_id_.name()).getFor(dbo_name);
+
             assert(buf_it.second->has<float>(tod_var.name()));
             NullableVector<float>& tods = buf_it.second->get<float>(tod_var.name());
 

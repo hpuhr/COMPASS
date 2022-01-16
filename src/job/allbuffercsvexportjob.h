@@ -24,13 +24,16 @@
 #include "buffer.h"
 #include "job.h"
 
+namespace dbContent
+{
 class DBOVariableOrderedSet;
+}
 
 class AllBufferCSVExportJob : public Job
 {
   public:
     AllBufferCSVExportJob(std::map<std::string, std::shared_ptr<Buffer>> buffers,
-                          DBOVariableOrderedSet* read_set,
+                          dbContent::DBOVariableOrderedSet* read_set,
                           std::map<unsigned int, std::string> number_to_dbo,
                           const std::vector<std::pair<unsigned int, unsigned int>>& row_indexes,
                           const std::string& file_name, bool overwrite, bool only_selected,
@@ -41,7 +44,7 @@ class AllBufferCSVExportJob : public Job
 
   protected:
     std::map<std::string, std::shared_ptr<Buffer>> buffers_;
-    DBOVariableOrderedSet* read_set_;
+    dbContent::DBOVariableOrderedSet* read_set_;
     std::map<unsigned int, std::string> number_to_dbo_;
     const std::vector<std::pair<unsigned int, unsigned int>>& row_indexes_;
 

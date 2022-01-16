@@ -153,6 +153,8 @@ void CreateAssociationsJob::createTargetReports()
 {
     loginf << "CreateAssociationsJob: createTargetReports";
 
+    using namespace dbContent;
+
     MetaDBOVariable* meta_key_var = task_.keyVar();
     MetaDBOVariable* meta_ds_id_var = task_.dsIdVar();
     MetaDBOVariable* meta_tod_var = task_.todVar();

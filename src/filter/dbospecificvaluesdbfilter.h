@@ -21,7 +21,11 @@
 #include "dbfilter.h"
 
 class DBContent;
+
+namespace dbContent
+{
 class DBContentVariable;
+}
 
 class DBOSpecificValuesDBFilter : public DBFilter
 {
@@ -31,7 +35,7 @@ public:
     virtual ~DBOSpecificValuesDBFilter() override;
 
     virtual std::string getConditionString(const std::string& dbo_name, bool& first,
-                                           std::vector<DBContentVariable*>& filtered_variables) override;
+                                           std::vector<dbContent::DBContentVariable*>& filtered_variables) override;
 
     virtual bool filters(const std::string& dbo_name) override;
 
@@ -43,7 +47,7 @@ protected:
   std::string condition_operator_; // operator to be used in generated conditions
 
   DBContent* object_{nullptr};
-  DBContentVariable* variable_ {nullptr};
+  dbContent::DBContentVariable* variable_ {nullptr};
 
   std::string ds_column_name_;
 

@@ -34,6 +34,9 @@
 using namespace Utils;
 using namespace std;
 
+namespace dbContent
+{
+
 DBContentVariableSelectionWidget::DBContentVariableSelectionWidget(bool h_box, QWidget* parent)
     : QFrame(parent), dbo_man_(COMPASS::instance().objectManager())
 {
@@ -357,4 +360,6 @@ void DBContentVariableSelectionWidget::showMetaVariables(bool show_meta_variable
 {
     show_meta_variables_ = show_meta_variables;
     updateMenuEntries();
+}
+
 }

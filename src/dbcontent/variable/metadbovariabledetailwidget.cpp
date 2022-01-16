@@ -12,6 +12,9 @@
 
 using namespace std;
 
+namespace dbContent
+{
+
 MetaDBOVariableDetailWidget::MetaDBOVariableDetailWidget(DBContentManager& dbo_man, QWidget *parent)
     : QWidget(parent), dbo_man_(dbo_man)
 {
@@ -149,4 +152,6 @@ void MetaDBOVariableDetailWidget::deleteVariableSlot()
     assert (meta_var_);
 
     dbo_man_.deleteMetaVariable(meta_var_->name());
+}
+
 }

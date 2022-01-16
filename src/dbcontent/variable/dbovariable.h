@@ -29,6 +29,10 @@
 
 class DBTableColumn;
 class DBContent;
+
+namespace dbContent
+{
+
 class DBContentVariableWidget;
 
 class DBContentVariable : public QObject, public Property, public Configurable
@@ -217,6 +221,8 @@ private:
     //void setMinMax();
 };
 
-Q_DECLARE_METATYPE(DBContentVariable*)
+}
+
+Q_DECLARE_METATYPE(dbContent::DBContentVariable*)
 
 #endif /* DBOVARIABLE_H_ */

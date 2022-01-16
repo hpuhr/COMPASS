@@ -28,7 +28,7 @@
 class BufferCSVExportJob : public Job
 {
   public:
-    BufferCSVExportJob(std::shared_ptr<Buffer> buffer, const DBContentVariableSet& read_set,
+    BufferCSVExportJob(std::shared_ptr<Buffer> buffer, const dbContent::DBContentVariableSet& read_set,
                        const std::string& file_name, bool overwrite, bool only_selected,
                        bool use_presentation, bool show_associations);
     virtual ~BufferCSVExportJob();
@@ -37,7 +37,7 @@ class BufferCSVExportJob : public Job
 
   protected:
     std::shared_ptr<Buffer> buffer_;
-    DBContentVariableSet read_set_;
+    dbContent::DBContentVariableSet read_set_;
 
     std::string file_name_;
     bool overwrite_;

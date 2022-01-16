@@ -30,7 +30,7 @@ class DBContent;
 
 class SQLGenerator
 {
-  public:
+public:
     SQLGenerator(DBInterface& db_interface);
     virtual ~SQLGenerator();
 
@@ -40,13 +40,13 @@ class SQLGenerator
                                          const std::string& key_col_name, std::string table_name);
 
     std::shared_ptr<DBCommand> getSelectCommand(
-        const DBContent& object, DBContentVariableSet read_list, const std::string& filter, bool use_order = false,
-        DBContentVariable* order_variable = nullptr, bool use_order_ascending = false,
-        const std::string& limit = "");
+            const DBContent& object, dbContent::DBContentVariableSet read_list, const std::string& filter,
+            bool use_order = false, dbContent::DBContentVariable* order_variable = nullptr,
+            bool use_order_ascending = false, const std::string& limit = "");
 
-//    std::shared_ptr<DBCommand> getSelectCommand(const DBObject& object,
-//                                                const std::vector<std::string>& columns,
-//                                                bool distinct = false);
+    //    std::shared_ptr<DBCommand> getSelectCommand(const DBObject& object,
+    //                                                const std::vector<std::string>& columns,
+    //                                                bool distinct = false);
     std::shared_ptr<DBCommand> getDataSourcesSelectCommand();
 
     //std::shared_ptr<DBCommand> getDistinctDataSourcesSelectCommand(DBObject& object);
@@ -70,12 +70,12 @@ class SQLGenerator
     std::string getSelectPropertyStatement(const std::string& id);
     std::string getSelectAllPropertiesStatement();
 
-//    std::string getInsertMinMaxStatement(const std::string& variable_name,
-//                                         const std::string& object_name, const std::string& min,
-//                                         const std::string& max);
-//    std::string getSelectMinMaxStatement(const std::string& variable_name,
-//                                         const std::string& object_name);
-//    std::string getSelectMinMaxStatement();
+    //    std::string getInsertMinMaxStatement(const std::string& variable_name,
+    //                                         const std::string& object_name, const std::string& min,
+    //                                         const std::string& max);
+    //    std::string getSelectMinMaxStatement(const std::string& variable_name,
+    //                                         const std::string& object_name);
+    //    std::string getSelectMinMaxStatement();
 
     std::string getSelectNullCount (const std::string& table_name, const std::vector<std::string> columns);
 
@@ -88,7 +88,7 @@ class SQLGenerator
 
     std::shared_ptr<DBCommand> getTableSelectMinMaxNormalStatement(const DBContent& object);
 
-  protected:
+protected:
     DBInterface& db_interface_;
 
     //std::string table_minmax_create_statement_;
@@ -97,9 +97,9 @@ class SQLGenerator
     std::string table_sectors_create_statement_;
     std::string table_view_points_create_statement_;
 
-//    std::string subTablesWhereClause(const DBTable& table,
-//                                     const std::vector<std::string>& used_tables);
-//    std::string subTableKeyClause(const DBTable& table, const std::string& sub_table_name);
+    //    std::string subTablesWhereClause(const DBTable& table,
+    //                                     const std::vector<std::string>& used_tables);
+    //    std::string subTableKeyClause(const DBTable& table, const std::string& sub_table_name);
 };
 
 #endif /* SQLGENERATOR_H_ */

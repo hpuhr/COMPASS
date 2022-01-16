@@ -44,6 +44,7 @@
 QT_CHARTS_USE_NAMESPACE
 
 using namespace std;
+using namespace dbContent;
 
 ScatterPlotViewDataWidget::ScatterPlotViewDataWidget(ScatterPlotView* view, ScatterPlotViewDataSource* data_source,
                                                      QWidget* parent, Qt::WindowFlags f)

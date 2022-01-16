@@ -22,8 +22,12 @@
 
 #include "dbovariable.h"
 
+namespace dbContent
+{
 class DBContentVariableOrderedSetWidget;
 class DBContentVariableSelectionWidget;
+}
+
 class ScatterPlotView;
 
 class QCheckBox;
@@ -55,8 +59,8 @@ class ScatterPlotViewConfigWidget : public QWidget
   protected:
     ScatterPlotView* view_;
 
-    DBContentVariableSelectionWidget* select_var_x_ {nullptr};
-    DBContentVariableSelectionWidget* select_var_y_ {nullptr};
+    dbContent::DBContentVariableSelectionWidget* select_var_x_ {nullptr};
+    dbContent::DBContentVariableSelectionWidget* select_var_y_ {nullptr};
 
     QLabel* status_label_ {nullptr};
     QPushButton* reload_button_{nullptr};

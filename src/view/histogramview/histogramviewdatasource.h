@@ -48,7 +48,7 @@ class HistogramViewDataSource : public QObject, public Configurable
                                          const std::string& instance_id);
 
     /// @brief Returns variable read list
-    DBOVariableOrderedSet* getSet()
+    dbContent::DBOVariableOrderedSet* getSet()
     {
         assert(set_);
         return set_;
@@ -58,7 +58,7 @@ class HistogramViewDataSource : public QObject, public Configurable
 
   protected:
     /// Variable read list
-    DBOVariableOrderedSet* set_{nullptr};
+    dbContent::DBOVariableOrderedSet* set_{nullptr};
 
     /// Selected DBObject records
     //ViewSelectionEntries& selection_entries_;

@@ -26,9 +26,9 @@ class QListWidget;
 #include "dbovariableorderedset.h"
 #include "dbovariableselectionwidget.h"
 
-/**
- * @brief Widget representation of a DBOVariableOrderedSet
- */
+namespace dbContent
+{
+
 class DBContentVariableOrderedSetWidget : public QWidget
 {
     Q_OBJECT
@@ -69,5 +69,7 @@ class DBContentVariableOrderedSetWidget : public QWidget
     /// @brief Updates variables list
     void updateMenuEntries();
 };
+
+}
 
 #endif /* DBOVariableOrderedSetWidget_H_ */

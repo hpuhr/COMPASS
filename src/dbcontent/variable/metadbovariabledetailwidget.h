@@ -4,12 +4,17 @@
 #include <QWidget>
 
 class DBContentManager;
-class MetaDBOVariable;
-class DBContentVariableSelectionWidget;
+
 
 class QLineEdit;
 class QTextEdit;
 class QPushButton;
+
+namespace dbContent
+{
+
+class MetaDBOVariable;
+class DBContentVariableSelectionWidget;
 
 class MetaDBOVariableDetailWidget : public QWidget
 {
@@ -40,5 +45,7 @@ private:
 
     QPushButton* delete_button_ {nullptr};
 };
+
+}
 
 #endif // METADBOVARIABLEDETAILWIDGET_H

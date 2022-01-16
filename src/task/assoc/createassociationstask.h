@@ -31,11 +31,16 @@
 
 class TaskManager;
 class CreateAssociationsTaskWidget;
-class DBContentVariable;
-class MetaDBOVariable;
 class DBContent;
 class Buffer;
 class CreateAssociationsJob;
+
+namespace dbContent
+{
+class DBContentVariable;
+class MetaDBOVariable;
+
+}
 
 class CreateAssociationsTask : public Task, public Configurable
 {
@@ -60,17 +65,17 @@ public:
     TaskWidget* widget();
     virtual void deleteWidget();
 
-    MetaDBOVariable* keyVar() const;
-    MetaDBOVariable* dsIdVar() const;
-    MetaDBOVariable* todVar() const;
-    MetaDBOVariable* targetAddrVar() const;
-    MetaDBOVariable* targetIdVar() const;
-    MetaDBOVariable* trackNumVar() const;
-    MetaDBOVariable* trackEndVar() const;
-    MetaDBOVariable* mode3AVar() const;
-    MetaDBOVariable* modeCVar() const;
-    MetaDBOVariable* latitudeVar() const;
-    MetaDBOVariable* longitudeVar() const;
+    dbContent::MetaDBOVariable* keyVar() const;
+    dbContent::MetaDBOVariable* dsIdVar() const;
+    dbContent::MetaDBOVariable* todVar() const;
+    dbContent::MetaDBOVariable* targetAddrVar() const;
+    dbContent::MetaDBOVariable* targetIdVar() const;
+    dbContent::MetaDBOVariable* trackNumVar() const;
+    dbContent::MetaDBOVariable* trackEndVar() const;
+    dbContent::MetaDBOVariable* mode3AVar() const;
+    dbContent::MetaDBOVariable* modeCVar() const;
+    dbContent::MetaDBOVariable* latitudeVar() const;
+    dbContent::MetaDBOVariable* longitudeVar() const;
 
     virtual bool checkPrerequisites();
     virtual bool isRecommended();
@@ -137,37 +142,37 @@ public:
 
 protected:
     std::string key_var_str_;
-    MetaDBOVariable* key_var_{nullptr};
+    dbContent::MetaDBOVariable* key_var_{nullptr};
 
     std::string ds_id_var_str_;
-    MetaDBOVariable* ds_id_var_{nullptr};
+    dbContent::MetaDBOVariable* ds_id_var_{nullptr};
 
     std::string tod_var_str_;
-    MetaDBOVariable* tod_var_{nullptr};
+    dbContent::MetaDBOVariable* tod_var_{nullptr};
 
     std::string target_addr_var_str_;
-    MetaDBOVariable* target_addr_var_{nullptr};
+    dbContent::MetaDBOVariable* target_addr_var_{nullptr};
 
     std::string target_id_var_str_;
-    MetaDBOVariable* target_id_var_{nullptr};
+    dbContent::MetaDBOVariable* target_id_var_{nullptr};
 
     std::string track_num_var_str_;
-    MetaDBOVariable* track_num_var_{nullptr};
+    dbContent::MetaDBOVariable* track_num_var_{nullptr};
 
     std::string track_end_var_str_;
-    MetaDBOVariable* track_end_var_{nullptr};
+    dbContent::MetaDBOVariable* track_end_var_{nullptr};
 
     std::string mode_3a_var_str_;
-    MetaDBOVariable* mode_3a_var_{nullptr};
+    dbContent::MetaDBOVariable* mode_3a_var_{nullptr};
 
     std::string mode_c_var_str_;
-    MetaDBOVariable* mode_c_var_{nullptr};
+    dbContent::MetaDBOVariable* mode_c_var_{nullptr};
 
     std::string latitude_var_str_;
-    MetaDBOVariable* latitude_var_{nullptr};
+    dbContent::MetaDBOVariable* latitude_var_{nullptr};
 
     std::string longitude_var_str_;
-    MetaDBOVariable* longitude_var_{nullptr};
+    dbContent::MetaDBOVariable* longitude_var_{nullptr};
 
     bool associate_non_mode_s_ {true};
     bool clean_dubious_utns_ {true};
@@ -211,9 +216,9 @@ protected:
     std::shared_ptr<CreateAssociationsJob> create_job_;
     bool create_job_done_{false};
 
-    void checkAndSetMetaVariable(std::string& name_str, MetaDBOVariable** var);
+    void checkAndSetMetaVariable(std::string& name_str, dbContent::MetaDBOVariable** var);
 
-    DBContentVariableSet getReadSetFor(const std::string& dbo_name);
+    dbContent::DBContentVariableSet getReadSetFor(const std::string& dbo_name);
 };
 
 #endif // CREATEASSOCIATIONSTASK_H

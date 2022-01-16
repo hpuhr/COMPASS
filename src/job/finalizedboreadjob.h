@@ -33,7 +33,7 @@ class Buffer;
 class FinalizeDBOReadJob : public Job
 {
   public:
-    FinalizeDBOReadJob(DBContent& dbobject, DBContentVariableSet& read_list,
+    FinalizeDBOReadJob(DBContent& dbobject, dbContent::DBContentVariableSet& read_list,
                        std::shared_ptr<Buffer> buffer);
     virtual ~FinalizeDBOReadJob();
 
@@ -47,7 +47,7 @@ class FinalizeDBOReadJob : public Job
 
   protected:
     DBContent& dbobject_;
-    DBContentVariableSet read_list_;
+    dbContent::DBContentVariableSet read_list_;
     std::shared_ptr<Buffer> buffer_;
 };
 

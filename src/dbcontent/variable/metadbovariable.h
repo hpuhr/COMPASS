@@ -24,6 +24,9 @@
 #include "dbovariabledefinition.h"
 #include "stringconv.h"
 
+namespace dbContent
+{
+
 class MetaDBOVariableWidget;
 
 class MetaDBOVariable : public Configurable
@@ -89,5 +92,7 @@ class MetaDBOVariable : public Configurable
     virtual void checkSubConfigurables();
     void updateDescription();
 };
+
+}
 
 #endif  // METADBOVARIABLE_H

@@ -40,26 +40,26 @@ class DBOReadDBJob : public Job
     void intermediateSignal(std::shared_ptr<Buffer> buffer);
 
   public:
-    DBOReadDBJob(DBInterface& db_interface, DBContent& dbobject, DBContentVariableSet read_list,
-                 std::string custom_filter_clause, std::vector<DBContentVariable*> filtered_variables,
-                 bool use_order, DBContentVariable* order_variable, bool use_order_ascending,
+    DBOReadDBJob(DBInterface& db_interface, DBContent& dbobject, dbContent::DBContentVariableSet read_list,
+                 std::string custom_filter_clause, std::vector<dbContent::DBContentVariable*> filtered_variables,
+                 bool use_order, dbContent::DBContentVariable* order_variable, bool use_order_ascending,
                  const std::string& limit_str);
     virtual ~DBOReadDBJob();
 
     virtual void run();
 
-    DBContentVariableSet& readList() { return read_list_; }
+    dbContent::DBContentVariableSet& readList() { return read_list_; }
 
     unsigned int rowCount() const;
 
   protected:
     DBInterface& db_interface_;
     DBContent& dbobject_;
-    DBContentVariableSet read_list_;
+    dbContent::DBContentVariableSet read_list_;
     std::string custom_filter_clause_;
-    std::vector<DBContentVariable*> filtered_variables_;
+    std::vector<dbContent::DBContentVariable*> filtered_variables_;
     bool use_order_;
-    DBContentVariable* order_variable_;
+    dbContent::DBContentVariable* order_variable_;
     bool use_order_ascending_;
     std::string limit_str_;
 

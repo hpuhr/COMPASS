@@ -5,8 +5,6 @@
 
 #include <QDialog>
 
-class DBContentVariable;
-class DBContentVariableDataTypeComboBox;
 class UnitSelectionWidget;
 class StringRepresentationComboBox;
 
@@ -14,6 +12,12 @@ class QLineEdit;
 class QCheckBox;
 class QPushButton;
 class QTextEdit;
+
+namespace dbContent
+{
+
+class DBContentVariable;
+class DBContentVariableDataTypeComboBox;
 
 class DBContentVariableCreateDialog : public QDialog
 {
@@ -52,7 +56,7 @@ protected:
     QLineEdit* name_edit_ {nullptr};
     QLineEdit* short_name_edit_ {nullptr};
     QTextEdit* description_edit_ {nullptr};
-    DBContentVariableDataTypeComboBox* type_combo_ {nullptr};
+    dbContent::DBContentVariableDataTypeComboBox* type_combo_ {nullptr};
     UnitSelectionWidget* unit_sel_ {nullptr};
     StringRepresentationComboBox* representation_box_ {nullptr};
     QLineEdit* db_column_edit_ {nullptr};
@@ -82,5 +86,6 @@ protected:
     void checkSettings();
 };
 
+}
 
 #endif // DBOVARIABLE_CREATEDIALOG_H

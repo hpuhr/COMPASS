@@ -82,7 +82,7 @@ class ViewManager : public QObject, public Configurable
 
     std::map<std::string, ViewContainer*> getContainers() { return containers_; }
     std::map<std::string, View*> getViews() { return views_; }
-    DBContentVariableSet getReadSet(const std::string& dbo_name);
+    dbContent::DBContentVariableSet getReadSet(const std::string& dbo_name);
 
     //ViewManagerWidget* widget();
 

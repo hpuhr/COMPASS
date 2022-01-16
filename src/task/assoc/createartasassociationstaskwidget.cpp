@@ -37,6 +37,7 @@
 #include <QPushButton>
 #include <QVBoxLayout>
 
+using namespace dbContent;
 
 CreateARTASAssociationsTaskWidget::CreateARTASAssociationsTaskWidget(
         CreateARTASAssociationsTask& task, QWidget* parent, Qt::WindowFlags f)

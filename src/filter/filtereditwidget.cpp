@@ -72,7 +72,7 @@ FilterEditWidget::FilterEditWidget(DBFilter* filter, QWidget* parent)
 
     QGridLayout* condition_layout = new QGridLayout();
 
-    condition_variable_widget_ = new DBContentVariableSelectionWidget();
+    condition_variable_widget_ = new dbContent::DBContentVariableSelectionWidget();
     condition_layout->addWidget(condition_variable_widget_, 0, 0);
 
     QVBoxLayout* math_layout = new QVBoxLayout();

@@ -40,7 +40,6 @@ class COMPASS;
 class Buffer;
 class BufferWriter;
 class SQLiteConnection;
-class DBContentVariable;
 class QProgressDialog;
 class DBContent;
 class DBODataSource;
@@ -58,6 +57,7 @@ class QWidget;
 namespace dbContent
 {
 class DBDataSource;
+class DBContentVariable;
 }
 
 class DBInterface : public QObject, public Configurable
@@ -116,9 +116,9 @@ public:
     void updateBuffer(const std::string& table_name, const std::string& key_col, std::shared_ptr<Buffer> buffer,
                       int from_index = -1, int to_index = -1);  // no indexes means full buffer
 
-    void prepareRead(const DBContent& dbobject, DBContentVariableSet read_list,
-                     std::string custom_filter_clause, std::vector<DBContentVariable*> filtered_variables,
-                     bool use_order = false, DBContentVariable* order_variable = nullptr,
+    void prepareRead(const DBContent& dbobject, dbContent::DBContentVariableSet read_list,
+                     std::string custom_filter_clause, std::vector<dbContent::DBContentVariable*> filtered_variables,
+                     bool use_order = false, dbContent::DBContentVariable* order_variable = nullptr,
                      bool use_order_ascending = false, const std::string& limit = "");
 
     std::shared_ptr<Buffer> readDataChunk(const DBContent& dbobject);

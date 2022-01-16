@@ -235,7 +235,7 @@ void HistogramViewDataWidget::updateFromData(std::string dbo_name)
     assert (buffers_.count(dbo_name));
     Buffer* buffer = buffers_.at(dbo_name).get();
 
-    DBContentVariable* data_var {nullptr};
+    dbContent::DBContentVariable* data_var {nullptr};
 
     if (!view_->hasDataVar())
     {
@@ -245,7 +245,7 @@ void HistogramViewDataWidget::updateFromData(std::string dbo_name)
 
     if (view_->isDataVarMeta())
     {
-        MetaDBOVariable& meta_var = view_->metaDataVar();
+        dbContent::MetaDBOVariable& meta_var = view_->metaDataVar();
         if (!meta_var.existsIn(dbo_name))
         {
             logwrn << "HistogramViewDataWidget: updateFromData: meta var does not exist in dbo";
@@ -1547,14 +1547,14 @@ void HistogramViewDataWidget::calculateGlobalMinMax()
         Buffer* buffer = buf_it.second.get();
         string dbo_name = buf_it.first;
 
-        DBContentVariable* data_var {nullptr};
+        dbContent::DBContentVariable* data_var {nullptr};
 
         if (!view_->hasDataVar())
             continue;
 
         if (view_->isDataVarMeta())
         {
-            MetaDBOVariable& meta_var = view_->metaDataVar();
+            dbContent::MetaDBOVariable& meta_var = view_->metaDataVar();
             if (!meta_var.existsIn(dbo_name))
                 continue;
 
@@ -2027,7 +2027,7 @@ void HistogramViewDataWidget::rectangleSelectedSlot (unsigned int index1, unsign
 
     loginf << "HistogramViewDataWidget: rectangleSelectedSlot: val_min " << val_min << " val_max " << val_max;
 
-    DBContentVariable* data_var {nullptr};
+    dbContent::DBContentVariable* data_var {nullptr};
 
     if (!view_->hasDataVar())
     {
@@ -2041,7 +2041,7 @@ void HistogramViewDataWidget::rectangleSelectedSlot (unsigned int index1, unsign
 
         if (view_->isDataVarMeta())
         {
-            MetaDBOVariable& meta_var = view_->metaDataVar();
+            dbContent::MetaDBOVariable& meta_var = view_->metaDataVar();
             if (!meta_var.existsIn(dbo_name))
             {
                 logwrn << "HistogramViewDataWidget: rectangleSelectedSlot: meta var does not exist in dbo";

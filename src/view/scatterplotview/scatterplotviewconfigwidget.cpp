@@ -33,6 +33,7 @@
 #include <QTabWidget>
 
 using namespace Utils;
+using namespace dbContent;
 
 ScatterPlotViewConfigWidget::ScatterPlotViewConfigWidget(ScatterPlotView* view, QWidget* parent)
     : QWidget(parent), view_(view)

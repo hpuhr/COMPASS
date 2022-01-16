@@ -22,6 +22,9 @@
 #include "dbcontent/dbcontent.h"
 #include "dbovariable.h"
 
+namespace dbContent
+{
+
 DBContentVariableSet::DBContentVariableSet() { changed_ = false; }
 
 DBContentVariableSet::~DBContentVariableSet() {}
@@ -231,3 +234,4 @@ unsigned int DBContentVariableSet::getVariableWithDBColumnName(const std::string
     assert(false);
 }
 
+}

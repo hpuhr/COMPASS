@@ -5,10 +5,14 @@
 #include <QListWidget>
 
 class DBContentManager;
-class MetaDBOVariableDetailWidget;
 
 class QSplitter;
 class QPushButton;
+
+namespace dbContent
+{
+
+class MetaDBOVariableDetailWidget;
 
 class MetaDBOVariableConfigurationDialog : public QDialog
 {
@@ -41,5 +45,7 @@ protected:
     MetaDBOVariableDetailWidget* detail_widget_{nullptr};
 
 };
+
+}
 
 #endif // METADBOVARIABLECONFIGURATIONDIALOG_H

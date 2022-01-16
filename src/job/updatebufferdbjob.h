@@ -27,7 +27,11 @@
 class Buffer;
 class DBContent;
 class DBInterface;
+
+namespace dbContent
+{
 class DBContentVariable;
+}
 
 /**
  * @brief Buffer write job
@@ -42,7 +46,7 @@ class UpdateBufferDBJob : public Job
     void updateProgressSignal(float percent);
 
   public:
-    UpdateBufferDBJob(DBInterface& db_interface, DBContent& dbobject, DBContentVariable& key_var,
+    UpdateBufferDBJob(DBInterface& db_interface, DBContent& dbobject, dbContent::DBContentVariable& key_var,
                       std::shared_ptr<Buffer> buffer);
 
     virtual ~UpdateBufferDBJob();
@@ -58,7 +62,7 @@ class UpdateBufferDBJob : public Job
   protected:
     DBInterface& db_interface_;
     DBContent& dbobject_;
-    DBContentVariable& key_var_;
+    dbContent::DBContentVariable& key_var_;
     std::shared_ptr<Buffer> buffer_;
 };
 

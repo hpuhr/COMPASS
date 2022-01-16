@@ -104,7 +104,7 @@ QVariant BufferTableModel::headerData(int section, Qt::Orientation orientation, 
             col -= 1;  // for the actual properties
 
         assert(col < read_set_.getSize());
-        DBContentVariable& variable = read_set_.getVariable(col);
+        dbContent::DBContentVariable& variable = read_set_.getVariable(col);
         logdbg << "BufferTableModel: headerData: col " << col << " variable " << variable.name();
         return QString(variable.name().c_str());
     }
@@ -202,7 +202,7 @@ QVariant BufferTableModel::data(const QModelIndex& index, int role) const
 
         assert(col < read_set_.getSize());
 
-        DBContentVariable& variable = read_set_.getVariable(col);
+        dbContent::DBContentVariable& variable = read_set_.getVariable(col);
         PropertyDataType data_type = variable.dataType();
 
         value_str = NULL_STRING;

@@ -28,6 +28,8 @@
 #include "dbovariableorderedset.h"
 #include "metadbovariable.h"
 
+using namespace dbContent;
+
 AllBufferCSVExportJob::AllBufferCSVExportJob(
     std::map<std::string, std::shared_ptr<Buffer>> buffers, DBOVariableOrderedSet* read_set,
     std::map<unsigned int, std::string> number_to_dbo,

@@ -35,7 +35,12 @@
 class COMPASS;
 class EvaluationStandard;
 class DBContent;
+
+namespace dbContent {
+
 class DBContentVariableSet;
+
+}
 
 class QWidget;
 class QTabWidget;
@@ -76,7 +81,7 @@ public:
     void close();
 
     bool needsAdditionalVariables ();
-    void addVariables (const std::string dbo_name, DBContentVariableSet& read_set);
+    void addVariables (const std::string dbo_name, dbContent::DBContentVariableSet& read_set);
 
     virtual void generateSubConfigurable(const std::string& class_id,
                                          const std::string& instance_id) override;

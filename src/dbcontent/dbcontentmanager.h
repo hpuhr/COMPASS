@@ -34,11 +34,16 @@ class COMPASS;
 class DBContent;
 class DBContentManagerWidget;
 class DBContentManagerDataSourcesWidget;
+class DBSchemaManager;
+
+namespace dbContent {
+
 class MetaDBOVariableConfigurationDialog;
 class DBContentVariable;
 class MetaDBOVariable;
 class DBContentVariableSet;
-class DBSchemaManager;
+
+}
 
 class DBContentManager : public QObject, public Configurable
 {
@@ -82,13 +87,13 @@ public:
     size_t size() { return objects_.size(); }
 
     bool existsMetaVariable(const std::string& var_name);
-    MetaDBOVariable& metaVariable(const std::string& var_name);
+    dbContent::MetaDBOVariable& metaVariable(const std::string& var_name);
     void renameMetaVariable(const std::string& old_var_name, const std::string& new_var_name);
     void deleteMetaVariable(const std::string& var_name);
-    const std::vector<std::unique_ptr<MetaDBOVariable>>& metaVariables() { return meta_variables_; }
+    const std::vector<std::unique_ptr<dbContent::MetaDBOVariable>>& metaVariables() { return meta_variables_; }
 
-    bool usedInMetaVariable(const DBContentVariable& variable);
-    MetaDBOVariableConfigurationDialog* metaVariableConfigdialog();
+    bool usedInMetaVariable(const dbContent::DBContentVariable& variable);
+    dbContent::MetaDBOVariableConfigurationDialog* metaVariableConfigdialog();
 
 
     bool hasConfigDataSource(unsigned int ds_id);
@@ -136,11 +141,11 @@ public:
     void useOrderAscending(bool useOrderAscending);
 
     bool hasOrderVariable();
-    DBContentVariable& orderVariable();
-    void orderVariable(DBContentVariable& variable);
+    dbContent::DBContentVariable& orderVariable();
+    void orderVariable(dbContent::DBContentVariable& variable);
     bool hasOrderMetaVariable();
-    MetaDBOVariable& orderMetaVariable();
-    void orderMetaVariable(MetaDBOVariable& variable);
+    dbContent::MetaDBOVariable& orderMetaVariable();
+    void orderMetaVariable(dbContent::MetaDBOVariable& variable);
     void clearOrderVariable();
 
     void quitLoading();
@@ -195,7 +200,7 @@ protected:
 
     /// Container with all DBOs (DBO name -> DBO pointer)
     std::map<std::string, DBContent*> objects_;
-    std::vector<std::unique_ptr<MetaDBOVariable>> meta_variables_;
+    std::vector<std::unique_ptr<dbContent::MetaDBOVariable>> meta_variables_;
 
     std::vector<std::unique_ptr<dbContent::ConfigurationDataSource>> config_data_sources_;
     std::vector<std::unique_ptr<dbContent::DBDataSource>> db_data_sources_;
@@ -203,7 +208,7 @@ protected:
     std::unique_ptr<DBContentManagerWidget> widget_;
     std::unique_ptr<DBContentManagerDataSourcesWidget> load_widget_;
 
-    std::unique_ptr<MetaDBOVariableConfigurationDialog> meta_cfg_dialog_;
+    std::unique_ptr<dbContent::MetaDBOVariableConfigurationDialog> meta_cfg_dialog_;
 
     virtual void checkSubConfigurables();
     void finishLoading();

@@ -26,15 +26,16 @@ class QComboBox;
 class QPushButton;
 class QTextEdit;
 
-class DBContentVariable;
-class DBContentVariableDataTypeComboBox;
 class StringRepresentationComboBox;
 class UnitSelectionWidget;
 class QGridLayout;
 
-/**
- * @brief Edit widget for a DBObject
- */
+namespace dbContent
+{
+
+class DBContentVariable;
+class DBContentVariableDataTypeComboBox;
+
 class DBContentVariableWidget : public QWidget
 {
     Q_OBJECT
@@ -76,5 +77,7 @@ class DBContentVariableWidget : public QWidget
     StringRepresentationComboBox* representation_box_{nullptr};
     UnitSelectionWidget* unit_sel_{nullptr};
 };
+
+}
 
 #endif /* DBOBJECTEDITWIDGET_H_ */

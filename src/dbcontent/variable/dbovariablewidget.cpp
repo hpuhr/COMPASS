@@ -40,6 +40,9 @@
 
 using namespace Utils;
 
+namespace dbContent
+{
+
 DBContentVariableWidget::DBContentVariableWidget(DBContentVariable& variable, QWidget* parent, Qt::WindowFlags f)
     : QWidget(parent, f), variable_(&variable)
 {
@@ -182,3 +185,4 @@ void DBContentVariableWidget::editDescriptionSlot()
 //    emit dboVariableChangedSignal();
 //}
 
+}

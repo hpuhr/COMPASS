@@ -40,6 +40,7 @@
 #include <QVBoxLayout>
 
 using namespace Utils;
+using namespace dbContent;
 
 DBContentManagerWidget::DBContentManagerWidget(DBContentManager& object_manager)
     : object_manager_(object_manager)

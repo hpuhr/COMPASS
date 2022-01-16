@@ -35,6 +35,7 @@
 
 using namespace std;
 using namespace nlohmann;
+using namespace dbContent;
 
 HistogramViewDataSource::HistogramViewDataSource(const std::string& class_id,
                                              const std::string& instance_id, Configurable* parent)

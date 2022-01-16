@@ -36,6 +36,7 @@
 #include "taskmanager.h"
 
 using namespace Utils::String;
+using namespace dbContent;
 
 RadarPlotPositionCalculatorTaskWidget::RadarPlotPositionCalculatorTaskWidget(
     RadarPlotPositionCalculatorTask& task, QWidget* parent, Qt::WindowFlags f)

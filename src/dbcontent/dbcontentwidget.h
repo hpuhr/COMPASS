@@ -29,11 +29,7 @@ class QPushButton;
 class QTextEdit;
 
 class DBContent;
-class DBODataSourceDefinition;
-class DBContentVariable;
-class DBSchemaSelectionComboBox;
-class DBContentVariableDataTypeComboBox;
-class StringRepresentationComboBox;
+
 
 /**
  * @brief Edit widget for a DBObject

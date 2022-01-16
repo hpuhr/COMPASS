@@ -28,6 +28,9 @@
 #include "dbovariableset.h"
 #include "metadbovariable.h"
 
+namespace dbContent
+{
+
 DBOVariableOrderedSet::DBOVariableOrderedSet(const std::string& class_id,
                                              const std::string& instance_id, Configurable* parent)
     : Configurable(class_id, instance_id, parent), widget_(nullptr)
@@ -445,4 +448,6 @@ DBContentVariableOrderedSetWidget* DBOVariableOrderedSet::widget()
 
     assert(widget_);
     return widget_;
+}
+
 }

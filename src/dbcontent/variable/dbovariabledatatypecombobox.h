@@ -25,9 +25,9 @@
 #include "global.h"
 #include "logger.h"
 
-/**
- *  @brief Property data type selection for a DBOVariable
- */
+namespace dbContent
+{
+
 class DBContentVariableDataTypeComboBox : public QComboBox
 {
     Q_OBJECT
@@ -81,5 +81,7 @@ class DBContentVariableDataTypeComboBox : public QComboBox
         setCurrentIndex(index);
     }
 };
+
+}
 
 #endif /* DBOVARIABLEDATATYPECOMBOBOX_H_ */

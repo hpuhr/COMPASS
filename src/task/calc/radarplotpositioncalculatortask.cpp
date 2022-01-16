@@ -257,7 +257,7 @@ bool RadarPlotPositionCalculatorTask::isRecommended()
 
 bool RadarPlotPositionCalculatorTask::isRequired() { return false; }
 
-void RadarPlotPositionCalculatorTask::checkAndSetVariable(std::string& name_str, DBContentVariable** var)
+void RadarPlotPositionCalculatorTask::checkAndSetVariable(std::string& name_str, dbContent::DBContentVariable** var)
 {
     // TODO rework to only asserting, check must be done before
     if (db_object_)
@@ -373,7 +373,7 @@ void RadarPlotPositionCalculatorTask::run()
     assert(latitude_var_);
     assert(longitude_var_);
 
-    DBContentVariableSet read_set;
+    dbContent::DBContentVariableSet read_set;
     read_set.add(*key_var_);
     read_set.add(*datasource_var_);
     read_set.add(*range_var_);

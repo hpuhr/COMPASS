@@ -39,6 +39,7 @@
 
 using namespace std;
 using namespace Utils;
+using namespace dbContent;
 
 const std::string CreateARTASAssociationsTask::DONE_PROPERTY_NAME = "artas_associations_created";
 

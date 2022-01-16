@@ -25,10 +25,14 @@ class QLineEdit;
 class QComboBox;
 class QPushButton;
 class QTextEdit;
+class QGridLayout;
+
+namespace dbContent
+{
 
 class MetaDBOVariable;
-class QGridLayout;
 class DBContentVariableSelectionWidget;
+
 
 class MetaDBOVariableWidget : public QWidget
 {
@@ -62,5 +66,7 @@ class MetaDBOVariableWidget : public QWidget
 
     std::map<DBContentVariableSelectionWidget*, std::string> selection_widgets_;
 };
+
+}
 
 #endif /* METADBOVARIABLEWIDGET_H_ */

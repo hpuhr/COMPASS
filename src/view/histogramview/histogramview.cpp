@@ -31,6 +31,7 @@
 #include "latexvisitor.h"
 #include "evaluationmanager.h"
 
+using namespace dbContent;
 
 HistogramView::HistogramView(const std::string& class_id, const std::string& instance_id,
                              ViewContainer* w, ViewManager& view_manager)

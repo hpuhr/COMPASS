@@ -24,6 +24,8 @@
 #include "logger.h"
 #include "propertylist.h"
 
+using namespace dbContent;
+
 DBOReadDBJob::DBOReadDBJob(DBInterface& db_interface, DBContent& dbobject, DBContentVariableSet read_list,
                            std::string custom_filter_clause,
                            std::vector<DBContentVariable*> filtered_variables, bool use_order,

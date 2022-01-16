@@ -22,6 +22,9 @@
 
 using namespace std;
 
+namespace dbContent
+{
+
 DBContentVariableCreateDialog::DBContentVariableCreateDialog(DBContent& object, const std::string name,
                                                  const std::string description,
                                                  QWidget* parent, Qt::WindowFlags f)
@@ -65,7 +68,7 @@ DBContentVariableCreateDialog::DBContentVariableCreateDialog(DBContent& object, 
     form_layout->addRow("Comment", description_edit_);
 
     //    DBOVariableDataTypeComboBox* type_combo_ {nullptr};
-    type_combo_ = new DBContentVariableDataTypeComboBox(data_type_, data_type_str_);
+    type_combo_ = new dbContent::DBContentVariableDataTypeComboBox(data_type_, data_type_str_);
     form_layout->addRow("Data Type", type_combo_);
 
     //    UnitSelectionWidget* unit_sel_ {nullptr};
@@ -285,4 +288,6 @@ void DBContentVariableCreateDialog::checkSettings()
     db_column_edit_->setToolTip(db_column_quicktip.c_str());
 
     ok_button_->setDisabled(!name_ok_ || !db_column_name_ok_);
+}
+
 }

@@ -23,6 +23,9 @@
 #include "dbovariabledefinition.h"
 #include "propertylist.h"
 
+namespace dbContent
+{
+
 class MetaDBOVariable;
 class DBContentVariableSet;
 class DBOVariableOrderedSet;
@@ -128,5 +131,7 @@ class DBOVariableOrderedSet : public QObject, public Configurable
 
     void reorderVariables ();
 };
+
+}
 
 #endif /* DBOVariableOrderedSet_H_ */

@@ -212,7 +212,7 @@ void FilterManager::checkSubConfigurables()
 }
 
 std::string FilterManager::getSQLCondition(const std::string& dbo_name,
-                                           std::vector<DBContentVariable*>& filtered_variables)
+                                           std::vector<dbContent::DBContentVariable*>& filtered_variables)
 {
     assert(COMPASS::instance().objectManager().object(dbo_name).loadable());
 

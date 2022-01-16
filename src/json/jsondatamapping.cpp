@@ -176,7 +176,7 @@ void JSONDataMapping::check()
     }
 }
 
-DBContentVariable& JSONDataMapping::variable() const
+dbContent::DBContentVariable& JSONDataMapping::variable() const
 {
     assert(initialized_);
     assert(variable_);
