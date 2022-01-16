@@ -189,7 +189,7 @@ DBContentWidget::~DBContentWidget() {}
 
 void DBContentWidget::editNameSlot()
 {
-    logdbg << "DBObjectWidget: editName";
+    logdbg << "DBContentWidget editName";
     assert(name_edit_);
     assert(object_);
 
@@ -200,7 +200,7 @@ void DBContentWidget::editNameSlot()
 }
 void DBContentWidget::editInfoSlot()
 {
-    logdbg << "DBObjectWidget: editInfo";
+    logdbg << "DBContentWidget editInfo";
     assert(info_edit_);
     assert(object_);
 
@@ -210,9 +210,9 @@ void DBContentWidget::editInfoSlot()
     emit changedDBOSignal();
 }
 
-void DBContentWidget::editDBOVariableNameSlot()
+void DBContentWidget::editDBContentVariableNameSlot()
 {
-    logdbg << "DBObjectWidget: editDBOVariableNameSlot";
+    logdbg << "DBContentWidget editDBContentVariableNameSlot";
 
     QLineEdit* edit = static_cast<QLineEdit*>(sender());
     assert(edit);
@@ -225,7 +225,7 @@ void DBContentWidget::editDBOVariableNameSlot()
 
     if (new_name.size() == 0 || object_->hasVariable(new_name))
     {
-        QMessageBox m_warning(QMessageBox::Warning, "DBOVariable Renaming Failed",
+        QMessageBox m_warning(QMessageBox::Warning, "DBContent Variable Renaming Failed",
                               "New name is empty or already exists.", QMessageBox::Ok);
 
         m_warning.exec();
@@ -236,9 +236,9 @@ void DBContentWidget::editDBOVariableNameSlot()
     object_->renameVariable(variable->name(), new_name);
 }
 
-void DBContentWidget::editDBOVariableDescriptionSlot()
+void DBContentWidget::editDBContentVariableDescriptionSlot()
 {
-    logdbg << "DBObjectWidget: editDBOVariableDescriptionSlot";
+    logdbg << "DBContentWidget editDBContentVariableDescriptionSlot";
 
     QLineEdit* edit = static_cast<QLineEdit*>(sender());
     assert(edit);
@@ -249,16 +249,16 @@ void DBContentWidget::editDBOVariableDescriptionSlot()
     variable->description(edit->text().toStdString());
 }
 
-void DBContentWidget::editDBOVariableDBColumnSlot(const QString& text)
+void DBContentWidget::editDBContentVariableDBColumnSlot(const QString& text)
 {
-    logdbg << "DBObjectWidget: editDBOVariableDBColumnSlot";
+    logdbg << "DBContentWidget editDBContentVariableDBColumnSlot";
 
     assert (false); // TODO
 }
 
 void DBContentWidget::deleteDBOVarSlot()
 {
-    logdbg << "DBObjectWidget: deleteDBOVar";
+    logdbg << "DBContentWidget deleteDBOVar";
 
     QPushButton* button = static_cast<QPushButton*>(sender());
     assert(button);
@@ -274,7 +274,7 @@ void DBContentWidget::deleteDBOVarSlot()
 
 void DBContentWidget::updateDataSourcesGridSlot()
 {
-    logdbg << "DBObjectWidget: updateDataSourcesGrid";
+    logdbg << "DBContentWidget updateDataSourcesGrid";
     assert(object_);
     assert(ds_grid_);
 
@@ -314,7 +314,7 @@ void DBContentWidget::showLabelDefinitionWidgetSlot()
 
 void DBContentWidget::updateDBOVarsGridSlot()
 {
-    logdbg << "DBObjectWidget: updateDBOVarsGrid";
+    logdbg << "DBContentWidget updateDBOVarsGrid";
     assert(object_);
     assert(dbovars_grid_);
 
@@ -326,7 +326,7 @@ void DBContentWidget::updateDBOVarsGridSlot()
         delete child;
     }
 
-    logdbg << "DBObjectWidget: updateDBOVarsGrid: creating first row";
+    logdbg << "DBContentWidget updateDBOVarsGrid: creating first row";
 
     QFont font_bold;
     font_bold.setBold(true);
@@ -367,11 +367,11 @@ void DBContentWidget::updateDBOVarsGridSlot()
     QLabel* label = new QLabel(schema_string.c_str());
     dbovars_grid_->addWidget(label, row, col);
 
-    logdbg << "DBObjectWidget: updateDBOVarsGrid: getting schemas";
+    logdbg << "DBContentWidget updateDBOVarsGrid: getting schemas";
 
     QIcon del_icon(Files::getIconFilepath("delete.png").c_str());
 
-    logdbg << "DBObjectWidget: updateDBOVarsGrid: creating variable rows";
+    logdbg << "DBContentWidget updateDBOVarsGrid: creating variable rows";
 
     for (auto& var_it : object_->variables())
     {
@@ -384,22 +384,22 @@ void DBContentWidget::updateDBOVarsGridSlot()
         // QVariant data = QVariant::fromValue(dynamic_cast<QObject*>(var_it.second));
         QVariant data = QVariant::fromValue(&variable);
 
-        // logdbg  << "DBObjectWidget: updateDBOVarsGrid: creating variable row for " << it->first
+        // logdbg  << "DBContentWidget updateDBOVarsGrid: creating variable row for " << it->first
         // << " name";
         QLineEdit* name_edit = new QLineEdit(var_it->name().c_str());
         name_edit->setMaximumWidth(200);
         name_edit->setProperty("variable", data);
-        connect(name_edit, SIGNAL(returnPressed()), this, SLOT(editDBOVariableNameSlot()));
+        connect(name_edit, SIGNAL(returnPressed()), this, SLOT(editDBContentVariableNameSlot()));
         dbovars_grid_->addWidget(name_edit, row, col);
 
-        // logdbg  << "DBObjectWidget: updateDBOVarsGrid: creating variable row for " << it->first
+        // logdbg  << "DBContentWidget updateDBOVarsGrid: creating variable row for " << it->first
         // << " info";
         col++;
         QLineEdit* description_edit = new QLineEdit(var_it->description().c_str());
         description_edit->setMaximumWidth(300);
         description_edit->setProperty("variable", data);
         connect(description_edit, SIGNAL(returnPressed()), this,
-                SLOT(editDBOVariableDescriptionSlot()));
+                SLOT(editDBContentVariableDescriptionSlot()));
         dbovars_grid_->addWidget(description_edit, row, col);
 
         col++;
@@ -438,5 +438,5 @@ void DBContentWidget::updateDBOVarsGridSlot()
 
         row++;
     }
-    // logdbg  << "DBObjectWidget: updateDBOVarsGrid: done";
+    // logdbg  << "DBContentWidget updateDBOVarsGrid: done";
 }

@@ -15,40 +15,40 @@ class VariableDefinition : public Configurable
                           Configurable* parent)
         : Configurable(class_id, instance_id, parent)
     {
-        registerParameter("dbo_name", &dbo_name_, "");
-        registerParameter("dbo_variable_name", &dbo_variable_name_, "");
+        registerParameter("dbcontent_name", &dbcontent_name_, "");
+        registerParameter("variable_name", &variable_name_, "");
 
         // DBOVAR LOWERCASE HACK
         // boost::algorithm::to_lower(dbo_variable_name_);
 
-        assert(dbo_variable_name_.size() > 0);
+        assert(variable_name_.size() > 0);
     }
 
     VariableDefinition& operator=(VariableDefinition&& other)
     {
-        dbo_name_ = other.dbo_name_;
-        other.dbo_name_ = "";
+        dbcontent_name_ = other.dbcontent_name_;
+        other.dbcontent_name_ = "";
 
-        dbo_variable_name_ = other.dbo_variable_name_;
-        other.dbo_variable_name_ = "";
+        variable_name_ = other.variable_name_;
+        other.variable_name_ = "";
 
         return *this;
     }
 
     virtual ~VariableDefinition() {}
 
-    const std::string& dboName() { return dbo_name_; }
-    void dboName(const std::string& dbo_name) { dbo_name_ = dbo_name; }
+    const std::string& dboName() { return dbcontent_name_; }
+    void dboName(const std::string& dbo_name) { dbcontent_name_ = dbo_name; }
 
-    const std::string& variableName() { return dbo_variable_name_; }
+    const std::string& variableName() { return variable_name_; }
     void variableName(const std::string& dbo_variable_name)
     {
-        dbo_variable_name_ = dbo_variable_name;
+        variable_name_ = dbo_variable_name;
     }
 
   protected:
-    std::string dbo_name_;
-    std::string dbo_variable_name_;
+    std::string dbcontent_name_;
+    std::string variable_name_;
 };
 
 }

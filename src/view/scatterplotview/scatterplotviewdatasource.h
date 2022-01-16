@@ -46,7 +46,7 @@ class ScatterPlotViewDataSource : public QObject, public Configurable
                                          const std::string& instance_id);
 
     /// @brief Returns variable read list
-    dbContent::OrderedSet* getSet()
+    dbContent::VariableOrderedSet* getSet()
     {
         assert(set_);
         return set_;
@@ -56,7 +56,7 @@ class ScatterPlotViewDataSource : public QObject, public Configurable
 
   protected:
     /// Variable read list
-    dbContent::OrderedSet* set_{nullptr};
+    dbContent::VariableOrderedSet* set_{nullptr};
 
     /// Selected DBObject records
     //ViewSelectionEntries& selection_entries_;

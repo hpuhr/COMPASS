@@ -5,12 +5,1041 @@
         "name": "CAT021"
     },
     "sub_configs": {
-        "DBOLabelDefinition": {
-            "DBOLabelDefinition0": {
+        "LabelDefinition": {
+            "LabelDefinition0": {
+                "parameters": null,
+                "sub_configs": {
+                    "LabelEntry": {
+                        "LabelEntryACAD Type0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "ACAD Type"
+                            }
+                        },
+                        "LabelEntryACAS Status0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "ACAS Status"
+                            }
+                        },
+                        "LabelEntryAOS Age0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "AOS Age"
+                            }
+                        },
+                        "LabelEntryARTAS Hash0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "ARTAS Hash"
+                            }
+                        },
+                        "LabelEntryARV Capability0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "ARV Capability"
+                            }
+                        },
+                        "LabelEntryAir Speed Age0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Air Speed Age"
+                            }
+                        },
+                        "LabelEntryAir Speed0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Air Speed"
+                            }
+                        },
+                        "LabelEntryAircraft Address0": {
+                            "parameters": {
+                                "prefix": "AA ",
+                                "show": true,
+                                "suffix": "",
+                                "variable_name": "Aircraft Address"
+                            }
+                        },
+                        "LabelEntryAircraft Identification Age0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Aircraft Identification Age"
+                            }
+                        },
+                        "LabelEntryAircraft Identification0": {
+                            "parameters": {
+                                "prefix": "ID ",
+                                "show": true,
+                                "suffix": "",
+                                "variable_name": "Aircraft Identification"
+                            }
+                        },
+                        "LabelEntryAltitude Reporting Capability0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Altitude Reporting Capability"
+                            }
+                        },
+                        "LabelEntryBarometric Vertical Rate Age0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Barometric Vertical Rate Age"
+                            }
+                        },
+                        "LabelEntryBarometric Vertical Rate RE0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Barometric Vertical Rate RE"
+                            }
+                        },
+                        "LabelEntryBarometric Vertical Rate0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Barometric Vertical Rate"
+                            }
+                        },
+                        "LabelEntryCPR Valid0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "CPR Valid"
+                            }
+                        },
+                        "LabelEntryCockpit Display of Traffic Information0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Cockpit Display of Traffic Information"
+                            }
+                        },
+                        "LabelEntryConfidence Level0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Confidence Level"
+                            }
+                        },
+                        "LabelEntryDS ID0": {
+                            "parameters": {
+                                "prefix": "S ",
+                                "show": true,
+                                "suffix": "",
+                                "variable_name": "DS ID"
+                            }
+                        },
+                        "LabelEntryDifferential Correction0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Differential Correction"
+                            }
+                        },
+                        "LabelEntryEmitter Category0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Emitter Category"
+                            }
+                        },
+                        "LabelEntryFFT0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "FFT"
+                            }
+                        },
+                        "LabelEntryFS SA AH0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "FS SA AH"
+                            }
+                        },
+                        "LabelEntryFS SA AM0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "FS SA AM"
+                            }
+                        },
+                        "LabelEntryFS SA Age0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "FS SA Age"
+                            }
+                        },
+                        "LabelEntryFS SA MV0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "FS SA MV"
+                            }
+                        },
+                        "LabelEntryFS SA0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "FS SA"
+                            }
+                        },
+                        "LabelEntryGeometric Altitude Accuracy0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Geometric Altitude Accuracy"
+                            }
+                        },
+                        "LabelEntryGeometric Height Age0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Geometric Height Age"
+                            }
+                        },
+                        "LabelEntryGeometric Height0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Geometric Height"
+                            }
+                        },
+                        "LabelEntryGeometric Vertical Rate Age0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Geometric Vertical Rate Age"
+                            }
+                        },
+                        "LabelEntryGeometric Vertical Rate RE0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Geometric Vertical Rate RE"
+                            }
+                        },
+                        "LabelEntryGeometric Vertical Rate0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Geometric Vertical Rate"
+                            }
+                        },
+                        "LabelEntryGround Bit0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Ground Bit"
+                            }
+                        },
+                        "LabelEntryGround Speed RE0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Ground Speed RE"
+                            }
+                        },
+                        "LabelEntryGround Speed0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Ground Speed"
+                            }
+                        },
+                        "LabelEntryGround Vector Age0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Ground Vector Age"
+                            }
+                        },
+                        "LabelEntryIS SA Age0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "IS SA Age"
+                            }
+                        },
+                        "LabelEntryIntent Change Flag0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Intent Change Flag"
+                            }
+                        },
+                        "LabelEntryLNAV Mode0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "LNAV Mode"
+                            }
+                        },
+                        "LabelEntryLatitude HR0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Latitude HR"
+                            }
+                        },
+                        "LabelEntryLatitude0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Latitude"
+                            }
+                        },
+                        "LabelEntryLine ID0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Line ID"
+                            }
+                        },
+                        "LabelEntryList Lookup Check Failed0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "List Lookup Check Failed"
+                            }
+                        },
+                        "LabelEntryLocal Decoding Position Jump0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Local Decoding Position Jump"
+                            }
+                        },
+                        "LabelEntryLongitude HR0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Longitude HR"
+                            }
+                        },
+                        "LabelEntryLongitude0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Longitude"
+                            }
+                        },
+                        "LabelEntryMET Age0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "MET Age"
+                            }
+                        },
+                        "LabelEntryMET Temperature0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "MET Temperature"
+                            }
+                        },
+                        "LabelEntryMET Turbulence0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "MET Turbulence"
+                            }
+                        },
+                        "LabelEntryMET Wind Direction0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "MET Wind Direction"
+                            }
+                        },
+                        "LabelEntryMET Wind Speed0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "MET Wind Speed"
+                            }
+                        },
+                        "LabelEntryMOPS Version0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "MOPS Version"
+                            }
+                        },
+                        "LabelEntryMagnetic Heading Age0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Magnetic Heading Age"
+                            }
+                        },
+                        "LabelEntryMagnetic Heading0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Magnetic Heading"
+                            }
+                        },
+                        "LabelEntryMessage Amplitude Age0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Message Amplitude Age"
+                            }
+                        },
+                        "LabelEntryMessage Amplitude0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Message Amplitude"
+                            }
+                        },
+                        "LabelEntryMilitary emergency0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Military emergency"
+                            }
+                        },
+                        "LabelEntryMode 3/A Age0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Mode 3/A Age"
+                            }
+                        },
+                        "LabelEntryMode 3/A Code0": {
+                            "parameters": {
+                                "prefix": "A ",
+                                "show": true,
+                                "suffix": "",
+                                "variable_name": "Mode 3/A Code"
+                            }
+                        },
+                        "LabelEntryMode 3/A Garbled0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Mode 3/A Garbled"
+                            }
+                        },
+                        "LabelEntryMode 3/A Smoothed0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Mode 3/A Smoothed"
+                            }
+                        },
+                        "LabelEntryMode 3/A Valid0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Mode 3/A Valid"
+                            }
+                        },
+                        "LabelEntryMode C Code Age0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Mode C Code Age"
+                            }
+                        },
+                        "LabelEntryMode C Code0": {
+                            "parameters": {
+                                "prefix": "C ",
+                                "show": true,
+                                "suffix": "",
+                                "variable_name": "Mode C Code"
+                            }
+                        },
+                        "LabelEntryMultiple Navigational Aids0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Multiple Navigational Aids"
+                            }
+                        },
+                        "LabelEntryNACp0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "NACp"
+                            }
+                        },
+                        "LabelEntryNICbaro0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "NICbaro"
+                            }
+                        },
+                        "LabelEntryNUCp or NIC0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "NUCp or NIC"
+                            }
+                        },
+                        "LabelEntryNUCr or NACv0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "NUCr or NACv"
+                            }
+                        },
+                        "LabelEntryNo-Go Bit 0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "No-Go Bit "
+                            }
+                        },
+                        "LabelEntryPIC0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "PIC"
+                            }
+                        },
+                        "LabelEntryPosition Check Failed0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Position Check Failed"
+                            }
+                        },
+                        "LabelEntryPriority Status0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Priority Status"
+                            }
+                        },
+                        "LabelEntryQuality Indicators Age0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Quality Indicators Age"
+                            }
+                        },
+                        "LabelEntryRange Check Failed0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Range Check Failed"
+                            }
+                        },
+                        "LabelEntryRange Check Passed0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Range Check Passed"
+                            }
+                        },
+                        "LabelEntryReceiver ID0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Receiver ID"
+                            }
+                        },
+                        "LabelEntryRecord Number0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Record Number"
+                            }
+                        },
+                        "LabelEntryReport Period0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Report Period"
+                            }
+                        },
+                        "LabelEntryRoll Angle Age0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Roll Angle Age"
+                            }
+                        },
+                        "LabelEntryRoll Angle0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Roll Angle"
+                            }
+                        },
+                        "LabelEntrySAC0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "SAC"
+                            }
+                        },
+                        "LabelEntrySC Age0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "SC Age"
+                            }
+                        },
+                        "LabelEntrySC B2 low0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "SC B2 low"
+                            }
+                        },
+                        "LabelEntrySC CDTI/S0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "SC CDTI/S"
+                            }
+                        },
+                        "LabelEntrySC IDENT0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "SC IDENT"
+                            }
+                        },
+                        "LabelEntrySC L+W0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "SC L+W"
+                            }
+                        },
+                        "LabelEntrySC POA0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "SC POA"
+                            }
+                        },
+                        "LabelEntrySC RAS0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "SC RAS"
+                            }
+                        },
+                        "LabelEntrySDA0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "SDA"
+                            }
+                        },
+                        "LabelEntrySIC0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "SIC"
+                            }
+                        },
+                        "LabelEntrySIL Supplement0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "SIL Supplement"
+                            }
+                        },
+                        "LabelEntrySIL0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "SIL"
+                            }
+                        },
+                        "LabelEntrySPI0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "SPI"
+                            }
+                        },
+                        "LabelEntrySelected Altitude Available0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Selected Altitude Available"
+                            }
+                        },
+                        "LabelEntrySelected Altitude Source Availability0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Selected Altitude Source Availability"
+                            }
+                        },
+                        "LabelEntrySelected Altitude Source0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Selected Altitude Source"
+                            }
+                        },
+                        "LabelEntrySelected Altitude0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Selected Altitude"
+                            }
+                        },
+                        "LabelEntryService Identification0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Service Identification"
+                            }
+                        },
+                        "LabelEntrySimulated0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Simulated"
+                            }
+                        },
+                        "LabelEntrySingle Antenna0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Single Antenna"
+                            }
+                        },
+                        "LabelEntrySurveillance Status0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Surveillance Status"
+                            }
+                        },
+                        "LabelEntryTCAS Resolution Advisory0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "TCAS Resolution Advisory"
+                            }
+                        },
+                        "LabelEntryTCAS System Status0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "TCAS System Status"
+                            }
+                        },
+                        "LabelEntryTRD Age0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "TRD Age"
+                            }
+                        },
+                        "LabelEntryTarget State Report Capability0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Target State Report Capability"
+                            }
+                        },
+                        "LabelEntryTarget Status Age0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Target Status Age"
+                            }
+                        },
+                        "LabelEntryTest0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Test"
+                            }
+                        },
+                        "LabelEntryTime of Day Accuracy0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Time of Day Accuracy"
+                            }
+                        },
+                        "LabelEntryTime of Day0": {
+                            "parameters": {
+                                "prefix": "T ",
+                                "show": true,
+                                "suffix": "",
+                                "variable_name": "Time of Day"
+                            }
+                        },
+                        "LabelEntryToA Position0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "ToA Position"
+                            }
+                        },
+                        "LabelEntryToA Velocity0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "ToA Velocity"
+                            }
+                        },
+                        "LabelEntryToMR Position FSI0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "ToMR Position FSI"
+                            }
+                        },
+                        "LabelEntryToMR Position HP0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "ToMR Position HP"
+                            }
+                        },
+                        "LabelEntryToMR Position0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "ToMR Position"
+                            }
+                        },
+                        "LabelEntryToMR Velocity FSI0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "ToMR Velocity FSI"
+                            }
+                        },
+                        "LabelEntryToMR Velocity HP0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "ToMR Velocity HP"
+                            }
+                        },
+                        "LabelEntryToMRv0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "ToMRv"
+                            }
+                        },
+                        "LabelEntryToRT0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "ToRT"
+                            }
+                        },
+                        "LabelEntryTrack Angle Rate Age0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Track Angle Rate Age"
+                            }
+                        },
+                        "LabelEntryTrack Angle Rate0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Track Angle Rate"
+                            }
+                        },
+                        "LabelEntryTrack Angle0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Track Angle"
+                            }
+                        },
+                        "LabelEntryTrack Number0": {
+                            "parameters": {
+                                "prefix": "TN ",
+                                "show": true,
+                                "suffix": "",
+                                "variable_name": "Track Number"
+                            }
+                        },
+                        "LabelEntryTrajectory Change Report Capability0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Trajectory Change Report Capability"
+                            }
+                        },
+                        "LabelEntryTrue Air Speed Age0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "True Air Speed Age"
+                            }
+                        },
+                        "LabelEntryTrue Airspeed RE0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "True Airspeed RE"
+                            }
+                        },
+                        "LabelEntryTrue Airspeed0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "True Airspeed"
+                            }
+                        },
+                        "LabelEntryVersion Not Supported0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Version Not Supported"
+                            }
+                        }
+                    }
+                }
             }
         },
-        "DBOVariable": {
-            "DBOVariable1": {
+        "Variable": {
+            "Variable1": {
                 "parameters": {
                     "data_type_str": "BOOL",
                     "db_column_name": "arv_capability",
@@ -23,7 +1052,7 @@
                     "unit": ""
                 }
             },
-            "DBOVariable10": {
+            "Variable10": {
                 "parameters": {
                     "data_type_str": "BOOL",
                     "db_column_name": "position_check_failed",
@@ -36,7 +1065,7 @@
                     "unit": ""
                 }
             },
-            "DBOVariable11": {
+            "Variable11": {
                 "parameters": {
                     "data_type_str": "BOOL",
                     "db_column_name": "local_decoding_position_jump",
@@ -49,7 +1078,7 @@
                     "unit": ""
                 }
             },
-            "DBOVariable12": {
+            "Variable12": {
                 "parameters": {
                     "data_type_str": "BOOL",
                     "db_column_name": "list_lookup_check_failed",
@@ -62,7 +1091,7 @@
                     "unit": ""
                 }
             },
-            "DBOVariable13": {
+            "Variable13": {
                 "parameters": {
                     "data_type_str": "BOOL",
                     "db_column_name": "no_go_bit",
@@ -75,7 +1104,7 @@
                     "unit": ""
                 }
             },
-            "DBOVariable14": {
+            "Variable14": {
                 "parameters": {
                     "data_type_str": "BOOL",
                     "db_column_name": "range_check_passed",
@@ -88,7 +1117,7 @@
                     "unit": ""
                 }
             },
-            "DBOVariable15": {
+            "Variable15": {
                 "parameters": {
                     "data_type_str": "BOOL",
                     "db_column_name": "range_check_failed",
@@ -101,7 +1130,7 @@
                     "unit": ""
                 }
             },
-            "DBOVariable16": {
+            "Variable16": {
                 "parameters": {
                     "data_type_str": "BOOL",
                     "db_column_name": "spi",
@@ -114,7 +1143,7 @@
                     "unit": ""
                 }
             },
-            "DBOVariable17": {
+            "Variable17": {
                 "parameters": {
                     "data_type_str": "BOOL",
                     "db_column_name": "mode_3a_garbled",
@@ -127,7 +1156,7 @@
                     "unit": ""
                 }
             },
-            "DBOVariable18": {
+            "Variable18": {
                 "parameters": {
                     "data_type_str": "BOOL",
                     "db_column_name": "mode_3a_smoothed",
@@ -140,7 +1169,7 @@
                     "unit": ""
                 }
             },
-            "DBOVariable19": {
+            "Variable19": {
                 "parameters": {
                     "data_type_str": "BOOL",
                     "db_column_name": "mode_3a_valid",
@@ -153,7 +1182,7 @@
                     "unit": ""
                 }
             },
-            "DBOVariable2": {
+            "Variable2": {
                 "parameters": {
                     "data_type_str": "BOOL",
                     "db_column_name": "cockpit_display_of_traffic_information",
@@ -166,7 +1195,7 @@
                     "unit": ""
                 }
             },
-            "DBOVariable20": {
+            "Variable20": {
                 "parameters": {
                     "data_type_str": "FLOAT",
                     "db_column_name": "toa_position",
@@ -179,7 +1208,7 @@
                     "unit": "Second"
                 }
             },
-            "DBOVariable21": {
+            "Variable21": {
                 "parameters": {
                     "data_type_str": "FLOAT",
                     "db_column_name": "toa_velocity",
@@ -192,7 +1221,7 @@
                     "unit": "Second"
                 }
             },
-            "DBOVariable22": {
+            "Variable22": {
                 "parameters": {
                     "data_type_str": "FLOAT",
                     "db_column_name": "tort",
@@ -205,7 +1234,7 @@
                     "unit": "Second"
                 }
             },
-            "DBOVariable23": {
+            "Variable23": {
                 "parameters": {
                     "data_type_str": "UCHAR",
                     "db_column_name": "acas_status",
@@ -218,7 +1247,7 @@
                     "unit": ""
                 }
             },
-            "DBOVariable25": {
+            "Variable25": {
                 "parameters": {
                     "data_type_str": "UCHAR",
                     "db_column_name": "multiple_navigational_aids",
@@ -231,7 +1260,7 @@
                     "unit": ""
                 }
             },
-            "DBOVariable27": {
+            "Variable27": {
                 "parameters": {
                     "data_type_str": "UCHAR",
                     "db_column_name": "sda",
@@ -244,7 +1273,7 @@
                     "unit": ""
                 }
             },
-            "DBOVariable29": {
+            "Variable29": {
                 "parameters": {
                     "data_type_str": "DOUBLE",
                     "db_column_name": "latitude_hr",
@@ -257,7 +1286,7 @@
                     "unit": "Degree"
                 }
             },
-            "DBOVariable3": {
+            "Variable3": {
                 "parameters": {
                     "data_type_str": "UCHAR",
                     "db_column_name": "trajectory_change_report_capability",
@@ -270,7 +1299,7 @@
                     "unit": ""
                 }
             },
-            "DBOVariable30": {
+            "Variable30": {
                 "parameters": {
                     "data_type_str": "DOUBLE",
                     "db_column_name": "longitude_hr",
@@ -283,7 +1312,7 @@
                     "unit": "Degree"
                 }
             },
-            "DBOVariable32": {
+            "Variable32": {
                 "parameters": {
                     "data_type_str": "FLOAT",
                     "db_column_name": "selected_altitude",
@@ -296,7 +1325,7 @@
                     "unit": "Feet"
                 }
             },
-            "DBOVariable33": {
+            "Variable33": {
                 "parameters": {
                     "data_type_str": "BOOL",
                     "db_column_name": "selected_altitude_source_availability",
@@ -309,7 +1338,7 @@
                     "unit": ""
                 }
             },
-            "DBOVariable34": {
+            "Variable34": {
                 "parameters": {
                     "data_type_str": "UCHAR",
                     "db_column_name": "selected_altitude_source",
@@ -322,7 +1351,7 @@
                     "unit": ""
                 }
             },
-            "DBOVariable35": {
+            "Variable35": {
                 "parameters": {
                     "data_type_str": "FLOAT",
                     "db_column_name": "fs_sa",
@@ -335,7 +1364,7 @@
                     "unit": "Feet"
                 }
             },
-            "DBOVariable36": {
+            "Variable36": {
                 "parameters": {
                     "data_type_str": "BOOL",
                     "db_column_name": "fs_sa_ah",
@@ -348,7 +1377,7 @@
                     "unit": ""
                 }
             },
-            "DBOVariable37": {
+            "Variable37": {
                 "parameters": {
                     "data_type_str": "BOOL",
                     "db_column_name": "fs_sa_am",
@@ -361,7 +1390,7 @@
                     "unit": ""
                 }
             },
-            "DBOVariable38": {
+            "Variable38": {
                 "parameters": {
                     "data_type_str": "BOOL",
                     "db_column_name": "fs_sa_mv",
@@ -374,7 +1403,7 @@
                     "unit": ""
                 }
             },
-            "DBOVariable39": {
+            "Variable39": {
                 "parameters": {
                     "data_type_str": "FLOAT",
                     "db_column_name": "air_speed",
@@ -387,7 +1416,7 @@
                     "unit": ""
                 }
             },
-            "DBOVariable4": {
+            "Variable4": {
                 "parameters": {
                     "data_type_str": "BOOL",
                     "db_column_name": "target_state_report_capability",
@@ -400,7 +1429,7 @@
                     "unit": ""
                 }
             },
-            "DBOVariable40": {
+            "Variable40": {
                 "parameters": {
                     "data_type_str": "BOOL",
                     "db_column_name": "true_airspeed_re",
@@ -413,7 +1442,7 @@
                     "unit": ""
                 }
             },
-            "DBOVariable41": {
+            "Variable41": {
                 "parameters": {
                     "data_type_str": "BOOL",
                     "db_column_name": "ground_speed_re",
@@ -426,7 +1455,7 @@
                     "unit": ""
                 }
             },
-            "DBOVariable42": {
+            "Variable42": {
                 "parameters": {
                     "data_type_str": "UINT",
                     "db_column_name": "track_number",
@@ -439,7 +1468,7 @@
                     "unit": ""
                 }
             },
-            "DBOVariable44": {
+            "Variable44": {
                 "parameters": {
                     "data_type_str": "BOOL",
                     "db_column_name": "intent_change_flag",
@@ -452,7 +1481,7 @@
                     "unit": ""
                 }
             },
-            "DBOVariable45": {
+            "Variable45": {
                 "parameters": {
                     "data_type_str": "BOOL",
                     "db_column_name": "lnav_mode",
@@ -465,7 +1494,7 @@
                     "unit": ""
                 }
             },
-            "DBOVariable46": {
+            "Variable46": {
                 "parameters": {
                     "data_type_str": "BOOL",
                     "db_column_name": "military_emergency",
@@ -478,7 +1507,7 @@
                     "unit": ""
                 }
             },
-            "DBOVariable47": {
+            "Variable47": {
                 "parameters": {
                     "data_type_str": "UCHAR",
                     "db_column_name": "surveillance_status",
@@ -491,7 +1520,7 @@
                     "unit": ""
                 }
             },
-            "DBOVariable48": {
+            "Variable48": {
                 "parameters": {
                     "data_type_str": "BOOL",
                     "db_column_name": "version_not_supported",
@@ -504,7 +1533,7 @@
                     "unit": ""
                 }
             },
-            "DBOVariable49": {
+            "Variable49": {
                 "parameters": {
                     "data_type_str": "FLOAT",
                     "db_column_name": "met_temperature",
@@ -517,7 +1546,7 @@
                     "unit": ""
                 }
             },
-            "DBOVariable5": {
+            "Variable5": {
                 "parameters": {
                     "data_type_str": "UCHAR",
                     "db_column_name": "report_period",
@@ -530,7 +1559,7 @@
                     "unit": ""
                 }
             },
-            "DBOVariable50": {
+            "Variable50": {
                 "parameters": {
                     "data_type_str": "UINT",
                     "db_column_name": "met_turbulence",
@@ -543,7 +1572,7 @@
                     "unit": ""
                 }
             },
-            "DBOVariable51": {
+            "Variable51": {
                 "parameters": {
                     "data_type_str": "UINT",
                     "db_column_name": "met_wind_direction",
@@ -556,7 +1585,7 @@
                     "unit": ""
                 }
             },
-            "DBOVariable52": {
+            "Variable52": {
                 "parameters": {
                     "data_type_str": "UINT",
                     "db_column_name": "met_wind_speed",
@@ -569,7 +1598,7 @@
                     "unit": ""
                 }
             },
-            "DBOVariable53": {
+            "Variable53": {
                 "parameters": {
                     "data_type_str": "BOOL",
                     "db_column_name": "sc_b2_low",
@@ -582,7 +1611,7 @@
                     "unit": ""
                 }
             },
-            "DBOVariable54": {
+            "Variable54": {
                 "parameters": {
                     "data_type_str": "BOOL",
                     "db_column_name": "sc_cdti_s",
@@ -595,7 +1624,7 @@
                     "unit": ""
                 }
             },
-            "DBOVariable55": {
+            "Variable55": {
                 "parameters": {
                     "data_type_str": "BOOL",
                     "db_column_name": "sc_ident",
@@ -608,7 +1637,7 @@
                     "unit": ""
                 }
             },
-            "DBOVariable56": {
+            "Variable56": {
                 "parameters": {
                     "data_type_str": "BOOL",
                     "db_column_name": "sc_poa",
@@ -621,7 +1650,7 @@
                     "unit": ""
                 }
             },
-            "DBOVariable57": {
+            "Variable57": {
                 "parameters": {
                     "data_type_str": "BOOL",
                     "db_column_name": "sc_ras",
@@ -634,7 +1663,7 @@
                     "unit": ""
                 }
             },
-            "DBOVariable58": {
+            "Variable58": {
                 "parameters": {
                     "data_type_str": "FLOAT",
                     "db_column_name": "air_speed_age",
@@ -647,7 +1676,7 @@
                     "unit": "Second"
                 }
             },
-            "DBOVariable59": {
+            "Variable59": {
                 "parameters": {
                     "data_type_str": "FLOAT",
                     "db_column_name": "aos_age",
@@ -660,7 +1689,7 @@
                     "unit": "Second"
                 }
             },
-            "DBOVariable6": {
+            "Variable6": {
                 "parameters": {
                     "data_type_str": "FLOAT",
                     "db_column_name": "time_of_day",
@@ -673,7 +1702,7 @@
                     "unit": "Second"
                 }
             },
-            "DBOVariable60": {
+            "Variable60": {
                 "parameters": {
                     "data_type_str": "FLOAT",
                     "db_column_name": "barometric_vertical_rate_age",
@@ -686,7 +1715,7 @@
                     "unit": "Second"
                 }
             },
-            "DBOVariable61": {
+            "Variable61": {
                 "parameters": {
                     "data_type_str": "FLOAT",
                     "db_column_name": "fs_sa_age",
@@ -699,7 +1728,7 @@
                     "unit": "Second"
                 }
             },
-            "DBOVariable62": {
+            "Variable62": {
                 "parameters": {
                     "data_type_str": "FLOAT",
                     "db_column_name": "mode_c_code_age",
@@ -712,7 +1741,7 @@
                     "unit": "Second"
                 }
             },
-            "DBOVariable63": {
+            "Variable63": {
                 "parameters": {
                     "data_type_str": "FLOAT",
                     "db_column_name": "geometric_height_age",
@@ -725,7 +1754,7 @@
                     "unit": "Second"
                 }
             },
-            "DBOVariable64": {
+            "Variable64": {
                 "parameters": {
                     "data_type_str": "FLOAT",
                     "db_column_name": "geometric_vertical_rate_age",
@@ -738,7 +1767,7 @@
                     "unit": "Second"
                 }
             },
-            "DBOVariable65": {
+            "Variable65": {
                 "parameters": {
                     "data_type_str": "FLOAT",
                     "db_column_name": "ground_vector_age",
@@ -751,7 +1780,7 @@
                     "unit": "Second"
                 }
             },
-            "DBOVariable66": {
+            "Variable66": {
                 "parameters": {
                     "data_type_str": "FLOAT",
                     "db_column_name": "is_sa_age",
@@ -764,7 +1793,7 @@
                     "unit": "Second"
                 }
             },
-            "DBOVariable67": {
+            "Variable67": {
                 "parameters": {
                     "data_type_str": "FLOAT",
                     "db_column_name": "magnetic_heading_age",
@@ -777,7 +1806,7 @@
                     "unit": "Second"
                 }
             },
-            "DBOVariable68": {
+            "Variable68": {
                 "parameters": {
                     "data_type_str": "FLOAT",
                     "db_column_name": "message_amplitude_age",
@@ -790,7 +1819,7 @@
                     "unit": "Second"
                 }
             },
-            "DBOVariable69": {
+            "Variable69": {
                 "parameters": {
                     "data_type_str": "FLOAT",
                     "db_column_name": "met_age",
@@ -803,7 +1832,7 @@
                     "unit": "Second"
                 }
             },
-            "DBOVariable7": {
+            "Variable7": {
                 "parameters": {
                     "data_type_str": "FLOAT",
                     "db_column_name": "time_of_day_accuracy",
@@ -816,7 +1845,7 @@
                     "unit": "Second"
                 }
             },
-            "DBOVariable70": {
+            "Variable70": {
                 "parameters": {
                     "data_type_str": "FLOAT",
                     "db_column_name": "mode_3a_age",
@@ -829,7 +1858,7 @@
                     "unit": "Second"
                 }
             },
-            "DBOVariable71": {
+            "Variable71": {
                 "parameters": {
                     "data_type_str": "FLOAT",
                     "db_column_name": "quality_indicators_age",
@@ -842,7 +1871,7 @@
                     "unit": "Second"
                 }
             },
-            "DBOVariable72": {
+            "Variable72": {
                 "parameters": {
                     "data_type_str": "FLOAT",
                     "db_column_name": "roll_angle_age",
@@ -855,7 +1884,7 @@
                     "unit": "Second"
                 }
             },
-            "DBOVariable73": {
+            "Variable73": {
                 "parameters": {
                     "data_type_str": "FLOAT",
                     "db_column_name": "sc_age",
@@ -868,7 +1897,7 @@
                     "unit": "Second"
                 }
             },
-            "DBOVariable74": {
+            "Variable74": {
                 "parameters": {
                     "data_type_str": "FLOAT",
                     "db_column_name": "aircraft_identification_age",
@@ -881,7 +1910,7 @@
                     "unit": "Second"
                 }
             },
-            "DBOVariable75": {
+            "Variable75": {
                 "parameters": {
                     "data_type_str": "FLOAT",
                     "db_column_name": "trd_age",
@@ -894,7 +1923,7 @@
                     "unit": "Second"
                 }
             },
-            "DBOVariable76": {
+            "Variable76": {
                 "parameters": {
                     "data_type_str": "FLOAT",
                     "db_column_name": "target_status_age",
@@ -907,7 +1936,7 @@
                     "unit": "Second"
                 }
             },
-            "DBOVariable77": {
+            "Variable77": {
                 "parameters": {
                     "data_type_str": "FLOAT",
                     "db_column_name": "track_angle_rate_age",
@@ -920,7 +1949,7 @@
                     "unit": "Second"
                 }
             },
-            "DBOVariable78": {
+            "Variable78": {
                 "parameters": {
                     "data_type_str": "FLOAT",
                     "db_column_name": "true_air_speed_age",
@@ -933,7 +1962,7 @@
                     "unit": "Second"
                 }
             },
-            "DBOVariable79": {
+            "Variable79": {
                 "parameters": {
                     "data_type_str": "UCHAR",
                     "db_column_name": "receiver_id",
@@ -946,7 +1975,7 @@
                     "unit": ""
                 }
             },
-            "DBOVariable8": {
+            "Variable8": {
                 "parameters": {
                     "data_type_str": "UCHAR",
                     "db_column_name": "confidence_level",
@@ -959,7 +1988,7 @@
                     "unit": ""
                 }
             },
-            "DBOVariable9": {
+            "Variable9": {
                 "parameters": {
                     "data_type_str": "BOOL",
                     "db_column_name": "cpr_valid",
@@ -972,7 +2001,7 @@
                     "unit": ""
                 }
             },
-            "DBOVariableADSBaircraft_leng_width0": {
+            "VariableADSBaircraft_leng_width0": {
                 "parameters": {
                     "data_type_str": "UCHAR",
                     "db_column_name": "sc_l_w",
@@ -986,7 +2015,7 @@
                     "unit": ""
                 }
             },
-            "DBOVariableADSBalt_baro_ft0": {
+            "VariableADSBalt_baro_ft0": {
                 "parameters": {
                     "data_type_str": "FLOAT",
                     "db_column_name": "mode_c_code",
@@ -1000,7 +2029,7 @@
                     "unit": "Feet"
                 }
             },
-            "DBOVariableADSBalt_geo_ft0": {
+            "VariableADSBalt_geo_ft0": {
                 "parameters": {
                     "data_type_str": "FLOAT",
                     "db_column_name": "geometric_height",
@@ -1014,7 +2043,7 @@
                     "unit": "Feet"
                 }
             },
-            "DBOVariableADSBalt_reporting_capability_ft0": {
+            "VariableADSBalt_reporting_capability_ft0": {
                 "parameters": {
                     "data_type_str": "UCHAR",
                     "db_column_name": "altitude_reporting_capability",
@@ -1028,7 +2057,7 @@
                     "unit": ""
                 }
             },
-            "DBOVariableADSBbaro_vertical_rate_ftm0": {
+            "VariableADSBbaro_vertical_rate_ftm0": {
                 "parameters": {
                     "data_type_str": "DOUBLE",
                     "db_column_name": "barometric_vertical_rate",
@@ -1042,7 +2071,7 @@
                     "unit": ""
                 }
             },
-            "DBOVariableADSBbaro_vertical_rate_re0": {
+            "VariableADSBbaro_vertical_rate_re0": {
                 "parameters": {
                     "data_type_str": "BOOL",
                     "db_column_name": "barometric_vertical_rate_re",
@@ -1056,7 +2085,7 @@
                     "unit": ""
                 }
             },
-            "DBOVariableADSBcallsign0": {
+            "VariableADSBcallsign0": {
                 "parameters": {
                     "data_type_str": "STRING",
                     "db_column_name": "aircraft_identification",
@@ -1070,7 +2099,7 @@
                     "unit": ""
                 }
             },
-            "DBOVariableADSBdescriptor_atp0": {
+            "VariableADSBdescriptor_atp0": {
                 "parameters": {
                     "data_type_str": "UCHAR",
                     "db_column_name": "acad_type",
@@ -1084,7 +2113,7 @@
                     "unit": ""
                 }
             },
-            "DBOVariableADSBdifferential_correction0": {
+            "VariableADSBdifferential_correction0": {
                 "parameters": {
                     "data_type_str": "BOOL",
                     "db_column_name": "differential_correction",
@@ -1098,7 +2127,7 @@
                     "unit": ""
                 }
             },
-            "DBOVariableADSBds_id0": {
+            "VariableADSBds_id0": {
                 "parameters": {
                     "data_type_str": "UINT",
                     "db_column_name": "ds_id",
@@ -1112,7 +2141,7 @@
                     "unit": ""
                 }
             },
-            "DBOVariableADSBemitter_category0": {
+            "VariableADSBemitter_category0": {
                 "parameters": {
                     "data_type_str": "UINT",
                     "db_column_name": "emitter_category",
@@ -1126,7 +2155,7 @@
                     "unit": ""
                 }
             },
-            "DBOVariableADSBfrom_fft0": {
+            "VariableADSBfrom_fft0": {
                 "parameters": {
                     "data_type_str": "BOOL",
                     "db_column_name": "fft",
@@ -1140,7 +2169,7 @@
                     "unit": ""
                 }
             },
-            "DBOVariableADSBgeo_height_accuracy0": {
+            "VariableADSBgeo_height_accuracy0": {
                 "parameters": {
                     "data_type_str": "UCHAR",
                     "db_column_name": "geometric_altitude_accuracy",
@@ -1154,7 +2183,7 @@
                     "unit": ""
                 }
             },
-            "DBOVariableADSBgeo_vertical_rate_ftm0": {
+            "VariableADSBgeo_vertical_rate_ftm0": {
                 "parameters": {
                     "data_type_str": "DOUBLE",
                     "db_column_name": "geometric_vertical_rate",
@@ -1168,7 +2197,7 @@
                     "unit": ""
                 }
             },
-            "DBOVariableADSBgeo_vertical_rate_re0": {
+            "VariableADSBgeo_vertical_rate_re0": {
                 "parameters": {
                     "data_type_str": "BOOL",
                     "db_column_name": "geometric_vertical_rate_re",
@@ -1182,7 +2211,7 @@
                     "unit": ""
                 }
             },
-            "DBOVariableADSBground_bit0": {
+            "VariableADSBground_bit0": {
                 "parameters": {
                     "data_type_str": "BOOL",
                     "db_column_name": "ground_bit",
@@ -1196,7 +2225,7 @@
                     "unit": ""
                 }
             },
-            "DBOVariableADSBgroundspeed_kt0": {
+            "VariableADSBgroundspeed_kt0": {
                 "parameters": {
                     "data_type_str": "DOUBLE",
                     "db_column_name": "ground_speed",
@@ -1210,7 +2239,7 @@
                     "unit": "Knots"
                 }
             },
-            "DBOVariableADSBhash_code0": {
+            "VariableADSBhash_code0": {
                 "parameters": {
                     "data_type_str": "STRING",
                     "db_column_name": "artas_hash",
@@ -1224,7 +2253,7 @@
                     "unit": ""
                 }
             },
-            "DBOVariableADSBline_id0": {
+            "VariableADSBline_id0": {
                 "parameters": {
                     "data_type_str": "UINT",
                     "db_column_name": "line_id",
@@ -1238,7 +2267,7 @@
                     "unit": ""
                 }
             },
-            "DBOVariableADSBmagnetic_heading_deg0": {
+            "VariableADSBmagnetic_heading_deg0": {
                 "parameters": {
                     "data_type_str": "DOUBLE",
                     "db_column_name": "magnetic_heading",
@@ -1252,7 +2281,7 @@
                     "unit": "Degree"
                 }
             },
-            "DBOVariableADSBmode3a_code0": {
+            "VariableADSBmode3a_code0": {
                 "parameters": {
                     "data_type_str": "UINT",
                     "db_column_name": "mode_3a_code",
@@ -1266,7 +2295,7 @@
                     "unit": ""
                 }
             },
-            "DBOVariableADSBmops_version0": {
+            "VariableADSBmops_version0": {
                 "parameters": {
                     "data_type_str": "UCHAR",
                     "db_column_name": "mops_version",
@@ -1280,7 +2309,7 @@
                     "unit": ""
                 }
             },
-            "DBOVariableADSBnac_p0": {
+            "VariableADSBnac_p0": {
                 "parameters": {
                     "data_type_str": "UCHAR",
                     "db_column_name": "nacp",
@@ -1294,7 +2323,7 @@
                     "unit": ""
                 }
             },
-            "DBOVariableADSBnic_baro0": {
+            "VariableADSBnic_baro0": {
                 "parameters": {
                     "data_type_str": "BOOL",
                     "db_column_name": "nicbaro",
@@ -1308,7 +2337,7 @@
                     "unit": ""
                 }
             },
-            "DBOVariableADSBnucp_nic0": {
+            "VariableADSBnucp_nic0": {
                 "parameters": {
                     "data_type_str": "UCHAR",
                     "db_column_name": "nucp_or_nic",
@@ -1322,7 +2351,7 @@
                     "unit": ""
                 }
             },
-            "DBOVariableADSBnucr_nacv0": {
+            "VariableADSBnucr_nacv0": {
                 "parameters": {
                     "data_type_str": "UCHAR",
                     "db_column_name": "nucr_or_nacv",
@@ -1336,7 +2365,7 @@
                     "unit": ""
                 }
             },
-            "DBOVariableADSBop_status_ra0": {
+            "VariableADSBop_status_ra0": {
                 "parameters": {
                     "data_type_str": "BOOL",
                     "db_column_name": "tcas_resolution_advisory",
@@ -1350,7 +2379,7 @@
                     "unit": ""
                 }
             },
-            "DBOVariableADSBop_status_sa0": {
+            "VariableADSBop_status_sa0": {
                 "parameters": {
                     "data_type_str": "BOOL",
                     "db_column_name": "single_antenna",
@@ -1364,7 +2393,7 @@
                     "unit": ""
                 }
             },
-            "DBOVariableADSBop_status_tcas0": {
+            "VariableADSBop_status_tcas0": {
                 "parameters": {
                     "data_type_str": "BOOL",
                     "db_column_name": "tcas_system_status",
@@ -1378,7 +2407,7 @@
                     "unit": ""
                 }
             },
-            "DBOVariableADSBpic0": {
+            "VariableADSBpic0": {
                 "parameters": {
                     "data_type_str": "UCHAR",
                     "db_column_name": "pic",
@@ -1392,7 +2421,7 @@
                     "unit": ""
                 }
             },
-            "DBOVariableADSBpos_lat_deg0": {
+            "VariableADSBpos_lat_deg0": {
                 "parameters": {
                     "data_type_str": "DOUBLE",
                     "db_column_name": "latitude",
@@ -1406,7 +2435,7 @@
                     "unit": "Degree"
                 }
             },
-            "DBOVariableADSBpos_long_deg0": {
+            "VariableADSBpos_long_deg0": {
                 "parameters": {
                     "data_type_str": "DOUBLE",
                     "db_column_name": "longitude",
@@ -1420,7 +2449,7 @@
                     "unit": "Degree"
                 }
             },
-            "DBOVariableADSBrec_num0": {
+            "VariableADSBrec_num0": {
                 "parameters": {
                     "data_type_str": "UINT",
                     "db_column_name": "record_number",
@@ -1434,7 +2463,7 @@
                     "unit": ""
                 }
             },
-            "DBOVariableADSBroll_angle_deg0": {
+            "VariableADSBroll_angle_deg0": {
                 "parameters": {
                     "data_type_str": "FLOAT",
                     "db_column_name": "roll_angle",
@@ -1448,7 +2477,7 @@
                     "unit": ""
                 }
             },
-            "DBOVariableADSBsac0": {
+            "VariableADSBsac0": {
                 "parameters": {
                     "data_type_str": "UCHAR",
                     "db_column_name": "sac",
@@ -1462,7 +2491,7 @@
                     "unit": ""
                 }
             },
-            "DBOVariableADSBsam0": {
+            "VariableADSBsam0": {
                 "parameters": {
                     "data_type_str": "CHAR",
                     "db_column_name": "message_amplitude",
@@ -1476,7 +2505,7 @@
                     "unit": ""
                 }
             },
-            "DBOVariableADSBselected_alt_capability0": {
+            "VariableADSBselected_alt_capability0": {
                 "parameters": {
                     "data_type_str": "BOOL",
                     "db_column_name": "selected_altitude_available",
@@ -1490,7 +2519,7 @@
                     "unit": ""
                 }
             },
-            "DBOVariableADSBservice_id0": {
+            "VariableADSBservice_id0": {
                 "parameters": {
                     "data_type_str": "UCHAR",
                     "db_column_name": "service_identification",
@@ -1504,7 +2533,7 @@
                     "unit": ""
                 }
             },
-            "DBOVariableADSBsic0": {
+            "VariableADSBsic0": {
                 "parameters": {
                     "data_type_str": "UCHAR",
                     "db_column_name": "sic",
@@ -1518,7 +2547,7 @@
                     "unit": ""
                 }
             },
-            "DBOVariableADSBsil0": {
+            "VariableADSBsil0": {
                 "parameters": {
                     "data_type_str": "UCHAR",
                     "db_column_name": "sil",
@@ -1532,7 +2561,7 @@
                     "unit": ""
                 }
             },
-            "DBOVariableADSBsils0": {
+            "VariableADSBsils0": {
                 "parameters": {
                     "data_type_str": "BOOL",
                     "db_column_name": "sil_supplement",
@@ -1546,7 +2575,7 @@
                     "unit": ""
                 }
             },
-            "DBOVariableADSBsimulated_target0": {
+            "VariableADSBsimulated_target0": {
                 "parameters": {
                     "data_type_str": "BOOL",
                     "db_column_name": "simulated",
@@ -1560,7 +2589,7 @@
                     "unit": ""
                 }
             },
-            "DBOVariableADSBtarget_addr0": {
+            "VariableADSBtarget_addr0": {
                 "parameters": {
                     "data_type_str": "UINT",
                     "db_column_name": "aircraft_address",
@@ -1574,7 +2603,7 @@
                     "unit": ""
                 }
             },
-            "DBOVariableADSBtarget_status0": {
+            "VariableADSBtarget_status0": {
                 "parameters": {
                     "data_type_str": "UCHAR",
                     "db_column_name": "priority_status",
@@ -1588,7 +2617,7 @@
                     "unit": ""
                 }
             },
-            "DBOVariableADSBtest_target0": {
+            "VariableADSBtest_target0": {
                 "parameters": {
                     "data_type_str": "BOOL",
                     "db_column_name": "test",
@@ -1602,7 +2631,7 @@
                     "unit": ""
                 }
             },
-            "DBOVariableADSBtorp0": {
+            "VariableADSBtorp0": {
                 "parameters": {
                     "data_type_str": "FLOAT",
                     "db_column_name": "tomr_position",
@@ -1616,7 +2645,7 @@
                     "unit": "Second"
                 }
             },
-            "DBOVariableADSBtorp_fsi0": {
+            "VariableADSBtorp_fsi0": {
                 "parameters": {
                     "data_type_str": "UCHAR",
                     "db_column_name": "tomr_position_fsi",
@@ -1630,7 +2659,7 @@
                     "unit": ""
                 }
             },
-            "DBOVariableADSBtorp_precise0": {
+            "VariableADSBtorp_precise0": {
                 "parameters": {
                     "data_type_str": "DOUBLE",
                     "db_column_name": "tomr_position_hp",
@@ -1644,7 +2673,7 @@
                     "unit": "Second"
                 }
             },
-            "DBOVariableADSBtorv0": {
+            "VariableADSBtorv0": {
                 "parameters": {
                     "data_type_str": "FLOAT",
                     "db_column_name": "tomrv",
@@ -1658,7 +2687,7 @@
                     "unit": "Second"
                 }
             },
-            "DBOVariableADSBtorv_fsi0": {
+            "VariableADSBtorv_fsi0": {
                 "parameters": {
                     "data_type_str": "UCHAR",
                     "db_column_name": "tomr_velocity_fsi",
@@ -1672,7 +2701,7 @@
                     "unit": ""
                 }
             },
-            "DBOVariableADSBtorv_precise0": {
+            "VariableADSBtorv_precise0": {
                 "parameters": {
                     "data_type_str": "DOUBLE",
                     "db_column_name": "tomr_velocity_hp",
@@ -1686,7 +2715,7 @@
                     "unit": ""
                 }
             },
-            "DBOVariableADSBtrack_angle_deg0": {
+            "VariableADSBtrack_angle_deg0": {
                 "parameters": {
                     "data_type_str": "DOUBLE",
                     "db_column_name": "track_angle",
@@ -1700,7 +2729,7 @@
                     "unit": "Degree"
                 }
             },
-            "DBOVariableADSBtrue_airspeed_kt0": {
+            "VariableADSBtrue_airspeed_kt0": {
                 "parameters": {
                     "data_type_str": "DOUBLE",
                     "db_column_name": "true_airspeed",
@@ -1714,7 +2743,7 @@
                     "unit": "Knots"
                 }
             },
-            "DBOVariableADSBturnrate_degps0": {
+            "VariableADSBturnrate_degps0": {
                 "parameters": {
                     "data_type_str": "DOUBLE",
                     "db_column_name": "track_angle_rate",

@@ -65,7 +65,7 @@ MetaVariableDetailWidget::MetaVariableDetailWidget(DBContentManager& dbo_man, QW
 
 void MetaVariableDetailWidget::show (MetaVariable& meta_var)
 {
-    loginf << "MetaDBOVariableDetailWidget: show: var '" << meta_var.name() << "'";
+    loginf << "MetaVariableDetailWidget: show: var '" << meta_var.name() << "'";
 
     has_current_entry_ = true;
     meta_var_ = &meta_var;
@@ -77,7 +77,7 @@ void MetaVariableDetailWidget::show (MetaVariable& meta_var)
 
     for (auto& sel_it : selection_widgets_)
     {
-        loginf << "MetaDBOVariableDetailWidget: show: var '" << meta_var.name() << "' exists in " << sel_it.first
+        loginf << "MetaVariableDetailWidget: show: var '" << meta_var.name() << "' exists in " << sel_it.first
                << " " << meta_var.existsIn(sel_it.first);
 
         if (meta_var.existsIn(sel_it.first))
@@ -120,7 +120,7 @@ void MetaVariableDetailWidget::nameEditedSlot()
 
     string new_name = name_edit_->text().toStdString();
 
-    loginf << "MetaDBOVariableDetailWidget: nameEditedSlot: name '" << new_name << "'";
+    loginf << "MetaVariableDetailWidget: nameEditedSlot: name '" << new_name << "'";
 
     assert (has_current_entry_);
     assert (meta_var_);
@@ -131,7 +131,7 @@ void MetaVariableDetailWidget::nameEditedSlot()
 
 void MetaVariableDetailWidget::variableChangedSlot()
 {
-    loginf << "MetaDBOVariableDetailWidget: variableChangedSlot";
+    loginf << "MetaVariableDetailWidget: variableChangedSlot";
 
     if (!has_current_entry_)
         return;
@@ -146,7 +146,7 @@ void MetaVariableDetailWidget::variableChangedSlot()
 
 void MetaVariableDetailWidget::deleteVariableSlot()
 {
-    loginf << "MetaDBOVariableDetailWidget: deleteVariableSlot";
+    loginf << "MetaVariableDetailWidget: deleteVariableSlot";
 
     assert (has_current_entry_);
     assert (meta_var_);

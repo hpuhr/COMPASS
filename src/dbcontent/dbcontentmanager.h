@@ -177,7 +177,7 @@ protected:
 
     bool use_order_{false};
     bool use_order_ascending_{false};
-    std::string order_variable_dbo_name_;
+    std::string order_variable_dbcontent_name_;
     std::string order_variable_name_;
 
     bool use_limit_{false};

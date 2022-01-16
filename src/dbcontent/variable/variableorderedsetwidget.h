@@ -51,14 +51,14 @@ class VariableOrderedSetWidget : public QWidget
 
   public:
     /// @brief Constructor
-    VariableOrderedSetWidget(OrderedSet& set, QWidget* parent = 0,
+    VariableOrderedSetWidget(VariableOrderedSet& set, QWidget* parent = 0,
                                 Qt::WindowFlags f = 0);
     /// @brief Destructor
     virtual ~VariableOrderedSetWidget();
 
   protected:
     /// Represented set
-    OrderedSet& set_;
+    VariableOrderedSet& set_;
     /// Context menu for adding a variable
     QMenu menu_;
 

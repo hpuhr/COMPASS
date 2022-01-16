@@ -2,7 +2,7 @@
     "parameters": {
         "limit_max": 1000000,
         "limit_min": 0,
-        "order_variable_dbo_name": "Meta",
+        "order_variable_dbcontent_name": "Meta",
         "order_variable_name": "Time of Day",
         "use_filters": false,
         "use_limit": false,
@@ -11,39 +11,39 @@
     },
     "sub_config_files": [
         {
-            "class_id": "DBObject",
+            "class_id": "DBContent",
             "instance_id": "CAT001",
-            "path": "db_object_cat001.json"
+            "path": "db_content_cat001.json"
         },
         {
-            "class_id": "DBObject",
+            "class_id": "DBContent",
             "instance_id": "CAT020",
-            "path": "db_object_cat020.json"
+            "path": "db_content_cat020.json"
         },
         {
-            "class_id": "DBObject",
+            "class_id": "DBContent",
             "instance_id": "CAT021",
-            "path": "db_object_cat021.json"
+            "path": "db_content_cat021.json"
         },
         {
-            "class_id": "DBObject",
+            "class_id": "DBContent",
             "instance_id": "CAT048",
-            "path": "db_object_cat048.json"
+            "path": "db_content_cat048.json"
         },
         {
-            "class_id": "DBObject",
+            "class_id": "DBContent",
             "instance_id": "CAT062",
-            "path": "db_object_cat062.json"
+            "path": "db_content_cat062.json"
         },
         {
-            "class_id": "DBObject",
+            "class_id": "DBContent",
             "instance_id": "RefTraj",
-            "path": "db_object_reftraj.json"
+            "path": "db_content_reftraj.json"
         }
     ],
     "sub_configs": {
-        "DBContentConfigurationDataSource": {
-            "DBContentConfigurationDataSourceADSB0": {
+        "ConfigurationDataSource": {
+            "ConfigurationDataSourceADSB0": {
                 "parameters": {
                     "ds_type": "ADSB",
                     "has_short_name": true,
@@ -59,7 +59,7 @@
                     "sic": 80
                 }
             },
-            "DBContentConfigurationDataSourceMLAT0": {
+            "ConfigurationDataSourceMLAT0": {
                 "parameters": {
                     "ds_type": "MLAT",
                     "has_short_name": true,
@@ -75,7 +75,7 @@
                     "sic": 70
                 }
             },
-            "DBContentConfigurationDataSourceMLAT1": {
+            "ConfigurationDataSourceMLAT1": {
                 "parameters": {
                     "ds_type": "MLAT",
                     "has_short_name": true,
@@ -91,7 +91,7 @@
                     "sic": 71
                 }
             },
-            "DBContentConfigurationDataSourceMLAT2": {
+            "ConfigurationDataSourceMLAT2": {
                 "parameters": {
                     "ds_type": "MLAT",
                     "has_short_name": true,
@@ -107,7 +107,7 @@
                     "sic": 72
                 }
             },
-            "DBContentConfigurationDataSourceMLAT3": {
+            "ConfigurationDataSourceMLAT3": {
                 "parameters": {
                     "ds_type": "MLAT",
                     "has_short_name": true,
@@ -123,7 +123,7 @@
                     "sic": 73
                 }
             },
-            "DBContentConfigurationDataSourceMLAT4": {
+            "ConfigurationDataSourceMLAT4": {
                 "parameters": {
                     "ds_type": "MLAT",
                     "has_short_name": true,
@@ -139,7 +139,7 @@
                     "sic": 74
                 }
             },
-            "DBContentConfigurationDataSourceMLAT5": {
+            "ConfigurationDataSourceMLAT5": {
                 "parameters": {
                     "ds_type": "MLAT",
                     "has_short_name": true,
@@ -155,7 +155,7 @@
                     "sic": 75
                 }
             },
-            "DBContentConfigurationDataSourceMLAT6": {
+            "ConfigurationDataSourceMLAT6": {
                 "parameters": {
                     "ds_type": "MLAT",
                     "has_short_name": true,
@@ -171,7 +171,7 @@
                     "sic": 76
                 }
             },
-            "DBContentConfigurationDataSourceMLAT7": {
+            "ConfigurationDataSourceMLAT7": {
                 "parameters": {
                     "ds_type": "MLAT",
                     "has_short_name": true,
@@ -187,7 +187,7 @@
                     "sic": 77
                 }
             },
-            "DBContentConfigurationDataSourceMLAT8": {
+            "ConfigurationDataSourceMLAT8": {
                 "parameters": {
                     "ds_type": "MLAT",
                     "has_short_name": true,
@@ -203,7 +203,7 @@
                     "sic": 78
                 }
             },
-            "DBContentConfigurationDataSourceMLAT9": {
+            "ConfigurationDataSourceMLAT9": {
                 "parameters": {
                     "ds_type": "MLAT",
                     "has_short_name": true,
@@ -219,7 +219,7 @@
                     "sic": 81
                 }
             },
-            "DBContentConfigurationDataSourceRadar0": {
+            "ConfigurationDataSourceRadar0": {
                 "parameters": {
                     "ds_type": "Radar",
                     "has_short_name": true,
@@ -238,7 +238,7 @@
                     "sic": 1
                 }
             },
-            "DBContentConfigurationDataSourceRadar1": {
+            "ConfigurationDataSourceRadar1": {
                 "parameters": {
                     "ds_type": "Radar",
                     "has_short_name": true,
@@ -259,7 +259,7 @@
                     "sic": 0
                 }
             },
-            "DBContentConfigurationDataSourceRadar10": {
+            "ConfigurationDataSourceRadar10": {
                 "parameters": {
                     "ds_type": "Radar",
                     "has_short_name": true,
@@ -280,7 +280,7 @@
                     "sic": 11
                 }
             },
-            "DBContentConfigurationDataSourceRadar11": {
+            "ConfigurationDataSourceRadar11": {
                 "parameters": {
                     "ds_type": "Radar",
                     "has_short_name": true,
@@ -299,7 +299,7 @@
                     "sic": 144
                 }
             },
-            "DBContentConfigurationDataSourceRadar12": {
+            "ConfigurationDataSourceRadar12": {
                 "parameters": {
                     "ds_type": "Radar",
                     "has_short_name": true,
@@ -317,7 +317,7 @@
                     "sic": 9
                 }
             },
-            "DBContentConfigurationDataSourceRadar13": {
+            "ConfigurationDataSourceRadar13": {
                 "parameters": {
                     "ds_type": "Radar",
                     "has_short_name": true,
@@ -335,7 +335,7 @@
                     "sic": 12
                 }
             },
-            "DBContentConfigurationDataSourceRadar2": {
+            "ConfigurationDataSourceRadar2": {
                 "parameters": {
                     "ds_type": "Radar",
                     "has_short_name": true,
@@ -356,7 +356,7 @@
                     "sic": 13
                 }
             },
-            "DBContentConfigurationDataSourceRadar3": {
+            "ConfigurationDataSourceRadar3": {
                 "parameters": {
                     "ds_type": "Radar",
                     "has_short_name": true,
@@ -377,7 +377,7 @@
                     "sic": 20
                 }
             },
-            "DBContentConfigurationDataSourceRadar4": {
+            "ConfigurationDataSourceRadar4": {
                 "parameters": {
                     "ds_type": "Radar",
                     "has_short_name": true,
@@ -398,7 +398,7 @@
                     "sic": 48
                 }
             },
-            "DBContentConfigurationDataSourceRadar5": {
+            "ConfigurationDataSourceRadar5": {
                 "parameters": {
                     "ds_type": "Radar",
                     "has_short_name": true,
@@ -417,7 +417,7 @@
                     "sic": 16
                 }
             },
-            "DBContentConfigurationDataSourceRadar6": {
+            "ConfigurationDataSourceRadar6": {
                 "parameters": {
                     "ds_type": "Radar",
                     "has_short_name": true,
@@ -436,7 +436,7 @@
                     "sic": 9
                 }
             },
-            "DBContentConfigurationDataSourceRadar7": {
+            "ConfigurationDataSourceRadar7": {
                 "parameters": {
                     "ds_type": "Radar",
                     "has_short_name": true,
@@ -457,7 +457,7 @@
                     "sic": 10
                 }
             },
-            "DBContentConfigurationDataSourceRadar8": {
+            "ConfigurationDataSourceRadar8": {
                 "parameters": {
                     "ds_type": "Radar",
                     "has_short_name": true,
@@ -476,7 +476,7 @@
                     "sic": 15
                 }
             },
-            "DBContentConfigurationDataSourceRadar9": {
+            "ConfigurationDataSourceRadar9": {
                 "parameters": {
                     "ds_type": "Radar",
                     "has_short_name": true,
@@ -497,7 +497,7 @@
                     "sic": 7
                 }
             },
-            "DBContentConfigurationDataSourceTracker1": {
+            "ConfigurationDataSourceTracker1": {
                 "parameters": {
                     "ds_type": "Tracker",
                     "has_short_name": false,
@@ -513,1484 +513,1484 @@
                 }
             }
         },
-        "MetaDBOVariable": {
-            "MetaDBOVariableARTAS Hash0": {
+        "MetaVariable": {
+            "MetaVariableARTAS Hash0": {
                 "parameters": {
                     "name": "ARTAS Hash"
                 },
                 "sub_configs": {
-                    "DBOVariableDefinition": {
-                        "DBOVariableDefinitionCAT001ARTAS Hash0": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT001ARTAS Hash0": {
                             "parameters": {
-                                "dbo_name": "CAT001",
-                                "dbo_variable_name": "ARTAS Hash"
+                                "dbcontent_name": "CAT001",
+                                "variable_name": "ARTAS Hash"
                             }
                         },
-                        "DBOVariableDefinitionCAT020ARTAS Hash0": {
+                        "VariableDefinitionCAT020ARTAS Hash0": {
                             "parameters": {
-                                "dbo_name": "CAT020",
-                                "dbo_variable_name": "ARTAS Hash"
+                                "dbcontent_name": "CAT020",
+                                "variable_name": "ARTAS Hash"
                             }
                         },
-                        "DBOVariableDefinitionCAT021ARTAS Hash0": {
+                        "VariableDefinitionCAT021ARTAS Hash0": {
                             "parameters": {
-                                "dbo_name": "CAT021",
-                                "dbo_variable_name": "ARTAS Hash"
+                                "dbcontent_name": "CAT021",
+                                "variable_name": "ARTAS Hash"
                             }
                         },
-                        "DBOVariableDefinitionCAT048ARTAS Hash0": {
+                        "VariableDefinitionCAT048ARTAS Hash0": {
                             "parameters": {
-                                "dbo_name": "CAT048",
-                                "dbo_variable_name": "ARTAS Hash"
+                                "dbcontent_name": "CAT048",
+                                "variable_name": "ARTAS Hash"
                             }
                         }
                     }
                 }
             },
-            "MetaDBOVariableAircraft Address0": {
+            "MetaVariableAircraft Address0": {
                 "parameters": {
                     "name": "Aircraft Address"
                 },
                 "sub_configs": {
-                    "DBOVariableDefinition": {
-                        "DBOVariableDefinitionCAT020Aircraft Address0": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT020Aircraft Address0": {
                             "parameters": {
-                                "dbo_name": "CAT020",
-                                "dbo_variable_name": "Aircraft Address"
+                                "dbcontent_name": "CAT020",
+                                "variable_name": "Aircraft Address"
                             }
                         },
-                        "DBOVariableDefinitionCAT021Aircraft Address0": {
+                        "VariableDefinitionCAT021Aircraft Address0": {
                             "parameters": {
-                                "dbo_name": "CAT021",
-                                "dbo_variable_name": "Aircraft Address"
+                                "dbcontent_name": "CAT021",
+                                "variable_name": "Aircraft Address"
                             }
                         },
-                        "DBOVariableDefinitionCAT048Aircraft Address0": {
+                        "VariableDefinitionCAT048Aircraft Address0": {
                             "parameters": {
-                                "dbo_name": "CAT048",
-                                "dbo_variable_name": "Aircraft Address"
+                                "dbcontent_name": "CAT048",
+                                "variable_name": "Aircraft Address"
                             }
                         },
-                        "DBOVariableDefinitionCAT062Aircraft Address0": {
+                        "VariableDefinitionCAT062Aircraft Address0": {
                             "parameters": {
-                                "dbo_name": "CAT062",
-                                "dbo_variable_name": "Aircraft Address"
+                                "dbcontent_name": "CAT062",
+                                "variable_name": "Aircraft Address"
                             }
                         }
                     }
                 }
             },
-            "MetaDBOVariableAircraft Identification0": {
+            "MetaVariableAircraft Identification0": {
                 "parameters": {
                     "name": "Aircraft Identification"
                 },
                 "sub_configs": {
-                    "DBOVariableDefinition": {
-                        "DBOVariableDefinitionCAT020Aircraft Identification0": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT020Aircraft Identification0": {
                             "parameters": {
-                                "dbo_name": "CAT020",
-                                "dbo_variable_name": "Aircraft Identification"
+                                "dbcontent_name": "CAT020",
+                                "variable_name": "Aircraft Identification"
                             }
                         },
-                        "DBOVariableDefinitionCAT021Aircraft Identification0": {
+                        "VariableDefinitionCAT021Aircraft Identification0": {
                             "parameters": {
-                                "dbo_name": "CAT021",
-                                "dbo_variable_name": "Aircraft Identification"
+                                "dbcontent_name": "CAT021",
+                                "variable_name": "Aircraft Identification"
                             }
                         },
-                        "DBOVariableDefinitionCAT048Aircraft Identification0": {
+                        "VariableDefinitionCAT048Aircraft Identification0": {
                             "parameters": {
-                                "dbo_name": "CAT048",
-                                "dbo_variable_name": "Aircraft Identification"
+                                "dbcontent_name": "CAT048",
+                                "variable_name": "Aircraft Identification"
                             }
                         },
-                        "DBOVariableDefinitionCAT062Aircraft Identification0": {
+                        "VariableDefinitionCAT062Aircraft Identification0": {
                             "parameters": {
-                                "dbo_name": "CAT062",
-                                "dbo_variable_name": "Aircraft Identification"
+                                "dbcontent_name": "CAT062",
+                                "variable_name": "Aircraft Identification"
                             }
                         }
                     }
                 }
             },
-            "MetaDBOVariableAzimuth0": {
+            "MetaVariableAzimuth0": {
                 "parameters": {
                     "name": "Azimuth"
                 },
                 "sub_configs": {
-                    "DBOVariableDefinition": {
-                        "DBOVariableDefinitionCAT001Azimuth0": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT001Azimuth0": {
                             "parameters": {
-                                "dbo_name": "CAT001",
-                                "dbo_variable_name": "Azimuth"
+                                "dbcontent_name": "CAT001",
+                                "variable_name": "Azimuth"
                             }
                         },
-                        "DBOVariableDefinitionCAT048Azimuth0": {
+                        "VariableDefinitionCAT048Azimuth0": {
                             "parameters": {
-                                "dbo_name": "CAT048",
-                                "dbo_variable_name": "Azimuth"
+                                "dbcontent_name": "CAT048",
+                                "variable_name": "Azimuth"
                             }
                         }
                     }
                 }
             },
-            "MetaDBOVariableDS ID0": {
+            "MetaVariableDS ID0": {
                 "parameters": {
                     "name": "DS ID"
                 },
                 "sub_configs": {
-                    "DBOVariableDefinition": {
-                        "DBOVariableDefinitionCAT001DS ID0": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT001DS ID0": {
                             "parameters": {
-                                "dbo_name": "CAT001",
-                                "dbo_variable_name": "DS ID"
+                                "dbcontent_name": "CAT001",
+                                "variable_name": "DS ID"
                             }
                         },
-                        "DBOVariableDefinitionCAT020DS ID0": {
+                        "VariableDefinitionCAT020DS ID0": {
                             "parameters": {
-                                "dbo_name": "CAT020",
-                                "dbo_variable_name": "DS ID"
+                                "dbcontent_name": "CAT020",
+                                "variable_name": "DS ID"
                             }
                         },
-                        "DBOVariableDefinitionCAT021DS ID0": {
+                        "VariableDefinitionCAT021DS ID0": {
                             "parameters": {
-                                "dbo_name": "CAT021",
-                                "dbo_variable_name": "DS ID"
+                                "dbcontent_name": "CAT021",
+                                "variable_name": "DS ID"
                             }
                         },
-                        "DBOVariableDefinitionCAT048DS ID0": {
+                        "VariableDefinitionCAT048DS ID0": {
                             "parameters": {
-                                "dbo_name": "CAT048",
-                                "dbo_variable_name": "DS ID"
+                                "dbcontent_name": "CAT048",
+                                "variable_name": "DS ID"
                             }
                         },
-                        "DBOVariableDefinitionCAT062DS ID0": {
+                        "VariableDefinitionCAT062DS ID0": {
                             "parameters": {
-                                "dbo_name": "CAT062",
-                                "dbo_variable_name": "DS ID"
+                                "dbcontent_name": "CAT062",
+                                "variable_name": "DS ID"
                             }
                         }
                     }
                 }
             },
-            "MetaDBOVariableFFT0": {
+            "MetaVariableFFT0": {
                 "parameters": {
                     "name": "FFT"
                 },
                 "sub_configs": {
-                    "DBOVariableDefinition": {
-                        "DBOVariableDefinitionCAT001FFT0": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT001FFT0": {
                             "parameters": {
-                                "dbo_name": "CAT001",
-                                "dbo_variable_name": "FFT"
+                                "dbcontent_name": "CAT001",
+                                "variable_name": "FFT"
                             }
                         },
-                        "DBOVariableDefinitionCAT020FFT0": {
+                        "VariableDefinitionCAT020FFT0": {
                             "parameters": {
-                                "dbo_name": "CAT020",
-                                "dbo_variable_name": "FFT"
+                                "dbcontent_name": "CAT020",
+                                "variable_name": "FFT"
                             }
                         },
-                        "DBOVariableDefinitionCAT021FFT0": {
+                        "VariableDefinitionCAT021FFT0": {
                             "parameters": {
-                                "dbo_name": "CAT021",
-                                "dbo_variable_name": "FFT"
+                                "dbcontent_name": "CAT021",
+                                "variable_name": "FFT"
                             }
                         },
-                        "DBOVariableDefinitionCAT048FFT0": {
+                        "VariableDefinitionCAT048FFT0": {
                             "parameters": {
-                                "dbo_name": "CAT048",
-                                "dbo_variable_name": "FFT"
+                                "dbcontent_name": "CAT048",
+                                "variable_name": "FFT"
                             }
                         }
                     }
                 }
             },
-            "MetaDBOVariableFlight Status0": {
+            "MetaVariableFlight Status0": {
                 "parameters": {
                     "name": "Flight Status"
                 },
                 "sub_configs": {
-                    "DBOVariableDefinition": {
-                        "DBOVariableDefinitionCAT020Flight Status0": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT020Flight Status0": {
                             "parameters": {
-                                "dbo_name": "CAT020",
-                                "dbo_variable_name": "Flight Status"
+                                "dbcontent_name": "CAT020",
+                                "variable_name": "Flight Status"
                             }
                         },
-                        "DBOVariableDefinitionCAT048Flight Status0": {
+                        "VariableDefinitionCAT048Flight Status0": {
                             "parameters": {
-                                "dbo_name": "CAT048",
-                                "dbo_variable_name": "Flight Status"
+                                "dbcontent_name": "CAT048",
+                                "variable_name": "Flight Status"
                             }
                         }
                     }
                 }
             },
-            "MetaDBOVariableGround Bit0": {
+            "MetaVariableGround Bit0": {
                 "parameters": {
                     "name": "Ground Bit"
                 },
                 "sub_configs": {
-                    "DBOVariableDefinition": {
-                        "DBOVariableDefinitionCAT020Ground Bit0": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT020Ground Bit0": {
                             "parameters": {
-                                "dbo_name": "CAT020",
-                                "dbo_variable_name": "Ground Bit"
+                                "dbcontent_name": "CAT020",
+                                "variable_name": "Ground Bit"
                             }
                         },
-                        "DBOVariableDefinitionCAT021Ground Bit0": {
+                        "VariableDefinitionCAT021Ground Bit0": {
                             "parameters": {
-                                "dbo_name": "CAT021",
-                                "dbo_variable_name": "Ground Bit"
+                                "dbcontent_name": "CAT021",
+                                "variable_name": "Ground Bit"
                             }
                         }
                     }
                 }
             },
-            "MetaDBOVariableLatitude StdDev0": {
+            "MetaVariableLatitude StdDev0": {
                 "parameters": {
                     "name": "Latitude StdDev"
                 },
                 "sub_configs": {
-                    "DBOVariableDefinition": {
-                        "DBOVariableDefinitionCAT020Latitude StdDev0": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT020Latitude StdDev0": {
                             "parameters": {
-                                "dbo_name": "CAT020",
-                                "dbo_variable_name": "Latitude StdDev"
+                                "dbcontent_name": "CAT020",
+                                "variable_name": "Latitude StdDev"
                             }
                         },
-                        "DBOVariableDefinitionCAT062Latitude StdDev0": {
+                        "VariableDefinitionCAT062Latitude StdDev0": {
                             "parameters": {
-                                "dbo_name": "CAT062",
-                                "dbo_variable_name": "Latitude StdDev"
+                                "dbcontent_name": "CAT062",
+                                "variable_name": "Latitude StdDev"
                             }
                         }
                     }
                 }
             },
-            "MetaDBOVariableLatitude0": {
+            "MetaVariableLatitude0": {
                 "parameters": {
                     "name": "Latitude"
                 },
                 "sub_configs": {
-                    "DBOVariableDefinition": {
-                        "DBOVariableDefinitionCAT001Latitude0": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT001Latitude0": {
                             "parameters": {
-                                "dbo_name": "CAT001",
-                                "dbo_variable_name": "Latitude"
+                                "dbcontent_name": "CAT001",
+                                "variable_name": "Latitude"
                             }
                         },
-                        "DBOVariableDefinitionCAT020Latitude0": {
+                        "VariableDefinitionCAT020Latitude0": {
                             "parameters": {
-                                "dbo_name": "CAT020",
-                                "dbo_variable_name": "Latitude"
+                                "dbcontent_name": "CAT020",
+                                "variable_name": "Latitude"
                             }
                         },
-                        "DBOVariableDefinitionCAT021Latitude0": {
+                        "VariableDefinitionCAT021Latitude0": {
                             "parameters": {
-                                "dbo_name": "CAT021",
-                                "dbo_variable_name": "Latitude"
+                                "dbcontent_name": "CAT021",
+                                "variable_name": "Latitude"
                             }
                         },
-                        "DBOVariableDefinitionCAT048Latitude0": {
+                        "VariableDefinitionCAT048Latitude0": {
                             "parameters": {
-                                "dbo_name": "CAT048",
-                                "dbo_variable_name": "Latitude"
+                                "dbcontent_name": "CAT048",
+                                "variable_name": "Latitude"
                             }
                         },
-                        "DBOVariableDefinitionCAT062Latitude0": {
+                        "VariableDefinitionCAT062Latitude0": {
                             "parameters": {
-                                "dbo_name": "CAT062",
-                                "dbo_variable_name": "Latitude"
+                                "dbcontent_name": "CAT062",
+                                "variable_name": "Latitude"
                             }
                         }
                     }
                 }
             },
-            "MetaDBOVariableLongitude StdDev0": {
+            "MetaVariableLongitude StdDev0": {
                 "parameters": {
                     "name": "Longitude StdDev"
                 },
                 "sub_configs": {
-                    "DBOVariableDefinition": {
-                        "DBOVariableDefinitionCAT020Longitude StdDev0": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT020Longitude StdDev0": {
                             "parameters": {
-                                "dbo_name": "CAT020",
-                                "dbo_variable_name": "Longitude StdDev"
+                                "dbcontent_name": "CAT020",
+                                "variable_name": "Longitude StdDev"
                             }
                         },
-                        "DBOVariableDefinitionCAT062Longitude StdDev0": {
+                        "VariableDefinitionCAT062Longitude StdDev0": {
                             "parameters": {
-                                "dbo_name": "CAT062",
-                                "dbo_variable_name": "Longitude StdDev"
+                                "dbcontent_name": "CAT062",
+                                "variable_name": "Longitude StdDev"
                             }
                         }
                     }
                 }
             },
-            "MetaDBOVariableLongitude0": {
+            "MetaVariableLongitude0": {
                 "parameters": {
                     "name": "Longitude"
                 },
                 "sub_configs": {
-                    "DBOVariableDefinition": {
-                        "DBOVariableDefinitionCAT001Longitude0": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT001Longitude0": {
                             "parameters": {
-                                "dbo_name": "CAT001",
-                                "dbo_variable_name": "Longitude"
+                                "dbcontent_name": "CAT001",
+                                "variable_name": "Longitude"
                             }
                         },
-                        "DBOVariableDefinitionCAT020Longitude0": {
+                        "VariableDefinitionCAT020Longitude0": {
                             "parameters": {
-                                "dbo_name": "CAT020",
-                                "dbo_variable_name": "Longitude"
+                                "dbcontent_name": "CAT020",
+                                "variable_name": "Longitude"
                             }
                         },
-                        "DBOVariableDefinitionCAT021Longitude0": {
+                        "VariableDefinitionCAT021Longitude0": {
                             "parameters": {
-                                "dbo_name": "CAT021",
-                                "dbo_variable_name": "Longitude"
+                                "dbcontent_name": "CAT021",
+                                "variable_name": "Longitude"
                             }
                         },
-                        "DBOVariableDefinitionCAT048Longitude0": {
+                        "VariableDefinitionCAT048Longitude0": {
                             "parameters": {
-                                "dbo_name": "CAT048",
-                                "dbo_variable_name": "Longitude"
+                                "dbcontent_name": "CAT048",
+                                "variable_name": "Longitude"
                             }
                         },
-                        "DBOVariableDefinitionCAT062Longitude0": {
+                        "VariableDefinitionCAT062Longitude0": {
                             "parameters": {
-                                "dbo_name": "CAT062",
-                                "dbo_variable_name": "Longitude"
+                                "dbcontent_name": "CAT062",
+                                "variable_name": "Longitude"
                             }
                         }
                     }
                 }
             },
-            "MetaDBOVariableMilitary Emergency0": {
+            "MetaVariableMilitary Emergency0": {
                 "parameters": {
                     "name": "Military Emergency"
                 },
                 "sub_configs": {
-                    "DBOVariableDefinition": {
-                        "DBOVariableDefinitionCAT001Military Emergency0": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT001Military Emergency0": {
                             "parameters": {
-                                "dbo_name": "CAT001",
-                                "dbo_variable_name": "Military Emergency"
+                                "dbcontent_name": "CAT001",
+                                "variable_name": "Military Emergency"
                             }
                         },
-                        "DBOVariableDefinitionCAT048Military Emergency0": {
+                        "VariableDefinitionCAT048Military Emergency0": {
                             "parameters": {
-                                "dbo_name": "CAT048",
-                                "dbo_variable_name": "Military Emergency"
+                                "dbcontent_name": "CAT048",
+                                "variable_name": "Military Emergency"
                             }
                         },
-                        "DBOVariableDefinitionCAT062Military Emergency0": {
+                        "VariableDefinitionCAT062Military Emergency0": {
                             "parameters": {
-                                "dbo_name": "CAT062",
-                                "dbo_variable_name": "Military Emergency"
+                                "dbcontent_name": "CAT062",
+                                "variable_name": "Military Emergency"
                             }
                         }
                     }
                 }
             },
-            "MetaDBOVariableMilitary Identification0": {
+            "MetaVariableMilitary Identification0": {
                 "parameters": {
                     "name": "Military Identification"
                 },
                 "sub_configs": {
-                    "DBOVariableDefinition": {
-                        "DBOVariableDefinitionCAT001Military Identification0": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT001Military Identification0": {
                             "parameters": {
-                                "dbo_name": "CAT001",
-                                "dbo_variable_name": "Military Identification"
+                                "dbcontent_name": "CAT001",
+                                "variable_name": "Military Identification"
                             }
                         },
-                        "DBOVariableDefinitionCAT048Military Identification0": {
+                        "VariableDefinitionCAT048Military Identification0": {
                             "parameters": {
-                                "dbo_name": "CAT048",
-                                "dbo_variable_name": "Military Identification"
+                                "dbcontent_name": "CAT048",
+                                "variable_name": "Military Identification"
                             }
                         },
-                        "DBOVariableDefinitionCAT062Military Identification0": {
+                        "VariableDefinitionCAT062Military Identification0": {
                             "parameters": {
-                                "dbo_name": "CAT062",
-                                "dbo_variable_name": "Military Identification"
+                                "dbcontent_name": "CAT062",
+                                "variable_name": "Military Identification"
                             }
                         }
                     }
                 }
             },
-            "MetaDBOVariableMode 3/A Age0": {
+            "MetaVariableMode 3/A Age0": {
                 "parameters": {
                     "name": "Mode 3/A Age"
                 },
                 "sub_configs": {
-                    "DBOVariableDefinition": {
-                        "DBOVariableDefinitionCAT021Mode 3/A Age0": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT021Mode 3/A Age0": {
                             "parameters": {
-                                "dbo_name": "CAT021",
-                                "dbo_variable_name": "Mode 3/A Age"
+                                "dbcontent_name": "CAT021",
+                                "variable_name": "Mode 3/A Age"
                             }
                         },
-                        "DBOVariableDefinitionCAT062Mode 3/A Age0": {
+                        "VariableDefinitionCAT062Mode 3/A Age0": {
                             "parameters": {
-                                "dbo_name": "CAT062",
-                                "dbo_variable_name": "Mode 3/A Age"
+                                "dbcontent_name": "CAT062",
+                                "variable_name": "Mode 3/A Age"
                             }
                         }
                     }
                 }
             },
-            "MetaDBOVariableMode 3/A Code0": {
+            "MetaVariableMode 3/A Code0": {
                 "parameters": {
                     "name": "Mode 3/A Code"
                 },
                 "sub_configs": {
-                    "DBOVariableDefinition": {
-                        "DBOVariableDefinitionCAT001Mode 3/A Code0": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT001Mode 3/A Code0": {
                             "parameters": {
-                                "dbo_name": "CAT001",
-                                "dbo_variable_name": "Mode 3/A Code"
+                                "dbcontent_name": "CAT001",
+                                "variable_name": "Mode 3/A Code"
                             }
                         },
-                        "DBOVariableDefinitionCAT020Mode 3/A Code0": {
+                        "VariableDefinitionCAT020Mode 3/A Code0": {
                             "parameters": {
-                                "dbo_name": "CAT020",
-                                "dbo_variable_name": "Mode 3/A Code"
+                                "dbcontent_name": "CAT020",
+                                "variable_name": "Mode 3/A Code"
                             }
                         },
-                        "DBOVariableDefinitionCAT021Mode 3/A Code0": {
+                        "VariableDefinitionCAT021Mode 3/A Code0": {
                             "parameters": {
-                                "dbo_name": "CAT021",
-                                "dbo_variable_name": "Mode 3/A Code"
+                                "dbcontent_name": "CAT021",
+                                "variable_name": "Mode 3/A Code"
                             }
                         },
-                        "DBOVariableDefinitionCAT048Mode 3/A Code0": {
+                        "VariableDefinitionCAT048Mode 3/A Code0": {
                             "parameters": {
-                                "dbo_name": "CAT048",
-                                "dbo_variable_name": "Mode 3/A Code"
+                                "dbcontent_name": "CAT048",
+                                "variable_name": "Mode 3/A Code"
                             }
                         },
-                        "DBOVariableDefinitionCAT062Mode 3/A Code0": {
+                        "VariableDefinitionCAT062Mode 3/A Code0": {
                             "parameters": {
-                                "dbo_name": "CAT062",
-                                "dbo_variable_name": "Mode 3/A Code"
+                                "dbcontent_name": "CAT062",
+                                "variable_name": "Mode 3/A Code"
                             }
                         }
                     }
                 }
             },
-            "MetaDBOVariableMode 3/A Garbled0": {
+            "MetaVariableMode 3/A Garbled0": {
                 "parameters": {
                     "name": "Mode 3/A Garbled"
                 },
                 "sub_configs": {
-                    "DBOVariableDefinition": {
-                        "DBOVariableDefinitionCAT001Mode 3/A Garbled0": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT001Mode 3/A Garbled0": {
                             "parameters": {
-                                "dbo_name": "CAT001",
-                                "dbo_variable_name": "Mode 3/A Garbled"
+                                "dbcontent_name": "CAT001",
+                                "variable_name": "Mode 3/A Garbled"
                             }
                         },
-                        "DBOVariableDefinitionCAT020Mode 3/A Garbled0": {
+                        "VariableDefinitionCAT020Mode 3/A Garbled0": {
                             "parameters": {
-                                "dbo_name": "CAT020",
-                                "dbo_variable_name": "Mode 3/A Garbled"
+                                "dbcontent_name": "CAT020",
+                                "variable_name": "Mode 3/A Garbled"
                             }
                         },
-                        "DBOVariableDefinitionCAT021Mode 3/A Garbled0": {
+                        "VariableDefinitionCAT021Mode 3/A Garbled0": {
                             "parameters": {
-                                "dbo_name": "CAT021",
-                                "dbo_variable_name": "Mode 3/A Garbled"
+                                "dbcontent_name": "CAT021",
+                                "variable_name": "Mode 3/A Garbled"
                             }
                         },
-                        "DBOVariableDefinitionCAT048Mode 3/A Garbled0": {
+                        "VariableDefinitionCAT048Mode 3/A Garbled0": {
                             "parameters": {
-                                "dbo_name": "CAT048",
-                                "dbo_variable_name": "Mode 3/A Garbled"
+                                "dbcontent_name": "CAT048",
+                                "variable_name": "Mode 3/A Garbled"
                             }
                         },
-                        "DBOVariableDefinitionCAT062Mode 3/A Garbled0": {
+                        "VariableDefinitionCAT062Mode 3/A Garbled0": {
                             "parameters": {
-                                "dbo_name": "CAT062",
-                                "dbo_variable_name": "Mode 3/A Garbled"
+                                "dbcontent_name": "CAT062",
+                                "variable_name": "Mode 3/A Garbled"
                             }
                         }
                     }
                 }
             },
-            "MetaDBOVariableMode 3/A Smoothed0": {
+            "MetaVariableMode 3/A Smoothed0": {
                 "parameters": {
                     "name": "Mode 3/A Smoothed"
                 },
                 "sub_configs": {
-                    "DBOVariableDefinition": {
-                        "DBOVariableDefinitionCAT001Mode 3/A Smoothed0": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT001Mode 3/A Smoothed0": {
                             "parameters": {
-                                "dbo_name": "CAT001",
-                                "dbo_variable_name": "Mode 3/A Smoothed"
+                                "dbcontent_name": "CAT001",
+                                "variable_name": "Mode 3/A Smoothed"
                             }
                         },
-                        "DBOVariableDefinitionCAT020Mode 3/A Smoothed0": {
+                        "VariableDefinitionCAT020Mode 3/A Smoothed0": {
                             "parameters": {
-                                "dbo_name": "CAT020",
-                                "dbo_variable_name": "Mode 3/A Smoothed"
+                                "dbcontent_name": "CAT020",
+                                "variable_name": "Mode 3/A Smoothed"
                             }
                         },
-                        "DBOVariableDefinitionCAT021Mode 3/A Smoothed0": {
+                        "VariableDefinitionCAT021Mode 3/A Smoothed0": {
                             "parameters": {
-                                "dbo_name": "CAT021",
-                                "dbo_variable_name": "Mode 3/A Smoothed"
+                                "dbcontent_name": "CAT021",
+                                "variable_name": "Mode 3/A Smoothed"
                             }
                         },
-                        "DBOVariableDefinitionCAT048Mode 3/A Smoothed0": {
+                        "VariableDefinitionCAT048Mode 3/A Smoothed0": {
                             "parameters": {
-                                "dbo_name": "CAT048",
-                                "dbo_variable_name": "Mode 3/A Smoothed"
+                                "dbcontent_name": "CAT048",
+                                "variable_name": "Mode 3/A Smoothed"
                             }
                         }
                     }
                 }
             },
-            "MetaDBOVariableMode 3/A Valid0": {
+            "MetaVariableMode 3/A Valid0": {
                 "parameters": {
                     "name": "Mode 3/A Valid"
                 },
                 "sub_configs": {
-                    "DBOVariableDefinition": {
-                        "DBOVariableDefinitionCAT001Mode 3/A Valid0": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT001Mode 3/A Valid0": {
                             "parameters": {
-                                "dbo_name": "CAT001",
-                                "dbo_variable_name": "Mode 3/A Valid"
+                                "dbcontent_name": "CAT001",
+                                "variable_name": "Mode 3/A Valid"
                             }
                         },
-                        "DBOVariableDefinitionCAT020Mode 3/A Valid0": {
+                        "VariableDefinitionCAT020Mode 3/A Valid0": {
                             "parameters": {
-                                "dbo_name": "CAT020",
-                                "dbo_variable_name": "Mode 3/A Valid"
+                                "dbcontent_name": "CAT020",
+                                "variable_name": "Mode 3/A Valid"
                             }
                         },
-                        "DBOVariableDefinitionCAT021Mode 3/A Valid0": {
+                        "VariableDefinitionCAT021Mode 3/A Valid0": {
                             "parameters": {
-                                "dbo_name": "CAT021",
-                                "dbo_variable_name": "Mode 3/A Valid"
+                                "dbcontent_name": "CAT021",
+                                "variable_name": "Mode 3/A Valid"
                             }
                         },
-                        "DBOVariableDefinitionCAT048Mode 3/A Valid0": {
+                        "VariableDefinitionCAT048Mode 3/A Valid0": {
                             "parameters": {
-                                "dbo_name": "CAT048",
-                                "dbo_variable_name": "Mode 3/A Valid"
+                                "dbcontent_name": "CAT048",
+                                "variable_name": "Mode 3/A Valid"
                             }
                         },
-                        "DBOVariableDefinitionCAT062Mode 3/A Valid0": {
+                        "VariableDefinitionCAT062Mode 3/A Valid0": {
                             "parameters": {
-                                "dbo_name": "CAT062",
-                                "dbo_variable_name": "Mode 3/A Valid"
+                                "dbcontent_name": "CAT062",
+                                "variable_name": "Mode 3/A Valid"
                             }
                         }
                     }
                 }
             },
-            "MetaDBOVariableMode C Code0": {
+            "MetaVariableMode C Code0": {
                 "parameters": {
                     "name": "Mode C Code"
                 },
                 "sub_configs": {
-                    "DBOVariableDefinition": {
-                        "DBOVariableDefinitionCAT001Mode C Code0": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT001Mode C Code0": {
                             "parameters": {
-                                "dbo_name": "CAT001",
-                                "dbo_variable_name": "Mode C Code"
+                                "dbcontent_name": "CAT001",
+                                "variable_name": "Mode C Code"
                             }
                         },
-                        "DBOVariableDefinitionCAT020Mode C Code0": {
+                        "VariableDefinitionCAT020Mode C Code0": {
                             "parameters": {
-                                "dbo_name": "CAT020",
-                                "dbo_variable_name": "Mode C Code"
+                                "dbcontent_name": "CAT020",
+                                "variable_name": "Mode C Code"
                             }
                         },
-                        "DBOVariableDefinitionCAT021Mode C Code0": {
+                        "VariableDefinitionCAT021Mode C Code0": {
                             "parameters": {
-                                "dbo_name": "CAT021",
-                                "dbo_variable_name": "Mode C Code"
+                                "dbcontent_name": "CAT021",
+                                "variable_name": "Mode C Code"
                             }
                         },
-                        "DBOVariableDefinitionCAT048Mode C Code0": {
+                        "VariableDefinitionCAT048Mode C Code0": {
                             "parameters": {
-                                "dbo_name": "CAT048",
-                                "dbo_variable_name": "Mode C Code"
+                                "dbcontent_name": "CAT048",
+                                "variable_name": "Mode C Code"
                             }
                         },
-                        "DBOVariableDefinitionCAT062Mode C Code LM0": {
+                        "VariableDefinitionCAT062Mode C Code LM0": {
                             "parameters": {
-                                "dbo_name": "CAT062",
-                                "dbo_variable_name": "Mode C Code LM"
+                                "dbcontent_name": "CAT062",
+                                "variable_name": "Mode C Code LM"
                             }
                         }
                     }
                 }
             },
-            "MetaDBOVariableMode C Garbled0": {
+            "MetaVariableMode C Garbled0": {
                 "parameters": {
                     "name": "Mode C Garbled"
                 },
                 "sub_configs": {
-                    "DBOVariableDefinition": {
-                        "DBOVariableDefinitionCAT001Mode C Garbled0": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT001Mode C Garbled0": {
                             "parameters": {
-                                "dbo_name": "CAT001",
-                                "dbo_variable_name": "Mode C Garbled"
+                                "dbcontent_name": "CAT001",
+                                "variable_name": "Mode C Garbled"
                             }
                         },
-                        "DBOVariableDefinitionCAT020Mode C Garbled0": {
+                        "VariableDefinitionCAT020Mode C Garbled0": {
                             "parameters": {
-                                "dbo_name": "CAT020",
-                                "dbo_variable_name": "Mode C Garbled"
+                                "dbcontent_name": "CAT020",
+                                "variable_name": "Mode C Garbled"
                             }
                         },
-                        "DBOVariableDefinitionCAT048Mode C Garbled0": {
+                        "VariableDefinitionCAT048Mode C Garbled0": {
                             "parameters": {
-                                "dbo_name": "CAT048",
-                                "dbo_variable_name": "Mode C Garbled"
+                                "dbcontent_name": "CAT048",
+                                "variable_name": "Mode C Garbled"
                             }
                         },
-                        "DBOVariableDefinitionCAT062Mode C Garbled LM0": {
+                        "VariableDefinitionCAT062Mode C Garbled LM0": {
                             "parameters": {
-                                "dbo_name": "CAT062",
-                                "dbo_variable_name": "Mode C Garbled LM"
+                                "dbcontent_name": "CAT062",
+                                "variable_name": "Mode C Garbled LM"
                             }
                         }
                     }
                 }
             },
-            "MetaDBOVariableMode C Valid0": {
+            "MetaVariableMode C Valid0": {
                 "parameters": {
                     "name": "Mode C Valid"
                 },
                 "sub_configs": {
-                    "DBOVariableDefinition": {
-                        "DBOVariableDefinitionCAT001Mode C Valid0": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT001Mode C Valid0": {
                             "parameters": {
-                                "dbo_name": "CAT001",
-                                "dbo_variable_name": "Mode C Valid"
+                                "dbcontent_name": "CAT001",
+                                "variable_name": "Mode C Valid"
                             }
                         },
-                        "DBOVariableDefinitionCAT020Mode C Valid0": {
+                        "VariableDefinitionCAT020Mode C Valid0": {
                             "parameters": {
-                                "dbo_name": "CAT020",
-                                "dbo_variable_name": "Mode C Valid"
+                                "dbcontent_name": "CAT020",
+                                "variable_name": "Mode C Valid"
                             }
                         },
-                        "DBOVariableDefinitionCAT048Mode C Valid0": {
+                        "VariableDefinitionCAT048Mode C Valid0": {
                             "parameters": {
-                                "dbo_name": "CAT048",
-                                "dbo_variable_name": "Mode C Valid"
+                                "dbcontent_name": "CAT048",
+                                "variable_name": "Mode C Valid"
                             }
                         },
-                        "DBOVariableDefinitionCAT062Mode C Valid LM0": {
+                        "VariableDefinitionCAT062Mode C Valid LM0": {
                             "parameters": {
-                                "dbo_name": "CAT062",
-                                "dbo_variable_name": "Mode C Valid LM"
+                                "dbcontent_name": "CAT062",
+                                "variable_name": "Mode C Valid LM"
                             }
                         }
                     }
                 }
             },
-            "MetaDBOVariableMode S Specific Service Capability0": {
+            "MetaVariableMode S Specific Service Capability0": {
                 "parameters": {
                     "name": "Mode S Specific Service Capability"
                 },
                 "sub_configs": {
-                    "DBOVariableDefinition": {
-                        "DBOVariableDefinitionCAT020Mode S Specific Service Capability0": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT020Mode S Specific Service Capability0": {
                             "parameters": {
-                                "dbo_name": "CAT020",
-                                "dbo_variable_name": "Mode S Specific Service Capability"
+                                "dbcontent_name": "CAT020",
+                                "variable_name": "Mode S Specific Service Capability"
                             }
                         },
-                        "DBOVariableDefinitionCAT048Mode S Specific Service Capability0": {
+                        "VariableDefinitionCAT048Mode S Specific Service Capability0": {
                             "parameters": {
-                                "dbo_name": "CAT048",
-                                "dbo_variable_name": "Mode S Specific Service Capability"
+                                "dbcontent_name": "CAT048",
+                                "variable_name": "Mode S Specific Service Capability"
                             }
                         }
                     }
                 }
             },
-            "MetaDBOVariableRDP Chain0": {
+            "MetaVariableRDP Chain0": {
                 "parameters": {
                     "name": "RDP Chain"
                 },
                 "sub_configs": {
-                    "DBOVariableDefinition": {
-                        "DBOVariableDefinitionCAT001RDP Chain0": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT001RDP Chain0": {
                             "parameters": {
-                                "dbo_name": "CAT001",
-                                "dbo_variable_name": "RDP Chain"
+                                "dbcontent_name": "CAT001",
+                                "variable_name": "RDP Chain"
                             }
                         },
-                        "DBOVariableDefinitionCAT048RDP Chain0": {
+                        "VariableDefinitionCAT048RDP Chain0": {
                             "parameters": {
-                                "dbo_name": "CAT048",
-                                "dbo_variable_name": "RDP Chain"
+                                "dbcontent_name": "CAT048",
+                                "variable_name": "RDP Chain"
                             }
                         }
                     }
                 }
             },
-            "MetaDBOVariableRange0": {
+            "MetaVariableRange0": {
                 "parameters": {
                     "name": "Range"
                 },
                 "sub_configs": {
-                    "DBOVariableDefinition": {
-                        "DBOVariableDefinitionCAT001Range0": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT001Range0": {
                             "parameters": {
-                                "dbo_name": "CAT001",
-                                "dbo_variable_name": "Range"
+                                "dbcontent_name": "CAT001",
+                                "variable_name": "Range"
                             }
                         },
-                        "DBOVariableDefinitionCAT048Range0": {
+                        "VariableDefinitionCAT048Range0": {
                             "parameters": {
-                                "dbo_name": "CAT048",
-                                "dbo_variable_name": "Range"
+                                "dbcontent_name": "CAT048",
+                                "variable_name": "Range"
                             }
                         }
                     }
                 }
             },
-            "MetaDBOVariableSAC0": {
+            "MetaVariableSAC0": {
                 "parameters": {
                     "name": "SAC"
                 },
                 "sub_configs": {
-                    "DBOVariableDefinition": {
-                        "DBOVariableDefinitionCAT001SAC0": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT001SAC0": {
                             "parameters": {
-                                "dbo_name": "CAT001",
-                                "dbo_variable_name": "SAC"
+                                "dbcontent_name": "CAT001",
+                                "variable_name": "SAC"
                             }
                         },
-                        "DBOVariableDefinitionCAT020SAC0": {
+                        "VariableDefinitionCAT020SAC0": {
                             "parameters": {
-                                "dbo_name": "CAT020",
-                                "dbo_variable_name": "SAC"
+                                "dbcontent_name": "CAT020",
+                                "variable_name": "SAC"
                             }
                         },
-                        "DBOVariableDefinitionCAT021SAC0": {
+                        "VariableDefinitionCAT021SAC0": {
                             "parameters": {
-                                "dbo_name": "CAT021",
-                                "dbo_variable_name": "SAC"
+                                "dbcontent_name": "CAT021",
+                                "variable_name": "SAC"
                             }
                         },
-                        "DBOVariableDefinitionCAT048SAC0": {
+                        "VariableDefinitionCAT048SAC0": {
                             "parameters": {
-                                "dbo_name": "CAT048",
-                                "dbo_variable_name": "SAC"
+                                "dbcontent_name": "CAT048",
+                                "variable_name": "SAC"
                             }
                         },
-                        "DBOVariableDefinitionCAT062SAC0": {
+                        "VariableDefinitionCAT062SAC0": {
                             "parameters": {
-                                "dbo_name": "CAT062",
-                                "dbo_variable_name": "SAC"
+                                "dbcontent_name": "CAT062",
+                                "variable_name": "SAC"
                             }
                         }
                     }
                 }
             },
-            "MetaDBOVariableSIC0": {
+            "MetaVariableSIC0": {
                 "parameters": {
                     "name": "SIC"
                 },
                 "sub_configs": {
-                    "DBOVariableDefinition": {
-                        "DBOVariableDefinitionCAT001SIC0": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT001SIC0": {
                             "parameters": {
-                                "dbo_name": "CAT001",
-                                "dbo_variable_name": "SIC"
+                                "dbcontent_name": "CAT001",
+                                "variable_name": "SIC"
                             }
                         },
-                        "DBOVariableDefinitionCAT020SIC0": {
+                        "VariableDefinitionCAT020SIC0": {
                             "parameters": {
-                                "dbo_name": "CAT020",
-                                "dbo_variable_name": "SIC"
+                                "dbcontent_name": "CAT020",
+                                "variable_name": "SIC"
                             }
                         },
-                        "DBOVariableDefinitionCAT021SIC0": {
+                        "VariableDefinitionCAT021SIC0": {
                             "parameters": {
-                                "dbo_name": "CAT021",
-                                "dbo_variable_name": "SIC"
+                                "dbcontent_name": "CAT021",
+                                "variable_name": "SIC"
                             }
                         },
-                        "DBOVariableDefinitionCAT048SIC0": {
+                        "VariableDefinitionCAT048SIC0": {
                             "parameters": {
-                                "dbo_name": "CAT048",
-                                "dbo_variable_name": "SIC"
+                                "dbcontent_name": "CAT048",
+                                "variable_name": "SIC"
                             }
                         },
-                        "DBOVariableDefinitionCAT062SIC0": {
+                        "VariableDefinitionCAT062SIC0": {
                             "parameters": {
-                                "dbo_name": "CAT062",
-                                "dbo_variable_name": "SIC"
+                                "dbcontent_name": "CAT062",
+                                "variable_name": "SIC"
                             }
                         }
                     }
                 }
             },
-            "MetaDBOVariableSPI0": {
+            "MetaVariableSPI0": {
                 "parameters": {
                     "name": "SPI"
                 },
                 "sub_configs": {
-                    "DBOVariableDefinition": {
-                        "DBOVariableDefinitionCAT001SPI0": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT001SPI0": {
                             "parameters": {
-                                "dbo_name": "CAT001",
-                                "dbo_variable_name": "SPI"
+                                "dbcontent_name": "CAT001",
+                                "variable_name": "SPI"
                             }
                         },
-                        "DBOVariableDefinitionCAT020SPI0": {
+                        "VariableDefinitionCAT020SPI0": {
                             "parameters": {
-                                "dbo_name": "CAT020",
-                                "dbo_variable_name": "SPI"
+                                "dbcontent_name": "CAT020",
+                                "variable_name": "SPI"
                             }
                         },
-                        "DBOVariableDefinitionCAT021SPI0": {
+                        "VariableDefinitionCAT021SPI0": {
                             "parameters": {
-                                "dbo_name": "CAT021",
-                                "dbo_variable_name": "SPI"
+                                "dbcontent_name": "CAT021",
+                                "variable_name": "SPI"
                             }
                         },
-                        "DBOVariableDefinitionCAT048SPI0": {
+                        "VariableDefinitionCAT048SPI0": {
                             "parameters": {
-                                "dbo_name": "CAT048",
-                                "dbo_variable_name": "SPI"
+                                "dbcontent_name": "CAT048",
+                                "variable_name": "SPI"
                             }
                         },
-                        "DBOVariableDefinitionCAT062SPI0": {
+                        "VariableDefinitionCAT062SPI0": {
                             "parameters": {
-                                "dbo_name": "CAT062",
-                                "dbo_variable_name": "SPI"
+                                "dbcontent_name": "CAT062",
+                                "variable_name": "SPI"
                             }
                         }
                     }
                 }
             },
-            "MetaDBOVariableService Identification0": {
+            "MetaVariableService Identification0": {
                 "parameters": {
                     "name": "Service Identification"
                 },
                 "sub_configs": {
-                    "DBOVariableDefinition": {
-                        "DBOVariableDefinitionCAT021Service Identification0": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT021Service Identification0": {
                             "parameters": {
-                                "dbo_name": "CAT021",
-                                "dbo_variable_name": "Service Identification"
+                                "dbcontent_name": "CAT021",
+                                "variable_name": "Service Identification"
                             }
                         },
-                        "DBOVariableDefinitionCAT062Service Identification0": {
+                        "VariableDefinitionCAT062Service Identification0": {
                             "parameters": {
-                                "dbo_name": "CAT062",
-                                "dbo_variable_name": "Service Identification"
+                                "dbcontent_name": "CAT062",
+                                "variable_name": "Service Identification"
                             }
                         }
                     }
                 }
             },
-            "MetaDBOVariableSimulated0": {
+            "MetaVariableSimulated0": {
                 "parameters": {
                     "name": "Simulated"
                 },
                 "sub_configs": {
-                    "DBOVariableDefinition": {
-                        "DBOVariableDefinitionCAT001Simulated0": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT001Simulated0": {
                             "parameters": {
-                                "dbo_name": "CAT001",
-                                "dbo_variable_name": "Simulated"
+                                "dbcontent_name": "CAT001",
+                                "variable_name": "Simulated"
                             }
                         },
-                        "DBOVariableDefinitionCAT020Simulated0": {
+                        "VariableDefinitionCAT020Simulated0": {
                             "parameters": {
-                                "dbo_name": "CAT020",
-                                "dbo_variable_name": "Simulated"
+                                "dbcontent_name": "CAT020",
+                                "variable_name": "Simulated"
                             }
                         },
-                        "DBOVariableDefinitionCAT021Simulated0": {
+                        "VariableDefinitionCAT021Simulated0": {
                             "parameters": {
-                                "dbo_name": "CAT021",
-                                "dbo_variable_name": "Simulated"
+                                "dbcontent_name": "CAT021",
+                                "variable_name": "Simulated"
                             }
                         },
-                        "DBOVariableDefinitionCAT048Simulated0": {
+                        "VariableDefinitionCAT048Simulated0": {
                             "parameters": {
-                                "dbo_name": "CAT048",
-                                "dbo_variable_name": "Simulated"
+                                "dbcontent_name": "CAT048",
+                                "variable_name": "Simulated"
                             }
                         },
-                        "DBOVariableDefinitionCAT062Simulated0": {
+                        "VariableDefinitionCAT062Simulated0": {
                             "parameters": {
-                                "dbo_name": "CAT062",
-                                "dbo_variable_name": "Simulated"
+                                "dbcontent_name": "CAT062",
+                                "variable_name": "Simulated"
                             }
                         }
                     }
                 }
             },
-            "MetaDBOVariableTest0": {
+            "MetaVariableTest0": {
                 "parameters": {
                     "name": "Test"
                 },
                 "sub_configs": {
-                    "DBOVariableDefinition": {
-                        "DBOVariableDefinitionCAT001Test0": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT001Test0": {
                             "parameters": {
-                                "dbo_name": "CAT001",
-                                "dbo_variable_name": "Test"
+                                "dbcontent_name": "CAT001",
+                                "variable_name": "Test"
                             }
                         },
-                        "DBOVariableDefinitionCAT020Test0": {
+                        "VariableDefinitionCAT020Test0": {
                             "parameters": {
-                                "dbo_name": "CAT020",
-                                "dbo_variable_name": "Test"
+                                "dbcontent_name": "CAT020",
+                                "variable_name": "Test"
                             }
                         },
-                        "DBOVariableDefinitionCAT021Test0": {
+                        "VariableDefinitionCAT021Test0": {
                             "parameters": {
-                                "dbo_name": "CAT021",
-                                "dbo_variable_name": "Test"
+                                "dbcontent_name": "CAT021",
+                                "variable_name": "Test"
                             }
                         },
-                        "DBOVariableDefinitionCAT048Test0": {
+                        "VariableDefinitionCAT048Test0": {
                             "parameters": {
-                                "dbo_name": "CAT048",
-                                "dbo_variable_name": "Test"
+                                "dbcontent_name": "CAT048",
+                                "variable_name": "Test"
                             }
                         }
                     }
                 }
             },
-            "MetaDBOVariableTime of Day0": {
+            "MetaVariableTime of Day0": {
                 "parameters": {
                     "name": "Time of Day"
                 },
                 "sub_configs": {
-                    "DBOVariableDefinition": {
-                        "DBOVariableDefinitionCAT001Time of Day0": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT001Time of Day0": {
                             "parameters": {
-                                "dbo_name": "CAT001",
-                                "dbo_variable_name": "Time of Day"
+                                "dbcontent_name": "CAT001",
+                                "variable_name": "Time of Day"
                             }
                         },
-                        "DBOVariableDefinitionCAT020Time of Day0": {
+                        "VariableDefinitionCAT020Time of Day0": {
                             "parameters": {
-                                "dbo_name": "CAT020",
-                                "dbo_variable_name": "Time of Day"
+                                "dbcontent_name": "CAT020",
+                                "variable_name": "Time of Day"
                             }
                         },
-                        "DBOVariableDefinitionCAT021Time of Day0": {
+                        "VariableDefinitionCAT021Time of Day0": {
                             "parameters": {
-                                "dbo_name": "CAT021",
-                                "dbo_variable_name": "Time of Day"
+                                "dbcontent_name": "CAT021",
+                                "variable_name": "Time of Day"
                             }
                         },
-                        "DBOVariableDefinitionCAT048Time of Day0": {
+                        "VariableDefinitionCAT048Time of Day0": {
                             "parameters": {
-                                "dbo_name": "CAT048",
-                                "dbo_variable_name": "Time of Day"
+                                "dbcontent_name": "CAT048",
+                                "variable_name": "Time of Day"
                             }
                         },
-                        "DBOVariableDefinitionCAT062Time of Day0": {
+                        "VariableDefinitionCAT062Time of Day0": {
                             "parameters": {
-                                "dbo_name": "CAT062",
-                                "dbo_variable_name": "Time of Day"
+                                "dbcontent_name": "CAT062",
+                                "variable_name": "Time of Day"
                             }
                         }
                     }
                 }
             },
-            "MetaDBOVariableTrack Angle0": {
+            "MetaVariableTrack Angle0": {
                 "parameters": {
                     "name": "Track Angle"
                 },
                 "sub_configs": {
-                    "DBOVariableDefinition": {
-                        "DBOVariableDefinitionCAT001Track Angle0": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT001Track Angle0": {
                             "parameters": {
-                                "dbo_name": "CAT001",
-                                "dbo_variable_name": "Track Angle"
+                                "dbcontent_name": "CAT001",
+                                "variable_name": "Track Angle"
                             }
                         },
-                        "DBOVariableDefinitionCAT021Track Angle0": {
+                        "VariableDefinitionCAT021Track Angle0": {
                             "parameters": {
-                                "dbo_name": "CAT021",
-                                "dbo_variable_name": "Track Angle"
+                                "dbcontent_name": "CAT021",
+                                "variable_name": "Track Angle"
                             }
                         },
-                        "DBOVariableDefinitionCAT048Track Angle0": {
+                        "VariableDefinitionCAT048Track Angle0": {
                             "parameters": {
-                                "dbo_name": "CAT048",
-                                "dbo_variable_name": "Track Angle"
+                                "dbcontent_name": "CAT048",
+                                "variable_name": "Track Angle"
                             }
                         }
                     }
                 }
             },
-            "MetaDBOVariableTrack Climbing/Descending0": {
+            "MetaVariableTrack Climbing/Descending0": {
                 "parameters": {
                     "name": "Track Climbing/Descending"
                 },
                 "sub_configs": {
-                    "DBOVariableDefinition": {
-                        "DBOVariableDefinitionCAT020Track Climbing/Descending0": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT020Track Climbing/Descending0": {
                             "parameters": {
-                                "dbo_name": "CAT020",
-                                "dbo_variable_name": "Track Climbing/Descending"
+                                "dbcontent_name": "CAT020",
+                                "variable_name": "Track Climbing/Descending"
                             }
                         },
-                        "DBOVariableDefinitionCAT048Track Climbing/Descending0": {
+                        "VariableDefinitionCAT048Track Climbing/Descending0": {
                             "parameters": {
-                                "dbo_name": "CAT048",
-                                "dbo_variable_name": "Track Climbing/Descending"
+                                "dbcontent_name": "CAT048",
+                                "variable_name": "Track Climbing/Descending"
                             }
                         }
                     }
                 }
             },
-            "MetaDBOVariableTrack Confirmed0": {
+            "MetaVariableTrack Confirmed0": {
                 "parameters": {
                     "name": "Track Confirmed"
                 },
                 "sub_configs": {
-                    "DBOVariableDefinition": {
-                        "DBOVariableDefinitionCAT001Track Confirmed0": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT001Track Confirmed0": {
                             "parameters": {
-                                "dbo_name": "CAT001",
-                                "dbo_variable_name": "Track Confirmed"
+                                "dbcontent_name": "CAT001",
+                                "variable_name": "Track Confirmed"
                             }
                         },
-                        "DBOVariableDefinitionCAT020Track Confirmed0": {
+                        "VariableDefinitionCAT020Track Confirmed0": {
                             "parameters": {
-                                "dbo_name": "CAT020",
-                                "dbo_variable_name": "Track Confirmed"
+                                "dbcontent_name": "CAT020",
+                                "variable_name": "Track Confirmed"
                             }
                         },
-                        "DBOVariableDefinitionCAT048Track Confirmed0": {
+                        "VariableDefinitionCAT048Track Confirmed0": {
                             "parameters": {
-                                "dbo_name": "CAT048",
-                                "dbo_variable_name": "Track Confirmed"
+                                "dbcontent_name": "CAT048",
+                                "variable_name": "Track Confirmed"
                             }
                         }
                     }
                 }
             },
-            "MetaDBOVariableTrack Doubtful0": {
+            "MetaVariableTrack Doubtful0": {
                 "parameters": {
                     "name": "Track Doubtful"
                 },
                 "sub_configs": {
-                    "DBOVariableDefinition": {
-                        "DBOVariableDefinitionCAT001Track Doubtful0": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT001Track Doubtful0": {
                             "parameters": {
-                                "dbo_name": "CAT001",
-                                "dbo_variable_name": "Track Doubtful"
+                                "dbcontent_name": "CAT001",
+                                "variable_name": "Track Doubtful"
                             }
                         },
-                        "DBOVariableDefinitionCAT048Track Doubtful0": {
+                        "VariableDefinitionCAT048Track Doubtful0": {
                             "parameters": {
-                                "dbo_name": "CAT048",
-                                "dbo_variable_name": "Track Doubtful"
+                                "dbcontent_name": "CAT048",
+                                "variable_name": "Track Doubtful"
                             }
                         }
                     }
                 }
             },
-            "MetaDBOVariableTrack End0": {
+            "MetaVariableTrack End0": {
                 "parameters": {
                     "name": "Track End"
                 },
                 "sub_configs": {
-                    "DBOVariableDefinition": {
-                        "DBOVariableDefinitionCAT001Track End0": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT001Track End0": {
                             "parameters": {
-                                "dbo_name": "CAT001",
-                                "dbo_variable_name": "Track End"
+                                "dbcontent_name": "CAT001",
+                                "variable_name": "Track End"
                             }
                         },
-                        "DBOVariableDefinitionCAT020Track End0": {
+                        "VariableDefinitionCAT020Track End0": {
                             "parameters": {
-                                "dbo_name": "CAT020",
-                                "dbo_variable_name": "Track End"
+                                "dbcontent_name": "CAT020",
+                                "variable_name": "Track End"
                             }
                         },
-                        "DBOVariableDefinitionCAT048Track End0": {
+                        "VariableDefinitionCAT048Track End0": {
                             "parameters": {
-                                "dbo_name": "CAT048",
-                                "dbo_variable_name": "Track End"
+                                "dbcontent_name": "CAT048",
+                                "variable_name": "Track End"
                             }
                         },
-                        "DBOVariableDefinitionCAT062Track End0": {
+                        "VariableDefinitionCAT062Track End0": {
                             "parameters": {
-                                "dbo_name": "CAT062",
-                                "dbo_variable_name": "Track End"
+                                "dbcontent_name": "CAT062",
+                                "variable_name": "Track End"
                             }
                         }
                     }
                 }
             },
-            "MetaDBOVariableTrack Ghost Target0": {
+            "MetaVariableTrack Ghost Target0": {
                 "parameters": {
                     "name": "Track Ghost Target"
                 },
                 "sub_configs": {
-                    "DBOVariableDefinition": {
-                        "DBOVariableDefinitionCAT001Track Ghost Target0": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT001Track Ghost Target0": {
                             "parameters": {
-                                "dbo_name": "CAT001",
-                                "dbo_variable_name": "Track Ghost Target"
+                                "dbcontent_name": "CAT001",
+                                "variable_name": "Track Ghost Target"
                             }
                         },
-                        "DBOVariableDefinitionCAT020Track Ghost Target0": {
+                        "VariableDefinitionCAT020Track Ghost Target0": {
                             "parameters": {
-                                "dbo_name": "CAT020",
-                                "dbo_variable_name": "Track Ghost Target"
+                                "dbcontent_name": "CAT020",
+                                "variable_name": "Track Ghost Target"
                             }
                         },
-                        "DBOVariableDefinitionCAT048Track Ghost Target0": {
+                        "VariableDefinitionCAT048Track Ghost Target0": {
                             "parameters": {
-                                "dbo_name": "CAT048",
-                                "dbo_variable_name": "Track Ghost Target"
+                                "dbcontent_name": "CAT048",
+                                "variable_name": "Track Ghost Target"
                             }
                         }
                     }
                 }
             },
-            "MetaDBOVariableTrack Groundspeed0": {
+            "MetaVariableTrack Groundspeed0": {
                 "parameters": {
                     "name": "Track Groundspeed"
                 },
                 "sub_configs": {
-                    "DBOVariableDefinition": {
-                        "DBOVariableDefinitionCAT001Track Groundspeed0": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT001Track Groundspeed0": {
                             "parameters": {
-                                "dbo_name": "CAT001",
-                                "dbo_variable_name": "Track Groundspeed"
+                                "dbcontent_name": "CAT001",
+                                "variable_name": "Track Groundspeed"
                             }
                         },
-                        "DBOVariableDefinitionCAT048Track Groundspeed0": {
+                        "VariableDefinitionCAT048Track Groundspeed0": {
                             "parameters": {
-                                "dbo_name": "CAT048",
-                                "dbo_variable_name": "Track Groundspeed"
+                                "dbcontent_name": "CAT048",
+                                "variable_name": "Track Groundspeed"
                             }
                         }
                     }
                 }
             },
-            "MetaDBOVariableTrack Horizontal Manoeuvre0": {
+            "MetaVariableTrack Horizontal Manoeuvre0": {
                 "parameters": {
                     "name": "Track Horizontal Manoeuvre"
                 },
                 "sub_configs": {
-                    "DBOVariableDefinition": {
-                        "DBOVariableDefinitionCAT001Track Horizontal Manoeuvre0": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT001Track Horizontal Manoeuvre0": {
                             "parameters": {
-                                "dbo_name": "CAT001",
-                                "dbo_variable_name": "Track Horizontal Manoeuvre"
+                                "dbcontent_name": "CAT001",
+                                "variable_name": "Track Horizontal Manoeuvre"
                             }
                         },
-                        "DBOVariableDefinitionCAT020Track Horizontal Manoeuvre0": {
+                        "VariableDefinitionCAT020Track Horizontal Manoeuvre0": {
                             "parameters": {
-                                "dbo_name": "CAT020",
-                                "dbo_variable_name": "Track Horizontal Manoeuvre"
+                                "dbcontent_name": "CAT020",
+                                "variable_name": "Track Horizontal Manoeuvre"
                             }
                         },
-                        "DBOVariableDefinitionCAT048Track Horizontal Manoeuvre0": {
+                        "VariableDefinitionCAT048Track Horizontal Manoeuvre0": {
                             "parameters": {
-                                "dbo_name": "CAT048",
-                                "dbo_variable_name": "Track Horizontal Manoeuvre"
+                                "dbcontent_name": "CAT048",
+                                "variable_name": "Track Horizontal Manoeuvre"
                             }
                         }
                     }
                 }
             },
-            "MetaDBOVariableTrack Number0": {
+            "MetaVariableTrack Number0": {
                 "parameters": {
                     "name": "Track Number"
                 },
                 "sub_configs": {
-                    "DBOVariableDefinition": {
-                        "DBOVariableDefinitionCAT001Track Number0": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT001Track Number0": {
                             "parameters": {
-                                "dbo_name": "CAT001",
-                                "dbo_variable_name": "Track Number"
+                                "dbcontent_name": "CAT001",
+                                "variable_name": "Track Number"
                             }
                         },
-                        "DBOVariableDefinitionCAT021Track Number0": {
+                        "VariableDefinitionCAT021Track Number0": {
                             "parameters": {
-                                "dbo_name": "CAT021",
-                                "dbo_variable_name": "Track Number"
+                                "dbcontent_name": "CAT021",
+                                "variable_name": "Track Number"
                             }
                         },
-                        "DBOVariableDefinitionCAT048Track Number0": {
+                        "VariableDefinitionCAT048Track Number0": {
                             "parameters": {
-                                "dbo_name": "CAT048",
-                                "dbo_variable_name": "Track Number"
+                                "dbcontent_name": "CAT048",
+                                "variable_name": "Track Number"
                             }
                         },
-                        "DBOVariableDefinitionCAT062Track Number0": {
+                        "VariableDefinitionCAT062Track Number0": {
                             "parameters": {
-                                "dbo_name": "CAT062",
-                                "dbo_variable_name": "Track Number"
+                                "dbcontent_name": "CAT062",
+                                "variable_name": "Track Number"
                             }
                         }
                     }
                 }
             },
-            "MetaDBOVariableTrack Sensor Types0": {
+            "MetaVariableTrack Sensor Types0": {
                 "parameters": {
                     "name": "Track Sensor Types"
                 },
                 "sub_configs": {
-                    "DBOVariableDefinition": {
-                        "DBOVariableDefinitionCAT001Track Sensor Types0": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT001Track Sensor Types0": {
                             "parameters": {
-                                "dbo_name": "CAT001",
-                                "dbo_variable_name": "Track Sensor Types"
+                                "dbcontent_name": "CAT001",
+                                "variable_name": "Track Sensor Types"
                             }
                         },
-                        "DBOVariableDefinitionCAT048Track Sensor Types0": {
+                        "VariableDefinitionCAT048Track Sensor Types0": {
                             "parameters": {
-                                "dbo_name": "CAT048",
-                                "dbo_variable_name": "Track Sensor Types"
+                                "dbcontent_name": "CAT048",
+                                "variable_name": "Track Sensor Types"
                             }
                         }
                     }
                 }
             },
-            "MetaDBOVariableTransponder Com. Capability0": {
+            "MetaVariableTransponder Com. Capability0": {
                 "parameters": {
                     "name": "Transponder Com. Capability"
                 },
                 "sub_configs": {
-                    "DBOVariableDefinition": {
-                        "DBOVariableDefinitionCAT020Transponder Com. Capability0": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT020Transponder Com. Capability0": {
                             "parameters": {
-                                "dbo_name": "CAT020",
-                                "dbo_variable_name": "Transponder Com. Capability"
+                                "dbcontent_name": "CAT020",
+                                "variable_name": "Transponder Com. Capability"
                             }
                         },
-                        "DBOVariableDefinitionCAT048Transponder Com. Capability0": {
+                        "VariableDefinitionCAT048Transponder Com. Capability0": {
                             "parameters": {
-                                "dbo_name": "CAT048",
-                                "dbo_variable_name": "Transponder Com. Capability"
+                                "dbcontent_name": "CAT048",
+                                "variable_name": "Transponder Com. Capability"
                             }
                         }
                     }
                 }
             },
-            "MetaDBOVariableType0": {
+            "MetaVariableType0": {
                 "parameters": {
                     "name": "Type"
                 },
                 "sub_configs": {
-                    "DBOVariableDefinition": {
-                        "DBOVariableDefinitionCAT001Type0": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT001Type0": {
                             "parameters": {
-                                "dbo_name": "CAT001",
-                                "dbo_variable_name": "Type"
+                                "dbcontent_name": "CAT001",
+                                "variable_name": "Type"
                             }
                         },
-                        "DBOVariableDefinitionCAT048Type0": {
+                        "VariableDefinitionCAT048Type0": {
                             "parameters": {
-                                "dbo_name": "CAT048",
-                                "dbo_variable_name": "Type"
+                                "dbcontent_name": "CAT048",
+                                "variable_name": "Type"
                             }
                         },
-                        "DBOVariableDefinitionCAT062Type LM0": {
+                        "VariableDefinitionCAT062Type LM0": {
                             "parameters": {
-                                "dbo_name": "CAT062",
-                                "dbo_variable_name": "Type LM"
+                                "dbcontent_name": "CAT062",
+                                "variable_name": "Type LM"
                             }
                         }
                     }
                 }
             },
-            "MetaDBOVariableX StdDev0": {
+            "MetaVariableX StdDev0": {
                 "parameters": {
                     "name": "X StdDev"
                 },
                 "sub_configs": {
-                    "DBOVariableDefinition": {
-                        "DBOVariableDefinitionCAT020X StdDev0": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT020X StdDev0": {
                             "parameters": {
-                                "dbo_name": "CAT020",
-                                "dbo_variable_name": "X StdDev"
+                                "dbcontent_name": "CAT020",
+                                "variable_name": "X StdDev"
                             }
                         },
-                        "DBOVariableDefinitionCAT062X StdDev0": {
+                        "VariableDefinitionCAT062X StdDev0": {
                             "parameters": {
-                                "dbo_name": "CAT062",
-                                "dbo_variable_name": "X StdDev"
+                                "dbcontent_name": "CAT062",
+                                "variable_name": "X StdDev"
                             }
                         }
                     }
                 }
             },
-            "MetaDBOVariableX0": {
+            "MetaVariableX0": {
                 "parameters": {
                     "name": "X"
                 },
                 "sub_configs": {
-                    "DBOVariableDefinition": {
-                        "DBOVariableDefinitionCAT001X0": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT001X0": {
                             "parameters": {
-                                "dbo_name": "CAT001",
-                                "dbo_variable_name": "X"
+                                "dbcontent_name": "CAT001",
+                                "variable_name": "X"
                             }
                         },
-                        "DBOVariableDefinitionCAT020X0": {
+                        "VariableDefinitionCAT020X0": {
                             "parameters": {
-                                "dbo_name": "CAT020",
-                                "dbo_variable_name": "X"
+                                "dbcontent_name": "CAT020",
+                                "variable_name": "X"
                             }
                         },
-                        "DBOVariableDefinitionCAT048X0": {
+                        "VariableDefinitionCAT048X0": {
                             "parameters": {
-                                "dbo_name": "CAT048",
-                                "dbo_variable_name": "X"
+                                "dbcontent_name": "CAT048",
+                                "variable_name": "X"
                             }
                         }
                     }
                 }
             },
-            "MetaDBOVariableY StdDev0": {
+            "MetaVariableY StdDev0": {
                 "parameters": {
                     "name": "Y StdDev"
                 },
                 "sub_configs": {
-                    "DBOVariableDefinition": {
-                        "DBOVariableDefinitionCAT020Y StdDev0": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT020Y StdDev0": {
                             "parameters": {
-                                "dbo_name": "CAT020",
-                                "dbo_variable_name": "Y StdDev"
+                                "dbcontent_name": "CAT020",
+                                "variable_name": "Y StdDev"
                             }
                         },
-                        "DBOVariableDefinitionCAT062Y StdDev0": {
+                        "VariableDefinitionCAT062Y StdDev0": {
                             "parameters": {
-                                "dbo_name": "CAT062",
-                                "dbo_variable_name": "Y StdDev"
+                                "dbcontent_name": "CAT062",
+                                "variable_name": "Y StdDev"
                             }
                         }
                     }
                 }
             },
-            "MetaDBOVariableY0": {
+            "MetaVariableY0": {
                 "parameters": {
                     "name": "Y"
                 },
                 "sub_configs": {
-                    "DBOVariableDefinition": {
-                        "DBOVariableDefinitionCAT001Y0": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT001Y0": {
                             "parameters": {
-                                "dbo_name": "CAT001",
-                                "dbo_variable_name": "Y"
+                                "dbcontent_name": "CAT001",
+                                "variable_name": "Y"
                             }
                         },
-                        "DBOVariableDefinitionCAT020Y0": {
+                        "VariableDefinitionCAT020Y0": {
                             "parameters": {
-                                "dbo_name": "CAT020",
-                                "dbo_variable_name": "Y"
+                                "dbcontent_name": "CAT020",
+                                "variable_name": "Y"
                             }
                         },
-                        "DBOVariableDefinitionCAT048Y0": {
+                        "VariableDefinitionCAT048Y0": {
                             "parameters": {
-                                "dbo_name": "CAT048",
-                                "dbo_variable_name": "Y"
+                                "dbcontent_name": "CAT048",
+                                "variable_name": "Y"
                             }
                         }
                     }
                 }
             },
-            "MetaDBOVariableline_id0": {
+            "MetaVariableline_id0": {
                 "parameters": {
                     "name": "Line ID"
                 },
                 "sub_configs": {
-                    "DBOVariableDefinition": {
-                        "DBOVariableDefinitionCAT001Line ID0": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT001Line ID0": {
                             "parameters": {
-                                "dbo_name": "CAT001",
-                                "dbo_variable_name": "Line ID"
+                                "dbcontent_name": "CAT001",
+                                "variable_name": "Line ID"
                             }
                         },
-                        "DBOVariableDefinitionCAT020Line ID0": {
+                        "VariableDefinitionCAT020Line ID0": {
                             "parameters": {
-                                "dbo_name": "CAT020",
-                                "dbo_variable_name": "Line ID"
+                                "dbcontent_name": "CAT020",
+                                "variable_name": "Line ID"
                             }
                         },
-                        "DBOVariableDefinitionCAT021Line ID0": {
+                        "VariableDefinitionCAT021Line ID0": {
                             "parameters": {
-                                "dbo_name": "CAT021",
-                                "dbo_variable_name": "Line ID"
+                                "dbcontent_name": "CAT021",
+                                "variable_name": "Line ID"
                             }
                         },
-                        "DBOVariableDefinitionCAT048Line ID0": {
+                        "VariableDefinitionCAT048Line ID0": {
                             "parameters": {
-                                "dbo_name": "CAT048",
-                                "dbo_variable_name": "Line ID"
+                                "dbcontent_name": "CAT048",
+                                "variable_name": "Line ID"
                             }
                         },
-                        "DBOVariableDefinitionCAT062Line ID0": {
+                        "VariableDefinitionCAT062Line ID0": {
                             "parameters": {
-                                "dbo_name": "CAT062",
-                                "dbo_variable_name": "Line ID"
+                                "dbcontent_name": "CAT062",
+                                "variable_name": "Line ID"
                             }
                         }
                     }
                 }
             },
-            "MetaDBOVariablerec_num0": {
+            "MetaVariablerec_num0": {
                 "parameters": {
                     "name": "Record Number"
                 },
                 "sub_configs": {
-                    "DBOVariableDefinition": {
-                        "DBOVariableDefinitionCAT001rec_num0": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT001rec_num0": {
                             "parameters": {
-                                "dbo_name": "CAT001",
-                                "dbo_variable_name": "Record Number"
+                                "dbcontent_name": "CAT001",
+                                "variable_name": "Record Number"
                             }
                         },
-                        "DBOVariableDefinitionCAT020rec_num0": {
+                        "VariableDefinitionCAT020rec_num0": {
                             "parameters": {
-                                "dbo_name": "CAT020",
-                                "dbo_variable_name": "Record Number"
+                                "dbcontent_name": "CAT020",
+                                "variable_name": "Record Number"
                             }
                         },
-                        "DBOVariableDefinitionCAT021rec_num0": {
+                        "VariableDefinitionCAT021rec_num0": {
                             "parameters": {
-                                "dbo_name": "CAT021",
-                                "dbo_variable_name": "Record Number"
+                                "dbcontent_name": "CAT021",
+                                "variable_name": "Record Number"
                             }
                         },
-                        "DBOVariableDefinitionCAT048rec_num0": {
+                        "VariableDefinitionCAT048rec_num0": {
                             "parameters": {
-                                "dbo_name": "CAT048",
-                                "dbo_variable_name": "Record Number"
+                                "dbcontent_name": "CAT048",
+                                "variable_name": "Record Number"
                             }
                         },
-                        "DBOVariableDefinitionCAT062rec_num0": {
+                        "VariableDefinitionCAT062rec_num0": {
                             "parameters": {
-                                "dbo_name": "CAT062",
-                                "dbo_variable_name": "Record Number"
+                                "dbcontent_name": "CAT062",
+                                "variable_name": "Record Number"
                             }
                         },
-                        "DBOVariableDefinitionRefTrajrec_num0": {
+                        "VariableDefinitionRefTrajrec_num0": {
                             "parameters": {
-                                "dbo_name": "RefTraj",
-                                "dbo_variable_name": "rec_num"
+                                "dbcontent_name": "RefTraj",
+                                "variable_name": "rec_num"
                             }
                         }
                     }

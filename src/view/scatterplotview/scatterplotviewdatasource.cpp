@@ -61,10 +61,10 @@ void ScatterPlotViewDataSource::generateSubConfigurable(const std::string& class
     logdbg << "ScatterPlotViewDataSource: generateSubConfigurable: class_id " << class_id
            << " instance_id " << instance_id;
 
-    if (class_id.compare("DBOVariableOrderedSet") == 0)
+    if (class_id.compare("VariableOrderedSet") == 0)
     {
         assert(set_ == 0);
-        set_ = new dbContent::OrderedSet(class_id, instance_id, this);
+        set_ = new dbContent::VariableOrderedSet(class_id, instance_id, this);
     }
     else
         throw std::runtime_error(
@@ -75,7 +75,7 @@ void ScatterPlotViewDataSource::checkSubConfigurables()
 {
     if (set_ == nullptr)
     {
-        generateSubConfigurable("DBOVariableOrderedSet", "DBOVariableOrderedSet0");
+        generateSubConfigurable("VariableOrderedSet", "VariableOrderedSet0");
         assert(set_);
 
         DBContentManager& obj_man = COMPASS::instance().objectManager();

@@ -352,13 +352,13 @@ void DBContentManagerWidget::addAllMetaVariablesSlot()
                         << "DBObjectManagerWidget: addAllMetaVariablesSlot: adding meta variable "
                         << var_it->name();
 
-                    std::string instance = "MetaDBOVariable" + var_it->name() + "0";
+                    std::string instance = "MetaVariable" + var_it->name() + "0";
 
                     Configuration& config =
-                        object_manager_.addNewSubConfiguration("MetaDBOVariable", instance);
+                        object_manager_.addNewSubConfiguration("MetaVariable", instance);
                     config.addParameterString("name", var_it->name());
 
-                    object_manager_.generateSubConfigurable("MetaDBOVariable", instance);
+                    object_manager_.generateSubConfigurable("MetaVariable", instance);
                 }
 
                 assert(object_manager_.existsMetaVariable(var_it->name()));

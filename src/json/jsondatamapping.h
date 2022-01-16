@@ -111,8 +111,8 @@ class JSONDataMapping : public Configurable
     bool active_{false};
     std::string json_key_;
 
-    std::string db_object_name_;
-    std::string dbovariable_name_;
+    std::string db_content_name_;
+    std::string dbcontent_variable_name_;
     dbContent::Variable* variable_{nullptr};
 
     bool mandatory_{false};

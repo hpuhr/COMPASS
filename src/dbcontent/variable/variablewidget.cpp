@@ -158,7 +158,7 @@ void VariableWidget::update()
 
 void VariableWidget::editNameSlot()
 {
-    logdbg << "DBOVariableWidget: editName";
+    logdbg << "VariableWidget: editName";
     assert(name_edit_);
 
     std::string text = name_edit_->text().toStdString();
@@ -168,7 +168,7 @@ void VariableWidget::editNameSlot()
 }
 void VariableWidget::editDescriptionSlot()
 {
-    logdbg << "DBOVariableWidget: editDescriptionSlot";
+    logdbg << "VariableWidget: editDescriptionSlot";
     assert(description_edit_);
 
     std::string text = description_edit_->text().toStdString();
@@ -177,9 +177,9 @@ void VariableWidget::editDescriptionSlot()
     emit dboVariableChangedSignal();
 }
 
-//void DBOVariableWidget::editDataTypeSlot()
+//void VariableWidget::editDataTypeSlot()
 //{
-//    logdbg << "DBOVariableWidget: editDataTypeSlot";
+//    logdbg << "VariableWidget: editDataTypeSlot";
 //    assert(type_combo_);
 //    variable_->dataType(type_combo_->getType());
 //    emit dboVariableChangedSignal();

@@ -89,13 +89,13 @@ const std::vector<std::string> DBContentManager::data_source_types_ {"Radar", "M
 
 DBContentManager::DBContentManager(const std::string& class_id, const std::string& instance_id,
                                  COMPASS* compass)
-    : Configurable(class_id, instance_id, compass, "db_object.json"), compass_(*compass)
+    : Configurable(class_id, instance_id, compass, "db_content_manager.json"), compass_(*compass)
 {
-    logdbg << "DBObjectManager: constructor: creating subconfigurables";
+    logdbg << "DBContentManager: constructor: creating subconfigurables";
 
     registerParameter("use_order", &use_order_, false);
     registerParameter("use_order_ascending", &use_order_ascending_, false);
-    registerParameter("order_variable_dbo_name", &order_variable_dbo_name_, "");
+    registerParameter("order_variable_dbcontent_name", &order_variable_dbcontent_name_, "");
     registerParameter("order_variable_name", &order_variable_name_, "");
 
     registerParameter("use_limit", &use_limit_, false);
@@ -129,36 +129,36 @@ DBContentManager::~DBContentManager()
 void DBContentManager::generateSubConfigurable(const std::string& class_id,
                                               const std::string& instance_id)
 {
-    logdbg << "DBObjectManager: generateSubConfigurable: class_id " << class_id << " instance_id "
+    logdbg << "DBContentManager: generateSubConfigurable: class_id " << class_id << " instance_id "
            << instance_id;
     if (class_id.compare("DBObject") == 0)
     {
         DBContent* object = new DBContent(compass_, class_id, instance_id, this);
-        loginf << "DBObjectManager: generateSubConfigurable: adding object type " << object->name();
+        loginf << "DBContentManager: generateSubConfigurable: adding object type " << object->name();
         assert(!objects_.count(object->name()));
         objects_[object->name()] = object;
     }
-    else if (class_id.compare("MetaDBOVariable") == 0)
+    else if (class_id.compare("MetaVariable") == 0)
     {
         MetaVariable* meta_var = new MetaVariable(class_id, instance_id, this);
-        logdbg << "DBObjectManager: generateSubConfigurable: adding meta var type "
+        logdbg << "DBContentManager: generateSubConfigurable: adding meta var type "
                << meta_var->name();
 
         assert(!existsMetaVariable(meta_var->name()));
         meta_variables_.emplace_back(meta_var);
     }
-    else if (class_id.compare("DBContentConfigurationDataSource") == 0)
+    else if (class_id.compare("ConfigurationDataSource") == 0)
     {
         unique_ptr<dbContent::ConfigurationDataSource> ds {
             new dbContent::ConfigurationDataSource(class_id, instance_id, *this)};
-        loginf << "DBObjectManager: generateSubConfigurable: adding config ds "
+        loginf << "DBContentManager: generateSubConfigurable: adding config ds "
                << ds->name() << " sac/sic " <<  ds->sac() << "/" << ds->sic();
 
         assert (!hasConfigDataSource(Number::dsIdFrom(ds->sac(), ds->sic())));
         config_data_sources_.emplace_back(move(ds));
     }
     else
-        throw std::runtime_error("DBObjectManager: generateSubConfigurable: unknown class_id " +
+        throw std::runtime_error("DBContentManager: generateSubConfigurable: unknown class_id " +
                                  class_id);
 }
 
@@ -169,14 +169,14 @@ void DBContentManager::checkSubConfigurables()
 
 bool DBContentManager::existsObject(const std::string& dbo_name)
 {
-    logdbg << "DBObjectManager: existsObject: '" << dbo_name << "'";
+    logdbg << "DBContentManager: existsObject: '" << dbo_name << "'";
 
     return (objects_.find(dbo_name) != objects_.end());
 }
 
 DBContent& DBContentManager::object(const std::string& dbo_name)
 {
-    logdbg << "DBObjectManager: object: name " << dbo_name;
+    logdbg << "DBContentManager: object: name " << dbo_name;
 
     assert(objects_.find(dbo_name) != objects_.end());
 
@@ -185,7 +185,7 @@ DBContent& DBContentManager::object(const std::string& dbo_name)
 
 void DBContentManager::deleteObject(const std::string& dbo_name)
 {
-    logdbg << "DBObjectManager: deleteObject: name " << dbo_name;
+    logdbg << "DBContentManager: deleteObject: name " << dbo_name;
     assert(existsObject(dbo_name));
     delete objects_.at(dbo_name);
     objects_.erase(dbo_name);
@@ -211,7 +211,7 @@ bool DBContentManager::existsMetaVariable(const std::string& var_name)
 
 MetaVariable& DBContentManager::metaVariable(const std::string& var_name)
 {
-    logdbg << "DBObjectManager: metaVariable: name " << var_name;
+    logdbg << "DBContentManager: metaVariable: name " << var_name;
 
     assert(existsMetaVariable(var_name));
 
@@ -237,7 +237,7 @@ void DBContentManager::renameMetaVariable(const std::string& old_var_name, const
 
 void DBContentManager::deleteMetaVariable(const std::string& var_name)
 {
-    logdbg << "DBObjectManager: deleteMetaVariable: name " << var_name;
+    logdbg << "DBContentManager: deleteMetaVariable: name " << var_name;
     assert(existsMetaVariable(var_name));
 
     auto it = std::find_if(meta_variables_.begin(), meta_variables_.end(),
@@ -294,7 +294,7 @@ unsigned int DBContentManager::limitMin() const { return limit_min_; }
 void DBContentManager::limitMin(unsigned int limit_min)
 {
     limit_min_ = limit_min;
-    loginf << "DBObjectManager: limitMin: " << limit_min_;
+    loginf << "DBContentManager: limitMin: " << limit_min_;
 }
 
 unsigned int DBContentManager::limitMax() const { return limit_max_; }
@@ -302,7 +302,7 @@ unsigned int DBContentManager::limitMax() const { return limit_max_; }
 void DBContentManager::limitMax(unsigned int limit_max)
 {
     limit_max_ = limit_max;
-    loginf << "DBObjectManager: limitMax: " << limit_max_;
+    loginf << "DBContentManager: limitMax: " << limit_max_;
 }
 
 bool DBContentManager::useOrder() const { return use_order_; }
@@ -318,8 +318,8 @@ void DBContentManager::useOrderAscending(bool use_order_ascending)
 
 bool DBContentManager::hasOrderVariable()
 {
-    if (existsObject(order_variable_dbo_name_))
-        if (object(order_variable_dbo_name_).hasVariable(order_variable_name_))
+    if (existsObject(order_variable_dbcontent_name_))
+        if (object(order_variable_dbcontent_name_).hasVariable(order_variable_name_))
             return true;
     return false;
 }
@@ -327,18 +327,18 @@ bool DBContentManager::hasOrderVariable()
 Variable& DBContentManager::orderVariable()
 {
     assert(hasOrderVariable());
-    return object(order_variable_dbo_name_).variable(order_variable_name_);
+    return object(order_variable_dbcontent_name_).variable(order_variable_name_);
 }
 
 void DBContentManager::orderVariable(Variable& variable)
 {
-    order_variable_dbo_name_ = variable.dboName();
+    order_variable_dbcontent_name_ = variable.dboName();
     order_variable_name_ = variable.name();
 }
 
 bool DBContentManager::hasOrderMetaVariable()
 {
-    if (order_variable_dbo_name_ == META_OBJECT_NAME)
+    if (order_variable_dbcontent_name_ == META_OBJECT_NAME)
         return existsMetaVariable(order_variable_name_);
 
     return false;
@@ -352,13 +352,13 @@ MetaVariable& DBContentManager::orderMetaVariable()
 
 void DBContentManager::orderMetaVariable(MetaVariable& variable)
 {
-    order_variable_dbo_name_ = META_OBJECT_NAME;
+    order_variable_dbcontent_name_ = META_OBJECT_NAME;
     order_variable_name_ = variable.name();
 }
 
 void DBContentManager::clearOrderVariable()
 {
-    order_variable_dbo_name_ = "";
+    order_variable_dbcontent_name_ = "";
     order_variable_name_ = "";
 }
 
@@ -404,7 +404,7 @@ std::vector<unsigned int> DBContentManager::unfilteredDS (const std::string& dbo
 
 void DBContentManager::load()
 {
-    logdbg << "DBObjectManager: loadSlot";
+    logdbg << "DBContentManager: loadSlot";
 
     data_.clear();
 
@@ -412,26 +412,26 @@ void DBContentManager::load()
 
     bool load_job_created = false;
 
-    loginf << "DBObjectManager: loadSlot: loading associations";
+    loginf << "DBContentManager: loadSlot: loading associations";
 
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
     while (JobManager::instance().hasDBJobs())
     {
-        logdbg << "DBObjectManager: loadSlot: waiting on association loading";
+        logdbg << "DBContentManager: loadSlot: waiting on association loading";
 
         QCoreApplication::processEvents();
         QThread::msleep(5);
     }
 
-    loginf << "DBObjectManager: loadSlot: starting loading";
+    loginf << "DBContentManager: loadSlot: starting loading";
 
     EvaluationManager& eval_man = COMPASS::instance().evaluationManager();
     ViewManager& view_man = COMPASS::instance().viewManager();
 
     for (auto& object : objects_)
     {
-        loginf << "DBObjectManager: loadSlot: object " << object.first
+        loginf << "DBContentManager: loadSlot: object " << object.first
                << " loadable " << object.second->loadable()
                << " loading wanted " << loadingWanted(object.first);
 
@@ -440,7 +440,7 @@ void DBContentManager::load()
 
         if (object.second->loadable() && loadingWanted(object.first))
         {
-            loginf << "DBObjectManager: loadSlot: loading object " << object.first;
+            loginf << "DBContentManager: loadSlot: loading object " << object.first;
             VariableSet read_set = view_man.getReadSet(object.first); // TODO add required vars for processing
 
             if (eval_man.needsAdditionalVariables())
@@ -448,7 +448,7 @@ void DBContentManager::load()
 
             if (read_set.getSize() == 0)
             {
-                logwrn << "DBObjectManager: loadSlot: skipping loading of object " << object.first
+                logwrn << "DBContentManager: loadSlot: skipping loading of object " << object.first
                        << " since an empty read list was detected";
                 continue;
             }
@@ -457,7 +457,7 @@ void DBContentManager::load()
             if (use_limit_)
             {
                 limit_str = std::to_string(limit_min_) + "," + std::to_string(limit_max_);
-                logdbg << "DBObjectManager: loadSlot: use limit str " << limit_str;
+                logdbg << "DBContentManager: loadSlot: use limit str " << limit_str;
             }
 
             Variable* variable = nullptr;
@@ -486,7 +486,7 @@ void DBContentManager::load()
 
 void DBContentManager::addLoadedData(std::map<std::string, std::shared_ptr<Buffer>> data)
 {
-    loginf << "DBObjectManager: addLoadedData";
+    loginf << "DBContentManager: addLoadedData";
 
     // newest data batch has been finalized, ready to be added
 
@@ -498,25 +498,25 @@ void DBContentManager::addLoadedData(std::map<std::string, std::shared_ptr<Buffe
     {
         if (!buf_it.second->size())
         {
-            logerr << "DBObjectManager: addLoadedData: buffer dbo " << buf_it.first << " with 0 size";
+            logerr << "DBContentManager: addLoadedData: buffer dbo " << buf_it.first << " with 0 size";
             continue;
         }
 
         if (data_.count(buf_it.first))
         {
-            loginf << "DBObjectManager: addLoadedData: adding buffer dbo " << buf_it.first
+            loginf << "DBContentManager: addLoadedData: adding buffer dbo " << buf_it.first
                    << " adding size " << buf_it.second->size() << " current size " << data_.at(buf_it.first)->size();
 
             data_.at(buf_it.first)->seizeBuffer(*buf_it.second.get());
 
-            loginf << "DBObjectManager: addLoadedData: new buffer dbo " << buf_it.first
+            loginf << "DBContentManager: addLoadedData: new buffer dbo " << buf_it.first
                    << " size " << data_.at(buf_it.first)->size();
         }
         else
         {
             data_[buf_it.first] = move(buf_it.second);
 
-            loginf << "DBObjectManager: addLoadedData: created buffer dbo " << buf_it.first
+            loginf << "DBContentManager: addLoadedData: created buffer dbo " << buf_it.first
                    << " size " << data_.at(buf_it.first)->size();
         }
 
@@ -529,7 +529,7 @@ void DBContentManager::addLoadedData(std::map<std::string, std::shared_ptr<Buffe
 
 void DBContentManager::quitLoading()
 {
-    loginf << "DBObjectManager: quitLoading";
+    loginf << "DBContentManager: quitLoading";
 
     for (auto& object : objects_)
         object.second->quitLoading();
@@ -539,7 +539,7 @@ void DBContentManager::quitLoading()
 
 void DBContentManager::databaseOpenedSlot()
 {
-    loginf << "DBObjectManager: databaseOpenedSlot";
+    loginf << "DBContentManager: databaseOpenedSlot";
 
     loadDBDataSources();
     loadMaxRecordNumber();
@@ -565,15 +565,15 @@ void DBContentManager::databaseClosedSlot()
         load_widget_->update();
 }
 
-//void DBObjectManager::databaseContentChangedSlot()
+//void DBContentManager::databaseContentChangedSlot()
 //{
-//    loginf << "DBObjectManager: databaseContentChangedSlot";
+//    loginf << "DBContentManager: databaseContentChangedSlot";
 
 //    // emit databaseContentChangedSignal();
 
 //    //    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
-//    //    loginf << "DBObjectManager: databaseContentChangedSlot";
+//    //    loginf << "DBContentManager: databaseContentChangedSlot";
 
 //    //    if (COMPASS::instance().interface().hasProperty("associations_generated"))
 //    //    {
@@ -612,7 +612,7 @@ void DBContentManager::loadingDone(DBContent& object)
     {
         if (object_it.second->isLoading())
         {
-            logdbg << "DBObjectManager: loadingDoneSlot: " << object_it.first << " still loading";
+            logdbg << "DBContentManager: loadingDoneSlot: " << object_it.first << " still loading";
             done = false;
             break;
         }
@@ -621,7 +621,7 @@ void DBContentManager::loadingDone(DBContent& object)
     if (done)
         finishLoading();
     else
-        logdbg << "DBObjectManager: loadingDoneSlot: not done";
+        logdbg << "DBContentManager: loadingDoneSlot: not done";
 }
 
 void DBContentManager::metaDialogOKSlot()
@@ -632,7 +632,7 @@ void DBContentManager::metaDialogOKSlot()
 
 void DBContentManager::finishLoading()
 {
-    loginf << "DBObjectManager: finishLoading: all done";
+    loginf << "DBContentManager: finishLoading: all done";
     load_in_progress_ = false;
 
     COMPASS::instance().viewManager().doViewPointAfterLoad();
@@ -713,13 +713,13 @@ bool DBContentManager::hasDataSource(unsigned int ds_id)
 
 void DBContentManager::addNewDataSource (unsigned int ds_id)
 {
-    loginf << "DBObjectManager: addNewDataSource: ds_id " << ds_id;
+    loginf << "DBContentManager: addNewDataSource: ds_id " << ds_id;
 
     assert (!hasDataSource(ds_id));
 
     if (hasConfigDataSource(ds_id))
     {
-        loginf << "DBObjectManager: addNewDataSource: ds_id " << ds_id << " from config";
+        loginf << "DBContentManager: addNewDataSource: ds_id " << ds_id << " from config";
 
         dbContent::ConfigurationDataSource& cfg_ds = configDataSource(ds_id);
 
@@ -728,7 +728,7 @@ void DBContentManager::addNewDataSource (unsigned int ds_id)
     }
     else
     {
-        loginf << "DBObjectManager: addNewDataSource: ds_id " << ds_id << " create new";
+        loginf << "DBContentManager: addNewDataSource: ds_id " << ds_id << " create new";
 
         dbContent::DBDataSource* new_ds = new dbContent::DBDataSource();
         new_ds->id(ds_id);
@@ -742,7 +742,7 @@ void DBContentManager::addNewDataSource (unsigned int ds_id)
 
     assert (hasDataSource(ds_id));
 
-    loginf << "DBObjectManager: addNewDataSource: ds_id " << ds_id << " done";
+    loginf << "DBContentManager: addNewDataSource: ds_id " << ds_id << " done";
 }
 
 dbContent::DBDataSource& DBContentManager::dataSource(unsigned int ds_id)
@@ -829,7 +829,7 @@ bool DBContentManager::loadInProgress() const
 
 void DBContentManager::insertData(std::map<std::string, std::shared_ptr<Buffer>> data)
 {
-    loginf << "DBObjectManager: insertData";
+    loginf << "DBContentManager: insertData";
 
     assert (!load_in_progress_);
     assert (!insert_in_progress_);
@@ -854,7 +854,7 @@ void DBContentManager::insertDone(DBContent& object)
     {
         if (object_it.second->isInserting())
         {
-            logdbg << "DBObjectManager: insertDone: " << object_it.first << " still inserting";
+            logdbg << "DBContentManager: insertDone: " << object_it.first << " still inserting";
             done = false;
             break;
         }
@@ -863,12 +863,12 @@ void DBContentManager::insertDone(DBContent& object)
     if (done)
         finishInserting();
     else
-        logdbg << "DBObjectManager: insertDone: not done";
+        logdbg << "DBContentManager: insertDone: not done";
 }
 
 void DBContentManager::finishInserting()
 {
-    loginf << "DBObjectManager: finishInserting: all done";
+    loginf << "DBContentManager: finishInserting: all done";
 
     insert_in_progress_ = false;
 
@@ -886,7 +886,7 @@ void DBContentManager::finishInserting()
         cutCachedData();
         filterDataSources();
 
-        logdbg << "DBObjectManager: finishInserting: distributing data";
+        logdbg << "DBContentManager: finishInserting: distributing data";
 
         if (data_.size())
             emit loadedDataSignal(data_, true);
@@ -898,13 +898,13 @@ void DBContentManager::finishInserting()
         load_widget_->update();
 
     boost::posix_time::time_duration time_diff = boost::posix_time::microsec_clock::local_time() - start_time;
-    loginf << "DBObjectManager: finishInserting: processing took "
+    loginf << "DBContentManager: finishInserting: processing took "
         << String::timeStringFromDouble(time_diff.total_milliseconds() / 1000.0, true);
 }
 
 void DBContentManager::addInsertedDataToChache()
 {
-    loginf << "DBObjectManager: addInsertedDataToChache";
+    loginf << "DBContentManager: addInsertedDataToChache";
 
     for (auto& buf_it : insert_data_)
     {
@@ -921,7 +921,7 @@ void DBContentManager::addInsertedDataToChache()
 
         for (auto& prop_it : buffer_properties_to_be_removed)
         {
-            logdbg << "DBObjectManager: addInsertedDataToChache: deleting property " << prop_it.name();
+            logdbg << "DBContentManager: addInsertedDataToChache: deleting property " << prop_it.name();
             buf_it.second->deleteProperty(prop_it);
         }
 
@@ -991,7 +991,7 @@ void DBContentManager::filterDataSources()
                 indexes_to_remove.push_back(index);
         }
 
-        loginf << "DBObjectManager: filterDataSources: in " << buf_it.first << " remove "
+        loginf << "DBContentManager: filterDataSources: in " << buf_it.first << " remove "
                << indexes_to_remove.size() << " of " << buffer_size;
 
         buf_it.second->removeIndexes(indexes_to_remove);
@@ -1016,7 +1016,7 @@ void DBContentManager::cutCachedData()
 
     float time_offset = COMPASS::instance().mainWindow().importASTERIXFromNetworkTimeOffset();
 
-    loginf << "DBObjectManager: cutCachedData: max_time " << String::timeStringFromDouble(max_time)
+    loginf << "DBContentManager: cutCachedData: max_time " << String::timeStringFromDouble(max_time)
            << " time offset " << String::timeStringFromDouble(time_offset);
 
     max_time += time_offset;
@@ -1049,17 +1049,17 @@ void DBContentManager::cutCachedData()
             }
         }
         else
-            logwrn << "DBObjectManager: cutCachedData: buffer " << buf_it.first << " has not tod for min/max";
+            logwrn << "DBContentManager: cutCachedData: buffer " << buf_it.first << " has not tod for min/max";
     }
 
     if (max_time_set)
-        loginf << "DBObjectManager: cutCachedData: data time min " << String::timeStringFromDouble(min_tod_found)
+        loginf << "DBContentManager: cutCachedData: data time min " << String::timeStringFromDouble(min_tod_found)
                << " max " << String::timeStringFromDouble(max_tod_found);
 
     float min_tod = max_time - 300.0; // max - 5min
     assert (min_tod > 0); // does not work for midnight crossings
 
-    loginf << "DBObjectManager: cutCachedData: min_tod " << String::timeStringFromDouble(min_tod)
+    loginf << "DBContentManager: cutCachedData: min_tod " << String::timeStringFromDouble(min_tod)
               //<< " data min " << String::timeStringFromDouble(min_tod_found)
            << " data max " << String::timeStringFromDouble(max_time);
     //<< " utc " << String::timeStringFromDouble(secondsSinceMidnighUTC());
@@ -1084,7 +1084,7 @@ void DBContentManager::cutCachedData()
             {
                 if (!tod_vec.isNull(index) && tod_vec.get(index) > min_tod)
                 {
-                    logdbg << "DBObjectManager: cutCachedData: found " << buf_it.first
+                    logdbg << "DBContentManager: cutCachedData: found " << buf_it.first
                            << " cutoff tod index " << index
                            << " tod " << String::timeStringFromDouble(tod_vec.get(index));
                     break;
@@ -1095,7 +1095,7 @@ void DBContentManager::cutCachedData()
             {
                 index--; // cut at previous
 
-                loginf << "DBObjectManager: cutCachedData: cutting " << buf_it.first
+                loginf << "DBContentManager: cutCachedData: cutting " << buf_it.first
                        << " up to index " << index
                        << " total size " << buffer_size;
                 assert (index < buffer_size);
@@ -1103,7 +1103,7 @@ void DBContentManager::cutCachedData()
             }
         }
         else
-            logwrn << "DBObjectManager: cutCachedData: buffer " << buf_it.first << " has not tod for cutoff";
+            logwrn << "DBContentManager: cutCachedData: buffer " << buf_it.first << " has not tod for cutoff";
     }
 
     // remove empty buffers
@@ -1123,7 +1123,7 @@ unsigned int DBContentManager::maxRecordNumber() const
 
 void DBContentManager::maxRecordNumber(unsigned int value)
 {
-    logdbg << "DBObjectManager: maxRecordNumber: " << value;
+    logdbg << "DBContentManager: maxRecordNumber: " << value;
 
     max_rec_num_ = value;
     has_max_rec_num_ = true;
@@ -1136,7 +1136,7 @@ const std::map<std::string, std::shared_ptr<Buffer>>& DBContentManager::data() c
 
 void DBContentManager::dsTypeLoadingWanted (const std::string& ds_type, bool wanted)
 {
-    loginf << "DBObjectManager: dsTypeLoadingWanted: ds_type " << ds_type << " wanted " << wanted;
+    loginf << "DBContentManager: dsTypeLoadingWanted: ds_type " << ds_type << " wanted " << wanted;
 
     ds_type_loading_wanted_[ds_type] = wanted;
 }
@@ -1168,7 +1168,7 @@ void DBContentManager::loadMaxRecordNumber()
 
     has_max_rec_num_ = true;
 
-    loginf << "DBObjectManager: loadMaxRecordNumber: " << max_rec_num_;
+    loginf << "DBContentManager: loadMaxRecordNumber: " << max_rec_num_;
 }
 
 const std::vector<std::unique_ptr<dbContent::DBDataSource>>& DBContentManager::dataSources() const
@@ -1206,7 +1206,7 @@ std::map<unsigned int, std::vector <std::pair<std::string, unsigned int>>> DBCon
 
                 if (existing_lines.count(ip+":"+to_string(port)))
                 {
-                    logwrn << "DBObjectManager: getNetworkLines: source " << ds_it->name()
+                    logwrn << "DBContentManager: getNetworkLines: source " << ds_it->name()
                            << " line " << ip << ":" << port
                            << " already in use";
                 }

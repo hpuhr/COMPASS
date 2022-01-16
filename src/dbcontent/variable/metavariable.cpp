@@ -58,6 +58,7 @@ MetaVariable::~MetaVariable()
 
     for (auto it : definitions_)
         delete it.second;
+
     definitions_.clear();
     variables_.clear();
 }
@@ -70,7 +71,7 @@ void MetaVariable::checkSubConfigurables()
 void MetaVariable::generateSubConfigurable(const std::string& class_id,
                                               const std::string& instance_id)
 {
-    if (class_id.compare("DBOVariableDefinition") == 0)
+    if (class_id.compare("VariableDefinition") == 0)
     {
         VariableDefinition* definition = new VariableDefinition(class_id, instance_id, this);
 
@@ -82,7 +83,7 @@ void MetaVariable::generateSubConfigurable(const std::string& class_id,
 
         if (!object_manager_.existsObject(dbo_name))
         {
-            logerr << "MetaDBOVariable: generateSubConfigurable: name " << name_
+            logerr << "MetaVariable: generateSubConfigurable: name " << name_
                    << " dbovariable definition " << instance_id << " has unknown dbo, ignoring";
             // delete definition;
             return;
@@ -90,7 +91,7 @@ void MetaVariable::generateSubConfigurable(const std::string& class_id,
 
         if (!object_manager_.object(dbo_name).hasVariable(dbovar_name))
         {
-            logerr << "MetaDBOVariable: generateSubConfigurable: name " << name_
+            logerr << "MetaVariable: generateSubConfigurable: name " << name_
                    << " dbovariable definition " << instance_id << " has unknown dbo variable, ignoring";
             // delete definition;
             return;
@@ -98,7 +99,7 @@ void MetaVariable::generateSubConfigurable(const std::string& class_id,
 
         if (variables_.find(dbo_name) != variables_.end())
         {
-            logerr << "MetaDBOVariable: generateSubConfigurable: name " << name_
+            logerr << "MetaVariable: generateSubConfigurable: name " << name_
                    << " dbovariable definition " << instance_id << " has already defined dbo, ignoring";
             // delete definition;
             return;
@@ -113,7 +114,7 @@ void MetaVariable::generateSubConfigurable(const std::string& class_id,
             dbo_name, object_manager_.object(dbo_name).variable(dbovar_name)));
     }
     else
-        throw std::runtime_error("DBOVariable: generateSubConfigurable: unknown class_id " +
+        throw std::runtime_error("MetaVariable: generateSubConfigurable: unknown class_id " +
                                  class_id);
 }
 
@@ -138,7 +139,7 @@ void MetaVariable::set(Variable& var)
 {
     string dbo_name = var.dbObject().name();
 
-    loginf << "MetaDBOVariable " << name_ << ": set: dbo " << dbo_name << " name " << var.name();
+    loginf << "MetaVariable " << name_ << ": set: dbo " << dbo_name << " name " << var.name();
 
     if (existsIn(dbo_name))
         removeVariable(dbo_name);
@@ -148,7 +149,7 @@ void MetaVariable::set(Variable& var)
 
 void MetaVariable::removeVariable(const std::string& dbo_name)
 {
-    loginf << "MetaDBOVariable " << name_ << ": removeVariable: dbo " << dbo_name;
+    loginf << "MetaVariable " << name_ << ": removeVariable: dbo " << dbo_name;
     assert(existsIn(dbo_name));
     delete definitions_.at(dbo_name);
     definitions_.erase(dbo_name);
@@ -159,17 +160,17 @@ void MetaVariable::removeVariable(const std::string& dbo_name)
 
 void MetaVariable::addVariable(const std::string& dbo_name, const std::string& dbovariable_name)
 {
-    loginf << "MetaDBOVariable " << name_ << ": addVariable: dbo " << dbo_name << " varname "
+    loginf << "MetaVariable " << name_ << ": addVariable: dbo " << dbo_name << " varname "
            << dbovariable_name;
 
     assert(!existsIn(dbo_name));
 
-    std::string instance_id = "DBOVariableDefinition" + dbo_name + dbovariable_name + "0";
+    std::string instance_id = "VariableDefinition" + dbo_name + dbovariable_name + "0";
 
-    Configuration& config = addNewSubConfiguration("DBOVariableDefinition", instance_id);
-    config.addParameterString("dbo_name", dbo_name);
-    config.addParameterString("dbo_variable_name", dbovariable_name);
-    generateSubConfigurable("DBOVariableDefinition", instance_id);
+    Configuration& config = addNewSubConfiguration("VariableDefinition", instance_id);
+    config.addParameterString("dbcontent_name", dbo_name);
+    config.addParameterString("variable_name", dbovariable_name);
+    generateSubConfigurable("VariableDefinition", instance_id);
 
     updateDescription();
 }
@@ -233,7 +234,7 @@ PropertyDataType MetaVariable::dataType() const
     for (auto variable_it : variables_)
     {
         if (variable_it.second.dataType() != data_type)
-            logerr << "MetaDBOVariable: dataType: meta var " << name_
+            logerr << "MetaVariable: dataType: meta var " << name_
                    << " has different data types in sub variables";
     }
 
@@ -255,14 +256,14 @@ Variable::Representation MetaVariable::representation()
     for (auto variable_it : variables_)
     {
         if (variable_it.second.representation() != representation)
-            logerr << "MetaDBOVariable: dataType: meta var " << name_
+            logerr << "MetaVariable: dataType: meta var " << name_
                    << " has different representations in sub variables";
     }
 
     return representation;
 }
 
-//std::string MetaDBOVariable::getMinString() const
+//std::string MetaVariable::getMinString() const
 //{
 //    std::string value_string;
 
@@ -278,7 +279,7 @@ Variable::Representation MetaVariable::representation()
 //    return value_string;
 //}
 
-//std::string MetaDBOVariable::getMaxString() const
+//std::string MetaVariable::getMaxString() const
 //{
 //    std::string value_string;
 
@@ -294,13 +295,13 @@ Variable::Representation MetaVariable::representation()
 //    return value_string;
 //}
 
-//std::string MetaDBOVariable::getMinStringRepresentation() const
+//std::string MetaVariable::getMinStringRepresentation() const
 //{
 //    assert(variables_.size());
 //    return variables_.begin()->second.getRepresentationStringFromValue(getMinString());
 //}
 
-//std::string MetaDBOVariable::getMaxStringRepresentation() const
+//std::string MetaVariable::getMaxStringRepresentation() const
 //{
 //    assert(variables_.size());
 //    return variables_.begin()->second.getRepresentationStringFromValue(getMaxString());
@@ -308,7 +309,7 @@ Variable::Representation MetaVariable::representation()
 
 void MetaVariable::removeOutdatedVariables()
 {
-    loginf << "MetaDBOVariable " << name() << ": removeOutdatedVariables";
+    loginf << "MetaVariable " << name() << ": removeOutdatedVariables";
 
     bool delete_var;
 
@@ -326,7 +327,7 @@ void MetaVariable::removeOutdatedVariables()
 
         if (delete_var)
         {
-            loginf << "MetaDBOVariable: removeOutdatedVariables: removing var " << var_it->first;
+            loginf << "MetaVariable: removeOutdatedVariables: removing var " << var_it->first;
             assert(variables_.count(var_it->first));
             variables_.erase(var_it->first);
 

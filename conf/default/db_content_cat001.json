@@ -1,16 +1,358 @@
 {
     "parameters": {
         "db_table_name": "data_cat001",
+        "ds_type": "Radar",
         "info": "",
         "name": "CAT001"
     },
     "sub_configs": {
         "DBOLabelDefinition": {
             "DBOLabelDefinition0": {
+                "parameters": null,
+                "sub_configs": {
+                    "LabelEntry": {
+                        "LabelEntryARTAS Hash0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "ARTAS Hash"
+                            }
+                        },
+                        "LabelEntryAntenna0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Antenna"
+                            }
+                        },
+                        "LabelEntryAzimuth0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Azimuth"
+                            }
+                        },
+                        "LabelEntryDS ID0": {
+                            "parameters": {
+                                "prefix": "S ",
+                                "show": true,
+                                "suffix": "",
+                                "variable_name": "DS ID"
+                            }
+                        },
+                        "LabelEntryDS1/DS20": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "DS1/DS2"
+                            }
+                        },
+                        "LabelEntryFFT0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "FFT"
+                            }
+                        },
+                        "LabelEntryLatitude0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Latitude"
+                            }
+                        },
+                        "LabelEntryLine ID0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Line ID"
+                            }
+                        },
+                        "LabelEntryLongitude0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Longitude"
+                            }
+                        },
+                        "LabelEntryMilitary Emergency0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Military Emergency"
+                            }
+                        },
+                        "LabelEntryMilitary Identification0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Military Identification"
+                            }
+                        },
+                        "LabelEntryMode 3/A Code0": {
+                            "parameters": {
+                                "prefix": "A ",
+                                "show": true,
+                                "suffix": "",
+                                "variable_name": "Mode 3/A Code"
+                            }
+                        },
+                        "LabelEntryMode 3/A Garbled0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Mode 3/A Garbled"
+                            }
+                        },
+                        "LabelEntryMode 3/A Smoothed0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Mode 3/A Smoothed"
+                            }
+                        },
+                        "LabelEntryMode 3/A Valid0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Mode 3/A Valid"
+                            }
+                        },
+                        "LabelEntryMode C Code0": {
+                            "parameters": {
+                                "prefix": "C ",
+                                "show": true,
+                                "suffix": "",
+                                "variable_name": "Mode C Code"
+                            }
+                        },
+                        "LabelEntryMode C Garbled0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Mode C Garbled"
+                            }
+                        },
+                        "LabelEntryMode C Valid0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Mode C Valid"
+                            }
+                        },
+                        "LabelEntryRDP Chain0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "RDP Chain"
+                            }
+                        },
+                        "LabelEntryRange0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Range"
+                            }
+                        },
+                        "LabelEntryReceived Power0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Received Power"
+                            }
+                        },
+                        "LabelEntryRecord Number0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Record Number"
+                            }
+                        },
+                        "LabelEntrySAC0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "SAC"
+                            }
+                        },
+                        "LabelEntrySIC0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "SIC"
+                            }
+                        },
+                        "LabelEntrySPI0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "SPI"
+                            }
+                        },
+                        "LabelEntrySimulated0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Simulated"
+                            }
+                        },
+                        "LabelEntryTest0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Test"
+                            }
+                        },
+                        "LabelEntryTime of Day0": {
+                            "parameters": {
+                                "prefix": "T ",
+                                "show": true,
+                                "suffix": "",
+                                "variable_name": "Time of Day"
+                            }
+                        },
+                        "LabelEntryTrack Angle0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Track Angle"
+                            }
+                        },
+                        "LabelEntryTrack Confirmed0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Track Confirmed"
+                            }
+                        },
+                        "LabelEntryTrack Doubtful0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Track Doubtful"
+                            }
+                        },
+                        "LabelEntryTrack End0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Track End"
+                            }
+                        },
+                        "LabelEntryTrack Ghost Target0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Track Ghost Target"
+                            }
+                        },
+                        "LabelEntryTrack Groundspeed0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Track Groundspeed"
+                            }
+                        },
+                        "LabelEntryTrack Horizontal Manoeuvre0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Track Horizontal Manoeuvre"
+                            }
+                        },
+                        "LabelEntryTrack Number0": {
+                            "parameters": {
+                                "prefix": "TN ",
+                                "show": true,
+                                "suffix": "",
+                                "variable_name": "Track Number"
+                            }
+                        },
+                        "LabelEntryTrack Sensor Types0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Track Sensor Types"
+                            }
+                        },
+                        "LabelEntryTrack0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Track"
+                            }
+                        },
+                        "LabelEntryTruncated Time of Day0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Truncated Time of Day"
+                            }
+                        },
+                        "LabelEntryType0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Type"
+                            }
+                        },
+                        "LabelEntryX0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "X"
+                            }
+                        },
+                        "LabelEntryY0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Y"
+                            }
+                        }
+                    }
+                }
             }
         },
-        "DBOVariable": {
-            "DBOVariable10": {
+        "Variable": {
+            "Variable10": {
                 "parameters": {
                     "data_type_str": "BOOL",
                     "db_column_name": "antenna",
@@ -23,7 +365,7 @@
                     "unit": ""
                 }
             },
-            "DBOVariable11": {
+            "Variable11": {
                 "parameters": {
                     "data_type_str": "UCHAR",
                     "db_column_name": "ds1_ds2",
@@ -36,7 +378,7 @@
                     "unit": ""
                 }
             },
-            "DBOVariable12": {
+            "Variable12": {
                 "parameters": {
                     "data_type_str": "INT",
                     "db_column_name": "received_power",
@@ -49,7 +391,7 @@
                     "unit": ""
                 }
             },
-            "DBOVariable13": {
+            "Variable13": {
                 "parameters": {
                     "data_type_str": "FLOAT",
                     "db_column_name": "truncated_time_of_day",
@@ -62,7 +404,7 @@
                     "unit": ""
                 }
             },
-            "DBOVariable14": {
+            "Variable14": {
                 "parameters": {
                     "data_type_str": "BOOL",
                     "db_column_name": "rdp_chain",
@@ -75,7 +417,7 @@
                     "unit": ""
                 }
             },
-            "DBOVariable15": {
+            "Variable15": {
                 "parameters": {
                     "data_type_str": "BOOL",
                     "db_column_name": "track",
@@ -88,7 +430,7 @@
                     "unit": ""
                 }
             },
-            "DBOVariable3": {
+            "Variable3": {
                 "parameters": {
                     "data_type_str": "DOUBLE",
                     "db_column_name": "x",
@@ -101,7 +443,7 @@
                     "unit": "Meter"
                 }
             },
-            "DBOVariable4": {
+            "Variable4": {
                 "parameters": {
                     "data_type_str": "DOUBLE",
                     "db_column_name": "y",
@@ -114,7 +456,7 @@
                     "unit": "Meter"
                 }
             },
-            "DBOVariable7": {
+            "Variable7": {
                 "parameters": {
                     "data_type_str": "UCHAR",
                     "db_column_name": "track_sensor_types",
@@ -127,7 +469,7 @@
                     "unit": ""
                 }
             },
-            "DBOVariableRadardetection_type0": {
+            "VariableRadardetection_type0": {
                 "parameters": {
                     "data_type_str": "UCHAR",
                     "db_column_name": "type",
@@ -141,7 +483,7 @@
                     "unit": ""
                 }
             },
-            "DBOVariableRadards_id0": {
+            "VariableRadards_id0": {
                 "parameters": {
                     "data_type_str": "UINT",
                     "db_column_name": "ds_id",
@@ -155,7 +497,7 @@
                     "unit": ""
                 }
             },
-            "DBOVariableRadarfrom_fft0": {
+            "VariableRadarfrom_fft0": {
                 "parameters": {
                     "data_type_str": "BOOL",
                     "db_column_name": "fft",
@@ -169,7 +511,7 @@
                     "unit": ""
                 }
             },
-            "DBOVariableRadarhash_code0": {
+            "VariableRadarhash_code0": {
                 "parameters": {
                     "data_type_str": "STRING",
                     "db_column_name": "artas_hash",
@@ -183,7 +525,7 @@
                     "unit": ""
                 }
             },
-            "DBOVariableRadarline_id0": {
+            "VariableRadarline_id0": {
                 "parameters": {
                     "data_type_str": "UINT",
                     "db_column_name": "line_id",
@@ -197,7 +539,7 @@
                     "unit": ""
                 }
             },
-            "DBOVariableRadarmil_emergency0": {
+            "VariableRadarmil_emergency0": {
                 "parameters": {
                     "data_type_str": "BOOL",
                     "db_column_name": "military_emergency",
@@ -211,7 +553,7 @@
                     "unit": ""
                 }
             },
-            "DBOVariableRadarmil_ident0": {
+            "VariableRadarmil_ident0": {
                 "parameters": {
                     "data_type_str": "BOOL",
                     "db_column_name": "military_identification",
@@ -225,7 +567,7 @@
                     "unit": ""
                 }
             },
-            "DBOVariableRadarmode3a_code0": {
+            "VariableRadarmode3a_code0": {
                 "parameters": {
                     "data_type_str": "UINT",
                     "db_column_name": "mode_3a_code",
@@ -239,7 +581,7 @@
                     "unit": ""
                 }
             },
-            "DBOVariableRadarmode3a_g0": {
+            "VariableRadarmode3a_g0": {
                 "parameters": {
                     "data_type_str": "BOOL",
                     "db_column_name": "mode_3a_garbled",
@@ -253,7 +595,7 @@
                     "unit": ""
                 }
             },
-            "DBOVariableRadarmode3a_smo0": {
+            "VariableRadarmode3a_smo0": {
                 "parameters": {
                     "data_type_str": "BOOL",
                     "db_column_name": "mode_3a_smoothed",
@@ -267,7 +609,7 @@
                     "unit": ""
                 }
             },
-            "DBOVariableRadarmode3a_v0": {
+            "VariableRadarmode3a_v0": {
                 "parameters": {
                     "data_type_str": "BOOL",
                     "db_column_name": "mode_3a_valid",
@@ -281,7 +623,7 @@
                     "unit": ""
                 }
             },
-            "DBOVariableRadarmodec_code_ft0": {
+            "VariableRadarmodec_code_ft0": {
                 "parameters": {
                     "data_type_str": "FLOAT",
                     "db_column_name": "mode_c_code",
@@ -295,7 +637,7 @@
                     "unit": "Feet"
                 }
             },
-            "DBOVariableRadarmodec_g0": {
+            "VariableRadarmodec_g0": {
                 "parameters": {
                     "data_type_str": "BOOL",
                     "db_column_name": "mode_c_garbled",
@@ -309,7 +651,7 @@
                     "unit": ""
                 }
             },
-            "DBOVariableRadarmodec_v0": {
+            "VariableRadarmodec_v0": {
                 "parameters": {
                     "data_type_str": "BOOL",
                     "db_column_name": "mode_c_valid",
@@ -323,7 +665,7 @@
                     "unit": ""
                 }
             },
-            "DBOVariableRadarpos_azm_deg0": {
+            "VariableRadarpos_azm_deg0": {
                 "parameters": {
                     "data_type_str": "DOUBLE",
                     "db_column_name": "azimuth",
@@ -337,7 +679,7 @@
                     "unit": "Degree"
                 }
             },
-            "DBOVariableRadarpos_lat_deg0": {
+            "VariableRadarpos_lat_deg0": {
                 "parameters": {
                     "data_type_str": "DOUBLE",
                     "db_column_name": "latitude",
@@ -351,7 +693,7 @@
                     "unit": "Degree"
                 }
             },
-            "DBOVariableRadarpos_lon_deg0": {
+            "VariableRadarpos_lon_deg0": {
                 "parameters": {
                     "data_type_str": "DOUBLE",
                     "db_column_name": "longitude",
@@ -365,7 +707,7 @@
                     "unit": "Degree"
                 }
             },
-            "DBOVariableRadarpos_range_nm0": {
+            "VariableRadarpos_range_nm0": {
                 "parameters": {
                     "data_type_str": "DOUBLE",
                     "db_column_name": "range",
@@ -379,7 +721,7 @@
                     "unit": "Nautical Mile"
                 }
             },
-            "DBOVariableRadarrec_num0": {
+            "VariableRadarrec_num0": {
                 "parameters": {
                     "data_type_str": "UINT",
                     "db_column_name": "record_number",
@@ -393,7 +735,7 @@
                     "unit": ""
                 }
             },
-            "DBOVariableRadarsac0": {
+            "VariableRadarsac0": {
                 "parameters": {
                     "data_type_str": "UCHAR",
                     "db_column_name": "sac",
@@ -407,7 +749,7 @@
                     "unit": ""
                 }
             },
-            "DBOVariableRadarsic0": {
+            "VariableRadarsic0": {
                 "parameters": {
                     "data_type_str": "UCHAR",
                     "db_column_name": "sic",
@@ -421,7 +763,7 @@
                     "unit": ""
                 }
             },
-            "DBOVariableRadarsimulated_target0": {
+            "VariableRadarsimulated_target0": {
                 "parameters": {
                     "data_type_str": "BOOL",
                     "db_column_name": "simulated",
@@ -435,7 +777,7 @@
                     "unit": ""
                 }
             },
-            "DBOVariableRadarspi0": {
+            "VariableRadarspi0": {
                 "parameters": {
                     "data_type_str": "BOOL",
                     "db_column_name": "spi",
@@ -449,7 +791,7 @@
                     "unit": ""
                 }
             },
-            "DBOVariableRadartest_target0": {
+            "VariableRadartest_target0": {
                 "parameters": {
                     "data_type_str": "BOOL",
                     "db_column_name": "test",
@@ -463,7 +805,7 @@
                     "unit": ""
                 }
             },
-            "DBOVariableRadartod0": {
+            "VariableRadartod0": {
                 "parameters": {
                     "data_type_str": "FLOAT",
                     "db_column_name": "time_of_day",
@@ -477,7 +819,7 @@
                     "unit": "Second"
                 }
             },
-            "DBOVariableRadartrack_confirmed0": {
+            "VariableRadartrack_confirmed0": {
                 "parameters": {
                     "data_type_str": "BOOL",
                     "db_column_name": "track_confirmed",
@@ -491,7 +833,7 @@
                     "unit": ""
                 }
             },
-            "DBOVariableRadartrack_doubtful0": {
+            "VariableRadartrack_doubtful0": {
                 "parameters": {
                     "data_type_str": "BOOL",
                     "db_column_name": "track_doubtful",
@@ -505,7 +847,7 @@
                     "unit": ""
                 }
             },
-            "DBOVariableRadartrack_end0": {
+            "VariableRadartrack_end0": {
                 "parameters": {
                     "data_type_str": "BOOL",
                     "db_column_name": "track_end",
@@ -519,7 +861,7 @@
                     "unit": ""
                 }
             },
-            "DBOVariableRadartrack_ghost_target0": {
+            "VariableRadartrack_ghost_target0": {
                 "parameters": {
                     "data_type_str": "BOOL",
                     "db_column_name": "track_ghost_target",
@@ -533,7 +875,7 @@
                     "unit": ""
                 }
             },
-            "DBOVariableRadartrack_groundspeed_kt0": {
+            "VariableRadartrack_groundspeed_kt0": {
                 "parameters": {
                     "data_type_str": "DOUBLE",
                     "db_column_name": "track_groundspeed",
@@ -547,7 +889,7 @@
                     "unit": "Knots"
                 }
             },
-            "DBOVariableRadartrack_heading_deg0": {
+            "VariableRadartrack_heading_deg0": {
                 "parameters": {
                     "data_type_str": "DOUBLE",
                     "db_column_name": "track_angle",
@@ -561,7 +903,7 @@
                     "unit": "Degree"
                 }
             },
-            "DBOVariableRadartrack_manoeuvre_hori0": {
+            "VariableRadartrack_manoeuvre_hori0": {
                 "parameters": {
                     "data_type_str": "BOOL",
                     "db_column_name": "track_horizontal_manoeuvre",
@@ -575,7 +917,7 @@
                     "unit": ""
                 }
             },
-            "DBOVariableRadartrack_num0": {
+            "VariableRadartrack_num0": {
                 "parameters": {
                     "data_type_str": "UINT",
                     "db_column_name": "track_number",

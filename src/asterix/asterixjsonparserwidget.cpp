@@ -140,7 +140,7 @@ void ASTERIXJSONParserWidget::keyPressEvent(QKeyEvent* event)
         ss << ";\"JSON Key\"";
         ss << ";\"JSON Comment\"";
         ss << ";\"JSON Unit\"";
-        ss << ";\"DBOVariable\"";
+        ss << ";\"DBContent Variable\"";
         ss << ";\"DBOVar SN\"";
         ss << ";\"DBOVar DataType\"";
         ss << ";\"DBOVar Comment\"";
@@ -228,9 +228,9 @@ void ASTERIXJSONParserWidget::keyPressEvent(QKeyEvent* event)
                 ss << ";"; // DBOVar Unit
                 ss << ";"; // DBOVar DBColumn
             }
-            else if (entry_type == ASTERIXJSONParser::EntryType::UnmappedDBOVariable)
+            else if (entry_type == ASTERIXJSONParser::EntryType::UnmappedDBContentVariable)
             {
-                dbovar_name = parser_.unmappedDBOVariable(model_row);
+                dbovar_name = parser_.unmappedDBContentVariable(model_row);
 
                 ss << ""; // Active
                 ss << ";"; // JSON Key

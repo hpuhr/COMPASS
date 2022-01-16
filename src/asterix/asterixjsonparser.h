@@ -34,7 +34,7 @@ private:
 
 public:
     enum EntryType {
-        ExistingMapping=0, UnmappedJSONKey, UnmappedDBOVariable
+        ExistingMapping=0, UnmappedJSONKey, UnmappedDBContentVariable
     };
 
 
@@ -95,21 +95,21 @@ public:
     unsigned int totalEntrySize () const;
     bool existsJSONKeyInCATInfo(const std::string& key);
     bool hasJSONKeyMapped (const std::string& key);
-    bool hasDBOVariableMapped (const std::string& var_name);
+    bool hasDBContentVariableMapped (const std::string& var_name);
 
     bool hasJSONKeyInMapping (const std::string& key);
     unsigned int indexOfJSONKeyInMapping (const std::string& key);
 
     //void updateToChangedIndex (unsigned int index); // to be called when existing row is changed
     void selectMapping (unsigned int index);
-    void selectUnmappedDBOVariable (const std::string& name);
+    void selectUnmappedDBContentVariable (const std::string& name);
 
     // index is not model index but directly in data_mappings_ + not_added_json_keys_ + not_added_dbo_variables_
     EntryType entryType (unsigned int index) const;
     JSONDataMapping& mapping (unsigned int index);
     const JSONDataMapping& mapping (unsigned int index) const;
     const std::string& unmappedJSONKey (unsigned int index) const;
-    const std::string& unmappedDBOVariable (unsigned int index) const;
+    const std::string& unmappedDBContentVariable (unsigned int index) const;
 
     const jASTERIX::CategoryItemInfo& categoryItemInfo() const;
 

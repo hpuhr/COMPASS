@@ -25,19 +25,14 @@
 #include "global.h"
 #include "logger.h"
 
-/**
- * @brief String representation selection for a DBOVariable
- */
 class StringRepresentationComboBox : public QComboBox
 {
     Q_OBJECT
 
   signals:
-    /// @brief Emitted if representation was changed
     void changedRepresentation();
 
   public slots:
-    /// @brief Sets the representation
     void changedSlot()
     {
         loginf << "StringRepresentationComboBox: changed " << currentText().toStdString();
@@ -47,7 +42,6 @@ class StringRepresentationComboBox : public QComboBox
     }
 
   public:
-    /// @brief Constructor
     StringRepresentationComboBox(dbContent::Variable::Representation& representation, std::string& representation_str,
                                  QWidget* parent = 0)
         : QComboBox(parent), representation_(representation), representation_str_(representation_str)
@@ -57,26 +51,16 @@ class StringRepresentationComboBox : public QComboBox
 
         update();
 
-        // connect(this, SIGNAL( activated(const QString &) ), this, SIGNAL( changedRepresentation()
-        // ));
         connect(this, SIGNAL(currentTextChanged(const QString&)), this, SLOT(changedSlot()));
     }
 
-    /// @brief Destructor
     virtual ~StringRepresentationComboBox() {}
 
-    /// @brief Returns the currently selected representation
     dbContent::Variable::Representation representation()
     {
         std::string text = currentText().toStdString();
         return dbContent::Variable::stringToRepresentation(text);
     }
-
-    /// @brief Sets the currently selected representation
-//    void representation(DBOVariable::Representation representation)
-//    {
-//        setCurrentText(DBOVariable::representationToString(representation).c_str());
-//    }
 
     void setRepresentation(dbContent::Variable::Representation& representation,
                            std::string& representation_str)
@@ -88,7 +72,6 @@ class StringRepresentationComboBox : public QComboBox
     }
 
   protected:
-    /// Used variable
     dbContent::Variable::Representation& representation_;
     std::string& representation_str_;
 

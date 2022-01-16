@@ -39,7 +39,7 @@ JSONObjectParser::JSONObjectParser(const std::string& class_id, const std::strin
 {
     registerParameter("name", &name_, "");
     registerParameter("active", &active_, true);
-    registerParameter("db_object_name", &db_object_name_, "");
+    registerParameter("db_content_name", &db_content_name_, "");
 
     registerParameter("json_container_key", &json_container_key_, "");
     registerParameter("json_key", &json_key_, "*");
@@ -48,10 +48,10 @@ JSONObjectParser::JSONObjectParser(const std::string& class_id, const std::strin
     registerParameter("override_data_source", &override_data_source_, false);
     registerParameter("data_source_variable_name", &data_source_variable_name_, "");
 
-    assert(db_object_name_.size());
+    assert(db_content_name_.size());
 
     if (!name_.size())
-        name_ = db_object_name_;
+        name_ = db_content_name_;
 
     assert(name_.size());
 
@@ -63,7 +63,7 @@ JSONObjectParser::JSONObjectParser(const std::string& class_id, const std::strin
 JSONObjectParser& JSONObjectParser::operator=(JSONObjectParser&& other)
 {
     name_ = other.name_;
-    db_object_name_ = other.db_object_name_;
+    db_content_name_ = other.db_content_name_;
     db_object_ = other.db_object_;
 
     json_container_key_ = other.json_container_key_;
@@ -85,7 +85,7 @@ JSONObjectParser& JSONObjectParser::operator=(JSONObjectParser&& other)
     list_ = other.list_;
 
     other.configuration().updateParameterPointer("name", &name_);
-    other.configuration().updateParameterPointer("db_object_name", &db_object_name_);
+    other.configuration().updateParameterPointer("db_object_name", &db_content_name_);
     other.configuration().updateParameterPointer("json_key", &json_key_);
     other.configuration().updateParameterPointer("json_value", &json_value_);
     other.configuration().updateParameterPointer("override_data_source", &override_data_source_);
@@ -149,11 +149,11 @@ void JSONObjectParser::initialize()
 
     DBContentManager& obj_man = COMPASS::instance().objectManager();
 
-    if (!obj_man.existsObject(db_object_name_))
-        logwrn << "JSONObjectParser: initialize: dbobject '" << db_object_name_
+    if (!obj_man.existsObject(db_content_name_))
+        logwrn << "JSONObjectParser: initialize: dbobject '" << db_content_name_
                << "' does not exist";
     else
-        db_object_ = &obj_man.object(db_object_name_);
+        db_object_ = &obj_man.object(db_content_name_);
 
     assert(db_object_);
 
@@ -586,12 +586,12 @@ void JSONObjectParser::checkIfKeysExistsInMappings(const std::string& location,
     if (!found)
     {
         loginf << "JSONObjectParser: checkIfKeysExistsInMappings: creating new mapping for dbo "
-               << db_object_name_ << "'" << location << "' type " << j.type_name() << " value "
+               << db_content_name_ << "'" << location << "' type " << j.type_name() << " value "
                << j.dump() << " in array " << is_in_array;
 
         Configuration& new_cfg = configuration().addNewSubConfiguration("JSONDataMapping");
         new_cfg.addParameterString("json_key", location);
-        new_cfg.addParameterString("db_object_name", db_object_name_);
+        new_cfg.addParameterString("db_object_name", db_content_name_);
 
         if (is_in_array)
             new_cfg.addParameterBool("in_array", true);
@@ -886,7 +886,7 @@ JSONObjectParserWidget* JSONObjectParser::widget()
     return widget_.get();  // needed for qt integration, not pretty
 }
 
-std::string JSONObjectParser::dbObjectName() const { return db_object_name_; }
+std::string JSONObjectParser::dbObjectName() const { return db_content_name_; }
 
 void JSONObjectParser::setMappingActive(JSONDataMapping& mapping, bool active)
 {

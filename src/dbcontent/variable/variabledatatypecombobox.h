@@ -36,7 +36,7 @@ class VariableDataTypeComboBox : public QComboBox
     /// @brief Sets the data type
     void changed()
     {
-        loginf << "DBOVariableDataTypeComboBox: changed: " << currentText().toStdString();
+        loginf << "VariableDataTypeComboBox: changed: " << currentText().toStdString();
 
         data_type_str_ = currentText().toStdString();
         data_type_ = Property::asDataType(data_type_str_);

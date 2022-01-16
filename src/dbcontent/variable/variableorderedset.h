@@ -28,7 +28,7 @@ namespace dbContent
 
 class MetaVariable;
 class VariableSet;
-class OrderedSet;
+class VariableOrderedSet;
 class VariableOrderedSetWidget;
 
 /**
@@ -56,7 +56,7 @@ class VariableOrderDefinition : public VariableDefinition
  *
  * Set with DBOVariables, which can only be added once (set), and have a specific order.
  */
-class OrderedSet : public QObject, public Configurable
+class VariableOrderedSet : public QObject, public Configurable
 {
     Q_OBJECT
 
@@ -66,10 +66,10 @@ class OrderedSet : public QObject, public Configurable
 
   public:
     /// @brief Constructor
-    OrderedSet(const std::string& class_id, const std::string& instance_id,
+    VariableOrderedSet(const std::string& class_id, const std::string& instance_id,
                           Configurable* parent);
     /// @brief Destructor
-    virtual ~OrderedSet();
+    virtual ~VariableOrderedSet();
 
     virtual void generateSubConfigurable(const std::string& class_id,
                                          const std::string& instance_id);

@@ -80,18 +80,6 @@ void ASTERIXJSONParser::doMappingChecks()
     for (auto& map_it : data_mappings_)
     {
         map_it.check();
-
-        // add json key to var desc
-//        if (map_it.dboVariableName().size() && dbObject().hasVariable(map_it.dboVariableName()))
-//        {
-//            DBOVariable& var = dbObject().variable(map_it.dboVariableName());
-
-//            if (var.description().rfind("From "+map_it.jsonKey(), 0) != 0)
-//            {
-//                loginf << "ASTERIXJSONParser: doMappingChecks: adding json key to var " << var.name();
-//                var.description("From "+map_it.jsonKey()+"\n\n"+var.description());
-//            }
-//        }
     }
 
     for (auto& map_it : data_mappings_)
@@ -115,7 +103,7 @@ void ASTERIXJSONParser::doMappingChecks()
 
     for (auto& dbovar_it : dbObject().variables())
     {
-        if (!hasDBOVariableMapped(dbovar_it->name()))
+        if (!hasDBContentVariableMapped(dbovar_it->name()))
             not_added_dbo_variables_.push_back(dbovar_it->name());
     }
 
@@ -141,7 +129,7 @@ bool ASTERIXJSONParser::hasJSONKeyMapped (const std::string& key)
             != data_mappings_.end();
 }
 
-bool ASTERIXJSONParser::hasDBOVariableMapped (const std::string& var_name)
+bool ASTERIXJSONParser::hasDBContentVariableMapped (const std::string& var_name)
 {
     return std::find_if(data_mappings_.begin(), data_mappings_.end(),
                         [var_name](const JSONDataMapping& mapping) -> bool { return mapping.dboVariableName() == var_name; })
@@ -179,7 +167,7 @@ void ASTERIXJSONParser::selectMapping (unsigned int index)
     widget_->selectModelRow(index);
 }
 
-void ASTERIXJSONParser::selectUnmappedDBOVariable (const std::string& name)
+void ASTERIXJSONParser::selectUnmappedDBContentVariable (const std::string& name)
 {
     assert (widget_);
 
@@ -213,7 +201,7 @@ ASTERIXJSONParser::EntryType ASTERIXJSONParser::entryType (unsigned int index) c
 
     assert (index < not_added_dbo_variables_.size());
 
-    return ASTERIXJSONParser::EntryType::UnmappedDBOVariable;
+    return ASTERIXJSONParser::EntryType::UnmappedDBContentVariable;
 }
 
 JSONDataMapping& ASTERIXJSONParser::mapping (unsigned int index)
@@ -236,9 +224,9 @@ const std::string& ASTERIXJSONParser::unmappedJSONKey (unsigned int index) const
     return not_added_json_keys_.at(index - data_mappings_.size());
 }
 
-const std::string& ASTERIXJSONParser::unmappedDBOVariable (unsigned int index) const
+const std::string& ASTERIXJSONParser::unmappedDBContentVariable (unsigned int index) const
 {
-    assert (entryType(index) == ASTERIXJSONParser::EntryType::UnmappedDBOVariable);
+    assert (entryType(index) == ASTERIXJSONParser::EntryType::UnmappedDBContentVariable);
     return not_added_dbo_variables_.at(index - data_mappings_.size() - not_added_json_keys_.size());
 }
 
@@ -750,10 +738,10 @@ QVariant ASTERIXJSONParser::data(const QModelIndex& index, int role) const
             else
                 return QVariant();
         }
-        else if (entry_type == ASTERIXJSONParser::EntryType::UnmappedDBOVariable)
+        else if (entry_type == ASTERIXJSONParser::EntryType::UnmappedDBContentVariable)
         {
             if (col_name == "DBObject Variable")
-                return unmappedDBOVariable(row).c_str();
+                return unmappedDBContentVariable(row).c_str();
             else
                 return QVariant();
         }
@@ -785,7 +773,7 @@ QVariant ASTERIXJSONParser::data(const QModelIndex& index, int role) const
             else
                 return QVariant();
         }
-        else if (entry_type == ASTERIXJSONParser::EntryType::UnmappedDBOVariable)
+        else if (entry_type == ASTERIXJSONParser::EntryType::UnmappedDBContentVariable)
         {
 
             if (col_name == "DBObject Variable")

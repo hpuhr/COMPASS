@@ -56,34 +56,23 @@ class Variable : public QObject, public Property, public Configurable
         return representation_2_string_;
     }
 
-    /// @brief Constructor
     Variable(const std::string& class_id, const std::string& instance_id, DBContent* parent);
-    //DBOVariable() = default;
-    /// @brief Move constructor
-    //DBOVariable& operator=(DBOVariable&& other);
-    /// @brief Desctructor
     virtual ~Variable();
 
-    /// @brief Comparison operator
     bool operator==(const Variable& var);
 
-    /// @brief Prints information for debugging
     void print();
 
     virtual void generateSubConfigurable(const std::string& class_id,
                                          const std::string& instance_id);
 
-    /// @brief Returns variable identifier
     const std::string& name() const { return name_; }
-    /// @brief Sets variable identifier
     void name(const std::string& name);
 
     DBContent& object() const;
     const std::string& dboName() const;
 
-    /// @brief Returns variable description
     const std::string& description() const { return description_; }
-    /// @brief Sets variable description
     void description(const std::string& description) { description_ = description; }
 
     std::string dbColumnName() const;
@@ -95,12 +84,9 @@ class Variable : public QObject, public Property, public Configurable
     bool isKey() const;
     void isKey(bool value);
 
-    /// @brief Returns if dimension information is present
     bool hasDimension() { return dimension_.size() > 0; }
-    /// @brief Returns unit dimension
     const std::string& dimensionConst() const { return dimension_; }  // TODO should be const
     std::string& dimension() { return dimension_; }                   // TODO should be const
-    /// @brief  Returns unit unit
     const std::string& unitConst() const { return unit_; }
     std::string& unit() { return unit_; }
     std::string dimensionUnitStr();
@@ -155,18 +141,18 @@ class Variable : public QObject, public Property, public Configurable
             else
             {
                 throw std::runtime_error(
-                    "DBOVariable: getAsSpecialRepresentationString: unknown representation " +
+                    "Variable: getAsSpecialRepresentationString: unknown representation " +
                     std::to_string((int)representation_));
             }
         }
         catch (std::exception& e)
         {
-            logerr << "DBOVariable: getAsSpecialRepresentationString: exception thrown: "
+            logerr << "Variable: getAsSpecialRepresentationString: exception thrown: "
                    << e.what();
         }
         catch (...)
         {
-            logerr << "DBOVariable: getAsSpecialRepresentationString: exception thrown";
+            logerr << "Variable: getAsSpecialRepresentationString: exception thrown";
             ;
         }
 

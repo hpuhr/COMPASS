@@ -39,8 +39,8 @@ JSONDataMapping::JSONDataMapping(const std::string& class_id, const std::string&
     registerParameter("active", &active_, false);
     registerParameter("json_key", &json_key_, "");
 
-    registerParameter("db_object_name", &db_object_name_, "");
-    registerParameter("dbovariable_name", &dbovariable_name_, "");
+    registerParameter("db_content_name", &db_content_name_, "");
+    registerParameter("db_content_variable_name", &dbcontent_variable_name_, "");
 
     registerParameter("comment", &comment_, "");
 
@@ -62,7 +62,7 @@ JSONDataMapping::JSONDataMapping(const std::string& class_id, const std::string&
     registerParameter("in_array", &in_array_, false);
     registerParameter("append_value", &append_value_, false);
 
-    logdbg << "JSONDataMapping: ctor: dbo " << db_object_name_ << " var " << dbovariable_name_
+    logdbg << "JSONDataMapping: ctor: dbo " << db_content_name_ << " var " << dbcontent_variable_name_
            << " dim " << dimension_ << " unit " << unit_;
 
     sub_keys_ = Utils::String::split(json_key_, '.');
@@ -85,8 +85,8 @@ JSONDataMapping& JSONDataMapping::operator=(JSONDataMapping&& other)
 
     active_ = other.active_;
     json_key_ = other.json_key_;
-    db_object_name_ = other.db_object_name_;
-    dbovariable_name_ = other.dbovariable_name_;
+    db_content_name_ = other.db_content_name_;
+    dbcontent_variable_name_ = other.dbcontent_variable_name_;
     variable_ = other.variable_;
 
     mandatory_ = other.mandatory_;
@@ -112,8 +112,8 @@ JSONDataMapping& JSONDataMapping::operator=(JSONDataMapping&& other)
 
     other.configuration().updateParameterPointer("active", &active_);
     other.configuration().updateParameterPointer("json_key", &json_key_);
-    other.configuration().updateParameterPointer("db_object_name", &db_object_name_);
-    other.configuration().updateParameterPointer("dbovariable_name", &dbovariable_name_);
+    other.configuration().updateParameterPointer("db_object_name", &db_content_name_);
+    other.configuration().updateParameterPointer("dbovariable_name", &dbcontent_variable_name_);
     other.configuration().updateParameterPointer("mandatory", &mandatory_);
     other.configuration().updateParameterPointer("comment", &comment_);
     other.configuration().updateParameterPointer("format_data_type", &format_data_type_);
@@ -162,13 +162,13 @@ void JSONDataMapping::check()
 {
     DBContentManager& obj_man = COMPASS::instance().objectManager();
 
-    if (db_object_name_.size() && !obj_man.existsObject(db_object_name_))
+    if (db_content_name_.size() && !obj_man.existsObject(db_content_name_))
         assert (false);
 
-    DBContent& db_object = obj_man.object(db_object_name_);
+    DBContent& db_object = obj_man.object(db_content_name_);
 
-    if (dbovariable_name_.size() && !db_object.hasVariable(dbovariable_name_))
-        dbovariable_name_ = "";
+    if (dbcontent_variable_name_.size() && !db_object.hasVariable(dbcontent_variable_name_))
+        dbcontent_variable_name_ = "";
 
     if (active_ && !canBeActive())
     {
@@ -206,22 +206,22 @@ Format& JSONDataMapping::jsonValueFormatRef()
 //    json_value_format_ = json_value_format;
 //}
 
-std::string JSONDataMapping::dbObjectName() const { return db_object_name_; }
+std::string JSONDataMapping::dbObjectName() const { return db_content_name_; }
 
 void JSONDataMapping::dboVariableName(const std::string& name)
 {
     loginf << "JSONDataMapping: dboVariableName: " << name;
 
-    dbovariable_name_ = name;
+    dbcontent_variable_name_ = name;
     initialized_ = false;
 
-    if (!dbovariable_name_.size())
+    if (!dbcontent_variable_name_.size())
         active_ = false;
 
     initialize();
 }
 
-std::string JSONDataMapping::dboVariableName() const { return dbovariable_name_; }
+std::string JSONDataMapping::dboVariableName() const { return dbcontent_variable_name_; }
 
 std::string JSONDataMapping::dimensionUnitStr()
 {
@@ -273,7 +273,7 @@ void JSONDataMapping::active(bool active)
 
 bool JSONDataMapping::canBeActive() const
 {
-    return json_key_.size() && dbovariable_name_.size();
+    return json_key_.size() && dbcontent_variable_name_.size();
 }
 
 void JSONDataMapping::initialize()
@@ -284,18 +284,18 @@ void JSONDataMapping::initialize()
 
     DBContentManager& obj_man = COMPASS::instance().objectManager();
 
-    if (db_object_name_.size() && !obj_man.existsObject(db_object_name_))
-        logwrn << "JSONDataMapping: initialize: dbobject '" << db_object_name_
+    if (db_content_name_.size() && !obj_man.existsObject(db_content_name_))
+        logwrn << "JSONDataMapping: initialize: dbobject '" << db_content_name_
                << "' does not exist";
 
-    if (db_object_name_.size() && obj_man.existsObject(db_object_name_) &&
-            dbovariable_name_.size() && !obj_man.object(db_object_name_).hasVariable(dbovariable_name_))
-        logwrn << "JSONDataMapping: initialize: dbobject " << db_object_name_ << " variable '"
-               << dbovariable_name_ << "' does not exist";
+    if (db_content_name_.size() && obj_man.existsObject(db_content_name_) &&
+            dbcontent_variable_name_.size() && !obj_man.object(db_content_name_).hasVariable(dbcontent_variable_name_))
+        logwrn << "JSONDataMapping: initialize: dbobject " << db_content_name_ << " variable '"
+               << dbcontent_variable_name_ << "' does not exist";
 
-    if (db_object_name_.size() && obj_man.existsObject(db_object_name_) &&
-            dbovariable_name_.size() && obj_man.object(db_object_name_).hasVariable(dbovariable_name_))
-        variable_ = &obj_man.object(db_object_name_).variable(dbovariable_name_);
+    if (db_content_name_.size() && obj_man.existsObject(db_content_name_) &&
+            dbcontent_variable_name_.size() && obj_man.object(db_content_name_).hasVariable(dbcontent_variable_name_))
+        variable_ = &obj_man.object(db_content_name_).variable(dbcontent_variable_name_);
 
 
     if (append_value_)

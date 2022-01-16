@@ -34,7 +34,7 @@ using namespace Utils;
 namespace dbContent
 {
 
-VariableOrderedSetWidget::VariableOrderedSetWidget(OrderedSet& set,
+VariableOrderedSetWidget::VariableOrderedSetWidget(VariableOrderedSet& set,
                                                          QWidget* parent, Qt::WindowFlags f)
     : QWidget(parent, f), set_(set)
 {
@@ -173,7 +173,7 @@ void VariableOrderedSetWidget::removeSlot()
     assert(list_widget_);
     int index = list_widget_->currentRow();
 
-    loginf << "DBOVariableOrderedSetWidget: remove: index " << index;
+    loginf << "VariableOrderedSetWidget: remove: index " << index;
 
     if (index < 0)
         return;
@@ -186,7 +186,7 @@ void VariableOrderedSetWidget::moveUpSlot()
 {
     assert(list_widget_);
     int index = list_widget_->currentRow();
-    loginf << "DBOVariableOrderedSetWidget: moveUp: index " << index;
+    loginf << "VariableOrderedSetWidget: moveUp: index " << index;
 
     if (index <= 0)
         return;
@@ -200,7 +200,7 @@ void VariableOrderedSetWidget::moveDownSlot()
 {
     assert(list_widget_);
     int index = list_widget_->currentRow();
-    loginf << "DBOVariableOrderedSetWidget: moveDown: index " << index;
+    loginf << "VariableOrderedSetWidget: moveDown: index " << index;
 
     if (index < 0 || index == (int)set_.getSize() - 1)
         return;
@@ -213,13 +213,13 @@ void VariableOrderedSetWidget::moveDownSlot()
 
 void VariableOrderedSetWidget::updateVariableListSlot()
 {
-    logdbg << "DBOVariableOrderedSetWidget: updateVariableListSlot";
+    logdbg << "VariableOrderedSetWidget: updateVariableListSlot";
 
     assert(list_widget_);
 
     list_widget_->clear();
 
-    logdbg << "DBOVariableOrderedSetWidget: updateVariableListSlot: clear done";
+    logdbg << "VariableOrderedSetWidget: updateVariableListSlot: clear done";
 
     const std::map<unsigned int, VariableOrderDefinition*>& variables = set_.definitions();
     std::map<unsigned int, VariableOrderDefinition*>::const_iterator it;
@@ -242,7 +242,7 @@ void VariableOrderedSetWidget::updateVariableListSlot()
 
     if (current_index_ != -1)
     {
-        logdbg << "DBOVariableOrderedSetWidget: updateVariableListSlot: current index "
+        logdbg << "VariableOrderedSetWidget: updateVariableListSlot: current index "
                << current_index_;
         list_widget_->setCurrentRow(current_index_);
         current_index_ = -1;

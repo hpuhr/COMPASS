@@ -114,7 +114,7 @@ void MetaVariableWidget::unlock()
 
 void MetaVariableWidget::editNameSlot()
 {
-    logdbg << "MetaDBOVariableWidget: editName";
+    logdbg << "MetaVariableWidget: editName";
     assert(name_edit_);
 
     std::string text = name_edit_->text().toStdString();

@@ -215,7 +215,7 @@ void VariableSelectionWidget::triggerSlot(QAction* action)
     object_label_->setText(obj_name.c_str());
     variable_label_->setText(var_name.c_str());
 
-    loginf << "DBOVariableSelectionWidget: triggerSlot: obj " << obj_name.c_str() << " var "
+    loginf << "VariableSelectionWidget: triggerSlot: obj " << obj_name.c_str() << " var "
            << var_name.c_str();
 
     updateToolTip();

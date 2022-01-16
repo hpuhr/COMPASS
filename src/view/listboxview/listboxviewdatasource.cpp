@@ -53,7 +53,7 @@ ListBoxViewDataSource::ListBoxViewDataSource(const std::string& class_id,
 
     assert (hasCurrentSet());
 
-    connect(getSet(), &OrderedSet::setChangedSignal, this,
+    connect(getSet(), &VariableOrderedSet::setChangedSignal, this,
             &ListBoxViewDataSource::setChangedSlot, Qt::UniqueConnection);
 }
 
@@ -68,12 +68,12 @@ void ListBoxViewDataSource::generateSubConfigurable(const std::string& class_id,
     logdbg << "ListBoxViewDataSource: generateSubConfigurable: class_id " << class_id
            << " instance_id " << instance_id;
 
-    if (class_id.compare("DBOVariableOrderedSet") == 0)
+    if (class_id.compare("VariableOrderedSet") == 0)
     {
         assert (!sets_.count(instance_id));
 
-        std::unique_ptr<OrderedSet> set;
-        set.reset(new OrderedSet(class_id, instance_id, this));
+        std::unique_ptr<VariableOrderedSet> set;
+        set.reset(new VariableOrderedSet(class_id, instance_id, this));
 
         sets_[instance_id] = move(set);
     }
@@ -86,7 +86,7 @@ void ListBoxViewDataSource::checkSubConfigurables()
 {
     if (!hasSet(DEFAULT_SET_NAME))
     {
-        generateSubConfigurable("DBOVariableOrderedSet", DEFAULT_SET_NAME);
+        generateSubConfigurable("VariableOrderedSet", DEFAULT_SET_NAME);
         assert(hasSet(DEFAULT_SET_NAME));
         addDefaultVariables(*sets_.at(DEFAULT_SET_NAME).get());
     }
@@ -110,7 +110,7 @@ void ListBoxViewDataSource::addSet (const std::string& name)
     assert (name.size());
     assert (!hasSet(name));
 
-    generateSubConfigurable("DBOVariableOrderedSet", name);
+    generateSubConfigurable("VariableOrderedSet", name);
     assert(hasSet(name));
     addDefaultVariables(*sets_.at(name).get());
 }
@@ -125,7 +125,7 @@ void ListBoxViewDataSource::copySet (const std::string& name, const std::string&
     assert (new_name.size());
     assert (!hasSet(new_name));
 
-    generateSubConfigurable("DBOVariableOrderedSet", new_name);
+    generateSubConfigurable("VariableOrderedSet", new_name);
     assert(hasSet(new_name));
 
     for (const auto& var_def_it : getSet()->definitions())
@@ -146,13 +146,13 @@ void ListBoxViewDataSource::removeSet (const std::string& name)
 }
 
 
-OrderedSet* ListBoxViewDataSource::getSet()
+VariableOrderedSet* ListBoxViewDataSource::getSet()
 {
     assert (hasCurrentSet());
     return sets_.at(current_set_name_).get();
 }
 
-const std::map<std::string, std::unique_ptr<OrderedSet>>& ListBoxViewDataSource::getSets()
+const std::map<std::string, std::unique_ptr<VariableOrderedSet>>& ListBoxViewDataSource::getSets()
 {
     return sets_;
 }
@@ -220,7 +220,7 @@ void ListBoxViewDataSource::currentSetName(const std::string& current_set_name)
     assert (hasSet(current_set_name));
     current_set_name_ = current_set_name;
 
-    connect(getSet(), &OrderedSet::setChangedSignal, this,
+    connect(getSet(), &VariableOrderedSet::setChangedSignal, this,
             &ListBoxViewDataSource::setChangedSlot, Qt::UniqueConnection);
 
     emit setChangedSignal();
@@ -289,7 +289,7 @@ void ListBoxViewDataSource::removeTemporaryVariable (const std::string& dbo_name
     }
 }
 
-void ListBoxViewDataSource::addDefaultVariables (OrderedSet& set)
+void ListBoxViewDataSource::addDefaultVariables (VariableOrderedSet& set)
 {
     DBContentManager& obj_man = COMPASS::instance().objectManager();
 

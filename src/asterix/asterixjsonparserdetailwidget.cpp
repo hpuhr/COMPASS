@@ -113,11 +113,10 @@ ASTERIXJSONParserDetailWidget::ASTERIXJSONParserDetailWidget(ASTERIXJSONParser& 
 
     // dbo var
 
-    QLabel* dbovar_label = new QLabel("DBOVariable");
+    QLabel* dbovar_label = new QLabel("DBContent Variable");
     dbovar_label->setFont(font_bold);
     form_layout->addRow(dbovar_label);
 
-    //    DBOVariableSelectionWidget* dbo_var_sel_ {nullptr};
     dbo_var_sel_ = new dbContent::VariableSelectionWidget();
     dbo_var_sel_->showMetaVariables(false);
     dbo_var_sel_->showDBOOnly(parser_.dbObjectName());
@@ -125,7 +124,7 @@ ASTERIXJSONParserDetailWidget::ASTERIXJSONParserDetailWidget(ASTERIXJSONParser& 
     dbo_var_sel_->setDisabled(true);
 
     connect(dbo_var_sel_, &dbContent::VariableSelectionWidget::selectionChanged,
-            this, &ASTERIXJSONParserDetailWidget::mappingDBOVariableChangedSlot);
+            this, &ASTERIXJSONParserDetailWidget::mappingDBContentVariableChangedSlot);
     form_layout->addRow("Name", dbo_var_sel_);
 
     dbo_var_comment_edit_ = new QTextEdit();
@@ -140,20 +139,20 @@ ASTERIXJSONParserDetailWidget::ASTERIXJSONParserDetailWidget(ASTERIXJSONParser& 
 
     // buttons
 
-    new_dbovar_button_ = new QPushButton("New DBOVariable");
+    new_dbovar_button_ = new QPushButton("New DBContent Variable");
     new_dbovar_button_->setHidden(true);
     connect(new_dbovar_button_, &QPushButton::clicked,
             this, &ASTERIXJSONParserDetailWidget::createNewDBVariableSlot);
     main_layout->addWidget(new_dbovar_button_);
 
-    dbovar_edit_button_ = new QPushButton("Edit DBOVariable");
+    dbovar_edit_button_ = new QPushButton("Edit DBContent Variable");
     dbovar_edit_button_->setHidden(true);
     connect(dbovar_edit_button_, &QPushButton::clicked,
             this, &ASTERIXJSONParserDetailWidget::editDBVariableSlot);
     main_layout->addWidget(dbovar_edit_button_);
 
-    dbovar_delete_button_ = new QPushButton("Delete DBOVariable");
-    dbovar_delete_button_->setToolTip("Deletes the DBOVariable from the DBObject, not just from the Mapping.");
+    dbovar_delete_button_ = new QPushButton("Delete DBContent Variable");
+    dbovar_delete_button_->setToolTip("Deletes the DBContent Variable from the DBContent, not just from the Mapping.");
     dbovar_delete_button_->setHidden(true);
     connect(dbovar_delete_button_, &QPushButton::clicked,
             this, &ASTERIXJSONParserDetailWidget::deleteDBVariableSlot);
@@ -209,7 +208,7 @@ void ASTERIXJSONParserDetailWidget::currentIndexChangedSlot (unsigned int index)
         unit_sel_->update(mapping.dimensionRef(), mapping.unitRef());
         data_format_widget_->update(mapping.formatDataTypeRef(), mapping.jsonValueFormatRef());
 
-        showDBOVariable(mapping.dboVariableName(), true);
+        showDBContentVariable(mapping.dboVariableName(), true);
 
         delete_mapping_button_->setHidden(false);
 
@@ -233,7 +232,7 @@ void ASTERIXJSONParserDetailWidget::currentIndexChangedSlot (unsigned int index)
         showJSONKey(key, false);
         unit_sel_->clear();
         data_format_widget_->clear();
-        showDBOVariable("");
+        showDBContentVariable("");
 
         delete_mapping_button_->setHidden(true);
 
@@ -241,14 +240,14 @@ void ASTERIXJSONParserDetailWidget::currentIndexChangedSlot (unsigned int index)
 
         return;
     }
-    else if (entry_type_ == ASTERIXJSONParser::EntryType::UnmappedDBOVariable)
+    else if (entry_type_ == ASTERIXJSONParser::EntryType::UnmappedDBContentVariable)
     {
-        info_label_->setText("Unmapped DBO Variable");
+        info_label_->setText("Unmapped DBContent Variable");
 
         active_check_->setDisabled(true);
         active_check_->setChecked(false);
 
-        string dbovar = parser_.unmappedDBOVariable(entry_index_);
+        string dbovar = parser_.unmappedDBContentVariable(entry_index_);
 
         loginf << "ASTERIXJSONParserDetailWidget: currentIndexChangedSlot: not added dbovar " << entry_index_
                << " key '" << dbovar << "'";
@@ -256,7 +255,7 @@ void ASTERIXJSONParserDetailWidget::currentIndexChangedSlot (unsigned int index)
         showJSONKey("", false);
         unit_sel_->clear();
         data_format_widget_->clear();
-        showDBOVariable(dbovar);
+        showDBContentVariable(dbovar);
 
         delete_mapping_button_->setHidden(true);
 
@@ -338,7 +337,7 @@ void ASTERIXJSONParserDetailWidget::showJSONKey (const std::string& key, bool un
     }
 }
 
-void ASTERIXJSONParserDetailWidget::showDBOVariable (const std::string& var_name, bool mapping_exists)
+void ASTERIXJSONParserDetailWidget::showDBContentVariable (const std::string& var_name, bool mapping_exists)
 {
     assert (dbo_var_sel_);
     assert (dbo_var_comment_edit_);
@@ -358,7 +357,7 @@ void ASTERIXJSONParserDetailWidget::showDBOVariable (const std::string& var_name
 
         if (mapping_exists)
         {
-            new_dbovar_button_->setText("New DBOVariable");
+            new_dbovar_button_->setText("New DBContent Variable");
             new_dbovar_button_->setHidden(false);
         }
         else
@@ -381,9 +380,9 @@ void ASTERIXJSONParserDetailWidget::showDBOVariable (const std::string& var_name
         new_dbovar_button_->setHidden(false);
 
         if (mapping_exists)
-            new_dbovar_button_->setText("New DBOVariable");
+            new_dbovar_button_->setText("New DBContent Variable");
         else
-            new_dbovar_button_->setText("New DBOVariable && Mapping");
+            new_dbovar_button_->setText("New DBContent Variable && Mapping");
 
         dbovar_edit_button_->setHidden(true);
         dbovar_delete_button_->setHidden(true);
@@ -455,12 +454,12 @@ void ASTERIXJSONParserDetailWidget::mappingAppendChangedSlot()
     parser_.mapping(entry_index_).appendValue(append_check->checkState() == Qt::Checked);
 }
 
-void ASTERIXJSONParserDetailWidget::mappingDBOVariableChangedSlot()
+void ASTERIXJSONParserDetailWidget::mappingDBContentVariableChangedSlot()
 {
     if (setting_new_content_)
         return;
 
-    loginf << "ASTERIXJSONParserDetailWidget: mappingDBOVariableChangedSlot";
+    loginf << "ASTERIXJSONParserDetailWidget: mappingDBContentVariableChangedSlot";
 
     assert (has_current_entry_);
     assert (entry_type_ == ASTERIXJSONParser::EntryType::ExistingMapping
@@ -488,8 +487,8 @@ void ASTERIXJSONParserDetailWidget::mappingDBOVariableChangedSlot()
 
         Configuration& new_cfg = parser_.configuration().addNewSubConfiguration("JSONDataMapping");
         new_cfg.addParameterString("json_key", json_key);
-        new_cfg.addParameterString("db_object_name", parser_.dbObjectName());
-        new_cfg.addParameterString("dbovariable_name", dbo_var_sel_->selectedVariable().name());
+        new_cfg.addParameterString("db_content_name", parser_.dbObjectName());
+        new_cfg.addParameterString("db_content_variable_name", dbo_var_sel_->selectedVariable().name());
 
         parser_.generateSubConfigurable("JSONDataMapping", new_cfg.getInstanceId());
 
@@ -577,7 +576,7 @@ void ASTERIXJSONParserDetailWidget::createNewDBVariableSlot()
         {
             assert (!parser_.dbObject().hasVariable(dialog.name()));
 
-            Configuration& new_cfg = parser_.dbObject().configuration().addNewSubConfiguration("DBOVariable");
+            Configuration& new_cfg = parser_.dbObject().configuration().addNewSubConfiguration("Variable");
             new_cfg.addParameterString("name", dialog.name());
             new_cfg.addParameterString("short_name", dialog.shortName());
             new_cfg.addParameterString("description", dialog.description());
@@ -587,7 +586,7 @@ void ASTERIXJSONParserDetailWidget::createNewDBVariableSlot()
             new_cfg.addParameterString("dimension", dialog.dimension());
             new_cfg.addParameterString("unit", dialog.unit());
 
-            parser_.dbObject().generateSubConfigurable("DBOVariable", new_cfg.getInstanceId());
+            parser_.dbObject().generateSubConfigurable("Variable", new_cfg.getInstanceId());
 
             assert (parser_.dbObject().hasVariable(dialog.name()));
         }
@@ -607,8 +606,8 @@ void ASTERIXJSONParserDetailWidget::createNewDBVariableSlot()
 
             Configuration& new_cfg = parser_.configuration().addNewSubConfiguration("JSONDataMapping");
             new_cfg.addParameterString("json_key", json_key);
-            new_cfg.addParameterString("db_object_name", parser_.dbObjectName());
-            new_cfg.addParameterString("dbovariable_name", dialog.name());
+            new_cfg.addParameterString("db_content_name", parser_.dbObjectName());
+            new_cfg.addParameterString("db_content_variable_name", dialog.name());
 
             parser_.generateSubConfigurable("JSONDataMapping", new_cfg.getInstanceId());
 
@@ -650,7 +649,7 @@ void ASTERIXJSONParserDetailWidget::deleteDBVariableSlot()
 
     assert (has_current_entry_);
     assert (entry_type_ == ASTERIXJSONParser::EntryType::ExistingMapping
-            || entry_type_ == ASTERIXJSONParser::EntryType::UnmappedDBOVariable);
+            || entry_type_ == ASTERIXJSONParser::EntryType::UnmappedDBContentVariable);
     assert (dbo_var_sel_);
 
     assert (dbo_var_sel_->hasVariable());
@@ -689,7 +688,7 @@ void ASTERIXJSONParserDetailWidget::deleteDBVariableSlot()
         showJSONKey("", false);
         unit_sel_->clear();
         data_format_widget_->clear();
-        showDBOVariable("");
+        showDBContentVariable("");
 
         delete_mapping_button_->setHidden(true);
         new_dbovar_button_->setHidden(true);
@@ -705,7 +704,7 @@ void ASTERIXJSONParserDetailWidget::editDBVariableSlot()
 
     assert (has_current_entry_);
     assert (entry_type_ == ASTERIXJSONParser::EntryType::ExistingMapping
-            || entry_type_ == ASTERIXJSONParser::EntryType::UnmappedDBOVariable);
+            || entry_type_ == ASTERIXJSONParser::EntryType::UnmappedDBContentVariable);
     assert (dbo_var_sel_);
 
     assert (dbo_var_sel_->hasVariable());
@@ -728,8 +727,8 @@ void ASTERIXJSONParserDetailWidget::editDBVariableSlot()
 
         if (entry_type_ == ASTERIXJSONParser::EntryType::ExistingMapping)
             parser_.selectMapping(entry_index_); // ok since order in mappings is the same
-        else if (entry_type_ == ASTERIXJSONParser::EntryType::UnmappedDBOVariable)
-            parser_.selectUnmappedDBOVariable(dialog.variable().name()); // search for new name
+        else if (entry_type_ == ASTERIXJSONParser::EntryType::UnmappedDBContentVariable)
+            parser_.selectUnmappedDBContentVariable(dialog.variable().name()); // search for new name
     }
 
     loginf << "ASTERIXJSONParserDetailWidget: editDBVariableSlot: done";
@@ -759,7 +758,7 @@ void ASTERIXJSONParserDetailWidget::deleteMappingSlot()
     showJSONKey("", false);
     unit_sel_->clear();
     data_format_widget_->clear();
-    showDBOVariable("");
+    showDBContentVariable("");
 
     delete_mapping_button_->setHidden(true);
     new_dbovar_button_->setHidden(true);

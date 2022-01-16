@@ -81,13 +81,13 @@ Variable::Variable(const std::string& class_id, const std::string& instance_id,
     registerParameter("unit", &unit_, "");
 
     if (name_.size() == 0)
-        logerr << "DBOVariable: constructor: instance " << instance_id << " has no name";
+        logerr << "Variable: constructor: instance " << instance_id << " has no name";
 
 
     assert(name_.size() > 0);
 
     if (data_type_str_.size() == 0)
-        logerr << "DBOVariable: constructor: name " << name_ << " has no data type";
+        logerr << "Variable: constructor: name " << name_ << " has no data type";
 
     assert(data_type_str_.size() > 0);
     data_type_ = Property::asDataType(data_type_str_);
@@ -99,7 +99,7 @@ Variable::Variable(const std::string& class_id, const std::string& instance_id,
 
     representation_ = stringToRepresentation(representation_str_);
 
-    // loginf  << "DBOVariable: constructor: name " << id_ << " unitdim '" << unit_dimension_ << "'
+    // loginf  << "Variable: constructor: name " << id_ << " unitdim '" << unit_dimension_ << "'
     // unitunit '" << unit_unit_ << "'";
 
     assert (db_column_name_.size());
@@ -108,10 +108,10 @@ Variable::Variable(const std::string& class_id, const std::string& instance_id,
     createSubConfigurables();
 }
 
-//DBOVariable& DBOVariable::operator=(DBOVariable&& other)
+//Variable& Variable::operator=(Variable&& other)
 ////: Configurable(std::move(other))
 //{
-//    loginf << "DBOVariable: move operator: moving";
+//    loginf << "Variable: move operator: moving";
 
 //    data_type_ = other.data_type_;
 //    data_type_str_ = other.data_type_str_;
@@ -163,7 +163,7 @@ Variable::Variable(const std::string& class_id, const std::string& instance_id,
 //    other.configuration().updateParameterPointer("unit", &unit_);
 
 //    // return *this;
-//    return static_cast<DBOVariable&>(Configurable::operator=(std::move(other)));
+//    return static_cast<Variable&>(Configurable::operator=(std::move(other)));
 //}
 
 Variable::~Variable()
@@ -191,7 +191,7 @@ void Variable::generateSubConfigurable(const std::string& class_id,
 //        //configuration().removeSubConfiguration(class_id, instance_id);
 //    }
 //    else
-        throw std::runtime_error("DBOVariable: generateSubConfigurable: unknown class_id " +
+        throw std::runtime_error("Variable: generateSubConfigurable: unknown class_id " +
                                      class_id);
 }
 
@@ -209,7 +209,7 @@ bool Variable::operator==(const Variable& var)
 
 void Variable::print()
 {
-    loginf << "DBOVariable: print: dbo " << Configurable::parent().instanceId() << " id " << name_
+    loginf << "Variable: print: dbo " << Configurable::parent().instanceId() << " id " << name_
            << " data type " << data_type_str_;
 }
 
@@ -233,11 +233,11 @@ const std::string& Variable::dboName() const
 
 void Variable::name(const std::string& name)
 {
-    loginf << "DBOVariable: name: old " << name_ << " new " << name;
+    loginf << "Variable: name: old " << name_ << " new " << name;
     name_ = name;
 }
 
-//const std::string& DBOVariable::metaTable() const
+//const std::string& Variable::metaTable() const
 //{
 //    assert(db_object_);
 //    return db_object_->currentMetaTable();
@@ -264,12 +264,12 @@ std::string Variable::dbColumnIdentifier() const
     return dbTableName()+":"+dbColumnName();
 }
 
-//void DBOVariable::setMinMax()
+//void Variable::setMinMax()
 //{
 //    assert(!min_max_set_);
 
 //    assert(db_object_);
-//    logdbg << "DBOVariable " << db_object_->name() << " " << name_ << ": setMinMax";
+//    logdbg << "Variable " << db_object_->name() << " " << name_ << ": setMinMax";
 
 //    if (!dbObject().existsInDB() || !dbObject().count())
 //    {
@@ -287,34 +287,34 @@ std::string Variable::dbColumnIdentifier() const
 
 //    min_max_set_ = true;
 
-//    logdbg << "DBOVariable: setMinMax: min " << min_ << " max " << max_;
+//    logdbg << "Variable: setMinMax: min " << min_ << " max " << max_;
 //}
 
-//std::string DBOVariable::getMinString()
+//std::string Variable::getMinString()
 //{
 //    if (!min_max_set_)
 //        setMinMax();  // already unit transformed
 
 //    assert(min_max_set_);
 
-//    logdbg << "DBOVariable: getMinString: object " << dboName() << " name " << name()
+//    logdbg << "Variable: getMinString: object " << dboName() << " name " << name()
 //           << " returning " << min_;
 //    return min_;
 //}
 
-//std::string DBOVariable::getMaxString()
+//std::string Variable::getMaxString()
 //{
 //    if (!min_max_set_)
 //        setMinMax();  // is already unit transformed
 
 //    assert(min_max_set_);
 
-//    logdbg << "DBOVariable: getMaxString: object " << dboName() << " name " << name()
+//    logdbg << "Variable: getMaxString: object " << dboName() << " name " << name()
 //           << " returning " << max_;
 //    return max_;
 //}
 
-//std::string DBOVariable::getMinStringRepresentation()
+//std::string Variable::getMinStringRepresentation()
 //{
 //    if (representation_ == Representation::STANDARD)
 //        return getMinString();
@@ -322,7 +322,7 @@ std::string Variable::dbColumnIdentifier() const
 //        return getRepresentationStringFromValue(getMinString());
 //}
 
-//std::string DBOVariable::getMaxStringRepresentation()
+//std::string Variable::getMaxStringRepresentation()
 //{
 //    if (representation_ == Representation::STANDARD)
 //        return getMaxString();
@@ -361,7 +361,7 @@ void Variable::representation(const Variable::Representation& representation)
 
 std::string Variable::getRepresentationStringFromValue(const std::string& value_str) const
 {
-    logdbg << "DBOVariable: getRepresentationStringFromValue: value " << value_str << " data_type "
+    logdbg << "Variable: getRepresentationStringFromValue: value " << value_str << " data_type "
            << Property::asString(data_type_) << " representation "
            << representationToString(representation_);
 
@@ -420,13 +420,13 @@ std::string Variable::getRepresentationStringFromValue(const std::string& value_
         }
         case PropertyDataType::STRING:
             throw std::invalid_argument(
-                "DBOVariable: getRepresentationStringFromValue: representation of string variable"
+                "Variable: getRepresentationStringFromValue: representation of string variable"
                 " impossible");
         default:
-            logerr << "DBOVariable: getRepresentationStringFromValue:: unknown property type "
+            logerr << "Variable: getRepresentationStringFromValue:: unknown property type "
                    << Property::asString(data_type_);
             throw std::runtime_error(
-                "DBOVariable: getRepresentationStringFromValue:: unknown property type " +
+                "Variable: getRepresentationStringFromValue:: unknown property type " +
                 Property::asString(data_type_));
     }
 }
@@ -488,7 +488,7 @@ std::string Variable::getValueStringFromRepresentation(
 
 std::string Variable::multiplyString(const std::string& value_str, double factor) const
 {
-    logdbg << "DBOVariable: multiplyString: value " << value_str << " factor " << factor
+    logdbg << "Variable: multiplyString: value " << value_str << " factor " << factor
            << " data_type " << Property::asString(data_type_);
 
     if (value_str == NULL_STRING)
@@ -563,15 +563,15 @@ std::string Variable::multiplyString(const std::string& value_str, double factor
         }
         case PropertyDataType::STRING:
             throw std::invalid_argument(
-                "DBOVariable: multiplyString: multiplication of string variable impossible");
+                "Variable: multiplyString: multiplication of string variable impossible");
         default:
-            logerr << "DBOVariable: multiplyString:: unknown property type "
+            logerr << "Variable: multiplyString:: unknown property type "
                    << Property::asString(data_type_);
-            throw std::runtime_error("DBOVariable: multiplyString:: unknown property type " +
+            throw std::runtime_error("Variable: multiplyString:: unknown property type " +
                                      Property::asString(data_type_));
     }
 
-    logdbg << "DBOVariable: multiplyString: return value " << return_string;
+    logdbg << "Variable: multiplyString: return value " << return_string;
 
     return return_string;
 }
@@ -579,7 +579,7 @@ std::string Variable::multiplyString(const std::string& value_str, double factor
 const std::string& Variable::getLargerValueString(const std::string& value_a_str,
                                                      const std::string& value_b_str) const
 {
-    logdbg << "DBOVariable: getLargerValueString: value a " << value_a_str << " b " << value_b_str
+    logdbg << "Variable: getLargerValueString: value a " << value_a_str << " b " << value_b_str
            << " data_type " << Property::asString(data_type_);
 
     if (value_a_str == NULL_STRING || value_b_str == NULL_STRING)
@@ -634,11 +634,11 @@ const std::string& Variable::getLargerValueString(const std::string& value_a_str
         }
         case PropertyDataType::STRING:
             throw std::invalid_argument(
-                "DBOVariable: getLargerValueString: operation on string variable impossible");
+                "Variable: getLargerValueString: operation on string variable impossible");
         default:
-            logerr << "DBOVariable: getLargerValueString:: unknown property type "
+            logerr << "Variable: getLargerValueString:: unknown property type "
                    << Property::asString(data_type_);
-            throw std::runtime_error("DBOVariable: getLargerValueString:: unknown property type " +
+            throw std::runtime_error("Variable: getLargerValueString:: unknown property type " +
                                      Property::asString(data_type_));
     }
 }
@@ -646,7 +646,7 @@ const std::string& Variable::getLargerValueString(const std::string& value_a_str
 const std::string& Variable::getSmallerValueString(const std::string& value_a_str,
                                                       const std::string& value_b_str) const
 {
-    logdbg << "DBOVariable: getSmallerValueString: value a " << value_a_str << " b " << value_b_str
+    logdbg << "Variable: getSmallerValueString: value a " << value_a_str << " b " << value_b_str
            << " data_type " << Property::asString(data_type_);
 
     if (value_a_str == NULL_STRING || value_b_str == NULL_STRING)
@@ -701,11 +701,11 @@ const std::string& Variable::getSmallerValueString(const std::string& value_a_st
         }
         case PropertyDataType::STRING:
             throw std::invalid_argument(
-                "DBOVariable: getSmallerValueString: operation on string variable impossible");
+                "Variable: getSmallerValueString: operation on string variable impossible");
         default:
-            logerr << "DBOVariable: getSmallerValueString:: unknown property type "
+            logerr << "Variable: getSmallerValueString:: unknown property type "
                    << Property::asString(data_type_);
-            throw std::runtime_error("DBOVariable: getSmallerValueString:: unknown property type " +
+            throw std::runtime_error("Variable: getSmallerValueString:: unknown property type " +
                                      Property::asString(data_type_));
     }
 }

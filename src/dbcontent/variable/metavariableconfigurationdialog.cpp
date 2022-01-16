@@ -33,7 +33,7 @@ MetaVariableConfigurationDialog::MetaVariableConfigurationDialog(DBContentManage
 
     QVBoxLayout* main_layout = new QVBoxLayout();
 
-    QSettings settings("COMPASS", "MetaDBOVariableConfigurationDialog");
+    QSettings settings("COMPASS", "MetaVariableConfigurationDialog");
 
     splitter_ = new QSplitter();
     splitter_->setOrientation(Qt::Horizontal);
@@ -87,7 +87,7 @@ MetaVariableConfigurationDialog::MetaVariableConfigurationDialog(DBContentManage
 
 MetaVariableConfigurationDialog::~MetaVariableConfigurationDialog()
 {
-    QSettings settings("COMPASS", "MetaDBOVariableConfigurationDialog");
+    QSettings settings("COMPASS", "MetaVariableConfigurationDialog");
     settings.setValue("mainSplitterSizes", splitter_->saveState());
 }
 
@@ -122,7 +122,7 @@ void MetaVariableConfigurationDialog::itemSelectedSlot(const QString& text)
 {
     string item_name = text.toStdString();
 
-    loginf << "MetaDBOVariableConfigurationDialog: itemSelectedSlot: item '" << item_name << "'";
+    loginf << "MetaVariableConfigurationDialog: itemSelectedSlot: item '" << item_name << "'";
 
     assert (detail_widget_);
 
@@ -149,7 +149,7 @@ void MetaVariableConfigurationDialog::addAllMetaVariablesSlot()
         {
             if (dbo_man_.usedInMetaVariable(*var_it.get()))
             {
-                loginf << "MetaDBOVariableConfigurationDialog: addAllMetaVariablesSlot: not adding dbovariable "
+                loginf << "MetaVariableConfigurationDialog: addAllMetaVariablesSlot: not adding dbovariable "
                        << var_it->name() << " since already used";
                 continue;
             }
@@ -174,16 +174,16 @@ void MetaVariableConfigurationDialog::addAllMetaVariablesSlot()
                 if (!dbo_man_.existsMetaVariable(var_it->name()))
                 {
                     loginf
-                            << "MetaDBOVariableConfigurationDialog: addAllMetaVariablesSlot: adding meta variable "
+                            << "MetaVariableConfigurationDialog: addAllMetaVariablesSlot: adding meta variable "
                         << var_it->name();
 
-                    std::string instance = "MetaDBOVariable" + var_it->name() + "0";
+                    std::string instance = "MetaVariable" + var_it->name() + "0";
 
                     Configuration& config =
-                            dbo_man_.addNewSubConfiguration("MetaDBOVariable", instance);
+                            dbo_man_.addNewSubConfiguration("MetaVariable", instance);
                     config.addParameterString("name", var_it->name());
 
-                    dbo_man_.generateSubConfigurable("MetaDBOVariable", instance);
+                    dbo_man_.generateSubConfigurable("MetaVariable", instance);
                 }
 
                 assert(dbo_man_.existsMetaVariable(var_it->name()));
@@ -193,7 +193,7 @@ void MetaVariableConfigurationDialog::addAllMetaVariablesSlot()
                 {
                     if (!meta_var.existsIn(*dbo_it2))
                     {
-                        loginf << "MetaDBOVariableConfigurationDialog: addAllMetaVariablesSlot: adding meta "
+                        loginf << "MetaVariableConfigurationDialog: addAllMetaVariablesSlot: adding meta "
                                   "variable "
                                << var_it->name() << " dbo variable " << var_it->name();
                         meta_var.addVariable(*dbo_it2, var_it->name());

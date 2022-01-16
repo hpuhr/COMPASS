@@ -47,9 +47,9 @@ class DBContentWidget : public QWidget
     void editNameSlot();
     void editInfoSlot();
 
-    void editDBOVariableNameSlot();
-    void editDBOVariableDescriptionSlot();
-    void editDBOVariableDBColumnSlot(const QString& text);
+    void editDBContentVariableNameSlot();
+    void editDBContentVariableDescriptionSlot();
+    void editDBContentVariableDBColumnSlot(const QString& text);
     void deleteDBOVarSlot();
 
     void updateDBOVarsGridSlot();
@@ -75,7 +75,6 @@ class DBContentWidget : public QWidget
 
     QPushButton* new_meta_button_{nullptr};
 
-    /// @brief Grid with all DBOVariables
     QGridLayout* dbovars_grid_{nullptr};
 };
 

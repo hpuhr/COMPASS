@@ -194,7 +194,7 @@ void JSONObjectParserWidget::updateMappingsGrid()
     comment_label->setFont(font_bold);
     mappings_grid_->addWidget(comment_label, row, 2);
 
-    QLabel* dbovar_label = new QLabel("DBOVariable");
+    QLabel* dbovar_label = new QLabel("DBContent Variable");
     dbovar_label->setFont(font_bold);
     mappings_grid_->addWidget(dbovar_label, row, 3);
 
@@ -258,7 +258,8 @@ void JSONObjectParserWidget::updateMappingsGrid()
         var_sel->showEmptyVariable(true);
         if (map_it.second.second->hasVariable())
             var_sel->selectedVariable(map_it.second.second->variable());
-        connect(var_sel, SIGNAL(selectionChanged()), this, SLOT(mappingDBOVariableChangedSlot()));
+        connect(var_sel, &dbContent::VariableSelectionWidget::selectionChanged,
+                this, &JSONObjectParserWidget::mappingDBContentVariableChangedSlot);
         var_sel->setProperty("mapping", data);
         // var_sel->setProperty("row", row);
         mappings_grid_->addWidget(var_sel, row, 3);
@@ -382,7 +383,7 @@ void JSONObjectParserWidget::mappingActiveChangedSlot()
 
     if (!mapping->hasVariable() && widget->checkState() == Qt::Checked)
     {
-        QMessageBox m_warning(QMessageBox::Warning, "Activation failed", "DBOVariable not defined.",
+        QMessageBox m_warning(QMessageBox::Warning, "Activation failed", "DBContent Variable not defined.",
                               QMessageBox::Ok);
 
         m_warning.exec();
@@ -435,9 +436,9 @@ void JSONObjectParserWidget::mappingCommentChangedSlot()
     mapping->comment(widget->text().toStdString());
 }
 
-void JSONObjectParserWidget::mappingDBOVariableChangedSlot()
+void JSONObjectParserWidget::mappingDBContentVariableChangedSlot()
 {
-    loginf << "JSONObjectParserWidget: mappingDBOVariableChangedSlot";
+    loginf << "JSONObjectParserWidget: mappingDBContentVariableChangedSlot";
 
     dbContent::VariableSelectionWidget* var_widget =
             static_cast<dbContent::VariableSelectionWidget*>(sender());
@@ -450,13 +451,13 @@ void JSONObjectParserWidget::mappingDBOVariableChangedSlot()
 
     if (var_widget->hasVariable())
     {
-        loginf << "JSONObjectParserWidget: mappingDBOVariableChangedSlot: variable set";
+        loginf << "JSONObjectParserWidget: mappingDBContentVariableChangedSlot: variable set";
 
         mapping->dboVariableName(var_widget->selectedVariable().name());
     }
     else
     {
-        loginf << "JSONObjectParserWidget: mappingDBOVariableChangedSlot: variable removed";
+        loginf << "JSONObjectParserWidget: mappingDBContentVariableChangedSlot: variable removed";
 
         mapping->dboVariableName("");
     }

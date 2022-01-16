@@ -31,7 +31,7 @@
 using namespace dbContent;
 
 AllBufferCSVExportJob::AllBufferCSVExportJob(
-    std::map<std::string, std::shared_ptr<Buffer>> buffers, OrderedSet* read_set,
+    std::map<std::string, std::shared_ptr<Buffer>> buffers, VariableOrderedSet* read_set,
     std::map<unsigned int, std::string> number_to_dbo,
     const std::vector<std::pair<unsigned int, unsigned int>>& row_indexes,
     const std::string& file_name, bool overwrite, bool only_selected, bool use_presentation,

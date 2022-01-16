@@ -487,7 +487,7 @@ void ListBoxViewConfigWidget::updateSetWidget()
 
     assert (view_->getDataSource()->hasCurrentSet());
 
-    connect(view_->getDataSource()->getSet(), &dbContent::OrderedSet::variableAddedChangedSignal,
+    connect(view_->getDataSource()->getSet(), &dbContent::VariableOrderedSet::variableAddedChangedSignal,
             this, &ListBoxViewConfigWidget::reloadWantedSlot, Qt::UniqueConnection);
 
     QWidget* set_widget = view_->getDataSource()->getSet()->widget();

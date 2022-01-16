@@ -34,7 +34,7 @@ public slots:
     void mappingInArrayChangedSlot();
     void mappingAppendChangedSlot();
 
-    void mappingDBOVariableChangedSlot();
+    void mappingDBContentVariableChangedSlot();
     void dboVariableCommentChangedSlot();
 
     void createNewDBVariableSlot(); // create new dbovar, and mapping if required
@@ -80,7 +80,7 @@ private:
     bool setting_new_content_ {false};
 
     void showJSONKey (const std::string& key, bool unmapped_selectable);
-    void showDBOVariable (const std::string& var_name, bool mapping_exists=false);
+    void showDBContentVariable (const std::string& var_name, bool mapping_exists=false);
 
 };
 
