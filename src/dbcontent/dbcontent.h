@@ -15,8 +15,8 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DBOBJECT_H_
-#define DBOBJECT_H_
+#ifndef DBCONTENT_DBCONTENT_H_
+#define DBCONTENT_DBCONTENT_H_
 
 #include "configurable.h"
 #include "dboassociationcollection.h"
@@ -218,4 +218,4 @@ protected:
 
 };
 
-#endif /* DBOBJECT_H_ */
+#endif /* DBCONTENT_DBCONTENT_H_ */

@@ -15,8 +15,8 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DBOLABELDEFINITIONWIDGET_H
-#define DBOLABELDEFINITIONWIDGET_H
+#ifndef DBCONTENT_LABELDEFINITIONWIDGET_H
+#define DBCONTENT_LABELDEFINITIONWIDGET_H
 
 #include <QStringList>
 #include <QWidget>
@@ -55,4 +55,4 @@ class LabelDefinitionWidget : public QWidget
 
 }
 
-#endif  // DBOLABELDEFINITIONWIDGET_H
+#endif  // DBCONTENT_LABELDEFINITIONWIDGET_H

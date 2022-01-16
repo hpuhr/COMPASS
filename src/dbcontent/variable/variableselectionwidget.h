@@ -15,8 +15,8 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DBOVARIABLESELECTIONWIDGET_H
-#define DBOVARIABLESELECTIONWIDGET_H
+#ifndef DBCONTENT_VARIABLESELECTIONWIDGET_H
+#define DBCONTENT_VARIABLESELECTIONWIDGET_H
 
 #include "property.h"
 
@@ -107,4 +107,4 @@ class VariableSelectionWidget : public QFrame
 
 }
 
-#endif  // DBOVARIABLESELECTIONWIDGET_H
+#endif  // DBCONTENT_VARIABLESELECTIONWIDGET_H

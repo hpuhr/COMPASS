@@ -15,8 +15,8 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DBOBJECTMANAGERWIDGET_H_
-#define DBOBJECTMANAGERWIDGET_H_
+#ifndef DBCONTENT_DBCONTENTMANAGERWIDGET_H_
+#define DBCONTENT_DBCONTENTMANAGERWIDGET_H_
 
 #include <QWidget>
 #include <map>
@@ -102,4 +102,4 @@ class DBContentManagerWidget: public QWidget
     std::map<dbContent::MetaVariable*, dbContent::MetaVariableWidget*> edit_meta_widgets_;
 };
 
-#endif /* DBOBJECTMANAGERWIDGET_H_ */
+#endif /* DBCONTENT_DBCONTENTMANAGERWIDGET_H_ */

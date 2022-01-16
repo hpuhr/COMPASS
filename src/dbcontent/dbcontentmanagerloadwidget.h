@@ -15,8 +15,8 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DBOBJECTMANAGERINFOWIDGET_H_
-#define DBOBJECTMANAGERINFOWIDGET_H_
+#ifndef DBCONTENT_DBCONTENTMANAGERLOADWIDGET_H_
+#define DBCONTENT_DBCONTENTMANAGERLOADWIDGET_H_
 
 #include <QFrame>
 #include <map>
@@ -64,4 +64,4 @@ private:
     void updateExistingContent();
 };
 
-#endif /* DBOBJECTMANAGERINFOWIDGET_H_ */
+#endif /* DBCONTENT_DBCONTENTMANAGERLOADWIDGET_H_ */

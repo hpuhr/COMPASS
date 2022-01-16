@@ -15,8 +15,8 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DBOVARIABLEORDEREDSETWIDGET_H_
-#define DBOVARIABLEORDEREDSETWIDGET_H_
+#ifndef DBCONTENT_VARIABLEORDEREDSETWIDGET_H_
+#define DBCONTENT_VARIABLEORDEREDSETWIDGET_H_
 
 class QListWidget;
 
@@ -72,4 +72,4 @@ class VariableOrderedSetWidget : public QWidget
 
 }
 
-#endif /* DBOVariableOrderedSetWidget_H_ */
+#endif /* DBCONTENT_VARIABLEORDEREDSETWIDGET_H_ */

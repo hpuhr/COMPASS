@@ -15,8 +15,8 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef SELECTDBOBJECTDIALOG_H
-#define SELECTDBOBJECTDIALOG_H
+#ifndef DBCONTENT_SELECTDIALOG_H
+#define DBCONTENT_SELECTDIALOG_H
 
 #include <QComboBox>
 #include <QDialog>
@@ -79,4 +79,4 @@ class SelectDBContentDialog : public QDialog
 
 }
 
-#endif  // SELECTDBOBJECTDIALOG_H
+#endif  // DBCONTENT_SELECTDIALOG_H

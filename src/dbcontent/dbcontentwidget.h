@@ -15,8 +15,8 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DBOBJECTEDITWIDGET_H_
-#define DBOBJECTEDITWIDGET_H_
+#ifndef DBCONTENT_DBCONTENTWIDGET_H_
+#define DBCONTENT_DBCONTENTWIDGET_H_
 
 #include <QWidget>
 #include <map>
@@ -79,4 +79,4 @@ class DBContentWidget : public QWidget
     QGridLayout* dbovars_grid_{nullptr};
 };
 
-#endif /* DBOBJECTEDITWIDGET_H_ */
+#endif /* DBCONTENT_DBCONTENTWIDGET_H_ */

@@ -15,8 +15,8 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DBOVARIABLEWIDGET_H_
-#define DBOVARIABLEWIDGET_H_
+#ifndef DBCONTENT_VARIABLEWIDGET_H_
+#define DBCONTENT_VARIABLEWIDGET_H_
 
 #include <QWidget>
 #include <map>
@@ -80,4 +80,4 @@ class VariableWidget : public QWidget
 
 }
 
-#endif /* DBOBJECTEDITWIDGET_H_ */
+#endif /* DBCONTENT_VARIABLEWIDGET_H_ */

@@ -15,8 +15,8 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DBOLABELDEFINITION_H
-#define DBOLABELDEFINITION_H
+#ifndef DBCONTENT_LABELDEFINITION_H
+#define DBCONTENT_LABELDEFINITION_H
 
 #include <QObject>
 #include <list>
@@ -112,4 +112,4 @@ class LabelDefinition : public QObject, public Configurable
 
 }
 
-#endif  // DBOLABELDEFINITION_H
+#endif  // DBCONTENT_LABELDEFINITION_H

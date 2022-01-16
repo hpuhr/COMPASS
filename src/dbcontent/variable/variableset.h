@@ -15,8 +15,8 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DBOVARIABLESET_H_
-#define DBOVARIABLESET_H_
+#ifndef DBCONTENT_VARIABLESET_H_
+#define DBCONTENT_VARIABLESET_H_
 
 #include "propertylist.h"
 
@@ -82,4 +82,4 @@ class VariableSet
 
 }
 
-#endif /* DBOVARIABLESET_H_ */
+#endif /* DBCONTENT_VARIABLESET_H_ */

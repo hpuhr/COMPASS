@@ -15,8 +15,8 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef METADBOVARIABLE_H
-#define METADBOVARIABLE_H
+#ifndef DBCONTENT_METAVARIABLE_H
+#define DBCONTENT_METAVARIABLE_H
 
 #include "configurable.h"
 #include "dbcontent/dbcontentmanager.h"
@@ -95,4 +95,4 @@ class MetaVariable : public Configurable
 
 }
 
-#endif  // METADBOVARIABLE_H
+#endif  // DBCONTENT_METAVARIABLE_H

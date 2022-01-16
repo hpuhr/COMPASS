@@ -15,8 +15,8 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DBOVARIABLE_H_
-#define DBOVARIABLE_H_
+#ifndef DBCONTENT_VARIABLE_H_
+#define DBCONTENT_VARIABLE_H_
 
 #include <QObject>
 #include <string>
@@ -225,4 +225,4 @@ private:
 
 Q_DECLARE_METATYPE(dbContent::Variable*)
 
-#endif /* DBOVARIABLE_H_ */
+#endif /* DBCONTENT_VARIABLE_H_ */

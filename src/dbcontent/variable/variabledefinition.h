@@ -1,5 +1,5 @@
-#ifndef DBOVARIABLEDEFINITION_H
-#define DBOVARIABLEDEFINITION_H
+#ifndef DBCONTENT_VARIABLEDEFINITION_H
+#define DBCONTENT_VARIABLEDEFINITION_H
 
 #include <string>
 
@@ -53,4 +53,4 @@ class VariableDefinition : public Configurable
 
 }
 
-#endif // DBOVARIABLEDEFINITION_H
+#endif // DBCONTENT_VARIABLEDEFINITION_H

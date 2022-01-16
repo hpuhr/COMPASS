@@ -15,8 +15,8 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DBOBJECTMANAGER_H_
-#define DBOBJECTMANAGER_H_
+#ifndef DBCONTENT_DBCONTENTMANAGER_H_
+#define DBCONTENT_DBCONTENTMANAGER_H_
 
 #include "configurable.h"
 #include "dbcontent/source/configurationdatasource.h"
@@ -223,4 +223,4 @@ protected:
     void loadMaxRecordNumber();
 };
 
-#endif /* DBOBJECTMANAGER_H_ */
+#endif /* DBCONTENT_DBCONTENTMANAGER_H_ */
