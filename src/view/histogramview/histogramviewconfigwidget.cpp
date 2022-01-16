@@ -18,7 +18,7 @@
 #include "histogramviewconfigwidget.h"
 #include "compass.h"
 #include "dbcontent/dbcontentmanager.h"
-#include "dbovariableselectionwidget.h"
+#include "dbcontent/variable/variableselectionwidget.h"
 #include "histogramview.h"
 #include "histogramviewdatasource.h"
 #include "logger.h"
@@ -65,7 +65,7 @@ HistogramViewConfigWidget::HistogramViewConfigWidget(HistogramView* view, QWidge
                 &HistogramViewConfigWidget::showSelectedVariableDataSlot);
         cfg_layout->addWidget(selected_var_check_);
 
-        select_var_ = new dbContent::DBContentVariableSelectionWidget();
+        select_var_ = new dbContent::VariableSelectionWidget();
         select_var_->showMetaVariables(true);
         select_var_->showDataTypesOnly({PropertyDataType::BOOL,
                                         PropertyDataType::CHAR,
@@ -83,7 +83,7 @@ HistogramViewConfigWidget::HistogramViewConfigWidget(HistogramView* view, QWidge
             else
                 select_var_->selectedVariable(view_->dataVar());
         }
-        connect(select_var_, &dbContent::DBContentVariableSelectionWidget::selectionChanged, this,
+        connect(select_var_, &dbContent::VariableSelectionWidget::selectionChanged, this,
                 &HistogramViewConfigWidget::selectedVariableChangedSlot);
         cfg_layout->addWidget(select_var_);
 

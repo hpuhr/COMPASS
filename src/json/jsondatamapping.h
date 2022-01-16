@@ -29,7 +29,7 @@
 
 namespace dbContent {
 
-class DBContentVariable;
+class Variable;
 
 }
 
@@ -70,7 +70,7 @@ class JSONDataMapping : public Configurable
     bool canBeActive() const;
 
     bool hasVariable() { return variable_ != nullptr; }
-    dbContent::DBContentVariable& variable() const;
+    dbContent::Variable& variable() const;
 
     bool mandatory() const;
     void mandatory(bool mandatory);
@@ -113,7 +113,7 @@ class JSONDataMapping : public Configurable
 
     std::string db_object_name_;
     std::string dbovariable_name_;
-    dbContent::DBContentVariable* variable_{nullptr};
+    dbContent::Variable* variable_{nullptr};
 
     bool mandatory_{false};
 

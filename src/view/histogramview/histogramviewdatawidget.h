@@ -20,7 +20,7 @@
 
 #include "global.h"
 #include "nullablevector.h"
-#include "dbovariable.h"
+#include "dbcontent/variable/variable.h"
 #include "histogramviewdatatoolwidget.h"
 #include "histogramviewchartview.h"
 
@@ -260,7 +260,7 @@ protected:
 
     template<typename T>
     void updateCounts(const std::string& dbo_name, NullableVector<T>& data, NullableVector<bool>& selected_vec,
-                      dbContent::DBContentVariable* data_var)
+                      dbContent::Variable* data_var)
     {
         loginf << "HistogramViewDataWidget: updateCounts: start dbo " << dbo_name;
 
@@ -274,7 +274,7 @@ protected:
         {
             for (unsigned int bin_cnt = 0; bin_cnt < num_bins_; ++bin_cnt)
             {
-                if (data_var->representation() != dbContent::DBContentVariable::Representation::STANDARD)
+                if (data_var->representation() != dbContent::Variable::Representation::STANDARD)
                     labels_.push_back(data_var->getAsSpecialRepresentationString(
                                           data_min_.toDouble()+bin_cnt*bin_size_+bin_size_/2.0f));
                 else

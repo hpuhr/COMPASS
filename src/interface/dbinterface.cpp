@@ -25,7 +25,7 @@
 //#include "dbinterfaceinfowidget.h"
 #include "dbcontent/dbcontent.h"
 #include "dbcontent/dbcontentmanager.h"
-#include "dbovariable.h"
+#include "dbcontent/variable/variable.h"
 #include "dbresult.h"
 #include "dbtableinfo.h"
 #include "dimension.h"
@@ -39,7 +39,7 @@
 #include "sectorlayer.h"
 #include "evaluationmanager.h"
 #include "dbcontent/source/dbdatasource.h"
-#include "metadbovariable.h"
+#include "dbcontent/variable/metavariable.h"
 
 #include <QApplication>
 #include <QMessageBox>
@@ -347,7 +347,7 @@ unsigned int DBInterface::getMaxRecordNumber(DBContent& object)
     assert (COMPASS::instance().objectManager().metaVariable(
                 DBContent::meta_var_rec_num_id_.name()).existsIn(object.name()));
 
-    DBContentVariable& rec_num_var = COMPASS::instance().objectManager().metaVariable(
+    Variable& rec_num_var = COMPASS::instance().objectManager().metaVariable(
                 DBContent::meta_var_rec_num_id_.name()).getFor(object.name());
 
     assert (object.hasVariable(rec_num_var.name()));
@@ -1097,7 +1097,7 @@ void DBInterface::insertBuffer(DBContent& db_object, std::shared_ptr<Buffer> buf
     {
         assert (db_object.hasVariable(DBContent::meta_var_rec_num_id_.name()));
 
-        DBContentVariable& rec_num_var = db_object.variable(DBContent::meta_var_rec_num_id_.name());
+        Variable& rec_num_var = db_object.variable(DBContent::meta_var_rec_num_id_.name());
         assert (rec_num_var.dataType() == PropertyDataType::UINT);
 
         string rec_num_col_str = rec_num_var.dbColumnName();
@@ -1291,10 +1291,10 @@ void DBInterface::updateBuffer(const std::string& table_name, const std::string&
     db_connection_->finalizeBindStatement();
 }
 
-void DBInterface::prepareRead(const DBContent& dbobject, DBContentVariableSet read_list,
+void DBInterface::prepareRead(const DBContent& dbobject, VariableSet read_list,
                               string custom_filter_clause,
-                              vector<DBContentVariable*> filtered_variables, bool use_order,
-                              DBContentVariable* order_variable, bool use_order_ascending,
+                              vector<Variable*> filtered_variables, bool use_order,
+                              Variable* order_variable, bool use_order_ascending,
                               const string& limit)
 {
     assert(db_connection_);

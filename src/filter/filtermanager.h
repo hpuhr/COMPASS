@@ -34,7 +34,7 @@ class ViewableDataConfig;
 
 namespace dbContent {
 
-class DBContentVariable;
+class Variable;
 
 }
 
@@ -76,7 +76,7 @@ public:
 
     /// @brief Returns the SQL condition for a DBO and sets all used variable names
     std::string getSQLCondition(const std::string& dbo_name,
-                                std::vector<dbContent::DBContentVariable*>& filtered_variables);
+                                std::vector<dbContent::Variable*>& filtered_variables);
 
     /// @brief Returns number of existing filters
     unsigned int getNumFilters();

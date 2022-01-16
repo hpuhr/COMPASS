@@ -1,7 +1,7 @@
 #include "asterixjsonparserdetailwidget.h"
 #include "datatypeformatselectionwidget.h"
-#include "dbovariable.h"
-#include "dbovariableselectionwidget.h"
+#include "dbcontent/variable/variable.h"
+#include "dbcontent/variable/variableselectionwidget.h"
 #include "files.h"
 #include "jsonobjectparser.h"
 #include "logger.h"
@@ -9,8 +9,8 @@
 #include "compass.h"
 #include "dbcontent/dbcontentmanager.h"
 #include "dbcontent/dbcontent.h"
-#include "dbovariableeditdialog.h"
-#include "dbovariablecreatedialog.h"
+#include "dbcontent/variable/variableeditdialog.h"
+#include "dbcontent/variable/variablecreatedialog.h"
 #include "stringconv.h"
 
 #include <QVBoxLayout>
@@ -118,13 +118,13 @@ ASTERIXJSONParserDetailWidget::ASTERIXJSONParserDetailWidget(ASTERIXJSONParser& 
     form_layout->addRow(dbovar_label);
 
     //    DBOVariableSelectionWidget* dbo_var_sel_ {nullptr};
-    dbo_var_sel_ = new dbContent::DBContentVariableSelectionWidget();
+    dbo_var_sel_ = new dbContent::VariableSelectionWidget();
     dbo_var_sel_->showMetaVariables(false);
     dbo_var_sel_->showDBOOnly(parser_.dbObjectName());
     dbo_var_sel_->showEmptyVariable(true);
     dbo_var_sel_->setDisabled(true);
 
-    connect(dbo_var_sel_, &dbContent::DBContentVariableSelectionWidget::selectionChanged,
+    connect(dbo_var_sel_, &dbContent::VariableSelectionWidget::selectionChanged,
             this, &ASTERIXJSONParserDetailWidget::mappingDBOVariableChangedSlot);
     form_layout->addRow("Name", dbo_var_sel_);
 
@@ -565,7 +565,7 @@ void ASTERIXJSONParserDetailWidget::createNewDBVariableSlot()
         name = *parts.rbegin();
 
 
-    dbContent::DBContentVariableCreateDialog dialog (parser_.dbObject(), name, description, this);
+    dbContent::VariableCreateDialog dialog (parser_.dbObject(), name, description, this);
 
     int ret = dialog.exec();
 
@@ -710,7 +710,7 @@ void ASTERIXJSONParserDetailWidget::editDBVariableSlot()
 
     assert (dbo_var_sel_->hasVariable());
 
-    dbContent::DBContentVariableEditDialog dialog (dbo_var_sel_->selectedVariable(), this);
+    dbContent::VariableEditDialog dialog (dbo_var_sel_->selectedVariable(), this);
 
     string current_var_name = dbo_var_sel_->selectedVariable().name();
 

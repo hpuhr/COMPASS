@@ -15,7 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "dbovariablewidget.h"
+#include "dbcontent/variable/variablewidget.h"
 
 #include <QCheckBox>
 #include <QComboBox>
@@ -31,8 +31,8 @@
 #include "configuration.h"
 #include "configurationmanager.h"
 #include "dbcontent/dbcontent.h"
-#include "dbovariable.h"
-#include "dbovariabledatatypecombobox.h"
+#include "dbcontent/variable/variable.h"
+#include "dbcontent/variable/variabledatatypecombobox.h"
 #include "logger.h"
 #include "stringconv.h"
 #include "stringrepresentationcombobox.h"
@@ -43,7 +43,7 @@ using namespace Utils;
 namespace dbContent
 {
 
-DBContentVariableWidget::DBContentVariableWidget(DBContentVariable& variable, QWidget* parent, Qt::WindowFlags f)
+VariableWidget::VariableWidget(Variable& variable, QWidget* parent, Qt::WindowFlags f)
     : QWidget(parent, f), variable_(&variable)
 {
     setMinimumSize(QSize(800, 600));
@@ -83,7 +83,7 @@ DBContentVariableWidget::DBContentVariableWidget(DBContentVariable& variable, QW
     QLabel* type_label = new QLabel("Data Type");
     properties_layout_->addWidget(type_label, row, 0);
 
-    type_combo_ = new DBContentVariableDataTypeComboBox(variable_->dataTypeRef(), variable_->dataTypeStringRef());
+    type_combo_ = new VariableDataTypeComboBox(variable_->dataTypeRef(), variable_->dataTypeStringRef());
     properties_layout_->addWidget(type_combo_, row, 1);
     row++;
 
@@ -109,9 +109,9 @@ DBContentVariableWidget::DBContentVariableWidget(DBContentVariable& variable, QW
     show();
 }
 
-DBContentVariableWidget::~DBContentVariableWidget() {}
+VariableWidget::~VariableWidget() {}
 
-void DBContentVariableWidget::lock()
+void VariableWidget::lock()
 {
     if (locked_)
         return;
@@ -125,7 +125,7 @@ void DBContentVariableWidget::lock()
     locked_ = true;
 }
 
-void DBContentVariableWidget::unlock()
+void VariableWidget::unlock()
 {
     if (!locked_)
         return;
@@ -139,14 +139,14 @@ void DBContentVariableWidget::unlock()
     locked_ = false;
 }
 
-void DBContentVariableWidget::setVariable(DBContentVariable& variable)
+void VariableWidget::setVariable(Variable& variable)
 {
     variable_ = &variable;
 
     update();
 }
 
-void DBContentVariableWidget::update()
+void VariableWidget::update()
 {
     name_edit_->setText(variable_->name().c_str());
     description_edit_->setText(variable_->description().c_str());
@@ -156,7 +156,7 @@ void DBContentVariableWidget::update()
     unit_sel_->update(variable_->dimension(), variable_->unit());
 }
 
-void DBContentVariableWidget::editNameSlot()
+void VariableWidget::editNameSlot()
 {
     logdbg << "DBOVariableWidget: editName";
     assert(name_edit_);
@@ -166,7 +166,7 @@ void DBContentVariableWidget::editNameSlot()
     variable_->name(text);
     emit dboVariableChangedSignal();
 }
-void DBContentVariableWidget::editDescriptionSlot()
+void VariableWidget::editDescriptionSlot()
 {
     logdbg << "DBOVariableWidget: editDescriptionSlot";
     assert(description_edit_);

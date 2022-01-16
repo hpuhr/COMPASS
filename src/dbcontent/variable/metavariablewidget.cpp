@@ -15,7 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "metadbovariablewidget.h"
+#include "dbcontent/variable/metavariablewidget.h"
 
 #include <QComboBox>
 #include <QGridLayout>
@@ -28,9 +28,9 @@
 #include "configuration.h"
 #include "dbcontent/dbcontent.h"
 #include "dbcontent/dbcontentmanager.h"
-#include "dbovariableselectionwidget.h"
+#include "dbcontent/variable/variableselectionwidget.h"
 #include "logger.h"
-#include "metadbovariable.h"
+#include "dbcontent/variable/metavariable.h"
 #include "stringconv.h"
 
 using namespace Utils;
@@ -38,7 +38,7 @@ using namespace Utils;
 namespace dbContent
 {
 
-MetaDBOVariableWidget::MetaDBOVariableWidget(MetaDBOVariable& variable, QWidget* parent,
+MetaVariableWidget::MetaVariableWidget(MetaVariable& variable, QWidget* parent,
                                              Qt::WindowFlags f)
     : QWidget(parent, f), variable_(variable)
 {
@@ -90,9 +90,9 @@ MetaDBOVariableWidget::MetaDBOVariableWidget(MetaDBOVariable& variable, QWidget*
     show();
 }
 
-MetaDBOVariableWidget::~MetaDBOVariableWidget() {}
+MetaVariableWidget::~MetaVariableWidget() {}
 
-void MetaDBOVariableWidget::lock()
+void MetaVariableWidget::lock()
 {
     if (locked_)
         return;
@@ -102,7 +102,7 @@ void MetaDBOVariableWidget::lock()
     setDisabled(true);
 }
 
-void MetaDBOVariableWidget::unlock()
+void MetaVariableWidget::unlock()
 {
     if (!locked_)
         return;
@@ -112,7 +112,7 @@ void MetaDBOVariableWidget::unlock()
     setDisabled(false);
 }
 
-void MetaDBOVariableWidget::editNameSlot()
+void MetaVariableWidget::editNameSlot()
 {
     logdbg << "MetaDBOVariableWidget: editName";
     assert(name_edit_);
@@ -124,10 +124,10 @@ void MetaDBOVariableWidget::editNameSlot()
     emit metaVariableChangedSignal();
 }
 
-void MetaDBOVariableWidget::subVariableChangedSlot()
+void MetaVariableWidget::subVariableChangedSlot()
 {
-    DBContentVariableSelectionWidget* var_sel =
-        dynamic_cast<DBContentVariableSelectionWidget*>(QObject::sender());
+    VariableSelectionWidget* var_sel =
+        dynamic_cast<VariableSelectionWidget*>(QObject::sender());
     assert(var_sel);
     assert(!var_sel->hasMetaVariable());
     assert(selection_widgets_.count(var_sel) > 0);
@@ -140,12 +140,12 @@ void MetaDBOVariableWidget::subVariableChangedSlot()
     if (var_sel->hasVariable())
     {
         assert(!variable_.existsIn(obj_name));
-        DBContentVariable& variable = var_sel->selectedVariable();
+        Variable& variable = var_sel->selectedVariable();
         variable_.addVariable(obj_name, variable.name());
     }
 }
 
-void MetaDBOVariableWidget::updateSlot()
+void MetaVariableWidget::updateSlot()
 {
     assert(grid_layout_);
 
@@ -164,7 +164,7 @@ void MetaDBOVariableWidget::updateSlot()
     {
         grid_layout_->addWidget(new QLabel(obj_it.first.c_str()), row, 0);
 
-        DBContentVariableSelectionWidget* var_sel = new DBContentVariableSelectionWidget(true);
+        VariableSelectionWidget* var_sel = new VariableSelectionWidget(true);
         var_sel->showDBOOnly(obj_it.first);
 
         if (variable_.existsIn(obj_it.first))

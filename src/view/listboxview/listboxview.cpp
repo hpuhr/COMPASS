@@ -153,7 +153,7 @@ ListBoxViewDataWidget* ListBoxView::getDataWidget()
     return widget_->getDataWidget();
 }
 
-dbContent::DBContentVariableSet ListBoxView::getSet(const std::string& dbo_name)
+dbContent::VariableSet ListBoxView::getSet(const std::string& dbo_name)
 {
     assert(data_source_);
 

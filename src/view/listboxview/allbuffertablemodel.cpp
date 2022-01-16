@@ -25,13 +25,13 @@
 #include "buffer.h"
 #include "dbcontent/dbcontent.h"
 #include "dbcontent/dbcontentmanager.h"
-#include "dbovariable.h"
-#include "dbovariableset.h"
+#include "dbcontent/variable/variable.h"
+#include "dbcontent/variable/variableset.h"
 #include "global.h"
 #include "jobmanager.h"
 #include "listboxview.h"
 #include "listboxviewdatasource.h"
-#include "metadbovariable.h"
+#include "dbcontent/variable/metavariable.h"
 
 AllBufferTableModel::AllBufferTableModel(AllBufferTableWidget* table_widget,
                                          ListBoxViewDataSource& data_source)
@@ -228,7 +228,7 @@ QVariant AllBufferTableModel::data(const QModelIndex& index, int role) const
             assert(manager.object(dbo_name).hasVariable(variable_name));
         }
 
-        dbContent::DBContentVariable& variable = (variable_dbo_name == META_OBJECT_NAME)
+        dbContent::Variable& variable = (variable_dbo_name == META_OBJECT_NAME)
                                     ? manager.metaVariable(variable_name).getFor(dbo_name)
                                     : manager.object(dbo_name).variable(variable_name);
         PropertyDataType data_type = variable.dataType();
@@ -517,7 +517,7 @@ void AllBufferTableModel::updateTimeIndexes()
                    << " data, last index " << buffer_index << " size " << buf_it.second->size();
 
             DBContentManager& object_manager = COMPASS::instance().objectManager();
-            const dbContent::DBContentVariable& tod_var =
+            const dbContent::Variable& tod_var =
                     object_manager.metaVariable(DBContent::meta_var_tod_id_.name()).getFor(dbo_name);
 
             assert(buf_it.second->has<float>(tod_var.name()));

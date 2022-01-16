@@ -23,8 +23,8 @@
 #include "dbinterface.h"
 #include "dbcontent/dbcontent.h"
 #include "dbcontent/dbcontentmanager.h"
-#include "dbovariable.h"
-#include "metadbovariable.h"
+#include "dbcontent/variable/variable.h"
+#include "dbcontent/variable/metavariable.h"
 #include "stringconv.h"
 
 #include <math.h>
@@ -596,13 +596,13 @@ void CreateARTASAssociationsJob::createSensorHashes(DBContent& object)
 
     using namespace dbContent;
 
-    MetaDBOVariable* key_meta_var = task_.keyVar();
-    MetaDBOVariable* hash_meta_var = task_.hashVar();
-    MetaDBOVariable* tod_meta_var = task_.todVar();
+    MetaVariable* key_meta_var = task_.keyVar();
+    MetaVariable* hash_meta_var = task_.hashVar();
+    MetaVariable* tod_meta_var = task_.todVar();
 
-    DBContentVariable& key_var = key_meta_var->getFor(dbo_name);
-    DBContentVariable& hash_var = hash_meta_var->getFor(dbo_name);
-    DBContentVariable& tod_var = tod_meta_var->getFor(dbo_name);
+    Variable& key_var = key_meta_var->getFor(dbo_name);
+    Variable& hash_var = hash_meta_var->getFor(dbo_name);
+    Variable& tod_var = tod_meta_var->getFor(dbo_name);
 
     assert(buffer->has<int>(key_var.name()));
     assert(buffer->has<std::string>(hash_var.name()));

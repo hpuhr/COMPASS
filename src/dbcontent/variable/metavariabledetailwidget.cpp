@@ -1,7 +1,7 @@
-#include "metadbovariabledetailwidget.h"
-#include "metadbovariable.h"
+#include "dbcontent/variable/metavariabledetailwidget.h"
+#include "dbcontent/variable/metavariable.h"
 #include "dbcontent/dbcontentmanager.h"
-#include "dbovariableselectionwidget.h"
+#include "dbcontent/variable/variableselectionwidget.h"
 #include "logger.h"
 
 #include <QLabel>
@@ -15,7 +15,7 @@ using namespace std;
 namespace dbContent
 {
 
-MetaDBOVariableDetailWidget::MetaDBOVariableDetailWidget(DBContentManager& dbo_man, QWidget *parent)
+MetaVariableDetailWidget::MetaVariableDetailWidget(DBContentManager& dbo_man, QWidget *parent)
     : QWidget(parent), dbo_man_(dbo_man)
 {
     QVBoxLayout* main_layout = new QVBoxLayout();
@@ -24,7 +24,7 @@ MetaDBOVariableDetailWidget::MetaDBOVariableDetailWidget(DBContentManager& dbo_m
 
     name_edit_ = new QLineEdit();
     connect(name_edit_, &QLineEdit::editingFinished,
-            this, &MetaDBOVariableDetailWidget::nameEditedSlot);
+            this, &MetaVariableDetailWidget::nameEditedSlot);
     name_edit_->setDisabled(true);
     form_layout->addRow("Name", name_edit_);
 
@@ -36,12 +36,12 @@ MetaDBOVariableDetailWidget::MetaDBOVariableDetailWidget(DBContentManager& dbo_m
 
     for (auto dbcont_it = dbo_man_.begin(); dbcont_it != dbo_man_.end(); ++dbcont_it)
     {
-        DBContentVariableSelectionWidget* var_sel = new DBContentVariableSelectionWidget(true);
+        VariableSelectionWidget* var_sel = new VariableSelectionWidget(true);
         var_sel->showDBOOnly(dbcont_it->first);
         var_sel->setProperty("DBObject", dbcont_it->first.c_str());
 
-        connect(var_sel, &DBContentVariableSelectionWidget::selectionChanged,
-                this, &MetaDBOVariableDetailWidget::variableChangedSlot);
+        connect(var_sel, &VariableSelectionWidget::selectionChanged,
+                this, &MetaVariableDetailWidget::variableChangedSlot);
 
         var_sel->setDisabled(true);
 
@@ -54,7 +54,7 @@ MetaDBOVariableDetailWidget::MetaDBOVariableDetailWidget(DBContentManager& dbo_m
 
     delete_button_ = new QPushButton("Delete");
     connect(delete_button_, &QPushButton::clicked,
-            this, &MetaDBOVariableDetailWidget::deleteVariableSlot);
+            this, &MetaVariableDetailWidget::deleteVariableSlot);
     delete_button_->setDisabled(true);
 
     main_layout->addWidget(delete_button_);
@@ -63,7 +63,7 @@ MetaDBOVariableDetailWidget::MetaDBOVariableDetailWidget(DBContentManager& dbo_m
 }
 
 
-void MetaDBOVariableDetailWidget::show (MetaDBOVariable& meta_var)
+void MetaVariableDetailWidget::show (MetaVariable& meta_var)
 {
     loginf << "MetaDBOVariableDetailWidget: show: var '" << meta_var.name() << "'";
 
@@ -92,7 +92,7 @@ void MetaDBOVariableDetailWidget::show (MetaDBOVariable& meta_var)
     delete_button_->setDisabled(false);
 }
 
-void MetaDBOVariableDetailWidget::clear()
+void MetaVariableDetailWidget::clear()
 {
     has_current_entry_ = false;
     meta_var_ = nullptr;
@@ -111,7 +111,7 @@ void MetaDBOVariableDetailWidget::clear()
     delete_button_->setDisabled(true);
 }
 
-void MetaDBOVariableDetailWidget::nameEditedSlot()
+void MetaVariableDetailWidget::nameEditedSlot()
 {
     if (!has_current_entry_)
         return;
@@ -129,14 +129,14 @@ void MetaDBOVariableDetailWidget::nameEditedSlot()
 }
 
 
-void MetaDBOVariableDetailWidget::variableChangedSlot()
+void MetaVariableDetailWidget::variableChangedSlot()
 {
     loginf << "MetaDBOVariableDetailWidget: variableChangedSlot";
 
     if (!has_current_entry_)
         return;
 
-    DBContentVariableSelectionWidget* sel_widget = dynamic_cast<DBContentVariableSelectionWidget*>(QObject::sender());
+    VariableSelectionWidget* sel_widget = dynamic_cast<VariableSelectionWidget*>(QObject::sender());
     assert (sel_widget);
     assert (sel_widget->hasVariable());
 
@@ -144,7 +144,7 @@ void MetaDBOVariableDetailWidget::variableChangedSlot()
     meta_var_->set(sel_widget->selectedVariable());
 }
 
-void MetaDBOVariableDetailWidget::deleteVariableSlot()
+void MetaVariableDetailWidget::deleteVariableSlot()
 {
     loginf << "MetaDBOVariableDetailWidget: deleteVariableSlot";
 

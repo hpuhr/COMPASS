@@ -31,8 +31,8 @@
 #include "filtermanager.h"
 #include "dbcontent/dbcontentmanager.h"
 #include "dbcontent/dbcontent.h"
-#include "metadbovariable.h"
-#include "dbovariable.h"
+#include "dbcontent/variable/metavariable.h"
+#include "dbcontent/variable/variable.h"
 #include "viewpointstablemodel.h"
 #include "viewpointsreportgenerator.h"
 #include "viewpointsreportgeneratordialog.h"
@@ -209,10 +209,10 @@ void ViewManager::checkSubConfigurables()
     }
 }
 
-dbContent::DBContentVariableSet ViewManager::getReadSet(const std::string& dbo_name)
+dbContent::VariableSet ViewManager::getReadSet(const std::string& dbo_name)
 {
-    dbContent::DBContentVariableSet read_set;
-    dbContent::DBContentVariableSet read_set_tmp;
+    dbContent::VariableSet read_set;
+    dbContent::VariableSet read_set_tmp;
 
     for (auto view_it : views_)
     {
@@ -336,7 +336,7 @@ void ViewManager::doViewPointAfterLoad ()
             continue;
         }
 
-        const dbContent::DBContentVariable& tod_var = object_manager.metaVariable("tod").getFor(dbo_name);
+        const dbContent::Variable& tod_var = object_manager.metaVariable("tod").getFor(dbo_name);
 //        const DBOVariable& latitude_var =
 //                object_manager.metaVariable("pos_lat_deg").getFor(dbo_name);
 //        const DBOVariable& longitude_var =
@@ -421,7 +421,7 @@ void ViewManager::selectTimeWindow(float time_min, float time_max)
             continue;
         }
 
-        const dbContent::DBContentVariable& tod_var = object_manager.metaVariable("tod").getFor(dbo_name);
+        const dbContent::Variable& tod_var = object_manager.metaVariable("tod").getFor(dbo_name);
 
         if (object_manager.data().count(dbo_it.first))
         {

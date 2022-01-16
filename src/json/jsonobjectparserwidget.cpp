@@ -19,8 +19,8 @@
 
 #include "configuration.h"
 #include "datatypeformatselectionwidget.h"
-#include "dbovariable.h"
-#include "dbovariableselectionwidget.h"
+#include "dbcontent/variable/variable.h"
+#include "dbcontent/variable/variableselectionwidget.h"
 #include "files.h"
 #include "jsonobjectparser.h"
 #include "logger.h"
@@ -252,7 +252,7 @@ void JSONObjectParserWidget::updateMappingsGrid()
         comment_edit->setProperty("mapping", data);
         mappings_grid_->addWidget(comment_edit, row, 2);
 
-        dbContent::DBContentVariableSelectionWidget* var_sel = new dbContent::DBContentVariableSelectionWidget();
+        dbContent::VariableSelectionWidget* var_sel = new dbContent::VariableSelectionWidget();
         var_sel->showMetaVariables(false);
         var_sel->showDBOOnly(map_it.second.second->dbObjectName());
         var_sel->showEmptyVariable(true);
@@ -439,8 +439,8 @@ void JSONObjectParserWidget::mappingDBOVariableChangedSlot()
 {
     loginf << "JSONObjectParserWidget: mappingDBOVariableChangedSlot";
 
-    dbContent::DBContentVariableSelectionWidget* var_widget =
-            static_cast<dbContent::DBContentVariableSelectionWidget*>(sender());
+    dbContent::VariableSelectionWidget* var_widget =
+            static_cast<dbContent::VariableSelectionWidget*>(sender());
     assert(var_widget);
     QVariant data = var_widget->property("mapping");
     // unsigned int row = var_widget->property("row").toUInt();

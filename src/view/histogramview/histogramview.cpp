@@ -22,7 +22,7 @@
 #include "compass.h"
 #include "dbcontent/dbcontentmanager.h"
 #include "dbcontent/dbcontent.h"
-#include "metadbovariable.h"
+#include "dbcontent/variable/metavariable.h"
 #include "histogramviewconfigwidget.h"
 #include "histogramviewdatasource.h"
 #include "histogramviewdatawidget.h"
@@ -156,17 +156,17 @@ HistogramViewDataWidget* HistogramView::getDataWidget()
     return widget_->getDataWidget();
 }
 
-DBContentVariableSet HistogramView::getSet(const std::string& dbo_name)
+VariableSet HistogramView::getSet(const std::string& dbo_name)
 {
     assert(data_source_);
 
-    DBContentVariableSet set = data_source_->getSet()->getExistingInDBFor(dbo_name);
+    VariableSet set = data_source_->getSet()->getExistingInDBFor(dbo_name);
 
     if (hasDataVar())
     {
         if (isDataVarMeta())
         {
-            MetaDBOVariable& meta_var = metaDataVar();
+            MetaVariable& meta_var = metaDataVar();
 
             if (meta_var.existsIn(dbo_name) && !set.hasVariable(meta_var.getFor(dbo_name)))
                 set.add(meta_var.getFor(dbo_name));
@@ -217,7 +217,7 @@ bool HistogramView::isDataVarMeta ()
     return data_var_dbo_ == META_OBJECT_NAME;
 }
 
-DBContentVariable& HistogramView::dataVar()
+Variable& HistogramView::dataVar()
 {
     assert (hasDataVar());
     assert (!isDataVarMeta());
@@ -226,7 +226,7 @@ DBContentVariable& HistogramView::dataVar()
     return COMPASS::instance().objectManager().object(data_var_dbo_).variable(data_var_name_);
 }
 
-void HistogramView::dataVar (DBContentVariable& var)
+void HistogramView::dataVar (Variable& var)
 {
     loginf << "HistogramView: dataVar: dbo " << var.dboName() << " name " << var.name();
 
@@ -242,7 +242,7 @@ void HistogramView::dataVar (DBContentVariable& var)
         widget_->configWidget()->setStatus("Reload Required", true, Qt::red);
 }
 
-MetaDBOVariable& HistogramView::metaDataVar()
+MetaVariable& HistogramView::metaDataVar()
 {
     assert (hasDataVar());
     assert (isDataVarMeta());
@@ -250,7 +250,7 @@ MetaDBOVariable& HistogramView::metaDataVar()
     return COMPASS::instance().objectManager().metaVariable(data_var_name_);
 }
 
-void HistogramView::metaDataVar (MetaDBOVariable& var)
+void HistogramView::metaDataVar (MetaVariable& var)
 {
     loginf << "HistogramView: metaDataVar: name " << var.name();
 

@@ -21,14 +21,14 @@
 #include <QComboBox>
 #include <stdexcept>
 
-#include "dbovariable.h"
+#include "dbcontent/variable/variable.h"
 #include "global.h"
 #include "logger.h"
 
 namespace dbContent
 {
 
-class DBContentVariableDataTypeComboBox : public QComboBox
+class VariableDataTypeComboBox : public QComboBox
 {
     Q_OBJECT
 
@@ -44,7 +44,7 @@ class DBContentVariableDataTypeComboBox : public QComboBox
 
   public:
     /// @brief Constructor
-    DBContentVariableDataTypeComboBox(PropertyDataType& data_type, std::string& data_type_str, QWidget* parent = 0)
+    VariableDataTypeComboBox(PropertyDataType& data_type, std::string& data_type_str, QWidget* parent = 0)
         : QComboBox(parent), data_type_(data_type), data_type_str_(data_type_str)
     {
         for (auto& type_it : Property::dataTypes2Strings())
@@ -58,7 +58,7 @@ class DBContentVariableDataTypeComboBox : public QComboBox
         connect(this, SIGNAL(activated(const QString&)), this, SLOT(changed()));
     }
     /// @brief Destructor
-    virtual ~DBContentVariableDataTypeComboBox() {}
+    virtual ~VariableDataTypeComboBox() {}
 
     /// @brief Sets the currently selected data type
     void setType(PropertyDataType& type, std::string& data_type_str)

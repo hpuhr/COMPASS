@@ -24,7 +24,7 @@ class CreateARTASAssociationsTask;
 
 namespace dbContent
 {
-class DBContentVariableSelectionWidget;
+class VariableSelectionWidget;
 }
 
 class QPushButton;
@@ -64,15 +64,15 @@ class CreateARTASAssociationsTaskWidget : public TaskWidget
     CreateARTASAssociationsTask& task_;
 
     //DBODataSourceSelectionComboBox* ds_combo_{nullptr};
-    dbContent::DBContentVariableSelectionWidget* ds_id_box_{nullptr};
-    dbContent::DBContentVariableSelectionWidget* track_num_box_{nullptr};
-    dbContent::DBContentVariableSelectionWidget* track_begin_box_{nullptr};
-    dbContent::DBContentVariableSelectionWidget* track_end_box_{nullptr};
-    dbContent::DBContentVariableSelectionWidget* track_coasting_box_{nullptr};
+    dbContent::VariableSelectionWidget* ds_id_box_{nullptr};
+    dbContent::VariableSelectionWidget* track_num_box_{nullptr};
+    dbContent::VariableSelectionWidget* track_begin_box_{nullptr};
+    dbContent::VariableSelectionWidget* track_end_box_{nullptr};
+    dbContent::VariableSelectionWidget* track_coasting_box_{nullptr};
 
-    dbContent::DBContentVariableSelectionWidget* key_box_{nullptr};
-    dbContent::DBContentVariableSelectionWidget* hash_box_{nullptr};
-    dbContent::DBContentVariableSelectionWidget* tod_box_{nullptr};
+    dbContent::VariableSelectionWidget* key_box_{nullptr};
+    dbContent::VariableSelectionWidget* hash_box_{nullptr};
+    dbContent::VariableSelectionWidget* tod_box_{nullptr};
 
     QLineEdit* end_track_time_edit_{nullptr};
 

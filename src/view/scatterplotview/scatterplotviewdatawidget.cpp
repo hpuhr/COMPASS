@@ -21,8 +21,8 @@
 #include "buffer.h"
 #include "dbcontent/dbcontentmanager.h"
 #include "dbcontent/dbcontent.h"
-#include "dbovariable.h"
-#include "metadbovariable.h"
+#include "dbcontent/variable/variable.h"
+#include "dbcontent/variable/metavariable.h"
 #include "scatterplotviewdatasource.h"
 #include "scatterplotviewchartview.h"
 #include "logger.h"
@@ -344,14 +344,14 @@ bool ScatterPlotViewDataWidget::canUpdateFromDataX(std::string dbo_name)
 
     Buffer* buffer = buffers_.at(dbo_name).get();
 
-    DBContentVariable* data_var {nullptr};
+    Variable* data_var {nullptr};
 
     if (!view_->hasDataVarX())
         return false;
 
     if (view_->isDataVarXMeta())
     {
-        MetaDBOVariable& meta_var = view_->metaDataVarX();
+        MetaVariable& meta_var = view_->metaDataVarX();
         if (!meta_var.existsIn(dbo_name))
             return false;
 
@@ -508,7 +508,7 @@ void ScatterPlotViewDataWidget::updateFromDataX(std::string dbo_name, unsigned i
 
     if (buffer_x_counts_.count(dbo_name))
         last_size = buffer_x_counts_.at(dbo_name);
-    DBContentVariable* data_var {nullptr};
+    Variable* data_var {nullptr};
 
     if (!view_->hasDataVarX())
     {
@@ -518,7 +518,7 @@ void ScatterPlotViewDataWidget::updateFromDataX(std::string dbo_name, unsigned i
 
     if (view_->isDataVarXMeta())
     {
-        MetaDBOVariable& meta_var = view_->metaDataVarX();
+        MetaVariable& meta_var = view_->metaDataVarX();
         if (!meta_var.existsIn(dbo_name))
         {
             logwrn << "ScatterPlotViewDataWidget: updateFromDataX: meta var does not exist in dbo";
@@ -728,14 +728,14 @@ bool ScatterPlotViewDataWidget::canUpdateFromDataY(std::string dbo_name)
 
     Buffer* buffer = buffers_.at(dbo_name).get();
 
-    DBContentVariable* data_var {nullptr};
+    Variable* data_var {nullptr};
 
     if (!view_->hasDataVarY())
         return false;
 
     if (view_->isDataVarYMeta())
     {
-        MetaDBOVariable& meta_var = view_->metaDataVarY();
+        MetaVariable& meta_var = view_->metaDataVarY();
         if (!meta_var.existsIn(dbo_name))
             return false;
 
@@ -891,7 +891,7 @@ void ScatterPlotViewDataWidget::updateFromDataY(std::string dbo_name, unsigned i
     if (buffer_y_counts_.count(dbo_name))
         last_size = buffer_y_counts_.at(dbo_name);
 
-    DBContentVariable* data_var {nullptr};
+    Variable* data_var {nullptr};
 
     if (!view_->hasDataVarY())
     {
@@ -901,7 +901,7 @@ void ScatterPlotViewDataWidget::updateFromDataY(std::string dbo_name, unsigned i
 
     if (view_->isDataVarYMeta())
     {
-        MetaDBOVariable& meta_var = view_->metaDataVarY();
+        MetaVariable& meta_var = view_->metaDataVarY();
         if (!meta_var.existsIn(dbo_name))
         {
             logwrn << "ScatterPlotViewDataWidget: updateFromDataY: meta var does not eyist in dbo";

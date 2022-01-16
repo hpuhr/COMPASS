@@ -18,8 +18,8 @@
 #include "buffer.h"
 
 #include "boost/date_time/posix_time/posix_time.hpp"
-#include "dbovariable.h"
-#include "dbovariableset.h"
+#include "dbcontent/variable/variable.h"
+#include "dbcontent/variable/variableset.h"
 #include "logger.h"
 #include "nullablevector.h"
 #include "string.h"
@@ -651,11 +651,11 @@ bool Buffer::isNone(const Property& property, unsigned int row_cnt)
     }
 }
 
-void Buffer::transformVariables(dbContent::DBContentVariableSet& list, bool dbcol2dbovar)
+void Buffer::transformVariables(dbContent::VariableSet& list, bool dbcol2dbovar)
 {
     logdbg << "Buffer: transformVariables: dbo '" << dbo_name_ << "' dbcol2dbovar " << dbcol2dbovar;
 
-    vector<dbContent::DBContentVariable*>& variables = list.getSet();
+    vector<dbContent::Variable*>& variables = list.getSet();
     string variable_name;
     string db_column_name;
 

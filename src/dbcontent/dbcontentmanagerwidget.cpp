@@ -23,11 +23,11 @@
 #include "dbcontent/dbcontent.h"
 #include "dbcontent/dbcontentmanager.h"
 #include "dbcontent/dbcontentwidget.h"
-#include "dbovariable.h"
+#include "dbcontent/variable/variable.h"
 #include "files.h"
 #include "global.h"
-#include "metadbovariable.h"
-#include "metadbovariablewidget.h"
+#include "dbcontent/variable/metavariable.h"
+#include "dbcontent/variable/metavariablewidget.h"
 #include "stringconv.h"
 
 #include <QComboBox>
@@ -290,11 +290,11 @@ void DBContentManagerWidget::editMetaVariableSlot()
 {
     assert(edit_meta_buttons_.find((QPushButton*)sender()) != edit_meta_buttons_.end());
 
-    MetaDBOVariable* meta_var = edit_meta_buttons_[(QPushButton*)sender()];
+    MetaVariable* meta_var = edit_meta_buttons_[(QPushButton*)sender()];
 
     if (edit_meta_widgets_.find(meta_var) == edit_meta_widgets_.end())
     {
-        MetaDBOVariableWidget* widget = meta_var->widget();
+        MetaVariableWidget* widget = meta_var->widget();
         connect(widget, SIGNAL(metaVariableChangedSignal()), this, SLOT(updateMetaVariablesSlot()));
         edit_meta_widgets_[meta_var] = widget;
     }
@@ -306,7 +306,7 @@ void DBContentManagerWidget::deleteMetaVariableSlot()
 {
     assert(delete_meta_buttons_.find((QPushButton*)sender()) != delete_meta_buttons_.end());
 
-    MetaDBOVariable* meta_var = delete_meta_buttons_[(QPushButton*)sender()];
+    MetaVariable* meta_var = delete_meta_buttons_[(QPushButton*)sender()];
     object_manager_.deleteMetaVariable(meta_var->name());
 
     updateMetaVariablesSlot();
@@ -362,7 +362,7 @@ void DBContentManagerWidget::addAllMetaVariablesSlot()
                 }
 
                 assert(object_manager_.existsMetaVariable(var_it->name()));
-                MetaDBOVariable& meta_var = object_manager_.metaVariable(var_it->name());
+                MetaVariable& meta_var = object_manager_.metaVariable(var_it->name());
 
                 for (auto dbo_it2 = found_dbos.begin(); dbo_it2 != found_dbos.end(); dbo_it2++)
                 {

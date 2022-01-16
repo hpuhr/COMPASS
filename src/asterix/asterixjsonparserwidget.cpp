@@ -2,7 +2,7 @@
 #include "asterixjsonparserdetailwidget.h"
 #include "asterixjsonparser.h"
 #include "dbcontent/dbcontent.h"
-#include "dbovariable.h"
+#include "dbcontent/variable/variable.h"
 #include "logger.h"
 
 #include <QSplitter>

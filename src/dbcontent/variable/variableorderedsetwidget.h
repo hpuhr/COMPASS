@@ -23,13 +23,13 @@ class QListWidget;
 #include <QMenu>
 #include <QWidget>
 
-#include "dbovariableorderedset.h"
-#include "dbovariableselectionwidget.h"
+#include "dbcontent/variable/variableorderedset.h"
+#include "dbcontent/variable/variableselectionwidget.h"
 
 namespace dbContent
 {
 
-class DBContentVariableOrderedSetWidget : public QWidget
+class VariableOrderedSetWidget : public QWidget
 {
     Q_OBJECT
 
@@ -51,14 +51,14 @@ class DBContentVariableOrderedSetWidget : public QWidget
 
   public:
     /// @brief Constructor
-    DBContentVariableOrderedSetWidget(DBOVariableOrderedSet& set, QWidget* parent = 0,
+    VariableOrderedSetWidget(OrderedSet& set, QWidget* parent = 0,
                                 Qt::WindowFlags f = 0);
     /// @brief Destructor
-    virtual ~DBContentVariableOrderedSetWidget();
+    virtual ~VariableOrderedSetWidget();
 
   protected:
     /// Represented set
-    DBOVariableOrderedSet& set_;
+    OrderedSet& set_;
     /// Context menu for adding a variable
     QMenu menu_;
 

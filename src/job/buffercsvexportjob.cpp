@@ -23,10 +23,10 @@
 #include "compass.h"
 #include "dbcontent/dbcontent.h"
 #include "dbcontent/dbcontentmanager.h"
-#include "dbovariable.h"
+#include "dbcontent/variable/variable.h"
 
 BufferCSVExportJob::BufferCSVExportJob(std::shared_ptr<Buffer> buffer,
-                                       const dbContent::DBContentVariableSet& read_set, const std::string& file_name,
+                                       const dbContent::VariableSet& read_set, const std::string& file_name,
                                        bool overwrite, bool only_selected, bool use_presentation,
                                        bool show_associations)
     : Job("BufferCSVExportJob"),
@@ -117,7 +117,7 @@ void BufferCSVExportJob::run()
             {
                 value_str = "";
 
-                dbContent::DBContentVariable& variable = read_set_.getVariable(col);
+                dbContent::Variable& variable = read_set_.getVariable(col);
                 PropertyDataType data_type = variable.dataType();
 
                 std::string property_name = variable.name();

@@ -24,10 +24,10 @@
 #include "dbcontent/dbcontent.h"
 #include "dbcontent/dbcontentmanager.h"
 //#include "dbodatasource.h"
-#include "dbovariable.h"
-#include "dbovariableset.h"
+#include "dbcontent/variable/variable.h"
+#include "dbcontent/variable/variableset.h"
 #include "jobmanager.h"
-#include "metadbovariable.h"
+#include "dbcontent/variable/metavariable.h"
 //#include "postprocesstask.h"
 #include "stringconv.h"
 #include "taskmanager.h"
@@ -261,7 +261,7 @@ void CreateAssociationsTask::run()
         if (!dbo_it.second->hasData())
             continue;
 
-        DBContentVariableSet read_set = getReadSetFor(dbo_it.first);
+        VariableSet read_set = getReadSetFor(dbo_it.first);
 
         TODO_ASSERT
 
@@ -594,74 +594,74 @@ void CreateAssociationsTask::closeStatusDialogSlot()
     status_dialog_ = nullptr;
 }
 
-MetaDBOVariable* CreateAssociationsTask::keyVar() const
+MetaVariable* CreateAssociationsTask::keyVar() const
 {
     assert (key_var_);
     return key_var_;
 }
 
-MetaDBOVariable* CreateAssociationsTask::dsIdVar() const
+MetaVariable* CreateAssociationsTask::dsIdVar() const
 {
     assert (key_var_);
     return ds_id_var_;
 }
 
-MetaDBOVariable* CreateAssociationsTask::targetAddrVar() const
+MetaVariable* CreateAssociationsTask::targetAddrVar() const
 {
     assert (target_addr_var_);
     return target_addr_var_;
 }
 
-MetaDBOVariable* CreateAssociationsTask::todVar() const
+MetaVariable* CreateAssociationsTask::todVar() const
 {
     assert (tod_var_);
     return tod_var_;
 }
 
-MetaDBOVariable* CreateAssociationsTask::targetIdVar() const
+MetaVariable* CreateAssociationsTask::targetIdVar() const
 {
     assert (target_id_var_);
     return target_id_var_;
 }
 
-MetaDBOVariable* CreateAssociationsTask::trackNumVar() const
+MetaVariable* CreateAssociationsTask::trackNumVar() const
 {
     assert (track_num_var_);
     return track_num_var_;
 }
 
-MetaDBOVariable* CreateAssociationsTask::trackEndVar() const
+MetaVariable* CreateAssociationsTask::trackEndVar() const
 {
     assert (track_end_var_);
     return track_end_var_;
 }
 
-MetaDBOVariable* CreateAssociationsTask::mode3AVar() const
+MetaVariable* CreateAssociationsTask::mode3AVar() const
 {
     assert (mode_3a_var_);
     return mode_3a_var_;
 }
 
-MetaDBOVariable* CreateAssociationsTask::modeCVar() const
+MetaVariable* CreateAssociationsTask::modeCVar() const
 {
     assert (mode_c_var_);
     return mode_c_var_;
 }
 
-MetaDBOVariable* CreateAssociationsTask::latitudeVar() const
+MetaVariable* CreateAssociationsTask::latitudeVar() const
 {
     assert (latitude_var_);
     return latitude_var_;
 }
 
-MetaDBOVariable* CreateAssociationsTask::longitudeVar() const
+MetaVariable* CreateAssociationsTask::longitudeVar() const
 {
     assert (longitude_var_);
     return longitude_var_;
 }
 
 void CreateAssociationsTask::checkAndSetMetaVariable(std::string& name_str,
-                                                     MetaDBOVariable** var)
+                                                     MetaVariable** var)
 {
     DBContentManager& object_man = COMPASS::instance().objectManager();
 
@@ -681,9 +681,9 @@ void CreateAssociationsTask::checkAndSetMetaVariable(std::string& name_str,
     }
 }
 
-DBContentVariableSet CreateAssociationsTask::getReadSetFor(const std::string& dbo_name)
+VariableSet CreateAssociationsTask::getReadSetFor(const std::string& dbo_name)
 {
-    DBContentVariableSet read_set;
+    VariableSet read_set;
 
     assert(key_var_);
     assert(key_var_->existsIn(dbo_name));

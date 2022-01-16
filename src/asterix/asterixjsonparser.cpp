@@ -621,7 +621,7 @@ void ASTERIXJSONParser::removeMapping(unsigned int index)
     logdbg << "ASTERIXJSONParser: removeMapping: size " << data_mappings_.size();
 }
 
-const dbContent::DBContentVariableSet& ASTERIXJSONParser::variableList() const { return var_list_; }
+const dbContent::VariableSet& ASTERIXJSONParser::variableList() const { return var_list_; }
 
 ASTERIXJSONParserWidget* ASTERIXJSONParser::widget()
 {

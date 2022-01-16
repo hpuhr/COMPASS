@@ -25,9 +25,9 @@
 #include "files.h"
 #include "dbcontent/dbcontentmanager.h"
 #include "dbcontent/dbcontent.h"
-#include "dbovariable.h"
+#include "dbcontent/variable/variable.h"
 #include "buffer.h"
-#include "dbovariableset.h"
+#include "dbcontent/variable/variableset.h"
 #include "util/number.h"
 //#include "postprocesstask.h"
 //#include "managedatasourcestask.h"
@@ -533,22 +533,22 @@ void GPSTrailImportTask::run()
 
     using namespace dbContent;
 
-    DBContentVariable& sac_var = reftraj_obj.variable("sac");
-    DBContentVariable& sic_var = reftraj_obj.variable("sic");
-    DBContentVariable& ds_id_var = reftraj_obj.variable("ds_id");
-    DBContentVariable& tod_var = reftraj_obj.variable("tod");
-    DBContentVariable& lat_var = reftraj_obj.variable("pos_lat_deg");
-    DBContentVariable& long_var = reftraj_obj.variable("pos_long_deg");
+    Variable& sac_var = reftraj_obj.variable("sac");
+    Variable& sic_var = reftraj_obj.variable("sic");
+    Variable& ds_id_var = reftraj_obj.variable("ds_id");
+    Variable& tod_var = reftraj_obj.variable("tod");
+    Variable& lat_var = reftraj_obj.variable("pos_lat_deg");
+    Variable& long_var = reftraj_obj.variable("pos_long_deg");
 
-    DBContentVariable& m3a_var = reftraj_obj.variable("mode3a_code");
-    DBContentVariable& ta_var = reftraj_obj.variable("target_addr");
-    DBContentVariable& cs_var = reftraj_obj.variable("callsign");
+    Variable& m3a_var = reftraj_obj.variable("mode3a_code");
+    Variable& ta_var = reftraj_obj.variable("target_addr");
+    Variable& cs_var = reftraj_obj.variable("callsign");
 
-    DBContentVariable& head_var = reftraj_obj.variable("heading_deg");
-    DBContentVariable& spd_var = reftraj_obj.variable("groundspeed_kt");
+    Variable& head_var = reftraj_obj.variable("heading_deg");
+    Variable& spd_var = reftraj_obj.variable("groundspeed_kt");
 
 
-    DBContentVariableSet var_set;
+    VariableSet var_set;
 
     var_set.add(sac_var);
     var_set.add(sic_var);

@@ -26,7 +26,7 @@
 #include "dbcontent/labeldefinitionwidget.h"
 #include "dboreadassociationsjob.h"
 #include "dboreaddbjob.h"
-#include "dbovariable.h"
+#include "dbcontent/variable/variable.h"
 #include "dbtableinfo.h"
 #include "filtermanager.h"
 #include "finalizedboreadjob.h"
@@ -38,7 +38,7 @@
 #include "updatebufferdbjob.h"
 #include "viewmanager.h"
 #include "util/number.h"
-#include "metadbovariable.h"
+#include "dbcontent/variable/metavariable.h"
 
 #include <algorithm>
 #include <boost/algorithm/string.hpp>
@@ -124,7 +124,7 @@ void DBContent::generateSubConfigurable(const string& class_id, const string& in
         logdbg << "DBObject: generateSubConfigurable: generating variable " << instance_id
                << " with name " << var_name;
 
-        variables_.emplace_back(new DBContentVariable(class_id, instance_id, this));
+        variables_.emplace_back(new Variable(class_id, instance_id, this));
     }
     else if (class_id == "DBOLabelDefinition")
     {
@@ -152,19 +152,19 @@ void DBContent::checkSubConfigurables()
 bool DBContent::hasVariable(const string& name) const
 {
     auto iter = find_if(variables_.begin(), variables_.end(),
-    [name](const unique_ptr<DBContentVariable>& var) { return var->name() == name;});
+    [name](const unique_ptr<Variable>& var) { return var->name() == name;});
 
     return iter != variables_.end();
 
     //return variables_.find(name) != variables_.end();
 }
 
-DBContentVariable& DBContent::variable(const string& name)
+Variable& DBContent::variable(const string& name)
 {
     assert(hasVariable(name));
 
     auto iter = find_if(variables_.begin(), variables_.end(),
-    [name](const unique_ptr<DBContentVariable>& var) { return var->name() == name;});
+    [name](const unique_ptr<Variable>& var) { return var->name() == name;});
 
     assert (iter != variables_.end());
     assert (iter->get());
@@ -195,7 +195,7 @@ void DBContent::deleteVariable(const string& name)
     assert(hasVariable(name));
 
     auto iter = find_if(variables_.begin(), variables_.end(),
-    [name](const unique_ptr<DBContentVariable>& var) { return var->name() == name;});
+    [name](const unique_ptr<Variable>& var) { return var->name() == name;});
     assert (iter != variables_.end());
 
     variables_.erase(iter);
@@ -205,7 +205,7 @@ void DBContent::deleteVariable(const string& name)
 bool DBContent::hasVariableDBColumnName(const std::string& name) const
 {
     auto iter = find_if(variables_.begin(), variables_.end(),
-    [name](const unique_ptr<DBContentVariable>& var) { return var->dbColumnName() == name;});
+    [name](const unique_ptr<Variable>& var) { return var->dbColumnName() == name;});
 
     logdbg << "DBObject: hasVariableDBColumnName: name '" << name << "' " << (iter != variables_.end());
 
@@ -228,7 +228,7 @@ bool DBContent::hasKeyVariable()
     return false;
 }
 
-DBContentVariable& DBContent::getKeyVariable()
+Variable& DBContent::getKeyVariable()
 {
     assert(hasKeyVariable());
 
@@ -282,15 +282,15 @@ dbContent::LabelDefinitionWidget* DBContent::labelDefinitionWidget()
     return label_definition_->widget();
 }
 
-void DBContent::load(DBContentVariableSet& read_set, bool use_filters, bool use_order,
-                    DBContentVariable* order_variable, bool use_order_ascending,
+void DBContent::load(VariableSet& read_set, bool use_filters, bool use_order,
+                    Variable* order_variable, bool use_order_ascending,
                     const string& limit_str)
 {
     assert(is_loadable_);
     assert(existsInDB());
 
     string custom_filter_clause;
-    vector<DBContentVariable*> filtered_variables;
+    vector<Variable*> filtered_variables;
 
     if (dbo_manager_.hasDSFilter(name_))
     {
@@ -299,7 +299,7 @@ void DBContent::load(DBContentVariableSet& read_set, bool use_filters, bool use_
 
         assert (hasVariable(DBContent::meta_var_datasource_id_.name()));
 
-        DBContentVariable& datasource_var = variable(DBContent::meta_var_datasource_id_.name());
+        Variable& datasource_var = variable(DBContent::meta_var_datasource_id_.name());
         assert (datasource_var.dataType() == PropertyDataType::UINT);
 
         // add to filtered vars
@@ -333,9 +333,9 @@ void DBContent::load(DBContentVariableSet& read_set, bool use_filters, bool use_
                  use_order_ascending, limit_str);
 }
 
-void DBContent::loadFiltered(DBContentVariableSet& read_set, string custom_filter_clause,
-                    vector<DBContentVariable*> filtered_variables, bool use_order,
-                    DBContentVariable* order_variable, bool use_order_ascending,
+void DBContent::loadFiltered(VariableSet& read_set, string custom_filter_clause,
+                    vector<Variable*> filtered_variables, bool use_order,
+                    Variable* order_variable, bool use_order_ascending,
                     const string& limit_str)
 {
     logdbg << "DBObject: loadFiltered: name " << name_ << " loadable " << is_loadable_;
@@ -389,7 +389,7 @@ void DBContent::insertData(shared_ptr<Buffer> buffer)
     assert (!insert_active_);
     insert_active_ = true;
 
-    DBContentVariableSet list;
+    VariableSet list;
 
     for (auto prop_it : buffer->properties().properties())
     {
@@ -420,7 +420,7 @@ void DBContent::doDataSourcesBeforeInsert (shared_ptr<Buffer> buffer)
 
     assert (hasVariable(DBContent::meta_var_datasource_id_.name()));
 
-    DBContentVariable& datasource_var = variable(DBContent::meta_var_datasource_id_.name());
+    Variable& datasource_var = variable(DBContent::meta_var_datasource_id_.name());
     assert (datasource_var.dataType() == PropertyDataType::UINT);
 
     string datasource_col_str = datasource_var.dbColumnName();
@@ -458,7 +458,7 @@ void DBContent::insertDoneSlot()
     assert (existsInDB()); // check
 }
 
-void DBContent::updateData(DBContentVariable& key_var, DBContentVariableSet& list, shared_ptr<Buffer> buffer)
+void DBContent::updateData(Variable& key_var, VariableSet& list, shared_ptr<Buffer> buffer)
 {
     assert(!update_job_);
 
@@ -495,7 +495,7 @@ map<unsigned int, string> DBContent::loadLabelData(vector<unsigned int> rec_nums
     assert (dbo_manager_.existsMetaVariable(DBContent::meta_var_rec_num_id_.name()));
     assert (dbo_manager_.metaVariable(DBContent::meta_var_rec_num_id_.name()).existsIn(name_));
 
-    DBContentVariable& rec_num_var = dbo_manager_.metaVariable(DBContent::meta_var_rec_num_id_.name()).getFor(name_);
+    Variable& rec_num_var = dbo_manager_.metaVariable(DBContent::meta_var_rec_num_id_.name()).getFor(name_);
 
     custom_filter_clause = rec_num_var.dbColumnName() + " in (";
     for (auto& rec_num : rec_nums)
@@ -509,7 +509,7 @@ map<unsigned int, string> DBContent::loadLabelData(vector<unsigned int> rec_nums
     }
     custom_filter_clause += ")";
 
-    DBContentVariableSet read_list = label_definition_->readList();
+    VariableSet read_list = label_definition_->readList();
 
     if (!read_list.hasVariable(rec_num_var))
         read_list.add(rec_num_var);
@@ -550,7 +550,7 @@ void DBContent::readJobIntermediateSlot(shared_ptr<Buffer> buffer)
     assert (sender);
     assert(sender == read_job_.get());
 
-    vector<DBContentVariable*>& variables = sender->readList().getSet();
+    vector<Variable*>& variables = sender->readList().getSet();
     const PropertyList& properties = buffer->properties();
 
     for (auto var_it : variables)
@@ -805,7 +805,7 @@ void DBContent::saveAssociations()
 void DBContent::sortContent()
 {
     sort(variables_.begin(), variables_.end(),
-        [](const std::unique_ptr<DBContentVariable>& a, const std::unique_ptr<DBContentVariable>& b) -> bool
+        [](const std::unique_ptr<Variable>& a, const std::unique_ptr<Variable>& b) -> bool
     {
         return a->name() > b->name();
     });

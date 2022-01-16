@@ -33,9 +33,9 @@ class DBContent;
 namespace dbContent
 {
 
-class DBContentVariableWidget;
+class VariableWidget;
 
-class DBContentVariable : public QObject, public Property, public Configurable
+class Variable : public QObject, public Property, public Configurable
 {
     Q_OBJECT
   public:
@@ -57,15 +57,15 @@ class DBContentVariable : public QObject, public Property, public Configurable
     }
 
     /// @brief Constructor
-    DBContentVariable(const std::string& class_id, const std::string& instance_id, DBContent* parent);
+    Variable(const std::string& class_id, const std::string& instance_id, DBContent* parent);
     //DBOVariable() = default;
     /// @brief Move constructor
     //DBOVariable& operator=(DBOVariable&& other);
     /// @brief Desctructor
-    virtual ~DBContentVariable();
+    virtual ~Variable();
 
     /// @brief Comparison operator
-    bool operator==(const DBContentVariable& var);
+    bool operator==(const Variable& var);
 
     /// @brief Prints information for debugging
     void print();
@@ -116,7 +116,7 @@ class DBContentVariable : public QObject, public Property, public Configurable
 //    std::string getMinStringRepresentation();
 //    std::string getMaxStringRepresentation();
 
-    DBContentVariableWidget* widget();
+    VariableWidget* widget();
 
     Representation representation() const;
     Representation& representationRef() { return representation_; } // have to take care of representation_str
@@ -127,28 +127,28 @@ class DBContentVariable : public QObject, public Property, public Configurable
     template <typename T>
     std::string getAsSpecialRepresentationString(T value) const
     {
-        assert(representation_ != DBContentVariable::Representation::STANDARD);
+        assert(representation_ != Variable::Representation::STANDARD);
 
         std::ostringstream out;
         try
         {
-            if (representation_ == DBContentVariable::Representation::SECONDS_TO_TIME)
+            if (representation_ == Variable::Representation::SECONDS_TO_TIME)
             {
                 return Utils::String::timeStringFromDouble(value);
             }
-            else if (representation_ == DBContentVariable::Representation::DEC_TO_OCTAL)
+            else if (representation_ == Variable::Representation::DEC_TO_OCTAL)
             {
                 out << std::oct << std::setfill('0') << std::setw(4) << value;
             }
-            else if (representation_ == DBContentVariable::Representation::DEC_TO_HEX)
+            else if (representation_ == Variable::Representation::DEC_TO_HEX)
             {
                 out << std::uppercase << std::hex << std::setfill('0') << std::setw(6) << value;
             }
-            else if (representation_ == DBContentVariable::Representation::FEET_TO_FLIGHTLEVEL)
+            else if (representation_ == Variable::Representation::FEET_TO_FLIGHTLEVEL)
             {
                 out << value / 100.0;
             }
-            else if (representation_ == DBContentVariable::Representation::DATA_SRC_NAME)
+            else if (representation_ == Variable::Representation::DATA_SRC_NAME)
             {
                 return getDataSourcesAsString(std::to_string(value));
             }
@@ -212,7 +212,7 @@ private:
 //    /// Maximum as string
 //    std::string max_;
 
-    DBContentVariableWidget* widget_{nullptr};
+    VariableWidget* widget_{nullptr};
 
     std::string getDataSourcesAsString(const std::string& value) const;
 
@@ -223,6 +223,6 @@ private:
 
 }
 
-Q_DECLARE_METATYPE(dbContent::DBContentVariable*)
+Q_DECLARE_METATYPE(dbContent::Variable*)
 
 #endif /* DBOVARIABLE_H_ */

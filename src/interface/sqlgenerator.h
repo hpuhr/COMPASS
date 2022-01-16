@@ -20,7 +20,7 @@
 
 #include <memory>
 
-#include "dbovariableset.h"
+#include "dbcontent/variable/variableset.h"
 
 class Buffer;
 class DBCommand;
@@ -40,8 +40,8 @@ public:
                                          const std::string& key_col_name, std::string table_name);
 
     std::shared_ptr<DBCommand> getSelectCommand(
-            const DBContent& object, dbContent::DBContentVariableSet read_list, const std::string& filter,
-            bool use_order = false, dbContent::DBContentVariable* order_variable = nullptr,
+            const DBContent& object, dbContent::VariableSet read_list, const std::string& filter,
+            bool use_order = false, dbContent::Variable* order_variable = nullptr,
             bool use_order_ascending = false, const std::string& limit = "");
 
     //    std::shared_ptr<DBCommand> getSelectCommand(const DBObject& object,

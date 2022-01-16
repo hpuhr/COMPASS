@@ -24,9 +24,9 @@
 //#include "dbodatasourcedefinitionwidget.h"
 //#include "dboeditdatasourceswidget.h"
 #include "dbcontent/labeldefinitionwidget.h"
-#include "dbovariable.h"
-#include "dbovariabledatatypecombobox.h"
-#include "dbovariablewidget.h"
+#include "dbcontent/variable/variable.h"
+#include "dbcontent/variable/variabledatatypecombobox.h"
+#include "dbcontent/variable/variablewidget.h"
 #include "files.h"
 #include "logger.h"
 #include "stringconv.h"
@@ -219,7 +219,7 @@ void DBContentWidget::editDBOVariableNameSlot()
 
     std::string new_name = edit->text().toStdString();
 
-    DBContentVariable* variable = edit->property("variable").value<DBContentVariable*>();
+    Variable* variable = edit->property("variable").value<Variable*>();
     assert(variable);
     assert(object_->hasVariable(variable->name()));
 
@@ -243,7 +243,7 @@ void DBContentWidget::editDBOVariableDescriptionSlot()
     QLineEdit* edit = static_cast<QLineEdit*>(sender());
     assert(edit);
 
-    DBContentVariable* variable = edit->property("variable").value<DBContentVariable*>();
+    Variable* variable = edit->property("variable").value<Variable*>();
     assert(variable);
 
     variable->description(edit->text().toStdString());
@@ -265,7 +265,7 @@ void DBContentWidget::deleteDBOVarSlot()
 
     QVariant data = button->property("variable");
 
-    DBContentVariable* variable = data.value<DBContentVariable*>();
+    Variable* variable = data.value<Variable*>();
     assert(variable);
     object_->deleteVariable(variable->name());
 
@@ -378,7 +378,7 @@ void DBContentWidget::updateDBOVarsGridSlot()
         row++;
         col = 0;
 
-        DBContentVariable& variable = *var_it.get();
+        Variable& variable = *var_it.get();
 
         // QVariant data = QVariant(qMetaTypeId<QObject*>(), var_it.second);
         // QVariant data = QVariant::fromValue(dynamic_cast<QObject*>(var_it.second));
@@ -403,7 +403,7 @@ void DBContentWidget::updateDBOVarsGridSlot()
         dbovars_grid_->addWidget(description_edit, row, col);
 
         col++;
-        DBContentVariableDataTypeComboBox* type_combo = new DBContentVariableDataTypeComboBox(
+        VariableDataTypeComboBox* type_combo = new VariableDataTypeComboBox(
                     variable.dataTypeRef(), variable.dataTypeStringRef());
         dbovars_grid_->addWidget(type_combo, row, col);
 

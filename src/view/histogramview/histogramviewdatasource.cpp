@@ -65,7 +65,7 @@ void HistogramViewDataSource::generateSubConfigurable(const std::string& class_i
     if (class_id.compare("DBOVariableOrderedSet") == 0)
     {
         assert(set_ == 0);
-        set_ = new DBOVariableOrderedSet(class_id, instance_id, this);
+        set_ = new OrderedSet(class_id, instance_id, this);
     }
     else
         throw std::runtime_error(
@@ -144,7 +144,7 @@ bool HistogramViewDataSource::addTemporaryVariable (const std::string& dbo_name,
     if (dbo_name == META_OBJECT_NAME)
     {
         assert (obj_man.existsMetaVariable(var_name));
-        MetaDBOVariable& meta_var = obj_man.metaVariable(var_name);
+        MetaVariable& meta_var = obj_man.metaVariable(var_name);
         if (!set_->hasMetaVariable(meta_var))
         {
             set_->add(meta_var);
@@ -159,7 +159,7 @@ bool HistogramViewDataSource::addTemporaryVariable (const std::string& dbo_name,
         DBContent& obj = obj_man.object(dbo_name);
 
         assert (obj.hasVariable(var_name));
-        DBContentVariable& var = obj.variable(var_name);
+        Variable& var = obj.variable(var_name);
 
         if (!set_->hasVariable(var))
         {
@@ -178,7 +178,7 @@ void HistogramViewDataSource::removeTemporaryVariable (const std::string& dbo_na
     if (dbo_name == META_OBJECT_NAME)
     {
         assert (obj_man.existsMetaVariable(var_name));
-        MetaDBOVariable& meta_var = obj_man.metaVariable(var_name);
+        MetaVariable& meta_var = obj_man.metaVariable(var_name);
         assert (set_->hasMetaVariable(meta_var));
         set_->removeMetaVariable(meta_var);
     }
@@ -188,7 +188,7 @@ void HistogramViewDataSource::removeTemporaryVariable (const std::string& dbo_na
         DBContent& obj = obj_man.object(dbo_name);
 
         assert (obj.hasVariable(var_name));
-        DBContentVariable& var = obj.variable(var_name);
+        Variable& var = obj.variable(var_name);
         assert (set_->hasVariable(var));
         set_->removeVariable(var);
     }

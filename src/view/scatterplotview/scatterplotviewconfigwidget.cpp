@@ -18,7 +18,7 @@
 #include "scatterplotviewconfigwidget.h"
 #include "compass.h"
 #include "dbcontent/dbcontentmanager.h"
-#include "dbovariableselectionwidget.h"
+#include "dbcontent/variable/variableselectionwidget.h"
 #include "scatterplotview.h"
 #include "scatterplotviewdatasource.h"
 #include "logger.h"
@@ -60,7 +60,7 @@ ScatterPlotViewConfigWidget::ScatterPlotViewConfigWidget(ScatterPlotView* view, 
 
         cfg_layout->addWidget(new QLabel("X Variable"));
 
-        select_var_x_ = new DBContentVariableSelectionWidget();
+        select_var_x_ = new VariableSelectionWidget();
         select_var_x_->showMetaVariables(true);
         select_var_x_->showEmptyVariable(false);
         select_var_x_->showDataTypesOnly({PropertyDataType::BOOL,
@@ -79,13 +79,13 @@ ScatterPlotViewConfigWidget::ScatterPlotViewConfigWidget(ScatterPlotView* view, 
             else
                 select_var_x_->selectedVariable(view_->dataVarX());
         }
-        connect(select_var_x_, &DBContentVariableSelectionWidget::selectionChanged, this,
+        connect(select_var_x_, &VariableSelectionWidget::selectionChanged, this,
                 &ScatterPlotViewConfigWidget::selectedVariableXChangedSlot);
         cfg_layout->addWidget(select_var_x_);
 
         cfg_layout->addWidget(new QLabel("Y Variable"));
 
-        select_var_y_ = new DBContentVariableSelectionWidget();
+        select_var_y_ = new VariableSelectionWidget();
         select_var_y_->showMetaVariables(true);
         select_var_y_->showEmptyVariable(false);
         select_var_y_->showDataTypesOnly({PropertyDataType::BOOL,
@@ -104,7 +104,7 @@ ScatterPlotViewConfigWidget::ScatterPlotViewConfigWidget(ScatterPlotView* view, 
             else
                 select_var_y_->selectedVariable(view_->dataVarY());
         }
-        connect(select_var_y_, &DBContentVariableSelectionWidget::selectionChanged, this,
+        connect(select_var_y_, &VariableSelectionWidget::selectionChanged, this,
                 &ScatterPlotViewConfigWidget::selectedVariableYChangedSlot);
         cfg_layout->addWidget(select_var_y_);
 

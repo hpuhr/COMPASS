@@ -22,8 +22,8 @@
 #include "dbinterface.h"
 #include "dbcontent/dbcontent.h"
 #include "dbcontent/dbcontentmanager.h"
-#include "metadbovariable.h"
-#include "dbovariable.h"
+#include "dbcontent/variable/metavariable.h"
+#include "dbcontent/variable/variable.h"
 #include "stringconv.h"
 #include "projection/transformation.h"
 #include "evaluationmanager.h"
@@ -155,17 +155,17 @@ void CreateAssociationsJob::createTargetReports()
 
     using namespace dbContent;
 
-    MetaDBOVariable* meta_key_var = task_.keyVar();
-    MetaDBOVariable* meta_ds_id_var = task_.dsIdVar();
-    MetaDBOVariable* meta_tod_var = task_.todVar();
-    MetaDBOVariable* meta_ta_var = task_.targetAddrVar();
-    MetaDBOVariable* meta_ti_var = task_.targetIdVar();
-    MetaDBOVariable* meta_tn_var = task_.trackNumVar();
-    MetaDBOVariable* meta_tr_end_var = task_.trackEndVar();
-    MetaDBOVariable* meta_mode_3a_var = task_.mode3AVar();
-    MetaDBOVariable* meta_mode_c_var = task_.modeCVar();
-    MetaDBOVariable* meta_latitude_var = task_.latitudeVar();
-    MetaDBOVariable* meta_longitude_var = task_.longitudeVar();
+    MetaVariable* meta_key_var = task_.keyVar();
+    MetaVariable* meta_ds_id_var = task_.dsIdVar();
+    MetaVariable* meta_tod_var = task_.todVar();
+    MetaVariable* meta_ta_var = task_.targetAddrVar();
+    MetaVariable* meta_ti_var = task_.targetIdVar();
+    MetaVariable* meta_tn_var = task_.trackNumVar();
+    MetaVariable* meta_tr_end_var = task_.trackEndVar();
+    MetaVariable* meta_mode_3a_var = task_.mode3AVar();
+    MetaVariable* meta_mode_c_var = task_.modeCVar();
+    MetaVariable* meta_latitude_var = task_.latitudeVar();
+    MetaVariable* meta_longitude_var = task_.longitudeVar();
 
     assert (meta_key_var);
     assert (meta_ds_id_var);
@@ -192,39 +192,39 @@ void CreateAssociationsJob::createTargetReports()
         size_t buffer_size = buffer->size();
 
         assert (meta_key_var->existsIn(dbo_name));
-        DBContentVariable& key_var = meta_key_var->getFor(dbo_name);
+        Variable& key_var = meta_key_var->getFor(dbo_name);
 
         assert (meta_ds_id_var->existsIn(dbo_name));
-        DBContentVariable& ds_id_var = meta_ds_id_var->getFor(dbo_name);
+        Variable& ds_id_var = meta_ds_id_var->getFor(dbo_name);
 
         assert (meta_tod_var->existsIn(dbo_name));
-        DBContentVariable& tod_var = meta_tod_var->getFor(dbo_name);
+        Variable& tod_var = meta_tod_var->getFor(dbo_name);
 
         assert (meta_ta_var->existsIn(dbo_name));
-        DBContentVariable& ta_var = meta_ta_var->getFor(dbo_name);
+        Variable& ta_var = meta_ta_var->getFor(dbo_name);
 
         assert (meta_ti_var->existsIn(dbo_name));
-        DBContentVariable& ti_var = meta_ti_var->getFor(dbo_name);
+        Variable& ti_var = meta_ti_var->getFor(dbo_name);
 
-        DBContentVariable* tn_var {nullptr}; // not in ads-b
+        Variable* tn_var {nullptr}; // not in ads-b
         if (meta_tn_var->existsIn(dbo_name))
             tn_var = &meta_tn_var->getFor(dbo_name);
 
-        DBContentVariable* tr_end_var {nullptr}; // not in ads-b
+        Variable* tr_end_var {nullptr}; // not in ads-b
         if (meta_tr_end_var->existsIn(dbo_name))
             tr_end_var = &meta_tr_end_var->getFor(dbo_name);
 
         assert (meta_mode_3a_var->existsIn(dbo_name));
-        DBContentVariable& mode_3a_var = meta_mode_3a_var->getFor(dbo_name);
+        Variable& mode_3a_var = meta_mode_3a_var->getFor(dbo_name);
 
         assert (meta_mode_c_var->existsIn(dbo_name));
-        DBContentVariable& mode_c_var = meta_mode_c_var->getFor(dbo_name);
+        Variable& mode_c_var = meta_mode_c_var->getFor(dbo_name);
 
         assert (meta_latitude_var->existsIn(dbo_name));
-        DBContentVariable& latitude_var = meta_latitude_var->getFor(dbo_name);
+        Variable& latitude_var = meta_latitude_var->getFor(dbo_name);
 
         assert (meta_longitude_var->existsIn(dbo_name));
-        DBContentVariable& longitude_var = meta_longitude_var->getFor(dbo_name);
+        Variable& longitude_var = meta_longitude_var->getFor(dbo_name);
 
 
         assert (buffer->has<int>(key_var.name()));

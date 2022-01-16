@@ -33,7 +33,7 @@ class TaskManager;
 class UpdateBufferDBJob;
 
 namespace dbContent {
-class DBContentVariable;
+class Variable;
 }
 
 class QMessageBox;
@@ -98,25 +98,25 @@ class RadarPlotPositionCalculatorTask : public Task, public Configurable
     DBContent* db_object_{nullptr};
 
     std::string key_var_str_;
-    dbContent::DBContentVariable* key_var_{nullptr};
+    dbContent::Variable* key_var_{nullptr};
 
     std::string datasource_var_str_;
-    dbContent::DBContentVariable* datasource_var_{nullptr};
+    dbContent::Variable* datasource_var_{nullptr};
 
     std::string range_var_str_;
-    dbContent::DBContentVariable* range_var_{nullptr};
+    dbContent::Variable* range_var_{nullptr};
 
     std::string azimuth_var_str_;
-    dbContent::DBContentVariable* azimuth_var_{nullptr};
+    dbContent::Variable* azimuth_var_{nullptr};
 
     std::string altitude_var_str_;
-    dbContent::DBContentVariable* altitude_var_{nullptr};
+    dbContent::Variable* altitude_var_{nullptr};
 
     std::string latitude_var_str_;
-    dbContent::DBContentVariable* latitude_var_{nullptr};
+    dbContent::Variable* latitude_var_{nullptr};
 
     std::string longitude_var_str_;
-    dbContent::DBContentVariable* longitude_var_{nullptr};
+    dbContent::Variable* longitude_var_{nullptr};
 
     std::shared_ptr<UpdateBufferDBJob> job_ptr_;
 
@@ -132,7 +132,7 @@ class RadarPlotPositionCalculatorTask : public Task, public Configurable
     QMessageBox* msg_box_{nullptr};
     size_t target_report_count_{0};
 
-    void checkAndSetVariable(std::string& name_str, dbContent::DBContentVariable** var);
+    void checkAndSetVariable(std::string& name_str, dbContent::Variable** var);
 };
 
 #endif /* RADARPLOTPOSITIONCALCULATOR_H_ */

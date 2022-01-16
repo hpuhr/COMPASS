@@ -20,13 +20,13 @@
 
 #include <QWidget>
 
-#include "dbovariable.h"
+#include "dbcontent/variable/variable.h"
 
 class HistogramView;
 
 namespace dbContent {
-class DBContentVariableOrderedSetWidget;
-class DBContentVariableSelectionWidget;
+class VariableOrderedSetWidget;
+class VariableSelectionWidget;
 }
 
 class QCheckBox;
@@ -68,7 +68,7 @@ class HistogramViewConfigWidget : public QWidget
 
     // data variable
     QCheckBox* selected_var_check_ {nullptr}; // active if variable data is shown
-    dbContent::DBContentVariableSelectionWidget* select_var_ {nullptr};
+    dbContent::VariableSelectionWidget* select_var_ {nullptr};
 
     // eval
     QCheckBox* eval_results_check_ {nullptr}; // active if eval data is shown

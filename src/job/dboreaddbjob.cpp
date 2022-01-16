@@ -20,16 +20,16 @@
 #include "buffer.h"
 #include "dbinterface.h"
 #include "dbcontent/dbcontent.h"
-#include "dbovariable.h"
+#include "dbcontent/variable/variable.h"
 #include "logger.h"
 #include "propertylist.h"
 
 using namespace dbContent;
 
-DBOReadDBJob::DBOReadDBJob(DBInterface& db_interface, DBContent& dbobject, DBContentVariableSet read_list,
+DBOReadDBJob::DBOReadDBJob(DBInterface& db_interface, DBContent& dbobject, VariableSet read_list,
                            std::string custom_filter_clause,
-                           std::vector<DBContentVariable*> filtered_variables, bool use_order,
-                           DBContentVariable* order_variable, bool use_order_ascending,
+                           std::vector<Variable*> filtered_variables, bool use_order,
+                           Variable* order_variable, bool use_order_ascending,
                            const std::string& limit_str)
     : Job("DBOReadDBJob"),
       db_interface_(db_interface),

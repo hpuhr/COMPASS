@@ -28,7 +28,7 @@ public:
     virtual ~UTNFilter();
 
     virtual std::string getConditionString(const std::string& dbo_name, bool& first,
-                                           std::vector<dbContent::DBContentVariable*>& filtered_variables);
+                                           std::vector<dbContent::Variable*>& filtered_variables);
 
     virtual void generateSubConfigurable(const std::string& class_id,
                                          const std::string& instance_id);

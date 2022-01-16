@@ -18,7 +18,7 @@
 #ifndef FINALIZEDBOREADJOB_H_
 #define FINALIZEDBOREADJOB_H_
 
-#include "dbovariableset.h"
+#include "dbcontent/variable/variableset.h"
 #include "global.h"
 #include "job.h"
 
@@ -33,7 +33,7 @@ class Buffer;
 class FinalizeDBOReadJob : public Job
 {
   public:
-    FinalizeDBOReadJob(DBContent& dbobject, dbContent::DBContentVariableSet& read_list,
+    FinalizeDBOReadJob(DBContent& dbobject, dbContent::VariableSet& read_list,
                        std::shared_ptr<Buffer> buffer);
     virtual ~FinalizeDBOReadJob();
 
@@ -47,7 +47,7 @@ class FinalizeDBOReadJob : public Job
 
   protected:
     DBContent& dbobject_;
-    dbContent::DBContentVariableSet read_list_;
+    dbContent::VariableSet read_list_;
     std::shared_ptr<Buffer> buffer_;
 };
 

@@ -20,7 +20,7 @@
 #include "compass.h"
 #include "dbcontent/dbcontent.h"
 #include "dbcontent/dbcontentmanager.h"
-#include "dbovariable.h"
+#include "dbcontent/variable/variable.h"
 #include "logger.h"
 #include "stringconv.h"
 #include "dbfiltercondition.h"
@@ -100,7 +100,7 @@ DBOSpecificValuesDBFilter::~DBOSpecificValuesDBFilter() {}
 bool DBOSpecificValuesDBFilter::filters(const std::string& dbo_type) { return dbo_name_ == dbo_type; }
 
 std::string DBOSpecificValuesDBFilter::getConditionString(const std::string& dbo_name, bool& first,
-                                                          std::vector<dbContent::DBContentVariable*>& filtered_variables)
+                                                          std::vector<dbContent::Variable*>& filtered_variables)
 {
     assert(!disabled_);
 

@@ -53,7 +53,7 @@ ListBoxViewDataSource::ListBoxViewDataSource(const std::string& class_id,
 
     assert (hasCurrentSet());
 
-    connect(getSet(), &DBOVariableOrderedSet::setChangedSignal, this,
+    connect(getSet(), &OrderedSet::setChangedSignal, this,
             &ListBoxViewDataSource::setChangedSlot, Qt::UniqueConnection);
 }
 
@@ -72,8 +72,8 @@ void ListBoxViewDataSource::generateSubConfigurable(const std::string& class_id,
     {
         assert (!sets_.count(instance_id));
 
-        std::unique_ptr<DBOVariableOrderedSet> set;
-        set.reset(new DBOVariableOrderedSet(class_id, instance_id, this));
+        std::unique_ptr<OrderedSet> set;
+        set.reset(new OrderedSet(class_id, instance_id, this));
 
         sets_[instance_id] = move(set);
     }
@@ -146,13 +146,13 @@ void ListBoxViewDataSource::removeSet (const std::string& name)
 }
 
 
-DBOVariableOrderedSet* ListBoxViewDataSource::getSet()
+OrderedSet* ListBoxViewDataSource::getSet()
 {
     assert (hasCurrentSet());
     return sets_.at(current_set_name_).get();
 }
 
-const std::map<std::string, std::unique_ptr<DBOVariableOrderedSet>>& ListBoxViewDataSource::getSets()
+const std::map<std::string, std::unique_ptr<OrderedSet>>& ListBoxViewDataSource::getSets()
 {
     return sets_;
 }
@@ -220,7 +220,7 @@ void ListBoxViewDataSource::currentSetName(const std::string& current_set_name)
     assert (hasSet(current_set_name));
     current_set_name_ = current_set_name;
 
-    connect(getSet(), &DBOVariableOrderedSet::setChangedSignal, this,
+    connect(getSet(), &OrderedSet::setChangedSignal, this,
             &ListBoxViewDataSource::setChangedSlot, Qt::UniqueConnection);
 
     emit setChangedSignal();
@@ -234,7 +234,7 @@ bool ListBoxViewDataSource::addTemporaryVariable (const std::string& dbo_name, c
     if (dbo_name == META_OBJECT_NAME)
     {
         assert (obj_man.existsMetaVariable(var_name));
-        MetaDBOVariable& meta_var = obj_man.metaVariable(var_name);
+        MetaVariable& meta_var = obj_man.metaVariable(var_name);
         if (!getSet()->hasMetaVariable(meta_var))
         {
             getSet()->add(meta_var);
@@ -249,7 +249,7 @@ bool ListBoxViewDataSource::addTemporaryVariable (const std::string& dbo_name, c
         DBContent& obj = obj_man.object(dbo_name);
 
         assert (obj.hasVariable(var_name));
-        DBContentVariable& var = obj.variable(var_name);
+        Variable& var = obj.variable(var_name);
 
         if (!getSet()->hasVariable(var))
         {
@@ -273,7 +273,7 @@ void ListBoxViewDataSource::removeTemporaryVariable (const std::string& dbo_name
     if (dbo_name == META_OBJECT_NAME)
     {
         assert (obj_man.existsMetaVariable(var_name));
-        MetaDBOVariable& meta_var = obj_man.metaVariable(var_name);
+        MetaVariable& meta_var = obj_man.metaVariable(var_name);
         assert (getSet()->hasMetaVariable(meta_var));
         getSet()->removeMetaVariable(meta_var);
     }
@@ -283,13 +283,13 @@ void ListBoxViewDataSource::removeTemporaryVariable (const std::string& dbo_name
         DBContent& obj = obj_man.object(dbo_name);
 
         assert (obj.hasVariable(var_name));
-        DBContentVariable& var = obj.variable(var_name);
+        Variable& var = obj.variable(var_name);
         assert (getSet()->hasVariable(var));
         getSet()->removeVariable(var);
     }
 }
 
-void ListBoxViewDataSource::addDefaultVariables (DBOVariableOrderedSet& set)
+void ListBoxViewDataSource::addDefaultVariables (OrderedSet& set)
 {
     DBContentManager& obj_man = COMPASS::instance().objectManager();
 

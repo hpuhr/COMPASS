@@ -31,8 +31,8 @@
 #include "dbfilter.h"
 #include "dbfiltercondition.h"
 #include "dbfilterwidget.h"
-#include "dbovariable.h"
-#include "dbovariableselectionwidget.h"
+#include "dbcontent/variable/variable.h"
+#include "dbcontent/variable/variableselectionwidget.h"
 #include "files.h"
 #include "filterconditionoperatorcombobox.h"
 #include "filterconditionresetvaluecombobox.h"
@@ -72,7 +72,7 @@ FilterEditWidget::FilterEditWidget(DBFilter* filter, QWidget* parent)
 
     QGridLayout* condition_layout = new QGridLayout();
 
-    condition_variable_widget_ = new dbContent::DBContentVariableSelectionWidget();
+    condition_variable_widget_ = new dbContent::VariableSelectionWidget();
     condition_layout->addWidget(condition_variable_widget_, 0, 0);
 
     QVBoxLayout* math_layout = new QVBoxLayout();

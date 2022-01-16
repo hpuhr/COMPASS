@@ -23,16 +23,16 @@
 namespace dbContent
 {
 
-class DBContentVariable;
+class Variable;
 
 
-class DBContentVariableSet
+class VariableSet
 {
   public:
     /// @brief Constructor
-    DBContentVariableSet();
+    VariableSet();
     /// @brief Destructor
-    virtual ~DBContentVariableSet();
+    virtual ~VariableSet();
 
     /// @brief Returns flag indicating if a change occurred
     bool getChanged() { return changed_; }
@@ -40,31 +40,31 @@ class DBContentVariableSet
     void setChanged(bool changed) { changed_ = changed; }
 
     /// @brief Adds a DBOVariable
-    bool add(DBContentVariable& var);
-    bool add(const DBContentVariable& var);
+    bool add(Variable& var);
+    bool add(const Variable& var);
     /// @brief Adds another set of variables
-    bool add(DBContentVariableSet& set);
+    bool add(VariableSet& set);
     /// @brief Adds variables for a given type from a given set of variables
     // bool addOnly (DBOVariableSet &set, const std::string &dbo_type);
     /// @brief Removes variable at a given index
     void removeVariableAt(unsigned int index);
-    void removeVariable(const DBContentVariable& var);
+    void removeVariable(const Variable& var);
     /// @brief Intersects with another set of variables
-    bool intersect(DBContentVariableSet& set);
+    bool intersect(VariableSet& set);
     /// @brief Removes all variables
     void clear();
     /// @brief Returns if given variable is in the set
-    bool hasVariable(const DBContentVariable& variable);
+    bool hasVariable(const Variable& variable);
     bool hasDBColumnName(const std::string& db_column_name);
     unsigned int getVariableWithDBColumnName(const std::string& db_column_name);
 
-    DBContentVariableSet& operator=(const DBContentVariableSet& source);
+    VariableSet& operator=(const VariableSet& source);
     // DBOVariableSet *clone ();
 
     /// @brief Returns container with all variables
-    std::vector<DBContentVariable*>& getSet() { return set_; }
+    std::vector<Variable*>& getSet() { return set_; }
     /// @brief Returns variable at a given index
-    DBContentVariable& getVariable(unsigned int index) const;
+    Variable& getVariable(unsigned int index) const;
 
     /// @brief Prints contents, for debugging purposes
     void print();
@@ -74,7 +74,7 @@ class DBContentVariableSet
 
   protected:
     /// Container with all variables in the set
-    std::vector<DBContentVariable*> set_;
+    std::vector<Variable*> set_;
 
     /// Change occurred flag
     bool changed_;

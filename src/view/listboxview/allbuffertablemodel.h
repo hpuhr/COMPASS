@@ -21,7 +21,7 @@
 #include <QAbstractTableModel>
 #include <memory>
 
-#include "dbovariableset.h"
+#include "dbcontent/variable/variableset.h"
 
 class Buffer;
 class DBContent;

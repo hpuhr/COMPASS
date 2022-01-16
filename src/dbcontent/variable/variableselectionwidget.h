@@ -31,10 +31,10 @@ class DBContentManager;
 namespace dbContent
 {
 
-class DBContentVariable;
-class MetaDBOVariable;
+class Variable;
+class MetaVariable;
 
-class DBContentVariableSelectionWidget : public QFrame
+class VariableSelectionWidget : public QFrame
 {
     Q_OBJECT
 
@@ -46,17 +46,17 @@ class DBContentVariableSelectionWidget : public QFrame
     void selectionChanged();
 
   public:
-    DBContentVariableSelectionWidget(bool h_box = true, QWidget* parent = nullptr);
-    ~DBContentVariableSelectionWidget();
+    VariableSelectionWidget(bool h_box = true, QWidget* parent = nullptr);
+    ~VariableSelectionWidget();
 
     bool hasVariable() const { return variable_selected_; }
-    DBContentVariable& selectedVariable() const;
-    void selectedVariable(DBContentVariable& variable);
+    Variable& selectedVariable() const;
+    void selectedVariable(Variable& variable);
     void selectEmptyVariable();
 
     bool hasMetaVariable() const { return meta_variable_selected_; }
-    MetaDBOVariable& selectedMetaVariable() const;
-    void selectedMetaVariable(MetaDBOVariable& variable);
+    MetaVariable& selectedMetaVariable() const;
+    void selectedMetaVariable(MetaVariable& variable);
 
     bool showMetaVariables() const;
     void showMetaVariables(bool show_meta_variables);

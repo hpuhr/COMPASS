@@ -31,7 +31,7 @@ class FilterManager;
 
 namespace dbContent
 {
-class DBContentVariable;
+class Variable;
 }
 
 /**
@@ -83,7 +83,7 @@ class DBFilter : public Configurable
 
     /// @brief Returns the condition string for a DBObject
     virtual std::string getConditionString(const std::string& dbo_name, bool& first,
-                                           std::vector<dbContent::DBContentVariable*>& filtered_variables);
+                                           std::vector<dbContent::Variable*>& filtered_variables);
     /// @brief Returns if only sub-filters and no own conditions exist
     bool onlyHasSubFilter() { return conditions_.size() > 0; }
 

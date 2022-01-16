@@ -23,7 +23,7 @@
 #include "sqliteconnection.h"
 #include "dbinterface.h"
 #include "dbcontent/dbcontent.h"
-#include "dbovariable.h"
+#include "dbcontent/variable/variable.h"
 #include "filtermanager.h"
 #include "logger.h"
 #include "propertylist.h"
@@ -555,8 +555,8 @@ string SQLGenerator::createDBUpdateStringBind(shared_ptr<Buffer> buffer,
 
 
 shared_ptr<DBCommand> SQLGenerator::getSelectCommand(
-        const DBContent& object, DBContentVariableSet read_list, const string& filter, bool use_order,
-        DBContentVariable* order_variable, bool use_order_ascending, const string& limit)
+        const DBContent& object, VariableSet read_list, const string& filter, bool use_order,
+        Variable* order_variable, bool use_order_ascending, const string& limit)
 {
     logdbg << "SQLGenerator: getSelectCommand: dbo " << object.name()
            << " read list size " << read_list.getSize();
@@ -579,7 +579,7 @@ shared_ptr<DBCommand> SQLGenerator::getSelectCommand(
     for (auto var_it : read_list.getSet())
         // look what tables are needed for loaded variables and add variables to sql query
     {
-        DBContentVariable* variable = var_it;
+        Variable* variable = var_it;
 
         if (!first)
             ss << ", ";

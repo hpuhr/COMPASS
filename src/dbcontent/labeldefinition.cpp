@@ -19,12 +19,12 @@
 #include "buffer.h"
 #include "dbcontent/dbcontent.h"
 #include "dbcontent/labeldefinitionwidget.h"
-#include "dbovariable.h"
+#include "dbcontent/variable/variable.h"
 #include "global.h"
 #include "propertylist.h"
 #include "compass.h"
 #include "dbcontent/dbcontentmanager.h"
-#include "metadbovariable.h"
+#include "dbcontent/variable/metavariable.h"
 
 #include <iostream>
 #include <string>
@@ -109,7 +109,7 @@ LabelDefinition::~LabelDefinition()
     read_list_.clear();
 }
 
-DBContentVariableSet& LabelDefinition::readList()
+VariableSet& LabelDefinition::readList()
 {
     updateReadList();
     return read_list_;
@@ -269,7 +269,7 @@ std::map<unsigned int, std::string> LabelDefinition::generateLabels(std::vector<
     assert (dbo_man_.existsMetaVariable(DBContent::meta_var_rec_num_id_.name()));
     assert (dbo_man_.metaVariable(DBContent::meta_var_rec_num_id_.name()).existsIn(dbo_name));
 
-    DBContentVariable& rec_num_var = dbo_man_.metaVariable(DBContent::meta_var_rec_num_id_.name()).getFor(dbo_name);
+    Variable& rec_num_var = dbo_man_.metaVariable(DBContent::meta_var_rec_num_id_.name()).getFor(dbo_name);
 
     std::map<unsigned int, size_t> rec_num_to_index;
     NullableVector<unsigned int>& rec_num_list = buffer->get<unsigned int>(rec_num_var.dbColumnName());
@@ -289,7 +289,7 @@ std::map<unsigned int, std::string> LabelDefinition::generateLabels(std::vector<
     bool null;
 
     int var_count = 0;
-    for (DBContentVariable* variable : read_list_.getSet())
+    for (Variable* variable : read_list_.getSet())
     {
         data_type = variable->dataType();
         db_col_name = variable->dbColumnName();

@@ -20,9 +20,9 @@
 
 #include <QWidget>
 
-#include "dbovariable.h"
+#include "dbcontent/variable/variable.h"
 
-class DBContentVariableOrderedSetWidget;
+class VariableOrderedSetWidget;
 class ListBoxView;
 
 class QComboBox;

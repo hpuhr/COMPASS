@@ -23,7 +23,7 @@
 #include <memory>
 
 #include "configurable.h"
-#include "dbovariableset.h"
+#include "dbcontent/variable/variableset.h"
 //#include "DBObjectManager.h"
 
 class DBContent;
@@ -83,7 +83,7 @@ class LabelDefinition : public QObject, public Configurable
                        DBContent* parent, DBContentManager& dbo_man);
     virtual ~LabelDefinition();
 
-    DBContentVariableSet& readList();
+    VariableSet& readList();
     const std::map<std::string, LabelEntry*>& entries() { return entries_; }
     LabelEntry& entry(const std::string& variable_name);
 
@@ -103,7 +103,7 @@ class LabelDefinition : public QObject, public Configurable
     DBContentManager& dbo_man_;
     std::map<std::string, LabelEntry*> entries_;  // varname -> labelentry
 
-    DBContentVariableSet read_list_;
+    VariableSet read_list_;
 
     LabelDefinitionWidget* widget_{nullptr};
 

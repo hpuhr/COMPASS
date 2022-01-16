@@ -30,11 +30,11 @@ class QGridLayout;
 namespace dbContent
 {
 
-class MetaDBOVariable;
-class DBContentVariableSelectionWidget;
+class MetaVariable;
+class VariableSelectionWidget;
 
 
-class MetaDBOVariableWidget : public QWidget
+class MetaVariableWidget : public QWidget
 {
     Q_OBJECT
 
@@ -48,14 +48,14 @@ class MetaDBOVariableWidget : public QWidget
     void updateSlot();
 
   public:
-    MetaDBOVariableWidget(MetaDBOVariable& variable, QWidget* parent = 0, Qt::WindowFlags f = 0);
-    virtual ~MetaDBOVariableWidget();
+    MetaVariableWidget(MetaVariable& variable, QWidget* parent = 0, Qt::WindowFlags f = 0);
+    virtual ~MetaVariableWidget();
 
     void lock();
     void unlock();
 
   private:
-    MetaDBOVariable& variable_;
+    MetaVariable& variable_;
 
     QLineEdit* name_edit_{nullptr};
     QLineEdit* description_edit_{nullptr};
@@ -64,7 +64,7 @@ class MetaDBOVariableWidget : public QWidget
 
     bool locked_{false};
 
-    std::map<DBContentVariableSelectionWidget*, std::string> selection_widgets_;
+    std::map<VariableSelectionWidget*, std::string> selection_widgets_;
 };
 
 }

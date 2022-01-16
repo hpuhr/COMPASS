@@ -19,7 +19,7 @@
 #define VIEW_H
 
 #include "configurable.h"
-#include "dbovariableset.h"
+#include "dbcontent/variable/variableset.h"
 #include "viewcontainerwidget.h"
 #include "buffer.h"
 #include "appmode.h"
@@ -88,7 +88,7 @@ class View : public QObject, public Configurable
 
     void showInTabWidget();
 
-    virtual dbContent::DBContentVariableSet getSet(const std::string& dbo_name) = 0;
+    virtual dbContent::VariableSet getSet(const std::string& dbo_name) = 0;
 
     void viewShutdown(const std::string& err);
     void emitSelectionChange();

@@ -1,7 +1,7 @@
 #ifndef DBOVARIABLE_CREATEDIALOG_H
 #define DBOVARIABLE_CREATEDIALOG_H
 
-#include "dbovariable.h"
+#include "dbcontent/variable/variable.h"
 
 #include <QDialog>
 
@@ -16,10 +16,10 @@ class QTextEdit;
 namespace dbContent
 {
 
-class DBContentVariable;
-class DBContentVariableDataTypeComboBox;
+class Variable;
+class VariableDataTypeComboBox;
 
-class DBContentVariableCreateDialog : public QDialog
+class VariableCreateDialog : public QDialog
 {
     Q_OBJECT
 
@@ -30,7 +30,7 @@ public slots:
     void dbColumnChangedSlot(const QString& name);
 
 public:
-    DBContentVariableCreateDialog(DBContent& object, const std::string name="",
+    VariableCreateDialog(DBContent& object, const std::string name="",
                             const std::string description="",
                             QWidget* parent = nullptr, Qt::WindowFlags f = 0);
 
@@ -56,7 +56,7 @@ protected:
     QLineEdit* name_edit_ {nullptr};
     QLineEdit* short_name_edit_ {nullptr};
     QTextEdit* description_edit_ {nullptr};
-    dbContent::DBContentVariableDataTypeComboBox* type_combo_ {nullptr};
+    dbContent::VariableDataTypeComboBox* type_combo_ {nullptr};
     UnitSelectionWidget* unit_sel_ {nullptr};
     StringRepresentationComboBox* representation_box_ {nullptr};
     QLineEdit* db_column_edit_ {nullptr};
@@ -76,7 +76,7 @@ protected:
     std::string dimension_;
     std::string unit_;
 
-    DBContentVariable::Representation representation_ {DBContentVariable::Representation::STANDARD};
+    Variable::Representation representation_ {Variable::Representation::STANDARD};
     std::string representation_str_ {"STANDARD"};
 
     std::string description_;

@@ -13,10 +13,10 @@ class QPushButton;
 namespace dbContent
 {
 
-class MetaDBOVariable;
-class DBContentVariableSelectionWidget;
+class MetaVariable;
+class VariableSelectionWidget;
 
-class MetaDBOVariableDetailWidget : public QWidget
+class MetaVariableDetailWidget : public QWidget
 {
     Q_OBJECT
 
@@ -27,21 +27,21 @@ public slots:
     void deleteVariableSlot();
 
 public:
-    MetaDBOVariableDetailWidget(DBContentManager& dbo_man, QWidget* parent = nullptr);
+    MetaVariableDetailWidget(DBContentManager& dbo_man, QWidget* parent = nullptr);
 
-    void show (MetaDBOVariable& meta_var);
+    void show (MetaVariable& meta_var);
     void clear();
 
 private:
     DBContentManager& dbo_man_;
 
     bool has_current_entry_ {false};
-    MetaDBOVariable* meta_var_ {nullptr};
+    MetaVariable* meta_var_ {nullptr};
 
     QLineEdit* name_edit_{nullptr};
     QTextEdit* description_edit_{nullptr};
 
-    std::map<std::string, DBContentVariableSelectionWidget*> selection_widgets_; // db content -> var select
+    std::map<std::string, VariableSelectionWidget*> selection_widgets_; // db content -> var select
 
     QPushButton* delete_button_ {nullptr};
 };

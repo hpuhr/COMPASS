@@ -24,14 +24,14 @@
 #include "dboassociationcollection.h"
 #include "dbcontent/dbcontent.h"
 #include "dbcontent/dbcontentmanager.h"
-#include "dbovariable.h"
-#include "dbovariableorderedset.h"
-#include "metadbovariable.h"
+#include "dbcontent/variable/variable.h"
+#include "dbcontent/variable/variableorderedset.h"
+#include "dbcontent/variable/metavariable.h"
 
 using namespace dbContent;
 
 AllBufferCSVExportJob::AllBufferCSVExportJob(
-    std::map<std::string, std::shared_ptr<Buffer>> buffers, DBOVariableOrderedSet* read_set,
+    std::map<std::string, std::shared_ptr<Buffer>> buffers, OrderedSet* read_set,
     std::map<unsigned int, std::string> number_to_dbo,
     const std::vector<std::pair<unsigned int, unsigned int>>& row_indexes,
     const std::string& file_name, bool overwrite, bool only_selected, bool use_presentation,
@@ -174,7 +174,7 @@ void AllBufferCSVExportJob::run()
                     assert(manager.object(dbo_name).hasVariable(variable_name));
                 }
 
-                DBContentVariable& variable = (variable_dbo_name == META_OBJECT_NAME)
+                Variable& variable = (variable_dbo_name == META_OBJECT_NAME)
                                             ? manager.metaVariable(variable_name).getFor(dbo_name)
                                             : manager.object(dbo_name).variable(variable_name);
 

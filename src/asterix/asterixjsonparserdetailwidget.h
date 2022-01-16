@@ -17,7 +17,7 @@ class QComboBox;
 
 namespace dbContent
 {
-class DBContentVariableSelectionWidget;
+class VariableSelectionWidget;
 }
 
 class ASTERIXJSONParserDetailWidget : public QWidget
@@ -67,7 +67,7 @@ private:
     UnitSelectionWidget* unit_sel_ {nullptr};
     DataTypeFormatSelectionWidget* data_format_widget_ {nullptr};
 
-    dbContent::DBContentVariableSelectionWidget* dbo_var_sel_ {nullptr};
+    dbContent::VariableSelectionWidget* dbo_var_sel_ {nullptr};
 
     QTextEdit* dbo_var_comment_edit_ {nullptr};
 

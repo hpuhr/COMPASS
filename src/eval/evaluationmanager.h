@@ -38,7 +38,7 @@ class DBContent;
 
 namespace dbContent {
 
-class DBContentVariableSet;
+class VariableSet;
 
 }
 
@@ -81,7 +81,7 @@ public:
     void close();
 
     bool needsAdditionalVariables ();
-    void addVariables (const std::string dbo_name, dbContent::DBContentVariableSet& read_set);
+    void addVariables (const std::string dbo_name, dbContent::VariableSet& read_set);
 
     virtual void generateSubConfigurable(const std::string& class_id,
                                          const std::string& instance_id) override;

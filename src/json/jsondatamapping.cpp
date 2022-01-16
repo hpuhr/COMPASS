@@ -20,7 +20,7 @@
 #include "compass.h"
 #include "dbcontent/dbcontent.h"
 #include "dbcontent/dbcontentmanager.h"
-#include "dbovariable.h"
+#include "dbcontent/variable/variable.h"
 #include "jsondatamappingwidget.h"
 #include "jsonobjectparser.h"
 #include "unit.h"
@@ -176,7 +176,7 @@ void JSONDataMapping::check()
     }
 }
 
-dbContent::DBContentVariable& JSONDataMapping::variable() const
+dbContent::Variable& JSONDataMapping::variable() const
 {
     assert(initialized_);
     assert(variable_);

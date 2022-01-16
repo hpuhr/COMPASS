@@ -22,7 +22,7 @@
 #include "dbinterface.h"
 #include "dbcontent/dbcontent.h"
 #include "dbcontent/dbcontentmanager.h"
-#include "dbovariable.h"
+#include "dbcontent/variable/variable.h"
 #include "files.h"
 #include "jobmanager.h"
 #include "jsonimporttaskwidget.h"

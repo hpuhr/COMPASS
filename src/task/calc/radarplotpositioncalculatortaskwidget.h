@@ -27,7 +27,7 @@ class DBContentComboBox;
 
 namespace dbContent
 {
-class DBContentVariableSelectionWidget;
+class VariableSelectionWidget;
 }
 
 class QPushButton;
@@ -59,14 +59,14 @@ class RadarPlotPositionCalculatorTaskWidget : public TaskWidget
     RadarPlotPositionCalculatorTask& task_;
 
     DBContentComboBox* object_box_{nullptr};
-    dbContent::DBContentVariableSelectionWidget* key_box_{nullptr};
-    dbContent::DBContentVariableSelectionWidget* datasource_box_{nullptr};
-    dbContent::DBContentVariableSelectionWidget* range_box_{nullptr};
-    dbContent::DBContentVariableSelectionWidget* azimuth_box_{nullptr};
-    dbContent::DBContentVariableSelectionWidget* altitude_box_{nullptr};
+    dbContent::VariableSelectionWidget* key_box_{nullptr};
+    dbContent::VariableSelectionWidget* datasource_box_{nullptr};
+    dbContent::VariableSelectionWidget* range_box_{nullptr};
+    dbContent::VariableSelectionWidget* azimuth_box_{nullptr};
+    dbContent::VariableSelectionWidget* altitude_box_{nullptr};
 
-    dbContent::DBContentVariableSelectionWidget* latitude_box_{nullptr};
-    dbContent::DBContentVariableSelectionWidget* longitude_box_{nullptr};
+    dbContent::VariableSelectionWidget* latitude_box_{nullptr};
+    dbContent::VariableSelectionWidget* longitude_box_{nullptr};
 
     void setDBOBject(const std::string& object_name);
 };

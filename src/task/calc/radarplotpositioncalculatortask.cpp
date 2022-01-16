@@ -26,8 +26,8 @@
 #include "dbinterface.h"
 #include "dbcontent/dbcontent.h"
 #include "dbcontent/dbcontentmanager.h"
-#include "dbovariable.h"
-#include "dbovariableset.h"
+#include "dbcontent/variable/variable.h"
+#include "dbcontent/variable/variableset.h"
 #include "logger.h"
 #include "projection.h"
 #include "projectionmanager.h"
@@ -257,7 +257,7 @@ bool RadarPlotPositionCalculatorTask::isRecommended()
 
 bool RadarPlotPositionCalculatorTask::isRequired() { return false; }
 
-void RadarPlotPositionCalculatorTask::checkAndSetVariable(std::string& name_str, dbContent::DBContentVariable** var)
+void RadarPlotPositionCalculatorTask::checkAndSetVariable(std::string& name_str, dbContent::Variable** var)
 {
     // TODO rework to only asserting, check must be done before
     if (db_object_)
@@ -373,7 +373,7 @@ void RadarPlotPositionCalculatorTask::run()
     assert(latitude_var_);
     assert(longitude_var_);
 
-    dbContent::DBContentVariableSet read_set;
+    dbContent::VariableSet read_set;
     read_set.add(*key_var_);
     read_set.add(*datasource_var_);
     read_set.add(*range_var_);

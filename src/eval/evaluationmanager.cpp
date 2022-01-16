@@ -28,15 +28,15 @@
 #include "dbcontent/dbcontentmanager.h"
 #include "dbcontentmanagerloadwidget.h"
 #include "sector.h"
-#include "metadbovariable.h"
-#include "dbovariable.h"
+#include "dbcontent/variable/metavariable.h"
+#include "dbcontent/variable/variable.h"
 #include "buffer.h"
 #include "filtermanager.h"
 #include "dbfilter.h"
 #include "viewabledataconfig.h"
 #include "viewmanager.h"
 #include "stringconv.h"
-#include "dbovariableorderedset.h"
+#include "dbcontent/variable/variableorderedset.h"
 #include "sqliteconnection.h"
 #include "stringconv.h"
 
@@ -648,7 +648,7 @@ bool EvaluationManager::needsAdditionalVariables ()
     return needs_additional_variables_;
 }
 
-void EvaluationManager::addVariables (const std::string dbo_name, dbContent::DBContentVariableSet& read_set)
+void EvaluationManager::addVariables (const std::string dbo_name, dbContent::VariableSet& read_set)
 {
     loginf << "EvaluationManager: addVariables: dbo_name " << dbo_name;
 

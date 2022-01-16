@@ -18,7 +18,7 @@
 #include "listboxviewconfigwidget.h"
 #include "compass.h"
 #include "dbcontent/dbcontentmanager.h"
-#include "dbovariableorderedsetwidget.h"
+#include "dbcontent/variable/variableorderedsetwidget.h"
 #include "listboxview.h"
 #include "listboxviewdatasource.h"
 #include "logger.h"
@@ -487,7 +487,7 @@ void ListBoxViewConfigWidget::updateSetWidget()
 
     assert (view_->getDataSource()->hasCurrentSet());
 
-    connect(view_->getDataSource()->getSet(), &dbContent::DBOVariableOrderedSet::variableAddedChangedSignal,
+    connect(view_->getDataSource()->getSet(), &dbContent::OrderedSet::variableAddedChangedSignal,
             this, &ListBoxViewConfigWidget::reloadWantedSlot, Qt::UniqueConnection);
 
     QWidget* set_widget = view_->getDataSource()->getSet()->widget();

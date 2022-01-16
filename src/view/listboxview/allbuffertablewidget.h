@@ -29,7 +29,7 @@ class QTableView;
 class AllBufferTableModel;
 class QStringList;
 class Buffer;
-class DBContentVariableSet;
+class VariableSet;
 class DBContent;
 class ListBoxView;
 class ListBoxViewDataSource;

@@ -1,6 +1,6 @@
-#include "dbovariablecreatedialog.h"
-#include "dbovariable.h"
-#include "dbovariabledatatypecombobox.h"
+#include "dbcontent/variable/variablecreatedialog.h"
+#include "dbcontent/variable/variable.h"
+#include "dbcontent/variable/variabledatatypecombobox.h"
 #include "stringrepresentationcombobox.h"
 #include "unitselectionwidget.h"
 #include "stringconv.h"
@@ -25,7 +25,7 @@ using namespace std;
 namespace dbContent
 {
 
-DBContentVariableCreateDialog::DBContentVariableCreateDialog(DBContent& object, const std::string name,
+VariableCreateDialog::VariableCreateDialog(DBContent& object, const std::string name,
                                                  const std::string description,
                                                  QWidget* parent, Qt::WindowFlags f)
     : QDialog(parent, f), object_(object)
@@ -46,12 +46,12 @@ DBContentVariableCreateDialog::DBContentVariableCreateDialog(DBContent& object, 
     name_ = name;
 
     name_edit_ = new QLineEdit(name_.c_str());
-    connect(name_edit_, &QLineEdit::textChanged, this, &DBContentVariableCreateDialog::nameChangedSlot);
+    connect(name_edit_, &QLineEdit::textChanged, this, &VariableCreateDialog::nameChangedSlot);
     form_layout->addRow("Name", name_edit_);
 
     //    QLineEdit* short_name_edit_ {nullptr};
     short_name_edit_ = new QLineEdit();
-    connect(short_name_edit_, &QLineEdit::textChanged, this, &DBContentVariableCreateDialog::shortNameChangedSlot);
+    connect(short_name_edit_, &QLineEdit::textChanged, this, &VariableCreateDialog::shortNameChangedSlot);
     form_layout->addRow("Short Name", short_name_edit_);
 
     //    QTextEdit* description_edit_ {nullptr};
@@ -63,12 +63,12 @@ DBContentVariableCreateDialog::DBContentVariableCreateDialog(DBContent& object, 
     //description_edit_->setWordWrapMode(QTextOption::WrapMode::WrapAnywhere);
 
     connect(description_edit_, &QTextEdit::textChanged, this,
-            &DBContentVariableCreateDialog::commentChangedSlot);
+            &VariableCreateDialog::commentChangedSlot);
 
     form_layout->addRow("Comment", description_edit_);
 
     //    DBOVariableDataTypeComboBox* type_combo_ {nullptr};
-    type_combo_ = new dbContent::DBContentVariableDataTypeComboBox(data_type_, data_type_str_);
+    type_combo_ = new dbContent::VariableDataTypeComboBox(data_type_, data_type_str_);
     form_layout->addRow("Data Type", type_combo_);
 
     //    UnitSelectionWidget* unit_sel_ {nullptr};
@@ -94,7 +94,7 @@ DBContentVariableCreateDialog::DBContentVariableCreateDialog(DBContent& object, 
 
     db_column_edit_ = new QLineEdit(db_column_name_.c_str());
 
-    connect(db_column_edit_, &QLineEdit::textChanged, this, &DBContentVariableCreateDialog::dbColumnChangedSlot);
+    connect(db_column_edit_, &QLineEdit::textChanged, this, &VariableCreateDialog::dbColumnChangedSlot);
     form_layout->addRow("DBColumn", db_column_edit_);
 
     main_layout->addLayout(form_layout);
@@ -106,13 +106,13 @@ DBContentVariableCreateDialog::DBContentVariableCreateDialog(DBContent& object, 
     QHBoxLayout* button_layout = new QHBoxLayout();
 
     cancel_button_ = new QPushButton("Cancel");
-    connect(cancel_button_, &QPushButton::clicked, this, &DBContentVariableCreateDialog::reject);
+    connect(cancel_button_, &QPushButton::clicked, this, &VariableCreateDialog::reject);
     button_layout->addWidget(cancel_button_);
 
     button_layout->addStretch();
 
     ok_button_ = new QPushButton("OK");
-    connect(ok_button_, &QPushButton::clicked, this, &DBContentVariableCreateDialog::accept);
+    connect(ok_button_, &QPushButton::clicked, this, &VariableCreateDialog::accept);
     button_layout->addWidget(ok_button_);
 
     main_layout->addLayout(button_layout);
@@ -128,47 +128,47 @@ DBContentVariableCreateDialog::DBContentVariableCreateDialog(DBContent& object, 
     checkSettings();
 }
 
-std::string DBContentVariableCreateDialog::name() const
+std::string VariableCreateDialog::name() const
 {
     return name_;
 }
 
-std::string DBContentVariableCreateDialog::shortName() const
+std::string VariableCreateDialog::shortName() const
 {
     return short_name_;
 }
 
-std::string DBContentVariableCreateDialog::dataTypeStr() const
+std::string VariableCreateDialog::dataTypeStr() const
 {
     return Property::asString(data_type_);
 }
 
-std::string DBContentVariableCreateDialog::dimension() const
+std::string VariableCreateDialog::dimension() const
 {
     return dimension_;
 }
 
-std::string DBContentVariableCreateDialog::unit() const
+std::string VariableCreateDialog::unit() const
 {
     return unit_;
 }
 
-std::string DBContentVariableCreateDialog::representationStr() const
+std::string VariableCreateDialog::representationStr() const
 {
     return representation_str_;
 }
 
-std::string DBContentVariableCreateDialog::description() const
+std::string VariableCreateDialog::description() const
 {
     return description_;
 }
 
-std::string DBContentVariableCreateDialog::dbColumnName() const
+std::string VariableCreateDialog::dbColumnName() const
 {
     return db_column_name_;
 }
 
-void DBContentVariableCreateDialog::nameChangedSlot(const QString& name)
+void VariableCreateDialog::nameChangedSlot(const QString& name)
 {
     loginf << "DBOVariableCreateDialog: nameChangedSlot: name '" << name.toStdString() << "'";
 
@@ -192,19 +192,19 @@ void DBContentVariableCreateDialog::nameChangedSlot(const QString& name)
     checkSettings();
 }
 
-void DBContentVariableCreateDialog::shortNameChangedSlot(const QString& name)
+void VariableCreateDialog::shortNameChangedSlot(const QString& name)
 {
     short_name_ = name.toStdString();
 }
 
-void DBContentVariableCreateDialog::commentChangedSlot()
+void VariableCreateDialog::commentChangedSlot()
 {
     assert (description_edit_);
 
     description_ = description_edit_->document()->toPlainText().toStdString();
 }
 
-void DBContentVariableCreateDialog::dbColumnChangedSlot(const QString& name)
+void VariableCreateDialog::dbColumnChangedSlot(const QString& name)
 {
     loginf << "DBOVariableCreateDialog: dbColumnChangedSlot: name '" << name.toStdString() << "'";
 
@@ -226,7 +226,7 @@ void DBContentVariableCreateDialog::dbColumnChangedSlot(const QString& name)
     checkSettings();
 }
 
-void DBContentVariableCreateDialog::checkSettings()
+void VariableCreateDialog::checkSettings()
 {
     assert (name_edit_);
     assert (db_column_edit_);

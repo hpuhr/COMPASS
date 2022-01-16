@@ -33,10 +33,10 @@ class QGridLayout;
 namespace dbContent
 {
 
-class DBContentVariable;
-class DBContentVariableDataTypeComboBox;
+class Variable;
+class VariableDataTypeComboBox;
 
-class DBContentVariableWidget : public QWidget
+class VariableWidget : public QWidget
 {
     Q_OBJECT
 
@@ -52,19 +52,19 @@ class DBContentVariableWidget : public QWidget
 
   public:
     /// @brief Constructor
-    DBContentVariableWidget(DBContentVariable& variable, QWidget* parent = 0, Qt::WindowFlags f = 0);
+    VariableWidget(Variable& variable, QWidget* parent = 0, Qt::WindowFlags f = 0);
     /// @brief Destructor
-    virtual ~DBContentVariableWidget();
+    virtual ~VariableWidget();
 
     void lock();
     void unlock();
 
-    void setVariable(DBContentVariable& variable);
+    void setVariable(Variable& variable);
     void update();
 
   private:
     /// @brief DBObject to be managed
-    DBContentVariable* variable_{nullptr};
+    Variable* variable_{nullptr};
     QGridLayout* properties_layout_{nullptr};
 
     bool locked_{false};
@@ -73,7 +73,7 @@ class DBContentVariableWidget : public QWidget
     QLineEdit* name_edit_{nullptr};
     /// @brief DBOVariable info
     QLineEdit* description_edit_{nullptr};
-    DBContentVariableDataTypeComboBox* type_combo_{nullptr};
+    VariableDataTypeComboBox* type_combo_{nullptr};
     StringRepresentationComboBox* representation_box_{nullptr};
     UnitSelectionWidget* unit_sel_{nullptr};
 };

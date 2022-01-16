@@ -17,20 +17,20 @@
 
 //#include <boost/algorithm/string.hpp>
 
-#include "metadbovariable.h"
+#include "dbcontent/variable/metavariable.h"
 
 #include "compass.h"
 #include "dbcontent/dbcontent.h"
 #include "dbcontent/dbcontentmanager.h"
-#include "dbovariable.h"
-#include "metadbovariablewidget.h"
+#include "dbcontent/variable/variable.h"
+#include "dbcontent/variable/metavariablewidget.h"
 
 using namespace std;
 
 namespace dbContent
 {
 
-MetaDBOVariable::MetaDBOVariable(const std::string& class_id, const std::string& instance_id,
+MetaVariable::MetaVariable(const std::string& class_id, const std::string& instance_id,
                                  DBContentManager* object_manager)
     : Configurable(class_id, instance_id, object_manager),
       object_manager_(*object_manager),
@@ -48,7 +48,7 @@ MetaDBOVariable::MetaDBOVariable(const std::string& class_id, const std::string&
     updateDescription();
 }
 
-MetaDBOVariable::~MetaDBOVariable()
+MetaVariable::~MetaVariable()
 {
     if (widget_)
     {
@@ -62,17 +62,17 @@ MetaDBOVariable::~MetaDBOVariable()
     variables_.clear();
 }
 
-void MetaDBOVariable::checkSubConfigurables()
+void MetaVariable::checkSubConfigurables()
 {
     // nothing to do here
 }
 
-void MetaDBOVariable::generateSubConfigurable(const std::string& class_id,
+void MetaVariable::generateSubConfigurable(const std::string& class_id,
                                               const std::string& instance_id)
 {
     if (class_id.compare("DBOVariableDefinition") == 0)
     {
-        DBContentVariableDefinition* definition = new DBContentVariableDefinition(class_id, instance_id, this);
+        VariableDefinition* definition = new VariableDefinition(class_id, instance_id, this);
 
         const std::string& dbo_name = definition->dboName();
         std::string dbovar_name = definition->variableName();
@@ -109,7 +109,7 @@ void MetaDBOVariable::generateSubConfigurable(const std::string& class_id,
         assert(variables_.find(dbo_name) == variables_.end());
 
         definitions_[dbo_name] = definition;
-        variables_.insert(std::pair<std::string, DBContentVariable&>(
+        variables_.insert(std::pair<std::string, Variable&>(
             dbo_name, object_manager_.object(dbo_name).variable(dbovar_name)));
     }
     else
@@ -117,24 +117,24 @@ void MetaDBOVariable::generateSubConfigurable(const std::string& class_id,
                                  class_id);
 }
 
-bool MetaDBOVariable::existsIn(const std::string& dbo_name)
+bool MetaVariable::existsIn(const std::string& dbo_name)
 {
     return variables_.count(dbo_name) > 0;
 }
 
-DBContentVariable& MetaDBOVariable::getFor(const std::string& dbo_name)
+Variable& MetaVariable::getFor(const std::string& dbo_name)
 {
     assert(existsIn(dbo_name));
     return variables_.at(dbo_name);
 }
 
-std::string MetaDBOVariable::getNameFor(const std::string& dbo_name)
+std::string MetaVariable::getNameFor(const std::string& dbo_name)
 {
     assert(existsIn(dbo_name));
     return variables_.at(dbo_name).name();
 }
 
-void MetaDBOVariable::set(DBContentVariable& var)
+void MetaVariable::set(Variable& var)
 {
     string dbo_name = var.dbObject().name();
 
@@ -146,7 +146,7 @@ void MetaDBOVariable::set(DBContentVariable& var)
     addVariable(dbo_name, var.name());
 }
 
-void MetaDBOVariable::removeVariable(const std::string& dbo_name)
+void MetaVariable::removeVariable(const std::string& dbo_name)
 {
     loginf << "MetaDBOVariable " << name_ << ": removeVariable: dbo " << dbo_name;
     assert(existsIn(dbo_name));
@@ -157,7 +157,7 @@ void MetaDBOVariable::removeVariable(const std::string& dbo_name)
     updateDescription();
 }
 
-void MetaDBOVariable::addVariable(const std::string& dbo_name, const std::string& dbovariable_name)
+void MetaVariable::addVariable(const std::string& dbo_name, const std::string& dbovariable_name)
 {
     loginf << "MetaDBOVariable " << name_ << ": addVariable: dbo " << dbo_name << " varname "
            << dbovariable_name;
@@ -174,7 +174,7 @@ void MetaDBOVariable::addVariable(const std::string& dbo_name, const std::string
     updateDescription();
 }
 
-bool MetaDBOVariable::uses(const DBContentVariable& variable)
+bool MetaVariable::uses(const Variable& variable)
 {
     for (auto& var_it : variables_)
         if (var_it.second == variable)
@@ -183,11 +183,11 @@ bool MetaDBOVariable::uses(const DBContentVariable& variable)
     return false;
 }
 
-MetaDBOVariableWidget* MetaDBOVariable::widget()
+MetaVariableWidget* MetaVariable::widget()
 {
     if (!widget_)
     {
-        widget_ = new MetaDBOVariableWidget(*this);
+        widget_ = new MetaVariableWidget(*this);
 
         if (locked_)
             widget_->lock();
@@ -196,7 +196,7 @@ MetaDBOVariableWidget* MetaDBOVariable::widget()
     return widget_;
 }
 
-void MetaDBOVariable::unlock()
+void MetaVariable::unlock()
 {
     if (!locked_)
         return;
@@ -207,7 +207,7 @@ void MetaDBOVariable::unlock()
         widget_->unlock();
 }
 
-void MetaDBOVariable::lock()
+void MetaVariable::lock()
 {
     if (locked_)
         return;
@@ -218,13 +218,13 @@ void MetaDBOVariable::lock()
         widget_->lock();
 }
 
-std::string MetaDBOVariable::name() const { return name_; }
+std::string MetaVariable::name() const { return name_; }
 
-void MetaDBOVariable::name(const std::string& name) { name_ = name; }
+void MetaVariable::name(const std::string& name) { name_ = name; }
 
-std::string MetaDBOVariable::description() const { return description_; }
+std::string MetaVariable::description() const { return description_; }
 
-PropertyDataType MetaDBOVariable::dataType() const
+PropertyDataType MetaVariable::dataType() const
 {
     assert(hasVariables());
 
@@ -240,17 +240,17 @@ PropertyDataType MetaDBOVariable::dataType() const
     return data_type;
 }
 
-const std::string& MetaDBOVariable::dataTypeString() const
+const std::string& MetaVariable::dataTypeString() const
 {
     assert(hasVariables());
     return Property::asString(dataType());
 }
 
-DBContentVariable::Representation MetaDBOVariable::representation()
+Variable::Representation MetaVariable::representation()
 {
     assert(hasVariables());
 
-    DBContentVariable::Representation representation = variables_.begin()->second.representation();
+    Variable::Representation representation = variables_.begin()->second.representation();
 
     for (auto variable_it : variables_)
     {
@@ -306,7 +306,7 @@ DBContentVariable::Representation MetaDBOVariable::representation()
 //    return variables_.begin()->second.getRepresentationStringFromValue(getMaxString());
 //}
 
-void MetaDBOVariable::removeOutdatedVariables()
+void MetaVariable::removeOutdatedVariables()
 {
     loginf << "MetaDBOVariable " << name() << ": removeOutdatedVariables";
 
@@ -338,7 +338,7 @@ void MetaDBOVariable::removeOutdatedVariables()
     }
 }
 
-void MetaDBOVariable::updateDescription()
+void MetaVariable::updateDescription()
 {
     description_ = "";
 

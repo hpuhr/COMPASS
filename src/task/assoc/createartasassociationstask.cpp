@@ -24,10 +24,10 @@
 #include "dbcontent/dbcontent.h"
 #include "dbcontent/dbcontentmanager.h"
 //#include "dbodatasource.h"
-#include "dbovariable.h"
-#include "dbovariableset.h"
+#include "dbcontent/variable/variable.h"
+#include "dbcontent/variable/variableset.h"
 #include "jobmanager.h"
-#include "metadbovariable.h"
+#include "dbcontent/variable/metavariable.h"
 //#include "postprocesstask.h"
 #include "stringconv.h"
 #include "taskmanager.h"
@@ -310,7 +310,7 @@ void CreateARTASAssociationsTask::run()
         if (dbo_it.first == "RefTraj") // not set in references
             continue;
 
-        DBContentVariableSet read_set = getReadSetFor(dbo_it.first);
+        VariableSet read_set = getReadSetFor(dbo_it.first);
         TODO_ASSERT
 
 //        connect(dbo_it.second, &DBObject::newDataSignal, this,
@@ -483,7 +483,7 @@ void CreateARTASAssociationsTask::currentDataSourceName(const std::string& curre
     current_data_source_name_ = current_data_source_name;
 }
 
-DBContentVariable* CreateARTASAssociationsTask::trackerDsIdVar() const { return tracker_ds_id_var_; }
+Variable* CreateARTASAssociationsTask::trackerDsIdVar() const { return tracker_ds_id_var_; }
 
 std::string CreateARTASAssociationsTask::trackerDsIdVarStr() const
 {
@@ -567,11 +567,11 @@ void CreateARTASAssociationsTask::todVarStr(const std::string& tod_var_str)
     tod_var_str_ = tod_var_str;
 }
 
-MetaDBOVariable* CreateARTASAssociationsTask::keyVar() const { return key_var_; }
+MetaVariable* CreateARTASAssociationsTask::keyVar() const { return key_var_; }
 
-MetaDBOVariable* CreateARTASAssociationsTask::hashVar() const { return hash_var_; }
+MetaVariable* CreateARTASAssociationsTask::hashVar() const { return hash_var_; }
 
-MetaDBOVariable* CreateARTASAssociationsTask::todVar() const { return tod_var_; }
+MetaVariable* CreateARTASAssociationsTask::todVar() const { return tod_var_; }
 
 float CreateARTASAssociationsTask::endTrackTime() const { return end_track_time_; }
 
@@ -698,7 +698,7 @@ void CreateARTASAssociationsTask::markTrackCoastingAssociationsDubious(bool valu
     mark_track_coasting_associations_dubious_ = value;
 }
 
-void CreateARTASAssociationsTask::checkAndSetVariable(std::string& name_str, DBContentVariable** var)
+void CreateARTASAssociationsTask::checkAndSetVariable(std::string& name_str, Variable** var)
 {
     DBContentManager& object_man = COMPASS::instance().objectManager();
     DBContent& object = object_man.object("Tracker");
@@ -719,7 +719,7 @@ void CreateARTASAssociationsTask::checkAndSetVariable(std::string& name_str, DBC
 }
 
 void CreateARTASAssociationsTask::checkAndSetMetaVariable(std::string& name_str,
-                                                          MetaDBOVariable** var)
+                                                          MetaVariable** var)
 {
     DBContentManager& object_man = COMPASS::instance().objectManager();
 
@@ -739,9 +739,9 @@ void CreateARTASAssociationsTask::checkAndSetMetaVariable(std::string& name_str,
     }
 }
 
-DBContentVariableSet CreateARTASAssociationsTask::getReadSetFor(const std::string& dbo_name)
+VariableSet CreateARTASAssociationsTask::getReadSetFor(const std::string& dbo_name)
 {
-    DBContentVariableSet read_set;
+    VariableSet read_set;
 
     assert(key_var_);
     assert(key_var_->existsIn(dbo_name));

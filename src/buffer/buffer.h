@@ -29,7 +29,7 @@
 
 namespace dbContent {
 
-class DBContentVariableSet;
+class VariableSet;
 
 }
 
@@ -124,7 +124,7 @@ class Buffer
 
     bool isNone(const Property& property, unsigned int row_cnt);
 
-    void transformVariables(dbContent::DBContentVariableSet& list,
+    void transformVariables(dbContent::VariableSet& list,
                             bool dbcol2dbovar);  // tc2dbovar true for db col -> dbo var, false dbo var -> db column
 
     std::shared_ptr<Buffer> getPartialCopy(const PropertyList& partial_properties);

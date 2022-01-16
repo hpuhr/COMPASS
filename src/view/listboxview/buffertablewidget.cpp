@@ -32,8 +32,8 @@
 #include "buffertablemodel.h"
 #include "dbcontent/dbcontent.h"
 #include "dbcontent/dbcontentmanager.h"
-#include "dbovariable.h"
-#include "dbovariableset.h"
+#include "dbcontent/variable/variable.h"
+#include "dbcontent/variable/variableset.h"
 #include "listboxviewdatasource.h"
 #include "logger.h"
 

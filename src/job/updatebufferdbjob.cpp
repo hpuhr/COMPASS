@@ -21,13 +21,13 @@
 #include "buffer.h"
 #include "dbinterface.h"
 #include "dbcontent/dbcontent.h"
-#include "dbovariable.h"
+#include "dbcontent/variable/variable.h"
 #include "stringconv.h"
 
 using namespace Utils::String;
 
 UpdateBufferDBJob::UpdateBufferDBJob(DBInterface& db_interface, DBContent& dbobject,
-                                     dbContent::DBContentVariable& key_var, std::shared_ptr<Buffer> buffer)
+                                     dbContent::Variable& key_var, std::shared_ptr<Buffer> buffer)
     : Job("UpdateBufferDBJob"),
       db_interface_(db_interface),
       dbobject_(dbobject),

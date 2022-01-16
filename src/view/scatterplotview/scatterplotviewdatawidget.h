@@ -20,7 +20,7 @@
 
 #include "global.h"
 #include "nullablevector.h"
-#include "dbovariable.h"
+#include "dbcontent/variable/variable.h"
 #include "scatterplotviewdatatoolwidget.h"
 #include "scatterplotviewchartview.h"
 

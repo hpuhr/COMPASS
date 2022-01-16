@@ -22,7 +22,7 @@
 #include <QTableWidgetItem>
 #include <QVBoxLayout>
 
-#include "dbovariable.h"
+#include "dbcontent/variable/variable.h"
 
 namespace dbContent
 {

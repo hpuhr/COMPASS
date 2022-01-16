@@ -1,6 +1,6 @@
-#include "metadbovariableconfigurationdialog.h"
-#include "metadbovariable.h"
-#include "metadbovariabledetailwidget.h"
+#include "dbcontent/variable/metavariableconfigurationdialog.h"
+#include "dbcontent/variable/metavariable.h"
+#include "dbcontent/variable/metavariabledetailwidget.h"
 #include "dbcontent/dbcontentmanager.h"
 #include "dbcontent/dbcontent.h"
 
@@ -17,7 +17,7 @@ using namespace std;
 namespace dbContent
 {
 
-MetaDBOVariableConfigurationDialog::MetaDBOVariableConfigurationDialog(DBContentManager& dbo_man)
+MetaVariableConfigurationDialog::MetaVariableConfigurationDialog(DBContentManager& dbo_man)
     : QDialog(), dbo_man_(dbo_man)
 {
 
@@ -41,13 +41,13 @@ MetaDBOVariableConfigurationDialog::MetaDBOVariableConfigurationDialog(DBContent
     list_widget_ = new QListWidget();
     list_widget_->setSortingEnabled(true);
     connect(list_widget_, &QListWidget::currentTextChanged,
-            this, &MetaDBOVariableConfigurationDialog::itemSelectedSlot);
+            this, &MetaVariableConfigurationDialog::itemSelectedSlot);
 
     updateList();
 
     splitter_->addWidget(list_widget_);
 
-    detail_widget_ = new MetaDBOVariableDetailWidget(dbo_man_);
+    detail_widget_ = new MetaVariableDetailWidget(dbo_man_);
 
     splitter_->addWidget(detail_widget_);
     splitter_->restoreState(settings.value("mainSplitterSizes").toByteArray());
@@ -60,7 +60,7 @@ MetaDBOVariableConfigurationDialog::MetaDBOVariableConfigurationDialog(DBContent
 
     QPushButton* add_all_metavar_button = new QPushButton("Add All");
     connect(add_all_metavar_button, &QPushButton::clicked,
-            this, &MetaDBOVariableConfigurationDialog::addAllMetaVariablesSlot);
+            this, &MetaVariableConfigurationDialog::addAllMetaVariablesSlot);
     button_layout->addWidget(add_all_metavar_button);
 
     main_layout->addLayout(button_layout);
@@ -77,7 +77,7 @@ MetaDBOVariableConfigurationDialog::MetaDBOVariableConfigurationDialog(DBContent
     final_button_layout->addStretch();
 
     QPushButton* ok_button_ = new QPushButton("OK");
-    connect(ok_button_, &QPushButton::clicked, this, &MetaDBOVariableConfigurationDialog::okClickedSlot);
+    connect(ok_button_, &QPushButton::clicked, this, &MetaVariableConfigurationDialog::okClickedSlot);
     final_button_layout->addWidget(ok_button_);
 
     main_layout->addLayout(final_button_layout);
@@ -85,13 +85,13 @@ MetaDBOVariableConfigurationDialog::MetaDBOVariableConfigurationDialog(DBContent
     setLayout(main_layout);
 }
 
-MetaDBOVariableConfigurationDialog::~MetaDBOVariableConfigurationDialog()
+MetaVariableConfigurationDialog::~MetaVariableConfigurationDialog()
 {
     QSettings settings("COMPASS", "MetaDBOVariableConfigurationDialog");
     settings.setValue("mainSplitterSizes", splitter_->saveState());
 }
 
-void MetaDBOVariableConfigurationDialog::updateList()
+void MetaVariableConfigurationDialog::updateList()
 {
     assert (list_widget_);
     list_widget_->clear();
@@ -105,20 +105,20 @@ void MetaDBOVariableConfigurationDialog::updateList()
     }
 }
 
-void MetaDBOVariableConfigurationDialog::selectMetaVariable (const std::string& name)
+void MetaVariableConfigurationDialog::selectMetaVariable (const std::string& name)
 {
     assert (list_widget_->findItems(name.c_str(), Qt::MatchExactly).size() == 1);
     list_widget_->setCurrentItem(list_widget_->findItems(name.c_str(), Qt::MatchExactly).at(0));
 }
 
 
-void MetaDBOVariableConfigurationDialog::clearDetails()
+void MetaVariableConfigurationDialog::clearDetails()
 {
     assert (detail_widget_);
     detail_widget_->clear();
 }
 
-void MetaDBOVariableConfigurationDialog::itemSelectedSlot(const QString& text)
+void MetaVariableConfigurationDialog::itemSelectedSlot(const QString& text)
 {
     string item_name = text.toStdString();
 
@@ -137,7 +137,7 @@ void MetaDBOVariableConfigurationDialog::itemSelectedSlot(const QString& text)
     }
 }
 
-void MetaDBOVariableConfigurationDialog::addAllMetaVariablesSlot()
+void MetaVariableConfigurationDialog::addAllMetaVariablesSlot()
 {
     std::vector<std::string> found_dbos;
 
@@ -187,7 +187,7 @@ void MetaDBOVariableConfigurationDialog::addAllMetaVariablesSlot()
                 }
 
                 assert(dbo_man_.existsMetaVariable(var_it->name()));
-                MetaDBOVariable& meta_var = dbo_man_.metaVariable(var_it->name());
+                MetaVariable& meta_var = dbo_man_.metaVariable(var_it->name());
 
                 for (auto dbo_it2 = found_dbos.begin(); dbo_it2 != found_dbos.end(); dbo_it2++)
                 {
@@ -209,7 +209,7 @@ void MetaDBOVariableConfigurationDialog::addAllMetaVariablesSlot()
         updateList();
 }
 
-void MetaDBOVariableConfigurationDialog::okClickedSlot()
+void MetaVariableConfigurationDialog::okClickedSlot()
 {
     emit okSignal();
 }

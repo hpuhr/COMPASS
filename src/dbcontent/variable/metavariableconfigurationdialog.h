@@ -12,9 +12,9 @@ class QPushButton;
 namespace dbContent
 {
 
-class MetaDBOVariableDetailWidget;
+class MetaVariableDetailWidget;
 
-class MetaDBOVariableConfigurationDialog : public QDialog
+class MetaVariableConfigurationDialog : public QDialog
 {
     Q_OBJECT
 
@@ -28,8 +28,8 @@ public slots:
     void addAllMetaVariablesSlot();
 
 public:
-    MetaDBOVariableConfigurationDialog(DBContentManager& dbo_man);
-    virtual ~MetaDBOVariableConfigurationDialog();
+    MetaVariableConfigurationDialog(DBContentManager& dbo_man);
+    virtual ~MetaVariableConfigurationDialog();
 
     void updateList();
     void selectMetaVariable (const std::string& name);
@@ -42,7 +42,7 @@ protected:
 
     QListWidget* list_widget_ {nullptr};
 
-    MetaDBOVariableDetailWidget* detail_widget_{nullptr};
+    MetaVariableDetailWidget* detail_widget_{nullptr};
 
 };
 

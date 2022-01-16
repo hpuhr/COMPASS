@@ -21,7 +21,7 @@
 #include "buffer.h"
 #include "dbinterface.h"
 #include "dbcontent/dbcontent.h"
-#include "dbovariable.h"
+#include "dbcontent/variable/variable.h"
 #include "stringconv.h"
 
 using namespace Utils::String;

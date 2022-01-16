@@ -21,9 +21,9 @@
 
 #include "buffer.h"
 #include "dbcontent/dbcontent.h"
-#include "dbovariableset.h"
+#include "dbcontent/variable/variableset.h"
 
-FinalizeDBOReadJob::FinalizeDBOReadJob(DBContent& dbobject, dbContent::DBContentVariableSet& read_list,
+FinalizeDBOReadJob::FinalizeDBOReadJob(DBContent& dbobject, dbContent::VariableSet& read_list,
                                        std::shared_ptr<Buffer> buffer)
     : Job("FinalizeDBOReadJob"), dbobject_(dbobject), read_list_(read_list), buffer_(buffer)
 {

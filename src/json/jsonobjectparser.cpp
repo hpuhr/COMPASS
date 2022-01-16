@@ -856,7 +856,7 @@ void JSONObjectParser::transformBuffer(Buffer& buffer, size_t index) const
     //}
 }
 
-const dbContent::DBContentVariableSet& JSONObjectParser::variableList() const { return var_list_; }
+const dbContent::VariableSet& JSONObjectParser::variableList() const { return var_list_; }
 
 bool JSONObjectParser::overrideDataSource() const { return override_data_source_; }
 

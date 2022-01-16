@@ -20,8 +20,8 @@
 #include "dbfiltercondition.h"
 #include "dbcontent/dbcontent.h"
 #include "dbcontent/dbcontentmanager.h"
-#include "dbovariable.h"
-#include "metadbovariable.h"
+#include "dbcontent/variable/variable.h"
+#include "dbcontent/variable/metavariable.h"
 #include "stringconv.h"
 #include "unit.h"
 #include "unitmanager.h"
@@ -104,7 +104,7 @@ bool DBFilterCondition::filters(const std::string& dbo_name)
 }
 
 std::string DBFilterCondition::getConditionString(const std::string& dbo_name, bool& first,
-                                                  std::vector<dbContent::DBContentVariable*>& filtered_variables)
+                                                  std::vector<dbContent::Variable*>& filtered_variables)
 {
     logdbg << "DBFilterCondition: getConditionString: object " << dbo_name << " first " << first;
     assert(usable_);
@@ -122,7 +122,7 @@ std::string DBFilterCondition::getConditionString(const std::string& dbo_name, b
 
     assert (hasVariable(dbo_name));
 
-    dbContent::DBContentVariable& var {variable(dbo_name)};
+    dbContent::Variable& var {variable(dbo_name)};
 
     //const DBTableColumn& column = var.currentDBColumn();
     std::string db_column_name = var.dbColumnName();
@@ -250,7 +250,7 @@ bool DBFilterCondition::hasVariable (const std::string& dbo_name)
 }
 
 
-dbContent::DBContentVariable& DBFilterCondition::variable (const std::string& dbo_name)
+dbContent::Variable& DBFilterCondition::variable (const std::string& dbo_name)
 {
     assert (hasVariable(dbo_name));
 
@@ -337,7 +337,7 @@ bool DBFilterCondition::checkValueInvalid(const std::string& new_value)
 {
     assert(usable_);
 
-    std::vector<dbContent::DBContentVariable*> variables;
+    std::vector<dbContent::Variable*> variables;
 
     if (new_value.size() == 0)
     {
@@ -387,7 +387,7 @@ bool DBFilterCondition::checkValueInvalid(const std::string& new_value)
 }
 
 std::pair<std::string, bool> DBFilterCondition::getTransformedValue(const std::string& untransformed_value,
-                                                                    dbContent::DBContentVariable* variable)
+                                                                    dbContent::Variable* variable)
 {
     assert(variable);
 
@@ -417,7 +417,7 @@ std::pair<std::string, bool> DBFilterCondition::getTransformedValue(const std::s
     {
         value_str = value_it;
 
-        if (variable->representation() != dbContent::DBContentVariable::Representation::STANDARD)
+        if (variable->representation() != dbContent::Variable::Representation::STANDARD)
             value_str =
                     variable->getValueStringFromRepresentation(value_str);  // fix representation
 

@@ -24,7 +24,7 @@
 #include "dbinterface.h"
 #include "dbcontent/dbcontent.h"
 #include "dbcontent/dbcontentmanager.h"
-#include "dbovariable.h"
+#include "dbcontent/variable/variable.h"
 #include "filtermanagerwidget.h"
 #include "logger.h"
 #include "viewpoint.h"
@@ -212,7 +212,7 @@ void FilterManager::checkSubConfigurables()
 }
 
 std::string FilterManager::getSQLCondition(const std::string& dbo_name,
-                                           std::vector<dbContent::DBContentVariable*>& filtered_variables)
+                                           std::vector<dbContent::Variable*>& filtered_variables)
 {
     assert(COMPASS::instance().objectManager().object(dbo_name).loadable());
 

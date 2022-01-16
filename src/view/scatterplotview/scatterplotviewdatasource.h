@@ -22,8 +22,8 @@
 
 #include "buffer.h"
 #include "configurable.h"
-#include "dbovariable.h"
-#include "dbovariableorderedset.h"
+#include "dbcontent/variable/variable.h"
+#include "dbcontent/variable/variableorderedset.h"
 
 class Job;
 class ViewableDataConfig;
@@ -46,7 +46,7 @@ class ScatterPlotViewDataSource : public QObject, public Configurable
                                          const std::string& instance_id);
 
     /// @brief Returns variable read list
-    dbContent::DBOVariableOrderedSet* getSet()
+    dbContent::OrderedSet* getSet()
     {
         assert(set_);
         return set_;
@@ -56,7 +56,7 @@ class ScatterPlotViewDataSource : public QObject, public Configurable
 
   protected:
     /// Variable read list
-    dbContent::DBOVariableOrderedSet* set_{nullptr};
+    dbContent::OrderedSet* set_{nullptr};
 
     /// Selected DBObject records
     //ViewSelectionEntries& selection_entries_;

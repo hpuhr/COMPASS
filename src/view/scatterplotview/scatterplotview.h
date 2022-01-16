@@ -25,8 +25,8 @@ class ScatterPlotViewDataSource;
 class ScatterPlotViewDataWidget;
 
 namespace dbContent {
-class DBContentVariable;
-class MetaDBOVariable;
+class Variable;
+class MetaVariable;
 }
 
 class ScatterPlotView : public View
@@ -67,28 +67,28 @@ class ScatterPlotView : public View
 
     ScatterPlotViewDataWidget* getDataWidget();
 
-    virtual dbContent::DBContentVariableSet getSet(const std::string& dbo_name) override;
+    virtual dbContent::VariableSet getSet(const std::string& dbo_name) override;
 
     virtual void accept(LatexVisitor& v) override;
 
     bool hasDataVarX ();
     bool isDataVarXMeta ();
-    dbContent::DBContentVariable& dataVarX();
-    void dataVarX (dbContent::DBContentVariable& var);
+    dbContent::Variable& dataVarX();
+    void dataVarX (dbContent::Variable& var);
 
-    dbContent::MetaDBOVariable& metaDataVarX();
-    void metaDataVarX (dbContent::MetaDBOVariable& var);
+    dbContent::MetaVariable& metaDataVarX();
+    void metaDataVarX (dbContent::MetaVariable& var);
 
     std::string dataVarXDBO() const;
     std::string dataVarXName() const;
 
     bool hasDataVarY ();
     bool isDataVarYMeta ();
-    dbContent::DBContentVariable& dataVarY();
-    void dataVarY (dbContent::DBContentVariable& var);
+    dbContent::Variable& dataVarY();
+    void dataVarY (dbContent::Variable& var);
 
-    dbContent::MetaDBOVariable& metaDataVarY();
-    void metaDataVarY (dbContent::MetaDBOVariable& var);
+    dbContent::MetaVariable& metaDataVarY();
+    void metaDataVarY (dbContent::MetaVariable& var);
 
     std::string dataVarYDBO() const;
     std::string dataVarYName() const;

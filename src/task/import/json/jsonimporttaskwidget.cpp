@@ -21,7 +21,7 @@
 #include "dbcontent/dbcontent.h"
 #include "dbcontent/dbcontentcombobox.h"
 #include "dbcontent/dbcontentmanager.h"
-#include "dbovariable.h"
+#include "dbcontent/variable/variable.h"
 #include "dbovariableselectionwidget.h"
 #include "jsonimporttask.h"
 #include "jsonparsingschema.h"

@@ -2,8 +2,8 @@
 #define ASTERIXJSONPARSER_H
 
 #include "configurable.h"
-#include "dbovariable.h"
-#include "dbovariableset.h"
+#include "dbcontent/variable/variable.h"
+#include "dbcontent/variable/variableset.h"
 #include "format.h"
 #include "jsondatamapping.h"
 #include "asterixjsonparserwidget.h"
@@ -52,7 +52,7 @@ public:
     bool parseJSON(nlohmann::json& j, Buffer& buffer) const;
     void createMappingStubs(nlohmann::json& j);
 
-    const dbContent::DBContentVariableSet& variableList() const;
+    const dbContent::VariableSet& variableList() const;
 
     bool initialized() const { return initialized_; }
     void initialize();
@@ -124,7 +124,7 @@ private:
 
     jASTERIX::CategoryItemInfo item_info_;
 
-    dbContent::DBContentVariableSet var_list_;
+    dbContent::VariableSet var_list_;
 
     bool initialized_{false};
 

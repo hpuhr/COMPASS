@@ -8,10 +8,10 @@
 namespace dbContent
 {
 
-class DBContentVariableDefinition : public Configurable
+class VariableDefinition : public Configurable
 {
   public:
-    DBContentVariableDefinition(const std::string& class_id, const std::string& instance_id,
+    VariableDefinition(const std::string& class_id, const std::string& instance_id,
                           Configurable* parent)
         : Configurable(class_id, instance_id, parent)
     {
@@ -24,7 +24,7 @@ class DBContentVariableDefinition : public Configurable
         assert(dbo_variable_name_.size() > 0);
     }
 
-    DBContentVariableDefinition& operator=(DBContentVariableDefinition&& other)
+    VariableDefinition& operator=(VariableDefinition&& other)
     {
         dbo_name_ = other.dbo_name_;
         other.dbo_name_ = "";
@@ -35,7 +35,7 @@ class DBContentVariableDefinition : public Configurable
         return *this;
     }
 
-    virtual ~DBContentVariableDefinition() {}
+    virtual ~VariableDefinition() {}
 
     const std::string& dboName() { return dbo_name_; }
     void dboName(const std::string& dbo_name) { dbo_name_ = dbo_name; }

@@ -7,7 +7,7 @@
 #include "projectionmanager.h"
 #include "projection.h"
 #include "json.hpp"
-#include "metadbovariable.h"
+#include "dbcontent/variable/metavariable.h"
 #include "stringconv.h"
 
 #include "boost/date_time/posix_time/posix_time.hpp"
@@ -64,7 +64,7 @@ void ASTERIXPostprocessJob::doFutureTimestampsCheck()
 
         assert (obj_man.metaVariable(DBContent::meta_var_tod_id_.name()).existsIn(buf_it.first));
 
-        dbContent::DBContentVariable& tod_var = obj_man.metaVariable(DBContent::meta_var_tod_id_.name()).getFor(buf_it.first);
+        dbContent::Variable& tod_var = obj_man.metaVariable(DBContent::meta_var_tod_id_.name()).getFor(buf_it.first);
 
         Property tod_prop {tod_var.name(), tod_var.dataType()};
 
@@ -159,12 +159,12 @@ void ASTERIXPostprocessJob::doRadarPlotPositionCalculations()
         assert (db_object.hasVariable(DBContent::meta_var_latitude_.name()));
         assert (db_object.hasVariable(DBContent::meta_var_longitude_.name()));
 
-        dbContent::DBContentVariable& datasource_var = db_object.variable(DBContent::meta_var_datasource_id_.name());
-        dbContent::DBContentVariable& range_var = db_object.variable(DBContent::var_radar_range_.name());
-        dbContent::DBContentVariable& azimuth_var = db_object.variable(DBContent::var_radar_azimuth_.name());
-        dbContent::DBContentVariable& altitude_var = db_object.variable(DBContent::var_radar_altitude_.name());
-        dbContent::DBContentVariable& latitude_var = db_object.variable(DBContent::meta_var_latitude_.name());
-        dbContent::DBContentVariable& longitude_var = db_object.variable(DBContent::meta_var_longitude_.name());
+        dbContent::Variable& datasource_var = db_object.variable(DBContent::meta_var_datasource_id_.name());
+        dbContent::Variable& range_var = db_object.variable(DBContent::var_radar_range_.name());
+        dbContent::Variable& azimuth_var = db_object.variable(DBContent::var_radar_azimuth_.name());
+        dbContent::Variable& altitude_var = db_object.variable(DBContent::var_radar_altitude_.name());
+        dbContent::Variable& latitude_var = db_object.variable(DBContent::meta_var_latitude_.name());
+        dbContent::Variable& longitude_var = db_object.variable(DBContent::meta_var_longitude_.name());
 
         datasource_var_name = datasource_var.name();
         range_var_name = range_var.name();

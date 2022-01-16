@@ -19,8 +19,8 @@
 #define JSONOBJECTPARSER_H
 
 #include "configurable.h"
-#include "dbovariable.h"
-#include "dbovariableset.h"
+#include "dbcontent/variable/variable.h"
+#include "dbcontent/variable/variableset.h"
 #include "format.h"
 #include "jsondatamapping.h"
 #include "jsonobjectparserwidget.h"
@@ -35,7 +35,7 @@ class DBContent;
 
 namespace dbContent {
 
-class DBContentVariable;
+class Variable;
 
 }
 
@@ -75,7 +75,7 @@ class JSONObjectParser : public Configurable
     bool parseJSON(nlohmann::json& j, Buffer& buffer) const;
     void createMappingStubs(nlohmann::json& j);
 
-    const dbContent::DBContentVariableSet& variableList() const;
+    const dbContent::VariableSet& variableList() const;
 
     bool overrideDataSource() const;
     void overrideDataSource(bool override);
@@ -119,7 +119,7 @@ private:
 
     std::vector<std::string> json_values_vector_;
 
-    dbContent::DBContentVariableSet var_list_;
+    dbContent::VariableSet var_list_;
 
     bool override_data_source_{false};
     std::string data_source_variable_name_;

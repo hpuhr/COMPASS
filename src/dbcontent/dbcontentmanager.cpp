@@ -24,10 +24,10 @@
 #include "dbcontent/dbcontent.h"
 #include "dbcontentmanagerloadwidget.h"
 #include "dbcontent/dbcontentmanagerwidget.h"
-#include "dbovariable.h"
-#include "dbovariableset.h"
+#include "dbcontent/variable/variable.h"
+#include "dbcontent/variable/variableset.h"
 #include "logger.h"
-#include "metadbovariable.h"
+#include "dbcontent/variable/metavariable.h"
 #include "stringconv.h"
 #include "number.h"
 #include "viewmanager.h"
@@ -35,7 +35,7 @@
 #include "evaluationmanager.h"
 #include "filtermanager.h"
 #include "util/number.h"
-#include "metadbovariableconfigurationdialog.h"
+#include "dbcontent/variable/metavariableconfigurationdialog.h"
 #include "json.hpp"
 
 #include <QApplication>
@@ -140,7 +140,7 @@ void DBContentManager::generateSubConfigurable(const std::string& class_id,
     }
     else if (class_id.compare("MetaDBOVariable") == 0)
     {
-        MetaDBOVariable* meta_var = new MetaDBOVariable(class_id, instance_id, this);
+        MetaVariable* meta_var = new MetaVariable(class_id, instance_id, this);
         logdbg << "DBObjectManager: generateSubConfigurable: adding meta var type "
                << meta_var->name();
 
@@ -205,18 +205,18 @@ bool DBContentManager::hasData()
 bool DBContentManager::existsMetaVariable(const std::string& var_name)
 {
     return std::find_if(meta_variables_.begin(), meta_variables_.end(),
-                        [var_name](const std::unique_ptr<MetaDBOVariable>& var) -> bool { return var->name() == var_name; })
+                        [var_name](const std::unique_ptr<MetaVariable>& var) -> bool { return var->name() == var_name; })
             != meta_variables_.end();
 }
 
-MetaDBOVariable& DBContentManager::metaVariable(const std::string& var_name)
+MetaVariable& DBContentManager::metaVariable(const std::string& var_name)
 {
     logdbg << "DBObjectManager: metaVariable: name " << var_name;
 
     assert(existsMetaVariable(var_name));
 
     auto it = std::find_if(meta_variables_.begin(), meta_variables_.end(),
-                           [var_name](const std::unique_ptr<MetaDBOVariable>& var) -> bool { return var->name() == var_name; });
+                           [var_name](const std::unique_ptr<MetaVariable>& var) -> bool { return var->name() == var_name; });
 
     assert (it != meta_variables_.end());
 
@@ -241,7 +241,7 @@ void DBContentManager::deleteMetaVariable(const std::string& var_name)
     assert(existsMetaVariable(var_name));
 
     auto it = std::find_if(meta_variables_.begin(), meta_variables_.end(),
-                           [var_name](const std::unique_ptr<MetaDBOVariable>& var) -> bool { return var->name() == var_name; });
+                           [var_name](const std::unique_ptr<MetaVariable>& var) -> bool { return var->name() == var_name; });
 
     assert (it != meta_variables_.end());
 
@@ -254,7 +254,7 @@ void DBContentManager::deleteMetaVariable(const std::string& var_name)
     }
 }
 
-bool DBContentManager::usedInMetaVariable(const DBContentVariable& variable)
+bool DBContentManager::usedInMetaVariable(const Variable& variable)
 {
     for (auto& meta_it : meta_variables_)
         if (meta_it->uses(variable))
@@ -324,13 +324,13 @@ bool DBContentManager::hasOrderVariable()
     return false;
 }
 
-DBContentVariable& DBContentManager::orderVariable()
+Variable& DBContentManager::orderVariable()
 {
     assert(hasOrderVariable());
     return object(order_variable_dbo_name_).variable(order_variable_name_);
 }
 
-void DBContentManager::orderVariable(DBContentVariable& variable)
+void DBContentManager::orderVariable(Variable& variable)
 {
     order_variable_dbo_name_ = variable.dboName();
     order_variable_name_ = variable.name();
@@ -344,13 +344,13 @@ bool DBContentManager::hasOrderMetaVariable()
     return false;
 }
 
-MetaDBOVariable& DBContentManager::orderMetaVariable()
+MetaVariable& DBContentManager::orderMetaVariable()
 {
     assert(hasOrderMetaVariable());
     return metaVariable(order_variable_name_);
 }
 
-void DBContentManager::orderMetaVariable(MetaDBOVariable& variable)
+void DBContentManager::orderMetaVariable(MetaVariable& variable)
 {
     order_variable_dbo_name_ = META_OBJECT_NAME;
     order_variable_name_ = variable.name();
@@ -441,7 +441,7 @@ void DBContentManager::load()
         if (object.second->loadable() && loadingWanted(object.first))
         {
             loginf << "DBObjectManager: loadSlot: loading object " << object.first;
-            DBContentVariableSet read_set = view_man.getReadSet(object.first); // TODO add required vars for processing
+            VariableSet read_set = view_man.getReadSet(object.first); // TODO add required vars for processing
 
             if (eval_man.needsAdditionalVariables())
                 eval_man.addVariables(object.first, read_set);
@@ -460,7 +460,7 @@ void DBContentManager::load()
                 logdbg << "DBObjectManager: loadSlot: use limit str " << limit_str;
             }
 
-            DBContentVariable* variable = nullptr;
+            Variable* variable = nullptr;
 
             assert (hasOrderVariable() || hasOrderMetaVariable());
 
@@ -909,7 +909,7 @@ void DBContentManager::addInsertedDataToChache()
     for (auto& buf_it : insert_data_)
     {
 
-        DBContentVariableSet read_set = COMPASS::instance().viewManager().getReadSet(buf_it.first);
+        VariableSet read_set = COMPASS::instance().viewManager().getReadSet(buf_it.first);
         vector<Property> buffer_properties_to_be_removed;
 
         // remove all unused
@@ -941,7 +941,7 @@ void DBContentManager::addInsertedDataToChache()
             // sort by tod
             assert (metaVariable(DBContent::meta_var_tod_id_.name()).existsIn(buf_it.first));
 
-            DBContentVariable& tod_var = metaVariable(DBContent::meta_var_tod_id_.name()).getFor(buf_it.first);
+            Variable& tod_var = metaVariable(DBContent::meta_var_tod_id_.name()).getFor(buf_it.first);
 
             Property tod_prop {tod_var.name(), tod_var.dataType()};
 
@@ -971,7 +971,7 @@ void DBContentManager::filterDataSources()
     {
         assert (metaVariable(DBContent::meta_var_datasource_id_.name()).existsIn(buf_it.first));
 
-        DBContentVariable& ds_id_var = metaVariable(DBContent::meta_var_datasource_id_.name()).getFor(buf_it.first);
+        Variable& ds_id_var = metaVariable(DBContent::meta_var_datasource_id_.name()).getFor(buf_it.first);
 
         Property ds_id_prop {ds_id_var.name(), ds_id_var.dataType()};
         assert (buf_it.second->hasProperty(ds_id_prop));
@@ -1025,7 +1025,7 @@ void DBContentManager::cutCachedData()
     {
         assert (metaVariable(DBContent::meta_var_tod_id_.name()).existsIn(buf_it.first));
 
-        DBContentVariable& tod_var = metaVariable(DBContent::meta_var_tod_id_.name()).getFor(buf_it.first);
+        Variable& tod_var = metaVariable(DBContent::meta_var_tod_id_.name()).getFor(buf_it.first);
 
         Property tod_prop {tod_var.name(), tod_var.dataType()};
 
@@ -1070,7 +1070,7 @@ void DBContentManager::cutCachedData()
 
         assert (metaVariable(DBContent::meta_var_tod_id_.name()).existsIn(buf_it.first));
 
-        DBContentVariable& tod_var = metaVariable(DBContent::meta_var_tod_id_.name()).getFor(buf_it.first);
+        Variable& tod_var = metaVariable(DBContent::meta_var_tod_id_.name()).getFor(buf_it.first);
 
         Property tod_prop {tod_var.name(), tod_var.dataType()};
 
@@ -1247,13 +1247,13 @@ std::map<unsigned int, std::vector <std::pair<std::string, unsigned int>>> DBCon
 
 
 
-MetaDBOVariableConfigurationDialog* DBContentManager::metaVariableConfigdialog()
+MetaVariableConfigurationDialog* DBContentManager::metaVariableConfigdialog()
 {
     if (!meta_cfg_dialog_)
     {
-        meta_cfg_dialog_.reset(new MetaDBOVariableConfigurationDialog(*this));
+        meta_cfg_dialog_.reset(new MetaVariableConfigurationDialog(*this));
 
-        connect(meta_cfg_dialog_.get(), &MetaDBOVariableConfigurationDialog::okSignal,
+        connect(meta_cfg_dialog_.get(), &MetaVariableConfigurationDialog::okSignal,
                 this, &DBContentManager::metaDialogOKSlot);
     }
 
