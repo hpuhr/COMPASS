@@ -20,10 +20,10 @@
 #include "buffer.h"
 #include "createassociationstask.h"
 #include "dbinterface.h"
-#include "dbobject.h"
-#include "dbobjectmanager.h"
-#include "metadbovariable.h"
-#include "dbovariable.h"
+#include "dbcontent/dbcontent.h"
+#include "dbcontent/dbcontentmanager.h"
+#include "dbcontent/variable/metavariable.h"
+#include "dbcontent/variable/variable.h"
 #include "stringconv.h"
 #include "projection/transformation.h"
 #include "evaluationmanager.h"
@@ -69,7 +69,7 @@ void CreateAssociationsJob::run()
 
     loginf << "CreateAssociationsJob: run: clearing associations";
 
-    DBObjectManager& object_man = COMPASS::instance().objectManager();
+    DBContentManager& object_man = COMPASS::instance().dbContentManager();
 
     object_man.removeAssociations();
 
@@ -153,17 +153,19 @@ void CreateAssociationsJob::createTargetReports()
 {
     loginf << "CreateAssociationsJob: createTargetReports";
 
-    MetaDBOVariable* meta_key_var = task_.keyVar();
-    MetaDBOVariable* meta_ds_id_var = task_.dsIdVar();
-    MetaDBOVariable* meta_tod_var = task_.todVar();
-    MetaDBOVariable* meta_ta_var = task_.targetAddrVar();
-    MetaDBOVariable* meta_ti_var = task_.targetIdVar();
-    MetaDBOVariable* meta_tn_var = task_.trackNumVar();
-    MetaDBOVariable* meta_tr_end_var = task_.trackEndVar();
-    MetaDBOVariable* meta_mode_3a_var = task_.mode3AVar();
-    MetaDBOVariable* meta_mode_c_var = task_.modeCVar();
-    MetaDBOVariable* meta_latitude_var = task_.latitudeVar();
-    MetaDBOVariable* meta_longitude_var = task_.longitudeVar();
+    using namespace dbContent;
+
+    MetaVariable* meta_key_var = task_.keyVar();
+    MetaVariable* meta_ds_id_var = task_.dsIdVar();
+    MetaVariable* meta_tod_var = task_.todVar();
+    MetaVariable* meta_ta_var = task_.targetAddrVar();
+    MetaVariable* meta_ti_var = task_.targetIdVar();
+    MetaVariable* meta_tn_var = task_.trackNumVar();
+    MetaVariable* meta_tr_end_var = task_.trackEndVar();
+    MetaVariable* meta_mode_3a_var = task_.mode3AVar();
+    MetaVariable* meta_mode_c_var = task_.modeCVar();
+    MetaVariable* meta_latitude_var = task_.latitudeVar();
+    MetaVariable* meta_longitude_var = task_.longitudeVar();
 
     assert (meta_key_var);
     assert (meta_ds_id_var);
@@ -177,52 +179,52 @@ void CreateAssociationsJob::createTargetReports()
     assert (meta_latitude_var);
     assert (meta_longitude_var);
 
-    DBObjectManager& object_man = COMPASS::instance().objectManager();
+    DBContentManager& object_man = COMPASS::instance().dbContentManager();
 
     Association::TargetReport tr;
 
     for (auto& buf_it : buffers_) // dbo name, buffer
     {
         string dbo_name = buf_it.first;
-        DBObject& dbo = object_man.object(dbo_name);
+        DBContent& dbo = object_man.object(dbo_name);
 
         shared_ptr<Buffer> buffer = buf_it.second;
         size_t buffer_size = buffer->size();
 
         assert (meta_key_var->existsIn(dbo_name));
-        DBOVariable& key_var = meta_key_var->getFor(dbo_name);
+        Variable& key_var = meta_key_var->getFor(dbo_name);
 
         assert (meta_ds_id_var->existsIn(dbo_name));
-        DBOVariable& ds_id_var = meta_ds_id_var->getFor(dbo_name);
+        Variable& ds_id_var = meta_ds_id_var->getFor(dbo_name);
 
         assert (meta_tod_var->existsIn(dbo_name));
-        DBOVariable& tod_var = meta_tod_var->getFor(dbo_name);
+        Variable& tod_var = meta_tod_var->getFor(dbo_name);
 
         assert (meta_ta_var->existsIn(dbo_name));
-        DBOVariable& ta_var = meta_ta_var->getFor(dbo_name);
+        Variable& ta_var = meta_ta_var->getFor(dbo_name);
 
         assert (meta_ti_var->existsIn(dbo_name));
-        DBOVariable& ti_var = meta_ti_var->getFor(dbo_name);
+        Variable& ti_var = meta_ti_var->getFor(dbo_name);
 
-        DBOVariable* tn_var {nullptr}; // not in ads-b
+        Variable* tn_var {nullptr}; // not in ads-b
         if (meta_tn_var->existsIn(dbo_name))
             tn_var = &meta_tn_var->getFor(dbo_name);
 
-        DBOVariable* tr_end_var {nullptr}; // not in ads-b
+        Variable* tr_end_var {nullptr}; // not in ads-b
         if (meta_tr_end_var->existsIn(dbo_name))
             tr_end_var = &meta_tr_end_var->getFor(dbo_name);
 
         assert (meta_mode_3a_var->existsIn(dbo_name));
-        DBOVariable& mode_3a_var = meta_mode_3a_var->getFor(dbo_name);
+        Variable& mode_3a_var = meta_mode_3a_var->getFor(dbo_name);
 
         assert (meta_mode_c_var->existsIn(dbo_name));
-        DBOVariable& mode_c_var = meta_mode_c_var->getFor(dbo_name);
+        Variable& mode_c_var = meta_mode_c_var->getFor(dbo_name);
 
         assert (meta_latitude_var->existsIn(dbo_name));
-        DBOVariable& latitude_var = meta_latitude_var->getFor(dbo_name);
+        Variable& latitude_var = meta_latitude_var->getFor(dbo_name);
 
         assert (meta_longitude_var->existsIn(dbo_name));
-        DBOVariable& longitude_var = meta_longitude_var->getFor(dbo_name);
+        Variable& longitude_var = meta_longitude_var->getFor(dbo_name);
 
 
         assert (buffer->has<int>(key_var.name()));
@@ -347,14 +349,15 @@ std::map<unsigned int, Association::Target> CreateAssociationsJob::createReferen
         return sum_targets;
     }
 
-    DBObjectManager& object_man = COMPASS::instance().objectManager();
+    DBContentManager& object_man = COMPASS::instance().dbContentManager();
 
     // create utn for all tracks
     for (auto& ds_it : target_reports_.at("RefTraj")) // ds_id->trs
     {
         loginf << "CreateAssociationsJob: createReferenceUTNs: processing ds_id " << ds_it.first;
 
-        string ds_name = object_man.object("RefTraj").dataSources().at(ds_it.first).name();
+        TODO_ASSERT
+        string ds_name; // = object_man.object("RefTraj").dataSources().at(ds_it.first).name();
 
         loginf << "CreateAssociationsJob: createReferenceUTNs: creating tmp targets for ds_id " << ds_it.first;
 
@@ -413,14 +416,15 @@ void CreateAssociationsJob::createTrackerUTNs(std::map<unsigned int, Association
         return;
     }
 
-    DBObjectManager& object_man = COMPASS::instance().objectManager();
+    DBContentManager& object_man = COMPASS::instance().dbContentManager();
 
     // create utn for all tracks
     for (auto& ds_it : target_reports_.at("Tracker")) // ds_id->trs
     {
         loginf << "CreateAssociationsJob: createTrackerUTNs: processing ds_id " << ds_it.first;
 
-        string ds_name = object_man.object("Tracker").dataSources().at(ds_it.first).name();
+        TODO_ASSERT
+        string ds_name;// = object_man.object("Tracker").dataSources().at(ds_it.first).name();
 
         loginf << "CreateAssociationsJob: createTrackerUTNs: creating tmp targets for ds_id " << ds_it.first;
 
@@ -485,7 +489,7 @@ void CreateAssociationsJob::createNonTrackerUTNS(std::map<unsigned int, Associat
     // get ta lookup map
     std::map<unsigned int, unsigned int> ta_2_utn = getTALookupMap(targets);
 
-    DBObjectManager& object_man = COMPASS::instance().objectManager();
+    DBContentManager& object_man = COMPASS::instance().dbContentManager();
 
     const bool associate_non_mode_s = task_.associateNonModeS();
     const double max_time_diff_sensor = task_.maxTimeDiffSensor();
@@ -507,7 +511,8 @@ void CreateAssociationsJob::createNonTrackerUTNS(std::map<unsigned int, Associat
             assert (num_data_sources);
             done_perc = (unsigned int)(100.0 * (float)ds_cnt/(float)num_data_sources);
 
-            string ds_name = object_man.object(dbo_it.first).dataSources().at(ds_it.first).name();
+            TODO_ASSERT
+            string ds_name;// = object_man.object(dbo_it.first).dataSources().at(ds_it.first).name();
             emit statusSignal(("Creating "+dbo_it.first+" "+ds_name+" UTNs ("+to_string(done_perc)+"%)").c_str());
 
             std::vector<Association::TargetReport>& target_reports = ds_it.second;
@@ -725,12 +730,12 @@ void CreateAssociationsJob::createAssociations()
 {
     loginf << "CreateAssociationsJob: createAssociations";
 
-    DBObjectManager& object_man = COMPASS::instance().objectManager();
+    DBContentManager& object_man = COMPASS::instance().dbContentManager();
 
     for (auto& dbo_it : target_reports_)
     {
         assert (object_man.existsObject(dbo_it.first));
-        DBObject& dbo = object_man.object(dbo_it.first);
+        DBContent& dbo = object_man.object(dbo_it.first);
 
         for (auto& ds_it : dbo_it.second) // ds_id -> trs
         {
@@ -750,10 +755,11 @@ std::map<unsigned int, Association::Target> CreateAssociationsJob::createTracked
 
     map<unsigned int, pair<unsigned int, float>> tn2utn; // track num -> utn, last tod
 
-    DBObjectManager& object_man = COMPASS::instance().objectManager();
+    DBContentManager& object_man = COMPASS::instance().dbContentManager();
 
-    assert (object_man.object(dbo_name).dataSources().count(ds_id));
-    string ds_name = object_man.object(dbo_name).dataSources().at(ds_id).name();
+    TODO_ASSERT
+    //assert (object_man.object(dbo_name).dataSources().count(ds_id));
+    string ds_name;// = object_man.object(dbo_name).dataSources().at(ds_id).name();
 
     std::map<unsigned int, std::vector<Association::TargetReport>>& ds_id_trs = target_reports_.at(dbo_name);
 

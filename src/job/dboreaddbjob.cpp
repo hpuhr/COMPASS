@@ -19,15 +19,17 @@
 
 #include "buffer.h"
 #include "dbinterface.h"
-#include "dbobject.h"
-#include "dbovariable.h"
+#include "dbcontent/dbcontent.h"
+#include "dbcontent/variable/variable.h"
 #include "logger.h"
 #include "propertylist.h"
 
-DBOReadDBJob::DBOReadDBJob(DBInterface& db_interface, DBObject& dbobject, DBOVariableSet read_list,
+using namespace dbContent;
+
+DBOReadDBJob::DBOReadDBJob(DBInterface& db_interface, DBContent& dbobject, VariableSet read_list,
                            std::string custom_filter_clause,
-                           std::vector<DBOVariable*> filtered_variables, bool use_order,
-                           DBOVariable* order_variable, bool use_order_ascending,
+                           std::vector<Variable*> filtered_variables, bool use_order,
+                           Variable* order_variable, bool use_order_ascending,
                            const std::string& limit_str)
     : Job("DBOReadDBJob"),
       db_interface_(db_interface),
@@ -41,15 +43,6 @@ DBOReadDBJob::DBOReadDBJob(DBInterface& db_interface, DBObject& dbobject, DBOVar
       limit_str_(limit_str)
 {
     assert(dbobject_.existsInDB());
-
-    for (auto& var_it : read_list_.getSet())
-        assert(var_it->existsInDB());
-
-    for (auto& var_it : filtered_variables_)
-        assert(var_it->existsInDB());
-
-    if (order_variable_)
-        assert(order_variable_->existsInDB());
 }
 
 DBOReadDBJob::~DBOReadDBJob() {}
@@ -91,6 +84,8 @@ void DBOReadDBJob::run()
         logdbg << "DBOReadDBJob: run: " << dbobject_.name() << ": intermediate signal, #buffers "
                << cnt << " last one " << buffer->lastOne();
         row_count_ += buffer->size();
+
+        loginf << "DBOReadDBJob: run: " << dbobject_.name() << ": emitting intermediate read, size " << row_count_;
         emit intermediateSignal(buffer);
 
         if (buffer->lastOne())

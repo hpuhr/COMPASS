@@ -20,16 +20,13 @@
 #include "boost/date_time/posix_time/posix_time.hpp"
 #include "buffer.h"
 #include "dbinterface.h"
-#include "dbobject.h"
-#include "dbovariable.h"
-#include "dbtable.h"
-#include "dbtablecolumn.h"
-#include "metadbtable.h"
+#include "dbcontent/dbcontent.h"
+#include "dbcontent/variable/variable.h"
 #include "stringconv.h"
 
 using namespace Utils::String;
 
-InsertBufferDBJob::InsertBufferDBJob(DBInterface& db_interface, DBObject& dbobject,
+InsertBufferDBJob::InsertBufferDBJob(DBInterface& db_interface, DBContent& dbobject,
                                      std::shared_ptr<Buffer> buffer, bool emit_change)
     : Job("InsertBufferDBJob"),
       db_interface_(db_interface),
@@ -57,7 +54,7 @@ void InsertBufferDBJob::run()
            << buffer_->size();
     assert(buffer_->size());
 
-    db_interface_.insertBuffer(dbobject_.currentMetaTable(), buffer_);
+    db_interface_.insertBuffer(dbobject_, buffer_);
     loading_stop_time = boost::posix_time::microsec_clock::local_time();
 
     double load_time;

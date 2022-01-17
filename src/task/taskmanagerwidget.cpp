@@ -310,30 +310,30 @@ void TaskManagerWidget::setCurrentTask(Task& task)
     if (task_list_->currentItem() != task_item)
         task_list_->setCurrentItem(task_item);
 
-    // set widget
-    if (tasks_widget_->indexOf(task.widget()) == -1)  // add of not added previously
-        tasks_widget_->addWidget(task.widget());
+//    // set widget
+//    if (tasks_widget_->indexOf(task.widget()) == -1)  // add of not added previously
+//        tasks_widget_->addWidget(task.widget());
 
-    tasks_widget_->setCurrentWidget(task.widget());
+//    tasks_widget_->setCurrentWidget(task.widget());
 
-    // update run current task button
-    if (task.canRun())
-    {
-        QFont font_bold;
-        font_bold.setBold(true);
+//    // update run current task button
+//    if (task.canRun())
+//    {
+//        QFont font_bold;
+//        font_bold.setBold(true);
 
-        run_current_task_button_->setEnabled(true);
+//        run_current_task_button_->setEnabled(true);
 
-        if (!task.done() && task.isRecommended())
-            run_current_task_button_->setFont(font_bold);
-        else
-            run_current_task_button_->setFont(QFont());
-    }
-    else
-    {
-        run_current_task_button_->setEnabled(false);
-        run_current_task_button_->setFont(QFont());
-    }
+//        if (!task.done() && task.isRecommended())
+//            run_current_task_button_->setFont(font_bold);
+//        else
+//            run_current_task_button_->setFont(QFont());
+//    }
+//    else
+//    {
+//        run_current_task_button_->setEnabled(false);
+//        run_current_task_button_->setFont(QFont());
+//    }
 }
 
 void TaskManagerWidget::expertModeToggledSlot()

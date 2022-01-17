@@ -24,10 +24,10 @@
 #include <QVBoxLayout>
 
 #include "compass.h"
-#include "dbobjectcombobox.h"
-#include "dbobjectmanager.h"
-#include "dbovariable.h"
-#include "dbovariableselectionwidget.h"
+#include "dbcontent/dbcontentcombobox.h"
+#include "dbcontent/dbcontentmanager.h"
+#include "dbcontent/variable/variable.h"
+#include "dbcontent/variable/variableselectionwidget.h"
 #include "logger.h"
 #include "projectionmanager.h"
 #include "projectionmanagerwidget.h"
@@ -36,6 +36,7 @@
 #include "taskmanager.h"
 
 using namespace Utils::String;
+using namespace dbContent;
 
 RadarPlotPositionCalculatorTaskWidget::RadarPlotPositionCalculatorTaskWidget(
     RadarPlotPositionCalculatorTask& task, QWidget* parent, Qt::WindowFlags f)
@@ -50,57 +51,57 @@ RadarPlotPositionCalculatorTaskWidget::RadarPlotPositionCalculatorTaskWidget(
 
     grid->addWidget(new QLabel("DBObject"), row_cnt, 0);
 
-    object_box_ = new DBObjectComboBox(false);
-    connect(object_box_, &DBObjectComboBox::changedObject, this,
+    object_box_ = new DBContentComboBox(false);
+    connect(object_box_, &DBContentComboBox::changedObject, this,
             &RadarPlotPositionCalculatorTaskWidget::dbObjectChangedSlot);
     grid->addWidget(object_box_, row_cnt, 1);
 
     row_cnt++;
     grid->addWidget(new QLabel("Key Variable"), row_cnt, 0);
-    key_box_ = new DBOVariableSelectionWidget();
-    connect(key_box_, &DBOVariableSelectionWidget::selectionChanged, this,
+    key_box_ = new VariableSelectionWidget();
+    connect(key_box_, &VariableSelectionWidget::selectionChanged, this,
             &RadarPlotPositionCalculatorTaskWidget::keyVarChangedSlot);
     grid->addWidget(key_box_, row_cnt, 1);
 
     row_cnt++;
     grid->addWidget(new QLabel("Data Source Variable"), row_cnt, 0);
-    datasource_box_ = new DBOVariableSelectionWidget();
-    connect(datasource_box_, &DBOVariableSelectionWidget::selectionChanged, this,
+    datasource_box_ = new VariableSelectionWidget();
+    connect(datasource_box_, &VariableSelectionWidget::selectionChanged, this,
             &RadarPlotPositionCalculatorTaskWidget::datasourceVarChangedSlot);
     grid->addWidget(datasource_box_, row_cnt, 1);
 
     row_cnt++;
     grid->addWidget(new QLabel("Range Variable"), row_cnt, 0);
-    range_box_ = new DBOVariableSelectionWidget();
-    connect(range_box_, &DBOVariableSelectionWidget::selectionChanged, this,
+    range_box_ = new VariableSelectionWidget();
+    connect(range_box_, &VariableSelectionWidget::selectionChanged, this,
             &RadarPlotPositionCalculatorTaskWidget::rangeVarChangedSlot);
     grid->addWidget(range_box_, row_cnt, 1);
 
     row_cnt++;
     grid->addWidget(new QLabel("Azimuth Variable"), row_cnt, 0);
-    azimuth_box_ = new DBOVariableSelectionWidget();
-    connect(azimuth_box_, &DBOVariableSelectionWidget::selectionChanged, this,
+    azimuth_box_ = new VariableSelectionWidget();
+    connect(azimuth_box_, &VariableSelectionWidget::selectionChanged, this,
             &RadarPlotPositionCalculatorTaskWidget::azimuthVarChangedSlot);
     grid->addWidget(azimuth_box_, row_cnt, 1);
 
     row_cnt++;
     grid->addWidget(new QLabel("Altitude Variable"), row_cnt, 0);
-    altitude_box_ = new DBOVariableSelectionWidget();
-    connect(altitude_box_, &DBOVariableSelectionWidget::selectionChanged, this,
+    altitude_box_ = new VariableSelectionWidget();
+    connect(altitude_box_, &VariableSelectionWidget::selectionChanged, this,
             &RadarPlotPositionCalculatorTaskWidget::altitudeVarChangedSlot);
     grid->addWidget(altitude_box_, row_cnt, 1);
 
     row_cnt++;
     grid->addWidget(new QLabel("Latitude Variable"), row_cnt, 0);
-    latitude_box_ = new DBOVariableSelectionWidget();
-    connect(latitude_box_, &DBOVariableSelectionWidget::selectionChanged, this,
+    latitude_box_ = new VariableSelectionWidget();
+    connect(latitude_box_, &VariableSelectionWidget::selectionChanged, this,
             &RadarPlotPositionCalculatorTaskWidget::latitudeVarChangedSlot);
     grid->addWidget(latitude_box_, row_cnt, 1);
 
     row_cnt++;
     grid->addWidget(new QLabel("Longitude"), row_cnt, 0);
-    longitude_box_ = new DBOVariableSelectionWidget();
-    connect(longitude_box_, &DBOVariableSelectionWidget::selectionChanged, this,
+    longitude_box_ = new VariableSelectionWidget();
+    connect(longitude_box_, &VariableSelectionWidget::selectionChanged, this,
             &RadarPlotPositionCalculatorTaskWidget::longitudeVarChangedSlot);
     grid->addWidget(longitude_box_, row_cnt, 1);
 
@@ -126,8 +127,8 @@ void RadarPlotPositionCalculatorTaskWidget::update()
         object_box_->setObjectName(object_name);
         setDBOBject(object_name);
 
-        assert(COMPASS::instance().objectManager().existsObject(object_name));
-        DBObject& object = COMPASS::instance().objectManager().object(object_name);
+        assert(COMPASS::instance().dbContentManager().existsObject(object_name));
+        DBContent& object = COMPASS::instance().dbContentManager().object(object_name);
 
         assert(key_box_);
         if (task_.keyVarStr().size() && object.hasVariable(task_.keyVarStr()))

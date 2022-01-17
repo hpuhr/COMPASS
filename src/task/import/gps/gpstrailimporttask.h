@@ -29,7 +29,7 @@
 class TaskManager;
 class GPSTrailImportTaskWidget;
 class SavedFile;
-class DBObject;
+class DBContent;
 class Buffer;
 
 class GPSTrailImportTask : public Task, public Configurable
@@ -38,7 +38,7 @@ class GPSTrailImportTask : public Task, public Configurable
 
 public slots:
     void insertProgressSlot(float percent);
-    void insertDoneSlot(DBObject& object);
+    void insertDoneSlot(DBContent& object);
 
 public:
     GPSTrailImportTask(const std::string& class_id, const std::string& instance_id,

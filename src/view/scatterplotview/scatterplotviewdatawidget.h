@@ -20,7 +20,7 @@
 
 #include "global.h"
 #include "nullablevector.h"
-#include "dbovariable.h"
+#include "dbcontent/variable/variable.h"
 #include "scatterplotviewdatatoolwidget.h"
 #include "scatterplotviewchartview.h"
 
@@ -35,7 +35,7 @@ class ScatterPlotViewDataSource;
 //class QTabWidget;
 class QHBoxLayout;
 class Buffer;
-class DBObject;
+class DBContent;
 
 namespace QtCharts {
     class QChart;
@@ -63,7 +63,7 @@ class ScatterPlotViewDataWidget : public QWidget
   public slots:
     void loadingStartedSlot();
     /// @brief Called when new result Buffer was delivered
-    void updateDataSlot(DBObject& object, std::shared_ptr<Buffer> buffer);
+    void updateDataSlot(DBContent& object, std::shared_ptr<Buffer> buffer);
     void loadingDoneSlot();
 
     void toolChangedSlot(ScatterPlotViewDataTool selected, QCursor cursor);

@@ -19,8 +19,8 @@
 
 #include "compass.h"
 #include "dbinterface.h"
-#include "dbobject.h"
-#include "dbobjectmanager.h"
+#include "dbcontent/dbcontent.h"
+#include "dbcontent/dbcontentmanager.h"
 #include "dboeditdatasourceactionoptionswidget.h"
 #include "dboeditdatasourceswidget.h"
 #include "json.hpp"

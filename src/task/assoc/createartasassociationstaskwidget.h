@@ -21,9 +21,13 @@
 #include <taskwidget.h>
 
 class CreateARTASAssociationsTask;
+
+namespace dbContent
+{
+class VariableSelectionWidget;
+}
+
 class QPushButton;
-class DBODataSourceSelectionComboBox;
-class DBOVariableSelectionWidget;
 class QLineEdit;
 class QCheckBox;
 
@@ -32,7 +36,7 @@ class CreateARTASAssociationsTaskWidget : public TaskWidget
     Q_OBJECT
 
   public slots:
-    void currentDataSourceChangedSlot();
+    //void currentDataSourceChangedSlot();
     void anyVariableChangedSlot();
 
     void endTrackTimeEditSlot(QString value);
@@ -59,16 +63,16 @@ class CreateARTASAssociationsTaskWidget : public TaskWidget
   protected:
     CreateARTASAssociationsTask& task_;
 
-    DBODataSourceSelectionComboBox* ds_combo_{nullptr};
-    DBOVariableSelectionWidget* ds_id_box_{nullptr};
-    DBOVariableSelectionWidget* track_num_box_{nullptr};
-    DBOVariableSelectionWidget* track_begin_box_{nullptr};
-    DBOVariableSelectionWidget* track_end_box_{nullptr};
-    DBOVariableSelectionWidget* track_coasting_box_{nullptr};
+    //DBODataSourceSelectionComboBox* ds_combo_{nullptr};
+    dbContent::VariableSelectionWidget* ds_id_box_{nullptr};
+    dbContent::VariableSelectionWidget* track_num_box_{nullptr};
+    dbContent::VariableSelectionWidget* track_begin_box_{nullptr};
+    dbContent::VariableSelectionWidget* track_end_box_{nullptr};
+    dbContent::VariableSelectionWidget* track_coasting_box_{nullptr};
 
-    DBOVariableSelectionWidget* key_box_{nullptr};
-    DBOVariableSelectionWidget* hash_box_{nullptr};
-    DBOVariableSelectionWidget* tod_box_{nullptr};
+    dbContent::VariableSelectionWidget* key_box_{nullptr};
+    dbContent::VariableSelectionWidget* hash_box_{nullptr};
+    dbContent::VariableSelectionWidget* tod_box_{nullptr};
 
     QLineEdit* end_track_time_edit_{nullptr};
 

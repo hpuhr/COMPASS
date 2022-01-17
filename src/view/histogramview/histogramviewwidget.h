@@ -18,7 +18,6 @@
 #ifndef HISTOGRAMVIEWWIDGET_H_
 #define HISTOGRAMVIEWWIDGET_H_
 
-#include "eventprocessor.h"
 #include "viewwidget.h"
 
 class HistogramView;
@@ -37,8 +36,6 @@ class HistogramViewWidget : public ViewWidget
                       Configurable* config_parent, HistogramView* view, QWidget* parent = NULL);
     /// @brief Destructor
     virtual ~HistogramViewWidget();
-
-    virtual void updateView();
 
     /// @brief Toggles visibility of the config widget
     void toggleConfigWidget();

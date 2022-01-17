@@ -21,17 +21,17 @@
 #include "createartasassociationsstatusdialog.h"
 #include "createartasassociationstaskwidget.h"
 #include "dbinterface.h"
-#include "dbobject.h"
-#include "dbobjectmanager.h"
-#include "dbodatasource.h"
-#include "dbovariable.h"
-#include "dbovariableset.h"
+#include "dbcontent/dbcontent.h"
+#include "dbcontent/dbcontentmanager.h"
+//#include "dbodatasource.h"
+#include "dbcontent/variable/variable.h"
+#include "dbcontent/variable/variableset.h"
 #include "jobmanager.h"
-#include "metadbovariable.h"
-#include "postprocesstask.h"
+#include "dbcontent/variable/metavariable.h"
+//#include "postprocesstask.h"
 #include "stringconv.h"
 #include "taskmanager.h"
-#include "dbconnection.h"
+#include "sqliteconnection.h"
 
 #include <QApplication>
 #include <QMessageBox>
@@ -39,6 +39,7 @@
 
 using namespace std;
 using namespace Utils;
+using namespace dbContent;
 
 const std::string CreateARTASAssociationsTask::DONE_PROPERTY_NAME = "artas_associations_created";
 
@@ -119,9 +120,6 @@ bool CreateARTASAssociationsTask::checkPrerequisites()
     if (!COMPASS::instance().interface().ready())
         return false;
 
-    if (COMPASS::instance().interface().connection().type() != SQLITE_IDENTIFIER)
-        return false;
-
     logdbg << "CreateARTASAssociationsTask: checkPrerequisites: done "
            << COMPASS::instance().interface().hasProperty(DONE_PROPERTY_NAME);
 
@@ -132,31 +130,31 @@ bool CreateARTASAssociationsTask::checkPrerequisites()
         return false;
 
     // check if was post-processed
-    logdbg << "CreateARTASAssociationsTask: checkPrerequisites: post "
-           << COMPASS::instance().interface().hasProperty(PostProcessTask::DONE_PROPERTY_NAME);
+//    logdbg << "CreateARTASAssociationsTask: checkPrerequisites: post "
+//           << COMPASS::instance().interface().hasProperty(PostProcessTask::DONE_PROPERTY_NAME);
 
-    if (!COMPASS::instance().interface().hasProperty(PostProcessTask::DONE_PROPERTY_NAME))
-        return false;
+//    if (!COMPASS::instance().interface().hasProperty(PostProcessTask::DONE_PROPERTY_NAME))
+//        return false;
 
-    logdbg << "CreateARTASAssociationsTask: checkPrerequisites: post2 "
-           << COMPASS::instance().interface().hasProperty(PostProcessTask::DONE_PROPERTY_NAME);
+//    logdbg << "CreateARTASAssociationsTask: checkPrerequisites: post2 "
+//           << COMPASS::instance().interface().hasProperty(PostProcessTask::DONE_PROPERTY_NAME);
 
-    if (COMPASS::instance().interface().getProperty(PostProcessTask::DONE_PROPERTY_NAME) != "1")
-        return false;
+//    if (COMPASS::instance().interface().getProperty(PostProcessTask::DONE_PROPERTY_NAME) != "1")
+//        return false;
 
     // check if hash var exists in all data
-    DBObjectManager& object_man = COMPASS::instance().objectManager();
+    DBContentManager& object_man = COMPASS::instance().dbContentManager();
 
     logdbg << "CreateARTASAssociationsTask: checkPrerequisites: tracker hashes";
     assert (object_man.existsObject("Tracker"));
 
-    DBObject& tracker_obj = object_man.object("Tracker");
+    DBContent& tracker_obj = object_man.object("Tracker");
     if (!tracker_obj.hasData()) // check if tracker data exists
         return false;
 
-    DBOVariable& tracker_hash_var = object_man.metaVariable(hash_var_str_).getFor("Tracker");
-    if (tracker_hash_var.getMinString() == NULL_STRING || tracker_hash_var.getMaxString() == NULL_STRING)
-        return false;  // tracker needs hash info no hashes
+//    DBOVariable& tracker_hash_var = object_man.metaVariable(hash_var_str_).getFor("Tracker");
+//    if (tracker_hash_var.getMinString() == NULL_STRING || tracker_hash_var.getMaxString() == NULL_STRING)
+//        return false;  // tracker needs hash info no hashes
 
 
     logdbg << "CreateARTASAssociationsTask: checkPrerequisites: sensor hashes";
@@ -167,9 +165,9 @@ bool CreateARTASAssociationsTask::checkPrerequisites()
             !dbo_it.second->hasData())  // DBO other than tracker no data is acceptable
             continue;
 
-        DBOVariable& hash_var = object_man.metaVariable(hash_var_str_).getFor(dbo_it.first);
-        if (hash_var.getMinString() != NULL_STRING && hash_var.getMaxString() != NULL_STRING)
-            any_data_found = true;  // has data and hashes
+//        DBOVariable& hash_var = object_man.metaVariable(hash_var_str_).getFor(dbo_it.first);
+//        if (hash_var.getMinString() != NULL_STRING && hash_var.getMaxString() != NULL_STRING)
+        any_data_found = true;  // TODO no data check
     }
     if (!any_data_found)
         return false; // sensor data needed
@@ -188,14 +186,18 @@ bool CreateARTASAssociationsTask::isRecommended()
 
 bool CreateARTASAssociationsTask::canRun()
 {
-    DBObjectManager& object_man = COMPASS::instance().objectManager();
+    return false;
+
+    TODO_ASSERT
+
+    DBContentManager& object_man = COMPASS::instance().dbContentManager();
 
     logdbg << "CreateARTASAssociationsTask: canRun: tracker " << object_man.existsObject("Tracker");
 
     if (!object_man.existsObject("Tracker"))
         return false;
 
-    DBObject& tracker_object = object_man.object("Tracker");
+    DBContent& tracker_object = object_man.object("Tracker");
 
     // tracker stuff
     logdbg << "CreateARTASAssociationsTask: canRun: tracker loadable " << tracker_object.loadable();
@@ -207,30 +209,32 @@ bool CreateARTASAssociationsTask::canRun()
         return false;
 
     // no data sources
-    logdbg << "CreateARTASAssociationsTask: canRun: no tracker data sources "
-           << (tracker_object.dsBegin() == tracker_object.dsEnd());
-    if (tracker_object.dsBegin() == tracker_object.dsEnd())
-        return false;
 
-    bool ds_found{false};
-    for (auto ds_it = tracker_object.dsBegin(); ds_it != tracker_object.dsEnd(); ++ds_it)
-    {
-        if ((ds_it->second.hasShortName() &&
-             ds_it->second.shortName() == current_data_source_name_) ||
-            (ds_it->second.name() == current_data_source_name_))
-        {
-            ds_found = true;
-            break;
-        }
-    }
 
-    logdbg << "CreateARTASAssociationsTask: canRun: tracker ds_found " << ds_found;
-    if (!ds_found)
-    {
-        logdbg << "CreateARTASAssociationsTask: canRun: resetting current source to "
-               << tracker_object.dsBegin()->second.name();
-        current_data_source_name_ = tracker_object.dsBegin()->second.name();
-    }
+//    logdbg << "CreateARTASAssociationsTask: canRun: no tracker data sources "
+//           << (tracker_object.dsBegin() == tracker_object.dsEnd());
+//    if (tracker_object.dsBegin() == tracker_object.dsEnd())
+//        return false;
+
+//    bool ds_found{false};
+//    for (auto ds_it = tracker_object.dsBegin(); ds_it != tracker_object.dsEnd(); ++ds_it)
+//    {
+//        if ((ds_it->second.hasShortName() &&
+//             ds_it->second.shortName() == current_data_source_name_) ||
+//            (ds_it->second.name() == current_data_source_name_))
+//        {
+//            ds_found = true;
+//            break;
+//        }
+//    }
+
+//    logdbg << "CreateARTASAssociationsTask: canRun: tracker ds_found " << ds_found;
+//    if (!ds_found)
+//    {
+//        logdbg << "CreateARTASAssociationsTask: canRun: resetting current source to "
+//               << tracker_object.dsBegin()->second.name();
+//        current_data_source_name_ = tracker_object.dsBegin()->second.name();
+//    }
 
     loginf << "CreateARTASAssociationsTask: canRun: tracker vars";
     if (!tracker_object.hasVariable(tracker_track_num_var_str_) ||
@@ -296,7 +300,7 @@ void CreateARTASAssociationsTask::run()
     checkAndSetMetaVariable(hash_var_str_, &hash_var_);
     checkAndSetMetaVariable(tod_var_str_, &tod_var_);
 
-    DBObjectManager& object_man = COMPASS::instance().objectManager();
+    DBContentManager& object_man = COMPASS::instance().dbContentManager();
 
     for (auto& dbo_it : object_man)
     {
@@ -306,30 +310,35 @@ void CreateARTASAssociationsTask::run()
         if (dbo_it.first == "RefTraj") // not set in references
             continue;
 
-        DBOVariableSet read_set = getReadSetFor(dbo_it.first);
-        connect(dbo_it.second, &DBObject::newDataSignal, this,
-                &CreateARTASAssociationsTask::newDataSlot);
-        connect(dbo_it.second, &DBObject::loadingDoneSignal, this,
-                &CreateARTASAssociationsTask::loadingDoneSlot);
+        VariableSet read_set = getReadSetFor(dbo_it.first);
+        TODO_ASSERT
+
+//        connect(dbo_it.second, &DBObject::newDataSignal, this,
+//                &CreateARTASAssociationsTask::newDataSlot);
+//        connect(dbo_it.second, &DBObject::loadingDoneSignal, this,
+//                &CreateARTASAssociationsTask::loadingDoneSlot);
 
         if (dbo_it.first == "Tracker")
         {
-            DBObject& tracker_object = object_man.object("Tracker");
+            DBContent& tracker_object = object_man.object("Tracker");
 
             bool ds_found{false};
             int ds_id{-1};
-            for (auto ds_it = tracker_object.dsBegin(); ds_it != tracker_object.dsEnd(); ++ds_it)
-            {
-                if ((ds_it->second.hasShortName() &&
-                     ds_it->second.shortName() == current_data_source_name_) ||
-                    (!ds_it->second.hasShortName() &&
-                     ds_it->second.name() == current_data_source_name_))
-                {
-                    ds_found = true;
-                    ds_id = ds_it->first;
-                    break;
-                }
-            }
+
+            TODO_ASSERT
+
+//            for (auto ds_it = tracker_object.dsBegin(); ds_it != tracker_object.dsEnd(); ++ds_it)
+//            {
+//                if ((ds_it->second.hasShortName() &&
+//                     ds_it->second.shortName() == current_data_source_name_) ||
+//                    (!ds_it->second.hasShortName() &&
+//                     ds_it->second.name() == current_data_source_name_))
+//                {
+//                    ds_found = true;
+//                    ds_id = ds_it->first;
+//                    break;
+//                }
+//            }
 
             assert(ds_found);
             std::string custom_filter_clause{tracker_ds_id_var_str_ + " in (" +
@@ -343,8 +352,8 @@ void CreateARTASAssociationsTask::run()
             //                             use_order, DBOVariable* order_variable, bool
             //                             use_order_ascending, const std::string &limit_str)
 
-            dbo_it.second->load(read_set, custom_filter_clause, {tracker_ds_id_var_}, false,
-                                &tod_var_->getFor("Tracker"), false);
+            dbo_it.second->loadFiltered(read_set, custom_filter_clause, {tracker_ds_id_var_}, false,
+                                        &tod_var_->getFor("Tracker"), false);
         }
         else
             dbo_it.second->load(read_set, false, false, nullptr, false);
@@ -356,17 +365,19 @@ void CreateARTASAssociationsTask::run()
     status_dialog_->show();
 }
 
-void CreateARTASAssociationsTask::newDataSlot(DBObject& object)
+void CreateARTASAssociationsTask::newDataSlot(DBContent& object)
 {
 }
 
-void CreateARTASAssociationsTask::loadingDoneSlot(DBObject& object)
+void CreateARTASAssociationsTask::loadingDoneSlot(DBContent& object)
 {
     loginf << "CreateARTASAssociationsTask: loadingDoneSlot: object " << object.name();
 
-    disconnect(&object, &DBObject::newDataSignal, this, &CreateARTASAssociationsTask::newDataSlot);
-    disconnect(&object, &DBObject::loadingDoneSignal, this,
-               &CreateARTASAssociationsTask::loadingDoneSlot);
+    TODO_ASSERT
+
+//    disconnect(&object, &DBObject::newDataSignal, this, &CreateARTASAssociationsTask::newDataSlot);
+//    disconnect(&object, &DBObject::loadingDoneSignal, this,
+//               &CreateARTASAssociationsTask::loadingDoneSlot);
 
     dbo_loading_done_flags_.at(object.name()) = true;
 
@@ -385,13 +396,15 @@ void CreateARTASAssociationsTask::loadingDoneSlot(DBObject& object)
 
         std::map<std::string, std::shared_ptr<Buffer>> buffers;
 
-        DBObjectManager& object_man = COMPASS::instance().objectManager();
+        DBContentManager& object_man = COMPASS::instance().dbContentManager();
 
-        for (auto& dbo_it : object_man)
-        {
-            buffers[dbo_it.first] = dbo_it.second->data();
-            dbo_it.second->clearData();
-        }
+        TODO_ASSERT
+
+//        for (auto& dbo_it : object_man)
+//        {
+//            buffers[dbo_it.first] = dbo_it.second->data();
+//            dbo_it.second->clearData();
+//        }
 
         create_job_ = std::make_shared<CreateARTASAssociationsJob>(
             *this, COMPASS::instance().interface(), buffers);
@@ -470,7 +483,7 @@ void CreateARTASAssociationsTask::currentDataSourceName(const std::string& curre
     current_data_source_name_ = current_data_source_name;
 }
 
-DBOVariable* CreateARTASAssociationsTask::trackerDsIdVar() const { return tracker_ds_id_var_; }
+Variable* CreateARTASAssociationsTask::trackerDsIdVar() const { return tracker_ds_id_var_; }
 
 std::string CreateARTASAssociationsTask::trackerDsIdVarStr() const
 {
@@ -554,11 +567,11 @@ void CreateARTASAssociationsTask::todVarStr(const std::string& tod_var_str)
     tod_var_str_ = tod_var_str;
 }
 
-MetaDBOVariable* CreateARTASAssociationsTask::keyVar() const { return key_var_; }
+MetaVariable* CreateARTASAssociationsTask::keyVar() const { return key_var_; }
 
-MetaDBOVariable* CreateARTASAssociationsTask::hashVar() const { return hash_var_; }
+MetaVariable* CreateARTASAssociationsTask::hashVar() const { return hash_var_; }
 
-MetaDBOVariable* CreateARTASAssociationsTask::todVar() const { return tod_var_; }
+MetaVariable* CreateARTASAssociationsTask::todVar() const { return tod_var_; }
 
 float CreateARTASAssociationsTask::endTrackTime() const { return end_track_time_; }
 
@@ -685,10 +698,10 @@ void CreateARTASAssociationsTask::markTrackCoastingAssociationsDubious(bool valu
     mark_track_coasting_associations_dubious_ = value;
 }
 
-void CreateARTASAssociationsTask::checkAndSetVariable(std::string& name_str, DBOVariable** var)
+void CreateARTASAssociationsTask::checkAndSetVariable(std::string& name_str, Variable** var)
 {
-    DBObjectManager& object_man = COMPASS::instance().objectManager();
-    DBObject& object = object_man.object("Tracker");
+    DBContentManager& object_man = COMPASS::instance().dbContentManager();
+    DBContent& object = object_man.object("Tracker");
 
     if (!object.hasVariable(name_str))
     {
@@ -702,14 +715,13 @@ void CreateARTASAssociationsTask::checkAndSetVariable(std::string& name_str, DBO
         *var = &object.variable(name_str);
         loginf << "CreateARTASAssociationsTask: checkAndSetVariable: var " << name_str << " set";
         assert(var);
-        assert((*var)->existsInDB());
     }
 }
 
 void CreateARTASAssociationsTask::checkAndSetMetaVariable(std::string& name_str,
-                                                          MetaDBOVariable** var)
+                                                          MetaVariable** var)
 {
-    DBObjectManager& object_man = COMPASS::instance().objectManager();
+    DBContentManager& object_man = COMPASS::instance().dbContentManager();
 
     if (!object_man.existsMetaVariable(name_str))
     {
@@ -727,9 +739,9 @@ void CreateARTASAssociationsTask::checkAndSetMetaVariable(std::string& name_str,
     }
 }
 
-DBOVariableSet CreateARTASAssociationsTask::getReadSetFor(const std::string& dbo_name)
+VariableSet CreateARTASAssociationsTask::getReadSetFor(const std::string& dbo_name)
 {
-    DBOVariableSet read_set;
+    VariableSet read_set;
 
     assert(key_var_);
     assert(key_var_->existsIn(dbo_name));

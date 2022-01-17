@@ -25,7 +25,7 @@
 class CreateAssociationsTask;
 class DBInterface;
 class Buffer;
-class DBObject;
+class DBContent;
 
 class CreateAssociationsJob : public Job
 {

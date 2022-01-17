@@ -20,10 +20,10 @@
 #include <QThread>
 
 #include "buffer.h"
-#include "dbobject.h"
-#include "dbovariableset.h"
+#include "dbcontent/dbcontent.h"
+#include "dbcontent/variable/variableset.h"
 
-FinalizeDBOReadJob::FinalizeDBOReadJob(DBObject& dbobject, DBOVariableSet& read_list,
+FinalizeDBOReadJob::FinalizeDBOReadJob(DBContent& dbobject, dbContent::VariableSet& read_list,
                                        std::shared_ptr<Buffer> buffer)
     : Job("FinalizeDBOReadJob"), dbobject_(dbobject), read_list_(read_list), buffer_(buffer)
 {
@@ -37,8 +37,11 @@ void FinalizeDBOReadJob::run()
     logdbg << "FinalizeDBOReadJob: run: read_list size " << read_list_.getSize();
     started_ = true;
 
+    // rename db column names into DBOVariable names
     buffer_->transformVariables(read_list_, true);
-    buffer_->addProperty("selected", PropertyDataType::BOOL);  // add boolean to indicate selection
+
+    // add boolean to indicate selection
+    buffer_->addProperty(DBContent::selected_var);
 
     logdbg << "FinalizeDBOReadJob: run: done";
     done_ = true;

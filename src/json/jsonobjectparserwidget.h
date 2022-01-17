@@ -44,7 +44,7 @@ class JSONObjectParserWidget : public QWidget
     void mappingActiveChangedSlot();
     void mappingKeyChangedSlot();
     void mappingCommentChangedSlot();
-    void mappingDBOVariableChangedSlot();
+    void mappingDBContentVariableChangedSlot();
     void mappingMandatoryChangedSlot();
     void mappingInArrayChangedSlot();
     void mappingAppendChangedSlot();

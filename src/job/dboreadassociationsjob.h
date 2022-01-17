@@ -20,18 +20,18 @@
 
 #include "job.h"
 
-class DBObject;
+class DBContent;
 
 class DBOReadAssociationsJob : public Job
 {
   public:
-    DBOReadAssociationsJob(DBObject& dbobject);
+    DBOReadAssociationsJob(DBContent& dbobject);
     virtual ~DBOReadAssociationsJob();
 
     virtual void run();
 
   protected:
-    DBObject& dbobject_;
+    DBContent& dbobject_;
 };
 
 #endif  // DBOREADASSOCIATIONSJOB_H

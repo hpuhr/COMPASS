@@ -16,8 +16,9 @@
  */
 
 #include "listboxviewconfigwidget.h"
-#include "dbobjectmanager.h"
-#include "dbovariableorderedsetwidget.h"
+#include "compass.h"
+#include "dbcontent/dbcontentmanager.h"
+#include "dbcontent/variable/variableorderedsetwidget.h"
 #include "listboxview.h"
 #include "listboxviewdatasource.h"
 #include "logger.h"
@@ -419,7 +420,8 @@ void ListBoxViewConfigWidget::reloadWantedSlot()
 void ListBoxViewConfigWidget::reloadRequestedSlot()
 {
     assert(reload_needed_);
-    emit reloadRequestedSignal();
+
+    COMPASS::instance().dbContentManager().load();
     reload_needed_ = false;
 
     updateUpdateButton();
@@ -485,7 +487,7 @@ void ListBoxViewConfigWidget::updateSetWidget()
 
     assert (view_->getDataSource()->hasCurrentSet());
 
-    connect(view_->getDataSource()->getSet(), &DBOVariableOrderedSet::variableAddedChangedSignal,
+    connect(view_->getDataSource()->getSet(), &dbContent::VariableOrderedSet::variableAddedChangedSignal,
             this, &ListBoxViewConfigWidget::reloadWantedSlot, Qt::UniqueConnection);
 
     QWidget* set_widget = view_->getDataSource()->getSet()->widget();

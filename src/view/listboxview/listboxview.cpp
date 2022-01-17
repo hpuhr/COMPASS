@@ -20,13 +20,12 @@
 #include <QApplication>
 
 #include "compass.h"
-#include "dbobjectmanager.h"
+#include "dbcontent/dbcontentmanager.h"
 #include "listboxviewconfigwidget.h"
 #include "listboxviewdatasource.h"
 #include "listboxviewdatawidget.h"
 #include "listboxviewwidget.h"
 #include "logger.h"
-#include "viewselection.h"
 #include "latexvisitor.h"
 
 ListBoxView::ListBoxView(const std::string& class_id, const std::string& instance_id,
@@ -38,7 +37,7 @@ ListBoxView::ListBoxView(const std::string& class_id, const std::string& instanc
     registerParameter("overwrite_csv", &overwrite_csv_, true);
     registerParameter("show_associations", &show_associations_, false);
 
-    can_show_associations_ = COMPASS::instance().objectManager().hasAssociations();
+    can_show_associations_ = COMPASS::instance().dbContentManager().hasAssociations();
 
     if (!can_show_associations_)
         show_associations_ = false;
@@ -59,10 +58,6 @@ ListBoxView::~ListBoxView()
     }
 }
 
-void ListBoxView::update(bool atOnce) {}
-
-void ListBoxView::clearData() {}
-
 bool ListBoxView::init()
 {
     View::init();
@@ -71,25 +66,23 @@ bool ListBoxView::init()
 
     assert(data_source_);
 
-    DBObjectManager& object_man = COMPASS::instance().objectManager();
-    connect(&object_man, &DBObjectManager::allLoadingDoneSignal, this, &ListBoxView::allLoadingDoneSlot);
-    connect(&object_man, &DBObjectManager::allLoadingDoneSignal,
+    DBContentManager& object_man = COMPASS::instance().dbContentManager();
+    connect(&object_man, &DBContentManager::loadingDoneSignal, this, &ListBoxView::allLoadingDoneSlot);
+    connect(&object_man, &DBContentManager::loadingDoneSignal,
             widget_->getDataWidget(), &ListBoxViewDataWidget::loadingDoneSlot);
 
-    connect(data_source_, &ListBoxViewDataSource::loadingStartedSignal, widget_->getDataWidget(),
-            &ListBoxViewDataWidget::loadingStartedSlot);
-    connect(data_source_, &ListBoxViewDataSource::updateDataSignal, widget_->getDataWidget(),
-            &ListBoxViewDataWidget::updateDataSlot);
+//    connect(data_source_, &ListBoxViewDataSource::loadingStartedSignal, widget_->getDataWidget(),
+//            &ListBoxViewDataWidget::loadingStartedSlot);
+//    connect(data_source_, &ListBoxViewDataSource::updateDataSignal, widget_->getDataWidget(),
+//            &ListBoxViewDataWidget::updateDataSlot);
 
     connect(widget_->configWidget(), &ListBoxViewConfigWidget::exportSignal,
             widget_->getDataWidget(), &ListBoxViewDataWidget::exportDataSlot);
     connect(widget_->getDataWidget(), &ListBoxViewDataWidget::exportDoneSignal,
             widget_->configWidget(), &ListBoxViewConfigWidget::exportDoneSlot);
 
-    connect(widget_->configWidget(), &ListBoxViewConfigWidget::reloadRequestedSignal,
-            &COMPASS::instance().objectManager(), &DBObjectManager::loadSlot);
-    connect(data_source_, &ListBoxViewDataSource::loadingStartedSignal, widget_->configWidget(),
-            &ListBoxViewConfigWidget::loadingStartedSlot);
+//    connect(data_source_, &ListBoxViewDataSource::loadingStartedSignal, widget_->configWidget(),
+//            &ListBoxViewConfigWidget::loadingStartedSlot);
 
     connect(this, &ListBoxView::showOnlySelectedSignal, widget_->getDataWidget(),
             &ListBoxViewDataWidget::showOnlySelectedSlot);
@@ -104,6 +97,22 @@ bool ListBoxView::init()
 
     return true;
 }
+
+void ListBoxView::loadingStarted()
+{
+    loginf << "OSGView: loadingStarted";
+}
+
+void ListBoxView::loadedData(const std::map<std::string, std::shared_ptr<Buffer>>& data, bool requires_reset)
+{
+    loginf << "ListBoxView: loadedData";
+}
+
+void ListBoxView::loadingDone()
+{
+    loginf << "ListBoxView: loadingDone";
+}
+
 
 void ListBoxView::generateSubConfigurable(const std::string& class_id,
                                           const std::string& instance_id)
@@ -144,7 +153,7 @@ ListBoxViewDataWidget* ListBoxView::getDataWidget()
     return widget_->getDataWidget();
 }
 
-DBOVariableSet ListBoxView::getSet(const std::string& dbo_name)
+dbContent::VariableSet ListBoxView::getSet(const std::string& dbo_name)
 {
     assert(data_source_);
 

@@ -20,7 +20,7 @@
 
 #include <QWidget>
 
-#include "dbobject.h"
+#include "dbcontent/dbcontent.h"
 #include "dboeditdatasourceactionoptions.h"
 
 class ManageDataSourcesTask;

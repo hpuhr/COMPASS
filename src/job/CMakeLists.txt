@@ -7,12 +7,11 @@ target_sources(compass
     PUBLIC
         "${CMAKE_CURRENT_LIST_DIR}/job.h"
         "${CMAKE_CURRENT_LIST_DIR}/jobmanager.h"
-        "${CMAKE_CURRENT_LIST_DIR}/jobmanagerwidget.h"
         "${CMAKE_CURRENT_LIST_DIR}/dboreaddbjob.h"
         "${CMAKE_CURRENT_LIST_DIR}/allbuffercsvexportjob.h"
         "${CMAKE_CURRENT_LIST_DIR}/buffercsvexportjob.h"
-        "${CMAKE_CURRENT_LIST_DIR}/dboactivedatasourcesdbjob.h"
-        "${CMAKE_CURRENT_LIST_DIR}/dbominmaxdbjob.h"
+        #"${CMAKE_CURRENT_LIST_DIR}/dboactivedatasourcesdbjob.h"
+        #"${CMAKE_CURRENT_LIST_DIR}/dbominmaxdbjob.h"
         "${CMAKE_CURRENT_LIST_DIR}/finalizedboreadjob.h"
         "${CMAKE_CURRENT_LIST_DIR}/insertbufferdbjob.h"
         "${CMAKE_CURRENT_LIST_DIR}/updatebufferdbjob.h"
@@ -23,15 +22,11 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/createartasassociationsjob.h"
         "${CMAKE_CURRENT_LIST_DIR}/createassociationsjob.h"
         "${CMAKE_CURRENT_LIST_DIR}/dboreadassociationsjob.h"
-        "${CMAKE_CURRENT_LIST_DIR}/mysqldbimportjob.h"
-    #        src/job/dbovariabledistinctstatisticsdbjob.h
-    #        src/job/dbocountdbjob.h
-    #        src/job/dboinfodbjob.h
-    #        src/job/writebufferdbjob.h
-    #        src/job/transformationjob.h
+        "${CMAKE_CURRENT_LIST_DIR}/asterixjsonmappingjob.h"
+        "${CMAKE_CURRENT_LIST_DIR}/asterixpostprocessjob.h"
     PRIVATE
-        "${CMAKE_CURRENT_LIST_DIR}/dboactivedatasourcesdbjob.cpp"
-        "${CMAKE_CURRENT_LIST_DIR}/dbominmaxdbjob.cpp"
+        #"${CMAKE_CURRENT_LIST_DIR}/dboactivedatasourcesdbjob.cpp"
+        #"${CMAKE_CURRENT_LIST_DIR}/dbominmaxdbjob.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/dboreaddbjob.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/finalizedboreadjob.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/allbuffercsvexportjob.cpp"
@@ -39,7 +34,6 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/insertbufferdbjob.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/updatebufferdbjob.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/jobmanager.cpp"
-        "${CMAKE_CURRENT_LIST_DIR}/jobmanagerwidget.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/readjsonfilejob.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/jsonparsejob.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/jsonmappingjob.cpp"
@@ -47,12 +41,8 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/createartasassociationsjob.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/createassociationsjob.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/dboreadassociationsjob.cpp"
-        "${CMAKE_CURRENT_LIST_DIR}/mysqldbimportjob.cpp"
-    #        src/job/dbovariabledistinctstatisticsdbjob.cpp
-    #        src/job/dbocountdbjob.cpp
-    #        src/job/dboinfodbjob.cpp
-    #        src/job/writebufferdbjob.cpp
-    #        src/job/transformationjob.cpp
+        "${CMAKE_CURRENT_LIST_DIR}/asterixjsonmappingjob.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/asterixpostprocessjob.cpp"
 )
 
 IF (jASTERIX_FOUND)
@@ -61,9 +51,7 @@ IF (jASTERIX_FOUND)
 target_sources(compass
     PUBLIC
         "${CMAKE_CURRENT_LIST_DIR}/asterixdecodejob.h"
-#        "${CMAKE_CURRENT_LIST_DIR}/asterixextractrecordsjob.h"
     PRIVATE
         "${CMAKE_CURRENT_LIST_DIR}/asterixdecodejob.cpp"
-#        "${CMAKE_CURRENT_LIST_DIR}/asterixextractrecordsjob.cpp"
 )
 ENDIF()

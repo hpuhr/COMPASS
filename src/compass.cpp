@@ -16,16 +16,10 @@
  */
 
 #include "compass.h"
-
-#include <qobject.h>
-
-#include <boost/date_time/posix_time/posix_time.hpp>
-
 #include "config.h"
 #include "dbinterface.h"
-#include "dbobject.h"
-#include "dbobjectmanager.h"
-#include "dbschemamanager.h"
+#include "dbcontent/dbcontent.h"
+#include "dbcontent/dbcontentmanager.h"
 #include "dbtableinfo.h"
 #include "filtermanager.h"
 #include "global.h"
@@ -35,63 +29,75 @@
 #include "taskmanager.h"
 #include "viewmanager.h"
 #include "evaluationmanager.h"
+#include "mainwindow.h"
+#include "files.h"
+
+#include <qobject.h>
+
+#include <boost/date_time/posix_time/posix_time.hpp>
 
 using namespace std;
+using namespace nlohmann;
+using namespace Utils;
 
-/**
- * Sets init state, creates members, starts the thread using go.
- */
 COMPASS::COMPASS() : Configurable("COMPASS", "COMPASS0", 0, "compass.json")
 {
     logdbg << "COMPASS: constructor: start";
 
     simple_config_.reset(new SimpleConfig("config.json"));
 
+    registerParameter("last_db_filename", &last_db_filename_, "");
+    registerParameter("db_file_list", &db_file_list_, json::array());
+
     JobManager::instance().start();
 
     createSubConfigurables();
 
     assert(db_interface_);
-    assert(db_schema_manager_);
-    assert(dbo_manager_);
+    assert(dbcontent_manager_);
     assert(filter_manager_);
     assert(task_manager_);
     assert(view_manager_);
     assert(eval_manager_);
 
-    QObject::connect(db_schema_manager_.get(), &DBSchemaManager::schemaChangedSignal,
-                     dbo_manager_.get(), &DBObjectManager::updateSchemaInformationSlot);
-    // QObject::connect (db_schema_manager_, SIGNAL(schemaLockedSignal()), dbo_manager_,
-    // SLOT(schemaLockedSlot()));
-    QObject::connect(db_interface_.get(), &DBInterface::databaseContentChangedSignal,
-                     db_schema_manager_.get(), &DBSchemaManager::databaseContentChangedSlot,
-                     Qt::QueuedConnection);
-    QObject::connect(db_interface_.get(), &DBInterface::databaseContentChangedSignal,
-                     dbo_manager_.get(), &DBObjectManager::databaseContentChangedSlot,
-                     Qt::QueuedConnection);
-    // QObject::connect(db_interface_, SIGNAL(databaseOpenedSignal()), filter_manager_,
-    // SLOT(databaseOpenedSlot()));
+//    QObject::connect(db_interface_.get(), &DBInterface::databaseContentChangedSignal,
+//                     dbo_manager_.get(), &DBObjectManager::databaseContentChangedSlot,
+//                     Qt::QueuedConnection);
 
-    QObject::connect(dbo_manager_.get(), &DBObjectManager::dbObjectsChangedSignal,
-                     task_manager_.get(), &TaskManager::dbObjectsChangedSlot);
-    QObject::connect(dbo_manager_.get(), &DBObjectManager::schemaChangedSignal, task_manager_.get(),
-                     &TaskManager::schemaChangedSlot);
+//    QObject::connect(dbo_manager_.get(), &DBObjectManager::dbObjectsChangedSignal,
+//                     task_manager_.get(), &TaskManager::dbObjectsChangedSlot);
+//    QObject::connect(dbo_manager_.get(), &DBObjectManager::schemaChangedSignal, task_manager_.get(),
+//                     &TaskManager::schemaChangedSlot);
 
-    dbo_manager_->updateSchemaInformationSlot();
+    // database opending
+    QObject::connect(db_interface_.get(), &DBInterface::databaseOpenedSignal,
+                     dbcontent_manager_.get(), &DBContentManager::databaseOpenedSlot);
+    QObject::connect(db_interface_.get(), &DBInterface::databaseClosedSignal,
+                     dbcontent_manager_.get(), &DBContentManager::databaseClosedSlot);
+
+    QObject::connect(db_interface_.get(), &DBInterface::databaseOpenedSignal,
+                     filter_manager_.get(), &FilterManager::databaseOpenedSlot);
+    QObject::connect(db_interface_.get(), &DBInterface::databaseClosedSignal,
+                     filter_manager_.get(), &FilterManager::databaseClosedSlot);
+
+    QObject::connect(db_interface_.get(), &DBInterface::databaseOpenedSignal,
+                     eval_manager_.get(), &EvaluationManager::databaseOpenedSlot);
+    QObject::connect(db_interface_.get(), &DBInterface::databaseClosedSignal,
+                     eval_manager_.get(), &EvaluationManager::databaseClosedSlot);
+
+    // data exchange
+    QObject::connect(dbcontent_manager_.get(), &DBContentManager::loadingStartedSignal,
+                     view_manager_.get(), &ViewManager::loadingStartedSlot);
+    QObject::connect(dbcontent_manager_.get(), &DBContentManager::loadedDataSignal,
+                     view_manager_.get(), &ViewManager::loadedDataSlot);
+    QObject::connect(dbcontent_manager_.get(), &DBContentManager::loadingDoneSignal,
+                     view_manager_.get(), &ViewManager::loadingDoneSlot);
+
+    qRegisterMetaType<AppMode>("AppMode");
 
     logdbg << "COMPASS: constructor: end";
 }
 
-// void COMPASS::initialize()
-//{
-//    assert (!initialized_);
-//    initialized_=true;
-
-//}
-
-/**
- * Deletes members.
- */
 COMPASS::~COMPASS()
 {
     logdbg << "COMPASS: destructor: start";
@@ -102,10 +108,7 @@ COMPASS::~COMPASS()
         shutdown();
     }
 
-    // assert (!initialized_);
-
-    assert(!dbo_manager_);
-    assert(!db_schema_manager_);
+    assert(!dbcontent_manager_);
     assert(!db_interface_);
     assert(!filter_manager_);
     assert(!task_manager_);
@@ -125,18 +128,11 @@ void COMPASS::generateSubConfigurable(const std::string& class_id, const std::st
         db_interface_.reset(new DBInterface(class_id, instance_id, this));
         assert(db_interface_);
     }
-    else if (class_id == "DBObjectManager")
+    else if (class_id == "DBContentManager")
     {
-        assert(!dbo_manager_);
-        dbo_manager_.reset(new DBObjectManager(class_id, instance_id, this));
-        assert(dbo_manager_);
-    }
-    else if (class_id == "DBSchemaManager")
-    {
-        assert(db_interface_);
-        assert(!db_schema_manager_);
-        db_schema_manager_.reset(new DBSchemaManager(class_id, instance_id, this, *db_interface_));
-        assert(db_schema_manager_);
+        assert(!dbcontent_manager_);
+        dbcontent_manager_.reset(new DBContentManager(class_id, instance_id, this));
+        assert(dbcontent_manager_);
     }
     else if (class_id == "FilterManager")
     {
@@ -174,18 +170,12 @@ void COMPASS::checkSubConfigurables()
         generateSubConfigurable("DBInterface", "DBInterface0");
         assert(db_interface_);
     }
-    if (!dbo_manager_)
+    if (!dbcontent_manager_)
     {
         assert(db_interface_);
         addNewSubConfiguration("DBObjectManager", "DBObjectManager0");
         generateSubConfigurable("DBObjectManager", "DBObjectManager0");
-        assert(dbo_manager_);
-    }
-    if (!db_schema_manager_)
-    {
-        addNewSubConfiguration("DBSchemaManager", "DBSchemaManager0");
-        generateSubConfigurable("DBSchemaManager", "DBSchemaManager0");
-        assert(dbo_manager_);
+        assert(dbcontent_manager_);
     }
     if (!filter_manager_)
     {
@@ -213,51 +203,94 @@ void COMPASS::checkSubConfigurables()
     }
 }
 
+void COMPASS::openDBFile(const std::string& filename)
+{
+    loginf << "COMPASS: openDBFile: opening file '" << filename << "'";
+
+    assert (!db_opened_);
+    assert (db_interface_);
+
+    last_db_filename_ = filename;
+
+    db_interface_->openDBFile(filename, false);
+    assert (db_interface_->dbOpen());
+
+    addDBFileToList(filename);
+
+    db_opened_ = true;
+}
+
+void COMPASS::createNewDBFile(const std::string& filename)
+{
+    loginf << "COMPASS: createNewDBFile: creating new file '" << filename << "'";
+
+    assert (!db_opened_);
+    assert (db_interface_);
+
+    if (Files::fileExists(filename))
+    {
+        // confirmation already done by dialog
+        loginf << "COMPASS: createNewDBFile: deleting pre-existing file '" << filename << "'";
+        Files::deleteFile(filename);
+    }
+
+    last_db_filename_ = filename;
+
+    db_interface_->openDBFile(filename, true);
+    assert (db_interface_->dbOpen());
+
+    addDBFileToList(filename);
+
+    db_opened_ = true;
+}
+
+void COMPASS::closeDB()
+{
+    loginf << "COMPASS: closeDB: closing db file '" << last_db_filename_ << "'";
+
+    assert (db_opened_);
+
+    dbcontent_manager_->saveDBDataSources();
+
+    db_interface_->closeDBFile();
+    assert (!db_interface_->dbOpen());
+
+    db_opened_ = false;
+}
+
+
 DBInterface& COMPASS::interface()
 {
     assert(db_interface_);
-    // assert (initialized_);
     return *db_interface_;
 }
 
-DBSchemaManager& COMPASS::schemaManager()
+DBContentManager& COMPASS::dbContentManager()
 {
-    assert(db_schema_manager_);
-    // assert (initialized_);
-    return *db_schema_manager_;
-}
-
-DBObjectManager& COMPASS::objectManager()
-{
-    assert(dbo_manager_);
-    // assert (initialized_);
-    return *dbo_manager_;
+    assert(dbcontent_manager_);
+    return *dbcontent_manager_;
 }
 
 FilterManager& COMPASS::filterManager()
 {
     assert(filter_manager_);
-    // assert (initialized_);
     return *filter_manager_;
 }
 
 TaskManager& COMPASS::taskManager()
 {
     assert(task_manager_);
-    // assert (initialized_);
     return *task_manager_;
 }
 
 ViewManager& COMPASS::viewManager()
 {
     assert(view_manager_);
-    // assert (initialized_);
     return *view_manager_;
 }
 
 SimpleConfig& COMPASS::config()
 {
-    // assert (initialized_);
     assert(simple_config_);
     return *simple_config_;
 }
@@ -268,18 +301,11 @@ EvaluationManager& COMPASS::evaluationManager()
     return *eval_manager_;
 }
 
-bool COMPASS::ready()
+bool COMPASS::dbOpened()
 {
-    if (!db_interface_)  // || !initialized_)
-        return false;
-
-    return db_interface_->ready();
+    return db_opened_;
 }
 
-///**
-// * Calls stop. If data was written uning the StructureReader, this process is finished correctly.
-// * State is set to DB_STATE_SHUTDOWN and ouput buffers are cleared.
-// */
 void COMPASS::shutdown()
 {
     loginf << "COMPASS: database shutdown";
@@ -289,6 +315,17 @@ void COMPASS::shutdown()
         logerr << "COMPASS: already shut down";
         return;
     }
+
+    assert(task_manager_);
+    task_manager_->shutdown();
+    task_manager_ = nullptr;
+
+    assert(db_interface_);
+
+    assert(dbcontent_manager_);
+    if (db_interface_->dbOpen())
+        dbcontent_manager_->saveDBDataSources();
+    dbcontent_manager_ = nullptr;
 
     JobManager::instance().shutdown();
     ProjectionManager::instance().shutdown();
@@ -301,26 +338,97 @@ void COMPASS::shutdown()
     view_manager_->close();
     view_manager_ = nullptr;
 
-    assert(db_interface_);
-    db_interface_->closeConnection();  // removes connection widgets, needs to be before
-
-    assert(dbo_manager_);
-    dbo_manager_ = nullptr;
-
-    assert(db_schema_manager_);
-    db_schema_manager_ = nullptr;
-
-    assert(task_manager_);
-    task_manager_->shutdown();
-    task_manager_ = nullptr;
-
-    assert(db_interface_);
-    db_interface_ = nullptr;
-
     assert(filter_manager_);
     filter_manager_ = nullptr;
+
+    if (db_interface_->dbOpen())
+        db_interface_->closeDBFile();
+
+    db_interface_ = nullptr;
+
+    //main_window_ = nullptr;
 
     shut_down_ = true;
 
     loginf << "COMPASS: shutdown: end";
 }
+
+MainWindow& COMPASS::mainWindow()
+{
+    if (!main_window_)
+        main_window_ = new MainWindow();
+
+    assert(main_window_);
+    return *main_window_;
+}
+
+AppMode COMPASS::appMode() const
+{
+    return app_mode_;
+}
+
+void COMPASS::appMode(const AppMode& app_mode)
+{
+    if (app_mode_ != app_mode)
+    {
+        app_mode_ = app_mode;
+
+        loginf << "COMPASS: appMode: app_mode " << appModeStr();
+
+        emit appModeSwitchSignal(app_mode_);
+    }
+}
+
+std::string COMPASS::appModeStr() const
+{
+    if (!appModes2Strings().count(app_mode_))
+    {
+        std::cout << "COMPASS: appModeStr: unkown type " << (unsigned int) app_mode_ << std::endl;
+        logerr << "COMPASS: appModeStr: unkown type " << (unsigned int) app_mode_;
+    }
+
+    assert(appModes2Strings().count(app_mode_) > 0);
+    return appModes2Strings().at(app_mode_);
+}
+
+const std::map<AppMode, std::string>& COMPASS::appModes2Strings()
+{
+    static const auto* map = new std::map<AppMode, std::string>
+        {{AppMode::Offline, "Offline Mode"},
+        {AppMode::LiveRunning, "Live Mode: Running"},
+        {AppMode::LivePaused, "Live Mode: Paused"}};
+
+    return *map;
+}
+
+std::string COMPASS::lastDbFilename() const
+{
+    return last_db_filename_;
+}
+
+std::vector<std::string> COMPASS::dbFileList() const
+{
+    return db_file_list_.get<std::vector<string>>();
+}
+
+void COMPASS::clearDBFileList()
+{
+    db_file_list_.clear();
+}
+
+void COMPASS::addDBFileToList(const std::string filename)
+{
+    vector<string> tmp_list = db_file_list_.get<std::vector<string>>();
+
+    if (find(tmp_list.begin(), tmp_list.end(), filename) == tmp_list.end())
+    {
+        loginf << "COMPASS: addDBFileToList: adding filename '" << filename << "'";
+
+        tmp_list.push_back(filename);
+
+        sort(tmp_list.begin(), tmp_list.end());
+
+        db_file_list_ = tmp_list;
+    }
+}
+

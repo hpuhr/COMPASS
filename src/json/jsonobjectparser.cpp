@@ -17,17 +17,17 @@
 
 #include "jsonobjectparser.h"
 
-#include <algorithm>
-
 #include "compass.h"
 #include "buffer.h"
 #include "configuration.h"
-#include "dbobject.h"
-#include "dbobjectmanager.h"
+#include "dbcontent/dbcontent.h"
+#include "dbcontent/dbcontentmanager.h"
 #include "stringconv.h"
 #include "unit.h"
 #include "unitmanager.h"
 #include "util/json.h"
+
+#include <algorithm>
 
 using namespace std;
 using namespace nlohmann;
@@ -39,7 +39,7 @@ JSONObjectParser::JSONObjectParser(const std::string& class_id, const std::strin
 {
     registerParameter("name", &name_, "");
     registerParameter("active", &active_, true);
-    registerParameter("db_object_name", &db_object_name_, "");
+    registerParameter("db_content_name", &db_content_name_, "");
 
     registerParameter("json_container_key", &json_container_key_, "");
     registerParameter("json_key", &json_key_, "*");
@@ -48,10 +48,10 @@ JSONObjectParser::JSONObjectParser(const std::string& class_id, const std::strin
     registerParameter("override_data_source", &override_data_source_, false);
     registerParameter("data_source_variable_name", &data_source_variable_name_, "");
 
-    assert(db_object_name_.size());
+    assert(db_content_name_.size());
 
     if (!name_.size())
-        name_ = db_object_name_;
+        name_ = db_content_name_;
 
     assert(name_.size());
 
@@ -63,7 +63,7 @@ JSONObjectParser::JSONObjectParser(const std::string& class_id, const std::strin
 JSONObjectParser& JSONObjectParser::operator=(JSONObjectParser&& other)
 {
     name_ = other.name_;
-    db_object_name_ = other.db_object_name_;
+    db_content_name_ = other.db_content_name_;
     db_object_ = other.db_object_;
 
     json_container_key_ = other.json_container_key_;
@@ -85,7 +85,7 @@ JSONObjectParser& JSONObjectParser::operator=(JSONObjectParser&& other)
     list_ = other.list_;
 
     other.configuration().updateParameterPointer("name", &name_);
-    other.configuration().updateParameterPointer("db_object_name", &db_object_name_);
+    other.configuration().updateParameterPointer("db_object_name", &db_content_name_);
     other.configuration().updateParameterPointer("json_key", &json_key_);
     other.configuration().updateParameterPointer("json_value", &json_value_);
     other.configuration().updateParameterPointer("override_data_source", &override_data_source_);
@@ -103,13 +103,13 @@ void JSONObjectParser::generateSubConfigurable(const std::string& class_id,
 {
     if (class_id == "JSONDataMapping")
     {
-        data_mappings_.emplace_back(class_id, instance_id, *this);
+        data_mappings_.emplace_back(new JSONDataMapping(class_id, instance_id, *this));
     }
     else
-        throw std::runtime_error("DBObject: generateSubConfigurable: unknown class_id " + class_id);
+        throw std::runtime_error("JSONObjectParser: generateSubConfigurable: unknown class_id " + class_id);
 }
 
-DBObject& JSONObjectParser::dbObject() const
+DBContent& JSONObjectParser::dbObject() const
 {
     assert(db_object_);
     return *db_object_;
@@ -147,13 +147,13 @@ void JSONObjectParser::initialize()
 {
     assert(!db_object_);
 
-    DBObjectManager& obj_man = COMPASS::instance().objectManager();
+    DBContentManager& obj_man = COMPASS::instance().dbContentManager();
 
-    if (!obj_man.existsObject(db_object_name_))
-        logwrn << "JSONObjectParser: initialize: dbobject '" << db_object_name_
+    if (!obj_man.existsObject(db_content_name_))
+        logwrn << "JSONObjectParser: initialize: dbobject '" << db_content_name_
                << "' does not exist";
     else
-        db_object_ = &obj_man.object(db_object_name_);
+        db_object_ = &obj_man.object(db_content_name_);
 
     assert(db_object_);
 
@@ -161,16 +161,16 @@ void JSONObjectParser::initialize()
     {
         for (auto& mapping : data_mappings_)
         {
-            if (!mapping.active())
+            if (! mapping->active())
             {
-                assert(!mapping.mandatory());
+                assert(! mapping->mandatory());
                 continue;
             }
 
-            mapping.initializeIfRequired();
+             mapping->initializeIfRequired();
 
-            list_.addProperty(mapping.variable().name(), mapping.variable().dataType());
-            var_list_.add(mapping.variable());
+            list_.addProperty( mapping->variable().name(),  mapping->variable().dataType());
+            var_list_.add( mapping->variable());
         }
 
         if (override_data_source_)
@@ -332,9 +332,9 @@ bool JSONObjectParser::parseTargetReport(const nlohmann::json& tr, Buffer& buffe
 
     for (const auto& map_it : data_mappings_)
     {
-        if (!map_it.active())
+        if (!map_it->active())
         {
-            assert(!map_it.mandatory());
+            assert(!map_it->mandatory());
             continue;
         }
 
@@ -343,37 +343,37 @@ bool JSONObjectParser::parseTargetReport(const nlohmann::json& tr, Buffer& buffe
         try
         {
 
-            data_type = map_it.variable().dataType();
-            current_var_name = map_it.variable().name();
+            data_type = map_it->variable().dataType();
+            current_var_name = map_it->variable().name();
 
             switch (data_type)
             {
             case PropertyDataType::BOOL:
             {
                 logdbg << "JSONObjectParser: parseTargetReport: bool " << current_var_name
-                       << " format '" << map_it.jsonValueFormat() << "'";
+                       << " format '" << map_it->jsonValueFormat() << "'";
                 assert(buffer.has<bool>(current_var_name));
                 mandatory_missing =
-                        map_it.findAndSetValue(tr, buffer.get<bool>(current_var_name), row_cnt);
+                        map_it->findAndSetValue(tr, buffer.get<bool>(current_var_name), row_cnt);
 
                 break;
             }
             case PropertyDataType::CHAR:
             {
                 logdbg << "JSONObjectParser: parseTargetReport: char " << current_var_name
-                       << " format '" << map_it.jsonValueFormat() << "'";
+                       << " format '" << map_it->jsonValueFormat() << "'";
                 assert(buffer.has<char>(current_var_name));
                 mandatory_missing =
-                        map_it.findAndSetValue(tr, buffer.get<char>(current_var_name), row_cnt);
+                        map_it->findAndSetValue(tr, buffer.get<char>(current_var_name), row_cnt);
 
                 break;
             }
             case PropertyDataType::UCHAR:
             {
                 logdbg << "JSONObjectParser: parseTargetReport: uchar " << current_var_name
-                       << " format '" << map_it.jsonValueFormat() << "'";
+                       << " format '" << map_it->jsonValueFormat() << "'";
                 assert(buffer.has<unsigned char>(current_var_name));
-                mandatory_missing = map_it.findAndSetValue(
+                mandatory_missing = map_it->findAndSetValue(
                             tr, buffer.get<unsigned char>(current_var_name), row_cnt);
 
                 break;
@@ -381,39 +381,39 @@ bool JSONObjectParser::parseTargetReport(const nlohmann::json& tr, Buffer& buffe
             case PropertyDataType::INT:
             {
                 logdbg << "JSONObjectParser: parseTargetReport: int " << current_var_name
-                       << " format '" << map_it.jsonValueFormat() << "'";
+                       << " format '" << map_it->jsonValueFormat() << "'";
                 assert(buffer.has<int>(current_var_name));
                 mandatory_missing =
-                        map_it.findAndSetValue(tr, buffer.get<int>(current_var_name), row_cnt);
+                        map_it->findAndSetValue(tr, buffer.get<int>(current_var_name), row_cnt);
 
                 break;
             }
             case PropertyDataType::UINT:
             {
                 logdbg << "JSONObjectParser: parseTargetReport: uint " << current_var_name
-                       << " format '" << map_it.jsonValueFormat() << "'";
+                       << " format '" << map_it->jsonValueFormat() << "'";
                 assert(buffer.has<unsigned int>(current_var_name));
                 mandatory_missing =
-                        map_it.findAndSetValue(tr, buffer.get<unsigned int>(current_var_name), row_cnt);
+                        map_it->findAndSetValue(tr, buffer.get<unsigned int>(current_var_name), row_cnt);
 
                 break;
             }
             case PropertyDataType::LONGINT:
             {
                 logdbg << "JSONObjectParser: parseTargetReport: long " << current_var_name
-                       << " format '" << map_it.jsonValueFormat() << "'";
+                       << " format '" << map_it->jsonValueFormat() << "'";
                 assert(buffer.has<long int>(current_var_name));
                 mandatory_missing =
-                        map_it.findAndSetValue(tr, buffer.get<long int>(current_var_name), row_cnt);
+                        map_it->findAndSetValue(tr, buffer.get<long int>(current_var_name), row_cnt);
 
                 break;
             }
             case PropertyDataType::ULONGINT:
             {
                 logdbg << "JSONObjectParser: parseTargetReport: ulong " << current_var_name
-                       << " format '" << map_it.jsonValueFormat() << "'";
+                       << " format '" << map_it->jsonValueFormat() << "'";
                 assert(buffer.has<unsigned long>(current_var_name));
-                mandatory_missing = map_it.findAndSetValue(
+                mandatory_missing = map_it->findAndSetValue(
                             tr, buffer.get<unsigned long>(current_var_name), row_cnt);
 
                 break;
@@ -421,40 +421,40 @@ bool JSONObjectParser::parseTargetReport(const nlohmann::json& tr, Buffer& buffe
             case PropertyDataType::FLOAT:
             {
                 logdbg << "JSONObjectParser: parseTargetReport: float " << current_var_name
-                       << " format '" << map_it.jsonValueFormat() << "'";
+                       << " format '" << map_it->jsonValueFormat() << "'";
                 assert(buffer.has<float>(current_var_name));
                 mandatory_missing =
-                        map_it.findAndSetValue(tr, buffer.get<float>(current_var_name), row_cnt);
+                        map_it->findAndSetValue(tr, buffer.get<float>(current_var_name), row_cnt);
 
                 break;
             }
             case PropertyDataType::DOUBLE:
             {
                 logdbg << "JSONObjectParser: parseTargetReport: double " << current_var_name
-                       << " format '" << map_it.jsonValueFormat() << "'";
+                       << " format '" << map_it->jsonValueFormat() << "'";
                 assert(buffer.has<double>(current_var_name));
                 mandatory_missing =
-                        map_it.findAndSetValue(tr, buffer.get<double>(current_var_name), row_cnt);
+                        map_it->findAndSetValue(tr, buffer.get<double>(current_var_name), row_cnt);
 
                 break;
             }
             case PropertyDataType::STRING:
             {
                 logdbg << "JSONObjectParser: parseTargetReport: string " << current_var_name
-                       << " format '" << map_it.jsonValueFormat() << "'";
+                       << " format '" << map_it->jsonValueFormat() << "'";
                 assert(buffer.has<std::string>(current_var_name));
 
                 //                if (buffer.dboName() == "Tracker" && current_var_name == "ground_bit")
                 //                {
                 //                    loginf << "JSONObjectParser: parseTargetReport: string " << current_var_name
-                //                           << " format '" << map_it.jsonValueFormat() << "' mand " << mandatory_missing;
+                //                           << " format '" << map_it->jsonValueFormat() << "' mand " << mandatory_missing;
 
                 //                    mandatory_missing =
-                //                        map_it.findAndSetValue(tr, buffer.get<std::string>(current_var_name), row_cnt, true);
+                //                        map_it->findAndSetValue(tr, buffer.get<std::string>(current_var_name), row_cnt, true);
                 //                }
                 //                else
                 mandatory_missing =
-                        map_it.findAndSetValue(tr, buffer.get<std::string>(current_var_name), row_cnt);
+                        map_it->findAndSetValue(tr, buffer.get<std::string>(current_var_name), row_cnt);
 
                 break;
             }
@@ -470,7 +470,7 @@ bool JSONObjectParser::parseTargetReport(const nlohmann::json& tr, Buffer& buffe
         catch (exception& e)
         {
             logerr << "JSONObjectParser: parseTargetReport: caught exception '" << e.what() << "' in \n'"
-                   << tr.dump(4) << "' mapping " << map_it.jsonKey();
+                   << tr.dump(4) << "' mapping " << map_it->jsonKey();
             throw e;
         }
 
@@ -568,16 +568,16 @@ void JSONObjectParser::checkIfKeysExistsInMappings(const std::string& location,
 
     for (auto& map_it : data_mappings_)
     {
-        if (map_it.jsonKey() == location)
+        if (map_it->jsonKey() == location)
         {
             found = true;
 
-            if (!map_it.comment().size())
+            if (!map_it->comment().size())
             {
                 std::stringstream ss;
 
                 ss << "Type " << j.type_name() << ", value " << j.dump();
-                map_it.comment(ss.str());
+                map_it->comment(ss.str());
             }
             break;
         }
@@ -586,12 +586,12 @@ void JSONObjectParser::checkIfKeysExistsInMappings(const std::string& location,
     if (!found)
     {
         loginf << "JSONObjectParser: checkIfKeysExistsInMappings: creating new mapping for dbo "
-               << db_object_name_ << "'" << location << "' type " << j.type_name() << " value "
+               << db_content_name_ << "'" << location << "' type " << j.type_name() << " value "
                << j.dump() << " in array " << is_in_array;
 
         Configuration& new_cfg = configuration().addNewSubConfiguration("JSONDataMapping");
         new_cfg.addParameterString("json_key", location);
-        new_cfg.addParameterString("db_object_name", db_object_name_);
+        new_cfg.addParameterString("db_object_name", db_content_name_);
 
         if (is_in_array)
             new_cfg.addParameterBool("in_array", true);
@@ -612,19 +612,19 @@ void JSONObjectParser::removeMapping(unsigned int index)
 {
     assert(hasMapping(index));
 
-    JSONDataMapping& mapping = data_mappings_.at(index);
+    unique_ptr<JSONDataMapping>& mapping = data_mappings_.at(index);
 
-    loginf << "JSONObjectParser: removeMapping: index " << index << " key " << mapping.jsonKey()
-           << " instance " << mapping.instanceId();
+    loginf << "JSONObjectParser: removeMapping: index " << index << " key " <<  mapping->jsonKey()
+           << " instance " <<  mapping->instanceId();
 
     logdbg << "JSONObjectParser: removeMapping: size " << data_mappings_.size();
 
-    if (mapping.active() && mapping.initialized())
+    if ( mapping->active() &&  mapping->initialized())
     {
-        if (list_.hasProperty(mapping.variable().name()))
-            list_.removeProperty(mapping.variable().name());
-        if (mapping.hasVariable() && var_list_.hasVariable(mapping.variable()))
-            var_list_.removeVariable(mapping.variable());
+        if (list_.hasProperty( mapping->variable().name()))
+            list_.removeProperty( mapping->variable().name());
+        if ( mapping->hasVariable() && var_list_.hasVariable( mapping->variable()))
+            var_list_.removeVariable( mapping->variable());
     }
 
     logdbg << "JSONObjectParser: removeMapping: removing";
@@ -856,7 +856,7 @@ void JSONObjectParser::transformBuffer(Buffer& buffer, size_t index) const
     //}
 }
 
-const DBOVariableSet& JSONObjectParser::variableList() const { return var_list_; }
+const dbContent::VariableSet& JSONObjectParser::variableList() const { return var_list_; }
 
 bool JSONObjectParser::overrideDataSource() const { return override_data_source_; }
 
@@ -886,12 +886,12 @@ JSONObjectParserWidget* JSONObjectParser::widget()
     return widget_.get();  // needed for qt integration, not pretty
 }
 
-std::string JSONObjectParser::dbObjectName() const { return db_object_name_; }
+std::string JSONObjectParser::dbObjectName() const { return db_content_name_; }
 
 void JSONObjectParser::setMappingActive(JSONDataMapping& mapping, bool active)
 {
     if (!mapping.initialized())
-        mapping.initializeIfRequired();
+         mapping.initializeIfRequired();
 
     if (active)
     {
@@ -906,7 +906,7 @@ void JSONObjectParser::setMappingActive(JSONDataMapping& mapping, bool active)
             var_list_.removeVariable(mapping.variable());
     }
 
-    mapping.active(active);
+     mapping.active(active);
 }
 
 void JSONObjectParser::updateMappings()

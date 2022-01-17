@@ -29,22 +29,20 @@ class COMPASS;
 class DatabaseOpenTask;
 class ManageSchemaTask;
 class ManageDBObjectsTask;
-class MySQLDBImportTask;
 class CreateARTASAssociationsTask;
-class JSONImportTask;
+//class JSONImportTask;
 class GPSTrailImportTask;
+class ASTERIXImportTask;
 class ViewPointsImportTask;
 class RadarPlotPositionCalculatorTask;
-class PostProcessTask;
+//class PostProcessTask;
 class TaskManagerWidget;
-class ManageDataSourcesTask;
+//class ManageDataSourcesTask;
 class ManageSectorsTask;
 class CreateAssociationsTask;
 class MainWindow;
 
-#if USE_JASTERIX
-class ASTERIXImportTask;
-#endif
+
 
 class QMainWindow;
 
@@ -93,32 +91,29 @@ class TaskManager : public QObject, public Configurable
 
     DatabaseOpenTask& databaseOpenTask() const;
     ManageSchemaTask& manageSchemaTask() const;
-    ManageDataSourcesTask& manageDataSourcesTask() const;
-#if USE_JASTERIX
+    //ManageDataSourcesTask& manageDataSourcesTask() const;
     ASTERIXImportTask& asterixImporterTask() const;
-#endif
     ViewPointsImportTask& viewPointsImportTask() const;
-    JSONImportTask& jsonImporterTask() const;
-    MySQLDBImportTask& mysqldbImportTask() const;
+    //JSONImportTask& jsonImporterTask() const;
     GPSTrailImportTask& gpsTrailImportTask() const;
-    ManageDataSourcesTask& manageDatasourcesTask() const;
+    //ManageDataSourcesTask& manageDatasourcesTask() const;
     ManageSectorsTask& manageSectorsTask() const;
     RadarPlotPositionCalculatorTask& radarPlotPositionCalculatorTask() const;
     CreateARTASAssociationsTask& createArtasAssociationsTask() const;
-    PostProcessTask& postProcessTask() const;
+    //PostProcessTask& postProcessTask() const;
     CreateAssociationsTask& createAssociationsTask() const;
 
     void createAndOpenNewSqlite3DB(const std::string& filename);
     void openSqlite3DB(const std::string& filename);
 
     void importViewPointsFile(const std::string& filename);
-#if USE_JASTERIX
+
     void importASTERIXFile(const std::string& filename);
     void asterixFraming(const std::string& asterix_framing);
     void asterixDecoderConfig(const std::string& asterix_decoder_cfg);
     bool asterixOptionsSet() const;
     void setAsterixOptions();
-#endif
+
     void importJSONFile(const std::string& filename, const std::string& schema);
     void importGPSTrailFile(const std::string& filename);
     void importSectorsFile(const std::string& filename);
@@ -154,14 +149,12 @@ protected:
     bool view_points_import_file_ {false};
     std::string view_points_import_filename_;
 
-#if USE_JASTERIX
     bool asterix_import_file_ {false};
     std::string asterix_import_filename_;
     bool set_asterix_framing_ {false};
     std::string asterix_framing_;
     bool set_asterix_decoder_cfg_ {false};
     std::string asterix_decoder_cfg_;
-#endif
 
     bool json_import_file_ {false};
     std::string json_import_filename_;
@@ -193,17 +186,14 @@ protected:
     std::unique_ptr<DatabaseOpenTask> database_open_task_;
     std::unique_ptr<ManageSchemaTask> manage_schema_task_;
     std::unique_ptr<ManageDBObjectsTask> manage_dbobjects_task_;
-#if USE_JASTERIX
     std::unique_ptr<ASTERIXImportTask> asterix_importer_task_;
-#endif
     std::unique_ptr<ViewPointsImportTask> view_points_import_task_;
-    std::unique_ptr<JSONImportTask> json_import_task_;
-    std::unique_ptr<MySQLDBImportTask> mysqldb_import_task_;
+    //std::unique_ptr<JSONImportTask> json_import_task_;
     std::unique_ptr<GPSTrailImportTask> gps_trail_import_task_;
-    std::unique_ptr<ManageDataSourcesTask> manage_datasources_task_;
+    //std::unique_ptr<ManageDataSourcesTask> manage_datasources_task_;
     std::unique_ptr<ManageSectorsTask> manage_sectors_task_;
     std::unique_ptr<RadarPlotPositionCalculatorTask> radar_plot_position_calculator_task_;
-    std::unique_ptr<PostProcessTask> post_process_task_;
+    //std::unique_ptr<PostProcessTask> post_process_task_;
     std::unique_ptr<CreateARTASAssociationsTask> create_artas_associations_task_;
     std::unique_ptr<CreateAssociationsTask> create_associations_task_;
 

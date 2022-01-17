@@ -44,18 +44,22 @@ enum class PropertyDataType
  */
 class Property
 {
-  protected:
+protected:
     /// @brief Default constructor. Use only if members are overwritten.
     Property() {}
 
-  public:
+public:
     /// @brief Constructor
     Property(std::string id, PropertyDataType type);
     /// @brief Destructor
     virtual ~Property() {}
 
     PropertyDataType dataType() const { return data_type_; }
+    PropertyDataType& dataTypeRef() { return data_type_; }
+
     const std::string& dataTypeString() const { return data_type_str_; }
+    const std::string& dbDataTypeString() const;
+    std::string& dataTypeStringRef() { return data_type_str_; }
     void dataType(PropertyDataType type)
     {
         data_type_ = type;
@@ -65,18 +69,13 @@ class Property
     const std::string& name() const { return name_; }
 
     static const std::string& asString(PropertyDataType type);
-    static PropertyDataType& asDataType(const std::string& type);
+    static PropertyDataType asDataType(const std::string& type);
 
-    static const std::map<PropertyDataType, std::string>& dataTypes2Strings()
-    {
-        return data_types_2_strings_;
-    }
-    static const std::map<std::string, PropertyDataType>& strings2DataTypes()
-    {
-        return strings_2_data_types_;
-    }
+    static const std::map<PropertyDataType, std::string>& dataTypes2Strings();
+    static const std::map<PropertyDataType, std::string>& dbDataTypes2Strings();
+    static const std::map<std::string, PropertyDataType>& strings2DataTypes();
 
-  protected:
+protected:
     /// Data type
     PropertyDataType data_type_;
     std::string data_type_str_;
@@ -84,8 +83,8 @@ class Property
     std::string name_;
 
     /// Mappings from PropertyDataType to strings, and back.
-    static std::map<PropertyDataType, std::string> data_types_2_strings_;
-    static std::map<std::string, PropertyDataType> strings_2_data_types_;
+    //    static const std::map<PropertyDataType, std::string> data_types_2_strings_;
+    //    static const std::map<std::string, PropertyDataType> strings_2_data_types_;
 };
 
 #endif /* PROPERTY_H_ */

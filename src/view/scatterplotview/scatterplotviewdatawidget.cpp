@@ -19,10 +19,10 @@
 #include "scatterplotview.h"
 #include "compass.h"
 #include "buffer.h"
-#include "dbobjectmanager.h"
-#include "dbobject.h"
-#include "dbovariable.h"
-#include "metadbovariable.h"
+#include "dbcontent/dbcontentmanager.h"
+#include "dbcontent/dbcontent.h"
+#include "dbcontent/variable/variable.h"
+#include "dbcontent/variable/metavariable.h"
 #include "scatterplotviewdatasource.h"
 #include "scatterplotviewchartview.h"
 #include "logger.h"
@@ -44,6 +44,7 @@
 QT_CHARTS_USE_NAMESPACE
 
 using namespace std;
+using namespace dbContent;
 
 ScatterPlotViewDataWidget::ScatterPlotViewDataWidget(ScatterPlotView* view, ScatterPlotViewDataSource* data_source,
                                                      QWidget* parent, Qt::WindowFlags f)
@@ -167,7 +168,7 @@ void ScatterPlotViewDataWidget::loadingStartedSlot()
     clear();
 }
 
-void ScatterPlotViewDataWidget::updateDataSlot(DBObject& object, std::shared_ptr<Buffer> buffer)
+void ScatterPlotViewDataWidget::updateDataSlot(DBContent& object, std::shared_ptr<Buffer> buffer)
 {
     logdbg << "ScatterPlotViewDataWidget: updateDataSlot: start";
 
@@ -195,10 +196,10 @@ void ScatterPlotViewDataWidget::updateDataSlot(DBObject& object, std::shared_ptr
         loginf << "ScatterPlotViewDataWidget: updateDataSlot: updating data";
 
         // add selected flags & rec_nums
-        assert (buffer->has<bool>("selected"));
+        assert (buffer->has<bool>(DBContent::selected_var.name()));
         assert (buffer->has<int>("rec_num"));
 
-        NullableVector<bool>& selected_vec = buffer->get<bool>("selected");
+        NullableVector<bool>& selected_vec = buffer->get<bool>(DBContent::selected_var.name());
         NullableVector<int>& rec_num_vec = buffer->get<int>("rec_num");
 
         std::vector<bool>& selected_data = selected_values_[dbo_name];
@@ -286,8 +287,8 @@ void ScatterPlotViewDataWidget::invertSelectionSlot()
 
     for (auto& buf_it : buffers_)
     {
-        assert (buf_it.second->has<bool>("selected"));
-        NullableVector<bool>& selected_vec = buf_it.second->get<bool>("selected");
+        assert (buf_it.second->has<bool>(DBContent::selected_var.name()));
+        NullableVector<bool>& selected_vec = buf_it.second->get<bool>(DBContent::selected_var.name());
 
         for (unsigned int cnt=0; cnt < buf_it.second->size(); ++cnt)
         {
@@ -307,8 +308,8 @@ void ScatterPlotViewDataWidget::clearSelectionSlot()
 
     for (auto& buf_it : buffers_)
     {
-        assert (buf_it.second->has<bool>("selected"));
-        NullableVector<bool>& selected_vec = buf_it.second->get<bool>("selected");
+        assert (buf_it.second->has<bool>(DBContent::selected_var.name()));
+        NullableVector<bool>& selected_vec = buf_it.second->get<bool>(DBContent::selected_var.name());
 
         for (unsigned int cnt=0; cnt < buf_it.second->size(); ++cnt)
             selected_vec.set(cnt, false);
@@ -343,14 +344,14 @@ bool ScatterPlotViewDataWidget::canUpdateFromDataX(std::string dbo_name)
 
     Buffer* buffer = buffers_.at(dbo_name).get();
 
-    DBOVariable* data_var {nullptr};
+    Variable* data_var {nullptr};
 
     if (!view_->hasDataVarX())
         return false;
 
     if (view_->isDataVarXMeta())
     {
-        MetaDBOVariable& meta_var = view_->metaDataVarX();
+        MetaVariable& meta_var = view_->metaDataVarX();
         if (!meta_var.existsIn(dbo_name))
             return false;
 
@@ -507,7 +508,7 @@ void ScatterPlotViewDataWidget::updateFromDataX(std::string dbo_name, unsigned i
 
     if (buffer_x_counts_.count(dbo_name))
         last_size = buffer_x_counts_.at(dbo_name);
-    DBOVariable* data_var {nullptr};
+    Variable* data_var {nullptr};
 
     if (!view_->hasDataVarX())
     {
@@ -517,7 +518,7 @@ void ScatterPlotViewDataWidget::updateFromDataX(std::string dbo_name, unsigned i
 
     if (view_->isDataVarXMeta())
     {
-        MetaDBOVariable& meta_var = view_->metaDataVarX();
+        MetaVariable& meta_var = view_->metaDataVarX();
         if (!meta_var.existsIn(dbo_name))
         {
             logwrn << "ScatterPlotViewDataWidget: updateFromDataX: meta var does not exist in dbo";
@@ -727,14 +728,14 @@ bool ScatterPlotViewDataWidget::canUpdateFromDataY(std::string dbo_name)
 
     Buffer* buffer = buffers_.at(dbo_name).get();
 
-    DBOVariable* data_var {nullptr};
+    Variable* data_var {nullptr};
 
     if (!view_->hasDataVarY())
         return false;
 
     if (view_->isDataVarYMeta())
     {
-        MetaDBOVariable& meta_var = view_->metaDataVarY();
+        MetaVariable& meta_var = view_->metaDataVarY();
         if (!meta_var.existsIn(dbo_name))
             return false;
 
@@ -890,7 +891,7 @@ void ScatterPlotViewDataWidget::updateFromDataY(std::string dbo_name, unsigned i
     if (buffer_y_counts_.count(dbo_name))
         last_size = buffer_y_counts_.at(dbo_name);
 
-    DBOVariable* data_var {nullptr};
+    Variable* data_var {nullptr};
 
     if (!view_->hasDataVarY())
     {
@@ -900,7 +901,7 @@ void ScatterPlotViewDataWidget::updateFromDataY(std::string dbo_name, unsigned i
 
     if (view_->isDataVarYMeta())
     {
-        MetaDBOVariable& meta_var = view_->metaDataVarY();
+        MetaVariable& meta_var = view_->metaDataVarY();
         if (!meta_var.existsIn(dbo_name))
         {
             logwrn << "ScatterPlotViewDataWidget: updateFromDataY: meta var does not eyist in dbo";
@@ -1170,10 +1171,10 @@ void ScatterPlotViewDataWidget::updateFromAllData()
 
         if (canUpdateFromDataX(buf_it.first) && canUpdateFromDataY(buf_it.first))
         {
-            assert (buf_it.second->has<bool>("selected"));
+            assert (buf_it.second->has<bool>(DBContent::selected_var.name()));
             assert (buf_it.second->has<int>("rec_num"));
 
-            NullableVector<bool>& selected_vec = buf_it.second->get<bool>("selected");
+            NullableVector<bool>& selected_vec = buf_it.second->get<bool>(DBContent::selected_var.name());
             NullableVector<int>& rec_num_vec = buf_it.second->get<int>("rec_num");
 
             std::vector<bool>& selected_data = selected_values_[buf_it.first];
@@ -1390,8 +1391,8 @@ void ScatterPlotViewDataWidget::selectData (double x_min, double x_max, double y
     unsigned int sel_cnt = 0;
     for (auto& buf_it : buffers_)
     {
-        assert (buf_it.second->has<bool>("selected"));
-        NullableVector<bool>& selected_vec = buf_it.second->get<bool>("selected");
+        assert (buf_it.second->has<bool>(DBContent::selected_var.name()));
+        NullableVector<bool>& selected_vec = buf_it.second->get<bool>(DBContent::selected_var.name());
 
         assert (buf_it.second->has<int>("rec_num"));
         NullableVector<int>& rec_num_vec = buf_it.second->get<int>("rec_num");

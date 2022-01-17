@@ -8,7 +8,7 @@ set ( CMAKE_BUILD_TYPE RelWithDebInfo ) #Debug RelWithDebInfo Release
 project( COMPASS )
 SET(CPACK_PACKAGE_VERSION_MAJOR "0")
 SET(CPACK_PACKAGE_VERSION_MINOR "6")
-SET(CPACK_PACKAGE_VERSION_PATCH "3")
+SET(CPACK_PACKAGE_VERSION_PATCH "4")
 
 message("  System: ${CMAKE_SYSTEM}")
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
@@ -37,7 +37,7 @@ set(CMAKE_AUTOMOC ON)
 #add_definitions(${Qt5Widgets_DEFINITIONS})
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${Qt5Widgets_EXECUTABLE_COMPILE_FLAGS}")
 
-find_package ( Boost REQUIRED COMPONENTS regex system program_options filesystem iostreams)
+find_package ( Boost REQUIRED COMPONENTS regex system program_options filesystem iostreams thread)
 message("  Boost_INCLUDE_DIR: ${Boost_INCLUDE_DIR}")
 message("  Boost_LIBRARY_DIR: ${Boost_LIBRARY_DIR}")
 
@@ -47,14 +47,6 @@ set(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH};/usr/local/lib/cmake/;/usr/lib/x86_64
 message("  CMAKE_PREFIX_PATH: ${CMAKE_PREFIX_PATH}")
 
 find_package (Eigen3 3.2 REQUIRED)
-
-find_package ( MySQLpp REQUIRED )
-message("  MySQLpp_INCLUDE_DIR: ${MySQLpp_INCLUDE_DIR}") 
-message("  MySQLpp_LIBRARY: ${MySQLpp_LIBRARY}") 
-
-find_package ( MySQL REQUIRED )
-message("  MYSQL_INCLUDE_DIR: ${MYSQL_INCLUDE_DIR}")
-message("  MYSQL_LIBRARY: ${MYSQL_LIBRARY}")
 
 find_package ( Sqlite3 REQUIRED )
 message("  SQLite3_INCLUDE_DIR: ${SQLITE3_INCLUDE_DIR}")
@@ -76,7 +68,7 @@ find_package(TBB REQUIRED)
 message("  TBB_INCLUDE_DIRS: ${TBB_INCLUDE_DIRS}")
 message("  TBB_LIBRARIES: ${TBB_LIBRARIES}")
 
-find_package ( jASTERIX )
+find_package ( jASTERIX REQUIRED)
 message("  jASTERIX found: ${jASTERIX_FOUND}")
 message("  jASTERIX_INCLUDE_DIR: ${jASTERIX_INCLUDE_DIR}")
 message("  jASTERIX_LIBRARIES: ${jASTERIX_LIBRARIES}")
@@ -124,8 +116,6 @@ include_directories (
     ${Qt5Charts_INCLUDE_DIRS}
     ${Boost_INCLUDE_DIRS}
     ${SQLITE3_INCLUDE_DIR}
-    ${MYSQL_INCLUDE_DIR}
-    ${MySQLpp_INCLUDE_DIR}
     ${LOG4CPP_INCLUDE_DIR}
     ${GDAL_INCLUDE_DIRS}
     ${OPENSCENEGRAPH_INCLUDE_DIRS}
@@ -158,8 +148,6 @@ target_link_libraries ( compass
     Qt5::Charts
     ${Boost_LIBRARIES}
     ${LOG4CPP_LIBRARIES}
-    ${MySQLpp_LIBRARY}
-    ${MYSQL_LIBRARY}
     ${GDAL_LIBRARIES}
     ${SQLITE3_LIBRARIES}
     ${LibArchive_LIBRARIES}
@@ -167,7 +155,6 @@ target_link_libraries ( compass
     ${TBB_LIBRARIES}
     ${OPENSSL_CRYPTO_LIBRARY}
     NemaTode::NemaTode
-    #Eigen3::Eigen
     )
 
 

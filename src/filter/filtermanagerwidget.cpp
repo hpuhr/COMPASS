@@ -19,16 +19,10 @@
 
 #include "dbfilter.h"
 #include "dbfilterwidget.h"
-#include "datasourcesfilter.h"
-#include "dbschema.h"
-#include "dbschemamanager.h"
-#include "dbschemawidget.h"
-#include "dbtable.h"
 #include "filtergeneratorwidget.h"
 #include "filtermanager.h"
 #include "global.h"
 #include "logger.h"
-#include "metadbtable.h"
 
 #include <QComboBox>
 #include <QHBoxLayout>
@@ -41,23 +35,15 @@
 
 FilterManagerWidget::FilterManagerWidget(FilterManager& filter_manager, QWidget* parent,
                                          Qt::WindowFlags f)
-    : QFrame(parent),
+    : QWidget(parent),
       filter_manager_(filter_manager),
       filter_generator_widget_(nullptr),
       add_button_(nullptr)
 {
-    unsigned int frame_width = FRAME_SIZE;
     QFont font_bold;
     font_bold.setBold(true);
 
-    setFrameStyle(QFrame::Panel | QFrame::Raised);
-    setLineWidth(frame_width);
-
     QVBoxLayout* layout = new QVBoxLayout();
-
-    QLabel* filter_label = new QLabel(tr("Filters"));
-    filter_label->setFont(font_bold);
-    layout->addWidget(filter_label);
 
     // use filters stuff
     filters_check_ = new QCheckBox("Use Filters");
@@ -65,20 +51,30 @@ FilterManagerWidget::FilterManagerWidget(FilterManager& filter_manager, QWidget*
     connect(filters_check_, &QCheckBox::clicked, this, &FilterManagerWidget::toggleUseFilters);
     layout->addWidget(filters_check_);
 
-    QHBoxLayout* filter_layout = new QHBoxLayout();
+    layout->addSpacing(15);
 
-    QVBoxLayout* ds_filter_parent_layout = new QVBoxLayout();
-    ds_filter_layout_ = new QVBoxLayout();
+    // add two filter columns
+    QHBoxLayout* ds_filter_parent_layout = new QHBoxLayout();
 
-    ds_filter_parent_layout->addLayout(ds_filter_layout_);
-    ds_filter_parent_layout->addStretch();
+    {
+        QVBoxLayout* ds_filter_layout0_parent = new QVBoxLayout();
+        ds_filter_layout0_ = new QVBoxLayout();
+        ds_filter_layout0_parent->addLayout(ds_filter_layout0_);
+        ds_filter_layout0_parent->addStretch();
 
-    filter_layout->addLayout(ds_filter_parent_layout);
+        ds_filter_parent_layout->addLayout(ds_filter_layout0_parent);
+    }
 
-    other_filter_layout_ = new QVBoxLayout();
-    filter_layout->addLayout(other_filter_layout_);
+    {
+        QVBoxLayout* ds_filter_layout1_parent = new QVBoxLayout();
+        ds_filter_layout1_ = new QVBoxLayout();
+        ds_filter_layout1_parent->addLayout(ds_filter_layout1_);
+        ds_filter_layout1_parent->addStretch();
 
-    layout->addLayout(filter_layout);
+        ds_filter_parent_layout->addLayout(ds_filter_layout1_parent);
+    }
+
+    layout->addLayout(ds_filter_parent_layout);
 
     layout->addStretch();
 
@@ -91,6 +87,8 @@ FilterManagerWidget::FilterManagerWidget(FilterManager& filter_manager, QWidget*
     layout->addLayout(button_layout);
 
     setLayout(layout);
+
+    updateFiltersSlot();
 
     setDisabled(true);
 }
@@ -132,25 +130,32 @@ void FilterManagerWidget::addFilterSlot()
 
 void FilterManagerWidget::updateFiltersSlot()
 {
-    assert(ds_filter_layout_);
+    assert(ds_filter_layout0_);
 
     QLayoutItem* child;
-    while ((child = ds_filter_layout_->takeAt(0)) != 0)
-        ds_filter_layout_->removeItem(child);
+    while ((child = ds_filter_layout0_->takeAt(0)))
+        ds_filter_layout0_->removeItem(child);
 
-    assert(other_filter_layout_);
-    while ((child = other_filter_layout_->takeAt(0)) != 0)
-        other_filter_layout_->removeItem(child);
+    assert(ds_filter_layout1_);
+
+    while ((child = ds_filter_layout1_->takeAt(0)))
+        ds_filter_layout1_->removeItem(child);
 
     std::vector<DBFilter*>& filters = filter_manager_.filters();
+
+    unsigned int num_filters_break = filters.size() / 2;
+    unsigned int cnt = 0;
+
     for (auto it : filters)
     {
         loginf << "FilterManagerWidget: updateFiltersSlot: filter " << it->getName();
 
-        if (dynamic_cast<DataSourcesFilter*>(it))
-            ds_filter_layout_->addWidget(it->widget());
+        if (cnt < num_filters_break)
+            ds_filter_layout0_->addWidget(it->widget());
         else
-            other_filter_layout_->addWidget(it->widget());
+            ds_filter_layout1_->addWidget(it->widget());
+
+        ++cnt;
     }
 }
 

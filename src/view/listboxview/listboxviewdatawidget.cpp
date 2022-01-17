@@ -25,8 +25,8 @@
 #include "compass.h"
 #include "buffer.h"
 #include "buffertablewidget.h"
-#include "dbobject.h"
-#include "dbobjectmanager.h"
+#include "dbcontent/dbcontent.h"
+#include "dbcontent/dbcontentmanager.h"
 #include "listboxviewdatasource.h"
 #include "logger.h"
 
@@ -41,10 +41,8 @@ ListBoxViewDataWidget::ListBoxViewDataWidget(ListBoxView* view, ListBoxViewDataS
     tab_widget_ = new QTabWidget();
     layout->addWidget(tab_widget_);
 
-    for (auto& obj_it : COMPASS::instance().objectManager())
+    for (auto& obj_it : COMPASS::instance().dbContentManager())
     {
-        if (obj_it.second->hasData())
-        {
             if (!all_buffer_table_widget_)
             {
                 all_buffer_table_widget_ = new AllBufferTableWidget(*view_, *data_source_);
@@ -71,7 +69,6 @@ ListBoxViewDataWidget::ListBoxViewDataWidget(ListBoxView* view, ListBoxViewDataS
                     &BufferTableWidget::usePresentationSlot);
             connect(this, &ListBoxViewDataWidget::showAssociationsSignal, buffer_table,
                     &BufferTableWidget::showAssociationsSlot);
-        }
     }
 
     setLayout(layout);
@@ -108,7 +105,7 @@ void ListBoxViewDataWidget::loadingStartedSlot()
         buffer_table.second->clear();
 }
 
-void ListBoxViewDataWidget::updateDataSlot(DBObject& object, std::shared_ptr<Buffer> buffer)
+void ListBoxViewDataWidget::updateDataSlot(DBContent& object, std::shared_ptr<Buffer> buffer)
 {
     logdbg << "ListBoxViewDataWidget: updateTables: start";
 

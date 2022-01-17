@@ -19,14 +19,15 @@
 #define SCATTERPLOTVIEW_H_
 
 #include "view.h"
-#include "viewselection.h"
 
 class ScatterPlotViewWidget;
 class ScatterPlotViewDataSource;
 class ScatterPlotViewDataWidget;
 
-class DBOVariable;
-class MetaDBOVariable;
+namespace dbContent {
+class Variable;
+class MetaVariable;
+}
 
 class ScatterPlotView : public View
 {
@@ -48,9 +49,11 @@ class ScatterPlotView : public View
     /// @brief Destructor
     virtual ~ScatterPlotView() override;
 
-    void update(bool atOnce = false) override;
-    void clearData() override;
     bool init() override;
+
+    virtual void loadingStarted() override;
+    virtual void loadedData(const std::map<std::string, std::shared_ptr<Buffer>>& data, bool requires_reset) override;
+    virtual void loadingDone() override;
 
     virtual void generateSubConfigurable(const std::string& class_id,
                                          const std::string& instance_id) override;
@@ -64,28 +67,28 @@ class ScatterPlotView : public View
 
     ScatterPlotViewDataWidget* getDataWidget();
 
-    virtual DBOVariableSet getSet(const std::string& dbo_name) override;
+    virtual dbContent::VariableSet getSet(const std::string& dbo_name) override;
 
     virtual void accept(LatexVisitor& v) override;
 
     bool hasDataVarX ();
     bool isDataVarXMeta ();
-    DBOVariable& dataVarX();
-    void dataVarX (DBOVariable& var);
+    dbContent::Variable& dataVarX();
+    void dataVarX (dbContent::Variable& var);
 
-    MetaDBOVariable& metaDataVarX();
-    void metaDataVarX (MetaDBOVariable& var);
+    dbContent::MetaVariable& metaDataVarX();
+    void metaDataVarX (dbContent::MetaVariable& var);
 
     std::string dataVarXDBO() const;
     std::string dataVarXName() const;
 
     bool hasDataVarY ();
     bool isDataVarYMeta ();
-    DBOVariable& dataVarY();
-    void dataVarY (DBOVariable& var);
+    dbContent::Variable& dataVarY();
+    void dataVarY (dbContent::Variable& var);
 
-    MetaDBOVariable& metaDataVarY();
-    void metaDataVarY (MetaDBOVariable& var);
+    dbContent::MetaVariable& metaDataVarY();
+    void metaDataVarY (dbContent::MetaVariable& var);
 
     std::string dataVarYDBO() const;
     std::string dataVarYName() const;

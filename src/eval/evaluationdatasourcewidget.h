@@ -21,7 +21,7 @@
 #include <QFrame>
 
 class ActiveDataSource;
-class DBObjectComboBox;
+class DBContentComboBox;
 
 class QCheckBox;
 class QGridLayout;
@@ -53,7 +53,7 @@ protected:
     /// Container with checkboxes for all sensors (sensor number -> checkbox)
     std::map<int, ActiveDataSource>& data_sources_;
 
-    DBObjectComboBox* dbo_combo_ {nullptr};
+    DBContentComboBox* dbo_combo_ {nullptr};
 
     QGridLayout* data_source_layout_ {nullptr};
     std::map<int, QCheckBox*> data_sources_checkboxes_;

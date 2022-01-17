@@ -24,22 +24,20 @@
 #include "eval/requirement/base/baseconfig.h"
 #include "compass.h"
 #include "dbinterface.h"
-#include "dbobject.h"
-#include "dbobjectmanager.h"
-#include "dbobjectmanagerloadwidget.h"
-#include "dbobjectinfowidget.h"
+#include "dbcontent/dbcontent.h"
+#include "dbcontent/dbcontentmanager.h"
+#include "dbcontentmanagerloadwidget.h"
 #include "sector.h"
-#include "metadbovariable.h"
-#include "dbovariable.h"
+#include "dbcontent/variable/metavariable.h"
+#include "dbcontent/variable/variable.h"
 #include "buffer.h"
 #include "filtermanager.h"
-#include "datasourcesfilter.h"
-#include "datasourcesfilterwidget.h"
+#include "dbfilter.h"
 #include "viewabledataconfig.h"
 #include "viewmanager.h"
 #include "stringconv.h"
-#include "dbovariableorderedset.h"
-#include "dbconnection.h"
+#include "dbcontent/variable/variableorderedset.h"
+#include "sqliteconnection.h"
 #include "stringconv.h"
 
 #include "json.hpp"
@@ -165,14 +163,14 @@ void EvaluationManager::init(QTabWidget* tab_widget)
 
     tab_widget->addTab(widget(), "Evaluation");
 
-    if (!COMPASS::instance().objectManager().hasAssociations())
+    if (!COMPASS::instance().dbContentManager().hasAssociations())
         widget()->setDisabled(true);
 }
 
 bool EvaluationManager::canLoadData ()
 {
     assert (initialized_);
-    return COMPASS::instance().objectManager().hasAssociations() && hasCurrentStandard();
+    return COMPASS::instance().dbContentManager().hasAssociations() && hasCurrentStandard();
 }
 
 void EvaluationManager::loadData ()
@@ -205,7 +203,7 @@ void EvaluationManager::loadData ()
 
     // actually load
 
-    DBObjectManager& object_man = COMPASS::instance().objectManager();
+    DBContentManager& object_man = COMPASS::instance().dbContentManager();
 
     // load adsb mops versions in a hacky way
     if (object_man.object("ADSB").hasData() && !has_adsb_info_)
@@ -225,59 +223,62 @@ void EvaluationManager::loadData ()
     data_.clear();
 
     // set if load for dbos
-    for (auto& obj_it : object_man)
-    {
-        obj_it.second->infoWidget()->setLoad(obj_it.first == dbo_name_ref_
-                                             || obj_it.first == dbo_name_tst_);
-    }
+
+    TODO_ASSERT
+
+//    for (auto& obj_it : object_man)
+//    {
+//        obj_it.second->infoWidget()->setLoad(obj_it.first == dbo_name_ref_
+//                                             || obj_it.first == dbo_name_tst_);
+//    }
 
     // set ref data sources filters
 
 
     fil_man.disableAllFilters();
 
-    if (dbo_name_ref_ != dbo_name_tst_)
-    {
-        {
-            DataSourcesFilter* ref_filter = fil_man.getDataSourcesFilter(dbo_name_ref_);
-            ref_filter->setActive(true);
+//    if (dbo_name_ref_ != dbo_name_tst_)
+//    {
+//        {
+//            DataSourcesFilter* ref_filter = fil_man.getDataSourcesFilter(dbo_name_ref_);
+//            ref_filter->setActive(true);
 
-            for (auto& fil_ds_it : ref_filter->dataSources())
-            {
-                assert (data_sources_ref_.count(fil_ds_it.first));
-                fil_ds_it.second.setActive(data_sources_ref_.at(fil_ds_it.first).isActive());
-            }
+//            for (auto& fil_ds_it : ref_filter->dataSources())
+//            {
+//                assert (data_sources_ref_.count(fil_ds_it.first));
+//                fil_ds_it.second.setActive(data_sources_ref_.at(fil_ds_it.first).isActive());
+//            }
 
-            ref_filter->widget()->update();
-        }
+//            ref_filter->widget()->update();
+//        }
 
-        {
-            DataSourcesFilter* tst_filter = fil_man.getDataSourcesFilter(dbo_name_tst_);
-            tst_filter->setActive(true);
+//        {
+//            DataSourcesFilter* tst_filter = fil_man.getDataSourcesFilter(dbo_name_tst_);
+//            tst_filter->setActive(true);
 
-            for (auto& fil_ds_it : tst_filter->dataSources())
-            {
-                assert (data_sources_tst_.count(fil_ds_it.first));
-                fil_ds_it.second.setActive(data_sources_tst_.at(fil_ds_it.first).isActive());
-            }
+//            for (auto& fil_ds_it : tst_filter->dataSources())
+//            {
+//                assert (data_sources_tst_.count(fil_ds_it.first));
+//                fil_ds_it.second.setActive(data_sources_tst_.at(fil_ds_it.first).isActive());
+//            }
 
-            tst_filter->widget()->update();
-        }
-    }
-    else // same ref / tst dbo
-    {
-        DataSourcesFilter* filter = fil_man.getDataSourcesFilter(dbo_name_ref_);
-        filter->setActive(true);
+//            tst_filter->widget()->update();
+//        }
+//    }
+//    else // same ref / tst dbo
+//    {
+//        DataSourcesFilter* filter = fil_man.getDataSourcesFilter(dbo_name_ref_);
+//        filter->setActive(true);
 
-        for (auto& fil_ds_it : filter->dataSources())
-        {
-            assert (data_sources_tst_.count(fil_ds_it.first));
-            fil_ds_it.second.setActive(data_sources_ref_.at(fil_ds_it.first).isActive()
-                                       || data_sources_tst_.at(fil_ds_it.first).isActive());
-        }
+//        for (auto& fil_ds_it : filter->dataSources())
+//        {
+//            assert (data_sources_tst_.count(fil_ds_it.first));
+//            fil_ds_it.second.setActive(data_sources_ref_.at(fil_ds_it.first).isActive()
+//                                       || data_sources_tst_.at(fil_ds_it.first).isActive());
+//        }
 
-        filter->widget()->update();
-    }
+//        filter->widget()->update();
+//    }
 
     // position data
     if (load_only_sector_data_ && hasCurrentStandard())
@@ -422,10 +423,11 @@ void EvaluationManager::loadData ()
     // reference data
     {
         assert (object_man.existsObject(dbo_name_ref_));
-        DBObject& dbo_ref = object_man.object(dbo_name_ref_);
+        DBContent& dbo_ref = object_man.object(dbo_name_ref_);
 
-        connect(&dbo_ref, &DBObject::newDataSignal, this, &EvaluationManager::newDataSlot);
-        connect(&dbo_ref, &DBObject::loadingDoneSignal, this, &EvaluationManager::loadingDoneSlot);
+        TODO_ASSERT
+//        connect(&dbo_ref, &DBObject::newDataSignal, this, &EvaluationManager::newDataSlot);
+//        connect(&dbo_ref, &DBObject::loadingDoneSignal, this, &EvaluationManager::loadingDoneSlot);
     }
 
     // test data
@@ -433,16 +435,18 @@ void EvaluationManager::loadData ()
     if (dbo_name_ref_ != dbo_name_tst_) // otherwise already connected
     {
         assert (object_man.existsObject(dbo_name_tst_));
-        DBObject& dbo_tst = object_man.object(dbo_name_tst_);
+        DBContent& dbo_tst = object_man.object(dbo_name_tst_);
 
-        connect(&dbo_tst, &DBObject::newDataSignal, this, &EvaluationManager::newDataSlot);
-        connect(&dbo_tst, &DBObject::loadingDoneSignal, this, &EvaluationManager::loadingDoneSlot);
+        TODO_ASSERT
+
+//        connect(&dbo_tst, &DBObject::newDataSignal, this, &EvaluationManager::newDataSlot);
+//        connect(&dbo_tst, &DBObject::loadingDoneSignal, this, &EvaluationManager::loadingDoneSlot);
 
     }
 
     needs_additional_variables_ = true;
 
-    object_man.loadSlot();
+    object_man.load();
 
     needs_additional_variables_ = false;
 
@@ -479,6 +483,9 @@ std::string EvaluationManager::getCannotEvaluateComment()
 {
     assert (!canEvaluate());
 
+    if (!sectors_loaded_)
+        return "No Database loaded";
+
     // no sector
     if (!sectorsLayers().size())
         return "Please add at least one sector";
@@ -493,65 +500,88 @@ std::string EvaluationManager::getCannotEvaluateComment()
     return "Please activate at least one requirement group";
 }
 
-void EvaluationManager::newDataSlot(DBObject& object)
+void EvaluationManager::databaseOpenedSlot()
 {
-    loginf << "EvaluationManager: newDataSlot: obj " << object.name() << " buffer size " << object.data()->size();
+    loginf << "EvaluationManager: databaseOpenedSlot";
+
+    assert (!sectors_loaded_);
+    loadSectors();
 }
-void EvaluationManager::loadingDoneSlot(DBObject& object)
+
+void EvaluationManager::databaseClosedSlot()
 {
-    loginf << "EvaluationManager: loadingDoneSlot: obj " << object.name() << " buffer size " << object.data()->size();
+    loginf << "EvaluationManager: databaseClosedSlot";
 
-    DBObjectManager& object_man = COMPASS::instance().objectManager();
+    sector_layers_.clear();
 
-    if (object.name() == dbo_name_ref_)
-    {
-        DBObject& dbo_ref = object_man.object(dbo_name_ref_);
+    sectors_loaded_ = false;
+}
 
-        disconnect(&dbo_ref, &DBObject::newDataSignal, this, &EvaluationManager::newDataSlot);
-        disconnect(&dbo_ref, &DBObject::loadingDoneSignal, this, &EvaluationManager::loadingDoneSlot);
+void EvaluationManager::newDataSlot(DBContent& object)
+{
+    //loginf << "EvaluationManager: newDataSlot: obj " << object.name() << " buffer size " << object.data()->size();
+}
+void EvaluationManager::loadingDoneSlot(DBContent& object)
+{
+    TODO_ASSERT
 
-        data_.addReferenceData(dbo_ref, object.data());
+//    loginf << "EvaluationManager: loadingDoneSlot: obj " << object.name() << " buffer size " << object.data()->size();
 
-        reference_data_loaded_ = true;
-    }
+//    DBObjectManager& object_man = COMPASS::instance().objectManager();
 
-    if (object.name() == dbo_name_tst_)
-    {
-        DBObject& dbo_tst = object_man.object(dbo_name_tst_);
+//    if (object.name() == dbo_name_ref_)
+//    {
+//        DBObject& dbo_ref = object_man.object(dbo_name_ref_);
 
-        if (dbo_name_ref_ != dbo_name_tst_) // otherwise already disconnected
-        {
-            disconnect(&dbo_tst, &DBObject::newDataSignal, this, &EvaluationManager::newDataSlot);
-            disconnect(&dbo_tst, &DBObject::loadingDoneSignal, this, &EvaluationManager::loadingDoneSlot);
-        }
+//        TODO_ASSERT
 
-        data_.addTestData(dbo_tst, object.data());
+////        disconnect(&dbo_ref, &DBObject::newDataSignal, this, &EvaluationManager::newDataSlot);
+////        disconnect(&dbo_ref, &DBObject::loadingDoneSignal, this, &EvaluationManager::loadingDoneSlot);
 
-        test_data_loaded_ = true;
-    }
+//        data_.addReferenceData(dbo_ref, object.data());
 
-    bool data_loaded_tmp = reference_data_loaded_ && test_data_loaded_;
+//        reference_data_loaded_ = true;
+//    }
 
-    loginf << "EvaluationManager: loadingDoneSlot: data loaded " << data_loaded_;
+//    if (object.name() == dbo_name_tst_)
+//    {
+//        DBObject& dbo_tst = object_man.object(dbo_name_tst_);
 
-    if (data_loaded_tmp)
-    {
-        loginf << "EvaluationManager: loadingDoneSlot: finalizing";
+//        if (dbo_name_ref_ != dbo_name_tst_) // otherwise already disconnected
+//        {
+//            TODO_ASSERT
 
-        boost::posix_time::ptime start_time = boost::posix_time::microsec_clock::local_time();
+////            disconnect(&dbo_tst, &DBObject::newDataSignal, this, &EvaluationManager::newDataSlot);
+////            disconnect(&dbo_tst, &DBObject::loadingDoneSignal, this, &EvaluationManager::loadingDoneSlot);
+//        }
 
-        data_.finalize();
+//        data_.addTestData(dbo_tst, object.data());
 
-        boost::posix_time::time_duration time_diff =  boost::posix_time::microsec_clock::local_time() - start_time;
+//        test_data_loaded_ = true;
+//    }
 
-        loginf << "EvaluationManager: loadingDoneSlot: finalize done "
-               << String::timeStringFromDouble(time_diff.total_milliseconds() / 1000.0, true);
-    }
+//    bool data_loaded_tmp = reference_data_loaded_ && test_data_loaded_;
 
-    data_loaded_ = data_loaded_tmp;
+//    loginf << "EvaluationManager: loadingDoneSlot: data loaded " << data_loaded_;
 
-    if (widget_)
-        widget_->updateButtons();
+//    if (data_loaded_tmp)
+//    {
+//        loginf << "EvaluationManager: loadingDoneSlot: finalizing";
+
+//        boost::posix_time::ptime start_time = boost::posix_time::microsec_clock::local_time();
+
+//        data_.finalize();
+
+//        boost::posix_time::time_duration time_diff =  boost::posix_time::microsec_clock::local_time() - start_time;
+
+//        loginf << "EvaluationManager: loadingDoneSlot: finalize done "
+//               << String::timeStringFromDouble(time_diff.total_milliseconds() / 1000.0, true);
+//    }
+
+//    data_loaded_ = data_loaded_tmp;
+
+//    if (widget_)
+//        widget_->updateButtons();
 }
 
 void EvaluationManager::evaluate ()
@@ -618,13 +648,13 @@ bool EvaluationManager::needsAdditionalVariables ()
     return needs_additional_variables_;
 }
 
-void EvaluationManager::addVariables (const std::string dbo_name, DBOVariableSet& read_set)
+void EvaluationManager::addVariables (const std::string dbo_name, dbContent::VariableSet& read_set)
 {
     loginf << "EvaluationManager: addVariables: dbo_name " << dbo_name;
 
     // TODO add required variables from standard requirements
 
-    DBObjectManager& object_man = COMPASS::instance().objectManager();
+    DBContentManager& object_man = COMPASS::instance().dbContentManager();
 
     read_set.add(object_man.metaVariable("rec_num").getFor(dbo_name));
     read_set.add(object_man.metaVariable("ds_id").getFor(dbo_name));
@@ -657,7 +687,7 @@ void EvaluationManager::addVariables (const std::string dbo_name, DBOVariableSet
     if (object_man.metaVariable("track_num").existsIn(dbo_name))
         read_set.add(object_man.metaVariable("track_num").getFor(dbo_name));
 
-    DBObject& db_object = object_man.object(dbo_name);
+    DBContent& db_object = object_man.object(dbo_name);
 
     // ground bit
     if (object_man.metaVariable("ground_bit").existsIn(dbo_name))
@@ -796,6 +826,9 @@ void EvaluationManager::loadSectors()
     loginf << "EvaluationManager: loadSectors";
 
     assert (!sectors_loaded_);
+
+    if (!COMPASS::instance().interface().ready())
+        sectors_loaded_ = false;
 
     sector_layers_ = COMPASS::instance().interface().loadSectors();
 
@@ -1092,15 +1125,7 @@ bool EvaluationManager::hasValidReferenceDBO ()
     if (!dbo_name_ref_.size())
         return false;
 
-    if (!COMPASS::instance().objectManager().existsObject(dbo_name_ref_))
-        return false;
-
-    DBObject& object = COMPASS::instance().objectManager().object(dbo_name_ref_);
-
-    if (!object.hasCurrentDataSourceDefinition())
-        return false;
-
-    return object.hasDataSources();
+    return COMPASS::instance().dbContentManager().existsObject(dbo_name_ref_);
 }
 
 
@@ -1134,15 +1159,7 @@ bool EvaluationManager::hasValidTestDBO ()
     if (!dbo_name_tst_.size())
         return false;
 
-    if (!COMPASS::instance().objectManager().existsObject(dbo_name_tst_))
-        return false;
-
-    DBObject& object = COMPASS::instance().objectManager().object(dbo_name_tst_);
-
-    if (!object.hasCurrentDataSourceDefinition())
-        return false;
-
-    return object.hasDataSources();
+    return COMPASS::instance().dbContentManager().existsObject(dbo_name_tst_);
 }
 
 std::set<int> EvaluationManager::activeDataSourcesTst()
@@ -1333,13 +1350,17 @@ void EvaluationManager::updateReferenceDBO()
     if (!hasValidReferenceDBO())
         return;
 
-    DBObject& object = COMPASS::instance().objectManager().object(dbo_name_ref_);
+    DBContent& object = COMPASS::instance().dbContentManager().object(dbo_name_ref_);
 
-    if (object.hasDataSources())
-        updateReferenceDataSources();
+    return;
 
-    if (object.hasActiveDataSourcesInfo())
-        updateReferenceDataSourcesActive();
+    TODO_ASSERT
+
+//    if (object.hasDataSources())
+//        updateReferenceDataSources();
+
+//    if (object.hasActiveDataSourcesInfo())
+//        updateReferenceDataSourcesActive();
 }
 
 void EvaluationManager::updateReferenceDataSources()
@@ -1348,53 +1369,57 @@ void EvaluationManager::updateReferenceDataSources()
 
     assert (hasValidReferenceDBO());
 
-    DBObject& object = COMPASS::instance().objectManager().object(dbo_name_ref_);
+    return;
 
-    for (auto ds_it = object.dsBegin(); ds_it != object.dsEnd(); ++ds_it)
-    {
-        if (data_sources_ref_.find(ds_it->first) == data_sources_ref_.end())
-        {
-            if (!active_sources_ref_[dbo_name_ref_].contains(to_string(ds_it->first)))
-                active_sources_ref_[dbo_name_ref_][to_string(ds_it->first)] = true; // init with default true
+//    DBObject& object = COMPASS::instance().objectManager().object(dbo_name_ref_);
 
-            // needed for old compiler
-            json::boolean_t& active
-                    = active_sources_ref_[dbo_name_ref_][to_string(ds_it->first)].get_ref<json::boolean_t&>();
+    TODO_ASSERT
 
-            data_sources_ref_.emplace(std::piecewise_construct,
-                                      std::forward_as_tuple(ds_it->first),  // args for key
-                                      std::forward_as_tuple(ds_it->first, ds_it->second.name(),
-                                                            active));
-        }
-    }
+//    for (auto ds_it = object.dsBegin(); ds_it != object.dsEnd(); ++ds_it)
+//    {
+//        if (data_sources_ref_.find(ds_it->first) == data_sources_ref_.end())
+//        {
+//            if (!active_sources_ref_[dbo_name_ref_].contains(to_string(ds_it->first)))
+//                active_sources_ref_[dbo_name_ref_][to_string(ds_it->first)] = true; // init with default true
+
+//            // needed for old compiler
+//            json::boolean_t& active
+//                    = active_sources_ref_[dbo_name_ref_][to_string(ds_it->first)].get_ref<json::boolean_t&>();
+
+//            data_sources_ref_.emplace(std::piecewise_construct,
+//                                      std::forward_as_tuple(ds_it->first),  // args for key
+//                                      std::forward_as_tuple(ds_it->first, ds_it->second.name(),
+//                                                            active));
+//        }
+//    }
 }
 
-void EvaluationManager::updateReferenceDataSourcesActive()
-{
-    loginf << "EvaluationManager: updateReferenceDataSourcesActive";
+//void EvaluationManager::updateReferenceDataSourcesActive()
+//{
+//    loginf << "EvaluationManager: updateReferenceDataSourcesActive";
 
-    assert (hasValidReferenceDBO());
+//    assert (hasValidReferenceDBO());
 
-    DBObject& object = COMPASS::instance().objectManager().object(dbo_name_ref_);
+//    DBObject& object = COMPASS::instance().objectManager().object(dbo_name_ref_);
 
-    assert (object.hasActiveDataSourcesInfo());
+//    assert (object.hasActiveDataSourcesInfo());
 
-    for (auto& srcit : data_sources_ref_)
-        srcit.second.setActiveInData(false);
+//    for (auto& srcit : data_sources_ref_)
+//        srcit.second.setActiveInData(false);
 
-    for (auto& it : object.getActiveDataSources())
-    {
-        assert(data_sources_ref_.find(it) != data_sources_ref_.end());
-        ActiveDataSource& src = data_sources_ref_.at(it);
-        src.setActiveInData(true);
-    }
+//    for (auto& it : object.getActiveDataSources())
+//    {
+//        assert(data_sources_ref_.find(it) != data_sources_ref_.end());
+//        ActiveDataSource& src = data_sources_ref_.at(it);
+//        src.setActiveInData(true);
+//    }
 
-    for (auto& srcit : data_sources_ref_)
-    {
-        if (!srcit.second.isActiveInData())
-            srcit.second.setActive(false);
-    }
-}
+//    for (auto& srcit : data_sources_ref_)
+//    {
+//        if (!srcit.second.isActiveInData())
+//            srcit.second.setActive(false);
+//    }
+//}
 
 void EvaluationManager::updateTestDBO()
 {
@@ -1406,13 +1431,17 @@ void EvaluationManager::updateTestDBO()
     if (!hasValidTestDBO())
         return;
 
-    DBObject& object = COMPASS::instance().objectManager().object(dbo_name_tst_);
+    return;
 
-    if (object.hasDataSources())
-        updateTestDataSources();
+    DBContent& object = COMPASS::instance().dbContentManager().object(dbo_name_tst_);
 
-    if (object.hasActiveDataSourcesInfo())
-        updateTestDataSourcesActive();
+    TODO_ASSERT
+
+//    if (object.hasDataSources())
+//        updateTestDataSources();
+
+//    if (object.hasActiveDataSourcesInfo())
+//        updateTestDataSourcesActive();
 }
 
 void EvaluationManager::updateTestDataSources()
@@ -1421,53 +1450,57 @@ void EvaluationManager::updateTestDataSources()
 
     assert (hasValidTestDBO());
 
-    DBObject& object = COMPASS::instance().objectManager().object(dbo_name_tst_);
+    return;
 
-    for (auto ds_it = object.dsBegin(); ds_it != object.dsEnd(); ++ds_it)
-    {
-        if (data_sources_tst_.find(ds_it->first) == data_sources_tst_.end())
-        {
-            if (!active_sources_tst_[dbo_name_tst_].contains(to_string(ds_it->first)))
-                active_sources_tst_[dbo_name_tst_][to_string(ds_it->first)] = true; // init with default true
+    DBContent& object = COMPASS::instance().dbContentManager().object(dbo_name_tst_);
 
-            // needed for old compiler
-            json::boolean_t& active =
-                    active_sources_tst_[dbo_name_tst_][to_string(ds_it->first)].get_ref<json::boolean_t&>();
+    TODO_ASSERT
 
-            data_sources_tst_.emplace(std::piecewise_construct,
-                                      std::forward_as_tuple(ds_it->first),  // args for key
-                                      std::forward_as_tuple(ds_it->first, ds_it->second.name(),
-                                                            active));
-        }
-    }
+//    for (auto ds_it = object.dsBegin(); ds_it != object.dsEnd(); ++ds_it)
+//    {
+//        if (data_sources_tst_.find(ds_it->first) == data_sources_tst_.end())
+//        {
+//            if (!active_sources_tst_[dbo_name_tst_].contains(to_string(ds_it->first)))
+//                active_sources_tst_[dbo_name_tst_][to_string(ds_it->first)] = true; // init with default true
+
+//            // needed for old compiler
+//            json::boolean_t& active =
+//                    active_sources_tst_[dbo_name_tst_][to_string(ds_it->first)].get_ref<json::boolean_t&>();
+
+//            data_sources_tst_.emplace(std::piecewise_construct,
+//                                      std::forward_as_tuple(ds_it->first),  // args for key
+//                                      std::forward_as_tuple(ds_it->first, ds_it->second.name(),
+//                                                            active));
+//        }
+//    }
 }
 
-void EvaluationManager::updateTestDataSourcesActive()
-{
-    loginf << "EvaluationManager: updateTestDataSourcesActive";
+//void EvaluationManager::updateTestDataSourcesActive()
+//{
+//    loginf << "EvaluationManager: updateTestDataSourcesActive";
 
-    assert (hasValidTestDBO());
+//    assert (hasValidTestDBO());
 
-    DBObject& object = COMPASS::instance().objectManager().object(dbo_name_tst_);
+//    DBObject& object = COMPASS::instance().objectManager().object(dbo_name_tst_);
 
-    assert (object.hasActiveDataSourcesInfo());
+//    assert (object.hasActiveDataSourcesInfo());
 
-    for (auto& srcit : data_sources_tst_)
-        srcit.second.setActiveInData(false);
+//    for (auto& srcit : data_sources_tst_)
+//        srcit.second.setActiveInData(false);
 
-    for (auto& it : object.getActiveDataSources())
-    {
-        assert(data_sources_tst_.find(it) != data_sources_tst_.end());
-        ActiveDataSource& src = data_sources_tst_.at(it);
-        src.setActiveInData(true);
-    }
+//    for (auto& it : object.getActiveDataSources())
+//    {
+//        assert(data_sources_tst_.find(it) != data_sources_tst_.end());
+//        ActiveDataSource& src = data_sources_tst_.at(it);
+//        src.setActiveInData(true);
+//    }
 
-    for (auto& srcit : data_sources_tst_)
-    {
-        if (!srcit.second.isActiveInData())
-            srcit.second.setActive(false);
-    }
-}
+//    for (auto& srcit : data_sources_tst_)
+//    {
+//        if (!srcit.second.isActiveInData())
+//            srcit.second.setActive(false);
+//    }
+//}
 
 void EvaluationManager::setViewableDataConfig (const nlohmann::json::object_t& data)
 {
@@ -1716,7 +1749,7 @@ bool EvaluationManager::useUTN (unsigned int utn)
     logdbg << "EvaluationManager: useUTN: utn " << utn;
 
     if (!current_config_name_.size())
-        current_config_name_ = COMPASS::instance().interface().connection().shortIdentifier();
+        current_config_name_ = COMPASS::instance().lastDbFilename();
 
     string utn_str = to_string(utn);
 
@@ -1733,7 +1766,7 @@ void EvaluationManager::useUTN (unsigned int utn, bool value, bool update_td, bo
            << " update_td " << update_td;
 
     if (!current_config_name_.size())
-        current_config_name_ = COMPASS::instance().interface().connection().shortIdentifier();
+        current_config_name_ = COMPASS::instance().lastDbFilename();
 
     string utn_str = to_string(utn);
     configs_[current_config_name_]["utns"][utn_str]["use"] = value;
@@ -1752,7 +1785,7 @@ void EvaluationManager::useAllUTNs (bool value)
     update_results_ = false;
 
     if (!current_config_name_.size())
-        current_config_name_ = COMPASS::instance().interface().connection().shortIdentifier();
+        current_config_name_ = COMPASS::instance().lastDbFilename();
 
     set<unsigned int> already_set;
 
@@ -1790,7 +1823,7 @@ void EvaluationManager::clearUTNComments ()
     update_results_ = false;
 
     if (!current_config_name_.size())
-        current_config_name_ = COMPASS::instance().interface().connection().shortIdentifier();
+        current_config_name_ = COMPASS::instance().lastDbFilename();
 
     set<unsigned int> already_set;
 
@@ -1828,7 +1861,7 @@ void EvaluationManager::filterUTNs ()
 
     update_results_ = false;
 
-    DBObjectManager& dbo_man = COMPASS::instance().objectManager();
+    DBContentManager& dbo_man = COMPASS::instance().dbContentManager();
 
     map<string, set<unsigned int>> associated_utns;
 
@@ -1987,7 +2020,7 @@ std::string EvaluationManager::utnComment (unsigned int utn)
     logdbg << "EvaluationManager: utnComment: utn " << utn;
 
     if (!current_config_name_.size())
-        current_config_name_ = COMPASS::instance().interface().connection().shortIdentifier();
+        current_config_name_ = COMPASS::instance().lastDbFilename();
 
     string utn_str = to_string(utn);
 
@@ -2004,7 +2037,7 @@ void EvaluationManager::utnComment (unsigned int utn, std::string value, bool up
            << " update_td " << update_td;
 
     if (!current_config_name_.size())
-        current_config_name_ = COMPASS::instance().interface().connection().shortIdentifier();
+        current_config_name_ = COMPASS::instance().lastDbFilename();
 
     string utn_str = to_string(utn);
     configs_[current_config_name_]["utns"][utn_str]["comment"] = value;

@@ -18,40 +18,38 @@
 #ifndef CLIENT_H_
 #define CLIENT_H_
 
+#include "global.h"
+
 #include <QApplication>
-#include <memory>
 
-class MainWindow;
-
-/**
- * @brief Main Class
- *
- */
 class Client : public QApplication
 {
-  public:
-    ///@brief Constructor.
+public:
     Client(int& argc, char** argv);
-    ///@brief Destructor.
     virtual ~Client();
 
-    ///@brief Re-implementation from QApplication so exceptions can be thrown in slots.
     virtual bool notify(QObject* receiver, QEvent* event);
 
     bool quitRequested() const;
-    MainWindow& mainWindow();
 
-  private:
+    void run ();
+
+private:
+
     std::string system_install_path_;
     bool quit_requested_{false};
 
     bool home_subdir_deletion_wanted_{false};
     bool config_and_data_copy_wanted_{false};
 
-    //bool config_and_data_exists_{false};
-    //bool config_and_data_copied_{false};
-
-    //bool upgrade_needed_{false};
+    std::string create_new_sqlite3_db_filename_;
+    std::string open_sqlite3_db_filename_;
+    //    std::string import_view_points_filename;
+    std::string import_asterix_filename_;
+    bool import_asterix_network_ {false};
+    std::string import_asterix_network_time_offset_;
+    //    std::string asterix_framing;
+    //    std::string asterix_decoder_cfg;
 
     void checkAndSetupConfig();
 
@@ -60,11 +58,6 @@ class Client : public QApplication
 
     void deleteCompleteHomeSubDir();
     void copyConfigurationAndData();
-    //void copyConfiguration();
-
-  protected:
-    std::unique_ptr<MainWindow> main_window_;
 };
-//}
 
 #endif /* CLIENT_H_ */

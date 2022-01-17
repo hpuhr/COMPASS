@@ -30,8 +30,13 @@ class DBFilter;
 class DataSourcesFilter;
 class COMPASS;
 class FilterManagerWidget;
-class DBOVariable;
 class ViewableDataConfig;
+
+namespace dbContent {
+
+class Variable;
+
+}
 
 /**
  * @brief Manages all filters and generates SQL conditions
@@ -49,7 +54,11 @@ signals:
     void changedFiltersSignal();
 
 public slots:
-    void startedSlot();
+
+    void databaseOpenedSlot();
+    void databaseClosedSlot();
+
+    //void startedSlot();
     void deleteFilterSlot(DBFilter* filter);
 
     void unshowViewPointSlot (const ViewableDataConfig* vp);
@@ -67,7 +76,7 @@ public:
 
     /// @brief Returns the SQL condition for a DBO and sets all used variable names
     std::string getSQLCondition(const std::string& dbo_name,
-                                std::vector<DBOVariable*>& filtered_variables);
+                                std::vector<dbContent::Variable*>& filtered_variables);
 
     /// @brief Returns number of existing filters
     unsigned int getNumFilters();
@@ -88,8 +97,6 @@ public:
 
     void setConfigInViewPoint (nlohmann::json& data);
     void disableAllFilters ();
-
-    DataSourcesFilter* getDataSourcesFilter (const std::string& dbo_name);
 
 protected:
     /// Database definition, resets if changed

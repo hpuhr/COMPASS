@@ -20,18 +20,18 @@
 #include <QApplication>
 
 #include "compass.h"
-#include "dbobjectmanager.h"
-#include "dbobject.h"
-#include "metadbovariable.h"
+#include "dbcontent/dbcontentmanager.h"
+#include "dbcontent/dbcontent.h"
+#include "dbcontent/variable/metavariable.h"
 #include "scatterplotviewconfigwidget.h"
 #include "scatterplotviewdatasource.h"
 #include "scatterplotviewdatawidget.h"
 #include "scatterplotviewwidget.h"
 #include "logger.h"
-#include "viewselection.h"
 #include "latexvisitor.h"
 
 using namespace std;
+using namespace dbContent;
 
 ScatterPlotView::ScatterPlotView(const std::string& class_id, const std::string& instance_id,
                              ViewContainer* w, ViewManager& view_manager)
@@ -66,10 +66,6 @@ ScatterPlotView::~ScatterPlotView()
     loginf << "ScatterPlotView: dtor: done";
 }
 
-void ScatterPlotView::update(bool atOnce) {}
-
-void ScatterPlotView::clearData() {}
-
 bool ScatterPlotView::init()
 {
     View::init();
@@ -78,23 +74,21 @@ bool ScatterPlotView::init()
 
     assert(data_source_);
 
-    DBObjectManager& object_man = COMPASS::instance().objectManager();
-    connect(&object_man, &DBObjectManager::allLoadingDoneSignal, this, &ScatterPlotView::allLoadingDoneSlot);
+    DBContentManager& object_man = COMPASS::instance().dbContentManager();
+    connect(&object_man, &DBContentManager::loadingDoneSignal, this, &ScatterPlotView::allLoadingDoneSlot);
 
-    connect(data_source_, &ScatterPlotViewDataSource::loadingStartedSignal, widget_->getDataWidget(),
-            &ScatterPlotViewDataWidget::loadingStartedSlot);
-    connect(data_source_, &ScatterPlotViewDataSource::updateDataSignal, widget_->getDataWidget(),
-            &ScatterPlotViewDataWidget::updateDataSlot);
+//    connect(data_source_, &ScatterPlotViewDataSource::loadingStartedSignal, widget_->getDataWidget(),
+//            &ScatterPlotViewDataWidget::loadingStartedSlot);
+//    connect(data_source_, &ScatterPlotViewDataSource::updateDataSignal, widget_->getDataWidget(),
+//            &ScatterPlotViewDataWidget::updateDataSlot);
 
 //    connect(widget_->configWidget(), &ScatterPlotViewConfigWidget::exportSignal,
 //            widget_->getDataWidget(), &ScatterPlotViewDataWidget::exportDataSlot);
 //    connect(widget_->getDataWidget(), &ScatterPlotViewDataWidget::exportDoneSignal,
 //            widget_->configWidget(), &ScatterPlotViewConfigWidget::exportDoneSlot);
 
-    connect(widget_->configWidget(), &ScatterPlotViewConfigWidget::reloadRequestedSignal,
-            &COMPASS::instance().objectManager(), &DBObjectManager::loadSlot);
-    connect(data_source_, &ScatterPlotViewDataSource::loadingStartedSignal, widget_->configWidget(),
-            &ScatterPlotViewConfigWidget::loadingStartedSlot);
+//    connect(data_source_, &ScatterPlotViewDataSource::loadingStartedSignal, widget_->configWidget(),
+//            &ScatterPlotViewConfigWidget::loadingStartedSlot);
 
     //    connect(this, &ScatterPlotView::showOnlySelectedSignal, widget_->getDataWidget(),
     //            &ScatterPlotViewDataWidget::showOnlySelectedSlot);
@@ -108,6 +102,21 @@ bool ScatterPlotView::init()
     //    widget_->getDataWidget()->showAssociationsSlot(show_associations_);
 
     return true;
+}
+
+void ScatterPlotView::loadingStarted()
+{
+    loginf << "ScatterPlotView: loadingStarted";
+}
+
+void ScatterPlotView::loadedData(const std::map<std::string, std::shared_ptr<Buffer>>& data, bool requires_reset)
+{
+    loginf << "ScatterPlotView: loadedData";
+}
+
+void ScatterPlotView::loadingDone()
+{
+    loginf << "ScatterPlotView: loadingDone";
 }
 
 void ScatterPlotView::generateSubConfigurable(const std::string& class_id,
@@ -149,19 +158,19 @@ ScatterPlotViewDataWidget* ScatterPlotView::getDataWidget()
     return widget_->getDataWidget();
 }
 
-DBOVariableSet ScatterPlotView::getSet(const std::string& dbo_name)
+VariableSet ScatterPlotView::getSet(const std::string& dbo_name)
 {
     loginf << "ScatterPlotView: getSet";
 
     assert(data_source_);
 
-    DBOVariableSet set = data_source_->getSet()->getExistingInDBFor(dbo_name);
+    VariableSet set = data_source_->getSet()->getExistingInDBFor(dbo_name);
 
     if (hasDataVarX())
     {
         if (isDataVarXMeta())
         {
-            MetaDBOVariable& meta_var = metaDataVarX();
+            MetaVariable& meta_var = metaDataVarX();
 
             if (meta_var.existsIn(dbo_name) && !set.hasVariable(meta_var.getFor(dbo_name)))
             {
@@ -183,7 +192,7 @@ DBOVariableSet ScatterPlotView::getSet(const std::string& dbo_name)
     {
         if (isDataVarYMeta())
         {
-            MetaDBOVariable& meta_var = metaDataVarY();
+            MetaVariable& meta_var = metaDataVarY();
 
             if (meta_var.existsIn(dbo_name) && !set.hasVariable(meta_var.getFor(dbo_name)))
             {
@@ -215,9 +224,9 @@ bool ScatterPlotView::hasDataVarX ()
         return false;
 
     if (data_var_x_dbo_ == META_OBJECT_NAME)
-        return COMPASS::instance().objectManager().existsMetaVariable(data_var_x_name_);
+        return COMPASS::instance().dbContentManager().existsMetaVariable(data_var_x_name_);
     else
-        return COMPASS::instance().objectManager().object(data_var_x_dbo_).hasVariable(data_var_x_name_);
+        return COMPASS::instance().dbContentManager().object(data_var_x_dbo_).hasVariable(data_var_x_name_);
 }
 
 bool ScatterPlotView::isDataVarXMeta ()
@@ -225,16 +234,16 @@ bool ScatterPlotView::isDataVarXMeta ()
     return data_var_x_dbo_ == META_OBJECT_NAME;
 }
 
-DBOVariable& ScatterPlotView::dataVarX()
+Variable& ScatterPlotView::dataVarX()
 {
     assert (hasDataVarX());
     assert (!isDataVarXMeta());
-    assert (COMPASS::instance().objectManager().object(data_var_x_dbo_).hasVariable(data_var_x_name_));
+    assert (COMPASS::instance().dbContentManager().object(data_var_x_dbo_).hasVariable(data_var_x_name_));
 
-    return COMPASS::instance().objectManager().object(data_var_x_dbo_).variable(data_var_x_name_);
+    return COMPASS::instance().dbContentManager().object(data_var_x_dbo_).variable(data_var_x_name_);
 }
 
-void ScatterPlotView::dataVarX (DBOVariable& var)
+void ScatterPlotView::dataVarX (Variable& var)
 {
     data_var_x_dbo_ = var.dboName();
     data_var_x_name_ = var.name();
@@ -247,15 +256,15 @@ void ScatterPlotView::dataVarX (DBOVariable& var)
     updateStatus();
 }
 
-MetaDBOVariable& ScatterPlotView::metaDataVarX()
+MetaVariable& ScatterPlotView::metaDataVarX()
 {
     assert (hasDataVarX());
     assert (isDataVarXMeta());
 
-    return COMPASS::instance().objectManager().metaVariable(data_var_x_name_);
+    return COMPASS::instance().dbContentManager().metaVariable(data_var_x_name_);
 }
 
-void ScatterPlotView::metaDataVarX (MetaDBOVariable& var)
+void ScatterPlotView::metaDataVarX (MetaVariable& var)
 {
     data_var_x_dbo_ = META_OBJECT_NAME;
     data_var_x_name_ = var.name();
@@ -286,9 +295,9 @@ bool ScatterPlotView::hasDataVarY ()
         return false;
 
     if (data_var_y_dbo_ == META_OBJECT_NAME)
-        return COMPASS::instance().objectManager().existsMetaVariable(data_var_y_name_);
+        return COMPASS::instance().dbContentManager().existsMetaVariable(data_var_y_name_);
     else
-        return COMPASS::instance().objectManager().object(data_var_y_dbo_).hasVariable(data_var_y_name_);
+        return COMPASS::instance().dbContentManager().object(data_var_y_dbo_).hasVariable(data_var_y_name_);
 }
 
 bool ScatterPlotView::isDataVarYMeta ()
@@ -296,16 +305,16 @@ bool ScatterPlotView::isDataVarYMeta ()
     return data_var_y_dbo_ == META_OBJECT_NAME;
 }
 
-DBOVariable& ScatterPlotView::dataVarY()
+Variable& ScatterPlotView::dataVarY()
 {
     assert (hasDataVarY());
     assert (!isDataVarYMeta());
-    assert (COMPASS::instance().objectManager().object(data_var_y_dbo_).hasVariable(data_var_y_name_));
+    assert (COMPASS::instance().dbContentManager().object(data_var_y_dbo_).hasVariable(data_var_y_name_));
 
-    return COMPASS::instance().objectManager().object(data_var_y_dbo_).variable(data_var_y_name_);
+    return COMPASS::instance().dbContentManager().object(data_var_y_dbo_).variable(data_var_y_name_);
 }
 
-void ScatterPlotView::dataVarY (DBOVariable& var)
+void ScatterPlotView::dataVarY (Variable& var)
 {
     data_var_y_dbo_ = var.dboName();
     data_var_y_name_ = var.name();
@@ -318,15 +327,15 @@ void ScatterPlotView::dataVarY (DBOVariable& var)
     updateStatus();
 }
 
-MetaDBOVariable& ScatterPlotView::metaDataVarY()
+MetaVariable& ScatterPlotView::metaDataVarY()
 {
     assert (hasDataVarY());
     assert (isDataVarYMeta());
 
-    return COMPASS::instance().objectManager().metaVariable(data_var_y_name_);
+    return COMPASS::instance().dbContentManager().metaVariable(data_var_y_name_);
 }
 
-void ScatterPlotView::metaDataVarY (MetaDBOVariable& var)
+void ScatterPlotView::metaDataVarY (MetaVariable& var)
 {
     data_var_y_dbo_ = META_OBJECT_NAME;
     data_var_y_name_ = var.name();

@@ -27,21 +27,26 @@
 #include "logger.h"
 #include "nullablevector.h"
 
-class DBOVariable;
+namespace dbContent {
+
+class Variable;
+
+}
+
 class JSONObjectParser;
 
 class JSONDataMapping : public Configurable
 {
   public:
     JSONDataMapping(const std::string& class_id, const std::string& instance_id,
-                    JSONObjectParser& parent);
-    JSONDataMapping() = default;
-    JSONDataMapping(JSONDataMapping&& other) { *this = std::move(other); }
+                    Configurable& parent);
+    //JSONDataMapping() = default;
+    //JSONDataMapping(JSONDataMapping&& other) { *this = std::move(other); }
 
     virtual ~JSONDataMapping();
 
     /// @brief Move constructor
-    JSONDataMapping& operator=(JSONDataMapping&& other);
+    //JSONDataMapping& operator=(JSONDataMapping&& other);
 
     // return bool mandatory missing
     template <typename T>
@@ -55,15 +60,17 @@ class JSONDataMapping : public Configurable
     /// @brief Returns unit
     std::string& unitRef() { return unit_; }
     const std::string& unit() const { return unit_; }
+    std::string dimensionUnitStr();
 
     const std::string& jsonKey() const;
     void jsonKey(const std::string& json_key);
 
     bool active() const;
     void active(bool active);
+    bool canBeActive() const;
 
     bool hasVariable() { return variable_ != nullptr; }
-    DBOVariable& variable() const;
+    dbContent::Variable& variable() const;
 
     bool mandatory() const;
     void mandatory(bool mandatory);
@@ -96,15 +103,17 @@ class JSONDataMapping : public Configurable
     bool inArray() const;
     void inArray(bool inArray);
 
+    void check();
+
   private:
     bool initialized_{false};
 
     bool active_{false};
     std::string json_key_;
 
-    std::string db_object_name_;
-    std::string dbovariable_name_;
-    DBOVariable* variable_{nullptr};
+    std::string db_content_name_;
+    std::string dbcontent_variable_name_;
+    dbContent::Variable* variable_{nullptr};
 
     bool mandatory_{false};
 

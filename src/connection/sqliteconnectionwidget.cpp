@@ -17,7 +17,6 @@
 
 #include "sqliteconnectionwidget.h"
 #include "logger.h"
-#include "mysqlserver.h"
 #include "sqliteconnection.h"
 #include "files.h"
 

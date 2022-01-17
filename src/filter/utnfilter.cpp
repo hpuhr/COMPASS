@@ -18,8 +18,8 @@
 #include "utnfilter.h"
 #include "compass.h"
 #include "utnfilterwidget.h"
-#include "dbobject.h"
-#include "dbobjectmanager.h"
+#include "dbcontent/dbcontent.h"
+#include "dbcontent/dbcontentmanager.h"
 #include "logger.h"
 #include "stringconv.h"
 
@@ -36,7 +36,7 @@ UTNFilter::UTNFilter(const std::string& class_id, const std::string& instance_id
 
     name_ = "UTNs";
 
-    if (!COMPASS::instance().objectManager().hasAssociations())
+    if (!COMPASS::instance().dbContentManager().hasAssociations())
     {
         loginf << "UTNFilter: contructor: disabled since no associations";
 
@@ -53,28 +53,28 @@ UTNFilter::~UTNFilter() {}
 
 bool UTNFilter::filters(const std::string& dbo_type)
 {
-    if (!COMPASS::instance().objectManager().hasAssociations())
+    if (!COMPASS::instance().dbContentManager().hasAssociations())
         return false;
 
     return true;
 }
 
 std::string UTNFilter::getConditionString(const std::string& dbo_name, bool& first,
-                                          std::vector<DBOVariable*>& filtered_variables)
+                                          std::vector<dbContent::Variable*>& filtered_variables)
 {
     logdbg << "UTNFilter: getConditionString: dbo " << dbo_name << " active " << active_;
 
-    if (!COMPASS::instance().objectManager().hasAssociations())
+    if (!COMPASS::instance().dbContentManager().hasAssociations())
         return "";
 
     stringstream ss;
 
     if (active_)
     {
-        DBObjectManager& obj_man = COMPASS::instance().objectManager();
+        DBContentManager& obj_man = COMPASS::instance().dbContentManager();
         assert (obj_man.existsObject(dbo_name));
 
-        DBObject& object = obj_man.object(dbo_name);
+        DBContent& object = obj_man.object(dbo_name);
 
         if (!object.hasAssociations())
         {
@@ -137,7 +137,7 @@ void UTNFilter::generateSubConfigurable(const std::string& class_id,
         assert(!widget_);
         widget_ = new UTNFilterWidget(*this, class_id, instance_id);
 
-        if (!COMPASS::instance().objectManager().hasAssociations())
+        if (!COMPASS::instance().dbContentManager().hasAssociations())
         {
             widget_->setDisabled(true);
             widget_->setInvisible();
@@ -157,7 +157,7 @@ void UTNFilter::checkSubConfigurables()
         logdbg << "UTNFilter: checkSubConfigurables: generating my filter widget";
         widget_ = new UTNFilterWidget(*this, "UTNFilterWidget", instanceId() + "Widget0");
 
-        if (!COMPASS::instance().objectManager().hasAssociations())
+        if (!COMPASS::instance().dbContentManager().hasAssociations())
         {
             widget_->setDisabled(true);
             widget_->setInvisible();

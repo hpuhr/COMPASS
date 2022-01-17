@@ -1262,6 +1262,23 @@ void Configuration::removeSubConfiguration(const std::string& class_id,
     sub_configurations_.erase(sub_configurations_.find(key));
 }
 
+void Configuration::removeSubConfigurations(const std::string& class_id)
+{
+    logdbg << "Configuration: removeSubConfigurations: me " << class_id_;
+
+    std::vector<std::pair<std::string, std::string>> to_be_removed;
+
+    for (auto& sub_it : sub_configurations_)
+    {
+        if (sub_it.first.first == class_id)
+            to_be_removed.push_back(sub_it.first);
+    }
+
+    for (auto& sub_key_it : to_be_removed)
+        sub_configurations_.erase(sub_key_it);
+}
+
+
 // void Configuration::setTemplate (bool template_flag, const std::string& template_name)
 //{
 //    template_flag_ = template_flag;

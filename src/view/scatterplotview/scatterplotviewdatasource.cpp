@@ -22,8 +22,8 @@
 #include "compass.h"
 #include "configuration.h"
 #include "configurationmanager.h"
-#include "dbobject.h"
-#include "dbobjectmanager.h"
+#include "dbcontent/dbcontent.h"
+#include "dbcontent/dbcontentmanager.h"
 #include "job.h"
 #include "logger.h"
 #include "viewpoint.h"
@@ -39,22 +39,8 @@ using namespace nlohmann;
 ScatterPlotViewDataSource::ScatterPlotViewDataSource(const std::string& class_id,
                                              const std::string& instance_id, Configurable* parent)
     : QObject(),
-      Configurable(class_id, instance_id, parent),
-      selection_entries_(ViewSelection::getInstance().getEntries())
+      Configurable(class_id, instance_id, parent)
 {
-    // registerParameter ("use_selection", &use_selection_, true);
-
-    connect(&COMPASS::instance().objectManager(), SIGNAL(loadingStartedSignal()), this,
-            SLOT(loadingStartedSlot()));
-
-    for (auto& obj_it : COMPASS::instance().objectManager())
-    {
-        connect(obj_it.second, SIGNAL(newDataSignal(DBObject&)), this,
-                SLOT(newDataSlot(DBObject&)));
-        connect(obj_it.second, SIGNAL(loadingDoneSignal(DBObject&)), this,
-                SLOT(loadingDoneSlot(DBObject&)));
-    }
-
     createSubConfigurables();
 }
 
@@ -75,10 +61,10 @@ void ScatterPlotViewDataSource::generateSubConfigurable(const std::string& class
     logdbg << "ScatterPlotViewDataSource: generateSubConfigurable: class_id " << class_id
            << " instance_id " << instance_id;
 
-    if (class_id.compare("DBOVariableOrderedSet") == 0)
+    if (class_id.compare("VariableOrderedSet") == 0)
     {
         assert(set_ == 0);
-        set_ = new DBOVariableOrderedSet(class_id, instance_id, this);
+        set_ = new dbContent::VariableOrderedSet(class_id, instance_id, this);
     }
     else
         throw std::runtime_error(
@@ -89,10 +75,10 @@ void ScatterPlotViewDataSource::checkSubConfigurables()
 {
     if (set_ == nullptr)
     {
-        generateSubConfigurable("DBOVariableOrderedSet", "DBOVariableOrderedSet0");
+        generateSubConfigurable("VariableOrderedSet", "VariableOrderedSet0");
         assert(set_);
 
-        DBObjectManager& obj_man = COMPASS::instance().objectManager();
+        DBContentManager& obj_man = COMPASS::instance().dbContentManager();
 
         if (obj_man.existsMetaVariable("rec_num"))
             set_->add(obj_man.metaVariable("rec_num"));
@@ -152,12 +138,12 @@ void ScatterPlotViewDataSource::showViewPoint (const ViewableDataConfig* vp)
 
 bool ScatterPlotViewDataSource::addTemporaryVariable (const std::string& dbo_name, const std::string& var_name)
 {
-    DBObjectManager& obj_man = COMPASS::instance().objectManager();
+    DBContentManager& obj_man = COMPASS::instance().dbContentManager();
 
     if (dbo_name == META_OBJECT_NAME)
     {
         assert (obj_man.existsMetaVariable(var_name));
-        MetaDBOVariable& meta_var = obj_man.metaVariable(var_name);
+        dbContent::MetaVariable& meta_var = obj_man.metaVariable(var_name);
         if (!set_->hasMetaVariable(meta_var))
         {
             set_->add(meta_var);
@@ -169,10 +155,10 @@ bool ScatterPlotViewDataSource::addTemporaryVariable (const std::string& dbo_nam
     else
     {
         assert (obj_man.existsObject(dbo_name));
-        DBObject& obj = obj_man.object(dbo_name);
+        DBContent& obj = obj_man.object(dbo_name);
 
         assert (obj.hasVariable(var_name));
-        DBOVariable& var = obj.variable(var_name);
+        dbContent::Variable& var = obj.variable(var_name);
 
         if (!set_->hasVariable(var))
         {
@@ -186,44 +172,25 @@ bool ScatterPlotViewDataSource::addTemporaryVariable (const std::string& dbo_nam
 
 void ScatterPlotViewDataSource::removeTemporaryVariable (const std::string& dbo_name, const std::string& var_name)
 {
-    DBObjectManager& obj_man = COMPASS::instance().objectManager();
+    DBContentManager& obj_man = COMPASS::instance().dbContentManager();
 
     if (dbo_name == META_OBJECT_NAME)
     {
         assert (obj_man.existsMetaVariable(var_name));
-        MetaDBOVariable& meta_var = obj_man.metaVariable(var_name);
+        dbContent::MetaVariable& meta_var = obj_man.metaVariable(var_name);
         assert (set_->hasMetaVariable(meta_var));
         set_->removeMetaVariable(meta_var);
     }
     else
     {
         assert (obj_man.existsObject(dbo_name));
-        DBObject& obj = obj_man.object(dbo_name);
+        DBContent& obj = obj_man.object(dbo_name);
 
         assert (obj.hasVariable(var_name));
-        DBOVariable& var = obj.variable(var_name);
+        dbContent::Variable& var = obj.variable(var_name);
         assert (set_->hasVariable(var));
         set_->removeVariable(var);
     }
 }
 
-void ScatterPlotViewDataSource::loadingStartedSlot()
-{
-    logdbg << "ScatterPlotViewDataSource: loadingStartedSlot";
-    emit loadingStartedSignal();
-}
 
-void ScatterPlotViewDataSource::newDataSlot(DBObject& object)
-{
-    logdbg << "ScatterPlotViewDataSource: newDataSlot: object " << object.name();
-
-    std::shared_ptr<Buffer> buffer = object.data();
-    assert(buffer);
-
-    emit updateDataSignal(object, buffer);
-}
-
-void ScatterPlotViewDataSource::loadingDoneSlot(DBObject& object)
-{
-    logdbg << "ScatterPlotViewDataSource: loadingDoneSlot: object " << object.name();
-}

@@ -93,17 +93,6 @@ void UnitManager::checkSubConfigurables()
         dimensions_.at("Time")->addUnit("V6Time", 4096.0, "");
     }
 
-    if (dimensions_.count("Position") == 0)
-    {
-        addNewSubConfiguration("Dimension", "Position");
-        generateSubConfigurable("Dimension", "Position");
-
-        dimensions_.at("Position")->addUnit("Meter", 1.0, "");
-        dimensions_.at("Position")->addUnit("Kilometer", 1.0 / 1000.0, "");
-        dimensions_.at("Position")->addUnit("Mile", 1.0 / 1609.344, "");
-        dimensions_.at("Position")->addUnit("Nautical Mile", 1.0 / 1852.0, "");
-    }
-
     if (dimensions_.count("Speed") == 0)
     {
         addNewSubConfiguration("Dimension", "Speed");

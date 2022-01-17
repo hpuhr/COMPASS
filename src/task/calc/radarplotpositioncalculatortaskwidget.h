@@ -23,8 +23,12 @@
 class Buffer;
 class QLabel;
 class RadarPlotPositionCalculatorTask;
-class DBObjectComboBox;
-class DBOVariableSelectionWidget;
+class DBContentComboBox;
+
+namespace dbContent
+{
+class VariableSelectionWidget;
+}
 
 class QPushButton;
 
@@ -54,15 +58,15 @@ class RadarPlotPositionCalculatorTaskWidget : public TaskWidget
   protected:
     RadarPlotPositionCalculatorTask& task_;
 
-    DBObjectComboBox* object_box_{nullptr};
-    DBOVariableSelectionWidget* key_box_{nullptr};
-    DBOVariableSelectionWidget* datasource_box_{nullptr};
-    DBOVariableSelectionWidget* range_box_{nullptr};
-    DBOVariableSelectionWidget* azimuth_box_{nullptr};
-    DBOVariableSelectionWidget* altitude_box_{nullptr};
+    DBContentComboBox* object_box_{nullptr};
+    dbContent::VariableSelectionWidget* key_box_{nullptr};
+    dbContent::VariableSelectionWidget* datasource_box_{nullptr};
+    dbContent::VariableSelectionWidget* range_box_{nullptr};
+    dbContent::VariableSelectionWidget* azimuth_box_{nullptr};
+    dbContent::VariableSelectionWidget* altitude_box_{nullptr};
 
-    DBOVariableSelectionWidget* latitude_box_{nullptr};
-    DBOVariableSelectionWidget* longitude_box_{nullptr};
+    dbContent::VariableSelectionWidget* latitude_box_{nullptr};
+    dbContent::VariableSelectionWidget* longitude_box_{nullptr};
 
     void setDBOBject(const std::string& object_name);
 };

@@ -18,74 +18,98 @@
 #ifndef COMPASS_H_
 #define COMPASS_H_
 
+#include "configurable.h"
+#include "propertylist.h"
+#include "singleton.h"
+#include "json.hpp"
+#include "appmode.h"
+
+#include <QObject>
+
+#include <memory>
 #include <map>
 #include <set>
 #include <vector>
 
-#include "configurable.h"
-#include "propertylist.h"
-#include "singleton.h"
 
 class DBInterface;
-class DBObjectManager;
-class DBSchemaManager;
+class DBContentManager;
 class FilterManager;
 class TaskManager;
 class ViewManager;
 class SimpleConfig;
 class EvaluationManager;
+class MainWindow;
 
-class COMPASS : public Configurable, public Singleton
+class COMPASS : public QObject, public Configurable, public Singleton
 {
-  public:
-    ///@brief Destructor.
-    virtual ~COMPASS();
+    Q_OBJECT
 
-    // void initialize ();
+signals:
+    void appModeSwitchSignal (AppMode app_mode);
+
+public:
+    virtual ~COMPASS();
 
     virtual void generateSubConfigurable(const std::string& class_id,
                                          const std::string& instance_id);
 
+    void openDBFile(const std::string& filename);
+    void createNewDBFile(const std::string& filename);
+    bool dbOpened();
+    void closeDB();
+
     DBInterface& interface();
-    DBSchemaManager& schemaManager();
-    DBObjectManager& objectManager();
+    DBContentManager& dbContentManager();
     FilterManager& filterManager();
     TaskManager& taskManager();
     ViewManager& viewManager();
     SimpleConfig& config();
     EvaluationManager& evaluationManager();
 
-    bool ready();
-
-    ///@brief Shuts down the DB access.
     void shutdown();
 
-  protected:
-    // bool initialized_ {false};
+    MainWindow& mainWindow();
+
+protected:
+    bool db_opened_{false};
     bool shut_down_{false};
 
+    AppMode app_mode_ {AppMode::Offline};
+
     std::unique_ptr<SimpleConfig> simple_config_;
-    /// DB interface, encapsulating all database functionality.
     std::unique_ptr<DBInterface> db_interface_;
-    std::unique_ptr<DBObjectManager> dbo_manager_;
-    std::unique_ptr<DBSchemaManager> db_schema_manager_;
+    std::unique_ptr<DBContentManager> dbcontent_manager_;
     std::unique_ptr<FilterManager> filter_manager_;
     std::unique_ptr<TaskManager> task_manager_;
     std::unique_ptr<ViewManager> view_manager_;
     std::unique_ptr<EvaluationManager> eval_manager_;
 
+    std::string last_db_filename_;
+    nlohmann::json db_file_list_;
+
     virtual void checkSubConfigurables();
 
-    ///@brief Constructor.
+    MainWindow* main_window_;
+
     COMPASS();
 
-  public:
-    ///@brief Instance access function for Singleton.
+public:
     static COMPASS& instance()
     {
         static COMPASS instance;
         return instance;
     }
+    std::string lastDbFilename() const;
+    std::vector<std::string> dbFileList() const;
+    void clearDBFileList();
+    void addDBFileToList(const std::string filename);
+
+    AppMode appMode() const;
+    void appMode(const AppMode& app_mode);
+    std::string appModeStr() const;
+
+    static const std::map<AppMode, std::string>& appModes2Strings();
 };
 
 #endif /* COMPASS_H_ */

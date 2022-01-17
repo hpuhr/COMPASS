@@ -27,7 +27,7 @@
 #include <QTableWidget>
 #include <QVBoxLayout>
 
-#include "dbobject.h"
+#include "dbcontent/dbcontent.h"
 #include "dboeditdatasourceactionoptionswidget.h"
 #include "files.h"
 #include "managedatasourcestask.h"
@@ -49,9 +49,8 @@ DBOEditDataSourcesWidget::DBOEditDataSourcesWidget(ManageDataSourcesTask& task, 
 
     QVBoxLayout* sources_layout = new QVBoxLayout();
 
-    // check if additional columns are required
-    if (object_.hasCurrentDataSourceDefinition())
     {
+        // check if additional columns are required
         const DBODataSourceDefinition& ds_def = object_.currentDataSourceDefinition();
 
         // psr ranges
@@ -409,7 +408,7 @@ void DBOEditDataSourcesWidget::updateConfigDSTable()
             if (ds_it.second.hasSac())
             {
                 QTableWidgetItem* item =
-                    new QTableWidgetItem(QString::number((uint)ds_it.second.sac()));
+                        new QTableWidgetItem(QString::number((uint)ds_it.second.sac()));
                 item->setData(Qt::UserRole, QVariant(id));
                 config_ds_table_->setItem(row, col, item);
             }
@@ -427,7 +426,7 @@ void DBOEditDataSourcesWidget::updateConfigDSTable()
             if (ds_it.second.hasSic())
             {
                 QTableWidgetItem* item =
-                    new QTableWidgetItem(QString::number((uint)ds_it.second.sic()));
+                        new QTableWidgetItem(QString::number((uint)ds_it.second.sic()));
                 item->setData(Qt::UserRole, QVariant(id));
                 config_ds_table_->setItem(row, col, item);
             }
@@ -445,7 +444,7 @@ void DBOEditDataSourcesWidget::updateConfigDSTable()
             if (ds_it.second.hasLatitude())
             {
                 QTableWidgetItem* item =
-                    new QTableWidgetItem(QString::number(ds_it.second.latitude(), 'g', 10));
+                        new QTableWidgetItem(QString::number(ds_it.second.latitude(), 'g', 10));
                 item->setData(Qt::UserRole, QVariant(id));
                 config_ds_table_->setItem(row, col, item);
             }
@@ -463,7 +462,7 @@ void DBOEditDataSourcesWidget::updateConfigDSTable()
             if (ds_it.second.hasLongitude())
             {
                 QTableWidgetItem* item =
-                    new QTableWidgetItem(QString::number(ds_it.second.longitude(), 'g', 10));
+                        new QTableWidgetItem(QString::number(ds_it.second.longitude(), 'g', 10));
                 item->setData(Qt::UserRole, QVariant(id));
                 config_ds_table_->setItem(row, col, item);
             }
@@ -481,7 +480,7 @@ void DBOEditDataSourcesWidget::updateConfigDSTable()
             if (ds_it.second.hasAltitude())
             {
                 QTableWidgetItem* item =
-                    new QTableWidgetItem(QString::number(ds_it.second.altitude()));
+                        new QTableWidgetItem(QString::number(ds_it.second.altitude()));
                 item->setData(Qt::UserRole, QVariant(id));
                 config_ds_table_->setItem(row, col, item);
             }
@@ -500,7 +499,7 @@ void DBOEditDataSourcesWidget::updateConfigDSTable()
             if (ds_it.second.hasPrimaryRangeMin())
             {
                 QTableWidgetItem* item =
-                    new QTableWidgetItem(QString::number(ds_it.second.primaryRangeMin()));
+                        new QTableWidgetItem(QString::number(ds_it.second.primaryRangeMin()));
                 item->setData(Qt::UserRole, QVariant(id));
                 config_ds_table_->setItem(row, col, item);
             }
@@ -519,7 +518,7 @@ void DBOEditDataSourcesWidget::updateConfigDSTable()
             if (ds_it.second.hasPrimaryRangeMax())
             {
                 QTableWidgetItem* item =
-                    new QTableWidgetItem(QString::number(ds_it.second.primaryRangeMax()));
+                        new QTableWidgetItem(QString::number(ds_it.second.primaryRangeMax()));
                 item->setData(Qt::UserRole, QVariant(id));
                 config_ds_table_->setItem(row, col, item);
             }
@@ -539,7 +538,7 @@ void DBOEditDataSourcesWidget::updateConfigDSTable()
             if (ds_it.second.hasSecondaryRangeMin())
             {
                 QTableWidgetItem* item =
-                    new QTableWidgetItem(QString::number(ds_it.second.secondaryRangeMin()));
+                        new QTableWidgetItem(QString::number(ds_it.second.secondaryRangeMin()));
                 item->setData(Qt::UserRole, QVariant(id));
                 config_ds_table_->setItem(row, col, item);
             }
@@ -558,7 +557,7 @@ void DBOEditDataSourcesWidget::updateConfigDSTable()
             if (ds_it.second.hasSecondaryRangeMax())
             {
                 QTableWidgetItem* item =
-                    new QTableWidgetItem(QString::number(ds_it.second.secondaryRangeMax()));
+                        new QTableWidgetItem(QString::number(ds_it.second.secondaryRangeMax()));
                 item->setData(Qt::UserRole, QVariant(id));
                 config_ds_table_->setItem(row, col, item);
             }
@@ -578,7 +577,7 @@ void DBOEditDataSourcesWidget::updateConfigDSTable()
             if (ds_it.second.hasModeSRangeMin())
             {
                 QTableWidgetItem* item =
-                    new QTableWidgetItem(QString::number(ds_it.second.modeSRangeMin()));
+                        new QTableWidgetItem(QString::number(ds_it.second.modeSRangeMin()));
                 item->setData(Qt::UserRole, QVariant(id));
                 config_ds_table_->setItem(row, col, item);
             }
@@ -597,7 +596,7 @@ void DBOEditDataSourcesWidget::updateConfigDSTable()
             if (ds_it.second.hasModeSRangeMax())
             {
                 QTableWidgetItem* item =
-                    new QTableWidgetItem(QString::number(ds_it.second.modeSRangeMax()));
+                        new QTableWidgetItem(QString::number(ds_it.second.modeSRangeMax()));
                 item->setData(Qt::UserRole, QVariant(id));
                 config_ds_table_->setItem(row, col, item);
             }
@@ -617,7 +616,7 @@ void DBOEditDataSourcesWidget::updateConfigDSTable()
             if (ds_it.second.hasPrimaryAzimuthStdDev())
             {
                 QTableWidgetItem* item =
-                    new QTableWidgetItem(QString::number(ds_it.second.primaryAzimuthStdDev()));
+                        new QTableWidgetItem(QString::number(ds_it.second.primaryAzimuthStdDev()));
                 item->setData(Qt::UserRole, QVariant(id));
                 config_ds_table_->setItem(row, col, item);
             }
@@ -636,7 +635,7 @@ void DBOEditDataSourcesWidget::updateConfigDSTable()
             if (ds_it.second.hasPrimaryRangeStdDev())
             {
                 QTableWidgetItem* item =
-                    new QTableWidgetItem(QString::number(ds_it.second.primaryRangeStdDev()));
+                        new QTableWidgetItem(QString::number(ds_it.second.primaryRangeStdDev()));
                 item->setData(Qt::UserRole, QVariant(id));
                 config_ds_table_->setItem(row, col, item);
             }
@@ -656,7 +655,7 @@ void DBOEditDataSourcesWidget::updateConfigDSTable()
             if (ds_it.second.hasSecondaryAzimuthStdDev())
             {
                 QTableWidgetItem* item =
-                    new QTableWidgetItem(QString::number(ds_it.second.secondaryAzimuthStdDev()));
+                        new QTableWidgetItem(QString::number(ds_it.second.secondaryAzimuthStdDev()));
                 item->setData(Qt::UserRole, QVariant(id));
                 config_ds_table_->setItem(row, col, item);
             }
@@ -675,7 +674,7 @@ void DBOEditDataSourcesWidget::updateConfigDSTable()
             if (ds_it.second.hasSecondaryRangeStdDev())
             {
                 QTableWidgetItem* item =
-                    new QTableWidgetItem(QString::number(ds_it.second.secondaryRangeStdDev()));
+                        new QTableWidgetItem(QString::number(ds_it.second.secondaryRangeStdDev()));
                 item->setData(Qt::UserRole, QVariant(id));
                 config_ds_table_->setItem(row, col, item);
             }
@@ -695,7 +694,7 @@ void DBOEditDataSourcesWidget::updateConfigDSTable()
             if (ds_it.second.hasModeSAzimuthStdDev())
             {
                 QTableWidgetItem* item =
-                    new QTableWidgetItem(QString::number(ds_it.second.modeSAzimuthStdDev()));
+                        new QTableWidgetItem(QString::number(ds_it.second.modeSAzimuthStdDev()));
                 item->setData(Qt::UserRole, QVariant(id));
                 config_ds_table_->setItem(row, col, item);
             }
@@ -714,7 +713,7 @@ void DBOEditDataSourcesWidget::updateConfigDSTable()
             if (ds_it.second.hasModeSRangeStdDev())
             {
                 QTableWidgetItem* item =
-                    new QTableWidgetItem(QString::number(ds_it.second.modeSRangeStdDev()));
+                        new QTableWidgetItem(QString::number(ds_it.second.modeSRangeStdDev()));
                 item->setData(Qt::UserRole, QVariant(id));
                 config_ds_table_->setItem(row, col, item);
             }
@@ -783,7 +782,7 @@ void DBOEditDataSourcesWidget::updateDBDSTable()
             if (ds_it.second.hasSac())
             {
                 QTableWidgetItem* item =
-                    new QTableWidgetItem(QString::number((uint)ds_it.second.sac()));
+                        new QTableWidgetItem(QString::number((uint)ds_it.second.sac()));
                 item->setData(Qt::UserRole, QVariant(id));
                 db_ds_table_->setItem(row, col, item);
             }
@@ -801,7 +800,7 @@ void DBOEditDataSourcesWidget::updateDBDSTable()
             if (ds_it.second.hasSic())
             {
                 QTableWidgetItem* item =
-                    new QTableWidgetItem(QString::number((uint)ds_it.second.sic()));
+                        new QTableWidgetItem(QString::number((uint)ds_it.second.sic()));
                 item->setData(Qt::UserRole, QVariant(id));
                 db_ds_table_->setItem(row, col, item);
             }
@@ -819,7 +818,7 @@ void DBOEditDataSourcesWidget::updateDBDSTable()
             if (ds_it.second.hasLatitude())
             {
                 QTableWidgetItem* item =
-                    new QTableWidgetItem(QString::number(ds_it.second.latitude(), 'g', 10));
+                        new QTableWidgetItem(QString::number(ds_it.second.latitude(), 'g', 10));
                 item->setData(Qt::UserRole, QVariant(id));
                 db_ds_table_->setItem(row, col, item);
             }
@@ -837,7 +836,7 @@ void DBOEditDataSourcesWidget::updateDBDSTable()
             if (ds_it.second.hasLongitude())
             {
                 QTableWidgetItem* item =
-                    new QTableWidgetItem(QString::number(ds_it.second.longitude(), 'g', 10));
+                        new QTableWidgetItem(QString::number(ds_it.second.longitude(), 'g', 10));
                 item->setData(Qt::UserRole, QVariant(id));
                 db_ds_table_->setItem(row, col, item);
             }
@@ -855,7 +854,7 @@ void DBOEditDataSourcesWidget::updateDBDSTable()
             if (ds_it.second.hasAltitude())
             {
                 QTableWidgetItem* item =
-                    new QTableWidgetItem(QString::number(ds_it.second.altitude()));
+                        new QTableWidgetItem(QString::number(ds_it.second.altitude()));
                 item->setData(Qt::UserRole, QVariant(id));
                 db_ds_table_->setItem(row, col, item);
             }
@@ -875,7 +874,7 @@ void DBOEditDataSourcesWidget::updateDBDSTable()
             if (ds_it.second.hasPrimaryRangeMin())
             {
                 QTableWidgetItem* item =
-                    new QTableWidgetItem(QString::number(ds_it.second.primaryRangeMin()));
+                        new QTableWidgetItem(QString::number(ds_it.second.primaryRangeMin()));
                 item->setData(Qt::UserRole, QVariant(id));
                 db_ds_table_->setItem(row, col, item);
             }
@@ -894,7 +893,7 @@ void DBOEditDataSourcesWidget::updateDBDSTable()
             if (ds_it.second.hasPrimaryRangeMax())
             {
                 QTableWidgetItem* item =
-                    new QTableWidgetItem(QString::number(ds_it.second.primaryRangeMax()));
+                        new QTableWidgetItem(QString::number(ds_it.second.primaryRangeMax()));
                 item->setData(Qt::UserRole, QVariant(id));
                 db_ds_table_->setItem(row, col, item);
             }
@@ -914,7 +913,7 @@ void DBOEditDataSourcesWidget::updateDBDSTable()
             if (ds_it.second.hasSecondaryRangeMin())
             {
                 QTableWidgetItem* item =
-                    new QTableWidgetItem(QString::number(ds_it.second.secondaryRangeMin()));
+                        new QTableWidgetItem(QString::number(ds_it.second.secondaryRangeMin()));
                 item->setData(Qt::UserRole, QVariant(id));
                 db_ds_table_->setItem(row, col, item);
             }
@@ -933,7 +932,7 @@ void DBOEditDataSourcesWidget::updateDBDSTable()
             if (ds_it.second.hasSecondaryRangeMax())
             {
                 QTableWidgetItem* item =
-                    new QTableWidgetItem(QString::number(ds_it.second.secondaryRangeMax()));
+                        new QTableWidgetItem(QString::number(ds_it.second.secondaryRangeMax()));
                 item->setData(Qt::UserRole, QVariant(id));
                 db_ds_table_->setItem(row, col, item);
             }
@@ -953,7 +952,7 @@ void DBOEditDataSourcesWidget::updateDBDSTable()
             if (ds_it.second.hasModeSRangeMin())
             {
                 QTableWidgetItem* item =
-                    new QTableWidgetItem(QString::number(ds_it.second.modeSRangeMin()));
+                        new QTableWidgetItem(QString::number(ds_it.second.modeSRangeMin()));
                 item->setData(Qt::UserRole, QVariant(id));
                 db_ds_table_->setItem(row, col, item);
             }
@@ -972,7 +971,7 @@ void DBOEditDataSourcesWidget::updateDBDSTable()
             if (ds_it.second.hasModeSRangeMax())
             {
                 QTableWidgetItem* item =
-                    new QTableWidgetItem(QString::number(ds_it.second.modeSRangeMax()));
+                        new QTableWidgetItem(QString::number(ds_it.second.modeSRangeMax()));
                 item->setData(Qt::UserRole, QVariant(id));
                 db_ds_table_->setItem(row, col, item);
             }
@@ -992,7 +991,7 @@ void DBOEditDataSourcesWidget::updateDBDSTable()
             if (ds_it.second.hasPrimaryAzimuthStdDev())
             {
                 QTableWidgetItem* item =
-                    new QTableWidgetItem(QString::number(ds_it.second.primaryAzimuthStdDev()));
+                        new QTableWidgetItem(QString::number(ds_it.second.primaryAzimuthStdDev()));
                 item->setData(Qt::UserRole, QVariant(id));
                 db_ds_table_->setItem(row, col, item);
             }
@@ -1011,7 +1010,7 @@ void DBOEditDataSourcesWidget::updateDBDSTable()
             if (ds_it.second.hasPrimaryRangeStdDev())
             {
                 QTableWidgetItem* item =
-                    new QTableWidgetItem(QString::number(ds_it.second.primaryRangeStdDev()));
+                        new QTableWidgetItem(QString::number(ds_it.second.primaryRangeStdDev()));
                 item->setData(Qt::UserRole, QVariant(id));
                 db_ds_table_->setItem(row, col, item);
             }
@@ -1031,7 +1030,7 @@ void DBOEditDataSourcesWidget::updateDBDSTable()
             if (ds_it.second.hasSecondaryAzimuthStdDev())
             {
                 QTableWidgetItem* item =
-                    new QTableWidgetItem(QString::number(ds_it.second.secondaryAzimuthStdDev()));
+                        new QTableWidgetItem(QString::number(ds_it.second.secondaryAzimuthStdDev()));
                 item->setData(Qt::UserRole, QVariant(id));
                 db_ds_table_->setItem(row, col, item);
             }
@@ -1050,7 +1049,7 @@ void DBOEditDataSourcesWidget::updateDBDSTable()
             if (ds_it.second.hasSecondaryRangeStdDev())
             {
                 QTableWidgetItem* item =
-                    new QTableWidgetItem(QString::number(ds_it.second.secondaryRangeStdDev()));
+                        new QTableWidgetItem(QString::number(ds_it.second.secondaryRangeStdDev()));
                 item->setData(Qt::UserRole, QVariant(id));
                 db_ds_table_->setItem(row, col, item);
             }
@@ -1070,7 +1069,7 @@ void DBOEditDataSourcesWidget::updateDBDSTable()
             if (ds_it.second.hasModeSAzimuthStdDev())
             {
                 QTableWidgetItem* item =
-                    new QTableWidgetItem(QString::number(ds_it.second.modeSAzimuthStdDev()));
+                        new QTableWidgetItem(QString::number(ds_it.second.modeSAzimuthStdDev()));
                 item->setData(Qt::UserRole, QVariant(id));
                 db_ds_table_->setItem(row, col, item);
             }
@@ -1089,7 +1088,7 @@ void DBOEditDataSourcesWidget::updateDBDSTable()
             if (ds_it.second.hasModeSRangeStdDev())
             {
                 QTableWidgetItem* item =
-                    new QTableWidgetItem(QString::number(ds_it.second.modeSRangeStdDev()));
+                        new QTableWidgetItem(QString::number(ds_it.second.modeSRangeStdDev()));
                 item->setData(Qt::UserRole, QVariant(id));
                 db_ds_table_->setItem(row, col, item);
             }

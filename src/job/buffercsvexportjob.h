@@ -22,13 +22,13 @@
 
 #include "boost/date_time/posix_time/posix_time.hpp"
 #include "buffer.h"
-#include "dbovariableset.h"
+#include "dbcontent/variable/variableset.h"
 #include "job.h"
 
 class BufferCSVExportJob : public Job
 {
   public:
-    BufferCSVExportJob(std::shared_ptr<Buffer> buffer, const DBOVariableSet& read_set,
+    BufferCSVExportJob(std::shared_ptr<Buffer> buffer, const dbContent::VariableSet& read_set,
                        const std::string& file_name, bool overwrite, bool only_selected,
                        bool use_presentation, bool show_associations);
     virtual ~BufferCSVExportJob();
@@ -37,7 +37,7 @@ class BufferCSVExportJob : public Job
 
   protected:
     std::shared_ptr<Buffer> buffer_;
-    DBOVariableSet read_set_;
+    dbContent::VariableSet read_set_;
 
     std::string file_name_;
     bool overwrite_;

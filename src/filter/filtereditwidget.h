@@ -23,7 +23,6 @@
 
 #include "configuration.h"
 
-class DBOVariableSelectionWidget;
 class FilterConditionOperatorComboBox;
 class FilterConditionResetValueComboBox;
 class QGridLayout;
@@ -33,6 +32,11 @@ class QComboBox;
 class QPushButton;
 class DBFilterCondition;
 class DBFilter;
+
+namespace dbContent
+{
+class VariableSelectionWidget;
+}
 
 class FilterEditWidget : public QWidget
 {
@@ -55,7 +59,7 @@ class FilterEditWidget : public QWidget
   protected:
     DBFilter* filter_;
     QLineEdit* filter_name_;
-    DBOVariableSelectionWidget* condition_variable_widget_;
+    dbContent::VariableSelectionWidget* condition_variable_widget_;
     QCheckBox* condition_absolute_;
     FilterConditionOperatorComboBox* condition_combo_;
     FilterConditionResetValueComboBox* condition_reset_combo_;
@@ -63,7 +67,7 @@ class FilterEditWidget : public QWidget
 
     QGridLayout* conditions_grid_;
     std::map<QPushButton*, DBFilterCondition*> conditions_delete_buttons_;
-    std::map<DBOVariableSelectionWidget*, DBFilterCondition*> conditions_variable_selects_;
+    std::map<dbContent::VariableSelectionWidget*, DBFilterCondition*> conditions_variable_selects_;
     std::map<QCheckBox*, DBFilterCondition*> conditions_abs_checkboxes_;
     std::map<FilterConditionOperatorComboBox*, DBFilterCondition*> conditions_operator_combos_;
     std::map<FilterConditionResetValueComboBox*, DBFilterCondition*> conditions_reset_value_combos_;

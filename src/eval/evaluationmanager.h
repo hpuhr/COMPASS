@@ -34,8 +34,13 @@
 
 class COMPASS;
 class EvaluationStandard;
-class DBObject;
-class DBOVariableSet;
+class DBContent;
+
+namespace dbContent {
+
+class VariableSet;
+
+}
 
 class QWidget;
 class QTabWidget;
@@ -52,8 +57,12 @@ signals:
     void resultsChangedSignal();
 
 public slots:
-    void newDataSlot(DBObject& object);
-    void loadingDoneSlot(DBObject& object);
+
+    void databaseOpenedSlot();
+    void databaseClosedSlot();
+
+    void newDataSlot(DBContent& object);
+    void loadingDoneSlot(DBContent& object);
 
 public:
     EvaluationManager(const std::string& class_id, const std::string& instance_id, COMPASS* compass);
@@ -72,7 +81,7 @@ public:
     void close();
 
     bool needsAdditionalVariables ();
-    void addVariables (const std::string dbo_name, DBOVariableSet& read_set);
+    void addVariables (const std::string dbo_name, dbContent::VariableSet& read_set);
 
     virtual void generateSubConfigurable(const std::string& class_id,
                                          const std::string& instance_id) override;
@@ -80,7 +89,6 @@ public:
     EvaluationManagerWidget* widget();
 
     bool sectorsLoaded() const;
-    void loadSectors();
 
     bool hasSectorLayer (const std::string& layer_name);
     //void renameSectorLayer (const std::string& name, const std::string& new_name);
@@ -329,8 +337,6 @@ public:
     double resultDetailZoom() const;
     void resultDetailZoom(double result_detail_zoom);
 
-
-
 protected:
     COMPASS& compass_;
 
@@ -461,13 +467,15 @@ protected:
 
     virtual void checkSubConfigurables() override;
 
+    void loadSectors();
+
     void updateReferenceDBO();
     void updateReferenceDataSources();
-    void updateReferenceDataSourcesActive();
+    //void updateReferenceDataSourcesActive();
 
     void updateTestDBO();
     void updateTestDataSources();
-    void updateTestDataSourcesActive();
+    //void updateTestDataSourcesActive();
 
     nlohmann::json::object_t getBaseViewableDataConfig ();
     nlohmann::json::object_t getBaseViewableNoDataConfig ();

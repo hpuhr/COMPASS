@@ -22,15 +22,15 @@
 #include <QVBoxLayout>
 
 #include "compass.h"
-#include "dbobjectmanager.h"
-#include "dbobjectmanagerwidget.h"
+#include "dbcontent/dbcontentmanager.h"
+#include "dbcontent/dbcontentmanagerwidget.h"
 
 ManageDBObjectsTaskWidget::ManageDBObjectsTaskWidget(ManageDBObjectsTask& task, QWidget* parent)
     : TaskWidget(parent), task_(task)
 {
     QVBoxLayout* main_layout_ = new QVBoxLayout();
 
-    object_manager_widget_ = COMPASS::instance().objectManager().widget();
+    object_manager_widget_ = COMPASS::instance().dbContentManager().widget();
     main_layout_->addWidget(object_manager_widget_);
 
     expertModeChangedSlot();

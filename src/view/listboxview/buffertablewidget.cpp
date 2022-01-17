@@ -30,17 +30,16 @@
 #include "boost/date_time/posix_time/posix_time.hpp"
 #include "buffer.h"
 #include "buffertablemodel.h"
-#include "dbobject.h"
-#include "dbobjectmanager.h"
-#include "dbovariable.h"
-#include "dbovariableset.h"
+#include "dbcontent/dbcontent.h"
+#include "dbcontent/dbcontentmanager.h"
+#include "dbcontent/variable/variable.h"
+#include "dbcontent/variable/variableset.h"
 #include "listboxviewdatasource.h"
 #include "logger.h"
-#include "viewselection.h"
 
 // using namespace Utils;
 
-BufferTableWidget::BufferTableWidget(DBObject& object, ListBoxView& view,
+BufferTableWidget::BufferTableWidget(DBContent& object, ListBoxView& view,
                                      ListBoxViewDataSource& data_source, QWidget* parent,
                                      Qt::WindowFlags f)
     : QWidget(parent, f), object_(object), view_(view), data_source_(data_source)
@@ -55,7 +54,8 @@ BufferTableWidget::BufferTableWidget(DBObject& object, ListBoxView& view,
     model_ = new BufferTableModel(this, object_, data_source_);
     table_->setModel(model_);
 
-    connect(model_, SIGNAL(exportDoneSignal(bool)), this, SLOT(exportDoneSlot(bool)));
+    connect(model_, &BufferTableModel::exportDoneSignal,
+            this, &BufferTableWidget::exportDoneSlot);
 
     layout->addWidget(table_);
     table_->show();

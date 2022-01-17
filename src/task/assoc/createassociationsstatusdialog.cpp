@@ -18,8 +18,8 @@
 #include "createassociationsstatusdialog.h"
 #include "compass.h"
 #include "createassociationstask.h"
-#include "dbobject.h"
-#include "dbobjectmanager.h"
+#include "dbcontent/dbcontent.h"
+#include "dbcontent/dbcontentmanager.h"
 #include "logger.h"
 #include "stringconv.h"
 
@@ -259,7 +259,7 @@ void CreateAssociationsStatusDialog::updateDBOAssociatedGrid()
         dbo_associated_grid_->addWidget(percent_label, row, 3);
     }
 
-    for (auto& dbo_it : COMPASS::instance().objectManager())
+    for (auto& dbo_it : COMPASS::instance().dbContentManager())
     {
         ++row;
 

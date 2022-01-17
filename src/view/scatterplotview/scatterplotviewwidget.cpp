@@ -118,10 +118,6 @@ ScatterPlotViewWidget::~ScatterPlotViewWidget()
 
 /*
  */
-void ScatterPlotViewWidget::updateView() {}
-
-/*
- */
 void ScatterPlotViewWidget::toggleConfigWidget()
 {
     assert(config_widget_);

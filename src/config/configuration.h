@@ -162,6 +162,7 @@ class Configuration
     Configuration& getSubConfiguration(const std::string& class_id, const std::string& instance_id);
     /// @brief Removes a sub-configuration
     void removeSubConfiguration(const std::string& class_id, const std::string& instance_id);
+    void removeSubConfigurations(const std::string& class_id);
 
     /// @brief Returns the instance identifier
     const std::string& getInstanceId() { return instance_id_; }

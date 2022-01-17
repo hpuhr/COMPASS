@@ -18,72 +18,140 @@
 #ifndef MAINWINDOW_H_
 #define MAINWINDOW_H_
 
+#include "global.h"
+#include "appmode.h"
+
 #include <QMainWindow>
 
-#include "global.h"
-
-//#include "JobOrderer.h"
-
+class QLabel;
 class QPushButton;
-class DBSelectionWidget;
-class DBSchemaManagerWidget;
-class DBObjectManagerWidget;
-class MainLoadWidget;
 class QTabWidget;
 class QCheckBox;
 class QMenu;
 class QPushButton;
-class TaskManagerWidget;
+class QAction;
 
-/**
- * @brief Main window which embeds all other components
- *
- * When started, allows management of database connection and schema. When database is opened,
- * a stack widget is used to display the main widget with further components.
- *
- * Also handles shutdown behavior using the closeEvent() function.
- */
+class DBSelectionWidget;
+class DBSchemaManagerWidget;
+class DBContentManagerWidget;
+class MainLoadWidget;
+
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
-  signals:
-    void startedSignal();
+private slots:
 
-  private slots:
-    /// @brief Called when database was opened
-    void databaseOpenedSlot();
-    /// @brief If database is open, switch to ManagementWidget
-    void startSlot();
+    void newDBSlot();
+    void openExistingDBSlot();
+    void openRecentDBSlot();
+    void clearExistingDBsSlot();
+    void closeDBSlot();
 
-    /// @brief Handles key press events
-    // void keyPressEvent ( QKeyEvent * event );
+    void saveConfigSlot();
+
+    void quitWOConfigSlot();
+    void quitSlot();
+
+    void loadButtonSlot();
+    void loadingDoneSlot();
+
+    void livePauseSlot();
+    void liveStopSlot();
+
+    void importAsterixRecordingSlot();
+    void importRecentAsterixRecordingSlot();
+    void importAsterixFromNetworkSlot();
+
+    void configureMetaVariablesSlot();
 
     void quitRequestedSlot();
     void showAddViewMenuSlot();
 
-  public:
-    /// @brief Constructor
+    void appModeSwitchSlot (AppMode app_mode);
+
+public:
     MainWindow();
-    /// @brief Destructor
     virtual ~MainWindow();
 
     void disableConfigurationSaving();
     void showEvaluationTab();
     void showViewPointsTab();
 
+    void createAndOpenNewSqlite3DB(const std::string& filename);
+    void openSqlite3DB(const std::string& filename);
+
+    void importASTERIXFile(const std::string& filename);
+    void importASTERIXFromNetwork();
+    void importASTERIXFromNetworkTimeOffset(float value);
+
+    float importASTERIXFromNetworkTimeOffset();
+    //    void asterixFraming(const std::string& asterix_framing);
+    //    void asterixDecoderConfig(const std::string& asterix_decoder_cfg);
+    //    bool asterixOptionsSet() const;
+    //    void setAsterixOptions();
+
+    void loadData(bool value);
+    void quit(bool value);
+    bool quitNeeded();
+
+    bool automaticTasksDefined() const;
+    void performAutomaticTasks ();
+
+    void updateMenus();
+    void updateBottomWidget();
+
 protected:
     bool started_ {false};
-    /// Widget stack for startup to usage switch
     QTabWidget* tab_widget_{nullptr};
-
-    TaskManagerWidget* task_manager_widget_{nullptr};
-
-    MainLoadWidget* management_widget_{nullptr};
 
     QPushButton* add_view_button_{nullptr};
 
     bool save_configuration_{true};
+
+    // command line defined tasks
+    bool automatic_tasks_defined_ {false};
+    bool sqlite3_create_new_db_ {false};
+    std::string sqlite3_create_new_db_filename_;
+
+    bool sqlite3_open_db_ {false};
+    std::string sqlite3_open_db_filename_;
+
+    bool asterix_import_file_ {false};
+    std::string asterix_import_filename_;
+    bool asterix_import_network_ {false};
+    float asterix_import_network_time_offset_ {0};
+    //    bool set_asterix_framing_ {false};
+    //    std::string asterix_framing_;
+    //    bool set_asterix_decoder_cfg_ {false};
+    //    std::string asterix_decoder_cfg_;
+
+    bool load_data_ {false};
+    bool quit_ {false};
+
+    // menu
+
+    // file menu
+    QAction* new_db_action_ {nullptr};
+    QAction* open_existing_db_action_ {nullptr};
+    QMenu* open_recent_db_menu_ {nullptr};
+    QAction* close_db_action_ {nullptr};
+
+    // import menu
+    QMenu* import_menu_ {nullptr};
+
+    QMenu* import_recent_asterix_menu_ {nullptr};
+
+    bool loading_{false};
+
+    QLabel* db_label_{nullptr};
+    QLabel* status_label_{nullptr};
+    QPushButton* load_button_{nullptr};
+
+    QPushButton* live_pause_button_{nullptr};
+    QPushButton* live_stop_button_{nullptr};
+
+    void createMenus ();
 
     /// @brief Called when application closes
     void closeEvent(QCloseEvent* event);

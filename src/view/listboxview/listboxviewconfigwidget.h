@@ -20,9 +20,9 @@
 
 #include <QWidget>
 
-#include "dbovariable.h"
+#include "dbcontent/variable/variable.h"
 
-class DBOVariableOrderedSetWidget;
+class VariableOrderedSetWidget;
 class ListBoxView;
 
 class QComboBox;
@@ -62,7 +62,6 @@ class ListBoxViewConfigWidget : public QWidget
 
   signals:
     void exportSignal(bool overwrite);
-    void reloadRequestedSignal();  // reload from database
 
   public:
     /// @brief Constructor

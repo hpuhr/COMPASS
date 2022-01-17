@@ -22,14 +22,16 @@
 
 #include "compass.h"
 #include "dboassociationcollection.h"
-#include "dbobject.h"
-#include "dbobjectmanager.h"
-#include "dbovariable.h"
-#include "dbovariableorderedset.h"
-#include "metadbovariable.h"
+#include "dbcontent/dbcontent.h"
+#include "dbcontent/dbcontentmanager.h"
+#include "dbcontent/variable/variable.h"
+#include "dbcontent/variable/variableorderedset.h"
+#include "dbcontent/variable/metavariable.h"
+
+using namespace dbContent;
 
 AllBufferCSVExportJob::AllBufferCSVExportJob(
-    std::map<std::string, std::shared_ptr<Buffer>> buffers, DBOVariableOrderedSet* read_set,
+    std::map<std::string, std::shared_ptr<Buffer>> buffers, VariableOrderedSet* read_set,
     std::map<unsigned int, std::string> number_to_dbo,
     const std::vector<std::pair<unsigned int, unsigned int>>& row_indexes,
     const std::string& file_name, bool overwrite, bool only_selected, bool use_presentation,
@@ -94,7 +96,7 @@ void AllBufferCSVExportJob::run()
         output_file << ss.str() << "\n";
 
         // write the data
-        DBObjectManager& manager = COMPASS::instance().objectManager();
+        DBContentManager& manager = COMPASS::instance().dbContentManager();
 
         for (auto& row_index_it : row_indexes_)
         {
@@ -110,8 +112,8 @@ void AllBufferCSVExportJob::run()
 
             assert(buffer_index < buffer->size());
 
-            assert(buffer->has<bool>("selected"));
-            NullableVector<bool>& selected_vec = buffer->get<bool>("selected");
+            assert(buffer->has<bool>(DBContent::selected_var.name()));
+            NullableVector<bool>& selected_vec = buffer->get<bool>(DBContent::selected_var.name());
 
             assert(buffer->has<int>("rec_num"));
             NullableVector<int>& rec_num_vec = buffer->get<int>("rec_num");
@@ -172,7 +174,7 @@ void AllBufferCSVExportJob::run()
                     assert(manager.object(dbo_name).hasVariable(variable_name));
                 }
 
-                DBOVariable& variable = (variable_dbo_name == META_OBJECT_NAME)
+                Variable& variable = (variable_dbo_name == META_OBJECT_NAME)
                                             ? manager.metaVariable(variable_name).getFor(dbo_name)
                                             : manager.object(dbo_name).variable(variable_name);
 

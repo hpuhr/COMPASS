@@ -21,10 +21,10 @@
 #include "buffer.h"
 #include "createartasassociationstask.h"
 #include "dbinterface.h"
-#include "dbobject.h"
-#include "dbobjectmanager.h"
-#include "dbovariable.h"
-#include "metadbovariable.h"
+#include "dbcontent/dbcontent.h"
+#include "dbcontent/dbcontentmanager.h"
+#include "dbcontent/variable/variable.h"
+#include "dbcontent/variable/metavariable.h"
 #include "stringconv.h"
 
 #include <math.h>
@@ -67,7 +67,7 @@ void CreateARTASAssociationsJob::run()
 
     loginf << "CreateARTASAssociationsJob: run: clearing associations";
 
-    DBObjectManager& object_man = COMPASS::instance().objectManager();
+    DBContentManager& object_man = COMPASS::instance().dbContentManager();
 
     object_man.removeAssociations();
 
@@ -360,8 +360,8 @@ void CreateARTASAssociationsJob::createARTASAssociations()
 {
     loginf << "CreateARTASAssociationsJob: createARTASAssociations";
 
-    DBObjectManager& object_man = COMPASS::instance().objectManager();
-    DBObject& tracker_object = object_man.object(tracker_dbo_name_);
+    DBContentManager& object_man = COMPASS::instance().dbContentManager();
+    DBContent& tracker_object = object_man.object(tracker_dbo_name_);
 
     for (auto& ut_it : finished_tracks_)                    // utn -> UAT
         for (auto& assoc_it : ut_it.second.rec_nums_tris_)  // rec_num -> tri
@@ -373,7 +373,7 @@ void CreateARTASAssociationsJob::createSensorAssociations()
     loginf << "CreateARTASAssociationsJob: createSensorAssociations";
     // for each rec_num + tri, find sensor hash + rec_num
 
-    DBObjectManager& object_man = COMPASS::instance().objectManager();
+    DBContentManager& object_man = COMPASS::instance().dbContentManager();
 
     for (auto& dbo_it : object_man)
     {
@@ -580,7 +580,7 @@ bool CreateARTASAssociationsJob::isTimeAtBeginningOrEnd(float tod_track)
            (fabs(last_track_tod_ - tod_track) <= misses_acceptable_time_);
 }
 
-void CreateARTASAssociationsJob::createSensorHashes(DBObject& object)
+void CreateARTASAssociationsJob::createSensorHashes(DBContent& object)
 {
     loginf << "CreateARTASAssociationsJob: createSensorHashes: object " << object.name();
 
@@ -594,13 +594,15 @@ void CreateARTASAssociationsJob::createSensorHashes(DBObject& object)
     std::shared_ptr<Buffer> buffer = buffers_.at(dbo_name);
     size_t buffer_size = buffer->size();
 
-    MetaDBOVariable* key_meta_var = task_.keyVar();
-    MetaDBOVariable* hash_meta_var = task_.hashVar();
-    MetaDBOVariable* tod_meta_var = task_.todVar();
+    using namespace dbContent;
 
-    DBOVariable& key_var = key_meta_var->getFor(dbo_name);
-    DBOVariable& hash_var = hash_meta_var->getFor(dbo_name);
-    DBOVariable& tod_var = tod_meta_var->getFor(dbo_name);
+    MetaVariable* key_meta_var = task_.keyVar();
+    MetaVariable* hash_meta_var = task_.hashVar();
+    MetaVariable* tod_meta_var = task_.todVar();
+
+    Variable& key_var = key_meta_var->getFor(dbo_name);
+    Variable& hash_var = hash_meta_var->getFor(dbo_name);
+    Variable& tod_var = tod_meta_var->getFor(dbo_name);
 
     assert(buffer->has<int>(key_var.name()));
     assert(buffer->has<std::string>(hash_var.name()));

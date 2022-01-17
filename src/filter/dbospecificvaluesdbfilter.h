@@ -20,8 +20,12 @@
 
 #include "dbfilter.h"
 
-class DBObject;
-class DBOVariable;
+class DBContent;
+
+namespace dbContent
+{
+class Variable;
+}
 
 class DBOSpecificValuesDBFilter : public DBFilter
 {
@@ -31,7 +35,7 @@ public:
     virtual ~DBOSpecificValuesDBFilter() override;
 
     virtual std::string getConditionString(const std::string& dbo_name, bool& first,
-                                           std::vector<DBOVariable*>& filtered_variables) override;
+                                           std::vector<dbContent::Variable*>& filtered_variables) override;
 
     virtual bool filters(const std::string& dbo_name) override;
 
@@ -42,8 +46,8 @@ protected:
   std::string variable_name_;
   std::string condition_operator_; // operator to be used in generated conditions
 
-  DBObject* object_{nullptr};
-  DBOVariable* variable_ {nullptr};
+  DBContent* object_{nullptr};
+  dbContent::Variable* variable_ {nullptr};
 
   std::string ds_column_name_;
 

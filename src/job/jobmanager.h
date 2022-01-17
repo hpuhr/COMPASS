@@ -35,7 +35,6 @@
 class WorkerThread;
 // class DBJob;
 class Job;
-class JobManagerWidget;
 
 /**
  * @brief Manages execution of TransformationJobs
@@ -85,8 +84,6 @@ class JobManager : public QThread, public Singleton, public Configurable
         return instance;
     }
 
-    JobManagerWidget* widget();
-
   protected:
     /// Flag indicating if thread should stop.
     volatile bool stop_requested_;
@@ -104,14 +101,10 @@ class JobManager : public QThread, public Singleton, public Configurable
     std::shared_ptr<Job> active_db_job_;
     tbb::concurrent_queue<std::shared_ptr<Job>> queued_db_jobs_;
 
-    JobManagerWidget* widget_;
-
     boost::posix_time::ptime last_update_time_;
 
     /// @brief Constructor
     JobManager();
-
-    void updateWidget(bool really = false);
 
   private:
     void run();

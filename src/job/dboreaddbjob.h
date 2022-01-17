@@ -19,11 +19,11 @@
 #define DBOREADDBJOB_H_
 
 #include "boost/date_time/posix_time/posix_time.hpp"
-#include "dbovariableset.h"
+#include "dbcontent/variable/variableset.h"
 #include "job.h"
 
 class Buffer;
-class DBObject;
+class DBContent;
 class DBInterface;
 
 /**
@@ -35,30 +35,31 @@ class DBInterface;
 class DBOReadDBJob : public Job
 {
     Q_OBJECT
+
   signals:
     void intermediateSignal(std::shared_ptr<Buffer> buffer);
 
   public:
-    DBOReadDBJob(DBInterface& db_interface, DBObject& dbobject, DBOVariableSet read_list,
-                 std::string custom_filter_clause, std::vector<DBOVariable*> filtered_variables,
-                 bool use_order, DBOVariable* order_variable, bool use_order_ascending,
+    DBOReadDBJob(DBInterface& db_interface, DBContent& dbobject, dbContent::VariableSet read_list,
+                 std::string custom_filter_clause, std::vector<dbContent::Variable*> filtered_variables,
+                 bool use_order, dbContent::Variable* order_variable, bool use_order_ascending,
                  const std::string& limit_str);
     virtual ~DBOReadDBJob();
 
     virtual void run();
 
-    DBOVariableSet& readList() { return read_list_; }
+    dbContent::VariableSet& readList() { return read_list_; }
 
     unsigned int rowCount() const;
 
   protected:
     DBInterface& db_interface_;
-    DBObject& dbobject_;
-    DBOVariableSet read_list_;
+    DBContent& dbobject_;
+    dbContent::VariableSet read_list_;
     std::string custom_filter_clause_;
-    std::vector<DBOVariable*> filtered_variables_;
+    std::vector<dbContent::Variable*> filtered_variables_;
     bool use_order_;
-    DBOVariable* order_variable_;
+    dbContent::Variable* order_variable_;
     bool use_order_ascending_;
     std::string limit_str_;
 

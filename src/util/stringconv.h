@@ -152,8 +152,17 @@ inline double timeFromString(std::string time_str, bool* ok=nullptr)
     }
 
     time = std::stod(chunks[0]) * 3600.0;
-    time += std::stod(chunks[1]) * 60.0;
-    time += std::stod(chunks[2]);
+
+    if (time >= 0)
+    {
+        time += std::stod(chunks[1]) * 60.0;
+        time += std::stod(chunks[2]);
+    }
+    else
+    {
+        time -= std::stod(chunks[1]) * 60.0;
+        time -= std::stod(chunks[2]);
+    }
 
     if (ok)
         *ok = true;
@@ -362,6 +371,25 @@ inline std::string latexString(std::string str)
 
     return str;
 }
+
+inline std::string ipFromString(const std::string& name)
+{
+    // string like "224.9.2.252:15040"
+
+    std::vector<std::string> parts = split(name, ':');
+    assert (parts.size() == 2);
+    return parts.at(0);
+}
+
+inline unsigned int portFromString(const std::string& name)
+{
+    // string like "224.9.2.252:15040"
+
+    std::vector<std::string> parts = split(name, ':');
+    assert (parts.size() == 2);
+    return stoi(parts.at(1));
+}
+
 
 }  // namespace String
 

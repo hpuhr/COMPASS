@@ -27,7 +27,7 @@ class QPushButton;
 class QVBoxLayout;
 class QCheckBox;
 
-class FilterManagerWidget : public QFrame
+class FilterManagerWidget : public QWidget
 {
     Q_OBJECT
 
@@ -54,9 +54,9 @@ class FilterManagerWidget : public QFrame
 
     FilterGeneratorWidget* filter_generator_widget_;
 
-    QCheckBox* filters_check_{nullptr};
-    QVBoxLayout* ds_filter_layout_;
-    QVBoxLayout* other_filter_layout_;
+    QCheckBox* filters_check_ {nullptr};
+    QVBoxLayout* ds_filter_layout0_ {nullptr};
+    QVBoxLayout* ds_filter_layout1_ {nullptr};
 
     QPushButton* add_button_;
 };

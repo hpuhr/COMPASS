@@ -8,19 +8,29 @@ RUN apt-get update && apt-get install -y apt-utils
 RUN apt-get install software-properties-common build-essential -y
 RUN add-apt-repository ppa:ubuntu-toolchain-r/test -y 
 RUN add-apt-repository ppa:george-edison55/cmake-3.x
+#RUN add-apt-repository ppa:mhier/libboost-latest
 RUN apt-get update
 RUN apt-get install gcc g++ cmake -y
 #RUN apt-get install gcc-9 g++-9 cmake -y
 #RUN sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 60 --slave /usr/bin/g++ g++ /usr/bin/g++-9
 #RUN update-alternatives --set gcc "/usr/bin/gcc-9"
 
+RUN apt-get install wget -y
+
+#install boost
+RUN wget -O boost_1_68_0.tar.gz https://sourceforge.net/projects/boost/files/boost/1.68.0/boost_1_68_0.tar.gz/download --no-check-certificate
+RUN tar xzvf boost_1_68_0.tar.gz
+RUN cd boost_1_68_0/ && ./bootstrap.sh --prefix=/usr/
+RUN cd boost_1_68_0/ && ./b2
+RUN cd boost_1_68_0/ && ./b2 install
+
 # install atsdb deps
-RUN apt-get install libboost-all-dev liblog4cpp5-dev libssl-dev libarchive-dev libmysql++-dev libeigen3-dev libmysqlclient-dev libsqlite3-dev libgdal-dev  -y
+#RUN apt-get install libboost-all-dev -y
+RUN apt-get install liblog4cpp5-dev libssl-dev libarchive-dev libmysql++-dev libeigen3-dev libmysqlclient-dev libsqlite3-dev libgdal-dev  -y
 # tools
 RUN apt-get install locate zip unzip qtchooser chrpath -y
 
 RUN apt-get install libtbb-dev -y
-RUN apt-get install wget -y
 #RUN wget https://launchpad.net/ubuntu/+archive/primary/+files/libtbb2_2017~U7-8_amd64.deb
 #RUN dpkg -i libtbb2_2017~U7-8_amd64.deb
 #RUN wget https://launchpad.net/ubuntu/+archive/primary/+files/libtbb-dev_2017~U7-8_amd64.deb
@@ -99,12 +109,32 @@ RUN cd osgQt-Qt4/build && make install
 
 RUN apt-get install libgeos++-dev -y
 
-RUN wget https://github.com/gwaldron/osgearth/archive/osgearth-2.10.2.zip
-RUN unzip osgearth-2.10.2.zip
-RUN mkdir osgearth-osgearth-2.10.2/build
-RUN cd osgearth-osgearth-2.10.2/build && cmake -DCMAKE_INSTALL_PREFIX=/usr -DOSGEARTH_USE_QT=TRUE -DDESIRED_QT_VERSION=5 -DCMAKE_BUILD_TYPE=Release ..
-RUN cd osgearth-osgearth-2.10.2/build && make -j 16
-RUN cd osgearth-osgearth-2.10.2/build && make install
+#RUN apt-get install libprotobuf-dev protobuf-compiler libglew-dev -y
+
+RUN apt-get install autoconf automake libtool curl -y
+
+RUN wget https://github.com/protocolbuffers/protobuf/releases/download/v3.19.1/protobuf-cpp-3.19.1.zip
+RUN unzip protobuf-cpp-3.19.1.zip
+RUN cd protobuf-3.19.1 && ./autogen.sh
+RUN cd protobuf-3.19.1 && ./configure
+RUN cd protobuf-3.19.1 && make
+RUN cd protobuf-3.19.1 && make check
+RUN cd protobuf-3.19.1 && make install
+RUN cd protobuf-3.19.1 && ldconfig # refresh shared library cache.
+
+RUN echo 'if(PROTOBUF_FOUND)' >> /usr/share/cmake-3.2/Modules/FindProtobuf.cmake
+RUN echo '    set(Protobuf_FOUND ${PROTOBUF_FOUND})' >> /usr/share/cmake-3.2/Modules/FindProtobuf.cmake
+RUN echo '    set(Protobuf_PROTOC_EXECUTABLE ${PROTOBUF_PROTOC_EXECUTABLE})' >> /usr/share/cmake-3.2/Modules/FindProtobuf.cmake
+RUN echo '    set(Protobuf_INCLUDE_DIR ${PROTOBUF_INCLUDE_DIR})    ' >> /usr/share/cmake-3.2/Modules/FindProtobuf.cmake
+RUN echo '    set(Protobuf_LIBRARIES ${PROTOBUF_LIBRARIES})    ' >> /usr/share/cmake-3.2/Modules/FindProtobuf.cmake
+RUN echo 'endif()' >> /usr/share/cmake-3.2/Modules/FindProtobuf.cmake
+
+RUN wget https://github.com/gwaldron/osgearth/archive/osgearth-3.2.zip
+RUN unzip osgearth-3.2.zip
+RUN mkdir osgearth-osgearth-3.2/build
+RUN cd osgearth-osgearth-3.2/build && cmake -DCMAKE_CXX_FLAGS=-std=c++11 -DOSGEARTH_BUILD_TESTS=OFF -DOSGEARTH_BUILD_EXAMPLES=OFF -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release ..
+RUN cd osgearth-osgearth-3.2/build && make -j 16
+RUN cd osgearth-osgearth-3.2/build && make install
 
 #RUN wget https://github.com/gwaldron/osgearth/archive/osgearth-2.10.2.zip
 #RUN unzip osgearth-2.10.2.zip
@@ -122,7 +152,7 @@ RUN cd NemaTode-master/build && make install
 
 #RUN apt-get install gdb -y
 
-RUN ldconfig -v /usr/lib64/ 
+RUN ldconfig -v /usr/lib64/
 RUN updatedb
 
 USER sk

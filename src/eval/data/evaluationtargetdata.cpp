@@ -19,10 +19,10 @@
 #include "buffer.h"
 #include "logger.h"
 #include "stringconv.h"
-#include "dbovariable.h"
-#include "metadbovariable.h"
+#include "dbcontent/variable/variable.h"
+#include "dbcontent/variable/metavariable.h"
 #include "compass.h"
-#include "dbobjectmanager.h"
+#include "dbcontent/dbcontentmanager.h"
 #include "evaluationmanager.h"
 //#include "projection/transformation.h"
 

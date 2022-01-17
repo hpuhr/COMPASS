@@ -23,7 +23,7 @@
 #include "configurable.h"
 #include "jsonobjectparser.h"
 
-class JSONImportTask;
+//class JSONImportTask;
 
 class JSONParsingSchema : public Configurable
 {

@@ -25,9 +25,8 @@
 #include <cassert>
 
 class Buffer;
-class DBObject;
+class DBContent;
 class DBInterface;
-class DBOVariable;
 class DBTable;
 
 /**
@@ -43,7 +42,7 @@ class InsertBufferDBJob : public Job
     void insertProgressSignal(float percent);
 
   public:
-    InsertBufferDBJob(DBInterface& db_interface, DBObject& dbobject, std::shared_ptr<Buffer> buffer,
+    InsertBufferDBJob(DBInterface& db_interface, DBContent& dbobject, std::shared_ptr<Buffer> buffer,
                       bool emit_change = true);
 
     virtual ~InsertBufferDBJob();
@@ -60,7 +59,7 @@ class InsertBufferDBJob : public Job
 
   protected:
     DBInterface& db_interface_;
-    DBObject& dbobject_;
+    DBContent& dbobject_;
     std::shared_ptr<Buffer> buffer_;
     bool emit_change_{true};
 

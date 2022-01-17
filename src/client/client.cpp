@@ -23,16 +23,18 @@
 #include "files.h"
 #include "global.h"
 #include "logger.h"
-#include "mainwindow.h"
 #include "stringconv.h"
 #include "taskmanager.h"
+#include "mainwindow.h"
 
 #include <QApplication>
 #include <QMessageBox>
 #include <QSurfaceFormat>
+#include <QSplashScreen>
 
 #include <boost/filesystem.hpp>
 #include <boost/program_options.hpp>
+#include "boost/date_time/posix_time/posix_time.hpp"
 
 #include <string>
 #include <locale.h>
@@ -80,64 +82,58 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
     //    format.setSamples(8);
     // QSurfaceFormat::setDefaultFormat(format);
 
-    std::string create_new_sqlite3_db_filename;
-    std::string open_sqlite3_db_filename;
-    std::string import_view_points_filename;
-#if USE_JASTERIX
-    std::string import_asterix_filename;
-    std::string asterix_framing;
-    std::string asterix_decoder_cfg;
-#endif
-    std::string import_json_filename;
-    std::string import_json_schema;
-    std::string import_gps_trail_filename;
-    std::string import_sectors_filename;
+//    std::string import_json_filename;
+//    std::string import_json_schema;
+//    std::string import_gps_trail_filename;
+//    std::string import_sectors_filename;
 
-    bool auto_process {false};
-    bool associate_data {false};
+//    bool auto_process {false};
+//    bool associate_data {false};
 
-    bool start {false};
+//    bool start {false};
     bool load_data {false};
-    std::string export_view_points_report_filename;
-    bool evaluate {false};
-    std::string export_eval_report_filename;
+//    std::string export_view_points_report_filename;
+//    bool evaluate {false};
+//    std::string export_eval_report_filename;
     bool quit {false};
 
     po::options_description desc("Allowed options");
     desc.add_options()("help", "produce help message")
             ("reset,r", po::bool_switch(&config_and_data_copy_wanted_) ,"reset user configuration and data")
-            ("create_new_sqlite3_db", po::value<std::string>(&create_new_sqlite3_db_filename),
+            ("create_db", po::value<std::string>(&create_new_sqlite3_db_filename_),
              "creates and opens new SQLite3 database with given filename, e.g. '/data/file1.db'")
-            ("open_sqlite3_db", po::value<std::string>(&open_sqlite3_db_filename),
+            ("open_db", po::value<std::string>(&open_sqlite3_db_filename_),
              "opens existing SQLite3 database with given filename, e.g. '/data/file1.db'")
-            ("import_view_points", po::value<std::string>(&import_view_points_filename),
-             "imports view points JSON file with given filename, e.g. '/data/file1.json'")
-        #if USE_JASTERIX
-            ("import_asterix", po::value<std::string>(&import_asterix_filename),
+//            ("import_view_points", po::value<std::string>(&import_view_points_filename),
+//             "imports view points JSON file with given filename, e.g. '/data/file1.json'")
+            ("import_asterix_file", po::value<std::string>(&import_asterix_filename_),
              "imports ASTERIX file with given filename, e.g. '/data/file1.ff'")
-            ("asterix_framing", po::value<std::string>(&asterix_framing),
-             "sets ASTERIX framing, e.g. 'none', 'ioss', 'ioss_seq', 'rff'")
-            ("asterix_decoder_cfg", po::value<std::string>(&asterix_decoder_cfg),
-             "sets ASTERIX decoder config using JSON string, e.g. ''{\"10\":{\"edition\":\"0.31\"}}''"
-             " (including one pair of single quotes)")
-        #endif
-            ("import_json", po::value<std::string>(&import_json_filename),
-             "imports JSON file with given filename, e.g. '/data/file1.json'")
-            ("json_schema", po::value<std::string>(&import_json_schema),
-             "JSON file import schema, e.g. 'jASTERIX', 'OpenSkyNetwork', 'ADSBExchange', 'SDDL'")
-            ("import_gps_trail", po::value<std::string>(&import_gps_trail_filename),
-             "imports gps trail NMEA with given filename, e.g. '/data/file2.txt'")
-            ("import_sectors_json", po::value<std::string>(&import_sectors_filename),
-             "imports exported sectors JSON with given filename, e.g. '/data/sectors.json'")
-            ("auto_process", po::bool_switch(&auto_process), "start automatic processing of imported data")
-            ("associate_data", po::bool_switch(&associate_data), "associate target reports")
-            ("start", po::bool_switch(&start), "start after finishing previous steps")
+            ("import_asterix_network", po::bool_switch(&import_asterix_network_),
+             "imports ASTERIX from defined network UDP streams")
+            ("import_asterix_network_time_offset", po::value<std::string>(&import_asterix_network_time_offset_),
+             "imports used time offset during ASTERIX network import, in HH:MM:SS.ZZZ'")
+//            ("asterix_framing", po::value<std::string>(&asterix_framing),
+//             "sets ASTERIX framing, e.g. 'none', 'ioss', 'ioss_seq', 'rff'")
+//            ("asterix_decoder_cfg", po::value<std::string>(&asterix_decoder_cfg),
+//             "sets ASTERIX decoder config using JSON string, e.g. ''{\"10\":{\"edition\":\"0.31\"}}''"
+//             " (including one pair of single quotes)")
+//            ("import_json", po::value<std::string>(&import_json_filename),
+//             "imports JSON file with given filename, e.g. '/data/file1.json'")
+//            ("json_schema", po::value<std::string>(&import_json_schema),
+//             "JSON file import schema, e.g. 'jASTERIX', 'OpenSkyNetwork', 'ADSBExchange', 'SDDL'")
+//            ("import_gps_trail", po::value<std::string>(&import_gps_trail_filename),
+//             "imports gps trail NMEA with given filename, e.g. '/data/file2.txt'")
+//            ("import_sectors_json", po::value<std::string>(&import_sectors_filename),
+//             "imports exported sectors JSON with given filename, e.g. '/data/sectors.json'")
+//            ("auto_process", po::bool_switch(&auto_process), "start automatic processing of imported data")
+//            ("associate_data", po::bool_switch(&associate_data), "associate target reports")
+//            ("start", po::bool_switch(&start), "start after finishing previous steps")
             ("load_data", po::bool_switch(&load_data), "load data after start")
-            ("export_view_points_report", po::value<std::string>(&export_view_points_report_filename),
-             "export view points report after start with given filename, e.g. '/data/db2/report.tex")
-            ("evaluate", po::bool_switch(&evaluate), "run evaluation")
-            ("export_eval_report", po::value<std::string>(&export_eval_report_filename),
-             "export evaluation report after start with given filename, e.g. '/data/eval_db2/report.tex")
+//            ("export_view_points_report", po::value<std::string>(&export_view_points_report_filename),
+//             "export view points report after start with given filename, e.g. '/data/db2/report.tex")
+//            ("evaluate", po::bool_switch(&evaluate), "run evaluation")
+//            ("export_eval_report", po::value<std::string>(&export_eval_report_filename),
+//             "export evaluation report after start with given filename, e.g. '/data/eval_db2/report.tex")
             ("quit", po::bool_switch(&quit), "quit after finishing all previous steps");
 
     try
@@ -161,103 +157,125 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
 
     checkAndSetupConfig();
 
+    if (import_asterix_filename_.size() && import_asterix_network_)
+    {
+        logerr << "COMPASSClient: unable to import both ASTERIX file and from network at the same time";
+        return;
+    }
+
     if (quit_requested_)
         return;
 
-    if (import_json_filename.size() && !import_json_schema.size())
-    {
-        loginf << "COMPASSClient: schema name must be set for JSON import";
-        return;
-    }
+//    if (import_json_filename.size() && !import_json_schema.size())
+//    {
+//        loginf << "COMPASSClient: schema name must be set for JSON import";
+//        return;
+//    }
 
+
+
+}
+
+void Client::run ()
+{
     loginf << "COMPASSClient: started with " << std::thread::hardware_concurrency() << " threads";
 
-    TaskManager& task_man = COMPASS::instance().taskManager();
+    QPixmap pixmap(Files::getImageFilepath("logo.png").c_str());
+    QSplashScreen splash(pixmap);
+    splash.show();
 
-    if (create_new_sqlite3_db_filename.size())
-        task_man.createAndOpenNewSqlite3DB(create_new_sqlite3_db_filename);
+    boost::posix_time::ptime start_time = boost::posix_time::microsec_clock::local_time();
 
-    if (open_sqlite3_db_filename.size())
-        task_man.openSqlite3DB(open_sqlite3_db_filename);
-
-    if (import_view_points_filename.size())
-        task_man.importViewPointsFile(import_view_points_filename);
-
-#if USE_JASTERIX
-    try
+    while ((boost::posix_time::microsec_clock::local_time() - start_time).total_milliseconds() < 50)
     {
-        if (asterix_framing.size())
-        {
-            if (asterix_framing == "none")
-                task_man.asterixFraming("");
-            else
-                task_man.asterixFraming(asterix_framing);
-        }
-
-        if (asterix_decoder_cfg.size())
-            task_man.asterixDecoderConfig(asterix_decoder_cfg);
-
-        if (task_man.asterixOptionsSet())
-            task_man.setAsterixOptions();
-    }
-    catch (exception& e)
-    {
-        logerr << "COMPASSClient: setting ASTERIX options resulted in error: " << e.what();
-        quit_requested_ = true;
-        return;
+        QCoreApplication::processEvents();
     }
 
-    if (import_asterix_filename.size())
-        task_man.importASTERIXFile(import_asterix_filename);
-#endif
+    MainWindow& main_window = COMPASS::instance().mainWindow();
+    splash.raise();
 
-    if (import_json_filename.size())
-        task_man.importJSONFile(import_json_filename, import_json_schema);
+    main_window.show();
+    splash.raise();
 
-    if (import_gps_trail_filename.size())
-        task_man.importGPSTrailFile(import_gps_trail_filename);
+    splash.finish(&main_window);
 
-    if (import_sectors_filename.size())
-        task_man.importSectorsFile(import_sectors_filename);
+    if (create_new_sqlite3_db_filename_.size())
+        main_window.createAndOpenNewSqlite3DB(create_new_sqlite3_db_filename_);
 
-    if (auto_process)
-        task_man.autoProcess(auto_process);
+    if (open_sqlite3_db_filename_.size())
+        main_window.openSqlite3DB(open_sqlite3_db_filename_);
 
-    if (associate_data)
-        task_man.associateData(associate_data);
+//    if (import_view_points_filename.size())
+//        task_man.importViewPointsFile(import_view_points_filename);
 
-    if (start)
-        task_man.start(start);
+//    try
+//    {
+//        if (asterix_framing.size())
+//        {
+//            if (asterix_framing == "none")
+//                task_man.asterixFraming("");
+//            else
+//                task_man.asterixFraming(asterix_framing);
+//        }
 
-    if (load_data)
-        task_man.loadData(load_data);
+//        if (asterix_decoder_cfg.size())
+//            task_man.asterixDecoderConfig(asterix_decoder_cfg);
 
-    if (export_view_points_report_filename.size())
-        task_man.exportViewPointsReportFile(export_view_points_report_filename);
+//        if (task_man.asterixOptionsSet())
+//            task_man.setAsterixOptions();
+//    }
+//    catch (exception& e)
+//    {
+//        logerr << "COMPASSClient: setting ASTERIX options resulted in error: " << e.what();
+//        quit_requested_ = true;
+//        return;
+//    }
 
-    if (evaluate)
-        task_man.evaluate(true);
+    if (import_asterix_filename_.size())
+        main_window.importASTERIXFile(import_asterix_filename_);
+    else if (import_asterix_network_)
+        main_window.importASTERIXFromNetwork();
 
-    if (export_eval_report_filename.size())
-        task_man.exportEvalReportFile(export_eval_report_filename);
+    if (import_asterix_network_time_offset_.size())
+        main_window.importASTERIXFromNetworkTimeOffset(String::timeFromString(import_asterix_network_time_offset_));
 
-    if (quit)
-        task_man.quit(quit);
+//    if (import_json_filename.size())
+//        task_man.importJSONFile(import_json_filename, import_json_schema);
 
+//    if (import_gps_trail_filename.size())
+//        task_man.importGPSTrailFile(import_gps_trail_filename);
+
+//    if (import_sectors_filename.size())
+//        task_man.importSectorsFile(import_sectors_filename);
+
+//    if (auto_process)
+//        task_man.autoProcess(auto_process);
+
+//    if (associate_data)
+//        task_man.associateData(associate_data);
+
+//    if (start)
+//        task_man.start(start);
+
+//    if (load_data)
+//        main_window.loadData(load_data);
+
+//    if (export_view_points_report_filename.size())
+//        task_man.exportViewPointsReportFile(export_view_points_report_filename);
+
+//    if (evaluate)
+//        task_man.evaluate(true);
+
+//    if (export_eval_report_filename.size())
+//        task_man.exportEvalReportFile(export_eval_report_filename);
+
+//    if (quit)
+//        main_window.quit(quit);
 }
 
 Client::~Client()
 {
     loginf << "Client: destructor";
-}
-
-MainWindow& Client::mainWindow()
-{
-    if (!main_window_)
-        main_window_.reset(new MainWindow());
-
-    assert(main_window_);
-    return *main_window_;
 }
 
 bool Client::notify(QObject* receiver, QEvent* event)

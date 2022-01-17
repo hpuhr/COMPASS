@@ -1,0 +1,790 @@
+{
+    "parameters": {
+        "db_table_name": "sd_reftraj",
+        "info": "",
+        "name": "RefTraj"
+    },
+    "sub_configs": {
+        "LabelDefinition": {
+            "LabelDefinition0": {
+                "parameters": null,
+                "sub_configs": {
+                    "LabelEntry": {
+                        "LabelEntryacceleration_ms20": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "acceleration_ms2"
+                            }
+                        },
+                        "LabelEntryalt_baro_ft0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "alt_baro_ft"
+                            }
+                        },
+                        "LabelEntryalt_baro_std_dev_ft0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "alt_baro_std_dev_ft"
+                            }
+                        },
+                        "LabelEntryalt_geo_ft0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "alt_geo_ft"
+                            }
+                        },
+                        "LabelEntryalt_geo_std_dev_ft0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "alt_geo_std_dev_ft"
+                            }
+                        },
+                        "LabelEntrycalc_vertical_rate_ftm0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "calc_vertical_rate_ftm"
+                            }
+                        },
+                        "LabelEntrycallsign0": {
+                            "parameters": {
+                                "prefix": "CS ",
+                                "show": true,
+                                "suffix": "",
+                                "variable_name": "callsign"
+                            }
+                        },
+                        "LabelEntrycivil_emergency0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "civil_emergency"
+                            }
+                        },
+                        "LabelEntryds_id0": {
+                            "parameters": {
+                                "prefix": "DS ",
+                                "show": true,
+                                "suffix": "",
+                                "variable_name": "ds_id"
+                            }
+                        },
+                        "LabelEntrygroundspeed_kt0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "groundspeed_kt"
+                            }
+                        },
+                        "LabelEntryheading_deg0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "heading_deg"
+                            }
+                        },
+                        "LabelEntrymanoeuvre_hori0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "manoeuvre_hori"
+                            }
+                        },
+                        "LabelEntrymil_emergency0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "mil_emergency"
+                            }
+                        },
+                        "LabelEntrymode3a_code0": {
+                            "parameters": {
+                                "prefix": "A ",
+                                "show": true,
+                                "suffix": "",
+                                "variable_name": "mode3a_code"
+                            }
+                        },
+                        "LabelEntrymodec_code_ft0": {
+                            "parameters": {
+                                "prefix": "C ",
+                                "show": true,
+                                "suffix": "",
+                                "variable_name": "modec_code_ft"
+                            }
+                        },
+                        "LabelEntrymof_long0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "mof_long"
+                            }
+                        },
+                        "LabelEntrymof_trans0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "mof_trans"
+                            }
+                        },
+                        "LabelEntrymof_vert0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "mof_vert"
+                            }
+                        },
+                        "LabelEntrypos_lat_deg0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "pos_lat_deg"
+                            }
+                        },
+                        "LabelEntrypos_long_deg0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "pos_long_deg"
+                            }
+                        },
+                        "LabelEntrypos_std_dev_lat_deg0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "pos_std_dev_lat_deg"
+                            }
+                        },
+                        "LabelEntrypos_std_dev_latlong_corr_coeff0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "pos_std_dev_latlong_corr_coeff"
+                            }
+                        },
+                        "LabelEntrypos_std_dev_long_deg0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "pos_std_dev_long_deg"
+                            }
+                        },
+                        "LabelEntryrec_num0": {
+                            "parameters": {
+                                "prefix": "R ",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "rec_num"
+                            }
+                        },
+                        "LabelEntrysac0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "sac"
+                            }
+                        },
+                        "LabelEntrysic0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "sic"
+                            }
+                        },
+                        "LabelEntryspi0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "spi"
+                            }
+                        },
+                        "LabelEntrytarget_addr0": {
+                            "parameters": {
+                                "prefix": "TA ",
+                                "show": true,
+                                "suffix": "",
+                                "variable_name": "target_addr"
+                            }
+                        },
+                        "LabelEntrytimestamp0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "timestamp"
+                            }
+                        },
+                        "LabelEntrytod0": {
+                            "parameters": {
+                                "prefix": "T ",
+                                "show": true,
+                                "suffix": "",
+                                "variable_name": "tod"
+                            }
+                        },
+                        "LabelEntrytrack_created0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "track_created"
+                            }
+                        },
+                        "LabelEntrytrack_end0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "track_end"
+                            }
+                        },
+                        "LabelEntrytrack_num0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "track_num"
+                            }
+                        },
+                        "LabelEntryturnrate_degps0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "turnrate_degps"
+                            }
+                        },
+                        "LabelEntryusable0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "usable"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "Variable": {
+            "VariableRefTrajacceleration_ms20": {
+                "parameters": {
+                    "data_type_str": "DOUBLE",
+                    "db_column_name": "acceleration_ms2",
+                    "dbo_name": "RefTraj",
+                    "description": "Acceleration in meters per square second",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "acceleration_ms2",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "VariableRefTrajalt_baro_ft0": {
+                "parameters": {
+                    "data_type_str": "INT",
+                    "db_column_name": "alt_baro_ft",
+                    "dbo_name": "RefTraj",
+                    "description": "",
+                    "dimension": "Height",
+                    "is_key": false,
+                    "name": "alt_baro_ft",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": "Feet"
+                }
+            },
+            "VariableRefTrajalt_baro_std_dev_ft0": {
+                "parameters": {
+                    "data_type_str": "DOUBLE",
+                    "db_column_name": "alt_baro_std_dev_ft",
+                    "dbo_name": "RefTraj",
+                    "description": "",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "alt_baro_std_dev_ft",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "VariableRefTrajalt_geo_ft0": {
+                "parameters": {
+                    "data_type_str": "DOUBLE",
+                    "db_column_name": "alt_geo_ft",
+                    "dbo_name": "RefTraj",
+                    "description": "Geometric altitude",
+                    "dimension": "Height",
+                    "is_key": false,
+                    "name": "alt_geo_ft",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": "Feet"
+                }
+            },
+            "VariableRefTrajalt_geo_std_dev_ft0": {
+                "parameters": {
+                    "data_type_str": "DOUBLE",
+                    "db_column_name": "alt_geo_std_dev_ft",
+                    "dbo_name": "RefTraj",
+                    "description": "",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "alt_geo_std_dev_ft",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "VariableRefTrajcalc_vertical_rate_ftm0": {
+                "parameters": {
+                    "data_type_str": "DOUBLE",
+                    "db_column_name": "calc_vertical_rate_ftm",
+                    "dbo_name": "RefTraj",
+                    "description": " ",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "calc_vertical_rate_ftm",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "VariableRefTrajcallsign0": {
+                "parameters": {
+                    "data_type_str": "STRING",
+                    "db_column_name": "callsign",
+                    "dbo_name": "RefTraj",
+                    "description": "Aircraft identification",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "callsign",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "VariableRefTrajcivil_emergency0": {
+                "parameters": {
+                    "data_type_str": "CHAR",
+                    "db_column_name": "civil_emergency",
+                    "dbo_name": "RefTraj",
+                    "description": "Civil emergency",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "civil_emergency",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "VariableRefTrajds_id0": {
+                "parameters": {
+                    "data_type_str": "INT",
+                    "db_column_name": "ds_id",
+                    "dbo_name": "RefTraj",
+                    "description": "DATA SOURCE ID, is derived from table DS and its sub tables",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "ds_id",
+                    "representation_str": "DATA_SRC_NAME",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "VariableRefTrajgroundspeed_kt0": {
+                "parameters": {
+                    "data_type_str": "DOUBLE",
+                    "db_column_name": "groundspeed_kt",
+                    "dbo_name": "RefTraj",
+                    "description": " ",
+                    "dimension": "Speed",
+                    "is_key": false,
+                    "name": "groundspeed_kt",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": "Knots"
+                }
+            },
+            "VariableRefTrajheading_deg0": {
+                "parameters": {
+                    "data_type_str": "DOUBLE",
+                    "db_column_name": "heading_deg",
+                    "dbo_name": "RefTraj",
+                    "description": " ",
+                    "dimension": "Angle",
+                    "is_key": false,
+                    "name": "heading_deg",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": "Degree"
+                }
+            },
+            "VariableRefTrajmanoeuvre_hori0": {
+                "parameters": {
+                    "data_type_str": "STRING",
+                    "db_column_name": "manoeuvre_hori",
+                    "dbo_name": "RefTraj",
+                    "description": "Y = horizontal Manoeuvre, N = No Manoeuvre",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "manoeuvre_hori",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "VariableRefTrajmil_emergency0": {
+                "parameters": {
+                    "data_type_str": "STRING",
+                    "db_column_name": "mil_emergency",
+                    "dbo_name": "RefTraj",
+                    "description": " ",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "mil_emergency",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "VariableRefTrajmode3a_code0": {
+                "parameters": {
+                    "data_type_str": "INT",
+                    "db_column_name": "mode3a_code",
+                    "dbo_name": "RefTraj",
+                    "description": "Code, 4 octels",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "mode3a_code",
+                    "representation_str": "DEC_TO_OCTAL",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "VariableRefTrajmodec_code_ft0": {
+                "parameters": {
+                    "data_type_str": "INT",
+                    "db_column_name": "modec_code_ft",
+                    "dbo_name": "RefTraj",
+                    "description": "Flight Level / Altitude in Ft",
+                    "dimension": "Height",
+                    "is_key": false,
+                    "name": "modec_code_ft",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": "Feet"
+                }
+            },
+            "VariableRefTrajmof_long0": {
+                "parameters": {
+                    "data_type_str": "CHAR",
+                    "db_column_name": "mof_long",
+                    "dbo_name": "RefTraj",
+                    "description": "Mode of flight - Longitudinal acceleration: 0 = Constant Groundspeed, 1 = Increasing Groundspeed, 2 = Decreasing Groundspeed, 3 = Undetermined",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "mof_long",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "VariableRefTrajmof_trans0": {
+                "parameters": {
+                    "data_type_str": "CHAR",
+                    "db_column_name": "mof_trans",
+                    "dbo_name": "RefTraj",
+                    "description": "Mode of flight - Transversal acceleration: 0 = Constant Course, 1 = Right Turn, 2 = Left Turn, 3 = Undetermined",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "mof_trans",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "VariableRefTrajmof_vert0": {
+                "parameters": {
+                    "data_type_str": "CHAR",
+                    "db_column_name": "mof_vert",
+                    "dbo_name": "RefTraj",
+                    "description": "Mode of flight - Vertical acceleration: 0 = Level Flight, 1 = Climb, 2 = Descent, 3 = Undetermined",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "mof_vert",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "VariableRefTrajpos_lat_deg0": {
+                "parameters": {
+                    "data_type_str": "DOUBLE",
+                    "db_column_name": "pos_lat_deg",
+                    "dbo_name": "RefTraj",
+                    "description": "WGS84 latitude position",
+                    "dimension": "Angle",
+                    "is_key": false,
+                    "name": "pos_lat_deg",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": "Degree"
+                }
+            },
+            "VariableRefTrajpos_long_deg0": {
+                "parameters": {
+                    "data_type_str": "DOUBLE",
+                    "db_column_name": "pos_long_deg",
+                    "dbo_name": "RefTraj",
+                    "description": "WGS84 longitude position",
+                    "dimension": "Angle",
+                    "is_key": false,
+                    "name": "pos_long_deg",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": "Degree"
+                }
+            },
+            "VariableRefTrajpos_std_dev_lat_deg0": {
+                "parameters": {
+                    "data_type_str": "DOUBLE",
+                    "db_column_name": "pos_std_dev_lat_deg",
+                    "dbo_name": "RefTraj",
+                    "description": " ",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "pos_std_dev_lat_deg",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "VariableRefTrajpos_std_dev_latlong_corr_coeff0": {
+                "parameters": {
+                    "data_type_str": "DOUBLE",
+                    "db_column_name": "pos_std_dev_latlong_corr_coeff",
+                    "dbo_name": "RefTraj",
+                    "description": " ",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "pos_std_dev_latlong_corr_coeff",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "VariableRefTrajpos_std_dev_long_deg0": {
+                "parameters": {
+                    "data_type_str": "DOUBLE",
+                    "db_column_name": "pos_std_dev_long_deg",
+                    "dbo_name": "RefTraj",
+                    "description": " ",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "pos_std_dev_long_deg",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "VariableRefTrajrec_num0": {
+                "parameters": {
+                    "data_type_str": "INT",
+                    "db_column_name": "rec_num",
+                    "dbo_name": "RefTraj",
+                    "description": "Unique record id starting with 0 on every new recording",
+                    "dimension": "",
+                    "is_key": true,
+                    "name": "rec_num",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "VariableRefTrajsac0": {
+                "parameters": {
+                    "data_type_str": "UCHAR",
+                    "db_column_name": "sac",
+                    "dbo_name": "RefTraj",
+                    "description": "ASTERIX System Area Code",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "sac",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "VariableRefTrajsic0": {
+                "parameters": {
+                    "data_type_str": "UCHAR",
+                    "db_column_name": "sic",
+                    "dbo_name": "RefTraj",
+                    "description": "ASTERIX System Identification Code",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "sic",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "VariableRefTrajspi0": {
+                "parameters": {
+                    "data_type_str": "STRING",
+                    "db_column_name": "spi",
+                    "dbo_name": "RefTraj",
+                    "description": " ",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "spi",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "VariableRefTrajtarget_addr0": {
+                "parameters": {
+                    "data_type_str": "INT",
+                    "db_column_name": "target_addr",
+                    "dbo_name": "RefTraj",
+                    "description": "24 bit target address / aircraft address / Mode-S address",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "target_addr",
+                    "representation_str": "DEC_TO_HEX",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "VariableRefTrajtimestamp0": {
+                "parameters": {
+                    "data_type_str": "LONGINT",
+                    "db_column_name": "timestamp",
+                    "dbo_name": "RefTraj",
+                    "description": " ",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "timestamp",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "VariableRefTrajtod0": {
+                "parameters": {
+                    "data_type_str": "FLOAT",
+                    "db_column_name": "tod",
+                    "dbo_name": "RefTraj",
+                    "description": "Time of Message / Time of Day (= ms since last midnight)",
+                    "dimension": "Time",
+                    "is_key": false,
+                    "name": "tod",
+                    "representation_str": "SECONDS_TO_TIME",
+                    "short_name": "",
+                    "unit": "Second"
+                }
+            },
+            "VariableRefTrajtrack_created0": {
+                "parameters": {
+                    "data_type_str": "STRING",
+                    "db_column_name": "track_created",
+                    "dbo_name": "RefTraj",
+                    "description": " ",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "track_created",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "VariableRefTrajtrack_end0": {
+                "parameters": {
+                    "data_type_str": "STRING",
+                    "db_column_name": "track_end",
+                    "dbo_name": "RefTraj",
+                    "description": "Y = End of track, N = Track is still alive",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "track_end",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "VariableRefTrajtrack_num0": {
+                "parameters": {
+                    "data_type_str": "INT",
+                    "db_column_name": "track_num",
+                    "dbo_name": "RefTraj",
+                    "description": "Track number",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "track_num",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "VariableRefTrajturnrate_degps0": {
+                "parameters": {
+                    "data_type_str": "DOUBLE",
+                    "db_column_name": "turnrate_degps",
+                    "dbo_name": "RefTraj",
+                    "description": "Turn rate in Deg/sec",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "turnrate_degps",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "VariableRefTrajusable0": {
+                "parameters": {
+                    "data_type_str": "STRING",
+                    "db_column_name": "usable",
+                    "dbo_name": "RefTraj",
+                    "description": "Y = to be used for evaluation, N = not to be used",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "usable",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            }
+        }
+    }
+}

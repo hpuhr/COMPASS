@@ -21,7 +21,7 @@
 #include "logger.h"
 #include "viewpointstablemodel.h"
 #include "compass.h"
-#include "dbobjectmanager.h"
+#include "dbcontent/dbcontentmanager.h"
 #include "viewpointstoolwidget.h"
 #include "viewpointsreportgenerator.h"
 #include "viewpointsreportgeneratordialog.h"
@@ -116,10 +116,10 @@ ViewPointsWidget::ViewPointsWidget(ViewManager& view_manager)
 
     setLayout(main_layout);
 
-    DBObjectManager& dbo_man = COMPASS::instance().objectManager();
+    DBContentManager& dbo_man = COMPASS::instance().dbContentManager();
 
-    connect (&dbo_man, &DBObjectManager::loadingStartedSignal, this, &ViewPointsWidget::loadingStartedSlot);
-    connect (&dbo_man, &DBObjectManager::allLoadingDoneSignal, this, &ViewPointsWidget::allLoadingDoneSlot);
+    connect (&dbo_man, &DBContentManager::loadingStartedSignal, this, &ViewPointsWidget::loadingStartedSlot);
+    connect (&dbo_man, &DBContentManager::loadingDoneSignal, this, &ViewPointsWidget::allLoadingDoneSlot);
 
     // shortcuts
     {

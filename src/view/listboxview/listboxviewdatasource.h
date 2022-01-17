@@ -20,9 +20,9 @@
 
 #include "buffer.h"
 #include "configurable.h"
-#include "dbovariable.h"
-#include "dbovariableorderedset.h"
-#include "viewselection.h"
+#include "dbcontent/variable/variable.h"
+#include "dbcontent/variable/variableorderedset.h"
+//#include "viewselection.h"
 
 #include <QObject>
 
@@ -42,15 +42,9 @@ class ListBoxViewDataSource : public QObject, public Configurable
 {
     Q_OBJECT
   public slots:
-    void loadingStartedSlot();
-    void newDataSlot(DBObject& object);
-    void loadingDoneSlot(DBObject& object);
     void setChangedSlot();
 
   signals:
-    void loadingStartedSignal();
-    /// @brief Emitted when resulting buffer was delivered
-    void updateDataSignal(DBObject& object, std::shared_ptr<Buffer> buffer);
     void setChangedSignal();
 
   public:
@@ -73,9 +67,9 @@ class ListBoxViewDataSource : public QObject, public Configurable
     void currentSetName(const std::string& current_set_name);
 
     /// @brief Returns variable read list
-    DBOVariableOrderedSet* getSet();
+    dbContent::VariableOrderedSet* getSet();
 
-    const std::map<std::string, std::unique_ptr<DBOVariableOrderedSet>>& getSets();
+    const std::map<std::string, std::unique_ptr<dbContent::VariableOrderedSet>>& getSets();
 
     void unshowViewPoint (const ViewableDataConfig* vp); // vp can be nullptr
     void showViewPoint (const ViewableDataConfig* vp);
@@ -85,10 +79,10 @@ protected:
 
     /// Variable read list
     //DBOVariableOrderedSet* set_{nullptr};
-    std::map<std::string, std::unique_ptr<DBOVariableOrderedSet>> sets_;
+    std::map<std::string, std::unique_ptr<dbContent::VariableOrderedSet>> sets_;
 
     /// Selected DBObject records
-    ViewSelectionEntries& selection_entries_;
+    //ViewSelectionEntries& selection_entries_;
 
     std::vector<std::pair<std::string, std::string>> temporary_added_variables_; // not persisted, DBO->varname
 
@@ -97,7 +91,7 @@ protected:
     bool addTemporaryVariable (const std::string& dbo_name, const std::string& var_name); // only to set, true of added
     void removeTemporaryVariable (const std::string& dbo_name, const std::string& var_name); // only to set
 
-    void addDefaultVariables (DBOVariableOrderedSet& set);
+    void addDefaultVariables (dbContent::VariableOrderedSet& set);
 };
 
 #endif /* LISTBOXVIEWDATASOURCE_H_ */

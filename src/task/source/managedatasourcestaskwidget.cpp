@@ -24,8 +24,8 @@
 #include <QVBoxLayout>
 
 #include "compass.h"
-#include "dbobject.h"
-#include "dbobjectmanager.h"
+#include "dbcontent/dbcontent.h"
+#include "dbcontent/dbcontentmanager.h"
 #include "dboeditdatasourceswidget.h"
 #include "managedatasourcestask.h"
 

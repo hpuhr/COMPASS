@@ -18,6 +18,14 @@
 //#include <iostream>
 
 #include "allbuffertablewidget.h"
+#include "allbuffertablemodel.h"
+#include "buffer.h"
+#include "dbcontent/dbcontent.h"
+#include "dbcontent/dbcontentmanager.h"
+#include "dbcontent/variable/variable.h"
+#include "dbcontent/variable/variableset.h"
+#include "listboxviewdatasource.h"
+#include "logger.h"
 
 #include <QApplication>
 #include <QClipboard>
@@ -28,16 +36,7 @@
 #include <QVBoxLayout>
 #include <QTimer>
 
-#include "allbuffertablemodel.h"
 #include "boost/date_time/posix_time/posix_time.hpp"
-#include "buffer.h"
-#include "dbobject.h"
-#include "dbobjectmanager.h"
-#include "dbovariable.h"
-#include "dbovariableset.h"
-#include "listboxviewdatasource.h"
-#include "logger.h"
-#include "viewselection.h"
 
 // using namespace Utils;
 
@@ -55,7 +54,8 @@ AllBufferTableWidget::AllBufferTableWidget(ListBoxView& view, ListBoxViewDataSou
     model_ = new AllBufferTableModel(this, data_source_);
     table_->setModel(model_);
 
-    connect(model_, SIGNAL(exportDoneSignal(bool)), this, SLOT(exportDoneSlot(bool)));
+    connect(model_, &AllBufferTableModel::exportDoneSignal,
+            this, &AllBufferTableWidget::exportDoneSlot);
 
     layout->addWidget(table_);
     table_->show();

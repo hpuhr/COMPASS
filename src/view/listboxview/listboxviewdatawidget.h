@@ -29,7 +29,7 @@ class QTabWidget;
 class AllBufferTableWidget;
 class BufferTableWidget;
 class Buffer;
-class DBObject;
+class DBContent;
 
 /**
  * @brief Widget with tab containing BufferTableWidgets in ListBoxView
@@ -48,7 +48,7 @@ class ListBoxViewDataWidget : public QWidget
   public slots:
     void loadingStartedSlot();
     /// @brief Called when new result Buffer was delivered
-    void updateDataSlot(DBObject& object, std::shared_ptr<Buffer> buffer);
+    void updateDataSlot(DBContent& object, std::shared_ptr<Buffer> buffer);
     void loadingDoneSlot();
 
     void exportDataSlot(bool overwrite);

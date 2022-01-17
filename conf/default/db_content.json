@@ -1,0 +1,2001 @@
+{
+    "parameters": {
+        "limit_max": 1000000,
+        "limit_min": 0,
+        "order_variable_dbcontent_name": "Meta",
+        "order_variable_name": "Time of Day",
+        "use_filters": false,
+        "use_limit": false,
+        "use_order": true,
+        "use_order_ascending": true
+    },
+    "sub_config_files": [
+        {
+            "class_id": "DBContent",
+            "instance_id": "CAT001",
+            "path": "db_content_cat001.json"
+        },
+        {
+            "class_id": "DBContent",
+            "instance_id": "CAT020",
+            "path": "db_content_cat020.json"
+        },
+        {
+            "class_id": "DBContent",
+            "instance_id": "CAT021",
+            "path": "db_content_cat021.json"
+        },
+        {
+            "class_id": "DBContent",
+            "instance_id": "CAT048",
+            "path": "db_content_cat048.json"
+        },
+        {
+            "class_id": "DBContent",
+            "instance_id": "CAT062",
+            "path": "db_content_cat062.json"
+        },
+        {
+            "class_id": "DBContent",
+            "instance_id": "RefTraj",
+            "path": "db_content_reftraj.json"
+        }
+    ],
+    "sub_configs": {
+        "ConfigurationDataSource": {
+            "ConfigurationDataSourceADSB0": {
+                "parameters": {
+                    "ds_type": "ADSB",
+                    "has_short_name": true,
+                    "info": {
+                        "network_lines": [
+                            "239.192.31.24:8600",
+                            "239.192.31.25:8600"
+                        ]
+                    },
+                    "name": "AWAM ADSB",
+                    "sac": 50,
+                    "short_name": "WADS",
+                    "sic": 80
+                }
+            },
+            "ConfigurationDataSourceMLAT0": {
+                "parameters": {
+                    "ds_type": "MLAT",
+                    "has_short_name": true,
+                    "info": {
+                        "network_lines": [
+                            "239.192.21.24:8600",
+                            "239.192.21.25:8600"
+                        ]
+                    },
+                    "name": "AWAM VIE",
+                    "sac": 50,
+                    "short_name": "WVIE",
+                    "sic": 70
+                }
+            },
+            "ConfigurationDataSourceMLAT1": {
+                "parameters": {
+                    "ds_type": "MLAT",
+                    "has_short_name": true,
+                    "info": {
+                        "network_lines": [
+                            "239.192.22.24:8600",
+                            "239.192.22.25:8600"
+                        ]
+                    },
+                    "name": "AWAM LNZ",
+                    "sac": 50,
+                    "short_name": "WLNZ",
+                    "sic": 71
+                }
+            },
+            "ConfigurationDataSourceMLAT2": {
+                "parameters": {
+                    "ds_type": "MLAT",
+                    "has_short_name": true,
+                    "info": {
+                        "network_lines": [
+                            "239.192.23.24:8600",
+                            "239.192.23.25:8600"
+                        ]
+                    },
+                    "name": "AWAM SBG",
+                    "sac": 50,
+                    "short_name": "WSBG",
+                    "sic": 72
+                }
+            },
+            "ConfigurationDataSourceMLAT3": {
+                "parameters": {
+                    "ds_type": "MLAT",
+                    "has_short_name": true,
+                    "info": {
+                        "network_lines": [
+                            "239.192.24.24:8600",
+                            "239.192.24.25:8600"
+                        ]
+                    },
+                    "name": "AWAM INN",
+                    "sac": 50,
+                    "short_name": "WINN",
+                    "sic": 73
+                }
+            },
+            "ConfigurationDataSourceMLAT4": {
+                "parameters": {
+                    "ds_type": "MLAT",
+                    "has_short_name": true,
+                    "info": {
+                        "network_lines": [
+                            "239.192.25.24:8600",
+                            "239.192.25.25:8600"
+                        ]
+                    },
+                    "name": "AWAM KFT",
+                    "sac": 50,
+                    "short_name": "WKFT",
+                    "sic": 74
+                }
+            },
+            "ConfigurationDataSourceMLAT5": {
+                "parameters": {
+                    "ds_type": "MLAT",
+                    "has_short_name": true,
+                    "info": {
+                        "network_lines": [
+                            "239.192.26.24:8600",
+                            "239.192.26.25:8600"
+                        ]
+                    },
+                    "name": "AWAM GRZ",
+                    "sac": 50,
+                    "short_name": "WGRZ",
+                    "sic": 75
+                }
+            },
+            "ConfigurationDataSourceMLAT6": {
+                "parameters": {
+                    "ds_type": "MLAT",
+                    "has_short_name": true,
+                    "info": {
+                        "network_lines": [
+                            "239.192.27.24:8600",
+                            "239.192.27.25:8600"
+                        ]
+                    },
+                    "name": "AWAM West",
+                    "sac": 50,
+                    "short_name": "WWES",
+                    "sic": 76
+                }
+            },
+            "ConfigurationDataSourceMLAT7": {
+                "parameters": {
+                    "ds_type": "MLAT",
+                    "has_short_name": true,
+                    "info": {
+                        "network_lines": [
+                            "239.192.28.24:8600",
+                            "239.192.28.25:8600"
+                        ]
+                    },
+                    "name": "AWAM East",
+                    "sac": 50,
+                    "short_name": "WEAS",
+                    "sic": 77
+                }
+            },
+            "ConfigurationDataSourceMLAT8": {
+                "parameters": {
+                    "ds_type": "MLAT",
+                    "has_short_name": true,
+                    "info": {
+                        "network_lines": [
+                            "239.192.29.24:8600",
+                            "239.192.29.25:8600"
+                        ]
+                    },
+                    "name": "AWAM Upper",
+                    "sac": 50,
+                    "short_name": "WUPP",
+                    "sic": 78
+                }
+            },
+            "ConfigurationDataSourceMLAT9": {
+                "parameters": {
+                    "ds_type": "MLAT",
+                    "has_short_name": true,
+                    "info": {
+                        "network_lines": [
+                            "239.192.32.24:8600",
+                            "239.192.32.25:8600"
+                        ]
+                    },
+                    "name": "AWAM GND",
+                    "sac": 50,
+                    "short_name": "WGND",
+                    "sic": 81
+                }
+            },
+            "ConfigurationDataSourceRadar0": {
+                "parameters": {
+                    "ds_type": "Radar",
+                    "has_short_name": true,
+                    "info": {
+                        "altitude": 667.0,
+                        "latitude": 48.2607138,
+                        "longitude": 17.1632861,
+                        "network_lines": [
+                            "239.192.9.18:8600",
+                            "239.192.9.15:8600"
+                        ]
+                    },
+                    "name": "Javornik",
+                    "sac": 48,
+                    "short_name": "JAV",
+                    "sic": 1
+                }
+            },
+            "ConfigurationDataSourceRadar1": {
+                "parameters": {
+                    "ds_type": "Radar",
+                    "has_short_name": true,
+                    "info": {
+                        "altitude": 323.0,
+                        "latitude": 48.2390277777778,
+                        "longitude": 14.1821888888889,
+                        "network_lines": [
+                            "239.192.5.18:8600",
+                            "239.192.5.14:8600",
+                            "239.192.5.15:8600",
+                            "239.192.5.21:8600"
+                        ]
+                    },
+                    "name": "Linz Mode-S",
+                    "sac": 50,
+                    "short_name": "LNZ",
+                    "sic": 0
+                }
+            },
+            "ConfigurationDataSourceRadar10": {
+                "parameters": {
+                    "ds_type": "Radar",
+                    "has_short_name": true,
+                    "info": {
+                        "altitude": 280.0,
+                        "latitude": 48.1043694444,
+                        "longitude": 16.560975,
+                        "network_lines": [
+                            "239.192.4.18:8600",
+                            "239.192.4.14:8600",
+                            "239.192.4.15:8600",
+                            "239.192.4.21:8600"
+                        ]
+                    },
+                    "name": "Wien Schwechat",
+                    "sac": 50,
+                    "short_name": "VIE",
+                    "sic": 11
+                }
+            },
+            "ConfigurationDataSourceRadar11": {
+                "parameters": {
+                    "ds_type": "Radar",
+                    "has_short_name": true,
+                    "info": {
+                        "altitude": 880.0,
+                        "latitude": 49.6596444444,
+                        "longitude": 16.1333916667,
+                        "network_lines": [
+                            "239.192.8.18:8600",
+                            "239.192.8.15:8600"
+                        ]
+                    },
+                    "name": "Bukop",
+                    "sac": 49,
+                    "short_name": "BUK",
+                    "sic": 144
+                }
+            },
+            "ConfigurationDataSourceRadar12": {
+                "parameters": {
+                    "ds_type": "Radar",
+                    "has_short_name": true,
+                    "info": {
+                        "altitude": 587.0,
+                        "latitude": 48.5769972222,
+                        "longitude": 16.3956305556,
+                        "network_lines": [
+                            "224.9.2.252:15009"
+                        ]
+                    },
+                    "name": "Buschberg",
+                    "sac": 50,
+                    "short_name": "Bub",
+                    "sic": 9
+                }
+            },
+            "ConfigurationDataSourceRadar13": {
+                "parameters": {
+                    "ds_type": "Radar",
+                    "has_short_name": true,
+                    "info": {
+                        "altitude": 410.0,
+                        "latitude": 46.9866777778,
+                        "longitude": 15.4319916667,
+                        "network_lines": [
+                            "224.9.2.252:15012"
+                        ]
+                    },
+                    "name": "Graz",
+                    "sac": 50,
+                    "short_name": "Grz",
+                    "sic": 12
+                }
+            },
+            "ConfigurationDataSourceRadar2": {
+                "parameters": {
+                    "ds_type": "Radar",
+                    "has_short_name": true,
+                    "info": {
+                        "altitude": 226.0,
+                        "latitude": 48.1005611111111,
+                        "longitude": 16.5778083333333,
+                        "network_lines": [
+                            "239.192.13.18:8600",
+                            "239.192.13.14:8600",
+                            "239.192.13.15:8600",
+                            "239.192.13.21:8600"
+                        ]
+                    },
+                    "name": "Wien Mode-S",
+                    "sac": 50,
+                    "short_name": "VIS",
+                    "sic": 13
+                }
+            },
+            "ConfigurationDataSourceRadar3": {
+                "parameters": {
+                    "ds_type": "Radar",
+                    "has_short_name": true,
+                    "info": {
+                        "altitude": 2203.0,
+                        "latitude": 46.7871083333,
+                        "longitude": 14.9713333333,
+                        "network_lines": [
+                            "239.192.2.18:8600",
+                            "239.192.2.14:8600",
+                            "239.192.2.15:8600",
+                            "239.192.2.21:8600"
+                        ]
+                    },
+                    "name": "Koralpe Mode-S",
+                    "sac": 50,
+                    "short_name": "KOR",
+                    "sic": 20
+                }
+            },
+            "ConfigurationDataSourceRadar4": {
+                "parameters": {
+                    "ds_type": "Radar",
+                    "has_short_name": true,
+                    "info": {
+                        "altitude": 672.0,
+                        "latitude": 47.1798611111111,
+                        "longitude": 14.7498611111111,
+                        "network_lines": [
+                            "239.192.12.18:8600",
+                            "239.192.12.14:8600",
+                            "239.192.12.15:8600",
+                            "239.192.12.21:8600"
+                        ]
+                    },
+                    "name": "Zeltweg",
+                    "sac": 50,
+                    "short_name": "ZWG",
+                    "sic": 48
+                }
+            },
+            "ConfigurationDataSourceRadar5": {
+                "parameters": {
+                    "ds_type": "Radar",
+                    "has_short_name": true,
+                    "info": {
+                        "altitude": 461.0,
+                        "latitude": 48.311075,
+                        "longitude": 11.8144611111111,
+                        "network_lines": [
+                            "239.192.11.18:8600",
+                            "239.192.11.15:8600"
+                        ]
+                    },
+                    "name": "Munich South",
+                    "sac": 98,
+                    "short_name": "MUS",
+                    "sic": 16
+                }
+            },
+            "ConfigurationDataSourceRadar6": {
+                "parameters": {
+                    "ds_type": "Radar",
+                    "has_short_name": true,
+                    "info": {
+                        "altitude": 821.0,
+                        "latitude": 45.9309333333,
+                        "longitude": 14.2981333333,
+                        "network_lines": [
+                            "239.192.10.18:8600",
+                            "239.192.10.15:8600"
+                        ]
+                    },
+                    "name": "Vrhnika",
+                    "sac": 147,
+                    "short_name": "VRH",
+                    "sic": 9
+                }
+            },
+            "ConfigurationDataSourceRadar7": {
+                "parameters": {
+                    "ds_type": "Radar",
+                    "has_short_name": true,
+                    "info": {
+                        "altitude": 859.0,
+                        "latitude": 48.4708583333,
+                        "longitude": 13.6853194444,
+                        "network_lines": [
+                            "239.192.7.18:8600",
+                            "239.192.7.14:8600",
+                            "239.192.7.15:8600",
+                            "239.192.7.21:8600"
+                        ]
+                    },
+                    "name": "Feichtberg Mode-S",
+                    "sac": 50,
+                    "short_name": "FEI",
+                    "sic": 10
+                }
+            },
+            "ConfigurationDataSourceRadar8": {
+                "parameters": {
+                    "ds_type": "Radar",
+                    "has_short_name": true,
+                    "info": {
+                        "altitude": 461.0,
+                        "latitude": 48.3822916666667,
+                        "longitude": 11.8014277777778,
+                        "network_lines": [
+                            "239.192.3.18:8600",
+                            "239.192.3.15:8600"
+                        ]
+                    },
+                    "name": "Munich Nord",
+                    "sac": 98,
+                    "short_name": "MUN",
+                    "sic": 15
+                }
+            },
+            "ConfigurationDataSourceRadar9": {
+                "parameters": {
+                    "ds_type": "Radar",
+                    "has_short_name": true,
+                    "info": {
+                        "altitude": 870.0,
+                        "latitude": 47.9181333333333,
+                        "longitude": 13.0046166666667,
+                        "network_lines": [
+                            "239.192.6.18:8600",
+                            "239.192.6.14:8600",
+                            "239.192.6.15:8600",
+                            "239.192.6.21:8600"
+                        ]
+                    },
+                    "name": "Salzburg",
+                    "sac": 50,
+                    "short_name": "SBG",
+                    "sic": 7
+                }
+            },
+            "ConfigurationDataSourceTracker1": {
+                "parameters": {
+                    "ds_type": "Tracker",
+                    "has_short_name": false,
+                    "info": {
+                        "network_lines": [
+                            "239.204.0.8:8602"
+                        ]
+                    },
+                    "name": "ARTAS",
+                    "sac": 50,
+                    "short_name": "",
+                    "sic": 240
+                }
+            }
+        },
+        "MetaVariable": {
+            "MetaVariableARTAS Hash0": {
+                "parameters": {
+                    "name": "ARTAS Hash"
+                },
+                "sub_configs": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT001ARTAS Hash0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT001",
+                                "variable_name": "ARTAS Hash"
+                            }
+                        },
+                        "VariableDefinitionCAT020ARTAS Hash0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT020",
+                                "variable_name": "ARTAS Hash"
+                            }
+                        },
+                        "VariableDefinitionCAT021ARTAS Hash0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT021",
+                                "variable_name": "ARTAS Hash"
+                            }
+                        },
+                        "VariableDefinitionCAT048ARTAS Hash0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT048",
+                                "variable_name": "ARTAS Hash"
+                            }
+                        }
+                    }
+                }
+            },
+            "MetaVariableAircraft Address0": {
+                "parameters": {
+                    "name": "Aircraft Address"
+                },
+                "sub_configs": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT020Aircraft Address0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT020",
+                                "variable_name": "Aircraft Address"
+                            }
+                        },
+                        "VariableDefinitionCAT021Aircraft Address0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT021",
+                                "variable_name": "Aircraft Address"
+                            }
+                        },
+                        "VariableDefinitionCAT048Aircraft Address0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT048",
+                                "variable_name": "Aircraft Address"
+                            }
+                        },
+                        "VariableDefinitionCAT062Aircraft Address0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT062",
+                                "variable_name": "Aircraft Address"
+                            }
+                        }
+                    }
+                }
+            },
+            "MetaVariableAircraft Identification0": {
+                "parameters": {
+                    "name": "Aircraft Identification"
+                },
+                "sub_configs": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT020Aircraft Identification0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT020",
+                                "variable_name": "Aircraft Identification"
+                            }
+                        },
+                        "VariableDefinitionCAT021Aircraft Identification0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT021",
+                                "variable_name": "Aircraft Identification"
+                            }
+                        },
+                        "VariableDefinitionCAT048Aircraft Identification0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT048",
+                                "variable_name": "Aircraft Identification"
+                            }
+                        },
+                        "VariableDefinitionCAT062Aircraft Identification0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT062",
+                                "variable_name": "Aircraft Identification"
+                            }
+                        }
+                    }
+                }
+            },
+            "MetaVariableAzimuth0": {
+                "parameters": {
+                    "name": "Azimuth"
+                },
+                "sub_configs": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT001Azimuth0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT001",
+                                "variable_name": "Azimuth"
+                            }
+                        },
+                        "VariableDefinitionCAT048Azimuth0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT048",
+                                "variable_name": "Azimuth"
+                            }
+                        }
+                    }
+                }
+            },
+            "MetaVariableDS ID0": {
+                "parameters": {
+                    "name": "DS ID"
+                },
+                "sub_configs": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT001DS ID0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT001",
+                                "variable_name": "DS ID"
+                            }
+                        },
+                        "VariableDefinitionCAT020DS ID0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT020",
+                                "variable_name": "DS ID"
+                            }
+                        },
+                        "VariableDefinitionCAT021DS ID0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT021",
+                                "variable_name": "DS ID"
+                            }
+                        },
+                        "VariableDefinitionCAT048DS ID0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT048",
+                                "variable_name": "DS ID"
+                            }
+                        },
+                        "VariableDefinitionCAT062DS ID0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT062",
+                                "variable_name": "DS ID"
+                            }
+                        }
+                    }
+                }
+            },
+            "MetaVariableFFT0": {
+                "parameters": {
+                    "name": "FFT"
+                },
+                "sub_configs": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT001FFT0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT001",
+                                "variable_name": "FFT"
+                            }
+                        },
+                        "VariableDefinitionCAT020FFT0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT020",
+                                "variable_name": "FFT"
+                            }
+                        },
+                        "VariableDefinitionCAT021FFT0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT021",
+                                "variable_name": "FFT"
+                            }
+                        },
+                        "VariableDefinitionCAT048FFT0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT048",
+                                "variable_name": "FFT"
+                            }
+                        }
+                    }
+                }
+            },
+            "MetaVariableFlight Status0": {
+                "parameters": {
+                    "name": "Flight Status"
+                },
+                "sub_configs": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT020Flight Status0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT020",
+                                "variable_name": "Flight Status"
+                            }
+                        },
+                        "VariableDefinitionCAT048Flight Status0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT048",
+                                "variable_name": "Flight Status"
+                            }
+                        }
+                    }
+                }
+            },
+            "MetaVariableGround Bit0": {
+                "parameters": {
+                    "name": "Ground Bit"
+                },
+                "sub_configs": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT020Ground Bit0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT020",
+                                "variable_name": "Ground Bit"
+                            }
+                        },
+                        "VariableDefinitionCAT021Ground Bit0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT021",
+                                "variable_name": "Ground Bit"
+                            }
+                        }
+                    }
+                }
+            },
+            "MetaVariableLatitude StdDev0": {
+                "parameters": {
+                    "name": "Latitude StdDev"
+                },
+                "sub_configs": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT020Latitude StdDev0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT020",
+                                "variable_name": "Latitude StdDev"
+                            }
+                        },
+                        "VariableDefinitionCAT062Latitude StdDev0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT062",
+                                "variable_name": "Latitude StdDev"
+                            }
+                        }
+                    }
+                }
+            },
+            "MetaVariableLatitude0": {
+                "parameters": {
+                    "name": "Latitude"
+                },
+                "sub_configs": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT001Latitude0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT001",
+                                "variable_name": "Latitude"
+                            }
+                        },
+                        "VariableDefinitionCAT020Latitude0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT020",
+                                "variable_name": "Latitude"
+                            }
+                        },
+                        "VariableDefinitionCAT021Latitude0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT021",
+                                "variable_name": "Latitude"
+                            }
+                        },
+                        "VariableDefinitionCAT048Latitude0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT048",
+                                "variable_name": "Latitude"
+                            }
+                        },
+                        "VariableDefinitionCAT062Latitude0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT062",
+                                "variable_name": "Latitude"
+                            }
+                        }
+                    }
+                }
+            },
+            "MetaVariableLongitude StdDev0": {
+                "parameters": {
+                    "name": "Longitude StdDev"
+                },
+                "sub_configs": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT020Longitude StdDev0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT020",
+                                "variable_name": "Longitude StdDev"
+                            }
+                        },
+                        "VariableDefinitionCAT062Longitude StdDev0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT062",
+                                "variable_name": "Longitude StdDev"
+                            }
+                        }
+                    }
+                }
+            },
+            "MetaVariableLongitude0": {
+                "parameters": {
+                    "name": "Longitude"
+                },
+                "sub_configs": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT001Longitude0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT001",
+                                "variable_name": "Longitude"
+                            }
+                        },
+                        "VariableDefinitionCAT020Longitude0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT020",
+                                "variable_name": "Longitude"
+                            }
+                        },
+                        "VariableDefinitionCAT021Longitude0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT021",
+                                "variable_name": "Longitude"
+                            }
+                        },
+                        "VariableDefinitionCAT048Longitude0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT048",
+                                "variable_name": "Longitude"
+                            }
+                        },
+                        "VariableDefinitionCAT062Longitude0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT062",
+                                "variable_name": "Longitude"
+                            }
+                        }
+                    }
+                }
+            },
+            "MetaVariableMilitary Emergency0": {
+                "parameters": {
+                    "name": "Military Emergency"
+                },
+                "sub_configs": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT001Military Emergency0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT001",
+                                "variable_name": "Military Emergency"
+                            }
+                        },
+                        "VariableDefinitionCAT048Military Emergency0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT048",
+                                "variable_name": "Military Emergency"
+                            }
+                        },
+                        "VariableDefinitionCAT062Military Emergency0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT062",
+                                "variable_name": "Military Emergency"
+                            }
+                        }
+                    }
+                }
+            },
+            "MetaVariableMilitary Identification0": {
+                "parameters": {
+                    "name": "Military Identification"
+                },
+                "sub_configs": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT001Military Identification0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT001",
+                                "variable_name": "Military Identification"
+                            }
+                        },
+                        "VariableDefinitionCAT048Military Identification0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT048",
+                                "variable_name": "Military Identification"
+                            }
+                        },
+                        "VariableDefinitionCAT062Military Identification0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT062",
+                                "variable_name": "Military Identification"
+                            }
+                        }
+                    }
+                }
+            },
+            "MetaVariableMode 3/A Age0": {
+                "parameters": {
+                    "name": "Mode 3/A Age"
+                },
+                "sub_configs": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT021Mode 3/A Age0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT021",
+                                "variable_name": "Mode 3/A Age"
+                            }
+                        },
+                        "VariableDefinitionCAT062Mode 3/A Age0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT062",
+                                "variable_name": "Mode 3/A Age"
+                            }
+                        }
+                    }
+                }
+            },
+            "MetaVariableMode 3/A Code0": {
+                "parameters": {
+                    "name": "Mode 3/A Code"
+                },
+                "sub_configs": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT001Mode 3/A Code0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT001",
+                                "variable_name": "Mode 3/A Code"
+                            }
+                        },
+                        "VariableDefinitionCAT020Mode 3/A Code0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT020",
+                                "variable_name": "Mode 3/A Code"
+                            }
+                        },
+                        "VariableDefinitionCAT021Mode 3/A Code0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT021",
+                                "variable_name": "Mode 3/A Code"
+                            }
+                        },
+                        "VariableDefinitionCAT048Mode 3/A Code0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT048",
+                                "variable_name": "Mode 3/A Code"
+                            }
+                        },
+                        "VariableDefinitionCAT062Mode 3/A Code0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT062",
+                                "variable_name": "Mode 3/A Code"
+                            }
+                        }
+                    }
+                }
+            },
+            "MetaVariableMode 3/A Garbled0": {
+                "parameters": {
+                    "name": "Mode 3/A Garbled"
+                },
+                "sub_configs": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT001Mode 3/A Garbled0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT001",
+                                "variable_name": "Mode 3/A Garbled"
+                            }
+                        },
+                        "VariableDefinitionCAT020Mode 3/A Garbled0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT020",
+                                "variable_name": "Mode 3/A Garbled"
+                            }
+                        },
+                        "VariableDefinitionCAT021Mode 3/A Garbled0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT021",
+                                "variable_name": "Mode 3/A Garbled"
+                            }
+                        },
+                        "VariableDefinitionCAT048Mode 3/A Garbled0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT048",
+                                "variable_name": "Mode 3/A Garbled"
+                            }
+                        },
+                        "VariableDefinitionCAT062Mode 3/A Garbled0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT062",
+                                "variable_name": "Mode 3/A Garbled"
+                            }
+                        }
+                    }
+                }
+            },
+            "MetaVariableMode 3/A Smoothed0": {
+                "parameters": {
+                    "name": "Mode 3/A Smoothed"
+                },
+                "sub_configs": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT001Mode 3/A Smoothed0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT001",
+                                "variable_name": "Mode 3/A Smoothed"
+                            }
+                        },
+                        "VariableDefinitionCAT020Mode 3/A Smoothed0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT020",
+                                "variable_name": "Mode 3/A Smoothed"
+                            }
+                        },
+                        "VariableDefinitionCAT021Mode 3/A Smoothed0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT021",
+                                "variable_name": "Mode 3/A Smoothed"
+                            }
+                        },
+                        "VariableDefinitionCAT048Mode 3/A Smoothed0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT048",
+                                "variable_name": "Mode 3/A Smoothed"
+                            }
+                        }
+                    }
+                }
+            },
+            "MetaVariableMode 3/A Valid0": {
+                "parameters": {
+                    "name": "Mode 3/A Valid"
+                },
+                "sub_configs": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT001Mode 3/A Valid0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT001",
+                                "variable_name": "Mode 3/A Valid"
+                            }
+                        },
+                        "VariableDefinitionCAT020Mode 3/A Valid0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT020",
+                                "variable_name": "Mode 3/A Valid"
+                            }
+                        },
+                        "VariableDefinitionCAT021Mode 3/A Valid0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT021",
+                                "variable_name": "Mode 3/A Valid"
+                            }
+                        },
+                        "VariableDefinitionCAT048Mode 3/A Valid0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT048",
+                                "variable_name": "Mode 3/A Valid"
+                            }
+                        },
+                        "VariableDefinitionCAT062Mode 3/A Valid0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT062",
+                                "variable_name": "Mode 3/A Valid"
+                            }
+                        }
+                    }
+                }
+            },
+            "MetaVariableMode C Code0": {
+                "parameters": {
+                    "name": "Mode C Code"
+                },
+                "sub_configs": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT001Mode C Code0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT001",
+                                "variable_name": "Mode C Code"
+                            }
+                        },
+                        "VariableDefinitionCAT020Mode C Code0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT020",
+                                "variable_name": "Mode C Code"
+                            }
+                        },
+                        "VariableDefinitionCAT021Mode C Code0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT021",
+                                "variable_name": "Mode C Code"
+                            }
+                        },
+                        "VariableDefinitionCAT048Mode C Code0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT048",
+                                "variable_name": "Mode C Code"
+                            }
+                        },
+                        "VariableDefinitionCAT062Mode C Code LM0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT062",
+                                "variable_name": "Mode C Code LM"
+                            }
+                        }
+                    }
+                }
+            },
+            "MetaVariableMode C Garbled0": {
+                "parameters": {
+                    "name": "Mode C Garbled"
+                },
+                "sub_configs": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT001Mode C Garbled0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT001",
+                                "variable_name": "Mode C Garbled"
+                            }
+                        },
+                        "VariableDefinitionCAT020Mode C Garbled0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT020",
+                                "variable_name": "Mode C Garbled"
+                            }
+                        },
+                        "VariableDefinitionCAT048Mode C Garbled0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT048",
+                                "variable_name": "Mode C Garbled"
+                            }
+                        },
+                        "VariableDefinitionCAT062Mode C Garbled LM0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT062",
+                                "variable_name": "Mode C Garbled LM"
+                            }
+                        }
+                    }
+                }
+            },
+            "MetaVariableMode C Valid0": {
+                "parameters": {
+                    "name": "Mode C Valid"
+                },
+                "sub_configs": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT001Mode C Valid0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT001",
+                                "variable_name": "Mode C Valid"
+                            }
+                        },
+                        "VariableDefinitionCAT020Mode C Valid0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT020",
+                                "variable_name": "Mode C Valid"
+                            }
+                        },
+                        "VariableDefinitionCAT048Mode C Valid0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT048",
+                                "variable_name": "Mode C Valid"
+                            }
+                        },
+                        "VariableDefinitionCAT062Mode C Valid LM0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT062",
+                                "variable_name": "Mode C Valid LM"
+                            }
+                        }
+                    }
+                }
+            },
+            "MetaVariableMode S Specific Service Capability0": {
+                "parameters": {
+                    "name": "Mode S Specific Service Capability"
+                },
+                "sub_configs": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT020Mode S Specific Service Capability0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT020",
+                                "variable_name": "Mode S Specific Service Capability"
+                            }
+                        },
+                        "VariableDefinitionCAT048Mode S Specific Service Capability0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT048",
+                                "variable_name": "Mode S Specific Service Capability"
+                            }
+                        }
+                    }
+                }
+            },
+            "MetaVariableRDP Chain0": {
+                "parameters": {
+                    "name": "RDP Chain"
+                },
+                "sub_configs": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT001RDP Chain0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT001",
+                                "variable_name": "RDP Chain"
+                            }
+                        },
+                        "VariableDefinitionCAT048RDP Chain0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT048",
+                                "variable_name": "RDP Chain"
+                            }
+                        }
+                    }
+                }
+            },
+            "MetaVariableRange0": {
+                "parameters": {
+                    "name": "Range"
+                },
+                "sub_configs": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT001Range0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT001",
+                                "variable_name": "Range"
+                            }
+                        },
+                        "VariableDefinitionCAT048Range0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT048",
+                                "variable_name": "Range"
+                            }
+                        }
+                    }
+                }
+            },
+            "MetaVariableSAC0": {
+                "parameters": {
+                    "name": "SAC"
+                },
+                "sub_configs": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT001SAC0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT001",
+                                "variable_name": "SAC"
+                            }
+                        },
+                        "VariableDefinitionCAT020SAC0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT020",
+                                "variable_name": "SAC"
+                            }
+                        },
+                        "VariableDefinitionCAT021SAC0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT021",
+                                "variable_name": "SAC"
+                            }
+                        },
+                        "VariableDefinitionCAT048SAC0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT048",
+                                "variable_name": "SAC"
+                            }
+                        },
+                        "VariableDefinitionCAT062SAC0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT062",
+                                "variable_name": "SAC"
+                            }
+                        }
+                    }
+                }
+            },
+            "MetaVariableSIC0": {
+                "parameters": {
+                    "name": "SIC"
+                },
+                "sub_configs": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT001SIC0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT001",
+                                "variable_name": "SIC"
+                            }
+                        },
+                        "VariableDefinitionCAT020SIC0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT020",
+                                "variable_name": "SIC"
+                            }
+                        },
+                        "VariableDefinitionCAT021SIC0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT021",
+                                "variable_name": "SIC"
+                            }
+                        },
+                        "VariableDefinitionCAT048SIC0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT048",
+                                "variable_name": "SIC"
+                            }
+                        },
+                        "VariableDefinitionCAT062SIC0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT062",
+                                "variable_name": "SIC"
+                            }
+                        }
+                    }
+                }
+            },
+            "MetaVariableSPI0": {
+                "parameters": {
+                    "name": "SPI"
+                },
+                "sub_configs": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT001SPI0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT001",
+                                "variable_name": "SPI"
+                            }
+                        },
+                        "VariableDefinitionCAT020SPI0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT020",
+                                "variable_name": "SPI"
+                            }
+                        },
+                        "VariableDefinitionCAT021SPI0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT021",
+                                "variable_name": "SPI"
+                            }
+                        },
+                        "VariableDefinitionCAT048SPI0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT048",
+                                "variable_name": "SPI"
+                            }
+                        },
+                        "VariableDefinitionCAT062SPI0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT062",
+                                "variable_name": "SPI"
+                            }
+                        }
+                    }
+                }
+            },
+            "MetaVariableService Identification0": {
+                "parameters": {
+                    "name": "Service Identification"
+                },
+                "sub_configs": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT021Service Identification0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT021",
+                                "variable_name": "Service Identification"
+                            }
+                        },
+                        "VariableDefinitionCAT062Service Identification0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT062",
+                                "variable_name": "Service Identification"
+                            }
+                        }
+                    }
+                }
+            },
+            "MetaVariableSimulated0": {
+                "parameters": {
+                    "name": "Simulated"
+                },
+                "sub_configs": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT001Simulated0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT001",
+                                "variable_name": "Simulated"
+                            }
+                        },
+                        "VariableDefinitionCAT020Simulated0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT020",
+                                "variable_name": "Simulated"
+                            }
+                        },
+                        "VariableDefinitionCAT021Simulated0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT021",
+                                "variable_name": "Simulated"
+                            }
+                        },
+                        "VariableDefinitionCAT048Simulated0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT048",
+                                "variable_name": "Simulated"
+                            }
+                        },
+                        "VariableDefinitionCAT062Simulated0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT062",
+                                "variable_name": "Simulated"
+                            }
+                        }
+                    }
+                }
+            },
+            "MetaVariableTest0": {
+                "parameters": {
+                    "name": "Test"
+                },
+                "sub_configs": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT001Test0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT001",
+                                "variable_name": "Test"
+                            }
+                        },
+                        "VariableDefinitionCAT020Test0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT020",
+                                "variable_name": "Test"
+                            }
+                        },
+                        "VariableDefinitionCAT021Test0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT021",
+                                "variable_name": "Test"
+                            }
+                        },
+                        "VariableDefinitionCAT048Test0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT048",
+                                "variable_name": "Test"
+                            }
+                        }
+                    }
+                }
+            },
+            "MetaVariableTime of Day0": {
+                "parameters": {
+                    "name": "Time of Day"
+                },
+                "sub_configs": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT001Time of Day0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT001",
+                                "variable_name": "Time of Day"
+                            }
+                        },
+                        "VariableDefinitionCAT020Time of Day0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT020",
+                                "variable_name": "Time of Day"
+                            }
+                        },
+                        "VariableDefinitionCAT021Time of Day0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT021",
+                                "variable_name": "Time of Day"
+                            }
+                        },
+                        "VariableDefinitionCAT048Time of Day0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT048",
+                                "variable_name": "Time of Day"
+                            }
+                        },
+                        "VariableDefinitionCAT062Time of Day0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT062",
+                                "variable_name": "Time of Day"
+                            }
+                        }
+                    }
+                }
+            },
+            "MetaVariableTrack Angle0": {
+                "parameters": {
+                    "name": "Track Angle"
+                },
+                "sub_configs": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT001Track Angle0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT001",
+                                "variable_name": "Track Angle"
+                            }
+                        },
+                        "VariableDefinitionCAT021Track Angle0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT021",
+                                "variable_name": "Track Angle"
+                            }
+                        },
+                        "VariableDefinitionCAT048Track Angle0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT048",
+                                "variable_name": "Track Angle"
+                            }
+                        }
+                    }
+                }
+            },
+            "MetaVariableTrack Climbing/Descending0": {
+                "parameters": {
+                    "name": "Track Climbing/Descending"
+                },
+                "sub_configs": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT020Track Climbing/Descending0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT020",
+                                "variable_name": "Track Climbing/Descending"
+                            }
+                        },
+                        "VariableDefinitionCAT048Track Climbing/Descending0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT048",
+                                "variable_name": "Track Climbing/Descending"
+                            }
+                        }
+                    }
+                }
+            },
+            "MetaVariableTrack Confirmed0": {
+                "parameters": {
+                    "name": "Track Confirmed"
+                },
+                "sub_configs": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT001Track Confirmed0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT001",
+                                "variable_name": "Track Confirmed"
+                            }
+                        },
+                        "VariableDefinitionCAT020Track Confirmed0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT020",
+                                "variable_name": "Track Confirmed"
+                            }
+                        },
+                        "VariableDefinitionCAT048Track Confirmed0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT048",
+                                "variable_name": "Track Confirmed"
+                            }
+                        }
+                    }
+                }
+            },
+            "MetaVariableTrack Doubtful0": {
+                "parameters": {
+                    "name": "Track Doubtful"
+                },
+                "sub_configs": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT001Track Doubtful0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT001",
+                                "variable_name": "Track Doubtful"
+                            }
+                        },
+                        "VariableDefinitionCAT048Track Doubtful0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT048",
+                                "variable_name": "Track Doubtful"
+                            }
+                        }
+                    }
+                }
+            },
+            "MetaVariableTrack End0": {
+                "parameters": {
+                    "name": "Track End"
+                },
+                "sub_configs": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT001Track End0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT001",
+                                "variable_name": "Track End"
+                            }
+                        },
+                        "VariableDefinitionCAT020Track End0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT020",
+                                "variable_name": "Track End"
+                            }
+                        },
+                        "VariableDefinitionCAT048Track End0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT048",
+                                "variable_name": "Track End"
+                            }
+                        },
+                        "VariableDefinitionCAT062Track End0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT062",
+                                "variable_name": "Track End"
+                            }
+                        }
+                    }
+                }
+            },
+            "MetaVariableTrack Ghost Target0": {
+                "parameters": {
+                    "name": "Track Ghost Target"
+                },
+                "sub_configs": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT001Track Ghost Target0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT001",
+                                "variable_name": "Track Ghost Target"
+                            }
+                        },
+                        "VariableDefinitionCAT020Track Ghost Target0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT020",
+                                "variable_name": "Track Ghost Target"
+                            }
+                        },
+                        "VariableDefinitionCAT048Track Ghost Target0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT048",
+                                "variable_name": "Track Ghost Target"
+                            }
+                        }
+                    }
+                }
+            },
+            "MetaVariableTrack Groundspeed0": {
+                "parameters": {
+                    "name": "Track Groundspeed"
+                },
+                "sub_configs": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT001Track Groundspeed0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT001",
+                                "variable_name": "Track Groundspeed"
+                            }
+                        },
+                        "VariableDefinitionCAT048Track Groundspeed0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT048",
+                                "variable_name": "Track Groundspeed"
+                            }
+                        }
+                    }
+                }
+            },
+            "MetaVariableTrack Horizontal Manoeuvre0": {
+                "parameters": {
+                    "name": "Track Horizontal Manoeuvre"
+                },
+                "sub_configs": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT001Track Horizontal Manoeuvre0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT001",
+                                "variable_name": "Track Horizontal Manoeuvre"
+                            }
+                        },
+                        "VariableDefinitionCAT020Track Horizontal Manoeuvre0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT020",
+                                "variable_name": "Track Horizontal Manoeuvre"
+                            }
+                        },
+                        "VariableDefinitionCAT048Track Horizontal Manoeuvre0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT048",
+                                "variable_name": "Track Horizontal Manoeuvre"
+                            }
+                        }
+                    }
+                }
+            },
+            "MetaVariableTrack Number0": {
+                "parameters": {
+                    "name": "Track Number"
+                },
+                "sub_configs": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT001Track Number0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT001",
+                                "variable_name": "Track Number"
+                            }
+                        },
+                        "VariableDefinitionCAT021Track Number0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT021",
+                                "variable_name": "Track Number"
+                            }
+                        },
+                        "VariableDefinitionCAT048Track Number0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT048",
+                                "variable_name": "Track Number"
+                            }
+                        },
+                        "VariableDefinitionCAT062Track Number0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT062",
+                                "variable_name": "Track Number"
+                            }
+                        }
+                    }
+                }
+            },
+            "MetaVariableTrack Sensor Types0": {
+                "parameters": {
+                    "name": "Track Sensor Types"
+                },
+                "sub_configs": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT001Track Sensor Types0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT001",
+                                "variable_name": "Track Sensor Types"
+                            }
+                        },
+                        "VariableDefinitionCAT048Track Sensor Types0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT048",
+                                "variable_name": "Track Sensor Types"
+                            }
+                        }
+                    }
+                }
+            },
+            "MetaVariableTransponder Com. Capability0": {
+                "parameters": {
+                    "name": "Transponder Com. Capability"
+                },
+                "sub_configs": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT020Transponder Com. Capability0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT020",
+                                "variable_name": "Transponder Com. Capability"
+                            }
+                        },
+                        "VariableDefinitionCAT048Transponder Com. Capability0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT048",
+                                "variable_name": "Transponder Com. Capability"
+                            }
+                        }
+                    }
+                }
+            },
+            "MetaVariableType0": {
+                "parameters": {
+                    "name": "Type"
+                },
+                "sub_configs": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT001Type0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT001",
+                                "variable_name": "Type"
+                            }
+                        },
+                        "VariableDefinitionCAT048Type0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT048",
+                                "variable_name": "Type"
+                            }
+                        },
+                        "VariableDefinitionCAT062Type LM0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT062",
+                                "variable_name": "Type LM"
+                            }
+                        }
+                    }
+                }
+            },
+            "MetaVariableX StdDev0": {
+                "parameters": {
+                    "name": "X StdDev"
+                },
+                "sub_configs": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT020X StdDev0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT020",
+                                "variable_name": "X StdDev"
+                            }
+                        },
+                        "VariableDefinitionCAT062X StdDev0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT062",
+                                "variable_name": "X StdDev"
+                            }
+                        }
+                    }
+                }
+            },
+            "MetaVariableX0": {
+                "parameters": {
+                    "name": "X"
+                },
+                "sub_configs": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT001X0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT001",
+                                "variable_name": "X"
+                            }
+                        },
+                        "VariableDefinitionCAT020X0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT020",
+                                "variable_name": "X"
+                            }
+                        },
+                        "VariableDefinitionCAT048X0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT048",
+                                "variable_name": "X"
+                            }
+                        }
+                    }
+                }
+            },
+            "MetaVariableY StdDev0": {
+                "parameters": {
+                    "name": "Y StdDev"
+                },
+                "sub_configs": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT020Y StdDev0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT020",
+                                "variable_name": "Y StdDev"
+                            }
+                        },
+                        "VariableDefinitionCAT062Y StdDev0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT062",
+                                "variable_name": "Y StdDev"
+                            }
+                        }
+                    }
+                }
+            },
+            "MetaVariableY0": {
+                "parameters": {
+                    "name": "Y"
+                },
+                "sub_configs": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT001Y0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT001",
+                                "variable_name": "Y"
+                            }
+                        },
+                        "VariableDefinitionCAT020Y0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT020",
+                                "variable_name": "Y"
+                            }
+                        },
+                        "VariableDefinitionCAT048Y0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT048",
+                                "variable_name": "Y"
+                            }
+                        }
+                    }
+                }
+            },
+            "MetaVariableline_id0": {
+                "parameters": {
+                    "name": "Line ID"
+                },
+                "sub_configs": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT001Line ID0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT001",
+                                "variable_name": "Line ID"
+                            }
+                        },
+                        "VariableDefinitionCAT020Line ID0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT020",
+                                "variable_name": "Line ID"
+                            }
+                        },
+                        "VariableDefinitionCAT021Line ID0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT021",
+                                "variable_name": "Line ID"
+                            }
+                        },
+                        "VariableDefinitionCAT048Line ID0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT048",
+                                "variable_name": "Line ID"
+                            }
+                        },
+                        "VariableDefinitionCAT062Line ID0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT062",
+                                "variable_name": "Line ID"
+                            }
+                        }
+                    }
+                }
+            },
+            "MetaVariablerec_num0": {
+                "parameters": {
+                    "name": "Record Number"
+                },
+                "sub_configs": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT001rec_num0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT001",
+                                "variable_name": "Record Number"
+                            }
+                        },
+                        "VariableDefinitionCAT020rec_num0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT020",
+                                "variable_name": "Record Number"
+                            }
+                        },
+                        "VariableDefinitionCAT021rec_num0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT021",
+                                "variable_name": "Record Number"
+                            }
+                        },
+                        "VariableDefinitionCAT048rec_num0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT048",
+                                "variable_name": "Record Number"
+                            }
+                        },
+                        "VariableDefinitionCAT062rec_num0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT062",
+                                "variable_name": "Record Number"
+                            }
+                        },
+                        "VariableDefinitionRefTrajrec_num0": {
+                            "parameters": {
+                                "dbcontent_name": "RefTraj",
+                                "variable_name": "rec_num"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

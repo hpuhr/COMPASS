@@ -1,0 +1,1419 @@
+{
+    "parameters": {
+        "db_table_name": "data_cat048",
+        "info": "",
+        "name": "CAT048"
+    },
+    "sub_configs": {
+        "LabelDefinition": {
+            "LabelDefinition0": {
+                "parameters": null,
+                "sub_configs": {
+                    "LabelEntry": {
+                        "LabelEntry(M)SSR Amplitude0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "(M)SSR Amplitude"
+                            }
+                        },
+                        "LabelEntry(M)SSR Number of Replies0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "(M)SSR Number of Replies"
+                            }
+                        },
+                        "LabelEntry3D Height0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "3D Height"
+                            }
+                        },
+                        "LabelEntryACID Capability0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "ACID Capability"
+                            }
+                        },
+                        "LabelEntryARTAS Hash0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "ARTAS Hash"
+                            }
+                        },
+                        "LabelEntryAircraft Address0": {
+                            "parameters": {
+                                "prefix": "AA ",
+                                "show": true,
+                                "suffix": "",
+                                "variable_name": "Aircraft Address"
+                            }
+                        },
+                        "LabelEntryAircraft Identification0": {
+                            "parameters": {
+                                "prefix": "ID ",
+                                "show": true,
+                                "suffix": "",
+                                "variable_name": "Aircraft Identification"
+                            }
+                        },
+                        "LabelEntryAltitude Reporting Capability0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Altitude Reporting Capability"
+                            }
+                        },
+                        "LabelEntryAzimuth Difference PSR/SSR0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Azimuth Difference PSR/SSR"
+                            }
+                        },
+                        "LabelEntryAzimuth0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Azimuth"
+                            }
+                        },
+                        "LabelEntryB1A0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "B1A"
+                            }
+                        },
+                        "LabelEntryB1B0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "B1B"
+                            }
+                        },
+                        "LabelEntryDS ID0": {
+                            "parameters": {
+                                "prefix": "S ",
+                                "show": true,
+                                "suffix": "",
+                                "variable_name": "DS ID"
+                            }
+                        },
+                        "LabelEntryExtended Range0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Extended Range"
+                            }
+                        },
+                        "LabelEntryFFT0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "FFT"
+                            }
+                        },
+                        "LabelEntryFOE/FRI0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "FOE/FRI"
+                            }
+                        },
+                        "LabelEntryFlight Status0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Flight Status"
+                            }
+                        },
+                        "LabelEntryLatitude0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Latitude"
+                            }
+                        },
+                        "LabelEntryLine ID0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Line ID"
+                            }
+                        },
+                        "LabelEntryLongitude0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Longitude"
+                            }
+                        },
+                        "LabelEntryMilitary Emergency0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Military Emergency"
+                            }
+                        },
+                        "LabelEntryMilitary Identification0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Military Identification"
+                            }
+                        },
+                        "LabelEntryMode 3/A Code0": {
+                            "parameters": {
+                                "prefix": "A ",
+                                "show": true,
+                                "suffix": "",
+                                "variable_name": "Mode 3/A Code"
+                            }
+                        },
+                        "LabelEntryMode 3/A Garbled0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Mode 3/A Garbled"
+                            }
+                        },
+                        "LabelEntryMode 3/A Smoothed0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Mode 3/A Smoothed"
+                            }
+                        },
+                        "LabelEntryMode 3/A Valid0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Mode 3/A Valid"
+                            }
+                        },
+                        "LabelEntryMode C Code0": {
+                            "parameters": {
+                                "prefix": "C ",
+                                "show": true,
+                                "suffix": "",
+                                "variable_name": "Mode C Code"
+                            }
+                        },
+                        "LabelEntryMode C Garbled0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Mode C Garbled"
+                            }
+                        },
+                        "LabelEntryMode C Valid0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Mode C Valid"
+                            }
+                        },
+                        "LabelEntryMode S Specific Service Capability0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Mode S Specific Service Capability"
+                            }
+                        },
+                        "LabelEntryPSR Amplitude0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "PSR Amplitude"
+                            }
+                        },
+                        "LabelEntryPSR Plot Runlength0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "PSR Plot Runlength"
+                            }
+                        },
+                        "LabelEntryRDP Chain0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "RDP Chain"
+                            }
+                        },
+                        "LabelEntryRange Difference PSR/SSR0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Range Difference PSR/SSR"
+                            }
+                        },
+                        "LabelEntryRange0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Range"
+                            }
+                        },
+                        "LabelEntryRecord Number0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Record Number"
+                            }
+                        },
+                        "LabelEntrySAC0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "SAC"
+                            }
+                        },
+                        "LabelEntrySI/II Transponder Capability0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "SI/II Transponder Capability"
+                            }
+                        },
+                        "LabelEntrySIC0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "SIC"
+                            }
+                        },
+                        "LabelEntrySPI0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "SPI"
+                            }
+                        },
+                        "LabelEntrySSR Plot Runlength0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "SSR Plot Runlength"
+                            }
+                        },
+                        "LabelEntrySimulated0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Simulated"
+                            }
+                        },
+                        "LabelEntryTest0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Test"
+                            }
+                        },
+                        "LabelEntryTime of Day0": {
+                            "parameters": {
+                                "prefix": "T ",
+                                "show": true,
+                                "suffix": "",
+                                "variable_name": "Time of Day"
+                            }
+                        },
+                        "LabelEntryTrack Angle0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Track Angle"
+                            }
+                        },
+                        "LabelEntryTrack Climbing/Descending0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Track Climbing/Descending"
+                            }
+                        },
+                        "LabelEntryTrack Confirmed0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Track Confirmed"
+                            }
+                        },
+                        "LabelEntryTrack Doubtful0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Track Doubtful"
+                            }
+                        },
+                        "LabelEntryTrack End0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Track End"
+                            }
+                        },
+                        "LabelEntryTrack Ghost Target0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Track Ghost Target"
+                            }
+                        },
+                        "LabelEntryTrack Groundspeed0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Track Groundspeed"
+                            }
+                        },
+                        "LabelEntryTrack Horizontal Manoeuvre0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Track Horizontal Manoeuvre"
+                            }
+                        },
+                        "LabelEntryTrack Number0": {
+                            "parameters": {
+                                "prefix": "TN ",
+                                "show": true,
+                                "suffix": "",
+                                "variable_name": "Track Number"
+                            }
+                        },
+                        "LabelEntryTrack Sensor Types0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Track Sensor Types"
+                            }
+                        },
+                        "LabelEntryTrack Sigma (H)0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Track Sigma (H)"
+                            }
+                        },
+                        "LabelEntryTrack Sigma (V)0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Track Sigma (V)"
+                            }
+                        },
+                        "LabelEntryTrack Sigma (X)0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Track Sigma (X)"
+                            }
+                        },
+                        "LabelEntryTrack Sigma (Y)0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Track Sigma (Y)"
+                            }
+                        },
+                        "LabelEntryTrack Slant Range Corrected0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Track Slant Range Corrected"
+                            }
+                        },
+                        "LabelEntryTrack Supported0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Track Supported"
+                            }
+                        },
+                        "LabelEntryTransponder Com. Capability0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Transponder Com. Capability"
+                            }
+                        },
+                        "LabelEntryType0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Type"
+                            }
+                        },
+                        "LabelEntryX0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "X"
+                            }
+                        },
+                        "LabelEntryY0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Y"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "Variable": {
+            "Variable1": {
+                "parameters": {
+                    "data_type_str": "BOOL",
+                    "db_column_name": "extended_range",
+                    "description": "From 020.ERR\n\n0 No Extended Range\n1 Extended Range present",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Extended Range",
+                    "representation_str": "STANDARD",
+                    "short_name": "ERR",
+                    "unit": ""
+                }
+            },
+            "Variable2": {
+                "parameters": {
+                    "data_type_str": "UCHAR",
+                    "db_column_name": "foe_fri",
+                    "description": "From 020.FOE/FRI\n\n0 No Mode 4 interrogation\n1 Friendly target\n2 Unknown target\n3 No reply",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "FOE/FRI",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "Variable3": {
+                "parameters": {
+                    "data_type_str": "DOUBLE",
+                    "db_column_name": "x",
+                    "description": "From 042.X-Component\n\nMax. range = +/-256 NM",
+                    "dimension": "Length",
+                    "is_key": false,
+                    "name": "X",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": "Meter"
+                }
+            },
+            "Variable4": {
+                "parameters": {
+                    "data_type_str": "DOUBLE",
+                    "db_column_name": "y",
+                    "description": "From 042.Y-Component\n\nMax. range = +/-256 NM",
+                    "dimension": "Length",
+                    "is_key": false,
+                    "name": "Y",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": "Meter"
+                }
+            },
+            "Variable5": {
+                "parameters": {
+                    "data_type_str": "FLOAT",
+                    "db_column_name": "height_3d",
+                    "description": "From 110.3D-Height\n\n3D height, in binary notation. Negative values are expressed in two’s complement",
+                    "dimension": "Height",
+                    "is_key": false,
+                    "name": "3D Height",
+                    "representation_str": "STANDARD",
+                    "short_name": "3D H",
+                    "unit": "Feet"
+                }
+            },
+            "Variable6": {
+                "parameters": {
+                    "data_type_str": "DOUBLE",
+                    "db_column_name": "psr_plot_runlength",
+                    "description": "From 130.PRL.value\n\nPrimary Plot Runlength, expressed as positive binary value",
+                    "dimension": "Angle",
+                    "is_key": false,
+                    "name": "PSR Plot Runlength",
+                    "representation_str": "STANDARD",
+                    "short_name": "PRL",
+                    "unit": "Degree"
+                }
+            },
+            "Variable7": {
+                "parameters": {
+                    "data_type_str": "UCHAR",
+                    "db_column_name": "track_sensor_types",
+                    "description": "From 170.RAD\n\nType of Sensor(s) maintaining Track\n0 Combined Track\n1 PSR Track\n2 SSR/Mode S Track\n3 Invalid",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Track Sensor Types",
+                    "representation_str": "STANDARD",
+                    "short_name": "RAD",
+                    "unit": ""
+                }
+            },
+            "Variable8": {
+                "parameters": {
+                    "data_type_str": "BOOL",
+                    "db_column_name": "altitude_reporting_capability",
+                    "description": "From 230.ARC\n\nAltitude reporting capability\n0 100 ft resolution\n1 25 ft resolution",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Altitude Reporting Capability",
+                    "representation_str": "STANDARD",
+                    "short_name": "ARC",
+                    "unit": ""
+                }
+            },
+            "Variable9": {
+                "parameters": {
+                    "data_type_str": "BOOL",
+                    "db_column_name": "si_ii_transponder_capability",
+                    "description": "From 230.SI\n\nSI/II Transponder Capability\n0 No\n1 Yes",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "SI/II Transponder Capability",
+                    "representation_str": "STANDARD",
+                    "short_name": "SI",
+                    "unit": ""
+                }
+            },
+            "VariableRadaracas_aircraft_identification0": {
+                "parameters": {
+                    "data_type_str": "BOOL",
+                    "db_column_name": "acid_capability",
+                    "dbo_name": "CAT048",
+                    "description": "From 230.AIC\n\nAircraft identification capability\n0 No\n1 Yes",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "ACID Capability",
+                    "representation_str": "STANDARD",
+                    "short_name": "AIC",
+                    "unit": ""
+                }
+            },
+            "VariableRadaracas_bds_1_a0": {
+                "parameters": {
+                    "data_type_str": "BOOL",
+                    "db_column_name": "b1a",
+                    "dbo_name": "CAT048",
+                    "description": "From 230.B1A\n\nBDS 1,0 bit 16",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "B1A",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "VariableRadaracas_bds_1_b0": {
+                "parameters": {
+                    "data_type_str": "UCHAR",
+                    "db_column_name": "b1b",
+                    "dbo_name": "CAT048",
+                    "description": "From 230.B1B\n\nBDS 1,0 bits 37/40",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "B1B",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "VariableRadaracas_comm_capability0": {
+                "parameters": {
+                    "data_type_str": "UCHAR",
+                    "db_column_name": "transponder_com_capability",
+                    "dbo_name": "CAT048",
+                    "description": "From 230.COM\n\nCommunications capability of the transponder\n0 No communications capability (surveillance only)\n1 Comm. A and Comm. B capability\n2 Comm. A, Comm. B and Uplink ELM\n3 Comm. A, Comm. B, Uplink ELM and Downlink ELM\n4 Level 5 Transponder capability\n5 to 7 Not assigned",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Transponder Com. Capability",
+                    "representation_str": "STANDARD",
+                    "short_name": "COM",
+                    "unit": ""
+                }
+            },
+            "VariableRadaracas_flight_status0": {
+                "parameters": {
+                    "data_type_str": "UCHAR",
+                    "db_column_name": "flight_status",
+                    "dbo_name": "CAT048",
+                    "description": "From 230.STAT\n\nFlight Status\n0 No alert, no SPI, aircraft airborne\n1 No alert, no SPI, aircraft on ground\n2 Alert, no SPI, aircraft airborne\n3 Alert, no SPI, aircraft on ground\n4 Alert, SPI, aircraft airborne or on ground\n5 No alert, SPI, aircraft airborne or on ground\n6 - 7 Not assigned",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Flight Status",
+                    "representation_str": "STANDARD",
+                    "short_name": "STAT",
+                    "unit": ""
+                }
+            },
+            "VariableRadaracas_modes_service0": {
+                "parameters": {
+                    "data_type_str": "BOOL",
+                    "db_column_name": "mode_s_specific_service_capability",
+                    "dbo_name": "CAT048",
+                    "description": "From 230.MSSC\n\nMode-S Specific Service Capability\n0 No\n1 Yes",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Mode S Specific Service Capability",
+                    "representation_str": "STANDARD",
+                    "short_name": "MSSC",
+                    "unit": ""
+                }
+            },
+            "VariableRadarcallsign0": {
+                "parameters": {
+                    "data_type_str": "STRING",
+                    "db_column_name": "aircraft_identification",
+                    "dbo_name": "CAT048",
+                    "description": "From 240.Aircraft Identification\n\nAircraft Identification",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Aircraft Identification",
+                    "representation_str": "STANDARD",
+                    "short_name": "ACID",
+                    "unit": ""
+                }
+            },
+            "VariableRadardetection_type0": {
+                "parameters": {
+                    "data_type_str": "UCHAR",
+                    "db_column_name": "type",
+                    "dbo_name": "CAT048",
+                    "description": "From 020.TYP\n\nDetection Type\n\n0 No detection\n1 Single PSR detection\n2 Single SSR detection\n3 SSR + PSR detection\n4 Single ModeS All-Call\n5 Single ModeS Roll-Call\n6 ModeS All-Call + PSR\n7 ModeS Roll-Call +PSR",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Type",
+                    "representation_str": "STANDARD",
+                    "short_name": "TYP",
+                    "unit": ""
+                }
+            },
+            "VariableRadards_id0": {
+                "parameters": {
+                    "data_type_str": "UINT",
+                    "db_column_name": "ds_id",
+                    "dbo_name": "CAT048",
+                    "description": "From ds_id\n\nData Source ID",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "DS ID",
+                    "representation_str": "DATA_SRC_NAME",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "VariableRadarfrom_fft0": {
+                "parameters": {
+                    "data_type_str": "BOOL",
+                    "db_column_name": "fft",
+                    "dbo_name": "CAT048",
+                    "description": "From 020.RAB\n\n0 Report from aircraft transponder\n1 Report from field monitor(fixed transponder)",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "FFT",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "VariableRadarhash_code0": {
+                "parameters": {
+                    "data_type_str": "STRING",
+                    "db_column_name": "artas_hash",
+                    "dbo_name": "CAT048",
+                    "description": "From artas_md5\n\nARTAS MD5 Hash Code",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "ARTAS Hash",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "VariableRadarline_id0": {
+                "parameters": {
+                    "data_type_str": "UINT",
+                    "db_column_name": "line_id",
+                    "dbo_name": "CAT048",
+                    "description": "COMMUNICATION LINE ID determines the origin of the record, see table COMMS",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Line ID",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "VariableRadarmil_emergency0": {
+                "parameters": {
+                    "data_type_str": "BOOL",
+                    "db_column_name": "military_emergency",
+                    "dbo_name": "CAT048",
+                    "description": "From 020.ME\n\n0 No military emergency \n1 Military emergency",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Military Emergency",
+                    "representation_str": "STANDARD",
+                    "short_name": "ME",
+                    "unit": ""
+                }
+            },
+            "VariableRadarmil_ident0": {
+                "parameters": {
+                    "data_type_str": "BOOL",
+                    "db_column_name": "military_identification",
+                    "dbo_name": "CAT048",
+                    "description": "From 020.MI\n\n0 No military identification\n1 Military identification",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Military Identification",
+                    "representation_str": "STANDARD",
+                    "short_name": "MI",
+                    "unit": ""
+                }
+            },
+            "VariableRadarmode3a_code0": {
+                "parameters": {
+                    "data_type_str": "UINT",
+                    "db_column_name": "mode_3a_code",
+                    "dbo_name": "CAT048",
+                    "description": "From 070.Mode-3/A reply\n\n070.Mode-3/A reply in decimal\nrepresentation",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Mode 3/A Code",
+                    "representation_str": "DEC_TO_OCTAL",
+                    "short_name": "MA",
+                    "unit": ""
+                }
+            },
+            "VariableRadarmode3a_g0": {
+                "parameters": {
+                    "data_type_str": "BOOL",
+                    "db_column_name": "mode_3a_garbled",
+                    "dbo_name": "CAT048",
+                    "description": "From 070.G\n\n0 Default\n1 Garbled code",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Mode 3/A Garbled",
+                    "representation_str": "STANDARD",
+                    "short_name": "MA G",
+                    "unit": ""
+                }
+            },
+            "VariableRadarmode3a_smo0": {
+                "parameters": {
+                    "data_type_str": "BOOL",
+                    "db_column_name": "mode_3a_smoothed",
+                    "dbo_name": "CAT048",
+                    "description": "From 070.L\n\n0 Mode-3/A code derived from the reply of the transponder\n1 Mode-3/A code not extracted during the last scan",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Mode 3/A Smoothed",
+                    "representation_str": "STANDARD",
+                    "short_name": "MA S",
+                    "unit": ""
+                }
+            },
+            "VariableRadarmode3a_v0": {
+                "parameters": {
+                    "data_type_str": "BOOL",
+                    "db_column_name": "mode_3a_valid",
+                    "dbo_name": "CAT048",
+                    "description": "From 070.V\n\n0 Code not validated\n1 Code validated\n",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Mode 3/A Valid",
+                    "representation_str": "STANDARD",
+                    "short_name": "MA V",
+                    "unit": ""
+                }
+            },
+            "VariableRadarmodec_code_ft0": {
+                "parameters": {
+                    "data_type_str": "FLOAT",
+                    "db_column_name": "mode_c_code",
+                    "dbo_name": "CAT048",
+                    "description": "From 090.Flight Level\n\nThis data item shall be sent when Mode C code or Mode S altitude code is present and decodable. It represents the flight level of the plot, even if associated\nwith a track.",
+                    "dimension": "Height",
+                    "is_key": false,
+                    "name": "Mode C Code",
+                    "representation_str": "STANDARD",
+                    "short_name": "MC",
+                    "unit": "Feet"
+                }
+            },
+            "VariableRadarmodec_g0": {
+                "parameters": {
+                    "data_type_str": "BOOL",
+                    "db_column_name": "mode_c_garbled",
+                    "dbo_name": "CAT048",
+                    "description": "From 090.G\n\n0 Default\n1 Garbled code",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Mode C Garbled",
+                    "representation_str": "STANDARD",
+                    "short_name": "MC G",
+                    "unit": ""
+                }
+            },
+            "VariableRadarmodec_v0": {
+                "parameters": {
+                    "data_type_str": "BOOL",
+                    "db_column_name": "mode_c_valid",
+                    "dbo_name": "CAT048",
+                    "description": "From 090.V\n\n0 Code not validated\n1 Code validated",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Mode C Valid",
+                    "representation_str": "STANDARD",
+                    "short_name": "MC V",
+                    "unit": ""
+                }
+            },
+            "VariableRadarmssr_amplitude_dbm0": {
+                "parameters": {
+                    "data_type_str": "INT",
+                    "db_column_name": "mssr_amplitude",
+                    "dbo_name": "CAT048",
+                    "description": "From 130.SAM.value\n\nFrom 130.SAM\n\nAmplitude of received replies for M(SSR)",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "(M)SSR Amplitude",
+                    "representation_str": "STANDARD",
+                    "short_name": "SAM",
+                    "unit": ""
+                }
+            },
+            "VariableRadarmssr_replies_num0": {
+                "parameters": {
+                    "data_type_str": "UINT",
+                    "db_column_name": "mssr_number_of_replies",
+                    "dbo_name": "CAT048",
+                    "description": "From 130.SRR.value\n\nFrom 130.SRR\n\nNumber of received replies for M(SSR)",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "(M)SSR Number of Replies",
+                    "representation_str": "STANDARD",
+                    "short_name": "SSR",
+                    "unit": ""
+                }
+            },
+            "VariableRadarpos_azm_deg0": {
+                "parameters": {
+                    "data_type_str": "DOUBLE",
+                    "db_column_name": "azimuth",
+                    "dbo_name": "CAT048",
+                    "description": "From 040.THETA\n\nMeasured position of an aircraft in local polar co-ordinates",
+                    "dimension": "Angle",
+                    "is_key": false,
+                    "name": "Azimuth",
+                    "representation_str": "STANDARD",
+                    "short_name": "Azm",
+                    "unit": "Degree"
+                }
+            },
+            "VariableRadarpos_lat_deg0": {
+                "parameters": {
+                    "data_type_str": "DOUBLE",
+                    "db_column_name": "latitude",
+                    "dbo_name": "CAT048",
+                    "description": "Calculated from 040.RHO/040.THETA \n\nPosition in WGS-84 Coordinates\nRange -90 <= latitude <= 90 deg.",
+                    "dimension": "Angle",
+                    "is_key": false,
+                    "name": "Latitude",
+                    "representation_str": "STANDARD",
+                    "short_name": "Lat",
+                    "unit": "Degree"
+                }
+            },
+            "VariableRadarpos_lon_deg0": {
+                "parameters": {
+                    "data_type_str": "DOUBLE",
+                    "db_column_name": "longitude",
+                    "dbo_name": "CAT048",
+                    "description": "Calculated from 040.RHO/040.THETA \n\nPosition in WGS-84 Coordinates\nRange -90 <= latitude <= 90 deg.",
+                    "dimension": "Angle",
+                    "is_key": false,
+                    "name": "Longitude",
+                    "representation_str": "STANDARD",
+                    "short_name": "Lon",
+                    "unit": "Degree"
+                }
+            },
+            "VariableRadarpos_range_nm0": {
+                "parameters": {
+                    "data_type_str": "DOUBLE",
+                    "db_column_name": "range",
+                    "dbo_name": "CAT048",
+                    "description": "From 040.RHO\n\nMeasured position of an aircraft in local polar co-ordinates\n\nMax. range = 256 NM",
+                    "dimension": "Length",
+                    "is_key": false,
+                    "name": "Range",
+                    "representation_str": "STANDARD",
+                    "short_name": "Rng",
+                    "unit": "Nautical Mile"
+                }
+            },
+            "VariableRadarpsr_amplitude_dbm0": {
+                "parameters": {
+                    "data_type_str": "INT",
+                    "db_column_name": "psr_amplitude",
+                    "dbo_name": "CAT048",
+                    "description": "From 130.PAM.value\n\nFrom 130.PAM\n\nPSR amplitude\n\n",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "PSR Amplitude",
+                    "representation_str": "STANDARD",
+                    "short_name": "PAM",
+                    "unit": ""
+                }
+            },
+            "VariableRadarpsr_ssr_azm_diff_deg0": {
+                "parameters": {
+                    "data_type_str": "DOUBLE",
+                    "db_column_name": "azimuth_difference_psr_ssr",
+                    "dbo_name": "CAT048",
+                    "description": "From 130.APD.value\n\nFrom 130.APD\n\nDifference in Azimuth between PSR and SSR plot",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Azimuth Difference PSR/SSR",
+                    "representation_str": "STANDARD",
+                    "short_name": "APD",
+                    "unit": ""
+                }
+            },
+            "VariableRadarpsr_ssr_range_diff_nm0": {
+                "parameters": {
+                    "data_type_str": "DOUBLE",
+                    "db_column_name": "range_difference_psr_ssr",
+                    "dbo_name": "CAT048",
+                    "description": "From 130.RPD.value\n\nFrom 130.RPD\n\nDifference in Range between PSR and SSR plot",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Range Difference PSR/SSR",
+                    "representation_str": "STANDARD",
+                    "short_name": "RPD",
+                    "unit": ""
+                }
+            },
+            "VariableRadarrdp_chain0": {
+                "parameters": {
+                    "data_type_str": "BOOL",
+                    "db_column_name": "rdp_chain",
+                    "dbo_name": "CAT048",
+                    "description": "From 020.RDP\n\n0 Report from RDP Chain 1\n1 Report from RDP Chain 2",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "RDP Chain",
+                    "representation_str": "STANDARD",
+                    "short_name": "RDP",
+                    "unit": ""
+                }
+            },
+            "VariableRadarrec_num0": {
+                "parameters": {
+                    "data_type_str": "UINT",
+                    "db_column_name": "record_number",
+                    "dbo_name": "CAT048",
+                    "description": "Unique record id starting with 0 on every new recording",
+                    "dimension": "",
+                    "is_key": true,
+                    "name": "Record Number",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "VariableRadarsac0": {
+                "parameters": {
+                    "data_type_str": "UCHAR",
+                    "db_column_name": "sac",
+                    "dbo_name": "CAT048",
+                    "description": "From 010.SAC\n\nData Source Identifier System Area Code",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "SAC",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "VariableRadarsic0": {
+                "parameters": {
+                    "data_type_str": "UCHAR",
+                    "db_column_name": "sic",
+                    "dbo_name": "CAT048",
+                    "description": "From 010.SIC\n\nData Source Identifier System Identification Code",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "SIC",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "VariableRadarsimulated_target0": {
+                "parameters": {
+                    "data_type_str": "BOOL",
+                    "db_column_name": "simulated",
+                    "dbo_name": "CAT048",
+                    "description": "From 020.SIM\n\n0  Actual target report\n1 Simulated target report",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Simulated",
+                    "representation_str": "STANDARD",
+                    "short_name": "SIM",
+                    "unit": ""
+                }
+            },
+            "VariableRadarspi0": {
+                "parameters": {
+                    "data_type_str": "BOOL",
+                    "db_column_name": "spi",
+                    "dbo_name": "CAT048",
+                    "description": "From 020.SPI\n\n0 Absence of SPI\n1 Special Position Identification",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "SPI",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "VariableRadarssr_runlength_deg0": {
+                "parameters": {
+                    "data_type_str": "INT",
+                    "db_column_name": "ssr_plot_runlength",
+                    "dbo_name": "CAT048",
+                    "description": "From 130.SRL.value\n\nFrom 130.SRL\n\nSSR plot runlength",
+                    "dimension": "Angle",
+                    "is_key": false,
+                    "name": "SSR Plot Runlength",
+                    "representation_str": "STANDARD",
+                    "short_name": "SRL",
+                    "unit": "Degree"
+                }
+            },
+            "VariableRadartarget_addr0": {
+                "parameters": {
+                    "data_type_str": "UINT",
+                    "db_column_name": "aircraft_address",
+                    "dbo_name": "CAT048",
+                    "description": "From 220.AIRCRAFT ADDRESS\n\n24-bits Mode S address",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Aircraft Address",
+                    "representation_str": "DEC_TO_HEX",
+                    "short_name": "ACAD",
+                    "unit": ""
+                }
+            },
+            "VariableRadartest_target0": {
+                "parameters": {
+                    "data_type_str": "BOOL",
+                    "db_column_name": "test",
+                    "dbo_name": "CAT048",
+                    "description": "From 020.TST\n\n0 Real target report\n1 Test target report",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Test",
+                    "representation_str": "STANDARD",
+                    "short_name": "TST",
+                    "unit": ""
+                }
+            },
+            "VariableRadartod0": {
+                "parameters": {
+                    "data_type_str": "FLOAT",
+                    "db_column_name": "time_of_day",
+                    "dbo_name": "CAT048",
+                    "description": "From 140.Time-of-Day\n\nAbsolute time stamping expressed as Co-ordinated Universal Time (UTC)",
+                    "dimension": "Time",
+                    "is_key": false,
+                    "name": "Time of Day",
+                    "representation_str": "SECONDS_TO_TIME",
+                    "short_name": "ToD",
+                    "unit": "Second"
+                }
+            },
+            "VariableRadartrack_climb_desc_mode0": {
+                "parameters": {
+                    "data_type_str": "UCHAR",
+                    "db_column_name": "track_climbing_descending",
+                    "dbo_name": "CAT048",
+                    "description": "From 170.CDM\n\nClimbing / Descending Mode\n0 Maintaining\n1 Climbing\n2 Descending\n3 Invalid",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Track Climbing/Descending",
+                    "representation_str": "STANDARD",
+                    "short_name": "CDM",
+                    "unit": ""
+                }
+            },
+            "VariableRadartrack_confirmed0": {
+                "parameters": {
+                    "data_type_str": "BOOL",
+                    "db_column_name": "track_confirmed",
+                    "dbo_name": "CAT048",
+                    "description": "From 170.CNF\n\nConfirmed vs. Tentative Track\n0 Tentative Track\n1 Confirmed Track",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Track Confirmed",
+                    "representation_str": "STANDARD",
+                    "short_name": "CNF",
+                    "unit": ""
+                }
+            },
+            "VariableRadartrack_doubtful0": {
+                "parameters": {
+                    "data_type_str": "BOOL",
+                    "db_column_name": "track_doubtful",
+                    "dbo_name": "CAT048",
+                    "description": "From 170.DOU\n\nSignals level of confidence in plot to track association process\n0 Normal confidence\n1 Low confidence in plot to track association.",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Track Doubtful",
+                    "representation_str": "STANDARD",
+                    "short_name": "DOU",
+                    "unit": ""
+                }
+            },
+            "VariableRadartrack_end0": {
+                "parameters": {
+                    "data_type_str": "BOOL",
+                    "db_column_name": "track_end",
+                    "dbo_name": "CAT048",
+                    "description": "From 170.TRE\n\nSignal for End_of_Track\n0 Track still alive\n1 End of track lifetime(last report for this track)",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Track End",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "VariableRadartrack_ghost_target0": {
+                "parameters": {
+                    "data_type_str": "BOOL",
+                    "db_column_name": "track_ghost_target",
+                    "dbo_name": "CAT048",
+                    "description": "From 170.GHO\n\nGhost vs. true target\n0 True target track.\n1 Ghost target track.",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Track Ghost Target",
+                    "representation_str": "STANDARD",
+                    "short_name": "GHO",
+                    "unit": ""
+                }
+            },
+            "VariableRadartrack_groundspeed_kt0": {
+                "parameters": {
+                    "data_type_str": "DOUBLE",
+                    "db_column_name": "track_groundspeed",
+                    "dbo_name": "CAT048",
+                    "description": "From 200.CALCULATED GROUNDSPEED\n\nCalculated track velocity expressed in polar co-ordinates.",
+                    "dimension": "Speed",
+                    "is_key": false,
+                    "name": "Track Groundspeed",
+                    "representation_str": "STANDARD",
+                    "short_name": "GSpd",
+                    "unit": "Knots"
+                }
+            },
+            "VariableRadartrack_heading_deg0": {
+                "parameters": {
+                    "data_type_str": "DOUBLE",
+                    "db_column_name": "track_angle",
+                    "dbo_name": "CAT048",
+                    "description": "From 200.CALCULATED HEADING\n\nCalculated track velocity expressed in polar co-ordinates.\n\nWas called Track Heading previously, but renamed since it refers to  the direction of movement.",
+                    "dimension": "Angle",
+                    "is_key": false,
+                    "name": "Track Angle",
+                    "representation_str": "STANDARD",
+                    "short_name": "Ang",
+                    "unit": "Degree"
+                }
+            },
+            "VariableRadartrack_manoeuvre_hori0": {
+                "parameters": {
+                    "data_type_str": "BOOL",
+                    "db_column_name": "track_horizontal_manoeuvre",
+                    "dbo_name": "CAT048",
+                    "description": "From 170.MAH\n\nManoeuvre detection in Horizontal Sense\n0 No horizontal man.sensed\n1 Horizontal man. sensed",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Track Horizontal Manoeuvre",
+                    "representation_str": "STANDARD",
+                    "short_name": "MAH",
+                    "unit": ""
+                }
+            },
+            "VariableRadartrack_num0": {
+                "parameters": {
+                    "data_type_str": "UINT",
+                    "db_column_name": "track_number",
+                    "dbo_name": "CAT048",
+                    "description": "From 161.TRACK NUMBER\n\nAn integer value representing a unique reference to a track\nrecord within a particular track file.",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Track Number",
+                    "representation_str": "STANDARD",
+                    "short_name": "TN",
+                    "unit": ""
+                }
+            },
+            "VariableRadartrack_sigma_h_deg0": {
+                "parameters": {
+                    "data_type_str": "DOUBLE",
+                    "db_column_name": "track_sigma_h",
+                    "dbo_name": "CAT048",
+                    "description": "From 210.Sigma (H)\n\nStandard Deviation on the heading within the local grid system\n0 <= sigma(H) < 22.5 degrees",
+                    "dimension": "Angle",
+                    "is_key": false,
+                    "name": "Track Sigma (H)",
+                    "representation_str": "STANDARD",
+                    "short_name": "SigH",
+                    "unit": "Degree"
+                }
+            },
+            "VariableRadartrack_sigma_v_kt0": {
+                "parameters": {
+                    "data_type_str": "DOUBLE",
+                    "db_column_name": "track_sigma_v",
+                    "dbo_name": "CAT048",
+                    "description": "From 210.Sigma (V)\n\nStandard Deviation on the groundspeed within the local grid system\n0<=Sigma (V)<56.25 Kt",
+                    "dimension": "Speed",
+                    "is_key": false,
+                    "name": "Track Sigma (V)",
+                    "representation_str": "STANDARD",
+                    "short_name": "SigV",
+                    "unit": "Knots"
+                }
+            },
+            "VariableRadartrack_sigma_x_nm0": {
+                "parameters": {
+                    "data_type_str": "DOUBLE",
+                    "db_column_name": "track_sigma_x",
+                    "dbo_name": "CAT048",
+                    "description": "From 210.Sigma (X)\n\nStandard Deviation on the horizontal axis of the local grid system\n0<= Sigma(X)<2 NM",
+                    "dimension": "Length",
+                    "is_key": false,
+                    "name": "Track Sigma (X)",
+                    "representation_str": "STANDARD",
+                    "short_name": "SigX",
+                    "unit": "Meter"
+                }
+            },
+            "VariableRadartrack_sigma_y_nm0": {
+                "parameters": {
+                    "data_type_str": "DOUBLE",
+                    "db_column_name": "track_sigma_y",
+                    "dbo_name": "CAT048",
+                    "description": "From 210.Sigma (Y)\n\nStandard Deviation on the horizontal axis of the local grid system\n0<= Sigma(X)<2 NM",
+                    "dimension": "Length",
+                    "is_key": false,
+                    "name": "Track Sigma (Y)",
+                    "representation_str": "STANDARD",
+                    "short_name": "SigY",
+                    "unit": "Meter"
+                }
+            },
+            "VariableRadartrack_slant_corr0": {
+                "parameters": {
+                    "data_type_str": "BOOL",
+                    "db_column_name": "track_slant_range_corrected",
+                    "dbo_name": "CAT048",
+                    "description": "From 170.TCC\n\nType of plot coordinate transformation mechanism: \n0 Tracking performed in so-called 'Radar Plane', i.e. neither slant range correction nor stereographical projection was applied.\n1 Slant range correction and a suitable projection technique are used to track in a 2D.reference plane, tangential to the earth model at the Radar Site co-ordinates.",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Track Slant Range Corrected",
+                    "representation_str": "STANDARD",
+                    "short_name": "TCC",
+                    "unit": ""
+                }
+            },
+            "VariableRadartrack_sup0": {
+                "parameters": {
+                    "data_type_str": "BOOL",
+                    "db_column_name": "track_supported",
+                    "dbo_name": "CAT048",
+                    "description": "From 170.SUP\n\nTrack maintained with track information from neighbouring Node B on the cluster, or network\n0 no\n1 yes",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Track Supported",
+                    "representation_str": "STANDARD",
+                    "short_name": "SUP",
+                    "unit": ""
+                }
+            }
+        }
+    }
+}

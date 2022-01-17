@@ -19,14 +19,15 @@
 #define HISTOGRAMVIEW_H_
 
 #include "view.h"
-#include "viewselection.h"
 
 class HistogramViewWidget;
 class HistogramViewDataSource;
 class HistogramViewDataWidget;
 
-class DBOVariable;
-class MetaDBOVariable;
+namespace dbContent {
+class Variable;
+class MetaVariable;
+}
 
 class HistogramView : public View
 {
@@ -50,9 +51,11 @@ class HistogramView : public View
     /// @brief Destructor
     virtual ~HistogramView() override;
 
-    void update(bool atOnce = false) override;
-    void clearData() override;
     bool init() override;
+
+    virtual void loadingStarted() override;
+    virtual void loadedData(const std::map<std::string, std::shared_ptr<Buffer>>& data, bool requires_reset) override;
+    virtual void loadingDone() override;
 
     virtual void generateSubConfigurable(const std::string& class_id,
                                          const std::string& instance_id) override;
@@ -66,7 +69,7 @@ class HistogramView : public View
 
     HistogramViewDataWidget* getDataWidget();
 
-    virtual DBOVariableSet getSet(const std::string& dbo_name) override;
+    virtual dbContent::VariableSet getSet(const std::string& dbo_name) override;
 
     virtual void accept(LatexVisitor& v) override;
 
@@ -75,11 +78,11 @@ class HistogramView : public View
 
     bool hasDataVar ();
     bool isDataVarMeta ();
-    DBOVariable& dataVar();
-    void dataVar (DBOVariable& var);
+    dbContent::Variable& dataVar();
+    void dataVar (dbContent::Variable& var);
 
-    MetaDBOVariable& metaDataVar();
-    void metaDataVar (MetaDBOVariable& var);
+    dbContent::MetaVariable& metaDataVar();
+    void metaDataVar (dbContent::MetaVariable& var);
 
     std::string dataVarDBO() const;
     std::string dataVarName() const;

@@ -18,8 +18,6 @@
 #include "manageschemataskwidget.h"
 
 #include "compass.h"
-#include "dbschemamanager.h"
-#include "dbschemamanagerwidget.h"
 #include "manageschematask.h"
 
 #include <QHBoxLayout>
@@ -30,11 +28,6 @@ ManageSchemaTaskWidget::ManageSchemaTaskWidget(ManageSchemaTask& task, QWidget* 
     : TaskWidget(parent), task_(task)
 {
     QVBoxLayout* main_layout = new QVBoxLayout();
-
-    DBSchemaManagerWidget* dbschema_manager_widget = COMPASS::instance().schemaManager().widget();
-    connect(dbschema_manager_widget, &DBSchemaManagerWidget::schemaLockedSignal, this,
-            &ManageSchemaTaskWidget::schemaLockedSlot);
-    main_layout->addWidget(dbschema_manager_widget);
 
     expertModeChangedSlot();
 

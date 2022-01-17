@@ -23,14 +23,14 @@
 #include "stringconv.h"
 #include "taskmanager.h"
 #include "files.h"
-#include "dbobjectmanager.h"
-#include "dbobject.h"
-#include "dbovariable.h"
+#include "dbcontent/dbcontentmanager.h"
+#include "dbcontent/dbcontent.h"
+#include "dbcontent/variable/variable.h"
 #include "buffer.h"
-#include "dbovariableset.h"
-#include "dbtablecolumn.h"
-#include "postprocesstask.h"
-#include "managedatasourcestask.h"
+#include "dbcontent/variable/variableset.h"
+#include "util/number.h"
+//#include "postprocesstask.h"
+//#include "managedatasourcestask.h"
 
 #include <iostream>
 #include <fstream>
@@ -214,10 +214,7 @@ bool GPSTrailImportTask::checkPrerequisites()
     if (COMPASS::instance().interface().hasProperty(DONE_PROPERTY_NAME))
         done_ = COMPASS::instance().interface().getProperty(DONE_PROPERTY_NAME) == "1";
 
-    if (!COMPASS::instance().objectManager().existsObject("RefTraj"))
-        return false;
-
-    if (!COMPASS::instance().objectManager().object("RefTraj").hasCurrentMetaTable())
+    if (!COMPASS::instance().dbContentManager().existsObject("RefTraj"))
         return false;
 
     return true;
@@ -512,12 +509,11 @@ void GPSTrailImportTask::run()
     assert (gps_fixes_.size());
     assert (!buffer_);
 
-    DBObjectManager& obj_man = COMPASS::instance().objectManager();
+    DBContentManager& obj_man = COMPASS::instance().dbContentManager();
 
     assert (obj_man.existsObject("RefTraj"));
 
-    DBObject& reftraj_obj = obj_man.object("RefTraj");
-    assert (reftraj_obj.hasCurrentMetaTable());
+    DBContent& reftraj_obj = obj_man.object("RefTraj");
 
     assert (reftraj_obj.hasVariable("sac"));
     assert (reftraj_obj.hasVariable("sic"));
@@ -535,22 +531,24 @@ void GPSTrailImportTask::run()
 
     loginf << "GPSTrailImportTask: run: getting variables";
 
-    DBOVariable& sac_var = reftraj_obj.variable("sac");
-    DBOVariable& sic_var = reftraj_obj.variable("sic");
-    DBOVariable& ds_id_var = reftraj_obj.variable("ds_id");
-    DBOVariable& tod_var = reftraj_obj.variable("tod");
-    DBOVariable& lat_var = reftraj_obj.variable("pos_lat_deg");
-    DBOVariable& long_var = reftraj_obj.variable("pos_long_deg");
+    using namespace dbContent;
 
-    DBOVariable& m3a_var = reftraj_obj.variable("mode3a_code");
-    DBOVariable& ta_var = reftraj_obj.variable("target_addr");
-    DBOVariable& cs_var = reftraj_obj.variable("callsign");
+    Variable& sac_var = reftraj_obj.variable("sac");
+    Variable& sic_var = reftraj_obj.variable("sic");
+    Variable& ds_id_var = reftraj_obj.variable("ds_id");
+    Variable& tod_var = reftraj_obj.variable("tod");
+    Variable& lat_var = reftraj_obj.variable("pos_lat_deg");
+    Variable& long_var = reftraj_obj.variable("pos_long_deg");
 
-    DBOVariable& head_var = reftraj_obj.variable("heading_deg");
-    DBOVariable& spd_var = reftraj_obj.variable("groundspeed_kt");
+    Variable& m3a_var = reftraj_obj.variable("mode3a_code");
+    Variable& ta_var = reftraj_obj.variable("target_addr");
+    Variable& cs_var = reftraj_obj.variable("callsign");
+
+    Variable& head_var = reftraj_obj.variable("heading_deg");
+    Variable& spd_var = reftraj_obj.variable("groundspeed_kt");
 
 
-    DBOVariableSet var_set;
+    VariableSet var_set;
 
     var_set.add(sac_var);
     var_set.add(sic_var);
@@ -606,31 +604,33 @@ void GPSTrailImportTask::run()
     NullableVector<double>& spd_vec = buffer_->get<double>("groundspeed_kt");
 
     unsigned int cnt = 0;
-    int ds_id = ds_sac_*255+ds_sic_;
+    int ds_id = Number::dsIdFrom(ds_sac_, ds_sic_);
 
     // config data source
     {
-        ManageDataSourcesTask& ds_task = COMPASS::instance().taskManager().manageDataSourcesTask();
+        TODO_ASSERT
 
-        if (!ds_task.hasDataSource("RefTraj", ds_sac_, ds_sic_)) // add if not existing
-        {
-            loginf << "GPSTrailImportTask: run: adding data source '" << ds_name_ << "' "
-                   << ds_sac_ << "/" << ds_sic_;
-            StoredDBODataSource& new_ds = ds_task.addNewStoredDataSource("RefTraj");
-            new_ds.name(ds_name_);
-            new_ds.sac(ds_sac_);
-            new_ds.sic(ds_sic_);
-        }
-        else // set name if existing
-        {
-            loginf << "GPSTrailImportTask: run: setting data source '" << ds_name_ << "' "
-                   << ds_sac_ << "/" << ds_sic_;
-            StoredDBODataSource& ds = ds_task.getDataSource("RefTraj", ds_sac_, ds_sic_);
-            ds.name(ds_name_);
-        }
+//        ManageDataSourcesTask& ds_task = COMPASS::instance().taskManager().manageDataSourcesTask();
+
+//        if (!ds_task.hasDataSource("RefTraj", ds_sac_, ds_sic_)) // add if not existing
+//        {
+//            loginf << "GPSTrailImportTask: run: adding data source '" << ds_name_ << "' "
+//                   << ds_sac_ << "/" << ds_sic_;
+//            StoredDBODataSource& new_ds = ds_task.addNewStoredDataSource("RefTraj");
+//            new_ds.name(ds_name_);
+//            new_ds.sac(ds_sac_);
+//            new_ds.sic(ds_sic_);
+//        }
+//        else // set name if existing
+//        {
+//            loginf << "GPSTrailImportTask: run: setting data source '" << ds_name_ << "' "
+//                   << ds_sac_ << "/" << ds_sic_;
+//            StoredDBODataSource& ds = ds_task.getDataSource("RefTraj", ds_sac_, ds_sic_);
+//            ds.name(ds_name_);
+//        }
     }
 
-    bool has_ds = reftraj_obj.hasDataSources() && reftraj_obj.hasDataSource(ds_id);
+    bool has_ds = false; //reftraj_obj.hasDataSources() && reftraj_obj.hasDataSource(ds_id);
 
     float tod;
 
@@ -685,19 +685,23 @@ void GPSTrailImportTask::run()
 
         datasources_to_add[ds_id] = {ds_sac_, ds_sic_};
 
-        reftraj_obj.addDataSources(datasources_to_add);
+        TODO_ASSERT
+
+        //reftraj_obj.addDataSources(datasources_to_add);
     }
 
     //void insertData(DBOVariableSet& list, std::shared_ptr<Buffer> buffer, bool emit_change = true);
 
     loginf << "GPSTrailImportTask: run: inserting data";
 
-    connect(&reftraj_obj, &DBObject::insertDoneSignal, this, &GPSTrailImportTask::insertDoneSlot,
-            Qt::UniqueConnection);
-    connect(&reftraj_obj, &DBObject::insertProgressSignal, this,
-            &GPSTrailImportTask::insertProgressSlot, Qt::UniqueConnection);
+//    connect(&reftraj_obj, &DBObject::insertDoneSignal, this, &GPSTrailImportTask::insertDoneSlot,
+//            Qt::UniqueConnection);
+//    connect(&reftraj_obj, &DBObject::insertProgressSignal, this,
+//            &GPSTrailImportTask::insertProgressSlot, Qt::UniqueConnection);
 
-    reftraj_obj.insertData(var_set, buffer_, false);
+    TODO_ASSERT
+
+    //reftraj_obj.insertData(var_set, buffer_, false);
 }
 
 void GPSTrailImportTask::insertProgressSlot(float percent)
@@ -705,7 +709,7 @@ void GPSTrailImportTask::insertProgressSlot(float percent)
     loginf << "GPSTrailImportTask: insertProgressSlot: percent " << percent;
 }
 
-void GPSTrailImportTask::insertDoneSlot(DBObject& object)
+void GPSTrailImportTask::insertDoneSlot(DBContent& object)
 {
     loginf << "GPSTrailImportTask: insertDoneSlot";
 
@@ -716,12 +720,12 @@ void GPSTrailImportTask::insertDoneSlot(DBObject& object)
     task_manager_.appendSuccess("GPSTrailImportTask: imported " + to_string(gps_fixes_.size())
                                 +" GPS fixes");
 
-    COMPASS::instance().interface().setProperty(PostProcessTask::DONE_PROPERTY_NAME, "0");
+    //COMPASS::instance().interface().setProperty(PostProcessTask::DONE_PROPERTY_NAME, "0");
 
     COMPASS::instance().interface().setProperty(DONE_PROPERTY_NAME, "1");
 
-    COMPASS::instance().interface().databaseContentChanged();
-    object.updateToDatabaseContent();
+//    COMPASS::instance().interface().databaseContentChanged();
+//    object.updateToDatabaseContent();
 
     QMessageBox msg_box;
 

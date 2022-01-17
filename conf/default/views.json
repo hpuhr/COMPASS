@@ -3,556 +3,685 @@
     "sub_configs": {
         "ViewContainer": {
             "ViewContainer0": {
-                "parameters": null,
+                "parameters": null
+            }
+        },
+        "ViewContainerWidget": {
+            "ViewWindow1": {
+                "parameters": {
+                    "height": 1349,
+                    "min_height": 900,
+                    "min_width": 1200,
+                    "pos_x": 1720,
+                    "pos_y": 64,
+                    "width": 1720
+                },
                 "sub_configs": {
-                    "ListBoxView": {
-                        "ListBoxView0": {
-                            "parameters": {
-                                "overwrite_csv": true,
-                                "show_associations": false,
-                                "show_only_selected": false,
-                                "use_presentation": true
-                            },
+                    "ViewContainer": {
+                        "ViewWindow1ViewContainer0": {
+                            "parameters": null,
                             "sub_configs": {
-                                "ListBoxViewDataSource": {
-                                    "ListBoxViewDataSource0": {
+                                "OSGView": {
+                                    "OSGView1": {
                                         "parameters": {
-                                            "current_set_name": "Vertical Movement"
+                                            "blend_mode_name": "contour",
+                                            "connect_height_none": false,
+                                            "connect_last_layer": false,
+                                            "eval_colors": {
+                                                "Across": "#00FFFF",
+                                                "Along": "#00FFFF",
+                                                "Detection": "#00FFFF",
+                                                "Dubious": "#00FFFF",
+                                                "Extra Data": "#00FFFF",
+                                                "Extra Track": "#00FFFF",
+                                                "Identification Correct": "#00FFFF",
+                                                "Identification False": "#00FFFF",
+                                                "Latency": "#00FFFF",
+                                                "Mode A False": "#00FFFF",
+                                                "Mode A Present": "#00FFFF",
+                                                "Mode C False": "#00FFFF",
+                                                "Mode C Present": "#00FFFF",
+                                                "Position Correct": "#00FFFF",
+                                                "Position False": "#00FFFF",
+                                                "Speed": "#00FFFF"
+                                            },
+                                            "groundspeed_period": 1,
+                                            "height_offset_factor": 0.0,
+                                            "height_scale_factor": 2.0,
+                                            "label_bg_color": "#000000",
+                                            "label_break_item_count": 3,
+                                            "layer_mode": "DBObject:DS ID",
+                                            "load_groundspeed_vars": false,
+                                            "load_position_accuracy_vars": false,
+                                            "map_name": "minimal_2d.earth",
+                                            "map_opacity": 0.0,
+                                            "mode_s_azimuth_stddev": 0.06,
+                                            "mode_s_range_stddev": 50.0,
+                                            "null_height_offset": 0.0,
+                                            "num_accuracy_ellipse_points_factor": 4.0,
+                                            "num_accuracy_ellipse_points_max": 32.0,
+                                            "overlay_text_color_invert": false,
+                                            "position_accuracy_vars_scale": 2.0,
+                                            "primary_azimuth_stddev": 0.15,
+                                            "primary_range_stddev": 120.0,
+                                            "radar_layer_config": {
+                                                "show_labels": true,
+                                                "show_layer": false,
+                                                "show_range_rings": true
+                                            },
+                                            "secondary_azimuth_stddev": 0.08,
+                                            "secondary_range_stddev": 70.0,
+                                            "sector_layer_config": {
+                                                "show_layer": true
+                                            },
+                                            "selection_color": "#FFFF00",
+                                            "time_filter_auto_play_step_interval": 10,
+                                            "time_filter_auto_play_update_interval": 1000.0,
+                                            "time_filter_max_opacity_tdiff": 4.0,
+                                            "time_filter_opacity_min": 0.4000000059604645,
+                                            "time_filter_time_window": 60,
+                                            "time_filter_use_opacity": true,
+                                            "use_depth_check": false,
+                                            "use_height": false,
+                                            "use_radar_min_stddev": false
                                         },
                                         "sub_configs": {
-                                            "DBOVariableOrderedSet": {
-                                                "ADS-B Position Quality": {
-                                                    "parameters": null,
+                                            "GeometryStyleFactory": {
+                                                "GeometryStyleFactory0": {
+                                                    "parameters": {
+                                                        "current_sorting_variable": "DBObject",
+                                                        "current_style_preset": "Layer Color per DBObject"
+                                                    },
                                                     "sub_configs": {
-                                                        "DBOVariableOrderDefinition": {
-                                                            "DBOVariableOrderDefinition0": {
+                                                        "GeometryRenderOrder": {
+                                                            "DBObjectOrder0": {
                                                                 "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "rec_num",
-                                                                    "index": 0
+                                                                    "sorting_variable": "DBObject"
+                                                                },
+                                                                "sub_configs": {
+                                                                    "GeometryRenderOrderItem": {
+                                                                        "CAT001Style0": {
+                                                                            "parameters": {
+                                                                                "index": 0,
+                                                                                "name": "CAT001"
+                                                                            }
+                                                                        },
+                                                                        "CAT020Style0": {
+                                                                            "parameters": {
+                                                                                "index": 1,
+                                                                                "name": "CAT020"
+                                                                            }
+                                                                        },
+                                                                        "CAT021Style0": {
+                                                                            "parameters": {
+                                                                                "index": 2,
+                                                                                "name": "CAT021"
+                                                                            }
+                                                                        },
+                                                                        "CAT048Style0": {
+                                                                            "parameters": {
+                                                                                "index": 3,
+                                                                                "name": "CAT048"
+                                                                            }
+                                                                        },
+                                                                        "CAT062Style0": {
+                                                                            "parameters": {
+                                                                                "index": 4,
+                                                                                "name": "CAT062"
+                                                                            }
+                                                                        }
+                                                                    }
                                                                 }
                                                             },
-                                                            "DBOVariableOrderDefinition1": {
+                                                            "DBObjectOrder1": {
                                                                 "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "tod",
-                                                                    "index": 1
-                                                                }
-                                                            },
-                                                            "DBOVariableOrderDefinition10": {
-                                                                "parameters": {
-                                                                    "dbo_name": "ADSB",
-                                                                    "dbo_variable_name": "nucp_nic",
-                                                                    "index": 10
-                                                                }
-                                                            },
-                                                            "DBOVariableOrderDefinition11": {
-                                                                "parameters": {
-                                                                    "dbo_name": "ADSB",
-                                                                    "dbo_variable_name": "sil",
-                                                                    "index": 11
-                                                                }
-                                                            },
-                                                            "DBOVariableOrderDefinition2": {
-                                                                "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "ds_id",
-                                                                    "index": 2
-                                                                }
-                                                            },
-                                                            "DBOVariableOrderDefinition3": {
-                                                                "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "mode3a_code",
-                                                                    "index": 3
-                                                                }
-                                                            },
-                                                            "DBOVariableOrderDefinition4": {
-                                                                "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "target_addr",
-                                                                    "index": 4
-                                                                }
-                                                            },
-                                                            "DBOVariableOrderDefinition5": {
-                                                                "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "callsign",
-                                                                    "index": 5
-                                                                }
-                                                            },
-                                                            "DBOVariableOrderDefinition6": {
-                                                                "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "modec_code_ft",
-                                                                    "index": 6
-                                                                }
-                                                            },
-                                                            "DBOVariableOrderDefinition7": {
-                                                                "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "track_num",
-                                                                    "index": 7
-                                                                }
-                                                            },
-                                                            "DBOVariableOrderDefinition8": {
-                                                                "parameters": {
-                                                                    "dbo_name": "ADSB",
-                                                                    "dbo_variable_name": "mops_version",
-                                                                    "index": 8
-                                                                }
-                                                            },
-                                                            "DBOVariableOrderDefinition9": {
-                                                                "parameters": {
-                                                                    "dbo_name": "ADSB",
-                                                                    "dbo_variable_name": "nac_p",
-                                                                    "index": 9
+                                                                    "sorting_variable": "DS ID"
                                                                 }
                                                             }
-                                                        }
-                                                    }
-                                                },
-                                                "Default": {
-                                                    "parameters": null,
-                                                    "sub_configs": {
-                                                        "DBOVariableOrderDefinition": {
-                                                            "DBOVariableOrderDefinition0": {
+                                                        },
+                                                        "GeometryStylePreset": {
+                                                            "GeometryStylePreset0": {
                                                                 "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "rec_num",
-                                                                    "index": 0
+                                                                    "name": "Default"
+                                                                },
+                                                                "sub_configs": {
+                                                                    "GeometryStyleRule": {
+                                                                        "GeometryStyleRuleBase0": {
+                                                                            "parameters": {
+                                                                                "active": true,
+                                                                                "color_str": "#AAAAAA",
+                                                                                "line_width": 2.0,
+                                                                                "name": "Default Style",
+                                                                                "opacity": 1.0,
+                                                                                "overrides_color": true,
+                                                                                "overrides_line_width": true,
+                                                                                "overrides_opacity": true,
+                                                                                "overrides_symbol": true,
+                                                                                "overrides_symbol_size": true,
+                                                                                "symbol": 0,
+                                                                                "symbol_size": 10.0
+                                                                            }
+                                                                        }
+                                                                    }
                                                                 }
                                                             },
-                                                            "DBOVariableOrderDefinition1": {
+                                                            "GeometryStylePreset1": {
                                                                 "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "tod",
-                                                                    "index": 1
+                                                                    "name": "Layer Color per DBObject"
+                                                                },
+                                                                "sub_configs": {
+                                                                    "GeometryLayerStyleRule": {
+                                                                        "GeometryLayerStyleRule0": {
+                                                                            "parameters": {
+                                                                                "active": true,
+                                                                                "color_str": "#00ff00",
+                                                                                "layer_identifier_keys": "DBObject",
+                                                                                "layer_identifier_values": "CAT001",
+                                                                                "line_width": 0.0,
+                                                                                "name": "DBObject:CAT001",
+                                                                                "opacity": 0.0,
+                                                                                "overrides_color": true,
+                                                                                "overrides_line_width": false,
+                                                                                "overrides_opacity": false,
+                                                                                "overrides_symbol": true,
+                                                                                "overrides_symbol_size": false,
+                                                                                "symbol": 0,
+                                                                                "symbol_size": 0.0
+                                                                            }
+                                                                        },
+                                                                        "GeometryLayerStyleRule1": {
+                                                                            "parameters": {
+                                                                                "active": true,
+                                                                                "color_str": "#ff0000",
+                                                                                "layer_identifier_keys": "DBObject",
+                                                                                "layer_identifier_values": "CAT020",
+                                                                                "line_width": 0.0,
+                                                                                "name": "DBObject:CAT020",
+                                                                                "opacity": 0.0,
+                                                                                "overrides_color": true,
+                                                                                "overrides_line_width": false,
+                                                                                "overrides_opacity": false,
+                                                                                "overrides_symbol": true,
+                                                                                "overrides_symbol_size": false,
+                                                                                "symbol": 3,
+                                                                                "symbol_size": 0.0
+                                                                            }
+                                                                        },
+                                                                        "GeometryLayerStyleRule2": {
+                                                                            "parameters": {
+                                                                                "active": true,
+                                                                                "color_str": "#6666ff",
+                                                                                "layer_identifier_keys": "DBObject",
+                                                                                "layer_identifier_values": "CAT021",
+                                                                                "line_width": 0.0,
+                                                                                "name": "DBObject:CAT021",
+                                                                                "opacity": 0.0,
+                                                                                "overrides_color": true,
+                                                                                "overrides_line_width": false,
+                                                                                "overrides_opacity": false,
+                                                                                "overrides_symbol": true,
+                                                                                "overrides_symbol_size": false,
+                                                                                "symbol": 2,
+                                                                                "symbol_size": 0.0
+                                                                            }
+                                                                        },
+                                                                        "GeometryLayerStyleRule3": {
+                                                                            "parameters": {
+                                                                                "active": true,
+                                                                                "color_str": "#00ff00",
+                                                                                "layer_identifier_keys": "DBObject",
+                                                                                "layer_identifier_values": "CAT048",
+                                                                                "line_width": 0.0,
+                                                                                "name": "DBObject:CAT048",
+                                                                                "opacity": 0.0,
+                                                                                "overrides_color": true,
+                                                                                "overrides_line_width": false,
+                                                                                "overrides_opacity": false,
+                                                                                "overrides_symbol": true,
+                                                                                "overrides_symbol_size": false,
+                                                                                "symbol": 0,
+                                                                                "symbol_size": 0.0
+                                                                            }
+                                                                        },
+                                                                        "GeometryLayerStyleRule4": {
+                                                                            "parameters": {
+                                                                                "active": true,
+                                                                                "color_str": "#dddddd",
+                                                                                "layer_identifier_keys": "DBObject",
+                                                                                "layer_identifier_values": "CAT062",
+                                                                                "line_width": 0.0,
+                                                                                "name": "DBObject:CAT062",
+                                                                                "opacity": 0.0,
+                                                                                "overrides_color": true,
+                                                                                "overrides_line_width": false,
+                                                                                "overrides_opacity": false,
+                                                                                "overrides_symbol": true,
+                                                                                "overrides_symbol_size": false,
+                                                                                "symbol": 1,
+                                                                                "symbol_size": 0.0
+                                                                            }
+                                                                        }
+                                                                    },
+                                                                    "GeometryStyleRule": {
+                                                                        "GeometryStyleRuleBase0": {
+                                                                            "parameters": {
+                                                                                "active": true,
+                                                                                "color_str": "#AAAAAA",
+                                                                                "line_width": 2.0,
+                                                                                "name": "Default Style",
+                                                                                "opacity": 1.0,
+                                                                                "overrides_color": true,
+                                                                                "overrides_line_width": true,
+                                                                                "overrides_opacity": true,
+                                                                                "overrides_symbol": true,
+                                                                                "overrides_symbol_size": true,
+                                                                                "symbol": 0,
+                                                                                "symbol_size": 10.0
+                                                                            }
+                                                                        }
+                                                                    },
+                                                                    "GeometryStyleRuleGenerator": {
+                                                                        "GeometryStyleRuleGenerator0": {
+                                                                            "parameters": {
+                                                                                "color_identifier_key": "DBObject",
+                                                                                "generate_color": true,
+                                                                                "generate_symbol": true,
+                                                                                "name": "Rule Generator",
+                                                                                "symbol_identifier_key": "DBObject"
+                                                                            }
+                                                                        }
+                                                                    }
                                                                 }
                                                             },
-                                                            "DBOVariableOrderDefinition2": {
+                                                            "GeometryStylePreset2": {
                                                                 "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "ds_id",
-                                                                    "index": 2
+                                                                    "name": "Layer Color per DS ID"
+                                                                },
+                                                                "sub_configs": {
+                                                                    "GeometryStyleRule": {
+                                                                        "GeometryStyleRuleBase0": {
+                                                                            "parameters": {
+                                                                                "active": true,
+                                                                                "color_str": "#AAAAAA",
+                                                                                "line_width": 2.0,
+                                                                                "name": "Default Style",
+                                                                                "opacity": 1.0,
+                                                                                "overrides_color": true,
+                                                                                "overrides_line_width": true,
+                                                                                "overrides_opacity": true,
+                                                                                "overrides_symbol": true,
+                                                                                "overrides_symbol_size": true,
+                                                                                "symbol": 0,
+                                                                                "symbol_size": 10.0
+                                                                            }
+                                                                        }
+                                                                    },
+                                                                    "GeometryStyleRuleGenerator": {
+                                                                        "GeometryStyleRuleGenerator0": {
+                                                                            "parameters": {
+                                                                                "color_identifier_key": "DS ID",
+                                                                                "generate_color": true,
+                                                                                "generate_symbol": true,
+                                                                                "name": "Rule Generator",
+                                                                                "symbol_identifier_key": "DBObject"
+                                                                            }
+                                                                        }
+                                                                    }
                                                                 }
                                                             },
-                                                            "DBOVariableOrderDefinition3": {
+                                                            "GeometryStylePreset3": {
                                                                 "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "mode3a_code",
-                                                                    "index": 3
+                                                                    "name": "Layer Color per UTN"
+                                                                },
+                                                                "sub_configs": {
+                                                                    "GeometryStyleRule": {
+                                                                        "GeometryStyleRuleBase0": {
+                                                                            "parameters": {
+                                                                                "active": true,
+                                                                                "color_str": "#AAAAAA",
+                                                                                "line_width": 2.0,
+                                                                                "name": "Default Style",
+                                                                                "opacity": 1.0,
+                                                                                "overrides_color": true,
+                                                                                "overrides_line_width": true,
+                                                                                "overrides_opacity": true,
+                                                                                "overrides_symbol": true,
+                                                                                "overrides_symbol_size": true,
+                                                                                "symbol": 0,
+                                                                                "symbol_size": 10.0
+                                                                            }
+                                                                        }
+                                                                    },
+                                                                    "GeometryStyleRuleGenerator": {
+                                                                        "GeometryStyleRuleGenerator0": {
+                                                                            "parameters": {
+                                                                                "color_identifier_key": "UTN",
+                                                                                "generate_color": true,
+                                                                                "generate_symbol": true,
+                                                                                "name": "Rule Generator",
+                                                                                "symbol_identifier_key": "DBObject"
+                                                                            }
+                                                                        }
+                                                                    }
                                                                 }
                                                             },
-                                                            "DBOVariableOrderDefinition4": {
+                                                            "GeometryStylePreset4": {
                                                                 "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "target_addr",
-                                                                    "index": 4
+                                                                    "name": "Layer Color per ACID"
+                                                                },
+                                                                "sub_configs": {
+                                                                    "GeometryStyleRule": {
+                                                                        "GeometryStyleRuleBase0": {
+                                                                            "parameters": {
+                                                                                "active": true,
+                                                                                "color_str": "#AAAAAA",
+                                                                                "line_width": 2.0,
+                                                                                "name": "Default Style",
+                                                                                "opacity": 1.0,
+                                                                                "overrides_color": true,
+                                                                                "overrides_line_width": true,
+                                                                                "overrides_opacity": true,
+                                                                                "overrides_symbol": true,
+                                                                                "overrides_symbol_size": true,
+                                                                                "symbol": 0,
+                                                                                "symbol_size": 10.0
+                                                                            }
+                                                                        }
+                                                                    },
+                                                                    "GeometryStyleRuleGenerator": {
+                                                                        "GeometryStyleRuleGenerator0": {
+                                                                            "parameters": {
+                                                                                "color_identifier_key": "ACID",
+                                                                                "generate_color": true,
+                                                                                "generate_symbol": true,
+                                                                                "name": "Rule Generator",
+                                                                                "symbol_identifier_key": "DBObject"
+                                                                            }
+                                                                        }
+                                                                    }
                                                                 }
                                                             },
-                                                            "DBOVariableOrderDefinition5": {
+                                                            "GeometryStylePreset5": {
                                                                 "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "callsign",
-                                                                    "index": 5
+                                                                    "name": "Layer Color per ACAD"
+                                                                },
+                                                                "sub_configs": {
+                                                                    "GeometryStyleRule": {
+                                                                        "GeometryStyleRuleBase0": {
+                                                                            "parameters": {
+                                                                                "active": true,
+                                                                                "color_str": "#AAAAAA",
+                                                                                "line_width": 2.0,
+                                                                                "name": "Default Style",
+                                                                                "opacity": 1.0,
+                                                                                "overrides_color": true,
+                                                                                "overrides_line_width": true,
+                                                                                "overrides_opacity": true,
+                                                                                "overrides_symbol": true,
+                                                                                "overrides_symbol_size": true,
+                                                                                "symbol": 0,
+                                                                                "symbol_size": 10.0
+                                                                            }
+                                                                        }
+                                                                    },
+                                                                    "GeometryStyleRuleGenerator": {
+                                                                        "GeometryStyleRuleGenerator0": {
+                                                                            "parameters": {
+                                                                                "color_identifier_key": "ACAD",
+                                                                                "generate_color": true,
+                                                                                "generate_symbol": true,
+                                                                                "name": "Rule Generator",
+                                                                                "symbol_identifier_key": "DBObject"
+                                                                            }
+                                                                        }
+                                                                    }
                                                                 }
                                                             },
-                                                            "DBOVariableOrderDefinition6": {
+                                                            "GeometryStylePreset6": {
                                                                 "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "modec_code_ft",
-                                                                    "index": 6
+                                                                    "name": "Layer Color per Mode 3/A Code"
+                                                                },
+                                                                "sub_configs": {
+                                                                    "GeometryStyleRule": {
+                                                                        "GeometryStyleRuleBase0": {
+                                                                            "parameters": {
+                                                                                "active": true,
+                                                                                "color_str": "#AAAAAA",
+                                                                                "line_width": 2.0,
+                                                                                "name": "Default Style",
+                                                                                "opacity": 1.0,
+                                                                                "overrides_color": true,
+                                                                                "overrides_line_width": true,
+                                                                                "overrides_opacity": true,
+                                                                                "overrides_symbol": true,
+                                                                                "overrides_symbol_size": true,
+                                                                                "symbol": 0,
+                                                                                "symbol_size": 10.0
+                                                                            }
+                                                                        }
+                                                                    },
+                                                                    "GeometryStyleRuleGenerator": {
+                                                                        "GeometryStyleRuleGenerator0": {
+                                                                            "parameters": {
+                                                                                "color_identifier_key": "Mode 3/A Code",
+                                                                                "generate_color": true,
+                                                                                "generate_symbol": true,
+                                                                                "name": "Rule Generator",
+                                                                                "symbol_identifier_key": "DBObject"
+                                                                            }
+                                                                        }
+                                                                    }
                                                                 }
                                                             },
-                                                            "DBOVariableOrderDefinition7": {
+                                                            "GeometryStylePreset7": {
                                                                 "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "track_num",
-                                                                    "index": 7
-                                                                }
-                                                            }
-                                                        }
-                                                    }
-                                                },
-                                                "Horizontal Movement": {
-                                                    "parameters": null,
-                                                    "sub_configs": {
-                                                        "DBOVariableOrderDefinition": {
-                                                            "DBOVariableOrderDefinition0": {
-                                                                "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "rec_num",
-                                                                    "index": 0
-                                                                }
-                                                            },
-                                                            "DBOVariableOrderDefinition1": {
-                                                                "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "tod",
-                                                                    "index": 1
-                                                                }
-                                                            },
-                                                            "DBOVariableOrderDefinition10": {
-                                                                "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "mof_long",
-                                                                    "index": 10
-                                                                }
-                                                            },
-                                                            "DBOVariableOrderDefinition11": {
-                                                                "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "mof_trans",
-                                                                    "index": 11
+                                                                    "name": "Layer Color per Track Number"
+                                                                },
+                                                                "sub_configs": {
+                                                                    "GeometryStyleRule": {
+                                                                        "GeometryStyleRuleBase0": {
+                                                                            "parameters": {
+                                                                                "active": true,
+                                                                                "color_str": "#AAAAAA",
+                                                                                "line_width": 2.0,
+                                                                                "name": "Default Style",
+                                                                                "opacity": 1.0,
+                                                                                "overrides_color": true,
+                                                                                "overrides_line_width": true,
+                                                                                "overrides_opacity": true,
+                                                                                "overrides_symbol": true,
+                                                                                "overrides_symbol_size": true,
+                                                                                "symbol": 0,
+                                                                                "symbol_size": 10.0
+                                                                            }
+                                                                        }
+                                                                    },
+                                                                    "GeometryStyleRuleGenerator": {
+                                                                        "GeometryStyleRuleGenerator0": {
+                                                                            "parameters": {
+                                                                                "color_identifier_key": "Track Number",
+                                                                                "generate_color": true,
+                                                                                "generate_symbol": true,
+                                                                                "name": "Rule Generator",
+                                                                                "symbol_identifier_key": "DBObject"
+                                                                            }
+                                                                        }
+                                                                    }
                                                                 }
                                                             },
-                                                            "DBOVariableOrderDefinition2": {
+                                                            "GeometryStylePreset8": {
                                                                 "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "ds_id",
-                                                                    "index": 2
-                                                                }
-                                                            },
-                                                            "DBOVariableOrderDefinition3": {
-                                                                "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "mode3a_code",
-                                                                    "index": 3
-                                                                }
-                                                            },
-                                                            "DBOVariableOrderDefinition4": {
-                                                                "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "target_addr",
-                                                                    "index": 4
-                                                                }
-                                                            },
-                                                            "DBOVariableOrderDefinition5": {
-                                                                "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "callsign",
-                                                                    "index": 5
-                                                                }
-                                                            },
-                                                            "DBOVariableOrderDefinition6": {
-                                                                "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "modec_code_ft",
-                                                                    "index": 6
-                                                                }
-                                                            },
-                                                            "DBOVariableOrderDefinition7": {
-                                                                "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "track_num",
-                                                                    "index": 7
-                                                                }
-                                                            },
-                                                            "DBOVariableOrderDefinition8": {
-                                                                "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "groundspeed_kt",
-                                                                    "index": 8
-                                                                }
-                                                            },
-                                                            "DBOVariableOrderDefinition9": {
-                                                                "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "heading_deg",
-                                                                    "index": 9
-                                                                }
-                                                            }
-                                                        }
-                                                    }
-                                                },
-                                                "Mode A/C Info": {
-                                                    "parameters": null,
-                                                    "sub_configs": {
-                                                        "DBOVariableOrderDefinition": {
-                                                            "DBOVariableOrderDefinition0": {
-                                                                "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "rec_num",
-                                                                    "index": 0
-                                                                }
-                                                            },
-                                                            "DBOVariableOrderDefinition1": {
-                                                                "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "tod",
-                                                                    "index": 1
-                                                                }
-                                                            },
-                                                            "DBOVariableOrderDefinition10": {
-                                                                "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "mode3a_v",
-                                                                    "index": 8
-                                                                }
-                                                            },
-                                                            "DBOVariableOrderDefinition11": {
-                                                                "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "modec_g",
-                                                                    "index": 10
-                                                                }
-                                                            },
-                                                            "DBOVariableOrderDefinition12": {
-                                                                "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "modec_v",
-                                                                    "index": 11
-                                                                }
-                                                            },
-                                                            "DBOVariableOrderDefinition2": {
-                                                                "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "ds_id",
-                                                                    "index": 2
-                                                                }
-                                                            },
-                                                            "DBOVariableOrderDefinition3": {
-                                                                "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "mode3a_code",
-                                                                    "index": 5
-                                                                }
-                                                            },
-                                                            "DBOVariableOrderDefinition4": {
-                                                                "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "target_addr",
-                                                                    "index": 3
-                                                                }
-                                                            },
-                                                            "DBOVariableOrderDefinition5": {
-                                                                "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "callsign",
-                                                                    "index": 4
-                                                                }
-                                                            },
-                                                            "DBOVariableOrderDefinition6": {
-                                                                "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "modec_code_ft",
-                                                                    "index": 9
-                                                                }
-                                                            },
-                                                            "DBOVariableOrderDefinition7": {
-                                                                "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "track_num",
-                                                                    "index": 12
-                                                                }
-                                                            },
-                                                            "DBOVariableOrderDefinition8": {
-                                                                "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "mode3a_g",
-                                                                    "index": 6
-                                                                }
-                                                            },
-                                                            "DBOVariableOrderDefinition9": {
-                                                                "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "mode3a_smo",
-                                                                    "index": 7
-                                                                }
-                                                            }
-                                                        }
-                                                    }
-                                                },
-                                                "Track Lifetime": {
-                                                    "parameters": null,
-                                                    "sub_configs": {
-                                                        "DBOVariableOrderDefinition": {
-                                                            "DBOVariableOrderDefinition0": {
-                                                                "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "rec_num",
-                                                                    "index": 0
-                                                                }
-                                                            },
-                                                            "DBOVariableOrderDefinition1": {
-                                                                "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "tod",
-                                                                    "index": 1
-                                                                }
-                                                            },
-                                                            "DBOVariableOrderDefinition10": {
-                                                                "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "track_coasted",
-                                                                    "index": 10
-                                                                }
-                                                            },
-                                                            "DBOVariableOrderDefinition11": {
-                                                                "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "track_end",
-                                                                    "index": 11
-                                                                }
-                                                            },
-                                                            "DBOVariableOrderDefinition2": {
-                                                                "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "ds_id",
-                                                                    "index": 2
-                                                                }
-                                                            },
-                                                            "DBOVariableOrderDefinition3": {
-                                                                "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "mode3a_code",
-                                                                    "index": 3
-                                                                }
-                                                            },
-                                                            "DBOVariableOrderDefinition4": {
-                                                                "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "target_addr",
-                                                                    "index": 4
-                                                                }
-                                                            },
-                                                            "DBOVariableOrderDefinition5": {
-                                                                "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "callsign",
-                                                                    "index": 5
-                                                                }
-                                                            },
-                                                            "DBOVariableOrderDefinition6": {
-                                                                "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "modec_code_ft",
-                                                                    "index": 6
-                                                                }
-                                                            },
-                                                            "DBOVariableOrderDefinition7": {
-                                                                "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "track_num",
-                                                                    "index": 7
-                                                                }
-                                                            },
-                                                            "DBOVariableOrderDefinition8": {
-                                                                "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "track_created",
-                                                                    "index": 8
-                                                                }
-                                                            },
-                                                            "DBOVariableOrderDefinition9": {
-                                                                "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "track_confirmed",
-                                                                    "index": 9
-                                                                }
-                                                            }
-                                                        }
-                                                    }
-                                                },
-                                                "Vertical Movement": {
-                                                    "parameters": null,
-                                                    "sub_configs": {
-                                                        "DBOVariableOrderDefinition": {
-                                                            "DBOVariableOrderDefinition0": {
-                                                                "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "rec_num",
-                                                                    "index": 0
-                                                                }
-                                                            },
-                                                            "DBOVariableOrderDefinition1": {
-                                                                "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "tod",
-                                                                    "index": 1
-                                                                }
-                                                            },
-                                                            "DBOVariableOrderDefinition10": {
-                                                                "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "calc_vertical_rate_ftm",
-                                                                    "index": 10
-                                                                }
-                                                            },
-                                                            "DBOVariableOrderDefinition11": {
-                                                                "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "ground_bit",
-                                                                    "index": 11
-                                                                }
-                                                            },
-                                                            "DBOVariableOrderDefinition2": {
-                                                                "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "ds_id",
-                                                                    "index": 2
-                                                                }
-                                                            },
-                                                            "DBOVariableOrderDefinition3": {
-                                                                "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "mode3a_code",
-                                                                    "index": 3
-                                                                }
-                                                            },
-                                                            "DBOVariableOrderDefinition4": {
-                                                                "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "target_addr",
-                                                                    "index": 4
-                                                                }
-                                                            },
-                                                            "DBOVariableOrderDefinition5": {
-                                                                "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "callsign",
-                                                                    "index": 5
-                                                                }
-                                                            },
-                                                            "DBOVariableOrderDefinition6": {
-                                                                "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "modec_code_ft",
-                                                                    "index": 6
-                                                                }
-                                                            },
-                                                            "DBOVariableOrderDefinition7": {
-                                                                "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "track_num",
-                                                                    "index": 7
-                                                                }
-                                                            },
-                                                            "DBOVariableOrderDefinition8": {
-                                                                "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "track_climb_desc_mode",
-                                                                    "index": 8
-                                                                }
-                                                            },
-                                                            "DBOVariableOrderDefinition9": {
-                                                                "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "mof_vert",
-                                                                    "index": 9
+                                                                    "name": "Color by Detection Type"
+                                                                },
+                                                                "sub_configs": {
+                                                                    "DetectionTypeStyleRule": {
+                                                                        "DetectionTypeStyleRule0": {
+                                                                            "parameters": {
+                                                                                "active": true,
+                                                                                "color_str": "",
+                                                                                "line_width": 0.0,
+                                                                                "name": "Color By Detection Type",
+                                                                                "none_color_str": "#666666",
+                                                                                "opacity": 0.0,
+                                                                                "overrides_color": false,
+                                                                                "overrides_line_width": false,
+                                                                                "overrides_opacity": false,
+                                                                                "overrides_symbol": false,
+                                                                                "overrides_symbol_size": false,
+                                                                                "symbol": 0,
+                                                                                "symbol_size": 0.0,
+                                                                                "t0_color_str": "#c3c3c3",
+                                                                                "t1_color_str": "#e3bd9a",
+                                                                                "t2_color_str": "#0000ff",
+                                                                                "t3_color_str": "#00ff00",
+                                                                                "t4_color_str": "#AAAAFF",
+                                                                                "t5_color_str": "#aa00ff",
+                                                                                "t6_color_str": "#FFAAAA",
+                                                                                "t7_color_str": "#FFFFFF"
+                                                                            }
+                                                                        }
+                                                                    },
+                                                                    "GeometryStyleRule": {
+                                                                        "GeometryStyleRuleBase0": {
+                                                                            "parameters": {
+                                                                                "active": true,
+                                                                                "color_str": "#AAAAAA",
+                                                                                "line_width": 2.0,
+                                                                                "name": "Default Style",
+                                                                                "opacity": 1.0,
+                                                                                "overrides_color": true,
+                                                                                "overrides_line_width": true,
+                                                                                "overrides_opacity": true,
+                                                                                "overrides_symbol": true,
+                                                                                "overrides_symbol_size": true,
+                                                                                "symbol": 0,
+                                                                                "symbol_size": 10.0
+                                                                            }
+                                                                        }
+                                                                    },
+                                                                    "GeometryStyleRuleGenerator": {
+                                                                        "GeometryStyleRuleGenerator0": {
+                                                                            "parameters": {
+                                                                                "color_identifier_key": "",
+                                                                                "generate_color": false,
+                                                                                "generate_symbol": true,
+                                                                                "name": "Rule Generator",
+                                                                                "symbol_identifier_key": "DBObject"
+                                                                            }
+                                                                        }
+                                                                    }
                                                                 }
                                                             }
                                                         }
                                                     }
                                                 }
+                                            },
+                                            "OSGViewDataSource": {
+                                                "OSGViewDataSource0": {
+                                                    "parameters": null,
+                                                    "sub_configs": {
+                                                        "VariableOrderedSet": {
+                                                            "VariableOrderedSet0": {
+                                                                "parameters": null,
+                                                                "sub_configs": {
+                                                                    "VariableOrderDefinition": {
+                                                                        "VariableOrderDefinition0": {
+                                                                            "parameters": {
+                                                                                "dbcontent_name": "Meta",
+                                                                                "index": 0,
+                                                                                "variable_name": "Record Number"
+                                                                            }
+                                                                        },
+                                                                        "VariableOrderDefinition1": {
+                                                                            "parameters": {
+                                                                                "dbcontent_name": "Meta",
+                                                                                "index": 1,
+                                                                                "variable_name": "DS ID"
+                                                                            }
+                                                                        },
+                                                                        "VariableOrderDefinition10": {
+                                                                            "parameters": {
+                                                                                "dbcontent_name": "Meta",
+                                                                                "index": 10,
+                                                                                "variable_name": "Longitude"
+                                                                            }
+                                                                        },
+                                                                        "VariableOrderDefinition11": {
+                                                                            "parameters": {
+                                                                                "dbcontent_name": "Meta",
+                                                                                "index": 11,
+                                                                                "variable_name": "Type"
+                                                                            }
+                                                                        },
+                                                                        "VariableOrderDefinition2": {
+                                                                            "parameters": {
+                                                                                "dbcontent_name": "Meta",
+                                                                                "index": 2,
+                                                                                "variable_name": "Line ID"
+                                                                            }
+                                                                        },
+                                                                        "VariableOrderDefinition3": {
+                                                                            "parameters": {
+                                                                                "dbcontent_name": "Meta",
+                                                                                "index": 3,
+                                                                                "variable_name": "Time of Day"
+                                                                            }
+                                                                        },
+                                                                        "VariableOrderDefinition4": {
+                                                                            "parameters": {
+                                                                                "dbcontent_name": "Meta",
+                                                                                "index": 4,
+                                                                                "variable_name": "Aircraft Address"
+                                                                            }
+                                                                        },
+                                                                        "VariableOrderDefinition5": {
+                                                                            "parameters": {
+                                                                                "dbcontent_name": "Meta",
+                                                                                "index": 5,
+                                                                                "variable_name": "Aircraft Identification"
+                                                                            }
+                                                                        },
+                                                                        "VariableOrderDefinition6": {
+                                                                            "parameters": {
+                                                                                "dbcontent_name": "Meta",
+                                                                                "index": 6,
+                                                                                "variable_name": "Track Number"
+                                                                            }
+                                                                        },
+                                                                        "VariableOrderDefinition7": {
+                                                                            "parameters": {
+                                                                                "dbcontent_name": "Meta",
+                                                                                "index": 7,
+                                                                                "variable_name": "Mode 3/A Code"
+                                                                            }
+                                                                        },
+                                                                        "VariableOrderDefinition8": {
+                                                                            "parameters": {
+                                                                                "dbcontent_name": "Meta",
+                                                                                "index": 8,
+                                                                                "variable_name": "Mode C Code"
+                                                                            }
+                                                                        },
+                                                                        "VariableOrderDefinition9": {
+                                                                            "parameters": {
+                                                                                "dbcontent_name": "Meta",
+                                                                                "index": 9,
+                                                                                "variable_name": "Latitude"
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            },
+                                            "OSGViewWidget": {
+                                                "OSGViewWidget0": {
+                                                    "parameters": null
+                                                }
                                             }
                                         }
-                                    }
-                                },
-                                "ListBoxViewWidget": {
-                                    "ListBoxViewWidget0": {
-                                        "parameters": null
                                     }
                                 }
                             }

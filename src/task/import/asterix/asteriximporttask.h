@@ -18,27 +18,33 @@
 #ifndef ASTERIXIMPORTTASK_H
 #define ASTERIXIMPORTTASK_H
 
-#include <QObject>
-#include <deque>
-#include <memory>
-#include <mutex>
-
 #include "asterixdecodejob.h"
 #include "asterixpostprocess.h"
 #include "configurable.h"
 #include "json.hpp"
-#include "jsonmappingjob.h"
+#include "asterixjsonmappingjob.h"
+#include "asterixpostprocessjob.h"
 #include "jsonmappingstubsjob.h"
-#include "jsonparsingschema.h"
+#include "asterixjsonparsingschema.h"
 #include "task.h"
+
+#include <QObject>
+
+#include <deque>
+#include <memory>
+#include <mutex>
+
 
 //#include <tbb/concurrent_queue.h>
 
 class TaskManager;
+
 class ASTERIXImportTaskWidget;
 class ASTERIXCategoryConfig;
 class ASTERIXStatusDialog;
-class SavedFile;
+class ASTERIXImportTaskDialog;
+
+class QProgressDialog;
 
 namespace jASTERIX
 {
@@ -50,6 +56,10 @@ class ASTERIXImportTask : public Task, public Configurable
     Q_OBJECT
 
   public slots:
+    void dialogImportSlot();
+    void dialogTestImportSlot();
+    void dialogCancelSlot();
+
     void decodeASTERIXDoneSlot();
     void decodeASTERIXObsoleteSlot();
     void addDecodedASTERIXSlot();
@@ -57,40 +67,40 @@ class ASTERIXImportTask : public Task, public Configurable
     void mapJSONDoneSlot();
     void mapJSONObsoleteSlot();
 
-    void mapStubsDoneSlot();
-    void mapStubsObsoleteSlot();
+    void postprocessDoneSlot();
+    void postprocessObsoleteSlot();
 
-    void insertProgressSlot(float percent);
-    void insertDoneSlot(DBObject& object);
-
-    void closeStatusDialogSlot();
+    void insertDoneSlot();
 
   public:
     ASTERIXImportTask(const std::string& class_id, const std::string& instance_id,
                       TaskManager& task_manager);
     virtual ~ASTERIXImportTask();
 
-    virtual TaskWidget* widget();
-    virtual void deleteWidget();
+    ASTERIXImportTaskDialog* dialog();
 
     virtual void generateSubConfigurable(const std::string& class_id,
-                                         const std::string& instance_id);
+                                         const std::string& instance_id) override;
 
-    void asterixFraming(const std::string& asterix_framing);
+    void asterixFileFraming(const std::string& asterix_framing);
     void asterixDecoderConfig(const std::string& asterix_decoder_cfg);
 
     bool canImportFile();
-    virtual bool canRun();
-    virtual void run();
-    void run(bool test, bool create_mapping_stubs);
+    virtual bool canRun() override;
+    virtual void run() override;
+    virtual void stop() override;
+    void run(bool test);
+    bool isRunning() const;
 
-    const std::map<std::string, SavedFile*>& fileList() { return file_list_; }
-    bool hasFile(const std::string& filename) { return file_list_.count(filename) > 0; }
+    std::vector<std::string> fileList();
     void addFile(const std::string& filename);
-    void removeCurrentFilename();
-    void removeAllFiles ();
-    void currentFilename(const std::string& filename);
-    const std::string& currentFilename() { return current_filename_; }
+    void clearFileList ();
+
+    void importFilename(const std::string& filename);
+    const std::string& importFilename() { return current_filename_; }
+
+    void importNetwork();
+    bool isImportNetwork();
 
     std::shared_ptr<jASTERIX::jASTERIX> jASTERIX() { return jasterix_; }
     void refreshjASTERIX();
@@ -109,7 +119,7 @@ class ASTERIXImportTask : public Task, public Configurable
     std::string spfEditionForCategory(unsigned int category);
     void spfEditionForCategory(unsigned int category, const std::string& spf);
 
-    std::shared_ptr<JSONParsingSchema> schema() const;
+    std::shared_ptr<ASTERIXJSONParsingSchema> schema() const;
 
     bool debug() const;
     void debug(bool debug);
@@ -117,9 +127,9 @@ class ASTERIXImportTask : public Task, public Configurable
     bool limitRAM() const;
     void limitRAM(bool value);
 
-    virtual bool checkPrerequisites();
-    virtual bool isRecommended();
-    virtual bool isRequired();
+    virtual bool checkPrerequisites() override;
+    virtual bool isRecommended() override;
+    virtual bool isRequired() override;
 
     bool overrideActive() const;
     void overrideActive(bool value);
@@ -139,53 +149,54 @@ class ASTERIXImportTask : public Task, public Configurable
     float overrideTodOffset() const;
     void overrideTodOffset(float value);
 
-    std::vector<std::string> getPossibleMappings (unsigned int cat);
-    std::string getActiveMapping (unsigned int cat);
-    void setActiveMapping (unsigned int cat, const std::string& mapping_name);
+    unsigned int fileLineID() const;
+    void fileLineID(unsigned int value);
 
-  protected:
+protected:
     bool debug_jasterix_;
     bool limit_ram_;
     std::shared_ptr<jASTERIX::jASTERIX> jasterix_;
     ASTERIXPostProcess post_process_;
 
-    std::map<std::string, SavedFile*> file_list_;
+    bool import_file_ {false}; // false = network, true file
+
+    nlohmann::json file_list_;
     std::string current_filename_;
-    std::string current_framing_;
+    std::string current_file_framing_;
+    unsigned int file_line_id_ {0};
 
     bool test_{false};
-    bool create_mapping_stubs_{false};
 
-    std::unique_ptr<ASTERIXImportTaskWidget> widget_;
+    bool running_ {false};
+    boost::posix_time::ptime start_time_;
+    std::unique_ptr<QProgressDialog> file_progress_dialog_;
+
+    std::unique_ptr<ASTERIXImportTaskDialog> dialog_;
 
     std::map<unsigned int, ASTERIXCategoryConfig> category_configs_;
 
-    std::shared_ptr<JSONParsingSchema> schema_;
+    std::shared_ptr<ASTERIXJSONParsingSchema> schema_;
 
     std::shared_ptr<ASTERIXDecodeJob> decode_job_;
 
-    std::shared_ptr<JSONMappingJob> json_map_job_;
-    // std::deque <std::shared_ptr <JSONMappingJob>> json_map_jobs_;
-    // std::mutex map_jobs_mutex_;
-    // bool waiting_for_map_ {false};
-    std::shared_ptr<JSONMappingStubsJob> json_map_stub_job_;
+    std::shared_ptr<ASTERIXJSONMappingJob> json_map_job_;
+
+    std::shared_ptr<ASTERIXPostprocessJob> postprocess_job_;
+
+    std::map<std::string, std::shared_ptr<Buffer>> buffer_cache_; // to be used for file import
+    boost::posix_time::ptime last_insert_time_;
 
     bool error_{false};
     std::string error_message_;
 
-    std::unique_ptr<ASTERIXStatusDialog> status_widget_;
-
     bool waiting_for_insert_{false};
-    size_t insert_active_{0};
+    bool insert_active_{false};
 
-    std::map<std::string, std::tuple<std::string, DBOVariableSet>> dbo_variable_sets_;
     std::set<int> added_data_sources_;
-
-    unsigned int num_radar_inserted_ {0};
 
     bool all_done_{false};
 
-    virtual void checkSubConfigurables();
+    virtual void checkSubConfigurables() override;
 
     void insertData(std::map<std::string, std::shared_ptr<Buffer>> job_buffers);
     void checkAllDone();

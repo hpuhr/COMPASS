@@ -17,8 +17,8 @@
 
 #include "adsbqualityfilter.h"
 #include "adsbqualityfilterwidget.h"
-#include "dbobject.h"
-#include "dbobjectmanager.h"
+#include "dbcontent/dbcontent.h"
+#include "dbcontent/dbcontentmanager.h"
 #include "logger.h"
 #include "stringconv.h"
 
@@ -79,7 +79,7 @@ bool ADSBQualityFilter::filters(const std::string& dbo_type)
 }
 
 std::string ADSBQualityFilter::getConditionString(const std::string& dbo_name, bool& first,
-                                                  std::vector<DBOVariable*>& filtered_variables)
+                                                  std::vector<dbContent::Variable*>& filtered_variables)
 {
     logdbg << "ADSBQualityFilter: getConditionString: dbo " << dbo_name << " active " << active_;
 

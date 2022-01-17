@@ -36,30 +36,9 @@
         "DBInterface": {
             "DBInterface0": {
                 "parameters": {
-                    "read_chunk_size": 100000,
-                    "used_connection": "SQLite Connection"
+                    "read_chunk_size": 100000
                 },
                 "sub_configs": {
-                    "MySQLppConnection": {
-                        "MySQL++ Connection": {
-                            "parameters": {
-                                "used_server": "Localhost"
-                            },
-                            "sub_configs": {
-                                "MySQLServer": {
-                                    "Localhost": {
-                                        "parameters": {
-                                            "database": "skeyes2",
-                                            "host": "localhost",
-                                            "password": "sassc",
-                                            "port": 3306,
-                                            "user": "sassc"
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    },
                     "SQLiteConnection": {
                         "SQLite Connection": {
                             "parameters": {

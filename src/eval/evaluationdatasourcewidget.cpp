@@ -18,7 +18,7 @@
 #include "evaluationdatasourcewidget.h"
 #include "logger.h"
 #include "activedatasource.h"
-#include "dbobjectcombobox.h"
+#include "dbcontent/dbcontentcombobox.h"
 
 #include <QLabel>
 #include <QCheckBox>
@@ -51,9 +51,9 @@ EvaluationDataSourceWidget::EvaluationDataSourceWidget(const std::string& title,
 
     dbo_lay->addWidget(new QLabel("DBObject"), 0, 0);
 
-    dbo_combo_ = new DBObjectComboBox(false);
+    dbo_combo_ = new DBContentComboBox(false);
     dbo_combo_->setObjectName(dbo_name_);
-    connect (dbo_combo_, &DBObjectComboBox::changedObject, this, &EvaluationDataSourceWidget::dboNameChangedSlot);
+    connect (dbo_combo_, &DBContentComboBox::changedObject, this, &EvaluationDataSourceWidget::dboNameChangedSlot);
 
     dbo_lay->addWidget(dbo_combo_, 0, 1);
 

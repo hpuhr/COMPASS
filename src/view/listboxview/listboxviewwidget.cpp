@@ -86,10 +86,6 @@ ListBoxViewWidget::~ListBoxViewWidget()
 
 /*
  */
-void ListBoxViewWidget::updateView() {}
-
-/*
- */
 void ListBoxViewWidget::toggleConfigWidget()
 {
     assert(config_widget_);

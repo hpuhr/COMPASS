@@ -17,8 +17,6 @@
 
 #include "jsonparsingschema.h"
 
-#include "jsonimporttask.h"
-
 JSONParsingSchema::JSONParsingSchema(const std::string& class_id, const std::string& instance_id,
                                      Configurable* parent)
     : Configurable(class_id, instance_id, parent)

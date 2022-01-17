@@ -20,10 +20,14 @@
 
 #include <QWidget>
 
-#include "dbovariable.h"
+#include "dbcontent/variable/variable.h"
 
-class DBOVariableOrderedSetWidget;
-class DBOVariableSelectionWidget;
+namespace dbContent
+{
+class VariableOrderedSetWidget;
+class VariableSelectionWidget;
+}
+
 class ScatterPlotView;
 
 class QCheckBox;
@@ -46,9 +50,6 @@ class ScatterPlotViewConfigWidget : public QWidget
     void reloadRequestedSlot();
     void loadingStartedSlot();
 
-  signals:
-    void reloadRequestedSignal();  // reload from database
-
   public:
     ScatterPlotViewConfigWidget(ScatterPlotView* view, QWidget* parent = nullptr);
     virtual ~ScatterPlotViewConfigWidget();
@@ -58,8 +59,8 @@ class ScatterPlotViewConfigWidget : public QWidget
   protected:
     ScatterPlotView* view_;
 
-    DBOVariableSelectionWidget* select_var_x_ {nullptr};
-    DBOVariableSelectionWidget* select_var_y_ {nullptr};
+    dbContent::VariableSelectionWidget* select_var_x_ {nullptr};
+    dbContent::VariableSelectionWidget* select_var_y_ {nullptr};
 
     QLabel* status_label_ {nullptr};
     QPushButton* reload_button_{nullptr};

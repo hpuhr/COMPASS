@@ -19,6 +19,7 @@
 #define DBTABLEINFO_H_
 
 #include <map>
+#include <string>
 
 class DBTableColumnInfo
 {

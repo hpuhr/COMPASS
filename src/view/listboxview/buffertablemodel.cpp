@@ -23,15 +23,15 @@
 #include "buffer.h"
 #include "buffercsvexportjob.h"
 #include "buffertablewidget.h"
-#include "dbobject.h"
-#include "dbobjectmanager.h"
-#include "dbovariableset.h"
+#include "dbcontent/dbcontent.h"
+#include "dbcontent/dbcontentmanager.h"
+#include "dbcontent/variable/variableset.h"
 #include "global.h"
 #include "jobmanager.h"
 #include "listboxview.h"
 #include "listboxviewdatasource.h"
 
-BufferTableModel::BufferTableModel(BufferTableWidget* table_widget, DBObject& object,
+BufferTableModel::BufferTableModel(BufferTableWidget* table_widget, DBContent& object,
                                    ListBoxViewDataSource& data_source)
     : QAbstractTableModel(table_widget),
       table_widget_(table_widget),
@@ -104,7 +104,7 @@ QVariant BufferTableModel::headerData(int section, Qt::Orientation orientation, 
             col -= 1;  // for the actual properties
 
         assert(col < read_set_.getSize());
-        DBOVariable& variable = read_set_.getVariable(col);
+        dbContent::Variable& variable = read_set_.getVariable(col);
         logdbg << "BufferTableModel: headerData: col " << col << " variable " << variable.name();
         return QString(variable.name().c_str());
     }
@@ -146,12 +146,12 @@ QVariant BufferTableModel::data(const QModelIndex& index, int role) const
     {
         if (col == 0)  // selected special case
         {
-            assert(buffer_->has<bool>("selected"));
+            assert(buffer_->has<bool>(DBContent::selected_var.name()));
 
-            if (buffer_->get<bool>("selected").isNull(buffer_index))
+            if (buffer_->get<bool>(DBContent::selected_var.name()).isNull(buffer_index))
                 return Qt::Unchecked;
 
-            if (buffer_->get<bool>("selected").get(buffer_index))
+            if (buffer_->get<bool>(DBContent::selected_var.name()).get(buffer_index))
                 return Qt::Checked;
             else
                 return Qt::Unchecked;
@@ -174,7 +174,7 @@ QVariant BufferTableModel::data(const QModelIndex& index, int role) const
         {
             if (col == 1)
             {
-                DBObjectManager& manager = COMPASS::instance().objectManager();
+                DBContentManager& manager = COMPASS::instance().dbContentManager();
 
                 std::string dbo_name = buffer_->dboName();
                 assert(dbo_name.size());
@@ -202,7 +202,7 @@ QVariant BufferTableModel::data(const QModelIndex& index, int role) const
 
         assert(col < read_set_.getSize());
 
-        DBOVariable& variable = read_set_.getVariable(col);
+        dbContent::Variable& variable = read_set_.getVariable(col);
         PropertyDataType data_type = variable.dataType();
 
         value_str = NULL_STRING;
@@ -274,7 +274,7 @@ QVariant BufferTableModel::data(const QModelIndex& index, int role) const
             else if (data_type == PropertyDataType::UINT)
             {
                 assert(buffer_->has<unsigned int>(property_name));
-                null = buffer_->get<unsigned int>(properties.at(col).name()).isNull(buffer_index);
+                null = buffer_->get<unsigned int>(property_name).isNull(buffer_index);
                 if (!null)
                 {
                     if (use_presentation_)
@@ -373,17 +373,17 @@ bool BufferTableModel::setData(const QModelIndex& index, const QVariant& value, 
         unsigned int buffer_index = row_indexes_.at(index.row());
 
         assert(buffer_);
-        assert(buffer_->has<bool>("selected"));
+        assert(buffer_->has<bool>(DBContent::selected_var.name()));
 
         if (value == Qt::Checked)
         {
             loginf << "BufferTableModel: setData: checked row index" << buffer_index;
-            buffer_->get<bool>("selected").set(buffer_index, true);
+            buffer_->get<bool>(DBContent::selected_var.name()).set(buffer_index, true);
         }
         else
         {
             loginf << "BufferTableModel: setData: unchecked row index " << buffer_index;
-            buffer_->get<bool>("selected").set(buffer_index, false);
+            buffer_->get<bool>(DBContent::selected_var.name()).set(buffer_index, false);
         }
         assert(table_widget_);
         table_widget_->view().emitSelectionChange();
@@ -435,8 +435,8 @@ void BufferTableModel::updateRows()
     unsigned int buffer_index{0};  // index in buffer
     unsigned int buffer_size = buffer_->size();
 
-    assert(buffer_->has<bool>("selected"));
-    NullableVector<bool> selected_vec = buffer_->get<bool>("selected");
+    assert(buffer_->has<bool>(DBContent::selected_var.name()));
+    NullableVector<bool> selected_vec = buffer_->get<bool>(DBContent::selected_var.name());
 
     if (row_indexes_.size())  // get last processed index
     {

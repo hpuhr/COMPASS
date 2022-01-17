@@ -20,7 +20,7 @@
 
 #include "configurable.h"
 #include "createassociationsstatusdialog.h"
-#include "dbovariableset.h"
+#include "dbcontent/variable/variableset.h"
 #include "task.h"
 #include "global.h"
 
@@ -31,11 +31,16 @@
 
 class TaskManager;
 class CreateAssociationsTaskWidget;
-class DBOVariable;
-class MetaDBOVariable;
-class DBObject;
+class DBContent;
 class Buffer;
 class CreateAssociationsJob;
+
+namespace dbContent
+{
+class Variable;
+class MetaVariable;
+
+}
 
 class CreateAssociationsTask : public Task, public Configurable
 {
@@ -45,8 +50,8 @@ public slots:
     void createDoneSlot();
     void createObsoleteSlot();
 
-    void newDataSlot(DBObject& object);
-    void loadingDoneSlot(DBObject& object);
+    void newDataSlot(DBContent& object);
+    void loadingDoneSlot(DBContent& object);
 
     void associationStatusSlot(QString status);
 
@@ -60,17 +65,17 @@ public:
     TaskWidget* widget();
     virtual void deleteWidget();
 
-    MetaDBOVariable* keyVar() const;
-    MetaDBOVariable* dsIdVar() const;
-    MetaDBOVariable* todVar() const;
-    MetaDBOVariable* targetAddrVar() const;
-    MetaDBOVariable* targetIdVar() const;
-    MetaDBOVariable* trackNumVar() const;
-    MetaDBOVariable* trackEndVar() const;
-    MetaDBOVariable* mode3AVar() const;
-    MetaDBOVariable* modeCVar() const;
-    MetaDBOVariable* latitudeVar() const;
-    MetaDBOVariable* longitudeVar() const;
+    dbContent::MetaVariable* keyVar() const;
+    dbContent::MetaVariable* dsIdVar() const;
+    dbContent::MetaVariable* todVar() const;
+    dbContent::MetaVariable* targetAddrVar() const;
+    dbContent::MetaVariable* targetIdVar() const;
+    dbContent::MetaVariable* trackNumVar() const;
+    dbContent::MetaVariable* trackEndVar() const;
+    dbContent::MetaVariable* mode3AVar() const;
+    dbContent::MetaVariable* modeCVar() const;
+    dbContent::MetaVariable* latitudeVar() const;
+    dbContent::MetaVariable* longitudeVar() const;
 
     virtual bool checkPrerequisites();
     virtual bool isRecommended();
@@ -137,37 +142,37 @@ public:
 
 protected:
     std::string key_var_str_;
-    MetaDBOVariable* key_var_{nullptr};
+    dbContent::MetaVariable* key_var_{nullptr};
 
     std::string ds_id_var_str_;
-    MetaDBOVariable* ds_id_var_{nullptr};
+    dbContent::MetaVariable* ds_id_var_{nullptr};
 
     std::string tod_var_str_;
-    MetaDBOVariable* tod_var_{nullptr};
+    dbContent::MetaVariable* tod_var_{nullptr};
 
     std::string target_addr_var_str_;
-    MetaDBOVariable* target_addr_var_{nullptr};
+    dbContent::MetaVariable* target_addr_var_{nullptr};
 
     std::string target_id_var_str_;
-    MetaDBOVariable* target_id_var_{nullptr};
+    dbContent::MetaVariable* target_id_var_{nullptr};
 
     std::string track_num_var_str_;
-    MetaDBOVariable* track_num_var_{nullptr};
+    dbContent::MetaVariable* track_num_var_{nullptr};
 
     std::string track_end_var_str_;
-    MetaDBOVariable* track_end_var_{nullptr};
+    dbContent::MetaVariable* track_end_var_{nullptr};
 
     std::string mode_3a_var_str_;
-    MetaDBOVariable* mode_3a_var_{nullptr};
+    dbContent::MetaVariable* mode_3a_var_{nullptr};
 
     std::string mode_c_var_str_;
-    MetaDBOVariable* mode_c_var_{nullptr};
+    dbContent::MetaVariable* mode_c_var_{nullptr};
 
     std::string latitude_var_str_;
-    MetaDBOVariable* latitude_var_{nullptr};
+    dbContent::MetaVariable* latitude_var_{nullptr};
 
     std::string longitude_var_str_;
-    MetaDBOVariable* longitude_var_{nullptr};
+    dbContent::MetaVariable* longitude_var_{nullptr};
 
     bool associate_non_mode_s_ {true};
     bool clean_dubious_utns_ {true};
@@ -211,9 +216,9 @@ protected:
     std::shared_ptr<CreateAssociationsJob> create_job_;
     bool create_job_done_{false};
 
-    void checkAndSetMetaVariable(std::string& name_str, MetaDBOVariable** var);
+    void checkAndSetMetaVariable(std::string& name_str, dbContent::MetaVariable** var);
 
-    DBOVariableSet getReadSetFor(const std::string& dbo_name);
+    dbContent::VariableSet getReadSetFor(const std::string& dbo_name);
 };
 
 #endif // CREATEASSOCIATIONSTASK_H

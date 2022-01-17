@@ -20,7 +20,7 @@
 
 #include "global.h"
 #include "nullablevector.h"
-#include "dbovariable.h"
+#include "dbcontent/variable/variable.h"
 #include "histogramviewdatatoolwidget.h"
 #include "histogramviewchartview.h"
 
@@ -34,7 +34,7 @@ class HistogramViewDataSource;
 class QTabWidget;
 class QHBoxLayout;
 class Buffer;
-class DBObject;
+class DBContent;
 
 namespace EvaluationRequirementResult
 {
@@ -103,7 +103,7 @@ class HistogramViewDataWidget : public QWidget
   public slots:
     void loadingStartedSlot();
     /// @brief Called when new result Buffer was delivered
-    void updateDataSlot(DBObject& object, std::shared_ptr<Buffer> buffer);
+    void updateDataSlot(DBContent& object, std::shared_ptr<Buffer> buffer);
     void loadingDoneSlot();
 
     void exportDataSlot(bool overwrite);
@@ -260,7 +260,7 @@ protected:
 
     template<typename T>
     void updateCounts(const std::string& dbo_name, NullableVector<T>& data, NullableVector<bool>& selected_vec,
-                      DBOVariable* data_var)
+                      dbContent::Variable* data_var)
     {
         loginf << "HistogramViewDataWidget: updateCounts: start dbo " << dbo_name;
 
@@ -274,7 +274,7 @@ protected:
         {
             for (unsigned int bin_cnt = 0; bin_cnt < num_bins_; ++bin_cnt)
             {
-                if (data_var->representation() != DBOVariable::Representation::STANDARD)
+                if (data_var->representation() != dbContent::Variable::Representation::STANDARD)
                     labels_.push_back(data_var->getAsSpecialRepresentationString(
                                           data_min_.toDouble()+bin_cnt*bin_size_+bin_size_/2.0f));
                 else

@@ -17,9 +17,9 @@
 
 #include "dboreadassociationsjob.h"
 
-#include "dbobject.h"
+#include "dbcontent/dbcontent.h"
 
-DBOReadAssociationsJob::DBOReadAssociationsJob(DBObject& dbobject)
+DBOReadAssociationsJob::DBOReadAssociationsJob(DBContent& dbobject)
     : Job("DBOReadAssociationsJob"), dbobject_(dbobject)
 {
     assert(dbobject_.existsInDB());
