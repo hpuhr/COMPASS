@@ -262,7 +262,7 @@ std::map<unsigned int, std::string> LabelDefinition::generateLabels(std::vector<
     // check and insert strings for with rec_num
     std::map<unsigned int, std::string> labels;
 
-    DBContentManager& dbo_man_ = COMPASS::instance().objectManager();
+    DBContentManager& dbo_man_ = COMPASS::instance().dbContentManager();
 
     string dbo_name = db_object_.name();
 

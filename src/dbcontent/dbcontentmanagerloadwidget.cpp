@@ -103,7 +103,7 @@ void DBContentManagerDataSourcesWidget::loadDSTypeChangedSlot()
 
     loginf << "DBObjectManagerLoadWidget: loadDSTypeChangedSlot: ds_type " << ds_type_name << " load " << load;
 
-    COMPASS::instance().objectManager().dsTypeLoadingWanted(ds_type_name, load);
+    COMPASS::instance().dbContentManager().dsTypeLoadingWanted(ds_type_name, load);
 }
 
 void DBContentManagerDataSourcesWidget::loadDSChangedSlot()
@@ -117,7 +117,7 @@ void DBContentManagerDataSourcesWidget::loadDSChangedSlot()
 
     loginf << "DBObjectManagerLoadWidget: loadDSChangedSlot: ds_id " << ds_id << " load " << load;
 
-    COMPASS::instance().objectManager().dataSource(ds_id).loadingWanted(load);
+    COMPASS::instance().dbContentManager().dataSource(ds_id).loadingWanted(load);
 }
 
 
@@ -275,11 +275,11 @@ void DBContentManagerDataSourcesWidget::clearAndCreateContent()
 
     //ds_id -> (ip, port)
     std::map<unsigned int, std::vector <std::pair<std::string, unsigned int>>> net_lines =
-            COMPASS::instance().objectManager().getNetworkLines();
+            COMPASS::instance().dbContentManager().getNetworkLines();
 
     string tooltip;
 
-    DBContentManager& dbo_man = COMPASS::instance().objectManager();
+    DBContentManager& dbo_man = COMPASS::instance().dbContentManager();
     bool ds_found;
 
     for (auto& ds_type_name : DBContentManager::data_source_types_)

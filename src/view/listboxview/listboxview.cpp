@@ -37,7 +37,7 @@ ListBoxView::ListBoxView(const std::string& class_id, const std::string& instanc
     registerParameter("overwrite_csv", &overwrite_csv_, true);
     registerParameter("show_associations", &show_associations_, false);
 
-    can_show_associations_ = COMPASS::instance().objectManager().hasAssociations();
+    can_show_associations_ = COMPASS::instance().dbContentManager().hasAssociations();
 
     if (!can_show_associations_)
         show_associations_ = false;
@@ -66,7 +66,7 @@ bool ListBoxView::init()
 
     assert(data_source_);
 
-    DBContentManager& object_man = COMPASS::instance().objectManager();
+    DBContentManager& object_man = COMPASS::instance().dbContentManager();
     connect(&object_man, &DBContentManager::loadingDoneSignal, this, &ListBoxView::allLoadingDoneSlot);
     connect(&object_man, &DBContentManager::loadingDoneSignal,
             widget_->getDataWidget(), &ListBoxViewDataWidget::loadingDoneSlot);

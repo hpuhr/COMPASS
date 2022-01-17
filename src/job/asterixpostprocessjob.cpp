@@ -45,7 +45,7 @@ void ASTERIXPostprocessJob::run()
 
 void ASTERIXPostprocessJob::doFutureTimestampsCheck()
 {
-    DBContentManager& obj_man = COMPASS::instance().objectManager();
+    DBContentManager& obj_man = COMPASS::instance().dbContentManager();
 
     unsigned int buffer_size;
 
@@ -119,7 +119,7 @@ void ASTERIXPostprocessJob::doRadarPlotPositionCalculations()
 
     // do radar position projection
 
-    DBContentManager& dbo_man = COMPASS::instance().objectManager();
+    DBContentManager& dbo_man = COMPASS::instance().dbContentManager();
     ProjectionManager& proj_man = ProjectionManager::instance();
 
     assert(proj_man.hasCurrentProjection());

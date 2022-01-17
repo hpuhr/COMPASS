@@ -174,7 +174,7 @@ QVariant BufferTableModel::data(const QModelIndex& index, int role) const
         {
             if (col == 1)
             {
-                DBContentManager& manager = COMPASS::instance().objectManager();
+                DBContentManager& manager = COMPASS::instance().dbContentManager();
 
                 std::string dbo_name = buffer_->dboName();
                 assert(dbo_name.size());

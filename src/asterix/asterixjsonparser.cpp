@@ -246,7 +246,7 @@ const std::vector<std::string>& ASTERIXJSONParser::notAddedJSONKeys() const
 DBContent& ASTERIXJSONParser::dbObject() const
 {
 
-    DBContentManager& obj_man = COMPASS::instance().objectManager();
+    DBContentManager& obj_man = COMPASS::instance().dbContentManager();
 
     if (!obj_man.existsObject(db_content_name_))
         throw runtime_error ("ASTERIXJSONParser: dbObject: dbobject '" + db_content_name_+ "' does not exist");

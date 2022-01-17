@@ -120,7 +120,7 @@ bool ViewPointsImportTask::isRecommended()
     if (!checkPrerequisites())
         return false;
 
-    if (COMPASS::instance().objectManager().hasData())
+    if (COMPASS::instance().dbContentManager().hasData())
         return false; // not recommended if already has data
 
     return canImport();

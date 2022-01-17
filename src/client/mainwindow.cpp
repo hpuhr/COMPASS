@@ -102,7 +102,7 @@ MainWindow::MainWindow()
 
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
-    tab_widget_->addTab(COMPASS::instance().objectManager().loadWidget(), "Data Sources");
+    tab_widget_->addTab(COMPASS::instance().dbContentManager().loadWidget(), "Data Sources");
     tab_widget_->addTab(COMPASS::instance().filterManager().widget(), "Filters");
 
     COMPASS::instance().evaluationManager().init(tab_widget_); // adds eval widget
@@ -174,7 +174,7 @@ MainWindow::MainWindow()
     connect (&COMPASS::instance(), &COMPASS::appModeSwitchSignal,
              this, &MainWindow::appModeSwitchSlot);
 
-    QObject::connect(&COMPASS::instance().objectManager(), &DBContentManager::loadingDoneSignal,
+    QObject::connect(&COMPASS::instance().dbContentManager(), &DBContentManager::loadingDoneSignal,
                      this, &MainWindow::loadingDoneSlot);
 }
 
@@ -876,7 +876,7 @@ void MainWindow::performAutomaticTasks ()
     {
         loginf << "MainWindow: performAutomaticTasks: loading data";
 
-        DBContentManager& obj_man = COMPASS::instance().objectManager();
+        DBContentManager& obj_man = COMPASS::instance().dbContentManager();
 
         obj_man.load();
 
@@ -1161,7 +1161,7 @@ void MainWindow::configureMetaVariablesSlot()
 {
     loginf << "MainWindow: configureMetaVariablesSlot";
 
-    COMPASS::instance().objectManager().metaVariableConfigdialog()->show();
+    COMPASS::instance().dbContentManager().metaVariableConfigdialog()->show();
 }
 
 //void MainWindow::startSlot()
@@ -1258,14 +1258,14 @@ void MainWindow::loadButtonSlot()
     if (loading_)
     {
         load_button_->setDisabled(true);
-        COMPASS::instance().objectManager().quitLoading();
+        COMPASS::instance().dbContentManager().quitLoading();
         return;
     }
 
     loading_ = true;
     load_button_->setText("Stop");
 
-    COMPASS::instance().objectManager().load();
+    COMPASS::instance().dbContentManager().load();
 }
 
 void MainWindow::loadingDoneSlot()

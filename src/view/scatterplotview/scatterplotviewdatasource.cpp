@@ -78,7 +78,7 @@ void ScatterPlotViewDataSource::checkSubConfigurables()
         generateSubConfigurable("VariableOrderedSet", "VariableOrderedSet0");
         assert(set_);
 
-        DBContentManager& obj_man = COMPASS::instance().objectManager();
+        DBContentManager& obj_man = COMPASS::instance().dbContentManager();
 
         if (obj_man.existsMetaVariable("rec_num"))
             set_->add(obj_man.metaVariable("rec_num"));
@@ -138,7 +138,7 @@ void ScatterPlotViewDataSource::showViewPoint (const ViewableDataConfig* vp)
 
 bool ScatterPlotViewDataSource::addTemporaryVariable (const std::string& dbo_name, const std::string& var_name)
 {
-    DBContentManager& obj_man = COMPASS::instance().objectManager();
+    DBContentManager& obj_man = COMPASS::instance().dbContentManager();
 
     if (dbo_name == META_OBJECT_NAME)
     {
@@ -172,7 +172,7 @@ bool ScatterPlotViewDataSource::addTemporaryVariable (const std::string& dbo_nam
 
 void ScatterPlotViewDataSource::removeTemporaryVariable (const std::string& dbo_name, const std::string& var_name)
 {
-    DBContentManager& obj_man = COMPASS::instance().objectManager();
+    DBContentManager& obj_man = COMPASS::instance().dbContentManager();
 
     if (dbo_name == META_OBJECT_NAME)
     {

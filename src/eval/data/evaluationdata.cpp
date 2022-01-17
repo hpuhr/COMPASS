@@ -60,7 +60,7 @@ void EvaluationData::addReferenceData (DBContent& object, std::shared_ptr<Buffer
     ref_buffer_ = buffer;
 
     // preset variable names
-    DBContentManager& object_manager = COMPASS::instance().objectManager();
+    DBContentManager& object_manager = COMPASS::instance().dbContentManager();
 
     string dbo_name = ref_buffer_->dboName();
 
@@ -200,7 +200,7 @@ void EvaluationData::addTestData (DBContent& object, std::shared_ptr<Buffer> buf
     assert (!tst_buffer_);
     tst_buffer_ = buffer;
 
-    DBContentManager& object_manager = COMPASS::instance().objectManager();
+    DBContentManager& object_manager = COMPASS::instance().dbContentManager();
 
     string dbo_name = tst_buffer_->dboName();
 

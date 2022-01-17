@@ -69,7 +69,7 @@ void CreateAssociationsJob::run()
 
     loginf << "CreateAssociationsJob: run: clearing associations";
 
-    DBContentManager& object_man = COMPASS::instance().objectManager();
+    DBContentManager& object_man = COMPASS::instance().dbContentManager();
 
     object_man.removeAssociations();
 
@@ -179,7 +179,7 @@ void CreateAssociationsJob::createTargetReports()
     assert (meta_latitude_var);
     assert (meta_longitude_var);
 
-    DBContentManager& object_man = COMPASS::instance().objectManager();
+    DBContentManager& object_man = COMPASS::instance().dbContentManager();
 
     Association::TargetReport tr;
 
@@ -349,7 +349,7 @@ std::map<unsigned int, Association::Target> CreateAssociationsJob::createReferen
         return sum_targets;
     }
 
-    DBContentManager& object_man = COMPASS::instance().objectManager();
+    DBContentManager& object_man = COMPASS::instance().dbContentManager();
 
     // create utn for all tracks
     for (auto& ds_it : target_reports_.at("RefTraj")) // ds_id->trs
@@ -416,7 +416,7 @@ void CreateAssociationsJob::createTrackerUTNs(std::map<unsigned int, Association
         return;
     }
 
-    DBContentManager& object_man = COMPASS::instance().objectManager();
+    DBContentManager& object_man = COMPASS::instance().dbContentManager();
 
     // create utn for all tracks
     for (auto& ds_it : target_reports_.at("Tracker")) // ds_id->trs
@@ -489,7 +489,7 @@ void CreateAssociationsJob::createNonTrackerUTNS(std::map<unsigned int, Associat
     // get ta lookup map
     std::map<unsigned int, unsigned int> ta_2_utn = getTALookupMap(targets);
 
-    DBContentManager& object_man = COMPASS::instance().objectManager();
+    DBContentManager& object_man = COMPASS::instance().dbContentManager();
 
     const bool associate_non_mode_s = task_.associateNonModeS();
     const double max_time_diff_sensor = task_.maxTimeDiffSensor();
@@ -730,7 +730,7 @@ void CreateAssociationsJob::createAssociations()
 {
     loginf << "CreateAssociationsJob: createAssociations";
 
-    DBContentManager& object_man = COMPASS::instance().objectManager();
+    DBContentManager& object_man = COMPASS::instance().dbContentManager();
 
     for (auto& dbo_it : target_reports_)
     {
@@ -755,7 +755,7 @@ std::map<unsigned int, Association::Target> CreateAssociationsJob::createTracked
 
     map<unsigned int, pair<unsigned int, float>> tn2utn; // track num -> utn, last tod
 
-    DBContentManager& object_man = COMPASS::instance().objectManager();
+    DBContentManager& object_man = COMPASS::instance().dbContentManager();
 
     TODO_ASSERT
     //assert (object_man.object(dbo_name).dataSources().count(ds_id));

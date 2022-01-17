@@ -163,14 +163,14 @@ void EvaluationManager::init(QTabWidget* tab_widget)
 
     tab_widget->addTab(widget(), "Evaluation");
 
-    if (!COMPASS::instance().objectManager().hasAssociations())
+    if (!COMPASS::instance().dbContentManager().hasAssociations())
         widget()->setDisabled(true);
 }
 
 bool EvaluationManager::canLoadData ()
 {
     assert (initialized_);
-    return COMPASS::instance().objectManager().hasAssociations() && hasCurrentStandard();
+    return COMPASS::instance().dbContentManager().hasAssociations() && hasCurrentStandard();
 }
 
 void EvaluationManager::loadData ()
@@ -203,7 +203,7 @@ void EvaluationManager::loadData ()
 
     // actually load
 
-    DBContentManager& object_man = COMPASS::instance().objectManager();
+    DBContentManager& object_man = COMPASS::instance().dbContentManager();
 
     // load adsb mops versions in a hacky way
     if (object_man.object("ADSB").hasData() && !has_adsb_info_)
@@ -654,7 +654,7 @@ void EvaluationManager::addVariables (const std::string dbo_name, dbContent::Var
 
     // TODO add required variables from standard requirements
 
-    DBContentManager& object_man = COMPASS::instance().objectManager();
+    DBContentManager& object_man = COMPASS::instance().dbContentManager();
 
     read_set.add(object_man.metaVariable("rec_num").getFor(dbo_name));
     read_set.add(object_man.metaVariable("ds_id").getFor(dbo_name));
@@ -1125,7 +1125,7 @@ bool EvaluationManager::hasValidReferenceDBO ()
     if (!dbo_name_ref_.size())
         return false;
 
-    return COMPASS::instance().objectManager().existsObject(dbo_name_ref_);
+    return COMPASS::instance().dbContentManager().existsObject(dbo_name_ref_);
 }
 
 
@@ -1159,7 +1159,7 @@ bool EvaluationManager::hasValidTestDBO ()
     if (!dbo_name_tst_.size())
         return false;
 
-    return COMPASS::instance().objectManager().existsObject(dbo_name_tst_);
+    return COMPASS::instance().dbContentManager().existsObject(dbo_name_tst_);
 }
 
 std::set<int> EvaluationManager::activeDataSourcesTst()
@@ -1350,7 +1350,7 @@ void EvaluationManager::updateReferenceDBO()
     if (!hasValidReferenceDBO())
         return;
 
-    DBContent& object = COMPASS::instance().objectManager().object(dbo_name_ref_);
+    DBContent& object = COMPASS::instance().dbContentManager().object(dbo_name_ref_);
 
     return;
 
@@ -1433,7 +1433,7 @@ void EvaluationManager::updateTestDBO()
 
     return;
 
-    DBContent& object = COMPASS::instance().objectManager().object(dbo_name_tst_);
+    DBContent& object = COMPASS::instance().dbContentManager().object(dbo_name_tst_);
 
     TODO_ASSERT
 
@@ -1452,7 +1452,7 @@ void EvaluationManager::updateTestDataSources()
 
     return;
 
-    DBContent& object = COMPASS::instance().objectManager().object(dbo_name_tst_);
+    DBContent& object = COMPASS::instance().dbContentManager().object(dbo_name_tst_);
 
     TODO_ASSERT
 
@@ -1861,7 +1861,7 @@ void EvaluationManager::filterUTNs ()
 
     update_results_ = false;
 
-    DBContentManager& dbo_man = COMPASS::instance().objectManager();
+    DBContentManager& dbo_man = COMPASS::instance().dbContentManager();
 
     map<string, set<unsigned int>> associated_utns;
 

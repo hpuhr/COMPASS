@@ -286,7 +286,7 @@ void LatexVisitor::visit(const EvaluationResultsReport::SectionContentFigure* e)
 
     ignore_listbox_views_ = true;
 
-    DBContentManager& obj_man = COMPASS::instance().objectManager();
+    DBContentManager& obj_man = COMPASS::instance().dbContentManager();
     ViewManager& view_man = COMPASS::instance().viewManager();
 
     while (QCoreApplication::hasPendingEvents())

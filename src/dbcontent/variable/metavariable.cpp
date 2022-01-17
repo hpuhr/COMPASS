@@ -313,7 +313,7 @@ void MetaVariable::removeOutdatedVariables()
 
     bool delete_var;
 
-    DBContentManager& obj_man = COMPASS::instance().objectManager();
+    DBContentManager& obj_man = COMPASS::instance().dbContentManager();
 
     for (auto var_it = definitions_.begin(); var_it != definitions_.end();)
     {

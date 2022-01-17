@@ -36,11 +36,11 @@ class DBContentComboBox : public QComboBox
     DBContentComboBox(bool allow_meta, QWidget* parent = 0)
         : QComboBox(parent), allow_meta_(allow_meta)
     {
-        assert(COMPASS::instance().objectManager().size());
+        assert(COMPASS::instance().dbContentManager().size());
         if (allow_meta_)
             addItem(META_OBJECT_NAME.c_str());
 
-        for (auto& obj_it : COMPASS::instance().objectManager())
+        for (auto& obj_it : COMPASS::instance().dbContentManager())
         {
             addItem(obj_it.first.c_str());
         }

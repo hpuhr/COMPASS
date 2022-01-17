@@ -160,7 +160,7 @@ void JSONDataMapping::inArray(bool in_array) { in_array_ = in_array; }
 
 void JSONDataMapping::check()
 {
-    DBContentManager& obj_man = COMPASS::instance().objectManager();
+    DBContentManager& obj_man = COMPASS::instance().dbContentManager();
 
     if (db_content_name_.size() && !obj_man.existsObject(db_content_name_))
         assert (false);
@@ -282,7 +282,7 @@ void JSONDataMapping::initialize()
 
     assert(!initialized_);
 
-    DBContentManager& obj_man = COMPASS::instance().objectManager();
+    DBContentManager& obj_man = COMPASS::instance().dbContentManager();
 
     if (db_content_name_.size() && !obj_man.existsObject(db_content_name_))
         logwrn << "JSONDataMapping: initialize: dbobject '" << db_content_name_

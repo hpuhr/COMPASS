@@ -116,7 +116,7 @@ ViewPointsWidget::ViewPointsWidget(ViewManager& view_manager)
 
     setLayout(main_layout);
 
-    DBContentManager& dbo_man = COMPASS::instance().objectManager();
+    DBContentManager& dbo_man = COMPASS::instance().dbContentManager();
 
     connect (&dbo_man, &DBContentManager::loadingStartedSignal, this, &ViewPointsWidget::loadingStartedSlot);
     connect (&dbo_man, &DBContentManager::loadingDoneSignal, this, &ViewPointsWidget::allLoadingDoneSlot);

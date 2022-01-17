@@ -63,7 +63,7 @@ void VariableOrderedSet::generateSubConfigurable(const std::string& class_id,
         VariableOrderDefinition* definition =
             new VariableOrderDefinition(class_id, instance_id, this);
 
-        DBContentManager& manager = COMPASS::instance().objectManager();
+        DBContentManager& manager = COMPASS::instance().dbContentManager();
 
         if (definition->dboName() == META_OBJECT_NAME)
         {
@@ -307,7 +307,7 @@ VariableSet VariableOrderedSet::getFor(const std::string& dbo_name)
 {
     loginf << "VariableOrderedSet: getFor: type " << dbo_name;
 
-    DBContentManager& manager = COMPASS::instance().objectManager();
+    DBContentManager& manager = COMPASS::instance().dbContentManager();
     VariableSet type_set;
     std::map<unsigned int, VariableOrderDefinition*>::iterator it;
 
@@ -334,7 +334,7 @@ VariableSet VariableOrderedSet::getExistingInDBFor(const std::string& dbo_name)
 {
     logdbg << "VariableOrderedSet: getExistingInDBFor: type " << dbo_name;
 
-    DBContentManager& manager = COMPASS::instance().objectManager();
+    DBContentManager& manager = COMPASS::instance().dbContentManager();
     VariableSet type_set;
     std::map<unsigned int, VariableOrderDefinition*>::iterator it;
 

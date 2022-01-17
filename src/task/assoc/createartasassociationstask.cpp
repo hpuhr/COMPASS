@@ -143,7 +143,7 @@ bool CreateARTASAssociationsTask::checkPrerequisites()
 //        return false;
 
     // check if hash var exists in all data
-    DBContentManager& object_man = COMPASS::instance().objectManager();
+    DBContentManager& object_man = COMPASS::instance().dbContentManager();
 
     logdbg << "CreateARTASAssociationsTask: checkPrerequisites: tracker hashes";
     assert (object_man.existsObject("Tracker"));
@@ -190,7 +190,7 @@ bool CreateARTASAssociationsTask::canRun()
 
     TODO_ASSERT
 
-    DBContentManager& object_man = COMPASS::instance().objectManager();
+    DBContentManager& object_man = COMPASS::instance().dbContentManager();
 
     logdbg << "CreateARTASAssociationsTask: canRun: tracker " << object_man.existsObject("Tracker");
 
@@ -300,7 +300,7 @@ void CreateARTASAssociationsTask::run()
     checkAndSetMetaVariable(hash_var_str_, &hash_var_);
     checkAndSetMetaVariable(tod_var_str_, &tod_var_);
 
-    DBContentManager& object_man = COMPASS::instance().objectManager();
+    DBContentManager& object_man = COMPASS::instance().dbContentManager();
 
     for (auto& dbo_it : object_man)
     {
@@ -396,7 +396,7 @@ void CreateARTASAssociationsTask::loadingDoneSlot(DBContent& object)
 
         std::map<std::string, std::shared_ptr<Buffer>> buffers;
 
-        DBContentManager& object_man = COMPASS::instance().objectManager();
+        DBContentManager& object_man = COMPASS::instance().dbContentManager();
 
         TODO_ASSERT
 
@@ -700,7 +700,7 @@ void CreateARTASAssociationsTask::markTrackCoastingAssociationsDubious(bool valu
 
 void CreateARTASAssociationsTask::checkAndSetVariable(std::string& name_str, Variable** var)
 {
-    DBContentManager& object_man = COMPASS::instance().objectManager();
+    DBContentManager& object_man = COMPASS::instance().dbContentManager();
     DBContent& object = object_man.object("Tracker");
 
     if (!object.hasVariable(name_str))
@@ -721,7 +721,7 @@ void CreateARTASAssociationsTask::checkAndSetVariable(std::string& name_str, Var
 void CreateARTASAssociationsTask::checkAndSetMetaVariable(std::string& name_str,
                                                           MetaVariable** var)
 {
-    DBContentManager& object_man = COMPASS::instance().objectManager();
+    DBContentManager& object_man = COMPASS::instance().dbContentManager();
 
     if (!object_man.existsMetaVariable(name_str))
     {

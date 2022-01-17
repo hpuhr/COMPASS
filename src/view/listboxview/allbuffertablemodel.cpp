@@ -180,7 +180,7 @@ QVariant AllBufferTableModel::data(const QModelIndex& index, int role) const
         {
             if (col == 2)
             {
-                DBContentManager& manager = COMPASS::instance().objectManager();
+                DBContentManager& manager = COMPASS::instance().dbContentManager();
                 const DBOAssociationCollection& associations =
                     manager.object(dbo_name).associations();
 
@@ -210,7 +210,7 @@ QVariant AllBufferTableModel::data(const QModelIndex& index, int role) const
         std::string variable_dbo_name = data_source_.getSet()->variableDefinition(col).dboName();
         std::string variable_name = data_source_.getSet()->variableDefinition(col).variableName();
 
-        DBContentManager& manager = COMPASS::instance().objectManager();
+        DBContentManager& manager = COMPASS::instance().dbContentManager();
 
         // check if data & variables exist
         if (variable_dbo_name == META_OBJECT_NAME)
@@ -516,7 +516,7 @@ void AllBufferTableModel::updateTimeIndexes()
             logdbg << "AllBufferTableModel: updateTimeIndexes: new " << dbo_name
                    << " data, last index " << buffer_index << " size " << buf_it.second->size();
 
-            DBContentManager& object_manager = COMPASS::instance().objectManager();
+            DBContentManager& object_manager = COMPASS::instance().dbContentManager();
             const dbContent::Variable& tod_var =
                     object_manager.metaVariable(DBContent::meta_var_tod_id_.name()).getFor(dbo_name);
 

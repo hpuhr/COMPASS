@@ -739,7 +739,7 @@ std::string Variable::getDataSourcesAsString(const std::string& value) const
 {
     assert(db_object_);
 
-    DBContentManager& dbo_man = COMPASS::instance().objectManager();
+    DBContentManager& dbo_man = COMPASS::instance().dbContentManager();
 
     unsigned int ds_id = stoi(value);
 

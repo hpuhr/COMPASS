@@ -74,7 +74,7 @@ bool ScatterPlotView::init()
 
     assert(data_source_);
 
-    DBContentManager& object_man = COMPASS::instance().objectManager();
+    DBContentManager& object_man = COMPASS::instance().dbContentManager();
     connect(&object_man, &DBContentManager::loadingDoneSignal, this, &ScatterPlotView::allLoadingDoneSlot);
 
 //    connect(data_source_, &ScatterPlotViewDataSource::loadingStartedSignal, widget_->getDataWidget(),
@@ -224,9 +224,9 @@ bool ScatterPlotView::hasDataVarX ()
         return false;
 
     if (data_var_x_dbo_ == META_OBJECT_NAME)
-        return COMPASS::instance().objectManager().existsMetaVariable(data_var_x_name_);
+        return COMPASS::instance().dbContentManager().existsMetaVariable(data_var_x_name_);
     else
-        return COMPASS::instance().objectManager().object(data_var_x_dbo_).hasVariable(data_var_x_name_);
+        return COMPASS::instance().dbContentManager().object(data_var_x_dbo_).hasVariable(data_var_x_name_);
 }
 
 bool ScatterPlotView::isDataVarXMeta ()
@@ -238,9 +238,9 @@ Variable& ScatterPlotView::dataVarX()
 {
     assert (hasDataVarX());
     assert (!isDataVarXMeta());
-    assert (COMPASS::instance().objectManager().object(data_var_x_dbo_).hasVariable(data_var_x_name_));
+    assert (COMPASS::instance().dbContentManager().object(data_var_x_dbo_).hasVariable(data_var_x_name_));
 
-    return COMPASS::instance().objectManager().object(data_var_x_dbo_).variable(data_var_x_name_);
+    return COMPASS::instance().dbContentManager().object(data_var_x_dbo_).variable(data_var_x_name_);
 }
 
 void ScatterPlotView::dataVarX (Variable& var)
@@ -261,7 +261,7 @@ MetaVariable& ScatterPlotView::metaDataVarX()
     assert (hasDataVarX());
     assert (isDataVarXMeta());
 
-    return COMPASS::instance().objectManager().metaVariable(data_var_x_name_);
+    return COMPASS::instance().dbContentManager().metaVariable(data_var_x_name_);
 }
 
 void ScatterPlotView::metaDataVarX (MetaVariable& var)
@@ -295,9 +295,9 @@ bool ScatterPlotView::hasDataVarY ()
         return false;
 
     if (data_var_y_dbo_ == META_OBJECT_NAME)
-        return COMPASS::instance().objectManager().existsMetaVariable(data_var_y_name_);
+        return COMPASS::instance().dbContentManager().existsMetaVariable(data_var_y_name_);
     else
-        return COMPASS::instance().objectManager().object(data_var_y_dbo_).hasVariable(data_var_y_name_);
+        return COMPASS::instance().dbContentManager().object(data_var_y_dbo_).hasVariable(data_var_y_name_);
 }
 
 bool ScatterPlotView::isDataVarYMeta ()
@@ -309,9 +309,9 @@ Variable& ScatterPlotView::dataVarY()
 {
     assert (hasDataVarY());
     assert (!isDataVarYMeta());
-    assert (COMPASS::instance().objectManager().object(data_var_y_dbo_).hasVariable(data_var_y_name_));
+    assert (COMPASS::instance().dbContentManager().object(data_var_y_dbo_).hasVariable(data_var_y_name_));
 
-    return COMPASS::instance().objectManager().object(data_var_y_dbo_).variable(data_var_y_name_);
+    return COMPASS::instance().dbContentManager().object(data_var_y_dbo_).variable(data_var_y_name_);
 }
 
 void ScatterPlotView::dataVarY (Variable& var)
@@ -332,7 +332,7 @@ MetaVariable& ScatterPlotView::metaDataVarY()
     assert (hasDataVarY());
     assert (isDataVarYMeta());
 
-    return COMPASS::instance().objectManager().metaVariable(data_var_y_name_);
+    return COMPASS::instance().dbContentManager().metaVariable(data_var_y_name_);
 }
 
 void ScatterPlotView::metaDataVarY (MetaVariable& var)

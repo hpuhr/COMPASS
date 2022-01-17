@@ -228,7 +228,7 @@ void ListBoxViewDataSource::currentSetName(const std::string& current_set_name)
 
 bool ListBoxViewDataSource::addTemporaryVariable (const std::string& dbo_name, const std::string& var_name)
 {
-    DBContentManager& obj_man = COMPASS::instance().objectManager();
+    DBContentManager& obj_man = COMPASS::instance().dbContentManager();
     
     assert (hasCurrentSet());
     if (dbo_name == META_OBJECT_NAME)
@@ -268,7 +268,7 @@ void ListBoxViewDataSource::removeTemporaryVariable (const std::string& dbo_name
 //    assert (el != temporary_added_variables_.end());
 //    temporary_added_variables_.erase(el);
 
-    DBContentManager& obj_man = COMPASS::instance().objectManager();
+    DBContentManager& obj_man = COMPASS::instance().dbContentManager();
 
     if (dbo_name == META_OBJECT_NAME)
     {
@@ -291,7 +291,7 @@ void ListBoxViewDataSource::removeTemporaryVariable (const std::string& dbo_name
 
 void ListBoxViewDataSource::addDefaultVariables (VariableOrderedSet& set)
 {
-    DBContentManager& obj_man = COMPASS::instance().objectManager();
+    DBContentManager& obj_man = COMPASS::instance().dbContentManager();
 
     if (obj_man.existsMetaVariable(DBContent::meta_var_rec_num_id_.name()))
         set.add(obj_man.metaVariable(DBContent::meta_var_rec_num_id_.name()));

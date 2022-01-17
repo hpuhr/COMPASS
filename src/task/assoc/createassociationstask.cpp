@@ -145,7 +145,7 @@ bool CreateAssociationsTask::checkPrerequisites()
 //        return false;
 
     // check if hash var exists in all data
-    DBContentManager& object_man = COMPASS::instance().objectManager();
+    DBContentManager& object_man = COMPASS::instance().dbContentManager();
 
     logdbg << "CreateAssociationsTask: checkPrerequisites: tracker hashes";
     assert (object_man.existsObject("Tracker"));
@@ -169,7 +169,7 @@ bool CreateAssociationsTask::isRecommended()
 
 bool CreateAssociationsTask::canRun()
 {
-    DBContentManager& object_man = COMPASS::instance().objectManager();
+    DBContentManager& object_man = COMPASS::instance().dbContentManager();
 
     logdbg << "CreateAssociationsTask: canRun: tracker " << object_man.existsObject("Tracker");
 
@@ -254,7 +254,7 @@ void CreateAssociationsTask::run()
     checkAndSetMetaVariable(latitude_var_str_, &latitude_var_);
     checkAndSetMetaVariable(longitude_var_str_, &longitude_var_);
 
-    DBContentManager& object_man = COMPASS::instance().objectManager();
+    DBContentManager& object_man = COMPASS::instance().dbContentManager();
 
     for (auto& dbo_it : object_man)
     {
@@ -509,7 +509,7 @@ void CreateAssociationsTask::loadingDoneSlot(DBContent& object)
 
         std::map<std::string, std::shared_ptr<Buffer>> buffers;
 
-        DBContentManager& object_man = COMPASS::instance().objectManager();
+        DBContentManager& object_man = COMPASS::instance().dbContentManager();
 
         TODO_ASSERT
 
@@ -663,7 +663,7 @@ MetaVariable* CreateAssociationsTask::longitudeVar() const
 void CreateAssociationsTask::checkAndSetMetaVariable(std::string& name_str,
                                                      MetaVariable** var)
 {
-    DBContentManager& object_man = COMPASS::instance().objectManager();
+    DBContentManager& object_man = COMPASS::instance().dbContentManager();
 
     if (!object_man.existsMetaVariable(name_str))
     {

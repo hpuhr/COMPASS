@@ -247,7 +247,7 @@ void ViewManager::setCurrentViewPoint (const ViewableDataConfig* viewable)
 
     emit showViewPointSignal(current_viewable_);
 
-    COMPASS::instance().objectManager().load();
+    COMPASS::instance().dbContentManager().load();
 }
 
 
@@ -313,7 +313,7 @@ void ViewManager::doViewPointAfterLoad ()
         loginf << "ViewManager: doViewPointAfterLoad: time window min " << time_min << " max " << time_max;
     }
 
-    DBContentManager& object_manager = COMPASS::instance().objectManager();
+    DBContentManager& object_manager = COMPASS::instance().dbContentManager();
 
     if (!object_manager.existsMetaVariable("tod") ||
             !object_manager.existsMetaVariable("pos_lat_deg") ||
@@ -402,7 +402,7 @@ void ViewManager::selectTimeWindow(float time_min, float time_max)
 {
     loginf << "ViewManager: selectTimeWindow: time_min " << time_min << " time_max " << time_max;
 
-    DBContentManager& object_manager = COMPASS::instance().objectManager();
+    DBContentManager& object_manager = COMPASS::instance().dbContentManager();
 
     if (!object_manager.existsMetaVariable("tod"))
     {

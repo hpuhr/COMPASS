@@ -160,7 +160,7 @@ void MetaVariableWidget::updateSlot()
     selection_widgets_.clear();
 
     unsigned int row = 0;
-    for (auto& obj_it : COMPASS::instance().objectManager())
+    for (auto& obj_it : COMPASS::instance().dbContentManager())
     {
         grid_layout_->addWidget(new QLabel(obj_it.first.c_str()), row, 0);
 

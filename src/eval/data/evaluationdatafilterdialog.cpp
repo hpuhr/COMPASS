@@ -127,7 +127,7 @@ EvaluationDataFilterDialog::EvaluationDataFilterDialog(EvaluationData& eval_data
 
     config_layout->addRow("Remove By Non-Detection of DBObject", remove_dbo_check_);
 
-    for (auto& dbo_it : COMPASS::instance().objectManager())
+    for (auto& dbo_it : COMPASS::instance().dbContentManager())
     {
         QCheckBox* tmp = new QCheckBox();
         tmp->setChecked(eval_man_.removeNotDetectedDBO(dbo_it.first));

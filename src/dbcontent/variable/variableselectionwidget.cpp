@@ -38,7 +38,7 @@ namespace dbContent
 {
 
 VariableSelectionWidget::VariableSelectionWidget(bool h_box, QWidget* parent)
-    : QFrame(parent), dbo_man_(COMPASS::instance().objectManager())
+    : QFrame(parent), dbo_man_(COMPASS::instance().dbContentManager())
 {
     setFrameStyle(QFrame::Panel | QFrame::Sunken);
     setLineWidth(1);

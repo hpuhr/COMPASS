@@ -30,7 +30,7 @@ ManageDBObjectsTaskWidget::ManageDBObjectsTaskWidget(ManageDBObjectsTask& task, 
 {
     QVBoxLayout* main_layout_ = new QVBoxLayout();
 
-    object_manager_widget_ = COMPASS::instance().objectManager().widget();
+    object_manager_widget_ = COMPASS::instance().dbContentManager().widget();
     main_layout_->addWidget(object_manager_widget_);
 
     expertModeChangedSlot();

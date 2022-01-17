@@ -569,7 +569,7 @@ bool ASTERIXImportTask::isRecommended()
     if (!checkPrerequisites())
         return false;
 
-    if (COMPASS::instance().objectManager().hasData())
+    if (COMPASS::instance().dbContentManager().hasData())
         return false;
 
     return true;
@@ -668,7 +668,7 @@ bool ASTERIXImportTask::canRun()
     if (import_file_)
         return canImportFile(); // set file exists
     else
-        return COMPASS::instance().objectManager().getNetworkLines().size(); // there are network lines defined
+        return COMPASS::instance().dbContentManager().getNetworkLines().size(); // there are network lines defined
 }
 
 void ASTERIXImportTask::run()
@@ -870,7 +870,7 @@ void ASTERIXImportTask::run(bool test) // , bool create_mapping_stubs
     if (import_file_)
         decode_job_->setDecodeFile(current_filename_, current_file_framing_); // do file import
     else
-        decode_job_->setDecodeUDPStreams(COMPASS::instance().objectManager().getNetworkLines()); // record from network
+        decode_job_->setDecodeUDPStreams(COMPASS::instance().dbContentManager().getNetworkLines()); // record from network
 
 
     connect(decode_job_.get(), &ASTERIXDecodeJob::obsoleteSignal, this,
@@ -1197,7 +1197,7 @@ void ASTERIXImportTask::insertData(std::map<std::string, std::shared_ptr<Buffer>
 
     assert (!test_);
 
-    DBContentManager& object_manager = COMPASS::instance().objectManager();
+    DBContentManager& object_manager = COMPASS::instance().dbContentManager();
 
     while (insert_active_ && !stopped_)
     {
@@ -1255,7 +1255,7 @@ void ASTERIXImportTask::insertDoneSlot()
     {
         logdbg << "ASTERIXImportTask: insertDoneSlot: finalizing";
 
-        disconnect(&COMPASS::instance().objectManager(), &DBContentManager::insertDoneSignal,
+        disconnect(&COMPASS::instance().dbContentManager(), &DBContentManager::insertDoneSignal,
                    this, &ASTERIXImportTask::insertDoneSlot);
 
         emit doneSignal(name_);

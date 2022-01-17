@@ -89,7 +89,7 @@ void BufferCSVExportJob::run()
         std::string dbo_name = buffer_->dboName();
         assert(dbo_name.size());
 
-        DBContentManager& manager = COMPASS::instance().objectManager();
+        DBContentManager& manager = COMPASS::instance().dbContentManager();
 
         for (; row < buffer_size; ++row)
         {

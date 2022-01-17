@@ -340,7 +340,7 @@ void CreateARTASAssociationsStatusDialog::updateDBOAssociatedGrid()
         dbo_associated_grid_->addWidget(percent_label, row, 3);
     }
 
-    for (auto& dbo_it : COMPASS::instance().objectManager())
+    for (auto& dbo_it : COMPASS::instance().dbContentManager())
     {
         if (dbo_it.first == "Tracker")
             continue;

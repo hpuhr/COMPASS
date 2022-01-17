@@ -228,7 +228,7 @@ void DBFilterCondition::setVariableName(const std::string& variable_name)
 
 bool DBFilterCondition::hasVariable (const std::string& dbo_name)
 {
-    DBContentManager& dbo_man = COMPASS::instance().objectManager();
+    DBContentManager& dbo_man = COMPASS::instance().dbContentManager();
 
     if (variable_dbo_name_ == META_OBJECT_NAME)
     {
@@ -254,7 +254,7 @@ dbContent::Variable& DBFilterCondition::variable (const std::string& dbo_name)
 {
     assert (hasVariable(dbo_name));
 
-    DBContentManager& dbo_man = COMPASS::instance().objectManager();
+    DBContentManager& dbo_man = COMPASS::instance().dbContentManager();
 
     if (variable_dbo_name_ == META_OBJECT_NAME)
         return dbo_man.metaVariable(variable_name_).getFor(dbo_name);
@@ -347,7 +347,7 @@ bool DBFilterCondition::checkValueInvalid(const std::string& new_value)
 
     if (variable_dbo_name_ == META_OBJECT_NAME)
     {
-         DBContentManager& dbo_man = COMPASS::instance().objectManager();
+         DBContentManager& dbo_man = COMPASS::instance().dbContentManager();
 
         assert (dbo_man.existsMetaVariable(variable_name_));
 

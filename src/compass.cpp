@@ -54,7 +54,7 @@ COMPASS::COMPASS() : Configurable("COMPASS", "COMPASS0", 0, "compass.json")
     createSubConfigurables();
 
     assert(db_interface_);
-    assert(dbo_manager_);
+    assert(dbcontent_manager_);
     assert(filter_manager_);
     assert(task_manager_);
     assert(view_manager_);
@@ -71,9 +71,9 @@ COMPASS::COMPASS() : Configurable("COMPASS", "COMPASS0", 0, "compass.json")
 
     // database opending
     QObject::connect(db_interface_.get(), &DBInterface::databaseOpenedSignal,
-                     dbo_manager_.get(), &DBContentManager::databaseOpenedSlot);
+                     dbcontent_manager_.get(), &DBContentManager::databaseOpenedSlot);
     QObject::connect(db_interface_.get(), &DBInterface::databaseClosedSignal,
-                     dbo_manager_.get(), &DBContentManager::databaseClosedSlot);
+                     dbcontent_manager_.get(), &DBContentManager::databaseClosedSlot);
 
     QObject::connect(db_interface_.get(), &DBInterface::databaseOpenedSignal,
                      filter_manager_.get(), &FilterManager::databaseOpenedSlot);
@@ -86,11 +86,11 @@ COMPASS::COMPASS() : Configurable("COMPASS", "COMPASS0", 0, "compass.json")
                      eval_manager_.get(), &EvaluationManager::databaseClosedSlot);
 
     // data exchange
-    QObject::connect(dbo_manager_.get(), &DBContentManager::loadingStartedSignal,
+    QObject::connect(dbcontent_manager_.get(), &DBContentManager::loadingStartedSignal,
                      view_manager_.get(), &ViewManager::loadingStartedSlot);
-    QObject::connect(dbo_manager_.get(), &DBContentManager::loadedDataSignal,
+    QObject::connect(dbcontent_manager_.get(), &DBContentManager::loadedDataSignal,
                      view_manager_.get(), &ViewManager::loadedDataSlot);
-    QObject::connect(dbo_manager_.get(), &DBContentManager::loadingDoneSignal,
+    QObject::connect(dbcontent_manager_.get(), &DBContentManager::loadingDoneSignal,
                      view_manager_.get(), &ViewManager::loadingDoneSlot);
 
     qRegisterMetaType<AppMode>("AppMode");
@@ -108,7 +108,7 @@ COMPASS::~COMPASS()
         shutdown();
     }
 
-    assert(!dbo_manager_);
+    assert(!dbcontent_manager_);
     assert(!db_interface_);
     assert(!filter_manager_);
     assert(!task_manager_);
@@ -130,9 +130,9 @@ void COMPASS::generateSubConfigurable(const std::string& class_id, const std::st
     }
     else if (class_id == "DBContentManager")
     {
-        assert(!dbo_manager_);
-        dbo_manager_.reset(new DBContentManager(class_id, instance_id, this));
-        assert(dbo_manager_);
+        assert(!dbcontent_manager_);
+        dbcontent_manager_.reset(new DBContentManager(class_id, instance_id, this));
+        assert(dbcontent_manager_);
     }
     else if (class_id == "FilterManager")
     {
@@ -170,12 +170,12 @@ void COMPASS::checkSubConfigurables()
         generateSubConfigurable("DBInterface", "DBInterface0");
         assert(db_interface_);
     }
-    if (!dbo_manager_)
+    if (!dbcontent_manager_)
     {
         assert(db_interface_);
         addNewSubConfiguration("DBObjectManager", "DBObjectManager0");
         generateSubConfigurable("DBObjectManager", "DBObjectManager0");
-        assert(dbo_manager_);
+        assert(dbcontent_manager_);
     }
     if (!filter_manager_)
     {
@@ -250,7 +250,7 @@ void COMPASS::closeDB()
 
     assert (db_opened_);
 
-    dbo_manager_->saveDBDataSources();
+    dbcontent_manager_->saveDBDataSources();
 
     db_interface_->closeDBFile();
     assert (!db_interface_->dbOpen());
@@ -265,10 +265,10 @@ DBInterface& COMPASS::interface()
     return *db_interface_;
 }
 
-DBContentManager& COMPASS::objectManager()
+DBContentManager& COMPASS::dbContentManager()
 {
-    assert(dbo_manager_);
-    return *dbo_manager_;
+    assert(dbcontent_manager_);
+    return *dbcontent_manager_;
 }
 
 FilterManager& COMPASS::filterManager()
@@ -322,10 +322,10 @@ void COMPASS::shutdown()
 
     assert(db_interface_);
 
-    assert(dbo_manager_);
+    assert(dbcontent_manager_);
     if (db_interface_->dbOpen())
-        dbo_manager_->saveDBDataSources();
-    dbo_manager_ = nullptr;
+        dbcontent_manager_->saveDBDataSources();
+    dbcontent_manager_ = nullptr;
 
     JobManager::instance().shutdown();
     ProjectionManager::instance().shutdown();

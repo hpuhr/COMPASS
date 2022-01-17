@@ -68,7 +68,7 @@ bool HistogramView::init()
 
     assert(data_source_);
 
-    DBContentManager& object_man = COMPASS::instance().objectManager();
+    DBContentManager& object_man = COMPASS::instance().dbContentManager();
     connect(&object_man, &DBContentManager::loadingDoneSignal, this, &HistogramView::allLoadingDoneSlot);
 
 //    connect(data_source_, &HistogramViewDataSource::loadingStartedSignal, widget_->getDataWidget(),
@@ -207,9 +207,9 @@ bool HistogramView::hasDataVar ()
         return false;
 
     if (data_var_dbo_ == META_OBJECT_NAME)
-        return COMPASS::instance().objectManager().existsMetaVariable(data_var_name_);
+        return COMPASS::instance().dbContentManager().existsMetaVariable(data_var_name_);
     else
-        return COMPASS::instance().objectManager().object(data_var_dbo_).hasVariable(data_var_name_);
+        return COMPASS::instance().dbContentManager().object(data_var_dbo_).hasVariable(data_var_name_);
 }
 
 bool HistogramView::isDataVarMeta ()
@@ -221,9 +221,9 @@ Variable& HistogramView::dataVar()
 {
     assert (hasDataVar());
     assert (!isDataVarMeta());
-    assert (COMPASS::instance().objectManager().object(data_var_dbo_).hasVariable(data_var_name_));
+    assert (COMPASS::instance().dbContentManager().object(data_var_dbo_).hasVariable(data_var_name_));
 
-    return COMPASS::instance().objectManager().object(data_var_dbo_).variable(data_var_name_);
+    return COMPASS::instance().dbContentManager().object(data_var_dbo_).variable(data_var_name_);
 }
 
 void HistogramView::dataVar (Variable& var)
@@ -247,7 +247,7 @@ MetaVariable& HistogramView::metaDataVar()
     assert (hasDataVar());
     assert (isDataVarMeta());
 
-    return COMPASS::instance().objectManager().metaVariable(data_var_name_);
+    return COMPASS::instance().dbContentManager().metaVariable(data_var_name_);
 }
 
 void HistogramView::metaDataVar (MetaVariable& var)

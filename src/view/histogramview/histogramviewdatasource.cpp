@@ -79,7 +79,7 @@ void HistogramViewDataSource::checkSubConfigurables()
         generateSubConfigurable("VariableOrderedSet", "VariableOrderedSet0");
         assert(set_);
 
-        DBContentManager& obj_man = COMPASS::instance().objectManager();
+        DBContentManager& obj_man = COMPASS::instance().dbContentManager();
 
         if (obj_man.existsMetaVariable("rec_num"))
             set_->add(obj_man.metaVariable("rec_num"));
@@ -139,7 +139,7 @@ void HistogramViewDataSource::showViewPoint (const ViewableDataConfig* vp)
 
 bool HistogramViewDataSource::addTemporaryVariable (const std::string& dbo_name, const std::string& var_name)
 {
-    DBContentManager& obj_man = COMPASS::instance().objectManager();
+    DBContentManager& obj_man = COMPASS::instance().dbContentManager();
 
     if (dbo_name == META_OBJECT_NAME)
     {
@@ -173,7 +173,7 @@ bool HistogramViewDataSource::addTemporaryVariable (const std::string& dbo_name,
 
 void HistogramViewDataSource::removeTemporaryVariable (const std::string& dbo_name, const std::string& var_name)
 {
-    DBContentManager& obj_man = COMPASS::instance().objectManager();
+    DBContentManager& obj_man = COMPASS::instance().dbContentManager();
 
     if (dbo_name == META_OBJECT_NAME)
     {

@@ -247,7 +247,7 @@ void CreateARTASAssociationsTaskWidget::update()
 //    if (ds_combo_->getDSName() != task_.currentDataSourceName())
 //        task_.currentDataSourceName(ds_combo_->getDSName());
 
-    DBContentManager& object_man = COMPASS::instance().objectManager();
+    DBContentManager& object_man = COMPASS::instance().dbContentManager();
 
     DBContent& track_object = object_man.object("Tracker");
 

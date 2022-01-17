@@ -117,7 +117,7 @@ void VariableOrderedSetWidget::updateMenuEntries()
     menu_.clear();
 
     QMenu* meta_menu = menu_.addMenu(QString::fromStdString(META_OBJECT_NAME));
-    for (auto& meta_it : COMPASS::instance().objectManager().metaVariables())
+    for (auto& meta_it : COMPASS::instance().dbContentManager().metaVariables())
     {
         QAction* action = meta_menu->addAction(QString::fromStdString(meta_it->name()));
 
@@ -127,7 +127,7 @@ void VariableOrderedSetWidget::updateMenuEntries()
         action->setData(QVariant(vmap));
     }
 
-    for (auto& object_it : COMPASS::instance().objectManager())
+    for (auto& object_it : COMPASS::instance().dbContentManager())
     {
         QMenu* m2 = menu_.addMenu(QString::fromStdString(object_it.first));
 
@@ -153,7 +153,7 @@ void VariableOrderedSetWidget::triggerSlot(QAction* action)
     std::string var_name = vmap.begin().key().toStdString();
     std::string obj_name = vmap.begin().value().toString().toStdString();
 
-    DBContentManager& manager = COMPASS::instance().objectManager();
+    DBContentManager& manager = COMPASS::instance().dbContentManager();
 
     if (obj_name == META_OBJECT_NAME)
     {
@@ -224,7 +224,7 @@ void VariableOrderedSetWidget::updateVariableListSlot()
     const std::map<unsigned int, VariableOrderDefinition*>& variables = set_.definitions();
     std::map<unsigned int, VariableOrderDefinition*>::const_iterator it;
 
-    DBContentManager& manager = COMPASS::instance().objectManager();
+    DBContentManager& manager = COMPASS::instance().dbContentManager();
     VariableOrderDefinition* def = nullptr;
 
     for (it = variables.begin(); it != variables.end(); it++)

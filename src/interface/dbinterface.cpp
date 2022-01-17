@@ -343,11 +343,11 @@ unsigned int DBInterface::getMaxRecordNumber(DBContent& object)
     assert (dbOpen());
     assert(object.existsInDB());
 
-    assert (COMPASS::instance().objectManager().existsMetaVariable(DBContent::meta_var_rec_num_id_.name()));
-    assert (COMPASS::instance().objectManager().metaVariable(
+    assert (COMPASS::instance().dbContentManager().existsMetaVariable(DBContent::meta_var_rec_num_id_.name()));
+    assert (COMPASS::instance().dbContentManager().metaVariable(
                 DBContent::meta_var_rec_num_id_.name()).existsIn(object.name()));
 
-    Variable& rec_num_var = COMPASS::instance().objectManager().metaVariable(
+    Variable& rec_num_var = COMPASS::instance().dbContentManager().metaVariable(
                 DBContent::meta_var_rec_num_id_.name()).getFor(object.name());
 
     assert (object.hasVariable(rec_num_var.name()));
@@ -377,7 +377,7 @@ unsigned int DBInterface::getMaxRecordNumber(DBContent& object)
 std::map<unsigned int, std::tuple<std::set<unsigned int>, std::tuple<bool, unsigned int, unsigned int>,
 std::tuple<bool, unsigned int, unsigned int>>> DBInterface::queryADSBInfo()
 {
-    DBContent& object = COMPASS::instance().objectManager().object("ADSB");
+    DBContent& object = COMPASS::instance().dbContentManager().object("ADSB");
 
     assert(object.existsInDB());
 
@@ -1105,8 +1105,8 @@ void DBInterface::insertBuffer(DBContent& db_object, std::shared_ptr<Buffer> buf
 
         buffer->addProperty(rec_num_col_str, PropertyDataType::UINT);
 
-        assert (COMPASS::instance().objectManager().hasMaxRecordNumber());
-        unsigned int max_rec_num = COMPASS::instance().objectManager().maxRecordNumber();
+        assert (COMPASS::instance().dbContentManager().hasMaxRecordNumber());
+        unsigned int max_rec_num = COMPASS::instance().dbContentManager().maxRecordNumber();
 
         NullableVector<unsigned int>& rec_num_vec = buffer->get<unsigned int>(rec_num_col_str);
 
@@ -1118,7 +1118,7 @@ void DBInterface::insertBuffer(DBContent& db_object, std::shared_ptr<Buffer> buf
             rec_num_vec.set(cnt, max_rec_num);
         }
 
-        COMPASS::instance().objectManager().maxRecordNumber(max_rec_num);
+        COMPASS::instance().dbContentManager().maxRecordNumber(max_rec_num);
     }
 
     insertBuffer(db_object.dbTableName(), buffer);

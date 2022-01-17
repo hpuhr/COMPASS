@@ -127,8 +127,8 @@ void RadarPlotPositionCalculatorTaskWidget::update()
         object_box_->setObjectName(object_name);
         setDBOBject(object_name);
 
-        assert(COMPASS::instance().objectManager().existsObject(object_name));
-        DBContent& object = COMPASS::instance().objectManager().object(object_name);
+        assert(COMPASS::instance().dbContentManager().existsObject(object_name));
+        DBContent& object = COMPASS::instance().dbContentManager().object(object_name);
 
         assert(key_box_);
         if (task_.keyVarStr().size() && object.hasVariable(task_.keyVarStr()))
