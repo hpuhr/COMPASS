@@ -98,6 +98,14 @@
                                 "variable_name": "Altitude Reporting Capability"
                             }
                         },
+                        "LabelEntryAssociations0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Associations"
+                            }
+                        },
                         "LabelEntryBarometric Vertical Rate Age0": {
                             "parameters": {
                                 "prefix": "",
@@ -2005,7 +2013,6 @@
                 "parameters": {
                     "data_type_str": "UCHAR",
                     "db_column_name": "sc_l_w",
-                    "dbo_name": "CAT021",
                     "description": "From 271.L+W\n\nSurface Capabilities and Characteristics:  Operational capabilities of the aircraft while on the ground.\n\nAircraft L+W",
                     "dimension": "",
                     "is_key": false,
@@ -2019,7 +2026,6 @@
                 "parameters": {
                     "data_type_str": "FLOAT",
                     "db_column_name": "mode_c_code",
-                    "dbo_name": "CAT021",
                     "description": "From 145.Flight Level\n\nFlight Level from barometric measurements, not QNH corrected",
                     "dimension": "Height",
                     "is_key": false,
@@ -2033,7 +2039,6 @@
                 "parameters": {
                     "data_type_str": "FLOAT",
                     "db_column_name": "geometric_height",
-                    "dbo_name": "CAT021",
                     "description": "From 140.Geometric Height\n\nMinimum height from a plane tangent to the earth’s ellipsoid,\ndefined by WGS-84\n\nRenamed to match CAT062",
                     "dimension": "Height",
                     "is_key": false,
@@ -2047,7 +2052,6 @@
                 "parameters": {
                     "data_type_str": "UCHAR",
                     "db_column_name": "altitude_reporting_capability",
-                    "dbo_name": "CAT021",
                     "description": "From 040.ARC\n\nAltitude Reporting Capability\n0 Unknown\n1 25 ft\n2 100 ft\n3 undefined",
                     "dimension": "",
                     "is_key": false,
@@ -2057,11 +2061,23 @@
                     "unit": ""
                 }
             },
+            "VariableADSBassociations0": {
+                "parameters": {
+                    "data_type_str": "JSON",
+                    "db_column_name": "associations",
+                    "description": "Associations set as JSON object",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Associations",
+                    "representation_str": "STANDARD",
+                    "short_name": "Assoc",
+                    "unit": ""
+                }
+            },
             "VariableADSBbaro_vertical_rate_ftm0": {
                 "parameters": {
                     "data_type_str": "DOUBLE",
                     "db_column_name": "barometric_vertical_rate",
-                    "dbo_name": "CAT021",
                     "description": "From 155.Barometric Vertical Rate\n\nBarometric Vertical Rate in ft/min",
                     "dimension": "",
                     "is_key": false,
@@ -2075,7 +2091,6 @@
                 "parameters": {
                     "data_type_str": "BOOL",
                     "db_column_name": "barometric_vertical_rate_re",
-                    "dbo_name": "CAT021",
                     "description": "From 155.RE\n\nBarometric Vertical Rate Range Exceeded\n\n0 Value in defined range\n1 Value exceeds defined range",
                     "dimension": "",
                     "is_key": false,
@@ -2089,7 +2104,6 @@
                 "parameters": {
                     "data_type_str": "STRING",
                     "db_column_name": "aircraft_identification",
-                    "dbo_name": "CAT021",
                     "description": "From 170.Target Identification\n\nTarget (aircraft or vehicle) identification in 8 characters, as\nreported by the target.",
                     "dimension": "",
                     "is_key": false,
@@ -2103,7 +2117,6 @@
                 "parameters": {
                     "data_type_str": "UCHAR",
                     "db_column_name": "acad_type",
-                    "dbo_name": "CAT021",
                     "description": "From 040.ATP\n\nAddress Type\n0 Non unique address\n1 24-Bit ICAO address\n2 Surface vehicle address\n3 Anonymous address\n4 Reserved for future use\n5 Reserved for future use\n6 Reserved for future use\n7 Reserved for future use",
                     "dimension": "",
                     "is_key": false,
@@ -2117,7 +2130,6 @@
                 "parameters": {
                     "data_type_str": "BOOL",
                     "db_column_name": "differential_correction",
-                    "dbo_name": "CAT021",
                     "description": "From 040.DCR\n\nDifferential Correction\n0 No differential correction (ADS-B)\n1 Differential correction (ADS-B)",
                     "dimension": "",
                     "is_key": false,
@@ -2131,7 +2143,6 @@
                 "parameters": {
                     "data_type_str": "UINT",
                     "db_column_name": "ds_id",
-                    "dbo_name": "CAT021",
                     "description": "From ds_id\n\nData Source Identification",
                     "dimension": "",
                     "is_key": false,
@@ -2145,7 +2156,6 @@
                 "parameters": {
                     "data_type_str": "UINT",
                     "db_column_name": "emitter_category",
-                    "dbo_name": "CAT021",
                     "description": "From 020.ECAT\n\n0 No ADS-B Emitter Category Information\n1 light aircraft <= 7000 kg\n2 reserved\n3 7000 kg < medium aircraft < 136000 kg\n4 reserved\n5 136000 kg <= heavy aircraft\n6 highly manoeuvrable (5g acceleration capability) and high speed (>400 knots cruise)\n7 reserved\n8 reserved\n9 reserved\n10 rotocraft\n11 glider / sailplane\n12 lighter-than-air\n13 unmanned aerial vehicle\n14 space / transatmospheric vehicle\n15 ultralight / handglider / paraglider\n16 parachutist / skydiver\n17 reserved\n18 reserved\n19 reserved\n20 surface emergency vehicle\n21 surface service vehicle\n22 fixed ground or tethered obstruction\n23 reserved",
                     "dimension": "",
                     "is_key": false,
@@ -2159,7 +2169,6 @@
                 "parameters": {
                     "data_type_str": "BOOL",
                     "db_column_name": "fft",
-                    "dbo_name": "CAT021",
                     "description": "From 040.RAB\n\nReport Type\n0 Report from target transponder\n1 Report from field monitor(fixed transponder)",
                     "dimension": "",
                     "is_key": false,
@@ -2173,7 +2182,6 @@
                 "parameters": {
                     "data_type_str": "UCHAR",
                     "db_column_name": "geometric_altitude_accuracy",
-                    "dbo_name": "CAT021",
                     "description": "From 090.GVA\n\nGeometric Height Accuracy\n\nRenamed to match CAT062",
                     "dimension": "",
                     "is_key": false,
@@ -2187,7 +2195,6 @@
                 "parameters": {
                     "data_type_str": "DOUBLE",
                     "db_column_name": "geometric_vertical_rate",
-                    "dbo_name": "CAT021",
                     "description": "From 157.Geometric Vertical Rate\n\nGeometric Vertical Rate, with reference to WGS-84.\n\nUnit is ft/min",
                     "dimension": "",
                     "is_key": false,
@@ -2201,7 +2208,6 @@
                 "parameters": {
                     "data_type_str": "BOOL",
                     "db_column_name": "geometric_vertical_rate_re",
-                    "dbo_name": "CAT021",
                     "description": "From 157.RE\n\nGeometric Vertical Rate Range Exceeded\n\n0 Value in defined range\n1 Value exceeds defined range",
                     "dimension": "",
                     "is_key": false,
@@ -2215,7 +2221,6 @@
                 "parameters": {
                     "data_type_str": "BOOL",
                     "db_column_name": "ground_bit",
-                    "dbo_name": "CAT021",
                     "description": "From 040.GBS\n\nGround Bit Setting\n0 Ground Bit not set\n1 Ground Bit set",
                     "dimension": "",
                     "is_key": false,
@@ -2229,7 +2234,6 @@
                 "parameters": {
                     "data_type_str": "DOUBLE",
                     "db_column_name": "ground_speed",
-                    "dbo_name": "CAT021",
                     "description": "From 160.Ground Speed\n\nGround Speed referenced to WGS-84\n0 ≤ Ground Speed < 2 NM/s",
                     "dimension": "Speed",
                     "is_key": false,
@@ -2243,7 +2247,6 @@
                 "parameters": {
                     "data_type_str": "STRING",
                     "db_column_name": "artas_hash",
-                    "dbo_name": "CAT021",
                     "description": "From artas_md5\n\nARTAS MD5 Hash Code ",
                     "dimension": "",
                     "is_key": false,
@@ -2257,7 +2260,6 @@
                 "parameters": {
                     "data_type_str": "UINT",
                     "db_column_name": "line_id",
-                    "dbo_name": "CAT021",
                     "description": "Communication line ID",
                     "dimension": "",
                     "is_key": false,
@@ -2271,7 +2273,6 @@
                 "parameters": {
                     "data_type_str": "DOUBLE",
                     "db_column_name": "magnetic_heading",
-                    "dbo_name": "CAT021",
                     "description": "From 152.Magnetic Heading\n\nMagnetic Heading (Element of Air Vector)",
                     "dimension": "Angle",
                     "is_key": false,
@@ -2285,7 +2286,6 @@
                 "parameters": {
                     "data_type_str": "UINT",
                     "db_column_name": "mode_3a_code",
-                    "dbo_name": "CAT021",
                     "description": "From 070.Mode-3/A\n\n",
                     "dimension": "",
                     "is_key": false,
@@ -2299,7 +2299,6 @@
                 "parameters": {
                     "data_type_str": "UCHAR",
                     "db_column_name": "mops_version",
-                    "dbo_name": "CAT021",
                     "description": "From 210.VN\n\nVersion Number\nThis sub-field shall contain a value describing the MOPS used by each aircraft.\nCurrently defined for 1090 ES (LTT=2):\n0 ED102/DO-260\n1 DO-260A\n2 ED102A/DO-260B",
                     "dimension": "",
                     "is_key": false,
@@ -2313,7 +2312,6 @@
                 "parameters": {
                     "data_type_str": "UCHAR",
                     "db_column_name": "nacp",
-                    "dbo_name": "CAT021",
                     "description": "From 090.NACp\n\nNavigation Accuracy Category for Position",
                     "dimension": "",
                     "is_key": false,
@@ -2327,7 +2325,6 @@
                 "parameters": {
                     "data_type_str": "BOOL",
                     "db_column_name": "nicbaro",
-                    "dbo_name": "CAT021",
                     "description": "From 090.NICbaro\n\nNavigation Integrity Category for Barometric Altitude",
                     "dimension": "",
                     "is_key": false,
@@ -2341,7 +2338,6 @@
                 "parameters": {
                     "data_type_str": "UCHAR",
                     "db_column_name": "nucp_or_nic",
-                    "dbo_name": "CAT021",
                     "description": "From 090.NUCp or NIC\n\n'Navigation Uncertainty Category for Position' NUCp or 'Navigation Integrity Category 'NIC'",
                     "dimension": "",
                     "is_key": false,
@@ -2355,7 +2351,6 @@
                 "parameters": {
                     "data_type_str": "UCHAR",
                     "db_column_name": "nucr_or_nacv",
-                    "dbo_name": "CAT021",
                     "description": "From 090.NUCr or NACv\n\n'Navigation Uncertainty Category for velocity' NUCr or the 'Navigation Accuracy Category for Velocity' NACv",
                     "dimension": "",
                     "is_key": false,
@@ -2369,7 +2364,6 @@
                 "parameters": {
                     "data_type_str": "BOOL",
                     "db_column_name": "tcas_resolution_advisory",
-                    "dbo_name": "CAT021",
                     "description": "From 008.RA\n\nTCAS Resolution Advisory active\n0 TCAS II or ACAS RA not active\n1 TCAS RA active",
                     "dimension": "",
                     "is_key": false,
@@ -2383,7 +2377,6 @@
                 "parameters": {
                     "data_type_str": "BOOL",
                     "db_column_name": "single_antenna",
-                    "dbo_name": "CAT021",
                     "description": "From 008.SA\n\n0  Antenna Diversity\n1 Single Antenna only",
                     "dimension": "",
                     "is_key": false,
@@ -2397,7 +2390,6 @@
                 "parameters": {
                     "data_type_str": "BOOL",
                     "db_column_name": "tcas_system_status",
-                    "dbo_name": "CAT021",
                     "description": "From 008.Not TCAS\n\nTCAS System Status\n0 TCAS not operational\n1 TCAS operational",
                     "dimension": "",
                     "is_key": false,
@@ -2411,7 +2403,6 @@
                 "parameters": {
                     "data_type_str": "UCHAR",
                     "db_column_name": "pic",
-                    "dbo_name": "CAT021",
                     "description": "From 090.PIC\n\nPosition Integrity Category",
                     "dimension": "",
                     "is_key": false,
@@ -2425,7 +2416,6 @@
                 "parameters": {
                     "data_type_str": "DOUBLE",
                     "db_column_name": "latitude",
-                    "dbo_name": "CAT021",
                     "description": "From 130.Latitude\n\nPosition in WGS-84 Co-ordinates latitude",
                     "dimension": "Angle",
                     "is_key": false,
@@ -2439,7 +2429,6 @@
                 "parameters": {
                     "data_type_str": "DOUBLE",
                     "db_column_name": "longitude",
-                    "dbo_name": "CAT021",
                     "description": "From 130.Longitude\n\nPosition in WGS-84 Co-ordinates longitude",
                     "dimension": "Angle",
                     "is_key": false,
@@ -2453,7 +2442,6 @@
                 "parameters": {
                     "data_type_str": "UINT",
                     "db_column_name": "record_number",
-                    "dbo_name": "CAT021",
                     "description": "Ascending record number",
                     "dimension": "",
                     "is_key": true,
@@ -2467,7 +2455,6 @@
                 "parameters": {
                     "data_type_str": "FLOAT",
                     "db_column_name": "roll_angle",
-                    "dbo_name": "CAT021",
                     "description": "From 230.Roll Angle\n\nThe roll angle, in two’s complement form, of an aircraft executing a turn.\n\n(LSB) = 0.01 degree",
                     "dimension": "",
                     "is_key": false,
@@ -2481,7 +2468,6 @@
                 "parameters": {
                     "data_type_str": "UCHAR",
                     "db_column_name": "sac",
-                    "dbo_name": "CAT021",
                     "description": "From 010.SAC\n\nSystem Area Code",
                     "dimension": "",
                     "is_key": false,
@@ -2495,7 +2481,6 @@
                 "parameters": {
                     "data_type_str": "CHAR",
                     "db_column_name": "message_amplitude",
-                    "dbo_name": "CAT021",
                     "description": "From 132.MAM\n\nAmplitude, in dBm, of ADS-B messages received by the ground\nstation, coded in two’s complement.",
                     "dimension": "",
                     "is_key": false,
@@ -2509,7 +2494,6 @@
                 "parameters": {
                     "data_type_str": "BOOL",
                     "db_column_name": "selected_altitude_available",
-                    "dbo_name": "CAT021",
                     "description": "From 040.SAA\n\nSelected Altitude Available\n0 Altitude Equipment not capable to provide Selected Altitude\n1 Equipment capable to provide Selected Altitude\n",
                     "dimension": "",
                     "is_key": false,
@@ -2523,7 +2507,6 @@
                 "parameters": {
                     "data_type_str": "UCHAR",
                     "db_column_name": "service_identification",
-                    "dbo_name": "CAT021",
                     "description": "From 015.Service Identification\n\nIdentification of the service provided to one or more users.",
                     "dimension": "",
                     "is_key": false,
@@ -2537,7 +2520,6 @@
                 "parameters": {
                     "data_type_str": "UCHAR",
                     "db_column_name": "sic",
-                    "dbo_name": "CAT021",
                     "description": "From 010.SIC\n\nSystem Identification Code",
                     "dimension": "",
                     "is_key": false,
@@ -2551,7 +2533,6 @@
                 "parameters": {
                     "data_type_str": "UCHAR",
                     "db_column_name": "sil",
-                    "dbo_name": "CAT021",
                     "description": "From 090.SIL\n\nSurveillance (version 1) or Source (version 2) Integrity Level",
                     "dimension": "",
                     "is_key": false,
@@ -2565,7 +2546,6 @@
                 "parameters": {
                     "data_type_str": "BOOL",
                     "db_column_name": "sil_supplement",
-                    "dbo_name": "CAT021",
                     "description": "From 090.SIL-Supplement\n\nSIL-Supplement\n0 measured per flight-hour\n1 measured per sample",
                     "dimension": "",
                     "is_key": false,
@@ -2579,7 +2559,6 @@
                 "parameters": {
                     "data_type_str": "BOOL",
                     "db_column_name": "simulated",
-                    "dbo_name": "CAT021",
                     "description": "From 040.SIM\n\nSimulated Target\n0 Actual target report\n1 Simulated target report",
                     "dimension": "",
                     "is_key": false,
@@ -2593,7 +2572,6 @@
                 "parameters": {
                     "data_type_str": "UINT",
                     "db_column_name": "aircraft_address",
-                    "dbo_name": "CAT021",
                     "description": "From 080.Target Address\n\n24-Bit aircraft address",
                     "dimension": "",
                     "is_key": false,
@@ -2607,7 +2585,6 @@
                 "parameters": {
                     "data_type_str": "UCHAR",
                     "db_column_name": "priority_status",
-                    "dbo_name": "CAT021",
                     "description": "From 200.PS\n\n0 No emergency / not reported\n1 General emergency\n2 Lifeguard / medical emergency\n3 Minimum fuel\n4 No communications\n5 Unlawful interference\n6 'Downed' Aircraft",
                     "dimension": "",
                     "is_key": false,
@@ -2621,7 +2598,6 @@
                 "parameters": {
                     "data_type_str": "BOOL",
                     "db_column_name": "test",
-                    "dbo_name": "CAT021",
                     "description": "From 040.TST\n\nTest Target\n0 Default\n1 Test Target",
                     "dimension": "",
                     "is_key": false,
@@ -2635,7 +2611,6 @@
                 "parameters": {
                     "data_type_str": "FLOAT",
                     "db_column_name": "tomr_position",
-                    "dbo_name": "CAT021",
                     "description": "From 073.Time of Message Reception for Position\n\nTime of Message Reception for Position\n\nTime of reception of the latest position squitter in the Ground\nStation, in the form of elapsed time since last midnight,\nexpressed as UTC.",
                     "dimension": "Time",
                     "is_key": false,
@@ -2649,7 +2624,6 @@
                 "parameters": {
                     "data_type_str": "UCHAR",
                     "db_column_name": "tomr_position_fsi",
-                    "dbo_name": "CAT021",
                     "description": "From 074.FSI\n\nTime of Reception HP Full Second Indication\n\nFull Second Indication\n3 Reserved\n2 TOMRp whole seconds = (I021/073) Whole seconds – 1\n1 TOMRp whole seconds = (I021/073) Whole seconds + 1\n0 TOMRp whole seconds = (I021/073) Whole seconds",
                     "dimension": "",
                     "is_key": false,
@@ -2663,7 +2637,6 @@
                 "parameters": {
                     "data_type_str": "DOUBLE",
                     "db_column_name": "tomr_position_hp",
-                    "dbo_name": "CAT021",
                     "description": "From 074.Time of Message Reception of Position - high precision\n\nTime of Message Reception of Position - High Precision\n\nFractional part of the time of message reception for position in the ground station.\n\nTime at which the latest ADS-B position information was received\nby the ground station, expressed as fraction of the second of the\nUTC Time.",
                     "dimension": "Time",
                     "is_key": false,
@@ -2677,7 +2650,6 @@
                 "parameters": {
                     "data_type_str": "FLOAT",
                     "db_column_name": "tomrv",
-                    "dbo_name": "CAT021",
                     "description": "From 075.Time of Message Reception of Velocity\n\nTime of Message Reception for Velocity\n\nTime of reception of the latest velocity squitter in the Ground\nStation, in the form of elapsed time since last midnight,\nexpressed as UTC.",
                     "dimension": "Time",
                     "is_key": false,
@@ -2691,7 +2663,6 @@
                 "parameters": {
                     "data_type_str": "UCHAR",
                     "db_column_name": "tomr_velocity_fsi",
-                    "dbo_name": "CAT021",
                     "description": "From 076.FSI\n\nTime of Message Reception for Velocity - High Precision Full Second Indication\n\n3 Reserved\n2 TOMRv whole seconds = (I021/075) Whole seconds – 1\n1 TOMRv whole seconds = (I021/075) Whole seconds + 1\n0 TOMRv whole seconds = (I021/075) Whole seconds",
                     "dimension": "",
                     "is_key": false,
@@ -2705,7 +2676,6 @@
                 "parameters": {
                     "data_type_str": "DOUBLE",
                     "db_column_name": "tomr_velocity_hp",
-                    "dbo_name": "CAT021",
                     "description": "From 076.Time of Message Reception of Velocity - high precision\n\nTime of Message Reception of Position - High Precision\n\nFractional part of the time of message reception for velocity in the ground station.\n\nTime at which the latest ADS-B position information was received\nby the ground station, expressed as fraction of the second of the\nUTC Time.",
                     "dimension": "",
                     "is_key": false,
@@ -2719,7 +2689,6 @@
                 "parameters": {
                     "data_type_str": "DOUBLE",
                     "db_column_name": "track_angle",
-                    "dbo_name": "CAT021",
                     "description": "From 160.Track Angle\n\nTrack Angle clockwise reference to 'True North'",
                     "dimension": "Angle",
                     "is_key": false,
@@ -2733,7 +2702,6 @@
                 "parameters": {
                     "data_type_str": "DOUBLE",
                     "db_column_name": "true_airspeed",
-                    "dbo_name": "CAT021",
                     "description": "From 151.True Air Speed\n\n ",
                     "dimension": "Speed",
                     "is_key": false,
@@ -2747,7 +2715,6 @@
                 "parameters": {
                     "data_type_str": "DOUBLE",
                     "db_column_name": "track_angle_rate",
-                    "dbo_name": "CAT021",
                     "description": "From 165.TAR\n\nTrack Angle Rate\nFor Edition 0.26: (LSB) = 1/4 deg/s\nLater: (LSB) = 1/32 deg/s",
                     "dimension": "",
                     "is_key": false,

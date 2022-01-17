@@ -10,6 +10,14 @@
                 "parameters": null,
                 "sub_configs": {
                     "LabelEntry": {
+                        "LabelEntryAssociations0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Associations"
+                            }
+                        },
                         "LabelEntryacceleration_ms20": {
                             "parameters": {
                                 "prefix": "",
@@ -299,7 +307,6 @@
                 "parameters": {
                     "data_type_str": "DOUBLE",
                     "db_column_name": "acceleration_ms2",
-                    "dbo_name": "RefTraj",
                     "description": "Acceleration in meters per square second",
                     "dimension": "",
                     "is_key": false,
@@ -313,7 +320,6 @@
                 "parameters": {
                     "data_type_str": "INT",
                     "db_column_name": "alt_baro_ft",
-                    "dbo_name": "RefTraj",
                     "description": "",
                     "dimension": "Height",
                     "is_key": false,
@@ -327,7 +333,6 @@
                 "parameters": {
                     "data_type_str": "DOUBLE",
                     "db_column_name": "alt_baro_std_dev_ft",
-                    "dbo_name": "RefTraj",
                     "description": "",
                     "dimension": "",
                     "is_key": false,
@@ -341,7 +346,6 @@
                 "parameters": {
                     "data_type_str": "DOUBLE",
                     "db_column_name": "alt_geo_ft",
-                    "dbo_name": "RefTraj",
                     "description": "Geometric altitude",
                     "dimension": "Height",
                     "is_key": false,
@@ -355,7 +359,6 @@
                 "parameters": {
                     "data_type_str": "DOUBLE",
                     "db_column_name": "alt_geo_std_dev_ft",
-                    "dbo_name": "RefTraj",
                     "description": "",
                     "dimension": "",
                     "is_key": false,
@@ -365,11 +368,23 @@
                     "unit": ""
                 }
             },
+            "VariableRefTrajassociations0": {
+                "parameters": {
+                    "data_type_str": "JSON",
+                    "db_column_name": "associations",
+                    "description": "Associations set as JSON object",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Associations",
+                    "representation_str": "STANDARD",
+                    "short_name": "Assoc",
+                    "unit": ""
+                }
+            },
             "VariableRefTrajcalc_vertical_rate_ftm0": {
                 "parameters": {
                     "data_type_str": "DOUBLE",
                     "db_column_name": "calc_vertical_rate_ftm",
-                    "dbo_name": "RefTraj",
                     "description": " ",
                     "dimension": "",
                     "is_key": false,
@@ -383,7 +398,6 @@
                 "parameters": {
                     "data_type_str": "STRING",
                     "db_column_name": "callsign",
-                    "dbo_name": "RefTraj",
                     "description": "Aircraft identification",
                     "dimension": "",
                     "is_key": false,
@@ -397,7 +411,6 @@
                 "parameters": {
                     "data_type_str": "CHAR",
                     "db_column_name": "civil_emergency",
-                    "dbo_name": "RefTraj",
                     "description": "Civil emergency",
                     "dimension": "",
                     "is_key": false,
@@ -411,7 +424,6 @@
                 "parameters": {
                     "data_type_str": "INT",
                     "db_column_name": "ds_id",
-                    "dbo_name": "RefTraj",
                     "description": "DATA SOURCE ID, is derived from table DS and its sub tables",
                     "dimension": "",
                     "is_key": false,
@@ -425,7 +437,6 @@
                 "parameters": {
                     "data_type_str": "DOUBLE",
                     "db_column_name": "groundspeed_kt",
-                    "dbo_name": "RefTraj",
                     "description": " ",
                     "dimension": "Speed",
                     "is_key": false,
@@ -439,7 +450,6 @@
                 "parameters": {
                     "data_type_str": "DOUBLE",
                     "db_column_name": "heading_deg",
-                    "dbo_name": "RefTraj",
                     "description": " ",
                     "dimension": "Angle",
                     "is_key": false,
@@ -453,7 +463,6 @@
                 "parameters": {
                     "data_type_str": "STRING",
                     "db_column_name": "manoeuvre_hori",
-                    "dbo_name": "RefTraj",
                     "description": "Y = horizontal Manoeuvre, N = No Manoeuvre",
                     "dimension": "",
                     "is_key": false,
@@ -467,7 +476,6 @@
                 "parameters": {
                     "data_type_str": "STRING",
                     "db_column_name": "mil_emergency",
-                    "dbo_name": "RefTraj",
                     "description": " ",
                     "dimension": "",
                     "is_key": false,
@@ -481,7 +489,6 @@
                 "parameters": {
                     "data_type_str": "INT",
                     "db_column_name": "mode3a_code",
-                    "dbo_name": "RefTraj",
                     "description": "Code, 4 octels",
                     "dimension": "",
                     "is_key": false,
@@ -495,7 +502,6 @@
                 "parameters": {
                     "data_type_str": "INT",
                     "db_column_name": "modec_code_ft",
-                    "dbo_name": "RefTraj",
                     "description": "Flight Level / Altitude in Ft",
                     "dimension": "Height",
                     "is_key": false,
@@ -509,7 +515,6 @@
                 "parameters": {
                     "data_type_str": "CHAR",
                     "db_column_name": "mof_long",
-                    "dbo_name": "RefTraj",
                     "description": "Mode of flight - Longitudinal acceleration: 0 = Constant Groundspeed, 1 = Increasing Groundspeed, 2 = Decreasing Groundspeed, 3 = Undetermined",
                     "dimension": "",
                     "is_key": false,
@@ -523,7 +528,6 @@
                 "parameters": {
                     "data_type_str": "CHAR",
                     "db_column_name": "mof_trans",
-                    "dbo_name": "RefTraj",
                     "description": "Mode of flight - Transversal acceleration: 0 = Constant Course, 1 = Right Turn, 2 = Left Turn, 3 = Undetermined",
                     "dimension": "",
                     "is_key": false,
@@ -537,7 +541,6 @@
                 "parameters": {
                     "data_type_str": "CHAR",
                     "db_column_name": "mof_vert",
-                    "dbo_name": "RefTraj",
                     "description": "Mode of flight - Vertical acceleration: 0 = Level Flight, 1 = Climb, 2 = Descent, 3 = Undetermined",
                     "dimension": "",
                     "is_key": false,
@@ -551,7 +554,6 @@
                 "parameters": {
                     "data_type_str": "DOUBLE",
                     "db_column_name": "pos_lat_deg",
-                    "dbo_name": "RefTraj",
                     "description": "WGS84 latitude position",
                     "dimension": "Angle",
                     "is_key": false,
@@ -565,7 +567,6 @@
                 "parameters": {
                     "data_type_str": "DOUBLE",
                     "db_column_name": "pos_long_deg",
-                    "dbo_name": "RefTraj",
                     "description": "WGS84 longitude position",
                     "dimension": "Angle",
                     "is_key": false,
@@ -579,7 +580,6 @@
                 "parameters": {
                     "data_type_str": "DOUBLE",
                     "db_column_name": "pos_std_dev_lat_deg",
-                    "dbo_name": "RefTraj",
                     "description": " ",
                     "dimension": "",
                     "is_key": false,
@@ -593,7 +593,6 @@
                 "parameters": {
                     "data_type_str": "DOUBLE",
                     "db_column_name": "pos_std_dev_latlong_corr_coeff",
-                    "dbo_name": "RefTraj",
                     "description": " ",
                     "dimension": "",
                     "is_key": false,
@@ -607,7 +606,6 @@
                 "parameters": {
                     "data_type_str": "DOUBLE",
                     "db_column_name": "pos_std_dev_long_deg",
-                    "dbo_name": "RefTraj",
                     "description": " ",
                     "dimension": "",
                     "is_key": false,
@@ -621,7 +619,6 @@
                 "parameters": {
                     "data_type_str": "INT",
                     "db_column_name": "rec_num",
-                    "dbo_name": "RefTraj",
                     "description": "Unique record id starting with 0 on every new recording",
                     "dimension": "",
                     "is_key": true,
@@ -635,7 +632,6 @@
                 "parameters": {
                     "data_type_str": "UCHAR",
                     "db_column_name": "sac",
-                    "dbo_name": "RefTraj",
                     "description": "ASTERIX System Area Code",
                     "dimension": "",
                     "is_key": false,
@@ -649,7 +645,6 @@
                 "parameters": {
                     "data_type_str": "UCHAR",
                     "db_column_name": "sic",
-                    "dbo_name": "RefTraj",
                     "description": "ASTERIX System Identification Code",
                     "dimension": "",
                     "is_key": false,
@@ -663,7 +658,6 @@
                 "parameters": {
                     "data_type_str": "STRING",
                     "db_column_name": "spi",
-                    "dbo_name": "RefTraj",
                     "description": " ",
                     "dimension": "",
                     "is_key": false,
@@ -677,7 +671,6 @@
                 "parameters": {
                     "data_type_str": "INT",
                     "db_column_name": "target_addr",
-                    "dbo_name": "RefTraj",
                     "description": "24 bit target address / aircraft address / Mode-S address",
                     "dimension": "",
                     "is_key": false,
@@ -691,7 +684,6 @@
                 "parameters": {
                     "data_type_str": "LONGINT",
                     "db_column_name": "timestamp",
-                    "dbo_name": "RefTraj",
                     "description": " ",
                     "dimension": "",
                     "is_key": false,
@@ -705,7 +697,6 @@
                 "parameters": {
                     "data_type_str": "FLOAT",
                     "db_column_name": "tod",
-                    "dbo_name": "RefTraj",
                     "description": "Time of Message / Time of Day (= ms since last midnight)",
                     "dimension": "Time",
                     "is_key": false,
@@ -719,7 +710,6 @@
                 "parameters": {
                     "data_type_str": "STRING",
                     "db_column_name": "track_created",
-                    "dbo_name": "RefTraj",
                     "description": " ",
                     "dimension": "",
                     "is_key": false,
@@ -733,7 +723,6 @@
                 "parameters": {
                     "data_type_str": "STRING",
                     "db_column_name": "track_end",
-                    "dbo_name": "RefTraj",
                     "description": "Y = End of track, N = Track is still alive",
                     "dimension": "",
                     "is_key": false,
@@ -747,7 +736,6 @@
                 "parameters": {
                     "data_type_str": "INT",
                     "db_column_name": "track_num",
-                    "dbo_name": "RefTraj",
                     "description": "Track number",
                     "dimension": "",
                     "is_key": false,
@@ -761,7 +749,6 @@
                 "parameters": {
                     "data_type_str": "DOUBLE",
                     "db_column_name": "turnrate_degps",
-                    "dbo_name": "RefTraj",
                     "description": "Turn rate in Deg/sec",
                     "dimension": "",
                     "is_key": false,
@@ -775,7 +762,6 @@
                 "parameters": {
                     "data_type_str": "STRING",
                     "db_column_name": "usable",
-                    "dbo_name": "RefTraj",
                     "description": "Y = to be used for evaluation, N = not to be used",
                     "dimension": "",
                     "is_key": false,
