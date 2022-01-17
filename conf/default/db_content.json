@@ -613,6 +613,51 @@
                     }
                 }
             },
+            "MetaVariableAssociations0": {
+                "parameters": {
+                    "name": "Associations"
+                },
+                "sub_configs": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT001Associations0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT001",
+                                "variable_name": "Associations"
+                            }
+                        },
+                        "VariableDefinitionCAT020Associations0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT020",
+                                "variable_name": "Associations"
+                            }
+                        },
+                        "VariableDefinitionCAT021Associations0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT021",
+                                "variable_name": "Associations"
+                            }
+                        },
+                        "VariableDefinitionCAT048Associations0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT048",
+                                "variable_name": "Associations"
+                            }
+                        },
+                        "VariableDefinitionCAT062Associations0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT062",
+                                "variable_name": "Associations"
+                            }
+                        },
+                        "VariableDefinitionRefTrajAssociations0": {
+                            "parameters": {
+                                "dbcontent_name": "RefTraj",
+                                "variable_name": "Associations"
+                            }
+                        }
+                    }
+                }
+            },
             "MetaVariableAzimuth0": {
                 "parameters": {
                     "name": "Azimuth"
