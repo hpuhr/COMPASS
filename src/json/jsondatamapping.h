@@ -40,13 +40,13 @@ class JSONDataMapping : public Configurable
   public:
     JSONDataMapping(const std::string& class_id, const std::string& instance_id,
                     Configurable& parent);
-    JSONDataMapping() = default;
-    JSONDataMapping(JSONDataMapping&& other) { *this = std::move(other); }
+    //JSONDataMapping() = default;
+    //JSONDataMapping(JSONDataMapping&& other) { *this = std::move(other); }
 
     virtual ~JSONDataMapping();
 
     /// @brief Move constructor
-    JSONDataMapping& operator=(JSONDataMapping&& other);
+    //JSONDataMapping& operator=(JSONDataMapping&& other);
 
     // return bool mandatory missing
     template <typename T>

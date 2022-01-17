@@ -6,8 +6,8 @@
         "name": "CAT020"
     },
     "sub_configs": {
-        "DBOLabelDefinition": {
-            "DBOLabelDefinition0": {
+        "LabelDefinition": {
+            "LabelDefinition0": {
                 "parameters": null,
                 "sub_configs": {
                     "LabelEntry": {

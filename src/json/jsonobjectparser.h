@@ -42,7 +42,7 @@ class Variable;
 
 class JSONObjectParser : public Configurable
 {
-    using MappingIterator = std::vector<JSONDataMapping>::iterator;
+    using MappingIterator = std::vector<std::unique_ptr<JSONDataMapping>>::iterator;
 
   public:
     JSONObjectParser(const std::string& class_id, const std::string& instance_id,
@@ -132,7 +132,7 @@ private:
 
     std::unique_ptr<JSONObjectParserWidget> widget_;
 
-    std::vector<JSONDataMapping> data_mappings_;
+    std::vector<std::unique_ptr<JSONDataMapping>> data_mappings_;
 
     // returns true on successful parse
     bool parseTargetReport(const nlohmann::json& tr, Buffer& buffer, size_t row_cnt) const;

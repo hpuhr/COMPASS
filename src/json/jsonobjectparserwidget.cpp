@@ -225,8 +225,8 @@ void JSONObjectParserWidget::updateMappingsGrid()
     unsigned int index = 0;
     for (auto& map_it : *parser_)
     {
-        map_it.initializeIfRequired();
-        sorted_mappings.insert({map_it.jsonKey(), {index, &map_it}});
+        map_it->initializeIfRequired();
+        sorted_mappings.insert({map_it->jsonKey(), {index, map_it.get()}});
         ++index;
         // loginf << "UGA insert " << map_it.jsonKey();
     }

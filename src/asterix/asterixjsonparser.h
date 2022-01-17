@@ -30,7 +30,7 @@ signals:
     void rowContentChangedSignal (unsigned int row_index); // emitted when something in the index was changed
 
 private:
-    using MappingIterator = std::vector<JSONDataMapping>::iterator;
+    using MappingIterator = std::vector<std::unique_ptr<JSONDataMapping>>::iterator;
 
 public:
     enum EntryType {
@@ -61,7 +61,7 @@ public:
     void appendVariablesToBuffer(Buffer& buffer) const;
 
     virtual void generateSubConfigurable(const std::string& class_id,
-                                         const std::string& instance_id);
+                                         const std::string& instance_id) override;
 
     ASTERIXJSONParserWidget* widget();
 
@@ -120,7 +120,7 @@ private:
     std::string name_;
     unsigned int category_;
 
-    std::string db_object_name_;
+    std::string db_content_name_;
 
     jASTERIX::CategoryItemInfo item_info_;
 
@@ -132,7 +132,7 @@ private:
 
     std::unique_ptr<ASTERIXJSONParserWidget> widget_;
 
-    std::vector<JSONDataMapping> data_mappings_;
+    std::vector<std::unique_ptr<JSONDataMapping>> data_mappings_;
     bool mapping_checks_dirty_ {true};
     std::set<std::string> not_existing_json_keys_; // mapped keys not existing in cat info
     std::vector<std::string> not_added_json_keys_; // keys existing in cat info not in mappings

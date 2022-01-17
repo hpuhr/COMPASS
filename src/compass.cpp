@@ -128,7 +128,7 @@ void COMPASS::generateSubConfigurable(const std::string& class_id, const std::st
         db_interface_.reset(new DBInterface(class_id, instance_id, this));
         assert(db_interface_);
     }
-    else if (class_id == "DBObjectManager")
+    else if (class_id == "DBContentManager")
     {
         assert(!dbo_manager_);
         dbo_manager_.reset(new DBContentManager(class_id, instance_id, this));

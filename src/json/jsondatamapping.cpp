@@ -79,57 +79,57 @@ JSONDataMapping::JSONDataMapping(const std::string& class_id, const std::string&
     createSubConfigurables();
 }
 
-JSONDataMapping& JSONDataMapping::operator=(JSONDataMapping&& other)
-{
-    logdbg << "JSONDataMapping: operator=: this " << this << " other " << &other;
+//JSONDataMapping& JSONDataMapping::operator=(JSONDataMapping&& other)
+//{
+//    logdbg << "JSONDataMapping: operator=: this " << this << " other " << &other;
 
-    active_ = other.active_;
-    json_key_ = other.json_key_;
-    db_content_name_ = other.db_content_name_;
-    dbcontent_variable_name_ = other.dbcontent_variable_name_;
-    variable_ = other.variable_;
+//    active_ = other.active_;
+//    json_key_ = other.json_key_;
+//    db_content_name_ = other.db_content_name_;
+//    dbcontent_variable_name_ = other.dbcontent_variable_name_;
+//    variable_ = other.variable_;
 
-    mandatory_ = other.mandatory_;
-    comment_ = other.comment_;
-    // json_value_format_ = other.json_value_format_;
-    format_data_type_ = other.format_data_type_;
-    json_value_format_ = std::move(other.json_value_format_);
+//    mandatory_ = other.mandatory_;
+//    comment_ = other.comment_;
+//    // json_value_format_ = other.json_value_format_;
+//    format_data_type_ = other.format_data_type_;
+//    json_value_format_ = std::move(other.json_value_format_);
 
-    dimension_ = other.dimension_;
-    unit_ = other.unit_;
+//    dimension_ = other.dimension_;
+//    unit_ = other.unit_;
 
-    in_array_ = other.in_array_;
-    append_value_ = other.append_value_;
+//    in_array_ = other.in_array_;
+//    append_value_ = other.append_value_;
 
-    has_sub_keys_ = other.has_sub_keys_;
-    sub_keys_ = std::move(other.sub_keys_);
-    num_sub_keys_ = other.num_sub_keys_;
+//    has_sub_keys_ = other.has_sub_keys_;
+//    sub_keys_ = std::move(other.sub_keys_);
+//    num_sub_keys_ = other.num_sub_keys_;
 
-    if (sub_keys_.size())
-        last_key_ = sub_keys_.end() - 1;
-    if (sub_keys_.size() > 1)
-        second_to_last_key_ = sub_keys_.end() - 2;
+//    if (sub_keys_.size())
+//        last_key_ = sub_keys_.end() - 1;
+//    if (sub_keys_.size() > 1)
+//        second_to_last_key_ = sub_keys_.end() - 2;
 
-    other.configuration().updateParameterPointer("active", &active_);
-    other.configuration().updateParameterPointer("json_key", &json_key_);
-    other.configuration().updateParameterPointer("db_object_name", &db_content_name_);
-    other.configuration().updateParameterPointer("dbovariable_name", &dbcontent_variable_name_);
-    other.configuration().updateParameterPointer("mandatory", &mandatory_);
-    other.configuration().updateParameterPointer("comment", &comment_);
-    other.configuration().updateParameterPointer("format_data_type", &format_data_type_);
-    other.configuration().updateParameterPointer("json_value_format", &json_value_format_);
-    other.configuration().updateParameterPointer("dimension", &dimension_);
-    other.configuration().updateParameterPointer("unit", &unit_);
-    other.configuration().updateParameterPointer("in_array", &in_array_);
-    other.configuration().updateParameterPointer("append_value", &append_value_);
+//    other.configuration().updateParameterPointer("active", &active_);
+//    other.configuration().updateParameterPointer("json_key", &json_key_);
+//    other.configuration().updateParameterPointer("db_object_name", &db_content_name_);
+//    other.configuration().updateParameterPointer("dbovariable_name", &dbcontent_variable_name_);
+//    other.configuration().updateParameterPointer("mandatory", &mandatory_);
+//    other.configuration().updateParameterPointer("comment", &comment_);
+//    other.configuration().updateParameterPointer("format_data_type", &format_data_type_);
+//    other.configuration().updateParameterPointer("json_value_format", &json_value_format_);
+//    other.configuration().updateParameterPointer("dimension", &dimension_);
+//    other.configuration().updateParameterPointer("unit", &unit_);
+//    other.configuration().updateParameterPointer("in_array", &in_array_);
+//    other.configuration().updateParameterPointer("append_value", &append_value_);
 
-    widget_ = std::move(other.widget_);
-    if (widget_)
-        widget_->setMapping(*this);
-    other.widget_ = nullptr;
+//    widget_ = std::move(other.widget_);
+//    if (widget_)
+//        widget_->setMapping(*this);
+//    other.widget_ = nullptr;
 
-    return static_cast<JSONDataMapping&>(Configurable::operator=(std::move(other)));
-}
+//    return static_cast<JSONDataMapping&>(Configurable::operator=(std::move(other)));
+//}
 
 JSONDataMapping::~JSONDataMapping() { logdbg << "JSONDataMapping: destructor: this " << this; }
 

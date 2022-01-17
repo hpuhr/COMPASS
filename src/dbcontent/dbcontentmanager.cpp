@@ -89,7 +89,7 @@ const std::vector<std::string> DBContentManager::data_source_types_ {"Radar", "M
 
 DBContentManager::DBContentManager(const std::string& class_id, const std::string& instance_id,
                                  COMPASS* compass)
-    : Configurable(class_id, instance_id, compass, "db_content_manager.json"), compass_(*compass)
+    : Configurable(class_id, instance_id, compass, "db_content.json"), compass_(*compass)
 {
     logdbg << "DBContentManager: constructor: creating subconfigurables";
 
@@ -131,10 +131,10 @@ void DBContentManager::generateSubConfigurable(const std::string& class_id,
 {
     logdbg << "DBContentManager: generateSubConfigurable: class_id " << class_id << " instance_id "
            << instance_id;
-    if (class_id.compare("DBObject") == 0)
+    if (class_id.compare("DBContent") == 0)
     {
         DBContent* object = new DBContent(compass_, class_id, instance_id, this);
-        loginf << "DBContentManager: generateSubConfigurable: adding object type " << object->name();
+        loginf << "DBContentManager: generateSubConfigurable: adding content " << object->name();
         assert(!objects_.count(object->name()));
         objects_[object->name()] = object;
     }
