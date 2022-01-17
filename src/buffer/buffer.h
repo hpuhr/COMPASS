@@ -21,6 +21,8 @@
 #include "propertylist.h"
 #include "logger.h"
 
+#include "json.hpp"
+
 #include <memory>
 #include <tuple>
 #include <unordered_map>
