@@ -18,16 +18,18 @@
 #ifndef STRINGMANIPULATION_H_
 #define STRINGMANIPULATION_H_
 
+#include "global.h"
+#include "logger.h"
+#include "property.h"
+
+#include "json.hpp"
+
 #include <boost/regex.hpp>
 #include <boost/algorithm/string/replace.hpp>
 
 #include <iomanip>
 #include <map>
 #include <vector>
-
-#include "global.h"
-#include "logger.h"
-#include "property.h"
 
 namespace Utils
 {
@@ -287,6 +289,11 @@ inline std::string getValueString(const double& value)
     std::ostringstream out;
     out << std::setprecision(double_limit::max_digits10) << value;
     return out.str();
+}
+
+inline std::string getValueString(const nlohmann::json& value)
+{
+    return value.dump();
 }
 
 template <typename T>

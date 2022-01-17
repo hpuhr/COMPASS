@@ -22,20 +22,6 @@
 
 #include <limits>
 
-//const std::map<PropertyDataType, std::string> Property::data_types_2_strings_ =
-//        boost::assign::map_list_of(PropertyDataType::BOOL, "BOOL")(PropertyDataType::CHAR, "CHAR")(
-//            PropertyDataType::UCHAR, "UCHAR")(PropertyDataType::INT, "INT")(
-//            PropertyDataType::UINT, "UINT")(PropertyDataType::LONGINT, "LONGINT")(
-//            PropertyDataType::ULONGINT, "ULONGINT")(PropertyDataType::FLOAT, "FLOAT")(
-//            PropertyDataType::DOUBLE, "DOUBLE")(PropertyDataType::STRING, "STRING");
-
-//const std::map<std::string, PropertyDataType> Property::strings_2_data_types_ =
-//        boost::assign::map_list_of("BOOL", PropertyDataType::BOOL)("CHAR", PropertyDataType::CHAR)(
-//            "UCHAR", PropertyDataType::UCHAR)("INT", PropertyDataType::INT)(
-//            "UINT", PropertyDataType::UINT)("LONGINT", PropertyDataType::LONGINT)(
-//            "ULONGINT", PropertyDataType::ULONGINT)("FLOAT", PropertyDataType::FLOAT)(
-//            "DOUBLE", PropertyDataType::DOUBLE)("STRING", PropertyDataType::STRING);
-
 const std::map<PropertyDataType, std::string>& Property::dataTypes2Strings()
 {
     static const auto* map = new std::map<PropertyDataType, std::string>
@@ -48,7 +34,8 @@ const std::map<PropertyDataType, std::string>& Property::dataTypes2Strings()
         {PropertyDataType::ULONGINT, "ULONGINT"},
         {PropertyDataType::FLOAT, "FLOAT"},
         {PropertyDataType::DOUBLE, "DOUBLE"},
-        {PropertyDataType::STRING, "STRING"}};
+        {PropertyDataType::STRING, "STRING"},
+        {PropertyDataType::JSON, "JSON"}};
     return *map;
 }
 
@@ -64,7 +51,8 @@ const std::map<PropertyDataType, std::string>& Property::dbDataTypes2Strings()
         {PropertyDataType::ULONGINT, "BIGINT"},
         {PropertyDataType::FLOAT, "FLOAT"},
         {PropertyDataType::DOUBLE, "DOUBLE"},
-        {PropertyDataType::STRING, "TEXT"}};
+        {PropertyDataType::STRING, "TEXT"},
+        {PropertyDataType::JSON, "TEXT"}};
     return *map;
 }
 
@@ -80,7 +68,8 @@ const std::map<std::string, PropertyDataType>& Property::strings2DataTypes()
         {"ULONGINT", PropertyDataType::ULONGINT},
         {"FLOAT", PropertyDataType::FLOAT},
         {"DOUBLE", PropertyDataType::DOUBLE},
-        {"STRING", PropertyDataType::STRING}};
+        {"STRING", PropertyDataType::STRING},
+        {"JSON", PropertyDataType::JSON}};
     return *map;
 }
 
@@ -127,211 +116,3 @@ PropertyDataType Property::asDataType(const std::string& type)
     return strings2DataTypes().at(type);
 }
 
-// PROPERTY_DATA_TYPE Property::getDataType() const
-//{
-//    return (PROPERTY_DATA_TYPE) data_type_int_;
-//}
-
-// unsigned int Property::getDataTypeInt() const
-//{
-//    return data_type_int_;
-//}
-
-// std::string &Property::getDataTypeStr() const
-//{
-//    assert (data_type_int_ > 0 && data_type_int_ < P_TYPE_SENTINEL);
-//    return data_type_strings[(PROPERTY_DATA_TYPE) data_type_int_];
-//}
-
-// std::string Property::getID() const
-//{
-//    return id_;
-//}
-
-// unsigned int Property::getSize() const
-//{
-//    return size_;
-//}
-
-// bool Property::isNan (void *ptr)
-//{
-//  switch (data_type_int_)
-//  {
-//  case P_TYPE_BOOL:
-//  {
-//    return false;
-//  }
-//  break;
-//  case P_TYPE_UCHAR:
-//  {
-//    return false;
-//  }
-//  break;
-//  case P_TYPE_CHAR:
-//  {
-//    return false;
-//  }
-//  break;
-//  case P_TYPE_INT:
-//  {
-//    return *((int*)ptr) == std::numeric_limits<int>::max();
-//  }
-//  break;
-//  case P_TYPE_UINT:
-//  {
-//    return *((unsigned int*)ptr) == std::numeric_limits<unsigned int>::max();
-//  }
-//  break;
-//  case P_TYPE_STRING:
-//  {
-//    return false;
-//  }
-//  break;
-//  case P_TYPE_FLOAT:
-//  {
-//    return *((float*)ptr) != *((float*)ptr);    //TODO: Too compiler/platform dependent!
-//  }
-//  break;
-//  case P_TYPE_DOUBLE:
-//  {
-//    return *((float*)ptr) != *((float*)ptr);    //TODO: Too compiler/platform dependent!
-//  }
-//  break;
-//  case P_TYPE_POINTER:
-//  {
-//    return *((void**)ptr) != NULL;
-//  }
-//  break;
-//  default:
-//    logerr  <<  "Property: isNan: unknown property type";
-//    throw std::runtime_error ("Property: isNan: unknown property type");
-//    return false;
-//  }
-//  return isNan ((PROPERTY_DATA_TYPE) data_type_int_, ptr);
-//}
-
-// void Property::setNan (void *ptr)
-//{
-//  switch (data_type_int_)
-//  {
-//  case P_TYPE_BOOL:
-//  {
-//  }
-//  break;
-//  case P_TYPE_UCHAR:
-//  {
-//  }
-//  break;
-//  case P_TYPE_CHAR:
-//  {
-//  }
-//  break;
-//  case P_TYPE_INT:
-//  {
-//    *((int*)ptr) = std::numeric_limits<int>::max();
-//  }
-//  break;
-//  case P_TYPE_UINT:
-//  {
-//    *((unsigned int*)ptr) = std::numeric_limits<unsigned int>::max();
-//  }
-//  break;
-//  case P_TYPE_STRING:
-//  {
-//  }
-//  break;
-//  case P_TYPE_FLOAT:
-//  {
-//    *((float*)ptr) = std::numeric_limits<float>::quiet_NaN();
-//  }
-//  break;
-//  case P_TYPE_DOUBLE:
-//  {
-//    *((double*)ptr) = std::numeric_limits<double>::quiet_NaN();
-//  }
-//  break;
-//  case P_TYPE_POINTER:
-//  {
-//    *((void**)ptr) = NULL;
-//  }
-//  break;
-//  default:
-//    logerr  <<  "Property: setNan: unknown property type";
-//    throw std::runtime_error ("Property: setNan: unknown property type");
-//  }
-//  setNan ((PROPERTY_DATA_TYPE) data_type_int_, ptr);
-//}
-
-// void Property::setValue (void *source, void *target, bool null)
-//{
-//  switch (data_type_int_)
-//  {
-//  case P_TYPE_BOOL:
-//  {
-//    if (null)
-//      *(bool *)target = false;
-//    else
-//      *(bool *)target = *(bool *)source;
-//  }
-//  break;
-//  case P_TYPE_UCHAR:
-//  {
-//    if (null)
-//      *(unsigned char *)target = 0;
-//    else
-//      *(unsigned char *)target = *(unsigned *)source;
-//  }
-//  break;
-//  case P_TYPE_CHAR:
-//  {
-//    if (null)
-//      *(char *)target = 0;
-//    else
-//      *(char *)target = *(char *)source;
-//  }
-//  break;
-//  case P_TYPE_INT:
-//  {
-//    if (null)
-//      *(int *)target = std::numeric_limits<int>::max();
-//    else
-//      *(int *)target = *(int *)source;
-//  }
-//  break;
-//  case P_TYPE_UINT:
-//  {
-//    if (null)
-//      *(unsigned int *)target = std::numeric_limits<unsigned int>::max();
-//    else
-//      *(unsigned int *)target = *(unsigned int *)source;
-//  }
-//  break;
-//  case P_TYPE_STRING:
-//  {
-//    if (null)
-//      *(std::string *)target = std::string();
-//    else
-//      *(std::string *)target = *(std::string *)source;
-//  }
-//  break;
-//  case P_TYPE_FLOAT:
-//  {
-//    if (null)
-//      *(float *)target = std::numeric_limits<float>::quiet_NaN();
-//    else
-//      *(float *)target = *(float *)source;
-//  }
-//  break;
-//  case P_TYPE_DOUBLE:
-//  {
-//    if (null)
-//      *(double *)target = std::numeric_limits<double>::quiet_NaN();
-//    else
-//      *(double *)target = *(double *)source;
-//  }
-//  break;
-//  default:
-//    logerr  <<  "Property: setValue: unknown property type";
-//    throw std::runtime_error ("Property: setValue: unknown property type");
-//  }
-//}

@@ -122,7 +122,7 @@ std::string DBFilterCondition::getConditionString(const std::string& dbo_name, b
 
     assert (hasVariable(dbo_name));
 
-    dbContent::Variable& var {variable(dbo_name)};
+    dbContent::Variable& var = variable(dbo_name);
 
     //const DBTableColumn& column = var.currentDBColumn();
     std::string db_column_name = var.dbColumnName();

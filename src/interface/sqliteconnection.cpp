@@ -383,22 +383,6 @@ void SQLiteConnection::readRowIntoBuffer(const PropertyList& list, unsigned int 
                     logdbg << "SQLiteConnection: readRowIntoBuffer: unsigned int index " << index
                            << " property '" << prop.name() << " is null";
                 break;
-            case PropertyDataType::STRING:
-                if (sqlite3_column_type(statement_, cnt) != SQLITE_NULL)
-                {
-                    logdbg << "SQLiteConnection: readRowIntoBuffer: string index " << index
-                           << " property '" << prop.name()
-                           << "' value "
-                           << std::string(reinterpret_cast<const char*>(sqlite3_column_text(statement_, cnt)));
-
-                    buffer->get<std::string>(prop.name())
-                            .set(index, std::string(reinterpret_cast<const char*>(
-                                                        sqlite3_column_text(statement_, cnt))));
-                }
-                else
-                    logdbg << "SQLiteConnection: readRowIntoBuffer: string index " << index
-                           << " property '" << prop.name() << " is null";
-                break;
             case PropertyDataType::FLOAT:
                 if (sqlite3_column_type(statement_, cnt) != SQLITE_NULL)
                 {
@@ -427,7 +411,38 @@ void SQLiteConnection::readRowIntoBuffer(const PropertyList& list, unsigned int 
                     logdbg << "SQLiteConnection: readRowIntoBuffer: double index " << index
                            << " property '" << prop.name() << " is null";
                 break;
+            case PropertyDataType::STRING:
+                if (sqlite3_column_type(statement_, cnt) != SQLITE_NULL)
+                {
+                    logdbg << "SQLiteConnection: readRowIntoBuffer: string index " << index
+                           << " property '" << prop.name()
+                           << "' value "
+                           << std::string(reinterpret_cast<const char*>(sqlite3_column_text(statement_, cnt)));
 
+                    buffer->get<std::string>(prop.name())
+                            .set(index, std::string(reinterpret_cast<const char*>(
+                                                        sqlite3_column_text(statement_, cnt))));
+                }
+                else
+                    logdbg << "SQLiteConnection: readRowIntoBuffer: string index " << index
+                           << " property '" << prop.name() << " is null";
+                break;
+            case PropertyDataType::JSON:
+                if (sqlite3_column_type(statement_, cnt) != SQLITE_NULL)
+                {
+                    logdbg << "SQLiteConnection: readRowIntoBuffer: json index " << index
+                           << " property '" << prop.name()
+                           << "' value "
+                           << std::string(reinterpret_cast<const char*>(sqlite3_column_text(statement_, cnt)));
+
+                    buffer->get<nlohmann::json>(prop.name())
+                            .set(index, nlohmann::json::parse(std::string(reinterpret_cast<const char*>(
+                                                        sqlite3_column_text(statement_, cnt)))));
+                }
+                else
+                    logdbg << "SQLiteConnection: readRowIntoBuffer: string index " << index
+                           << " property '" << prop.name() << " is null";
+                break;
             default:
                 logerr << "MySQLppConnection: readRowIntoBuffer: unknown property type";
                 throw std::runtime_error(

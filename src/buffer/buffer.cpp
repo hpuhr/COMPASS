@@ -85,6 +85,7 @@ Buffer::~Buffer()
     getArrayListMap<float>().clear();
     getArrayListMap<double>().clear();
     getArrayListMap<string>().clear();
+    getArrayListMap<json>().clear();
 
     data_size_ = 0;
 
@@ -176,6 +177,11 @@ void Buffer::addProperty(string id, PropertyDataType type)
             getArrayListMap<string>()[id] = shared_ptr<NullableVector<string>>(
                 new NullableVector<string>(property, *this));
             break;
+        case PropertyDataType::JSON:
+            assert(getArrayListMap<json>().count(id) == 0);
+            getArrayListMap<json>()[id] = shared_ptr<NullableVector<json>>(
+                new NullableVector<json>(property, *this));
+            break;
         default:
             logerr << "Buffer: addProperty: unknown property type " << Property::asString(type);
             throw runtime_error("Buffer: addProperty: unknown property type " +
@@ -250,6 +256,11 @@ void Buffer::deleteProperty(const Property& property)
         remove<string> (property.name());
         assert (!has<string>(property.name()));
         break;
+    case PropertyDataType::JSON:
+        assert (has<json>(property.name()));
+        remove<json> (property.name());
+        assert (!has<json>(property.name()));
+        break;
     default:
         logerr << "Buffer: deleteProperty: unknown property type "
                    << Property::asString(property.dataType());
@@ -297,6 +308,9 @@ void Buffer::sortByProperty(const Property& property)
     case PropertyDataType::STRING:
         perm = get<string> (property.name()).sortPermutation();
         break;
+    case PropertyDataType::JSON:
+        perm = get<json> (property.name()).sortPermutation();
+        break;
     default:
         logerr << "Buffer: sortByProperty: unknown property type "
                    << Property::asString(property.dataType());
@@ -343,6 +357,9 @@ void Buffer::sortByProperty(const Property& property)
         case PropertyDataType::STRING:
             get<string> (prop_it.name()).sortByPermutation(perm);
             break;
+        case PropertyDataType::JSON:
+            get<json> (prop_it.name()).sortByPermutation(perm);
+            break;
         default:
             logerr << "Buffer: sortByProperty: unknown property type "
                        << Property::asString(property.dataType());
@@ -373,6 +390,7 @@ void Buffer::seizeBuffer(Buffer& org_buffer)
     seizeArrayListMap<float>(org_buffer);
     seizeArrayListMap<double>(org_buffer);
     seizeArrayListMap<string>(org_buffer);
+    seizeArrayListMap<json>(org_buffer);
 
     data_size_ += org_buffer.data_size_;
 
@@ -406,6 +424,8 @@ void Buffer::cutToSize(size_t size)
         it.second->cutToSize(size);
     for (auto& it : getArrayListMap<string>())
         it.second->cutToSize(size);
+    for (auto& it : getArrayListMap<json>())
+        it.second->cutToSize(size);
 
     data_size_ = size;
 }
@@ -436,6 +456,8 @@ void Buffer::cutUpToIndex(size_t index) // everything up to index is removed
             assert (it.second->size() <= data_size_);
         for (auto& it : getArrayListMap<string>())
             assert (it.second->size() <= data_size_);
+        for (auto& it : getArrayListMap<json>())
+            assert (it.second->size() <= data_size_);
 
         loginf << "Buffer: cutUpToIndex: index " << index << " data_size_ " << data_size_;
     }
@@ -459,6 +481,8 @@ void Buffer::cutUpToIndex(size_t index) // everything up to index is removed
     for (auto& it : getArrayListMap<double>())
         it.second->cutUpToIndex(index);
     for (auto& it : getArrayListMap<string>())
+        it.second->cutUpToIndex(index);
+    for (auto& it : getArrayListMap<json>())
         it.second->cutUpToIndex(index);
 
     data_size_ -= index+1;
@@ -486,6 +510,8 @@ void Buffer::cutUpToIndex(size_t index) // everything up to index is removed
         for (auto& it : getArrayListMap<double>())
             assert (it.second->size() <= data_size_);
         for (auto& it : getArrayListMap<string>())
+            assert (it.second->size() <= data_size_);
+        for (auto& it : getArrayListMap<json>())
             assert (it.second->size() <= data_size_);
     }
 }
@@ -516,6 +542,8 @@ void Buffer::removeIndexes(const std::vector<size_t>& indexes_to_remove)
             assert (it.second->size() <= data_size_);
         for (auto& it : getArrayListMap<string>())
             assert (it.second->size() <= data_size_);
+        for (auto& it : getArrayListMap<json>())
+            assert (it.second->size() <= data_size_);
 
         loginf << "Buffer: removeIndexes: indexes " << indexes_to_remove.size() << " data_size_ " << data_size_;
     }
@@ -542,6 +570,8 @@ void Buffer::removeIndexes(const std::vector<size_t>& indexes_to_remove)
             it.second->clearData();
         for (auto& it : getArrayListMap<string>())
             it.second->clearData();
+        for (auto& it : getArrayListMap<json>())
+            it.second->clearData();
     }
     else
     {
@@ -564,6 +594,8 @@ void Buffer::removeIndexes(const std::vector<size_t>& indexes_to_remove)
         for (auto& it : getArrayListMap<double>())
             it.second->removeIndexes(indexes_to_remove);
         for (auto& it : getArrayListMap<string>())
+            it.second->removeIndexes(indexes_to_remove);
+        for (auto& it : getArrayListMap<json>())
             it.second->removeIndexes(indexes_to_remove);
     }
 
@@ -592,6 +624,8 @@ void Buffer::removeIndexes(const std::vector<size_t>& indexes_to_remove)
         for (auto& it : getArrayListMap<double>())
             assert (it.second->size() <= data_size_);
         for (auto& it : getArrayListMap<string>())
+            assert (it.second->size() <= data_size_);
+        for (auto& it : getArrayListMap<json>())
             assert (it.second->size() <= data_size_);
     }
 }
@@ -643,6 +677,9 @@ bool Buffer::isNone(const Property& property, unsigned int row_cnt)
         case PropertyDataType::STRING:
             assert(getArrayListMap<string>().count(property.name()));
             return getArrayListMap<string>().at(property.name())->isNull(row_cnt);
+        case PropertyDataType::JSON:
+            assert(getArrayListMap<json>().count(property.name()));
+            return getArrayListMap<json>().at(property.name())->isNull(row_cnt);
         default:
             logerr << "Buffer: isNone: unknown property type "
                    << Property::asString(property.dataType());
@@ -758,6 +795,11 @@ void Buffer::transformVariables(dbContent::VariableSet& list, bool dbcol2dbovar)
                     rename<string>(current_var_name, transformed_var_name);
                     break;
                 }
+                case PropertyDataType::JSON:
+                {
+                    rename<json>(current_var_name, transformed_var_name);
+                    break;
+                }
                 default:
                     logerr << "Buffer: transformVariables: unknown property type "
                            << Property::asString(data_type);
@@ -834,6 +876,11 @@ shared_ptr<Buffer> Buffer::getPartialCopy(const PropertyList& partial_properties
                           << " size " << get<string>(prop.name()).size();
                 tmp_buffer->get<string>(prop.name()).copyData(get<string>(prop.name()));
                 break;
+            case PropertyDataType::JSON:
+                logdbg << "Buffer: getPartialCopy: adding JSON property " << prop.name()
+                          << " size " << get<json>(prop.name()).size();
+                tmp_buffer->get<json>(prop.name()).copyData(get<json>(prop.name()));
+                break;
             default:
                 logerr << "Buffer: getPartialCopy: unknown property type "
                        << Property::asString(prop.dataType());
@@ -883,6 +930,9 @@ nlohmann::json Buffer::asJSON()
             if (!it.second->isNull(cnt))
                 j[cnt][it.second->propertyName()] = it.second->get(cnt);
         for (auto& it : getArrayListMap<string>())
+            if (!it.second->isNull(cnt))
+                j[cnt][it.second->propertyName()] = it.second->get(cnt);
+        for (auto& it : getArrayListMap<json>())
             if (!it.second->isNull(cnt))
                 j[cnt][it.second->propertyName()] = it.second->get(cnt);
     }

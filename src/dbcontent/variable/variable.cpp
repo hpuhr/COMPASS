@@ -422,6 +422,10 @@ std::string Variable::getRepresentationStringFromValue(const std::string& value_
             throw std::invalid_argument(
                 "Variable: getRepresentationStringFromValue: representation of string variable"
                 " impossible");
+        case PropertyDataType::JSON:
+            throw std::invalid_argument(
+                "Variable: getRepresentationStringFromValue: representation of json variable"
+                " impossible");
         default:
             logerr << "Variable: getRepresentationStringFromValue:: unknown property type "
                    << Property::asString(data_type_);
@@ -564,6 +568,9 @@ std::string Variable::multiplyString(const std::string& value_str, double factor
         case PropertyDataType::STRING:
             throw std::invalid_argument(
                 "Variable: multiplyString: multiplication of string variable impossible");
+        case PropertyDataType::JSON:
+            throw std::invalid_argument(
+                "Variable: multiplyString: multiplication of json variable impossible");
         default:
             logerr << "Variable: multiplyString:: unknown property type "
                    << Property::asString(data_type_);
@@ -635,6 +642,9 @@ const std::string& Variable::getLargerValueString(const std::string& value_a_str
         case PropertyDataType::STRING:
             throw std::invalid_argument(
                 "Variable: getLargerValueString: operation on string variable impossible");
+        case PropertyDataType::JSON:
+            throw std::invalid_argument(
+                "Variable: getLargerValueString: operation on json variable impossible");
         default:
             logerr << "Variable: getLargerValueString:: unknown property type "
                    << Property::asString(data_type_);
@@ -702,6 +712,9 @@ const std::string& Variable::getSmallerValueString(const std::string& value_a_st
         case PropertyDataType::STRING:
             throw std::invalid_argument(
                 "Variable: getSmallerValueString: operation on string variable impossible");
+        case PropertyDataType::JSON:
+            throw std::invalid_argument(
+                "Variable: getSmallerValueString: operation on json variable impossible");
         default:
             logerr << "Variable: getSmallerValueString:: unknown property type "
                    << Property::asString(data_type_);

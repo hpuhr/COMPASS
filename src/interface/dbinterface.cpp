@@ -1465,10 +1465,14 @@ void DBInterface::insertBindStatementUpdateForCurrentIndex(shared_ptr<Buffer> bu
                                          buffer->get<double>(property.name()).get(row));
             break;
         case PropertyDataType::STRING:
-
             db_connection_->bindVariable(
                         index_cnt, buffer->get<string>(property.name()).get(row));
             break;
+        case PropertyDataType::JSON:
+            db_connection_->bindVariable(
+                        index_cnt, buffer->get<nlohmann::json>(property.name()).get(row).dump());
+            break;
+
         default:
             logerr << "Buffer: insertBindStatementUpdateForCurrentIndex: unknown property type "
                        << Property::asString(data_type);

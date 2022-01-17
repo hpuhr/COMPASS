@@ -30,6 +30,7 @@
 #include <string>
 
 using namespace std;
+using namespace nlohmann;
 
 namespace dbContent
 {
@@ -402,6 +403,16 @@ std::map<unsigned int, std::string> LabelDefinition::generateLabels(std::vector<
                 {
                     value_str = variable->getRepresentationStringFromValue(
                                 buffer->get<std::string>(db_col_name).getAsString(buffer_index));
+                }
+            }
+            else if (data_type == PropertyDataType::JSON)
+            {
+                assert(buffer->has<json>(db_col_name));
+                null = buffer->get<json>(db_col_name).isNull(buffer_index);
+                if (!null)
+                {
+                    value_str = variable->getRepresentationStringFromValue(
+                                buffer->get<json>(db_col_name).getAsString(buffer_index));
                 }
             }
             else

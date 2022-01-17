@@ -474,6 +474,9 @@ size_t row_cnt, bool debug) const;
 template bool JSONDataMapping::findAndSetValue(const nlohmann::json& j,
 NullableVector<std::string>& array_list,
 size_t row_cnt, bool debug) const;
+template bool JSONDataMapping::findAndSetValue(const nlohmann::json& j,
+NullableVector<nlohmann::json>& array_list,
+size_t row_cnt, bool debug) const;
 
 const nlohmann::json* JSONDataMapping::findKey(const nlohmann::json& j) const
 {

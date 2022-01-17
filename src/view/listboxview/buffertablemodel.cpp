@@ -348,6 +348,15 @@ QVariant BufferTableModel::data(const QModelIndex& index, int role) const
                     value_str = buffer_->get<std::string>(property_name).getAsString(buffer_index);
                 }
             }
+            else if (data_type == PropertyDataType::JSON)
+            {
+                assert(buffer_->has<nlohmann::json>(property_name));
+                null = buffer_->get<nlohmann::json>(property_name).isNull(buffer_index);
+                if (!null)
+                {
+                    value_str = buffer_->get<nlohmann::json>(property_name).getAsString(buffer_index);
+                }
+            }
             else
                 throw std::domain_error("BufferTableWidget: show: unknown property data type");
 

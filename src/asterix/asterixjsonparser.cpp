@@ -448,17 +448,18 @@ bool ASTERIXJSONParser::parseTargetReport(const nlohmann::json& tr, Buffer& buff
                        << " format '" << map_it->jsonValueFormat() << "'";
                 assert(buffer.has<std::string>(current_var_name));
 
-                //                if (buffer.dboName() == "Tracker" && current_var_name == "ground_bit")
-                //                {
-                //                    loginf << "ASTERIXJSONParser: parseTargetReport: string " << current_var_name
-                //                           << " format '" << map_it->jsonValueFormat() << "' mand " << mandatory_missing;
-
-                //                    mandatory_missing =
-                //                        map_it->findAndSetValue(tr, buffer.get<std::string>(current_var_name), row_cnt, true);
-                //                }
-                //                else
                 mandatory_missing =
                         map_it->findAndSetValue(tr, buffer.get<std::string>(current_var_name), row_cnt);
+
+                break;
+            }
+            case PropertyDataType::JSON:
+            {
+                logdbg << "ASTERIXJSONParser: parseTargetReport: json " << current_var_name
+                       << " format '" << map_it->jsonValueFormat() << "'";
+                assert(buffer.has<json>(current_var_name));
+                mandatory_missing =
+                        map_it->findAndSetValue(tr, buffer.get<json>(current_var_name), row_cnt);
 
                 break;
             }

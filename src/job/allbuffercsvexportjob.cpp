@@ -367,6 +367,21 @@ void AllBufferCSVExportJob::run()
                             buffer->get<std::string>(property_name).getAsString(buffer_index);
                     }
                 }
+                else if (data_type == PropertyDataType::JSON)
+                {
+                    if (!buffer->has<nlohmann::json>(property_name))
+                    {
+                        ss << ";";
+                        continue;
+                    }
+
+                    null = buffer->get<nlohmann::json>(property_name).isNull(buffer_index);
+                    if (!null)
+                    {
+                        value_str =
+                            buffer->get<nlohmann::json>(property_name).getAsString(buffer_index);
+                    }
+                }
                 else
                     throw std::domain_error(
                         "AllBufferCSVExportJob: run: unknown property data type");
