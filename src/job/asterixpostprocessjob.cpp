@@ -149,8 +149,8 @@ void ASTERIXPostprocessJob::doRadarPlotPositionCalculations()
         unsigned int buffer_size = buffer->size();
         assert(buffer_size);
 
-        assert (dbo_man.existsObject(dbo_name));
-        DBContent& db_object = dbo_man.object(dbo_name);
+        assert (dbo_man.existsDBContent(dbo_name));
+        DBContent& db_object = dbo_man.dbContent(dbo_name);
 
         assert (db_object.hasVariable(DBContent::meta_var_datasource_id_.name()));
         assert (db_object.hasVariable(DBContent::var_radar_range_.name()));

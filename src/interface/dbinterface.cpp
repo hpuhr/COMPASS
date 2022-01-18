@@ -377,7 +377,7 @@ unsigned int DBInterface::getMaxRecordNumber(DBContent& object)
 std::map<unsigned int, std::tuple<std::set<unsigned int>, std::tuple<bool, unsigned int, unsigned int>,
 std::tuple<bool, unsigned int, unsigned int>>> DBInterface::queryADSBInfo()
 {
-    DBContent& object = COMPASS::instance().dbContentManager().object("ADSB");
+    DBContent& object = COMPASS::instance().dbContentManager().dbContent("ADSB");
 
     assert(object.existsInDB());
 

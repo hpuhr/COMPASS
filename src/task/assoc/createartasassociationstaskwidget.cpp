@@ -55,7 +55,7 @@ CreateARTASAssociationsTaskWidget::CreateARTASAssociationsTaskWidget(
         // tracker data source
         grid->addWidget(new QLabel("CAT062 Data Source"), row_cnt, 0);
 
-        assert(COMPASS::instance().dbContentManager().existsObject("CAT062"));
+        assert(COMPASS::instance().dbContentManager().existsDBContent("CAT062"));
 
         ds_combo_ = new DBDataSourceComboBox();
         ds_combo_->showDSTypeOnly("CAT062");
@@ -245,7 +245,7 @@ void CreateARTASAssociationsTaskWidget::update()
 
     DBContentManager& object_man = COMPASS::instance().dbContentManager();
 
-    DBContent& track_object = object_man.object("CAT062");
+    DBContent& track_object = object_man.dbContent("CAT062");
 
     // tracker vats
     assert(ds_id_box_);

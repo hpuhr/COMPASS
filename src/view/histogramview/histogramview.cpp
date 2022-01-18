@@ -209,7 +209,7 @@ bool HistogramView::hasDataVar ()
     if (data_var_dbo_ == META_OBJECT_NAME)
         return COMPASS::instance().dbContentManager().existsMetaVariable(data_var_name_);
     else
-        return COMPASS::instance().dbContentManager().object(data_var_dbo_).hasVariable(data_var_name_);
+        return COMPASS::instance().dbContentManager().dbContent(data_var_dbo_).hasVariable(data_var_name_);
 }
 
 bool HistogramView::isDataVarMeta ()
@@ -221,9 +221,9 @@ Variable& HistogramView::dataVar()
 {
     assert (hasDataVar());
     assert (!isDataVarMeta());
-    assert (COMPASS::instance().dbContentManager().object(data_var_dbo_).hasVariable(data_var_name_));
+    assert (COMPASS::instance().dbContentManager().dbContent(data_var_dbo_).hasVariable(data_var_name_));
 
-    return COMPASS::instance().dbContentManager().object(data_var_dbo_).variable(data_var_name_);
+    return COMPASS::instance().dbContentManager().dbContent(data_var_dbo_).variable(data_var_name_);
 }
 
 void HistogramView::dataVar (Variable& var)

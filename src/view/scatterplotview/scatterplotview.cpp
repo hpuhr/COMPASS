@@ -226,7 +226,7 @@ bool ScatterPlotView::hasDataVarX ()
     if (data_var_x_dbo_ == META_OBJECT_NAME)
         return COMPASS::instance().dbContentManager().existsMetaVariable(data_var_x_name_);
     else
-        return COMPASS::instance().dbContentManager().object(data_var_x_dbo_).hasVariable(data_var_x_name_);
+        return COMPASS::instance().dbContentManager().dbContent(data_var_x_dbo_).hasVariable(data_var_x_name_);
 }
 
 bool ScatterPlotView::isDataVarXMeta ()
@@ -238,9 +238,9 @@ Variable& ScatterPlotView::dataVarX()
 {
     assert (hasDataVarX());
     assert (!isDataVarXMeta());
-    assert (COMPASS::instance().dbContentManager().object(data_var_x_dbo_).hasVariable(data_var_x_name_));
+    assert (COMPASS::instance().dbContentManager().dbContent(data_var_x_dbo_).hasVariable(data_var_x_name_));
 
-    return COMPASS::instance().dbContentManager().object(data_var_x_dbo_).variable(data_var_x_name_);
+    return COMPASS::instance().dbContentManager().dbContent(data_var_x_dbo_).variable(data_var_x_name_);
 }
 
 void ScatterPlotView::dataVarX (Variable& var)
@@ -297,7 +297,7 @@ bool ScatterPlotView::hasDataVarY ()
     if (data_var_y_dbo_ == META_OBJECT_NAME)
         return COMPASS::instance().dbContentManager().existsMetaVariable(data_var_y_name_);
     else
-        return COMPASS::instance().dbContentManager().object(data_var_y_dbo_).hasVariable(data_var_y_name_);
+        return COMPASS::instance().dbContentManager().dbContent(data_var_y_dbo_).hasVariable(data_var_y_name_);
 }
 
 bool ScatterPlotView::isDataVarYMeta ()
@@ -309,9 +309,9 @@ Variable& ScatterPlotView::dataVarY()
 {
     assert (hasDataVarY());
     assert (!isDataVarYMeta());
-    assert (COMPASS::instance().dbContentManager().object(data_var_y_dbo_).hasVariable(data_var_y_name_));
+    assert (COMPASS::instance().dbContentManager().dbContent(data_var_y_dbo_).hasVariable(data_var_y_name_));
 
-    return COMPASS::instance().dbContentManager().object(data_var_y_dbo_).variable(data_var_y_name_);
+    return COMPASS::instance().dbContentManager().dbContent(data_var_y_dbo_).variable(data_var_y_name_);
 }
 
 void ScatterPlotView::dataVarY (Variable& var)

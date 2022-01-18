@@ -149,11 +149,11 @@ void JSONObjectParser::initialize()
 
     DBContentManager& obj_man = COMPASS::instance().dbContentManager();
 
-    if (!obj_man.existsObject(db_content_name_))
+    if (!obj_man.existsDBContent(db_content_name_))
         logwrn << "JSONObjectParser: initialize: dbobject '" << db_content_name_
                << "' does not exist";
     else
-        db_object_ = &obj_man.object(db_content_name_);
+        db_object_ = &obj_man.dbContent(db_content_name_);
 
     assert(db_object_);
 

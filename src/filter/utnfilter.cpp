@@ -72,9 +72,9 @@ std::string UTNFilter::getConditionString(const std::string& dbo_name, bool& fir
     if (active_)
     {
         DBContentManager& obj_man = COMPASS::instance().dbContentManager();
-        assert (obj_man.existsObject(dbo_name));
+        assert (obj_man.existsDBContent(dbo_name));
 
-        DBContent& object = obj_man.object(dbo_name);
+        DBContent& object = obj_man.dbContent(dbo_name);
 
         TODO_ASSERT
 

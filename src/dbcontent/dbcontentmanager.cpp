@@ -104,7 +104,7 @@ DBContentManager::DBContentManager(const std::string& class_id, const std::strin
 
     createSubConfigurables();
 
-    for (auto& dbo_it : objects_)
+    for (auto& dbo_it : dbcontent_)
         dbo_it.second->checkLabelDefinitions();
 
     qRegisterMetaType<std::shared_ptr<Buffer>>("std::shared_ptr<Buffer>"); // for dbo read job
@@ -116,9 +116,9 @@ DBContentManager::~DBContentManager()
 {
     data_.clear();
 
-    for (auto it : objects_)
+    for (auto it : dbcontent_)
         delete it.second;
-    objects_.clear();
+    dbcontent_.clear();
 
     meta_variables_.clear();
 
@@ -135,8 +135,8 @@ void DBContentManager::generateSubConfigurable(const std::string& class_id,
     {
         DBContent* object = new DBContent(compass_, class_id, instance_id, this);
         loginf << "DBContentManager: generateSubConfigurable: adding content " << object->name();
-        assert(!objects_.count(object->name()));
-        objects_[object->name()] = object;
+        assert(!dbcontent_.count(object->name()));
+        dbcontent_[object->name()] = object;
     }
     else if (class_id.compare("MetaVariable") == 0)
     {
@@ -167,35 +167,35 @@ void DBContentManager::checkSubConfigurables()
     // nothing to do, must be defined in configuration
 }
 
-bool DBContentManager::existsObject(const std::string& dbo_name)
+bool DBContentManager::existsDBContent(const std::string& dbcontent_name)
 {
-    logdbg << "DBContentManager: existsObject: '" << dbo_name << "'";
+    logdbg << "DBContentManager: existsDBContent: '" << dbcontent_name << "'";
 
-    return (objects_.find(dbo_name) != objects_.end());
+    return (dbcontent_.find(dbcontent_name) != dbcontent_.end());
 }
 
-DBContent& DBContentManager::object(const std::string& dbo_name)
+DBContent& DBContentManager::dbContent(const std::string& dbcontent_name)
 {
-    logdbg << "DBContentManager: object: name " << dbo_name;
+    logdbg << "DBContentManager: dbContent: name " << dbcontent_name;
 
-    assert(objects_.find(dbo_name) != objects_.end());
+    assert(dbcontent_.find(dbcontent_name) != dbcontent_.end());
 
-    return *objects_.at(dbo_name);
+    return *dbcontent_.at(dbcontent_name);
 }
 
-void DBContentManager::deleteObject(const std::string& dbo_name)
+void DBContentManager::deleteDBContent(const std::string& dbcontent_name)
 {
-    logdbg << "DBContentManager: deleteObject: name " << dbo_name;
-    assert(existsObject(dbo_name));
-    delete objects_.at(dbo_name);
-    objects_.erase(dbo_name);
+    logdbg << "DBContentManager: deleteDBContent: name " << dbcontent_name;
+    assert(existsDBContent(dbcontent_name));
+    delete dbcontent_.at(dbcontent_name);
+    dbcontent_.erase(dbcontent_name);
 
     emit dbObjectsChangedSignal();
 }
 
 bool DBContentManager::hasData()
 {
-    for (auto& object_it : objects_)
+    for (auto& object_it : dbcontent_)
         if (object_it.second->hasData())
             return true;
 
@@ -318,8 +318,8 @@ void DBContentManager::useOrderAscending(bool use_order_ascending)
 
 bool DBContentManager::hasOrderVariable()
 {
-    if (existsObject(order_variable_dbcontent_name_))
-        if (object(order_variable_dbcontent_name_).hasVariable(order_variable_name_))
+    if (existsDBContent(order_variable_dbcontent_name_))
+        if (dbContent(order_variable_dbcontent_name_).hasVariable(order_variable_name_))
             return true;
     return false;
 }
@@ -327,7 +327,7 @@ bool DBContentManager::hasOrderVariable()
 Variable& DBContentManager::orderVariable()
 {
     assert(hasOrderVariable());
-    return object(order_variable_dbcontent_name_).variable(order_variable_name_);
+    return dbContent(order_variable_dbcontent_name_).variable(order_variable_name_);
 }
 
 void DBContentManager::orderVariable(Variable& variable)
@@ -429,7 +429,7 @@ void DBContentManager::load()
     EvaluationManager& eval_man = COMPASS::instance().evaluationManager();
     ViewManager& view_man = COMPASS::instance().viewManager();
 
-    for (auto& object : objects_)
+    for (auto& object : dbcontent_)
     {
         loginf << "DBContentManager: loadSlot: object " << object.first
                << " loadable " << object.second->loadable()
@@ -531,7 +531,7 @@ void DBContentManager::quitLoading()
 {
     loginf << "DBContentManager: quitLoading";
 
-    for (auto& object : objects_)
+    for (auto& object : dbcontent_)
         object.second->quitLoading();
 
     load_in_progress_ = true;  // TODO
@@ -544,7 +544,7 @@ void DBContentManager::databaseOpenedSlot()
     loadDBDataSources();
     loadMaxRecordNumber();
 
-    for (auto& object : objects_)
+    for (auto& object : dbcontent_)
         object.second->databaseOpenedSlot();
 
     if (load_widget_)
@@ -558,7 +558,7 @@ void DBContentManager::databaseClosedSlot()
     max_rec_num_ = 0;
     has_max_rec_num_ = false;
 
-    for (auto& object : objects_)
+    for (auto& object : dbcontent_)
         object.second->databaseClosedSlot();
 
     if (load_widget_)
@@ -608,7 +608,7 @@ void DBContentManager::loadingDone(DBContent& object)
 {
     bool done = true;
 
-    for (auto& object_it : objects_)
+    for (auto& object_it : dbcontent_)
     {
         if (object_it.second->isLoading())
         {
@@ -769,7 +769,7 @@ void DBContentManager::setAssociationsDataSource(const std::string& dbo, const s
 
 //    has_associations_ = true;
 //    associations_dbo_ = dbo;
-//    assert(existsObject(associations_dbo_));
+//    assert(existsDBContent(associations_dbo_));
 //    associations_ds_ = data_source_name;
 
 //    if (load_widget_)
@@ -818,7 +818,7 @@ std::string DBContentManager::associationsDataSourceName() const { return associ
 
 bool DBContentManager::isOtherDBObjectPostProcessing(DBContent& object)
 {
-    for (auto& dbo_it : objects_)
+    for (auto& dbo_it : dbcontent_)
         if (dbo_it.second != &object && dbo_it.second->isPostProcessing())
             return true;
 
@@ -844,8 +844,8 @@ void DBContentManager::insertData(std::map<std::string, std::shared_ptr<Buffer>>
 
     for (auto& buf_it : insert_data_)
     {
-        assert(existsObject(buf_it.first));
-        object(buf_it.first).insertData(buf_it.second);
+        assert(existsDBContent(buf_it.first));
+        dbContent(buf_it.first).insertData(buf_it.second);
     }
 }
 
@@ -853,7 +853,7 @@ void DBContentManager::insertDone(DBContent& object)
 {
     bool done = true;
 
-    for (auto& object_it : objects_)
+    for (auto& object_it : dbcontent_)
     {
         if (object_it.second->isInserting())
         {
@@ -1163,7 +1163,7 @@ void DBContentManager::loadMaxRecordNumber()
 
     max_rec_num_ = 0;
 
-    for (auto& obj_it : objects_)
+    for (auto& obj_it : dbcontent_)
     {
         if (obj_it.second->existsInDB())
             max_rec_num_ = max(COMPASS::instance().interface().getMaxRecordNumber(*obj_it.second), max_rec_num_);

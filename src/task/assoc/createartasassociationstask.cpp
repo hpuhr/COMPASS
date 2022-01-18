@@ -149,9 +149,9 @@ bool CreateARTASAssociationsTask::checkPrerequisites()
     DBContentManager& object_man = COMPASS::instance().dbContentManager();
 
     logdbg << "CreateARTASAssociationsTask: checkPrerequisites: tracker hashes";
-    assert (object_man.existsObject("Tracker"));
+    assert (object_man.existsDBContent("Tracker"));
 
-    DBContent& tracker_obj = object_man.object("Tracker");
+    DBContent& tracker_obj = object_man.dbContent("Tracker");
     if (!tracker_obj.hasData()) // check if tracker data exists
         return false;
 
@@ -195,12 +195,12 @@ bool CreateARTASAssociationsTask::canRun()
 
             DBContentManager& object_man = COMPASS::instance().dbContentManager();
 
-    logdbg << "CreateARTASAssociationsTask: canRun: tracker " << object_man.existsObject("Tracker");
+    logdbg << "CreateARTASAssociationsTask: canRun: tracker " << object_man.existsDBContent("Tracker");
 
-    if (!object_man.existsObject("Tracker"))
+    if (!object_man.existsDBContent("Tracker"))
         return false;
 
-    DBContent& tracker_object = object_man.object("Tracker");
+    DBContent& tracker_object = object_man.dbContent("Tracker");
 
     // tracker stuff
     logdbg << "CreateARTASAssociationsTask: canRun: tracker loadable " << tracker_object.loadable();
@@ -323,7 +323,7 @@ void CreateARTASAssociationsTask::run()
 
                 if (dbo_it.first == "Tracker")
         {
-            DBContent& tracker_object = object_man.object("Tracker");
+            DBContent& tracker_object = object_man.dbContent("Tracker");
 
             bool ds_found{false};
             int ds_id{-1};
@@ -724,7 +724,7 @@ void CreateARTASAssociationsTask::markTrackCoastingAssociationsDubious(bool valu
 void CreateARTASAssociationsTask::checkAndSetVariable(std::string& name_str, Variable** var)
 {
     DBContentManager& object_man = COMPASS::instance().dbContentManager();
-    DBContent& object = object_man.object("Tracker");
+    DBContent& object = object_man.dbContent("Tracker");
 
     if (!object.hasVariable(name_str))
     {

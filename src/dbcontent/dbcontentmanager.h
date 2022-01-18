@@ -76,15 +76,15 @@ public:
     virtual void generateSubConfigurable(const std::string& class_id,
                                          const std::string& instance_id);
 
-    bool existsObject(const std::string& dbo_name);
-    DBContent& object(const std::string& dbo_name);
-    void deleteObject(const std::string& dbo_name);
+    bool existsDBContent(const std::string& dbcontent_name);
+    DBContent& dbContent(const std::string& dbcontent_name);
+    void deleteDBContent(const std::string& dbcontent_name);
     bool hasData();
 
     using DBObjectIterator = typename std::map<std::string, DBContent*>::iterator;
-    DBObjectIterator begin() { return objects_.begin(); }
-    DBObjectIterator end() { return objects_.end(); }
-    size_t size() { return objects_.size(); }
+    DBObjectIterator begin() { return dbcontent_.begin(); }
+    DBObjectIterator end() { return dbcontent_.end(); }
+    size_t size() { return dbcontent_.size(); }
 
     bool existsMetaVariable(const std::string& var_name);
     dbContent::MetaVariable& metaVariable(const std::string& var_name);
@@ -198,7 +198,7 @@ protected:
     bool insert_in_progress_{false};
 
     /// Container with all DBOs (DBO name -> DBO pointer)
-    std::map<std::string, DBContent*> objects_;
+    std::map<std::string, DBContent*> dbcontent_;
     std::vector<std::unique_ptr<dbContent::MetaVariable>> meta_variables_;
 
     std::vector<std::unique_ptr<dbContent::ConfigurationDataSource>> config_data_sources_;

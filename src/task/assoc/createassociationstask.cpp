@@ -148,7 +148,7 @@ bool CreateAssociationsTask::checkPrerequisites()
     DBContentManager& object_man = COMPASS::instance().dbContentManager();
 
     logdbg << "CreateAssociationsTask: checkPrerequisites: tracker hashes";
-    assert (object_man.existsObject("Tracker"));
+    assert (object_man.existsDBContent("Tracker"));
 
     if (!object_man.hasData())
         return false;
@@ -171,7 +171,7 @@ bool CreateAssociationsTask::canRun()
 {
     DBContentManager& object_man = COMPASS::instance().dbContentManager();
 
-    logdbg << "CreateAssociationsTask: canRun: tracker " << object_man.existsObject("Tracker");
+    logdbg << "CreateAssociationsTask: canRun: tracker " << object_man.existsDBContent("Tracker");
 
     // meta var stuff
     logdbg << "CreateAssociationsTask: canRun: meta vars";

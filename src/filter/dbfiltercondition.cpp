@@ -242,10 +242,10 @@ bool DBFilterCondition::hasVariable (const std::string& dbo_name)
         if (dbo_name != variable_dbo_name_)
             return false;
 
-        if (!dbo_man.existsObject(variable_dbo_name_))
+        if (!dbo_man.existsDBContent(variable_dbo_name_))
             return false;
 
-        return dbo_man.object(variable_dbo_name_).hasVariable(variable_name_);
+        return dbo_man.dbContent(variable_dbo_name_).hasVariable(variable_name_);
     }
 }
 
@@ -259,7 +259,7 @@ dbContent::Variable& DBFilterCondition::variable (const std::string& dbo_name)
     if (variable_dbo_name_ == META_OBJECT_NAME)
         return dbo_man.metaVariable(variable_name_).getFor(dbo_name);
     else
-         return dbo_man.object(variable_dbo_name_).variable(variable_name_);
+         return dbo_man.dbContent(variable_dbo_name_).variable(variable_name_);
 }
 
 

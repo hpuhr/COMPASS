@@ -214,7 +214,7 @@ bool GPSTrailImportTask::checkPrerequisites()
     if (COMPASS::instance().interface().hasProperty(DONE_PROPERTY_NAME))
         done_ = COMPASS::instance().interface().getProperty(DONE_PROPERTY_NAME) == "1";
 
-    if (!COMPASS::instance().dbContentManager().existsObject("RefTraj"))
+    if (!COMPASS::instance().dbContentManager().existsDBContent("RefTraj"))
         return false;
 
     return true;
@@ -511,9 +511,9 @@ void GPSTrailImportTask::run()
 
     DBContentManager& obj_man = COMPASS::instance().dbContentManager();
 
-    assert (obj_man.existsObject("RefTraj"));
+    assert (obj_man.existsDBContent("RefTraj"));
 
-    DBContent& reftraj_obj = obj_man.object("RefTraj");
+    DBContent& reftraj_obj = obj_man.dbContent("RefTraj");
 
     assert (reftraj_obj.hasVariable("sac"));
     assert (reftraj_obj.hasVariable("sic"));

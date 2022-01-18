@@ -364,7 +364,7 @@ void CreateARTASAssociationsJob::createARTASAssociations()
     loginf << "CreateARTASAssociationsJob: createARTASAssociations";
 
     DBContentManager& object_man = COMPASS::instance().dbContentManager();
-    DBContent& tracker_object = object_man.object(tracker_dbo_name_);
+    DBContent& tracker_object = object_man.dbContent(tracker_dbo_name_);
 
     TODO_ASSERT
 

@@ -654,7 +654,7 @@ void JSONImportTask::insertData(std::map<std::string, std::shared_ptr<Buffer>> j
                << " num prop " << buffer->properties().size();
         //buffer->properties().print();
 
-        assert(object_manager.existsObject(dbo_name));
+        assert(object_manager.existsDBContent(dbo_name));
         DBObject& db_object = object_manager.object(dbo_name);
 
         ++insert_active_;

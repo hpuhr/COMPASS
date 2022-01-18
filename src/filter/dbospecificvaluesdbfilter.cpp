@@ -40,11 +40,11 @@ DBOSpecificValuesDBFilter::DBOSpecificValuesDBFilter(const std::string& class_id
     registerParameter("condition_operator", &condition_operator_, "");
 
     // dbobject
-    if (!COMPASS::instance().dbContentManager().existsObject(dbo_name_))
+    if (!COMPASS::instance().dbContentManager().existsDBContent(dbo_name_))
         throw std::invalid_argument("DataSourcesFilter: DataSourcesFilter: instance " +
                                     instance_id + " has non-existing object " + dbo_name_);
 
-    object_ = &COMPASS::instance().dbContentManager().object(dbo_name_);
+    object_ = &COMPASS::instance().dbContentManager().dbContent(dbo_name_);
     assert (object_);
 
     TODO_ASSERT

@@ -206,7 +206,7 @@ void EvaluationManager::loadData ()
     DBContentManager& object_man = COMPASS::instance().dbContentManager();
 
     // load adsb mops versions in a hacky way
-    if (object_man.object("ADSB").hasData() && !has_adsb_info_)
+    if (object_man.dbContent("ADSB").hasData() && !has_adsb_info_)
     {
         adsb_info_ = COMPASS::instance().interface().queryADSBInfo();
         has_adsb_info_ = true;
@@ -422,8 +422,8 @@ void EvaluationManager::loadData ()
 
     // reference data
     {
-        assert (object_man.existsObject(dbo_name_ref_));
-        DBContent& dbo_ref = object_man.object(dbo_name_ref_);
+        assert (object_man.existsDBContent(dbo_name_ref_));
+        DBContent& dbo_ref = object_man.dbContent(dbo_name_ref_);
 
         TODO_ASSERT
 //        connect(&dbo_ref, &DBObject::newDataSignal, this, &EvaluationManager::newDataSlot);
@@ -434,8 +434,8 @@ void EvaluationManager::loadData ()
 
     if (dbo_name_ref_ != dbo_name_tst_) // otherwise already connected
     {
-        assert (object_man.existsObject(dbo_name_tst_));
-        DBContent& dbo_tst = object_man.object(dbo_name_tst_);
+        assert (object_man.existsDBContent(dbo_name_tst_));
+        DBContent& dbo_tst = object_man.dbContent(dbo_name_tst_);
 
         TODO_ASSERT
 
@@ -673,7 +673,7 @@ void EvaluationManager::addVariables (const std::string dbo_name, dbContent::Var
         read_set.add(object_man.metaVariable("modec_v").getFor(dbo_name));
 
     if (dbo_name_ref_ == dbo_name && dbo_name_ref_ == "Tracker")
-        read_set.add(object_man.object("Tracker").variable("tracked_alt_baro_ft"));
+        read_set.add(object_man.dbContent("Tracker").variable("tracked_alt_baro_ft"));
 
     // m3a
     read_set.add(object_man.metaVariable("mode3a_code").getFor(dbo_name));
@@ -687,7 +687,7 @@ void EvaluationManager::addVariables (const std::string dbo_name, dbContent::Var
     if (object_man.metaVariable("track_num").existsIn(dbo_name))
         read_set.add(object_man.metaVariable("track_num").getFor(dbo_name));
 
-    DBContent& db_object = object_man.object(dbo_name);
+    DBContent& db_object = object_man.dbContent(dbo_name);
 
     // ground bit
     if (object_man.metaVariable("ground_bit").existsIn(dbo_name))
@@ -1125,7 +1125,7 @@ bool EvaluationManager::hasValidReferenceDBO ()
     if (!dbo_name_ref_.size())
         return false;
 
-    return COMPASS::instance().dbContentManager().existsObject(dbo_name_ref_);
+    return COMPASS::instance().dbContentManager().existsDBContent(dbo_name_ref_);
 }
 
 
@@ -1159,7 +1159,7 @@ bool EvaluationManager::hasValidTestDBO ()
     if (!dbo_name_tst_.size())
         return false;
 
-    return COMPASS::instance().dbContentManager().existsObject(dbo_name_tst_);
+    return COMPASS::instance().dbContentManager().existsDBContent(dbo_name_tst_);
 }
 
 std::set<int> EvaluationManager::activeDataSourcesTst()
@@ -1350,7 +1350,7 @@ void EvaluationManager::updateReferenceDBO()
     if (!hasValidReferenceDBO())
         return;
 
-    DBContent& object = COMPASS::instance().dbContentManager().object(dbo_name_ref_);
+    DBContent& object = COMPASS::instance().dbContentManager().dbContent(dbo_name_ref_);
 
     return;
 
@@ -1433,7 +1433,7 @@ void EvaluationManager::updateTestDBO()
 
     return;
 
-    DBContent& object = COMPASS::instance().dbContentManager().object(dbo_name_tst_);
+    DBContent& object = COMPASS::instance().dbContentManager().dbContent(dbo_name_tst_);
 
     TODO_ASSERT
 
@@ -1452,7 +1452,7 @@ void EvaluationManager::updateTestDataSources()
 
     return;
 
-    DBContent& object = COMPASS::instance().dbContentManager().object(dbo_name_tst_);
+    DBContent& object = COMPASS::instance().dbContentManager().dbContent(dbo_name_tst_);
 
     TODO_ASSERT
 

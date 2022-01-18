@@ -194,7 +194,7 @@ DBOEditDataSourceActionOptionsCollection ManageDataSourcesTask::getSyncOptionsFr
 {
     DBOEditDataSourceActionOptionsCollection options_collection;
 
-    assert(COMPASS::instance().objectManager().existsObject(dbo_name));
+    assert(COMPASS::instance().objectManager().existsDBContent(dbo_name));
 
     const std::map<int, DBODataSource>& db_data_sources =
         COMPASS::instance().objectManager().object(dbo_name).dataSources();
@@ -215,7 +215,7 @@ DBOEditDataSourceActionOptionsCollection ManageDataSourcesTask::getSyncOptionsFr
 {
     DBOEditDataSourceActionOptionsCollection options_collection;
 
-    assert(COMPASS::instance().objectManager().existsObject(dbo_name));
+    assert(COMPASS::instance().objectManager().existsDBContent(dbo_name));
 
     for (auto& ds_it : stored_data_sources_[dbo_name])
     {
@@ -232,7 +232,7 @@ DBOEditDataSourcesWidget* ManageDataSourcesTask::editDataSourcesWidget(const std
 {
     if (!edit_ds_widgets_[dbo_name])
     {
-        assert(COMPASS::instance().objectManager().existsObject(dbo_name));
+        assert(COMPASS::instance().objectManager().existsDBContent(dbo_name));
 
         edit_ds_widgets_[dbo_name].reset(new DBOEditDataSourcesWidget(
             *this, COMPASS::instance().objectManager().object(dbo_name)));

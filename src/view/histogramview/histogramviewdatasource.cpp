@@ -155,8 +155,8 @@ bool HistogramViewDataSource::addTemporaryVariable (const std::string& dbo_name,
     }
     else
     {
-        assert (obj_man.existsObject(dbo_name));
-        DBContent& obj = obj_man.object(dbo_name);
+        assert (obj_man.existsDBContent(dbo_name));
+        DBContent& obj = obj_man.dbContent(dbo_name);
 
         assert (obj.hasVariable(var_name));
         Variable& var = obj.variable(var_name);
@@ -184,8 +184,8 @@ void HistogramViewDataSource::removeTemporaryVariable (const std::string& dbo_na
     }
     else
     {
-        assert (obj_man.existsObject(dbo_name));
-        DBContent& obj = obj_man.object(dbo_name);
+        assert (obj_man.existsDBContent(dbo_name));
+        DBContent& obj = obj_man.dbContent(dbo_name);
 
         assert (obj.hasVariable(var_name));
         Variable& var = obj.variable(var_name);

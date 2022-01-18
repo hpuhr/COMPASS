@@ -188,7 +188,7 @@ void CreateAssociationsJob::createTargetReports()
     for (auto& buf_it : buffers_) // dbo name, buffer
     {
         string dbo_name = buf_it.first;
-        DBContent& dbo = object_man.object(dbo_name);
+        DBContent& dbo = object_man.dbContent(dbo_name);
 
         shared_ptr<Buffer> buffer = buf_it.second;
         size_t buffer_size = buffer->size();
@@ -738,7 +738,7 @@ void CreateAssociationsJob::createAssociations()
 
 //    for (auto& dbo_it : target_reports_)
 //    {
-//        assert (object_man.existsObject(dbo_it.first));
+//        assert (object_man.existsDBContent(dbo_it.first));
 //        DBContent& dbo = object_man.object(dbo_it.first);
 
 //        for (auto& ds_it : dbo_it.second) // ds_id -> trs

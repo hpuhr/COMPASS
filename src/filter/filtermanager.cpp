@@ -171,13 +171,13 @@ void FilterManager::generateSubConfigurable(const std::string& class_id,
 
 bool FilterManager::checkDBObject (const std::string& dbo_name)
 {
-    if (!COMPASS::instance().dbContentManager().existsObject(dbo_name))
+    if (!COMPASS::instance().dbContentManager().existsDBContent(dbo_name))
     {
         loginf << "FilterManager: checkDBObject: failed because of non-existing dbobject '" << dbo_name << "'";
         return false;
     }
 
-    DBContent& object = COMPASS::instance().dbContentManager().object(dbo_name);
+    DBContent& object = COMPASS::instance().dbContentManager().dbContent(dbo_name);
 
     if (!object.existsInDB())
     {
@@ -214,7 +214,7 @@ void FilterManager::checkSubConfigurables()
 std::string FilterManager::getSQLCondition(const std::string& dbo_name,
                                            std::vector<dbContent::Variable*>& filtered_variables)
 {
-    assert(COMPASS::instance().dbContentManager().object(dbo_name).loadable());
+    assert(COMPASS::instance().dbContentManager().dbContent(dbo_name).loadable());
 
     std::stringstream ss;
 

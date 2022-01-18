@@ -159,9 +159,9 @@ void VariableOrderedSetWidget::triggerSlot(QAction* action)
     }
     else
     {
-        assert(manager.existsObject(obj_name));
-        assert(manager.object(obj_name).hasVariable(var_name));
-        set_.add(manager.object(obj_name).variable(var_name));
+        assert(manager.existsDBContent(obj_name));
+        assert(manager.dbContent(obj_name).hasVariable(var_name));
+        set_.add(manager.dbContent(obj_name).variable(var_name));
     }
 }
 
@@ -237,9 +237,9 @@ void VariableOrderedSetWidget::updateVariableListSlot()
         }
         else
         {
-            assert(manager.existsObject(def->dboName()));
-            assert(manager.object(def->dboName()).hasVariable(def->variableName()));
-            tooltip = manager.object(def->dboName()).variable(def->variableName()).description();
+            assert(manager.existsDBContent(def->dboName()));
+            assert(manager.dbContent(def->dboName()).hasVariable(def->variableName()));
+            tooltip = manager.dbContent(def->dboName()).variable(def->variableName()).description();
         }
 
         QListWidgetItem* item = new QListWidgetItem((def->dboName() + ", " + def->variableName()).c_str());

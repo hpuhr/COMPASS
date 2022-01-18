@@ -226,13 +226,13 @@ QVariant AllBufferTableModel::data(const QModelIndex& index, int role) const
             if (dbo_name != variable_dbo_name)  // check if other dbo
                 return QString();
 
-            assert(manager.existsObject(dbo_name));
-            assert(manager.object(dbo_name).hasVariable(variable_name));
+            assert(manager.existsDBContent(dbo_name));
+            assert(manager.dbContent(dbo_name).hasVariable(variable_name));
         }
 
         dbContent::Variable& variable = (variable_dbo_name == META_OBJECT_NAME)
                                     ? manager.metaVariable(variable_name).getFor(dbo_name)
-                                    : manager.object(dbo_name).variable(variable_name);
+                                    : manager.dbContent(dbo_name).variable(variable_name);
         PropertyDataType data_type = variable.dataType();
 
         value_str = NULL_STRING;
