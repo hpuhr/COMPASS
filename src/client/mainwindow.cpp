@@ -28,7 +28,6 @@
 #include "filtermanager.h"
 #include "filtermanagerwidget.h"
 #include "global.h"
-//#include "jobmanager.h"
 #include "logger.h"
 #include "stringconv.h"
 #include "taskmanager.h"
@@ -244,6 +243,14 @@ void MainWindow::createMenus ()
     connect(quit_act, &QAction::triggered, this, &MainWindow::quitSlot);
     file_menu->addAction(quit_act);
 
+    // configuration menu
+    QMenu* config_menu = menuBar()->addMenu(tr("&Configuration"));
+
+    // db operations
+    QAction* meta_action = new QAction(tr("Meta Variables"));
+    meta_action->setStatusTip(tr("Configure Meta Variables"));
+    connect(meta_action, &QAction::triggered, this, &MainWindow::configureMetaVariablesSlot);
+    config_menu->addAction(meta_action);
 
     // import menu
 
@@ -263,14 +270,14 @@ void MainWindow::createMenus ()
     connect(import_ast_net_action, &QAction::triggered, this, &MainWindow::importAsterixFromNetworkSlot);
     import_menu_->addAction(import_ast_net_action);
 
-    // configuration
-    QMenu* config_menu = menuBar()->addMenu(tr("&Configuration"));
+    // process menu
 
-    // db operations
-    QAction* meta_action = new QAction(tr("Meta Variables"));
-    meta_action->setStatusTip(tr("Configure Meta Variables"));
-    connect(meta_action, &QAction::triggered, this, &MainWindow::configureMetaVariablesSlot);
-    config_menu->addAction(meta_action);
+    process_menu_ = menuBar()->addMenu(tr("&Process"));
+
+    QAction* assoc_artas_action = new QAction(tr("Calculate Associations from ARTAS"));
+    assoc_artas_action->setStatusTip(tr("Create Unique Targets based on ARTAS TRI information"));
+    connect(assoc_artas_action, &QAction::triggered, this, &MainWindow::calculateAssociationsARTASSlot);
+    process_menu_->addAction(assoc_artas_action);
 }
 
 void MainWindow::updateMenus()
@@ -1155,6 +1162,11 @@ void MainWindow::importAsterixFromNetworkSlot()
     COMPASS::instance().taskManager().asterixImporterTask().importNetwork();
 
     COMPASS::instance().taskManager().asterixImporterTask().dialog()->show();
+}
+
+void MainWindow::calculateAssociationsARTASSlot()
+{
+    loginf << "MainWindow: calculateAssociationsARTASSlot";
 }
 
 void MainWindow::configureMetaVariablesSlot()

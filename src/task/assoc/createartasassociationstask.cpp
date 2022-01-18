@@ -96,22 +96,6 @@ CreateARTASAssociationsTask::CreateARTASAssociationsTask(const std::string& clas
 
 CreateARTASAssociationsTask::~CreateARTASAssociationsTask() {}
 
-TaskWidget* CreateARTASAssociationsTask::widget()
-{
-    if (!widget_)
-    {
-        widget_.reset(new CreateARTASAssociationsTaskWidget(*this));
-
-        connect(&task_manager_, &TaskManager::expertModeChangedSignal, widget_.get(),
-                &CreateARTASAssociationsTaskWidget::expertModeChangedSlot);
-    }
-
-    assert(widget_);
-    return widget_.get();
-}
-
-void CreateARTASAssociationsTask::deleteWidget() { widget_.reset(nullptr); }
-
 bool CreateARTASAssociationsTask::checkPrerequisites()
 {
     logdbg << "CreateARTASAssociationsTask: checkPrerequisites: ready "

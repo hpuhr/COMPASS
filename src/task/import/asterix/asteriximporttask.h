@@ -39,7 +39,6 @@
 
 class TaskManager;
 
-class ASTERIXImportTaskWidget;
 class ASTERIXCategoryConfig;
 class ASTERIXStatusDialog;
 class ASTERIXImportTaskDialog;

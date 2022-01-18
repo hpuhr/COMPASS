@@ -30,6 +30,7 @@
 #include "boost/date_time/posix_time/posix_time.hpp"
 
 class TaskManager;
+class CreateARTASAssociationsTaskDialog;
 class CreateARTASAssociationsTaskWidget;
 
 class DBContent;
@@ -60,9 +61,6 @@ public:
     CreateARTASAssociationsTask(const std::string& class_id, const std::string& instance_id,
                                 TaskManager& task_manager);
     virtual ~CreateARTASAssociationsTask();
-
-    TaskWidget* widget();
-    virtual void deleteWidget();
 
     std::string currentDataSourceName() const;
     void currentDataSourceName(const std::string& currentDataSourceName);
@@ -193,8 +191,6 @@ protected:
 
     bool ignore_track_coasting_associations_{false};
     bool mark_track_coasting_associations_dubious_{false};
-
-    std::unique_ptr<CreateARTASAssociationsTaskWidget> widget_;
 
     bool save_associations_{true};
 

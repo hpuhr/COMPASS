@@ -59,11 +59,13 @@ private slots:
     void livePauseSlot();
     void liveStopSlot();
 
+    void configureMetaVariablesSlot();
+
     void importAsterixRecordingSlot();
     void importRecentAsterixRecordingSlot();
     void importAsterixFromNetworkSlot();
 
-    void configureMetaVariablesSlot();
+    void calculateAssociationsARTASSlot();
 
     void quitRequestedSlot();
     void showAddViewMenuSlot();
@@ -141,6 +143,9 @@ protected:
     QMenu* import_menu_ {nullptr};
 
     QMenu* import_recent_asterix_menu_ {nullptr};
+
+    // process menu
+    QMenu* process_menu_ {nullptr};
 
     bool loading_{false};
 
