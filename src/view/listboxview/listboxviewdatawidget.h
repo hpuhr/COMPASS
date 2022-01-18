@@ -48,7 +48,7 @@ class ListBoxViewDataWidget : public QWidget
   public slots:
     void loadingStartedSlot();
     /// @brief Called when new result Buffer was delivered
-    void updateDataSlot(DBContent& object, std::shared_ptr<Buffer> buffer);
+    void updateDataSlot(const std::map<std::string, std::shared_ptr<Buffer>>& data, bool requires_reset);
     void loadingDoneSlot();
 
     void exportDataSlot(bool overwrite);
