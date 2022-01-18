@@ -30,6 +30,7 @@
 #include <QVBoxLayout>
 
 using namespace Utils;
+using namespace std;
 
 namespace dbContent
 {
@@ -115,38 +116,34 @@ VariableOrderedSetWidget::~VariableOrderedSetWidget() {}
 void VariableOrderedSetWidget::updateMenuEntries()
 {
     menu_.clear();
+    menu_.setToolTipsVisible(true);
 
-    QMenu* meta_menu = menu_.addMenu(QString::fromStdString(META_OBJECT_NAME));
+    QMenu* meta_menu = menu_.addMenu(META_OBJECT_NAME.c_str());
+    meta_menu->setToolTipsVisible(true);
+
     for (auto& meta_it : COMPASS::instance().dbContentManager().metaVariables())
     {
-        QAction* action = meta_menu->addAction(QString::fromStdString(meta_it->name()));
-
-        QVariantMap vmap;
-        vmap.insert(QString::fromStdString(meta_it->name()),
-                    QVariant(QString::fromStdString(META_OBJECT_NAME)));
-        action->setData(QVariant(vmap));
+        QAction* action = meta_menu->addAction(meta_it->name().c_str());
+        action->setToolTip(meta_it->description().c_str());
+        action->setData(QVariantMap({{meta_it->name().c_str(),QVariant(META_OBJECT_NAME.c_str())}}));
     }
 
     for (auto& object_it : COMPASS::instance().dbContentManager())
     {
-        QMenu* m2 = menu_.addMenu(QString::fromStdString(object_it.first));
+        QMenu* m2 = menu_.addMenu(object_it.first.c_str());
+        m2->setToolTipsVisible(true);
 
         for (auto& var_it : object_it.second->variables())
         {
-            QAction* action = m2->addAction(QString::fromStdString(var_it->name()));
-
-            QVariantMap vmap;
-            vmap.insert(QString::fromStdString(var_it->name()),
-                        QVariant(QString::fromStdString(object_it.first)));
-            action->setData(QVariant(vmap));
+            QAction* action = m2->addAction(var_it->name().c_str());
+            action->setToolTip(var_it->description().c_str());
+            action->setData(QVariantMap({{var_it->name().c_str(), QVariant(object_it.first.c_str())}}));
         }
     }
 }
 
 void VariableOrderedSetWidget::showMenuSlot() { menu_.exec(QCursor::pos()); }
 
-/*
- */
 void VariableOrderedSetWidget::triggerSlot(QAction* action)
 {
     QVariantMap vmap = action->data().toMap();
@@ -227,17 +224,28 @@ void VariableOrderedSetWidget::updateVariableListSlot()
     DBContentManager& manager = COMPASS::instance().dbContentManager();
     VariableOrderDefinition* def = nullptr;
 
+    string tooltip;
+
     for (it = variables.begin(); it != variables.end(); it++)
     {
         def = it->second;
+
         if (def->dboName() == META_OBJECT_NAME)
+        {
             assert(manager.existsMetaVariable(def->variableName()));
+            tooltip = manager.metaVariable(def->variableName()).description();
+        }
         else
         {
             assert(manager.existsObject(def->dboName()));
             assert(manager.object(def->dboName()).hasVariable(def->variableName()));
+            tooltip = manager.object(def->dboName()).variable(def->variableName()).description();
         }
-        list_widget_->addItem((def->dboName() + ", " + def->variableName()).c_str());
+
+        QListWidgetItem* item = new QListWidgetItem((def->dboName() + ", " + def->variableName()).c_str());
+        item->setToolTip(tooltip.c_str());
+
+        list_widget_->addItem(item);
     }
 
     if (current_index_ != -1)
