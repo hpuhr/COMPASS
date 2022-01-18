@@ -95,7 +95,6 @@ public:
     bool usedInMetaVariable(const dbContent::Variable& variable);
     dbContent::MetaVariableConfigurationDialog* metaVariableConfigdialog();
 
-
     bool hasConfigDataSource(unsigned int ds_id);
     dbContent::ConfigurationDataSource& configDataSource(unsigned int ds_id);
 

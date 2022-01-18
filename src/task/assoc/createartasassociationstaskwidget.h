@@ -25,6 +25,7 @@ class CreateARTASAssociationsTask;
 namespace dbContent
 {
 class VariableSelectionWidget;
+class DBDataSourceComboBox;
 }
 
 class QPushButton;
@@ -36,7 +37,7 @@ class CreateARTASAssociationsTaskWidget : public TaskWidget
     Q_OBJECT
 
   public slots:
-    //void currentDataSourceChangedSlot();
+    void currentDataSourceChangedSlot();
     void anyVariableChangedSlot();
 
     void endTrackTimeEditSlot(QString value);
@@ -63,7 +64,7 @@ class CreateARTASAssociationsTaskWidget : public TaskWidget
   protected:
     CreateARTASAssociationsTask& task_;
 
-    //DBODataSourceSelectionComboBox* ds_combo_{nullptr};
+    dbContent::DBDataSourceComboBox* ds_combo_{nullptr};
     dbContent::VariableSelectionWidget* ds_id_box_{nullptr};
     dbContent::VariableSelectionWidget* track_num_box_{nullptr};
     dbContent::VariableSelectionWidget* track_begin_box_{nullptr};

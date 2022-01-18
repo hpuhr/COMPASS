@@ -40,6 +40,9 @@
 #include "asteriximporttask.h"
 #include "asteriximporttaskdialog.h"
 
+#include "createartasassociationstask.h"
+#include "createartasassociationstaskdialog.h"
+
 #include <QApplication>
 #include <QFileDialog>
 #include <QCloseEvent>
@@ -1167,6 +1170,8 @@ void MainWindow::importAsterixFromNetworkSlot()
 void MainWindow::calculateAssociationsARTASSlot()
 {
     loginf << "MainWindow: calculateAssociationsARTASSlot";
+
+    COMPASS::instance().taskManager().createArtasAssociationsTask().dialog()->show();
 }
 
 void MainWindow::configureMetaVariablesSlot()

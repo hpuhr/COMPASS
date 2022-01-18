@@ -46,6 +46,9 @@ class CreateARTASAssociationsTask : public Task, public Configurable
     Q_OBJECT
 
 public slots:
+    void dialogRunSlot();
+    void dialogCancelSlot();
+
     void createDoneSlot();
     void createObsoleteSlot();
 
@@ -61,6 +64,9 @@ public:
     CreateARTASAssociationsTask(const std::string& class_id, const std::string& instance_id,
                                 TaskManager& task_manager);
     virtual ~CreateARTASAssociationsTask();
+
+
+    CreateARTASAssociationsTaskDialog* dialog();
 
     std::string currentDataSourceName() const;
     void currentDataSourceName(const std::string& currentDataSourceName);
@@ -193,6 +199,8 @@ protected:
     bool mark_track_coasting_associations_dubious_{false};
 
     bool save_associations_{true};
+
+    std::unique_ptr<CreateARTASAssociationsTaskDialog> dialog_;
 
     std::unique_ptr<CreateARTASAssociationsStatusDialog> status_dialog_{nullptr};
 

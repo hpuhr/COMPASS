@@ -18,7 +18,7 @@
 #include "createartasassociationstaskwidget.h"
 
 #include "createartasassociationstask.h"
-//#include "dbodatasourceselectioncombobox.h"
+#include "dbdatasourceselectioncombobox.h"
 #include "compass.h"
 #include "dbcontent/dbcontentmanager.h"
 #include "dbcontent/dbcontent.h"
@@ -52,53 +52,51 @@ CreateARTASAssociationsTaskWidget::CreateARTASAssociationsTaskWidget(
         QGridLayout* grid = new QGridLayout();
         int row_cnt = 0;
 
-        TODO_ASSERT
-
         // tracker data source
-//        grid->addWidget(new QLabel("Tracker Data Source"), row_cnt, 0);
+        grid->addWidget(new QLabel("CAT062 Data Source"), row_cnt, 0);
 
-//        assert(COMPASS::instance().objectManager().existsObject("Tracker"));
-//        DBObject& dbo_tracker = COMPASS::instance().objectManager().object("Tracker");
+        assert(COMPASS::instance().dbContentManager().existsObject("CAT062"));
 
-//        ds_combo_ = new DBODataSourceSelectionComboBox(dbo_tracker);
-//        connect(ds_combo_, &DBODataSourceSelectionComboBox::changedDataSourceSignal, this,
-//                &CreateARTASAssociationsTaskWidget::currentDataSourceChangedSlot);
+        ds_combo_ = new DBDataSourceComboBox();
+        ds_combo_->showDSTypeOnly("CAT062");
+        connect(ds_combo_, &DBDataSourceComboBox::changedSource, this,
+                &CreateARTASAssociationsTaskWidget::currentDataSourceChangedSlot);
 
-//        grid->addWidget(ds_combo_, row_cnt, 1);
+        grid->addWidget(ds_combo_, row_cnt, 1);
 
         // tracker vars
         row_cnt++;
         grid->addWidget(new QLabel("Tracker Data Source ID Variable"), row_cnt, 0);
         ds_id_box_ = new VariableSelectionWidget();
-        ds_id_box_->showDBOOnly("Tracker");
+        ds_id_box_->showDBOOnly("CAT062");
         connect(ds_id_box_, SIGNAL(selectionChanged()), this, SLOT(anyVariableChangedSlot()));
         grid->addWidget(ds_id_box_, row_cnt, 1);
 
         row_cnt++;
         grid->addWidget(new QLabel("Tracker Track Number Variable"), row_cnt, 0);
         track_num_box_ = new VariableSelectionWidget();
-        track_num_box_->showDBOOnly("Tracker");
+        track_num_box_->showDBOOnly("CAT062");
         connect(track_num_box_, SIGNAL(selectionChanged()), this, SLOT(anyVariableChangedSlot()));
         grid->addWidget(track_num_box_, row_cnt, 1);
 
         row_cnt++;
         grid->addWidget(new QLabel("Tracker Track Begin Variable"), row_cnt, 0);
         track_begin_box_ = new VariableSelectionWidget();
-        track_begin_box_->showDBOOnly("Tracker");
+        track_begin_box_->showDBOOnly("CAT062");
         connect(track_begin_box_, SIGNAL(selectionChanged()), this, SLOT(anyVariableChangedSlot()));
         grid->addWidget(track_begin_box_, row_cnt, 1);
 
         row_cnt++;
         grid->addWidget(new QLabel("Tracker Track Number Variable"), row_cnt, 0);
         track_end_box_ = new VariableSelectionWidget();
-        track_end_box_->showDBOOnly("Tracker");
+        track_end_box_->showDBOOnly("CAT062");
         connect(track_end_box_, SIGNAL(selectionChanged()), this, SLOT(anyVariableChangedSlot()));
         grid->addWidget(track_end_box_, row_cnt, 1);
 
         row_cnt++;
         grid->addWidget(new QLabel("Tracker Track Coasting Variable"), row_cnt, 0);
         track_coasting_box_ = new VariableSelectionWidget();
-        track_coasting_box_->showDBOOnly("Tracker");
+        track_coasting_box_->showDBOOnly("CAT062");
         connect(track_coasting_box_, SIGNAL(selectionChanged()), this,
                 SLOT(anyVariableChangedSlot()));
         grid->addWidget(track_coasting_box_, row_cnt, 1);
@@ -230,26 +228,24 @@ CreateARTASAssociationsTaskWidget::CreateARTASAssociationsTaskWidget(
 
 CreateARTASAssociationsTaskWidget::~CreateARTASAssociationsTaskWidget() {}
 
-//void CreateARTASAssociationsTaskWidget::currentDataSourceChangedSlot()
-//{
-//    assert(ds_combo_);
-//    task_.currentDataSourceName(ds_combo_->getDSName());
-//}
+void CreateARTASAssociationsTaskWidget::currentDataSourceChangedSlot()
+{
+    assert(ds_combo_);
+    task_.currentDataSourceName(ds_combo_->getDSName());
+}
 
 void CreateARTASAssociationsTaskWidget::update()
 {
-    TODO_ASSERT
+    if (task_.currentDataSourceName().size() &&
+            ds_combo_->hasDSName(task_.currentDataSourceName()))
+        ds_combo_->setDSName(task_.currentDataSourceName());
 
-//    if (task_.currentDataSourceName().size() &&
-//            ds_combo_->hasDataSource(task_.currentDataSourceName()))
-//        ds_combo_->setDataSource(task_.currentDataSourceName());
-
-//    if (ds_combo_->getDSName() != task_.currentDataSourceName())
-//        task_.currentDataSourceName(ds_combo_->getDSName());
+    if (ds_combo_->getDSName() != task_.currentDataSourceName())
+        task_.currentDataSourceName(ds_combo_->getDSName());
 
     DBContentManager& object_man = COMPASS::instance().dbContentManager();
 
-    DBContent& track_object = object_man.object("Tracker");
+    DBContent& track_object = object_man.object("CAT062");
 
     // tracker vats
     assert(ds_id_box_);
