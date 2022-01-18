@@ -180,21 +180,23 @@ QVariant AllBufferTableModel::data(const QModelIndex& index, int role) const
         {
             if (col == 2)
             {
-                DBContentManager& manager = COMPASS::instance().dbContentManager();
-                const DBOAssociationCollection& associations =
-                    manager.object(dbo_name).associations();
+                TODO_ASSERT
 
-                assert(buffer->has<int>("rec_num"));
-                assert(!buffer->get<int>("rec_num").isNull(buffer_index));
-                unsigned int rec_num = buffer->get<int>("rec_num").get(buffer_index);
+//                DBContentManager& manager = COMPASS::instance().dbContentManager();
+//                const DBOAssociationCollection& associations =
+//                    manager.object(dbo_name).associations();
 
-                if (associations.contains(rec_num))
-                {
-                    return QVariant(
-                        manager.object(dbo_name).associations().getUTNsStringFor(rec_num).c_str());
-                }
-                else
-                    return QVariant();
+//                assert(buffer->has<int>("rec_num"));
+//                assert(!buffer->get<int>("rec_num").isNull(buffer_index));
+//                unsigned int rec_num = buffer->get<int>("rec_num").get(buffer_index);
+
+//                if (associations.contains(rec_num))
+//                {
+//                    return QVariant(
+//                        manager.object(dbo_name).associations().getUTNsStringFor(rec_num).c_str());
+//                }
+//                else
+//                    return QVariant();
             }
 
             col -= 3;  // for the actual properties

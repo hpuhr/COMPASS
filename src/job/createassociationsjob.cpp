@@ -125,13 +125,15 @@ void CreateAssociationsJob::run()
 
     // save associations
     emit statusSignal("Saving Associations");
-    for (auto& dbo_it : object_man)
-    {
-        loginf << "CreateAssociationsJob: run: processing object " << dbo_it.first
-               << " associated " << dbo_it.second->associations().size() << " of "
-               << dbo_it.second->count();
-        dbo_it.second->saveAssociations();
-    }
+
+    TODO_ASSERT
+//    for (auto& dbo_it : object_man)
+//    {
+//        loginf << "CreateAssociationsJob: run: processing object " << dbo_it.first
+//               << " associated " << dbo_it.second->associations().size() << " of "
+//               << dbo_it.second->count();
+//        dbo_it.second->saveAssociations();
+//    }
 
     object_man.setAssociationsByAll(); // no specific dbo or data source
 
@@ -732,20 +734,22 @@ void CreateAssociationsJob::createAssociations()
 
     DBContentManager& object_man = COMPASS::instance().dbContentManager();
 
-    for (auto& dbo_it : target_reports_)
-    {
-        assert (object_man.existsObject(dbo_it.first));
-        DBContent& dbo = object_man.object(dbo_it.first);
+    TODO_ASSERT
 
-        for (auto& ds_it : dbo_it.second) // ds_id -> trs
-        {
-            for (auto& tr_it : ds_it.second)
-            {
-                for (auto utn_ptr_it : tr_it.assoc_targets_)
-                    dbo.addAssociation(tr_it.rec_num_, utn_ptr_it->utn_, false, 0);
-            }
-        }
-    }
+//    for (auto& dbo_it : target_reports_)
+//    {
+//        assert (object_man.existsObject(dbo_it.first));
+//        DBContent& dbo = object_man.object(dbo_it.first);
+
+//        for (auto& ds_it : dbo_it.second) // ds_id -> trs
+//        {
+//            for (auto& tr_it : ds_it.second)
+//            {
+//                for (auto utn_ptr_it : tr_it.assoc_targets_)
+//                    dbo.addAssociation(tr_it.rec_num_, utn_ptr_it->utn_, false, 0);
+//            }
+//        }
+//    }
 }
 
 std::map<unsigned int, Association::Target> CreateAssociationsJob::createTrackedTargets(

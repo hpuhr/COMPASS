@@ -1865,20 +1865,22 @@ void EvaluationManager::filterUTNs ()
 
     map<string, set<unsigned int>> associated_utns;
 
-    if (remove_not_detected_dbos_) // prepare associations
-    {
-        if (dbo_man.hasAssociations())
-        {
-            for (auto& dbo_it : dbo_man)
-            {
-                if (remove_not_detected_dbo_values_.contains(dbo_it.first)
-                        && remove_not_detected_dbo_values_.at(dbo_it.first) == true)
-                {
-                    associated_utns[dbo_it.first] = dbo_it.second->associations().getAllUTNS();
-                }
-            }
-        }
-    }
+    TODO_ASSERT
+
+//    if (remove_not_detected_dbos_) // prepare associations
+//    {
+//        if (dbo_man.hasAssociations())
+//        {
+//            for (auto& dbo_it : dbo_man)
+//            {
+//                if (remove_not_detected_dbo_values_.contains(dbo_it.first)
+//                        && remove_not_detected_dbo_values_.at(dbo_it.first) == true)
+//                {
+//                    associated_utns[dbo_it.first] = dbo_it.second->associations().getAllUTNS();
+//                }
+//            }
+//        }
+//    }
 
     bool use;
     string comment;

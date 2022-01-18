@@ -115,16 +115,19 @@ void CreateARTASAssociationsJob::run()
     }
 
     // save associations
-    emit statusSignal("Saving Associations");
-    for (auto& dbo_it : object_man)
-    {
-        loginf << "CreateARTASAssociationsJob: run: processing object " << dbo_it.first
-               << " associated " << dbo_it.second->associations().size() << " of "
-               << dbo_it.second->count();
-        dbo_it.second->saveAssociations();
-    }
 
-    object_man.setAssociationsDataSource(tracker_dbo_name_, task_.currentDataSourceName());
+    TODO_ASSERT
+
+//    emit statusSignal("Saving Associations");
+//    for (auto& dbo_it : object_man)
+//    {
+//        loginf << "CreateARTASAssociationsJob: run: processing object " << dbo_it.first
+//               << " associated " << dbo_it.second->associations().size() << " of "
+//               << dbo_it.second->count();
+//        dbo_it.second->saveAssociations();
+//    }
+
+//    object_man.setAssociationsDataSource(tracker_dbo_name_, task_.currentDataSourceName());
 
     stop_time = boost::posix_time::microsec_clock::local_time();
 
@@ -363,9 +366,11 @@ void CreateARTASAssociationsJob::createARTASAssociations()
     DBContentManager& object_man = COMPASS::instance().dbContentManager();
     DBContent& tracker_object = object_man.object(tracker_dbo_name_);
 
-    for (auto& ut_it : finished_tracks_)                    // utn -> UAT
-        for (auto& assoc_it : ut_it.second.rec_nums_tris_)  // rec_num -> tri
-            tracker_object.addAssociation(assoc_it.first, ut_it.first, true, assoc_it.first);
+    TODO_ASSERT
+
+//    for (auto& ut_it : finished_tracks_)                    // utn -> UAT
+//        for (auto& assoc_it : ut_it.second.rec_nums_tris_)  // rec_num -> tri
+//            tracker_object.addAssociation(assoc_it.first, ut_it.first, true, assoc_it.first);
 }
 
 void CreateARTASAssociationsJob::createSensorAssociations()
@@ -514,8 +519,10 @@ void CreateARTASAssociationsJob::createSensorAssociations()
                         ++dubious_associations_cnt_;
                     }
 
-                    object_man.object(best_match_dbo_name)
-                        .addAssociation(best_match_rec_num, ut_it.first, true, assoc_it.first);
+                    TODO_ASSERT
+
+//                    object_man.object(best_match_dbo_name)
+//                        .addAssociation(best_match_rec_num, ut_it.first, true, assoc_it.first);
                     ++found_hashes_cnt_;
                 }
                 else

@@ -756,52 +756,55 @@ dbContent::DBDataSource& DBContentManager::dataSource(unsigned int ds_id)
 
 
 
-bool DBContentManager::hasAssociations() const { return has_associations_; }
+bool DBContentManager::hasAssociations() const
+{
+    return has_associations_;
+}
 
 void DBContentManager::setAssociationsDataSource(const std::string& dbo, const std::string& data_source_name)
 {
-    COMPASS::instance().interface().setProperty("associations_generated", "1");
-    COMPASS::instance().interface().setProperty("associations_dbo", dbo);
-    COMPASS::instance().interface().setProperty("associations_ds", data_source_name);
+//    COMPASS::instance().interface().setProperty("associations_generated", "1");
+//    COMPASS::instance().interface().setProperty("associations_dbo", dbo);
+//    COMPASS::instance().interface().setProperty("associations_ds", data_source_name);
 
-    has_associations_ = true;
-    associations_dbo_ = dbo;
-    assert(existsObject(associations_dbo_));
-    associations_ds_ = data_source_name;
+//    has_associations_ = true;
+//    associations_dbo_ = dbo;
+//    assert(existsObject(associations_dbo_));
+//    associations_ds_ = data_source_name;
 
-    if (load_widget_)
-        loadWidget()->update();
+//    if (load_widget_)
+//        loadWidget()->update();
 }
 
 void DBContentManager::setAssociationsByAll()
 {
-    COMPASS::instance().interface().setProperty("associations_generated", "1");
-    COMPASS::instance().interface().setProperty("associations_dbo", "");
-    COMPASS::instance().interface().setProperty("associations_ds", "");
+//    COMPASS::instance().interface().setProperty("associations_generated", "1");
+//    COMPASS::instance().interface().setProperty("associations_dbo", "");
+//    COMPASS::instance().interface().setProperty("associations_ds", "");
 
-    has_associations_ = true;
-    associations_dbo_ = "";
-    associations_ds_ = "";
+//    has_associations_ = true;
+//    associations_dbo_ = "";
+//    associations_ds_ = "";
 
-    if (load_widget_)
-        loadWidget()->update();
+//    if (load_widget_)
+//        loadWidget()->update();
 }
 
 void DBContentManager::removeAssociations()
 {
-    COMPASS::instance().interface().setProperty("associations_generated", "0");
-    COMPASS::instance().interface().setProperty("associations_dbo", "");
-    COMPASS::instance().interface().setProperty("associations_ds", "");
+//    COMPASS::instance().interface().setProperty("associations_generated", "0");
+//    COMPASS::instance().interface().setProperty("associations_dbo", "");
+//    COMPASS::instance().interface().setProperty("associations_ds", "");
 
-    has_associations_ = false;
-    associations_dbo_ = "";
-    associations_ds_ = "";
+//    has_associations_ = false;
+//    associations_dbo_ = "";
+//    associations_ds_ = "";
 
-    for (auto& dbo_it : objects_)
-        dbo_it.second->clearAssociations();
+//    for (auto& dbo_it : objects_)
+//        dbo_it.second->clearAssociations();
 
-    if (load_widget_)
-        loadWidget()->update();
+//    if (load_widget_)
+//        loadWidget()->update();
 }
 
 bool DBContentManager::hasAssociationsDataSource() const

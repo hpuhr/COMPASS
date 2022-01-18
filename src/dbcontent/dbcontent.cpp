@@ -24,7 +24,6 @@
 #include "dbcontent/dbcontentwidget.h"
 #include "dbcontent/labeldefinition.h"
 #include "dbcontent/labeldefinitionwidget.h"
-#include "dboreadassociationsjob.h"
 #include "dboreaddbjob.h"
 #include "dbcontent/variable/variable.h"
 #include "dbtableinfo.h"
@@ -212,11 +211,11 @@ bool DBContent::hasVariableDBColumnName(const std::string& name) const
     return iter != variables_.end();
 }
 
-string DBContent::associationsTableName()
-{
-    assert (db_table_name_.size());
-    return db_table_name_ + "_assoc";
-}
+//string DBContent::associationsTableName()
+//{
+//    assert (db_table_name_.size());
+//    return db_table_name_ + "_assoc";
+//}
 
 
 bool DBContent::hasKeyVariable()
@@ -637,7 +636,7 @@ void DBContent::databaseOpenedSlot()
 {
     loginf << "DBContent " << name_ << ": databaseOpenedSlot";
 
-    string associations_table_name = associationsTableName();
+    //string associations_table_name = associationsTableName();
 
     is_loadable_ = existsInDB();
 
@@ -667,10 +666,10 @@ void DBContent::checkLabelDefinitions()
     label_definition_->checkLabelDefinitions();
 }
 
-bool DBContent::associationsLoaded() const
-{
-    return associations_loaded_;
-}
+//bool DBContent::associationsLoaded() const
+//{
+//    return associations_loaded_;
+//}
 
 bool DBContent::isLoading() { return read_job_ != nullptr || finalize_jobs_.size(); }
 
@@ -695,112 +694,112 @@ bool DBContent::existsInDB() const
     return COMPASS::instance().interface().existsTable(db_table_name_);
 }
 
-void DBContent::loadAssociationsIfRequired()
-{
-    if (dbo_manager_.hasAssociations() && !associations_loaded_)
-    {
-        shared_ptr<DBOReadAssociationsJob> read_job =
-                make_shared<DBOReadAssociationsJob>(*this);
-        JobManager::instance().addDBJob(read_job);  // fire and forget
-    }
-}
+//void DBContent::loadAssociationsIfRequired()
+//{
+//    if (dbo_manager_.hasAssociations() && !associations_loaded_)
+//    {
+//        shared_ptr<DBOReadAssociationsJob> read_job =
+//                make_shared<DBOReadAssociationsJob>(*this);
+//        JobManager::instance().addDBJob(read_job);  // fire and forget
+//    }
+//}
 
-void DBContent::loadAssociations()
-{
-    loginf << "DBContent " << name_ << ": loadAssociations";
+//void DBContent::loadAssociations()
+//{
+//    loginf << "DBContent " << name_ << ": loadAssociations";
 
-    associations_.clear();
+//    associations_.clear();
 
-    boost::posix_time::ptime loading_start_time;
-    boost::posix_time::ptime loading_stop_time;
+//    boost::posix_time::ptime loading_start_time;
+//    boost::posix_time::ptime loading_stop_time;
 
-    loading_start_time = boost::posix_time::microsec_clock::local_time();
+//    loading_start_time = boost::posix_time::microsec_clock::local_time();
 
-    DBInterface& db_interface = COMPASS::instance().interface();
+//    DBInterface& db_interface = COMPASS::instance().interface();
 
-    string associations_table_name = associationsTableName();
+//    string associations_table_name = associationsTableName();
 
-    if (db_interface.existsTable(associations_table_name))
-        associations_ = db_interface.getAssociations(associations_table_name);
+//    if (db_interface.existsTable(associations_table_name))
+//        associations_ = db_interface.getAssociations(associations_table_name);
 
-    associations_loaded_ = true;
+//    associations_loaded_ = true;
 
-    loading_stop_time = boost::posix_time::microsec_clock::local_time();
+//    loading_stop_time = boost::posix_time::microsec_clock::local_time();
 
-    double load_time;
-    boost::posix_time::time_duration diff = loading_stop_time - loading_start_time;
-    load_time = diff.total_milliseconds() / 1000.0;
+//    double load_time;
+//    boost::posix_time::time_duration diff = loading_stop_time - loading_start_time;
+//    load_time = diff.total_milliseconds() / 1000.0;
 
-    loginf << "DBContent " << name_ << ": loadAssociations: " << associations_.size()
-           << " associactions done (" << String::doubleToStringPrecision(load_time, 2) << " s).";
-}
+//    loginf << "DBContent " << name_ << ": loadAssociations: " << associations_.size()
+//           << " associactions done (" << String::doubleToStringPrecision(load_time, 2) << " s).";
+//}
 
-bool DBContent::hasAssociations() { return associations_.size() > 0; }
+//bool DBContent::hasAssociations() { return associations_.size() > 0; }
 
-void DBContent::addAssociation(unsigned int rec_num, unsigned int utn, bool has_src, unsigned int src_rec_num)
-{
-    associations_.add(rec_num, DBOAssociationEntry(utn, has_src, src_rec_num));
-    associations_changed_ = true;
-    associations_loaded_ = true;
-}
+//void DBContent::addAssociation(unsigned int rec_num, unsigned int utn, bool has_src, unsigned int src_rec_num)
+//{
+//    associations_.add(rec_num, DBOAssociationEntry(utn, has_src, src_rec_num));
+//    associations_changed_ = true;
+//    associations_loaded_ = true;
+//}
 
-void DBContent::clearAssociations()
-{
-    associations_.clear();
-    associations_changed_ = true;
-    associations_loaded_ = false;
-}
+//void DBContent::clearAssociations()
+//{
+//    associations_.clear();
+//    associations_changed_ = true;
+//    associations_loaded_ = false;
+//}
 
-void DBContent::saveAssociations()
-{
-    loginf << "DBContent " << name_ << ": saveAssociations";
+//void DBContent::saveAssociations()
+//{
+//    loginf << "DBContent " << name_ << ": saveAssociations";
 
-    DBInterface& db_interface = COMPASS::instance().interface();
+//    DBInterface& db_interface = COMPASS::instance().interface();
 
-    string associations_table_name = associationsTableName();
-    assert(associations_table_name.size());
+//    string associations_table_name = associationsTableName();
+//    assert(associations_table_name.size());
 
-    if (db_interface.existsTable(associations_table_name))
-        db_interface.clearTableContent(associations_table_name);
-    else
-        db_interface.createAssociationsTable(associations_table_name);
+//    if (db_interface.existsTable(associations_table_name))
+//        db_interface.clearTableContent(associations_table_name);
+//    else
+//        db_interface.createAssociationsTable(associations_table_name);
 
-    if (!hasAssociations())
-        return;
+//    if (!hasAssociations())
+//        return;
 
-    assert(db_interface.existsTable(associations_table_name));
+//    assert(db_interface.existsTable(associations_table_name));
 
-    // assoc_id INT, rec_num INT, utn INT
+//    // assoc_id INT, rec_num INT, utn INT
 
-    PropertyList list;
-    list.addProperty("rec_num", PropertyDataType::INT);
-    list.addProperty("utn", PropertyDataType::INT);
-    list.addProperty("src_rec_num", PropertyDataType::INT);
+//    PropertyList list;
+//    list.addProperty("rec_num", PropertyDataType::INT);
+//    list.addProperty("utn", PropertyDataType::INT);
+//    list.addProperty("src_rec_num", PropertyDataType::INT);
 
-    shared_ptr<Buffer> buffer_ptr = shared_ptr<Buffer>(new Buffer(list, name_));
+//    shared_ptr<Buffer> buffer_ptr = shared_ptr<Buffer>(new Buffer(list, name_));
 
-    NullableVector<int>& rec_nums = buffer_ptr->get<int>("rec_num");
-    NullableVector<int>& utns = buffer_ptr->get<int>("utn");
-    NullableVector<int>& src_rec_nums = buffer_ptr->get<int>("src_rec_num");
+//    NullableVector<int>& rec_nums = buffer_ptr->get<int>("rec_num");
+//    NullableVector<int>& utns = buffer_ptr->get<int>("utn");
+//    NullableVector<int>& src_rec_nums = buffer_ptr->get<int>("src_rec_num");
 
-    size_t cnt = 0;
-    for (auto& assoc_it : associations_)
-    {
-        rec_nums.set(cnt, assoc_it.first);
-        utns.set(cnt, assoc_it.second.utn_);
+//    size_t cnt = 0;
+//    for (auto& assoc_it : associations_)
+//    {
+//        rec_nums.set(cnt, assoc_it.first);
+//        utns.set(cnt, assoc_it.second.utn_);
 
-        if (assoc_it.second.has_src_)
-            src_rec_nums.set(cnt, assoc_it.second.src_rec_num_);
+//        if (assoc_it.second.has_src_)
+//            src_rec_nums.set(cnt, assoc_it.second.src_rec_num_);
 
-        ++cnt;
-    }
+//        ++cnt;
+//    }
 
-    db_interface.insertBuffer(associations_table_name, buffer_ptr);
+//    db_interface.insertBuffer(associations_table_name, buffer_ptr);
 
-    associations_changed_ = false;
+//    associations_changed_ = false;
 
-    loginf << "DBContent " << name_ << ": saveAssociations: done";
-}
+//    loginf << "DBContent " << name_ << ": saveAssociations: done";
+//}
 
 void DBContent::sortContent()
 {

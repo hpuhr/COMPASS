@@ -110,7 +110,9 @@ void BufferCSVExportJob::run()
                 assert(!rec_num_vec.isNull(row));
                 unsigned int rec_num = rec_num_vec.get(row);
 
-                ss << manager.object(dbo_name).associations().getUTNsStringFor(rec_num);
+                TODO_ASSERT
+
+                //ss << manager.object(dbo_name).associations().getUTNsStringFor(rec_num);
             }
 
             for (size_t col = 0; col < read_set_size; col++)

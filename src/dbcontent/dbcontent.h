@@ -160,14 +160,14 @@ public:
     bool existsInDB() const;
 
     // association stuff, outdated
-    void loadAssociationsIfRequired();  // starts loading job if required
-    void loadAssociations();            // actually loads associations, should be called from job
-    bool associationsLoaded() const;
-    bool hasAssociations();
-    void addAssociation(unsigned int rec_num, unsigned int utn, bool has_src, unsigned int src_rec_num);
-    const DBOAssociationCollection& associations() { return associations_; }
-    void clearAssociations();
-    void saveAssociations();
+//    void loadAssociationsIfRequired();  // starts loading job if required
+//    void loadAssociations();            // actually loads associations, should be called from job
+//    bool associationsLoaded() const;
+//    bool hasAssociations();
+//    void addAssociation(unsigned int rec_num, unsigned int utn, bool has_src, unsigned int src_rec_num);
+//    const DBOAssociationCollection& associations() { return associations_; }
+//    void clearAssociations();
+//    void saveAssociations();
 
 
     std::string dbTableName() const;
@@ -202,15 +202,15 @@ protected:
 
     std::unique_ptr<DBContentWidget> widget_;
 
-    bool associations_changed_{false};
-    bool associations_loaded_{false};
-    DBOAssociationCollection associations_;
+//    bool associations_changed_{false};
+//    bool associations_loaded_{false};
+//    DBOAssociationCollection associations_;
 
     virtual void checkSubConfigurables();
 
     void doDataSourcesBeforeInsert (std::shared_ptr<Buffer> buffer);
 
-    std::string associationsTableName();
+    //std::string associationsTableName();
 
     void sortContent();
 

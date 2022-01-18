@@ -76,23 +76,25 @@ std::string UTNFilter::getConditionString(const std::string& dbo_name, bool& fir
 
         DBContent& object = obj_man.object(dbo_name);
 
-        if (!object.hasAssociations())
-        {
-            logdbg << "UTNFilter: getConditionString: no associations";
-            return "";
-        }
+        TODO_ASSERT
+
+//        if (!object.hasAssociations())
+//        {
+//            logdbg << "UTNFilter: getConditionString: no associations";
+//            return "";
+//        }
 
         vector<unsigned int> rec_nums;
-        const DBOAssociationCollection& assocations = object.associations();
+//        const DBOAssociationCollection& assocations = object.associations();
 
-        for (auto utn : utns_)
-        {
-            vector<unsigned int> rec_nums_utn = assocations.getRecNumsForUTN(utn);
+//        for (auto utn : utns_)
+//        {
+//            vector<unsigned int> rec_nums_utn = assocations.getRecNumsForUTN(utn);
 
-            logdbg << "UTNFilter: getConditionString: utn " << utn << " num rec_nums " << rec_nums_utn.size();
+//            logdbg << "UTNFilter: getConditionString: utn " << utn << " num rec_nums " << rec_nums_utn.size();
 
-            rec_nums.insert(rec_nums.end(), rec_nums_utn.begin(), rec_nums_utn.end());
-        }
+//            rec_nums.insert(rec_nums.end(), rec_nums_utn.begin(), rec_nums_utn.end());
+//        }
 
         logdbg << "UTNFilter: getConditionString got " << rec_nums.size() << " rec_nums for dbo " << dbo_name;;
 
