@@ -87,9 +87,17 @@ public:
     static const Property meta_var_longitude_;
     static const Property meta_var_detection_type_;
 
+    static const Property meta_var_artas_hash_;
+    static const Property meta_var_associations_;
+
     static const Property var_radar_range_;
     static const Property var_radar_azimuth_;
     static const Property var_radar_altitude_;
+
+    static const Property var_tracker_tris_;
+    static const Property var_tracker_track_begin_;
+    static const Property var_tracker_coasting_;
+    static const Property var_tracker_track_end_;
 
     static const Property selected_var;
 

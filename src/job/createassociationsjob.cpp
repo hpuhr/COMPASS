@@ -71,7 +71,8 @@ void CreateAssociationsJob::run()
 
     DBContentManager& object_man = COMPASS::instance().dbContentManager();
 
-    object_man.removeAssociations();
+    TODO_ASSERT
+    //object_man.removeAssociations();
 
     // create target reports
     emit statusSignal("Creating Target Reports");
@@ -135,7 +136,7 @@ void CreateAssociationsJob::run()
 //        dbo_it.second->saveAssociations();
 //    }
 
-    object_man.setAssociationsByAll(); // no specific dbo or data source
+//    object_man.setAssociationsByAll(); // no specific dbo or data source
 
     loginf << "CreateAssociationsJob: run: clearing tmp data";
     targets.clear(); // removes from assoc target reports

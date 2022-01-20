@@ -38,7 +38,6 @@ class CreateARTASAssociationsTaskWidget : public TaskWidget
 
   public slots:
     void currentDataSourceChangedSlot();
-    void anyVariableChangedSlot();
 
     void endTrackTimeEditSlot(QString value);
 
@@ -65,15 +64,6 @@ class CreateARTASAssociationsTaskWidget : public TaskWidget
     CreateARTASAssociationsTask& task_;
 
     dbContent::DBDataSourceComboBox* ds_combo_{nullptr};
-    dbContent::VariableSelectionWidget* ds_id_box_{nullptr};
-    dbContent::VariableSelectionWidget* track_num_box_{nullptr};
-    dbContent::VariableSelectionWidget* track_begin_box_{nullptr};
-    dbContent::VariableSelectionWidget* track_end_box_{nullptr};
-    dbContent::VariableSelectionWidget* track_coasting_box_{nullptr};
-
-    dbContent::VariableSelectionWidget* key_box_{nullptr};
-    dbContent::VariableSelectionWidget* hash_box_{nullptr};
-    dbContent::VariableSelectionWidget* tod_box_{nullptr};
 
     QLineEdit* end_track_time_edit_{nullptr};
 

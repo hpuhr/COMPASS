@@ -37,7 +37,7 @@ ListBoxView::ListBoxView(const std::string& class_id, const std::string& instanc
     registerParameter("overwrite_csv", &overwrite_csv_, true);
     registerParameter("show_associations", &show_associations_, false);
 
-    can_show_associations_ = COMPASS::instance().dbContentManager().hasAssociations();
+    can_show_associations_ = false; // COMPASS::instance().dbContentManager().hasAssociations(); TODO_ASSERT
 
     if (!can_show_associations_)
         show_associations_ = false;

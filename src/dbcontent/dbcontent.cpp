@@ -61,10 +61,17 @@ const Property DBContent::meta_var_latitude_ {"Latitude", PropertyDataType::DOUB
 const Property DBContent::meta_var_longitude_ {"Longitude", PropertyDataType::DOUBLE};
 
 const Property DBContent::meta_var_detection_type_ {"Type", PropertyDataType::UCHAR};
+const Property DBContent::meta_var_artas_hash_ {"ARTAS Hash", PropertyDataType::UINT};
+const Property DBContent::meta_var_associations_ {"Associations", PropertyDataType::JSON};
 
 const Property DBContent::var_radar_range_ {"Range", PropertyDataType::DOUBLE};
 const Property DBContent::var_radar_azimuth_ {"Azimuth", PropertyDataType::DOUBLE};
 const Property DBContent::var_radar_altitude_ {"Mode C Code", PropertyDataType::FLOAT};
+
+const Property DBContent::var_tracker_tris_ {"Target Report Identifiers", PropertyDataType::STRING};
+const Property DBContent::var_tracker_track_begin_ {"Track Begin", PropertyDataType::BOOL};
+const Property DBContent::var_tracker_coasting_ {"Coasting", PropertyDataType::BOOL};
+const Property DBContent::var_tracker_track_end_ {"Track End", PropertyDataType::BOOL};
 
 const Property DBContent::selected_var {"selected", PropertyDataType::BOOL};
 

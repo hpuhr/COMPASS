@@ -163,14 +163,20 @@ void EvaluationManager::init(QTabWidget* tab_widget)
 
     tab_widget->addTab(widget(), "Evaluation");
 
-    if (!COMPASS::instance().dbContentManager().hasAssociations())
+    // if (!COMPASS::instance().dbContentManager().hasAssociations()) TODO_ASSERT
         widget()->setDisabled(true);
 }
 
 bool EvaluationManager::canLoadData ()
 {
     assert (initialized_);
-    return COMPASS::instance().dbContentManager().hasAssociations() && hasCurrentStandard();
+
+    return false;
+
+    TODO_ASSERT
+
+
+    //return COMPASS::instance().dbContentManager().hasAssociations() && hasCurrentStandard();
 }
 
 void EvaluationManager::loadData ()
@@ -1986,21 +1992,23 @@ void EvaluationManager::filterUTNs ()
 
         if (use && remove_not_detected_dbos_) // prepare associations
         {
-            if (dbo_man.hasAssociations())
-            {
-                for (auto& dbo_it : dbo_man)
-                {
-                    if (remove_not_detected_dbo_values_.contains(dbo_it.first)
-                            && remove_not_detected_dbo_values_.at(dbo_it.first) == true // removed if not detected
-                            && associated_utns.count(dbo_it.first) // have associations
-                            && !associated_utns.at(dbo_it.first).count(target_it.utn_)) // not detected
-                    {
-                        use = false; // remove it
-                        comment = "Not Detected by "+dbo_it.first;
-                        break;
-                    }
-                }
-            }
+            TODO_ASSERT
+
+//            if (dbo_man.hasAssociations())
+//            {
+//                for (auto& dbo_it : dbo_man)
+//                {
+//                    if (remove_not_detected_dbo_values_.contains(dbo_it.first)
+//                            && remove_not_detected_dbo_values_.at(dbo_it.first) == true // removed if not detected
+//                            && associated_utns.count(dbo_it.first) // have associations
+//                            && !associated_utns.at(dbo_it.first).count(target_it.utn_)) // not detected
+//                    {
+//                        use = false; // remove it
+//                        comment = "Not Detected by "+dbo_it.first;
+//                        break;
+//                    }
+//                }
+//            }
         }
 
         if (!use)

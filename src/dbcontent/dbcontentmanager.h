@@ -99,8 +99,10 @@ public:
     dbContent::ConfigurationDataSource& configDataSource(unsigned int ds_id);
 
     bool hasDataSource(unsigned int ds_id);
+    bool hasDataSourcesOfDBContent(const std::string dbcontent_name);
     bool canAddNewDataSourceFromConfig (unsigned int ds_id);
     void addNewDataSource (unsigned int ds_id); // be sure not to call from different thread
+
     dbContent::DBDataSource& dataSource(unsigned int ds_id);
     const std::vector<std::unique_ptr<dbContent::DBDataSource>>& dataSources() const;
 
@@ -116,6 +118,7 @@ public:
     void addLoadedData(std::map<std::string, std::shared_ptr<Buffer>> data);
     void loadingDone(DBContent& object); // to be called by dbo when it's loading is finished
     bool loadInProgress() const;
+    void clearData();
 
     void insertData(std::map<std::string, std::shared_ptr<Buffer>> data);
     void insertDone(DBContent& object); // to be called by dbo when it's insert is finished
@@ -149,14 +152,14 @@ public:
 
     void quitLoading();
 
-    bool hasAssociations() const;
-    void setAssociationsDataSource(const std::string& dbo, const std::string& data_source_name);
-    void setAssociationsByAll();
-    void removeAssociations();
+//    bool hasAssociations() const;
+//    void setAssociationsDataSource(const std::string& dbo, const std::string& data_source_name);
+//    void setAssociationsByAll();
+//    void removeAssociations();
 
-    bool hasAssociationsDataSource() const;
-    std::string associationsDBObject() const;
-    std::string associationsDataSourceName() const;
+//    bool hasAssociationsDataSource() const;
+//    std::string associationsDBObject() const;
+//    std::string associationsDataSourceName() const;
 
     bool isOtherDBObjectPostProcessing(DBContent& object);
 
@@ -183,9 +186,9 @@ protected:
     unsigned int limit_min_{0};
     unsigned int limit_max_{100000};
 
-    bool has_associations_{false};
-    std::string associations_dbo_;
-    std::string associations_ds_;
+//    bool has_associations_{false};
+//    std::string associations_dbo_;
+//    std::string associations_ds_;
 
     bool has_max_rec_num_ {false};
     unsigned int max_rec_num_ {0};

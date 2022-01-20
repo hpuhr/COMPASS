@@ -711,6 +711,14 @@ bool DBContentManager::hasDataSource(unsigned int ds_id)
     { return Number::dsIdFrom(s->sac(), s->sic()) == ds_id; } ) != db_data_sources_.end();
 }
 
+bool DBContentManager::hasDataSourcesOfDBContent(const std::string dbcontent_name)
+{
+    return find_if(db_data_sources_.begin(), db_data_sources_.end(),
+                   [dbcontent_name] (const std::unique_ptr<dbContent::DBDataSource>& s)
+    { return s->numInsertedMap().count(dbcontent_name) > 0; } ) != db_data_sources_.end();
+}
+
+
 void DBContentManager::addNewDataSource (unsigned int ds_id)
 {
     loginf << "DBContentManager: addNewDataSource: ds_id " << ds_id;
@@ -756,65 +764,65 @@ dbContent::DBDataSource& DBContentManager::dataSource(unsigned int ds_id)
 
 
 
-bool DBContentManager::hasAssociations() const
-{
-    return has_associations_;
-}
+//bool DBContentManager::hasAssociations() const
+//{
+//    return has_associations_;
+//}
 
-void DBContentManager::setAssociationsDataSource(const std::string& dbo, const std::string& data_source_name)
-{
-//    COMPASS::instance().interface().setProperty("associations_generated", "1");
-//    COMPASS::instance().interface().setProperty("associations_dbo", dbo);
-//    COMPASS::instance().interface().setProperty("associations_ds", data_source_name);
+//void DBContentManager::setAssociationsDataSource(const std::string& dbo, const std::string& data_source_name)
+//{
+////    COMPASS::instance().interface().setProperty("associations_generated", "1");
+////    COMPASS::instance().interface().setProperty("associations_dbo", dbo);
+////    COMPASS::instance().interface().setProperty("associations_ds", data_source_name);
 
-//    has_associations_ = true;
-//    associations_dbo_ = dbo;
-//    assert(existsDBContent(associations_dbo_));
-//    associations_ds_ = data_source_name;
+////    has_associations_ = true;
+////    associations_dbo_ = dbo;
+////    assert(existsDBContent(associations_dbo_));
+////    associations_ds_ = data_source_name;
 
-//    if (load_widget_)
-//        loadWidget()->update();
-}
+////    if (load_widget_)
+////        loadWidget()->update();
+//}
 
-void DBContentManager::setAssociationsByAll()
-{
-//    COMPASS::instance().interface().setProperty("associations_generated", "1");
-//    COMPASS::instance().interface().setProperty("associations_dbo", "");
-//    COMPASS::instance().interface().setProperty("associations_ds", "");
+//void DBContentManager::setAssociationsByAll()
+//{
+////    COMPASS::instance().interface().setProperty("associations_generated", "1");
+////    COMPASS::instance().interface().setProperty("associations_dbo", "");
+////    COMPASS::instance().interface().setProperty("associations_ds", "");
 
-//    has_associations_ = true;
-//    associations_dbo_ = "";
-//    associations_ds_ = "";
+////    has_associations_ = true;
+////    associations_dbo_ = "";
+////    associations_ds_ = "";
 
-//    if (load_widget_)
-//        loadWidget()->update();
-}
+////    if (load_widget_)
+////        loadWidget()->update();
+//}
 
-void DBContentManager::removeAssociations()
-{
-//    COMPASS::instance().interface().setProperty("associations_generated", "0");
-//    COMPASS::instance().interface().setProperty("associations_dbo", "");
-//    COMPASS::instance().interface().setProperty("associations_ds", "");
+//void DBContentManager::removeAssociations()
+//{
+////    COMPASS::instance().interface().setProperty("associations_generated", "0");
+////    COMPASS::instance().interface().setProperty("associations_dbo", "");
+////    COMPASS::instance().interface().setProperty("associations_ds", "");
 
-//    has_associations_ = false;
-//    associations_dbo_ = "";
-//    associations_ds_ = "";
+////    has_associations_ = false;
+////    associations_dbo_ = "";
+////    associations_ds_ = "";
 
-//    for (auto& dbo_it : objects_)
-//        dbo_it.second->clearAssociations();
+////    for (auto& dbo_it : objects_)
+////        dbo_it.second->clearAssociations();
 
-//    if (load_widget_)
-//        loadWidget()->update();
-}
+////    if (load_widget_)
+////        loadWidget()->update();
+//}
 
-bool DBContentManager::hasAssociationsDataSource() const
-{
-    return associations_dbo_.size() && associations_ds_.size();
-}
+//bool DBContentManager::hasAssociationsDataSource() const
+//{
+//    return associations_dbo_.size() && associations_ds_.size();
+//}
 
-std::string DBContentManager::associationsDBObject() const { return associations_dbo_; }
+//std::string DBContentManager::associationsDBObject() const { return associations_dbo_; }
 
-std::string DBContentManager::associationsDataSourceName() const { return associations_ds_; }
+//std::string DBContentManager::associationsDataSourceName() const { return associations_ds_; }
 
 bool DBContentManager::isOtherDBObjectPostProcessing(DBContent& object)
 {
@@ -828,6 +836,11 @@ bool DBContentManager::isOtherDBObjectPostProcessing(DBContent& object)
 bool DBContentManager::loadInProgress() const
 {
     return load_in_progress_;
+}
+
+void DBContentManager::clearData()
+{
+    data_.clear();
 }
 
 void DBContentManager::insertData(std::map<std::string, std::shared_ptr<Buffer>> data)
