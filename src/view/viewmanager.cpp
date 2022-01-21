@@ -495,10 +495,17 @@ unsigned int ViewManager::newViewNumber()
     return max_number + 1;
 }
 
+void ViewManager::disableDataDistribution(bool value)
+{
+    loginf << "ViewManager: disableDataDistribution: value " << value;
+
+    disable_data_distribution_ = value;
+}
+
 ViewContainerWidget* ViewManager::addNewContainerWidget()
 {
     logdbg << "ViewManager: addNewContainerWidget";
-
+    
     container_count_++;
     std::string container_widget_name = "ViewWindow" + std::to_string(container_count_);
 
@@ -612,6 +619,9 @@ void ViewManager::selectionChangedSlot()
 
 void ViewManager::loadingStartedSlot()
 {
+    if (disable_data_distribution_)
+        return;
+
     loginf << "ViewManager: loadingStartedSlot";
 
     for (auto& view_it : views_)
@@ -622,6 +632,9 @@ void ViewManager::loadingStartedSlot()
 // e.g. when data in the beginning was removed, or order of previously emitted data was changed, etc.
 void ViewManager::loadedDataSlot (const std::map<std::string, std::shared_ptr<Buffer>>& data, bool requires_reset)
 {
+    if (disable_data_distribution_)
+        return;
+
     loginf << "ViewManager: loadedDataSlot: reset " << requires_reset;
 
     for (auto& view_it : views_)
@@ -632,6 +645,9 @@ void ViewManager::loadedDataSlot (const std::map<std::string, std::shared_ptr<Bu
 
 void ViewManager::loadingDoneSlot() // emitted when all dbos have finished loading
 {
+    if (disable_data_distribution_)
+        return;
+
     loginf << "ViewManager: loadingDoneSlot";
 
     for (auto& view_it : views_)

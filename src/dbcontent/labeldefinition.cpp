@@ -187,9 +187,9 @@ void LabelDefinition::checkLabelDefinitions()
                 show = true;
                 prefix = "ID ";
             }
-            else if (dbo_man_.metaVariable(DBContent::meta_var_track_num_id_.name()).existsIn(dbo_name)
+            else if (dbo_man_.metaVariable(DBContent::meta_var_track_num_.name()).existsIn(dbo_name)
                      && variable_name == dbo_man_.metaVariable(
-                         DBContent::meta_var_track_num_id_.name()).getFor(dbo_name).name())
+                         DBContent::meta_var_track_num_.name()).getFor(dbo_name).name())
             {
                 show = true;
                 prefix = "TN ";

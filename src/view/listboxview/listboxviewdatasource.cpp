@@ -327,8 +327,8 @@ void ListBoxViewDataSource::addDefaultVariables (VariableOrderedSet& set)
         set.add(obj_man.metaVariable(DBContent::meta_var_mc_id_.name()));
 
     //        Track Number
-    if (obj_man.existsMetaVariable(DBContent::meta_var_track_num_id_.name()))
-        set.add(obj_man.metaVariable(DBContent::meta_var_track_num_id_.name()));
+    if (obj_man.existsMetaVariable(DBContent::meta_var_track_num_.name()))
+        set.add(obj_man.metaVariable(DBContent::meta_var_track_num_.name()));
 }
 
 void ListBoxViewDataSource::setChangedSlot()

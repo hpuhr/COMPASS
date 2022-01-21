@@ -102,6 +102,10 @@ class ViewManager : public QObject, public Configurable
 
     unsigned int newViewNumber();
 
+    void disableDataDistribution(bool value);
+    // disables propagation of data to the views. used when loading is performed for processing purposes
+
+
 protected:
     COMPASS& compass_;
 
@@ -124,6 +128,8 @@ protected:
     unsigned int container_count_{0};
 
     QStringList view_class_list_;
+
+    bool disable_data_distribution_ {false};
 
     virtual void checkSubConfigurables();
 };

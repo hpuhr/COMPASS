@@ -79,7 +79,7 @@ class CreateARTASAssociationsJob : public Job
     float association_dubious_close_time_future_{0};
     // time delta of tou where association is dubious when multible hashes exist
 
-    const std::string tracker_dbo_name_{"Tracker"};
+    const std::string tracker_dbcontent_name_{"CAT062"};
     std::map<int, UniqueARTASTrack> finished_tracks_;  // utn -> unique track
 
     // dbo -> hash -> rec_num, tod

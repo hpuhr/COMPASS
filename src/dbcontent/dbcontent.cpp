@@ -55,7 +55,7 @@ const Property DBContent::meta_var_m3a_id_ {"Mode 3/A Code", PropertyDataType::U
 const Property DBContent::meta_var_ta_id_ {"Aircraft Address", PropertyDataType::UINT};
 const Property DBContent::meta_var_ti_id_ {"Aircraft Identification", PropertyDataType::STRING};
 const Property DBContent::meta_var_mc_id_ {"Mode C Code", PropertyDataType::FLOAT};
-const Property DBContent::meta_var_track_num_id_ {"Track Number", PropertyDataType::UINT};;
+const Property DBContent::meta_var_track_num_ {"Track Number", PropertyDataType::UINT};;
 
 const Property DBContent::meta_var_latitude_ {"Latitude", PropertyDataType::DOUBLE};
 const Property DBContent::meta_var_longitude_ {"Longitude", PropertyDataType::DOUBLE};
@@ -813,7 +813,7 @@ void DBContent::sortContent()
     sort(variables_.begin(), variables_.end(),
         [](const std::unique_ptr<Variable>& a, const std::unique_ptr<Variable>& b) -> bool
     {
-        return a->name() > b->name();
+        return a->name() < b->name();
     });
 }
 

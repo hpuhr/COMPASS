@@ -161,13 +161,13 @@ void CreateARTASAssociationsJob::createUTNS()
 {
     loginf << "CreateARTASAssociationsJob: createUTNS";
 
-    if (!buffers_.count(tracker_dbo_name_))
+    if (!buffers_.count(tracker_dbcontent_name_))
     {
         logwrn << "CreateARTASAssociationsJob: createUTNS: no tracker data found";
         return;
     }
 
-    shared_ptr<Buffer> buffer = buffers_.at(tracker_dbo_name_);
+    shared_ptr<Buffer> buffer = buffers_.at(tracker_dbcontent_name_);
     size_t buffer_size = buffer->size();
 
     assert(buffer->has<unsigned int>(task_.trackerTrackNumVar()->name()));
@@ -176,8 +176,8 @@ void CreateARTASAssociationsJob::createUTNS()
     assert(buffer->has<bool>(task_.trackerCoastingVar()->name()));
     assert(buffer->has<string>(task_.trackerTRIsVar()->name()));
 
-    assert(buffer->has<unsigned int>(task_.keyVar()->getNameFor(tracker_dbo_name_)));
-    assert(buffer->has<float>(task_.todVar()->getNameFor(tracker_dbo_name_)));
+    assert(buffer->has<unsigned int>(task_.keyVar()->getNameFor(tracker_dbcontent_name_)));
+    assert(buffer->has<float>(task_.todVar()->getNameFor(tracker_dbcontent_name_)));
 
     NullableVector<unsigned int> track_nums = buffer->get<unsigned int>(task_.trackerTrackNumVar()->name());
     NullableVector<bool> track_begins = buffer->get<bool>(task_.trackerTrackBeginVar()->name());
@@ -185,8 +185,8 @@ void CreateARTASAssociationsJob::createUTNS()
     NullableVector<bool> track_coastings = buffer->get<bool>(task_.trackerCoastingVar()->name());
     NullableVector<string> tri_hashes = buffer->get<string>(task_.trackerTRIsVar()->name());
 
-    NullableVector<unsigned int> rec_nums = buffer->get<unsigned int>(task_.keyVar()->getNameFor(tracker_dbo_name_));
-    NullableVector<float> tods = buffer->get<float>(task_.todVar()->getNameFor(tracker_dbo_name_));
+    NullableVector<unsigned int> rec_nums = buffer->get<unsigned int>(task_.keyVar()->getNameFor(tracker_dbcontent_name_));
+    NullableVector<float> tods = buffer->get<float>(task_.todVar()->getNameFor(tracker_dbcontent_name_));
 
     map<int, UniqueARTASTrack> current_tracks;  // utn -> unique track
     map<int, int> current_track_mappings;       // track_num -> utn
@@ -361,7 +361,7 @@ void CreateARTASAssociationsJob::createARTASAssociations()
     loginf << "CreateARTASAssociationsJob: createARTASAssociations";
 
     DBContentManager& object_man = COMPASS::instance().dbContentManager();
-    DBContent& tracker_object = object_man.dbContent(tracker_dbo_name_);
+    DBContent& tracker_object = object_man.dbContent(tracker_dbcontent_name_);
 
 //    TODO_ASSERT
 
@@ -379,7 +379,7 @@ void CreateARTASAssociationsJob::createSensorAssociations()
 
     for (auto& dbo_it : object_man)
     {
-        if (dbo_it.first != tracker_dbo_name_ && dbo_it.second->hasData())
+        if (dbo_it.first != tracker_dbcontent_name_ && dbo_it.second->hasData())
         {
             string status = "Creating " + dbo_it.first + " Hash List";
             emit statusSignal(status.c_str());

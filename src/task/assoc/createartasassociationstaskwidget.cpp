@@ -159,6 +159,8 @@ CreateARTASAssociationsTaskWidget::CreateARTASAssociationsTaskWidget(
             &CreateARTASAssociationsTaskWidget::anyTrackFlagChangedSlot);
     main_layout->addWidget(mark_track_coasting_associations_dubious_check_);
 
+    main_layout->addStretch();
+
     update();
     expertModeChangedSlot();
 
