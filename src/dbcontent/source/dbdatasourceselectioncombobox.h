@@ -22,20 +22,9 @@ class DBDataSourceComboBox : public QComboBox
     DBDataSourceComboBox(QWidget* parent = 0)
         : QComboBox(parent)
     {
+        updateBox();
 
-        for (auto& ds_it : COMPASS::instance().dbContentManager().dataSources())
-        {
-            if (show_dstype_only_ && ds_it->dsType() != only_dstype_name_)
-                continue;
-
-            if (show_dbcontent_only_ && !ds_it->hasNumInserted(only_dbcontent_name_))
-                continue;
-
-            addItem(ds_it->name().c_str());
-        }
-
-        setCurrentIndex(0);
-        connect(this, SIGNAL(activated(const QString&)), this, SIGNAL(changedObject()));
+        connect(this, SIGNAL(activated(const QString&)), this, SIGNAL(changedSource()));
     }
     virtual ~DBDataSourceComboBox() {}
 
@@ -43,6 +32,8 @@ class DBDataSourceComboBox : public QComboBox
     {
         only_dstype_name_ = only_dstype_name;
         show_dstype_only_ = true;
+
+        updateBox();
     }
 
     void disableShowDSTypeOnly()
@@ -55,6 +46,8 @@ class DBDataSourceComboBox : public QComboBox
     {
         only_dbcontent_name_ = only_dbcontent_name;
         show_dbcontent_only_ = true;
+
+        updateBox();
     }
 
     void disableShowDBOOnly()
@@ -85,6 +78,23 @@ class DBDataSourceComboBox : public QComboBox
     bool show_dbcontent_only_{false};
     std::string only_dbcontent_name_;
 
+    void updateBox()
+    {
+        clear();
+
+        for (auto& ds_it : COMPASS::instance().dbContentManager().dataSources())
+        {
+            if (show_dstype_only_ && ds_it->dsType() != only_dstype_name_)
+                continue;
+
+            if (show_dbcontent_only_ && !ds_it->hasNumInserted(only_dbcontent_name_))
+                continue;
+
+            addItem(ds_it->name().c_str());
+        }
+
+        setCurrentIndex(0);
+    }
 };
 
 }

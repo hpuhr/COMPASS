@@ -58,7 +58,7 @@ CreateARTASAssociationsTaskWidget::CreateARTASAssociationsTaskWidget(
         assert(COMPASS::instance().dbContentManager().existsDBContent("CAT062"));
 
         ds_combo_ = new DBDataSourceComboBox();
-        ds_combo_->showDSTypeOnly("CAT062");
+        ds_combo_->showDBContentOnly("CAT062");
         connect(ds_combo_, &DBDataSourceComboBox::changedSource, this,
                 &CreateARTASAssociationsTaskWidget::currentDataSourceChangedSlot);
 

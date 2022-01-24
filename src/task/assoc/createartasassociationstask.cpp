@@ -307,6 +307,8 @@ void CreateARTASAssociationsTask::run()
     connect(status_dialog_.get(), &CreateARTASAssociationsStatusDialog::closeSignal, this,
             &CreateARTASAssociationsTask::closeStatusDialogSlot);
     status_dialog_->markStartTime();
+    status_dialog_->setAssociationStatus("Loading Data");
+    status_dialog_->show();
 
     checkAndSetTrackerVariableFromMeta(DBContent::meta_var_datasource_id_.name(), &tracker_ds_id_var_);
     checkAndSetTrackerVariableFromMeta(DBContent::meta_var_track_num_.name(), &tracker_track_num_var_);
@@ -381,7 +383,6 @@ void CreateARTASAssociationsTask::run()
     }
 
     //status_dialog_->setDBODoneFlags(dbo_loading_done_flags_);
-    status_dialog_->show();
 }
 
 void CreateARTASAssociationsTask::loadedDataDataSlot(
@@ -402,6 +403,11 @@ void CreateARTASAssociationsTask::loadingDoneSlot()
     assert(!create_job_);
 
     DBContentManager& object_man = COMPASS::instance().dbContentManager();
+
+    disconnect(&object_man, &DBContentManager::loadedDataSignal,
+            this, &CreateARTASAssociationsTask::loadedDataDataSlot);
+    disconnect(&object_man, &DBContentManager::loadingDoneSignal,
+            this, &CreateARTASAssociationsTask::loadingDoneSlot);
 
     object_man.clearData();
 
@@ -449,14 +455,17 @@ void CreateARTASAssociationsTask::createDoneSlot()
 {
     loginf << "CreateARTASAssociationsTask: createDoneSlot";
 
+    assert (create_job_);
+
     create_job_done_ = true;
 
-    status_dialog_->setAssociationStatus("Done");
+    status_dialog_->setAssociationCounts(create_job_->associationCounts());
     status_dialog_->setFoundHashes(create_job_->foundHashes());
     status_dialog_->setMissingHashesAtBeginning(create_job_->missingHashesAtBeginning());
     status_dialog_->setMissingHashes(create_job_->missingHashes());
     status_dialog_->setDubiousAssociations(create_job_->dubiousAssociations());
     status_dialog_->setFoundDuplicates(create_job_->foundHashDuplicates());
+    status_dialog_->setAssociationStatus("Done");
 
     status_dialog_->setDone();
 
@@ -474,6 +483,7 @@ void CreateARTASAssociationsTask::createDoneSlot()
     if (save_associations_)
     {
         COMPASS::instance().interface().setProperty(DONE_PROPERTY_NAME, "1");
+        COMPASS::instance().dbContentManager().setAssociationsIdentifier("ARTAS");
 
         task_manager_.appendSuccess("CreateARTASAssociationsTask: done after " + time_str);
         done_ = true;
@@ -802,13 +812,22 @@ void CreateARTASAssociationsTask::associationStatusSlot(QString status)
 
 void CreateARTASAssociationsTask::saveAssociationsQuestionSlot(QString question_str)
 {
+    assert (status_dialog_);
+    assert(create_job_);
+
+    status_dialog_->setAssociationCounts(create_job_->associationCounts());
+    status_dialog_->setFoundHashes(create_job_->foundHashes());
+    status_dialog_->setMissingHashesAtBeginning(create_job_->missingHashesAtBeginning());
+    status_dialog_->setMissingHashes(create_job_->missingHashes());
+    status_dialog_->setDubiousAssociations(create_job_->dubiousAssociations());
+    status_dialog_->setFoundDuplicates(create_job_->foundHashDuplicates());
+
     QMessageBox::StandardButton reply;
     reply = QMessageBox::question(nullptr, "Malformed Associations", question_str,
                                   QMessageBox::Yes | QMessageBox::No);
 
     save_associations_ = reply == QMessageBox::Yes;
 
-    assert(create_job_);
     create_job_->setSaveQuestionAnswer(save_associations_);
 }
 

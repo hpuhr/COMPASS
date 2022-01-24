@@ -16,7 +16,7 @@ CreateARTASAssociationsTaskDialog::CreateARTASAssociationsTaskDialog(CreateARTAS
 
     setModal(true);
 
-    setMinimumSize(QSize(1000, 800));
+    setMinimumSize(QSize(800, 600));
 
     QFont font_bold;
     font_bold.setBold(true);

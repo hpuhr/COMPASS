@@ -70,6 +70,7 @@ void CreateARTASAssociationsJob::run()
 
     loginf << "CreateARTASAssociationsJob: run: clearing associations";
 
+    emit statusSignal("Clearing Previous ARTAS Associations");
     removePreviousAssociations();
 
     // create utns
@@ -112,6 +113,8 @@ void CreateARTASAssociationsJob::run()
     }
 
     // save associations
+    emit statusSignal("Saving Associations");
+
     saveAssociations();
 
 //    object_man.setAssociationsDataSource(tracker_dbo_name_, task_.currentDataSourceName());
@@ -363,13 +366,13 @@ void CreateARTASAssociationsJob::saveAssociations()
 
     // write association info to buffers
 
-    unsigned int num_associated {0};
-    unsigned int num_not_associated {0};
-
     unsigned int rec_num;
 
     for (auto& cont_assoc_it : associations_) // dbcontent -> rec_nums
     {
+        unsigned int num_associated {0};
+        unsigned int num_not_associated {0};
+
         string dbcontent_name = cont_assoc_it.first;
         std::map<unsigned int,
                 std::tuple<unsigned int, std::vector<std::pair<std::string, unsigned int>>>>& associations
@@ -402,28 +405,21 @@ void CreateARTASAssociationsJob::saveAssociations()
             if (associations.count(rec_num))
             {
                 if (assoc_vec.isNull(cnt))
-                    assoc_vec.set(cnt, json::object());
-
-                json& assoc_json = assoc_vec.getRef(cnt);
-                assert (assoc_json.is_object());
-
-                if (!assoc_json.contains(associations_src_name_))
-                    assoc_json[associations_src_name_] = {get<0>(associations.at(rec_num))}; // set utn as vector
+                    assoc_vec.set(cnt, {get<0>(associations.at(rec_num))});
                 else
-                {
-                    assert (assoc_json[associations_src_name_].is_array());
-                    assoc_json[associations_src_name_].push_back(get<0>(associations.at(rec_num)));
-                }
+                    assoc_vec.getRef(cnt).push_back(get<0>(associations.at(rec_num)));
 
                 ++num_associated;
             }
             else
                 ++num_not_associated;
         }
-    }
 
-    loginf << "CreateARTASAssociationsJob: saveAssociations: assoc " << num_associated
-           << " not assoc " << num_not_associated;
+        association_counts_[dbcontent_name] = {buffers_.at(dbcontent_name)->size(), num_associated};
+
+        loginf << "CreateARTASAssociationsJob: saveAssociations: dcontent " << dbcontent_name
+               <<  " assoc " << num_associated << " not assoc " << num_not_associated;
+    }
 
     // delete all data from buffer except rec_nums and associations, rename to db column names
     for (auto& buf_it : buffers_)
@@ -465,15 +461,17 @@ void CreateARTASAssociationsJob::saveAssociations()
         dbContent::Variable& key_var =
                 dbcontent_man.metaVariable(DBContent::meta_var_rec_num_id_.name()).getFor(dbcontent_name);
 
-        unsigned int steps = buf_it.second->size() / 10000;
+        unsigned int chunk_size = 50000;
+
+        unsigned int steps = buf_it.second->size() / chunk_size;
 
         unsigned int index_from = 0;
         unsigned int index_to = 0;
 
         for (unsigned int cnt = 0; cnt <= steps; cnt++)
         {
-            index_from = cnt * 10000;
-            index_to = index_from + 10000;
+            index_from = cnt * chunk_size;
+            index_to = index_from + chunk_size;
 
             if (index_to > buf_it.second->size() - 1)
                 index_to = buf_it.second->size() - 1;
@@ -701,13 +699,7 @@ void CreateARTASAssociationsJob::removePreviousAssociations()
         assert (buf_it.second->has<json>(assoc_var_name));
         NullableVector<json>& assoc_vec = buf_it.second->get<json>(assoc_var_name);
 
-        for (unsigned int cnt=0; cnt < assoc_vec.size(); ++cnt)
-        {
-            if (!assoc_vec.isNull(cnt) && assoc_vec.get(cnt).contains(associations_src_name_))
-            {
-                  assoc_vec.getRef(cnt).erase(associations_src_name_);
-            }
-        }
+        assoc_vec.setAllNull();
     }
 }
 
@@ -795,6 +787,11 @@ void CreateARTASAssociationsJob::createSensorHashes(DBContent& object)
         sensor_hashes_[dbo_name].emplace(hashes.get(cnt),
                                          make_pair(rec_nums.get(cnt), tods.get(cnt)));
     }
+}
+
+std::map<std::string, std::pair<unsigned int, unsigned int> > CreateARTASAssociationsJob::associationCounts() const
+{
+    return association_counts_;
 }
 
 void CreateARTASAssociationsJob::setSaveQuestionAnswer(bool value)

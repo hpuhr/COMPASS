@@ -544,6 +544,20 @@ void DBContentManager::databaseOpenedSlot()
     loadDBDataSources();
     loadMaxRecordNumber();
 
+    if (COMPASS::instance().interface().hasProperty("associations_generated"))
+    {
+        assert(COMPASS::instance().interface().hasProperty("associations_id"));
+
+        has_associations_ =
+                COMPASS::instance().interface().getProperty("associations_generated") == "1";
+        associations_id_ = COMPASS::instance().interface().getProperty("associations_id");
+    }
+    else
+    {
+        has_associations_ = false;
+        associations_id_ = "";
+    }
+
     for (auto& object : dbcontent_)
         object.second->databaseOpenedSlot();
 
@@ -764,25 +778,22 @@ dbContent::DBDataSource& DBContentManager::dataSource(unsigned int ds_id)
 
 
 
-//bool DBContentManager::hasAssociations() const
-//{
-//    return has_associations_;
-//}
+bool DBContentManager::hasAssociations() const
+{
+    return has_associations_;
+}
 
-//void DBContentManager::setAssociationsDataSource(const std::string& dbo, const std::string& data_source_name)
-//{
-////    COMPASS::instance().interface().setProperty("associations_generated", "1");
-////    COMPASS::instance().interface().setProperty("associations_dbo", dbo);
-////    COMPASS::instance().interface().setProperty("associations_ds", data_source_name);
+void DBContentManager::setAssociationsIdentifier(const std::string& assoc_id)
+{
+    COMPASS::instance().interface().setProperty("associations_generated", "1");
+    COMPASS::instance().interface().setProperty("associations_id", assoc_id);
 
-////    has_associations_ = true;
-////    associations_dbo_ = dbo;
-////    assert(existsDBContent(associations_dbo_));
-////    associations_ds_ = data_source_name;
+    has_associations_ = true;
+    associations_id_ = assoc_id;
 
-////    if (load_widget_)
-////        loadWidget()->update();
-//}
+    if (load_widget_)
+        loadWidget()->update();
+}
 
 //void DBContentManager::setAssociationsByAll()
 //{
@@ -820,7 +831,7 @@ dbContent::DBDataSource& DBContentManager::dataSource(unsigned int ds_id)
 //    return associations_dbo_.size() && associations_ds_.size();
 //}
 
-//std::string DBContentManager::associationsDBObject() const { return associations_dbo_; }
+std::string DBContentManager::associationsID() const { return associations_id_; }
 
 //std::string DBContentManager::associationsDataSourceName() const { return associations_ds_; }
 

@@ -39,7 +39,7 @@ using namespace Utils;
 using namespace Utils::String;
 
 DBContentManagerDataSourcesWidget::DBContentManagerDataSourcesWidget(DBContentManager& object_manager)
-    : dbo_manager_(object_manager)
+    : dbcontent_man_(object_manager)
 {
     QFont font_bold;
     font_bold.setBold(true);
@@ -51,40 +51,46 @@ DBContentManagerDataSourcesWidget::DBContentManagerDataSourcesWidget(DBContentMa
     type_layout_ = new QGridLayout();
 
     main_layout->addLayout(type_layout_);
-    update();
+
+    main_layout->addStretch();
 
     // associations
 
-//    QGridLayout* assoc_layout = new QGridLayout();
+    QHBoxLayout* assoc_layout = new QHBoxLayout();
 
-//    QLabel* assoc_label = new QLabel("Associations");
-//    assoc_label->setFont(font_bold);
-//    assoc_layout->addWidget(assoc_label, 0, 0);
-
-//    associations_label_ = new QLabel();
-//    associations_label_->setAlignment(Qt::AlignTop | Qt::AlignLeft);
-//    assoc_layout->addWidget(associations_label_, 0, 1);
-
-//    main_layout->addLayout(assoc_layout);
-
-//    update();
-
-//    main_layout->addStretch();
-
-//    // limit stuff
-//    bool use_limit = dbo_manager_.useLimit();
-//    limit_check_ = new QCheckBox("Use Limit");
-//    limit_check_->setChecked(use_limit);
-//    connect(limit_check_, &QCheckBox::clicked, this, &DBObjectManagerLoadWidget::toggleUseLimit);
-//    main_layout->addWidget(limit_check_);
+    QLabel* assoc_label = new QLabel("Associations");
+    assoc_label->setFont(font_bold);
+    assoc_layout->addWidget(assoc_label);
 
 
-    QHBoxLayout* bottom_layout = new QHBoxLayout();
+    associations_label_ = new QLabel("None");
+    //associations_label_->setAlignment(Qt::AlignTop | Qt::AlignLeft);
+    assoc_layout->addWidget(associations_label_);
+
+    assoc_layout->addStretch();
+
+    main_layout->addLayout(assoc_layout);
+
+    //    update();
+
+    //    main_layout->addStretch();
+
+    //    // limit stuff
+    //    bool use_limit = dbo_manager_.useLimit();
+    //    limit_check_ = new QCheckBox("Use Limit");
+    //    limit_check_->setChecked(use_limit);
+    //    connect(limit_check_, &QCheckBox::clicked, this, &DBObjectManagerLoadWidget::toggleUseLimit);
+    //    main_layout->addWidget(limit_check_);
 
 
-    bottom_layout->addStretch();
+    //    QHBoxLayout* bottom_layout = new QHBoxLayout();
 
-    main_layout->addLayout(bottom_layout);
+
+    //    bottom_layout->addStretch();
+
+    //    main_layout->addLayout(bottom_layout);
+
+    update();
 
     setLayout(main_layout);
 }
@@ -164,11 +170,11 @@ void DBContentManagerDataSourcesWidget::loadDSChangedSlot()
 
 void DBContentManagerDataSourcesWidget::update()
 {
-    logdbg << "DBObjectManagerLoadWidget: update: num data sources " << dbo_manager_.dataSources().size();
+    logdbg << "DBObjectManagerLoadWidget: update: num data sources " << dbcontent_man_.dataSources().size();
 
     bool clear_required = false;
 
-    for (const auto& ds_it : dbo_manager_.dataSources())
+    for (const auto& ds_it : dbcontent_man_.dataSources())
     {
         if (!ds_boxes_.count(ds_it->name()))
         {
@@ -201,31 +207,14 @@ void DBContentManagerDataSourcesWidget::update()
         updateExistingContent();
 
 
-    //    QLayoutItem* item;
-    //    while ((item = info_layout_->takeAt(0)) != nullptr)
-    //    {
-    //        info_layout_->removeItem(item);
-    //    }
-
-    //    for (auto& obj_it : object_manager_)
-    //    {
-    //        info_layout_->addWidget(obj_it.second->infoWidget());
-    //    }
-
-    //    assert(associations_label_);
-    //    if (dbo_manager_.hasAssociations())
-    //    {
-    //        if (dbo_manager_.hasAssociationsDataSource())
-    //        {
-    //            std::string tmp = "From " + dbo_manager_.associationsDBObject() + ":" +
-    //                    dbo_manager_.associationsDataSourceName();
-    //            associations_label_->setText(tmp.c_str());
-    //        }
-    //        else
-    //            associations_label_->setText("All");
-    //    }
-    //    else
-    //        associations_label_->setText("None");
+    assert(associations_label_);
+    if (dbcontent_man_.hasAssociations())
+    {
+        std::string tmp = "From " + dbcontent_man_.associationsID();
+        associations_label_->setText(tmp.c_str());
+    }
+    else
+        associations_label_->setText("None");
 }
 
 void DBContentManagerDataSourcesWidget::clearAndCreateContent()
@@ -310,7 +299,7 @@ void DBContentManagerDataSourcesWidget::clearAndCreateContent()
 
         ds_found = false;
 
-        for (const auto& ds_it : dbo_manager_.dataSources())
+        for (const auto& ds_it : dbcontent_man_.dataSources())
         {
             if (ds_it->dsType() != ds_type_name)
                 continue;
@@ -439,7 +428,7 @@ void DBContentManagerDataSourcesWidget::updateExistingContent()
 
     if (show_counts_)
     {
-        for (const auto& ds_it : dbo_manager_.dataSources())
+        for (const auto& ds_it : dbcontent_man_.dataSources())
         {
             //loginf << row << " '" << ds_it->dsType() << "' '" << dstype << "'";
 

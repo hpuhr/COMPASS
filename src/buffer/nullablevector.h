@@ -395,7 +395,7 @@ void NullableVector<T>::setAllNull()
     unsigned int data_size = data_.size();
 
     for (unsigned int cnt=0; cnt < data_size; ++cnt)
-        setNull(index);
+        setNull(cnt);
 }
 
 

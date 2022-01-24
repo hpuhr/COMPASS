@@ -152,13 +152,13 @@ public:
 
     void quitLoading();
 
-//    bool hasAssociations() const;
-//    void setAssociationsDataSource(const std::string& dbo, const std::string& data_source_name);
+    bool hasAssociations() const;
+    void setAssociationsIdentifier(const std::string& assoc_id);
 //    void setAssociationsByAll();
 //    void removeAssociations();
 
 //    bool hasAssociationsDataSource() const;
-//    std::string associationsDBObject() const;
+    std::string associationsID() const;
 //    std::string associationsDataSourceName() const;
 
     bool isOtherDBObjectPostProcessing(DBContent& object);
@@ -186,9 +186,8 @@ protected:
     unsigned int limit_min_{0};
     unsigned int limit_max_{100000};
 
-//    bool has_associations_{false};
-//    std::string associations_dbo_;
-//    std::string associations_ds_;
+    bool has_associations_{false};
+    std::string associations_id_;
 
     bool has_max_rec_num_ {false};
     unsigned int max_rec_num_ {0};

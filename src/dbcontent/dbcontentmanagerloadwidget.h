@@ -47,11 +47,13 @@ public:
     void loadingDone();
 
 private:
-    DBContentManager& dbo_manager_;
+    DBContentManager& dbcontent_man_;
 
     bool show_counts_ {false};
 
     QGridLayout* type_layout_{nullptr};
+
+    QLabel* associations_label_{nullptr};
 
     std::map<std::string, QCheckBox*> ds_type_boxes_;
 

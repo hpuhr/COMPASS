@@ -59,6 +59,8 @@ public:
     size_t foundHashDuplicates() const;
     size_t dubiousAssociations() const;
 
+    std::map<std::string, std::pair<unsigned int, unsigned int> > associationCounts() const;
+
 protected:
     CreateARTASAssociationsTask& task_;
     DBInterface& db_interface_;
@@ -112,6 +114,8 @@ protected:
     void createSensorHashes(DBContent& object);
 
     std::map<unsigned int, unsigned int> track_rec_num_utns_;  // track rec num -> utn
+
+    std::map<std::string, std::pair<unsigned int,unsigned int>> association_counts_; // dbcontent -> total, assoc cnt
 
     void removePreviousAssociations();
 
