@@ -18,9 +18,15 @@
 #ifndef ARRAYLIST_H_
 #define ARRAYLIST_H_
 
+
+#include "buffer.h"
+#include "property.h"
+#include "stringconv.h"
+
 #include <tbb/tbb.h>
 
 #include <QDateTime>
+
 #include <array>
 #include <bitset>
 #include <iomanip>
@@ -29,10 +35,7 @@
 #include <set>
 #include <sstream>
 #include <vector>
-
-#include "buffer.h"
-#include "property.h"
-#include "stringconv.h"
+#include <type_traits>
 
 //#include "boost/lexical_cast.hpp"
 
@@ -58,6 +61,28 @@ public:
 
     /// @brief Returns const reference to a specific value
     const T get(unsigned int index);
+
+    // exists only for non-integral types
+    template<typename T_ = T, typename std::enable_if<!std::is_integral<T_>::value>::type* = nullptr>
+    T_& getRef(unsigned int index)
+    {
+        logdbg << "NullableVector " << property_.name() << ": getRef: index " << index;
+        if (BUFFER_PEDANTIC_CHECKING)
+        {
+            assert(data_.size() <= buffer_.data_size_);
+            assert(null_flags_.size() <= buffer_.data_size_);
+            assert(index < data_.size());
+        }
+
+        if (isNull(index))
+        {
+            logerr << "NullableVector " << property_.name() << ": getRef: index " << index << " is null";
+            assert (false);
+        }
+
+        return data_.at(index);
+    }
+
 
     /// @brief Returns string of a specific value
     const std::string getAsString(unsigned int index);
@@ -166,19 +191,12 @@ const T NullableVector<T>::get(unsigned int index)
         assert(data_.size() <= buffer_.data_size_);
         assert(null_flags_.size() <= buffer_.data_size_);
         assert(index < data_.size());
-        assert(index < data_.size());
     }
 
     if (isNull(index))
     {
-        if (BUFFER_PEDANTIC_CHECKING)
-        {
-            logerr << "NullableVector " << property_.name() << ": get: index " << index
-                   << " is null";
-            assert(false);
-        }
-
-        throw std::runtime_error("NullableVector: get of Null value " + std::to_string(index));
+        logerr << "NullableVector " << property_.name() << ": get: index " << index << " is null";
+        assert (false);
     }
 
     return data_.at(index);

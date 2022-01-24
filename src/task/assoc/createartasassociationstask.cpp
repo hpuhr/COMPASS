@@ -754,12 +754,6 @@ VariableSet CreateARTASAssociationsTask::getReadSetFor(const std::string& dbo_na
 {
     VariableSet read_set;
 
-    assert(rec_num_var_);
-    assert(rec_num_var_->existsIn(dbo_name));
-    read_set.add(rec_num_var_->getFor(dbo_name));
-
-    assert(hash_var_);
-
     assert(tod_var_);
     assert(tod_var_->existsIn(dbo_name));
     read_set.add(tod_var_->getFor(dbo_name));
@@ -787,9 +781,15 @@ VariableSet CreateARTASAssociationsTask::getReadSetFor(const std::string& dbo_na
     }
     else
     {
+        assert(hash_var_);
         assert(hash_var_->existsIn(dbo_name));
         read_set.add(hash_var_->getFor(dbo_name));
     }
+
+    // must be last for update process
+    assert(rec_num_var_);
+    assert(rec_num_var_->existsIn(dbo_name));
+    read_set.add(rec_num_var_->getFor(dbo_name));
 
     return read_set;
 }
@@ -811,6 +811,7 @@ void CreateARTASAssociationsTask::saveAssociationsQuestionSlot(QString question_
     assert(create_job_);
     create_job_->setSaveQuestionAnswer(save_associations_);
 }
+
 
 void CreateARTASAssociationsTask::closeStatusDialogSlot()
 {

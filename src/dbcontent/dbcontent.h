@@ -55,7 +55,7 @@ class DBContent : public QObject, public Configurable
 
 signals:
     void updateProgressSignal(float percent);
-    void updateDoneSignal(DBContent& object);
+    void updateDoneSignal(DBContent& dbcontent);
 
     void labelDefinitionChangedSignal();
 
@@ -138,8 +138,7 @@ public:
     void quitLoading();
 
     void insertData(std::shared_ptr<Buffer> buffer);
-    void updateData(dbContent::Variable& key_var, dbContent::VariableSet& list,
-                    std::shared_ptr<Buffer> buffer);
+    void updateData(dbContent::Variable& key_var, std::shared_ptr<Buffer> buffer);
 
     std::map<unsigned int, std::string> loadLabelData(std::vector<unsigned int> rec_nums, int break_item_cnt);
 
@@ -150,8 +149,7 @@ public:
     size_t count();
     size_t loadedCount();
 
-    virtual void generateSubConfigurable(const std::string& class_id,
-                                         const std::string& instance_id);
+    virtual void generateSubConfigurable(const std::string& class_id, const std::string& instance_id);
 
     bool hasKeyVariable();
     dbContent::Variable& getKeyVariable();

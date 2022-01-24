@@ -518,8 +518,10 @@ string SQLGenerator::createDBUpdateStringBind(shared_ptr<Buffer> buffer,
     ss << "UPDATE " << table_name << " SET ";
 
     if (key_col_name != properties.at(size - 1).name())
+    {
         throw runtime_error(
-                "SQLGenerator: createDBUpdateStringBind: id var not at last position");
+                "SQLGenerator: createDBUpdateStringBind: key_col_name not at last position");
+    }
 
     for (unsigned int cnt = 0; cnt < size; cnt++)
     {

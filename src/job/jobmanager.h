@@ -33,18 +33,8 @@
 #include "singleton.h"
 
 class WorkerThread;
-// class DBJob;
 class Job;
 
-/**
- * @brief Manages execution of TransformationJobs
- *
- * Allows addition of TransformationJobs, which are held in a list and assigned to any active
- * TransformationWorkers. A number of such TransformationWorkers are generated and managed. Using a
- * timer event, jobs are checked if earlier jobs are done and flushed in the order of addition. Jobs
- * may be done, but can be blocked by unfinished jobs which were added earlier.
- *
- */
 class JobManager : public QThread, public Singleton, public Configurable
 {
     Q_OBJECT
@@ -54,8 +44,6 @@ class JobManager : public QThread, public Singleton, public Configurable
 
   public:
     virtual ~JobManager();
-
-    // all job's done signal order is maintained in the call order
 
     // blocks started of later ones
     void addBlockingJob(std::shared_ptr<Job> job);
@@ -85,7 +73,6 @@ class JobManager : public QThread, public Singleton, public Configurable
     }
 
   protected:
-    /// Flag indicating if thread should stop.
     volatile bool stop_requested_;
     volatile bool stopped_;
 
@@ -103,7 +90,6 @@ class JobManager : public QThread, public Singleton, public Configurable
 
     boost::posix_time::ptime last_update_time_;
 
-    /// @brief Constructor
     JobManager();
 
   private:

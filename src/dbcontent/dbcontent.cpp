@@ -464,7 +464,7 @@ void DBContent::insertDoneSlot()
     assert (existsInDB()); // check
 }
 
-void DBContent::updateData(Variable& key_var, VariableSet& list, shared_ptr<Buffer> buffer)
+void DBContent::updateData(Variable& key_var, shared_ptr<Buffer> buffer)
 {
     assert(!update_job_);
 

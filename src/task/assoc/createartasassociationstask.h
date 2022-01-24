@@ -143,13 +143,10 @@ protected:
 
     float end_track_time_{0};  // time-delta after which begin a new track
 
-    float association_time_past_{
-        0};  // time_delta for which associations are considered into past time
-    float association_time_future_{
-        0};  // time_delta for which associations are considered into future time
+    float association_time_past_{0};  // time_delta for which associations are considered into past time
+    float association_time_future_{0};  // time_delta for which associations are considered into future time
 
-    float misses_acceptable_time_{
-        0};  // time delta at beginning/end of recording where misses are acceptable
+    float misses_acceptable_time_{0};  // time delta at beginning/end of recording where misses are acceptable
 
     float associations_dubious_distant_time_{0};
     // time delta of tou where association is dubious bc too distant in time

@@ -27,13 +27,15 @@
 #include "dbcontent/variable/metavariable.h"
 #include "stringconv.h"
 
-#include <math.h>
-
 #include <QThread>
+#include <QCoreApplication>
+
+#include <cmath>
 #include <algorithm>
 
 using namespace Utils;
 using namespace std;
+using namespace nlohmann;
 
 CreateARTASAssociationsJob::CreateARTASAssociationsJob(
     CreateARTASAssociationsTask& task, DBInterface& db_interface,
@@ -68,9 +70,7 @@ void CreateARTASAssociationsJob::run()
 
     loginf << "CreateARTASAssociationsJob: run: clearing associations";
 
-    DBContentManager& object_man = COMPASS::instance().dbContentManager();
-
-    //object_man.removeAssociations(); TODO
+    removePreviousAssociations();
 
     // create utns
     emit statusSignal("Creating UTNs");
@@ -96,10 +96,6 @@ void CreateARTASAssociationsJob::run()
 
         if (!save_question_answer_)  // nope
         {
-            emit statusSignal("Clearing created Associations");
-
-            //object_man.removeAssociations();
-
             stop_time = boost::posix_time::microsec_clock::local_time();
 
             double load_time;
@@ -116,17 +112,7 @@ void CreateARTASAssociationsJob::run()
     }
 
     // save associations
-
-//    TODO_ASSERT
-
-//    emit statusSignal("Saving Associations");
-//    for (auto& dbo_it : object_man)
-//    {
-//        loginf << "CreateARTASAssociationsJob: run: processing object " << dbo_it.first
-//               << " associated " << dbo_it.second->associations().size() << " of "
-//               << dbo_it.second->count();
-//        dbo_it.second->saveAssociations();
-//    }
+    saveAssociations();
 
 //    object_man.setAssociationsDataSource(tracker_dbo_name_, task_.currentDataSourceName());
 
@@ -138,6 +124,7 @@ void CreateARTASAssociationsJob::run()
 
     loginf << "CreateARTASAssociationsJob: run: done ("
            << String::doubleToStringPrecision(load_time, 2) << " s).";
+
     done_ = true;
 }
 
@@ -360,14 +347,150 @@ void CreateARTASAssociationsJob::createARTASAssociations()
 {
     loginf << "CreateARTASAssociationsJob: createARTASAssociations";
 
-    DBContentManager& object_man = COMPASS::instance().dbContentManager();
-    DBContent& tracker_object = object_man.dbContent(tracker_dbcontent_name_);
+    // set utns in tracker rec_nums
 
-//    TODO_ASSERT
+    for (auto& ut_it : finished_tracks_)                    // utn -> UAT
+        for (auto& assoc_it : ut_it.second.rec_nums_tris_)  // rec_num -> tri
+            associations_[tracker_dbcontent_name_][assoc_it.first] = {ut_it.first, {}};
+            //tracker_object.addAssociation(assoc_it.first, ut_it.first, true, assoc_it.first);
+}
 
-//    for (auto& ut_it : finished_tracks_)                    // utn -> UAT
-//        for (auto& assoc_it : ut_it.second.rec_nums_tris_)  // rec_num -> tri
-//            tracker_object.addAssociation(assoc_it.first, ut_it.first, true, assoc_it.first);
+void CreateARTASAssociationsJob::saveAssociations()
+{
+    loginf << "CreateARTASAssociationsJob: saveAssociations";
+
+    DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
+
+    // write association info to buffers
+
+    unsigned int num_associated {0};
+    unsigned int num_not_associated {0};
+
+    unsigned int rec_num;
+
+    for (auto& cont_assoc_it : associations_) // dbcontent -> rec_nums
+    {
+        string dbcontent_name = cont_assoc_it.first;
+        std::map<unsigned int,
+                std::tuple<unsigned int, std::vector<std::pair<std::string, unsigned int>>>>& associations
+                = cont_assoc_it.second;
+
+        loginf << "CreateARTASAssociationsJob: saveAssociations: db content " << dbcontent_name;
+
+        assert (buffers_.count(dbcontent_name));
+
+        assert (dbcontent_man.metaVariable(DBContent::meta_var_rec_num_id_.name()).existsIn(dbcontent_name));
+        assert (dbcontent_man.metaVariable(DBContent::meta_var_associations_.name()).existsIn(dbcontent_name));
+
+        string rec_num_var_name =
+                dbcontent_man.metaVariable(DBContent::meta_var_rec_num_id_.name()).getFor(dbcontent_name).name();
+        string assoc_var_name =
+                dbcontent_man.metaVariable(DBContent::meta_var_associations_.name()).getFor(dbcontent_name).name();
+
+        assert (buffers_.at(dbcontent_name)->has<unsigned int>(rec_num_var_name));
+        assert (buffers_.at(dbcontent_name)->has<json>(assoc_var_name));
+
+        NullableVector<unsigned int>& rec_num_vec = buffers_.at(dbcontent_name)->get<unsigned int>(rec_num_var_name);
+        NullableVector<json>& assoc_vec = buffers_.at(dbcontent_name)->get<json>(assoc_var_name);
+
+        for (unsigned int cnt=0; cnt < buffers_.at(dbcontent_name)->size(); ++cnt)
+        {
+            assert (!rec_num_vec.isNull(cnt));
+
+            rec_num = rec_num_vec.get(cnt);
+
+            if (associations.count(rec_num))
+            {
+                if (assoc_vec.isNull(cnt))
+                    assoc_vec.set(cnt, json::object());
+
+                json& assoc_json = assoc_vec.getRef(cnt);
+                assert (assoc_json.is_object());
+
+                if (!assoc_json.contains(associations_src_name_))
+                    assoc_json[associations_src_name_] = {get<0>(associations.at(rec_num))}; // set utn as vector
+                else
+                {
+                    assert (assoc_json[associations_src_name_].is_array());
+                    assoc_json[associations_src_name_].push_back(get<0>(associations.at(rec_num)));
+                }
+
+                ++num_associated;
+            }
+            else
+                ++num_not_associated;
+        }
+    }
+
+    loginf << "CreateARTASAssociationsJob: saveAssociations: assoc " << num_associated
+           << " not assoc " << num_not_associated;
+
+    // delete all data from buffer except rec_nums and associations, rename to db column names
+    for (auto& buf_it : buffers_)
+    {
+        string dbcontent_name = buf_it.first;
+
+        string rec_num_var_name =
+                dbcontent_man.metaVariable(DBContent::meta_var_rec_num_id_.name()).getFor(dbcontent_name).name();
+        string rec_num_col_name =
+                dbcontent_man.metaVariable(DBContent::meta_var_rec_num_id_.name()).getFor(dbcontent_name).dbColumnName();
+
+        string assoc_var_name =
+                dbcontent_man.metaVariable(DBContent::meta_var_associations_.name()).getFor(dbcontent_name).name();
+        string assoc_col_name =
+                dbcontent_man.metaVariable(DBContent::meta_var_associations_.name()).getFor(dbcontent_name).dbColumnName();
+
+
+        PropertyList properties = buf_it.second->properties();
+
+        for (auto& prop_it : properties.properties())
+        {
+            if (prop_it.name() == rec_num_var_name)
+                buf_it.second->rename<unsigned int>(rec_num_var_name, rec_num_col_name);
+            else if (prop_it.name() == assoc_var_name)
+                buf_it.second->rename<json>(assoc_var_name, assoc_col_name);
+            else
+                buf_it.second->deleteProperty(prop_it);
+        }
+    }
+
+    // actually save data, ok since DB job
+    for (auto& buf_it : buffers_)
+    {
+        string dbcontent_name = buf_it.first;
+
+        loginf << "CreateARTASAssociationsJob: saveAssociations: saving for " << dbcontent_name;
+
+        DBContent& dbcontent = dbcontent_man.dbContent(buf_it.first);
+        dbContent::Variable& key_var =
+                dbcontent_man.metaVariable(DBContent::meta_var_rec_num_id_.name()).getFor(dbcontent_name);
+
+        unsigned int steps = buf_it.second->size() / 10000;
+
+        unsigned int index_from = 0;
+        unsigned int index_to = 0;
+
+        for (unsigned int cnt = 0; cnt <= steps; cnt++)
+        {
+            index_from = cnt * 10000;
+            index_to = index_from + 10000;
+
+            if (index_to > buf_it.second->size() - 1)
+                index_to = buf_it.second->size() - 1;
+
+            loginf << "CreateARTASAssociationsJob: saveAssociations: step " << cnt << " steps " << steps << " from "
+                   << index_from << " to " << index_to;
+
+            db_interface_.updateBuffer(dbcontent.dbTableName(), key_var.dbColumnName(),
+                                       buf_it.second, index_from, index_to);
+
+        }
+
+    }
+
+    buffers_.clear();
+
+    loginf << "CreateARTASAssociationsJob: saveAssociations: done";
 }
 
 void CreateARTASAssociationsJob::createSensorAssociations()
@@ -516,10 +639,20 @@ void CreateARTASAssociationsJob::createSensorAssociations()
                         ++dubious_associations_cnt_;
                     }
 
-// TODO_ASSERT
-
 //                    object_man.object(best_match_dbo_name)
 //                        .addAssociation(best_match_rec_num, ut_it.first, true, assoc_it.first);
+
+                    // add utn to non-tracker rec_num
+                    associations_[best_match_dbo_name][best_match_rec_num] = {ut_it.first, {}};
+
+                    // add non-tracker rec_num to tracker src rec_nums
+
+                    assert (associations_.count(tracker_dbcontent_name_));
+                    assert (associations_.at(tracker_dbcontent_name_).count(assoc_it.first));
+
+                    get<1>(associations_.at(tracker_dbcontent_name_).at(assoc_it.first)).push_back(
+                                {best_match_dbo_name, best_match_rec_num});
+
                     ++found_hashes_cnt_;
                 }
                 else
@@ -550,6 +683,32 @@ void CreateARTASAssociationsJob::createSensorAssociations()
            << found_hashes_cnt_ << " found, " << acceptable_missing_hashes_cnt_
            << " missing at beginning, " << missing_hashes_cnt_ << " missing, "
            << found_hash_duplicates_cnt_ << " duplicates";
+}
+
+void CreateARTASAssociationsJob::removePreviousAssociations()
+{
+    loginf << "CreateARTASAssociationsJob: removePreviousAssociations";
+
+    DBContentManager& object_man = COMPASS::instance().dbContentManager();
+
+    for (auto& buf_it : buffers_)
+    {
+        assert (object_man.metaVariable(DBContent::meta_var_associations_.name()).existsIn(buf_it.first));
+
+        string assoc_var_name =
+                object_man.metaVariable(DBContent::meta_var_associations_.name()).getFor(buf_it.first).name();
+
+        assert (buf_it.second->has<json>(assoc_var_name));
+        NullableVector<json>& assoc_vec = buf_it.second->get<json>(assoc_var_name);
+
+        for (unsigned int cnt=0; cnt < assoc_vec.size(); ++cnt)
+        {
+            if (!assoc_vec.isNull(cnt) && assoc_vec.get(cnt).contains(associations_src_name_))
+            {
+                  assoc_vec.getRef(cnt).erase(associations_src_name_);
+            }
+        }
+    }
 }
 
 bool CreateARTASAssociationsJob::isPossibleAssociation(float tod_track, float tod_target)

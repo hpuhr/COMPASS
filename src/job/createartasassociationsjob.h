@@ -39,11 +39,11 @@ class CreateARTASAssociationsJob : public Job
 {
     Q_OBJECT
 
-  signals:
+signals:
     void statusSignal(QString status);
     void saveAssociationsQuestionSignal(QString question);
 
-  public:
+public:
     CreateARTASAssociationsJob(CreateARTASAssociationsTask& task, DBInterface& db_interface,
                                std::map<std::string, std::shared_ptr<Buffer>> buffers);
 
@@ -59,18 +59,15 @@ class CreateARTASAssociationsJob : public Job
     size_t foundHashDuplicates() const;
     size_t dubiousAssociations() const;
 
-  protected:
+protected:
     CreateARTASAssociationsTask& task_;
     DBInterface& db_interface_;
     std::map<std::string, std::shared_ptr<Buffer>> buffers_;
 
-    float misses_acceptable_time_{
-        0};  // time delta at beginning/end of recording where misses are acceptable
+    float misses_acceptable_time_{0};  // time delta at beginning/end of recording where misses are acceptable
 
-    float association_time_past_{
-        0};  // time_delta for which associations are considered into past time
-    float association_time_future_{
-        0};  // time_delta for which associations are considered into future time
+    float association_time_past_{0};  // time_delta for which associations are considered into past time
+    float association_time_future_{0};  // time_delta for which associations are considered into future time
 
     float associations_dubious_distant_time_{0};
     // time delta of tou where association is dubious bc too distant in time
@@ -80,10 +77,17 @@ class CreateARTASAssociationsJob : public Job
     // time delta of tou where association is dubious when multible hashes exist
 
     const std::string tracker_dbcontent_name_{"CAT062"};
+    const std::string associations_src_name_{"ARTAS"};
     std::map<int, UniqueARTASTrack> finished_tracks_;  // utn -> unique track
 
     // dbo -> hash -> rec_num, tod
     std::map<std::string, std::multimap<std::string, std::pair<int, float>>> sensor_hashes_;
+
+    std::map<std::string,
+    std::map<unsigned int,
+    std::tuple<unsigned int, std::vector<std::pair<std::string, unsigned int>>>>> associations_;
+    // dbcontent -> rec_num -> <utn, src rec_nums (dbcontent, rec_num)>
+
 
     float first_track_tod_{0};
     float last_track_tod_{0};
@@ -103,9 +107,13 @@ class CreateARTASAssociationsJob : public Job
     void createUTNS();
     void createARTASAssociations();
     void createSensorAssociations();
+    void saveAssociations();
+
     void createSensorHashes(DBContent& object);
 
     std::map<unsigned int, unsigned int> track_rec_num_utns_;  // track rec num -> utn
+
+    void removePreviousAssociations();
 
     bool isPossibleAssociation(float tod_track, float tod_target);
     bool isAssociationInDubiousDistantTime(float tod_track, float tod_target);
