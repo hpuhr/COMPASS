@@ -563,6 +563,8 @@ void DBContentManager::databaseOpenedSlot()
 
     if (load_widget_)
         load_widget_->update();
+
+    emit associationStatusChangedSignal();
 }
 
 void DBContentManager::databaseClosedSlot()
@@ -572,11 +574,16 @@ void DBContentManager::databaseClosedSlot()
     max_rec_num_ = 0;
     has_max_rec_num_ = false;
 
+    has_associations_ = false;
+    associations_id_ = "";
+
     for (auto& object : dbcontent_)
         object.second->databaseClosedSlot();
 
     if (load_widget_)
         load_widget_->update();
+
+    associationStatusChangedSignal();
 }
 
 //void DBContentManager::databaseContentChangedSlot()

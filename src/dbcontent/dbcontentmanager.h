@@ -59,6 +59,7 @@ public slots:
 
 signals:
     void dbObjectsChangedSignal();
+    void associationStatusChangedSignal();
 
     void loadingStartedSignal(); // emitted when load has been started
     // all data contained, also new one. requires_reset true indicates that all shown info should be re-created,
