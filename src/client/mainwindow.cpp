@@ -43,6 +43,9 @@
 #include "createartasassociationstask.h"
 #include "createartasassociationstaskdialog.h"
 
+#include "createassociationstask.h"
+#include "createassociationstaskdialog.h"
+
 #include <QApplication>
 #include <QFileDialog>
 #include <QCloseEvent>
@@ -281,6 +284,11 @@ void MainWindow::createMenus ()
     assoc_artas_action->setStatusTip(tr("Create Unique Targets based on ARTAS TRI information"));
     connect(assoc_artas_action, &QAction::triggered, this, &MainWindow::calculateAssociationsARTASSlot);
     process_menu_->addAction(assoc_artas_action);
+
+    QAction* assoc_action = new QAction(tr("Calculate Associations"));
+    assoc_action->setStatusTip(tr("Create Unique Targets based on all DB Content"));
+    connect(assoc_action, &QAction::triggered, this, &MainWindow::calculateAssociationsSlot);
+    process_menu_->addAction(assoc_action);
 }
 
 void MainWindow::updateMenus()
@@ -1172,6 +1180,13 @@ void MainWindow::calculateAssociationsARTASSlot()
     loginf << "MainWindow: calculateAssociationsARTASSlot";
 
     COMPASS::instance().taskManager().createArtasAssociationsTask().dialog()->show();
+}
+
+void MainWindow::calculateAssociationsSlot()
+{
+    loginf << "MainWindow: calculateAssociationsSlot";
+
+    COMPASS::instance().taskManager().createAssociationsTask().dialog()->show();
 }
 
 void MainWindow::configureMetaVariablesSlot()

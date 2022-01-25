@@ -86,8 +86,8 @@ protected:
     std::map<std::string, std::multimap<std::string, std::pair<int, float>>> sensor_hashes_;
 
     std::map<std::string,
-    std::map<unsigned int,
-    std::tuple<unsigned int, std::vector<std::pair<std::string, unsigned int>>>>> associations_;
+        std::map<unsigned int,
+            std::tuple<unsigned int, std::vector<std::pair<std::string, unsigned int>>>>> associations_;
     // dbcontent -> rec_num -> <utn, src rec_nums (dbcontent, rec_num)>
 
 

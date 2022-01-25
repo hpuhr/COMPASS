@@ -66,6 +66,7 @@ private slots:
     void importAsterixFromNetworkSlot();
 
     void calculateAssociationsARTASSlot();
+    void calculateAssociationsSlot();
 
     void quitRequestedSlot();
     void showAddViewMenuSlot();

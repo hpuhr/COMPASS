@@ -136,6 +136,7 @@ bool CreateARTASAssociationsTask::checkPrerequisites()
     assert (object_man.existsDBContent("CAT062"));
 
     DBContent& tracker_obj = object_man.dbContent("CAT062");
+
     if (!tracker_obj.hasData()) // check if tracker data exists
         return false;
 
@@ -174,14 +175,14 @@ bool CreateARTASAssociationsTask::isRecommended()
 
 bool CreateARTASAssociationsTask::canRun()
 {
-    DBContentManager& object_man = COMPASS::instance().dbContentManager();
+    DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
 
-    logdbg << "CreateARTASAssociationsTask: canRun: tracker " << object_man.existsDBContent("CAT062");
+    logdbg << "CreateARTASAssociationsTask: canRun: tracker " << dbcontent_man.existsDBContent("CAT062");
 
-    if (!object_man.existsDBContent("CAT062"))
+    if (!dbcontent_man.existsDBContent("CAT062"))
         return false;
 
-    DBContent& tracker_object = object_man.dbContent("CAT062");
+    DBContent& tracker_object = dbcontent_man.dbContent("CAT062");
 
     // tracker stuff
     logdbg << "CreateARTASAssociationsTask: canRun: tracker loadable " << tracker_object.loadable();
@@ -197,15 +198,15 @@ bool CreateARTASAssociationsTask::canRun()
 
 
     logdbg << "CreateARTASAssociationsTask: canRun: num tracker data sources "
-               << object_man.hasDataSourcesOfDBContent("CAT062");
+               << dbcontent_man.hasDataSourcesOfDBContent("CAT062");
 
-    if (!object_man.hasDataSourcesOfDBContent("CAT062"))
+    if (!dbcontent_man.hasDataSourcesOfDBContent("CAT062"))
         return false;
 
     bool ds_found{false};
     unsigned int current_ds_id {0};
 
-    for (auto& ds_it : object_man.dataSources())
+    for (auto& ds_it : dbcontent_man.dataSources())
     {
         if (!ds_it->numInsertedMap().count("CAT062")) // check if track data exists
             continue;
@@ -235,30 +236,30 @@ bool CreateARTASAssociationsTask::canRun()
 
     // meta var stuff
     loginf << "CreateARTASAssociationsTask: canRun: meta vars "
-        << !object_man.existsMetaVariable(DBContent::meta_var_rec_num_id_.name()) << " "
-        << !object_man.existsMetaVariable(DBContent::meta_var_datasource_id_.name()) << " "
-        << !object_man.existsMetaVariable(DBContent::meta_var_tod_id_.name()) << " "
-        << !object_man.existsMetaVariable(DBContent::meta_var_track_num_.name()) << " "
-        << !object_man.existsMetaVariable(DBContent::meta_var_artas_hash_.name()) << " "
-        << !object_man.existsMetaVariable(DBContent::meta_var_associations_.name());
+        << !dbcontent_man.existsMetaVariable(DBContent::meta_var_rec_num_id_.name()) << " "
+        << !dbcontent_man.existsMetaVariable(DBContent::meta_var_datasource_id_.name()) << " "
+        << !dbcontent_man.existsMetaVariable(DBContent::meta_var_tod_id_.name()) << " "
+        << !dbcontent_man.existsMetaVariable(DBContent::meta_var_track_num_.name()) << " "
+        << !dbcontent_man.existsMetaVariable(DBContent::meta_var_artas_hash_.name()) << " "
+        << !dbcontent_man.existsMetaVariable(DBContent::meta_var_associations_.name());
 
-    if (!object_man.existsMetaVariable(DBContent::meta_var_rec_num_id_.name()) ||
-            !object_man.existsMetaVariable(DBContent::meta_var_datasource_id_.name()) ||
-            !object_man.existsMetaVariable(DBContent::meta_var_tod_id_.name()) ||
-            !object_man.existsMetaVariable(DBContent::meta_var_track_num_.name()) ||
-            !object_man.existsMetaVariable(DBContent::meta_var_artas_hash_.name()) ||
-            !object_man.existsMetaVariable(DBContent::meta_var_associations_.name()))
+    if (!dbcontent_man.existsMetaVariable(DBContent::meta_var_rec_num_id_.name()) ||
+            !dbcontent_man.existsMetaVariable(DBContent::meta_var_datasource_id_.name()) ||
+            !dbcontent_man.existsMetaVariable(DBContent::meta_var_tod_id_.name()) ||
+            !dbcontent_man.existsMetaVariable(DBContent::meta_var_track_num_.name()) ||
+            !dbcontent_man.existsMetaVariable(DBContent::meta_var_artas_hash_.name()) ||
+            !dbcontent_man.existsMetaVariable(DBContent::meta_var_associations_.name()))
         return false;
 
     loginf << "CreateARTASAssociationsTask: canRun: metas in objects";
-    for (auto& dbo_it : object_man)
+    for (auto& dbo_it : dbcontent_man)
     {
         if (dbo_it.first == "RefTraj") // not set in references
             continue;
 
         if (dbo_it.first == "CAT062")  // check metas specific to tracker
         {
-            if (!object_man.metaVariable(DBContent::meta_var_track_num_.name()).existsIn(dbo_it.first))
+            if (!dbcontent_man.metaVariable(DBContent::meta_var_track_num_.name()).existsIn(dbo_it.first))
             {
                 logwrn << "CreateARTASAssociationsTask: canRun: no track number in " << dbo_it.first;
                 return false;
@@ -266,7 +267,7 @@ bool CreateARTASAssociationsTask::canRun()
         }
         else // check metas specific not to tracker
         {
-            if (!object_man.metaVariable(DBContent::meta_var_artas_hash_.name()).existsIn(dbo_it.first))
+            if (!dbcontent_man.metaVariable(DBContent::meta_var_artas_hash_.name()).existsIn(dbo_it.first))
             {
                 logwrn << "CreateARTASAssociationsTask: canRun: no ARTAS hash in " << dbo_it.first;
                 return false;
@@ -274,15 +275,15 @@ bool CreateARTASAssociationsTask::canRun()
         }
 
         loginf << "CreateARTASAssociationsTask: canRun: metas in object " << dbo_it.first << " "
-            << !object_man.metaVariable(DBContent::meta_var_rec_num_id_.name()).existsIn(dbo_it.first) << " "
-            << !object_man.metaVariable(DBContent::meta_var_datasource_id_.name()).existsIn(dbo_it.first) << " "
-            << !object_man.metaVariable(DBContent::meta_var_tod_id_.name()).existsIn(dbo_it.first) << " "
-            << !object_man.metaVariable(DBContent::meta_var_associations_.name()).existsIn(dbo_it.first);
+            << !dbcontent_man.metaVariable(DBContent::meta_var_rec_num_id_.name()).existsIn(dbo_it.first) << " "
+            << !dbcontent_man.metaVariable(DBContent::meta_var_datasource_id_.name()).existsIn(dbo_it.first) << " "
+            << !dbcontent_man.metaVariable(DBContent::meta_var_tod_id_.name()).existsIn(dbo_it.first) << " "
+            << !dbcontent_man.metaVariable(DBContent::meta_var_associations_.name()).existsIn(dbo_it.first);
 
-        if (!object_man.metaVariable(DBContent::meta_var_rec_num_id_.name()).existsIn(dbo_it.first) ||
-                !object_man.metaVariable(DBContent::meta_var_datasource_id_.name()).existsIn(dbo_it.first) ||
-                !object_man.metaVariable(DBContent::meta_var_tod_id_.name()).existsIn(dbo_it.first) ||
-                !object_man.metaVariable(DBContent::meta_var_associations_.name()).existsIn(dbo_it.first))
+        if (!dbcontent_man.metaVariable(DBContent::meta_var_rec_num_id_.name()).existsIn(dbo_it.first) ||
+                !dbcontent_man.metaVariable(DBContent::meta_var_datasource_id_.name()).existsIn(dbo_it.first) ||
+                !dbcontent_man.metaVariable(DBContent::meta_var_tod_id_.name()).existsIn(dbo_it.first) ||
+                !dbcontent_man.metaVariable(DBContent::meta_var_associations_.name()).existsIn(dbo_it.first))
             return false;
     }
 
@@ -402,14 +403,14 @@ void CreateARTASAssociationsTask::loadingDoneSlot()
 
     assert(!create_job_);
 
-    DBContentManager& object_man = COMPASS::instance().dbContentManager();
+    DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
 
-    disconnect(&object_man, &DBContentManager::loadedDataSignal,
+    disconnect(&dbcontent_man, &DBContentManager::loadedDataSignal,
             this, &CreateARTASAssociationsTask::loadedDataDataSlot);
-    disconnect(&object_man, &DBContentManager::loadingDoneSignal,
+    disconnect(&dbcontent_man, &DBContentManager::loadingDoneSignal,
             this, &CreateARTASAssociationsTask::loadingDoneSlot);
 
-    object_man.clearData();
+    dbcontent_man.clearData();
 
     COMPASS::instance().viewManager().disableDataDistribution(false);
 
@@ -433,7 +434,7 @@ void CreateARTASAssociationsTask::loadingDoneSlot()
 
 void CreateARTASAssociationsTask::dialogRunSlot()
 {
-    loginf << "ASTERIXImportTask: dialogRunSlot";
+    loginf << "CreateARTASAssociationsTask: dialogRunSlot";
 
     assert (dialog_);
     dialog_->hide();
@@ -444,7 +445,7 @@ void CreateARTASAssociationsTask::dialogRunSlot()
 
 void CreateARTASAssociationsTask::dialogCancelSlot()
 {
-    loginf << "ASTERIXImportTask: dialogCancelSlot";
+    loginf << "CreateARTASAssociationsTask: dialogCancelSlot";
 
     assert (dialog_);
     dialog_->hide();

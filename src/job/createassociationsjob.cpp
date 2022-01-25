@@ -38,6 +38,7 @@
 
 using namespace std;
 using namespace Utils;
+using namespace nlohmann;
 
 bool CreateAssociationsJob::in_appimage_ {getenv("APPDIR") != nullptr};
 
@@ -69,10 +70,8 @@ void CreateAssociationsJob::run()
 
     loginf << "CreateAssociationsJob: run: clearing associations";
 
-    DBContentManager& object_man = COMPASS::instance().dbContentManager();
-
-    TODO_ASSERT
-    //object_man.removeAssociations();
+    emit statusSignal("Clearing Previous ARTAS Associations");
+    removePreviousAssociations();
 
     // create target reports
     emit statusSignal("Creating Target Reports");
@@ -127,14 +126,7 @@ void CreateAssociationsJob::run()
     // save associations
     emit statusSignal("Saving Associations");
 
-    TODO_ASSERT
-//    for (auto& dbo_it : object_man)
-//    {
-//        loginf << "CreateAssociationsJob: run: processing object " << dbo_it.first
-//               << " associated " << dbo_it.second->associations().size() << " of "
-//               << dbo_it.second->count();
-//        dbo_it.second->saveAssociations();
-//    }
+    saveAssociations();
 
 //    object_man.setAssociationsByAll(); // no specific dbo or data source
 
@@ -152,6 +144,26 @@ void CreateAssociationsJob::run()
     done_ = true;
 }
 
+void CreateAssociationsJob::removePreviousAssociations()
+{
+    loginf << "CreateAssociationsJob: removePreviousAssociations";
+
+    DBContentManager& object_man = COMPASS::instance().dbContentManager();
+
+    for (auto& buf_it : buffers_)
+    {
+        assert (object_man.metaVariable(DBContent::meta_var_associations_.name()).existsIn(buf_it.first));
+
+        string assoc_var_name =
+                object_man.metaVariable(DBContent::meta_var_associations_.name()).getFor(buf_it.first).name();
+
+        assert (buf_it.second->has<json>(assoc_var_name));
+        NullableVector<json>& assoc_vec = buf_it.second->get<json>(assoc_var_name);
+
+        assoc_vec.setAllNull();
+    }
+}
+
 void CreateAssociationsJob::createTargetReports()
 {
     loginf << "CreateAssociationsJob: createTargetReports";
@@ -164,7 +176,7 @@ void CreateAssociationsJob::createTargetReports()
     MetaVariable* meta_ta_var = task_.targetAddrVar();
     MetaVariable* meta_ti_var = task_.targetIdVar();
     MetaVariable* meta_tn_var = task_.trackNumVar();
-    MetaVariable* meta_tr_end_var = task_.trackEndVar();
+    MetaVariable* meta_track_end_var = task_.trackEndVar();
     MetaVariable* meta_mode_3a_var = task_.mode3AVar();
     MetaVariable* meta_mode_c_var = task_.modeCVar();
     MetaVariable* meta_latitude_var = task_.latitudeVar();
@@ -176,20 +188,17 @@ void CreateAssociationsJob::createTargetReports()
     assert (meta_ta_var);
     assert (meta_ti_var);
     assert (meta_tn_var);
-    assert (meta_tr_end_var);
+    assert (meta_track_end_var);
     assert (meta_mode_3a_var);
     assert (meta_mode_c_var);
     assert (meta_latitude_var);
     assert (meta_longitude_var);
-
-    DBContentManager& object_man = COMPASS::instance().dbContentManager();
 
     Association::TargetReport tr;
 
     for (auto& buf_it : buffers_) // dbo name, buffer
     {
         string dbo_name = buf_it.first;
-        DBContent& dbo = object_man.dbContent(dbo_name);
 
         shared_ptr<Buffer> buffer = buf_it.second;
         size_t buffer_size = buffer->size();
@@ -209,13 +218,13 @@ void CreateAssociationsJob::createTargetReports()
         assert (meta_ti_var->existsIn(dbo_name));
         Variable& ti_var = meta_ti_var->getFor(dbo_name);
 
-        Variable* tn_var {nullptr}; // not in ads-b
+        Variable* tn_var {nullptr}; // not in ads-b, reftraj
         if (meta_tn_var->existsIn(dbo_name))
             tn_var = &meta_tn_var->getFor(dbo_name);
 
-        Variable* tr_end_var {nullptr}; // not in ads-b
-        if (meta_tr_end_var->existsIn(dbo_name))
-            tr_end_var = &meta_tr_end_var->getFor(dbo_name);
+        Variable* tr_end_var {nullptr}; // not in ads-b, reftraj
+        if (meta_track_end_var->existsIn(dbo_name))
+            tr_end_var = &meta_track_end_var->getFor(dbo_name);
 
         assert (meta_mode_3a_var->existsIn(dbo_name));
         Variable& mode_3a_var = meta_mode_3a_var->getFor(dbo_name);
@@ -230,40 +239,40 @@ void CreateAssociationsJob::createTargetReports()
         Variable& longitude_var = meta_longitude_var->getFor(dbo_name);
 
 
-        assert (buffer->has<int>(key_var.name()));
-        NullableVector<int>& rec_nums = buffer->get<int>(key_var.name());
+        assert (buffer->has<unsigned int>(key_var.name()));
+        NullableVector<unsigned int>& rec_nums = buffer->get<unsigned int>(key_var.name());
 
-        assert (buffer->has<int>(ds_id_var.name()));
-        NullableVector<int>& ds_ids = buffer->get<int>(ds_id_var.name());
+        assert (buffer->has<unsigned int>(ds_id_var.name()));
+        NullableVector<unsigned int>& ds_ids = buffer->get<unsigned int>(ds_id_var.name());
 
         assert (buffer->has<float>(tod_var.name()));
         NullableVector<float>& tods = buffer->get<float>(tod_var.name());
 
-        assert (buffer->has<int>(ta_var.name()));
-        NullableVector<int>& tas = buffer->get<int>(ta_var.name());
+        assert (buffer->has<unsigned int>(ta_var.name()));
+        NullableVector<unsigned int>& tas = buffer->get<unsigned int>(ta_var.name());
 
         assert (buffer->has<string>(ti_var.name()));
         NullableVector<string>& tis = buffer->get<string>(ti_var.name());
 
-        NullableVector<int>* tns {nullptr};
+        NullableVector<unsigned int>* tns {nullptr};
         if (tn_var)
         {
-            assert (buffer->has<int>(tn_var->name()));
-            tns = &buffer->get<int>(tn_var->name());
+            assert (buffer->has<unsigned int>(tn_var->name()));
+            tns = &buffer->get<unsigned int>(tn_var->name());
         }
 
-        NullableVector<string>* tr_ends {nullptr};
+        NullableVector<bool>* tr_ends {nullptr};
         if (tr_end_var)
         {
-            assert (buffer->has<string>(tr_end_var->name()));
-            tr_ends = &buffer->get<string>(tr_end_var->name());
+            assert (buffer->has<bool>(tr_end_var->name()));
+            tr_ends = &buffer->get<bool>(tr_end_var->name());
         }
 
-        assert (buffer->has<int>(mode_3a_var.name()));
-        NullableVector<int>& m3as = buffer->get<int>(mode_3a_var.name());
+        assert (buffer->has<unsigned int>(mode_3a_var.name()));
+        NullableVector<unsigned int>& m3as = buffer->get<unsigned int>(mode_3a_var.name());
 
-        assert (buffer->has<int>(mode_c_var.name()));
-        NullableVector<int>& mcs = buffer->get<int>(mode_c_var.name());
+        assert (buffer->has<float>(mode_c_var.name()));
+        NullableVector<float>& mcs = buffer->get<float>(mode_c_var.name());
 
         assert (buffer->has<double>(latitude_var.name()));
         NullableVector<double>& lats = buffer->get<double>(latitude_var.name());
@@ -319,7 +328,7 @@ void CreateAssociationsJob::createTargetReports()
             tr.tn_ = tr.has_tn_ ? tns->get(cnt) : 0;
 
             tr.has_track_end_ = tr_ends && !tr_ends->isNull(cnt);
-            tr.track_end_ = tr.has_track_end_ ? tr_ends->get(cnt) == "Y" : false;
+            tr.track_end_ = tr.has_track_end_ ? tr_ends->get(cnt) : false;
 
             tr.has_ma_ = !m3as.isNull(cnt);
             tr.ma_ = tr.has_ma_ ? m3as.get(cnt) : 0;
@@ -352,15 +361,15 @@ std::map<unsigned int, Association::Target> CreateAssociationsJob::createReferen
         return sum_targets;
     }
 
-    DBContentManager& object_man = COMPASS::instance().dbContentManager();
+    DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
 
     // create utn for all tracks
     for (auto& ds_it : target_reports_.at("RefTraj")) // ds_id->trs
     {
         loginf << "CreateAssociationsJob: createReferenceUTNs: processing ds_id " << ds_it.first;
 
-        TODO_ASSERT
-        string ds_name; // = object_man.object("RefTraj").dataSources().at(ds_it.first).name();
+        assert (dbcontent_man.hasDataSource(ds_it.first));
+        string ds_name = dbcontent_man.dataSource(ds_it.first).name();
 
         loginf << "CreateAssociationsJob: createReferenceUTNs: creating tmp targets for ds_id " << ds_it.first;
 
@@ -419,15 +428,15 @@ void CreateAssociationsJob::createTrackerUTNs(std::map<unsigned int, Association
         return;
     }
 
-    DBContentManager& object_man = COMPASS::instance().dbContentManager();
+    DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
 
     // create utn for all tracks
     for (auto& ds_it : target_reports_.at("Tracker")) // ds_id->trs
     {
         loginf << "CreateAssociationsJob: createTrackerUTNs: processing ds_id " << ds_it.first;
 
-        TODO_ASSERT
-        string ds_name;// = object_man.object("Tracker").dataSources().at(ds_it.first).name();
+        assert (dbcontent_man.hasDataSource(ds_it.first));
+        string ds_name = dbcontent_man.dataSource(ds_it.first).name();
 
         loginf << "CreateAssociationsJob: createTrackerUTNs: creating tmp targets for ds_id " << ds_it.first;
 
@@ -492,7 +501,7 @@ void CreateAssociationsJob::createNonTrackerUTNS(std::map<unsigned int, Associat
     // get ta lookup map
     std::map<unsigned int, unsigned int> ta_2_utn = getTALookupMap(targets);
 
-    DBContentManager& object_man = COMPASS::instance().dbContentManager();
+    DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
 
     const bool associate_non_mode_s = task_.associateNonModeS();
     const double max_time_diff_sensor = task_.maxTimeDiffSensor();
@@ -513,9 +522,10 @@ void CreateAssociationsJob::createNonTrackerUTNS(std::map<unsigned int, Associat
 
             assert (num_data_sources);
             done_perc = (unsigned int)(100.0 * (float)ds_cnt/(float)num_data_sources);
+            assert (dbcontent_man.hasDataSource(ds_it.first));
 
-            TODO_ASSERT
-            string ds_name;// = object_man.object(dbo_it.first).dataSources().at(ds_it.first).name();
+            string ds_name = dbcontent_man.dataSource(ds_it.first).name();
+
             emit statusSignal(("Creating "+dbo_it.first+" "+ds_name+" UTNs ("+to_string(done_perc)+"%)").c_str());
 
             std::vector<Association::TargetReport>& target_reports = ds_it.second;
@@ -733,24 +743,154 @@ void CreateAssociationsJob::createAssociations()
 {
     loginf << "CreateAssociationsJob: createAssociations";
 
-    DBContentManager& object_man = COMPASS::instance().dbContentManager();
+    for (auto& dbo_it : target_reports_)
+    {
+        for (auto& ds_it : dbo_it.second) // ds_id -> trs
+        {
+            for (auto& tr_it : ds_it.second)
+            {
+                for (auto utn_ptr_it : tr_it.assoc_targets_)
+                {
+                    //dbo.addAssociation(tr_it.rec_num_, utn_ptr_it->utn_, false, 0);
 
-    TODO_ASSERT
+                    associations_[dbo_it.first][tr_it.rec_num_] = {utn_ptr_it->utn_, {}};
+                }
+            }
+        }
+    }
+}
 
-//    for (auto& dbo_it : target_reports_)
-//    {
-//        assert (object_man.existsDBContent(dbo_it.first));
-//        DBContent& dbo = object_man.object(dbo_it.first);
+void CreateAssociationsJob::saveAssociations()
+{
+    loginf << "CreateAssociationsJob: saveAssociations";
 
-//        for (auto& ds_it : dbo_it.second) // ds_id -> trs
-//        {
-//            for (auto& tr_it : ds_it.second)
-//            {
-//                for (auto utn_ptr_it : tr_it.assoc_targets_)
-//                    dbo.addAssociation(tr_it.rec_num_, utn_ptr_it->utn_, false, 0);
-//            }
-//        }
-//    }
+    DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
+
+    // write association info to buffers
+
+    unsigned int rec_num;
+
+    for (auto& cont_assoc_it : associations_) // dbcontent -> rec_nums
+    {
+        unsigned int num_associated {0};
+        unsigned int num_not_associated {0};
+
+        string dbcontent_name = cont_assoc_it.first;
+        std::map<unsigned int,
+                std::tuple<unsigned int, std::vector<std::pair<std::string, unsigned int>>>>& associations
+                = cont_assoc_it.second;
+
+        loginf << "CreateAssociationsJob: saveAssociations: db content " << dbcontent_name;
+
+        assert (buffers_.count(dbcontent_name));
+
+        assert (dbcontent_man.metaVariable(DBContent::meta_var_rec_num_id_.name()).existsIn(dbcontent_name));
+        assert (dbcontent_man.metaVariable(DBContent::meta_var_associations_.name()).existsIn(dbcontent_name));
+
+        string rec_num_var_name =
+                dbcontent_man.metaVariable(DBContent::meta_var_rec_num_id_.name()).getFor(dbcontent_name).name();
+        string assoc_var_name =
+                dbcontent_man.metaVariable(DBContent::meta_var_associations_.name()).getFor(dbcontent_name).name();
+
+        assert (buffers_.at(dbcontent_name)->has<unsigned int>(rec_num_var_name));
+        assert (buffers_.at(dbcontent_name)->has<json>(assoc_var_name));
+
+        NullableVector<unsigned int>& rec_num_vec = buffers_.at(dbcontent_name)->get<unsigned int>(rec_num_var_name);
+        NullableVector<json>& assoc_vec = buffers_.at(dbcontent_name)->get<json>(assoc_var_name);
+
+        for (unsigned int cnt=0; cnt < buffers_.at(dbcontent_name)->size(); ++cnt)
+        {
+            assert (!rec_num_vec.isNull(cnt));
+
+            rec_num = rec_num_vec.get(cnt);
+
+            if (associations.count(rec_num))
+            {
+                if (assoc_vec.isNull(cnt))
+                    assoc_vec.set(cnt, {get<0>(associations.at(rec_num))});
+                else
+                    assoc_vec.getRef(cnt).push_back(get<0>(associations.at(rec_num)));
+
+                ++num_associated;
+            }
+            else
+                ++num_not_associated;
+        }
+
+        association_counts_[dbcontent_name] = {buffers_.at(dbcontent_name)->size(), num_associated};
+
+        loginf << "CreateAssociationsJob: saveAssociations: dcontent " << dbcontent_name
+               <<  " assoc " << num_associated << " not assoc " << num_not_associated;
+    }
+
+    // delete all data from buffer except rec_nums and associations, rename to db column names
+    for (auto& buf_it : buffers_)
+    {
+        string dbcontent_name = buf_it.first;
+
+        string rec_num_var_name =
+                dbcontent_man.metaVariable(DBContent::meta_var_rec_num_id_.name()).getFor(dbcontent_name).name();
+        string rec_num_col_name =
+                dbcontent_man.metaVariable(DBContent::meta_var_rec_num_id_.name()).getFor(dbcontent_name).dbColumnName();
+
+        string assoc_var_name =
+                dbcontent_man.metaVariable(DBContent::meta_var_associations_.name()).getFor(dbcontent_name).name();
+        string assoc_col_name =
+                dbcontent_man.metaVariable(DBContent::meta_var_associations_.name()).getFor(dbcontent_name).dbColumnName();
+
+
+        PropertyList properties = buf_it.second->properties();
+
+        for (auto& prop_it : properties.properties())
+        {
+            if (prop_it.name() == rec_num_var_name)
+                buf_it.second->rename<unsigned int>(rec_num_var_name, rec_num_col_name);
+            else if (prop_it.name() == assoc_var_name)
+                buf_it.second->rename<json>(assoc_var_name, assoc_col_name);
+            else
+                buf_it.second->deleteProperty(prop_it);
+        }
+    }
+
+    // actually save data, ok since DB job
+    for (auto& buf_it : buffers_)
+    {
+        string dbcontent_name = buf_it.first;
+
+        loginf << "CreateAssociationsJob: saveAssociations: saving for " << dbcontent_name;
+
+        DBContent& dbcontent = dbcontent_man.dbContent(buf_it.first);
+        dbContent::Variable& key_var =
+                dbcontent_man.metaVariable(DBContent::meta_var_rec_num_id_.name()).getFor(dbcontent_name);
+
+        unsigned int chunk_size = 50000;
+
+        unsigned int steps = buf_it.second->size() / chunk_size;
+
+        unsigned int index_from = 0;
+        unsigned int index_to = 0;
+
+        for (unsigned int cnt = 0; cnt <= steps; cnt++)
+        {
+            index_from = cnt * chunk_size;
+            index_to = index_from + chunk_size;
+
+            if (index_to > buf_it.second->size() - 1)
+                index_to = buf_it.second->size() - 1;
+
+            loginf << "CreateAssociationsJob: saveAssociations: step " << cnt << " steps " << steps << " from "
+                   << index_from << " to " << index_to;
+
+            db_interface_.updateBuffer(dbcontent.dbTableName(), key_var.dbColumnName(),
+                                       buf_it.second, index_from, index_to);
+
+        }
+
+    }
+
+    buffers_.clear();
+
+    loginf << "CreateAssociationsJob: saveAssociations: done";
 }
 
 std::map<unsigned int, Association::Target> CreateAssociationsJob::createTrackedTargets(
@@ -760,11 +900,10 @@ std::map<unsigned int, Association::Target> CreateAssociationsJob::createTracked
 
     map<unsigned int, pair<unsigned int, float>> tn2utn; // track num -> utn, last tod
 
-    DBContentManager& object_man = COMPASS::instance().dbContentManager();
+    DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
 
-    TODO_ASSERT
-    //assert (object_man.object(dbo_name).dataSources().count(ds_id));
-    string ds_name;// = object_man.object(dbo_name).dataSources().at(ds_id).name();
+    assert (dbcontent_man.hasDataSource(ds_id));
+    string ds_name = dbcontent_man.dataSource(ds_id).name();
 
     std::map<unsigned int, std::vector<Association::TargetReport>>& ds_id_trs = target_reports_.at(dbo_name);
 

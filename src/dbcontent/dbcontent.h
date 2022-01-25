@@ -83,6 +83,7 @@ public:
     static const Property meta_var_ti_id_;
     static const Property meta_var_mc_id_;
     static const Property meta_var_track_num_;
+    static const Property meta_var_track_end_;
     static const Property meta_var_latitude_;
     static const Property meta_var_longitude_;
     static const Property meta_var_detection_type_;

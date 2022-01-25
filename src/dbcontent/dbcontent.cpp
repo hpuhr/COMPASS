@@ -55,7 +55,8 @@ const Property DBContent::meta_var_m3a_id_ {"Mode 3/A Code", PropertyDataType::U
 const Property DBContent::meta_var_ta_id_ {"Aircraft Address", PropertyDataType::UINT};
 const Property DBContent::meta_var_ti_id_ {"Aircraft Identification", PropertyDataType::STRING};
 const Property DBContent::meta_var_mc_id_ {"Mode C Code", PropertyDataType::FLOAT};
-const Property DBContent::meta_var_track_num_ {"Track Number", PropertyDataType::UINT};;
+const Property DBContent::meta_var_track_num_ {"Track Number", PropertyDataType::UINT};
+const Property DBContent::meta_var_track_end_ {"Track End", PropertyDataType::BOOL};
 
 const Property DBContent::meta_var_latitude_ {"Latitude", PropertyDataType::DOUBLE};
 const Property DBContent::meta_var_longitude_ {"Longitude", PropertyDataType::DOUBLE};

@@ -31,7 +31,6 @@
 
 class TaskManager;
 class CreateARTASAssociationsTaskDialog;
-class CreateARTASAssociationsTaskWidget;
 
 class DBContent;
 class Buffer;
@@ -64,7 +63,6 @@ public:
     CreateARTASAssociationsTask(const std::string& class_id, const std::string& instance_id,
                                 TaskManager& task_manager);
     virtual ~CreateARTASAssociationsTask();
-
 
     CreateARTASAssociationsTaskDialog* dialog();
 
