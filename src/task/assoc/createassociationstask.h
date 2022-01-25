@@ -154,6 +154,7 @@ protected:
     dbContent::MetaVariable* mode_c_var_{nullptr};
     dbContent::MetaVariable* latitude_var_{nullptr};
     dbContent::MetaVariable* longitude_var_{nullptr};
+    dbContent::MetaVariable* associations_var_{nullptr};
 
     bool associate_non_mode_s_ {true};
     bool clean_dubious_utns_ {true};

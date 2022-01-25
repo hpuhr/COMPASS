@@ -157,13 +157,7 @@ bool CreateAssociationsTask::canRun()
 {
     DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
 
-    logdbg << "CreateAssociationsTask: canRun: tracker " << dbcontent_man.existsDBContent("Tracker");
-
-    // meta var stuff
-    logdbg << "CreateAssociationsTask: canRun: meta vars";
-
-
-    logdbg << "CreateAssociationsTask: canRun: metas ";
+    loginf << "CreateAssociationsTask: canRun: metas ";
     if (!dbcontent_man.existsMetaVariable(DBContent::meta_var_rec_num_id_.name())
             || !dbcontent_man.existsMetaVariable(DBContent::meta_var_datasource_id_.name())
             || !dbcontent_man.existsMetaVariable(DBContent::meta_var_tod_id_.name())
@@ -177,22 +171,32 @@ bool CreateAssociationsTask::canRun()
             || !dbcontent_man.existsMetaVariable(DBContent::meta_var_longitude_.name()))
         return false;
 
-    logdbg << "CreateAssociationsTask: canRun: metas in objects";
+    loginf << "CreateAssociationsTask: canRun: metas in dbcontent";
     for (auto& dbo_it : dbcontent_man)
     {
+        if (dbo_it.first == "RefTraj") // TODO
+            continue;
+
+        loginf << "CreateAssociationsTask: canRun: metas in dbcontent " << dbo_it.first;
+
         if (!dbcontent_man.metaVariable(DBContent::meta_var_rec_num_id_.name()).existsIn(dbo_it.first)
                 || !dbcontent_man.metaVariable(DBContent::meta_var_datasource_id_.name()).existsIn(dbo_it.first)
                 || !dbcontent_man.metaVariable(DBContent::meta_var_tod_id_.name()).existsIn(dbo_it.first)
-                || !dbcontent_man.metaVariable(DBContent::meta_var_ta_id_.name()).existsIn(dbo_it.first)
-                || !dbcontent_man.metaVariable(DBContent::meta_var_ti_id_.name()).existsIn(dbo_it.first)
-                //|| !dbcontent_man.metaVariable(track_num_var_str_).existsIn(dbo_it.first) // not in adsb
-                //|| !dbcontent_man.metaVariable(track_end_var_str_).existsIn(dbo_it.first) // not in adsb
                 || !dbcontent_man.metaVariable(DBContent::meta_var_m3a_id_.name()).existsIn(dbo_it.first)
                 || !dbcontent_man.metaVariable(DBContent::meta_var_mc_id_.name()).existsIn(dbo_it.first)
                 || !dbcontent_man.metaVariable(DBContent::meta_var_latitude_.name()).existsIn(dbo_it.first)
                 || !dbcontent_man.metaVariable(DBContent::meta_var_longitude_.name()).existsIn(dbo_it.first)
+                || !dbcontent_man.metaVariable(DBContent::meta_var_associations_.name()).existsIn(dbo_it.first)
                 )
             return false;
+
+        if (dbo_it.first != "CAT001")  // check metas specific track vars
+        {
+            if (!dbcontent_man.metaVariable(DBContent::meta_var_ta_id_.name()).existsIn(dbo_it.first)
+                    || !dbcontent_man.metaVariable(DBContent::meta_var_ti_id_.name()).existsIn(dbo_it.first)
+                    )
+                return false;
+        }
 
         if (dbo_it.first != "CAT021" && dbo_it.first != "RefTraj")  // check metas specific track vars
         {
@@ -240,7 +244,7 @@ void CreateAssociationsTask::run()
     checkAndSetMetaVariable(DBContent::meta_var_mc_id_.name(), &mode_c_var_);
     checkAndSetMetaVariable(DBContent::meta_var_latitude_.name(), &latitude_var_);
     checkAndSetMetaVariable(DBContent::meta_var_longitude_.name(), &longitude_var_);
-
+    checkAndSetMetaVariable(DBContent::meta_var_associations_.name(), &associations_var_);
 
 
     DBContentManager& object_man = COMPASS::instance().dbContentManager();
@@ -255,6 +259,9 @@ void CreateAssociationsTask::run()
     for (auto& dbo_it : object_man)
     {
         if (!dbo_it.second->hasData())
+            continue;
+
+        if (dbo_it.first == "RefTraj") // TODO
             continue;
 
         VariableSet read_set = getReadSetFor(dbo_it.first);
@@ -680,22 +687,20 @@ VariableSet CreateAssociationsTask::getReadSetFor(const std::string& dbo_name)
     read_set.add(tod_var_->getFor(dbo_name));
 
     assert(target_addr_var_);
-    assert(target_addr_var_->existsIn(dbo_name));
-    read_set.add(target_addr_var_->getFor(dbo_name));
+    if(target_addr_var_->existsIn(dbo_name))
+        read_set.add(target_addr_var_->getFor(dbo_name));
 
     assert(target_id_var_);
-    assert(target_id_var_->existsIn(dbo_name));
-    read_set.add(target_id_var_->getFor(dbo_name));
+    if(target_id_var_->existsIn(dbo_name))
+        read_set.add(target_id_var_->getFor(dbo_name));
 
     assert(track_num_var_);
     if(track_num_var_->existsIn(dbo_name))
         read_set.add(track_num_var_->getFor(dbo_name));
 
-    if (dbo_name != "CAT021" && dbo_name != "RefTraj")
-    {
-        assert(track_end_var_);
+    assert(track_end_var_);
+    if(track_end_var_->existsIn(dbo_name))
         read_set.add(track_end_var_->getFor(dbo_name));
-    }
 
     assert(mode_3a_var_);
     assert(mode_3a_var_->existsIn(dbo_name));
@@ -712,6 +717,10 @@ VariableSet CreateAssociationsTask::getReadSetFor(const std::string& dbo_name)
     assert(longitude_var_);
     assert(longitude_var_->existsIn(dbo_name));
     read_set.add(longitude_var_->getFor(dbo_name));
+
+    assert(associations_var_);
+    assert(associations_var_->existsIn(dbo_name));
+    read_set.add(associations_var_->getFor(dbo_name));
 
     // must be last for update process
     assert(rec_num_var_);

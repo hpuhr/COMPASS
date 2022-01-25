@@ -396,7 +396,7 @@
                     "append_value": false,
                     "comment": "Type number, value 3528",
                     "db_content_name": "CAT020",
-                    "db_content_variable_name": "Track number",
+                    "db_content_variable_name": "Track Number",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": false,

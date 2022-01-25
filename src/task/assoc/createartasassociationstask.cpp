@@ -254,7 +254,7 @@ bool CreateARTASAssociationsTask::canRun()
     loginf << "CreateARTASAssociationsTask: canRun: metas in objects";
     for (auto& dbo_it : dbcontent_man)
     {
-        if (dbo_it.first == "RefTraj") // not set in references
+        if (dbo_it.first == "RefTraj") // TODO
             continue;
 
         if (dbo_it.first == "CAT062")  // check metas specific to tracker
@@ -280,10 +280,10 @@ bool CreateARTASAssociationsTask::canRun()
             << !dbcontent_man.metaVariable(DBContent::meta_var_tod_id_.name()).existsIn(dbo_it.first) << " "
             << !dbcontent_man.metaVariable(DBContent::meta_var_associations_.name()).existsIn(dbo_it.first);
 
-        if (!dbcontent_man.metaVariable(DBContent::meta_var_rec_num_id_.name()).existsIn(dbo_it.first) ||
-                !dbcontent_man.metaVariable(DBContent::meta_var_datasource_id_.name()).existsIn(dbo_it.first) ||
-                !dbcontent_man.metaVariable(DBContent::meta_var_tod_id_.name()).existsIn(dbo_it.first) ||
-                !dbcontent_man.metaVariable(DBContent::meta_var_associations_.name()).existsIn(dbo_it.first))
+        if (!dbcontent_man.metaVariable(DBContent::meta_var_rec_num_id_.name()).existsIn(dbo_it.first)
+                || !dbcontent_man.metaVariable(DBContent::meta_var_datasource_id_.name()).existsIn(dbo_it.first)
+                || !dbcontent_man.metaVariable(DBContent::meta_var_tod_id_.name()).existsIn(dbo_it.first)
+                || !dbcontent_man.metaVariable(DBContent::meta_var_associations_.name()).existsIn(dbo_it.first))
             return false;
     }
 

@@ -212,11 +212,13 @@ void CreateAssociationsJob::createTargetReports()
         assert (meta_tod_var->existsIn(dbo_name));
         Variable& tod_var = meta_tod_var->getFor(dbo_name);
 
-        assert (meta_ta_var->existsIn(dbo_name));
-        Variable& ta_var = meta_ta_var->getFor(dbo_name);
+        Variable* ta_var {nullptr}; // not in cat001
+        if (meta_ta_var->existsIn(dbo_name))
+            ta_var = &meta_ta_var->getFor(dbo_name);
 
-        assert (meta_ti_var->existsIn(dbo_name));
-        Variable& ti_var = meta_ti_var->getFor(dbo_name);
+        Variable* ti_var {nullptr}; // not in cat001
+        if (meta_ti_var->existsIn(dbo_name))
+            ti_var = &meta_ti_var->getFor(dbo_name);
 
         Variable* tn_var {nullptr}; // not in ads-b, reftraj
         if (meta_tn_var->existsIn(dbo_name))
@@ -248,11 +250,19 @@ void CreateAssociationsJob::createTargetReports()
         assert (buffer->has<float>(tod_var.name()));
         NullableVector<float>& tods = buffer->get<float>(tod_var.name());
 
-        assert (buffer->has<unsigned int>(ta_var.name()));
-        NullableVector<unsigned int>& tas = buffer->get<unsigned int>(ta_var.name());
+        NullableVector<unsigned int>* tas {nullptr};
+        if (ta_var)
+        {
+            assert (buffer->has<unsigned int>(ta_var->name()));
+            tas = &buffer->get<unsigned int>(ta_var->name());
+        }
 
-        assert (buffer->has<string>(ti_var.name()));
-        NullableVector<string>& tis = buffer->get<string>(ti_var.name());
+        NullableVector<string>* tis {nullptr};
+        if (ti_var)
+        {
+            assert (buffer->has<string>(ti_var->name()));
+            tis = &buffer->get<string>(ti_var->name());
+        }
 
         NullableVector<unsigned int>* tns {nullptr};
         if (tn_var)
@@ -318,11 +328,11 @@ void CreateAssociationsJob::createTargetReports()
 
             tr.tod_ = tods.get(cnt);
 
-            tr.has_ta_ = !tas.isNull(cnt);
-            tr.ta_ = tr.has_ta_ ? tas.get(cnt) : 0;
+            tr.has_ta_ = tas && !tas->isNull(cnt);
+            tr.ta_ = tr.has_ta_ ? tas->get(cnt) : 0;
 
-            tr.has_ti_ = !tis.isNull(cnt);
-            tr.ti_ = tr.has_ti_ ? tis.get(cnt) : "";
+            tr.has_ti_ = tis && !tis->isNull(cnt);
+            tr.ti_ = tr.has_ti_ ? tis->get(cnt) : "";
 
             tr.has_tn_ = tns && !tns->isNull(cnt);
             tr.tn_ = tr.has_tn_ ? tns->get(cnt) : 0;
@@ -422,7 +432,7 @@ void CreateAssociationsJob::createTrackerUTNs(std::map<unsigned int, Association
 
     //std::map<unsigned int, Association::Target> sum_targets;
 
-    if (!target_reports_.count("Tracker"))
+    if (!target_reports_.count("CAT062"))
     {
         loginf << "CreateAssociationsJob: createTrackerUTNs: no tracker data";
         return;
@@ -431,7 +441,7 @@ void CreateAssociationsJob::createTrackerUTNs(std::map<unsigned int, Association
     DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
 
     // create utn for all tracks
-    for (auto& ds_it : target_reports_.at("Tracker")) // ds_id->trs
+    for (auto& ds_it : target_reports_.at("CAT062")) // ds_id->trs
     {
         loginf << "CreateAssociationsJob: createTrackerUTNs: processing ds_id " << ds_it.first;
 
@@ -442,7 +452,7 @@ void CreateAssociationsJob::createTrackerUTNs(std::map<unsigned int, Association
 
         emit statusSignal(("Creating new "+ds_name+" UTNs").c_str());
 
-        map<unsigned int, Association::Target> tracker_targets = createTrackedTargets("Tracker", ds_it.first);
+        map<unsigned int, Association::Target> tracker_targets = createTrackedTargets("CAT062", ds_it.first);
 
         if (!tracker_targets.size())
         {
@@ -490,7 +500,7 @@ void CreateAssociationsJob::createNonTrackerUTNS(std::map<unsigned int, Associat
 
     for (auto& dbo_it : target_reports_)
     {
-        if (dbo_it.first == "RefTraj" || dbo_it.first == "Tracker") // already associated
+        if (dbo_it.first == "RefTraj" || dbo_it.first == "CAT062") // already associated
             continue;
 
         num_data_sources += dbo_it.second.size();
@@ -513,7 +523,7 @@ void CreateAssociationsJob::createNonTrackerUTNS(std::map<unsigned int, Associat
 
     for (auto& dbo_it : target_reports_)
     {
-        if (dbo_it.first == "RefTraj" || dbo_it.first == "Tracker") // already associated
+        if (dbo_it.first == "RefTraj" || dbo_it.first == "CAT062") // already associated
             continue;
 
         for (auto& ds_it : dbo_it.second) // ds_id -> trs

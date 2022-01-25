@@ -427,12 +427,12 @@
                                 "variable_name": "Track Horizontal Manoeuvre"
                             }
                         },
-                        "LabelEntryTrack number0": {
+                        "LabelEntryTrack Number0": {
                             "parameters": {
                                 "prefix": "",
                                 "show": false,
                                 "suffix": "",
-                                "variable_name": "Track number"
+                                "variable_name": "Track Number"
                             }
                         },
                         "LabelEntryTransponder Com. Capability0": {
@@ -1292,7 +1292,7 @@
                     "description": "From 161.Track Number\n\nAn integer value representing a unique reference to a track\nrecord within a particular track file.",
                     "dimension": "",
                     "is_key": false,
-                    "name": "Track number",
+                    "name": "Track Number",
                     "representation_str": "STANDARD",
                     "short_name": "TN",
                     "unit": ""

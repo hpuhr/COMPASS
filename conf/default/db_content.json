@@ -1771,6 +1771,12 @@
                                 "variable_name": "Track Number"
                             }
                         },
+                        "VariableDefinitionCAT020Track Number0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT020",
+                                "variable_name": "Track Number"
+                            }
+                        },
                         "VariableDefinitionCAT021Track Number0": {
                             "parameters": {
                                 "dbcontent_name": "CAT021",
