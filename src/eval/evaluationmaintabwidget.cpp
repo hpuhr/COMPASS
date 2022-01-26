@@ -46,14 +46,13 @@ EvaluationMainTabWidget::EvaluationMainTabWidget(EvaluationManager& eval_man,
 
     QHBoxLayout* data_sources_layout = new QHBoxLayout();
 
-    data_source_ref_widget_.reset(new EvaluationDataSourceWidget("Reference Data", eval_man_.dboNameRef(),
-                                                             eval_man_.dataSourcesRef()));
+    // titles define which data sources to display
+    data_source_ref_widget_.reset(new EvaluationDataSourceWidget("Reference Data", eval_man_.dboNameRef()));
     connect (data_source_ref_widget_.get(), &EvaluationDataSourceWidget::dboNameChangedSignal,
              this, &EvaluationMainTabWidget::dboRefNameChangedSlot);
     data_sources_layout->addWidget(data_source_ref_widget_.get());
 
-    data_source_tst_widget_.reset(new EvaluationDataSourceWidget("Test Data", eval_man_.dboNameTst(),
-                                                             eval_man_.dataSourcesTst()));
+    data_source_tst_widget_.reset(new EvaluationDataSourceWidget("Test Data", eval_man_.dboNameTst()));
     connect (data_source_tst_widget_.get(), &EvaluationDataSourceWidget::dboNameChangedSignal,
              this, &EvaluationMainTabWidget::dboTstNameChangedSlot);
     data_sources_layout->addWidget(data_source_tst_widget_.get());
@@ -101,6 +100,15 @@ EvaluationMainTabWidget::EvaluationMainTabWidget(EvaluationManager& eval_man,
 
     setContentsMargins(0, 0, 0, 0);
     setLayout(main_layout);
+}
+
+void EvaluationMainTabWidget::updateDataSources()
+{
+    if (data_source_ref_widget_)
+        data_source_ref_widget_->updateDataSources();
+
+    if (data_source_tst_widget_)
+        data_source_tst_widget_->updateDataSources();
 }
 
 void EvaluationMainTabWidget::dboRefNameChangedSlot(const std::string& dbo_name)

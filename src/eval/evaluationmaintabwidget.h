@@ -42,6 +42,8 @@ private slots:
 public:
     EvaluationMainTabWidget(EvaluationManager& eval_man, EvaluationManagerWidget& man_widget);
 
+    void updateDataSources();
+
 protected:
     EvaluationManager& eval_man_;
     EvaluationManagerWidget& man_widget_;

@@ -107,6 +107,12 @@ EvaluationManagerWidget::~EvaluationManagerWidget()
 
 }
 
+void EvaluationManagerWidget::updateDataSources()
+{
+    if (main_tab_widget_)
+        main_tab_widget_->updateDataSources();
+}
+
 void EvaluationManagerWidget::updateButtons()
 {
     evaluate_button_->setEnabled(eval_man_.canEvaluate());

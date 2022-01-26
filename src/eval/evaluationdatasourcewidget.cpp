@@ -17,8 +17,8 @@
 
 #include "evaluationdatasourcewidget.h"
 #include "logger.h"
-#include "activedatasource.h"
 #include "dbcontent/dbcontentcombobox.h"
+#include "evaluationmanager.h"
 
 #include <QLabel>
 #include <QCheckBox>
@@ -26,10 +26,11 @@
 #include <QGridLayout>
 #include <QVariant>
 
+using namespace std;
+
 EvaluationDataSourceWidget::EvaluationDataSourceWidget(const std::string& title, const std::string& dbo_name,
-                                                       std::map<int, ActiveDataSource>& data_sources,
                                                        QWidget* parent, Qt::WindowFlags f)
-    : QFrame(parent, f), title_(title), dbo_name_(dbo_name), data_sources_(data_sources)
+    : QFrame(parent, f), title_(title), dbo_name_(dbo_name)
 {
     setFrameStyle(QFrame::Panel | QFrame::Raised);
     setLineWidth(2);
@@ -63,14 +64,14 @@ EvaluationDataSourceWidget::EvaluationDataSourceWidget(const std::string& title,
     // data sources
     data_source_layout_ = new QGridLayout();
 
-    updateDataSources();
+    //updateDataSources();
 
     main_layout->addLayout(data_source_layout_);
 
     main_layout->addStretch();
 
-    updateCheckboxesChecked();
-    updateCheckboxesDisabled();
+    //updateCheckboxesChecked();
+    //updateCheckboxesDisabled();
 
     // buttons
 
@@ -93,26 +94,34 @@ void EvaluationDataSourceWidget::updateDataSources()
             delete child->widget();
         delete child;
 
-//        if (child->widget())
-//            data_source_layout_->removeWidget(child->widget());
-
-//        data_source_layout_->removeItem(child);
-//        delete child;
     }
     data_sources_checkboxes_.clear();
 
     unsigned int col, row;
     unsigned int cnt = 0;
 
-    for (auto& it : data_sources_)
+    DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
+
+    map<unsigned int, bool> data_sources;
+
+    if (title_ == "Reference Data")
+        data_sources = COMPASS::instance().evaluationManager().dataSourcesRef();
+    else
+        data_sources = COMPASS::instance().evaluationManager().dataSourcesTst();
+
+    for (auto& it : data_sources)
     {
-        QCheckBox* checkbox = new QCheckBox(tr(it.second.getName().c_str()));
-        checkbox->setChecked(true);
+        assert (dbcontent_man.hasDataSource(it.first));
+
+        dbContent::DBDataSource& ds = dbcontent_man.dataSource(it.first);
+
+        QCheckBox* checkbox = new QCheckBox(tr(ds.name().c_str()));
+        checkbox->setChecked(it.second);
         checkbox->setProperty("id", it.first);
         connect(checkbox, SIGNAL(clicked()), this, SLOT(toggleDataSourceSlot()));
 
-        loginf << "EvaluationDataSourceWidget: EvaluationDataSourceWidget: got sensor " << it.first << " name "
-               << it.second.getName() << " active " << checkbox->isChecked();
+        loginf << "EvaluationDataSourceWidget: updateDataSources: got sensor " << it.first << " name "
+               << ds.name() << " active " << checkbox->isChecked();
 
         data_sources_checkboxes_[it.first] = checkbox;
 
@@ -126,13 +135,19 @@ void EvaluationDataSourceWidget::updateDataSources()
 
 void EvaluationDataSourceWidget::updateCheckboxesChecked()
 {
+    map<unsigned int, bool> data_sources;
+
+    if (title_ == "Reference Data")
+        data_sources = COMPASS::instance().evaluationManager().dataSourcesRef();
+    else
+        data_sources = COMPASS::instance().evaluationManager().dataSourcesTst();
+
     for (auto& checkit : data_sources_checkboxes_)
     {
-        assert(data_sources_.find(checkit.first) != data_sources_.end());
-        ActiveDataSource& src = data_sources_.at(checkit.first);
-        checkit.second->setChecked(src.isActive());
-        logdbg << "EvaluationDataSourceWidget: updateCheckboxesChecked: name " << src.getName()
-               << " active " << src.isActive();
+        assert(data_sources.count(checkit.first));
+        checkit.second->setChecked(data_sources.at(checkit.first));
+        logdbg << "EvaluationDataSourceWidget: updateCheckboxesChecked: ds_id " << checkit.first
+               << " active " << data_sources.at(checkit.first);
     }
 }
 
@@ -149,30 +164,50 @@ void EvaluationDataSourceWidget::dboNameChangedSlot()
     updateDataSources();
 
     updateCheckboxesChecked();
-    updateCheckboxesDisabled();
+    //updateCheckboxesDisabled();
 }
 
-void EvaluationDataSourceWidget::updateCheckboxesDisabled()
-{
-    for (auto& checkit : data_sources_checkboxes_)
-    {
-        assert(data_sources_.find(checkit.first) != data_sources_.end());
-        ActiveDataSource& src = data_sources_.at(checkit.first);
-        checkit.second->setEnabled(src.isActiveInData());
-        loginf << "EvaluationDataSourceWidget: updateCheckboxesDisabled: src " << src.getName()
-               << " active " << src.isActiveInData();
-    }
-}
+//void EvaluationDataSourceWidget::updateCheckboxesDisabled()
+//{
+//    map<unsigned int, bool> data_sources;
+
+//    if (title_ == "Reference Data")
+//        data_sources = COMPASS::instance().evaluationManager().dataSourcesRef();
+//    else
+//        data_sources = COMPASS::instance().evaluationManager().dataSourcesTst();
+
+//    for (auto& checkit : data_sources_checkboxes_)
+//    {
+//        assert(data_sources.count(checkit.first));
+//        ActiveDataSource& src = data_sources_.at(checkit.first);
+//        checkit.second->setEnabled(src.isActiveInData());
+//        loginf << "EvaluationDataSourceWidget: updateCheckboxesDisabled: src " << src.getName()
+//               << " active " << src.isActiveInData();
+//    }
+//}
 
 void EvaluationDataSourceWidget::toggleDataSourceSlot()
 {
     logdbg << "EvaluationDataSourceWidget: toggleDataSource";
     QCheckBox* check = (QCheckBox*)sender();
 
-    int id = check->property("id").toInt();
+    unsigned int ds_id = check->property("id").toInt();
 
-    assert(data_sources_.find(id) != data_sources_.end());
-    data_sources_.at(id).setActive(check->checkState() == Qt::Checked);
+    if (title_ == "Reference Data")
+    {
+        map<unsigned int, bool>& data_sources = COMPASS::instance().evaluationManager().dataSourcesRef();
+
+        assert(data_sources.count(ds_id));
+        data_sources.at(ds_id) = check->checkState() == Qt::Checked;
+
+    }
+    else
+    {
+        map<unsigned int, bool>& data_sources = COMPASS::instance().evaluationManager().dataSourcesTst();
+
+        assert(data_sources.count(ds_id));
+        data_sources.at(ds_id) = check->checkState() == Qt::Checked;
+    }
 
     updateCheckboxesChecked();
 }
