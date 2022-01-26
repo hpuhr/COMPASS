@@ -51,8 +51,6 @@ FilterManager::FilterManager(const std::string& class_id, const std::string& ins
 
 FilterManager::~FilterManager()
 {
-    for (unsigned int cnt = 0; cnt < filters_.size(); cnt++)
-        delete filters_.at(cnt);
     filters_.clear();
 
     if (widget_)
@@ -91,7 +89,7 @@ void FilterManager::generateSubConfigurable(const std::string& class_id,
     if (class_id == "DBFilter")
     {
         DBFilter* filter = new DBFilter(class_id, instance_id, this);
-        filters_.push_back(filter);
+        filters_.emplace_back(filter);
     }
     else if (class_id == "DBOSpecificValuesDBFilter")
     {
@@ -113,6 +111,7 @@ void FilterManager::generateSubConfigurable(const std::string& class_id,
         }
 
         DBOSpecificValuesDBFilter* filter = new DBOSpecificValuesDBFilter(class_id, instance_id, this);
+
         if (filter->disabled())
         {
             loginf << "FilterManager: generateSubConfigurable: deleting disabled dbo specific filter"
@@ -120,7 +119,7 @@ void FilterManager::generateSubConfigurable(const std::string& class_id,
             delete filter;
         }
         else
-            filters_.push_back(filter);
+            filters_.emplace_back(filter);
     }
     else if (class_id == "UTNFilter")
     {
@@ -134,7 +133,8 @@ void FilterManager::generateSubConfigurable(const std::string& class_id,
             }
 
             UTNFilter* filter = new UTNFilter(class_id, instance_id, this);
-            filters_.push_back(filter);
+
+            filters_.emplace_back(filter);
         }
         catch (const std::exception& e)
         {
@@ -155,7 +155,8 @@ void FilterManager::generateSubConfigurable(const std::string& class_id,
             }
 
             ADSBQualityFilter* filter = new ADSBQualityFilter(class_id, instance_id, this);
-            filters_.push_back(filter);
+
+            filters_.emplace_back(filter);
         }
         catch (const std::exception& e)
         {
@@ -192,14 +193,14 @@ void FilterManager::checkSubConfigurables()
 {
     // check for UTN filter
 
-//    string classid = "UTNFilter";
+    string classid = "UTNFilter";
 
-//    if (std::find_if(filters_.begin(), filters_.end(),
-//                     [&classid](const DBFilter* x) { return x->classId() == classid;}) == filters_.end())
-//    { // not UTN filter
-//        addNewSubConfiguration(classid, classid+"0");
-//        generateSubConfigurable(classid, classid+"0");
-//    }
+    if (std::find_if(filters_.begin(), filters_.end(),
+                     [&classid](const unique_ptr<DBFilter>& x) { return x->classId() == classid;}) == filters_.end())
+    { // not UTN filter
+        addNewSubConfiguration(classid, classid+"0");
+        generateSubConfigurable(classid, classid+"0");
+    }
 
 //    classid = "ADSBQualityFilter";
 
@@ -212,6 +213,7 @@ void FilterManager::checkSubConfigurables()
 }
 
 std::string FilterManager::getSQLCondition(const std::string& dbo_name,
+                                           std::vector<std::string>& extra_from_parts,
                                            std::vector<dbContent::Variable*>& filtered_variables)
 {
     assert(COMPASS::instance().dbContentManager().dbContent(dbo_name).loadable());
@@ -220,7 +222,7 @@ std::string FilterManager::getSQLCondition(const std::string& dbo_name,
 
     bool first = true;
 
-    for (auto* filter : filters_)
+    for (auto& filter : filters_)
     {
         loginf << "FilterManager: getSQLCondition: filter " << filter->instanceId() << " active "
                << filter->getActive() << " filters " << dbo_name << " "
@@ -228,7 +230,7 @@ std::string FilterManager::getSQLCondition(const std::string& dbo_name,
 
         if (filter->getActive() && filter->filters(dbo_name))
         {
-            ss << filter->getConditionString(dbo_name, first, filtered_variables);
+            ss << filter->getConditionString(dbo_name, first, extra_from_parts, filtered_variables);
         }
     }
 
@@ -242,22 +244,25 @@ DBFilter* FilterManager::getFilter(unsigned int index)
 {
     assert(index < filters_.size());
 
-    return filters_.at(index);
+    return filters_.at(index).get();
 }
 
 bool FilterManager::hasFilter (const std::string& name)
 {
-    auto it = find_if(filters_.begin(), filters_.end(), [name] (const DBFilter* f) { return f->getName() == name; } );
+    auto it = find_if(filters_.begin(), filters_.end(), [name] (const unique_ptr<DBFilter>& f)
+    { return f->getName() == name; } );
 
     return it != filters_.end();
 }
 
 DBFilter* FilterManager::getFilter (const std::string& name)
 {
-    auto it = find_if(filters_.begin(), filters_.end(), [name] (const DBFilter* f) { return f->getName() == name; } );
+    auto it = find_if(filters_.begin(), filters_.end(), [name] (const unique_ptr<DBFilter>& f)
+    { return f->getName() == name; } );
+
     assert (it != filters_.end());
 
-    return *it;
+    return it->get();
 }
 
 
@@ -270,21 +275,18 @@ void FilterManager::reset()
     }
 }
 
-void FilterManager::deleteFilterSlot(DBFilter* filter)
-{
-    std::vector<DBFilter*>::iterator it;
+//void FilterManager::deleteFilterSlot(DBFilter* filter)
+//{
+//    auto it = find(filters_.begin(), filters_.end(), filter);
+//    if (it == filters_.end())
+//        throw std::runtime_error("FilterManager: deleteFilter: called with unknown filter");
+//    else
+//    {
+//        filters_.erase(it);
+//    }
 
-    it = find(filters_.begin(), filters_.end(), filter);
-    if (it == filters_.end())
-        throw std::runtime_error("FilterManager: deleteFilter: called with unknown filter");
-    else
-    {
-        filters_.erase(it);
-        delete filter;
-    }
-
-    emit changedFiltersSignal();
-}
+//    emit changedFiltersSignal();
+//}
 
 void FilterManager::unshowViewPointSlot (const ViewableDataConfig* vp)
 {
@@ -335,7 +337,7 @@ void FilterManager::showViewPointSlot (const ViewableDataConfig* vp)
             std::string filter_name = fil_it.first;
 
             auto it = find_if(filters_.begin(), filters_.end(),
-                              [filter_name] (const DBFilter* f) { return f->getName() == filter_name; } );
+                              [filter_name] (const unique_ptr<DBFilter>& f) { return f->getName() == filter_name; } );
 
             if (it == filters_.end())
             {
@@ -377,7 +379,7 @@ void FilterManager::setConfigInViewPoint (nlohmann::json& data)
         data["filters"] = json::object();
         json& filters = data.at("filters");
 
-        for (auto fil_it : filters_)
+        for (auto& fil_it : filters_)
         {
             if (fil_it->getActive())
                 fil_it->saveViewPointConditions(filters);
@@ -438,7 +440,7 @@ void FilterManager::databaseClosedSlot()
 
 void FilterManager::disableAllFilters ()
 {
-    for (auto fil_it : filters_)
+    for (auto& fil_it : filters_)
         if (!fil_it->disabled())
             fil_it->setActive(false);
 }

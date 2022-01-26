@@ -104,6 +104,7 @@ bool DBFilterCondition::filters(const std::string& dbo_name)
 }
 
 std::string DBFilterCondition::getConditionString(const std::string& dbo_name, bool& first,
+                                                  std::vector<std::string>& extra_from_parts,
                                                   std::vector<dbContent::Variable*>& filtered_variables)
 {
     logdbg << "DBFilterCondition: getConditionString: object " << dbo_name << " first " << first;

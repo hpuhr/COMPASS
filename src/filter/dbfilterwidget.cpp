@@ -191,14 +191,6 @@ void DBFilterWidget::toggleActive()
     emit possibleFilterChange();
 }
 
-void DBFilterWidget::invert()
-{
-    logdbg << "DBFilterWidget: invert";
-    filter_.invert();
-
-    emit possibleFilterChange();
-}
-
 void DBFilterWidget::update(void)
 {
     logdbg << "DBFilterWidget: update";

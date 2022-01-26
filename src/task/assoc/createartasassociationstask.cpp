@@ -375,7 +375,7 @@ void CreateARTASAssociationsTask::run()
             //                             use_order, DBOVariable* order_variable, bool
             //                             use_order_ascending, const std::string &limit_str)
 
-            dbo_it.second->loadFiltered(read_set, custom_filter_clause, {tracker_ds_id_var_}, false,
+            dbo_it.second->loadFiltered(read_set, {}, custom_filter_clause, {tracker_ds_id_var_}, false,
                                         &tod_var_->getFor("CAT062"), false);
         }
         else

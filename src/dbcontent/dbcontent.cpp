@@ -297,6 +297,7 @@ void DBContent::load(VariableSet& read_set, bool use_filters, bool use_order,
     assert(existsInDB());
 
     string custom_filter_clause;
+    std::vector<std::string> extra_from_parts;
     vector<Variable*> filtered_variables;
 
     if (dbo_manager_.hasDSFilter(name_))
@@ -331,19 +332,19 @@ void DBContent::load(VariableSet& read_set, bool use_filters, bool use_order,
             custom_filter_clause += " AND";
 
         custom_filter_clause +=
-                COMPASS::instance().filterManager().getSQLCondition(name_, filtered_variables);
+                COMPASS::instance().filterManager().getSQLCondition(name_, extra_from_parts, filtered_variables);
     }
 
     loginf << "DBContent: load: filter '" << custom_filter_clause << "'";
 
-    loadFiltered(read_set, custom_filter_clause, filtered_variables, use_order, order_variable,
+    loadFiltered(read_set, extra_from_parts, custom_filter_clause, filtered_variables, use_order, order_variable,
                  use_order_ascending, limit_str);
 }
 
-void DBContent::loadFiltered(VariableSet& read_set, string custom_filter_clause,
-                    vector<Variable*> filtered_variables, bool use_order,
-                    Variable* order_variable, bool use_order_ascending,
-                    const string& limit_str)
+void DBContent::loadFiltered(VariableSet& read_set, const std::vector<std::string>& extra_from_parts,
+                             string custom_filter_clause, vector<Variable*> filtered_variables,
+                             bool use_order, Variable* order_variable, bool use_order_ascending,
+                             const string& limit_str)
 {
     logdbg << "DBContent: loadFiltered: name " << name_ << " loadable " << is_loadable_;
 
@@ -368,7 +369,8 @@ void DBContent::loadFiltered(VariableSet& read_set, string custom_filter_clause,
 
     read_job_ = shared_ptr<DBOReadDBJob>(
                 new DBOReadDBJob(
-                    COMPASS::instance().interface(), *this, read_set, custom_filter_clause, filtered_variables,
+                    COMPASS::instance().interface(), *this, read_set, extra_from_parts,
+                    custom_filter_clause, filtered_variables,
                     use_order, order_variable, use_order_ascending, limit_str));
 
     connect(read_job_.get(), &DBOReadDBJob::intermediateSignal,
@@ -525,7 +527,7 @@ map<unsigned int, string> DBContent::loadLabelData(vector<unsigned int> rec_nums
 
     DBInterface& db_interface = COMPASS::instance().interface();
 
-    db_interface.prepareRead(*this, read_list, custom_filter_clause, {}, false, nullptr, false, "");
+    db_interface.prepareRead(*this, read_list, {}, custom_filter_clause, {}, false, nullptr, false, "");
     shared_ptr<Buffer> buffer = db_interface.readDataChunk(*this);
     db_interface.finalizeReadStatement(*this);
 

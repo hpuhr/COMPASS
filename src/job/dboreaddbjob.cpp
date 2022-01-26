@@ -27,6 +27,7 @@
 using namespace dbContent;
 
 DBOReadDBJob::DBOReadDBJob(DBInterface& db_interface, DBContent& dbobject, VariableSet read_list,
+                           const std::vector<std::string>& extra_from_parts,
                            std::string custom_filter_clause,
                            std::vector<Variable*> filtered_variables, bool use_order,
                            Variable* order_variable, bool use_order_ascending,
@@ -35,6 +36,7 @@ DBOReadDBJob::DBOReadDBJob(DBInterface& db_interface, DBContent& dbobject, Varia
       db_interface_(db_interface),
       dbobject_(dbobject),
       read_list_(read_list),
+      extra_from_parts_(extra_from_parts),
       custom_filter_clause_(custom_filter_clause),
       filtered_variables_(filtered_variables),
       use_order_(use_order),
@@ -61,7 +63,7 @@ void DBOReadDBJob::run()
 
     start_time_ = boost::posix_time::microsec_clock::local_time();
 
-    db_interface_.prepareRead(dbobject_, read_list_, custom_filter_clause_, filtered_variables_,
+    db_interface_.prepareRead(dbobject_, read_list_, extra_from_parts_, custom_filter_clause_, filtered_variables_,
                               use_order_, order_variable_, use_order_ascending_, limit_str_);
 
     unsigned int cnt = 0;

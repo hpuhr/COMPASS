@@ -47,8 +47,6 @@ class DBFilterWidget : public QFrame, public Configurable
     void toggleAnd();
     /// @brief Active toggle
     void toggleActive();
-    /// @brief Invert function, not used yet
-    void invert();
     /// @brief Slot for sub-filters to propagate their changes. Not used yet.
     void possibleSubFilterChange();
     /// @brief Reset function

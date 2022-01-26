@@ -20,12 +20,14 @@
 #include "utnfilterwidget.h"
 #include "dbcontent/dbcontent.h"
 #include "dbcontent/dbcontentmanager.h"
+#include "dbcontent/variable/metavariable.h"
 #include "logger.h"
 #include "stringconv.h"
 
 using namespace std;
 using namespace Utils;
 using namespace nlohmann;
+using namespace dbContent;
 
 UTNFilter::UTNFilter(const std::string& class_id, const std::string& instance_id,
                      Configurable* parent)
@@ -36,11 +38,9 @@ UTNFilter::UTNFilter(const std::string& class_id, const std::string& instance_id
 
     name_ = "UTNs";
 
-    TODO_ASSERT
-
 //    if (!COMPASS::instance().dbContentManager().hasAssociations())
 //    {
-//        loginf << "UTNFilter: contructor: disabled since no associations";
+//        loginf << "UTNFilter: constructor: disabled since no associations";
 
 //        active_ = false;
 //        visible_ = false;
@@ -55,77 +55,43 @@ UTNFilter::~UTNFilter() {}
 
 bool UTNFilter::filters(const std::string& dbo_type)
 {
-    TODO_ASSERT
-
-//    if (!COMPASS::instance().dbContentManager().hasAssociations())
-//        return false;
+    if (!COMPASS::instance().dbContentManager().hasAssociations())
+        return false;
 
     return true;
 }
 
 std::string UTNFilter::getConditionString(const std::string& dbo_name, bool& first,
+                                          std::vector<std::string>& extra_from_parts,
                                           std::vector<dbContent::Variable*>& filtered_variables)
 {
     logdbg << "UTNFilter: getConditionString: dbo " << dbo_name << " active " << active_;
 
-    TODO_ASSERT
-
-//    if (!COMPASS::instance().dbContentManager().hasAssociations())
-//        return "";
+    if (!COMPASS::instance().dbContentManager().hasAssociations())
+        return "";
 
     stringstream ss;
 
     if (active_)
     {
-        DBContentManager& obj_man = COMPASS::instance().dbContentManager();
-        assert (obj_man.existsDBContent(dbo_name));
+        DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
+        assert (dbcontent_man.existsDBContent(dbo_name));
 
-        DBContent& object = obj_man.dbContent(dbo_name);
+        assert (dbcontent_man.metaVariable(DBContent::meta_var_associations_.name()).existsIn(dbo_name));
+        Variable& assoc_var = dbcontent_man.metaVariable(DBContent::meta_var_associations_.name()).getFor(dbo_name);
 
-        TODO_ASSERT
+        extra_from_parts.push_back("json_each("+dbcontent_man.dbContent(dbo_name).dbTableName()+".associations)");
 
-//        if (!object.hasAssociations())
-//        {
-//            logdbg << "UTNFilter: getConditionString: no associations";
-//            return "";
-//        }
-
-        vector<unsigned int> rec_nums;
-//        const DBOAssociationCollection& assocations = object.associations();
-
-//        for (auto utn : utns_)
-//        {
-//            vector<unsigned int> rec_nums_utn = assocations.getRecNumsForUTN(utn);
-
-//            logdbg << "UTNFilter: getConditionString: utn " << utn << " num rec_nums " << rec_nums_utn.size();
-
-//            rec_nums.insert(rec_nums.end(), rec_nums_utn.begin(), rec_nums_utn.end());
-//        }
-
-        logdbg << "UTNFilter: getConditionString got " << rec_nums.size() << " rec_nums for dbo " << dbo_name;;
-
-        filtered_variables.push_back(&object.variable("rec_num"));
-
-        if (!rec_nums.size())
-            logdbg << "UTNFilter: getConditionString: no rec_nums";
-
+        filtered_variables.push_back(&assoc_var);
 
         if (!first)
         {
             ss << " AND";
         }
 
-        ss << " rec_num IN (";
+        // SELECT x FROM data_cat062, json_each(data_cat062.associations) WHERE json_each.value == 0;
 
-        for (unsigned int cnt = 0; cnt < rec_nums.size(); ++cnt)
-        {
-            if (cnt != 0)
-                ss << ",";
-
-            ss << to_string(rec_nums.at(cnt));
-        }
-
-        ss << ")";
+        ss << " json_each.value IN (" << utns_str_ << ")";
 
         first = false;
     }
@@ -136,7 +102,7 @@ std::string UTNFilter::getConditionString(const std::string& dbo_name, bool& fir
 }
 
 void UTNFilter::generateSubConfigurable(const std::string& class_id,
-                                                const std::string& instance_id)
+                                        const std::string& instance_id)
 {
     logdbg << "UTNFilter: generateSubConfigurable: class_id " << class_id;
 
@@ -144,8 +110,6 @@ void UTNFilter::generateSubConfigurable(const std::string& class_id,
     {
         assert(!widget_);
         widget_ = new UTNFilterWidget(*this, class_id, instance_id);
-
-        TODO_ASSERT
 
 //        if (!COMPASS::instance().dbContentManager().hasAssociations())
 //        {
@@ -164,10 +128,8 @@ void UTNFilter::checkSubConfigurables()
 
     if (!widget_)
     {
-        logdbg << "UTNFilter: checkSubConfigurables: generating my filter widget";
+        logdbg << "UTNFilter: checkSubConfigurables: generating filter widget";
         widget_ = new UTNFilterWidget(*this, "UTNFilterWidget", instanceId() + "Widget0");
-
-        TODO_ASSERT
 
 //        if (!COMPASS::instance().dbContentManager().hasAssociations())
 //        {
@@ -178,21 +140,11 @@ void UTNFilter::checkSubConfigurables()
     }
     assert(widget_);
 
-//    for (unsigned int cnt = 0; cnt < sub_filters_.size(); cnt++)
-//    {
-//        DBFilterWidget* filter_widget = sub_filters_.at(cnt)->widget();
-//        QObject::connect((QWidget*)filter_widget, SIGNAL(possibleFilterChange()), (QWidget*)widget_,
-//                         SLOT(possibleSubFilterChange()));
-//        widget_->addChildWidget(filter_widget);
-//    }
 }
 
 
 void UTNFilter::reset()
 {
-//    for (auto& it : data_sources_)
-//        it.second.setActive(true);
-
     widget_->update();
 }
 
@@ -247,7 +199,7 @@ bool UTNFilter::updateUTNSFromStr(const std::string& utns)
     vector<unsigned int> utns_tmp;
     vector<string> utns_tmp_str = String::split(utns, ',');
 
-    bool ok;
+    bool ok = true;
 
     for (auto& utn_str : utns_tmp_str)
     {

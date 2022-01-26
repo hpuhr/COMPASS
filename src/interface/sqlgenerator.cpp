@@ -557,7 +557,8 @@ string SQLGenerator::createDBUpdateStringBind(shared_ptr<Buffer> buffer,
 
 
 shared_ptr<DBCommand> SQLGenerator::getSelectCommand(
-        const DBContent& object, VariableSet read_list, const string& filter, bool use_order,
+        const DBContent& object, VariableSet read_list,
+        std::vector<std::string> extra_from_parts, const string& filter, bool use_order,
         Variable* order_variable, bool use_order_ascending, const string& limit)
 {
     logdbg << "SQLGenerator: getSelectCommand: dbo " << object.name()
@@ -597,10 +598,11 @@ shared_ptr<DBCommand> SQLGenerator::getSelectCommand(
 
     ss << " FROM " << table_db_name;  // << table->getAllTableNames();
 
+    // add extra from parts
+    for (auto& from_part : extra_from_parts)
+        ss << ", " << from_part;
 
-
-
-    logdbg << "SQLGenerator: getSelectCommand: filterting statement";
+    logdbg << "SQLGenerator: getSelectCommand: filtering statement";
     // add filter statement
     if (filter.size() > 0)
         ss << " WHERE "  << filter;
@@ -628,7 +630,7 @@ shared_ptr<DBCommand> SQLGenerator::getSelectCommand(
     command->set(ss.str());
     command->list(property_list);
 
-    logdbg << "SQLGenerator: getSelectCommand: command sql '" << ss.str() << "'";
+    loginf << "SQLGenerator: getSelectCommand: command sql '" << ss.str() << "'";
 
     return command;
 }
