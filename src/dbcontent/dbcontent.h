@@ -74,14 +74,19 @@ public slots:
     void updateDoneSlot();
 
 public:
-    static const Property meta_var_rec_num_id_;
+    static const Property meta_var_rec_num_;
     static const Property meta_var_datasource_id_;
     static const Property meta_var_line_id_;
-    static const Property meta_var_tod_id_;
-    static const Property meta_var_m3a_id_;
-    static const Property meta_var_ta_id_;
-    static const Property meta_var_ti_id_;
-    static const Property meta_var_mc_id_;
+    static const Property meta_var_tod_;
+    static const Property meta_var_m3a_;
+    static const Property meta_var_m3a_g_;
+    static const Property meta_var_m3a_v_;
+    static const Property meta_var_ta_;
+    static const Property meta_var_ti_;
+    static const Property meta_var_mc_;
+    static const Property meta_var_mc_g_;
+    static const Property meta_var_mc_v_;
+    static const Property meta_var_ground_bit_;
     static const Property meta_var_track_num_;
     static const Property meta_var_track_end_;
     static const Property meta_var_latitude_;
@@ -99,6 +104,7 @@ public:
     static const Property var_tracker_track_begin_;
     static const Property var_tracker_coasting_;
     static const Property var_tracker_track_end_;
+    static const Property var_tracker_baro_alt_;
 
     static const Property selected_var;
 

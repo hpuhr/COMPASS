@@ -115,8 +115,11 @@ public:
     bool hasDSFilter (const std::string& dbo_name);
     std::vector<unsigned int> unfilteredDS (const std::string& dbo_name); // DS IDs
 
+    void setLoadOnlyDataSources (std::set<unsigned int> ds_ids);
+
     void load();
     void addLoadedData(std::map<std::string, std::shared_ptr<Buffer>> data);
+    std::map<std::string, std::shared_ptr<Buffer>> loadedData();
     void loadingDone(DBContent& object); // to be called by dbo when it's loading is finished
     bool loadInProgress() const;
     void clearData();

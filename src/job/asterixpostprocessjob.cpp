@@ -62,9 +62,9 @@ void ASTERIXPostprocessJob::doFutureTimestampsCheck()
     {
         buffer_size = buf_it.second->size();
 
-        assert (obj_man.metaVariable(DBContent::meta_var_tod_id_.name()).existsIn(buf_it.first));
+        assert (obj_man.metaVariable(DBContent::meta_var_tod_.name()).existsIn(buf_it.first));
 
-        dbContent::Variable& tod_var = obj_man.metaVariable(DBContent::meta_var_tod_id_.name()).getFor(buf_it.first);
+        dbContent::Variable& tod_var = obj_man.metaVariable(DBContent::meta_var_tod_.name()).getFor(buf_it.first);
 
         Property tod_prop {tod_var.name(), tod_var.dataType()};
 

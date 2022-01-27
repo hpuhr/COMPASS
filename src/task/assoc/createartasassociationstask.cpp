@@ -236,16 +236,16 @@ bool CreateARTASAssociationsTask::canRun()
 
     // meta var stuff
     loginf << "CreateARTASAssociationsTask: canRun: meta vars "
-        << !dbcontent_man.existsMetaVariable(DBContent::meta_var_rec_num_id_.name()) << " "
+        << !dbcontent_man.existsMetaVariable(DBContent::meta_var_rec_num_.name()) << " "
         << !dbcontent_man.existsMetaVariable(DBContent::meta_var_datasource_id_.name()) << " "
-        << !dbcontent_man.existsMetaVariable(DBContent::meta_var_tod_id_.name()) << " "
+        << !dbcontent_man.existsMetaVariable(DBContent::meta_var_tod_.name()) << " "
         << !dbcontent_man.existsMetaVariable(DBContent::meta_var_track_num_.name()) << " "
         << !dbcontent_man.existsMetaVariable(DBContent::meta_var_artas_hash_.name()) << " "
         << !dbcontent_man.existsMetaVariable(DBContent::meta_var_associations_.name());
 
-    if (!dbcontent_man.existsMetaVariable(DBContent::meta_var_rec_num_id_.name()) ||
+    if (!dbcontent_man.existsMetaVariable(DBContent::meta_var_rec_num_.name()) ||
             !dbcontent_man.existsMetaVariable(DBContent::meta_var_datasource_id_.name()) ||
-            !dbcontent_man.existsMetaVariable(DBContent::meta_var_tod_id_.name()) ||
+            !dbcontent_man.existsMetaVariable(DBContent::meta_var_tod_.name()) ||
             !dbcontent_man.existsMetaVariable(DBContent::meta_var_track_num_.name()) ||
             !dbcontent_man.existsMetaVariable(DBContent::meta_var_artas_hash_.name()) ||
             !dbcontent_man.existsMetaVariable(DBContent::meta_var_associations_.name()))
@@ -275,14 +275,14 @@ bool CreateARTASAssociationsTask::canRun()
         }
 
         loginf << "CreateARTASAssociationsTask: canRun: metas in object " << dbo_it.first << " "
-            << !dbcontent_man.metaVariable(DBContent::meta_var_rec_num_id_.name()).existsIn(dbo_it.first) << " "
+            << !dbcontent_man.metaVariable(DBContent::meta_var_rec_num_.name()).existsIn(dbo_it.first) << " "
             << !dbcontent_man.metaVariable(DBContent::meta_var_datasource_id_.name()).existsIn(dbo_it.first) << " "
-            << !dbcontent_man.metaVariable(DBContent::meta_var_tod_id_.name()).existsIn(dbo_it.first) << " "
+            << !dbcontent_man.metaVariable(DBContent::meta_var_tod_.name()).existsIn(dbo_it.first) << " "
             << !dbcontent_man.metaVariable(DBContent::meta_var_associations_.name()).existsIn(dbo_it.first);
 
-        if (!dbcontent_man.metaVariable(DBContent::meta_var_rec_num_id_.name()).existsIn(dbo_it.first)
+        if (!dbcontent_man.metaVariable(DBContent::meta_var_rec_num_.name()).existsIn(dbo_it.first)
                 || !dbcontent_man.metaVariable(DBContent::meta_var_datasource_id_.name()).existsIn(dbo_it.first)
-                || !dbcontent_man.metaVariable(DBContent::meta_var_tod_id_.name()).existsIn(dbo_it.first)
+                || !dbcontent_man.metaVariable(DBContent::meta_var_tod_.name()).existsIn(dbo_it.first)
                 || !dbcontent_man.metaVariable(DBContent::meta_var_associations_.name()).existsIn(dbo_it.first))
             return false;
     }
@@ -319,9 +319,9 @@ void CreateARTASAssociationsTask::run()
     checkAndSetTrackerVariable(DBContent::var_tracker_coasting_.name(), &tracker_track_coasting_var_);
     checkAndSetTrackerVariable(DBContent::var_tracker_tris_.name(), &tracker_tris_var_);
 
-    checkAndSetMetaVariable(DBContent::meta_var_rec_num_id_.name(), &rec_num_var_);
+    checkAndSetMetaVariable(DBContent::meta_var_rec_num_.name(), &rec_num_var_);
     checkAndSetMetaVariable(DBContent::meta_var_artas_hash_.name(), &hash_var_);
-    checkAndSetMetaVariable(DBContent::meta_var_tod_id_.name(), &tod_var_);
+    checkAndSetMetaVariable(DBContent::meta_var_tod_.name(), &tod_var_);
     checkAndSetMetaVariable(DBContent::meta_var_associations_.name(), &associations_var_);
 
     DBContentManager& object_man = COMPASS::instance().dbContentManager();

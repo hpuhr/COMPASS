@@ -401,6 +401,24 @@ std::vector<unsigned int> DBContentManager::unfilteredDS (const std::string& dbo
     return ds_ids;
 }
 
+void DBContentManager::setLoadOnlyDataSources (std::set<unsigned int> ds_ids)
+{
+    loginf << "DBContentManager: setLoadOnlyDataSources";
+
+    // deactivate all loading
+    for (auto& ds_it : db_data_sources_)
+        ds_it->loadingWanted(false);
+
+    for (auto ds_id_it : ds_ids)
+    {
+        assert (hasDataSource(ds_id_it));
+        dataSource(ds_id_it).loadingWanted(true);
+    }
+
+    if (load_widget_)
+        load_widget_->update();
+
+}
 
 void DBContentManager::load()
 {
@@ -525,6 +543,11 @@ void DBContentManager::addLoadedData(std::map<std::string, std::shared_ptr<Buffe
 
     if (something_changed)
         emit loadedDataSignal(data_, false);
+}
+
+std::map<std::string, std::shared_ptr<Buffer>> DBContentManager::loadedData()
+{
+    return data_;
 }
 
 void DBContentManager::quitLoading()
@@ -911,7 +934,7 @@ void DBContentManager::finishInserting()
     // add inserted to loaded data
 
     boost::posix_time::ptime start_time = boost::posix_time::microsec_clock::local_time();
-    assert (existsMetaVariable(DBContent::meta_var_tod_id_.name()));
+    assert (existsMetaVariable(DBContent::meta_var_tod_.name()));
 
     if (COMPASS::instance().appMode() == AppMode::LiveRunning) // do tod cleanup
     {
@@ -973,9 +996,9 @@ void DBContentManager::addInsertedDataToChache()
             data_.at(buf_it.first)->seizeBuffer(*buf_it.second.get());
 
             // sort by tod
-            assert (metaVariable(DBContent::meta_var_tod_id_.name()).existsIn(buf_it.first));
+            assert (metaVariable(DBContent::meta_var_tod_.name()).existsIn(buf_it.first));
 
-            Variable& tod_var = metaVariable(DBContent::meta_var_tod_id_.name()).getFor(buf_it.first);
+            Variable& tod_var = metaVariable(DBContent::meta_var_tod_.name()).getFor(buf_it.first);
 
             Property tod_prop {tod_var.name(), tod_var.dataType()};
 
@@ -1057,9 +1080,9 @@ void DBContentManager::cutCachedData()
 
     for (auto& buf_it : data_)
     {
-        assert (metaVariable(DBContent::meta_var_tod_id_.name()).existsIn(buf_it.first));
+        assert (metaVariable(DBContent::meta_var_tod_.name()).existsIn(buf_it.first));
 
-        Variable& tod_var = metaVariable(DBContent::meta_var_tod_id_.name()).getFor(buf_it.first);
+        Variable& tod_var = metaVariable(DBContent::meta_var_tod_.name()).getFor(buf_it.first);
 
         Property tod_prop {tod_var.name(), tod_var.dataType()};
 
@@ -1102,9 +1125,9 @@ void DBContentManager::cutCachedData()
     {
         buffer_size = buf_it.second->size();
 
-        assert (metaVariable(DBContent::meta_var_tod_id_.name()).existsIn(buf_it.first));
+        assert (metaVariable(DBContent::meta_var_tod_.name()).existsIn(buf_it.first));
 
-        Variable& tod_var = metaVariable(DBContent::meta_var_tod_id_.name()).getFor(buf_it.first);
+        Variable& tod_var = metaVariable(DBContent::meta_var_tod_.name()).getFor(buf_it.first);
 
         Property tod_prop {tod_var.name(), tod_var.dataType()};
 

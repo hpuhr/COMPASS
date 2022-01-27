@@ -158,15 +158,15 @@ bool CreateAssociationsTask::canRun()
     DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
 
     loginf << "CreateAssociationsTask: canRun: metas ";
-    if (!dbcontent_man.existsMetaVariable(DBContent::meta_var_rec_num_id_.name())
+    if (!dbcontent_man.existsMetaVariable(DBContent::meta_var_rec_num_.name())
             || !dbcontent_man.existsMetaVariable(DBContent::meta_var_datasource_id_.name())
-            || !dbcontent_man.existsMetaVariable(DBContent::meta_var_tod_id_.name())
-            || !dbcontent_man.existsMetaVariable(DBContent::meta_var_ta_id_.name())
-            || !dbcontent_man.existsMetaVariable(DBContent::meta_var_ti_id_.name())
+            || !dbcontent_man.existsMetaVariable(DBContent::meta_var_tod_.name())
+            || !dbcontent_man.existsMetaVariable(DBContent::meta_var_ta_.name())
+            || !dbcontent_man.existsMetaVariable(DBContent::meta_var_ti_.name())
             || !dbcontent_man.existsMetaVariable(DBContent::meta_var_track_num_.name())
             || !dbcontent_man.existsMetaVariable(DBContent::meta_var_track_end_.name())
-            || !dbcontent_man.existsMetaVariable(DBContent::meta_var_m3a_id_.name())
-            || !dbcontent_man.existsMetaVariable(DBContent::meta_var_mc_id_.name())
+            || !dbcontent_man.existsMetaVariable(DBContent::meta_var_m3a_.name())
+            || !dbcontent_man.existsMetaVariable(DBContent::meta_var_mc_.name())
             || !dbcontent_man.existsMetaVariable(DBContent::meta_var_latitude_.name())
             || !dbcontent_man.existsMetaVariable(DBContent::meta_var_longitude_.name()))
         return false;
@@ -179,11 +179,11 @@ bool CreateAssociationsTask::canRun()
 
         loginf << "CreateAssociationsTask: canRun: metas in dbcontent " << dbo_it.first;
 
-        if (!dbcontent_man.metaVariable(DBContent::meta_var_rec_num_id_.name()).existsIn(dbo_it.first)
+        if (!dbcontent_man.metaVariable(DBContent::meta_var_rec_num_.name()).existsIn(dbo_it.first)
                 || !dbcontent_man.metaVariable(DBContent::meta_var_datasource_id_.name()).existsIn(dbo_it.first)
-                || !dbcontent_man.metaVariable(DBContent::meta_var_tod_id_.name()).existsIn(dbo_it.first)
-                || !dbcontent_man.metaVariable(DBContent::meta_var_m3a_id_.name()).existsIn(dbo_it.first)
-                || !dbcontent_man.metaVariable(DBContent::meta_var_mc_id_.name()).existsIn(dbo_it.first)
+                || !dbcontent_man.metaVariable(DBContent::meta_var_tod_.name()).existsIn(dbo_it.first)
+                || !dbcontent_man.metaVariable(DBContent::meta_var_m3a_.name()).existsIn(dbo_it.first)
+                || !dbcontent_man.metaVariable(DBContent::meta_var_mc_.name()).existsIn(dbo_it.first)
                 || !dbcontent_man.metaVariable(DBContent::meta_var_latitude_.name()).existsIn(dbo_it.first)
                 || !dbcontent_man.metaVariable(DBContent::meta_var_longitude_.name()).existsIn(dbo_it.first)
                 || !dbcontent_man.metaVariable(DBContent::meta_var_associations_.name()).existsIn(dbo_it.first)
@@ -192,8 +192,8 @@ bool CreateAssociationsTask::canRun()
 
         if (dbo_it.first != "CAT001")  // check metas specific track vars
         {
-            if (!dbcontent_man.metaVariable(DBContent::meta_var_ta_id_.name()).existsIn(dbo_it.first)
-                    || !dbcontent_man.metaVariable(DBContent::meta_var_ti_id_.name()).existsIn(dbo_it.first)
+            if (!dbcontent_man.metaVariable(DBContent::meta_var_ta_.name()).existsIn(dbo_it.first)
+                    || !dbcontent_man.metaVariable(DBContent::meta_var_ti_.name()).existsIn(dbo_it.first)
                     )
                 return false;
         }
@@ -233,15 +233,15 @@ void CreateAssociationsTask::run()
     status_dialog_->setAssociationStatus("Loading Data");
     status_dialog_->show();
 
-    checkAndSetMetaVariable(DBContent::meta_var_rec_num_id_.name(), &rec_num_var_);
+    checkAndSetMetaVariable(DBContent::meta_var_rec_num_.name(), &rec_num_var_);
     checkAndSetMetaVariable(DBContent::meta_var_datasource_id_.name(), &ds_id_var_);
-    checkAndSetMetaVariable(DBContent::meta_var_tod_id_.name(), &tod_var_);
-    checkAndSetMetaVariable(DBContent::meta_var_ta_id_.name(), &target_addr_var_);
-    checkAndSetMetaVariable(DBContent::meta_var_ti_id_.name(), &target_id_var_);
+    checkAndSetMetaVariable(DBContent::meta_var_tod_.name(), &tod_var_);
+    checkAndSetMetaVariable(DBContent::meta_var_ta_.name(), &target_addr_var_);
+    checkAndSetMetaVariable(DBContent::meta_var_ti_.name(), &target_id_var_);
     checkAndSetMetaVariable(DBContent::meta_var_track_num_.name(), &track_num_var_);
     checkAndSetMetaVariable(DBContent::meta_var_track_end_.name(), &track_end_var_);
-    checkAndSetMetaVariable(DBContent::meta_var_m3a_id_.name(), &mode_3a_var_);
-    checkAndSetMetaVariable(DBContent::meta_var_mc_id_.name(), &mode_c_var_);
+    checkAndSetMetaVariable(DBContent::meta_var_m3a_.name(), &mode_3a_var_);
+    checkAndSetMetaVariable(DBContent::meta_var_mc_.name(), &mode_c_var_);
     checkAndSetMetaVariable(DBContent::meta_var_latitude_.name(), &latitude_var_);
     checkAndSetMetaVariable(DBContent::meta_var_longitude_.name(), &longitude_var_);
     checkAndSetMetaVariable(DBContent::meta_var_associations_.name(), &associations_var_);

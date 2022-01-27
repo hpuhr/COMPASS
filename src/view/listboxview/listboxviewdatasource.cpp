@@ -293,12 +293,12 @@ void ListBoxViewDataSource::addDefaultVariables (VariableOrderedSet& set)
 {
     DBContentManager& obj_man = COMPASS::instance().dbContentManager();
 
-    if (obj_man.existsMetaVariable(DBContent::meta_var_rec_num_id_.name()))
-        set.add(obj_man.metaVariable(DBContent::meta_var_rec_num_id_.name()));
+    if (obj_man.existsMetaVariable(DBContent::meta_var_rec_num_.name()))
+        set.add(obj_man.metaVariable(DBContent::meta_var_rec_num_.name()));
 
     //        Time of Day
-    if (obj_man.existsMetaVariable(DBContent::meta_var_tod_id_.name()))
-        set.add(obj_man.metaVariable(DBContent::meta_var_tod_id_.name()));
+    if (obj_man.existsMetaVariable(DBContent::meta_var_tod_.name()))
+        set.add(obj_man.metaVariable(DBContent::meta_var_tod_.name()));
 
     //        Datasource
     if (obj_man.existsMetaVariable(DBContent::meta_var_datasource_id_.name()))
@@ -311,20 +311,20 @@ void ListBoxViewDataSource::addDefaultVariables (VariableOrderedSet& set)
 //            set.add(obj_man.metaVariable("pos_long_deg"));
 
     //        Mode 3/A code
-    if (obj_man.existsMetaVariable(DBContent::meta_var_m3a_id_.name()))
-        set.add(obj_man.metaVariable(DBContent::meta_var_m3a_id_.name()));
+    if (obj_man.existsMetaVariable(DBContent::meta_var_m3a_.name()))
+        set.add(obj_man.metaVariable(DBContent::meta_var_m3a_.name()));
 
     //        Mode S TA
-    if (obj_man.existsMetaVariable(DBContent::meta_var_ta_id_.name()))
-        set.add(obj_man.metaVariable(DBContent::meta_var_ta_id_.name()));
+    if (obj_man.existsMetaVariable(DBContent::meta_var_ta_.name()))
+        set.add(obj_man.metaVariable(DBContent::meta_var_ta_.name()));
 
     //        Mode S Callsign
-    if (obj_man.existsMetaVariable(DBContent::meta_var_ti_id_.name()))
-        set.add(obj_man.metaVariable(DBContent::meta_var_ti_id_.name()));
+    if (obj_man.existsMetaVariable(DBContent::meta_var_ti_.name()))
+        set.add(obj_man.metaVariable(DBContent::meta_var_ti_.name()));
 
     //        Mode C
-    if (obj_man.existsMetaVariable(DBContent::meta_var_mc_id_.name()))
-        set.add(obj_man.metaVariable(DBContent::meta_var_mc_id_.name()));
+    if (obj_man.existsMetaVariable(DBContent::meta_var_mc_.name()))
+        set.add(obj_man.metaVariable(DBContent::meta_var_mc_.name()));
 
     //        Track Number
     if (obj_man.existsMetaVariable(DBContent::meta_var_track_num_.name()))

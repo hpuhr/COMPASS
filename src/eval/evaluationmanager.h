@@ -60,8 +60,11 @@ public slots:
     void databaseClosedSlot();
     void associationStatusChangedSlot();
 
-    void newDataSlot(DBContent& object);
-    void loadingDoneSlot(DBContent& object);
+    void loadedDataDataSlot(const std::map<std::string, std::shared_ptr<Buffer>>& data, bool requires_reset);
+    void loadingDoneSlot();
+
+//    void newDataSlot(DBContent& object);
+//    void loadingDoneSlot(DBContent& object);
 
 public:
     EvaluationManager(const std::string& class_id, const std::string& instance_id, COMPASS* compass);
@@ -468,11 +471,9 @@ protected:
 
     void updateReferenceDBO();
     void updateReferenceDataSources();
-    //void updateReferenceDataSourcesActive();
 
     void updateTestDBO();
     void updateTestDataSources();
-    //void updateTestDataSourcesActive();
 
     nlohmann::json::object_t getBaseViewableDataConfig ();
     nlohmann::json::object_t getBaseViewableNoDataConfig ();

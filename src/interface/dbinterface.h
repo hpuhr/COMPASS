@@ -164,11 +164,10 @@ public:
 
     std::shared_ptr<DBResult> queryMinMaxNormalForTable(const std::string& table_name);
 
-    std::set<int> queryActiveSensorNumbers(DBContent& object);
     unsigned int getMaxRecordNumber(DBContent& object);
 
-    std::map<unsigned int, std::tuple<std::set<unsigned int>, std::tuple<bool, unsigned int, unsigned int>,
-    std::tuple<bool, unsigned int, unsigned int>>> queryADSBInfo();
+    //std::map<unsigned int, std::tuple<std::set<unsigned int>, std::tuple<bool, unsigned int, unsigned int>,
+    //std::tuple<bool, unsigned int, unsigned int>>> queryADSBInfo();
     // ta -> mops versions, nucp_nics, nac_ps
 
     //    void deleteAllRowsWithVariableValue (DBOVariable *variable, std::string value, std::string

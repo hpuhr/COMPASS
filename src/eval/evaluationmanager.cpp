@@ -166,7 +166,7 @@ void EvaluationManager::init(QTabWidget* tab_widget)
     widget()->setDisabled(true);
 
     connect (&COMPASS::instance().dbContentManager(), &DBContentManager::associationStatusChangedSignal,
-            this, &EvaluationManager::associationStatusChangedSlot);
+             this, &EvaluationManager::associationStatusChangedSlot);
 }
 
 bool EvaluationManager::canLoadData ()
@@ -205,15 +205,14 @@ void EvaluationManager::loadData ()
     emit resultsChangedSignal();
 
     // actually load
-
-    DBContentManager& object_man = COMPASS::instance().dbContentManager();
+    DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
 
     // load adsb mops versions in a hacky way
-    if (object_man.dbContent("CAT021").hasData() && !has_adsb_info_)
-    {
-        adsb_info_ = COMPASS::instance().interface().queryADSBInfo();
-        has_adsb_info_ = true;
-    }
+//    if (dbcontent_man.dbContent("CAT021").hasData() && !has_adsb_info_)
+//    {
+//        adsb_info_ = COMPASS::instance().interface().queryADSBInfo();
+//        has_adsb_info_ = true;
+//    }
 
     QApplication::restoreOverrideCursor();
 
@@ -227,64 +226,22 @@ void EvaluationManager::loadData ()
 
     // set if load for dbos
 
-    TODO_ASSERT
+    std::set<unsigned int> ds_ids;
 
-//    for (auto& obj_it : object_man)
-//    {
-//        obj_it.second->infoWidget()->setLoad(obj_it.first == dbo_name_ref_
-//                                             || obj_it.first == dbo_name_tst_);
-//    }
+    for (auto& ds_it : data_sources_ref_)
+        if (ds_it.second)
+            ds_ids.insert(ds_it.first);
 
-    // set ref data sources filters
+    for (auto& ds_it : data_sources_tst_)
+        if (ds_it.second)
+            ds_ids.insert(ds_it.first);
 
+    dbcontent_man.setLoadOnlyDataSources(ds_ids);
 
     fil_man.disableAllFilters();
 
-//    if (dbo_name_ref_ != dbo_name_tst_)
-//    {
-//        {
-//            DataSourcesFilter* ref_filter = fil_man.getDataSourcesFilter(dbo_name_ref_);
-//            ref_filter->setActive(true);
-
-//            for (auto& fil_ds_it : ref_filter->dataSources())
-//            {
-//                assert (data_sources_ref_.count(fil_ds_it.first));
-//                fil_ds_it.second.setActive(data_sources_ref_.at(fil_ds_it.first).isActive());
-//            }
-
-//            ref_filter->widget()->update();
-//        }
-
-//        {
-//            DataSourcesFilter* tst_filter = fil_man.getDataSourcesFilter(dbo_name_tst_);
-//            tst_filter->setActive(true);
-
-//            for (auto& fil_ds_it : tst_filter->dataSources())
-//            {
-//                assert (data_sources_tst_.count(fil_ds_it.first));
-//                fil_ds_it.second.setActive(data_sources_tst_.at(fil_ds_it.first).isActive());
-//            }
-
-//            tst_filter->widget()->update();
-//        }
-//    }
-//    else // same ref / tst dbo
-//    {
-//        DataSourcesFilter* filter = fil_man.getDataSourcesFilter(dbo_name_ref_);
-//        filter->setActive(true);
-
-//        for (auto& fil_ds_it : filter->dataSources())
-//        {
-//            assert (data_sources_tst_.count(fil_ds_it.first));
-//            fil_ds_it.second.setActive(data_sources_ref_.at(fil_ds_it.first).isActive()
-//                                       || data_sources_tst_.at(fil_ds_it.first).isActive());
-//        }
-
-//        filter->widget()->update();
-//    }
-
     // position data
-    if (load_only_sector_data_ && hasCurrentStandard())
+    if (load_only_sector_data_ && hasCurrentStandard() && sectorsLayers().size())
     {
         assert (fil_man.hasFilter("Position"));
         DBFilter* pos_fil = fil_man.getFilter("Position");
@@ -378,7 +335,9 @@ void EvaluationManager::loadData ()
 
         if (use_adsb_filter_)
         {
-            assert (fil_man.hasFilter("ADSB Quality"));
+            TODO_ASSERT
+
+                    assert (fil_man.hasFilter("ADSB Quality"));
             DBFilter* adsb_fil = fil_man.getFilter("ADSB Quality");
 
             adsb_fil->setActive(true);
@@ -423,33 +382,16 @@ void EvaluationManager::loadData ()
         }
     }
 
-    // reference data
-    {
-        assert (object_man.existsDBContent(dbo_name_ref_));
-        DBContent& dbo_ref = object_man.dbContent(dbo_name_ref_);
+    COMPASS::instance().viewManager().disableDataDistribution(true);
 
-        TODO_ASSERT
-//        connect(&dbo_ref, &DBObject::newDataSignal, this, &EvaluationManager::newDataSlot);
-//        connect(&dbo_ref, &DBObject::loadingDoneSignal, this, &EvaluationManager::loadingDoneSlot);
-    }
-
-    // test data
-
-    if (dbo_name_ref_ != dbo_name_tst_) // otherwise already connected
-    {
-        assert (object_man.existsDBContent(dbo_name_tst_));
-        DBContent& dbo_tst = object_man.dbContent(dbo_name_tst_);
-
-        TODO_ASSERT
-
-//        connect(&dbo_tst, &DBObject::newDataSignal, this, &EvaluationManager::newDataSlot);
-//        connect(&dbo_tst, &DBObject::loadingDoneSignal, this, &EvaluationManager::loadingDoneSlot);
-
-    }
+    connect(&dbcontent_man, &DBContentManager::loadedDataSignal,
+            this, &EvaluationManager::loadedDataDataSlot);
+    connect(&dbcontent_man, &DBContentManager::loadingDoneSignal,
+            this, &EvaluationManager::loadingDoneSlot);
 
     needs_additional_variables_ = true;
 
-    object_man.load();
+    dbcontent_man.load();
 
     needs_additional_variables_ = false;
 
@@ -538,13 +480,69 @@ void EvaluationManager::associationStatusChangedSlot()
     widget()->updateButtons();
 }
 
-void EvaluationManager::newDataSlot(DBContent& object)
+void EvaluationManager::loadedDataDataSlot(
+        const std::map<std::string, std::shared_ptr<Buffer>>& data, bool requires_reset)
 {
-    //loginf << "EvaluationManager: newDataSlot: obj " << object.name() << " buffer size " << object.data()->size();
+
 }
-void EvaluationManager::loadingDoneSlot(DBContent& object)
+
+void EvaluationManager::loadingDoneSlot()
 {
-    TODO_ASSERT
+    loginf << "EvaluationManager: loadingDoneSlot";
+
+    DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
+
+
+    disconnect(&dbcontent_man, &DBContentManager::loadedDataSignal,
+               this, &EvaluationManager::loadedDataDataSlot);
+    disconnect(&dbcontent_man, &DBContentManager::loadingDoneSignal,
+               this, &EvaluationManager::loadingDoneSlot);
+
+    COMPASS::instance().viewManager().disableDataDistribution(false);
+
+    std::map<std::string, std::shared_ptr<Buffer>> data = dbcontent_man.loadedData();
+    assert (data.count(dbo_name_ref_));
+    data_.addReferenceData(dbcontent_man.dbContent(dbo_name_ref_), data.at(dbo_name_ref_));
+    reference_data_loaded_ = true;
+
+    assert (data.count(dbo_name_tst_));
+    data_.addTestData(dbcontent_man.dbContent(dbo_name_tst_), data.at(dbo_name_tst_));
+    test_data_loaded_ = true;
+
+    dbcontent_man.clearData();
+
+    bool data_loaded_tmp = reference_data_loaded_ && test_data_loaded_;
+
+    loginf << "EvaluationManager: loadingDoneSlot: data loaded " << data_loaded_;
+
+    if (data_loaded_tmp)
+    {
+        loginf << "EvaluationManager: loadingDoneSlot: finalizing";
+
+        boost::posix_time::ptime start_time = boost::posix_time::microsec_clock::local_time();
+
+        data_.finalize();
+
+        boost::posix_time::time_duration time_diff =  boost::posix_time::microsec_clock::local_time() - start_time;
+
+        loginf << "EvaluationManager: loadingDoneSlot: finalize done "
+                   << String::timeStringFromDouble(time_diff.total_milliseconds() / 1000.0, true);
+    }
+
+    data_loaded_ = data_loaded_tmp;
+
+    if (widget_)
+        widget_->updateButtons();
+
+}
+
+//void EvaluationManager::newDataSlot(DBContent& object)
+//{
+//    //loginf << "EvaluationManager: newDataSlot: obj " << object.name() << " buffer size " << object.data()->size();
+//}
+//void EvaluationManager::loadingDoneSlot(DBContent& object)
+//{
+//    TODO_ASSERT
 
 //    loginf << "EvaluationManager: loadingDoneSlot: obj " << object.name() << " buffer size " << object.data()->size();
 
@@ -603,7 +601,7 @@ void EvaluationManager::loadingDoneSlot(DBContent& object)
 
 //    if (widget_)
 //        widget_->updateButtons();
-}
+//}
 
 void EvaluationManager::evaluate ()
 {
@@ -677,77 +675,83 @@ void EvaluationManager::addVariables (const std::string dbo_name, dbContent::Var
 
     DBContentManager& object_man = COMPASS::instance().dbContentManager();
 
-    read_set.add(object_man.metaVariable("rec_num").getFor(dbo_name));
-    read_set.add(object_man.metaVariable("ds_id").getFor(dbo_name));
-    read_set.add(object_man.metaVariable("tod").getFor(dbo_name));
-    read_set.add(object_man.metaVariable("pos_lat_deg").getFor(dbo_name));
-    read_set.add(object_man.metaVariable("pos_long_deg").getFor(dbo_name));
-    read_set.add(object_man.metaVariable("target_addr").getFor(dbo_name));
+    read_set.add(object_man.metaVariable(DBContent::meta_var_rec_num_.name()).getFor(dbo_name));
+    read_set.add(object_man.metaVariable(DBContent::meta_var_datasource_id_.name()).getFor(dbo_name));
+    read_set.add(object_man.metaVariable(DBContent::meta_var_tod_.name()).getFor(dbo_name));
+    read_set.add(object_man.metaVariable(DBContent::meta_var_latitude_.name()).getFor(dbo_name));
+    read_set.add(object_man.metaVariable(DBContent::meta_var_longitude_.name()).getFor(dbo_name));
+
+    if (object_man.metaVariable(DBContent::meta_var_ta_.name()).existsIn(dbo_name))
+        read_set.add(object_man.metaVariable(DBContent::meta_var_ta_.name()).getFor(dbo_name));
 
     // flight level
-    read_set.add(object_man.metaVariable("modec_code_ft").getFor(dbo_name));
+    read_set.add(object_man.metaVariable(DBContent::meta_var_mc_.name()).getFor(dbo_name));
 
-    if (object_man.metaVariable("modec_g").existsIn(dbo_name))
-        read_set.add(object_man.metaVariable("modec_g").getFor(dbo_name));
+    if (object_man.metaVariable(DBContent::meta_var_mc_g_.name()).existsIn(dbo_name))
+        read_set.add(object_man.metaVariable(DBContent::meta_var_mc_g_.name()).getFor(dbo_name));
 
-    if (object_man.metaVariable("modec_v").existsIn(dbo_name))
-        read_set.add(object_man.metaVariable("modec_v").getFor(dbo_name));
+    if (object_man.metaVariable(DBContent::meta_var_mc_v_.name()).existsIn(dbo_name))
+        read_set.add(object_man.metaVariable(DBContent::meta_var_mc_v_.name()).getFor(dbo_name));
 
-    if (dbo_name_ref_ == dbo_name && dbo_name_ref_ == "Tracker")
-        read_set.add(object_man.dbContent("Tracker").variable("tracked_alt_baro_ft"));
+    if (dbo_name_ref_ == dbo_name && dbo_name_ref_ == "CAT062")
+        read_set.add(object_man.dbContent("CAT062").variable(DBContent::var_tracker_baro_alt_.name()));
 
     // m3a
-    read_set.add(object_man.metaVariable("mode3a_code").getFor(dbo_name));
+    read_set.add(object_man.metaVariable(DBContent::meta_var_m3a_.name()).getFor(dbo_name));
 
-    if (object_man.metaVariable("mode3a_g").existsIn(dbo_name))
-        read_set.add(object_man.metaVariable("mode3a_g").getFor(dbo_name));
+    if (object_man.metaVariable(DBContent::meta_var_m3a_g_.name()).existsIn(dbo_name))
+        read_set.add(object_man.metaVariable(DBContent::meta_var_m3a_g_.name()).getFor(dbo_name));
 
-    if (object_man.metaVariable("mode3a_v").existsIn(dbo_name))
-        read_set.add(object_man.metaVariable("mode3a_v").getFor(dbo_name));
+    if (object_man.metaVariable(DBContent::meta_var_m3a_v_.name()).existsIn(dbo_name))
+        read_set.add(object_man.metaVariable(DBContent::meta_var_m3a_v_.name()).getFor(dbo_name));
 
-    if (object_man.metaVariable("track_num").existsIn(dbo_name))
-        read_set.add(object_man.metaVariable("track_num").getFor(dbo_name));
+    // tn
+    if (object_man.metaVariable(DBContent::meta_var_track_num_.name()).existsIn(dbo_name))
+        read_set.add(object_man.metaVariable(DBContent::meta_var_track_num_.name()).getFor(dbo_name));
 
     DBContent& db_object = object_man.dbContent(dbo_name);
 
     // ground bit
-    if (object_man.metaVariable("ground_bit").existsIn(dbo_name))
-        read_set.add(object_man.metaVariable("ground_bit").getFor(dbo_name));
+    if (object_man.metaVariable(DBContent::meta_var_ground_bit_.name()).existsIn(dbo_name))
+        read_set.add(object_man.metaVariable(DBContent::meta_var_ground_bit_.name()).getFor(dbo_name));
+
+    //    if (dbo_name == "ADSB")
+    //    {
+    //        read_set.add(db_object.variable("ground_bit"));
+    //        //            read_set.add(obj.variable("nac_p"));
+    //        //            read_set.add(obj.variable("nucp_nic"));
+    //        //            read_set.add(obj.variable("sil"));
+    //    }
+
+    // speed & heading
+
+    // TODO
 
 //    if (dbo_name == "ADSB")
 //    {
-//        read_set.add(db_object.variable("ground_bit"));
-//        //            read_set.add(obj.variable("nac_p"));
-//        //            read_set.add(obj.variable("nucp_nic"));
-//        //            read_set.add(obj.variable("sil"));
+//        read_set.add(db_object.variable("groundspeed_kt")); // double
+//        read_set.add(db_object.variable("track_angle_deg")); // double
 //    }
+//    else if (dbo_name == "MLAT")
+//    {
+//        read_set.add(db_object.variable("velocity_vx_ms")); // double
+//        read_set.add(db_object.variable("velocity_vy_ms")); // double
+//    }
+//    else if (dbo_name == "Radar")
+//    {
+//        read_set.add(db_object.variable("track_groundspeed_kt")); // double
+//        read_set.add(db_object.variable("track_heading_deg")); // double
+//    }
+//    else if (dbo_name == "Tracker" || dbo_name == "RefTraj")
+//    {
+//        read_set.add(db_object.variable("groundspeed_kt")); // double
+//        read_set.add(db_object.variable("heading_deg")); // double
 
-    // speed & heading
-    if (dbo_name == "ADSB")
-    {
-        read_set.add(db_object.variable("groundspeed_kt")); // double
-        read_set.add(db_object.variable("track_angle_deg")); // double
-    }
-    else if (dbo_name == "MLAT")
-    {
-        read_set.add(db_object.variable("velocity_vx_ms")); // double
-        read_set.add(db_object.variable("velocity_vy_ms")); // double
-    }
-    else if (dbo_name == "Radar")
-    {
-        read_set.add(db_object.variable("track_groundspeed_kt")); // double
-        read_set.add(db_object.variable("track_heading_deg")); // double
-    }
-    else if (dbo_name == "Tracker" || dbo_name == "RefTraj")
-    {
-        read_set.add(db_object.variable("groundspeed_kt")); // double
-        read_set.add(db_object.variable("heading_deg")); // double
+//        // for mono sensor + lu sensor
 
-        // for mono sensor + lu sensor
-
-        read_set.add(db_object.variable("multiple_sources")); // string
-        read_set.add(db_object.variable("track_lu_ds_id")); // int
-    }
+//        read_set.add(db_object.variable("multiple_sources")); // string
+//        read_set.add(db_object.variable("track_lu_ds_id")); // int
+//    }
 
     //        read_set.add(object_man.metaVariable("groundspeed_kt").getFor(dbo_name_ref_));
     //        read_set.add(object_man.metaVariable("heading_deg").getFor(dbo_name_ref_));
@@ -772,7 +776,7 @@ void EvaluationManager::generateSubConfigurable(const std::string& class_id,
 
         // resort by name
         sort(standards_.begin(), standards_.end(),
-            [](const std::unique_ptr<EvaluationStandard>& a, const std::unique_ptr<EvaluationStandard>& b) -> bool
+             [](const std::unique_ptr<EvaluationStandard>& a, const std::unique_ptr<EvaluationStandard>& b) -> bool
         {
             return a->name() > b->name();
         });
@@ -855,7 +859,7 @@ void EvaluationManager::loadSectors()
 
     for (auto& sec_lay_it : sector_layers_)
         for (auto& sec_it : sec_lay_it->sectors())
-           max_sector_id_ = std::max(max_sector_id_, sec_it->id());
+            max_sector_id_ = std::max(max_sector_id_, sec_it->id());
 
     sectors_loaded_ = true;
 }
@@ -1255,7 +1259,7 @@ EvaluationStandard& EvaluationManager::currentStandard()
     string name = current_standard_;
 
     auto iter = std::find_if(standards_.begin(), standards_.end(),
-       [&name](const unique_ptr<EvaluationStandard>& x) { return x->name() == name;});
+                             [&name](const unique_ptr<EvaluationStandard>& x) { return x->name() == name;});
 
     assert (iter != standards_.end());
 
@@ -1265,7 +1269,7 @@ EvaluationStandard& EvaluationManager::currentStandard()
 bool EvaluationManager::hasStandard(const std::string& name)
 {
     auto iter = std::find_if(standards_.begin(), standards_.end(),
-       [&name](const unique_ptr<EvaluationStandard>& x) { return x->name() == name;});
+                             [&name](const unique_ptr<EvaluationStandard>& x) { return x->name() == name;});
 
     return iter != standards_.end();
 }
@@ -1297,7 +1301,7 @@ void EvaluationManager::deleteCurrentStandard()
     string name = current_standard_;
 
     auto iter = std::find_if(standards_.begin(), standards_.end(),
-       [&name](const unique_ptr<EvaluationStandard>& x) { return x->name() == name;});
+                             [&name](const unique_ptr<EvaluationStandard>& x) { return x->name() == name;});
 
     assert (iter != standards_.end());
 
@@ -1376,10 +1380,10 @@ void EvaluationManager::updateReferenceDataSources()
 
             data_sources_ref_[ds_id] = active;
 
-//            data_sources_ref_.emplace(std::piecewise_construct,
-//                                      std::forward_as_tuple(ds_it->first),  // args for key
-//                                      std::forward_as_tuple(ds_it->first, ds_it->second.name(),
-//                                                            active));
+            //            data_sources_ref_.emplace(std::piecewise_construct,
+            //                                      std::forward_as_tuple(ds_it->first),  // args for key
+            //                                      std::forward_as_tuple(ds_it->first, ds_it->second.name(),
+            //                                                            active));
         }
 
     }
@@ -1425,10 +1429,10 @@ void EvaluationManager::updateTestDataSources()
 
             data_sources_tst_[ds_id] = active;
 
-//            data_sources_tst_.emplace(std::piecewise_construct,
-//                                      std::forward_as_tuple(ds_it->first),  // args for key
-//                                      std::forward_as_tuple(ds_it->first, ds_it->second.name(),
-//                                                            active));
+            //            data_sources_tst_.emplace(std::piecewise_construct,
+            //                                      std::forward_as_tuple(ds_it->first),  // args for key
+            //                                      std::forward_as_tuple(ds_it->first, ds_it->second.name(),
+            //                                                            active));
         }
     }
 }
@@ -1798,22 +1802,22 @@ void EvaluationManager::filterUTNs ()
 
     TODO_ASSERT
 
-//    if (remove_not_detected_dbos_) // prepare associations
-//    {
-//        if (dbo_man.hasAssociations())
-//        {
-//            for (auto& dbo_it : dbo_man)
-//            {
-//                if (remove_not_detected_dbo_values_.contains(dbo_it.first)
-//                        && remove_not_detected_dbo_values_.at(dbo_it.first) == true)
-//                {
-//                    associated_utns[dbo_it.first] = dbo_it.second->associations().getAllUTNS();
-//                }
-//            }
-//        }
-//    }
+            //    if (remove_not_detected_dbos_) // prepare associations
+            //    {
+            //        if (dbo_man.hasAssociations())
+            //        {
+            //            for (auto& dbo_it : dbo_man)
+            //            {
+            //                if (remove_not_detected_dbo_values_.contains(dbo_it.first)
+            //                        && remove_not_detected_dbo_values_.at(dbo_it.first) == true)
+            //                {
+            //                    associated_utns[dbo_it.first] = dbo_it.second->associations().getAllUTNS();
+            //                }
+            //            }
+            //        }
+            //    }
 
-    bool use;
+            bool use;
     string comment;
 
     std::set<std::pair<int,int>> remove_mode_as = removeModeACodeData();
@@ -1919,21 +1923,21 @@ void EvaluationManager::filterUTNs ()
         {
             TODO_ASSERT
 
-//            if (dbo_man.hasAssociations())
-//            {
-//                for (auto& dbo_it : dbo_man)
-//                {
-//                    if (remove_not_detected_dbo_values_.contains(dbo_it.first)
-//                            && remove_not_detected_dbo_values_.at(dbo_it.first) == true // removed if not detected
-//                            && associated_utns.count(dbo_it.first) // have associations
-//                            && !associated_utns.at(dbo_it.first).count(target_it.utn_)) // not detected
-//                    {
-//                        use = false; // remove it
-//                        comment = "Not Detected by "+dbo_it.first;
-//                        break;
-//                    }
-//                }
-//            }
+                    //            if (dbo_man.hasAssociations())
+                    //            {
+                    //                for (auto& dbo_it : dbo_man)
+                    //                {
+                    //                    if (remove_not_detected_dbo_values_.contains(dbo_it.first)
+                    //                            && remove_not_detected_dbo_values_.at(dbo_it.first) == true // removed if not detected
+                    //                            && associated_utns.count(dbo_it.first) // have associations
+                    //                            && !associated_utns.at(dbo_it.first).count(target_it.utn_)) // not detected
+                    //                    {
+                    //                        use = false; // remove it
+                    //                        comment = "Not Detected by "+dbo_it.first;
+                    //                        break;
+                    //                    }
+                    //                }
+                    //            }
         }
 
         if (!use)

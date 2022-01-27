@@ -382,11 +382,11 @@ void CreateARTASAssociationsJob::saveAssociations()
 
         assert (buffers_.count(dbcontent_name));
 
-        assert (dbcontent_man.metaVariable(DBContent::meta_var_rec_num_id_.name()).existsIn(dbcontent_name));
+        assert (dbcontent_man.metaVariable(DBContent::meta_var_rec_num_.name()).existsIn(dbcontent_name));
         assert (dbcontent_man.metaVariable(DBContent::meta_var_associations_.name()).existsIn(dbcontent_name));
 
         string rec_num_var_name =
-                dbcontent_man.metaVariable(DBContent::meta_var_rec_num_id_.name()).getFor(dbcontent_name).name();
+                dbcontent_man.metaVariable(DBContent::meta_var_rec_num_.name()).getFor(dbcontent_name).name();
         string assoc_var_name =
                 dbcontent_man.metaVariable(DBContent::meta_var_associations_.name()).getFor(dbcontent_name).name();
 
@@ -427,9 +427,9 @@ void CreateARTASAssociationsJob::saveAssociations()
         string dbcontent_name = buf_it.first;
 
         string rec_num_var_name =
-                dbcontent_man.metaVariable(DBContent::meta_var_rec_num_id_.name()).getFor(dbcontent_name).name();
+                dbcontent_man.metaVariable(DBContent::meta_var_rec_num_.name()).getFor(dbcontent_name).name();
         string rec_num_col_name =
-                dbcontent_man.metaVariable(DBContent::meta_var_rec_num_id_.name()).getFor(dbcontent_name).dbColumnName();
+                dbcontent_man.metaVariable(DBContent::meta_var_rec_num_.name()).getFor(dbcontent_name).dbColumnName();
 
         string assoc_var_name =
                 dbcontent_man.metaVariable(DBContent::meta_var_associations_.name()).getFor(dbcontent_name).name();
@@ -459,7 +459,7 @@ void CreateARTASAssociationsJob::saveAssociations()
 
         DBContent& dbcontent = dbcontent_man.dbContent(buf_it.first);
         dbContent::Variable& key_var =
-                dbcontent_man.metaVariable(DBContent::meta_var_rec_num_id_.name()).getFor(dbcontent_name);
+                dbcontent_man.metaVariable(DBContent::meta_var_rec_num_.name()).getFor(dbcontent_name);
 
         unsigned int chunk_size = 50000;
 

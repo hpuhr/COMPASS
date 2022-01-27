@@ -159,30 +159,30 @@ void LabelDefinition::checkLabelDefinitions()
                 show = true;
                 prefix = "S ";
             }
-            else if (dbo_man_.metaVariable(DBContent::meta_var_tod_id_.name()).existsIn(dbo_name)
+            else if (dbo_man_.metaVariable(DBContent::meta_var_tod_.name()).existsIn(dbo_name)
                      && variable_name == dbo_man_.metaVariable(
-                         DBContent::meta_var_tod_id_.name()).getFor(dbo_name).name())
+                         DBContent::meta_var_tod_.name()).getFor(dbo_name).name())
             {
                 show = true;
                 prefix = "T ";
             }
-            else if (dbo_man_.metaVariable(DBContent::meta_var_m3a_id_.name()).existsIn(dbo_name)
+            else if (dbo_man_.metaVariable(DBContent::meta_var_m3a_.name()).existsIn(dbo_name)
                      && variable_name == dbo_man_.metaVariable(
-                         DBContent::meta_var_m3a_id_.name()).getFor(dbo_name).name())
+                         DBContent::meta_var_m3a_.name()).getFor(dbo_name).name())
             {
                 show = true;
                 prefix = "A ";
             }
-            else if (dbo_man_.metaVariable(DBContent::meta_var_ta_id_.name()).existsIn(dbo_name)
+            else if (dbo_man_.metaVariable(DBContent::meta_var_ta_.name()).existsIn(dbo_name)
                      && variable_name == dbo_man_.metaVariable(
-                         DBContent::meta_var_ta_id_.name()).getFor(dbo_name).name())
+                         DBContent::meta_var_ta_.name()).getFor(dbo_name).name())
             {
                 show = true;
                 prefix = "AA ";
             }
-            else if (dbo_man_.metaVariable(DBContent::meta_var_ti_id_.name()).existsIn(dbo_name)
+            else if (dbo_man_.metaVariable(DBContent::meta_var_ti_.name()).existsIn(dbo_name)
                      && variable_name == dbo_man_.metaVariable(
-                         DBContent::meta_var_ti_id_.name()).getFor(dbo_name).name())
+                         DBContent::meta_var_ti_.name()).getFor(dbo_name).name())
             {
                 show = true;
                 prefix = "ID ";
@@ -194,9 +194,9 @@ void LabelDefinition::checkLabelDefinitions()
                 show = true;
                 prefix = "TN ";
             }
-            else if (dbo_man_.metaVariable(DBContent::meta_var_mc_id_.name()).existsIn(dbo_name)
+            else if (dbo_man_.metaVariable(DBContent::meta_var_mc_.name()).existsIn(dbo_name)
                      && variable_name == dbo_man_.metaVariable(
-                         DBContent::meta_var_mc_id_.name()).getFor(dbo_name).name())
+                         DBContent::meta_var_mc_.name()).getFor(dbo_name).name())
             {
                 show = true;
                 prefix = "C ";
@@ -267,10 +267,10 @@ std::map<unsigned int, std::string> LabelDefinition::generateLabels(std::vector<
 
     string dbo_name = db_object_.name();
 
-    assert (dbo_man_.existsMetaVariable(DBContent::meta_var_rec_num_id_.name()));
-    assert (dbo_man_.metaVariable(DBContent::meta_var_rec_num_id_.name()).existsIn(dbo_name));
+    assert (dbo_man_.existsMetaVariable(DBContent::meta_var_rec_num_.name()));
+    assert (dbo_man_.metaVariable(DBContent::meta_var_rec_num_.name()).existsIn(dbo_name));
 
-    Variable& rec_num_var = dbo_man_.metaVariable(DBContent::meta_var_rec_num_id_.name()).getFor(dbo_name);
+    Variable& rec_num_var = dbo_man_.metaVariable(DBContent::meta_var_rec_num_.name()).getFor(dbo_name);
 
     std::map<unsigned int, size_t> rec_num_to_index;
     NullableVector<unsigned int>& rec_num_list = buffer->get<unsigned int>(rec_num_var.dbColumnName());

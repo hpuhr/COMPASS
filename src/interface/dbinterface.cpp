@@ -297,58 +297,17 @@ void DBInterface::createTable(const DBContent& object)
 
 bool DBInterface::existsPropertiesTable() { return existsTable(TABLE_NAME_PROPERTIES); }
 
-set<int> DBInterface::queryActiveSensorNumbers(DBContent& object)
-{
-    logdbg << "DBInterface: queryActiveSensorNumbers: start";
-
-    assert (false); // TODO
-
-    //    assert(object.existsInDB());
-
-    //    QMutexLocker locker(&connection_mutex_);
-
-    //    string local_key_dbovar = object.currentDataSourceDefinition().localKey();
-    //    assert(object.hasVariable(local_key_dbovar));
-    //    const DBTableColumn& local_key_col = object.variable(local_key_dbovar).currentDBColumn();
-
-    //    set<int> data;
-
-    //    shared_ptr<DBCommand> command = sql_generator_.getDistinctDataSourcesSelectCommand(object);
-
-    //    shared_ptr<DBResult> result = current_connection_->execute(*command);
-
-    //    assert(result->containsData());
-
-    //    shared_ptr<Buffer> buffer = result->buffer();
-    //    for (unsigned int cnt = 0; cnt < buffer->size(); cnt++)
-    //    {
-    //        if (buffer->get<int>(local_key_col.name()).isNull(cnt))
-    //        {
-    //            logwrn << "DBInterface: queryActiveSensorNumbers: object " << object.name()
-    //                   << " has NULL ds_id's, which will be omitted";
-    //        }
-    //        else
-    //        {
-    //            int tmp = buffer->get<int>(local_key_col.name()).get(cnt);
-    //            data.insert(tmp);
-    //        }
-    //    }
-
-    //    logdbg << "DBInterface: queryActiveSensorNumbers: done";
-    //    return data;
-}
-
 unsigned int DBInterface::getMaxRecordNumber(DBContent& object)
 {
     assert (dbOpen());
     assert(object.existsInDB());
 
-    assert (COMPASS::instance().dbContentManager().existsMetaVariable(DBContent::meta_var_rec_num_id_.name()));
+    assert (COMPASS::instance().dbContentManager().existsMetaVariable(DBContent::meta_var_rec_num_.name()));
     assert (COMPASS::instance().dbContentManager().metaVariable(
-                DBContent::meta_var_rec_num_id_.name()).existsIn(object.name()));
+                DBContent::meta_var_rec_num_.name()).existsIn(object.name()));
 
     Variable& rec_num_var = COMPASS::instance().dbContentManager().metaVariable(
-                DBContent::meta_var_rec_num_id_.name()).getFor(object.name());
+                DBContent::meta_var_rec_num_.name()).getFor(object.name());
 
     assert (object.hasVariable(rec_num_var.name()));
 
@@ -374,58 +333,58 @@ unsigned int DBInterface::getMaxRecordNumber(DBContent& object)
 }
 
 
-std::map<unsigned int, std::tuple<std::set<unsigned int>, std::tuple<bool, unsigned int, unsigned int>,
-std::tuple<bool, unsigned int, unsigned int>>> DBInterface::queryADSBInfo()
-{
-    DBContent& object = COMPASS::instance().dbContentManager().dbContent("ADSB");
+//std::map<unsigned int, std::tuple<std::set<unsigned int>, std::tuple<bool, unsigned int, unsigned int>,
+//std::tuple<bool, unsigned int, unsigned int>>> DBInterface::queryADSBInfo()
+//{
+//    DBContent& object = COMPASS::instance().dbContentManager().dbContent("ADSB");
 
-    assert(object.existsInDB());
+//    assert(object.existsInDB());
 
-    QMutexLocker locker(&connection_mutex_);
+//    QMutexLocker locker(&connection_mutex_);
 
-    std::map<unsigned int, std::tuple<std::set<unsigned int>, std::tuple<bool, unsigned int, unsigned int>,
-            std::tuple<bool, unsigned int, unsigned int>>> data;
+//    std::map<unsigned int, std::tuple<std::set<unsigned int>, std::tuple<bool, unsigned int, unsigned int>,
+//            std::tuple<bool, unsigned int, unsigned int>>> data;
 
-    shared_ptr<DBCommand> command = sql_generator_.getADSBInfoCommand(object);
+//    shared_ptr<DBCommand> command = sql_generator_.getADSBInfoCommand(object);
 
-    shared_ptr<DBResult> result = db_connection_->execute(*command);
+//    shared_ptr<DBResult> result = db_connection_->execute(*command);
 
-    assert(result->containsData());
+//    assert(result->containsData());
 
-    shared_ptr<Buffer> buffer = result->buffer();
-    assert (buffer->has<int>("TARGET_ADDR"));
-    assert (buffer->has<int>("MOPS_VERSION"));
-    assert (buffer->has<char>("MIN_NUCP_NIC"));
-    assert (buffer->has<char>("MAX_NUCP_NIC"));
-    assert (buffer->has<char>("MIN_NACP"));
-    assert (buffer->has<char>("MAX_NACP"));
+//    shared_ptr<Buffer> buffer = result->buffer();
+//    assert (buffer->has<int>("TARGET_ADDR"));
+//    assert (buffer->has<int>("MOPS_VERSION"));
+//    assert (buffer->has<char>("MIN_NUCP_NIC"));
+//    assert (buffer->has<char>("MAX_NUCP_NIC"));
+//    assert (buffer->has<char>("MIN_NACP"));
+//    assert (buffer->has<char>("MAX_NACP"));
 
-    NullableVector<int>& tas = buffer->get<int>("TARGET_ADDR");
-    NullableVector<int>& mops = buffer->get<int>("MOPS_VERSION");
-    NullableVector<char>& min_nus = buffer->get<char>("MIN_NUCP_NIC");
-    NullableVector<char>& max_nus = buffer->get<char>("MAX_NUCP_NIC");
-    NullableVector<char>& min_nas = buffer->get<char>("MIN_NACP");
-    NullableVector<char>& max_nas = buffer->get<char>("MAX_NACP");
+//    NullableVector<int>& tas = buffer->get<int>("TARGET_ADDR");
+//    NullableVector<int>& mops = buffer->get<int>("MOPS_VERSION");
+//    NullableVector<char>& min_nus = buffer->get<char>("MIN_NUCP_NIC");
+//    NullableVector<char>& max_nus = buffer->get<char>("MAX_NUCP_NIC");
+//    NullableVector<char>& min_nas = buffer->get<char>("MIN_NACP");
+//    NullableVector<char>& max_nas = buffer->get<char>("MAX_NACP");
 
-    for (unsigned int cnt = 0; cnt < buffer->size(); cnt++)
-    {
-        if (tas.isNull(cnt))
-            continue;
+//    for (unsigned int cnt = 0; cnt < buffer->size(); cnt++)
+//    {
+//        if (tas.isNull(cnt))
+//            continue;
 
-        if (!mops.isNull(cnt))
-            get<0>(data[tas.get(cnt)]).insert(mops.get(cnt));
+//        if (!mops.isNull(cnt))
+//            get<0>(data[tas.get(cnt)]).insert(mops.get(cnt));
 
-        if (!min_nus.isNull(cnt) && !max_nus.isNull(cnt))
-            get<1>(data[tas.get(cnt)]) =
-                    std::tuple<bool, unsigned int, unsigned int>(true, min_nus.get(cnt), max_nus.get(cnt));
+//        if (!min_nus.isNull(cnt) && !max_nus.isNull(cnt))
+//            get<1>(data[tas.get(cnt)]) =
+//                    std::tuple<bool, unsigned int, unsigned int>(true, min_nus.get(cnt), max_nus.get(cnt));
 
-        if (!min_nas.isNull(cnt) && !max_nas.isNull(cnt))
-            get<2>(data[tas.get(cnt)]) =
-                    std::tuple<bool, unsigned int, unsigned int>(true, min_nas.get(cnt), max_nas.get(cnt));
-    }
+//        if (!min_nas.isNull(cnt) && !max_nas.isNull(cnt))
+//            get<2>(data[tas.get(cnt)]) =
+//                    std::tuple<bool, unsigned int, unsigned int>(true, min_nas.get(cnt), max_nas.get(cnt));
+//    }
 
-    return data;
-}
+//    return data;
+//}
 
 bool DBInterface::existsDataSourcesTable()
 {
@@ -1095,9 +1054,9 @@ void DBInterface::insertBuffer(DBContent& db_object, std::shared_ptr<Buffer> buf
 
     // create record numbers & and store new max rec num
     {
-        assert (db_object.hasVariable(DBContent::meta_var_rec_num_id_.name()));
+        assert (db_object.hasVariable(DBContent::meta_var_rec_num_.name()));
 
-        Variable& rec_num_var = db_object.variable(DBContent::meta_var_rec_num_id_.name());
+        Variable& rec_num_var = db_object.variable(DBContent::meta_var_rec_num_.name());
         assert (rec_num_var.dataType() == PropertyDataType::UINT);
 
         string rec_num_col_str = rec_num_var.dbColumnName();

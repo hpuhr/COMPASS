@@ -48,6 +48,8 @@ void EvaluationData::addReferenceData (DBContent& object, std::shared_ptr<Buffer
 {
     loginf << "EvaluationData: addReferenceData: dbo " << object.name() << " size " << buffer->size();
 
+    return;
+
     TODO_ASSERT
 
 //    if (!object.hasAssociations())
@@ -190,6 +192,8 @@ void EvaluationData::addReferenceData (DBContent& object, std::shared_ptr<Buffer
 void EvaluationData::addTestData (DBContent& object, std::shared_ptr<Buffer> buffer)
 {
     loginf << "EvaluationData: addTestData: dbo " << object.name() << " size " << buffer->size();
+
+    return;
 
     TODO_ASSERT
 

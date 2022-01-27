@@ -47,14 +47,19 @@ using namespace std;
 using namespace Utils;
 using namespace dbContent;
 
-const Property DBContent::meta_var_rec_num_id_ {"Record Number", PropertyDataType::UINT};
+const Property DBContent::meta_var_rec_num_ {"Record Number", PropertyDataType::UINT};
 const Property DBContent::meta_var_datasource_id_ {"DS ID", PropertyDataType::UINT};
 const Property DBContent::meta_var_line_id_ {"Line ID", PropertyDataType::UINT};
-const Property DBContent::meta_var_tod_id_ {"Time of Day", PropertyDataType::FLOAT};
-const Property DBContent::meta_var_m3a_id_ {"Mode 3/A Code", PropertyDataType::UINT};
-const Property DBContent::meta_var_ta_id_ {"Aircraft Address", PropertyDataType::UINT};
-const Property DBContent::meta_var_ti_id_ {"Aircraft Identification", PropertyDataType::STRING};
-const Property DBContent::meta_var_mc_id_ {"Mode C Code", PropertyDataType::FLOAT};
+const Property DBContent::meta_var_tod_ {"Time of Day", PropertyDataType::FLOAT};
+const Property DBContent::meta_var_m3a_ {"Mode 3/A Code", PropertyDataType::UINT};
+const Property DBContent::meta_var_m3a_g_ {"Mode 3/A Garbled", PropertyDataType::BOOL};
+const Property DBContent::meta_var_m3a_v_ {"Mode 3/A Valid", PropertyDataType::BOOL};
+const Property DBContent::meta_var_ta_ {"Aircraft Address", PropertyDataType::UINT};
+const Property DBContent::meta_var_ti_ {"Aircraft Identification", PropertyDataType::STRING};
+const Property DBContent::meta_var_mc_ {"Mode C Code", PropertyDataType::FLOAT};
+const Property DBContent::meta_var_mc_g_ {"Mode C Garbled", PropertyDataType::BOOL};
+const Property DBContent::meta_var_mc_v_ {"Mode C Valid", PropertyDataType::BOOL};
+const Property DBContent::meta_var_ground_bit_ {"Ground Bit", PropertyDataType::BOOL};
 const Property DBContent::meta_var_track_num_ {"Track Number", PropertyDataType::UINT};
 const Property DBContent::meta_var_track_end_ {"Track End", PropertyDataType::BOOL};
 
@@ -73,6 +78,8 @@ const Property DBContent::var_tracker_tris_ {"Target Report Identifiers", Proper
 const Property DBContent::var_tracker_track_begin_ {"Track Begin", PropertyDataType::BOOL};
 const Property DBContent::var_tracker_coasting_ {"Coasting", PropertyDataType::BOOL};
 const Property DBContent::var_tracker_track_end_ {"Track End", PropertyDataType::BOOL};
+const Property DBContent::var_tracker_baro_alt_ {"Barometric Altitude Calculated", PropertyDataType::FLOAT};
+
 
 const Property DBContent::selected_var {"selected", PropertyDataType::BOOL};
 
@@ -501,10 +508,10 @@ map<unsigned int, string> DBContent::loadLabelData(vector<unsigned int> rec_nums
     string custom_filter_clause;
     bool first = true;
 
-    assert (dbo_manager_.existsMetaVariable(DBContent::meta_var_rec_num_id_.name()));
-    assert (dbo_manager_.metaVariable(DBContent::meta_var_rec_num_id_.name()).existsIn(name_));
+    assert (dbo_manager_.existsMetaVariable(DBContent::meta_var_rec_num_.name()));
+    assert (dbo_manager_.metaVariable(DBContent::meta_var_rec_num_.name()).existsIn(name_));
 
-    Variable& rec_num_var = dbo_manager_.metaVariable(DBContent::meta_var_rec_num_id_.name()).getFor(name_);
+    Variable& rec_num_var = dbo_manager_.metaVariable(DBContent::meta_var_rec_num_.name()).getFor(name_);
 
     custom_filter_clause = rec_num_var.dbColumnName() + " in (";
     for (auto& rec_num : rec_nums)
