@@ -463,7 +463,10 @@ void EvaluationManager::databaseOpenedSlot()
         widget()->setDisabled(false);
 
     widget()->updateDataSources();
+    widget()->updateSectors();
     widget()->updateButtons();
+
+    emit sectorsChangedSignal();
 }
 
 void EvaluationManager::databaseClosedSlot()
@@ -474,8 +477,13 @@ void EvaluationManager::databaseClosedSlot()
 
     sectors_loaded_ = false;
 
+    data_sources_ref_.clear();
+    data_sources_tst_.clear();
+
     widget()->updateDataSources();
     widget()->setDisabled(true);
+
+    emit sectorsChangedSignal();
 }
 
 void EvaluationManager::associationStatusChangedSlot()
@@ -990,6 +998,9 @@ void EvaluationManager::saveSector(std::shared_ptr<Sector> sector)
     assert (hasSector(sector->name(), sector->layerName()));
     COMPASS::instance().interface().saveSector(sector);
 
+    if (widget_)
+        widget_->updateSectors();
+
     emit sectorsChangedSignal();
 }
 
@@ -1016,6 +1027,9 @@ void EvaluationManager::deleteSector(shared_ptr<Sector> sector)
 
     COMPASS::instance().interface().deleteSector(sector);
 
+    if (widget_)
+        widget_->updateSectors();
+
     emit sectorsChangedSignal();
 }
 
@@ -1025,6 +1039,9 @@ void EvaluationManager::deleteAllSectors()
     sector_layers_.clear();
 
     COMPASS::instance().interface().deleteAllSectors();
+
+    if (widget_)
+        widget_->updateSectors();
 
     emit sectorsChangedSignal();
 }
@@ -1101,6 +1118,9 @@ void EvaluationManager::importSectors (const std::string& filename)
                << filename << "'";
         throw e;
     }
+
+    if (widget_)
+        widget_->updateSectors();
 
     emit sectorsChangedSignal();
 }

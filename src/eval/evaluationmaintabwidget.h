@@ -43,6 +43,7 @@ public:
     EvaluationMainTabWidget(EvaluationManager& eval_man, EvaluationManagerWidget& man_widget);
 
     void updateDataSources();
+    void updateSectors();
 
 protected:
     EvaluationManager& eval_man_;

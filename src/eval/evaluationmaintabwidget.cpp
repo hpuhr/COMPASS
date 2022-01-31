@@ -111,6 +111,12 @@ void EvaluationMainTabWidget::updateDataSources()
         data_source_tst_widget_->updateDataSources();
 }
 
+void EvaluationMainTabWidget::updateSectors()
+{
+    assert (sector_widget_);
+    sector_widget_->update();
+}
+
 void EvaluationMainTabWidget::dboRefNameChangedSlot(const std::string& dbo_name)
 {
     loginf << "EvaluationMainTabWidget: dboRefNameChangedSlot: name " << dbo_name;
