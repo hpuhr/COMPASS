@@ -496,7 +496,6 @@ void EvaluationManager::loadingDoneSlot()
 
     DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
 
-
     disconnect(&dbcontent_man, &DBContentManager::loadedDataSignal,
                this, &EvaluationManager::loadedDataDataSlot);
     disconnect(&dbcontent_man, &DBContentManager::loadingDoneSignal,
