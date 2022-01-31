@@ -184,12 +184,17 @@ void EvaluationManager::loadData ()
 
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
+
     // remove previous stuff
     if (viewable_data_cfg_)
     {
         COMPASS::instance().viewManager().unsetCurrentViewPoint();
         viewable_data_cfg_ = nullptr;
     }
+
+    DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
+
+    dbcontent_man.clearData(); // clear any previously loaded data
 
     results_gen_->clear();
 
@@ -205,7 +210,6 @@ void EvaluationManager::loadData ()
     emit resultsChangedSignal();
 
     // actually load
-    DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
 
     // load adsb mops versions in a hacky way
 //    if (dbcontent_man.dbContent("CAT021").hasData() && !has_adsb_info_)
@@ -509,7 +513,7 @@ void EvaluationManager::loadingDoneSlot()
     data_.addTestData(dbcontent_man.dbContent(dbo_name_tst_), data.at(dbo_name_tst_));
     test_data_loaded_ = true;
 
-    dbcontent_man.clearData();
+    dbcontent_man.clearData(); // clear data, has been stored locally
 
     bool data_loaded_tmp = reference_data_loaded_ && test_data_loaded_;
 

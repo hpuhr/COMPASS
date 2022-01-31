@@ -119,6 +119,11 @@ void ScatterPlotView::loadingDone()
     loginf << "ScatterPlotView: loadingDone";
 }
 
+void ScatterPlotView::clearData()
+{
+    loginf << "ScatterPlotView: clearData";
+}
+
 void ScatterPlotView::generateSubConfigurable(const std::string& class_id,
                                             const std::string& instance_id)
 {

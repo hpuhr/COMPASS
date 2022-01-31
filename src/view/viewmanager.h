@@ -64,6 +64,8 @@ class ViewManager : public QObject, public Configurable
     void init(QTabWidget* tab_widget);
     void close();
 
+    void clearDataInViews();
+
     void registerView(View* view);
     void unregisterView(View* view);
     bool isRegistered(View* view);

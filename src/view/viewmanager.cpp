@@ -516,6 +516,14 @@ ViewContainerWidget* ViewManager::addNewContainerWidget()
     return container_widgets_.at(container_widget_name);
 }
 
+void ViewManager::clearDataInViews()
+{
+    for (auto& view_it : views_)
+    {
+        view_it.second->clearData();
+    }
+}
+
 void ViewManager::registerView(View* view)
 {
     logdbg << "ViewManager: registerView";

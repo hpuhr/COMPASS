@@ -123,6 +123,10 @@ void ListBoxView::loadingDone()
     widget_->getDataWidget()->loadingDoneSlot();
 }
 
+void ListBoxView::clearData()
+{
+    widget_->getDataWidget()->clearData();
+}
 
 void ListBoxView::generateSubConfigurable(const std::string& class_id,
                                           const std::string& instance_id)

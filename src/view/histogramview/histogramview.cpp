@@ -117,6 +117,11 @@ void HistogramView::loadingDone()
     loginf << "HistogramView: loadingDone";
 }
 
+void HistogramView::clearData()
+{
+    loginf << "HistogramView: clearData";
+}
+
 void HistogramView::generateSubConfigurable(const std::string& class_id,
                                             const std::string& instance_id)
 {

@@ -66,7 +66,7 @@ class ListBoxViewDataWidget : public QWidget
     virtual ~ListBoxViewDataWidget();
 
     /// @brief Clears the table contents
-    void clearTables();
+    void clearData();
     void resetModels();
     void updateToSelection();
 

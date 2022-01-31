@@ -882,6 +882,8 @@ bool DBContentManager::loadInProgress() const
 void DBContentManager::clearData()
 {
     data_.clear();
+
+    COMPASS::instance().viewManager().clearDataInViews();
 }
 
 void DBContentManager::insertData(std::map<std::string, std::shared_ptr<Buffer>> data)

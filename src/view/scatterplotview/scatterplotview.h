@@ -55,6 +55,8 @@ class ScatterPlotView : public View
     virtual void loadedData(const std::map<std::string, std::shared_ptr<Buffer>>& data, bool requires_reset) override;
     virtual void loadingDone() override;
 
+    virtual void clearData() override;
+
     virtual void generateSubConfigurable(const std::string& class_id,
                                          const std::string& instance_id) override;
 
