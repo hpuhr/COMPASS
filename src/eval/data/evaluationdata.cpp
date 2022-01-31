@@ -37,6 +37,7 @@
 
 using namespace std;
 using namespace Utils;
+using namespace nlohmann;
 
 EvaluationData::EvaluationData(EvaluationManager& eval_man)
     : eval_man_(eval_man)
@@ -48,289 +49,318 @@ void EvaluationData::addReferenceData (DBContent& object, std::shared_ptr<Buffer
 {
     loginf << "EvaluationData: addReferenceData: dbo " << object.name() << " size " << buffer->size();
 
-    return;
+    DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
 
-    TODO_ASSERT
+    if (!dbcontent_man.hasAssociations())
+    {
+        logwrn << "EvaluationData: addReferenceData: dbcontent has no associations";
+        unassociated_ref_cnt_ = buffer->size();
 
-//    if (!object.hasAssociations())
-//    {
-//        logwrn << "EvaluationData: addReferenceData: object " << object.name() << " has no associations";
-//        unassociated_ref_cnt_ = buffer->size();
+        return;
+    }
 
-//        return;
-//    }
+    assert (!ref_buffer_);
+    ref_buffer_ = buffer;
 
-//    assert (!ref_buffer_);
-//    ref_buffer_ = buffer;
+    // preset variable names
 
-//    // preset variable names
-//    DBContentManager& object_manager = COMPASS::instance().dbContentManager();
+    string dbo_name = ref_buffer_->dboName();
 
-//    string dbo_name = ref_buffer_->dboName();
+    ref_tod_name_ = dbcontent_man.metaVariable(DBContent::meta_var_tod_.name()).getFor(dbo_name).name();
 
-//    ref_latitude_name_ = object_manager.metaVariable("pos_lat_deg").getFor(dbo_name).name();
-//    ref_longitude_name_ = object_manager.metaVariable("pos_long_deg").getFor(dbo_name).name();
-//    ref_target_address_name_ = object_manager.metaVariable("target_addr").getFor(dbo_name).name();
-//    ref_callsign_name_ = object_manager.metaVariable("callsign").getFor(dbo_name).name();
+    ref_latitude_name_ = dbcontent_man.metaVariable(DBContent::meta_var_latitude_.name()).getFor(dbo_name).name();
+    ref_longitude_name_ = dbcontent_man.metaVariable(DBContent::meta_var_longitude_.name()).getFor(dbo_name).name();
 
-//    // mc
-//    ref_modec_name_ = object_manager.metaVariable("modec_code_ft").getFor(dbo_name).name();
+    if (dbcontent_man.metaVariable(DBContent::meta_var_ta_.name()).existsIn(dbo_name))
+        ref_target_address_name_ = dbcontent_man.metaVariable(DBContent::meta_var_ta_.name()).getFor(dbo_name).name();
 
-//    if (object_manager.metaVariable("modec_g").existsIn(dbo_name))
-//        ref_modec_g_name_ = object_manager.metaVariable("modec_g").getFor(dbo_name).name();
+    if (dbcontent_man.metaVariable(DBContent::meta_var_ti_.name()).existsIn(dbo_name))
+        ref_callsign_name_ = dbcontent_man.metaVariable(DBContent::meta_var_ti_.name()).getFor(dbo_name).name();
 
-//    if (object_manager.metaVariable("modec_v").existsIn(dbo_name))
-//        ref_modec_v_name_ = object_manager.metaVariable("modec_v").getFor(dbo_name).name();
+    // mc
+    ref_modec_name_ = dbcontent_man.metaVariable(DBContent::meta_var_mc_.name()).getFor(dbo_name).name();
+
+    if (dbcontent_man.metaVariable(DBContent::meta_var_mc_g_.name()).existsIn(dbo_name))
+        ref_modec_g_name_ = dbcontent_man.metaVariable(DBContent::meta_var_mc_g_.name()).getFor(dbo_name).name();
+
+    if (dbcontent_man.metaVariable(DBContent::meta_var_mc_v_.name()).existsIn(dbo_name))
+        ref_modec_v_name_ = dbcontent_man.metaVariable(DBContent::meta_var_mc_v_.name()).getFor(dbo_name).name();
 
 
-//    if (dbo_name == "Tracker")
-//    {
-//        has_ref_altitude_secondary_ = true;
-//        ref_altitude_secondary_name_ = "tracked_alt_baro_ft";
-//    }
+    if (dbo_name == "CAT062")
+    {
+        has_ref_altitude_secondary_ = true;
+        ref_altitude_secondary_name_ = DBContent::var_tracker_baro_alt_.name();
+    }
 
-//    // m3a
-//    ref_modea_name_ = object_manager.metaVariable("mode3a_code").getFor(dbo_name).name();
+    // m3a
+    ref_modea_name_ = dbcontent_man.metaVariable(DBContent::meta_var_m3a_.name()).getFor(dbo_name).name();
 
-//    if (object_manager.metaVariable("mode3a_g").existsIn(dbo_name))
-//        ref_modea_g_name_ = object_manager.metaVariable("mode3a_g").getFor(dbo_name).name();
+    if (dbcontent_man.metaVariable(DBContent::meta_var_m3a_g_.name()).existsIn(dbo_name))
+        ref_modea_g_name_ = dbcontent_man.metaVariable(DBContent::meta_var_m3a_g_.name()).getFor(dbo_name).name();
 
-//    if (object_manager.metaVariable("mode3a_v").existsIn(dbo_name))
-//        ref_modea_v_name_ = object_manager.metaVariable("mode3a_v").getFor(dbo_name).name();
+    if (dbcontent_man.metaVariable(DBContent::meta_var_m3a_v_.name()).existsIn(dbo_name))
+        ref_modea_v_name_ = dbcontent_man.metaVariable(DBContent::meta_var_m3a_v_.name()).getFor(dbo_name).name();
 
-//    // ground bit
-//    if (object_manager.metaVariable("ground_bit").existsIn(dbo_name))
-//        ref_ground_bit_name_ = object_manager.metaVariable("ground_bit").getFor(dbo_name).name();
+    // ground bit
+    if (dbcontent_man.metaVariable(DBContent::meta_var_ground_bit_.name()).existsIn(dbo_name))
+        ref_ground_bit_name_ = dbcontent_man.metaVariable(DBContent::meta_var_ground_bit_.name()).getFor(dbo_name).name();
 
-//    // speed & track_angle
-//    if (dbo_name == "ADSB")
-//    {
-//        ref_spd_ground_speed_kts_name_ = "groundspeed_kt";
-//        ref_spd_track_angle_deg_name_ = "track_angle_deg";
-//    }
-//    else if (dbo_name == "MLAT")
-//    {
-//        ref_spd_x_ms_name_ = "velocity_vx_ms";
-//        ref_spd_y_ms_name_ = "velocity_vy_ms";
-//    }
-//    else if (dbo_name == "Radar")
-//    {
-//        ref_spd_ground_speed_kts_name_ = "track_groundspeed_kt";
-//        ref_spd_track_angle_deg_name_ = "track_heading_deg";
-//    }
-//    else if (dbo_name == "Tracker" || dbo_name == "RefTraj")
-//    {
-//        ref_spd_ground_speed_kts_name_ = "groundspeed_kt";
-//        ref_spd_track_angle_deg_name_ = "heading_deg";
-//    }
+    // speed & track_angle
+    //TODO
+    if (dbo_name == "ADSB")
+    {
+        ref_spd_ground_speed_kts_name_ = "groundspeed_kt";
+        ref_spd_track_angle_deg_name_ = "track_angle_deg";
+    }
+    else if (dbo_name == "MLAT")
+    {
+        ref_spd_x_ms_name_ = "velocity_vx_ms";
+        ref_spd_y_ms_name_ = "velocity_vy_ms";
+    }
+    else if (dbo_name == "Radar")
+    {
+        ref_spd_ground_speed_kts_name_ = "track_groundspeed_kt";
+        ref_spd_track_angle_deg_name_ = "track_heading_deg";
+    }
+    else if (dbo_name == "Tracker" || dbo_name == "RefTraj")
+    {
+        ref_spd_ground_speed_kts_name_ = "groundspeed_kt";
+        ref_spd_track_angle_deg_name_ = "heading_deg";
+    }
 
-//    set<int> active_srcs = eval_man_.activeDataSourcesRef();
-//    bool use_active_srcs = (eval_man_.dboNameRef() == eval_man_.dboNameTst());
-//    unsigned int num_skipped {0};
+    set<unsigned int> active_srcs = eval_man_.activeDataSourcesRef();
+    bool use_active_srcs = (eval_man_.dboNameRef() == eval_man_.dboNameTst());
+    unsigned int num_skipped {0};
 
-//    const DBOAssociationCollection& associations = object.associations();
+    unsigned int buffer_size = buffer->size();
 
-//    unsigned int buffer_size = buffer->size();
-//    NullableVector<int>& rec_nums = buffer->get<int>("rec_num");
-//    NullableVector<float>& tods = buffer->get<float>("tod");
-//    NullableVector<int>& ds_ids = buffer->get<int>("ds_id");
+//    assert (buffer->has<unsigned int>(DBContent::meta_var_rec_num_.name()));
+//    NullableVector<unsigned int>& rec_nums = buffer->get<unsigned int>(DBContent::meta_var_rec_num_.name());
 
-//    unsigned int rec_num;
-//    float tod;
+    assert (buffer->has<float>(ref_tod_name_));
+    NullableVector<float>& tods = buffer->get<float>(ref_tod_name_);
 
-//    loginf << "EvaluationData: addReferenceData: adding target data";
+    assert (buffer->has<unsigned int>(DBContent::meta_var_datasource_id_.name()));
+    NullableVector<unsigned int>& ds_ids = buffer->get<unsigned int>(DBContent::meta_var_datasource_id_.name());
 
-//    for (unsigned int cnt=0; cnt < buffer_size; ++cnt)
-//    {
-//        assert (!ds_ids.isNull(cnt));
+    assert (buffer->has<json>(DBContent::meta_var_associations_.name()));
+    NullableVector<json>& assoc_vec = buffer->get<json>(DBContent::meta_var_associations_.name());
 
-//        if (use_active_srcs && !active_srcs.count(ds_ids.get(cnt))) // skip those entries not for tst src
-//        {
-//            ++num_skipped;
-//            continue;
-//        }
+    //unsigned int rec_num;
+    float tod;
+    vector<unsigned int> utn_vec;
 
-//        assert (!rec_nums.isNull(cnt));
-//        assert (!tods.isNull(cnt));
+    loginf << "EvaluationData: addReferenceData: adding target data";
 
-//        rec_num = rec_nums.get(cnt);
-//        tod = tods.get(cnt);
+    for (unsigned int cnt=0; cnt < buffer_size; ++cnt)
+    {
+        assert (!ds_ids.isNull(cnt));
 
-//        std::vector<unsigned int> utn_vec = associations.getUTNsFor(rec_num);
+        if (use_active_srcs && !active_srcs.count(ds_ids.get(cnt))) // skip those entries not for tst src
+        {
+            ++num_skipped;
+            continue;
+        }
 
-//        if (!utn_vec.size())
-//        {
-//            ++unassociated_ref_cnt_;
-//            continue;
-//        }
+        //assert (!rec_nums.isNull(cnt));
+        assert (!tods.isNull(cnt));
 
-//        for (auto utn_it : utn_vec)
-//        {
-//            if (!hasTargetData(utn_it))
-//                //target_data_.emplace(target_data_.end(), utn_it, *this, eval_man_);
-//                target_data_.push_back({utn_it, *this, eval_man_});
+        //rec_num = rec_nums.get(cnt);
+        tod = tods.get(cnt);
 
-//            assert (hasTargetData(utn_it));
+        if (assoc_vec.isNull(cnt))
+            utn_vec.clear();
+        else
+            utn_vec = assoc_vec.get(cnt).get<std::vector<unsigned int>>();
 
-//            auto tr_tag_it = target_data_.get<target_tag>().find(utn_it);
-//            auto index_it = target_data_.project<0>(tr_tag_it); // get iterator for random access
+        if (!utn_vec.size())
+        {
+            ++unassociated_ref_cnt_;
+            continue;
+        }
 
-//            //            if (!targetData(utn_it).hasRefBuffer())
-//            //                target_data_.modify(index_it, [buffer](EvaluationTargetData& t) { t.setRefBuffer(buffer); });
+        for (auto utn_it : utn_vec)
+        {
+            if (!hasTargetData(utn_it))
+                //target_data_.emplace(target_data_.end(), utn_it, *this, eval_man_);
+                target_data_.push_back({utn_it, *this, eval_man_});
 
-//            target_data_.modify(index_it, [tod, cnt](EvaluationTargetData& t) { t.addRefIndex(tod, cnt); });
+            assert (hasTargetData(utn_it));
 
-//            ++associated_ref_cnt_;
-//        }
-//    }
+            auto tr_tag_it = target_data_.get<target_tag>().find(utn_it);
+            auto index_it = target_data_.project<0>(tr_tag_it); // get iterator for random access
 
-//    loginf << "EvaluationData: addReferenceData: num targets " << target_data_.size()
-//           << " ref associated cnt " << associated_ref_cnt_ << " unassoc " << unassociated_ref_cnt_
-//           << " num_skipped " << num_skipped;
+            //            if (!targetData(utn_it).hasRefBuffer())
+            //                target_data_.modify(index_it, [buffer](EvaluationTargetData& t) { t.setRefBuffer(buffer); });
+
+            target_data_.modify(index_it, [tod, cnt](EvaluationTargetData& t) { t.addRefIndex(tod, cnt); });
+
+            ++associated_ref_cnt_;
+        }
+    }
+
+    loginf << "EvaluationData: addReferenceData: num targets " << target_data_.size()
+           << " ref associated cnt " << associated_ref_cnt_ << " unassoc " << unassociated_ref_cnt_
+           << " num_skipped " << num_skipped;
 }
 
 void EvaluationData::addTestData (DBContent& object, std::shared_ptr<Buffer> buffer)
 {
     loginf << "EvaluationData: addTestData: dbo " << object.name() << " size " << buffer->size();
 
-    return;
+    DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
 
-    TODO_ASSERT
+    if (!dbcontent_man.hasAssociations())
+    {
+        logwrn << "EvaluationData: addTestData: dbcontent has no associations";
+        unassociated_ref_cnt_ = buffer->size();
 
-//    if (!object.hasAssociations())
+        return;
+    }
+
+    assert (!tst_buffer_);
+    tst_buffer_ = buffer;
+
+    string dbo_name = tst_buffer_->dboName();
+
+    tst_tod_name_ = dbcontent_man.metaVariable(DBContent::meta_var_tod_.name()).getFor(dbo_name).name();
+
+    tst_latitude_name_ = dbcontent_man.metaVariable(DBContent::meta_var_latitude_.name()).getFor(dbo_name).name();
+    tst_longitude_name_ = dbcontent_man.metaVariable(DBContent::meta_var_longitude_.name()).getFor(dbo_name).name();
+
+    if (dbcontent_man.metaVariable(DBContent::meta_var_ta_.name()).existsIn(dbo_name))
+        tst_target_address_name_ = dbcontent_man.metaVariable(DBContent::meta_var_ta_.name()).getFor(dbo_name).name();
+
+    if (dbcontent_man.metaVariable(DBContent::meta_var_ti_.name()).existsIn(dbo_name))
+        tst_callsign_name_ = dbcontent_man.metaVariable(DBContent::meta_var_ti_.name()).getFor(dbo_name).name();
+
+    // mc
+    tst_modec_name_ = dbcontent_man.metaVariable(DBContent::meta_var_mc_.name()).getFor(dbo_name).name();
+
+    if (dbcontent_man.metaVariable(DBContent::meta_var_mc_g_.name()).existsIn(dbo_name))
+        tst_modec_g_name_ = dbcontent_man.metaVariable(DBContent::meta_var_mc_g_.name()).getFor(dbo_name).name();
+
+    if (dbcontent_man.metaVariable(DBContent::meta_var_mc_v_.name()).existsIn(dbo_name))
+        tst_modec_v_name_ = dbcontent_man.metaVariable(DBContent::meta_var_mc_v_.name()).getFor(dbo_name).name();
+
+
+//    if (dbo_name == "CAT062")
 //    {
-//        logwrn << "EvaluationData: addTestData: object " << object.name() << " has no associations";
-//        unassociated_tst_cnt_ = buffer->size();
-
-//        return;
+//        has_tst_altitude_secondary_ = true;
+//        tst_altitude_secondary_name_ = DBContent::var_tracker_baro_alt_.name();
 //    }
 
-//    assert (!tst_buffer_);
-//    tst_buffer_ = buffer;
+    // m3a
+    tst_modea_name_ = dbcontent_man.metaVariable(DBContent::meta_var_m3a_.name()).getFor(dbo_name).name();
 
-//    DBContentManager& object_manager = COMPASS::instance().dbContentManager();
+    if (dbcontent_man.metaVariable(DBContent::meta_var_m3a_g_.name()).existsIn(dbo_name))
+        tst_modea_g_name_ = dbcontent_man.metaVariable(DBContent::meta_var_m3a_g_.name()).getFor(dbo_name).name();
 
-//    string dbo_name = tst_buffer_->dboName();
+    if (dbcontent_man.metaVariable(DBContent::meta_var_m3a_v_.name()).existsIn(dbo_name))
+        tst_modea_v_name_ = dbcontent_man.metaVariable(DBContent::meta_var_m3a_v_.name()).getFor(dbo_name).name();
 
-//    tst_latitude_name_ = object_manager.metaVariable("pos_lat_deg").getFor(dbo_name).name();
-//    tst_longitude_name_ = object_manager.metaVariable("pos_long_deg").getFor(dbo_name).name();
-//    tst_target_address_name_ = object_manager.metaVariable("target_addr").getFor(dbo_name).name();
-//    tst_callsign_name_ = object_manager.metaVariable("callsign").getFor(dbo_name).name();
+    // ground bit
+    if (dbcontent_man.metaVariable(DBContent::meta_var_ground_bit_.name()).existsIn(dbo_name))
+        tst_ground_bit_name_ = dbcontent_man.metaVariable(DBContent::meta_var_ground_bit_.name()).getFor(dbo_name).name();
 
-//    // m3a
-//    tst_modea_name_ = object_manager.metaVariable("mode3a_code").getFor(dbo_name).name();
+    // speed & track_angle
+    //TODO
+    if (dbo_name == "ADSB")
+    {
+        tst_spd_ground_speed_kts_name_ = "groundspeed_kt";
+        tst_spd_track_angle_deg_name_ = "track_angle_deg";
+    }
+    else if (dbo_name == "MLAT")
+    {
+        tst_spd_x_ms_name_ = "velocity_vx_ms";
+        tst_spd_y_ms_name_ = "velocity_vy_ms";
+    }
+    else if (dbo_name == "Radar")
+    {
+        tst_spd_ground_speed_kts_name_ = "track_groundspeed_kt";
+        tst_spd_track_angle_deg_name_ = "track_heading_deg";
+    }
+    else if (dbo_name == "Tracker" || dbo_name == "RefTraj")
+    {
+        tst_spd_ground_speed_kts_name_ = "groundspeed_kt";
+        tst_spd_track_angle_deg_name_ = "heading_deg";
+    }
 
-//    if (object_manager.metaVariable("mode3a_g").existsIn(dbo_name))
-//        tst_modea_g_name_ = object_manager.metaVariable("mode3a_g").getFor(dbo_name).name();
+    set<unsigned int> active_srcs = eval_man_.activeDataSourcesRef();
+    bool use_active_srcs = (eval_man_.dboNameRef() == eval_man_.dboNameTst());
+    unsigned int num_skipped {0};
 
-//    if (object_manager.metaVariable("mode3a_v").existsIn(dbo_name))
-//        tst_modea_v_name_ = object_manager.metaVariable("mode3a_v").getFor(dbo_name).name();
+    unsigned int buffer_size = buffer->size();
 
-//    // mc
-//    tst_modec_name_ = object_manager.metaVariable("modec_code_ft").getFor(dbo_name).name();
-//    if (object_manager.metaVariable("modec_g").existsIn(dbo_name))
-//        tst_modec_g_name_ = object_manager.metaVariable("modec_g").getFor(dbo_name).name();
+//    assert (buffer->has<unsigned int>(DBContent::meta_var_rec_num_.name()));
+//    NullableVector<unsigned int>& rec_nums = buffer->get<unsigned int>(DBContent::meta_var_rec_num_.name());
 
-//    if (object_manager.metaVariable("modec_v").existsIn(dbo_name))
-//        tst_modec_v_name_ = object_manager.metaVariable("modec_v").getFor(dbo_name).name();
+    assert (buffer->has<float>(DBContent::meta_var_tod_.name()));
+    NullableVector<float>& tods = buffer->get<float>(DBContent::meta_var_tod_.name());
 
-//    // ground bit
-//    if (object_manager.metaVariable("ground_bit").existsIn(dbo_name))
-//        tst_ground_bit_name_ = object_manager.metaVariable("ground_bit").getFor(dbo_name).name();
+    assert (buffer->has<unsigned int>(DBContent::meta_var_datasource_id_.name()));
+    NullableVector<unsigned int>& ds_ids = buffer->get<unsigned int>(DBContent::meta_var_datasource_id_.name());
 
-//    // track num
-//    if (object_manager.metaVariable("track_num").existsIn(dbo_name) && dbo_name != "ADSB" ) // HACK
-//        tst_track_num_name_ = object_manager.metaVariable("track_num").getFor(dbo_name).name();
+    assert (buffer->has<json>(DBContent::meta_var_associations_.name()));
+    NullableVector<json>& assoc_vec = buffer->get<json>(DBContent::meta_var_associations_.name());
 
-//    // speed & track_angle
-//    if (dbo_name == "ADSB")
-//    {
-//        tst_spd_ground_speed_kts_name_ = "groundspeed_kt";
-//        tst_spd_track_angle_deg_name_ = "track_angle_deg";
-//    }
-//    else if (dbo_name == "MLAT")
-//    {
-//        tst_spd_x_ms_name_ = "velocity_vx_ms";
-//        tst_spd_y_ms_name_ = "velocity_vy_ms";
-//    }
-//    else if (dbo_name == "Radar")
-//    {
-//        tst_spd_ground_speed_kts_name_ = "track_groundspeed_kt";
-//        tst_spd_track_angle_deg_name_ = "track_heading_deg";
-//    }
-//    else if (dbo_name == "Tracker" || dbo_name == "RefTraj")
-//    {
-//        tst_spd_ground_speed_kts_name_ = "groundspeed_kt";
-//        tst_spd_track_angle_deg_name_ = "heading_deg";
+    //unsigned int rec_num;
+    float tod;
+    vector<unsigned int> utn_vec;
 
-//        tst_multiple_srcs_name_ = "multiple_sources";
-//        tst_track_lu_ds_id_name_ = "track_lu_ds_id";
-//    }
+    loginf << "EvaluationData: addTestData: adding target data";
 
-//    set<int> active_srcs = eval_man_.activeDataSourcesTst();
-//    bool use_active_srcs = (eval_man_.dboNameRef() == eval_man_.dboNameTst());
-//    unsigned int num_skipped {0};
+    for (unsigned int cnt=0; cnt < buffer_size; ++cnt)
+    {
+        assert (!ds_ids.isNull(cnt));
 
-//    const DBOAssociationCollection& associations = object.associations();
+        if (use_active_srcs && !active_srcs.count(ds_ids.get(cnt))) // skip those entries not for tst src
+        {
+            ++num_skipped;
+            continue;
+        }
 
-//    unsigned int buffer_size = buffer->size();
-//    NullableVector<int>& rec_nums = buffer->get<int>("rec_num");
-//    NullableVector<float>& tods = buffer->get<float>("tod");
-//    NullableVector<int>& ds_ids = buffer->get<int>("ds_id");
+        //assert (!rec_nums.isNull(cnt));
+        assert (!tods.isNull(cnt));
 
-//    unsigned int rec_num;
-//    float tod;
+        //rec_num = rec_nums.get(cnt);
+        tod = tods.get(cnt);
 
-//    loginf << "EvaluationData: addTestData: adding target data";
+        if (assoc_vec.isNull(cnt))
+            utn_vec.clear();
+        else
+            utn_vec = assoc_vec.get(cnt).get<std::vector<unsigned int>>();
 
-//    for (unsigned int cnt=0; cnt < buffer_size; ++cnt)
-//    {
-//        assert (!ds_ids.isNull(cnt));
+        if (!utn_vec.size())
+        {
+            ++unassociated_tst_cnt_;
+            continue;
+        }
 
-//        if (use_active_srcs && !active_srcs.count(ds_ids.get(cnt))) // skip those entries not for tst src
-//        {
-//            ++num_skipped;
-//            continue;
-//        }
+        for (auto utn_it : utn_vec)
+        {
+            if (!hasTargetData(utn_it))
+                //target_data_.emplace(target_data_.end(), utn_it, *this, eval_man_);
+                target_data_.push_back({utn_it, *this, eval_man_});
 
-//        assert (!rec_nums.isNull(cnt));
-//        assert (!tods.isNull(cnt));
+            assert (hasTargetData(utn_it));
 
-//        rec_num = rec_nums.get(cnt);
-//        tod = tods.get(cnt);
+            auto tr_tag_it = target_data_.get<target_tag>().find(utn_it);
+            auto index_it = target_data_.project<0>(tr_tag_it); // get iterator for random access
 
-//        std::vector<unsigned int> utn_vec = associations.getUTNsFor(rec_num);
+            //            if (!targetData(utn_it).hasRefBuffer())
+            //                target_data_.modify(index_it, [buffer](EvaluationTargetData& t) { t.setRefBuffer(buffer); });
 
-//        if (!utn_vec.size())
-//        {
-//            ++unassociated_tst_cnt_;
-//            continue;
-//        }
+            target_data_.modify(index_it, [tod, cnt](EvaluationTargetData& t) { t.addTstIndex(tod, cnt); });
 
-//        for (auto utn_it : utn_vec)
-//        {
-//            if (!hasTargetData(utn_it))
-//                //target_data_.emplace(target_data_.end(), utn_it, *this, eval_man_);
-//                target_data_.push_back({utn_it, *this, eval_man_});
-//                //target_data_.emplace_back(utn_it, *this, eval_man_);
+            ++associated_tst_cnt_;
+        }
+    }
 
-//            assert (hasTargetData(utn_it));
-
-//            auto tr_tag_it = target_data_.get<target_tag>().find(utn_it);
-//            auto index_it = target_data_.project<0>(tr_tag_it);  // get iterator for random access
-
-//            //            if (!targetData(utn_it).hasTstBuffer())
-//            //                target_data_.modify(index_it, [buffer](EvaluationTargetData& t) { t.setTstBuffer(buffer); });
-
-//            target_data_.modify(index_it, [tod, cnt](EvaluationTargetData& t) { t.addTstIndex(tod, cnt); });
-
-//            ++associated_tst_cnt_;
-//        }
-//    }
-
-//    loginf << "EvaluationData: addTestData: num targets " << target_data_.size()
-//           << " tst associated cnt " << associated_tst_cnt_ << " unassoc " << unassociated_tst_cnt_
-//           << " num_skipped " << num_skipped;
+    loginf << "EvaluationData: addTestData: num targets " << target_data_.size()
+           << " tst associated cnt " << associated_tst_cnt_ << " unassoc " << unassociated_tst_cnt_
+           << " num_skipped " << num_skipped;
 }
 
 void EvaluationData::finalize ()

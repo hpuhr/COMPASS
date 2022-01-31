@@ -1153,6 +1153,17 @@ bool EvaluationManager::hasValidReferenceDBO ()
     return COMPASS::instance().dbContentManager().existsDBContent(dbo_name_ref_);
 }
 
+set<unsigned int> EvaluationManager::activeDataSourcesRef()
+{
+    set<unsigned int> srcs;
+
+    for (auto& ds_it : data_sources_ref_)
+        if (ds_it.second)
+            srcs.insert(ds_it.first);
+
+    return srcs;
+
+}
 
 std::string EvaluationManager::dboNameTst() const
 {
@@ -1174,6 +1185,18 @@ bool EvaluationManager::hasValidTestDBO ()
         return false;
 
     return COMPASS::instance().dbContentManager().existsDBContent(dbo_name_tst_);
+}
+
+set<unsigned int> EvaluationManager::activeDataSourcesTst()
+{
+    set<unsigned int> srcs;
+
+    for (auto& ds_it : data_sources_tst_)
+        if (ds_it.second)
+            srcs.insert(ds_it.first);
+
+    return srcs;
+
 }
 
 bool EvaluationManager::dataLoaded() const

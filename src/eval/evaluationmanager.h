@@ -116,11 +116,13 @@ public:
     void dboNameRef(const std::string& name);
     bool hasValidReferenceDBO ();
     std::map<unsigned int, bool>& dataSourcesRef() { return data_sources_ref_; } // can be used to set active bool
+    std::set<unsigned int> activeDataSourcesRef();
 
     std::string dboNameTst() const;
     void dboNameTst(const std::string& name);
     bool hasValidTestDBO ();
     std::map<unsigned int, bool>& dataSourcesTst() { return data_sources_tst_; } // can be used to set active bool
+    std::set<unsigned int> activeDataSourcesTst();
 
     bool dataLoaded() const;
     bool evaluated() const;

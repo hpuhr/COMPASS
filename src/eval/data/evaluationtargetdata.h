@@ -102,9 +102,9 @@ public:
     std::string modeACodesStr() const;
 
     bool hasModeC() const;
-    int modeCMin() const;
+    float modeCMin() const;
     std::string modeCMinStr() const;
-    int modeCMax() const;
+    float modeCMax() const;
     std::string modeCMaxStr() const;
 
     bool isPrimaryOnly () const;
@@ -135,7 +135,7 @@ public:
     unsigned int refModeAForTime (float tod) const;
 
     bool hasRefModeCForTime (float tod) const; // only if set, is v, not g
-    int refModeCForTime (float tod) const;
+    float refModeCForTime (float tod) const;
 
     bool hasRefTAForTime (float tod) const;
     unsigned int refTAForTime (float tod) const;
@@ -155,7 +155,7 @@ public:
     unsigned int tstModeAForTime (float tod) const;
 
     bool hasTstModeCForTime (float tod) const; // only if set, is v, not g
-    int tstModeCForTime (float tod) const;
+    float tstModeCForTime (float tod) const;
 
     bool hasTstGroundBitForTime (float tod) const; // only if set
     bool tstGroundBitForTime (float tod) const; // true is on ground
@@ -217,8 +217,8 @@ protected:
     mutable std::vector<unsigned int> mode_a_codes_;
 
     mutable bool has_mode_c_ {false};
-    mutable int mode_c_min_ {0};
-    mutable int mode_c_max_ {0};
+    mutable float mode_c_min_ {0};
+    mutable float mode_c_max_ {0};
 
     mutable bool has_pos_ {false};
     mutable double latitude_min_ {0};
