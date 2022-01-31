@@ -60,6 +60,7 @@ private slots:
     void liveStopSlot();
 
     void configureMetaVariablesSlot();
+    void configureSectorsSlot();
 
     void importAsterixRecordingSlot();
     void importRecentAsterixRecordingSlot();
@@ -139,6 +140,9 @@ protected:
     QAction* open_existing_db_action_ {nullptr};
     QMenu* open_recent_db_menu_ {nullptr};
     QAction* close_db_action_ {nullptr};
+
+    // configure sectors
+    QAction* sectors_action_ {nullptr};
 
     // import menu
     QMenu* import_menu_ {nullptr};

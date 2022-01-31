@@ -44,11 +44,6 @@
             "path": "task_manage_datasources.json"
         },
         {
-            "class_id": "ManageSchemaTask",
-            "instance_id": "ManageSchemaTask0",
-            "path": "task_manage_schema.json"
-        },
-        {
             "class_id": "ManageSectorsTask",
             "instance_id": "ManageSectorsTask0",
             "path": "task_manage_sectors.json"

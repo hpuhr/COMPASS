@@ -34,6 +34,8 @@
 #include "taskmanagerwidget.h"
 #include "viewmanager.h"
 #include "viewpointswidget.h"
+#include "managesectorstask.h"
+#include "managesectorstaskdialog.h"
 #include "evaluationmanager.h"
 #include "compass.h"
 
@@ -252,11 +254,17 @@ void MainWindow::createMenus ()
     // configuration menu
     QMenu* config_menu = menuBar()->addMenu(tr("&Configuration"));
 
-    // db operations
+    // configure operations
     QAction* meta_action = new QAction(tr("Meta Variables"));
     meta_action->setStatusTip(tr("Configure Meta Variables"));
     connect(meta_action, &QAction::triggered, this, &MainWindow::configureMetaVariablesSlot);
     config_menu->addAction(meta_action);
+
+    sectors_action_ = new QAction(tr("Sectors"));
+    sectors_action_->setStatusTip(tr("Configure Sectors (stored in Database)"));
+    connect(sectors_action_, &QAction::triggered, this, &MainWindow::configureSectorsSlot);
+    sectors_action_->setDisabled(true);
+    config_menu->addAction(sectors_action_);
 
     // import menu
 
@@ -298,7 +306,10 @@ void MainWindow::updateMenus()
     assert (open_recent_db_menu_);
     assert (close_db_action_);
 
+    assert (sectors_action_);
+
     assert (import_menu_);
+
 
     open_recent_db_menu_->clear();
 
@@ -320,6 +331,8 @@ void MainWindow::updateMenus()
     open_existing_db_action_->setDisabled(db_open);
     open_recent_db_menu_->setDisabled(db_open);
     close_db_action_->setDisabled(!db_open);
+
+    sectors_action_->setDisabled(!db_open);
 
     import_menu_->setDisabled(!db_open || COMPASS::instance().taskManager().asterixImporterTask().isRunning());
 
@@ -1194,6 +1207,13 @@ void MainWindow::configureMetaVariablesSlot()
     loginf << "MainWindow: configureMetaVariablesSlot";
 
     COMPASS::instance().dbContentManager().metaVariableConfigdialog()->show();
+}
+
+void MainWindow::configureSectorsSlot()
+{
+    loginf << "MainWindow: configureSectorsSlot";
+
+    COMPASS::instance().taskManager().manageSectorsTask().dialog()->show();
 }
 
 //void MainWindow::startSlot()
