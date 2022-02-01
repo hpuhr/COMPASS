@@ -705,7 +705,7 @@ void EvaluationManager::addVariables (const std::string dbo_name, dbContent::Var
         read_set.add(object_man.metaVariable(DBContent::meta_var_mc_v_.name()).getFor(dbo_name));
 
     if (dbo_name_ref_ == dbo_name && dbo_name_ref_ == "CAT062")
-        read_set.add(object_man.dbContent("CAT062").variable(DBContent::var_tracker_baro_alt_.name()));
+        read_set.add(object_man.dbContent("CAT062").variable(DBContent::var_cat062_baro_alt_.name()));
 
     // m3a
     read_set.add(object_man.metaVariable(DBContent::meta_var_m3a_.name()).getFor(dbo_name));

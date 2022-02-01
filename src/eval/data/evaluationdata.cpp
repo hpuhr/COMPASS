@@ -90,7 +90,7 @@ void EvaluationData::addReferenceData (DBContent& object, std::shared_ptr<Buffer
     if (dbo_name == "CAT062")
     {
         has_ref_altitude_secondary_ = true;
-        ref_altitude_secondary_name_ = DBContent::var_tracker_baro_alt_.name();
+        ref_altitude_secondary_name_ = DBContent::var_cat062_baro_alt_.name();
     }
 
     // m3a

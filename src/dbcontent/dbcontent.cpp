@@ -70,16 +70,20 @@ const Property DBContent::meta_var_detection_type_ {"Type", PropertyDataType::UC
 const Property DBContent::meta_var_artas_hash_ {"ARTAS Hash", PropertyDataType::UINT};
 const Property DBContent::meta_var_associations_ {"Associations", PropertyDataType::JSON};
 
+const Property DBContent::meta_var_vx_ {"Vx", PropertyDataType::DOUBLE};
+const Property DBContent::meta_var_vy_ {"Vy", PropertyDataType::DOUBLE};
+const Property DBContent::meta_var_ground_speed_ {"Track Groundspeed", PropertyDataType::DOUBLE};
+const Property DBContent::meta_var_track_angle_ {"Track Angle", PropertyDataType::DOUBLE};
+
 const Property DBContent::var_radar_range_ {"Range", PropertyDataType::DOUBLE};
 const Property DBContent::var_radar_azimuth_ {"Azimuth", PropertyDataType::DOUBLE};
 const Property DBContent::var_radar_altitude_ {"Mode C Code", PropertyDataType::FLOAT};
 
-const Property DBContent::var_tracker_tris_ {"Target Report Identifiers", PropertyDataType::STRING};
-const Property DBContent::var_tracker_track_begin_ {"Track Begin", PropertyDataType::BOOL};
-const Property DBContent::var_tracker_coasting_ {"Coasting", PropertyDataType::BOOL};
-const Property DBContent::var_tracker_track_end_ {"Track End", PropertyDataType::BOOL};
-const Property DBContent::var_tracker_baro_alt_ {"Barometric Altitude Calculated", PropertyDataType::FLOAT};
-
+const Property DBContent::var_cat062_tris_ {"Target Report Identifiers", PropertyDataType::STRING};
+const Property DBContent::var_cat062_track_begin_ {"Track Begin", PropertyDataType::BOOL};
+const Property DBContent::var_cat062_coasting_ {"Coasting", PropertyDataType::BOOL};
+const Property DBContent::var_cat062_track_end_ {"Track End", PropertyDataType::BOOL};
+const Property DBContent::var_cat062_baro_alt_ {"Barometric Altitude Calculated", PropertyDataType::FLOAT};
 
 const Property DBContent::selected_var {"selected", PropertyDataType::BOOL};
 

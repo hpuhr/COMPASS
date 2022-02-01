@@ -228,10 +228,10 @@ bool CreateARTASAssociationsTask::canRun()
 
     loginf << "CreateARTASAssociationsTask: canRun: tracker vars";
 
-    if (!tracker_object.hasVariable(DBContent::var_tracker_tris_.name()) ||
-            !tracker_object.hasVariable(DBContent::var_tracker_track_begin_.name()) ||
-            !tracker_object.hasVariable(DBContent::var_tracker_coasting_.name()) ||
-            !tracker_object.hasVariable(DBContent::var_tracker_track_end_.name()))
+    if (!tracker_object.hasVariable(DBContent::var_cat062_tris_.name()) ||
+            !tracker_object.hasVariable(DBContent::var_cat062_track_begin_.name()) ||
+            !tracker_object.hasVariable(DBContent::var_cat062_coasting_.name()) ||
+            !tracker_object.hasVariable(DBContent::var_cat062_track_end_.name()))
         return false;
 
     // meta var stuff
@@ -314,10 +314,10 @@ void CreateARTASAssociationsTask::run()
     checkAndSetTrackerVariableFromMeta(DBContent::meta_var_datasource_id_.name(), &tracker_ds_id_var_);
     checkAndSetTrackerVariableFromMeta(DBContent::meta_var_track_num_.name(), &tracker_track_num_var_);
 
-    checkAndSetTrackerVariable(DBContent::var_tracker_track_begin_.name(), &tracker_track_begin_var_);
-    checkAndSetTrackerVariable(DBContent::var_tracker_track_end_.name(), &tracker_track_end_var_);
-    checkAndSetTrackerVariable(DBContent::var_tracker_coasting_.name(), &tracker_track_coasting_var_);
-    checkAndSetTrackerVariable(DBContent::var_tracker_tris_.name(), &tracker_tris_var_);
+    checkAndSetTrackerVariable(DBContent::var_cat062_track_begin_.name(), &tracker_track_begin_var_);
+    checkAndSetTrackerVariable(DBContent::var_cat062_track_end_.name(), &tracker_track_end_var_);
+    checkAndSetTrackerVariable(DBContent::var_cat062_coasting_.name(), &tracker_track_coasting_var_);
+    checkAndSetTrackerVariable(DBContent::var_cat062_tris_.name(), &tracker_tris_var_);
 
     checkAndSetMetaVariable(DBContent::meta_var_rec_num_.name(), &rec_num_var_);
     checkAndSetMetaVariable(DBContent::meta_var_artas_hash_.name(), &hash_var_);
