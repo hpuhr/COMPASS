@@ -2276,7 +2276,7 @@ nlohmann::json::object_t EvaluationManager::getBaseViewableNoDataConfig ()
 {
     nlohmann::json data;
 
-    data["db_objects"] = vector<string>{};
+    data["data_sources"] = vector<unsigned int>{};
 
     return data;
 }
