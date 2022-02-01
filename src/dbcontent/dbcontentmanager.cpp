@@ -401,13 +401,23 @@ std::vector<unsigned int> DBContentManager::unfilteredDS (const std::string& dbo
     return ds_ids;
 }
 
+void DBContentManager::setLoadDataSources (bool loading_wanted)
+{
+    loginf << "DBContentManager: setLoadDataSources: wanted " << loading_wanted;
+
+    for (auto& ds_it : db_data_sources_)
+        ds_it->loadingWanted(loading_wanted);
+
+    if (load_widget_)
+        load_widget_->update();
+}
+
 void DBContentManager::setLoadOnlyDataSources (std::set<unsigned int> ds_ids)
 {
     loginf << "DBContentManager: setLoadOnlyDataSources";
 
     // deactivate all loading
-    for (auto& ds_it : db_data_sources_)
-        ds_it->loadingWanted(false);
+    setLoadDataSources(false);
 
     for (auto ds_id_it : ds_ids)
     {
@@ -417,8 +427,28 @@ void DBContentManager::setLoadOnlyDataSources (std::set<unsigned int> ds_ids)
 
     if (load_widget_)
         load_widget_->update();
-
 }
+
+bool DBContentManager::loadDataSourcesFiltered()
+{
+    for (auto& ds_it : db_data_sources_)
+        if (!ds_it->loadingWanted())
+            return true;
+
+    return false;
+}
+
+std::set<unsigned int> DBContentManager::getLoadDataSources ()
+{
+    std::set<unsigned int> ds_to_load;
+
+    for (auto& ds_it : db_data_sources_)
+        if (ds_it->loadingWanted())
+            ds_to_load.insert(ds_it->id());
+
+    return ds_to_load;
+}
+
 
 void DBContentManager::load()
 {

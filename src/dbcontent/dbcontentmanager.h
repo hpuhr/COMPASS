@@ -115,7 +115,10 @@ public:
     bool hasDSFilter (const std::string& dbo_name);
     std::vector<unsigned int> unfilteredDS (const std::string& dbo_name); // DS IDs
 
+    void setLoadDataSources (bool loading_wanted);
     void setLoadOnlyDataSources (std::set<unsigned int> ds_ids);
+    bool loadDataSourcesFiltered();
+    std::set<unsigned int> getLoadDataSources ();
 
     void load();
     void addLoadedData(std::map<std::string, std::shared_ptr<Buffer>> data);

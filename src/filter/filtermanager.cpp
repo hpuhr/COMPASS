@@ -303,21 +303,19 @@ void FilterManager::showViewPointSlot (const ViewableDataConfig* vp)
 
     DBContentManager& obj_man = COMPASS::instance().dbContentManager();
 
-    TODO_ASSERT
+    // add all data sources that need loading
+    if (data.contains("data_sources")) // the listed ones should be loaded
+    {
+        const json& data_sources  = data.at("data_sources");
 
-    // add all db objects that need loading
-//    if (data.contains("db_objects")) // the listed ones should be loaded
-//    {
-//        const json& db_objects  = data.at("db_objects");
-//        for (auto& obj_it : obj_man)
-//            obj_it.second->loadingWanted(
-//                        std::find(db_objects.begin(), db_objects.end(), obj_it.first) != db_objects.end());
-//    }
-//    else // all should be loaded
-//    {
-//        for (auto& obj_it : obj_man)
-//            obj_it.second->loadingWanted(true);
-//    }
+        std::set<unsigned int> ds_ids = data_sources.get<std::set<unsigned int>>();
+
+        obj_man.setLoadOnlyDataSources(ds_ids);
+    }
+    else // all should be loaded
+    {
+        obj_man.setLoadDataSources(true);
+    }
 
     // add filters
     use_filters_ = data.contains("filters");
@@ -357,21 +355,8 @@ void FilterManager::setConfigInViewPoint (nlohmann::json& data)
 
     DBContentManager& obj_man = COMPASS::instance().dbContentManager();
 
-    data["db_objects"] = json::array();
-    json& db_objects = data["db_objects"];
-
-    TODO_ASSERT
-
-    // add all db objects that need loading
-    unsigned int cnt=0;
-//    for (auto& obj_it : obj_man)
-//    {
-//        if (obj_it.second->loadable() && obj_it.second->loadingWanted())
-//        {
-//            db_objects[cnt] = obj_it.first;
-//            ++cnt;
-//        }
-//    }
+    if (obj_man.loadDataSourcesFiltered()) // ds filters active
+        data["data_sources"] = obj_man.getLoadDataSources(); // add all data sources that need loading
 
     // add filters
     if (use_filters_)

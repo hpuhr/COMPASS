@@ -1634,11 +1634,11 @@ void EvaluationManager::showSurroundingData (unsigned int utn)
     data["filters"]["Time of Day"]["Time of Day Maximum"] = String::timeStringFromDouble(time_end);
     data["filters"]["Time of Day"]["Time of Day Minimum"] = String::timeStringFromDouble(time_begin);
 
-    //    "Target Address": {
-    //    "Target Address Values": "FEFE10"
+    //    "Aircraft Address": {
+    //    "Aircraft Address Values": "FEFE10"
     //    },
     if (target_data.targetAddresses().size())
-        data["filters"]["Target Address"]["Target Address Values"] = target_data.targetAddressesStr()+",NULL";
+        data["filters"]["Aircraft Address"]["Aircraft Address Values"] = target_data.targetAddressesStr()+",NULL";
 
     //    "Mode 3/A Code": {
     //    "Mode 3/A Code Values": "7000"

@@ -89,73 +89,73 @@ QVariant ViewPointsTableModel::data(const QModelIndex& index, int role) const
 
     switch (role)
     {
-        case Qt::DisplayRole:
-        case Qt::EditRole:
-            {
-                logdbg << "ViewPointsTableModel: data: display role: row " << index.row() << " col " << index.column();
+    case Qt::DisplayRole:
+    case Qt::EditRole:
+    {
+        logdbg << "ViewPointsTableModel: data: display role: row " << index.row() << " col " << index.column();
 
-                assert (index.row() >= 0);
-                assert (index.row() < view_points_.size());
+        assert (index.row() >= 0);
+        assert (index.row() < view_points_.size());
 
-                const ViewPoint& vp = view_points_.at(index.row());
+        const ViewPoint& vp = view_points_.at(index.row());
 
-                logdbg << "ViewPointsTableModel: data: got key " << view_points_.at(index.row()).id();
+        logdbg << "ViewPointsTableModel: data: got key " << view_points_.at(index.row()).id();
 
-                assert (index.column() < table_columns_.size());
-                std::string col_name = table_columns_.at(index.column()).toStdString();
+        assert (index.column() < table_columns_.size());
+        std::string col_name = table_columns_.at(index.column()).toStdString();
 
-                if (!vp.data().contains(col_name))
-                    return QVariant();
+        if (!vp.data().contains(col_name))
+            return QVariant();
 
-                const json& data = vp.data().at(col_name);
+        const json& data = vp.data().at(col_name);
 
-                //            if (col_name == "status" && (data == "open" || data == "closed" || data == "todo"))
-                //                return QVariant();
+        //            if (col_name == "status" && (data == "open" || data == "closed" || data == "todo"))
+        //                return QVariant();
 
-                // s1.find(s2) != std::string::npos
-                if (data.is_number() && col_name.find("time") != std::string::npos)
-                    return String::timeStringFromDouble(data).c_str();
+        // s1.find(s2) != std::string::npos
+        if (data.is_number() && col_name.find("time") != std::string::npos)
+            return String::timeStringFromDouble(data).c_str();
 
-                if (data.is_boolean())
-                    return data.get<bool>();
+        if (data.is_boolean())
+            return data.get<bool>();
 
-                if (data.is_number())
-                    return data.get<float>();
+        if (data.is_number())
+            return data.get<float>();
 
-                return JSON::toString(data).c_str();
-            }
-        case Qt::DecorationRole:
-            {
-                assert (index.column() < table_columns_.size());
+        return JSON::toString(data).c_str();
+    }
+    case Qt::DecorationRole:
+    {
+        assert (index.column() < table_columns_.size());
 
-                if (table_columns_.at(index.column()) == "status")
-                {
-                    assert (index.row() >= 0);
-                    assert (index.row() < view_points_.size());
+        if (table_columns_.at(index.column()) == "status")
+        {
+            assert (index.row() >= 0);
+            assert (index.row() < view_points_.size());
 
-                    const ViewPoint& vp = view_points_.at(index.row());
+            const ViewPoint& vp = view_points_.at(index.row());
 
-                    const json& data = vp.data().at("status");
-                    assert (data.is_string());
+            const json& data = vp.data().at("status");
+            assert (data.is_string());
 
-                    std::string status = data;
+            std::string status = data;
 
-                    if (status == "open")
-                        return open_icon_;
-                    else if (status == "closed")
-                        return closed_icon_;
-                    else if (status == "todo")
-                        return todo_icon_;
-                    else
-                        return unknown_icon_;
-                }
-                else
-                    return QVariant();
-            }
-        default:
-            {
-                return QVariant();
-            }
+            if (status == "open")
+                return open_icon_;
+            else if (status == "closed")
+                return closed_icon_;
+            else if (status == "todo")
+                return todo_icon_;
+            else
+                return unknown_icon_;
+        }
+        else
+            return QVariant();
+    }
+    default:
+    {
+        return QVariant();
+    }
     }
 }
 
@@ -208,10 +208,10 @@ bool ViewPointsTableModel::setData(const QModelIndex& index, const QVariant &val
 
         assert (index.column() == statusColumn() || index.column() == commentColumn());
 
-//        if (index.column() == statusColumn())
-//            view_points_.at(id).setStatus(value.toString().toStdString());
-//        else
-//            view_points_.at(id).setComment(value.toString().toStdString());
+        //        if (index.column() == statusColumn())
+        //            view_points_.at(id).setStatus(value.toString().toStdString());
+        //        else
+        //            view_points_.at(id).setComment(value.toString().toStdString());
 
         if (index.column() == statusColumn())
         {
@@ -384,9 +384,9 @@ const ViewPoint& ViewPointsTableModel::saveNewViewPoint(unsigned int id, const n
     if (id > max_id_)
         max_id_ = id;
 
-//    view_points_.emplace(std::piecewise_construct,
-//                         std::forward_as_tuple(id),   // args for key
-//                         std::forward_as_tuple(id, new_data_ref, view_manager_, true));  // args for mapped value
+    //    view_points_.emplace(std::piecewise_construct,
+    //                         std::forward_as_tuple(id),   // args for key
+    //                         std::forward_as_tuple(id, new_data_ref, view_manager_, true));  // args for mapped value
 
     assert (hasViewPoint(id));
 
@@ -478,7 +478,17 @@ void ViewPointsTableModel::importViewPoints (const std::string& filename)
 
         string version_str = version;
 
-        if (version_str != "0.1")
+        if (version_str != "0.2") // old version, not possible
+        {
+            QMessageBox m_warning(QMessageBox::Warning, "Import View Points",
+                                  ("View Points File has wrong version "+version_str
+                                   +", only version 0.2 is supported in this version").c_str(),
+                                  QMessageBox::Ok);
+            m_warning.exec();
+            return;
+        }
+
+        if (version_str != "0.2")
             throw std::runtime_error("File '"+filename+"' context version "+version_str+" is not supported");
 
         loginf << "ViewPointsTableModel: importViewPoints: context '" << j.at("view_point_context").dump(4) << "'";
@@ -541,7 +551,7 @@ void ViewPointsTableModel::exportViewPoints (const std::string& filename)
 
     data["view_point_context"] = json::object();
     json& context = data.at("view_point_context");
-    context["version"] = "0.1";
+    context["version"] = "0.2";
 
     data["view_points"] = json::array();
     json& view_points = data.at("view_points");
@@ -573,9 +583,9 @@ void ViewPointsTableModel::exportViewPoints (const std::string& filename)
 unsigned int ViewPointsTableModel::getIdOf (const QModelIndex& index)
 {
     assert (index.isValid());
-//    auto map_it = view_points_.begin();
-//    std::advance(map_it, index.row());
-//    assert (map_it != view_points_.end());
+    //    auto map_it = view_points_.begin();
+    //    std::advance(map_it, index.row());
+    //    assert (map_it != view_points_.end());
 
     assert (index.row() >= 0);
     assert (index.row() < view_points_.size());
