@@ -2246,67 +2246,20 @@ void EvaluationManager::removeModeACodes(bool value)
 nlohmann::json::object_t EvaluationManager::getBaseViewableDataConfig ()
 {
     nlohmann::json data;
-    //    "db_objects": [
-    //    "Tracker"
-    //    ],
-    // "filters": {
-    //    "Tracker Data Sources": {
-    //    "active_sources": [
-    //    13040,
-    //    13041
-    //    ]
-    //    }
-    //    }
 
-    if (dbo_name_ref_ != dbo_name_tst_)
-    {
-        data["db_objects"] = vector<string>{dbo_name_ref_, dbo_name_tst_};
+    // set data sources
 
-        // ref srcs
-        {
-            vector<unsigned int> active_ref_srcs;
+    std::set<unsigned int> data_sources;
 
-            for (auto& ds_it : data_sources_ref_)
-                if (ds_it.second)
-                    active_ref_srcs.push_back(ds_it.first);
+    for (auto& src_it : data_sources_ref_)
+        if (src_it.second)
+            data_sources.insert(src_it.first);
 
-            data["filters"][dbo_name_ref_+" Data Sources"]["active_sources"] = active_ref_srcs;
-        }
+    for (auto& src_it : data_sources_tst_)
+        if (src_it.second)
+            data_sources.insert(src_it.first);
 
-        // tst srcs
-        {
-            vector<unsigned int> active_tst_srcs;
-
-            for (auto& ds_it : data_sources_tst_)
-                if (ds_it.second)
-                    active_tst_srcs.push_back(ds_it.first);
-
-            data["filters"][dbo_name_tst_+" Data Sources"]["active_sources"] = active_tst_srcs;
-        }
-
-    }
-    else
-    {
-        data["db_objects"] = vector<string>{dbo_name_ref_};
-
-        vector<unsigned int> active_srcs;
-
-        // ref srcs
-        {
-            for (auto& ds_it : data_sources_ref_)
-                if (ds_it.second)
-                    active_srcs.push_back(ds_it.first);
-        }
-
-        // tst srcs
-        {
-            for (auto& ds_it : data_sources_tst_)
-                if (ds_it.second)
-                    active_srcs.push_back(ds_it.first);
-        }
-
-        data["filters"][dbo_name_ref_+" Data Sources"]["active_sources"] = active_srcs;
-    }
+    data["data_sources"] = data_sources;
 
     if (load_only_sector_data_ && min_max_pos_set_)
     {
