@@ -108,6 +108,8 @@ class ViewManager : public QObject, public Configurable
     // disables propagation of data to the views. used when loading is performed for processing purposes
 
 
+    bool isProcessingData() const;
+
 protected:
     COMPASS& compass_;
 
@@ -115,6 +117,7 @@ protected:
     ViewPointsWidget* view_points_widget_{nullptr};
 
     bool initialized_{false};
+    bool processing_data_ {false};
 
     QTabWidget* main_tab_widget_{nullptr};
 

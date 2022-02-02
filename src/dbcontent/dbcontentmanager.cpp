@@ -572,7 +572,9 @@ void DBContentManager::addLoadedData(std::map<std::string, std::shared_ptr<Buffe
     }
 
     if (something_changed)
+    {
         emit loadedDataSignal(data_, false);
+    }
 }
 
 std::map<std::string, std::shared_ptr<Buffer>> DBContentManager::loadedData()
@@ -693,7 +695,17 @@ void DBContentManager::loadingDone(DBContent& object)
     }
 
     if (done)
+    {
+        if (skipped_last_data_distribution_)
+        {
+            loginf << "DBContentManager: loadingDoneSlot: final skipped data distribution";
+            skipped_last_data_distribution_ = false;
+
+            emit loadedDataSignal(data_, false);
+        }
+
         finishLoading();
+    }
     else
         logdbg << "DBContentManager: loadingDoneSlot: not done";
 }

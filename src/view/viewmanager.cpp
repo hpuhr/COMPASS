@@ -502,6 +502,11 @@ void ViewManager::disableDataDistribution(bool value)
     disable_data_distribution_ = value;
 }
 
+bool ViewManager::isProcessingData() const
+{
+    return processing_data_;
+}
+
 ViewContainerWidget* ViewManager::addNewContainerWidget()
 {
     logdbg << "ViewManager: addNewContainerWidget";
@@ -642,11 +647,14 @@ void ViewManager::loadedDataSlot (const std::map<std::string, std::shared_ptr<Bu
 {
     if (disable_data_distribution_)
         return;
-
     loginf << "ViewManager: loadedDataSlot: reset " << requires_reset;
+
+    processing_data_ = true;
 
     for (auto& view_it : views_)
         view_it.second->loadedData(data, requires_reset);
+
+    processing_data_ = false;
 
     loginf << "ViewManager: loadedDataSlot: done";
 }
