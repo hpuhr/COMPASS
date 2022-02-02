@@ -66,6 +66,7 @@ class DBOReadDBJob : public Job
     std::string limit_str_;
 
     unsigned int row_count_{0};
+    std::shared_ptr<Buffer> cached_buffer_;
 
     boost::posix_time::ptime start_time_;
     boost::posix_time::ptime stop_time_;

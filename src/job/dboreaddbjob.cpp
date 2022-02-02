@@ -16,13 +16,14 @@
  */
 
 #include "dboreaddbjob.h"
-
 #include "buffer.h"
 #include "dbinterface.h"
 #include "dbcontent/dbcontent.h"
 #include "dbcontent/variable/variable.h"
 #include "logger.h"
 #include "propertylist.h"
+#include "compass.h"
+#include "viewmanager.h"
 
 using namespace dbContent;
 
@@ -68,10 +69,15 @@ void DBOReadDBJob::run()
 
     unsigned int cnt = 0;
 
+    ViewManager &view_manager = COMPASS::instance().viewManager();
+
+    bool last_buffer;
+
     while (!done_)
     {
         std::shared_ptr<Buffer> buffer = db_interface_.readDataChunk(dbobject_);
         assert(buffer);
+        last_buffer = buffer->lastOne();
 
         cnt++;
 
@@ -87,12 +93,33 @@ void DBOReadDBJob::run()
                << cnt << " last one " << buffer->lastOne();
         row_count_ += buffer->size();
 
-        loginf << "DBOReadDBJob: run: " << dbobject_.name() << ": emitting intermediate read, size " << row_count_;
-        emit intermediateSignal(buffer);
+        // add data to cache
+        if (!cached_buffer_) // no cache
+            cached_buffer_ = buffer;
+        else
+        {
+            cached_buffer_->seizeBuffer(*buffer);
+            buffer = nullptr;
+        }
 
-        if (buffer->lastOne())
+        if (!view_manager.isProcessingData() || last_buffer) // distribute data
+        {
+            loginf << "DBOReadDBJob: run: " << dbobject_.name() << ": emitting intermediate read, size " << row_count_;
+            emit intermediateSignal(cached_buffer_);
+
+            cached_buffer_ = nullptr;
+        }
+        else
+            loginf << "DBOReadDBJob: run: " << dbobject_.name() << ": UGA SKIP SKIP SKIP";
+
+        if (last_buffer)
+        {
+            loginf << "DBOReadDBJob: run: " << dbobject_.name() << ": last buffer";
             break;
+        }
     }
+
+    assert (!cached_buffer_);
 
     logdbg << "DBOReadDBJob: run: " << dbobject_.name() << ": finalizing statement";
     db_interface_.finalizeReadStatement(dbobject_);
