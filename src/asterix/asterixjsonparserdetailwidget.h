@@ -68,6 +68,7 @@ private:
     DataTypeFormatSelectionWidget* data_format_widget_ {nullptr};
 
     dbContent::VariableSelectionWidget* dbo_var_sel_ {nullptr};
+    QLabel* dbo_var_data_type_label_ {nullptr};
 
     QTextEdit* dbo_var_comment_edit_ {nullptr};
 
