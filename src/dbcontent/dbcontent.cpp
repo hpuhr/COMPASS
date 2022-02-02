@@ -279,8 +279,8 @@ string DBContent::status()
                 return "Queued";
         }
     }
-    else if (finalize_jobs_.size() > 0)
-        return "Post-processing";
+//    else if (finalize_jobs_.size() > 0)
+//        return "Post-processing";
     else
         return "Idle";
 }
@@ -373,11 +373,11 @@ void DBContent::loadFiltered(VariableSet& read_set, const std::vector<std::strin
         JobManager::instance().cancelJob(read_job_);
         read_job_ = nullptr;
     }
-    read_job_data_.clear();
+    //read_job_data_.clear();
 
-    for (auto job_it : finalize_jobs_)
-        JobManager::instance().cancelJob(job_it);
-    finalize_jobs_.clear();
+//    for (auto job_it : finalize_jobs_)
+//        JobManager::instance().cancelJob(job_it);
+//    finalize_jobs_.clear();
 
     //    DBInterface &db_interface, DBContent &dbobject, VariableSet read_list, string
     //    custom_filter_clause, Variable *order, const string &limit_str
@@ -574,6 +574,7 @@ void DBContent::readJobIntermediateSlot(shared_ptr<Buffer> buffer)
     assert (sender);
     assert(sender == read_job_.get());
 
+    // check variables
     vector<Variable*>& variables = sender->readList().getSet();
     const PropertyList& properties = buffer->properties();
 
@@ -587,15 +588,30 @@ void DBContent::readJobIntermediateSlot(shared_ptr<Buffer> buffer)
     logdbg << "DBContent: " << name_ << " readJobIntermediateSlot: got buffer with size "
            << buffer->size();
 
-    read_job_data_.push_back(buffer);
+    // finalize buffer
+    buffer->transformVariables(sender->readList(), true);
 
-    FinalizeDBOReadJob* job = new FinalizeDBOReadJob(*this, sender->readList(), buffer);
+    // add boolean to indicate selection
+    buffer->addProperty(DBContent::selected_var);
 
-    shared_ptr<FinalizeDBOReadJob> job_ptr = shared_ptr<FinalizeDBOReadJob>(job);
-    connect(job, SIGNAL(doneSignal()), this, SLOT(finalizeReadJobDoneSlot()), Qt::QueuedConnection);
-    finalize_jobs_.push_back(job_ptr);
+    // add loaded data
+    dbo_manager_.addLoadedData({{name_, buffer}});
 
-    JobManager::instance().addBlockingJob(job_ptr);
+    if (!isLoading())  // is last one
+    {
+        loginf << "DBContent: " << name_ << " finalizeReadJobDoneSlot: loading done";
+        dbo_manager_.loadingDone(*this);
+    }
+
+//    read_job_data_.push_back(buffer);
+
+//    FinalizeDBOReadJob* job = new FinalizeDBOReadJob(*this, sender->readList(), buffer);
+
+//    shared_ptr<FinalizeDBOReadJob> job_ptr = shared_ptr<FinalizeDBOReadJob>(job);
+//    connect(job, SIGNAL(doneSignal()), this, SLOT(finalizeReadJobDoneSlot()), Qt::QueuedConnection);
+//    finalize_jobs_.push_back(job_ptr);
+
+//    JobManager::instance().addBlockingJob(job_ptr);
 
 }
 
@@ -603,7 +619,7 @@ void DBContent::readJobObsoleteSlot()
 {
     logdbg << "DBContent: " << name_ << " readJobObsoleteSlot";
     read_job_ = nullptr;
-    read_job_data_.clear();
+    //read_job_data_.clear();
 }
 
 void DBContent::readJobDoneSlot()
@@ -618,44 +634,44 @@ void DBContent::readJobDoneSlot()
     }
 }
 
-void DBContent::finalizeReadJobDoneSlot()
-{
-    logdbg << "DBContent: " << name_ << " finalizeReadJobDoneSlot";
+//void DBContent::finalizeReadJobDoneSlot()
+//{
+//    logdbg << "DBContent: " << name_ << " finalizeReadJobDoneSlot";
 
-    FinalizeDBOReadJob* sender = dynamic_cast<FinalizeDBOReadJob*>(QObject::sender());
+//    FinalizeDBOReadJob* sender = dynamic_cast<FinalizeDBOReadJob*>(QObject::sender());
 
-    if (!sender)
-    {
-        logwrn << "DBContent: finalizeReadJobDoneSlot: null sender, event on the loose";
-        return;
-    }
+//    if (!sender)
+//    {
+//        logwrn << "DBContent: finalizeReadJobDoneSlot: null sender, event on the loose";
+//        return;
+//    }
 
-    shared_ptr<Buffer> buffer = sender->buffer();
-    assert (buffer);
+//    shared_ptr<Buffer> buffer = sender->buffer();
+//    assert (buffer);
 
-    bool found = false;
-    for (auto final_it : finalize_jobs_)
-    {
-        if (final_it.get() == sender)
-        {
-            finalize_jobs_.erase(find(finalize_jobs_.begin(), finalize_jobs_.end(), final_it));
-            found = true;
-            break;
-        }
-    }
-    assert(found);
+//    bool found = false;
+//    for (auto final_it : finalize_jobs_)
+//    {
+//        if (final_it.get() == sender)
+//        {
+//            finalize_jobs_.erase(find(finalize_jobs_.begin(), finalize_jobs_.end(), final_it));
+//            found = true;
+//            break;
+//        }
+//    }
+//    assert(found);
 
-    // add loaded data
-    dbo_manager_.addLoadedData({{name_, buffer}});
+//    // add loaded data
+//    dbo_manager_.addLoadedData({{name_, buffer}});
 
-    if (!isLoading())  // is last one
-    {
-        loginf << "DBContent: " << name_ << " finalizeReadJobDoneSlot: loading done";
-        dbo_manager_.loadingDone(*this);
-    }
+//    if (!isLoading())  // is last one
+//    {
+//        loginf << "DBContent: " << name_ << " finalizeReadJobDoneSlot: loading done";
+//        dbo_manager_.loadingDone(*this);
+//    }
 
-    return;
-}
+//    return;
+//}
 
 void DBContent::databaseOpenedSlot()
 {
@@ -696,11 +712,11 @@ void DBContent::checkLabelDefinitions()
 //    return associations_loaded_;
 //}
 
-bool DBContent::isLoading() { return read_job_ != nullptr || finalize_jobs_.size(); }
+bool DBContent::isLoading() { return read_job_ != nullptr; }
 
 bool DBContent::isInserting() { return insert_active_; }
 
-bool DBContent::isPostProcessing() { return finalize_jobs_.size(); }
+//bool DBContent::isPostProcessing() { return finalize_jobs_.size(); }
 
 bool DBContent::hasData() { return count_ > 0; }
 

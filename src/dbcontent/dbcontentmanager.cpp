@@ -696,14 +696,6 @@ void DBContentManager::loadingDone(DBContent& object)
 
     if (done)
     {
-        if (skipped_last_data_distribution_)
-        {
-            loginf << "DBContentManager: loadingDoneSlot: final skipped data distribution";
-            skipped_last_data_distribution_ = false;
-
-            emit loadedDataSignal(data_, false);
-        }
-
         finishLoading();
     }
     else
@@ -907,14 +899,14 @@ std::string DBContentManager::associationsID() const { return associations_id_; 
 
 //std::string DBContentManager::associationsDataSourceName() const { return associations_ds_; }
 
-bool DBContentManager::isOtherDBObjectPostProcessing(DBContent& object)
-{
-    for (auto& dbo_it : dbcontent_)
-        if (dbo_it.second != &object && dbo_it.second->isPostProcessing())
-            return true;
+//bool DBContentManager::isOtherDBObjectPostProcessing(DBContent& object)
+//{
+//    for (auto& dbo_it : dbcontent_)
+//        if (dbo_it.second != &object && dbo_it.second->isPostProcessing())
+//            return true;
 
-    return false;
-}
+//    return false;
+//}
 
 bool DBContentManager::loadInProgress() const
 {

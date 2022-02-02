@@ -66,7 +66,7 @@ public slots:
     void readJobIntermediateSlot(std::shared_ptr<Buffer> buffer);
     void readJobObsoleteSlot();
     void readJobDoneSlot();
-    void finalizeReadJobDoneSlot();
+    //void finalizeReadJobDoneSlot();
 
     void insertDoneSlot();
 
@@ -160,7 +160,7 @@ public:
 
     bool isLoading();
     bool isInserting();
-    bool isPostProcessing();
+    //bool isPostProcessing();
     bool hasData();
     size_t count();
     size_t loadedCount();
@@ -212,8 +212,8 @@ protected:
     std::unique_ptr<dbContent::LabelDefinition> label_definition_;
 
     std::shared_ptr<DBOReadDBJob> read_job_{nullptr};
-    std::vector<std::shared_ptr<Buffer>> read_job_data_;
-    std::vector<std::shared_ptr<FinalizeDBOReadJob>> finalize_jobs_;
+    //std::vector<std::shared_ptr<Buffer>> read_job_data_;
+    //std::vector<std::shared_ptr<FinalizeDBOReadJob>> finalize_jobs_;
 
     bool insert_active_ {false};
     std::shared_ptr<InsertBufferDBJob> insert_job_{nullptr};

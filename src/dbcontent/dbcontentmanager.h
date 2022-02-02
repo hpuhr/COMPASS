@@ -168,7 +168,7 @@ public:
     std::string associationsID() const;
 //    std::string associationsDataSourceName() const;
 
-    bool isOtherDBObjectPostProcessing(DBContent& object);
+    //bool isOtherDBObjectPostProcessing(DBContent& object);
 
     bool hasMaxRecordNumber() const { return has_max_rec_num_; }
     unsigned int maxRecordNumber() const;
