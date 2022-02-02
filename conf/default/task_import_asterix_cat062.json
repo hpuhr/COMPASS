@@ -2915,7 +2915,7 @@
                     "json_key": "340.MDC.Last Measured Mode C Code",
                     "json_value_format": "",
                     "mandatory": false,
-                    "unit": "Feet"
+                    "unit": "Flight Level"
                 }
             },
             "JSONDataMapping73": {

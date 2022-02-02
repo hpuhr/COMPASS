@@ -789,6 +789,12 @@
                                 "dbcontent_name": "CAT021",
                                 "variable_name": "Ground Bit"
                             }
+                        },
+                        "VariableDefinitionCAT062Ground Speed ADD0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT062",
+                                "variable_name": "Ground Speed ADD"
+                            }
                         }
                     }
                 }
@@ -1723,6 +1729,12 @@
                                 "variable_name": "Track Groundspeed"
                             }
                         },
+                        "VariableDefinitionCAT021Ground Speed0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT021",
+                                "variable_name": "Ground Speed"
+                            }
+                        },
                         "VariableDefinitionCAT048Track Groundspeed0": {
                             "parameters": {
                                 "dbcontent_name": "CAT048",
@@ -1862,6 +1874,48 @@
                             "parameters": {
                                 "dbcontent_name": "CAT062",
                                 "variable_name": "Type LM"
+                            }
+                        }
+                    }
+                }
+            },
+            "MetaVariableVx0": {
+                "parameters": {
+                    "name": "Vx"
+                },
+                "sub_configs": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT020Vx0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT020",
+                                "variable_name": "Vx"
+                            }
+                        },
+                        "VariableDefinitionCAT062Vx0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT062",
+                                "variable_name": "Vx"
+                            }
+                        }
+                    }
+                }
+            },
+            "MetaVariableVy0": {
+                "parameters": {
+                    "name": "Vy"
+                },
+                "sub_configs": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT020Vy0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT020",
+                                "variable_name": "Vy"
+                            }
+                        },
+                        "VariableDefinitionCAT062Vy0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT062",
+                                "variable_name": "Vy"
                             }
                         }
                     }

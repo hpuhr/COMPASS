@@ -2232,7 +2232,7 @@
             },
             "Variable29": {
                 "parameters": {
-                    "data_type_str": "FLOAT",
+                    "data_type_str": "DOUBLE",
                     "db_column_name": "vx",
                     "description": "From 185.Vx\n\nCalculated track velocity expressed in Cartesian co-ordinates\n\n(LSB) = 0.25 m/s\n\n-8192m/s <= Vx <= 8191.75m/s",
                     "dimension": "Speed",
@@ -2258,7 +2258,7 @@
             },
             "Variable30": {
                 "parameters": {
-                    "data_type_str": "FLOAT",
+                    "data_type_str": "DOUBLE",
                     "db_column_name": "vy",
                     "description": "From 185.Vy\n\nCalculated track velocity expressed in Cartesian co-ordinates\n\n(LSB) = 0.25 m/s\n\n-8192m/s <= Vx <= 8191.75m/s",
                     "dimension": "Speed",
