@@ -101,6 +101,14 @@ public:
     static const Property meta_var_ground_speed_;
     static const Property meta_var_track_angle_;
 
+    static const Property meta_var_x_stddev_;
+    static const Property meta_var_y_stddev_;
+    static const Property meta_var_xy_cov_;
+
+    static const Property meta_var_latitude_stddev_;
+    static const Property meta_var_longitude_stddev_;
+    static const Property meta_var_latlon_cov_;
+
     static const Property var_radar_range_;
     static const Property var_radar_azimuth_;
     static const Property var_radar_altitude_;

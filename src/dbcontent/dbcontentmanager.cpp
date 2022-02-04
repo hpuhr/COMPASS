@@ -1242,6 +1242,42 @@ bool DBContentManager::dsTypeLoadingWanted (const std::string& ds_type)
     return ds_type_loading_wanted_.at(ds_type);
 }
 
+bool DBContentManager::canGetVariable (const std::string& dbcont_name, const Property& property)
+{
+    assert (dbcontent_.count(dbcont_name));
+
+    return dbcontent_.at(dbcont_name)->hasVariable(property.name());
+}
+
+dbContent::Variable& DBContentManager::getVariable (const std::string& dbcont_name, const Property& property)
+{
+    assert (canGetVariable(dbcont_name, property));
+    assert (dbcontent_.at(dbcont_name)->hasVariable(property.name()));
+
+    Variable& variable = dbcontent_.at(dbcont_name)->variable(property.name());
+
+    assert (variable.dataType() == property.dataType());
+
+    return variable;
+}
+
+bool DBContentManager::metaCanGetVariable (const std::string& dbcont_name, const Property& meta_property)
+{
+    assert (dbcontent_.count(dbcont_name));
+
+    if (!existsMetaVariable(meta_property.name()))
+        return false;
+
+    return metaVariable(meta_property.name()).existsIn(dbcont_name);
+}
+
+dbContent::Variable& DBContentManager::metaGetVariable (const std::string& dbcont_name, const Property& meta_property)
+{
+    assert (metaCanGetVariable(dbcont_name, meta_property));
+
+    return metaVariable(meta_property.name()).getFor(dbcont_name);
+}
+
 bool DBContentManager::insertInProgress() const
 {
     return insert_in_progress_;

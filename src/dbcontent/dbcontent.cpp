@@ -75,6 +75,13 @@ const Property DBContent::meta_var_vy_ {"Vy", PropertyDataType::DOUBLE};
 const Property DBContent::meta_var_ground_speed_ {"Track Groundspeed", PropertyDataType::DOUBLE};
 const Property DBContent::meta_var_track_angle_ {"Track Angle", PropertyDataType::DOUBLE};
 
+const Property DBContent::meta_var_x_stddev_ {"X StdDev", PropertyDataType::DOUBLE};
+const Property DBContent::meta_var_y_stddev_ {"Y StdDev", PropertyDataType::DOUBLE};
+const Property DBContent::meta_var_xy_cov_ {"X/Y Covariance", PropertyDataType::DOUBLE};
+const Property DBContent::meta_var_latitude_stddev_ {"Latitude StdDev", PropertyDataType::DOUBLE};
+const Property DBContent::meta_var_longitude_stddev_ {"Longitude StdDev", PropertyDataType::DOUBLE};
+const Property DBContent::meta_var_latlon_cov_ {"Lat/Lon Cov", PropertyDataType::DOUBLE};
+
 const Property DBContent::var_radar_range_ {"Range", PropertyDataType::DOUBLE};
 const Property DBContent::var_radar_azimuth_ {"Azimuth", PropertyDataType::DOUBLE};
 const Property DBContent::var_radar_altitude_ {"Mode C Code", PropertyDataType::FLOAT};

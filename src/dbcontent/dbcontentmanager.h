@@ -179,6 +179,12 @@ public:
     void dsTypeLoadingWanted (const std::string& ds_type, bool wanted);
     bool dsTypeLoadingWanted (const std::string& ds_type);
 
+    bool canGetVariable (const std::string& dbcont_name, const Property& property);
+    dbContent::Variable& getVariable (const std::string& dbcont_name, const Property& property);
+
+    bool metaCanGetVariable (const std::string& dbcont_name, const Property& meta_property);
+    dbContent::Variable& metaGetVariable (const std::string& dbcont_name, const Property& meta_property);
+
 protected:
     COMPASS& compass_;
 

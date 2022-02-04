@@ -73,7 +73,7 @@ void DBOReadDBJob::run()
 
     bool last_buffer;
 
-    while (!done_)
+    while (!obsolete_)
     {
         std::shared_ptr<Buffer> buffer = db_interface_.readDataChunk(dbobject_);
         assert(buffer);
@@ -82,10 +82,7 @@ void DBOReadDBJob::run()
         cnt++;
 
         if (obsolete_)
-        {
-            loginf << "DBOReadDBJob: run: " << dbobject_.name() << ": obsolete after prepared";
             break;
-        }
 
         assert(buffer->dboName() == dbobject_.name());
 
@@ -102,6 +99,9 @@ void DBOReadDBJob::run()
             buffer = nullptr;
         }
 
+        if (obsolete_)
+            break;
+
         if (!view_manager.isProcessingData() || last_buffer) // distribute data
         {
             loginf << "DBOReadDBJob: run: " << dbobject_.name() << ": emitting intermediate read, size " << row_count_;
@@ -109,8 +109,6 @@ void DBOReadDBJob::run()
 
             cached_buffer_ = nullptr;
         }
-        else
-            loginf << "DBOReadDBJob: run: " << dbobject_.name() << ": UGA SKIP SKIP SKIP";
 
         if (last_buffer)
         {
