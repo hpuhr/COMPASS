@@ -258,27 +258,19 @@ void EvaluationData::addTestData (DBContent& object, std::shared_ptr<Buffer> buf
         tst_ground_bit_name_ = dbcontent_man.metaVariable(DBContent::meta_var_ground_bit_.name()).getFor(dbo_name).name();
 
     // speed & track_angle
-    //TODO
-    if (dbo_name == "ADSB")
-    {
-        tst_spd_ground_speed_kts_name_ = "groundspeed_kt";
-        tst_spd_track_angle_deg_name_ = "track_angle_deg";
-    }
-    else if (dbo_name == "MLAT")
-    {
-        tst_spd_x_ms_name_ = "velocity_vx_ms";
-        tst_spd_y_ms_name_ = "velocity_vy_ms";
-    }
-    else if (dbo_name == "Radar")
-    {
-        tst_spd_ground_speed_kts_name_ = "track_groundspeed_kt";
-        tst_spd_track_angle_deg_name_ = "track_heading_deg";
-    }
-    else if (dbo_name == "Tracker" || dbo_name == "RefTraj")
-    {
-        tst_spd_ground_speed_kts_name_ = "groundspeed_kt";
-        tst_spd_track_angle_deg_name_ = "heading_deg";
-    }
+    if (dbcontent_man.metaVariable(DBContent::meta_var_vx_.name()).existsIn(dbo_name))
+        tst_spd_x_ms_name_ = dbcontent_man.metaVariable(DBContent::meta_var_vx_.name()).getFor(dbo_name).name();
+
+    if (dbcontent_man.metaVariable(DBContent::meta_var_vy_.name()).existsIn(dbo_name))
+        tst_spd_y_ms_name_ = dbcontent_man.metaVariable(DBContent::meta_var_vy_.name()).getFor(dbo_name).name();
+
+    if (dbcontent_man.metaVariable(DBContent::meta_var_ground_speed_.name()).existsIn(dbo_name))
+        tst_spd_ground_speed_kts_name_ = dbcontent_man.metaVariable(
+                    DBContent::meta_var_ground_speed_.name()).getFor(dbo_name).name();
+
+    if (dbcontent_man.metaVariable(DBContent::meta_var_track_angle_.name()).existsIn(dbo_name))
+        tst_spd_track_angle_deg_name_ = dbcontent_man.metaVariable(
+                    DBContent::meta_var_track_angle_.name()).getFor(dbo_name).name();
 
     set<unsigned int> active_srcs = eval_man_.activeDataSourcesRef();
     bool use_active_srcs = (eval_man_.dboNameRef() == eval_man_.dboNameTst());
