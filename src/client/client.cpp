@@ -104,8 +104,8 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
              "creates and opens new SQLite3 database with given filename, e.g. '/data/file1.db'")
             ("open_db", po::value<std::string>(&open_sqlite3_db_filename_),
              "opens existing SQLite3 database with given filename, e.g. '/data/file1.db'")
-//            ("import_view_points", po::value<std::string>(&import_view_points_filename),
-//             "imports view points JSON file with given filename, e.g. '/data/file1.json'")
+            ("import_view_points", po::value<std::string>(&import_view_points_filename_),
+             "imports view points JSON file with given filename, e.g. '/data/file1.json'")
             ("import_asterix_file", po::value<std::string>(&import_asterix_filename_),
              "imports ASTERIX file with given filename, e.g. '/data/file1.ff'")
             ("import_asterix_network", po::bool_switch(&import_asterix_network_),
@@ -205,8 +205,8 @@ void Client::run ()
     if (open_sqlite3_db_filename_.size())
         main_window.openSqlite3DB(open_sqlite3_db_filename_);
 
-//    if (import_view_points_filename.size())
-//        task_man.importViewPointsFile(import_view_points_filename);
+    if (import_view_points_filename_.size())
+        main_window.importViewPointsFile(import_view_points_filename_);
 
 //    try
 //    {

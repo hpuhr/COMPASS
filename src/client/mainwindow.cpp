@@ -33,7 +33,8 @@
 #include "taskmanager.h"
 #include "taskmanagerwidget.h"
 #include "viewmanager.h"
-#include "viewpointswidget.h"
+#include "viewpointsimporttask.h"
+#include "viewpointsimporttaskdialog.h"
 #include "managesectorstask.h"
 #include "managesectorstaskdialog.h"
 #include "evaluationmanager.h"
@@ -284,6 +285,12 @@ void MainWindow::createMenus ()
     connect(import_ast_net_action, &QAction::triggered, this, &MainWindow::importAsterixFromNetworkSlot);
     import_menu_->addAction(import_ast_net_action);
 
+    QAction* import_vp_file_action = new QAction(tr("&View Points"));
+    import_vp_file_action->setShortcut(tr("Ctrl+V"));
+    import_vp_file_action->setStatusTip(tr("Import View Points File"));
+    connect(import_vp_file_action, &QAction::triggered, this, &MainWindow::importViewPointsSlot);
+    import_menu_->addAction(import_vp_file_action);
+
     // process menu
 
     process_menu_ = menuBar()->addMenu(tr("&Process"));
@@ -425,10 +432,19 @@ void MainWindow::showViewPointsTab()
     tab_widget_->setCurrentIndex(2);
 }
 
+void MainWindow::importViewPointsFile(const std::string& filename)
+{
+    loginf << "MainWindow: importViewPointsFile: filename '" << filename << "'";
+
+    automatic_tasks_defined_ = true;
+    view_points_import_file_ = true;
+    view_points_import_filename_ = filename;
+}
+
 
 void MainWindow::createAndOpenNewSqlite3DB(const std::string& filename)
 {
-    loginf << "MainWindow: sqlite3CreateNewDB: filename '" << filename << "'";
+    loginf << "MainWindow: createAndOpenNewSqlite3DB: filename '" << filename << "'";
 
     automatic_tasks_defined_ = true;
     sqlite3_create_new_db_ = true;
@@ -437,7 +453,7 @@ void MainWindow::createAndOpenNewSqlite3DB(const std::string& filename)
 
 void MainWindow::openSqlite3DB(const std::string& filename)
 {
-    loginf << "MainWindow: sqlite3OpenDB: filename '" << filename << "'";
+    loginf << "MainWindow: openSqlite3DB: filename '" << filename << "'";
 
     automatic_tasks_defined_ = true;
     sqlite3_open_db_ = true;
@@ -555,61 +571,44 @@ void MainWindow::performAutomaticTasks ()
 
     loginf << "MainWindow: performAutomaticTasks: database opened";
 
-//    // do longer wait on startup for things to settle
-//    boost::posix_time::ptime start_time = boost::posix_time::microsec_clock::local_time();
+    // do longer wait on startup for things to settle
+    boost::posix_time::ptime start_time = boost::posix_time::microsec_clock::local_time();
 
-//    while ((boost::posix_time::microsec_clock::local_time()-start_time).total_milliseconds() < 50)
-//    {
-//        QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
-//        QThread::msleep(1);
-//    }
-//    // does not show widget
-//    //QCoreApplication::processEvents();
+    while ((boost::posix_time::microsec_clock::local_time()-start_time).total_milliseconds() < 50)
+    {
+        QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+        QThread::msleep(1);
+    }
+    // does not show widget
+    //QCoreApplication::processEvents();
 
-//    // does cause application halt
-//    //    while (QCoreApplication::hasPendingEvents())
-//    //        QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+    // does cause application halt
+    //    while (QCoreApplication::hasPendingEvents())
+    //        QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
 
-//    loginf << "MainWindow: performAutomaticTasks: waiting done";
+    loginf << "MainWindow: performAutomaticTasks: waiting done";
 
-//    if (view_points_import_file_)
-//    {
-//        loginf << "MainWindow: performAutomaticTasks: importing view points file '"
-//               << view_points_import_filename_ << "'";
+    if (view_points_import_file_)
+    {
+        loginf << "MainWindow: performAutomaticTasks: importing view points file '"
+               << view_points_import_filename_ << "'";
 
-//        if (!Files::fileExists(view_points_import_filename_))
-//        {
-//            logerr << "MainWindow: performAutomaticTasks: view points file '" << view_points_import_filename_
-//                   << "' does not exist";
-//            return;
-//        }
+        if (!Files::fileExists(view_points_import_filename_))
+        {
+            logerr << "MainWindow: performAutomaticTasks: view points file '" << view_points_import_filename_
+                   << "' does not exist";
+            return;
+        }
 
-//        widget_->setCurrentTask(*view_points_import_task_);
-//        if(widget_->getCurrentTaskName() != view_points_import_task_->name())
-//        {
-//            logerr << "MainWindow: performAutomaticTasks: wrong task '" << widget_->getCurrentTaskName()
-//                   << "' selected, aborting";
-//            return;
-//        }
+        ViewPointsImportTask& vp_import_task = COMPASS::instance().taskManager().viewPointsImportTask();
 
-//        ViewPointsImportTaskWidget* view_points_import_task_widget =
-//                dynamic_cast<ViewPointsImportTaskWidget*>(view_points_import_task_->widget());
-//        assert(view_points_import_task_widget);
+        vp_import_task.importFilename(view_points_import_filename_);
 
-//        view_points_import_task_widget->addFile(view_points_import_filename_);
-//        view_points_import_task_widget->selectFile(view_points_import_filename_);
+        assert(vp_import_task.canRun());
+        vp_import_task.showDoneSummary(false);
 
-//        assert(view_points_import_task_->canImport());
-//        view_points_import_task_->showDoneSummary(false);
-
-//        view_points_import_task_widget->importSlot();
-
-//        while (!view_points_import_task_->finished())
-//        {
-//            QCoreApplication::processEvents();
-//            QThread::msleep(1);
-//        }
-//    }
+        vp_import_task.run();
+    }
 
     assert (!(asterix_import_file_ && asterix_import_network_)); // check done in client
 
@@ -626,9 +625,6 @@ void MainWindow::performAutomaticTasks ()
         }
 
         ASTERIXImportTask& ast_import_task = COMPASS::instance().taskManager().asterixImporterTask();
-
-//        if (!ast_import_task.hasFile(asterix_import_filename_))
-//            ast_import_task.addFile(asterix_import_filename_);
 
         ast_import_task.importFilename(asterix_import_filename_);
 
@@ -1185,7 +1181,7 @@ void MainWindow::importRecentAsterixRecordingSlot()
 
     assert (filename.size());
 
-    COMPASS::instance().taskManager().asterixImporterTask().importFilename(filename); // also adds
+    COMPASS::instance().taskManager().asterixImporterTask().importFilename(filename);
 
     updateMenus();
 
@@ -1199,6 +1195,20 @@ void MainWindow::importAsterixFromNetworkSlot()
     COMPASS::instance().taskManager().asterixImporterTask().importNetwork();
 
     COMPASS::instance().taskManager().asterixImporterTask().dialog()->show();
+}
+
+void MainWindow::importViewPointsSlot()
+{
+    string filename = QFileDialog::getOpenFileName(this, "Import View Points", "", "*.json").toStdString();
+
+    if (filename.size() > 0)
+    {
+        COMPASS::instance().taskManager().viewPointsImportTask().importFilename(filename);
+
+        updateMenus();
+
+        COMPASS::instance().taskManager().viewPointsImportTask().dialog()->show();
+    }
 }
 
 void MainWindow::calculateAssociationsARTASSlot()
