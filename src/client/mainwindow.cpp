@@ -517,6 +517,8 @@ void MainWindow::performAutomaticTasks ()
         return;
     }
 
+    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+
     if (sqlite3_create_new_db_)
     {
         loginf << "MainWindow: performAutomaticTasks: creating and opening new sqlite3 database '"
@@ -539,6 +541,7 @@ void MainWindow::performAutomaticTasks ()
         {
             logerr << "MainWindow: performAutomaticTasks: sqlite3 database '" << sqlite3_open_db_filename_
                    << "' does not exist";
+            QApplication::restoreOverrideCursor();
             return;
         }
 
@@ -547,6 +550,8 @@ void MainWindow::performAutomaticTasks ()
         updateBottomWidget();
         updateMenus();
     }
+
+    QApplication::restoreOverrideCursor();
 
     loginf << "MainWindow: performAutomaticTasks: database opened";
 
@@ -1075,10 +1080,14 @@ void MainWindow::openExistingDBSlot()
 
     if (filename.size() > 0)
     {
+        QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+
         COMPASS::instance().openDBFile(filename);
 
         updateBottomWidget();
         updateMenus();
+
+        QApplication::restoreOverrideCursor();
     }
 }
 
@@ -1093,10 +1102,14 @@ void MainWindow::openRecentDBSlot()
 
     assert (filename.size());
 
+    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+
     COMPASS::instance().openDBFile(filename);
 
     updateBottomWidget();
     updateMenus();
+
+    QApplication::restoreOverrideCursor();
 }
 
 void MainWindow::clearExistingDBsSlot()

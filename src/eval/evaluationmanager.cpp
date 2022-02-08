@@ -184,7 +184,6 @@ void EvaluationManager::loadData ()
 
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
-
     // remove previous stuff
     if (viewable_data_cfg_)
     {
@@ -684,47 +683,45 @@ void EvaluationManager::addVariables (const std::string dbo_name, dbContent::Var
 
     // TODO add required variables from standard requirements
 
-    DBContentManager& object_man = COMPASS::instance().dbContentManager();
+    DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
 
-    read_set.add(object_man.metaVariable(DBContent::meta_var_rec_num_.name()).getFor(dbo_name));
-    read_set.add(object_man.metaVariable(DBContent::meta_var_datasource_id_.name()).getFor(dbo_name));
-    read_set.add(object_man.metaVariable(DBContent::meta_var_tod_.name()).getFor(dbo_name));
-    read_set.add(object_man.metaVariable(DBContent::meta_var_latitude_.name()).getFor(dbo_name));
-    read_set.add(object_man.metaVariable(DBContent::meta_var_longitude_.name()).getFor(dbo_name));
+    read_set.add(dbcontent_man.metaVariable(DBContent::meta_var_rec_num_.name()).getFor(dbo_name));
+    read_set.add(dbcontent_man.metaVariable(DBContent::meta_var_datasource_id_.name()).getFor(dbo_name));
+    read_set.add(dbcontent_man.metaVariable(DBContent::meta_var_tod_.name()).getFor(dbo_name));
+    read_set.add(dbcontent_man.metaVariable(DBContent::meta_var_latitude_.name()).getFor(dbo_name));
+    read_set.add(dbcontent_man.metaVariable(DBContent::meta_var_longitude_.name()).getFor(dbo_name));
 
-    if (object_man.metaVariable(DBContent::meta_var_ta_.name()).existsIn(dbo_name))
-        read_set.add(object_man.metaVariable(DBContent::meta_var_ta_.name()).getFor(dbo_name));
+    if (dbcontent_man.metaVariable(DBContent::meta_var_ta_.name()).existsIn(dbo_name))
+        read_set.add(dbcontent_man.metaVariable(DBContent::meta_var_ta_.name()).getFor(dbo_name));
 
     // flight level
-    read_set.add(object_man.metaVariable(DBContent::meta_var_mc_.name()).getFor(dbo_name));
+    read_set.add(dbcontent_man.metaVariable(DBContent::meta_var_mc_.name()).getFor(dbo_name));
 
-    if (object_man.metaVariable(DBContent::meta_var_mc_g_.name()).existsIn(dbo_name))
-        read_set.add(object_man.metaVariable(DBContent::meta_var_mc_g_.name()).getFor(dbo_name));
+    if (dbcontent_man.metaVariable(DBContent::meta_var_mc_g_.name()).existsIn(dbo_name))
+        read_set.add(dbcontent_man.metaVariable(DBContent::meta_var_mc_g_.name()).getFor(dbo_name));
 
-    if (object_man.metaVariable(DBContent::meta_var_mc_v_.name()).existsIn(dbo_name))
-        read_set.add(object_man.metaVariable(DBContent::meta_var_mc_v_.name()).getFor(dbo_name));
+    if (dbcontent_man.metaVariable(DBContent::meta_var_mc_v_.name()).existsIn(dbo_name))
+        read_set.add(dbcontent_man.metaVariable(DBContent::meta_var_mc_v_.name()).getFor(dbo_name));
 
     if (dbo_name_ref_ == dbo_name && dbo_name_ref_ == "CAT062")
-        read_set.add(object_man.dbContent("CAT062").variable(DBContent::var_cat062_baro_alt_.name()));
+        read_set.add(dbcontent_man.dbContent("CAT062").variable(DBContent::var_cat062_baro_alt_.name()));
 
     // m3a
-    read_set.add(object_man.metaVariable(DBContent::meta_var_m3a_.name()).getFor(dbo_name));
+    read_set.add(dbcontent_man.metaVariable(DBContent::meta_var_m3a_.name()).getFor(dbo_name));
 
-    if (object_man.metaVariable(DBContent::meta_var_m3a_g_.name()).existsIn(dbo_name))
-        read_set.add(object_man.metaVariable(DBContent::meta_var_m3a_g_.name()).getFor(dbo_name));
+    if (dbcontent_man.metaVariable(DBContent::meta_var_m3a_g_.name()).existsIn(dbo_name))
+        read_set.add(dbcontent_man.metaVariable(DBContent::meta_var_m3a_g_.name()).getFor(dbo_name));
 
-    if (object_man.metaVariable(DBContent::meta_var_m3a_v_.name()).existsIn(dbo_name))
-        read_set.add(object_man.metaVariable(DBContent::meta_var_m3a_v_.name()).getFor(dbo_name));
+    if (dbcontent_man.metaVariable(DBContent::meta_var_m3a_v_.name()).existsIn(dbo_name))
+        read_set.add(dbcontent_man.metaVariable(DBContent::meta_var_m3a_v_.name()).getFor(dbo_name));
 
     // tn
-    if (object_man.metaVariable(DBContent::meta_var_track_num_.name()).existsIn(dbo_name))
-        read_set.add(object_man.metaVariable(DBContent::meta_var_track_num_.name()).getFor(dbo_name));
-
-    DBContent& db_object = object_man.dbContent(dbo_name);
+    if (dbcontent_man.metaVariable(DBContent::meta_var_track_num_.name()).existsIn(dbo_name))
+        read_set.add(dbcontent_man.metaVariable(DBContent::meta_var_track_num_.name()).getFor(dbo_name));
 
     // ground bit
-    if (object_man.metaVariable(DBContent::meta_var_ground_bit_.name()).existsIn(dbo_name))
-        read_set.add(object_man.metaVariable(DBContent::meta_var_ground_bit_.name()).getFor(dbo_name));
+    if (dbcontent_man.metaVariable(DBContent::meta_var_ground_bit_.name()).existsIn(dbo_name))
+        read_set.add(dbcontent_man.metaVariable(DBContent::meta_var_ground_bit_.name()).getFor(dbo_name));
 
     //    if (dbo_name == "ADSB")
     //    {
@@ -736,27 +733,17 @@ void EvaluationManager::addVariables (const std::string dbo_name, dbContent::Var
 
     // speed & heading
 
-    // TODO
+    if (dbcontent_man.metaVariable(DBContent::meta_var_vx_.name()).existsIn(dbo_name))
+        read_set.add(dbcontent_man.metaVariable(DBContent::meta_var_vx_.name()).getFor(dbo_name));
 
-//    if (dbo_name == "ADSB")
-//    {
-//        read_set.add(db_object.variable("groundspeed_kt")); // double
-//        read_set.add(db_object.variable("track_angle_deg")); // double
-//    }
-//    else if (dbo_name == "MLAT")
-//    {
-//        read_set.add(db_object.variable("velocity_vx_ms")); // double
-//        read_set.add(db_object.variable("velocity_vy_ms")); // double
-//    }
-//    else if (dbo_name == "Radar")
-//    {
-//        read_set.add(db_object.variable("track_groundspeed_kt")); // double
-//        read_set.add(db_object.variable("track_heading_deg")); // double
-//    }
-//    else if (dbo_name == "Tracker" || dbo_name == "RefTraj")
-//    {
-//        read_set.add(db_object.variable("groundspeed_kt")); // double
-//        read_set.add(db_object.variable("heading_deg")); // double
+    if (dbcontent_man.metaVariable(DBContent::meta_var_vy_.name()).existsIn(dbo_name))
+        read_set.add(dbcontent_man.metaVariable(DBContent::meta_var_vy_.name()).getFor(dbo_name));
+
+    if (dbcontent_man.metaVariable(DBContent::meta_var_ground_speed_.name()).existsIn(dbo_name))
+        read_set.add(dbcontent_man.metaVariable(DBContent::meta_var_ground_speed_.name()).getFor(dbo_name));
+
+    if (dbcontent_man.metaVariable(DBContent::meta_var_track_angle_.name()).existsIn(dbo_name))
+        read_set.add(dbcontent_man.metaVariable(DBContent::meta_var_track_angle_.name()).getFor(dbo_name));
 
 //        // for mono sensor + lu sensor
 
@@ -764,8 +751,6 @@ void EvaluationManager::addVariables (const std::string dbo_name, dbContent::Var
 //        read_set.add(db_object.variable("track_lu_ds_id")); // int
 //    }
 
-    //        read_set.add(object_man.metaVariable("groundspeed_kt").getFor(dbo_name_ref_));
-    //        read_set.add(object_man.metaVariable("heading_deg").getFor(dbo_name_ref_));
 }
 
 EvaluationManager::~EvaluationManager()
