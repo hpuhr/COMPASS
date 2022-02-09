@@ -132,7 +132,7 @@ void LabelDefinition::updateReadList()
 
 void LabelDefinition::checkLabelDefinitions()
 {
-    loginf << "DBOLabelDefinition: checkLabelDefinitions: dbo " << db_object_.name();
+    loginf << "LabelDefinition: checkLabelDefinitions: dbo " << db_object_.name();
 
     std::string variable_name;
     bool show = false;
@@ -150,7 +150,7 @@ void LabelDefinition::checkLabelDefinitions()
             prefix = "";
             suffix = "";
 
-            logdbg << "DBOLabelDefinition: checkSubConfigurables: new var " << variable_name;
+            logdbg << "LabelDefinition: checkSubConfigurables: new var " << variable_name;
 
             if (dbo_man_.metaVariable(DBContent::meta_var_datasource_id_.name()).existsIn(dbo_name)
                     && variable_name == dbo_man_.metaVariable(
@@ -219,20 +219,20 @@ void LabelDefinition::generateSubConfigurable(const std::string& class_id,
 {
     if (class_id == "LabelEntry")
     {
-        logdbg << "DBOLabelDefinition: generateSubConfigurable: instance_id " << instance_id;
+        logdbg << "LabelDefinition: generateSubConfigurable: instance_id " << instance_id;
 
         LabelEntry* entry = new LabelEntry(class_id, instance_id, this);
         assert(entries_.find(entry->variableName()) == entries_.end());
         entries_[entry->variableName()] = entry;
     }
     else
-        throw std::runtime_error("DBOLabelDefinition: generateSubConfigurable: unknown class_id " +
+        throw std::runtime_error("LabelDefinition: generateSubConfigurable: unknown class_id " +
                                  class_id);
 }
 
 void LabelDefinition::checkSubConfigurables()
 {
-    logdbg << "DBOLabelDefinition: checkSubConfigurables: object " << db_object_.name();
+    logdbg << "LabelDefinition: checkSubConfigurables: object " << db_object_.name();
 }
 LabelEntry& LabelDefinition::entry(const std::string& variable_name)
 {
@@ -417,7 +417,7 @@ std::map<unsigned int, std::string> LabelDefinition::generateLabels(std::vector<
             }
             else
                 throw std::domain_error(
-                        "DBOLabelDefinition: generateLabels: unknown property data type");
+                        "LabelDefinition: generateLabels: unknown property data type");
 
             if (!null)
             {

@@ -173,7 +173,7 @@ void DBContent::checkSubConfigurables()
 
     if (!label_definition_)
     {
-        generateSubConfigurable("DBOLabelDefinition", "DBOLabelDefinition0");
+        generateSubConfigurable("LabelDefinition", "LabelDefinition0");
         assert(label_definition_);
     }
 }

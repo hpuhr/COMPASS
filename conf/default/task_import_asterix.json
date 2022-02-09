@@ -1,11 +1,12 @@
 {
     "parameters": {
-        "current_file_framing": "ioss",
+        "current_file_framing": "",
         "current_framing": "",
         "debug_jasterix": false,
         "file_list": [
             "/home/sk/data/austria/hello_world/acg_helloworld_fake_ID.ff",
-            "/home/sk/data/austria/live_test/20200905_4h_all.ff"
+            "/home/sk/data/austria/live_test/20200905_4h_all.ff",
+            "/home/sk/data/austria/loww/2021/CSS34_CAT010_20210119.netto"
         ],
         "limit_ram": false,
         "override_sac_new": 120,
@@ -144,6 +145,11 @@
                         "class_id": "ASTERIXJSONParser",
                         "instance_id": "CAT001",
                         "path": "task_import_asterix_cat001.json"
+                    },
+                    {
+                        "class_id": "ASTERIXJSONParser",
+                        "instance_id": "CAT010",
+                        "path": "task_import_asterix_cat010.json"
                     },
                     {
                         "class_id": "ASTERIXJSONParser",

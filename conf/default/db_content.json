@@ -17,6 +17,11 @@
         },
         {
             "class_id": "DBContent",
+            "instance_id": "CAT010",
+            "path": "db_content_cat010.json"
+        },
+        {
+            "class_id": "DBContent",
             "instance_id": "CAT020",
             "path": "db_content_cat020.json"
         },
