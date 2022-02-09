@@ -42,477 +42,6 @@
         }
     ],
     "sub_configs": {
-        "ConfigurationDataSource": {
-            "ConfigurationDataSourceADSB0": {
-                "parameters": {
-                    "ds_type": "ADSB",
-                    "has_short_name": true,
-                    "info": {
-                        "network_lines": [
-                            "239.192.31.24:8600",
-                            "239.192.31.25:8600"
-                        ]
-                    },
-                    "name": "AWAM ADSB",
-                    "sac": 50,
-                    "short_name": "WADS",
-                    "sic": 80
-                }
-            },
-            "ConfigurationDataSourceMLAT0": {
-                "parameters": {
-                    "ds_type": "MLAT",
-                    "has_short_name": true,
-                    "info": {
-                        "network_lines": [
-                            "239.192.21.24:8600",
-                            "239.192.21.25:8600"
-                        ]
-                    },
-                    "name": "AWAM VIE",
-                    "sac": 50,
-                    "short_name": "WVIE",
-                    "sic": 70
-                }
-            },
-            "ConfigurationDataSourceMLAT1": {
-                "parameters": {
-                    "ds_type": "MLAT",
-                    "has_short_name": true,
-                    "info": {
-                        "network_lines": [
-                            "239.192.22.24:8600",
-                            "239.192.22.25:8600"
-                        ]
-                    },
-                    "name": "AWAM LNZ",
-                    "sac": 50,
-                    "short_name": "WLNZ",
-                    "sic": 71
-                }
-            },
-            "ConfigurationDataSourceMLAT2": {
-                "parameters": {
-                    "ds_type": "MLAT",
-                    "has_short_name": true,
-                    "info": {
-                        "network_lines": [
-                            "239.192.23.24:8600",
-                            "239.192.23.25:8600"
-                        ]
-                    },
-                    "name": "AWAM SBG",
-                    "sac": 50,
-                    "short_name": "WSBG",
-                    "sic": 72
-                }
-            },
-            "ConfigurationDataSourceMLAT3": {
-                "parameters": {
-                    "ds_type": "MLAT",
-                    "has_short_name": true,
-                    "info": {
-                        "network_lines": [
-                            "239.192.24.24:8600",
-                            "239.192.24.25:8600"
-                        ]
-                    },
-                    "name": "AWAM INN",
-                    "sac": 50,
-                    "short_name": "WINN",
-                    "sic": 73
-                }
-            },
-            "ConfigurationDataSourceMLAT4": {
-                "parameters": {
-                    "ds_type": "MLAT",
-                    "has_short_name": true,
-                    "info": {
-                        "network_lines": [
-                            "239.192.25.24:8600",
-                            "239.192.25.25:8600"
-                        ]
-                    },
-                    "name": "AWAM KFT",
-                    "sac": 50,
-                    "short_name": "WKFT",
-                    "sic": 74
-                }
-            },
-            "ConfigurationDataSourceMLAT5": {
-                "parameters": {
-                    "ds_type": "MLAT",
-                    "has_short_name": true,
-                    "info": {
-                        "network_lines": [
-                            "239.192.26.24:8600",
-                            "239.192.26.25:8600"
-                        ]
-                    },
-                    "name": "AWAM GRZ",
-                    "sac": 50,
-                    "short_name": "WGRZ",
-                    "sic": 75
-                }
-            },
-            "ConfigurationDataSourceMLAT6": {
-                "parameters": {
-                    "ds_type": "MLAT",
-                    "has_short_name": true,
-                    "info": {
-                        "network_lines": [
-                            "239.192.27.24:8600",
-                            "239.192.27.25:8600"
-                        ]
-                    },
-                    "name": "AWAM West",
-                    "sac": 50,
-                    "short_name": "WWES",
-                    "sic": 76
-                }
-            },
-            "ConfigurationDataSourceMLAT7": {
-                "parameters": {
-                    "ds_type": "MLAT",
-                    "has_short_name": true,
-                    "info": {
-                        "network_lines": [
-                            "239.192.28.24:8600",
-                            "239.192.28.25:8600"
-                        ]
-                    },
-                    "name": "AWAM East",
-                    "sac": 50,
-                    "short_name": "WEAS",
-                    "sic": 77
-                }
-            },
-            "ConfigurationDataSourceMLAT8": {
-                "parameters": {
-                    "ds_type": "MLAT",
-                    "has_short_name": true,
-                    "info": {
-                        "network_lines": [
-                            "239.192.29.24:8600",
-                            "239.192.29.25:8600"
-                        ]
-                    },
-                    "name": "AWAM Upper",
-                    "sac": 50,
-                    "short_name": "WUPP",
-                    "sic": 78
-                }
-            },
-            "ConfigurationDataSourceMLAT9": {
-                "parameters": {
-                    "ds_type": "MLAT",
-                    "has_short_name": true,
-                    "info": {
-                        "network_lines": [
-                            "239.192.32.24:8600",
-                            "239.192.32.25:8600"
-                        ]
-                    },
-                    "name": "AWAM GND",
-                    "sac": 50,
-                    "short_name": "WGND",
-                    "sic": 81
-                }
-            },
-            "ConfigurationDataSourceRadar0": {
-                "parameters": {
-                    "ds_type": "Radar",
-                    "has_short_name": true,
-                    "info": {
-                        "altitude": 667.0,
-                        "latitude": 48.2607138,
-                        "longitude": 17.1632861,
-                        "network_lines": [
-                            "239.192.9.18:8600",
-                            "239.192.9.15:8600"
-                        ]
-                    },
-                    "name": "Javornik",
-                    "sac": 48,
-                    "short_name": "JAV",
-                    "sic": 1
-                }
-            },
-            "ConfigurationDataSourceRadar1": {
-                "parameters": {
-                    "ds_type": "Radar",
-                    "has_short_name": true,
-                    "info": {
-                        "altitude": 323.0,
-                        "latitude": 48.2390277777778,
-                        "longitude": 14.1821888888889,
-                        "network_lines": [
-                            "239.192.5.18:8600",
-                            "239.192.5.14:8600",
-                            "239.192.5.15:8600",
-                            "239.192.5.21:8600"
-                        ]
-                    },
-                    "name": "Linz Mode-S",
-                    "sac": 50,
-                    "short_name": "LNZ",
-                    "sic": 0
-                }
-            },
-            "ConfigurationDataSourceRadar10": {
-                "parameters": {
-                    "ds_type": "Radar",
-                    "has_short_name": true,
-                    "info": {
-                        "altitude": 280.0,
-                        "latitude": 48.1043694444,
-                        "longitude": 16.560975,
-                        "network_lines": [
-                            "239.192.4.18:8600",
-                            "239.192.4.14:8600",
-                            "239.192.4.15:8600",
-                            "239.192.4.21:8600"
-                        ]
-                    },
-                    "name": "Wien Schwechat",
-                    "sac": 50,
-                    "short_name": "VIE",
-                    "sic": 11
-                }
-            },
-            "ConfigurationDataSourceRadar11": {
-                "parameters": {
-                    "ds_type": "Radar",
-                    "has_short_name": true,
-                    "info": {
-                        "altitude": 880.0,
-                        "latitude": 49.6596444444,
-                        "longitude": 16.1333916667,
-                        "network_lines": [
-                            "239.192.8.18:8600",
-                            "239.192.8.15:8600"
-                        ]
-                    },
-                    "name": "Bukop",
-                    "sac": 49,
-                    "short_name": "BUK",
-                    "sic": 144
-                }
-            },
-            "ConfigurationDataSourceRadar12": {
-                "parameters": {
-                    "ds_type": "Radar",
-                    "has_short_name": true,
-                    "info": {
-                        "altitude": 587.0,
-                        "latitude": 48.5769972222,
-                        "longitude": 16.3956305556,
-                        "network_lines": [
-                            "224.9.2.252:15009"
-                        ]
-                    },
-                    "name": "Buschberg",
-                    "sac": 50,
-                    "short_name": "Bub",
-                    "sic": 9
-                }
-            },
-            "ConfigurationDataSourceRadar13": {
-                "parameters": {
-                    "ds_type": "Radar",
-                    "has_short_name": true,
-                    "info": {
-                        "altitude": 410.0,
-                        "latitude": 46.9866777778,
-                        "longitude": 15.4319916667,
-                        "network_lines": [
-                            "224.9.2.252:15012"
-                        ]
-                    },
-                    "name": "Graz",
-                    "sac": 50,
-                    "short_name": "Grz",
-                    "sic": 12
-                }
-            },
-            "ConfigurationDataSourceRadar2": {
-                "parameters": {
-                    "ds_type": "Radar",
-                    "has_short_name": true,
-                    "info": {
-                        "altitude": 226.0,
-                        "latitude": 48.1005611111111,
-                        "longitude": 16.5778083333333,
-                        "network_lines": [
-                            "239.192.13.18:8600",
-                            "239.192.13.14:8600",
-                            "239.192.13.15:8600",
-                            "239.192.13.21:8600"
-                        ]
-                    },
-                    "name": "Wien Mode-S",
-                    "sac": 50,
-                    "short_name": "VIS",
-                    "sic": 13
-                }
-            },
-            "ConfigurationDataSourceRadar3": {
-                "parameters": {
-                    "ds_type": "Radar",
-                    "has_short_name": true,
-                    "info": {
-                        "altitude": 2203.0,
-                        "latitude": 46.7871083333,
-                        "longitude": 14.9713333333,
-                        "network_lines": [
-                            "239.192.2.18:8600",
-                            "239.192.2.14:8600",
-                            "239.192.2.15:8600",
-                            "239.192.2.21:8600"
-                        ]
-                    },
-                    "name": "Koralpe Mode-S",
-                    "sac": 50,
-                    "short_name": "KOR",
-                    "sic": 20
-                }
-            },
-            "ConfigurationDataSourceRadar4": {
-                "parameters": {
-                    "ds_type": "Radar",
-                    "has_short_name": true,
-                    "info": {
-                        "altitude": 672.0,
-                        "latitude": 47.1798611111111,
-                        "longitude": 14.7498611111111,
-                        "network_lines": [
-                            "239.192.12.18:8600",
-                            "239.192.12.14:8600",
-                            "239.192.12.15:8600",
-                            "239.192.12.21:8600"
-                        ]
-                    },
-                    "name": "Zeltweg",
-                    "sac": 50,
-                    "short_name": "ZWG",
-                    "sic": 48
-                }
-            },
-            "ConfigurationDataSourceRadar5": {
-                "parameters": {
-                    "ds_type": "Radar",
-                    "has_short_name": true,
-                    "info": {
-                        "altitude": 461.0,
-                        "latitude": 48.311075,
-                        "longitude": 11.8144611111111,
-                        "network_lines": [
-                            "239.192.11.18:8600",
-                            "239.192.11.15:8600"
-                        ]
-                    },
-                    "name": "Munich South",
-                    "sac": 98,
-                    "short_name": "MUS",
-                    "sic": 16
-                }
-            },
-            "ConfigurationDataSourceRadar6": {
-                "parameters": {
-                    "ds_type": "Radar",
-                    "has_short_name": true,
-                    "info": {
-                        "altitude": 821.0,
-                        "latitude": 45.9309333333,
-                        "longitude": 14.2981333333,
-                        "network_lines": [
-                            "239.192.10.18:8600",
-                            "239.192.10.15:8600"
-                        ]
-                    },
-                    "name": "Vrhnika",
-                    "sac": 147,
-                    "short_name": "VRH",
-                    "sic": 9
-                }
-            },
-            "ConfigurationDataSourceRadar7": {
-                "parameters": {
-                    "ds_type": "Radar",
-                    "has_short_name": true,
-                    "info": {
-                        "altitude": 859.0,
-                        "latitude": 48.4708583333,
-                        "longitude": 13.6853194444,
-                        "network_lines": [
-                            "239.192.7.18:8600",
-                            "239.192.7.14:8600",
-                            "239.192.7.15:8600",
-                            "239.192.7.21:8600"
-                        ]
-                    },
-                    "name": "Feichtberg Mode-S",
-                    "sac": 50,
-                    "short_name": "FEI",
-                    "sic": 10
-                }
-            },
-            "ConfigurationDataSourceRadar8": {
-                "parameters": {
-                    "ds_type": "Radar",
-                    "has_short_name": true,
-                    "info": {
-                        "altitude": 461.0,
-                        "latitude": 48.3822916666667,
-                        "longitude": 11.8014277777778,
-                        "network_lines": [
-                            "239.192.3.18:8600",
-                            "239.192.3.15:8600"
-                        ]
-                    },
-                    "name": "Munich Nord",
-                    "sac": 98,
-                    "short_name": "MUN",
-                    "sic": 15
-                }
-            },
-            "ConfigurationDataSourceRadar9": {
-                "parameters": {
-                    "ds_type": "Radar",
-                    "has_short_name": true,
-                    "info": {
-                        "altitude": 870.0,
-                        "latitude": 47.9181333333333,
-                        "longitude": 13.0046166666667,
-                        "network_lines": [
-                            "239.192.6.18:8600",
-                            "239.192.6.14:8600",
-                            "239.192.6.15:8600",
-                            "239.192.6.21:8600"
-                        ]
-                    },
-                    "name": "Salzburg",
-                    "sac": 50,
-                    "short_name": "SBG",
-                    "sic": 7
-                }
-            },
-            "ConfigurationDataSourceTracker1": {
-                "parameters": {
-                    "ds_type": "Tracker",
-                    "has_short_name": false,
-                    "info": {
-                        "network_lines": [
-                            "239.204.0.8:8602"
-                        ]
-                    },
-                    "name": "ARTAS",
-                    "sac": 50,
-                    "short_name": "",
-                    "sic": 240
-                }
-            }
-        },
         "MetaVariable": {
             "MetaVariableARTAS Hash0": {
                 "parameters": {
@@ -790,10 +319,25 @@
                                 "variable_name": "Ground Bit"
                             }
                         },
-                        "VariableDefinitionCAT062Ground Speed ADD0": {
+                        "VariableDefinitionCAT062Surface Target0": {
                             "parameters": {
                                 "dbcontent_name": "CAT062",
-                                "variable_name": "Ground Speed ADD"
+                                "variable_name": "Surface Target"
+                            }
+                        }
+                    }
+                }
+            },
+            "MetaVariableLatLong Cov0": {
+                "parameters": {
+                    "name": "Lat/Long Cov"
+                },
+                "sub_configs": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT020LatLong Cov0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT020",
+                                "variable_name": "Lat/Lon Cov"
                             }
                         }
                     }
@@ -1964,6 +1508,27 @@
                             "parameters": {
                                 "dbcontent_name": "CAT048",
                                 "variable_name": "X"
+                            }
+                        }
+                    }
+                }
+            },
+            "MetaVariableXY Cov0": {
+                "parameters": {
+                    "name": "X/Y Covariance"
+                },
+                "sub_configs": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT020X/Y Cov0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT020",
+                                "variable_name": "X/Y StdDev Cov"
+                            }
+                        },
+                        "VariableDefinitionCAT062X/Y Cov0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT062",
+                                "variable_name": "X/Y Covariance"
                             }
                         }
                     }
