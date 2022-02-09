@@ -573,9 +573,11 @@ void ViewPointsTableModel::exportViewPoints (const std::string& filename)
 
     json data;
 
-    data["view_point_context"] = json::object();
-    json& context = data.at("view_point_context");
-    context["version"] = "0.2";
+    data["content_type"] = "view_points";
+    data["content_version"] = "0.2";
+
+    //data["view_point_context"] = json::object();
+    //json& context = data.at("view_point_context");
 
     data["view_points"] = json::array();
     json& view_points = data.at("view_points");

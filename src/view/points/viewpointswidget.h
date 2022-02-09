@@ -63,6 +63,8 @@ public:
     ViewPointsWidget(ViewManager& view_manager);
     virtual ~ViewPointsWidget();
 
+    void loadViewPoints();
+
     void resizeColumnsToContents();
 
     //    void selectNextOpen();

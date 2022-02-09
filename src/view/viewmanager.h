@@ -62,6 +62,7 @@ class ViewManager : public QObject, public Configurable
     virtual ~ViewManager();
 
     void init(QTabWidget* tab_widget);
+    void loadViewPoints();
     void close();
 
     void clearDataInViews();

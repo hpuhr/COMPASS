@@ -101,6 +101,13 @@ void ViewManager::init(QTabWidget* tab_widget)
     createSubConfigurables();
 }
 
+
+void ViewManager::loadViewPoints()
+{
+    assert (view_points_widget_);
+    view_points_widget_->loadViewPoints();
+}
+
 void ViewManager::close()
 {
     loginf << "ViewManager: close";

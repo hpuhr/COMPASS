@@ -154,6 +154,18 @@ ViewPointsWidget::~ViewPointsWidget()
 {
 }
 
+void ViewPointsWidget::loadViewPoints()
+{
+    loginf << "ViewPointsWidget: loadViewPoints";
+
+    assert (table_model_);
+    table_model_->loadViewPoints();
+
+    assert (table_view_);
+    table_view_->resizeColumnsToContents();
+    table_view_->resizeRowsToContents();
+}
+
 
 void ViewPointsWidget::resizeColumnsToContents()
 {
@@ -391,12 +403,7 @@ void ViewPointsWidget::databaseOpenedSlot()
 {
     loginf << "ViewPointsWidget: databaseOpenedSlot";
 
-    assert (table_model_);
-    table_model_->loadViewPoints();
-
-    assert (table_view_);
-    table_view_->resizeColumnsToContents();
-    table_view_->resizeRowsToContents();
+    loadViewPoints();
 }
 
 void ViewPointsWidget::databaseClosedSlot()
