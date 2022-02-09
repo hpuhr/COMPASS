@@ -111,9 +111,16 @@ public:
 
     void saveDBDataSources();
 
-    bool loadingWanted (const std::string& dbo_name);
-    bool hasDSFilter (const std::string& dbo_name);
-    std::vector<unsigned int> unfilteredDS (const std::string& dbo_name); // DS IDs
+    bool dsTypeFiltered();
+    std::set<std::string> wantedDSTypes();
+    void dsTypeLoadingWanted (const std::string& ds_type, bool wanted);
+    bool dsTypeLoadingWanted (const std::string& ds_type);
+    void setLoadDSTypes (bool loading_wanted);
+    void setLoadOnlyDSTypes (std::set<std::string> ds_types);
+
+    bool loadingWanted (const std::string& dbcontent_name);
+    bool hasDSFilter (const std::string& dbcontent_name);
+    std::vector<unsigned int> unfilteredDS (const std::string& dbcontent_name); // DS IDs
 
     void setLoadDataSources (bool loading_wanted);
     void setLoadOnlyDataSources (std::set<unsigned int> ds_ids);
@@ -175,9 +182,6 @@ public:
     void maxRecordNumber(unsigned int value);
 
     const std::map<std::string, std::shared_ptr<Buffer>>& data() const;
-
-    void dsTypeLoadingWanted (const std::string& ds_type, bool wanted);
-    bool dsTypeLoadingWanted (const std::string& ds_type);
 
     bool canGetVariable (const std::string& dbcont_name, const Property& property);
     dbContent::Variable& getVariable (const std::string& dbcont_name, const Property& property);

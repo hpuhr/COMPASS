@@ -242,8 +242,8 @@ void ViewManager::setCurrentViewPoint (const ViewableDataConfig* viewable)
 
     view_point_data_selected_ = false;
 
-    loginf << "ViewManager: setCurrentViewPoint: setting current view point"; // << " data: '"
-    //<< view_points_widget_->tableModel()->viewPoint(current_view_point_).data().dump(4) << "'";
+    loginf << "ViewManager: setCurrentViewPoint: setting current view point data: '"
+    << viewable->data().dump(4) << "'";
 
     emit showViewPointSignal(current_viewable_);
 

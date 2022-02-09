@@ -39,6 +39,24 @@ ViewPointsTableModel::ViewPointsTableModel(ViewManager& view_manager)
 {
     table_columns_ = default_table_columns_;
 
+    open_icon_ = QIcon(Files::getIconFilepath("not_recommended.png").c_str());
+    closed_icon_ = QIcon(Files::getIconFilepath("not_todo.png").c_str());
+    todo_icon_ = QIcon(Files::getIconFilepath("todo.png").c_str());
+    unknown_icon_ = QIcon(Files::getIconFilepath("todo_maybe.png").c_str());
+}
+
+//ViewPointsTableModel::~ViewPointsTableModel()
+//{
+
+//}
+
+
+void ViewPointsTableModel::loadViewPoints()
+{
+    loginf << "ViewPointsTableModel: loadViewPoints";
+
+    beginResetModel();
+
     // load view points
     if (COMPASS::instance().interface().existsViewPointsTable())
     {
@@ -61,16 +79,22 @@ ViewPointsTableModel::ViewPointsTableModel(ViewManager& view_manager)
     updateTypes();
     updateStatuses();
 
-    open_icon_ = QIcon(Files::getIconFilepath("not_recommended.png").c_str());
-    closed_icon_ = QIcon(Files::getIconFilepath("not_todo.png").c_str());
-    todo_icon_ = QIcon(Files::getIconFilepath("todo.png").c_str());
-    unknown_icon_ = QIcon(Files::getIconFilepath("todo_maybe.png").c_str());
+    endResetModel();
 }
+void ViewPointsTableModel::clearViewPoints()
+{
+    loginf << "ViewPointsTableModel: clearViewPoints";
 
-//ViewPointsTableModel::~ViewPointsTableModel()
-//{
+    beginResetModel();
 
-//}
+    view_points_.clear();
+
+    table_columns_ = default_table_columns_;
+    types_.clear();
+    statuses_.clear();
+
+    endResetModel();
+}
 
 int ViewPointsTableModel::rowCount(const QModelIndex& parent) const
 {

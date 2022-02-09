@@ -362,37 +362,37 @@ void DBContentManager::clearOrderVariable()
     order_variable_name_ = "";
 }
 
-bool DBContentManager::loadingWanted (const std::string& dbo_name)
+bool DBContentManager::loadingWanted (const std::string& dbcontent_name)
 {
     for (auto& ds_it : db_data_sources_)
     {
-        if (dsTypeLoadingWanted(ds_it->dsType()) && ds_it->loadingWanted() && ds_it->hasNumInserted(dbo_name))
+        if (dsTypeLoadingWanted(ds_it->dsType()) && ds_it->loadingWanted() && ds_it->hasNumInserted(dbcontent_name))
             return true;
     }
 
     return false;
 }
 
-bool DBContentManager::hasDSFilter (const std::string& dbo_name)
+bool DBContentManager::hasDSFilter (const std::string& dbcontent_name)
 {
     for (auto& ds_it : db_data_sources_)
     {
-        if (dsTypeLoadingWanted(ds_it->dsType()) && !ds_it->loadingWanted() && ds_it->hasNumInserted(dbo_name))
+        if (dsTypeLoadingWanted(ds_it->dsType()) && !ds_it->loadingWanted() && ds_it->hasNumInserted(dbcontent_name))
             return true;
     }
 
     return false;
 }
 
-std::vector<unsigned int> DBContentManager::unfilteredDS (const std::string& dbo_name)
+std::vector<unsigned int> DBContentManager::unfilteredDS (const std::string& dbcontent_name)
 {
-    assert (hasDSFilter(dbo_name));
+    assert (hasDSFilter(dbcontent_name));
 
     std::vector<unsigned int> ds_ids;
 
     for (auto& ds_it : db_data_sources_)
     {
-        if (dsTypeLoadingWanted(ds_it->dsType()) && ds_it->loadingWanted() && ds_it->hasNumInserted(dbo_name))
+        if (dsTypeLoadingWanted(ds_it->dsType()) && ds_it->loadingWanted() && ds_it->hasNumInserted(dbcontent_name))
             ds_ids.push_back(ds_it->id());
     }
 
@@ -1227,6 +1227,26 @@ const std::map<std::string, std::shared_ptr<Buffer>>& DBContentManager::data() c
     return data_;
 }
 
+bool DBContentManager::dsTypeFiltered()
+{
+    for (auto& ds_type_it : ds_type_loading_wanted_)
+        if (!ds_type_it.second)
+            return true;
+
+    return false;
+}
+
+std::set<std::string> DBContentManager::wantedDSTypes()
+{
+    std::set<std::string> ret;
+
+    for (auto& ds_type_it : ds_type_loading_wanted_)
+        if (ds_type_it.second)
+            ret.insert(ds_type_it.first);
+
+    return ret;
+}
+
 void DBContentManager::dsTypeLoadingWanted (const std::string& ds_type, bool wanted)
 {
     loginf << "DBContentManager: dsTypeLoadingWanted: ds_type " << ds_type << " wanted " << wanted;
@@ -1241,6 +1261,35 @@ bool DBContentManager::dsTypeLoadingWanted (const std::string& ds_type)
 
     return ds_type_loading_wanted_.at(ds_type);
 }
+
+void DBContentManager::setLoadDSTypes (bool loading_wanted)
+{
+    loginf << "DBContentManager: setLoadDSTypes: wanted " << loading_wanted;
+
+    for (auto& ds_type_it : data_source_types_)
+    {
+        logdbg << "DBContentManager: setLoadDSTypes: wanted " << loading_wanted;
+        ds_type_loading_wanted_[ds_type_it] = loading_wanted;
+    }
+
+    if (load_widget_)
+        load_widget_->update();
+}
+
+void DBContentManager::setLoadOnlyDSTypes (std::set<std::string> ds_types)
+{
+    // deactivate all loading
+    setLoadDSTypes(false);
+
+    for (auto ds_type_it : ds_types)
+    {
+        dsTypeLoadingWanted(ds_type_it, true);
+    }
+
+    if (load_widget_)
+        load_widget_->update();
+}
+
 
 bool DBContentManager::canGetVariable (const std::string& dbcont_name, const Property& property)
 {

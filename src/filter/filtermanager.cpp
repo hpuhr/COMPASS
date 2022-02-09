@@ -303,6 +303,24 @@ void FilterManager::showViewPointSlot (const ViewableDataConfig* vp)
 
     DBContentManager& obj_man = COMPASS::instance().dbContentManager();
 
+    // add all data source types that need loading
+    if (data.contains("data_source_types")) // the listed ones should be loaded
+    {
+        const json& data_source_types  = data.at("data_source_types");
+
+        std::set<std::string> ds_types = data_source_types.get<std::set<std::string>>();
+
+        logdbg << "FilterManager: showViewPointSlot: load " << ds_types.size() << " ds_types";
+
+        obj_man.setLoadOnlyDSTypes(ds_types);
+    }
+    else // all should be loaded
+    {
+        logdbg << "FilterManager: showViewPointSlot: load all ds_types";
+
+        obj_man.setLoadDSTypes(true);
+    }
+
     // add all data sources that need loading
     if (data.contains("data_sources")) // the listed ones should be loaded
     {
@@ -310,10 +328,14 @@ void FilterManager::showViewPointSlot (const ViewableDataConfig* vp)
 
         std::set<unsigned int> ds_ids = data_sources.get<std::set<unsigned int>>();
 
+        logdbg << "FilterManager: showViewPointSlot: load " << ds_ids.size() << " ds_ids";
+
         obj_man.setLoadOnlyDataSources(ds_ids);
     }
     else // all should be loaded
     {
+        logdbg << "FilterManager: showViewPointSlot: load all ds_ids";
+
         obj_man.setLoadDataSources(true);
     }
 
@@ -354,6 +376,9 @@ void FilterManager::setConfigInViewPoint (nlohmann::json& data)
     loginf << "FilterManager: setConfigInViewPoint";
 
     DBContentManager& obj_man = COMPASS::instance().dbContentManager();
+
+    if (obj_man.dsTypeFiltered()) // ds types filters active
+        data["data_source_types"] = obj_man.wantedDSTypes(); // add all data sources that need loading
 
     if (obj_man.loadDataSourcesFiltered()) // ds filters active
         data["data_sources"] = obj_man.getLoadDataSources(); // add all data sources that need loading

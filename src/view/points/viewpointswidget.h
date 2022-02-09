@@ -34,6 +34,9 @@ class ViewPointsWidget : public QWidget
     Q_OBJECT
 
   public slots:
+    void databaseOpenedSlot();
+    void databaseClosedSlot();
+
     void exportSlot();
     void exportPDFSlot();
     void deleteAllSlot();

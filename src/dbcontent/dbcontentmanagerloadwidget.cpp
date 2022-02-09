@@ -423,20 +423,31 @@ void DBContentManagerDataSourcesWidget::updateExistingContent()
 {
     loginf << "DBObjectManagerLoadWidget: updateExistingContent";
 
+    for (auto& ds_typ_it : ds_type_boxes_)
+    {
+        logdbg << "DBObjectManagerLoadWidget: updateExistingContent: ds_typ " << ds_typ_it.first
+               << " " << dbcontent_man_.dsTypeLoadingWanted(ds_typ_it.first);
+        ds_typ_it.second->setChecked(dbcontent_man_.dsTypeLoadingWanted(ds_typ_it.first));
+    }
+
     string ds_name;
     string ds_content_name;
 
-    if (show_counts_)
+    for (const auto& ds_it : dbcontent_man_.dataSources())
     {
-        for (const auto& ds_it : dbcontent_man_.dataSources())
+        //loginf << row << " '" << ds_it->dsType() << "' '" << dstype << "'";
+
+        ds_name = ds_it->name();
+
+        assert (ds_boxes_.count(ds_name));
+        ds_boxes_.at(ds_name)->setChecked(ds_it->loadingWanted());
+        // ds_boxes_[ds_name] // checkbox
+
+        logdbg << "DBObjectManagerLoadWidget: updateExistingContent: ds " << ds_name
+               << " " << ds_it->loadingWanted();
+
+        if (show_counts_)
         {
-            //loginf << row << " '" << ds_it->dsType() << "' '" << dstype << "'";
-
-            ds_name = ds_it->name();
-
-            assert (ds_boxes_.count(ds_name));
-            // ds_boxes_[ds_name] // checkbox
-
             for (auto& cnt_it : ds_it->numInsertedSummedLinesMap())
             {
                 ds_content_name = cnt_it.first;

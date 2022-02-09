@@ -842,7 +842,7 @@ void DBInterface::createViewPointsTable()
 {
     assert(!existsViewPointsTable());
 
-    setProperty("view_points_version", "0.1");
+    setProperty("view_points_version", "0.2");
 
     connection_mutex_.lock();
     db_connection_->executeSQL(sql_generator_.getTableViewPointsCreateStatement());

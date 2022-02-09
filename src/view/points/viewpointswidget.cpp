@@ -25,6 +25,7 @@
 #include "viewpointstoolwidget.h"
 #include "viewpointsreportgenerator.h"
 #include "viewpointsreportgeneratordialog.h"
+#include "dbinterface.h"
 
 #include <QTableView>
 #include <QVBoxLayout>
@@ -141,6 +142,12 @@ ViewPointsWidget::ViewPointsWidget(ViewManager& view_manager)
         QShortcut* p_shortcut = new QShortcut(QKeySequence(tr("Up", "Previous")), this);
         connect (p_shortcut, &QShortcut::activated, this, &ViewPointsWidget::selectPreviousSlot);
     }
+
+
+    QObject::connect(&COMPASS::instance().interface(), &DBInterface::databaseOpenedSignal,
+                     this, &ViewPointsWidget::databaseOpenedSlot);
+    QObject::connect(&COMPASS::instance().interface(), &DBInterface::databaseClosedSignal,
+                     this, &ViewPointsWidget::databaseClosedSlot);
 }
 
 ViewPointsWidget::~ViewPointsWidget()
@@ -379,6 +386,27 @@ void ViewPointsWidget::editCommentSlot()
 //{
 //    loginf << "ViewPointsWidget: closeCurrentSelectNext";
 //}
+
+void ViewPointsWidget::databaseOpenedSlot()
+{
+    loginf << "ViewPointsWidget: databaseOpenedSlot";
+
+    assert (table_model_);
+    table_model_->loadViewPoints();
+
+    assert (table_view_);
+    table_view_->resizeColumnsToContents();
+    table_view_->resizeRowsToContents();
+}
+
+void ViewPointsWidget::databaseClosedSlot()
+{
+    loginf << "ViewPointsWidget: databaseClosedSlot";
+
+    assert (table_model_);
+    table_model_->clearViewPoints();
+}
+
 
 void ViewPointsWidget::exportSlot()
 {
