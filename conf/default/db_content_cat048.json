@@ -812,7 +812,7 @@
                 "parameters": {
                     "data_type_str": "UINT",
                     "db_column_name": "line_id",
-                    "description": "COMMUNICATION LINE ID determines the origin of the record, see table COMMS",
+                    "description": "Communication line ID",
                     "dimension": "",
                     "is_key": false,
                     "name": "Line ID",

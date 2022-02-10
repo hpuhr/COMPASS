@@ -1,7 +1,6 @@
 {
     "parameters": {
         "db_table_name": "data_cat001",
-        "ds_type": "Radar",
         "info": "",
         "name": "CAT001"
     },

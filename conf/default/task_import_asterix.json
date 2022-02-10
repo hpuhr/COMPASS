@@ -1,13 +1,9 @@
 {
     "parameters": {
-        "current_file_framing": "",
+        "current_file_framing": "ioss",
         "current_framing": "",
         "debug_jasterix": false,
-        "file_list": [
-            "/home/sk/data/austria/hello_world/acg_helloworld_fake_ID.ff",
-            "/home/sk/data/austria/live_test/20200905_4h_all.ff",
-            "/home/sk/data/austria/loww/2021/CSS34_CAT010_20210119.netto"
-        ],
+        "file_list": [],
         "limit_ram": false,
         "override_sac_new": 120,
         "override_sac_org": 120,
@@ -47,7 +43,7 @@
             "ASTERIXCategoryConfig11": {
                 "parameters": {
                     "category": 10,
-                    "decode": false,
+                    "decode": true,
                     "edition": "0.31",
                     "ref": "",
                     "spf": ""

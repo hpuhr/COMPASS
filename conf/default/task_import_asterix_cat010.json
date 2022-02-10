@@ -252,7 +252,7 @@
                     "append_value": false,
                     "comment": "",
                     "db_content_name": "CAT010",
-                    "db_content_variable_name": "Mode-3/A Code",
+                    "db_content_variable_name": "Mode 3/A Code",
                     "dimension": "",
                     "format_data_type": "UINT",
                     "in_array": false,
@@ -977,6 +977,54 @@
                     "format_data_type": "",
                     "in_array": false,
                     "json_key": "550.TTF",
+                    "json_value_format": "",
+                    "mandatory": false,
+                    "unit": ""
+                }
+            },
+            "JSONDataMapping64": {
+                "parameters": {
+                    "active": true,
+                    "append_value": false,
+                    "comment": "Type number, value 12870",
+                    "db_content_name": "CAT010",
+                    "db_content_variable_name": "DS ID",
+                    "dimension": "",
+                    "format_data_type": "",
+                    "in_array": false,
+                    "json_key": "ds_id",
+                    "json_value_format": "",
+                    "mandatory": false,
+                    "unit": ""
+                }
+            },
+            "JSONDataMapping65": {
+                "parameters": {
+                    "active": true,
+                    "append_value": false,
+                    "comment": "Type string, value \"132fbfcd\"",
+                    "db_content_name": "CAT010",
+                    "db_content_variable_name": "ARTAS Hash",
+                    "dimension": "",
+                    "format_data_type": "",
+                    "in_array": false,
+                    "json_key": "artas_md5",
+                    "json_value_format": "",
+                    "mandatory": false,
+                    "unit": ""
+                }
+            },
+            "JSONDataMapping66": {
+                "parameters": {
+                    "active": true,
+                    "append_value": false,
+                    "comment": "Line Identifer",
+                    "db_content_name": "CAT010",
+                    "db_content_variable_name": "Line ID",
+                    "dimension": "",
+                    "format_data_type": "",
+                    "in_array": false,
+                    "json_key": "line_id",
                     "json_value_format": "",
                     "mandatory": false,
                     "unit": ""

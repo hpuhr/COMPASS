@@ -1,7 +1,6 @@
 {
     "parameters": {
         "db_table_name": "data_cat020",
-        "ds_type": "MLAT",
         "info": "",
         "name": "CAT020"
     },
