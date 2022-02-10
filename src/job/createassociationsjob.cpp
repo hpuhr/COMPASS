@@ -759,11 +759,12 @@ void CreateAssociationsJob::createAssociations()
         {
             for (auto& tr_it : ds_it.second)
             {
-                for (auto utn_ptr_it : tr_it.assoc_targets_)
+                for (auto& utn_ptr_it : tr_it.assoc_targets_)
                 {
                     //dbo.addAssociation(tr_it.rec_num_, utn_ptr_it->utn_, false, 0);
 
-                    associations_[dbo_it.first][tr_it.rec_num_] = {utn_ptr_it->utn_, {}};
+                    associations_[dbo_it.first][tr_it.rec_num_] =
+                            std::make_tuple(utn_ptr_it->utn_, std::vector<std::pair<std::string, unsigned int>>());
                 }
             }
         }

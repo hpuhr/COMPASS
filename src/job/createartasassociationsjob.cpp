@@ -354,7 +354,8 @@ void CreateARTASAssociationsJob::createARTASAssociations()
 
     for (auto& ut_it : finished_tracks_)                    // utn -> UAT
         for (auto& assoc_it : ut_it.second.rec_nums_tris_)  // rec_num -> tri
-            associations_[tracker_dbcontent_name_][assoc_it.first] = {ut_it.first, {}};
+            associations_[tracker_dbcontent_name_][assoc_it.first] =
+                    std::make_tuple(ut_it.first, std::vector<std::pair<std::string, unsigned int>>());
             //tracker_object.addAssociation(assoc_it.first, ut_it.first, true, assoc_it.first);
 }
 
@@ -641,7 +642,8 @@ void CreateARTASAssociationsJob::createSensorAssociations()
 //                        .addAssociation(best_match_rec_num, ut_it.first, true, assoc_it.first);
 
                     // add utn to non-tracker rec_num
-                    associations_[best_match_dbo_name][best_match_rec_num] = {ut_it.first, {}};
+                    associations_[best_match_dbo_name][best_match_rec_num] =
+                            make_tuple(ut_it.first, std::vector<std::pair<std::string, unsigned int>>());
 
                     // add non-tracker rec_num to tracker src rec_nums
 
