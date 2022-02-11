@@ -156,11 +156,15 @@ void DBInterface::updateTableInfo()
 
 void DBInterface::openDBFile(const std::string& filename, bool overwrite)
 {
+    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+
     if (overwrite && Files::fileExists(filename))
     {
         loginf << "DBInterface: openDBFile: deleting pre-existing file '" << filename << "'";
         Files::deleteFile(filename);
     }
+
+    bool created_new_db = !Files::fileExists(filename);
 
     loginf << "DBInterface: openDBFile: opening file '" << filename << "'";
     assert (db_connection_);
@@ -168,18 +172,49 @@ void DBInterface::openDBFile(const std::string& filename, bool overwrite)
 
     updateTableInfo();
 
-    if (!existsPropertiesTable())
+    if (created_new_db)
+    {
+        assert (!existsPropertiesTable());
         createPropertiesTable();
+        properties_loaded_ = true;
 
-    loadProperties();
+        setProperty("APP_VERSION", COMPASS::instance().config().getString("version"));
 
-    if (!existsDataSourcesTable())
+        assert (!existsDataSourcesTable());
         createDataSourcesTable();
 
-    if (!existsSectorsTable())
+        assert (!existsSectorsTable());
         createSectorsTable();
+    }
+    else
+    {
+        assert (existsPropertiesTable());
+        loadProperties();
+
+        if (!hasProperty("APP_VERSION")
+                 || getProperty("APP_VERSION") != COMPASS::instance().config().getString("version"))
+        {
+            string reason = hasProperty("APP_VERSION") ?
+                        "DB from Version " + getProperty("APP_VERSION") + ", current "
+                           + COMPASS::instance().config().getString("version") : "DB from Version older than 0.7.0";
+
+            table_info_.clear();
+            properties_loaded_ = false;
+            properties_.clear();
+            db_connection_->disconnect();
+
+            QApplication::restoreOverrideCursor();
+
+            throw std::runtime_error ("Incorrect application version for database:\n "+reason);
+        }
+
+        assert (existsDataSourcesTable());
+        assert (existsSectorsTable());
+    }
 
     emit databaseOpenedSignal();
+
+    QApplication::restoreOverrideCursor();
 
     loginf << "DBInterface: openDBFile: done";
 }
@@ -213,11 +248,11 @@ bool DBInterface::dbOpen()
 }
 
 
-vector<string> DBInterface::getDatabases()
-{
-    assert(db_connection_);
-    return db_connection_->getDatabases();
-}
+//vector<string> DBInterface::getDatabases()
+//{
+//    assert(db_connection_);
+//    return db_connection_->getDatabases();
+//}
 
 bool DBInterface::ready()
 {

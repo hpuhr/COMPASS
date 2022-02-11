@@ -569,10 +569,10 @@ std::map<std::string, DBTableInfo> SQLiteConnection::getTableInfo()
     return info;
 }
 
-std::vector<std::string> SQLiteConnection::getDatabases()
-{
-    return std::vector<std::string>();  // no databases
-}
+//std::vector<std::string> SQLiteConnection::getDatabases()
+//{
+//    return std::vector<std::string>();  // no databases
+//}
 
 std::vector<std::string> SQLiteConnection::getTableList()  // buffer of table name strings
 {

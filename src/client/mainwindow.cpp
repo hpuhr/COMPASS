@@ -1076,14 +1076,10 @@ void MainWindow::openExistingDBSlot()
 
     if (filename.size() > 0)
     {
-        QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-
         COMPASS::instance().openDBFile(filename);
 
         updateBottomWidget();
         updateMenus();
-
-        QApplication::restoreOverrideCursor();
     }
 }
 
@@ -1098,14 +1094,10 @@ void MainWindow::openRecentDBSlot()
 
     assert (filename.size());
 
-    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-
     COMPASS::instance().openDBFile(filename);
 
     updateBottomWidget();
     updateMenus();
-
-    QApplication::restoreOverrideCursor();
 }
 
 void MainWindow::clearExistingDBsSlot()

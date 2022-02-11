@@ -82,7 +82,7 @@ public:
     bool getPreparedCommandDone() { return prepared_command_done_; }
 
     std::map<std::string, DBTableInfo> getTableInfo();
-    virtual std::vector<std::string> getDatabases();
+    //virtual std::vector<std::string> getDatabases();
 
     virtual void generateSubConfigurable(const std::string& class_id,
                                          const std::string& instance_id);

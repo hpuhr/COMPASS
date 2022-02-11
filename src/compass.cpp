@@ -32,7 +32,7 @@
 #include "mainwindow.h"
 #include "files.h"
 
-#include <qobject.h>
+#include <QMessageBox>
 
 #include <boost/date_time/posix_time/posix_time.hpp>
 
@@ -212,12 +212,24 @@ void COMPASS::openDBFile(const std::string& filename)
 
     last_db_filename_ = filename;
 
-    db_interface_->openDBFile(filename, false);
-    assert (db_interface_->dbOpen());
+    try
+    {
+        db_interface_->openDBFile(filename, false);
+        assert (db_interface_->dbOpen());
 
-    addDBFileToList(filename);
+        addDBFileToList(filename);
 
-    db_opened_ = true;
+        db_opened_ = true;
+
+    }  catch (std::exception& e)
+    {
+        QMessageBox m_warning(QMessageBox::Warning, "Opening Database Failed",
+                                          e.what(), QMessageBox::Ok);
+        m_warning.exec();
+
+        db_opened_ = false;
+    }
+
 }
 
 void COMPASS::createNewDBFile(const std::string& filename)
