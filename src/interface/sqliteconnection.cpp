@@ -39,27 +39,17 @@ SQLiteConnection::SQLiteConnection(const std::string& class_id, const std::strin
                                    DBInterface* interface)
     : Configurable(class_id, instance_id, interface), interface_(*interface), db_opened_(false)
 {
-    //registerParameter("last_filename", &last_filename_, "");
-
     createSubConfigurables();
 }
 
 SQLiteConnection::~SQLiteConnection()
 {
     assert(!db_handle_);
-
-//    for (auto it : file_list_)
-//        delete it.second;
-
-//    file_list_.clear();
 }
 
 void SQLiteConnection::openFile(const std::string& file_name)
 {
     loginf << "SQLiteConnection: openFile: " << file_name;
-
-//    last_filename_ = file_name;
-//    assert(last_filename_.size() > 0);
 
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
@@ -82,14 +72,6 @@ void SQLiteConnection::openFile(const std::string& file_name)
 
     db_opened_ = true;
 
-//    interface_.databaseOpenend();
-//    interface_.databaseContentChanged();
-
-    //emit connectedSignal();
-
-//    if (info_widget_)
-//        info_widget_->updateSlot();
-
     QApplication::restoreOverrideCursor();
 }
 
@@ -98,12 +80,6 @@ void SQLiteConnection::disconnect()
     logdbg << "SQLiteConnection: disconnect";
 
     db_opened_ = false;
-
-//    if (widget_)
-//        widget_ = nullptr;
-
-//    if (info_widget_)
-//        info_widget_ = nullptr;
 
     if (db_handle_)
     {
@@ -200,7 +176,6 @@ void SQLiteConnection::bindVariableNull(unsigned int index)
     sqlite3_bind_null(statement_, index);
 }
 
-// TODO: beware of se deleted propertylist, new buffer should use deep copied list
 std::shared_ptr<DBResult> SQLiteConnection::execute(const DBCommand& command)
 {
     std::shared_ptr<DBResult> dbresult(new DBResult());
@@ -569,19 +544,14 @@ std::map<std::string, DBTableInfo> SQLiteConnection::getTableInfo()
     return info;
 }
 
-//std::vector<std::string> SQLiteConnection::getDatabases()
-//{
-//    return std::vector<std::string>();  // no databases
-//}
-
 std::vector<std::string> SQLiteConnection::getTableList()  // buffer of table name strings
 {
     std::vector<std::string> tables;
 
     DBCommand command;
     command.set("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name DESC;");
-    // command.set ("SELECT name FROM sqlite_master WHERE name != 'sqlite_sequence' ORDER BY name
-    // DESC;");
+    // command.set ("SELECT name FROM sqlite_master WHERE name != 'sqlite_sequence' ORDER BY name  DESC;");
+
     PropertyList list;
     list.addProperty("name", PropertyDataType::STRING);
     command.list(list);
@@ -664,39 +634,8 @@ DBTableInfo SQLiteConnection::getColumnList(
 void SQLiteConnection::generateSubConfigurable(const std::string& class_id,
                                                const std::string& instance_id)
 {
-//    if (class_id == "SQLiteFile")
-//    {
-//        SavedFile* file = new SavedFile(class_id, instance_id, this);
-//        assert(file_list_.count(file->name()) == 0);
-//        file_list_.insert(std::pair<std::string, SavedFile*>(file->name(), file));
-//    }
-//    else
-        throw std::runtime_error("SQLiteConnection: generateSubConfigurable: unknown class_id " +
-                                 class_id);
+    throw std::runtime_error("SQLiteConnection: generateSubConfigurable: unknown class_id " + class_id);
 }
-
-//QWidget* SQLiteConnection::widget()
-//{
-//    if (!widget_)
-//        widget_.reset(new SQLiteConnectionWidget(*this));
-
-//    assert(widget_);
-//    return widget_.get();
-//}
-
-// void SQLiteConnection::deleteWidget ()
-//{
-//    widget_ = nullptr;
-//}
-
-//QWidget* SQLiteConnection::infoWidget()
-//{
-//    if (!info_widget_)
-//        info_widget_.reset(new SQLiteConnectionInfoWidget(*this));
-
-//    assert(info_widget_);
-//    return info_widget_.get();
-//}
 
 std::string SQLiteConnection::status() const
 {
@@ -706,63 +645,3 @@ std::string SQLiteConnection::status() const
         return "Not connected";
 }
 
-//std::string SQLiteConnection::identifier() const
-//{
-//    assert(db_opened_);
-
-//    return last_filename_;
-//}
-
-//std::string SQLiteConnection::shortIdentifier() const
-//{
-//    assert(db_opened_);
-
-//    return Files::getFilenameFromPath(last_filename_);
-//}
-
-//void SQLiteConnection::addFile(const std::string& filename)
-//{
-//    if (file_list_.count(filename) != 0)
-//        throw std::invalid_argument("SQLiteConnection: addFile: name '" + filename +
-//                                    "' already in use");
-
-//    std::string instancename = filename;
-//    instancename.erase(std::remove(instancename.begin(), instancename.end(), '/'),
-//                       instancename.end());
-
-//    Configuration& config = addNewSubConfiguration("SQLiteFile", "SQLiteFile" + instancename);
-//    config.addParameterString("name", filename);
-//    generateSubConfigurable("SQLiteFile", "SQLiteFile" + instancename);
-
-//    last_filename_ = filename;
-
-//    if (widget_)
-//        widget_->updateFileListSlot();
-//}
-
-//void SQLiteConnection::removeFile(const std::string& filename)
-//{
-//    if (file_list_.count(filename) != 1)
-//        throw std::invalid_argument("SQLiteConnection: addFile: name '" + filename +
-//                                    "' not in use");
-
-//    delete file_list_.at(filename);
-//    file_list_.erase(filename);
-
-//    if (widget_)
-//        widget_->updateFileListSlot();
-//}
-
-//void SQLiteConnection::removeAllFiles ()
-//{
-//    loginf << "SQLiteConnection: removeAllFiles";
-
-//    while (file_list_.size())
-//    {
-//        delete file_list_.begin()->second;
-//        file_list_.erase(file_list_.begin());
-//    }
-
-//    if (widget_)
-//        widget_->updateFileListSlot();
-//}

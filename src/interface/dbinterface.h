@@ -31,9 +31,7 @@
 #include <memory>
 #include <set>
 
-//static const std::string ACTIVE_DATA_SOURCES_PROPERTY_PREFIX = "activeDataSources_"; // TODO remove
 static const std::string TABLE_NAME_PROPERTIES = "properties";
-//static const std::string TABLE_NAME_MINMAX = "atsdb_minmax";
 static const std::string TABLE_NAME_SECTORS = "sectors";
 static const std::string TABLE_NAME_VIEWPOINTS = "viewpoints";
 
@@ -46,7 +44,6 @@ class DBContent;
 class DBODataSource;
 class DBResult;
 class DBTableInfo;
-//class DBInterfaceInfoWidget;
 class Job;
 class BufferWriter;
 class Sector;
@@ -71,23 +68,11 @@ signals:
     void databaseClosedSignal();
 
 public:
-    /// @brief Constructor
     DBInterface(std::string class_id, std::string instance_id, COMPASS* compass);
-    /// @brief Destructor
     virtual ~DBInterface();
-
-    //void databaseOpenend();
-    //void databaseContentChanged();
-
 
     virtual void generateSubConfigurable(const std::string& class_id,
                                          const std::string& instance_id);
-
-    //std::vector<std::string> getDatabases();
-
-    //DBInterfaceInfoWidget* infoWidget();
-
-    //QWidget* connectionWidget();
 
     void openDBFile(const std::string& filename, bool overwrite);
     void closeDBFile();
@@ -109,11 +94,6 @@ public:
     void insertBuffer(DBContent& db_object, std::shared_ptr<Buffer> buffer);
     void insertBuffer(const std::string& table_name, std::shared_ptr<Buffer> buffer);
 
-    //    bool checkUpdateBuffer(DBObject& object, DBOVariable& key_var, DBOVariableSet& list,
-    //                           std::shared_ptr<Buffer> buffer);
-    //    void updateBuffer(MetaDBTable& meta_table, const DBTableColumn& key_col,
-    //                      std::shared_ptr<Buffer> buffer, int from_index = -1,
-    //                      int to_index = -1);  // no indexes means full buffer
     void updateBuffer(const std::string& table_name, const std::string& key_col, std::shared_ptr<Buffer> buffer,
                       int from_index = -1, int to_index = -1);  // no indexes means full buffer
 
@@ -136,13 +116,6 @@ public:
 
     bool existsTable(const std::string& table_name);
     void createTable(const DBContent& object);
-    //    bool existsMinMaxTable();
-    //    void createMinMaxTable();
-    //    std::pair<std::string, std::string> getMinMaxString(const DBOVariable& var);
-    //    /// (dbo type, id) -> (min, max)
-    //    std::map<std::pair<std::string, std::string>, std::pair<std::string, std::string>> getMinMaxInfo();
-    //    void insertMinMax(const std::string& id, const std::string& object_name, const std::string& min,
-    //                      const std::string& max);
 
     bool areColumnsNull (const std::string& table_name, const std::vector<std::string> columns);
 
@@ -163,20 +136,11 @@ public:
 
     void clearTableContent(const std::string& table_name);
 
-    std::shared_ptr<DBResult> queryMinMaxNormalForTable(const std::string& table_name);
-
     unsigned int getMaxRecordNumber(DBContent& object);
 
     //std::map<unsigned int, std::tuple<std::set<unsigned int>, std::tuple<bool, unsigned int, unsigned int>,
     //std::tuple<bool, unsigned int, unsigned int>>> queryADSBInfo();
     // ta -> mops versions, nucp_nics, nac_ps
-
-    //    void deleteAllRowsWithVariableValue (DBOVariable *variable, std::string value, std::string
-    //    filter); void updateAllRowsWithVariableValue (DBOVariable *variable, std::string value,
-    //    std::string new_value, std::string filter);
-
-    void createAssociationsTable(const std::string& table_name);
-    DBOAssociationCollection getAssociations(const std::string& table_name);
 
 protected:
     std::unique_ptr<SQLiteConnection> db_connection_;
@@ -190,8 +154,6 @@ protected:
 
     SQLGenerator sql_generator_;
 
-    //DBInterfaceInfoWidget* info_widget_{nullptr};
-
     std::map<std::string, DBTableInfo> table_info_;
 
     std::map<std::string, std::string> properties_;
@@ -200,16 +162,10 @@ protected:
 
     void insertBindStatementUpdateForCurrentIndex(std::shared_ptr<Buffer> buffer, unsigned int row);
 
-    //    /// @brief Returns buffer with min/max data from another Buffer with the string contents.
-    //    Delete returned buffer yourself. Buffer *createFromMinMaxStringBuffer (Buffer
-    //    *string_buffer, PropertyDataType data_type);
-
     void loadProperties();
     void saveProperties();
 
     void updateTableInfo();
-    //void closeConnection();
-
 };
 
 #endif /* DBINTERFACE_H_ */
