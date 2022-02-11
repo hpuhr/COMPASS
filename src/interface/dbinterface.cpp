@@ -57,7 +57,7 @@ using namespace dbContent;
 DBInterface::DBInterface(string class_id, string instance_id, COMPASS* compass)
     : Configurable(class_id, instance_id, compass), sql_generator_(*this)
 {
-    QMutexLocker locker(&connection_mutex_);
+    boost::mutex::scoped_lock locker(connection_mutex_);
 
     registerParameter("read_chunk_size", &read_chunk_size_, 50000);
 
@@ -68,7 +68,7 @@ DBInterface::~DBInterface()
 {
     logdbg << "DBInterface: desctructor: start";
 
-    QMutexLocker locker(&connection_mutex_);
+    boost::mutex::scoped_lock locker(connection_mutex_);
 
     db_connection_ = nullptr;
 
@@ -105,7 +105,7 @@ DBInterface::~DBInterface()
 
 //void DBInterface::closeConnection()
 //{
-//    QMutexLocker locker(&connection_mutex_);
+//    boost::mutex::scoped_lock locker(connection_mutex_);
 
 //    if (properties_loaded_)  // false if database not opened
 //        saveProperties();
@@ -127,9 +127,12 @@ DBInterface::~DBInterface()
 
 void DBInterface::updateTableInfo()
 {
-    QMutexLocker locker(&connection_mutex_);
+    boost::mutex::scoped_lock locker2(table_info_mutex_);
+
     loginf << "DBInterface: updateTableInfo";
     table_info_.clear();
+
+    boost::mutex::scoped_lock locker(connection_mutex_);
 
     assert(db_connection_);
     table_info_ = db_connection_->getTableInfo();
@@ -198,7 +201,7 @@ void DBInterface::openDBFile(const std::string& filename, bool overwrite)
                         "DB from Version " + getProperty("APP_VERSION") + ", current "
                            + COMPASS::instance().config().getString("version") : "DB from Version older than 0.7.0";
 
-            table_info_.clear();
+            table_info_.clear(); // not need to lock
             properties_loaded_ = false;
             properties_.clear();
             db_connection_->disconnect();
@@ -224,7 +227,7 @@ void DBInterface::closeDBFile()
     loginf << "DBInterface: closeDBFile";
 
     {
-        QMutexLocker locker(&connection_mutex_);
+        boost::mutex::scoped_lock locker(connection_mutex_);
 
         if (properties_loaded_)  // false if database not opened
             saveProperties();
@@ -235,7 +238,7 @@ void DBInterface::closeDBFile()
         properties_loaded_ = false;
 
         properties_.clear();
-        table_info_.clear();
+        table_info_.clear(); // no need to lock
     }
 
     emit databaseClosedSignal();
@@ -301,7 +304,7 @@ void DBInterface::checkSubConfigurables()
 
 bool DBInterface::existsTable(const string& table_name)
 {
-    QMutexLocker locker(&connection_mutex_);  // TODO
+    boost::mutex::scoped_lock locker(table_info_mutex_);
     return table_info_.count(table_name) == 1;
 }
 
@@ -316,7 +319,7 @@ void DBInterface::createTable(const DBContent& object)
 
     string statement = sql_generator_.getCreateTableStatement(object);
 
-    QMutexLocker locker(&connection_mutex_);
+    boost::mutex::scoped_lock locker(connection_mutex_);
 
     db_connection_->executeSQL(statement);
 
@@ -346,7 +349,7 @@ unsigned int DBInterface::getMaxRecordNumber(DBContent& object)
 
     assert (object.hasVariable(rec_num_var.name()));
 
-    QMutexLocker locker(&connection_mutex_);
+    boost::mutex::scoped_lock locker(connection_mutex_);
 
     shared_ptr<DBCommand> command = sql_generator_.getMaxRecordNumberCommand(object.dbTableName(),
                                                                              rec_num_var.dbColumnName());
@@ -375,7 +378,7 @@ unsigned int DBInterface::getMaxRecordNumber(DBContent& object)
 
 //    assert(object.existsInDB());
 
-//    QMutexLocker locker(&connection_mutex_);
+//    boost::mutex::scoped_lock locker(connection_mutex_);
 
 //    std::map<unsigned int, std::tuple<std::set<unsigned int>, std::tuple<bool, unsigned int, unsigned int>,
 //            std::tuple<bool, unsigned int, unsigned int>>> data;
@@ -442,7 +445,7 @@ std::vector<std::unique_ptr<dbContent::DBDataSource>> DBInterface::getDataSource
 
     using namespace dbContent;
 
-    QMutexLocker locker(&connection_mutex_);
+    boost::mutex::scoped_lock locker(connection_mutex_);
 
     shared_ptr<DBCommand> command = sql_generator_.getDataSourcesSelectCommand();
 
@@ -579,7 +582,7 @@ size_t DBInterface::count(const string& table)
     logdbg << "DBInterface: count: table " << table;
     assert(existsTable(table));
 
-    QMutexLocker locker(&connection_mutex_);
+    boost::mutex::scoped_lock locker(connection_mutex_);
     assert(db_connection_);
 
     string sql = sql_generator_.getCountStatement(table);
@@ -621,7 +624,7 @@ void DBInterface::loadProperties()
 
     assert (!properties_loaded_);
 
-    QMutexLocker locker(&connection_mutex_);
+    boost::mutex::scoped_lock locker(connection_mutex_);
 
     DBCommand command;
     command.set(sql_generator_.getSelectAllPropertiesStatement());
@@ -673,7 +676,7 @@ void DBInterface::saveProperties()
         return;
     }
 
-    // QMutexLocker locker(&connection_mutex_); // done in closeConnection
+    // boost::mutex::scoped_lock locker(connection_mutex_); // done in closeConnection
     assert(db_connection_);
     assert (properties_loaded_);
 
@@ -692,7 +695,7 @@ std::vector<std::shared_ptr<SectorLayer>> DBInterface::loadSectors()
 {
     loginf << "DBInterface: loadSectors";
 
-    QMutexLocker locker(&connection_mutex_);
+    boost::mutex::scoped_lock locker(connection_mutex_);
 
     DBCommand command;
     command.set(sql_generator_.getSelectAllSectorsStatement());
@@ -768,7 +771,7 @@ std::vector<std::shared_ptr<SectorLayer>> DBInterface::loadSectors()
 //void DBInterface::insertMinMax(const string& id, const string& object_name,
 //                               const string& min, const string& max)
 //{
-//    QMutexLocker locker(&connection_mutex_);
+//    boost::mutex::scoped_lock locker(connection_mutex_);
 
 //    string str = sql_generator_.getInsertMinMaxStatement(id, object_name, min, max);
 //    current_connection_->executeSQL(str);
@@ -776,7 +779,7 @@ std::vector<std::shared_ptr<SectorLayer>> DBInterface::loadSectors()
 
 bool DBInterface::areColumnsNull (const std::string& table_name, const std::vector<std::string> columns)
 {
-    QMutexLocker locker(&connection_mutex_);
+    boost::mutex::scoped_lock locker(connection_mutex_);
 
     string str = sql_generator_.getSelectNullCount(table_name, columns);
 
@@ -824,7 +827,7 @@ bool DBInterface::areColumnsNull (const std::string& table_name, const std::vect
 //        return pair<string, string>(NULL_STRING, NULL_STRING);
 //    }
 
-//    QMutexLocker locker(&connection_mutex_);
+//    boost::mutex::scoped_lock locker(connection_mutex_);
 
 //    PropertyList list;
 //    list.addProperty("min", PropertyDataType::STRING);
@@ -894,7 +897,7 @@ void DBInterface::setViewPoint(const unsigned int id, const string& value)
         return;
     }
 
-    // QMutexLocker locker(&connection_mutex_); // done in closeConnection
+    // boost::mutex::scoped_lock locker(connection_mutex_); // done in closeConnection
     assert(db_connection_);
 
     if (!existsViewPointsTable())
@@ -912,7 +915,7 @@ map<unsigned int, string> DBInterface::viewPoints()
 
     assert (existsViewPointsTable());
 
-    QMutexLocker locker(&connection_mutex_);
+    boost::mutex::scoped_lock locker(connection_mutex_);
 
     DBCommand command;
     command.set(sql_generator_.getSelectAllViewPointsStatement());
@@ -952,7 +955,7 @@ map<unsigned int, string> DBInterface::viewPoints()
 
 void DBInterface::deleteViewPoint(const unsigned int id)
 {
-    QMutexLocker locker(&connection_mutex_);
+    boost::mutex::scoped_lock locker(connection_mutex_);
     db_connection_->executeSQL(sql_generator_.getDeleteStatement(TABLE_NAME_VIEWPOINTS,
                                                                  "id="+to_string(id)));
 }
@@ -1012,7 +1015,7 @@ void DBInterface::saveSector(shared_ptr<Sector> sector)
 
     logdbg << "DBInterface: saveSector: cmd '" << str << "'";
     {
-        QMutexLocker locker(&connection_mutex_);
+        boost::mutex::scoped_lock locker(connection_mutex_);
         db_connection_->executeSQL(str);
     }
 
@@ -1023,7 +1026,7 @@ void DBInterface::deleteSector(shared_ptr<Sector> sector)
 {
     unsigned int sector_id = sector->id();
 
-    QMutexLocker locker(&connection_mutex_);
+    boost::mutex::scoped_lock locker(connection_mutex_);
     string cmd = sql_generator_.getDeleteStatement(TABLE_NAME_SECTORS,"id="+to_string(sector_id));
 
     //loginf << "UGA '" << cmd << "'";
@@ -1132,24 +1135,27 @@ void DBInterface::insertBuffer(const string& table_name, shared_ptr<Buffer> buff
 
     const PropertyList& properties = buffer->properties();
 
-    assert(table_info_.count(table_name));
+    { // check table exists and has correct columns
+        boost::mutex::scoped_lock locker(table_info_mutex_);
+        assert(table_info_.count(table_name));
 
-    DBTableInfo& table_info = table_info_.at(table_name);
+        DBTableInfo& table_info = table_info_.at(table_name);
 
-    for (unsigned int cnt = 0; cnt < properties.size(); ++cnt)
-    {
-        logdbg << "DBInterface: insertBuffer: checking column '" << properties.at(cnt).name()
-               << "'";
+        for (unsigned int cnt = 0; cnt < properties.size(); ++cnt)
+        {
+            logdbg << "DBInterface: insertBuffer: checking column '" << properties.at(cnt).name()
+                   << "'";
 
-        if (!table_info.hasColumn(properties.at(cnt).name()))
-            throw runtime_error("DBInterface: insertBuffer: column '" +
-                                properties.at(cnt).name() + "' does not exist in table " +
-                                table_name);
+            if (!table_info.hasColumn(properties.at(cnt).name()))
+                throw runtime_error("DBInterface: insertBuffer: column '" +
+                                    properties.at(cnt).name() + "' does not exist in table " +
+                                    table_name);
+        }
     }
 
     string bind_statement = sql_generator_.insertDBUpdateStringBind(buffer, table_name);
 
-    QMutexLocker locker(&connection_mutex_);
+    boost::mutex::scoped_lock locker(connection_mutex_);
 
     logdbg << "DBInterface: insertBuffer: preparing bind statement";
     db_connection_->prepareBindStatement(bind_statement);
@@ -1261,7 +1267,7 @@ void DBInterface::updateBuffer(const std::string& table_name, const std::string&
     string bind_statement =
             sql_generator_.createDBUpdateStringBind(buffer, key_col, table_name);
 
-    QMutexLocker locker(&connection_mutex_);
+    boost::mutex::scoped_lock locker(connection_mutex_);
 
     logdbg << "DBInterface: updateBuffer: preparing bind statement '" << bind_statement << "'";
     db_connection_->prepareBindStatement(bind_statement);
@@ -1372,7 +1378,7 @@ void DBInterface::createPropertiesTable()
 
 void DBInterface::clearTableContent(const string& table_name)
 {
-    QMutexLocker locker(&connection_mutex_);
+    boost::mutex::scoped_lock locker(connection_mutex_);
     // DELETE FROM tablename;
     db_connection_->executeSQL("DELETE FROM " + table_name + ";");
 }
@@ -1381,7 +1387,7 @@ shared_ptr<DBResult> DBInterface::queryMinMaxNormalForTable(const std::string& t
 {
     assert (false); // TODO
 
-    //    QMutexLocker locker(&connection_mutex_);
+    //    boost::mutex::scoped_lock locker(connection_mutex_);
     //    logdbg << "DBInterface: queryMinMaxForTable: getting command";
     //    shared_ptr<DBCommand> command = sql_generator_.getTableSelectMinMaxNormalStatement(table);
 

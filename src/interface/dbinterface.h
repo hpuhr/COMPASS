@@ -24,9 +24,10 @@
 #include "propertylist.h"
 #include "sqlgenerator.h"
 
-#include <qobject.h>
+#include <QObject>
 
-#include <QMutex>
+#include <boost/thread/mutex.hpp>
+
 #include <memory>
 #include <set>
 
@@ -182,7 +183,8 @@ protected:
 
     bool properties_loaded_ {false};
 
-    QMutex connection_mutex_;
+    boost::mutex connection_mutex_;
+    boost::mutex table_info_mutex_;
 
     unsigned int read_chunk_size_;
 
