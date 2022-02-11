@@ -64,6 +64,7 @@ private slots:
 
     void importAsterixRecordingSlot();
     void importRecentAsterixRecordingSlot();
+    void clearImportRecentAsterixRecordingsSlot();
     void importAsterixFromNetworkSlot();
 
     void importViewPointsSlot();

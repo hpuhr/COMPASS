@@ -317,7 +317,6 @@ void MainWindow::updateMenus()
 
     assert (import_menu_);
 
-
     open_recent_db_menu_->clear();
 
     // recent db files
@@ -330,13 +329,26 @@ void MainWindow::updateMenus()
         connect(file_act, &QAction::triggered, this, &MainWindow::openRecentDBSlot);
         open_recent_db_menu_->addAction(file_act);
     }
-    open_recent_db_menu_->setDisabled(recent_file_list.size() == 0);
+
+    if (recent_file_list.size() == 0)
+        open_recent_db_menu_->setDisabled(true);
+    else // add clear action
+    {
+        open_recent_db_menu_->addSeparator();
+
+        QAction* clear_file_act = new QAction("Clear");
+        connect(clear_file_act, &QAction::triggered, this, &MainWindow::clearExistingDBsSlot);
+        open_recent_db_menu_->addAction(clear_file_act);
+    }
 
     bool db_open = COMPASS::instance().dbOpened();
 
     new_db_action_->setDisabled(db_open);
     open_existing_db_action_->setDisabled(db_open);
-    open_recent_db_menu_->setDisabled(db_open);
+
+    if (recent_file_list.size()) // is disabled otherwise
+        open_recent_db_menu_->setDisabled(db_open);
+
     close_db_action_->setDisabled(!db_open);
 
     sectors_action_->setDisabled(!db_open);
@@ -356,7 +368,16 @@ void MainWindow::updateMenus()
         connect(file_act, &QAction::triggered, this, &MainWindow::importRecentAsterixRecordingSlot);
         import_recent_asterix_menu_->addAction(file_act);
     }
-    import_recent_asterix_menu_->setDisabled(recent_ast_list.size() == 0);
+    if (recent_ast_list.size() == 0)
+        import_recent_asterix_menu_->setDisabled(true);
+    else
+    {
+        import_recent_asterix_menu_->addSeparator();
+
+        QAction* clear_file_act = new QAction("Clear");
+        connect(clear_file_act, &QAction::triggered, this, &MainWindow::clearImportRecentAsterixRecordingsSlot);
+        import_recent_asterix_menu_->addAction(clear_file_act);
+    }
 
 }
 
@@ -1178,6 +1199,15 @@ void MainWindow::importRecentAsterixRecordingSlot()
     updateMenus();
 
     COMPASS::instance().taskManager().asterixImporterTask().dialog()->show();
+}
+
+void MainWindow::clearImportRecentAsterixRecordingsSlot()
+{
+    loginf << "MainWindow: clearImportRecentAsterixRecordingsSlot";
+
+    COMPASS::instance().taskManager().asterixImporterTask().clearFileList();
+
+    updateMenus();
 }
 
 void MainWindow::importAsterixFromNetworkSlot()
