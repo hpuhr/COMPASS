@@ -24,6 +24,7 @@
 #include "dbcontent/dbcontentwidget.h"
 #include "dbcontent/labeldefinition.h"
 #include "dbcontent/labeldefinitionwidget.h"
+#include "datasourcemanager.h"
 #include "dboreaddbjob.h"
 #include "dbcontent/variable/variable.h"
 #include "dbtableinfo.h"
@@ -322,9 +323,11 @@ void DBContent::load(VariableSet& read_set, bool use_filters, bool use_order,
     std::vector<std::string> extra_from_parts;
     vector<Variable*> filtered_variables;
 
-    if (dbo_manager_.hasDSFilter(name_))
+    DataSourceManager& ds_man = COMPASS::instance().dataSourceManager();
+
+    if (ds_man.hasDSFilter(name_))
     {
-        vector<unsigned int> ds_ids_to_load = dbo_manager_.unfilteredDS(name_);
+        vector<unsigned int> ds_ids_to_load = ds_man.unfilteredDS(name_);
         assert (ds_ids_to_load.size());
 
         assert (hasVariable(DBContent::meta_var_datasource_id_.name()));
@@ -457,16 +460,18 @@ void DBContent::doDataSourcesBeforeInsert (shared_ptr<Buffer> buffer)
     string datasource_col_str = datasource_var.dbColumnName();
     assert (buffer->has<unsigned int>(datasource_col_str));
 
+    DataSourceManager& ds_man = COMPASS::instance().dataSourceManager();
+
     NullableVector<unsigned int>& datasource_vec = buffer->get<unsigned int>(datasource_col_str);
 
     for (auto& ds_id_cnt : datasource_vec.distinctValuesWithCounts())
     {
-        if (!dbo_manager_.hasDataSource(ds_id_cnt.first))
-            dbo_manager_.addNewDataSource(ds_id_cnt.first);
+        if (!ds_man.hasDataSource(ds_id_cnt.first))
+            ds_man.addNewDataSource(ds_id_cnt.first);
 
         // add record count
-        dbo_manager_.dataSource(ds_id_cnt.first).addNumInserted(name_, 0, ds_id_cnt.second); // TODO HACK LINE ID
-        dbo_manager_.dataSource(ds_id_cnt.first).addNumLoaded(name_, 0, ds_id_cnt.second); // because propagated after
+        ds_man.dataSource(ds_id_cnt.first).addNumInserted(name_, 0, ds_id_cnt.second); // TODO HACK LINE ID
+        ds_man.dataSource(ds_id_cnt.first).addNumLoaded(name_, 0, ds_id_cnt.second); // because propagated after
     }
 }
 

@@ -1,6 +1,5 @@
 
 include(${CMAKE_CURRENT_LIST_DIR}/variable/CMakeLists.txt)
-include(${CMAKE_CURRENT_LIST_DIR}/source/CMakeLists.txt)
 
 include_directories (
     "${CMAKE_CURRENT_LIST_DIR}"

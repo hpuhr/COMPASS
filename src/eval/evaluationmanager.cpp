@@ -27,6 +27,7 @@
 #include "dbcontent/dbcontent.h"
 #include "dbcontent/dbcontentmanager.h"
 #include "dbcontentmanagerloadwidget.h"
+#include "datasourcemanager.h"
 #include "sector.h"
 #include "dbcontent/variable/metavariable.h"
 #include "dbcontent/variable/variable.h"
@@ -239,7 +240,9 @@ void EvaluationManager::loadData ()
         if (ds_it.second)
             ds_ids.insert(ds_it.first);
 
-    dbcontent_man.setLoadOnlyDataSources(ds_ids);
+    DataSourceManager& ds_man = COMPASS::instance().dataSourceManager();
+
+    ds_man.setLoadOnlyDataSources(ds_ids);
 
     fil_man.disableAllFilters();
 
@@ -1382,7 +1385,7 @@ void EvaluationManager::updateReferenceDBO()
     if (!hasValidReferenceDBO())
         return;
 
-    if (COMPASS::instance().dbContentManager().hasDataSourcesOfDBContent(dbo_name_ref_))
+    if (COMPASS::instance().dataSourceManager().hasDataSourcesOfDBContent(dbo_name_ref_))
         updateReferenceDataSources();
 }
 
@@ -1392,7 +1395,7 @@ void EvaluationManager::updateReferenceDataSources()
 
     assert (hasValidReferenceDBO());
 
-    for (auto& ds_it : COMPASS::instance().dbContentManager().dataSources())
+    for (auto& ds_it : COMPASS::instance().dataSourceManager().dataSources())
     {
         if (!ds_it->hasNumInserted(dbo_name_ref_))
             continue;
@@ -1430,7 +1433,7 @@ void EvaluationManager::updateTestDBO()
     if (!hasValidTestDBO())
         return;
 
-    if (COMPASS::instance().dbContentManager().hasDataSourcesOfDBContent(dbo_name_tst_))
+    if (COMPASS::instance().dataSourceManager().hasDataSourcesOfDBContent(dbo_name_tst_))
         updateTestDataSources();
 }
 
@@ -1441,7 +1444,7 @@ void EvaluationManager::updateTestDataSources()
     assert (hasValidTestDBO());
 
 
-    for (auto& ds_it : COMPASS::instance().dbContentManager().dataSources())
+    for (auto& ds_it : COMPASS::instance().dataSourceManager().dataSources())
     {
         if (!ds_it->hasNumInserted(dbo_name_tst_))
             continue;

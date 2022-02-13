@@ -28,7 +28,7 @@
 #include "logger.h"
 #include "propertylist.h"
 #include "stringconv.h"
-#include "dbcontent/source/dbdatasource.h"
+#include "source/dbdatasource.h"
 
 #include <algorithm>
 #include <iomanip>

@@ -19,13 +19,11 @@
 #define DBCONTENT_DBCONTENTMANAGER_H_
 
 #include "configurable.h"
-#include "dbcontent/source/configurationdatasource.h"
-#include "dbcontent/source/dbdatasource.h"
 #include "global.h"
 #include "singleton.h"
 #include "buffer.h"
 
-#include <qobject.h>
+#include <QObject>
 
 #include <vector>
 #include <memory>
@@ -33,7 +31,6 @@
 class COMPASS;
 class DBContent;
 class DBContentManagerWidget;
-class DBContentManagerDataSourcesWidget;
 class DBSchemaManager;
 
 namespace dbContent {
@@ -50,9 +47,7 @@ class DBContentManager : public QObject, public Configurable
     Q_OBJECT
 
 public slots:
-
     void databaseOpenedSlot();
-    //void databaseContentChangedSlot();
     void databaseClosedSlot();
 
     void metaDialogOKSlot();
@@ -69,7 +64,6 @@ signals:
     void insertDoneSignal(); // emitted when all dbos have finished loading
 
 public:
-    const static std::vector<std::string> data_source_types_;
 
     DBContentManager(const std::string& class_id, const std::string& instance_id, COMPASS* compass);
     virtual ~DBContentManager();
@@ -96,37 +90,6 @@ public:
     bool usedInMetaVariable(const dbContent::Variable& variable);
     dbContent::MetaVariableConfigurationDialog* metaVariableConfigdialog();
 
-    bool hasConfigDataSource(unsigned int ds_id);
-    dbContent::ConfigurationDataSource& configDataSource(unsigned int ds_id);
-
-    bool hasDataSource(unsigned int ds_id);
-    bool hasDataSourcesOfDBContent(const std::string dbcontent_name);
-    bool canAddNewDataSourceFromConfig (unsigned int ds_id);
-    void addNewDataSource (unsigned int ds_id); // be sure not to call from different thread
-
-    dbContent::DBDataSource& dataSource(unsigned int ds_id);
-    const std::vector<std::unique_ptr<dbContent::DBDataSource>>& dataSources() const;
-
-    std::map<unsigned int, std::vector <std::pair<std::string, unsigned int>>> getNetworkLines(); //ds_id -> (ip, port)
-
-    void saveDBDataSources();
-
-    bool dsTypeFiltered();
-    std::set<std::string> wantedDSTypes();
-    void dsTypeLoadingWanted (const std::string& ds_type, bool wanted);
-    bool dsTypeLoadingWanted (const std::string& ds_type);
-    void setLoadDSTypes (bool loading_wanted);
-    void setLoadOnlyDSTypes (std::set<std::string> ds_types);
-
-    bool loadingWanted (const std::string& dbcontent_name);
-    bool hasDSFilter (const std::string& dbcontent_name);
-    std::vector<unsigned int> unfilteredDS (const std::string& dbcontent_name); // DS IDs
-
-    void setLoadDataSources (bool loading_wanted);
-    void setLoadOnlyDataSources (std::set<unsigned int> ds_ids);
-    bool loadDataSourcesFiltered();
-    std::set<unsigned int> getLoadDataSources ();
-
     void load();
     void addLoadedData(std::map<std::string, std::shared_ptr<Buffer>> data);
     std::map<std::string, std::shared_ptr<Buffer>> loadedData();
@@ -139,7 +102,6 @@ public:
     bool insertInProgress() const;
 
     DBContentManagerWidget* widget();
-    DBContentManagerDataSourcesWidget* loadWidget();
 
     bool useLimit() const;
     void useLimit(bool useLimit);
@@ -192,8 +154,6 @@ public:
 protected:
     COMPASS& compass_;
 
-    std::map<std::string, bool> ds_type_loading_wanted_;
-
     bool use_order_{false};
     bool use_order_ascending_{false};
     std::string order_variable_dbcontent_name_;
@@ -220,11 +180,7 @@ protected:
     std::map<std::string, DBContent*> dbcontent_;
     std::vector<std::unique_ptr<dbContent::MetaVariable>> meta_variables_;
 
-    std::vector<std::unique_ptr<dbContent::ConfigurationDataSource>> config_data_sources_;
-    std::vector<std::unique_ptr<dbContent::DBDataSource>> db_data_sources_;
-
     std::unique_ptr<DBContentManagerWidget> widget_;
-    std::unique_ptr<DBContentManagerDataSourcesWidget> load_widget_;
 
     std::unique_ptr<dbContent::MetaVariableConfigurationDialog> meta_cfg_dialog_;
 
@@ -236,8 +192,6 @@ protected:
     void filterDataSources();
     void cutCachedData();
 
-    void loadDBDataSources();
-    void sortDBDataSources();
     void loadMaxRecordNumber();
 };
 

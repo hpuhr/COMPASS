@@ -20,6 +20,7 @@
 #include "dbinterface.h"
 #include "dbcontent/dbcontent.h"
 #include "dbcontent/dbcontentmanager.h"
+#include "datasourcemanager.h"
 #include "dbtableinfo.h"
 #include "filtermanager.h"
 #include "global.h"
@@ -134,6 +135,12 @@ void COMPASS::generateSubConfigurable(const std::string& class_id, const std::st
         dbcontent_manager_.reset(new DBContentManager(class_id, instance_id, this));
         assert(dbcontent_manager_);
     }
+    else if (class_id == "DataSourceManager")
+    {
+        assert(!ds_manager_);
+        ds_manager_.reset(new DataSourceManager(class_id, instance_id, this));
+        assert(ds_manager_);
+    }
     else if (class_id == "FilterManager")
     {
         assert(!filter_manager_);
@@ -172,9 +179,14 @@ void COMPASS::checkSubConfigurables()
     }
     if (!dbcontent_manager_)
     {
-        assert(db_interface_);
         addNewSubConfiguration("DBObjectManager", "DBObjectManager0");
         generateSubConfigurable("DBObjectManager", "DBObjectManager0");
+        assert(dbcontent_manager_);
+    }
+    if (!ds_manager_)
+    {
+        addNewSubConfiguration("DataSourceManager", "DataSourceManager0");
+        generateSubConfigurable("DataSourceManager", "DataSourceManager0");
         assert(dbcontent_manager_);
     }
     if (!filter_manager_)
@@ -262,7 +274,7 @@ void COMPASS::closeDB()
 
     assert (db_opened_);
 
-    dbcontent_manager_->saveDBDataSources();
+    ds_manager_->saveDBDataSources();
 
     db_interface_->closeDBFile();
     assert (!db_interface_->dbOpen());
@@ -281,6 +293,12 @@ DBContentManager& COMPASS::dbContentManager()
 {
     assert(dbcontent_manager_);
     return *dbcontent_manager_;
+}
+
+DataSourceManager& COMPASS::dataSourceManager()
+{
+    assert(ds_manager_);
+    return *ds_manager_;
 }
 
 FilterManager& COMPASS::filterManager()
@@ -334,9 +352,12 @@ void COMPASS::shutdown()
 
     assert(db_interface_);
 
-    assert(dbcontent_manager_);
+    assert(ds_manager_);
     if (db_interface_->dbOpen())
-        dbcontent_manager_->saveDBDataSources();
+        ds_manager_->saveDBDataSources();
+    ds_manager_ = nullptr;
+
+    assert(dbcontent_manager_);
     dbcontent_manager_ = nullptr;
 
     JobManager::instance().shutdown();

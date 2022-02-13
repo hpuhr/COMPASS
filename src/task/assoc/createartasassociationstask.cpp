@@ -25,6 +25,7 @@
 #include "dbcontent/dbcontentmanager.h"
 #include "dbcontent/variable/variable.h"
 #include "dbcontent/variable/variableset.h"
+#include "datasourcemanager.h"
 #include "jobmanager.h"
 #include "dbcontent/variable/metavariable.h"
 #include "stringconv.h"
@@ -176,6 +177,7 @@ bool CreateARTASAssociationsTask::isRecommended()
 bool CreateARTASAssociationsTask::canRun()
 {
     DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
+    DataSourceManager& ds_man = COMPASS::instance().dataSourceManager();
 
     logdbg << "CreateARTASAssociationsTask: canRun: tracker " << dbcontent_man.existsDBContent("CAT062");
 
@@ -198,15 +200,15 @@ bool CreateARTASAssociationsTask::canRun()
 
 
     logdbg << "CreateARTASAssociationsTask: canRun: num tracker data sources "
-               << dbcontent_man.hasDataSourcesOfDBContent("CAT062");
+               << ds_man.hasDataSourcesOfDBContent("CAT062");
 
-    if (!dbcontent_man.hasDataSourcesOfDBContent("CAT062"))
+    if (!ds_man.hasDataSourcesOfDBContent("CAT062"))
         return false;
 
     bool ds_found{false};
     unsigned int current_ds_id {0};
 
-    for (auto& ds_it : dbcontent_man.dataSources())
+    for (auto& ds_it : ds_man.dataSources())
     {
         if (!ds_it->numInsertedMap().count("CAT062")) // check if track data exists
             continue;
@@ -325,6 +327,7 @@ void CreateARTASAssociationsTask::run()
     checkAndSetMetaVariable(DBContent::meta_var_associations_.name(), &associations_var_);
 
     DBContentManager& object_man = COMPASS::instance().dbContentManager();
+    DataSourceManager& ds_man = COMPASS::instance().dataSourceManager();
 
     COMPASS::instance().viewManager().disableDataDistribution(true);
 
@@ -348,7 +351,7 @@ void CreateARTASAssociationsTask::run()
             bool ds_found{false};
             unsigned int current_ds_id;
 
-            for (auto& ds_it : object_man.dataSources())
+            for (auto& ds_it : ds_man.dataSources())
             {
                 if (!ds_it->numInsertedMap().count("CAT062")) // check if track data exists
                     continue;

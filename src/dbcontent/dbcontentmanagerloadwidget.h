@@ -23,7 +23,7 @@
 
 class DBContent;
 class DBContentWidget;
-class DBContentManager;
+class DataSourceManager;
 
 class QGridLayout;
 class QPushButton;
@@ -40,14 +40,14 @@ public slots:
     void loadDSChangedSlot();
 
 public:
-    DBContentManagerDataSourcesWidget(DBContentManager& object_manager);
+    DBContentManagerDataSourcesWidget(DataSourceManager& ds_man);
     virtual ~DBContentManagerDataSourcesWidget();
 
     void update();
     void loadingDone();
 
 private:
-    DBContentManager& dbcontent_man_;
+    DataSourceManager& ds_man_;
 
     bool show_counts_ {false};
 

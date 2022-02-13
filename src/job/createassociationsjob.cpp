@@ -22,6 +22,7 @@
 #include "dbinterface.h"
 #include "dbcontent/dbcontent.h"
 #include "dbcontent/dbcontentmanager.h"
+#include "datasourcemanager.h"
 #include "dbcontent/variable/metavariable.h"
 #include "dbcontent/variable/variable.h"
 #include "stringconv.h"
@@ -372,14 +373,15 @@ std::map<unsigned int, Association::Target> CreateAssociationsJob::createReferen
     }
 
     DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
+    DataSourceManager& ds_man = COMPASS::instance().dataSourceManager();
 
     // create utn for all tracks
     for (auto& ds_it : target_reports_.at("RefTraj")) // ds_id->trs
     {
         loginf << "CreateAssociationsJob: createReferenceUTNs: processing ds_id " << ds_it.first;
 
-        assert (dbcontent_man.hasDataSource(ds_it.first));
-        string ds_name = dbcontent_man.dataSource(ds_it.first).name();
+        assert (ds_man.hasDataSource(ds_it.first));
+        string ds_name = ds_man.dataSource(ds_it.first).name();
 
         loginf << "CreateAssociationsJob: createReferenceUTNs: creating tmp targets for ds_id " << ds_it.first;
 
@@ -438,15 +440,15 @@ void CreateAssociationsJob::createTrackerUTNs(std::map<unsigned int, Association
         return;
     }
 
-    DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
+    DataSourceManager& ds_man = COMPASS::instance().dataSourceManager();
 
     // create utn for all tracks
     for (auto& ds_it : target_reports_.at("CAT062")) // ds_id->trs
     {
         loginf << "CreateAssociationsJob: createTrackerUTNs: processing ds_id " << ds_it.first;
 
-        assert (dbcontent_man.hasDataSource(ds_it.first));
-        string ds_name = dbcontent_man.dataSource(ds_it.first).name();
+        assert (ds_man.hasDataSource(ds_it.first));
+        string ds_name = ds_man.dataSource(ds_it.first).name();
 
         loginf << "CreateAssociationsJob: createTrackerUTNs: creating tmp targets for ds_id " << ds_it.first;
 
@@ -511,7 +513,8 @@ void CreateAssociationsJob::createNonTrackerUTNS(std::map<unsigned int, Associat
     // get ta lookup map
     std::map<unsigned int, unsigned int> ta_2_utn = getTALookupMap(targets);
 
-    DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
+    //DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
+    DataSourceManager& ds_man = COMPASS::instance().dataSourceManager();
 
     const bool associate_non_mode_s = task_.associateNonModeS();
     const double max_time_diff_sensor = task_.maxTimeDiffSensor();
@@ -532,9 +535,9 @@ void CreateAssociationsJob::createNonTrackerUTNS(std::map<unsigned int, Associat
 
             assert (num_data_sources);
             done_perc = (unsigned int)(100.0 * (float)ds_cnt/(float)num_data_sources);
-            assert (dbcontent_man.hasDataSource(ds_it.first));
+            assert (ds_man.hasDataSource(ds_it.first));
 
-            string ds_name = dbcontent_man.dataSource(ds_it.first).name();
+            string ds_name = ds_man.dataSource(ds_it.first).name();
 
             emit statusSignal(("Creating "+dbo_it.first+" "+ds_name+" UTNs ("+to_string(done_perc)+"%)").c_str());
 
@@ -911,10 +914,10 @@ std::map<unsigned int, Association::Target> CreateAssociationsJob::createTracked
 
     map<unsigned int, pair<unsigned int, float>> tn2utn; // track num -> utn, last tod
 
-    DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
+    DataSourceManager& ds_man = COMPASS::instance().dataSourceManager();
 
-    assert (dbcontent_man.hasDataSource(ds_id));
-    string ds_name = dbcontent_man.dataSource(ds_id).name();
+    assert (ds_man.hasDataSource(ds_id));
+    string ds_name = ds_man.dataSource(ds_id).name();
 
     std::map<unsigned int, std::vector<Association::TargetReport>>& ds_id_trs = target_reports_.at(dbo_name);
 

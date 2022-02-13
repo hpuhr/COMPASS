@@ -18,6 +18,7 @@
 #include "evaluationdatasourcewidget.h"
 #include "logger.h"
 #include "dbcontent/dbcontentcombobox.h"
+#include "datasourcemanager.h"
 #include "evaluationmanager.h"
 
 #include <QLabel>
@@ -100,7 +101,7 @@ void EvaluationDataSourceWidget::updateDataSources()
     unsigned int col, row;
     unsigned int cnt = 0;
 
-    DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
+    DataSourceManager& ds_man = COMPASS::instance().dataSourceManager();
 
     map<unsigned int, bool> data_sources;
 
@@ -111,9 +112,9 @@ void EvaluationDataSourceWidget::updateDataSources()
 
     for (auto& it : data_sources)
     {
-        assert (dbcontent_man.hasDataSource(it.first));
+        assert (ds_man.hasDataSource(it.first));
 
-        dbContent::DBDataSource& ds = dbcontent_man.dataSource(it.first);
+        dbContent::DBDataSource& ds = ds_man.dataSource(it.first);
 
         QCheckBox* checkbox = new QCheckBox(tr(ds.name().c_str()));
         checkbox->setChecked(it.second);

@@ -25,6 +25,7 @@
 #include "dbcontent/dbcontent.h"
 #include "dbcontent/dbcontentmanager.h"
 #include "dbcontent/variable/variable.h"
+#include "datasourcemanager.h"
 #include "filtermanagerwidget.h"
 #include "logger.h"
 #include "viewpoint.h"
@@ -301,7 +302,7 @@ void FilterManager::showViewPointSlot (const ViewableDataConfig* vp)
 
     const json& data = vp->data();
 
-    DBContentManager& obj_man = COMPASS::instance().dbContentManager();
+    DataSourceManager& ds_man = COMPASS::instance().dataSourceManager();
 
     // add all data source types that need loading
     if (data.contains("data_source_types")) // the listed ones should be loaded
@@ -312,13 +313,13 @@ void FilterManager::showViewPointSlot (const ViewableDataConfig* vp)
 
         logdbg << "FilterManager: showViewPointSlot: load " << ds_types.size() << " ds_types";
 
-        obj_man.setLoadOnlyDSTypes(ds_types);
+        ds_man.setLoadOnlyDSTypes(ds_types);
     }
     else // all should be loaded
     {
         logdbg << "FilterManager: showViewPointSlot: load all ds_types";
 
-        obj_man.setLoadDSTypes(true);
+        ds_man.setLoadDSTypes(true);
     }
 
     // add all data sources that need loading
@@ -330,13 +331,13 @@ void FilterManager::showViewPointSlot (const ViewableDataConfig* vp)
 
         logdbg << "FilterManager: showViewPointSlot: load " << ds_ids.size() << " ds_ids";
 
-        obj_man.setLoadOnlyDataSources(ds_ids);
+        ds_man.setLoadOnlyDataSources(ds_ids);
     }
     else // all should be loaded
     {
         logdbg << "FilterManager: showViewPointSlot: load all ds_ids";
 
-        obj_man.setLoadDataSources(true);
+        ds_man.setLoadDataSources(true);
     }
 
     // add filters
@@ -375,13 +376,13 @@ void FilterManager::setConfigInViewPoint (nlohmann::json& data)
 {
     loginf << "FilterManager: setConfigInViewPoint";
 
-    DBContentManager& obj_man = COMPASS::instance().dbContentManager();
+    DataSourceManager& ds_man = COMPASS::instance().dataSourceManager();
 
-    if (obj_man.dsTypeFiltered()) // ds types filters active
-        data["data_source_types"] = obj_man.wantedDSTypes(); // add all data sources that need loading
+    if (ds_man.dsTypeFiltered()) // ds types filters active
+        data["data_source_types"] = ds_man.wantedDSTypes(); // add all data sources that need loading
 
-    if (obj_man.loadDataSourcesFiltered()) // ds filters active
-        data["data_sources"] = obj_man.getLoadDataSources(); // add all data sources that need loading
+    if (ds_man.loadDataSourcesFiltered()) // ds filters active
+        data["data_sources"] = ds_man.getLoadDataSources(); // add all data sources that need loading
 
     // add filters
     if (use_filters_)

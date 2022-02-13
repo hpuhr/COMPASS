@@ -20,6 +20,7 @@
 #include "compass.h"
 #include "config.h"
 #include "configurationmanager.h"
+#include "datasourcemanager.h"
 #include "dbcontent/dbcontent.h"
 #include "dbcontent/dbcontentmanager.h"
 #include "dbcontentmanagerloadwidget.h"
@@ -110,7 +111,7 @@ MainWindow::MainWindow()
 
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
-    tab_widget_->addTab(COMPASS::instance().dbContentManager().loadWidget(), "Data Sources");
+    tab_widget_->addTab(COMPASS::instance().dataSourceManager().loadWidget(), "Data Sources");
     tab_widget_->addTab(COMPASS::instance().filterManager().widget(), "Filters");
 
     COMPASS::instance().evaluationManager().init(tab_widget_); // adds eval widget

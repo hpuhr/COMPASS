@@ -1,7 +1,7 @@
 #ifndef DBCONTENT_DBDATASOURCE_H
 #define DBCONTENT_DBDATASOURCE_H
 
-#include "dbcontent/source/datasourcebase.h"
+#include "source/datasourcebase.h"
 #include "property.h"
 
 namespace dbContent

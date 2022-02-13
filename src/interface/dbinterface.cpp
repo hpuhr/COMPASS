@@ -37,7 +37,7 @@
 #include "sector.h"
 #include "sectorlayer.h"
 #include "evaluationmanager.h"
-#include "dbcontent/source/dbdatasource.h"
+#include "source/dbdatasource.h"
 #include "dbcontent/variable/metavariable.h"
 
 #include <QApplication>

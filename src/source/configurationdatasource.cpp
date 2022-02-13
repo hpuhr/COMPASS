@@ -1,6 +1,6 @@
-#include "dbcontent/source/configurationdatasource.h"
-#include "dbcontent/source/dbdatasource.h"
-#include "dbcontent/dbcontentmanager.h"
+#include "source/configurationdatasource.h"
+#include "source/dbdatasource.h"
+#include "datasourcemanager.h"
 #include "logger.h"
 #include "util/number.h"
 
@@ -15,8 +15,8 @@ namespace dbContent
 
 
 ConfigurationDataSource::ConfigurationDataSource(const std::string& class_id, const std::string& instance_id,
-                                                 DBContentManager& dbo_manager)
-    : Configurable(class_id, instance_id, &dbo_manager)
+                                                 DataSourceManager& ds_manager)
+    : Configurable(class_id, instance_id, &ds_manager)
 {
     registerParameter("ds_type", &ds_type_, "");
     registerParameter("sac", &sac_, 0);
@@ -24,17 +24,17 @@ ConfigurationDataSource::ConfigurationDataSource(const std::string& class_id, co
 
     assert (ds_type_.size());
 
-    if (find(DBContentManager::data_source_types_.begin(),
-             DBContentManager::data_source_types_.end(), ds_type_)
-        == DBContentManager::data_source_types_.end())
+    if (find(DataSourceManager::data_source_types_.begin(),
+             DataSourceManager::data_source_types_.end(), ds_type_)
+        == DataSourceManager::data_source_types_.end())
     {
         logerr << "ConfigurationDataSource: sac/sic " << sac_ << sic_ << " ds_type '" << ds_type_
                << "' unknown";
     }
 
-    assert (find(DBContentManager::data_source_types_.begin(),
-                 DBContentManager::data_source_types_.end(), ds_type_)
-            != DBContentManager::data_source_types_.end());
+    assert (find(DataSourceManager::data_source_types_.begin(),
+                 DataSourceManager::data_source_types_.end(), ds_type_)
+            != DataSourceManager::data_source_types_.end());
 
     registerParameter("name", &name_, "");
     registerParameter("has_short_name", &has_short_name_, false);

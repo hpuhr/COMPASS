@@ -1,6 +1,7 @@
-﻿#include "asterixpostprocessjob.h"
+﻿#include "dbcontent/dbcontent.h"
+#include "asterixpostprocessjob.h"
 #include "dbcontent/dbcontentmanager.h"
-#include "dbcontent/dbcontent.h"
+#include "datasourcemanager.h"
 #include "buffer.h"
 #include "compass.h"
 #include "mainwindow.h"
@@ -119,7 +120,8 @@ void ASTERIXPostprocessJob::doRadarPlotPositionCalculations()
 
     // do radar position projection
 
-    DBContentManager& dbo_man = COMPASS::instance().dbContentManager();
+    DataSourceManager& ds_man = COMPASS::instance().dataSourceManager();
+    DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
     ProjectionManager& proj_man = ProjectionManager::instance();
 
     assert(proj_man.hasCurrentProjection());
@@ -149,8 +151,8 @@ void ASTERIXPostprocessJob::doRadarPlotPositionCalculations()
         unsigned int buffer_size = buffer->size();
         assert(buffer_size);
 
-        assert (dbo_man.existsDBContent(dbo_name));
-        DBContent& db_object = dbo_man.dbContent(dbo_name);
+        assert (dbcont_man.existsDBContent(dbo_name));
+        DBContent& db_object = dbcont_man.dbContent(dbo_name);
 
         assert (db_object.hasVariable(DBContent::meta_var_datasource_id_.name()));
         assert (db_object.hasVariable(DBContent::var_radar_range_.name()));
@@ -206,8 +208,8 @@ void ASTERIXPostprocessJob::doRadarPlotPositionCalculations()
         {
             if (!projection.hasCoordinateSystem(ds_id_it))
             {
-                assert (dbo_man.hasConfigDataSource(ds_id_it)
-                        || dbo_man.hasDataSource(ds_id_it)); // creation done after in doDataSourcesBeforeInsert
+                assert (ds_man.hasConfigDataSource(ds_id_it)
+                        || ds_man.hasDataSource(ds_id_it)); // creation done after in doDataSourcesBeforeInsert
 
                 //                if (!dbo_man.hasDataSource(ds_id_it))
                 //                {
@@ -222,9 +224,9 @@ void ASTERIXPostprocessJob::doRadarPlotPositionCalculations()
 
                 //                assert (dbo_man.hasDataSource(ds_id_it));
 
-                if (dbo_man.hasConfigDataSource(ds_id_it))
+                if (ds_man.hasConfigDataSource(ds_id_it))
                 {
-                    dbContent::ConfigurationDataSource& data_source = dbo_man.configDataSource(ds_id_it);
+                    dbContent::ConfigurationDataSource& data_source = ds_man.configDataSource(ds_id_it);
 
                     if (data_source.info().contains("latitude")
                             && data_source.info().contains("longitude")
@@ -243,9 +245,9 @@ void ASTERIXPostprocessJob::doRadarPlotPositionCalculations()
                         logerr << "ASTERIXPostprocessJob: run: config ds " << data_source.name()
                                << " defined but missing position info";
                 }
-                else if (dbo_man.hasDataSource(ds_id_it))
+                else if (ds_man.hasDataSource(ds_id_it))
                 {
-                    dbContent::DBDataSource& data_source = dbo_man.dataSource(ds_id_it);
+                    dbContent::DBDataSource& data_source = ds_man.dataSource(ds_id_it);
 
                     if (data_source.info().contains("latitude")
                             && data_source.info().contains("longitude")

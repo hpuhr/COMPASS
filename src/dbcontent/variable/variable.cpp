@@ -24,7 +24,7 @@
 #include "configurationmanager.h"
 #include "dbinterface.h"
 #include "dbcontent/dbcontent.h"
-#include "dbcontent/dbcontentmanager.h"
+#include "datasourcemanager.h"
 #include "dbcontent/variable/variablewidget.h"
 #include "stringconv.h"
 #include "unit.h"
@@ -752,13 +752,13 @@ std::string Variable::getDataSourcesAsString(const std::string& value) const
 {
     assert(db_object_);
 
-    DBContentManager& dbo_man = COMPASS::instance().dbContentManager();
+    DataSourceManager& ds_man = COMPASS::instance().dataSourceManager();
 
     unsigned int ds_id = stoi(value);
 
-    if (dbo_man.hasDataSource(ds_id))
+    if (ds_man.hasDataSource(ds_id))
     {
-        dbContent::DBDataSource& ds = dbo_man.dataSource(ds_id);
+        dbContent::DBDataSource& ds = ds_man.dataSource(ds_id);
 
         if (ds.hasShortName())
             return ds.shortName();

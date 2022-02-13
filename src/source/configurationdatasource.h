@@ -1,10 +1,10 @@
 #ifndef DBCONTENT_CONFIGURATIONDATASOURCE_H
 #define DBCONTENT_CONFIGURATIONDATASOURCE_H
 
-#include "dbcontent/source/datasourcebase.h"
+#include "source/datasourcebase.h"
 #include "configurable.h"
 
-class DBContentManager;
+class DataSourceManager;
 
 namespace dbContent
 {
@@ -15,7 +15,7 @@ class ConfigurationDataSource : public Configurable, public DataSourceBase
 {
 public:
     ConfigurationDataSource(const std::string& class_id, const std::string& instance_id,
-                            DBContentManager& dbo_manager);
+                            DataSourceManager& ds_manager);
     //ConfigurationDataSource() = default;
     virtual ~ConfigurationDataSource();
 

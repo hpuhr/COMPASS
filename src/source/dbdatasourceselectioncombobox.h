@@ -5,8 +5,8 @@
 #include <QComboBox>
 
 #include "compass.h"
-#include "dbcontent/dbcontentmanager.h"
-#include "dbcontent/source/dbdatasource.h"
+#include "datasourcemanager.h"
+#include "source/dbdatasource.h"
 
 namespace dbContent
 {
@@ -82,7 +82,7 @@ class DBDataSourceComboBox : public QComboBox
     {
         clear();
 
-        for (auto& ds_it : COMPASS::instance().dbContentManager().dataSources())
+        for (auto& ds_it : COMPASS::instance().dataSourceManager().dataSources())
         {
             if (show_dstype_only_ && ds_it->dsType() != only_dstype_name_)
                 continue;

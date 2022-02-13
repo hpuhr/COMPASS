@@ -17,10 +17,10 @@
 
 #include "dbcontentmanagerloadwidget.h"
 #include "compass.h"
-#include "dbcontent/dbcontent.h"
 #include "dbcontent/dbcontentmanager.h"
-#include "dbcontent/variable/variable.h"
-#include "dbcontent/variable/variableselectionwidget.h"
+#include "datasourcemanager.h"
+//#include "dbcontent/variable/variable.h"
+//#include "dbcontent/variable/variableselectionwidget.h"
 #include "global.h"
 #include "stringconv.h"
 #include "viewmanager.h"
@@ -38,8 +38,8 @@ using namespace std;
 using namespace Utils;
 using namespace Utils::String;
 
-DBContentManagerDataSourcesWidget::DBContentManagerDataSourcesWidget(DBContentManager& object_manager)
-    : dbcontent_man_(object_manager)
+DBContentManagerDataSourcesWidget::DBContentManagerDataSourcesWidget(DataSourceManager& ds_man)
+    : ds_man_(ds_man)
 {
     QFont font_bold;
     font_bold.setBold(true);
@@ -109,7 +109,7 @@ void DBContentManagerDataSourcesWidget::loadDSTypeChangedSlot()
 
     loginf << "DBObjectManagerLoadWidget: loadDSTypeChangedSlot: ds_type " << ds_type_name << " load " << load;
 
-    COMPASS::instance().dbContentManager().dsTypeLoadingWanted(ds_type_name, load);
+    COMPASS::instance().dataSourceManager().dsTypeLoadingWanted(ds_type_name, load);
 }
 
 void DBContentManagerDataSourcesWidget::loadDSChangedSlot()
@@ -123,7 +123,7 @@ void DBContentManagerDataSourcesWidget::loadDSChangedSlot()
 
     loginf << "DBObjectManagerLoadWidget: loadDSChangedSlot: ds_id " << ds_id << " load " << load;
 
-    COMPASS::instance().dbContentManager().dataSource(ds_id).loadingWanted(load);
+    ds_man_.dataSource(ds_id).loadingWanted(load);
 }
 
 
@@ -170,11 +170,11 @@ void DBContentManagerDataSourcesWidget::loadDSChangedSlot()
 
 void DBContentManagerDataSourcesWidget::update()
 {
-    logdbg << "DBObjectManagerLoadWidget: update: num data sources " << dbcontent_man_.dataSources().size();
+    logdbg << "DBObjectManagerLoadWidget: update: num data sources " << ds_man_.dataSources().size();
 
     bool clear_required = false;
 
-    for (const auto& ds_it : dbcontent_man_.dataSources())
+    for (const auto& ds_it : ds_man_.dataSources())
     {
         if (!ds_boxes_.count(ds_it->name()))
         {
@@ -206,11 +206,13 @@ void DBContentManagerDataSourcesWidget::update()
     else
         updateExistingContent();
 
+// TODO move this
+    DBContentManager& dbo_man = COMPASS::instance().dbContentManager();
 
     assert(associations_label_);
-    if (dbcontent_man_.hasAssociations())
+    if (dbo_man.hasAssociations())
     {
-        std::string tmp = "From " + dbcontent_man_.associationsID();
+        std::string tmp = "From " + dbo_man.associationsID();
         associations_label_->setText(tmp.c_str());
     }
     else
@@ -263,15 +265,14 @@ void DBContentManagerDataSourcesWidget::clearAndCreateContent()
     unsigned int button_size = 28;
 
     //ds_id -> (ip, port)
-    std::map<unsigned int, std::vector <std::pair<std::string, unsigned int>>> net_lines =
-            COMPASS::instance().dbContentManager().getNetworkLines();
+    std::map<unsigned int, std::vector <std::pair<std::string, unsigned int>>> net_lines = ds_man_.getNetworkLines();
 
     string tooltip;
 
-    DBContentManager& dbo_man = COMPASS::instance().dbContentManager();
+    //DBContentManager& dbo_man = COMPASS::instance().dbContentManager();
     bool ds_found;
 
-    for (auto& ds_type_name : DBContentManager::data_source_types_)
+    for (auto& ds_type_name : DataSourceManager::data_source_types_)
     {
         logdbg << "DBObjectManagerLoadWidget: clearAndCreateContent: typ " << ds_type_name << " cnt " << dstyp_cnt;
 
@@ -284,7 +285,7 @@ void DBContentManagerDataSourcesWidget::clearAndCreateContent()
 
         QCheckBox* dstyp_box = new QCheckBox(ds_type_name.c_str());
         dstyp_box->setFont(font_bold);
-        dstyp_box->setChecked(dbo_man.dsTypeLoadingWanted(ds_type_name));
+        dstyp_box->setChecked(ds_man_.dsTypeLoadingWanted(ds_type_name));
         dstyp_box->setProperty("DSType", ds_type_name.c_str());
 
         connect(dstyp_box, &QCheckBox::clicked, this,
@@ -299,7 +300,7 @@ void DBContentManagerDataSourcesWidget::clearAndCreateContent()
 
         ds_found = false;
 
-        for (const auto& ds_it : dbcontent_man_.dataSources())
+        for (const auto& ds_it : ds_man_.dataSources())
         {
             if (ds_it->dsType() != ds_type_name)
                 continue;
@@ -426,14 +427,14 @@ void DBContentManagerDataSourcesWidget::updateExistingContent()
     for (auto& ds_typ_it : ds_type_boxes_)
     {
         logdbg << "DBObjectManagerLoadWidget: updateExistingContent: ds_typ " << ds_typ_it.first
-               << " " << dbcontent_man_.dsTypeLoadingWanted(ds_typ_it.first);
-        ds_typ_it.second->setChecked(dbcontent_man_.dsTypeLoadingWanted(ds_typ_it.first));
+               << " " << ds_man_.dsTypeLoadingWanted(ds_typ_it.first);
+        ds_typ_it.second->setChecked(ds_man_.dsTypeLoadingWanted(ds_typ_it.first));
     }
 
     string ds_name;
     string ds_content_name;
 
-    for (const auto& ds_it : dbcontent_man_.dataSources())
+    for (const auto& ds_it : ds_man_.dataSources())
     {
         //loginf << row << " '" << ds_it->dsType() << "' '" << dstype << "'";
 
