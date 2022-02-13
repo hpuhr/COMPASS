@@ -26,7 +26,7 @@
 #include "dbinterface.h"
 #include "dbcontent/dbcontent.h"
 #include "dbcontent/dbcontentmanager.h"
-#include "dbcontentmanagerloadwidget.h"
+#include "datasourcesloadwidget.h"
 #include "datasourcemanager.h"
 #include "sector.h"
 #include "dbcontent/variable/metavariable.h"

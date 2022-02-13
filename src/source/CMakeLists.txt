@@ -10,11 +10,13 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/configurationdatasource.h"
         "${CMAKE_CURRENT_LIST_DIR}/dbdatasource.h"
         "${CMAKE_CURRENT_LIST_DIR}/dbdatasourceselectioncombobox.h"
+        "${CMAKE_CURRENT_LIST_DIR}/datasourcesloadwidget.h"
     PRIVATE
         "${CMAKE_CURRENT_LIST_DIR}/datasourcemanager.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/datasourcebase.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/configurationdatasource.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/dbdatasource.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/datasourcesloadwidget"
 )
 
 

@@ -23,7 +23,7 @@
 #include "datasourcemanager.h"
 #include "dbcontent/dbcontent.h"
 #include "dbcontent/dbcontentmanager.h"
-#include "dbcontentmanagerloadwidget.h"
+#include "datasourcesloadwidget.h"
 #include "dbcontent/variable/metavariableconfigurationdialog.h"
 #include "files.h"
 #include "filtermanager.h"

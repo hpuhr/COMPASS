@@ -15,14 +15,12 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DBCONTENT_DBCONTENTMANAGERLOADWIDGET_H_
-#define DBCONTENT_DBCONTENTMANAGERLOADWIDGET_H_
+#ifndef DATASOURCESLOADWIDGET_H_
+#define DATASOURCESLOADWIDGET_H_
 
 #include <QFrame>
 #include <map>
 
-class DBContent;
-class DBContentWidget;
 class DataSourceManager;
 
 class QGridLayout;
@@ -31,7 +29,7 @@ class QCheckBox;
 class QLineEdit;
 class QLabel;
 
-class DBContentManagerDataSourcesWidget : public QWidget
+class DataSourcesLoadWidget : public QWidget
 {
     Q_OBJECT
 
@@ -40,8 +38,8 @@ public slots:
     void loadDSChangedSlot();
 
 public:
-    DBContentManagerDataSourcesWidget(DataSourceManager& ds_man);
-    virtual ~DBContentManagerDataSourcesWidget();
+    DataSourcesLoadWidget(DataSourceManager& ds_man);
+    virtual ~DataSourcesLoadWidget();
 
     void update();
     void loadingDone();
@@ -66,4 +64,4 @@ private:
     void updateExistingContent();
 };
 
-#endif /* DBCONTENT_DBCONTENTMANAGERLOADWIDGET_H_ */
+#endif /* DATASOURCESLOADWIDGET_H_ */

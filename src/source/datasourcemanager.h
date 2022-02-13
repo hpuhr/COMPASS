@@ -12,7 +12,7 @@
 #include <memory>
 
 class COMPASS;
-class DBContentManagerDataSourcesWidget;
+class DataSourcesLoadWidget;
 
 class DataSourceManager : public QObject, public Configurable
 {
@@ -62,7 +62,7 @@ public:
     bool loadDataSourcesFiltered();
     std::set<unsigned int> getLoadDataSources ();
 
-    DBContentManagerDataSourcesWidget* loadWidget();
+    DataSourcesLoadWidget* loadWidget();
     void updateWidget();
 
 protected:
@@ -71,7 +71,7 @@ protected:
     std::vector<std::unique_ptr<dbContent::ConfigurationDataSource>> config_data_sources_;
     std::vector<std::unique_ptr<dbContent::DBDataSource>> db_data_sources_;
 
-    std::unique_ptr<DBContentManagerDataSourcesWidget> load_widget_;
+    std::unique_ptr<DataSourcesLoadWidget> load_widget_;
 
     std::map<std::string, bool> ds_type_loading_wanted_;
 

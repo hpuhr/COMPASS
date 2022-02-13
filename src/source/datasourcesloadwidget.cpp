@@ -15,12 +15,10 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "dbcontentmanagerloadwidget.h"
+#include "datasourcesloadwidget.h"
 #include "compass.h"
 #include "dbcontent/dbcontentmanager.h"
 #include "datasourcemanager.h"
-//#include "dbcontent/variable/variable.h"
-//#include "dbcontent/variable/variableselectionwidget.h"
 #include "global.h"
 #include "stringconv.h"
 #include "viewmanager.h"
@@ -38,7 +36,7 @@ using namespace std;
 using namespace Utils;
 using namespace Utils::String;
 
-DBContentManagerDataSourcesWidget::DBContentManagerDataSourcesWidget(DataSourceManager& ds_man)
+DataSourcesLoadWidget::DataSourcesLoadWidget(DataSourceManager& ds_man)
     : ds_man_(ds_man)
 {
     QFont font_bold;
@@ -95,10 +93,10 @@ DBContentManagerDataSourcesWidget::DBContentManagerDataSourcesWidget(DataSourceM
     setLayout(main_layout);
 }
 
-DBContentManagerDataSourcesWidget::~DBContentManagerDataSourcesWidget() {}
+DataSourcesLoadWidget::~DataSourcesLoadWidget() {}
 
 
-void DBContentManagerDataSourcesWidget::loadDSTypeChangedSlot()
+void DataSourcesLoadWidget::loadDSTypeChangedSlot()
 {
     QCheckBox* box = dynamic_cast<QCheckBox*>(QObject::sender());
     assert (box);
@@ -112,7 +110,7 @@ void DBContentManagerDataSourcesWidget::loadDSTypeChangedSlot()
     COMPASS::instance().dataSourceManager().dsTypeLoadingWanted(ds_type_name, load);
 }
 
-void DBContentManagerDataSourcesWidget::loadDSChangedSlot()
+void DataSourcesLoadWidget::loadDSChangedSlot()
 {
     QCheckBox* box = dynamic_cast<QCheckBox*>(QObject::sender());
     assert (box);
@@ -168,7 +166,7 @@ void DBContentManagerDataSourcesWidget::loadDSChangedSlot()
 //    dbo_manager_.limitMax(max);
 //}
 
-void DBContentManagerDataSourcesWidget::update()
+void DataSourcesLoadWidget::update()
 {
     logdbg << "DBObjectManagerLoadWidget: update: num data sources " << ds_man_.dataSources().size();
 
@@ -219,7 +217,7 @@ void DBContentManagerDataSourcesWidget::update()
         associations_label_->setText("None");
 }
 
-void DBContentManagerDataSourcesWidget::clearAndCreateContent()
+void DataSourcesLoadWidget::clearAndCreateContent()
 {
     loginf << "DBObjectManagerLoadWidget: clearAndCreateContent";
 
@@ -289,7 +287,7 @@ void DBContentManagerDataSourcesWidget::clearAndCreateContent()
         dstyp_box->setProperty("DSType", ds_type_name.c_str());
 
         connect(dstyp_box, &QCheckBox::clicked, this,
-                &DBContentManagerDataSourcesWidget::loadDSTypeChangedSlot);
+                &DataSourcesLoadWidget::loadDSTypeChangedSlot);
 
         type_layout_->addWidget(dstyp_box, row, col_start, 1, num_col_per_dstype, Qt::AlignTop | Qt::AlignLeft);
 
@@ -317,7 +315,7 @@ void DBContentManagerDataSourcesWidget::clearAndCreateContent()
             ds_box->setProperty("DS ID", ds_id);
 
             connect(ds_box, &QCheckBox::clicked, this,
-                    &DBContentManagerDataSourcesWidget::loadDSChangedSlot);
+                    &DataSourcesLoadWidget::loadDSChangedSlot);
 
             type_layout_->addWidget(ds_box, row, col_start, 1, 2, //num_col_per_dstype-1,
                                     Qt::AlignTop | Qt::AlignLeft);
@@ -420,7 +418,7 @@ void DBContentManagerDataSourcesWidget::clearAndCreateContent()
     }
 }
 
-void DBContentManagerDataSourcesWidget::updateExistingContent()
+void DataSourcesLoadWidget::updateExistingContent()
 {
     loginf << "DBObjectManagerLoadWidget: updateExistingContent";
 

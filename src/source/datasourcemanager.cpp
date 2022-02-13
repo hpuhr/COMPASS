@@ -1,5 +1,5 @@
 #include "datasourcemanager.h"
-#include "dbcontentmanagerloadwidget.h"
+#include "datasourcesloadwidget.h"
 #include "compass.h"
 #include "dbinterface.h"
 #include "stringconv.h"
@@ -43,11 +43,11 @@ void DataSourceManager::generateSubConfigurable(const std::string& class_id,
                                      class_id);
 }
 
-DBContentManagerDataSourcesWidget* DataSourceManager::loadWidget()
+DataSourcesLoadWidget* DataSourceManager::loadWidget()
 {
     if (!load_widget_)
     {
-        load_widget_.reset(new DBContentManagerDataSourcesWidget(*this));
+        load_widget_.reset(new DataSourcesLoadWidget(*this));
     }
 
     assert(load_widget_);
