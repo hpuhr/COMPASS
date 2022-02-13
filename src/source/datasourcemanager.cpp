@@ -1,5 +1,6 @@
 #include "datasourcemanager.h"
 #include "datasourcesloadwidget.h"
+#include "datasourcesconfigurationdialog.h"
 #include "compass.h"
 #include "dbinterface.h"
 #include "stringconv.h"
@@ -58,6 +59,19 @@ void DataSourceManager::updateWidget()
 {
     if (load_widget_)
         load_widget_->update();
+}
+
+DataSourcesConfigurationDialog* DataSourceManager::configurationDialog()
+{
+    if (!config_dialog_)
+    {
+        config_dialog_.reset(new DataSourcesConfigurationDialog(*this));
+
+        connect (config_dialog_.get(), &DataSourcesConfigurationDialog::doneSignal,
+                 this, &DataSourceManager::configurationDialogDoneSlot);
+    }
+
+    return config_dialog_.get();
 }
 
 
@@ -165,6 +179,15 @@ void DataSourceManager::databaseClosedSlot()
 
     if (load_widget_)
         load_widget_->update();
+}
+
+void DataSourceManager::configurationDialogDoneSlot()
+{
+    loginf << "DataSourceManager: configurationDialogDoneSlot";
+
+    config_dialog_->hide();
+    config_dialog_ = nullptr;
+
 }
 
 bool DataSourceManager::hasConfigDataSource (unsigned int ds_id)

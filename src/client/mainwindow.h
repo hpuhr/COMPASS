@@ -59,6 +59,7 @@ private slots:
     void livePauseSlot();
     void liveStopSlot();
 
+    void configureDataSourcesSlot();
     void configureMetaVariablesSlot();
     void configureSectorsSlot();
 

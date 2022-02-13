@@ -21,6 +21,7 @@
 #include "config.h"
 #include "configurationmanager.h"
 #include "datasourcemanager.h"
+#include "datasourcesconfigurationdialog.h"
 #include "dbcontent/dbcontent.h"
 #include "dbcontent/dbcontentmanager.h"
 #include "datasourcesloadwidget.h"
@@ -257,6 +258,11 @@ void MainWindow::createMenus ()
     QMenu* config_menu = menuBar()->addMenu(tr("&Configuration"));
 
     // configure operations
+    QAction* ds_action = new QAction(tr("Data Sources"));
+    ds_action->setStatusTip(tr("Configure Data Sources"));
+    connect(ds_action, &QAction::triggered, this, &MainWindow::configureDataSourcesSlot);
+    config_menu->addAction(ds_action);
+
     QAction* meta_action = new QAction(tr("Meta Variables"));
     meta_action->setStatusTip(tr("Configure Meta Variables"));
     connect(meta_action, &QAction::triggered, this, &MainWindow::configureMetaVariablesSlot);
@@ -1246,6 +1252,13 @@ void MainWindow::calculateAssociationsSlot()
     loginf << "MainWindow: calculateAssociationsSlot";
 
     COMPASS::instance().taskManager().createAssociationsTask().dialog()->show();
+}
+
+void MainWindow::configureDataSourcesSlot()
+{
+    loginf << "MainWindow: configureDataSourcesSlot";
+
+    COMPASS::instance().dataSourceManager().configurationDialog()->show();
 }
 
 void MainWindow::configureMetaVariablesSlot()

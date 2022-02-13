@@ -13,6 +13,7 @@
 
 class COMPASS;
 class DataSourcesLoadWidget;
+class DataSourcesConfigurationDialog;
 
 class DataSourceManager : public QObject, public Configurable
 {
@@ -21,6 +22,8 @@ class DataSourceManager : public QObject, public Configurable
 public slots:
     void databaseOpenedSlot();
     void databaseClosedSlot();
+
+    void configurationDialogDoneSlot();
 
 public:
     const static std::vector<std::string> data_source_types_;
@@ -65,6 +68,8 @@ public:
     DataSourcesLoadWidget* loadWidget();
     void updateWidget();
 
+    DataSourcesConfigurationDialog* configurationDialog();
+
 protected:
     COMPASS& compass_;
 
@@ -72,6 +77,7 @@ protected:
     std::vector<std::unique_ptr<dbContent::DBDataSource>> db_data_sources_;
 
     std::unique_ptr<DataSourcesLoadWidget> load_widget_;
+    std::unique_ptr<DataSourcesConfigurationDialog> config_dialog_;
 
     std::map<std::string, bool> ds_type_loading_wanted_;
 
