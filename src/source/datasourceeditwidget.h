@@ -5,13 +5,20 @@
 
 class DataSourceManager;
 class DataSourcesConfigurationDialog;
+class DSTypeSelectionComboBox;
 
+class QLabel;
 class QLineEdit;
 class QPushButton;
 
 class DataSourceEditWidget : public QWidget
 {
     Q_OBJECT
+
+public slots:
+    void nameEditedSlot(const QString& value);
+    void shortNameEditedSlot(const QString& value);
+    void dsTypeEditedSlot(const QString& value);
 
 public:
     DataSourceEditWidget(DataSourceManager& ds_man, DataSourcesConfigurationDialog& dialog);
@@ -29,6 +36,12 @@ protected:
 
     QLineEdit* name_edit_{nullptr};
     QLineEdit* short_name_edit_{nullptr};
+
+    DSTypeSelectionComboBox* dstype_combo_{nullptr};
+
+    QLabel* sac_label_{nullptr};
+    QLabel* sic_label_{nullptr};
+    QLabel* ds_id_label_{nullptr};
 
     void updateContent();
 

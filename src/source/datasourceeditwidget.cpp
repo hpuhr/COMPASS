@@ -2,6 +2,8 @@
 #include "datasourcemanager.h"
 #include "configurationdatasource.h"
 #include "dbdatasource.h"
+#include "dstypeselectioncombobox.h"
+#include "datasourcesconfigurationdialog.h"
 #include "logger.h"
 
 #include <QLineEdit>
@@ -9,6 +11,7 @@
 #include <QVBoxLayout>
 #include <QGridLayout>
 #include <QLabel>
+#include <QMessageBox>
 
 using namespace std;
 
@@ -17,38 +20,63 @@ DataSourceEditWidget::DataSourceEditWidget(DataSourceManager& ds_man, DataSource
 {
     setMaximumWidth(300);
 
-//    QFont font_bold;
-//    font_bold.setBold(true);
-
-//    QFont font_big;
-//    font_big.setPointSize(18);
-
     QVBoxLayout* main_layout = new QVBoxLayout();
-
-//    QLabel* main_label = new QLabel("Edit Data Source");
-//    main_label->setFont(font_big);
-//    main_layout->addWidget(main_label);
 
     QGridLayout* properties_layout_ = new QGridLayout();
 
     unsigned int row = 0;
-    QLabel* name_label = new QLabel("Name");
-    properties_layout_->addWidget(name_label, row, 0);
+
+    // "Name", "Short Name", "DSType", "SAC", "SIC"
+
+    //name_edit_
+    properties_layout_->addWidget(new QLabel("Name"), row, 0);
 
     name_edit_ = new QLineEdit();
-    //connect(name_edit_, SIGNAL(returnPressed()), this, SLOT(editNameSlot()));
+    connect(name_edit_, &QLineEdit::textEdited, this, &DataSourceEditWidget::nameEditedSlot);
     properties_layout_->addWidget(name_edit_, row, 1);
     row++;
 
-    //name_edit_
     //short_name_edit_
 
-    QLabel* short_name_label = new QLabel("Short Name");
-    properties_layout_->addWidget(short_name_label, row, 0);
+    properties_layout_->addWidget(new QLabel("Short Name"), row, 0);
 
     short_name_edit_ = new QLineEdit();
-    //connect(name_edit_, SIGNAL(returnPressed()), this, SLOT(editNameSlot()));
+    connect(short_name_edit_, &QLineEdit::textEdited, this, &DataSourceEditWidget::shortNameEditedSlot);
     properties_layout_->addWidget(short_name_edit_, row, 1);
+    row++;
+
+    // dstype_combo_
+
+    properties_layout_->addWidget(new QLabel("DSType"), row, 0);
+
+    dstype_combo_ = new DSTypeSelectionComboBox();
+    connect(dstype_combo_, &DSTypeSelectionComboBox::changedTypeSignal, this, &DataSourceEditWidget::dsTypeEditedSlot);
+    properties_layout_->addWidget(dstype_combo_, row, 1);
+    row++;
+
+    //QLabel* sac_label_{nullptr};
+
+    properties_layout_->addWidget(new QLabel("SAC"), row, 0);
+
+    sac_label_ = new QLabel();
+    properties_layout_->addWidget(sac_label_, row, 1);
+    row++;
+
+    //QLabel* sic_label_{nullptr};
+
+    properties_layout_->addWidget(new QLabel("SIC"), row, 0);
+
+    sic_label_ = new QLabel();
+    properties_layout_->addWidget(sic_label_, row, 1);
+    row++;
+
+    //QLabel* ds_id_label_{nullptr};
+
+    properties_layout_->addWidget(new QLabel("DS ID"), row, 0);
+
+    ds_id_label_ = new QLabel();
+    properties_layout_->addWidget(ds_id_label_, row, 1);
+    row++;
 
     updateContent();
 
@@ -83,6 +111,76 @@ void DataSourceEditWidget::clear()
 }
 
 
+void DataSourceEditWidget::nameEditedSlot(const QString& value)
+{
+    string text = value.toStdString();
+
+    loginf << "DataSourceEditWidget: nameEditedSlot: '" << text << "'";
+
+    if (!text.size())
+    {
+        QMessageBox m_warning(QMessageBox::Warning, "Invalid Name",
+                              "Empty names are not permitted. Please set another name.",
+                              QMessageBox::Ok);
+
+        m_warning.exec();
+        return;
+    }
+
+    assert (has_current_ds_);
+
+    if (current_ds_in_db_)
+    {
+        assert (ds_man_.hasDBDataSource(current_ds_id_));
+        ds_man_.dbDataSource(current_ds_id_).name(text);
+    }
+
+    assert (ds_man_.hasConfigDataSource(current_ds_id_));
+    ds_man_.configDataSource(current_ds_id_).name(text);
+
+    dialog_.updateDataSource(current_ds_id_);
+}
+
+void DataSourceEditWidget::shortNameEditedSlot(const QString& value)
+{
+    string text = value.toStdString();
+
+    loginf << "DataSourceEditWidget: shortNameEditedSlot: '" << text << "'";
+
+    assert (has_current_ds_);
+
+    if (current_ds_in_db_)
+    {
+        assert (ds_man_.hasDBDataSource(current_ds_id_));
+        ds_man_.dbDataSource(current_ds_id_).shortName(text);
+    }
+
+    assert (ds_man_.hasConfigDataSource(current_ds_id_));
+    ds_man_.configDataSource(current_ds_id_).shortName(text);
+
+    dialog_.updateDataSource(current_ds_id_);
+}
+
+void DataSourceEditWidget::dsTypeEditedSlot(const QString& value)
+{
+    string text = value.toStdString();
+
+    loginf << "DataSourceEditWidget: dsTypeEditedSlot: '" << text << "'";
+
+    assert (has_current_ds_);
+
+    if (current_ds_in_db_)
+    {
+        assert (ds_man_.hasDBDataSource(current_ds_id_));
+        ds_man_.dbDataSource(current_ds_id_).dsType(text);
+    }
+
+    assert (ds_man_.hasConfigDataSource(current_ds_id_));
+    ds_man_.configDataSource(current_ds_id_).dsType(text);
+
+    dialog_.updateDataSource(current_ds_id_);
+}
+
 void DataSourceEditWidget::updateContent()
 {
     assert (name_edit_);
@@ -95,10 +193,17 @@ void DataSourceEditWidget::updateContent()
 
         short_name_edit_->setText("");
         short_name_edit_->setDisabled(true);
+
+        dstype_combo_->setType("");
+        dstype_combo_->setDisabled(true);
+
+        sac_label_->setText("");
+        sic_label_->setText("");
+        ds_id_label_->setText("");
     }
     else
     {
-        if (current_ds_in_db_)
+        if (current_ds_in_db_) // db && cfg
         {
             assert (ds_man_.hasDBDataSource(current_ds_id_));
 
@@ -114,6 +219,13 @@ void DataSourceEditWidget::updateContent()
                 short_name_edit_->setText("");
 
             short_name_edit_->setDisabled(false);
+
+            dstype_combo_->setType(ds.dsType());
+            dstype_combo_->setDisabled(false);
+
+            sac_label_->setText(QString::number(ds.sac()));
+            sic_label_->setText(QString::number(ds.sic()));
+            ds_id_label_->setText(QString::number(ds.id()));
         }
         else // cfg only
         {
@@ -130,6 +242,13 @@ void DataSourceEditWidget::updateContent()
                 short_name_edit_->setText("");
 
             short_name_edit_->setDisabled(false);
+
+            dstype_combo_->setType(ds.dsType());
+            dstype_combo_->setDisabled(false);
+
+            sac_label_->setText(QString::number(ds.sac()));
+            sic_label_->setText(QString::number(ds.sic()));
+            ds_id_label_->setText(QString::number(ds.id()));
         }
     }
 }

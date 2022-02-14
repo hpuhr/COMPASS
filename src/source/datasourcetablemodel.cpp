@@ -166,3 +166,18 @@ unsigned int DataSourceTableModel::getIdOf (const QModelIndex& index)
 
     return ds_man_.getAllDsIDs().at(index.row());
 }
+
+
+void DataSourceTableModel::updateDataSource(unsigned int ds_id)
+{
+    loginf << "DataSourceTableModel: updateDataSource: ds_id " << ds_id;
+
+    auto ds_ids = ds_man_.getAllDsIDs();
+
+    auto itr = std::find(ds_ids.begin(), ds_ids.end(), ds_id);
+    assert (itr != ds_ids.end());
+
+    unsigned int row = std::distance(ds_ids.begin(), itr);
+
+    emit dataChanged(index(row, 0), index(row, table_columns_.size()-1), QVector<int>(Qt::DisplayRole));
+}
