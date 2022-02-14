@@ -19,6 +19,8 @@ DataSourceManager::DataSourceManager(const std::string& class_id, const std::str
         : Configurable(class_id, instance_id, compass, "data_sources.json"), compass_(*compass)
 {
     createSubConfigurables();
+
+    updateDSIdsAll();
 }
 
 DataSourceManager::~DataSourceManager()
@@ -42,6 +44,11 @@ void DataSourceManager::generateSubConfigurable(const std::string& class_id,
         else
             throw std::runtime_error("DataSourceManager: generateSubConfigurable: unknown class_id " +
                                      class_id);
+}
+
+std::vector<unsigned int> DataSourceManager::getAllDsIDs()
+{
+    return ds_ids_all_;
 }
 
 DataSourcesLoadWidget* DataSourceManager::loadWidget()
@@ -134,8 +141,8 @@ void DataSourceManager::setLoadOnlyDataSources (std::set<unsigned int> ds_ids)
 
     for (auto ds_id_it : ds_ids)
     {
-        assert (hasDataSource(ds_id_it));
-        dataSource(ds_id_it).loadingWanted(true);
+        assert (hasDBDataSource(ds_id_it));
+        dbDataSource(ds_id_it).loadingWanted(true);
     }
 
     if (load_widget_)
@@ -177,6 +184,8 @@ void DataSourceManager::databaseClosedSlot()
 {
     db_data_sources_.clear();
 
+    updateDSIdsAll();
+
     if (load_widget_)
         load_widget_->update();
 }
@@ -192,25 +201,18 @@ void DataSourceManager::configurationDialogDoneSlot()
 
 bool DataSourceManager::hasConfigDataSource (unsigned int ds_id)
 {
-    unsigned int sac = Number::sacFromDsId(ds_id);
-    unsigned int sic = Number::sicFromDsId(ds_id);
-
     return find_if(config_data_sources_.begin(), config_data_sources_.end(),
-                   [sac,sic] (const std::unique_ptr<dbContent::ConfigurationDataSource>& s)
-    { return s->sac() == sac && s->sic() == sic; } ) != config_data_sources_.end();
-
+                   [ds_id] (const std::unique_ptr<dbContent::ConfigurationDataSource>& s)
+    { return s->id() == ds_id; } ) != config_data_sources_.end();
 }
 
 dbContent::ConfigurationDataSource& DataSourceManager::configDataSource (unsigned int ds_id)
 {
     assert (hasConfigDataSource(ds_id));
 
-    unsigned int sac = Number::sacFromDsId(ds_id);
-    unsigned int sic = Number::sicFromDsId(ds_id);
-
     return *find_if(config_data_sources_.begin(), config_data_sources_.end(),
-                    [sac,sic] (const std::unique_ptr<dbContent::ConfigurationDataSource>& s)
-    { return s->sac() == sac && s->sic() == sic; } )->get();
+                    [ds_id] (const std::unique_ptr<dbContent::ConfigurationDataSource>& s)
+    { return s->id() == ds_id; } )->get();
 }
 
 void DataSourceManager::checkSubConfigurables()
@@ -241,6 +243,27 @@ void DataSourceManager::sortDBDataSources()
     });
 }
 
+void DataSourceManager::updateDSIdsAll()
+{
+    ds_ids_all_.clear();
+
+    std::set<unsigned int> ds_ids_set;
+
+    for (auto& ds_it : config_data_sources_) // add from cfg
+    {
+        if (!ds_ids_set.count(ds_it->id()))
+            ds_ids_set.insert(ds_it->id());
+    }
+
+    for (auto& ds_it : db_data_sources_) // add from db
+    {
+        if (!ds_ids_set.count(ds_it->id()))
+            ds_ids_set.insert(ds_it->id());
+    }
+
+    std::copy(ds_ids_set.begin(), ds_ids_set.end(), std::back_inserter(ds_ids_all_)); // copy to vec
+}
+
 void DataSourceManager::saveDBDataSources()
 {
     DBInterface& db_interface = COMPASS::instance().interface();
@@ -251,17 +274,17 @@ void DataSourceManager::saveDBDataSources()
 
 bool DataSourceManager::canAddNewDataSourceFromConfig (unsigned int ds_id)
 {
-    if (hasDataSource(ds_id))
+    if (hasDBDataSource(ds_id))
         return false;
 
     return hasConfigDataSource(ds_id);
 }
 
-bool DataSourceManager::hasDataSource(unsigned int ds_id)
+bool DataSourceManager::hasDBDataSource(unsigned int ds_id)
 {
     return find_if(db_data_sources_.begin(), db_data_sources_.end(),
                    [ds_id] (const std::unique_ptr<dbContent::DBDataSource>& s)
-    { return Number::dsIdFrom(s->sac(), s->sic()) == ds_id; } ) != db_data_sources_.end();
+    { return s->id() == ds_id; } ) != db_data_sources_.end();
 }
 
 bool DataSourceManager::hasDataSourcesOfDBContent(const std::string dbcontent_name)
@@ -276,7 +299,7 @@ void DataSourceManager::addNewDataSource (unsigned int ds_id)
 {
     loginf << "DataSourceManager: addNewDataSource: ds_id " << ds_id;
 
-    assert (!hasDataSource(ds_id));
+    assert (!hasDBDataSource(ds_id));
 
     if (hasConfigDataSource(ds_id))
     {
@@ -301,14 +324,15 @@ void DataSourceManager::addNewDataSource (unsigned int ds_id)
         sortDBDataSources();
     }
 
-    assert (hasDataSource(ds_id));
+    assert (hasDBDataSource(ds_id));
+    updateDSIdsAll();
 
     loginf << "DataSourceManager: addNewDataSource: ds_id " << ds_id << " done";
 }
 
-dbContent::DBDataSource& DataSourceManager::dataSource(unsigned int ds_id)
+dbContent::DBDataSource& DataSourceManager::dbDataSource(unsigned int ds_id)
 {
-    assert (hasDataSource(ds_id));
+    assert (hasDBDataSource(ds_id));
 
     return *find_if(db_data_sources_.begin(), db_data_sources_.end(),
                     [ds_id] (const std::unique_ptr<dbContent::DBDataSource>& s)
@@ -378,7 +402,7 @@ void DataSourceManager::setLoadOnlyDSTypes (std::set<std::string> ds_types)
         load_widget_->update();
 }
 
-const std::vector<std::unique_ptr<dbContent::DBDataSource>>& DataSourceManager::dataSources() const
+const std::vector<std::unique_ptr<dbContent::DBDataSource>>& DataSourceManager::dbDataSources() const
 {
     return db_data_sources_;
 }

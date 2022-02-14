@@ -112,9 +112,9 @@ void EvaluationDataSourceWidget::updateDataSources()
 
     for (auto& it : data_sources)
     {
-        assert (ds_man.hasDataSource(it.first));
+        assert (ds_man.hasDBDataSource(it.first));
 
-        dbContent::DBDataSource& ds = ds_man.dataSource(it.first);
+        dbContent::DBDataSource& ds = ds_man.dbDataSource(it.first);
 
         QCheckBox* checkbox = new QCheckBox(tr(ds.name().c_str()));
         checkbox->setChecked(it.second);

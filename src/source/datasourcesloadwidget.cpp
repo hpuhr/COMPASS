@@ -121,7 +121,7 @@ void DataSourcesLoadWidget::loadDSChangedSlot()
 
     loginf << "DBObjectManagerLoadWidget: loadDSChangedSlot: ds_id " << ds_id << " load " << load;
 
-    ds_man_.dataSource(ds_id).loadingWanted(load);
+    ds_man_.dbDataSource(ds_id).loadingWanted(load);
 }
 
 
@@ -168,11 +168,11 @@ void DataSourcesLoadWidget::loadDSChangedSlot()
 
 void DataSourcesLoadWidget::update()
 {
-    logdbg << "DBObjectManagerLoadWidget: update: num data sources " << ds_man_.dataSources().size();
+    logdbg << "DBObjectManagerLoadWidget: update: num data sources " << ds_man_.dbDataSources().size();
 
     bool clear_required = false;
 
-    for (const auto& ds_it : ds_man_.dataSources())
+    for (const auto& ds_it : ds_man_.dbDataSources())
     {
         if (!ds_boxes_.count(ds_it->name()))
         {
@@ -298,7 +298,7 @@ void DataSourcesLoadWidget::clearAndCreateContent()
 
         ds_found = false;
 
-        for (const auto& ds_it : ds_man_.dataSources())
+        for (const auto& ds_it : ds_man_.dbDataSources())
         {
             if (ds_it->dsType() != ds_type_name)
                 continue;
@@ -432,7 +432,7 @@ void DataSourcesLoadWidget::updateExistingContent()
     string ds_name;
     string ds_content_name;
 
-    for (const auto& ds_it : ds_man_.dataSources())
+    for (const auto& ds_it : ds_man_.dbDataSources())
     {
         //loginf << row << " '" << ds_it->dsType() << "' '" << dstype << "'";
 

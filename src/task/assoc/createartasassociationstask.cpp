@@ -208,7 +208,7 @@ bool CreateARTASAssociationsTask::canRun()
     bool ds_found{false};
     unsigned int current_ds_id {0};
 
-    for (auto& ds_it : ds_man.dataSources())
+    for (auto& ds_it : ds_man.dbDataSources())
     {
         if (!ds_it->numInsertedMap().count("CAT062")) // check if track data exists
             continue;
@@ -351,7 +351,7 @@ void CreateARTASAssociationsTask::run()
             bool ds_found{false};
             unsigned int current_ds_id;
 
-            for (auto& ds_it : ds_man.dataSources())
+            for (auto& ds_it : ds_man.dbDataSources())
             {
                 if (!ds_it->numInsertedMap().count("CAT062")) // check if track data exists
                     continue;

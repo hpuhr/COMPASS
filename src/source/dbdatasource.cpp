@@ -104,22 +104,6 @@ void DBDataSource::clearNumLoaded()
     num_loaded_.clear();
 }
 
-//json DBDataSource::getAsJSON()
-//{
-//    json j = DataSourceBase::getAsJSON();
-
-//    j["counts"] = counts_;
-
-//    return j;
-//}
-
-//void DBDataSource::setFromJSON(json& j)
-//{
-//    DataSourceBase::setFromJSON(j);
-
-//    counts_ = j.at("counts");
-//}
-
 unsigned int DBDataSource::id() const
 {
     return id_;

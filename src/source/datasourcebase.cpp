@@ -1,5 +1,7 @@
 #include "source/datasourcebase.h"
 #include "logger.h"
+#include "number.h"
+using namespace Utils;
 
 using namespace nlohmann;
 
@@ -40,6 +42,11 @@ unsigned int DataSourceBase::sic() const
 void DataSourceBase::sic(unsigned int sic)
 {
     sic_ = sic;
+}
+
+unsigned int DataSourceBase::id() const
+{
+    return Number::dsIdFrom(sac(), sic());
 }
 
 std::string DataSourceBase::name() const

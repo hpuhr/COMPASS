@@ -209,7 +209,7 @@ void ASTERIXPostprocessJob::doRadarPlotPositionCalculations()
             if (!projection.hasCoordinateSystem(ds_id_it))
             {
                 assert (ds_man.hasConfigDataSource(ds_id_it)
-                        || ds_man.hasDataSource(ds_id_it)); // creation done after in doDataSourcesBeforeInsert
+                        || ds_man.hasDBDataSource(ds_id_it)); // creation done after in doDataSourcesBeforeInsert
 
                 //                if (!dbo_man.hasDataSource(ds_id_it))
                 //                {
@@ -245,9 +245,9 @@ void ASTERIXPostprocessJob::doRadarPlotPositionCalculations()
                         logerr << "ASTERIXPostprocessJob: run: config ds " << data_source.name()
                                << " defined but missing position info";
                 }
-                else if (ds_man.hasDataSource(ds_id_it))
+                else if (ds_man.hasDBDataSource(ds_id_it))
                 {
-                    dbContent::DBDataSource& data_source = ds_man.dataSource(ds_id_it);
+                    dbContent::DBDataSource& data_source = ds_man.dbDataSource(ds_id_it);
 
                     if (data_source.info().contains("latitude")
                             && data_source.info().contains("longitude")

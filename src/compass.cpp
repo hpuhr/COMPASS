@@ -56,21 +56,19 @@ COMPASS::COMPASS() : Configurable("COMPASS", "COMPASS0", 0, "compass.json")
 
     assert(db_interface_);
     assert(dbcontent_manager_);
+    assert(ds_manager_);
     assert(filter_manager_);
     assert(task_manager_);
     assert(view_manager_);
     assert(eval_manager_);
 
-//    QObject::connect(db_interface_.get(), &DBInterface::databaseContentChangedSignal,
-//                     dbo_manager_.get(), &DBObjectManager::databaseContentChangedSlot,
-//                     Qt::QueuedConnection);
-
-//    QObject::connect(dbo_manager_.get(), &DBObjectManager::dbObjectsChangedSignal,
-//                     task_manager_.get(), &TaskManager::dbObjectsChangedSlot);
-//    QObject::connect(dbo_manager_.get(), &DBObjectManager::schemaChangedSignal, task_manager_.get(),
-//                     &TaskManager::schemaChangedSlot);
-
     // database opending
+
+    QObject::connect(db_interface_.get(), &DBInterface::databaseOpenedSignal,
+                     ds_manager_.get(), &DataSourceManager::databaseOpenedSlot);
+    QObject::connect(db_interface_.get(), &DBInterface::databaseClosedSignal,
+                     ds_manager_.get(), &DataSourceManager::databaseClosedSlot);
+
     QObject::connect(db_interface_.get(), &DBInterface::databaseOpenedSignal,
                      dbcontent_manager_.get(), &DBContentManager::databaseOpenedSlot);
     QObject::connect(db_interface_.get(), &DBInterface::databaseClosedSignal,

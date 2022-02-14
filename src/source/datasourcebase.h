@@ -22,6 +22,8 @@ public:
     unsigned int sic() const;
     void sic(unsigned int sic);
 
+    virtual unsigned int id() const; // from sac/sic
+
     std::string name() const;
     void name(const std::string &name);
 

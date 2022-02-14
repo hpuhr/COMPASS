@@ -756,9 +756,9 @@ std::string Variable::getDataSourcesAsString(const std::string& value) const
 
     unsigned int ds_id = stoi(value);
 
-    if (ds_man.hasDataSource(ds_id))
+    if (ds_man.hasDBDataSource(ds_id))
     {
-        dbContent::DBDataSource& ds = ds_man.dataSource(ds_id);
+        dbContent::DBDataSource& ds = ds_man.dbDataSource(ds_id);
 
         if (ds.hasShortName())
             return ds.shortName();

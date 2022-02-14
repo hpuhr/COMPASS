@@ -380,8 +380,8 @@ std::map<unsigned int, Association::Target> CreateAssociationsJob::createReferen
     {
         loginf << "CreateAssociationsJob: createReferenceUTNs: processing ds_id " << ds_it.first;
 
-        assert (ds_man.hasDataSource(ds_it.first));
-        string ds_name = ds_man.dataSource(ds_it.first).name();
+        assert (ds_man.hasDBDataSource(ds_it.first));
+        string ds_name = ds_man.dbDataSource(ds_it.first).name();
 
         loginf << "CreateAssociationsJob: createReferenceUTNs: creating tmp targets for ds_id " << ds_it.first;
 
@@ -447,8 +447,8 @@ void CreateAssociationsJob::createTrackerUTNs(std::map<unsigned int, Association
     {
         loginf << "CreateAssociationsJob: createTrackerUTNs: processing ds_id " << ds_it.first;
 
-        assert (ds_man.hasDataSource(ds_it.first));
-        string ds_name = ds_man.dataSource(ds_it.first).name();
+        assert (ds_man.hasDBDataSource(ds_it.first));
+        string ds_name = ds_man.dbDataSource(ds_it.first).name();
 
         loginf << "CreateAssociationsJob: createTrackerUTNs: creating tmp targets for ds_id " << ds_it.first;
 
@@ -535,9 +535,9 @@ void CreateAssociationsJob::createNonTrackerUTNS(std::map<unsigned int, Associat
 
             assert (num_data_sources);
             done_perc = (unsigned int)(100.0 * (float)ds_cnt/(float)num_data_sources);
-            assert (ds_man.hasDataSource(ds_it.first));
+            assert (ds_man.hasDBDataSource(ds_it.first));
 
-            string ds_name = ds_man.dataSource(ds_it.first).name();
+            string ds_name = ds_man.dbDataSource(ds_it.first).name();
 
             emit statusSignal(("Creating "+dbo_it.first+" "+ds_name+" UTNs ("+to_string(done_perc)+"%)").c_str());
 
@@ -916,8 +916,8 @@ std::map<unsigned int, Association::Target> CreateAssociationsJob::createTracked
 
     DataSourceManager& ds_man = COMPASS::instance().dataSourceManager();
 
-    assert (ds_man.hasDataSource(ds_id));
-    string ds_name = ds_man.dataSource(ds_id).name();
+    assert (ds_man.hasDBDataSource(ds_id));
+    string ds_name = ds_man.dbDataSource(ds_id).name();
 
     std::map<unsigned int, std::vector<Association::TargetReport>>& ds_id_trs = target_reports_.at(dbo_name);
 

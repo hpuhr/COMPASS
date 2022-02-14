@@ -39,22 +39,14 @@ public:
     unsigned int numLoaded (const std::string& db_content);
     void clearNumLoaded();
 
-//    virtual nlohmann::json getAsJSON();
-//    virtual void setFromJSON(nlohmann::json& j);
-
-    unsigned int id() const;
+    virtual unsigned int id() const override; // from saved db content
     void id(unsigned int id);
-
-//    unsigned int activeLine() const;
-//    void activeLine(unsigned int active_line);
 
     bool loadingWanted() const;
     void loadingWanted(bool loading_wanted);
 
 protected:
     unsigned int id_{0};
-
-    //unsigned int active_line_ {0};
 
     bool loading_wanted_ {true};
 

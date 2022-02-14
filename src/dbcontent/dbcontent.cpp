@@ -466,12 +466,12 @@ void DBContent::doDataSourcesBeforeInsert (shared_ptr<Buffer> buffer)
 
     for (auto& ds_id_cnt : datasource_vec.distinctValuesWithCounts())
     {
-        if (!ds_man.hasDataSource(ds_id_cnt.first))
+        if (!ds_man.hasDBDataSource(ds_id_cnt.first))
             ds_man.addNewDataSource(ds_id_cnt.first);
 
         // add record count
-        ds_man.dataSource(ds_id_cnt.first).addNumInserted(name_, 0, ds_id_cnt.second); // TODO HACK LINE ID
-        ds_man.dataSource(ds_id_cnt.first).addNumLoaded(name_, 0, ds_id_cnt.second); // because propagated after
+        ds_man.dbDataSource(ds_id_cnt.first).addNumInserted(name_, 0, ds_id_cnt.second); // TODO HACK LINE ID
+        ds_man.dbDataSource(ds_id_cnt.first).addNumLoaded(name_, 0, ds_id_cnt.second); // because propagated after
     }
 }
 

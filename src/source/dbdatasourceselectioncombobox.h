@@ -82,7 +82,7 @@ class DBDataSourceComboBox : public QComboBox
     {
         clear();
 
-        for (auto& ds_it : COMPASS::instance().dataSourceManager().dataSources())
+        for (auto& ds_it : COMPASS::instance().dataSourceManager().dbDataSources())
         {
             if (show_dstype_only_ && ds_it->dsType() != only_dstype_name_)
                 continue;

@@ -34,16 +34,18 @@ public:
     virtual void generateSubConfigurable(const std::string& class_id,
                                          const std::string& instance_id);
 
+    std::vector<unsigned int> getAllDsIDs(); // both config and db
+
     bool hasConfigDataSource(unsigned int ds_id);
     dbContent::ConfigurationDataSource& configDataSource(unsigned int ds_id);
 
-    bool hasDataSource(unsigned int ds_id);
+    bool hasDBDataSource(unsigned int ds_id);
     bool hasDataSourcesOfDBContent(const std::string dbcontent_name);
     bool canAddNewDataSourceFromConfig (unsigned int ds_id);
     void addNewDataSource (unsigned int ds_id); // be sure not to call from different thread
 
-    dbContent::DBDataSource& dataSource(unsigned int ds_id);
-    const std::vector<std::unique_ptr<dbContent::DBDataSource>>& dataSources() const;
+    dbContent::DBDataSource& dbDataSource(unsigned int ds_id);
+    const std::vector<std::unique_ptr<dbContent::DBDataSource>>& dbDataSources() const;
 
     std::map<unsigned int, std::vector <std::pair<std::string, unsigned int>>> getNetworkLines(); //ds_id -> (ip, port)
 
@@ -75,6 +77,7 @@ protected:
 
     std::vector<std::unique_ptr<dbContent::ConfigurationDataSource>> config_data_sources_;
     std::vector<std::unique_ptr<dbContent::DBDataSource>> db_data_sources_;
+    std::vector<unsigned int> ds_ids_all_; // both from config and db, vector to have order
 
     std::unique_ptr<DataSourcesLoadWidget> load_widget_;
     std::unique_ptr<DataSourcesConfigurationDialog> config_dialog_;
@@ -85,6 +88,8 @@ protected:
 
     void loadDBDataSources();
     void sortDBDataSources();
+
+    void updateDSIdsAll();
 };
 
 #endif // DATASOURCEMANAGER_H

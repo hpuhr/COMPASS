@@ -1395,7 +1395,7 @@ void EvaluationManager::updateReferenceDataSources()
 
     assert (hasValidReferenceDBO());
 
-    for (auto& ds_it : COMPASS::instance().dataSourceManager().dataSources())
+    for (auto& ds_it : COMPASS::instance().dataSourceManager().dbDataSources())
     {
         if (!ds_it->hasNumInserted(dbo_name_ref_))
             continue;
@@ -1444,7 +1444,7 @@ void EvaluationManager::updateTestDataSources()
     assert (hasValidTestDBO());
 
 
-    for (auto& ds_it : COMPASS::instance().dataSourceManager().dataSources())
+    for (auto& ds_it : COMPASS::instance().dataSourceManager().dbDataSources())
     {
         if (!ds_it->hasNumInserted(dbo_name_tst_))
             continue;
