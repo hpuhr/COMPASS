@@ -67,7 +67,7 @@ QVariant DataSourceTableModel::data(const QModelIndex& index, int role) const
             else
                 return QVariant();
         }
-        else
+        else // cfg only
         {
             assert (ds_man_.hasConfigDataSource(ds_id));
 
@@ -104,12 +104,12 @@ QVariant DataSourceTableModel::data(const QModelIndex& index, int role) const
         assert (index.column() < table_columns_.size());
         std::string col_name = table_columns_.at(index.column()).toStdString();
 
-        if (col_name != "In DB" && col_name != "In CfG")
+        if (col_name != "In DB" && col_name != "In Cfg")
             return QVariant();
 
         if (col_name == "In DB" && ds_man_.hasDBDataSource(ds_id))
             return db_icon_;
-        else if (col_name == "In CfG" && ds_man_.hasConfigDataSource(ds_id))
+        else if (col_name == "In Cfg" && ds_man_.hasConfigDataSource(ds_id))
             return config_icon_;
         else
             return QVariant();

@@ -5,6 +5,7 @@
 
 class DataSourceManager;
 class DataSourceTableModel;
+class DataSourceEditWidget;
 
 class QTableView;
 class QSortFilterProxyModel;
@@ -31,6 +32,8 @@ protected:
     QTableView* table_view_{nullptr};
     QSortFilterProxyModel* proxy_model_{nullptr};
     DataSourceTableModel* table_model_;
+
+    DataSourceEditWidget* edit_widget_ {nullptr};
 
     QPushButton* done_button_{nullptr};
 };

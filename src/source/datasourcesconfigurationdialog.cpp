@@ -1,5 +1,6 @@
 #include "datasourcesconfigurationdialog.h"
 #include "datasourcetablemodel.h"
+#include "datasourceeditwidget.h"
 #include "logger.h"
 
 #include <QHBoxLayout>
@@ -18,7 +19,7 @@ DataSourcesConfigurationDialog::DataSourcesConfigurationDialog(DataSourceManager
 
     setModal(true);
 
-    setMinimumSize(QSize(800, 600));
+    setMinimumSize(QSize(1000, 600));
 
     QFont font_bold;
     font_bold.setBold(true);
@@ -27,6 +28,8 @@ DataSourcesConfigurationDialog::DataSourcesConfigurationDialog(DataSourceManager
     font_big.setPointSize(16);
 
     QVBoxLayout* main_layout = new QVBoxLayout();
+
+    QHBoxLayout* top_layout = new QHBoxLayout();
 
     table_model_ = new DataSourceTableModel(ds_man_, *this);
 
@@ -53,7 +56,12 @@ DataSourcesConfigurationDialog::DataSourcesConfigurationDialog(DataSourceManager
 
     table_view_->resizeColumnsToContents();
     table_view_->resizeRowsToContents();
-    main_layout->addWidget(table_view_);
+    top_layout->addWidget(table_view_);
+
+    edit_widget_ = new DataSourceEditWidget (ds_man_, *this);
+    top_layout->addWidget(edit_widget_);
+
+    main_layout->addLayout(top_layout);
 
     QHBoxLayout* button_layout = new QHBoxLayout();
 
@@ -70,9 +78,14 @@ DataSourcesConfigurationDialog::DataSourcesConfigurationDialog(DataSourceManager
 
 void DataSourcesConfigurationDialog::currentRowChanged(const QModelIndex& current, const QModelIndex& previous)
 {
+    assert (edit_widget_);
+
     if (!current.isValid())
     {
         loginf << "DataSourcesConfigurationDialog: currentRowChanged: invalid index";
+
+        edit_widget_->clear();
+
         return;
     }
 
@@ -82,9 +95,8 @@ void DataSourcesConfigurationDialog::currentRowChanged(const QModelIndex& curren
     unsigned int id = table_model_->getIdOf(source_index);
 
     loginf << "DataSourcesConfigurationDialog: currentRowChanged: current id " << id;
-    //restore_focus_ = true;
 
-    //view_manager_.setCurrentViewPoint(&table_model_->viewPoint(id));
+    edit_widget_->showID(id);
 }
 
 void DataSourcesConfigurationDialog::doneClickedSlot()

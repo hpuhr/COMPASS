@@ -29,7 +29,7 @@ protected:
     DataSourceManager& ds_man_;
     DataSourcesConfigurationDialog& dialog_;
 
-    QStringList table_columns_ {"Name", "Short Name", "DSType", "SAC", "SIC", "In DB", "In CfG"};
+    QStringList table_columns_ {"Name", "Short Name", "DSType", "SAC", "SIC", "In DB", "In Cfg"};
 
     QIcon db_icon_;
     QIcon config_icon_;
