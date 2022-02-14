@@ -28,7 +28,7 @@ DataSourcesConfigurationDialog::DataSourcesConfigurationDialog(DataSourceManager
 
     QVBoxLayout* main_layout = new QVBoxLayout();
 
-    table_model_ = new DataSourceTableModel(ds_man_);
+    table_model_ = new DataSourceTableModel(ds_man_, *this);
 
     proxy_model_ = new QSortFilterProxyModel();
     proxy_model_->setSourceModel(table_model_);
@@ -79,12 +79,12 @@ void DataSourcesConfigurationDialog::currentRowChanged(const QModelIndex& curren
     auto const source_index = proxy_model_->mapToSource(current);
     assert (source_index.isValid());
 
-//    unsigned int id = table_model_->getIdOf(source_index);
+    unsigned int id = table_model_->getIdOf(source_index);
 
-//    loginf << "DataSourcesConfigurationDialog: currentRowChanged: current id " << id;
-//    restore_focus_ = true;
+    loginf << "DataSourcesConfigurationDialog: currentRowChanged: current id " << id;
+    //restore_focus_ = true;
 
-//    view_manager_.setCurrentViewPoint(&table_model_->viewPoint(id));
+    //view_manager_.setCurrentViewPoint(&table_model_->viewPoint(id));
 }
 
 void DataSourcesConfigurationDialog::doneClickedSlot()

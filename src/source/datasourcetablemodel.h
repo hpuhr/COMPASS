@@ -4,11 +4,12 @@
 #include <QAbstractItemModel>
 
 class DataSourceManager;
+class DataSourcesConfigurationDialog;
 
 class DataSourceTableModel : public QAbstractItemModel
 {
 public:
-    DataSourceTableModel(DataSourceManager& ds_man);
+    DataSourceTableModel(DataSourceManager& ds_man, DataSourcesConfigurationDialog& dialog);
 
     QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
     QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
@@ -21,8 +22,11 @@ public:
 
     //bool setData(const QModelIndex &index, const QVariant &value, int role) override;
 
+    unsigned int getIdOf (const QModelIndex& index);
+
 protected:
     DataSourceManager& ds_man_;
+    DataSourcesConfigurationDialog& dialog_;
 
     QStringList table_columns_ {"Name", "Short Name", "DSType", "SAC", "SIC"};
 };

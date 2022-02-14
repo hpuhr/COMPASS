@@ -2,8 +2,8 @@
 #include "datasourcemanager.h"
 #include "logger.h"
 
-DataSourceTableModel::DataSourceTableModel(DataSourceManager& ds_man)
-    : ds_man_(ds_man)
+DataSourceTableModel::DataSourceTableModel(DataSourceManager& ds_man, DataSourcesConfigurationDialog& dialog)
+    : ds_man_(ds_man), dialog_(dialog)
 {
 
 }
@@ -97,4 +97,14 @@ Qt::ItemFlags DataSourceTableModel::flags(const QModelIndex &index) const
 //    else
 
     return QAbstractItemModel::flags(index);
+}
+
+unsigned int DataSourceTableModel::getIdOf (const QModelIndex& index)
+{
+    assert (index.isValid());
+
+    assert (index.row() >= 0);
+    assert (index.row() < ds_man_.dataSources().size());
+
+    return ds_man_.dataSources().at(index.row())->id();
 }
