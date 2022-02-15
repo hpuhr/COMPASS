@@ -262,8 +262,9 @@ void DataSourcesLoadWidget::clearAndCreateContent()
 
     unsigned int button_size = 28;
 
-    //ds_id -> (ip, port)
-    std::map<unsigned int, std::vector <std::pair<std::string, unsigned int>>> net_lines = ds_man_.getNetworkLines();
+    // ds_id -> line str ->(ip, port)
+    std::map<unsigned int, std::map<std::string, std::pair<std::string, unsigned int>>> net_lines =
+            ds_man_.getNetworkLines();
 
     string tooltip;
 
@@ -328,16 +329,31 @@ void DataSourcesLoadWidget::clearAndCreateContent()
             {
                 QHBoxLayout* button_lay = new QHBoxLayout();
 
-                for (unsigned int line_cnt = 0; line_cnt < net_lines.at(ds_id).size(); ++line_cnt)
+                unsigned int last_line_number=0, current_line_number=0;
+
+                for (auto& line_it : net_lines.at(ds_id))
                 {
-                    QPushButton* button = new QPushButton ("L"+QString::number(line_cnt+1));
+                    current_line_number = String::getAppendedInt(line_it.first);
+                    assert (current_line_number >= 1 && current_line_number <= 4);
+
+                    if (current_line_number > 1 && (current_line_number - last_line_number) > 1)
+                    {
+                        // space to be inserted
+
+                        unsigned int num_spaces = current_line_number - last_line_number - 1;
+
+                        for (unsigned int cnt=0; cnt < num_spaces; ++cnt)
+                            button_lay->addSpacing(button_size);
+                    }
+
+                    QPushButton* button = new QPushButton (line_it.first.c_str());
                     button->setFixedSize(button_size,button_size);
                     button->setCheckable(true);
-                    button->setDown(line_cnt == 0);
+                    button->setDown(current_line_number == 1);
 
                     QPalette pal = button->palette();
 
-                    if (line_cnt == 0)
+                    if (current_line_number == 1)
                         pal.setColor(QPalette::Button, QColor(Qt::green));
                     else
                         pal.setColor(QPalette::Button, QColor(Qt::yellow));
@@ -347,17 +363,19 @@ void DataSourcesLoadWidget::clearAndCreateContent()
                     button->update();
                     //button->setDisabled(line_cnt != 0);
 
-                    if (line_cnt == 0)
+                    if (current_line_number == 1)
                         tooltip = "Connected";
                     else
                         tooltip = "Not Connected";
 
-                    tooltip += "\nIP: "+net_lines.at(ds_id).at(line_cnt).first+":"
-                                 +to_string(net_lines.at(ds_id).at(line_cnt).second);
+                    tooltip += "\nIP: "+line_it.second.first+":"
+                                 +to_string(line_it.second.second);
 
                     button->setToolTip(tooltip.c_str());
 
                     button_lay->addWidget(button);
+
+                    last_line_number = current_line_number;
                 }
 
                 type_layout_->addLayout(button_lay, row, col_start+3, // 2 for start

@@ -407,47 +407,49 @@ const std::vector<std::unique_ptr<dbContent::DBDataSource>>& DataSourceManager::
     return db_data_sources_;
 }
 
-std::map<unsigned int, std::vector <std::pair<std::string, unsigned int>>> DataSourceManager::getNetworkLines()
+std::map<unsigned int, std::map<std::string, std::pair<std::string, unsigned int>>> DataSourceManager::getNetworkLines()
 {
-    //ds_id -> (ip, port)
-    std::map<unsigned int, std::vector <std::pair<std::string, unsigned int>>> lines;
+    // ds_id -> line str ->(ip, port)
+    std::map<unsigned int, std::map<std::string, std::pair<std::string, unsigned int>>> lines;
 
-    string line_address;
-    string ip;
-    unsigned int port;
+//    string line_address;
+//    string ip;
+//    unsigned int port;
 
-    set<string> existing_lines; // to check
+//    set<string> existing_lines; // to check
 
     for (auto& ds_it : config_data_sources_)
     {
-        if (ds_it->info().contains("network_lines"))
+        if (ds_it->hasNetworkLines())
         {
-            json& network_lines = ds_it->info().at("network_lines");
-            assert (network_lines.is_array());
+            lines[ds_it->id()] = ds_it->networkLines();
 
-            for (auto& line_it : network_lines.get<json::array_t>())  // iterate over array
-            {
-                assert (line_it.is_primitive());
-                assert (line_it.is_string());
+//            json& network_lines = ds_it->info().at("network_lines");
+//            assert (network_lines.is_array());
 
-                line_address = line_it;
+//            for (auto& line_it : network_lines.get<json::array_t>())  // iterate over array
+//            {
+//                assert (line_it.is_primitive());
+//                assert (line_it.is_string());
 
-                ip = String::ipFromString(line_address);
-                port = String::portFromString(line_address);
+//                line_address = line_it;
 
-                if (existing_lines.count(ip+":"+to_string(port)))
-                {
-                    logwrn << "DataSourceManager: getNetworkLines: source " << ds_it->name()
-                           << " line " << ip << ":" << port
-                           << " already in use";
-                }
-                else
-                    lines[Number::dsIdFrom(ds_it->sac(), ds_it->sic())].push_back({ip, port});
+//                ip = String::ipFromString(line_address);
+//                port = String::portFromString(line_address);
 
-                existing_lines.insert(ip+":"+to_string(port));
+//                if (existing_lines.count(ip+":"+to_string(port)))
+//                {
+//                    logwrn << "DataSourceManager: getNetworkLines: source " << ds_it->name()
+//                           << " line " << ip << ":" << port
+//                           << " already in use";
+//                }
+//                else
+//                    lines[Number::dsIdFrom(ds_it->sac(), ds_it->sic())].push_back({ip, port});
 
-                //break; // TODO only parse one for now
-            }
+//                existing_lines.insert(ip+":"+to_string(port));
+
+//                //break; // TODO only parse one for now
+//            }
         }
     }
 

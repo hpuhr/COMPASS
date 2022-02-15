@@ -49,7 +49,7 @@ class ASTERIXDecodeJob : public Job
                         const std::string& framing);
 
     void setDecodeUDPStreams (
-            const std::map<unsigned int, std::vector <std::pair<std::string, unsigned int>>>& ds_lines);
+            const std::map<unsigned int, std::map<std::string, std::pair<std::string, unsigned int>>>& ds_lines);
     // ds_id -> (ip,port)
 
     virtual void run() override;
@@ -86,7 +86,8 @@ private:
     std::string framing_;
 
     bool decode_udp_streams_ {false};
-    std::map<unsigned int, std::vector <std::pair<std::string, unsigned int>>> ds_lines_;
+    std::map<unsigned int, std::map<std::string, std::pair<std::string, unsigned int>>> ds_lines_;
+    // ds_id -> line str ->(ip, port)
 
     volatile bool pause_{false};
 
