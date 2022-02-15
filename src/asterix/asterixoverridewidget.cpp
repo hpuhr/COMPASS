@@ -16,6 +16,8 @@
  */
 
 #include "asterixoverridewidget.h"
+#include "asteriximporttask.h"
+#include "textfielddoublevalidator.h"
 
 #include <QCheckBox>
 #include <QDoubleValidator>
@@ -24,9 +26,6 @@
 #include <QLabel>
 #include <QLineEdit>
 #include <QVBoxLayout>
-
-#include "asteriximporttask.h"
-#include "textfielddoublevalidator.h"
 
 ASTERIXOverrideWidget::ASTERIXOverrideWidget(ASTERIXImportTask& task, QWidget* parent)
     : QWidget(parent), task_(task)

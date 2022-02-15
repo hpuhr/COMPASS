@@ -36,6 +36,18 @@ public:
     nlohmann::json& info(); // for direct use, var->value
     std::string infoStr();
 
+    bool hasPosition();
+    bool hasFullPosition();
+
+    void latitude (double value);
+    double latitude ();
+
+    void longitude (double value);
+    double longitude ();
+
+    void altitude (double value);
+    double altitude ();
+
 protected:
     std::string ds_type_;
 

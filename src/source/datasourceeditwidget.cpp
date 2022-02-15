@@ -5,6 +5,7 @@
 #include "dstypeselectioncombobox.h"
 #include "datasourcesconfigurationdialog.h"
 #include "logger.h"
+#include "textfielddoublevalidator.h"
 
 #include <QLineEdit>
 #include <QPushButton>
@@ -78,9 +79,41 @@ DataSourceEditWidget::DataSourceEditWidget(DataSourceManager& ds_man, DataSource
     properties_layout_->addWidget(ds_id_label_, row, 1);
     row++;
 
-    updateContent();
-
     main_layout->addLayout(properties_layout_);
+
+    // position_widget_
+
+    position_widget_ = new QWidget();
+    position_widget_->setContentsMargins(0, 0, 0, 0);
+
+    QGridLayout* position_layout = new QGridLayout();
+
+    position_layout->addWidget(new QLabel("Latitude"), 0, 0);
+
+    latitude_edit_ = new QLineEdit();
+    latitude_edit_->setValidator(new TextFieldDoubleValidator(-90, 90, 12));
+    connect(latitude_edit_, &QLineEdit::textEdited, this, &DataSourceEditWidget::latitudeEditedSlot);
+    position_layout->addWidget(latitude_edit_, 0, 1);
+
+    position_layout->addWidget(new QLabel("Longitude"), 1, 0);
+
+    longitude_edit_ = new QLineEdit();
+    longitude_edit_->setValidator(new TextFieldDoubleValidator(-180, 180, 12));
+    connect(longitude_edit_, &QLineEdit::textEdited, this, &DataSourceEditWidget::longitudeEditedSlot);
+    position_layout->addWidget(longitude_edit_, 1, 1);
+
+    position_layout->addWidget(new QLabel("Altitude"), 2, 0);
+
+    altitude_edit_ = new QLineEdit();
+    altitude_edit_->setValidator(new TextFieldDoubleValidator(-10000, 10000, 12));
+    connect(altitude_edit_, &QLineEdit::textEdited, this, &DataSourceEditWidget::altitudeEditedSlot);
+    position_layout->addWidget(altitude_edit_, 2, 1);
+
+    position_widget_->setLayout(position_layout);
+
+    main_layout->addWidget(position_widget_);
+
+    updateContent();
 
     main_layout->addStretch();
 
@@ -181,6 +214,27 @@ void DataSourceEditWidget::dsTypeEditedSlot(const QString& value)
     dialog_.updateDataSource(current_ds_id_);
 }
 
+void DataSourceEditWidget::latitudeEditedSlot(const QString& value_str)
+{
+    double value = value_str.toDouble();
+
+    loginf << "DataSourceEditWidget: latitudeEditedSlot: '" << value << "'";
+}
+
+void DataSourceEditWidget::longitudeEditedSlot(const QString& value_str)
+{
+    double value = value_str.toDouble();
+
+    loginf << "DataSourceEditWidget: longitudeEditedSlot: '" << value << "'";
+}
+
+void DataSourceEditWidget::altitudeEditedSlot(const QString& value_str)
+{
+    double value = value_str.toDouble();
+
+    loginf << "DataSourceEditWidget: altitudeEditedSlot: '" << value << "'";
+}
+
 void DataSourceEditWidget::updateContent()
 {
     assert (name_edit_);
@@ -200,6 +254,8 @@ void DataSourceEditWidget::updateContent()
         sac_label_->setText("");
         sic_label_->setText("");
         ds_id_label_->setText("");
+
+        position_widget_->setHidden(true);
     }
     else
     {
@@ -226,6 +282,17 @@ void DataSourceEditWidget::updateContent()
             sac_label_->setText(QString::number(ds.sac()));
             sic_label_->setText(QString::number(ds.sic()));
             ds_id_label_->setText(QString::number(ds.id()));
+
+            if (ds.dsType() == "Radar" || ds.hasPosition())
+            {
+                latitude_edit_->setText(QString::number(ds.latitude()));
+                longitude_edit_->setText(QString::number(ds.longitude()));
+                altitude_edit_->setText(QString::number(ds.altitude()));
+
+                position_widget_->setHidden(false);
+            }
+            else
+                position_widget_->setHidden(true);
         }
         else // cfg only
         {
@@ -249,6 +316,17 @@ void DataSourceEditWidget::updateContent()
             sac_label_->setText(QString::number(ds.sac()));
             sic_label_->setText(QString::number(ds.sic()));
             ds_id_label_->setText(QString::number(ds.id()));
+
+            if (ds.dsType() == "Radar" || ds.hasPosition())
+            {
+                latitude_edit_->setText(QString::number(ds.latitude(), 'g', 12));
+                longitude_edit_->setText(QString::number(ds.longitude(), 'g', 12));
+                altitude_edit_->setText(QString::number(ds.altitude(), 'g', 12));
+
+                position_widget_->setHidden(false);
+            }
+            else
+                position_widget_->setHidden(true);
         }
     }
 }

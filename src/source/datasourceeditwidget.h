@@ -10,6 +10,7 @@ class DSTypeSelectionComboBox;
 class QLabel;
 class QLineEdit;
 class QPushButton;
+class QGridLayout;
 
 class DataSourceEditWidget : public QWidget
 {
@@ -19,6 +20,10 @@ public slots:
     void nameEditedSlot(const QString& value);
     void shortNameEditedSlot(const QString& value);
     void dsTypeEditedSlot(const QString& value);
+
+    void latitudeEditedSlot(const QString& value_str);
+    void longitudeEditedSlot(const QString& value_str);
+    void altitudeEditedSlot(const QString& value_str);
 
 public:
     DataSourceEditWidget(DataSourceManager& ds_man, DataSourcesConfigurationDialog& dialog);
@@ -42,6 +47,11 @@ protected:
     QLabel* sac_label_{nullptr};
     QLabel* sic_label_{nullptr};
     QLabel* ds_id_label_{nullptr};
+
+    QWidget* position_widget_{nullptr};
+    QLineEdit* latitude_edit_{nullptr};
+    QLineEdit* longitude_edit_{nullptr};
+    QLineEdit* altitude_edit_{nullptr};
 
     void updateContent();
 

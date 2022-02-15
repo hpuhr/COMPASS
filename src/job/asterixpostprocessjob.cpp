@@ -228,18 +228,16 @@ void ASTERIXPostprocessJob::doRadarPlotPositionCalculations()
                 {
                     dbContent::ConfigurationDataSource& data_source = ds_man.configDataSource(ds_id_it);
 
-                    if (data_source.info().contains("latitude")
-                            && data_source.info().contains("longitude")
-                            && data_source.info().contains("altitude"))
+                    if (data_source.hasFullPosition())
                     {
                         loginf << "ASTERIXPostprocessJob: run: adding proj ds " << ds_id_it
-                               << " lat/long " << (double) data_source.info().at("latitude") << "," <<
-                                  (double) data_source.info().at("longitude")
-                               << " alt " << (double) data_source.info().at("altitude");
+                               << " lat/long " << data_source.latitude()
+                               << "," << data_source.longitude()
+                               << " alt " << data_source.altitude();
 
-                        projection.addCoordinateSystem(ds_id_it, data_source.info().at("latitude"),
-                                                       data_source.info().at("longitude"),
-                                                       data_source.info().at("altitude"));
+                        projection.addCoordinateSystem(ds_id_it, data_source.latitude(),
+                                                       data_source.longitude(),
+                                                       data_source.altitude());
                     }
                     else
                         logerr << "ASTERIXPostprocessJob: run: config ds " << data_source.name()
@@ -249,18 +247,16 @@ void ASTERIXPostprocessJob::doRadarPlotPositionCalculations()
                 {
                     dbContent::DBDataSource& data_source = ds_man.dbDataSource(ds_id_it);
 
-                    if (data_source.info().contains("latitude")
-                            && data_source.info().contains("longitude")
-                            && data_source.info().contains("altitude"))
+                    if (data_source.hasFullPosition())
                     {
-                        loginf << "ASTERIXPostprocessJob: run: adding proj ds " << data_source.id()
-                               << " lat/long " << (double) data_source.info().at("latitude") << "," <<
-                                  (double) data_source.info().at("longitude")
-                               << " alt " << (double) data_source.info().at("altitude");
+                        loginf << "ASTERIXPostprocessJob: run: adding proj ds " << ds_id_it
+                               << " lat/long " << data_source.latitude()
+                               << "," << data_source.longitude()
+                               << " alt " << data_source.altitude();
 
-                        projection.addCoordinateSystem(data_source.id(), data_source.info().at("latitude"),
-                                                       data_source.info().at("longitude"),
-                                                       data_source.info().at("altitude"));
+                        projection.addCoordinateSystem(ds_id_it, data_source.latitude(),
+                                                       data_source.longitude(),
+                                                       data_source.altitude());
                     }
                     else
                         logerr << "ASTERIXPostprocessJob: run: ds " << data_source.name()

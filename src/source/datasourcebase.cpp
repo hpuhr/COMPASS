@@ -95,5 +95,61 @@ std::string DataSourceBase::infoStr()
     return info_.dump();
 }
 
+bool DataSourceBase::hasPosition()
+{
+    return info_.contains("position");
+}
+
+bool DataSourceBase::hasFullPosition()
+{
+    return info_.contains("position")
+            && info_.at("position").contains("latitude")
+            && info_.at("position").contains("longitude")
+            && info_.at("position").contains("altitude");
+}
+
+void DataSourceBase::latitude (double value)
+{
+    info_["position"]["latitude"] = value;
+}
+double DataSourceBase::latitude ()
+{
+    assert (hasPosition());
+
+    if (!info_.at("position").contains("latitude"))
+        return 0.0;
+    else
+        return info_.at("position").at("latitude");
+}
+
+void DataSourceBase::longitude (double value)
+{
+    info_["position"]["longitude"] = value;
+}
+double DataSourceBase::longitude ()
+{
+    assert (hasPosition());
+
+    if (!info_.at("position").contains("longitude"))
+        return 0.0;
+    else
+        return info_.at("position").at("longitude");
+}
+
+void DataSourceBase::altitude (double value)
+{
+    info_["position"]["altitude"] = value;
+}
+
+double DataSourceBase::altitude ()
+{
+    assert (hasPosition());
+
+    if (!info_.at("position").contains("altitude"))
+        return 0.0;
+    else
+        return info_.at("position").at("altitude");
+}
+
 }
 
