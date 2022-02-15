@@ -87,6 +87,7 @@ DataSourceEditWidget::DataSourceEditWidget(DataSourceManager& ds_man, DataSource
     position_widget_->setContentsMargins(0, 0, 0, 0);
 
     QGridLayout* position_layout = new QGridLayout();
+    //position_layout->setMargin(0);
 
     position_layout->addWidget(new QLabel("Latitude"), 0, 0);
 
@@ -219,6 +220,15 @@ void DataSourceEditWidget::latitudeEditedSlot(const QString& value_str)
     double value = value_str.toDouble();
 
     loginf << "DataSourceEditWidget: latitudeEditedSlot: '" << value << "'";
+
+    if (current_ds_in_db_)
+    {
+        assert (ds_man_.hasDBDataSource(current_ds_id_));
+        ds_man_.dbDataSource(current_ds_id_).latitude(value);
+    }
+
+    assert (ds_man_.hasConfigDataSource(current_ds_id_));
+    ds_man_.configDataSource(current_ds_id_).latitude(value);
 }
 
 void DataSourceEditWidget::longitudeEditedSlot(const QString& value_str)
@@ -226,6 +236,15 @@ void DataSourceEditWidget::longitudeEditedSlot(const QString& value_str)
     double value = value_str.toDouble();
 
     loginf << "DataSourceEditWidget: longitudeEditedSlot: '" << value << "'";
+
+    if (current_ds_in_db_)
+    {
+        assert (ds_man_.hasDBDataSource(current_ds_id_));
+        ds_man_.dbDataSource(current_ds_id_).longitude(value);
+    }
+
+    assert (ds_man_.hasConfigDataSource(current_ds_id_));
+    ds_man_.configDataSource(current_ds_id_).longitude(value);
 }
 
 void DataSourceEditWidget::altitudeEditedSlot(const QString& value_str)
@@ -233,6 +252,15 @@ void DataSourceEditWidget::altitudeEditedSlot(const QString& value_str)
     double value = value_str.toDouble();
 
     loginf << "DataSourceEditWidget: altitudeEditedSlot: '" << value << "'";
+
+    if (current_ds_in_db_)
+    {
+        assert (ds_man_.hasDBDataSource(current_ds_id_));
+        ds_man_.dbDataSource(current_ds_id_).altitude(value);
+    }
+
+    assert (ds_man_.hasConfigDataSource(current_ds_id_));
+    ds_man_.configDataSource(current_ds_id_).altitude(value);
 }
 
 void DataSourceEditWidget::updateContent()

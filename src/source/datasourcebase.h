@@ -48,6 +48,9 @@ public:
     void altitude (double value);
     double altitude ();
 
+    bool hasNetworkLines();
+    std::map<std::string, std::pair<std::string, unsigned int>> networkLines();
+
 protected:
     std::string ds_type_;
 

@@ -53,6 +53,12 @@ protected:
     QLineEdit* longitude_edit_{nullptr};
     QLineEdit* altitude_edit_{nullptr};
 
+    QWidget* net_widget_{nullptr};
+    QLineEdit* net_l1_edit_{nullptr};
+    QLineEdit* net_l2_edit_{nullptr};
+    QLineEdit* net_l3_edit_{nullptr};
+    QLineEdit* net_l4_edit_{nullptr};
+
     void updateContent();
 
 };

@@ -1,8 +1,10 @@
 #include "source/datasourcebase.h"
 #include "logger.h"
 #include "number.h"
-using namespace Utils;
 
+
+using namespace Utils;
+using namespace std;
 using namespace nlohmann;
 
 namespace dbContent
@@ -149,6 +151,46 @@ double DataSourceBase::altitude ()
         return 0.0;
     else
         return info_.at("position").at("altitude");
+}
+
+bool DataSourceBase::hasNetworkLines()
+{
+    return info_.contains("network_lines");
+}
+
+std::map<std::string, std::pair<std::string, unsigned int>> DataSourceBase::networkLines()
+{
+    assert (hasNetworkLines());
+
+    std::map<std::string, std::pair<std::string, unsigned int>> ret;
+    set<string> existing_lines; // to check
+
+    json& network_lines = info_.at("network_lines");
+    assert (network_lines.is_object());
+
+    string ip;
+    unsigned int port;
+
+    for (auto& line_it : network_lines.get<json::object_t>())  // iterate over array
+    {
+        assert (line_it.first == "L1" || line_it.first == "L2" || line_it.first == "L3" || line_it.first == "L4");
+
+        assert (line_it.second.is_string());
+
+        ip = String::ipFromString(line_it.second);
+        port = String::portFromString(line_it.second);
+
+        if (existing_lines.count(ip+":"+to_string(port)))
+        {
+            logwrn << "DataSourceBase: networkLines: source " << name_
+                   << " line " << ip << ":" << port
+                   << " already in use";
+        }
+        else
+            ret[line_it.first] = {ip, port};
+    }
+
+    return ret;
 }
 
 }
