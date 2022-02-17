@@ -186,6 +186,16 @@ MainWindow::MainWindow()
 
     QObject::connect(&COMPASS::instance().dbContentManager(), &DBContentManager::loadingDoneSignal,
                      this, &MainWindow::loadingDoneSlot);
+
+//    QLabel* test = new QLabel("See the lovely lakes", this,
+//                              Qt::Window | Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint);
+//    //test->setWindowFlags(Qt::Window | Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint); //, Qt::Window | Qt::WindowStaysOnTopHint
+//    //test->setAttribute(Qt::WA_TranslucentBackground);
+//    test->move(100, 100);
+//    //test->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
+//    test->raise();
+//    test->show();
+
 }
 
 MainWindow::~MainWindow()

@@ -25,6 +25,11 @@ public slots:
     void longitudeEditedSlot(const QString& value_str);
     void altitudeEditedSlot(const QString& value_str);
 
+    void net1EditedSlot(const QString& value_str);
+    void net2EditedSlot(const QString& value_str);
+    void net3EditedSlot(const QString& value_str);
+    void net4EditedSlot(const QString& value_str);
+
 public:
     DataSourceEditWidget(DataSourceManager& ds_man, DataSourcesConfigurationDialog& dialog);
 

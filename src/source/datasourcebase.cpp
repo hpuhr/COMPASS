@@ -177,6 +177,9 @@ std::map<std::string, std::pair<std::string, unsigned int>> DataSourceBase::netw
 
         assert (line_it.second.is_string());
 
+        if (line_it.second.size() == 0) // empty string
+            continue;
+
         ip = String::ipFromString(line_it.second);
         port = String::portFromString(line_it.second);
 
@@ -191,6 +194,13 @@ std::map<std::string, std::pair<std::string, unsigned int>> DataSourceBase::netw
     }
 
     return ret;
+}
+
+void DataSourceBase::networkLine (const std::string& key, const std::string ip_port)
+{
+    assert (key == "L1" || key == "L2" || key == "L3" || key == "L4");
+
+    info_["network_lines"][key] = ip_port;
 }
 
 }

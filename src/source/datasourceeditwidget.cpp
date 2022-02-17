@@ -114,6 +114,41 @@ DataSourceEditWidget::DataSourceEditWidget(DataSourceManager& ds_man, DataSource
 
     main_layout->addWidget(position_widget_);
 
+    // net widget
+
+    net_widget_ = new QWidget();
+    net_widget_->setContentsMargins(0, 0, 0, 0);
+
+    QGridLayout* net_layout = new QGridLayout();
+
+    net_layout->addWidget(new QLabel("Line1"), 0, 0);
+
+    net_l1_edit_ = new QLineEdit();
+    connect(net_l1_edit_, &QLineEdit::textEdited, this, &DataSourceEditWidget::net1EditedSlot);
+    net_layout->addWidget(net_l1_edit_, 0, 1);
+
+    net_layout->addWidget(new QLabel("Line2"), 1, 0);
+
+    net_l2_edit_ = new QLineEdit();
+    connect(net_l2_edit_, &QLineEdit::textEdited, this, &DataSourceEditWidget::net2EditedSlot);
+    net_layout->addWidget(net_l2_edit_, 1, 1);
+
+    net_layout->addWidget(new QLabel("Line3"), 2, 0);
+
+    net_l3_edit_ = new QLineEdit();
+    connect(net_l3_edit_, &QLineEdit::textEdited, this, &DataSourceEditWidget::net3EditedSlot);
+    net_layout->addWidget(net_l3_edit_, 2, 1);
+
+    net_layout->addWidget(new QLabel("Line4"), 3, 0);
+
+    net_l4_edit_ = new QLineEdit();
+    connect(net_l4_edit_, &QLineEdit::textEdited, this, &DataSourceEditWidget::net4EditedSlot);
+    net_layout->addWidget(net_l4_edit_, 3, 1);
+
+    net_widget_->setLayout(net_layout);
+
+    main_layout->addWidget(net_widget_);
+
     updateContent();
 
     main_layout->addStretch();
@@ -263,6 +298,78 @@ void DataSourceEditWidget::altitudeEditedSlot(const QString& value_str)
     ds_man_.configDataSource(current_ds_id_).altitude(value);
 }
 
+void DataSourceEditWidget::net1EditedSlot(const QString& value_str)
+{
+    string value = value_str.toStdString();
+
+    loginf << "DataSourceEditWidget: net1EditedSlot: '" << value << "'";
+
+    assert (has_current_ds_);
+
+    if (current_ds_in_db_)
+    {
+        assert (ds_man_.hasDBDataSource(current_ds_id_));
+        ds_man_.dbDataSource(current_ds_id_).networkLine("L1", value);
+    }
+
+    assert (ds_man_.hasConfigDataSource(current_ds_id_));
+    ds_man_.configDataSource(current_ds_id_).networkLine("L1", value);
+}
+
+void DataSourceEditWidget::net2EditedSlot(const QString& value_str)
+{
+    string value = value_str.toStdString();
+
+    loginf << "DataSourceEditWidget: net2EditedSlot: '" << value << "'";
+
+    assert (has_current_ds_);
+
+    if (current_ds_in_db_)
+    {
+        assert (ds_man_.hasDBDataSource(current_ds_id_));
+        ds_man_.dbDataSource(current_ds_id_).networkLine("L2", value);
+    }
+
+    assert (ds_man_.hasConfigDataSource(current_ds_id_));
+    ds_man_.configDataSource(current_ds_id_).networkLine("L2", value);
+}
+
+void DataSourceEditWidget::net3EditedSlot(const QString& value_str)
+{
+    string value = value_str.toStdString();
+
+    loginf << "DataSourceEditWidget: net3EditedSlot: '" << value << "'";
+
+    assert (has_current_ds_);
+
+    if (current_ds_in_db_)
+    {
+        assert (ds_man_.hasDBDataSource(current_ds_id_));
+        ds_man_.dbDataSource(current_ds_id_).networkLine("L3", value);
+    }
+
+    assert (ds_man_.hasConfigDataSource(current_ds_id_));
+    ds_man_.configDataSource(current_ds_id_).networkLine("L3", value);
+}
+
+void DataSourceEditWidget::net4EditedSlot(const QString& value_str)
+{
+    string value = value_str.toStdString();
+
+    loginf << "DataSourceEditWidget: net4EditedSlot: '" << value << "'";
+
+    assert (has_current_ds_);
+
+    if (current_ds_in_db_)
+    {
+        assert (ds_man_.hasDBDataSource(current_ds_id_));
+        ds_man_.dbDataSource(current_ds_id_).networkLine("L4", value);
+    }
+
+    assert (ds_man_.hasConfigDataSource(current_ds_id_));
+    ds_man_.configDataSource(current_ds_id_).networkLine("L4", value);
+}
+
 void DataSourceEditWidget::updateContent()
 {
     assert (name_edit_);
@@ -284,6 +391,7 @@ void DataSourceEditWidget::updateContent()
         ds_id_label_->setText("");
 
         position_widget_->setHidden(true);
+        net_widget_->setHidden(true);
     }
     else
     {
@@ -321,6 +429,36 @@ void DataSourceEditWidget::updateContent()
             }
             else
                 position_widget_->setHidden(true);
+
+            if (ds.hasNetworkLines())
+            {
+                net_widget_->setHidden(false);
+
+                std::map<std::string, std::pair<std::string, unsigned int>> lines = ds.networkLines();
+
+                if (lines.count("L1"))
+                    net_l1_edit_->setText((lines.at("L1").first+":"+to_string(lines.at("L1").second)).c_str());
+                else
+                    net_l1_edit_->setText("");
+
+                if (lines.count("L2"))
+                    net_l2_edit_->setText((lines.at("L2").first+":"+to_string(lines.at("L2").second)).c_str());
+                else
+                    net_l2_edit_->setText("");
+
+                if (lines.count("L3"))
+                    net_l3_edit_->setText((lines.at("L3").first+":"+to_string(lines.at("L3").second)).c_str());
+                else
+                    net_l3_edit_->setText("");
+
+                if (lines.count("L4"))
+                    net_l4_edit_->setText((lines.at("L4").first+":"+to_string(lines.at("L4").second)).c_str());
+                else
+                    net_l4_edit_->setText("");
+
+            }
+            else
+                net_widget_->setHidden(true);
         }
         else // cfg only
         {
@@ -355,6 +493,36 @@ void DataSourceEditWidget::updateContent()
             }
             else
                 position_widget_->setHidden(true);
+
+            if (ds.hasNetworkLines())
+            {
+                net_widget_->setHidden(false);
+
+                std::map<std::string, std::pair<std::string, unsigned int>> lines = ds.networkLines();
+
+                if (lines.count("L1"))
+                    net_l1_edit_->setText((lines.at("L1").first+":"+to_string(lines.at("L1").second)).c_str());
+                else
+                    net_l1_edit_->setText("");
+
+                if (lines.count("L2"))
+                    net_l2_edit_->setText((lines.at("L2").first+":"+to_string(lines.at("L2").second)).c_str());
+                else
+                    net_l2_edit_->setText("");
+
+                if (lines.count("L3"))
+                    net_l3_edit_->setText((lines.at("L3").first+":"+to_string(lines.at("L3").second)).c_str());
+                else
+                    net_l3_edit_->setText("");
+
+                if (lines.count("L4"))
+                    net_l4_edit_->setText((lines.at("L4").first+":"+to_string(lines.at("L4").second)).c_str());
+                else
+                    net_l4_edit_->setText("");
+
+            }
+            else
+                net_widget_->setHidden(true);
         }
     }
 }

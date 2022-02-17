@@ -50,6 +50,7 @@ public:
 
     bool hasNetworkLines();
     std::map<std::string, std::pair<std::string, unsigned int>> networkLines();
+    void networkLine (const std::string& key, const std::string ip_port);
 
 protected:
     std::string ds_type_;
