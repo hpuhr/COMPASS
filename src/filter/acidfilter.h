@@ -1,0 +1,41 @@
+#ifndef ACIDFILTER_H
+#define ACIDFILTER_H
+
+
+#include "dbfilter.h"
+
+#include <set>
+
+class ACIDFilter : public DBFilter
+{
+public:
+    ACIDFilter(const std::string& class_id, const std::string& instance_id,
+               Configurable* parent);
+     virtual ~ACIDFilter();
+
+     virtual std::string getConditionString(const std::string& dbo_name, bool& first,
+                                            std::vector<std::string>& extra_from_parts,
+                                            std::vector<dbContent::Variable*>& filtered_variables) override;
+
+     virtual void generateSubConfigurable(const std::string& class_id,
+                                          const std::string& instance_id) override;
+
+     virtual bool filters(const std::string& dbo_name) override;
+     virtual void reset() override;
+
+     virtual void saveViewPointConditions (nlohmann::json& filters) override;
+     virtual void loadViewPointConditions (const nlohmann::json& filters) override;
+
+    std::string valueString() const;
+    void valueString(const std::string& value_str);
+
+    virtual bool activeInLiveMode() override;
+    virtual std::vector<size_t> filterBuffer(const std::string& dbcontent_name, std::shared_ptr<Buffer> buffer) override;
+
+protected:
+    std::string value_str_; // org string
+
+    virtual void checkSubConfigurables() override;
+};
+
+#endif // ACIDFILTER_H

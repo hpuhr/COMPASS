@@ -26,6 +26,7 @@
 
 #include <boost/regex.hpp>
 #include <boost/algorithm/string/replace.hpp>
+#include <boost/algorithm/string.hpp>
 
 #include <iomanip>
 #include <map>
@@ -397,6 +398,11 @@ inline unsigned int portFromString(const std::string& name)
     return stoi(parts.at(1));
 }
 
+
+inline std::string trim(const std::string& name)
+{
+    return boost::algorithm::trim_copy(name);
+}
 
 }  // namespace String
 

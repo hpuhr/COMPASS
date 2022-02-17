@@ -18,7 +18,6 @@
 #include "utnfilterwidget.h"
 #include "utnfilter.h"
 #include "stringconv.h"
-//#include "textfielddoublevalidator.h"
 #include "logger.h"
 
 #include <QHBoxLayout>

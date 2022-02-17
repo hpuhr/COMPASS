@@ -32,6 +32,9 @@
 #include "dbospecificvaluesdbfilter.h"
 #include "utnfilter.h"
 #include "adsbqualityfilter.h"
+#include "acadfilter.h"
+#include "acidfilter.h"
+#include "mode3afilter.h"
 
 #include "json.hpp"
 
@@ -94,12 +97,6 @@ void FilterManager::generateSubConfigurable(const std::string& class_id,
     }
     else if (class_id == "DBOSpecificValuesDBFilter")
     {
-        if (hasSubConfigurable(class_id, instance_id))
-        {
-            logerr << "FilterManager: generateSubConfigurable: dbo specific filter "
-                   << instance_id << " already present";
-            return;
-        }
         std::string dbo_name = configuration()
                 .getSubConfiguration(class_id, instance_id)
                 .getParameterConfigValueString("dbo_name");
@@ -121,6 +118,21 @@ void FilterManager::generateSubConfigurable(const std::string& class_id,
         }
         else
             filters_.emplace_back(filter);
+    }
+    else if (class_id == "ACADFilter")
+    {
+        ACADFilter* filter = new ACADFilter(class_id, instance_id, this);
+        filters_.emplace_back(filter);
+    }
+    else if (class_id == "ACIDFilter")
+    {
+        ACIDFilter* filter = new ACIDFilter(class_id, instance_id, this);
+        filters_.emplace_back(filter);
+    }
+    else if (class_id == "Mode3AFilter")
+    {
+        Mode3AFilter* filter = new Mode3AFilter(class_id, instance_id, this);
+        filters_.emplace_back(filter);
     }
     else if (class_id == "UTNFilter")
     {
