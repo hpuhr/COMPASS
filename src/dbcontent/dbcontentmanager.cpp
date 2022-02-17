@@ -740,6 +740,7 @@ void DBContentManager::finishInserting()
 
         cutCachedData();
         filterDataSources();
+        COMPASS::instance().filterManager().filterBuffers(data_);
 
         logdbg << "DBContentManager: finishInserting: distributing data";
 

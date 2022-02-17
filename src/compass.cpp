@@ -92,6 +92,10 @@ COMPASS::COMPASS() : Configurable("COMPASS", "COMPASS0", 0, "compass.json")
     QObject::connect(dbcontent_manager_.get(), &DBContentManager::loadingDoneSignal,
                      view_manager_.get(), &ViewManager::loadingDoneSlot);
 
+    // appmode
+    connect (this, &COMPASS::appModeSwitchSignal,
+             filter_manager_.get(), &FilterManager::appModeSwitchSlot);
+
     qRegisterMetaType<AppMode>("AppMode");
 
     logdbg << "COMPASS: constructor: end";

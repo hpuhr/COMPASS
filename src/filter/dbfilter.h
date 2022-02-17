@@ -18,16 +18,18 @@
 #ifndef DBFILTER_H_
 #define DBFILTER_H_
 
-#include <string>
-#include <vector>
-
 #include "configurable.h"
+#include "appmode.h"
 
 #include "json.hpp"
+
+#include <string>
+#include <vector>
 
 class DBFilterWidget;
 class DBFilterCondition;
 class FilterManager;
+class Buffer;
 
 namespace dbContent
 {
@@ -78,10 +80,15 @@ class DBFilter : public Configurable
 
     DBFilterWidget* widget();
 
-    bool disabled() const { return disabled_; }
+    bool unusable() const { return unusable_; }
 
     virtual void saveViewPointConditions (nlohmann::json& filters);
     virtual void loadViewPointConditions (const nlohmann::json& filters);
+
+    void updateToAppMode (AppMode app_mode);
+
+    virtual bool activeInLiveMode();
+    virtual std::vector<size_t> filterBuffer(const std::string& dbcontent_name, std::shared_ptr<Buffer> buffer);
 
   protected:
     // FilterManager &filter_manager_;
@@ -90,8 +97,8 @@ class DBFilter : public Configurable
     bool active_ {true}; // active flag, if false no conditions are used
 
     bool visible_ {true}; // widget expanded flag
-    bool disabled_{false};  // if a conditions is unusable
-
+    bool unusable_{false};  // if a conditions is unusable
+    bool disabled_ {false}; // if disabled due to other reasons (e.g. AppMode)
 
     bool changed_ {false};
 

@@ -113,7 +113,7 @@ void FilterManager::generateSubConfigurable(const std::string& class_id,
 
         DBOSpecificValuesDBFilter* filter = new DBOSpecificValuesDBFilter(class_id, instance_id, this);
 
-        if (filter->disabled())
+        if (filter->unusable())
         {
             loginf << "FilterManager: generateSubConfigurable: deleting disabled dbo specific filter"
                    << filter->instanceId();
@@ -271,7 +271,7 @@ void FilterManager::reset()
 {
     for (unsigned int cnt = 0; cnt < filters_.size(); cnt++)
     {
-        if (!filters_.at(cnt)->disabled())
+        if (!filters_.at(cnt)->unusable())
             filters_.at(cnt)->reset();
     }
 }
@@ -428,6 +428,14 @@ void FilterManager::databaseClosedSlot()
         widget_->setDisabled(true);
 }
 
+void FilterManager::appModeSwitchSlot (AppMode app_mode)
+{
+    loginf << "FilterManager: appModeSwitchSlot";
+
+    for (auto& fil_it : filters_)
+        fil_it->updateToAppMode(app_mode);
+}
+
 //void FilterManager::startedSlot()
 //{
 //    loginf << "FilterManager: startedSlot";
@@ -452,7 +460,26 @@ void FilterManager::databaseClosedSlot()
 void FilterManager::disableAllFilters ()
 {
     for (auto& fil_it : filters_)
-        if (!fil_it->disabled())
+        if (!fil_it->unusable())
             fil_it->setActive(false);
+}
+
+void FilterManager::filterBuffers(std::map<std::string, std::shared_ptr<Buffer>>& data)
+{
+    loginf << "FilterManager: filterBuffers";
+
+    vector<size_t> indexes_to_remove;
+
+    for (auto& buf_it : data)
+    {
+        for (auto& fil_it : filters_)
+        {
+            if (fil_it->activeInLiveMode())
+            {
+                indexes_to_remove = fil_it->filterBuffer(buf_it.first, buf_it.second);
+                buf_it.second->removeIndexes(indexes_to_remove);
+            }
+        }
+    }
 }
 

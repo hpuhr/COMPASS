@@ -18,19 +18,22 @@
 #ifndef FILTERMANAGER_H_
 #define FILTERMANAGER_H_
 
+#include "configurable.h"
+#include "singleton.h"
+#include "appmode.h"
+
 #include <QObject>
+
 #include <map>
 #include <string>
 #include <vector>
-
-#include "configurable.h"
-#include "singleton.h"
 
 class DBFilter;
 class DataSourcesFilter;
 class COMPASS;
 class FilterManagerWidget;
 class ViewableDataConfig;
+class Buffer;
 
 namespace dbContent {
 
@@ -48,6 +51,8 @@ public slots:
 
     void databaseOpenedSlot();
     void databaseClosedSlot();
+
+    void appModeSwitchSlot (AppMode app_mode);
 
     //void deleteFilterSlot(DBFilter* filter);
 
@@ -83,6 +88,8 @@ public:
 
     void setConfigInViewPoint (nlohmann::json& data);
     void disableAllFilters ();
+
+    void filterBuffers(std::map<std::string, std::shared_ptr<Buffer>>& data);
 
 protected:
     // database id, resets if changed

@@ -64,7 +64,7 @@ void DBFilter::setActive(bool active)
     //    if (active_ && !active)
     //        FilterManager::getInstance().setChanged();
 
-    assert(!disabled_);
+    assert(!unusable_);
 
     active_ = active;
 
@@ -74,11 +74,11 @@ void DBFilter::setActive(bool active)
         widget_->update();
 }
 
-bool DBFilter::getActive() { return active_; }
+bool DBFilter::getActive() { return active_ && !disabled_; }
 
 bool DBFilter::getChanged()
 {
-    assert(!disabled_);
+    assert(!unusable_);
 
     bool ret = changed_;
 
@@ -92,7 +92,7 @@ bool DBFilter::getChanged()
 
 void DBFilter::setChanged(bool changed)
 {
-    assert(!disabled_);
+    assert(!unusable_);
 
     changed_ = changed;
 
@@ -106,14 +106,14 @@ void DBFilter::setChanged(bool changed)
 bool DBFilter::getVisible() { return visible_; }
 void DBFilter::setVisible(bool visible)
 {
-    assert(!disabled_);
+    assert(!unusable_);
 
     visible_ = visible;
 }
 
 void DBFilter::setName(const std::string& name)
 {
-    assert(!disabled_);
+    assert(!unusable_);
 
     name_ = name;
 
@@ -123,7 +123,7 @@ void DBFilter::setName(const std::string& name)
 
 bool DBFilter::filters(const std::string& dbo_type)
 {
-    if (disabled_)
+    if (unusable_)
         return false;
 
     bool ret = false;
@@ -145,7 +145,7 @@ std::string DBFilter::getConditionString(const std::string& dbo_name, bool& firs
                                          std::vector<std::string>& extra_from_parts,
                                          std::vector<dbContent::Variable*>& filtered_variables)
 {
-    assert(!disabled_);
+    assert(!unusable_);
 
     std::stringstream ss;
 
@@ -189,11 +189,11 @@ void DBFilter::generateSubConfigurable(const std::string& class_id, const std::s
         DBFilterCondition* condition = new DBFilterCondition(class_id, instance_id, this);
         conditions_.push_back(condition);
 
-        disabled_ = disabled_ | !condition->usable();
+        unusable_ = unusable_ | !condition->usable();
 
         if (widget_)
         {
-            if (disabled_)  // bit of a hack. think about order of generation.
+            if (unusable_)  // bit of a hack. think about order of generation.
             {
                 widget_->setInvisible();
                 widget_->setDisabled(true);
@@ -215,7 +215,7 @@ void DBFilter::checkSubConfigurables()
         logdbg << "DBFilter: checkSubConfigurables: generating generic filter widget";
         widget_ = new DBFilterWidget("DBFilterWidget", instanceId() + "Widget0", *this);
 
-        if (disabled_)
+        if (unusable_)
         {
             widget_->setInvisible();
             widget_->setDisabled(true);
@@ -229,7 +229,7 @@ void DBFilter::checkSubConfigurables()
  */
 void DBFilter::reset()
 {
-    if (disabled_)
+    if (unusable_)
         return;
 
     for (unsigned int cnt = 0; cnt < conditions_.size(); cnt++)
@@ -296,4 +296,28 @@ void DBFilter::loadViewPointConditions (const nlohmann::json& filters)
         else
             (*it)->setValue(value);
     }
+}
+
+void DBFilter::updateToAppMode (AppMode app_mode)
+{
+    if (app_mode == AppMode::LiveRunning)
+        disabled_ = !activeInLiveMode();
+    else
+        disabled_ = false;
+
+    widget_->setDisabled(disabled_ || unusable_);
+
+    if (widget_)
+        widget_->update();
+}
+
+bool DBFilter::activeInLiveMode()
+{
+    return false;
+}
+
+std::vector<size_t> DBFilter::filterBuffer(const std::string& dbcontent_name, std::shared_ptr<Buffer> buffer)
+{
+    assert (activeInLiveMode()); // re-implement in sub-class
+    return std::vector<size_t>();
 }

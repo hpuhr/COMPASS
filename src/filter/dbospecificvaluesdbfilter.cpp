@@ -103,7 +103,7 @@ std::string DBOSpecificValuesDBFilter::getConditionString(const std::string& dbo
                                                           std::vector<std::string>& extra_from_parts,
                                                           std::vector<dbContent::Variable*>& filtered_variables)
 {
-    assert(!disabled_);
+    assert(!unusable_);
 
     TODO_ASSERT
     //assert (object_->hasDataSources());
@@ -208,7 +208,7 @@ void DBOSpecificValuesDBFilter::checkSubConfigurables()
         logdbg << "DBOSpecificValuesDBFilter: checkSubConfigurables: generating generic filter widget";
         widget_ = new DBFilterWidget("DBFilterWidget", instanceId() + "Widget0", *this);
 
-        if (disabled_)
+        if (unusable_)
         {
             widget_->setInvisible();
             widget_->setDisabled(true);
