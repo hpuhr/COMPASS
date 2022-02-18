@@ -3296,19 +3296,6 @@
                     "unit": ""
                 }
             },
-            "VariableTrackercallsign0": {
-                "parameters": {
-                    "data_type_str": "STRING",
-                    "db_column_name": "aircraft_identification_add",
-                    "description": "From 380.ID.Target Identification\n\nAircraft identification\n\nCharacters 1-8 (coded on 6 bits each) defining a target identification when flight plan is available or the registration marking when no flight plan is available.",
-                    "dimension": "",
-                    "is_key": false,
-                    "name": "Aircraft Identification ADD",
-                    "representation_str": "STANDARD",
-                    "short_name": "ACID ADD",
-                    "unit": ""
-                }
-            },
             "VariableTrackercivil_emergency0": {
                 "parameters": {
                     "data_type_str": "UCHAR",
