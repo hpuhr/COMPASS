@@ -203,20 +203,6 @@ void DBOSpecificValuesDBFilter::checkSubConfigurables()
 
     // widget
 
-    if (!widget_)
-    {
-        logdbg << "DBOSpecificValuesDBFilter: checkSubConfigurables: generating generic filter widget";
-        widget_ = new DBFilterWidget("DBFilterWidget", instanceId() + "Widget0", *this);
-
-        if (unusable_)
-        {
-            widget_->setInvisible();
-            widget_->setDisabled(true);
-        }
-    }
-    assert(widget_);
-
-
     TODO_ASSERT
 
     // data sources

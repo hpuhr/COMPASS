@@ -36,6 +36,7 @@ protected:
     std::string value_str_; // org string
 
     virtual void checkSubConfigurables() override;
+    virtual DBFilterWidget* createWidget() override;
 };
 
 #endif // ACIDFILTER_H

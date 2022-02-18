@@ -21,8 +21,6 @@ ACIDFilter::ACIDFilter(const std::string& class_id, const std::string& instance_
     name_ = "Aircraft Identification";
 
     createSubConfigurables();
-
-    assert(widget_);
 }
 
 ACIDFilter::~ACIDFilter() {}
@@ -69,33 +67,23 @@ void ACIDFilter::generateSubConfigurable(const std::string& class_id, const std:
 {
     logdbg << "ACIDFilter: generateSubConfigurable: class_id " << class_id;
 
-    if (class_id.compare("ACIDFilterWidget") == 0)
-    {
-        assert(!widget_);
-        widget_ = new ACIDFilterWidget(*this, class_id, instance_id);
-    }
-    else
-        throw std::runtime_error("ACIDFilter: generateSubConfigurable: unknown class_id " + class_id);
+    throw std::runtime_error("ACIDFilter: generateSubConfigurable: unknown class_id " + class_id);
 }
 
 void ACIDFilter::checkSubConfigurables()
 {
     logdbg << "ACIDFilter: checkSubConfigurables";
-
-    if (!widget_)
-    {
-        logdbg << "ACIDFilter: checkSubConfigurables: generating filter widget";
-        widget_ = new ACIDFilterWidget(*this, "ACIDFilterWidget", instanceId() + "Widget0");
-
-    }
-    assert(widget_);
-
 }
 
+DBFilterWidget* ACIDFilter::createWidget()
+{
+    return new ACIDFilterWidget(*this);
+}
 
 void ACIDFilter::reset()
 {
-    widget_->update();
+    if (widget())
+        widget_->update();
 }
 
 void ACIDFilter::saveViewPointConditions (nlohmann::json& filters)

@@ -47,8 +47,6 @@ UTNFilter::UTNFilter(const std::string& class_id, const std::string& instance_id
 //    }
 
     createSubConfigurables();
-
-    assert(widget_);
 }
 
 UTNFilter::~UTNFilter() {}
@@ -106,46 +104,25 @@ void UTNFilter::generateSubConfigurable(const std::string& class_id,
 {
     logdbg << "UTNFilter: generateSubConfigurable: class_id " << class_id;
 
-    if (class_id.compare("UTNFilterWidget") == 0)
-    {
-        assert(!widget_);
-        widget_ = new UTNFilterWidget(*this, class_id, instance_id);
-
-//        if (!COMPASS::instance().dbContentManager().hasAssociations())
-//        {
-//            widget_->setDisabled(true);
-//            widget_->setInvisible();
-//        }
-    }
-    else
-        throw std::runtime_error("UTNFilter: generateSubConfigurable: unknown class_id " +
-                                 class_id);
+    throw std::runtime_error("UTNFilter: generateSubConfigurable: unknown class_id " + class_id);
 }
 
 void UTNFilter::checkSubConfigurables()
 {
     logdbg << "UTNFilter: checkSubConfigurables";
 
-    if (!widget_)
-    {
-        logdbg << "UTNFilter: checkSubConfigurables: generating filter widget";
-        widget_ = new UTNFilterWidget(*this, "UTNFilterWidget", instanceId() + "Widget0");
+}
 
-//        if (!COMPASS::instance().dbContentManager().hasAssociations())
-//        {
-//            widget_->setDisabled(true);
-//            widget_->setInvisible();
-//        }
-
-    }
-    assert(widget_);
-
+DBFilterWidget* UTNFilter::createWidget()
+{
+    return new UTNFilterWidget(*this);
 }
 
 
 void UTNFilter::reset()
 {
-    widget_->update();
+    if (widget_)
+        widget_->update();
 }
 
 void UTNFilter::saveViewPointConditions (nlohmann::json& filters)

@@ -24,8 +24,6 @@ ModeCFilter::ModeCFilter(const std::string& class_id, const std::string& instanc
     name_ = "Barometric Altitude";
 
     createSubConfigurables();
-
-    assert(widget_);
 }
 
 ModeCFilter::~ModeCFilter() {}
@@ -83,27 +81,18 @@ void ModeCFilter::generateSubConfigurable(const std::string& class_id, const std
 {
     logdbg << "ModeCFilter: generateSubConfigurable: class_id " << class_id;
 
-    if (class_id.compare("ModeCFilterWidget") == 0)
-    {
-        assert(!widget_);
-        widget_ = new ModeCFilterWidget(*this, class_id, instance_id);
-    }
-    else
-        throw std::runtime_error("ModeCFilter: generateSubConfigurable: unknown class_id " + class_id);
+    throw std::runtime_error("ModeCFilter: generateSubConfigurable: unknown class_id " + class_id);
 }
+
+DBFilterWidget* ModeCFilter::createWidget()
+{
+    return new ModeCFilterWidget(*this);
+}
+
 
 void ModeCFilter::checkSubConfigurables()
 {
     logdbg << "ModeCFilter: checkSubConfigurables";
-
-    if (!widget_)
-    {
-        logdbg << "ModeCFilter: checkSubConfigurables: generating filter widget";
-        widget_ = new ModeCFilterWidget(*this, "ModeCFilterWidget", instanceId() + "Widget0");
-
-    }
-    assert(widget_);
-
 }
 
 

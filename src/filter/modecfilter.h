@@ -44,6 +44,7 @@ protected:
     bool null_wanted_ {false};
 
     virtual void checkSubConfigurables() override;
+    virtual DBFilterWidget* createWidget() override;
 };
 
 #endif // MODECFILTER_H

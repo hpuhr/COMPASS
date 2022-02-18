@@ -27,12 +27,10 @@
 using namespace std;
 using namespace Utils;
 
-UTNFilterWidget::UTNFilterWidget(UTNFilter& filter, const std::string& class_id, const std::string& instance_id)
-    : DBFilterWidget(class_id, instance_id, filter), filter_(filter)
+UTNFilterWidget::UTNFilterWidget(UTNFilter& filter)
+    : DBFilterWidget(filter), filter_(filter)
 {
     QHBoxLayout* layout = new QHBoxLayout();
-    layout->setContentsMargins(0, 0, 0, 0);
-    layout->setSpacing(0);
 
     label_ = new QLabel("UTNs IN");
     layout->addWidget(label_);

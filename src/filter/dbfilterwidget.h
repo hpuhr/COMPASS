@@ -21,12 +21,11 @@
 #include <QFrame>
 #include <QMenu>
 
-#include "configurable.h"
+#include "dbfilter.h"
 
 class QWidget;
 class QCheckBox;
 class QVBoxLayout;
-class DBFilter;
 class QPushButton;
 
 /**
@@ -37,7 +36,7 @@ class QPushButton;
  * possibleFilterChange when something is changed, but the filter decides of the change is
  * propagated to the FilterManager (based on the active_ flag).
  */
-class DBFilterWidget : public QFrame, public Configurable
+class DBFilterWidget : public QFrame
 {
     Q_OBJECT
   private slots:
@@ -69,7 +68,7 @@ class DBFilterWidget : public QFrame, public Configurable
 
   public:
     /// @brief Constructor
-    DBFilterWidget(const std::string& class_id, const std::string& instance_id, DBFilter& filter);
+    DBFilterWidget(DBFilter& filter);
     /// @brief Destructor
     virtual ~DBFilterWidget();
 
@@ -83,14 +82,13 @@ class DBFilterWidget : public QFrame, public Configurable
 
     void setInvisible()
     {
-        visible_ = false;
-        child_->setVisible(visible_);
+        filter_.widgetVisible(false);
+        child_->setVisible(false);
     }
 
   protected:
     DBFilter& filter_;
 
-    bool visible_;
     QWidget* child_ {nullptr}; // Child widget from DBFilter
 
     QCheckBox* visible_checkbox_ {nullptr};

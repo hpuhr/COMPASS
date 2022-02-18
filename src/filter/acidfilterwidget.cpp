@@ -9,12 +9,10 @@
 using namespace std;
 using namespace Utils;
 
-ACIDFilterWidget::ACIDFilterWidget(ACIDFilter& filter, const std::string& class_id, const std::string& instance_id)
-    : DBFilterWidget(class_id, instance_id, filter), filter_(filter)
+ACIDFilterWidget::ACIDFilterWidget(ACIDFilter& filter)
+    : DBFilterWidget(filter), filter_(filter)
 {
     QHBoxLayout* layout = new QHBoxLayout();
-    layout->setContentsMargins(0, 0, 0, 0);
-    layout->setSpacing(0);
 
     label_ = new QLabel("ACIDs IN");
     layout->addWidget(label_);

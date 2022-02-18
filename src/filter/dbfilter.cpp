@@ -38,6 +38,8 @@ DBFilter::DBFilter(const std::string& class_id, const std::string& instance_id,
     registerParameter("visible", &visible_, false);
     registerParameter("name", &name_, instance_id);
 
+    registerParameter("widget_visible", &widget_visible_, true);
+
     if (classId().compare("DBFilter") == 0)  // else do it in subclass
         createSubConfigurables();
 }
@@ -46,11 +48,7 @@ DBFilter::~DBFilter()
 {
     logdbg << "DBFilter: destructor: instance_id " << instanceId();
 
-    if (widget_)
-    {
-        delete widget_;
-        widget_ = nullptr;
-    }
+    widget_ = nullptr;
 
     for (unsigned int cnt = 0; cnt < conditions_.size(); cnt++)
     {
@@ -177,13 +175,7 @@ void DBFilter::generateSubConfigurable(const std::string& class_id, const std::s
 {
     logdbg << "DBFilter: generateSubConfigurable: " << classId() << " instance " << instanceId();
 
-    if (class_id == "DBFilterWidget")
-    {
-        logdbg << "DBFilter: generateSubConfigurable: generating widget";
-        assert(!widget_);
-        widget_ = new DBFilterWidget(class_id, instance_id, *this);
-    }
-    else if (class_id == "DBFilterCondition")
+    if (class_id == "DBFilterCondition")
     {
         logdbg << "DBFilter: generateSubConfigurable: generating condition";
         DBFilterCondition* condition = new DBFilterCondition(class_id, instance_id, this);
@@ -208,20 +200,11 @@ void DBFilter::generateSubConfigurable(const std::string& class_id, const std::s
 
 void DBFilter::checkSubConfigurables()
 {
-    logdbg << "DBFilter: checkSubConfigurables: " << classId();
+}
 
-    if (!widget_)
-    {
-        logdbg << "DBFilter: checkSubConfigurables: generating generic filter widget";
-        widget_ = new DBFilterWidget("DBFilterWidget", instanceId() + "Widget0", *this);
-
-        if (unusable_)
-        {
-            widget_->setInvisible();
-            widget_->setDisabled(true);
-        }
-    }
-    assert(widget_);
+DBFilterWidget* DBFilter::createWidget()
+{
+    return new DBFilterWidget(*this);
 }
 
 /**
@@ -251,8 +234,11 @@ void DBFilter::deleteCondition(DBFilterCondition* condition)
 
 DBFilterWidget* DBFilter::widget()
 {
+    if (!widget_)
+        widget_.reset(createWidget());
+
     assert(widget_);
-    return widget_;
+    return widget_.get();
 }
 
 void DBFilter::saveViewPointConditions (nlohmann::json& filters)
@@ -320,4 +306,14 @@ std::vector<size_t> DBFilter::filterBuffer(const std::string& dbcontent_name, st
 {
     assert (activeInLiveMode()); // re-implement in sub-class
     return std::vector<size_t>();
+}
+
+bool DBFilter::widgetVisible() const
+{
+    return widget_visible_;
+}
+
+void DBFilter::widgetVisible(bool widget_expanded)
+{
+    widget_visible_ = widget_expanded;
 }

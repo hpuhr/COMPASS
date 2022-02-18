@@ -22,8 +22,6 @@ Mode3AFilter::Mode3AFilter(const std::string& class_id, const std::string& insta
     name_ = "Mode 3/A Codes";
 
     createSubConfigurables();
-
-    assert(widget_);
 }
 
 Mode3AFilter::~Mode3AFilter() {}
@@ -92,33 +90,24 @@ void Mode3AFilter::generateSubConfigurable(const std::string& class_id, const st
 {
     logdbg << "Mode3AFilter: generateSubConfigurable: class_id " << class_id;
 
-    if (class_id.compare("Mode3AFilterWidget") == 0)
-    {
-        assert(!widget_);
-        widget_ = new Mode3AFilterWidget(*this, class_id, instance_id);
-    }
-    else
-        throw std::runtime_error("Mode3AFilter: generateSubConfigurable: unknown class_id " + class_id);
+    throw std::runtime_error("Mode3AFilter: generateSubConfigurable: unknown class_id " + class_id);
 }
 
 void Mode3AFilter::checkSubConfigurables()
 {
     logdbg << "Mode3AFilter: checkSubConfigurables";
+}
 
-    if (!widget_)
-    {
-        logdbg << "Mode3AFilter: checkSubConfigurables: generating filter widget";
-        widget_ = new Mode3AFilterWidget(*this, "Mode3AFilterWidget", instanceId() + "Widget0");
-
-    }
-    assert(widget_);
-
+DBFilterWidget* Mode3AFilter::createWidget()
+{
+    return new Mode3AFilterWidget(*this);
 }
 
 
 void Mode3AFilter::reset()
 {
-    widget_->update();
+    if (widget())
+        widget_->update();
 }
 
 void Mode3AFilter::saveViewPointConditions (nlohmann::json& filters)

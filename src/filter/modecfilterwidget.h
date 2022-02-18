@@ -18,7 +18,7 @@ protected slots:
     void nullWantedChangedSlot();
 
 public:
-    ModeCFilterWidget(ModeCFilter& filter, const std::string& class_id, const std::string& instance_id);
+    ModeCFilterWidget(ModeCFilter& filter);
     virtual ~ModeCFilterWidget();
 
     virtual void update();

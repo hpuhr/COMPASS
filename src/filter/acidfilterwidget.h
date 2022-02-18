@@ -16,7 +16,7 @@ protected slots:
     void valueEditedSlot(const QString& value);
 
 public:
-    ACIDFilterWidget(ACIDFilter& filter, const std::string& class_id, const std::string& instance_id);
+    ACIDFilterWidget(ACIDFilter& filter);
     virtual ~ACIDFilterWidget();
 
     virtual void update();

@@ -38,6 +38,7 @@ protected:
     bool null_wanted_ {false};  // indicates NULL in values
 
     virtual void checkSubConfigurables() override;
+    virtual DBFilterWidget* createWidget() override;
 
     bool updateValuesFromStr(const std::string& values); // returns success
 };

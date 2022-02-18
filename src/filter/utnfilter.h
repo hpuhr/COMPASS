@@ -48,6 +48,7 @@ protected:
     std::vector<unsigned int> utns_;
 
     virtual void checkSubConfigurables();
+    virtual DBFilterWidget* createWidget() override;
 
     bool updateUTNSFromStr(const std::string& utns); // returns success
 };

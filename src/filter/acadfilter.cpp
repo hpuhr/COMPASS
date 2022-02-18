@@ -22,8 +22,6 @@ ACADFilter::ACADFilter(const std::string& class_id, const std::string& instance_
     name_ = "Aircraft Address";
 
     createSubConfigurables();
-
-    assert(widget_);
 }
 
 ACADFilter::~ACADFilter() {}
@@ -92,33 +90,24 @@ void ACADFilter::generateSubConfigurable(const std::string& class_id, const std:
 {
     logdbg << "ACADFilter: generateSubConfigurable: class_id " << class_id;
 
-    if (class_id.compare("ACADFilterWidget") == 0)
-    {
-        assert(!widget_);
-        widget_ = new ACADFilterWidget(*this, class_id, instance_id);
-    }
-    else
-        throw std::runtime_error("ACADFilter: generateSubConfigurable: unknown class_id " + class_id);
+    throw std::runtime_error("ACADFilter: generateSubConfigurable: unknown class_id " + class_id);
 }
 
 void ACADFilter::checkSubConfigurables()
 {
     logdbg << "ACADFilter: checkSubConfigurables";
+}
 
-    if (!widget_)
-    {
-        logdbg << "ACADFilter: checkSubConfigurables: generating filter widget";
-        widget_ = new ACADFilterWidget(*this, "ACADFilterWidget", instanceId() + "Widget0");
-
-    }
-    assert(widget_);
-
+DBFilterWidget* ACADFilter::createWidget()
+{
+    return new ACADFilterWidget(*this);
 }
 
 
 void ACADFilter::reset()
 {
-    widget_->update();
+    if (widget_)
+        widget_->update();
 }
 
 void ACADFilter::saveViewPointConditions (nlohmann::json& filters)
@@ -156,11 +145,7 @@ std::string ACADFilter::valuesString() const
 void ACADFilter::valuesString(const std::string& values_str)
 {
     if (!updateValuesFromStr(values_str)) // false on failure
-    {
-//        if (widget_)
-//            widget_->update();
         return;
-    }
 
     values_str_ = values_str;
 }

@@ -16,7 +16,7 @@ protected slots:
     void valueEditedSlot(const QString& value);
 
 public:
-    Mode3AFilterWidget(Mode3AFilter& filter, const std::string& class_id, const std::string& instance_id);
+    Mode3AFilterWidget(Mode3AFilter& filter);
     virtual ~Mode3AFilterWidget();
 
     virtual void update();

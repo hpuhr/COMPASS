@@ -149,6 +149,7 @@ protected:
     unsigned int max_sil_v2_ {0};
 
     virtual void checkSubConfigurables();
+    virtual DBFilterWidget* createWidget() override;
 };
 
 #endif // ADSBQUALITYFILTER_H

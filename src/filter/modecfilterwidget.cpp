@@ -11,12 +11,10 @@
 using namespace std;
 using namespace Utils;
 
-ModeCFilterWidget::ModeCFilterWidget(ModeCFilter& filter, const std::string& class_id, const std::string& instance_id)
-    : DBFilterWidget(class_id, instance_id, filter), filter_(filter)
+ModeCFilterWidget::ModeCFilterWidget(ModeCFilter& filter)
+    : DBFilterWidget(filter), filter_(filter)
 {
     QFormLayout* layout = new QFormLayout();
-    layout->setContentsMargins(0, 0, 0, 0);
-    //layout->setSpacing(0);
 
     min_value_edit_ = new QLineEdit();
     min_value_edit_->setValidator(new TextFieldDoubleValidator(-10000, 100000, 2));
