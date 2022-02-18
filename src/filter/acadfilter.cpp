@@ -169,7 +169,7 @@ std::vector<size_t> ACADFilter::filterBuffer(const std::string& dbcontent_name, 
 
     NullableVector<unsigned int>& data_vec = buffer->get<unsigned int> (var.name());
 
-    for (unsigned int cnt=0; cnt < data_vec.size(); ++cnt)
+    for (unsigned int cnt=0; cnt < buffer->size(); ++cnt)
     {
         if (data_vec.isNull(cnt))
         {

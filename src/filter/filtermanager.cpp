@@ -492,7 +492,7 @@ void FilterManager::filterBuffers(std::map<std::string, std::shared_ptr<Buffer>>
     {
         for (auto& fil_it : filters_)
         {
-            if (fil_it->activeInLiveMode())
+            if (fil_it->getActive())
             {
                 indexes_to_remove = fil_it->filterBuffer(buf_it.first, buf_it.second);
                 buf_it.second->removeIndexes(indexes_to_remove);

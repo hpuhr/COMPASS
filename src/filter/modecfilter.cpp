@@ -158,7 +158,7 @@ std::vector<size_t> ModeCFilter::filterBuffer(const std::string& dbcontent_name,
 
     float value;
 
-    for (unsigned int cnt=0; cnt < data_vec.size(); ++cnt)
+    for (unsigned int cnt=0; cnt < buffer->size(); ++cnt)
     {
         if (data_vec.isNull(cnt))
         {

@@ -144,11 +144,14 @@ std::vector<size_t> ACIDFilter::filterBuffer(const std::string& dbcontent_name, 
 
     fil_str.erase(remove(fil_str.begin(), fil_str.end(), '%'), fil_str.end()); // remove % char
 
-    for (unsigned int cnt=0; cnt < data_vec.size(); ++cnt)
+    for (unsigned int cnt=0; cnt < buffer->size(); ++cnt)
     {
         if (data_vec.isNull(cnt) || data_vec.get(cnt).find(fil_str) == std::string::npos) // null or not found
             to_be_removed.push_back(cnt);
     }
+
+    loginf << "ACIDFilter: filterBuffer: content " << dbcontent_name << " erase '" << fil_str << "' num "
+           << to_be_removed.size() << " total " << buffer->size();
 
     return to_be_removed;
 }
