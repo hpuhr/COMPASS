@@ -35,6 +35,7 @@
 #include "acadfilter.h"
 #include "acidfilter.h"
 #include "mode3afilter.h"
+#include "modecfilter.h"
 
 #include "json.hpp"
 
@@ -132,6 +133,11 @@ void FilterManager::generateSubConfigurable(const std::string& class_id,
     else if (class_id == "Mode3AFilter")
     {
         Mode3AFilter* filter = new Mode3AFilter(class_id, instance_id, this);
+        filters_.emplace_back(filter);
+    }
+    else if (class_id == "ModeCFilter")
+    {
+        ModeCFilter* filter = new ModeCFilter(class_id, instance_id, this);
         filters_.emplace_back(filter);
     }
     else if (class_id == "UTNFilter")
