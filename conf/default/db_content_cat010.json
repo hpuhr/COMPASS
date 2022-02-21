@@ -967,7 +967,7 @@
             },
             "Variable36": {
                 "parameters": {
-                    "data_type_str": "BOOL",
+                    "data_type_str": "UCHAR",
                     "db_column_name": "track_merged_split",
                     "description": "From 170.MRS\n\n0 Merge or split indication undetermined\n1 Track merged by association to plot\n2 Track merged by non-association to plot\n3 Split track",
                     "dimension": "",

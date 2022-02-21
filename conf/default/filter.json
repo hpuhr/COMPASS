@@ -20,11 +20,11 @@
         "ACIDFilter": {
             "Aircraft Identification": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "changed": true,
                     "name": "Aircraft Identification",
                     "op_and_": true,
-                    "value_str": "%PZX%",
+                    "value_str": "%TUI%",
                     "visible": false,
                     "widget_visible": true
                 }
@@ -316,7 +316,7 @@
         "ModeCFilter": {
             "Barometric Altitude": {
                 "parameters": {
-                    "active": true,
+                    "active": false,
                     "changed": true,
                     "max_value": 3000.0,
                     "min_value": -1000.0,

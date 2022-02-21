@@ -3,7 +3,8 @@
         "current_file_framing": "ioss",
         "current_framing": "",
         "debug_jasterix": false,
-        "file_list": [],
+        "file_list": [
+        ],
         "limit_ram": false,
         "override_sac_new": 120,
         "override_sac_org": 120,

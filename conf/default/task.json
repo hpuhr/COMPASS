@@ -29,29 +29,14 @@
             "path": "task_import_gps.json"
         },
         {
-            "class_id": "JSONImportTask",
-            "instance_id": "JSONImportTask",
-            "path": "task_import_json.json"
-        },
-        {
             "class_id": "ManageDBObjectsTask",
             "instance_id": "ManageDBObjectsTask0",
             "path": "task_manage_dbojects.json"
         },
         {
-            "class_id": "ManageDataSourcesTask",
-            "instance_id": "ManageDataSourcesTask0",
-            "path": "task_manage_datasources.json"
-        },
-        {
             "class_id": "ManageSectorsTask",
             "instance_id": "ManageSectorsTask0",
             "path": "task_manage_sectors.json"
-        },
-        {
-            "class_id": "PostProcessTask",
-            "instance_id": "PostProcessTask0",
-            "path": "task_postprocess.json"
         },
         {
             "class_id": "RadarPlotPositionCalculatorTask",

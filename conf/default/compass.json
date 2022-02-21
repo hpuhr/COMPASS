@@ -1,16 +1,19 @@
 {
     "parameters": {
         "db_file_list": [
-            "/home/sk/data/austria/hello_world/test.db",
-            "/home/sk/data/austria/live_test/test.db"
         ],
-        "last_db_filename": "/home/sk/data/austria/hello_world/test.db"
+        "last_db_filename": ""
     },
     "sub_config_files": [
         {
             "class_id": "DBContentManager",
             "instance_id": "DBContentManager0",
             "path": "db_content.json"
+        },
+        {
+            "class_id": "DataSourceManager",
+            "instance_id": "DataSourceManager0",
+            "path": "data_sources.json"
         },
         {
             "class_id": "EvaluationManager",
