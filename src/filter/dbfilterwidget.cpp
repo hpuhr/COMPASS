@@ -33,9 +33,6 @@
 
 using namespace Utils;
 
-/**
- * Initializes members, registers Parameter, creates GUI elements and the menu, calls update
- */
 DBFilterWidget::DBFilterWidget(DBFilter& filter)
     : QFrame(), filter_(filter)
 {
@@ -46,7 +43,6 @@ DBFilterWidget::DBFilterWidget(DBFilter& filter)
     main_layout->setSpacing(1);
 
     setFrameStyle(QFrame::Panel | QFrame::Sunken);
-//    setLineWidth(0);
 
     QHBoxLayout* config_layout = new QHBoxLayout();
     config_layout->setContentsMargins(1, 1, 1, 1);
@@ -103,14 +99,8 @@ DBFilterWidget::DBFilterWidget(DBFilter& filter)
     update();
 }
 
-/**
- * Tells the DBFilter that the widget has already been deleted.
- */
 DBFilterWidget::~DBFilterWidget() {}
 
-/**
- * Adds possible actions for a generic filter
- */
 void DBFilterWidget::createMenu()
 {
     if (!filter_.isGeneric())
@@ -126,18 +116,12 @@ void DBFilterWidget::createMenu()
     connect(delete_action, SIGNAL(triggered()), this, SLOT(deleteFilter()));
 }
 
-/**
- * Adds a widget to the child layout
- */
 void DBFilterWidget::addChildWidget(QWidget* widget)
 {
     assert(widget);
     child_layout_->addWidget(widget);
 }
 
-/**
- * Removes all contents of the child layout, and adds all condition widgets of the filter
- */
 void DBFilterWidget::updateChildWidget()
 {
     QLayoutItem* child;
@@ -207,6 +191,12 @@ void DBFilterWidget::update(void)
     //  {
     //    conditions.at(cnt)->update();
     //  }
+}
+
+void DBFilterWidget::setInvisible()
+{
+    filter_.widgetVisible(false);
+    child_->setVisible(false);
 }
 
 void DBFilterWidget::possibleSubFilterChange()

@@ -15,9 +15,10 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "dbfiltercondition.h"
 #include "compass.h"
 #include "dbfilter.h"
-#include "dbfiltercondition.h"
+#include "dbfilterwidget.h"
 #include "dbcontent/dbcontent.h"
 #include "dbcontent/dbcontentmanager.h"
 #include "dbcontent/variable/variable.h"

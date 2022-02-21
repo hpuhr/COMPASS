@@ -34,6 +34,7 @@
 #include "buffer.h"
 #include "filtermanager.h"
 #include "dbfilter.h"
+#include "dbfilterwidget.h"
 #include "viewabledataconfig.h"
 #include "viewmanager.h"
 #include "stringconv.h"

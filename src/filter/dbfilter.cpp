@@ -16,6 +16,7 @@
  */
 
 #include "dbfilter.h"
+#include "dbfilterwidget.h"
 
 #include <QVBoxLayout>
 #include <boost/algorithm/string.hpp>

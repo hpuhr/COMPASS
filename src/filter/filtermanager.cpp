@@ -21,6 +21,7 @@
 #include "configurationmanager.h"
 #include "sqliteconnection.h"
 #include "dbfilter.h"
+#include "dbfilterwidget.h"
 #include "dbinterface.h"
 #include "dbcontent/dbcontent.h"
 #include "dbcontent/dbcontentmanager.h"
