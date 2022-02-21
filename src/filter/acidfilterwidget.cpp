@@ -38,7 +38,7 @@ void ACIDFilterWidget::update()
 
     assert (value_edit_);
 
-    value_edit_->setText(filter_.valueString().c_str());
+    value_edit_->setText(filter_.valuesString().c_str());
 }
 
 void ACIDFilterWidget::valueEditedSlot(const QString& value)
@@ -47,5 +47,5 @@ void ACIDFilterWidget::valueEditedSlot(const QString& value)
 
     loginf << "ACIDFilterWidget: valueEditedSlot: '" << value_str << "'";
 
-    filter_.valueString(value_str);
+    filter_.valuesString(value_str);
 }

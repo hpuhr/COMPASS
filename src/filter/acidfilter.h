@@ -26,17 +26,22 @@ public:
      virtual void saveViewPointConditions (nlohmann::json& filters) override;
      virtual void loadViewPointConditions (const nlohmann::json& filters) override;
 
-    std::string valueString() const;
-    void valueString(const std::string& value_str);
+    std::string valuesString() const;
+    void valuesString(const std::string& values_str);
 
     virtual bool activeInLiveMode() override;
     virtual std::vector<size_t> filterBuffer(const std::string& dbcontent_name, std::shared_ptr<Buffer> buffer) override;
 
 protected:
-    std::string value_str_; // org string
+    std::string values_str_; // org string for display
+
+    std::set<std::string> values_; // parts w/o %
+    bool null_wanted_ {false};  // indicates NULL in values
 
     virtual void checkSubConfigurables() override;
     virtual DBFilterWidget* createWidget() override;
+
+    bool updateValuesFromStr(const std::string& values); // returns success
 };
 
 #endif // ACIDFILTER_H
