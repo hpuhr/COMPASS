@@ -894,10 +894,10 @@ bool NullableVector<T>::isNeverNull()
     for (unsigned int cnt = 0; cnt < null_flags_.size(); cnt++)
     {
         if (null_flags_.at(cnt))
-            return true;
+            return false;
     }
 
-    return false;
+    return true;
 }
 
 template <class T>

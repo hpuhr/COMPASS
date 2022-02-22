@@ -112,8 +112,6 @@ ASTERIXDecodeJob::ASTERIXDecodeJob(ASTERIXImportTask& task, bool test,
       post_process_(post_process), receive_semaphore_((unsigned int) 0)
 {
     logdbg << "ASTERIXDecodeJob: ctor";
-
-    receive_buffer_.reset(new boost::array<char, MAX_ALL_RECEIVE_SIZE>());
 }
 
 ASTERIXDecodeJob::~ASTERIXDecodeJob()
@@ -204,7 +202,7 @@ void ASTERIXDecodeJob::doFileDecoding()
 
     auto callback = [this](std::unique_ptr<nlohmann::json> data, size_t num_frames,
             size_t num_records, size_t numErrors) {
-        this->jasterix_callback(std::move(data), num_frames, num_records, numErrors);
+        this->jasterix_callback(std::move(data), this->file_line_id_, num_frames, num_records, numErrors);
     };
 
     try
@@ -230,13 +228,9 @@ void ASTERIXDecodeJob::doUDPStreamDecoding()
 
     boost::asio::io_context io_context;
 
-    //const std::string& sender_id,
-    auto data_callback = [this](const char* data, unsigned int length) {
-        this->storeReceivedData(data, length);
-    };
-
     string ip;
     unsigned int port;
+    unsigned int line;
 
     vector<unique_ptr<UDPReceiver>> udp_receivers;
 
@@ -249,8 +243,16 @@ void ASTERIXDecodeJob::doUDPStreamDecoding()
             ip = line_it.second.first;
             port = line_it.second.second;
 
+            line = String::getAppendedInt(line_it.first);
+            assert (line >= 1 && line <= 4);
+            line--; // technical counting starts at 0
+
             loginf << "ASTERIXDecodeJob: doUDPStreamDecoding: setting up ds_id " << ds_it.first
-                   << " ip " << ip << ":" << port;
+                   << " line " << line << " ip " << ip << ":" << port;
+
+            auto data_callback = [this,line](const char* data, unsigned int length) {
+                this->storeReceivedData(line, data, length);
+            };
 
             udp_receivers.emplace_back(new UDPReceiver(io_context, ip, port, data_callback));
 
@@ -265,10 +267,7 @@ void ASTERIXDecodeJob::doUDPStreamDecoding()
 
     last_receive_decode_time_ = boost::posix_time::microsec_clock::local_time();
 
-    auto callback = [this](std::unique_ptr<nlohmann::json> data, size_t num_frames,
-            size_t num_records, size_t numErrors) {
-        this->jasterix_callback(std::move(data), num_frames, num_records, numErrors);
-    };
+    unsigned int line_id = 0;
 
     while (!obsolete_)
     {
@@ -278,30 +277,55 @@ void ASTERIXDecodeJob::doUDPStreamDecoding()
             break;
 
         {
-            boost::mutex::scoped_lock lock(receive_buffer_mutex_);
+            boost::mutex::scoped_lock lock(receive_buffers_mutex_);
 
-            if (receive_buffer_size_
+            if (receive_buffer_sizes_.size() // any data received
                     && (boost::posix_time::microsec_clock::local_time()
                         - last_receive_decode_time_).total_milliseconds() > 1000)
             {
-                loginf << "ASTERIXDecodeJob: doUDPStreamDecoding: processing buffer size "
-                       << receive_buffer_size_ << " max " << MAX_ALL_RECEIVE_SIZE;
+                loginf << "ASTERIXDecodeJob: doUDPStreamDecoding: processing "
+                       << receive_buffer_sizes_.size() << " buffers  max " << MAX_ALL_RECEIVE_SIZE;
 
-                assert (receive_buffer_size_ <= MAX_ALL_RECEIVE_SIZE);
+                // copy data
+                while (receive_buffer_sizes_.size())
+                {
+                    line_id = receive_buffer_sizes_.begin()->first;
 
-                if (!receive_buffer_copy_)
-                    receive_buffer_copy_.reset(new boost::array<char, MAX_ALL_RECEIVE_SIZE>());
+                    assert (receive_buffers_.count(line_id));
 
-                *receive_buffer_copy_ = *receive_buffer_;
-                size_t tmp_buffer_size = receive_buffer_size_;
+                    assert (receive_buffer_sizes_.at(line_id) <= MAX_ALL_RECEIVE_SIZE);
 
-                receive_buffer_size_ = 0;
+                    if (!receive_buffers_copy_.count(line_id))
+                        receive_buffers_copy_[line_id].reset(new boost::array<char, MAX_ALL_RECEIVE_SIZE>());
+
+                    *receive_buffers_copy_.at(line_id) = *receive_buffers_.at(line_id);
+                    receive_copy_buffer_sizes_[line_id] = receive_buffer_sizes_.at(line_id);
+
+                    receive_buffer_sizes_.erase(receive_buffer_sizes_.begin()); // remove size
+                }
 
                 lock.unlock();
 
                 last_receive_decode_time_ = boost::posix_time::microsec_clock::local_time();
 
-                task_.jASTERIX()->decodeData((char*) receive_buffer_copy_->data(), tmp_buffer_size, callback);
+                while (receive_copy_buffer_sizes_.size())
+                {
+                    line_id = receive_copy_buffer_sizes_.begin()->first;
+
+                    assert (receive_buffers_copy_.count(line_id));
+
+                    auto callback = [this, line_id](std::unique_ptr<nlohmann::json> data, size_t num_frames,
+                            size_t num_records, size_t numErrors) {
+                        this->jasterix_callback(std::move(data), line_id, num_frames, num_records, numErrors);
+                    };
+
+                    task_.jASTERIX()->decodeData(
+                                (char*) receive_buffers_copy_.at(line_id)->data(),
+                                receive_copy_buffer_sizes_.begin()->second, callback);
+
+                    receive_copy_buffer_sizes_.erase(receive_buffer_sizes_.begin()); // remove size
+                }
+
             }
         }
     }
@@ -318,34 +342,37 @@ void ASTERIXDecodeJob::doUDPStreamDecoding()
     loginf << "ASTERIXDecodeJob: doUDPStreamDecoding: done";
 }
 
-void ASTERIXDecodeJob::storeReceivedData (const char* data, unsigned int length) // const std::string& sender_id,
+void ASTERIXDecodeJob::storeReceivedData (unsigned int line, const char* data, unsigned int length) // const std::string& sender_id,
 {
     if (obsolete_)
         return;
 
     //loginf << "ASTERIXDecodeJob: storeReceivedData: sender " << sender_id;
 
-    if (length + receive_buffer_size_ >= MAX_ALL_RECEIVE_SIZE)
+    boost::mutex::scoped_lock lock(receive_buffers_mutex_);
+
+    if (length + receive_buffer_sizes_[line] >= MAX_ALL_RECEIVE_SIZE)
     {
         logerr << "ASTERIXDecodeJob: storeReceivedData: overload, too much data in buffer";
         return;
     }
 
-    boost::mutex::scoped_lock lock(receive_buffer_mutex_);
+    if (!receive_buffers_.count(line))
+        receive_buffers_[line].reset(new boost::array<char, MAX_ALL_RECEIVE_SIZE>());
 
-    assert (receive_buffer_);
+    assert (receive_buffers_[line]);
 
     for (unsigned int cnt=0; cnt < length; ++cnt)
-        receive_buffer_->at(receive_buffer_size_+cnt) = data[cnt];
+        receive_buffers_[line]->at(receive_buffer_sizes_[line]+cnt) = data[cnt];
 
-    receive_buffer_size_ += length;
+    receive_buffer_sizes_[line] += length;
 
     lock.unlock();
 
     receive_semaphore_.post();
 }
 
-void ASTERIXDecodeJob::jasterix_callback(std::unique_ptr<nlohmann::json> data, size_t num_frames,
+void ASTERIXDecodeJob::jasterix_callback(std::unique_ptr<nlohmann::json> data, unsigned int line_id, size_t num_frames,
                                          size_t num_records, size_t num_errors)
 {
     if (obsolete_)
@@ -378,8 +405,8 @@ void ASTERIXDecodeJob::jasterix_callback(std::unique_ptr<nlohmann::json> data, s
         countRecord(category, record);
     };
 
-    auto process_lambda = [this, &category](nlohmann::json& record) {
-        record["line_id"] = file_line_id_;
+    auto process_lambda = [this, line_id, &category](nlohmann::json& record) {
+        record["line_id"] = line_id;
         post_process_.postProcess(category, record);
     };
 
