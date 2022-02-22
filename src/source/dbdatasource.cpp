@@ -126,5 +126,31 @@ void DBDataSource::loadingWanted(bool loading_wanted)
     loading_wanted_ = loading_wanted;
 }
 
+bool DBDataSource::specificlineLoadingWanted() const
+{
+    for (auto& line_it : line_loading_wanted_)
+    {
+        if (!line_it.second)
+            return true;
+    }
+
+    return false;
+}
+
+void DBDataSource::lineLoadingWanted(unsigned int line_id, bool wanted)
+{
+    assert (line_id <= 4);
+    line_loading_wanted_[line_id] = wanted;
+}
+
+bool DBDataSource::lineLoadingWanted(unsigned int line_id) const
+{
+    assert (line_id <= 4);
+
+    if (line_loading_wanted_.count(line_id))
+        return line_loading_wanted_.at(line_id);
+    else
+        return true;
+}
 
 }
