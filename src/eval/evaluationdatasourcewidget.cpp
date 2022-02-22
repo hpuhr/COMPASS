@@ -29,9 +29,10 @@
 
 using namespace std;
 
-EvaluationDataSourceWidget::EvaluationDataSourceWidget(const std::string& title, const std::string& dbo_name,
-                                                       QWidget* parent, Qt::WindowFlags f)
-    : QFrame(parent, f), title_(title), dbo_name_(dbo_name)
+EvaluationDataSourceWidget::EvaluationDataSourceWidget(
+        const std::string& title, const std::string& dbo_name, unsigned int line_id,
+        QWidget* parent, Qt::WindowFlags f)
+    : QFrame(parent, f), title_(title), dbo_name_(dbo_name), line_id_(line_id)
 {
     setFrameStyle(QFrame::Panel | QFrame::Raised);
     setLineWidth(2);
@@ -73,6 +74,23 @@ EvaluationDataSourceWidget::EvaluationDataSourceWidget(const std::string& title,
 
     //updateCheckboxesChecked();
     //updateCheckboxesDisabled();
+
+    // line
+    assert (line_id_ <= 3);
+
+    QGridLayout* line_lay = new QGridLayout();
+
+    line_lay->addWidget(new QLabel("Line ID"), 0, 0);
+
+    QComboBox* line_box = new QComboBox();
+    line_box->addItems({"1", "2", "3", "4"});
+    line_box->setCurrentIndex(line_id_);
+
+    connect(line_box, &QComboBox::currentTextChanged,
+            this, &EvaluationDataSourceWidget::lineIDEditSlot);
+    line_lay->addWidget(line_box, 0, 1);
+
+    main_layout->addLayout(line_lay);
 
     // buttons
 
@@ -213,5 +231,15 @@ void EvaluationDataSourceWidget::toggleDataSourceSlot()
     updateCheckboxesChecked();
 }
 
+void EvaluationDataSourceWidget::lineIDEditSlot(const QString& text)
+{
+    bool ok;
+    unsigned int line_id = text.toInt(&ok);
 
+    assert (ok);
+    assert (line_id <= 4);
+    --line_id;
+
+    emit lineChangedSignal(line_id);
+}
 

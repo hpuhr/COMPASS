@@ -98,8 +98,8 @@ class EvaluationData : public QAbstractItemModel
 public:
     EvaluationData(EvaluationManager& eval_man);
 
-    void addReferenceData (DBContent& object, std::shared_ptr<Buffer> buffer);
-    void addTestData (DBContent& object, std::shared_ptr<Buffer> buffer);
+    void addReferenceData (DBContent& object, unsigned int line_id, std::shared_ptr<Buffer> buffer);
+    void addTestData (DBContent& object, unsigned int line_id, std::shared_ptr<Buffer> buffer);
     void finalize ();
 
     bool hasTargetData (unsigned int utn);
@@ -137,6 +137,7 @@ public:
 
     // ref
     std::shared_ptr<Buffer> ref_buffer_;
+    unsigned int ref_line_id_;
 
     std::string ref_tod_name_;
     std::string ref_latitude_name_;
@@ -164,6 +165,7 @@ public:
 
     // tst
     std::shared_ptr<Buffer> tst_buffer_;
+    unsigned int tst_line_id_;
 
     std::string tst_tod_name_;
     std::string tst_latitude_name_;

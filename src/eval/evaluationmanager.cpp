@@ -62,9 +62,11 @@ EvaluationManager::EvaluationManager(const std::string& class_id, const std::str
     : Configurable(class_id, instance_id, compass, "eval.json"), compass_(*compass), data_(*this)
 {
     registerParameter("dbo_name_ref", &dbo_name_ref_, "RefTraj");
+    registerParameter("line_id_ref", &line_id_ref_, 0);
     registerParameter("active_sources_ref", &active_sources_ref_, json::object());
 
     registerParameter("dbo_name_tst", &dbo_name_tst_, "Tracker");
+    registerParameter("line_id_tst", &line_id_tst_, 0);
     registerParameter("active_sources_tst", &active_sources_tst_, json::object());
 
     registerParameter("current_standard", &current_standard_, "");
@@ -244,6 +246,8 @@ void EvaluationManager::loadData ()
     DataSourceManager& ds_man = COMPASS::instance().dataSourceManager();
 
     ds_man.setLoadOnlyDataSources(ds_ids);
+
+    // TODO load lines
 
     fil_man.disableAllFilters();
 
@@ -516,11 +520,11 @@ void EvaluationManager::loadingDoneSlot()
 
     std::map<std::string, std::shared_ptr<Buffer>> data = dbcontent_man.loadedData();
     assert (data.count(dbo_name_ref_));
-    data_.addReferenceData(dbcontent_man.dbContent(dbo_name_ref_), data.at(dbo_name_ref_));
+    data_.addReferenceData(dbcontent_man.dbContent(dbo_name_ref_), line_id_ref_, data.at(dbo_name_ref_));
     reference_data_loaded_ = true;
 
     assert (data.count(dbo_name_tst_));
-    data_.addTestData(dbcontent_man.dbContent(dbo_name_tst_), data.at(dbo_name_tst_));
+    data_.addTestData(dbcontent_man.dbContent(dbo_name_tst_), line_id_tst_, data.at(dbo_name_tst_));
     test_data_loaded_ = true;
 
     dbcontent_man.clearData(); // clear data, has been stored locally
@@ -2608,6 +2612,26 @@ double EvaluationManager::resultDetailZoom() const
 void EvaluationManager::resultDetailZoom(double result_detail_zoom)
 {
     result_detail_zoom_ = result_detail_zoom;
+}
+
+unsigned int EvaluationManager::lineIDRef() const
+{
+    return line_id_ref_;
+}
+
+void EvaluationManager::lineIDRef(unsigned int line_id_ref)
+{
+    line_id_ref_ = line_id_ref;
+}
+
+unsigned int EvaluationManager::lineIDTst() const
+{
+    return line_id_tst_;
+}
+
+void EvaluationManager::lineIDTst(unsigned int line_id_tst)
+{
+    line_id_tst_ = line_id_tst;
 }
 
 bool EvaluationManager::removeModeCValues() const

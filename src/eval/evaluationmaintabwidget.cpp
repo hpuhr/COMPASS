@@ -47,14 +47,20 @@ EvaluationMainTabWidget::EvaluationMainTabWidget(EvaluationManager& eval_man,
     QHBoxLayout* data_sources_layout = new QHBoxLayout();
 
     // titles define which data sources to display
-    data_source_ref_widget_.reset(new EvaluationDataSourceWidget("Reference Data", eval_man_.dboNameRef()));
+    data_source_ref_widget_.reset(
+                new EvaluationDataSourceWidget("Reference Data", eval_man_.dboNameRef(), eval_man_.lineIDRef()));
     connect (data_source_ref_widget_.get(), &EvaluationDataSourceWidget::dboNameChangedSignal,
              this, &EvaluationMainTabWidget::dboRefNameChangedSlot);
+    connect (data_source_ref_widget_.get(), &EvaluationDataSourceWidget::lineChangedSignal,
+             this, &EvaluationMainTabWidget::lineRefChangedSlot);
     data_sources_layout->addWidget(data_source_ref_widget_.get());
 
-    data_source_tst_widget_.reset(new EvaluationDataSourceWidget("Test Data", eval_man_.dboNameTst()));
+    data_source_tst_widget_.reset(
+                new EvaluationDataSourceWidget("Test Data", eval_man_.dboNameTst(), eval_man_.lineIDTst()));
     connect (data_source_tst_widget_.get(), &EvaluationDataSourceWidget::dboNameChangedSignal,
              this, &EvaluationMainTabWidget::dboTstNameChangedSlot);
+    connect (data_source_tst_widget_.get(), &EvaluationDataSourceWidget::lineChangedSignal,
+             this, &EvaluationMainTabWidget::lineTstChangedSlot);
     data_sources_layout->addWidget(data_source_tst_widget_.get());
 
     main_layout->addLayout(data_sources_layout);
@@ -124,11 +130,25 @@ void EvaluationMainTabWidget::dboRefNameChangedSlot(const std::string& dbo_name)
     eval_man_.dboNameRef(dbo_name);
 }
 
+void EvaluationMainTabWidget::lineRefChangedSlot(unsigned int line_id)
+{
+    loginf << "EvaluationMainTabWidget: lineRefChangedSlot: value " << line_id;
+
+    eval_man_.lineIDRef(line_id);
+}
+
 void EvaluationMainTabWidget::dboTstNameChangedSlot(const std::string& dbo_name)
 {
     loginf << "EvaluationMainTabWidget: dboTstNameChangedSlot: name " << dbo_name;
 
     eval_man_.dboNameTst(dbo_name);
+}
+
+void EvaluationMainTabWidget::lineTstChangedSlot(unsigned int line_id)
+{
+    loginf << "EvaluationMainTabWidget: lineTstChangedSlot: value " << line_id;
+
+    eval_man_.lineIDTst(line_id);
 }
 
 void EvaluationMainTabWidget::changedStandardsSlot()

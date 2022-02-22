@@ -45,7 +45,7 @@ EvaluationData::EvaluationData(EvaluationManager& eval_man)
 
 }
 
-void EvaluationData::addReferenceData (DBContent& object, std::shared_ptr<Buffer> buffer)
+void EvaluationData::addReferenceData (DBContent& object, unsigned int line_id, std::shared_ptr<Buffer> buffer)
 {
     loginf << "EvaluationData: addReferenceData: dbo " << object.name() << " size " << buffer->size();
 
@@ -61,6 +61,8 @@ void EvaluationData::addReferenceData (DBContent& object, std::shared_ptr<Buffer
 
     assert (!ref_buffer_);
     ref_buffer_ = buffer;
+    ref_line_id_ = line_id;
+    assert (ref_line_id_ <= 3);
 
     // preset variable names
 
@@ -137,6 +139,9 @@ void EvaluationData::addReferenceData (DBContent& object, std::shared_ptr<Buffer
     assert (buffer->has<unsigned int>(DBContent::meta_var_datasource_id_.name()));
     NullableVector<unsigned int>& ds_ids = buffer->get<unsigned int>(DBContent::meta_var_datasource_id_.name());
 
+    assert (buffer->has<unsigned int>(DBContent::meta_var_line_id_.name()));
+    NullableVector<unsigned int>& line_ids = buffer->get<unsigned int>(DBContent::meta_var_line_id_.name());
+
     assert (buffer->has<json>(DBContent::meta_var_associations_.name()));
     NullableVector<json>& assoc_vec = buffer->get<json>(DBContent::meta_var_associations_.name());
 
@@ -151,6 +156,14 @@ void EvaluationData::addReferenceData (DBContent& object, std::shared_ptr<Buffer
         assert (!ds_ids.isNull(cnt));
 
         if (use_active_srcs && !active_srcs.count(ds_ids.get(cnt))) // skip those entries not for tst src
+        {
+            ++num_skipped;
+            continue;
+        }
+
+        assert (!line_ids.isNull(cnt));
+
+        if (line_ids.get(cnt) != ref_line_id_)
         {
             ++num_skipped;
             continue;
@@ -198,7 +211,7 @@ void EvaluationData::addReferenceData (DBContent& object, std::shared_ptr<Buffer
            << " num_skipped " << num_skipped;
 }
 
-void EvaluationData::addTestData (DBContent& object, std::shared_ptr<Buffer> buffer)
+void EvaluationData::addTestData (DBContent& object, unsigned int line_id,  std::shared_ptr<Buffer> buffer)
 {
     loginf << "EvaluationData: addTestData: dbo " << object.name() << " size " << buffer->size();
 
@@ -214,6 +227,8 @@ void EvaluationData::addTestData (DBContent& object, std::shared_ptr<Buffer> buf
 
     assert (!tst_buffer_);
     tst_buffer_ = buffer;
+    tst_line_id_ = line_id;
+    assert (tst_line_id_ <= 3);
 
     string dbo_name = tst_buffer_->dboName();
 
@@ -287,6 +302,9 @@ void EvaluationData::addTestData (DBContent& object, std::shared_ptr<Buffer> buf
     assert (buffer->has<unsigned int>(DBContent::meta_var_datasource_id_.name()));
     NullableVector<unsigned int>& ds_ids = buffer->get<unsigned int>(DBContent::meta_var_datasource_id_.name());
 
+    assert (buffer->has<unsigned int>(DBContent::meta_var_line_id_.name()));
+    NullableVector<unsigned int>& line_ids = buffer->get<unsigned int>(DBContent::meta_var_line_id_.name());
+
     assert (buffer->has<json>(DBContent::meta_var_associations_.name()));
     NullableVector<json>& assoc_vec = buffer->get<json>(DBContent::meta_var_associations_.name());
 
@@ -301,6 +319,14 @@ void EvaluationData::addTestData (DBContent& object, std::shared_ptr<Buffer> buf
         assert (!ds_ids.isNull(cnt));
 
         if (use_active_srcs && !active_srcs.count(ds_ids.get(cnt))) // skip those entries not for tst src
+        {
+            ++num_skipped;
+            continue;
+        }
+
+        assert (!line_ids.isNull(cnt));
+
+        if (line_ids.get(cnt) != ref_line_id_)
         {
             ++num_skipped;
             continue;
