@@ -96,7 +96,7 @@ void SQLiteConnection::executeSQL(const std::string& sql)
     int result = sqlite3_exec(db_handle_, sql.c_str(), NULL, NULL, &exec_err_msg);
     if (result != SQLITE_OK)
     {
-        logerr << "DBInterface: executeSQL: sqlite3_exec failed: " << exec_err_msg;
+        logerr << "DBInterface: executeSQL: sqlite3_exec cmd '" << sql << "' failed: " << exec_err_msg;
         sqlite3_free(exec_err_msg);
         std::string error;
         error += "DBInterface: executeSQL: sqlite3_exec failed: ";

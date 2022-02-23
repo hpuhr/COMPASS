@@ -326,7 +326,7 @@ void EvaluationData::addTestData (DBContent& object, unsigned int line_id,  std:
 
         assert (!line_ids.isNull(cnt));
 
-        if (line_ids.get(cnt) != ref_line_id_)
+        if (line_ids.get(cnt) != tst_line_id_)
         {
             ++num_skipped;
             continue;

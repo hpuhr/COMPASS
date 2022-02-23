@@ -518,6 +518,8 @@ void EvaluationManager::loadingDoneSlot()
 
     COMPASS::instance().viewManager().disableDataDistribution(false);
 
+    loginf << "EvaluationManager: loadingDoneSlot: line ref " << line_id_ref_ << " tst " << line_id_tst_;
+
     std::map<std::string, std::shared_ptr<Buffer>> data = dbcontent_man.loadedData();
     assert (data.count(dbo_name_ref_));
     data_.addReferenceData(dbcontent_man.dbContent(dbo_name_ref_), line_id_ref_, data.at(dbo_name_ref_));
