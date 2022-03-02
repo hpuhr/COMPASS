@@ -35,6 +35,8 @@
 
 #include <QMessageBox>
 
+#include <osgDB/Registry>
+
 #include <boost/date_time/posix_time/posix_time.hpp>
 
 using namespace std;
@@ -372,6 +374,8 @@ void COMPASS::shutdown()
     assert(view_manager_);
     view_manager_->close();
     view_manager_ = nullptr;
+
+    //osgDB::Registry::instance(true);
 
     assert(filter_manager_);
     filter_manager_ = nullptr;
