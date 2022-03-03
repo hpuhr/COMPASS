@@ -97,7 +97,7 @@ RUN apt-get update && apt-get --only-upgrade install libgdal-dev  -y
 RUN wget https://github.com/openscenegraph/OpenSceneGraph/archive/OpenSceneGraph-3.6.5.zip
 RUN unzip OpenSceneGraph-3.6.5.zip
 RUN mkdir OpenSceneGraph-OpenSceneGraph-3.6.5/build
-RUN cd OpenSceneGraph-OpenSceneGraph-3.6.5/build && cmake -DCMAKE_INSTALL_PREFIX=/usr --config Debug ..
+RUN cd OpenSceneGraph-OpenSceneGraph-3.6.5/build && cmake -DCMAKE_INSTALL_PREFIX=/usr --config Release ..
 RUN cd OpenSceneGraph-OpenSceneGraph-3.6.5/build && make -j 16
 RUN cd OpenSceneGraph-OpenSceneGraph-3.6.5/build && make install
 
@@ -131,7 +131,7 @@ RUN echo 'endif()' >> /usr/share/cmake-3.2/Modules/FindProtobuf.cmake
 RUN wget https://github.com/gwaldron/osgearth/archive/osgearth-3.2.zip
 RUN unzip osgearth-3.2.zip
 RUN mkdir osgearth-osgearth-3.2/build
-RUN cd osgearth-osgearth-3.2/build && cmake -DCMAKE_CXX_FLAGS=-std=c++11 -DOSGEARTH_BUILD_TESTS=OFF -DOSGEARTH_BUILD_EXAMPLES=OFF -DCMAKE_INSTALL_PREFIX=/usr --config Debug ..
+RUN cd osgearth-osgearth-3.2/build && cmake -DCMAKE_CXX_FLAGS=-std=c++11 -DOSGEARTH_BUILD_TESTS=OFF -DOSGEARTH_BUILD_EXAMPLES=OFF -DCMAKE_INSTALL_PREFIX=/usr --config Release ..
 RUN cd osgearth-osgearth-3.2/build && make -j 16
 RUN cd osgearth-osgearth-3.2/build && make install
 

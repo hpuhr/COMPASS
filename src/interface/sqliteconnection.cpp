@@ -40,6 +40,8 @@ SQLiteConnection::SQLiteConnection(const std::string& class_id, const std::strin
     : Configurable(class_id, instance_id, interface), interface_(*interface), db_opened_(false)
 {
     createSubConfigurables();
+
+    loginf << "SQLiteConnection: constructor: SQLITE_VERSION " << SQLITE_VERSION;
 }
 
 SQLiteConnection::~SQLiteConnection()
