@@ -26,7 +26,7 @@ RUN cd boost_1_68_0/ && ./b2 install
 
 # install atsdb deps
 #RUN apt-get install libboost-all-dev -y
-RUN apt-get install liblog4cpp5-dev libssl-dev libarchive-dev libmysql++-dev libeigen3-dev libmysqlclient-dev libsqlite3-dev libgdal-dev  -y
+RUN apt-get install liblog4cpp5-dev libssl-dev libarchive-dev libmysql++-dev libeigen3-dev libgdal-dev  -y #libmysqlclient-dev libsqlite3-dev
 # tools
 RUN apt-get install locate zip unzip qtchooser chrpath -y
 
@@ -35,6 +35,15 @@ RUN apt-get install libtbb-dev -y
 #RUN dpkg -i libtbb2_2017~U7-8_amd64.deb
 #RUN wget https://launchpad.net/ubuntu/+archive/primary/+files/libtbb-dev_2017~U7-8_amd64.deb
 #RUN dpkg -i libtbb-dev_2017~U7-8_amd64.deb
+
+RUN wget https://sqlite.org/2022/sqlite-autoconf-3380000.tar.gz --no-check-certificate
+RUN tar xvzf sqlite-autoconf-3380000.tar.gz
+RUN cd sqlite-autoconf-3380000 && env CPPFLAGS='-O2 -DSQLITE_ENABLE_FTS5=1 -DSQLITE_ENABLE_STAT4=1 -DSQLITE_ENABLE_UPDATE_DELETE_LIMIT=1 -DSQLITE_ENABLE_COLUMN_METADATA=1' ./configure --prefix=/usr/ --libdir=/usr/lib/x86_64-linux-gnu/
+RUN cd sqlite-autoconf-3380000 && make
+RUN cd sqlite-autoconf-3380000 && make install
+RUN sqlite3 --version
+RUN sqlite3 -cmd "PRAGMA compile_options;"
+RUN sqlite3 -cmd "CREATE TABLE countries (id varchar(3), data json);insert into countries (id, data) values(1, json('{\"cell\":\"+491765\", \"home\":\"+498973\"}'));select * from countries;"
 
 RUN cp /etc/apt/sources.list /etc/apt/sources.list~
 RUN sed -Ei 's/^# deb-src /deb-src /' /etc/apt/sources.list
@@ -88,7 +97,7 @@ RUN apt-get update && apt-get --only-upgrade install libgdal-dev  -y
 RUN wget https://github.com/openscenegraph/OpenSceneGraph/archive/OpenSceneGraph-3.6.5.zip
 RUN unzip OpenSceneGraph-3.6.5.zip
 RUN mkdir OpenSceneGraph-OpenSceneGraph-3.6.5/build
-RUN cd OpenSceneGraph-OpenSceneGraph-3.6.5/build && cmake -DCMAKE_INSTALL_PREFIX=/usr --config Release ..
+RUN cd OpenSceneGraph-OpenSceneGraph-3.6.5/build && cmake -DCMAKE_INSTALL_PREFIX=/usr --config Debug ..
 RUN cd OpenSceneGraph-OpenSceneGraph-3.6.5/build && make -j 16
 RUN cd OpenSceneGraph-OpenSceneGraph-3.6.5/build && make install
 
@@ -99,17 +108,7 @@ RUN cd osgQt-Qt4/build && cmake -DCMAKE_INSTALL_PREFIX=/usr --config Release ..
 RUN cd osgQt-Qt4/build && make -j 16
 RUN cd osgQt-Qt4/build && make install
 
-# osgEarth
-#RUN wget https://github.com/gwaldron/osgearth/archive/osgearth-2.9.zip
-#RUN unzip osgearth-2.9.zip
-#RUN mkdir osgearth-osgearth-2.9/build
-#RUN cd osgearth-osgearth-2.9/build && cmake -DCMAKE_INSTALL_PREFIX=/usr -DOSGEARTH_USE_QT=TRUE -DDESIRED_QT_VERSION=5 -DCMAKE_BUILD_TYPE=Release ..
-#RUN cd osgearth-osgearth-2.9/build && make -j 16
-#RUN cd osgearth-osgearth-2.9/build && make install
-
 RUN apt-get install libgeos++-dev -y
-
-#RUN apt-get install libprotobuf-dev protobuf-compiler libglew-dev -y
 
 RUN apt-get install autoconf automake libtool curl -y
 
@@ -132,7 +131,7 @@ RUN echo 'endif()' >> /usr/share/cmake-3.2/Modules/FindProtobuf.cmake
 RUN wget https://github.com/gwaldron/osgearth/archive/osgearth-3.2.zip
 RUN unzip osgearth-3.2.zip
 RUN mkdir osgearth-osgearth-3.2/build
-RUN cd osgearth-osgearth-3.2/build && cmake -DCMAKE_CXX_FLAGS=-std=c++11 -DOSGEARTH_BUILD_TESTS=OFF -DOSGEARTH_BUILD_EXAMPLES=OFF -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release ..
+RUN cd osgearth-osgearth-3.2/build && cmake -DCMAKE_CXX_FLAGS=-std=c++11 -DOSGEARTH_BUILD_TESTS=OFF -DOSGEARTH_BUILD_EXAMPLES=OFF -DCMAKE_INSTALL_PREFIX=/usr --config Debug ..
 RUN cd osgearth-osgearth-3.2/build && make -j 16
 RUN cd osgearth-osgearth-3.2/build && make install
 
