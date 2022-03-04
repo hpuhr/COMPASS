@@ -181,9 +181,9 @@ protected:
 
     std::shared_ptr<ASTERIXDecodeJob> decode_job_;
 
-    std::shared_ptr<ASTERIXJSONMappingJob> json_map_job_;
+    std::vector<std::shared_ptr<ASTERIXJSONMappingJob>> json_map_jobs_;
 
-    std::shared_ptr<ASTERIXPostprocessJob> postprocess_job_;
+    std::vector<std::shared_ptr<ASTERIXPostprocessJob>> postprocess_jobs_;
 
     //std::map<std::string, std::shared_ptr<Buffer>> buffer_cache_; // to be used for file import
     boost::posix_time::ptime last_insert_time_;

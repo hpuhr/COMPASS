@@ -686,11 +686,11 @@ void ASTERIXImportTask::stop()
     if (decode_job_)
         decode_job_->setObsolete();
 
-    if (json_map_job_)
-        json_map_job_->setObsolete();
+    for (auto& job_it : json_map_jobs_)
+        job_it->setObsolete();
 
-    if (postprocess_job_)
-        postprocess_job_->setObsolete();
+    for (auto& job_it : postprocess_jobs_)
+        job_it->setObsolete();
 
     while(decode_job_ && !decode_job_->done())
     {
@@ -700,7 +700,7 @@ void ASTERIXImportTask::stop()
         QThread::msleep(1);
     }
 
-    while(json_map_job_ && !json_map_job_->done())
+    while(json_map_jobs_.size())
     {
         loginf << "ASTERIXImportTask: stop: waiting for map job to finish";
 
@@ -708,7 +708,7 @@ void ASTERIXImportTask::stop()
         QThread::msleep(1);
     }
 
-    while(postprocess_job_ && !postprocess_job_->done())
+    while(postprocess_jobs_.size())
     {
         loginf << "ASTERIXImportTask: stop: waiting for post-process job to finish";
 
@@ -1005,27 +1005,27 @@ void ASTERIXImportTask::addDecodedASTERIXSlot()
     // break here for testing
     //return;
 
-    while (json_map_job_ && !stopped_)  // only one can exist at a time
-    {
-        if (stopped_)
-            return;
+//    while (json_map_job_ && !stopped_)  // only one can exist at a time
+//    {
+//        if (stopped_)
+//            return;
 
-        //        if (decode_job_)
-        //            decode_job_->pause();
+//        //        if (decode_job_)
+//        //            decode_job_->pause();
 
-        logdbg << "ASTERIXImportTask: addDecodedASTERIXSlot: waiting on mapping to finish";
+//        logdbg << "ASTERIXImportTask: addDecodedASTERIXSlot: waiting on mapping to finish";
 
-        QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
-        QThread::msleep(1);
+//        QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+//        QThread::msleep(1);
 
-        if (stopped_)
-            return;
-    }
+//        if (stopped_)
+//            return;
+//    }
 
     if (stopped_)
         return;
 
-    assert(!json_map_job_);
+    //assert(!json_map_job_);
 
     assert(schema_);
 
@@ -1036,17 +1036,19 @@ void ASTERIXImportTask::addDecodedASTERIXSlot()
     else
         keys = {"frames", "content", "data_blocks", "content", "records"};
 
-    json_map_job_ =
+    std::shared_ptr<ASTERIXJSONMappingJob> json_map_job =
             make_shared<ASTERIXJSONMappingJob>(std::move(extracted_data), keys, schema_->parsers());
+
+    json_map_jobs_.push_back(json_map_job);
 
     assert(!extracted_data);
 
-    connect(json_map_job_.get(), &ASTERIXJSONMappingJob::obsoleteSignal, this,
+    connect(json_map_job.get(), &ASTERIXJSONMappingJob::obsoleteSignal, this,
             &ASTERIXImportTask::mapJSONObsoleteSlot, Qt::QueuedConnection);
-    connect(json_map_job_.get(), &ASTERIXJSONMappingJob::doneSignal, this,
+    connect(json_map_job.get(), &ASTERIXJSONMappingJob::doneSignal, this,
             &ASTERIXImportTask::mapJSONDoneSlot, Qt::QueuedConnection);
 
-    JobManager::instance().addNonBlockingJob(json_map_job_);
+    JobManager::instance().addNonBlockingJob(json_map_job);
 
     //    if (decode_job_)
     //    {
@@ -1076,17 +1078,22 @@ void ASTERIXImportTask::mapJSONDoneSlot()
     {
         logdbg << "ASTERIXImportTask: mapJSONDoneSlot: stopping";
 
-        json_map_job_ = nullptr;
+        json_map_jobs_.clear();
 
         checkAllDone();
 
         return;
     }
 
-    assert(json_map_job_);
+    ASTERIXJSONMappingJob* map_job = dynamic_cast<ASTERIXJSONMappingJob*>(QObject::sender());
+    assert(map_job);
 
-    std::map<std::string, std::shared_ptr<Buffer>> job_buffers {json_map_job_->buffers()};
-    json_map_job_ = nullptr;
+    std::map<std::string, std::shared_ptr<Buffer>> job_buffers {map_job->buffers()};
+
+    assert (json_map_jobs_.size());
+    assert (json_map_jobs_.begin()->get() == map_job);
+    map_job = nullptr;
+    json_map_jobs_.erase(json_map_jobs_.begin()); // remove
 
     logdbg << "ASTERIXImportTask: mapJSONDoneSlot: processing, num buffers " << job_buffers.size();
 
@@ -1095,16 +1102,19 @@ void ASTERIXImportTask::mapJSONDoneSlot()
 
     if (!test_)
     {
-        postprocess_job_ =
+        std::shared_ptr<ASTERIXPostprocessJob> postprocess_job =
                 make_shared<ASTERIXPostprocessJob>(std::move(job_buffers), !import_file_);
+
+        postprocess_jobs_.push_back(postprocess_job);
+
         // check for future when net import
 
-        connect(postprocess_job_.get(), &ASTERIXPostprocessJob::obsoleteSignal, this,
+        connect(postprocess_job.get(), &ASTERIXPostprocessJob::obsoleteSignal, this,
                 &ASTERIXImportTask::postprocessObsoleteSlot, Qt::QueuedConnection);
-        connect(postprocess_job_.get(), &ASTERIXPostprocessJob::doneSignal, this,
+        connect(postprocess_job.get(), &ASTERIXPostprocessJob::doneSignal, this,
                 &ASTERIXImportTask::postprocessDoneSlot, Qt::QueuedConnection);
 
-        JobManager::instance().addNonBlockingJob(postprocess_job_);
+        JobManager::instance().addNonBlockingJob(postprocess_job);
     }
 
     //    if (decode_job_)
@@ -1127,12 +1137,15 @@ void ASTERIXImportTask::mapJSONObsoleteSlot()
 {
     logdbg << "ASTERIXImportTask: mapJSONObsoleteSlot";
 
-    if (stopped_)
-    {
-        json_map_job_ = nullptr;
+    ASTERIXJSONMappingJob* map_job = dynamic_cast<ASTERIXJSONMappingJob*>(QObject::sender());
+    assert(map_job);
 
-        checkAllDone();
-    }
+    assert (json_map_jobs_.size());
+    assert (json_map_jobs_.begin()->get() == map_job);
+    map_job = nullptr;
+    json_map_jobs_.erase(json_map_jobs_.begin()); // remove
+
+    checkAllDone();
 
 }
 
@@ -1142,17 +1155,23 @@ void ASTERIXImportTask::postprocessDoneSlot()
 
     if (stopped_)
     {
-        postprocess_job_ = nullptr;
+        postprocess_jobs_.clear();
 
         checkAllDone();
 
         return;
     }
 
-    assert (postprocess_job_);
+    ASTERIXPostprocessJob* post_job = dynamic_cast<ASTERIXPostprocessJob*>(QObject::sender());
+    assert(post_job);
 
-    std::map<std::string, std::shared_ptr<Buffer>> job_buffers {postprocess_job_->buffers()};
-    postprocess_job_ = nullptr;
+    std::map<std::string, std::shared_ptr<Buffer>> job_buffers {post_job->buffers()};
+
+    assert (postprocess_jobs_.size());
+    assert (postprocess_jobs_.begin()->get() == post_job);
+    post_job = nullptr;
+    postprocess_jobs_.erase(postprocess_jobs_.begin()); // remove
+
 
     //    if (decode_job_)
     //    {
@@ -1202,7 +1221,13 @@ void ASTERIXImportTask::postprocessDoneSlot()
 
 void ASTERIXImportTask::postprocessObsoleteSlot()
 {
-    postprocess_job_ = nullptr;
+    ASTERIXPostprocessJob* post_job = dynamic_cast<ASTERIXPostprocessJob*>(QObject::sender());
+    assert(post_job);
+
+    assert (postprocess_jobs_.size());
+    assert (postprocess_jobs_.begin()->get() == post_job);
+    post_job = nullptr;
+    postprocess_jobs_.erase(postprocess_jobs_.begin()); // remove
 }
 
 void ASTERIXImportTask::insertData(std::map<std::string, std::shared_ptr<Buffer>> job_buffers)
@@ -1304,12 +1329,12 @@ void ASTERIXImportTask::checkAllDone()
 {
     loginf << "ASTERIXImportTask: checkAllDone: all done " << all_done_ << " decode "
            << (decode_job_ != nullptr)
-           << " map job " << (json_map_job_ != nullptr)
-           << " post job " << (postprocess_job_ != nullptr)
+           << " map jobs " << json_map_jobs_.size()
+           << " post jobs " << postprocess_jobs_.size()
            << " wait insert " << waiting_for_insert_
            << " insert active " << insert_active_;
 
-    if (!all_done_ && decode_job_ == nullptr && json_map_job_ == nullptr && postprocess_job_ == nullptr
+    if (!all_done_ && decode_job_ == nullptr && !json_map_jobs_.size() && !postprocess_jobs_.size()
             && !waiting_for_insert_ && !insert_active_)
     {
         loginf << "ASTERIXImportTask: checkAllDone: setting all done: total packets " << num_packets_total_;
