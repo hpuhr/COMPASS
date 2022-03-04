@@ -286,10 +286,12 @@ void ASTERIXDecodeJob::doUDPStreamDecoding()
                 loginf << "ASTERIXDecodeJob: doUDPStreamDecoding: processing "
                        << receive_buffer_sizes_.size() << " buffers  max " << MAX_ALL_RECEIVE_SIZE;
 
+                loginf << "ASTERIXDecodeJob: doUDPStreamDecoding: copying data";
+
                 // copy data
-                while (receive_buffer_sizes_.size())
+                for (auto& size_it : receive_buffer_sizes_)
                 {
-                    line_id = receive_buffer_sizes_.begin()->first;
+                    line_id = size_it.first;
 
                     assert (receive_buffers_.count(line_id));
 
@@ -299,18 +301,21 @@ void ASTERIXDecodeJob::doUDPStreamDecoding()
                         receive_buffers_copy_[line_id].reset(new boost::array<char, MAX_ALL_RECEIVE_SIZE>());
 
                     *receive_buffers_copy_.at(line_id) = *receive_buffers_.at(line_id);
-                    receive_copy_buffer_sizes_[line_id] = receive_buffer_sizes_.at(line_id);
+                    receive_copy_buffer_sizes_[line_id] = size_it.second;
 
-                    receive_buffer_sizes_.erase(receive_buffer_sizes_.begin()); // remove size
                 }
+
+                receive_buffer_sizes_.clear();
 
                 lock.unlock();
 
                 last_receive_decode_time_ = boost::posix_time::microsec_clock::local_time();
 
-                while (receive_copy_buffer_sizes_.size())
+                loginf << "ASTERIXDecodeJob: doUDPStreamDecoding: processing copied data";
+
+                for (auto& size_it : receive_copy_buffer_sizes_)
                 {
-                    line_id = receive_copy_buffer_sizes_.begin()->first;
+                    line_id = size_it.first;
 
                     assert (receive_buffers_copy_.count(line_id));
 
@@ -319,13 +324,13 @@ void ASTERIXDecodeJob::doUDPStreamDecoding()
                         this->jasterix_callback(std::move(data), line_id, num_frames, num_records, numErrors);
                     };
 
-                    task_.jASTERIX()->decodeData(
-                                (char*) receive_buffers_copy_.at(line_id)->data(),
-                                receive_copy_buffer_sizes_.begin()->second, callback);
-
-                    receive_copy_buffer_sizes_.erase(receive_buffer_sizes_.begin()); // remove size
+                    task_.jASTERIX()->decodeData((char*) receive_buffers_copy_.at(line_id)->data(),
+                                                 size_it.second, callback);
                 }
 
+                loginf << "ASTERIXDecodeJob: doUDPStreamDecoding: done";
+
+                receive_copy_buffer_sizes_.clear();
             }
         }
     }

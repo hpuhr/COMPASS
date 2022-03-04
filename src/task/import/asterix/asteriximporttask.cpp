@@ -986,7 +986,7 @@ void ASTERIXImportTask::addDecodedASTERIXSlot()
     }
 
     // remove if break here for testing
-    if (maxLoadReached())
+    if (import_file_ && maxLoadReached())
     {
         logdbg << "ASTERIXImportTask: addDecodedASTERIXSlot: returning since max load reached";
         return;
@@ -1000,6 +1000,10 @@ void ASTERIXImportTask::addDecodedASTERIXSlot()
     std::unique_ptr<nlohmann::json> extracted_data {decode_job_->extractedData()};
     ++num_packets_in_processing_;
     ++num_packets_total_;
+
+    loginf << "ASTERIXImportTask: addDecodedASTERIXSlot: processing data,"
+           << " num_packets_in_processing_ " << num_packets_in_processing_
+           << " num_packets_total_ " << num_packets_total_;
 
     // break here for testing
     //return;
@@ -1255,10 +1259,10 @@ void ASTERIXImportTask::insertDoneSlot()
 
     insert_active_ = false;
 
+    --num_packets_in_processing_;
+
     if (import_file_)
     {
-        --num_packets_in_processing_;
-
         logdbg << "ASTERIXImportTask: insertDoneSlot: num_packets_in_processing " << num_packets_in_processing_;
 
         updateFileProgressDialog();
