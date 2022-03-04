@@ -59,8 +59,10 @@ class ASTERIXDecodeJob : public Job
     size_t numRecords() const;
     size_t numErrors() const;
 
-    void pause() { pause_ = true; }
-    void unpause() { pause_ = false; }
+//    void pause() { pause_ = true; }
+//    void unpause() { pause_ = false; }
+
+    bool hasData() { return extracted_data_ != 0;}
 
     bool error() const;
     std::string errorMessage() const;
@@ -89,7 +91,7 @@ private:
     std::map<unsigned int, std::map<std::string, std::pair<std::string, unsigned int>>> ds_lines_;
     // ds_id -> line str ->(ip, port)
 
-    volatile bool pause_{false};
+    //volatile bool pause_{false};
 
     boost::posix_time::ptime start_time_;
 

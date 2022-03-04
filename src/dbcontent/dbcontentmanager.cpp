@@ -725,8 +725,10 @@ void DBContentManager::finishInserting()
 {
     loginf << "DBContentManager: finishInserting: all done";
 
-    insert_in_progress_ = false;
+    if (COMPASS::instance().appMode() == AppMode::Offline || COMPASS::instance().appMode() == AppMode::LivePaused)
+        insert_data_.clear();
 
+    insert_in_progress_ = false;
     emit insertDoneSignal();
 
     // add inserted to loaded data
@@ -749,8 +751,6 @@ void DBContentManager::finishInserting()
         if (data_.size())
             emit loadedDataSignal(data_, true);
     }
-    else
-        insert_data_.clear();
 
     COMPASS::instance().dataSourceManager().updateWidget();
 

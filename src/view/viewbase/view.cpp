@@ -97,6 +97,14 @@ bool View::init()
     return true;
 }
 
+void View::databaseOpened()
+{
+}
+
+void View::databaseClosed()
+{
+}
+
 /**
 @brief Returns the views name.
 @return The views name.

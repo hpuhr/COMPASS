@@ -167,6 +167,9 @@ protected:
     bool test_{false};
 
     bool running_ {false};
+    unsigned int num_packets_in_processing_{0};
+    unsigned int num_packets_total_{0};
+
     boost::posix_time::ptime start_time_;
     std::unique_ptr<QProgressDialog> file_progress_dialog_;
 
@@ -182,7 +185,7 @@ protected:
 
     std::shared_ptr<ASTERIXPostprocessJob> postprocess_job_;
 
-    std::map<std::string, std::shared_ptr<Buffer>> buffer_cache_; // to be used for file import
+    //std::map<std::string, std::shared_ptr<Buffer>> buffer_cache_; // to be used for file import
     boost::posix_time::ptime last_insert_time_;
 
     bool error_{false};
@@ -201,6 +204,7 @@ protected:
     void checkAllDone();
 
     bool maxLoadReached();
+    void updateFileProgressDialog();
 };
 
 #endif  // ASTERIXIMPORTTASK_H

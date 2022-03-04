@@ -637,6 +637,24 @@ void ViewManager::selectionChangedSlot()
     emit selectionChangedSignal();
 }
 
+void ViewManager::databaseOpenedSlot()
+{
+    loginf << "ViewManager: databaseOpenedSlot";
+
+    for (auto& view_it : views_)
+        view_it.second->databaseOpened();
+}
+
+void ViewManager::databaseClosedSlot()
+{
+    loginf << "ViewManager: databaseClosedSlot";
+
+    clearDataInViews();
+
+    for (auto& view_it : views_)
+        view_it.second->databaseClosed();
+}
+
 void ViewManager::loadingStartedSlot()
 {
     if (disable_data_distribution_)

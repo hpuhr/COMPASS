@@ -49,6 +49,9 @@ class ViewManager : public QObject, public Configurable
   public slots:
     void selectionChangedSlot();
 
+    void databaseOpenedSlot();
+    void databaseClosedSlot();
+
     void loadingStartedSlot();
     // all data contained, also new one. requires_reset true indicates that all shown info should be re-created,
     // e.g. when data in the beginning was removed, or order of previously emitted data was changed, etc.

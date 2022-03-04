@@ -490,8 +490,8 @@ void ASTERIXDecodeJob::jasterix_callback(std::unique_ptr<nlohmann::json> data, u
         logdbg << "ASTERIXDecodeJob: jasterix_callback: max_index " << max_index_
                << " perc " <<  String::percentToString((float) max_index_/(float) file_size_);
 
-    while (!obsolete_ && pause_)  // block decoder until unpaused
-        QThread::msleep(1);
+//    while (!obsolete_ && pause_)  // block decoder until unpaused
+//        QThread::msleep(1);
 
     emit decodedASTERIXSignal();
 
