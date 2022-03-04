@@ -418,7 +418,7 @@ void DBContent::quitLoading()
 
 void DBContent::insertData(shared_ptr<Buffer> buffer)
 {
-    loginf << "DBContent " << name_ << ": insertData: buffer " << buffer->size();
+    logdbg << "DBContent " << name_ << ": insertData: buffer " << buffer->size();
 
     assert (!insert_active_);
     insert_active_ = true;

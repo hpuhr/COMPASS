@@ -170,6 +170,8 @@ protected:
     unsigned int num_packets_in_processing_{0};
     unsigned int num_packets_total_{0};
 
+    unsigned int num_records_ {0};
+
     boost::posix_time::ptime start_time_;
     std::unique_ptr<QProgressDialog> file_progress_dialog_;
 

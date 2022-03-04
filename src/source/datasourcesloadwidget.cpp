@@ -77,7 +77,7 @@ DataSourcesLoadWidget::DataSourcesLoadWidget(DataSourceManager& ds_man)
     //    bool use_limit = dbo_manager_.useLimit();
     //    limit_check_ = new QCheckBox("Use Limit");
     //    limit_check_->setChecked(use_limit);
-    //    connect(limit_check_, &QCheckBox::clicked, this, &DBObjectManagerLoadWidget::toggleUseLimit);
+    //    connect(limit_check_, &QCheckBox::clicked, this, &DataSourcesLoadWidget::toggleUseLimit);
     //    main_layout->addWidget(limit_check_);
 
 
@@ -105,7 +105,7 @@ void DataSourcesLoadWidget::loadDSTypeChangedSlot()
 
     bool load = box->checkState() == Qt::Checked;
 
-    loginf << "DBObjectManagerLoadWidget: loadDSTypeChangedSlot: ds_type " << ds_type_name << " load " << load;
+    loginf << "DataSourcesLoadWidget: loadDSTypeChangedSlot: ds_type " << ds_type_name << " load " << load;
 
     COMPASS::instance().dataSourceManager().dsTypeLoadingWanted(ds_type_name, load);
 }
@@ -119,13 +119,13 @@ void DataSourcesLoadWidget::loadDSChangedSlot()
 
     bool load = box->checkState() == Qt::Checked;
 
-    loginf << "DBObjectManagerLoadWidget: loadDSChangedSlot: ds_id " << ds_id << " load " << load;
+    loginf << "DataSourcesLoadWidget: loadDSChangedSlot: ds_id " << ds_id << " load " << load;
 
     ds_man_.dbDataSource(ds_id).loadingWanted(load);
 }
 
 
-//void DBObjectManagerLoadWidget::toggleUseLimit()
+//void DataSourcesLoadWidget::toggleUseLimit()
 //{
 //    assert(limit_check_);
 //    assert(limit_widget_);
@@ -133,7 +133,7 @@ void DataSourcesLoadWidget::loadDSChangedSlot()
 //    assert(limit_max_edit_);
 
 //    bool checked = limit_check_->checkState() == Qt::Checked;
-//    logdbg << "DBObjectManagerLoadWidget: toggleUseLimit: setting use limit to " << checked;
+//    logdbg << "DataSourcesLoadWidget: toggleUseLimit: setting use limit to " << checked;
 //    dbo_manager_.useLimit(checked);
 
 //    if (checked)
@@ -145,7 +145,7 @@ void DataSourcesLoadWidget::loadDSChangedSlot()
 //    limit_max_edit_->setEnabled(checked);
 //}
 
-//void DBObjectManagerLoadWidget::limitMinChanged()
+//void DataSourcesLoadWidget::limitMinChanged()
 //{
 //    assert(limit_min_edit_);
 
@@ -155,7 +155,7 @@ void DataSourcesLoadWidget::loadDSChangedSlot()
 //    unsigned int min = std::stoul(limit_min_edit_->text().toStdString());
 //    dbo_manager_.limitMin(min);
 //}
-//void DBObjectManagerLoadWidget::limitMaxChanged()
+//void DataSourcesLoadWidget::limitMaxChanged()
 //{
 //    assert(limit_max_edit_);
 
@@ -168,7 +168,7 @@ void DataSourcesLoadWidget::loadDSChangedSlot()
 
 void DataSourcesLoadWidget::update()
 {
-    logdbg << "DBObjectManagerLoadWidget: update: num data sources " << ds_man_.dbDataSources().size();
+    logdbg << "DataSourcesLoadWidget: update: num data sources " << ds_man_.dbDataSources().size();
 
     bool clear_required = false;
 
@@ -176,7 +176,7 @@ void DataSourcesLoadWidget::update()
     {
         if (!ds_boxes_.count(ds_it->name()))
         {
-            loginf << "DBObjectManagerLoadWidget: update: ds_box " << ds_it->name() << " missing ";
+            loginf << "DataSourcesLoadWidget: update: ds_box " << ds_it->name() << " missing ";
 
             clear_required = true;
             break;
@@ -190,7 +190,7 @@ void DataSourcesLoadWidget::update()
         {
             if (!ds_content_boxes_.count(ds_it->name()) || !ds_content_boxes_.at(ds_it->name()).count(cnt_it.first))
             {
-                loginf << "DBObjectManagerLoadWidget: update: ds_content_boxes " << cnt_it.first << " missing ";
+                loginf << "DataSourcesLoadWidget: update: ds_content_boxes " << cnt_it.first << " missing ";
 
                 clear_required = true;
                 break;
@@ -219,7 +219,7 @@ void DataSourcesLoadWidget::update()
 
 void DataSourcesLoadWidget::clearAndCreateContent()
 {
-    loginf << "DBObjectManagerLoadWidget: clearAndCreateContent";
+    loginf << "DataSourcesLoadWidget: clearAndCreateContent";
 
     // remove all previous
     while (QLayoutItem* item = type_layout_->takeAt(0))
@@ -273,7 +273,7 @@ void DataSourcesLoadWidget::clearAndCreateContent()
 
     for (auto& ds_type_name : DataSourceManager::data_source_types_)
     {
-        logdbg << "DBObjectManagerLoadWidget: clearAndCreateContent: typ " << ds_type_name << " cnt " << dstyp_cnt;
+        logdbg << "DataSourcesLoadWidget: clearAndCreateContent: typ " << ds_type_name << " cnt " << dstyp_cnt;
 
         if (ds_type_name == "MLAT" || ds_type_name == "Tracker")  // break into next column
         {
@@ -308,7 +308,7 @@ void DataSourcesLoadWidget::clearAndCreateContent()
 
             ds_id = Number::dsIdFrom(ds_it->sac(), ds_it->sic());
             ds_name = ds_it->name();
-            loginf << "DBObjectManagerLoadWidget: clearAndCreateContent: create '"
+            loginf << "DataSourcesLoadWidget: clearAndCreateContent: create '"
                    << ds_it->dsType() << "' '" << ds_name << "'";
 
             QCheckBox* ds_box = new QCheckBox(ds_name.c_str());
@@ -438,11 +438,11 @@ void DataSourcesLoadWidget::clearAndCreateContent()
 
 void DataSourcesLoadWidget::updateExistingContent()
 {
-    loginf << "DBObjectManagerLoadWidget: updateExistingContent";
+    logdbg << "DataSourcesLoadWidget: updateExistingContent";
 
     for (auto& ds_typ_it : ds_type_boxes_)
     {
-        logdbg << "DBObjectManagerLoadWidget: updateExistingContent: ds_typ " << ds_typ_it.first
+        logdbg << "DataSourcesLoadWidget: updateExistingContent: ds_typ " << ds_typ_it.first
                << " " << ds_man_.dsTypeLoadingWanted(ds_typ_it.first);
         ds_typ_it.second->setChecked(ds_man_.dsTypeLoadingWanted(ds_typ_it.first));
     }
@@ -460,7 +460,7 @@ void DataSourcesLoadWidget::updateExistingContent()
         ds_boxes_.at(ds_name)->setChecked(ds_it->loadingWanted());
         // ds_boxes_[ds_name] // checkbox
 
-        logdbg << "DBObjectManagerLoadWidget: updateExistingContent: ds " << ds_name
+        logdbg << "DataSourcesLoadWidget: updateExistingContent: ds " << ds_name
                << " " << ds_it->loadingWanted();
 
         if (show_counts_)

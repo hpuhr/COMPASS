@@ -684,7 +684,7 @@ void DBContentManager::clearData()
 
 void DBContentManager::insertData(std::map<std::string, std::shared_ptr<Buffer>> data)
 {
-    loginf << "DBContentManager: insertData";
+    logdbg << "DBContentManager: insertData";
 
     assert (!load_in_progress_);
     assert (!insert_in_progress_);
@@ -723,7 +723,7 @@ void DBContentManager::insertDone(DBContent& object)
 
 void DBContentManager::finishInserting()
 {
-    loginf << "DBContentManager: finishInserting: all done";
+    logdbg << "DBContentManager: finishInserting: all done";
 
     if (COMPASS::instance().appMode() == AppMode::Offline || COMPASS::instance().appMode() == AppMode::LivePaused)
         insert_data_.clear();
@@ -755,7 +755,7 @@ void DBContentManager::finishInserting()
     COMPASS::instance().dataSourceManager().updateWidget();
 
     boost::posix_time::time_duration time_diff = boost::posix_time::microsec_clock::local_time() - start_time;
-    loginf << "DBContentManager: finishInserting: processing took "
+    logdbg << "DBContentManager: finishInserting: processing took "
         << String::timeStringFromDouble(time_diff.total_milliseconds() / 1000.0, true);
 }
 
