@@ -23,6 +23,7 @@
 #include "sqliteconnection.h"
 #include "dbinterface.h"
 #include "dbcontent/dbcontent.h"
+#include "dbcontent/dbcontentmanager.h"
 #include "dbcontent/variable/variable.h"
 #include "filtermanager.h"
 #include "logger.h"
@@ -129,6 +130,23 @@ string SQLGenerator::getCreateTableStatement(const DBContent& object)
     }
 
     ss << ");";
+
+    // CREATE [UNIQUE] INDEX index_name ON table_name(column_list);
+
+    ss << "\nCREATE INDEX TOD_INDEX_" << object.name() << " ON " << object.dbTableName() << "(";
+    ss << COMPASS::instance().dbContentManager().metaGetVariable(
+              object.name(), DBContent::meta_var_tod_).dbColumnName()
+       << ");";
+
+    ss << "\nCREATE INDEX DS_ID_INDEX_" << object.name() << " ON " << object.dbTableName() << "(";
+    ss << COMPASS::instance().dbContentManager().metaGetVariable(
+              object.name(), DBContent::meta_var_datasource_id_).dbColumnName()
+       << ");";
+
+    ss << "\nCREATE INDEX LINE_ID_INDEX_" << object.name() << " ON " << object.dbTableName() << "(";
+    ss << COMPASS::instance().dbContentManager().metaGetVariable(
+              object.name(), DBContent::meta_var_line_id_).dbColumnName()
+       << ");";
 
     loginf << "SQLGenerator: getCreateTableStatement: sql '" << ss.str() << "'";
     return ss.str();

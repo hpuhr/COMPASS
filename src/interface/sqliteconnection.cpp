@@ -68,8 +68,14 @@ void SQLiteConnection::openFile(const std::string& file_name)
         throw std::runtime_error("SQLiteConnection: openFile: error");
     }
     char* sErrMsg = 0;
-    sqlite3_exec(db_handle_, "PRAGMA synchronous = OFF", NULL, NULL, &sErrMsg);
-    sqlite3_exec(db_handle_, "PRAGMA journal_mode = WAL", NULL, NULL, &sErrMsg);
+    sqlite3_exec(db_handle_, "PRAGMA SYNCHRONOUS = OFF", NULL, NULL, &sErrMsg);
+    sqlite3_exec(db_handle_, "PRAGMA TEMP_STORE = 2", NULL, NULL, &sErrMsg);
+    sqlite3_exec(db_handle_, "PRAGMA JOURNAL_MODE = OFF", NULL, NULL, &sErrMsg);
+    sqlite3_exec(db_handle_, "PRAGMA LOCKING_MODE = EXCLUSIVE", NULL, NULL, &sErrMsg);
+    sqlite3_exec(db_handle_, "PRAGMA CACHE_SIZE = 500", NULL, NULL, &sErrMsg);
+
+
+
     //sqlite3_exec(db_handle_, "PRAGMA locking_mode = EXCLUSIVE", NULL, NULL, &sErrMsg);
 
     db_opened_ = true;
