@@ -81,6 +81,16 @@ void DataSourcesConfigurationDialog::updateDataSource(unsigned int ds_id)
     table_model_->updateDataSource(ds_id);
 }
 
+void DataSourcesConfigurationDialog::beginResetModel()
+{
+    table_model_->beginModelReset();
+}
+
+void DataSourcesConfigurationDialog::endResetModel()
+{
+    table_model_->endModelReset();
+}
+
 void DataSourcesConfigurationDialog::currentRowChanged(const QModelIndex& current, const QModelIndex& previous)
 {
     assert (edit_widget_);

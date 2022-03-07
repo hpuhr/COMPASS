@@ -275,7 +275,7 @@ void DataSourcesLoadWidget::clearAndCreateContent()
     {
         logdbg << "DataSourcesLoadWidget: clearAndCreateContent: typ " << ds_type_name << " cnt " << dstyp_cnt;
 
-        if (ds_type_name == "MLAT" || ds_type_name == "Tracker")  // break into next column
+        if (ds_type_name == "MLAT" || ds_type_name == "Tracker" || ds_type_name == "Other")  // break into next column
         {
             row = 0;
             dstype_col++;

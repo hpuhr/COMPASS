@@ -208,8 +208,12 @@ void ASTERIXPostprocessJob::doRadarPlotPositionCalculations()
         {
             if (!projection.hasCoordinateSystem(ds_id_it))
             {
-                assert (ds_man.hasConfigDataSource(ds_id_it)
-                        || ds_man.hasDBDataSource(ds_id_it)); // creation done after in doDataSourcesBeforeInsert
+                if (!ds_man.hasConfigDataSource(ds_id_it) && !ds_man.hasDBDataSource(ds_id_it))
+                {
+                    logwrn << "ASTERIXPostprocessJob: doRadarPlotPositionCalculations: data source id "
+                           << ds_id_it << " not defined in config or db";
+                    continue;
+                }
 
                 //                if (!dbo_man.hasDataSource(ds_id_it))
                 //                {
@@ -230,7 +234,7 @@ void ASTERIXPostprocessJob::doRadarPlotPositionCalculations()
 
                     if (data_source.hasFullPosition())
                     {
-                        loginf << "ASTERIXPostprocessJob: run: adding proj ds " << ds_id_it
+                        loginf << "ASTERIXPostprocessJob: doRadarPlotPositionCalculations: adding proj ds " << ds_id_it
                                << " lat/long " << data_source.latitude()
                                << "," << data_source.longitude()
                                << " alt " << data_source.altitude();
@@ -240,7 +244,8 @@ void ASTERIXPostprocessJob::doRadarPlotPositionCalculations()
                                                        data_source.altitude());
                     }
                     else
-                        logerr << "ASTERIXPostprocessJob: run: config ds " << data_source.name()
+                        logerr << "ASTERIXPostprocessJob: doRadarPlotPositionCalculations: config ds "
+                               << data_source.name()
                                << " defined but missing position info";
                 }
                 else if (ds_man.hasDBDataSource(ds_id_it))

@@ -29,7 +29,7 @@ ConfigurationDataSource::ConfigurationDataSource(const std::string& class_id, co
         == DataSourceManager::data_source_types_.end())
     {
         logerr << "ConfigurationDataSource: sac/sic " << sac_ << sic_ << " ds_type '" << ds_type_
-               << "' unknown";
+               << "' wrong";
     }
 
     assert (find(DataSourceManager::data_source_types_.begin(),

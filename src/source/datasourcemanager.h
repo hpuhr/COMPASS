@@ -37,6 +37,9 @@ public:
     std::vector<unsigned int> getAllDsIDs(); // both config and db
 
     bool hasConfigDataSource(unsigned int ds_id);
+    void createConfigDataSource(unsigned int ds_id);
+    void deleteConfigDataSource(unsigned int ds_id);
+    void deleteAllConfigDataSources();
     dbContent::ConfigurationDataSource& configDataSource(unsigned int ds_id);
 
     bool hasDBDataSource(unsigned int ds_id);

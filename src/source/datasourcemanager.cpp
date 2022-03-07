@@ -12,7 +12,8 @@ using namespace Utils;
 using namespace dbContent;
 using namespace nlohmann;
 
-const std::vector<std::string> DataSourceManager::data_source_types_ {"Radar", "MLAT", "ADSB", "Tracker", "RefTraj"};
+const std::vector<std::string> DataSourceManager::data_source_types_ {"Radar", "MLAT", "ADSB", "Tracker", "RefTraj",
+                                                                      "Other"};
 
 DataSourceManager::DataSourceManager(const std::string& class_id, const std::string& instance_id,
                                      COMPASS* compass)
@@ -31,7 +32,7 @@ DataSourceManager::~DataSourceManager()
 void DataSourceManager::generateSubConfigurable(const std::string& class_id,
                                               const std::string& instance_id)
 {
-    if (class_id.compare("ConfigurationDataSource") == 0)
+    if (class_id == "ConfigurationDataSource")
         {
             unique_ptr<dbContent::ConfigurationDataSource> ds {
                 new dbContent::ConfigurationDataSource(class_id, instance_id, *this)};
@@ -206,6 +207,48 @@ bool DataSourceManager::hasConfigDataSource (unsigned int ds_id)
     { return s->id() == ds_id; } ) != config_data_sources_.end();
 }
 
+void DataSourceManager::createConfigDataSource(unsigned int ds_id)
+{
+    assert (!hasConfigDataSource(ds_id));
+
+    Configuration& new_cfg = configuration().addNewSubConfiguration("ConfigurationDataSource");
+    new_cfg.addParameterString("ds_type", "Other");
+    new_cfg.addParameterUnsignedInt("sac", Number::sacFromDsId(ds_id));
+    new_cfg.addParameterUnsignedInt("sic", Number::sicFromDsId(ds_id));
+    new_cfg.addParameterString("name", "Unknown ("+to_string(Number::sacFromDsId(ds_id))+"/"
+                                                  +to_string(Number::sicFromDsId(ds_id))+")");
+
+    generateSubConfigurable("ConfigurationDataSource", new_cfg.getInstanceId());
+}
+
+void DataSourceManager::deleteConfigDataSource(unsigned int ds_id)
+{
+    loginf << "DataSourceManager: deleteConfigDataSource: ds_id " << ds_id;
+
+    assert (hasConfigDataSource(ds_id));
+    assert (!hasDBDataSource(ds_id)); // can not delete config data sources in existing db
+
+    auto ds_it = find_if(config_data_sources_.begin(), config_data_sources_.end(),
+                   [ds_id] (const std::unique_ptr<dbContent::ConfigurationDataSource>& s)
+    { return s->id() == ds_id; } );
+
+    config_data_sources_.erase(ds_it);
+
+    updateDSIdsAll();
+}
+
+void DataSourceManager::deleteAllConfigDataSources()
+{
+    loginf << "DataSourceManager: deleteAllConfigDataSources";
+
+    for (auto& ds_it : config_data_sources_)
+        assert (!hasDBDataSource(ds_it->id()));
+
+    config_data_sources_.clear();
+
+    updateDSIdsAll();
+}
+
 dbContent::ConfigurationDataSource& DataSourceManager::configDataSource (unsigned int ds_id)
 {
     assert (hasConfigDataSource(ds_id));
@@ -314,14 +357,20 @@ void DataSourceManager::addNewDataSource (unsigned int ds_id)
     {
         loginf << "DataSourceManager: addNewDataSource: ds_id " << ds_id << " create new";
 
+        createConfigDataSource(ds_id);
+
         dbContent::DBDataSource* new_ds = new dbContent::DBDataSource();
         new_ds->id(ds_id);
         new_ds->sac(Number::sacFromDsId(ds_id));
         new_ds->sic(Number::sicFromDsId(ds_id));
-        new_ds->name(to_string(ds_id));
+        new_ds->dsType("Other");
+        new_ds->name("Unknown ("+to_string(Number::sacFromDsId(ds_id))+"/"
+                                +to_string(Number::sicFromDsId(ds_id))+")");
 
         db_data_sources_.emplace_back(move(new_ds));
         sortDBDataSources();
+
+
     }
 
     assert (hasDBDataSource(ds_id));

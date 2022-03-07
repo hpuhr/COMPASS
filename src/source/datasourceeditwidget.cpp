@@ -149,9 +149,14 @@ DataSourceEditWidget::DataSourceEditWidget(DataSourceManager& ds_man, DataSource
 
     main_layout->addWidget(net_widget_);
 
-    updateContent();
-
     main_layout->addStretch();
+
+    delete_button_ = new QPushButton("Delete");
+    delete_button_->setToolTip("Deletes the data source in configuration");
+    connect(delete_button_, &QPushButton::clicked, this, &DataSourceEditWidget::deleteSlot);
+    main_layout->addWidget(delete_button_);
+
+    updateContent();
 
     setLayout(main_layout);
 }
@@ -370,10 +375,31 @@ void DataSourceEditWidget::net4EditedSlot(const QString& value_str)
     ds_man_.configDataSource(current_ds_id_).networkLine("L4", value);
 }
 
+void DataSourceEditWidget::deleteSlot()
+{
+    loginf << "DataSourceEditWidget: deleteSlot";
+
+    assert (has_current_ds_);
+    assert (!current_ds_in_db_);
+
+    dialog_.beginResetModel();
+    ds_man_.deleteConfigDataSource(current_ds_id_);
+    dialog_.endResetModel();
+
+    clear();
+}
+
 void DataSourceEditWidget::updateContent()
 {
     assert (name_edit_);
     assert (short_name_edit_);
+    assert (dstype_combo_);
+    assert (sac_label_);
+    assert (sic_label_);
+    assert (ds_id_label_);
+    assert (position_widget_);
+    assert (net_widget_);
+    assert (delete_button_);
 
     if (!has_current_ds_)
     {
@@ -392,6 +418,8 @@ void DataSourceEditWidget::updateContent()
 
         position_widget_->setHidden(true);
         net_widget_->setHidden(true);
+
+        delete_button_->setHidden(true);
     }
     else
     {
@@ -459,6 +487,8 @@ void DataSourceEditWidget::updateContent()
             }
             else
                 net_widget_->setHidden(true);
+
+            delete_button_->setHidden(true);
         }
         else // cfg only
         {
@@ -523,6 +553,8 @@ void DataSourceEditWidget::updateContent()
             }
             else
                 net_widget_->setHidden(true);
+
+            delete_button_->setHidden(false);
         }
     }
 }

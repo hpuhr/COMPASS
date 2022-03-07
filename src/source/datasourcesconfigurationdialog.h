@@ -27,6 +27,8 @@ public:
     DataSourcesConfigurationDialog(DataSourceManager& ds_man);
 
     void updateDataSource(unsigned int ds_id);
+    void beginResetModel();
+    void endResetModel();
 
 protected:
     DataSourceManager& ds_man_;

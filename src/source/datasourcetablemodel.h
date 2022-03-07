@@ -26,6 +26,8 @@ public:
     unsigned int getIdOf (const QModelIndex& index);
 
     void updateDataSource(unsigned int ds_id);
+    void beginModelReset();
+    void endModelReset();
 
 protected:
     DataSourceManager& ds_man_;

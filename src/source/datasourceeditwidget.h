@@ -30,6 +30,8 @@ public slots:
     void net3EditedSlot(const QString& value_str);
     void net4EditedSlot(const QString& value_str);
 
+    void deleteSlot();
+
 public:
     DataSourceEditWidget(DataSourceManager& ds_man, DataSourcesConfigurationDialog& dialog);
 
@@ -63,6 +65,8 @@ protected:
     QLineEdit* net_l2_edit_{nullptr};
     QLineEdit* net_l3_edit_{nullptr};
     QLineEdit* net_l4_edit_{nullptr};
+
+    QPushButton* delete_button_{nullptr};
 
     void updateContent();
 

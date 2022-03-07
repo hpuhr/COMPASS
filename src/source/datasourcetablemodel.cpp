@@ -181,3 +181,12 @@ void DataSourceTableModel::updateDataSource(unsigned int ds_id)
 
     emit dataChanged(index(row, 0), index(row, table_columns_.size()-1), QVector<int>(Qt::DisplayRole));
 }
+
+void DataSourceTableModel::beginModelReset()
+{
+    beginResetModel();
+}
+void DataSourceTableModel::endModelReset()
+{
+    endResetModel();
+}
