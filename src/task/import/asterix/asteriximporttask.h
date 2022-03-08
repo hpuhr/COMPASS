@@ -123,9 +123,6 @@ class ASTERIXImportTask : public Task, public Configurable
     bool debug() const;
     void debug(bool debug);
 
-    bool limitRAM() const;
-    void limitRAM(bool value);
-
     virtual bool checkPrerequisites() override;
     virtual bool isRecommended() override;
     virtual bool isRequired() override;
@@ -153,7 +150,6 @@ class ASTERIXImportTask : public Task, public Configurable
 
 protected:
     bool debug_jasterix_;
-    bool limit_ram_;
     std::shared_ptr<jASTERIX::jASTERIX> jasterix_;
     ASTERIXPostProcess post_process_;
 

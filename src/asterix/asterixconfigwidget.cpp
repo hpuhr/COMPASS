@@ -212,10 +212,6 @@ void ASTERIXConfigWidget::updateCategories()
 
     QIcon edit_icon(Files::getIconFilepath("edit.png").c_str());
 
-    QLabel* mapping_label = new QLabel("Mapping");
-    mapping_label->setFont(font_bold);
-    categories_grid_->addWidget(mapping_label, 0, 7);
-
     int row = 1;
 
     ref_edit_buttons_.clear();
@@ -297,19 +293,6 @@ void ASTERIXConfigWidget::updateCategories()
         categories_grid_->addWidget(spf_edit, row, 6);
         assert(!spf_edit_buttons_.count(category));
         spf_edit_buttons_[category] = spf_edit;
-
-        // mapping
-        // TODO
-//        ASTERIXMappingComboBox* map_combo = new ASTERIXMappingComboBox(task_, category);
-//        map_combo->setMapping(task_.getActiveMapping(category));
-//        logdbg << "ASTERIXConfigWidget: updateCategories: cat " << category << " mapping '"
-//               << task_.getActiveMapping(category) << "'";
-
-//        connect(map_combo, &ASTERIXMappingComboBox::changedMappingSignal,
-//                this, &ASTERIXConfigWidget::categoryMappingChangedSlot);
-
-//        categories_grid_->addWidget(map_combo, row, 7);
-
 
         row++;
     }

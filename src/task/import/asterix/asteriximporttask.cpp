@@ -57,7 +57,7 @@ using namespace nlohmann;
 using namespace std;
 
 const unsigned int unlimited_chunk_size = 4000;
-const unsigned int limited_chunk_size = 2000;
+//const unsigned int limited_chunk_size = 2000;
 
 const std::string DONE_PROPERTY_NAME = "asterix_data_imported";
 
@@ -71,7 +71,6 @@ ASTERIXImportTask::ASTERIXImportTask(const std::string& class_id, const std::str
     tooltip_ = "Allows importing of ASTERIX data recording files into the opened database.";
 
     registerParameter("debug_jasterix", &debug_jasterix_, false);
-    registerParameter("limit_ram", &limit_ram_, false);
 
     registerParameter("file_list", &file_list_, json::array());
     registerParameter("current_file_framing", &current_file_framing_, "");
@@ -88,16 +87,8 @@ ASTERIXImportTask::ASTERIXImportTask(const std::string& class_id, const std::str
            << jasterix_definition_path << "'";
     assert(Files::directoryExists(jasterix_definition_path));
 
-    if (limit_ram_)
-    {
-        jASTERIX::frame_chunk_size = limited_chunk_size;
-        jASTERIX::data_block_chunk_size = limited_chunk_size;
-    }
-    else
-    {
-        jASTERIX::frame_chunk_size = unlimited_chunk_size;
-        jASTERIX::data_block_chunk_size = unlimited_chunk_size;
-    }
+    jASTERIX::frame_chunk_size = unlimited_chunk_size;
+    jASTERIX::data_block_chunk_size = unlimited_chunk_size;
 
     jasterix_ = std::make_shared<jASTERIX::jASTERIX>(jasterix_definition_path, false,
                                                      debug_jasterix_, true);
@@ -536,24 +527,6 @@ void ASTERIXImportTask::debug(bool debug_jasterix)
     loginf << "ASTERIXImportTask: debug " << debug_jasterix_;
 }
 
-bool ASTERIXImportTask::limitRAM() const { return limit_ram_; }
-
-void ASTERIXImportTask::limitRAM(bool limit_ram)
-{
-    limit_ram_ = limit_ram;
-
-    if (limit_ram_)
-    {
-        jASTERIX::frame_chunk_size = limited_chunk_size;
-        jASTERIX::data_block_chunk_size = limited_chunk_size;
-    }
-    else
-    {
-        jASTERIX::frame_chunk_size = unlimited_chunk_size;
-        jASTERIX::data_block_chunk_size = unlimited_chunk_size;
-    }
-}
-
 bool ASTERIXImportTask::checkPrerequisites()
 {
     if (!COMPASS::instance().interface().ready())  // must be connected
@@ -755,41 +728,6 @@ void ASTERIXImportTask::run(bool test) // , bool create_mapping_stubs
 
     loginf << "ASTERIXImportTask: run: filename " << current_filename_ << " test " << test_
            << " free RAM " << free_ram << " GB";
-
-    if (free_ram < ram_threshold && !limit_ram_)
-    {
-        loginf << "ASTERIXImportTask: run: only " << free_ram
-               << " GB free ram, recommending limiting";
-
-        QMessageBox::StandardButton reply;
-        reply = QMessageBox::question(
-                    nullptr, "RAM Limiting",
-                    "There is only " + QString::number(free_ram) + " GB free RAM available.\n" +
-                    "This will result in decreased decoding performance.\n\n" +
-                    "Do you agree to limiting RAM usage?",
-                    QMessageBox::Yes | QMessageBox::No);
-        if (reply == QMessageBox::Yes)
-        {
-            limitRAM(true);
-        }
-    }
-    else if (free_ram >= ram_threshold && limit_ram_)
-    {
-        loginf << "ASTERIXImportTask: run: " << free_ram
-               << " GB free ram, recommending not limiting";
-
-        QMessageBox::StandardButton reply;
-        reply = QMessageBox::question(
-                    nullptr, "RAM Limiting",
-                    "There is " + QString::number(free_ram) + " GB free RAM available.\n" +
-                    "This will result in increased decoding performance.\n\n" +
-                    "Do you agree to increased RAM usage?",
-                    QMessageBox::Yes | QMessageBox::No);
-        if (reply == QMessageBox::Yes)
-        {
-            limitRAM(false);
-        }
-    }
 
     if (test_)
         task_manager_.appendInfo("ASTERIXImportTask: test import of file '" + current_filename_ +
