@@ -4,6 +4,7 @@
 #include "configurable.h"
 #include "source/configurationdatasource.h"
 #include "source/dbdatasource.h"
+#include "json.hpp"
 
 #include <QObject>
 
@@ -18,6 +19,9 @@ class DataSourcesConfigurationDialog;
 class DataSourceManager : public QObject, public Configurable
 {
     Q_OBJECT
+
+signals:
+    void dataSourcesChangedSignal();
 
 public slots:
     void databaseOpenedSlot();
@@ -39,7 +43,6 @@ public:
     bool hasConfigDataSource(unsigned int ds_id);
     void createConfigDataSource(unsigned int ds_id);
     void deleteConfigDataSource(unsigned int ds_id);
-    void deleteAllConfigDataSources();
     dbContent::ConfigurationDataSource& configDataSource(unsigned int ds_id);
 
     bool hasDBDataSource(unsigned int ds_id);
@@ -75,6 +78,13 @@ public:
     void updateWidget();
 
     DataSourcesConfigurationDialog* configurationDialog();
+
+    void importDataSources(const std::string& filename);
+    void importDataSourcesJSONDeprecated(const nlohmann::json& j);
+    void importDataSourcesJSON(const nlohmann::json& j);
+
+    void deleteAllConfigDataSources();
+    void exportDataSources(const std::string& filename);
 
 protected:
     COMPASS& compass_;

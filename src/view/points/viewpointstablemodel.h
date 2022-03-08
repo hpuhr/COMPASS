@@ -84,7 +84,6 @@ public:
     void printViewPoints();
     //void saveViewPoints();
 
-    void importViewPoints (const std::string& filename);
     void exportViewPoints (const std::string& filename);
 
     //void update();

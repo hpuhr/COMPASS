@@ -203,5 +203,160 @@ void DataSourceBase::networkLine (const std::string& key, const std::string ip_p
     info_["network_lines"][key] = ip_port;
 }
 
+void DataSourceBase::setFromJSONDeprecated (const nlohmann::json& j)
+{
+    info_.clear();
+
+    //    j["dbo_name"] = dbo_name_;
+    assert(j.contains("dbo_name"));
+    ds_type_ = j.at("dbo_name");
+
+
+    //    j["name"] = name_;
+    assert(j.contains("name"));
+    name_ = j.at("name");
+
+    //    if (has_short_name_)
+    //        j["short_name"] = short_name_;
+    if (j.contains("short_name"))
+    {
+        has_short_name_ = true;
+        short_name_ = j.at("short_name");
+    }
+    else
+        has_short_name_ = false;
+
+    //    if (has_sac_)
+    //        j["sac"] = sac_;
+    assert(j.contains("sac"));
+    sac_ = j.at("sac");
+
+    //    if (has_sic_)
+    //        j["sic"] = sic_;
+    assert(j.contains("sic"));
+    sic_ = j.at("sic");
+
+    //    if (has_latitude_)
+    //        j["latitude"] = latitude_;
+    if (j.contains("latitude"))
+        info_["position"]["latitude"] = j.at("latitude");
+
+    //    if (has_longitude_)
+    //        j["longitude"] = longitude_;
+    if (j.contains("longitude"))
+        info_["position"]["longitude"] = j.at("longitude");
+
+    //    if (has_altitude_)
+    //        j["altitude"] = altitude_;
+    if (j.contains("altitude"))
+        info_["position"]["altitude"] = j.at("altitude");
+
+    //    // psr
+    //    if (has_primary_azimuth_stddev_)
+    //        j["primary_azimuth_stddev"] = primary_azimuth_stddev_;
+    if (j.contains("primary_azimuth_stddev"))
+        info_["radar_accuracy"]["primary_azimuth_stddev"] = j.at("primary_azimuth_stddev");
+
+    //    if (has_primary_range_stddev_)
+    //        j["primary_range_stddev"] = primary_range_stddev_;
+    if (j.contains("primary_range_stddev"))
+        info_["radar_accuracy"]["primary_range_stddev"] = j.at("primary_range_stddev");
+
+    //    if (has_primary_ir_min_)
+    //        j["primary_ir_min"] = primary_ir_min_;
+    if (j.contains("primary_ir_min"))
+        info_["radar_range"]["primary_ir_min"] = j.at("primary_ir_min");
+
+    //    if (has_primary_ir_max_)
+    //        j["primary_ir_max"] = primary_ir_max_;
+    if (j.contains("primary_ir_max"))
+        info_["radar_range"]["primary_ir_max"] = j.at("primary_ir_max");
+
+    //    // ssr
+    //    if (has_secondary_azimuth_stddev_)
+    //        j["secondary_azimuth_stddev"] = secondary_azimuth_stddev_;
+    if (j.contains("secondary_azimuth_stddev"))
+        info_["radar_accuracy"]["secondary_azimuth_stddev"] = j.at("secondary_azimuth_stddev");
+
+    //    if (has_secondary_range_stddev_)
+    //        j["secondary_range_stddev"] = secondary_range_stddev_;
+    if (j.contains("secondary_range_stddev"))
+        info_["radar_accuracy"]["secondary_range_stddev"] = j.at("secondary_range_stddev");
+
+
+    //    if (has_secondary_ir_min_)
+    //        j["secondary_ir_min"] = secondary_ir_min_;
+    if (j.contains("secondary_ir_min"))
+        info_["radar_range"]["secondary_ir_min"] = j.at("secondary_ir_min");
+
+    //    if (has_secondary_ir_max_)
+    //        j["secondary_ir_max"] = secondary_ir_max_;
+    if (j.contains("secondary_ir_max"))
+        info_["radar_range"]["secondary_ir_max"] = j.at("secondary_ir_max");
+
+    //    // mode s
+    //    if (has_mode_s_azimuth_stddev_)
+    //        j["mode_s_azimuth_stddev"] = mode_s_azimuth_stddev_;
+    if (j.contains("mode_s_azimuth_stddev"))
+        info_["radar_accuracy"]["mode_s_azimuth_stddev"] = j.at("mode_s_azimuth_stddev");
+
+    //    if (has_mode_s_range_stddev_)
+    //        j["mode_s_range_stddev"] = mode_s_range_stddev_;
+    if (j.contains("mode_s_range_stddev"))
+        info_["radar_accuracy"]["mode_s_range_stddev"] = j.at("mode_s_range_stddev");
+
+    //    if (has_mode_s_ir_min_)
+    //        j["mode_s_ir_min"] = mode_s_ir_min_;
+    if (j.contains("mode_s_ir_min"))
+        info_["radar_range"]["mode_s_ir_min"] = j.at("mode_s_ir_min");
+
+    //    if (has_mode_s_ir_max_)
+    //        j["mode_s_ir_max"] = mode_s_ir_max_;
+    if (j.contains("secondary_ir_min"))
+        info_["radar_range"]["secondary_ir_min"] = j.at("secondary_ir_min");
+
+}
+
+void DataSourceBase::setFromJSON (const nlohmann::json& j)
+{
+    //    "ds_type": "Radar",
+    assert(j.contains("ds_type"));
+    ds_type_ = j.at("ds_type");
+
+    //    "has_short_name": true,
+    //    "short_name": "dsgsd",
+    if (j.contains("short_name"))
+    {
+        short_name_ = j.at("short_name");
+        has_short_name_ = true;
+    }
+    else
+        has_short_name_ = false;
+
+    //    "info": {
+    //        "position": {
+    //            "altitude": 323.0,
+    //            "latitude": 44.23
+    //            "longitude": 134.18
+    //        }
+    //    },
+    if (j.contains("info"))
+        info_ = j.at("info");
+    else
+        info_.clear();
+
+    //    "name": "sdgsdf",
+    assert(j.contains("name"));
+    name_ = j.at("name");
+
+    //    "sac": 50,
+    assert(j.contains("sac"));
+    sac_ = j.at("sac");
+
+    //    "sic": 0
+    assert(j.contains("sic"));
+    sic_ = j.at("sic");
+}
+
 }
 

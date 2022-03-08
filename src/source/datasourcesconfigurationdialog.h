@@ -21,6 +21,9 @@ public slots:
 
     void currentRowChanged(const QModelIndex& current, const QModelIndex& previous);
 
+    void importClickedSlot();
+    void deleteAllClickedSlot();
+    void exportClickedSlot();
     void doneClickedSlot();
 
 public:
@@ -38,8 +41,6 @@ protected:
     DataSourceTableModel* table_model_;
 
     DataSourceEditWidget* edit_widget_ {nullptr};
-
-    QPushButton* done_button_{nullptr};
 };
 
 #endif // DATASOURCESCONFIGURATIONDIALOG_H

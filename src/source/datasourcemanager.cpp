@@ -5,7 +5,10 @@
 #include "dbinterface.h"
 #include "stringconv.h"
 #include "number.h"
+#include "files.h"
 #include "json.hpp"
+
+#include <fstream>
 
 using namespace std;
 using namespace Utils;
@@ -17,7 +20,7 @@ const std::vector<std::string> DataSourceManager::data_source_types_ {"Radar", "
 
 DataSourceManager::DataSourceManager(const std::string& class_id, const std::string& instance_id,
                                      COMPASS* compass)
-        : Configurable(class_id, instance_id, compass, "data_sources.json"), compass_(*compass)
+    : Configurable(class_id, instance_id, compass, "data_sources.json"), compass_(*compass)
 {
     createSubConfigurables();
 
@@ -30,21 +33,21 @@ DataSourceManager::~DataSourceManager()
 }
 
 void DataSourceManager::generateSubConfigurable(const std::string& class_id,
-                                              const std::string& instance_id)
+                                                const std::string& instance_id)
 {
     if (class_id == "ConfigurationDataSource")
-        {
-            unique_ptr<dbContent::ConfigurationDataSource> ds {
-                new dbContent::ConfigurationDataSource(class_id, instance_id, *this)};
-            loginf << "DataSourceManager: generateSubConfigurable: adding config ds "
+    {
+        unique_ptr<dbContent::ConfigurationDataSource> ds {
+            new dbContent::ConfigurationDataSource(class_id, instance_id, *this)};
+        loginf << "DataSourceManager: generateSubConfigurable: adding config ds "
                    << ds->name() << " sac/sic " <<  ds->sac() << "/" << ds->sic();
 
-            assert (!hasConfigDataSource(Number::dsIdFrom(ds->sac(), ds->sic())));
-            config_data_sources_.emplace_back(move(ds));
-        }
-        else
-            throw std::runtime_error("DataSourceManager: generateSubConfigurable: unknown class_id " +
-                                     class_id);
+        assert (!hasConfigDataSource(Number::dsIdFrom(ds->sac(), ds->sic())));
+        config_data_sources_.emplace_back(move(ds));
+    }
+    else
+        throw std::runtime_error("DataSourceManager: generateSubConfigurable: unknown class_id " +
+                                 class_id);
 }
 
 std::vector<unsigned int> DataSourceManager::getAllDsIDs()
@@ -82,6 +85,129 @@ DataSourcesConfigurationDialog* DataSourceManager::configurationDialog()
     return config_dialog_.get();
 }
 
+void DataSourceManager::importDataSources(const std::string& filename)
+{
+    loginf << "DataSourceManager: importDataSources: file '" << filename << "'";
+
+    try
+    {
+        if (!Files::fileExists(filename))
+            throw std::runtime_error ("File '"+filename+"' not found.");
+
+        std::ifstream input_file(filename, std::ifstream::in);
+
+        json j = json::parse(input_file);
+
+        if (!j.contains("content_type"))
+            importDataSourcesJSONDeprecated(j);
+        else
+            importDataSourcesJSON(j);
+    }
+    catch (json::exception& e)
+    {
+        logerr << "DataSourceManager: importDataSources: could not load file '"
+                   << filename << "'";
+        throw e;
+    }
+
+    updateWidget();
+
+    emit dataSourcesChangedSignal();
+}
+
+void DataSourceManager::importDataSourcesJSONDeprecated(const nlohmann::json& j)
+{
+    loginf << "DataSourceManager: importDataSourcesJSONDeprecated";
+
+    for (auto& j_dbo_it : j.items())
+    {
+        std::string dbo_name = j_dbo_it.key();
+
+        for (auto& j_ds_it : j_dbo_it.value().get<json::array_t>())
+        {
+            loginf << "DataSourceManager: importDataSources: found dbo " << dbo_name
+                   << " ds '" << j_ds_it.dump(4) << "'";
+
+            assert(j_ds_it.contains("dbo_name"));
+            assert(j_ds_it.contains("name"));
+            assert(j_ds_it.contains("sac"));
+            assert(j_ds_it.contains("sic"));
+
+            unsigned int sac = j_ds_it.at("sac");
+            unsigned int sic = j_ds_it.at("sic");
+
+            unsigned int ds_id = Number::dsIdFrom(sac, sic);
+
+            if (!hasConfigDataSource(ds_id))
+                createConfigDataSource(ds_id);
+
+            configDataSource(ds_id).setFromJSONDeprecated(j_ds_it);
+
+            if (hasDBDataSource(ds_id))
+                dbDataSource(ds_id).setFromJSONDeprecated(j_ds_it);
+        }
+    }
+}
+
+void DataSourceManager::importDataSourcesJSON(const nlohmann::json& j)
+{
+    loginf << "DataSourceManager: importDataSourcesJSON";
+
+    if (!j.contains("content_type")
+            || !j.at("content_type").is_string()
+            || j.at("content_type") != "data_sources")
+        throw std::runtime_error("current data is not view point content");
+
+    if (!j.contains("content_version")
+            || !j.at("content_version").is_string()
+            || j.at("content_version") != "0.2")
+        throw std::runtime_error("current data content version is not supported");
+
+    if (!j.contains("data_sources")
+            || !j.at("data_sources").is_array())
+        throw std::runtime_error("current data contains no data sources");
+
+    for (auto& j_ds_it : j.at("data_sources").get<json::array_t>())
+    {
+
+        assert(j_ds_it.contains("ds_type"));
+        assert(j_ds_it.contains("name"));
+        assert(j_ds_it.contains("sac"));
+        assert(j_ds_it.contains("sic"));
+
+        unsigned int sac = j_ds_it.at("sac");
+        unsigned int sic = j_ds_it.at("sic");
+
+        unsigned int ds_id = Number::dsIdFrom(sac, sic);
+
+        if (!hasConfigDataSource(ds_id))
+            createConfigDataSource(ds_id);
+
+        configDataSource(ds_id).setFromJSON(j_ds_it);
+
+        if (hasDBDataSource(ds_id))
+            dbDataSource(ds_id).setFromJSON(j_ds_it);
+    }
+
+    saveDBDataSources();
+}
+
+void DataSourceManager::deleteAllConfigDataSources()
+{
+    loginf << "DataSourceManager: deleteAllConfigDataSources";
+
+    for (auto& ds_it : config_data_sources_)
+        assert (!hasDBDataSource(ds_it->id()));
+
+    config_data_sources_.clear();
+
+    updateDSIdsAll();
+}
+
+void DataSourceManager::exportDataSources(const std::string& filename)
+{
+    loginf << "DataSourceManager: exportDataSources: file '" << filename << "'";
+}
 
 bool DataSourceManager::loadingWanted (const std::string& dbcontent_name)
 {
@@ -229,22 +355,10 @@ void DataSourceManager::deleteConfigDataSource(unsigned int ds_id)
     assert (!hasDBDataSource(ds_id)); // can not delete config data sources in existing db
 
     auto ds_it = find_if(config_data_sources_.begin(), config_data_sources_.end(),
-                   [ds_id] (const std::unique_ptr<dbContent::ConfigurationDataSource>& s)
+                         [ds_id] (const std::unique_ptr<dbContent::ConfigurationDataSource>& s)
     { return s->id() == ds_id; } );
 
     config_data_sources_.erase(ds_it);
-
-    updateDSIdsAll();
-}
-
-void DataSourceManager::deleteAllConfigDataSources()
-{
-    loginf << "DataSourceManager: deleteAllConfigDataSources";
-
-    for (auto& ds_it : config_data_sources_)
-        assert (!hasDBDataSource(ds_it->id()));
-
-    config_data_sources_.clear();
 
     updateDSIdsAll();
 }
@@ -461,68 +575,15 @@ std::map<unsigned int, std::map<std::string, std::pair<std::string, unsigned int
     // ds_id -> line str ->(ip, port)
     std::map<unsigned int, std::map<std::string, std::pair<std::string, unsigned int>>> lines;
 
-//    string line_address;
-//    string ip;
-//    unsigned int port;
-
-//    set<string> existing_lines; // to check
-
     for (auto& ds_it : config_data_sources_)
     {
         if (ds_it->hasNetworkLines())
         {
             lines[ds_it->id()] = ds_it->networkLines();
-
-//            json& network_lines = ds_it->info().at("network_lines");
-//            assert (network_lines.is_array());
-
-//            for (auto& line_it : network_lines.get<json::array_t>())  // iterate over array
-//            {
-//                assert (line_it.is_primitive());
-//                assert (line_it.is_string());
-
-//                line_address = line_it;
-
-//                ip = String::ipFromString(line_address);
-//                port = String::portFromString(line_address);
-
-//                if (existing_lines.count(ip+":"+to_string(port)))
-//                {
-//                    logwrn << "DataSourceManager: getNetworkLines: source " << ds_it->name()
-//                           << " line " << ip << ":" << port
-//                           << " already in use";
-//                }
-//                else
-//                    lines[Number::dsIdFrom(ds_it->sac(), ds_it->sic())].push_back({ip, port});
-
-//                existing_lines.insert(ip+":"+to_string(port));
-
-//                //break; // TODO only parse one for now
-//            }
         }
     }
 
-//    for (auto& ds_it : db_data_sources_) // should be same
-//    {
-//        if (ds_it->info().contains("network_lines"))
-//        {
-//            json& network_lines = ds_it->info().at("network_lines");
-//            assert (network_lines.is_array());
-
-//            for (auto& line_it : network_lines.get<json::array_t>())  // iterate over array
-//            {
-//                assert (line_it.is_primitive());
-//                assert (line_it.is_string());
-
-//                line_address = line_it;
-
-//                ip = String::ipFromString(line_address);
-//                port = String::portFromString(line_address);
-
-//                lines[Number::dsIdFrom(ds_it->sac(), ds_it->sic())].push_back({ip, port});
-//            }
-//        }
-//    }
+    //db_data_sources_ // should be same
 
     return lines;
 }

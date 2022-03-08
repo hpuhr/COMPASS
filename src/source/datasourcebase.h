@@ -52,6 +52,9 @@ public:
     std::map<std::string, std::pair<std::string, unsigned int>> networkLines();
     void networkLine (const std::string& key, const std::string ip_port);
 
+    void setFromJSONDeprecated (const nlohmann::json& j);
+    void setFromJSON (const nlohmann::json& j);
+
 protected:
     std::string ds_type_;
 

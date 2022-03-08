@@ -1,6 +1,7 @@
 #include "datasourcesconfigurationdialog.h"
 #include "datasourcetablemodel.h"
 #include "datasourceeditwidget.h"
+#include "datasourcemanager.h"
 #include "logger.h"
 
 #include <QHBoxLayout>
@@ -10,6 +11,9 @@
 #include <QSortFilterProxyModel>
 #include <QTableView>
 #include <QHeaderView>
+#include <QFileDialog>
+
+using namespace std;
 
 DataSourcesConfigurationDialog::DataSourcesConfigurationDialog(DataSourceManager& ds_man)
     : QDialog(), ds_man_(ds_man)
@@ -63,13 +67,39 @@ DataSourcesConfigurationDialog::DataSourcesConfigurationDialog(DataSourceManager
 
     main_layout->addLayout(top_layout);
 
+    QFrame* line = new QFrame();
+    line->setFrameShape(QFrame::HLine);
+    line->setFrameShadow(QFrame::Sunken);
+    main_layout->addWidget(line);
+
     QHBoxLayout* button_layout = new QHBoxLayout();
+
+    QPushButton* import_button = new QPushButton ("Import");
+    import_button->setToolTip("Imports data sources as JSON file. The data sources defined in the JSON file"
+                              " will override existing ones (with same SAC/SIC) in the configuration and database");
+    connect(import_button, &QPushButton::clicked, this, &DataSourcesConfigurationDialog::importClickedSlot);
+    button_layout->addWidget(import_button);
+
+    button_layout->addSpacing(32);
+
+    QPushButton* delete_all_button = new QPushButton("Delete All");
+    delete_all_button->setToolTip("Deletes all data sources existing in the configuration,"
+                                  " but not those (also) defined in the database");
+    connect(delete_all_button, &QPushButton::clicked, this, &DataSourcesConfigurationDialog::deleteAllClickedSlot);
+    button_layout->addWidget(delete_all_button);
+
+    button_layout->addSpacing(32);
+
+    QPushButton* export_button = new QPushButton ("Export");
+    export_button->setToolTip("Exports all data sources as JSON file");
+    connect(export_button, &QPushButton::clicked, this, &DataSourcesConfigurationDialog::exportClickedSlot);
+    button_layout->addWidget(export_button);
 
     button_layout->addStretch();
 
-    done_button_ = new QPushButton("Done");
-    connect(done_button_, &QPushButton::clicked, this, &DataSourcesConfigurationDialog::doneClickedSlot);
-    button_layout->addWidget(done_button_);
+    QPushButton* done_button = new QPushButton("Done");
+    connect(done_button, &QPushButton::clicked, this, &DataSourcesConfigurationDialog::doneClickedSlot);
+    button_layout->addWidget(done_button);
 
     main_layout->addLayout(button_layout);
 
@@ -112,6 +142,31 @@ void DataSourcesConfigurationDialog::currentRowChanged(const QModelIndex& curren
     loginf << "DataSourcesConfigurationDialog: currentRowChanged: current id " << id;
 
     edit_widget_->showID(id);
+}
+
+void DataSourcesConfigurationDialog::importClickedSlot()
+{
+    loginf << "DataSourcesConfigurationDialog: importClickedSlot";
+
+    string filename = QFileDialog::getOpenFileName(this, "Import Data Sources", "", "*.json").toStdString();
+
+    if (filename.size() > 0)
+    {
+        table_model_->beginModelReset();
+
+        ds_man_.importDataSources(filename);
+
+        table_model_->endModelReset();
+    }
+}
+
+void DataSourcesConfigurationDialog::deleteAllClickedSlot()
+{
+
+}
+void DataSourcesConfigurationDialog::exportClickedSlot()
+{
+
 }
 
 void DataSourcesConfigurationDialog::doneClickedSlot()

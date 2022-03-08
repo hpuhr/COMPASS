@@ -21,6 +21,7 @@
 #include "logger.h"
 #include "viewpointstablemodel.h"
 #include "compass.h"
+#include "mainwindow.h"
 #include "dbcontent/dbcontentmanager.h"
 #include "viewpointstoolwidget.h"
 #include "viewpointsreportgenerator.h"
@@ -468,24 +469,9 @@ void ViewPointsWidget::importSlot()
 {
     loginf << "ViewPointsWidget: importSlot";
 
-    QFileDialog dialog(this);
-    dialog.setWindowTitle("Import View Points JSON");
-    // dialog.setDirectory(QDir::homePath());
-    dialog.setFileMode(QFileDialog::ExistingFile);
-    dialog.setNameFilter(trUtf8("JSON (*.json)"));
+    COMPASS::instance().mainWindow().importViewPointsSlot();
 
-    QStringList fileNames;
-    if (dialog.exec())
-    {
-        assert (table_model_);
-
-        for (auto& filename : dialog.selectedFiles())
-        {
-            table_model_->importViewPoints(filename.toStdString());
-
-            resizeColumnsToContents();
-        }
-    }
+    resizeColumnsToContents();
 }
 
 void ViewPointsWidget::currentRowChanged(const QModelIndex& current, const QModelIndex& previous)

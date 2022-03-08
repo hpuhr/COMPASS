@@ -40,7 +40,7 @@ class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
-private slots:
+public slots:
 
     void newDBSlot();
     void openExistingDBSlot();

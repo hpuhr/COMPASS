@@ -449,9 +449,9 @@ void DataSourceEditWidget::updateContent()
 
             if (ds.dsType() == "Radar" || ds.hasPosition())
             {
-                latitude_edit_->setText(QString::number(ds.latitude()));
-                longitude_edit_->setText(QString::number(ds.longitude()));
-                altitude_edit_->setText(QString::number(ds.altitude()));
+                latitude_edit_->setText(QString::number(ds.latitude(), 'g', 12));
+                longitude_edit_->setText(QString::number(ds.longitude(), 'g', 12));
+                altitude_edit_->setText(QString::number(ds.altitude(), 'g', 12));
 
                 position_widget_->setHidden(false);
             }

@@ -274,7 +274,7 @@ void ViewPointsImportTask::run()
 {
     loginf << "ViewPointsImportTask: import";
 
-    assert (canImport());
+    assert (canImport()); // checked file content, version etc
     done_ = false;
     stopped_ = false;
 
