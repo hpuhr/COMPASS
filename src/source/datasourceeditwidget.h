@@ -38,6 +38,8 @@ public:
     void showID(unsigned int ds_id);
     void clear();
 
+    void updateContent();
+
 protected:
     DataSourceManager& ds_man_;
     DataSourcesConfigurationDialog& dialog_;
@@ -67,9 +69,6 @@ protected:
     QLineEdit* net_l4_edit_{nullptr};
 
     QPushButton* delete_button_{nullptr};
-
-    void updateContent();
-
 };
 
 #endif // DATASOURCEEDITWIDGET_H

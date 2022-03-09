@@ -68,38 +68,40 @@ json ConfigurationDataSource::getAsJSON()
     if (has_short_name_)
         j["short_name"] = short_name_;
 
-    j["info"] = info_;
-
+    if (!info_.is_null())
+        j["info"] = info_;
 
     return j;
 }
 
-void ConfigurationDataSource::setFromJSON(json& j)
+void ConfigurationDataSource::setFromJSON(const json& j)
 {
-    j["ds_type"] = ds_type_;
+    logdbg << "ConfigurationDataSource: setFromJSON: '" << j.dump(4) << "'";
 
-    j["sac"] = sac_;
-    j["sic"] = sic_;
+    assert(j.contains("ds_type"));
 
-    j["name"] = name_;
+    ds_type_ = j["ds_type"];
 
-    if (has_short_name_)
-        j["short_name"] = short_name_;
+    assert(j.contains("sac"));
+    assert(j.contains("sic"));
+    sac_ = j["sac"];
+    sic_ = j["sic"];
 
-    j["info"] = info_;
+    assert(j.contains("name"));
+    name_ = j["name"];
 
-    ds_type_ = j.at("ds_type");
+    if (j.contains("short_name"))
+    {
+        has_short_name_ = true;
+        short_name_ = j["short_name"];
+    }
+    else
+        has_short_name_ = false;
 
-    sac_ = j.at("sac");
-    sic_ = j.at("sic");
-
-    name_ = j.at("name");
-
-    has_short_name_ = j.contains("short_name");
-    if (has_short_name_)
-        short_name_ = j.at("short_name");
-
-    info_ = j.at("info");
+    if (j.contains("info"))
+        info_ = j["info"];
+    else
+        info_ = nullptr;
 }
 
 DBDataSource* ConfigurationDataSource::getAsNewDBDS()
@@ -114,7 +116,8 @@ DBDataSource* ConfigurationDataSource::getAsNewDBDS()
     if (has_short_name_)
         new_ds->shortName(short_name_);
 
-    new_ds->info(info_.dump());
+    if (!info_.is_null())
+        new_ds->info(info_.dump());
 
     loginf << "ConfigurationDataSource: getAsNewDBDS: name " << new_ds->name()
             << " sac/sic " << new_ds->sac() << "/" << new_ds->sic();

@@ -12,6 +12,7 @@
 #include <QTableView>
 #include <QHeaderView>
 #include <QFileDialog>
+#include <QMessageBox>
 
 using namespace std;
 
@@ -157,16 +158,45 @@ void DataSourcesConfigurationDialog::importClickedSlot()
         ds_man_.importDataSources(filename);
 
         table_model_->endModelReset();
+
+        edit_widget_->updateContent();
     }
 }
 
 void DataSourcesConfigurationDialog::deleteAllClickedSlot()
 {
+    QMessageBox::StandardButton reply;
+    reply = QMessageBox::question(
+                nullptr, "Delete All Data Sources",
+                "This will delete all data sources existing in the configuration,"
+                         " but not those (also) defined in the database. Do you want to continue?",
+                QMessageBox::Yes | QMessageBox::No);
 
+    if (reply == QMessageBox::Yes)
+    {
+        loginf << "DataSourcesConfigurationDialog: deleteAllClickedSlot: deletion confirmed";
+
+        table_model_->beginModelReset();
+
+        ds_man_.deleteAllConfigDataSources();
+        edit_widget_->clear();
+
+        table_model_->endModelReset();
+    }
 }
+
 void DataSourcesConfigurationDialog::exportClickedSlot()
 {
+    loginf << "DataSourcesConfigurationDialog: exportClickedSlot";
 
+    string filename = QFileDialog::getSaveFileName(this, "Export Data Sources as JSON", "", "*.json").toStdString();
+
+    if (filename.size() > 0)
+    {
+        loginf << "DataSourcesConfigurationDialog: exportClickedSlot: file '" << filename << "'";
+
+        ds_man_.exportDataSources(filename);
+    }
 }
 
 void DataSourcesConfigurationDialog::doneClickedSlot()

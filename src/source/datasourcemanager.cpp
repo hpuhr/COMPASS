@@ -8,6 +8,8 @@
 #include "files.h"
 #include "json.hpp"
 
+#include <QMessageBox>
+
 #include <fstream>
 
 using namespace std;
@@ -110,6 +112,7 @@ void DataSourceManager::importDataSources(const std::string& filename)
         throw e;
     }
 
+    updateDSIdsAll();
     updateWidget();
 
     emit dataSourcesChangedSignal();
@@ -189,17 +192,25 @@ void DataSourceManager::importDataSourcesJSON(const nlohmann::json& j)
             dbDataSource(ds_id).setFromJSON(j_ds_it);
     }
 
-    saveDBDataSources();
+    if (COMPASS::instance().dbOpened())
+        saveDBDataSources();
 }
 
 void DataSourceManager::deleteAllConfigDataSources()
 {
     loginf << "DataSourceManager: deleteAllConfigDataSources";
 
-    for (auto& ds_it : config_data_sources_)
-        assert (!hasDBDataSource(ds_it->id()));
-
-    config_data_sources_.clear();
+    for(auto it = config_data_sources_.begin(); it != config_data_sources_.end();)
+    {
+       if(!hasDBDataSource((*it)->id())) // erase if not in db
+       {
+          it = config_data_sources_.erase(it); // erase and update it
+       }
+       else // next one
+       {
+          ++it;
+       }
+    }
 
     updateDSIdsAll();
 }
@@ -207,6 +218,29 @@ void DataSourceManager::deleteAllConfigDataSources()
 void DataSourceManager::exportDataSources(const std::string& filename)
 {
     loginf << "DataSourceManager: exportDataSources: file '" << filename << "'";
+
+    json data;
+
+    data["content_type"] = "data_sources";
+    data["content_version"] = "0.2";
+
+    data["data_sources"] = json::array();
+    json& data_sources = data.at("data_sources");
+
+    unsigned int cnt = 0;
+    for (auto& ds_it : config_data_sources_)
+    {
+        data_sources[cnt] = ds_it->getAsJSON();
+        ++cnt;
+    }
+
+    std::ofstream file(filename);
+    file << data.dump(4);
+
+    QMessageBox m_info(QMessageBox::Information, "Export Data Sources",
+                       "File export: '"+QString(filename.c_str())+"' done.\n"
+                       +QString::number(config_data_sources_.size())+" Data Sources saved.", QMessageBox::Ok);
+    m_info.exec();
 }
 
 bool DataSourceManager::loadingWanted (const std::string& dbcontent_name)
