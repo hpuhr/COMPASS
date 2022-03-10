@@ -34,6 +34,11 @@ DataSourceManager::DataSourceManager(const std::string& class_id, const std::str
 
 DataSourceManager::~DataSourceManager()
 {
+    loginf << "DataSourceManager: dtor";
+
+    config_data_sources_.clear();
+    db_data_sources_.clear(); // delete their widgets, which removes them from load_widget_
+
     load_widget_ = nullptr;
 }
 

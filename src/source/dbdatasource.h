@@ -7,6 +7,7 @@
 namespace dbContent
 {
 
+class DBDataSourceWidget;
 
 class DBDataSource : public DataSourceBase
 {
@@ -49,6 +50,8 @@ public:
     void lineLoadingWanted(unsigned int line_id, bool wanted);
     bool lineLoadingWanted(unsigned int line_id) const;
 
+    DBDataSourceWidget* widget();
+
 protected:
     unsigned int id_{0};
 
@@ -60,6 +63,8 @@ protected:
     std::map<std::string, std::map<unsigned int, unsigned int>> counts_map_; // db_content -> line id -> count
 
     std::map<unsigned int, bool> line_loading_wanted_; // not contained means true
+
+    std::unique_ptr<DBDataSourceWidget> widget_;
 };
 
 }

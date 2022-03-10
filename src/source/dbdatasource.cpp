@@ -1,4 +1,5 @@
 #include "source/dbdatasource.h"
+#include "source/dbdatasourcewidget.h"
 #include "logger.h"
 
 using namespace nlohmann;
@@ -151,6 +152,15 @@ bool DBDataSource::lineLoadingWanted(unsigned int line_id) const
         return line_loading_wanted_.at(line_id);
     else
         return true;
+}
+
+DBDataSourceWidget* DBDataSource::widget()
+{
+    if (!widget_)
+        widget_.reset(new DBDataSourceWidget(*this));
+
+    assert (widget_);
+    return widget_.get();
 }
 
 }

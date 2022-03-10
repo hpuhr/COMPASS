@@ -31,6 +31,11 @@ class QCheckBox;
 class QLineEdit;
 class QLabel;
 
+namespace dbContent
+{
+    class DBDataSourceWidget;
+}
+
 class DataSourcesLoadWidget : public QWidget
 {
     Q_OBJECT
@@ -67,15 +72,19 @@ private:
 
     std::map<std::string, QCheckBox*> ds_type_boxes_;
 
-    std::map<std::string, QCheckBox*> ds_boxes_; // ds name -> load box
-    std::map<std::string, std::map<std::string, QLabel*>> ds_content_boxes_; // ds name -> (cont, label)
-    std::map<std::string, std::map<std::string, QLabel*>> ds_content_loaded_labels_; // ds name -> (cont, label)
-    std::map<std::string, std::map<std::string, QLabel*>> ds_content_total_labels_; // ds name -> (cont, label)
+    std::map<std::string, dbContent::DBDataSourceWidget*> ds_widgets_;
+
+//    std::map<std::string, QCheckBox*> ds_boxes_; // ds name -> load box
+//    std::map<std::string, std::map<std::string, QLabel*>> ds_content_boxes_; // ds name -> (cont, label)
+//    std::map<std::string, std::map<std::string, QLabel*>> ds_content_loaded_labels_; // ds name -> (cont, label)
+//    std::map<std::string, std::map<std::string, QLabel*>> ds_content_total_labels_; // ds name -> (cont, label)
 
     bool counts_shown_current_ {false};
 
     void clearAndCreateContent();
-    void updateExistingContent();
+    //void updateExistingContent();
+
+    void clear();
 };
 
 #endif /* DATASOURCESLOADWIDGET_H_ */
