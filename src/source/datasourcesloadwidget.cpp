@@ -23,6 +23,7 @@
 #include "stringconv.h"
 #include "viewmanager.h"
 #include "number.h"
+#include "files.h"
 
 #include <QCheckBox>
 #include <QGridLayout>
@@ -34,7 +35,6 @@
 
 using namespace std;
 using namespace Utils;
-using namespace Utils::String;
 
 DataSourcesLoadWidget::DataSourcesLoadWidget(DataSourceManager& ds_man)
     : ds_man_(ds_man)
@@ -44,11 +44,33 @@ DataSourcesLoadWidget::DataSourcesLoadWidget(DataSourceManager& ds_man)
 
     QVBoxLayout* main_layout = new QVBoxLayout();
 
+    QHBoxLayout* vlay = new QHBoxLayout();
+    vlay->setContentsMargins(0, 0, 0, 0);
+
     // data sources, per type
 
     type_layout_ = new QGridLayout();
 
-    main_layout->addLayout(type_layout_);
+    vlay->addLayout(type_layout_);
+
+    // button
+
+    QVBoxLayout* button_layout = new QVBoxLayout();
+    button_layout->setContentsMargins(0, 0, 0, 0);
+
+    QPushButton* edit_button = new QPushButton();
+    edit_button->setIcon(QIcon(Files::getIconFilepath("edit.png").c_str()));
+    edit_button->setFixedSize(UI_ICON_SIZE);
+    edit_button->setFlat(UI_ICON_BUTTON_FLAT);
+    edit_button->setToolTip(tr("Data Source Options"));
+    connect (edit_button, &QPushButton::clicked, this, &DataSourcesLoadWidget::editClickedSlot);
+    button_layout->addWidget(edit_button);
+
+    button_layout->addStretch();
+
+    vlay->addLayout(button_layout);
+
+    main_layout->addLayout(vlay);
 
     main_layout->addStretch();
 
@@ -69,28 +91,25 @@ DataSourcesLoadWidget::DataSourcesLoadWidget(DataSourceManager& ds_man)
 
     main_layout->addLayout(assoc_layout);
 
-    //    update();
-
-    //    main_layout->addStretch();
-
-    //    // limit stuff
-    //    bool use_limit = dbo_manager_.useLimit();
-    //    limit_check_ = new QCheckBox("Use Limit");
-    //    limit_check_->setChecked(use_limit);
-    //    connect(limit_check_, &QCheckBox::clicked, this, &DataSourcesLoadWidget::toggleUseLimit);
-    //    main_layout->addWidget(limit_check_);
-
-
-    //    QHBoxLayout* bottom_layout = new QHBoxLayout();
-
-
-    //    bottom_layout->addStretch();
-
-    //    main_layout->addLayout(bottom_layout);
-
     update();
 
     setLayout(main_layout);
+
+    // menu
+    QAction* sel_dstyp_action = edit_menu_.addAction("Select All DSTypes");
+    connect(sel_dstyp_action, &QAction::triggered, this, &DataSourcesLoadWidget::selectAllDSTypesSlot);
+
+    QAction* desel_dstyp_action = edit_menu_.addAction("Deselect All DSTypes");
+    connect(desel_dstyp_action, &QAction::triggered, this, &DataSourcesLoadWidget::deselectAllDSTypesSlot);
+
+    QAction* sel_ds_action = edit_menu_.addAction("Select All Data Sources");
+    connect(sel_ds_action, &QAction::triggered, this, &DataSourcesLoadWidget::selectAllDataSourcesSlot);
+
+    QAction* desel_ds_action = edit_menu_.addAction("Deselect All Data Sources");
+    connect(desel_ds_action, &QAction::triggered, this, &DataSourcesLoadWidget::deselectAllDataSourcesSlot);
+
+    QAction* show_cnt_action = edit_menu_.addAction("Toggle Show Counts");
+    connect(show_cnt_action, &QAction::triggered, this, &DataSourcesLoadWidget::toogleShowCountsSlot);
 }
 
 DataSourcesLoadWidget::~DataSourcesLoadWidget() {}
@@ -124,6 +143,37 @@ void DataSourcesLoadWidget::loadDSChangedSlot()
     ds_man_.dbDataSource(ds_id).loadingWanted(load);
 }
 
+void DataSourcesLoadWidget::editClickedSlot()
+{
+    loginf << "DataSourcesLoadWidget: editClickedSlot";
+
+    edit_menu_.exec(QCursor::pos());
+}
+
+void DataSourcesLoadWidget::selectAllDSTypesSlot()
+{
+    loginf << "DataSourcesLoadWidget: selectAllDSTypesSlot";
+}
+void DataSourcesLoadWidget::deselectAllDSTypesSlot()
+{
+    loginf << "DataSourcesLoadWidget: deselectAllDSTypesSlot";
+}
+
+void DataSourcesLoadWidget::selectAllDataSourcesSlot()
+{
+    loginf << "DataSourcesLoadWidget: selectAllDataSourcesSlot";
+}
+void DataSourcesLoadWidget::deselectAllDataSourcesSlot()
+{
+    loginf << "DataSourcesLoadWidget: deselectAllDataSourcesSlot";
+}
+
+void DataSourcesLoadWidget::toogleShowCountsSlot()
+{
+    loginf << "DataSourcesLoadWidget: toogleShowCountsSlot";
+
+    ds_man_.loadWidgetShowCounts(!ds_man_.loadWidgetShowCounts());
+}
 
 //void DataSourcesLoadWidget::toggleUseLimit()
 //{
@@ -172,31 +222,38 @@ void DataSourcesLoadWidget::update()
 
     bool clear_required = false;
 
-    for (const auto& ds_it : ds_man_.dbDataSources())
+    bool show_counts = ds_man_.loadWidgetShowCounts();
+
+    if (counts_shown_current_ != show_counts // check if counts shown last time
+            || ds_boxes_.size() != ds_man_.dbDataSources().size()) // check if same size
+        clear_required = true;
+    else // check each one
     {
-        if (!ds_boxes_.count(ds_it->name()))
+        for (const auto& ds_it : ds_man_.dbDataSources())
         {
-            loginf << "DataSourcesLoadWidget: update: ds_box " << ds_it->name() << " missing ";
-
-            clear_required = true;
-            break;
-        }
-        // check content widget exist
-
-        if (!show_counts_ || !ds_it->hasNumInserted()) // no counts or no data
-            continue;
-
-        for (auto& cnt_it : ds_it->numInsertedSummedLinesMap())
-        {
-            if (!ds_content_boxes_.count(ds_it->name()) || !ds_content_boxes_.at(ds_it->name()).count(cnt_it.first))
+            if (!ds_boxes_.count(ds_it->name()))
             {
-                loginf << "DataSourcesLoadWidget: update: ds_content_boxes " << cnt_it.first << " missing ";
+                loginf << "DataSourcesLoadWidget: update: ds_box " << ds_it->name() << " missing ";
 
                 clear_required = true;
                 break;
             }
-        }
+            // check content widget exist
 
+            if (!show_counts || !ds_it->hasNumInserted()) // no counts or no data
+                continue;
+
+            for (auto& cnt_it : ds_it->numInsertedSummedLinesMap())
+            {
+                if (!ds_content_boxes_.count(ds_it->name()) || !ds_content_boxes_.at(ds_it->name()).count(cnt_it.first))
+                {
+                    loginf << "DataSourcesLoadWidget: update: ds_content_boxes " << cnt_it.first << " missing ";
+
+                    clear_required = true;
+                    break;
+                }
+            }
+        }
     }
 
     if (clear_required)
@@ -204,7 +261,9 @@ void DataSourcesLoadWidget::update()
     else
         updateExistingContent();
 
-// TODO move this
+    counts_shown_current_ = show_counts;
+
+    // TODO move this
     DBContentManager& dbo_man = COMPASS::instance().dbContentManager();
 
     assert(associations_label_);
@@ -270,6 +329,8 @@ void DataSourcesLoadWidget::clearAndCreateContent()
 
     //DBContentManager& dbo_man = COMPASS::instance().dbContentManager();
     bool ds_found;
+
+    bool show_counts = ds_man_.loadWidgetShowCounts();
 
     for (auto& ds_type_name : DataSourceManager::data_source_types_)
     {
@@ -343,7 +404,7 @@ void DataSourcesLoadWidget::clearAndCreateContent()
                         unsigned int num_spaces = current_line_number - last_line_number - 1;
 
                         for (unsigned int cnt=0; cnt < num_spaces; ++cnt)
-                            button_lay->addSpacing(button_size);
+                            button_lay->addSpacing(button_size+2);
                     }
 
                     QPushButton* button = new QPushButton (line_it.first.c_str());
@@ -384,7 +445,7 @@ void DataSourcesLoadWidget::clearAndCreateContent()
 
             ++row;
 
-            if (show_counts_)
+            if (show_counts)
             {
                 for (auto& cnt_it : ds_it->numInsertedSummedLinesMap())
                 {
@@ -426,6 +487,8 @@ void DataSourcesLoadWidget::clearAndCreateContent()
             }
         }
 
+        QPushButton* config_button = new QPushButton();
+
         if (!ds_found)
         {
             dstyp_box->setChecked(false);
@@ -450,6 +513,8 @@ void DataSourcesLoadWidget::updateExistingContent()
     string ds_name;
     string ds_content_name;
 
+    bool show_counts = ds_man_.loadWidgetShowCounts();
+
     for (const auto& ds_it : ds_man_.dbDataSources())
     {
         //loginf << row << " '" << ds_it->dsType() << "' '" << dstype << "'";
@@ -463,7 +528,7 @@ void DataSourcesLoadWidget::updateExistingContent()
         logdbg << "DataSourcesLoadWidget: updateExistingContent: ds " << ds_name
                << " " << ds_it->loadingWanted();
 
-        if (show_counts_)
+        if (show_counts)
         {
             for (auto& cnt_it : ds_it->numInsertedSummedLinesMap())
             {

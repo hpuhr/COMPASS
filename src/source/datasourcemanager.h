@@ -86,6 +86,12 @@ public:
     void deleteAllConfigDataSources();
     void exportDataSources(const std::string& filename);
 
+    bool loadWidgetShowCounts() const;
+    void loadWidgetShowCounts(bool value);
+
+    bool loadWidgetShowLines() const;
+    void loadWidgetShowLines(bool value);
+
 protected:
     COMPASS& compass_;
 
@@ -94,6 +100,9 @@ protected:
     std::vector<unsigned int> ds_ids_all_; // both from config and db, vector to have order
 
     std::unique_ptr<DataSourcesLoadWidget> load_widget_;
+    bool load_widget_show_counts_ {false};
+    bool load_widget_show_lines_ {false};
+
     std::unique_ptr<DataSourcesConfigurationDialog> config_dialog_;
 
     std::map<std::string, bool> ds_type_loading_wanted_;

@@ -24,6 +24,9 @@ DataSourceManager::DataSourceManager(const std::string& class_id, const std::str
                                      COMPASS* compass)
     : Configurable(class_id, instance_id, compass, "data_sources.json"), compass_(*compass)
 {
+    registerParameter("load_widget_show_counts", &load_widget_show_counts_, true);
+    registerParameter("load_widget_show_lines", &load_widget_show_lines_, true);
+
     createSubConfigurables();
 
     updateDSIdsAll();
@@ -241,6 +244,36 @@ void DataSourceManager::exportDataSources(const std::string& filename)
                        "File export: '"+QString(filename.c_str())+"' done.\n"
                        +QString::number(config_data_sources_.size())+" Data Sources saved.", QMessageBox::Ok);
     m_info.exec();
+}
+
+bool DataSourceManager::loadWidgetShowCounts() const
+{
+    return load_widget_show_counts_;
+}
+
+void DataSourceManager::loadWidgetShowCounts(bool value)
+{
+    loginf << "DataSourceManager: loadWidgetShowCounts: value " << value;
+
+    load_widget_show_counts_ = value;
+
+    if (load_widget_)
+        load_widget_->update();
+}
+
+bool DataSourceManager::loadWidgetShowLines() const
+{
+    return load_widget_show_lines_;
+}
+
+void DataSourceManager::loadWidgetShowLines(bool value)
+{
+    loginf << "DataSourceManager: loadWidgetShowLines: value " << value;
+
+    load_widget_show_lines_ = value;
+
+    if (load_widget_)
+        load_widget_->update();
 }
 
 bool DataSourceManager::loadingWanted (const std::string& dbcontent_name)

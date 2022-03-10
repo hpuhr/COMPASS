@@ -18,7 +18,9 @@
 #ifndef DATASOURCESLOADWIDGET_H_
 #define DATASOURCESLOADWIDGET_H_
 
-#include <QFrame>
+#include <QWidget>
+#include <QMenu>
+
 #include <map>
 
 class DataSourceManager;
@@ -37,6 +39,16 @@ public slots:
     void loadDSTypeChangedSlot();
     void loadDSChangedSlot();
 
+    void editClickedSlot();
+
+    void selectAllDSTypesSlot();
+    void deselectAllDSTypesSlot();
+
+    void selectAllDataSourcesSlot();
+    void deselectAllDataSourcesSlot();
+
+    void toogleShowCountsSlot();
+
 public:
     DataSourcesLoadWidget(DataSourceManager& ds_man);
     virtual ~DataSourcesLoadWidget();
@@ -47,7 +59,7 @@ public:
 private:
     DataSourceManager& ds_man_;
 
-    bool show_counts_ {false};
+    QMenu edit_menu_;
 
     QGridLayout* type_layout_{nullptr};
 
@@ -59,6 +71,8 @@ private:
     std::map<std::string, std::map<std::string, QLabel*>> ds_content_boxes_; // ds name -> (cont, label)
     std::map<std::string, std::map<std::string, QLabel*>> ds_content_loaded_labels_; // ds name -> (cont, label)
     std::map<std::string, std::map<std::string, QLabel*>> ds_content_total_labels_; // ds name -> (cont, label)
+
+    bool counts_shown_current_ {false};
 
     void clearAndCreateContent();
     void updateExistingContent();
