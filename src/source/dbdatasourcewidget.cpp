@@ -20,7 +20,11 @@ DBDataSourceWidget::DBDataSourceWidget(DBDataSource& src, QWidget *parent)
 {
     main_layout_ = new QVBoxLayout();
 
+    grid_layout_ = new QGridLayout();
+
     updateContent();
+
+    main_layout_->addLayout(grid_layout_);
 
     setLayout(main_layout_);
 
@@ -64,27 +68,18 @@ void DBDataSourceWidget::recreateWidgets()
 
     loginf << "DBDataSourceWidget " << src_.name() << ": recreateWidgets: show_counts " << show_counts;
 
-    if (grid_layout_)
+    QLayoutItem* child;
+    while ((child = grid_layout_->takeAt(0)) != nullptr)
     {
-        loginf << "DBDataSourceWidget " << src_.name() << ": recreateWidgets: deleting layout";
-
-        QLayoutItem* child;
-        while ((child = grid_layout_->takeAt(0)) != nullptr)
-        {
-            if (child->widget())
-                delete child->widget();
-            delete child;
-        }
-
-        delete grid_layout_;
-
-        load_check_ = nullptr;
-        content_labels_.clear();
-        loaded_cnt_labels_.clear();
-        total_cnt_labels_.clear();
+        if (child->widget())
+            delete child->widget();
+        delete child;
     }
 
-    grid_layout_ = new QGridLayout();
+    load_check_ = nullptr;
+    content_labels_.clear();
+    loaded_cnt_labels_.clear();
+    total_cnt_labels_.clear();
 
     // update load check
     load_check_ = new QCheckBox(src_.name().c_str());
@@ -133,8 +128,6 @@ void DBDataSourceWidget::recreateWidgets()
     }
 
     last_show_counts_ = show_counts;
-
-    main_layout_->addLayout(grid_layout_);
 
     update();
 }
