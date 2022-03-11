@@ -223,13 +223,12 @@ void DataSourcesLoadWidget::update()
 {
     logdbg << "DataSourcesLoadWidget: update: num data sources " << ds_man_.dbDataSources().size();
 
-    bool clear_required = false;
+    bool recreate_required = false;
 
     bool show_counts = ds_man_.loadWidgetShowCounts();
 
-    if (counts_shown_current_ != show_counts // check if counts shown last time
-            || ds_widgets_.size() != ds_man_.dbDataSources().size()) // check if same size
-        clear_required = true;
+    if (ds_widgets_.size() != ds_man_.dbDataSources().size()) // check if same size
+        recreate_required = true;
     else // check each one
     {
         for (const auto& ds_it : ds_man_.dbDataSources())
@@ -238,16 +237,19 @@ void DataSourcesLoadWidget::update()
             {
                 loginf << "DataSourcesLoadWidget: update: ds_box " << ds_it->name() << " missing ";
 
-                clear_required = true;
+                recreate_required = true;
                 break;
             }
         }
     }
 
-    if (clear_required)
+    if (recreate_required)
         clearAndCreateContent();
-//    else
-//        updateExistingContent();
+    else
+    {
+        for (auto& ds_widget_it : ds_widgets_)
+            ds_widget_it.second->updateContent();
+    }
 
     counts_shown_current_ = show_counts;
 
@@ -275,25 +277,7 @@ void DataSourcesLoadWidget::clear()
 
     // remove all previous
     while (QLayoutItem* item = type_layout_->takeAt(0))
-    {
-//        if (item->layout())
-//        {
-//            while (QLayoutItem* item2 = item->layout()->takeAt(0))
-//            {
-//                if (item2->widget())
-//                    delete item2->widget();
-
-//                delete item2;
-//            }
-//        }
-
-//        if (item->widget())
-//            delete item->widget();
-
-//        delete item;
-
         type_layout_->removeItem(item);
-    }
 }
 
 void DataSourcesLoadWidget::clearAndCreateContent()
@@ -337,7 +321,9 @@ void DataSourcesLoadWidget::clearAndCreateContent()
         connect(dstyp_box, &QCheckBox::clicked,
                 this, &DataSourcesLoadWidget::loadDSTypeChangedSlot);
 
-        type_layout_->addWidget(dstyp_box, row, col, Qt::AlignTop | Qt::AlignLeft);
+        dstyp_box->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+
+        type_layout_->addWidget(dstyp_box, row, col);
 
         assert (!ds_type_boxes_.count(ds_type_name));
         ds_type_boxes_[ds_type_name] = dstyp_box;
@@ -360,126 +346,13 @@ void DataSourcesLoadWidget::clearAndCreateContent()
 
             DBDataSourceWidget* ds_widget = ds_it->widget();
 
-            type_layout_->addWidget(ds_widget, row, col, Qt::AlignTop | Qt::AlignLeft);
+            type_layout_->addWidget(ds_widget, row, col);
 
             assert (!ds_widgets_.count(ds_name));
             ds_widgets_[ds_name] = ds_widget;
 
             ++row;
 
-//            QCheckBox* ds_box = new QCheckBox(ds_name.c_str());
-//            ds_box->setChecked(ds_it->loadingWanted());
-//            ds_box->setProperty("DS ID", ds_id);
-
-//            connect(ds_box, &QCheckBox::clicked, this,
-//                    &DataSourcesLoadWidget::loadDSChangedSlot);
-
-//            type_layout_->addWidget(ds_box, row, col_start, 1, 2, //num_col_per_dstype-1,
-//                                    Qt::AlignTop | Qt::AlignLeft);
-
-//            assert (!ds_boxes_.count(ds_name));
-//            ds_boxes_[ds_name] = ds_box;
-
-//            // Line Buttons
-//            if (net_lines.count(ds_id))
-//            {
-//                QHBoxLayout* button_lay = new QHBoxLayout();
-
-//                unsigned int last_line_number=0, current_line_number=0;
-
-//                for (auto& line_it : net_lines.at(ds_id))
-//                {
-//                    current_line_number = String::getAppendedInt(line_it.first);
-//                    assert (current_line_number >= 1 && current_line_number <= 4);
-
-//                    if (current_line_number > 1 && (current_line_number - last_line_number) > 1)
-//                    {
-//                        // space to be inserted
-
-//                        unsigned int num_spaces = current_line_number - last_line_number - 1;
-
-//                        for (unsigned int cnt=0; cnt < num_spaces; ++cnt)
-//                            button_lay->addSpacing(button_size+2);
-//                    }
-
-//                    QPushButton* button = new QPushButton (line_it.first.c_str());
-//                    button->setFixedSize(button_size,button_size);
-//                    button->setCheckable(true);
-//                    button->setDown(current_line_number == 1);
-
-//                    QPalette pal = button->palette();
-
-//                    if (current_line_number == 1)
-//                        pal.setColor(QPalette::Button, QColor(Qt::green));
-//                    else
-//                        pal.setColor(QPalette::Button, QColor(Qt::yellow));
-
-//                    button->setAutoFillBackground(true);
-//                    button->setPalette(pal);
-//                    button->update();
-//                    //button->setDisabled(line_cnt != 0);
-
-//                    if (current_line_number == 1)
-//                        tooltip = "Connected";
-//                    else
-//                        tooltip = "Not Connected";
-
-//                    tooltip += "\nIP: "+line_it.second.first+":"
-//                                 +to_string(line_it.second.second);
-
-//                    button->setToolTip(tooltip.c_str());
-
-//                    button_lay->addWidget(button);
-
-//                    last_line_number = current_line_number;
-//                }
-
-//                type_layout_->addLayout(button_lay, row, col_start+3, // 2 for start
-//                                        Qt::AlignTop | Qt::AlignLeft);
-//            }
-
-//            ++row;
-
-//            if (show_counts)
-//            {
-//                for (auto& cnt_it : ds_it->numInsertedSummedLinesMap())
-//                {
-//                    ds_content_name = cnt_it.first;
-
-//                    // content checkbox
-
-//                    QLabel* dbcont_box = new QLabel(ds_content_name.c_str());
-
-//                    type_layout_->addWidget(dbcont_box, row, col_start+1,
-//                                            Qt::AlignTop | Qt::AlignRight);
-
-//                    assert (!ds_content_boxes_.count(ds_name) || !ds_content_boxes_.at(ds_name).count(ds_content_name));
-//                    ds_content_boxes_[ds_name][ds_content_name] = dbcont_box;
-
-//                    // ds content loaded label
-
-//                    QLabel* ds_content_loaded_label = new QLabel(QString::number(ds_it->numLoaded(ds_content_name)));
-
-//                    type_layout_->addWidget(ds_content_loaded_label, row, col_start+2,
-//                                            Qt::AlignTop | Qt::AlignRight);
-
-//                    assert (!ds_content_loaded_labels_.count(ds_name)
-//                            || !ds_content_loaded_labels_.at(ds_name).count(ds_content_name));
-//                    ds_content_loaded_labels_[ds_name][ds_content_name] = ds_content_loaded_label;
-
-//                    // ds content num inserted label
-
-//                    QLabel* ds_content_total_label = new QLabel(QString::number(cnt_it.second));
-
-//                    type_layout_->addWidget(ds_content_total_label, row, col_start+3,
-//                                            Qt::AlignTop | Qt::AlignRight);
-
-//                    assert (!ds_content_total_labels_.count(ds_name)
-//                            || !ds_content_total_labels_.at(ds_name).count(ds_content_name));
-//                    ds_content_total_labels_[ds_name][ds_content_name] = ds_content_total_label;
-//                    ++row;
-//                }
-//            }
         }
 
         if (!ds_found)
@@ -490,6 +363,9 @@ void DataSourcesLoadWidget::clearAndCreateContent()
 
         dstyp_cnt++;
     }
+
+    for(int c=0; c < type_layout_->columnCount(); c++)
+        type_layout_->setColumnStretch(c,1);
 }
 
 //void DataSourcesLoadWidget::updateExistingContent()

@@ -7,6 +7,8 @@
 
 class QCheckBox;
 class QLabel;
+class QGridLayout;
+class QVBoxLayout;
 
 class DataSourceManager;
 
@@ -25,11 +27,14 @@ public slots:
 public:
     explicit DBDataSourceWidget(DBDataSource& src, QWidget *parent = nullptr);
 
-    void update();
+    void updateContent();
 
 protected:
     DBDataSource& src_;
     DataSourceManager& ds_man_;
+
+    QVBoxLayout* main_layout_ {nullptr};
+    QGridLayout* grid_layout_ {nullptr};
 
     QCheckBox* load_check_ {nullptr};
 
@@ -37,6 +42,11 @@ protected:
     std::map<std::string, QLabel*> loaded_cnt_labels_; // cont -> loaded count label
     std::map<std::string, QLabel*> total_cnt_labels_; // cont -> total count label
 
+    bool last_show_counts_ {false}; // indicates if counts where added to layout last time
+
+    bool needsRecreate();
+    void recreateWidgets();
+    void updateWidgets(); // updates all widgets to be stored in layout
 };
 
 }
