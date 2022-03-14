@@ -335,20 +335,69 @@ void DBContent::load(VariableSet& read_set, bool use_filters, bool use_order,
         Variable& datasource_var = variable(DBContent::meta_var_datasource_id_.name());
         assert (datasource_var.dataType() == PropertyDataType::UINT);
 
-        // add to filtered vars
-        filtered_variables.push_back(&datasource_var);
-
-        custom_filter_clause = datasource_var.dbColumnName() + " IN (";
-
-        for (auto ds_id_it = ds_ids_to_load.begin(); ds_id_it != ds_ids_to_load.end(); ++ds_id_it)
+        if (ds_man.lineSpecificLoadingRequired(name_)) // ds specific line loading
         {
-            if (ds_id_it != ds_ids_to_load.begin())
-                custom_filter_clause += ",";
+            assert (hasVariable(DBContent::meta_var_line_id_.name()));
 
-            custom_filter_clause += to_string(*ds_id_it);
+            Variable& line_var = variable(DBContent::meta_var_line_id_.name());
+            assert (line_var.dataType() == PropertyDataType::UINT);
+
+            // add to filtered vars
+            filtered_variables.push_back(&datasource_var);
+            filtered_variables.push_back(&line_var);
+
+            for (auto ds_id_it : ds_ids_to_load)
+            {
+                assert (ds_man.hasDBDataSource(ds_id_it));
+
+                DBDataSource& src = ds_man.dbDataSource(ds_id_it);
+
+                if (!src.anyLinesLoadingWanted()) // check if any lines should be loaded
+                    continue;
+
+                if (custom_filter_clause.size())
+                    custom_filter_clause += " OR";
+                else
+                    custom_filter_clause += " (";
+
+                custom_filter_clause += "(" + datasource_var.dbColumnName() + " = " + to_string(ds_id_it);
+                custom_filter_clause += " AND " + line_var.dbColumnName() + " IN (";
+
+                bool first = true;
+                for (auto line_it : src.getLoadingWantedLines())
+                {
+                    if (!first)
+                        custom_filter_clause += ",";
+
+                    custom_filter_clause += to_string(line_it);
+
+                    first = false;
+                }
+
+                custom_filter_clause += "))";
+            }
+
+            if (ds_ids_to_load.size())
+                custom_filter_clause += ")";
         }
+        else // simple line id in statement
+        {
 
-        custom_filter_clause += ")";
+            // add to filtered vars
+            filtered_variables.push_back(&datasource_var);
+
+            custom_filter_clause = datasource_var.dbColumnName() + " IN (";
+
+            for (auto ds_id_it = ds_ids_to_load.begin(); ds_id_it != ds_ids_to_load.end(); ++ds_id_it)
+            {
+                if (ds_id_it != ds_ids_to_load.begin())
+                    custom_filter_clause += ",";
+
+                custom_filter_clause += to_string(*ds_id_it);
+            }
+
+            custom_filter_clause += ")";
+        }
     }
 
     if (use_filters)

@@ -150,7 +150,7 @@ void DBDataSource::loadingWanted(bool loading_wanted)
     loading_wanted_ = loading_wanted;
 }
 
-bool DBDataSource::specificlineLoadingWanted() const
+bool DBDataSource::lineSpecificLoadingWanted() const
 {
     for (auto& line_it : line_loading_wanted_)
     {
@@ -159,6 +159,21 @@ bool DBDataSource::specificlineLoadingWanted() const
     }
 
     return false;
+}
+
+bool DBDataSource::anyLinesLoadingWanted() const
+{
+    bool any_wanted = false;
+
+    for (unsigned int cnt=0; cnt < 4; ++cnt)
+    {
+        if (lineLoadingWanted(cnt))
+        {
+            any_wanted = true;
+        }
+    }
+
+    return any_wanted;
 }
 
 void DBDataSource::lineLoadingWanted(unsigned int line_id, bool wanted)
@@ -175,6 +190,17 @@ bool DBDataSource::lineLoadingWanted(unsigned int line_id) const
         return line_loading_wanted_.at(line_id);
     else
         return true;
+}
+
+std::set<unsigned int> DBDataSource::getLoadingWantedLines() const
+{
+    std::set<unsigned int> lines;
+
+    for (unsigned int cnt=0; cnt < 4; ++cnt)
+        if (lineLoadingWanted(cnt))
+            lines.insert(cnt);
+
+    return lines;
 }
 
 DBDataSourceWidget* DBDataSource::widget()

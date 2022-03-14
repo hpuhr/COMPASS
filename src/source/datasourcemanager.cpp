@@ -320,6 +320,16 @@ std::vector<unsigned int> DataSourceManager::unfilteredDS (const std::string& db
     return ds_ids;
 }
 
+bool DataSourceManager::lineSpecificLoadingRequired(const std::string& dbcontent_name)
+{
+    for (auto& ds_it : db_data_sources_)
+        if (dsTypeLoadingWanted(ds_it->dsType()) && ds_it->loadingWanted() && ds_it->hasNumInserted(dbcontent_name)
+                && ds_it->lineSpecificLoadingWanted())
+            return true;
+
+    return false;
+}
+
 void DataSourceManager::setLoadDataSources (bool loading_wanted)
 {
     loginf << "DataSourceManager: setLoadDataSources: wanted " << loading_wanted;

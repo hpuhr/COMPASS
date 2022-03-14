@@ -4,6 +4,8 @@
 #include "source/datasourcebase.h"
 #include "property.h"
 
+#include <set>
+
 namespace dbContent
 {
 
@@ -48,9 +50,11 @@ public:
     bool loadingWanted() const;
     void loadingWanted(bool loading_wanted);
 
-    bool specificlineLoadingWanted() const;
+    bool lineSpecificLoadingWanted() const;
+    bool anyLinesLoadingWanted() const;
     void lineLoadingWanted(unsigned int line_id, bool wanted);
     bool lineLoadingWanted(unsigned int line_id) const;
+    std::set<unsigned int> getLoadingWantedLines() const;
 
     DBDataSourceWidget* widget();
 

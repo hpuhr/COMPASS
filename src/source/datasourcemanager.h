@@ -68,6 +68,7 @@ public:
     bool loadingWanted (const std::string& dbcontent_name);
     bool hasDSFilter (const std::string& dbcontent_name);
     std::vector<unsigned int> unfilteredDS (const std::string& dbcontent_name); // DS IDs
+    bool lineSpecificLoadingRequired(const std::string& dbcontent_name);
 
     void setLoadDataSources (bool loading_wanted);
     void setLoadOnlyDataSources (std::set<unsigned int> ds_ids);
