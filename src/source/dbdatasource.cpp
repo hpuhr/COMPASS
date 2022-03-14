@@ -33,7 +33,7 @@ void DBDataSource::counts (const std::string& counts)
 {
     counts_ = json::parse(counts);
 
-    counts_map_ = counts_.get<std::map<std::string, std::map<unsigned int, unsigned int>>>();
+    num_inserted_ = counts_.get<std::map<std::string, std::map<unsigned int, unsigned int>>>();
 }
 
 std::string DBDataSource::countsStr()
@@ -43,28 +43,43 @@ std::string DBDataSource::countsStr()
 
 bool DBDataSource::hasNumInserted() const
 {
-    return counts_map_.size();
+    return num_inserted_.size();
 }
 
 bool DBDataSource::hasNumInserted(const std::string& db_content) const
 {
-    if (!counts_map_.count(db_content))
+    if (!num_inserted_.count(db_content))
         return false;
 
-    return counts_map_.at(db_content).size();
+    return num_inserted_.at(db_content).size();
 }
 
 const std::map<std::string, std::map<unsigned int, unsigned int>>& DBDataSource::numInsertedMap() const
 {
     assert (hasNumInserted());
-    return counts_map_;
+    return num_inserted_;
+}
+
+std::map<unsigned int, unsigned int> DBDataSource::numInsertedLinesMap() const
+{
+    std::map<unsigned int, unsigned int> line_cnts;
+
+    for (auto& db_cont_it : num_inserted_)
+    {
+        for (auto& cnt_it : db_cont_it.second)
+        {
+            line_cnts[cnt_it.first] += cnt_it.second;
+        }
+    }
+
+    return line_cnts;
 }
 
 std::map<std::string, unsigned int> DBDataSource::numInsertedSummedLinesMap() const
 {
     std::map<std::string, unsigned int> line_sum_map;
 
-    for (auto& db_cont_it : counts_map_)
+    for (auto& db_cont_it : num_inserted_)
     {
         for (auto& cnt_it : db_cont_it.second)
         {
@@ -77,9 +92,9 @@ std::map<std::string, unsigned int> DBDataSource::numInsertedSummedLinesMap() co
 
 void DBDataSource::addNumInserted(const std::string& db_content, unsigned int line_id, unsigned int num)
 {
-    counts_map_[db_content][line_id] += num;
+    num_inserted_[db_content][line_id] += num;
 
-    counts_ = counts_map_;
+    counts_ = num_inserted_;
 }
 
 void DBDataSource::addNumLoaded(const std::string& db_content, unsigned int line_id, unsigned int num)
@@ -98,6 +113,14 @@ unsigned int DBDataSource::numLoaded (const std::string& db_content)
     }
 
     return num_loaded;
+}
+
+unsigned int DBDataSource::numLoaded (const std::string& db_content, unsigned int line_id)
+{
+    if (num_loaded_.count(db_content) && num_loaded_.at(db_content).count(line_id))
+        return num_loaded_.at(db_content).at(line_id);
+
+    return 0;
 }
 
 void DBDataSource::clearNumLoaded()

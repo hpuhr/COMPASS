@@ -7,6 +7,7 @@
 #include <QCheckBox>
 #include <QLabel>
 #include <QPushButton>
+#include <QVariant>
 
 using namespace std;
 using namespace Utils;
@@ -41,6 +42,37 @@ void DBDataSourceWidget::updateContent()
 
 bool DBDataSourceWidget::needsRecreate()
 {
+    if (!line_buttons_.size())
+        return true;
+
+//    // check lines
+
+//    bool net_lines_shown = COMPASS::instance().appMode() == AppMode::LivePaused
+//            || COMPASS::instance().appMode() == AppMode::LiveRunning;
+
+//    if (last_net_lines_shown_ != net_lines_shown)
+//        return true;
+
+//    if (net_lines_shown)
+//    {
+//        // ds_id -> line str ->(ip, port)
+//        std::map<unsigned int, std::map<std::string, std::pair<std::string, unsigned int>>> net_lines =
+//                ds_man_.getNetworkLines();
+
+//        // check num lines
+//        if (net_lines.count(src_.id()) && net_lines.at(src_.id()).size() != line_buttons_.size())
+//            return true;
+//    }
+//    else // inserted
+//    {
+//        // line id -> count
+//       std::map<unsigned int, unsigned int> inserted_lines = src_.numInsertedLinesMap();
+
+//       if (inserted_lines.size() != line_buttons_.size())
+//           return true;
+//    }
+
+    // check counts shown
     bool show_counts = ds_man_.loadWidgetShowCounts();
 
     if (last_show_counts_ != show_counts)
@@ -77,6 +109,7 @@ void DBDataSourceWidget::recreateWidgets()
     }
 
     load_check_ = nullptr;
+    line_buttons_.clear();
     content_labels_.clear();
     loaded_cnt_labels_.clear();
     total_cnt_labels_.clear();
@@ -87,7 +120,8 @@ void DBDataSourceWidget::recreateWidgets()
 
     unsigned int row = 0;
 
-    grid_layout_->addWidget(load_check_, row, 0, 1, 4);
+    grid_layout_->addWidget(load_check_, row, 0, 1, 2);
+    grid_layout_->addWidget(createLinesWidget(), row, 2, 1, 2);
     ++row;
 
     if (show_counts)
@@ -132,6 +166,47 @@ void DBDataSourceWidget::recreateWidgets()
     update();
 }
 
+QWidget* DBDataSourceWidget::createLinesWidget()
+{
+    QWidget* widget = new QWidget();
+    widget->setContentsMargins(0, 0, 0, 0);
+
+    QHBoxLayout* button_lay = new QHBoxLayout();
+    button_lay->setContentsMargins(0, 0, 0, 0);
+    button_lay->addStretch();
+
+    string line_str;
+
+    unsigned int button_size = 26;
+
+    for (unsigned int cnt=0; cnt < 4; ++cnt)
+    {
+        line_str = "L"+to_string(cnt+1);
+
+        QPushButton* button = new QPushButton (line_str.c_str());
+        button->setFixedSize(button_size,button_size);
+        button->setCheckable(true);
+        button->setStyleSheet(" QPushButton:pressed { border: 3px outset; } " \
+        " QPushButton:checked { border: 3px outset; }");
+        button->setChecked(true);
+
+        button->setProperty("Line ID", cnt);
+        connect (button, &QPushButton::clicked, this, &DBDataSourceWidget::lineButtonClickedSlot);
+
+        QSizePolicy sp_retain = widget->sizePolicy();
+        sp_retain.setRetainSizeWhenHidden(true);
+        button->setSizePolicy(sp_retain);
+
+        line_buttons_[line_str] = button;
+
+        button_lay->addWidget(button);
+    }
+
+    widget->setLayout(button_lay);
+
+    return widget;
+}
+
 void DBDataSourceWidget::updateWidgets()
 {
     loginf << "DBDataSourceWidget: updateWidgets";
@@ -140,73 +215,35 @@ void DBDataSourceWidget::updateWidgets()
 
     assert (load_check_);
     load_check_->setText(src_.name().c_str());
-
     load_check_->setChecked(src_.loadingWanted());
 
-    // ds_id -> line str ->(ip, port)
-    std::map<unsigned int, std::map<std::string, std::pair<std::string, unsigned int>>> net_lines =
-            ds_man_.getNetworkLines();
+    bool net_lines_shown = COMPASS::instance().appMode() == AppMode::LivePaused
+            || COMPASS::instance().appMode() == AppMode::LiveRunning;
 
-    string tooltip;
+    if (net_lines_shown)
+    {
+        // ds_id -> line str ->(ip, port)
+        std::map<unsigned int, std::map<std::string, std::pair<std::string, unsigned int>>> net_lines =
+                ds_man_.getNetworkLines();
 
-    //    if (net_lines.count(ds_id))
-    //    {
-    //        QHBoxLayout* button_lay = new QHBoxLayout();
+        string tooltip;
+    }
+    else
+    {
+        // LX -> cnt
+        std::map<unsigned int, unsigned int> inserted_lines = src_.numInsertedLinesMap();
 
-    //        unsigned int last_line_number=0, current_line_number=0;
+        string line_str;
 
-    //        for (auto& line_it : net_lines.at(ds_id))
-    //        {
-    //            current_line_number = String::getAppendedInt(line_it.first);
-    //            assert (current_line_number >= 1 && current_line_number <= 4);
+        for (unsigned int cnt=0; cnt < 4; ++cnt)
+        {
+            line_str = "L"+to_string(cnt+1);
 
-    //            if (current_line_number > 1 && (current_line_number - last_line_number) > 1)
-    //            {
-    //                // space to be inserted
+            assert (line_buttons_.count(line_str));
 
-    //                unsigned int num_spaces = current_line_number - last_line_number - 1;
-
-    //                for (unsigned int cnt=0; cnt < num_spaces; ++cnt)
-    //                    button_lay->addSpacing(button_size+2);
-    //            }
-
-    //            QPushButton* button = new QPushButton (line_it.first.c_str());
-    //            button->setFixedSize(button_size,button_size);
-    //            button->setCheckable(true);
-    //            button->setDown(current_line_number == 1);
-
-    //            QPalette pal = button->palette();
-
-    //            if (current_line_number == 1)
-    //                pal.setColor(QPalette::Button, QColor(Qt::green));
-    //            else
-    //                pal.setColor(QPalette::Button, QColor(Qt::yellow));
-
-    //            button->setAutoFillBackground(true);
-    //            button->setPalette(pal);
-    //            button->update();
-    //            //button->setDisabled(line_cnt != 0);
-
-    //            if (current_line_number == 1)
-    //                tooltip = "Connected";
-    //            else
-    //                tooltip = "Not Connected";
-
-    //            tooltip += "\nIP: "+line_it.second.first+":"
-    //                                     +to_string(line_it.second.second);
-
-    //            button->setToolTip(tooltip.c_str());
-
-    //            button_lay->addWidget(button);
-
-    //            last_line_number = current_line_number;
-    //        }
-
-    //        type_layout_->addLayout(button_lay, row, col_start+3, // 2 for start
-    //                                Qt::AlignTop | Qt::AlignLeft);
-    //    }
-
-    //            ++row;
+            line_buttons_.at(line_str)->setHidden(!inserted_lines.count(cnt)); // hide if no data
+        }
+    }
 
 
     if (show_counts)
@@ -230,7 +267,21 @@ void DBDataSourceWidget::updateWidgets()
 
 void DBDataSourceWidget::loadingChangedSlot()
 {
+    loginf << "DBDataSourceWidget: loadingChangedSlot";
 
+    src_.loadingWanted(!src_.loadingWanted());
+}
+
+void DBDataSourceWidget::lineButtonClickedSlot()
+{
+    QPushButton* sender = dynamic_cast<QPushButton*>(QObject::sender());
+    assert (sender);
+
+    unsigned int line_id = sender->property("Line ID").toUInt();
+
+    loginf << "DBDataSourceWidget: lineButtonClickedSlot: line " << line_id;
+
+    src_.lineLoadingWanted(line_id, !src_.lineLoadingWanted(line_id));
 }
 
 }

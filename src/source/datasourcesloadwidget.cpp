@@ -225,8 +225,6 @@ void DataSourcesLoadWidget::update()
 
     bool recreate_required = false;
 
-    bool show_counts = ds_man_.loadWidgetShowCounts();
-
     if (ds_widgets_.size() != ds_man_.dbDataSources().size()) // check if same size
         recreate_required = true;
     else // check each one
@@ -250,8 +248,6 @@ void DataSourcesLoadWidget::update()
         for (auto& ds_widget_it : ds_widgets_)
             ds_widget_it.second->updateContent();
     }
-
-    counts_shown_current_ = show_counts;
 
     // TODO move this
     DBContentManager& dbo_man = COMPASS::instance().dbContentManager();

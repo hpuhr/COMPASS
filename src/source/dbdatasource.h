@@ -32,12 +32,14 @@ public:
     bool hasNumInserted() const;
     bool hasNumInserted(const std::string& db_content) const;
     const std::map<std::string, std::map<unsigned int, unsigned int>>& numInsertedMap() const;
+    std::map<unsigned int, unsigned int> numInsertedLinesMap() const;
     std::map<std::string, unsigned int> numInsertedSummedLinesMap() const;
 
     void addNumInserted(const std::string& db_content, unsigned int line_id, unsigned int num);
 
     void addNumLoaded(const std::string& db_content, unsigned int line_id, unsigned int num);
     unsigned int numLoaded (const std::string& db_content);
+    unsigned int numLoaded (const std::string& db_content, unsigned int line_id);
     void clearNumLoaded();
 
     virtual unsigned int id() const override; // from saved db content
@@ -60,7 +62,7 @@ protected:
     nlohmann::json counts_;
 
     std::map<std::string, std::map<unsigned int, unsigned int>> num_loaded_; // db_content -> line id -> count
-    std::map<std::string, std::map<unsigned int, unsigned int>> counts_map_; // db_content -> line id -> count
+    std::map<std::string, std::map<unsigned int, unsigned int>> num_inserted_; // db_content -> line id -> count
 
     std::map<unsigned int, bool> line_loading_wanted_; // not contained means true
 
