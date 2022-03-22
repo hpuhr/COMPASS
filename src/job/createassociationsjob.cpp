@@ -129,7 +129,7 @@ void CreateAssociationsJob::run()
 
     saveAssociations();
 
-//    object_man.setAssociationsByAll(); // no specific dbo or data source
+    //    object_man.setAssociationsByAll(); // no specific dbo or data source
 
     loginf << "CreateAssociationsJob: run: clearing tmp data";
     targets.clear(); // removes from assoc target reports
@@ -173,6 +173,7 @@ void CreateAssociationsJob::createTargetReports()
 
     MetaVariable* meta_key_var = task_.keyVar();
     MetaVariable* meta_ds_id_var = task_.dsIdVar();
+    MetaVariable* meta_line_id_var = task_.lineIdVar();
     MetaVariable* meta_tod_var = task_.todVar();
     MetaVariable* meta_ta_var = task_.targetAddrVar();
     MetaVariable* meta_ti_var = task_.targetIdVar();
@@ -185,6 +186,7 @@ void CreateAssociationsJob::createTargetReports()
 
     assert (meta_key_var);
     assert (meta_ds_id_var);
+    assert (meta_line_id_var);
     assert (meta_tod_var);
     assert (meta_ta_var);
     assert (meta_ti_var);
@@ -209,6 +211,9 @@ void CreateAssociationsJob::createTargetReports()
 
         assert (meta_ds_id_var->existsIn(dbo_name));
         Variable& ds_id_var = meta_ds_id_var->getFor(dbo_name);
+
+        assert (meta_line_id_var->existsIn(dbo_name));
+        Variable& line_id_var = meta_line_id_var->getFor(dbo_name);
 
         assert (meta_tod_var->existsIn(dbo_name));
         Variable& tod_var = meta_tod_var->getFor(dbo_name);
@@ -247,6 +252,9 @@ void CreateAssociationsJob::createTargetReports()
 
         assert (buffer->has<unsigned int>(ds_id_var.name()));
         NullableVector<unsigned int>& ds_ids = buffer->get<unsigned int>(ds_id_var.name());
+
+        assert (buffer->has<unsigned int>(line_id_var.name()));
+        NullableVector<unsigned int>& line_ids = buffer->get<unsigned int>(line_id_var.name());
 
         assert (buffer->has<float>(tod_var.name()));
         NullableVector<float>& tods = buffer->get<float>(tod_var.name());
@@ -295,10 +303,12 @@ void CreateAssociationsJob::createTargetReports()
         {
             assert (!rec_nums.isNull(cnt));
             assert (!ds_ids.isNull(cnt));
+            assert (!line_ids.isNull(cnt));
 
             tr.dbo_name_ = dbo_name;
             tr.rec_num_ = rec_nums.get(cnt);
             tr.ds_id_ = ds_ids.get(cnt);
+            tr.line_id_ = line_ids.get(cnt);
 
             if (tods.isNull(cnt))
             {
@@ -912,8 +922,6 @@ std::map<unsigned int, Association::Target> CreateAssociationsJob::createTracked
 {
     map<unsigned int, Association::Target> tracker_targets; // utn -> target
 
-    map<unsigned int, pair<unsigned int, float>> tn2utn; // track num -> utn, last tod
-
     DataSourceManager& ds_man = COMPASS::instance().dataSourceManager();
 
     assert (ds_man.hasDBDataSource(ds_id));
@@ -933,104 +941,114 @@ std::map<unsigned int, Association::Target> CreateAssociationsJob::createTracked
 
     bool use_non_mode_s = task_.associateNonModeS();
 
-    // create temporary targets
-    for (auto& tr_it : ds_id_trs.at(ds_id))
+    // iterate over lines
+    for (unsigned int line_cnt = 0; line_cnt < 4; line_cnt++)
     {
-        if (tr_it.has_tn_) // has track number
+        map<unsigned int, pair<unsigned int, float>> tn2utn; // track num -> utn, last tod
+
+        // create temporary targets
+        for (auto& tr_it : ds_id_trs.at(ds_id))
         {
-            if (!tn2utn.count(tr_it.tn_)) // if not yet mapped to utn
+            if (tr_it.line_id_ != line_cnt) // check for current line
+                continue;
+
+            if (tr_it.has_tn_) // has track number
             {
-                attached_to_existing_utn = false;
-
-                // check if can be attached to already existing utn
-                if (!tr_it.has_ta_ && use_non_mode_s) // not for mode-s targets
+                if (!tn2utn.count(tr_it.tn_)) // if not yet mapped to utn
                 {
-                    int cont_utn = findContinuationUTNForTrackerUpdate(tr_it, tracker_targets);
+                    attached_to_existing_utn = false;
 
-                    if (cont_utn != -1)
+                    // check if can be attached to already existing utn
+                    if (!tr_it.has_ta_ && use_non_mode_s) // not for mode-s targets
                     {
-                        logdbg << "CreateAssociationsJob: createPerTrackerTargets: continuing target "
+                        int cont_utn = findContinuationUTNForTrackerUpdate(tr_it, tracker_targets);
+
+                        if (cont_utn != -1)
+                        {
+                            logdbg << "CreateAssociationsJob: createPerTrackerTargets: continuing target "
                                << cont_utn << " with tn " << tr_it.tn_ << " at time "
                                << String::timeStringFromDouble(tr_it.tod_);
-                        tn2utn[tr_it.tn_] = {cont_utn, tr_it.tod_};
-                        attached_to_existing_utn = true;
+                            tn2utn[tr_it.tn_] = {cont_utn, tr_it.tod_};
+                            attached_to_existing_utn = true;
+                        }
+                    }
+
+                    if (!attached_to_existing_utn)
+                    {
+                        logdbg << "CreateAssociationsJob: createPerTrackerTargets: registering new tmp target "
+                           << tmp_utn_cnt << " for tn " << tr_it.tn_;
+
+                        tn2utn[tr_it.tn_] = {tmp_utn_cnt, tr_it.tod_};
+                        ++tmp_utn_cnt;
                     }
                 }
 
-                if (!attached_to_existing_utn)
+                //loginf << "UGA1";
+                if (tracker_targets.count(tn2utn.at(tr_it.tn_).first)) // additional checks if already exists
                 {
-                    logdbg << "CreateAssociationsJob: createPerTrackerTargets: registering new tmp target "
-                           << tmp_utn_cnt << " for tn " << tr_it.tn_;
+                    Association::Target& existing_target = tracker_targets.at(tn2utn.at(tr_it.tn_).first);
 
-                    tn2utn[tr_it.tn_] = {tmp_utn_cnt, tr_it.tod_};
-                    ++tmp_utn_cnt;
-                }
-            }
-
-            //loginf << "UGA1";
-            if (tracker_targets.count(tn2utn.at(tr_it.tn_).first)) // additional checks if already exists
-            {
-                Association::Target& existing_target = tracker_targets.at(tn2utn.at(tr_it.tn_).first);
-
-                if (tr_it.has_ta_ && existing_target.hasTA() // new target part if ta change
-                        && !existing_target.hasTA(tr_it.ta_))
-                {
-                    logdbg << "CreateAssociationsJob: createPerTrackerTargets: registering new tmp target "
+                    if (tr_it.has_ta_ && existing_target.hasTA() // new target part if ta change
+                            && !existing_target.hasTA(tr_it.ta_))
+                    {
+                        logdbg << "CreateAssociationsJob: createPerTrackerTargets: registering new tmp target "
                            << tmp_utn_cnt << " for tn " << tr_it.tn_ << " because of ta switch "
                            << " at " << String::timeStringFromDouble(tr_it.tod_)
                            << " existing " << existing_target.asStr()
                            << " tr " << tr_it.asStr();
 
-                    tn2utn[tr_it.tn_] = {tmp_utn_cnt, tr_it.tod_};
-                    ++tmp_utn_cnt;
+                        tn2utn[tr_it.tn_] = {tmp_utn_cnt, tr_it.tod_};
+                        ++tmp_utn_cnt;
+                    }
                 }
-            }
-            //loginf << "UGA2";
+                //loginf << "UGA2";
 
-            if (tn2utn.at(tr_it.tn_).second > tr_it.tod_)
-            {
-                logwrn << "CreateAssociationsJob: createPerTrackerTargets: tod backjump -"
+                if (tn2utn.at(tr_it.tn_).second > tr_it.tod_)
+                {
+                    logwrn << "CreateAssociationsJob: createPerTrackerTargets: tod backjump -"
                        << String::timeStringFromDouble(tn2utn.at(tr_it.tn_).second-tr_it.tod_)
                        << " tmp target " << tmp_utn_cnt << " at tr " << tr_it.asStr() << " tn " << tr_it.tn_;
-            }
-            assert (tn2utn.at(tr_it.tn_).second <= tr_it.tod_);
+                }
+                assert (tn2utn.at(tr_it.tn_).second <= tr_it.tod_);
 
-            //loginf << "UGA3";
+                //loginf << "UGA3";
 
-            if (tr_it.tod_ - tn2utn.at(tr_it.tn_).second > 60.0) // gap, new track // TODO parameter
-            {
-                logdbg << "CreateAssociationsJob: createPerTrackerTargets: registering new tmp target "
+                if (tr_it.tod_ - tn2utn.at(tr_it.tn_).second > 60.0) // gap, new track // TODO parameter
+                {
+                    logdbg << "CreateAssociationsJob: createPerTrackerTargets: registering new tmp target "
                        << tmp_utn_cnt << " for tn " << tr_it.tn_ << " because of gap "
                        << String::timeStringFromDouble(tr_it.tod_ - tn2utn.at(tr_it.tn_).second)
                        << " at " << String::timeStringFromDouble(tr_it.tod_);
 
-                tn2utn[tr_it.tn_] = {tmp_utn_cnt, tr_it.tod_};
-                ++tmp_utn_cnt;
+                    tn2utn[tr_it.tn_] = {tmp_utn_cnt, tr_it.tod_};
+                    ++tmp_utn_cnt;
+                }
+
+                //loginf << "UGA4";
+
+                assert (tn2utn.count(tr_it.tn_));
+                utn = tn2utn.at(tr_it.tn_).first;
+                tn2utn.at(tr_it.tn_).second = tr_it.tod_;
+
+                if (!tracker_targets.count(utn)) // add new target if not existing
+                {
+                    logdbg << "CreateAssociationsJob: createPerTrackerTargets: creating new tmp target " << utn;
+
+                    tracker_targets.emplace(
+                                std::piecewise_construct,
+                                std::forward_as_tuple(utn),   // args for key
+                                std::forward_as_tuple(utn, true));  // args for mapped value
+                }
+
+                tracker_targets.at(utn).addAssociated(&tr_it);
             }
-
-            //loginf << "UGA4";
-
-            assert (tn2utn.count(tr_it.tn_));
-            utn = tn2utn.at(tr_it.tn_).first;
-            tn2utn.at(tr_it.tn_).second = tr_it.tod_;
-
-            if (!tracker_targets.count(utn)) // add new target if not existing
+            else
             {
-                logdbg << "CreateAssociationsJob: createPerTrackerTargets: creating new tmp target " << utn;
-
-                tracker_targets.emplace(
-                            std::piecewise_construct,
-                            std::forward_as_tuple(utn),   // args for key
-                            std::forward_as_tuple(utn, true));  // args for mapped value
-            }
-
-            tracker_targets.at(utn).addAssociated(&tr_it);
-        }
-        else
-        {
-            logwrn << "CreateAssociationsJob: createPerTrackerTargets: tracker target report w/o track num in ds_id "
+                logwrn << "CreateAssociationsJob: createPerTrackerTargets: tracker target report w/o track num in ds_id "
                    << tr_it.ds_id_ << " at tod " << String::timeStringFromDouble(tr_it.tod_);
+            }
         }
+
     }
 
     return tracker_targets;

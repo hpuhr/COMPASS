@@ -17,6 +17,7 @@ namespace Association
 
         string dbo_name_;
         unsigned int ds_id_{0};
+        unsigned int line_id_{0};
         unsigned int rec_num_{0};
         float tod_{0};
 

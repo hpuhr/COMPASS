@@ -235,6 +235,7 @@ void CreateAssociationsTask::run()
 
     checkAndSetMetaVariable(DBContent::meta_var_rec_num_.name(), &rec_num_var_);
     checkAndSetMetaVariable(DBContent::meta_var_datasource_id_.name(), &ds_id_var_);
+    checkAndSetMetaVariable(DBContent::meta_var_line_id_.name(), &line_id_var_);
     checkAndSetMetaVariable(DBContent::meta_var_tod_.name(), &tod_var_);
     checkAndSetMetaVariable(DBContent::meta_var_ta_.name(), &target_addr_var_);
     checkAndSetMetaVariable(DBContent::meta_var_ti_.name(), &target_id_var_);
@@ -596,9 +597,16 @@ MetaVariable* CreateAssociationsTask::keyVar() const
 
 MetaVariable* CreateAssociationsTask::dsIdVar() const
 {
-    assert (rec_num_var_);
+    assert (ds_id_var_);
     return ds_id_var_;
 }
+
+MetaVariable* CreateAssociationsTask::lineIdVar() const
+{
+    assert (line_id_var_);
+    return line_id_var_;
+}
+
 
 MetaVariable* CreateAssociationsTask::targetAddrVar() const
 {
@@ -681,6 +689,10 @@ VariableSet CreateAssociationsTask::getReadSetFor(const std::string& dbo_name)
     assert(ds_id_var_);
     assert(ds_id_var_->existsIn(dbo_name));
     read_set.add(ds_id_var_->getFor(dbo_name));
+
+    assert(line_id_var_);
+    assert(line_id_var_->existsIn(dbo_name));
+    read_set.add(line_id_var_->getFor(dbo_name));
 
     assert(tod_var_);
     assert(tod_var_->existsIn(dbo_name));
