@@ -58,7 +58,7 @@ public:
     DataSourcesLoadWidget(DataSourceManager& ds_man);
     virtual ~DataSourcesLoadWidget();
 
-    void update();
+    void updateContent();
     void loadingDone();
 
 private:

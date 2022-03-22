@@ -92,7 +92,7 @@ DataSourcesLoadWidget::DataSourcesLoadWidget(DataSourceManager& ds_man)
 
     main_layout->addLayout(assoc_layout);
 
-    update();
+    updateContent();
 
     setLayout(main_layout);
 
@@ -219,9 +219,9 @@ void DataSourcesLoadWidget::toogleShowCountsSlot()
 //    dbo_manager_.limitMax(max);
 //}
 
-void DataSourcesLoadWidget::update()
+void DataSourcesLoadWidget::updateContent()
 {
-    logdbg << "DataSourcesLoadWidget: update: num data sources " << ds_man_.dbDataSources().size();
+    loginf << "DataSourcesLoadWidget: updateContent: num data sources " << ds_man_.dbDataSources().size();
 
     bool recreate_required = false;
 
@@ -233,7 +233,7 @@ void DataSourcesLoadWidget::update()
         {
             if (!ds_widgets_.count(ds_it->name()))
             {
-                loginf << "DataSourcesLoadWidget: update: ds_box " << ds_it->name() << " missing ";
+                loginf << "DataSourcesLoadWidget: updateContent: ds_box " << ds_it->name() << " missing ";
 
                 recreate_required = true;
                 break;
@@ -241,8 +241,12 @@ void DataSourcesLoadWidget::update()
         }
     }
 
+    loginf << "DataSourcesLoadWidget: updateContent: recreate_required " << recreate_required;
+
     if (recreate_required)
+    {
         clearAndCreateContent();
+    }
     else
     {
         for (auto& ds_widget_it : ds_widgets_)
@@ -251,6 +255,8 @@ void DataSourcesLoadWidget::update()
 
     // TODO move this
     DBContentManager& dbo_man = COMPASS::instance().dbContentManager();
+
+    loginf << "DataSourcesLoadWidget: updateContent: UGA " << dbo_man.hasAssociations();
 
     assert(associations_label_);
     if (dbo_man.hasAssociations())
@@ -278,7 +284,7 @@ void DataSourcesLoadWidget::clear()
 
 void DataSourcesLoadWidget::clearAndCreateContent()
 {
-    loginf << "DataSourcesLoadWidget: clearAndCreateContent";
+    logdbg << "DataSourcesLoadWidget: clearAndCreateContent";
 
     clear();
 
@@ -298,6 +304,8 @@ void DataSourcesLoadWidget::clearAndCreateContent()
 
     //DBContentManager& dbo_man = COMPASS::instance().dbContentManager();
     bool ds_found;
+
+    logdbg << "DataSourcesLoadWidget: clearAndCreateContent: iterating data source types";
 
     for (auto& ds_type_name : DataSourceManager::data_source_types_)
     {
@@ -328,6 +336,8 @@ void DataSourcesLoadWidget::clearAndCreateContent()
 
         ds_found = false;
 
+        logdbg << "DataSourcesLoadWidget: clearAndCreateContent: data sources for type " << ds_type_name;
+
         for (const auto& ds_it : ds_man_.dbDataSources())
         {
             if (ds_it->dsType() != ds_type_name)
@@ -337,8 +347,8 @@ void DataSourcesLoadWidget::clearAndCreateContent()
 
             ds_id = Number::dsIdFrom(ds_it->sac(), ds_it->sic());
             ds_name = ds_it->name();
-            loginf << "DataSourcesLoadWidget: clearAndCreateContent: create '"
-                   << ds_it->dsType() << "' '" << ds_name << "'";
+            logdbg << "DataSourcesLoadWidget: clearAndCreateContent: create '" << ds_it->dsType()
+                   << "' '" << ds_name << "'";
 
             DBDataSourceWidget* ds_widget = ds_it->widget();
 
@@ -348,7 +358,6 @@ void DataSourcesLoadWidget::clearAndCreateContent()
             ds_widgets_[ds_name] = ds_widget;
 
             ++row;
-
         }
 
         if (!ds_found)
@@ -360,8 +369,12 @@ void DataSourcesLoadWidget::clearAndCreateContent()
         dstyp_cnt++;
     }
 
+    logdbg << "DataSourcesLoadWidget: clearAndCreateContent: setting columns";
+
     for(int c=0; c < type_layout_->columnCount(); c++)
         type_layout_->setColumnStretch(c,1);
+
+    logdbg << "DataSourcesLoadWidget: clearAndCreateContent: done";
 }
 
 //void DataSourcesLoadWidget::updateExistingContent()

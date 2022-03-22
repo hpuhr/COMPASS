@@ -79,7 +79,7 @@ DataSourcesLoadWidget* DataSourceManager::loadWidget()
 void DataSourceManager::updateWidget()
 {
     if (load_widget_)
-        load_widget_->update();
+        load_widget_->updateContent();
 }
 
 DataSourcesConfigurationDialog* DataSourceManager::configurationDialog()
@@ -263,7 +263,7 @@ void DataSourceManager::loadWidgetShowCounts(bool value)
     load_widget_show_counts_ = value;
 
     if (load_widget_)
-        load_widget_->update();
+        load_widget_->updateContent();
 }
 
 bool DataSourceManager::loadWidgetShowLines() const
@@ -278,7 +278,7 @@ void DataSourceManager::loadWidgetShowLines(bool value)
     load_widget_show_lines_ = value;
 
     if (load_widget_)
-        load_widget_->update();
+        load_widget_->updateContent();
 }
 
 bool DataSourceManager::loadingWanted (const std::string& dbcontent_name)
@@ -338,7 +338,7 @@ void DataSourceManager::setLoadDataSources (bool loading_wanted)
         ds_it->loadingWanted(loading_wanted);
 
     if (load_widget_)
-        load_widget_->update();
+        load_widget_->updateContent();
 }
 
 void DataSourceManager::setLoadOnlyDataSources (std::set<unsigned int> ds_ids)
@@ -355,7 +355,7 @@ void DataSourceManager::setLoadOnlyDataSources (std::set<unsigned int> ds_ids)
     }
 
     if (load_widget_)
-        load_widget_->update();
+        load_widget_->updateContent();
 }
 
 bool DataSourceManager::loadDataSourcesFiltered()
@@ -386,7 +386,7 @@ void DataSourceManager::databaseOpenedSlot()
     loadDBDataSources();
 
     if (load_widget_)
-        load_widget_->update();
+        load_widget_->updateContent();
 }
 
 void DataSourceManager::databaseClosedSlot()
@@ -396,7 +396,7 @@ void DataSourceManager::databaseClosedSlot()
     updateDSIdsAll();
 
     if (load_widget_)
-        load_widget_->update();
+        load_widget_->updateContent();
 }
 
 void DataSourceManager::configurationDialogDoneSlot()
@@ -630,7 +630,7 @@ void DataSourceManager::setLoadDSTypes (bool loading_wanted)
     }
 
     if (load_widget_)
-        load_widget_->update();
+        load_widget_->updateContent();
 }
 
 void DataSourceManager::setLoadOnlyDSTypes (std::set<std::string> ds_types)
@@ -644,7 +644,7 @@ void DataSourceManager::setLoadOnlyDSTypes (std::set<std::string> ds_types)
     }
 
     if (load_widget_)
-        load_widget_->update();
+        load_widget_->updateContent();
 }
 
 const std::vector<std::unique_ptr<dbContent::DBDataSource>>& DataSourceManager::dbDataSources() const

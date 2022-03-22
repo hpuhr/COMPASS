@@ -403,7 +403,7 @@ void DBContent::load(VariableSet& read_set, bool use_filters, bool use_order,
     if (use_filters)
     {
         if (custom_filter_clause.size())
-            custom_filter_clause += " AND";
+            custom_filter_clause += " AND ";
 
         custom_filter_clause +=
                 COMPASS::instance().filterManager().getSQLCondition(name_, extra_from_parts, filtered_variables);

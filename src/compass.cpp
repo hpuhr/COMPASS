@@ -67,14 +67,14 @@ COMPASS::COMPASS() : Configurable("COMPASS", "COMPASS0", 0, "compass.json")
     // database opending
 
     QObject::connect(db_interface_.get(), &DBInterface::databaseOpenedSignal,
-                     ds_manager_.get(), &DataSourceManager::databaseOpenedSlot);
-    QObject::connect(db_interface_.get(), &DBInterface::databaseClosedSignal,
-                     ds_manager_.get(), &DataSourceManager::databaseClosedSlot);
-
-    QObject::connect(db_interface_.get(), &DBInterface::databaseOpenedSignal,
                      dbcontent_manager_.get(), &DBContentManager::databaseOpenedSlot);
     QObject::connect(db_interface_.get(), &DBInterface::databaseClosedSignal,
                      dbcontent_manager_.get(), &DBContentManager::databaseClosedSlot);
+
+    QObject::connect(db_interface_.get(), &DBInterface::databaseOpenedSignal,
+                     ds_manager_.get(), &DataSourceManager::databaseOpenedSlot);
+    QObject::connect(db_interface_.get(), &DBInterface::databaseClosedSignal,
+                     ds_manager_.get(), &DataSourceManager::databaseClosedSlot);
 
     QObject::connect(db_interface_.get(), &DBInterface::databaseOpenedSignal,
                      filter_manager_.get(), &FilterManager::databaseOpenedSlot);
