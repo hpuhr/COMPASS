@@ -36,26 +36,26 @@ public:
     nlohmann::json& info(); // for direct use, var->value
     std::string infoStr();
 
-    bool hasPosition();
-    bool hasFullPosition();
+    bool hasPosition() const;
+    bool hasFullPosition() const;
 
     void latitude (double value);
-    double latitude ();
+    double latitude () const;
 
     void longitude (double value);
-    double longitude ();
+    double longitude () const;
 
     void altitude (double value);
-    double altitude ();
+    double altitude () const;
 
-    bool hasRadarRanges();
+    bool hasRadarRanges() const;
     void addRadarRanges();
-    std::map<std::string, double> radarRanges();
+    std::map<std::string, double> radarRanges() const;
     void radarRange (const std::string& key, const double range);
 
-    bool hasNetworkLines();
+    bool hasNetworkLines() const;
     void addNetworkLines();
-    std::map<std::string, std::pair<std::string, unsigned int>> networkLines();
+    std::map<std::string, std::pair<std::string, unsigned int>> networkLines() const;
     void networkLine (const std::string& key, const std::string ip_port);
 
     void setFromJSONDeprecated (const nlohmann::json& j);

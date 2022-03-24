@@ -221,6 +221,8 @@ void DataSourceManager::deleteAllConfigDataSources()
     }
 
     updateDSIdsAll();
+
+    emit dataSourcesChangedSignal();
 }
 
 void DataSourceManager::exportDataSources(const std::string& filename)
@@ -385,6 +387,8 @@ void DataSourceManager::databaseOpenedSlot()
 
     loadDBDataSources();
 
+    emit dataSourcesChangedSignal();
+
     if (load_widget_)
         load_widget_->updateContent();
 }
@@ -394,6 +398,8 @@ void DataSourceManager::databaseClosedSlot()
     db_data_sources_.clear();
 
     updateDSIdsAll();
+
+    emit dataSourcesChangedSignal();
 
     if (load_widget_)
         load_widget_->updateContent();
@@ -406,6 +412,7 @@ void DataSourceManager::configurationDialogDoneSlot()
     config_dialog_->hide();
     config_dialog_ = nullptr;
 
+    emit dataSourcesChangedSignal();
 }
 
 bool DataSourceManager::hasConfigDataSource (unsigned int ds_id)
@@ -443,6 +450,8 @@ void DataSourceManager::deleteConfigDataSource(unsigned int ds_id)
     config_data_sources_.erase(ds_it);
 
     updateDSIdsAll();
+
+    emit dataSourcesChangedSignal();
 }
 
 dbContent::ConfigurationDataSource& DataSourceManager::configDataSource (unsigned int ds_id)
@@ -571,6 +580,8 @@ void DataSourceManager::addNewDataSource (unsigned int ds_id)
 
     assert (hasDBDataSource(ds_id));
     updateDSIdsAll();
+
+    emit dataSourcesChangedSignal();
 
     loginf << "DataSourceManager: addNewDataSource: ds_id " << ds_id << " done";
 }

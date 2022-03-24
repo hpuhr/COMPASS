@@ -97,12 +97,12 @@ std::string DataSourceBase::infoStr()
     return info_.dump();
 }
 
-bool DataSourceBase::hasPosition()
+bool DataSourceBase::hasPosition() const
 {
     return info_.contains("position");
 }
 
-bool DataSourceBase::hasFullPosition()
+bool DataSourceBase::hasFullPosition() const
 {
     return info_.contains("position")
             && info_.at("position").contains("latitude")
@@ -114,7 +114,7 @@ void DataSourceBase::latitude (double value)
 {
     info_["position"]["latitude"] = value;
 }
-double DataSourceBase::latitude ()
+double DataSourceBase::latitude () const
 {
     assert (hasPosition());
 
@@ -128,7 +128,7 @@ void DataSourceBase::longitude (double value)
 {
     info_["position"]["longitude"] = value;
 }
-double DataSourceBase::longitude ()
+double DataSourceBase::longitude () const
 {
     assert (hasPosition());
 
@@ -143,7 +143,7 @@ void DataSourceBase::altitude (double value)
     info_["position"]["altitude"] = value;
 }
 
-double DataSourceBase::altitude ()
+double DataSourceBase::altitude () const
 {
     assert (hasPosition());
 
@@ -153,7 +153,7 @@ double DataSourceBase::altitude ()
         return info_.at("position").at("altitude");
 }
 
-bool DataSourceBase::hasRadarRanges()
+bool DataSourceBase::hasRadarRanges() const
 {
     return info_.contains("radar_range");
 }
@@ -164,7 +164,7 @@ void DataSourceBase::addRadarRanges()
     info_["radar_range"] = json::object();
 }
 
-std::map<std::string, double> DataSourceBase::radarRanges()
+std::map<std::string, double> DataSourceBase::radarRanges() const
 {
     assert (hasRadarRanges());
     return info_.at("radar_range").get<std::map<std::string, double>>();
@@ -175,7 +175,7 @@ void DataSourceBase::radarRange (const std::string& key, const double range)
     info_["radar_range"][key] = range;
 }
 
-bool DataSourceBase::hasNetworkLines()
+bool DataSourceBase::hasNetworkLines() const
 {
     return info_.contains("network_lines");
 }
@@ -186,14 +186,14 @@ void DataSourceBase::addNetworkLines()
     info_["network_lines"] = json::object();
 }
 
-std::map<std::string, std::pair<std::string, unsigned int>> DataSourceBase::networkLines()
+std::map<std::string, std::pair<std::string, unsigned int>> DataSourceBase::networkLines() const
 {
     assert (hasNetworkLines());
 
     std::map<std::string, std::pair<std::string, unsigned int>> ret;
     set<string> existing_lines; // to check
 
-    json& network_lines = info_.at("network_lines");
+    const json& network_lines = info_.at("network_lines");
     assert (network_lines.is_object());
 
     string ip;
