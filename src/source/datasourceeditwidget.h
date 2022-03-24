@@ -25,6 +25,10 @@ public slots:
     void longitudeEditedSlot(const QString& value_str);
     void altitudeEditedSlot(const QString& value_str);
 
+    void addRadarRangesSlot();
+    void radarRangeEditedSlot(const QString& value_str);
+
+    void addNetLinesSlot();
     void net1EditedSlot(const QString& value_str);
     void net2EditedSlot(const QString& value_str);
     void net3EditedSlot(const QString& value_str);
@@ -57,10 +61,26 @@ protected:
     QLabel* sic_label_{nullptr};
     QLabel* ds_id_label_{nullptr};
 
+    // position
     QWidget* position_widget_{nullptr};
     QLineEdit* latitude_edit_{nullptr};
     QLineEdit* longitude_edit_{nullptr};
     QLineEdit* altitude_edit_{nullptr};
+
+    // radar ranges
+
+    QWidget* ranges_widget_{nullptr};
+    QLineEdit* psr_min_edit_{nullptr};
+    QLineEdit* psr_max_edit_{nullptr};
+    QLineEdit* ssr_min_edit_{nullptr};
+    QLineEdit* ssr_max_edit_{nullptr};
+    QLineEdit* mode_s_min_edit_{nullptr};
+    QLineEdit* mode_s_max_edit_{nullptr};
+
+    QPushButton* add_ranges_button_{nullptr};
+
+    // net lines
+    QPushButton* add_lines_button_{nullptr};
 
     QWidget* net_widget_{nullptr};
     QLineEdit* net_l1_edit_{nullptr};

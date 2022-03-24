@@ -48,7 +48,13 @@ public:
     void altitude (double value);
     double altitude ();
 
+    bool hasRadarRanges();
+    void addRadarRanges();
+    std::map<std::string, double> radarRanges();
+    void radarRange (const std::string& key, const double range);
+
     bool hasNetworkLines();
+    void addNetworkLines();
     std::map<std::string, std::pair<std::string, unsigned int>> networkLines();
     void networkLine (const std::string& key, const std::string ip_port);
 

@@ -174,11 +174,11 @@ DBContentWidget::DBContentWidget(DBContent* object, QWidget* parent,
 
     dbo_frame->setLayout(dbovars_grid_);
 
-    QScrollArea* dbo_scroll_ = new QScrollArea();
-    dbo_scroll_->setWidgetResizable(true);
-    dbo_scroll_->setWidget(dbo_frame);
+    QScrollArea* dbo_scroll = new QScrollArea();
+    dbo_scroll->setWidgetResizable(true);
+    dbo_scroll->setWidget(dbo_frame);
 
-    main_layout->addWidget(dbo_scroll_);
+    main_layout->addWidget(dbo_scroll);
 
     setLayout(main_layout);
 

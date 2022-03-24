@@ -153,9 +153,37 @@ double DataSourceBase::altitude ()
         return info_.at("position").at("altitude");
 }
 
+bool DataSourceBase::hasRadarRanges()
+{
+    return info_.contains("radar_range");
+}
+
+void DataSourceBase::addRadarRanges()
+{
+    assert (!hasRadarRanges());
+    info_["radar_range"] = json::object();
+}
+
+std::map<std::string, double> DataSourceBase::radarRanges()
+{
+    assert (hasRadarRanges());
+    return info_.at("radar_range").get<std::map<std::string, double>>();
+}
+
+void DataSourceBase::radarRange (const std::string& key, const double range)
+{
+    info_["radar_range"][key] = range;
+}
+
 bool DataSourceBase::hasNetworkLines()
 {
     return info_.contains("network_lines");
+}
+
+void DataSourceBase::addNetworkLines()
+{
+    assert (!hasNetworkLines());
+    info_["network_lines"] = json::object();
 }
 
 std::map<std::string, std::pair<std::string, unsigned int>> DataSourceBase::networkLines()
