@@ -256,8 +256,6 @@ void DataSourcesLoadWidget::updateContent()
     // TODO move this
     DBContentManager& dbo_man = COMPASS::instance().dbContentManager();
 
-    loginf << "DataSourcesLoadWidget: updateContent: UGA " << dbo_man.hasAssociations();
-
     assert(associations_label_);
     if (dbo_man.hasAssociations())
     {

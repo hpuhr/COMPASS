@@ -178,6 +178,7 @@ QWidget* DBDataSourceWidget::createLinesWidget()
     string line_str;
 
     unsigned int button_size = 26;
+    widget->setMinimumHeight(button_size);
 
     for (unsigned int cnt=0; cnt < 4; ++cnt)
     {
@@ -209,7 +210,7 @@ QWidget* DBDataSourceWidget::createLinesWidget()
 
 void DBDataSourceWidget::updateWidgets()
 {
-    loginf << "DBDataSourceWidget: updateWidgets";
+    logdbg << "DBDataSourceWidget: updateWidgets";
 
     bool show_counts = ds_man_.loadWidgetShowCounts();
 

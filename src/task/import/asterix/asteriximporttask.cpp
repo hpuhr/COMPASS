@@ -75,11 +75,7 @@ ASTERIXImportTask::ASTERIXImportTask(const std::string& class_id, const std::str
     registerParameter("file_list", &file_list_, json::array());
     registerParameter("current_file_framing", &current_file_framing_, "");
 
-    registerParameter("override_sac_org", &post_process_.override_sac_org_, 0);
-    registerParameter("override_sic_org", &post_process_.override_sic_org_, 0);
-    registerParameter("override_sac_new", &post_process_.override_sac_new_, 1);
-    registerParameter("override_sic_new", &post_process_.override_sic_new_, 1);
-    registerParameter("override_tod_offset", &post_process_.override_tod_offset_, 0.0);
+    registerParameter("override_tod_offset", &override_tod_offset_, 0.0);
 
     std::string jasterix_definition_path = HOME_DATA_DIRECTORY + "jasterix_definitions";
 
@@ -551,58 +547,22 @@ bool ASTERIXImportTask::isRecommended()
 
 bool ASTERIXImportTask::isRequired() { return false; }
 
-bool ASTERIXImportTask::overrideActive() const { return post_process_.override_active_; }
+bool ASTERIXImportTask::overrideTodActive() const { return override_tod_active_; }
 
-void ASTERIXImportTask::overrideActive(bool value)
+void ASTERIXImportTask::overrideTodActive(bool value)
 {
     loginf << "ASTERIXImportTask: overrideActive: value " << value;
 
-    post_process_.override_active_ = value;
+    override_tod_active_ = value;
 }
 
-unsigned int ASTERIXImportTask::overrideSacOrg() const { return post_process_.override_sac_org_; }
-
-void ASTERIXImportTask::overrideSacOrg(unsigned int value)
-{
-    loginf << "ASTERIXImportTask: overrideSacOrg: value " << value;
-
-    post_process_.override_sac_org_ = value;
-}
-
-unsigned int ASTERIXImportTask::overrideSicOrg() const { return post_process_.override_sic_org_; }
-
-void ASTERIXImportTask::overrideSicOrg(unsigned int value)
-{
-    loginf << "ASTERIXImportTask: overrideSicOrg: value " << value;
-
-    post_process_.override_sic_org_ = value;
-}
-
-unsigned int ASTERIXImportTask::overrideSacNew() const { return post_process_.override_sac_new_; }
-
-void ASTERIXImportTask::overrideSacNew(unsigned int value)
-{
-    loginf << "ASTERIXImportTask: overrideSacNew: value " << value;
-
-    post_process_.override_sac_new_ = value;
-}
-
-unsigned int ASTERIXImportTask::overrideSicNew() const { return post_process_.override_sic_new_; }
-
-void ASTERIXImportTask::overrideSicNew(unsigned int value)
-{
-    loginf << "ASTERIXImportTask: overrideSicNew: value " << value;
-
-    post_process_.override_sic_new_ = value;
-}
-
-float ASTERIXImportTask::overrideTodOffset() const { return post_process_.override_tod_offset_; }
+float ASTERIXImportTask::overrideTodOffset() const { return override_tod_offset_; }
 
 void ASTERIXImportTask::overrideTodOffset(float value)
 {
     loginf << "ASTERIXImportTask: overrideTodOffset: value " << value;
 
-    post_process_.override_tod_offset_ = value;
+    override_tod_offset_ = value;
 }
 
 unsigned int ASTERIXImportTask::fileLineID() const
@@ -1028,7 +988,9 @@ void ASTERIXImportTask::mapJSONDoneSlot()
     if (!test_)
     {
         std::shared_ptr<ASTERIXPostprocessJob> postprocess_job =
-                make_shared<ASTERIXPostprocessJob>(std::move(job_buffers), !import_file_);
+                make_shared<ASTERIXPostprocessJob>(std::move(job_buffers),
+                                                   override_tod_active_, override_tod_offset_,
+                                                   !import_file_);
 
         postprocess_jobs_.push_back(postprocess_job);
 

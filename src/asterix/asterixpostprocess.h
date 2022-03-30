@@ -32,15 +32,6 @@ class ASTERIXPostProcess
   protected:
     friend class ASTERIXImportTask;  // uses the members for config
 
-    bool override_active_{false};
-    unsigned int override_sac_org_{0};
-    unsigned int override_sic_org_{0};
-
-    unsigned int override_sac_new_{0};
-    unsigned int override_sic_new_{0};
-
-    float override_tod_offset_{0};
-
     std::map<std::pair<unsigned int, unsigned int>, double> cat002_last_tod_period_;
     std::map<std::pair<unsigned int, unsigned int>, double> cat002_last_tod_;
 

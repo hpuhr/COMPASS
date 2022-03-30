@@ -12,7 +12,8 @@ class Buffer;
 class ASTERIXPostprocessJob : public Job
 {
 public:
-    ASTERIXPostprocessJob(std::map<std::string, std::shared_ptr<Buffer>> buffers, bool do_timestamp_checks);
+    ASTERIXPostprocessJob(std::map<std::string, std::shared_ptr<Buffer>> buffers,
+                          bool override_tod_active, float override_tod_offset, bool do_timestamp_checks);
 
     virtual ~ASTERIXPostprocessJob();
 
@@ -22,10 +23,14 @@ public:
 
 private:
     std::map<std::string, std::shared_ptr<Buffer>> buffers_;
-    bool do_timestamp_checks_;
 
+    bool override_tod_active_{false};
+    float override_tod_offset_{0};
+
+    bool do_timestamp_checks_;
     float network_time_offset_ {0};
 
+    void doTodOverride();
     void doFutureTimestampsCheck();
     void doRadarPlotPositionCalculations();
 };

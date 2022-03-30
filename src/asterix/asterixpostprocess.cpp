@@ -26,8 +26,6 @@ using namespace Utils;
 using namespace nlohmann;
 using namespace std;
 
-const float tod_24h = 24 * 60 * 60;
-
 ASTERIXPostProcess::ASTERIXPostProcess() {}
 
 void ASTERIXPostProcess::postProcess(unsigned int category, nlohmann::json& record)
@@ -659,36 +657,4 @@ void ASTERIXPostProcess::postProcessCAT062(int sac, int sic, nlohmann::json& rec
 
 //        //select ground_bit,count(*) from sd_track group by ground_bit;
 //    }
-
-    // overrides
-    if (override_active_)
-    {
-        if (record.contains("010") && record.at("010").contains("SAC") &&
-            record.at("010").contains("SIC") &&
-            record.at("010").at("SAC") == this->override_sac_org_ &&
-            record.at("010").at("SIC") == this->override_sic_org_)
-        {
-            record.at("010").at("SAC") = override_sac_new_;
-            record.at("010").at("SIC") = override_sic_new_;
-            record["ds_id"] = record["ds_id"] = Number::dsIdFrom(override_sac_new_, override_sic_new_);
-        }
-
-        if (record.contains("070") && record.at("070").contains("Time Of Track Information"))
-        {
-            float tod = record.at("070").at("Time Of Track Information");  // in seconds
-
-            tod += override_tod_offset_;
-
-            // check for out-of-bounds because of midnight-jump
-            while (tod < 0.0f)
-                tod += tod_24h;
-            while (tod > tod_24h)
-                tod -= tod_24h;
-
-            assert(tod >= 0.0f);
-            assert(tod <= tod_24h);
-
-            record.at("070").at("Time Of Track Information") = tod;
-        }
-    }
 }

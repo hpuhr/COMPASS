@@ -457,7 +457,7 @@ void ViewPointsImportTask::run()
                 else
                 {
                     loginf << "ViewPointsImportTask: import: override information not set";
-                    asterix_importer_task.overrideActive(false);
+                    asterix_importer_task.overrideTodActive(false);
                 }
                 asterix_importer_task.importFilename(filename);
 

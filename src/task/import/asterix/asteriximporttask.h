@@ -127,20 +127,8 @@ class ASTERIXImportTask : public Task, public Configurable
     virtual bool isRecommended() override;
     virtual bool isRequired() override;
 
-    bool overrideActive() const;
-    void overrideActive(bool value);
-
-    unsigned int overrideSacOrg() const;
-    void overrideSacOrg(unsigned int value);
-
-    unsigned int overrideSicOrg() const;
-    void overrideSicOrg(unsigned int value);
-
-    unsigned int overrideSacNew() const;
-    void overrideSacNew(unsigned int value);
-
-    unsigned int overrideSicNew() const;
-    void overrideSicNew(unsigned int value);
+    bool overrideTodActive() const;
+    void overrideTodActive(bool value);
 
     float overrideTodOffset() const;
     void overrideTodOffset(float value);
@@ -161,6 +149,9 @@ protected:
     unsigned int file_line_id_ {0};
 
     bool test_{false};
+
+    bool override_tod_active_{false};
+    float override_tod_offset_{0};
 
     bool running_ {false};
     unsigned int num_packets_in_processing_{0};

@@ -13,13 +13,18 @@
 
 #include "boost/date_time/posix_time/posix_time.hpp"
 
+const float tod_24h = 24 * 60 * 60;
+
 using namespace std;
 using namespace nlohmann;
 using namespace Utils;
 
-ASTERIXPostprocessJob::ASTERIXPostprocessJob(map<string, shared_ptr<Buffer>> buffers, bool do_timestamp_checks)
+ASTERIXPostprocessJob::ASTERIXPostprocessJob(map<string, shared_ptr<Buffer>> buffers,
+                                             bool override_tod_active, float override_tod_offset,
+                                             bool do_timestamp_checks)
     : Job("ASTERIXPostprocessJob"),
-      buffers_(move(buffers)), do_timestamp_checks_(do_timestamp_checks)
+      buffers_(move(buffers)), override_tod_active_(override_tod_active), override_tod_offset_(override_tod_offset),
+      do_timestamp_checks_(do_timestamp_checks)
 {
     network_time_offset_ = COMPASS::instance().mainWindow().importASTERIXFromNetworkTimeOffset();
 }
@@ -32,6 +37,9 @@ void ASTERIXPostprocessJob::run()
 
     started_ = true;
 
+    if (override_tod_active_)
+        doTodOverride();
+
     if (do_timestamp_checks_)
         doFutureTimestampsCheck();
 
@@ -42,6 +50,49 @@ void ASTERIXPostprocessJob::run()
     //    loginf << "UGA Buffer sort took " << String::timeStringFromDouble(ms / 1000.0, true);
 
     done_ = true;
+}
+
+void ASTERIXPostprocessJob::doTodOverride()
+{
+    assert (override_tod_active_);
+
+    DBContentManager& obj_man = COMPASS::instance().dbContentManager();
+
+    unsigned int buffer_size;
+
+    for (auto& buf_it : buffers_)
+    {
+        buffer_size = buf_it.second->size();
+
+        assert (obj_man.metaVariable(DBContent::meta_var_tod_.name()).existsIn(buf_it.first));
+
+        dbContent::Variable& tod_var = obj_man.metaVariable(DBContent::meta_var_tod_.name()).getFor(buf_it.first);
+
+        Property tod_prop {tod_var.name(), tod_var.dataType()};
+
+        assert (buf_it.second->hasProperty(tod_prop));
+
+        NullableVector<float>& tod_vec = buf_it.second->get<float>(tod_var.name());
+
+        for (unsigned int index=0; index < buffer_size; ++index)
+        {
+            if (!tod_vec.isNull(index))
+            {
+                float& tod_ref = tod_vec.getRef(index);
+
+                tod_ref += override_tod_offset_;
+
+                // check for out-of-bounds because of midnight-jump
+                while (tod_ref < 0.0f)
+                    tod_ref += tod_24h;
+                while (tod_ref > tod_24h)
+                    tod_ref -= tod_24h;
+
+                assert(tod_ref >= 0.0f);
+                assert(tod_ref <= tod_24h);
+            }
+        }
+    }
 }
 
 void ASTERIXPostprocessJob::doFutureTimestampsCheck()
