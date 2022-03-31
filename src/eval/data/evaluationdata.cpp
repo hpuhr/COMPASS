@@ -272,6 +272,10 @@ void EvaluationData::addTestData (DBContent& object, unsigned int line_id,  std:
     if (dbcontent_man.metaVariable(DBContent::meta_var_ground_bit_.name()).existsIn(dbo_name))
         tst_ground_bit_name_ = dbcontent_man.metaVariable(DBContent::meta_var_ground_bit_.name()).getFor(dbo_name).name();
 
+    // track num
+    if (dbcontent_man.metaVariable(DBContent::meta_var_track_num_.name()).existsIn(dbo_name))
+        tst_track_num_name_ = dbcontent_man.metaVariable(DBContent::meta_var_track_num_.name()).getFor(dbo_name).name();
+
     // speed & track_angle
     if (dbcontent_man.metaVariable(DBContent::meta_var_vx_.name()).existsIn(dbo_name))
         tst_spd_x_ms_name_ = dbcontent_man.metaVariable(DBContent::meta_var_vx_.name()).getFor(dbo_name).name();
