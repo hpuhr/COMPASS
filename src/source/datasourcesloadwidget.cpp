@@ -221,7 +221,7 @@ void DataSourcesLoadWidget::toogleShowCountsSlot()
 
 void DataSourcesLoadWidget::updateContent()
 {
-    loginf << "DataSourcesLoadWidget: updateContent: num data sources " << ds_man_.dbDataSources().size();
+    logdbg << "DataSourcesLoadWidget: updateContent: num data sources " << ds_man_.dbDataSources().size();
 
     bool recreate_required = false;
 
@@ -233,7 +233,7 @@ void DataSourcesLoadWidget::updateContent()
         {
             if (!ds_widgets_.count(ds_it->name()))
             {
-                loginf << "DataSourcesLoadWidget: updateContent: ds_box " << ds_it->name() << " missing ";
+                logdbg << "DataSourcesLoadWidget: updateContent: ds_box " << ds_it->name() << " missing ";
 
                 recreate_required = true;
                 break;
@@ -241,7 +241,7 @@ void DataSourcesLoadWidget::updateContent()
         }
     }
 
-    loginf << "DataSourcesLoadWidget: updateContent: recreate_required " << recreate_required;
+    logdbg << "DataSourcesLoadWidget: updateContent: recreate_required " << recreate_required;
 
     if (recreate_required)
     {
