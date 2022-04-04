@@ -304,7 +304,7 @@ void EvaluationData::addTestData (DBContent& object, unsigned int line_id,  std:
     NullableVector<float>& tods = buffer->get<float>(DBContent::meta_var_tod_.name());
 
     assert (buffer->has<unsigned int>(DBContent::meta_var_datasource_id_.name()));
-    NullableVector<unsigned int>& ds_ids = buffer->get<unsigned int>(DBContent::meta_var_datasource_id_.name());
+    NullableVector<unsigned int>& ds_ids = buffer->get<unsigned int>(DBCon tent::meta_var_datasource_id_.name());
 
     assert (buffer->has<unsigned int>(DBContent::meta_var_line_id_.name()));
     NullableVector<unsigned int>& line_ids = buffer->get<unsigned int>(DBContent::meta_var_line_id_.name());
