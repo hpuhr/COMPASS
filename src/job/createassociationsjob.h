@@ -67,6 +67,7 @@ protected:
     void createNonTrackerUTNS(std::map<unsigned int, Association::Target>& targets);
     void createAssociations();
     void saveAssociations();
+    void saveTargets(std::map<unsigned int, Association::Target>& targets);
 
     void removePreviousAssociations();
 

@@ -3,6 +3,8 @@
 
 #include "json.hpp"
 
+#include <set>
+
 namespace dbContent {
 
 class Target
@@ -12,6 +14,12 @@ public:
 
     unsigned int utn() { return utn_; }
     nlohmann::json info()  { return info_; }
+
+    std::set<unsigned int> tas();
+    void tas(const std::set<unsigned int>& tas);
+
+    std::set<unsigned int> mas();
+    void mas(const std::set<unsigned int>& mas);
 
 protected:
     unsigned int utn_ {0};

@@ -22,6 +22,7 @@
 #include "dbinterface.h"
 #include "dbcontent/dbcontent.h"
 #include "dbcontent/dbcontentmanager.h"
+#include "dbcontent/target.h"
 #include "datasourcemanager.h"
 #include "dbcontent/variable/metavariable.h"
 #include "dbcontent/variable/variable.h"
@@ -128,6 +129,11 @@ void CreateAssociationsJob::run()
     emit statusSignal("Saving Associations");
 
     saveAssociations();
+
+    // save targets
+    emit statusSignal("Saving Targets");
+
+    saveTargets(targets);
 
     //    object_man.setAssociationsByAll(); // no specific dbo or data source
 
@@ -915,6 +921,29 @@ void CreateAssociationsJob::saveAssociations()
     buffers_.clear();
 
     loginf << "CreateAssociationsJob: saveAssociations: done";
+}
+
+void CreateAssociationsJob::saveTargets(std::map<unsigned int, Association::Target>& targets)
+{
+    loginf << "CreateAssociationsJob: saveTargets";
+
+    DBContentManager& cont_man = COMPASS::instance().dbContentManager();
+
+    cont_man.clearTargetsInfo();
+
+    for (auto& tgt_it : targets)
+    {
+        cont_man.createTarget(tgt_it.first);
+
+        std::shared_ptr<dbContent::Target> target = cont_man.target(tgt_it.first);
+
+        target->tas(tgt_it.second.tas_);
+        target->mas(tgt_it.second.mas_);
+    }
+
+    cont_man.saveTargets();
+
+    loginf << "CreateAssociationsJob: saveTargetssaveTargets: done";
 }
 
 std::map<unsigned int, Association::Target> CreateAssociationsJob::createTrackedTargets(

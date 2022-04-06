@@ -152,6 +152,8 @@ public:
     bool metaCanGetVariable (const std::string& dbcont_name, const Property& meta_property);
     dbContent::Variable& metaGetVariable (const std::string& dbcont_name, const Property& meta_property);
 
+    bool hasTargetsInfo();
+    void clearTargetsInfo();
     bool existsTarget(unsigned int utn);
     void createTarget(unsigned int utn);
     std::shared_ptr<dbContent::Target> target(unsigned int utn);

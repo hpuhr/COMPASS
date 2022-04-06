@@ -25,6 +25,7 @@
 #include "dbcontent/dbcontentmanagerwidget.h"
 #include "dbcontent/variable/variable.h"
 #include "dbcontent/variable/variableset.h"
+#include "dbcontent/target.h"
 #include "logger.h"
 #include "dbcontent/variable/metavariable.h"
 #include "datasourcemanager.h"
@@ -1028,6 +1029,17 @@ dbContent::Variable& DBContentManager::metaGetVariable (const std::string& dbcon
     return metaVariable(meta_property.name()).getFor(dbcont_name);
 }
 
+bool DBContentManager::hasTargetsInfo()
+{
+    return targets_.size();
+}
+
+void DBContentManager::clearTargetsInfo()
+{
+    targets_.clear();
+    COMPASS::instance().interface().clearTargetsTable();
+}
+
 bool DBContentManager::existsTarget(unsigned int utn)
 {
     return targets_.count(utn);
@@ -1037,7 +1049,7 @@ void DBContentManager::createTarget(unsigned int utn)
 {
     assert (!existsTarget(utn));
 
-    targets_.emplace(utn, nlohmann::json::object());
+    targets_.emplace(utn, new dbContent::Target(utn, nlohmann::json::object()));
 
     assert (existsTarget(utn));
 }

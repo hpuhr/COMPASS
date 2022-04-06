@@ -353,7 +353,7 @@ shared_ptr<DBCommand> SQLGenerator::getTableSelectMinMaxNormalStatement(const DB
 
 std::string SQLGenerator::getInsertTargetStatement(unsigned int utn, const std::string& info)
 {
-    return "REPLACE INTO " + TABLE_NAME_TARGETS + " VALUES (" + to_string(utn)+ "', '" + info + "');";
+    return "REPLACE INTO " + TABLE_NAME_TARGETS + " VALUES (" + to_string(utn)+ ", '" + info + "');";
 }
 
 string SQLGenerator::getInsertPropertyStatement(const string& id,
