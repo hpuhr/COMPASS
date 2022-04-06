@@ -39,6 +39,7 @@ class MetaVariableConfigurationDialog;
 class Variable;
 class MetaVariable;
 class VariableSet;
+class Target;
 
 }
 
@@ -151,6 +152,11 @@ public:
     bool metaCanGetVariable (const std::string& dbcont_name, const Property& meta_property);
     dbContent::Variable& metaGetVariable (const std::string& dbcont_name, const Property& meta_property);
 
+    bool existsTarget(unsigned int utn);
+    void createTarget(unsigned int utn);
+    std::shared_ptr<dbContent::Target> target(unsigned int utn);
+    void saveTargets();
+
 protected:
     COMPASS& compass_;
 
@@ -179,6 +185,8 @@ protected:
     /// Container with all DBOs (DBO name -> DBO pointer)
     std::map<std::string, DBContent*> dbcontent_;
     std::vector<std::unique_ptr<dbContent::MetaVariable>> meta_variables_;
+
+    std::map<unsigned int, std::shared_ptr<dbContent::Target>> targets_;
 
     std::unique_ptr<DBContentManagerWidget> widget_;
 

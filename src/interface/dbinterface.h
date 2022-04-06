@@ -34,6 +34,7 @@
 static const std::string TABLE_NAME_PROPERTIES = "properties";
 static const std::string TABLE_NAME_SECTORS = "sectors";
 static const std::string TABLE_NAME_VIEWPOINTS = "viewpoints";
+static const std::string TABLE_NAME_TARGETS = "targets";
 
 class COMPASS;
 class Buffer;
@@ -56,6 +57,7 @@ namespace dbContent
 {
 class DBDataSource;
 class Variable;
+class Target;
 }
 
 class DBInterface : public QObject, public Configurable
@@ -133,6 +135,12 @@ public:
     void saveSector(std::shared_ptr<Sector> sector); // write to db and add
     void deleteSector(std::shared_ptr<Sector> sector);
     void deleteAllSectors();
+
+    bool existsTargetsTable();
+    void createTargetsTable();
+    void clearTargetsTable();
+    std::map<unsigned int, std::shared_ptr<dbContent::Target>> loadTargets();
+    void saveTargets(std::map<unsigned int, std::shared_ptr<dbContent::Target>> targets);
 
     void clearTableContent(const std::string& table_name);
 

@@ -347,8 +347,6 @@ public:
     double resultDetailZoom() const;
     void resultDetailZoom(double result_detail_zoom);
 
-
-
 protected:
     COMPASS& compass_;
 

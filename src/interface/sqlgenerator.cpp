@@ -80,6 +80,11 @@ SQLGenerator::SQLGenerator(DBInterface& db_interface) : db_interface_(db_interfa
        << "(id INT, json TEXT, PRIMARY KEY (id));";
     table_view_points_create_statement_ = ss.str();
     ss.str(string());
+
+    ss << "CREATE TABLE " << TABLE_NAME_TARGETS
+       << "(utn INT, json TEXT, PRIMARY KEY (utn));";
+    table_targets_create_statement_ = ss.str();
+    ss.str(string());
 }
 
 SQLGenerator::~SQLGenerator() {}
@@ -346,6 +351,11 @@ shared_ptr<DBCommand> SQLGenerator::getTableSelectMinMaxNormalStatement(const DB
     return command;
 }
 
+std::string SQLGenerator::getInsertTargetStatement(unsigned int utn, const std::string& info)
+{
+    return "REPLACE INTO " + TABLE_NAME_TARGETS + " VALUES (" + to_string(utn)+ "', '" + info + "');";
+}
+
 string SQLGenerator::getInsertPropertyStatement(const string& id,
                                                 const string& value)
 {
@@ -406,6 +416,13 @@ string SQLGenerator::getSelectAllSectorsStatement()
 {
     stringstream ss;
     ss << "SELECT id, name, layer_name, json FROM " << TABLE_NAME_SECTORS << ";";
+    return ss.str();
+}
+
+string SQLGenerator::getSelectAllTargetsStatement()
+{
+    stringstream ss;
+    ss << "SELECT utn, json FROM " << TABLE_NAME_TARGETS << ";";
     return ss.str();
 }
 
@@ -476,6 +493,10 @@ string SQLGenerator::getTableViewPointsCreateStatement()
     return table_view_points_create_statement_;
 }
 
+std::string SQLGenerator::getTableTargetsCreateStatement()
+{
+    return table_targets_create_statement_;
+}
 
 string SQLGenerator::insertDBUpdateStringBind(shared_ptr<Buffer> buffer,
                                               string tablename)

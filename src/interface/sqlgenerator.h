@@ -65,7 +65,10 @@ public:
     std::string getTableDataSourcesCreateStatement();
     std::string getTableSectorsCreateStatement();
     std::string getTableViewPointsCreateStatement();
+    std::string getTableTargetsCreateStatement();
     std::string getDeleteStatement (const std::string& table, const std::string& filter);
+
+    std::string getInsertTargetStatement(unsigned int utn, const std::string& info);
 
     std::string getInsertPropertyStatement(const std::string& id, const std::string& value);
     std::string getSelectPropertyStatement(const std::string& id);
@@ -86,6 +89,7 @@ public:
     std::string getReplaceSectorStatement(const unsigned int id, const std::string& name,
                                           const std::string& layer_name, const std::string& json);
     std::string getSelectAllSectorsStatement();
+    std::string getSelectAllTargetsStatement();
 
     std::shared_ptr<DBCommand> getTableSelectMinMaxNormalStatement(const DBContent& object);
 
@@ -97,6 +101,7 @@ protected:
     std::string table_data_sources_create_statement_;
     std::string table_sectors_create_statement_;
     std::string table_view_points_create_statement_;
+    std::string table_targets_create_statement_;
 
     //    std::string subTablesWhereClause(const DBTable& table,
     //                                     const std::vector<std::string>& used_tables);

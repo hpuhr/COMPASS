@@ -1250,6 +1250,8 @@ void ASTERIXImportTask::checkAllDone()
         {
             logdbg << "ASTERIXImportTask: checkAllDone: deleting status widget";
         }
+
+        COMPASS::instance().dataSourceManager().saveDBDataSources();
     }
 
     logdbg << "ASTERIXImportTask: checkAllDone: done";

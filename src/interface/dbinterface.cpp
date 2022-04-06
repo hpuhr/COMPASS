@@ -39,6 +39,7 @@
 #include "evaluationmanager.h"
 #include "source/dbdatasource.h"
 #include "dbcontent/variable/metavariable.h"
+#include "dbcontent/target.h"
 
 #include <QApplication>
 #include <QMessageBox>
@@ -146,6 +147,9 @@ void DBInterface::openDBFile(const std::string& filename, bool overwrite)
         assert (existsDataSourcesTable());
         assert (existsSectorsTable());
     }
+
+    if (!existsTargetsTable())
+        createTargetsTable();
 
     emit databaseOpenedSignal();
 
@@ -889,6 +893,104 @@ void DBInterface::deleteAllSectors()
 {
     clearTableContent(TABLE_NAME_SECTORS);
 }
+
+bool DBInterface::existsTargetsTable()
+{
+    return existsTable(TABLE_NAME_TARGETS);
+}
+
+void DBInterface::createTargetsTable()
+{
+    loginf << "DBInterface: createTargetsTable";
+
+    assert(!existsTargetsTable());
+
+    connection_mutex_.lock();
+
+    loginf << "DBInterface: createTargetsTable: sql '" << sql_generator_.getTableTargetsCreateStatement() << "'";
+    db_connection_->executeSQL(sql_generator_.getTableTargetsCreateStatement());
+    connection_mutex_.unlock();
+
+    updateTableInfo();
+}
+
+void DBInterface::clearTargetsTable()
+{
+    clearTableContent(TABLE_NAME_TARGETS);
+}
+
+std::map<unsigned int, std::shared_ptr<dbContent::Target>> DBInterface::loadTargets()
+{
+    loginf << "DBInterface: loadTargets";
+
+    boost::mutex::scoped_lock locker(connection_mutex_);
+
+    DBCommand command;
+    command.set(sql_generator_.getSelectAllTargetsStatement());
+
+    PropertyList list;
+    list.addProperty("utn", PropertyDataType::UINT);
+    list.addProperty("json", PropertyDataType::STRING);
+    command.list(list);
+
+    shared_ptr<DBResult> result = db_connection_->execute(command);
+
+    assert(result->containsData());
+
+    shared_ptr<Buffer> buffer = result->buffer();
+
+    assert(buffer);
+    assert(buffer->has<unsigned int>("utn"));
+    assert(buffer->has<string>("json"));
+
+    NullableVector<unsigned int> utn_vec = buffer->get<unsigned int>("utn");
+    NullableVector<string> json_vec = buffer->get<string>("json");
+
+    unsigned int utn;
+    string json_str;
+
+    std::map<unsigned int, std::shared_ptr<dbContent::Target>> targets;
+
+    for (size_t cnt = 0; cnt < buffer->size(); ++cnt)
+    {
+        assert(!utn_vec.isNull(cnt));
+        assert(!json_vec.isNull(cnt));
+
+        utn = utn_vec.get(cnt);
+        json_str = json_vec.get(cnt);
+
+        assert (!targets.count(utn));
+
+        shared_ptr<dbContent::Target> target = make_shared<dbContent::Target>(utn, nlohmann::json::parse(json_str));
+
+        targets[utn] = target;
+
+        loginf << "DBInterface: loadSectors: loaded target " << utn << " json '"
+               << json_str << "'";
+    }
+
+    return targets;
+}
+
+void DBInterface::saveTargets(std::map<unsigned int, std::shared_ptr<dbContent::Target>> targets)
+{
+    loginf << "DBInterface: saveTargets";
+
+    assert (db_connection_);
+
+    clearTargetsTable();
+
+    string str;
+
+    for (auto& tgt_it : targets)
+    {
+        string str = sql_generator_.getInsertTargetStatement(tgt_it.first, tgt_it.second->info().dump());
+        db_connection_->executeSQL(str);
+    }
+
+    loginf << "DBInterface: saveTargets: done";
+}
+
 
 void DBInterface::insertBuffer(DBContent& db_object, std::shared_ptr<Buffer> buffer)
 {

@@ -506,6 +506,8 @@ void DBContentManager::databaseOpenedSlot()
     for (auto& object : dbcontent_)
         object.second->databaseOpenedSlot();
 
+    targets_ = COMPASS::instance().interface().loadTargets();
+
     emit associationStatusChangedSignal();
 }
 
@@ -519,6 +521,8 @@ void DBContentManager::databaseClosedSlot()
 
     for (auto& object : dbcontent_)
         object.second->databaseClosedSlot();
+
+    targets_.clear();
 
     associationStatusChangedSignal();
 }
@@ -1022,6 +1026,31 @@ dbContent::Variable& DBContentManager::metaGetVariable (const std::string& dbcon
     assert (metaCanGetVariable(dbcont_name, meta_property));
 
     return metaVariable(meta_property.name()).getFor(dbcont_name);
+}
+
+bool DBContentManager::existsTarget(unsigned int utn)
+{
+    return targets_.count(utn);
+}
+
+void DBContentManager::createTarget(unsigned int utn)
+{
+    assert (!existsTarget(utn));
+
+    targets_.emplace(utn, nlohmann::json::object());
+
+    assert (existsTarget(utn));
+}
+
+std::shared_ptr<dbContent::Target> DBContentManager::target(unsigned int utn)
+{
+    assert (existsTarget(utn));
+    return targets_.at(utn);
+}
+
+void DBContentManager::saveTargets()
+{
+    COMPASS::instance().interface().saveTargets(targets_);
 }
 
 bool DBContentManager::insertInProgress() const

@@ -284,6 +284,7 @@ void COMPASS::closeDB()
     assert (db_opened_);
 
     ds_manager_->saveDBDataSources();
+    dbcontent_manager_->saveTargets();
 
     db_interface_->closeDBFile();
     assert (!db_interface_->dbOpen());
@@ -367,6 +368,8 @@ void COMPASS::shutdown()
     ds_manager_ = nullptr;
 
     assert(dbcontent_manager_);
+    if (db_interface_->dbOpen())
+        dbcontent_manager_->saveTargets();
     dbcontent_manager_ = nullptr;
 
     JobManager::instance().shutdown();
