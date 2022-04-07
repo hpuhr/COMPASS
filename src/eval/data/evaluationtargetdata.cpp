@@ -21,10 +21,10 @@
 #include "stringconv.h"
 #include "dbcontent/variable/variable.h"
 #include "dbcontent/variable/metavariable.h"
+#include "dbcontent/target.h"
 #include "compass.h"
 #include "dbcontent/dbcontentmanager.h"
 #include "evaluationmanager.h"
-//#include "projection/transformation.h"
 
 //#include <ogr_spatialref.h>
 
@@ -101,56 +101,66 @@ void EvaluationTargetData::finalize () const
     updateModeCMinMax();
     updatePositionMinMax();
 
-    std::set<unsigned int> mops_version;
-    std::tuple<bool, unsigned int, unsigned int> nucp_info;
-    std::tuple<bool, unsigned int, unsigned int> nacp_info;
+    DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
 
-    if (eval_man_->hasADSBInfo() && target_addresses_.size())
+    if (dbcont_man.hasTargetsInfo() && dbcont_man.existsTarget(utn_) && dbcont_man.target(utn_)->hasAdsbMOPSVersion())
     {
-        for (auto ta_it : target_addresses_)
-        {
-            if (eval_man_->hasADSBInfo(ta_it))
-            {
-                tie(mops_version, nucp_info, nacp_info) = eval_man_->adsbInfo(ta_it);
-                mops_versions_.insert(mops_version.begin(), mops_version.end());
-
-                if (get<0>(nucp_info))
-                {
-                    if (has_nucp_nic_)
-                    {
-                        min_nucp_nic_ = min (min_nucp_nic_, get<1>(nucp_info));
-                        max_nucp_nic_ = max (max_nucp_nic_, get<2>(nucp_info));
-                    }
-                    else
-                    {
-                        min_nucp_nic_ = get<1>(nucp_info);
-                        max_nucp_nic_ = get<2>(nucp_info);
-                        has_nucp_nic_ = true;
-                    }
-                }
-
-                if (get<0>(nacp_info))
-                {
-                    if (has_nacp)
-                    {
-                        min_nacp_ = min (min_nacp_, get<1>(nacp_info));
-                        max_nacp_ = max (max_nacp_, get<2>(nacp_info));
-                    }
-                    else
-                    {
-                        min_nacp_ = get<1>(nacp_info);
-                        max_nacp_ = get<2>(nacp_info);
-                        has_nacp = true;
-                    }
-                }
-            }
-        }
-
-        has_adsb_info_ = mops_versions_.size();
-        //        loginf << "UGA utn " << utn_ << " mops " << mopsVersionsStr()
-        //               << " nucp_nic " <<  (has_nucp_nic_ ? nucpNicStr() : " none ")
-        //               << " nacp "<<  (has_nacp ? nacpStr() : " none ");
+        has_adsb_info_ = true;
+        has_mops_version_ = true;
+        mops_version_ = dbcont_man.target(utn_)->adsbMOPSVersion();
     }
+
+
+//    std::set<unsigned int> mops_version;
+//    std::tuple<bool, unsigned int, unsigned int> nucp_info;
+//    std::tuple<bool, unsigned int, unsigned int> nacp_info;
+
+//    if (eval_man_->hasADSBInfo() && target_addresses_.size())
+//    {
+//        for (auto ta_it : target_addresses_)
+//        {
+//            if (eval_man_->hasADSBInfo(ta_it))
+//            {
+//                tie(mops_version, nucp_info, nacp_info) = eval_man_->adsbInfo(ta_it);
+//                mops_versions_.insert(mops_version.begin(), mops_version.end());
+
+//                if (get<0>(nucp_info))
+//                {
+//                    if (has_nucp_nic_)
+//                    {
+//                        min_nucp_nic_ = min (min_nucp_nic_, get<1>(nucp_info));
+//                        max_nucp_nic_ = max (max_nucp_nic_, get<2>(nucp_info));
+//                    }
+//                    else
+//                    {
+//                        min_nucp_nic_ = get<1>(nucp_info);
+//                        max_nucp_nic_ = get<2>(nucp_info);
+//                        has_nucp_nic_ = true;
+//                    }
+//                }
+
+//                if (get<0>(nacp_info))
+//                {
+//                    if (has_nacp)
+//                    {
+//                        min_nacp_ = min (min_nacp_, get<1>(nacp_info));
+//                        max_nacp_ = max (max_nacp_, get<2>(nacp_info));
+//                    }
+//                    else
+//                    {
+//                        min_nacp_ = get<1>(nacp_info);
+//                        max_nacp_ = get<2>(nacp_info);
+//                        has_nacp = true;
+//                    }
+//                }
+//            }
+//        }
+
+//        has_adsb_info_ = mops_versions_.size();
+//        //        loginf << "UGA utn " << utn_ << " mops " << mopsVersionsStr()
+//        //               << " nucp_nic " <<  (has_nucp_nic_ ? nucpNicStr() : " none ")
+//        //               << " nacp "<<  (has_nacp ? nacpStr() : " none ");
+//    }
 
     calculateTestDataMappings();
 }
@@ -1421,26 +1431,23 @@ bool EvaluationTargetData::hasADSBInfo() const
     return has_adsb_info_;
 }
 
-std::set<unsigned int> EvaluationTargetData::mopsVersions() const
+bool EvaluationTargetData::hasMOPSVersion() const
 {
-    return mops_versions_;
+    return has_mops_version_;
 }
 
-std::string EvaluationTargetData::mopsVersionsStr() const
+unsigned int EvaluationTargetData::mopsVersion() const
 {
-    std::ostringstream out;
+    assert (has_mops_version_);
+    return mops_version_;
+}
 
-    bool first = true;
-    for (auto mops : mops_versions_)
-    {
-        if (!first)
-            out << ",";
-        out << mops;
-
-        first = false;
-    }
-
-    return out.str();
+std::string EvaluationTargetData::mopsVersionStr() const
+{
+    if (hasMOPSVersion())
+        return to_string(mopsVersion());
+    else
+        return "?";
 }
 
 std::string EvaluationTargetData::nucpNicStr() const
@@ -1453,7 +1460,7 @@ std::string EvaluationTargetData::nucpNicStr() const
             return to_string(min_nucp_nic_)+"-"+to_string(max_nucp_nic_);
     }
     else
-        return "";
+        return "?";
 }
 
 std::string EvaluationTargetData::nacpStr() const
@@ -1466,7 +1473,7 @@ std::string EvaluationTargetData::nacpStr() const
             return to_string(min_nacp_)+"-"+to_string(max_nacp_);
     }
     else
-        return "";
+        return "?";
 }
 
 bool EvaluationTargetData::hasNucpNic() const

@@ -190,8 +190,9 @@ public:
     bool hasPos() const;
 
     bool hasADSBInfo() const;
-    std::set<unsigned int> mopsVersions() const;
-    std::string mopsVersionsStr() const;
+    bool hasMOPSVersion() const;
+    unsigned int mopsVersion() const;
+    std::string mopsVersionStr() const;
 
     bool hasNucpNic() const;
     std::string nucpNicStr() const;
@@ -228,7 +229,8 @@ protected:
     mutable double longitude_max_ {0};
 
     mutable bool has_adsb_info_ {false};
-    mutable std::set<unsigned int> mops_versions_;
+    mutable bool has_mops_version_ {false};
+    mutable unsigned int mops_version_;
     mutable bool has_nucp_nic_ {false};
     mutable unsigned int min_nucp_nic_, max_nucp_nic_;
     mutable bool has_nacp {false};

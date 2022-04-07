@@ -207,50 +207,50 @@ void CreateAssociationsJob::createTargetReports()
 
     for (auto& buf_it : buffers_) // dbo name, buffer
     {
-        string dbo_name = buf_it.first;
+        string dbcontent_name = buf_it.first;
 
         shared_ptr<Buffer> buffer = buf_it.second;
         size_t buffer_size = buffer->size();
 
-        assert (meta_key_var->existsIn(dbo_name));
-        Variable& key_var = meta_key_var->getFor(dbo_name);
+        assert (meta_key_var->existsIn(dbcontent_name));
+        Variable& key_var = meta_key_var->getFor(dbcontent_name);
 
-        assert (meta_ds_id_var->existsIn(dbo_name));
-        Variable& ds_id_var = meta_ds_id_var->getFor(dbo_name);
+        assert (meta_ds_id_var->existsIn(dbcontent_name));
+        Variable& ds_id_var = meta_ds_id_var->getFor(dbcontent_name);
 
-        assert (meta_line_id_var->existsIn(dbo_name));
-        Variable& line_id_var = meta_line_id_var->getFor(dbo_name);
+        assert (meta_line_id_var->existsIn(dbcontent_name));
+        Variable& line_id_var = meta_line_id_var->getFor(dbcontent_name);
 
-        assert (meta_tod_var->existsIn(dbo_name));
-        Variable& tod_var = meta_tod_var->getFor(dbo_name);
+        assert (meta_tod_var->existsIn(dbcontent_name));
+        Variable& tod_var = meta_tod_var->getFor(dbcontent_name);
 
         Variable* ta_var {nullptr}; // not in cat001
-        if (meta_ta_var->existsIn(dbo_name))
-            ta_var = &meta_ta_var->getFor(dbo_name);
+        if (meta_ta_var->existsIn(dbcontent_name))
+            ta_var = &meta_ta_var->getFor(dbcontent_name);
 
         Variable* ti_var {nullptr}; // not in cat001
-        if (meta_ti_var->existsIn(dbo_name))
-            ti_var = &meta_ti_var->getFor(dbo_name);
+        if (meta_ti_var->existsIn(dbcontent_name))
+            ti_var = &meta_ti_var->getFor(dbcontent_name);
 
         Variable* tn_var {nullptr}; // not in ads-b, reftraj
-        if (meta_tn_var->existsIn(dbo_name))
-            tn_var = &meta_tn_var->getFor(dbo_name);
+        if (meta_tn_var->existsIn(dbcontent_name))
+            tn_var = &meta_tn_var->getFor(dbcontent_name);
 
         Variable* tr_end_var {nullptr}; // not in ads-b, reftraj
-        if (meta_track_end_var->existsIn(dbo_name))
-            tr_end_var = &meta_track_end_var->getFor(dbo_name);
+        if (meta_track_end_var->existsIn(dbcontent_name))
+            tr_end_var = &meta_track_end_var->getFor(dbcontent_name);
 
-        assert (meta_mode_3a_var->existsIn(dbo_name));
-        Variable& mode_3a_var = meta_mode_3a_var->getFor(dbo_name);
+        assert (meta_mode_3a_var->existsIn(dbcontent_name));
+        Variable& mode_3a_var = meta_mode_3a_var->getFor(dbcontent_name);
 
-        assert (meta_mode_c_var->existsIn(dbo_name));
-        Variable& mode_c_var = meta_mode_c_var->getFor(dbo_name);
+        assert (meta_mode_c_var->existsIn(dbcontent_name));
+        Variable& mode_c_var = meta_mode_c_var->getFor(dbcontent_name);
 
-        assert (meta_latitude_var->existsIn(dbo_name));
-        Variable& latitude_var = meta_latitude_var->getFor(dbo_name);
+        assert (meta_latitude_var->existsIn(dbcontent_name));
+        Variable& latitude_var = meta_latitude_var->getFor(dbcontent_name);
 
-        assert (meta_longitude_var->existsIn(dbo_name));
-        Variable& longitude_var = meta_longitude_var->getFor(dbo_name);
+        assert (meta_longitude_var->existsIn(dbcontent_name));
+        Variable& longitude_var = meta_longitude_var->getFor(dbcontent_name);
 
 
         assert (buffer->has<unsigned int>(key_var.name()));
@@ -305,13 +305,20 @@ void CreateAssociationsJob::createTargetReports()
         assert (buffer->has<double>(longitude_var.name()));
         NullableVector<double>& longs = buffer->get<double>(longitude_var.name());
 
+        NullableVector<unsigned char>* adsb_mops {nullptr};
+        if (dbcontent_name == "CAT021")
+        {
+            assert (buffer->has<unsigned char>(DBContent::var_cat021_mops_version_.name()));
+            adsb_mops = &buffer->get<unsigned char>(DBContent::var_cat021_mops_version_.name());
+        }
+
         for (size_t cnt = 0; cnt < buffer_size; ++cnt)
         {
             assert (!rec_nums.isNull(cnt));
             assert (!ds_ids.isNull(cnt));
             assert (!line_ids.isNull(cnt));
 
-            tr.dbo_name_ = dbo_name;
+            tr.dbcontent_name_ = dbcontent_name;
             tr.rec_num_ = rec_nums.get(cnt);
             tr.ds_id_ = ds_ids.get(cnt);
             tr.line_id_ = line_ids.get(cnt);
@@ -319,27 +326,27 @@ void CreateAssociationsJob::createTargetReports()
             if (tods.isNull(cnt))
             {
                 logwrn << "CreateAssociationsJob: createTargetReports: target report w/o time: dbo "
-                       << dbo_name << " rec_num " << tr.rec_num_  << " ds_id " << tr.ds_id_;
+                       << dbcontent_name << " rec_num " << tr.rec_num_  << " ds_id " << tr.ds_id_;
                 continue;
             }
 
             if (tods.isNull(cnt))
             {
                 logwrn << "CreateAssociationsJob: createTargetReports: target report w/o time: dbo "
-                       << dbo_name << " rec_num " << tr.rec_num_  << " ds_id " << tr.ds_id_;
+                       << dbcontent_name << " rec_num " << tr.rec_num_  << " ds_id " << tr.ds_id_;
                 continue;
             }
 
             if (lats.isNull(cnt))
             {
                 logwrn << "CreateAssociationsJob: createTargetReports: target report w/o latitude: dbo "
-                       << dbo_name << " rec_num " << tr.rec_num_  << " ds_id " << tr.ds_id_;
+                       << dbcontent_name << " rec_num " << tr.rec_num_  << " ds_id " << tr.ds_id_;
                 continue;
             }
             if (longs.isNull(cnt))
             {
                 logwrn << "CreateAssociationsJob: createTargetReports: target report w/o longitude: dbo "
-                       << dbo_name << " rec_num " << tr.rec_num_  << " ds_id " << tr.ds_id_;
+                       << dbcontent_name << " rec_num " << tr.rec_num_  << " ds_id " << tr.ds_id_;
                 continue;
             }
 
@@ -371,7 +378,20 @@ void CreateAssociationsJob::createTargetReports()
             tr.latitude_ = lats.get(cnt);
             tr.longitude_ = longs.get(cnt);
 
-            target_reports_[dbo_name][tr.ds_id_].push_back(tr);
+            if (adsb_mops && !adsb_mops->isNull(cnt))
+            {
+                tr.has_adsb_info_ = true;
+                tr.has_mops_version_ = true;
+                tr.mops_version_ = adsb_mops->get(cnt);
+            }
+            else
+            {
+                tr.has_adsb_info_ = false;
+                tr.has_mops_version_ = false;
+                tr.mops_version_ = 0;
+            }
+
+            target_reports_[dbcontent_name][tr.ds_id_].push_back(tr);
         }
     }
 }
@@ -634,19 +654,26 @@ void CreateAssociationsJob::createNonTrackerUTNS(std::map<unsigned int, Associat
                 EvaluationTargetPosition ref_pos;
                 bool ok;
 
-                for (unsigned int target_cnt=0; target_cnt < targets.size(); ++target_cnt)
+                unsigned int target_cnt=0;
+                for (auto& target_it : targets)
                 {
-                    //assert (targets.count(target_cnt));
-                    //Association::Target& other = targets.at(target_cnt);
-                    Association::Target& other = std::next(targets.begin(), target_cnt)->second;
+                    //Association::Target& other = std::next(targets.begin(), target_cnt)->second;
+
+                    Association::Target& other = target_it.second;
 
                     results[target_cnt] = tuple<bool, unsigned int, double>(false, other.utn_, 0);
 
                     if ((tr_it.has_ta_ && other.hasTA())) // only try if not both mode s
+                    {
+                        ++target_cnt;
                         continue;
+                    }
 
                     if (!other.isTimeInside(tod))
+                    {
+                        ++target_cnt;
                         continue;
+                    }
 
                     if (tr_it.has_ma_ || tr_it.has_mc_) // mode a/c based
                     {
@@ -655,7 +682,10 @@ void CreateAssociationsJob::createNonTrackerUTNS(std::map<unsigned int, Associat
                                                                                    max_time_diff_sensor);
 
                         if (ma_res != Association::CompareResult::SAME)
+                        {
+                            target_cnt++;
                             continue;
+                        }
                         //loginf << "UGA3 same mode a";
 
                         // check mode c code
@@ -664,7 +694,10 @@ void CreateAssociationsJob::createNonTrackerUTNS(std::map<unsigned int, Associat
                                     max_time_diff_sensor, max_altitude_diff_sensor, false);
 
                         if (mc_res != Association::CompareResult::SAME)
+                        {
+                            target_cnt++;
                             continue;
+                        }
                     }
 
                     // check positions
@@ -674,7 +707,10 @@ void CreateAssociationsJob::createNonTrackerUTNS(std::map<unsigned int, Associat
                     tie(ok, x_pos, y_pos) = trafo.distanceCart(ref_pos.latitude_, ref_pos.longitude_);
 
                     if (!ok)
+                    {
+                        ++target_cnt;
                         continue;
+                    }
 
                     distance = sqrt(pow(x_pos,2)+pow(y_pos,2));
 
@@ -682,6 +718,8 @@ void CreateAssociationsJob::createNonTrackerUTNS(std::map<unsigned int, Associat
 
                     if (distance < max_distance_acceptable_sensor)
                         results[target_cnt] = tuple<bool, unsigned int, double>(true, other.utn_, distance);
+
+                    ++target_cnt;
                 }
 
                 // find best match
@@ -939,6 +977,14 @@ void CreateAssociationsJob::saveTargets(std::map<unsigned int, Association::Targ
 
         target->tas(tgt_it.second.tas_);
         target->mas(tgt_it.second.mas_);
+
+        // set counts
+        for (auto& count_it : tgt_it.second.getDBContentCounts())
+            target->dbContentCount(count_it.first, count_it.second);
+
+        // set adsb stuff
+        if (tgt_it.second.hasADSBMOPSVersion())
+            target->adsbMOPSVersion(tgt_it.second.getADSBMOPSVersion());
     }
 
     cont_man.saveTargets();

@@ -2165,26 +2165,6 @@ void EvaluationManager::removeNotDetectedDBOs(const std::string& dbo_name, bool 
     remove_not_detected_dbo_values_[dbo_name] = value;
 }
 
-bool EvaluationManager::hasADSBInfo() const
-{
-    return has_adsb_info_;
-}
-
-bool EvaluationManager::hasADSBInfo(unsigned int ta) const
-{
-    assert (has_adsb_info_);
-    return adsb_info_.count(ta);
-}
-
-std::tuple<std::set<unsigned int>, std::tuple<bool, unsigned int, unsigned int>,
-std::tuple<bool, unsigned int, unsigned int>> EvaluationManager::adsbInfo(unsigned int ta) const
-{
-    assert (has_adsb_info_);
-    assert (adsb_info_.count(ta));
-
-    return adsb_info_.at(ta);
-}
-
 bool EvaluationManager::loadOnlySectorData() const
 {
     return load_only_sector_data_;

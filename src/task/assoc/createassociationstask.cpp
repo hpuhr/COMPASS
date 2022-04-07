@@ -682,62 +682,69 @@ void CreateAssociationsTask::checkAndSetMetaVariable(const std::string& name_str
     }
 }
 
-VariableSet CreateAssociationsTask::getReadSetFor(const std::string& dbo_name)
+VariableSet CreateAssociationsTask::getReadSetFor(const std::string& dbcontent_name)
 {
     VariableSet read_set;
 
     assert(ds_id_var_);
-    assert(ds_id_var_->existsIn(dbo_name));
-    read_set.add(ds_id_var_->getFor(dbo_name));
+    assert(ds_id_var_->existsIn(dbcontent_name));
+    read_set.add(ds_id_var_->getFor(dbcontent_name));
 
     assert(line_id_var_);
-    assert(line_id_var_->existsIn(dbo_name));
-    read_set.add(line_id_var_->getFor(dbo_name));
+    assert(line_id_var_->existsIn(dbcontent_name));
+    read_set.add(line_id_var_->getFor(dbcontent_name));
 
     assert(tod_var_);
-    assert(tod_var_->existsIn(dbo_name));
-    read_set.add(tod_var_->getFor(dbo_name));
+    assert(tod_var_->existsIn(dbcontent_name));
+    read_set.add(tod_var_->getFor(dbcontent_name));
 
     assert(target_addr_var_);
-    if(target_addr_var_->existsIn(dbo_name))
-        read_set.add(target_addr_var_->getFor(dbo_name));
+    if(target_addr_var_->existsIn(dbcontent_name))
+        read_set.add(target_addr_var_->getFor(dbcontent_name));
 
     assert(target_id_var_);
-    if(target_id_var_->existsIn(dbo_name))
-        read_set.add(target_id_var_->getFor(dbo_name));
+    if(target_id_var_->existsIn(dbcontent_name))
+        read_set.add(target_id_var_->getFor(dbcontent_name));
 
     assert(track_num_var_);
-    if(track_num_var_->existsIn(dbo_name))
-        read_set.add(track_num_var_->getFor(dbo_name));
+    if(track_num_var_->existsIn(dbcontent_name))
+        read_set.add(track_num_var_->getFor(dbcontent_name));
 
     assert(track_end_var_);
-    if(track_end_var_->existsIn(dbo_name))
-        read_set.add(track_end_var_->getFor(dbo_name));
+    if(track_end_var_->existsIn(dbcontent_name))
+        read_set.add(track_end_var_->getFor(dbcontent_name));
 
     assert(mode_3a_var_);
-    assert(mode_3a_var_->existsIn(dbo_name));
-    read_set.add(mode_3a_var_->getFor(dbo_name));
+    assert(mode_3a_var_->existsIn(dbcontent_name));
+    read_set.add(mode_3a_var_->getFor(dbcontent_name));
 
     assert(mode_c_var_);
-    assert(mode_c_var_->existsIn(dbo_name));
-    read_set.add(mode_c_var_->getFor(dbo_name));
+    assert(mode_c_var_->existsIn(dbcontent_name));
+    read_set.add(mode_c_var_->getFor(dbcontent_name));
 
     assert(latitude_var_);
-    assert(latitude_var_->existsIn(dbo_name));
-    read_set.add(latitude_var_->getFor(dbo_name));
+    assert(latitude_var_->existsIn(dbcontent_name));
+    read_set.add(latitude_var_->getFor(dbcontent_name));
 
     assert(longitude_var_);
-    assert(longitude_var_->existsIn(dbo_name));
-    read_set.add(longitude_var_->getFor(dbo_name));
+    assert(longitude_var_->existsIn(dbcontent_name));
+    read_set.add(longitude_var_->getFor(dbcontent_name));
 
     assert(associations_var_);
-    assert(associations_var_->existsIn(dbo_name));
-    read_set.add(associations_var_->getFor(dbo_name));
+    assert(associations_var_->existsIn(dbcontent_name));
+    read_set.add(associations_var_->getFor(dbcontent_name));
 
     // must be last for update process
     assert(rec_num_var_);
-    assert(rec_num_var_->existsIn(dbo_name));
-    read_set.add(rec_num_var_->getFor(dbo_name));
+    assert(rec_num_var_->existsIn(dbcontent_name));
+    read_set.add(rec_num_var_->getFor(dbcontent_name));
+
+    if (dbcontent_name == "CAT021")
+    {
+        read_set.add(COMPASS::instance().dbContentManager().dbContent("CAT021").variable(
+                         DBContent::var_cat021_mops_version_.name()));
+    }
+
 
     return read_set;
 }

@@ -240,11 +240,6 @@ public:
     bool removeNotDetectedDBO(const std::string& dbo_name) const;
     void removeNotDetectedDBOs(const std::string& dbo_name, bool value);
 
-    bool hasADSBInfo() const;
-    bool hasADSBInfo(unsigned int ta) const;
-    std::tuple<std::set<unsigned int>, std::tuple<bool, unsigned int, unsigned int>,
-            std::tuple<bool, unsigned int, unsigned int>> adsbInfo(unsigned int ta) const;
-
     bool loadOnlySectorData() const;
     void loadOnlySectorData(bool value);
 

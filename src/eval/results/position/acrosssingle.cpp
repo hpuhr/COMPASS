@@ -191,7 +191,7 @@ namespace EvaluationRequirementResult
          num_value_ok_, // "#ACOK"
          num_value_nok_, // "#ACNOK"
          p_min_var, // "PACOK"
-         target_->mopsVersionsStr().c_str(), // "MOPS"
+         target_->mopsVersionStr().c_str(), // "MOPS"
          target_->nucpNicStr().c_str(), // "NUCp/NIC"
          target_->nacpStr().c_str()}, // "NACp"
                     this, {utn_});

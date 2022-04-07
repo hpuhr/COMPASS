@@ -208,7 +208,7 @@ namespace EvaluationRequirementResult
          num_comp_failed_, // "#DOK"
          num_comp_passed_, // "#DNOK"
          prob_var, // "PDOK"
-         target_->mopsVersionsStr().c_str(), // "MOPS"
+         target_->mopsVersionStr().c_str(), // "MOPS"
          target_->nucpNicStr().c_str(), // "NUCp/NIC"
          target_->nacpStr().c_str()}, // "NACp"
                     this, {utn_});

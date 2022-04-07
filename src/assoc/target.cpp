@@ -959,4 +959,55 @@ namespace Association
                 addAssociated(tr_it);
         }
     }
+
+    std::map <std::string, unsigned int> Target::getDBContentCounts()
+    {
+        std::map <std::string, unsigned int> counts;
+
+        for (auto& tr_it : assoc_trs_)
+        {
+            counts[tr_it->dbcontent_name_] += 1;
+        }
+
+        return counts;
+    }
+
+    bool Target::hasADSBMOPSVersion()
+    {
+        for (auto tr_it : assoc_trs_)
+        {
+            if (tr_it->has_adsb_info_ && tr_it->has_mops_version_)
+                return true;
+        }
+
+        return false;
+    }
+    unsigned int Target::getADSBMOPSVersion()
+    {
+        assert (hasADSBMOPSVersion());
+
+        bool mops_found{false};
+        unsigned int mops_value{0};
+
+        for (auto tr_it : assoc_trs_)
+        {
+            if (tr_it->has_adsb_info_ && tr_it->has_mops_version_)
+            {
+                if (mops_found)
+                {
+                    if (tr_it->mops_version_ != mops_value)
+                        logwrn << "Target: getADSBMOPSVersion: utn " << utn_ << " has differing MOPS version values "
+                               << tr_it->mops_version_ << ", " << mops_value;
+                }
+                else
+                {
+                    mops_value = tr_it->mops_version_;
+                    mops_found = true;
+                }
+            }
+        }
+
+        assert (mops_found);
+        return mops_value;
+    }
 }

@@ -15,7 +15,7 @@ namespace Association
     public:
         TargetReport();
 
-        string dbo_name_;
+        string dbcontent_name_;
         unsigned int ds_id_{0};
         unsigned int line_id_{0};
         unsigned int rec_num_{0};
@@ -55,6 +55,11 @@ namespace Association
 
         double latitude_{0};
         double longitude_{0};
+
+        // adsb
+        bool has_adsb_info_{false};
+        bool has_mops_version_{false};
+        unsigned int mops_version_{0};
 
         vector<Target*> assoc_targets_;
         //vector<Target*> potential_targets_;
