@@ -510,6 +510,8 @@ void DBContentManager::databaseOpenedSlot()
     targets_ = COMPASS::instance().interface().loadTargets();
 
     emit associationStatusChangedSignal();
+
+    loginf << "DBContentManager: databaseOpenedSlot: done";
 }
 
 void DBContentManager::databaseClosedSlot()
@@ -1049,7 +1051,7 @@ void DBContentManager::createTarget(unsigned int utn)
 {
     assert (!existsTarget(utn));
 
-    targets_.emplace(utn, new dbContent::Target(utn, nlohmann::json::object()));
+    targets_.emplace(utn, make_shared<dbContent::Target>(utn, nlohmann::json::object()));
 
     assert (existsTarget(utn));
 }

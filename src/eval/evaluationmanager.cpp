@@ -993,10 +993,10 @@ void EvaluationManager::saveSector(std::shared_ptr<Sector> sector)
     assert (hasSector(sector->name(), sector->layerName()));
     COMPASS::instance().interface().saveSector(sector);
 
-    if (widget_)
-        widget_->updateSectors();
+//    if (widget_)
+//        widget_->updateSectors();
 
-    emit sectorsChangedSignal();
+//    emit sectorsChangedSignal();
 }
 
 void EvaluationManager::deleteSector(shared_ptr<Sector> sector)
