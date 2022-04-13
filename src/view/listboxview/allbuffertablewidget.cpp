@@ -276,6 +276,8 @@ void AllBufferTableWidget::keyPressEvent(QKeyEvent* event)
             QApplication::clipboard()->setText(selected_headers + selected_text);
         }
     }
+
+    loginf << "AllBufferTableWidget: keyPressEvent: done";
 }
 
 std::vector<std::vector<std::string>> AllBufferTableWidget::getSelectedText ()

@@ -233,7 +233,6 @@ void MainWindow::createMenus ()
     open_recent_db_menu_->addAction(clear_act);
 
     close_db_action_ = new QAction(tr("&Close"));
-    close_db_action_->setShortcut(tr("Ctrl+C"));
     close_db_action_->setStatusTip(tr("Close opened database"));
     connect(close_db_action_, &QAction::triggered, this, &MainWindow::closeDBSlot);
     file_menu->addAction(close_db_action_);
