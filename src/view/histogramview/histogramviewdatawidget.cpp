@@ -122,11 +122,13 @@ HistogramViewDataWidget::HistogramViewDataWidget(HistogramView* view, HistogramV
 
     setLayout(main_layout_);
 
-    colors_["Radar"] = QColor("#00FF00");
-    colors_["MLAT"] = QColor("#FF0000");
-    colors_["ADSB"] = QColor("#6666FF");
+    colors_["CAT001"] = QColor("#00FF00");
+    colors_["CAT010"] = QColor("#FFCC00");
+    colors_["CAT020"] = QColor("#FF0000");
+    colors_["CAT021"] = QColor("#6666FF");
+    colors_["CAT048"] = QColor("#00FF00");
     colors_["RefTraj"] = QColor("#FFA500");
-    colors_["Tracker"] = QColor("#CCCCCC");
+    colors_["CAT062"] = QColor("#CCCCCC");
 
     // shortcuts
     {
@@ -209,14 +211,13 @@ void HistogramViewDataWidget::loadingStartedSlot()
     updateChart();
 }
 
-void HistogramViewDataWidget::updateDataSlot(DBContent& object, std::shared_ptr<Buffer> buffer)
+void HistogramViewDataWidget::updateDataSlot(
+        const std::map<std::string, std::shared_ptr<Buffer>>& data, bool requires_reset)
 {
     logdbg << "HistogramViewDataWidget: updateDataSlot: start";
 
-    if (!buffer->size())
-        return;
+    buffers_ = data;
 
-    buffers_[object.name()] = buffer;
     //updateFromData(object.name());
 
     logdbg << "HistogramViewDataWidget: updateDataSlot: end";

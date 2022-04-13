@@ -38,7 +38,7 @@ HistogramView::HistogramView(const std::string& class_id, const std::string& ins
     : View(class_id, instance_id, w, view_manager)
 {
     registerParameter("data_var_dbo", &data_var_dbo_, META_OBJECT_NAME);
-    registerParameter("data_var_name", &data_var_name_, "tod");
+    registerParameter("data_var_name", &data_var_name_, DBContent::meta_var_tod_.name());
 
     registerParameter("use_log_scale", &use_log_scale_, true);
 
@@ -105,16 +105,22 @@ bool HistogramView::init()
 void HistogramView::loadingStarted()
 {
     loginf << "HistogramView: loadingStarted";
+
+    getDataWidget()->loadingStartedSlot();
 }
 
 void HistogramView::loadedData(const std::map<std::string, std::shared_ptr<Buffer>>& data, bool requires_reset)
 {
     loginf << "HistogramView: loadedData";
+
+    getDataWidget()->updateDataSlot(data, requires_reset);
 }
 
 void HistogramView::loadingDone()
 {
     loginf << "HistogramView: loadingDone";
+
+    getDataWidget()->loadingDoneSlot();
 }
 
 void HistogramView::clearData()
