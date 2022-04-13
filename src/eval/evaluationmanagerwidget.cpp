@@ -117,10 +117,13 @@ void EvaluationManagerWidget::updateSectors()
 {
     if (main_tab_widget_)
         main_tab_widget_->updateSectors();
+
+    updateButtons();
 }
 
 void EvaluationManagerWidget::updateButtons()
 {
+    load_button_->setEnabled(eval_man_.anySectorsWithReq());
     evaluate_button_->setEnabled(eval_man_.canEvaluate());
     gen_report_button_->setEnabled(eval_man_.canGenerateReport());
 

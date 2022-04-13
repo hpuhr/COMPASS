@@ -91,6 +91,7 @@ public:
     EvaluationManagerWidget* widget();
 
     bool sectorsLoaded() const;
+    bool anySectorsWithReq();
 
     bool hasSectorLayer (const std::string& layer_name);
     //void renameSectorLayer (const std::string& name, const std::string& new_name);

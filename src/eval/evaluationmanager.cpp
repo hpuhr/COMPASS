@@ -215,11 +215,11 @@ void EvaluationManager::loadData ()
     // actually load
 
     // load adsb mops versions in a hacky way
-//    if (dbcontent_man.dbContent("CAT021").hasData() && !has_adsb_info_)
-//    {
-//        adsb_info_ = COMPASS::instance().interface().queryADSBInfo();
-//        has_adsb_info_ = true;
-//    }
+    //    if (dbcontent_man.dbContent("CAT021").hasData() && !has_adsb_info_)
+    //    {
+    //        adsb_info_ = COMPASS::instance().interface().queryADSBInfo();
+    //        has_adsb_info_ = true;
+    //    }
 
     QApplication::restoreOverrideCursor();
 
@@ -235,19 +235,27 @@ void EvaluationManager::loadData ()
 
     std::set<unsigned int> ds_ids;
 
-    for (auto& ds_it : data_sources_ref_)
-        if (ds_it.second)
-            ds_ids.insert(ds_it.first);
-
-    for (auto& ds_it : data_sources_tst_)
-        if (ds_it.second)
-            ds_ids.insert(ds_it.first);
-
     DataSourceManager& ds_man = COMPASS::instance().dataSourceManager();
 
-    ds_man.setLoadOnlyDataSources(ds_ids);
+    for (auto& ds_it : data_sources_ref_)
+    {
+        assert (ds_man.hasDBDataSource(ds_it.first));
+        ds_man.dbDataSource(ds_it.first).lineLoadingWanted(line_id_ref_, true); // set wanted line
 
-    // TODO load lines
+        if (ds_it.second)
+            ds_ids.insert(ds_it.first);
+    }
+
+    for (auto& ds_it : data_sources_tst_)
+    {
+        assert (ds_man.hasDBDataSource(ds_it.first));
+        ds_man.dbDataSource(ds_it.first).lineLoadingWanted(line_id_tst_, true); // set wanted line
+
+        if (ds_it.second)
+            ds_ids.insert(ds_it.first);
+    }
+
+    ds_man.setLoadOnlyDataSources(ds_ids); // limit loaded data sources
 
     fil_man.disableAllFilters();
 
@@ -256,8 +264,6 @@ void EvaluationManager::loadData ()
     {
         assert (fil_man.hasFilter("Position"));
         DBFilter* pos_fil = fil_man.getFilter("Position");
-
-        pos_fil->setActive(true);
 
         json fil_cond;
 
@@ -305,6 +311,8 @@ void EvaluationManager::loadData ()
 
         if (!first)
         {
+            pos_fil->setActive(true);
+
             latitude_min_ = lat_min-0.2;
             latitude_max_ = lat_max+0.2;
             longitude_min_ = long_min-0.2;
@@ -320,7 +328,9 @@ void EvaluationManager::loadData ()
 
         }
         else
+        {
             min_max_pos_set_ = false;
+        }
     }
     else
         min_max_pos_set_ = false;
@@ -446,6 +456,9 @@ std::string EvaluationManager::getCannotEvaluateComment()
     if (!sectorsLayers().size())
         return "Please add at least one sector";
 
+    if (!anySectorsWithReq())
+        return "Please set requirements for at least one sector";
+
     if (!data_loaded_)
         return "Please select and load reference & test data";
 
@@ -488,6 +501,7 @@ void EvaluationManager::databaseClosedSlot()
     data_sources_tst_.clear();
 
     widget()->updateDataSources();
+    widget()->updateSectors();
     widget()->setDisabled(true);
 
     emit sectorsChangedSignal();
@@ -755,11 +769,11 @@ void EvaluationManager::addVariables (const std::string dbo_name, dbContent::Var
     if (dbcontent_man.metaVariable(DBContent::meta_var_track_angle_.name()).existsIn(dbo_name))
         read_set.add(dbcontent_man.metaVariable(DBContent::meta_var_track_angle_.name()).getFor(dbo_name));
 
-//        // for mono sensor + lu sensor
+    //        // for mono sensor + lu sensor
 
-//        read_set.add(db_object.variable("multiple_sources")); // string
-//        read_set.add(db_object.variable("track_lu_ds_id")); // int
-//    }
+    //        read_set.add(db_object.variable("multiple_sources")); // string
+    //        read_set.add(db_object.variable("track_lu_ds_id")); // int
+    //    }
 
 }
 
@@ -899,6 +913,9 @@ void EvaluationManager::createNewSector (const std::string& name, const std::str
 
     assert (hasSector(name, layer_name));
     sector->save();
+
+    if (widget_)
+        widget_->updateSectors();
 }
 
 bool EvaluationManager::hasSector (const string& name, const string& layer_name)
@@ -970,6 +987,9 @@ void EvaluationManager::moveSector(unsigned int id, const std::string& old_layer
 
     assert (hasSector(tmp_sector->name(), new_layer_name));
     tmp_sector->save();
+
+    if (widget_)
+        widget_->updateSectors();
 }
 
 std::vector<std::shared_ptr<SectorLayer>>& EvaluationManager::sectorsLayers()
@@ -992,11 +1012,6 @@ void EvaluationManager::saveSector(std::shared_ptr<Sector> sector)
     assert (sectors_loaded_);
     assert (hasSector(sector->name(), sector->layerName()));
     COMPASS::instance().interface().saveSector(sector);
-
-//    if (widget_)
-//        widget_->updateSectors();
-
-//    emit sectorsChangedSignal();
 }
 
 void EvaluationManager::deleteSector(shared_ptr<Sector> sector)
@@ -1383,12 +1398,44 @@ bool EvaluationManager::sectorsLoaded() const
     return sectors_loaded_;
 }
 
+bool EvaluationManager::anySectorsWithReq()
+{
+    if (!sectors_loaded_)
+        return false;
+
+    bool any = false;
+
+    if (hasCurrentStandard())
+    {
+        EvaluationStandard& standard = currentStandard();
+
+        std::vector<std::shared_ptr<SectorLayer>>& sector_layers = sectorsLayers();
+        for (auto& sec_it : sector_layers)
+        {
+            const string& sector_layer_name = sec_it->name();
+
+            for (auto& req_group_it : standard)
+            {
+                const string& requirement_group_name = req_group_it->name();
+
+                if (useGroupInSectorLayer(sector_layer_name, requirement_group_name))
+                {
+                    any = true;
+                    break;
+                }
+            }
+        }
+    }
+
+    return any;
+}
+
 void EvaluationManager::updateReferenceDBO()
 {
     loginf << "EvaluationManager: updateReferenceDBO";
-    
+
     data_sources_ref_.clear();
-    
+
     if (!hasValidReferenceDBO())
         return;
 
