@@ -177,7 +177,7 @@ void DBInterface::closeDBFile()
         table_info_.clear(); // no need to lock
     }
 
-    emit databaseClosedSignal();
+    // signal emitted in COMPASS
 }
 
 bool DBInterface::dbOpen()
@@ -965,8 +965,8 @@ std::map<unsigned int, std::shared_ptr<dbContent::Target>> DBInterface::loadTarg
 
         targets[utn] = target;
 
-        loginf << "DBInterface: loadSectors: loaded target " << utn << " json '"
-               << json_str << "'";
+//        loginf << "DBInterface: loadTargets: loaded target " << utn << " json '"
+//               << json_str << "'";
     }
 
     return targets;

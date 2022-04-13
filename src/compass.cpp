@@ -290,6 +290,8 @@ void COMPASS::closeDB()
     assert (!db_interface_->dbOpen());
 
     db_opened_ = false;
+
+    emit db_interface_->databaseClosedSignal();
 }
 
 
