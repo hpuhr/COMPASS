@@ -38,10 +38,10 @@ ScatterPlotView::ScatterPlotView(const std::string& class_id, const std::string&
     : View(class_id, instance_id, w, view_manager)
 {
     registerParameter("data_var_x_dbo", &data_var_x_dbo_, META_OBJECT_NAME);
-    registerParameter("data_var_x_name", &data_var_x_name_, "pos_long_deg");
+    registerParameter("data_var_x_name", &data_var_x_name_, DBContent::meta_var_longitude_.name());
 
     registerParameter("data_var_y_dbo", &data_var_y_dbo_, META_OBJECT_NAME);
-    registerParameter("data_var_y_name", &data_var_y_name_, "pos_lat_deg");
+    registerParameter("data_var_y_name", &data_var_y_name_, DBContent::meta_var_latitude_.name());
 
 
     // create sub done in init
@@ -107,21 +107,29 @@ bool ScatterPlotView::init()
 void ScatterPlotView::loadingStarted()
 {
     loginf << "ScatterPlotView: loadingStarted";
+
+    getDataWidget()->loadingStartedSlot();
 }
 
 void ScatterPlotView::loadedData(const std::map<std::string, std::shared_ptr<Buffer>>& data, bool requires_reset)
 {
     loginf << "ScatterPlotView: loadedData";
+
+    getDataWidget()->updateDataSlot(data, requires_reset);
 }
 
 void ScatterPlotView::loadingDone()
 {
     loginf << "ScatterPlotView: loadingDone";
+
+    getDataWidget()->loadingDoneSlot();
 }
 
 void ScatterPlotView::clearData()
 {
     loginf << "ScatterPlotView: clearData";
+
+    getDataWidget()->clear();
 }
 
 void ScatterPlotView::generateSubConfigurable(const std::string& class_id,

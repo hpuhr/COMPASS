@@ -126,6 +126,8 @@ void HistogramView::loadingDone()
 void HistogramView::clearData()
 {
     loginf << "HistogramView: clearData";
+
+    getDataWidget()->clear();
 }
 
 void HistogramView::generateSubConfigurable(const std::string& class_id,
