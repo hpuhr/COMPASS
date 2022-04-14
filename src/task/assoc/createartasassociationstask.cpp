@@ -256,7 +256,7 @@ bool CreateARTASAssociationsTask::canRun()
     loginf << "CreateARTASAssociationsTask: canRun: metas in objects";
     for (auto& dbo_it : dbcontent_man)
     {
-        if (dbo_it.first == "RefTraj") // TODO
+        if (dbo_it.first == "RefTraj") // not covered by ARTAS
             continue;
 
         if (dbo_it.first == "CAT062")  // check metas specific to tracker

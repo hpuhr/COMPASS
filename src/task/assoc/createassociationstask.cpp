@@ -174,8 +174,8 @@ bool CreateAssociationsTask::canRun()
     loginf << "CreateAssociationsTask: canRun: metas in dbcontent";
     for (auto& dbo_it : dbcontent_man)
     {
-        if (dbo_it.first == "RefTraj") // TODO
-            continue;
+//        if (dbo_it.first == "RefTraj") // TODO
+//            continue;
 
         loginf << "CreateAssociationsTask: canRun: metas in dbcontent " << dbo_it.first;
 
@@ -262,8 +262,8 @@ void CreateAssociationsTask::run()
         if (!dbo_it.second->hasData())
             continue;
 
-        if (dbo_it.first == "RefTraj") // TODO
-            continue;
+//        if (dbo_it.first == "RefTraj") // TODO
+//            continue;
 
         VariableSet read_set = getReadSetFor(dbo_it.first);
 

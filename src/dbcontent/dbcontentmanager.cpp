@@ -375,9 +375,6 @@ void DBContentManager::load()
                << " loadable " << object.second->loadable()
                << " loading wanted " << ds_man.loadingWanted(object.first);
 
-        if (object.first == "RefTraj")
-            continue;
-
         if (object.second->loadable() && ds_man.loadingWanted(object.first))
         {
             loginf << "DBContentManager: loadSlot: loading object " << object.first;
