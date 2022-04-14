@@ -1451,6 +1451,18 @@
                                 "dbcontent_name": "CAT048",
                                 "variable_name": "Track Confirmed"
                             }
+                        },
+                        "VariableDefinitionCAT062Confirmed0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT062",
+                                "variable_name": "Confirmed"
+                            }
+                        },
+                        "VariableDefinitionRefTrajConfirmed0": {
+                            "parameters": {
+                                "dbcontent_name": "RefTraj",
+                                "variable_name": "Confirmed"
+                            }
                         }
                     }
                 }
@@ -1515,6 +1527,12 @@
                         "VariableDefinitionCAT062Track End0": {
                             "parameters": {
                                 "dbcontent_name": "CAT062",
+                                "variable_name": "Track End"
+                            }
+                        },
+                        "VariableDefinitionRefTrajTrack End0": {
+                            "parameters": {
+                                "dbcontent_name": "RefTraj",
                                 "variable_name": "Track End"
                             }
                         }
@@ -1659,6 +1677,12 @@
                         "VariableDefinitionCAT062Track Number0": {
                             "parameters": {
                                 "dbcontent_name": "CAT062",
+                                "variable_name": "Track Number"
+                            }
+                        },
+                        "VariableDefinitionRefTrajTrack Number0": {
+                            "parameters": {
+                                "dbcontent_name": "RefTraj",
                                 "variable_name": "Track Number"
                             }
                         }
