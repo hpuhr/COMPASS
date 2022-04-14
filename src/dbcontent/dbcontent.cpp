@@ -149,6 +149,10 @@ void DBContent::generateSubConfigurable(const string& class_id, const string& in
                 .getSubConfiguration(class_id, instance_id)
                 .getParameterConfigValueString("name");
 
+        if (hasVariable(var_name))
+            logerr << "DBContent: generateSubConfigurable: duplicate variable " << instance_id
+                   << " with name '" << var_name << "'";
+
         assert(!hasVariable(var_name));
 
         logdbg << "DBContent: generateSubConfigurable: generating variable " << instance_id
