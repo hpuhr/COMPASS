@@ -37,6 +37,8 @@
 #include "viewmanager.h"
 #include "viewpointsimporttask.h"
 #include "viewpointsimporttaskdialog.h"
+#include "gpstrailimporttask.h"
+#include "gpstrailimporttaskdialog.h"
 #include "managesectorstask.h"
 #include "managesectorstaskdialog.h"
 #include "evaluationmanager.h"
@@ -301,6 +303,12 @@ void MainWindow::createMenus ()
     connect(import_ast_net_action, &QAction::triggered, this, &MainWindow::importAsterixFromNetworkSlot);
     import_menu_->addAction(import_ast_net_action);
 
+    QAction* import_gps_file_action = new QAction(tr("&GPS Trail"));
+    import_gps_file_action->setShortcut(tr("Ctrl+G"));
+    import_gps_file_action->setStatusTip(tr("Import GPS Trail File"));
+    connect(import_gps_file_action, &QAction::triggered, this, &MainWindow::importGPSTrailSlot);
+    import_menu_->addAction(import_gps_file_action);
+
     QAction* import_vp_file_action = new QAction(tr("&View Points"));
     import_vp_file_action->setShortcut(tr("Ctrl+V"));
     import_vp_file_action->setStatusTip(tr("Import View Points File"));
@@ -370,6 +378,7 @@ void MainWindow::updateMenus()
     sectors_action_->setDisabled(!db_open);
 
     import_menu_->setDisabled(!db_open || COMPASS::instance().taskManager().asterixImporterTask().isRunning());
+    process_menu_->setDisabled(!db_open || COMPASS::instance().taskManager().asterixImporterTask().isRunning());
 
     assert (import_recent_asterix_menu_);
 
@@ -1233,6 +1242,21 @@ void MainWindow::importAsterixFromNetworkSlot()
     COMPASS::instance().taskManager().asterixImporterTask().importNetwork();
 
     COMPASS::instance().taskManager().asterixImporterTask().dialog()->show();
+}
+
+void MainWindow::importGPSTrailSlot()
+{
+    string filename = QFileDialog::getOpenFileName(this, "Import GPS Trail", "",
+                                                   tr("Text Files (*.nmea *.txt)")).toStdString();
+
+    if (filename.size() > 0)
+    {
+        COMPASS::instance().taskManager().gpsTrailImportTask().importFilename(filename);
+
+        updateMenus();
+
+        COMPASS::instance().taskManager().gpsTrailImportTask().dialog()->show();
+    }
 }
 
 void MainWindow::importViewPointsSlot()

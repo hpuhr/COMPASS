@@ -34,6 +34,7 @@
 #include <QTextEdit>
 #include <QLineEdit>
 #include <QCheckBox>
+#include <QComboBox>
 
 #include <iostream>
 
@@ -68,40 +69,9 @@ void GPSTrailImportTaskWidget::addMainTab()
     QVBoxLayout* tab_layout = new QVBoxLayout();
 
     // file stuff
-    {
-        QLabel* files_label = new QLabel("NMEA File Selection");
-        files_label->setFont(font_bold);
-        tab_layout->addWidget(files_label);
+    file_label_ = new QLabel(task_.importFilename().c_str());
+    tab_layout->addWidget(file_label_);
 
-        file_list_ = new QListWidget();
-        file_list_->setWordWrap(true);
-        file_list_->setTextElideMode(Qt::ElideNone);
-        file_list_->setSelectionBehavior(QAbstractItemView::SelectItems);
-        file_list_->setSelectionMode(QAbstractItemView::SingleSelection);
-        connect(file_list_, SIGNAL(itemClicked(QListWidgetItem*)), this, SLOT(selectedFileSlot()));
-
-        updateFileListSlot();
-        tab_layout->addWidget(file_list_);
-    }
-
-    // file button stuff
-    {
-        QHBoxLayout* button_layout = new QHBoxLayout();
-
-        add_file_button_ = new QPushButton("Add");
-        connect(add_file_button_, &QPushButton::clicked, this, &GPSTrailImportTaskWidget::addFileSlot);
-        button_layout->addWidget(add_file_button_);
-
-        delete_file_button_ = new QPushButton("Remove");
-        connect(delete_file_button_, &QPushButton::clicked, this, &GPSTrailImportTaskWidget::deleteFileSlot);
-        button_layout->addWidget(delete_file_button_);
-
-        delete_all_files_button_ = new QPushButton("Remove All");
-        connect(delete_all_files_button_, &QPushButton::clicked, this, &GPSTrailImportTaskWidget::deleteAllFilesSlot);
-        button_layout->addWidget(delete_all_files_button_);
-
-        tab_layout->addLayout(button_layout);
-    }
 
     text_edit_ = new QTextEdit ();
     text_edit_->setReadOnly(true);
@@ -201,6 +171,18 @@ void GPSTrailImportTaskWidget::addConfigTab()
     grid->addWidget(callsign_edit_, row, 1);
 
 
+    // line id
+    ++row;
+
+    grid->addWidget(new QLabel("Line ID"), row, 0);
+
+    QComboBox* file_line_box = new QComboBox();
+    file_line_box->addItems({"1", "2", "3", "4"});
+
+    connect(file_line_box, &QComboBox::currentTextChanged,
+            this, &GPSTrailImportTaskWidget::lineIDEditSlot);
+    grid->addWidget(file_line_box, row, 1);
+
     // finish him
     tab_layout->addLayout(grid);
 
@@ -215,86 +197,12 @@ void GPSTrailImportTaskWidget::addConfigTab()
 
 GPSTrailImportTaskWidget::~GPSTrailImportTaskWidget() {}
 
-void GPSTrailImportTaskWidget::addFile(const std::string& filename)
-{
-    if (!task_.hasFile(filename))
-        task_.addFile(filename);
-}
-
 void GPSTrailImportTaskWidget::selectFile(const std::string& filename)
 {
-    QList<QListWidgetItem*> items = file_list_->findItems(filename.c_str(), Qt::MatchExactly);
-    assert (items.size() > 0);
-
-    assert(task_.hasFile(filename));
-    task_.currentFilename(filename);
-
-    for (auto item_it : items)
-    {
-        assert (item_it);
-        file_list_->setCurrentItem(item_it);
-    }
+    assert(file_label_);
+    file_label_->setText(task_.importFilename().c_str());
 
     updateText();
-}
-
-void GPSTrailImportTaskWidget::addFileSlot()
-{
-    QString filename = QFileDialog::getOpenFileName(this, tr("Add NMEA File"));
-
-    if (filename.size() > 0)
-        addFile(filename.toStdString());
-}
-
-void GPSTrailImportTaskWidget::deleteFileSlot()
-{
-    loginf << "JSONImporterTaskWidget: deleteFileSlot";
-
-    if (!file_list_->currentItem() || !task_.currentFilename().size())
-    {
-        QMessageBox m_warning(QMessageBox::Warning, "JSON File Deletion Failed",
-                              "Please select a file in the list.", QMessageBox::Ok);
-        m_warning.exec();
-        return;
-    }
-
-    assert(task_.currentFilename().size());
-    assert(task_.hasFile(task_.currentFilename()));
-    task_.removeCurrentFilename();
-}
-
-void GPSTrailImportTaskWidget::deleteAllFilesSlot()
-{
-    loginf << "GPSTrailImportTaskWidget: deleteAllFilesSlot";
-    task_.removeAllFiles();
-}
-
-
-void GPSTrailImportTaskWidget::selectedFileSlot()
-{
-    logdbg << "JSONImporterTaskWidget: selectedFileSlot";
-    assert(file_list_->currentItem());
-
-    QString filename = file_list_->currentItem()->text();
-    assert(task_.hasFile(filename.toStdString()));
-
-    task_.currentFilename(filename.toStdString());
-
-    updateText();
-}
-
-void GPSTrailImportTaskWidget::updateFileListSlot()
-{
-    assert(file_list_);
-
-    file_list_->clear();
-
-    for (auto it : task_.fileList())
-    {
-        QListWidgetItem* item = new QListWidgetItem(tr(it.first.c_str()), file_list_);
-        if (it.first == task_.currentFilename())
-            file_list_->setCurrentItem(item);
-    }
 }
 
 void GPSTrailImportTaskWidget::sacEditedSlot(const QString& value)
@@ -386,6 +294,21 @@ void GPSTrailImportTaskWidget::callsignEditedSlot(const QString& value)
     callsign_edit_->setText(upper_value);
 
     task_.callsign(upper_value.toStdString());
+}
+
+void GPSTrailImportTaskWidget::lineIDEditSlot(const QString& text)
+{
+    loginf << "GPSTrailImportTaskWidget: lineIDEditSlot: value '" << text.toStdString() << "'";
+
+    bool ok;
+
+    unsigned int line_id = text.toUInt(&ok);
+
+    assert (ok);
+
+    assert (line_id > 0 && line_id <= 4);
+
+    task_.lineID(line_id-1);
 }
 
 void GPSTrailImportTaskWidget::updateConfig ()

@@ -76,6 +76,8 @@ public slots:
 public:
     static const Property meta_var_rec_num_;
     static const Property meta_var_datasource_id_;
+    static const Property meta_var_sac_id_;
+    static const Property meta_var_sic_id_;
     static const Property meta_var_line_id_;
     static const Property meta_var_tod_;
     static const Property meta_var_m3a_;
