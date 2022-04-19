@@ -180,21 +180,23 @@ QVariant AllBufferTableModel::data(const QModelIndex& index, int role) const
         {
             if (col == 2)
             {
-                DBContentManager& manager = COMPASS::instance().dbContentManager();
-                const DBOAssociationCollection& associations =
-                    manager.object(dbo_name).associations();
+                TODO_ASSERT
 
-                assert(buffer->has<int>("rec_num"));
-                assert(!buffer->get<int>("rec_num").isNull(buffer_index));
-                unsigned int rec_num = buffer->get<int>("rec_num").get(buffer_index);
+//                DBContentManager& manager = COMPASS::instance().dbContentManager();
+//                const DBOAssociationCollection& associations =
+//                    manager.object(dbo_name).associations();
 
-                if (associations.contains(rec_num))
-                {
-                    return QVariant(
-                        manager.object(dbo_name).associations().getUTNsStringFor(rec_num).c_str());
-                }
-                else
-                    return QVariant();
+//                assert(buffer->has<int>("rec_num"));
+//                assert(!buffer->get<int>("rec_num").isNull(buffer_index));
+//                unsigned int rec_num = buffer->get<int>("rec_num").get(buffer_index);
+
+//                if (associations.contains(rec_num))
+//                {
+//                    return QVariant(
+//                        manager.object(dbo_name).associations().getUTNsStringFor(rec_num).c_str());
+//                }
+//                else
+//                    return QVariant();
             }
 
             col -= 3;  // for the actual properties
@@ -224,13 +226,13 @@ QVariant AllBufferTableModel::data(const QModelIndex& index, int role) const
             if (dbo_name != variable_dbo_name)  // check if other dbo
                 return QString();
 
-            assert(manager.existsObject(dbo_name));
-            assert(manager.object(dbo_name).hasVariable(variable_name));
+            assert(manager.existsDBContent(dbo_name));
+            assert(manager.dbContent(dbo_name).hasVariable(variable_name));
         }
 
         dbContent::Variable& variable = (variable_dbo_name == META_OBJECT_NAME)
                                     ? manager.metaVariable(variable_name).getFor(dbo_name)
-                                    : manager.object(dbo_name).variable(variable_name);
+                                    : manager.dbContent(dbo_name).variable(variable_name);
         PropertyDataType data_type = variable.dataType();
 
         value_str = NULL_STRING;
@@ -372,6 +374,15 @@ QVariant AllBufferTableModel::data(const QModelIndex& index, int role) const
                 if (!null)
                 {
                     value_str = buffer->get<std::string>(property_name).getAsString(buffer_index);
+                }
+            }
+            else if (data_type == PropertyDataType::JSON)
+            {
+                assert(buffer->has<nlohmann::json>(property_name));
+                null = buffer->get<nlohmann::json>(property_name).isNull(buffer_index);
+                if (!null)
+                {
+                    value_str = buffer->get<nlohmann::json>(property_name).getAsString(buffer_index);
                 }
             }
             else
@@ -518,7 +529,7 @@ void AllBufferTableModel::updateTimeIndexes()
 
             DBContentManager& object_manager = COMPASS::instance().dbContentManager();
             const dbContent::Variable& tod_var =
-                    object_manager.metaVariable(DBContent::meta_var_tod_id_.name()).getFor(dbo_name);
+                    object_manager.metaVariable(DBContent::meta_var_tod_.name()).getFor(dbo_name);
 
             assert(buf_it.second->has<float>(tod_var.name()));
             NullableVector<float>& tods = buf_it.second->get<float>(tod_var.name());

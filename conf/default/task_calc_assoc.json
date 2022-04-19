@@ -25,6 +25,7 @@
         "target_addr_var_str": "target_addr",
         "target_id_var_str": "callsign",
         "tod_var_str": "tod",
+        "track_end_var_str": "track_end",
         "track_num_var_str": "track_num"
     }
 }

@@ -69,9 +69,14 @@ class View : public QObject, public Configurable
 
     virtual bool init();
 
+    virtual void databaseOpened();
+    virtual void databaseClosed();
+
     virtual void loadingStarted()=0;
     virtual void loadedData(const std::map<std::string, std::shared_ptr<Buffer>>& data, bool requires_reset)=0;
     virtual void loadingDone()=0;
+
+    virtual void clearData()=0; // clear shown data in view
 
     virtual void appModeSwitch (AppMode app_mode) {};
 

@@ -49,7 +49,6 @@ class ASTERIXImportTaskWidget : public QWidget
     void fileLineIDEditSlot(const QString& text);
 
     void debugChangedSlot();
-    void limitRAMChangedSlot();
     void testImportSlot();
 
   public:
@@ -80,7 +79,6 @@ protected:
     QCheckBox* limit_ram_check_{nullptr};
 
     void addMainTab();
-    void addASTERIXConfigTab();
     void addOverrideTab();
     void addMappingsTab();
 

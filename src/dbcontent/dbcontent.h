@@ -55,7 +55,7 @@ class DBContent : public QObject, public Configurable
 
 signals:
     void updateProgressSignal(float percent);
-    void updateDoneSignal(DBContent& object);
+    void updateDoneSignal(DBContent& dbcontent);
 
     void labelDefinitionChangedSignal();
 
@@ -66,7 +66,7 @@ public slots:
     void readJobIntermediateSlot(std::shared_ptr<Buffer> buffer);
     void readJobObsoleteSlot();
     void readJobDoneSlot();
-    void finalizeReadJobDoneSlot();
+    //void finalizeReadJobDoneSlot();
 
     void insertDoneSlot();
 
@@ -74,22 +74,56 @@ public slots:
     void updateDoneSlot();
 
 public:
-    static const Property meta_var_rec_num_id_;
+    static const Property meta_var_rec_num_;
     static const Property meta_var_datasource_id_;
+    static const Property meta_var_sac_id_;
+    static const Property meta_var_sic_id_;
     static const Property meta_var_line_id_;
-    static const Property meta_var_tod_id_;
-    static const Property meta_var_m3a_id_;
-    static const Property meta_var_ta_id_;
-    static const Property meta_var_ti_id_;
-    static const Property meta_var_mc_id_;
-    static const Property meta_var_track_num_id_;
+    static const Property meta_var_tod_;
+    static const Property meta_var_m3a_;
+    static const Property meta_var_m3a_g_;
+    static const Property meta_var_m3a_v_;
+    static const Property meta_var_ta_;
+    static const Property meta_var_ti_;
+    static const Property meta_var_mc_;
+    static const Property meta_var_mc_g_;
+    static const Property meta_var_mc_v_;
+    static const Property meta_var_ground_bit_;
+    static const Property meta_var_track_num_;
+    static const Property meta_var_track_end_;
     static const Property meta_var_latitude_;
     static const Property meta_var_longitude_;
     static const Property meta_var_detection_type_;
 
+    static const Property meta_var_artas_hash_;
+    static const Property meta_var_associations_;
+
+    static const Property meta_var_vx_;
+    static const Property meta_var_vy_;
+    static const Property meta_var_ground_speed_;
+    static const Property meta_var_track_angle_;
+
+    static const Property meta_var_x_stddev_;
+    static const Property meta_var_y_stddev_;
+    static const Property meta_var_xy_cov_;
+
+    static const Property meta_var_latitude_stddev_;
+    static const Property meta_var_longitude_stddev_;
+    static const Property meta_var_latlon_cov_;
+
     static const Property var_radar_range_;
     static const Property var_radar_azimuth_;
     static const Property var_radar_altitude_;
+
+    static const Property var_cat021_mops_version_;
+    static const Property var_cat021_nacp_;
+    static const Property var_cat021_nucp_nic_;
+
+    static const Property var_cat062_tris_;
+    static const Property var_cat062_track_begin_;
+    static const Property var_cat062_coasting_;
+    static const Property var_cat062_track_end_;
+    static const Property var_cat062_baro_alt_;
 
     static const Property selected_var;
 
@@ -123,27 +157,25 @@ public:
     void load(dbContent::VariableSet& read_set, bool use_filters, bool use_order,
               dbContent::Variable* order_variable, bool use_order_ascending,
               const std::string& limit_str = ""); // main load function
-    void loadFiltered(dbContent::VariableSet& read_set, std::string custom_filter_clause,
-                      std::vector<dbContent::Variable*> filtered_variables, bool use_order,
-                      dbContent::Variable* order_variable, bool use_order_ascending,
+    void loadFiltered(dbContent::VariableSet& read_set, const std::vector<std::string>& extra_from_parts,
+                      std::string custom_filter_clause, std::vector<dbContent::Variable*> filtered_variables,
+                      bool use_order, dbContent::Variable* order_variable, bool use_order_ascending,
                       const std::string& limit_str = ""); // load function for custom filtering
     void quitLoading();
 
     void insertData(std::shared_ptr<Buffer> buffer);
-    void updateData(dbContent::Variable& key_var, dbContent::VariableSet& list,
-                    std::shared_ptr<Buffer> buffer);
+    void updateData(dbContent::Variable& key_var, std::shared_ptr<Buffer> buffer);
 
     std::map<unsigned int, std::string> loadLabelData(std::vector<unsigned int> rec_nums, int break_item_cnt);
 
     bool isLoading();
     bool isInserting();
-    bool isPostProcessing();
+    //bool isPostProcessing();
     bool hasData();
     size_t count();
     size_t loadedCount();
 
-    virtual void generateSubConfigurable(const std::string& class_id,
-                                         const std::string& instance_id);
+    virtual void generateSubConfigurable(const std::string& class_id, const std::string& instance_id);
 
     bool hasKeyVariable();
     dbContent::Variable& getKeyVariable();
@@ -160,14 +192,14 @@ public:
     bool existsInDB() const;
 
     // association stuff, outdated
-    void loadAssociationsIfRequired();  // starts loading job if required
-    void loadAssociations();            // actually loads associations, should be called from job
-    bool associationsLoaded() const;
-    bool hasAssociations();
-    void addAssociation(unsigned int rec_num, unsigned int utn, bool has_src, unsigned int src_rec_num);
-    const DBOAssociationCollection& associations() { return associations_; }
-    void clearAssociations();
-    void saveAssociations();
+//    void loadAssociationsIfRequired();  // starts loading job if required
+//    void loadAssociations();            // actually loads associations, should be called from job
+//    bool associationsLoaded() const;
+//    bool hasAssociations();
+//    void addAssociation(unsigned int rec_num, unsigned int utn, bool has_src, unsigned int src_rec_num);
+//    const DBOAssociationCollection& associations() { return associations_; }
+//    void clearAssociations();
+//    void saveAssociations();
 
 
     std::string dbTableName() const;
@@ -190,8 +222,8 @@ protected:
     std::unique_ptr<dbContent::LabelDefinition> label_definition_;
 
     std::shared_ptr<DBOReadDBJob> read_job_{nullptr};
-    std::vector<std::shared_ptr<Buffer>> read_job_data_;
-    std::vector<std::shared_ptr<FinalizeDBOReadJob>> finalize_jobs_;
+    //std::vector<std::shared_ptr<Buffer>> read_job_data_;
+    //std::vector<std::shared_ptr<FinalizeDBOReadJob>> finalize_jobs_;
 
     bool insert_active_ {false};
     std::shared_ptr<InsertBufferDBJob> insert_job_{nullptr};
@@ -202,15 +234,15 @@ protected:
 
     std::unique_ptr<DBContentWidget> widget_;
 
-    bool associations_changed_{false};
-    bool associations_loaded_{false};
-    DBOAssociationCollection associations_;
+//    bool associations_changed_{false};
+//    bool associations_loaded_{false};
+//    DBOAssociationCollection associations_;
 
     virtual void checkSubConfigurables();
 
     void doDataSourcesBeforeInsert (std::shared_ptr<Buffer> buffer);
 
-    std::string associationsTableName();
+    //std::string associationsTableName();
 
     void sortContent();
 

@@ -34,7 +34,7 @@ std::string TargetReport::asStr()
 {
     stringstream ss;
 
-    ss << "dbo " << dbo_name_ << " ds_id " << ds_id_ << " rec_num " << rec_num_
+    ss << "dbo " << dbcontent_name_ << " ds_id " << ds_id_ << " rec_num " << rec_num_
        << " tod " << String::timeStringFromDouble(tod_);
 
     if (has_ta_)

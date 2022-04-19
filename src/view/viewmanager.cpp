@@ -101,6 +101,13 @@ void ViewManager::init(QTabWidget* tab_widget)
     createSubConfigurables();
 }
 
+
+void ViewManager::loadViewPoints()
+{
+    assert (view_points_widget_);
+    view_points_widget_->loadViewPoints();
+}
+
 void ViewManager::close()
 {
     loginf << "ViewManager: close";
@@ -242,8 +249,8 @@ void ViewManager::setCurrentViewPoint (const ViewableDataConfig* viewable)
 
     view_point_data_selected_ = false;
 
-    loginf << "ViewManager: setCurrentViewPoint: setting current view point"; // << " data: '"
-    //<< view_points_widget_->tableModel()->viewPoint(current_view_point_).data().dump(4) << "'";
+    loginf << "ViewManager: setCurrentViewPoint: setting current view point data: '"
+    << viewable->data().dump(4) << "'";
 
     emit showViewPointSignal(current_viewable_);
 
@@ -495,10 +502,22 @@ unsigned int ViewManager::newViewNumber()
     return max_number + 1;
 }
 
+void ViewManager::disableDataDistribution(bool value)
+{
+    loginf << "ViewManager: disableDataDistribution: value " << value;
+
+    disable_data_distribution_ = value;
+}
+
+bool ViewManager::isProcessingData() const
+{
+    return processing_data_;
+}
+
 ViewContainerWidget* ViewManager::addNewContainerWidget()
 {
     logdbg << "ViewManager: addNewContainerWidget";
-
+    
     container_count_++;
     std::string container_widget_name = "ViewWindow" + std::to_string(container_count_);
 
@@ -507,6 +526,14 @@ ViewContainerWidget* ViewManager::addNewContainerWidget()
 
     assert(container_widgets_.count(container_widget_name) == 1);
     return container_widgets_.at(container_widget_name);
+}
+
+void ViewManager::clearDataInViews()
+{
+    for (auto& view_it : views_)
+    {
+        view_it.second->clearData();
+    }
 }
 
 void ViewManager::registerView(View* view)
@@ -610,8 +637,29 @@ void ViewManager::selectionChangedSlot()
     emit selectionChangedSignal();
 }
 
+void ViewManager::databaseOpenedSlot()
+{
+    loginf << "ViewManager: databaseOpenedSlot";
+
+    for (auto& view_it : views_)
+        view_it.second->databaseOpened();
+}
+
+void ViewManager::databaseClosedSlot()
+{
+    loginf << "ViewManager: databaseClosedSlot";
+
+    clearDataInViews();
+
+    for (auto& view_it : views_)
+        view_it.second->databaseClosed();
+}
+
 void ViewManager::loadingStartedSlot()
 {
+    if (disable_data_distribution_)
+        return;
+
     loginf << "ViewManager: loadingStartedSlot";
 
     for (auto& view_it : views_)
@@ -622,16 +670,25 @@ void ViewManager::loadingStartedSlot()
 // e.g. when data in the beginning was removed, or order of previously emitted data was changed, etc.
 void ViewManager::loadedDataSlot (const std::map<std::string, std::shared_ptr<Buffer>>& data, bool requires_reset)
 {
+    if (disable_data_distribution_)
+        return;
     loginf << "ViewManager: loadedDataSlot: reset " << requires_reset;
+
+    processing_data_ = true;
 
     for (auto& view_it : views_)
         view_it.second->loadedData(data, requires_reset);
+
+    processing_data_ = false;
 
     loginf << "ViewManager: loadedDataSlot: done";
 }
 
 void ViewManager::loadingDoneSlot() // emitted when all dbos have finished loading
 {
+    if (disable_data_distribution_)
+        return;
+
     loginf << "ViewManager: loadingDoneSlot";
 
     for (auto& view_it : views_)

@@ -30,7 +30,7 @@
 #include "boost/date_time/posix_time/posix_time.hpp"
 
 class TaskManager;
-class CreateARTASAssociationsTaskWidget;
+class CreateARTASAssociationsTaskDialog;
 
 class DBContent;
 class Buffer;
@@ -45,11 +45,14 @@ class CreateARTASAssociationsTask : public Task, public Configurable
     Q_OBJECT
 
 public slots:
+    void dialogRunSlot();
+    void dialogCancelSlot();
+
     void createDoneSlot();
     void createObsoleteSlot();
 
-    void newDataSlot(DBContent& object);
-    void loadingDoneSlot(DBContent& object);
+    void loadedDataDataSlot(const std::map<std::string, std::shared_ptr<Buffer>>& data, bool requires_reset);
+    void loadingDoneSlot();
 
     void associationStatusSlot(QString status);
     void saveAssociationsQuestionSlot(QString question_str);
@@ -61,41 +64,19 @@ public:
                                 TaskManager& task_manager);
     virtual ~CreateARTASAssociationsTask();
 
-    TaskWidget* widget();
-    virtual void deleteWidget();
+    CreateARTASAssociationsTaskDialog* dialog();
 
     std::string currentDataSourceName() const;
     void currentDataSourceName(const std::string& currentDataSourceName);
 
-    std::string trackerDsIdVarStr() const;
-    void trackerDsIdVarStr(const std::string& var_str);
     dbContent::Variable* trackerDsIdVar() const;
-
-    std::string trackerTrackNumVarStr() const;
-    void trackerTrackNumVarStr(const std::string& var_str);
-
-    std::string trackerTrackBeginVarStr() const;
-    void trackerTrackBeginVarStr(const std::string& var_str);
-
-    std::string trackerTrackEndVarStr() const;
-    void trackerTrackEndVarStr(const std::string& var_str);
-
-    std::string trackerTrackCoastingVarStr() const;
-    void trackerTrackCoastingVarStr(const std::string& var_str);
-
-    std::string keyVarStr() const;
-    void keyVarStr(const std::string& keyVarStr);
-
-    std::string hashVarStr() const;
-    void hashVarStr(const std::string& hashVarStr);
-
-    std::string todVarStr() const;
-    void todVarStr(const std::string& todVarStr);
-
+    dbContent::Variable* trackerTrackNumVar() const;
+    dbContent::Variable* trackerTrackBeginVar() const;
+    dbContent::Variable* trackerTrackEndVar() const;
+    dbContent::Variable* trackerCoastingVar() const;
+    dbContent::Variable* trackerTRIsVar() const;
     dbContent::MetaVariable* keyVar() const;
-
     dbContent::MetaVariable* hashVar() const;
-
     dbContent::MetaVariable* todVar() const;
 
     float endTrackTime() const;
@@ -143,43 +124,27 @@ public:
 protected:
     std::string current_data_source_name_;
 
-    std::string tracker_ds_id_var_str_;
     dbContent::Variable* tracker_ds_id_var_{nullptr};
-
-    std::string tracker_track_num_var_str_;
     dbContent::Variable* tracker_track_num_var_{nullptr};
-
-    std::string tracker_track_begin_var_str_;
     dbContent::Variable* tracker_track_begin_var_{nullptr};
-
-    std::string tracker_track_end_var_str_;
     dbContent::Variable* tracker_track_end_var_{nullptr};
-
-    std::string tracker_track_coasting_var_str_;
     dbContent::Variable* tracker_track_coasting_var_{nullptr};
+    dbContent::Variable* tracker_tris_var_{nullptr};
 
-    std::string key_var_str_;
-    dbContent::MetaVariable* key_var_{nullptr};
-
-    // contains artas md5 for target reports, tris for tracker
-    std::string hash_var_str_;
-    dbContent::MetaVariable* hash_var_{nullptr};
-
-    std::string tod_var_str_;
+    dbContent::MetaVariable* rec_num_var_{nullptr};
+    dbContent::MetaVariable* hash_var_{nullptr}; // contains artas md5 for target reports, tris for tracker
     dbContent::MetaVariable* tod_var_{nullptr};
+    dbContent::MetaVariable* associations_var_{nullptr};
 
     boost::posix_time::ptime start_time_;
     boost::posix_time::ptime stop_time_;
 
     float end_track_time_{0};  // time-delta after which begin a new track
 
-    float association_time_past_{
-        0};  // time_delta for which associations are considered into past time
-    float association_time_future_{
-        0};  // time_delta for which associations are considered into future time
+    float association_time_past_{0};  // time_delta for which associations are considered into past time
+    float association_time_future_{0};  // time_delta for which associations are considered into future time
 
-    float misses_acceptable_time_{
-        0};  // time delta at beginning/end of recording where misses are acceptable
+    float misses_acceptable_time_{0};  // time delta at beginning/end of recording where misses are acceptable
 
     float associations_dubious_distant_time_{0};
     // time delta of tou where association is dubious bc too distant in time
@@ -194,20 +159,22 @@ protected:
     bool ignore_track_coasting_associations_{false};
     bool mark_track_coasting_associations_dubious_{false};
 
-    std::unique_ptr<CreateARTASAssociationsTaskWidget> widget_;
-
     bool save_associations_{true};
+
+    std::map<std::string, std::shared_ptr<Buffer>> data_;
+
+    std::unique_ptr<CreateARTASAssociationsTaskDialog> dialog_;
 
     std::unique_ptr<CreateARTASAssociationsStatusDialog> status_dialog_{nullptr};
 
-    std::map<std::string, bool> dbo_loading_done_flags_;
     bool dbo_loading_done_{false};
 
     std::shared_ptr<CreateARTASAssociationsJob> create_job_;
     bool create_job_done_{false};
 
-    void checkAndSetVariable(std::string& name_str, dbContent::Variable** var);
-    void checkAndSetMetaVariable(std::string& name_str, dbContent::MetaVariable** var);
+    void checkAndSetTrackerVariable(const std::string& name_str, dbContent::Variable** var);
+    void checkAndSetTrackerVariableFromMeta(const std::string& meta_name_str, dbContent::Variable** var);
+    void checkAndSetMetaVariable(const std::string& name_str, dbContent::MetaVariable** var);
 
     dbContent::VariableSet getReadSetFor(const std::string& dbo_name);
 };

@@ -481,10 +481,6 @@ void ListBoxViewConfigWidget::updateSetWidget()
         return;
     }
 
-    //    while (set_stack_->count() > 0)  // remove all widgets
-    //        set_stack_->removeWidget(set_stack_->widget(0));
-    //    return;
-
     assert (view_->getDataSource()->hasCurrentSet());
 
     connect(view_->getDataSource()->getSet(), &dbContent::VariableOrderedSet::variableAddedChangedSignal,

@@ -23,12 +23,13 @@
 #include "sqliteconnection.h"
 #include "dbinterface.h"
 #include "dbcontent/dbcontent.h"
+#include "dbcontent/dbcontentmanager.h"
 #include "dbcontent/variable/variable.h"
 #include "filtermanager.h"
 #include "logger.h"
 #include "propertylist.h"
 #include "stringconv.h"
-#include "dbcontent/source/dbdatasource.h"
+#include "source/dbdatasource.h"
 
 #include <algorithm>
 #include <iomanip>
@@ -78,6 +79,11 @@ SQLGenerator::SQLGenerator(DBInterface& db_interface) : db_interface_(db_interfa
     ss << "CREATE TABLE " << TABLE_NAME_VIEWPOINTS
        << "(id INT, json TEXT, PRIMARY KEY (id));";
     table_view_points_create_statement_ = ss.str();
+    ss.str(string());
+
+    ss << "CREATE TABLE " << TABLE_NAME_TARGETS
+       << "(utn INT, json TEXT, PRIMARY KEY (utn));";
+    table_targets_create_statement_ = ss.str();
     ss.str(string());
 }
 
@@ -129,6 +135,23 @@ string SQLGenerator::getCreateTableStatement(const DBContent& object)
     }
 
     ss << ");";
+
+    // CREATE [UNIQUE] INDEX index_name ON table_name(column_list);
+
+    ss << "\nCREATE INDEX TOD_INDEX_" << object.name() << " ON " << object.dbTableName() << "(";
+    ss << COMPASS::instance().dbContentManager().metaGetVariable(
+              object.name(), DBContent::meta_var_tod_).dbColumnName()
+       << ");";
+
+    ss << "\nCREATE INDEX DS_ID_INDEX_" << object.name() << " ON " << object.dbTableName() << "(";
+    ss << COMPASS::instance().dbContentManager().metaGetVariable(
+              object.name(), DBContent::meta_var_datasource_id_).dbColumnName()
+       << ");";
+
+    ss << "\nCREATE INDEX LINE_ID_INDEX_" << object.name() << " ON " << object.dbTableName() << "(";
+    ss << COMPASS::instance().dbContentManager().metaGetVariable(
+              object.name(), DBContent::meta_var_line_id_).dbColumnName()
+       << ");";
 
     loginf << "SQLGenerator: getCreateTableStatement: sql '" << ss.str() << "'";
     return ss.str();
@@ -328,6 +351,11 @@ shared_ptr<DBCommand> SQLGenerator::getTableSelectMinMaxNormalStatement(const DB
     return command;
 }
 
+std::string SQLGenerator::getInsertTargetStatement(unsigned int utn, const std::string& info)
+{
+    return "REPLACE INTO " + TABLE_NAME_TARGETS + " VALUES (" + to_string(utn)+ ", '" + info + "');";
+}
+
 string SQLGenerator::getInsertPropertyStatement(const string& id,
                                                 const string& value)
 {
@@ -388,6 +416,13 @@ string SQLGenerator::getSelectAllSectorsStatement()
 {
     stringstream ss;
     ss << "SELECT id, name, layer_name, json FROM " << TABLE_NAME_SECTORS << ";";
+    return ss.str();
+}
+
+string SQLGenerator::getSelectAllTargetsStatement()
+{
+    stringstream ss;
+    ss << "SELECT utn, json FROM " << TABLE_NAME_TARGETS << ";";
     return ss.str();
 }
 
@@ -458,6 +493,10 @@ string SQLGenerator::getTableViewPointsCreateStatement()
     return table_view_points_create_statement_;
 }
 
+std::string SQLGenerator::getTableTargetsCreateStatement()
+{
+    return table_targets_create_statement_;
+}
 
 string SQLGenerator::insertDBUpdateStringBind(shared_ptr<Buffer> buffer,
                                               string tablename)
@@ -518,8 +557,10 @@ string SQLGenerator::createDBUpdateStringBind(shared_ptr<Buffer> buffer,
     ss << "UPDATE " << table_name << " SET ";
 
     if (key_col_name != properties.at(size - 1).name())
+    {
         throw runtime_error(
-                "SQLGenerator: createDBUpdateStringBind: id var not at last position");
+                "SQLGenerator: createDBUpdateStringBind: key_col_name not at last position");
+    }
 
     for (unsigned int cnt = 0; cnt < size; cnt++)
     {
@@ -555,7 +596,8 @@ string SQLGenerator::createDBUpdateStringBind(shared_ptr<Buffer> buffer,
 
 
 shared_ptr<DBCommand> SQLGenerator::getSelectCommand(
-        const DBContent& object, VariableSet read_list, const string& filter, bool use_order,
+        const DBContent& object, VariableSet read_list,
+        std::vector<std::string> extra_from_parts, const string& filter, bool use_order,
         Variable* order_variable, bool use_order_ascending, const string& limit)
 {
     logdbg << "SQLGenerator: getSelectCommand: dbo " << object.name()
@@ -595,10 +637,11 @@ shared_ptr<DBCommand> SQLGenerator::getSelectCommand(
 
     ss << " FROM " << table_db_name;  // << table->getAllTableNames();
 
+    // add extra from parts
+    for (auto& from_part : extra_from_parts)
+        ss << ", " << from_part;
 
-
-
-    logdbg << "SQLGenerator: getSelectCommand: filterting statement";
+    logdbg << "SQLGenerator: getSelectCommand: filtering statement";
     // add filter statement
     if (filter.size() > 0)
         ss << " WHERE "  << filter;
@@ -626,7 +669,7 @@ shared_ptr<DBCommand> SQLGenerator::getSelectCommand(
     command->set(ss.str());
     command->list(property_list);
 
-    logdbg << "SQLGenerator: getSelectCommand: command sql '" << ss.str() << "'";
+    loginf << "SQLGenerator: getSelectCommand: command sql '" << ss.str() << "'";
 
     return command;
 }

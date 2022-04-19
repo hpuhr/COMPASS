@@ -57,11 +57,13 @@ ScatterPlotViewDataWidget::ScatterPlotViewDataWidget(ScatterPlotView* view, Scat
 
     setLayout(main_layout_);
 
-    colors_["Radar"] = QColor("#00FF00");
-    colors_["MLAT"] = QColor("#FF0000");
-    colors_["ADSB"] = QColor("#6666FF");
+    colors_["CAT001"] = QColor("#00FF00");
+    colors_["CAT010"] = QColor("#FFCC00");
+    colors_["CAT020"] = QColor("#FF0000");
+    colors_["CAT021"] = QColor("#6666FF");
+    colors_["CAT048"] = QColor("#00FF00");
     colors_["RefTraj"] = QColor("#FFA500");
-    colors_["Tracker"] = QColor("#CCCCCC");
+    colors_["CAT062"] = QColor("#CCCCCC");
 
     // shortcuts
     {
@@ -168,79 +170,80 @@ void ScatterPlotViewDataWidget::loadingStartedSlot()
     clear();
 }
 
-void ScatterPlotViewDataWidget::updateDataSlot(DBContent& object, std::shared_ptr<Buffer> buffer)
+void ScatterPlotViewDataWidget::updateDataSlot(
+        const std::map<std::string, std::shared_ptr<Buffer>>& data, bool requires_reset)
 {
     logdbg << "ScatterPlotViewDataWidget: updateDataSlot: start";
 
-    if (!buffer->size())
-        return;
-
-    string dbo_name = object.name();
-    buffers_[dbo_name] = buffer;
-
-    unsigned int current_size = buffer->size();
-
-    logdbg << "ScatterPlotViewDataWidget: updateDataSlot: before x " << x_values_[dbo_name].size()
-           << " y " << y_values_[dbo_name].size();
-
-    assert (x_values_[dbo_name].size() == y_values_[dbo_name].size());
-    assert (x_values_[dbo_name].size() == selected_values_[dbo_name].size());
-    assert (x_values_[dbo_name].size() == rec_num_values_[dbo_name].size());
-
-    loginf << "ScatterPlotViewDataWidget: updateDataSlot: dbo " << dbo_name
-           << " canUpdateFromDataX " << canUpdateFromDataX(dbo_name)
-           << " canUpdateFromDataY " << canUpdateFromDataY(dbo_name);
-
-    if (canUpdateFromDataX(dbo_name) && canUpdateFromDataY(dbo_name))
-    {
-        loginf << "ScatterPlotViewDataWidget: updateDataSlot: updating data";
-
-        // add selected flags & rec_nums
-        assert (buffer->has<bool>(DBContent::selected_var.name()));
-        assert (buffer->has<int>("rec_num"));
-
-        NullableVector<bool>& selected_vec = buffer->get<bool>(DBContent::selected_var.name());
-        NullableVector<int>& rec_num_vec = buffer->get<int>("rec_num");
-
-        std::vector<bool>& selected_data = selected_values_[dbo_name];
-        std::vector<unsigned int>& rec_num_data = rec_num_values_[dbo_name];
-
-        unsigned int last_size = 0;
-
-        if (buffer_x_counts_.count(dbo_name))
-            last_size = buffer_x_counts_.at(dbo_name);
-
-        for (unsigned int cnt=last_size; cnt < current_size; ++cnt)
-        {
-            if (selected_vec.isNull(cnt))
-                selected_data.push_back(false);
-            else
-                selected_data.push_back(selected_vec.get(cnt));
-
-            assert (!rec_num_vec.isNull(cnt));
-            rec_num_data.push_back(rec_num_vec.get(cnt));
-        }
-
-        updateFromDataX(dbo_name, current_size);
-        updateFromDataY(dbo_name, current_size);
-    }
-    else
-        logdbg << "ScatterPlotViewDataWidget: updateDataSlot: " << dbo_name
-               << " update not possible";
-
-
-    logdbg << "ScatterPlotViewDataWidget: updateDataSlot: after x " << x_values_[dbo_name].size()
-           << " y " << y_values_[dbo_name].size();
-
-    assert (x_values_[dbo_name].size() == y_values_[dbo_name].size());
-    assert (x_values_[dbo_name].size() == selected_values_[dbo_name].size());
-    assert (x_values_[dbo_name].size() == rec_num_values_[dbo_name].size());
-
-    logdbg << "ScatterPlotViewDataWidget: updateDataSlot: end";
+    buffers_ = data;
 }
 
 void ScatterPlotViewDataWidget::loadingDoneSlot()
 {
+    for (auto& buf_it : buffers_)
+    {
+        string dbo_name = buf_it.first;
+        std::shared_ptr<Buffer> buffer = buf_it.second;
+
+        unsigned int current_size = buffer->size();
+
+        logdbg << "ScatterPlotViewDataWidget: loadingDoneSlot: before x " << x_values_[dbo_name].size()
+               << " y " << y_values_[dbo_name].size();
+
+        assert (x_values_[dbo_name].size() == y_values_[dbo_name].size());
+        assert (x_values_[dbo_name].size() == selected_values_[dbo_name].size());
+        assert (x_values_[dbo_name].size() == rec_num_values_[dbo_name].size());
+
+        loginf << "ScatterPlotViewDataWidget: loadingDoneSlot: dbo " << dbo_name
+               << " canUpdateFromDataX " << canUpdateFromDataX(dbo_name)
+               << " canUpdateFromDataY " << canUpdateFromDataY(dbo_name);
+
+        if (canUpdateFromDataX(dbo_name) && canUpdateFromDataY(dbo_name))
+        {
+            loginf << "ScatterPlotViewDataWidget: loadingDoneSlot: updating data";
+
+            // add selected flags & rec_nums
+            assert (buffer->has<bool>(DBContent::selected_var.name()));
+            assert (buffer->has<unsigned int>(DBContent::meta_var_rec_num_.name()));
+
+            NullableVector<bool>& selected_vec = buffer->get<bool>(DBContent::selected_var.name());
+            NullableVector<unsigned int>& rec_num_vec = buffer->get<unsigned int>(DBContent::meta_var_rec_num_.name());
+
+            std::vector<bool>& selected_data = selected_values_[dbo_name];
+            std::vector<unsigned int>& rec_num_data = rec_num_values_[dbo_name];
+
+            unsigned int last_size = 0;
+
+            if (buffer_x_counts_.count(dbo_name))
+                last_size = buffer_x_counts_.at(dbo_name);
+
+            for (unsigned int cnt=last_size; cnt < current_size; ++cnt)
+            {
+                if (selected_vec.isNull(cnt))
+                    selected_data.push_back(false);
+                else
+                    selected_data.push_back(selected_vec.get(cnt));
+
+                assert (!rec_num_vec.isNull(cnt));
+                rec_num_data.push_back(rec_num_vec.get(cnt));
+            }
+
+            updateFromDataX(dbo_name, current_size);
+            updateFromDataY(dbo_name, current_size);
+        }
+        else
+            logdbg << "ScatterPlotViewDataWidget: loadingDoneSlot: " << dbo_name
+                   << " update not possible";
+
+
+        logdbg << "ScatterPlotViewDataWidget: loadingDoneSlot: after x " << x_values_[dbo_name].size()
+               << " y " << y_values_[dbo_name].size();
+
+        assert (x_values_[dbo_name].size() == y_values_[dbo_name].size());
+        assert (x_values_[dbo_name].size() == selected_values_[dbo_name].size());
+        assert (x_values_[dbo_name].size() == rec_num_values_[dbo_name].size());
+    }
+
     updateMinMax();
 
     updateChart();
@@ -482,6 +485,7 @@ bool ScatterPlotViewDataWidget::canUpdateFromDataX(std::string dbo_name)
         break;
     }
     case PropertyDataType::STRING:
+    case PropertyDataType::JSON:
     {
         return false;
 
@@ -710,6 +714,20 @@ void ScatterPlotViewDataWidget::updateFromDataX(std::string dbo_name, unsigned i
 
         break;
     }
+    case PropertyDataType::JSON:
+    {
+        if (!buffer->has<nlohmann::json>(current_var_name))
+        {
+            logdbg << "ScatterPlotViewDataWidget: updateFromDataX: buffer does not contain " << current_var_name;
+            x_var_not_in_buffer_ = true;
+            return;
+        }
+
+        assert(buffer->has<nlohmann::json>(current_var_name));
+        //NullableVector<string>& data = buffer->get<string>(current_var_name);
+
+        break;
+    }
     default:
         logerr << "ScatterPlotViewDataWidget: updateFromDataX: impossible for property type "
                << Property::asString(data_type);
@@ -865,6 +883,7 @@ bool ScatterPlotViewDataWidget::canUpdateFromDataY(std::string dbo_name)
         break;
     }
     case PropertyDataType::STRING:
+    case PropertyDataType::JSON:
     {
         return false;
 
@@ -1093,6 +1112,20 @@ void ScatterPlotViewDataWidget::updateFromDataY(std::string dbo_name, unsigned i
 
         break;
     }
+    case PropertyDataType::JSON:
+    {
+        if (!buffer->has<nlohmann::json>(current_var_name))
+        {
+            logdbg << "ScatterPlotViewDataWidget: updateFromDataY: buffer does not contain " << current_var_name;
+            y_var_not_in_buffer_ = true;
+            return;
+        }
+
+        assert(buffer->has<nlohmann::json>(current_var_name));
+        //NullableVector<string>& data = buffer->get<string>(current_var_name);
+
+        break;
+    }
     default:
         logerr << "ScatterPlotViewDataWidget: updateFromDataY: impossible for property type "
                << Property::asString(data_type);
@@ -1172,10 +1205,11 @@ void ScatterPlotViewDataWidget::updateFromAllData()
         if (canUpdateFromDataX(buf_it.first) && canUpdateFromDataY(buf_it.first))
         {
             assert (buf_it.second->has<bool>(DBContent::selected_var.name()));
-            assert (buf_it.second->has<int>("rec_num"));
+            assert (buf_it.second->has<unsigned int>(DBContent::meta_var_rec_num_.name()));
 
             NullableVector<bool>& selected_vec = buf_it.second->get<bool>(DBContent::selected_var.name());
-            NullableVector<int>& rec_num_vec = buf_it.second->get<int>("rec_num");
+            NullableVector<unsigned int>& rec_num_vec = buf_it.second->get<unsigned int>(
+                        DBContent::meta_var_rec_num_.name());
 
             std::vector<bool>& selected_data = selected_values_[buf_it.first];
             std::vector<unsigned int>& rec_num_data = rec_num_values_[buf_it.first];
@@ -1394,10 +1428,11 @@ void ScatterPlotViewDataWidget::selectData (double x_min, double x_max, double y
         assert (buf_it.second->has<bool>(DBContent::selected_var.name()));
         NullableVector<bool>& selected_vec = buf_it.second->get<bool>(DBContent::selected_var.name());
 
-        assert (buf_it.second->has<int>("rec_num"));
-        NullableVector<int>& rec_num_vec = buf_it.second->get<int>("rec_num");
+        assert (buf_it.second->has<unsigned int>(DBContent::meta_var_rec_num_.name()));
+        NullableVector<unsigned int>& rec_num_vec = buf_it.second->get<unsigned int>(
+                    DBContent::meta_var_rec_num_.name());
 
-        std::map<int, std::vector<unsigned int>> rec_num_indexes =
+        std::map<unsigned int, std::vector<unsigned int>> rec_num_indexes =
                 rec_num_vec.distinctValuesWithIndexes(0, rec_num_vec.size());
         // rec_num -> index
 

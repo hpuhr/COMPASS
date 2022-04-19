@@ -37,7 +37,7 @@ ListBoxView::ListBoxView(const std::string& class_id, const std::string& instanc
     registerParameter("overwrite_csv", &overwrite_csv_, true);
     registerParameter("show_associations", &show_associations_, false);
 
-    can_show_associations_ = COMPASS::instance().dbContentManager().hasAssociations();
+    can_show_associations_ = false; // COMPASS::instance().dbContentManager().hasAssociations(); TODO_ASSERT
 
     if (!can_show_associations_)
         show_associations_ = false;
@@ -66,10 +66,11 @@ bool ListBoxView::init()
 
     assert(data_source_);
 
-    DBContentManager& object_man = COMPASS::instance().dbContentManager();
-    connect(&object_man, &DBContentManager::loadingDoneSignal, this, &ListBoxView::allLoadingDoneSlot);
-    connect(&object_man, &DBContentManager::loadingDoneSignal,
-            widget_->getDataWidget(), &ListBoxViewDataWidget::loadingDoneSlot);
+//    DBContentManager& object_man = COMPASS::instance().dbContentManager();
+//    connect(&object_man, &DBContentManager::loadingDoneSignal,
+//            this, &ListBoxView::allLoadingDoneSlot);
+//    connect(&object_man, &DBContentManager::loadingDoneSignal,
+//            widget_->getDataWidget(), &ListBoxViewDataWidget::loadingDoneSlot);
 
 //    connect(data_source_, &ListBoxViewDataSource::loadingStartedSignal, widget_->getDataWidget(),
 //            &ListBoxViewDataWidget::loadingStartedSlot);
@@ -101,18 +102,31 @@ bool ListBoxView::init()
 void ListBoxView::loadingStarted()
 {
     loginf << "OSGView: loadingStarted";
+
+    widget_->configWidget()->loadingStartedSlot();
+    widget_->getDataWidget()->loadingStartedSlot();
 }
 
 void ListBoxView::loadedData(const std::map<std::string, std::shared_ptr<Buffer>>& data, bool requires_reset)
 {
     loginf << "ListBoxView: loadedData";
+
+    widget_->getDataWidget()->updateDataSlot(data, requires_reset);
 }
 
 void ListBoxView::loadingDone()
 {
     loginf << "ListBoxView: loadingDone";
+
+    widget_->configWidget()->setStatus("", false);
+
+    widget_->getDataWidget()->loadingDoneSlot();
 }
 
+void ListBoxView::clearData()
+{
+    widget_->getDataWidget()->clearData();
+}
 
 void ListBoxView::generateSubConfigurable(const std::string& class_id,
                                           const std::string& instance_id)
@@ -245,11 +259,11 @@ void ListBoxView::showViewPointSlot (const ViewableDataConfig* vp)
     assert (widget_);
 }
 
-void ListBoxView::allLoadingDoneSlot()
-{
-    loginf << "ListBoxView: allLoadingDoneSlot";
-    assert(widget_);
-    widget_->configWidget()->setStatus("", false);
-    //widget_->getDataWidget()->selectFirstSelectedRow();
-}
+//void ListBoxView::allLoadingDoneSlot()
+//{
+//    loginf << "ListBoxView: allLoadingDoneSlot";
+//    assert(widget_);
+//    widget_->configWidget()->setStatus("", false);
+//    //widget_->getDataWidget()->selectFirstSelectedRow();
+//}
 

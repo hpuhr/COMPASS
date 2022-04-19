@@ -34,13 +34,18 @@ class EvaluationMainTabWidget : public QWidget
 
 private slots:
     void dboRefNameChangedSlot(const std::string& dbo_name);
+    void lineRefChangedSlot(unsigned int line_id);
     void dboTstNameChangedSlot(const std::string& dbo_name);
+    void lineTstChangedSlot(unsigned int line_id);
 
     void changedStandardsSlot(); // eval man
     void changedCurrentStandardSlot(); // eval man
 
 public:
     EvaluationMainTabWidget(EvaluationManager& eval_man, EvaluationManagerWidget& man_widget);
+
+    void updateDataSources();
+    void updateSectors();
 
 protected:
     EvaluationManager& eval_man_;

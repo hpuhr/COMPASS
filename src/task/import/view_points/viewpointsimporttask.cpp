@@ -16,7 +16,7 @@
  */
 
 #include "viewpointsimporttask.h"
-#include "viewpointsimporttaskwidget.h"
+#include "viewpointsimporttaskdialog.h"
 #include "taskmanager.h"
 #include "compass.h"
 #include "dbinterface.h"
@@ -25,9 +25,9 @@
 #include "files.h"
 #include "logger.h"
 #include "taskmanagerwidget.h"
+#include "viewmanager.h"
 #include "viewpointsimporttask.h"
 #include "viewpointsimporttaskwidget.h"
-#include "savedfile.h"
 #include "global.h"
 
 #include "asteriximporttask.h"
@@ -49,7 +49,7 @@ using namespace std;
 using namespace nlohmann;
 using namespace Utils;
 
-const std::string DONE_PROPERTY_NAME = "view_points_imported";
+//const std::string DONE_PROPERTY_NAME = "view_points_imported";
 
 ViewPointsImportTask::ViewPointsImportTask(const std::string& class_id, const std::string& instance_id,
                                            TaskManager& task_manager)
@@ -57,163 +57,66 @@ ViewPointsImportTask::ViewPointsImportTask(const std::string& class_id, const st
       Configurable(class_id, instance_id, &task_manager, "task_import_view_points.json")
 {
     tooltip_ =
-            "Allows import of view points and associated datasets. This task can not "
-            "be run, but is performed using the 'Import' button.";
-
-    registerParameter("current_filename", &current_filename_, "");
+            "Allows import of view points and associated datasets.";
 
     createSubConfigurables(); // no thing
 
-    if (current_filename_.size())
-        parseCurrentFile();
+    current_error_ = "No filename set";
 }
 
 ViewPointsImportTask::~ViewPointsImportTask()
 {
-    for (auto it : file_list_)
-        delete it.second;
-
-    file_list_.clear();
 }
 
-TaskWidget* ViewPointsImportTask::widget()
+ViewPointsImportTaskDialog* ViewPointsImportTask::dialog()
 {
-    if (!widget_)
+    if (!dialog_)
     {
-        widget_.reset(new ViewPointsImportTaskWidget(*this));
+        dialog_.reset(new ViewPointsImportTaskDialog(*this));
 
-        //        connect(widget_.get(), &ViewPointsImportTaskWidget::databaseOpenedSignal, this,
-        //                &ViewPointsImportTask::databaseOpenedSlot);
-        connect(&task_manager_, &TaskManager::expertModeChangedSignal, widget_.get(),
-                &ViewPointsImportTaskWidget::expertModeChangedSlot);
+        connect(dialog_.get(), &ViewPointsImportTaskDialog::importSignal,
+                this, &ViewPointsImportTask::dialogImportSlot);
+
+        connect(dialog_.get(), &ViewPointsImportTaskDialog::cancelSignal,
+                this, &ViewPointsImportTask::dialogCancelSlot);
     }
 
-    return widget_.get();
+    assert(dialog_);
+    return dialog_.get();
+
 }
 
-void ViewPointsImportTask::deleteWidget() { widget_.reset(nullptr); }
+void ViewPointsImportTask::dialogImportSlot()
+{
+    assert (canRun());
+
+    assert (dialog_);
+    dialog_->hide();
+
+    run();
+}
+
+void ViewPointsImportTask::dialogCancelSlot()
+{
+    assert (dialog_);
+    dialog_->hide();
+}
 
 void ViewPointsImportTask::generateSubConfigurable(const std::string& class_id,
                                                    const std::string& instance_id)
 {
-    if (class_id == "JSONFile")
-    {
-        SavedFile* file = new SavedFile(class_id, instance_id, this);
-        assert(file_list_.count(file->name()) == 0);
-        file_list_.insert(std::pair<std::string, SavedFile*>(file->name(), file));
-    }
-    else
-        throw std::runtime_error("ViewPointsImportTask: generateSubConfigurable: unknown class_id " +
-                                 class_id);
+    throw std::runtime_error("ViewPointsImportTask: generateSubConfigurable: unknown class_id " +
+                             class_id);
 }
 
-bool ViewPointsImportTask::checkPrerequisites()
+void ViewPointsImportTask::importFilename(const std::string& filename)
 {
-    if (COMPASS::instance().interface().hasProperty(DONE_PROPERTY_NAME))
-        done_ = COMPASS::instance().interface().getProperty(DONE_PROPERTY_NAME) == "1";
-
-    return COMPASS::instance().interface().ready();  // must be connected
-}
-
-bool ViewPointsImportTask::isRecommended()
-{
-    if (!checkPrerequisites())
-        return false;
-
-    if (COMPASS::instance().dbContentManager().hasData())
-        return false; // not recommended if already has data
-
-    return canImport();
-}
-
-bool ViewPointsImportTask::isRequired()
-{
-    return false;
-}
-
-std::string ViewPointsImportTask::currentFilename() const
-{
-    return current_filename_;
-}
-
-void ViewPointsImportTask::addFile(const std::string& filename)
-{
-    loginf << "ViewPointsImportTask: addFile: filename '" << filename << "'";
-
-    if (file_list_.count(filename) != 0)
-        throw std::invalid_argument("ViewPointsImportTask: addFile: name '" + filename +
-                                    "' already in use");
-
-    std::string instancename = filename;
-    instancename.erase(std::remove(instancename.begin(), instancename.end(), '/'),
-                       instancename.end());
-
-    Configuration& config = addNewSubConfiguration("JSONFile", "JSONFile" + instancename);
-    config.addParameterString("name", filename);
-    generateSubConfigurable("JSONFile", "JSONFile" + instancename);
-
     current_filename_ = filename;
-    parseCurrentFile();
-
-    emit statusChangedSignal(name_);
-
-    if (widget_)
-        widget_->updateFileListSlot();
-}
-
-void ViewPointsImportTask::removeCurrentFilename()
-{
-    loginf << "ViewPointsImportTask: removeCurrentFilename: filename '" << current_filename_ << "'";
-
-    assert(current_filename_.size());
-    assert(hasFile(current_filename_));
-
-    if (file_list_.count(current_filename_) != 1)
-        throw std::invalid_argument("ViewPointsImportTask: removeCurrentFilename: name '" +
-                                    current_filename_ + "' not in use");
-
-    delete file_list_.at(current_filename_);
-    file_list_.erase(current_filename_);
-    current_filename_ = "";
-    current_data_ = json::object();
-
-    emit statusChangedSignal(name_);
-
-    if (widget_)
-    {
-        widget_->updateFileListSlot();
-        widget_->updateContext();
-    }
-}
-
-void ViewPointsImportTask::removeAllFiles ()
-{
-    loginf << "ViewPointsImportTask: removeAllFiles";
-
-    while (file_list_.size())
-    {
-        delete file_list_.begin()->second;
-        file_list_.erase(file_list_.begin());
-    }
-
-    current_filename_ = "";
-    current_data_ = json::object();
-
-    emit statusChangedSignal(name_);
-
-    if (widget_)
-    {
-        widget_->updateFileListSlot();
-        widget_->updateContext();
-    }
-}
-
-void ViewPointsImportTask::currentFilename(const std::string& value)
-{
-    loginf << "ViewPointsImportTask: currentFilename: value '" << value << "'";
-    current_filename_ = value;
 
     parseCurrentFile();
+
+    if (dialog_)
+        dialog_->updateContext();
 }
 
 std::string ViewPointsImportTask::currentError() const
@@ -250,9 +153,6 @@ void ViewPointsImportTask::parseCurrentFile ()
         logerr << "ViewPointsImportTask: parseCurrentFile: " << current_error_;
     }
 
-    if (widget_)
-        widget_->updateContext();
-
     loginf << "ViewPointsImportTask: parseCurrentFile: done";
 }
 
@@ -266,20 +166,17 @@ void ViewPointsImportTask::checkParsedData ()
     if (!current_data_.contains("view_point_context"))
         throw std::runtime_error("current data has no context information");
 
+    if (!current_data_.contains("content_type")
+            || !current_data_.at("content_type").is_string()
+            || current_data_.at("content_type") != "view_points")
+        throw std::runtime_error("current data is not view point content");
+
+    if (!current_data_.contains("content_version")
+            || !current_data_.at("content_version").is_string()
+            || current_data_.at("content_version") != "0.2")
+        throw std::runtime_error("current data content version is not supported");
+
     json& context = current_data_.at("view_point_context");
-
-    if (!context.contains("version"))
-        throw std::runtime_error("current data context has no version");
-
-    json& version = context.at("version");
-
-    if (!version.is_string())
-        throw std::runtime_error("current data context version is not string");
-
-    string version_str = version;
-
-    if (version_str != "0.1")
-        throw std::runtime_error("current data context version '"+version_str+"' is not supported");
 
     if (context.contains("datasets"))
     {
@@ -288,7 +185,7 @@ void ViewPointsImportTask::checkParsedData ()
 
         for (json& ds_it : context.at("datasets").get<json::array_t>())
         {
-            if (!ds_it.contains("name") || !ds_it.at("name").is_string())
+            if (ds_it.contains("name") && !ds_it.at("name").is_string())
                 throw std::runtime_error("dataset '"+ds_it.dump()+"' does not contain a valid name");
 
             if (!ds_it.contains("filename") || !ds_it.at("filename").is_string())
@@ -348,20 +245,40 @@ void ViewPointsImportTask::checkParsedData ()
            << " view points";
 }
 
+bool ViewPointsImportTask::checkPrerequisites()
+{
+    return canImport();
+}
+
+bool ViewPointsImportTask::isRecommended()
+{
+    return false;
+}
+
+bool ViewPointsImportTask::isRequired()
+{
+    return false;
+}
+
 bool ViewPointsImportTask::canImport ()
 {
     return current_error_.size() == 0;
 }
 
-void ViewPointsImportTask::import ()
+bool ViewPointsImportTask::canRun()
+{
+    return canImport();
+}
+
+void ViewPointsImportTask::run()
 {
     loginf << "ViewPointsImportTask: import";
 
-    assert (canImport());
+    assert (canImport()); // checked file content, version etc
+    done_ = false;
+    stopped_ = false;
 
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-
-    finished_ = false;
 
     // view points
 
@@ -389,8 +306,8 @@ void ViewPointsImportTask::import ()
         else
         {
             loginf << "ViewPointsImportTask: import: aborted";
-            task_manager_.appendInfo("ViewPointsImportTask: import aborted by user");
-            finished_ = true;
+
+            done_ = true;
             return;
         }
     }
@@ -408,8 +325,9 @@ void ViewPointsImportTask::import ()
         db_interface.setViewPoint(id, vp_it.dump());
     }
 
+    COMPASS::instance().viewManager().loadViewPoints();
+
     loginf << "ViewPointsImportTask: import: imported " << to_string(view_points.size()) << " view points";
-    task_manager_.appendSuccess("ViewPointsImportTask: imported "+to_string(view_points.size())+" view points");
 
     QApplication::restoreOverrideCursor();
 
@@ -424,10 +342,15 @@ void ViewPointsImportTask::import ()
 
             for (auto& ds_it : context.at("datasets").get<json::array_t>())
             {
-                std::string name = ds_it.at("name");
+                std::string name;
+
+                if (ds_it.contains("name"))
+                    name= ds_it.at("name");
+
                 std::string filename = ds_it.at("filename");
 
-                loginf << "ViewPointsImportTask: import: importing dataset '" << name << "' file '" << filename << "'";
+                loginf << "ViewPointsImportTask: import: importing dataset name '" << name
+                       << "' file '" << filename << "'";
 
                 if (!Files::fileExists(filename))
                 {
@@ -439,41 +362,15 @@ void ViewPointsImportTask::import ()
                     assert (Files::fileExists(filename));
                 }
 
-                QCoreApplication::processEvents();
-
-                loginf << "ViewPointsImportTask: import: wait done";
-
-                TaskManagerWidget* widget = task_manager_.widget();
-                assert (widget);
-
                 ASTERIXImportTask& asterix_importer_task = task_manager_.asterixImporterTask();
 
-                widget->setCurrentTask(asterix_importer_task);
-                if(widget->getCurrentTaskName() != asterix_importer_task.name())
+                // set data source info
+                if (ds_it.contains("ds_name") && ds_it.contains("ds_sac") && ds_it.contains("ds_sic"))
                 {
-                    logerr << "ViewPointsImportTask: import: wrong task '" << widget->getCurrentTaskName()
-                           << "' selected, aborting";
-                    finished_ = true;
-                    return;
-                }
+                    TODO_ASSERT
 
-//                ASTERIXImportTaskWidget* asterix_import_task_widget =
-//                        dynamic_cast<ASTERIXImportTaskWidget*>(asterix_importer_task.widget());
-//                assert(asterix_import_task_widget);
+//                    ManageDataSourcesTask& ds_task = COMPASS::instance().taskManager().manageDataSourcesTask();
 
-//                asterix_import_task_widget->addFile(filename);
-//                asterix_import_task_widget->selectFile(filename);
-
-//                ASTERIXOverrideWidget* asterix_override_widget = asterix_import_task_widget->overrideWidget();
-//                assert (asterix_override_widget);
-
-                TODO_ASSERT
-
-//                ManageDataSourcesTask& ds_task = COMPASS::instance().taskManager().manageDataSourcesTask();
-
-//                // set data source info
-//                if (ds_it.contains("ds_name") && ds_it.contains("ds_sac") && ds_it.contains("ds_sic"))
-//                {
 //                    assert (ds_it.at("ds_name").is_string());
 //                    assert (ds_it.at("ds_sac").is_number());
 //                    assert (ds_it.at("ds_sic").is_number());
@@ -487,7 +384,7 @@ void ViewPointsImportTask::import ()
 //                    if (!ds_task.hasDataSource("Tracker", ds_sac, ds_sic)) // add if not existing
 //                    {
 //                        loginf << "ViewPointsImportTask: import: adding data source '" << ds_name << "' "
-//                               << ds_sac << "/" << ds_sic;
+//                                                       << ds_sac << "/" << ds_sic;
 //                        StoredDBODataSource& new_ds = ds_task.addNewStoredDataSource("Tracker");
 //                        new_ds.name(ds_name);
 //                        new_ds.sac(ds_sac);
@@ -496,17 +393,19 @@ void ViewPointsImportTask::import ()
 //                    else // set name if existing
 //                    {
 //                        loginf << "ViewPointsImportTask: import: setting data source '" << ds_name << "' "
-//                               << ds_sac << "/" << ds_sic;
+//                                                       << ds_sac << "/" << ds_sic;
 //                        StoredDBODataSource& ds = ds_task.getDataSource("Tracker", ds_sac, ds_sic);
 //                        ds.name(ds_name);
 //                    }
-//                }
+                }
 
 
-//            if (ds_it.contains("ds_sac") && ds_it.contains("ds_sic")
-//                        && ds_it.contains("ds_sac_override") && ds_it.contains("ds_sic_override")
-//                        && ds_it.contains("time_offset"))
-//                {
+                if (ds_it.contains("ds_sac") && ds_it.contains("ds_sic")
+                        && ds_it.contains("ds_sac_override") && ds_it.contains("ds_sic_override")
+                        && ds_it.contains("time_offset"))
+                {
+                    TODO_ASSERT
+
 //                    loginf << "ViewPointsImportTask: import: override information set";
 
 //                    // set override information
@@ -541,7 +440,7 @@ void ViewPointsImportTask::import ()
 //                    if (!ds_task.hasDataSource("Tracker", ds_sac, ds_sic)) // add if not existing
 //                    {
 //                        loginf << "ViewPointsImportTask: import: adding override data source '" << ds_name << "' "
-//                               << ds_sac << "/" << ds_sic;
+//                                                       << ds_sac << "/" << ds_sic;
 //                        StoredDBODataSource& new_ds = ds_task.addNewStoredDataSource("Tracker");
 //                        new_ds.name(ds_name);
 //                        new_ds.sac(ds_sac);
@@ -550,24 +449,24 @@ void ViewPointsImportTask::import ()
 //                    else // set name if existing
 //                    {
 //                        loginf << "ViewPointsImportTask: import: setting override data source '" << ds_name << "' "
-//                               << ds_sac << "/" << ds_sic;
+//                                                       << ds_sac << "/" << ds_sic;
 //                        StoredDBODataSource& ds = ds_task.getDataSource("Tracker", ds_sac, ds_sic);
 //                        ds.name(ds_name);
 //                    }
-//                }
-//                else
-//                {
-//                    loginf << "ViewPointsImportTask: import: override information not set";
-//                    asterix_importer_task.overrideActive(false);
-//                }
-//                asterix_override_widget->updateSlot();
+                }
+                else
+                {
+                    loginf << "ViewPointsImportTask: import: override information not set";
+                    asterix_importer_task.overrideTodActive(false);
+                }
+                asterix_importer_task.importFilename(filename);
 
                 assert(asterix_importer_task.canRun());
                 asterix_importer_task.showDoneSummary(false);
 
                 //widget->runCurrentTaskSlot();
                 loginf << "ViewPointsImportTask: import: running task";
-                widget->runTask(asterix_importer_task);
+                asterix_importer_task.run();
 
                 while (!asterix_importer_task.done())
                 {
@@ -579,17 +478,19 @@ void ViewPointsImportTask::import ()
 
             }
 
-            task_manager_.appendSuccess("ViewPointsImportTask: import of ASTERIX files done");
+            //task_manager_.appendSuccess("ViewPointsImportTask: import of ASTERIX files done");
 
-            COMPASS::instance().interface().setProperty(DONE_PROPERTY_NAME, "1");
+            done_ = true;
 
             emit doneSignal(name_);
         }
     }
 
-    finished_ = true;
-
     loginf << "ViewPointsImportTask: done";
+}
+void ViewPointsImportTask::stop()
+{
+
 }
 
 const nlohmann::json& ViewPointsImportTask::currentData() const
@@ -597,7 +498,3 @@ const nlohmann::json& ViewPointsImportTask::currentData() const
     return current_data_;
 }
 
-bool ViewPointsImportTask::finished() const
-{
-    return finished_;
-}

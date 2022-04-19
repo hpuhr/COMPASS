@@ -122,11 +122,13 @@ HistogramViewDataWidget::HistogramViewDataWidget(HistogramView* view, HistogramV
 
     setLayout(main_layout_);
 
-    colors_["Radar"] = QColor("#00FF00");
-    colors_["MLAT"] = QColor("#FF0000");
-    colors_["ADSB"] = QColor("#6666FF");
+    colors_["CAT001"] = QColor("#00FF00");
+    colors_["CAT010"] = QColor("#FFCC00");
+    colors_["CAT020"] = QColor("#FF0000");
+    colors_["CAT021"] = QColor("#6666FF");
+    colors_["CAT048"] = QColor("#00FF00");
     colors_["RefTraj"] = QColor("#FFA500");
-    colors_["Tracker"] = QColor("#CCCCCC");
+    colors_["CAT062"] = QColor("#CCCCCC");
 
     // shortcuts
     {
@@ -209,14 +211,13 @@ void HistogramViewDataWidget::loadingStartedSlot()
     updateChart();
 }
 
-void HistogramViewDataWidget::updateDataSlot(DBContent& object, std::shared_ptr<Buffer> buffer)
+void HistogramViewDataWidget::updateDataSlot(
+        const std::map<std::string, std::shared_ptr<Buffer>>& data, bool requires_reset)
 {
     logdbg << "HistogramViewDataWidget: updateDataSlot: start";
 
-    if (!buffer->size())
-        return;
+    buffers_ = data;
 
-    buffers_[object.name()] = buffer;
     //updateFromData(object.name());
 
     logdbg << "HistogramViewDataWidget: updateDataSlot: end";
@@ -592,6 +593,19 @@ void HistogramViewDataWidget::updateFromData(std::string dbo_name)
         }
 
         assert(buffer->has<string>(current_var_name));
+        //NullableVector<string>& data = buffer->get<string>(current_var_name);
+
+        break;
+    }
+    case PropertyDataType::JSON:
+    {
+        if (!buffer->has<nlohmann::json>(current_var_name))
+        {
+            loginf << "HistogramViewDataWidget: updateFromData: buffer does not contain " << current_var_name;
+            return;
+        }
+
+        assert(buffer->has<nlohmann::json>(current_var_name));
         //NullableVector<string>& data = buffer->get<string>(current_var_name);
 
         break;
@@ -1735,6 +1749,22 @@ void HistogramViewDataWidget::calculateGlobalMinMax()
 
             break;
         }
+        case PropertyDataType::JSON:
+        {
+            if (!buffer->has<nlohmann::json>(current_var_name))
+            {
+                loginf << "HistogramViewDataWidget: calculateGlobalMinMax: buffer does not contain "
+                       << current_var_name;
+                data_not_in_buffer_ = true;
+                return;
+            }
+
+            assert(buffer->has<nlohmann::json>(current_var_name));
+//            NullableVector<nlohmann::json>& data = buffer->get<nlohmann::json>(current_var_name);
+//            updateMinMax (data);
+
+            break;
+        }
         default:
             logerr << "HistogramViewDataWidget: updateFromData: impossible for property type "
                    << Property::asString(data_type);
@@ -2233,6 +2263,20 @@ void HistogramViewDataWidget::rectangleSelectedSlot (unsigned int index1, unsign
             }
 
             assert(buffer->has<string>(current_var_name));
+            //NullableVector<string>& data = buffer->get<string>(current_var_name);
+
+            break;
+        }
+        case PropertyDataType::JSON:
+        {
+            if (!buffer->has<nlohmann::json>(current_var_name))
+            {
+                loginf << "HistogramViewDataWidget: rectangleSelectedSlot: buffer does not contain "
+                       << current_var_name;
+                return;
+            }
+
+            assert(buffer->has<nlohmann::json>(current_var_name));
             //NullableVector<string>& data = buffer->get<string>(current_var_name);
 
             break;

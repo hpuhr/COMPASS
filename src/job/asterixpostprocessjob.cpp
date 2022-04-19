@@ -1,6 +1,7 @@
-﻿#include "asterixpostprocessjob.h"
+﻿#include "dbcontent/dbcontent.h"
+#include "asterixpostprocessjob.h"
 #include "dbcontent/dbcontentmanager.h"
-#include "dbcontent/dbcontent.h"
+#include "datasourcemanager.h"
 #include "buffer.h"
 #include "compass.h"
 #include "mainwindow.h"
@@ -12,13 +13,18 @@
 
 #include "boost/date_time/posix_time/posix_time.hpp"
 
+const float tod_24h = 24 * 60 * 60;
+
 using namespace std;
 using namespace nlohmann;
 using namespace Utils;
 
-ASTERIXPostprocessJob::ASTERIXPostprocessJob(map<string, shared_ptr<Buffer>> buffers, bool do_timestamp_checks)
+ASTERIXPostprocessJob::ASTERIXPostprocessJob(map<string, shared_ptr<Buffer>> buffers,
+                                             bool override_tod_active, float override_tod_offset,
+                                             bool do_timestamp_checks)
     : Job("ASTERIXPostprocessJob"),
-      buffers_(move(buffers)), do_timestamp_checks_(do_timestamp_checks)
+      buffers_(move(buffers)), override_tod_active_(override_tod_active), override_tod_offset_(override_tod_offset),
+      do_timestamp_checks_(do_timestamp_checks)
 {
     network_time_offset_ = COMPASS::instance().mainWindow().importASTERIXFromNetworkTimeOffset();
 }
@@ -31,6 +37,9 @@ void ASTERIXPostprocessJob::run()
 
     started_ = true;
 
+    if (override_tod_active_)
+        doTodOverride();
+
     if (do_timestamp_checks_)
         doFutureTimestampsCheck();
 
@@ -41,6 +50,49 @@ void ASTERIXPostprocessJob::run()
     //    loginf << "UGA Buffer sort took " << String::timeStringFromDouble(ms / 1000.0, true);
 
     done_ = true;
+}
+
+void ASTERIXPostprocessJob::doTodOverride()
+{
+    assert (override_tod_active_);
+
+    DBContentManager& obj_man = COMPASS::instance().dbContentManager();
+
+    unsigned int buffer_size;
+
+    for (auto& buf_it : buffers_)
+    {
+        buffer_size = buf_it.second->size();
+
+        assert (obj_man.metaVariable(DBContent::meta_var_tod_.name()).existsIn(buf_it.first));
+
+        dbContent::Variable& tod_var = obj_man.metaVariable(DBContent::meta_var_tod_.name()).getFor(buf_it.first);
+
+        Property tod_prop {tod_var.name(), tod_var.dataType()};
+
+        assert (buf_it.second->hasProperty(tod_prop));
+
+        NullableVector<float>& tod_vec = buf_it.second->get<float>(tod_var.name());
+
+        for (unsigned int index=0; index < buffer_size; ++index)
+        {
+            if (!tod_vec.isNull(index))
+            {
+                float& tod_ref = tod_vec.getRef(index);
+
+                tod_ref += override_tod_offset_;
+
+                // check for out-of-bounds because of midnight-jump
+                while (tod_ref < 0.0f)
+                    tod_ref += tod_24h;
+                while (tod_ref > tod_24h)
+                    tod_ref -= tod_24h;
+
+                assert(tod_ref >= 0.0f);
+                assert(tod_ref <= tod_24h);
+            }
+        }
+    }
 }
 
 void ASTERIXPostprocessJob::doFutureTimestampsCheck()
@@ -62,9 +114,9 @@ void ASTERIXPostprocessJob::doFutureTimestampsCheck()
     {
         buffer_size = buf_it.second->size();
 
-        assert (obj_man.metaVariable(DBContent::meta_var_tod_id_.name()).existsIn(buf_it.first));
+        assert (obj_man.metaVariable(DBContent::meta_var_tod_.name()).existsIn(buf_it.first));
 
-        dbContent::Variable& tod_var = obj_man.metaVariable(DBContent::meta_var_tod_id_.name()).getFor(buf_it.first);
+        dbContent::Variable& tod_var = obj_man.metaVariable(DBContent::meta_var_tod_.name()).getFor(buf_it.first);
 
         Property tod_prop {tod_var.name(), tod_var.dataType()};
 
@@ -119,7 +171,8 @@ void ASTERIXPostprocessJob::doRadarPlotPositionCalculations()
 
     // do radar position projection
 
-    DBContentManager& dbo_man = COMPASS::instance().dbContentManager();
+    DataSourceManager& ds_man = COMPASS::instance().dataSourceManager();
+    DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
     ProjectionManager& proj_man = ProjectionManager::instance();
 
     assert(proj_man.hasCurrentProjection());
@@ -149,8 +202,8 @@ void ASTERIXPostprocessJob::doRadarPlotPositionCalculations()
         unsigned int buffer_size = buffer->size();
         assert(buffer_size);
 
-        assert (dbo_man.existsObject(dbo_name));
-        DBContent& db_object = dbo_man.object(dbo_name);
+        assert (dbcont_man.existsDBContent(dbo_name));
+        DBContent& db_object = dbcont_man.dbContent(dbo_name);
 
         assert (db_object.hasVariable(DBContent::meta_var_datasource_id_.name()));
         assert (db_object.hasVariable(DBContent::var_radar_range_.name()));
@@ -206,8 +259,12 @@ void ASTERIXPostprocessJob::doRadarPlotPositionCalculations()
         {
             if (!projection.hasCoordinateSystem(ds_id_it))
             {
-                assert (dbo_man.hasConfigDataSource(ds_id_it)
-                        || dbo_man.hasDataSource(ds_id_it)); // creation done after in doDataSourcesBeforeInsert
+                if (!ds_man.hasConfigDataSource(ds_id_it) && !ds_man.hasDBDataSource(ds_id_it))
+                {
+                    logwrn << "ASTERIXPostprocessJob: doRadarPlotPositionCalculations: data source id "
+                           << ds_id_it << " not defined in config or db";
+                    continue;
+                }
 
                 //                if (!dbo_man.hasDataSource(ds_id_it))
                 //                {
@@ -222,43 +279,40 @@ void ASTERIXPostprocessJob::doRadarPlotPositionCalculations()
 
                 //                assert (dbo_man.hasDataSource(ds_id_it));
 
-                if (dbo_man.hasConfigDataSource(ds_id_it))
+                if (ds_man.hasConfigDataSource(ds_id_it))
                 {
-                    dbContent::ConfigurationDataSource& data_source = dbo_man.configDataSource(ds_id_it);
+                    dbContent::ConfigurationDataSource& data_source = ds_man.configDataSource(ds_id_it);
 
-                    if (data_source.info().contains("latitude")
-                            && data_source.info().contains("longitude")
-                            && data_source.info().contains("altitude"))
+                    if (data_source.hasFullPosition())
                     {
-                        loginf << "ASTERIXPostprocessJob: run: adding proj ds " << ds_id_it
-                               << " lat/long " << (double) data_source.info().at("latitude") << "," <<
-                                  (double) data_source.info().at("longitude")
-                               << " alt " << (double) data_source.info().at("altitude");
+                        loginf << "ASTERIXPostprocessJob: doRadarPlotPositionCalculations: adding proj ds " << ds_id_it
+                               << " lat/long " << data_source.latitude()
+                               << "," << data_source.longitude()
+                               << " alt " << data_source.altitude();
 
-                        projection.addCoordinateSystem(ds_id_it, data_source.info().at("latitude"),
-                                                       data_source.info().at("longitude"),
-                                                       data_source.info().at("altitude"));
+                        projection.addCoordinateSystem(ds_id_it, data_source.latitude(),
+                                                       data_source.longitude(),
+                                                       data_source.altitude());
                     }
                     else
-                        logerr << "ASTERIXPostprocessJob: run: config ds " << data_source.name()
+                        logerr << "ASTERIXPostprocessJob: doRadarPlotPositionCalculations: config ds "
+                               << data_source.name()
                                << " defined but missing position info";
                 }
-                else if (dbo_man.hasDataSource(ds_id_it))
+                else if (ds_man.hasDBDataSource(ds_id_it))
                 {
-                    dbContent::DBDataSource& data_source = dbo_man.dataSource(ds_id_it);
+                    dbContent::DBDataSource& data_source = ds_man.dbDataSource(ds_id_it);
 
-                    if (data_source.info().contains("latitude")
-                            && data_source.info().contains("longitude")
-                            && data_source.info().contains("altitude"))
+                    if (data_source.hasFullPosition())
                     {
-                        loginf << "ASTERIXPostprocessJob: run: adding proj ds " << data_source.id()
-                               << " lat/long " << (double) data_source.info().at("latitude") << "," <<
-                                  (double) data_source.info().at("longitude")
-                               << " alt " << (double) data_source.info().at("altitude");
+                        loginf << "ASTERIXPostprocessJob: run: adding proj ds " << ds_id_it
+                               << " lat/long " << data_source.latitude()
+                               << "," << data_source.longitude()
+                               << " alt " << data_source.altitude();
 
-                        projection.addCoordinateSystem(data_source.id(), data_source.info().at("latitude"),
-                                                       data_source.info().at("longitude"),
-                                                       data_source.info().at("altitude"));
+                        projection.addCoordinateSystem(ds_id_it, data_source.latitude(),
+                                                       data_source.longitude(),
+                                                       data_source.altitude());
                     }
                     else
                         logerr << "ASTERIXPostprocessJob: run: ds " << data_source.name()

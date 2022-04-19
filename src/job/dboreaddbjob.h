@@ -41,6 +41,7 @@ class DBOReadDBJob : public Job
 
   public:
     DBOReadDBJob(DBInterface& db_interface, DBContent& dbobject, dbContent::VariableSet read_list,
+                 const std::vector<std::string>& extra_from_parts,
                  std::string custom_filter_clause, std::vector<dbContent::Variable*> filtered_variables,
                  bool use_order, dbContent::Variable* order_variable, bool use_order_ascending,
                  const std::string& limit_str);
@@ -56,6 +57,7 @@ class DBOReadDBJob : public Job
     DBInterface& db_interface_;
     DBContent& dbobject_;
     dbContent::VariableSet read_list_;
+    std::vector<std::string> extra_from_parts_;
     std::string custom_filter_clause_;
     std::vector<dbContent::Variable*> filtered_variables_;
     bool use_order_;
@@ -64,6 +66,7 @@ class DBOReadDBJob : public Job
     std::string limit_str_;
 
     unsigned int row_count_{0};
+    std::shared_ptr<Buffer> cached_buffer_;
 
     boost::posix_time::ptime start_time_;
     boost::posix_time::ptime stop_time_;

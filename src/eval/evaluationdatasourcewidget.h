@@ -32,35 +32,35 @@ class EvaluationDataSourceWidget : public QFrame
 
 signals:
     void dboNameChangedSignal(const std::string& dbo_name);
+    void lineChangedSignal(unsigned int line_id);
 
 protected slots:
     void dboNameChangedSlot();
     /// @brief Updates the sensor active checkboxes
     void toggleDataSourceSlot();
+    void lineIDEditSlot(const QString& text);
 
 
 public:
-    EvaluationDataSourceWidget(const std::string& title, const std::string& dbo_name,
-                               std::map<int, ActiveDataSource>& data_sources,
+    EvaluationDataSourceWidget(const std::string& title, const std::string& dbo_name, unsigned int line_id,
                                QWidget* parent=nullptr, Qt::WindowFlags f=Qt::WindowFlags());
 
     virtual ~EvaluationDataSourceWidget();
 
+    void updateDataSources();
+
 protected:
     std::string title_;
     std::string dbo_name_;
-
-    /// Container with checkboxes for all sensors (sensor number -> checkbox)
-    std::map<int, ActiveDataSource>& data_sources_;
+    unsigned int line_id_;
 
     DBContentComboBox* dbo_combo_ {nullptr};
 
     QGridLayout* data_source_layout_ {nullptr};
-    std::map<int, QCheckBox*> data_sources_checkboxes_;
+    std::map<unsigned int, QCheckBox*> data_sources_checkboxes_;
 
-    void updateDataSources();
     void updateCheckboxesChecked();
-    void updateCheckboxesDisabled();
+    //void updateCheckboxesDisabled();
 };
 
 #endif // EVALUATIONDATASOURCEWIDGET_H

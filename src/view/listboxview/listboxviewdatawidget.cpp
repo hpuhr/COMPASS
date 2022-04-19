@@ -80,22 +80,10 @@ ListBoxViewDataWidget::~ListBoxViewDataWidget()
     // buffer_tables_.clear();
 }
 
-void ListBoxViewDataWidget::clearTables()
+void ListBoxViewDataWidget::clearData()
 {
-    logdbg << "ListBoxViewDataWidget: updateTables: start";
-    // TODO
-    //  std::map <DB_OBJECT_TYPE, BufferTableWidget*>::iterator it;
+    logdbg << "ListBoxViewDataWidget: clearData";
 
-    //  for (it = buffer_tables_.begin(); it != buffer_tables_.end(); it++)
-    //  {
-    //    it->second->show (0, 0, false);
-    //  }
-
-    logdbg << "ListBoxViewDataWidget: updateTables: end";
-}
-
-void ListBoxViewDataWidget::loadingStartedSlot()
-{
     buffers_.clear();
 
     if (all_buffer_table_widget_)
@@ -103,11 +91,19 @@ void ListBoxViewDataWidget::loadingStartedSlot()
 
     for (auto buffer_table : buffer_tables_)
         buffer_table.second->clear();
+
+    logdbg << "ListBoxViewDataWidget: clearData: end";
 }
 
-void ListBoxViewDataWidget::updateDataSlot(DBContent& object, std::shared_ptr<Buffer> buffer)
+void ListBoxViewDataWidget::loadingStartedSlot()
 {
-    logdbg << "ListBoxViewDataWidget: updateTables: start";
+    clearData();
+}
+
+void ListBoxViewDataWidget::updateDataSlot(const std::map<std::string, std::shared_ptr<Buffer>>& data,
+                                           bool requires_reset)
+{
+    loginf << "ListBoxViewDataWidget: updateTables";
 
 //    assert(all_buffer_table_widget_);
 //    all_buffer_table_widget_->show(buffer);
@@ -115,14 +111,15 @@ void ListBoxViewDataWidget::updateDataSlot(DBContent& object, std::shared_ptr<Bu
 //    assert(buffer_tables_.count(object.name()) > 0);
 //    buffer_tables_.at(object.name())->show(buffer);
 
-    buffers_[object.name()] = buffer;
-
+    buffers_ = data;
 
     logdbg << "ListBoxViewDataWidget: updateTables: end";
 }
 
 void ListBoxViewDataWidget::loadingDoneSlot()
 {
+    loginf << "ListBoxViewDataWidget: loadingDoneSlot";
+
     assert(all_buffer_table_widget_);
     all_buffer_table_widget_->show(buffers_);
 

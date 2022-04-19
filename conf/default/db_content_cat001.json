@@ -1,7 +1,6 @@
 {
     "parameters": {
         "db_table_name": "data_cat001",
-        "ds_type": "Radar",
         "info": "",
         "name": "CAT001"
     },
@@ -25,6 +24,14 @@
                                 "show": false,
                                 "suffix": "",
                                 "variable_name": "Antenna"
+                            }
+                        },
+                        "LabelEntryAssociations0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Associations"
                             }
                         },
                         "LabelEntryAzimuth0": {
@@ -469,11 +476,23 @@
                     "unit": ""
                 }
             },
+            "VariableRadarassociations0": {
+                "parameters": {
+                    "data_type_str": "JSON",
+                    "db_column_name": "associations",
+                    "description": "Associations set as JSON object",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Associations",
+                    "representation_str": "STANDARD",
+                    "short_name": "Assoc",
+                    "unit": ""
+                }
+            },
             "VariableRadardetection_type0": {
                 "parameters": {
                     "data_type_str": "UCHAR",
                     "db_column_name": "type",
-                    "dbo_name": "CAT001",
                     "description": "From 020.TYP\n\nFrom 020.SSR/PSR\n\nRadar detection in last antenna scan, as follows:\n0 No detection;\n1 Sole primary detection;\n2 Sole secondary detection;\n3 Combined primary and secondary detection.",
                     "dimension": "",
                     "is_key": false,
@@ -487,7 +506,6 @@
                 "parameters": {
                     "data_type_str": "UINT",
                     "db_column_name": "ds_id",
-                    "dbo_name": "CAT001",
                     "description": "From ds_id\n\nData Source ID",
                     "dimension": "",
                     "is_key": false,
@@ -501,7 +519,6 @@
                 "parameters": {
                     "data_type_str": "BOOL",
                     "db_column_name": "fft",
-                    "dbo_name": "CAT001",
                     "description": "From 020.RAB\n\n0 Report from aircraft transponder\n1 Report from field monitor(fixed transponder)",
                     "dimension": "",
                     "is_key": false,
@@ -515,7 +532,6 @@
                 "parameters": {
                     "data_type_str": "STRING",
                     "db_column_name": "artas_hash",
-                    "dbo_name": "CAT001",
                     "description": "From artas_md5\n\nARTAS MD5 Hash Code",
                     "dimension": "",
                     "is_key": false,
@@ -529,7 +545,6 @@
                 "parameters": {
                     "data_type_str": "UINT",
                     "db_column_name": "line_id",
-                    "dbo_name": "CAT001",
                     "description": "COMMUNICATION LINE ID determines the origin of the record, see table COMMS",
                     "dimension": "",
                     "is_key": false,
@@ -543,7 +558,6 @@
                 "parameters": {
                     "data_type_str": "BOOL",
                     "db_column_name": "military_emergency",
-                    "dbo_name": "CAT001",
                     "description": "From 020.ME\n\n0 No military emergency \n1 Military emergency",
                     "dimension": "",
                     "is_key": false,
@@ -557,7 +571,6 @@
                 "parameters": {
                     "data_type_str": "BOOL",
                     "db_column_name": "military_identification",
-                    "dbo_name": "CAT001",
                     "description": "From 020.MI\n\n0 No military identification\n1 Military identification",
                     "dimension": "",
                     "is_key": false,
@@ -571,7 +584,6 @@
                 "parameters": {
                     "data_type_str": "UINT",
                     "db_column_name": "mode_3a_code",
-                    "dbo_name": "CAT001",
                     "description": "From 070.Mode-3/A reply\n\n070.Mode-3/A reply in decimal\nrepresentation",
                     "dimension": "",
                     "is_key": false,
@@ -585,7 +597,6 @@
                 "parameters": {
                     "data_type_str": "BOOL",
                     "db_column_name": "mode_3a_garbled",
-                    "dbo_name": "CAT001",
                     "description": "From 070.G\n\n0 Default\n1 Garbled code",
                     "dimension": "",
                     "is_key": false,
@@ -599,7 +610,6 @@
                 "parameters": {
                     "data_type_str": "BOOL",
                     "db_column_name": "mode_3a_smoothed",
-                    "dbo_name": "CAT001",
                     "description": "From 070.L\n\n0 Mode-3/A code derived from the reply of the transponder\n1 Mode-3/A code not extracted during the last scan",
                     "dimension": "",
                     "is_key": false,
@@ -613,7 +623,6 @@
                 "parameters": {
                     "data_type_str": "BOOL",
                     "db_column_name": "mode_3a_valid",
-                    "dbo_name": "CAT001",
                     "description": "From 070.V\n\n0 Code not validated\n1 Code validated\n",
                     "dimension": "",
                     "is_key": false,
@@ -627,7 +636,6 @@
                 "parameters": {
                     "data_type_str": "FLOAT",
                     "db_column_name": "mode_c_code",
-                    "dbo_name": "CAT001",
                     "description": "From 090.Mode-C HEIGHT\n\nFrom 090.Flight Level\n\nThis data item shall be sent when Mode C code or Mode S altitude code is present and decodable. It represents the flight level of the plot, even if associated\nwith a track.",
                     "dimension": "Height",
                     "is_key": false,
@@ -641,7 +649,6 @@
                 "parameters": {
                     "data_type_str": "BOOL",
                     "db_column_name": "mode_c_garbled",
-                    "dbo_name": "CAT001",
                     "description": "From 090.G\n\n0 Default\n1 Garbled code",
                     "dimension": "",
                     "is_key": false,
@@ -655,7 +662,6 @@
                 "parameters": {
                     "data_type_str": "BOOL",
                     "db_column_name": "mode_c_valid",
-                    "dbo_name": "CAT001",
                     "description": "From 090.V\n\n0 Code not validated\n1 Code validated",
                     "dimension": "",
                     "is_key": false,
@@ -669,7 +675,6 @@
                 "parameters": {
                     "data_type_str": "DOUBLE",
                     "db_column_name": "azimuth",
-                    "dbo_name": "CAT001",
                     "description": "From 040.THETA\n\nMeasured position of an aircraft in local polar co-ordinates",
                     "dimension": "Angle",
                     "is_key": false,
@@ -683,7 +688,6 @@
                 "parameters": {
                     "data_type_str": "DOUBLE",
                     "db_column_name": "latitude",
-                    "dbo_name": "CAT001",
                     "description": "Calculated from 040.RHO/040.THETA \n\nPosition in WGS-84 Coordinates\nRange -90 <= latitude <= 90 deg.",
                     "dimension": "Angle",
                     "is_key": false,
@@ -697,7 +701,6 @@
                 "parameters": {
                     "data_type_str": "DOUBLE",
                     "db_column_name": "longitude",
-                    "dbo_name": "CAT001",
                     "description": "Calculated from 040.RHO/040.THETA \n\nPosition in WGS-84 Coordinates\nRange -90 <= latitude <= 90 deg.",
                     "dimension": "Angle",
                     "is_key": false,
@@ -711,7 +714,6 @@
                 "parameters": {
                     "data_type_str": "DOUBLE",
                     "db_column_name": "range",
-                    "dbo_name": "CAT001",
                     "description": "From 040.RHO\n\nMeasured position of an aircraft in local polar co-ordinates\n\nMax. range = 256 NM",
                     "dimension": "Length",
                     "is_key": false,
@@ -725,7 +727,6 @@
                 "parameters": {
                     "data_type_str": "UINT",
                     "db_column_name": "record_number",
-                    "dbo_name": "CAT001",
                     "description": "Unique record id starting with 0 on every new recording",
                     "dimension": "",
                     "is_key": true,
@@ -739,7 +740,6 @@
                 "parameters": {
                     "data_type_str": "UCHAR",
                     "db_column_name": "sac",
-                    "dbo_name": "CAT001",
                     "description": "From 010.SAC\n\nData Source Identifier System Area Code",
                     "dimension": "",
                     "is_key": false,
@@ -753,7 +753,6 @@
                 "parameters": {
                     "data_type_str": "UCHAR",
                     "db_column_name": "sic",
-                    "dbo_name": "CAT001",
                     "description": "From 010.SIC\n\nData Source Identifier System Identification Code",
                     "dimension": "",
                     "is_key": false,
@@ -767,7 +766,6 @@
                 "parameters": {
                     "data_type_str": "BOOL",
                     "db_column_name": "simulated",
-                    "dbo_name": "CAT001",
                     "description": "From 020.SIM\n\n0  Actual target report\n1 Simulated target report",
                     "dimension": "",
                     "is_key": false,
@@ -781,7 +779,6 @@
                 "parameters": {
                     "data_type_str": "BOOL",
                     "db_column_name": "spi",
-                    "dbo_name": "CAT001",
                     "description": "From 020.SPI\n\n0 Absence of SPI\n1 Special Position Identification",
                     "dimension": "",
                     "is_key": false,
@@ -795,7 +792,6 @@
                 "parameters": {
                     "data_type_str": "BOOL",
                     "db_column_name": "test",
-                    "dbo_name": "CAT001",
                     "description": "From 020.TST\n\n0 Real target report\n1 Test target report",
                     "dimension": "",
                     "is_key": false,
@@ -809,7 +805,6 @@
                 "parameters": {
                     "data_type_str": "FLOAT",
                     "db_column_name": "time_of_day",
-                    "dbo_name": "CAT001",
                     "description": "From 140.Time-of-Day\n\nAbsolute time stamping expressed as Co-ordinated Universal Time (UTC)",
                     "dimension": "Time",
                     "is_key": false,
@@ -823,7 +818,6 @@
                 "parameters": {
                     "data_type_str": "BOOL",
                     "db_column_name": "track_confirmed",
-                    "dbo_name": "CAT001",
                     "description": "From 170.CON\n\nFrom 170.CNF\n\nConfirmed vs. Tentative Track\n0 Tentative Track\n1 Confirmed Track",
                     "dimension": "",
                     "is_key": false,
@@ -837,7 +831,6 @@
                 "parameters": {
                     "data_type_str": "BOOL",
                     "db_column_name": "track_doubtful",
-                    "dbo_name": "CAT001",
                     "description": "From 170.DOU\n\nSignals level of confidence in plot to track association process\n0 Normal confidence\n1 Low confidence in plot to track association.",
                     "dimension": "",
                     "is_key": false,
@@ -851,7 +844,6 @@
                 "parameters": {
                     "data_type_str": "BOOL",
                     "db_column_name": "track_end",
-                    "dbo_name": "CAT001",
                     "description": "From 170.TRE\n\nSignal for End_of_Track\n0 Track still alive\n1 End of track lifetime(last report for this track)",
                     "dimension": "",
                     "is_key": false,
@@ -865,7 +857,6 @@
                 "parameters": {
                     "data_type_str": "BOOL",
                     "db_column_name": "track_ghost_target",
-                    "dbo_name": "CAT001",
                     "description": "From 170.GHO\n\nGhost vs. true target\n0 True target track.\n1 Ghost target track.",
                     "dimension": "",
                     "is_key": false,
@@ -879,7 +870,6 @@
                 "parameters": {
                     "data_type_str": "DOUBLE",
                     "db_column_name": "track_groundspeed",
-                    "dbo_name": "CAT001",
                     "description": "From 200.CALCULATED GROUNDSPEED\n\nCalculated track velocity expressed in polar co-ordinates.",
                     "dimension": "Speed",
                     "is_key": false,
@@ -893,7 +883,6 @@
                 "parameters": {
                     "data_type_str": "DOUBLE",
                     "db_column_name": "track_angle",
-                    "dbo_name": "CAT001",
                     "description": "From 200.CALCULATED HEADING\n\nCalculated track velocity expressed in polar co-ordinates.\n\nWas called Track Heading previously, but renamed since it refers to  the direction of movement.",
                     "dimension": "Angle",
                     "is_key": false,
@@ -907,7 +896,6 @@
                 "parameters": {
                     "data_type_str": "BOOL",
                     "db_column_name": "track_horizontal_manoeuvre",
-                    "dbo_name": "CAT001",
                     "description": "From 170.MAN\n\nFrom 170.MAH\n\nManoeuvre detection in Horizontal Sense\n0 No horizontal man.sensed\n1 Horizontal man. sensed",
                     "dimension": "",
                     "is_key": false,
@@ -921,7 +909,6 @@
                 "parameters": {
                     "data_type_str": "UINT",
                     "db_column_name": "track_number",
-                    "dbo_name": "CAT001",
                     "description": "From 161.TRACK/PLOT NUMBER\n\nAn integer value representing a unique reference to a\ntrack/plot record within a particular track/plot file.",
                     "dimension": "",
                     "is_key": false,

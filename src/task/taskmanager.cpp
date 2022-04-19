@@ -31,8 +31,6 @@
 //#include "managedatasourcestaskwidget.h"
 #include "managedbobjectstask.h"
 #include "managedbobjectstaskwidget.h"
-#include "manageschematask.h"
-#include "manageschemataskwidget.h"
 #include "managesectorstask.h"
 #include "managesectorstaskwidget.h"
 //#include "postprocesstask.h"
@@ -78,11 +76,11 @@ TaskManager::TaskManager(const std::string& class_id, const std::string& instanc
 
     createSubConfigurables();
 
-    task_list_ = {"DatabaseOpenTask", "ManageSchemaTask",
+    task_list_ = {"DatabaseOpenTask",
                   "ManageDBObjectsTask", "ASTERIXImportTask",
-                  "ViewPointsImportTask", "GPSTrailImportTask", // "MySQLDBImportTask","JSONImportTask",
+                  "ViewPointsImportTask", "GPSTrailImportTask", // "JSONImportTask",
                   "ManageSectorsTask", // "ManageDataSourcesTask",
-                  "RadarPlotPositionCalculatorTask", //"PostProcessTask",
+                  "RadarPlotPositionCalculatorTask",
                   "CreateAssociationsTask", "CreateARTASAssociationsTask"};  // defines order of tasks
 
     for (auto& task_it : task_list_)  // check that all tasks in list exist
@@ -100,13 +98,6 @@ void TaskManager::generateSubConfigurable(const std::string& class_id,
         database_open_task_.reset(new DatabaseOpenTask(class_id, instance_id, *this));
         assert(database_open_task_);
         addTask(class_id, database_open_task_.get());
-    }
-    else if (class_id.compare("ManageSchemaTask") == 0)
-    {
-        assert(!manage_schema_task_);
-        manage_schema_task_.reset(new ManageSchemaTask(class_id, instance_id, *this));
-        assert(manage_schema_task_);
-        addTask(class_id, manage_schema_task_.get());
     }
     else if (class_id.compare("ManageDBObjectsTask") == 0)
     {
@@ -208,12 +199,6 @@ void TaskManager::checkSubConfigurables()
     {
         generateSubConfigurable("DatabaseOpenTask", "DatabaseOpenTask0");
         assert(database_open_task_);
-    }
-
-    if (!manage_schema_task_)
-    {
-        generateSubConfigurable("ManageSchemaTask", "ManageSchemaTask0");
-        assert(manage_schema_task_);
     }
 
     if (!manage_dbobjects_task_)
@@ -352,7 +337,6 @@ void TaskManager::shutdown()
     loginf << "TaskManager: shutdown";
 
     database_open_task_ = nullptr;
-    manage_schema_task_ = nullptr;
     manage_dbobjects_task_ = nullptr;
 
     asterix_importer_task_->stop(); // stops if active
@@ -416,12 +400,6 @@ DatabaseOpenTask& TaskManager::databaseOpenTask() const
 {
     assert(database_open_task_);
     return *database_open_task_;
-}
-
-ManageSchemaTask& TaskManager::manageSchemaTask() const
-{
-    assert(manage_schema_task_);
-    return *manage_schema_task_;
 }
 
 //ManageDataSourcesTask& TaskManager::manageDataSourcesTask() const

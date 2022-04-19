@@ -22,12 +22,13 @@
 #include "configurationmanager.h"
 #include "dbinterface.h"
 #include "dbcontent/dbcontent.h"
-#include "dbcontentmanagerloadwidget.h"
 #include "dbcontent/dbcontentmanagerwidget.h"
 #include "dbcontent/variable/variable.h"
 #include "dbcontent/variable/variableset.h"
+#include "dbcontent/target.h"
 #include "logger.h"
 #include "dbcontent/variable/metavariable.h"
+#include "datasourcemanager.h"
 #include "stringconv.h"
 #include "number.h"
 #include "viewmanager.h"
@@ -36,7 +37,6 @@
 #include "filtermanager.h"
 #include "util/number.h"
 #include "dbcontent/variable/metavariableconfigurationdialog.h"
-#include "json.hpp"
 
 #include <QApplication>
 #include <QMessageBox>
@@ -46,7 +46,6 @@
 
 using namespace std;
 using namespace Utils;
-using namespace nlohmann;
 using namespace dbContent;
 
 // move to somewhere else?
@@ -85,8 +84,6 @@ double secondsSinceMidnightUTC ()
     //    return tod;
 }
 
-const std::vector<std::string> DBContentManager::data_source_types_ {"Radar", "MLAT", "ADSB", "Tracker", "RefTraj"};
-
 DBContentManager::DBContentManager(const std::string& class_id, const std::string& instance_id,
                                  COMPASS* compass)
     : Configurable(class_id, instance_id, compass, "db_content.json"), compass_(*compass)
@@ -104,7 +101,7 @@ DBContentManager::DBContentManager(const std::string& class_id, const std::strin
 
     createSubConfigurables();
 
-    for (auto& dbo_it : objects_)
+    for (auto& dbo_it : dbcontent_)
         dbo_it.second->checkLabelDefinitions();
 
     qRegisterMetaType<std::shared_ptr<Buffer>>("std::shared_ptr<Buffer>"); // for dbo read job
@@ -116,14 +113,14 @@ DBContentManager::~DBContentManager()
 {
     data_.clear();
 
-    for (auto it : objects_)
+    for (auto it : dbcontent_)
         delete it.second;
-    objects_.clear();
+    dbcontent_.clear();
 
     meta_variables_.clear();
 
     widget_ = nullptr;
-    load_widget_ = nullptr;
+
 }
 
 void DBContentManager::generateSubConfigurable(const std::string& class_id,
@@ -135,8 +132,8 @@ void DBContentManager::generateSubConfigurable(const std::string& class_id,
     {
         DBContent* object = new DBContent(compass_, class_id, instance_id, this);
         loginf << "DBContentManager: generateSubConfigurable: adding content " << object->name();
-        assert(!objects_.count(object->name()));
-        objects_[object->name()] = object;
+        assert(!dbcontent_.count(object->name()));
+        dbcontent_[object->name()] = object;
     }
     else if (class_id.compare("MetaVariable") == 0)
     {
@@ -146,16 +143,6 @@ void DBContentManager::generateSubConfigurable(const std::string& class_id,
 
         assert(!existsMetaVariable(meta_var->name()));
         meta_variables_.emplace_back(meta_var);
-    }
-    else if (class_id.compare("ConfigurationDataSource") == 0)
-    {
-        unique_ptr<dbContent::ConfigurationDataSource> ds {
-            new dbContent::ConfigurationDataSource(class_id, instance_id, *this)};
-        loginf << "DBContentManager: generateSubConfigurable: adding config ds "
-               << ds->name() << " sac/sic " <<  ds->sac() << "/" << ds->sic();
-
-        assert (!hasConfigDataSource(Number::dsIdFrom(ds->sac(), ds->sic())));
-        config_data_sources_.emplace_back(move(ds));
     }
     else
         throw std::runtime_error("DBContentManager: generateSubConfigurable: unknown class_id " +
@@ -167,35 +154,35 @@ void DBContentManager::checkSubConfigurables()
     // nothing to do, must be defined in configuration
 }
 
-bool DBContentManager::existsObject(const std::string& dbo_name)
+bool DBContentManager::existsDBContent(const std::string& dbcontent_name)
 {
-    logdbg << "DBContentManager: existsObject: '" << dbo_name << "'";
+    logdbg << "DBContentManager: existsDBContent: '" << dbcontent_name << "'";
 
-    return (objects_.find(dbo_name) != objects_.end());
+    return (dbcontent_.find(dbcontent_name) != dbcontent_.end());
 }
 
-DBContent& DBContentManager::object(const std::string& dbo_name)
+DBContent& DBContentManager::dbContent(const std::string& dbcontent_name)
 {
-    logdbg << "DBContentManager: object: name " << dbo_name;
+    logdbg << "DBContentManager: dbContent: name " << dbcontent_name;
 
-    assert(objects_.find(dbo_name) != objects_.end());
+    assert(dbcontent_.find(dbcontent_name) != dbcontent_.end());
 
-    return *objects_.at(dbo_name);
+    return *dbcontent_.at(dbcontent_name);
 }
 
-void DBContentManager::deleteObject(const std::string& dbo_name)
+void DBContentManager::deleteDBContent(const std::string& dbcontent_name)
 {
-    logdbg << "DBContentManager: deleteObject: name " << dbo_name;
-    assert(existsObject(dbo_name));
-    delete objects_.at(dbo_name);
-    objects_.erase(dbo_name);
+    logdbg << "DBContentManager: deleteDBContent: name " << dbcontent_name;
+    assert(existsDBContent(dbcontent_name));
+    delete dbcontent_.at(dbcontent_name);
+    dbcontent_.erase(dbcontent_name);
 
     emit dbObjectsChangedSignal();
 }
 
 bool DBContentManager::hasData()
 {
-    for (auto& object_it : objects_)
+    for (auto& object_it : dbcontent_)
         if (object_it.second->hasData())
             return true;
 
@@ -274,17 +261,6 @@ DBContentManagerWidget* DBContentManager::widget()
     return widget_.get();
 }
 
-DBContentManagerDataSourcesWidget* DBContentManager::loadWidget()
-{
-    if (!load_widget_)
-    {
-        load_widget_.reset(new DBContentManagerDataSourcesWidget(*this));
-    }
-
-    assert(load_widget_);
-    return load_widget_.get();
-}
-
 bool DBContentManager::useLimit() const { return use_limit_; }
 
 void DBContentManager::useLimit(bool use_limit) { use_limit_ = use_limit; }
@@ -318,8 +294,8 @@ void DBContentManager::useOrderAscending(bool use_order_ascending)
 
 bool DBContentManager::hasOrderVariable()
 {
-    if (existsObject(order_variable_dbcontent_name_))
-        if (object(order_variable_dbcontent_name_).hasVariable(order_variable_name_))
+    if (existsDBContent(order_variable_dbcontent_name_))
+        if (dbContent(order_variable_dbcontent_name_).hasVariable(order_variable_name_))
             return true;
     return false;
 }
@@ -327,7 +303,7 @@ bool DBContentManager::hasOrderVariable()
 Variable& DBContentManager::orderVariable()
 {
     assert(hasOrderVariable());
-    return object(order_variable_dbcontent_name_).variable(order_variable_name_);
+    return dbContent(order_variable_dbcontent_name_).variable(order_variable_name_);
 }
 
 void DBContentManager::orderVariable(Variable& variable)
@@ -362,44 +338,7 @@ void DBContentManager::clearOrderVariable()
     order_variable_name_ = "";
 }
 
-bool DBContentManager::loadingWanted (const std::string& dbo_name)
-{
-    for (auto& ds_it : db_data_sources_)
-    {
-        if (dsTypeLoadingWanted(ds_it->dsType()) && ds_it->loadingWanted() && ds_it->hasNumInserted(dbo_name))
-            return true;
-    }
 
-    return false;
-}
-
-bool DBContentManager::hasDSFilter (const std::string& dbo_name)
-{
-    for (auto& ds_it : db_data_sources_)
-    {
-        if (dsTypeLoadingWanted(ds_it->dsType()) && !ds_it->loadingWanted() && ds_it->hasNumInserted(dbo_name))
-            return true;
-    }
-
-    return false;
-}
-
-std::vector<unsigned int> DBContentManager::unfilteredDS (const std::string& dbo_name)
-{
-    assert (hasDSFilter(dbo_name));
-
-    std::vector<unsigned int> ds_ids;
-
-    for (auto& ds_it : db_data_sources_)
-    {
-        if (dsTypeLoadingWanted(ds_it->dsType()) && ds_it->loadingWanted() && ds_it->hasNumInserted(dbo_name))
-            ds_ids.push_back(ds_it->id());
-    }
-
-    assert (ds_ids.size());
-
-    return ds_ids;
-}
 
 
 void DBContentManager::load()
@@ -426,19 +365,17 @@ void DBContentManager::load()
 
     loginf << "DBContentManager: loadSlot: starting loading";
 
+    DataSourceManager& ds_man =  COMPASS::instance().dataSourceManager();
     EvaluationManager& eval_man = COMPASS::instance().evaluationManager();
     ViewManager& view_man = COMPASS::instance().viewManager();
 
-    for (auto& object : objects_)
+    for (auto& object : dbcontent_)
     {
         loginf << "DBContentManager: loadSlot: object " << object.first
                << " loadable " << object.second->loadable()
-               << " loading wanted " << loadingWanted(object.first);
+               << " loading wanted " << ds_man.loadingWanted(object.first);
 
-        if (object.first == "RefTraj")
-            continue;
-
-        if (object.second->loadable() && loadingWanted(object.first))
+        if (object.second->loadable() && ds_man.loadingWanted(object.first))
         {
             loginf << "DBContentManager: loadSlot: loading object " << object.first;
             VariableSet read_set = view_man.getReadSet(object.first); // TODO add required vars for processing
@@ -524,14 +461,21 @@ void DBContentManager::addLoadedData(std::map<std::string, std::shared_ptr<Buffe
     }
 
     if (something_changed)
+    {
         emit loadedDataSignal(data_, false);
+    }
+}
+
+std::map<std::string, std::shared_ptr<Buffer>> DBContentManager::loadedData()
+{
+    return data_;
 }
 
 void DBContentManager::quitLoading()
 {
     loginf << "DBContentManager: quitLoading";
 
-    for (auto& object : objects_)
+    for (auto& object : dbcontent_)
         object.second->quitLoading();
 
     load_in_progress_ = true;  // TODO
@@ -541,28 +485,46 @@ void DBContentManager::databaseOpenedSlot()
 {
     loginf << "DBContentManager: databaseOpenedSlot";
 
-    loadDBDataSources();
     loadMaxRecordNumber();
 
-    for (auto& object : objects_)
+    if (COMPASS::instance().interface().hasProperty("associations_generated"))
+    {
+        assert(COMPASS::instance().interface().hasProperty("associations_id"));
+
+        has_associations_ =
+                COMPASS::instance().interface().getProperty("associations_generated") == "1";
+        associations_id_ = COMPASS::instance().interface().getProperty("associations_id");
+    }
+    else
+    {
+        has_associations_ = false;
+        associations_id_ = "";
+    }
+
+    for (auto& object : dbcontent_)
         object.second->databaseOpenedSlot();
 
-    if (load_widget_)
-        load_widget_->update();
+    targets_ = COMPASS::instance().interface().loadTargets();
+
+    emit associationStatusChangedSignal();
+
+    loginf << "DBContentManager: databaseOpenedSlot: done";
 }
 
 void DBContentManager::databaseClosedSlot()
 {
-    db_data_sources_.clear();
-
     max_rec_num_ = 0;
     has_max_rec_num_ = false;
 
-    for (auto& object : objects_)
+    has_associations_ = false;
+    associations_id_ = "";
+
+    for (auto& object : dbcontent_)
         object.second->databaseClosedSlot();
 
-    if (load_widget_)
-        load_widget_->update();
+    targets_.clear();
+
+    associationStatusChangedSignal();
 }
 
 //void DBContentManager::databaseContentChangedSlot()
@@ -608,7 +570,7 @@ void DBContentManager::loadingDone(DBContent& object)
 {
     bool done = true;
 
-    for (auto& object_it : objects_)
+    for (auto& object_it : dbcontent_)
     {
         if (object_it.second->isLoading())
         {
@@ -619,7 +581,9 @@ void DBContentManager::loadingDone(DBContent& object)
     }
 
     if (done)
+    {
         finishLoading();
+    }
     else
         logdbg << "DBContentManager: loadingDoneSlot: not done";
 }
@@ -642,194 +606,89 @@ void DBContentManager::finishLoading()
     QApplication::restoreOverrideCursor();
 }
 
-bool DBContentManager::hasConfigDataSource (unsigned int ds_id)
+
+
+
+bool DBContentManager::hasAssociations() const
 {
-    unsigned int sac = Number::sacFromDsId(ds_id);
-    unsigned int sic = Number::sicFromDsId(ds_id);
-
-    return find_if(config_data_sources_.begin(), config_data_sources_.end(),
-                   [sac,sic] (const std::unique_ptr<dbContent::ConfigurationDataSource>& s)
-    { return s->sac() == sac && s->sic() == sic; } ) != config_data_sources_.end();
-
+    return has_associations_;
 }
 
-dbContent::ConfigurationDataSource& DBContentManager::configDataSource (unsigned int ds_id)
-{
-    assert (hasConfigDataSource(ds_id));
-
-    unsigned int sac = Number::sacFromDsId(ds_id);
-    unsigned int sic = Number::sicFromDsId(ds_id);
-
-    return *find_if(config_data_sources_.begin(), config_data_sources_.end(),
-                    [sac,sic] (const std::unique_ptr<dbContent::ConfigurationDataSource>& s)
-    { return s->sac() == sac && s->sic() == sic; } )->get();
-}
-
-void DBContentManager::loadDBDataSources()
-{
-    assert (!db_data_sources_.size());
-
-    DBInterface& db_interface = COMPASS::instance().interface();
-
-    if (db_interface.existsDataSourcesTable())
-    {
-        db_data_sources_ = db_interface.getDataSources();
-        sortDBDataSources();
-    }
-}
-
-void DBContentManager::sortDBDataSources()
-{
-    sort(db_data_sources_.begin(), db_data_sources_.end(),
-         [](const std::unique_ptr<dbContent::DBDataSource>& a,
-         const std::unique_ptr<dbContent::DBDataSource>& b) -> bool
-    {
-        return a->name() < b->name();
-    });
-}
-
-void DBContentManager::saveDBDataSources()
-{
-    DBInterface& db_interface = COMPASS::instance().interface();
-
-    assert(db_interface.dbOpen());
-    db_interface.saveDataSources(db_data_sources_);
-}
-
-bool DBContentManager::canAddNewDataSourceFromConfig (unsigned int ds_id)
-{
-    if (hasDataSource(ds_id))
-        return false;
-
-    return hasConfigDataSource(ds_id);
-}
-
-bool DBContentManager::hasDataSource(unsigned int ds_id)
-{
-    return find_if(db_data_sources_.begin(), db_data_sources_.end(),
-                   [ds_id] (const std::unique_ptr<dbContent::DBDataSource>& s)
-    { return Number::dsIdFrom(s->sac(), s->sic()) == ds_id; } ) != db_data_sources_.end();
-}
-
-void DBContentManager::addNewDataSource (unsigned int ds_id)
-{
-    loginf << "DBContentManager: addNewDataSource: ds_id " << ds_id;
-
-    assert (!hasDataSource(ds_id));
-
-    if (hasConfigDataSource(ds_id))
-    {
-        loginf << "DBContentManager: addNewDataSource: ds_id " << ds_id << " from config";
-
-        dbContent::ConfigurationDataSource& cfg_ds = configDataSource(ds_id);
-
-        db_data_sources_.emplace_back(move(cfg_ds.getAsNewDBDS()));
-        sortDBDataSources();
-    }
-    else
-    {
-        loginf << "DBContentManager: addNewDataSource: ds_id " << ds_id << " create new";
-
-        dbContent::DBDataSource* new_ds = new dbContent::DBDataSource();
-        new_ds->id(ds_id);
-        new_ds->sac(Number::sacFromDsId(ds_id));
-        new_ds->sic(Number::sicFromDsId(ds_id));
-        new_ds->name(to_string(ds_id));
-
-        db_data_sources_.emplace_back(move(new_ds));
-        sortDBDataSources();
-    }
-
-    assert (hasDataSource(ds_id));
-
-    loginf << "DBContentManager: addNewDataSource: ds_id " << ds_id << " done";
-}
-
-dbContent::DBDataSource& DBContentManager::dataSource(unsigned int ds_id)
-{
-    assert (hasDataSource(ds_id));
-
-    return *find_if(db_data_sources_.begin(), db_data_sources_.end(),
-                    [ds_id] (const std::unique_ptr<dbContent::DBDataSource>& s)
-    { return Number::dsIdFrom(s->sac(), s->sic()) == ds_id; } )->get();
-}
-
-
-
-bool DBContentManager::hasAssociations() const { return has_associations_; }
-
-void DBContentManager::setAssociationsDataSource(const std::string& dbo, const std::string& data_source_name)
+void DBContentManager::setAssociationsIdentifier(const std::string& assoc_id)
 {
     COMPASS::instance().interface().setProperty("associations_generated", "1");
-    COMPASS::instance().interface().setProperty("associations_dbo", dbo);
-    COMPASS::instance().interface().setProperty("associations_ds", data_source_name);
+    COMPASS::instance().interface().setProperty("associations_id", assoc_id);
 
     has_associations_ = true;
-    associations_dbo_ = dbo;
-    assert(existsObject(associations_dbo_));
-    associations_ds_ = data_source_name;
+    associations_id_ = assoc_id;
 
-    if (load_widget_)
-        loadWidget()->update();
+   COMPASS::instance().dataSourceManager().updateWidget();
 }
 
-void DBContentManager::setAssociationsByAll()
-{
-    COMPASS::instance().interface().setProperty("associations_generated", "1");
-    COMPASS::instance().interface().setProperty("associations_dbo", "");
-    COMPASS::instance().interface().setProperty("associations_ds", "");
+//void DBContentManager::setAssociationsByAll()
+//{
+////    COMPASS::instance().interface().setProperty("associations_generated", "1");
+////    COMPASS::instance().interface().setProperty("associations_dbo", "");
+////    COMPASS::instance().interface().setProperty("associations_ds", "");
 
-    has_associations_ = true;
-    associations_dbo_ = "";
-    associations_ds_ = "";
+////    has_associations_ = true;
+////    associations_dbo_ = "";
+////    associations_ds_ = "";
 
-    if (load_widget_)
-        loadWidget()->update();
-}
+////    if (load_widget_)
+////        loadWidget()->update();
+//}
 
-void DBContentManager::removeAssociations()
-{
-    COMPASS::instance().interface().setProperty("associations_generated", "0");
-    COMPASS::instance().interface().setProperty("associations_dbo", "");
-    COMPASS::instance().interface().setProperty("associations_ds", "");
+//void DBContentManager::removeAssociations()
+//{
+////    COMPASS::instance().interface().setProperty("associations_generated", "0");
+////    COMPASS::instance().interface().setProperty("associations_dbo", "");
+////    COMPASS::instance().interface().setProperty("associations_ds", "");
 
-    has_associations_ = false;
-    associations_dbo_ = "";
-    associations_ds_ = "";
+////    has_associations_ = false;
+////    associations_dbo_ = "";
+////    associations_ds_ = "";
 
-    for (auto& dbo_it : objects_)
-        dbo_it.second->clearAssociations();
+////    for (auto& dbo_it : objects_)
+////        dbo_it.second->clearAssociations();
 
-    if (load_widget_)
-        loadWidget()->update();
-}
+////    if (load_widget_)
+////        loadWidget()->update();
+//}
 
-bool DBContentManager::hasAssociationsDataSource() const
-{
-    return associations_dbo_.size() && associations_ds_.size();
-}
+//bool DBContentManager::hasAssociationsDataSource() const
+//{
+//    return associations_dbo_.size() && associations_ds_.size();
+//}
 
-std::string DBContentManager::associationsDBObject() const { return associations_dbo_; }
+std::string DBContentManager::associationsID() const { return associations_id_; }
 
-std::string DBContentManager::associationsDataSourceName() const { return associations_ds_; }
+//std::string DBContentManager::associationsDataSourceName() const { return associations_ds_; }
 
-bool DBContentManager::isOtherDBObjectPostProcessing(DBContent& object)
-{
-    for (auto& dbo_it : objects_)
-        if (dbo_it.second != &object && dbo_it.second->isPostProcessing())
-            return true;
+//bool DBContentManager::isOtherDBObjectPostProcessing(DBContent& object)
+//{
+//    for (auto& dbo_it : dbcontent_)
+//        if (dbo_it.second != &object && dbo_it.second->isPostProcessing())
+//            return true;
 
-    return false;
-}
+//    return false;
+//}
 
 bool DBContentManager::loadInProgress() const
 {
     return load_in_progress_;
 }
 
+void DBContentManager::clearData()
+{
+    data_.clear();
+
+    COMPASS::instance().viewManager().clearDataInViews();
+}
+
 void DBContentManager::insertData(std::map<std::string, std::shared_ptr<Buffer>> data)
 {
-    loginf << "DBContentManager: insertData";
+    logdbg << "DBContentManager: insertData";
 
     assert (!load_in_progress_);
     assert (!insert_in_progress_);
@@ -841,8 +700,8 @@ void DBContentManager::insertData(std::map<std::string, std::shared_ptr<Buffer>>
 
     for (auto& buf_it : insert_data_)
     {
-        assert(existsObject(buf_it.first));
-        object(buf_it.first).insertData(buf_it.second);
+        assert(existsDBContent(buf_it.first));
+        dbContent(buf_it.first).insertData(buf_it.second);
     }
 }
 
@@ -850,7 +709,7 @@ void DBContentManager::insertDone(DBContent& object)
 {
     bool done = true;
 
-    for (auto& object_it : objects_)
+    for (auto& object_it : dbcontent_)
     {
         if (object_it.second->isInserting())
         {
@@ -868,16 +727,18 @@ void DBContentManager::insertDone(DBContent& object)
 
 void DBContentManager::finishInserting()
 {
-    loginf << "DBContentManager: finishInserting: all done";
+    logdbg << "DBContentManager: finishInserting: all done";
+
+    if (COMPASS::instance().appMode() == AppMode::Offline || COMPASS::instance().appMode() == AppMode::LivePaused)
+        insert_data_.clear();
 
     insert_in_progress_ = false;
-
     emit insertDoneSignal();
 
     // add inserted to loaded data
 
     boost::posix_time::ptime start_time = boost::posix_time::microsec_clock::local_time();
-    assert (existsMetaVariable(DBContent::meta_var_tod_id_.name()));
+    assert (existsMetaVariable(DBContent::meta_var_tod_.name()));
 
     if (COMPASS::instance().appMode() == AppMode::LiveRunning) // do tod cleanup
     {
@@ -886,19 +747,19 @@ void DBContentManager::finishInserting()
         cutCachedData();
         filterDataSources();
 
+        if (COMPASS::instance().filterManager().useFilters())
+            COMPASS::instance().filterManager().filterBuffers(data_);
+
         logdbg << "DBContentManager: finishInserting: distributing data";
 
         if (data_.size())
             emit loadedDataSignal(data_, true);
     }
-    else
-        insert_data_.clear();
 
-    if (load_widget_)
-        load_widget_->update();
+    COMPASS::instance().dataSourceManager().updateWidget();
 
     boost::posix_time::time_duration time_diff = boost::posix_time::microsec_clock::local_time() - start_time;
-    loginf << "DBContentManager: finishInserting: processing took "
+    logdbg << "DBContentManager: finishInserting: processing took "
         << String::timeStringFromDouble(time_diff.total_milliseconds() / 1000.0, true);
 }
 
@@ -939,9 +800,9 @@ void DBContentManager::addInsertedDataToChache()
             data_.at(buf_it.first)->seizeBuffer(*buf_it.second.get());
 
             // sort by tod
-            assert (metaVariable(DBContent::meta_var_tod_id_.name()).existsIn(buf_it.first));
+            assert (metaVariable(DBContent::meta_var_tod_.name()).existsIn(buf_it.first));
 
-            Variable& tod_var = metaVariable(DBContent::meta_var_tod_id_.name()).getFor(buf_it.first);
+            Variable& tod_var = metaVariable(DBContent::meta_var_tod_.name()).getFor(buf_it.first);
 
             Property tod_prop {tod_var.name(), tod_var.dataType()};
 
@@ -956,13 +817,7 @@ void DBContentManager::addInsertedDataToChache()
 
 void DBContentManager::filterDataSources()
 {
-    set<unsigned int> wanted_data_sources;
-
-    for (auto& ds_it : db_data_sources_)
-    {
-        if (dsTypeLoadingWanted(ds_it->dsType()) && ds_it->loadingWanted())
-           wanted_data_sources.insert(ds_it->id());
-    }
+    set<unsigned int> wanted_data_sources = COMPASS::instance().dataSourceManager().getLoadDataSources();
 
     unsigned int buffer_size;
     vector<size_t> indexes_to_remove;
@@ -1023,9 +878,9 @@ void DBContentManager::cutCachedData()
 
     for (auto& buf_it : data_)
     {
-        assert (metaVariable(DBContent::meta_var_tod_id_.name()).existsIn(buf_it.first));
+        assert (metaVariable(DBContent::meta_var_tod_.name()).existsIn(buf_it.first));
 
-        Variable& tod_var = metaVariable(DBContent::meta_var_tod_id_.name()).getFor(buf_it.first);
+        Variable& tod_var = metaVariable(DBContent::meta_var_tod_.name()).getFor(buf_it.first);
 
         Property tod_prop {tod_var.name(), tod_var.dataType()};
 
@@ -1068,9 +923,9 @@ void DBContentManager::cutCachedData()
     {
         buffer_size = buf_it.second->size();
 
-        assert (metaVariable(DBContent::meta_var_tod_id_.name()).existsIn(buf_it.first));
+        assert (metaVariable(DBContent::meta_var_tod_.name()).existsIn(buf_it.first));
 
-        Variable& tod_var = metaVariable(DBContent::meta_var_tod_id_.name()).getFor(buf_it.first);
+        Variable& tod_var = metaVariable(DBContent::meta_var_tod_.name()).getFor(buf_it.first);
 
         Property tod_prop {tod_var.name(), tod_var.dataType()};
 
@@ -1134,19 +989,79 @@ const std::map<std::string, std::shared_ptr<Buffer>>& DBContentManager::data() c
     return data_;
 }
 
-void DBContentManager::dsTypeLoadingWanted (const std::string& ds_type, bool wanted)
-{
-    loginf << "DBContentManager: dsTypeLoadingWanted: ds_type " << ds_type << " wanted " << wanted;
 
-    ds_type_loading_wanted_[ds_type] = wanted;
+
+
+bool DBContentManager::canGetVariable (const std::string& dbcont_name, const Property& property)
+{
+    assert (dbcontent_.count(dbcont_name));
+
+    return dbcontent_.at(dbcont_name)->hasVariable(property.name());
 }
 
-bool DBContentManager::dsTypeLoadingWanted (const std::string& ds_type)
+dbContent::Variable& DBContentManager::getVariable (const std::string& dbcont_name, const Property& property)
 {
-    if (!ds_type_loading_wanted_.count(ds_type))
-        return true;
+    assert (canGetVariable(dbcont_name, property));
+    assert (dbcontent_.at(dbcont_name)->hasVariable(property.name()));
 
-    return ds_type_loading_wanted_.at(ds_type);
+    Variable& variable = dbcontent_.at(dbcont_name)->variable(property.name());
+
+    assert (variable.dataType() == property.dataType());
+
+    return variable;
+}
+
+bool DBContentManager::metaCanGetVariable (const std::string& dbcont_name, const Property& meta_property)
+{
+    assert (dbcontent_.count(dbcont_name));
+
+    if (!existsMetaVariable(meta_property.name()))
+        return false;
+
+    return metaVariable(meta_property.name()).existsIn(dbcont_name);
+}
+
+dbContent::Variable& DBContentManager::metaGetVariable (const std::string& dbcont_name, const Property& meta_property)
+{
+    assert (metaCanGetVariable(dbcont_name, meta_property));
+
+    return metaVariable(meta_property.name()).getFor(dbcont_name);
+}
+
+bool DBContentManager::hasTargetsInfo()
+{
+    return targets_.size();
+}
+
+void DBContentManager::clearTargetsInfo()
+{
+    targets_.clear();
+    COMPASS::instance().interface().clearTargetsTable();
+}
+
+bool DBContentManager::existsTarget(unsigned int utn)
+{
+    return targets_.count(utn);
+}
+
+void DBContentManager::createTarget(unsigned int utn)
+{
+    assert (!existsTarget(utn));
+
+    targets_.emplace(utn, make_shared<dbContent::Target>(utn, nlohmann::json::object()));
+
+    assert (existsTarget(utn));
+}
+
+std::shared_ptr<dbContent::Target> DBContentManager::target(unsigned int utn)
+{
+    assert (existsTarget(utn));
+    return targets_.at(utn);
+}
+
+void DBContentManager::saveTargets()
+{
+    COMPASS::instance().interface().saveTargets(targets_);
 }
 
 bool DBContentManager::insertInProgress() const
@@ -1160,7 +1075,7 @@ void DBContentManager::loadMaxRecordNumber()
 
     max_rec_num_ = 0;
 
-    for (auto& obj_it : objects_)
+    for (auto& obj_it : dbcontent_)
     {
         if (obj_it.second->existsInDB())
             max_rec_num_ = max(COMPASS::instance().interface().getMaxRecordNumber(*obj_it.second), max_rec_num_);
@@ -1170,82 +1085,6 @@ void DBContentManager::loadMaxRecordNumber()
 
     loginf << "DBContentManager: loadMaxRecordNumber: " << max_rec_num_;
 }
-
-const std::vector<std::unique_ptr<dbContent::DBDataSource>>& DBContentManager::dataSources() const
-{
-    return db_data_sources_;
-}
-
-std::map<unsigned int, std::vector <std::pair<std::string, unsigned int>>> DBContentManager::getNetworkLines()
-{
-    //ds_id -> (ip, port)
-    std::map<unsigned int, std::vector <std::pair<std::string, unsigned int>>> lines;
-
-    string line_address;
-    string ip;
-    unsigned int port;
-
-    set<string> existing_lines; // to check
-
-    for (auto& ds_it : config_data_sources_)
-    {
-        if (ds_it->info().contains("network_lines"))
-        {
-            json& network_lines = ds_it->info().at("network_lines");
-            assert (network_lines.is_array());
-
-            for (auto& line_it : network_lines.get<json::array_t>())  // iterate over array
-            {
-                assert (line_it.is_primitive());
-                assert (line_it.is_string());
-
-                line_address = line_it;
-
-                ip = String::ipFromString(line_address);
-                port = String::portFromString(line_address);
-
-                if (existing_lines.count(ip+":"+to_string(port)))
-                {
-                    logwrn << "DBContentManager: getNetworkLines: source " << ds_it->name()
-                           << " line " << ip << ":" << port
-                           << " already in use";
-                }
-                else
-                    lines[Number::dsIdFrom(ds_it->sac(), ds_it->sic())].push_back({ip, port});
-
-                existing_lines.insert(ip+":"+to_string(port));
-
-                //break; // TODO only parse one for now
-            }
-        }
-    }
-
-//    for (auto& ds_it : db_data_sources_) // should be same
-//    {
-//        if (ds_it->info().contains("network_lines"))
-//        {
-//            json& network_lines = ds_it->info().at("network_lines");
-//            assert (network_lines.is_array());
-
-//            for (auto& line_it : network_lines.get<json::array_t>())  // iterate over array
-//            {
-//                assert (line_it.is_primitive());
-//                assert (line_it.is_string());
-
-//                line_address = line_it;
-
-//                ip = String::ipFromString(line_address);
-//                port = String::portFromString(line_address);
-
-//                lines[Number::dsIdFrom(ds_it->sac(), ds_it->sic())].push_back({ip, port});
-//            }
-//        }
-//    }
-
-    return lines;
-}
-
-
 
 MetaVariableConfigurationDialog* DBContentManager::metaVariableConfigdialog()
 {

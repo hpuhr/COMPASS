@@ -1,6 +1,6 @@
 {
     "parameters": {
-        "db_table_name": "sd_reftraj",
+        "db_table_name": "data_reftraj",
         "info": "",
         "name": "RefTraj"
     },
@@ -10,284 +10,428 @@
                 "parameters": null,
                 "sub_configs": {
                     "LabelEntry": {
-                        "LabelEntryacceleration_ms20": {
+                        "LabelEntryAircraft Address0": {
                             "parameters": {
                                 "prefix": "",
                                 "show": false,
                                 "suffix": "",
-                                "variable_name": "acceleration_ms2"
+                                "variable_name": "Aircraft Address"
                             }
                         },
-                        "LabelEntryalt_baro_ft0": {
+                        "LabelEntryAircraft Identification0": {
                             "parameters": {
                                 "prefix": "",
                                 "show": false,
                                 "suffix": "",
-                                "variable_name": "alt_baro_ft"
+                                "variable_name": "Aircraft Identification"
                             }
                         },
-                        "LabelEntryalt_baro_std_dev_ft0": {
+                        "LabelEntryAssociations0": {
                             "parameters": {
                                 "prefix": "",
                                 "show": false,
                                 "suffix": "",
-                                "variable_name": "alt_baro_std_dev_ft"
+                                "variable_name": "Associations"
                             }
                         },
-                        "LabelEntryalt_geo_ft0": {
+                        "LabelEntryAx StdDev0": {
                             "parameters": {
                                 "prefix": "",
                                 "show": false,
                                 "suffix": "",
-                                "variable_name": "alt_geo_ft"
+                                "variable_name": "Ax StdDev"
                             }
                         },
-                        "LabelEntryalt_geo_std_dev_ft0": {
+                        "LabelEntryAx0": {
                             "parameters": {
                                 "prefix": "",
                                 "show": false,
                                 "suffix": "",
-                                "variable_name": "alt_geo_std_dev_ft"
+                                "variable_name": "Ax"
                             }
                         },
-                        "LabelEntrycalc_vertical_rate_ftm0": {
+                        "LabelEntryAy StdDev0": {
                             "parameters": {
                                 "prefix": "",
                                 "show": false,
                                 "suffix": "",
-                                "variable_name": "calc_vertical_rate_ftm"
+                                "variable_name": "Ay StdDev"
                             }
                         },
-                        "LabelEntrycallsign0": {
-                            "parameters": {
-                                "prefix": "CS ",
-                                "show": true,
-                                "suffix": "",
-                                "variable_name": "callsign"
-                            }
-                        },
-                        "LabelEntrycivil_emergency0": {
+                        "LabelEntryAy0": {
                             "parameters": {
                                 "prefix": "",
                                 "show": false,
                                 "suffix": "",
-                                "variable_name": "civil_emergency"
+                                "variable_name": "Ay"
                             }
                         },
-                        "LabelEntryds_id0": {
-                            "parameters": {
-                                "prefix": "DS ",
-                                "show": true,
-                                "suffix": "",
-                                "variable_name": "ds_id"
-                            }
-                        },
-                        "LabelEntrygroundspeed_kt0": {
+                        "LabelEntryBarometric Altitude QNH Corrected0": {
                             "parameters": {
                                 "prefix": "",
                                 "show": false,
                                 "suffix": "",
-                                "variable_name": "groundspeed_kt"
+                                "variable_name": "Barometric Altitude QNH Corrected"
                             }
                         },
-                        "LabelEntryheading_deg0": {
+                        "LabelEntryBarometric Altitude StdDev0": {
                             "parameters": {
                                 "prefix": "",
                                 "show": false,
                                 "suffix": "",
-                                "variable_name": "heading_deg"
+                                "variable_name": "Barometric Altitude StdDev"
                             }
                         },
-                        "LabelEntrymanoeuvre_hori0": {
+                        "LabelEntryBarometric Altitude0": {
                             "parameters": {
                                 "prefix": "",
                                 "show": false,
                                 "suffix": "",
-                                "variable_name": "manoeuvre_hori"
+                                "variable_name": "Barometric Altitude"
                             }
                         },
-                        "LabelEntrymil_emergency0": {
+                        "LabelEntryBarometric Vertical Rate0": {
                             "parameters": {
                                 "prefix": "",
                                 "show": false,
                                 "suffix": "",
-                                "variable_name": "mil_emergency"
+                                "variable_name": "Barometric Vertical Rate"
                             }
                         },
-                        "LabelEntrymode3a_code0": {
-                            "parameters": {
-                                "prefix": "A ",
-                                "show": true,
-                                "suffix": "",
-                                "variable_name": "mode3a_code"
-                            }
-                        },
-                        "LabelEntrymodec_code_ft0": {
-                            "parameters": {
-                                "prefix": "C ",
-                                "show": true,
-                                "suffix": "",
-                                "variable_name": "modec_code_ft"
-                            }
-                        },
-                        "LabelEntrymof_long0": {
+                        "LabelEntryCoasting0": {
                             "parameters": {
                                 "prefix": "",
                                 "show": false,
                                 "suffix": "",
-                                "variable_name": "mof_long"
+                                "variable_name": "Coasting"
                             }
                         },
-                        "LabelEntrymof_trans0": {
+                        "LabelEntryConfirmed0": {
                             "parameters": {
                                 "prefix": "",
                                 "show": false,
                                 "suffix": "",
-                                "variable_name": "mof_trans"
+                                "variable_name": "Confirmed"
                             }
                         },
-                        "LabelEntrymof_vert0": {
+                        "LabelEntryDS ID0": {
                             "parameters": {
                                 "prefix": "",
                                 "show": false,
                                 "suffix": "",
-                                "variable_name": "mof_vert"
+                                "variable_name": "DS ID"
                             }
                         },
-                        "LabelEntrypos_lat_deg0": {
+                        "LabelEntryGeometric Altitude StdDev0": {
                             "parameters": {
                                 "prefix": "",
                                 "show": false,
                                 "suffix": "",
-                                "variable_name": "pos_lat_deg"
+                                "variable_name": "Geometric Altitude StdDev"
                             }
                         },
-                        "LabelEntrypos_long_deg0": {
+                        "LabelEntryGeometric Altitude0": {
                             "parameters": {
                                 "prefix": "",
                                 "show": false,
                                 "suffix": "",
-                                "variable_name": "pos_long_deg"
+                                "variable_name": "Geometric Altitude"
                             }
                         },
-                        "LabelEntrypos_std_dev_lat_deg0": {
+                        "LabelEntryGeometric Vertical Rate0": {
                             "parameters": {
                                 "prefix": "",
                                 "show": false,
                                 "suffix": "",
-                                "variable_name": "pos_std_dev_lat_deg"
+                                "variable_name": "Geometric Vertical Rate"
                             }
                         },
-                        "LabelEntrypos_std_dev_latlong_corr_coeff0": {
+                        "LabelEntryLatitude StdDev0": {
                             "parameters": {
                                 "prefix": "",
                                 "show": false,
                                 "suffix": "",
-                                "variable_name": "pos_std_dev_latlong_corr_coeff"
+                                "variable_name": "Latitude StdDev"
                             }
                         },
-                        "LabelEntrypos_std_dev_long_deg0": {
+                        "LabelEntryLatitude0": {
                             "parameters": {
                                 "prefix": "",
                                 "show": false,
                                 "suffix": "",
-                                "variable_name": "pos_std_dev_long_deg"
+                                "variable_name": "Latitude"
                             }
                         },
-                        "LabelEntryrec_num0": {
-                            "parameters": {
-                                "prefix": "R ",
-                                "show": false,
-                                "suffix": "",
-                                "variable_name": "rec_num"
-                            }
-                        },
-                        "LabelEntrysac0": {
+                        "LabelEntryLine ID0": {
                             "parameters": {
                                 "prefix": "",
                                 "show": false,
                                 "suffix": "",
-                                "variable_name": "sac"
+                                "variable_name": "Line ID"
                             }
                         },
-                        "LabelEntrysic0": {
+                        "LabelEntryLongitude StdDev0": {
                             "parameters": {
                                 "prefix": "",
                                 "show": false,
                                 "suffix": "",
-                                "variable_name": "sic"
+                                "variable_name": "Longitude StdDev"
                             }
                         },
-                        "LabelEntryspi0": {
+                        "LabelEntryLongitude0": {
                             "parameters": {
                                 "prefix": "",
                                 "show": false,
                                 "suffix": "",
-                                "variable_name": "spi"
+                                "variable_name": "Longitude"
                             }
                         },
-                        "LabelEntrytarget_addr0": {
-                            "parameters": {
-                                "prefix": "TA ",
-                                "show": true,
-                                "suffix": "",
-                                "variable_name": "target_addr"
-                            }
-                        },
-                        "LabelEntrytimestamp0": {
+                        "LabelEntryMode 3/A Code0": {
                             "parameters": {
                                 "prefix": "",
                                 "show": false,
                                 "suffix": "",
-                                "variable_name": "timestamp"
+                                "variable_name": "Mode 3/A Code"
                             }
                         },
-                        "LabelEntrytod0": {
-                            "parameters": {
-                                "prefix": "T ",
-                                "show": true,
-                                "suffix": "",
-                                "variable_name": "tod"
-                            }
-                        },
-                        "LabelEntrytrack_created0": {
+                        "LabelEntryMode 3/A Garbled0": {
                             "parameters": {
                                 "prefix": "",
                                 "show": false,
                                 "suffix": "",
-                                "variable_name": "track_created"
+                                "variable_name": "Mode 3/A Garbled"
                             }
                         },
-                        "LabelEntrytrack_end0": {
+                        "LabelEntryMode 3/A Valid0": {
                             "parameters": {
                                 "prefix": "",
                                 "show": false,
                                 "suffix": "",
-                                "variable_name": "track_end"
+                                "variable_name": "Mode 3/A Valid"
                             }
                         },
-                        "LabelEntrytrack_num0": {
+                        "LabelEntryMode C Code0": {
                             "parameters": {
                                 "prefix": "",
                                 "show": false,
                                 "suffix": "",
-                                "variable_name": "track_num"
+                                "variable_name": "Mode C Code"
                             }
                         },
-                        "LabelEntryturnrate_degps0": {
+                        "LabelEntryMode C Garbled0": {
                             "parameters": {
                                 "prefix": "",
                                 "show": false,
                                 "suffix": "",
-                                "variable_name": "turnrate_degps"
+                                "variable_name": "Mode C Garbled"
                             }
                         },
-                        "LabelEntryusable0": {
+                        "LabelEntryMode C Valid0": {
                             "parameters": {
                                 "prefix": "",
                                 "show": false,
                                 "suffix": "",
-                                "variable_name": "usable"
+                                "variable_name": "Mode C Valid"
+                            }
+                        },
+                        "LabelEntryRate Of Climb/Descent StdDev0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Rate Of Climb/Descent StdDev"
+                            }
+                        },
+                        "LabelEntryRate Of Climb/Descent0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Rate Of Climb/Descent"
+                            }
+                        },
+                        "LabelEntryRecord Number0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Record Number"
+                            }
+                        },
+                        "LabelEntryRoll Angle0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Roll Angle"
+                            }
+                        },
+                        "LabelEntrySAC0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "SAC"
+                            }
+                        },
+                        "LabelEntrySIC0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "SIC"
+                            }
+                        },
+                        "LabelEntrySPI0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "SPI"
+                            }
+                        },
+                        "LabelEntrySurface Target0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Surface Target"
+                            }
+                        },
+                        "LabelEntryTarget Length0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Target Length"
+                            }
+                        },
+                        "LabelEntryTarget Orientation0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Target Orientation"
+                            }
+                        },
+                        "LabelEntryTarget Width0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Target Width"
+                            }
+                        },
+                        "LabelEntryTime of Day0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Time of Day"
+                            }
+                        },
+                        "LabelEntryTrack Angle0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Track Angle"
+                            }
+                        },
+                        "LabelEntryTrack Begin0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Track Begin"
+                            }
+                        },
+                        "LabelEntryTrack End0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Track End"
+                            }
+                        },
+                        "LabelEntryTrack Number0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Track Number"
+                            }
+                        },
+                        "LabelEntryVx StdDev0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Vx StdDev"
+                            }
+                        },
+                        "LabelEntryVx0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Vx"
+                            }
+                        },
+                        "LabelEntryVy StdDev0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Vy StdDev"
+                            }
+                        },
+                        "LabelEntryVy0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Vy"
+                            }
+                        },
+                        "LabelEntryX StdDev0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "X StdDev"
+                            }
+                        },
+                        "LabelEntryX/Y Covariance0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "X/Y Covariance"
+                            }
+                        },
+                        "LabelEntryX0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "X"
+                            }
+                        },
+                        "LabelEntryY StdDev0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Y StdDev"
+                            }
+                        },
+                        "LabelEntryY0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Y"
                             }
                         }
                     }
@@ -295,493 +439,692 @@
             }
         },
         "Variable": {
-            "VariableRefTrajacceleration_ms20": {
+            "Variable115": {
+                "parameters": {
+                    "data_type_str": "FLOAT",
+                    "db_column_name": "geometric_altitude_stddev",
+                    "description": "Estimated accuracy (i.e. standard deviation) of the calculated geometric altitude of a target.",
+                    "dimension": "Height",
+                    "is_key": false,
+                    "name": "Geometric Altitude StdDev",
+                    "representation_str": "STANDARD",
+                    "short_name": "GA StdDev",
+                    "unit": "Feet"
+                }
+            },
+            "Variable116": {
                 "parameters": {
                     "data_type_str": "DOUBLE",
-                    "db_column_name": "acceleration_ms2",
-                    "dbo_name": "RefTraj",
-                    "description": "Acceleration in meters per square second",
+                    "db_column_name": "vx_stddev",
+                    "description": "Estimated accuracy (i.e. standard deviation) of the calculated track velocity in Cartesian co-ordinates.",
                     "dimension": "",
                     "is_key": false,
-                    "name": "acceleration_ms2",
+                    "name": "Vx StdDev",
                     "representation_str": "STANDARD",
                     "short_name": "",
                     "unit": ""
                 }
             },
-            "VariableRefTrajalt_baro_ft0": {
+            "Variable117": {
                 "parameters": {
-                    "data_type_str": "INT",
-                    "db_column_name": "alt_baro_ft",
-                    "dbo_name": "RefTraj",
-                    "description": "",
+                    "data_type_str": "DOUBLE",
+                    "db_column_name": "vy_stddev",
+                    "description": "Estimated accuracy (i.e. standard deviation) of the calculated track velocity in Cartesian co-ordinates.",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Vy StdDev",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "Variable118": {
+                "parameters": {
+                    "data_type_str": "FLOAT",
+                    "db_column_name": "ax_stddev",
+                    "description": "Estimated accuracy (i.e. standard deviation) of the calculated acceleration in Cartesian co-ordinates.",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Ax StdDev",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "Variable119": {
+                "parameters": {
+                    "data_type_str": "FLOAT",
+                    "db_column_name": "ay_stddev",
+                    "description": "Estimated accuracy (i.e. standard deviation) of the calculated acceleration in Cartesian co-ordinates.",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Ay StdDev",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "Variable120": {
+                "parameters": {
+                    "data_type_str": "DOUBLE",
+                    "db_column_name": "rate_of_climb_descent_stddev",
+                    "description": "Estimated accuracy (i.e. standard deviation) of the calculated rate of Climb/Descent of an aircraft.",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Rate Of Climb/Descent StdDev",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "Variable121": {
+                "parameters": {
+                    "data_type_str": "FLOAT",
+                    "db_column_name": "barometric_altitude_stddev",
+                    "description": "Estimated accuracy (i.e. standard deviation) of the calculated barometric altitude of the track.",
                     "dimension": "Height",
                     "is_key": false,
-                    "name": "alt_baro_ft",
+                    "name": "Barometric Altitude StdDev",
                     "representation_str": "STANDARD",
                     "short_name": "",
                     "unit": "Feet"
                 }
             },
-            "VariableRefTrajalt_baro_std_dev_ft0": {
+            "Variable25": {
                 "parameters": {
-                    "data_type_str": "DOUBLE",
-                    "db_column_name": "alt_baro_std_dev_ft",
-                    "dbo_name": "RefTraj",
-                    "description": "",
+                    "data_type_str": "BOOL",
+                    "db_column_name": "surface_target",
+                    "description": "0 Default value\n1 Surface target",
                     "dimension": "",
                     "is_key": false,
-                    "name": "alt_baro_std_dev_ft",
+                    "name": "Surface Target",
+                    "representation_str": "STANDARD",
+                    "short_name": "SFC",
+                    "unit": ""
+                }
+            },
+            "Variable26": {
+                "parameters": {
+                    "data_type_str": "FLOAT",
+                    "db_column_name": "x",
+                    "description": "Calculated position in Cartesian co-ordinates with a resolution of\n0.5m",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "X",
                     "representation_str": "STANDARD",
                     "short_name": "",
                     "unit": ""
                 }
             },
-            "VariableRefTrajalt_geo_ft0": {
+            "Variable27": {
                 "parameters": {
-                    "data_type_str": "DOUBLE",
-                    "db_column_name": "alt_geo_ft",
-                    "dbo_name": "RefTraj",
-                    "description": "Geometric altitude",
-                    "dimension": "Height",
-                    "is_key": false,
-                    "name": "alt_geo_ft",
-                    "representation_str": "STANDARD",
-                    "short_name": "",
-                    "unit": "Feet"
-                }
-            },
-            "VariableRefTrajalt_geo_std_dev_ft0": {
-                "parameters": {
-                    "data_type_str": "DOUBLE",
-                    "db_column_name": "alt_geo_std_dev_ft",
-                    "dbo_name": "RefTraj",
-                    "description": "",
+                    "data_type_str": "FLOAT",
+                    "db_column_name": "y",
+                    "description": "Calculated position in Cartesian co-ordinates with a resolution of\n0.5m",
                     "dimension": "",
                     "is_key": false,
-                    "name": "alt_geo_std_dev_ft",
+                    "name": "Y",
                     "representation_str": "STANDARD",
                     "short_name": "",
                     "unit": ""
                 }
             },
-            "VariableRefTrajcalc_vertical_rate_ftm0": {
+            "Variable28": {
                 "parameters": {
-                    "data_type_str": "DOUBLE",
-                    "db_column_name": "calc_vertical_rate_ftm",
-                    "dbo_name": "RefTraj",
-                    "description": " ",
+                    "data_type_str": "BOOL",
+                    "db_column_name": "barometric_altitude_qnh_corrected",
+                    "description": "0 No QNH correction applied\n1 QNH correction applied",
                     "dimension": "",
                     "is_key": false,
-                    "name": "calc_vertical_rate_ftm",
+                    "name": "Barometric Altitude QNH Corrected",
+                    "representation_str": "STANDARD",
+                    "short_name": "BA QNH C C",
+                    "unit": ""
+                }
+            },
+            "Variable29": {
+                "parameters": {
+                    "data_type_str": "DOUBLE",
+                    "db_column_name": "vx",
+                    "description": "Calculated track velocity expressed in Cartesian co-ordinates\n\n(LSB) = 0.25 m/s\n\n-8192m/s <= Vx <= 8191.75m/s",
+                    "dimension": "Speed",
+                    "is_key": false,
+                    "name": "Vx",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": "Meter/Second"
+                }
+            },
+            "Variable30": {
+                "parameters": {
+                    "data_type_str": "DOUBLE",
+                    "db_column_name": "vy",
+                    "description": "Calculated track velocity expressed in Cartesian co-ordinates\n\n(LSB) = 0.25 m/s\n\n-8192m/s <= Vx <= 8191.75m/s",
+                    "dimension": "Speed",
+                    "is_key": false,
+                    "name": "Vy",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": "Meter/Second"
+                }
+            },
+            "Variable32": {
+                "parameters": {
+                    "data_type_str": "FLOAT",
+                    "db_column_name": "ax",
+                    "description": "Calculated Acceleration of the target expressed in Cartesian co-\nordinates\n\n(LSB) = 0.25 m/s^2",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Ax",
                     "representation_str": "STANDARD",
                     "short_name": "",
                     "unit": ""
                 }
             },
-            "VariableRefTrajcallsign0": {
+            "Variable33": {
+                "parameters": {
+                    "data_type_str": "FLOAT",
+                    "db_column_name": "ay",
+                    "description": "Calculated Acceleration of the target expressed in Cartesian co-\nordinates\n\n(LSB) = 0.25 m/s^2",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Ay",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "Variable35": {
                 "parameters": {
                     "data_type_str": "STRING",
-                    "db_column_name": "callsign",
-                    "dbo_name": "RefTraj",
-                    "description": "Aircraft identification",
+                    "db_column_name": "aircraft_identification",
+                    "description": "Target Identification",
                     "dimension": "",
                     "is_key": false,
-                    "name": "callsign",
+                    "name": "Aircraft Identification",
                     "representation_str": "STANDARD",
-                    "short_name": "",
+                    "short_name": "ACID",
                     "unit": ""
                 }
             },
-            "VariableRefTrajcivil_emergency0": {
+            "Variable36": {
                 "parameters": {
-                    "data_type_str": "CHAR",
-                    "db_column_name": "civil_emergency",
-                    "dbo_name": "RefTraj",
-                    "description": "Civil emergency",
-                    "dimension": "",
+                    "data_type_str": "UCHAR",
+                    "db_column_name": "target_length",
+                    "description": "",
+                    "dimension": "Length",
                     "is_key": false,
-                    "name": "civil_emergency",
+                    "name": "Target Length",
                     "representation_str": "STANDARD",
                     "short_name": "",
+                    "unit": "Meter"
+                }
+            },
+            "Variable37": {
+                "parameters": {
+                    "data_type_str": "FLOAT",
+                    "db_column_name": "target_orientation",
+                    "description": "The orientation gives the direction which the target nose is pointing to, relative to the Geographical North.",
+                    "dimension": "Angle",
+                    "is_key": false,
+                    "name": "Target Orientation",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": "Degree"
+                }
+            },
+            "Variable38": {
+                "parameters": {
+                    "data_type_str": "UCHAR",
+                    "db_column_name": "target_width",
+                    "description": "",
+                    "dimension": "Length",
+                    "is_key": false,
+                    "name": "Target Width",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": "Meter"
+                }
+            },
+            "Variable71": {
+                "parameters": {
+                    "data_type_str": "DOUBLE",
+                    "db_column_name": "barometric_vertical_rate",
+                    "description": "Barometric Vertical Rate\n\nUnit:  feet/minute",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Barometric Vertical Rate",
+                    "representation_str": "STANDARD",
+                    "short_name": "BVR",
                     "unit": ""
                 }
             },
-            "VariableRefTrajds_id0": {
+            "Variable72": {
                 "parameters": {
-                    "data_type_str": "INT",
+                    "data_type_str": "DOUBLE",
+                    "db_column_name": "geometric_vertical_rate",
+                    "description": "GVR.Geometric Vertical Rate\n\nUnit: feet/minute",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Geometric Vertical Rate",
+                    "representation_str": "STANDARD",
+                    "short_name": "GVR",
+                    "unit": ""
+                }
+            },
+            "Variable73": {
+                "parameters": {
+                    "data_type_str": "DOUBLE",
+                    "db_column_name": "roll_angle",
+                    "description": "Roll Angle\n\nRoll Angle\n-180 <= Roll Angle <= 180\n",
+                    "dimension": "Angle",
+                    "is_key": false,
+                    "name": "Roll Angle",
+                    "representation_str": "STANDARD",
+                    "short_name": "RAN",
+                    "unit": "Degree"
+                }
+            },
+            "Variable74": {
+                "parameters": {
+                    "data_type_str": "DOUBLE",
+                    "db_column_name": "track_angle",
+                    "description": "Track Angle",
+                    "dimension": "Angle",
+                    "is_key": false,
+                    "name": "Track Angle",
+                    "representation_str": "STANDARD",
+                    "short_name": "TAN",
+                    "unit": "Degree"
+                }
+            },
+            "VariableTrackerassociations0": {
+                "parameters": {
+                    "data_type_str": "JSON",
+                    "db_column_name": "associations",
+                    "description": "Associations set as JSON object",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Associations",
+                    "representation_str": "STANDARD",
+                    "short_name": "Assoc",
+                    "unit": ""
+                }
+            },
+            "VariableTrackercalc_alt_geo_ft0": {
+                "parameters": {
+                    "data_type_str": "FLOAT",
+                    "db_column_name": "geometric_altitude",
+                    "description": "Calculated Track Geometric Altitude\n\nVertical distance between the target and the projection of its position on the earth’s ellipsoid, as defined by WGS84",
+                    "dimension": "Height",
+                    "is_key": false,
+                    "name": "Geometric Altitude",
+                    "representation_str": "STANDARD",
+                    "short_name": "GA",
+                    "unit": "Feet"
+                }
+            },
+            "VariableTrackercalc_vertical_rate_ftm0": {
+                "parameters": {
+                    "data_type_str": "FLOAT",
+                    "db_column_name": "rate_of_climb_descent",
+                    "description": "Calculated rate of Climb/Descent of an aircraft",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Rate Of Climb/Descent",
+                    "representation_str": "STANDARD",
+                    "short_name": "RoCD",
+                    "unit": ""
+                }
+            },
+            "VariableTrackerds_id0": {
+                "parameters": {
+                    "data_type_str": "UINT",
                     "db_column_name": "ds_id",
-                    "dbo_name": "RefTraj",
-                    "description": "DATA SOURCE ID, is derived from table DS and its sub tables",
+                    "description": "Data Source Identifier",
                     "dimension": "",
                     "is_key": false,
-                    "name": "ds_id",
+                    "name": "DS ID",
                     "representation_str": "DATA_SRC_NAME",
                     "short_name": "",
                     "unit": ""
                 }
             },
-            "VariableRefTrajgroundspeed_kt0": {
+            "VariableTrackerline_id0": {
                 "parameters": {
-                    "data_type_str": "DOUBLE",
-                    "db_column_name": "groundspeed_kt",
-                    "dbo_name": "RefTraj",
-                    "description": " ",
-                    "dimension": "Speed",
-                    "is_key": false,
-                    "name": "groundspeed_kt",
-                    "representation_str": "STANDARD",
-                    "short_name": "",
-                    "unit": "Knots"
-                }
-            },
-            "VariableRefTrajheading_deg0": {
-                "parameters": {
-                    "data_type_str": "DOUBLE",
-                    "db_column_name": "heading_deg",
-                    "dbo_name": "RefTraj",
-                    "description": " ",
-                    "dimension": "Angle",
-                    "is_key": false,
-                    "name": "heading_deg",
-                    "representation_str": "STANDARD",
-                    "short_name": "",
-                    "unit": "Degree"
-                }
-            },
-            "VariableRefTrajmanoeuvre_hori0": {
-                "parameters": {
-                    "data_type_str": "STRING",
-                    "db_column_name": "manoeuvre_hori",
-                    "dbo_name": "RefTraj",
-                    "description": "Y = horizontal Manoeuvre, N = No Manoeuvre",
+                    "data_type_str": "UINT",
+                    "db_column_name": "line_id",
+                    "description": "Communication line ID",
                     "dimension": "",
                     "is_key": false,
-                    "name": "manoeuvre_hori",
+                    "name": "Line ID",
                     "representation_str": "STANDARD",
                     "short_name": "",
                     "unit": ""
                 }
             },
-            "VariableRefTrajmil_emergency0": {
+            "VariableTrackerlm_alt_baro_ft0": {
                 "parameters": {
-                    "data_type_str": "STRING",
-                    "db_column_name": "mil_emergency",
-                    "dbo_name": "RefTraj",
-                    "description": " ",
-                    "dimension": "",
-                    "is_key": false,
-                    "name": "mil_emergency",
-                    "representation_str": "STANDARD",
-                    "short_name": "",
-                    "unit": ""
-                }
-            },
-            "VariableRefTrajmode3a_code0": {
-                "parameters": {
-                    "data_type_str": "INT",
-                    "db_column_name": "mode3a_code",
-                    "dbo_name": "RefTraj",
-                    "description": "Code, 4 octels",
-                    "dimension": "",
-                    "is_key": false,
-                    "name": "mode3a_code",
-                    "representation_str": "DEC_TO_OCTAL",
-                    "short_name": "",
-                    "unit": ""
-                }
-            },
-            "VariableRefTrajmodec_code_ft0": {
-                "parameters": {
-                    "data_type_str": "INT",
-                    "db_column_name": "modec_code_ft",
-                    "dbo_name": "RefTraj",
-                    "description": "Flight Level / Altitude in Ft",
+                    "data_type_str": "FLOAT",
+                    "db_column_name": "mode_c_code",
+                    "description": "Mode C Code",
                     "dimension": "Height",
                     "is_key": false,
-                    "name": "modec_code_ft",
+                    "name": "Mode C Code",
                     "representation_str": "STANDARD",
-                    "short_name": "",
+                    "short_name": "MC",
                     "unit": "Feet"
                 }
             },
-            "VariableRefTrajmof_long0": {
+            "VariableTrackerlm_alt_baro_g0": {
                 "parameters": {
-                    "data_type_str": "CHAR",
-                    "db_column_name": "mof_long",
-                    "dbo_name": "RefTraj",
-                    "description": "Mode of flight - Longitudinal acceleration: 0 = Constant Groundspeed, 1 = Increasing Groundspeed, 2 = Decreasing Groundspeed, 3 = Undetermined",
+                    "data_type_str": "BOOL",
+                    "db_column_name": "mode_c_garbled",
+                    "description": "0 Default\n1 Garbled code\n",
                     "dimension": "",
                     "is_key": false,
-                    "name": "mof_long",
+                    "name": "Mode C Garbled",
                     "representation_str": "STANDARD",
-                    "short_name": "",
+                    "short_name": "MC G",
                     "unit": ""
                 }
             },
-            "VariableRefTrajmof_trans0": {
+            "VariableTrackerlm_alt_baro_v0": {
                 "parameters": {
-                    "data_type_str": "CHAR",
-                    "db_column_name": "mof_trans",
-                    "dbo_name": "RefTraj",
-                    "description": "Mode of flight - Transversal acceleration: 0 = Constant Course, 1 = Right Turn, 2 = Left Turn, 3 = Undetermined",
+                    "data_type_str": "BOOL",
+                    "db_column_name": "mode_c_valid",
+                    "description": "0 Code not validated\n1 Code validated\n\n\n",
                     "dimension": "",
                     "is_key": false,
-                    "name": "mof_trans",
+                    "name": "Mode C Valid",
                     "representation_str": "STANDARD",
-                    "short_name": "",
+                    "short_name": "MC V",
                     "unit": ""
                 }
             },
-            "VariableRefTrajmof_vert0": {
+            "VariableTrackermode3a_g0": {
                 "parameters": {
-                    "data_type_str": "CHAR",
-                    "db_column_name": "mof_vert",
-                    "dbo_name": "RefTraj",
-                    "description": "Mode of flight - Vertical acceleration: 0 = Level Flight, 1 = Climb, 2 = Descent, 3 = Undetermined",
+                    "data_type_str": "BOOL",
+                    "db_column_name": "mode_3a_garbled",
+                    "description": "Mode-3/A Garbled\n\n0 Default\n1 Garbled Code",
                     "dimension": "",
                     "is_key": false,
-                    "name": "mof_vert",
+                    "name": "Mode 3/A Garbled",
                     "representation_str": "STANDARD",
-                    "short_name": "",
+                    "short_name": "MA G",
                     "unit": ""
                 }
             },
-            "VariableRefTrajpos_lat_deg0": {
+            "VariableTrackermode3a_v0": {
+                "parameters": {
+                    "data_type_str": "BOOL",
+                    "db_column_name": "mode_3a_valid",
+                    "description": "0 Code not validated\n1 Code validated",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Mode 3/A Valid",
+                    "representation_str": "STANDARD",
+                    "short_name": "MA V",
+                    "unit": ""
+                }
+            },
+            "VariableTrackerpos_lat_deg0": {
                 "parameters": {
                     "data_type_str": "DOUBLE",
-                    "db_column_name": "pos_lat_deg",
-                    "dbo_name": "RefTraj",
-                    "description": "WGS84 latitude position",
+                    "db_column_name": "latitude",
+                    "description": "Calculated Position in WGS-84 Co-ordinates with a resolution of\n180/2^25 degrees",
                     "dimension": "Angle",
                     "is_key": false,
-                    "name": "pos_lat_deg",
+                    "name": "Latitude",
+                    "representation_str": "STANDARD",
+                    "short_name": "Lat",
+                    "unit": "Degree"
+                }
+            },
+            "VariableTrackerpos_long_deg0": {
+                "parameters": {
+                    "data_type_str": "DOUBLE",
+                    "db_column_name": "longitude",
+                    "description": "Calculated Position in WGS-84 Co-ordinates with a resolution of\n180/2^25 degrees",
+                    "dimension": "Angle",
+                    "is_key": false,
+                    "name": "Longitude",
+                    "representation_str": "STANDARD",
+                    "short_name": "Lon",
+                    "unit": "Degree"
+                }
+            },
+            "VariableTrackerpos_std_dev_lat_deg0": {
+                "parameters": {
+                    "data_type_str": "DOUBLE",
+                    "db_column_name": "latitude_stddev",
+                    "description": "Estimated accuracy (i.e. standard deviation) of the calculated position of a target expressed in WGS-84.\n ",
+                    "dimension": "Angle",
+                    "is_key": false,
+                    "name": "Latitude StdDev",
                     "representation_str": "STANDARD",
                     "short_name": "",
                     "unit": "Degree"
                 }
             },
-            "VariableRefTrajpos_long_deg0": {
+            "VariableTrackerpos_std_dev_long_deg0": {
                 "parameters": {
                     "data_type_str": "DOUBLE",
-                    "db_column_name": "pos_long_deg",
-                    "dbo_name": "RefTraj",
-                    "description": "WGS84 longitude position",
+                    "db_column_name": "longitude_stddev",
+                    "description": "Estimated accuracy (i.e. standard deviation) of the calculated position of a target expressed in WGS-84.",
                     "dimension": "Angle",
                     "is_key": false,
-                    "name": "pos_long_deg",
+                    "name": "Longitude StdDev",
                     "representation_str": "STANDARD",
                     "short_name": "",
                     "unit": "Degree"
                 }
             },
-            "VariableRefTrajpos_std_dev_lat_deg0": {
+            "VariableTrackerpos_std_dev_x_m0": {
                 "parameters": {
                     "data_type_str": "DOUBLE",
-                    "db_column_name": "pos_std_dev_lat_deg",
-                    "dbo_name": "RefTraj",
-                    "description": " ",
+                    "db_column_name": "x_stddev",
+                    "description": "Standard deviation of x component in meters",
+                    "dimension": "Length",
+                    "is_key": false,
+                    "name": "X StdDev",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": "Meter"
+                }
+            },
+            "VariableTrackerpos_std_dev_xy_corr_coeff0": {
+                "parameters": {
+                    "data_type_str": "DOUBLE",
+                    "db_column_name": "x_y_covariance",
+                    "description": "XY Covariance Component\n\n1. XY covariance component = sign {Cov(X,Y)} * sqrt {abs [Cov (X,Y)]}\n2.",
                     "dimension": "",
                     "is_key": false,
-                    "name": "pos_std_dev_lat_deg",
+                    "name": "X/Y Covariance",
                     "representation_str": "STANDARD",
                     "short_name": "",
                     "unit": ""
                 }
             },
-            "VariableRefTrajpos_std_dev_latlong_corr_coeff0": {
+            "VariableTrackerpos_std_dev_y_m0": {
                 "parameters": {
                     "data_type_str": "DOUBLE",
-                    "db_column_name": "pos_std_dev_latlong_corr_coeff",
-                    "dbo_name": "RefTraj",
-                    "description": " ",
-                    "dimension": "",
+                    "db_column_name": "y_stddev",
+                    "description": "Standard deviation of y component in meters",
+                    "dimension": "Length",
                     "is_key": false,
-                    "name": "pos_std_dev_latlong_corr_coeff",
+                    "name": "Y StdDev",
                     "representation_str": "STANDARD",
                     "short_name": "",
-                    "unit": ""
+                    "unit": "Meter"
                 }
             },
-            "VariableRefTrajpos_std_dev_long_deg0": {
+            "VariableTrackerrec_num0": {
                 "parameters": {
-                    "data_type_str": "DOUBLE",
-                    "db_column_name": "pos_std_dev_long_deg",
-                    "dbo_name": "RefTraj",
-                    "description": " ",
-                    "dimension": "",
-                    "is_key": false,
-                    "name": "pos_std_dev_long_deg",
-                    "representation_str": "STANDARD",
-                    "short_name": "",
-                    "unit": ""
-                }
-            },
-            "VariableRefTrajrec_num0": {
-                "parameters": {
-                    "data_type_str": "INT",
-                    "db_column_name": "rec_num",
-                    "dbo_name": "RefTraj",
+                    "data_type_str": "UINT",
+                    "db_column_name": "record_number",
                     "description": "Unique record id starting with 0 on every new recording",
                     "dimension": "",
                     "is_key": true,
-                    "name": "rec_num",
+                    "name": "Record Number",
                     "representation_str": "STANDARD",
                     "short_name": "",
                     "unit": ""
                 }
             },
-            "VariableRefTrajsac0": {
+            "VariableTrackersac0": {
                 "parameters": {
                     "data_type_str": "UCHAR",
                     "db_column_name": "sac",
-                    "dbo_name": "RefTraj",
-                    "description": "ASTERIX System Area Code",
+                    "description": "From 010.SAC\n\nSystem Area Code",
                     "dimension": "",
                     "is_key": false,
-                    "name": "sac",
+                    "name": "SAC",
                     "representation_str": "STANDARD",
                     "short_name": "",
                     "unit": ""
                 }
             },
-            "VariableRefTrajsic0": {
+            "VariableTrackersic0": {
                 "parameters": {
                     "data_type_str": "UCHAR",
                     "db_column_name": "sic",
-                    "dbo_name": "RefTraj",
-                    "description": "ASTERIX System Identification Code",
+                    "description": "From 010.SIC\n\nSystem Identification Code",
                     "dimension": "",
                     "is_key": false,
-                    "name": "sic",
+                    "name": "SIC",
                     "representation_str": "STANDARD",
                     "short_name": "",
                     "unit": ""
                 }
             },
-            "VariableRefTrajspi0": {
+            "VariableTrackerspi0": {
                 "parameters": {
-                    "data_type_str": "STRING",
+                    "data_type_str": "BOOL",
                     "db_column_name": "spi",
-                    "dbo_name": "RefTraj",
-                    "description": " ",
+                    "description": "0 default value\n1 SPI present in the last report received from a sensor capable of decoding this data",
                     "dimension": "",
                     "is_key": false,
-                    "name": "spi",
+                    "name": "SPI",
                     "representation_str": "STANDARD",
                     "short_name": "",
                     "unit": ""
                 }
             },
-            "VariableRefTrajtarget_addr0": {
+            "VariableTrackertarget_addr0": {
                 "parameters": {
-                    "data_type_str": "INT",
-                    "db_column_name": "target_addr",
-                    "dbo_name": "RefTraj",
-                    "description": "24 bit target address / aircraft address / Mode-S address",
+                    "data_type_str": "UINT",
+                    "db_column_name": "aircraft_address",
+                    "description": "24 bits Target Address (ADD)",
                     "dimension": "",
                     "is_key": false,
-                    "name": "target_addr",
+                    "name": "Aircraft Address",
                     "representation_str": "DEC_TO_HEX",
-                    "short_name": "",
+                    "short_name": "ACAD",
                     "unit": ""
                 }
             },
-            "VariableRefTrajtimestamp0": {
-                "parameters": {
-                    "data_type_str": "LONGINT",
-                    "db_column_name": "timestamp",
-                    "dbo_name": "RefTraj",
-                    "description": " ",
-                    "dimension": "",
-                    "is_key": false,
-                    "name": "timestamp",
-                    "representation_str": "STANDARD",
-                    "short_name": "",
-                    "unit": ""
-                }
-            },
-            "VariableRefTrajtod0": {
+            "VariableTrackertod0": {
                 "parameters": {
                     "data_type_str": "FLOAT",
-                    "db_column_name": "tod",
-                    "dbo_name": "RefTraj",
-                    "description": "Time of Message / Time of Day (= ms since last midnight)",
+                    "db_column_name": "time_of_day",
+                    "description": "Absolute time stamping of the information provided in the track\nmessage, in the form of elapsed time since last midnight, expressed as UTC.",
                     "dimension": "Time",
                     "is_key": false,
-                    "name": "tod",
+                    "name": "Time of Day",
                     "representation_str": "SECONDS_TO_TIME",
-                    "short_name": "",
+                    "short_name": "ToD",
                     "unit": "Second"
                 }
             },
-            "VariableRefTrajtrack_created0": {
+            "VariableTrackertrack_coasted0": {
                 "parameters": {
-                    "data_type_str": "STRING",
-                    "db_column_name": "track_created",
-                    "dbo_name": "RefTraj",
-                    "description": " ",
+                    "data_type_str": "BOOL",
+                    "db_column_name": "coasting",
+                    "description": "0 Default value\n1 Age of the last received track update is higher than system dependent threshold (coasting)",
                     "dimension": "",
                     "is_key": false,
-                    "name": "track_created",
+                    "name": "Coasting",
                     "representation_str": "STANDARD",
                     "short_name": "",
                     "unit": ""
                 }
             },
-            "VariableRefTrajtrack_end0": {
+            "VariableTrackertrack_confirmed0": {
                 "parameters": {
-                    "data_type_str": "STRING",
+                    "data_type_str": "BOOL",
+                    "db_column_name": "confirmed",
+                    "description": "0 Tentative track\n1 Confirmed track\n",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Confirmed",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "VariableTrackertrack_created0": {
+                "parameters": {
+                    "data_type_str": "BOOL",
+                    "db_column_name": "track_begin",
+                    "description": "0 default value\n1 first message transmitted to the user for the track",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Track Begin",
+                    "representation_str": "STANDARD",
+                    "short_name": "TSB",
+                    "unit": ""
+                }
+            },
+            "VariableTrackertrack_end0": {
+                "parameters": {
+                    "data_type_str": "BOOL",
                     "db_column_name": "track_end",
-                    "dbo_name": "RefTraj",
-                    "description": "Y = End of track, N = Track is still alive",
+                    "description": "From 080.TSE\n\n0 default value\n1 last message transmitted to the user for the track",
                     "dimension": "",
                     "is_key": false,
-                    "name": "track_end",
+                    "name": "Track End",
                     "representation_str": "STANDARD",
-                    "short_name": "",
+                    "short_name": "TSE",
                     "unit": ""
                 }
             },
-            "VariableRefTrajtrack_num0": {
+            "VariableTrackertrack_num0": {
                 "parameters": {
-                    "data_type_str": "INT",
-                    "db_column_name": "track_num",
-                    "dbo_name": "RefTraj",
-                    "description": "Track number",
+                    "data_type_str": "UINT",
+                    "db_column_name": "track_number",
+                    "description": "From 040.Track Number\n\nIdentification of a track",
                     "dimension": "",
                     "is_key": false,
-                    "name": "track_num",
+                    "name": "Track Number",
                     "representation_str": "STANDARD",
-                    "short_name": "",
+                    "short_name": "TN",
                     "unit": ""
                 }
             },
-            "VariableRefTrajturnrate_degps0": {
+            "VariableTrackertracked_alt_baro_ft0": {
                 "parameters": {
-                    "data_type_str": "DOUBLE",
-                    "db_column_name": "turnrate_degps",
-                    "dbo_name": "RefTraj",
-                    "description": "Turn rate in Deg/sec",
-                    "dimension": "",
+                    "data_type_str": "FLOAT",
+                    "db_column_name": "barometric_altitude",
+                    "description": "Calculated Track Barometric Altitude\n\nCalculated Barometric Altitude of the track",
+                    "dimension": "Height",
                     "is_key": false,
-                    "name": "turnrate_degps",
+                    "name": "Barometric Altitude",
                     "representation_str": "STANDARD",
-                    "short_name": "",
-                    "unit": ""
+                    "short_name": "BA",
+                    "unit": "Feet"
                 }
             },
-            "VariableRefTrajusable0": {
+            "VariableTrackertracked_mode3a_code0": {
                 "parameters": {
-                    "data_type_str": "STRING",
-                    "db_column_name": "usable",
-                    "dbo_name": "RefTraj",
-                    "description": "Y = to be used for evaluation, N = not to be used",
+                    "data_type_str": "UINT",
+                    "db_column_name": "mode_3a_code",
+                    "description": "Mode-3/A code",
                     "dimension": "",
                     "is_key": false,
-                    "name": "usable",
-                    "representation_str": "STANDARD",
-                    "short_name": "",
+                    "name": "Mode 3/A Code",
+                    "representation_str": "DEC_TO_OCTAL",
+                    "short_name": "MA",
                     "unit": ""
                 }
             }

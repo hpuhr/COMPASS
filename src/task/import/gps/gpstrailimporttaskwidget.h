@@ -23,7 +23,7 @@
 class GPSTrailImportTask;
 
 class QPushButton;
-class QListWidget;
+class QLabel;
 class QTextEdit;
 class QTabWidget;
 class QHBoxLayout;
@@ -33,13 +33,8 @@ class QCheckBox;
 class GPSTrailImportTaskWidget : public TaskWidget
 {
     Q_OBJECT
-  public slots:
-    void addFileSlot();
-    void deleteFileSlot();
-    void deleteAllFilesSlot();
-    void selectedFileSlot();
-    void updateFileListSlot();
 
+  public slots:
     void sacEditedSlot(const QString& value);
     void sicEditedSlot(const QString& value);
     void nameEditedSlot(const QString& value);
@@ -55,11 +50,12 @@ class GPSTrailImportTaskWidget : public TaskWidget
     void callsignCheckedSlot();
     void callsignEditedSlot(const QString& value);
 
+    void lineIDEditSlot(const QString& text);
+
 public:
     GPSTrailImportTaskWidget(GPSTrailImportTask& task, QWidget* parent = 0, Qt::WindowFlags f = 0);
     virtual ~GPSTrailImportTaskWidget();
 
-    void addFile(const std::string& filename);
     void selectFile(const std::string& filename);
 
     void updateConfig ();
@@ -74,10 +70,7 @@ protected:
 
     QTabWidget* tab_widget_{nullptr};
 
-    QListWidget* file_list_{nullptr};
-    QPushButton* add_file_button_{nullptr};
-    QPushButton* delete_file_button_{nullptr};
-    QPushButton* delete_all_files_button_{nullptr};
+    QLabel* file_label_{nullptr};
 
     QTextEdit* text_edit_ {nullptr};
 

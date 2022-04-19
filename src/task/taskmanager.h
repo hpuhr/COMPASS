@@ -27,7 +27,6 @@
 
 class COMPASS;
 class DatabaseOpenTask;
-class ManageSchemaTask;
 class ManageDBObjectsTask;
 class CreateARTASAssociationsTask;
 //class JSONImportTask;
@@ -90,7 +89,6 @@ class TaskManager : public QObject, public Configurable
     void runTask(const std::string& task_name);
 
     DatabaseOpenTask& databaseOpenTask() const;
-    ManageSchemaTask& manageSchemaTask() const;
     //ManageDataSourcesTask& manageDataSourcesTask() const;
     ASTERIXImportTask& asterixImporterTask() const;
     ViewPointsImportTask& viewPointsImportTask() const;
@@ -184,7 +182,6 @@ protected:
 
     // tasks
     std::unique_ptr<DatabaseOpenTask> database_open_task_;
-    std::unique_ptr<ManageSchemaTask> manage_schema_task_;
     std::unique_ptr<ManageDBObjectsTask> manage_dbobjects_task_;
     std::unique_ptr<ASTERIXImportTask> asterix_importer_task_;
     std::unique_ptr<ViewPointsImportTask> view_points_import_task_;

@@ -141,7 +141,9 @@ void AllBufferCSVExportJob::run()
                 assert(!rec_num_vec.isNull(buffer_index));
                 unsigned int rec_num = rec_num_vec.get(buffer_index);
 
-                ss << manager.object(dbo_name).associations().getUTNsStringFor(rec_num);
+                TODO_ASSERT
+
+                //ss << manager.object(dbo_name).associations().getUTNsStringFor(rec_num);
             }
 
             for (unsigned int col = 0; col < read_set_size; ++col)
@@ -170,13 +172,13 @@ void AllBufferCSVExportJob::run()
                         continue;
                     }
 
-                    assert(manager.existsObject(dbo_name));
-                    assert(manager.object(dbo_name).hasVariable(variable_name));
+                    assert(manager.existsDBContent(dbo_name));
+                    assert(manager.dbContent(dbo_name).hasVariable(variable_name));
                 }
 
                 Variable& variable = (variable_dbo_name == META_OBJECT_NAME)
                                             ? manager.metaVariable(variable_name).getFor(dbo_name)
-                                            : manager.object(dbo_name).variable(variable_name);
+                                            : manager.dbContent(dbo_name).variable(variable_name);
 
                 PropertyDataType data_type = variable.dataType();
 
@@ -365,6 +367,21 @@ void AllBufferCSVExportJob::run()
                     {
                         value_str =
                             buffer->get<std::string>(property_name).getAsString(buffer_index);
+                    }
+                }
+                else if (data_type == PropertyDataType::JSON)
+                {
+                    if (!buffer->has<nlohmann::json>(property_name))
+                    {
+                        ss << ";";
+                        continue;
+                    }
+
+                    null = buffer->get<nlohmann::json>(property_name).isNull(buffer_index);
+                    if (!null)
+                    {
+                        value_str =
+                            buffer->get<nlohmann::json>(property_name).getAsString(buffer_index);
                     }
                 }
                 else

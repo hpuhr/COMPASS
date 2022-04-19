@@ -47,7 +47,8 @@ typedef std::tuple<std::map<std::string, std::shared_ptr<NullableVector<bool>>>,
                    std::map<std::string, std::shared_ptr<NullableVector<unsigned long int>>>,
                    std::map<std::string, std::shared_ptr<NullableVector<float>>>,
                    std::map<std::string, std::shared_ptr<NullableVector<double>>>,
-                   std::map<std::string, std::shared_ptr<NullableVector<std::string>>>>
+                   std::map<std::string, std::shared_ptr<NullableVector<std::string>>>,
+                   std::map<std::string, std::shared_ptr<NullableVector<nlohmann::json>>>>
     ArrayListMapTupel;
 
 template <class T, class Tuple>
@@ -64,8 +65,6 @@ struct Index<T, std::tuple<U, Types...>>
 {
     static const std::size_t value = 1 + Index<T, std::tuple<Types...>>::value;
 };
-
-#include "json.hpp"
 
 class Buffer
 {

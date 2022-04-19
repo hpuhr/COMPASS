@@ -1,15 +1,19 @@
 {
-    "parameters": null,
+    "parameters": {
+        "db_file_list": [
+        ],
+        "last_db_filename": ""
+    },
     "sub_config_files": [
         {
-            "class_id": "DBObjectManager",
-            "instance_id": "DBObjectManager0",
-            "path": "db_object.json"
+            "class_id": "DBContentManager",
+            "instance_id": "DBContentManager0",
+            "path": "db_content.json"
         },
         {
-            "class_id": "DBSchemaManager",
-            "instance_id": "DBSchemaManager0",
-            "path": "db_schema.json"
+            "class_id": "DataSourceManager",
+            "instance_id": "DataSourceManager0",
+            "path": "data_sources.json"
         },
         {
             "class_id": "EvaluationManager",
@@ -41,11 +45,7 @@
                 "sub_configs": {
                     "SQLiteConnection": {
                         "SQLite Connection": {
-                            "parameters": {
-                                "last_filename": ""
-                            },
-                            "sub_configs": {
-                            }
+                            "parameters": null
                         }
                     }
                 }

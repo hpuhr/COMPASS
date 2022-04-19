@@ -141,12 +141,12 @@ void FilterManagerWidget::updateFiltersSlot()
     while ((child = ds_filter_layout1_->takeAt(0)))
         ds_filter_layout1_->removeItem(child);
 
-    std::vector<DBFilter*>& filters = filter_manager_.filters();
+    auto& filters = filter_manager_.filters();
 
     unsigned int num_filters_break = filters.size() / 2;
     unsigned int cnt = 0;
 
-    for (auto it : filters)
+    for (auto& it : filters)
     {
         loginf << "FilterManagerWidget: updateFiltersSlot: filter " << it->getName();
 

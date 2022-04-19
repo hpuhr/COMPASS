@@ -20,7 +20,6 @@
 
 #include "configurable.h"
 #include "sectorlayer.h"
-#include "activedatasource.h"
 #include "evaluationdata.h"
 #include "evaluationresultsgenerator.h"
 #include "viewabledataconfig.h"
@@ -57,12 +56,15 @@ signals:
     void resultsChangedSignal();
 
 public slots:
-
     void databaseOpenedSlot();
     void databaseClosedSlot();
+    void associationStatusChangedSlot();
 
-    void newDataSlot(DBContent& object);
-    void loadingDoneSlot(DBContent& object);
+    void loadedDataDataSlot(const std::map<std::string, std::shared_ptr<Buffer>>& data, bool requires_reset);
+    void loadingDoneSlot();
+
+//    void newDataSlot(DBContent& object);
+//    void loadingDoneSlot(DBContent& object);
 
 public:
     EvaluationManager(const std::string& class_id, const std::string& instance_id, COMPASS* compass);
@@ -89,6 +91,7 @@ public:
     EvaluationManagerWidget* widget();
 
     bool sectorsLoaded() const;
+    bool anySectorsWithReq();
 
     bool hasSectorLayer (const std::string& layer_name);
     //void renameSectorLayer (const std::string& name, const std::string& new_name);
@@ -112,15 +115,23 @@ public:
 
     std::string dboNameRef() const;
     void dboNameRef(const std::string& name);
+
+    unsigned int lineIDRef() const;
+    void lineIDRef(unsigned int line_id_ref);
+
     bool hasValidReferenceDBO ();
-    std::map<int, ActiveDataSource>& dataSourcesRef() { return data_sources_ref_; }
-    std::set<int> activeDataSourcesRef();
+    std::map<unsigned int, bool>& dataSourcesRef() { return data_sources_ref_; } // can be used to set active bool
+    std::set<unsigned int> activeDataSourcesRef();
 
     std::string dboNameTst() const;
     void dboNameTst(const std::string& name);
+
+    unsigned int lineIDTst() const;
+    void lineIDTst(unsigned int line_id_tst);
+
     bool hasValidTestDBO ();
-    std::map<int, ActiveDataSource>& dataSourcesTst() { return data_sources_tst_; }
-    std::set<int> activeDataSourcesTst();
+    std::map<unsigned int, bool>& dataSourcesTst() { return data_sources_tst_; } // can be used to set active bool
+    std::set<unsigned int> activeDataSourcesTst();
 
     bool dataLoaded() const;
     bool evaluated() const;
@@ -229,11 +240,6 @@ public:
 
     bool removeNotDetectedDBO(const std::string& dbo_name) const;
     void removeNotDetectedDBOs(const std::string& dbo_name, bool value);
-
-    bool hasADSBInfo() const;
-    bool hasADSBInfo(unsigned int ta) const;
-    std::tuple<std::set<unsigned int>, std::tuple<bool, unsigned int, unsigned int>,
-            std::tuple<bool, unsigned int, unsigned int>> adsbInfo(unsigned int ta) const;
 
     bool loadOnlySectorData() const;
     void loadOnlySectorData(bool value);
@@ -352,12 +358,14 @@ protected:
     bool evaluated_ {false};
 
     std::string dbo_name_ref_;
-    std::map<int, ActiveDataSource> data_sources_ref_;
-    nlohmann::json active_sources_ref_;
+    unsigned int line_id_ref_;
+    std::map<unsigned int, bool> data_sources_ref_; // ds_id -> active flag
+    nlohmann::json active_sources_ref_; // config var for data_sources_ref_
 
     std::string dbo_name_tst_;
-    std::map<int, ActiveDataSource> data_sources_tst_;
-    nlohmann::json active_sources_tst_;
+    unsigned int line_id_tst_;
+    std::map<unsigned int, bool> data_sources_tst_; // ds_id -> active flag
+    nlohmann::json active_sources_tst_; // config var for active_sources_tst_
 
     std::string current_standard_;
     nlohmann::json configs_;
@@ -471,11 +479,9 @@ protected:
 
     void updateReferenceDBO();
     void updateReferenceDataSources();
-    //void updateReferenceDataSourcesActive();
 
     void updateTestDBO();
     void updateTestDataSources();
-    //void updateTestDataSourcesActive();
 
     nlohmann::json::object_t getBaseViewableDataConfig ();
     nlohmann::json::object_t getBaseViewableNoDataConfig ();

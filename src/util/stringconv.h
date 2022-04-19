@@ -18,16 +18,19 @@
 #ifndef STRINGMANIPULATION_H_
 #define STRINGMANIPULATION_H_
 
+#include "global.h"
+#include "logger.h"
+#include "property.h"
+
+#include "json.hpp"
+
 #include <boost/regex.hpp>
 #include <boost/algorithm/string/replace.hpp>
+#include <boost/algorithm/string.hpp>
 
 #include <iomanip>
 #include <map>
 #include <vector>
-
-#include "global.h"
-#include "logger.h"
-#include "property.h"
 
 namespace Utils
 {
@@ -289,6 +292,11 @@ inline std::string getValueString(const double& value)
     return out.str();
 }
 
+inline std::string getValueString(const nlohmann::json& value)
+{
+    return value.dump();
+}
+
 template <typename T>
 std::string getValueString(T value)
 {
@@ -390,6 +398,11 @@ inline unsigned int portFromString(const std::string& name)
     return stoi(parts.at(1));
 }
 
+
+inline std::string trim(const std::string& name)
+{
+    return boost::algorithm::trim_copy(name);
+}
 
 }  // namespace String
 

@@ -30,6 +30,7 @@
 #include <string>
 
 using namespace std;
+using namespace nlohmann;
 
 namespace dbContent
 {
@@ -131,7 +132,7 @@ void LabelDefinition::updateReadList()
 
 void LabelDefinition::checkLabelDefinitions()
 {
-    loginf << "DBOLabelDefinition: checkLabelDefinitions: dbo " << db_object_.name();
+    loginf << "LabelDefinition: checkLabelDefinitions: dbo " << db_object_.name();
 
     std::string variable_name;
     bool show = false;
@@ -149,7 +150,7 @@ void LabelDefinition::checkLabelDefinitions()
             prefix = "";
             suffix = "";
 
-            logdbg << "DBOLabelDefinition: checkSubConfigurables: new var " << variable_name;
+            logdbg << "LabelDefinition: checkSubConfigurables: new var " << variable_name;
 
             if (dbo_man_.metaVariable(DBContent::meta_var_datasource_id_.name()).existsIn(dbo_name)
                     && variable_name == dbo_man_.metaVariable(
@@ -158,44 +159,44 @@ void LabelDefinition::checkLabelDefinitions()
                 show = true;
                 prefix = "S ";
             }
-            else if (dbo_man_.metaVariable(DBContent::meta_var_tod_id_.name()).existsIn(dbo_name)
+            else if (dbo_man_.metaVariable(DBContent::meta_var_tod_.name()).existsIn(dbo_name)
                      && variable_name == dbo_man_.metaVariable(
-                         DBContent::meta_var_tod_id_.name()).getFor(dbo_name).name())
+                         DBContent::meta_var_tod_.name()).getFor(dbo_name).name())
             {
                 show = true;
                 prefix = "T ";
             }
-            else if (dbo_man_.metaVariable(DBContent::meta_var_m3a_id_.name()).existsIn(dbo_name)
+            else if (dbo_man_.metaVariable(DBContent::meta_var_m3a_.name()).existsIn(dbo_name)
                      && variable_name == dbo_man_.metaVariable(
-                         DBContent::meta_var_m3a_id_.name()).getFor(dbo_name).name())
+                         DBContent::meta_var_m3a_.name()).getFor(dbo_name).name())
             {
                 show = true;
                 prefix = "A ";
             }
-            else if (dbo_man_.metaVariable(DBContent::meta_var_ta_id_.name()).existsIn(dbo_name)
+            else if (dbo_man_.metaVariable(DBContent::meta_var_ta_.name()).existsIn(dbo_name)
                      && variable_name == dbo_man_.metaVariable(
-                         DBContent::meta_var_ta_id_.name()).getFor(dbo_name).name())
+                         DBContent::meta_var_ta_.name()).getFor(dbo_name).name())
             {
                 show = true;
                 prefix = "AA ";
             }
-            else if (dbo_man_.metaVariable(DBContent::meta_var_ti_id_.name()).existsIn(dbo_name)
+            else if (dbo_man_.metaVariable(DBContent::meta_var_ti_.name()).existsIn(dbo_name)
                      && variable_name == dbo_man_.metaVariable(
-                         DBContent::meta_var_ti_id_.name()).getFor(dbo_name).name())
+                         DBContent::meta_var_ti_.name()).getFor(dbo_name).name())
             {
                 show = true;
                 prefix = "ID ";
             }
-            else if (dbo_man_.metaVariable(DBContent::meta_var_track_num_id_.name()).existsIn(dbo_name)
+            else if (dbo_man_.metaVariable(DBContent::meta_var_track_num_.name()).existsIn(dbo_name)
                      && variable_name == dbo_man_.metaVariable(
-                         DBContent::meta_var_track_num_id_.name()).getFor(dbo_name).name())
+                         DBContent::meta_var_track_num_.name()).getFor(dbo_name).name())
             {
                 show = true;
                 prefix = "TN ";
             }
-            else if (dbo_man_.metaVariable(DBContent::meta_var_mc_id_.name()).existsIn(dbo_name)
+            else if (dbo_man_.metaVariable(DBContent::meta_var_mc_.name()).existsIn(dbo_name)
                      && variable_name == dbo_man_.metaVariable(
-                         DBContent::meta_var_mc_id_.name()).getFor(dbo_name).name())
+                         DBContent::meta_var_mc_.name()).getFor(dbo_name).name())
             {
                 show = true;
                 prefix = "C ";
@@ -218,20 +219,20 @@ void LabelDefinition::generateSubConfigurable(const std::string& class_id,
 {
     if (class_id == "LabelEntry")
     {
-        logdbg << "DBOLabelDefinition: generateSubConfigurable: instance_id " << instance_id;
+        logdbg << "LabelDefinition: generateSubConfigurable: instance_id " << instance_id;
 
         LabelEntry* entry = new LabelEntry(class_id, instance_id, this);
         assert(entries_.find(entry->variableName()) == entries_.end());
         entries_[entry->variableName()] = entry;
     }
     else
-        throw std::runtime_error("DBOLabelDefinition: generateSubConfigurable: unknown class_id " +
+        throw std::runtime_error("LabelDefinition: generateSubConfigurable: unknown class_id " +
                                  class_id);
 }
 
 void LabelDefinition::checkSubConfigurables()
 {
-    logdbg << "DBOLabelDefinition: checkSubConfigurables: object " << db_object_.name();
+    logdbg << "LabelDefinition: checkSubConfigurables: object " << db_object_.name();
 }
 LabelEntry& LabelDefinition::entry(const std::string& variable_name)
 {
@@ -266,10 +267,10 @@ std::map<unsigned int, std::string> LabelDefinition::generateLabels(std::vector<
 
     string dbo_name = db_object_.name();
 
-    assert (dbo_man_.existsMetaVariable(DBContent::meta_var_rec_num_id_.name()));
-    assert (dbo_man_.metaVariable(DBContent::meta_var_rec_num_id_.name()).existsIn(dbo_name));
+    assert (dbo_man_.existsMetaVariable(DBContent::meta_var_rec_num_.name()));
+    assert (dbo_man_.metaVariable(DBContent::meta_var_rec_num_.name()).existsIn(dbo_name));
 
-    Variable& rec_num_var = dbo_man_.metaVariable(DBContent::meta_var_rec_num_id_.name()).getFor(dbo_name);
+    Variable& rec_num_var = dbo_man_.metaVariable(DBContent::meta_var_rec_num_.name()).getFor(dbo_name);
 
     std::map<unsigned int, size_t> rec_num_to_index;
     NullableVector<unsigned int>& rec_num_list = buffer->get<unsigned int>(rec_num_var.dbColumnName());
@@ -404,9 +405,19 @@ std::map<unsigned int, std::string> LabelDefinition::generateLabels(std::vector<
                                 buffer->get<std::string>(db_col_name).getAsString(buffer_index));
                 }
             }
+            else if (data_type == PropertyDataType::JSON)
+            {
+                assert(buffer->has<json>(db_col_name));
+                null = buffer->get<json>(db_col_name).isNull(buffer_index);
+                if (!null)
+                {
+                    value_str = variable->getRepresentationStringFromValue(
+                                buffer->get<json>(db_col_name).getAsString(buffer_index));
+                }
+            }
             else
                 throw std::domain_error(
-                        "DBOLabelDefinition: generateLabels: unknown property data type");
+                        "LabelDefinition: generateLabels: unknown property data type");
 
             if (!null)
             {

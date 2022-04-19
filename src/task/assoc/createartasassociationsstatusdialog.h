@@ -42,11 +42,12 @@ public:
                                         QWidget* parent=nullptr, Qt::WindowFlags f=0);
 
     void markStartTime();
-    void setDone();
-
-    void setDBODoneFlags(const std::map<std::string, bool>& dbo_done_flags);
 
     void setAssociationStatus(const std::string& status);
+    void setAssociationCounts(std::map<std::string, std::pair<unsigned int,unsigned int>> association_counts);
+
+    void setDone();
+
 
     void setMissingHashesAtBeginning(const size_t& missing_hashes_at_beginning);
     void setMissingHashes(const size_t& missing_hashes);
@@ -62,11 +63,9 @@ private:
     boost::posix_time::time_duration time_diff_;
     std::string elapsed_time_str_;
 
-    std::map<std::string, bool> dbo_done_flags_;
+    std::string status_{"Waiting"};
 
-    std::string association_status_{"Waiting"};
-
-    std::map<std::string, unsigned int> association_counts_;
+    std::map<std::string, std::pair<unsigned int,unsigned int>> association_counts_; // dbcontent -> total, assoc cnt
 
     size_t missing_hashes_at_beginning_{0};
     size_t missing_hashes_{0};
@@ -75,8 +74,6 @@ private:
     size_t found_duplicates_{0};
 
     QLabel* time_label_{nullptr};
-
-    QGridLayout* dbo_done_grid_{nullptr};
 
     QLabel* association_status_label_{nullptr};
     QLabel* missing_hashes_at_beginning_label_{nullptr};
@@ -90,7 +87,6 @@ private:
     QPushButton* ok_button_{nullptr};
 
     void updateTime();
-    void updateDBODoneGrid();
     void updateDBOAssociatedGrid();
 };
 

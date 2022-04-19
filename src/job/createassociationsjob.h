@@ -52,6 +52,13 @@ protected:
     std::map<std::string, std::map<unsigned int, std::vector<Association::TargetReport>>> target_reports_;
     //dbo name->ds_id->trs
 
+    std::map<std::string,
+        std::map<unsigned int,
+            std::tuple<unsigned int, std::vector<std::pair<std::string, unsigned int>>>>> associations_;
+    // dbcontent -> rec_num -> <utn, src rec_nums (dbcontent, rec_num)>
+
+    std::map<std::string, std::pair<unsigned int,unsigned int>> association_counts_; // dbcontent -> total, assoc cnt
+
     void createTargetReports();
     std::map<unsigned int, Association::Target> createReferenceUTNs();
 
@@ -59,6 +66,10 @@ protected:
 
     void createNonTrackerUTNS(std::map<unsigned int, Association::Target>& targets);
     void createAssociations();
+    void saveAssociations();
+    void saveTargets(std::map<unsigned int, Association::Target>& targets);
+
+    void removePreviousAssociations();
 
     std::map<unsigned int, Association::Target> createTrackedTargets(const std::string& dbo_name, unsigned int ds_id);
     void cleanTrackerUTNs(std::map<unsigned int, Association::Target>& targets);

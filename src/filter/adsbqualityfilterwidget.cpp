@@ -23,13 +23,10 @@
 #include <QLineEdit>
 #include <QCheckBox>
 
-ADSBQualityFilterWidget::ADSBQualityFilterWidget(ADSBQualityFilter& filter, const std::string& class_id,
-                                                 const std::string& instance_id)
-    : DBFilterWidget(class_id, instance_id, filter), filter_(filter)
+ADSBQualityFilterWidget::ADSBQualityFilterWidget(ADSBQualityFilter& filter)
+    : DBFilterWidget(filter), filter_(filter)
 {
     QGridLayout* layout = new QGridLayout();
-    //layout->setContentsMargins(0, 0, 0, 0);
-    //layout->setSpacing(0);
 
 
     int row = 0;

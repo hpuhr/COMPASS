@@ -1,0 +1,31 @@
+
+include_directories (
+    "${CMAKE_CURRENT_LIST_DIR}"
+    )
+
+target_sources(compass
+    PUBLIC
+        "${CMAKE_CURRENT_LIST_DIR}/datasourcemanager.h"
+        "${CMAKE_CURRENT_LIST_DIR}/datasourcebase.h"
+        "${CMAKE_CURRENT_LIST_DIR}/configurationdatasource.h"
+        "${CMAKE_CURRENT_LIST_DIR}/dbdatasource.h"
+        "${CMAKE_CURRENT_LIST_DIR}/dbdatasourcewidget.h"
+        "${CMAKE_CURRENT_LIST_DIR}/dbdatasourceselectioncombobox.h"
+        "${CMAKE_CURRENT_LIST_DIR}/datasourcesloadwidget.h"
+        "${CMAKE_CURRENT_LIST_DIR}/datasourceeditwidget.h"
+        "${CMAKE_CURRENT_LIST_DIR}/datasourcetablemodel.h"
+        "${CMAKE_CURRENT_LIST_DIR}/datasourcesconfigurationdialog.h"
+        "${CMAKE_CURRENT_LIST_DIR}/dstypeselectioncombobox.h"
+    PRIVATE
+        "${CMAKE_CURRENT_LIST_DIR}/datasourcemanager.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/datasourcebase.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/configurationdatasource.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/dbdatasource.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/dbdatasourcewidget.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/datasourcesloadwidget.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/datasourceeditwidget.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/datasourcetablemodel.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/datasourcesconfigurationdialog.cpp"
+)
+
+

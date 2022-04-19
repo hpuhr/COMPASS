@@ -24,7 +24,7 @@
 #include "configurationmanager.h"
 #include "dbinterface.h"
 #include "dbcontent/dbcontent.h"
-#include "dbcontent/dbcontentmanager.h"
+#include "datasourcemanager.h"
 #include "dbcontent/variable/variablewidget.h"
 #include "stringconv.h"
 #include "unit.h"
@@ -422,6 +422,10 @@ std::string Variable::getRepresentationStringFromValue(const std::string& value_
             throw std::invalid_argument(
                 "Variable: getRepresentationStringFromValue: representation of string variable"
                 " impossible");
+        case PropertyDataType::JSON:
+            throw std::invalid_argument(
+                "Variable: getRepresentationStringFromValue: representation of json variable"
+                " impossible");
         default:
             logerr << "Variable: getRepresentationStringFromValue:: unknown property type "
                    << Property::asString(data_type_);
@@ -564,6 +568,9 @@ std::string Variable::multiplyString(const std::string& value_str, double factor
         case PropertyDataType::STRING:
             throw std::invalid_argument(
                 "Variable: multiplyString: multiplication of string variable impossible");
+        case PropertyDataType::JSON:
+            throw std::invalid_argument(
+                "Variable: multiplyString: multiplication of json variable impossible");
         default:
             logerr << "Variable: multiplyString:: unknown property type "
                    << Property::asString(data_type_);
@@ -635,6 +642,9 @@ const std::string& Variable::getLargerValueString(const std::string& value_a_str
         case PropertyDataType::STRING:
             throw std::invalid_argument(
                 "Variable: getLargerValueString: operation on string variable impossible");
+        case PropertyDataType::JSON:
+            throw std::invalid_argument(
+                "Variable: getLargerValueString: operation on json variable impossible");
         default:
             logerr << "Variable: getLargerValueString:: unknown property type "
                    << Property::asString(data_type_);
@@ -702,6 +712,9 @@ const std::string& Variable::getSmallerValueString(const std::string& value_a_st
         case PropertyDataType::STRING:
             throw std::invalid_argument(
                 "Variable: getSmallerValueString: operation on string variable impossible");
+        case PropertyDataType::JSON:
+            throw std::invalid_argument(
+                "Variable: getSmallerValueString: operation on json variable impossible");
         default:
             logerr << "Variable: getSmallerValueString:: unknown property type "
                    << Property::asString(data_type_);
@@ -739,13 +752,13 @@ std::string Variable::getDataSourcesAsString(const std::string& value) const
 {
     assert(db_object_);
 
-    DBContentManager& dbo_man = COMPASS::instance().dbContentManager();
+    DataSourceManager& ds_man = COMPASS::instance().dataSourceManager();
 
     unsigned int ds_id = stoi(value);
 
-    if (dbo_man.hasDataSource(ds_id))
+    if (ds_man.hasDBDataSource(ds_id))
     {
-        dbContent::DBDataSource& ds = dbo_man.dataSource(ds_id);
+        dbContent::DBDataSource& ds = ds_man.dbDataSource(ds_id);
 
         if (ds.hasShortName())
             return ds.shortName();

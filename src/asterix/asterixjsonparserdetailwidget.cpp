@@ -127,6 +127,9 @@ ASTERIXJSONParserDetailWidget::ASTERIXJSONParserDetailWidget(ASTERIXJSONParser& 
             this, &ASTERIXJSONParserDetailWidget::mappingDBContentVariableChangedSlot);
     form_layout->addRow("Name", dbo_var_sel_);
 
+    dbo_var_data_type_label_ = new QLabel();
+    form_layout->addRow("Data Type", dbo_var_data_type_label_);
+
     dbo_var_comment_edit_ = new QTextEdit();
     dbo_var_comment_edit_->setWordWrapMode(QTextOption::WrapMode::WrapAnywhere);
 
@@ -350,6 +353,7 @@ void ASTERIXJSONParserDetailWidget::showDBContentVariable (const std::string& va
 
         assert (parser_.dbObject().hasVariable(var_name));
         dbo_var_sel_->selectedVariable(parser_.dbObject().variable(var_name));
+        dbo_var_data_type_label_->setText(dbo_var_sel_->selectedVariable().dataTypeString().c_str());
 
         dbo_var_comment_edit_->setDisabled(false);
 
@@ -372,6 +376,7 @@ void ASTERIXJSONParserDetailWidget::showDBContentVariable (const std::string& va
     {
         dbo_var_sel_->setDisabled(false);
         dbo_var_sel_->selectEmptyVariable();
+        dbo_var_data_type_label_->setText("");
 
         dbo_var_comment_edit_->setDisabled(true);
 
@@ -471,9 +476,15 @@ void ASTERIXJSONParserDetailWidget::mappingDBContentVariableChangedSlot()
         // setting variable in existing mapping
 
         if (dbo_var_sel_->hasVariable())
+        {
             parser_.mapping(entry_index_).dboVariableName(dbo_var_sel_->selectedVariable().name());
+            dbo_var_data_type_label_->setText(dbo_var_sel_->selectedVariable().dataTypeString().c_str());
+        }
         else
+        {
             parser_.mapping(entry_index_).dboVariableName("");
+            dbo_var_data_type_label_->setText("");
+        }
 
         parser_.doMappingChecks();
 
@@ -481,6 +492,8 @@ void ASTERIXJSONParserDetailWidget::mappingDBContentVariableChangedSlot()
     }
     else if (dbo_var_sel_->hasVariable())
     {
+        dbo_var_data_type_label_->setText(dbo_var_sel_->selectedVariable().dataTypeString().c_str());
+
         // create new mapping
 
         string json_key = parser_.unmappedJSONKey(entry_index_);

@@ -103,7 +103,7 @@ class HistogramViewDataWidget : public QWidget
   public slots:
     void loadingStartedSlot();
     /// @brief Called when new result Buffer was delivered
-    void updateDataSlot(DBContent& object, std::shared_ptr<Buffer> buffer);
+    void updateDataSlot(const std::map<std::string, std::shared_ptr<Buffer>>& data, bool requires_reset);
     void loadingDoneSlot();
 
     void exportDataSlot(bool overwrite);
@@ -259,10 +259,10 @@ protected:
     void updateMinMax(const std::vector<double>& data);
 
     template<typename T>
-    void updateCounts(const std::string& dbo_name, NullableVector<T>& data, NullableVector<bool>& selected_vec,
+    void updateCounts(const std::string& dbcontent_name, NullableVector<T>& data, NullableVector<bool>& selected_vec,
                       dbContent::Variable* data_var)
     {
-        loginf << "HistogramViewDataWidget: updateCounts: start dbo " << dbo_name;
+        loginf << "HistogramViewDataWidget: updateCounts: start dbcontent " << dbcontent_name;
 
         if (!bin_size_valid_)
         {
@@ -283,7 +283,7 @@ protected:
             }
         }
 
-        std::vector<unsigned int>& counts = counts_[dbo_name];
+        std::vector<unsigned int>& counts = counts_[dbcontent_name];
 
         if (!counts.size()) // set 0 bins
         {
@@ -304,7 +304,7 @@ protected:
                 if (selected)
                     ++data_null_selected_cnt_;
                 else
-                    ++data_null_cnt_[dbo_name];
+                    ++data_null_cnt_[dbcontent_name];
                 continue;
             }
 
@@ -332,7 +332,7 @@ protected:
             }
         }
 
-        loginf << "HistogramViewDataWidget: updateCounts: end dbo " << dbo_name;
+        loginf << "HistogramViewDataWidget: updateCounts: end dbo " << dbcontent_name;
     }
 
     void updateCounts(const std::vector<double>& data);

@@ -169,7 +169,7 @@ void DBContentManagerWidget::addDBOSlot()
     {
         std::string name = text.toStdString();
 
-        if (object_manager_.existsObject(name))
+        if (object_manager_.existsDBContent(name))
         {
             logerr << "DBObjectManagerWidget: addDBO: DBObject same name already exists";
             return;
@@ -210,7 +210,7 @@ void DBContentManagerWidget::deleteDBOSlot()
     assert(delete_dbo_buttons_.find((QPushButton*)sender()) != delete_dbo_buttons_.end());
 
     DBContent* object = delete_dbo_buttons_[(QPushButton*)sender()];
-    object_manager_.deleteObject(object->name());
+    object_manager_.deleteDBContent(object->name());
 
     updateDBOsSlot();
 }

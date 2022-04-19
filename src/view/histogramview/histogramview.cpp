@@ -38,7 +38,7 @@ HistogramView::HistogramView(const std::string& class_id, const std::string& ins
     : View(class_id, instance_id, w, view_manager)
 {
     registerParameter("data_var_dbo", &data_var_dbo_, META_OBJECT_NAME);
-    registerParameter("data_var_name", &data_var_name_, "tod");
+    registerParameter("data_var_name", &data_var_name_, DBContent::meta_var_tod_.name());
 
     registerParameter("use_log_scale", &use_log_scale_, true);
 
@@ -105,16 +105,29 @@ bool HistogramView::init()
 void HistogramView::loadingStarted()
 {
     loginf << "HistogramView: loadingStarted";
+
+    getDataWidget()->loadingStartedSlot();
 }
 
 void HistogramView::loadedData(const std::map<std::string, std::shared_ptr<Buffer>>& data, bool requires_reset)
 {
     loginf << "HistogramView: loadedData";
+
+    getDataWidget()->updateDataSlot(data, requires_reset);
 }
 
 void HistogramView::loadingDone()
 {
     loginf << "HistogramView: loadingDone";
+
+    getDataWidget()->loadingDoneSlot();
+}
+
+void HistogramView::clearData()
+{
+    loginf << "HistogramView: clearData";
+
+    getDataWidget()->clear();
 }
 
 void HistogramView::generateSubConfigurable(const std::string& class_id,
@@ -209,7 +222,7 @@ bool HistogramView::hasDataVar ()
     if (data_var_dbo_ == META_OBJECT_NAME)
         return COMPASS::instance().dbContentManager().existsMetaVariable(data_var_name_);
     else
-        return COMPASS::instance().dbContentManager().object(data_var_dbo_).hasVariable(data_var_name_);
+        return COMPASS::instance().dbContentManager().dbContent(data_var_dbo_).hasVariable(data_var_name_);
 }
 
 bool HistogramView::isDataVarMeta ()
@@ -221,9 +234,9 @@ Variable& HistogramView::dataVar()
 {
     assert (hasDataVar());
     assert (!isDataVarMeta());
-    assert (COMPASS::instance().dbContentManager().object(data_var_dbo_).hasVariable(data_var_name_));
+    assert (COMPASS::instance().dbContentManager().dbContent(data_var_dbo_).hasVariable(data_var_name_));
 
-    return COMPASS::instance().dbContentManager().object(data_var_dbo_).variable(data_var_name_);
+    return COMPASS::instance().dbContentManager().dbContent(data_var_dbo_).variable(data_var_name_);
 }
 
 void HistogramView::dataVar (Variable& var)

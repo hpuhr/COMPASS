@@ -51,8 +51,6 @@ class ListBoxViewConfigWidget : public QWidget
     void toggleUsePresentation();
     void toggleUseOverwrite();
     void showAssociationsSlot();
-    /// @brief Called when database view checkbox is un/checked
-    // void toggleDatabaseView ();
     void exportSlot();
     void exportDoneSlot(bool cancelled);
 
@@ -64,15 +62,12 @@ class ListBoxViewConfigWidget : public QWidget
     void exportSignal(bool overwrite);
 
   public:
-    /// @brief Constructor
     ListBoxViewConfigWidget(ListBoxView* view, QWidget* parent = nullptr);
-    /// @brief Destructor
     virtual ~ListBoxViewConfigWidget();
 
     void setStatus (const std::string& status, bool visible, QColor color = Qt::black);
 
   protected:
-    /// Base view
     ListBoxView* view_;
 
     QComboBox* set_box_{nullptr};
@@ -81,9 +76,7 @@ class ListBoxViewConfigWidget : public QWidget
     QPushButton* rename_set_button_{nullptr};
     QPushButton* remove_set_button_{nullptr};
 
-    /// Variable read list widget
     QStackedWidget* set_stack_{nullptr};
-    //DBOVariableOrderedSetWidget* variable_set_widget_{nullptr};
 
     QCheckBox* only_selected_check_{nullptr};
     QCheckBox* presentation_check_{nullptr};

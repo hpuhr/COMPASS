@@ -20,6 +20,7 @@
 #include "dbinterface.h"
 #include "dbcontent/dbcontent.h"
 #include "dbcontent/dbcontentmanager.h"
+#include "datasourcemanager.h"
 #include "dbtableinfo.h"
 #include "filtermanager.h"
 #include "global.h"
@@ -32,7 +33,9 @@
 #include "mainwindow.h"
 #include "files.h"
 
-#include <qobject.h>
+#include <QMessageBox>
+
+#include <osgDB/Registry>
 
 #include <boost/date_time/posix_time/posix_time.hpp>
 
@@ -55,30 +58,33 @@ COMPASS::COMPASS() : Configurable("COMPASS", "COMPASS0", 0, "compass.json")
 
     assert(db_interface_);
     assert(dbcontent_manager_);
+    assert(ds_manager_);
     assert(filter_manager_);
     assert(task_manager_);
     assert(view_manager_);
     assert(eval_manager_);
 
-//    QObject::connect(db_interface_.get(), &DBInterface::databaseContentChangedSignal,
-//                     dbo_manager_.get(), &DBObjectManager::databaseContentChangedSlot,
-//                     Qt::QueuedConnection);
-
-//    QObject::connect(dbo_manager_.get(), &DBObjectManager::dbObjectsChangedSignal,
-//                     task_manager_.get(), &TaskManager::dbObjectsChangedSlot);
-//    QObject::connect(dbo_manager_.get(), &DBObjectManager::schemaChangedSignal, task_manager_.get(),
-//                     &TaskManager::schemaChangedSlot);
-
     // database opending
+
     QObject::connect(db_interface_.get(), &DBInterface::databaseOpenedSignal,
                      dbcontent_manager_.get(), &DBContentManager::databaseOpenedSlot);
     QObject::connect(db_interface_.get(), &DBInterface::databaseClosedSignal,
                      dbcontent_manager_.get(), &DBContentManager::databaseClosedSlot);
 
     QObject::connect(db_interface_.get(), &DBInterface::databaseOpenedSignal,
+                     ds_manager_.get(), &DataSourceManager::databaseOpenedSlot);
+    QObject::connect(db_interface_.get(), &DBInterface::databaseClosedSignal,
+                     ds_manager_.get(), &DataSourceManager::databaseClosedSlot);
+
+    QObject::connect(db_interface_.get(), &DBInterface::databaseOpenedSignal,
                      filter_manager_.get(), &FilterManager::databaseOpenedSlot);
     QObject::connect(db_interface_.get(), &DBInterface::databaseClosedSignal,
                      filter_manager_.get(), &FilterManager::databaseClosedSlot);
+
+    QObject::connect(db_interface_.get(), &DBInterface::databaseOpenedSignal,
+                     view_manager_.get(), &ViewManager::databaseOpenedSlot);
+    QObject::connect(db_interface_.get(), &DBInterface::databaseClosedSignal,
+                     view_manager_.get(), &ViewManager::databaseClosedSlot);
 
     QObject::connect(db_interface_.get(), &DBInterface::databaseOpenedSignal,
                      eval_manager_.get(), &EvaluationManager::databaseOpenedSlot);
@@ -92,6 +98,10 @@ COMPASS::COMPASS() : Configurable("COMPASS", "COMPASS0", 0, "compass.json")
                      view_manager_.get(), &ViewManager::loadedDataSlot);
     QObject::connect(dbcontent_manager_.get(), &DBContentManager::loadingDoneSignal,
                      view_manager_.get(), &ViewManager::loadingDoneSlot);
+
+    // appmode
+    connect (this, &COMPASS::appModeSwitchSignal,
+             filter_manager_.get(), &FilterManager::appModeSwitchSlot);
 
     qRegisterMetaType<AppMode>("AppMode");
 
@@ -134,6 +144,12 @@ void COMPASS::generateSubConfigurable(const std::string& class_id, const std::st
         dbcontent_manager_.reset(new DBContentManager(class_id, instance_id, this));
         assert(dbcontent_manager_);
     }
+    else if (class_id == "DataSourceManager")
+    {
+        assert(!ds_manager_);
+        ds_manager_.reset(new DataSourceManager(class_id, instance_id, this));
+        assert(ds_manager_);
+    }
     else if (class_id == "FilterManager")
     {
         assert(!filter_manager_);
@@ -172,9 +188,14 @@ void COMPASS::checkSubConfigurables()
     }
     if (!dbcontent_manager_)
     {
-        assert(db_interface_);
         addNewSubConfiguration("DBObjectManager", "DBObjectManager0");
         generateSubConfigurable("DBObjectManager", "DBObjectManager0");
+        assert(dbcontent_manager_);
+    }
+    if (!ds_manager_)
+    {
+        addNewSubConfiguration("DataSourceManager", "DataSourceManager0");
+        generateSubConfigurable("DataSourceManager", "DataSourceManager0");
         assert(dbcontent_manager_);
     }
     if (!filter_manager_)
@@ -212,12 +233,24 @@ void COMPASS::openDBFile(const std::string& filename)
 
     last_db_filename_ = filename;
 
-    db_interface_->openDBFile(filename, false);
-    assert (db_interface_->dbOpen());
+    try
+    {
+        db_interface_->openDBFile(filename, false);
+        assert (db_interface_->dbOpen());
 
-    addDBFileToList(filename);
+        addDBFileToList(filename);
 
-    db_opened_ = true;
+        db_opened_ = true;
+
+    }  catch (std::exception& e)
+    {
+        QMessageBox m_warning(QMessageBox::Warning, "Opening Database Failed",
+                                          e.what(), QMessageBox::Ok);
+        m_warning.exec();
+
+        db_opened_ = false;
+    }
+
 }
 
 void COMPASS::createNewDBFile(const std::string& filename)
@@ -250,12 +283,15 @@ void COMPASS::closeDB()
 
     assert (db_opened_);
 
-    dbcontent_manager_->saveDBDataSources();
+    ds_manager_->saveDBDataSources();
+    dbcontent_manager_->saveTargets();
 
     db_interface_->closeDBFile();
     assert (!db_interface_->dbOpen());
 
     db_opened_ = false;
+
+    emit db_interface_->databaseClosedSignal();
 }
 
 
@@ -269,6 +305,12 @@ DBContentManager& COMPASS::dbContentManager()
 {
     assert(dbcontent_manager_);
     return *dbcontent_manager_;
+}
+
+DataSourceManager& COMPASS::dataSourceManager()
+{
+    assert(ds_manager_);
+    return *ds_manager_;
 }
 
 FilterManager& COMPASS::filterManager()
@@ -322,9 +364,14 @@ void COMPASS::shutdown()
 
     assert(db_interface_);
 
+    assert(ds_manager_);
+    if (db_interface_->dbOpen())
+        ds_manager_->saveDBDataSources();
+    ds_manager_ = nullptr;
+
     assert(dbcontent_manager_);
     if (db_interface_->dbOpen())
-        dbcontent_manager_->saveDBDataSources();
+        dbcontent_manager_->saveTargets();
     dbcontent_manager_ = nullptr;
 
     JobManager::instance().shutdown();
@@ -337,6 +384,8 @@ void COMPASS::shutdown()
     assert(view_manager_);
     view_manager_->close();
     view_manager_ = nullptr;
+
+    //osgDB::Registry::instance(true);
 
     assert(filter_manager_);
     filter_manager_ = nullptr;

@@ -461,7 +461,7 @@ void LatexVisitor::visit(OSGView* e)
 
     if (add_overview_screenshot_) // overview screenshot
     {
-        data_widget->zoomHomeSlot();
+        data_widget->zoomToDataSlot(); // TODO wrong
         data_widget->addDataMarker();
 
         QImage overview_screenshot = data_widget->grabFrameBuffer();

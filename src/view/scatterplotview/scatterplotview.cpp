@@ -38,10 +38,10 @@ ScatterPlotView::ScatterPlotView(const std::string& class_id, const std::string&
     : View(class_id, instance_id, w, view_manager)
 {
     registerParameter("data_var_x_dbo", &data_var_x_dbo_, META_OBJECT_NAME);
-    registerParameter("data_var_x_name", &data_var_x_name_, "pos_long_deg");
+    registerParameter("data_var_x_name", &data_var_x_name_, DBContent::meta_var_longitude_.name());
 
     registerParameter("data_var_y_dbo", &data_var_y_dbo_, META_OBJECT_NAME);
-    registerParameter("data_var_y_name", &data_var_y_name_, "pos_lat_deg");
+    registerParameter("data_var_y_name", &data_var_y_name_, DBContent::meta_var_latitude_.name());
 
 
     // create sub done in init
@@ -107,16 +107,29 @@ bool ScatterPlotView::init()
 void ScatterPlotView::loadingStarted()
 {
     loginf << "ScatterPlotView: loadingStarted";
+
+    getDataWidget()->loadingStartedSlot();
 }
 
 void ScatterPlotView::loadedData(const std::map<std::string, std::shared_ptr<Buffer>>& data, bool requires_reset)
 {
     loginf << "ScatterPlotView: loadedData";
+
+    getDataWidget()->updateDataSlot(data, requires_reset);
 }
 
 void ScatterPlotView::loadingDone()
 {
     loginf << "ScatterPlotView: loadingDone";
+
+    getDataWidget()->loadingDoneSlot();
+}
+
+void ScatterPlotView::clearData()
+{
+    loginf << "ScatterPlotView: clearData";
+
+    getDataWidget()->clear();
 }
 
 void ScatterPlotView::generateSubConfigurable(const std::string& class_id,
@@ -226,7 +239,7 @@ bool ScatterPlotView::hasDataVarX ()
     if (data_var_x_dbo_ == META_OBJECT_NAME)
         return COMPASS::instance().dbContentManager().existsMetaVariable(data_var_x_name_);
     else
-        return COMPASS::instance().dbContentManager().object(data_var_x_dbo_).hasVariable(data_var_x_name_);
+        return COMPASS::instance().dbContentManager().dbContent(data_var_x_dbo_).hasVariable(data_var_x_name_);
 }
 
 bool ScatterPlotView::isDataVarXMeta ()
@@ -238,9 +251,9 @@ Variable& ScatterPlotView::dataVarX()
 {
     assert (hasDataVarX());
     assert (!isDataVarXMeta());
-    assert (COMPASS::instance().dbContentManager().object(data_var_x_dbo_).hasVariable(data_var_x_name_));
+    assert (COMPASS::instance().dbContentManager().dbContent(data_var_x_dbo_).hasVariable(data_var_x_name_));
 
-    return COMPASS::instance().dbContentManager().object(data_var_x_dbo_).variable(data_var_x_name_);
+    return COMPASS::instance().dbContentManager().dbContent(data_var_x_dbo_).variable(data_var_x_name_);
 }
 
 void ScatterPlotView::dataVarX (Variable& var)
@@ -297,7 +310,7 @@ bool ScatterPlotView::hasDataVarY ()
     if (data_var_y_dbo_ == META_OBJECT_NAME)
         return COMPASS::instance().dbContentManager().existsMetaVariable(data_var_y_name_);
     else
-        return COMPASS::instance().dbContentManager().object(data_var_y_dbo_).hasVariable(data_var_y_name_);
+        return COMPASS::instance().dbContentManager().dbContent(data_var_y_dbo_).hasVariable(data_var_y_name_);
 }
 
 bool ScatterPlotView::isDataVarYMeta ()
@@ -309,9 +322,9 @@ Variable& ScatterPlotView::dataVarY()
 {
     assert (hasDataVarY());
     assert (!isDataVarYMeta());
-    assert (COMPASS::instance().dbContentManager().object(data_var_y_dbo_).hasVariable(data_var_y_name_));
+    assert (COMPASS::instance().dbContentManager().dbContent(data_var_y_dbo_).hasVariable(data_var_y_name_));
 
-    return COMPASS::instance().dbContentManager().object(data_var_y_dbo_).variable(data_var_y_name_);
+    return COMPASS::instance().dbContentManager().dbContent(data_var_y_dbo_).variable(data_var_y_name_);
 }
 
 void ScatterPlotView::dataVarY (Variable& var)

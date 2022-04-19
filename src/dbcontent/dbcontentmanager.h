@@ -19,13 +19,11 @@
 #define DBCONTENT_DBCONTENTMANAGER_H_
 
 #include "configurable.h"
-#include "dbcontent/source/configurationdatasource.h"
-#include "dbcontent/source/dbdatasource.h"
 #include "global.h"
 #include "singleton.h"
 #include "buffer.h"
 
-#include <qobject.h>
+#include <QObject>
 
 #include <vector>
 #include <memory>
@@ -33,7 +31,6 @@
 class COMPASS;
 class DBContent;
 class DBContentManagerWidget;
-class DBContentManagerDataSourcesWidget;
 class DBSchemaManager;
 
 namespace dbContent {
@@ -42,6 +39,7 @@ class MetaVariableConfigurationDialog;
 class Variable;
 class MetaVariable;
 class VariableSet;
+class Target;
 
 }
 
@@ -50,15 +48,14 @@ class DBContentManager : public QObject, public Configurable
     Q_OBJECT
 
 public slots:
-
     void databaseOpenedSlot();
-    //void databaseContentChangedSlot();
     void databaseClosedSlot();
 
     void metaDialogOKSlot();
 
 signals:
     void dbObjectsChangedSignal();
+    void associationStatusChangedSignal();
 
     void loadingStartedSignal(); // emitted when load has been started
     // all data contained, also new one. requires_reset true indicates that all shown info should be re-created,
@@ -68,7 +65,6 @@ signals:
     void insertDoneSignal(); // emitted when all dbos have finished loading
 
 public:
-    const static std::vector<std::string> data_source_types_;
 
     DBContentManager(const std::string& class_id, const std::string& instance_id, COMPASS* compass);
     virtual ~DBContentManager();
@@ -76,15 +72,15 @@ public:
     virtual void generateSubConfigurable(const std::string& class_id,
                                          const std::string& instance_id);
 
-    bool existsObject(const std::string& dbo_name);
-    DBContent& object(const std::string& dbo_name);
-    void deleteObject(const std::string& dbo_name);
+    bool existsDBContent(const std::string& dbcontent_name);
+    DBContent& dbContent(const std::string& dbcontent_name);
+    void deleteDBContent(const std::string& dbcontent_name);
     bool hasData();
 
     using DBObjectIterator = typename std::map<std::string, DBContent*>::iterator;
-    DBObjectIterator begin() { return objects_.begin(); }
-    DBObjectIterator end() { return objects_.end(); }
-    size_t size() { return objects_.size(); }
+    DBObjectIterator begin() { return dbcontent_.begin(); }
+    DBObjectIterator end() { return dbcontent_.end(); }
+    size_t size() { return dbcontent_.size(); }
 
     bool existsMetaVariable(const std::string& var_name);
     dbContent::MetaVariable& metaVariable(const std::string& var_name);
@@ -95,35 +91,18 @@ public:
     bool usedInMetaVariable(const dbContent::Variable& variable);
     dbContent::MetaVariableConfigurationDialog* metaVariableConfigdialog();
 
-
-    bool hasConfigDataSource(unsigned int ds_id);
-    dbContent::ConfigurationDataSource& configDataSource(unsigned int ds_id);
-
-    bool hasDataSource(unsigned int ds_id);
-    bool canAddNewDataSourceFromConfig (unsigned int ds_id);
-    void addNewDataSource (unsigned int ds_id); // be sure not to call from different thread
-    dbContent::DBDataSource& dataSource(unsigned int ds_id);
-    const std::vector<std::unique_ptr<dbContent::DBDataSource>>& dataSources() const;
-
-    std::map<unsigned int, std::vector <std::pair<std::string, unsigned int>>> getNetworkLines(); //ds_id -> (ip, port)
-
-    void saveDBDataSources();
-
-    bool loadingWanted (const std::string& dbo_name);
-    bool hasDSFilter (const std::string& dbo_name);
-    std::vector<unsigned int> unfilteredDS (const std::string& dbo_name); // DS IDs
-
     void load();
     void addLoadedData(std::map<std::string, std::shared_ptr<Buffer>> data);
+    std::map<std::string, std::shared_ptr<Buffer>> loadedData();
     void loadingDone(DBContent& object); // to be called by dbo when it's loading is finished
     bool loadInProgress() const;
+    void clearData();
 
     void insertData(std::map<std::string, std::shared_ptr<Buffer>> data);
     void insertDone(DBContent& object); // to be called by dbo when it's insert is finished
     bool insertInProgress() const;
 
     DBContentManagerWidget* widget();
-    DBContentManagerDataSourcesWidget* loadWidget();
 
     bool useLimit() const;
     void useLimit(bool useLimit);
@@ -151,15 +130,15 @@ public:
     void quitLoading();
 
     bool hasAssociations() const;
-    void setAssociationsDataSource(const std::string& dbo, const std::string& data_source_name);
-    void setAssociationsByAll();
-    void removeAssociations();
+    void setAssociationsIdentifier(const std::string& assoc_id);
+//    void setAssociationsByAll();
+//    void removeAssociations();
 
-    bool hasAssociationsDataSource() const;
-    std::string associationsDBObject() const;
-    std::string associationsDataSourceName() const;
+//    bool hasAssociationsDataSource() const;
+    std::string associationsID() const;
+//    std::string associationsDataSourceName() const;
 
-    bool isOtherDBObjectPostProcessing(DBContent& object);
+    //bool isOtherDBObjectPostProcessing(DBContent& object);
 
     bool hasMaxRecordNumber() const { return has_max_rec_num_; }
     unsigned int maxRecordNumber() const;
@@ -167,13 +146,21 @@ public:
 
     const std::map<std::string, std::shared_ptr<Buffer>>& data() const;
 
-    void dsTypeLoadingWanted (const std::string& ds_type, bool wanted);
-    bool dsTypeLoadingWanted (const std::string& ds_type);
+    bool canGetVariable (const std::string& dbcont_name, const Property& property);
+    dbContent::Variable& getVariable (const std::string& dbcont_name, const Property& property);
+
+    bool metaCanGetVariable (const std::string& dbcont_name, const Property& meta_property);
+    dbContent::Variable& metaGetVariable (const std::string& dbcont_name, const Property& meta_property);
+
+    bool hasTargetsInfo();
+    void clearTargetsInfo();
+    bool existsTarget(unsigned int utn);
+    void createTarget(unsigned int utn);
+    std::shared_ptr<dbContent::Target> target(unsigned int utn);
+    void saveTargets();
 
 protected:
     COMPASS& compass_;
-
-    std::map<std::string, bool> ds_type_loading_wanted_;
 
     bool use_order_{false};
     bool use_order_ascending_{false};
@@ -185,8 +172,7 @@ protected:
     unsigned int limit_max_{100000};
 
     bool has_associations_{false};
-    std::string associations_dbo_;
-    std::string associations_ds_;
+    std::string associations_id_;
 
     bool has_max_rec_num_ {false};
     unsigned int max_rec_num_ {0};
@@ -199,14 +185,12 @@ protected:
     bool insert_in_progress_{false};
 
     /// Container with all DBOs (DBO name -> DBO pointer)
-    std::map<std::string, DBContent*> objects_;
+    std::map<std::string, DBContent*> dbcontent_;
     std::vector<std::unique_ptr<dbContent::MetaVariable>> meta_variables_;
 
-    std::vector<std::unique_ptr<dbContent::ConfigurationDataSource>> config_data_sources_;
-    std::vector<std::unique_ptr<dbContent::DBDataSource>> db_data_sources_;
+    std::map<unsigned int, std::shared_ptr<dbContent::Target>> targets_;
 
     std::unique_ptr<DBContentManagerWidget> widget_;
-    std::unique_ptr<DBContentManagerDataSourcesWidget> load_widget_;
 
     std::unique_ptr<dbContent::MetaVariableConfigurationDialog> meta_cfg_dialog_;
 
@@ -218,8 +202,6 @@ protected:
     void filterDataSources();
     void cutCachedData();
 
-    void loadDBDataSources();
-    void sortDBDataSources();
     void loadMaxRecordNumber();
 };
 

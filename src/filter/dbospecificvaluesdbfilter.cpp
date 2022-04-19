@@ -40,11 +40,11 @@ DBOSpecificValuesDBFilter::DBOSpecificValuesDBFilter(const std::string& class_id
     registerParameter("condition_operator", &condition_operator_, "");
 
     // dbobject
-    if (!COMPASS::instance().dbContentManager().existsObject(dbo_name_))
+    if (!COMPASS::instance().dbContentManager().existsDBContent(dbo_name_))
         throw std::invalid_argument("DataSourcesFilter: DataSourcesFilter: instance " +
                                     instance_id + " has non-existing object " + dbo_name_);
 
-    object_ = &COMPASS::instance().dbContentManager().object(dbo_name_);
+    object_ = &COMPASS::instance().dbContentManager().dbContent(dbo_name_);
     assert (object_);
 
     TODO_ASSERT
@@ -100,9 +100,10 @@ DBOSpecificValuesDBFilter::~DBOSpecificValuesDBFilter() {}
 bool DBOSpecificValuesDBFilter::filters(const std::string& dbo_type) { return dbo_name_ == dbo_type; }
 
 std::string DBOSpecificValuesDBFilter::getConditionString(const std::string& dbo_name, bool& first,
+                                                          std::vector<std::string>& extra_from_parts,
                                                           std::vector<dbContent::Variable*>& filtered_variables)
 {
-    assert(!disabled_);
+    assert(!unusable_);
 
     TODO_ASSERT
     //assert (object_->hasDataSources());
@@ -117,10 +118,7 @@ std::string DBOSpecificValuesDBFilter::getConditionString(const std::string& dbo
         {
             if (!first)
             {
-                if (op_and_)
-                    ss << " AND ";
-                else
-                    ss << " OR ";
+                ss << " AND ";
             }
 
             ss << "("; // first condition
@@ -204,20 +202,6 @@ void DBOSpecificValuesDBFilter::checkSubConfigurables()
     logdbg << "DBOSpecificValuesDBFilter: checkSubConfigurables";
 
     // widget
-
-    if (!widget_)
-    {
-        logdbg << "DBOSpecificValuesDBFilter: checkSubConfigurables: generating generic filter widget";
-        widget_ = new DBFilterWidget("DBFilterWidget", instanceId() + "Widget0", *this);
-
-        if (disabled_)
-        {
-            widget_->setInvisible();
-            widget_->setDisabled(true);
-        }
-    }
-    assert(widget_);
-
 
     TODO_ASSERT
 

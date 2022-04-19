@@ -299,7 +299,7 @@ void CreateAssociationsStatusDialog::updateDBOAssociatedGrid()
         QLabel* associated_label =
             dynamic_cast<QLabel*>(dbo_associated_grid_->itemAtPosition(row, 2)->widget());
         assert(associated_label);
-        size_t assoc_count = dbo_it.second->associations().size();
+        size_t assoc_count = 0; //dbo_it.second->associations().size();
         associated_label->setText(QString::number(assoc_count));
 
         QLabel* percent_label =

@@ -15,9 +15,10 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "dbfiltercondition.h"
 #include "compass.h"
 #include "dbfilter.h"
-#include "dbfiltercondition.h"
+#include "dbfilterwidget.h"
 #include "dbcontent/dbcontent.h"
 #include "dbcontent/dbcontentmanager.h"
 #include "dbcontent/variable/variable.h"
@@ -104,6 +105,7 @@ bool DBFilterCondition::filters(const std::string& dbo_name)
 }
 
 std::string DBFilterCondition::getConditionString(const std::string& dbo_name, bool& first,
+                                                  std::vector<std::string>& extra_from_parts,
                                                   std::vector<dbContent::Variable*>& filtered_variables)
 {
     logdbg << "DBFilterCondition: getConditionString: object " << dbo_name << " first " << first;
@@ -122,7 +124,7 @@ std::string DBFilterCondition::getConditionString(const std::string& dbo_name, b
 
     assert (hasVariable(dbo_name));
 
-    dbContent::Variable& var {variable(dbo_name)};
+    dbContent::Variable& var = variable(dbo_name);
 
     //const DBTableColumn& column = var.currentDBColumn();
     std::string db_column_name = var.dbColumnName();
@@ -242,10 +244,10 @@ bool DBFilterCondition::hasVariable (const std::string& dbo_name)
         if (dbo_name != variable_dbo_name_)
             return false;
 
-        if (!dbo_man.existsObject(variable_dbo_name_))
+        if (!dbo_man.existsDBContent(variable_dbo_name_))
             return false;
 
-        return dbo_man.object(variable_dbo_name_).hasVariable(variable_name_);
+        return dbo_man.dbContent(variable_dbo_name_).hasVariable(variable_name_);
     }
 }
 
@@ -259,7 +261,7 @@ dbContent::Variable& DBFilterCondition::variable (const std::string& dbo_name)
     if (variable_dbo_name_ == META_OBJECT_NAME)
         return dbo_man.metaVariable(variable_name_).getFor(dbo_name);
     else
-         return dbo_man.object(variable_dbo_name_).variable(variable_name_);
+         return dbo_man.dbContent(variable_dbo_name_).variable(variable_name_);
 }
 
 

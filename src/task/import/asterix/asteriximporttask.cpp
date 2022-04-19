@@ -26,6 +26,7 @@
 #include "dbcontent/dbcontent.h"
 #include "dbcontent/dbcontentmanager.h"
 #include "dbcontent/variable/variable.h"
+#include "datasourcemanager.h"
 #include "files.h"
 #include "jobmanager.h"
 #include "logger.h"
@@ -55,8 +56,8 @@ using namespace Utils;
 using namespace nlohmann;
 using namespace std;
 
-const unsigned int unlimited_chunk_size = 10000;
-const unsigned int limited_chunk_size = 5000;
+const unsigned int unlimited_chunk_size = 4000;
+//const unsigned int limited_chunk_size = 2000;
 
 const std::string DONE_PROPERTY_NAME = "asterix_data_imported";
 
@@ -70,16 +71,11 @@ ASTERIXImportTask::ASTERIXImportTask(const std::string& class_id, const std::str
     tooltip_ = "Allows importing of ASTERIX data recording files into the opened database.";
 
     registerParameter("debug_jasterix", &debug_jasterix_, false);
-    registerParameter("limit_ram", &limit_ram_, false);
 
     registerParameter("file_list", &file_list_, json::array());
     registerParameter("current_file_framing", &current_file_framing_, "");
 
-    registerParameter("override_sac_org", &post_process_.override_sac_org_, 0);
-    registerParameter("override_sic_org", &post_process_.override_sic_org_, 0);
-    registerParameter("override_sac_new", &post_process_.override_sac_new_, 1);
-    registerParameter("override_sic_new", &post_process_.override_sic_new_, 1);
-    registerParameter("override_tod_offset", &post_process_.override_tod_offset_, 0.0);
+    registerParameter("override_tod_offset", &override_tod_offset_, 0.0);
 
     std::string jasterix_definition_path = HOME_DATA_DIRECTORY + "jasterix_definitions";
 
@@ -87,16 +83,8 @@ ASTERIXImportTask::ASTERIXImportTask(const std::string& class_id, const std::str
            << jasterix_definition_path << "'";
     assert(Files::directoryExists(jasterix_definition_path));
 
-    if (limit_ram_)
-    {
-        jASTERIX::frame_chunk_size = limited_chunk_size;
-        jASTERIX::data_block_chunk_size = limited_chunk_size;
-    }
-    else
-    {
-        jASTERIX::frame_chunk_size = unlimited_chunk_size;
-        jASTERIX::data_block_chunk_size = unlimited_chunk_size;
-    }
+    jASTERIX::frame_chunk_size = unlimited_chunk_size;
+    jASTERIX::data_block_chunk_size = unlimited_chunk_size;
 
     jasterix_ = std::make_shared<jASTERIX::jASTERIX>(jasterix_definition_path, false,
                                                      debug_jasterix_, true);
@@ -535,24 +523,6 @@ void ASTERIXImportTask::debug(bool debug_jasterix)
     loginf << "ASTERIXImportTask: debug " << debug_jasterix_;
 }
 
-bool ASTERIXImportTask::limitRAM() const { return limit_ram_; }
-
-void ASTERIXImportTask::limitRAM(bool limit_ram)
-{
-    limit_ram_ = limit_ram;
-
-    if (limit_ram_)
-    {
-        jASTERIX::frame_chunk_size = limited_chunk_size;
-        jASTERIX::data_block_chunk_size = limited_chunk_size;
-    }
-    else
-    {
-        jASTERIX::frame_chunk_size = unlimited_chunk_size;
-        jASTERIX::data_block_chunk_size = unlimited_chunk_size;
-    }
-}
-
 bool ASTERIXImportTask::checkPrerequisites()
 {
     if (!COMPASS::instance().interface().ready())  // must be connected
@@ -577,58 +547,22 @@ bool ASTERIXImportTask::isRecommended()
 
 bool ASTERIXImportTask::isRequired() { return false; }
 
-bool ASTERIXImportTask::overrideActive() const { return post_process_.override_active_; }
+bool ASTERIXImportTask::overrideTodActive() const { return override_tod_active_; }
 
-void ASTERIXImportTask::overrideActive(bool value)
+void ASTERIXImportTask::overrideTodActive(bool value)
 {
     loginf << "ASTERIXImportTask: overrideActive: value " << value;
 
-    post_process_.override_active_ = value;
+    override_tod_active_ = value;
 }
 
-unsigned int ASTERIXImportTask::overrideSacOrg() const { return post_process_.override_sac_org_; }
-
-void ASTERIXImportTask::overrideSacOrg(unsigned int value)
-{
-    loginf << "ASTERIXImportTask: overrideSacOrg: value " << value;
-
-    post_process_.override_sac_org_ = value;
-}
-
-unsigned int ASTERIXImportTask::overrideSicOrg() const { return post_process_.override_sic_org_; }
-
-void ASTERIXImportTask::overrideSicOrg(unsigned int value)
-{
-    loginf << "ASTERIXImportTask: overrideSicOrg: value " << value;
-
-    post_process_.override_sic_org_ = value;
-}
-
-unsigned int ASTERIXImportTask::overrideSacNew() const { return post_process_.override_sac_new_; }
-
-void ASTERIXImportTask::overrideSacNew(unsigned int value)
-{
-    loginf << "ASTERIXImportTask: overrideSacNew: value " << value;
-
-    post_process_.override_sac_new_ = value;
-}
-
-unsigned int ASTERIXImportTask::overrideSicNew() const { return post_process_.override_sic_new_; }
-
-void ASTERIXImportTask::overrideSicNew(unsigned int value)
-{
-    loginf << "ASTERIXImportTask: overrideSicNew: value " << value;
-
-    post_process_.override_sic_new_ = value;
-}
-
-float ASTERIXImportTask::overrideTodOffset() const { return post_process_.override_tod_offset_; }
+float ASTERIXImportTask::overrideTodOffset() const { return override_tod_offset_; }
 
 void ASTERIXImportTask::overrideTodOffset(float value)
 {
     loginf << "ASTERIXImportTask: overrideTodOffset: value " << value;
 
-    post_process_.override_tod_offset_ = value;
+    override_tod_offset_ = value;
 }
 
 unsigned int ASTERIXImportTask::fileLineID() const
@@ -668,7 +602,7 @@ bool ASTERIXImportTask::canRun()
     if (import_file_)
         return canImportFile(); // set file exists
     else
-        return COMPASS::instance().dbContentManager().getNetworkLines().size(); // there are network lines defined
+        return COMPASS::instance().dataSourceManager().getNetworkLines().size(); // there are network lines defined
 }
 
 void ASTERIXImportTask::run()
@@ -685,11 +619,11 @@ void ASTERIXImportTask::stop()
     if (decode_job_)
         decode_job_->setObsolete();
 
-    if (json_map_job_)
-        json_map_job_->setObsolete();
+    for (auto& job_it : json_map_jobs_)
+        job_it->setObsolete();
 
-    if (postprocess_job_)
-        postprocess_job_->setObsolete();
+    for (auto& job_it : postprocess_jobs_)
+        job_it->setObsolete();
 
     while(decode_job_ && !decode_job_->done())
     {
@@ -699,7 +633,7 @@ void ASTERIXImportTask::stop()
         QThread::msleep(1);
     }
 
-    while(json_map_job_ && !json_map_job_->done())
+    while(json_map_jobs_.size())
     {
         loginf << "ASTERIXImportTask: stop: waiting for map job to finish";
 
@@ -707,7 +641,7 @@ void ASTERIXImportTask::stop()
         QThread::msleep(1);
     }
 
-    while(postprocess_job_ && !postprocess_job_->done())
+    while(postprocess_jobs_.size())
     {
         loginf << "ASTERIXImportTask: stop: waiting for post-process job to finish";
 
@@ -741,6 +675,11 @@ void ASTERIXImportTask::run(bool test) // , bool create_mapping_stubs
     running_ = true;
     done_ = false; // since can be run multiple times
 
+    num_packets_in_processing_ = 0;
+    num_packets_total_ = 0;
+
+    num_records_ = 0;
+
     start_time_ = boost::posix_time::microsec_clock::local_time();
 
     last_insert_time_ = boost::posix_time::microsec_clock::local_time();
@@ -750,41 +689,6 @@ void ASTERIXImportTask::run(bool test) // , bool create_mapping_stubs
     loginf << "ASTERIXImportTask: run: filename " << current_filename_ << " test " << test_
            << " free RAM " << free_ram << " GB";
 
-    if (free_ram < ram_threshold && !limit_ram_)
-    {
-        loginf << "ASTERIXImportTask: run: only " << free_ram
-               << " GB free ram, recommending limiting";
-
-        QMessageBox::StandardButton reply;
-        reply = QMessageBox::question(
-                    nullptr, "RAM Limiting",
-                    "There is only " + QString::number(free_ram) + " GB free RAM available.\n" +
-                    "This will result in decreased decoding performance.\n\n" +
-                    "Do you agree to limiting RAM usage?",
-                    QMessageBox::Yes | QMessageBox::No);
-        if (reply == QMessageBox::Yes)
-        {
-            limitRAM(true);
-        }
-    }
-    else if (free_ram >= ram_threshold && limit_ram_)
-    {
-        loginf << "ASTERIXImportTask: run: " << free_ram
-               << " GB free ram, recommending not limiting";
-
-        QMessageBox::StandardButton reply;
-        reply = QMessageBox::question(
-                    nullptr, "RAM Limiting",
-                    "There is " + QString::number(free_ram) + " GB free RAM available.\n" +
-                    "This will result in increased decoding performance.\n\n" +
-                    "Do you agree to increased RAM usage?",
-                    QMessageBox::Yes | QMessageBox::No);
-        if (reply == QMessageBox::Yes)
-        {
-            limitRAM(false);
-        }
-    }
-
     if (test_)
         task_manager_.appendInfo("ASTERIXImportTask: test import of file '" + current_filename_ +
                                  "' started");
@@ -793,6 +697,18 @@ void ASTERIXImportTask::run(bool test) // , bool create_mapping_stubs
                                  "' started");
 
     assert(canRun());
+
+    if (import_file_)
+    {
+        updateFileProgressDialog();
+
+        boost::posix_time::ptime start_time = boost::posix_time::microsec_clock::local_time();
+
+        while ((boost::posix_time::microsec_clock::local_time() - start_time).total_milliseconds() < 50)
+        {
+            QCoreApplication::processEvents();
+        }
+    }
 
     insert_active_ = false;
 
@@ -870,7 +786,7 @@ void ASTERIXImportTask::run(bool test) // , bool create_mapping_stubs
     if (import_file_)
         decode_job_->setDecodeFile(current_filename_, current_file_framing_); // do file import
     else
-        decode_job_->setDecodeUDPStreams(COMPASS::instance().dbContentManager().getNetworkLines()); // record from network
+        decode_job_->setDecodeUDPStreams(COMPASS::instance().dataSourceManager().getNetworkLines()); // record from network
 
 
     connect(decode_job_.get(), &ASTERIXDecodeJob::obsoleteSignal, this,
@@ -918,7 +834,7 @@ void ASTERIXImportTask::dialogCancelSlot()
 
 void ASTERIXImportTask::decodeASTERIXDoneSlot()
 {
-    loginf << "ASTERIXImportTask: decodeASTERIXDoneSlot";
+    logdbg << "ASTERIXImportTask: decodeASTERIXDoneSlot";
 
     if (!decode_job_) // called twice?
         return;
@@ -945,7 +861,7 @@ void ASTERIXImportTask::decodeASTERIXDoneSlot()
 }
 void ASTERIXImportTask::decodeASTERIXObsoleteSlot()
 {
-    loginf << "ASTERIXImportTask: decodeASTERIXObsoleteSlot";
+    logdbg << "ASTERIXImportTask: decodeASTERIXObsoleteSlot";
 
     decode_job_ = nullptr;
 }
@@ -967,25 +883,7 @@ void ASTERIXImportTask::addDecodedASTERIXSlot()
 
     if (import_file_)
     {
-        if (!file_progress_dialog_)
-        {
-            file_progress_dialog_.reset(
-                        new QProgressDialog(("File '"+current_filename_+"'").c_str(), "Abort", 0, 100));
-            file_progress_dialog_->setWindowTitle("Importing ASTERIX Recording");
-            file_progress_dialog_->setWindowModality(Qt::WindowModal);
-        }
-
-        file_progress_dialog_->setValue(decode_job_->getFileDecodingProgress());
-
-        string text = "File '"+current_filename_+"'";
-        string rec_text = "\n\nRecords/s: "+to_string((unsigned int) decode_job_->getRecordsPerSecond());
-        string rem_text = "Remaining: "+String::timeStringFromDouble(decode_job_->getRemainingTime() + 1.0, false);
-
-        int num_filler = text.size() - rec_text.size() - rem_text.size();
-        if (num_filler < 1)
-            num_filler = 1;
-
-        file_progress_dialog_->setLabelText((text + rec_text + std::string(num_filler, ' ') + rem_text).c_str());
+        updateFileProgressDialog();
 
         if (file_progress_dialog_->wasCanceled())
         {
@@ -994,31 +892,33 @@ void ASTERIXImportTask::addDecodedASTERIXSlot()
         }
     }
 
-    std::unique_ptr<nlohmann::json> extracted_data {decode_job_->extractedData()};
-
-    while (json_map_job_ && !stopped_)  // only one can exist at a time
+    // remove if break here for testing
+    if (import_file_ && maxLoadReached())
     {
-        if (stopped_)
-        {
-            return;
-        }
-
-        if (decode_job_)
-            decode_job_->pause();
-
-        logdbg << "ASTERIXImportTask: addDecodedASTERIXSlot: waiting on mapping to finish";
-
-        QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
-        QThread::msleep(1);
-
-        if (stopped_)
-            return;
+        logdbg << "ASTERIXImportTask: addDecodedASTERIXSlot: returning since max load reached";
+        return;
     }
 
     if (stopped_)
         return;
 
-    assert(!json_map_job_);
+    logdbg << "ASTERIXImportTask: addDecodedASTERIXSlot: processing data";
+
+    std::unique_ptr<nlohmann::json> extracted_data {decode_job_->extractedData()};
+    ++num_packets_in_processing_;
+    ++num_packets_total_;
+
+    loginf << "ASTERIXImportTask: addDecodedASTERIXSlot: processing data,"
+           << " num_packets_in_processing_ " << num_packets_in_processing_
+           << " num_packets_total_ " << num_packets_total_;
+
+    // break here for testing
+    //return;
+
+    if (stopped_)
+        return;
+
+    //assert(!json_map_job_);
 
     assert(schema_);
 
@@ -1029,46 +929,56 @@ void ASTERIXImportTask::addDecodedASTERIXSlot()
     else
         keys = {"frames", "content", "data_blocks", "content", "records"};
 
-    json_map_job_ =
+    std::shared_ptr<ASTERIXJSONMappingJob> json_map_job =
             make_shared<ASTERIXJSONMappingJob>(std::move(extracted_data), keys, schema_->parsers());
+
+    json_map_jobs_.push_back(json_map_job);
 
     assert(!extracted_data);
 
-    connect(json_map_job_.get(), &ASTERIXJSONMappingJob::obsoleteSignal, this,
+    connect(json_map_job.get(), &ASTERIXJSONMappingJob::obsoleteSignal, this,
             &ASTERIXImportTask::mapJSONObsoleteSlot, Qt::QueuedConnection);
-    connect(json_map_job_.get(), &ASTERIXJSONMappingJob::doneSignal, this,
+    connect(json_map_job.get(), &ASTERIXJSONMappingJob::doneSignal, this,
             &ASTERIXImportTask::mapJSONDoneSlot, Qt::QueuedConnection);
 
-    JobManager::instance().addNonBlockingJob(json_map_job_);
-
-    if (decode_job_)
-    {
-        if (maxLoadReached())
-            decode_job_->pause();
-        else
-            decode_job_->unpause();
-    }
+    JobManager::instance().addNonBlockingJob(json_map_job);
 }
 
 void ASTERIXImportTask::mapJSONDoneSlot()
 {
     logdbg << "ASTERIXImportTask: mapJSONDoneSlot";
 
+    // break here for testing
+    //    json_map_job_ = nullptr;
+    //    num_packets_in_processing_--;
+
+    //    if (decode_job_ && decode_job_->hasData())
+    //        addDecodedASTERIXSlot(); // load next chunk
+    //    else
+    //        checkAllDone();
+
+    //    return;
+
     if (stopped_)
     {
         logdbg << "ASTERIXImportTask: mapJSONDoneSlot: stopping";
 
-        json_map_job_ = nullptr;
+        json_map_jobs_.clear();
 
         checkAllDone();
 
         return;
     }
 
-    assert(json_map_job_);
+    ASTERIXJSONMappingJob* map_job = dynamic_cast<ASTERIXJSONMappingJob*>(QObject::sender());
+    assert(map_job);
 
-    std::map<std::string, std::shared_ptr<Buffer>> job_buffers {json_map_job_->buffers()};
-    json_map_job_ = nullptr;
+    std::map<std::string, std::shared_ptr<Buffer>> job_buffers {map_job->buffers()};
+
+    assert (json_map_jobs_.size());
+    assert (json_map_jobs_.begin()->get() == map_job);
+    map_job = nullptr;
+    json_map_jobs_.erase(json_map_jobs_.begin()); // remove
 
     logdbg << "ASTERIXImportTask: mapJSONDoneSlot: processing, num buffers " << job_buffers.size();
 
@@ -1077,24 +987,21 @@ void ASTERIXImportTask::mapJSONDoneSlot()
 
     if (!test_)
     {
-        postprocess_job_ =
-                make_shared<ASTERIXPostprocessJob>(std::move(job_buffers), !import_file_);
+        std::shared_ptr<ASTERIXPostprocessJob> postprocess_job =
+                make_shared<ASTERIXPostprocessJob>(std::move(job_buffers),
+                                                   override_tod_active_, override_tod_offset_,
+                                                   !import_file_);
+
+        postprocess_jobs_.push_back(postprocess_job);
+
         // check for future when net import
 
-        connect(postprocess_job_.get(), &ASTERIXPostprocessJob::obsoleteSignal, this,
+        connect(postprocess_job.get(), &ASTERIXPostprocessJob::obsoleteSignal, this,
                 &ASTERIXImportTask::postprocessObsoleteSlot, Qt::QueuedConnection);
-        connect(postprocess_job_.get(), &ASTERIXPostprocessJob::doneSignal, this,
+        connect(postprocess_job.get(), &ASTERIXPostprocessJob::doneSignal, this,
                 &ASTERIXImportTask::postprocessDoneSlot, Qt::QueuedConnection);
 
-        JobManager::instance().addNonBlockingJob(postprocess_job_);
-    }
-
-    if (decode_job_)
-    {
-        if (maxLoadReached())
-            decode_job_->pause();
-        else
-            decode_job_->unpause();
+        JobManager::instance().addNonBlockingJob(postprocess_job);
     }
 
     if (test_)
@@ -1109,12 +1016,15 @@ void ASTERIXImportTask::mapJSONObsoleteSlot()
 {
     logdbg << "ASTERIXImportTask: mapJSONObsoleteSlot";
 
-    if (stopped_)
-    {
-        json_map_job_ = nullptr;
+    ASTERIXJSONMappingJob* map_job = dynamic_cast<ASTERIXJSONMappingJob*>(QObject::sender());
+    assert(map_job);
 
-        checkAllDone();
-    }
+    assert (json_map_jobs_.size());
+    assert (json_map_jobs_.begin()->get() == map_job);
+    map_job = nullptr;
+    json_map_jobs_.erase(json_map_jobs_.begin()); // remove
+
+    checkAllDone();
 
 }
 
@@ -1124,53 +1034,53 @@ void ASTERIXImportTask::postprocessDoneSlot()
 
     if (stopped_)
     {
-        postprocess_job_ = nullptr;
+        postprocess_jobs_.clear();
 
         checkAllDone();
 
         return;
     }
 
-    assert (postprocess_job_);
+    ASTERIXPostprocessJob* post_job = dynamic_cast<ASTERIXPostprocessJob*>(QObject::sender());
+    assert(post_job);
 
-    std::map<std::string, std::shared_ptr<Buffer>> job_buffers {postprocess_job_->buffers()};
-    postprocess_job_ = nullptr;
+    std::map<std::string, std::shared_ptr<Buffer>> job_buffers {post_job->buffers()};
 
-    if (decode_job_)
-    {
-        if (maxLoadReached())
-            decode_job_->pause();
-        else
-            decode_job_->unpause();
-    }
+    assert (postprocess_jobs_.size());
+    assert (postprocess_jobs_.begin()->get() == post_job);
+    post_job = nullptr;
+    postprocess_jobs_.erase(postprocess_jobs_.begin()); // remove
+
 
     if (import_file_) // cache and insert only if time elapsed
     {
-        // merge into existing buffers
+        //        // merge into existing buffers
 
-        for (auto& buf_it : job_buffers)
-        {
-            if (!buffer_cache_.count(buf_it.first)) // set if first
-                buffer_cache_[buf_it.first] = buf_it.second;
-            else // append by seize if existing
-                buffer_cache_.at(buf_it.first)->seizeBuffer(*buf_it.second.get());
-        }
+        //        for (auto& buf_it : job_buffers)
+        //        {
+        //            if (!buffer_cache_.count(buf_it.first)) // set if first
+        //                buffer_cache_[buf_it.first] = buf_it.second;
+        //            else // append by seize if existing
+        //                buffer_cache_.at(buf_it.first)->seizeBuffer(*buf_it.second.get());
+        //        }
 
-        job_buffers.clear();
+        //        job_buffers.clear();
 
-        // insert if time elapsed or all other jobs are done
-        if ((boost::posix_time::microsec_clock::local_time() - last_insert_time_).total_milliseconds() > 2000
-                || (decode_job_ == nullptr && json_map_job_ == nullptr && postprocess_job_ == nullptr))
-        {
-            logdbg << "ASTERIXImportTask: postprocessDoneSlot: doing file insert";
+        //        // insert if time elapsed or all other jobs are done
+        //        if ((boost::posix_time::microsec_clock::local_time() - last_insert_time_).total_milliseconds() > 2000
+        //                || (decode_job_ == nullptr && json_map_job_ == nullptr && postprocess_job_ == nullptr))
+        //        {
+        //            logdbg << "ASTERIXImportTask: postprocessDoneSlot: doing file insert";
 
-            last_insert_time_ = boost::posix_time::microsec_clock::local_time();
+        //            last_insert_time_ = boost::posix_time::microsec_clock::local_time();
 
-            std::map<std::string, std::shared_ptr<Buffer>> buffer_cache_cpy = move(buffer_cache_);
-            buffer_cache_.clear(); // to be safe
+        //            std::map<std::string, std::shared_ptr<Buffer>> buffer_cache_cpy = move(buffer_cache_);
+        //            buffer_cache_.clear(); // to be safe
 
-            insertData(std::move(buffer_cache_cpy));
-        }
+        //            insertData(std::move(buffer_cache_cpy));
+        //        }
+
+        insertData(std::move(job_buffers));
     }
     else // insert immediately for network
     {
@@ -1182,7 +1092,13 @@ void ASTERIXImportTask::postprocessDoneSlot()
 
 void ASTERIXImportTask::postprocessObsoleteSlot()
 {
-    postprocess_job_ = nullptr;
+    ASTERIXPostprocessJob* post_job = dynamic_cast<ASTERIXPostprocessJob*>(QObject::sender());
+    assert(post_job);
+
+    assert (postprocess_jobs_.size());
+    assert (postprocess_jobs_.begin()->get() == post_job);
+    post_job = nullptr;
+    postprocess_jobs_.erase(postprocess_jobs_.begin()); // remove
 }
 
 void ASTERIXImportTask::insertData(std::map<std::string, std::shared_ptr<Buffer>> job_buffers)
@@ -1199,7 +1115,7 @@ void ASTERIXImportTask::insertData(std::map<std::string, std::shared_ptr<Buffer>
 
     DBContentManager& object_manager = COMPASS::instance().dbContentManager();
 
-    while (insert_active_ && !stopped_)
+    while (insert_active_ && !stopped_ && object_manager.insertInProgress())
     {
         //loginf << "ASTERIXImportTask: insertData: waiting for insert";
 
@@ -1212,10 +1128,14 @@ void ASTERIXImportTask::insertData(std::map<std::string, std::shared_ptr<Buffer>
 
         if (stopped_)
         {
+            waiting_for_insert_ = false;
+
             checkAllDone();
             return;
         }
     }
+
+    waiting_for_insert_ = false;
 
     if (stopped_)
     {
@@ -1224,9 +1144,11 @@ void ASTERIXImportTask::insertData(std::map<std::string, std::shared_ptr<Buffer>
     }
 
     //loginf << "ASTERIXImportTask: insertData: no more waiting for insert";
-    waiting_for_insert_ = false;
 
     assert(schema_);
+
+    for (auto& job_it : job_buffers)
+        num_records_ += job_it.second->size();
 
     insert_active_ = true;
 
@@ -1243,7 +1165,17 @@ void ASTERIXImportTask::insertData(std::map<std::string, std::shared_ptr<Buffer>
 void ASTERIXImportTask::insertDoneSlot()
 {
     logdbg << "ASTERIXImportTask: insertDoneSlot";
+
     insert_active_ = false;
+
+    --num_packets_in_processing_;
+
+    if (import_file_)
+    {
+        logdbg << "ASTERIXImportTask: insertDoneSlot: num_packets_in_processing " << num_packets_in_processing_;
+
+        updateFileProgressDialog();
+    }
 
     bool test = test_; // test_ cleared by checkAllDone
 
@@ -1261,25 +1193,30 @@ void ASTERIXImportTask::insertDoneSlot()
         emit doneSignal(name_);
     }
 
-    if (decode_job_)
-        decode_job_->unpause();
+    loginf << "ASTERIXImportTask: insertDoneSlot: processed " << num_records_ << " records";
+
+    if (decode_job_ && decode_job_->hasData())
+    {
+        logdbg << "ASTERIXImportTask: insertDoneSlot: starting decoding of next chunk";
+        addDecodedASTERIXSlot(); // load next chunk
+    }
 
     logdbg << "ASTERIXImportTask: insertDoneSlot: done";
 }
 
 void ASTERIXImportTask::checkAllDone()
 {
-    loginf << "ASTERIXImportTask: checkAllDone: all done " << all_done_ << " decode "
+    logdbg << "ASTERIXImportTask: checkAllDone: all done " << all_done_ << " decode "
            << (decode_job_ != nullptr)
-           << " map job " << (json_map_job_ != nullptr)
-           << " post job " << (postprocess_job_ != nullptr)
+           << " map jobs " << json_map_jobs_.size()
+           << " post jobs " << postprocess_jobs_.size()
            << " wait insert " << waiting_for_insert_
            << " insert active " << insert_active_;
 
-    if (!all_done_ && decode_job_ == nullptr && json_map_job_ == nullptr && postprocess_job_ == nullptr
+    if (!all_done_ && decode_job_ == nullptr && !json_map_jobs_.size() && !postprocess_jobs_.size()
             && !waiting_for_insert_ && !insert_active_)
     {
-        loginf << "ASTERIXImportTask: checkAllDone: setting all done";
+        logdbg << "ASTERIXImportTask: checkAllDone: setting all done: total packets " << num_packets_total_;
 
         if (import_file_ && file_progress_dialog_)
         {
@@ -1313,6 +1250,8 @@ void ASTERIXImportTask::checkAllDone()
         {
             logdbg << "ASTERIXImportTask: checkAllDone: deleting status widget";
         }
+
+        COMPASS::instance().dataSourceManager().saveDBDataSources();
     }
 
     logdbg << "ASTERIXImportTask: checkAllDone: done";
@@ -1320,10 +1259,44 @@ void ASTERIXImportTask::checkAllDone()
 
 bool ASTERIXImportTask::maxLoadReached()
 {
-    return insert_active_ && postprocess_job_ && json_map_job_; // full
+    return num_packets_in_processing_> 2;
+}
 
-    //    if (limit_ram_)
-    //        return json_map_jobs_.size() > limited_num_json_jobs_;
-    //    else
-    //        return json_map_jobs_.size() > unlimited_num_json_jobs_;
+void ASTERIXImportTask::updateFileProgressDialog()
+{
+    if (stopped_)
+        return;
+
+    if (!file_progress_dialog_)
+    {
+        file_progress_dialog_.reset(
+                    new QProgressDialog(("File '"+current_filename_+"'").c_str(), "Abort", 0, 100));
+        file_progress_dialog_->setWindowTitle("Importing ASTERIX Recording");
+        file_progress_dialog_->setWindowModality(Qt::WindowModal);
+    }
+
+    string text = "File '"+current_filename_+"'";
+    string rec_text;
+    string rem_text;
+
+    if (decode_job_)
+    {
+        file_progress_dialog_->setValue(decode_job_->getFileDecodingProgress());
+
+        rec_text = "\n\nRecords/s: "+to_string((unsigned int) decode_job_->getRecordsPerSecond());
+        rem_text = "Remaining: "+String::timeStringFromDouble(decode_job_->getRemainingTime() + 1.0, false);
+    }
+    else
+    {
+        rec_text = "\n\nRecords/s: Unknown";
+        rem_text = "Remaining: Unknown";
+    }
+
+    //string pack_text = "\npacks: "+to_string(num_packets_in_processing_) + " total " + to_string(num_packets_total_);
+
+    int num_filler = text.size() - rec_text.size() - rem_text.size();
+    if (num_filler < 1)
+        num_filler = 1;
+
+    file_progress_dialog_->setLabelText((text + rec_text + std::string(num_filler, ' ') + rem_text).c_str());
 }

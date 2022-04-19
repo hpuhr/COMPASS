@@ -39,7 +39,6 @@
 
 class TaskManager;
 
-class ASTERIXImportTaskWidget;
 class ASTERIXCategoryConfig;
 class ASTERIXStatusDialog;
 class ASTERIXImportTaskDialog;
@@ -124,27 +123,12 @@ class ASTERIXImportTask : public Task, public Configurable
     bool debug() const;
     void debug(bool debug);
 
-    bool limitRAM() const;
-    void limitRAM(bool value);
-
     virtual bool checkPrerequisites() override;
     virtual bool isRecommended() override;
     virtual bool isRequired() override;
 
-    bool overrideActive() const;
-    void overrideActive(bool value);
-
-    unsigned int overrideSacOrg() const;
-    void overrideSacOrg(unsigned int value);
-
-    unsigned int overrideSicOrg() const;
-    void overrideSicOrg(unsigned int value);
-
-    unsigned int overrideSacNew() const;
-    void overrideSacNew(unsigned int value);
-
-    unsigned int overrideSicNew() const;
-    void overrideSicNew(unsigned int value);
+    bool overrideTodActive() const;
+    void overrideTodActive(bool value);
 
     float overrideTodOffset() const;
     void overrideTodOffset(float value);
@@ -154,7 +138,6 @@ class ASTERIXImportTask : public Task, public Configurable
 
 protected:
     bool debug_jasterix_;
-    bool limit_ram_;
     std::shared_ptr<jASTERIX::jASTERIX> jasterix_;
     ASTERIXPostProcess post_process_;
 
@@ -167,7 +150,15 @@ protected:
 
     bool test_{false};
 
+    bool override_tod_active_{false};
+    float override_tod_offset_{0};
+
     bool running_ {false};
+    unsigned int num_packets_in_processing_{0};
+    unsigned int num_packets_total_{0};
+
+    unsigned int num_records_ {0};
+
     boost::posix_time::ptime start_time_;
     std::unique_ptr<QProgressDialog> file_progress_dialog_;
 
@@ -179,11 +170,11 @@ protected:
 
     std::shared_ptr<ASTERIXDecodeJob> decode_job_;
 
-    std::shared_ptr<ASTERIXJSONMappingJob> json_map_job_;
+    std::vector<std::shared_ptr<ASTERIXJSONMappingJob>> json_map_jobs_;
 
-    std::shared_ptr<ASTERIXPostprocessJob> postprocess_job_;
+    std::vector<std::shared_ptr<ASTERIXPostprocessJob>> postprocess_jobs_;
 
-    std::map<std::string, std::shared_ptr<Buffer>> buffer_cache_; // to be used for file import
+    //std::map<std::string, std::shared_ptr<Buffer>> buffer_cache_; // to be used for file import
     boost::posix_time::ptime last_insert_time_;
 
     bool error_{false};
@@ -202,6 +193,7 @@ protected:
     void checkAllDone();
 
     bool maxLoadReached();
+    void updateFileProgressDialog();
 };
 
 #endif  // ASTERIXIMPORTTASK_H

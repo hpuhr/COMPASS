@@ -46,16 +46,21 @@ EvaluationMainTabWidget::EvaluationMainTabWidget(EvaluationManager& eval_man,
 
     QHBoxLayout* data_sources_layout = new QHBoxLayout();
 
-    data_source_ref_widget_.reset(new EvaluationDataSourceWidget("Reference Data", eval_man_.dboNameRef(),
-                                                             eval_man_.dataSourcesRef()));
+    // titles define which data sources to display
+    data_source_ref_widget_.reset(
+                new EvaluationDataSourceWidget("Reference Data", eval_man_.dboNameRef(), eval_man_.lineIDRef()));
     connect (data_source_ref_widget_.get(), &EvaluationDataSourceWidget::dboNameChangedSignal,
              this, &EvaluationMainTabWidget::dboRefNameChangedSlot);
+    connect (data_source_ref_widget_.get(), &EvaluationDataSourceWidget::lineChangedSignal,
+             this, &EvaluationMainTabWidget::lineRefChangedSlot);
     data_sources_layout->addWidget(data_source_ref_widget_.get());
 
-    data_source_tst_widget_.reset(new EvaluationDataSourceWidget("Test Data", eval_man_.dboNameTst(),
-                                                             eval_man_.dataSourcesTst()));
+    data_source_tst_widget_.reset(
+                new EvaluationDataSourceWidget("Test Data", eval_man_.dboNameTst(), eval_man_.lineIDTst()));
     connect (data_source_tst_widget_.get(), &EvaluationDataSourceWidget::dboNameChangedSignal,
              this, &EvaluationMainTabWidget::dboTstNameChangedSlot);
+    connect (data_source_tst_widget_.get(), &EvaluationDataSourceWidget::lineChangedSignal,
+             this, &EvaluationMainTabWidget::lineTstChangedSlot);
     data_sources_layout->addWidget(data_source_tst_widget_.get());
 
     main_layout->addLayout(data_sources_layout);
@@ -103,6 +108,21 @@ EvaluationMainTabWidget::EvaluationMainTabWidget(EvaluationManager& eval_man,
     setLayout(main_layout);
 }
 
+void EvaluationMainTabWidget::updateDataSources()
+{
+    if (data_source_ref_widget_)
+        data_source_ref_widget_->updateDataSources();
+
+    if (data_source_tst_widget_)
+        data_source_tst_widget_->updateDataSources();
+}
+
+void EvaluationMainTabWidget::updateSectors()
+{
+    assert (sector_widget_);
+    sector_widget_->update();
+}
+
 void EvaluationMainTabWidget::dboRefNameChangedSlot(const std::string& dbo_name)
 {
     loginf << "EvaluationMainTabWidget: dboRefNameChangedSlot: name " << dbo_name;
@@ -110,11 +130,25 @@ void EvaluationMainTabWidget::dboRefNameChangedSlot(const std::string& dbo_name)
     eval_man_.dboNameRef(dbo_name);
 }
 
+void EvaluationMainTabWidget::lineRefChangedSlot(unsigned int line_id)
+{
+    loginf << "EvaluationMainTabWidget: lineRefChangedSlot: value " << line_id;
+
+    eval_man_.lineIDRef(line_id);
+}
+
 void EvaluationMainTabWidget::dboTstNameChangedSlot(const std::string& dbo_name)
 {
     loginf << "EvaluationMainTabWidget: dboTstNameChangedSlot: name " << dbo_name;
 
     eval_man_.dboNameTst(dbo_name);
+}
+
+void EvaluationMainTabWidget::lineTstChangedSlot(unsigned int line_id)
+{
+    loginf << "EvaluationMainTabWidget: lineTstChangedSlot: value " << line_id;
+
+    eval_man_.lineIDTst(line_id);
 }
 
 void EvaluationMainTabWidget::changedStandardsSlot()

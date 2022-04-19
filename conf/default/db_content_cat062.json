@@ -162,6 +162,14 @@
                                 "variable_name": "Amalgamated"
                             }
                         },
+                        "LabelEntryAssociations0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "Associations"
+                            }
+                        },
                         "LabelEntryAx StdDev0": {
                             "parameters": {
                                 "prefix": "",
@@ -2224,7 +2232,7 @@
             },
             "Variable29": {
                 "parameters": {
-                    "data_type_str": "FLOAT",
+                    "data_type_str": "DOUBLE",
                     "db_column_name": "vx",
                     "description": "From 185.Vx\n\nCalculated track velocity expressed in Cartesian co-ordinates\n\n(LSB) = 0.25 m/s\n\n-8192m/s <= Vx <= 8191.75m/s",
                     "dimension": "Speed",
@@ -2250,7 +2258,7 @@
             },
             "Variable30": {
                 "parameters": {
-                    "data_type_str": "FLOAT",
+                    "data_type_str": "DOUBLE",
                     "db_column_name": "vy",
                     "description": "From 185.Vy\n\nCalculated track velocity expressed in Cartesian co-ordinates\n\n(LSB) = 0.25 m/s\n\n-8192m/s <= Vx <= 8191.75m/s",
                     "dimension": "Speed",
@@ -3240,7 +3248,6 @@
                 "parameters": {
                     "data_type_str": "BOOL",
                     "db_column_name": "most_reliable_height",
-                    "dbo_name": "CAT062",
                     "description": "From 080.MRH\n\n0 Barometric altitude (Mode C) more reliable\n1 Geometric altitude more reliable",
                     "dimension": "",
                     "is_key": false,
@@ -3250,11 +3257,23 @@
                     "unit": ""
                 }
             },
+            "VariableTrackerassociations0": {
+                "parameters": {
+                    "data_type_str": "JSON",
+                    "db_column_name": "associations",
+                    "description": "Associations set as JSON object",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Associations",
+                    "representation_str": "STANDARD",
+                    "short_name": "Assoc",
+                    "unit": ""
+                }
+            },
             "VariableTrackercalc_alt_geo_ft0": {
                 "parameters": {
                     "data_type_str": "FLOAT",
                     "db_column_name": "geometric_altitude_calculated",
-                    "dbo_name": "CAT062",
                     "description": "From 130.Altitude\n\nCalculated Track Geometric Altitude\n\nVertical distance between the target and the projection of its position on the earth’s ellipsoid, as defined by WGS84",
                     "dimension": "Height",
                     "is_key": false,
@@ -3268,7 +3287,6 @@
                 "parameters": {
                     "data_type_str": "FLOAT",
                     "db_column_name": "rate_of_climb_descent",
-                    "dbo_name": "CAT062",
                     "description": "From 220.Rate of Climb/Descent\n\nCalculated rate of Climb/Descent of an aircraft",
                     "dimension": "",
                     "is_key": false,
@@ -3278,25 +3296,10 @@
                     "unit": ""
                 }
             },
-            "VariableTrackercallsign0": {
-                "parameters": {
-                    "data_type_str": "STRING",
-                    "db_column_name": "aircraft_identification_add",
-                    "dbo_name": "CAT062",
-                    "description": "From 380.ID.Target Identification\n\nAircraft identification\n\nCharacters 1-8 (coded on 6 bits each) defining a target identification when flight plan is available or the registration marking when no flight plan is available.",
-                    "dimension": "",
-                    "is_key": false,
-                    "name": "Aircraft Identification ADD",
-                    "representation_str": "STANDARD",
-                    "short_name": "ACID ADD",
-                    "unit": ""
-                }
-            },
             "VariableTrackercivil_emergency0": {
                 "parameters": {
                     "data_type_str": "UCHAR",
                     "db_column_name": "civil_emergency",
-                    "dbo_name": "CAT062",
                     "description": "From 080.EMS\n\nEmergency Status Indication\n0 No emergency\n1 General emergency\n2 Lifeguard / medical\n3 Minimum fuel\n4 No communications\n5 Unlawful interference\n6 \"Downed\" Aircraft\n7 Undefined",
                     "dimension": "",
                     "is_key": false,
@@ -3310,7 +3313,6 @@
                 "parameters": {
                     "data_type_str": "UINT",
                     "db_column_name": "ds_id",
-                    "dbo_name": "CAT062",
                     "description": "Data Source Identifier",
                     "dimension": "",
                     "is_key": false,
@@ -3324,7 +3326,6 @@
                 "parameters": {
                     "data_type_str": "STRING",
                     "db_column_name": "callsign_fpl",
-                    "dbo_name": "CAT062",
                     "description": "From 390.CSN.Callsign\n\nFlight Plan Related Data\n",
                     "dimension": "",
                     "is_key": false,
@@ -3338,7 +3339,6 @@
                 "parameters": {
                     "data_type_str": "STRING",
                     "db_column_name": "target_report_identifiers",
-                    "dbo_name": "CAT062",
                     "description": "From SPF.Target Report Identifiers.TRI\n\nARTAS MD5 Hash Codes",
                     "dimension": "",
                     "is_key": false,
@@ -3352,8 +3352,7 @@
                 "parameters": {
                     "data_type_str": "UINT",
                     "db_column_name": "line_id",
-                    "dbo_name": "CAT062",
-                    "description": "COMMUNICATION LINE ID determines the origin of the record, see table COMMS",
+                    "description": "Communication line ID",
                     "dimension": "",
                     "is_key": false,
                     "name": "Line ID",
@@ -3366,7 +3365,6 @@
                 "parameters": {
                     "data_type_str": "FLOAT",
                     "db_column_name": "mode_c_code_lm",
-                    "dbo_name": "CAT062",
                     "description": "From 340.MDC.Last Measured Mode C Code\n\nLast Measured Mode C Code",
                     "dimension": "Height",
                     "is_key": false,
@@ -3380,7 +3378,6 @@
                 "parameters": {
                     "data_type_str": "BOOL",
                     "db_column_name": "mode_c_garbled_lm",
-                    "dbo_name": "CAT062",
                     "description": "From 340.MDC.G\n\n0 Default\n1 Garbled code\n",
                     "dimension": "",
                     "is_key": false,
@@ -3394,7 +3391,6 @@
                 "parameters": {
                     "data_type_str": "BOOL",
                     "db_column_name": "mode_c_valid_lm_",
-                    "dbo_name": "CAT062",
                     "description": "From 340.MDC.V\n\n0 Code not validated\n1 Code validated\n\n\n",
                     "dimension": "",
                     "is_key": false,
@@ -3408,7 +3404,6 @@
                 "parameters": {
                     "data_type_str": "FLOAT",
                     "db_column_name": "geometric_altitude_add",
-                    "dbo_name": "CAT062",
                     "description": "From 380.GAL.Geometric Altitude\n\n-1500 ft <= Altitude <= 150000 ft",
                     "dimension": "Height",
                     "is_key": false,
@@ -3422,7 +3417,6 @@
                 "parameters": {
                     "data_type_str": "UINT",
                     "db_column_name": "mode_3a_code_lm",
-                    "dbo_name": "CAT062",
                     "description": "From 340.MDA.Mode-3/A reply\n\n",
                     "dimension": "",
                     "is_key": false,
@@ -3436,7 +3430,6 @@
                 "parameters": {
                     "data_type_str": "BOOL",
                     "db_column_name": "mode_3a_garbled_lm",
-                    "dbo_name": "CAT062",
                     "description": "From 340.MDA.G\n\n0 Default\n1 Garbled code\n\n",
                     "dimension": "",
                     "is_key": false,
@@ -3450,7 +3443,6 @@
                 "parameters": {
                     "data_type_str": "BOOL",
                     "db_column_name": "mode_3a_smoothed_lm",
-                    "dbo_name": "CAT062",
                     "description": "From 340.MDA.L\n\n0 Mode-3/A code derived from the reply of the transponder\n1 Mode-3/A code not extracted during the last scan\n\nSmoothed MODE 3/A data (L = 1) will be used in case of absence of\nMODE 3/A code information in the plot or in case of difference between plot and sensor local track MODE 3/A code information.\n\n",
                     "dimension": "",
                     "is_key": false,
@@ -3464,7 +3456,6 @@
                 "parameters": {
                     "data_type_str": "BOOL",
                     "db_column_name": "mode_3a_valid_lm",
-                    "dbo_name": "CAT062",
                     "description": "From 340.MDA.V\n\n0 Code not validated\n1 Code validated\n\n",
                     "dimension": "",
                     "is_key": false,
@@ -3478,7 +3469,6 @@
                 "parameters": {
                     "data_type_str": "FLOAT",
                     "db_column_name": "flight_level_measured_age",
-                    "dbo_name": "CAT062",
                     "description": "From 295.MFL.Age\n\nAge of the last valid and credible Mode C code or barometric altitude from ADS-B used to update the track (I062/136)",
                     "dimension": "Time",
                     "is_key": false,
@@ -3492,7 +3482,6 @@
                 "parameters": {
                     "data_type_str": "FLOAT",
                     "db_column_name": "flight_level_measured",
-                    "dbo_name": "CAT062",
                     "description": "From 136.Measured Flight Level\n\nLast valid and credible flight level used to update the track.",
                     "dimension": "Height",
                     "is_key": false,
@@ -3506,7 +3495,6 @@
                 "parameters": {
                     "data_type_str": "FLOAT",
                     "db_column_name": "mode_3a_age",
-                    "dbo_name": "CAT062",
                     "description": "From 295.MDA.Age\n\nAge of the last valid and credible Mode 3/A code used to update the track (I062/060)",
                     "dimension": "Time",
                     "is_key": false,
@@ -3520,7 +3508,6 @@
                 "parameters": {
                     "data_type_str": "BOOL",
                     "db_column_name": "military_emergency",
-                    "dbo_name": "CAT062",
                     "description": "From 080.ME\n\n0 default value\n1 Military Emergency present in the last report received from a sensor capable of decoding this data",
                     "dimension": "",
                     "is_key": false,
@@ -3534,7 +3521,6 @@
                 "parameters": {
                     "data_type_str": "BOOL",
                     "db_column_name": "mode_3a_garbled",
-                    "dbo_name": "CAT062",
                     "description": "From 060.G\n\nMode-3/A Garbled\n\n0 Default\n1 Garbled Code",
                     "dimension": "",
                     "is_key": false,
@@ -3548,7 +3534,6 @@
                 "parameters": {
                     "data_type_str": "BOOL",
                     "db_column_name": "mode_3a_valid",
-                    "dbo_name": "CAT062",
                     "description": "From 060.V\n\n0 Code not validated\n1 Code validated",
                     "dimension": "",
                     "is_key": false,
@@ -3562,7 +3547,6 @@
                 "parameters": {
                     "data_type_str": "UCHAR",
                     "db_column_name": "mom_longitudinal_acc",
-                    "dbo_name": "CAT062",
                     "description": "From 200.LONG\n\nMode of Movement\n\nLongitudinal Acceleration :\n0 Constant Groundspeed\n1 Increasing Groundspeed\n2 Decreasing Groundspeed\n3 Undetermined",
                     "dimension": "",
                     "is_key": false,
@@ -3576,7 +3560,6 @@
                 "parameters": {
                     "data_type_str": "UCHAR",
                     "db_column_name": "mom_transversal_acc",
-                    "dbo_name": "CAT062",
                     "description": "From 200.TRANS\n\nMode of Movement\n\nTransversal Acceleration:\n0 Constant Course\n1 Right Turn\n2 Left Turn\n3 Undetermined",
                     "dimension": "",
                     "is_key": false,
@@ -3590,7 +3573,6 @@
                 "parameters": {
                     "data_type_str": "UCHAR",
                     "db_column_name": "mom_vertical_rate",
-                    "dbo_name": "CAT062",
                     "description": "From 200.VERT\n\nMode of Movement\n\nVertical Rate :\n0 Level\n1 Climb\n2 Descent\n3 Undetermined",
                     "dimension": "",
                     "is_key": false,
@@ -3604,7 +3586,6 @@
                 "parameters": {
                     "data_type_str": "BOOL",
                     "db_column_name": "monosensor",
-                    "dbo_name": "CAT062",
                     "description": "From 080.MON\n\n0 Multisensor track\n1 Monosensor track",
                     "dimension": "",
                     "is_key": false,
@@ -3618,7 +3599,6 @@
                 "parameters": {
                     "data_type_str": "DOUBLE",
                     "db_column_name": "latitude",
-                    "dbo_name": "CAT062",
                     "description": "From 105.Latitude\n\nCalculated Position in WGS-84 Co-ordinates with a resolution of\n180/2^25 degrees",
                     "dimension": "Angle",
                     "is_key": false,
@@ -3632,7 +3612,6 @@
                 "parameters": {
                     "data_type_str": "DOUBLE",
                     "db_column_name": "longitude",
-                    "dbo_name": "CAT062",
                     "description": "From 105.Longitude\n\nCalculated Position in WGS-84 Co-ordinates with a resolution of\n180/2^25 degrees",
                     "dimension": "Angle",
                     "is_key": false,
@@ -3646,7 +3625,6 @@
                 "parameters": {
                     "data_type_str": "DOUBLE",
                     "db_column_name": "latitude_stddev",
-                    "dbo_name": "CAT062",
                     "description": "From 500.APW.APW (Latitude Component)\n\nEstimated accuracy (i.e. standard deviation) of the calculated position of a target expressed in WGS-84.\n ",
                     "dimension": "Angle",
                     "is_key": false,
@@ -3660,7 +3638,6 @@
                 "parameters": {
                     "data_type_str": "DOUBLE",
                     "db_column_name": "longitude_stddev",
-                    "dbo_name": "CAT062",
                     "description": "From 500.APW.APW (Longitude Component)\n\nEstimated accuracy (i.e. standard deviation) of the calculated position of a target expressed in WGS-84.",
                     "dimension": "Angle",
                     "is_key": false,
@@ -3674,7 +3651,6 @@
                 "parameters": {
                     "data_type_str": "DOUBLE",
                     "db_column_name": "x_stddev",
-                    "dbo_name": "CAT062",
                     "description": "From 500.APC.APC (X-Component)\n\nStandard deviation of x component in meters",
                     "dimension": "Length",
                     "is_key": false,
@@ -3688,7 +3664,6 @@
                 "parameters": {
                     "data_type_str": "DOUBLE",
                     "db_column_name": "x_y_covariance",
-                    "dbo_name": "CAT062",
                     "description": "From 500.COV.COV (XY Covariance Component)\n\nXY Covariance Component\n\n1. XY covariance component = sign {Cov(X,Y)} * sqrt {abs [Cov (X,Y)]}\n2. The maximum value for the (unsigned) XY covariance component is 16.383 km.",
                     "dimension": "",
                     "is_key": false,
@@ -3702,7 +3677,6 @@
                 "parameters": {
                     "data_type_str": "DOUBLE",
                     "db_column_name": "y_stddev",
-                    "dbo_name": "CAT062",
                     "description": "From 500.APC.APC (Y-Component)\n\nStandard deviation of y component in meters",
                     "dimension": "Length",
                     "is_key": false,
@@ -3716,7 +3690,6 @@
                 "parameters": {
                     "data_type_str": "UINT",
                     "db_column_name": "record_number",
-                    "dbo_name": "CAT062",
                     "description": "Unique record id starting with 0 on every new recording",
                     "dimension": "",
                     "is_key": true,
@@ -3730,7 +3703,6 @@
                 "parameters": {
                     "data_type_str": "UCHAR",
                     "db_column_name": "type_lm",
-                    "dbo_name": "CAT062",
                     "description": "From 340.TYP.TYP\n\nLast Measured Detection Type\n\n000 No detection\n001 Single PSR detection\n010 Single SSR detection\n011 SSR + PSR detection\n100 Single ModeS All-Call\n101 Single ModeS Roll-Call\n110 ModeS All-Call + PSR\n111 ModeS Roll-Call +PSR",
                     "dimension": "",
                     "is_key": false,
@@ -3744,7 +3716,6 @@
                 "parameters": {
                     "data_type_str": "UCHAR",
                     "db_column_name": "sac",
-                    "dbo_name": "CAT062",
                     "description": "From 010.SAC\n\nSystem Area Code",
                     "dimension": "",
                     "is_key": false,
@@ -3758,7 +3729,6 @@
                 "parameters": {
                     "data_type_str": "FLOAT",
                     "db_column_name": "selected_altitude_add",
-                    "dbo_name": "CAT062",
                     "description": "From 380.SAL.Altitude\n\nBarometric Altitude\n-1300ft <= Altitude <= 100000ft",
                     "dimension": "Height",
                     "is_key": false,
@@ -3772,7 +3742,6 @@
                 "parameters": {
                     "data_type_str": "UCHAR",
                     "db_column_name": "selected_altitude_source_add",
-                    "dbo_name": "CAT062",
                     "description": "From 380.SAL.Source\n\n0 Unknown\n01 Aircraft Altitude\n2 FCU/MCP Selected Altitude\n3 FMS Selected Altitude\n\n",
                     "dimension": "",
                     "is_key": false,
@@ -3786,7 +3755,6 @@
                 "parameters": {
                     "data_type_str": "UCHAR",
                     "db_column_name": "sic",
-                    "dbo_name": "CAT062",
                     "description": "From 010.SIC\n\nSystem Identification Code",
                     "dimension": "",
                     "is_key": false,
@@ -3800,7 +3768,6 @@
                 "parameters": {
                     "data_type_str": "BOOL",
                     "db_column_name": "simulated",
-                    "dbo_name": "CAT062",
                     "description": "From 080.SIM\n\n0 Actual track\n1 Simulated track",
                     "dimension": "",
                     "is_key": false,
@@ -3814,7 +3781,6 @@
                 "parameters": {
                     "data_type_str": "BOOL",
                     "db_column_name": "spi",
-                    "dbo_name": "CAT062",
                     "description": "From 080.SPI\n\n0 default value\n1 SPI present in the last report received from a sensor capable of decoding this data",
                     "dimension": "",
                     "is_key": false,
@@ -3828,7 +3794,6 @@
                 "parameters": {
                     "data_type_str": "UINT",
                     "db_column_name": "aircraft_address",
-                    "dbo_name": "CAT062",
                     "description": "From 380.ADR.Target Address\n\n24 bits Target Address (ADD)",
                     "dimension": "",
                     "is_key": false,
@@ -3842,7 +3807,6 @@
                 "parameters": {
                     "data_type_str": "FLOAT",
                     "db_column_name": "time_of_day",
-                    "dbo_name": "CAT062",
                     "description": "From 070.Time Of Track Information\n\nAbsolute time stamping of the information provided in the track\nmessage, in the form of elapsed time since last midnight, expressed as UTC.",
                     "dimension": "Time",
                     "is_key": false,
@@ -3856,7 +3820,6 @@
                 "parameters": {
                     "data_type_str": "FLOAT",
                     "db_column_name": "acas_age",
-                    "dbo_name": "CAT062",
                     "description": "From 295.ACS.Age\n\nAge of the DAP 'ACAS Resolution Advisory Report' in item 062/380 (Subfield #12)",
                     "dimension": "Time",
                     "is_key": false,
@@ -3870,7 +3833,6 @@
                 "parameters": {
                     "data_type_str": "BOOL",
                     "db_column_name": "amalgamated",
-                    "dbo_name": "CAT062",
                     "description": "From 080.AMA\n\n0 track not resulting from amalgamation process\n1 track resulting from amalgamation process",
                     "dimension": "",
                     "is_key": false,
@@ -3884,7 +3846,6 @@
                 "parameters": {
                     "data_type_str": "FLOAT",
                     "db_column_name": "barometric_pressure_setting_add_age",
-                    "dbo_name": "CAT062",
                     "description": "From 295.BPS.Age\n\nAge of the DAP 'Barometric Pressure Setting' in item 062/380 (Subfield #28)",
                     "dimension": "Time",
                     "is_key": false,
@@ -3898,7 +3859,6 @@
                 "parameters": {
                     "data_type_str": "FLOAT",
                     "db_column_name": "barometric_vertical_rate_add_age",
-                    "dbo_name": "CAT062",
                     "description": "From 295.BVR.Age\n\nAge of the DAP 'Barometric Vertical Rate' in item 062/380 (Subfield #13)",
                     "dimension": "Time",
                     "is_key": false,
@@ -3912,7 +3872,6 @@
                 "parameters": {
                     "data_type_str": "BOOL",
                     "db_column_name": "coasting",
-                    "dbo_name": "CAT062",
                     "description": "From 080.CST\n\n0 Default value\n1 Age of the last received track update is higher than system dependent threshold (coasting)",
                     "dimension": "",
                     "is_key": false,
@@ -3926,7 +3885,6 @@
                 "parameters": {
                     "data_type_str": "FLOAT",
                     "db_column_name": "com_add_age",
-                    "dbo_name": "CAT062",
                     "description": "From 295.COM.Age\n\nAge of the DAP 'Communication/ACAS Capability and Flight Status' in item 062/380 (Subfield #10)",
                     "dimension": "Time",
                     "is_key": false,
@@ -3940,7 +3898,6 @@
                 "parameters": {
                     "data_type_str": "BOOL",
                     "db_column_name": "confirmed",
-                    "dbo_name": "CAT062",
                     "description": "From 080.CNF\n\n0 Tentative track\n1 Confirmed track\n",
                     "dimension": "",
                     "is_key": false,
@@ -3954,7 +3911,6 @@
                 "parameters": {
                     "data_type_str": "BOOL",
                     "db_column_name": "track_begin",
-                    "dbo_name": "CAT062",
                     "description": "From 080.TSB\n\n 0 default value\n1 first message transmitted to the user for the track",
                     "dimension": "",
                     "is_key": false,
@@ -3968,7 +3924,6 @@
                 "parameters": {
                     "data_type_str": "FLOAT",
                     "db_column_name": "emitter_category_add_age",
-                    "dbo_name": "CAT062",
                     "description": "From 295.EMC.Age\n\nAge of the DAP 'Emitter Category' in item 062/380 (Subfield #21)",
                     "dimension": "Time",
                     "is_key": false,
@@ -3982,7 +3937,6 @@
                 "parameters": {
                     "data_type_str": "BOOL",
                     "db_column_name": "track_end",
-                    "dbo_name": "CAT062",
                     "description": "From 080.TSE\n\n0 default value\n1 last message transmitted to the user for the track",
                     "dimension": "",
                     "is_key": false,
@@ -3996,7 +3950,6 @@
                 "parameters": {
                     "data_type_str": "FLOAT",
                     "db_column_name": "ads_b_es_update_age",
-                    "dbo_name": "CAT062",
                     "description": "From 290.ES.Age\n\nAge of the last 1090 Extended Squitter ADS-B report used to update the track",
                     "dimension": "Time",
                     "is_key": false,
@@ -4010,7 +3963,6 @@
                 "parameters": {
                     "data_type_str": "FLOAT",
                     "db_column_name": "fs_sa_add_age",
-                    "dbo_name": "CAT062",
                     "description": "From 295.FSS.Age\n\nAge of the DAP 'Final State Selected Altitude' in item 062/380 (Subfield #7)",
                     "dimension": "Time",
                     "is_key": false,
@@ -4024,7 +3976,6 @@
                 "parameters": {
                     "data_type_str": "FLOAT",
                     "db_column_name": "geometric_altitude_add_age",
-                    "dbo_name": "CAT062",
                     "description": "From 295.GAL.Age\n\nAge of the DAP 'Geometric Altitude' in item 062/380 (Subfield #24)",
                     "dimension": "Time",
                     "is_key": false,
@@ -4038,7 +3989,6 @@
                 "parameters": {
                     "data_type_str": "FLOAT",
                     "db_column_name": "ground_speed_add_age",
-                    "dbo_name": "CAT062",
                     "description": "From 295.GSP.Age\n\nAge of the DAP 'Ground Speed' in item 062/380 (Subfield #18)",
                     "dimension": "Time",
                     "is_key": false,
@@ -4052,7 +4002,6 @@
                 "parameters": {
                     "data_type_str": "FLOAT",
                     "db_column_name": "geometric_vertical_rate_add_age",
-                    "dbo_name": "CAT062",
                     "description": "From 295.GVR.Age\n\nAge of the DAP 'Geometrical Vertical Rate' in item 062/380 (Subfield #14)",
                     "dimension": "Time",
                     "is_key": false,
@@ -4066,7 +4015,6 @@
                 "parameters": {
                     "data_type_str": "FLOAT",
                     "db_column_name": "indicated_airspeed_add_age",
-                    "dbo_name": "CAT062",
                     "description": "From 295.IAR.Age\n\nAge of the DAP 'Indicated Airspeed' in item 062/380 (Subfield #26)",
                     "dimension": "Time",
                     "is_key": false,
@@ -4080,7 +4028,6 @@
                 "parameters": {
                     "data_type_str": "FLOAT",
                     "db_column_name": "indicated_airspeed_mach_nb_add_age",
-                    "dbo_name": "CAT062",
                     "description": "From 295.IAS.Age\n\nAge of the DAP 'Indicated Airspeed/ Mach Number' in item 062/380 (Subfield #4)\n\nDespite there are now two subfields (#29 and #30) reporting the ages\nof, respectively, the Indicated Airspeed track data and the Mach\nNumber track data, this former subfield is kept free in order to prevent\na full incompatibility with previous releases of ASTERIX Cat. 062\nalready implemented.",
                     "dimension": "Time",
                     "is_key": false,
@@ -4094,7 +4041,6 @@
                 "parameters": {
                     "data_type_str": "UCHAR",
                     "db_column_name": "sac_lm",
-                    "dbo_name": "CAT062",
                     "description": "From 340.SID.SAC\n\nMeasured Information Sensor Identification\nSystem Area Code",
                     "dimension": "",
                     "is_key": false,
@@ -4108,7 +4054,6 @@
                 "parameters": {
                     "data_type_str": "UCHAR",
                     "db_column_name": "sic_lm",
-                    "dbo_name": "CAT062",
                     "description": "From 340.SID.SIC\n\nMeasured Information Sensor Identification\nSystem Identification Code",
                     "dimension": "",
                     "is_key": false,
@@ -4122,7 +4067,6 @@
                 "parameters": {
                     "data_type_str": "FLOAT",
                     "db_column_name": "mach_number_add_age",
-                    "dbo_name": "CAT062",
                     "description": "From 295.MAC.Age\n\nAge of the DAP 'Mach Number' in item 062/380 (Subfield #27)",
                     "dimension": "Time",
                     "is_key": false,
@@ -4136,7 +4080,6 @@
                 "parameters": {
                     "data_type_str": "FLOAT",
                     "db_column_name": "mode_s_mb_add_age",
-                    "dbo_name": "CAT062",
                     "description": "From 295.MB.Age\n\nAge of the DAP 'Mode S MB Data' in item 062/380 (Subfield #22)",
                     "dimension": "Time",
                     "is_key": false,
@@ -4150,7 +4093,6 @@
                 "parameters": {
                     "data_type_str": "FLOAT",
                     "db_column_name": "mode_s_update_age",
-                    "dbo_name": "CAT062",
                     "description": "From 290.MDS.Age\n\nAge of the last Mode S detection used to update the track",
                     "dimension": "Time",
                     "is_key": false,
@@ -4164,7 +4106,6 @@
                 "parameters": {
                     "data_type_str": "FLOAT",
                     "db_column_name": "met_add_age",
-                    "dbo_name": "CAT062",
                     "description": "From 295.MET.Age\n\nAge of the DAP 'Meteorological Data' in item 062/380 (Subfield #20)",
                     "dimension": "Time",
                     "is_key": false,
@@ -4178,7 +4119,6 @@
                 "parameters": {
                     "data_type_str": "FLOAT",
                     "db_column_name": "magnetic_heading_add_age",
-                    "dbo_name": "CAT062",
                     "description": "From 295.MHG.Age\n\nAge of the DAP 'Magnetic Heading' in item 062/380 (Subfield #3)",
                     "dimension": "Time",
                     "is_key": false,
@@ -4192,7 +4132,6 @@
                 "parameters": {
                     "data_type_str": "FLOAT",
                     "db_column_name": "mlat_update_age",
-                    "dbo_name": "CAT062",
                     "description": "From 290.MLT.Age\n\nAge of the last MLT detection",
                     "dimension": "Time",
                     "is_key": false,
@@ -4206,7 +4145,6 @@
                 "parameters": {
                     "data_type_str": "UINT",
                     "db_column_name": "track_number",
-                    "dbo_name": "CAT062",
                     "description": "From 040.Track Number\n\nIdentification of a track",
                     "dimension": "",
                     "is_key": false,
@@ -4220,7 +4158,6 @@
                 "parameters": {
                     "data_type_str": "FLOAT",
                     "db_column_name": "position_data_add_age",
-                    "dbo_name": "CAT062",
                     "description": "From 295.POS.Age\n\nAge of the DAP 'Position' in item 062/380 (Subfield #23)",
                     "dimension": "Time",
                     "is_key": false,
@@ -4234,7 +4171,6 @@
                 "parameters": {
                     "data_type_str": "FLOAT",
                     "db_column_name": "psr_update_age",
-                    "dbo_name": "CAT062",
                     "description": "From 290.PSR.Age\n\nAge of the last primary detection used to update the track",
                     "dimension": "Time",
                     "is_key": false,
@@ -4248,7 +4184,6 @@
                 "parameters": {
                     "data_type_str": "FLOAT",
                     "db_column_name": "position_uncertainty_add_age",
-                    "dbo_name": "CAT062",
                     "description": "From 295.PUN.Age\n\nAge of the DAP 'Position Uncertainty' in item 062/380 (Subfield #25)",
                     "dimension": "Time",
                     "is_key": false,
@@ -4262,7 +4197,6 @@
                 "parameters": {
                     "data_type_str": "FLOAT",
                     "db_column_name": "roll_angle_add_age",
-                    "dbo_name": "CAT062",
                     "description": "From 295.RAN.Age\n\nAge of the DAP 'Roll Angle' in item 062/380 (Subfield #15)",
                     "dimension": "Time",
                     "is_key": false,
@@ -4276,7 +4210,6 @@
                 "parameters": {
                     "data_type_str": "FLOAT",
                     "db_column_name": "sab_add_age",
-                    "dbo_name": "CAT062",
                     "description": "From 295.SAB.Age\n\nAge of the DAP 'Status Reported by ADS-B' in item 062/380 (Subfield #11)",
                     "dimension": "Time",
                     "is_key": false,
@@ -4290,7 +4223,6 @@
                 "parameters": {
                     "data_type_str": "FLOAT",
                     "db_column_name": "selected_altitude_add_age",
-                    "dbo_name": "CAT062",
                     "description": "From 295.SAL.Age\n\nAge of the DAP 'Selected Altitude' in item 062/380 (Subfield #6)",
                     "dimension": "Time",
                     "is_key": false,
@@ -4304,7 +4236,6 @@
                 "parameters": {
                     "data_type_str": "FLOAT",
                     "db_column_name": "ssr_update_age",
-                    "dbo_name": "CAT062",
                     "description": "From 290.SSR.Age\n\nAge of the last secondary detection used to update the track ",
                     "dimension": "Time",
                     "is_key": false,
@@ -4318,7 +4249,6 @@
                 "parameters": {
                     "data_type_str": "FLOAT",
                     "db_column_name": "track_angle_add_age",
-                    "dbo_name": "CAT062",
                     "description": "From 295.TAN.Age\n\nAge of the DAP 'Track Angle' in item 062/380 (Subfield #17)",
                     "dimension": "Time",
                     "is_key": false,
@@ -4332,7 +4262,6 @@
                 "parameters": {
                     "data_type_str": "FLOAT",
                     "db_column_name": "track_angle_rate_add_age",
-                    "dbo_name": "CAT062",
                     "description": "From 295.TAR.Age\n\nAge of the DAP 'Track Angle Rate' in item 062/380 (Subfield #16)",
                     "dimension": "Time",
                     "is_key": false,
@@ -4346,7 +4275,6 @@
                 "parameters": {
                     "data_type_str": "FLOAT",
                     "db_column_name": "true_airspeed_add_age",
-                    "dbo_name": "CAT062",
                     "description": "From 295.TAS.Age\n\nAge of the DAP 'True Airspeed' in item 062/380 (Subfield #5)",
                     "dimension": "Time",
                     "is_key": false,
@@ -4360,7 +4288,6 @@
                 "parameters": {
                     "data_type_str": "FLOAT",
                     "db_column_name": "trajectory_intent_add_age",
-                    "dbo_name": "CAT062",
                     "description": "From 295.TID.Age\n\nAge of the DAP 'Trajectory Intent' in item 062/380 (Subfield #8)",
                     "dimension": "Time",
                     "is_key": false,
@@ -4374,7 +4301,6 @@
                 "parameters": {
                     "data_type_str": "FLOAT",
                     "db_column_name": "velocity_uncertainty_add_age",
-                    "dbo_name": "CAT062",
                     "description": "From 295.VUN.Age\n\nAge of the DAP 'Velocity Uncertainty' in item 062/380 (Subfield #19)",
                     "dimension": "Time",
                     "is_key": false,
@@ -4388,7 +4314,6 @@
                 "parameters": {
                     "data_type_str": "FLOAT",
                     "db_column_name": "barometric_altitude_calculated",
-                    "dbo_name": "CAT062",
                     "description": "From 135.Calculated Track Barometric Altitude\n\nCalculated Barometric Altitude of the track",
                     "dimension": "Height",
                     "is_key": false,
@@ -4402,7 +4327,6 @@
                 "parameters": {
                     "data_type_str": "UINT",
                     "db_column_name": "mode_3a_code",
-                    "dbo_name": "CAT062",
                     "description": "From 060.Mode-3/A reply\n\nMode-3/A code",
                     "dimension": "",
                     "is_key": false,
@@ -4416,7 +4340,6 @@
                 "parameters": {
                     "data_type_str": "DOUBLE",
                     "db_column_name": "track_angle_rate_add",
-                    "dbo_name": "CAT062",
                     "description": "From 380.TAR.Rate of Turn\n\nTurn rate in deg/sec\n\nA positive value represents a right turn, whereas a negative value represents a left turn.\nValue 15 means 15 deg/sec or above.",
                     "dimension": "",
                     "is_key": false,

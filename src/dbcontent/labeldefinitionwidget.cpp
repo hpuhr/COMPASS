@@ -79,7 +79,7 @@ LabelDefinitionWidget::~LabelDefinitionWidget() {}
 
 void LabelDefinitionWidget::cellChangedSlot(int row, int column)
 {
-    logdbg << "DBOLabelDefinitionWidget: cellChangedSlot: row  " << row << " col " << column;
+    logdbg << "LabelDefinitionWidget: cellChangedSlot: row  " << row << " col " << column;
 
     QTableWidgetItem* item = table_->item(row, column);
     assert(item);
@@ -106,7 +106,7 @@ void LabelDefinitionWidget::cellChangedSlot(int row, int column)
         entry.suffix(item->text().toStdString());
     }
     else
-        throw std::runtime_error("DBOLabelDefinitionWidget: cellChangedSlot: wrong column");
+        throw std::runtime_error("LabelDefinitionWidget: cellChangedSlot: wrong column");
 
     definition_->updateReadList();
 }

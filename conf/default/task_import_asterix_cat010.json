@@ -1,23 +1,18 @@
 {
     "parameters": {
-        "active": false,
-        "data_source_variable_name": "ds_id",
-        "db_content_name": "MLAT",
-        "json_container_key": "",
-        "json_key": "category",
-        "json_value": "10",
-        "name": "CAT010 to MLAT",
-        "override_data_source": false
+        "category": 10,
+        "db_content_name": "CAT010",
+        "name": "CAT010"
     },
     "sub_configs": {
         "JSONDataMapping": {
             "JSONDataMapping0": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
-                    "comment": "Type number, value 1",
-                    "db_content_name": "MLAT",
-                    "db_content_variable_name": "",
+                    "comment": "",
+                    "db_content_name": "CAT010",
+                    "db_content_variable_name": "Message Type",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
@@ -31,9 +26,9 @@
                 "parameters": {
                     "active": true,
                     "append_value": false,
-                    "comment": "Type number, value 50",
-                    "db_content_name": "MLAT",
-                    "db_content_variable_name": "sac",
+                    "comment": "",
+                    "db_content_name": "CAT010",
+                    "db_content_variable_name": "SAC",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
@@ -45,15 +40,15 @@
             },
             "JSONDataMapping10": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
-                    "comment": "Type number, value 0",
-                    "db_content_name": "MLAT",
-                    "db_content_variable_name": "",
+                    "comment": "",
+                    "db_content_name": "CAT010",
+                    "db_content_variable_name": "SPI",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
-                    "json_key": "020.RAB",
+                    "json_key": "020.SPI",
                     "json_value_format": "",
                     "mandatory": false,
                     "unit": ""
@@ -63,25 +58,9 @@
                 "parameters": {
                     "active": true,
                     "append_value": false,
-                    "comment": "Type number, value 0",
-                    "db_content_name": "MLAT",
-                    "db_content_variable_name": "simulated_target",
-                    "dimension": "",
-                    "format_data_type": "STRING",
-                    "in_array": false,
-                    "json_key": "020.SIM",
-                    "json_value_format": "bool",
-                    "mandatory": false,
-                    "unit": ""
-                }
-            },
-            "JSONDataMapping12": {
-                "parameters": {
-                    "active": false,
-                    "append_value": false,
-                    "comment": "Type number, value 0",
-                    "db_content_name": "MLAT",
-                    "db_content_variable_name": "",
+                    "comment": "",
+                    "db_content_name": "CAT010",
+                    "db_content_variable_name": "Target Type",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
@@ -91,29 +70,29 @@
                     "unit": ""
                 }
             },
-            "JSONDataMapping13": {
+            "JSONDataMapping12": {
                 "parameters": {
                     "active": true,
                     "append_value": false,
-                    "comment": "Type number, value 0",
-                    "db_content_name": "MLAT",
-                    "db_content_variable_name": "test_target",
+                    "comment": "",
+                    "db_content_name": "CAT010",
+                    "db_content_variable_name": "Test",
                     "dimension": "",
-                    "format_data_type": "STRING",
+                    "format_data_type": "",
                     "in_array": false,
                     "json_key": "020.TST",
-                    "json_value_format": "bool",
+                    "json_value_format": "",
                     "mandatory": false,
                     "unit": ""
                 }
             },
-            "JSONDataMapping14": {
+            "JSONDataMapping13": {
                 "parameters": {
                     "active": true,
                     "append_value": false,
-                    "comment": "Type number, value 3",
-                    "db_content_name": "MLAT",
-                    "db_content_variable_name": "report_type",
+                    "comment": "",
+                    "db_content_name": "CAT010",
+                    "db_content_variable_name": "Detection Type",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
@@ -123,51 +102,67 @@
                     "unit": ""
                 }
             },
-            "JSONDataMapping15": {
+            "JSONDataMapping14": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
-                    "comment": "Type number, value 192.0",
-                    "db_content_name": "MLAT",
-                    "db_content_variable_name": "",
-                    "dimension": "",
+                    "comment": "",
+                    "db_content_name": "CAT010",
+                    "db_content_variable_name": "Range",
+                    "dimension": "Length",
                     "format_data_type": "",
                     "in_array": false,
                     "json_key": "040.RHO",
                     "json_value_format": "",
                     "mandatory": false,
-                    "unit": ""
+                    "unit": "Meter"
                 }
             },
-            "JSONDataMapping16": {
+            "JSONDataMapping15": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
-                    "comment": "Type number, value 154.632568289",
-                    "db_content_name": "MLAT",
-                    "db_content_variable_name": "",
-                    "dimension": "",
+                    "comment": "",
+                    "db_content_name": "CAT010",
+                    "db_content_variable_name": "Azimuth",
+                    "dimension": "Angle",
                     "format_data_type": "",
                     "in_array": false,
                     "json_key": "040.THETA",
                     "json_value_format": "",
                     "mandatory": false,
-                    "unit": ""
+                    "unit": "Degree"
+                }
+            },
+            "JSONDataMapping16": {
+                "parameters": {
+                    "active": true,
+                    "append_value": false,
+                    "comment": "",
+                    "db_content_name": "CAT010",
+                    "db_content_variable_name": "Latitude",
+                    "dimension": "Angle",
+                    "format_data_type": "",
+                    "in_array": false,
+                    "json_key": "041.Latitude",
+                    "json_value_format": "",
+                    "mandatory": false,
+                    "unit": "Degree"
                 }
             },
             "JSONDataMapping17": {
                 "parameters": {
                     "active": true,
                     "append_value": false,
-                    "comment": "Type number, value 48.12768930616766",
-                    "db_content_name": "MLAT",
-                    "db_content_variable_name": "pos_lat_deg",
+                    "comment": "",
+                    "db_content_name": "CAT010",
+                    "db_content_variable_name": "Longitude",
                     "dimension": "Angle",
                     "format_data_type": "",
                     "in_array": false,
-                    "json_key": "041.Latitude",
+                    "json_key": "041.Longitude",
                     "json_value_format": "",
-                    "mandatory": true,
+                    "mandatory": false,
                     "unit": "Degree"
                 }
             },
@@ -175,29 +170,29 @@
                 "parameters": {
                     "active": true,
                     "append_value": false,
-                    "comment": "Type number, value 16.537888149487706",
-                    "db_content_name": "MLAT",
-                    "db_content_variable_name": "pos_long_deg",
-                    "dimension": "Angle",
+                    "comment": "",
+                    "db_content_name": "CAT010",
+                    "db_content_variable_name": "X",
+                    "dimension": "Length",
                     "format_data_type": "",
                     "in_array": false,
-                    "json_key": "041.Longitude",
+                    "json_key": "042.X",
                     "json_value_format": "",
-                    "mandatory": true,
-                    "unit": "Degree"
+                    "mandatory": false,
+                    "unit": "Meter"
                 }
             },
             "JSONDataMapping19": {
                 "parameters": {
                     "active": true,
                     "append_value": false,
-                    "comment": "Type number, value -4347.0",
-                    "db_content_name": "MLAT",
-                    "db_content_variable_name": "pos_local_x_nm",
-                    "dimension": "Position",
+                    "comment": "",
+                    "db_content_name": "CAT010",
+                    "db_content_variable_name": "Y",
+                    "dimension": "Length",
                     "format_data_type": "",
                     "in_array": false,
-                    "json_key": "042.X",
+                    "json_key": "042.Y",
                     "json_value_format": "",
                     "mandatory": false,
                     "unit": "Meter"
@@ -207,9 +202,9 @@
                 "parameters": {
                     "active": true,
                     "append_value": false,
-                    "comment": "Type number, value 103",
-                    "db_content_name": "MLAT",
-                    "db_content_variable_name": "sic",
+                    "comment": "",
+                    "db_content_name": "CAT010",
+                    "db_content_variable_name": "SIC",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
@@ -223,29 +218,29 @@
                 "parameters": {
                     "active": true,
                     "append_value": false,
-                    "comment": "Type number, value -5012.0",
-                    "db_content_name": "MLAT",
-                    "db_content_variable_name": "pos_local_y_nm",
-                    "dimension": "Position",
+                    "comment": "",
+                    "db_content_name": "CAT010",
+                    "db_content_variable_name": "Mode 3/A Garbled",
+                    "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
-                    "json_key": "042.Y",
+                    "json_key": "060.G",
                     "json_value_format": "",
                     "mandatory": false,
-                    "unit": "Meter"
+                    "unit": ""
                 }
             },
             "JSONDataMapping21": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
-                    "comment": "Type number, value 180.0",
-                    "db_content_name": "MLAT",
-                    "db_content_variable_name": "",
+                    "comment": "",
+                    "db_content_name": "CAT010",
+                    "db_content_variable_name": "Mode 3/A Smoothed",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
-                    "json_key": "131.PAM",
+                    "json_key": "060.L",
                     "json_value_format": "",
                     "mandatory": false,
                     "unit": ""
@@ -255,61 +250,61 @@
                 "parameters": {
                     "active": true,
                     "append_value": false,
-                    "comment": "Type number, value 44400.015625",
-                    "db_content_name": "MLAT",
-                    "db_content_variable_name": "tod",
-                    "dimension": "Time",
-                    "format_data_type": "",
+                    "comment": "",
+                    "db_content_name": "CAT010",
+                    "db_content_variable_name": "Mode 3/A Code",
+                    "dimension": "",
+                    "format_data_type": "UINT",
                     "in_array": false,
-                    "json_key": "140.Time-of-Day",
-                    "json_value_format": "",
-                    "mandatory": true,
-                    "unit": "Second"
+                    "json_key": "060.Mode-3/A reply",
+                    "json_value_format": "octal",
+                    "mandatory": false,
+                    "unit": ""
                 }
             },
             "JSONDataMapping23": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
-                    "comment": "Type number, value 1",
-                    "db_content_name": "MLAT",
-                    "db_content_variable_name": "",
+                    "comment": "",
+                    "db_content_name": "CAT010",
+                    "db_content_variable_name": "Mode 3/A Valid",
                     "dimension": "",
-                    "format_data_type": "",
+                    "format_data_type": "BOOL",
                     "in_array": false,
-                    "json_key": "270.FX",
-                    "json_value_format": "",
+                    "json_key": "060.V",
+                    "json_value_format": "invert",
                     "mandatory": false,
                     "unit": ""
                 }
             },
             "JSONDataMapping24": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
-                    "comment": "Type number, value 1",
-                    "db_content_name": "MLAT",
-                    "db_content_variable_name": "",
-                    "dimension": "",
+                    "comment": "",
+                    "db_content_name": "CAT010",
+                    "db_content_variable_name": "Mode C Code",
+                    "dimension": "Height",
                     "format_data_type": "",
                     "in_array": false,
-                    "json_key": "270.FX2",
+                    "json_key": "090.Flight Level",
                     "json_value_format": "",
                     "mandatory": false,
-                    "unit": ""
+                    "unit": "Flight Level"
                 }
             },
             "JSONDataMapping25": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
-                    "comment": "Type number, value 11.0",
-                    "db_content_name": "MLAT",
-                    "db_content_variable_name": "",
+                    "comment": "",
+                    "db_content_name": "CAT010",
+                    "db_content_variable_name": "Mode C Garbled",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
-                    "json_key": "270.LENGTH",
+                    "json_key": "090.G",
                     "json_value_format": "",
                     "mandatory": false,
                     "unit": ""
@@ -317,47 +312,47 @@
             },
             "JSONDataMapping26": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
-                    "comment": "Type number, value 126.5625",
-                    "db_content_name": "MLAT",
-                    "db_content_variable_name": "",
+                    "comment": "",
+                    "db_content_name": "CAT010",
+                    "db_content_variable_name": "Mode C Valid",
                     "dimension": "",
-                    "format_data_type": "",
+                    "format_data_type": "BOOL",
                     "in_array": false,
-                    "json_key": "270.ORIENTATION",
-                    "json_value_format": "",
+                    "json_key": "090.V",
+                    "json_value_format": "invert",
                     "mandatory": false,
                     "unit": ""
                 }
             },
             "JSONDataMapping27": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
-                    "comment": "Type number, value 7.0",
-                    "db_content_name": "MLAT",
-                    "db_content_variable_name": "",
-                    "dimension": "",
+                    "comment": "",
+                    "db_content_name": "CAT010",
+                    "db_content_variable_name": "Measured Height",
+                    "dimension": "Height",
                     "format_data_type": "",
                     "in_array": false,
-                    "json_key": "270.WIDTH",
+                    "json_key": "091.Measured Height",
                     "json_value_format": "",
                     "mandatory": false,
-                    "unit": ""
+                    "unit": "Feet"
                 }
             },
             "JSONDataMapping28": {
                 "parameters": {
                     "active": true,
                     "append_value": false,
-                    "comment": "Type number, value 2.5",
-                    "db_content_name": "MLAT",
-                    "db_content_variable_name": "pos_std_dev_x_m",
+                    "comment": "",
+                    "db_content_name": "CAT010",
+                    "db_content_variable_name": "PSR Amplitude",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
-                    "json_key": "500.SDP-x",
+                    "json_key": "131.PAM",
                     "json_value_format": "",
                     "mandatory": false,
                     "unit": ""
@@ -367,25 +362,25 @@
                 "parameters": {
                     "active": true,
                     "append_value": false,
-                    "comment": "Type number, value -3.25",
-                    "db_content_name": "MLAT",
-                    "db_content_variable_name": "pos_std_dev_correlation_coeff",
-                    "dimension": "",
+                    "comment": "",
+                    "db_content_name": "CAT010",
+                    "db_content_variable_name": "Time of Day",
+                    "dimension": "Time",
                     "format_data_type": "",
                     "in_array": false,
-                    "json_key": "500.SDP-xy",
+                    "json_key": "140.Time-of-Day",
                     "json_value_format": "",
                     "mandatory": false,
-                    "unit": ""
+                    "unit": "Second"
                 }
             },
             "JSONDataMapping3": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
-                    "comment": "Type number, value 0",
-                    "db_content_name": "MLAT",
-                    "db_content_variable_name": "",
+                    "comment": "",
+                    "db_content_name": "CAT010",
+                    "db_content_variable_name": "Chain",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
@@ -399,13 +394,13 @@
                 "parameters": {
                     "active": true,
                     "append_value": false,
-                    "comment": "Type number, value 2.0",
-                    "db_content_name": "MLAT",
-                    "db_content_variable_name": "pos_std_dev_y_m",
+                    "comment": "",
+                    "db_content_name": "CAT010",
+                    "db_content_variable_name": "Track Number",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
-                    "json_key": "500.SDP-y",
+                    "json_key": "161.TRACK NUMBER",
                     "json_value_format": "",
                     "mandatory": false,
                     "unit": ""
@@ -413,31 +408,31 @@
             },
             "JSONDataMapping31": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
-                    "comment": "Type array, value [true,true,true,true,true,true,true,true,false,false,false,false,false,false,false,true,false,false,false,false,true,false,false,true,true,false,true,false,false,false,false,false]",
-                    "db_content_name": "MLAT",
-                    "db_content_variable_name": "",
+                    "comment": "",
+                    "db_content_name": "CAT010",
+                    "db_content_variable_name": "Track Confirmed",
                     "dimension": "",
-                    "format_data_type": "",
+                    "format_data_type": "BOOL",
                     "in_array": false,
-                    "json_key": "FSPEC",
-                    "json_value_format": "",
+                    "json_key": "170.CNF",
+                    "json_value_format": "invert",
                     "mandatory": false,
                     "unit": ""
                 }
             },
             "JSONDataMapping32": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
-                    "comment": "Type string, value \"2c120ba0\"",
-                    "db_content_name": "MLAT",
-                    "db_content_variable_name": "",
+                    "comment": "",
+                    "db_content_name": "CAT010",
+                    "db_content_variable_name": "Track Coasting",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
-                    "json_key": "artas_md5",
+                    "json_key": "170.CST",
                     "json_value_format": "",
                     "mandatory": false,
                     "unit": ""
@@ -447,13 +442,13 @@
                 "parameters": {
                     "active": true,
                     "append_value": false,
-                    "comment": "Type number, value 10",
-                    "db_content_name": "MLAT",
-                    "db_content_variable_name": "cat",
+                    "comment": "",
+                    "db_content_name": "CAT010",
+                    "db_content_variable_name": "Track Doubtful",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
-                    "json_key": "category",
+                    "json_key": "170.DOU",
                     "json_value_format": "",
                     "mandatory": false,
                     "unit": ""
@@ -463,13 +458,13 @@
                 "parameters": {
                     "active": true,
                     "append_value": false,
-                    "comment": "Type number, value 12903",
-                    "db_content_name": "MLAT",
-                    "db_content_variable_name": "ds_id",
+                    "comment": "",
+                    "db_content_name": "CAT010",
+                    "db_content_variable_name": "Track Ghost Target",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
-                    "json_key": "ds_id",
+                    "json_key": "170.GHO",
                     "json_value_format": "",
                     "mandatory": false,
                     "unit": ""
@@ -477,15 +472,15 @@
             },
             "JSONDataMapping35": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
-                    "comment": "Type number, value 11",
-                    "db_content_name": "MLAT",
-                    "db_content_variable_name": "",
+                    "comment": "",
+                    "db_content_name": "CAT010",
+                    "db_content_variable_name": "Track Horizontal Manoeuvre",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
-                    "json_key": "index",
+                    "json_key": "170.MAH",
                     "json_value_format": "",
                     "mandatory": false,
                     "unit": ""
@@ -493,15 +488,15 @@
             },
             "JSONDataMapping36": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
-                    "comment": "Type number, value 36",
-                    "db_content_name": "MLAT",
-                    "db_content_variable_name": "",
+                    "comment": "",
+                    "db_content_name": "CAT010",
+                    "db_content_variable_name": "Track Merged/Split",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
-                    "json_key": "length",
+                    "json_key": "170.MRS",
                     "json_value_format": "",
                     "mandatory": false,
                     "unit": ""
@@ -509,15 +504,15 @@
             },
             "JSONDataMapping37": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
-                    "comment": "Type number, value 0",
-                    "db_content_name": "MLAT",
-                    "db_content_variable_name": "",
+                    "comment": "",
+                    "db_content_name": "CAT010",
+                    "db_content_variable_name": "Position Smoothed",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
-                    "json_key": "550.DIV",
+                    "json_key": "170.STH",
                     "json_value_format": "",
                     "mandatory": false,
                     "unit": ""
@@ -525,15 +520,15 @@
             },
             "JSONDataMapping38": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
-                    "comment": "Type number, value 0",
-                    "db_content_name": "MLAT",
-                    "db_content_variable_name": "",
+                    "comment": "",
+                    "db_content_name": "CAT010",
+                    "db_content_variable_name": "Slant Range Corrected",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
-                    "json_key": "550.NOGO",
+                    "json_key": "170.TCC",
                     "json_value_format": "",
                     "mandatory": false,
                     "unit": ""
@@ -541,15 +536,15 @@
             },
             "JSONDataMapping39": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
-                    "comment": "Type number, value 0",
-                    "db_content_name": "MLAT",
-                    "db_content_variable_name": "",
+                    "comment": "",
+                    "db_content_name": "CAT010",
+                    "db_content_variable_name": "Type of Movement",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
-                    "json_key": "550.OVL",
+                    "json_key": "170.TOM",
                     "json_value_format": "",
                     "mandatory": false,
                     "unit": ""
@@ -557,11 +552,11 @@
             },
             "JSONDataMapping4": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
-                    "comment": "Type number, value 0",
-                    "db_content_name": "MLAT",
-                    "db_content_variable_name": "",
+                    "comment": "",
+                    "db_content_name": "CAT010",
+                    "db_content_variable_name": "Corrupted MLAT",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
@@ -573,15 +568,15 @@
             },
             "JSONDataMapping40": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
-                    "comment": "Type number, value 0",
-                    "db_content_name": "MLAT",
-                    "db_content_variable_name": "",
+                    "comment": "",
+                    "db_content_name": "CAT010",
+                    "db_content_variable_name": "Track End",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
-                    "json_key": "550.TSV",
+                    "json_key": "170.TRE",
                     "json_value_format": "",
                     "mandatory": false,
                     "unit": ""
@@ -589,80 +584,80 @@
             },
             "JSONDataMapping41": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
-                    "comment": "Type number, value 0",
-                    "db_content_name": "MLAT",
-                    "db_content_variable_name": "",
-                    "dimension": "",
+                    "comment": "",
+                    "db_content_name": "CAT010",
+                    "db_content_variable_name": "Ground Speed",
+                    "dimension": "Speed",
                     "format_data_type": "",
                     "in_array": false,
-                    "json_key": "550.TTF",
+                    "json_key": "200.Ground Speed",
                     "json_value_format": "",
                     "mandatory": false,
-                    "unit": ""
+                    "unit": "Knots"
                 }
             },
             "JSONDataMapping42": {
                 "parameters": {
                     "active": true,
                     "append_value": false,
-                    "comment": "Type number, value 0",
-                    "db_content_name": "MLAT",
-                    "db_content_variable_name": "spi",
-                    "dimension": "",
-                    "format_data_type": "STRING",
+                    "comment": "",
+                    "db_content_name": "CAT010",
+                    "db_content_variable_name": "Track Angle",
+                    "dimension": "Angle",
+                    "format_data_type": "",
                     "in_array": false,
-                    "json_key": "020.SPI",
-                    "json_value_format": "bool",
+                    "json_key": "200.Track Angle",
+                    "json_value_format": "",
                     "mandatory": false,
-                    "unit": ""
+                    "unit": "Degree"
                 }
             },
             "JSONDataMapping43": {
                 "parameters": {
                     "active": true,
                     "append_value": false,
-                    "comment": "Type number, value 18.75",
-                    "db_content_name": "MLAT",
-                    "db_content_variable_name": "alt_geo_ft",
-                    "dimension": "Height",
+                    "comment": "",
+                    "db_content_name": "CAT010",
+                    "db_content_variable_name": "Vx",
+                    "dimension": "Speed",
                     "format_data_type": "",
                     "in_array": false,
-                    "json_key": "091.Measured Height",
+                    "json_key": "202.Vx",
                     "json_value_format": "",
                     "mandatory": false,
-                    "unit": "Feet"
+                    "unit": "Meter/Second"
                 }
             },
             "JSONDataMapping44": {
                 "parameters": {
                     "active": true,
                     "append_value": false,
-                    "comment": "Type number, value 56578",
-                    "db_content_name": "MLAT",
-                    "db_content_variable_name": "track_num",
-                    "dimension": "",
+                    "comment": "",
+                    "db_content_name": "CAT010",
+                    "db_content_variable_name": "Vy",
+                    "dimension": "Speed",
                     "format_data_type": "",
                     "in_array": false,
-                    "json_key": "161.TRACK NUMBER",
+                    "json_key": "202.Vy",
                     "json_value_format": "",
                     "mandatory": false,
-                    "unit": ""
+                    "unit": "Meter/Second"
                 }
             },
             "JSONDataMapping45": {
                 "parameters": {
                     "active": true,
                     "append_value": false,
-                    "comment": "Type number, value 0",
-                    "db_content_name": "MLAT",
-                    "db_content_variable_name": "track_confirmed",
+                    "comment": "",
+                    "db_content_name": "CAT010",
+                    "db_content_variable_name": "Ax",
                     "dimension": "",
-                    "format_data_type": "STRING",
+                    "format_data_type": "",
                     "in_array": false,
-                    "json_key": "170.CNF",
-                    "json_value_format": "bool_invert",
+                    "json_key": "210.Ax",
+                    "json_value_format": "",
                     "mandatory": false,
                     "unit": ""
                 }
@@ -671,29 +666,29 @@
                 "parameters": {
                     "active": true,
                     "append_value": false,
-                    "comment": "Type number, value 0",
-                    "db_content_name": "MLAT",
-                    "db_content_variable_name": "track_coasted",
+                    "comment": "",
+                    "db_content_name": "CAT010",
+                    "db_content_variable_name": "Ay",
                     "dimension": "",
-                    "format_data_type": "STRING",
+                    "format_data_type": "",
                     "in_array": false,
-                    "json_key": "170.CST",
-                    "json_value_format": "bool",
+                    "json_key": "210.Ay",
+                    "json_value_format": "",
                     "mandatory": false,
                     "unit": ""
                 }
             },
             "JSONDataMapping47": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
-                    "comment": "Type number, value 0",
-                    "db_content_name": "MLAT",
-                    "db_content_variable_name": "",
+                    "comment": "",
+                    "db_content_name": "CAT010",
+                    "db_content_variable_name": "Aircraft Address",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
-                    "json_key": "170.FX",
+                    "json_key": "220.Target Address",
                     "json_value_format": "",
                     "mandatory": false,
                     "unit": ""
@@ -703,29 +698,29 @@
                 "parameters": {
                     "active": true,
                     "append_value": false,
-                    "comment": "Type number, value 0",
-                    "db_content_name": "MLAT",
-                    "db_content_variable_name": "track_manoeuvre_hori",
+                    "comment": "",
+                    "db_content_name": "CAT010",
+                    "db_content_variable_name": "ACID Source",
                     "dimension": "",
-                    "format_data_type": "STRING",
+                    "format_data_type": "",
                     "in_array": false,
-                    "json_key": "170.MAH",
-                    "json_value_format": "bool",
+                    "json_key": "245.STI",
+                    "json_value_format": "",
                     "mandatory": false,
                     "unit": ""
                 }
             },
             "JSONDataMapping49": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
-                    "comment": "Type number, value 0",
-                    "db_content_name": "MLAT",
-                    "db_content_variable_name": "",
+                    "comment": "",
+                    "db_content_name": "CAT010",
+                    "db_content_variable_name": "Aircraft Identification",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
-                    "json_key": "170.STH",
+                    "json_key": "245.Target Identification",
                     "json_value_format": "",
                     "mandatory": false,
                     "unit": ""
@@ -733,11 +728,11 @@
             },
             "JSONDataMapping5": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
-                    "comment": "Type number, value 0",
-                    "db_content_name": "MLAT",
-                    "db_content_variable_name": "",
+                    "comment": "",
+                    "db_content_name": "CAT010",
+                    "db_content_variable_name": "ADS-B Differential Correction",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
@@ -749,79 +744,79 @@
             },
             "JSONDataMapping50": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
-                    "comment": "Type number, value 1",
-                    "db_content_name": "MLAT",
-                    "db_content_variable_name": "",
-                    "dimension": "",
+                    "comment": "",
+                    "db_content_name": "CAT010",
+                    "db_content_variable_name": "Target Length",
+                    "dimension": "Length",
                     "format_data_type": "",
                     "in_array": false,
-                    "json_key": "170.TCC",
+                    "json_key": "270.LENGTH",
                     "json_value_format": "",
                     "mandatory": false,
-                    "unit": ""
+                    "unit": "Meter"
                 }
             },
             "JSONDataMapping51": {
                 "parameters": {
                     "active": true,
                     "append_value": false,
-                    "comment": "Type number, value 1",
-                    "db_content_name": "MLAT",
-                    "db_content_variable_name": "track_end",
-                    "dimension": "",
-                    "format_data_type": "STRING",
+                    "comment": "",
+                    "db_content_name": "CAT010",
+                    "db_content_variable_name": "Target Orientation",
+                    "dimension": "Angle",
+                    "format_data_type": "",
                     "in_array": false,
-                    "json_key": "170.TRE",
-                    "json_value_format": "bool",
+                    "json_key": "270.ORIENTATION",
+                    "json_value_format": "",
                     "mandatory": false,
-                    "unit": ""
+                    "unit": "Degree"
                 }
             },
             "JSONDataMapping52": {
                 "parameters": {
                     "active": true,
                     "append_value": false,
-                    "comment": "Type number, value 0.0",
-                    "db_content_name": "MLAT",
-                    "db_content_variable_name": "velocity_vx_ms",
-                    "dimension": "Speed",
+                    "comment": "",
+                    "db_content_name": "CAT010",
+                    "db_content_variable_name": "Target Width",
+                    "dimension": "Length",
                     "format_data_type": "",
                     "in_array": false,
-                    "json_key": "202.Vx",
+                    "json_key": "270.WIDTH",
                     "json_value_format": "",
                     "mandatory": false,
-                    "unit": "Meter/Second"
+                    "unit": "Meter"
                 }
             },
             "JSONDataMapping53": {
                 "parameters": {
                     "active": true,
                     "append_value": false,
-                    "comment": "Type number, value 3.0",
-                    "db_content_name": "MLAT",
-                    "db_content_variable_name": "velocity_vy_ms",
-                    "dimension": "Speed",
+                    "comment": "",
+                    "db_content_name": "CAT010",
+                    "db_content_variable_name": "Vehicle Fleet Identification",
+                    "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
-                    "json_key": "202.Vy",
+                    "json_key": "300.VFI",
                     "json_value_format": "",
                     "mandatory": false,
-                    "unit": "Meter/Second"
+                    "unit": ""
                 }
             },
             "JSONDataMapping54": {
                 "parameters": {
                     "active": true,
                     "append_value": false,
-                    "comment": "Type number, value 8152832",
-                    "db_content_name": "MLAT",
-                    "db_content_variable_name": "target_addr",
+                    "comment": "",
+                    "db_content_name": "CAT010",
+                    "db_content_variable_name": "Preprogrammed Message",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
-                    "json_key": "220.Target Address",
+                    "json_key": "310.MSG",
                     "json_value_format": "",
                     "mandatory": false,
                     "unit": ""
@@ -829,15 +824,15 @@
             },
             "JSONDataMapping55": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
-                    "comment": "Type string, value \"000000000000000000\"",
-                    "db_content_name": "MLAT",
-                    "db_content_variable_name": "",
+                    "comment": "",
+                    "db_content_name": "CAT010",
+                    "db_content_variable_name": "In Trouble",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
-                    "json_key": "SPF",
+                    "json_key": "310.TRB",
                     "json_value_format": "",
                     "mandatory": false,
                     "unit": ""
@@ -847,14 +842,14 @@
                 "parameters": {
                     "active": true,
                     "append_value": false,
-                    "comment": "Type number, value 0",
-                    "db_content_name": "MLAT",
-                    "db_content_variable_name": "mode3a_g",
+                    "comment": "",
+                    "db_content_name": "CAT010",
+                    "db_content_variable_name": "X StdDev",
                     "dimension": "",
-                    "format_data_type": "STRING",
+                    "format_data_type": "",
                     "in_array": false,
-                    "json_key": "060.G",
-                    "json_value_format": "bool",
+                    "json_key": "500.SDP-x",
+                    "json_value_format": "",
                     "mandatory": false,
                     "unit": ""
                 }
@@ -863,14 +858,14 @@
                 "parameters": {
                     "active": true,
                     "append_value": false,
-                    "comment": "Type number, value 1",
-                    "db_content_name": "MLAT",
-                    "db_content_variable_name": "mode3a_smo",
+                    "comment": "",
+                    "db_content_name": "CAT010",
+                    "db_content_variable_name": "X/Y Covariance",
                     "dimension": "",
-                    "format_data_type": "STRING",
+                    "format_data_type": "",
                     "in_array": false,
-                    "json_key": "060.L",
-                    "json_value_format": "bool",
+                    "json_key": "500.SDP-xy",
+                    "json_value_format": "",
                     "mandatory": false,
                     "unit": ""
                 }
@@ -879,14 +874,14 @@
                 "parameters": {
                     "active": true,
                     "append_value": false,
-                    "comment": "Type number, value 5561",
-                    "db_content_name": "MLAT",
-                    "db_content_variable_name": "mode3a_code",
+                    "comment": "",
+                    "db_content_name": "CAT010",
+                    "db_content_variable_name": "Y StdDev",
                     "dimension": "",
-                    "format_data_type": "INT",
+                    "format_data_type": "",
                     "in_array": false,
-                    "json_key": "060.Mode-3/A reply",
-                    "json_value_format": "octal",
+                    "json_key": "500.SDP-y",
+                    "json_value_format": "",
                     "mandatory": false,
                     "unit": ""
                 }
@@ -895,29 +890,29 @@
                 "parameters": {
                     "active": true,
                     "append_value": false,
-                    "comment": "Type number, value 1",
-                    "db_content_name": "MLAT",
-                    "db_content_variable_name": "mode3a_v",
+                    "comment": "",
+                    "db_content_name": "CAT010",
+                    "db_content_variable_name": "System Status",
                     "dimension": "",
-                    "format_data_type": "STRING",
+                    "format_data_type": "",
                     "in_array": false,
-                    "json_key": "060.V",
-                    "json_value_format": "bool_invert",
+                    "json_key": "550.NOGO",
+                    "json_value_format": "",
                     "mandatory": false,
                     "unit": ""
                 }
             },
             "JSONDataMapping6": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
-                    "comment": "Type number, value 1",
-                    "db_content_name": "MLAT",
-                    "db_content_variable_name": "",
+                    "comment": "",
+                    "db_content_name": "CAT010",
+                    "db_content_variable_name": "Ground Bit",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
-                    "json_key": "020.FX",
+                    "json_key": "020.GBS",
                     "json_value_format": "",
                     "mandatory": false,
                     "unit": ""
@@ -927,30 +922,30 @@
                 "parameters": {
                     "active": true,
                     "append_value": false,
-                    "comment": "Type number, value -576.0",
-                    "db_content_name": "MLAT",
-                    "db_content_variable_name": "flight_level_ft",
-                    "dimension": "Height",
+                    "comment": "",
+                    "db_content_name": "CAT010",
+                    "db_content_variable_name": "Diversity Degraded",
+                    "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
-                    "json_key": "090.Flight Level",
+                    "json_key": "550.DIV",
                     "json_value_format": "",
                     "mandatory": false,
-                    "unit": "Flight Level"
+                    "unit": ""
                 }
             },
             "JSONDataMapping61": {
                 "parameters": {
                     "active": true,
                     "append_value": false,
-                    "comment": "Type number, value 0",
-                    "db_content_name": "MLAT",
-                    "db_content_variable_name": "flight_level_g",
+                    "comment": "",
+                    "db_content_name": "CAT010",
+                    "db_content_variable_name": "Overload",
                     "dimension": "",
-                    "format_data_type": "STRING",
+                    "format_data_type": "",
                     "in_array": false,
-                    "json_key": "090.G",
-                    "json_value_format": "bool",
+                    "json_key": "550.OVL",
+                    "json_value_format": "",
                     "mandatory": false,
                     "unit": ""
                 }
@@ -959,29 +954,29 @@
                 "parameters": {
                     "active": true,
                     "append_value": false,
-                    "comment": "Type number, value 0",
-                    "db_content_name": "MLAT",
-                    "db_content_variable_name": "flight_level_v",
+                    "comment": "",
+                    "db_content_name": "CAT010",
+                    "db_content_variable_name": "Time Source Invalid",
                     "dimension": "",
-                    "format_data_type": "STRING",
+                    "format_data_type": "",
                     "in_array": false,
-                    "json_key": "090.V",
-                    "json_value_format": "bool_invert",
+                    "json_key": "550.TSV",
+                    "json_value_format": "",
                     "mandatory": false,
                     "unit": ""
                 }
             },
             "JSONDataMapping63": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
-                    "comment": "Type number, value 0",
-                    "db_content_name": "MLAT",
-                    "db_content_variable_name": "",
+                    "comment": "",
+                    "db_content_name": "CAT010",
+                    "db_content_variable_name": "Test Target Failure",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
-                    "json_key": "245.STI",
+                    "json_key": "550.TTF",
                     "json_value_format": "",
                     "mandatory": false,
                     "unit": ""
@@ -991,13 +986,13 @@
                 "parameters": {
                     "active": true,
                     "append_value": false,
-                    "comment": "Type string, value \"EK??VB??\"",
-                    "db_content_name": "MLAT",
-                    "db_content_variable_name": "callsign",
+                    "comment": "Type number, value 12870",
+                    "db_content_name": "CAT010",
+                    "db_content_variable_name": "DS ID",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
-                    "json_key": "245.Target Identification",
+                    "json_key": "ds_id",
                     "json_value_format": "",
                     "mandatory": false,
                     "unit": ""
@@ -1005,15 +1000,15 @@
             },
             "JSONDataMapping65": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
-                    "comment": "Type number, value 7",
-                    "db_content_name": "MLAT",
-                    "db_content_variable_name": "",
+                    "comment": "Type string, value \"132fbfcd\"",
+                    "db_content_name": "CAT010",
+                    "db_content_variable_name": "ARTAS Hash",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
-                    "json_key": "170.DOU",
+                    "json_key": "artas_md5",
                     "json_value_format": "",
                     "mandatory": false,
                     "unit": ""
@@ -1021,63 +1016,15 @@
             },
             "JSONDataMapping66": {
                 "parameters": {
-                    "active": false,
-                    "append_value": false,
-                    "comment": "Type number, value 1",
-                    "db_content_name": "MLAT",
-                    "db_content_variable_name": "",
-                    "dimension": "",
-                    "format_data_type": "",
-                    "in_array": false,
-                    "json_key": "170.FX2",
-                    "json_value_format": "",
-                    "mandatory": false,
-                    "unit": ""
-                }
-            },
-            "JSONDataMapping67": {
-                "parameters": {
                     "active": true,
                     "append_value": false,
-                    "comment": "Type number, value 0",
-                    "db_content_name": "MLAT",
-                    "db_content_variable_name": "track_ghost_target",
-                    "dimension": "",
-                    "format_data_type": "STRING",
-                    "in_array": false,
-                    "json_key": "170.GHO",
-                    "json_value_format": "bool",
-                    "mandatory": false,
-                    "unit": ""
-                }
-            },
-            "JSONDataMapping68": {
-                "parameters": {
-                    "active": false,
-                    "append_value": false,
-                    "comment": "Type number, value 3",
-                    "db_content_name": "MLAT",
-                    "db_content_variable_name": "",
+                    "comment": "Line Identifer",
+                    "db_content_name": "CAT010",
+                    "db_content_variable_name": "Line ID",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
-                    "json_key": "170.MRS",
-                    "json_value_format": "",
-                    "mandatory": false,
-                    "unit": ""
-                }
-            },
-            "JSONDataMapping69": {
-                "parameters": {
-                    "active": false,
-                    "append_value": false,
-                    "comment": "Type number, value 3",
-                    "db_content_name": "MLAT",
-                    "db_content_variable_name": "",
-                    "dimension": "",
-                    "format_data_type": "",
-                    "in_array": false,
-                    "json_key": "170.TOM",
+                    "json_key": "line_id",
                     "json_value_format": "",
                     "mandatory": false,
                     "unit": ""
@@ -1085,15 +1032,15 @@
             },
             "JSONDataMapping7": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
-                    "comment": "Type number, value 0",
-                    "db_content_name": "MLAT",
-                    "db_content_variable_name": "",
+                    "comment": "",
+                    "db_content_name": "CAT010",
+                    "db_content_variable_name": "Loop",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
-                    "json_key": "020.FX2",
+                    "json_key": "020.LOP",
                     "json_value_format": "",
                     "mandatory": false,
                     "unit": ""
@@ -1103,29 +1050,29 @@
                 "parameters": {
                     "active": true,
                     "append_value": false,
-                    "comment": "Type number, value 0",
-                    "db_content_name": "MLAT",
-                    "db_content_variable_name": "ground_bit",
+                    "comment": "",
+                    "db_content_name": "CAT010",
+                    "db_content_variable_name": "FFT",
                     "dimension": "",
-                    "format_data_type": "STRING",
+                    "format_data_type": "",
                     "in_array": false,
-                    "json_key": "020.GBS",
-                    "json_value_format": "bool",
+                    "json_key": "020.RAB",
+                    "json_value_format": "",
                     "mandatory": false,
                     "unit": ""
                 }
             },
             "JSONDataMapping9": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
-                    "comment": "Type number, value 0",
-                    "db_content_name": "MLAT",
-                    "db_content_variable_name": "",
+                    "comment": "",
+                    "db_content_name": "CAT010",
+                    "db_content_variable_name": "Simulated",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
-                    "json_key": "020.LOP",
+                    "json_key": "020.SIM",
                     "json_value_format": "",
                     "mandatory": false,
                     "unit": ""

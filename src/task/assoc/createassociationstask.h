@@ -30,7 +30,7 @@
 #include "boost/date_time/posix_time/posix_time.hpp"
 
 class TaskManager;
-class CreateAssociationsTaskWidget;
+class CreateAssociationsTaskDialog;
 class DBContent;
 class Buffer;
 class CreateAssociationsJob;
@@ -47,11 +47,14 @@ class CreateAssociationsTask : public Task, public Configurable
     Q_OBJECT
 
 public slots:
+    void dialogRunSlot();
+    void dialogCancelSlot();
+
     void createDoneSlot();
     void createObsoleteSlot();
 
-    void newDataSlot(DBContent& object);
-    void loadingDoneSlot(DBContent& object);
+    void loadedDataDataSlot(const std::map<std::string, std::shared_ptr<Buffer>>& data, bool requires_reset);
+    void loadingDoneSlot();
 
     void associationStatusSlot(QString status);
 
@@ -62,11 +65,11 @@ public:
                            TaskManager& task_manager);
     virtual ~CreateAssociationsTask();
 
-    TaskWidget* widget();
-    virtual void deleteWidget();
+    CreateAssociationsTaskDialog* dialog();
 
     dbContent::MetaVariable* keyVar() const;
     dbContent::MetaVariable* dsIdVar() const;
+    dbContent::MetaVariable* lineIdVar() const;
     dbContent::MetaVariable* todVar() const;
     dbContent::MetaVariable* targetAddrVar() const;
     dbContent::MetaVariable* targetIdVar() const;
@@ -141,38 +144,19 @@ public:
     void contMaxDistanceAcceptableTracker(double value);
 
 protected:
-    std::string key_var_str_;
-    dbContent::MetaVariable* key_var_{nullptr};
-
-    std::string ds_id_var_str_;
+    dbContent::MetaVariable* rec_num_var_{nullptr};
     dbContent::MetaVariable* ds_id_var_{nullptr};
-
-    std::string tod_var_str_;
+    dbContent::MetaVariable* line_id_var_{nullptr};
     dbContent::MetaVariable* tod_var_{nullptr};
-
-    std::string target_addr_var_str_;
     dbContent::MetaVariable* target_addr_var_{nullptr};
-
-    std::string target_id_var_str_;
     dbContent::MetaVariable* target_id_var_{nullptr};
-
-    std::string track_num_var_str_;
     dbContent::MetaVariable* track_num_var_{nullptr};
-
-    std::string track_end_var_str_;
     dbContent::MetaVariable* track_end_var_{nullptr};
-
-    std::string mode_3a_var_str_;
     dbContent::MetaVariable* mode_3a_var_{nullptr};
-
-    std::string mode_c_var_str_;
     dbContent::MetaVariable* mode_c_var_{nullptr};
-
-    std::string latitude_var_str_;
     dbContent::MetaVariable* latitude_var_{nullptr};
-
-    std::string longitude_var_str_;
     dbContent::MetaVariable* longitude_var_{nullptr};
+    dbContent::MetaVariable* associations_var_{nullptr};
 
     bool associate_non_mode_s_ {true};
     bool clean_dubious_utns_ {true};
@@ -206,17 +190,17 @@ protected:
     boost::posix_time::ptime start_time_;
     boost::posix_time::ptime stop_time_;
 
-    std::unique_ptr<CreateAssociationsTaskWidget> widget_;
+    std::unique_ptr<CreateAssociationsTaskDialog> dialog_;
 
-    std::unique_ptr<CreateAssociationsStatusDialog> status_dialog_{nullptr};
+    std::unique_ptr<CreateAssociationsStatusDialog> status_dialog_;
 
-    std::map<std::string, bool> dbo_loading_done_flags_;
+    std::map<std::string, std::shared_ptr<Buffer>> data_;
     bool dbo_loading_done_{false};
 
     std::shared_ptr<CreateAssociationsJob> create_job_;
     bool create_job_done_{false};
 
-    void checkAndSetMetaVariable(std::string& name_str, dbContent::MetaVariable** var);
+    void checkAndSetMetaVariable(const std::string& name_str, dbContent::MetaVariable** var);
 
     dbContent::VariableSet getReadSetFor(const std::string& dbo_name);
 };

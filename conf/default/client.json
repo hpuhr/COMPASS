@@ -11,14 +11,14 @@
             "path": "threads.json"
         },
         {
-            "class_id": "UnitManager",
-            "instance_id": "UnitManager0",
-            "path": "units.json"
-        },
-        {
             "class_id": "ProjectionManager",
             "instance_id": "ProjectionManager0",
             "path": "projection.json"
+        },
+        {
+            "class_id": "UnitManager",
+            "instance_id": "UnitManager0",
+            "path": "units.json"
         }
     ]
 }

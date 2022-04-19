@@ -27,7 +27,7 @@
 #include <memory>
 
 class TaskManager;
-class ManageSectorsTaskWidget;
+class ManageSectorsTaskDialog;
 class SavedFile;
 class Sector;
 class OGRPolygon;
@@ -35,6 +35,11 @@ class OGRLinearRing;
 
 class ManageSectorsTask : public Task, public Configurable
 {
+    Q_OBJECT
+
+public slots:
+    void dialogDoneSlot();
+
 public:
     ManageSectorsTask(const std::string& class_id, const std::string& instance_id,
                       TaskManager& task_manager);
@@ -43,8 +48,7 @@ public:
     virtual void generateSubConfigurable(const std::string& class_id,
                                          const std::string& instance_id);
 
-    virtual TaskWidget* widget();
-    virtual void deleteWidget();
+    ManageSectorsTaskDialog* dialog();
 
     bool canImportFile();
     void importFile (const std::string& layer_name, bool exclude, QColor color);
@@ -68,7 +72,7 @@ protected:
     std::map<std::string, SavedFile*> file_list_;
     std::string current_filename_;
 
-    std::unique_ptr<ManageSectorsTaskWidget> widget_;
+    std::unique_ptr<ManageSectorsTaskDialog> dialog_;
 
     unsigned int found_sectors_num_{0};
     std::string parse_message_;

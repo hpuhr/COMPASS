@@ -105,9 +105,9 @@ void VariableSelectionWidget::updateMenuEntries()
 
     if (show_dbo_only_)
     {
-        assert(dbo_man_.existsObject(only_dbo_name_));
+        assert(dbo_man_.existsDBContent(only_dbo_name_));
 
-        for (auto& var_it : dbo_man_.object(only_dbo_name_).variables())
+        for (auto& var_it : dbo_man_.dbContent(only_dbo_name_).variables())
         {
             if (show_data_types_only_ && !showDataType(var_it->dataType()))
                 continue;
@@ -205,7 +205,7 @@ void VariableSelectionWidget::triggerSlot(QAction* action)
         }
         else
         {
-            assert(dbo_man_.object(obj_name).hasVariable(var_name));
+            assert(dbo_man_.dbContent(obj_name).hasVariable(var_name));
 
             meta_variable_selected_ = false;
             variable_selected_ = true;
@@ -262,9 +262,9 @@ Variable& VariableSelectionWidget::selectedVariable() const
     std::string obj_name = object_label_->text().toStdString();
     std::string var_name = variable_label_->text().toStdString();
 
-    assert(dbo_man_.object(obj_name).hasVariable(var_name));
+    assert(dbo_man_.dbContent(obj_name).hasVariable(var_name));
 
-    return dbo_man_.object(obj_name).variable(var_name);
+    return dbo_man_.dbContent(obj_name).variable(var_name);
 }
 
 void VariableSelectionWidget::selectedMetaVariable(MetaVariable& variable)

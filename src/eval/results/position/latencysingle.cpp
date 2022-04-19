@@ -191,7 +191,7 @@ namespace EvaluationRequirementResult
          num_value_ok_, // "#LTOK"
          num_value_nok_, // "#LTNOK"
          p_min_var, // "PLTOK"
-         target_->mopsVersionsStr().c_str(), // "MOPS"
+         target_->mopsVersionStr().c_str(), // "MOPS"
          target_->nucpNicStr().c_str(), // "NUCp/NIC"
          target_->nacpStr().c_str()}, // "NACp"
                     this, {utn_});

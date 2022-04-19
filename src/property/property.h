@@ -32,8 +32,9 @@ enum class PropertyDataType
     ULONGINT,
     FLOAT,
     DOUBLE,
-    STRING
-};  // P_TYPE_POINTER and SENTINEL removed
+    STRING,
+    JSON
+};
 
 /**
  * @brief Base class for a data item identifier

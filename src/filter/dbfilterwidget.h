@@ -21,78 +21,51 @@
 #include <QFrame>
 #include <QMenu>
 
-#include "configurable.h"
+class DBFilter;
 
 class QWidget;
 class QCheckBox;
 class QVBoxLayout;
-class DBFilter;
 class QPushButton;
 
-/**
- * @brief Qt frame widget, which represents a DBFilter
- *
- * Has general elements, like a label with the filter name, show/hide button and a manage button for
- * generic filters. A child widget is embedded, which is the filters widget itself. Emits
- * possibleFilterChange when something is changed, but the filter decides of the change is
- * propagated to the FilterManager (based on the active_ flag).
- */
-class DBFilterWidget : public QFrame, public Configurable
+class DBFilterWidget : public QFrame
 {
     Q_OBJECT
-  private slots:
-    /// @brief Visibility toggle
+
+private slots:
     void toggleVisible();
-    /// @brief And operator toggle, not used yet
-    void toggleAnd();
-    /// @brief Active toggle
+
+    void toggleAnd(); // not used
+
     void toggleActive();
-    /// @brief Invert function, not used yet
-    void invert();
-    /// @brief Slot for sub-filters to propagate their changes. Not used yet.
+
     void possibleSubFilterChange();
-    /// @brief Reset function
     void reset();
-    /// @brief Deletes the filter
     void deleteFilter();
-    /// @brief Value changed in edit field
     void filterEditSlot();
 
-  protected slots:
-    /// @brief Shows the management menu
+protected slots:
     void showMenuSlot();
 
-  signals:
-    /// @brief Emitted when the filter is changed
+signals:
     void possibleFilterChange();
-    /// @brief Emitted when the file should be edited
     void filterEdit(DBFilter* filter);
     void deleteFilterSignal(DBFilter* filter);
 
-  public:
-    /// @brief Constructor
-    DBFilterWidget(const std::string& class_id, const std::string& instance_id, DBFilter& filter);
-    /// @brief Destructor
+public:
+    DBFilterWidget(DBFilter& filter);
     virtual ~DBFilterWidget();
 
-    /// @brief Adds a child widget
     void addChildWidget(QWidget* widget);
-    /// @brief Updates the child widget
     void updateChildWidget();
 
-    /// @brief Updates the management elements
     virtual void update(void);
 
-    void setInvisible()
-    {
-        visible_ = false;
-        child_->setVisible(visible_);
-    }
+    void setInvisible();
 
-  protected:
+protected:
     DBFilter& filter_;
 
-    bool visible_;
     QWidget* child_ {nullptr}; // Child widget from DBFilter
 
     QCheckBox* visible_checkbox_ {nullptr};

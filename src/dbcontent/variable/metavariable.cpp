@@ -81,7 +81,7 @@ void MetaVariable::generateSubConfigurable(const std::string& class_id,
         // DBOVAR LOWERCASE HACK
         // boost::algorithm::to_lower(dbovar_name);
 
-        if (!object_manager_.existsObject(dbo_name))
+        if (!object_manager_.existsDBContent(dbo_name))
         {
             logerr << "MetaVariable: generateSubConfigurable: name " << name_
                    << " dbovariable definition " << instance_id << " has unknown dbo, ignoring";
@@ -89,7 +89,7 @@ void MetaVariable::generateSubConfigurable(const std::string& class_id,
             return;
         }
 
-        if (!object_manager_.object(dbo_name).hasVariable(dbovar_name))
+        if (!object_manager_.dbContent(dbo_name).hasVariable(dbovar_name))
         {
             logerr << "MetaVariable: generateSubConfigurable: name " << name_
                    << " dbovariable definition " << instance_id << " has unknown dbo variable, ignoring";
@@ -105,13 +105,13 @@ void MetaVariable::generateSubConfigurable(const std::string& class_id,
             return;
         }
 
-        assert(object_manager_.existsObject(dbo_name));
-        assert(object_manager_.object(dbo_name).hasVariable(dbovar_name));
+        assert(object_manager_.existsDBContent(dbo_name));
+        assert(object_manager_.dbContent(dbo_name).hasVariable(dbovar_name));
         assert(variables_.find(dbo_name) == variables_.end());
 
         definitions_[dbo_name] = definition;
         variables_.insert(std::pair<std::string, Variable&>(
-            dbo_name, object_manager_.object(dbo_name).variable(dbovar_name)));
+            dbo_name, object_manager_.dbContent(dbo_name).variable(dbovar_name)));
     }
     else
         throw std::runtime_error("MetaVariable: generateSubConfigurable: unknown class_id " +
@@ -319,9 +319,9 @@ void MetaVariable::removeOutdatedVariables()
     {
         delete_var = false;
 
-        if (!obj_man.existsObject(var_it->second->dboName()))
+        if (!obj_man.existsDBContent(var_it->second->dboName()))
             delete_var = true;
-        else if (!obj_man.object(var_it->second->dboName())
+        else if (!obj_man.dbContent(var_it->second->dboName())
                       .hasVariable(var_it->second->variableName()))
             delete_var = true;
 

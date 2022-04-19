@@ -27,7 +27,7 @@
 #include <nmeaparse/nmea.h>
 
 class TaskManager;
-class GPSTrailImportTaskWidget;
+class GPSTrailImportTaskDialog;
 class SavedFile;
 class DBContent;
 class Buffer;
@@ -37,16 +37,17 @@ class GPSTrailImportTask : public Task, public Configurable
     Q_OBJECT
 
 public slots:
-    void insertProgressSlot(float percent);
-    void insertDoneSlot(DBContent& object);
+    void insertDoneSlot();
+
+    void dialogImportSlot();
+    void dialogDoneSlot();
 
 public:
     GPSTrailImportTask(const std::string& class_id, const std::string& instance_id,
                        TaskManager& task_manager);
     virtual ~GPSTrailImportTask();
 
-    virtual TaskWidget* widget();
-    virtual void deleteWidget();
+    GPSTrailImportTaskDialog* dialog();
 
     virtual void generateSubConfigurable(const std::string& class_id,
                                          const std::string& instance_id);
@@ -55,13 +56,8 @@ public:
     virtual bool canRun();
     virtual void run();
 
-    const std::map<std::string, SavedFile*>& fileList() { return file_list_; }
-    bool hasFile(const std::string& filename) { return file_list_.count(filename) > 0; }
-    void addFile(const std::string& filename);
-    void removeCurrentFilename();
-    void removeAllFiles ();
-    void currentFilename(const std::string& filename);
-    const std::string& currentFilename() { return current_filename_; }
+    void importFilename(const std::string& filename);
+    const std::string& importFilename() { return current_filename_; }
 
     virtual bool checkPrerequisites();
     virtual bool isRecommended();
@@ -100,8 +96,10 @@ public:
     std::string callsign() const;
     void callsign(const std::string& callsign);
 
+    unsigned int lineID() const;
+    void lineID(unsigned int line_id);
+
 protected:
-    std::map<std::string, SavedFile*> file_list_;
     std::string current_filename_;
 
     std::string ds_name_;
@@ -117,7 +115,9 @@ protected:
     bool set_callsign_;
     std::string callsign_;
 
-    std::unique_ptr<GPSTrailImportTaskWidget> widget_;
+    unsigned int line_id_ {0};
+
+    std::unique_ptr<GPSTrailImportTaskDialog> dialog_;
 
     std::string current_error_;
     std::string current_text_;

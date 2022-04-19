@@ -90,8 +90,8 @@ void RadarPlotPositionCalculatorTask::dbObjectStr(const std::string& db_object_s
 
     db_object_str_ = db_object_str;
 
-    assert(COMPASS::instance().dbContentManager().existsObject(db_object_str_));
-    db_object_ = &COMPASS::instance().dbContentManager().object(db_object_str_);
+    assert(COMPASS::instance().dbContentManager().existsDBContent(db_object_str_));
+    db_object_ = &COMPASS::instance().dbContentManager().dbContent(db_object_str_);
 
     emit statusChangedSignal(name_);
 }
@@ -241,10 +241,10 @@ bool RadarPlotPositionCalculatorTask::checkPrerequisites()
         done_ =
             COMPASS::instance().interface().getProperty(DONE_PROPERTY_NAME) == "1";  // set done flag
 
-    if (!COMPASS::instance().dbContentManager().existsObject("Radar"))
+    if (!COMPASS::instance().dbContentManager().existsDBContent("Radar"))
         return false;
 
-    return COMPASS::instance().dbContentManager().object("Radar").hasData();
+    return COMPASS::instance().dbContentManager().dbContent("Radar").hasData();
 }
 
 bool RadarPlotPositionCalculatorTask::isRecommended()
@@ -290,10 +290,10 @@ bool RadarPlotPositionCalculatorTask::canRun()
     if (!db_object_str_.size())
         return false;
 
-    if (!COMPASS::instance().dbContentManager().existsObject(db_object_str_))
+    if (!COMPASS::instance().dbContentManager().existsDBContent(db_object_str_))
         return false;
 
-    DBContent& object = COMPASS::instance().dbContentManager().object(db_object_str_);
+    DBContent& object = COMPASS::instance().dbContentManager().dbContent(db_object_str_);
 
     if (!object.loadable())
         return false;
@@ -342,8 +342,8 @@ void RadarPlotPositionCalculatorTask::run()
 
     num_loaded_ = 0;
 
-    assert(obj_man.existsObject(db_object_str_));
-    db_object_ = &COMPASS::instance().dbContentManager().object(db_object_str_);
+    assert(obj_man.existsDBContent(db_object_str_));
+    db_object_ = &COMPASS::instance().dbContentManager().dbContent(db_object_str_);
     assert(db_object_);
 
     if (key_var_str_.size())

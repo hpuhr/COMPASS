@@ -248,10 +248,10 @@ DBContent& ASTERIXJSONParser::dbObject() const
 
     DBContentManager& obj_man = COMPASS::instance().dbContentManager();
 
-    if (!obj_man.existsObject(db_content_name_))
+    if (!obj_man.existsDBContent(db_content_name_))
         throw runtime_error ("ASTERIXJSONParser: dbObject: dbobject '" + db_content_name_+ "' does not exist");
     else
-        return obj_man.object(db_content_name_);
+        return obj_man.dbContent(db_content_name_);
 }
 
 void ASTERIXJSONParser::initialize()
@@ -448,17 +448,18 @@ bool ASTERIXJSONParser::parseTargetReport(const nlohmann::json& tr, Buffer& buff
                        << " format '" << map_it->jsonValueFormat() << "'";
                 assert(buffer.has<std::string>(current_var_name));
 
-                //                if (buffer.dboName() == "Tracker" && current_var_name == "ground_bit")
-                //                {
-                //                    loginf << "ASTERIXJSONParser: parseTargetReport: string " << current_var_name
-                //                           << " format '" << map_it->jsonValueFormat() << "' mand " << mandatory_missing;
-
-                //                    mandatory_missing =
-                //                        map_it->findAndSetValue(tr, buffer.get<std::string>(current_var_name), row_cnt, true);
-                //                }
-                //                else
                 mandatory_missing =
                         map_it->findAndSetValue(tr, buffer.get<std::string>(current_var_name), row_cnt);
+
+                break;
+            }
+            case PropertyDataType::JSON:
+            {
+                logdbg << "ASTERIXJSONParser: parseTargetReport: json " << current_var_name
+                       << " format '" << map_it->jsonValueFormat() << "'";
+                assert(buffer.has<json>(current_var_name));
+                mandatory_missing =
+                        map_it->findAndSetValue(tr, buffer.get<json>(current_var_name), row_cnt);
 
                 break;
             }

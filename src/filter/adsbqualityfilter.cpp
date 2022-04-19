@@ -158,28 +158,20 @@ void ADSBQualityFilter::generateSubConfigurable(const std::string& class_id,
 {
     logdbg << "ADSBQualityFilter: generateSubConfigurable: class_id " << class_id;
 
-    if (class_id.compare("ADSBQualityFilterWidget") == 0)
-    {
-        assert(!widget_);
-        widget_ = new ADSBQualityFilterWidget(*this, class_id, instance_id);
-    }
-    else
-        throw std::runtime_error("ADSBQualityFilter: generateSubConfigurable: unknown class_id " +
-                                 class_id);
+    throw std::runtime_error("ADSBQualityFilter: generateSubConfigurable: unknown class_id " + class_id);
 }
 
 
 void ADSBQualityFilter::checkSubConfigurables()
 {
     logdbg << "ADSBQualityFilter: checkSubConfigurables";
-
-    if (!widget_)
-    {
-        logdbg << "ADSBQualityFilter: checkSubConfigurables: generating filter widget";
-        widget_ = new ADSBQualityFilterWidget(*this, "ADSBQualityFilterWidget", instanceId() + "Widget0");
-    }
-    assert(widget_);
 }
+
+DBFilterWidget* ADSBQualityFilter::createWidget()
+{
+    return new ADSBQualityFilterWidget(*this);
+}
+
 
 void ADSBQualityFilter::reset()
 {

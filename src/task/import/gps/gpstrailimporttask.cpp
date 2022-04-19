@@ -16,7 +16,7 @@
  */
 
 #include "gpstrailimporttask.h"
-#include "gpstrailimporttaskwidget.h"
+#include "gpstrailimporttaskdialog.h"
 #include "compass.h"
 #include "dbinterface.h"
 #include "savedfile.h"
@@ -26,11 +26,11 @@
 #include "dbcontent/dbcontentmanager.h"
 #include "dbcontent/dbcontent.h"
 #include "dbcontent/variable/variable.h"
+#include "datasourcemanager.h"
 #include "buffer.h"
 #include "dbcontent/variable/variableset.h"
+#include "dbcontent/variable/metavariable.h"
 #include "util/number.h"
-//#include "postprocesstask.h"
-//#include "managedatasourcestask.h"
 
 #include <iostream>
 #include <fstream>
@@ -69,7 +69,9 @@ GPSTrailImportTask::GPSTrailImportTask(const std::string& class_id, const std::s
     registerParameter("target_address", &target_address_, 0);
 
     registerParameter("set_callsign", &set_callsign_, false);
-    registerParameter("callsign_", &callsign_, "");
+    registerParameter("callsign", &callsign_, "");
+
+    //registerParameter("line_id", &line_id_, 0); always defaults to 0
 
     createSubConfigurables();
 
@@ -79,129 +81,45 @@ GPSTrailImportTask::GPSTrailImportTask(const std::string& class_id, const std::s
 
 GPSTrailImportTask::~GPSTrailImportTask()
 {
-    for (auto it : file_list_)
-        delete it.second;
-
-    file_list_.clear();
 }
 
 void GPSTrailImportTask::generateSubConfigurable(const std::string& class_id,
                                                  const std::string& instance_id)
 {
-    if (class_id == "NMEAFile")
-    {
-        SavedFile* file = new SavedFile(class_id, instance_id, this);
-        assert(file_list_.count(file->name()) == 0);
-        file_list_.insert(std::pair<std::string, SavedFile*>(file->name(), file));
-    }
-    else
         throw std::runtime_error("GPSTrailImportTask: generateSubConfigurable: unknown class_id " +
                                  class_id);
 }
 
-TaskWidget* GPSTrailImportTask::widget()
+GPSTrailImportTaskDialog* GPSTrailImportTask::dialog()
 {
-    if (!widget_)
+    if (!dialog_)
     {
-        widget_.reset(new GPSTrailImportTaskWidget(*this));
+        dialog_.reset(new GPSTrailImportTaskDialog(*this));
 
-        connect(&task_manager_, &TaskManager::expertModeChangedSignal, widget_.get(),
-                &GPSTrailImportTaskWidget::expertModeChangedSlot);
+        connect(dialog_.get(), &GPSTrailImportTaskDialog::importSignal,
+                this, &GPSTrailImportTask::dialogImportSlot);
+
+        connect(dialog_.get(), &GPSTrailImportTaskDialog::doneSignal,
+                this, &GPSTrailImportTask::dialogDoneSlot);
     }
 
-    assert(widget_);
-    return widget_.get();
+    assert(dialog_);
+    return dialog_.get();
 }
 
-void GPSTrailImportTask::deleteWidget() { widget_.reset(nullptr); }
-
-
-void GPSTrailImportTask::addFile(const std::string& filename)
+void GPSTrailImportTask::importFilename(const std::string& filename)
 {
-    loginf << "GPSTrailImportTask: addFile: filename '" << filename << "'";
-
-    if (file_list_.count(filename) != 0)
-        throw std::invalid_argument("GPSTrailImportTask: addFile: name '" + filename +
-                                    "' already in use");
-
-    std::string instancename = filename;
-    instancename.erase(std::remove(instancename.begin(), instancename.end(), '/'),
-                       instancename.end());
-
-    Configuration& config = addNewSubConfiguration("NMEAFile", "NMEAFile" + instancename);
-    config.addParameterString("name", filename);
-    generateSubConfigurable("NMEAFile", "NMEAFile" + instancename);
-
-    current_filename_ = filename;  // set as current
-    parseCurrentFile();
-
-    emit statusChangedSignal(name_);
-
-    if (widget_)
-    {
-        widget_->updateFileListSlot();
-        widget_->updateText();
-    }
-}
-
-void GPSTrailImportTask::removeCurrentFilename()
-{
-    loginf << "GPSTrailImportTask: removeCurrentFilename: filename '" << current_filename_ << "'";
-
-    assert(current_filename_.size());
-    assert(hasFile(current_filename_));
-
-    if (file_list_.count(current_filename_) != 1)
-        throw std::invalid_argument("GPSTrailImportTask: addFile: name '" + current_filename_ +
-                                    "' not in use");
-
-    delete file_list_.at(current_filename_);
-    file_list_.erase(current_filename_);
-    current_filename_ = "";
-
-    emit statusChangedSignal(name_);
-
-    if (widget_)
-    {
-        widget_->updateFileListSlot();
-        widget_->updateText();
-    }
-}
-
-void GPSTrailImportTask::removeAllFiles ()
-{
-    loginf << "GPSTrailImportTask: removeAllFiles";
-
-    while (file_list_.size())
-    {
-        delete file_list_.begin()->second;
-        file_list_.erase(file_list_.begin());
-    }
-
-    current_filename_ = "";
-
-    emit statusChangedSignal(name_);
-
-    if (widget_)
-    {
-        widget_->updateFileListSlot();
-        widget_->updateText();
-    }
-}
-
-void GPSTrailImportTask::currentFilename(const std::string& filename)
-{
-    loginf << "GPSTrailImportTask: currentFilename: filename '" << filename << "'";
+    loginf << "GPSTrailImportTask: importFilename: filename '" << filename << "'";
 
     current_filename_ = filename;
 
     parseCurrentFile();
 
-    //    if (widget_)
-    //    {
-    //        widget_->updateFileListSlot();
-    //        widget_->updateText();
-    //    }
+        if (dialog_)
+        {
+//            dialog_->updateFileListSlot();
+//            widget_->updateText();
+        }
 
     emit statusChangedSignal(name_);
 }
@@ -214,7 +132,7 @@ bool GPSTrailImportTask::checkPrerequisites()
     if (COMPASS::instance().interface().hasProperty(DONE_PROPERTY_NAME))
         done_ = COMPASS::instance().interface().getProperty(DONE_PROPERTY_NAME) == "1";
 
-    if (!COMPASS::instance().dbContentManager().existsObject("RefTraj"))
+    if (!COMPASS::instance().dbContentManager().existsDBContent("RefTraj"))
         return false;
 
     return true;
@@ -350,6 +268,18 @@ void GPSTrailImportTask::callsign(const std::string& callsign)
     loginf << "GPSTrailImportTask: callsign: value '" << callsign << "'";
 
     callsign_ = callsign;
+}
+
+unsigned int GPSTrailImportTask::lineID() const
+{
+    return line_id_;
+}
+
+void GPSTrailImportTask::lineID(unsigned int line_id)
+{
+    loginf << "GPSTrailImportTask: lineID: value " << line_id;
+
+    line_id_ = line_id;
 }
 
 std::string GPSTrailImportTask::currentText() const
@@ -509,130 +439,119 @@ void GPSTrailImportTask::run()
     assert (gps_fixes_.size());
     assert (!buffer_);
 
-    DBContentManager& obj_man = COMPASS::instance().dbContentManager();
+    DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
 
-    assert (obj_man.existsObject("RefTraj"));
+    string dbcontent_name = "RefTraj";
+    assert (dbcontent_man.existsDBContent(dbcontent_name));
 
-    DBContent& reftraj_obj = obj_man.object("RefTraj");
-
-    assert (reftraj_obj.hasVariable("sac"));
-    assert (reftraj_obj.hasVariable("sic"));
-    assert (reftraj_obj.hasVariable("ds_id"));
-    assert (reftraj_obj.hasVariable("tod"));
-    assert (reftraj_obj.hasVariable("pos_lat_deg"));
-    assert (reftraj_obj.hasVariable("pos_long_deg"));
-
-    assert (reftraj_obj.hasVariable("mode3a_code"));
-    assert (reftraj_obj.hasVariable("target_addr"));
-    assert (reftraj_obj.hasVariable("callsign"));
-
-    assert (reftraj_obj.hasVariable("heading_deg"));
-    assert (reftraj_obj.hasVariable("groundspeed_kt"));
+    assert (dbcontent_man.metaVariable(DBContent::meta_var_sac_id_.name()).existsIn(dbcontent_name));
+    assert (dbcontent_man.metaVariable(DBContent::meta_var_sic_id_.name()).existsIn(dbcontent_name));
+    assert (dbcontent_man.metaVariable(DBContent::meta_var_datasource_id_.name()).existsIn(dbcontent_name));
+    assert (dbcontent_man.metaVariable(DBContent::meta_var_line_id_.name()).existsIn(dbcontent_name));
+    assert (dbcontent_man.metaVariable(DBContent::meta_var_tod_.name()).existsIn(dbcontent_name));
+    assert (dbcontent_man.metaVariable(DBContent::meta_var_latitude_.name()).existsIn(dbcontent_name));
+    assert (dbcontent_man.metaVariable(DBContent::meta_var_longitude_.name()).existsIn(dbcontent_name));
+    assert (dbcontent_man.metaVariable(DBContent::meta_var_m3a_.name()).existsIn(dbcontent_name));
+    assert (dbcontent_man.metaVariable(DBContent::meta_var_ta_.name()).existsIn(dbcontent_name));
+    assert (dbcontent_man.metaVariable(DBContent::meta_var_ti_.name()).existsIn(dbcontent_name));
+    assert (dbcontent_man.metaVariable(DBContent::meta_var_vx_.name()).existsIn(dbcontent_name));
+    assert (dbcontent_man.metaVariable(DBContent::meta_var_vy_.name()).existsIn(dbcontent_name));
 
     loginf << "GPSTrailImportTask: run: getting variables";
 
     using namespace dbContent;
 
-    Variable& sac_var = reftraj_obj.variable("sac");
-    Variable& sic_var = reftraj_obj.variable("sic");
-    Variable& ds_id_var = reftraj_obj.variable("ds_id");
-    Variable& tod_var = reftraj_obj.variable("tod");
-    Variable& lat_var = reftraj_obj.variable("pos_lat_deg");
-    Variable& long_var = reftraj_obj.variable("pos_long_deg");
+    Variable& sac_var = dbcontent_man.metaVariable(DBContent::meta_var_sac_id_.name()).getFor(dbcontent_name);
+    Variable& sic_var = dbcontent_man.metaVariable(DBContent::meta_var_sic_id_.name()).getFor(dbcontent_name);
+    Variable& ds_id_var = dbcontent_man.metaVariable(DBContent::meta_var_datasource_id_.name()).getFor(dbcontent_name);
+    Variable& line_id_var = dbcontent_man.metaVariable(DBContent::meta_var_line_id_.name()).getFor(dbcontent_name);
+    Variable& tod_var = dbcontent_man.metaVariable(DBContent::meta_var_tod_.name()).getFor(dbcontent_name);
+    Variable& lat_var = dbcontent_man.metaVariable(DBContent::meta_var_latitude_.name()).getFor(dbcontent_name);
+    Variable& long_var = dbcontent_man.metaVariable(DBContent::meta_var_longitude_.name()).getFor(dbcontent_name);
+    Variable& m3a_var = dbcontent_man.metaVariable(DBContent::meta_var_m3a_.name()).getFor(dbcontent_name);
+    Variable& ta_var = dbcontent_man.metaVariable(DBContent::meta_var_ta_.name()).getFor(dbcontent_name);
+    Variable& ti_var = dbcontent_man.metaVariable(DBContent::meta_var_ti_.name()).getFor(dbcontent_name);
+    Variable& vx_var = dbcontent_man.metaVariable(DBContent::meta_var_vx_.name()).getFor(dbcontent_name);
+    Variable& vy_var = dbcontent_man.metaVariable(DBContent::meta_var_vy_.name()).getFor(dbcontent_name);
 
-    Variable& m3a_var = reftraj_obj.variable("mode3a_code");
-    Variable& ta_var = reftraj_obj.variable("target_addr");
-    Variable& cs_var = reftraj_obj.variable("callsign");
+    //VariableSet var_set;
 
-    Variable& head_var = reftraj_obj.variable("heading_deg");
-    Variable& spd_var = reftraj_obj.variable("groundspeed_kt");
+//    var_set.add(sac_var);
+//    var_set.add(sic_var);
+//    var_set.add(ds_id_var);
+//    var_set.add(tod_var);
+//    var_set.add(lat_var);
+//    var_set.add(long_var);
 
+//    if (set_mode_3a_code_)
+//        var_set.add(m3a_var);
 
-    VariableSet var_set;
+//    if (set_target_address_)
+//        var_set.add(ta_var);
 
-    var_set.add(sac_var);
-    var_set.add(sic_var);
-    var_set.add(ds_id_var);
-    var_set.add(tod_var);
-    var_set.add(lat_var);
-    var_set.add(long_var);
+//    if (set_callsign_)
+//        var_set.add(ti_var);
 
-    if (set_mode_3a_code_)
-        var_set.add(m3a_var);
-
-    if (set_target_address_)
-        var_set.add(ta_var);
-
-    if (set_callsign_)
-        var_set.add(cs_var);
-
-    var_set.add(head_var);
-    var_set.add(spd_var);
+//    var_set.add(vx_var);
+//    var_set.add(vy_var);
 
     PropertyList properties;
     properties.addProperty(sac_var.name(), PropertyDataType::UCHAR);
     properties.addProperty(sic_var.name(), PropertyDataType::UCHAR);
-    properties.addProperty(ds_id_var.name(), PropertyDataType::INT);
+    properties.addProperty(ds_id_var.name(), PropertyDataType::UINT);
+    properties.addProperty(line_id_var.name(), PropertyDataType::UINT);
     properties.addProperty(tod_var.name(), PropertyDataType::FLOAT);
     properties.addProperty(lat_var.name(), PropertyDataType::DOUBLE);
     properties.addProperty(long_var.name(), PropertyDataType::DOUBLE);
 
     if (set_mode_3a_code_)
-        properties.addProperty(m3a_var.name(), PropertyDataType::INT);
+        properties.addProperty(m3a_var.name(), PropertyDataType::UINT);
 
     if (set_target_address_)
-        properties.addProperty(ta_var.name(), PropertyDataType::INT);
+        properties.addProperty(ta_var.name(), PropertyDataType::UINT);
 
     if (set_callsign_)
-        properties.addProperty(cs_var.name(), PropertyDataType::STRING);
+        properties.addProperty(ti_var.name(), PropertyDataType::STRING);
 
-    properties.addProperty(head_var.name(), PropertyDataType::DOUBLE);
-    properties.addProperty(spd_var.name(), PropertyDataType::DOUBLE);
+    properties.addProperty(vx_var.name(), PropertyDataType::DOUBLE);
+    properties.addProperty(vy_var.name(), PropertyDataType::DOUBLE);
 
     loginf << "GPSTrailImportTask: run: creating buffer";
 
-    buffer_ = make_shared<Buffer>(properties, "RefTraj");
+    buffer_ = make_shared<Buffer>(properties, dbcontent_name);
 
-    NullableVector<unsigned char>& sac_vec = buffer_->get<unsigned char>("sac");
-    NullableVector<unsigned char>& sic_vec = buffer_->get<unsigned char>("sic");
-    NullableVector<int>& ds_id_vec = buffer_->get<int>("ds_id");
-    NullableVector<float>& tod_vec = buffer_->get<float>("tod");
-    NullableVector<double>& lat_vec = buffer_->get<double>("pos_lat_deg");
-    NullableVector<double>& long_vec = buffer_->get<double>("pos_long_deg");
+    NullableVector<unsigned char>& sac_vec = buffer_->get<unsigned char>(sac_var.name());
+    NullableVector<unsigned char>& sic_vec = buffer_->get<unsigned char>(sic_var.name());
+    NullableVector<unsigned int>& ds_id_vec = buffer_->get<unsigned int>(ds_id_var.name());
+    NullableVector<unsigned int>& line_id_vec = buffer_->get<unsigned int>(line_id_var.name());
+    NullableVector<float>& tod_vec = buffer_->get<float>(tod_var.name());
+    NullableVector<double>& lat_vec = buffer_->get<double>(lat_var.name());
+    NullableVector<double>& long_vec = buffer_->get<double>(long_var.name());
 
-    NullableVector<double>& head_vec = buffer_->get<double>("heading_deg");
-    NullableVector<double>& spd_vec = buffer_->get<double>("groundspeed_kt");
+    NullableVector<double>& vx_vec = buffer_->get<double>(vx_var.name());
+    NullableVector<double>& vy_vec = buffer_->get<double>(vy_var.name());
 
     unsigned int cnt = 0;
-    int ds_id = Number::dsIdFrom(ds_sac_, ds_sic_);
+    unsigned int ds_id = Number::dsIdFrom(ds_sac_, ds_sic_);
 
     // config data source
     {
-        TODO_ASSERT
+        DataSourceManager& src_man = COMPASS::instance().dataSourceManager();
 
-//        ManageDataSourcesTask& ds_task = COMPASS::instance().taskManager().manageDataSourcesTask();
+        if (!src_man.hasDBDataSource(ds_id))
+            src_man.addNewDataSource(ds_id);
 
-//        if (!ds_task.hasDataSource("RefTraj", ds_sac_, ds_sic_)) // add if not existing
-//        {
-//            loginf << "GPSTrailImportTask: run: adding data source '" << ds_name_ << "' "
-//                   << ds_sac_ << "/" << ds_sic_;
-//            StoredDBODataSource& new_ds = ds_task.addNewStoredDataSource("RefTraj");
-//            new_ds.name(ds_name_);
-//            new_ds.sac(ds_sac_);
-//            new_ds.sic(ds_sic_);
-//        }
-//        else // set name if existing
-//        {
-//            loginf << "GPSTrailImportTask: run: setting data source '" << ds_name_ << "' "
-//                   << ds_sac_ << "/" << ds_sic_;
-//            StoredDBODataSource& ds = ds_task.getDataSource("RefTraj", ds_sac_, ds_sic_);
-//            ds.name(ds_name_);
-//        }
+        assert (src_man.hasDBDataSource(ds_id));
+
+        dbContent::DBDataSource& src = src_man.dbDataSource(ds_id);
+
+        src.name(ds_name_);
+        src.dsType(dbcontent_name); // same as dstype
+
     }
 
-    bool has_ds = false; //reftraj_obj.hasDataSources() && reftraj_obj.hasDataSource(ds_id);
-
     float tod;
+    double speed_ms, track_angle_rad, vx, vy;
 
     loginf << "GPSTrailImportTask: run: filling buffer";
 
@@ -654,71 +573,61 @@ void GPSTrailImportTask::run()
         sac_vec.set(cnt, ds_sac_);
         sic_vec.set(cnt, ds_sic_);
         ds_id_vec.set(cnt, ds_id);
+        line_id_vec.set(cnt, line_id_);
 
         tod_vec.set(cnt, tod);
         lat_vec.set(cnt, fix_it.latitude);
         long_vec.set(cnt, fix_it.longitude);
 
         if (set_mode_3a_code_)
-            buffer_->get<int>("mode3a_code").set(cnt, mode_3a_code_);
+            buffer_->get<unsigned int>(m3a_var.name()).set(cnt, mode_3a_code_);
 
         if (set_target_address_)
-            buffer_->get<int>("target_addr").set(cnt, target_address_);
+            buffer_->get<unsigned int>(ta_var.name()).set(cnt, target_address_);
 
         if (set_callsign_)
-            buffer_->get<string>("callsign").set(cnt, callsign_);
+            buffer_->get<string>(ti_var.name()).set(cnt, callsign_);
 
-        if (fix_it.travelAngle != 0.0)
-            head_vec.set(cnt, fix_it.travelAngle);
+        if (fix_it.travelAngle != 0.0 && fix_it.speed != 0.0)
+        {
+            track_angle_rad = DEG2RAD * fix_it.travelAngle;
+            speed_ms = fix_it.speed * 0.27778;
 
-        if (fix_it.speed != 0.0)
-            spd_vec.set(cnt, fix_it.speed*0.539957); // km/h to knots
+            vx = sin(track_angle_rad) * speed_ms;
+            vy = cos(track_angle_rad) * speed_ms;
+
+            loginf << "UGA track_angle_rad " << track_angle_rad << " spd " << speed_ms << " vx " << vx << " vy " << vy;
+
+            vx_vec.set(cnt, vx);
+            vy_vec.set(cnt, vy);
+        }
+
+//        if (fix_it.travelAngle != 0.0) TODO
+//            head_vec.set(cnt, fix_it.travelAngle);
+
+//        if (fix_it.speed != 0.0)
+//            spd_vec.set(cnt, fix_it.speed*0.539957); // km/h to knots
 
         ++cnt;
-    }
-
-    if (!has_ds)
-    {
-        loginf << "GPSTrailImportTask: run: adding data source";
-
-        std::map<int, std::pair<int, int>> datasources_to_add;
-
-        datasources_to_add[ds_id] = {ds_sac_, ds_sic_};
-
-        TODO_ASSERT
-
-        //reftraj_obj.addDataSources(datasources_to_add);
     }
 
     //void insertData(DBOVariableSet& list, std::shared_ptr<Buffer> buffer, bool emit_change = true);
 
     loginf << "GPSTrailImportTask: run: inserting data";
 
-//    connect(&reftraj_obj, &DBObject::insertDoneSignal, this, &GPSTrailImportTask::insertDoneSlot,
-//            Qt::UniqueConnection);
-//    connect(&reftraj_obj, &DBObject::insertProgressSignal, this,
-//            &GPSTrailImportTask::insertProgressSlot, Qt::UniqueConnection);
+    connect(&dbcontent_man, &DBContentManager::insertDoneSignal, this, &GPSTrailImportTask::insertDoneSlot,
+            Qt::UniqueConnection);
 
-    TODO_ASSERT
-
-    //reftraj_obj.insertData(var_set, buffer_, false);
+    dbcontent_man.insertData({{dbcontent_name, buffer_}});
 }
 
-void GPSTrailImportTask::insertProgressSlot(float percent)
-{
-    loginf << "GPSTrailImportTask: insertProgressSlot: percent " << percent;
-}
-
-void GPSTrailImportTask::insertDoneSlot(DBContent& object)
+void GPSTrailImportTask::insertDoneSlot()
 {
     loginf << "GPSTrailImportTask: insertDoneSlot";
 
     buffer_ = nullptr;
 
     done_ = true;
-
-    task_manager_.appendSuccess("GPSTrailImportTask: imported " + to_string(gps_fixes_.size())
-                                +" GPS fixes");
 
     //COMPASS::instance().interface().setProperty(PostProcessTask::DONE_PROPERTY_NAME, "0");
 
@@ -737,6 +646,22 @@ void GPSTrailImportTask::insertDoneSlot(DBContent& object)
         msg_box.exec();
 
     emit doneSignal(name_);
+}
+
+void GPSTrailImportTask::dialogImportSlot()
+{
+    assert (canRun());
+
+    assert (dialog_);
+    dialog_->hide();
+
+    run();
+}
+
+void GPSTrailImportTask::dialogDoneSlot()
+{
+    assert (dialog_);
+    dialog_->hide();
 }
 
 //void GPSTrailImportTask::checkParsedData ()

@@ -19,6 +19,14 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/utnfilterwidget.h"
         "${CMAKE_CURRENT_LIST_DIR}/adsbqualityfilter.h"
         "${CMAKE_CURRENT_LIST_DIR}/adsbqualityfilterwidget.h"
+        "${CMAKE_CURRENT_LIST_DIR}/acadfilter.h"
+        "${CMAKE_CURRENT_LIST_DIR}/acadfilterwidget.h"
+        "${CMAKE_CURRENT_LIST_DIR}/acidfilter.h"
+        "${CMAKE_CURRENT_LIST_DIR}/acidfilterwidget.h"
+        "${CMAKE_CURRENT_LIST_DIR}/mode3afilter.h"
+        "${CMAKE_CURRENT_LIST_DIR}/mode3afilterwidget.h"
+        "${CMAKE_CURRENT_LIST_DIR}/modecfilter.h"
+        "${CMAKE_CURRENT_LIST_DIR}/modecfilterwidget.h"
     PRIVATE
         "${CMAKE_CURRENT_LIST_DIR}/dbfilter.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/dbfiltercondition.cpp"
@@ -32,6 +40,14 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/utnfilterwidget.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/adsbqualityfilter.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/adsbqualityfilterwidget.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/acadfilter.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/acadfilterwidget.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/acidfilter.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/acidfilterwidget.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/mode3afilter.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/mode3afilterwidget.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/modecfilter.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/modecfilterwidget.cpp"
 )
 
 

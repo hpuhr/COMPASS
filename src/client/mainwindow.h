@@ -40,7 +40,7 @@ class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
-private slots:
+public slots:
 
     void newDBSlot();
     void openExistingDBSlot();
@@ -59,11 +59,21 @@ private slots:
     void livePauseSlot();
     void liveStopSlot();
 
+    void configureDataSourcesSlot();
+    void configureMetaVariablesSlot();
+    void configureSectorsSlot();
+
     void importAsterixRecordingSlot();
     void importRecentAsterixRecordingSlot();
+    void clearImportRecentAsterixRecordingsSlot();
     void importAsterixFromNetworkSlot();
 
-    void configureMetaVariablesSlot();
+    void importGPSTrailSlot();
+
+    void importViewPointsSlot();
+
+    void calculateAssociationsARTASSlot();
+    void calculateAssociationsSlot();
 
     void quitRequestedSlot();
     void showAddViewMenuSlot();
@@ -80,6 +90,8 @@ public:
 
     void createAndOpenNewSqlite3DB(const std::string& filename);
     void openSqlite3DB(const std::string& filename);
+
+    void importViewPointsFile(const std::string& filename);
 
     void importASTERIXFile(const std::string& filename);
     void importASTERIXFromNetwork();
@@ -117,6 +129,9 @@ protected:
     bool sqlite3_open_db_ {false};
     std::string sqlite3_open_db_filename_;
 
+    bool view_points_import_file_ {false};
+    std::string view_points_import_filename_;
+
     bool asterix_import_file_ {false};
     std::string asterix_import_filename_;
     bool asterix_import_network_ {false};
@@ -137,10 +152,16 @@ protected:
     QMenu* open_recent_db_menu_ {nullptr};
     QAction* close_db_action_ {nullptr};
 
+    // configure sectors
+    QAction* sectors_action_ {nullptr};
+
     // import menu
     QMenu* import_menu_ {nullptr};
 
     QMenu* import_recent_asterix_menu_ {nullptr};
+
+    // process menu
+    QMenu* process_menu_ {nullptr};
 
     bool loading_{false};
 

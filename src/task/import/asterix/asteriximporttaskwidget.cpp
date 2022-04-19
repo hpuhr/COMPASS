@@ -49,7 +49,6 @@ ASTERIXImportTaskWidget::ASTERIXImportTaskWidget(ASTERIXImportTask& task, QWidge
     main_layout_->addWidget(tab_widget_);
 
     addMainTab();
-    addASTERIXConfigTab();
     addOverrideTab();
     addMappingsTab();
 
@@ -67,40 +66,33 @@ void ASTERIXImportTaskWidget::addMainTab()
 
     // source stuff
     {
-        QVBoxLayout* source_layout = new QVBoxLayout();
+        QFormLayout* source_layout = new QFormLayout();
 
         if (task_.isImportNetwork())
         {
             loginf << "ASTERIXImportTaskWidget: addMainTab: is network import";
 
-            QLabel* source_label = new QLabel("Network");
-            source_label->setFont(font_bold);
-            source_layout->addWidget(source_label);
+            source_layout->addRow(new QLabel("Network"));
         }
         else
         {
             loginf << "ASTERIXImportTaskWidget: addMainTab: is file import";
 
-            QLabel* source_label = new QLabel("File");
-            source_label->setFont(font_bold);
-            source_layout->addWidget(source_label);
-
-            QLabel* file_label = new QLabel(task_.importFilename().c_str());
-            source_layout->addWidget(file_label);
-
-            QLabel* line_label = new QLabel("Line ID");
-            source_layout->addWidget(line_label);
+            source_layout->addRow("File", new QLabel(task_.importFilename().c_str()));
 
             QComboBox* file_line_box = new QComboBox();
             file_line_box->addItems({"1", "2", "3", "4"});
 
             connect(file_line_box, &QComboBox::currentTextChanged,
                     this, &ASTERIXImportTaskWidget::fileLineIDEditSlot);
-            source_layout->addWidget(file_line_box);
+            source_layout->addRow("Line ID", file_line_box);
         }
 
         main_tab_layout->addLayout(source_layout);
     }
+
+    config_widget_ = new ASTERIXConfigWidget(task_, this);
+    main_tab_layout->addWidget(config_widget_);
 
     main_tab_layout->addStretch();
 
@@ -112,25 +104,12 @@ void ASTERIXImportTaskWidget::addMainTab()
                 &ASTERIXImportTaskWidget::debugChangedSlot);
         main_tab_layout->addWidget(debug_check_);
 
-        limit_ram_check_ = new QCheckBox("Limit RAM Usage");
-        limit_ram_check_->setChecked(task_.limitRAM());
-        connect(limit_ram_check_, &QCheckBox::clicked, this,
-                &ASTERIXImportTaskWidget::limitRAMChangedSlot);
-        main_tab_layout->addWidget(limit_ram_check_);
     }
 
     QWidget* main_tab_widget = new QWidget();
     main_tab_widget->setContentsMargins(0, 0, 0, 0);
     main_tab_widget->setLayout(main_tab_layout);
     tab_widget_->addTab(main_tab_widget, "Main");
-}
-
-void ASTERIXImportTaskWidget::addASTERIXConfigTab()
-{
-    assert(tab_widget_);
-
-    config_widget_ = new ASTERIXConfigWidget(task_, this);
-    tab_widget_->addTab(config_widget_, "Decoder");
 }
 
 void ASTERIXImportTaskWidget::addOverrideTab()
@@ -394,20 +373,6 @@ void ASTERIXImportTaskWidget::debugChangedSlot()
     assert(box);
 
     task_.debug(box->checkState() == Qt::Checked);
-}
-
-void ASTERIXImportTaskWidget::limitRAMChangedSlot()
-{
-    QCheckBox* box = dynamic_cast<QCheckBox*>(sender());
-    assert(box);
-
-    task_.limitRAM(box->checkState() == Qt::Checked);
-}
-
-void ASTERIXImportTaskWidget::updateLimitRAM()
-{
-    assert(limit_ram_check_);
-    limit_ram_check_->setChecked(task_.limitRAM());
 }
 
 //void ASTERIXImportTaskWidget::runStarted()

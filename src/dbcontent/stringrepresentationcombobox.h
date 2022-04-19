@@ -18,12 +18,13 @@
 #ifndef STRINGREPRESENTATIONCOMBOBOX_H_
 #define STRINGREPRESENTATIONCOMBOBOX_H_
 
-#include <QComboBox>
-#include <stdexcept>
-
 #include "dbcontent/variable/variable.h"
 #include "global.h"
 #include "logger.h"
+
+#include <QComboBox>
+
+#include <stdexcept>
 
 class StringRepresentationComboBox : public QComboBox
 {

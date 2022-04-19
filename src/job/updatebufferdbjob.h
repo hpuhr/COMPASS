@@ -33,11 +33,6 @@ namespace dbContent
 class Variable;
 }
 
-/**
- * @brief Buffer write job
- *
- * Writes buffer's data contents to a database table.
- */
 class UpdateBufferDBJob : public Job
 {
     Q_OBJECT

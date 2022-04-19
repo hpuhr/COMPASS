@@ -16,17 +16,19 @@
  */
 
 #include "dboreaddbjob.h"
-
 #include "buffer.h"
 #include "dbinterface.h"
 #include "dbcontent/dbcontent.h"
 #include "dbcontent/variable/variable.h"
 #include "logger.h"
 #include "propertylist.h"
+#include "compass.h"
+#include "viewmanager.h"
 
 using namespace dbContent;
 
 DBOReadDBJob::DBOReadDBJob(DBInterface& db_interface, DBContent& dbobject, VariableSet read_list,
+                           const std::vector<std::string>& extra_from_parts,
                            std::string custom_filter_clause,
                            std::vector<Variable*> filtered_variables, bool use_order,
                            Variable* order_variable, bool use_order_ascending,
@@ -35,6 +37,7 @@ DBOReadDBJob::DBOReadDBJob(DBInterface& db_interface, DBContent& dbobject, Varia
       db_interface_(db_interface),
       dbobject_(dbobject),
       read_list_(read_list),
+      extra_from_parts_(extra_from_parts),
       custom_filter_clause_(custom_filter_clause),
       filtered_variables_(filtered_variables),
       use_order_(use_order),
@@ -61,23 +64,25 @@ void DBOReadDBJob::run()
 
     start_time_ = boost::posix_time::microsec_clock::local_time();
 
-    db_interface_.prepareRead(dbobject_, read_list_, custom_filter_clause_, filtered_variables_,
+    db_interface_.prepareRead(dbobject_, read_list_, extra_from_parts_, custom_filter_clause_, filtered_variables_,
                               use_order_, order_variable_, use_order_ascending_, limit_str_);
 
     unsigned int cnt = 0;
 
-    while (!done_)
+    ViewManager &view_manager = COMPASS::instance().viewManager();
+
+    bool last_buffer;
+
+    while (!obsolete_)
     {
         std::shared_ptr<Buffer> buffer = db_interface_.readDataChunk(dbobject_);
         assert(buffer);
+        last_buffer = buffer->lastOne();
 
         cnt++;
 
         if (obsolete_)
-        {
-            loginf << "DBOReadDBJob: run: " << dbobject_.name() << ": obsolete after prepared";
             break;
-        }
 
         assert(buffer->dboName() == dbobject_.name());
 
@@ -85,12 +90,34 @@ void DBOReadDBJob::run()
                << cnt << " last one " << buffer->lastOne();
         row_count_ += buffer->size();
 
-        loginf << "DBOReadDBJob: run: " << dbobject_.name() << ": emitting intermediate read, size " << row_count_;
-        emit intermediateSignal(buffer);
+        // add data to cache
+        if (!cached_buffer_) // no cache
+            cached_buffer_ = buffer;
+        else
+        {
+            cached_buffer_->seizeBuffer(*buffer);
+            buffer = nullptr;
+        }
 
-        if (buffer->lastOne())
+        if (obsolete_)
             break;
+
+        if (!view_manager.isProcessingData() || last_buffer) // distribute data
+        {
+            loginf << "DBOReadDBJob: run: " << dbobject_.name() << ": emitting intermediate read, size " << row_count_;
+            emit intermediateSignal(cached_buffer_);
+
+            cached_buffer_ = nullptr;
+        }
+
+        if (last_buffer)
+        {
+            loginf << "DBOReadDBJob: run: " << dbobject_.name() << ": last buffer";
+            break;
+        }
     }
+
+    assert (!cached_buffer_);
 
     logdbg << "DBOReadDBJob: run: " << dbobject_.name() << ": finalizing statement";
     db_interface_.finalizeReadStatement(dbobject_);

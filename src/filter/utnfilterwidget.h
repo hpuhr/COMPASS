@@ -32,7 +32,7 @@ class UTNFilterWidget : public DBFilterWidget
     void valueEditedSlot(const QString& value);
 
 public:
-    UTNFilterWidget(UTNFilter& filter, const std::string& class_id, const std::string& instance_id);
+    UTNFilterWidget(UTNFilter& filter);
     virtual ~UTNFilterWidget();
 
     virtual void update();

@@ -250,7 +250,7 @@ void SingleDubiousTrack::addTargetDetailsToTableADSB (
                  num_tracks_dubious_, // "#DT"
                  reasons.c_str(),  // "Reasons"
                  p_dubious_var, // "PDT"
-                 target_->mopsVersionsStr().c_str(), // "MOPS"
+                 target_->mopsVersionStr().c_str(), // "MOPS"
                  target_->nucpNicStr().c_str(), // "NUCp/NIC"
                  target_->nacpStr().c_str()}, // "NACp"
                 this, {utn_});

@@ -34,39 +34,26 @@ class VariableOrderedSetWidget : public QWidget
     Q_OBJECT
 
   public slots:
-    /// @brief Updates the variables list
     void updateVariableListSlot();
-    /// @brief Removes the selected variable
     void removeSlot();
-    /// @brief Moves the selected variable up
     void moveUpSlot();
-    /// @brief Moves the selected variable down
     void moveDownSlot();
 
   protected slots:
-    /// @brief Called when menu action is executed
     void triggerSlot(QAction* action);
-    /// @brief Shows the context menu
     void showMenuSlot();
 
   public:
-    /// @brief Constructor
-    VariableOrderedSetWidget(VariableOrderedSet& set, QWidget* parent = 0,
-                                Qt::WindowFlags f = 0);
-    /// @brief Destructor
+    VariableOrderedSetWidget(VariableOrderedSet& set, QWidget* parent = 0, Qt::WindowFlags f = 0);
     virtual ~VariableOrderedSetWidget();
 
   protected:
-    /// Represented set
     VariableOrderedSet& set_;
-    /// Context menu for adding a variable
     QMenu menu_;
 
-    /// Variable list
     QListWidget* list_widget_{nullptr};
     int current_index_{-1};
 
-    /// @brief Updates variables list
     void updateMenuEntries();
 };
 

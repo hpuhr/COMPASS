@@ -110,7 +110,9 @@ void BufferCSVExportJob::run()
                 assert(!rec_num_vec.isNull(row));
                 unsigned int rec_num = rec_num_vec.get(row);
 
-                ss << manager.object(dbo_name).associations().getUTNsStringFor(rec_num);
+                TODO_ASSERT
+
+                //ss << manager.object(dbo_name).associations().getUTNsStringFor(rec_num);
             }
 
             for (size_t col = 0; col < read_set_size; col++)
@@ -297,6 +299,20 @@ void BufferCSVExportJob::run()
                     if (!null)
                     {
                         value_str = buffer_->get<std::string>(property_name).getAsString(row);
+                    }
+                }
+                else if (data_type == PropertyDataType::JSON)
+                {
+                    if (!buffer_->has<nlohmann::json>(property_name))
+                    {
+                        ss << ";";
+                        continue;
+                    }
+
+                    null = buffer_->get<nlohmann::json>(property_name).isNull(row);
+                    if (!null)
+                    {
+                        value_str = buffer_->get<nlohmann::json>(property_name).getAsString(row);
                     }
                 }
                 else

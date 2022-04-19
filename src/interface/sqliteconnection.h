@@ -82,26 +82,11 @@ public:
     bool getPreparedCommandDone() { return prepared_command_done_; }
 
     std::map<std::string, DBTableInfo> getTableInfo();
-    virtual std::vector<std::string> getDatabases();
 
     virtual void generateSubConfigurable(const std::string& class_id,
                                          const std::string& instance_id);
 
-    //QWidget* widget();
-    // void deleteWidget ();
-    //QWidget* infoWidget();
     std::string status() const;
-//    std::string identifier() const;
-//    std::string shortIdentifier() const;
-//    std::string type() const { return SQLITE_IDENTIFIER; }
-
-//    const std::map<std::string, SavedFile*>& fileList() { return file_list_; }
-//    bool hasFile(const std::string& filename) { return file_list_.count(filename) > 0; }
-//    void addFile(const std::string& filename);
-//    void removeFile(const std::string& filename);
-//    void removeAllFiles ();
-
-//    const std::string& lastFilename() { return last_filename_; }
 
     bool dbOpened() { return db_opened_; }
 
@@ -117,11 +102,6 @@ protected:
 
     std::shared_ptr<DBCommand> prepared_command_;
     bool prepared_command_done_;
-
-    //std::unique_ptr<SQLiteConnectionWidget> widget_;
-    //std::unique_ptr<SQLiteConnectionInfoWidget> info_widget_;
-
-    //std::map<std::string, SavedFile*> file_list_;
 
     void execute(const std::string& command);
     void execute(const std::string& command, std::shared_ptr<Buffer> buffer);

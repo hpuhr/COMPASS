@@ -67,7 +67,7 @@ std::string Single::getRequirementSectionID () // TODO hack
 {
     if (eval_man_.resultsGenerator().splitResultsByMOPS())
     {
-        string tmp = target()->mopsVersionsStr();
+        string tmp = target()->mopsVersionStr();
 
         if (!tmp.size())
             tmp = "Unknown";

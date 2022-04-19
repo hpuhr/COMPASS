@@ -75,8 +75,8 @@ void VariableOrderedSet::generateSubConfigurable(const std::string& class_id,
                 return;
             }
         }
-        else if (!manager.existsObject(definition->dboName()) ||
-                 !manager.object(definition->dboName()).hasVariable(definition->variableName()))
+        else if (!manager.existsDBContent(definition->dboName()) ||
+                 !manager.dbContent(definition->dboName()).hasVariable(definition->variableName()))
         {
             logwrn << "VariableOrderedSet: generateSubConfigurable: outdated name "
                    << definition->dboName() << " variable " << definition->variableName();
@@ -321,9 +321,9 @@ VariableSet VariableOrderedSet::getFor(const std::string& dbo_name)
         }
         else if (it->second->dboName() == dbo_name)
         {
-            assert(manager.existsObject(dbo_name));
-            assert(manager.object(dbo_name).hasVariable(it->second->variableName()));
-            type_set.add(manager.object(dbo_name).variable(it->second->variableName()));
+            assert(manager.existsDBContent(dbo_name));
+            assert(manager.dbContent(dbo_name).hasVariable(it->second->variableName()));
+            type_set.add(manager.dbContent(dbo_name).variable(it->second->variableName()));
         }
     }
 
@@ -348,9 +348,9 @@ VariableSet VariableOrderedSet::getExistingInDBFor(const std::string& dbo_name)
         }
         else if (it->second->dboName() == dbo_name)
         {
-            assert(manager.existsObject(dbo_name));
-            assert(manager.object(dbo_name).hasVariable(it->second->variableName()));
-            type_set.add(manager.object(dbo_name).variable(it->second->variableName()));
+            assert(manager.existsDBContent(dbo_name));
+            assert(manager.dbContent(dbo_name).hasVariable(it->second->variableName()));
+            type_set.add(manager.dbContent(dbo_name).variable(it->second->variableName()));
         }
     }
 

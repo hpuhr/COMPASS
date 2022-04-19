@@ -176,23 +176,26 @@ QVariant BufferTableModel::data(const QModelIndex& index, int role) const
             {
                 DBContentManager& manager = COMPASS::instance().dbContentManager();
 
-                std::string dbo_name = buffer_->dboName();
-                assert(dbo_name.size());
 
-                const DBOAssociationCollection& associations =
-                    manager.object(dbo_name).associations();
+                TODO_ASSERT
 
-                assert(buffer_->has<int>("rec_num"));
-                assert(!buffer_->get<int>("rec_num").isNull(buffer_index));
-                unsigned int rec_num = buffer_->get<int>("rec_num").get(buffer_index);
+//                std::string dbo_name = buffer_->dboName();
+//                assert(dbo_name.size());
 
-                if (associations.contains(rec_num))
-                {
-                    return QVariant(
-                        manager.object(dbo_name).associations().getUTNsStringFor(rec_num).c_str());
-                }
-                else
-                    return QVariant();
+//                const DBOAssociationCollection& associations =
+//                    manager.object(dbo_name).associations();
+
+//                assert(buffer_->has<int>("rec_num"));
+//                assert(!buffer_->get<int>("rec_num").isNull(buffer_index));
+//                unsigned int rec_num = buffer_->get<int>("rec_num").get(buffer_index);
+
+//                if (associations.contains(rec_num))
+//                {
+//                    return QVariant(
+//                        manager.object(dbo_name).associations().getUTNsStringFor(rec_num).c_str());
+//                }
+//                else
+//                    return QVariant();
             }
 
             col -= 2;  // for the actual properties
@@ -346,6 +349,15 @@ QVariant BufferTableModel::data(const QModelIndex& index, int role) const
                 if (!null)
                 {
                     value_str = buffer_->get<std::string>(property_name).getAsString(buffer_index);
+                }
+            }
+            else if (data_type == PropertyDataType::JSON)
+            {
+                assert(buffer_->has<nlohmann::json>(property_name));
+                null = buffer_->get<nlohmann::json>(property_name).isNull(buffer_index);
+                if (!null)
+                {
+                    value_str = buffer_->get<nlohmann::json>(property_name).getAsString(buffer_index);
                 }
             }
             else

@@ -49,6 +49,9 @@ class ViewManager : public QObject, public Configurable
   public slots:
     void selectionChangedSlot();
 
+    void databaseOpenedSlot();
+    void databaseClosedSlot();
+
     void loadingStartedSlot();
     // all data contained, also new one. requires_reset true indicates that all shown info should be re-created,
     // e.g. when data in the beginning was removed, or order of previously emitted data was changed, etc.
@@ -62,7 +65,10 @@ class ViewManager : public QObject, public Configurable
     virtual ~ViewManager();
 
     void init(QTabWidget* tab_widget);
+    void loadViewPoints();
     void close();
+
+    void clearDataInViews();
 
     void registerView(View* view);
     void unregisterView(View* view);
@@ -102,6 +108,12 @@ class ViewManager : public QObject, public Configurable
 
     unsigned int newViewNumber();
 
+    void disableDataDistribution(bool value);
+    // disables propagation of data to the views. used when loading is performed for processing purposes
+
+
+    bool isProcessingData() const;
+
 protected:
     COMPASS& compass_;
 
@@ -109,6 +121,7 @@ protected:
     ViewPointsWidget* view_points_widget_{nullptr};
 
     bool initialized_{false};
+    bool processing_data_ {false};
 
     QTabWidget* main_tab_widget_{nullptr};
 
@@ -124,6 +137,8 @@ protected:
     unsigned int container_count_{0};
 
     QStringList view_class_list_;
+
+    bool disable_data_distribution_ {false};
 
     virtual void checkSubConfigurables();
 };

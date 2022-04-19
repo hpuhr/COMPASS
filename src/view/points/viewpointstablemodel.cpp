@@ -39,6 +39,24 @@ ViewPointsTableModel::ViewPointsTableModel(ViewManager& view_manager)
 {
     table_columns_ = default_table_columns_;
 
+    open_icon_ = QIcon(Files::getIconFilepath("not_recommended.png").c_str());
+    closed_icon_ = QIcon(Files::getIconFilepath("not_todo.png").c_str());
+    todo_icon_ = QIcon(Files::getIconFilepath("todo.png").c_str());
+    unknown_icon_ = QIcon(Files::getIconFilepath("todo_maybe.png").c_str());
+}
+
+//ViewPointsTableModel::~ViewPointsTableModel()
+//{
+
+//}
+
+
+void ViewPointsTableModel::loadViewPoints()
+{
+    loginf << "ViewPointsTableModel: loadViewPoints";
+
+    beginResetModel();
+
     // load view points
     if (COMPASS::instance().interface().existsViewPointsTable())
     {
@@ -61,16 +79,22 @@ ViewPointsTableModel::ViewPointsTableModel(ViewManager& view_manager)
     updateTypes();
     updateStatuses();
 
-    open_icon_ = QIcon(Files::getIconFilepath("not_recommended.png").c_str());
-    closed_icon_ = QIcon(Files::getIconFilepath("not_todo.png").c_str());
-    todo_icon_ = QIcon(Files::getIconFilepath("todo.png").c_str());
-    unknown_icon_ = QIcon(Files::getIconFilepath("todo_maybe.png").c_str());
+    endResetModel();
 }
+void ViewPointsTableModel::clearViewPoints()
+{
+    loginf << "ViewPointsTableModel: clearViewPoints";
 
-//ViewPointsTableModel::~ViewPointsTableModel()
-//{
+    beginResetModel();
 
-//}
+    view_points_.clear();
+
+    table_columns_ = default_table_columns_;
+    types_.clear();
+    statuses_.clear();
+
+    endResetModel();
+}
 
 int ViewPointsTableModel::rowCount(const QModelIndex& parent) const
 {
@@ -89,73 +113,73 @@ QVariant ViewPointsTableModel::data(const QModelIndex& index, int role) const
 
     switch (role)
     {
-        case Qt::DisplayRole:
-        case Qt::EditRole:
-            {
-                logdbg << "ViewPointsTableModel: data: display role: row " << index.row() << " col " << index.column();
+    case Qt::DisplayRole:
+    case Qt::EditRole:
+    {
+        logdbg << "ViewPointsTableModel: data: display role: row " << index.row() << " col " << index.column();
 
-                assert (index.row() >= 0);
-                assert (index.row() < view_points_.size());
+        assert (index.row() >= 0);
+        assert (index.row() < view_points_.size());
 
-                const ViewPoint& vp = view_points_.at(index.row());
+        const ViewPoint& vp = view_points_.at(index.row());
 
-                logdbg << "ViewPointsTableModel: data: got key " << view_points_.at(index.row()).id();
+        logdbg << "ViewPointsTableModel: data: got key " << view_points_.at(index.row()).id();
 
-                assert (index.column() < table_columns_.size());
-                std::string col_name = table_columns_.at(index.column()).toStdString();
+        assert (index.column() < table_columns_.size());
+        std::string col_name = table_columns_.at(index.column()).toStdString();
 
-                if (!vp.data().contains(col_name))
-                    return QVariant();
+        if (!vp.data().contains(col_name))
+            return QVariant();
 
-                const json& data = vp.data().at(col_name);
+        const json& data = vp.data().at(col_name);
 
-                //            if (col_name == "status" && (data == "open" || data == "closed" || data == "todo"))
-                //                return QVariant();
+        //            if (col_name == "status" && (data == "open" || data == "closed" || data == "todo"))
+        //                return QVariant();
 
-                // s1.find(s2) != std::string::npos
-                if (data.is_number() && col_name.find("time") != std::string::npos)
-                    return String::timeStringFromDouble(data).c_str();
+        // s1.find(s2) != std::string::npos
+        if (data.is_number() && col_name.find("time") != std::string::npos)
+            return String::timeStringFromDouble(data).c_str();
 
-                if (data.is_boolean())
-                    return data.get<bool>();
+        if (data.is_boolean())
+            return data.get<bool>();
 
-                if (data.is_number())
-                    return data.get<float>();
+        if (data.is_number())
+            return data.get<float>();
 
-                return JSON::toString(data).c_str();
-            }
-        case Qt::DecorationRole:
-            {
-                assert (index.column() < table_columns_.size());
+        return JSON::toString(data).c_str();
+    }
+    case Qt::DecorationRole:
+    {
+        assert (index.column() < table_columns_.size());
 
-                if (table_columns_.at(index.column()) == "status")
-                {
-                    assert (index.row() >= 0);
-                    assert (index.row() < view_points_.size());
+        if (table_columns_.at(index.column()) == "status")
+        {
+            assert (index.row() >= 0);
+            assert (index.row() < view_points_.size());
 
-                    const ViewPoint& vp = view_points_.at(index.row());
+            const ViewPoint& vp = view_points_.at(index.row());
 
-                    const json& data = vp.data().at("status");
-                    assert (data.is_string());
+            const json& data = vp.data().at("status");
+            assert (data.is_string());
 
-                    std::string status = data;
+            std::string status = data;
 
-                    if (status == "open")
-                        return open_icon_;
-                    else if (status == "closed")
-                        return closed_icon_;
-                    else if (status == "todo")
-                        return todo_icon_;
-                    else
-                        return unknown_icon_;
-                }
-                else
-                    return QVariant();
-            }
-        default:
-            {
-                return QVariant();
-            }
+            if (status == "open")
+                return open_icon_;
+            else if (status == "closed")
+                return closed_icon_;
+            else if (status == "todo")
+                return todo_icon_;
+            else
+                return unknown_icon_;
+        }
+        else
+            return QVariant();
+    }
+    default:
+    {
+        return QVariant();
+    }
     }
 }
 
@@ -208,10 +232,10 @@ bool ViewPointsTableModel::setData(const QModelIndex& index, const QVariant &val
 
         assert (index.column() == statusColumn() || index.column() == commentColumn());
 
-//        if (index.column() == statusColumn())
-//            view_points_.at(id).setStatus(value.toString().toStdString());
-//        else
-//            view_points_.at(id).setComment(value.toString().toStdString());
+        //        if (index.column() == statusColumn())
+        //            view_points_.at(id).setStatus(value.toString().toStdString());
+        //        else
+        //            view_points_.at(id).setComment(value.toString().toStdString());
 
         if (index.column() == statusColumn())
         {
@@ -384,9 +408,9 @@ const ViewPoint& ViewPointsTableModel::saveNewViewPoint(unsigned int id, const n
     if (id > max_id_)
         max_id_ = id;
 
-//    view_points_.emplace(std::piecewise_construct,
-//                         std::forward_as_tuple(id),   // args for key
-//                         std::forward_as_tuple(id, new_data_ref, view_manager_, true));  // args for mapped value
+    //    view_points_.emplace(std::piecewise_construct,
+    //                         std::forward_as_tuple(id),   // args for key
+    //                         std::forward_as_tuple(id, new_data_ref, view_manager_, true));  // args for mapped value
 
     assert (hasViewPoint(id));
 
@@ -451,97 +475,17 @@ void ViewPointsTableModel::printViewPoints()
         vp_it.print();
 }
 
-void ViewPointsTableModel::importViewPoints (const std::string& filename)
-{
-    loginf << "ViewPointsTableModel: importViewPoints: filename '" << filename << "'";
-
-    try
-    {
-        if (!Files::fileExists(filename))
-            throw std::runtime_error ("File '"+filename+"' not found.");
-
-        std::ifstream ifs(filename);
-        json j = json::parse(ifs);
-
-        if (!j.contains("view_point_context"))
-            throw std::runtime_error("File '"+filename+"' has no context information");
-
-        json& context = j.at("view_point_context");
-
-        if (!context.contains("version"))
-            throw std::runtime_error("File '"+filename+"' context has no version");
-
-        json& version = context.at("version");
-
-        if (!version.is_string())
-            throw std::runtime_error("File '"+filename+"' context version is not number");
-
-        string version_str = version;
-
-        if (version_str != "0.1")
-            throw std::runtime_error("File '"+filename+"' context version "+version_str+" is not supported");
-
-        loginf << "ViewPointsTableModel: importViewPoints: context '" << j.at("view_point_context").dump(4) << "'";
-
-        if (!j.contains("view_points"))
-            throw std::runtime_error ("File '"+filename+"' does not contain view points.");
-
-        json& view_points = j.at("view_points");
-
-        if (!view_points.is_array())
-            throw std::runtime_error ("View points are not in an array.");
-
-        unsigned int row_begin = view_points_.size();
-        unsigned int row_end = row_begin+view_points.size()-1;
-
-        beginInsertRows(QModelIndex(), row_begin, row_end);
-
-        unsigned int id;
-        for (auto& vp_it : view_points.get<json::array_t>())
-        {
-            if (!vp_it.contains("id"))
-                throw std::runtime_error ("View point does not contain id");
-
-            id = vp_it.at("id");
-
-            if (!vp_it.contains("status"))
-                vp_it["status"] = "open";
-
-            saveNewViewPoint(id, vp_it, false);
-        }
-
-        endInsertRows();
-
-        updateTableColumns();
-        updateTypes();
-        updateStatuses();
-
-        //        if (view_points_widget_) // TODO
-        //            view_points_widget_->update();
-
-        QMessageBox m_info(QMessageBox::Information, "View Points Import File",
-                           "File import: '"+QString(filename.c_str())+"' done.\n"
-                           +QString::number(view_points.size())+" View Points added.", QMessageBox::Ok);
-        m_info.exec();
-    }
-    catch (std::exception& e)
-    {
-        QMessageBox m_warning(QMessageBox::Warning, "View Points Import File",
-                              "File import error: '"+QString(e.what())+"'.", QMessageBox::Ok);
-        m_warning.exec();
-        return;
-    }
-}
-
 void ViewPointsTableModel::exportViewPoints (const std::string& filename)
 {
     loginf << "ViewPointsTableModel: exportViewPoints: filename '" << filename << "'";
 
     json data;
 
-    data["view_point_context"] = json::object();
-    json& context = data.at("view_point_context");
-    context["version"] = "0.1";
+    data["content_type"] = "view_points";
+    data["content_version"] = "0.2";
+
+    //data["view_point_context"] = json::object();
+    //json& context = data.at("view_point_context");
 
     data["view_points"] = json::array();
     json& view_points = data.at("view_points");
@@ -573,9 +517,9 @@ void ViewPointsTableModel::exportViewPoints (const std::string& filename)
 unsigned int ViewPointsTableModel::getIdOf (const QModelIndex& index)
 {
     assert (index.isValid());
-//    auto map_it = view_points_.begin();
-//    std::advance(map_it, index.row());
-//    assert (map_it != view_points_.end());
+    //    auto map_it = view_points_.begin();
+    //    std::advance(map_it, index.row());
+    //    assert (map_it != view_points_.end());
 
     assert (index.row() >= 0);
     assert (index.row() < view_points_.size());

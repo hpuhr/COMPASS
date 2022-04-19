@@ -33,23 +33,16 @@
 
 using namespace Utils;
 
-/**
- * Initializes members, registers Parameter, creates GUI elements and the menu, calls update
- */
-DBFilterWidget::DBFilterWidget(const std::string& class_id, const std::string& instance_id,
-                               DBFilter& filter)
-    : QFrame(), Configurable(class_id, instance_id, &filter), filter_(filter)
+DBFilterWidget::DBFilterWidget(DBFilter& filter)
+    : QFrame(), filter_(filter)
 {
     logdbg << "DBFilterWidget: constructor";
-
-    registerParameter("visible", &visible_, false);
 
     QVBoxLayout* main_layout = new QVBoxLayout();
     main_layout->setContentsMargins(1, 1, 1, 1);
     main_layout->setSpacing(1);
 
     setFrameStyle(QFrame::Panel | QFrame::Sunken);
-//    setLineWidth(0);
 
     QHBoxLayout* config_layout = new QHBoxLayout();
     config_layout->setContentsMargins(1, 1, 1, 1);
@@ -84,7 +77,7 @@ DBFilterWidget::DBFilterWidget(const std::string& class_id, const std::string& i
     main_layout->addLayout(config_layout);
 
     child_ = new QWidget();
-    child_->setVisible(visible_);
+    child_->setVisible(filter_.widgetVisible());
 
     child_layout_ = new QVBoxLayout();
     child_layout_->setContentsMargins(5, 1, 1, 1);
@@ -106,14 +99,8 @@ DBFilterWidget::DBFilterWidget(const std::string& class_id, const std::string& i
     update();
 }
 
-/**
- * Tells the DBFilter that the widget has already been deleted.
- */
 DBFilterWidget::~DBFilterWidget() {}
 
-/**
- * Adds possible actions for a generic filter
- */
 void DBFilterWidget::createMenu()
 {
     if (!filter_.isGeneric())
@@ -129,18 +116,12 @@ void DBFilterWidget::createMenu()
     connect(delete_action, SIGNAL(triggered()), this, SLOT(deleteFilter()));
 }
 
-/**
- * Adds a widget to the child layout
- */
 void DBFilterWidget::addChildWidget(QWidget* widget)
 {
     assert(widget);
     child_layout_->addWidget(widget);
 }
 
-/**
- * Removes all contents of the child layout, and adds all condition widgets of the filter
- */
 void DBFilterWidget::updateChildWidget()
 {
     QLayoutItem* child;
@@ -167,8 +148,8 @@ void DBFilterWidget::updateChildWidget()
 void DBFilterWidget::toggleVisible()
 {
     logdbg << "DBFilterWidget: toggleVisible";
-    visible_ = !visible_;
-    child_->setVisible(visible_);
+    filter_.widgetVisible(!filter_.widgetVisible());
+    child_->setVisible(filter_.widgetVisible());
 }
 
 void DBFilterWidget::toggleAnd()
@@ -191,29 +172,14 @@ void DBFilterWidget::toggleActive()
     emit possibleFilterChange();
 }
 
-void DBFilterWidget::invert()
-{
-    logdbg << "DBFilterWidget: invert";
-    filter_.invert();
-
-    emit possibleFilterChange();
-}
-
 void DBFilterWidget::update(void)
 {
     logdbg << "DBFilterWidget: update";
 
     visible_checkbox_->setText(filter_.getName().c_str());
 
-    if (filter_.getActive())
-        active_checkbox_->setChecked(true);
-    else
-        active_checkbox_->setChecked(false);
-
-    if (visible_)
-        visible_checkbox_->setChecked(true);
-    else
-        visible_checkbox_->setChecked(false);
+    active_checkbox_->setChecked(filter_.getActive());
+    visible_checkbox_->setChecked(filter_.widgetVisible());
 
     //  if (!filter_.getAnd())
     //    and_checkbox_->setChecked(Qt::Checked);
@@ -225,6 +191,12 @@ void DBFilterWidget::update(void)
     //  {
     //    conditions.at(cnt)->update();
     //  }
+}
+
+void DBFilterWidget::setInvisible()
+{
+    filter_.widgetVisible(false);
+    child_->setVisible(false);
 }
 
 void DBFilterWidget::possibleSubFilterChange()
