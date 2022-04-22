@@ -91,11 +91,11 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
 //    bool associate_data {false};
 
 //    bool start {false};
-    bool load_data {false};
+//    bool load_data {false};
 //    std::string export_view_points_report_filename;
 //    bool evaluate {false};
 //    std::string export_eval_report_filename;
-    bool quit {false};
+//    bool quit {false};
 
     po::options_description desc("Allowed options");
     desc.add_options()("help", "produce help message")
@@ -128,13 +128,13 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
 //            ("auto_process", po::bool_switch(&auto_process), "start automatic processing of imported data")
 //            ("associate_data", po::bool_switch(&associate_data), "associate target reports")
 //            ("start", po::bool_switch(&start), "start after finishing previous steps")
-            ("load_data", po::bool_switch(&load_data), "load data after start")
+            ("load_data", po::bool_switch(&load_data_), "load data after start")
 //            ("export_view_points_report", po::value<std::string>(&export_view_points_report_filename),
 //             "export view points report after start with given filename, e.g. '/data/db2/report.tex")
 //            ("evaluate", po::bool_switch(&evaluate), "run evaluation")
 //            ("export_eval_report", po::value<std::string>(&export_eval_report_filename),
 //             "export evaluation report after start with given filename, e.g. '/data/eval_db2/report.tex")
-            ("quit", po::bool_switch(&quit), "quit after finishing all previous steps");
+            ("quit", po::bool_switch(&quit_), "quit after finishing all previous steps");
 
     try
     {
@@ -257,8 +257,8 @@ void Client::run ()
 //    if (start)
 //        task_man.start(start);
 
-//    if (load_data)
-//        main_window.loadData(load_data);
+    if (load_data_)
+        main_window.loadData(load_data_);
 
 //    if (export_view_points_report_filename.size())
 //        task_man.exportViewPointsReportFile(export_view_points_report_filename);
@@ -269,8 +269,8 @@ void Client::run ()
 //    if (export_eval_report_filename.size())
 //        task_man.exportEvalReportFile(export_eval_report_filename);
 
-//    if (quit)
-//        main_window.quit(quit);
+    if (quit_)
+        main_window.quit(quit_);
 }
 
 Client::~Client()

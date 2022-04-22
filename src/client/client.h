@@ -52,6 +52,9 @@ private:
     //    std::string asterix_framing;
     //    std::string asterix_decoder_cfg;
 
+    bool load_data_ {false};
+    bool quit_ {false};
+
     void checkAndSetupConfig();
 
     void checkNeededActions();
