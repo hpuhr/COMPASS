@@ -24,7 +24,7 @@
 #include "dbcontent/variable/variableset.h"
 #include "global.h"
 
-#include <qobject.h>
+#include <QObject>
 
 #include <memory>
 #include <string>
@@ -187,20 +187,7 @@ public:
 
     dbContent::LabelDefinitionWidget* labelDefinitionWidget();
 
-    //std::shared_ptr<Buffer> data() { return data_; }
-
     bool existsInDB() const;
-
-    // association stuff, outdated
-//    void loadAssociationsIfRequired();  // starts loading job if required
-//    void loadAssociations();            // actually loads associations, should be called from job
-//    bool associationsLoaded() const;
-//    bool hasAssociations();
-//    void addAssociation(unsigned int rec_num, unsigned int utn, bool has_src, unsigned int src_rec_num);
-//    const DBOAssociationCollection& associations() { return associations_; }
-//    void clearAssociations();
-//    void saveAssociations();
-
 
     std::string dbTableName() const;
 
@@ -222,8 +209,6 @@ protected:
     std::unique_ptr<dbContent::LabelDefinition> label_definition_;
 
     std::shared_ptr<DBOReadDBJob> read_job_{nullptr};
-    //std::vector<std::shared_ptr<Buffer>> read_job_data_;
-    //std::vector<std::shared_ptr<FinalizeDBOReadJob>> finalize_jobs_;
 
     bool insert_active_ {false};
     std::shared_ptr<InsertBufferDBJob> insert_job_{nullptr};
@@ -233,10 +218,6 @@ protected:
     std::vector<std::unique_ptr<dbContent::Variable>> variables_;
 
     std::unique_ptr<DBContentWidget> widget_;
-
-//    bool associations_changed_{false};
-//    bool associations_loaded_{false};
-//    DBOAssociationCollection associations_;
 
     virtual void checkSubConfigurables();
 

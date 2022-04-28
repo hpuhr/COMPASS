@@ -16,7 +16,7 @@
  */
 
 #include "dbcontent/dbcontentmanager.h"
-
+#include "dbcontent/dbcontentlabelgenerator.h"
 #include "compass.h"
 #include "mainwindow.h"
 #include "configurationmanager.h"
@@ -123,12 +123,24 @@ DBContentManager::~DBContentManager()
 
 }
 
+DBContentLabelGenerator& DBContentManager::labelGenerator()
+{
+    assert (label_generator_);
+    return *label_generator_;
+}
+
 void DBContentManager::generateSubConfigurable(const std::string& class_id,
                                               const std::string& instance_id)
 {
     logdbg << "DBContentManager: generateSubConfigurable: class_id " << class_id << " instance_id "
            << instance_id;
-    if (class_id.compare("DBContent") == 0)
+
+    if (class_id.compare("DBContentLabelGenerator") == 0)
+    {
+        assert (!label_generator_);
+        label_generator_.reset(new DBContentLabelGenerator(class_id, instance_id, *this));
+    }
+    else if (class_id.compare("DBContent") == 0)
     {
         DBContent* object = new DBContent(compass_, class_id, instance_id, this);
         loginf << "DBContentManager: generateSubConfigurable: adding content " << object->name();
@@ -151,7 +163,11 @@ void DBContentManager::generateSubConfigurable(const std::string& class_id,
 
 void DBContentManager::checkSubConfigurables()
 {
-    // nothing to do, must be defined in configuration
+    if (!label_generator_)
+    {
+        generateSubConfigurable("DBContentLabelGenerator", "DBContentLabelGenerator0");
+        assert (label_generator_);
+    }
 }
 
 bool DBContentManager::existsDBContent(const std::string& dbcontent_name)

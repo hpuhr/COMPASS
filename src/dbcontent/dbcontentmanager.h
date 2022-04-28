@@ -32,6 +32,7 @@ class COMPASS;
 class DBContent;
 class DBContentManagerWidget;
 class DBSchemaManager;
+class DBContentLabelGenerator;
 
 namespace dbContent {
 
@@ -71,6 +72,8 @@ public:
 
     virtual void generateSubConfigurable(const std::string& class_id,
                                          const std::string& instance_id);
+
+    DBContentLabelGenerator& labelGenerator();
 
     bool existsDBContent(const std::string& dbcontent_name);
     DBContent& dbContent(const std::string& dbcontent_name);
@@ -131,14 +134,7 @@ public:
 
     bool hasAssociations() const;
     void setAssociationsIdentifier(const std::string& assoc_id);
-//    void setAssociationsByAll();
-//    void removeAssociations();
-
-//    bool hasAssociationsDataSource() const;
     std::string associationsID() const;
-//    std::string associationsDataSourceName() const;
-
-    //bool isOtherDBObjectPostProcessing(DBContent& object);
 
     bool hasMaxRecordNumber() const { return has_max_rec_num_; }
     unsigned int maxRecordNumber() const;
@@ -161,6 +157,8 @@ public:
 
 protected:
     COMPASS& compass_;
+
+    std::unique_ptr<DBContentLabelGenerator> label_generator_;
 
     bool use_order_{false};
     bool use_order_ascending_{false};
