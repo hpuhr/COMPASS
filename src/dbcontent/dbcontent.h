@@ -111,6 +111,9 @@ public:
     static const Property meta_var_longitude_stddev_;
     static const Property meta_var_latlon_cov_;
 
+    static const Property meta_var_climb_descent_;
+    static const Property meta_var_spi_;
+
     static const Property var_radar_range_;
     static const Property var_radar_azimuth_;
     static const Property var_radar_altitude_;
