@@ -90,6 +90,7 @@ std::vector<std::string> DBContentLabelGenerator::getLabelTexts(
     // 2x2
     {
         // 1,2
+
         string acid;
 
         if (acid_var && buffer->has<string>(acid_var->name())
@@ -97,6 +98,15 @@ std::vector<std::string> DBContentLabelGenerator::getLabelTexts(
             acid = buffer->get<string>(acid_var->name()).get(buffer_index);
 
         tmp.push_back(acid);
+
+//        Variable& tod_var = dbcont_manager_.metaGetVariable(dbcontent_name, DBContent::meta_var_tod_);
+//        string tod;
+
+//        if (buffer->has<float>(tod_var.name()) &&
+//                !buffer->get<float>(tod_var.name()).isNull(buffer_index))
+//            tod = String::timeStringFromDouble(buffer->get<float>(tod_var.name()).get(buffer_index));
+
+//        tmp.push_back(tod);
 
         // 2,1
         string m3a;

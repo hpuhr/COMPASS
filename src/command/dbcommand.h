@@ -28,7 +28,7 @@
  */
 class DBCommand
 {
-  public:
+public:
     /// @brief Constructor
     DBCommand() : expect_data_result_(false) {}
     DBCommand(const PropertyList& list) : expect_data_result_(true), result_list_(list) {}
@@ -51,7 +51,7 @@ class DBCommand
     /// @brief Returns PropertyList of expected data.
     const PropertyList& resultList() const { return result_list_; }
 
-  protected:
+protected:
     /// SQL Command
     std::string command_;
     /// Flag if return of data is expected
