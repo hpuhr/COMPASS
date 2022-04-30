@@ -4,6 +4,16 @@
 #include "logger.h"
 #include "util/stringconv.h"
 
+#include "global.h"
+
+#if USE_EXPERIMENTAL_SOURCE
+#include "geometryleafitemlabels.h"
+#endif
+
+#include <QRect>
+
+#include <osg/Vec4>
+
 #include <algorithm>
 
 using namespace std;
@@ -26,23 +36,23 @@ DBContentLabelGenerator::~DBContentLabelGenerator()
 
 void DBContentLabelGenerator::generateSubConfigurable(const string& class_id, const string& instance_id)
 {
-//    if (class_id == "Variable")
-//    {
-//        string var_name = configuration()
-//                .getSubConfiguration(class_id, instance_id)
-//                .getParameterConfigValueString("name");
+    //    if (class_id == "Variable")
+    //    {
+    //        string var_name = configuration()
+    //                .getSubConfiguration(class_id, instance_id)
+    //                .getParameterConfigValueString("name");
 
-//        if (hasVariable(var_name))
-//            logerr << "DBContent: generateSubConfigurable: duplicate variable " << instance_id
-//                   << " with name '" << var_name << "'";
+    //        if (hasVariable(var_name))
+    //            logerr << "DBContent: generateSubConfigurable: duplicate variable " << instance_id
+    //                   << " with name '" << var_name << "'";
 
-//        assert(!hasVariable(var_name));
+    //        assert(!hasVariable(var_name));
 
-//        logdbg << "DBContent: generateSubConfigurable: generating variable " << instance_id
-//               << " with name " << var_name;
+    //        logdbg << "DBContent: generateSubConfigurable: generating variable " << instance_id
+    //               << " with name " << var_name;
 
-//        variables_.emplace_back(new Variable(class_id, instance_id, this));
-//    }
+    //        variables_.emplace_back(new Variable(class_id, instance_id, this));
+    //    }
     throw runtime_error("DBContentLabelGenerator: generateSubConfigurable: unknown class_id " + class_id);
 
 }
@@ -218,6 +228,54 @@ void DBContentLabelGenerator::unregisterLeafItemLabel (GeometryLeafItemLabels& i
 {
     assert (item_labels_.count(&item_label));
     item_labels_.erase(&item_label);
+}
+
+void DBContentLabelGenerator::autoAdustCurrentLOD(const osg::Matrixd screen_transform, std::vector<int> viewport)
+{
+    assert (viewport.size() == 4);
+
+    loginf << "DBContentLabelGenerator: autoAdustCurrentLOD: x " << viewport.at(0)
+           << " y " << viewport.at(1) << " w " << viewport.at(2) << " h " << viewport.at(3);
+
+    osg::Vec4 pos;
+    int x, y;
+
+    bool inside;
+
+    unsigned int num_labels = 0;
+    unsigned int num_labels_on_screen = 0;
+
+    for (auto& it_lab_it : item_labels_)
+    {
+        for (auto& pos_it : it_lab_it->getLabelPositions())
+        {
+            ++num_labels;
+
+            pos = pos_it;
+            pos = pos * screen_transform;
+            pos = pos / pos.w();
+
+            x = pos.x();
+            y = pos.y();
+
+            inside = x >= viewport.at(0) && x < viewport.at(2) && y >= viewport.at(1) && y < viewport.at(3);
+
+            logdbg << "DBContentLabelGenerator: autoAdustCurrentLOD: x " << x << " y " << y << " inside " << inside;
+
+            if (inside)
+                ++num_labels_on_screen;
+        }
+    }
+
+    loginf << "DBContentLabelGenerator: autoAdustCurrentLOD: num labels " << num_labels << " on screen "
+           << num_labels_on_screen;
+
+    if (num_labels_on_screen < 20)
+        current_lod_ = 3;
+    else if (num_labels_on_screen < 40)
+        current_lod_ = 2;
+    else
+        current_lod_ = 1;
 }
 
 unsigned int DBContentLabelGenerator::currentLOD() const
