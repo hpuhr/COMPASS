@@ -128,6 +128,8 @@ public:
     static const Property var_cat062_track_end_;
     static const Property var_cat062_baro_alt_;
 
+    static const Property var_cat062_wtc_;
+
     static const Property selected_var;
 
     DBContent(COMPASS& compass, const std::string& class_id, const std::string& instance_id,

@@ -102,6 +102,8 @@ const Property DBContent::var_cat062_coasting_ {"Coasting", PropertyDataType::BO
 const Property DBContent::var_cat062_track_end_ {"Track End", PropertyDataType::BOOL};
 const Property DBContent::var_cat062_baro_alt_ {"Barometric Altitude Calculated", PropertyDataType::FLOAT};
 
+const Property DBContent::var_cat062_wtc_ {"Wake Turbulence Category FPL", PropertyDataType::STRING};
+
 const Property DBContent::selected_var {"selected", PropertyDataType::BOOL};
 
 DBContent::DBContent(COMPASS& compass, const string& class_id, const string& instance_id,

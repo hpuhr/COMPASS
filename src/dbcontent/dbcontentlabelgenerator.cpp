@@ -1,6 +1,7 @@
 #include "dbcontentlabelgenerator.h"
 #include "dbcontent/dbcontentmanager.h"
 #include "dbcontent/dbcontent.h"
+#include "dbcontent/variable/metavariable.h"
 #include "dbcontentlabelgeneratorwidget.h"
 #include "logger.h"
 #include "util/stringconv.h"
@@ -168,24 +169,86 @@ std::vector<std::string> DBContentLabelGenerator::getLabelTexts(
         tmp.push_back(ds_name);
 
         // 3,1
-        Variable* spi_var {nullptr};
-        if (dbcont_manager_.metaCanGetVariable(dbcontent_name, DBContent::meta_var_spi_))
-            spi_var = &dbcont_manager_.metaGetVariable(dbcontent_name, DBContent::meta_var_spi_);
+        {
+            bool calc_vx_vy;
+            string var1, var2;
+            bool cant_calculate = false;
+            double speed_ms;
 
-        string spi("?");
+            if (dbcont_manager_.metaVariable(DBContent::meta_var_vx_.name()).existsIn(dbcontent_name)
+                    && buffer->has<double>(
+                        dbcont_manager_.metaVariable(DBContent::meta_var_vx_.name()).getFor(dbcontent_name).name())
+                    && dbcont_manager_.metaVariable(DBContent::meta_var_vy_.name()).existsIn(dbcontent_name)
+                    && buffer->has<double>(
+                        dbcont_manager_.metaVariable(DBContent::meta_var_vy_.name()).getFor(dbcontent_name).name()))
+            {
+                // calculate based on vx, vy
+                calc_vx_vy = true;
 
-        if (spi_var && buffer->has<bool>(spi_var->name()) &&
-                !buffer->get<bool>(spi_var->name()).isNull(buffer_index))
-            spi = to_string(buffer->get<bool>(spi_var->name()).get(buffer_index));
+                var1 = dbcont_manager_.metaVariable(DBContent::meta_var_vx_.name()).getFor(dbcontent_name).name();
+                var2 = dbcont_manager_.metaVariable(DBContent::meta_var_vy_.name()).getFor(dbcontent_name).name();
+            }
+            else if (dbcont_manager_.metaVariable(DBContent::meta_var_ground_speed_.name()).existsIn(dbcontent_name)
+                     && buffer->has<double>(
+                         dbcont_manager_.metaVariable(DBContent::meta_var_ground_speed_.name()).getFor(dbcontent_name).name()))
+            {
+                // calculate based on spd, track angle
+                calc_vx_vy = false;
 
-        tmp.push_back(spi);
+                var1 = dbcont_manager_.metaVariable(DBContent::meta_var_ground_speed_.name()).getFor(dbcontent_name).name();
+            }
+            else
+                cant_calculate = true;
+
+            if (cant_calculate)
+                tmp.push_back(""); // cant
+            else
+            {
+                if (calc_vx_vy)
+                {
+                    NullableVector<double>& vxs = buffer->get<double>(var1);
+                    NullableVector<double>& vys = buffer->get<double>(var2);
+
+                    if (!vxs.isNull(buffer_index) && !vys.isNull(buffer_index))
+                    {
+                        speed_ms = sqrt(pow(vxs.get(buffer_index), 2)+pow(vys.get(buffer_index), 2));
+                        tmp.push_back(String::doubleToStringPrecision(speed_ms * M_S2KNOTS, 2));
+                    }
+                    else
+                        tmp.push_back(""); // cant
+                }
+                else
+                {
+                    NullableVector<double>& speeds = buffer->get<double>(var1);
+
+                    if (!speeds.isNull(buffer_index))
+                    {
+                        speed_ms = speeds.get(buffer_index);
+                        tmp.push_back(String::doubleToStringPrecision(speed_ms, 2)); // should be kts
+                    }
+                    else
+                        tmp.push_back(""); // cant
+                }
+            }
+        }
+//        Variable* spi_var {nullptr};
+//        if (dbcont_manager_.metaCanGetVariable(dbcontent_name, DBContent::meta_var_spi_))
+//            spi_var = &dbcont_manager_.metaGetVariable(dbcontent_name, DBContent::meta_var_spi_);
+
+//        string spi("?");
+
+//        if (spi_var && buffer->has<bool>(spi_var->name()) &&
+//                !buffer->get<bool>(spi_var->name()).isNull(buffer_index))
+//            spi = to_string(buffer->get<bool>(spi_var->name()).get(buffer_index));
+
+//        tmp.push_back(spi);
 
         // 3,2
         Variable* c_d_var {nullptr};
         if (dbcont_manager_.metaCanGetVariable(dbcontent_name, DBContent::meta_var_climb_descent_))
             c_d_var = &dbcont_manager_.metaGetVariable(dbcontent_name, DBContent::meta_var_climb_descent_);
 
-        string c_d("?");
+        string c_d;
 
         if (c_d_var && buffer->has<unsigned char>(c_d_var->name()) &&
                 !buffer->get<unsigned char>(c_d_var->name()).isNull(buffer_index))
@@ -194,7 +257,12 @@ std::vector<std::string> DBContentLabelGenerator::getLabelTexts(
         tmp.push_back(c_d);
 
         // 3,3
-        tmp.push_back("UGA");
+
+        if (dbcontent_name == "CAT062" && buffer->has<string>(DBContent::var_cat062_wtc_.name())
+                && !buffer->get<string>(DBContent::var_cat062_wtc_.name()).isNull(buffer_index))
+            tmp.push_back(buffer->get<string>(DBContent::var_cat062_wtc_.name()).get(buffer_index));
+        else
+            tmp.push_back("");
     }
 
     //        Variable& tod_var = dbcont_manager_.metaGetVariable(dbcontent_name, DBContent::meta_var_tod_);
