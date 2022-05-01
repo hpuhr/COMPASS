@@ -11,6 +11,7 @@
 #include <set>
 
 class DBContentManager;
+class DBContentLabelGeneratorWidget;
 class GeometryLeafItemLabels;
 
 class DBContentLabelGenerator : public QObject, public Configurable
@@ -37,9 +38,15 @@ public:
     unsigned int currentLOD() const;
     void currentLOD(unsigned int current_lod);
 
-protected:
+    DBContentLabelGeneratorWidget& widget();
 
+    bool autoLOD() const;
+    void autoLOD(bool auto_lod);
+
+protected:
     DBContentManager& dbcont_manager_;
+
+    std::unique_ptr<DBContentLabelGeneratorWidget> widget_;
 
     bool auto_label_ {true};
     bool auto_lod_ {true};

@@ -19,6 +19,7 @@
 #define DBCONTENT_DBCONTENTMANAGERWIDGET_H_
 
 #include <QWidget>
+
 #include <map>
 
 class DBContent;
@@ -37,10 +38,7 @@ class QPushButton;
 class QLineEdit;
 class QComboBox;
 
-/**
- * @brief Shows all DBObjects, allows editing and adding new ones
- */
-class DBContentManagerWidget: public QWidget
+class DBContentManagerWidget : public QWidget
 {
     Q_OBJECT
 

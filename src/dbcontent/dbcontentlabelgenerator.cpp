@@ -1,6 +1,7 @@
 #include "dbcontentlabelgenerator.h"
 #include "dbcontent/dbcontentmanager.h"
 #include "dbcontent/dbcontent.h"
+#include "dbcontentlabelgeneratorwidget.h"
 #include "logger.h"
 #include "util/stringconv.h"
 
@@ -286,6 +287,27 @@ unsigned int DBContentLabelGenerator::currentLOD() const
 void DBContentLabelGenerator::currentLOD(unsigned int current_lod)
 {
     current_lod_ = current_lod;
+}
+
+
+DBContentLabelGeneratorWidget& DBContentLabelGenerator::widget()
+{
+    if (!widget_)
+    {
+        widget_.reset(new DBContentLabelGeneratorWidget(*this));
+    }
+
+    return *widget_.get();
+}
+
+bool DBContentLabelGenerator::autoLOD() const
+{
+    return auto_lod_;
+}
+
+void DBContentLabelGenerator::autoLOD(bool auto_lod)
+{
+    auto_lod_ = auto_lod;
 }
 
 void DBContentLabelGenerator::checkSubConfigurables()
