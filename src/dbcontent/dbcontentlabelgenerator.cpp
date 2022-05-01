@@ -84,7 +84,7 @@ std::vector<std::string> DBContentLabelGenerator::getLabelTexts(
 
     // 1x1
     {
-        string main_id;
+        string main_id("?");
 
         if (acid_var && buffer->has<string>(acid_var->name())
                 && !buffer->get<string>(acid_var->name()).isNull(buffer_index))
@@ -169,6 +169,19 @@ std::vector<std::string> DBContentLabelGenerator::getLabelTexts(
         tmp.push_back(ds_name);
 
         // 3,1
+        Variable* c_d_var {nullptr};
+        if (dbcont_manager_.metaCanGetVariable(dbcontent_name, DBContent::meta_var_climb_descent_))
+            c_d_var = &dbcont_manager_.metaGetVariable(dbcontent_name, DBContent::meta_var_climb_descent_);
+
+        string c_d;
+
+        if (c_d_var && buffer->has<unsigned char>(c_d_var->name()) &&
+                !buffer->get<unsigned char>(c_d_var->name()).isNull(buffer_index))
+            c_d = c_d_var->getAsSpecialRepresentationString((buffer->get<unsigned char>(c_d_var->name()).get(buffer_index)));
+
+        tmp.push_back(c_d);
+
+        // 3,2
         {
             bool calc_vx_vy;
             string var1, var2;
@@ -231,30 +244,6 @@ std::vector<std::string> DBContentLabelGenerator::getLabelTexts(
                 }
             }
         }
-//        Variable* spi_var {nullptr};
-//        if (dbcont_manager_.metaCanGetVariable(dbcontent_name, DBContent::meta_var_spi_))
-//            spi_var = &dbcont_manager_.metaGetVariable(dbcontent_name, DBContent::meta_var_spi_);
-
-//        string spi("?");
-
-//        if (spi_var && buffer->has<bool>(spi_var->name()) &&
-//                !buffer->get<bool>(spi_var->name()).isNull(buffer_index))
-//            spi = to_string(buffer->get<bool>(spi_var->name()).get(buffer_index));
-
-//        tmp.push_back(spi);
-
-        // 3,2
-        Variable* c_d_var {nullptr};
-        if (dbcont_manager_.metaCanGetVariable(dbcontent_name, DBContent::meta_var_climb_descent_))
-            c_d_var = &dbcont_manager_.metaGetVariable(dbcontent_name, DBContent::meta_var_climb_descent_);
-
-        string c_d;
-
-        if (c_d_var && buffer->has<unsigned char>(c_d_var->name()) &&
-                !buffer->get<unsigned char>(c_d_var->name()).isNull(buffer_index))
-            c_d = to_string(buffer->get<unsigned char>(c_d_var->name()).get(buffer_index));
-
-        tmp.push_back(c_d);
 
         // 3,3
 
@@ -263,6 +252,7 @@ std::vector<std::string> DBContentLabelGenerator::getLabelTexts(
             tmp.push_back(buffer->get<string>(DBContent::var_cat062_wtc_.name()).get(buffer_index));
         else
             tmp.push_back("");
+
     }
 
     //        Variable& tod_var = dbcont_manager_.metaGetVariable(dbcontent_name, DBContent::meta_var_tod_);

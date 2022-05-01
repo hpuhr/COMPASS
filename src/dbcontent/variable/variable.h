@@ -46,7 +46,8 @@ class Variable : public QObject, public Property, public Configurable
         DEC_TO_OCTAL,
         DEC_TO_HEX,
         FEET_TO_FLIGHTLEVEL,
-        DATA_SRC_NAME
+        DATA_SRC_NAME,
+        CLIMB_DESCENT
     };
 
     static Representation stringToRepresentation(const std::string& representation_str);
@@ -137,6 +138,17 @@ class Variable : public QObject, public Property, public Configurable
             else if (representation_ == Variable::Representation::DATA_SRC_NAME)
             {
                 return getDataSourcesAsString(std::to_string(value));
+            }
+            else if (representation_ == Variable::Representation::CLIMB_DESCENT)
+            {
+                if (value == 0)
+                    return "LVL";
+                else if (value == 1)
+                    return "CLB";
+                else if (value == 2)
+                    return "DSC";
+                else
+                    return "UDF";
             }
             else
             {

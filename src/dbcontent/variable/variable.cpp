@@ -41,7 +41,8 @@ std::map<Variable::Representation, std::string> Variable::representation_2_strin
     {Variable::Representation::DEC_TO_OCTAL, "DEC_TO_OCTAL"},
     {Variable::Representation::DEC_TO_HEX, "DEC_TO_HEX"},
     {Variable::Representation::FEET_TO_FLIGHTLEVEL, "FEET_TO_FLIGHTLEVEL"},
-    {Variable::Representation::DATA_SRC_NAME, "DATA_SRC_NAME"}};
+    {Variable::Representation::DATA_SRC_NAME, "DATA_SRC_NAME"},
+    {Variable::Representation::CLIMB_DESCENT, "CLIMB_DESCENT"}};
 
 std::map<std::string, Variable::Representation> Variable::string_2_representation_{
     {"STANDARD", Variable::Representation::STANDARD},
@@ -49,7 +50,8 @@ std::map<std::string, Variable::Representation> Variable::string_2_representatio
     {"DEC_TO_OCTAL", Variable::Representation::DEC_TO_OCTAL},
     {"DEC_TO_HEX", Variable::Representation::DEC_TO_HEX},
     {"FEET_TO_FLIGHTLEVEL", Variable::Representation::FEET_TO_FLIGHTLEVEL},
-    {"DATA_SRC_NAME", Variable::Representation::DATA_SRC_NAME}};
+    {"DATA_SRC_NAME", Variable::Representation::DATA_SRC_NAME},
+    {"CLIMB_DESCENT", Variable::Representation::CLIMB_DESCENT}};
 
 Variable::Representation Variable::stringToRepresentation(
     const std::string& representation_str)
