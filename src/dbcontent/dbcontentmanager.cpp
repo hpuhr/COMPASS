@@ -840,6 +840,7 @@ void DBContentManager::filterDataSources()
 
     for (auto& buf_it : data_)
     {
+        // remove unwanted data sources
         assert (metaVariable(DBContent::meta_var_datasource_id_.name()).existsIn(buf_it.first));
 
         Variable& ds_id_var = metaVariable(DBContent::meta_var_datasource_id_.name()).getFor(buf_it.first);
@@ -858,12 +859,44 @@ void DBContentManager::filterDataSources()
         {
             assert (!ds_id_vec.isNull(index));
 
-            if (!wanted_data_sources.count(ds_id_vec.get(index)))
+            if (!wanted_data_sources.count(ds_id_vec.get(index))) // unwanted ds
                 indexes_to_remove.push_back(index);
         }
 
         loginf << "DBContentManager: filterDataSources: in " << buf_it.first << " remove "
                << indexes_to_remove.size() << " of " << buffer_size;
+
+        buf_it.second->removeIndexes(indexes_to_remove);
+
+        // remove unwanted lines
+        indexes_to_remove.clear();
+        buffer_size = buf_it.second->size();
+
+        assert (metaVariable(DBContent::meta_var_line_id_.name()).existsIn(buf_it.first));
+
+        Variable& line_id_var = metaVariable(DBContent::meta_var_line_id_.name()).getFor(buf_it.first);
+
+        Property line_id_prop {line_id_var.name(), line_id_var.dataType()};
+        assert (buf_it.second->hasProperty(ds_id_prop));
+
+        NullableVector<unsigned int>& line_id_vec = buf_it.second->get<unsigned int>(line_id_var.name());
+
+        for (auto ds_id : wanted_data_sources)
+        {
+            dbContent::DBDataSource& ds = COMPASS::instance().dataSourceManager().dbDataSource(ds_id);
+            std::set<unsigned int> wanted_lines = ds.getLoadingWantedLines();
+
+            for (unsigned int index=0; index < buffer_size; ++index)
+            {
+                if (ds_id_vec.get(index) != ds_id)
+                    continue;
+
+                assert (!line_id_vec.isNull(index));
+
+                if (!wanted_lines.count(line_id_vec.get(index))) // unwanted ds
+                    indexes_to_remove.push_back(index);
+            }
+        }
 
         buf_it.second->removeIndexes(indexes_to_remove);
     }
