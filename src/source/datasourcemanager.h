@@ -53,6 +53,7 @@ public:
     dbContent::DBDataSource& dbDataSource(unsigned int ds_id);
     const std::vector<std::unique_ptr<dbContent::DBDataSource>>& dbDataSources() const;
 
+    void createNetworkDBDataSources();
     std::map<unsigned int, std::map<std::string, std::pair<std::string, unsigned int>>> getNetworkLines();
     //ds_id -> line str ->(ip, port)
 

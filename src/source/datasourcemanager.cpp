@@ -210,14 +210,14 @@ void DataSourceManager::deleteAllConfigDataSources()
 
     for(auto it = config_data_sources_.begin(); it != config_data_sources_.end();)
     {
-       if(!hasDBDataSource((*it)->id())) // erase if not in db
-       {
-          it = config_data_sources_.erase(it); // erase and update it
-       }
-       else // next one
-       {
-          ++it;
-       }
+        if(!hasDBDataSource((*it)->id())) // erase if not in db
+        {
+            it = config_data_sources_.erase(it); // erase and update it
+        }
+        else // next one
+        {
+            ++it;
+        }
     }
 
     updateDSIdsAll();
@@ -661,6 +661,38 @@ void DataSourceManager::setLoadOnlyDSTypes (std::set<std::string> ds_types)
 const std::vector<std::unique_ptr<dbContent::DBDataSource>>& DataSourceManager::dbDataSources() const
 {
     return db_data_sources_;
+}
+
+void DataSourceManager::createNetworkDBDataSources()
+{
+    unsigned int ds_id;
+
+    for (auto& ds_it : config_data_sources_)
+    {
+        ds_id = ds_it->id();
+
+        if (ds_it->hasNetworkLines())
+        {
+
+            if (!hasDBDataSource(ds_id))
+            {
+                loginf << "DataSourceManager: createNetworkDBDataSources: ds_id " << ds_id << " from config";
+
+                db_data_sources_.emplace_back(move(ds_it->getAsNewDBDS()));
+                //addNewDataSource(ds_it->id());
+            }
+
+            //            for (auto& line_it : ds_it->networkLines()) // lx -> ip, port
+            //            {
+            //                dbDataSource(ds_it->id()).addNumInserted()
+            //            }
+        }
+    }
+
+    sortDBDataSources();
+    updateDSIdsAll();
+
+    emit dataSourcesChangedSignal();
 }
 
 std::map<unsigned int, std::map<std::string, std::pair<std::string, unsigned int>>> DataSourceManager::getNetworkLines()

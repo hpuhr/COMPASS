@@ -786,7 +786,10 @@ void ASTERIXImportTask::run(bool test) // , bool create_mapping_stubs
     if (import_file_)
         decode_job_->setDecodeFile(current_filename_, current_file_framing_); // do file import
     else
+    {
+        COMPASS::instance().dataSourceManager().createNetworkDBDataSources();
         decode_job_->setDecodeUDPStreams(COMPASS::instance().dataSourceManager().getNetworkLines()); // record from network
+    }
 
 
     connect(decode_job_.get(), &ASTERIXDecodeJob::obsoleteSignal, this,
