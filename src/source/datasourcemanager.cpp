@@ -369,13 +369,15 @@ bool DataSourceManager::loadDataSourcesFiltered()
     return false;
 }
 
-std::set<unsigned int> DataSourceManager::getLoadDataSources ()
+std::map<unsigned int, std::set<unsigned int>> DataSourceManager::getLoadDataSources ()
 {
-    std::set<unsigned int> ds_to_load;
+    std::map<unsigned int, std::set<unsigned int>> ds_to_load;
 
     for (auto& ds_it : db_data_sources_)
+    {
         if (dsTypeLoadingWanted(ds_it->dsType()) && ds_it->loadingWanted())
-            ds_to_load.insert(ds_it->id());
+            ds_to_load[ds_it->id()] = ds_it->getLoadingWantedLines();
+    }
 
     return ds_to_load;
 }

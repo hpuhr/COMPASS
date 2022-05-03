@@ -74,7 +74,7 @@ public:
     void setLoadDataSources (bool loading_wanted);
     void setLoadOnlyDataSources (std::set<unsigned int> ds_ids);
     bool loadDataSourcesFiltered();
-    std::set<unsigned int> getLoadDataSources ();
+    std::map<unsigned int, std::set<unsigned int>> getLoadDataSources (); // ds_id -> wanted lines
 
     DataSourcesLoadWidget* loadWidget();
     void updateWidget();

@@ -833,7 +833,8 @@ void DBContentManager::addInsertedDataToChache()
 
 void DBContentManager::filterDataSources()
 {
-    set<unsigned int> wanted_data_sources = COMPASS::instance().dataSourceManager().getLoadDataSources();
+    std::map<unsigned int, std::set<unsigned int>> wanted_data_sources =
+            COMPASS::instance().dataSourceManager().getLoadDataSources();
 
     unsigned int buffer_size;
     vector<size_t> indexes_to_remove;
@@ -842,13 +843,19 @@ void DBContentManager::filterDataSources()
     {
         // remove unwanted data sources
         assert (metaVariable(DBContent::meta_var_datasource_id_.name()).existsIn(buf_it.first));
+        assert (metaVariable(DBContent::meta_var_line_id_.name()).existsIn(buf_it.first));
 
         Variable& ds_id_var = metaVariable(DBContent::meta_var_datasource_id_.name()).getFor(buf_it.first);
+        Variable& line_id_var = metaVariable(DBContent::meta_var_line_id_.name()).getFor(buf_it.first);
 
         Property ds_id_prop {ds_id_var.name(), ds_id_var.dataType()};
         assert (buf_it.second->hasProperty(ds_id_prop));
 
+        Property line_id_prop {line_id_var.name(), line_id_var.dataType()};
+        assert (buf_it.second->hasProperty(ds_id_prop));
+
         NullableVector<unsigned int>& ds_id_vec = buf_it.second->get<unsigned int>(ds_id_var.name());
+        NullableVector<unsigned int>& line_id_vec = buf_it.second->get<unsigned int>(line_id_var.name());
 
         buffer_size = buf_it.second->size();
 
@@ -858,8 +865,10 @@ void DBContentManager::filterDataSources()
         for (unsigned int index=0; index < buffer_size; ++index)
         {
             assert (!ds_id_vec.isNull(index));
+            assert (!line_id_vec.isNull(index));
 
-            if (!wanted_data_sources.count(ds_id_vec.get(index))) // unwanted ds
+            if (!wanted_data_sources.count(ds_id_vec.get(index)) // unwanted ds
+                    || !wanted_data_sources.at(ds_id_vec.get(index)).count(line_id_vec.get(index))) // unwanted line
                 indexes_to_remove.push_back(index);
         }
 
@@ -871,34 +880,6 @@ void DBContentManager::filterDataSources()
         // remove unwanted lines
         indexes_to_remove.clear();
         buffer_size = buf_it.second->size();
-
-        assert (metaVariable(DBContent::meta_var_line_id_.name()).existsIn(buf_it.first));
-
-        Variable& line_id_var = metaVariable(DBContent::meta_var_line_id_.name()).getFor(buf_it.first);
-
-        Property line_id_prop {line_id_var.name(), line_id_var.dataType()};
-        assert (buf_it.second->hasProperty(ds_id_prop));
-
-        NullableVector<unsigned int>& line_id_vec = buf_it.second->get<unsigned int>(line_id_var.name());
-
-        for (auto ds_id : wanted_data_sources)
-        {
-            dbContent::DBDataSource& ds = COMPASS::instance().dataSourceManager().dbDataSource(ds_id);
-            std::set<unsigned int> wanted_lines = ds.getLoadingWantedLines();
-
-            for (unsigned int index=0; index < buffer_size; ++index)
-            {
-                if (ds_id_vec.get(index) != ds_id)
-                    continue;
-
-                assert (!line_id_vec.isNull(index));
-
-                if (!wanted_lines.count(line_id_vec.get(index))) // unwanted ds
-                    indexes_to_remove.push_back(index);
-            }
-        }
-
-        buf_it.second->removeIndexes(indexes_to_remove);
     }
 
     // remove empty buffers

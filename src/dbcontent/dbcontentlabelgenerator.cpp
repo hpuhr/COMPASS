@@ -289,44 +289,44 @@ void DBContentLabelGenerator::unregisterLeafItemLabel (GeometryLeafItemLabels& i
     item_labels_.erase(&item_label);
 }
 
-void DBContentLabelGenerator::autoAdustCurrentLOD(const osg::Matrixd screen_transform, std::vector<int> viewport)
+void DBContentLabelGenerator::autoAdustCurrentLOD(unsigned int num_labels_on_screen)
 {
-    assert (viewport.size() == 4);
+//    assert (viewport.size() == 4);
 
-    loginf << "DBContentLabelGenerator: autoAdustCurrentLOD: x " << viewport.at(0)
-           << " y " << viewport.at(1) << " w " << viewport.at(2) << " h " << viewport.at(3);
+//    loginf << "DBContentLabelGenerator: autoAdustCurrentLOD: x " << viewport.at(0)
+//           << " y " << viewport.at(1) << " w " << viewport.at(2) << " h " << viewport.at(3);
 
-    osg::Vec4 pos;
-    int x, y;
+//    osg::Vec4 pos;
+//    int x, y;
 
-    bool inside;
+//    bool inside;
 
-    unsigned int num_labels = 0;
-    unsigned int num_labels_on_screen = 0;
+//    unsigned int num_labels = 0;
+//    unsigned int num_labels_on_screen = 0;
 
-    for (auto& it_lab_it : item_labels_)
-    {
-        for (auto& pos_it : it_lab_it->getLabelPositions())
-        {
-            ++num_labels;
+//    for (auto& it_lab_it : item_labels_)
+//    {
+//        for (auto& pos_it : it_lab_it->getLabelPositions())
+//        {
+//            ++num_labels;
 
-            pos = pos_it;
-            pos = pos * screen_transform;
-            pos = pos / pos.w();
+//            pos = pos_it;
+//            pos = pos * screen_transform;
+//            pos = pos / pos.w();
 
-            x = pos.x();
-            y = pos.y();
+//            x = pos.x();
+//            y = pos.y();
 
-            inside = x >= viewport.at(0) && x < viewport.at(2) && y >= viewport.at(1) && y < viewport.at(3);
+//            inside = x >= viewport.at(0) && x < viewport.at(2) && y >= viewport.at(1) && y < viewport.at(3);
 
-            logdbg << "DBContentLabelGenerator: autoAdustCurrentLOD: x " << x << " y " << y << " inside " << inside;
+//            logdbg << "DBContentLabelGenerator: autoAdustCurrentLOD: x " << x << " y " << y << " inside " << inside;
 
-            if (inside)
-                ++num_labels_on_screen;
-        }
-    }
+//            if (inside)
+//                ++num_labels_on_screen;
+//        }
+//    }
 
-    loginf << "DBContentLabelGenerator: autoAdustCurrentLOD: num labels " << num_labels << " on screen "
+    loginf << "DBContentLabelGenerator: autoAdustCurrentLOD: num labels on screen "
            << num_labels_on_screen;
 
     if (num_labels_on_screen < 20)

@@ -33,7 +33,7 @@ public:
     void registerLeafItemLabel (GeometryLeafItemLabels& item_label);
     void unregisterLeafItemLabel (GeometryLeafItemLabels& item_label);
 
-    void autoAdustCurrentLOD(const osg::Matrixd screen_transform, std::vector<int> viewport);
+    void autoAdustCurrentLOD(unsigned int num_labels_on_screen);
 
     unsigned int currentLOD() const;
     void currentLOD(unsigned int current_lod);
