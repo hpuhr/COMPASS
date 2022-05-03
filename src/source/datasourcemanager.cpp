@@ -537,6 +537,26 @@ bool DataSourceManager::hasDBDataSource(unsigned int ds_id)
     { return s->id() == ds_id; } ) != db_data_sources_.end();
 }
 
+bool DataSourceManager::hasDBDataSource(const std::string& ds_name)
+{
+    return find_if(db_data_sources_.begin(), db_data_sources_.end(),
+                   [ds_name] (const std::unique_ptr<dbContent::DBDataSource>& s)
+    { return (s->hasShortName() ? s->shortName() == ds_name : false)
+                || s->name() == ds_name; } ) != db_data_sources_.end();
+}
+
+unsigned int DataSourceManager::getDBDataSourceDSID(const std::string& ds_name)
+{
+    auto ds_it = find_if(db_data_sources_.begin(), db_data_sources_.end(),
+                         [ds_name] (const std::unique_ptr<dbContent::DBDataSource>& s)
+    { return (s->hasShortName() ? s->shortName() == ds_name : false)
+                || s->name() == ds_name; } );
+
+    assert (ds_it != db_data_sources_.end());
+
+    return (*ds_it)->id();
+}
+
 bool DataSourceManager::hasDataSourcesOfDBContent(const std::string dbcontent_name)
 {
     return find_if(db_data_sources_.begin(), db_data_sources_.end(),

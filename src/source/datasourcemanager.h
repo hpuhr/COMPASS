@@ -46,6 +46,8 @@ public:
     dbContent::ConfigurationDataSource& configDataSource(unsigned int ds_id);
 
     bool hasDBDataSource(unsigned int ds_id);
+    bool hasDBDataSource(const std::string& ds_name);
+    unsigned int getDBDataSourceDSID(const std::string& ds_name);
     bool hasDataSourcesOfDBContent(const std::string dbcontent_name);
     bool canAddNewDataSourceFromConfig (unsigned int ds_id);
     void addNewDataSource (unsigned int ds_id); // be sure not to call from different thread

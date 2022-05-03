@@ -277,17 +277,17 @@ void DBContentLabelGenerator::autoLabel(bool auto_label)
     auto_label_ = auto_label;
 }
 
-void DBContentLabelGenerator::registerLeafItemLabel (GeometryLeafItemLabels& item_label)
-{
-    assert (!item_labels_.count(&item_label));
-    item_labels_.insert(&item_label);
-}
+//void DBContentLabelGenerator::registerLeafItemLabel (GeometryLeafItemLabels& item_label)
+//{
+//    assert (!item_labels_.count(&item_label));
+//    item_labels_.insert(&item_label);
+//}
 
-void DBContentLabelGenerator::unregisterLeafItemLabel (GeometryLeafItemLabels& item_label)
-{
-    assert (item_labels_.count(&item_label));
-    item_labels_.erase(&item_label);
-}
+//void DBContentLabelGenerator::unregisterLeafItemLabel (GeometryLeafItemLabels& item_label)
+//{
+//    assert (item_labels_.count(&item_label));
+//    item_labels_.erase(&item_label);
+//}
 
 void DBContentLabelGenerator::autoAdustCurrentLOD(unsigned int num_labels_on_screen)
 {
@@ -366,6 +366,22 @@ bool DBContentLabelGenerator::autoLOD() const
 void DBContentLabelGenerator::autoLOD(bool auto_lod)
 {
     auto_lod_ = auto_lod;
+}
+
+void DBContentLabelGenerator::addLabelDSID(unsigned int ds_id)
+{
+    label_ds_ids_.insert(ds_id);
+}
+
+void DBContentLabelGenerator::removeLabelDSID(unsigned int ds_id)
+{
+    assert (label_ds_ids_.count(ds_id));
+    label_ds_ids_.erase(ds_id);
+}
+
+const std::set<unsigned int>& DBContentLabelGenerator::labelDSIDs() const
+{
+    return label_ds_ids_;
 }
 
 void DBContentLabelGenerator::checkSubConfigurables()

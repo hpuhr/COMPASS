@@ -30,8 +30,8 @@ public:
     bool autoLabel() const;
     void autoLabel(bool auto_label);
 
-    void registerLeafItemLabel (GeometryLeafItemLabels& item_label);
-    void unregisterLeafItemLabel (GeometryLeafItemLabels& item_label);
+//    void registerLeafItemLabel (GeometryLeafItemLabels& item_label);
+//    void unregisterLeafItemLabel (GeometryLeafItemLabels& item_label);
 
     void autoAdustCurrentLOD(unsigned int num_labels_on_screen);
 
@@ -42,6 +42,10 @@ public:
 
     bool autoLOD() const;
     void autoLOD(bool auto_lod);
+
+    void addLabelDSID(unsigned int ds_id);
+    void removeLabelDSID(unsigned int ds_id);
+    const std::set<unsigned int>& labelDSIDs() const;
 
 protected:
     DBContentManager& dbcont_manager_;
@@ -54,7 +58,9 @@ protected:
 
     nlohmann::json label_config_;
 
-    std::set<GeometryLeafItemLabels*> item_labels_;
+    std::set<unsigned int> label_ds_ids_;
+
+    //std::set<GeometryLeafItemLabels*> item_labels_;
 
     virtual void checkSubConfigurables();
 };
