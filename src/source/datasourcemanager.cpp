@@ -684,10 +684,19 @@ void DataSourceManager::createNetworkDBDataSources()
                 //addNewDataSource(ds_it->id());
             }
 
-            //            for (auto& line_it : ds_it->networkLines()) // lx -> ip, port
-            //            {
-            //                dbDataSource(ds_it->id()).addNumInserted()
-            //            }
+            unsigned int line_cnt;
+            bool first = true;
+
+            for (auto& line_it : ds_it->networkLines()) // lx -> ip, port
+            {
+                line_cnt = String::getAppendedInt(line_it.first);
+                assert (line_cnt >= 0 && line_cnt <= 4);
+
+                dbDataSource(ds_it->id()).lineLoadingWanted(line_cnt - 1, first); // only load first one
+                //dbDataSource(ds_it->id()).addNumInserted()
+
+                first = false;
+            }
         }
     }
 

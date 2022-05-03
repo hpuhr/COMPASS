@@ -234,9 +234,13 @@ void ASTERIXDecodeJob::doUDPStreamDecoding()
 
     vector<unique_ptr<UDPReceiver>> udp_receivers;
 
+    int max_lines = COMPASS::instance().mainWindow().importAsterixNetworkMaxLines();
+
     for (auto& ds_it : ds_lines_)
     {
         //loginf << ds_it.first << ":";
+
+        unsigned int line_cnt = 0;
 
         for (auto& line_it : ds_it.second)
         {
@@ -256,7 +260,10 @@ void ASTERIXDecodeJob::doUDPStreamDecoding()
 
             udp_receivers.emplace_back(new UDPReceiver(io_context, ip, port, data_callback));
 
-            continue; // HACK only do first line
+            ++line_cnt;
+
+            if (max_lines != -1 && line_cnt == (unsigned int) max_lines)
+                break; // HACK only do first line
         }
     }
 

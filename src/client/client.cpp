@@ -65,10 +65,10 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
 
     //    QApplication::setAttribute(Qt::AA_ShareOpenGLContexts);
 
-//    QSurfaceFormat format;
-//    format.setRenderableType(QSurfaceFormat::OpenGL);
-//    format.setProfile(QSurfaceFormat::CoreProfile);
-//    format.setVersion(3,3);
+    //    QSurfaceFormat format;
+    //    format.setRenderableType(QSurfaceFormat::OpenGL);
+    //    format.setProfile(QSurfaceFormat::CoreProfile);
+    //    format.setVersion(3,3);
 
     //    QSurfaceFormat format;
     //    format.setSwapBehavior(QSurfaceFormat::SwapBehavior::SingleBuffer); //DoubleBuffer
@@ -82,20 +82,20 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
     //    format.setSamples(8);
     // QSurfaceFormat::setDefaultFormat(format);
 
-//    std::string import_json_filename;
-//    std::string import_json_schema;
-//    std::string import_gps_trail_filename;
-//    std::string import_sectors_filename;
+    //    std::string import_json_filename;
+    //    std::string import_json_schema;
+    //    std::string import_gps_trail_filename;
+    //    std::string import_sectors_filename;
 
-//    bool auto_process {false};
-//    bool associate_data {false};
+    //    bool auto_process {false};
+    //    bool associate_data {false};
 
-//    bool start {false};
-//    bool load_data {false};
-//    std::string export_view_points_report_filename;
-//    bool evaluate {false};
-//    std::string export_eval_report_filename;
-//    bool quit {false};
+    //    bool start {false};
+    //    bool load_data {false};
+    //    std::string export_view_points_report_filename;
+    //    bool evaluate {false};
+    //    std::string export_eval_report_filename;
+    //    bool quit {false};
 
     po::options_description desc("Allowed options");
     desc.add_options()("help", "produce help message")
@@ -111,29 +111,31 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
             ("import_asterix_network", po::bool_switch(&import_asterix_network_),
              "imports ASTERIX from defined network UDP streams")
             ("import_asterix_network_time_offset", po::value<std::string>(&import_asterix_network_time_offset_),
-             "imports used time offset during ASTERIX network import, in HH:MM:SS.ZZZ'")
-//            ("asterix_framing", po::value<std::string>(&asterix_framing),
-//             "sets ASTERIX framing, e.g. 'none', 'ioss', 'ioss_seq', 'rff'")
-//            ("asterix_decoder_cfg", po::value<std::string>(&asterix_decoder_cfg),
-//             "sets ASTERIX decoder config using JSON string, e.g. ''{\"10\":{\"edition\":\"0.31\"}}''"
-//             " (including one pair of single quotes)")
-//            ("import_json", po::value<std::string>(&import_json_filename),
-//             "imports JSON file with given filename, e.g. '/data/file1.json'")
-//            ("json_schema", po::value<std::string>(&import_json_schema),
-//             "JSON file import schema, e.g. 'jASTERIX', 'OpenSkyNetwork', 'ADSBExchange', 'SDDL'")
-//            ("import_gps_trail", po::value<std::string>(&import_gps_trail_filename),
-//             "imports gps trail NMEA with given filename, e.g. '/data/file2.txt'")
-//            ("import_sectors_json", po::value<std::string>(&import_sectors_filename),
-//             "imports exported sectors JSON with given filename, e.g. '/data/sectors.json'")
-//            ("auto_process", po::bool_switch(&auto_process), "start automatic processing of imported data")
-//            ("associate_data", po::bool_switch(&associate_data), "associate target reports")
-//            ("start", po::bool_switch(&start), "start after finishing previous steps")
+             "used time offset during ASTERIX network import, in HH:MM:SS.ZZZ'")
+            ("import_asterix_network_max_lines", po::value<int>(&import_asterix_network_max_lines_),
+             "maximum number of lines per data source during ASTERIX network import, 1..4'")
+            //            ("asterix_framing", po::value<std::string>(&asterix_framing),
+            //             "sets ASTERIX framing, e.g. 'none', 'ioss', 'ioss_seq', 'rff'")
+            //            ("asterix_decoder_cfg", po::value<std::string>(&asterix_decoder_cfg),
+            //             "sets ASTERIX decoder config using JSON string, e.g. ''{\"10\":{\"edition\":\"0.31\"}}''"
+            //             " (including one pair of single quotes)")
+            //            ("import_json", po::value<std::string>(&import_json_filename),
+            //             "imports JSON file with given filename, e.g. '/data/file1.json'")
+            //            ("json_schema", po::value<std::string>(&import_json_schema),
+            //             "JSON file import schema, e.g. 'jASTERIX', 'OpenSkyNetwork', 'ADSBExchange', 'SDDL'")
+            //            ("import_gps_trail", po::value<std::string>(&import_gps_trail_filename),
+            //             "imports gps trail NMEA with given filename, e.g. '/data/file2.txt'")
+            //            ("import_sectors_json", po::value<std::string>(&import_sectors_filename),
+            //             "imports exported sectors JSON with given filename, e.g. '/data/sectors.json'")
+            //            ("auto_process", po::bool_switch(&auto_process), "start automatic processing of imported data")
+            //            ("associate_data", po::bool_switch(&associate_data), "associate target reports")
+            //            ("start", po::bool_switch(&start), "start after finishing previous steps")
             ("load_data", po::bool_switch(&load_data_), "load data after start")
-//            ("export_view_points_report", po::value<std::string>(&export_view_points_report_filename),
-//             "export view points report after start with given filename, e.g. '/data/db2/report.tex")
-//            ("evaluate", po::bool_switch(&evaluate), "run evaluation")
-//            ("export_eval_report", po::value<std::string>(&export_eval_report_filename),
-//             "export evaluation report after start with given filename, e.g. '/data/eval_db2/report.tex")
+            //            ("export_view_points_report", po::value<std::string>(&export_view_points_report_filename),
+            //             "export view points report after start with given filename, e.g. '/data/db2/report.tex")
+            //            ("evaluate", po::bool_switch(&evaluate), "run evaluation")
+            //            ("export_eval_report", po::value<std::string>(&export_eval_report_filename),
+            //             "export evaluation report after start with given filename, e.g. '/data/eval_db2/report.tex")
             ("quit", po::bool_switch(&quit_), "quit after finishing all previous steps");
 
     try
@@ -166,11 +168,11 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
     if (quit_requested_)
         return;
 
-//    if (import_json_filename.size() && !import_json_schema.size())
-//    {
-//        loginf << "COMPASSClient: schema name must be set for JSON import";
-//        return;
-//    }
+    //    if (import_json_filename.size() && !import_json_schema.size())
+    //    {
+    //        loginf << "COMPASSClient: schema name must be set for JSON import";
+    //        return;
+    //    }
 
 
 
@@ -208,28 +210,28 @@ void Client::run ()
     if (import_view_points_filename_.size())
         main_window.importViewPointsFile(import_view_points_filename_);
 
-//    try
-//    {
-//        if (asterix_framing.size())
-//        {
-//            if (asterix_framing == "none")
-//                task_man.asterixFraming("");
-//            else
-//                task_man.asterixFraming(asterix_framing);
-//        }
+    //    try
+    //    {
+    //        if (asterix_framing.size())
+    //        {
+    //            if (asterix_framing == "none")
+    //                task_man.asterixFraming("");
+    //            else
+    //                task_man.asterixFraming(asterix_framing);
+    //        }
 
-//        if (asterix_decoder_cfg.size())
-//            task_man.asterixDecoderConfig(asterix_decoder_cfg);
+    //        if (asterix_decoder_cfg.size())
+    //            task_man.asterixDecoderConfig(asterix_decoder_cfg);
 
-//        if (task_man.asterixOptionsSet())
-//            task_man.setAsterixOptions();
-//    }
-//    catch (exception& e)
-//    {
-//        logerr << "COMPASSClient: setting ASTERIX options resulted in error: " << e.what();
-//        quit_requested_ = true;
-//        return;
-//    }
+    //        if (task_man.asterixOptionsSet())
+    //            task_man.setAsterixOptions();
+    //    }
+    //    catch (exception& e)
+    //    {
+    //        logerr << "COMPASSClient: setting ASTERIX options resulted in error: " << e.what();
+    //        quit_requested_ = true;
+    //        return;
+    //    }
 
     if (import_asterix_filename_.size())
         main_window.importASTERIXFile(import_asterix_filename_);
@@ -239,35 +241,46 @@ void Client::run ()
     if (import_asterix_network_time_offset_.size())
         main_window.importASTERIXFromNetworkTimeOffset(String::timeFromString(import_asterix_network_time_offset_));
 
-//    if (import_json_filename.size())
-//        task_man.importJSONFile(import_json_filename, import_json_schema);
+    if (import_asterix_network_max_lines_ != -1)
+    {
+        if (import_asterix_network_max_lines_ < 1 || import_asterix_network_max_lines_ > 4)
+        {
+            loginf << "COMPASSClient: number of maximum network lines must be between 1 and 4";
+            main_window.quit(true);
+        }
 
-//    if (import_gps_trail_filename.size())
-//        task_man.importGPSTrailFile(import_gps_trail_filename);
+        main_window.importAsterixNetworkMaxLines(import_asterix_network_max_lines_);
+    }
 
-//    if (import_sectors_filename.size())
-//        task_man.importSectorsFile(import_sectors_filename);
+    //    if (import_json_filename.size())
+    //        task_man.importJSONFile(import_json_filename, import_json_schema);
 
-//    if (auto_process)
-//        task_man.autoProcess(auto_process);
+    //    if (import_gps_trail_filename.size())
+    //        task_man.importGPSTrailFile(import_gps_trail_filename);
 
-//    if (associate_data)
-//        task_man.associateData(associate_data);
+    //    if (import_sectors_filename.size())
+    //        task_man.importSectorsFile(import_sectors_filename);
 
-//    if (start)
-//        task_man.start(start);
+    //    if (auto_process)
+    //        task_man.autoProcess(auto_process);
+
+    //    if (associate_data)
+    //        task_man.associateData(associate_data);
+
+    //    if (start)
+    //        task_man.start(start);
 
     if (load_data_)
         main_window.loadData(load_data_);
 
-//    if (export_view_points_report_filename.size())
-//        task_man.exportViewPointsReportFile(export_view_points_report_filename);
+    //    if (export_view_points_report_filename.size())
+    //        task_man.exportViewPointsReportFile(export_view_points_report_filename);
 
-//    if (evaluate)
-//        task_man.evaluate(true);
+    //    if (evaluate)
+    //        task_man.evaluate(true);
 
-//    if (export_eval_report_filename.size())
-//        task_man.exportEvalReportFile(export_eval_report_filename);
+    //    if (export_eval_report_filename.size())
+    //        task_man.exportEvalReportFile(export_eval_report_filename);
 
     if (quit_)
         main_window.quit(quit_);

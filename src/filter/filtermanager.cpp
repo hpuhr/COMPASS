@@ -37,6 +37,7 @@
 #include "acidfilter.h"
 #include "mode3afilter.h"
 #include "modecfilter.h"
+#include "primaryonlyfilter.h"
 
 #include "json.hpp"
 
@@ -184,6 +185,11 @@ void FilterManager::generateSubConfigurable(const std::string& class_id,
                    << e.what() << "', deleting";
             configuration().removeSubConfiguration(class_id, instance_id);
         }
+    }
+    else if (class_id == "PrimaryOnlyFilter")
+    {
+        PrimaryOnlyFilter* filter = new PrimaryOnlyFilter(class_id, instance_id, this);
+        filters_.emplace_back(filter);
     }
     else
         throw std::runtime_error("FilterManager: generateSubConfigurable: unknown class_id " +

@@ -915,6 +915,12 @@ void ASTERIXImportTask::addDecodedASTERIXSlot()
            << " num_packets_in_processing_ " << num_packets_in_processing_
            << " num_packets_total_ " << num_packets_total_;
 
+    if (!extracted_data)
+    {
+        logwrn << "ASTERIXImportTask: addDecodedASTERIXSlot: processing data empty";
+        return;
+    }
+
     // break here for testing
     //return;
 

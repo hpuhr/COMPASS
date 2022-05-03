@@ -27,6 +27,8 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/mode3afilterwidget.h"
         "${CMAKE_CURRENT_LIST_DIR}/modecfilter.h"
         "${CMAKE_CURRENT_LIST_DIR}/modecfilterwidget.h"
+        "${CMAKE_CURRENT_LIST_DIR}/primaryonlyfilter.h"
+        "${CMAKE_CURRENT_LIST_DIR}/primaryonlyfilterwidget.h"
     PRIVATE
         "${CMAKE_CURRENT_LIST_DIR}/dbfilter.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/dbfiltercondition.cpp"
@@ -48,6 +50,8 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/mode3afilterwidget.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/modecfilter.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/modecfilterwidget.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/primaryonlyfilter.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/primaryonlyfilterwidget.cpp"
 )
 
 

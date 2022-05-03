@@ -535,6 +535,17 @@ float MainWindow::importASTERIXFromNetworkTimeOffset()
     return asterix_import_network_time_offset_;
 }
 
+int MainWindow::importAsterixNetworkMaxLines() const
+{
+    return asterix_import_network_max_lines_;
+}
+
+void MainWindow::importAsterixNetworkMaxLines(int value)
+{
+    loginf << "MainWindow: importAsterixNetworkMaxLines: value " << value;
+
+    asterix_import_network_max_lines_ = value;
+}
 
 void MainWindow::loadData(bool value)
 {

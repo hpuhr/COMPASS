@@ -96,8 +96,9 @@ public:
     void importASTERIXFile(const std::string& filename);
     void importASTERIXFromNetwork();
     void importASTERIXFromNetworkTimeOffset(float value);
-
     float importASTERIXFromNetworkTimeOffset();
+    int importAsterixNetworkMaxLines() const;
+    void importAsterixNetworkMaxLines(int value);
     //    void asterixFraming(const std::string& asterix_framing);
     //    void asterixDecoderConfig(const std::string& asterix_decoder_cfg);
     //    bool asterixOptionsSet() const;
@@ -112,6 +113,8 @@ public:
 
     void updateMenus();
     void updateBottomWidget();
+
+
 
 protected:
     bool started_ {false};
@@ -136,6 +139,7 @@ protected:
     std::string asterix_import_filename_;
     bool asterix_import_network_ {false};
     float asterix_import_network_time_offset_ {0};
+    int asterix_import_network_max_lines_ {-1};
     //    bool set_asterix_framing_ {false};
     //    std::string asterix_framing_;
     //    bool set_asterix_decoder_cfg_ {false};

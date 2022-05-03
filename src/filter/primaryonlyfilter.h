@@ -1,16 +1,14 @@
-#ifndef ACADFILTER_H
-#define ACADFILTER_H
+#ifndef PRIMARYONLYFILTER_H
+#define PRIMARYONLYFILTER_H
 
 #include "dbfilter.h"
 
-#include <set>
-
-class ACADFilter : public DBFilter
+class PrimaryOnlyFilter : public DBFilter
 {
 public:
-    ACADFilter(const std::string& class_id, const std::string& instance_id,
-               Configurable* parent);
-    virtual ~ACADFilter();
+    PrimaryOnlyFilter(const std::string& class_id, const std::string& instance_id,
+                      Configurable* parent);
+    virtual ~PrimaryOnlyFilter();
 
     virtual std::string getConditionString(const std::string& dbo_name, bool& first,
                                            std::vector<std::string>& extra_from_parts,
@@ -25,22 +23,12 @@ public:
     virtual void saveViewPointConditions (nlohmann::json& filters) override;
     virtual void loadViewPointConditions (const nlohmann::json& filters) override;
 
-    std::string valuesString() const;
-    void valuesString(const std::string& values_str);
-
     virtual bool activeInLiveMode() override;
     virtual std::vector<size_t> filterBuffer(const std::string& dbcontent_name, std::shared_ptr<Buffer> buffer) override;
 
 protected:
-    std::string values_str_; // org string for display
-
-    std::set<unsigned int> values_; // dec
-    bool null_wanted_ {false};  // indicates NULL in values
-
     virtual void checkSubConfigurables() override;
     virtual DBFilterWidget* createWidget() override;
-
-    bool updateValuesFromStr(const std::string& values); // returns success
 };
 
-#endif // ACADFILTER_H
+#endif // PRIMARYONLYFILTER_H
