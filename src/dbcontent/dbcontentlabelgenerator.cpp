@@ -384,6 +384,16 @@ const std::set<unsigned int>& DBContentLabelGenerator::labelDSIDs() const
     return label_ds_ids_;
 }
 
+bool DBContentLabelGenerator::labelWanted(unsigned int ds_id)
+{
+    return label_ds_ids_.count(ds_id);
+}
+
+bool DBContentLabelGenerator::labelWanted(std::shared_ptr<Buffer> buffer, unsigned int index)
+{
+    return true;
+}
+
 void DBContentLabelGenerator::checkSubConfigurables()
 {
     // nothing to see here

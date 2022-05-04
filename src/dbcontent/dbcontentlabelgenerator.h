@@ -10,6 +10,7 @@
 
 #include <set>
 
+class Buffer;
 class DBContentManager;
 class DBContentLabelGeneratorWidget;
 class GeometryLeafItemLabels;
@@ -46,6 +47,8 @@ public:
     void addLabelDSID(unsigned int ds_id);
     void removeLabelDSID(unsigned int ds_id);
     const std::set<unsigned int>& labelDSIDs() const;
+    bool labelWanted(unsigned int ds_id);
+    bool labelWanted(std::shared_ptr<Buffer> buffer, unsigned int index);
 
 protected:
     DBContentManager& dbcont_manager_;
