@@ -84,6 +84,7 @@ std::vector<std::string> DBContentLabelGenerator::getLabelTexts(
 
     Variable& m3a_var = dbcont_manager_.metaGetVariable(dbcontent_name, DBContent::meta_var_m3a_);
 
+    // first row
     // 1x1
     {
         string main_id("?");
@@ -109,46 +110,19 @@ std::vector<std::string> DBContentLabelGenerator::getLabelTexts(
     if (current_lod_ == 1)
         return tmp;
 
-    // 2x2
-    {
-        // 1,2
+    // 1,2
+    string acid;
 
-        string acid;
+    if (acid_var && buffer->has<string>(acid_var->name())
+            && !buffer->get<string>(acid_var->name()).isNull(buffer_index))
+        acid = buffer->get<string>(acid_var->name()).get(buffer_index);
 
-        if (acid_var && buffer->has<string>(acid_var->name())
-                && !buffer->get<string>(acid_var->name()).isNull(buffer_index))
-            acid = buffer->get<string>(acid_var->name()).get(buffer_index);
+    acid.erase(std::remove(acid.begin(), acid.end(), ' '), acid.end());
+    tmp.push_back(acid);
 
-        acid.erase(std::remove(acid.begin(), acid.end(), ' '), acid.end());
-        tmp.push_back(acid);
-
-        // 2,1
-        string m3a;
-
-        if (buffer->has<unsigned int>(m3a_var.name()) &&
-                !buffer->get<unsigned int>(m3a_var.name()).isNull(buffer_index))
-            m3a = m3a_var.getAsSpecialRepresentationString(buffer->get<unsigned int>(m3a_var.name()).get(buffer_index));
-
-        tmp.push_back(m3a);
-
-        // 2,2
-        Variable& mc_var = dbcont_manager_.metaGetVariable(dbcontent_name, DBContent::meta_var_mc_);
-        string mc;
-
-        if (buffer->has<float>(mc_var.name()) &&
-                !buffer->get<float>(mc_var.name()).isNull(buffer_index))
-            mc = String::doubleToStringPrecision(buffer->get<float>(mc_var.name()).get(buffer_index)/100.0,2);
-
-        tmp.push_back(mc);
-    }
-
-    if (current_lod_ == 2)
-        return tmp;
-
-    // 3x3
+    if (current_lod_ == 3)
     {
         // 1,3
-
         string acad;
 
         if (acad_var && buffer->has<unsigned int>(acad_var->name())
@@ -157,105 +131,130 @@ std::vector<std::string> DBContentLabelGenerator::getLabelTexts(
                         buffer->get<unsigned int>(acad_var->name()).get(buffer_index));
 
         tmp.push_back(acad);
+    }
 
-        // 2,3
-        string ds_name;
+    // row 2
 
-        Variable& dsid_var = dbcont_manager_.metaGetVariable(dbcontent_name, DBContent::meta_var_datasource_id_);
+    // 2,1
+    string m3a;
 
-        if (buffer->has<unsigned int>(dsid_var.name()) &&
-                !buffer->get<unsigned int>(dsid_var.name()).isNull(buffer_index))
-            ds_name = dsid_var.getAsSpecialRepresentationString(
-                        buffer->get<unsigned int>(dsid_var.name()).get(buffer_index));
+    if (buffer->has<unsigned int>(m3a_var.name()) &&
+            !buffer->get<unsigned int>(m3a_var.name()).isNull(buffer_index))
+        m3a = m3a_var.getAsSpecialRepresentationString(buffer->get<unsigned int>(m3a_var.name()).get(buffer_index));
 
-        tmp.push_back(ds_name);
+    tmp.push_back(m3a);
 
-        // 3,1
-        Variable* c_d_var {nullptr};
-        if (dbcont_manager_.metaCanGetVariable(dbcontent_name, DBContent::meta_var_climb_descent_))
-            c_d_var = &dbcont_manager_.metaGetVariable(dbcontent_name, DBContent::meta_var_climb_descent_);
+    // 2,2
+    Variable& mc_var = dbcont_manager_.metaGetVariable(dbcontent_name, DBContent::meta_var_mc_);
+    string mc;
 
-        string c_d;
+    if (buffer->has<float>(mc_var.name()) &&
+            !buffer->get<float>(mc_var.name()).isNull(buffer_index))
+        mc = String::doubleToStringPrecision(buffer->get<float>(mc_var.name()).get(buffer_index)/100.0,2);
 
-        if (c_d_var && buffer->has<unsigned char>(c_d_var->name()) &&
-                !buffer->get<unsigned char>(c_d_var->name()).isNull(buffer_index))
-            c_d = c_d_var->getAsSpecialRepresentationString((buffer->get<unsigned char>(c_d_var->name()).get(buffer_index)));
+    tmp.push_back(mc);
 
-        tmp.push_back(c_d);
+    if (current_lod_ == 2)
+        return tmp;
 
-        // 3,2
+    // 2,3
+    string ds_name;
+
+    Variable& dsid_var = dbcont_manager_.metaGetVariable(dbcontent_name, DBContent::meta_var_datasource_id_);
+
+    if (buffer->has<unsigned int>(dsid_var.name()) &&
+            !buffer->get<unsigned int>(dsid_var.name()).isNull(buffer_index))
+        ds_name = dsid_var.getAsSpecialRepresentationString(
+                    buffer->get<unsigned int>(dsid_var.name()).get(buffer_index));
+
+    tmp.push_back(ds_name);
+
+    // row 3
+
+    // 3,1
+    Variable* c_d_var {nullptr};
+    if (dbcont_manager_.metaCanGetVariable(dbcontent_name, DBContent::meta_var_climb_descent_))
+        c_d_var = &dbcont_manager_.metaGetVariable(dbcontent_name, DBContent::meta_var_climb_descent_);
+
+    string c_d;
+
+    if (c_d_var && buffer->has<unsigned char>(c_d_var->name()) &&
+            !buffer->get<unsigned char>(c_d_var->name()).isNull(buffer_index))
+        c_d = c_d_var->getAsSpecialRepresentationString((buffer->get<unsigned char>(c_d_var->name()).get(buffer_index)));
+
+    tmp.push_back(c_d);
+
+    // 3,2
+    {
+        bool calc_vx_vy;
+        string var1, var2;
+        bool cant_calculate = false;
+        double speed_ms;
+
+        if (dbcont_manager_.metaVariable(DBContent::meta_var_vx_.name()).existsIn(dbcontent_name)
+                && buffer->has<double>(
+                    dbcont_manager_.metaVariable(DBContent::meta_var_vx_.name()).getFor(dbcontent_name).name())
+                && dbcont_manager_.metaVariable(DBContent::meta_var_vy_.name()).existsIn(dbcontent_name)
+                && buffer->has<double>(
+                    dbcont_manager_.metaVariable(DBContent::meta_var_vy_.name()).getFor(dbcontent_name).name()))
         {
-            bool calc_vx_vy;
-            string var1, var2;
-            bool cant_calculate = false;
-            double speed_ms;
+            // calculate based on vx, vy
+            calc_vx_vy = true;
 
-            if (dbcont_manager_.metaVariable(DBContent::meta_var_vx_.name()).existsIn(dbcontent_name)
-                    && buffer->has<double>(
-                        dbcont_manager_.metaVariable(DBContent::meta_var_vx_.name()).getFor(dbcontent_name).name())
-                    && dbcont_manager_.metaVariable(DBContent::meta_var_vy_.name()).existsIn(dbcontent_name)
-                    && buffer->has<double>(
-                        dbcont_manager_.metaVariable(DBContent::meta_var_vy_.name()).getFor(dbcontent_name).name()))
+            var1 = dbcont_manager_.metaVariable(DBContent::meta_var_vx_.name()).getFor(dbcontent_name).name();
+            var2 = dbcont_manager_.metaVariable(DBContent::meta_var_vy_.name()).getFor(dbcontent_name).name();
+        }
+        else if (dbcont_manager_.metaVariable(DBContent::meta_var_ground_speed_.name()).existsIn(dbcontent_name)
+                 && buffer->has<double>(
+                     dbcont_manager_.metaVariable(DBContent::meta_var_ground_speed_.name()).getFor(dbcontent_name).name()))
+        {
+            // calculate based on spd, track angle
+            calc_vx_vy = false;
+
+            var1 = dbcont_manager_.metaVariable(DBContent::meta_var_ground_speed_.name()).getFor(dbcontent_name).name();
+        }
+        else
+            cant_calculate = true;
+
+        if (cant_calculate)
+            tmp.push_back(""); // cant
+        else
+        {
+            if (calc_vx_vy)
             {
-                // calculate based on vx, vy
-                calc_vx_vy = true;
+                NullableVector<double>& vxs = buffer->get<double>(var1);
+                NullableVector<double>& vys = buffer->get<double>(var2);
 
-                var1 = dbcont_manager_.metaVariable(DBContent::meta_var_vx_.name()).getFor(dbcontent_name).name();
-                var2 = dbcont_manager_.metaVariable(DBContent::meta_var_vy_.name()).getFor(dbcontent_name).name();
-            }
-            else if (dbcont_manager_.metaVariable(DBContent::meta_var_ground_speed_.name()).existsIn(dbcontent_name)
-                     && buffer->has<double>(
-                         dbcont_manager_.metaVariable(DBContent::meta_var_ground_speed_.name()).getFor(dbcontent_name).name()))
-            {
-                // calculate based on spd, track angle
-                calc_vx_vy = false;
-
-                var1 = dbcont_manager_.metaVariable(DBContent::meta_var_ground_speed_.name()).getFor(dbcontent_name).name();
-            }
-            else
-                cant_calculate = true;
-
-            if (cant_calculate)
-                tmp.push_back(""); // cant
-            else
-            {
-                if (calc_vx_vy)
+                if (!vxs.isNull(buffer_index) && !vys.isNull(buffer_index))
                 {
-                    NullableVector<double>& vxs = buffer->get<double>(var1);
-                    NullableVector<double>& vys = buffer->get<double>(var2);
-
-                    if (!vxs.isNull(buffer_index) && !vys.isNull(buffer_index))
-                    {
-                        speed_ms = sqrt(pow(vxs.get(buffer_index), 2)+pow(vys.get(buffer_index), 2));
-                        tmp.push_back(String::doubleToStringPrecision(speed_ms * M_S2KNOTS, 2));
-                    }
-                    else
-                        tmp.push_back(""); // cant
+                    speed_ms = sqrt(pow(vxs.get(buffer_index), 2)+pow(vys.get(buffer_index), 2));
+                    tmp.push_back(String::doubleToStringPrecision(speed_ms * M_S2KNOTS, 2));
                 }
                 else
-                {
-                    NullableVector<double>& speeds = buffer->get<double>(var1);
+                    tmp.push_back(""); // cant
+            }
+            else
+            {
+                NullableVector<double>& speeds = buffer->get<double>(var1);
 
-                    if (!speeds.isNull(buffer_index))
-                    {
-                        speed_ms = speeds.get(buffer_index);
-                        tmp.push_back(String::doubleToStringPrecision(speed_ms, 2)); // should be kts
-                    }
-                    else
-                        tmp.push_back(""); // cant
+                if (!speeds.isNull(buffer_index))
+                {
+                    speed_ms = speeds.get(buffer_index);
+                    tmp.push_back(String::doubleToStringPrecision(speed_ms, 2)); // should be kts
                 }
+                else
+                    tmp.push_back(""); // cant
             }
         }
-
-        // 3,3
-
-        if (dbcontent_name == "CAT062" && buffer->has<string>(DBContent::var_cat062_wtc_.name())
-                && !buffer->get<string>(DBContent::var_cat062_wtc_.name()).isNull(buffer_index))
-            tmp.push_back(buffer->get<string>(DBContent::var_cat062_wtc_.name()).get(buffer_index));
-        else
-            tmp.push_back("");
-
     }
+
+    // 3,3
+
+    if (dbcontent_name == "CAT062" && buffer->has<string>(DBContent::var_cat062_wtc_.name())
+            && !buffer->get<string>(DBContent::var_cat062_wtc_.name()).isNull(buffer_index))
+        tmp.push_back(buffer->get<string>(DBContent::var_cat062_wtc_.name()).get(buffer_index));
+    else
+        tmp.push_back("");
 
     //        Variable& tod_var = dbcont_manager_.metaGetVariable(dbcontent_name, DBContent::meta_var_tod_);
     //        string tod;
