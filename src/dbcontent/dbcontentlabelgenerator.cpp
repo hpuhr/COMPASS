@@ -34,6 +34,20 @@ DBContentLabelGenerator::DBContentLabelGenerator(const std::string& class_id, co
     registerParameter("filter_mode3a_values", &filter_mode3a_values_, "7000,7777");
     updateM3AValuesFromStr(filter_mode3a_values_);
 
+    registerParameter("filter_modec_min_active", &filter_modec_min_active_, false);
+    registerParameter("filter_modec_min_value", &filter_modec_min_value_, 10);
+    registerParameter("filter_modec_max_active", &filter_modec_max_active_, false);
+    registerParameter("filter_modec_max_value", &filter_modec_max_value_, 400);
+    registerParameter("filter_modec_null_wanted", &filter_modec_null_wanted_, false);
+
+    registerParameter("filter_ti_active", &filter_ti_active_, false);
+    registerParameter("filter_ti_values", &filter_ti_values_, "OE");
+    updateTIValuesFromStr(filter_ti_values_);
+
+    registerParameter("filter_ta_active", &filter_ta_active_, false);
+    registerParameter("filter_ta_values", &filter_ta_values_, "AADDCCDD");
+    updateTAValuesFromStr(filter_ta_values_);
+
     createSubConfigurables();
 }
 
@@ -344,9 +358,92 @@ bool DBContentLabelGenerator::labelWanted(std::shared_ptr<Buffer> buffer, unsign
         NullableVector<unsigned int>& data_vec = buffer->get<unsigned int> (var.name());
 
         if (data_vec.isNull(index))
-            return filter_m3a_null_wanted_;
+        {
+            if (!filter_m3a_null_wanted_)
+                return false; // null and not wanted
+        }
+        else if (!filter_m3a_values_set_.count(data_vec.get(index)))
+            return false; // set and not in values
+    }
+
+    if (filter_modec_min_active_ || filter_modec_max_active_)
+    {
+        if (!dbcont_manager_.metaCanGetVariable(buffer->dboName(), DBContent::meta_var_mc_))
+            return false;
+
+        dbContent::Variable& var = dbcont_manager_.metaGetVariable(buffer->dboName(), DBContent::meta_var_mc_);
+
+        assert (buffer->has<float> (var.name()));
+
+        NullableVector<float>& data_vec = buffer->get<float> (var.name());
+
+        if (data_vec.isNull(index))
+        {
+            if (!filter_modec_null_wanted_)
+                return false; // null and not wanted
+        }
         else
-            return filter_m3a_values_set_.count(data_vec.get(index));
+        {
+            if (filter_modec_min_active_ && data_vec.get(index)/100.0 < filter_modec_min_value_)
+                return false;
+
+            if (filter_modec_max_active_ && data_vec.get(index)/100.0 > filter_modec_max_value_)
+                return false;
+        }
+    }
+
+    if (filter_ti_active_)
+    {
+        if (!dbcont_manager_.metaCanGetVariable(buffer->dboName(), DBContent::meta_var_ti_))
+            return false;
+
+        dbContent::Variable& var = dbcont_manager_.metaGetVariable(buffer->dboName(), DBContent::meta_var_ti_);
+
+        assert (buffer->has<string> (var.name()));
+
+        NullableVector<string>& data_vec = buffer->get<string> (var.name());
+
+        if (data_vec.isNull(index))
+        {
+            if (!filter_ti_null_wanted_)
+                return false; // null not wanted
+        }
+        else
+        {
+            bool found = false;
+
+            for (auto& val_it : filter_ti_values_set_)
+            {
+                if (data_vec.get(index).find(val_it) != std::string::npos)
+                {
+                    found = true;
+                    break;
+                }
+            }
+
+            if (!found)
+                return false;
+        }
+    }
+
+    if (filter_ta_active_)
+    {
+        if (!dbcont_manager_.metaCanGetVariable(buffer->dboName(), DBContent::meta_var_ta_))
+            return false;
+
+        dbContent::Variable& var = dbcont_manager_.metaGetVariable(buffer->dboName(), DBContent::meta_var_ta_);
+
+        assert (buffer->has<unsigned int> (var.name()));
+
+        NullableVector<unsigned int>& data_vec = buffer->get<unsigned int> (var.name());
+
+        if (data_vec.isNull(index))
+        {
+            if (!filter_ta_null_wanted_)
+                return false; // null and not wanted
+        }
+        else if (!filter_ta_values_set_.count(data_vec.get(index)))
+            return false; // set and not in values
     }
 
     return true;
@@ -357,9 +454,9 @@ bool DBContentLabelGenerator::filterMode3aActive() const
     return filter_mode3a_active_;
 }
 
-void DBContentLabelGenerator::filterMode3aActive(bool filter_mode3a_active)
+void DBContentLabelGenerator::filterMode3aActive(bool filter_active)
 {
-    filter_mode3a_active_ = filter_mode3a_active;
+    filter_mode3a_active_ = filter_active;
 }
 
 std::string DBContentLabelGenerator::filterMode3aValues() const
@@ -367,10 +464,102 @@ std::string DBContentLabelGenerator::filterMode3aValues() const
     return filter_mode3a_values_;
 }
 
-void DBContentLabelGenerator::filterMode3aValues(const std::string &filter_mode3a_values)
+void DBContentLabelGenerator::filterMode3aValues(const std::string &filter_values)
 {
-    filter_mode3a_values_ = filter_mode3a_values;
+    filter_mode3a_values_ = filter_values;
     updateM3AValuesFromStr(filter_mode3a_values_);
+}
+
+bool DBContentLabelGenerator::filterTIActive() const
+{
+    return filter_ti_active_;
+}
+
+void DBContentLabelGenerator::filterTIActive(bool filter_active)
+{
+    filter_ti_active_ = filter_active;
+}
+
+std::string DBContentLabelGenerator::filterTIValues() const
+{
+    return filter_ti_values_;
+}
+
+void DBContentLabelGenerator::filterTIValues(const std::string &filter_values)
+{
+    filter_ti_values_ = filter_values;
+    updateTIValuesFromStr(filter_ti_values_);
+}
+
+bool DBContentLabelGenerator::filterTAActive() const
+{
+    return filter_ta_active_;
+}
+
+void DBContentLabelGenerator::filterTAActive(bool filter_active)
+{
+    filter_ta_active_ = filter_active;
+}
+
+std::string DBContentLabelGenerator::filterTAValues() const
+{
+    return filter_ta_values_;
+}
+
+void DBContentLabelGenerator::filterTAValues(const std::string &filter_values)
+{
+    filter_ta_values_ = filter_values;
+    updateTAValuesFromStr(filter_ta_values_);
+}
+
+bool DBContentLabelGenerator::filterModecMinActive() const
+{
+    return filter_modec_min_active_;
+}
+
+void DBContentLabelGenerator::filterModecMinActive(bool value)
+{
+    filter_modec_min_active_ = value;
+}
+
+float DBContentLabelGenerator::filterModecMinValue() const
+{
+    return filter_modec_min_value_;
+}
+
+void DBContentLabelGenerator::filterModecMinValue(float value)
+{
+    filter_modec_min_value_ = value;
+}
+
+bool DBContentLabelGenerator::filterModecMaxActive() const
+{
+    return filter_modec_max_active_;
+}
+
+void DBContentLabelGenerator::filterModecMaxActive(bool value)
+{
+    filter_modec_max_active_ = value;
+}
+
+float DBContentLabelGenerator::filterModecMaxValue() const
+{
+    return filter_modec_max_value_;
+}
+
+void DBContentLabelGenerator::filterModecMaxValue(float value)
+{
+    filter_modec_max_value_ = value;
+}
+
+bool DBContentLabelGenerator::filterModecNullWanted() const
+{
+    return filter_modec_null_wanted_;
+}
+
+void DBContentLabelGenerator::filterModecNullWanted(bool value)
+{
+    filter_modec_null_wanted_ = value;
 }
 
 void DBContentLabelGenerator::checkSubConfigurables()
@@ -399,7 +588,7 @@ bool DBContentLabelGenerator::updateM3AValuesFromStr(const std::string& values)
 
         if (!ok)
         {
-            logerr << "DBContentLabelGenerator: updateM3AValuesFromStr: utn '" << tmp_str << "' not valid";
+            logerr << "DBContentLabelGenerator: updateM3AValuesFromStr: value '" << tmp_str << "' not valid";
             break;
         }
 
@@ -410,6 +599,65 @@ bool DBContentLabelGenerator::updateM3AValuesFromStr(const std::string& values)
         return false;
 
     filter_m3a_values_set_ = values_tmp;
+
+    return true;
+}
+
+bool DBContentLabelGenerator::updateTIValuesFromStr(const std::string& values)
+{
+    set<string> values_tmp;
+    vector<string> split_str = String::split(values, ',');
+
+    filter_ti_null_wanted_ = false;
+
+    for (auto& tmp_str : split_str)
+    {
+        if (String::trim(tmp_str) == "NULL" || String::trim(tmp_str) == "null")
+        {
+            filter_ti_null_wanted_ = true;
+            continue;
+        }
+
+        values_tmp.insert(boost::algorithm::to_upper_copy(tmp_str));
+    }
+
+    filter_ti_values_set_ = values_tmp;
+
+    return true;
+}
+
+bool DBContentLabelGenerator::updateTAValuesFromStr(const std::string& values)
+{
+    set<unsigned int> values_tmp;
+    vector<string> split_str = String::split(values, ',');
+
+    bool ok = true;
+
+    filter_ta_null_wanted_ = false;
+
+    for (auto& tmp_str : split_str)
+    {
+        if (String::trim(tmp_str) == "NULL" || String::trim(tmp_str) == "null")
+        {
+            filter_ta_null_wanted_ = true;
+            continue;
+        }
+
+        unsigned int utn_tmp = QString(tmp_str.c_str()).toInt(&ok, 16);
+
+        if (!ok)
+        {
+            logerr << "DBContentLabelGenerator: updateTAValuesFromStr: value '" << tmp_str << "' not valid";
+            break;
+        }
+
+        values_tmp.insert(utn_tmp);
+    }
+
+    if (!ok)
+        return false;
+
+    filter_ta_values_set_ = values_tmp;
 
     return true;
 }
