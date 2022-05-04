@@ -1,4 +1,5 @@
 #include "dbcontentlabelgenerator.h"
+#include "compass.h"
 #include "dbcontent/dbcontentmanager.h"
 #include "dbcontent/dbcontent.h"
 #include "dbcontent/variable/metavariable.h"
@@ -29,6 +30,10 @@ DBContentLabelGenerator::DBContentLabelGenerator(const std::string& class_id, co
     registerParameter("auto_label", &auto_label_, true);
     registerParameter("label_config", &label_config_, json::object());
 
+    registerParameter("filter_mode3a_active", &filter_mode3a_active_, false);
+    registerParameter("filter_mode3a_values", &filter_mode3a_values_, "7000,7777");
+    updateM3AValuesFromStr(filter_mode3a_values_);
+
     createSubConfigurables();
 }
 
@@ -38,23 +43,6 @@ DBContentLabelGenerator::~DBContentLabelGenerator()
 
 void DBContentLabelGenerator::generateSubConfigurable(const string& class_id, const string& instance_id)
 {
-    //    if (class_id == "Variable")
-    //    {
-    //        string var_name = configuration()
-    //                .getSubConfiguration(class_id, instance_id)
-    //                .getParameterConfigValueString("name");
-
-    //        if (hasVariable(var_name))
-    //            logerr << "DBContent: generateSubConfigurable: duplicate variable " << instance_id
-    //                   << " with name '" << var_name << "'";
-
-    //        assert(!hasVariable(var_name));
-
-    //        logdbg << "DBContent: generateSubConfigurable: generating variable " << instance_id
-    //               << " with name " << var_name;
-
-    //        variables_.emplace_back(new Variable(class_id, instance_id, this));
-    //    }
     throw runtime_error("DBContentLabelGenerator: generateSubConfigurable: unknown class_id " + class_id);
 
 }
@@ -277,55 +265,8 @@ void DBContentLabelGenerator::autoLabel(bool auto_label)
     auto_label_ = auto_label;
 }
 
-//void DBContentLabelGenerator::registerLeafItemLabel (GeometryLeafItemLabels& item_label)
-//{
-//    assert (!item_labels_.count(&item_label));
-//    item_labels_.insert(&item_label);
-//}
-
-//void DBContentLabelGenerator::unregisterLeafItemLabel (GeometryLeafItemLabels& item_label)
-//{
-//    assert (item_labels_.count(&item_label));
-//    item_labels_.erase(&item_label);
-//}
-
 void DBContentLabelGenerator::autoAdustCurrentLOD(unsigned int num_labels_on_screen)
 {
-//    assert (viewport.size() == 4);
-
-//    loginf << "DBContentLabelGenerator: autoAdustCurrentLOD: x " << viewport.at(0)
-//           << " y " << viewport.at(1) << " w " << viewport.at(2) << " h " << viewport.at(3);
-
-//    osg::Vec4 pos;
-//    int x, y;
-
-//    bool inside;
-
-//    unsigned int num_labels = 0;
-//    unsigned int num_labels_on_screen = 0;
-
-//    for (auto& it_lab_it : item_labels_)
-//    {
-//        for (auto& pos_it : it_lab_it->getLabelPositions())
-//        {
-//            ++num_labels;
-
-//            pos = pos_it;
-//            pos = pos * screen_transform;
-//            pos = pos / pos.w();
-
-//            x = pos.x();
-//            y = pos.y();
-
-//            inside = x >= viewport.at(0) && x < viewport.at(2) && y >= viewport.at(1) && y < viewport.at(3);
-
-//            logdbg << "DBContentLabelGenerator: autoAdustCurrentLOD: x " << x << " y " << y << " inside " << inside;
-
-//            if (inside)
-//                ++num_labels_on_screen;
-//        }
-//    }
-
     loginf << "DBContentLabelGenerator: autoAdustCurrentLOD: num labels on screen "
            << num_labels_on_screen;
 
@@ -391,10 +332,84 @@ bool DBContentLabelGenerator::labelWanted(unsigned int ds_id)
 
 bool DBContentLabelGenerator::labelWanted(std::shared_ptr<Buffer> buffer, unsigned int index)
 {
+    if (filter_mode3a_active_)
+    {
+        if (!dbcont_manager_.metaCanGetVariable(buffer->dboName(), DBContent::meta_var_m3a_))
+            return false;
+
+        dbContent::Variable& var = dbcont_manager_.metaGetVariable(buffer->dboName(), DBContent::meta_var_m3a_);
+
+        assert (buffer->has<unsigned int> (var.name()));
+
+        NullableVector<unsigned int>& data_vec = buffer->get<unsigned int> (var.name());
+
+        if (data_vec.isNull(index))
+            return filter_m3a_null_wanted_;
+        else
+            return filter_m3a_values_set_.count(data_vec.get(index));
+    }
+
     return true;
+}
+
+bool DBContentLabelGenerator::filterMode3aActive() const
+{
+    return filter_mode3a_active_;
+}
+
+void DBContentLabelGenerator::filterMode3aActive(bool filter_mode3a_active)
+{
+    filter_mode3a_active_ = filter_mode3a_active;
+}
+
+std::string DBContentLabelGenerator::filterMode3aValues() const
+{
+    return filter_mode3a_values_;
+}
+
+void DBContentLabelGenerator::filterMode3aValues(const std::string &filter_mode3a_values)
+{
+    filter_mode3a_values_ = filter_mode3a_values;
+    updateM3AValuesFromStr(filter_mode3a_values_);
 }
 
 void DBContentLabelGenerator::checkSubConfigurables()
 {
     // nothing to see here
+}
+
+bool DBContentLabelGenerator::updateM3AValuesFromStr(const std::string& values)
+{
+    set<unsigned int> values_tmp;
+    vector<string> split_str = String::split(values, ',');
+
+    bool ok = true;
+
+    filter_m3a_null_wanted_ = false;
+
+    for (auto& tmp_str : split_str)
+    {
+        if (String::trim(tmp_str) == "NULL" || String::trim(tmp_str) == "null")
+        {
+            filter_m3a_null_wanted_ = true;
+            continue;
+        }
+
+        unsigned int utn_tmp = QString(tmp_str.c_str()).toInt(&ok, 8);
+
+        if (!ok)
+        {
+            logerr << "DBContentLabelGenerator: updateM3AValuesFromStr: utn '" << tmp_str << "' not valid";
+            break;
+        }
+
+        values_tmp.insert(utn_tmp);
+    }
+
+    if (!ok)
+        return false;
+
+    filter_m3a_values_set_ = values_tmp;
+
+    return true;
 }

@@ -5,6 +5,9 @@
 
 class DBContentLabelGenerator;
 
+class QCheckBox;
+class QLineEdit;
+
 class DBContentLabelGeneratorWidget : public QWidget
 {
     Q_OBJECT
@@ -12,6 +15,9 @@ class DBContentLabelGeneratorWidget : public QWidget
 public slots:
     void autoLabelChangedSlot(bool checked);
     void lodChangedSlot(const QString& text);
+
+    void filterMode3AActiveChangedSlot(bool checked);
+    void filterMode3ChangedSlot(const QString& text);
 
 public:
     DBContentLabelGeneratorWidget(DBContentLabelGenerator& label_generator);

@@ -50,6 +50,12 @@ public:
     bool labelWanted(unsigned int ds_id);
     bool labelWanted(std::shared_ptr<Buffer> buffer, unsigned int index);
 
+    bool filterMode3aActive() const;
+    void filterMode3aActive(bool filter_mode3a_active);
+
+    std::string filterMode3aValues() const;
+    void filterMode3aValues(const std::string& filter_mode3a_values);
+
 protected:
     DBContentManager& dbcont_manager_;
 
@@ -63,9 +69,15 @@ protected:
 
     std::set<unsigned int> label_ds_ids_;
 
+    bool filter_mode3a_active_;
+    std::string filter_mode3a_values_;
+    std::set<unsigned int> filter_m3a_values_set_; // dec
+    bool filter_m3a_null_wanted_ {false};
+
     //std::set<GeometryLeafItemLabels*> item_labels_;
 
     virtual void checkSubConfigurables();
+    bool updateM3AValuesFromStr(const std::string& values);
 };
 
 #endif // DBCONTENTLABELGENERATOR_H
