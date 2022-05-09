@@ -699,10 +699,14 @@ void MainWindow::performAutomaticTasks ()
 
         ast_import_task.importNetwork();
 
-        assert(ast_import_task.canRun());
-        ast_import_task.showDoneSummary(false);
+        if (ast_import_task.canRun())
+        {
+            ast_import_task.showDoneSummary(false);
 
-        ast_import_task.run(false); // no test
+            ast_import_task.run(false); // no test
+        }
+        else
+            logwrn << "MainWindow: performAutomaticTasks: importing ASTERIX from network not possible";
     }
 
 ////    if (json_import_file_)
