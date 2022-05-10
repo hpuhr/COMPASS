@@ -1,6 +1,3 @@
-## New Project Name
-Please note that the previous project name was ATSDB. OpenATS COMPASS is a direct successor, with the same functionality, licenses and scope.
-
 ## Description
 Based on a dynamic database schema, recorded air traffic surveillance data can be imported into database, analysed, inspected and evaluated.
 
