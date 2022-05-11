@@ -172,19 +172,6 @@ std::vector<std::string> DBContentLabelGenerator::getLabelTexts(
     // row 3
 
     // 3,1
-    Variable* c_d_var {nullptr};
-    if (dbcont_manager_.metaCanGetVariable(dbcontent_name, DBContent::meta_var_climb_descent_))
-        c_d_var = &dbcont_manager_.metaGetVariable(dbcontent_name, DBContent::meta_var_climb_descent_);
-
-    string c_d;
-
-    if (c_d_var && buffer->has<unsigned char>(c_d_var->name()) &&
-            !buffer->get<unsigned char>(c_d_var->name()).isNull(buffer_index))
-        c_d = c_d_var->getAsSpecialRepresentationString((buffer->get<unsigned char>(c_d_var->name()).get(buffer_index)));
-
-    tmp.push_back(c_d);
-
-    // 3,2
     {
         bool calc_vx_vy;
         string var1, var2;
@@ -247,6 +234,19 @@ std::vector<std::string> DBContentLabelGenerator::getLabelTexts(
             }
         }
     }
+
+    // 3,2
+    Variable* c_d_var {nullptr};
+    if (dbcont_manager_.metaCanGetVariable(dbcontent_name, DBContent::meta_var_climb_descent_))
+        c_d_var = &dbcont_manager_.metaGetVariable(dbcontent_name, DBContent::meta_var_climb_descent_);
+
+    string c_d;
+
+    if (c_d_var && buffer->has<unsigned char>(c_d_var->name()) &&
+            !buffer->get<unsigned char>(c_d_var->name()).isNull(buffer_index))
+        c_d = c_d_var->getAsSpecialRepresentationString((buffer->get<unsigned char>(c_d_var->name()).get(buffer_index)));
+
+    tmp.push_back(c_d);
 
     // 3,3
 

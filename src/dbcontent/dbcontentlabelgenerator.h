@@ -15,6 +15,14 @@ class DBContentManager;
 class DBContentLabelGeneratorWidget;
 class GeometryLeafItemLabels;
 
+enum LabelDirection
+{
+    LEFT_UP=0,
+    RIGHT_UP,
+    LEFT_DOWN,
+    RIGHT_DOWN
+};
+
 class DBContentLabelGenerator : public QObject, public Configurable
 {
     Q_OBJECT
