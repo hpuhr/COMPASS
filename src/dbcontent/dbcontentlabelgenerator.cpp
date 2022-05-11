@@ -6,6 +6,7 @@
 #include "dbcontentlabelgeneratorwidget.h"
 #include "logger.h"
 #include "util/stringconv.h"
+#include "util/number.h"
 
 #include "global.h"
 
@@ -28,6 +29,7 @@ DBContentLabelGenerator::DBContentLabelGenerator(const std::string& class_id, co
     : Configurable(class_id, instance_id, &manager), dbcont_manager_(manager)
 {
     registerParameter("auto_label", &auto_label_, true);
+    registerParameter("label_directions", &label_directions_, json::object());
     registerParameter("label_config", &label_config_, json::object());
 
     registerParameter("filter_mode3a_active", &filter_mode3a_active_, false);
@@ -565,6 +567,31 @@ void DBContentLabelGenerator::checkSubConfigurables()
 {
     // nothing to see here
 }
+
+LabelDirection DBContentLabelGenerator::labelDirection (unsigned int ds_id)
+{
+    string key = to_string(ds_id);
+
+    if (label_directions_.contains(key))
+    {
+        unsigned int direction = label_directions_.at(key);
+        assert (direction <= 3);
+        return LabelDirection(direction);
+    }
+    else
+    {
+        unsigned int direction = Number::randomNumber(0, 3.99);
+        assert (direction <= 3);
+        label_directions_[key] = direction;
+        return LabelDirection(direction);
+    }
+}
+
+void DBContentLabelGenerator::labelDirection (unsigned int ds_id, LabelDirection direction)
+{
+    label_directions_[to_string(ds_id)] = direction;
+}
+
 
 bool DBContentLabelGenerator::updateM3AValuesFromStr(const std::string& values)
 {

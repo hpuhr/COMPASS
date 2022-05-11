@@ -88,6 +88,9 @@ public:
     bool filterModecNullWanted() const;
     void filterModecNullWanted(bool value);
 
+    LabelDirection labelDirection (unsigned int ds_id);
+    void labelDirection (unsigned int ds_id, LabelDirection direction);
+
 protected:
     DBContentManager& dbcont_manager_;
 
@@ -96,6 +99,8 @@ protected:
     bool auto_label_ {true};
     bool auto_lod_ {true};
     unsigned int current_lod_ {3}; // 1, 2, 3
+
+    nlohmann::json label_directions_;
 
     nlohmann::json label_config_;
 

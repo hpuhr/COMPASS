@@ -113,7 +113,7 @@ void DBContentLabelDSWidget::updateListSlot()
 
         QPushButton* direction = new QPushButton();
         direction->setProperty("ds_id", ds_it->id());
-        direction->setIcon(arrow_lu_);
+        direction->setIcon(iconForDirection(label_generator_.labelDirection(ds_it->id())));
         direction->setFixedWidth(2*UI_ICON_SIZE.width());
         //direction->setFixedSize(UI_ICON_SIZE);
         direction->setFlat(UI_ICON_BUTTON_FLAT);
@@ -239,6 +239,8 @@ void DBContentLabelDSWidget::selectDirectionSlot()
     loginf << "DBContentLabelDSWidget: selectDirectionSlot: ds_id " << ds_id << " dir " << dir;
 
     LabelDirection direction = LabelDirection(dir);
+    label_generator_.labelDirection(ds_id, direction);
+
     assert (direction_buttons_.count(ds_id));
     direction_buttons_.at(ds_id)->setIcon(iconForDirection(direction));
 }
