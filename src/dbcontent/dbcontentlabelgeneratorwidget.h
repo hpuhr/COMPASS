@@ -13,6 +13,8 @@ class DBContentLabelGeneratorWidget : public QWidget
     Q_OBJECT
 
 public slots:
+    void editSettingsSlot();
+
     void autoLabelChangedSlot(bool checked);
     void lodChangedSlot(const QString& text);
 

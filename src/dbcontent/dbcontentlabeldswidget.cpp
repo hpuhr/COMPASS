@@ -35,6 +35,7 @@ DBContentLabelDSWidget::DBContentLabelDSWidget(DBContentLabelGenerator& label_ge
 
     ds_grid_ = new QGridLayout();
     ds_grid_->setContentsMargins(2,2,2,2);
+    ds_grid_->setSpacing(1);
     updateListSlot();
     main_layout->addLayout(ds_grid_);
 

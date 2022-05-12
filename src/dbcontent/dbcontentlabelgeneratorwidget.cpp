@@ -2,6 +2,7 @@
 #include "dbcontentlabelgenerator.h"
 #include "dbcontentlabeldswidget.h"
 #include "logger.h"
+#include "files.h"
 
 #include <QFormLayout>
 #include <QComboBox>
@@ -10,13 +11,30 @@
 #include <QGridLayout>
 #include <QLineEdit>
 #include <QCheckBox>
+#include <QPushButton>
+#include <QScrollArea>
 
 using namespace std;
+using namespace Utils;
 
 DBContentLabelGeneratorWidget::DBContentLabelGeneratorWidget(DBContentLabelGenerator& label_generator)
     : label_generator_(label_generator)
 {
     QVBoxLayout* main_layout = new QVBoxLayout();
+
+    QHBoxLayout* edit_layout = new QHBoxLayout();
+    edit_layout->addStretch();
+
+    QPushButton* ed_edit = new QPushButton();
+    ed_edit->setIcon(QIcon(Files::getIconFilepath("edit.png").c_str()));
+    ed_edit->setFixedSize(UI_ICON_SIZE);
+    ed_edit->setFlat(UI_ICON_BUTTON_FLAT);
+    connect(ed_edit, &QPushButton::clicked,
+            this, &DBContentLabelGeneratorWidget::editSettingsSlot);
+    ed_edit->setToolTip("Edit Label Contents");
+    edit_layout->addWidget(ed_edit);
+
+    main_layout->addLayout(edit_layout);
 
     QFormLayout* form_layout1 = new QFormLayout;
 
@@ -41,8 +59,15 @@ DBContentLabelGeneratorWidget::DBContentLabelGeneratorWidget(DBContentLabelGener
 
     main_layout->addLayout(form_layout1);
 
+    QScrollArea* scroll_area = new QScrollArea();
+    scroll_area->setWidgetResizable(true);
+
     DBContentLabelDSWidget* ds_widget = new DBContentLabelDSWidget(label_generator_);
-    main_layout->addWidget(ds_widget);
+    scroll_area->setWidget(ds_widget);
+    scroll_area->setMinimumHeight(300);
+    scroll_area->setMaximumHeight(400);
+
+    main_layout->addWidget(scroll_area);
 
     unsigned int row=0;
 
@@ -124,13 +149,19 @@ DBContentLabelGeneratorWidget::DBContentLabelGeneratorWidget(DBContentLabelGener
             this, &DBContentLabelGeneratorWidget::filterTAChangedSlot);
     filter_layout->addWidget(filter_ta_edit, row, 1);
 
-
     main_layout->addLayout(filter_layout);
+
+    main_layout->addStretch();
 
     setLayout(main_layout);
 }
 
 DBContentLabelGeneratorWidget::~DBContentLabelGeneratorWidget()
+{
+
+}
+
+void DBContentLabelGeneratorWidget::editSettingsSlot()
 {
 
 }
