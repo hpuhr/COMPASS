@@ -16,14 +16,11 @@
  */
 
 #include "dbcontent/dbcontent.h"
-
 #include "compass.h"
 #include "buffer.h"
 #include "dbinterface.h"
 #include "dbcontent/dbcontentmanager.h"
 #include "dbcontent/dbcontentwidget.h"
-#include "dbcontent/labeldefinition.h"
-#include "dbcontent/labeldefinitionwidget.h"
 #include "datasourcemanager.h"
 #include "dboreaddbjob.h"
 #include "dbcontent/variable/variable.h"
@@ -167,11 +164,6 @@ void DBContent::generateSubConfigurable(const string& class_id, const string& in
 
         variables_.emplace_back(new Variable(class_id, instance_id, this));
     }
-    else if (class_id == "LabelDefinition")
-    {
-        assert(!label_definition_);
-        label_definition_.reset(new dbContent::LabelDefinition(class_id, instance_id, this, dbo_manager_));
-    }
     else
         throw runtime_error("DBContent: generateSubConfigurable: unknown class_id " + class_id);
 
@@ -182,12 +174,6 @@ void DBContent::generateSubConfigurable(const string& class_id, const string& in
 void DBContent::checkSubConfigurables()
 {
     // nothing to see here
-
-    if (!label_definition_)
-    {
-        generateSubConfigurable("LabelDefinition", "LabelDefinition0");
-        assert(label_definition_);
-    }
 }
 
 bool DBContent::hasVariable(const string& name) const
@@ -316,12 +302,6 @@ DBContentWidget* DBContent::widget()
 }
 
 void DBContent::closeWidget() { widget_ = nullptr; }
-
-dbContent::LabelDefinitionWidget* DBContent::labelDefinitionWidget()
-{
-    assert(label_definition_);
-    return label_definition_->widget();
-}
 
 void DBContent::load(VariableSet& read_set, bool use_filters, bool use_order,
                      Variable* order_variable, bool use_order_ascending,
@@ -605,61 +585,61 @@ void DBContent::updateDoneSlot()
     emit updateDoneSignal(*this);
 }
 
-map<unsigned int, string> DBContent::loadLabelData(vector<unsigned int> rec_nums, int break_item_cnt)
-{
-    assert(is_loadable_);
-    assert(existsInDB());
+//map<unsigned int, string> DBContent::loadLabelData(vector<unsigned int> rec_nums, int break_item_cnt)
+//{
+//    assert(is_loadable_);
+//    assert(existsInDB());
 
-    string custom_filter_clause;
-    bool first = true;
+//    string custom_filter_clause;
+//    bool first = true;
 
-    assert (dbo_manager_.existsMetaVariable(DBContent::meta_var_rec_num_.name()));
-    assert (dbo_manager_.metaVariable(DBContent::meta_var_rec_num_.name()).existsIn(name_));
+//    assert (dbo_manager_.existsMetaVariable(DBContent::meta_var_rec_num_.name()));
+//    assert (dbo_manager_.metaVariable(DBContent::meta_var_rec_num_.name()).existsIn(name_));
 
-    Variable& rec_num_var = dbo_manager_.metaVariable(DBContent::meta_var_rec_num_.name()).getFor(name_);
+//    Variable& rec_num_var = dbo_manager_.metaVariable(DBContent::meta_var_rec_num_.name()).getFor(name_);
 
-    custom_filter_clause = rec_num_var.dbColumnName() + " in (";
-    for (auto& rec_num : rec_nums)
-    {
-        if (first)
-            first = false;
-        else
-            custom_filter_clause += ",";
+//    custom_filter_clause = rec_num_var.dbColumnName() + " in (";
+//    for (auto& rec_num : rec_nums)
+//    {
+//        if (first)
+//            first = false;
+//        else
+//            custom_filter_clause += ",";
 
-        custom_filter_clause += to_string(rec_num);
-    }
-    custom_filter_clause += ")";
+//        custom_filter_clause += to_string(rec_num);
+//    }
+//    custom_filter_clause += ")";
 
-    VariableSet read_list = label_definition_->readList();
+//    VariableSet read_list = label_definition_->readList();
 
-    if (!read_list.hasVariable(rec_num_var))
-        read_list.add(rec_num_var);
+//    if (!read_list.hasVariable(rec_num_var))
+//        read_list.add(rec_num_var);
 
-    boost::posix_time::ptime start_time = boost::posix_time::microsec_clock::local_time();
+//    boost::posix_time::ptime start_time = boost::posix_time::microsec_clock::local_time();
 
-    DBInterface& db_interface = COMPASS::instance().interface();
+//    DBInterface& db_interface = COMPASS::instance().interface();
 
-    db_interface.prepareRead(*this, read_list, {}, custom_filter_clause, {}, false, nullptr, false, "");
-    shared_ptr<Buffer> buffer = db_interface.readDataChunk(*this);
-    db_interface.finalizeReadStatement(*this);
+//    db_interface.prepareRead(*this, read_list, {}, custom_filter_clause, {}, false, nullptr, false, "");
+//    shared_ptr<Buffer> buffer = db_interface.readDataChunk(*this);
+//    db_interface.finalizeReadStatement(*this);
 
-    if (buffer->size() != rec_nums.size())
-        throw runtime_error("DBContent " + name_ +
-                            ": loadLabelData: failed to load label for " +
-                            custom_filter_clause);
+//    if (buffer->size() != rec_nums.size())
+//        throw runtime_error("DBContent " + name_ +
+//                            ": loadLabelData: failed to load label for " +
+//                            custom_filter_clause);
 
-    assert(buffer->size() == rec_nums.size());
+//    assert(buffer->size() == rec_nums.size());
 
-    map<unsigned int, string> labels =
-            label_definition_->generateLabels(rec_nums, buffer, break_item_cnt);
+//    map<unsigned int, string> labels =
+//            label_definition_->generateLabels(rec_nums, buffer, break_item_cnt);
 
-    boost::posix_time::ptime stop_time = boost::posix_time::microsec_clock::local_time();
-    boost::posix_time::time_duration diff = stop_time - start_time;
+//    boost::posix_time::ptime stop_time = boost::posix_time::microsec_clock::local_time();
+//    boost::posix_time::time_duration diff = stop_time - start_time;
 
-    logdbg << "DBContent: loadLabelData: done after " << diff.total_milliseconds() << " ms";
+//    logdbg << "DBContent: loadLabelData: done after " << diff.total_milliseconds() << " ms";
 
-    return labels;
-}
+//    return labels;
+//}
 
 void DBContent::readJobIntermediateSlot(shared_ptr<Buffer> buffer)
 {
@@ -796,12 +776,6 @@ void DBContent::databaseClosedSlot()
 string DBContent::dbTableName() const
 {
     return db_table_name_;
-}
-
-void DBContent::checkLabelDefinitions()
-{
-    assert (label_definition_);
-    label_definition_->checkLabelDefinitions();
 }
 
 //bool DBContent::associationsLoaded() const

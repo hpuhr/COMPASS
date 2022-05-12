@@ -44,8 +44,6 @@ class DBContentManager;
 
 namespace dbContent
 {
-class LabelDefinition;
-class LabelDefinitionWidget;
 class VariableSet;
 }
 
@@ -56,8 +54,6 @@ class DBContent : public QObject, public Configurable
 signals:
     void updateProgressSignal(float percent);
     void updateDoneSignal(DBContent& dbcontent);
-
-    void labelDefinitionChangedSignal();
 
 public slots:
     void databaseOpenedSlot();
@@ -171,7 +167,7 @@ public:
     void insertData(std::shared_ptr<Buffer> buffer);
     void updateData(dbContent::Variable& key_var, std::shared_ptr<Buffer> buffer);
 
-    std::map<unsigned int, std::string> loadLabelData(std::vector<unsigned int> rec_nums, int break_item_cnt);
+    //std::map<unsigned int, std::string> loadLabelData(std::vector<unsigned int> rec_nums, int break_item_cnt);
 
     bool isLoading();
     bool isInserting();
@@ -190,13 +186,9 @@ public:
     DBContentWidget* widget();
     void closeWidget();
 
-    dbContent::LabelDefinitionWidget* labelDefinitionWidget();
-
     bool existsInDB() const;
 
     std::string dbTableName() const;
-
-    void checkLabelDefinitions();
 
 protected:
     COMPASS& compass_;
@@ -210,8 +202,6 @@ protected:
 
     bool is_loadable_{false};  // loadable on its own
     size_t count_{0};
-
-    std::unique_ptr<dbContent::LabelDefinition> label_definition_;
 
     std::shared_ptr<DBOReadDBJob> read_job_{nullptr};
 

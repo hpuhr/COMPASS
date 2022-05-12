@@ -23,7 +23,7 @@
 #include "dbcontent/dbcontent.h"
 //#include "dbodatasourcedefinitionwidget.h"
 //#include "dboeditdatasourceswidget.h"
-#include "dbcontent/labeldefinitionwidget.h"
+//#include "dbcontent/labeldefinitionwidget.h"
 #include "dbcontent/variable/variable.h"
 #include "dbcontent/variable/variabledatatypecombobox.h"
 #include "dbcontent/variable/variablewidget.h"
@@ -101,11 +101,6 @@ DBContentWidget::DBContentWidget(DBContent* object, QWidget* parent,
         grid_layout->addWidget(info_edit_, 1, 1);
 
         properties_layout->addLayout(grid_layout);
-
-        edit_label_button_ = new QPushButton("Edit Label Definition");
-        connect(edit_label_button_, &QPushButton::clicked, this,
-                &DBContentWidget::showLabelDefinitionWidgetSlot);
-        properties_layout->addWidget(edit_label_button_);
 
         properties_frame->setLayout(properties_layout);
 
@@ -303,13 +298,6 @@ void DBContentWidget::updateDataSourcesGridSlot()
 
     QIcon edit_icon(Files::getIconFilepath("edit.png").c_str());
     QIcon del_icon(Files::getIconFilepath("delete.png").c_str());
-}
-
-void DBContentWidget::showLabelDefinitionWidgetSlot()
-{
-    assert(object_);
-
-    object_->labelDefinitionWidget()->show();
 }
 
 void DBContentWidget::updateDBOVarsGridSlot()
