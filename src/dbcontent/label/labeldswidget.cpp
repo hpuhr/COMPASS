@@ -1,7 +1,7 @@
-#include "dbcontentlabeldswidget.h"
+#include "dbcontent/label/labeldswidget.h"
 #include "compass.h"
 #include "datasourcemanager.h"
-#include "dbcontentlabelgenerator.h"
+#include "dbcontent/label/labelgenerator.h"
 #include "logger.h"
 #include "files.h"
 
@@ -17,8 +17,11 @@
 using namespace std;
 using namespace Utils;
 
+namespace dbContent
+{
 
-DBContentLabelDSWidget::DBContentLabelDSWidget(DBContentLabelGenerator& label_generator, QWidget* parent,
+
+LabelDSWidget::LabelDSWidget(LabelGenerator& label_generator, QWidget* parent,
                                                        Qt::WindowFlags f)
     : QWidget(parent, f), label_generator_(label_generator)
 {
@@ -54,15 +57,15 @@ DBContentLabelDSWidget::DBContentLabelDSWidget(DBContentLabelGenerator& label_ge
 
 
     connect(&COMPASS::instance().dataSourceManager(), &DataSourceManager::dataSourcesChangedSignal,
-            this, &DBContentLabelDSWidget::updateListSlot);
+            this, &LabelDSWidget::updateListSlot);
 }
 
-DBContentLabelDSWidget::~DBContentLabelDSWidget()
+LabelDSWidget::~LabelDSWidget()
 {
 
 }
 
-void DBContentLabelDSWidget::updateListSlot()
+void LabelDSWidget::updateListSlot()
 {
     loginf << "OSGViewConfigLabelDSWidget: updateListSlot";
 
@@ -106,7 +109,7 @@ void DBContentLabelDSWidget::updateListSlot()
         QCheckBox* box = new QCheckBox(ds_it->name().c_str());
         box->setProperty("ds_id", ds_it->id());
         box->setChecked(selected.count(ds_it->id()));
-        connect(box, &QCheckBox::clicked, this, &DBContentLabelDSWidget::sourceClickedSlot);
+        connect(box, &QCheckBox::clicked, this, &LabelDSWidget::sourceClickedSlot);
         ds_grid_->addWidget(box, row, 0);
 
 //        QLabel* test = new QLabel("L1");
@@ -118,7 +121,7 @@ void DBContentLabelDSWidget::updateListSlot()
         direction->setFixedWidth(2*UI_ICON_SIZE.width());
         //direction->setFixedSize(UI_ICON_SIZE);
         direction->setFlat(UI_ICON_BUTTON_FLAT);
-        connect(direction, &QPushButton::clicked, this, &DBContentLabelDSWidget::changeDirectionSlot);
+        connect(direction, &QPushButton::clicked, this, &LabelDSWidget::changeDirectionSlot);
         ds_grid_->addWidget(direction, row, 1);
 
         direction_buttons_[ds_it->id()] = direction;
@@ -161,7 +164,7 @@ void DBContentLabelDSWidget::updateListSlot()
 //    list_widget_->sortItems();
 }
 
-void DBContentLabelDSWidget::sourceClickedSlot()
+void LabelDSWidget::sourceClickedSlot()
 {
     QCheckBox* widget = static_cast<QCheckBox*>(sender());
     assert(widget);
@@ -177,7 +180,7 @@ void DBContentLabelDSWidget::sourceClickedSlot()
         label_generator_.addLabelDSID(ds_id);
 }
 
-void DBContentLabelDSWidget::changeDirectionSlot()
+void LabelDSWidget::changeDirectionSlot()
 {
     QPushButton* widget = static_cast<QPushButton*>(sender());
     assert(widget);
@@ -193,30 +196,30 @@ void DBContentLabelDSWidget::changeDirectionSlot()
     lu_action->setProperty("ds_id", ds_id);
     lu_action->setProperty("direction", 0);
     lu_action->setIcon(arrow_lu_);
-    connect(lu_action, &QAction::triggered, this, &DBContentLabelDSWidget::selectDirectionSlot);
+    connect(lu_action, &QAction::triggered, this, &LabelDSWidget::selectDirectionSlot);
 
     QAction* ru_action = menu.addAction("Right Up");
     ru_action->setProperty("ds_id", ds_id);
     ru_action->setProperty("direction", 1);
     ru_action->setIcon(arrow_ru_);
-    connect(ru_action, &QAction::triggered, this, &DBContentLabelDSWidget::selectDirectionSlot);
+    connect(ru_action, &QAction::triggered, this, &LabelDSWidget::selectDirectionSlot);
 
     QAction* ld_action = menu.addAction("Left Down");
     ld_action->setProperty("ds_id", ds_id);
     ld_action->setProperty("direction", 2);
     ld_action->setIcon(arrow_ld_);
-    connect(ld_action, &QAction::triggered, this, &DBContentLabelDSWidget::selectDirectionSlot);
+    connect(ld_action, &QAction::triggered, this, &LabelDSWidget::selectDirectionSlot);
 
     QAction* rd_action = menu.addAction("Right Down");
     rd_action->setProperty("ds_id", ds_id);
     rd_action->setProperty("direction", 3);
     rd_action->setIcon(arrow_rd_);
-    connect(rd_action, &QAction::triggered, this, &DBContentLabelDSWidget::selectDirectionSlot);
+    connect(rd_action, &QAction::triggered, this, &LabelDSWidget::selectDirectionSlot);
 
     menu.exec(QCursor::pos());
 }
 
-QIcon& DBContentLabelDSWidget::iconForDirection(LabelDirection direction)
+QIcon& LabelDSWidget::iconForDirection(LabelDirection direction)
 {
     if (direction == LabelDirection::LEFT_UP)
         return arrow_lu_;
@@ -228,7 +231,7 @@ QIcon& DBContentLabelDSWidget::iconForDirection(LabelDirection direction)
         return arrow_rd_;
 }
 
-void DBContentLabelDSWidget::selectDirectionSlot()
+void LabelDSWidget::selectDirectionSlot()
 {
     QVariant ds_id_var = sender()->property("ds_id");
     unsigned int ds_id = ds_id_var.value<unsigned int>();
@@ -244,4 +247,6 @@ void DBContentLabelDSWidget::selectDirectionSlot()
 
     assert (direction_buttons_.count(ds_id));
     direction_buttons_.at(ds_id)->setIcon(iconForDirection(direction));
+}
+
 }

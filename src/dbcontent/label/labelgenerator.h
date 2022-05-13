@@ -12,8 +12,12 @@
 
 class Buffer;
 class DBContentManager;
-class DBContentLabelGeneratorWidget;
 class GeometryLeafItemLabels;
+
+namespace dbContent
+{
+
+class LabelGeneratorWidget;
 
 enum LabelDirection
 {
@@ -23,14 +27,14 @@ enum LabelDirection
     RIGHT_DOWN
 };
 
-class DBContentLabelGenerator : public QObject, public Configurable
+class LabelGenerator : public QObject, public Configurable
 {
     Q_OBJECT
 
 public:
-    DBContentLabelGenerator(const std::string& class_id, const std::string& instance_id,
+    LabelGenerator(const std::string& class_id, const std::string& instance_id,
                             DBContentManager& manager);
-    virtual ~DBContentLabelGenerator();
+    virtual ~LabelGenerator();
 
     virtual void generateSubConfigurable(const std::string& class_id, const std::string& instance_id);
 
@@ -47,7 +51,7 @@ public:
     unsigned int currentLOD() const;
     void currentLOD(unsigned int current_lod);
 
-    DBContentLabelGeneratorWidget& widget();
+    LabelGeneratorWidget& widget();
 
     bool autoLOD() const;
     void autoLOD(bool auto_lod);
@@ -91,10 +95,12 @@ public:
     LabelDirection labelDirection (unsigned int ds_id);
     void labelDirection (unsigned int ds_id, LabelDirection direction);
 
+    void editLabelContents(const std::string& dbcontent_name);
+
 protected:
     DBContentManager& dbcont_manager_;
 
-    std::unique_ptr<DBContentLabelGeneratorWidget> widget_;
+    std::unique_ptr<LabelGeneratorWidget> widget_;
 
     bool auto_label_ {true};
     bool auto_lod_ {true};
@@ -134,5 +140,7 @@ protected:
     bool updateTIValuesFromStr(const std::string& values);
     bool updateTAValuesFromStr(const std::string& values);
 };
+
+}
 
 #endif // DBCONTENTLABELGENERATOR_H

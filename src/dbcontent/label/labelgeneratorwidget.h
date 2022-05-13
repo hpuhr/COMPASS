@@ -3,17 +3,21 @@
 
 #include <QWidget>
 
-class DBContentLabelGenerator;
-
 class QCheckBox;
 class QLineEdit;
 
-class DBContentLabelGeneratorWidget : public QWidget
+namespace dbContent
+{
+
+class LabelGenerator;
+
+class LabelGeneratorWidget : public QWidget
 {
     Q_OBJECT
 
 public slots:
     void editSettingsSlot();
+    void editDBContentSlot();
 
     void autoLabelChangedSlot(bool checked);
     void lodChangedSlot(const QString& text);
@@ -34,11 +38,13 @@ public slots:
     void filterTAChangedSlot(const QString& text);
 
 public:
-    DBContentLabelGeneratorWidget(DBContentLabelGenerator& label_generator);
-    virtual ~DBContentLabelGeneratorWidget();
+    LabelGeneratorWidget(LabelGenerator& label_generator);
+    virtual ~LabelGeneratorWidget();
 
 protected:
-    DBContentLabelGenerator& label_generator_;
+    LabelGenerator& label_generator_;
 };
+
+}
 
 #endif // DBCONTENTLABELGENERATORWIDGET_H

@@ -1,18 +1,21 @@
 #ifndef DBCONTENTLABELDSWIDGET_H
 #define DBCONTENTLABELDSWIDGET_H
 
-#include "dbcontentlabelgenerator.h"
+#include "dbcontent/label/labelgenerator.h"
 
 #include <QWidget>
 #include <QIcon>
-
-class DBContentLabelGenerator;
 
 //class QListWidget;
 class QPushButton;
 class QGridLayout;
 
-class DBContentLabelDSWidget : public QWidget
+namespace dbContent
+{
+
+class LabelGenerator;
+
+class LabelDSWidget : public QWidget
 {
     Q_OBJECT
 
@@ -23,12 +26,12 @@ class DBContentLabelDSWidget : public QWidget
     void selectDirectionSlot();
 
 public:
-    DBContentLabelDSWidget(DBContentLabelGenerator& label_generator, QWidget* parent = 0,
+    LabelDSWidget(LabelGenerator& label_generator, QWidget* parent = 0,
                                Qt::WindowFlags f = 0);
-    virtual ~DBContentLabelDSWidget();
+    virtual ~LabelDSWidget();
 
 protected:
-    DBContentLabelGenerator& label_generator_;
+    LabelGenerator& label_generator_;
 
     //QListWidget* list_widget_{nullptr};
 
@@ -43,5 +46,7 @@ protected:
 
     QIcon& iconForDirection(LabelDirection direction);
 };
+
+}
 
 #endif // DBCONTENTLABELDSWIDGET_H

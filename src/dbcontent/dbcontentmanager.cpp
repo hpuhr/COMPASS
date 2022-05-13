@@ -16,7 +16,7 @@
  */
 
 #include "dbcontent/dbcontentmanager.h"
-#include "dbcontent/dbcontentlabelgenerator.h"
+#include "dbcontent/label/labelgenerator.h"
 #include "compass.h"
 #include "mainwindow.h"
 #include "configurationmanager.h"
@@ -120,7 +120,7 @@ DBContentManager::~DBContentManager()
 
 }
 
-DBContentLabelGenerator& DBContentManager::labelGenerator()
+dbContent::LabelGenerator& DBContentManager::labelGenerator()
 {
     assert (label_generator_);
     return *label_generator_;
@@ -135,7 +135,7 @@ void DBContentManager::generateSubConfigurable(const std::string& class_id,
     if (class_id.compare("DBContentLabelGenerator") == 0)
     {
         assert (!label_generator_);
-        label_generator_.reset(new DBContentLabelGenerator(class_id, instance_id, *this));
+        label_generator_.reset(new dbContent::LabelGenerator(class_id, instance_id, *this));
     }
     else if (class_id.compare("DBContent") == 0)
     {

@@ -1,9 +1,9 @@
-#include "dbcontentlabelgenerator.h"
+#include "dbcontent/label/labelgenerator.h"
 #include "compass.h"
 #include "dbcontent/dbcontentmanager.h"
 #include "dbcontent/dbcontent.h"
 #include "dbcontent/variable/metavariable.h"
-#include "dbcontentlabelgeneratorwidget.h"
+#include "dbcontent/label/labelgeneratorwidget.h"
 #include "logger.h"
 #include "util/stringconv.h"
 #include "util/number.h"
@@ -24,7 +24,10 @@ using namespace std;
 using namespace nlohmann;
 using namespace Utils;
 
-DBContentLabelGenerator::DBContentLabelGenerator(const std::string& class_id, const std::string& instance_id,
+namespace dbContent
+{
+
+LabelGenerator::LabelGenerator(const std::string& class_id, const std::string& instance_id,
                                                  DBContentManager& manager)
     : Configurable(class_id, instance_id, &manager), dbcont_manager_(manager)
 {
@@ -53,17 +56,17 @@ DBContentLabelGenerator::DBContentLabelGenerator(const std::string& class_id, co
     createSubConfigurables();
 }
 
-DBContentLabelGenerator::~DBContentLabelGenerator()
+LabelGenerator::~LabelGenerator()
 {
 }
 
-void DBContentLabelGenerator::generateSubConfigurable(const string& class_id, const string& instance_id)
+void LabelGenerator::generateSubConfigurable(const string& class_id, const string& instance_id)
 {
     throw runtime_error("DBContentLabelGenerator: generateSubConfigurable: unknown class_id " + class_id);
 
 }
 
-std::vector<std::string> DBContentLabelGenerator::getLabelTexts(
+std::vector<std::string> LabelGenerator::getLabelTexts(
         const std::string& dbcontent_name, unsigned int buffer_index)
 {
     std::map<std::string, std::shared_ptr<Buffer>> buffers = dbcont_manager_.loadedData();
@@ -270,17 +273,17 @@ std::vector<std::string> DBContentLabelGenerator::getLabelTexts(
     return tmp;
 }
 
-bool DBContentLabelGenerator::autoLabel() const
+bool LabelGenerator::autoLabel() const
 {
     return auto_label_;
 }
 
-void DBContentLabelGenerator::autoLabel(bool auto_label)
+void LabelGenerator::autoLabel(bool auto_label)
 {
     auto_label_ = auto_label;
 }
 
-void DBContentLabelGenerator::autoAdustCurrentLOD(unsigned int num_labels_on_screen)
+void LabelGenerator::autoAdustCurrentLOD(unsigned int num_labels_on_screen)
 {
     loginf << "DBContentLabelGenerator: autoAdustCurrentLOD: num labels on screen "
            << num_labels_on_screen;
@@ -293,59 +296,59 @@ void DBContentLabelGenerator::autoAdustCurrentLOD(unsigned int num_labels_on_scr
         current_lod_ = 1;
 }
 
-unsigned int DBContentLabelGenerator::currentLOD() const
+unsigned int LabelGenerator::currentLOD() const
 {
     return current_lod_;
 }
 
-void DBContentLabelGenerator::currentLOD(unsigned int current_lod)
+void LabelGenerator::currentLOD(unsigned int current_lod)
 {
     current_lod_ = current_lod;
 }
 
 
-DBContentLabelGeneratorWidget& DBContentLabelGenerator::widget()
+LabelGeneratorWidget& LabelGenerator::widget()
 {
     if (!widget_)
     {
-        widget_.reset(new DBContentLabelGeneratorWidget(*this));
+        widget_.reset(new LabelGeneratorWidget(*this));
     }
 
     return *widget_.get();
 }
 
-bool DBContentLabelGenerator::autoLOD() const
+bool LabelGenerator::autoLOD() const
 {
     return auto_lod_;
 }
 
-void DBContentLabelGenerator::autoLOD(bool auto_lod)
+void LabelGenerator::autoLOD(bool auto_lod)
 {
     auto_lod_ = auto_lod;
 }
 
-void DBContentLabelGenerator::addLabelDSID(unsigned int ds_id)
+void LabelGenerator::addLabelDSID(unsigned int ds_id)
 {
     label_ds_ids_.insert(ds_id);
 }
 
-void DBContentLabelGenerator::removeLabelDSID(unsigned int ds_id)
+void LabelGenerator::removeLabelDSID(unsigned int ds_id)
 {
     assert (label_ds_ids_.count(ds_id));
     label_ds_ids_.erase(ds_id);
 }
 
-const std::set<unsigned int>& DBContentLabelGenerator::labelDSIDs() const
+const std::set<unsigned int>& LabelGenerator::labelDSIDs() const
 {
     return label_ds_ids_;
 }
 
-bool DBContentLabelGenerator::labelWanted(unsigned int ds_id)
+bool LabelGenerator::labelWanted(unsigned int ds_id)
 {
     return label_ds_ids_.count(ds_id);
 }
 
-bool DBContentLabelGenerator::labelWanted(std::shared_ptr<Buffer> buffer, unsigned int index)
+bool LabelGenerator::labelWanted(std::shared_ptr<Buffer> buffer, unsigned int index)
 {
     if (filter_mode3a_active_)
     {
@@ -450,125 +453,125 @@ bool DBContentLabelGenerator::labelWanted(std::shared_ptr<Buffer> buffer, unsign
     return true;
 }
 
-bool DBContentLabelGenerator::filterMode3aActive() const
+bool LabelGenerator::filterMode3aActive() const
 {
     return filter_mode3a_active_;
 }
 
-void DBContentLabelGenerator::filterMode3aActive(bool filter_active)
+void LabelGenerator::filterMode3aActive(bool filter_active)
 {
     filter_mode3a_active_ = filter_active;
 }
 
-std::string DBContentLabelGenerator::filterMode3aValues() const
+std::string LabelGenerator::filterMode3aValues() const
 {
     return filter_mode3a_values_;
 }
 
-void DBContentLabelGenerator::filterMode3aValues(const std::string &filter_values)
+void LabelGenerator::filterMode3aValues(const std::string &filter_values)
 {
     filter_mode3a_values_ = filter_values;
     updateM3AValuesFromStr(filter_mode3a_values_);
 }
 
-bool DBContentLabelGenerator::filterTIActive() const
+bool LabelGenerator::filterTIActive() const
 {
     return filter_ti_active_;
 }
 
-void DBContentLabelGenerator::filterTIActive(bool filter_active)
+void LabelGenerator::filterTIActive(bool filter_active)
 {
     filter_ti_active_ = filter_active;
 }
 
-std::string DBContentLabelGenerator::filterTIValues() const
+std::string LabelGenerator::filterTIValues() const
 {
     return filter_ti_values_;
 }
 
-void DBContentLabelGenerator::filterTIValues(const std::string &filter_values)
+void LabelGenerator::filterTIValues(const std::string &filter_values)
 {
     filter_ti_values_ = filter_values;
     updateTIValuesFromStr(filter_ti_values_);
 }
 
-bool DBContentLabelGenerator::filterTAActive() const
+bool LabelGenerator::filterTAActive() const
 {
     return filter_ta_active_;
 }
 
-void DBContentLabelGenerator::filterTAActive(bool filter_active)
+void LabelGenerator::filterTAActive(bool filter_active)
 {
     filter_ta_active_ = filter_active;
 }
 
-std::string DBContentLabelGenerator::filterTAValues() const
+std::string LabelGenerator::filterTAValues() const
 {
     return filter_ta_values_;
 }
 
-void DBContentLabelGenerator::filterTAValues(const std::string &filter_values)
+void LabelGenerator::filterTAValues(const std::string &filter_values)
 {
     filter_ta_values_ = filter_values;
     updateTAValuesFromStr(filter_ta_values_);
 }
 
-bool DBContentLabelGenerator::filterModecMinActive() const
+bool LabelGenerator::filterModecMinActive() const
 {
     return filter_modec_min_active_;
 }
 
-void DBContentLabelGenerator::filterModecMinActive(bool value)
+void LabelGenerator::filterModecMinActive(bool value)
 {
     filter_modec_min_active_ = value;
 }
 
-float DBContentLabelGenerator::filterModecMinValue() const
+float LabelGenerator::filterModecMinValue() const
 {
     return filter_modec_min_value_;
 }
 
-void DBContentLabelGenerator::filterModecMinValue(float value)
+void LabelGenerator::filterModecMinValue(float value)
 {
     filter_modec_min_value_ = value;
 }
 
-bool DBContentLabelGenerator::filterModecMaxActive() const
+bool LabelGenerator::filterModecMaxActive() const
 {
     return filter_modec_max_active_;
 }
 
-void DBContentLabelGenerator::filterModecMaxActive(bool value)
+void LabelGenerator::filterModecMaxActive(bool value)
 {
     filter_modec_max_active_ = value;
 }
 
-float DBContentLabelGenerator::filterModecMaxValue() const
+float LabelGenerator::filterModecMaxValue() const
 {
     return filter_modec_max_value_;
 }
 
-void DBContentLabelGenerator::filterModecMaxValue(float value)
+void LabelGenerator::filterModecMaxValue(float value)
 {
     filter_modec_max_value_ = value;
 }
 
-bool DBContentLabelGenerator::filterModecNullWanted() const
+bool LabelGenerator::filterModecNullWanted() const
 {
     return filter_modec_null_wanted_;
 }
 
-void DBContentLabelGenerator::filterModecNullWanted(bool value)
+void LabelGenerator::filterModecNullWanted(bool value)
 {
     filter_modec_null_wanted_ = value;
 }
 
-void DBContentLabelGenerator::checkSubConfigurables()
+void LabelGenerator::checkSubConfigurables()
 {
     // nothing to see here
 }
 
-LabelDirection DBContentLabelGenerator::labelDirection (unsigned int ds_id)
+LabelDirection LabelGenerator::labelDirection (unsigned int ds_id)
 {
     string key = to_string(ds_id);
 
@@ -587,13 +590,17 @@ LabelDirection DBContentLabelGenerator::labelDirection (unsigned int ds_id)
     }
 }
 
-void DBContentLabelGenerator::labelDirection (unsigned int ds_id, LabelDirection direction)
+void LabelGenerator::labelDirection (unsigned int ds_id, LabelDirection direction)
 {
     label_directions_[to_string(ds_id)] = direction;
 }
 
+void LabelGenerator::editLabelContents(const std::string& dbcontent_name)
+{
 
-bool DBContentLabelGenerator::updateM3AValuesFromStr(const std::string& values)
+}
+
+bool LabelGenerator::updateM3AValuesFromStr(const std::string& values)
 {
     set<unsigned int> values_tmp;
     vector<string> split_str = String::split(values, ',');
@@ -629,7 +636,7 @@ bool DBContentLabelGenerator::updateM3AValuesFromStr(const std::string& values)
     return true;
 }
 
-bool DBContentLabelGenerator::updateTIValuesFromStr(const std::string& values)
+bool LabelGenerator::updateTIValuesFromStr(const std::string& values)
 {
     set<string> values_tmp;
     vector<string> split_str = String::split(values, ',');
@@ -652,7 +659,7 @@ bool DBContentLabelGenerator::updateTIValuesFromStr(const std::string& values)
     return true;
 }
 
-bool DBContentLabelGenerator::updateTAValuesFromStr(const std::string& values)
+bool LabelGenerator::updateTAValuesFromStr(const std::string& values)
 {
     set<unsigned int> values_tmp;
     vector<string> split_str = String::split(values, ',');
@@ -686,4 +693,6 @@ bool DBContentLabelGenerator::updateTAValuesFromStr(const std::string& values)
     filter_ta_values_set_ = values_tmp;
 
     return true;
+}
+
 }

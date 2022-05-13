@@ -1,6 +1,8 @@
-#include "dbcontentlabelgeneratorwidget.h"
-#include "dbcontentlabelgenerator.h"
-#include "dbcontentlabeldswidget.h"
+#include "dbcontent/label/labelgeneratorwidget.h"
+#include "dbcontent/label/labelgenerator.h"
+#include "dbcontent/label/labeldswidget.h"
+#include "compass.h"
+#include "dbcontentmanager.h"
 #include "logger.h"
 #include "files.h"
 
@@ -13,11 +15,15 @@
 #include <QCheckBox>
 #include <QPushButton>
 #include <QScrollArea>
+#include <QMenu>
 
 using namespace std;
 using namespace Utils;
 
-DBContentLabelGeneratorWidget::DBContentLabelGeneratorWidget(DBContentLabelGenerator& label_generator)
+namespace dbContent
+{
+
+LabelGeneratorWidget::LabelGeneratorWidget(LabelGenerator& label_generator)
     : label_generator_(label_generator)
 {
     QVBoxLayout* main_layout = new QVBoxLayout();
@@ -30,7 +36,7 @@ DBContentLabelGeneratorWidget::DBContentLabelGeneratorWidget(DBContentLabelGener
     ed_edit->setFixedSize(UI_ICON_SIZE);
     ed_edit->setFlat(UI_ICON_BUTTON_FLAT);
     connect(ed_edit, &QPushButton::clicked,
-            this, &DBContentLabelGeneratorWidget::editSettingsSlot);
+            this, &LabelGeneratorWidget::editSettingsSlot);
     ed_edit->setToolTip("Edit Label Contents");
     edit_layout->addWidget(ed_edit);
 
@@ -41,7 +47,7 @@ DBContentLabelGeneratorWidget::DBContentLabelGeneratorWidget(DBContentLabelGener
     QCheckBox* auto_label_check = new QCheckBox();
     auto_label_check->setChecked(label_generator_.autoLabel());
     connect(auto_label_check, &QCheckBox::clicked,
-            this, &DBContentLabelGeneratorWidget::autoLabelChangedSlot);
+            this, &LabelGeneratorWidget::autoLabelChangedSlot);
     form_layout1->addRow("Auto Label", auto_label_check);
 
     // lod
@@ -54,7 +60,7 @@ DBContentLabelGeneratorWidget::DBContentLabelGeneratorWidget(DBContentLabelGener
         lod_box->setCurrentText(QString::number(label_generator_.currentLOD()));
 
     connect(lod_box, &QComboBox::currentTextChanged,
-            this, &DBContentLabelGeneratorWidget::lodChangedSlot);
+            this, &LabelGeneratorWidget::lodChangedSlot);
     form_layout1->addRow(tr("Level of Detail"), lod_box);
 
     main_layout->addLayout(form_layout1);
@@ -62,7 +68,7 @@ DBContentLabelGeneratorWidget::DBContentLabelGeneratorWidget(DBContentLabelGener
     QScrollArea* scroll_area = new QScrollArea();
     scroll_area->setWidgetResizable(true);
 
-    DBContentLabelDSWidget* ds_widget = new DBContentLabelDSWidget(label_generator_);
+    LabelDSWidget* ds_widget = new LabelDSWidget(label_generator_);
     scroll_area->setWidget(ds_widget);
     scroll_area->setMinimumHeight(300);
     scroll_area->setMaximumHeight(400);
@@ -78,13 +84,13 @@ DBContentLabelGeneratorWidget::DBContentLabelGeneratorWidget(DBContentLabelGener
     QCheckBox* filter_mode3a_box = new QCheckBox("Mode 3/A Codes");
     filter_mode3a_box->setChecked(label_generator_.filterMode3aActive());
     connect(filter_mode3a_box, &QCheckBox::clicked,
-            this, &DBContentLabelGeneratorWidget::filterMode3AActiveChangedSlot);
+            this, &LabelGeneratorWidget::filterMode3AActiveChangedSlot);
     filter_layout->addWidget(filter_mode3a_box, row, 0);
 
     QLineEdit* filter_mode3a_edit = new QLineEdit();
     filter_mode3a_edit->setText(label_generator_.filterMode3aValues().c_str());
     connect(filter_mode3a_edit, &QLineEdit::textEdited,
-            this, &DBContentLabelGeneratorWidget::filterMode3AChangedSlot);
+            this, &LabelGeneratorWidget::filterMode3AChangedSlot);
     filter_layout->addWidget(filter_mode3a_edit, row, 1);
 
     // mc
@@ -92,33 +98,33 @@ DBContentLabelGeneratorWidget::DBContentLabelGeneratorWidget(DBContentLabelGener
     QCheckBox* filter_modec_min_box = new QCheckBox("Mode C Min [FL]");
     filter_modec_min_box->setChecked(label_generator_.filterModecMinActive());
     connect(filter_modec_min_box, &QCheckBox::clicked,
-            this, &DBContentLabelGeneratorWidget::filterModeCMinActiveChangedSlot);
+            this, &LabelGeneratorWidget::filterModeCMinActiveChangedSlot);
     filter_layout->addWidget(filter_modec_min_box, row, 0);
 
     QLineEdit* filter_modec_min_edit = new QLineEdit();
     filter_modec_min_edit->setText(QString::number(label_generator_.filterModecMinValue()));
     connect(filter_modec_min_edit, &QLineEdit::textEdited,
-            this, &DBContentLabelGeneratorWidget::filterModeCMinChangedSlot);
+            this, &LabelGeneratorWidget::filterModeCMinChangedSlot);
     filter_layout->addWidget(filter_modec_min_edit, row, 1);
 
     ++row;
     QCheckBox* filter_modec_max_box = new QCheckBox("Mode C Max [FL]");
     filter_modec_max_box->setChecked(label_generator_.filterModecMaxActive());
     connect(filter_modec_max_box, &QCheckBox::clicked,
-            this, &DBContentLabelGeneratorWidget::filterModeCMaxActiveChangedSlot);
+            this, &LabelGeneratorWidget::filterModeCMaxActiveChangedSlot);
     filter_layout->addWidget(filter_modec_max_box, row, 0);
 
     QLineEdit* filter_modec_max_edit = new QLineEdit();
     filter_modec_max_edit->setText(QString::number(label_generator_.filterModecMaxValue()));
     connect(filter_modec_max_edit, &QLineEdit::textEdited,
-            this, &DBContentLabelGeneratorWidget::filterModeCMaxChangedSlot);
+            this, &LabelGeneratorWidget::filterModeCMaxChangedSlot);
     filter_layout->addWidget(filter_modec_max_edit, row, 1);
 
     ++row;
     QCheckBox* filter_modec_null_box = new QCheckBox("Mode C NULL");
     filter_modec_null_box->setChecked(label_generator_.filterModecNullWanted());
     connect(filter_modec_null_box, &QCheckBox::clicked,
-            this, &DBContentLabelGeneratorWidget::filterModeCNullWantedChangedSlot);
+            this, &LabelGeneratorWidget::filterModeCNullWantedChangedSlot);
     filter_layout->addWidget(filter_modec_null_box, row, 0);
 
     // ti
@@ -126,13 +132,13 @@ DBContentLabelGeneratorWidget::DBContentLabelGeneratorWidget(DBContentLabelGener
     QCheckBox* filter_ti_box = new QCheckBox("Aircraft Identification");
     filter_ti_box->setChecked(label_generator_.filterTIActive());
     connect(filter_ti_box, &QCheckBox::clicked,
-            this, &DBContentLabelGeneratorWidget::filterTIActiveChangedSlot);
+            this, &LabelGeneratorWidget::filterTIActiveChangedSlot);
     filter_layout->addWidget(filter_ti_box, row, 0);
 
     QLineEdit* filter_ti_edit = new QLineEdit();
     filter_ti_edit->setText(label_generator_.filterTIValues().c_str());
     connect(filter_ti_edit, &QLineEdit::textEdited,
-            this, &DBContentLabelGeneratorWidget::filterTIChangedSlot);
+            this, &LabelGeneratorWidget::filterTIChangedSlot);
     filter_layout->addWidget(filter_ti_edit, row, 1);
 
     // ta
@@ -140,13 +146,13 @@ DBContentLabelGeneratorWidget::DBContentLabelGeneratorWidget(DBContentLabelGener
     QCheckBox* filter_ta_box = new QCheckBox("Aircraft Address");
     filter_ta_box->setChecked(label_generator_.filterTAActive());
     connect(filter_ta_box, &QCheckBox::clicked,
-            this, &DBContentLabelGeneratorWidget::filterTAActiveChangedSlot);
+            this, &LabelGeneratorWidget::filterTAActiveChangedSlot);
     filter_layout->addWidget(filter_ta_box, row, 0);
 
     QLineEdit* filter_ta_edit = new QLineEdit();
     filter_ta_edit->setText(label_generator_.filterTAValues().c_str());
     connect(filter_ta_edit, &QLineEdit::textEdited,
-            this, &DBContentLabelGeneratorWidget::filterTAChangedSlot);
+            this, &LabelGeneratorWidget::filterTAChangedSlot);
     filter_layout->addWidget(filter_ta_edit, row, 1);
 
     main_layout->addLayout(filter_layout);
@@ -156,24 +162,45 @@ DBContentLabelGeneratorWidget::DBContentLabelGeneratorWidget(DBContentLabelGener
     setLayout(main_layout);
 }
 
-DBContentLabelGeneratorWidget::~DBContentLabelGeneratorWidget()
+LabelGeneratorWidget::~LabelGeneratorWidget()
 {
 
 }
 
-void DBContentLabelGeneratorWidget::editSettingsSlot()
+void LabelGeneratorWidget::editSettingsSlot()
 {
+    QMenu menu;
 
+    for (auto& db_cont_it : COMPASS::instance().dbContentManager())
+    {
+        QAction* action = new QAction(("Edit "+db_cont_it.first).c_str(), this);
+        connect (action, &QAction::triggered, this, &LabelGeneratorWidget::editDBContentSlot);
+        action->setProperty("dbcontent_name", db_cont_it.first.c_str());
+        menu.addAction(action);
+    }
+
+    menu.exec(QCursor::pos());
 }
 
-void DBContentLabelGeneratorWidget::autoLabelChangedSlot(bool checked)
+void LabelGeneratorWidget::editDBContentSlot()
+{
+    QVariant name = sender()->property("dbcontent_name");
+
+    string dbcontent_name = name.toString().toStdString();
+
+    loginf << "DBContentLabelGeneratorWidget: editDBContentSlot: dbcontent " << dbcontent_name;
+
+    label_generator_.editLabelContents(dbcontent_name);
+}
+
+void LabelGeneratorWidget::autoLabelChangedSlot(bool checked)
 {
     loginf << "DBContentLabelGeneratorWidget: autoLabelChangedSlot: checked " << checked;
 
     label_generator_.autoLabel(checked);
 }
 
-void DBContentLabelGeneratorWidget::lodChangedSlot(const QString& text)
+void LabelGeneratorWidget::lodChangedSlot(const QString& text)
 {
     string lod = text.toStdString();
 
@@ -188,13 +215,13 @@ void DBContentLabelGeneratorWidget::lodChangedSlot(const QString& text)
     }
 }
 
-void DBContentLabelGeneratorWidget::filterMode3AActiveChangedSlot(bool checked)
+void LabelGeneratorWidget::filterMode3AActiveChangedSlot(bool checked)
 {
     loginf << "DBContentLabelGeneratorWidget: filterMode3AActiveChangedSlot: checked " << checked;
 
     label_generator_.filterMode3aActive(checked);
 }
-void DBContentLabelGeneratorWidget::filterMode3AChangedSlot(const QString& text)
+void LabelGeneratorWidget::filterMode3AChangedSlot(const QString& text)
 {
     string values = text.toStdString();
 
@@ -203,13 +230,13 @@ void DBContentLabelGeneratorWidget::filterMode3AChangedSlot(const QString& text)
     label_generator_.filterMode3aValues(values);
 }
 
-void DBContentLabelGeneratorWidget::filterModeCMinActiveChangedSlot(bool checked)
+void LabelGeneratorWidget::filterModeCMinActiveChangedSlot(bool checked)
 {
     loginf << "DBContentLabelGeneratorWidget: filterModeCMinActiveChangedSlot: checked " << checked;
 
     label_generator_.filterModecMinActive(checked);
 }
-void DBContentLabelGeneratorWidget::filterModeCMinChangedSlot(const QString& text)
+void LabelGeneratorWidget::filterModeCMinChangedSlot(const QString& text)
 {
     bool ok;
 
@@ -222,13 +249,13 @@ void DBContentLabelGeneratorWidget::filterModeCMinChangedSlot(const QString& tex
                << text.toStdString() << "'";
 
 }
-void DBContentLabelGeneratorWidget::filterModeCMaxActiveChangedSlot(bool checked)
+void LabelGeneratorWidget::filterModeCMaxActiveChangedSlot(bool checked)
 {
     loginf << "DBContentLabelGeneratorWidget: filterModeCMaxActiveChangedSlot: checked " << checked;
 
     label_generator_.filterModecMaxActive(checked);
 }
-void DBContentLabelGeneratorWidget::filterModeCMaxChangedSlot(const QString& text)
+void LabelGeneratorWidget::filterModeCMaxChangedSlot(const QString& text)
 {
     bool ok;
 
@@ -240,19 +267,19 @@ void DBContentLabelGeneratorWidget::filterModeCMaxChangedSlot(const QString& tex
         loginf << "DBContentLabelGeneratorWidget: filterModeCMaxChangedSlot: impossible value '"
                << text.toStdString() << "'";
 }
-void DBContentLabelGeneratorWidget::filterModeCNullWantedChangedSlot(bool checked)
+void LabelGeneratorWidget::filterModeCNullWantedChangedSlot(bool checked)
 {
     loginf << "DBContentLabelGeneratorWidget: filterModeCNullWantedChangedSlot: checked " << checked;
     label_generator_.filterModecNullWanted(checked);
 }
 
-void DBContentLabelGeneratorWidget::filterTIActiveChangedSlot(bool checked)
+void LabelGeneratorWidget::filterTIActiveChangedSlot(bool checked)
 {
     loginf << "DBContentLabelGeneratorWidget: filterTIActiveChangedSlot: checked " << checked;
 
     label_generator_.filterTIActive(checked);
 }
-void DBContentLabelGeneratorWidget::filterTIChangedSlot(const QString& text)
+void LabelGeneratorWidget::filterTIChangedSlot(const QString& text)
 {
     string values = text.toStdString();
 
@@ -261,17 +288,19 @@ void DBContentLabelGeneratorWidget::filterTIChangedSlot(const QString& text)
     label_generator_.filterTIValues(values);
 }
 
-void DBContentLabelGeneratorWidget::filterTAActiveChangedSlot(bool checked)
+void LabelGeneratorWidget::filterTAActiveChangedSlot(bool checked)
 {
     loginf << "DBContentLabelGeneratorWidget: filterTAActiveChangedSlot: checked " << checked;
 
     label_generator_.filterTAActive(checked);
 }
-void DBContentLabelGeneratorWidget::filterTAChangedSlot(const QString& text)
+void LabelGeneratorWidget::filterTAChangedSlot(const QString& text)
 {
     string values = text.toStdString();
 
     loginf << "DBContentLabelGeneratorWidget: filterTAChangedSlot: value " << values;
 
     label_generator_.filterTAValues(values);
+}
+
 }
