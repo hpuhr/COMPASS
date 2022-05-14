@@ -18,6 +18,8 @@ namespace dbContent
 {
 
 class LabelGeneratorWidget;
+class LabelContentDialog;
+class VariableSet;
 
 enum LabelDirection
 {
@@ -30,6 +32,9 @@ enum LabelDirection
 class LabelGenerator : public QObject, public Configurable
 {
     Q_OBJECT
+
+public slots:
+    void editLabelContentsDoneSlot();
 
 public:
     LabelGenerator(const std::string& class_id, const std::string& instance_id,
@@ -97,6 +102,11 @@ public:
 
     void editLabelContents(const std::string& dbcontent_name);
 
+    void checkLabelConfig();
+    nlohmann::json labelConfig() const;
+
+    void addVariables (const std::string& dbcontent_name, dbContent::VariableSet& read_set);
+
 protected:
     DBContentManager& dbcont_manager_;
 
@@ -134,11 +144,15 @@ protected:
     bool filter_ta_null_wanted_ {false};
 
     //std::set<GeometryLeafItemLabels*> item_labels_;
+    std::unique_ptr<LabelContentDialog> label_edit_dialog_;
 
     virtual void checkSubConfigurables();
     bool updateM3AValuesFromStr(const std::string& values);
     bool updateTIValuesFromStr(const std::string& values);
     bool updateTAValuesFromStr(const std::string& values);
+
+    std::string getVariableValue(const std::string& dbcontent_name, unsigned int key,
+                                 std::shared_ptr<Buffer>& buffer, unsigned int index);
 };
 
 }

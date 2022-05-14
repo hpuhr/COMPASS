@@ -101,6 +101,9 @@ DBContentManager::DBContentManager(const std::string& class_id, const std::strin
 
     createSubConfigurables();
 
+    assert (label_generator_);
+    label_generator_->checkLabelConfig(); // here because references meta variables
+
     qRegisterMetaType<std::shared_ptr<Buffer>>("std::shared_ptr<Buffer>"); // for dbo read job
     // for signal about new data
     qRegisterMetaType<std::map<std::string, std::shared_ptr<Buffer>>>("std::map<std::string, std::shared_ptr<Buffer>>");
@@ -382,6 +385,8 @@ void DBContentManager::load()
     EvaluationManager& eval_man = COMPASS::instance().evaluationManager();
     ViewManager& view_man = COMPASS::instance().viewManager();
 
+    assert (label_generator_);
+
     for (auto& object : dbcontent_)
     {
         loginf << "DBContentManager: loadSlot: object " << object.first
@@ -392,6 +397,8 @@ void DBContentManager::load()
         {
             loginf << "DBContentManager: loadSlot: loading object " << object.first;
             VariableSet read_set = view_man.getReadSet(object.first); // TODO add required vars for processing
+
+            label_generator_->addVariables(object.first, read_set);
 
             if (eval_man.needsAdditionalVariables())
                 eval_man.addVariables(object.first, read_set);
@@ -780,10 +787,14 @@ void DBContentManager::addInsertedDataToChache()
 {
     loginf << "DBContentManager: addInsertedDataToChache";
 
+    assert (label_generator_);
+
     for (auto& buf_it : insert_data_)
     {
 
         VariableSet read_set = COMPASS::instance().viewManager().getReadSet(buf_it.first);
+        label_generator_->addVariables(buf_it.first, read_set);
+
         vector<Property> buffer_properties_to_be_removed;
 
         // remove all unused

@@ -49,10 +49,14 @@ VariableSelectionWidget::VariableSelectionWidget(bool h_box, QWidget* parent)
     variable_label_ = new QLabel(this);
     variable_label_->setAlignment(Qt::AlignRight);
 
-    QPushButton* sel_button = new QPushButton(this);
-    sel_button->setIcon(QIcon(Files::getIconFilepath("expand.png").c_str()));
-    sel_button->setFixedSize(UI_ICON_SIZE);
-    sel_button->setFlat(UI_ICON_BUTTON_FLAT);
+    sel_button_ = new QPushButton(this);
+    sel_button_->setIcon(QIcon(Files::getIconFilepath("expand.png").c_str()));
+    sel_button_->setFixedSize(UI_ICON_SIZE);
+    sel_button_->setFlat(UI_ICON_BUTTON_FLAT);
+
+    QSizePolicy sp_retain = sel_button_->sizePolicy();
+    sp_retain.setRetainSizeWhenHidden(true);
+    sel_button_->setSizePolicy(sp_retain);
 
     if (h_box)
     {
@@ -63,7 +67,7 @@ VariableSelectionWidget::VariableSelectionWidget(bool h_box, QWidget* parent)
         layout->addWidget(object_label_);
         layout->addWidget(variable_label_);
 
-        layout->addWidget(sel_button);
+        layout->addWidget(sel_button_);
     }
     else
     {
@@ -76,7 +80,7 @@ VariableSelectionWidget::VariableSelectionWidget(bool h_box, QWidget* parent)
         select_layout->setSpacing(1);
 
         select_layout->addWidget(object_label_);
-        select_layout->addWidget(sel_button);
+        select_layout->addWidget(sel_button_);
         layout->addLayout(select_layout);
 
         layout->addWidget(variable_label_);
@@ -84,12 +88,22 @@ VariableSelectionWidget::VariableSelectionWidget(bool h_box, QWidget* parent)
     setLayout(layout);
 
     connect(&menu_, SIGNAL(triggered(QAction*)), this, SLOT(triggerSlot(QAction*)));
-    connect(sel_button, SIGNAL(clicked()), this, SLOT(showMenuSlot()));
+    connect(sel_button_, SIGNAL(clicked()), this, SLOT(showMenuSlot()));
 
     updateMenuEntries();
 }
 
 VariableSelectionWidget::~VariableSelectionWidget() {}
+
+void VariableSelectionWidget::setReadOnly(bool read_only)
+{
+    assert (sel_button_);
+
+    if (read_only)
+        sel_button_->hide();
+    else
+        sel_button_->show();
+}
 
 void VariableSelectionWidget::updateMenuEntries()
 {

@@ -1,0 +1,184 @@
+#include "labelcontentdialog.h"
+#include "dbcontent/label/labelgenerator.h"
+#include "dbcontent/variable/variableselectionwidget.h"
+#include "compass.h"
+#include "dbcontent/dbcontentmanager.h"
+#include "dbcontent/dbcontent.h"
+
+#include <QGridLayout>
+#include <QHBoxLayout>
+#include <QLabel>
+#include <QPushButton>
+#include <QVBoxLayout>
+
+using namespace std;
+using namespace nlohmann;
+
+namespace dbContent
+{
+
+LabelContentDialog::LabelContentDialog(const std::string& dbcontent_name, LabelGenerator& label_generator)
+    : dbcontent_name_(dbcontent_name), label_generator_(label_generator),
+      label_config_(label_generator_.labelConfig())
+{
+    setWindowTitle(("Edit "+dbcontent_name_+" Label Content").c_str());
+    setWindowFlags(Qt::Window | Qt::WindowTitleHint | Qt::CustomizeWindowHint);
+
+    setModal(true);
+
+    setMinimumSize(QSize(700, 200));
+
+    QVBoxLayout* main_layout = new QVBoxLayout();
+
+    var_grid_ = new QGridLayout();
+    createVariableGrid();
+    main_layout->addLayout(var_grid_);
+
+
+    QHBoxLayout* button_layout = new QHBoxLayout();
+
+    done_button_ = new QPushButton("Done");
+    connect(done_button_, &QPushButton::clicked, this, &LabelContentDialog::doneClickedSlot);
+    button_layout->addWidget(done_button_);
+
+    main_layout->addLayout(button_layout);
+
+    setLayout(main_layout);
+}
+
+nlohmann::json LabelContentDialog::labelConfig() const
+{
+    return label_config_;
+}
+
+void LabelContentDialog::selectedVarChangedSlot()
+{
+    VariableSelectionWidget* var_widget = dynamic_cast<VariableSelectionWidget*>(sender());
+    assert (var_widget);
+
+    unsigned int key = var_widget->property("key").toUInt();
+
+    loginf << "LabelContentDialog: selectedVarChangedSlot: key " << key;
+
+    assert (label_config_.contains(dbcontent_name_));
+    json& dbcont_def = label_config_.at(dbcontent_name_);
+
+    if (var_widget->hasVariable())
+    {
+        Variable& var = var_widget->selectedVariable();
+
+        dbcont_def[to_string(key)] = var.name();
+    }
+    else // unselect
+    {
+        if (dbcont_def.count(to_string(key)))
+            dbcont_def.erase(to_string(key));
+    }
+}
+
+void LabelContentDialog::doneClickedSlot()
+{
+    emit doneSignal();
+}
+
+void LabelContentDialog::createVariableGrid()
+{
+    assert (var_grid_);
+
+    QFont font_bold;
+    font_bold.setBold(true);
+
+    assert (label_config_.contains(dbcontent_name_));
+    json& dbcont_def = label_config_.at(dbcontent_name_);
+
+    string key;
+
+    DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
+    DBContent& db_content = dbcont_man.dbContent(dbcontent_name_);
+
+    for (unsigned int row=0; row < 3; row++)
+    {
+        for (unsigned int col=0; col < 3; col++)
+        {
+            key = to_string(row*3 + col);
+
+            if (row == 0 && col == 0) // best id
+            {
+                assert (dbcont_def.contains(key));
+                string var_name = dbcont_def.at(key);
+
+                QLabel* best_id = new QLabel(var_name.c_str());
+                best_id->setFont(font_bold);
+                var_grid_->addWidget(best_id, row, col);
+            }
+            else
+            {
+                VariableSelectionWidget* var_widget = new VariableSelectionWidget();
+                var_widget->setProperty("key", row*3 + col);
+                var_widget->showDBOOnly(dbcontent_name_);
+
+                if (dbcont_def.contains(key))
+                {
+                    string var_name = dbcont_def.at(key);
+                    assert (db_content.hasVariable(var_name));
+                    dbContent::Variable& var = db_content.variable(var_name);
+
+                    var_widget->selectedVariable(var);
+                }
+
+                if (row <= 1 && col <= 1)
+                    var_widget->setReadOnly(true); // set static
+
+                connect(var_widget, &VariableSelectionWidget::selectionChanged,
+                        this, &LabelContentDialog::selectedVarChangedSlot);
+
+                var_grid_->addWidget(var_widget, 2*row, 2*col);
+            }
+        }
+    }
+
+    // add lines
+    {
+        QFrame *line_hor = new QFrame(this);
+        line_hor->setLineWidth(2);
+        line_hor->setMidLineWidth(1);
+        line_hor->setFrameShape(QFrame::HLine);
+        line_hor->setStyleSheet("background-color:rgb(0,0,0)");
+
+        var_grid_->addWidget(line_hor, 1, 0, 1, 2);
+    }
+
+    {
+        QFrame *line_vert = new QFrame(this);
+        line_vert->setLineWidth(2);
+        line_vert->setMidLineWidth(1);
+        line_vert->setFrameShape(QFrame::VLine);
+        line_vert->setStyleSheet("background-color:rgb(0,0,0)");
+
+        var_grid_->addWidget(line_vert, 0, 1, 2, 1);
+    }
+
+    {
+        QFrame *line_hor = new QFrame(this);
+        line_hor->setLineWidth(2);
+        line_hor->setMidLineWidth(1);
+        line_hor->setFrameShape(QFrame::HLine);
+        line_hor->setStyleSheet("background-color:rgb(0,0,0)");
+
+        var_grid_->addWidget(line_hor, 3, 0, 1, 4);
+    }
+
+    {
+        QFrame *line_vert = new QFrame(this);
+        line_vert->setLineWidth(2);
+        line_vert->setMidLineWidth(1);
+        line_vert->setFrameShape(QFrame::VLine);
+        line_vert->setStyleSheet("background-color:rgb(0,0,0)");
+
+        var_grid_->addWidget(line_vert, 0, 3, 4, 1);
+    }
+
+
+}
+
+}

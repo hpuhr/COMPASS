@@ -78,6 +78,7 @@ class VariableSelectionWidget : public QFrame
     void showDataTypesOnly(const std::vector<PropertyDataType>& only_data_types);
     void disableShowDataTypesOnly();
 
+    void setReadOnly(bool read_only);
     void updateMenuEntries();
 
   private:
@@ -85,6 +86,7 @@ class VariableSelectionWidget : public QFrame
 
     QLabel* object_label_{nullptr};
     QLabel* variable_label_{nullptr};
+    QPushButton* sel_button_{nullptr};
     QMenu menu_;
 
     bool variable_selected_{false};
