@@ -755,19 +755,13 @@ void EvaluationManager::addVariables (const std::string dbo_name, dbContent::Var
     //        //            read_set.add(obj.variable("sil"));
     //    }
 
-    // speed & heading
+    // speed & track angle
 
-    if (dbcontent_man.metaVariable(DBContent::meta_var_vx_.name()).existsIn(dbo_name))
-        read_set.add(dbcontent_man.metaVariable(DBContent::meta_var_vx_.name()).getFor(dbo_name));
+    assert (dbcontent_man.metaCanGetVariable(dbo_name, DBContent::meta_var_ground_speed_));
+    assert (dbcontent_man.metaCanGetVariable(dbo_name, DBContent::meta_var_track_angle_));
 
-    if (dbcontent_man.metaVariable(DBContent::meta_var_vy_.name()).existsIn(dbo_name))
-        read_set.add(dbcontent_man.metaVariable(DBContent::meta_var_vy_.name()).getFor(dbo_name));
-
-    if (dbcontent_man.metaVariable(DBContent::meta_var_ground_speed_.name()).existsIn(dbo_name))
-        read_set.add(dbcontent_man.metaVariable(DBContent::meta_var_ground_speed_.name()).getFor(dbo_name));
-
-    if (dbcontent_man.metaVariable(DBContent::meta_var_track_angle_.name()).existsIn(dbo_name))
-        read_set.add(dbcontent_man.metaVariable(DBContent::meta_var_track_angle_.name()).getFor(dbo_name));
+    read_set.add(dbcontent_man.metaGetVariable(dbo_name, DBContent::meta_var_ground_speed_));
+    read_set.add(dbcontent_man.metaGetVariable(dbo_name, DBContent::meta_var_track_angle_));
 
     //        // for mono sensor + lu sensor
 

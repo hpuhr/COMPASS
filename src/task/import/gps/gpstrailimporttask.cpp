@@ -456,6 +456,8 @@ void GPSTrailImportTask::run()
     assert (dbcontent_man.metaVariable(DBContent::meta_var_ti_.name()).existsIn(dbcontent_name));
     assert (dbcontent_man.metaVariable(DBContent::meta_var_vx_.name()).existsIn(dbcontent_name));
     assert (dbcontent_man.metaVariable(DBContent::meta_var_vy_.name()).existsIn(dbcontent_name));
+    assert (dbcontent_man.metaVariable(DBContent::meta_var_ground_speed_.name()).existsIn(dbcontent_name));
+    assert (dbcontent_man.metaVariable(DBContent::meta_var_track_angle_.name()).existsIn(dbcontent_name));
 
     loginf << "GPSTrailImportTask: run: getting variables";
 
@@ -473,27 +475,10 @@ void GPSTrailImportTask::run()
     Variable& ti_var = dbcontent_man.metaVariable(DBContent::meta_var_ti_.name()).getFor(dbcontent_name);
     Variable& vx_var = dbcontent_man.metaVariable(DBContent::meta_var_vx_.name()).getFor(dbcontent_name);
     Variable& vy_var = dbcontent_man.metaVariable(DBContent::meta_var_vy_.name()).getFor(dbcontent_name);
+    Variable& speed_var = dbcontent_man.metaVariable(DBContent::meta_var_ground_speed_.name()).getFor(dbcontent_name);
+    Variable& track_angle_var = dbcontent_man.metaVariable(DBContent::meta_var_track_angle_.name()).getFor(dbcontent_name);
 
-    //VariableSet var_set;
 
-//    var_set.add(sac_var);
-//    var_set.add(sic_var);
-//    var_set.add(ds_id_var);
-//    var_set.add(tod_var);
-//    var_set.add(lat_var);
-//    var_set.add(long_var);
-
-//    if (set_mode_3a_code_)
-//        var_set.add(m3a_var);
-
-//    if (set_target_address_)
-//        var_set.add(ta_var);
-
-//    if (set_callsign_)
-//        var_set.add(ti_var);
-
-//    var_set.add(vx_var);
-//    var_set.add(vy_var);
 
     PropertyList properties;
     properties.addProperty(sac_var.name(), PropertyDataType::UCHAR);
@@ -515,6 +500,8 @@ void GPSTrailImportTask::run()
 
     properties.addProperty(vx_var.name(), PropertyDataType::DOUBLE);
     properties.addProperty(vy_var.name(), PropertyDataType::DOUBLE);
+    properties.addProperty(speed_var.name(), PropertyDataType::DOUBLE);
+    properties.addProperty(track_angle_var.name(), PropertyDataType::DOUBLE);
 
     loginf << "GPSTrailImportTask: run: creating buffer";
 
@@ -530,6 +517,8 @@ void GPSTrailImportTask::run()
 
     NullableVector<double>& vx_vec = buffer_->get<double>(vx_var.name());
     NullableVector<double>& vy_vec = buffer_->get<double>(vy_var.name());
+    NullableVector<double>& speed_vec = buffer_->get<double>(speed_var.name());
+    NullableVector<double>& track_angle_vec = buffer_->get<double>(track_angle_var.name());
 
     unsigned int cnt = 0;
     unsigned int ds_id = Number::dsIdFrom(ds_sac_, ds_sic_);
@@ -592,6 +581,9 @@ void GPSTrailImportTask::run()
         {
             track_angle_rad = DEG2RAD * fix_it.travelAngle;
             speed_ms = fix_it.speed * 0.27778;
+
+            track_angle_vec.set(cnt, fix_it.travelAngle);
+            speed_vec.set(cnt, speed_ms * M_S2KNOTS);
 
             vx = sin(track_angle_rad) * speed_ms;
             vy = cos(track_angle_rad) * speed_ms;

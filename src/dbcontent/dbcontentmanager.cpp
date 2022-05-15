@@ -1027,9 +1027,6 @@ const std::map<std::string, std::shared_ptr<Buffer>>& DBContentManager::data() c
     return data_;
 }
 
-
-
-
 bool DBContentManager::canGetVariable (const std::string& dbcont_name, const Property& property)
 {
     assert (dbcontent_.count(dbcont_name));

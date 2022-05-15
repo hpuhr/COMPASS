@@ -110,19 +110,11 @@ void EvaluationData::addReferenceData (DBContent& object, unsigned int line_id, 
 
     // speed & track_angle
 
-    if (dbcontent_man.metaVariable(DBContent::meta_var_vx_.name()).existsIn(dbo_name))
-        ref_spd_x_ms_name_ = dbcontent_man.metaVariable(DBContent::meta_var_vx_.name()).getFor(dbo_name).name();
+    assert (dbcontent_man.metaCanGetVariable(dbo_name, DBContent::meta_var_ground_speed_));
+    assert (dbcontent_man.metaCanGetVariable(dbo_name, DBContent::meta_var_track_angle_));
 
-    if (dbcontent_man.metaVariable(DBContent::meta_var_vy_.name()).existsIn(dbo_name))
-        ref_spd_y_ms_name_ = dbcontent_man.metaVariable(DBContent::meta_var_vy_.name()).getFor(dbo_name).name();
-
-    if (dbcontent_man.metaVariable(DBContent::meta_var_ground_speed_.name()).existsIn(dbo_name))
-        ref_spd_ground_speed_kts_name_ = dbcontent_man.metaVariable(
-                    DBContent::meta_var_ground_speed_.name()).getFor(dbo_name).name();
-
-    if (dbcontent_man.metaVariable(DBContent::meta_var_track_angle_.name()).existsIn(dbo_name))
-        ref_spd_track_angle_deg_name_ = dbcontent_man.metaVariable(
-                    DBContent::meta_var_track_angle_.name()).getFor(dbo_name).name();
+    ref_spd_ground_speed_kts_name_ = dbcontent_man.metaGetVariable(dbo_name, DBContent::meta_var_ground_speed_).name();
+    ref_spd_track_angle_deg_name_ = dbcontent_man.metaGetVariable(dbo_name, DBContent::meta_var_track_angle_).name();
 
     set<unsigned int> active_srcs = eval_man_.activeDataSourcesRef();
     bool use_active_srcs = (eval_man_.dboNameRef() == eval_man_.dboNameTst());
@@ -277,19 +269,12 @@ void EvaluationData::addTestData (DBContent& object, unsigned int line_id,  std:
         tst_track_num_name_ = dbcontent_man.metaVariable(DBContent::meta_var_track_num_.name()).getFor(dbo_name).name();
 
     // speed & track_angle
-    if (dbcontent_man.metaVariable(DBContent::meta_var_vx_.name()).existsIn(dbo_name))
-        tst_spd_x_ms_name_ = dbcontent_man.metaVariable(DBContent::meta_var_vx_.name()).getFor(dbo_name).name();
 
-    if (dbcontent_man.metaVariable(DBContent::meta_var_vy_.name()).existsIn(dbo_name))
-        tst_spd_y_ms_name_ = dbcontent_man.metaVariable(DBContent::meta_var_vy_.name()).getFor(dbo_name).name();
+    assert (dbcontent_man.metaCanGetVariable(dbo_name, DBContent::meta_var_ground_speed_));
+    assert (dbcontent_man.metaCanGetVariable(dbo_name, DBContent::meta_var_track_angle_));
 
-    if (dbcontent_man.metaVariable(DBContent::meta_var_ground_speed_.name()).existsIn(dbo_name))
-        tst_spd_ground_speed_kts_name_ = dbcontent_man.metaVariable(
-                    DBContent::meta_var_ground_speed_.name()).getFor(dbo_name).name();
-
-    if (dbcontent_man.metaVariable(DBContent::meta_var_track_angle_.name()).existsIn(dbo_name))
-        tst_spd_track_angle_deg_name_ = dbcontent_man.metaVariable(
-                    DBContent::meta_var_track_angle_.name()).getFor(dbo_name).name();
+    tst_spd_ground_speed_kts_name_ = dbcontent_man.metaGetVariable(dbo_name, DBContent::meta_var_ground_speed_).name();
+    tst_spd_track_angle_deg_name_ = dbcontent_man.metaGetVariable(dbo_name, DBContent::meta_var_track_angle_).name();
 
     set<unsigned int> active_srcs = eval_man_.activeDataSourcesRef();
     bool use_active_srcs = (eval_man_.dboNameRef() == eval_man_.dboNameTst());
