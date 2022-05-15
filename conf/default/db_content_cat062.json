@@ -1670,6 +1670,19 @@
                     "unit": ""
                 }
             },
+            "VariableTrackergroundspeed_kt0": {
+                "parameters": {
+                    "data_type_str": "DOUBLE",
+                    "db_column_name": "ground_speed",
+                    "description": "Derived from Vx, Vy",
+                    "dimension": "Speed",
+                    "is_key": false,
+                    "name": "Ground Speed",
+                    "representation_str": "STANDARD",
+                    "short_name": "GSpd",
+                    "unit": "Knots"
+                }
+            },
             "VariableTrackerhash_code0": {
                 "parameters": {
                     "data_type_str": "STRING",
@@ -2175,6 +2188,19 @@
                     "representation_str": "STANDARD",
                     "short_name": "AMA",
                     "unit": ""
+                }
+            },
+            "VariableTrackertrack_angle_deg0": {
+                "parameters": {
+                    "data_type_str": "DOUBLE",
+                    "db_column_name": "track_angle",
+                    "description": "Derived from Vx, Vy",
+                    "dimension": "Angle",
+                    "is_key": false,
+                    "name": "Track Angle",
+                    "representation_str": "STANDARD",
+                    "short_name": "TrAng",
+                    "unit": "Degree"
                 }
             },
             "VariableTrackertrack_bps_age0": {

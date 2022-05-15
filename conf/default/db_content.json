@@ -47,6 +47,113 @@
         }
     ],
     "sub_configs": {
+        "DBContentLabelGenerator": {
+            "DBContentLabelGenerator0": {
+                "parameters": {
+                    "auto_label": true,
+                    "filter_mode3a_active": false,
+                    "filter_mode3a_values": "7000,7777",
+                    "filter_modec_max_active": false,
+                    "filter_modec_max_value": 100.0,
+                    "filter_modec_min_active": false,
+                    "filter_modec_min_value": 10.0,
+                    "filter_modec_null_wanted": false,
+                    "filter_ta_active": false,
+                    "filter_ta_values": "NULL",
+                    "filter_ti_active": false,
+                    "filter_ti_values": "OE",
+                    "label_config": {
+                        "CAT001": {
+                            "0": "Best available Identification",
+                            "3": "Mode 3/A Code",
+                            "4": "Mode C Code",
+                            "5": "DS ID",
+                            "6": "Track Groundspeed"
+                        },
+                        "CAT010": {
+                            "0": "Best available Identification",
+                            "1": "Aircraft Identification",
+                            "2": "Aircraft Address",
+                            "3": "Mode 3/A Code",
+                            "4": "Mode C Code",
+                            "5": "DS ID",
+                            "6": "Ground Speed"
+                        },
+                        "CAT020": {
+                            "0": "Best available Identification",
+                            "1": "Aircraft Identification",
+                            "2": "Aircraft Address",
+                            "3": "Mode 3/A Code",
+                            "4": "Mode C Code",
+                            "5": "DS ID"
+                        },
+                        "CAT021": {
+                            "0": "Best available Identification",
+                            "1": "Aircraft Identification",
+                            "2": "Aircraft Address",
+                            "3": "Mode 3/A Code",
+                            "4": "Mode C Code",
+                            "5": "DS ID",
+                            "6": "Ground Speed"
+                        },
+                        "CAT048": {
+                            "0": "Best available Identification",
+                            "1": "Aircraft Identification",
+                            "2": "Aircraft Address",
+                            "3": "Mode 3/A Code",
+                            "4": "Mode C Code",
+                            "5": "DS ID",
+                            "6": "Track Groundspeed"
+                        },
+                        "CAT062": {
+                            "0": "Best available Identification",
+                            "1": "Aircraft Identification",
+                            "2": "Aircraft Address",
+                            "3": "Mode 3/A Code",
+                            "4": "Mode C Code LM",
+                            "5": "DS ID",
+                            "6": "Vx",
+                            "7": "MOM Vertical Rate",
+                            "8": "Wake Turbulence Category FPL"
+                        },
+                        "RefTraj": {
+                            "0": "Best available Identification",
+                            "1": "Aircraft Identification",
+                            "2": "Aircraft Address",
+                            "3": "Mode 3/A Code",
+                            "4": "Mode C Code",
+                            "5": "DS ID"
+                        }
+                    },
+                    "label_directions": {
+                        "12241": 2,
+                        "12639": 1,
+                        "12750": 2,
+                        "12757": 2,
+                        "12760": 3,
+                        "12761": 0,
+                        "12763": 0,
+                        "12770": 3,
+                        "12798": 0,
+                        "12820": 2,
+                        "12821": 1,
+                        "12822": 2,
+                        "12823": 3,
+                        "12824": 0,
+                        "12825": 3,
+                        "12826": 1,
+                        "12827": 3,
+                        "12828": 1,
+                        "12830": 2,
+                        "12831": 3,
+                        "12990": 3,
+                        "25005": 3,
+                        "25006": 2,
+                        "37494": 0
+                    }
+                }
+            }
+        },
         "MetaVariable": {
             "MetaVariableARTAS Hash0": {
                 "parameters": {
@@ -1386,6 +1493,12 @@
                                 "variable_name": "Track Angle"
                             }
                         },
+                        "VariableDefinitionCAT020Track Angle0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT020",
+                                "variable_name": "Track Angle"
+                            }
+                        },
                         "VariableDefinitionCAT021Track Angle0": {
                             "parameters": {
                                 "dbcontent_name": "CAT021",
@@ -1395,6 +1508,18 @@
                         "VariableDefinitionCAT048Track Angle0": {
                             "parameters": {
                                 "dbcontent_name": "CAT048",
+                                "variable_name": "Track Angle"
+                            }
+                        },
+                        "VariableDefinitionCAT062Track Angle0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT062",
+                                "variable_name": "Track Angle"
+                            }
+                        },
+                        "VariableDefinitionRefTrajTrack Angle0": {
+                            "parameters": {
+                                "dbcontent_name": "RefTraj",
                                 "variable_name": "Track Angle"
                             }
                         }
@@ -1417,6 +1542,12 @@
                             "parameters": {
                                 "dbcontent_name": "CAT048",
                                 "variable_name": "Track Climbing/Descending"
+                            }
+                        },
+                        "VariableDefinitionCAT062MOM Vertical Rate0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT062",
+                                "variable_name": "MOM Vertical Rate"
                             }
                         }
                     }
@@ -1590,6 +1721,12 @@
                                 "variable_name": "Ground Speed"
                             }
                         },
+                        "VariableDefinitionCAT020Ground Speed0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT020",
+                                "variable_name": "Ground Speed"
+                            }
+                        },
                         "VariableDefinitionCAT021Ground Speed0": {
                             "parameters": {
                                 "dbcontent_name": "CAT021",
@@ -1600,6 +1737,18 @@
                             "parameters": {
                                 "dbcontent_name": "CAT048",
                                 "variable_name": "Track Groundspeed"
+                            }
+                        },
+                        "VariableDefinitionCAT062Ground Speed0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT062",
+                                "variable_name": "Ground Speed"
+                            }
+                        },
+                        "VariableDefinitionRefTrajGround Speed0": {
+                            "parameters": {
+                                "dbcontent_name": "RefTraj",
+                                "variable_name": "Ground Speed"
                             }
                         }
                     }

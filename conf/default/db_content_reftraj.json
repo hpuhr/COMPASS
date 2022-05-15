@@ -292,20 +292,7 @@
                     "unit": "Degree"
                 }
             },
-            "Variable74": {
-                "parameters": {
-                    "data_type_str": "DOUBLE",
-                    "db_column_name": "track_angle",
-                    "description": "Track Angle",
-                    "dimension": "Angle",
-                    "is_key": false,
-                    "name": "Track Angle",
-                    "representation_str": "STANDARD",
-                    "short_name": "TAN",
-                    "unit": "Degree"
-                }
-            },
-            "VariableTrackerassociations0": {
+            "VariableRefTrajassociations0": {
                 "parameters": {
                     "data_type_str": "JSON",
                     "db_column_name": "associations",
@@ -318,7 +305,7 @@
                     "unit": ""
                 }
             },
-            "VariableTrackercalc_alt_geo_ft0": {
+            "VariableRefTrajcalc_alt_geo_ft0": {
                 "parameters": {
                     "data_type_str": "FLOAT",
                     "db_column_name": "geometric_altitude",
@@ -331,7 +318,7 @@
                     "unit": "Feet"
                 }
             },
-            "VariableTrackercalc_vertical_rate_ftm0": {
+            "VariableRefTrajcalc_vertical_rate_ftm0": {
                 "parameters": {
                     "data_type_str": "FLOAT",
                     "db_column_name": "rate_of_climb_descent",
@@ -344,7 +331,7 @@
                     "unit": ""
                 }
             },
-            "VariableTrackerds_id0": {
+            "VariableRefTrajds_id0": {
                 "parameters": {
                     "data_type_str": "UINT",
                     "db_column_name": "ds_id",
@@ -357,7 +344,20 @@
                     "unit": ""
                 }
             },
-            "VariableTrackerline_id0": {
+            "VariableRefTrajgroundspeed_kt0": {
+                "parameters": {
+                    "data_type_str": "DOUBLE",
+                    "db_column_name": "ground_speed",
+                    "description": "Track ground speed, derived from Vx, Vy",
+                    "dimension": "Speed",
+                    "is_key": false,
+                    "name": "Ground Speed",
+                    "representation_str": "STANDARD",
+                    "short_name": "GSpd",
+                    "unit": "Knots"
+                }
+            },
+            "VariableRefTrajline_id0": {
                 "parameters": {
                     "data_type_str": "UINT",
                     "db_column_name": "line_id",
@@ -370,7 +370,7 @@
                     "unit": ""
                 }
             },
-            "VariableTrackerlm_alt_baro_ft0": {
+            "VariableRefTrajlm_alt_baro_ft0": {
                 "parameters": {
                     "data_type_str": "FLOAT",
                     "db_column_name": "mode_c_code",
@@ -383,7 +383,7 @@
                     "unit": "Feet"
                 }
             },
-            "VariableTrackerlm_alt_baro_g0": {
+            "VariableRefTrajlm_alt_baro_g0": {
                 "parameters": {
                     "data_type_str": "BOOL",
                     "db_column_name": "mode_c_garbled",
@@ -396,7 +396,7 @@
                     "unit": ""
                 }
             },
-            "VariableTrackerlm_alt_baro_v0": {
+            "VariableRefTrajlm_alt_baro_v0": {
                 "parameters": {
                     "data_type_str": "BOOL",
                     "db_column_name": "mode_c_valid",
@@ -409,7 +409,7 @@
                     "unit": ""
                 }
             },
-            "VariableTrackermode3a_g0": {
+            "VariableRefTrajmode3a_g0": {
                 "parameters": {
                     "data_type_str": "BOOL",
                     "db_column_name": "mode_3a_garbled",
@@ -422,7 +422,7 @@
                     "unit": ""
                 }
             },
-            "VariableTrackermode3a_v0": {
+            "VariableRefTrajmode3a_v0": {
                 "parameters": {
                     "data_type_str": "BOOL",
                     "db_column_name": "mode_3a_valid",
@@ -435,7 +435,7 @@
                     "unit": ""
                 }
             },
-            "VariableTrackerpos_lat_deg0": {
+            "VariableRefTrajpos_lat_deg0": {
                 "parameters": {
                     "data_type_str": "DOUBLE",
                     "db_column_name": "latitude",
@@ -448,7 +448,7 @@
                     "unit": "Degree"
                 }
             },
-            "VariableTrackerpos_long_deg0": {
+            "VariableRefTrajpos_long_deg0": {
                 "parameters": {
                     "data_type_str": "DOUBLE",
                     "db_column_name": "longitude",
@@ -461,7 +461,7 @@
                     "unit": "Degree"
                 }
             },
-            "VariableTrackerpos_std_dev_lat_deg0": {
+            "VariableRefTrajpos_std_dev_lat_deg0": {
                 "parameters": {
                     "data_type_str": "DOUBLE",
                     "db_column_name": "latitude_stddev",
@@ -474,7 +474,7 @@
                     "unit": "Degree"
                 }
             },
-            "VariableTrackerpos_std_dev_long_deg0": {
+            "VariableRefTrajpos_std_dev_long_deg0": {
                 "parameters": {
                     "data_type_str": "DOUBLE",
                     "db_column_name": "longitude_stddev",
@@ -487,7 +487,7 @@
                     "unit": "Degree"
                 }
             },
-            "VariableTrackerpos_std_dev_x_m0": {
+            "VariableRefTrajpos_std_dev_x_m0": {
                 "parameters": {
                     "data_type_str": "DOUBLE",
                     "db_column_name": "x_stddev",
@@ -500,7 +500,7 @@
                     "unit": "Meter"
                 }
             },
-            "VariableTrackerpos_std_dev_xy_corr_coeff0": {
+            "VariableRefTrajpos_std_dev_xy_corr_coeff0": {
                 "parameters": {
                     "data_type_str": "DOUBLE",
                     "db_column_name": "x_y_covariance",
@@ -513,7 +513,7 @@
                     "unit": ""
                 }
             },
-            "VariableTrackerpos_std_dev_y_m0": {
+            "VariableRefTrajpos_std_dev_y_m0": {
                 "parameters": {
                     "data_type_str": "DOUBLE",
                     "db_column_name": "y_stddev",
@@ -526,7 +526,7 @@
                     "unit": "Meter"
                 }
             },
-            "VariableTrackerrec_num0": {
+            "VariableRefTrajrec_num0": {
                 "parameters": {
                     "data_type_str": "UINT",
                     "db_column_name": "record_number",
@@ -539,7 +539,7 @@
                     "unit": ""
                 }
             },
-            "VariableTrackersac0": {
+            "VariableRefTrajsac0": {
                 "parameters": {
                     "data_type_str": "UCHAR",
                     "db_column_name": "sac",
@@ -552,7 +552,7 @@
                     "unit": ""
                 }
             },
-            "VariableTrackersic0": {
+            "VariableRefTrajsic0": {
                 "parameters": {
                     "data_type_str": "UCHAR",
                     "db_column_name": "sic",
@@ -565,7 +565,7 @@
                     "unit": ""
                 }
             },
-            "VariableTrackerspi0": {
+            "VariableRefTrajspi0": {
                 "parameters": {
                     "data_type_str": "BOOL",
                     "db_column_name": "spi",
@@ -578,7 +578,7 @@
                     "unit": ""
                 }
             },
-            "VariableTrackertarget_addr0": {
+            "VariableRefTrajtarget_addr0": {
                 "parameters": {
                     "data_type_str": "UINT",
                     "db_column_name": "aircraft_address",
@@ -591,7 +591,7 @@
                     "unit": ""
                 }
             },
-            "VariableTrackertod0": {
+            "VariableRefTrajtod0": {
                 "parameters": {
                     "data_type_str": "FLOAT",
                     "db_column_name": "time_of_day",
@@ -604,7 +604,20 @@
                     "unit": "Second"
                 }
             },
-            "VariableTrackertrack_coasted0": {
+            "VariableRefTrajtrack_angle_deg0": {
+                "parameters": {
+                    "data_type_str": "DOUBLE",
+                    "db_column_name": "track_angle",
+                    "description": "Track angle, derived from Vx, Vy",
+                    "dimension": "Angle",
+                    "is_key": false,
+                    "name": "Track Angle",
+                    "representation_str": "STANDARD",
+                    "short_name": "TrAng",
+                    "unit": "Degree"
+                }
+            },
+            "VariableRefTrajtrack_coasted0": {
                 "parameters": {
                     "data_type_str": "BOOL",
                     "db_column_name": "coasting",
@@ -617,7 +630,7 @@
                     "unit": ""
                 }
             },
-            "VariableTrackertrack_confirmed0": {
+            "VariableRefTrajtrack_confirmed0": {
                 "parameters": {
                     "data_type_str": "BOOL",
                     "db_column_name": "confirmed",
@@ -630,7 +643,7 @@
                     "unit": ""
                 }
             },
-            "VariableTrackertrack_created0": {
+            "VariableRefTrajtrack_created0": {
                 "parameters": {
                     "data_type_str": "BOOL",
                     "db_column_name": "track_begin",
@@ -643,7 +656,7 @@
                     "unit": ""
                 }
             },
-            "VariableTrackertrack_end0": {
+            "VariableRefTrajtrack_end0": {
                 "parameters": {
                     "data_type_str": "BOOL",
                     "db_column_name": "track_end",
@@ -656,7 +669,7 @@
                     "unit": ""
                 }
             },
-            "VariableTrackertrack_num0": {
+            "VariableRefTrajtrack_num0": {
                 "parameters": {
                     "data_type_str": "UINT",
                     "db_column_name": "track_number",
@@ -669,7 +682,7 @@
                     "unit": ""
                 }
             },
-            "VariableTrackertracked_alt_baro_ft0": {
+            "VariableRefTrajtracked_alt_baro_ft0": {
                 "parameters": {
                     "data_type_str": "FLOAT",
                     "db_column_name": "barometric_altitude",
@@ -682,7 +695,7 @@
                     "unit": "Feet"
                 }
             },
-            "VariableTrackertracked_mode3a_code0": {
+            "VariableRefTrajtracked_mode3a_code0": {
                 "parameters": {
                     "data_type_str": "UINT",
                     "db_column_name": "mode_3a_code",
