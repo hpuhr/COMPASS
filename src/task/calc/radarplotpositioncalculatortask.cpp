@@ -124,8 +124,8 @@ void RadarPlotPositionCalculatorTask::run()
     start_time_ = boost::posix_time::microsec_clock::local_time();
 
     DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
-    dbcontent_man.clearData();
 
+    dbcontent_man.clearData();
     dbcontent_done_.clear();
 
     COMPASS::instance().viewManager().disableDataDistribution(true);
@@ -186,29 +186,6 @@ void RadarPlotPositionCalculatorTask::loadingDoneSlot()
 
     COMPASS::instance().viewManager().disableDataDistribution(false);
 
-    //
-    //    std::pair<unsigned char, unsigned char> sac_sic_key;
-    //
-    //    sac_sic_key.first = 50;
-    //    sac_sic_key.second = 7;
-    ////
-    ////        double pos_azm_deg = 180.0;
-    ////        double pos_range_m = 1852.0 * 0.5;
-    ////        double altitude_m = 0.3048  * 1400.0;
-    //
-    //    double pos_azm_deg = 313.267583462432;
-    //    double pos_range_m = 1852.0 * 6.3508481015218;
-    //    double altitude_m = 0.3048  * 29995;
-    //    //altitude_m -= data_sources [sac_sic_key]->getAltitude ();
-    //
-    //    std::pair<double, double> lat_long = data_sources
-    //    [sac_sic_key]->calculateWorldCoordinates(pos_azm_deg, pos_range_m, altitude_m);
-    //
-    //    loginf << "UGA  lat " << lat_long.first << " long " << lat_long.second;
-    //    loginf << "UGAs lat " << 47.9696340057652 << " long " << 12.9230976753774;
-
-    //    return;
-
     ProjectionManager& proj_man = ProjectionManager::instance();
 
     assert(proj_man.hasCurrentProjection());
@@ -237,10 +214,6 @@ void RadarPlotPositionCalculatorTask::loadingDoneSlot()
         loginf << "RadarPlotPositionCalculatorTask: loadingDoneSlot: calculating " << dbcontent_name
                << " read_size " << read_size;
 
-        //    std::string latitude_var_dbname = latitude_var_->currentDBColumn().name();
-        //    std::string longitude_var_dbname = longitude_var_->currentDBColumn().name();
-        //    std::string keyvar_var_dbname = key_var_->currentDBColumn().name();
-
         PropertyList update_buffer_list;
 
         update_buffer_list.addProperty(
@@ -264,15 +237,10 @@ void RadarPlotPositionCalculatorTask::loadingDoneSlot()
         double pos_range_nm;
         double pos_range_m;
         double altitude_ft;
-        // double altitude_m;
         bool has_altitude;
-        // double altitude_angle;
 
         double lat, lon;
         unsigned int update_cnt = 0;
-
-        // double x1, y1, z1;
-        // VecB pos;
 
         assert(msg_box_);
         std::string msg;
@@ -322,86 +290,9 @@ void RadarPlotPositionCalculatorTask::loadingDoneSlot()
             else
                 altitude_ft = 0.0;  // has to assumed in projection later on
 
-            //        if (!db_object_->hasDataSource(sensor_id))
-            //        {
-            //            logerr << "RadarPlotPositionCalculatorTask: loadingDoneSlot: sensor id " << sensor_id
-            //                   << " unkown";
-            //            transformation_errors++;
-            //            continue;
-            //        }
-
-            //        DBODataSource& data_source = db_object_->getDataSource(sensor_id);
-
-            //        if (!data_source.hasLatitude() || !data_source.hasLongitude())
-            //        {
-            //            transformation_errors++;
-            //            continue;
-            //        }
-
             pos_azm_rad = pos_azm_deg * DEG2RAD;
 
             pos_range_m = 1852.0 * pos_range_nm;
-
-            // altitude_m = 0.3048 * altitude_ft;
-
-            //        if (use_ogr_proj)
-            //        {
-            //            ret = data_source.calculateOGRSystemCoordinates(pos_azm_rad, pos_range_m,
-            //            has_altitude, altitude_ft,
-            //                                                            sys_x, sys_y);
-            //            if (ret)
-            //                ret = proj_man.ogrCart2Geo(sys_x, sys_y, lat, lon);
-            //        }
-
-            //        if (use_sdl_proj)
-            //        {
-            //            t_CPos grs_pos;
-
-            //            ret = data_source.calculateSDLGRSCoordinates(pos_azm_rad, pos_range_m,
-            //            has_altitude, altitude_ft, grs_pos); if (ret)
-            //            {
-            //                t_GPos geo_pos;
-
-            //                ret = proj_man.sdlGRS2Geo(grs_pos, geo_pos);
-
-            //                if (ret)
-            //                {
-            //                    lat = geo_pos.latitude * RAD2DEG;
-            //                    lon = geo_pos.longitude * RAD2DEG;
-            //                    //lat = geo_pos.latitude; what to do with altitude?
-            //                }
-            //            }
-            //        }
-
-            //        if (use_rs2g_proj)
-            //        {
-            ////            float rho; // (m)
-            ////            float theta; // (deg)
-
-            //            x1 = pos_range_m * sin(pos_azm_rad);
-            //            y1 = pos_range_m * cos(pos_azm_rad);
-
-            //            if (has_altitude)
-            //                z1 = altitude_ft * FT2M;
-            //            else
-            //                z1 = -1000.0;
-
-            //            logdbg << "local x " << x1 << " y " << y1 << " z " << z1;
-
-            //            ret = data_source.calculateRadSlt2Geocentric(x1, y1, z1, pos);
-            //            if (ret)
-            //            {
-            //                logdbg << "geoc x " << pos[0] << " y " << pos[1] << " z " << pos[2];
-
-            //                ret = geocentric2Geodesic(pos);
-
-            //                lat = pos [0];
-            //                lon = pos [1];
-
-            //                logdbg << "geod x " << pos[0] << " y " << pos[1];
-            //                //what to do with altitude?
-            //            }
-            //        }
 
             if (!projection.hasCoordinateSystem(ds_id) && !ds_wo_full_pos.count(ds_id))
             {
@@ -417,9 +308,6 @@ void RadarPlotPositionCalculatorTask::loadingDoneSlot()
                     continue;
                 }
 
-                if (ds_id == 12241)
-                    loginf << "UGA0 lat " <<  ds.latitude() << " lon " << ds.longitude();
-
                 projection.addCoordinateSystem(ds_id, ds.latitude(), ds.longitude(), ds.altitude());
             }
 
@@ -432,9 +320,6 @@ void RadarPlotPositionCalculatorTask::loadingDoneSlot()
                 continue;
             }
 
-            if (ds_id == 12241)
-                loginf << "UGA update_cnt " << update_cnt << " lat " << lat << " lon " << lon << " rec_num " << rec_num;
-
             write_lat_vec.set(update_cnt, lat);
             write_lon_vec.set(update_cnt, lon);
             write_rec_num_vec.set(update_cnt, rec_num);
@@ -445,10 +330,8 @@ void RadarPlotPositionCalculatorTask::loadingDoneSlot()
             // " << lon;
         }
 
-        loginf << "RadarPlotPositionCalculatorTask: loadingDoneSlot: update_buffer size "
+        logdbg << "RadarPlotPositionCalculatorTask: loadingDoneSlot: update_buffer size "
            << update_buffer->size() << ", " << transformation_errors << " transformation errors";
-
-        loginf << "JSON " << update_buffer->asJSON(10).dump();
 
         msg_box_->close();
         delete msg_box_;
@@ -502,7 +385,7 @@ void RadarPlotPositionCalculatorTask::loadingDoneSlot()
         msg_box_->setStandardButtons(QMessageBox::NoButton);
         msg_box_->show();
 
-        loginf << "RadarPlotPositionCalculatorTask: loadingDoneSlot: writing " << dbcontent_name
+        logdbg << "RadarPlotPositionCalculatorTask: loadingDoneSlot: writing " << dbcontent_name
                << " size " << update_buffer->size()
                << " key " << dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_rec_num_).name();
 
@@ -533,15 +416,13 @@ void RadarPlotPositionCalculatorTask::updateDoneSlot(DBContent& db_content)
     {
         loginf << "RadarPlotPositionCalculatorTask: updateDoneSlot: fully done";
 
+        dialog_ = nullptr;
         data_.clear();
 
         assert(msg_box_);
         msg_box_->close();
         delete msg_box_;
         msg_box_ = nullptr;
-
-        //job_ptr_ = nullptr;
-        //data_.clear();
 
         stop_time_ = boost::posix_time::microsec_clock::local_time();
         boost::posix_time::time_duration time_diff = stop_time_ - start_time_;
@@ -583,6 +464,8 @@ void RadarPlotPositionCalculatorTask::dialogCloseSlot()
 
     if (run_wanted)
         run();
+    else
+        dialog_ = nullptr;
 }
 
 bool RadarPlotPositionCalculatorTask::isCalculating() { return calculating_; }

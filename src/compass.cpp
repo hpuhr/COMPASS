@@ -375,7 +375,6 @@ void COMPASS::shutdown()
     dbcontent_manager_ = nullptr;
 
     JobManager::instance().shutdown();
-    ProjectionManager::instance().shutdown();
 
     assert(eval_manager_);
     eval_manager_->close();

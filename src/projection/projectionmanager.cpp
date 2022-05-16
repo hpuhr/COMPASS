@@ -60,11 +60,6 @@ ProjectionManager::ProjectionManager()
 
 ProjectionManager::~ProjectionManager()
 {
-    if (widget_)
-    {
-        delete widget_;
-        widget_ = nullptr;
-    }
 }
 
 void ProjectionManager::generateSubConfigurable(const std::string& class_id,
@@ -113,17 +108,6 @@ void ProjectionManager::checkSubConfigurables()
     }
 }
 
-void ProjectionManager::shutdown()
-{
-    loginf << "ProjectionManager: shutdown";
-
-    if (widget_)
-    {
-        delete widget_;
-        widget_ = nullptr;
-    }
-}
-
 std::string ProjectionManager::currentProjectionName() const { return current_projection_name_; }
 
 void ProjectionManager::currentProjectionName(const std::string& name)
@@ -169,8 +153,13 @@ ProjectionManagerWidget* ProjectionManager::widget()
 {
     if (!widget_)
     {
-        widget_ = new ProjectionManagerWidget(*this);
+        widget_.reset(new ProjectionManagerWidget(*this));
     }
     assert(widget_);
-    return widget_;
+    return widget_.get();
+}
+
+void ProjectionManager::deleteWidget()
+{
+    widget_ = nullptr;
 }

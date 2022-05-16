@@ -4,6 +4,7 @@
 #include <QDialog>
 
 class RadarPlotPositionCalculatorTask;
+class RadarPlotPositionCalculatorTaskWidget;
 
 class RadarPlotPositionCalculatorTaskDialog : public QDialog
 {
@@ -18,11 +19,14 @@ public slots:
 
 public:
     RadarPlotPositionCalculatorTaskDialog(RadarPlotPositionCalculatorTask& task);
+    virtual ~RadarPlotPositionCalculatorTaskDialog();
 
     bool runWanted() const;
 
 protected:
     RadarPlotPositionCalculatorTask& task_;
+
+    std::unique_ptr<RadarPlotPositionCalculatorTaskWidget> widget_;
 
     bool run_wanted_ {false};
 };

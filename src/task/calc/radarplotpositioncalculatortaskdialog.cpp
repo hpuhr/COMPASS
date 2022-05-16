@@ -20,9 +20,8 @@ RadarPlotPositionCalculatorTaskDialog::RadarPlotPositionCalculatorTaskDialog(Rad
 
     QVBoxLayout* main_layout = new QVBoxLayout();
 
-    RadarPlotPositionCalculatorTaskWidget* widget = new RadarPlotPositionCalculatorTaskWidget(task_);
-    main_layout->addWidget(widget);
-
+    widget_.reset(new RadarPlotPositionCalculatorTaskWidget(task_));
+    main_layout->addWidget(widget_.get());
 
     main_layout->addStretch();
 
@@ -43,6 +42,12 @@ RadarPlotPositionCalculatorTaskDialog::RadarPlotPositionCalculatorTaskDialog(Rad
     main_layout->addLayout(button_layout);
 
     setLayout(main_layout);
+}
+
+RadarPlotPositionCalculatorTaskDialog::~RadarPlotPositionCalculatorTaskDialog()
+{
+    loginf << "RadarPlotPositionCalculatorTaskDialog: dtor";
+    widget_ = nullptr;
 }
 
 bool RadarPlotPositionCalculatorTaskDialog::runWanted() const

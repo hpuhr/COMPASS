@@ -49,10 +49,8 @@ class ProjectionManager : public Singleton, public Configurable
     // bool sdlGRS2Geo (t_CPos grs_pos, t_GPos& geo_pos);
 
     ProjectionManagerWidget* widget();
+    void deleteWidget();
 
-    void shutdown();
-
-    /// @brief Returns static instance
     static ProjectionManager& instance()
     {
         static ProjectionManager instance;
@@ -74,7 +72,7 @@ class ProjectionManager : public Singleton, public Configurable
 
     std::string current_projection_name_;
 
-    ProjectionManagerWidget* widget_{nullptr};
+    std::unique_ptr<ProjectionManagerWidget> widget_;
 
     std::map<std::string, std::unique_ptr<Projection>> projections_;
 

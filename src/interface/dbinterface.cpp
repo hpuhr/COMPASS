@@ -1111,7 +1111,7 @@ void DBInterface::updateBuffer(const std::string& table_name, const std::string&
 
     boost::mutex::scoped_lock locker(connection_mutex_);
 
-    loginf << "DBInterface: updateBuffer: preparing bind statement '" << bind_statement << "'";
+    logdbg << "DBInterface: updateBuffer: preparing bind statement '" << bind_statement << "'";
     db_connection_->prepareBindStatement(bind_statement);
     db_connection_->beginBindTransaction();
 
@@ -1129,10 +1129,10 @@ void DBInterface::updateBuffer(const std::string& table_name, const std::string&
 
     logdbg << "DBInterface: updateBuffer: ending bind transactions";
     db_connection_->endBindTransaction();
-    logdbg << "DBInterface: update: finalizing bind statement";
+    logdbg << "DBInterface: updateBuffer: finalizing bind statement";
     db_connection_->finalizeBindStatement();
 
-    loginf << "DBInterface: update: changes " << db_connection_->changes() << " indexes " << to_index - from_index +1;
+    logdbg << "DBInterface: updateBuffer: changes " << db_connection_->changes() << " indexes " << to_index - from_index +1;
 }
 
 void DBInterface::prepareRead(const DBContent& dbobject, VariableSet read_list,
