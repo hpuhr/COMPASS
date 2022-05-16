@@ -2,6 +2,7 @@
 #include "datasourcetablemodel.h"
 #include "datasourceeditwidget.h"
 #include "datasourcemanager.h"
+#include "datasourcecreatedialog.h"
 #include "logger.h"
 
 #include <QHBoxLayout>
@@ -75,6 +76,13 @@ DataSourcesConfigurationDialog::DataSourcesConfigurationDialog(DataSourceManager
 
     QHBoxLayout* button_layout = new QHBoxLayout();
 
+    QPushButton* new_button = new QPushButton ("Create New");
+    new_button->setToolTip("Allows creation of new data source");
+    connect(new_button, &QPushButton::clicked, this, &DataSourcesConfigurationDialog::newDSClickedSlot);
+    button_layout->addWidget(new_button);
+
+    button_layout->addStretch();
+
     QPushButton* import_button = new QPushButton ("Import");
     import_button->setToolTip("Imports data sources as JSON file. The data sources defined in the JSON file"
                               " will override existing ones (with same SAC/SIC) in the configuration and database");
@@ -143,6 +151,38 @@ void DataSourcesConfigurationDialog::currentRowChanged(const QModelIndex& curren
     loginf << "DataSourcesConfigurationDialog: currentRowChanged: current id " << id;
 
     edit_widget_->showID(id);
+}
+
+void DataSourcesConfigurationDialog::newDSClickedSlot()
+{
+    loginf << "DataSourcesConfigurationDialog: newDSClickedSlot";
+
+    create_dialog_.reset(new DataSourceCreateDialog(*this, ds_man_));
+    connect(create_dialog_.get(), &DataSourceCreateDialog::doneSignal,
+            this, &DataSourcesConfigurationDialog::newDSDoneSlot);
+
+    create_dialog_->show();
+}
+
+void DataSourcesConfigurationDialog::newDSDoneSlot()
+{
+    loginf << "DataSourcesConfigurationDialog: newDSDoneSlot";
+
+    assert (create_dialog_);
+
+    if (!create_dialog_->cancelled())
+    {
+        string ds_type = create_dialog_->dsType();
+
+        unsigned int sac = create_dialog_->sac();
+        unsigned int sic = create_dialog_->sic();
+
+            loginf << "DataSourcesConfigurationDialog: newDSDoneSlot: ds_type " << ds_type
+                   << " sac " << sac << " sic " << sic;
+    }
+
+    create_dialog_->close();
+    create_dialog_ = nullptr;
 }
 
 void DataSourcesConfigurationDialog::importClickedSlot()
