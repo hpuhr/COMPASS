@@ -126,6 +126,8 @@ void RadarPlotPositionCalculatorTask::run()
     DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
     dbcontent_man.clearData();
 
+    dbcontent_done_.clear();
+
     COMPASS::instance().viewManager().disableDataDistribution(true);
 
     connect(&dbcontent_man, &DBContentManager::loadedDataSignal,
@@ -147,7 +149,6 @@ void RadarPlotPositionCalculatorTask::run()
     QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
 
     num_loaded_ = 0;
-
 
     for (auto& dbo_it : dbcontent_man)
     {
@@ -274,7 +275,6 @@ void RadarPlotPositionCalculatorTask::loadingDoneSlot()
         // VecB pos;
 
         assert(msg_box_);
-        float done_percent;
         std::string msg;
 
         loginf << "RadarPlotPositionCalculatorTask: loadingDoneSlot: writing update_buffer";
@@ -282,22 +282,22 @@ void RadarPlotPositionCalculatorTask::loadingDoneSlot()
 
         size_t transformation_errors = 0;
 
-        NullableVector<unsigned int> read_ds_id_vec = read_buffer->get<unsigned int> (
+        NullableVector<unsigned int>& read_ds_id_vec = read_buffer->get<unsigned int> (
                     dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_datasource_id_).name());
-        NullableVector<unsigned int> read_rec_num_vec = read_buffer->get<unsigned int> (
+        NullableVector<unsigned int>& read_rec_num_vec = read_buffer->get<unsigned int> (
                     dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_rec_num_).name());
-        NullableVector<double> read_range_vec = read_buffer->get<double> (
+        NullableVector<double>& read_range_vec = read_buffer->get<double> (
                     dbcontent_man.getVariable(dbcontent_name, DBContent::var_radar_range_).name());
-        NullableVector<double> read_azimuth_vec = read_buffer->get<double> (
+        NullableVector<double>& read_azimuth_vec = read_buffer->get<double> (
                     dbcontent_man.getVariable(dbcontent_name, DBContent::var_radar_azimuth_).name());
-        NullableVector<float> read_altitude_vec = read_buffer->get<float> (
+        NullableVector<float>& read_altitude_vec = read_buffer->get<float> (
                     dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_mc_).name());
 
-        NullableVector<double> write_lat_vec = update_buffer->get<double> (
+        NullableVector<double>& write_lat_vec = update_buffer->get<double> (
                     dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_latitude_).name());
-        NullableVector<double> write_lon_vec = update_buffer->get<double> (
+        NullableVector<double>& write_lon_vec = update_buffer->get<double> (
                     dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_longitude_).name());
-        NullableVector<unsigned int> write_rec_num_vec = update_buffer->get<unsigned int> (
+        NullableVector<unsigned int>& write_rec_num_vec = update_buffer->get<unsigned int> (
                     dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_rec_num_).name());
 
         assert (read_ds_id_vec.isNeverNull());
@@ -411,11 +411,16 @@ void RadarPlotPositionCalculatorTask::loadingDoneSlot()
 
                 if (!ds.hasFullPosition())
                 {
+                    logwrn << "RadarPlotPositionCalculatorTask: loadingDoneSlot: data source " << ds.name()
+                           << " does not have full position information, skipping";
                     ds_wo_full_pos.insert(ds_id);
                     continue;
                 }
 
-                projection.addCoordinateSystem(ds.id(), ds.latitude(), ds.longitude(), ds.altitude());
+                if (ds_id == 12241)
+                    loginf << "UGA0 lat " <<  ds.latitude() << " lon " << ds.longitude();
+
+                projection.addCoordinateSystem(ds_id, ds.latitude(), ds.longitude(), ds.altitude());
             }
 
             ret = projection.polarToWGS84(ds_id, pos_azm_rad, pos_range_m, has_altitude,
@@ -426,6 +431,9 @@ void RadarPlotPositionCalculatorTask::loadingDoneSlot()
                 transformation_errors++;
                 continue;
             }
+
+            if (ds_id == 12241)
+                loginf << "UGA update_cnt " << update_cnt << " lat " << lat << " lon " << lon << " rec_num " << rec_num;
 
             write_lat_vec.set(update_cnt, lat);
             write_lon_vec.set(update_cnt, lon);
@@ -439,6 +447,8 @@ void RadarPlotPositionCalculatorTask::loadingDoneSlot()
 
         loginf << "RadarPlotPositionCalculatorTask: loadingDoneSlot: update_buffer size "
            << update_buffer->size() << ", " << transformation_errors << " transformation errors";
+
+        loginf << "JSON " << update_buffer->asJSON(10).dump();
 
         msg_box_->close();
         delete msg_box_;
@@ -496,9 +506,6 @@ void RadarPlotPositionCalculatorTask::loadingDoneSlot()
                << " size " << update_buffer->size()
                << " key " << dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_rec_num_).name();
 
-        for (auto& prop_it : update_buffer->properties().properties())
-            loginf << "UGA " << prop_it.name();
-
         DBContent& dbcontent = dbcontent_man.dbContent(dbcontent_name);
 
         dbcontent.updateData(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_rec_num_), update_buffer);
@@ -518,11 +525,15 @@ void RadarPlotPositionCalculatorTask::updateDoneSlot(DBContent& db_content)
                this, &RadarPlotPositionCalculatorTask::updateDoneSlot);
 
     assert (data_.count(db_content.name()));
-    data_.erase(db_content.name());
 
-    if (!data_.size())
+    assert (!dbcontent_done_.count(db_content.name()));
+    dbcontent_done_.insert(db_content.name());
+
+    if (dbcontent_done_.size() == data_.size())
     {
         loginf << "RadarPlotPositionCalculatorTask: updateDoneSlot: fully done";
+
+        data_.clear();
 
         assert(msg_box_);
         msg_box_->close();

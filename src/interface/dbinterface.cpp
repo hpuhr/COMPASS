@@ -1111,7 +1111,7 @@ void DBInterface::updateBuffer(const std::string& table_name, const std::string&
 
     boost::mutex::scoped_lock locker(connection_mutex_);
 
-    logdbg << "DBInterface: updateBuffer: preparing bind statement '" << bind_statement << "'";
+    loginf << "DBInterface: updateBuffer: preparing bind statement '" << bind_statement << "'";
     db_connection_->prepareBindStatement(bind_statement);
     db_connection_->beginBindTransaction();
 
@@ -1131,6 +1131,8 @@ void DBInterface::updateBuffer(const std::string& table_name, const std::string&
     db_connection_->endBindTransaction();
     logdbg << "DBInterface: update: finalizing bind statement";
     db_connection_->finalizeBindStatement();
+
+    loginf << "DBInterface: update: changes " << db_connection_->changes() << " indexes " << to_index - from_index +1;
 }
 
 void DBInterface::prepareRead(const DBContent& dbobject, VariableSet read_list,
@@ -1212,7 +1214,7 @@ void DBInterface::clearTableContent(const string& table_name)
 }
 
 void DBInterface::insertBindStatementUpdateForCurrentIndex(shared_ptr<Buffer> buffer,
-                                                           unsigned int row)
+                                                           unsigned int buffer_index)
 {
     assert(buffer);
     logdbg << "DBInterface: insertBindStatementUpdateForCurrentIndex: start";
@@ -1224,21 +1226,21 @@ void DBInterface::insertBindStatementUpdateForCurrentIndex(shared_ptr<Buffer> bu
     unsigned int index_cnt = 0;
 
     logdbg << "DBInterface: insertBindStatementUpdateForCurrentIndex: starting for loop";
-    for (unsigned int cnt = 0; cnt < size; cnt++)
+    for (unsigned int property_cnt = 0; property_cnt < size; property_cnt++)
     {
-        const Property& property = list.at(cnt);
+        const Property& property = list.at(property_cnt);
         PropertyDataType data_type = property.dataType();
 
-        logdbg << "DBInterface: insertBindStatementUpdateForCurrentIndex: at cnt " << cnt << " id "
-               << property.name() << " index cnt " << index_cnt;
+//        loginf << "DBInterface: insertBindStatementUpdateForCurrentIndex: at cnt " << cnt << " id "
+//               << property.name() << " index cnt " << index_cnt;
 
-        index_cnt = cnt + 1;
+        index_cnt = property_cnt + 1;
 
-        if (buffer->isNone(property, row))
+        if (buffer->isNull(property, buffer_index))
         {
             db_connection_->bindVariableNull(index_cnt);
-            logdbg << "DBInterface: insertBindStatementUpdateForCurrentIndex: at " << cnt
-                   << " is null";
+//            logwrn << "DBInterface: insertBindStatementUpdateForCurrentIndex: at " << property.name()
+//                   << " buffer_index " << buffer_index << " is null";
             continue;
         }
 
@@ -1246,24 +1248,24 @@ void DBInterface::insertBindStatementUpdateForCurrentIndex(shared_ptr<Buffer> bu
         {
         case PropertyDataType::BOOL:
             db_connection_->bindVariable(
-                        index_cnt, static_cast<int>(buffer->get<bool>(property.name()).get(row)));
+                        index_cnt, static_cast<int>(buffer->get<bool>(property.name()).get(buffer_index)));
             break;
         case PropertyDataType::CHAR:
             db_connection_->bindVariable(
-                        index_cnt, static_cast<int>(buffer->get<char>(property.name()).get(row)));
+                        index_cnt, static_cast<int>(buffer->get<char>(property.name()).get(buffer_index)));
             break;
         case PropertyDataType::UCHAR:
             db_connection_->bindVariable(
                         index_cnt,
-                        static_cast<int>(buffer->get<unsigned char>(property.name()).get(row)));
+                        static_cast<int>(buffer->get<unsigned char>(property.name()).get(buffer_index)));
             break;
         case PropertyDataType::INT:
             db_connection_->bindVariable(
-                        index_cnt, static_cast<int>(buffer->get<int>(property.name()).get(row)));
+                        index_cnt, static_cast<int>(buffer->get<int>(property.name()).get(buffer_index)));
             break;
         case PropertyDataType::UINT:
             db_connection_->bindVariable(
-                        index_cnt, static_cast<int>(buffer->get<unsigned int>(property.name()).get(row)));
+                        index_cnt, static_cast<int>(buffer->get<unsigned int>(property.name()).get(buffer_index)));
             break;
         case PropertyDataType::LONGINT:
             assert(false);
@@ -1273,19 +1275,19 @@ void DBInterface::insertBindStatementUpdateForCurrentIndex(shared_ptr<Buffer> bu
             break;
         case PropertyDataType::FLOAT:
             db_connection_->bindVariable(
-                        index_cnt, static_cast<double>(buffer->get<float>(property.name()).get(row)));
+                        index_cnt, static_cast<double>(buffer->get<float>(property.name()).get(buffer_index)));
             break;
         case PropertyDataType::DOUBLE:
             db_connection_->bindVariable(index_cnt,
-                                         buffer->get<double>(property.name()).get(row));
+                                         buffer->get<double>(property.name()).get(buffer_index));
             break;
         case PropertyDataType::STRING:
             db_connection_->bindVariable(
-                        index_cnt, buffer->get<string>(property.name()).get(row));
+                        index_cnt, buffer->get<string>(property.name()).get(buffer_index));
             break;
         case PropertyDataType::JSON:
             db_connection_->bindVariable(
-                        index_cnt, buffer->get<nlohmann::json>(property.name()).get(row).dump());
+                        index_cnt, buffer->get<nlohmann::json>(property.name()).get(buffer_index).dump());
             break;
 
         default:

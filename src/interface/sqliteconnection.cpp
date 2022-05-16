@@ -163,6 +163,12 @@ void SQLiteConnection::endBindTransaction()
 }
 void SQLiteConnection::finalizeBindStatement() { sqlite3_finalize(statement_); }
 
+int SQLiteConnection::changes()
+{
+    assert (db_handle_);
+    return sqlite3_changes(db_handle_);
+}
+
 void SQLiteConnection::bindVariable(unsigned int index, int value)
 {
     logdbg << "SQLiteConnection: bindVariable: index " << index << " value '" << value << "'";

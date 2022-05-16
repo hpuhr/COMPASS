@@ -640,46 +640,46 @@ void Buffer::printProperties()
 
 bool Buffer::firstWrite() { return data_size_ == 0; }
 
-bool Buffer::isNone(const Property& property, unsigned int row_cnt)
+bool Buffer::isNull(const Property& property, unsigned int index)
 {
     if (BUFFER_PEDANTIC_CHECKING)
-        assert(row_cnt < data_size_);
+        assert(index < data_size_);
 
     switch (property.dataType())
     {
         case PropertyDataType::BOOL:
             assert(getArrayListMap<bool>().count(property.name()));
-            return getArrayListMap<bool>().at(property.name())->isNull(row_cnt);
+            return getArrayListMap<bool>().at(property.name())->isNull(index);
         case PropertyDataType::CHAR:
             assert(getArrayListMap<char>().count(property.name()));
-            return getArrayListMap<char>().at(property.name())->isNull(row_cnt);
+            return getArrayListMap<char>().at(property.name())->isNull(index);
         case PropertyDataType::UCHAR:
             assert(getArrayListMap<unsigned char>().count(property.name()));
-            return getArrayListMap<unsigned char>().at(property.name())->isNull(row_cnt);
+            return getArrayListMap<unsigned char>().at(property.name())->isNull(index);
         case PropertyDataType::INT:
             assert(getArrayListMap<int>().count(property.name()));
-            return getArrayListMap<int>().at(property.name())->isNull(row_cnt);
+            return getArrayListMap<int>().at(property.name())->isNull(index);
         case PropertyDataType::UINT:
             assert(getArrayListMap<unsigned int>().count(property.name()));
-            return getArrayListMap<unsigned int>().at(property.name())->isNull(row_cnt);
+            return getArrayListMap<unsigned int>().at(property.name())->isNull(index);
         case PropertyDataType::LONGINT:
             assert(getArrayListMap<long int>().count(property.name()));
-            return getArrayListMap<long int>().at(property.name())->isNull(row_cnt);
+            return getArrayListMap<long int>().at(property.name())->isNull(index);
         case PropertyDataType::ULONGINT:
             assert(getArrayListMap<unsigned long int>().count(property.name()));
-            return getArrayListMap<unsigned long int>().at(property.name())->isNull(row_cnt);
+            return getArrayListMap<unsigned long int>().at(property.name())->isNull(index);
         case PropertyDataType::FLOAT:
             assert(getArrayListMap<float>().count(property.name()));
-            return getArrayListMap<float>().at(property.name())->isNull(row_cnt);
+            return getArrayListMap<float>().at(property.name())->isNull(index);
         case PropertyDataType::DOUBLE:
             assert(getArrayListMap<double>().count(property.name()));
-            return getArrayListMap<double>().at(property.name())->isNull(row_cnt);
+            return getArrayListMap<double>().at(property.name())->isNull(index);
         case PropertyDataType::STRING:
             assert(getArrayListMap<string>().count(property.name()));
-            return getArrayListMap<string>().at(property.name())->isNull(row_cnt);
+            return getArrayListMap<string>().at(property.name())->isNull(index);
         case PropertyDataType::JSON:
             assert(getArrayListMap<json>().count(property.name()));
-            return getArrayListMap<json>().at(property.name())->isNull(row_cnt);
+            return getArrayListMap<json>().at(property.name())->isNull(index);
         default:
             logerr << "Buffer: isNone: unknown property type "
                    << Property::asString(property.dataType());
@@ -894,11 +894,14 @@ shared_ptr<Buffer> Buffer::getPartialCopy(const PropertyList& partial_properties
     return tmp_buffer;
 }
 
-nlohmann::json Buffer::asJSON()
+nlohmann::json Buffer::asJSON(unsigned int max_size)
 {
     json j;
 
-    for (unsigned int cnt=0; cnt < data_size_; ++cnt)
+    if (max_size == 0)
+        max_size = data_size_;
+
+    for (unsigned int cnt=0; cnt < max_size; ++cnt)
     {
         j[cnt] = json::object();
 

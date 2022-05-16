@@ -600,12 +600,17 @@ void DataSourceEditWidget::updateContent()
             sic_label_->setText(QString::number(ds.sic()));
             ds_id_label_->setText(QString::number(ds.id()));
 
+            loginf << "DataSourceEditWidget: updateContent: ds_type " << ds.dsType()
+                   << " has pos " << ds.hasPosition();
+
             // position
             if (ds.dsType() == "Radar" || ds.hasPosition())
             {
                 latitude_edit_->setText(QString::number(ds.latitude(), 'g', 12));
                 longitude_edit_->setText(QString::number(ds.longitude(), 'g', 12));
                 altitude_edit_->setText(QString::number(ds.altitude(), 'g', 12));
+
+                position_widget_->setHidden(false);
             }
             else
                 position_widget_->setHidden(true);

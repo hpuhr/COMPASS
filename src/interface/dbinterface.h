@@ -168,7 +168,7 @@ protected:
 
     virtual void checkSubConfigurables();
 
-    void insertBindStatementUpdateForCurrentIndex(std::shared_ptr<Buffer> buffer, unsigned int row);
+    void insertBindStatementUpdateForCurrentIndex(std::shared_ptr<Buffer> buffer, unsigned int buffer_index);
 
     void loadProperties();
     void saveProperties();

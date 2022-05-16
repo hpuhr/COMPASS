@@ -83,6 +83,7 @@ protected:
 
     unsigned int num_loaded_{0};
     std::map<std::string, std::shared_ptr<Buffer>> data_;
+    std::set<std::string> dbcontent_done_;
 
     std::unique_ptr<RadarPlotPositionCalculatorTaskDialog> dialog_;
 

@@ -123,14 +123,14 @@ class Buffer
     /// @brief Sets DBO type
     void dboName(const std::string& dbo_name) { dbo_name_ = dbo_name; }
 
-    bool isNone(const Property& property, unsigned int row_cnt);
+    bool isNull(const Property& property, unsigned int index);
 
     void transformVariables(dbContent::VariableSet& list,
                             bool dbcol2dbovar);  // tc2dbovar true for db col -> dbo var, false dbo var -> db column
 
     std::shared_ptr<Buffer> getPartialCopy(const PropertyList& partial_properties);
 
-    nlohmann::json asJSON();
+    nlohmann::json asJSON(unsigned int max_size=0);
 
   protected:
     // Unique buffer id, copied when getting shallow copies
