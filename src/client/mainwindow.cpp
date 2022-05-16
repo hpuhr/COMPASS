@@ -47,9 +47,11 @@
 #include "asteriximporttask.h"
 #include "asteriximporttaskdialog.h"
 
+
+#include "radarplotpositioncalculatortask.h"
+#include "radarplotpositioncalculatortaskdialog.h"
 #include "createartasassociationstask.h"
 #include "createartasassociationstaskdialog.h"
-
 #include "createassociationstask.h"
 #include "createassociationstaskdialog.h"
 
@@ -318,6 +320,12 @@ void MainWindow::createMenus ()
     // process menu
 
     process_menu_ = menuBar()->addMenu(tr("&Process"));
+
+    QAction* calc_radar_plpos_action = new QAction(tr("Calculate Radar Plot Positions"));
+    calc_radar_plpos_action->setStatusTip(tr("Calculate Radar Plot Positios, only needed if Radar Position information"
+                                             " was changed"));
+    connect(calc_radar_plpos_action, &QAction::triggered, this, &MainWindow::calculateRadarPlotPositionsSlot);
+    process_menu_->addAction(calc_radar_plpos_action);
 
     QAction* assoc_artas_action = new QAction(tr("Calculate Associations from ARTAS"));
     assoc_artas_action->setStatusTip(tr("Create Unique Targets based on ARTAS TRI information"));
@@ -1286,6 +1294,13 @@ void MainWindow::importViewPointsSlot()
 
         COMPASS::instance().taskManager().viewPointsImportTask().dialog()->show();
     }
+}
+
+void MainWindow::calculateRadarPlotPositionsSlot()
+{
+    loginf << "MainWindow: calculateRadarPlotPositionsSlot";
+
+    COMPASS::instance().taskManager().radarPlotPositionCalculatorTask().dialog()->show();
 }
 
 void MainWindow::calculateAssociationsARTASSlot()

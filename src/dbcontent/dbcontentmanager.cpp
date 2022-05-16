@@ -428,7 +428,7 @@ void DBContentManager::load()
 
             // load (DBOVariableSet &read_set, bool use_filters, bool use_order, DBOVariable
             // *order_variable, bool use_order_ascending, const std::string &limit_str="")
-            object.second->load(read_set, COMPASS::instance().filterManager().useFilters(),
+            object.second->load(read_set, true, COMPASS::instance().filterManager().useFilters(),
                                 use_order_, variable, use_order_ascending_,
                                 limit_str);
 
@@ -701,6 +701,8 @@ bool DBContentManager::loadInProgress() const
 
 void DBContentManager::clearData()
 {
+    loginf << "DBContentManager: clearData";
+
     data_.clear();
 
     COMPASS::instance().viewManager().clearDataInViews();

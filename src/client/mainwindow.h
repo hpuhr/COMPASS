@@ -72,6 +72,7 @@ public slots:
 
     void importViewPointsSlot();
 
+    void calculateRadarPlotPositionsSlot();
     void calculateAssociationsARTASSlot();
     void calculateAssociationsSlot();
 

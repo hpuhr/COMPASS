@@ -16,11 +16,6 @@
  */
 
 #include "radarplotpositioncalculatortask.h"
-
-#include <QApplication>
-#include <QCoreApplication>
-#include <QMessageBox>
-
 #include "compass.h"
 #include "buffer.h"
 #include "dbinterface.h"
@@ -32,14 +27,22 @@
 #include "projection.h"
 #include "projectionmanager.h"
 #include "propertylist.h"
-#include "radarplotpositioncalculatortaskwidget.h"
+#include "radarplotpositioncalculatortaskdialog.h"
 #include "stringconv.h"
 #include "taskmanager.h"
+#include "viewmanager.h"
+#include "datasourcemanager.h"
 
+#include <QApplication>
+#include <QCoreApplication>
+#include <QMessageBox>
+
+using namespace std;
 using namespace Utils;
+using namespace dbContent;
 
 const std::string RadarPlotPositionCalculatorTask::DONE_PROPERTY_NAME =
-    "radar_plot_positions_calculated";
+        "radar_plot_positions_calculated";
 
 RadarPlotPositionCalculatorTask::RadarPlotPositionCalculatorTask(const std::string& class_id,
                                                                  const std::string& instance_id,
@@ -49,187 +52,27 @@ RadarPlotPositionCalculatorTask::RadarPlotPositionCalculatorTask(const std::stri
       Configurable(class_id, instance_id, &task_manager, "task_calc_radar_pos.json")
 {
     tooltip_ =
-        "Allows calculation of Radar plot position information based on the defined data sources.";
+            "Allows calculation of Radar plot position information based on the defined data sources.";
 
     qRegisterMetaType<std::shared_ptr<Buffer>>("std::shared_ptr<Buffer>");
     // qRegisterMetaType<DBObject>("DBObject");
 
-    registerParameter("db_object_str", &db_object_str_, "");
-    registerParameter("key_var_str", &key_var_str_, "");
-    registerParameter("datasource_var_str", &datasource_var_str_, "");
-    registerParameter("range_var_str", &range_var_str_, "");
-    registerParameter("azimuth_var_str", &azimuth_var_str_, "");
-    registerParameter("altitude_var_str", &altitude_var_str_, "");
-    registerParameter("latitude_var_str", &latitude_var_str_, "");
-    registerParameter("longitude_var_str", &longitude_var_str_, "");
 }
 
 RadarPlotPositionCalculatorTask::~RadarPlotPositionCalculatorTask() {}
 
-TaskWidget* RadarPlotPositionCalculatorTask::widget()
+RadarPlotPositionCalculatorTaskDialog* RadarPlotPositionCalculatorTask::dialog()
 {
-    if (!widget_)
+    if (!dialog_)
     {
-        widget_.reset(new RadarPlotPositionCalculatorTaskWidget(*this));
+        dialog_.reset(new RadarPlotPositionCalculatorTaskDialog(*this));
 
-        connect(&task_manager_, &TaskManager::expertModeChangedSignal, widget_.get(),
-                &RadarPlotPositionCalculatorTaskWidget::expertModeChangedSlot);
+        connect(dialog_.get(), &RadarPlotPositionCalculatorTaskDialog::closeSignal,
+                this, &RadarPlotPositionCalculatorTask::dialogCloseSlot);
     }
 
-    assert(widget_);
-    return widget_.get();
-}
-
-void RadarPlotPositionCalculatorTask::deleteWidget() { widget_.reset(nullptr); }
-
-std::string RadarPlotPositionCalculatorTask::dbObjectStr() const { return db_object_str_; }
-
-void RadarPlotPositionCalculatorTask::dbObjectStr(const std::string& db_object_str)
-{
-    loginf << "RadarPlotPositionCalculatorTask: dbObjectStr: " << db_object_str;
-
-    db_object_str_ = db_object_str;
-
-    assert(COMPASS::instance().dbContentManager().existsDBContent(db_object_str_));
-    db_object_ = &COMPASS::instance().dbContentManager().dbContent(db_object_str_);
-
-    emit statusChangedSignal(name_);
-}
-
-std::string RadarPlotPositionCalculatorTask::keyVarStr() const { return key_var_str_; }
-
-void RadarPlotPositionCalculatorTask::keyVarStr(const std::string& key_var_str)
-{
-    loginf << "RadarPlotPositionCalculatorTask: keyVarStr: " << key_var_str;
-
-    key_var_str_ = key_var_str;
-
-    if (db_object_ && key_var_str_.size())
-    {
-        assert(db_object_->hasVariable(key_var_str_));
-        key_var_ = &db_object_->variable(key_var_str_);
-    }
-    else
-        key_var_ = nullptr;
-
-    emit statusChangedSignal(name_);
-}
-
-std::string RadarPlotPositionCalculatorTask::datasourceVarStr() const
-{
-    return datasource_var_str_;
-}
-
-void RadarPlotPositionCalculatorTask::datasourceVarStr(const std::string& datasource_var_str)
-{
-    loginf << "RadarPlotPositionCalculatorTask: datasourceVarStr: " << datasource_var_str;
-
-    datasource_var_str_ = datasource_var_str;
-
-    if (db_object_ && datasource_var_str_.size())
-    {
-        assert(db_object_->hasVariable(datasource_var_str_));
-        datasource_var_ = &db_object_->variable(datasource_var_str_);
-    }
-    else
-        datasource_var_ = nullptr;
-
-    emit statusChangedSignal(name_);
-}
-
-std::string RadarPlotPositionCalculatorTask::rangeVarStr() const { return range_var_str_; }
-
-void RadarPlotPositionCalculatorTask::rangeVarStr(const std::string& range_var_str)
-{
-    loginf << "RadarPlotPositionCalculatorTask: rangeVarStr: " << range_var_str;
-
-    range_var_str_ = range_var_str;
-
-    if (db_object_ && range_var_str_.size())
-    {
-        assert(db_object_->hasVariable(range_var_str_));
-        range_var_ = &db_object_->variable(range_var_str_);
-    }
-    else
-        range_var_ = nullptr;
-
-    emit statusChangedSignal(name_);
-}
-
-std::string RadarPlotPositionCalculatorTask::azimuthVarStr() const { return azimuth_var_str_; }
-
-void RadarPlotPositionCalculatorTask::azimuthVarStr(const std::string& azimuth_var_str)
-{
-    loginf << "RadarPlotPositionCalculatorTask: azimuthVarStr: " << azimuth_var_str;
-
-    azimuth_var_str_ = azimuth_var_str;
-
-    if (db_object_ && azimuth_var_str_.size())
-    {
-        assert(db_object_->hasVariable(azimuth_var_str_));
-        azimuth_var_ = &db_object_->variable(azimuth_var_str_);
-    }
-    else
-        azimuth_var_ = nullptr;
-
-    emit statusChangedSignal(name_);
-}
-
-std::string RadarPlotPositionCalculatorTask::altitudeVarStr() const { return altitude_var_str_; }
-
-void RadarPlotPositionCalculatorTask::altitudeVarStr(const std::string& altitude_var_str)
-{
-    loginf << "RadarPlotPositionCalculatorTask: altitudeVarStr: " << altitude_var_str;
-
-    altitude_var_str_ = altitude_var_str;
-
-    if (db_object_ && altitude_var_str_.size())
-    {
-        assert(db_object_->hasVariable(altitude_var_str_));
-        altitude_var_ = &db_object_->variable(altitude_var_str_);
-    }
-    else
-        altitude_var_ = nullptr;
-
-    emit statusChangedSignal(name_);
-}
-
-std::string RadarPlotPositionCalculatorTask::latitudeVarStr() const { return latitude_var_str_; }
-
-void RadarPlotPositionCalculatorTask::latitudeVarStr(const std::string& latitude_var_str)
-{
-    loginf << "RadarPlotPositionCalculatorTask: latitudeVarStr: " << latitude_var_str;
-
-    latitude_var_str_ = latitude_var_str;
-
-    if (db_object_ && latitude_var_str_.size())
-    {
-        assert(db_object_->hasVariable(latitude_var_str_));
-        latitude_var_ = &db_object_->variable(latitude_var_str_);
-    }
-    else
-        latitude_var_ = nullptr;
-
-    emit statusChangedSignal(name_);
-}
-
-std::string RadarPlotPositionCalculatorTask::longitudeVarStr() const { return longitude_var_str_; }
-
-void RadarPlotPositionCalculatorTask::longitudeVarStr(const std::string& longitude_var_str)
-{
-    loginf << "RadarPlotPositionCalculatorTask: longitudeVarStr: " << longitude_var_str;
-
-    longitude_var_str_ = longitude_var_str;
-
-    if (db_object_ && longitude_var_str_.size())
-    {
-        assert(db_object_->hasVariable(longitude_var_str_));
-        longitude_var_ = &db_object_->variable(longitude_var_str_);
-    }
-    else
-        longitude_var_ = nullptr;
-
-    emit statusChangedSignal(name_);
+    assert(dialog_);
+    return dialog_.get();
 }
 
 bool RadarPlotPositionCalculatorTask::checkPrerequisites()
@@ -239,7 +82,7 @@ bool RadarPlotPositionCalculatorTask::checkPrerequisites()
 
     if (COMPASS::instance().interface().hasProperty(DONE_PROPERTY_NAME))
         done_ =
-            COMPASS::instance().interface().getProperty(DONE_PROPERTY_NAME) == "1";  // set done flag
+                COMPASS::instance().interface().getProperty(DONE_PROPERTY_NAME) == "1";  // set done flag
 
     if (!COMPASS::instance().dbContentManager().existsDBContent("Radar"))
         return false;
@@ -257,59 +100,14 @@ bool RadarPlotPositionCalculatorTask::isRecommended()
 
 bool RadarPlotPositionCalculatorTask::isRequired() { return false; }
 
-void RadarPlotPositionCalculatorTask::checkAndSetVariable(std::string& name_str, dbContent::Variable** var)
-{
-    // TODO rework to only asserting, check must be done before
-    if (db_object_)
-    {
-        if (!db_object_->hasVariable(name_str))
-        {
-            loginf << "RadarPlotPositionCalculatorTask: checkAndSetVariable: var " << name_str
-                   << " does not exist";
-            name_str = "";
-            var = nullptr;
-        }
-        else
-        {
-            *var = &db_object_->variable(name_str);
-            loginf << "RadarPlotPositionCalculatorTask: checkAndSetVariable: var " << name_str
-                   << " set";
-            assert(var);
-        }
-    }
-    else
-    {
-        loginf << "RadarPlotPositionCalculatorTask: checkAndSetVariable: dbobject null";
-        name_str = "";
-        var = nullptr;
-    }
-}
-
 bool RadarPlotPositionCalculatorTask::canRun()
 {
-    if (!db_object_str_.size())
+    if (!COMPASS::instance().dbContentManager().existsDBContent("CAT001")
+            && !COMPASS::instance().dbContentManager().existsDBContent("CAT048"))
         return false;
 
-    if (!COMPASS::instance().dbContentManager().existsDBContent(db_object_str_))
-        return false;
-
-    DBContent& object = COMPASS::instance().dbContentManager().dbContent(db_object_str_);
-
-    if (!object.loadable())
-        return false;
-
-    if (!object.count())
-        return false;
-
-    if (!key_var_str_.size() || !datasource_var_str_.size() || !range_var_str_.size() ||
-        !azimuth_var_str_.size() || !altitude_var_str_.size() || !latitude_var_str_.size() ||
-        !longitude_var_str_.size())
-        return false;
-
-    if (!object.hasVariable(key_var_str_) || !object.hasVariable(datasource_var_str_) ||
-        !object.hasVariable(range_var_str_) || !object.hasVariable(azimuth_var_str_) ||
-        !object.hasVariable(altitude_var_str_) || !object.hasVariable(latitude_var_str_) ||
-        !object.hasVariable(longitude_var_str_))
+    if (!COMPASS::instance().dbContentManager().dbContent("CAT001").loadable()
+            && !COMPASS::instance().dbContentManager().dbContent("CAT048").loadable())
         return false;
 
     return true;
@@ -325,12 +123,20 @@ void RadarPlotPositionCalculatorTask::run()
 
     start_time_ = boost::posix_time::microsec_clock::local_time();
 
-    DBContentManager& obj_man = COMPASS::instance().dbContentManager();
+    DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
+    dbcontent_man.clearData();
+
+    COMPASS::instance().viewManager().disableDataDistribution(true);
+
+    connect(&dbcontent_man, &DBContentManager::loadedDataSignal,
+            this, &RadarPlotPositionCalculatorTask::loadedDataDataSlot);
+    connect(&dbcontent_man, &DBContentManager::loadingDoneSignal,
+            this, &RadarPlotPositionCalculatorTask::loadingDoneSlot);
 
     calculating_ = true;
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
-    std::string msg = "Loading object data.";
+    std::string msg = "Loading object data";
     msg_box_ = new QMessageBox;
     assert(msg_box_);
     msg_box_->setWindowTitle("Calculating Radar Plot Positions");
@@ -342,82 +148,42 @@ void RadarPlotPositionCalculatorTask::run()
 
     num_loaded_ = 0;
 
-    assert(obj_man.existsDBContent(db_object_str_));
-    db_object_ = &COMPASS::instance().dbContentManager().dbContent(db_object_str_);
-    assert(db_object_);
 
-    if (key_var_str_.size())
-        checkAndSetVariable(key_var_str_, &key_var_);
-    if (datasource_var_str_.size())
-        checkAndSetVariable(datasource_var_str_, &datasource_var_);
-    if (range_var_str_.size())
-        checkAndSetVariable(range_var_str_, &range_var_);
-    if (azimuth_var_str_.size())
-        checkAndSetVariable(azimuth_var_str_, &azimuth_var_);
-    if (altitude_var_str_.size())
-        checkAndSetVariable(altitude_var_str_, &altitude_var_);
-    if (latitude_var_str_.size())
-        checkAndSetVariable(latitude_var_str_, &latitude_var_);
-    if (longitude_var_str_.size())
-        checkAndSetVariable(longitude_var_str_, &longitude_var_);
-
-    assert(db_object_);
-
-    target_report_count_ = db_object_->count();
-
-    assert(key_var_);
-    assert(datasource_var_);
-    assert(range_var_);
-    assert(azimuth_var_);
-    assert(altitude_var_);
-    assert(latitude_var_);
-    assert(longitude_var_);
-
-    dbContent::VariableSet read_set;
-    read_set.add(*key_var_);
-    read_set.add(*datasource_var_);
-    read_set.add(*range_var_);
-    read_set.add(*azimuth_var_);
-    read_set.add(*altitude_var_);
-    read_set.add(*latitude_var_);
-    read_set.add(*longitude_var_);
-
-    TODO_ASSERT
-
-//    connect(db_object_, &DBObject::newDataSignal, this,
-//            &RadarPlotPositionCalculatorTask::newDataSlot);
-//    connect(db_object_, &DBObject::loadingDoneSignal, this,
-//            &RadarPlotPositionCalculatorTask::loadingDoneSlot);
-
-//    db_object_->load(read_set, false, false, nullptr, false);  //"0,100000"
-}
-
-void RadarPlotPositionCalculatorTask::newDataSlot(DBContent& object)
-{
-    if (target_report_count_ != 0)
+    for (auto& dbo_it : dbcontent_man)
     {
-        assert(msg_box_);
-        size_t loaded_cnt = db_object_->loadedCount();
+        if (dbo_it.first != "CAT001" && dbo_it.first != "CAT048")
+            continue;
 
-        float done_percent = 100.0 * loaded_cnt / target_report_count_;
-        std::string msg =
-            "Loading object data: " + String::doubleToStringPrecision(done_percent, 2) + "%";
-        msg_box_->setText(msg.c_str());
+        if (!dbo_it.second->hasData())
+            continue;
 
-        QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+        VariableSet read_set = getReadSetFor(dbo_it.first);
+
+        dbo_it.second->load(read_set, false, false, true,
+                            &dbcontent_man.metaGetVariable(dbo_it.first, DBContent::meta_var_tod_), true);
     }
 }
 
-void RadarPlotPositionCalculatorTask::loadingDoneSlot(DBContent& object)
+void RadarPlotPositionCalculatorTask::loadedDataDataSlot(
+        const std::map<std::string, std::shared_ptr<Buffer>>& data, bool requires_reset)
+{
+    data_ = data;
+}
+
+void RadarPlotPositionCalculatorTask::loadingDoneSlot()
 {
     loginf << "RadarPlotPositionCalculatorTask: loadingDoneSlot: starting calculation";
 
-    TODO_ASSERT
+    DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
 
-//    disconnect(db_object_, &DBObject::newDataSignal, this,
-//               &RadarPlotPositionCalculatorTask::newDataSlot);
-//    disconnect(db_object_, &DBObject::loadingDoneSignal, this,
-//               &RadarPlotPositionCalculatorTask::loadingDoneSlot);
+    disconnect(&dbcontent_man, &DBContentManager::loadedDataSignal,
+               this, &RadarPlotPositionCalculatorTask::loadedDataDataSlot);
+    disconnect(&dbcontent_man, &DBContentManager::loadingDoneSignal,
+               this, &RadarPlotPositionCalculatorTask::loadingDoneSlot);
+
+    dbcontent_man.clearData();
+
+    COMPASS::instance().viewManager().disableDataDistribution(false);
 
     //
     //    std::pair<unsigned char, unsigned char> sac_sic_key;
@@ -450,341 +216,386 @@ void RadarPlotPositionCalculatorTask::loadingDoneSlot(DBContent& object)
     loginf << "RadarPlotPositionCalculatorTask: loadingDoneSlot: projection method '"
            << projection.name() << "'";
 
-    TODO_ASSERT
+    DataSourceManager& ds_man = COMPASS::instance().dataSourceManager();
 
-    //std::shared_ptr<Buffer> read_buffer = db_object_->data();
-//    unsigned int read_size = read_buffer->size();
-//    assert(read_size);
+    string dbcontent_name;
+    set<unsigned int> ds_wo_full_pos;
 
-//    //    std::string latitude_var_dbname = latitude_var_->currentDBColumn().name();
-//    //    std::string longitude_var_dbname = longitude_var_->currentDBColumn().name();
-//    //    std::string keyvar_var_dbname = key_var_->currentDBColumn().name();
+    for (auto& buf_it : data_)
+    {
+        dbcontent_name = buf_it.first;
+        assert (dbcontent_name == "CAT001" || dbcontent_name == "CAT048");
 
-//    PropertyList update_buffer_list;
-//    update_buffer_list.addProperty(latitude_var_str_, PropertyDataType::DOUBLE);
-//    update_buffer_list.addProperty(longitude_var_str_, PropertyDataType::DOUBLE);
-//    update_buffer_list.addProperty(key_var_str_, PropertyDataType::INT);
+        assert (msg_box_);
+        msg_box_->setText(("Processing "+dbcontent_name+" data").c_str());
 
-//    std::shared_ptr<Buffer> update_buffer =
-//        std::make_shared<Buffer>(update_buffer_list, db_object_->name());
+        std::shared_ptr<Buffer> read_buffer = buf_it.second;
+        unsigned int read_size = read_buffer->size();
+        assert(read_size);
 
-//    int rec_num;
-//    int sensor_id;
-//    // unsigned char sac, sic;
-//    // bool has_position;
-//    double pos_azm_deg;
-//    double pos_azm_rad;
-//    double pos_range_nm;
-//    double pos_range_m;
-//    double altitude_ft;
-//    // double altitude_m;
-//    bool has_altitude;
-//    // double altitude_angle;
+        loginf << "RadarPlotPositionCalculatorTask: loadingDoneSlot: calculating " << dbcontent_name
+               << " read_size " << read_size;
 
-//    TODO_ASSERT
-//    //assert(db_object_->hasDataSources());
+        //    std::string latitude_var_dbname = latitude_var_->currentDBColumn().name();
+        //    std::string longitude_var_dbname = longitude_var_->currentDBColumn().name();
+        //    std::string keyvar_var_dbname = key_var_->currentDBColumn().name();
 
-//    //    std::pair<unsigned char, unsigned char> sac_sic_key;
-//    // double sys_x, sys_y;
-//    double lat, lon;
-//    unsigned int update_cnt = 0;
+        PropertyList update_buffer_list;
 
-//    // double x1, y1, z1;
-//    // VecB pos;
+        update_buffer_list.addProperty(
+                    dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_latitude_).name(),
+                    PropertyDataType::DOUBLE);
+        update_buffer_list.addProperty(
+                    dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_longitude_).name(),
+                    PropertyDataType::DOUBLE);
+        update_buffer_list.addProperty(
+                    dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_rec_num_).name(),
+                    PropertyDataType::UINT); // must be at last position for update
 
-//    assert(msg_box_);
-//    float done_percent;
-//    std::string msg;
+        std::shared_ptr<Buffer> update_buffer =
+                std::make_shared<Buffer>(update_buffer_list, dbcontent_name);
 
-//    loginf << "RadarPlotPositionCalculatorTask: loadingDoneSlot: writing update_buffer";
-//    bool ret;
+        unsigned int rec_num;
+        unsigned int ds_id;
 
-//    size_t transformation_errors = 0;
+        double pos_azm_deg;
+        double pos_azm_rad;
+        double pos_range_nm;
+        double pos_range_m;
+        double altitude_ft;
+        // double altitude_m;
+        bool has_altitude;
+        // double altitude_angle;
 
-//    for (unsigned int cnt = 0; cnt < read_size; cnt++)
-//    {
-//        if (cnt % 50000 == 0 && target_report_count_ != 0)
-//        {
-//            done_percent = 100.0 * cnt / target_report_count_;
-//            msg =
-//                "Processing object data: " + String::doubleToStringPrecision(done_percent, 2) + "%";
-//            msg_box_->setText(msg.c_str());
+        double lat, lon;
+        unsigned int update_cnt = 0;
 
-//            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
-//        }
+        // double x1, y1, z1;
+        // VecB pos;
 
-//        if (read_buffer->get<int>(key_var_str_).isNull(cnt))
-//        {
-//            logerr << "RadarPlotPositionCalculatorTask: loadingDoneSlot: key null";
-//            continue;
-//        }
-//        rec_num = read_buffer->get<int>(key_var_str_).get(cnt);
+        assert(msg_box_);
+        float done_percent;
+        std::string msg;
 
-//        if (read_buffer->get<int>(datasource_var_str_).isNull(cnt))
-//        {
-//            logerr << "RadarPlotPositionCalculatorTask: loadingDoneSlot: data source null";
-//            continue;
-//        }
-//        sensor_id = read_buffer->get<int>(datasource_var_str_).get(cnt);
+        loginf << "RadarPlotPositionCalculatorTask: loadingDoneSlot: writing update_buffer";
+        bool ret;
 
-//        // sac = *((unsigned char*)adresses->at(1));
-//        // sic = *((unsigned char*)adresses->at(2));
+        size_t transformation_errors = 0;
 
-//        if (read_buffer->get<double>(azimuth_var_str_).isNull(cnt) ||
-//            read_buffer->get<double>(range_var_str_).isNull(cnt))
-//        {
-//            logdbg << "RadarPlotPositionCalculatorTask: loadingDoneSlot: position null";
-//            continue;
-//        }
+        NullableVector<unsigned int> read_ds_id_vec = read_buffer->get<unsigned int> (
+                    dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_datasource_id_).name());
+        NullableVector<unsigned int> read_rec_num_vec = read_buffer->get<unsigned int> (
+                    dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_rec_num_).name());
+        NullableVector<double> read_range_vec = read_buffer->get<double> (
+                    dbcontent_man.getVariable(dbcontent_name, DBContent::var_radar_range_).name());
+        NullableVector<double> read_azimuth_vec = read_buffer->get<double> (
+                    dbcontent_man.getVariable(dbcontent_name, DBContent::var_radar_azimuth_).name());
+        NullableVector<float> read_altitude_vec = read_buffer->get<float> (
+                    dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_mc_).name());
 
-//        pos_azm_deg = read_buffer->get<double>(azimuth_var_str_).get(cnt);
-//        pos_range_nm = read_buffer->get<double>(range_var_str_).get(cnt);
+        NullableVector<double> write_lat_vec = update_buffer->get<double> (
+                    dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_latitude_).name());
+        NullableVector<double> write_lon_vec = update_buffer->get<double> (
+                    dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_longitude_).name());
+        NullableVector<unsigned int> write_rec_num_vec = update_buffer->get<unsigned int> (
+                    dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_rec_num_).name());
 
-//        has_altitude = !read_buffer->get<int>(altitude_var_str_).isNull(cnt);
-//        if (has_altitude)
-//            altitude_ft = read_buffer->get<int>(altitude_var_str_).get(cnt);
-//        else
-//            altitude_ft = 0.0;  // has to assumed in projection later on
+        assert (read_ds_id_vec.isNeverNull());
+        assert (read_rec_num_vec.isNeverNull());
 
-//        TODO_ASSERT
-////        if (!db_object_->hasDataSource(sensor_id))
-////        {
-////            logerr << "RadarPlotPositionCalculatorTask: loadingDoneSlot: sensor id " << sensor_id
-////                   << " unkown";
-////            transformation_errors++;
-////            continue;
-////        }
+        for (unsigned int cnt = 0; cnt < read_size; cnt++)
+        {
+            rec_num = read_rec_num_vec.get(cnt);
 
-////        DBODataSource& data_source = db_object_->getDataSource(sensor_id);
+            ds_id = read_ds_id_vec.get(cnt);
 
-////        if (!data_source.hasLatitude() || !data_source.hasLongitude())
-////        {
-////            transformation_errors++;
-////            continue;
-////        }
+            if (read_azimuth_vec.isNull(cnt) || read_range_vec.isNull(cnt))
+                continue;
 
-//        pos_azm_rad = pos_azm_deg * DEG2RAD;
+            pos_azm_deg = read_azimuth_vec.get(cnt);
+            pos_range_nm = read_range_vec.get(cnt);
 
-//        pos_range_m = 1852.0 * pos_range_nm;
+            has_altitude = !read_altitude_vec.isNull(cnt);
 
-//        // altitude_m = 0.3048 * altitude_ft;
+            if (has_altitude)
+                altitude_ft = read_altitude_vec.get(cnt);
+            else
+                altitude_ft = 0.0;  // has to assumed in projection later on
 
-//        //        if (use_ogr_proj)
-//        //        {
-//        //            ret = data_source.calculateOGRSystemCoordinates(pos_azm_rad, pos_range_m,
-//        //            has_altitude, altitude_ft,
-//        //                                                            sys_x, sys_y);
-//        //            if (ret)
-//        //                ret = proj_man.ogrCart2Geo(sys_x, sys_y, lat, lon);
-//        //        }
+            //        if (!db_object_->hasDataSource(sensor_id))
+            //        {
+            //            logerr << "RadarPlotPositionCalculatorTask: loadingDoneSlot: sensor id " << sensor_id
+            //                   << " unkown";
+            //            transformation_errors++;
+            //            continue;
+            //        }
 
-//        //        if (use_sdl_proj)
-//        //        {
-//        //            t_CPos grs_pos;
+            //        DBODataSource& data_source = db_object_->getDataSource(sensor_id);
 
-//        //            ret = data_source.calculateSDLGRSCoordinates(pos_azm_rad, pos_range_m,
-//        //            has_altitude, altitude_ft, grs_pos); if (ret)
-//        //            {
-//        //                t_GPos geo_pos;
+            //        if (!data_source.hasLatitude() || !data_source.hasLongitude())
+            //        {
+            //            transformation_errors++;
+            //            continue;
+            //        }
 
-//        //                ret = proj_man.sdlGRS2Geo(grs_pos, geo_pos);
+            pos_azm_rad = pos_azm_deg * DEG2RAD;
 
-//        //                if (ret)
-//        //                {
-//        //                    lat = geo_pos.latitude * RAD2DEG;
-//        //                    lon = geo_pos.longitude * RAD2DEG;
-//        //                    //lat = geo_pos.latitude; what to do with altitude?
-//        //                }
-//        //            }
-//        //        }
+            pos_range_m = 1852.0 * pos_range_nm;
 
-//        //        if (use_rs2g_proj)
-//        //        {
-//        ////            float rho; // (m)
-//        ////            float theta; // (deg)
+            // altitude_m = 0.3048 * altitude_ft;
 
-//        //            x1 = pos_range_m * sin(pos_azm_rad);
-//        //            y1 = pos_range_m * cos(pos_azm_rad);
+            //        if (use_ogr_proj)
+            //        {
+            //            ret = data_source.calculateOGRSystemCoordinates(pos_azm_rad, pos_range_m,
+            //            has_altitude, altitude_ft,
+            //                                                            sys_x, sys_y);
+            //            if (ret)
+            //                ret = proj_man.ogrCart2Geo(sys_x, sys_y, lat, lon);
+            //        }
 
-//        //            if (has_altitude)
-//        //                z1 = altitude_ft * FT2M;
-//        //            else
-//        //                z1 = -1000.0;
+            //        if (use_sdl_proj)
+            //        {
+            //            t_CPos grs_pos;
 
-//        //            logdbg << "local x " << x1 << " y " << y1 << " z " << z1;
+            //            ret = data_source.calculateSDLGRSCoordinates(pos_azm_rad, pos_range_m,
+            //            has_altitude, altitude_ft, grs_pos); if (ret)
+            //            {
+            //                t_GPos geo_pos;
 
-//        //            ret = data_source.calculateRadSlt2Geocentric(x1, y1, z1, pos);
-//        //            if (ret)
-//        //            {
-//        //                logdbg << "geoc x " << pos[0] << " y " << pos[1] << " z " << pos[2];
+            //                ret = proj_man.sdlGRS2Geo(grs_pos, geo_pos);
 
-//        //                ret = geocentric2Geodesic(pos);
+            //                if (ret)
+            //                {
+            //                    lat = geo_pos.latitude * RAD2DEG;
+            //                    lon = geo_pos.longitude * RAD2DEG;
+            //                    //lat = geo_pos.latitude; what to do with altitude?
+            //                }
+            //            }
+            //        }
 
-//        //                lat = pos [0];
-//        //                lon = pos [1];
+            //        if (use_rs2g_proj)
+            //        {
+            ////            float rho; // (m)
+            ////            float theta; // (deg)
 
-//        //                logdbg << "geod x " << pos[0] << " y " << pos[1];
-//        //                //what to do with altitude?
-//        //            }
-//        //        }
+            //            x1 = pos_range_m * sin(pos_azm_rad);
+            //            y1 = pos_range_m * cos(pos_azm_rad);
 
-//        TODO_ASSERT
-////        if (!projection.hasCoordinateSystem(data_source.id()))
-////        {
-////            assert(data_source.hasLatitude());
-////            assert(data_source.hasLongitude());
-////            assert(data_source.hasAltitude());
-////            projection.addCoordinateSystem(data_source.id(), data_source.latitude(),
-////                                           data_source.longitude(), data_source.altitude());
-////        }
+            //            if (has_altitude)
+            //                z1 = altitude_ft * FT2M;
+            //            else
+            //                z1 = -1000.0;
 
-////        ret = projection.polarToWGS84(data_source.id(), pos_azm_rad, pos_range_m, has_altitude,
-////                                      altitude_ft, lat, lon);
+            //            logdbg << "local x " << x1 << " y " << y1 << " z " << z1;
 
-//        if (!ret)
-//        {
-//            transformation_errors++;
-//            continue;
-//        }
+            //            ret = data_source.calculateRadSlt2Geocentric(x1, y1, z1, pos);
+            //            if (ret)
+            //            {
+            //                logdbg << "geoc x " << pos[0] << " y " << pos[1] << " z " << pos[2];
 
-//        update_buffer->get<double>(latitude_var_str_).set(update_cnt, lat);
-//        update_buffer->get<double>(longitude_var_str_).set(update_cnt, lon);
-//        update_buffer->get<int>(key_var_str_).set(update_cnt, rec_num);
-//        update_cnt++;
+            //                ret = geocentric2Geodesic(pos);
 
-//        // loginf << "uga cnt " << update_cnt << " rec_num " << rec_num << " lat " << lat << " long
-//        // " << lon;
-//    }
+            //                lat = pos [0];
+            //                lon = pos [1];
 
-//    loginf << "RadarPlotPositionCalculatorTask: loadingDoneSlot: update_buffer size "
-//           << update_buffer->size() << ", " << transformation_errors << " transformation errors";
+            //                logdbg << "geod x " << pos[0] << " y " << pos[1];
+            //                //what to do with altitude?
+            //            }
+            //        }
 
-//    msg_box_->close();
-//    delete msg_box_;
-//    msg_box_ = nullptr;
+            if (!projection.hasCoordinateSystem(ds_id) && !ds_wo_full_pos.count(ds_id))
+            {
+                assert (ds_man.hasDBDataSource(ds_id));
 
-//    if (!update_buffer->size())
-//    {
-//        std::string text =
-//            "There were " + std::to_string(transformation_errors) +
-//            " skipped coordinates with transformation errors, no data available for insertion.";
+                dbContent::DBDataSource& ds = ds_man.dbDataSource(ds_id);
 
-//        QMessageBox msgBox;
-//        msgBox.setText(text.c_str());
-//        msgBox.exec();
+                if (!ds.hasFullPosition())
+                {
+                    ds_wo_full_pos.insert(ds_id);
+                    continue;
+                }
 
-//        return;
-//    }
+                projection.addCoordinateSystem(ds.id(), ds.latitude(), ds.longitude(), ds.altitude());
+            }
 
-//    if (transformation_errors)
-//    {
-//        QApplication::restoreOverrideCursor();
+            ret = projection.polarToWGS84(ds_id, pos_azm_rad, pos_range_m, has_altitude,
+                                          altitude_ft, lat, lon);
 
-//        QMessageBox::StandardButton reply;
+            if (!ret)
+            {
+                transformation_errors++;
+                continue;
+            }
 
-//        std::string question =
-//            "There were " + std::to_string(transformation_errors) +
-//            " skipped coordinates with transformation errors, " +
-//            std::to_string(update_buffer->size()) +
-//            " coordinates were projected correctly. Do you want to insert the data?";
+            write_lat_vec.set(update_cnt, lat);
+            write_lon_vec.set(update_cnt, lon);
+            write_rec_num_vec.set(update_cnt, rec_num);
 
-//        reply = QMessageBox::question(nullptr, "Insert Data", question.c_str(),
-//                                      QMessageBox::Yes | QMessageBox::No);
+            update_cnt++;
 
-//        if (reply == QMessageBox::No)
-//        {
-//            loginf
-//                << "RadarPlotPositionCalculatorTask: loadingDoneSlot: aborted by user because of "
-//                   "transformation errors";
-//            task_manager_.appendInfo(
-//                "RadarPlotPositionCalculatorTask: aborted by user because of "
-//                "transformation errors");
-//            return;
-//        }
-//        else
-//            task_manager_.appendWarning(
-//                "RadarPlotPositionCalculatorTask: continued by user ignoring" +
-//                std::to_string(transformation_errors) + " transformation errors");
+            // loginf << "uga cnt " << update_cnt << " rec_num " << rec_num << " lat " << lat << " long
+            // " << lon;
+        }
 
-//        QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-//    }
-//    else
-//        task_manager_.appendInfo("RadarPlotPositionCalculatorTask: no transformation errors");
+        loginf << "RadarPlotPositionCalculatorTask: loadingDoneSlot: update_buffer size "
+           << update_buffer->size() << ", " << transformation_errors << " transformation errors";
 
-//    msg_box_ = new QMessageBox;
-//    assert(msg_box_);
-//    msg_box_->setWindowTitle("Calculating Radar Plot Positions");
-//    msg = "Writing object data";
-//    msg_box_->setText(msg.c_str());
-//    msg_box_->setStandardButtons(QMessageBox::NoButton);
-//    msg_box_->show();
+        msg_box_->close();
+        delete msg_box_;
+        msg_box_ = nullptr;
 
-//    DBOVariableSet list;
-//    list.add(*latitude_var_);
-//    list.add(*longitude_var_);
-//    list.add(*key_var_);
+        if (!update_buffer->size())
+        {
+            std::string text =
+                    "There were " + std::to_string(transformation_errors) +
+                    " skipped coordinates with transformation errors, no data available for insertion.";
 
-//    db_object_->updateData(*key_var_, list, update_buffer);
+            QMessageBox msgBox;
+            msgBox.setText(text.c_str());
+            msgBox.exec();
 
-//    connect(db_object_, &DBObject::updateDoneSignal, this,
-//            &RadarPlotPositionCalculatorTask::updateDoneSlot);
-//    connect(db_object_, &DBObject::updateProgressSignal, this,
-//            &RadarPlotPositionCalculatorTask::updateProgressSlot);
+            return;
+        }
+
+        if (transformation_errors)
+        {
+            QApplication::restoreOverrideCursor();
+
+            QMessageBox::StandardButton reply;
+
+            std::string question =
+                    "There were " + std::to_string(transformation_errors) +
+                    " skipped coordinates with transformation errors, " +
+                    std::to_string(update_buffer->size()) +
+                    " coordinates were projected correctly. Do you want to insert the data?";
+
+            reply = QMessageBox::question(nullptr, "Insert Data", question.c_str(),
+                                          QMessageBox::Yes | QMessageBox::No);
+
+            if (reply == QMessageBox::No)
+            {
+                loginf << "RadarPlotPositionCalculatorTask: loadingDoneSlot: aborted by user because of "
+                   "transformation errors";
+                return;
+            }
+
+            QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+        }
+        else
+            task_manager_.appendInfo("RadarPlotPositionCalculatorTask: no transformation errors");
+
+        msg_box_ = new QMessageBox;
+        assert(msg_box_);
+        msg_box_->setWindowTitle("Calculating Radar Plot Positions");
+        msg = "Writing object data";
+        msg_box_->setText(msg.c_str());
+        msg_box_->setStandardButtons(QMessageBox::NoButton);
+        msg_box_->show();
+
+        loginf << "RadarPlotPositionCalculatorTask: loadingDoneSlot: writing " << dbcontent_name
+               << " size " << update_buffer->size()
+               << " key " << dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_rec_num_).name();
+
+        for (auto& prop_it : update_buffer->properties().properties())
+            loginf << "UGA " << prop_it.name();
+
+        DBContent& dbcontent = dbcontent_man.dbContent(dbcontent_name);
+
+        dbcontent.updateData(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_rec_num_), update_buffer);
+
+        connect(&dbcontent, &DBContent::updateDoneSignal,
+                this, &RadarPlotPositionCalculatorTask::updateDoneSlot);
+    }
 
     loginf << "RadarPlotPositionCalculatorTask: loadingDoneSlot: end";
 }
 
-void RadarPlotPositionCalculatorTask::updateProgressSlot(float percent)
-{
-    logdbg << "RadarPlotPositionCalculatorTask: updateProgressSlot: " << percent;
-
-    assert(msg_box_);
-    std::string msg = "Writing object data: " + String::doubleToStringPrecision(percent, 2) + "%";
-    msg_box_->setText(msg.c_str());
-}
-
-void RadarPlotPositionCalculatorTask::updateDoneSlot(DBContent& object)
+void RadarPlotPositionCalculatorTask::updateDoneSlot(DBContent& db_content)
 {
     loginf << "RadarPlotPositionCalculatorTask: updateDoneSlot";
 
-    disconnect(db_object_, &DBContent::updateDoneSignal, this,
-               &RadarPlotPositionCalculatorTask::updateDoneSlot);
-    disconnect(db_object_, &DBContent::updateProgressSignal, this,
-               &RadarPlotPositionCalculatorTask::updateProgressSlot);
+    disconnect(&db_content, &DBContent::updateDoneSignal,
+               this, &RadarPlotPositionCalculatorTask::updateDoneSlot);
 
-    assert(msg_box_);
-    msg_box_->close();
-    delete msg_box_;
-    msg_box_ = nullptr;
+    assert (data_.count(db_content.name()));
+    data_.erase(db_content.name());
 
-    job_ptr_ = nullptr;
-//    db_object_->clearData();
+    if (!data_.size())
+    {
+        loginf << "RadarPlotPositionCalculatorTask: updateDoneSlot: fully done";
 
-    stop_time_ = boost::posix_time::microsec_clock::local_time();
-    boost::posix_time::time_duration time_diff = stop_time_ - start_time_;
-    std::string elapsed_time_str =
-        String::timeStringFromDouble(time_diff.total_milliseconds() / 1000.0, false);
+        assert(msg_box_);
+        msg_box_->close();
+        delete msg_box_;
+        msg_box_ = nullptr;
 
-    done_ = true;
-    COMPASS::instance().interface().setProperty(DONE_PROPERTY_NAME, "1");
+        //job_ptr_ = nullptr;
+        //data_.clear();
 
-    task_manager_.appendSuccess("RadarPlotPositionCalculatorTask: done after " + elapsed_time_str);
+        stop_time_ = boost::posix_time::microsec_clock::local_time();
+        boost::posix_time::time_duration time_diff = stop_time_ - start_time_;
+        std::string elapsed_time_str =
+                String::timeStringFromDouble(time_diff.total_milliseconds() / 1000.0, false);
 
-    QApplication::restoreOverrideCursor();
+        done_ = true;
+        COMPASS::instance().interface().setProperty(DONE_PROPERTY_NAME, "1");
 
-    msg_box_ = new QMessageBox;
-    assert(msg_box_);
-    msg_box_->setWindowTitle("Calculating Radar Plot Positions");
-    msg_box_->setText("Writing of object data done.");
-    msg_box_->setStandardButtons(QMessageBox::Ok);
+        task_manager_.appendSuccess("RadarPlotPositionCalculatorTask: done after " + elapsed_time_str);
 
-    if (show_done_summary_)
-        msg_box_->exec();
+        QApplication::restoreOverrideCursor();
 
-    delete msg_box_;
-    msg_box_ = nullptr;
+        msg_box_ = new QMessageBox;
+        assert(msg_box_);
+        msg_box_->setWindowTitle("Calculating Radar Plot Positions");
+        msg_box_->setText("Writing of object data done.");
+        msg_box_->setStandardButtons(QMessageBox::Ok);
 
-    emit doneSignal(name_);
+        if (show_done_summary_)
+            msg_box_->exec();
+
+        delete msg_box_;
+        msg_box_ = nullptr;
+
+        emit doneSignal(name_);
+    }
+    else
+        loginf << "RadarPlotPositionCalculatorTask: updateDoneSlot: not yet done";
+}
+
+void RadarPlotPositionCalculatorTask::dialogCloseSlot()
+{
+    assert (dialog_);
+
+    bool run_wanted = dialog_->runWanted();
+
+    dialog_->close();
+
+    if (run_wanted)
+        run();
 }
 
 bool RadarPlotPositionCalculatorTask::isCalculating() { return calculating_; }
+
+dbContent::VariableSet RadarPlotPositionCalculatorTask::getReadSetFor(const std::string& dbcontent_name)
+{
+    DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
+
+    VariableSet read_set;
+
+    assert(dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_rec_num_));
+    read_set.add(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_rec_num_));
+
+    assert(dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_datasource_id_));
+    read_set.add(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_datasource_id_));
+
+    assert(dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_mc_));
+    read_set.add(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_mc_));
+
+    assert(dbcontent_man.canGetVariable(dbcontent_name, DBContent::var_radar_range_));
+    read_set.add(dbcontent_man.getVariable(dbcontent_name, DBContent::var_radar_range_));
+
+    assert(dbcontent_man.canGetVariable(dbcontent_name, DBContent::var_radar_azimuth_));
+    read_set.add(dbcontent_man.getVariable(dbcontent_name, DBContent::var_radar_azimuth_));
+
+    return read_set;
+}

@@ -326,17 +326,19 @@ void CreateARTASAssociationsTask::run()
     checkAndSetMetaVariable(DBContent::meta_var_tod_.name(), &tod_var_);
     checkAndSetMetaVariable(DBContent::meta_var_associations_.name(), &associations_var_);
 
-    DBContentManager& object_man = COMPASS::instance().dbContentManager();
+    DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
+    dbcontent_man.clearData();
+
     DataSourceManager& ds_man = COMPASS::instance().dataSourceManager();
 
     COMPASS::instance().viewManager().disableDataDistribution(true);
 
-    connect(&object_man, &DBContentManager::loadedDataSignal,
+    connect(&dbcontent_man, &DBContentManager::loadedDataSignal,
             this, &CreateARTASAssociationsTask::loadedDataDataSlot);
-    connect(&object_man, &DBContentManager::loadingDoneSignal,
+    connect(&dbcontent_man, &DBContentManager::loadingDoneSignal,
             this, &CreateARTASAssociationsTask::loadingDoneSlot);
 
-    for (auto& dbo_it : object_man)
+    for (auto& dbo_it : dbcontent_man)
     {
         if (!dbo_it.second->hasData())
             continue;
@@ -382,7 +384,7 @@ void CreateARTASAssociationsTask::run()
                                         &tod_var_->getFor("CAT062"), false);
         }
         else
-            dbo_it.second->load(read_set, false, false, nullptr, false);
+            dbo_it.second->load(read_set, false, false, false, nullptr, false);
 
     }
 

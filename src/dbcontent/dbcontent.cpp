@@ -303,7 +303,7 @@ DBContentWidget* DBContent::widget()
 
 void DBContent::closeWidget() { widget_ = nullptr; }
 
-void DBContent::load(VariableSet& read_set, bool use_filters, bool use_order,
+void DBContent::load(VariableSet& read_set, bool use_datasrc_filters, bool use_filters, bool use_order,
                      Variable* order_variable, bool use_order_ascending,
                      const string& limit_str)
 {
@@ -316,7 +316,7 @@ void DBContent::load(VariableSet& read_set, bool use_filters, bool use_order,
 
     DataSourceManager& ds_man = COMPASS::instance().dataSourceManager();
 
-    if (ds_man.hasDSFilter(name_))
+    if (use_datasrc_filters && ds_man.hasDSFilter(name_))
     {
         vector<unsigned int> ds_ids_to_load = ds_man.unfilteredDS(name_);
         assert (ds_ids_to_load.size());
@@ -564,6 +564,19 @@ void DBContent::updateData(Variable& key_var, shared_ptr<Buffer> buffer)
     assert(!update_job_);
 
     assert(existsInDB());
+
+    VariableSet list;
+
+    for (auto prop_it : buffer->properties().properties())
+    {
+        assert (hasVariable(prop_it.name()));
+        list.add(variable(prop_it.name()));
+    }
+
+    assert(!insert_job_);
+
+    // transform variable names from dbovars to dbcolumns
+    buffer->transformVariables(list, false);
 
     update_job_ =
             make_shared<UpdateBufferDBJob>(COMPASS::instance().interface(), *this, key_var, buffer);

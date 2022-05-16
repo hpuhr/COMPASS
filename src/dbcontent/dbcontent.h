@@ -155,7 +155,7 @@ public:
 
     bool loadable() const { return is_loadable_; }
 
-    void load(dbContent::VariableSet& read_set, bool use_filters, bool use_order,
+    void load(dbContent::VariableSet& read_set, bool use_datasrc_filters, bool use_filters, bool use_order,
               dbContent::Variable* order_variable, bool use_order_ascending,
               const std::string& limit_str = ""); // main load function
     void loadFiltered(dbContent::VariableSet& read_set, const std::vector<std::string>& extra_from_parts,

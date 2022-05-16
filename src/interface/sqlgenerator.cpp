@@ -549,6 +549,8 @@ string SQLGenerator::createDBUpdateStringBind(shared_ptr<Buffer> buffer,
     // UPDATE table_name SET col1=val1,col2=value2 WHERE somecol=someval;
 
     unsigned int size = properties.size();
+    assert (size);
+
     logdbg << "SQLGenerator: createDBUpdateStringBind: creating db string";
     stringstream ss;  // create a stringstream
 
@@ -558,6 +560,9 @@ string SQLGenerator::createDBUpdateStringBind(shared_ptr<Buffer> buffer,
 
     if (key_col_name != properties.at(size - 1).name())
     {
+        logerr << "SQLGenerator::createDBUpdateStringBind: key_col_name '" << key_col_name
+               << "' not at last position, but '" << properties.at(size - 1).name() << "'";
+
         throw runtime_error(
                 "SQLGenerator: createDBUpdateStringBind: key_col_name not at last position");
     }
