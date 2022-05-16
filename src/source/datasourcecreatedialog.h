@@ -49,9 +49,9 @@ protected:
     QPushButton* cancel_button_{nullptr};
     QPushButton* done_button_{nullptr};
 
+    std::string ds_type_;
     unsigned int sac_ {0};
     unsigned int sic_ {0};
-    std::string ds_type_;
 
     bool cancelled_{false};
 

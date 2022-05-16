@@ -25,6 +25,7 @@ public:
 
     unsigned int getIdOf (const QModelIndex& index);
 
+    QModelIndex dataSourceIndex(unsigned int ds_id); // returns row
     void updateDataSource(unsigned int ds_id);
     void beginModelReset();
     void endModelReset();

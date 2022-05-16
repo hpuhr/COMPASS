@@ -343,6 +343,8 @@ void DataSourceEditWidget::dsTypeEditedSlot(const QString& value)
     ds_man_.configDataSource(current_ds_id_).dsType(text);
 
     dialog_.updateDataSource(current_ds_id_);
+
+    updateContent();
 }
 
 void DataSourceEditWidget::latitudeEditedSlot(const QString& value_str)
@@ -606,9 +608,18 @@ void DataSourceEditWidget::updateContent()
             // position
             if (ds.dsType() == "Radar" || ds.hasPosition())
             {
-                latitude_edit_->setText(QString::number(ds.latitude(), 'g', 12));
-                longitude_edit_->setText(QString::number(ds.longitude(), 'g', 12));
-                altitude_edit_->setText(QString::number(ds.altitude(), 'g', 12));
+                if (ds.hasPosition())
+                {
+                    latitude_edit_->setText(QString::number(ds.latitude(), 'g', 12));
+                    longitude_edit_->setText(QString::number(ds.longitude(), 'g', 12));
+                    altitude_edit_->setText(QString::number(ds.altitude(), 'g', 12));
+                }
+                else
+                {
+                    latitude_edit_->setText("0");
+                    longitude_edit_->setText("0");
+                    altitude_edit_->setText("0");
+                }
 
                 position_widget_->setHidden(false);
             }
@@ -733,9 +744,19 @@ void DataSourceEditWidget::updateContent()
             // position
             if (ds.dsType() == "Radar" || ds.hasPosition())
             {
-                latitude_edit_->setText(QString::number(ds.latitude(), 'g', 12));
-                longitude_edit_->setText(QString::number(ds.longitude(), 'g', 12));
-                altitude_edit_->setText(QString::number(ds.altitude(), 'g', 12));
+                if (ds.hasPosition())
+                {
+                    latitude_edit_->setText(QString::number(ds.latitude(), 'g', 12));
+                    longitude_edit_->setText(QString::number(ds.longitude(), 'g', 12));
+                    altitude_edit_->setText(QString::number(ds.altitude(), 'g', 12));
+                }
+                else
+                {
+                    latitude_edit_->setText("0");
+                    longitude_edit_->setText("0");
+                    altitude_edit_->setText("0");
+
+                }
 
                 position_widget_->setHidden(false);
             }

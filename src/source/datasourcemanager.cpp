@@ -436,6 +436,8 @@ void DataSourceManager::createConfigDataSource(unsigned int ds_id)
                                                   +to_string(Number::sicFromDsId(ds_id))+")");
 
     generateSubConfigurable("ConfigurationDataSource", new_cfg.getInstanceId());
+
+    updateDSIdsAll();
 }
 
 void DataSourceManager::deleteConfigDataSource(unsigned int ds_id)

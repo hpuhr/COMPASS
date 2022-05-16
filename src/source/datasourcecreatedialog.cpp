@@ -75,6 +75,8 @@ void DataSourceCreateDialog::dsTypeEditedSlot(const QString& value)
 {
     ds_type_ = value.toStdString();
     loginf << "DataSourceEditWidget: dsTypeEditedSlot: " << ds_type_;
+
+    checkInput();
 }
 
 void DataSourceCreateDialog::sacEditedSlot(const QString& value_str)

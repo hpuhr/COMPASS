@@ -3,6 +3,7 @@
 #include "datasourceeditwidget.h"
 #include "datasourcemanager.h"
 #include "datasourcecreatedialog.h"
+#include "util/number.h"
 #include "logger.h"
 
 #include <QHBoxLayout>
@@ -16,6 +17,7 @@
 #include <QMessageBox>
 
 using namespace std;
+using namespace Utils;
 
 DataSourcesConfigurationDialog::DataSourcesConfigurationDialog(DataSourceManager& ds_man)
     : QDialog(), ds_man_(ds_man)
@@ -177,8 +179,27 @@ void DataSourcesConfigurationDialog::newDSDoneSlot()
         unsigned int sac = create_dialog_->sac();
         unsigned int sic = create_dialog_->sic();
 
-            loginf << "DataSourcesConfigurationDialog: newDSDoneSlot: ds_type " << ds_type
-                   << " sac " << sac << " sic " << sic;
+        loginf << "DataSourcesConfigurationDialog: newDSDoneSlot: ds_type " << ds_type
+               << " sac " << sac << " sic " << sic;
+
+        unsigned int ds_id = Number::dsIdFrom(sac, sic);
+
+        assert (!ds_man_.hasConfigDataSource(ds_id));
+
+        beginResetModel();
+
+        ds_man_.createConfigDataSource(ds_id);
+        assert (ds_man_.hasConfigDataSource(ds_id));
+        ds_man_.configDataSource(ds_id).dsType(ds_type);
+
+        endResetModel();
+
+        auto const model_index = table_model_->dataSourceIndex(ds_id);
+
+        auto const source_index = proxy_model_->mapFromSource(model_index);
+        assert (source_index.isValid());
+
+        table_view_->selectRow(source_index.row());
     }
 
     create_dialog_->close();
