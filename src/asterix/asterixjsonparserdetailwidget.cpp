@@ -232,7 +232,7 @@ void ASTERIXJSONParserDetailWidget::currentIndexChangedSlot (unsigned int index)
 
         info_label_->setText("Unmapped JSON Key");
 
-        active_check_->setEnabled(expert_mode_);
+        active_check_->setEnabled(false);
         active_check_->setChecked(false);
 
         string key = parser_.unmappedJSONKey(entry_index_);
@@ -260,7 +260,7 @@ void ASTERIXJSONParserDetailWidget::currentIndexChangedSlot (unsigned int index)
     {
         info_label_->setText("Unmapped DBContent Variable");
 
-        active_check_->setEnabled(expert_mode_);
+        active_check_->setEnabled(false);
         active_check_->setChecked(false);
 
         string dbovar = parser_.unmappedDBContentVariable(entry_index_);
