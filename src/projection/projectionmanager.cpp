@@ -130,6 +130,7 @@ std::map<std::string, std::unique_ptr<Projection>>& ProjectionManager::projectio
     return projections_;
 }
 
+
 // bool ProjectionManager::sdlGRS2Geo (t_CPos grs_pos, t_GPos& geo_pos)
 //{
 //    //logdbg << "ProjectionManager: sdlGRS2Geo: x_pos " << x_pos << " y_pos " << y_pos;

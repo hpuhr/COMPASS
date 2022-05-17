@@ -60,7 +60,6 @@ public:
     virtual ~RadarPlotPositionCalculatorTask();
 
     bool isCalculating();
-    unsigned int getNumLoaded() { return num_loaded_; }
 
     RadarPlotPositionCalculatorTaskDialog* dialog();
 
@@ -74,14 +73,11 @@ public:
     static const std::string DONE_PROPERTY_NAME;
 
 protected:
-    //std::map<std::string, std::shared_ptr<UpdateBufferDBJob>> job_ptr_;
-
     boost::posix_time::ptime start_time_;
     boost::posix_time::ptime stop_time_;
 
     bool calculating_{false};
 
-    unsigned int num_loaded_{0};
     std::map<std::string, std::shared_ptr<Buffer>> data_;
     std::set<std::string> dbcontent_done_;
 

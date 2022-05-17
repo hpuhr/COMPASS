@@ -147,8 +147,6 @@ void RadarPlotPositionCalculatorTask::run()
 
     QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
 
-    num_loaded_ = 0;
-
     for (auto& dbo_it : dbcontent_man)
     {
         if (dbo_it.first != "CAT001" && dbo_it.first != "CAT048")
@@ -189,6 +187,7 @@ void RadarPlotPositionCalculatorTask::loadingDoneSlot()
 
     assert(proj_man.hasCurrentProjection());
     Projection& projection = proj_man.currentProjection();
+    projection.clearCoordinateSystems(); // to rebuild from data sources
 
     loginf << "RadarPlotPositionCalculatorTask: loadingDoneSlot: projection method '"
            << projection.name() << "'";
