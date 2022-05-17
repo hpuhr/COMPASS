@@ -5,6 +5,8 @@
 
 #include <QDialog>
 
+#include <memory>
+
 class DataSourceManager;
 class DataSourceTableModel;
 class DataSourceEditWidget;

@@ -21,6 +21,7 @@
 #include "configurable.h"
 #include "task.h"
 #include "dbcontent/variable/variableset.h"
+#include "radarplotpositioncalculatortaskdialog.h"
 
 #include <QObject>
 
@@ -32,7 +33,6 @@
 class Buffer;
 class DBContent;
 
-class RadarPlotPositionCalculatorTaskDialog;
 class TaskManager;
 class UpdateBufferDBJob;
 

@@ -1,10 +1,13 @@
 #ifndef RADARPLOTPOSITIONCALCULATORTASKDIALOG_H
 #define RADARPLOTPOSITIONCALCULATORTASKDIALOG_H
 
+#include "radarplotpositioncalculatortaskwidget.h"
+
 #include <QDialog>
 
+#include <memory>
+
 class RadarPlotPositionCalculatorTask;
-class RadarPlotPositionCalculatorTaskWidget;
 
 class RadarPlotPositionCalculatorTaskDialog : public QDialog
 {

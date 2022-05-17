@@ -119,8 +119,6 @@ void RadarPlotPositionCalculatorTask::run()
 
     assert(canRun());
 
-    task_manager_.appendInfo("RadarPlotPositionCalculatorTask: started");
-
     start_time_ = boost::posix_time::microsec_clock::local_time();
 
     DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
@@ -136,6 +134,7 @@ void RadarPlotPositionCalculatorTask::run()
             this, &RadarPlotPositionCalculatorTask::loadingDoneSlot);
 
     calculating_ = true;
+    done_ = false;
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
     std::string msg = "Loading object data";
