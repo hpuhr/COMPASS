@@ -51,6 +51,7 @@ public:
 
 private:
     ASTERIXJSONParser& parser_;
+    bool expert_mode_ {false}; // COMPASS expert mode
 
     bool has_current_entry_ {false};
     ASTERIXJSONParser::EntryType entry_type_;

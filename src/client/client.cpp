@@ -100,7 +100,7 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
     po::options_description desc("Allowed options");
     desc.add_options()("help", "produce help message")
             ("reset,r", po::bool_switch(&config_and_data_copy_wanted_) ,"reset user configuration and data")
-            ("expert", po::bool_switch(&expert_mode_) ,"set expert mode")
+            ("expert_mode", po::bool_switch(&expert_mode_) ,"set expert mode")
             ("create_db", po::value<std::string>(&create_new_sqlite3_db_filename_),
              "creates and opens new SQLite3 database with given filename, e.g. '/data/file1.db'")
             ("open_db", po::value<std::string>(&open_sqlite3_db_filename_),

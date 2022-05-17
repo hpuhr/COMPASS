@@ -122,6 +122,9 @@ private:
 
     std::string db_content_name_;
 
+    mutable bool expert_mode_init_ {false}; // whether expert_mode_ was initialized
+    mutable bool expert_mode_ {false}; // COMPASS expert mode
+
     jASTERIX::CategoryItemInfo item_info_;
 
     dbContent::VariableSet var_list_;

@@ -834,6 +834,12 @@ QModelIndex ASTERIXJSONParser::parent(const QModelIndex& index) const
 
 Qt::ItemFlags ASTERIXJSONParser::flags(const QModelIndex& index) const
 {
+    if (!expert_mode_init_)
+    {
+        expert_mode_ = COMPASS::instance().expertMode();
+        expert_mode_init_ = true;
+    }
+
     if (!index.isValid())
         return Qt::ItemIsEnabled;
 
@@ -848,9 +854,13 @@ Qt::ItemFlags ASTERIXJSONParser::flags(const QModelIndex& index) const
 
         if (mapping(row).canBeActive())
         {
-            flags |= Qt::ItemIsEnabled;
             flags |= Qt::ItemIsUserCheckable;
-            flags |= Qt::ItemIsEditable;
+
+            if (expert_mode_)
+            {
+                flags |= Qt::ItemIsEnabled;
+                flags |= Qt::ItemIsEditable;
+            }
         }
 
         return flags;

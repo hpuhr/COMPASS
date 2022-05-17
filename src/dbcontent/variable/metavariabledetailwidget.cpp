@@ -133,7 +133,6 @@ void MetaVariableDetailWidget::nameEditedSlot()
     dbo_man_.renameMetaVariable(meta_var_->name(), new_name);
 }
 
-
 void MetaVariableDetailWidget::variableChangedSlot()
 {
     loginf << "MetaVariableDetailWidget: variableChangedSlot";

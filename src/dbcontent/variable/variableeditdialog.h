@@ -39,6 +39,8 @@ public:
 protected:
     Variable& variable_;
 
+    bool expert_mode_ {false}; // COMPASS expert mode
+
     QLineEdit* name_edit_ {nullptr};
     QLineEdit* short_name_edit_ {nullptr};
     QTextEdit* description_edit_ {nullptr};

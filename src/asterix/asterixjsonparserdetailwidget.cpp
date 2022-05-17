@@ -29,6 +29,8 @@ using namespace Utils;
 ASTERIXJSONParserDetailWidget::ASTERIXJSONParserDetailWidget(ASTERIXJSONParser& parser, QWidget* parent)
     : QWidget(parent), parser_(parser)
 {
+    expert_mode_ = COMPASS::instance().expertMode();
+
     QVBoxLayout* main_layout = new QVBoxLayout();
 
     QFormLayout* form_layout = new QFormLayout;
@@ -203,17 +205,23 @@ void ASTERIXJSONParserDetailWidget::currentIndexChangedSlot (unsigned int index)
         else
             info_label_->setText("Existing Mapping");
 
-        active_check_->setDisabled(false);
+        active_check_->setEnabled(expert_mode_);
+//        active_check_->setAttribute(Qt::WA_TransparentForMouseEvents, !expert_mode_); // read only
+//        active_check_->setFocusPolicy(!expert_mode_ ? Qt::NoFocus : Qt::StrongFocus);
         active_check_->setChecked(mapping.active());
 
         showJSONKey(mapping.jsonKey(), !parser_.existsJSONKeyInCATInfo(mapping.jsonKey()));
 
         unit_sel_->update(mapping.dimensionRef(), mapping.unitRef());
+        unit_sel_->setEnabled(expert_mode_);
+
         data_format_widget_->update(mapping.formatDataTypeRef(), mapping.jsonValueFormatRef());
+        data_format_widget_->setEnabled(expert_mode_);
 
         showDBContentVariable(mapping.dboVariableName(), true);
 
         delete_mapping_button_->setHidden(false);
+        delete_mapping_button_->setEnabled(expert_mode_);
 
         setting_new_content_ = false;
 
@@ -224,7 +232,7 @@ void ASTERIXJSONParserDetailWidget::currentIndexChangedSlot (unsigned int index)
 
         info_label_->setText("Unmapped JSON Key");
 
-        active_check_->setDisabled(true);
+        active_check_->setEnabled(expert_mode_);
         active_check_->setChecked(false);
 
         string key = parser_.unmappedJSONKey(entry_index_);
@@ -233,8 +241,13 @@ void ASTERIXJSONParserDetailWidget::currentIndexChangedSlot (unsigned int index)
                << " key '" << key << "'";
 
         showJSONKey(key, false);
+
         unit_sel_->clear();
+        unit_sel_->setEnabled(expert_mode_);
+
         data_format_widget_->clear();
+        data_format_widget_->setEnabled(expert_mode_);
+
         showDBContentVariable("");
 
         delete_mapping_button_->setHidden(true);
@@ -247,7 +260,7 @@ void ASTERIXJSONParserDetailWidget::currentIndexChangedSlot (unsigned int index)
     {
         info_label_->setText("Unmapped DBContent Variable");
 
-        active_check_->setDisabled(true);
+        active_check_->setEnabled(expert_mode_);
         active_check_->setChecked(false);
 
         string dbovar = parser_.unmappedDBContentVariable(entry_index_);
@@ -256,8 +269,13 @@ void ASTERIXJSONParserDetailWidget::currentIndexChangedSlot (unsigned int index)
                << " key '" << dbovar << "'";
 
         showJSONKey("", false);
+
         unit_sel_->clear();
+        unit_sel_->setEnabled(expert_mode_);
+
         data_format_widget_->clear();
+        data_format_widget_->setEnabled(expert_mode_);
+
         showDBContentVariable(dbovar);
 
         delete_mapping_button_->setHidden(true);
@@ -311,10 +329,10 @@ void ASTERIXJSONParserDetailWidget::showJSONKey (const std::string& key, bool un
 
             }
 
-            json_key_box_->setDisabled(false);
+            json_key_box_->setEnabled(expert_mode_);
         }
         else
-            json_key_box_->setDisabled(true);
+            json_key_box_->setEnabled(false);
 
         const jASTERIX::CategoryItemInfo& item_info = parser_.categoryItemInfo();
 
@@ -349,28 +367,32 @@ void ASTERIXJSONParserDetailWidget::showDBContentVariable (const std::string& va
     {
         dbo_var_sel_->updateMenuEntries();
 
-        dbo_var_sel_->setDisabled(false);
+        dbo_var_sel_->setEnabled(expert_mode_);
 
         assert (parser_.dbObject().hasVariable(var_name));
         dbo_var_sel_->selectedVariable(parser_.dbObject().variable(var_name));
         dbo_var_data_type_label_->setText(dbo_var_sel_->selectedVariable().dataTypeString().c_str());
 
-        dbo_var_comment_edit_->setDisabled(false);
-
+        dbo_var_comment_edit_->setEnabled(expert_mode_);
         dbo_var_comment_edit_->setText(parser_.dbObject().variable(var_name).description().c_str());
 
         if (mapping_exists)
         {
             new_dbovar_button_->setText("New DBContent Variable");
-            new_dbovar_button_->setHidden(false);
+            new_dbovar_button_->setHidden(!expert_mode_);
         }
         else
         {
             new_dbovar_button_->setHidden(true);
         }
 
+        if (expert_mode_)
+            dbovar_edit_button_->setText("Edit DBContent Variable");
+        else
+            dbovar_edit_button_->setText("Show DBContent Variable");
+
         dbovar_edit_button_->setHidden(false);
-        dbovar_delete_button_->setHidden(false);
+        dbovar_delete_button_->setHidden(!expert_mode_);
     }
     else
     {
@@ -382,7 +404,7 @@ void ASTERIXJSONParserDetailWidget::showDBContentVariable (const std::string& va
 
         dbo_var_comment_edit_->setText("");
 
-        new_dbovar_button_->setHidden(false);
+        new_dbovar_button_->setHidden(!expert_mode_);
 
         if (mapping_exists)
             new_dbovar_button_->setText("New DBContent Variable");
