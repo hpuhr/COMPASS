@@ -56,6 +56,8 @@ private:
     bool load_data_ {false};
     bool quit_ {false};
 
+    bool expert_mode_ {false};
+
     void checkAndSetupConfig();
 
     void checkNeededActions();

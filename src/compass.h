@@ -77,6 +77,7 @@ protected:
     bool db_opened_{false};
     bool shut_down_{false};
 
+    bool expert_mode_ {false};
     AppMode app_mode_ {AppMode::Offline};
 
     std::unique_ptr<SimpleConfig> simple_config_;
@@ -113,6 +114,9 @@ public:
     std::string appModeStr() const;
 
     static const std::map<AppMode, std::string>& appModes2Strings();
+
+    bool expertMode() const;
+    void expertMode(bool expert_mode);
 };
 
 #endif /* COMPASS_H_ */

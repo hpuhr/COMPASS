@@ -410,6 +410,18 @@ MainWindow& COMPASS::mainWindow()
     return *main_window_;
 }
 
+bool COMPASS::expertMode() const
+{
+    return expert_mode_;
+}
+
+void COMPASS::expertMode(bool expert_mode)
+{
+    loginf << "COMPASS: expertMode: setting expert mode " << expert_mode;
+
+    expert_mode_ = expert_mode;
+}
+
 AppMode COMPASS::appMode() const
 {
     return app_mode_;

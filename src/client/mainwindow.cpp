@@ -184,22 +184,11 @@ MainWindow::MainWindow()
 
 
     // do signal slots
-
     connect (&COMPASS::instance(), &COMPASS::appModeSwitchSignal,
              this, &MainWindow::appModeSwitchSlot);
 
     QObject::connect(&COMPASS::instance().dbContentManager(), &DBContentManager::loadingDoneSignal,
                      this, &MainWindow::loadingDoneSlot);
-
-//    QLabel* test = new QLabel("See the lovely lakes", this,
-//                              Qt::Window | Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint);
-//    //test->setWindowFlags(Qt::Window | Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint); //, Qt::Window | Qt::WindowStaysOnTopHint
-//    //test->setAttribute(Qt::WA_TranslucentBackground);
-//    test->move(100, 100);
-//    //test->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
-//    test->raise();
-//    test->show();
-
 }
 
 MainWindow::~MainWindow()
@@ -211,6 +200,8 @@ MainWindow::~MainWindow()
 
 void MainWindow::createMenus ()
 {
+    bool expert_mode = COMPASS::instance().expertMode();
+
     // file menu
     QMenu* file_menu = menuBar()->addMenu(tr("&File"));
 
@@ -277,7 +268,12 @@ void MainWindow::createMenus ()
     config_menu->addAction(ds_action);
 
     QAction* meta_action = new QAction(tr("Meta Variables"));
-    meta_action->setStatusTip(tr("Configure Meta Variables"));
+
+    if (expert_mode)
+        meta_action->setStatusTip(tr("Configure Meta Variables"));
+    else
+        meta_action->setStatusTip(tr("Show Meta Variables"));
+
     connect(meta_action, &QAction::triggered, this, &MainWindow::configureMetaVariablesSlot);
     config_menu->addAction(meta_action);
 

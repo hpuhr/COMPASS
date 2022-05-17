@@ -2,6 +2,7 @@
 #include "dbcontent/variable/metavariable.h"
 #include "dbcontent/dbcontentmanager.h"
 #include "dbcontent/variable/variableselectionwidget.h"
+#include "compass.h"
 #include "logger.h"
 
 #include <QLabel>
@@ -38,7 +39,7 @@ MetaVariableDetailWidget::MetaVariableDetailWidget(DBContentManager& dbo_man, QW
     {
         VariableSelectionWidget* var_sel = new VariableSelectionWidget(true);
         var_sel->showDBOOnly(dbcont_it->first);
-        var_sel->setProperty("DBObject", dbcont_it->first.c_str());
+        //var_sel->setProperty("DBContent", dbcont_it->first.c_str());
 
         connect(var_sel, &VariableSelectionWidget::selectionChanged,
                 this, &MetaVariableDetailWidget::variableChangedSlot);
@@ -65,19 +66,22 @@ MetaVariableDetailWidget::MetaVariableDetailWidget(DBContentManager& dbo_man, QW
 
 void MetaVariableDetailWidget::show (MetaVariable& meta_var)
 {
-    loginf << "MetaVariableDetailWidget: show: var '" << meta_var.name() << "'";
+    bool expert_mode = COMPASS::instance().expertMode();
+
+    loginf << "MetaVariableDetailWidget: show: var '" << meta_var.name() << "' expert_mode " << expert_mode;
 
     has_current_entry_ = true;
     meta_var_ = &meta_var;
 
     name_edit_->setText(meta_var.name().c_str());
     name_edit_->setDisabled(false);
+    name_edit_->setReadOnly(!expert_mode);
 
     description_edit_->document()->setPlainText(meta_var.description().c_str());
 
     for (auto& sel_it : selection_widgets_)
     {
-        loginf << "MetaVariableDetailWidget: show: var '" << meta_var.name() << "' exists in " << sel_it.first
+        logdbg << "MetaVariableDetailWidget: show: var '" << meta_var.name() << "' exists in " << sel_it.first
                << " " << meta_var.existsIn(sel_it.first);
 
         if (meta_var.existsIn(sel_it.first))
@@ -86,10 +90,11 @@ void MetaVariableDetailWidget::show (MetaVariable& meta_var)
             sel_it.second->selectEmptyVariable();
 
         sel_it.second->setDisabled(false);
+        sel_it.second->setReadOnly(!expert_mode);
 
     }
 
-    delete_button_->setDisabled(false);
+    delete_button_->setDisabled(!expert_mode);
 }
 
 void MetaVariableDetailWidget::clear()

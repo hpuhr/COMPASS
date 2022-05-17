@@ -3,6 +3,7 @@
 #include "dbcontent/variable/metavariabledetailwidget.h"
 #include "dbcontent/dbcontentmanager.h"
 #include "dbcontent/dbcontent.h"
+#include "compass.h"
 
 #include <QGridLayout>
 #include <QHBoxLayout>
@@ -20,7 +21,6 @@ namespace dbContent
 MetaVariableConfigurationDialog::MetaVariableConfigurationDialog(DBContentManager& dbo_man)
     : QDialog(), dbo_man_(dbo_man)
 {
-
     setWindowTitle("Configure Meta Variables");
     setWindowFlags(Qt::Window | Qt::WindowTitleHint | Qt::CustomizeWindowHint);
 
@@ -56,19 +56,22 @@ MetaVariableConfigurationDialog::MetaVariableConfigurationDialog(DBContentManage
 
     // buttons
 
-    QHBoxLayout* button_layout = new QHBoxLayout();
+    if (COMPASS::instance().expertMode())
+    {
+        QHBoxLayout* button_layout = new QHBoxLayout();
 
-    QPushButton* add_all_metavar_button = new QPushButton("Add All");
-    connect(add_all_metavar_button, &QPushButton::clicked,
-            this, &MetaVariableConfigurationDialog::addAllMetaVariablesSlot);
-    button_layout->addWidget(add_all_metavar_button);
+        QPushButton* add_all_metavar_button = new QPushButton("Add All");
+        connect(add_all_metavar_button, &QPushButton::clicked,
+                this, &MetaVariableConfigurationDialog::addAllMetaVariablesSlot);
+        button_layout->addWidget(add_all_metavar_button);
 
-    main_layout->addLayout(button_layout);
+        main_layout->addLayout(button_layout);
 
-    QFrame* line = new QFrame();
-    line->setFrameShape(QFrame::HLine);
-    line->setFrameShadow(QFrame::Sunken);
-    main_layout->addWidget(line);
+        QFrame* line = new QFrame();
+        line->setFrameShape(QFrame::HLine);
+        line->setFrameShadow(QFrame::Sunken);
+        main_layout->addWidget(line);
+    }
 
     // final buttons
 

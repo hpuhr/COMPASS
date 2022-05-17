@@ -99,10 +99,7 @@ void VariableSelectionWidget::setReadOnly(bool read_only)
 {
     assert (sel_button_);
 
-    if (read_only)
-        sel_button_->hide();
-    else
-        sel_button_->show();
+    sel_button_->setDisabled(read_only);
 }
 
 void VariableSelectionWidget::updateMenuEntries()
