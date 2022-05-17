@@ -1,140 +1,143 @@
 \section{Building from Source Code}
-Currently, COMPASS can be installed as source code and compiled by the user. Any recent Linux installation with a C++11 capable compiler should work without issues. Regarding software version, no particularly new features were used, so older versions than the verified ones should also work. \\
 
-The following software has to be installed on the workstation:
+%TODO_V7 Comment on building from source referring to the git repository
 
-\begin{table}[H]
-  \center
-  \begin{tabular}{ | l | l | l |}
-    \hline
-    \textbf{Package} & \textbf{Description} & \textbf{Verified version} \\ \hline
-    g++ & C++11 capable C++ compiler & 9.0.0 \\ \hline
-    cmake & CMake build tool & 3.9.1 \\ \hline
-    qt5-default & Qt5 development package & 5.9.9 \\ \hline
-    libboost-dev & Boost development libraries & 1.62.0.1 \\ \hline
-    mysql++-dev & MySQL library bindings & 3.2.2 \\ \hline
-    libmysqlclient-dev & MySQL development library & 1.0.2 \\ \hline
-    libsqlite3-dev & Sqlite3 development files & 3.2.2 \\ \hline
-    libgdal-dev & Geospatial data abstraction library & 2.2.1 \\ \hline
-    log4cpp5-dev & Logging libary & 1.1.1 \\ \hline
-    libarchive-dev & Archive libary & 3.2.2 \\ \hline
-    libeigen3-dev & Linear algebra libary & 3.3.4 \\ \hline
-    libtbb-dev & Intel Thread Building Blocks & 2019~U8-1 \\ \hline
-    NemaTode & Cross platform C++ 11 NMEA Parser \& GPS Framework & \\ \hline
-    doxygen & Documentation generation & 1.8.13 \\ 
-    \hline
-  \end{tabular}
-  \caption{Required software/libraries}
-\end{table}
+% Currently, COMPASS can be installed as source code and compiled by the user. Any recent Linux installation with a C++11 capable compiler should work without issues. Regarding software version, no particularly new features were used, so older versions than the verified ones should also work. \\
 
-To build the source code with the ASTERIX decoder jASTERIX, follow the instruction in \url{https://github.com/hpuhr/jASTERIX} (Installation with Building). \\
+% The following software has to be installed on the workstation:
 
-To install the COMPASS source code, either download the latest released version from \\ \url{https://github.com/hpuhr/COMPASS/releases} \\
-or use the following command (git required) to clone the current repository:
+% \begin{table}[H]
+%   \center
+%   \begin{tabular}{ | l | l | l |}
+%     \hline
+%     \textbf{Package} & \textbf{Description} & \textbf{Verified version} \\ \hline
+%     g++ & C++11 capable C++ compiler & 9.0.0 \\ \hline
+%     cmake & CMake build tool & 3.9.1 \\ \hline
+%     qt5-default & Qt5 development package & 5.9.9 \\ \hline
+%     libboost-dev & Boost development libraries & 1.62.0.1 \\ \hline
+%     mysql++-dev & MySQL library bindings & 3.2.2 \\ \hline
+%     libmysqlclient-dev & MySQL development library & 1.0.2 \\ \hline
+%     libsqlite3-dev & Sqlite3 development files & 3.2.2 \\ \hline
+%     libgdal-dev & Geospatial data abstraction library & 2.2.1 \\ \hline
+%     log4cpp5-dev & Logging libary & 1.1.1 \\ \hline
+%     libarchive-dev & Archive libary & 3.2.2 \\ \hline
+%     libeigen3-dev & Linear algebra libary & 3.3.4 \\ \hline
+%     libtbb-dev & Intel Thread Building Blocks & 2019~U8-1 \\ \hline
+%     NemaTode & Cross platform C++ 11 NMEA Parser \& GPS Framework & \\ \hline
+%     doxygen & Documentation generation & 1.8.13 \\ 
+%     \hline
+%   \end{tabular}
+%   \caption{Required software/libraries}
+% \end{table}
 
-\begin{lstlisting}
-git clone https://github.com/hpuhr/COMPASS.git
-\end{lstlisting}
+% To build the source code with the ASTERIX decoder jASTERIX, follow the instruction in \url{https://github.com/hpuhr/jASTERIX} (Installation with Building). \\
 
-Enter the COMPASS source folder, create a subfolder 'build', enter it and execute cmake to create a Makefile:
+% To install the COMPASS source code, either download the latest released version from \\ \url{https://github.com/hpuhr/COMPASS/releases} \\
+% or use the following command (git required) to clone the current repository:
 
-\begin{lstlisting}
-cmake ..
-\end{lstlisting}
+% \begin{lstlisting}
+% git clone https://github.com/hpuhr/COMPASS.git
+% \end{lstlisting}
 
-The output should look like this:
-\begin{lstlisting}
-sk@golem:~/test/COMPASS$ cmake .
-  Path: /home/sk/test/COMPASS
--- The C compiler identification is GNU 7.2.0
--- The CXX compiler identification is GNU 7.2.0
--- Check for working C compiler: /usr/bin/cc
--- Check for working C compiler: /usr/bin/cc -- works
--- Detecting C compiler ABI info
--- Detecting C compiler ABI info - done
--- Detecting C compile features
--- Detecting C compile features - done
--- Check for working CXX compiler: /usr/bin/c++
--- Check for working CXX compiler: /usr/bin/c++ -- works
--- Detecting CXX compiler ABI info
--- Detecting CXX compiler ABI info - done
--- Detecting CXX compile features
--- Detecting CXX compile features - done
-  System: Linux-4.13.0-16-generic
-  Install Path: /home/sk/test/COMPASS/dist
-  Platform: Linux
--- Looking for pthread.h
--- Looking for pthread.h - found
--- Looking for pthread_create
--- Looking for pthread_create - not found
--- Looking for pthread_create in pthreads
--- Looking for pthread_create in pthreads - not found
--- Looking for pthread_create in pthread
--- Looking for pthread_create in pthread - found
--- Found Threads: TRUE  
--- Boost version: 1.62.0
--- Found the following Boost libraries:
---   regex
---   system
---   thread
---   chrono
---   date_time
---   atomic
-  Boost_INCLUDE_DIR: /usr/include
-  Boost_LIBRARY_DIR: 
-  CMAKE_MODULE_PATH: /home/sk/test/COMPASS/cmake_modules
-...
--- Configuring done
--- Generating done
--- Build files have been written to: /home/sk/test/COMPASS
-\end{lstlisting}
+% Enter the COMPASS source folder, create a subfolder 'build', enter it and execute cmake to create a Makefile:
 
-Then, compile the source by executing:
+% \begin{lstlisting}
+% cmake ..
+% \end{lstlisting}
 
-\begin{lstlisting}
-make
-\end{lstlisting}
+% The output should look like this:
+% \begin{lstlisting}
+% sk@golem:~/test/COMPASS$ cmake .
+%   Path: /home/sk/test/COMPASS
+% -- The C compiler identification is GNU 7.2.0
+% -- The CXX compiler identification is GNU 7.2.0
+% -- Check for working C compiler: /usr/bin/cc
+% -- Check for working C compiler: /usr/bin/cc -- works
+% -- Detecting C compiler ABI info
+% -- Detecting C compiler ABI info - done
+% -- Detecting C compile features
+% -- Detecting C compile features - done
+% -- Check for working CXX compiler: /usr/bin/c++
+% -- Check for working CXX compiler: /usr/bin/c++ -- works
+% -- Detecting CXX compiler ABI info
+% -- Detecting CXX compiler ABI info - done
+% -- Detecting CXX compile features
+% -- Detecting CXX compile features - done
+%   System: Linux-4.13.0-16-generic
+%   Install Path: /home/sk/test/COMPASS/dist
+%   Platform: Linux
+% -- Looking for pthread.h
+% -- Looking for pthread.h - found
+% -- Looking for pthread_create
+% -- Looking for pthread_create - not found
+% -- Looking for pthread_create in pthreads
+% -- Looking for pthread_create in pthreads - not found
+% -- Looking for pthread_create in pthread
+% -- Looking for pthread_create in pthread - found
+% -- Found Threads: TRUE  
+% -- Boost version: 1.62.0
+% -- Found the following Boost libraries:
+% --   regex
+% --   system
+% --   thread
+% --   chrono
+% --   date_time
+% --   atomic
+%   Boost_INCLUDE_DIR: /usr/include
+%   Boost_LIBRARY_DIR: 
+%   CMAKE_MODULE_PATH: /home/sk/test/COMPASS/cmake_modules
+% ...
+% -- Configuring done
+% -- Generating done
+% -- Build files have been written to: /home/sk/test/COMPASS
+% \end{lstlisting}
 
-The output should look like this:
+% Then, compile the source by executing:
 
-\begin{lstlisting}
-Scanning dependencies of target compass_autogen
-[  1%] Automatic MOC for target compass
-Generating MOC predefs moc_predefs.h
-Generating MOC source 2MJGWJB4P3/moc_mainwindow.cpp
-...
-Generating MOC source 3JYSCEOBDA/moc_viewmanagerwidget.cpp
-Generating MOC compilation mocs_compilation.cpp
-[  1%] Built target compass_autogen
-Scanning dependencies of target compass
-[  2%] Building CXX object CMakeFiles/compass.dir/src/compass.cpp.o
-[  2%] Building CXX object CMakeFiles/compass.dir/src/buffer/arraylist.cpp.o
-...
-[ 93%] Linking CXX shared library dist/lib/libcompass.so
-[ 93%] Built target compass
-Scanning dependencies of target compass_client_autogen
-[ 94%] Automatic MOC for target compass_client
-Generating MOC predefs moc_predefs.h
-Generating MOC source 2MJGWJB4P3/moc_mainwindow.cpp
-...
-Generating MOC source 3JYSCEOBDA/moc_viewmanagerwidget.cpp
-Generating MOC compilation mocs_compilation.cpp
-[ 94%] Built target compass_client_autogen
-Scanning dependencies of target compass_client
-...
-[100%] Linking CXX executable compass_client
-[100%] Built target compass_client
-\end{lstlisting}
+% \begin{lstlisting}
+% make
+% \end{lstlisting}
 
-To install the COMPASS client, execute the following command in the build folder:
+% The output should look like this:
 
-\begin{lstlisting}
-sudo make install
-\end{lstlisting}
+% \begin{lstlisting}
+% Scanning dependencies of target compass_autogen
+% [  1%] Automatic MOC for target compass
+% Generating MOC predefs moc_predefs.h
+% Generating MOC source 2MJGWJB4P3/moc_mainwindow.cpp
+% ...
+% Generating MOC source 3JYSCEOBDA/moc_viewmanagerwidget.cpp
+% Generating MOC compilation mocs_compilation.cpp
+% [  1%] Built target compass_autogen
+% Scanning dependencies of target compass
+% [  2%] Building CXX object CMakeFiles/compass.dir/src/compass.cpp.o
+% [  2%] Building CXX object CMakeFiles/compass.dir/src/buffer/arraylist.cpp.o
+% ...
+% [ 93%] Linking CXX shared library dist/lib/libcompass.so
+% [ 93%] Built target compass
+% Scanning dependencies of target compass_client_autogen
+% [ 94%] Automatic MOC for target compass_client
+% Generating MOC predefs moc_predefs.h
+% Generating MOC source 2MJGWJB4P3/moc_mainwindow.cpp
+% ...
+% Generating MOC source 3JYSCEOBDA/moc_viewmanagerwidget.cpp
+% Generating MOC compilation mocs_compilation.cpp
+% [ 94%] Built target compass_client_autogen
+% Scanning dependencies of target compass_client
+% ...
+% [100%] Linking CXX executable compass_client
+% [100%] Built target compass_client
+% \end{lstlisting}
 
-This will install binary and a data folder to your system directories, commonly in '/usr/local/bin/', '/usr/local/lib/' and '/usr/local/compass/' (or similiar, depending on you Linux distribution.
+% To install the COMPASS client, execute the following command in the build folder:
 
-To start the COMPASS client run:
-\begin{lstlisting}
-compass_client
-\end{lstlisting}  
+% \begin{lstlisting}
+% sudo make install
+% \end{lstlisting}
+
+% This will install binary and a data folder to your system directories, commonly in '/usr/local/bin/', '/usr/local/lib/' and '/usr/local/compass/' (or similiar, depending on you Linux distribution.
+
+% To start the COMPASS client run:
+% \begin{lstlisting}
+% compass_client
+% \end{lstlisting}  
