@@ -33,6 +33,7 @@ public:
     std::string countsStr();
     bool hasNumInserted() const;
     bool hasNumInserted(const std::string& db_content) const;
+    bool hasNumInserted(unsigned int line_id) const;
     const std::map<std::string, std::map<unsigned int, unsigned int>>& numInsertedMap() const;
     std::map<unsigned int, unsigned int> numInsertedLinesMap() const;
     std::map<std::string, unsigned int> numInsertedSummedLinesMap() const;
@@ -40,6 +41,7 @@ public:
     void addNumInserted(const std::string& db_content, unsigned int line_id, unsigned int num);
 
     void addNumLoaded(const std::string& db_content, unsigned int line_id, unsigned int num);
+    unsigned int numLoaded (unsigned int line_id);
     unsigned int numLoaded (const std::string& db_content);
     unsigned int numLoaded (const std::string& db_content, unsigned int line_id);
     void clearNumLoaded();

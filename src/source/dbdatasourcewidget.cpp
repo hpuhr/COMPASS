@@ -190,8 +190,10 @@ void DBDataSourceWidget::updateWidgets()
     load_check_->setText(src_.name().c_str());
     load_check_->setChecked(src_.loadingWanted());
 
-    bool net_lines_shown = COMPASS::instance().appMode() == AppMode::LivePaused
-            || COMPASS::instance().appMode() == AppMode::LiveRunning;
+    AppMode app_mode = COMPASS::instance().appMode();
+
+    bool net_lines_shown = app_mode == AppMode::LivePaused
+            || app_mode == AppMode::LiveRunning;
 
     if (net_lines_shown)
     {
@@ -201,13 +203,31 @@ void DBDataSourceWidget::updateWidgets()
 
         string line_str;
 
-        for (unsigned int cnt=0; cnt < 4; ++cnt)
+        bool hidden;
+        bool disabled;
+
+        for (unsigned int line_cnt=0; line_cnt < 4; ++line_cnt)
         {
-            line_str = "L"+to_string(cnt+1);
+            line_str = "L"+to_string(line_cnt+1);
 
             assert (line_buttons_.count(line_str));
 
-            line_buttons_.at(line_str)->setHidden(!net_lines.at(src_.id()).count(line_str)); // hide if no data
+            hidden = !net_lines.at(src_.id()).count(line_str); // hide if no data
+
+            line_buttons_.at(line_str)->setHidden(hidden);
+
+            if (!hidden)
+            {
+                if (app_mode == AppMode::LiveRunning)
+                    disabled = !ds_man_.dbDataSource(src_.id()).numLoaded(line_cnt); // nothing loaded
+                else // AppMode::LivePaused
+                    disabled = !ds_man_.dbDataSource(src_.id()).hasNumInserted(line_cnt); // nothing inserted
+
+                line_buttons_.at(line_str)->setDisabled(disabled);
+
+                if (disabled)
+                    line_buttons_.at(line_str)->setChecked(false);
+            }
         }
 
         string tooltip;
