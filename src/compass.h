@@ -117,6 +117,8 @@ public:
 
     bool expertMode() const;
     void expertMode(bool expert_mode);
+
+    bool isShutDown() const;
 };
 
 #endif /* COMPASS_H_ */

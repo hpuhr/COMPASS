@@ -358,6 +358,8 @@ void COMPASS::shutdown()
         return;
     }
 
+    shut_down_ = true;
+
     assert(task_manager_);
     task_manager_->shutdown();
     task_manager_ = nullptr;
@@ -396,8 +398,6 @@ void COMPASS::shutdown()
 
     //main_window_ = nullptr;
 
-    shut_down_ = true;
-
     loginf << "COMPASS: shutdown: end";
 }
 
@@ -408,6 +408,11 @@ MainWindow& COMPASS::mainWindow()
 
     assert(main_window_);
     return *main_window_;
+}
+
+bool COMPASS::isShutDown() const
+{
+    return shut_down_;
 }
 
 bool COMPASS::expertMode() const
