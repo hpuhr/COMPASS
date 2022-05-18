@@ -202,7 +202,7 @@ void ASTERIXDecodeJob::doFileDecoding()
 
     auto callback = [this](std::unique_ptr<nlohmann::json> data, size_t num_frames,
             size_t num_records, size_t numErrors) {
-        this->jasterix_callback(std::move(data), this->file_line_id_, num_frames, num_records, numErrors);
+        this->fileJasterixCallback(std::move(data), this->file_line_id_, num_frames, num_records, numErrors);
     };
 
     try
@@ -328,7 +328,7 @@ void ASTERIXDecodeJob::doUDPStreamDecoding()
 
                     auto callback = [this, line_id](std::unique_ptr<nlohmann::json> data, size_t num_frames,
                             size_t num_records, size_t numErrors) {
-                        this->jasterix_callback(std::move(data), line_id, num_frames, num_records, numErrors);
+                        this->netJasterixCallback(std::move(data), line_id, num_frames, num_records, numErrors);
                     };
 
                     task_.jASTERIX()->decodeData((char*) receive_buffers_copy_.at(line_id)->data(),
@@ -338,6 +338,17 @@ void ASTERIXDecodeJob::doUDPStreamDecoding()
                 loginf << "ASTERIXDecodeJob: doUDPStreamDecoding: done";
 
                 receive_copy_buffer_sizes_.clear();
+
+                loginf << "ASTERIXDecodeJob: doUDPStreamDecoding: emitting signal";
+                emit decodedASTERIXSignal();
+
+                while (!obsolete_ && extracted_data_)  // block decoder until extracted records have been moved out
+                    QThread::msleep(1);
+
+                if (!obsolete_)
+                    assert(!extracted_data_);
+                else
+                    extracted_data_ = nullptr;
             }
         }
     }
@@ -384,7 +395,7 @@ void ASTERIXDecodeJob::storeReceivedData (unsigned int line, const char* data, u
     receive_semaphore_.post();
 }
 
-void ASTERIXDecodeJob::jasterix_callback(std::unique_ptr<nlohmann::json> data, unsigned int line_id, size_t num_frames,
+void ASTERIXDecodeJob::fileJasterixCallback(std::unique_ptr<nlohmann::json> data, unsigned int line_id, size_t num_frames,
                                          size_t num_records, size_t num_errors)
 {
     if (obsolete_)
@@ -392,12 +403,12 @@ void ASTERIXDecodeJob::jasterix_callback(std::unique_ptr<nlohmann::json> data, u
 
     if (error_)
     {
-        loginf << "ASTERIXDecodeJob: jasterix_callback: errors state";
+        loginf << "ASTERIXDecodeJob: fileJasterixCallback: errors state";
         return;
     }
 
-    //loginf << "ASTERIXDecodeJob: jasterix_callback: data '" << data->dump(2) << "'";
-    //loginf << "ASTERIXDecodeJob: jasterix_callback: framing '" << framing_ << "'";
+    //loginf << "ASTERIXDecodeJob: fileJasterixCallback: data '" << data->dump(2) << "'";
+    loginf << "ASTERIXDecodeJob: fileJasterixCallback: line_id " << line_id << " num_records " << num_records;
 
     assert(!extracted_data_);
     extracted_data_ = std::move(data);
@@ -409,7 +420,7 @@ void ASTERIXDecodeJob::jasterix_callback(std::unique_ptr<nlohmann::json> data, u
     num_errors_ = num_errors;
 
     if (num_errors_)
-        logwrn << "ASTERIXDecodeJob: jasterix_callback: num errors " << num_errors_;
+        logwrn << "ASTERIXDecodeJob: fileJasterixCallback: num errors " << num_errors_;
 
     unsigned int category{0};
 
@@ -436,7 +447,7 @@ void ASTERIXDecodeJob::jasterix_callback(std::unique_ptr<nlohmann::json> data, u
             if (!data_block.contains("category"))
             {
                 logwrn
-                        << "ASTERIXDecodeJob: jasterix_callback: data block without asterix category";
+                        << "ASTERIXDecodeJob: fileJasterixCallback: data block without asterix category";
                 continue;
             }
 
@@ -450,7 +461,7 @@ void ASTERIXDecodeJob::jasterix_callback(std::unique_ptr<nlohmann::json> data, u
             if (category == 1)
                 checkCAT001SacSics(data_block);
 
-            logdbg << "ASTERIXDecodeJob: jasterix_callback: applying JSON function without framing";
+            logdbg << "ASTERIXDecodeJob: fileJasterixCallback: applying JSON function without framing";
             JSON::applyFunctionToValues(data_block, keys, keys.begin(), process_lambda, false);
             JSON::applyFunctionToValues(data_block, keys, keys.begin(), count_lambda, false);
         }
@@ -482,7 +493,7 @@ void ASTERIXDecodeJob::jasterix_callback(std::unique_ptr<nlohmann::json> data, u
             {
                 if (!data_block.contains("category"))  // data block with errors
                 {
-                    logwrn << "ASTERIXDecodeJob: jasterix_callback: data block without asterix "
+                    logwrn << "ASTERIXDecodeJob: fileJasterixCallback: data block without asterix "
                               "category";
                     continue;
                 }
@@ -499,7 +510,7 @@ void ASTERIXDecodeJob::jasterix_callback(std::unique_ptr<nlohmann::json> data, u
     }
 
     if (decode_file_ && file_size_)
-        logdbg << "ASTERIXDecodeJob: jasterix_callback: max_index " << max_index_
+        logdbg << "ASTERIXDecodeJob: fileJasterixCallback: max_index " << max_index_
                << " perc " <<  String::percentToString((float) max_index_/(float) file_size_);
 
 //    while (!obsolete_ && pause_)  // block decoder until unpaused
@@ -514,6 +525,91 @@ void ASTERIXDecodeJob::jasterix_callback(std::unique_ptr<nlohmann::json> data, u
         assert(!extracted_data_);
     else
         extracted_data_ = nullptr;
+}
+
+void ASTERIXDecodeJob::netJasterixCallback(std::unique_ptr<nlohmann::json> data, unsigned int line_id, size_t num_frames,
+                                         size_t num_records, size_t num_errors)
+{
+    if (obsolete_)
+        return;
+
+    if (error_)
+    {
+        loginf << "ASTERIXDecodeJob: netJasterixCallback: errors state";
+        return;
+    }
+
+    //loginf << "ASTERIXDecodeJob: fileJasterixCallback: data '" << data->dump(2) << "'";
+    loginf << "ASTERIXDecodeJob: netJasterixCallback: line_id " << line_id << " num_records " << num_records;
+
+    std::unique_ptr<nlohmann::json> tmp_extracted_data = std::move(data);
+
+    num_frames_ = num_frames;
+    num_records_ = num_records;
+    num_errors_ = num_errors;
+
+    if (num_errors_)
+        logwrn << "ASTERIXDecodeJob: netJasterixCallback: num errors " << num_errors_;
+
+    unsigned int category{0};
+
+    auto count_lambda = [this, &category](nlohmann::json& record) {
+        countRecord(category, record);
+    };
+
+    auto process_lambda = [this, line_id, &category](nlohmann::json& record) {
+        record["line_id"] = line_id;
+        post_process_.postProcess(category, record);
+    };
+
+    max_index_ = 0;
+
+    assert (framing_ == "");
+    assert(tmp_extracted_data->contains("data_blocks"));
+    assert(tmp_extracted_data->at("data_blocks").is_array());
+
+    std::vector<std::string> keys{"content", "records"};
+
+    for (json& data_block : tmp_extracted_data->at("data_blocks"))
+    {
+        if (!data_block.contains("category"))
+        {
+            logwrn
+                    << "ASTERIXDecodeJob: netJasterixCallback: data block without asterix category";
+            continue;
+        }
+
+        category = data_block.at("category");
+
+        assert (data_block.contains("content"));
+        assert(data_block.at("content").is_object());
+        assert (data_block.at("content").contains("index"));
+        max_index_ = data_block.at("content").at("index");
+
+        if (category == 1)
+            checkCAT001SacSics(data_block);
+
+        logdbg << "ASTERIXDecodeJob: netJasterixCallback: applying JSON function without framing";
+        JSON::applyFunctionToValues(data_block, keys, keys.begin(), process_lambda, false);
+        JSON::applyFunctionToValues(data_block, keys, keys.begin(), count_lambda, false);
+    }
+
+    //    while (!obsolete_ && pause_)  // block decoder until unpaused
+    //        QThread::msleep(1);
+
+    if (extracted_data_)
+    {
+        // add to existing data
+        assert(extracted_data_->is_object());
+        assert(extracted_data_->contains("data_blocks"));
+        assert(extracted_data_->at("data_blocks").is_array());
+        extracted_data_->at("data_blocks").insert(extracted_data_->at("data_blocks").end(),
+                                                  tmp_extracted_data->at("data_blocks").begin(),
+                                                  tmp_extracted_data->at("data_blocks").end());
+    }
+    else
+        extracted_data_ = std::move(tmp_extracted_data);
+
 }
 
 size_t ASTERIXDecodeJob::numFrames() const { return num_frames_; }

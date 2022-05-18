@@ -893,17 +893,27 @@ void ASTERIXImportTask::addDecodedASTERIXSlot()
             stop();
             return;
         }
-    }
 
-    // remove if break here for testing
-    if (import_file_ && maxLoadReached())
-    {
-        logdbg << "ASTERIXImportTask: addDecodedASTERIXSlot: returning since max load reached";
-        return;
+        if (maxLoadReached())
+        {
+            logdbg << "ASTERIXImportTask: addDecodedASTERIXSlot: returning since max load reached";
+            return;
+
+        }
     }
 
     if (stopped_)
         return;
+
+    if (num_packets_in_processing_ > 10)
+    {
+        logwrn << "ASTERIXImportTask: addDecodedASTERIXSlot: overload detected, packets in processing "
+               << num_packets_in_processing_ << " skipping data";
+
+        std::unique_ptr<nlohmann::json> extracted_data {decode_job_->extractedData()};
+
+        return;
+    }
 
     logdbg << "ASTERIXImportTask: addDecodedASTERIXSlot: processing data";
 
