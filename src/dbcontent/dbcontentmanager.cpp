@@ -111,6 +111,8 @@ DBContentManager::DBContentManager(const std::string& class_id, const std::strin
 
 DBContentManager::~DBContentManager()
 {
+    loginf << "DBContentManager: dtor";
+
     data_.clear();
 
     for (auto it : dbcontent_)
@@ -121,6 +123,7 @@ DBContentManager::~DBContentManager()
 
     widget_ = nullptr;
 
+    loginf << "DBContentManager: dtor: done";
 }
 
 dbContent::LabelGenerator& DBContentManager::labelGenerator()
@@ -764,6 +767,8 @@ void DBContentManager::finishInserting()
     boost::posix_time::ptime start_time = boost::posix_time::microsec_clock::local_time();
     assert (existsMetaVariable(DBContent::meta_var_tod_.name()));
 
+    bool had_data = data_.size();
+
     if (COMPASS::instance().appMode() == AppMode::LiveRunning) // do tod cleanup
     {
         addInsertedDataToChache();
@@ -778,6 +783,8 @@ void DBContentManager::finishInserting()
 
         if (data_.size())
             emit loadedDataSignal(data_, true);
+        else if (had_data)
+            COMPASS::instance().viewManager().clearDataInViews();
     }
 
     COMPASS::instance().dataSourceManager().updateWidget();
