@@ -300,7 +300,7 @@
                     "dimension": "Speed",
                     "is_key": false,
                     "name": "Ground Speed",
-                    "representation_str": "STANDARD",
+                    "representation_str": "FLOAT_PREC1",
                     "short_name": "GSpd",
                     "unit": "Knots"
                 }

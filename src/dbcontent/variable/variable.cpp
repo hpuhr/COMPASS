@@ -42,7 +42,11 @@ std::map<Variable::Representation, std::string> Variable::representation_2_strin
     {Variable::Representation::DEC_TO_HEX, "DEC_TO_HEX"},
     {Variable::Representation::FEET_TO_FLIGHTLEVEL, "FEET_TO_FLIGHTLEVEL"},
     {Variable::Representation::DATA_SRC_NAME, "DATA_SRC_NAME"},
-    {Variable::Representation::CLIMB_DESCENT, "CLIMB_DESCENT"}};
+    {Variable::Representation::CLIMB_DESCENT, "CLIMB_DESCENT"},
+    {Variable::Representation::FLOAT_PREC0, "FLOAT_PREC0"},
+    {Variable::Representation::FLOAT_PREC1, "FLOAT_PREC1"},
+    {Variable::Representation::FLOAT_PREC2, "FLOAT_PREC2"},
+    {Variable::Representation::FLOAT_PREC4, "FLOAT_PREC4"}};
 
 std::map<std::string, Variable::Representation> Variable::string_2_representation_{
     {"STANDARD", Variable::Representation::STANDARD},
@@ -51,7 +55,11 @@ std::map<std::string, Variable::Representation> Variable::string_2_representatio
     {"DEC_TO_HEX", Variable::Representation::DEC_TO_HEX},
     {"FEET_TO_FLIGHTLEVEL", Variable::Representation::FEET_TO_FLIGHTLEVEL},
     {"DATA_SRC_NAME", Variable::Representation::DATA_SRC_NAME},
-    {"CLIMB_DESCENT", Variable::Representation::CLIMB_DESCENT}};
+    {"CLIMB_DESCENT", Variable::Representation::CLIMB_DESCENT},
+    {"FLOAT_PREC0", Variable::Representation::FLOAT_PREC0},
+    {"FLOAT_PREC1", Variable::Representation::FLOAT_PREC1},
+    {"FLOAT_PREC2", Variable::Representation::FLOAT_PREC2},
+    {"FLOAT_PREC4", Variable::Representation::FLOAT_PREC4}};
 
 Variable::Representation Variable::stringToRepresentation(
     const std::string& representation_str)

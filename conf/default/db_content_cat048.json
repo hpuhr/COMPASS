@@ -729,7 +729,7 @@
                     "dimension": "Speed",
                     "is_key": false,
                     "name": "Track Groundspeed",
-                    "representation_str": "STANDARD",
+                    "representation_str": "FLOAT_PREC1",
                     "short_name": "GSpd",
                     "unit": "Knots"
                 }

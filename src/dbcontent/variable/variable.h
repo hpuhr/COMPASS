@@ -47,7 +47,11 @@ class Variable : public QObject, public Property, public Configurable
         DEC_TO_HEX,
         FEET_TO_FLIGHTLEVEL,
         DATA_SRC_NAME,
-        CLIMB_DESCENT
+        CLIMB_DESCENT,
+        FLOAT_PREC0,
+        FLOAT_PREC1,
+        FLOAT_PREC2,
+        FLOAT_PREC4
     };
 
     static Representation stringToRepresentation(const std::string& representation_str);
@@ -149,6 +153,22 @@ class Variable : public QObject, public Property, public Configurable
                     return "DSC";
                 else
                     return "UDF";
+            }
+            else if (representation_ == Variable::Representation::FLOAT_PREC0)
+            {
+                out << std::fixed << std::setprecision(0)<< value;
+            }
+            else if (representation_ == Variable::Representation::FLOAT_PREC1)
+            {
+                out << std::fixed << std::setprecision(1)<< value;
+            }
+            else if (representation_ == Variable::Representation::FLOAT_PREC2)
+            {
+                out << std::fixed << std::setprecision(2)<< value;
+            }
+            else if (representation_ == Variable::Representation::FLOAT_PREC4)
+            {
+                out << std::fixed << std::setprecision(4)<< value;
             }
             else
             {

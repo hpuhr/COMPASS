@@ -85,7 +85,8 @@
                             "2": "Aircraft Address",
                             "3": "Mode 3/A Code",
                             "4": "Mode C Code",
-                            "5": "DS ID"
+                            "5": "DS ID",
+                            "6": "Ground Speed"
                         },
                         "CAT021": {
                             "0": "Best available Identification",
@@ -112,7 +113,7 @@
                             "3": "Mode 3/A Code",
                             "4": "Mode C Code LM",
                             "5": "DS ID",
-                            "6": "Vx",
+                            "6": "Ground Speed",
                             "7": "MOM Vertical Rate",
                             "8": "Wake Turbulence Category FPL"
                         },
