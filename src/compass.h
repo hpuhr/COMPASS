@@ -47,6 +47,8 @@ class COMPASS : public QObject, public Configurable, public Singleton
     Q_OBJECT
 
 signals:
+    void databaseOpenedSignal();
+    void databaseClosedSignal();
     void appModeSwitchSignal (AppMode app_mode);
 
 public:

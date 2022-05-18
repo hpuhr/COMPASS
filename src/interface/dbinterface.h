@@ -65,9 +65,9 @@ class DBInterface : public QObject, public Configurable
     Q_OBJECT
 
 signals:
-    void databaseOpenedSignal();
+    //void databaseOpenedSignal();
     void databaseContentChangedSignal();
-    void databaseClosedSignal();
+    //void databaseClosedSignal();
 
 public:
     DBInterface(std::string class_id, std::string instance_id, COMPASS* compass);

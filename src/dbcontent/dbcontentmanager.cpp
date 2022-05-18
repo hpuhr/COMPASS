@@ -533,6 +533,8 @@ void DBContentManager::databaseOpenedSlot()
 
 void DBContentManager::databaseClosedSlot()
 {
+    loginf << "DBContentManager: databaseClosedSlot";
+
     max_rec_num_ = 0;
     has_max_rec_num_ = false;
 

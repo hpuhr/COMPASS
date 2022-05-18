@@ -151,7 +151,7 @@ void DBInterface::openDBFile(const std::string& filename, bool overwrite)
     if (!existsTargetsTable())
         createTargetsTable();
 
-    emit databaseOpenedSignal();
+    //emit databaseOpenedSignal();
 
     QApplication::restoreOverrideCursor();
 

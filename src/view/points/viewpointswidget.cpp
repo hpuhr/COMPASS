@@ -145,9 +145,9 @@ ViewPointsWidget::ViewPointsWidget(ViewManager& view_manager)
     }
 
 
-    QObject::connect(&COMPASS::instance().interface(), &DBInterface::databaseOpenedSignal,
+    QObject::connect(&COMPASS::instance(), &COMPASS::databaseOpenedSignal,
                      this, &ViewPointsWidget::databaseOpenedSlot);
-    QObject::connect(&COMPASS::instance().interface(), &DBInterface::databaseClosedSignal,
+    QObject::connect(&COMPASS::instance(), &COMPASS::databaseClosedSignal,
                      this, &ViewPointsWidget::databaseClosedSlot);
 }
 

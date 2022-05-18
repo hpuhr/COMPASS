@@ -66,29 +66,29 @@ COMPASS::COMPASS() : Configurable("COMPASS", "COMPASS0", 0, "compass.json")
 
     // database opending
 
-    QObject::connect(db_interface_.get(), &DBInterface::databaseOpenedSignal,
+    QObject::connect(this, &COMPASS::databaseOpenedSignal,
                      dbcontent_manager_.get(), &DBContentManager::databaseOpenedSlot);
-    QObject::connect(db_interface_.get(), &DBInterface::databaseClosedSignal,
+    QObject::connect(this, &COMPASS::databaseClosedSignal,
                      dbcontent_manager_.get(), &DBContentManager::databaseClosedSlot);
 
-    QObject::connect(db_interface_.get(), &DBInterface::databaseOpenedSignal,
+    QObject::connect(this, &COMPASS::databaseOpenedSignal,
                      ds_manager_.get(), &DataSourceManager::databaseOpenedSlot);
-    QObject::connect(db_interface_.get(), &DBInterface::databaseClosedSignal,
+    QObject::connect(this, &COMPASS::databaseClosedSignal,
                      ds_manager_.get(), &DataSourceManager::databaseClosedSlot);
 
-    QObject::connect(db_interface_.get(), &DBInterface::databaseOpenedSignal,
+    QObject::connect(this, &COMPASS::databaseOpenedSignal,
                      filter_manager_.get(), &FilterManager::databaseOpenedSlot);
-    QObject::connect(db_interface_.get(), &DBInterface::databaseClosedSignal,
+    QObject::connect(this, &COMPASS::databaseClosedSignal,
                      filter_manager_.get(), &FilterManager::databaseClosedSlot);
 
-    QObject::connect(db_interface_.get(), &DBInterface::databaseOpenedSignal,
+    QObject::connect(this, &COMPASS::databaseOpenedSignal,
                      view_manager_.get(), &ViewManager::databaseOpenedSlot);
-    QObject::connect(db_interface_.get(), &DBInterface::databaseClosedSignal,
+    QObject::connect(this, &COMPASS::databaseClosedSignal,
                      view_manager_.get(), &ViewManager::databaseClosedSlot);
 
-    QObject::connect(db_interface_.get(), &DBInterface::databaseOpenedSignal,
+    QObject::connect(this, &COMPASS::databaseOpenedSignal,
                      eval_manager_.get(), &EvaluationManager::databaseOpenedSlot);
-    QObject::connect(db_interface_.get(), &DBInterface::databaseClosedSignal,
+    QObject::connect(this, &COMPASS::databaseClosedSignal,
                      eval_manager_.get(), &EvaluationManager::databaseClosedSlot);
 
     // data exchange
@@ -242,6 +242,8 @@ void COMPASS::openDBFile(const std::string& filename)
 
         db_opened_ = true;
 
+        emit databaseOpenedSignal();
+
     }  catch (std::exception& e)
     {
         QMessageBox m_warning(QMessageBox::Warning, "Opening Database Failed",
@@ -275,6 +277,8 @@ void COMPASS::createNewDBFile(const std::string& filename)
     addDBFileToList(filename);
 
     db_opened_ = true;
+
+    emit databaseOpenedSignal();
 }
 
 void COMPASS::closeDB()
@@ -291,7 +295,7 @@ void COMPASS::closeDB()
 
     db_opened_ = false;
 
-    emit db_interface_->databaseClosedSignal();
+    emit databaseClosedSignal();
 }
 
 
