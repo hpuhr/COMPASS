@@ -316,7 +316,7 @@ void DBContent::load(VariableSet& read_set, bool use_datasrc_filters, bool use_f
 
     DataSourceManager& ds_man = COMPASS::instance().dataSourceManager();
 
-    if (use_datasrc_filters && ds_man.hasDSFilter(name_))
+    if (use_datasrc_filters && (ds_man.hasDSFilter(name_) || ds_man.lineSpecificLoadingRequired(name_)))
     {
         vector<unsigned int> ds_ids_to_load = ds_man.unfilteredDS(name_);
         assert (ds_ids_to_load.size());
