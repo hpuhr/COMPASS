@@ -227,6 +227,8 @@ void DBDataSourceWidget::updateWidgets()
 
                 if (disabled)
                     line_buttons_.at(line_str)->setChecked(false);
+                else
+                    line_buttons_.at(line_str)->setChecked(src_.lineLoadingWanted(line_cnt));
             }
         }
 
@@ -239,13 +241,14 @@ void DBDataSourceWidget::updateWidgets()
 
         string line_str;
 
-        for (unsigned int cnt=0; cnt < 4; ++cnt)
+        for (unsigned int line_cnt=0; line_cnt < 4; ++line_cnt)
         {
-            line_str = "L"+to_string(cnt+1);
+            line_str = "L"+to_string(line_cnt+1);
 
             assert (line_buttons_.count(line_str));
 
-            line_buttons_.at(line_str)->setHidden(!inserted_lines.count(cnt)); // hide if no data
+            line_buttons_.at(line_str)->setChecked(src_.lineLoadingWanted(line_cnt));
+            line_buttons_.at(line_str)->setHidden(!inserted_lines.count(line_cnt)); // hide if no data
         }
     }
 

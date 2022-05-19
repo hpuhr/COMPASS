@@ -23,6 +23,7 @@
 #include "filtermanager.h"
 #include "global.h"
 #include "logger.h"
+#include "util/files.h"
 
 #include <QComboBox>
 #include <QHBoxLayout>
@@ -33,23 +34,42 @@
 #include <QVBoxLayout>
 #include <QCheckBox>
 
+using namespace Utils;
+
 FilterManagerWidget::FilterManagerWidget(FilterManager& filter_manager, QWidget* parent,
                                          Qt::WindowFlags f)
     : QWidget(parent),
       filter_manager_(filter_manager),
-      filter_generator_widget_(nullptr),
-      add_button_(nullptr)
+      filter_generator_widget_(nullptr)
 {
     QFont font_bold;
     font_bold.setBold(true);
 
     QVBoxLayout* layout = new QVBoxLayout();
 
+    // top
+    QHBoxLayout* top_layout = new QHBoxLayout();
+
     // use filters stuff
     filters_check_ = new QCheckBox("Use Filters");
     filters_check_->setChecked(filter_manager_.useFilters());
     connect(filters_check_, &QCheckBox::clicked, this, &FilterManagerWidget::toggleUseFilters);
-    layout->addWidget(filters_check_);
+    top_layout->addWidget(filters_check_);
+
+    top_layout->addStretch();
+
+    QPushButton* edit_button = new QPushButton();
+    edit_button->setIcon(QIcon(Files::getIconFilepath("edit.png").c_str()));
+    edit_button->setFixedSize(UI_ICON_SIZE);
+    edit_button->setFlat(UI_ICON_BUTTON_FLAT);
+    edit_button->setToolTip(tr("Filter Options"));
+    connect (edit_button, &QPushButton::clicked, this, &FilterManagerWidget::editClickedSlot);
+    top_layout->addWidget(edit_button);
+
+    QAction* show_cnt_action = edit_menu_.addAction("Add New Filter");
+    connect(show_cnt_action, &QAction::triggered, this, &FilterManagerWidget::addFilterSlot);
+
+    layout->addLayout(top_layout);
 
     layout->addSpacing(15);
 
@@ -78,13 +98,13 @@ FilterManagerWidget::FilterManagerWidget(FilterManager& filter_manager, QWidget*
 
     layout->addStretch();
 
-    QHBoxLayout* button_layout = new QHBoxLayout();
+//    QHBoxLayout* button_layout = new QHBoxLayout();
 
-    add_button_ = new QPushButton(tr("Add Filter"));
-    connect(add_button_, SIGNAL(clicked()), this, SLOT(addFilterSlot()));
-    button_layout->addWidget(add_button_);
+//    add_button_ = new QPushButton(tr("Add Filter"));
+//    connect(add_button_, SIGNAL(clicked()), this, SLOT(addFilterSlot()));
+//    button_layout->addWidget(add_button_);
 
-    layout->addLayout(button_layout);
+//    layout->addLayout(button_layout);
 
     setLayout(layout);
 
@@ -117,6 +137,10 @@ void FilterManagerWidget::updateUseFilters ()
     filters_check_->setChecked(filter_manager_.useFilters());
 }
 
+void FilterManagerWidget::editClickedSlot()
+{
+    edit_menu_.exec(QCursor::pos());
+}
 
 void FilterManagerWidget::addFilterSlot()
 {

@@ -19,6 +19,7 @@
 #define FILTERMANAGERWIDGET_H
 
 #include <QFrame>
+#include <QMenu>
 
 class FilterManager;
 class FilterGeneratorWidget;
@@ -36,6 +37,8 @@ class FilterManagerWidget : public QWidget
   public slots:
     void toggleUseFilters();
 
+    void editClickedSlot();
+
     void addFilterSlot();
     void updateFiltersSlot();
     void filterWidgetActionSlot(bool result);
@@ -52,13 +55,13 @@ class FilterManagerWidget : public QWidget
   protected:
     FilterManager& filter_manager_;
 
+    QMenu edit_menu_;
+
     FilterGeneratorWidget* filter_generator_widget_;
 
     QCheckBox* filters_check_ {nullptr};
     QVBoxLayout* ds_filter_layout0_ {nullptr};
     QVBoxLayout* ds_filter_layout1_ {nullptr};
-
-    QPushButton* add_button_;
 };
 
 #endif  // FILTERMANAGERWIDGET_H

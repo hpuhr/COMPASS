@@ -603,6 +603,7 @@ void ASTERIXDecodeJob::netJasterixCallback(std::unique_ptr<nlohmann::json> data,
         assert(extracted_data_->is_object());
         assert(extracted_data_->contains("data_blocks"));
         assert(extracted_data_->at("data_blocks").is_array());
+
         extracted_data_->at("data_blocks").insert(extracted_data_->at("data_blocks").end(),
                                                   tmp_extracted_data->at("data_blocks").begin(),
                                                   tmp_extracted_data->at("data_blocks").end());

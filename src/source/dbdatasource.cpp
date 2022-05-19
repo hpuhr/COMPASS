@@ -21,7 +21,7 @@ const Property DBDataSource::counts_column_{"counts", PropertyDataType::STRING};
 
 DBDataSource::DBDataSource()
 {
-
+    counts_ = json::object(); // init
 }
 
 DBDataSource::~DBDataSource()
