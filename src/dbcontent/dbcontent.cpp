@@ -328,6 +328,8 @@ void DBContent::load(VariableSet& read_set, bool use_datasrc_filters, bool use_f
 
         if (ds_man.lineSpecificLoadingRequired(name_)) // ds specific line loading
         {
+            loginf << "DBContent " << name_ << ": load: line specific loading wanted";
+
             assert (hasVariable(DBContent::meta_var_line_id_.name()));
 
             Variable& line_var = variable(DBContent::meta_var_line_id_.name());
@@ -371,8 +373,9 @@ void DBContent::load(VariableSet& read_set, bool use_datasrc_filters, bool use_f
             if (ds_ids_to_load.size())
                 custom_filter_clause += ")";
         }
-        else // simple line id in statement
+        else // simple ds id in statement
         {
+            loginf << "DBContent " << name_ << ": load: no line specific loading wanted";
 
             // add to filtered vars
             filtered_variables.push_back(&datasource_var);

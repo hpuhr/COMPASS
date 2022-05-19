@@ -258,31 +258,6 @@ void MainWindow::createMenus ()
     connect(quit_act, &QAction::triggered, this, &MainWindow::quitSlot);
     file_menu->addAction(quit_act);
 
-    // configuration menu
-    QMenu* config_menu = menuBar()->addMenu(tr("&Configuration"));
-
-    // configure operations
-    QAction* ds_action = new QAction(tr("Data Sources"));
-    ds_action->setStatusTip(tr("Configure Data Sources"));
-    connect(ds_action, &QAction::triggered, this, &MainWindow::configureDataSourcesSlot);
-    config_menu->addAction(ds_action);
-
-    QAction* meta_action = new QAction(tr("Meta Variables"));
-
-    if (expert_mode)
-        meta_action->setStatusTip(tr("Configure Meta Variables"));
-    else
-        meta_action->setStatusTip(tr("Show Meta Variables"));
-
-    connect(meta_action, &QAction::triggered, this, &MainWindow::configureMetaVariablesSlot);
-    config_menu->addAction(meta_action);
-
-    sectors_action_ = new QAction(tr("Sectors"));
-    sectors_action_->setStatusTip(tr("Configure Sectors (stored in Database)"));
-    connect(sectors_action_, &QAction::triggered, this, &MainWindow::configureSectorsSlot);
-    sectors_action_->setDisabled(true);
-    config_menu->addAction(sectors_action_);
-
     // import menu
 
     import_menu_ = menuBar()->addMenu(tr("&Import"));
@@ -312,6 +287,31 @@ void MainWindow::createMenus ()
     import_vp_file_action->setStatusTip(tr("Import View Points File"));
     connect(import_vp_file_action, &QAction::triggered, this, &MainWindow::importViewPointsSlot);
     import_menu_->addAction(import_vp_file_action);
+
+    // configuration menu
+    QMenu* config_menu = menuBar()->addMenu(tr("&Configuration"));
+
+    // configure operations
+    QAction* ds_action = new QAction(tr("Data Sources"));
+    ds_action->setStatusTip(tr("Configure Data Sources"));
+    connect(ds_action, &QAction::triggered, this, &MainWindow::configureDataSourcesSlot);
+    config_menu->addAction(ds_action);
+
+    QAction* meta_action = new QAction(tr("Meta Variables"));
+
+    if (expert_mode)
+        meta_action->setStatusTip(tr("Configure Meta Variables"));
+    else
+        meta_action->setStatusTip(tr("Show Meta Variables"));
+
+    connect(meta_action, &QAction::triggered, this, &MainWindow::configureMetaVariablesSlot);
+    config_menu->addAction(meta_action);
+
+    sectors_action_ = new QAction(tr("Sectors"));
+    sectors_action_->setStatusTip(tr("Configure Sectors (stored in Database)"));
+    connect(sectors_action_, &QAction::triggered, this, &MainWindow::configureSectorsSlot);
+    sectors_action_->setDisabled(true);
+    config_menu->addAction(sectors_action_);
 
     // process menu
 
