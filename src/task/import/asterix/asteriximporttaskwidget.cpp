@@ -68,17 +68,16 @@ void ASTERIXImportTaskWidget::addMainTab()
     {
         QFormLayout* source_layout = new QFormLayout();
 
+        source_label_ = new QLabel();
+        source_layout->addWidget(source_label_);
+
         if (task_.isImportNetwork())
         {
             loginf << "ASTERIXImportTaskWidget: addMainTab: is network import";
-
-            source_layout->addRow(new QLabel("Network"));
         }
         else
         {
             loginf << "ASTERIXImportTaskWidget: addMainTab: is file import";
-
-            source_layout->addRow("File", new QLabel(task_.importFilename().c_str()));
 
             QComboBox* file_line_box = new QComboBox();
             file_line_box->addItems({"1", "2", "3", "4"});
@@ -87,6 +86,8 @@ void ASTERIXImportTaskWidget::addMainTab()
                     this, &ASTERIXImportTaskWidget::fileLineIDEditSlot);
             source_layout->addRow("Line ID", file_line_box);
         }
+
+        updateSourceLabel();
 
         main_tab_layout->addLayout(source_layout);
     }
@@ -388,6 +389,16 @@ void ASTERIXImportTaskWidget::debugChangedSlot()
 
 //    test_button_->setDisabled(false);
 //}
+
+void ASTERIXImportTaskWidget::updateSourceLabel()
+{
+    assert (source_label_);
+
+    if (task_.isImportNetwork())
+        source_label_->setText("Source: Network");
+    else // file
+        source_label_->setText(("Source: "+task_.importFilename()).c_str());
+}
 
 ASTERIXOverrideWidget* ASTERIXImportTaskWidget::overrideWidget() const
 {

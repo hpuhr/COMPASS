@@ -204,22 +204,23 @@ void MainWindow::createMenus ()
 
     // file menu
     QMenu* file_menu = menuBar()->addMenu(tr("&File"));
+    file_menu->setToolTipsVisible(true);
 
     // db operations
     new_db_action_ = new QAction(tr("&New"));
     new_db_action_->setShortcuts(QKeySequence::New);
-    new_db_action_->setStatusTip(tr("Create a new database"));
+    new_db_action_->setToolTip(tr("Create a new database"));
     connect(new_db_action_, &QAction::triggered, this, &MainWindow::newDBSlot);
     file_menu->addAction(new_db_action_);
 
     open_existing_db_action_ = new QAction(tr("&Open"));
     open_existing_db_action_->setShortcuts(QKeySequence::Open);
-    open_existing_db_action_->setStatusTip(tr("Open an existing database"));
+    open_existing_db_action_->setToolTip(tr("Open an existing database"));
     connect(open_existing_db_action_, &QAction::triggered, this, &MainWindow::openExistingDBSlot);
     file_menu->addAction(open_existing_db_action_);
 
     open_recent_db_menu_ = file_menu->addMenu("Open Recent");
-    open_recent_db_menu_->setStatusTip(tr("Open a recent database"));
+    open_recent_db_menu_->setToolTip(tr("Open a recent database"));
 
     open_recent_db_menu_->addSeparator();
 
@@ -228,7 +229,7 @@ void MainWindow::createMenus ()
     open_recent_db_menu_->addAction(clear_act);
 
     close_db_action_ = new QAction(tr("&Close"));
-    close_db_action_->setStatusTip(tr("Close opened database"));
+    close_db_action_->setToolTip(tr("Close opened database"));
     connect(close_db_action_, &QAction::triggered, this, &MainWindow::closeDBSlot);
     file_menu->addAction(close_db_action_);
 
@@ -247,68 +248,70 @@ void MainWindow::createMenus ()
 
     QAction* quit2_act = new QAction(tr("Quit &Without Saving Config"));
     quit2_act->setShortcut(tr("Ctrl+W"));
-    quit2_act->setStatusTip(tr("Quit the application withour saving the configuration"));
+    quit2_act->setToolTip(tr("Quit the application withour saving the configuration"));
     connect(quit2_act, &QAction::triggered, this, &MainWindow::quitWOConfigSlot);
     file_menu->addAction(quit2_act);
 
     QAction* quit_act = new QAction(tr("&Quit"));
     quit_act->setShortcuts(QKeySequence::Quit);
     //QKeySequence(tr("Ctrl+P"));
-    quit_act->setStatusTip(tr("Quit the application"));
+    quit_act->setToolTip(tr("Quit the application"));
     connect(quit_act, &QAction::triggered, this, &MainWindow::quitSlot);
     file_menu->addAction(quit_act);
 
     // import menu
 
     import_menu_ = menuBar()->addMenu(tr("&Import"));
+    import_menu_->setToolTipsVisible(true);
 
     QAction* import_ast_file_action = new QAction(tr("&ASTERIX Recording"));
     import_ast_file_action->setShortcut(tr("Ctrl+A"));
-    import_ast_file_action->setStatusTip(tr("Import ASTERIX Recording File"));
+    import_ast_file_action->setToolTip(tr("Import ASTERIX Recording File"));
     connect(import_ast_file_action, &QAction::triggered, this, &MainWindow::importAsterixRecordingSlot);
     import_menu_->addAction(import_ast_file_action);
 
     import_recent_asterix_menu_ = import_menu_->addMenu("Recent ASTERIX Recording");
-    import_recent_asterix_menu_->setStatusTip(tr("Import a recent ASTERIX Recording File"));
+    import_recent_asterix_menu_->setToolTip(tr("Import a recent ASTERIX Recording File"));
 
     QAction* import_ast_net_action = new QAction(tr("ASTERIX From Network"));
-    import_ast_net_action->setStatusTip(tr("Import ASTERIX From Network"));
+    import_ast_net_action->setToolTip(tr("Import ASTERIX From Network"));
     connect(import_ast_net_action, &QAction::triggered, this, &MainWindow::importAsterixFromNetworkSlot);
     import_menu_->addAction(import_ast_net_action);
 
     QAction* import_gps_file_action = new QAction(tr("&GPS Trail"));
     import_gps_file_action->setShortcut(tr("Ctrl+G"));
-    import_gps_file_action->setStatusTip(tr("Import GPS Trail File"));
+    import_gps_file_action->setToolTip(tr("Import GPS Trail File"));
     connect(import_gps_file_action, &QAction::triggered, this, &MainWindow::importGPSTrailSlot);
     import_menu_->addAction(import_gps_file_action);
 
     QAction* import_vp_file_action = new QAction(tr("&View Points"));
     import_vp_file_action->setShortcut(tr("Ctrl+V"));
-    import_vp_file_action->setStatusTip(tr("Import View Points File"));
+    import_vp_file_action->setToolTip(tr("Import View Points File"));
     connect(import_vp_file_action, &QAction::triggered, this, &MainWindow::importViewPointsSlot);
     import_menu_->addAction(import_vp_file_action);
 
     // configuration menu
     QMenu* config_menu = menuBar()->addMenu(tr("&Configuration"));
+    config_menu->setToolTipsVisible(true);
 
     // configure operations
     QAction* ds_action = new QAction(tr("Data Sources"));
-    ds_action->setStatusTip(tr("Configure Data Sources"));
+    ds_action->setToolTip(tr("Configure Data Sources"));
     connect(ds_action, &QAction::triggered, this, &MainWindow::configureDataSourcesSlot);
     config_menu->addAction(ds_action);
 
     QAction* meta_action = new QAction(tr("Meta Variables"));
 
     if (expert_mode)
-        meta_action->setStatusTip(tr("Configure Meta Variables"));
+        meta_action->setToolTip(tr("Configure Meta Variables"));
     else
-        meta_action->setStatusTip(tr("Show Meta Variables"));
+        meta_action->setToolTip(tr("Show Meta Variables"));
 
     connect(meta_action, &QAction::triggered, this, &MainWindow::configureMetaVariablesSlot);
     config_menu->addAction(meta_action);
 
     sectors_action_ = new QAction(tr("Sectors"));
-    sectors_action_->setStatusTip(tr("Configure Sectors (stored in Database)"));
+    sectors_action_->setToolTip(tr("Configure Sectors (stored in Database)"));
     connect(sectors_action_, &QAction::triggered, this, &MainWindow::configureSectorsSlot);
     sectors_action_->setDisabled(true);
     config_menu->addAction(sectors_action_);
@@ -316,22 +319,23 @@ void MainWindow::createMenus ()
     // process menu
 
     process_menu_ = menuBar()->addMenu(tr("&Process"));
+    process_menu_->setToolTipsVisible(true);
 
     QAction* calc_radar_plpos_action = new QAction(tr("Calculate Radar Plot Positions"));
-    calc_radar_plpos_action->setStatusTip(tr("Calculate Radar Plot Positios, only needed if Radar Position information"
+    calc_radar_plpos_action->setToolTip(tr("Calculate Radar Plot Positios, only needed if Radar Position information"
                                              " was changed"));
     connect(calc_radar_plpos_action, &QAction::triggered, this, &MainWindow::calculateRadarPlotPositionsSlot);
     process_menu_->addAction(calc_radar_plpos_action);
 
-    QAction* assoc_artas_action = new QAction(tr("Calculate Associations from ARTAS"));
-    assoc_artas_action->setStatusTip(tr("Create Unique Targets based on ARTAS TRI information"));
-    connect(assoc_artas_action, &QAction::triggered, this, &MainWindow::calculateAssociationsARTASSlot);
-    process_menu_->addAction(assoc_artas_action);
-
     QAction* assoc_action = new QAction(tr("Calculate Associations"));
-    assoc_action->setStatusTip(tr("Create Unique Targets based on all DB Content"));
+    assoc_action->setToolTip(tr("Create Unique Targets based on all DB Content"));
     connect(assoc_action, &QAction::triggered, this, &MainWindow::calculateAssociationsSlot);
     process_menu_->addAction(assoc_action);
+
+    QAction* assoc_artas_action = new QAction(tr("Calculate Associations from ARTAS"));
+    assoc_artas_action->setToolTip(tr("Create Unique Targets based on ARTAS TRI information"));
+    connect(assoc_artas_action, &QAction::triggered, this, &MainWindow::calculateAssociationsARTASSlot);
+    process_menu_->addAction(assoc_artas_action);
 }
 
 void MainWindow::updateMenus()
@@ -1242,6 +1246,7 @@ void MainWindow::importRecentAsterixRecordingSlot()
 
     updateMenus();
 
+    COMPASS::instance().taskManager().asterixImporterTask().dialog()->updateSource();
     COMPASS::instance().taskManager().asterixImporterTask().dialog()->show();
 }
 
@@ -1260,6 +1265,7 @@ void MainWindow::importAsterixFromNetworkSlot()
 
     COMPASS::instance().taskManager().asterixImporterTask().importNetwork();
 
+    COMPASS::instance().taskManager().asterixImporterTask().dialog()->updateSource();
     COMPASS::instance().taskManager().asterixImporterTask().dialog()->show();
 }
 

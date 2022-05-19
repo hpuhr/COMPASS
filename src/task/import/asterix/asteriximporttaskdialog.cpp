@@ -54,6 +54,17 @@ ASTERIXImportTaskDialog::ASTERIXImportTaskDialog(ASTERIXImportTask& task)
     update();
 }
 
+void ASTERIXImportTaskDialog::updateSource()
+{
+    if (task_.isImportNetwork())
+        setWindowTitle("Import ASTERIX From Network");
+    else // file
+        setWindowTitle("Import ASTERIX From File");
+
+    assert (task_widget_);
+    task_widget_->updateSourceLabel();
+}
+
 void ASTERIXImportTaskDialog::updateButtons()
 {
     assert (import_button_);
