@@ -433,9 +433,6 @@ void GPSTrailImportTask::run()
 {
     loginf << "GPSTrailImportTask: run: filename '" << current_filename_ << " fixes " << gps_fixes_.size();
 
-    task_manager_.appendInfo("GPSTrailImportTask: import of file '" + current_filename_ +
-                             "' started");
-
     assert (gps_fixes_.size());
     assert (!buffer_);
 

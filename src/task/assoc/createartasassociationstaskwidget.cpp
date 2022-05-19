@@ -41,7 +41,7 @@ using namespace dbContent;
 
 CreateARTASAssociationsTaskWidget::CreateARTASAssociationsTaskWidget(
         CreateARTASAssociationsTask& task, QWidget* parent, Qt::WindowFlags f)
-    : TaskWidget(parent, f), task_(task)
+    : QWidget(parent, f), task_(task)
 {
     QFont font_bold;
     font_bold.setBold(true);
@@ -162,7 +162,6 @@ CreateARTASAssociationsTaskWidget::CreateARTASAssociationsTaskWidget(
     main_layout->addStretch();
 
     update();
-    expertModeChangedSlot();
 
     setLayout(main_layout);
 }
@@ -267,10 +266,4 @@ void CreateARTASAssociationsTaskWidget::anyTrackFlagChangedSlot()
             task_.markTrackCoastingAssociationsDubious())
         task_.markTrackCoastingAssociationsDubious(
                     mark_track_coasting_associations_dubious_check_->checkState() == Qt::Checked);
-}
-
-void CreateARTASAssociationsTaskWidget::expertModeChangedSlot()
-{
-    bool expert_mode = task_.manager().expertMode();
-
 }

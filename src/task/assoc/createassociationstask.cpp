@@ -219,8 +219,6 @@ void CreateAssociationsTask::run()
 
     loginf << "CreateAssociationsTask: run: started";
 
-    task_manager_.appendInfo("CreateAssociationsTask: started");
-
     start_time_ = boost::posix_time::microsec_clock::local_time();
 
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
@@ -495,7 +493,6 @@ void CreateAssociationsTask::loadingDoneSlot()
 
     dbo_loading_done_ = true;
 
-    task_manager_.appendInfo("CreateAssociationsTask: data loading done");
     loginf << "CreateAssociationsTask: loadingDoneSlot: data loading done";
 
     //assert(!create_job_);
@@ -559,8 +556,6 @@ void CreateAssociationsTask::createDoneSlot()
     std::string time_str = String::timeStringFromDouble(diff.total_milliseconds() / 1000.0, false);
 
     COMPASS::instance().interface().setProperty(DONE_PROPERTY_NAME, "1");
-
-    task_manager_.appendSuccess("CreateAssociationsTask: done after " + time_str);
 
     COMPASS::instance().interface().setProperty(DONE_PROPERTY_NAME, "1");
     COMPASS::instance().dbContentManager().setAssociationsIdentifier("All");

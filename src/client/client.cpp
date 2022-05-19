@@ -25,6 +25,7 @@
 #include "logger.h"
 #include "stringconv.h"
 #include "taskmanager.h"
+#include "asteriximporttask.h"
 #include "mainwindow.h"
 
 #include <QApplication>
@@ -84,8 +85,7 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
 
     //    std::string import_json_filename;
     //    std::string import_json_schema;
-    //    std::string import_gps_trail_filename;
-    //    std::string import_sectors_filename;
+
 
     //    bool auto_process {false};
     //    bool associate_data {false};
@@ -115,22 +115,20 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
              "used time offset during ASTERIX network import, in HH:MM:SS.ZZZ'")
             ("import_asterix_network_max_lines", po::value<int>(&import_asterix_network_max_lines_),
              "maximum number of lines per data source during ASTERIX network import, 1..4'")
-            //            ("asterix_framing", po::value<std::string>(&asterix_framing),
-            //             "sets ASTERIX framing, e.g. 'none', 'ioss', 'ioss_seq', 'rff'")
-            //            ("asterix_decoder_cfg", po::value<std::string>(&asterix_decoder_cfg),
-            //             "sets ASTERIX decoder config using JSON string, e.g. ''{\"10\":{\"edition\":\"0.31\"}}''"
-            //             " (including one pair of single quotes)")
+            ("asterix_framing", po::value<std::string>(&asterix_framing),
+             "sets ASTERIX framing, e.g. 'none', 'ioss', 'ioss_seq', 'rff'")
+            ("asterix_decoder_cfg", po::value<std::string>(&asterix_decoder_cfg),
+             "sets ASTERIX decoder config using JSON string, e.g. ''{\"10\":{\"edition\":\"0.31\"}}''"
+                         " (including one pair of single quotes)")
             //            ("import_json", po::value<std::string>(&import_json_filename),
             //             "imports JSON file with given filename, e.g. '/data/file1.json'")
             //            ("json_schema", po::value<std::string>(&import_json_schema),
             //             "JSON file import schema, e.g. 'jASTERIX', 'OpenSkyNetwork', 'ADSBExchange', 'SDDL'")
-            //            ("import_gps_trail", po::value<std::string>(&import_gps_trail_filename),
-            //             "imports gps trail NMEA with given filename, e.g. '/data/file2.txt'")
-            //            ("import_sectors_json", po::value<std::string>(&import_sectors_filename),
-            //             "imports exported sectors JSON with given filename, e.g. '/data/sectors.json'")
-            //            ("auto_process", po::bool_switch(&auto_process), "start automatic processing of imported data")
+            ("import_gps_trail", po::value<std::string>(&import_gps_trail_filename_),
+             "imports gps trail NMEA with given filename, e.g. '/data/file2.txt'")
+            ("import_sectors_json", po::value<std::string>(&import_sectors_filename_),
+             "imports exported sectors JSON with given filename, e.g. '/data/sectors.json'")
             //            ("associate_data", po::bool_switch(&associate_data), "associate target reports")
-            //            ("start", po::bool_switch(&start), "start after finishing previous steps")
             ("load_data", po::bool_switch(&load_data_), "load data after start")
             //            ("export_view_points_report", po::value<std::string>(&export_view_points_report_filename),
             //             "export view points report after start with given filename, e.g. '/data/db2/report.tex")
@@ -212,28 +210,28 @@ void Client::run ()
     if (import_view_points_filename_.size())
         main_window.importViewPointsFile(import_view_points_filename_);
 
-    //    try
-    //    {
-    //        if (asterix_framing.size())
-    //        {
-    //            if (asterix_framing == "none")
-    //                task_man.asterixFraming("");
-    //            else
-    //                task_man.asterixFraming(asterix_framing);
-    //        }
+    TaskManager& task_man = COMPASS::instance().taskManager();
 
-    //        if (asterix_decoder_cfg.size())
-    //            task_man.asterixDecoderConfig(asterix_decoder_cfg);
+    try
+    {
+        if (asterix_framing.size())
+        {
+            if (asterix_framing == "none")
+                task_man.asterixImporterTask().asterixFileFraming("");
+            else
+                task_man.asterixImporterTask().asterixFileFraming(asterix_framing);
+        }
 
-    //        if (task_man.asterixOptionsSet())
-    //            task_man.setAsterixOptions();
-    //    }
-    //    catch (exception& e)
-    //    {
-    //        logerr << "COMPASSClient: setting ASTERIX options resulted in error: " << e.what();
-    //        quit_requested_ = true;
-    //        return;
-    //    }
+        if (asterix_decoder_cfg.size())
+            task_man.asterixImporterTask().asterixDecoderConfig(asterix_decoder_cfg);
+
+    }
+    catch (exception& e)
+    {
+        logerr << "COMPASSClient: setting ASTERIX options resulted in error: " << e.what();
+        quit_requested_ = true;
+        return;
+    }
 
     if (import_asterix_filename_.size())
         main_window.importASTERIXFile(import_asterix_filename_);
@@ -257,20 +255,14 @@ void Client::run ()
     //    if (import_json_filename.size())
     //        task_man.importJSONFile(import_json_filename, import_json_schema);
 
-    //    if (import_gps_trail_filename.size())
-    //        task_man.importGPSTrailFile(import_gps_trail_filename);
+    if (import_gps_trail_filename_.size())
+        main_window.importGPSTrailFile(import_gps_trail_filename_);
 
-    //    if (import_sectors_filename.size())
-    //        task_man.importSectorsFile(import_sectors_filename);
-
-    //    if (auto_process)
-    //        task_man.autoProcess(auto_process);
+    if (import_sectors_filename_.size())
+        main_window.importSectorsFile(import_sectors_filename_);
 
     //    if (associate_data)
     //        task_man.associateData(associate_data);
-
-    //    if (start)
-    //        task_man.start(start);
 
     if (load_data_)
         main_window.loadData(load_data_);

@@ -37,7 +37,7 @@
 //#include "postprocesstask.h"
 #include "radarplotpositioncalculatortask.h"
 #include "taskmanager.h"
-#include "taskmanagerwidget.h"
+//#include "taskmanagerwidget.h"
 
 using namespace Utils;
 
@@ -83,8 +83,8 @@ TEST_CASE("COMPASS Import ASTERIX", "[COMPASS]")
 
     REQUIRE(!Files::fileExists(db_filename));
 
-    TaskManager& task_manager = COMPASS::instance().taskManager();
-    TaskManagerWidget* task_manager_widget = task_manager.widget();
+//    TaskManager& task_manager = COMPASS::instance().taskManager();
+//    TaskManagerWidget* task_manager_widget = task_manager.widget();
 
     TODO_ASSERT
 
@@ -110,10 +110,10 @@ TEST_CASE("COMPASS Import ASTERIX", "[COMPASS]")
         client.processEvents();
 
     // import asterix
-    ASTERIXImportTask& asterix_import_task = task_manager.asterixImporterTask();
-    task_manager_widget->setCurrentTask(asterix_import_task);
-    REQUIRE(task_manager_widget->getCurrentTaskName() == asterix_import_task.name());
-    REQUIRE(asterix_import_task.isRecommended());
+//    ASTERIXImportTask& asterix_import_task = task_manager.asterixImporterTask();
+//    task_manager_widget->setCurrentTask(asterix_import_task);
+//    REQUIRE(task_manager_widget->getCurrentTaskName() == asterix_import_task.name());
+//    REQUIRE(asterix_import_task.isRecommended());
 
 //    asterix_import_task.currentFraming("ioss");
 //    ASTERIXImportTaskWidget* asterix_import_task_widget =
@@ -150,20 +150,20 @@ TEST_CASE("COMPASS Import ASTERIX", "[COMPASS]")
     QThread::msleep(100);  // delay
 
     // calculate radar plot positions
-    RadarPlotPositionCalculatorTask& radar_plot_pos_calc =
-        task_manager.radarPlotPositionCalculatorTask();
+//    RadarPlotPositionCalculatorTask& radar_plot_pos_calc =
+//        task_manager.radarPlotPositionCalculatorTask();
 
-    task_manager_widget->setCurrentTask(radar_plot_pos_calc);
-    REQUIRE(task_manager_widget->getCurrentTaskName() == radar_plot_pos_calc.name());
-    REQUIRE(radar_plot_pos_calc.isRecommended());
-    radar_plot_pos_calc.showDoneSummary(false);
+//    task_manager_widget->setCurrentTask(radar_plot_pos_calc);
+//    REQUIRE(task_manager_widget->getCurrentTaskName() == radar_plot_pos_calc.name());
+//    REQUIRE(radar_plot_pos_calc.isRecommended());
+//    radar_plot_pos_calc.showDoneSummary(false);
 
-    task_manager_widget->runCurrentTaskSlot();
+//    task_manager_widget->runCurrentTaskSlot();
 
     QThread::msleep(100);
 
-    while (client.hasPendingEvents() || !radar_plot_pos_calc.done())
-        client.processEvents();
+//    while (client.hasPendingEvents() || !radar_plot_pos_calc.done())
+//        client.processEvents();
 
     // post-process
 //    PostProcessTask& post_process_task = task_manager.postProcessTask();
@@ -180,11 +180,11 @@ TEST_CASE("COMPASS Import ASTERIX", "[COMPASS]")
 //    while (client.hasPendingEvents() || !post_process_task.done())
 //        client.processEvents();
 
-    QThread::msleep(100);  // delay
+//    QThread::msleep(100);  // delay
 
-    REQUIRE(task_manager_widget->isStartPossible());
+//    REQUIRE(task_manager_widget->isStartPossible());
 
-    task_manager_widget->startSlot();
+//    task_manager_widget->startSlot();
 
     while (client.hasPendingEvents())
         client.processEvents();

@@ -37,8 +37,6 @@
 //#include "postprocesstaskwidget.h"
 #include "radarplotpositioncalculatortask.h"
 #include "radarplotpositioncalculatortaskwidget.h"
-#include "taskmanagerlogwidget.h"
-#include "taskmanagerwidget.h"
 #include "dbinterface.h"
 #include "files.h"
 #include "viewpointsimporttask.h"
@@ -72,7 +70,7 @@ using namespace Utils;
 TaskManager::TaskManager(const std::string& class_id, const std::string& instance_id, COMPASS* compass)
     : Configurable(class_id, instance_id, compass, "task.json")
 {
-    registerParameter("expert_mode", &expert_mode_, false);
+    //registerParameter("expert_mode", &expert_mode_, false);
 
     createSubConfigurables();
 
@@ -189,8 +187,8 @@ void TaskManager::addTask(const std::string& class_id, Task* task)
     assert(task);
     assert(!tasks_.count(class_id));
     tasks_[class_id] = task;
-    connect(task, &Task::statusChangedSignal, this, &TaskManager::taskStatusChangesSlot);
-    connect(task, &Task::doneSignal, this, &TaskManager::taskDoneSlot);
+//    connect(task, &Task::statusChangedSignal, this, &TaskManager::taskStatusChangesSlot);
+//    connect(task, &Task::doneSignal, this, &TaskManager::taskDoneSlot);
 }
 
 void TaskManager::checkSubConfigurables()
@@ -271,66 +269,66 @@ void TaskManager::checkSubConfigurables()
 
 std::map<std::string, Task*> TaskManager::tasks() const { return tasks_; }
 
-bool TaskManager::expertMode() const { return expert_mode_; }
+//bool TaskManager::expertMode() const { return expert_mode_; }
 
-void TaskManager::expertMode(bool value)
-{
-    expert_mode_ = value;
+//void TaskManager::expertMode(bool value)
+//{
+//    expert_mode_ = value;
 
-    if (widget_)
-    {
-        widget_->updateTaskStates();
-        widget_->selectNextTask();
-    }
+//    if (widget_)
+//    {
+//        widget_->updateTaskStates();
+//        widget_->selectNextTask();
+//    }
 
-    emit expertModeChangedSignal();
-}
+//    emit expertModeChangedSignal();
+//}
 
 std::vector<std::string> TaskManager::taskList() const { return task_list_; }
 
-void TaskManager::taskStatusChangesSlot(std::string task_name)
-{
-    loginf << "TaskManager: taskStatusChangesSlot: task " << task_name;
+//void TaskManager::taskStatusChangesSlot(std::string task_name)
+//{
+//    loginf << "TaskManager: taskStatusChangesSlot: task " << task_name;
 
-    if (widget_)
-    {
-        widget_->updateTaskStates();
-        widget_->selectNextTask();
-    }
-}
+//    if (widget_)
+//    {
+//        widget_->updateTaskStates();
+//        widget_->selectNextTask();
+//    }
+//}
 
-void TaskManager::taskDoneSlot(std::string task_name)
-{
-    loginf << "TaskManager: taskDoneSlot: task " << task_name;
+//void TaskManager::taskDoneSlot(std::string task_name)
+//{
+//    loginf << "TaskManager: taskDoneSlot: task " << task_name;
 
-    if (widget_)
-    {
-        widget_->updateTaskStates();
-        widget_->selectNextTask();
-    }
-}
+//    if (widget_)
+//    {
+//        widget_->updateTaskStates();
+//        widget_->selectNextTask();
+//    }
+//}
 
-void TaskManager::dbObjectsChangedSlot()
-{
-    loginf << "TaskManager: dbObjectsChangedSlot";
+//void TaskManager::dbObjectsChangedSlot()
+//{
+//    loginf << "TaskManager: dbObjectsChangedSlot";
 
-    if (widget_)
-    {
-        widget_->updateTaskStates();
-        widget_->selectNextTask();
-    }
-}
+//    if (widget_)
+//    {
+//        widget_->updateTaskStates();
+//        widget_->selectNextTask();
+//    }
+//}
 
-void TaskManager::schemaChangedSlot()
-{
-    loginf << "TaskManager: schemaChangedSlot";
+//void TaskManager::schemaChangedSlot()
+//{
+//    loginf << "TaskManager: schemaChangedSlot";
 
-    if (widget_)
-    {
-        widget_->updateTaskStates();
-        widget_->selectNextTask();
-    }
-}
+//    if (widget_)
+//    {
+//        widget_->updateTaskStates();
+//        widget_->selectNextTask();
+//    }
+//}
 
 void TaskManager::shutdown()
 {
@@ -351,39 +349,6 @@ void TaskManager::shutdown()
     create_artas_associations_task_ = nullptr;
     //post_process_task_ = nullptr;
     create_associations_task_ = nullptr;
-
-    widget_ = nullptr;
-}
-
-TaskManagerWidget* TaskManager::widget()
-{
-    if (!widget_)
-    {
-        widget_.reset(new TaskManagerWidget(*this));
-    }
-
-    return widget_.get();
-}
-
-void TaskManager::appendSuccess(const std::string& text)
-{
-    if (widget_)
-        widget_->logWidget()->appendSuccess(text);
-}
-void TaskManager::appendInfo(const std::string& text)
-{
-    if (widget_)
-        widget_->logWidget()->appendInfo(text);
-}
-void TaskManager::appendWarning(const std::string& text)
-{
-    if (widget_)
-        widget_->logWidget()->appendWarning(text);
-}
-void TaskManager::appendError(const std::string& text)
-{
-    if (widget_)
-        widget_->logWidget()->appendError(text);
 }
 
 void TaskManager::runTask(const std::string& task_name)
@@ -463,160 +428,162 @@ CreateAssociationsTask& TaskManager::createAssociationsTask() const
     return *create_associations_task_;
 }
 
-void TaskManager::createAndOpenNewSqlite3DB(const std::string& filename)
-{
-    loginf << "TaskManager: sqlite3CreateNewDB: filename '" << filename << "'";
+//void TaskManager::createAndOpenNewSqlite3DB(const std::string& filename)
+//{
+//    loginf << "TaskManager: sqlite3CreateNewDB: filename '" << filename << "'";
 
-    automatic_tasks_defined_ = true;
-    sqlite3_create_new_db_ = true;
-    sqlite3_create_new_db_filename_ = filename;
-}
+//    automatic_tasks_defined_ = true;
+//    sqlite3_create_new_db_ = true;
+//    sqlite3_create_new_db_filename_ = filename;
+//}
 
-void TaskManager::openSqlite3DB(const std::string& filename)
-{
-    loginf << "TaskManager: sqlite3OpenDB: filename '" << filename << "'";
+//void TaskManager::openSqlite3DB(const std::string& filename)
+//{
+//    loginf << "TaskManager: sqlite3OpenDB: filename '" << filename << "'";
 
-    automatic_tasks_defined_ = true;
-    sqlite3_open_db_ = true;
-    sqlite3_open_db_filename_ = filename;
-}
+//    automatic_tasks_defined_ = true;
+//    sqlite3_open_db_ = true;
+//    sqlite3_open_db_filename_ = filename;
+//}
 
-void TaskManager::importASTERIXFile(const std::string& filename)
-{
-    loginf << "TaskManager: asterixImportFile: filename '" << filename << "'";
+//void TaskManager::importASTERIXFile(const std::string& filename)
+//{
+//    loginf << "TaskManager: asterixImportFile: filename '" << filename << "'";
 
-    automatic_tasks_defined_ = true;
-    asterix_import_file_ = true;
-    asterix_import_filename_ = filename;
-}
+//    automatic_tasks_defined_ = true;
+//    asterix_import_file_ = true;
+//    asterix_import_filename_ = filename;
+//}
 
-bool TaskManager::asterixOptionsSet() const
-{
-    return set_asterix_framing_ || set_asterix_decoder_cfg_;
-}
+//bool TaskManager::asterixOptionsSet() const
+//{
+//    return set_asterix_framing_ || set_asterix_decoder_cfg_;
+//}
 
-void TaskManager::setAsterixOptions()
-{
-    assert (asterixOptionsSet());
+//void TaskManager::setAsterixOptions()
+//{
+//    loginf << "TaskManager: setAsterixOptions";
 
-    if (set_asterix_framing_)
-        asterixImporterTask().asterixFileFraming(asterix_framing_);
+//    assert (asterixOptionsSet());
 
-    if (set_asterix_decoder_cfg_)
-        asterixImporterTask().asterixDecoderConfig(asterix_decoder_cfg_);
-}
+//    if (set_asterix_framing_)
+//        asterixImporterTask().asterixFileFraming(asterix_framing_);
 
-void TaskManager::asterixFraming(const std::string& asterix_framing)
-{
-    asterix_framing_ = asterix_framing;
-    set_asterix_framing_ = true;
-}
+//    if (set_asterix_decoder_cfg_)
+//        asterixImporterTask().asterixDecoderConfig(asterix_decoder_cfg_);
+//}
 
-void TaskManager::asterixDecoderConfig(const std::string& asterix_decoder_cfg)
-{
-    asterix_decoder_cfg_ = asterix_decoder_cfg;
-    set_asterix_decoder_cfg_ = true;
-}
+//void TaskManager::asterixFraming(const std::string& asterix_framing)
+//{
+//    asterix_framing_ = asterix_framing;
+//    set_asterix_framing_ = true;
+//}
 
-void TaskManager::importJSONFile(const std::string& filename, const std::string& schema)
-{
-    loginf << "TaskManager: importJSONFile: filename '" << filename << "' schema '" << schema << "'";
+//void TaskManager::asterixDecoderConfig(const std::string& asterix_decoder_cfg)
+//{
+//    asterix_decoder_cfg_ = asterix_decoder_cfg;
+//    set_asterix_decoder_cfg_ = true;
+//}
 
-    assert (schema.size());
+//void TaskManager::importJSONFile(const std::string& filename, const std::string& schema)
+//{
+//    loginf << "TaskManager: importJSONFile: filename '" << filename << "' schema '" << schema << "'";
 
-    automatic_tasks_defined_ = true;
-    json_import_file_ = true;
-    json_import_filename_ = filename;
-    json_import_schema_ = schema;
-}
+//    assert (schema.size());
 
-void TaskManager::importGPSTrailFile(const std::string& filename)
-{
-    automatic_tasks_defined_ = true;
-    gps_trail_import_file_ = true;
-    gps_trail_import_filename_ = filename;
-}
+//    automatic_tasks_defined_ = true;
+//    json_import_file_ = true;
+//    json_import_filename_ = filename;
+//    json_import_schema_ = schema;
+//}
 
-void TaskManager::importSectorsFile(const std::string& filename)
-{
-    automatic_tasks_defined_ = true;
-    sectors_import_file_ = true;
-    sectors_import_filename_ = filename;
-}
+//void TaskManager::importGPSTrailFile(const std::string& filename)
+//{
+//    automatic_tasks_defined_ = true;
+//    gps_trail_import_file_ = true;
+//    gps_trail_import_filename_ = filename;
+//}
 
-void TaskManager::importViewPointsFile(const std::string& filename)
-{
-    loginf << "TaskManager: importViewPointsFile: filename '" << filename << "'";
+//void TaskManager::importSectorsFile(const std::string& filename)
+//{
+//    automatic_tasks_defined_ = true;
+//    sectors_import_file_ = true;
+//    sectors_import_filename_ = filename;
+//}
 
-    automatic_tasks_defined_ = true;
-    view_points_import_file_ = true;
-    view_points_import_filename_ = filename;
-}
+//void TaskManager::importViewPointsFile(const std::string& filename)
+//{
+//    loginf << "TaskManager: importViewPointsFile: filename '" << filename << "'";
 
-void TaskManager::autoProcess(bool value)
-{
-    loginf << "TaskManager: autoProcess: value " << value;
+//    automatic_tasks_defined_ = true;
+//    view_points_import_file_ = true;
+//    view_points_import_filename_ = filename;
+//}
 
-    automatic_tasks_defined_ = true;
-    auto_process_ = value;
-}
+//void TaskManager::autoProcess(bool value)
+//{
+//    loginf << "TaskManager: autoProcess: value " << value;
 
-void TaskManager::associateData(bool value)
-{
-    loginf << "TaskManager: associateData: value " << value;
+//    automatic_tasks_defined_ = true;
+//    auto_process_ = value;
+//}
 
-    automatic_tasks_defined_ = true;
-    associate_data_ = value;
-}
+//void TaskManager::associateData(bool value)
+//{
+//    loginf << "TaskManager: associateData: value " << value;
 
-void TaskManager::quit(bool value)
-{
-    loginf << "TaskManager: autoQuitAfterProcess: value " << value;
+//    automatic_tasks_defined_ = true;
+//    associate_data_ = value;
+//}
 
-    automatic_tasks_defined_ = true;
-    quit_ = value;
-}
+//void TaskManager::quit(bool value)
+//{
+//    loginf << "TaskManager: autoQuitAfterProcess: value " << value;
 
-void TaskManager::start(bool value)
-{
-    loginf << "TaskManager: start: value " << value;
+//    automatic_tasks_defined_ = true;
+//    quit_ = value;
+//}
 
-    automatic_tasks_defined_ = true;
-    start_ = value;
-}
+//void TaskManager::start(bool value)
+//{
+//    loginf << "TaskManager: start: value " << value;
+
+//    automatic_tasks_defined_ = true;
+//    start_ = value;
+//}
 
 
-void TaskManager::loadData(bool value)
-{
-    loginf << "TaskManager: loadData: value " << value;
+//void TaskManager::loadData(bool value)
+//{
+//    loginf << "TaskManager: loadData: value " << value;
 
-    automatic_tasks_defined_ = true;
-    load_data_ = value;
-}
+//    automatic_tasks_defined_ = true;
+//    load_data_ = value;
+//}
 
-void TaskManager::exportViewPointsReportFile(const std::string& filename)
-{
-    loginf << "TaskManager: exportViewPointsReport: file '" << filename << "'";
+//void TaskManager::exportViewPointsReportFile(const std::string& filename)
+//{
+//    loginf << "TaskManager: exportViewPointsReport: file '" << filename << "'";
 
-    automatic_tasks_defined_ = true;
-    export_view_points_report_ = true;
-    export_view_points_report_filename_ = filename;
-}
+//    automatic_tasks_defined_ = true;
+//    export_view_points_report_ = true;
+//    export_view_points_report_filename_ = filename;
+//}
 
-void TaskManager::exportEvalReportFile(const std::string& filename)
-{
-    automatic_tasks_defined_ = true;
-    export_eval_report_ = true;
-    export_eval_report_filename_ = filename;
-}
+//void TaskManager::exportEvalReportFile(const std::string& filename)
+//{
+//    automatic_tasks_defined_ = true;
+//    export_eval_report_ = true;
+//    export_eval_report_filename_ = filename;
+//}
 
-bool TaskManager::automaticTasksDefined() const
-{
-    return automatic_tasks_defined_;
-}
+//bool TaskManager::automaticTasksDefined() const
+//{
+//    return automatic_tasks_defined_;
+//}
 
-void TaskManager::performAutomaticTasks ()
-{
+//void TaskManager::performAutomaticTasks ()
+//{
 //    loginf << "TaskManager: performAutomaticTasks";
 //    assert (automatic_tasks_defined_);
 
@@ -1176,13 +1143,13 @@ void TaskManager::performAutomaticTasks ()
 //    }
 //    else
 //        loginf << "TaskManager: performAutomaticTasks: not quitting";
-}
+//}
 
-void TaskManager::evaluate(bool evaluate)
-{
-    automatic_tasks_defined_ = true;
-    evaluate_ = evaluate;
-}
+//void TaskManager::evaluate(bool evaluate)
+//{
+//    automatic_tasks_defined_ = true;
+//    evaluate_ = evaluate;
+//}
 
 MainWindow* TaskManager::getMainWindow()
 {

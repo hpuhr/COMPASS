@@ -74,6 +74,7 @@ public:
 
     bool canLoadData ();
     void loadData ();
+    void autofilterUTNs();
     bool canEvaluate ();
     std::string getCannotEvaluateComment();
     void evaluate ();

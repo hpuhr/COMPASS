@@ -491,14 +491,10 @@ void CreateARTASAssociationsTask::createDoneSlot()
         COMPASS::instance().interface().setProperty(DONE_PROPERTY_NAME, "1");
         COMPASS::instance().dbContentManager().setAssociationsIdentifier("ARTAS");
 
-        task_manager_.appendSuccess("CreateARTASAssociationsTask: done after " + time_str);
         done_ = true;
     }
     else
-    {
-        task_manager_.appendWarning("CreateARTASAssociationsTask: done after " + time_str +
-                                    " without saving");
-    }
+        logwrn << "CreateARTASAssociationsTask: done after " << time_str << " without saving";
 
     QApplication::restoreOverrideCursor();
 

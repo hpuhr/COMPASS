@@ -105,6 +105,9 @@ public:
     //    bool asterixOptionsSet() const;
     //    void setAsterixOptions();
 
+    void importGPSTrailFile(const std::string& filename);
+    void importSectorsFile(const std::string& filename);
+
     void loadData(bool value);
     void quit(bool value);
     bool quitNeeded();
@@ -142,10 +145,12 @@ protected:
     bool asterix_import_network_ {false};
     float asterix_import_network_time_offset_ {0};
     int asterix_import_network_max_lines_ {-1};
-    //    bool set_asterix_framing_ {false};
-    //    std::string asterix_framing_;
-    //    bool set_asterix_decoder_cfg_ {false};
-    //    std::string asterix_decoder_cfg_;
+
+    bool gps_trail_import_file_ {false};
+    std::string gps_trail_import_filename_;
+
+    bool sectors_import_file_ {false};
+    std::string sectors_import_filename_;
 
     bool load_data_ {false};
     bool quit_ {false};

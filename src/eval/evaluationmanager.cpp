@@ -420,6 +420,17 @@ void EvaluationManager::loadData ()
         widget_->updateButtons();
 }
 
+void EvaluationManager::autofilterUTNs()
+{
+    loginf << "EvaluationManager: autofilterUTNs";
+
+    data_.setUseAllTargetData(true);
+    data_.clearComments();
+    data_.setUseByFilter ();
+
+    loginf << "EvaluationManager: autofilterUTNs: done";
+}
+
 bool EvaluationManager::canEvaluate ()
 {
     assert (initialized_);

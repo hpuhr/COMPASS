@@ -372,8 +372,6 @@ void RadarPlotPositionCalculatorTask::loadingDoneSlot()
 
             QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
         }
-        else
-            task_manager_.appendInfo("RadarPlotPositionCalculatorTask: no transformation errors");
 
         msg_box_ = new QMessageBox;
         assert(msg_box_);
@@ -429,8 +427,6 @@ void RadarPlotPositionCalculatorTask::updateDoneSlot(DBContent& db_content)
 
         done_ = true;
         COMPASS::instance().interface().setProperty(DONE_PROPERTY_NAME, "1");
-
-        task_manager_.appendSuccess("RadarPlotPositionCalculatorTask: done after " + elapsed_time_str);
 
         QApplication::restoreOverrideCursor();
 

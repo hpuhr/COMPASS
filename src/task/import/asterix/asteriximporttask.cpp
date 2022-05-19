@@ -35,7 +35,6 @@
 #include "stringconv.h"
 #include "system.h"
 #include "taskmanager.h"
-#include "taskmanagerwidget.h"
 #include "mainwindow.h"
 #include "stringconv.h"
 
@@ -688,13 +687,6 @@ void ASTERIXImportTask::run(bool test) // , bool create_mapping_stubs
 
     loginf << "ASTERIXImportTask: run: filename " << current_filename_ << " test " << test_
            << " free RAM " << free_ram << " GB";
-
-    if (test_)
-        task_manager_.appendInfo("ASTERIXImportTask: test import of file '" + current_filename_ +
-                                 "' started");
-    else
-        task_manager_.appendInfo("ASTERIXImportTask: import of file '" + current_filename_ +
-                                 "' started");
 
     assert(canRun());
 

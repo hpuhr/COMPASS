@@ -24,7 +24,6 @@
 #include "dbcontent/dbcontentmanager.h"
 #include "files.h"
 #include "logger.h"
-#include "taskmanagerwidget.h"
 #include "viewmanager.h"
 #include "viewpointsimporttask.h"
 #include "viewpointsimporttaskwidget.h"
@@ -338,8 +337,6 @@ void ViewPointsImportTask::run()
 
         if (context.contains("datasets"))
         {
-            task_manager_.appendInfo("ViewPointsImportTask: import: starting import of ASTERIX files");
-
             for (auto& ds_it : context.at("datasets").get<json::array_t>())
             {
                 std::string name;

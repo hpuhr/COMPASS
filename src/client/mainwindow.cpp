@@ -33,7 +33,6 @@
 #include "logger.h"
 #include "stringconv.h"
 #include "taskmanager.h"
-#include "taskmanagerwidget.h"
 #include "viewmanager.h"
 #include "viewpointsimporttask.h"
 #include "viewpointsimporttaskdialog.h"
@@ -555,6 +554,21 @@ void MainWindow::importAsterixNetworkMaxLines(int value)
     asterix_import_network_max_lines_ = value;
 }
 
+void MainWindow::importGPSTrailFile(const std::string& filename)
+{
+    automatic_tasks_defined_ = true;
+    gps_trail_import_file_ = true;
+    gps_trail_import_filename_ = filename;
+}
+
+void MainWindow::importSectorsFile(const std::string& filename)
+{
+    automatic_tasks_defined_ = true;
+    sectors_import_file_ = true;
+    sectors_import_filename_ = filename;
+}
+
+
 void MainWindow::loadData(bool value)
 {
     loginf << "MainWindow: loadData: value " << value;
@@ -768,80 +782,67 @@ void MainWindow::performAutomaticTasks ()
 ////        loginf << "MainWindow: performAutomaticTasks: importing JSON file done";
 ////    }
 
-//    if (gps_trail_import_file_)
-//    {
-//        loginf << "MainWindow: performAutomaticTasks: importing GPS trail file '"
-//               << gps_trail_import_filename_ << "'";
+    if (gps_trail_import_file_)
+    {
+        loginf << "MainWindow: performAutomaticTasks: importing GPS trail file '"
+               << gps_trail_import_filename_ << "'";
 
-//        if (!Files::fileExists(gps_trail_import_filename_))
-//        {
-//            logerr << "MainWindow: performAutomaticTasks: GPS trail file '" << gps_trail_import_filename_
-//                   << "' does not exist";
-//            return;
-//        }
+        if (!Files::fileExists(gps_trail_import_filename_))
+        {
+            logerr << "MainWindow: performAutomaticTasks: GPS trail file '" << gps_trail_import_filename_
+                   << "' does not exist";
+            return;
+        }
 
-//        widget_->setCurrentTask(*gps_trail_import_task_);
-//        if(widget_->getCurrentTaskName() != gps_trail_import_task_->name())
-//        {
-//            logerr << "MainWindow: performAutomaticTasks: wrong task '" << widget_->getCurrentTaskName()
-//                   << "' selected, aborting";
-//            return;
-//        }
+        GPSTrailImportTask& trail_task = COMPASS::instance().taskManager().gpsTrailImportTask();
 
-//        GPSTrailImportTaskWidget* gps_import_task_widget =
-//                dynamic_cast<GPSTrailImportTaskWidget*>(gps_trail_import_task_->widget());
-//        assert(gps_import_task_widget);
+        trail_task.importFilename(gps_trail_import_filename_);
 
-//        gps_import_task_widget->addFile(gps_trail_import_filename_);
-//        gps_import_task_widget->selectFile(gps_trail_import_filename_);
+        if(!trail_task.canRun())
+        {
+            logerr << "MainWindow: performAutomaticTasks: gps file can not be imported";
+            return;
+        }
 
-//        assert(gps_trail_import_task_->canRun());
-//        gps_trail_import_task_->showDoneSummary(false);
+        trail_task.run();
 
-//        widget_->runTask(*gps_trail_import_task_);
+        while (!trail_task.done())
+        {
+            QCoreApplication::processEvents();
+            QThread::msleep(1);
+        }
+    }
 
-//        while (!gps_trail_import_task_->done())
-//        {
-//            QCoreApplication::processEvents();
-//            QThread::msleep(1);
-//        }
-//    }
+    if (sectors_import_file_)
+    {
+        loginf << "MainWindow: performAutomaticTasks: importing sectors file '"
+               << sectors_import_filename_ << "'";
 
-//    if (sectors_import_file_)
-//    {
-//        loginf << "MainWindow: performAutomaticTasks: importing sectors file '"
-//               << sectors_import_filename_ << "'";
+        if (!Files::fileExists(sectors_import_filename_))
+        {
+            logerr << "MainWindow: performAutomaticTasks: sectors file file '" << sectors_import_filename_
+                   << "' does not exist";
+            return;
+        }
 
-//        if (!Files::fileExists(sectors_import_filename_))
-//        {
-//            logerr << "MainWindow: performAutomaticTasks: sectors file file '" << sectors_import_filename_
-//                   << "' does not exist";
-//            return;
-//        }
+        ManageSectorsTask& sectors_task = COMPASS::instance().taskManager().manageSectorsTask();
 
-//        widget_->setCurrentTask(*manage_sectors_task_);
-//        if(widget_->getCurrentTaskName() != manage_sectors_task_->name())
-//        {
-//            logerr << "MainWindow: performAutomaticTasks: wrong task '" << widget_->getCurrentTaskName()
-//                   << "' selected, aborting";
-//            return;
-//        }
+        sectors_task.currentFilename(sectors_import_filename_);
 
-//        ManageSectorsTaskWidget* manage_sectors_task_widget =
-//                dynamic_cast<ManageSectorsTaskWidget*>(manage_sectors_task_->widget());
-//        assert(manage_sectors_task_widget);
+        if(!sectors_task.canRun())
+        {
+            logerr << "MainWindow: performAutomaticTasks: sectors file can not be imported";
+            return;
+        }
 
-//        manage_sectors_task_->showDoneSummary(false);
-//        manage_sectors_task_widget->importSectorsJSON(sectors_import_filename_);
+        sectors_task.run();
 
-//        //widget_->runTask(*manage_sectors_task_);
-
-//        //        while (!manage_sectors_task_->done())
-//        //        {
-//        //            QCoreApplication::processEvents();
-//        //            QThread::msleep(1);
-//        //        }
-//    }
+        while (!sectors_task.done())
+        {
+            QCoreApplication::processEvents();
+            QThread::msleep(1);
+        }
+    }
 
 //    start_time = boost::posix_time::microsec_clock::local_time();
 //    while ((boost::posix_time::microsec_clock::local_time()-start_time).total_milliseconds() < 50)
