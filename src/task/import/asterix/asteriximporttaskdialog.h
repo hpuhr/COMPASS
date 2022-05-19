@@ -25,6 +25,7 @@ public slots:
 public:
     explicit ASTERIXImportTaskDialog(ASTERIXImportTask& task);
 
+    void updateSource();
     void updateButtons();
 
 protected:

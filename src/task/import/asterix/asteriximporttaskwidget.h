@@ -55,7 +55,7 @@ class ASTERIXImportTaskWidget : public QWidget
     ASTERIXImportTaskWidget(ASTERIXImportTask& task, QWidget* parent=0, Qt::WindowFlags f=0);
     virtual ~ASTERIXImportTaskWidget();
 
-    void updateLimitRAM();
+    void updateSourceLabel();
 
     ASTERIXOverrideWidget* overrideWidget() const;
 
@@ -65,6 +65,8 @@ protected:
     QHBoxLayout* main_layout_{nullptr};
 
     QTabWidget* tab_widget_{nullptr};
+
+    QLabel* source_label_{nullptr};
 
     QComboBox* object_parser_box_{nullptr};
     QPushButton* add_object_parser_button_{nullptr};

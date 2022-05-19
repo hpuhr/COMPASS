@@ -307,7 +307,7 @@ bool DataSourceManager::hasDSFilter (const std::string& dbcontent_name)
 
 std::vector<unsigned int> DataSourceManager::unfilteredDS (const std::string& dbcontent_name)
 {
-    assert (hasDSFilter(dbcontent_name));
+    //assert (hasDSFilter(dbcontent_name)); can also be used if no filter active
 
     std::vector<unsigned int> ds_ids;
 
