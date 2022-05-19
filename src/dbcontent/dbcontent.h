@@ -117,6 +117,7 @@ public:
     static const Property var_cat021_mops_version_;
     static const Property var_cat021_nacp_;
     static const Property var_cat021_nucp_nic_;
+    static const Property var_cat021_sil_;
 
     static const Property var_cat062_tris_;
     static const Property var_cat062_track_begin_;

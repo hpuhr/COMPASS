@@ -122,6 +122,11 @@ void FilterManager::generateSubConfigurable(const std::string& class_id,
         else
             filters_.emplace_back(filter);
     }
+    else if (class_id == "ADSBQualityFilter")
+    {
+        ADSBQualityFilter* filter = new ADSBQualityFilter(class_id, instance_id, this);
+        filters_.emplace_back(filter);
+    }
     else if (class_id == "ACADFilter")
     {
         ACADFilter* filter = new ACADFilter(class_id, instance_id, this);

@@ -92,6 +92,7 @@ const Property DBContent::var_radar_altitude_ {"Mode C Code", PropertyDataType::
 const Property DBContent::var_cat021_mops_version_ {"MOPS Version", PropertyDataType::UCHAR};
 const Property DBContent::var_cat021_nacp_ {"NACp", PropertyDataType::UCHAR};
 const Property DBContent::var_cat021_nucp_nic_ {"NUCp or NIC", PropertyDataType::UCHAR};
+const Property DBContent::var_cat021_sil_ {"SIL", PropertyDataType::UCHAR};
 
 const Property DBContent::var_cat062_tris_ {"Target Report Identifiers", PropertyDataType::STRING};
 const Property DBContent::var_cat062_track_begin_ {"Track Begin", PropertyDataType::BOOL};

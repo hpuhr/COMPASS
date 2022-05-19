@@ -1,7 +1,7 @@
 {
     "parameters": {
         "db_id": "/home/sk/data/malta/delivery/20210307_1415_1600.db",
-        "use_filters": false
+        "use_filters": true
     },
     "sub_configs": {
         "ACADFilter": {
@@ -11,7 +11,7 @@
                     "changed": true,
                     "name": "Aircraft Address",
                     "op_and_": true,
-                    "values_str": "440a4c,NULL",
+                    "values_str": "4c01e1",
                     "visible": false,
                     "widget_visible": true
                 }
@@ -20,17 +20,76 @@
         "ACIDFilter": {
             "Aircraft Identification": {
                 "parameters": {
-                    "active": true,
+                    "active": false,
                     "changed": true,
                     "name": "Aircraft Identification",
                     "op_and_": true,
-                    "value_str": "%TUI%",
+                    "values_str": "null",
+                    "visible": false,
+                    "widget_visible": true
+                }
+            }
+        },
+        "ADSBQualityFilter": {
+            "ADSBQualityFilter": {
+                "parameters": {
+                    "active": true,
+                    "changed": true,
+                    "max_nacp": 5,
+                    "max_nic": 5,
+                    "max_nucp": 4,
+                    "max_sil_v1": 0,
+                    "max_sil_v2": 0,
+                    "min_nacp": 5,
+                    "min_nic": 5,
+                    "min_nucp": 4,
+                    "min_sil_v1": 0,
+                    "min_sil_v2": 0,
+                    "name": "ADSB Quality",
+                    "use_max_nacp": true,
+                    "use_max_nic": true,
+                    "use_max_nucp": true,
+                    "use_max_sil_v1": true,
+                    "use_max_sil_v2": true,
+                    "use_min_nacp": true,
+                    "use_min_nic": true,
+                    "use_min_nucp": true,
+                    "use_min_sil_v1": false,
+                    "use_min_sil_v2": false,
+                    "use_v0": true,
+                    "use_v1": true,
+                    "use_v2": true,
                     "visible": false,
                     "widget_visible": true
                 }
             }
         },
         "DBFilter": {
+            "ADSBMOPS": {
+                "parameters": {
+                    "active": false,
+                    "changed": true,
+                    "name": "ADSBMOPS",
+                    "visible": false,
+                    "widget_visible": true
+                },
+                "sub_configs": {
+                    "DBFilterCondition": {
+                        "ADSBMOPSCondition0": {
+                            "parameters": {
+                                "absolute_value": false,
+                                "display_instance_id": false,
+                                "op_and": true,
+                                "operator": "IN",
+                                "reset_value": "0",
+                                "value": "0",
+                                "variable_dbo_name": "CAT021",
+                                "variable_name": "MOPS Version"
+                            }
+                        }
+                    }
+                }
+            },
             "ARTAS Hash Code": {
                 "parameters": {
                     "active": false,
@@ -101,7 +160,7 @@
                                 "op_and": true,
                                 "operator": "<=",
                                 "reset_value": "MAX",
-                                "value": "49.215278",
+                                "value": "49.215488",
                                 "variable_dbo_name": "Meta",
                                 "variable_name": "Latitude"
                             }
@@ -113,7 +172,7 @@
                                 "op_and": true,
                                 "operator": ">=",
                                 "reset_value": "MIN",
-                                "value": "46.174722",
+                                "value": "46.208428",
                                 "variable_dbo_name": "Meta",
                                 "variable_name": "Latitude"
                             }
@@ -125,7 +184,7 @@
                                 "op_and": true,
                                 "operator": "<=",
                                 "reset_value": "MAX",
-                                "value": "17.360556",
+                                "value": "17.335926",
                                 "variable_dbo_name": "Meta",
                                 "variable_name": "Longitude"
                             }
@@ -137,7 +196,7 @@
                                 "op_and": true,
                                 "operator": ">=",
                                 "reset_value": "MIN",
-                                "value": "11.243333",
+                                "value": "11.246144",
                                 "variable_dbo_name": "Meta",
                                 "variable_name": "Longitude"
                             }
@@ -163,7 +222,7 @@
                                 "op_and": true,
                                 "operator": "<=",
                                 "reset_value": "MAX",
-                                "value": "16:00:09.195",
+                                "value": "09:03:43.000",
                                 "variable_dbo_name": "Meta",
                                 "variable_name": "Time of Day"
                             }
@@ -175,7 +234,7 @@
                                 "op_and": true,
                                 "operator": ">=",
                                 "reset_value": "MIN",
-                                "value": "15:50:56.984",
+                                "value": "08:00:23.398",
                                 "variable_dbo_name": "Meta",
                                 "variable_name": "Time of Day"
                             }
@@ -307,7 +366,7 @@
                     "changed": true,
                     "name": "Mode 3/A Codes",
                     "op_and_": true,
-                    "values_str": "7000",
+                    "values_str": "3771",
                     "visible": false,
                     "widget_visible": true
                 }
@@ -328,13 +387,25 @@
                 }
             }
         },
+        "PrimaryOnlyFilter": {
+            "Primary Only": {
+                "parameters": {
+                    "active": false,
+                    "changed": true,
+                    "name": "Primary Only",
+                    "op_and_": true,
+                    "visible": false,
+                    "widget_visible": true
+                }
+            }
+        },
         "UTNFilter": {
             "UTNFilter0": {
                 "parameters": {
                     "active": false,
                     "changed": true,
                     "name": "UTNs",
-                    "utns_str": "978",
+                    "utns_str": "404",
                     "visible": false,
                     "widget_visible": true
                 }
