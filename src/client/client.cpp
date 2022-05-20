@@ -270,6 +270,9 @@ void Client::run ()
     if (evaluate_)
         main_window.evaluate(true);
 
+    if (evaluate_run_filter_)
+        main_window.evaluateRunFilter(true);
+
     if (export_eval_report_filename_.size())
         main_window.exportEvalReportFile(export_eval_report_filename_);
 

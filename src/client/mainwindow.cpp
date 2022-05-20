@@ -474,16 +474,14 @@ void MainWindow::disableConfigurationSaving()
 
 void MainWindow::showEvaluationTab()
 {
-    assert (started_);
-    assert (tab_widget_->count() > 1);
-    tab_widget_->setCurrentIndex(1);
+    assert (tab_widget_->count() > 2);
+    tab_widget_->setCurrentIndex(2);
 }
 
 void MainWindow::showViewPointsTab()
 {
-    assert (started_);
-    assert (tab_widget_->count() > 2);
-    tab_widget_->setCurrentIndex(2);
+    assert (tab_widget_->count() > 3);
+    tab_widget_->setCurrentIndex(3);
 }
 
 void MainWindow::importViewPointsFile(const std::string& filename)
@@ -871,23 +869,7 @@ void MainWindow::performAutomaticTasks ()
             return;
         }
 
-        ManageSectorsTask& sectors_task = COMPASS::instance().taskManager().manageSectorsTask();
-
-        sectors_task.currentFilename(sectors_import_filename_);
-
-        if(!sectors_task.canRun())
-        {
-            logerr << "MainWindow: performAutomaticTasks: sectors file can not be imported";
-            return;
-        }
-
-        sectors_task.run();
-
-        while (!sectors_task.done())
-        {
-            QCoreApplication::processEvents();
-            QThread::msleep(1);
-        }
+        COMPASS::instance().evaluationManager().importSectors(sectors_import_filename_);
     }
 
     if (associate_data_)
@@ -900,6 +882,7 @@ void MainWindow::performAutomaticTasks ()
             return;
         }
 
+        assoc_task.showDoneSummary(false);
         assoc_task.run();
 
         while (!assoc_task.done())

@@ -130,8 +130,6 @@ public:
 
 
 protected:
-    bool started_ {false};
-
     QTabWidget* tab_widget_{nullptr};
 
     QPushButton* add_view_button_{nullptr};
