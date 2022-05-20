@@ -46,7 +46,7 @@ EvaluationTargetData::EvaluationTargetData()
 
 EvaluationTargetData::EvaluationTargetData(unsigned int utn, EvaluationData& eval_data, EvaluationManager& eval_man)
     : utn_(utn), eval_data_(&eval_data), eval_man_(&eval_man)
-      //wgs84_{new OGRSpatialReference()}, local_{new OGRSpatialReference()}
+    //wgs84_{new OGRSpatialReference()}, local_{new OGRSpatialReference()}
 {
     use_ = eval_man_->useUTN(utn_);
 
@@ -111,56 +111,56 @@ void EvaluationTargetData::finalize () const
     }
 
 
-//    std::set<unsigned int> mops_version;
-//    std::tuple<bool, unsigned int, unsigned int> nucp_info;
-//    std::tuple<bool, unsigned int, unsigned int> nacp_info;
+    //    std::set<unsigned int> mops_version;
+    //    std::tuple<bool, unsigned int, unsigned int> nucp_info;
+    //    std::tuple<bool, unsigned int, unsigned int> nacp_info;
 
-//    if (eval_man_->hasADSBInfo() && target_addresses_.size())
-//    {
-//        for (auto ta_it : target_addresses_)
-//        {
-//            if (eval_man_->hasADSBInfo(ta_it))
-//            {
-//                tie(mops_version, nucp_info, nacp_info) = eval_man_->adsbInfo(ta_it);
-//                mops_versions_.insert(mops_version.begin(), mops_version.end());
+    //    if (eval_man_->hasADSBInfo() && target_addresses_.size())
+    //    {
+    //        for (auto ta_it : target_addresses_)
+    //        {
+    //            if (eval_man_->hasADSBInfo(ta_it))
+    //            {
+    //                tie(mops_version, nucp_info, nacp_info) = eval_man_->adsbInfo(ta_it);
+    //                mops_versions_.insert(mops_version.begin(), mops_version.end());
 
-//                if (get<0>(nucp_info))
-//                {
-//                    if (has_nucp_nic_)
-//                    {
-//                        min_nucp_nic_ = min (min_nucp_nic_, get<1>(nucp_info));
-//                        max_nucp_nic_ = max (max_nucp_nic_, get<2>(nucp_info));
-//                    }
-//                    else
-//                    {
-//                        min_nucp_nic_ = get<1>(nucp_info);
-//                        max_nucp_nic_ = get<2>(nucp_info);
-//                        has_nucp_nic_ = true;
-//                    }
-//                }
+    //                if (get<0>(nucp_info))
+    //                {
+    //                    if (has_nucp_nic_)
+    //                    {
+    //                        min_nucp_nic_ = min (min_nucp_nic_, get<1>(nucp_info));
+    //                        max_nucp_nic_ = max (max_nucp_nic_, get<2>(nucp_info));
+    //                    }
+    //                    else
+    //                    {
+    //                        min_nucp_nic_ = get<1>(nucp_info);
+    //                        max_nucp_nic_ = get<2>(nucp_info);
+    //                        has_nucp_nic_ = true;
+    //                    }
+    //                }
 
-//                if (get<0>(nacp_info))
-//                {
-//                    if (has_nacp)
-//                    {
-//                        min_nacp_ = min (min_nacp_, get<1>(nacp_info));
-//                        max_nacp_ = max (max_nacp_, get<2>(nacp_info));
-//                    }
-//                    else
-//                    {
-//                        min_nacp_ = get<1>(nacp_info);
-//                        max_nacp_ = get<2>(nacp_info);
-//                        has_nacp = true;
-//                    }
-//                }
-//            }
-//        }
+    //                if (get<0>(nacp_info))
+    //                {
+    //                    if (has_nacp)
+    //                    {
+    //                        min_nacp_ = min (min_nacp_, get<1>(nacp_info));
+    //                        max_nacp_ = max (max_nacp_, get<2>(nacp_info));
+    //                    }
+    //                    else
+    //                    {
+    //                        min_nacp_ = get<1>(nacp_info);
+    //                        max_nacp_ = get<2>(nacp_info);
+    //                        has_nacp = true;
+    //                    }
+    //                }
+    //            }
+    //        }
 
-//        has_adsb_info_ = mops_versions_.size();
-//        //        loginf << "UGA utn " << utn_ << " mops " << mopsVersionsStr()
-//        //               << " nucp_nic " <<  (has_nucp_nic_ ? nucpNicStr() : " none ")
-//        //               << " nacp "<<  (has_nacp ? nacpStr() : " none ");
-//    }
+    //        has_adsb_info_ = mops_versions_.size();
+    //        //        loginf << "UGA utn " << utn_ << " mops " << mopsVersionsStr()
+    //        //               << " nucp_nic " <<  (has_nucp_nic_ ? nucpNicStr() : " none ")
+    //        //               << " nacp "<<  (has_nacp ? nacpStr() : " none ");
+    //    }
 
     calculateTestDataMappings();
 }
@@ -227,7 +227,7 @@ float EvaluationTargetData::timeDuration() const
         return 0;
 }
 
-std::vector<unsigned int> EvaluationTargetData::modeACodes() const
+std::set<unsigned int> EvaluationTargetData::modeACodes() const
 {
     logdbg << "EvaluationTargetData: modeACodes: utn " << utn_ << " num codes " << mode_a_codes_.size();
     return mode_a_codes_;
@@ -237,11 +237,15 @@ std::string EvaluationTargetData::modeACodesStr() const
 {
     std::ostringstream out;
 
-    for (unsigned int cnt=0; cnt < mode_a_codes_.size(); ++cnt)
+    unsigned int cnt=0;
+    for (auto& ma_it : mode_a_codes_)
     {
         if (cnt != 0)
             out << ", ";
-        out << String::octStringFromInt(mode_a_codes_.at(cnt), 4, '0');
+
+        out << String::octStringFromInt(ma_it, 4, '0');
+
+        ++cnt;
     }
 
     return out.str();
@@ -1145,7 +1149,7 @@ unsigned int EvaluationTargetData::tstTAForTime (float tod) const
     return eval_data_->tst_buffer_->get<unsigned int>(eval_data_->tst_target_address_name_).get(index);
 }
 
- // has gbs, gbs true
+// has gbs, gbs true
 pair<bool,bool> EvaluationTargetData::tstGroundBitForTimeInterpolated (float tod) const // true is on ground
 {
     if (!eval_data_->tst_ground_bit_name_.size())
@@ -1511,7 +1515,7 @@ bool EvaluationTargetData::hasNacp() const
 //    return tst_buffer_;
 //}
 
-std::vector<string> EvaluationTargetData::callsigns() const
+std::set<string> EvaluationTargetData::callsigns() const
 {
     return callsigns_;
 }
@@ -1520,17 +1524,20 @@ string EvaluationTargetData::callsignsStr() const
 {
     std::ostringstream out;
 
-    for (unsigned int cnt=0; cnt < callsigns_.size(); ++cnt)
+    unsigned int cnt=0;
+    for (auto& cs_it : callsigns_)
     {
         if (cnt != 0)
             out << ", ";
-        out << callsigns_.at(cnt);
+
+        out << cs_it;
+        ++cnt;
     }
 
     return out.str().c_str();
 }
 
-std::vector<unsigned int> EvaluationTargetData::targetAddresses() const
+std::set<unsigned int> EvaluationTargetData::targetAddresses() const
 {
     return target_addresses_;
 }
@@ -1539,11 +1546,14 @@ std::string EvaluationTargetData::targetAddressesStr() const
 {
     std::ostringstream out;
 
-    for (unsigned int cnt=0; cnt < target_addresses_.size(); ++cnt)
+    unsigned int cnt=0;
+    for (auto& ta_it : target_addresses_)
     {
         if (cnt != 0)
             out << ", ";
-        out << String::hexStringFromInt(target_addresses_.at(cnt), 6, '0');
+
+        out << String::hexStringFromInt(ta_it, 6, '0');
+        ++cnt;
     }
 
     return out.str().c_str();
@@ -1560,8 +1570,8 @@ void EvaluationTargetData::updateCallsigns() const
 
         for (auto& val_it : distinct_values)
         {
-            if (find(callsigns_.begin(), callsigns_.end(), val_it.first) == callsigns_.end())
-                callsigns_.push_back(val_it.first);
+            if (!callsigns_.count(val_it.first))
+                callsigns_.insert(val_it.first);
         }
     }
 
@@ -1572,8 +1582,8 @@ void EvaluationTargetData::updateCallsigns() const
 
         for (auto& val_it : distinct_values)
         {
-            if (find(callsigns_.begin(), callsigns_.end(), val_it.first) == callsigns_.end())
-                callsigns_.push_back(val_it.first);
+            if (!callsigns_.count(val_it.first))
+                callsigns_.insert(val_it.first);
         }
     }
 }
@@ -1590,8 +1600,8 @@ void EvaluationTargetData::updateTargetAddresses() const
 
         for (auto& val_it : distinct_values)
         {
-            if (find(target_addresses_.begin(), target_addresses_.end(), val_it.first) == target_addresses_.end())
-                target_addresses_.push_back(val_it.first);
+            if (!target_addresses_.count(val_it.first))
+                target_addresses_.insert(val_it.first);
         }
     }
 
@@ -1603,8 +1613,8 @@ void EvaluationTargetData::updateTargetAddresses() const
 
         for (auto& val_it : distinct_values)
         {
-            if (find(target_addresses_.begin(), target_addresses_.end(), val_it.first) == target_addresses_.end())
-                target_addresses_.push_back(val_it.first);
+            if (!target_addresses_.count(val_it.first))
+                target_addresses_.insert(val_it.first);
         }
     }
 }
@@ -1624,11 +1634,11 @@ void EvaluationTargetData::updateModeACodes() const
 
         for (auto& ma_it : distinct_codes)
         {
-            if (find(mode_a_codes_.begin(), mode_a_codes_.end(), ma_it.first) == mode_a_codes_.end())
+            if (!mode_a_codes_.count(ma_it.first))
             {
                 logdbg << "EvaluationTargetData: updateModeACodes: utn " << utn_ << " new ref m3a "
                        << String::octStringFromInt(ma_it.first, 4, '0');
-                mode_a_codes_.push_back(ma_it.first);
+                mode_a_codes_.insert(ma_it.first);
             }
         }
     }
@@ -1641,11 +1651,11 @@ void EvaluationTargetData::updateModeACodes() const
 
         for (auto& ma_it : distinct_codes)
         {
-            if (find(mode_a_codes_.begin(), mode_a_codes_.end(), ma_it.first) == mode_a_codes_.end())
+            if (!mode_a_codes_.count(ma_it.first))
             {
                 logdbg << "EvaluationTargetData: updateModeACodes: utn " << utn_ << " new tst m3a "
                        << String::octStringFromInt(ma_it.first, 4, '0');
-                mode_a_codes_.push_back(ma_it.first);
+                mode_a_codes_.insert(ma_it.first);
             }
         }
     }
@@ -1985,14 +1995,14 @@ void EvaluationTargetData::addRefPositiosToMapping (TstDataMapping& mapping) con
             }
             else
             {
-//                local_->SetStereographic(pos1.latitude_, pos1.longitude_, 1.0, 0.0, 0.0);
+                //                local_->SetStereographic(pos1.latitude_, pos1.longitude_, 1.0, 0.0, 0.0);
 
-//                unique_ptr<OGRCoordinateTransformation> ogr_geo2cart {
-//                    OGRCreateCoordinateTransformation(wgs84_.get(), local_.get())};
-//                assert (ogr_geo2cart);
-//                unique_ptr<OGRCoordinateTransformation> ogr_cart2geo{
-//                    OGRCreateCoordinateTransformation(local_.get(), wgs84_.get())};
-//                assert (ogr_cart2geo);
+                //                unique_ptr<OGRCoordinateTransformation> ogr_geo2cart {
+                //                    OGRCreateCoordinateTransformation(wgs84_.get(), local_.get())};
+                //                assert (ogr_geo2cart);
+                //                unique_ptr<OGRCoordinateTransformation> ogr_cart2geo{
+                //                    OGRCreateCoordinateTransformation(local_.get(), wgs84_.get())};
+                //                assert (ogr_cart2geo);
 
                 logdbg << "EvaluationTargetData: addRefPositiosToMapping: pos1 "
                        << pos1.latitude_ << ", " << pos1.longitude_;
@@ -2002,22 +2012,22 @@ void EvaluationTargetData::addRefPositiosToMapping (TstDataMapping& mapping) con
                 bool ok;
                 double x_pos, y_pos;
 
-//                if (in_appimage_) // inside appimage
-//                {
-//                    x_pos = pos2.longitude_;
-//                    y_pos = pos2.latitude_;
-//                }
-//                else
-//                {
-//                    x_pos = pos2.latitude_;
-//                    y_pos = pos2.longitude_;
-//                }
+                //                if (in_appimage_) // inside appimage
+                //                {
+                //                    x_pos = pos2.longitude_;
+                //                    y_pos = pos2.latitude_;
+                //                }
+                //                else
+                //                {
+                //                    x_pos = pos2.latitude_;
+                //                    y_pos = pos2.longitude_;
+                //                }
 
                 tie(ok, x_pos, y_pos) = trafo_.distanceCart(
                             pos1.latitude_, pos1.longitude_, pos2.latitude_, pos2.longitude_);
 
-//                logdbg << "EvaluationTargetData: addRefPositiosToMapping: geo2cart";
-//                bool ret = ogr_geo2cart->Transform(1, &x_pos, &y_pos); // wgs84 to cartesian offsets
+                //                logdbg << "EvaluationTargetData: addRefPositiosToMapping: geo2cart";
+                //                bool ret = ogr_geo2cart->Transform(1, &x_pos, &y_pos); // wgs84 to cartesian offsets
                 if (!ok)
                 {
                     logerr << "EvaluationTargetData: addRefPositiosToMapping: error with latitude " << pos2.latitude_
@@ -2083,9 +2093,9 @@ void EvaluationTargetData::addRefPositiosToMapping (TstDataMapping& mapping) con
 
                     mapping.has_ref_pos_ = true;
 
-//                    if (in_appimage_) // inside appimage
-//                        mapping.pos_ref_ = EvaluationTargetPosition(y_pos, x_pos, has_altitude, true, altitude);
-//                    else
+                    //                    if (in_appimage_) // inside appimage
+                    //                        mapping.pos_ref_ = EvaluationTargetPosition(y_pos, x_pos, has_altitude, true, altitude);
+                    //                    else
                     mapping.pos_ref_ = EvaluationTargetPosition(x_pos, y_pos, has_altitude, true, altitude);
 
                     mapping.posbased_spd_ref_.x_ = v_x;

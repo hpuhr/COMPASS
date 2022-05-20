@@ -75,14 +75,23 @@ EvaluationDataFilterDialog::EvaluationDataFilterDialog(EvaluationData& eval_data
     config_layout->addRow("Remove Mode A/C Code onlys", remove_mode_ac_only_check_);
 
     remove_mode_a_check_ = new QCheckBox();
-    remove_mode_a_check_->setChecked(eval_man_.removeModeACodes());
+    remove_mode_a_check_->setChecked(eval_man_.filterModeACodes());
     connect(remove_mode_a_check_, &QCheckBox::clicked, this,
             &EvaluationDataFilterDialog::removeModeASlot);
 
     config_layout->addRow("Remove By Mode A Code", remove_mode_a_check_);
 
+    remove_mode_a_blacklist_check_ = new QCheckBox();
+    remove_mode_a_blacklist_check_->setChecked(eval_man_.filterModeACodeBlacklist());
+    remove_mode_a_blacklist_check_->setToolTip("If checked, values are a blacklist - if not checked, a whitelist");
+    connect(remove_mode_a_blacklist_check_, &QCheckBox::clicked,
+            this, &EvaluationDataFilterDialog::removeModeABlackListSlot);
+
+    config_layout->addRow("Mode A Code Blacklist", remove_mode_a_blacklist_check_);
+
+
     remove_mode_a_edit_ = new QTextEdit();
-    remove_mode_a_edit_->setText(eval_man_.removeModeACodeValues().c_str());
+    remove_mode_a_edit_->setText(eval_man_.filterModeACodeValues().c_str());
     connect(remove_mode_a_edit_, &QTextEdit::textChanged, this,
             &EvaluationDataFilterDialog::removeModeAValuesSlot);
 
@@ -106,18 +115,26 @@ EvaluationDataFilterDialog::EvaluationDataFilterDialog(EvaluationData& eval_data
 
     // ta
     remove_ta_check_ = new QCheckBox();
-    remove_ta_check_->setChecked(eval_man_.removeTargetAddresses());
+    remove_ta_check_->setChecked(eval_man_.filterTargetAddresses());
     connect(remove_ta_check_, &QCheckBox::clicked, this,
             &EvaluationDataFilterDialog::removeTASlot);
 
     config_layout->addRow("Remove By Target Address", remove_ta_check_);
 
+    remove_ta_blacklist_check_ = new QCheckBox();
+    remove_ta_blacklist_check_->setChecked(eval_man_.filterTargetAddressesBlacklist());
+    remove_ta_blacklist_check_->setToolTip("If checked, values are a blacklist - if not checked, a whitelist");
+    connect(remove_ta_blacklist_check_, &QCheckBox::clicked,
+            this, &EvaluationDataFilterDialog::removeTABlackListSlot);
+
+    config_layout->addRow("Target Addresses Blacklist", remove_ta_blacklist_check_);
+
     remove_ta_edit_ = new QTextEdit();
-    remove_ta_edit_->setText(eval_man_.removeTargetAddressValues().c_str());
+    remove_ta_edit_->setText(eval_man_.filterTargetAddressValues().c_str());
     connect(remove_ta_edit_, &QTextEdit::textChanged, this,
             &EvaluationDataFilterDialog::removeTAValuesSlot);
 
-    config_layout->addRow("\tTarget Adresses (hex)", remove_ta_edit_);
+    config_layout->addRow("\tTarget Addresses (hex)", remove_ta_edit_);
 
     // dbos
     remove_dbo_check_ = new QCheckBox();
@@ -208,12 +225,18 @@ void EvaluationDataFilterDialog::removeModeACOnlyTargetsSlot(bool checked)
 
 void EvaluationDataFilterDialog::removeModeASlot(bool checked)
 {
-    eval_man_.removeModeACodes(checked);
+    eval_man_.filterModeACodes(checked);
 }
+
+void EvaluationDataFilterDialog::removeModeABlackListSlot(bool checked)
+{
+    eval_man_.filterModeACodeBlacklist(checked);
+}
+
 void EvaluationDataFilterDialog::removeModeAValuesSlot()
 {
     assert (remove_mode_a_edit_);
-    eval_man_.removeModeACodeValues(remove_mode_a_edit_->document()->toPlainText().toStdString());
+    eval_man_.filterModeACodeValues(remove_mode_a_edit_->document()->toPlainText().toStdString());
 }
 
 void EvaluationDataFilterDialog::removeModeCSlot(bool checked)
@@ -229,13 +252,18 @@ void EvaluationDataFilterDialog::removeModeCMinValueSlot()
 
 void EvaluationDataFilterDialog::removeTASlot(bool checked)
 {
-    eval_man_.removeTargetAddresses(checked);
+    eval_man_.filterTargetAddresses(checked);
+}
+
+void EvaluationDataFilterDialog::removeTABlackListSlot(bool checked)
+{
+    eval_man_.filterTargetAddressesBlacklist(checked);
 }
 
 void EvaluationDataFilterDialog::removeTAValuesSlot()
 {
     assert (remove_ta_edit_);
-    eval_man_.removeTargetAddressValues(remove_ta_edit_->document()->toPlainText().toStdString());
+    eval_man_.filterTargetAddressValues(remove_ta_edit_->document()->toPlainText().toStdString());
 }
 
 void EvaluationDataFilterDialog::removeDBOsSlot(bool checked)

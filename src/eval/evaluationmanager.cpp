@@ -85,14 +85,16 @@ EvaluationManager::EvaluationManager(const std::string& class_id, const std::str
     registerParameter("remove_psr_only_targets", &remove_psr_only_targets_, true);
     // ma
     registerParameter("remove_modeac_onlys", &remove_modeac_onlys_, false);
-    registerParameter("remove_mode_a_codes", &remove_mode_a_codes_, false);
-    registerParameter("remove_mode_a_code_values", &remove_mode_a_code_values_, "7000,7777");
+    registerParameter("filter_mode_a_codes", &filter_mode_a_codes_, false);
+    registerParameter("filter_mode_a_code_blacklist", &filter_mode_a_code_blacklist_, true);
+    registerParameter("filter_mode_a_code_values", &filter_mode_a_code_values_, "7000,7777");
     // mc
     registerParameter("remove_mode_c_values", &remove_mode_c_values_, false);
     registerParameter("remove_mode_c_min_value", &remove_mode_c_min_value_, 11000);
     // ta
-    registerParameter("remove_mode_target_addresses", &remove_target_addresses_, false);
-    registerParameter("remove_target_address_vales", &remove_target_address_values_, "");
+    registerParameter("filter_target_addresses", &filter_target_addresses_, false);
+    registerParameter("filter_target_addresses_blacklist", &filter_target_addresses_blacklist_, true);
+    registerParameter("filter_target_address_values", &filter_target_address_values_, "");
     // dbo
     registerParameter("remove_not_detected_dbos", &remove_not_detected_dbos_, false);
     registerParameter("remove_not_detected_dbo_values", &remove_not_detected_dbo_values_, json::object());
@@ -1894,8 +1896,10 @@ void EvaluationManager::filterUTNs ()
     bool use;
     string comment;
 
-    std::set<std::pair<int,int>> remove_mode_as = removeModeACodeData();
-    std::set<unsigned int> remove_tas = removeTargetAddressData();
+    std::set<std::pair<int,int>> remove_mode_as = filterModeACodeData();
+    std::set<unsigned int> remove_tas = filterTargetAddressData();
+
+    bool tmp_match;
 
     for (auto& target_it : data_)
     {
@@ -1935,34 +1939,39 @@ void EvaluationManager::filterUTNs ()
             }
         }
 
-        if (use && remove_mode_a_codes_)
+        if (use && filter_mode_a_codes_)
         {
+            tmp_match = false;
+
             for (auto t_ma : target_it.modeACodes())
             {
                 for (auto& r_ma_p : remove_mode_as)
                 {
                     if (r_ma_p.second == -1) // single
-                    {
-                        if (t_ma == r_ma_p.first)
-                        {
-                            use = false;
-                            comment = "Mode A";
-                            break;
-                        }
-                    }
+                        tmp_match |= (t_ma == r_ma_p.first);
                     else // pair
-                    {
-                        if (t_ma >= r_ma_p.first && t_ma <= r_ma_p.second)
-                        {
-                            use = false;
-                            comment = "Mode A";
-                            break;
-                        }
-                    }
+                        tmp_match |= (t_ma >= r_ma_p.first && t_ma <= r_ma_p.second);
                 }
 
-                if (!use) // already removed
+                if (tmp_match)
                     break;
+            }
+
+            if (filter_mode_a_code_blacklist_)
+            {
+                if (tmp_match) // disable if match
+                {
+                    use = false;
+                    comment = "Mode A";
+                }
+            }
+            else // whitelist
+            {
+                if (!tmp_match) // disable if not match
+                {
+                    use = false;
+                    comment = "Mode A";
+                }
             }
         }
 
@@ -1980,15 +1989,32 @@ void EvaluationManager::filterUTNs ()
             }
         }
 
-        if (use && remove_target_addresses_)
+        if (use && filter_target_addresses_)
         {
-            for (auto t_ta : target_it.targetAddresses())
+            tmp_match = false;
+
+            for (auto ta_it : target_it.targetAddresses())
             {
-                if (remove_tas.count(t_ta))
+                tmp_match = remove_tas.count(ta_it);
+
+                if (tmp_match)
+                    break;
+            }
+
+            if (filter_target_addresses_blacklist_)
+            {
+                if (tmp_match) // disable if match
                 {
                     use = false;
                     comment = "Target Address";
-                    break;
+                }
+            }
+            else // whitelist
+            {
+                if (!tmp_match) // disable if not match
+                {
+                    use = false;
+                    comment = "Target Address";
                 }
             }
         }
@@ -2107,16 +2133,16 @@ void EvaluationManager::removePsrOnlyTargets(bool value)
     remove_psr_only_targets_ = value;
 }
 
-std::string EvaluationManager::removeModeACodeValues() const
+std::string EvaluationManager::filterModeACodeValues() const
 {
-    return remove_mode_a_code_values_;
+    return filter_mode_a_code_values_;
 }
 
-std::set<std::pair<int,int>> EvaluationManager::removeModeACodeData() const // single ma,-1 or range ma1,ma2
+std::set<std::pair<int,int>> EvaluationManager::filterModeACodeData() const // single ma,-1 or range ma1,ma2
 {
     std::set<std::pair<int,int>> data;
 
-    vector<string> parts = String::split(remove_mode_a_code_values_, ',');
+    vector<string> parts = String::split(filter_mode_a_code_values_, ',');
 
     for (auto& part_it : parts)
     {
@@ -2145,23 +2171,23 @@ std::set<std::pair<int,int>> EvaluationManager::removeModeACodeData() const // s
     return data;
 }
 
-void EvaluationManager::removeModeACodeValues(const std::string& value)
+void EvaluationManager::filterModeACodeValues(const std::string& value)
 {
     loginf << "EvaluationManager: removeModeACodeValues: value '" << value << "'";
 
-    remove_mode_a_code_values_ = value;
+    filter_mode_a_code_values_ = value;
 }
 
-std::string EvaluationManager::removeTargetAddressValues() const
+std::string EvaluationManager::filterTargetAddressValues() const
 {
-    return remove_target_address_values_;
+    return filter_target_address_values_;
 }
 
-std::set<unsigned int> EvaluationManager::removeTargetAddressData() const
+std::set<unsigned int> EvaluationManager::filterTargetAddressData() const
 {
     std::set<unsigned int>  data;
 
-    vector<string> parts = String::split(remove_target_address_values_, ',');
+    vector<string> parts = String::split(filter_target_address_values_, ',');
 
     for (auto& part_it : parts)
     {
@@ -2172,11 +2198,11 @@ std::set<unsigned int> EvaluationManager::removeTargetAddressData() const
     return data;
 }
 
-void EvaluationManager::removeTargetAddressValues(const std::string& value)
+void EvaluationManager::filterTargetAddressValues(const std::string& value)
 {
     loginf << "EvaluationManager: removeTargetAddressValues: value '" << value << "'";
 
-    remove_target_address_values_ = value;
+    filter_target_address_values_ = value;
 }
 
 bool EvaluationManager::removeModeACOnlys() const
@@ -2227,28 +2253,28 @@ void EvaluationManager::loadOnlySectorData(bool value)
     load_only_sector_data_ = value;
 }
 
-bool EvaluationManager::removeTargetAddresses() const
+bool EvaluationManager::filterTargetAddresses() const
 {
-    return remove_target_addresses_;
+    return filter_target_addresses_;
 }
 
-void EvaluationManager::removeTargetAddresses(bool value)
+void EvaluationManager::filterTargetAddresses(bool value)
 {
     loginf << "EvaluationManager: removeTargetAddresses: value " << value;
 
-    remove_target_addresses_ = value;
+    filter_target_addresses_ = value;
 }
 
-bool EvaluationManager::removeModeACodes() const
+bool EvaluationManager::filterModeACodes() const
 {
-    return remove_mode_a_codes_;
+    return filter_mode_a_codes_;
 }
 
-void EvaluationManager::removeModeACodes(bool value)
+void EvaluationManager::filterModeACodes(bool value)
 {
     loginf << "EvaluationManager: removeModeACodes: value " << value;
 
-    remove_mode_a_codes_ = value;
+    filter_mode_a_codes_ = value;
 }
 
 nlohmann::json::object_t EvaluationManager::getBaseViewableDataConfig ()
@@ -2627,6 +2653,30 @@ double EvaluationManager::resultDetailZoom() const
 void EvaluationManager::resultDetailZoom(double result_detail_zoom)
 {
     result_detail_zoom_ = result_detail_zoom;
+}
+
+bool EvaluationManager::filterTargetAddressesBlacklist() const
+{
+    return filter_target_addresses_blacklist_;
+}
+
+void EvaluationManager::filterTargetAddressesBlacklist(bool value)
+{
+    loginf << "EvaluationManager: filterTargetAddressesBlacklist: value " << value;
+
+    filter_target_addresses_blacklist_ = value;
+}
+
+bool EvaluationManager::filterModeACodeBlacklist() const
+{
+    return filter_mode_a_code_blacklist_;
+}
+
+void EvaluationManager::filterModeACodeBlacklist(bool value)
+{
+    loginf << "EvaluationManager: filterModeACodeBlacklist: value " << value;
+
+    filter_mode_a_code_blacklist_ = value;
 }
 
 unsigned int EvaluationManager::lineIDRef() const

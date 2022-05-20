@@ -213,8 +213,10 @@ public:
     bool removePsrOnlyTargets() const;
     void removePsrOnlyTargets(bool value);
 
-    bool removeModeACodes() const;
-    void removeModeACodes(bool value);
+    bool filterModeACodes() const;
+    void filterModeACodes(bool value);
+    bool filterModeACodeBlacklist() const;
+    void filterModeACodeBlacklist(bool value);
 
     bool removeModeCValues() const;
     void removeModeCValues(bool value);
@@ -222,16 +224,18 @@ public:
     float removeModeCMinValue() const;
     void removeModeCMinValue(float value);
 
-    std::string removeModeACodeValues() const;
-    std::set<std::pair<int,int>> removeModeACodeData() const; // single ma,-1 or range ma1,ma2
-    void removeModeACodeValues(const std::string& value);
+    std::string filterModeACodeValues() const;
+    std::set<std::pair<int,int>> filterModeACodeData() const; // single ma,-1 or range ma1,ma2
+    void filterModeACodeValues(const std::string& value);
 
-    bool removeTargetAddresses() const;
-    void removeTargetAddresses(bool value);
+    bool filterTargetAddresses() const;
+    void filterTargetAddresses(bool value);
+    bool filterTargetAddressesBlacklist() const;
+    void filterTargetAddressesBlacklist(bool value);
 
-    std::string removeTargetAddressValues() const;
-    std::set<unsigned int> removeTargetAddressData() const;
-    void removeTargetAddressValues(const std::string& value);
+    std::string filterTargetAddressValues() const;
+    std::set<unsigned int> filterTargetAddressData() const;
+    void filterTargetAddressValues(const std::string& value);
 
     bool removeModeACOnlys() const;
     void removeModeACOnlys(bool value);
@@ -384,14 +388,16 @@ protected:
     bool remove_psr_only_targets_ {true};
     bool remove_modeac_onlys_ {false};
 
-    bool remove_mode_a_codes_{false};
-    std::string remove_mode_a_code_values_;
+    bool filter_mode_a_codes_{false};
+    bool filter_mode_a_code_blacklist_{true};
+    std::string filter_mode_a_code_values_;
 
     bool remove_mode_c_values_{false};
     float remove_mode_c_min_value_;
 
-    bool remove_target_addresses_{false};
-    std::string remove_target_address_values_;
+    bool filter_target_addresses_{false};
+    bool filter_target_addresses_blacklist_{true};
+    std::string filter_target_address_values_;
 
     bool remove_not_detected_dbos_{false};
     nlohmann::json remove_not_detected_dbo_values_;
