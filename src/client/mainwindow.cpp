@@ -602,6 +602,12 @@ void MainWindow::exportEvalReportFile(const std::string& filename)
     export_eval_report_filename_ = filename;
 }
 
+void MainWindow::evaluateRunFilter(bool value)
+{
+    automatic_tasks_defined_ = true;
+    evaluate_run_filter_ = value;
+}
+
 void MainWindow::evaluate(bool evaluate)
 {
     automatic_tasks_defined_ = true;
@@ -744,6 +750,12 @@ void MainWindow::performAutomaticTasks ()
         ast_import_task.showDoneSummary(false);
 
         ast_import_task.run(false); // no test
+
+        while (!ast_import_task.done())
+        {
+            QCoreApplication::processEvents();
+            QThread::msleep(1);
+        }
     }
 
     if (asterix_import_network_)
@@ -963,6 +975,9 @@ void MainWindow::performAutomaticTasks ()
 
             assert (eval_man.dataLoaded());
 
+            if (evaluate_run_filter_)
+                eval_man.autofilterUTNs();
+
             if (eval_man.canEvaluate())
             {
                 loginf << "MainWindow: performAutomaticTasks: doing evaluation";
@@ -1015,6 +1030,14 @@ void MainWindow::performAutomaticTasks ()
     if (quit_)
     {
         loginf << "MainWindow: performAutomaticTasks: quit requested";
+
+        start_time = boost::posix_time::microsec_clock::local_time();
+
+        while ((boost::posix_time::microsec_clock::local_time()-start_time).total_milliseconds() < 2000)
+        {
+            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+            QThread::msleep(1);
+        }
 
         quitSlot();
     }

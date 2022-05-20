@@ -128,9 +128,10 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
             ("load_data", po::bool_switch(&load_data_), "load data after start")
             ("export_view_points_report", po::value<std::string>(&export_view_points_report_filename_),
              "export view points report after start with given filename, e.g. '/data/db2/report.tex")
-            //            ("evaluate", po::bool_switch(&evaluate), "run evaluation")
-            //            ("export_eval_report", po::value<std::string>(&export_eval_report_filename),
-            //             "export evaluation report after start with given filename, e.g. '/data/eval_db2/report.tex")
+            ("evaluate", po::bool_switch(&evaluate_), "run evaluation")
+            ("evaluate_run_filter", po::bool_switch(&evaluate_run_filter_), "run evaluation filter before evaluation")
+            ("export_eval_report", po::value<std::string>(&export_eval_report_filename_),
+             "export evaluation report after start with given filename, e.g. '/data/eval_db2/report.tex")
             ("quit", po::bool_switch(&quit_), "quit after finishing all previous steps");
 
     try
@@ -263,14 +264,14 @@ void Client::run ()
     if (load_data_)
         main_window.loadData(load_data_);
 
-    //    if (export_view_points_report_filename.size())
-    //        task_man.exportViewPointsReportFile(export_view_points_report_filename);
+    if (export_view_points_report_filename_.size())
+        main_window.exportViewPointsReportFile(export_view_points_report_filename_);
 
-    //    if (evaluate)
-    //        task_man.evaluate(true);
+    if (evaluate_)
+        main_window.evaluate(true);
 
-    //    if (export_eval_report_filename.size())
-    //        task_man.exportEvalReportFile(export_eval_report_filename);
+    if (export_eval_report_filename_.size())
+        main_window.exportEvalReportFile(export_eval_report_filename_);
 
     if (quit_)
         main_window.quit(quit_);

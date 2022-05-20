@@ -115,6 +115,7 @@ public:
     void exportViewPointsReportFile(const std::string& filename);
     void exportEvalReportFile(const std::string& filename);
 
+    void evaluateRunFilter(bool value);
     void evaluate(bool evaluate);
 
     void quit(bool value);
@@ -167,6 +168,7 @@ protected:
     bool export_view_points_report_ {false};
     std::string export_view_points_report_filename_;
 
+    bool evaluate_run_filter_ {false};
     bool evaluate_ {false};
     bool export_eval_report_ {false};
     std::string export_eval_report_filename_;

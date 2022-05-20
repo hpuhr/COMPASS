@@ -60,6 +60,7 @@ private:
     bool load_data_ {false};
 
     std::string export_view_points_report_filename_;
+    bool evaluate_run_filter_ {false};
     bool evaluate_ {false};
     std::string export_eval_report_filename_;
 

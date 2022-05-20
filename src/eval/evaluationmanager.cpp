@@ -426,7 +426,7 @@ void EvaluationManager::autofilterUTNs()
 
     data_.setUseAllTargetData(true);
     data_.clearComments();
-    data_.setUseByFilter ();
+    data_.setUseByFilter();
 
     loginf << "EvaluationManager: autofilterUTNs: done";
 }
