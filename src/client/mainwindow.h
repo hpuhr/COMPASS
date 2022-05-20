@@ -108,7 +108,15 @@ public:
     void importGPSTrailFile(const std::string& filename);
     void importSectorsFile(const std::string& filename);
 
+    void associateData(bool value);
+
     void loadData(bool value);
+
+    void exportViewPointsReportFile(const std::string& filename);
+    void exportEvalReportFile(const std::string& filename);
+
+    void evaluate(bool evaluate);
+
     void quit(bool value);
     bool quitNeeded();
 
@@ -152,7 +160,17 @@ protected:
     bool sectors_import_file_ {false};
     std::string sectors_import_filename_;
 
+    bool associate_data_ {false};
+
     bool load_data_ {false};
+
+    bool export_view_points_report_ {false};
+    std::string export_view_points_report_filename_;
+
+    bool evaluate_ {false};
+    bool export_eval_report_ {false};
+    std::string export_eval_report_filename_;
+
     bool quit_ {false};
 
     // menu

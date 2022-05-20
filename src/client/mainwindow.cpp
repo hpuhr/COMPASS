@@ -36,6 +36,8 @@
 #include "viewmanager.h"
 #include "viewpointsimporttask.h"
 #include "viewpointsimporttaskdialog.h"
+#include "viewpointsreportgenerator.h"
+#include "viewpointsreportgeneratordialog.h"
 #include "gpstrailimporttask.h"
 #include "gpstrailimporttaskdialog.h"
 #include "managesectorstask.h"
@@ -45,7 +47,6 @@
 
 #include "asteriximporttask.h"
 #include "asteriximporttaskdialog.h"
-
 
 #include "radarplotpositioncalculatortask.h"
 #include "radarplotpositioncalculatortaskdialog.h"
@@ -569,6 +570,14 @@ void MainWindow::importSectorsFile(const std::string& filename)
 }
 
 
+void MainWindow::associateData(bool value)
+{
+    loginf << "MainWindow: associateData: value " << value;
+
+    automatic_tasks_defined_ = true;
+    associate_data_ = value;
+}
+
 void MainWindow::loadData(bool value)
 {
     loginf << "MainWindow: loadData: value " << value;
@@ -576,6 +585,29 @@ void MainWindow::loadData(bool value)
     automatic_tasks_defined_ = true;
     load_data_ = value;
 }
+
+void MainWindow::exportViewPointsReportFile(const std::string& filename)
+{
+    loginf << "TaskManager: exportViewPointsReport: file '" << filename << "'";
+
+    automatic_tasks_defined_ = true;
+    export_view_points_report_ = true;
+    export_view_points_report_filename_ = filename;
+}
+
+void MainWindow::exportEvalReportFile(const std::string& filename)
+{
+    automatic_tasks_defined_ = true;
+    export_eval_report_ = true;
+    export_eval_report_filename_ = filename;
+}
+
+void MainWindow::evaluate(bool evaluate)
+{
+    automatic_tasks_defined_ = true;
+    evaluate_ = evaluate;
+}
+
 
 void MainWindow::quit(bool value)
 {
@@ -703,6 +735,7 @@ void MainWindow::performAutomaticTasks ()
             return;
         }
 
+
         ASTERIXImportTask& ast_import_task = COMPASS::instance().taskManager().asterixImporterTask();
 
         ast_import_task.importFilename(asterix_import_filename_);
@@ -731,56 +764,57 @@ void MainWindow::performAutomaticTasks ()
             logwrn << "MainWindow: performAutomaticTasks: importing ASTERIX from network not possible";
     }
 
-////    if (json_import_file_)
-////    {
-////        loginf << "MainWindow: performAutomaticTasks: importing JSON file '"
-////               << json_import_filename_ << "'";
 
-////#if USE_JASTERIX
-////        if (!Files::fileExists(json_import_filename_))
-////        {
-////            logerr << "MainWindow: performAutomaticTasks: JSON file '" << asterix_import_filename_
-////                   << "' does not exist";
-////            return;
-////        }
-////#endif
+    ////    if (json_import_file_)
+    ////    {
+    ////        loginf << "MainWindow: performAutomaticTasks: importing JSON file '"
+    ////               << json_import_filename_ << "'";
 
-////        if(!json_import_task_->hasSchema(json_import_schema_))
-////        {
-////            logerr << "MainWindow: performAutomaticTasks: JSON schema '" << json_import_schema_
-////                   << "' does not exist";
-////            return;
-////        }
+    ////#if USE_JASTERIX
+    ////        if (!Files::fileExists(json_import_filename_))
+    ////        {
+    ////            logerr << "MainWindow: performAutomaticTasks: JSON file '" << asterix_import_filename_
+    ////                   << "' does not exist";
+    ////            return;
+    ////        }
+    ////#endif
 
-////        widget_->setCurrentTask(*json_import_task_);
-////        if(widget_->getCurrentTaskName() != json_import_task_->name())
-////        {
-////            logerr << "MainWindow: performAutomaticTasks: wrong task '" << widget_->getCurrentTaskName()
-////                   << "' selected, aborting";
-////            return;
-////        }
+    ////        if(!json_import_task_->hasSchema(json_import_schema_))
+    ////        {
+    ////            logerr << "MainWindow: performAutomaticTasks: JSON schema '" << json_import_schema_
+    ////                   << "' does not exist";
+    ////            return;
+    ////        }
 
-////        JSONImportTaskWidget* json_import_task_widget =
-////                dynamic_cast<JSONImportTaskWidget*>(json_import_task_->widget());
-////        assert(json_import_task_widget);
+    ////        widget_->setCurrentTask(*json_import_task_);
+    ////        if(widget_->getCurrentTaskName() != json_import_task_->name())
+    ////        {
+    ////            logerr << "MainWindow: performAutomaticTasks: wrong task '" << widget_->getCurrentTaskName()
+    ////                   << "' selected, aborting";
+    ////            return;
+    ////        }
 
-////        json_import_task_widget->addFile(json_import_filename_);
-////        json_import_task_widget->selectFile(json_import_filename_);
-////        json_import_task_widget->selectSchema(json_import_schema_);
+    ////        JSONImportTaskWidget* json_import_task_widget =
+    ////                dynamic_cast<JSONImportTaskWidget*>(json_import_task_->widget());
+    ////        assert(json_import_task_widget);
 
-////        assert(json_import_task_->canRun());
-////        json_import_task_->showDoneSummary(false);
+    ////        json_import_task_widget->addFile(json_import_filename_);
+    ////        json_import_task_widget->selectFile(json_import_filename_);
+    ////        json_import_task_widget->selectSchema(json_import_schema_);
 
-////        widget_->runTask(*json_import_task_);
+    ////        assert(json_import_task_->canRun());
+    ////        json_import_task_->showDoneSummary(false);
 
-////        while (!json_import_task_->done())
-////        {
-////            QCoreApplication::processEvents();
-////            QThread::msleep(1);
-////        }
+    ////        widget_->runTask(*json_import_task_);
 
-////        loginf << "MainWindow: performAutomaticTasks: importing JSON file done";
-////    }
+    ////        while (!json_import_task_->done())
+    ////        {
+    ////            QCoreApplication::processEvents();
+    ////            QThread::msleep(1);
+    ////        }
+
+    ////        loginf << "MainWindow: performAutomaticTasks: importing JSON file done";
+    ////    }
 
     if (gps_trail_import_file_)
     {
@@ -844,135 +878,24 @@ void MainWindow::performAutomaticTasks ()
         }
     }
 
-//    start_time = boost::posix_time::microsec_clock::local_time();
-//    while ((boost::posix_time::microsec_clock::local_time()-start_time).total_milliseconds() < 50)
-//    {
-//        QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
-//        QThread::msleep(1);
-//    }
+    if (associate_data_)
+    {
+        CreateAssociationsTask& assoc_task = COMPASS::instance().taskManager().createAssociationsTask();
 
-//    if (auto_process_)
-//    {
-//        // calculate radar plot positions
-//        if (radar_plot_position_calculator_task_->isRecommended())
-//        {
-//            loginf << "MainWindow: performAutomaticTasks: starting radar plot position calculation task";
+        if(!assoc_task.canRun())
+        {
+            logerr << "MainWindow: performAutomaticTasks: associations task can not be run";
+            return;
+        }
 
-//            widget_->setCurrentTask(*radar_plot_position_calculator_task_);
-//            if(widget_->getCurrentTaskName() != radar_plot_position_calculator_task_->name())
-//            {
-//                logerr << "MainWindow: performAutomaticTasks: wrong task '" << widget_->getCurrentTaskName()
-//                       << "' selected, aborting";
-//                return;
-//            }
-//            radar_plot_position_calculator_task_->showDoneSummary(false);
+        assoc_task.run();
 
-//            widget_->runTask(*radar_plot_position_calculator_task_);
-
-//            while (!radar_plot_position_calculator_task_->done())
-//            {
-//                QCoreApplication::processEvents();
-//                QThread::msleep(1);
-//            }
-//        }
-
-//        // post-process
-////        loginf << "MainWindow: performAutomaticTasks: starting post-processing task";
-
-////        if (!post_process_task_->isRecommended())
-////        {
-
-////            logerr << "MainWindow: performAutomaticTasks: wrong task '" << widget_->getCurrentTaskName()
-////                   << "' selected, aborting";
-////            return;
-////        }
-
-////        assert(post_process_task_->isRecommended());
-////        assert(post_process_task_->isRequired());
-
-////        widget_->setCurrentTask(*post_process_task_);
-////        if(widget_->getCurrentTaskName() != post_process_task_->name())
-////            widget_->setCurrentTask(*post_process_task_);
-
-////        widget_->runTask(*post_process_task_);
-
-////        while (!post_process_task_->done())
-////        {
-////            QCoreApplication::processEvents();
-////            QThread::msleep(1);
-////        }
-
-////        loginf << "MainWindow: performAutomaticTasks: post-processing task done";
-
-//        // artas assocs
-//        if (create_artas_associations_task_->isRecommended())
-//        {
-//            loginf << "MainWindow: performAutomaticTasks: starting association task";
-
-//            widget_->setCurrentTask(*create_artas_associations_task_);
-//            if(widget_->getCurrentTaskName() != create_artas_associations_task_->name())
-//            {
-//                logerr << "MainWindow: performAutomaticTasks: wrong task '" << widget_->getCurrentTaskName()
-//                       << "' selected, aborting";
-//                return;
-//            }
-
-//            create_artas_associations_task_->showDoneSummary(false);
-
-//            widget_->runTask(*create_artas_associations_task_);
-
-//            while (!create_artas_associations_task_->done())
-//            {
-//                QCoreApplication::processEvents();
-//                QThread::msleep(1);
-//            }
-//        }
-//    }
-
-//    if (associate_data_)
-//    {
-//        if (create_associations_task_->canRun())
-//        {
-//            widget_->setCurrentTask(*create_associations_task_);
-//            if(widget_->getCurrentTaskName() != create_associations_task_->name())
-//            {
-//                logerr << "MainWindow: performAutomaticTasks: wrong task '" << widget_->getCurrentTaskName()
-//                       << "' selected, aborting";
-//                return;
-//            }
-
-//            create_associations_task_->showDoneSummary(false);
-
-//            widget_->runTask(*create_associations_task_);
-
-//            while (!create_associations_task_->done())
-//            {
-//                QCoreApplication::processEvents();
-//                QThread::msleep(1);
-//            }
-//        }
-//        else
-//            logerr << "MainWindow: performAutomaticTasks: associate data task can not be run";
-//    }
-
-//    loginf << "MainWindow: performAutomaticTasks: done with startup tasks";
-
-//    bool started = false;
-
-//    if (start_)
-//    {
-//        loginf << "MainWindow: performAutomaticTasks: starting";
-
-//        if(widget_->isStartPossible())
-//        {
-//            widget_->startSlot();
-//            QCoreApplication::processEvents();
-
-//            started = true;
-//        }
-//        else
-//            loginf << "MainWindow: performAutomaticTasks: start not possible";
-//    }
+        while (!assoc_task.done())
+        {
+            QCoreApplication::processEvents();
+            QThread::msleep(1);
+        }
+    }
 
     if (load_data_)
     {
@@ -991,126 +914,103 @@ void MainWindow::performAutomaticTasks ()
     else
         loginf << "MainWindow: performAutomaticTasks: not loading data";
 
-//    if (export_view_points_report_)
-//    {
-//        if (!started)
-//        {
-//            logerr << "MainWindow: performAutomaticTasks: exporting view points report not possible since not started";
-//        }
-//        else
-//        {
-//            loginf << "MainWindow: performAutomaticTasks: exporting view points report";
+    if (export_view_points_report_)
+    {
+        loginf << "MainWindow: performAutomaticTasks: exporting view points report";
 
-//            getMainWindow()->showViewPointsTab();
+        showViewPointsTab();
 
-//            ViewPointsReportGenerator& gen = COMPASS::instance().viewManager().viewPointsGenerator();
+        ViewPointsReportGenerator& gen = COMPASS::instance().viewManager().viewPointsGenerator();
 
-//            ViewPointsReportGeneratorDialog& dialog = gen.dialog();
-//            dialog.show();
+        ViewPointsReportGeneratorDialog& dialog = gen.dialog();
+        dialog.show();
 
-//            QCoreApplication::processEvents();
+        QCoreApplication::processEvents();
 
-//            gen.reportPathAndFilename(export_view_points_report_filename_);
-//            gen.showDone(false);
+        gen.reportPathAndFilename(export_view_points_report_filename_);
+        gen.showDone(false);
 
-//            gen.run();
+        gen.run();
 
-//            while (gen.isRunning()) // not sure if needed here but what the hell
-//            {
-//                QCoreApplication::processEvents();
-//                QThread::msleep(1);
-//            }
+        while (gen.isRunning()) // not sure if needed here but what the hell
+        {
+            QCoreApplication::processEvents();
+            QThread::msleep(1);
+        }
 
-//            gen.showDone(true);
-//        }
-//    }
+        gen.showDone(true);
+    }
 
-//    if (evaluate_ || export_eval_report_)
-//    {
-//        if (!started)
-//        {
-//            logerr << "MainWindow: performAutomaticTasks: evaluation not possible since not started";
-//        }
-//        else
-//        {
-//            loginf << "MainWindow: performAutomaticTasks: running evaluation";
+    if (evaluate_ || export_eval_report_)
+    {
+        loginf << "MainWindow: performAutomaticTasks: running evaluation";
 
-//            getMainWindow()->showEvaluationTab();
+        showEvaluationTab();
 
-//            EvaluationManager& eval_man = COMPASS::instance().evaluationManager();
+        EvaluationManager& eval_man = COMPASS::instance().evaluationManager();
 
-//            if (eval_man.canLoadData())
-//            {
-//                loginf << "MainWindow: performAutomaticTasks: loading evaluation data";
+        if (eval_man.canLoadData())
+        {
+            loginf << "MainWindow: performAutomaticTasks: loading evaluation data";
 
-//                eval_man.loadData();
+            eval_man.loadData();
 
-//                while (!eval_man.dataLoaded())
-//                {
-//                    QCoreApplication::processEvents();
-//                    QThread::msleep(1);
-//                }
+            while (!eval_man.dataLoaded())
+            {
+                QCoreApplication::processEvents();
+                QThread::msleep(1);
+            }
 
-//                assert (eval_man.dataLoaded());
+            assert (eval_man.dataLoaded());
 
-//                if (eval_man.canEvaluate())
-//                {
-//                    loginf << "MainWindow: performAutomaticTasks: doing evaluation";
+            if (eval_man.canEvaluate())
+            {
+                loginf << "MainWindow: performAutomaticTasks: doing evaluation";
 
-//                    eval_man.evaluate();
+                eval_man.evaluate();
 
-////                    while (!eval_man.evaluated())
-////                    {
-////                        QCoreApplication::processEvents();
-////                        QThread::msleep(1);
-////                    }
+                assert (eval_man.evaluated());
 
-//                    assert (eval_man.evaluated());
+                loginf << "MainWindow: performAutomaticTasks: evaluation done";
 
-//                    loginf << "MainWindow: performAutomaticTasks: evaluation done";
+                if (export_eval_report_)
+                {
+                    if (eval_man.canGenerateReport())
+                    {
+                        loginf << "MainWindow: performAutomaticTasks: generating report";
 
-//                    if (export_eval_report_)
-//                    {
-//                        if (eval_man.canGenerateReport())
-//                        {
-//                            loginf << "MainWindow: performAutomaticTasks: generating report";
+                        EvaluationResultsReport::PDFGenerator& gen = eval_man.pdfGenerator();
 
-//                            EvaluationResultsReport::PDFGenerator& gen = eval_man.pdfGenerator();
+                        EvaluationResultsReport::PDFGeneratorDialog& dialog = gen.dialog();
+                        dialog.show();
 
-//                            EvaluationResultsReport::PDFGeneratorDialog& dialog = gen.dialog();
-//                            dialog.show();
+                        QCoreApplication::processEvents();
 
-//                            QCoreApplication::processEvents();
+                        gen.reportPathAndFilename(export_eval_report_filename_);
+                        gen.showDone(false);
 
-//                            gen.reportPathAndFilename(export_eval_report_filename_);
-//                            gen.showDone(false);
+                        gen.run();
 
-//                            gen.run();
+                        while (gen.isRunning()) // not sure if needed here but what the hell
+                        {
+                            QCoreApplication::processEvents();
+                            QThread::msleep(1);
+                        }
 
-//                            while (gen.isRunning()) // not sure if needed here but what the hell
-//                            {
-//                                QCoreApplication::processEvents();
-//                                QThread::msleep(1);
-//                            }
+                        gen.showDone(true);
 
-//                            gen.showDone(true);
-
-//                            loginf << "MainWindow: performAutomaticTasks: generating evaluation report done";
-//                        }
-//                        else
-//                            logerr << "MainWindow: performAutomaticTasks: "
-//                                      "exporting evaluation report not possible since report can't be generated";
-//                    }
-//                }
-//                else
-//                    logerr << "MainWindow: performAutomaticTasks: "
-//                              "evaluation not possible since evaluation can not be made";
-//            }
-//            else
-//                logerr << "MainWindow: performAutomaticTasks: "
-//                          "evaluation not possible since no data can be loaded";
-//        }
-//    }
+                        loginf << "MainWindow: performAutomaticTasks: generating evaluation report done";
+                    }
+                    else
+                        logerr << "MainWindow: performAutomaticTasks: "
+                                      "exporting evaluation report not possible since report can't be generated";
+                }
+            }
+            else
+                logerr << "MainWindow: performAutomaticTasks: "
+                              "evaluation not possible since evaluation can not be performed";
+        }
+    }
 
     if (quit_)
     {

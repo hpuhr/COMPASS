@@ -55,7 +55,14 @@ private:
     std::string import_gps_trail_filename_;
     std::string import_sectors_filename_;
 
+    bool associate_data_ {false};
+
     bool load_data_ {false};
+
+    std::string export_view_points_report_filename_;
+    bool evaluate_ {false};
+    std::string export_eval_report_filename_;
+
     bool quit_ {false};
 
     bool expert_mode_ {false};

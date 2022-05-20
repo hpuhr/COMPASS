@@ -87,14 +87,10 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
     //    std::string import_json_schema;
 
 
-    //    bool auto_process {false};
-    //    bool associate_data {false};
 
-    //    bool start {false};
+
     //    bool load_data {false};
-    //    std::string export_view_points_report_filename;
-    //    bool evaluate {false};
-    //    std::string export_eval_report_filename;
+
     //    bool quit {false};
 
     po::options_description desc("Allowed options");
@@ -128,10 +124,10 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
              "imports gps trail NMEA with given filename, e.g. '/data/file2.txt'")
             ("import_sectors_json", po::value<std::string>(&import_sectors_filename_),
              "imports exported sectors JSON with given filename, e.g. '/data/sectors.json'")
-            //            ("associate_data", po::bool_switch(&associate_data), "associate target reports")
+            ("associate_data", po::bool_switch(&associate_data_), "associate target reports")
             ("load_data", po::bool_switch(&load_data_), "load data after start")
-            //            ("export_view_points_report", po::value<std::string>(&export_view_points_report_filename),
-            //             "export view points report after start with given filename, e.g. '/data/db2/report.tex")
+            ("export_view_points_report", po::value<std::string>(&export_view_points_report_filename_),
+             "export view points report after start with given filename, e.g. '/data/db2/report.tex")
             //            ("evaluate", po::bool_switch(&evaluate), "run evaluation")
             //            ("export_eval_report", po::value<std::string>(&export_eval_report_filename),
             //             "export evaluation report after start with given filename, e.g. '/data/eval_db2/report.tex")
@@ -261,8 +257,8 @@ void Client::run ()
     if (import_sectors_filename_.size())
         main_window.importSectorsFile(import_sectors_filename_);
 
-    //    if (associate_data)
-    //        task_man.associateData(associate_data);
+    if (associate_data_)
+        main_window.associateData(associate_data_);
 
     if (load_data_)
         main_window.loadData(load_data_);
