@@ -471,24 +471,12 @@ std::string Variable::getValueStringFromRepresentation(
     }
     else if (representation_ == Variable::Representation::DATA_SRC_NAME)
     {
-        assert(db_object_);
+        DataSourceManager& ds_man = COMPASS::instance().dataSourceManager();
 
-        TODO_ASSERT
+        if (ds_man.hasDBDataSource(representation_str))
+            return std::to_string(ds_man.getDBDataSourceDSID(representation_str));
 
-//        if (db_object_->hasDataSources())
-//        {
-//            for (auto ds_it = db_object_->dsBegin(); ds_it != db_object_->dsEnd(); ++ds_it)
-//            {
-//                if ((ds_it->second.hasShortName() &&
-//                     representation_str == ds_it->second.shortName()) ||
-//                    representation_str == ds_it->second.name())
-//                {
-//                    return std::to_string(ds_it->first);
-//                }
-//            }
-//            // not found, return original
-//        }
-        // has no datasources, return original
+        // not found, return original
 
         return representation_str;
     }

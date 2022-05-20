@@ -31,6 +31,7 @@
 #include "sector.h"
 #include "dbcontent/variable/metavariable.h"
 #include "dbcontent/variable/variable.h"
+#include "dbcontent/target.h"
 #include "buffer.h"
 #include "filtermanager.h"
 #include "dbfilter.h"
@@ -358,9 +359,7 @@ void EvaluationManager::loadData ()
 
         if (use_adsb_filter_)
         {
-            TODO_ASSERT
-
-                    assert (fil_man.hasFilter("ADSB Quality"));
+            assert (fil_man.hasFilter("ADSB Quality"));
             DBFilter* adsb_fil = fil_man.getFilter("ADSB Quality");
 
             adsb_fil->setActive(true);
@@ -1891,7 +1890,7 @@ void EvaluationManager::filterUTNs ()
 
     update_results_ = false;
 
-    //DBContentManager& dbo_man = COMPASS::instance().dbContentManager();
+    DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
 
     bool use;
     string comment;
@@ -2021,23 +2020,21 @@ void EvaluationManager::filterUTNs ()
 
         if (use && remove_not_detected_dbos_) // prepare associations
         {
-            TODO_ASSERT
 
-                    //            if (dbo_man.hasAssociations())
-                    //            {
-                    //                for (auto& dbo_it : dbo_man)
-                    //                {
-                    //                    if (remove_not_detected_dbo_values_.contains(dbo_it.first)
-                    //                            && remove_not_detected_dbo_values_.at(dbo_it.first) == true // removed if not detected
-                    //                            && associated_utns.count(dbo_it.first) // have associations
-                    //                            && !associated_utns.at(dbo_it.first).count(target_it.utn_)) // not detected
-                    //                    {
-                    //                        use = false; // remove it
-                    //                        comment = "Not Detected by "+dbo_it.first;
-                    //                        break;
-                    //                    }
-                    //                }
-                    //            }
+            assert (dbcont_man.hasTargetsInfo());
+            assert (dbcont_man.existsTarget(target_it.utn_));
+
+            for (auto& dbcont_it : dbcont_man)
+            {
+                if (remove_not_detected_dbo_values_.contains(dbcont_it.first)
+                        && remove_not_detected_dbo_values_.at(dbcont_it.first) == true // removed if not detected
+                        && dbcont_man.target(target_it.utn_)->dbContentCount(dbcont_it.first) == 0) // not detected
+                {
+                    use = false; // remove it
+                    comment = "Not Detected in "+dbcont_it.first;
+                    break;
+                }
+            }
         }
 
         if (!use)

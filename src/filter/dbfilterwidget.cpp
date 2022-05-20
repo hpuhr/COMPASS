@@ -68,6 +68,7 @@ DBFilterWidget::DBFilterWidget(DBFilter& filter)
     config_layout->addStretch();
 
     manage_button_ = new QPushButton();
+    manage_button_->setDisabled(true); // TODO_ASSERT
     manage_button_->setIcon(QIcon(Files::getIconFilepath("edit.png").c_str()));
     manage_button_->setFixedSize(UI_ICON_SIZE);
     manage_button_->setFlat(UI_ICON_BUTTON_FLAT);
