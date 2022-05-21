@@ -35,12 +35,6 @@ ListBoxView::ListBoxView(const std::string& class_id, const std::string& instanc
     registerParameter("show_only_selected", &show_only_selected_, false);
     registerParameter("use_presentation", &use_presentation_, true);
     registerParameter("overwrite_csv", &overwrite_csv_, true);
-    registerParameter("show_associations", &show_associations_, false);
-
-    can_show_associations_ = false; // COMPASS::instance().dbContentManager().hasAssociations(); TODO_ASSERT
-
-    if (!can_show_associations_)
-        show_associations_ = false;
 }
 
 ListBoxView::~ListBoxView()
@@ -85,16 +79,13 @@ bool ListBoxView::init()
 //    connect(data_source_, &ListBoxViewDataSource::loadingStartedSignal, widget_->configWidget(),
 //            &ListBoxViewConfigWidget::loadingStartedSlot);
 
-    connect(this, &ListBoxView::showOnlySelectedSignal, widget_->getDataWidget(),
-            &ListBoxViewDataWidget::showOnlySelectedSlot);
-    connect(this, &ListBoxView::usePresentationSignal, widget_->getDataWidget(),
-            &ListBoxViewDataWidget::usePresentationSlot);
-    connect(this, &ListBoxView::showAssociationsSignal, widget_->getDataWidget(),
-            &ListBoxViewDataWidget::showAssociationsSlot);
+    connect(this, &ListBoxView::showOnlySelectedSignal,
+            widget_->getDataWidget(), &ListBoxViewDataWidget::showOnlySelectedSlot);
+    connect(this, &ListBoxView::usePresentationSignal,
+            widget_->getDataWidget(), &ListBoxViewDataWidget::usePresentationSlot);
 
     widget_->getDataWidget()->showOnlySelectedSlot(show_only_selected_);
     widget_->getDataWidget()->usePresentationSlot(use_presentation_);
-    widget_->getDataWidget()->showAssociationsSlot(show_associations_);
 
     return true;
 }
@@ -212,22 +203,10 @@ void ListBoxView::showOnlySelected(bool value)
     QApplication::restoreOverrideCursor();
 }
 
-bool ListBoxView::showAssociations() const { return show_associations_; }
-
-void ListBoxView::showAssociations(bool show_associations)
-{
-    loginf << "ListBoxView: showAssociations: " << show_associations;
-    show_associations_ = show_associations;
-
-    emit showAssociationsSignal(show_associations_);
-}
-
 void ListBoxView::accept(LatexVisitor& v)
 {
     v.visit(this);
 }
-
-bool ListBoxView::canShowAssociations() const { return can_show_associations_; }
 
 void ListBoxView::updateSelection()
 {

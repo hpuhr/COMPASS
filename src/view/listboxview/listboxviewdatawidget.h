@@ -43,7 +43,6 @@ class ListBoxViewDataWidget : public QWidget
     void exportDoneSignal(bool cancelled);
     void showOnlySelectedSignal(bool value);
     void usePresentationSignal(bool use_presentation);
-    void showAssociationsSignal(bool value);
 
   public slots:
     void loadingStartedSlot();
@@ -56,7 +55,6 @@ class ListBoxViewDataWidget : public QWidget
 
     void showOnlySelectedSlot(bool value);
     void usePresentationSlot(bool use_presentation);
-    void showAssociationsSlot(bool value);
 
   public:
     /// @brief Constructor

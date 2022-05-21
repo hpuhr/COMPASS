@@ -74,10 +74,8 @@ int BufferTableModel::columnCount(const QModelIndex& /*parent*/) const
 {
     logdbg << "BufferTableModel: columnCount: " << read_set_.getSize();
 
-    if (show_associations_)  // selected, utn
-        return read_set_.getSize() + 2;
-    else  // selected
-        return read_set_.getSize() + 1;
+    // selected
+    return read_set_.getSize() + 1;
 }
 
 QVariant BufferTableModel::headerData(int section, Qt::Orientation orientation, int role) const
@@ -93,15 +91,7 @@ QVariant BufferTableModel::headerData(int section, Qt::Orientation orientation, 
         if (col == 0)
             return QString();
 
-        if (show_associations_)
-        {
-            if (col == 1)
-                return QString("UTN");
-
-            col -= 2;  // for the actual properties
-        }
-        else
-            col -= 1;  // for the actual properties
+        col -= 1;  // for the actual properties
 
         assert(col < read_set_.getSize());
         dbContent::Variable& variable = read_set_.getVariable(col);
@@ -170,38 +160,7 @@ QVariant BufferTableModel::data(const QModelIndex& index, int role) const
         if (col == 0)  // selected special case
             return QVariant();
 
-        if (show_associations_)
-        {
-            if (col == 1)
-            {
-                DBContentManager& manager = COMPASS::instance().dbContentManager();
-
-
-                TODO_ASSERT
-
-//                std::string dbo_name = buffer_->dboName();
-//                assert(dbo_name.size());
-
-//                const DBOAssociationCollection& associations =
-//                    manager.object(dbo_name).associations();
-
-//                assert(buffer_->has<int>("rec_num"));
-//                assert(!buffer_->get<int>("rec_num").isNull(buffer_index));
-//                unsigned int rec_num = buffer_->get<int>("rec_num").get(buffer_index);
-
-//                if (associations.contains(rec_num))
-//                {
-//                    return QVariant(
-//                        manager.object(dbo_name).associations().getUTNsStringFor(rec_num).c_str());
-//                }
-//                else
-//                    return QVariant();
-            }
-
-            col -= 2;  // for the actual properties
-        }
-        else
-            col -= 1;  // for the actual properties
+        col -= 1;  // for the actual properties
 
         assert(col < read_set_.getSize());
 
@@ -491,7 +450,7 @@ void BufferTableModel::saveAsCSV(const std::string& file_name, bool overwrite)
     assert(buffer_);
     BufferCSVExportJob* export_job =
         new BufferCSVExportJob(buffer_, read_set_, file_name, overwrite, show_only_selected_,
-                               use_presentation_, show_associations_);
+                               use_presentation_);
 
     export_job_ = std::shared_ptr<BufferCSVExportJob>(export_job);
     connect(export_job, &BufferCSVExportJob::obsoleteSignal, this,
@@ -529,14 +488,6 @@ void BufferTableModel::showOnlySelected(bool value)
     show_only_selected_ = value;
 
     updateToSelection();
-}
-
-void BufferTableModel::showAssociations(bool value)
-{
-    loginf << "BufferTableModel: showAssociations: " << value;
-    beginResetModel();
-    show_associations_ = value;
-    endResetModel();
 }
 
 void BufferTableModel::updateToSelection()

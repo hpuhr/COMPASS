@@ -63,10 +63,8 @@ int AllBufferTableModel::columnCount(const QModelIndex& /*parent*/) const
 {
     logdbg << "AllBufferTableModel: columnCount: " << data_source_.getSet()->getSize();
 
-    if (show_associations_)  // selected, DBO, UTN
-        return data_source_.getSet()->getSize() + 3;
-    else  // cnt, DBO
-        return data_source_.getSet()->getSize() + 2;
+    // cnt, DBO
+    return data_source_.getSet()->getSize() + 2;
 }
 
 QVariant AllBufferTableModel::headerData(int section, Qt::Orientation orientation, int role) const
@@ -84,15 +82,7 @@ QVariant AllBufferTableModel::headerData(int section, Qt::Orientation orientatio
         if (col == 1)
             return QString("DBObject");
 
-        if (show_associations_)
-        {
-            if (col == 2)
-                return QString("UTN");
-
-            col -= 3;  // for the actual properties
-        }
-        else
-            col -= 2;  // for the actual properties
+        col -= 2;  // for the actual properties
 
         assert(col < data_source_.getSet()->getSize());
         std::string variable_name = data_source_.getSet()->variableDefinition(col).variableName();
@@ -176,33 +166,7 @@ QVariant AllBufferTableModel::data(const QModelIndex& index, int role) const
         if (col == 1)  // selected special case
             return QVariant(dbo_name.c_str());
 
-        if (show_associations_)
-        {
-            if (col == 2)
-            {
-                TODO_ASSERT
-
-//                DBContentManager& manager = COMPASS::instance().dbContentManager();
-//                const DBOAssociationCollection& associations =
-//                    manager.object(dbo_name).associations();
-
-//                assert(buffer->has<int>("rec_num"));
-//                assert(!buffer->get<int>("rec_num").isNull(buffer_index));
-//                unsigned int rec_num = buffer->get<int>("rec_num").get(buffer_index);
-
-//                if (associations.contains(rec_num))
-//                {
-//                    return QVariant(
-//                        manager.object(dbo_name).associations().getUTNsStringFor(rec_num).c_str());
-//                }
-//                else
-//                    return QVariant();
-            }
-
-            col -= 3;  // for the actual properties
-        }
-        else
-            col -= 2;  // for the actual properties
+        col -= 2;  // for the actual properties
 
         //        loginf << "AllBufferTableModel: data: col " << col << " set size " <<
         //        data_source_.getSet()->getSize()
@@ -594,7 +558,7 @@ void AllBufferTableModel::saveAsCSV(const std::string& file_name, bool overwrite
 
     AllBufferCSVExportJob* export_job = new AllBufferCSVExportJob(
         buffers_, data_source_.getSet(), number_to_dbo_, row_indexes_, file_name, overwrite,
-        show_only_selected_, use_presentation_, show_associations_);
+        show_only_selected_, use_presentation_);
 
     export_job_ = std::shared_ptr<AllBufferCSVExportJob>(export_job);
     connect(export_job, &AllBufferCSVExportJob::obsoleteSignal, this,
@@ -633,14 +597,6 @@ void AllBufferTableModel::showOnlySelected(bool value)
     show_only_selected_ = value;
 
     updateToSelection();
-}
-
-void AllBufferTableModel::showAssociations(bool value)
-{
-    loginf << "AllBufferTableModel: showAssociations: " << value;
-    beginResetModel();
-    show_associations_ = value;
-    endResetModel();
 }
 
 void AllBufferTableModel::updateToSelection()

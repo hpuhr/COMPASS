@@ -58,7 +58,6 @@ class BufferTableWidget : public QWidget
 
     void showOnlySelectedSlot(bool value);
     void usePresentationSlot(bool use_presentation);
-    void showAssociationsSlot(bool value);
 
   public:
     /// @brief Constructor

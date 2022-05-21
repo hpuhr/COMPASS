@@ -53,8 +53,6 @@ ListBoxViewDataWidget::ListBoxViewDataWidget(ListBoxView* view, ListBoxViewDataS
                         all_buffer_table_widget_, &AllBufferTableWidget::showOnlySelectedSlot);
                 connect(this, &ListBoxViewDataWidget::usePresentationSignal,
                         all_buffer_table_widget_, &AllBufferTableWidget::usePresentationSlot);
-                connect(this, &ListBoxViewDataWidget::showAssociationsSignal,
-                        all_buffer_table_widget_, &AllBufferTableWidget::showAssociationsSlot);
             }
 
             BufferTableWidget* buffer_table =
@@ -67,8 +65,6 @@ ListBoxViewDataWidget::ListBoxViewDataWidget(ListBoxView* view, ListBoxViewDataS
                     &BufferTableWidget::showOnlySelectedSlot);
             connect(this, &ListBoxViewDataWidget::usePresentationSignal, buffer_table,
                     &BufferTableWidget::usePresentationSlot);
-            connect(this, &ListBoxViewDataWidget::showAssociationsSignal, buffer_table,
-                    &BufferTableWidget::showAssociationsSlot);
     }
 
     setLayout(layout);
@@ -176,12 +172,6 @@ void ListBoxViewDataWidget::usePresentationSlot(bool use_presentation)
     loginf << "ListBoxViewDataWidget: usePresentationSlot";
 
     emit usePresentationSignal(use_presentation);
-}
-
-void ListBoxViewDataWidget::showAssociationsSlot(bool value)
-{
-    loginf << "ListBoxViewDataWidget: showAssociationsSlot: " << value;
-    emit showAssociationsSignal(value);
 }
 
 void ListBoxViewDataWidget::resetModels()
