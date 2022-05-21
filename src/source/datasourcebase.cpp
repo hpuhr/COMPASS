@@ -7,6 +7,11 @@ using namespace Utils;
 using namespace std;
 using namespace nlohmann;
 
+const string position_key = "position";
+const std::string radar_range_key = "radar_range";
+const std::string radar_accuracy_key = "radar_accuracy";
+const std::string network_lines_key = "network_lines";
+
 namespace dbContent
 {
 
@@ -99,91 +104,115 @@ std::string DataSourceBase::infoStr()
 
 bool DataSourceBase::hasPosition() const
 {
-    return info_.contains("position");
+    return info_.contains(position_key);
 }
 
 bool DataSourceBase::hasFullPosition() const
 {
-    return info_.contains("position")
-            && info_.at("position").contains("latitude")
-            && info_.at("position").contains("longitude")
-            && info_.at("position").contains("altitude");
+    return info_.contains(position_key)
+            && info_.at(position_key).contains("latitude")
+            && info_.at(position_key).contains("longitude")
+            && info_.at(position_key).contains("altitude");
 }
 
 void DataSourceBase::latitude (double value)
 {
-    info_["position"]["latitude"] = value;
+    info_[position_key]["latitude"] = value;
 }
 double DataSourceBase::latitude () const
 {
     assert (hasPosition());
 
-    if (!info_.at("position").contains("latitude"))
+    if (!info_.at(position_key).contains("latitude"))
         return 0.0;
     else
-        return info_.at("position").at("latitude");
+        return info_.at(position_key).at("latitude");
 }
 
 void DataSourceBase::longitude (double value)
 {
-    info_["position"]["longitude"] = value;
+    info_[position_key]["longitude"] = value;
 }
 double DataSourceBase::longitude () const
 {
     assert (hasPosition());
 
-    if (!info_.at("position").contains("longitude"))
+    if (!info_.at(position_key).contains("longitude"))
         return 0.0;
     else
-        return info_.at("position").at("longitude");
+        return info_.at(position_key).at("longitude");
 }
 
 void DataSourceBase::altitude (double value)
 {
-    info_["position"]["altitude"] = value;
+    info_[position_key]["altitude"] = value;
 }
 
 double DataSourceBase::altitude () const
 {
     assert (hasPosition());
 
-    if (!info_.at("position").contains("altitude"))
+    if (!info_.at(position_key).contains("altitude"))
         return 0.0;
     else
-        return info_.at("position").at("altitude");
+        return info_.at(position_key).at("altitude");
 }
 
 bool DataSourceBase::hasRadarRanges() const
 {
-    return info_.contains("radar_range");
+    return info_.contains(radar_range_key);
 }
 
 void DataSourceBase::addRadarRanges()
 {
     assert (!hasRadarRanges());
-    info_["radar_range"] = json::object();
+    info_[radar_range_key] = json::object();
 }
 
 std::map<std::string, double> DataSourceBase::radarRanges() const
 {
     assert (hasRadarRanges());
-    return info_.at("radar_range").get<std::map<std::string, double>>();
+    return info_.at(radar_range_key).get<std::map<std::string, double>>();
 }
 
 void DataSourceBase::radarRange (const std::string& key, const double range)
 {
-    info_["radar_range"][key] = range;
+    info_[radar_range_key][key] = range;
 }
+
+bool DataSourceBase::hasRadarAccuracies() const
+{
+    return info_.contains(radar_accuracy_key);
+}
+
+void DataSourceBase::addRadarAccuracies()
+{
+    assert (!hasRadarAccuracies());
+    info_[radar_accuracy_key] = json::object();
+}
+
+std::map<std::string, double> DataSourceBase::radarAccuracies() const
+{
+    assert (hasRadarRanges());
+    return info_.at(radar_accuracy_key).get<std::map<std::string, double>>();
+}
+
+
+void DataSourceBase::radarAccuracy (const std::string& key, const double value)
+{
+    info_[radar_accuracy_key][key] = value;
+}
+
 
 bool DataSourceBase::hasNetworkLines() const
 {
-    return info_.contains("network_lines");
+    return info_.contains(network_lines_key);
 }
 
 void DataSourceBase::addNetworkLines()
 {
     assert (!hasNetworkLines());
-    info_["network_lines"] = json::object();
+    info_[network_lines_key] = json::object();
 }
 
 std::map<std::string, std::pair<std::string, unsigned int>> DataSourceBase::networkLines() const
@@ -193,7 +222,7 @@ std::map<std::string, std::pair<std::string, unsigned int>> DataSourceBase::netw
     std::map<std::string, std::pair<std::string, unsigned int>> ret;
     set<string> existing_lines; // to check
 
-    const json& network_lines = info_.at("network_lines");
+    const json& network_lines = info_.at(network_lines_key);
     assert (network_lines.is_object());
 
     string ip;
@@ -228,7 +257,7 @@ void DataSourceBase::networkLine (const std::string& key, const std::string ip_p
 {
     assert (key == "L1" || key == "L2" || key == "L3" || key == "L4");
 
-    info_["network_lines"][key] = ip_port;
+    info_[network_lines_key][key] = ip_port;
 }
 
 void DataSourceBase::setFromJSONDeprecated (const nlohmann::json& j)
@@ -236,8 +265,8 @@ void DataSourceBase::setFromJSONDeprecated (const nlohmann::json& j)
     info_.clear();
 
     //    j["dbcontent_name"] = dbcontent_name_;
-    assert(j.contains("dbcontent_name"));
-    ds_type_ = j.at("dbcontent_name");
+    assert(j.contains("dbo_name"));
+    ds_type_ = j.at("dbo_name");
 
 
     //    j["name"] = name_;
@@ -267,81 +296,81 @@ void DataSourceBase::setFromJSONDeprecated (const nlohmann::json& j)
     //    if (has_latitude_)
     //        j["latitude"] = latitude_;
     if (j.contains("latitude"))
-        info_["position"]["latitude"] = j.at("latitude");
+        info_[position_key]["latitude"] = j.at("latitude");
 
     //    if (has_longitude_)
     //        j["longitude"] = longitude_;
     if (j.contains("longitude"))
-        info_["position"]["longitude"] = j.at("longitude");
+        info_[position_key]["longitude"] = j.at("longitude");
 
     //    if (has_altitude_)
     //        j["altitude"] = altitude_;
     if (j.contains("altitude"))
-        info_["position"]["altitude"] = j.at("altitude");
+        info_[position_key]["altitude"] = j.at("altitude");
 
     //    // psr
     //    if (has_primary_azimuth_stddev_)
     //        j["primary_azimuth_stddev"] = primary_azimuth_stddev_;
     if (j.contains("primary_azimuth_stddev"))
-        info_["radar_accuracy"]["primary_azimuth_stddev"] = j.at("primary_azimuth_stddev");
+        info_[radar_accuracy_key]["primary_azimuth_stddev"] = j.at("primary_azimuth_stddev");
 
     //    if (has_primary_range_stddev_)
     //        j["primary_range_stddev"] = primary_range_stddev_;
     if (j.contains("primary_range_stddev"))
-        info_["radar_accuracy"]["primary_range_stddev"] = j.at("primary_range_stddev");
+        info_[radar_accuracy_key]["primary_range_stddev"] = j.at("primary_range_stddev");
 
     //    if (has_primary_ir_min_)
     //        j["primary_ir_min"] = primary_ir_min_;
     if (j.contains("primary_ir_min"))
-        info_["radar_range"]["primary_ir_min"] = j.at("primary_ir_min");
+        info_[radar_range_key]["primary_ir_min"] = j.at("primary_ir_min");
 
     //    if (has_primary_ir_max_)
     //        j["primary_ir_max"] = primary_ir_max_;
     if (j.contains("primary_ir_max"))
-        info_["radar_range"]["primary_ir_max"] = j.at("primary_ir_max");
+        info_[radar_range_key]["primary_ir_max"] = j.at("primary_ir_max");
 
     //    // ssr
     //    if (has_secondary_azimuth_stddev_)
     //        j["secondary_azimuth_stddev"] = secondary_azimuth_stddev_;
     if (j.contains("secondary_azimuth_stddev"))
-        info_["radar_accuracy"]["secondary_azimuth_stddev"] = j.at("secondary_azimuth_stddev");
+        info_[radar_accuracy_key]["secondary_azimuth_stddev"] = j.at("secondary_azimuth_stddev");
 
     //    if (has_secondary_range_stddev_)
     //        j["secondary_range_stddev"] = secondary_range_stddev_;
     if (j.contains("secondary_range_stddev"))
-        info_["radar_accuracy"]["secondary_range_stddev"] = j.at("secondary_range_stddev");
+        info_[radar_accuracy_key]["secondary_range_stddev"] = j.at("secondary_range_stddev");
 
 
     //    if (has_secondary_ir_min_)
     //        j["secondary_ir_min"] = secondary_ir_min_;
     if (j.contains("secondary_ir_min"))
-        info_["radar_range"]["secondary_ir_min"] = j.at("secondary_ir_min");
+        info_[radar_range_key]["secondary_ir_min"] = j.at("secondary_ir_min");
 
     //    if (has_secondary_ir_max_)
     //        j["secondary_ir_max"] = secondary_ir_max_;
     if (j.contains("secondary_ir_max"))
-        info_["radar_range"]["secondary_ir_max"] = j.at("secondary_ir_max");
+        info_[radar_range_key]["secondary_ir_max"] = j.at("secondary_ir_max");
 
     //    // mode s
     //    if (has_mode_s_azimuth_stddev_)
     //        j["mode_s_azimuth_stddev"] = mode_s_azimuth_stddev_;
     if (j.contains("mode_s_azimuth_stddev"))
-        info_["radar_accuracy"]["mode_s_azimuth_stddev"] = j.at("mode_s_azimuth_stddev");
+        info_[radar_accuracy_key]["mode_s_azimuth_stddev"] = j.at("mode_s_azimuth_stddev");
 
     //    if (has_mode_s_range_stddev_)
     //        j["mode_s_range_stddev"] = mode_s_range_stddev_;
     if (j.contains("mode_s_range_stddev"))
-        info_["radar_accuracy"]["mode_s_range_stddev"] = j.at("mode_s_range_stddev");
+        info_[radar_accuracy_key]["mode_s_range_stddev"] = j.at("mode_s_range_stddev");
 
     //    if (has_mode_s_ir_min_)
     //        j["mode_s_ir_min"] = mode_s_ir_min_;
     if (j.contains("mode_s_ir_min"))
-        info_["radar_range"]["mode_s_ir_min"] = j.at("mode_s_ir_min");
+        info_[radar_range_key]["mode_s_ir_min"] = j.at("mode_s_ir_min");
 
     //    if (has_mode_s_ir_max_)
     //        j["mode_s_ir_max"] = mode_s_ir_max_;
     if (j.contains("secondary_ir_min"))
-        info_["radar_range"]["secondary_ir_min"] = j.at("secondary_ir_min");
+        info_[radar_range_key]["secondary_ir_min"] = j.at("secondary_ir_min");
 
 }
 
@@ -362,7 +391,7 @@ void DataSourceBase::setFromJSON (const nlohmann::json& j)
         has_short_name_ = false;
 
     //    "info": {
-    //        "position": {
+    //        position_key: {
     //            "altitude": 323.0,
     //            "latitude": 44.23
     //            "longitude": 134.18

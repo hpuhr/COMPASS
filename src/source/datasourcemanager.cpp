@@ -139,7 +139,7 @@ void DataSourceManager::importDataSourcesJSONDeprecated(const nlohmann::json& j)
             loginf << "DataSourceManager: importDataSources: found dbo " << dbcontent_name
                    << " ds '" << j_ds_it.dump(4) << "'";
 
-            assert(j_ds_it.contains("dbcontent_name"));
+            assert(j_ds_it.contains("dbo_name"));
             assert(j_ds_it.contains("name"));
             assert(j_ds_it.contains("sac"));
             assert(j_ds_it.contains("sic"));

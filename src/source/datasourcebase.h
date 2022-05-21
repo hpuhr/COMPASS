@@ -53,6 +53,11 @@ public:
     std::map<std::string, double> radarRanges() const;
     void radarRange (const std::string& key, const double range);
 
+    bool hasRadarAccuracies() const;
+    void addRadarAccuracies();
+    std::map<std::string, double> radarAccuracies() const;
+    void radarAccuracy (const std::string& key, const double value);
+
     bool hasNetworkLines() const;
     void addNetworkLines();
     std::map<std::string, std::pair<std::string, unsigned int>> networkLines() const;
