@@ -275,6 +275,8 @@ bool LabelGenerator::autoLabel() const
 void LabelGenerator::autoLabel(bool auto_label)
 {
     auto_label_ = auto_label;
+
+    emit labelOptionsChangedSignal();
 }
 
 void LabelGenerator::autoAdustCurrentLOD(unsigned int num_labels_on_screen)
@@ -324,12 +326,16 @@ void LabelGenerator::autoLOD(bool auto_lod)
 void LabelGenerator::addLabelDSID(unsigned int ds_id)
 {
     label_ds_ids_.insert(ds_id);
+
+    emit labelOptionsChangedSignal();
 }
 
 void LabelGenerator::removeLabelDSID(unsigned int ds_id)
 {
     assert (label_ds_ids_.count(ds_id));
     label_ds_ids_.erase(ds_id);
+
+    emit labelOptionsChangedSignal();
 }
 
 const std::set<unsigned int>& LabelGenerator::labelDSIDs() const
