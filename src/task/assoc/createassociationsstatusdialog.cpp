@@ -45,7 +45,7 @@ CreateAssociationsStatusDialog::CreateAssociationsStatusDialog(
 
     setModal(true);
 
-    setMinimumSize(QSize(600, 800));
+    setMinimumSize(QSize(500, 400));
 
     QFont font_bold;
     font_bold.setBold(true);
@@ -70,16 +70,6 @@ CreateAssociationsStatusDialog::CreateAssociationsStatusDialog(
 
     main_layout->addStretch();
 
-    // dbo reading
-    QLabel* dbo_read_label = new QLabel("DBObject Reading Status");
-    dbo_read_label->setFont(font_big);
-    main_layout->addWidget(dbo_read_label);
-
-    dbo_done_grid_ = new QGridLayout();
-    main_layout->addLayout(dbo_done_grid_);
-
-    main_layout->addStretch();
-
     // associations
 
     QLabel* assoc_label = new QLabel("Associations");
@@ -91,16 +81,18 @@ CreateAssociationsStatusDialog::CreateAssociationsStatusDialog(
         QGridLayout* association_grid = new QGridLayout();
 
         association_grid->addWidget(new QLabel("Status"), row, 0);
-        association_status_label_ = new QLabel();
-        association_status_label_->setAlignment(Qt::AlignRight);
-        association_grid->addWidget(association_status_label_, row, 1);
+        status_label_ = new QLabel();
+        status_label_->setAlignment(Qt::AlignRight);
+        association_grid->addWidget(status_label_, row, 1);
 
         main_layout->addLayout(association_grid);
     }
 
-    dbo_associated_grid_ = new QGridLayout();
-    updateDBOAssociatedGrid();
-    main_layout->addLayout(dbo_associated_grid_);
+    main_layout->addStretch();
+
+    dbcont_associated_grid_ = new QGridLayout();
+    updateDBContentAssociatedGrid();
+    main_layout->addLayout(dbcont_associated_grid_);
 
     main_layout->addStretch();
 
@@ -122,37 +114,39 @@ void CreateAssociationsStatusDialog::okClickedSlot() { emit closeSignal(); }
 void CreateAssociationsStatusDialog::markStartTime()
 {
     start_time_ = boost::posix_time::microsec_clock::local_time();
+
+    done_ = false;
 }
 
 void CreateAssociationsStatusDialog::setDone()
 {
     assert(ok_button_);
 
+    done_ = true;
+
     updateTime();
-    updateDBOAssociatedGrid();
+    updateDBContentAssociatedGrid();
 
     loginf << "CreateAssociationsStatusDialog: setDone: done after " << elapsed_time_str_;
 
     ok_button_->setVisible(true);
 }
 
-void CreateAssociationsStatusDialog::setDBODoneFlags(
-    const std::map<std::string, bool>& dbo_done_flags)
+void CreateAssociationsStatusDialog::setStatus(const std::string& status)
 {
-    dbo_done_flags_ = dbo_done_flags;
+    status_ = status;
+
+    assert(status_label_);
+    status_label_->setText(status_.c_str());
 
     updateTime();
-    updateDBODoneGrid();
 }
 
-void CreateAssociationsStatusDialog::setAssociationStatus(const std::string& status)
+void CreateAssociationsStatusDialog::setAssociationsCounts(
+        std::map<std::string, std::pair<unsigned int,unsigned int>> association_counts)
 {
-    association_status_ = status;
-
-    assert(association_status_label_);
-    association_status_label_->setText(association_status_.c_str());
-
-    updateTime();
+    association_counts_ = association_counts;
+    updateDBContentAssociatedGrid();
 }
 
 void CreateAssociationsStatusDialog::updateTime()
@@ -167,148 +161,101 @@ void CreateAssociationsStatusDialog::updateTime()
     time_label_->setText(elapsed_time_str_.c_str());
 }
 
-void CreateAssociationsStatusDialog::updateDBODoneGrid()
+void CreateAssociationsStatusDialog::updateDBContentAssociatedGrid()
 {
-    assert(dbo_done_grid_);
+    assert(dbcont_associated_grid_);
 
     // loginf << "CreateAssociationsStatusDialog: updateDBODoneGrid: rowcount " <<
     // cat_counters_grid_->rowCount();
 
     int row = 1;
-    if (dbo_done_grid_->rowCount() == 1)
+    if (dbcont_associated_grid_->rowCount() == 1)
     {
         // loginf << "CreateAssociationsStatusDialog: updateDBODoneGrid: adding first row";
 
         QFont font_bold;
         font_bold.setBold(true);
 
-        QLabel* dbo_label = new QLabel("DBObject");
+        QLabel* dbo_label = new QLabel("DBContent");
         dbo_label->setFont(font_bold);
-        dbo_done_grid_->addWidget(dbo_label, row, 0);
-
-        QLabel* done_label = new QLabel("Done");
-        done_label->setFont(font_bold);
-        done_label->setAlignment(Qt::AlignRight);
-        dbo_done_grid_->addWidget(done_label, row, 1);
-    }
-
-    for (auto& dbo_done_it : dbo_done_flags_)
-    {
-        ++row;
-
-        if (dbo_done_grid_->rowCount() < row + 1)
-        {
-            // loginf << "CreateAssociationsStatusDialog: updateDBODoneGrid: adding row " <<
-            // row;
-
-            dbo_done_grid_->addWidget(new QLabel(), row, 0);
-
-            QLabel* count_label = new QLabel();
-            count_label->setAlignment(Qt::AlignRight);
-            dbo_done_grid_->addWidget(count_label, row, 1);
-        }
-
-        // loginf << "CreateAssociationsStatusDialog: updateDBODoneGrid: setting row " << row;
-
-        QLabel* dbo_label = dynamic_cast<QLabel*>(dbo_done_grid_->itemAtPosition(row, 0)->widget());
-        assert(dbo_label);
-        dbo_label->setText(dbo_done_it.first.c_str());
-
-        QLabel* count_label =
-            dynamic_cast<QLabel*>(dbo_done_grid_->itemAtPosition(row, 1)->widget());
-        assert(count_label);
-        if (dbo_done_it.second)
-            count_label->setText("Done");
-        else
-            count_label->setText("Loading");
-    }
-}
-
-void CreateAssociationsStatusDialog::updateDBOAssociatedGrid()
-{
-    assert(dbo_associated_grid_);
-
-    // loginf << "CreateAssociationsStatusDialog: updateDBODoneGrid: rowcount " <<
-    // cat_counters_grid_->rowCount();
-
-    int row = 1;
-    if (dbo_associated_grid_->rowCount() == 1)
-    {
-        // loginf << "CreateAssociationsStatusDialog: updateDBODoneGrid: adding first row";
-
-        QFont font_bold;
-        font_bold.setBold(true);
-
-        QLabel* dbo_label = new QLabel("DBObject");
-        dbo_label->setFont(font_bold);
-        dbo_associated_grid_->addWidget(dbo_label, row, 0);
+        dbcont_associated_grid_->addWidget(dbo_label, row, 0);
 
         QLabel* count_label = new QLabel("Count");
         count_label->setFont(font_bold);
         count_label->setAlignment(Qt::AlignRight);
-        dbo_associated_grid_->addWidget(count_label, row, 1);
+        dbcont_associated_grid_->addWidget(count_label, row, 1);
 
         QLabel* associated_label = new QLabel("Associated");
         associated_label->setFont(font_bold);
         associated_label->setAlignment(Qt::AlignRight);
-        dbo_associated_grid_->addWidget(associated_label, row, 2);
+        dbcont_associated_grid_->addWidget(associated_label, row, 2);
 
         QLabel* percent_label = new QLabel("Percent");
         percent_label->setFont(font_bold);
         percent_label->setAlignment(Qt::AlignRight);
-        dbo_associated_grid_->addWidget(percent_label, row, 3);
+        dbcont_associated_grid_->addWidget(percent_label, row, 3);
     }
 
     for (auto& dbo_it : COMPASS::instance().dbContentManager())
     {
         ++row;
 
-        if (dbo_associated_grid_->rowCount() < row + 1)
+        if (dbcont_associated_grid_->rowCount() < row + 1)
         {
             // loginf << "CreateAssociationsStatusDialog: updateDBODoneGrid: adding row " <<
             // row;
 
-            dbo_associated_grid_->addWidget(new QLabel(), row, 0);
+            dbcont_associated_grid_->addWidget(new QLabel(), row, 0);
 
             QLabel* count_label = new QLabel();
             count_label->setAlignment(Qt::AlignRight);
-            dbo_associated_grid_->addWidget(count_label, row, 1);
+            dbcont_associated_grid_->addWidget(count_label, row, 1);
 
             QLabel* associated_label = new QLabel();
             associated_label->setAlignment(Qt::AlignRight);
-            dbo_associated_grid_->addWidget(associated_label, row, 2);
+            dbcont_associated_grid_->addWidget(associated_label, row, 2);
 
             QLabel* percent_label = new QLabel();
             percent_label->setAlignment(Qt::AlignRight);
-            dbo_associated_grid_->addWidget(percent_label, row, 3);
+            dbcont_associated_grid_->addWidget(percent_label, row, 3);
         }
 
         // loginf << "CreateAssociationsStatusDialog: updateDBODoneGrid: setting row " << row;
 
         QLabel* dbo_label =
-            dynamic_cast<QLabel*>(dbo_associated_grid_->itemAtPosition(row, 0)->widget());
+            dynamic_cast<QLabel*>(dbcont_associated_grid_->itemAtPosition(row, 0)->widget());
         assert(dbo_label);
         dbo_label->setText(dbo_it.first.c_str());
 
-        QLabel* count_label =
-            dynamic_cast<QLabel*>(dbo_associated_grid_->itemAtPosition(row, 1)->widget());
-        assert(count_label);
         size_t count = dbo_it.second->count();
+        size_t assoc_count = 0; //dbo_it.second->associations().size();
+
+        if (association_counts_.count(dbo_it.first))
+        {
+            count = association_counts_.at(dbo_it.first).first;
+            assoc_count = association_counts_.at(dbo_it.first).second;
+        }
+
+        QLabel* count_label =
+            dynamic_cast<QLabel*>(dbcont_associated_grid_->itemAtPosition(row, 1)->widget());
+        assert(count_label);
         count_label->setText(QString::number(count));
 
         QLabel* associated_label =
-            dynamic_cast<QLabel*>(dbo_associated_grid_->itemAtPosition(row, 2)->widget());
+            dynamic_cast<QLabel*>(dbcont_associated_grid_->itemAtPosition(row, 2)->widget());
         assert(associated_label);
-        size_t assoc_count = 0; //dbo_it.second->associations().size();
         associated_label->setText(QString::number(assoc_count));
 
         QLabel* percent_label =
-            dynamic_cast<QLabel*>(dbo_associated_grid_->itemAtPosition(row, 3)->widget());
+            dynamic_cast<QLabel*>(dbcont_associated_grid_->itemAtPosition(row, 3)->widget());
         assert(percent_label);
+
         if (count)
             percent_label->setText(
                 (String::percentToString(100.0 * assoc_count / count) + "%").c_str());
+        else if (count == 0 && assoc_count == 0 && done_)
+            percent_label->setText("100.00%");
         else
-            percent_label->setText("0");
+            percent_label->setText("0%");
     }
 }

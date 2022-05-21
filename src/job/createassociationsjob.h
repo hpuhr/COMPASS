@@ -42,6 +42,8 @@ public:
 
     virtual void run();
 
+    std::map<std::string, std::pair<unsigned int, unsigned int> > associationCounts() const;
+
 protected:
     static bool in_appimage_;
 

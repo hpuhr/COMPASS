@@ -151,6 +151,11 @@ void CreateAssociationsJob::run()
     done_ = true;
 }
 
+std::map<std::string, std::pair<unsigned int, unsigned int> > CreateAssociationsJob::associationCounts() const
+{
+    return association_counts_;
+}
+
 void CreateAssociationsJob::removePreviousAssociations()
 {
     loginf << "CreateAssociationsJob: removePreviousAssociations";

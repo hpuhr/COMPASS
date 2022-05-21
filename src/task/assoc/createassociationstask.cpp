@@ -228,7 +228,7 @@ void CreateAssociationsTask::run()
     connect(status_dialog_.get(), &CreateAssociationsStatusDialog::closeSignal, this,
             &CreateAssociationsTask::closeStatusDialogSlot);
     status_dialog_->markStartTime();
-    status_dialog_->setAssociationStatus("Loading Data");
+    status_dialog_->setStatus("Loading Data");
     status_dialog_->show();
 
     checkAndSetMetaVariable(DBContent::meta_var_rec_num_.name(), &rec_num_var_);
@@ -252,7 +252,7 @@ void CreateAssociationsTask::run()
     COMPASS::instance().viewManager().disableDataDistribution(true);
 
     connect(&dbcontent_man, &DBContentManager::loadedDataSignal,
-            this, &CreateAssociationsTask::loadedDataDataSlot);
+            this, &CreateAssociationsTask::loadedDataSlot);
     connect(&dbcontent_man, &DBContentManager::loadingDoneSignal,
             this, &CreateAssociationsTask::loadingDoneSlot);
 
@@ -260,9 +260,6 @@ void CreateAssociationsTask::run()
     {
         if (!dbo_it.second->hasData())
             continue;
-
-//        if (dbo_it.first == "RefTraj") // TODO
-//            continue;
 
         VariableSet read_set = getReadSetFor(dbo_it.first);
 
@@ -468,10 +465,13 @@ void CreateAssociationsTask::contMaxDistanceAcceptableTracker(double cont_max_di
     cont_max_distance_acceptable_tracker_ = cont_max_distance_acceptable_tracker;
 }
 
-void CreateAssociationsTask::loadedDataDataSlot(
+void CreateAssociationsTask::loadedDataSlot(
         const std::map<std::string, std::shared_ptr<Buffer>>& data, bool requires_reset)
 {
     data_ = data;
+
+    assert (status_dialog_);
+    status_dialog_->updateTime();
 }
 
 void CreateAssociationsTask::loadingDoneSlot()
@@ -481,11 +481,12 @@ void CreateAssociationsTask::loadingDoneSlot()
     DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
 
     disconnect(&dbcontent_man, &DBContentManager::loadedDataSignal,
-               this, &CreateAssociationsTask::loadedDataDataSlot);
+               this, &CreateAssociationsTask::loadedDataSlot);
     disconnect(&dbcontent_man, &DBContentManager::loadingDoneSignal,
                this, &CreateAssociationsTask::loadingDoneSlot);
 
     assert(status_dialog_);
+    status_dialog_->setStatus("Loading done, starting association");
 
     dbcontent_man.clearData();
 
@@ -512,7 +513,6 @@ void CreateAssociationsTask::loadingDoneSlot()
 
     JobManager::instance().addDBJob(create_job_);
 
-    status_dialog_->setAssociationStatus("In Progress");
 }
 
 void CreateAssociationsTask::dialogRunSlot()
@@ -540,8 +540,11 @@ void CreateAssociationsTask::createDoneSlot()
 
     create_job_done_ = true;
 
-    status_dialog_->setAssociationStatus("Done");
+    status_dialog_->setStatus("Done");
 
+    assert (create_job_);
+
+    status_dialog_->setAssociationsCounts(create_job_->associationCounts());
     status_dialog_->setDone();
 
     if (!show_done_summary_)
@@ -575,7 +578,7 @@ void CreateAssociationsTask::createObsoleteSlot()
 void CreateAssociationsTask::associationStatusSlot(QString status)
 {
     assert(status_dialog_);
-    status_dialog_->setAssociationStatus(status.toStdString());
+    status_dialog_->setStatus(status.toStdString());
 }
 
 void CreateAssociationsTask::closeStatusDialogSlot()
