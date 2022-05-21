@@ -45,12 +45,12 @@ public:
             bool use_order = false, dbContent::Variable* order_variable = nullptr,
             bool use_order_ascending = false, const std::string& limit = "");
 
-    //    std::shared_ptr<DBCommand> getSelectCommand(const DBObject& object,
+    //    std::shared_ptr<DBCommand> getSelectCommand(const DBContent& object,
     //                                                const std::vector<std::string>& columns,
     //                                                bool distinct = false);
     std::shared_ptr<DBCommand> getDataSourcesSelectCommand();
 
-    //std::shared_ptr<DBCommand> getDistinctDataSourcesSelectCommand(DBObject& object);
+    //std::shared_ptr<DBCommand> getDistinctDataSourcesSelectCommand(DBContent& object);
     std::shared_ptr<DBCommand> getMaxRecordNumberCommand(const std::string& table_name,
                                                          const std::string& rec_num_col_name);
     std::shared_ptr<DBCommand> getADSBInfoCommand(DBContent& adsb_obj);

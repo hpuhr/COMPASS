@@ -32,7 +32,7 @@ class DBContent;
 
 
 /**
- * @brief Edit widget for a DBObject
+ * @brief Edit widget for a DBContent
  */
 class DBContentWidget : public QWidget
 {

@@ -374,7 +374,7 @@ void CreateARTASAssociationsTask::run()
 
             assert(tracker_ds_id_var_);
 
-            //        void DBObject::load (DBOVariableSet& read_set,  std::string
+            //        void DBContent::load (DBOVariableSet& read_set,  std::string
             //        custom_filter_clause,
             //                             std::vector <DBOVariable*> filtered_variables, bool
             //                             use_order, DBOVariable* order_variable, bool
@@ -762,19 +762,19 @@ void CreateARTASAssociationsTask::checkAndSetMetaVariable(const std::string& nam
     }
 }
 
-VariableSet CreateARTASAssociationsTask::getReadSetFor(const std::string& dbo_name)
+VariableSet CreateARTASAssociationsTask::getReadSetFor(const std::string& dbcontent_name)
 {
     VariableSet read_set;
 
     assert(tod_var_);
-    assert(tod_var_->existsIn(dbo_name));
-    read_set.add(tod_var_->getFor(dbo_name));
+    assert(tod_var_->existsIn(dbcontent_name));
+    read_set.add(tod_var_->getFor(dbcontent_name));
 
     assert(associations_var_);
-    assert(associations_var_->existsIn(dbo_name));
-    read_set.add(associations_var_->getFor(dbo_name));
+    assert(associations_var_->existsIn(dbcontent_name));
+    read_set.add(associations_var_->getFor(dbcontent_name));
 
-    if (dbo_name == "CAT062")
+    if (dbcontent_name == "CAT062")
     {
         assert(tracker_track_num_var_);
         read_set.add(*tracker_track_num_var_);
@@ -794,14 +794,14 @@ VariableSet CreateARTASAssociationsTask::getReadSetFor(const std::string& dbo_na
     else
     {
         assert(hash_var_);
-        assert(hash_var_->existsIn(dbo_name));
-        read_set.add(hash_var_->getFor(dbo_name));
+        assert(hash_var_->existsIn(dbcontent_name));
+        read_set.add(hash_var_->getFor(dbcontent_name));
     }
 
     // must be last for update process
     assert(rec_num_var_);
-    assert(rec_num_var_->existsIn(dbo_name));
-    read_set.add(rec_num_var_->getFor(dbo_name));
+    assert(rec_num_var_->existsIn(dbcontent_name));
+    read_set.add(rec_num_var_->getFor(dbcontent_name));
 
     return read_set;
 }

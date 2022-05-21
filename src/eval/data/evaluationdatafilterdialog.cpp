@@ -142,13 +142,13 @@ EvaluationDataFilterDialog::EvaluationDataFilterDialog(EvaluationData& eval_data
     connect(remove_dbo_check_, &QCheckBox::clicked, this,
             &EvaluationDataFilterDialog::removeDBOsSlot);
 
-    config_layout->addRow("Remove By Non-Detection of DBObject", remove_dbo_check_);
+    config_layout->addRow("Remove By Non-Detection in DBContent", remove_dbo_check_);
 
     for (auto& dbo_it : COMPASS::instance().dbContentManager())
     {
         QCheckBox* tmp = new QCheckBox();
         tmp->setChecked(eval_man_.removeNotDetectedDBO(dbo_it.first));
-        tmp->setProperty("dbo_name", dbo_it.first.c_str());
+        tmp->setProperty("dbcontent_name", dbo_it.first.c_str());
         connect(tmp, &QCheckBox::clicked, this,
                 &EvaluationDataFilterDialog::removeSpecificDBOsSlot);
 
@@ -276,12 +276,12 @@ void EvaluationDataFilterDialog::removeSpecificDBOsSlot(bool checked)
     QCheckBox* tmp = dynamic_cast<QCheckBox*>(sender());
     assert (tmp);
 
-    QVariant data = tmp->property("dbo_name");
+    QVariant data = tmp->property("dbcontent_name");
     assert (data.isValid());
 
-    string dbo_name = data.toString().toStdString();
+    string dbcontent_name = data.toString().toStdString();
 
-    eval_man_.removeNotDetectedDBOs(dbo_name,checked);
+    eval_man_.removeNotDetectedDBOs(dbcontent_name,checked);
 }
 
 void EvaluationDataFilterDialog::runSlot()

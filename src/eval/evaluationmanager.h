@@ -84,7 +84,7 @@ public:
     void close();
 
     bool needsAdditionalVariables ();
-    void addVariables (const std::string dbo_name, dbContent::VariableSet& read_set);
+    void addVariables (const std::string dbcontent_name, dbContent::VariableSet& read_set);
 
     virtual void generateSubConfigurable(const std::string& class_id,
                                          const std::string& instance_id) override;
@@ -243,8 +243,8 @@ public:
     bool removeNotDetectedDBOs() const;
     void removeNotDetectedDBOs(bool value);
 
-    bool removeNotDetectedDBO(const std::string& dbo_name) const;
-    void removeNotDetectedDBOs(const std::string& dbo_name, bool value);
+    bool removeNotDetectedDBO(const std::string& dbcontent_name) const;
+    void removeNotDetectedDBOs(const std::string& dbcontent_name, bool value);
 
     bool loadOnlySectorData() const;
     void loadOnlySectorData(bool value);
@@ -362,12 +362,12 @@ protected:
 
     bool evaluated_ {false};
 
-    std::string dbo_name_ref_;
+    std::string dbcontent_name_ref_;
     unsigned int line_id_ref_;
     std::map<unsigned int, bool> data_sources_ref_; // ds_id -> active flag
     nlohmann::json active_sources_ref_; // config var for data_sources_ref_
 
-    std::string dbo_name_tst_;
+    std::string dbcontent_name_tst_;
     unsigned int line_id_tst_;
     std::map<unsigned int, bool> data_sources_tst_; // ds_id -> active flag
     nlohmann::json active_sources_tst_; // config var for active_sources_tst_

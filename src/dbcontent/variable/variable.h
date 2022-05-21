@@ -98,8 +98,8 @@ class Variable : public QObject, public Property, public Configurable
 
     DBContent& dbObject() const
     {
-        assert(db_object_);
-        return *db_object_;
+        assert(dbcontent_);
+        return *dbcontent_;
     }
 
 //    std::string getMinString();
@@ -208,7 +208,7 @@ private:
     static std::map<Representation, std::string> representation_2_string_;
     static std::map<std::string, Representation> string_2_representation_;
 
-    DBContent* db_object_{nullptr};
+    DBContent* dbcontent_{nullptr};
 
     std::string short_name_;
     /// Value representation type, based on enum STRING_REPRESENTATION

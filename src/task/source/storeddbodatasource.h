@@ -150,7 +150,7 @@ class StoredDBODataSource : public Configurable
     void setFromJSON(nlohmann::json& j);
 
   private:
-    std::string dbo_name_;
+    std::string dbcontent_name_;
     unsigned int id_{0};
     std::string name_;
     bool has_short_name_{false};

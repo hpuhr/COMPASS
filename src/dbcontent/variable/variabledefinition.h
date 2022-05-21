@@ -38,7 +38,7 @@ class VariableDefinition : public Configurable
     virtual ~VariableDefinition() {}
 
     const std::string& dboName() { return dbcontent_name_; }
-    void dboName(const std::string& dbo_name) { dbcontent_name_ = dbo_name; }
+    void dboName(const std::string& dbcontent_name) { dbcontent_name_ = dbcontent_name; }
 
     const std::string& variableName() { return variable_name_; }
     void variableName(const std::string& dbo_variable_name)

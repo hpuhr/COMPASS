@@ -132,14 +132,14 @@ void DataSourceManager::importDataSourcesJSONDeprecated(const nlohmann::json& j)
 
     for (auto& j_dbo_it : j.items())
     {
-        std::string dbo_name = j_dbo_it.key();
+        std::string dbcontent_name = j_dbo_it.key();
 
         for (auto& j_ds_it : j_dbo_it.value().get<json::array_t>())
         {
-            loginf << "DataSourceManager: importDataSources: found dbo " << dbo_name
+            loginf << "DataSourceManager: importDataSources: found dbo " << dbcontent_name
                    << " ds '" << j_ds_it.dump(4) << "'";
 
-            assert(j_ds_it.contains("dbo_name"));
+            assert(j_ds_it.contains("dbcontent_name"));
             assert(j_ds_it.contains("name"));
             assert(j_ds_it.contains("sac"));
             assert(j_ds_it.contains("sic"));

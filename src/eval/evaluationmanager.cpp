@@ -62,11 +62,11 @@ using namespace nlohmann;
 EvaluationManager::EvaluationManager(const std::string& class_id, const std::string& instance_id, COMPASS* compass)
     : Configurable(class_id, instance_id, compass, "eval.json"), compass_(*compass), data_(*this)
 {
-    registerParameter("dbo_name_ref", &dbo_name_ref_, "RefTraj");
+    registerParameter("dbcontent_name_ref", &dbcontent_name_ref_, "RefTraj");
     registerParameter("line_id_ref", &line_id_ref_, 0);
     registerParameter("active_sources_ref", &active_sources_ref_, json::object());
 
-    registerParameter("dbo_name_tst", &dbo_name_tst_, "Tracker");
+    registerParameter("dbcontent_name_tst", &dbcontent_name_tst_, "Tracker");
     registerParameter("line_id_tst", &line_id_tst_, 0);
     registerParameter("active_sources_tst", &active_sources_tst_, json::object());
 
@@ -547,12 +547,12 @@ void EvaluationManager::loadingDoneSlot()
     loginf << "EvaluationManager: loadingDoneSlot: line ref " << line_id_ref_ << " tst " << line_id_tst_;
 
     std::map<std::string, std::shared_ptr<Buffer>> data = dbcontent_man.loadedData();
-    assert (data.count(dbo_name_ref_));
-    data_.addReferenceData(dbcontent_man.dbContent(dbo_name_ref_), line_id_ref_, data.at(dbo_name_ref_));
+    assert (data.count(dbcontent_name_ref_));
+    data_.addReferenceData(dbcontent_man.dbContent(dbcontent_name_ref_), line_id_ref_, data.at(dbcontent_name_ref_));
     reference_data_loaded_ = true;
 
-    assert (data.count(dbo_name_tst_));
-    data_.addTestData(dbcontent_man.dbContent(dbo_name_tst_), line_id_tst_, data.at(dbo_name_tst_));
+    assert (data.count(dbcontent_name_tst_));
+    data_.addTestData(dbcontent_man.dbContent(dbcontent_name_tst_), line_id_tst_, data.at(dbcontent_name_tst_));
     test_data_loaded_ = true;
 
     dbcontent_man.clearData(); // clear data, has been stored locally
@@ -592,32 +592,32 @@ void EvaluationManager::loadingDoneSlot()
 
 //    loginf << "EvaluationManager: loadingDoneSlot: obj " << object.name() << " buffer size " << object.data()->size();
 
-//    DBObjectManager& object_man = COMPASS::instance().objectManager();
+//    DBContentManager& object_man = COMPASS::instance().objectManager();
 
-//    if (object.name() == dbo_name_ref_)
+//    if (object.name() == dbcontent_name_ref_)
 //    {
-//        DBObject& dbo_ref = object_man.object(dbo_name_ref_);
+//        DBContent& dbo_ref = object_man.object(dbcontent_name_ref_);
 
 //        TODO_ASSERT
 
-////        disconnect(&dbo_ref, &DBObject::newDataSignal, this, &EvaluationManager::newDataSlot);
-////        disconnect(&dbo_ref, &DBObject::loadingDoneSignal, this, &EvaluationManager::loadingDoneSlot);
+////        disconnect(&dbo_ref, &DBContent::newDataSignal, this, &EvaluationManager::newDataSlot);
+////        disconnect(&dbo_ref, &DBContent::loadingDoneSignal, this, &EvaluationManager::loadingDoneSlot);
 
 //        data_.addReferenceData(dbo_ref, object.data());
 
 //        reference_data_loaded_ = true;
 //    }
 
-//    if (object.name() == dbo_name_tst_)
+//    if (object.name() == dbcontent_name_tst_)
 //    {
-//        DBObject& dbo_tst = object_man.object(dbo_name_tst_);
+//        DBContent& dbo_tst = object_man.object(dbcontent_name_tst_);
 
-//        if (dbo_name_ref_ != dbo_name_tst_) // otherwise already disconnected
+//        if (dbcontent_name_ref_ != dbcontent_name_tst_) // otherwise already disconnected
 //        {
 //            TODO_ASSERT
 
-////            disconnect(&dbo_tst, &DBObject::newDataSignal, this, &EvaluationManager::newDataSlot);
-////            disconnect(&dbo_tst, &DBObject::loadingDoneSignal, this, &EvaluationManager::loadingDoneSlot);
+////            disconnect(&dbo_tst, &DBContent::newDataSignal, this, &EvaluationManager::newDataSlot);
+////            disconnect(&dbo_tst, &DBContent::loadingDoneSignal, this, &EvaluationManager::loadingDoneSlot);
 //        }
 
 //        data_.addTestData(dbo_tst, object.data());
@@ -713,55 +713,55 @@ bool EvaluationManager::needsAdditionalVariables ()
     return needs_additional_variables_;
 }
 
-void EvaluationManager::addVariables (const std::string dbo_name, dbContent::VariableSet& read_set)
+void EvaluationManager::addVariables (const std::string dbcontent_name, dbContent::VariableSet& read_set)
 {
-    loginf << "EvaluationManager: addVariables: dbo_name " << dbo_name;
+    loginf << "EvaluationManager: addVariables: dbcontent_name " << dbcontent_name;
 
     // TODO add required variables from standard requirements
 
     DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
 
-    read_set.add(dbcontent_man.metaVariable(DBContent::meta_var_rec_num_.name()).getFor(dbo_name));
-    read_set.add(dbcontent_man.metaVariable(DBContent::meta_var_datasource_id_.name()).getFor(dbo_name));
-    read_set.add(dbcontent_man.metaVariable(DBContent::meta_var_tod_.name()).getFor(dbo_name));
-    read_set.add(dbcontent_man.metaVariable(DBContent::meta_var_latitude_.name()).getFor(dbo_name));
-    read_set.add(dbcontent_man.metaVariable(DBContent::meta_var_longitude_.name()).getFor(dbo_name));
+    read_set.add(dbcontent_man.metaVariable(DBContent::meta_var_rec_num_.name()).getFor(dbcontent_name));
+    read_set.add(dbcontent_man.metaVariable(DBContent::meta_var_datasource_id_.name()).getFor(dbcontent_name));
+    read_set.add(dbcontent_man.metaVariable(DBContent::meta_var_tod_.name()).getFor(dbcontent_name));
+    read_set.add(dbcontent_man.metaVariable(DBContent::meta_var_latitude_.name()).getFor(dbcontent_name));
+    read_set.add(dbcontent_man.metaVariable(DBContent::meta_var_longitude_.name()).getFor(dbcontent_name));
 
-    if (dbcontent_man.metaVariable(DBContent::meta_var_ta_.name()).existsIn(dbo_name))
-        read_set.add(dbcontent_man.metaVariable(DBContent::meta_var_ta_.name()).getFor(dbo_name));
+    if (dbcontent_man.metaVariable(DBContent::meta_var_ta_.name()).existsIn(dbcontent_name))
+        read_set.add(dbcontent_man.metaVariable(DBContent::meta_var_ta_.name()).getFor(dbcontent_name));
 
     // flight level
-    read_set.add(dbcontent_man.metaVariable(DBContent::meta_var_mc_.name()).getFor(dbo_name));
+    read_set.add(dbcontent_man.metaVariable(DBContent::meta_var_mc_.name()).getFor(dbcontent_name));
 
-    if (dbcontent_man.metaVariable(DBContent::meta_var_mc_g_.name()).existsIn(dbo_name))
-        read_set.add(dbcontent_man.metaVariable(DBContent::meta_var_mc_g_.name()).getFor(dbo_name));
+    if (dbcontent_man.metaVariable(DBContent::meta_var_mc_g_.name()).existsIn(dbcontent_name))
+        read_set.add(dbcontent_man.metaVariable(DBContent::meta_var_mc_g_.name()).getFor(dbcontent_name));
 
-    if (dbcontent_man.metaVariable(DBContent::meta_var_mc_v_.name()).existsIn(dbo_name))
-        read_set.add(dbcontent_man.metaVariable(DBContent::meta_var_mc_v_.name()).getFor(dbo_name));
+    if (dbcontent_man.metaVariable(DBContent::meta_var_mc_v_.name()).existsIn(dbcontent_name))
+        read_set.add(dbcontent_man.metaVariable(DBContent::meta_var_mc_v_.name()).getFor(dbcontent_name));
 
-    if (dbo_name_ref_ == dbo_name && dbo_name_ref_ == "CAT062")
+    if (dbcontent_name_ref_ == dbcontent_name && dbcontent_name_ref_ == "CAT062")
         read_set.add(dbcontent_man.dbContent("CAT062").variable(DBContent::var_cat062_baro_alt_.name()));
 
     // m3a
-    read_set.add(dbcontent_man.metaVariable(DBContent::meta_var_m3a_.name()).getFor(dbo_name));
+    read_set.add(dbcontent_man.metaVariable(DBContent::meta_var_m3a_.name()).getFor(dbcontent_name));
 
-    if (dbcontent_man.metaVariable(DBContent::meta_var_m3a_g_.name()).existsIn(dbo_name))
-        read_set.add(dbcontent_man.metaVariable(DBContent::meta_var_m3a_g_.name()).getFor(dbo_name));
+    if (dbcontent_man.metaVariable(DBContent::meta_var_m3a_g_.name()).existsIn(dbcontent_name))
+        read_set.add(dbcontent_man.metaVariable(DBContent::meta_var_m3a_g_.name()).getFor(dbcontent_name));
 
-    if (dbcontent_man.metaVariable(DBContent::meta_var_m3a_v_.name()).existsIn(dbo_name))
-        read_set.add(dbcontent_man.metaVariable(DBContent::meta_var_m3a_v_.name()).getFor(dbo_name));
+    if (dbcontent_man.metaVariable(DBContent::meta_var_m3a_v_.name()).existsIn(dbcontent_name))
+        read_set.add(dbcontent_man.metaVariable(DBContent::meta_var_m3a_v_.name()).getFor(dbcontent_name));
 
     // tn
-    if (dbcontent_man.metaVariable(DBContent::meta_var_track_num_.name()).existsIn(dbo_name))
-        read_set.add(dbcontent_man.metaVariable(DBContent::meta_var_track_num_.name()).getFor(dbo_name));
+    if (dbcontent_man.metaVariable(DBContent::meta_var_track_num_.name()).existsIn(dbcontent_name))
+        read_set.add(dbcontent_man.metaVariable(DBContent::meta_var_track_num_.name()).getFor(dbcontent_name));
 
     // ground bit
-    if (dbcontent_man.metaVariable(DBContent::meta_var_ground_bit_.name()).existsIn(dbo_name))
-        read_set.add(dbcontent_man.metaVariable(DBContent::meta_var_ground_bit_.name()).getFor(dbo_name));
+    if (dbcontent_man.metaVariable(DBContent::meta_var_ground_bit_.name()).existsIn(dbcontent_name))
+        read_set.add(dbcontent_man.metaVariable(DBContent::meta_var_ground_bit_.name()).getFor(dbcontent_name));
 
-    //    if (dbo_name == "ADSB")
+    //    if (dbcontent_name == "ADSB")
     //    {
-    //        read_set.add(db_object.variable("ground_bit"));
+    //        read_set.add(dbcontent.variable("ground_bit"));
     //        //            read_set.add(obj.variable("nac_p"));
     //        //            read_set.add(obj.variable("nucp_nic"));
     //        //            read_set.add(obj.variable("sil"));
@@ -769,16 +769,16 @@ void EvaluationManager::addVariables (const std::string dbo_name, dbContent::Var
 
     // speed & track angle
 
-    assert (dbcontent_man.metaCanGetVariable(dbo_name, DBContent::meta_var_ground_speed_));
-    assert (dbcontent_man.metaCanGetVariable(dbo_name, DBContent::meta_var_track_angle_));
+    assert (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_ground_speed_));
+    assert (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_track_angle_));
 
-    read_set.add(dbcontent_man.metaGetVariable(dbo_name, DBContent::meta_var_ground_speed_));
-    read_set.add(dbcontent_man.metaGetVariable(dbo_name, DBContent::meta_var_track_angle_));
+    read_set.add(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_ground_speed_));
+    read_set.add(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_track_angle_));
 
     //        // for mono sensor + lu sensor
 
-    //        read_set.add(db_object.variable("multiple_sources")); // string
-    //        read_set.add(db_object.variable("track_lu_ds_id")); // int
+    //        read_set.add(dbcontent.variable("multiple_sources")); // string
+    //        read_set.add(dbcontent.variable("track_lu_ds_id")); // int
     //    }
 
 }
@@ -1172,24 +1172,24 @@ void EvaluationManager::exportSectors (const std::string& filename)
 
 std::string EvaluationManager::dboNameRef() const
 {
-    return dbo_name_ref_;
+    return dbcontent_name_ref_;
 }
 
 void EvaluationManager::dboNameRef(const std::string& name)
 {
     loginf << "EvaluationManager: dboNameRef: name " << name;
 
-    dbo_name_ref_ = name;
+    dbcontent_name_ref_ = name;
 
     updateReferenceDBO();
 }
 
 bool EvaluationManager::hasValidReferenceDBO ()
 {
-    if (!dbo_name_ref_.size())
+    if (!dbcontent_name_ref_.size())
         return false;
 
-    return COMPASS::instance().dbContentManager().existsDBContent(dbo_name_ref_);
+    return COMPASS::instance().dbContentManager().existsDBContent(dbcontent_name_ref_);
 }
 
 set<unsigned int> EvaluationManager::activeDataSourcesRef()
@@ -1206,24 +1206,24 @@ set<unsigned int> EvaluationManager::activeDataSourcesRef()
 
 std::string EvaluationManager::dboNameTst() const
 {
-    return dbo_name_tst_;
+    return dbcontent_name_tst_;
 }
 
 void EvaluationManager::dboNameTst(const std::string& name)
 {
     loginf << "EvaluationManager: dboNameTst: name " << name;
 
-    dbo_name_tst_ = name;
+    dbcontent_name_tst_ = name;
 
     updateTestDBO();
 }
 
 bool EvaluationManager::hasValidTestDBO ()
 {
-    if (!dbo_name_tst_.size())
+    if (!dbcontent_name_tst_.size())
         return false;
 
-    return COMPASS::instance().dbContentManager().existsDBContent(dbo_name_tst_);
+    return COMPASS::instance().dbContentManager().existsDBContent(dbcontent_name_tst_);
 }
 
 set<unsigned int> EvaluationManager::activeDataSourcesTst()
@@ -1445,7 +1445,7 @@ void EvaluationManager::updateReferenceDBO()
     if (!hasValidReferenceDBO())
         return;
 
-    if (COMPASS::instance().dataSourceManager().hasDataSourcesOfDBContent(dbo_name_ref_))
+    if (COMPASS::instance().dataSourceManager().hasDataSourcesOfDBContent(dbcontent_name_ref_))
         updateReferenceDataSources();
 }
 
@@ -1457,7 +1457,7 @@ void EvaluationManager::updateReferenceDataSources()
 
     for (auto& ds_it : COMPASS::instance().dataSourceManager().dbDataSources())
     {
-        if (!ds_it->hasNumInserted(dbo_name_ref_))
+        if (!ds_it->hasNumInserted(dbcontent_name_ref_))
             continue;
 
         unsigned int ds_id = ds_it->id();
@@ -1465,12 +1465,12 @@ void EvaluationManager::updateReferenceDataSources()
 
         if (data_sources_ref_.count(ds_id) == 0)
         {
-            if (!active_sources_ref_[dbo_name_ref_].contains(ds_id_str))
-                active_sources_ref_[dbo_name_ref_][ds_id_str] = true; // init with default true
+            if (!active_sources_ref_[dbcontent_name_ref_].contains(ds_id_str))
+                active_sources_ref_[dbcontent_name_ref_][ds_id_str] = true; // init with default true
 
             // needed for old compiler
             json::boolean_t& active
-                    = active_sources_ref_[dbo_name_ref_][ds_id_str].get_ref<json::boolean_t&>();
+                    = active_sources_ref_[dbcontent_name_ref_][ds_id_str].get_ref<json::boolean_t&>();
 
             data_sources_ref_[ds_id] = active;
 
@@ -1493,7 +1493,7 @@ void EvaluationManager::updateTestDBO()
     if (!hasValidTestDBO())
         return;
 
-    if (COMPASS::instance().dataSourceManager().hasDataSourcesOfDBContent(dbo_name_tst_))
+    if (COMPASS::instance().dataSourceManager().hasDataSourcesOfDBContent(dbcontent_name_tst_))
         updateTestDataSources();
 }
 
@@ -1506,7 +1506,7 @@ void EvaluationManager::updateTestDataSources()
 
     for (auto& ds_it : COMPASS::instance().dataSourceManager().dbDataSources())
     {
-        if (!ds_it->hasNumInserted(dbo_name_tst_))
+        if (!ds_it->hasNumInserted(dbcontent_name_tst_))
             continue;
 
         unsigned int ds_id = ds_it->id();
@@ -1514,12 +1514,12 @@ void EvaluationManager::updateTestDataSources()
 
         if (data_sources_tst_.count(ds_id) == 0)
         {
-            if (!active_sources_tst_[dbo_name_tst_].contains(ds_id_str))
-                active_sources_tst_[dbo_name_tst_][ds_id_str] = true; // init with default true
+            if (!active_sources_tst_[dbcontent_name_tst_].contains(ds_id_str))
+                active_sources_tst_[dbcontent_name_tst_][ds_id_str] = true; // init with default true
 
             // needed for old compiler
             json::boolean_t& active =
-                    active_sources_tst_[dbo_name_tst_][ds_id_str].get_ref<json::boolean_t&>();
+                    active_sources_tst_[dbcontent_name_tst_][ds_id_str].get_ref<json::boolean_t&>();
 
             data_sources_tst_[ds_id] = active;
 
@@ -2225,19 +2225,19 @@ void EvaluationManager::removeNotDetectedDBOs(bool value)
     remove_not_detected_dbos_ = value;
 }
 
-bool EvaluationManager::removeNotDetectedDBO(const std::string& dbo_name) const
+bool EvaluationManager::removeNotDetectedDBO(const std::string& dbcontent_name) const
 {
-    if (!remove_not_detected_dbo_values_.contains(dbo_name))
+    if (!remove_not_detected_dbo_values_.contains(dbcontent_name))
         return false;
 
-    return remove_not_detected_dbo_values_.at(dbo_name);
+    return remove_not_detected_dbo_values_.at(dbcontent_name);
 }
 
-void EvaluationManager::removeNotDetectedDBOs(const std::string& dbo_name, bool value)
+void EvaluationManager::removeNotDetectedDBOs(const std::string& dbcontent_name, bool value)
 {
-    loginf << "EvaluationManager: removeNotDetectedDBOs: dbo " << dbo_name << " value " << value;
+    loginf << "EvaluationManager: removeNotDetectedDBOs: dbo " << dbcontent_name << " value " << value;
 
-    remove_not_detected_dbo_values_[dbo_name] = value;
+    remove_not_detected_dbo_values_[dbcontent_name] = value;
 }
 
 bool EvaluationManager::loadOnlySectorData() const

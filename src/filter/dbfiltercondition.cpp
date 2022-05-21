@@ -47,7 +47,7 @@ DBFilterCondition::DBFilterCondition(const std::string& class_id, const std::str
     registerParameter("op_and", &op_and_, true);
     registerParameter("absolute_value", &absolute_value_, false);
 
-    registerParameter("variable_dbo_name", &variable_dbo_name_, "");
+    registerParameter("variable_dbcontent_name", &variable_dbcontent_name_, "");
     registerParameter("variable_name", &variable_name_, "");
 
     registerParameter("display_instance_id", &display_instance_id_, false);
@@ -95,20 +95,20 @@ void DBFilterCondition::invert()
 }
 
 /**
- * Returns if variable_ exists in DBObject of type
+ * Returns if variable_ exists in DBContent of type
  */
-bool DBFilterCondition::filters(const std::string& dbo_name)
+bool DBFilterCondition::filters(const std::string& dbcontent_name)
 {
     assert(usable_);
 
-    return hasVariable(dbo_name);
+    return hasVariable(dbcontent_name);
 }
 
-std::string DBFilterCondition::getConditionString(const std::string& dbo_name, bool& first,
+std::string DBFilterCondition::getConditionString(const std::string& dbcontent_name, bool& first,
                                                   std::vector<std::string>& extra_from_parts,
                                                   std::vector<dbContent::Variable*>& filtered_variables)
 {
-    logdbg << "DBFilterCondition: getConditionString: object " << dbo_name << " first " << first;
+    logdbg << "DBFilterCondition: getConditionString: object " << dbcontent_name << " first " << first;
     assert(usable_);
 
     std::stringstream ss;
@@ -122,9 +122,9 @@ std::string DBFilterCondition::getConditionString(const std::string& dbo_name, b
         variable_suffix = variable_suffix + ")";
     }
 
-    assert (hasVariable(dbo_name));
+    assert (hasVariable(dbcontent_name));
 
-    dbContent::Variable& var = variable(dbo_name);
+    dbContent::Variable& var = variable(dbcontent_name);
 
     //const DBTableColumn& column = var.currentDBColumn();
     std::string db_column_name = var.dbColumnName();
@@ -228,40 +228,40 @@ void DBFilterCondition::setVariableName(const std::string& variable_name)
     }
 }
 
-bool DBFilterCondition::hasVariable (const std::string& dbo_name)
+bool DBFilterCondition::hasVariable (const std::string& dbcontent_name)
 {
     DBContentManager& dbo_man = COMPASS::instance().dbContentManager();
 
-    if (variable_dbo_name_ == META_OBJECT_NAME)
+    if (variable_dbcontent_name_ == META_OBJECT_NAME)
     {
         if (!dbo_man.existsMetaVariable(variable_name_))
             return false;
 
-        return dbo_man.metaVariable(variable_name_).existsIn(dbo_name);
+        return dbo_man.metaVariable(variable_name_).existsIn(dbcontent_name);
     }
     else
     {
-        if (dbo_name != variable_dbo_name_)
+        if (dbcontent_name != variable_dbcontent_name_)
             return false;
 
-        if (!dbo_man.existsDBContent(variable_dbo_name_))
+        if (!dbo_man.existsDBContent(variable_dbcontent_name_))
             return false;
 
-        return dbo_man.dbContent(variable_dbo_name_).hasVariable(variable_name_);
+        return dbo_man.dbContent(variable_dbcontent_name_).hasVariable(variable_name_);
     }
 }
 
 
-dbContent::Variable& DBFilterCondition::variable (const std::string& dbo_name)
+dbContent::Variable& DBFilterCondition::variable (const std::string& dbcontent_name)
 {
-    assert (hasVariable(dbo_name));
+    assert (hasVariable(dbcontent_name));
 
     DBContentManager& dbo_man = COMPASS::instance().dbContentManager();
 
-    if (variable_dbo_name_ == META_OBJECT_NAME)
-        return dbo_man.metaVariable(variable_name_).getFor(dbo_name);
+    if (variable_dbcontent_name_ == META_OBJECT_NAME)
+        return dbo_man.metaVariable(variable_name_).getFor(dbcontent_name);
     else
-         return dbo_man.dbContent(variable_dbo_name_).variable(variable_name_);
+         return dbo_man.dbContent(variable_dbcontent_name_).variable(variable_name_);
 }
 
 
@@ -347,7 +347,7 @@ bool DBFilterCondition::checkValueInvalid(const std::string& new_value)
         return true;
     }
 
-    if (variable_dbo_name_ == META_OBJECT_NAME)
+    if (variable_dbcontent_name_ == META_OBJECT_NAME)
     {
          DBContentManager& dbo_man = COMPASS::instance().dbContentManager();
 
@@ -358,8 +358,8 @@ bool DBFilterCondition::checkValueInvalid(const std::string& new_value)
     }
     else
     {
-        assert (hasVariable(variable_dbo_name_));
-        variables.push_back(&variable(variable_dbo_name_));
+        assert (hasVariable(variable_dbcontent_name_));
+        variables.push_back(&variable(variable_dbcontent_name_));
     }
 
     bool invalid = true;

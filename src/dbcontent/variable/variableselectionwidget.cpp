@@ -116,9 +116,9 @@ void VariableSelectionWidget::updateMenuEntries()
 
     if (show_dbo_only_)
     {
-        assert(dbo_man_.existsDBContent(only_dbo_name_));
+        assert(dbo_man_.existsDBContent(only_dbcontent_name_));
 
-        for (auto& var_it : dbo_man_.dbContent(only_dbo_name_).variables())
+        for (auto& var_it : dbo_man_.dbContent(only_dbcontent_name_).variables())
         {
             if (show_data_types_only_ && !showDataType(var_it->dataType()))
                 continue;
@@ -128,7 +128,7 @@ void VariableSelectionWidget::updateMenuEntries()
 
             QVariantMap vmap;
             vmap.insert(QString::fromStdString(var_it->name()),
-                        QVariant(QString::fromStdString(only_dbo_name_)));
+                        QVariant(QString::fromStdString(only_dbcontent_name_)));
             action->setData(QVariant(vmap));
         }
     }
@@ -307,10 +307,10 @@ MetaVariable& VariableSelectionWidget::selectedMetaVariable() const
     return dbo_man_.metaVariable(var_name);
 }
 
-void VariableSelectionWidget::showDBOOnly(const std::string& only_dbo_name)
+void VariableSelectionWidget::showDBOOnly(const std::string& only_dbcontent_name)
 {
     show_dbo_only_ = true;
-    only_dbo_name_ = only_dbo_name;
+    only_dbcontent_name_ = only_dbcontent_name;
 
     assert(object_label_);
     object_label_->hide();
@@ -321,7 +321,7 @@ void VariableSelectionWidget::showDBOOnly(const std::string& only_dbo_name)
 void VariableSelectionWidget::disableShowDBOOnly()
 {
     show_dbo_only_ = false;
-    only_dbo_name_ = "";
+    only_dbcontent_name_ = "";
 
     assert(object_label_);
     object_label_->show();
@@ -329,7 +329,7 @@ void VariableSelectionWidget::disableShowDBOOnly()
     updateMenuEntries();
 }
 
-std::string VariableSelectionWidget::onlyDBOName() const { return only_dbo_name_; }
+std::string VariableSelectionWidget::onlyDBOName() const { return only_dbcontent_name_; }
 
 bool VariableSelectionWidget::showEmptyVariable() const { return show_empty_variable_; }
 

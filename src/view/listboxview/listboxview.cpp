@@ -158,11 +158,11 @@ ListBoxViewDataWidget* ListBoxView::getDataWidget()
     return widget_->getDataWidget();
 }
 
-dbContent::VariableSet ListBoxView::getSet(const std::string& dbo_name)
+dbContent::VariableSet ListBoxView::getSet(const std::string& dbcontent_name)
 {
     assert(data_source_);
 
-    return data_source_->getSet()->getExistingInDBFor(dbo_name);
+    return data_source_->getSet()->getExistingInDBFor(dbcontent_name);
 }
 
 // void ListBoxView::selectionChanged()

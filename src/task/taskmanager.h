@@ -27,7 +27,7 @@
 
 class COMPASS;
 class DatabaseOpenTask;
-class ManageDBObjectsTask;
+class ManageDBContentsTask;
 class CreateARTASAssociationsTask;
 //class JSONImportTask;
 class GPSTrailImportTask;
@@ -182,7 +182,7 @@ protected:
 
     // tasks
     std::unique_ptr<DatabaseOpenTask> database_open_task_;
-    std::unique_ptr<ManageDBObjectsTask> manage_dbobjects_task_;
+    std::unique_ptr<ManageDBContentsTask> manage_dbobjects_task_;
     std::unique_ptr<ASTERIXImportTask> asterix_importer_task_;
     std::unique_ptr<ViewPointsImportTask> view_points_import_task_;
     //std::unique_ptr<JSONImportTask> json_import_task_;

@@ -25,7 +25,7 @@
 #include "dbcontent/dbcontentmanager.h"
 #include "dbcontent/dbcontentmanagerwidget.h"
 
-ManageDBObjectsTaskWidget::ManageDBObjectsTaskWidget(ManageDBObjectsTask& task, QWidget* parent)
+ManageDBContentsTaskWidget::ManageDBContentsTaskWidget(ManageDBContentsTask& task, QWidget* parent)
     : TaskWidget(parent), task_(task)
 {
     QVBoxLayout* main_layout_ = new QVBoxLayout();
@@ -38,4 +38,4 @@ ManageDBObjectsTaskWidget::ManageDBObjectsTaskWidget(ManageDBObjectsTask& task, 
     setLayout(main_layout_);
 }
 
-void ManageDBObjectsTaskWidget::expertModeChangedSlot() {}
+void ManageDBContentsTaskWidget::expertModeChangedSlot() {}

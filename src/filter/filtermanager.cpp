@@ -100,14 +100,14 @@ void FilterManager::generateSubConfigurable(const std::string& class_id,
     }
     else if (class_id == "DBOSpecificValuesDBFilter")
     {
-        std::string dbo_name = configuration()
+        std::string dbcontent_name = configuration()
                 .getSubConfiguration(class_id, instance_id)
-                .getParameterConfigValueString("dbo_name");
+                .getParameterConfigValueString("dbcontent_name");
 
-        if (!checkDBObject(dbo_name))
+        if (!checkDBContent(dbcontent_name))
         {
             loginf << "FilterManager: generateSubConfigurable: disabling dbo specific filter "
-                   << instance_id << " for failed check dbobject '" << dbo_name << "'";
+                   << instance_id << " for failed check dbobject '" << dbcontent_name << "'";
             return;
         }
 
@@ -201,19 +201,19 @@ void FilterManager::generateSubConfigurable(const std::string& class_id,
                                  class_id);
 }
 
-bool FilterManager::checkDBObject (const std::string& dbo_name)
+bool FilterManager::checkDBContent (const std::string& dbcontent_name)
 {
-    if (!COMPASS::instance().dbContentManager().existsDBContent(dbo_name))
+    if (!COMPASS::instance().dbContentManager().existsDBContent(dbcontent_name))
     {
-        loginf << "FilterManager: checkDBObject: failed because of non-existing dbobject '" << dbo_name << "'";
+        loginf << "FilterManager: checkDBContent: failed because of non-existing dbobject '" << dbcontent_name << "'";
         return false;
     }
 
-    DBContent& object = COMPASS::instance().dbContentManager().dbContent(dbo_name);
+    DBContent& object = COMPASS::instance().dbContentManager().dbContent(dbcontent_name);
 
     if (!object.existsInDB())
     {
-        loginf << "FilterManager: checkDBObject: failed because of empty dbobject '" << dbo_name << "'";
+        loginf << "FilterManager: checkDBContent: failed because of empty dbobject '" << dbcontent_name << "'";
         return false;
     }
 
@@ -243,11 +243,11 @@ void FilterManager::checkSubConfigurables()
 //    }
 }
 
-std::string FilterManager::getSQLCondition(const std::string& dbo_name,
+std::string FilterManager::getSQLCondition(const std::string& dbcontent_name,
                                            std::vector<std::string>& extra_from_parts,
                                            std::vector<dbContent::Variable*>& filtered_variables)
 {
-    assert(COMPASS::instance().dbContentManager().dbContent(dbo_name).loadable());
+    assert(COMPASS::instance().dbContentManager().dbContent(dbcontent_name).loadable());
 
     std::stringstream ss;
 
@@ -256,16 +256,16 @@ std::string FilterManager::getSQLCondition(const std::string& dbo_name,
     for (auto& filter : filters_)
     {
         loginf << "FilterManager: getSQLCondition: filter " << filter->instanceId() << " active "
-               << filter->getActive() << " filters " << dbo_name << " "
-               << filter->filters(dbo_name);
+               << filter->getActive() << " filters " << dbcontent_name << " "
+               << filter->filters(dbcontent_name);
 
-        if (filter->getActive() && filter->filters(dbo_name))
+        if (filter->getActive() && filter->filters(dbcontent_name))
         {
-            ss << filter->getConditionString(dbo_name, first, extra_from_parts, filtered_variables);
+            ss << filter->getConditionString(dbcontent_name, first, extra_from_parts, filtered_variables);
         }
     }
 
-    logdbg << "FilterManager: getSQLCondition: name " << dbo_name << " '" << ss.str() << "'";
+    logdbg << "FilterManager: getSQLCondition: name " << dbcontent_name << " '" << ss.str() << "'";
     return ss.str();
 }
 

@@ -67,7 +67,7 @@ DBContentWidget::DBContentWidget(DBContent* object, QWidget* parent,
 
     QVBoxLayout* main_layout = new QVBoxLayout();
 
-    QLabel* main_label = new QLabel("Edit DBObject");
+    QLabel* main_label = new QLabel("Edit DBContent");
     main_label->setFont(font_big);
     main_layout->addWidget(main_label);
 

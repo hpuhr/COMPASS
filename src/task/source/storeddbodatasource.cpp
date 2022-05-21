@@ -29,7 +29,7 @@ StoredDBODataSource::StoredDBODataSource(const std::string& class_id,
                                          ManageDataSourcesTask& task)
     : Configurable(class_id, instance_id, &task)
 {
-    registerParameter("dbo_name", &dbo_name_, "");
+    registerParameter("dbcontent_name", &dbcontent_name_, "");
     registerParameter("id", &id_, 0);
     registerParameter("name", &name_, "");
     registerParameter("has_short_name", &has_short_name_, false);
@@ -86,7 +86,7 @@ StoredDBODataSource& StoredDBODataSource::operator=(DBODataSource& other)
 {
     // id_ = other.id(); not copied, keep own
 
-    dbo_name_ = other.dboName();
+    dbcontent_name_ = other.dboName();
     name_ = other.name();
     has_short_name_ = other.hasShortName();
     if (has_short_name_)
@@ -168,7 +168,7 @@ StoredDBODataSource& StoredDBODataSource::operator=(StoredDBODataSource&& other)
     //    object_ = other.object_;
     //    other.object_ = nullptr;
 
-    dbo_name_ = other.dbo_name_;
+    dbcontent_name_ = other.dbcontent_name_;
 
     // id_ = other.id_; do not use others id, keep your own
 
@@ -225,7 +225,7 @@ StoredDBODataSource& StoredDBODataSource::operator=(StoredDBODataSource&& other)
     has_mode_s_ir_max_ = other.has_mode_s_ir_max_;
     mode_s_ir_max_ = other.mode_s_ir_max_;
 
-    other.configuration().updateParameterPointer("dbo_name", &dbo_name_);
+    other.configuration().updateParameterPointer("dbcontent_name", &dbcontent_name_);
     other.configuration().updateParameterPointer("id", &id_);
     other.configuration().updateParameterPointer("name", &name_);
     other.configuration().updateParameterPointer("has_short_name", &has_short_name_);
@@ -285,7 +285,7 @@ bool StoredDBODataSource::operator==(const DBODataSource& other) const
            << " long " << (fabs(longitude_ - other.longitude()) < 1e-10) << " alt "
            << (fabs(altitude_ - other.altitude()) < 1e-10);
 
-    return (dbo_name_ == other.dboName()) && (name_ == other.name())
+    return (dbcontent_name_ == other.dboName()) && (name_ == other.name())
             &&(has_short_name_ == other.hasShortName())
             && (has_short_name_ ? short_name_ == other.shortName() : true)
             && (has_sac_ == other.hasSac()) && (has_sac_ ? sac_ == other.sac() : true)
@@ -613,7 +613,7 @@ int StoredDBODataSource::modeSRangeMax() const
     return mode_s_ir_max_;
 }
 
-std::string StoredDBODataSource::dboName() const { return dbo_name_; }
+std::string StoredDBODataSource::dboName() const { return dbcontent_name_; }
 
 unsigned int StoredDBODataSource::id() const { return id_; }
 
@@ -749,7 +749,7 @@ json StoredDBODataSource::getAsJSON()
 {
     json j;
 
-    j["dbo_name"] = dbo_name_;
+    j["dbcontent_name"] = dbcontent_name_;
     j["name"] = name_;
 
     if (has_short_name_)
@@ -803,7 +803,7 @@ json StoredDBODataSource::getAsJSON()
 
 void StoredDBODataSource::setFromJSON(json& j)
 {
-    dbo_name_ = j.at("dbo_name");
+    dbcontent_name_ = j.at("dbcontent_name");
     name_ = j.at("name");
 
     has_short_name_ = j.contains("short_name");

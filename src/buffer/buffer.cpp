@@ -52,8 +52,8 @@ Buffer::Buffer()
  * \param member_list PropertyList defining all properties
  * \param type DBO type
  */
-Buffer::Buffer(PropertyList properties, const string& dbo_name)
-    : dbo_name_(dbo_name), last_one_(false)
+Buffer::Buffer(PropertyList properties, const string& dbcontent_name)
+    : dbcontent_name_(dbcontent_name), last_one_(false)
 {
     logdbg << "Buffer: constructor: start";
 
@@ -71,7 +71,7 @@ Buffer::Buffer(PropertyList properties, const string& dbo_name)
  */
 Buffer::~Buffer()
 {
-    logdbg << "Buffer: destructor: dbo " << dbo_name_ << " id " << id_;
+    logdbg << "Buffer: destructor: dbo " << dbcontent_name_ << " id " << id_;
 
     properties_.clear();
 
@@ -690,7 +690,7 @@ bool Buffer::isNull(const Property& property, unsigned int index)
 
 void Buffer::transformVariables(dbContent::VariableSet& list, bool dbcol2dbovar)
 {
-    logdbg << "Buffer: transformVariables: dbo '" << dbo_name_ << "' dbcol2dbovar " << dbcol2dbovar;
+    logdbg << "Buffer: transformVariables: dbo '" << dbcontent_name_ << "' dbcol2dbovar " << dbcol2dbovar;
 
     vector<dbContent::Variable*>& variables = list.getSet();
     string variable_name;

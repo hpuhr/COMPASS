@@ -262,9 +262,9 @@ void ASTERIXImportTaskWidget::addParserSlot()
     if (ret == QDialog::Accepted)
     {
         unsigned int cat = dialog.category();
-        std::string dbo_name = dialog.selectedObject();
+        std::string dbcontent_name = dialog.selectedObject();
         loginf << "ASTERIXImportTaskWidget: addObjectParserSlot: cat " << cat << " obj "
-               << dbo_name;
+               << dbcontent_name;
 
         std::shared_ptr<ASTERIXJSONParsingSchema> current = task_.schema();
 
@@ -281,7 +281,7 @@ void ASTERIXImportTaskWidget::addParserSlot()
 
         Configuration& config = current->addNewSubConfiguration("ASTERIXJSONParser", instance);
         config.addParameterUnsignedInt("category", cat);
-        config.addParameterString("db_object_name", dbo_name);
+        config.addParameterString("dbcontent_name", dbcontent_name);
 
         current->generateSubConfigurable("JSONObjectParser", instance);
         updateParserBox();

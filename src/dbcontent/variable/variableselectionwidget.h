@@ -64,7 +64,7 @@ class VariableSelectionWidget : public QFrame
     bool showMetaVariablesOnly() const;
     void showMetaVariablesOnly(bool show_meta_variables_only);
 
-    void showDBOOnly(const std::string& only_dbo_name);
+    void showDBOOnly(const std::string& only_dbcontent_name);
     void disableShowDBOOnly();
 
     std::string onlyDBOName() const;
@@ -98,7 +98,7 @@ class VariableSelectionWidget : public QFrame
     bool show_meta_variables_only_{false};
 
     bool show_dbo_only_{false};
-    std::string only_dbo_name_;
+    std::string only_dbcontent_name_;
 
     bool show_data_types_only_{false};
     std::vector<PropertyDataType> only_data_types_;

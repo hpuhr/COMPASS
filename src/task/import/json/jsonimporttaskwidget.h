@@ -22,7 +22,7 @@
 
 class JSONImportTask;
 class RadarPlotPositionCalculatorTask;
-class DBObjectComboBox;
+class DBContentComboBox;
 class DBOVariableSelectionWidget;
 
 class QPushButton;

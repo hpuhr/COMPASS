@@ -123,11 +123,11 @@ void EvaluationMainTabWidget::updateSectors()
     sector_widget_->update();
 }
 
-void EvaluationMainTabWidget::dboRefNameChangedSlot(const std::string& dbo_name)
+void EvaluationMainTabWidget::dboRefNameChangedSlot(const std::string& dbcontent_name)
 {
-    loginf << "EvaluationMainTabWidget: dboRefNameChangedSlot: name " << dbo_name;
+    loginf << "EvaluationMainTabWidget: dboRefNameChangedSlot: name " << dbcontent_name;
 
-    eval_man_.dboNameRef(dbo_name);
+    eval_man_.dboNameRef(dbcontent_name);
 }
 
 void EvaluationMainTabWidget::lineRefChangedSlot(unsigned int line_id)
@@ -137,11 +137,11 @@ void EvaluationMainTabWidget::lineRefChangedSlot(unsigned int line_id)
     eval_man_.lineIDRef(line_id);
 }
 
-void EvaluationMainTabWidget::dboTstNameChangedSlot(const std::string& dbo_name)
+void EvaluationMainTabWidget::dboTstNameChangedSlot(const std::string& dbcontent_name)
 {
-    loginf << "EvaluationMainTabWidget: dboTstNameChangedSlot: name " << dbo_name;
+    loginf << "EvaluationMainTabWidget: dboTstNameChangedSlot: name " << dbcontent_name;
 
-    eval_man_.dboNameTst(dbo_name);
+    eval_man_.dboNameTst(dbcontent_name);
 }
 
 void EvaluationMainTabWidget::lineTstChangedSlot(unsigned int line_id)

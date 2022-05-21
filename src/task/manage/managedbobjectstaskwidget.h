@@ -20,10 +20,10 @@
 
 #include <taskwidget.h>
 
-class ManageDBObjectsTask;
+class ManageDBContentsTask;
 class DBContentManagerWidget;
 
-class ManageDBObjectsTaskWidget : public TaskWidget
+class ManageDBContentsTaskWidget : public TaskWidget
 {
     Q_OBJECT
 
@@ -31,10 +31,10 @@ class ManageDBObjectsTaskWidget : public TaskWidget
     void expertModeChangedSlot();
 
   public:
-    ManageDBObjectsTaskWidget(ManageDBObjectsTask& task, QWidget* parent = nullptr);
+    ManageDBContentsTaskWidget(ManageDBContentsTask& task, QWidget* parent = nullptr);
 
   protected:
-    ManageDBObjectsTask& task_;
+    ManageDBContentsTask& task_;
 
     DBContentManagerWidget* object_manager_widget_{nullptr};
 };

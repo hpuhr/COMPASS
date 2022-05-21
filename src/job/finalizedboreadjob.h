@@ -26,7 +26,7 @@ class DBContent;
 class Buffer;
 
 /**
- * @brief Finalizes read DBObject data from DBOReadDBJob
+ * @brief Finalizes read DBContent data from DBOReadDBJob
  *
  * Uses finalizeDBData() from Util.
  */

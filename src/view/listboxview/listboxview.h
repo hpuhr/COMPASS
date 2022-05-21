@@ -64,7 +64,7 @@ class ListBoxView : public View
 
     ListBoxViewDataWidget* getDataWidget();
 
-    virtual dbContent::VariableSet getSet(const std::string& dbo_name) override;
+    virtual dbContent::VariableSet getSet(const std::string& dbcontent_name) override;
 
     bool usePresentation() const;
     void usePresentation(bool use_presentation);

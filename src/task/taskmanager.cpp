@@ -75,7 +75,7 @@ TaskManager::TaskManager(const std::string& class_id, const std::string& instanc
     createSubConfigurables();
 
     task_list_ = {"DatabaseOpenTask",
-                  "ManageDBObjectsTask", "ASTERIXImportTask",
+                  "ManageDBContentsTask", "ASTERIXImportTask",
                   "ViewPointsImportTask", "GPSTrailImportTask", // "JSONImportTask",
                   "ManageSectorsTask", // "ManageDataSourcesTask",
                   "RadarPlotPositionCalculatorTask",
@@ -97,10 +97,10 @@ void TaskManager::generateSubConfigurable(const std::string& class_id,
         assert(database_open_task_);
         addTask(class_id, database_open_task_.get());
     }
-    else if (class_id.compare("ManageDBObjectsTask") == 0)
+    else if (class_id.compare("ManageDBContentsTask") == 0)
     {
         assert(!manage_dbobjects_task_);
-        manage_dbobjects_task_.reset(new ManageDBObjectsTask(class_id, instance_id, *this));
+        manage_dbobjects_task_.reset(new ManageDBContentsTask(class_id, instance_id, *this));
         assert(manage_dbobjects_task_);
         addTask(class_id, manage_dbobjects_task_.get());
     }
@@ -201,7 +201,7 @@ void TaskManager::checkSubConfigurables()
 
     if (!manage_dbobjects_task_)
     {
-        generateSubConfigurable("ManageDBObjectsTask", "ManageDBObjectsTask0");
+        generateSubConfigurable("ManageDBContentsTask", "ManageDBContentsTask0");
         assert(manage_dbobjects_task_);
     }
 
@@ -1000,7 +1000,7 @@ CreateAssociationsTask& TaskManager::createAssociationsTask() const
 
 //            loginf << "TaskManager: performAutomaticTasks: loading data";
 
-//            DBObjectManager& obj_man = COMPASS::instance().objectManager();
+//            DBContentManager& obj_man = COMPASS::instance().objectManager();
 
 //            obj_man.loadSlot();
 

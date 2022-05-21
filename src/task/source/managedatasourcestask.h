@@ -47,18 +47,18 @@ class ManageDataSourcesTask : public Task, public Configurable
     virtual bool isRequired() { return false; }
 
     /// @brief Returns flag indication if a StoredDBODataSource identified by name exists
-    bool hasStoredDataSource(const std::string& dbo_name, unsigned int id);
+    bool hasStoredDataSource(const std::string& dbcontent_name, unsigned int id);
     /// @brief Returns variable identified by id
-    StoredDBODataSource& storedDataSource(const std::string& dbo_name, unsigned int id);
-    StoredDBODataSource& addNewStoredDataSource(const std::string& dbo_name);
-    void deleteStoredDataSource(const std::string& dbo_name, unsigned int id);
+    StoredDBODataSource& storedDataSource(const std::string& dbcontent_name, unsigned int id);
+    StoredDBODataSource& addNewStoredDataSource(const std::string& dbcontent_name);
+    void deleteStoredDataSource(const std::string& dbcontent_name, unsigned int id);
     const std::map<unsigned int, StoredDBODataSource>& storedDataSources(
-        const std::string& dbo_name);
+        const std::string& dbcontent_name);
 
-    DBOEditDataSourceActionOptionsCollection getSyncOptionsFromDB(const std::string& dbo_name);
-    DBOEditDataSourceActionOptionsCollection getSyncOptionsFromCfg(const std::string& dbo_name);
+    DBOEditDataSourceActionOptionsCollection getSyncOptionsFromDB(const std::string& dbcontent_name);
+    DBOEditDataSourceActionOptionsCollection getSyncOptionsFromCfg(const std::string& dbcontent_name);
 
-    DBOEditDataSourcesWidget* editDataSourcesWidget(const std::string& dbo_name);
+    DBOEditDataSourcesWidget* editDataSourcesWidget(const std::string& dbcontent_name);
 
     void exportConfigDataSources();
     void clearConfigDataSources();
@@ -66,11 +66,11 @@ class ManageDataSourcesTask : public Task, public Configurable
     void importConfigDataSources(const std::string& filename);
     void autoSyncAllConfigDataSourcesToDB();
 
-    bool hasDataSource(const std::string& dbo_name, unsigned int sac, unsigned int sic);
-    StoredDBODataSource& getDataSource(const std::string& dbo_name, unsigned int sac,
+    bool hasDataSource(const std::string& dbcontent_name, unsigned int sac, unsigned int sic);
+    StoredDBODataSource& getDataSource(const std::string& dbcontent_name, unsigned int sac,
                                        unsigned int sic);
-    bool hasDataSource(const std::string& dbo_name, const std::string& name);
-    StoredDBODataSource& getDataSource(const std::string& dbo_name, const std::string& name);
+    bool hasDataSource(const std::string& dbcontent_name, const std::string& name);
+    StoredDBODataSource& getDataSource(const std::string& dbcontent_name, const std::string& name);
 
   protected:
     std::unique_ptr<ManageDataSourcesTaskWidget> widget_;

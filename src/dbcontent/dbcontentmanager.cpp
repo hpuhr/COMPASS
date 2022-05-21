@@ -690,7 +690,7 @@ std::string DBContentManager::associationsID() const { return associations_id_; 
 
 //std::string DBContentManager::associationsDataSourceName() const { return associations_ds_; }
 
-//bool DBContentManager::isOtherDBObjectPostProcessing(DBContent& object)
+//bool DBContentManager::isOtherDBContentPostProcessing(DBContent& object)
 //{
 //    for (auto& dbo_it : dbcontent_)
 //        if (dbo_it.second != &object && dbo_it.second->isPostProcessing())

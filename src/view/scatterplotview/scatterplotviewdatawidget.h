@@ -137,10 +137,10 @@ protected:
 
     unsigned int nan_value_cnt_ {0};
 
-    bool canUpdateFromDataX(std::string dbo_name);
-    void updateFromDataX(std::string dbo_name, unsigned int current_size);
-    bool canUpdateFromDataY(std::string dbo_name);
-    void updateFromDataY(std::string dbo_name, unsigned int current_size);
+    bool canUpdateFromDataX(std::string dbcontent_name);
+    void updateFromDataX(std::string dbcontent_name, unsigned int current_size);
+    bool canUpdateFromDataY(std::string dbcontent_name);
+    void updateFromDataY(std::string dbcontent_name, unsigned int current_size);
     void updateMinMax();
     void updateFromAllData();
     void updateChart();

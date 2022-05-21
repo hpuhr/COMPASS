@@ -73,7 +73,7 @@ class Buffer
 
   public:
     Buffer();
-    Buffer(PropertyList properties, const std::string& dbo_name = "");
+    Buffer(PropertyList properties, const std::string& dbcontent_name = "");
     virtual ~Buffer();
 
     // Adds all containers of org_buffer and removes them from org_buffer.
@@ -118,10 +118,10 @@ class Buffer
     void removeIndexes(const std::vector<size_t>& indexes_to_remove); // must be sorted
 
     /// @brief Returns DBO type
-    const std::string& dboName() { return dbo_name_; }
+    const std::string& dboName() { return dbcontent_name_; }
 
     /// @brief Sets DBO type
-    void dboName(const std::string& dbo_name) { dbo_name_ = dbo_name; }
+    void dboName(const std::string& dbcontent_name) { dbcontent_name_ = dbcontent_name; }
 
     bool isNull(const Property& property, unsigned int index);
 
@@ -137,7 +137,7 @@ class Buffer
     unsigned int id_;
     // List of all properties
     PropertyList properties_;
-    std::string dbo_name_;
+    std::string dbcontent_name_;
 
     ArrayListMapTupel array_list_tuple_;
     size_t data_size_{0};

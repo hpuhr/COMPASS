@@ -22,39 +22,39 @@
 #include "managedbobjectstaskwidget.h"
 #include "taskmanager.h"
 
-ManageDBObjectsTask::ManageDBObjectsTask(const std::string& class_id,
+ManageDBContentsTask::ManageDBContentsTask(const std::string& class_id,
                                          const std::string& instance_id, TaskManager& task_manager)
-    : Task("ManageDBObjectsTask", "Manage DBObjects", true, true, task_manager),
+    : Task("ManageDBContentsTask", "Manage DBContents", true, true, task_manager),
       Configurable(class_id, instance_id, &task_manager, "task_manage_dbojects.json")
 {
     tooltip_ =
-        "Allows management of DBObjects and is reserved for expert users. This task can not be run,"
+        "Allows management of DBContents and is reserved for expert users. This task can not be run,"
         " but is performed using the GUI elements.";
 }
 
-TaskWidget* ManageDBObjectsTask::widget()
+TaskWidget* ManageDBContentsTask::widget()
 {
     if (!widget_)
     {
-        widget_.reset(new ManageDBObjectsTaskWidget(*this));
+        widget_.reset(new ManageDBContentsTaskWidget(*this));
 
         connect(&task_manager_, &TaskManager::expertModeChangedSignal, widget_.get(),
-                &ManageDBObjectsTaskWidget::expertModeChangedSlot);
+                &ManageDBContentsTaskWidget::expertModeChangedSlot);
     }
 
     return widget_.get();
 }
 
-void ManageDBObjectsTask::deleteWidget() { widget_.reset(nullptr); }
+void ManageDBContentsTask::deleteWidget() { widget_.reset(nullptr); }
 
-void ManageDBObjectsTask::generateSubConfigurable(const std::string& class_id,
+void ManageDBContentsTask::generateSubConfigurable(const std::string& class_id,
                                                   const std::string& instance_id)
 {
-    throw std::runtime_error("ManageDBObjectsTask: generateSubConfigurable: unknown class_id " +
+    throw std::runtime_error("ManageDBContentsTask: generateSubConfigurable: unknown class_id " +
                              class_id);
 }
 
-bool ManageDBObjectsTask::checkPrerequisites()
+bool ManageDBContentsTask::checkPrerequisites()
 {
     if (!COMPASS::instance().interface().ready())
         return false;

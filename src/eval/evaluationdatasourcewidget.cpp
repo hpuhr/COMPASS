@@ -30,9 +30,9 @@
 using namespace std;
 
 EvaluationDataSourceWidget::EvaluationDataSourceWidget(
-        const std::string& title, const std::string& dbo_name, unsigned int line_id,
+        const std::string& title, const std::string& dbcontent_name, unsigned int line_id,
         QWidget* parent, Qt::WindowFlags f)
-    : QFrame(parent, f), title_(title), dbo_name_(dbo_name), line_id_(line_id)
+    : QFrame(parent, f), title_(title), dbcontent_name_(dbcontent_name), line_id_(line_id)
 {
     setFrameStyle(QFrame::Panel | QFrame::Raised);
     setLineWidth(2);
@@ -52,10 +52,10 @@ EvaluationDataSourceWidget::EvaluationDataSourceWidget(
     // dbo
     QGridLayout* dbo_lay = new QGridLayout();
 
-    dbo_lay->addWidget(new QLabel("DBObject"), 0, 0);
+    dbo_lay->addWidget(new QLabel("DBContent"), 0, 0);
 
     dbo_combo_ = new DBContentComboBox(false);
-    dbo_combo_->setObjectName(dbo_name_);
+    dbo_combo_->setObjectName(dbcontent_name_);
     connect (dbo_combo_, &DBContentComboBox::changedObject, this, &EvaluationDataSourceWidget::dboNameChangedSlot);
 
     dbo_lay->addWidget(dbo_combo_, 0, 1);
@@ -174,11 +174,11 @@ void EvaluationDataSourceWidget::dboNameChangedSlot()
 {
     assert (dbo_combo_);
 
-    dbo_name_ = dbo_combo_->getObjectName();
+    dbcontent_name_ = dbo_combo_->getObjectName();
 
-    loginf << "EvaluationDataSourceWidget: dboNameChangedSlot: name " << dbo_name_;
+    loginf << "EvaluationDataSourceWidget: dboNameChangedSlot: name " << dbcontent_name_;
 
-    emit dboNameChangedSignal(dbo_name_);
+    emit dboNameChangedSignal(dbcontent_name_);
 
     updateDataSources();
 

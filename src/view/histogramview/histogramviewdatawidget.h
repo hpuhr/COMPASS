@@ -179,7 +179,7 @@ protected:
     bool shows_data_ {false};
     bool data_not_in_buffer_ {false};
 
-    void updateFromData(std::string dbo_name);
+    void updateFromData(std::string dbcontent_name);
     void updateFromAllData();
     void updateFromResult(std::shared_ptr<EvaluationRequirementResult::Base> result);
     void updateCountResult (std::shared_ptr<EvaluationRequirementResult::SingleExtraData> result);

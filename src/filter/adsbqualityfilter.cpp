@@ -79,13 +79,13 @@ bool ADSBQualityFilter::filters(const std::string& dbo_type)
     return dbo_type == "CAT021";
 }
 
-std::string ADSBQualityFilter::getConditionString(const std::string& dbo_name, bool& first,
+std::string ADSBQualityFilter::getConditionString(const std::string& dbcontent_name, bool& first,
                                                   std::vector<std::string>& extra_from_parts,
                                                   std::vector<dbContent::Variable*>& filtered_variables)
 {
-    loginf << "ADSBQualityFilter: getConditionString: dbo " << dbo_name << " active " << active_;
+    loginf << "ADSBQualityFilter: getConditionString: dbo " << dbcontent_name << " active " << active_;
 
-    if (dbo_name != "CAT021")
+    if (dbcontent_name != "CAT021")
         return "";
 
     stringstream ss;

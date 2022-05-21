@@ -62,8 +62,8 @@ class DBFilter : public Configurable
 
     bool isGeneric() { return is_generic_; }
 
-    /// where condition string for a DBObject
-    virtual std::string getConditionString(const std::string& dbo_name, bool& first,
+    /// where condition string for a DBContent
+    virtual std::string getConditionString(const std::string& dbcontent_name, bool& first,
                                            std::vector<std::string>& extra_from_parts,
                                            std::vector<dbContent::Variable*>& filtered_variables);
     bool onlyHasSubFilter() { return conditions_.size() > 0; }

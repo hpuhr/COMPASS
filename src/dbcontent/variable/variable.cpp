@@ -78,7 +78,7 @@ std::string Variable::representationToString(Representation representation)
 
 Variable::Variable(const std::string& class_id, const std::string& instance_id,
                          DBContent* parent)
-    : Property(), Configurable(class_id, instance_id, parent), db_object_(parent)
+    : Property(), Configurable(class_id, instance_id, parent), dbcontent_(parent)
 {
     registerParameter("name", &name_, "");
     registerParameter("short_name", &short_name_, "");
@@ -129,8 +129,8 @@ Variable::Variable(const std::string& class_id, const std::string& instance_id,
 //    name_ = other.name_;
 //    other.name_ = "";
 
-//    db_object_ = other.db_object_;
-//    other.db_object_ = nullptr;
+//    dbcontent_ = other.dbcontent_;
+//    other.dbcontent_ = nullptr;
 
 //    representation_str_ = other.representation_str_;
 //    other.representation_str_ = "";
@@ -231,14 +231,14 @@ void Variable::checkSubConfigurables()
 
 DBContent& Variable::object() const
 {
-    assert(db_object_);
-    return *db_object_;
+    assert(dbcontent_);
+    return *dbcontent_;
 }
 
 const std::string& Variable::dboName() const
 {
-    assert(db_object_);
-    return db_object_->name();
+    assert(dbcontent_);
+    return dbcontent_->name();
 }
 
 void Variable::name(const std::string& name)
@@ -249,8 +249,8 @@ void Variable::name(const std::string& name)
 
 //const std::string& Variable::metaTable() const
 //{
-//    assert(db_object_);
-//    return db_object_->currentMetaTable();
+//    assert(dbcontent_);
+//    return dbcontent_->currentMetaTable();
 //}
 
 std::string Variable::dbColumnName() const
@@ -265,8 +265,8 @@ void Variable::dbColumnName(const std::string& value)
 
 std::string Variable::dbTableName() const
 {
-    assert (db_object_);
-    return db_object_->dbTableName();
+    assert (dbcontent_);
+    return dbcontent_->dbTableName();
 }
 
 std::string Variable::dbColumnIdentifier() const
@@ -278,8 +278,8 @@ std::string Variable::dbColumnIdentifier() const
 //{
 //    assert(!min_max_set_);
 
-//    assert(db_object_);
-//    logdbg << "Variable " << db_object_->name() << " " << name_ << ": setMinMax";
+//    assert(dbcontent_);
+//    logdbg << "Variable " << dbcontent_->name() << " " << name_ << ": setMinMax";
 
 //    if (!dbObject().existsInDB() || !dbObject().count())
 //    {
@@ -748,7 +748,7 @@ void Variable::isKey(bool value)
 
 std::string Variable::getDataSourcesAsString(const std::string& value) const
 {
-    assert(db_object_);
+    assert(dbcontent_);
 
     DataSourceManager& ds_man = COMPASS::instance().dataSourceManager();
 

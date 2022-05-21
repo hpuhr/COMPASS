@@ -45,16 +45,16 @@ class MetaVariable : public Configurable
     Variable::Representation representation();
 
     /// @brief Return if variable exist in DBO of type
-    bool existsIn(const std::string& dbo_name);
+    bool existsIn(const std::string& dbcontent_name);
     /// @brief Returns variable existing in DBO of type
-    Variable& getFor(const std::string& dbo_name);
+    Variable& getFor(const std::string& dbcontent_name);
     /// @brief Return variable identifier in DBO of type
-    std::string getNameFor(const std::string& dbo_name);
+    std::string getNameFor(const std::string& dbcontent_name);
     void set(Variable& var);
 
-    void removeVariable(const std::string& dbo_name);
+    void removeVariable(const std::string& dbcontent_name);
     /// @brief Sets sub-variable name for DBO of type
-    void addVariable(const std::string& dbo_name, const std::string& dbovariable_name);
+    void addVariable(const std::string& dbcontent_name, const std::string& dbovariable_name);
 
     const std::map<std::string, Variable&>& variables() { return variables_; }
     bool uses(const Variable& variable);

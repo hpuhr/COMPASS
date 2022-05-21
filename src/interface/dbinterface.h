@@ -93,7 +93,7 @@ public:
     // clears previous and saves new ones
 
     // insert data and create associated data sources
-    void insertBuffer(DBContent& db_object, std::shared_ptr<Buffer> buffer);
+    void insertBuffer(DBContent& dbcontent, std::shared_ptr<Buffer> buffer);
     void insertBuffer(const std::string& table_name, std::shared_ptr<Buffer> buffer);
 
     void updateBuffer(const std::string& table_name, const std::string& key_col, std::shared_ptr<Buffer> buffer,

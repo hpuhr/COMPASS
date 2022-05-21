@@ -31,13 +31,13 @@ bool ACIDFilter::filters(const std::string& dbo_type)
     return COMPASS::instance().dbContentManager().metaVariable(DBContent::meta_var_ti_.name()).existsIn(dbo_type);
 }
 
-std::string ACIDFilter::getConditionString(const std::string& dbo_name, bool& first,
+std::string ACIDFilter::getConditionString(const std::string& dbcontent_name, bool& first,
                                            std::vector<std::string>& extra_from_parts,
                                            std::vector<dbContent::Variable*>& filtered_variables)
 {
-    logdbg << "ACIDFilter: getConditionString: dbo " << dbo_name << " active " << active_;
+    logdbg << "ACIDFilter: getConditionString: dbo " << dbcontent_name << " active " << active_;
 
-    if (!COMPASS::instance().dbContentManager().metaVariable(DBContent::meta_var_ti_.name()).existsIn(dbo_name))
+    if (!COMPASS::instance().dbContentManager().metaVariable(DBContent::meta_var_ti_.name()).existsIn(dbcontent_name))
         return "";
 
     stringstream ss;
@@ -45,7 +45,7 @@ std::string ACIDFilter::getConditionString(const std::string& dbo_name, bool& fi
     if (active_  && (values_.size() || null_wanted_))
     {
         dbContent::Variable& var = COMPASS::instance().dbContentManager().metaVariable(
-                    DBContent::meta_var_ti_.name()).getFor(dbo_name);
+                    DBContent::meta_var_ti_.name()).getFor(dbcontent_name);
 
         filtered_variables.push_back(&var);
 

@@ -118,7 +118,7 @@ void HistogramViewDataSource::showViewPoint (const ViewableDataConfig* vp)
 
         for (auto& obj_it : context_variables.get<json::object_t>())
         {
-            string dbo_name = obj_it.first;
+            string dbcontent_name = obj_it.first;
             json& variable_names = obj_it.second;
 
             assert (variable_names.is_array());
@@ -127,21 +127,21 @@ void HistogramViewDataSource::showViewPoint (const ViewableDataConfig* vp)
             {
                 string var_name = var_it;
 
-                if (addTemporaryVariable(dbo_name, var_name))
+                if (addTemporaryVariable(dbcontent_name, var_name))
                 {
-                    loginf << "HistogramViewDataSource: showViewPoint: added var " << dbo_name << ", " << var_name;
-                    temporary_added_variables_.push_back({dbo_name, var_name});
+                    loginf << "HistogramViewDataSource: showViewPoint: added var " << dbcontent_name << ", " << var_name;
+                    temporary_added_variables_.push_back({dbcontent_name, var_name});
                 }
             }
         }
     }
 }
 
-bool HistogramViewDataSource::addTemporaryVariable (const std::string& dbo_name, const std::string& var_name)
+bool HistogramViewDataSource::addTemporaryVariable (const std::string& dbcontent_name, const std::string& var_name)
 {
     DBContentManager& obj_man = COMPASS::instance().dbContentManager();
 
-    if (dbo_name == META_OBJECT_NAME)
+    if (dbcontent_name == META_OBJECT_NAME)
     {
         assert (obj_man.existsMetaVariable(var_name));
         MetaVariable& meta_var = obj_man.metaVariable(var_name);
@@ -155,8 +155,8 @@ bool HistogramViewDataSource::addTemporaryVariable (const std::string& dbo_name,
     }
     else
     {
-        assert (obj_man.existsDBContent(dbo_name));
-        DBContent& obj = obj_man.dbContent(dbo_name);
+        assert (obj_man.existsDBContent(dbcontent_name));
+        DBContent& obj = obj_man.dbContent(dbcontent_name);
 
         assert (obj.hasVariable(var_name));
         Variable& var = obj.variable(var_name);
@@ -171,11 +171,11 @@ bool HistogramViewDataSource::addTemporaryVariable (const std::string& dbo_name,
     }
 }
 
-void HistogramViewDataSource::removeTemporaryVariable (const std::string& dbo_name, const std::string& var_name)
+void HistogramViewDataSource::removeTemporaryVariable (const std::string& dbcontent_name, const std::string& var_name)
 {
     DBContentManager& obj_man = COMPASS::instance().dbContentManager();
 
-    if (dbo_name == META_OBJECT_NAME)
+    if (dbcontent_name == META_OBJECT_NAME)
     {
         assert (obj_man.existsMetaVariable(var_name));
         MetaVariable& meta_var = obj_man.metaVariable(var_name);
@@ -184,8 +184,8 @@ void HistogramViewDataSource::removeTemporaryVariable (const std::string& dbo_na
     }
     else
     {
-        assert (obj_man.existsDBContent(dbo_name));
-        DBContent& obj = obj_man.dbContent(dbo_name);
+        assert (obj_man.existsDBContent(dbcontent_name));
+        DBContent& obj = obj_man.dbContent(dbcontent_name);
 
         assert (obj.hasVariable(var_name));
         Variable& var = obj.variable(var_name);

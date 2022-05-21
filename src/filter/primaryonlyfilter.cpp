@@ -21,38 +21,38 @@ PrimaryOnlyFilter::~PrimaryOnlyFilter()
 
 }
 
-bool PrimaryOnlyFilter::filters(const std::string& dbo_name)
+bool PrimaryOnlyFilter::filters(const std::string& dbcontent_name)
 {
     DBContentManager& cont_man = COMPASS::instance().dbContentManager();
 
-    if (cont_man.metaCanGetVariable(dbo_name, DBContent::meta_var_m3a_))
+    if (cont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_m3a_))
         return true;
 
-    if (cont_man.metaCanGetVariable(dbo_name, DBContent::meta_var_mc_))
+    if (cont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_mc_))
         return true;
 
-    if (cont_man.metaCanGetVariable(dbo_name, DBContent::meta_var_ta_))
+    if (cont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_ta_))
         return true;
 
-    if (cont_man.metaCanGetVariable(dbo_name, DBContent::meta_var_ti_))
+    if (cont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_ti_))
         return true;
 
     return false;
 }
 
-std::string PrimaryOnlyFilter::getConditionString(const std::string& dbo_name, bool& first,
+std::string PrimaryOnlyFilter::getConditionString(const std::string& dbcontent_name, bool& first,
                                            std::vector<std::string>& extra_from_parts,
                                            std::vector<dbContent::Variable*>& filtered_variables)
 {
-    logdbg << "PrimaryOnlyFilter: getConditionString: dbo " << dbo_name << " active " << active_;
+    logdbg << "PrimaryOnlyFilter: getConditionString: dbo " << dbcontent_name << " active " << active_;
 
     stringstream ss;
 
     DBContentManager& cont_man = COMPASS::instance().dbContentManager();
 
-    if (cont_man.metaCanGetVariable(dbo_name, DBContent::meta_var_m3a_))
+    if (cont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_m3a_))
     {
-        dbContent::Variable& var = cont_man.metaGetVariable(dbo_name, DBContent::meta_var_m3a_);
+        dbContent::Variable& var = cont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_m3a_);
         filtered_variables.push_back(&var);
 
         if (!first)
@@ -63,9 +63,9 @@ std::string PrimaryOnlyFilter::getConditionString(const std::string& dbo_name, b
         first = false;
     }
 
-    if (cont_man.metaCanGetVariable(dbo_name, DBContent::meta_var_mc_))
+    if (cont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_mc_))
     {
-        dbContent::Variable& var = cont_man.metaGetVariable(dbo_name, DBContent::meta_var_mc_);
+        dbContent::Variable& var = cont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_mc_);
         filtered_variables.push_back(&var);
 
         if (!first)
@@ -76,9 +76,9 @@ std::string PrimaryOnlyFilter::getConditionString(const std::string& dbo_name, b
         first = false;
     }
 
-    if (cont_man.metaCanGetVariable(dbo_name, DBContent::meta_var_ta_))
+    if (cont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_ta_))
     {
-        dbContent::Variable& var = cont_man.metaGetVariable(dbo_name, DBContent::meta_var_ta_);
+        dbContent::Variable& var = cont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_ta_);
         filtered_variables.push_back(&var);
 
         if (!first)
@@ -89,9 +89,9 @@ std::string PrimaryOnlyFilter::getConditionString(const std::string& dbo_name, b
         first = false;
     }
 
-    if (cont_man.metaCanGetVariable(dbo_name, DBContent::meta_var_ti_))
+    if (cont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_ti_))
     {
-        dbContent::Variable& var = cont_man.metaGetVariable(dbo_name, DBContent::meta_var_ti_);
+        dbContent::Variable& var = cont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_ti_);
         filtered_variables.push_back(&var);
 
         if (!first)

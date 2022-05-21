@@ -201,7 +201,7 @@ shared_ptr<DBCommand> SQLGenerator::getDataSourcesSelectCommand()
     return command;
 }
 
-//shared_ptr<DBCommand> SQLGenerator::getDistinctDataSourcesSelectCommand(DBObject& object)
+//shared_ptr<DBCommand> SQLGenerator::getDistinctDataSourcesSelectCommand(DBContent& object)
 //{
 //    // "SELECT DISTINCT sensor_number__value FROM " << table_names_.at(DBO_PLOTS) << " WHERE
 //    // mapped_position__present = '1' AND sensor_number__present = '1' ORDER BY
@@ -679,7 +679,7 @@ shared_ptr<DBCommand> SQLGenerator::getSelectCommand(
     return command;
 }
 
-//shared_ptr<DBCommand> SQLGenerator::getSelectCommand(const DBObject& object,
+//shared_ptr<DBCommand> SQLGenerator::getSelectCommand(const DBContent& object,
 //                                                     const vector<string>& columns,
 //                                                     bool distinct)
 //{

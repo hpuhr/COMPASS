@@ -188,8 +188,8 @@ void COMPASS::checkSubConfigurables()
     }
     if (!dbcontent_manager_)
     {
-        addNewSubConfiguration("DBObjectManager", "DBObjectManager0");
-        generateSubConfigurable("DBObjectManager", "DBObjectManager0");
+        addNewSubConfiguration("DBContentManager", "DBContentManager0");
+        generateSubConfigurable("DBContentManager", "DBContentManager0");
         assert(dbcontent_manager_);
     }
     if (!ds_manager_)

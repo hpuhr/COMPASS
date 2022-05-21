@@ -34,7 +34,7 @@
 
 using namespace Utils;
 
-DBOEditDataSourcesWidget::DBOEditDataSourcesWidget(ManageDataSourcesTask& task, DBObject& object,
+DBOEditDataSourcesWidget::DBOEditDataSourcesWidget(ManageDataSourcesTask& task, DBContent& object,
                                                    QWidget* parent, Qt::WindowFlags f)
     : QWidget(parent, f), task_(task), object_(object)
 {

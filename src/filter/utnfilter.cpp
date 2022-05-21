@@ -59,11 +59,11 @@ bool UTNFilter::filters(const std::string& dbo_type)
     return true;
 }
 
-std::string UTNFilter::getConditionString(const std::string& dbo_name, bool& first,
+std::string UTNFilter::getConditionString(const std::string& dbcontent_name, bool& first,
                                           std::vector<std::string>& extra_from_parts,
                                           std::vector<dbContent::Variable*>& filtered_variables)
 {
-    logdbg << "UTNFilter: getConditionString: dbo " << dbo_name << " active " << active_;
+    logdbg << "UTNFilter: getConditionString: dbo " << dbcontent_name << " active " << active_;
 
     if (!COMPASS::instance().dbContentManager().hasAssociations())
         return "";
@@ -73,12 +73,12 @@ std::string UTNFilter::getConditionString(const std::string& dbo_name, bool& fir
     if (active_)
     {
         DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
-        assert (dbcontent_man.existsDBContent(dbo_name));
+        assert (dbcontent_man.existsDBContent(dbcontent_name));
 
-        assert (dbcontent_man.metaVariable(DBContent::meta_var_associations_.name()).existsIn(dbo_name));
-        Variable& assoc_var = dbcontent_man.metaVariable(DBContent::meta_var_associations_.name()).getFor(dbo_name);
+        assert (dbcontent_man.metaVariable(DBContent::meta_var_associations_.name()).existsIn(dbcontent_name));
+        Variable& assoc_var = dbcontent_man.metaVariable(DBContent::meta_var_associations_.name()).getFor(dbcontent_name);
 
-        extra_from_parts.push_back("json_each("+dbcontent_man.dbContent(dbo_name).dbTableName()+".associations)");
+        extra_from_parts.push_back("json_each("+dbcontent_man.dbContent(dbcontent_name).dbTableName()+".associations)");
 
         filtered_variables.push_back(&assoc_var);
 

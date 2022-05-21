@@ -142,7 +142,7 @@ private:
     std::vector<std::string> not_added_dbo_variables_; // existing dbovars not in mappings
 
 
-    QStringList table_columns_ {"Active", "JSON Key", "DBObject Variable"};
+    QStringList table_columns_ {"Active", "JSON Key", "DBContent Variable"};
 
     QIcon todo_icon_;
     QIcon unknown_icon_;

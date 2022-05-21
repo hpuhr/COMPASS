@@ -77,7 +77,7 @@ class VariableOrderedSet : public QObject, public Configurable
     /// @brief Adds a variable to the set at last index
     void add(Variable& var);
     void add(MetaVariable& var);
-    void add (const std::string& dbo_name, const std::string var_name);
+    void add (const std::string& dbcontent_name, const std::string var_name);
 
     /// @brief Adds a variable set
     // void add (const DBOVariableOrderedSet &set);
@@ -100,8 +100,8 @@ class VariableOrderedSet : public QObject, public Configurable
     bool hasVariable(const std::string& dbo_type, const std::string& name) const;
 
     /// @brief Returns a copied new variable set, with all variables for a given DBO type
-    VariableSet getFor(const std::string& dbo_name);
-    VariableSet getExistingInDBFor(const std::string& dbo_name);
+    VariableSet getFor(const std::string& dbcontent_name);
+    VariableSet getExistingInDBFor(const std::string& dbcontent_name);
     // DBOVariableSet getUnorderedSet () const;
 
     /// @brief Returns a variable at a given index

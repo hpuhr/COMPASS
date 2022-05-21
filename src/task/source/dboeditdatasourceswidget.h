@@ -24,7 +24,7 @@
 #include "dboeditdatasourceactionoptions.h"
 
 class ManageDataSourcesTask;
-class DBObject;
+class DBContent;
 
 class QTableWidget;
 class QLabel;
@@ -52,7 +52,7 @@ class DBOEditDataSourcesWidget : public QWidget
     void dbItemChangedSlot(QTableWidgetItem* item);
 
   public:
-    DBOEditDataSourcesWidget(ManageDataSourcesTask& task, DBObject& object, QWidget* parent = 0,
+    DBOEditDataSourcesWidget(ManageDataSourcesTask& task, DBContent& object, QWidget* parent = 0,
                              Qt::WindowFlags f = 0);
     virtual ~DBOEditDataSourcesWidget();
 
@@ -60,7 +60,7 @@ class DBOEditDataSourcesWidget : public QWidget
 
   private:
     ManageDataSourcesTask& task_;
-    DBObject& object_;
+    DBContent& object_;
 
     QStringList table_columns_{"ID",  "Name", "Short Name", "SAC",
                                "SIC", "Latitude", "Longitude",  "Altitude"};

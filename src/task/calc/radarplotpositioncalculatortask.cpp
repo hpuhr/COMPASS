@@ -55,7 +55,7 @@ RadarPlotPositionCalculatorTask::RadarPlotPositionCalculatorTask(const std::stri
             "Allows calculation of Radar plot position information based on the defined data sources.";
 
     qRegisterMetaType<std::shared_ptr<Buffer>>("std::shared_ptr<Buffer>");
-    // qRegisterMetaType<DBObject>("DBObject");
+    // qRegisterMetaType<DBContent>("DBContent");
 
 }
 

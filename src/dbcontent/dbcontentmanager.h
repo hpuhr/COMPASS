@@ -80,9 +80,9 @@ public:
     void deleteDBContent(const std::string& dbcontent_name);
     bool hasData();
 
-    using DBObjectIterator = typename std::map<std::string, DBContent*>::iterator;
-    DBObjectIterator begin() { return dbcontent_.begin(); }
-    DBObjectIterator end() { return dbcontent_.end(); }
+    using DBContentIterator = typename std::map<std::string, DBContent*>::iterator;
+    DBContentIterator begin() { return dbcontent_.begin(); }
+    DBContentIterator end() { return dbcontent_.end(); }
     size_t size() { return dbcontent_.size(); }
 
     bool existsMetaVariable(const std::string& var_name);

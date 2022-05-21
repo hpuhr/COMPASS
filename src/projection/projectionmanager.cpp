@@ -86,7 +86,7 @@ void ProjectionManager::generateSubConfigurable(const std::string& class_id,
         projections_[name].reset(new OGRProjection(class_id, instance_id, *this));
     }
     else
-        throw std::runtime_error("DBObject: generateSubConfigurable: unknown class_id " + class_id);
+        throw std::runtime_error("DBContent: generateSubConfigurable: unknown class_id " + class_id);
 }
 
 void ProjectionManager::checkSubConfigurables()

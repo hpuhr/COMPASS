@@ -43,15 +43,15 @@ class DBContentManagerWidget : public QWidget
     Q_OBJECT
 
   public slots:
-    /// @brief Adds a DBObject
+    /// @brief Adds a DBContent
     void addDBOSlot();
-    /// @brief Is called when a DBObject was changed
+    /// @brief Is called when a DBContent was changed
     void changedDBOSlot();
-    /// @brief Edits a DBObject
+    /// @brief Edits a DBContent
     void editDBOSlot();
-    /// @brief Deletes a DBObject
+    /// @brief Deletes a DBContent
     void deleteDBOSlot();
-    /// @brief Updates the DBObject list
+    /// @brief Updates the DBContent list
     void updateDBOsSlot();
 
     void addMetaVariableSlot();
@@ -75,7 +75,7 @@ class DBContentManagerWidget : public QWidget
   private:
     DBContentManager& object_manager_;
 
-    /// Grid with all DBObjects
+    /// Grid with all DBContents
     QGridLayout* dbobjects_grid_{nullptr};
     QGridLayout* meta_variables_grid_{nullptr};
 

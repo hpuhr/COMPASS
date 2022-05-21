@@ -176,7 +176,7 @@ protected:
     void checkAndSetTrackerVariableFromMeta(const std::string& meta_name_str, dbContent::Variable** var);
     void checkAndSetMetaVariable(const std::string& name_str, dbContent::MetaVariable** var);
 
-    dbContent::VariableSet getReadSetFor(const std::string& dbo_name);
+    dbContent::VariableSet getReadSetFor(const std::string& dbcontent_name);
 };
 
 #endif  // CREATEARTASASSOCIATIONSTASK_H

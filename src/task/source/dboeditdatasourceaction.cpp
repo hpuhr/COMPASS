@@ -48,7 +48,7 @@ DBOEditDataSourceAction::DBOEditDataSourceAction(const std::string& action,
     refreshActionString();
 }
 
-void DBOEditDataSourceAction::perform(DBObject& object, const std::string& source_type,
+void DBOEditDataSourceAction::perform(DBContent& object, const std::string& source_type,
                                       const std::string& source_id)
 {
     loginf << "DBOEditDataSourceAction: perform: object src " << source_type << ", " << source_id
@@ -58,7 +58,7 @@ void DBOEditDataSourceAction::perform(DBObject& object, const std::string& sourc
 
     ManageDataSourcesTask& manage_ds_task = COMPASS::instance().taskManager().manageDataSourcesTask();
 
-    std::string dbo_name = object.name();
+    std::string dbcontent_name = object.name();
 
     if (action_ == "Add")
     {
@@ -67,7 +67,7 @@ void DBOEditDataSourceAction::perform(DBObject& object, const std::string& sourc
             assert(String::isNumber(source_id));
             unsigned int id = std::stoi(source_id);
             assert(object.hasDataSource(id));
-            manage_ds_task.addNewStoredDataSource(dbo_name) = object.getDataSource(id);
+            manage_ds_task.addNewStoredDataSource(dbcontent_name) = object.getDataSource(id);
         }
         else
             logerr << "DBOEditDataSourceAction: perform: unsupported action Add src " << source_type
@@ -83,7 +83,7 @@ void DBOEditDataSourceAction::perform(DBObject& object, const std::string& sourc
 
             assert(String::isNumber(target_id_));
             unsigned int tgt_id = std::stoi(target_id_);
-            assert(manage_ds_task.hasStoredDataSource(dbo_name, tgt_id));
+            assert(manage_ds_task.hasStoredDataSource(dbcontent_name, tgt_id));
 
             manage_ds_task.storedDataSource(object.name(), tgt_id) = object.getDataSource(src_id);
         }
@@ -91,13 +91,13 @@ void DBOEditDataSourceAction::perform(DBObject& object, const std::string& sourc
         {
             assert(String::isNumber(source_id));
             unsigned int src_id = std::stoi(source_id);
-            assert(manage_ds_task.hasStoredDataSource(dbo_name, src_id));
+            assert(manage_ds_task.hasStoredDataSource(dbcontent_name, src_id));
 
             assert(String::isNumber(target_id_));
             unsigned int tgt_id = std::stoi(target_id_);
             assert(object.hasDataSource(tgt_id));
 
-            object.getDataSource(tgt_id) = manage_ds_task.storedDataSource(dbo_name, src_id);
+            object.getDataSource(tgt_id) = manage_ds_task.storedDataSource(dbcontent_name, src_id);
             object.updateDataSource(tgt_id);
         }
         else

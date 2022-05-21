@@ -992,20 +992,20 @@ void DBInterface::saveTargets(std::map<unsigned int, std::shared_ptr<dbContent::
 }
 
 
-void DBInterface::insertBuffer(DBContent& db_object, std::shared_ptr<Buffer> buffer)
+void DBInterface::insertBuffer(DBContent& dbcontent, std::shared_ptr<Buffer> buffer)
 {
-    logdbg << "DBInterface: insertBuffer: dbo " << db_object.name() << " buffer size "
+    logdbg << "DBInterface: insertBuffer: dbo " << dbcontent.name() << " buffer size "
            << buffer->size();
 
     // create table if required
-    if (!existsTable(db_object.dbTableName()))
-        createTable(db_object);
+    if (!existsTable(dbcontent.dbTableName()))
+        createTable(dbcontent);
 
     // create record numbers & and store new max rec num
     {
-        assert (db_object.hasVariable(DBContent::meta_var_rec_num_.name()));
+        assert (dbcontent.hasVariable(DBContent::meta_var_rec_num_.name()));
 
-        Variable& rec_num_var = db_object.variable(DBContent::meta_var_rec_num_.name());
+        Variable& rec_num_var = dbcontent.variable(DBContent::meta_var_rec_num_.name());
         assert (rec_num_var.dataType() == PropertyDataType::UINT);
 
         string rec_num_col_str = rec_num_var.dbColumnName();
@@ -1029,7 +1029,7 @@ void DBInterface::insertBuffer(DBContent& db_object, std::shared_ptr<Buffer> buf
         COMPASS::instance().dbContentManager().maxRecordNumber(max_rec_num);
     }
 
-    insertBuffer(db_object.dbTableName(), buffer);
+    insertBuffer(dbcontent.dbTableName(), buffer);
 }
 
 void DBInterface::insertBuffer(const string& table_name, shared_ptr<Buffer> buffer)

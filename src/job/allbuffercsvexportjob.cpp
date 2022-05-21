@@ -73,8 +73,8 @@ void AllBufferCSVExportJob::run()
         unsigned int read_set_size = read_set_->getSize();
         std::shared_ptr<Buffer> buffer;
 
-        std::string dbo_name;
-        std::string variable_dbo_name;
+        std::string dbcontent_name;
+        std::string variable_dbcontent_name;
         std::string variable_name;
 
         std::stringstream ss;
@@ -100,10 +100,10 @@ void AllBufferCSVExportJob::run()
             buffer_index = row_index_it.second;
 
             assert(number_to_dbo_.count(dbo_num) == 1);
-            dbo_name = number_to_dbo_.at(dbo_num);
+            dbcontent_name = number_to_dbo_.at(dbo_num);
 
-            assert(buffers_.count(dbo_name) == 1);
-            buffer = buffers_.at(dbo_name);
+            assert(buffers_.count(dbcontent_name) == 1);
+            buffer = buffers_.at(dbcontent_name);
 
             assert(buffer_index < buffer->size());
 
@@ -127,21 +127,21 @@ void AllBufferCSVExportJob::run()
             else
                 ss << selected_vec.get(buffer_index) << ";";
 
-            ss << dbo_name;  // set dboname
+            ss << dbcontent_name;  // set dboname
 
             for (unsigned int col = 0; col < read_set_size; ++col)
             {
                 value_str = "";
 
-                variable_dbo_name = read_set_->variableDefinition(col).dboName();
+                variable_dbcontent_name = read_set_->variableDefinition(col).dboName();
                 variable_name = read_set_->variableDefinition(col).variableName();
 
                 // check if data & variables exist
-                if (variable_dbo_name == META_OBJECT_NAME)
+                if (variable_dbcontent_name == META_OBJECT_NAME)
                 {
                     assert(manager.existsMetaVariable(variable_name));
                     if (!manager.metaVariable(variable_name)
-                             .existsIn(dbo_name))  // not data if not exist
+                             .existsIn(dbcontent_name))  // not data if not exist
                     {
                         ss << ";";
                         continue;
@@ -149,19 +149,19 @@ void AllBufferCSVExportJob::run()
                 }
                 else
                 {
-                    if (dbo_name != variable_dbo_name)  // check if other dbo
+                    if (dbcontent_name != variable_dbcontent_name)  // check if other dbo
                     {
                         ss << ";";
                         continue;
                     }
 
-                    assert(manager.existsDBContent(dbo_name));
-                    assert(manager.dbContent(dbo_name).hasVariable(variable_name));
+                    assert(manager.existsDBContent(dbcontent_name));
+                    assert(manager.dbContent(dbcontent_name).hasVariable(variable_name));
                 }
 
-                Variable& variable = (variable_dbo_name == META_OBJECT_NAME)
-                                            ? manager.metaVariable(variable_name).getFor(dbo_name)
-                                            : manager.dbContent(dbo_name).variable(variable_name);
+                Variable& variable = (variable_dbcontent_name == META_OBJECT_NAME)
+                                            ? manager.metaVariable(variable_name).getFor(dbcontent_name)
+                                            : manager.dbContent(dbcontent_name).variable(variable_name);
 
                 PropertyDataType data_type = variable.dataType();
 

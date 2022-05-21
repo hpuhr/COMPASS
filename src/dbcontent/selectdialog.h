@@ -57,7 +57,7 @@ class SelectDBContentDialog : public QDialog
 
         setLayout(main_layout);
 
-        setWindowTitle(tr("Select Name and DBObject"));
+        setWindowTitle(tr("Select Name and DBContent"));
     }
 
     unsigned int category()

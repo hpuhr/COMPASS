@@ -188,7 +188,7 @@ TEST_CASE("COMPASS Import JSON", "[COMPASS]")
 
     QThread::msleep(100);  // delay
 
-    DBObjectManager& object_manager = COMPASS::instance().objectManager();
+    DBContentManager& object_manager = COMPASS::instance().objectManager();
     object_manager.loadSlot();
 
     while (client.hasPendingEvents() || object_manager.loadInProgress())

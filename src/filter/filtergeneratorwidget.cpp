@@ -272,7 +272,7 @@ void FilterGeneratorWidget::accept()
             configuration.addNewSubConfiguration("DBFilterCondition", condition_name);
         condition_configuration.addParameterString("operator", data_condition.operator_);
         condition_configuration.addParameterString("variable_name", data_condition.variable_name_);
-        condition_configuration.addParameterString("variable_dbo_name",
+        condition_configuration.addParameterString("variable_dbcontent_name",
                                                    data_condition.variable_dbo_type_);
         condition_configuration.addParameterBool("absolute_value", data_condition.absolute_value_);
         condition_configuration.addParameterString("value", data_condition.value_);

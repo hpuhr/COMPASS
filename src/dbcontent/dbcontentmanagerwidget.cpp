@@ -116,7 +116,7 @@ DBContentManagerWidget::~DBContentManagerWidget()
     edit_dbo_widgets_.clear();
 }
 
-// void DBObjectManagerWidget::lock ()
+// void DBContentManagerWidget::lock ()
 //{
 ////    for (auto it : edit_dbo_buttons_)
 ////        it.first->setDisabled (true);
@@ -132,7 +132,7 @@ DBContentManagerWidget::~DBContentManagerWidget()
 //    add_metavar_button_->setDisabled (true);
 //}
 
-// void DBObjectManagerWidget::unlock ()
+// void DBContentManagerWidget::unlock ()
 //{
 ////    for (auto it : edit_dbo_buttons_)
 ////        it.first->setDisabled (!it.second->hasCurrentMetaTable());
@@ -148,40 +148,40 @@ DBContentManagerWidget::~DBContentManagerWidget()
 //    add_metavar_button_->setDisabled (false);
 //}
 
-// void DBObjectManagerWidget::databaseOpenedSlot ()
+// void DBContentManagerWidget::databaseOpenedSlot ()
 //{
-//    loginf << "DBObjectManagerWidget: databaseOpenedSlot";
+//    loginf << "DBContentManagerWidget: databaseOpenedSlot";
 //}
 
 void DBContentManagerWidget::addDBOSlot()
 {
 //    if (!schema_manager_.hasCurrentSchema())
 //    {
-//        logerr << "DBObjectManagerWidget: addDBO: no schema was selected";
+//        logerr << "DBContentManagerWidget: addDBO: no schema was selected";
 //        return;
 //    }
 
     bool ok;
     QString text =
         QInputDialog::getText(this, tr("Database Object Name"),
-                              tr("Specify a (unique) DBObject name:"), QLineEdit::Normal, "", &ok);
+                              tr("Specify a (unique) DBContent name:"), QLineEdit::Normal, "", &ok);
     if (ok && !text.isEmpty())
     {
         std::string name = text.toStdString();
 
         if (object_manager_.existsDBContent(name))
         {
-            logerr << "DBObjectManagerWidget: addDBO: DBObject same name already exists";
+            logerr << "DBContentManagerWidget: addDBO: DBContent same name already exists";
             return;
         }
 
-            std::string instance = "DBObject" + name + "0";
+            std::string instance = "DBContent" + name + "0";
 
-            Configuration& config = object_manager_.addNewSubConfiguration("DBObject", instance);
+            Configuration& config = object_manager_.addNewSubConfiguration("DBContent", instance);
             config.addParameterString("name", name);
              //config.addParameterString ("meta_table", meta_table_name); // TODO add db_table_name
 
-            object_manager_.generateSubConfigurable("DBObject", instance);
+            object_manager_.generateSubConfigurable("DBContent", instance);
 
             updateDBOsSlot();
     }
@@ -324,7 +324,7 @@ void DBContentManagerWidget::addAllMetaVariablesSlot()
         {
             if (object_manager_.usedInMetaVariable(*var_it.get()))
             {
-                loginf << "DBObjectManagerWidget: addAllMetaVariablesSlot: not adding dbovariable "
+                loginf << "DBContentManagerWidget: addAllMetaVariablesSlot: not adding dbovariable "
                        << var_it->name() << " since already used";
                 continue;
             }
@@ -349,7 +349,7 @@ void DBContentManagerWidget::addAllMetaVariablesSlot()
                 if (!object_manager_.existsMetaVariable(var_it->name()))
                 {
                     loginf
-                        << "DBObjectManagerWidget: addAllMetaVariablesSlot: adding meta variable "
+                        << "DBContentManagerWidget: addAllMetaVariablesSlot: adding meta variable "
                         << var_it->name();
 
                     std::string instance = "MetaVariable" + var_it->name() + "0";
@@ -368,7 +368,7 @@ void DBContentManagerWidget::addAllMetaVariablesSlot()
                 {
                     if (!meta_var.existsIn(*dbo_it2))
                     {
-                        loginf << "DBObjectManagerWidget: addAllMetaVariablesSlot: adding meta "
+                        loginf << "DBContentManagerWidget: addAllMetaVariablesSlot: adding meta "
                                   "variable "
                                << var_it->name() << " dbo variable " << var_it->name();
                         meta_var.addVariable(*dbo_it2, var_it->name());
