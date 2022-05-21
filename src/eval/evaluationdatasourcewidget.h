@@ -31,11 +31,11 @@ class EvaluationDataSourceWidget : public QFrame
     Q_OBJECT
 
 signals:
-    void dboNameChangedSignal(const std::string& dbcontent_name);
+    void dbContentNameChangedSignal(const std::string& dbcontent_name);
     void lineChangedSignal(unsigned int line_id);
 
 protected slots:
-    void dboNameChangedSlot();
+    void dbContentNameChangedSlot();
     /// @brief Updates the sensor active checkboxes
     void toggleDataSourceSlot();
     void lineIDEditSlot(const QString& text);

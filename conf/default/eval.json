@@ -7,8 +7,8 @@
         "configs": {
         },
         "current_standard": "test",
-        "dbo_name_ref": "CAT062",
-        "dbo_name_tst": "CAT020",
+        "dbcontent_name_ref": "CAT062",
+        "dbcontent_name_tst": "CAT020",
         "generate_details": true,
         "load_time_begin": 0.0,
         "load_time_end": 0.0,

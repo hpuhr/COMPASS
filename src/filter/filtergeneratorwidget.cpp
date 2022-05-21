@@ -217,7 +217,7 @@ void FilterGeneratorWidget::addCondition()
     {
         const dbContent::Variable& var = condition_variable_widget_->selectedVariable();
         data_condition.variable_name_ = var.name();
-        data_condition.variable_dbo_type_ = var.dboName();
+        data_condition.variable_dbo_type_ = var.dbContentName();
     }
     else
     {

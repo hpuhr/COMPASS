@@ -36,8 +36,8 @@ public slots:
     void removeTABlackListSlot(bool checked);
     void removeTAValuesSlot();
     // dbo
-    void removeDBOsSlot(bool checked);
-    void removeSpecificDBOsSlot(bool checked);
+    void removeDBContentsSlot(bool checked);
+    void removeSpecificDBContentsSlot(bool checked);
 
     void runSlot();
     void cancelSlot();

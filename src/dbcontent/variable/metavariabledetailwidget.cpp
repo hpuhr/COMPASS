@@ -38,7 +38,7 @@ MetaVariableDetailWidget::MetaVariableDetailWidget(DBContentManager& dbo_man, QW
     for (auto dbcont_it = dbo_man_.begin(); dbcont_it != dbo_man_.end(); ++dbcont_it)
     {
         VariableSelectionWidget* var_sel = new VariableSelectionWidget(true);
-        var_sel->showDBOOnly(dbcont_it->first);
+        var_sel->showDBContentOnly(dbcont_it->first);
         //var_sel->setProperty("DBContent", dbcont_it->first.c_str());
 
         connect(var_sel, &VariableSelectionWidget::selectionChanged,

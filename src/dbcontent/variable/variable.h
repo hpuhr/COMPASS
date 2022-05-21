@@ -75,7 +75,7 @@ class Variable : public QObject, public Property, public Configurable
     void name(const std::string& name);
 
     DBContent& object() const;
-    const std::string& dboName() const;
+    const std::string& dbContentName() const;
 
     const std::string& description() const { return description_; }
     void description(const std::string& description) { description_ = description; }

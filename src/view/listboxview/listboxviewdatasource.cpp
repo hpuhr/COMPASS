@@ -129,7 +129,7 @@ void ListBoxViewDataSource::copySet (const std::string& name, const std::string&
     assert(hasSet(new_name));
 
     for (const auto& var_def_it : getSet()->definitions())
-        sets_.at(new_name)->add(var_def_it.second->dboName(), var_def_it.second->variableName());
+        sets_.at(new_name)->add(var_def_it.second->dbContentName(), var_def_it.second->variableName());
 }
 
 void ListBoxViewDataSource::removeSet (const std::string& name)

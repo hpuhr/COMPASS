@@ -254,7 +254,7 @@ void JSONObjectParserWidget::updateMappingsGrid()
 
         dbContent::VariableSelectionWidget* var_sel = new dbContent::VariableSelectionWidget();
         var_sel->showMetaVariables(false);
-        var_sel->showDBOOnly(map_it.second.second->dbObjectName());
+        var_sel->showDBContentOnly(map_it.second.second->dbObjectName());
         var_sel->showEmptyVariable(true);
         if (map_it.second.second->hasVariable())
             var_sel->selectedVariable(map_it.second.second->variable());

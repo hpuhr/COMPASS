@@ -29,8 +29,8 @@
 #include "jsonparsingschema.h"
 //#include "managedatasourcestask.h"
 //#include "managedatasourcestaskwidget.h"
-#include "managedbobjectstask.h"
-#include "managedbobjectstaskwidget.h"
+#include "managedbcontenttask.h"
+#include "managedbcontenttaskwidget.h"
 #include "managesectorstask.h"
 #include "managesectorstaskwidget.h"
 //#include "postprocesstask.h"
@@ -75,7 +75,7 @@ TaskManager::TaskManager(const std::string& class_id, const std::string& instanc
     createSubConfigurables();
 
     task_list_ = {"DatabaseOpenTask",
-                  "ManageDBContentsTask", "ASTERIXImportTask",
+                  "ManageDBContentTask", "ASTERIXImportTask",
                   "ViewPointsImportTask", "GPSTrailImportTask", // "JSONImportTask",
                   "ManageSectorsTask", // "ManageDataSourcesTask",
                   "RadarPlotPositionCalculatorTask",
@@ -97,10 +97,10 @@ void TaskManager::generateSubConfigurable(const std::string& class_id,
         assert(database_open_task_);
         addTask(class_id, database_open_task_.get());
     }
-    else if (class_id.compare("ManageDBContentsTask") == 0)
+    else if (class_id.compare("ManageDBContentTask") == 0)
     {
         assert(!manage_dbobjects_task_);
-        manage_dbobjects_task_.reset(new ManageDBContentsTask(class_id, instance_id, *this));
+        manage_dbobjects_task_.reset(new ManageDBContentTask(class_id, instance_id, *this));
         assert(manage_dbobjects_task_);
         addTask(class_id, manage_dbobjects_task_.get());
     }

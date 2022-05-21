@@ -19,7 +19,6 @@
 #define DBCONTENT_DBCONTENT_H_
 
 #include "configurable.h"
-#include "dboassociationcollection.h"
 #include "dbcontent/variable/variable.h"
 #include "dbcontent/variable/variableset.h"
 #include "global.h"
@@ -36,10 +35,10 @@ class PropertyList;
 class DBContentWidget;
 class Buffer;
 class Job;
-class DBOReadDBJob;
+class DBContentReadDBJob;
 class InsertBufferDBJob;
 class UpdateBufferDBJob;
-class FinalizeDBOReadJob;
+//class FinalizeDBOReadJob;
 class DBContentManager;
 
 namespace dbContent
@@ -204,7 +203,7 @@ protected:
     bool is_loadable_{false};  // loadable on its own
     size_t count_{0};
 
-    std::shared_ptr<DBOReadDBJob> read_job_{nullptr};
+    std::shared_ptr<DBContentReadDBJob> read_job_{nullptr};
 
     bool insert_active_ {false};
     std::shared_ptr<InsertBufferDBJob> insert_job_{nullptr};

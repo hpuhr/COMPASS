@@ -186,7 +186,7 @@ VariableSet HistogramView::getSet(const std::string& dbcontent_name)
         }
         else
         {
-            if (dataVar().dboName() == dbcontent_name && !set.hasVariable(dataVar()))
+            if (dataVar().dbContentName() == dbcontent_name && !set.hasVariable(dataVar()))
                 set.add(dataVar());
         }
     }
@@ -241,9 +241,9 @@ Variable& HistogramView::dataVar()
 
 void HistogramView::dataVar (Variable& var)
 {
-    loginf << "HistogramView: dataVar: dbo " << var.dboName() << " name " << var.name();
+    loginf << "HistogramView: dataVar: dbo " << var.dbContentName() << " name " << var.name();
 
-    data_var_dbo_ = var.dboName();
+    data_var_dbo_ = var.dbContentName();
     data_var_name_ = var.name();
     assert (hasDataVar());
     assert (!isDataVarMeta());

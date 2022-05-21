@@ -66,7 +66,7 @@ EvaluationManager::EvaluationManager(const std::string& class_id, const std::str
     registerParameter("line_id_ref", &line_id_ref_, 0);
     registerParameter("active_sources_ref", &active_sources_ref_, json::object());
 
-    registerParameter("dbcontent_name_tst", &dbcontent_name_tst_, "Tracker");
+    registerParameter("dbcontent_name_tst", &dbcontent_name_tst_, "CAT062");
     registerParameter("line_id_tst", &line_id_tst_, 0);
     registerParameter("active_sources_tst", &active_sources_tst_, json::object());
 
@@ -163,8 +163,8 @@ void EvaluationManager::init(QTabWidget* tab_widget)
     assert (!initialized_);
     assert (tab_widget);
 
-    updateReferenceDBO();
-    updateTestDBO();
+    updateReferenceDBContent();
+    updateTestDBContent();
 
     initialized_ = true;
 
@@ -1170,18 +1170,18 @@ void EvaluationManager::exportSectors (const std::string& filename)
 
 }
 
-std::string EvaluationManager::dboNameRef() const
+std::string EvaluationManager::dbContentNameRef() const
 {
     return dbcontent_name_ref_;
 }
 
-void EvaluationManager::dboNameRef(const std::string& name)
+void EvaluationManager::dbContentNameRef(const std::string& name)
 {
-    loginf << "EvaluationManager: dboNameRef: name " << name;
+    loginf << "EvaluationManager: dbContentNameRef: name " << name;
 
     dbcontent_name_ref_ = name;
 
-    updateReferenceDBO();
+    updateReferenceDBContent();
 }
 
 bool EvaluationManager::hasValidReferenceDBO ()
@@ -1204,18 +1204,18 @@ set<unsigned int> EvaluationManager::activeDataSourcesRef()
 
 }
 
-std::string EvaluationManager::dboNameTst() const
+std::string EvaluationManager::dbContentNameTst() const
 {
     return dbcontent_name_tst_;
 }
 
-void EvaluationManager::dboNameTst(const std::string& name)
+void EvaluationManager::dbContentNameTst(const std::string& name)
 {
-    loginf << "EvaluationManager: dboNameTst: name " << name;
+    loginf << "EvaluationManager: dbContentNameTst: name " << name;
 
     dbcontent_name_tst_ = name;
 
-    updateTestDBO();
+    updateTestDBContent();
 }
 
 bool EvaluationManager::hasValidTestDBO ()
@@ -1436,9 +1436,9 @@ bool EvaluationManager::anySectorsWithReq()
     return any;
 }
 
-void EvaluationManager::updateReferenceDBO()
+void EvaluationManager::updateReferenceDBContent()
 {
-    loginf << "EvaluationManager: updateReferenceDBO";
+    loginf << "EvaluationManager: updateReferenceDBContent";
 
     data_sources_ref_.clear();
 
@@ -1484,7 +1484,7 @@ void EvaluationManager::updateReferenceDataSources()
 
 }
 
-void EvaluationManager::updateTestDBO()
+void EvaluationManager::updateTestDBContent()
 {
     loginf << "EvaluationManager: updateTestDBO";
 
@@ -2213,19 +2213,19 @@ void EvaluationManager::removeModeACOnlys(bool value)
     remove_modeac_onlys_ = value;
 }
 
-bool EvaluationManager::removeNotDetectedDBOs() const
+bool EvaluationManager::removeNotDetectedDBContents() const
 {
     return remove_not_detected_dbos_;
 }
 
-void EvaluationManager::removeNotDetectedDBOs(bool value)
+void EvaluationManager::removeNotDetectedDBContents(bool value)
 {
     loginf << "EvaluationManager: removeNotDetectedDBOs: value " << value;
 
     remove_not_detected_dbos_ = value;
 }
 
-bool EvaluationManager::removeNotDetectedDBO(const std::string& dbcontent_name) const
+bool EvaluationManager::removeNotDetectedDBContent(const std::string& dbcontent_name) const
 {
     if (!remove_not_detected_dbo_values_.contains(dbcontent_name))
         return false;
@@ -2233,7 +2233,7 @@ bool EvaluationManager::removeNotDetectedDBO(const std::string& dbcontent_name) 
     return remove_not_detected_dbo_values_.at(dbcontent_name);
 }
 
-void EvaluationManager::removeNotDetectedDBOs(const std::string& dbcontent_name, bool value)
+void EvaluationManager::removeNotDetectedDBContents(const std::string& dbcontent_name, bool value)
 {
     loginf << "EvaluationManager: removeNotDetectedDBOs: dbo " << dbcontent_name << " value " << value;
 

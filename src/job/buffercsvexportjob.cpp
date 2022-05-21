@@ -81,7 +81,7 @@ void BufferCSVExportJob::run()
         assert(buffer_->has<unsigned int>(DBContent::meta_var_rec_num_.name()));
         NullableVector<unsigned int> rec_num_vec = buffer_->get<unsigned int>(DBContent::meta_var_rec_num_.name());
 
-        std::string dbcontent_name = buffer_->dboName();
+        std::string dbcontent_name = buffer_->dbContentName();
         assert(dbcontent_name.size());
 
         for (; row < buffer_size; ++row)

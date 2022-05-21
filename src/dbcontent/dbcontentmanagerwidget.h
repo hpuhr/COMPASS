@@ -52,7 +52,7 @@ class DBContentManagerWidget : public QWidget
     /// @brief Deletes a DBContent
     void deleteDBOSlot();
     /// @brief Updates the DBContent list
-    void updateDBOsSlot();
+    void updateDBContentsSlot();
 
     void addMetaVariableSlot();
     void editMetaVariableSlot();

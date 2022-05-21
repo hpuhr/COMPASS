@@ -114,8 +114,8 @@ public:
     void exportSectors (const std::string& filename);
     unsigned int getMaxSectorId ();
 
-    std::string dboNameRef() const;
-    void dboNameRef(const std::string& name);
+    std::string dbContentNameRef() const;
+    void dbContentNameRef(const std::string& name);
 
     unsigned int lineIDRef() const;
     void lineIDRef(unsigned int line_id_ref);
@@ -124,8 +124,8 @@ public:
     std::map<unsigned int, bool>& dataSourcesRef() { return data_sources_ref_; } // can be used to set active bool
     std::set<unsigned int> activeDataSourcesRef();
 
-    std::string dboNameTst() const;
-    void dboNameTst(const std::string& name);
+    std::string dbContentNameTst() const;
+    void dbContentNameTst(const std::string& name);
 
     unsigned int lineIDTst() const;
     void lineIDTst(unsigned int line_id_tst);
@@ -240,11 +240,11 @@ public:
     bool removeModeACOnlys() const;
     void removeModeACOnlys(bool value);
 
-    bool removeNotDetectedDBOs() const;
-    void removeNotDetectedDBOs(bool value);
+    bool removeNotDetectedDBContents() const;
+    void removeNotDetectedDBContents(bool value);
 
-    bool removeNotDetectedDBO(const std::string& dbcontent_name) const;
-    void removeNotDetectedDBOs(const std::string& dbcontent_name, bool value);
+    bool removeNotDetectedDBContent(const std::string& dbcontent_name) const;
+    void removeNotDetectedDBContents(const std::string& dbcontent_name, bool value);
 
     bool loadOnlySectorData() const;
     void loadOnlySectorData(bool value);
@@ -484,10 +484,10 @@ protected:
 
     void loadSectors();
 
-    void updateReferenceDBO();
+    void updateReferenceDBContent();
     void updateReferenceDataSources();
 
-    void updateTestDBO();
+    void updateTestDBContent();
     void updateTestDataSources();
 
     nlohmann::json::object_t getBaseViewableDataConfig ();

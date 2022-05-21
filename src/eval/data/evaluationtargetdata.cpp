@@ -1800,7 +1800,7 @@ void EvaluationTargetData::updatePositionMinMax() const
 //    string nucp_nic_name {"nucp_nic"};
 //    string sil_name {"sil"};
 
-//    if (ref_data_.size() && ref_buffer_->dboName() == "ADSB")
+//    if (ref_data_.size() && ref_buffer_->dbContentName() == "ADSB")
 //    {
 //        assert (ref_buffer_->has<int>(mops_name));
 //        assert (ref_buffer_->has<char>(nacp_name));
@@ -1840,7 +1840,7 @@ void EvaluationTargetData::updatePositionMinMax() const
 //        }
 //    }
 
-//    if (tst_data_.size() && tst_buffer_->dboName() == "ADSB")
+//    if (tst_data_.size() && tst_buffer_->dbContentName() == "ADSB")
 //    {
 //        assert (tst_buffer_->has<int>(mops_name));
 //        assert (tst_buffer_->has<char>(nacp_name));

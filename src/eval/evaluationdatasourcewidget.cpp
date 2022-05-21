@@ -56,7 +56,7 @@ EvaluationDataSourceWidget::EvaluationDataSourceWidget(
 
     dbo_combo_ = new DBContentComboBox(false);
     dbo_combo_->setObjectName(dbcontent_name_);
-    connect (dbo_combo_, &DBContentComboBox::changedObject, this, &EvaluationDataSourceWidget::dboNameChangedSlot);
+    connect (dbo_combo_, &DBContentComboBox::changedObject, this, &EvaluationDataSourceWidget::dbContentNameChangedSlot);
 
     dbo_lay->addWidget(dbo_combo_, 0, 1);
 
@@ -170,15 +170,15 @@ void EvaluationDataSourceWidget::updateCheckboxesChecked()
     }
 }
 
-void EvaluationDataSourceWidget::dboNameChangedSlot()
+void EvaluationDataSourceWidget::dbContentNameChangedSlot()
 {
     assert (dbo_combo_);
 
     dbcontent_name_ = dbo_combo_->getObjectName();
 
-    loginf << "EvaluationDataSourceWidget: dboNameChangedSlot: name " << dbcontent_name_;
+    loginf << "EvaluationDataSourceWidget: dbContentNameChangedSlot: name " << dbcontent_name_;
 
-    emit dboNameChangedSignal(dbcontent_name_);
+    emit dbContentNameChangedSignal(dbcontent_name_);
 
     updateDataSources();
 

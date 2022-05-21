@@ -307,7 +307,7 @@ MetaVariable& VariableSelectionWidget::selectedMetaVariable() const
     return dbo_man_.metaVariable(var_name);
 }
 
-void VariableSelectionWidget::showDBOOnly(const std::string& only_dbcontent_name)
+void VariableSelectionWidget::showDBContentOnly(const std::string& only_dbcontent_name)
 {
     show_dbo_only_ = true;
     only_dbcontent_name_ = only_dbcontent_name;
@@ -318,7 +318,7 @@ void VariableSelectionWidget::showDBOOnly(const std::string& only_dbcontent_name
     updateMenuEntries();
 }
 
-void VariableSelectionWidget::disableShowDBOOnly()
+void VariableSelectionWidget::disableShowDBContentOnly()
 {
     show_dbo_only_ = false;
     only_dbcontent_name_ = "";
@@ -329,7 +329,7 @@ void VariableSelectionWidget::disableShowDBOOnly()
     updateMenuEntries();
 }
 
-std::string VariableSelectionWidget::onlyDBOName() const { return only_dbcontent_name_; }
+std::string VariableSelectionWidget::onlyDBContentName() const { return only_dbcontent_name_; }
 
 bool VariableSelectionWidget::showEmptyVariable() const { return show_empty_variable_; }
 

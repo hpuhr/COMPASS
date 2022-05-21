@@ -64,10 +64,10 @@ class VariableSelectionWidget : public QFrame
     bool showMetaVariablesOnly() const;
     void showMetaVariablesOnly(bool show_meta_variables_only);
 
-    void showDBOOnly(const std::string& only_dbcontent_name);
-    void disableShowDBOOnly();
+    void showDBContentOnly(const std::string& only_dbcontent_name);
+    void disableShowDBContentOnly();
 
-    std::string onlyDBOName() const;
+    std::string onlyDBContentName() const;
 
     bool showEmptyVariable() const;
     void showEmptyVariable(bool show_empty_variable);

@@ -63,7 +63,7 @@ DBContentManagerWidget::DBContentManagerWidget(DBContentManager& object_manager)
     dob_frame->setLineWidth(1);
 
     dbobjects_grid_ = new QGridLayout();
-    updateDBOsSlot();
+    updateDBContentsSlot();
 
     dob_frame->setLayout(dbobjects_grid_);
 
@@ -183,11 +183,11 @@ void DBContentManagerWidget::addDBOSlot()
 
             object_manager_.generateSubConfigurable("DBContent", instance);
 
-            updateDBOsSlot();
+            updateDBContentsSlot();
     }
 }
 
-void DBContentManagerWidget::changedDBOSlot() { updateDBOsSlot(); }
+void DBContentManagerWidget::changedDBOSlot() { updateDBContentsSlot(); }
 
 void DBContentManagerWidget::editDBOSlot()
 {
@@ -212,10 +212,10 @@ void DBContentManagerWidget::deleteDBOSlot()
     DBContent* object = delete_dbo_buttons_[(QPushButton*)sender()];
     object_manager_.deleteDBContent(object->name());
 
-    updateDBOsSlot();
+    updateDBContentsSlot();
 }
 
-void DBContentManagerWidget::updateDBOsSlot()
+void DBContentManagerWidget::updateDBContentsSlot()
 {
     assert(dbobjects_grid_);
 

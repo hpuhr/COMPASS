@@ -207,7 +207,7 @@ void Variable::generateSubConfigurable(const std::string& class_id,
 
 bool Variable::operator==(const Variable& var)
 {
-    if (dboName() != var.dboName())
+    if (dbContentName() != var.dbContentName())
         return false;
     if (data_type_ != var.data_type_)
         return false;
@@ -235,7 +235,7 @@ DBContent& Variable::object() const
     return *dbcontent_;
 }
 
-const std::string& Variable::dboName() const
+const std::string& Variable::dbContentName() const
 {
     assert(dbcontent_);
     return dbcontent_->name();
@@ -307,7 +307,7 @@ std::string Variable::dbColumnIdentifier() const
 
 //    assert(min_max_set_);
 
-//    logdbg << "Variable: getMinString: object " << dboName() << " name " << name()
+//    logdbg << "Variable: getMinString: object " << dbContentName() << " name " << name()
 //           << " returning " << min_;
 //    return min_;
 //}
@@ -319,7 +319,7 @@ std::string Variable::dbColumnIdentifier() const
 
 //    assert(min_max_set_);
 
-//    logdbg << "Variable: getMaxString: object " << dboName() << " name " << name()
+//    logdbg << "Variable: getMaxString: object " << dbContentName() << " name " << name()
 //           << " returning " << max_;
 //    return max_;
 //}

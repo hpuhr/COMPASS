@@ -138,19 +138,19 @@ EvaluationDataFilterDialog::EvaluationDataFilterDialog(EvaluationData& eval_data
 
     // dbos
     remove_dbo_check_ = new QCheckBox();
-    remove_dbo_check_->setChecked(eval_man_.removeNotDetectedDBOs());
+    remove_dbo_check_->setChecked(eval_man_.removeNotDetectedDBContents());
     connect(remove_dbo_check_, &QCheckBox::clicked, this,
-            &EvaluationDataFilterDialog::removeDBOsSlot);
+            &EvaluationDataFilterDialog::removeDBContentsSlot);
 
     config_layout->addRow("Remove By Non-Detection in DBContent", remove_dbo_check_);
 
     for (auto& dbo_it : COMPASS::instance().dbContentManager())
     {
         QCheckBox* tmp = new QCheckBox();
-        tmp->setChecked(eval_man_.removeNotDetectedDBO(dbo_it.first));
+        tmp->setChecked(eval_man_.removeNotDetectedDBContent(dbo_it.first));
         tmp->setProperty("dbcontent_name", dbo_it.first.c_str());
         connect(tmp, &QCheckBox::clicked, this,
-                &EvaluationDataFilterDialog::removeSpecificDBOsSlot);
+                &EvaluationDataFilterDialog::removeSpecificDBContentsSlot);
 
         config_layout->addRow(("\tNon-Detection of "+dbo_it.first).c_str(), tmp);
     }
@@ -266,12 +266,12 @@ void EvaluationDataFilterDialog::removeTAValuesSlot()
     eval_man_.filterTargetAddressValues(remove_ta_edit_->document()->toPlainText().toStdString());
 }
 
-void EvaluationDataFilterDialog::removeDBOsSlot(bool checked)
+void EvaluationDataFilterDialog::removeDBContentsSlot(bool checked)
 {
-    eval_man_.removeNotDetectedDBOs(checked);
+    eval_man_.removeNotDetectedDBContents(checked);
 }
 
-void EvaluationDataFilterDialog::removeSpecificDBOsSlot(bool checked)
+void EvaluationDataFilterDialog::removeSpecificDBContentsSlot(bool checked)
 {
     QCheckBox* tmp = dynamic_cast<QCheckBox*>(sender());
     assert (tmp);
@@ -281,7 +281,7 @@ void EvaluationDataFilterDialog::removeSpecificDBOsSlot(bool checked)
 
     string dbcontent_name = data.toString().toStdString();
 
-    eval_man_.removeNotDetectedDBOs(dbcontent_name,checked);
+    eval_man_.removeNotDetectedDBContents(dbcontent_name,checked);
 }
 
 void EvaluationDataFilterDialog::runSlot()

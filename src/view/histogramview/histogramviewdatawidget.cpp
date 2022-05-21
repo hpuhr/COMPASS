@@ -259,7 +259,7 @@ void HistogramViewDataWidget::updateFromData(std::string dbcontent_name)
     {
         data_var = &view_->dataVar();
 
-        if (data_var->dboName() != dbcontent_name)
+        if (data_var->dbContentName() != dbcontent_name)
             return;
     }
     assert (data_var);
@@ -733,7 +733,7 @@ void HistogramViewDataWidget::updateCountResult (std::shared_ptr<EvaluationRequi
 
     assert (result);
 
-    string dbcontent_name = COMPASS::instance().evaluationManager().dboNameTst();
+    string dbcontent_name = COMPASS::instance().evaluationManager().dbContentNameTst();
 
     if (!counts_.size()) // first
     {
@@ -777,7 +777,7 @@ void HistogramViewDataWidget::updateCountResult (std::shared_ptr<EvaluationRequi
 
     assert (result);
 
-    string dbcontent_name = COMPASS::instance().evaluationManager().dboNameTst();
+    string dbcontent_name = COMPASS::instance().evaluationManager().dbContentNameTst();
 
     if (!counts_.size()) // first
     {
@@ -822,7 +822,7 @@ void HistogramViewDataWidget::updateCountResult (std::shared_ptr<EvaluationRequi
 
     assert (result);
 
-    string dbcontent_name = COMPASS::instance().evaluationManager().dboNameTst();
+    string dbcontent_name = COMPASS::instance().evaluationManager().dbContentNameTst();
 
     if (!counts_.size()) // first
     {
@@ -1056,7 +1056,7 @@ void HistogramViewDataWidget::updateCountResult (
 
     assert (result);
 
-    string dbcontent_name = COMPASS::instance().evaluationManager().dboNameTst();
+    string dbcontent_name = COMPASS::instance().evaluationManager().dbContentNameTst();
 
     if (!counts_.size()) // first
     {
@@ -1101,7 +1101,7 @@ void HistogramViewDataWidget::updateCountResult (
 
     assert (result);
 
-    string dbcontent_name = COMPASS::instance().evaluationManager().dboNameTst();
+    string dbcontent_name = COMPASS::instance().evaluationManager().dbContentNameTst();
 
     if (!counts_.size()) // first
     {
@@ -1149,7 +1149,7 @@ void HistogramViewDataWidget::updateCountResult (std::shared_ptr<EvaluationRequi
 
     assert (result);
 
-    string dbcontent_name = COMPASS::instance().evaluationManager().dboNameTst();
+    string dbcontent_name = COMPASS::instance().evaluationManager().dbContentNameTst();
 
     if (!counts_.size()) // first
     {
@@ -1192,7 +1192,7 @@ void HistogramViewDataWidget::updateCountResult (std::shared_ptr<EvaluationRequi
 
     assert (result);
 
-    string dbcontent_name = COMPASS::instance().evaluationManager().dboNameTst();
+    string dbcontent_name = COMPASS::instance().evaluationManager().dbContentNameTst();
 
     if (!counts_.size()) // first
     {
@@ -1239,7 +1239,7 @@ void HistogramViewDataWidget::updateCountResult (std::shared_ptr<EvaluationRequi
 
     assert (result);
 
-    string dbcontent_name = COMPASS::instance().evaluationManager().dboNameTst();
+    string dbcontent_name = COMPASS::instance().evaluationManager().dbContentNameTst();
 
     if (!counts_.size()) // first
     {
@@ -1282,7 +1282,7 @@ void HistogramViewDataWidget::updateCountResult (std::shared_ptr<EvaluationRequi
 
     assert (result);
 
-    string dbcontent_name = COMPASS::instance().evaluationManager().dboNameTst();
+    string dbcontent_name = COMPASS::instance().evaluationManager().dbContentNameTst();
 
     if (!counts_.size()) // first
     {
@@ -1578,7 +1578,7 @@ void HistogramViewDataWidget::calculateGlobalMinMax()
         {
             data_var = &view_->dataVar();
 
-            if (data_var->dboName() != dbcontent_name)
+            if (data_var->dbContentName() != dbcontent_name)
                 continue;
         }
         assert (data_var);
@@ -1967,7 +1967,7 @@ void HistogramViewDataWidget::updateCounts(const std::vector<double>& data)
         }
     }
 
-    string dbcontent_name = COMPASS::instance().evaluationManager().dboNameTst();
+    string dbcontent_name = COMPASS::instance().evaluationManager().dbContentNameTst();
     std::vector<unsigned int>& counts = counts_[dbcontent_name];
 
     if (!counts.size()) // set 0 bins
@@ -2084,7 +2084,7 @@ void HistogramViewDataWidget::rectangleSelectedSlot (unsigned int index1, unsign
         {
             data_var = &view_->dataVar();
 
-            if (data_var->dboName() != dbcontent_name)
+            if (data_var->dbContentName() != dbcontent_name)
                 continue;
         }
         assert (data_var);

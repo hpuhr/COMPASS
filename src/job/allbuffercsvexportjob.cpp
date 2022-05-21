@@ -21,7 +21,6 @@
 #include <sstream>
 
 #include "compass.h"
-#include "dboassociationcollection.h"
 #include "dbcontent/dbcontent.h"
 #include "dbcontent/dbcontentmanager.h"
 #include "dbcontent/variable/variable.h"
@@ -133,7 +132,7 @@ void AllBufferCSVExportJob::run()
             {
                 value_str = "";
 
-                variable_dbcontent_name = read_set_->variableDefinition(col).dboName();
+                variable_dbcontent_name = read_set_->variableDefinition(col).dbContentName();
                 variable_name = read_set_->variableDefinition(col).variableName();
 
                 // check if data & variables exist

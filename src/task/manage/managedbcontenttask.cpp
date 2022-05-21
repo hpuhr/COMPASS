@@ -15,14 +15,14 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "managedbobjectstask.h"
+#include "managedbcontenttask.h"
 
 #include "compass.h"
 #include "dbinterface.h"
-#include "managedbobjectstaskwidget.h"
+#include "managedbcontenttaskwidget.h"
 #include "taskmanager.h"
 
-ManageDBContentsTask::ManageDBContentsTask(const std::string& class_id,
+ManageDBContentTask::ManageDBContentTask(const std::string& class_id,
                                          const std::string& instance_id, TaskManager& task_manager)
     : Task("ManageDBContentsTask", "Manage DBContents", true, true, task_manager),
       Configurable(class_id, instance_id, &task_manager, "task_manage_dbojects.json")
@@ -32,29 +32,29 @@ ManageDBContentsTask::ManageDBContentsTask(const std::string& class_id,
         " but is performed using the GUI elements.";
 }
 
-TaskWidget* ManageDBContentsTask::widget()
+TaskWidget* ManageDBContentTask::widget()
 {
     if (!widget_)
     {
-        widget_.reset(new ManageDBContentsTaskWidget(*this));
+        widget_.reset(new ManageDBContentTaskWidget(*this));
 
         connect(&task_manager_, &TaskManager::expertModeChangedSignal, widget_.get(),
-                &ManageDBContentsTaskWidget::expertModeChangedSlot);
+                &ManageDBContentTaskWidget::expertModeChangedSlot);
     }
 
     return widget_.get();
 }
 
-void ManageDBContentsTask::deleteWidget() { widget_.reset(nullptr); }
+void ManageDBContentTask::deleteWidget() { widget_.reset(nullptr); }
 
-void ManageDBContentsTask::generateSubConfigurable(const std::string& class_id,
+void ManageDBContentTask::generateSubConfigurable(const std::string& class_id,
                                                   const std::string& instance_id)
 {
     throw std::runtime_error("ManageDBContentsTask: generateSubConfigurable: unknown class_id " +
                              class_id);
 }
 
-bool ManageDBContentsTask::checkPrerequisites()
+bool ManageDBContentTask::checkPrerequisites()
 {
     if (!COMPASS::instance().interface().ready())
         return false;

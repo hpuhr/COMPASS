@@ -141,11 +141,11 @@ void ASTERIXJSONParserWidget::keyPressEvent(QKeyEvent* event)
         ss << ";\"JSON Comment\"";
         ss << ";\"JSON Unit\"";
         ss << ";\"DBContent Variable\"";
-        ss << ";\"DBOVar SN\"";
-        ss << ";\"DBOVar DataType\"";
-        ss << ";\"DBOVar Comment\"";
-        ss << ";\"DBOVar Unit\"";
-        ss << ";\"DBOVar DBColumn\"";
+        ss << ";\"DBContVar SN\"";
+        ss << ";\"DBContVar DataType\"";
+        ss << ";\"DBContVar Comment\"";
+        ss << ";\"DBContVar Unit\"";
+        ss << ";\"DBContVar DBColumn\"";
         ss << "\n";
 
         // copy content
@@ -184,27 +184,27 @@ void ASTERIXJSONParserWidget::keyPressEvent(QKeyEvent* event)
 
                 ss << ";\"" << mapping.dimensionUnitStr() << "\""; // JSON Unit
 
-                ss << ";\"" << dbovar_name << "\""; // DBOVar
+                ss << ";\"" << dbovar_name << "\""; // DBContVar
 
                 if (dbcontent.hasVariable(dbovar_name))
                 {
                     if (dbcontent.variable(dbovar_name).hasShortName())
-                        ss << ";\"" << dbcontent.variable(dbovar_name).shortName() << "\""; // DBOVar SN
+                        ss << ";\"" << dbcontent.variable(dbovar_name).shortName() << "\""; // DBContVar SN
                     else
-                        ss << ";"; // DBOVar SN
+                        ss << ";"; // DBContVar SN
 
-                    ss << ";\"" << dbcontent.variable(dbovar_name).dataTypeString() << "\""; // DBOVar DataType
+                    ss << ";\"" << dbcontent.variable(dbovar_name).dataTypeString() << "\""; // DBContVar DataType
 
-                    ss << ";\"" << dbcontent.variable(dbovar_name).description() << "\""; // DBOVar Comment
-                    ss << ";\"" << dbcontent.variable(dbovar_name).dimensionUnitStr() << "\""; // DBOVar Unit
-                    ss << ";\"" << dbcontent.variable(dbovar_name).dbColumnName() << "\""; // DBOVar DBColumn
+                    ss << ";\"" << dbcontent.variable(dbovar_name).description() << "\""; // DBContVar Comment
+                    ss << ";\"" << dbcontent.variable(dbovar_name).dimensionUnitStr() << "\""; // DBContVar Unit
+                    ss << ";\"" << dbcontent.variable(dbovar_name).dbColumnName() << "\""; // DBContVar DBColumn
                 }
                 else
                 {
-                    ss << ";"; // DBOVar DataType
-                    ss << ";"; // DBOVar Comment
-                    ss << ";"; // DBOVar Unit
-                    ss << ";"; // DBOVar DBColumn
+                    ss << ";"; // DBContVar DataType
+                    ss << ";"; // DBContVar Comment
+                    ss << ";"; // DBContVar Unit
+                    ss << ";"; // DBContVar DBColumn
                 }
 
             }
@@ -221,12 +221,12 @@ void ASTERIXJSONParserWidget::keyPressEvent(QKeyEvent* event)
                     ss << ";"; // JSON Comment
 
                 ss << ";"; // JSON Unit
-                ss << ";"; // DBOVar
-                ss << ";"; // DBOVar SN
-                ss << ";"; // DBOVar DataType
-                ss << ";"; // DBOVar Comment
-                ss << ";"; // DBOVar Unit
-                ss << ";"; // DBOVar DBColumn
+                ss << ";"; // DBContVar
+                ss << ";"; // DBContVar SN
+                ss << ";"; // DBContVar DataType
+                ss << ";"; // DBContVar Comment
+                ss << ";"; // DBContVar Unit
+                ss << ";"; // DBContVar DBColumn
             }
             else if (entry_type == ASTERIXJSONParser::EntryType::UnmappedDBContentVariable)
             {
@@ -236,28 +236,28 @@ void ASTERIXJSONParserWidget::keyPressEvent(QKeyEvent* event)
                 ss << ";"; // JSON Key
                 ss << ";"; // JSON Comment
                 ss << ";"; // JSON Unit
-                ss << ";\"" << dbovar_name << "\""; // DBOVar
+                ss << ";\"" << dbovar_name << "\""; // DBContVar
 
                 if (dbcontent.hasVariable(dbovar_name))
                 {
                     if (dbcontent.variable(dbovar_name).hasShortName())
-                        ss << ";\"" << dbcontent.variable(dbovar_name).shortName() << "\""; // DBOVar SN
+                        ss << ";\"" << dbcontent.variable(dbovar_name).shortName() << "\""; // DBContVar SN
                     else
-                        ss << ";"; // DBOVar SN
+                        ss << ";"; // DBContVar SN
 
-                    ss << ";\"" << dbcontent.variable(dbovar_name).dataTypeString() << "\""; // DBOVar DataType
+                    ss << ";\"" << dbcontent.variable(dbovar_name).dataTypeString() << "\""; // DBContVar DataType
 
-                    ss << ";\"" << dbcontent.variable(dbovar_name).description() << "\""; // DBOVar Comment
-                    ss << ";\"" << dbcontent.variable(dbovar_name).dimensionUnitStr() << "\""; // DBOVar Unit
-                    ss << ";\"" << dbcontent.variable(dbovar_name).dbColumnName() << "\""; // DBOVar DBColumn
+                    ss << ";\"" << dbcontent.variable(dbovar_name).description() << "\""; // DBContVar Comment
+                    ss << ";\"" << dbcontent.variable(dbovar_name).dimensionUnitStr() << "\""; // DBContVar Unit
+                    ss << ";\"" << dbcontent.variable(dbovar_name).dbColumnName() << "\""; // DBContVar DBColumn
                 }
                 else
                 {
-                    ss << ";"; // DBOVar SN
-                    ss << ";"; // DBOVar DataType
-                    ss << ";"; // DBOVar Comment
-                    ss << ";"; // DBOVar Unit
-                    ss << ";"; // DBOVar DBColumn
+                    ss << ";"; // DBContVar SN
+                    ss << ";"; // DBContVar DataType
+                    ss << ";"; // DBContVar Comment
+                    ss << ";"; // DBContVar Unit
+                    ss << ";"; // DBContVar DBColumn
                 }
             }
 

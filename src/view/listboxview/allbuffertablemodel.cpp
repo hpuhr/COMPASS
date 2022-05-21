@@ -173,7 +173,7 @@ QVariant AllBufferTableModel::data(const QModelIndex& index, int role) const
         //               << " show assoc " << show_associations_;
         assert(col < data_source_.getSet()->getSize());
 
-        std::string variable_dbcontent_name = data_source_.getSet()->variableDefinition(col).dboName();
+        std::string variable_dbcontent_name = data_source_.getSet()->variableDefinition(col).dbContentName();
         std::string variable_name = data_source_.getSet()->variableDefinition(col).variableName();
 
         DBContentManager& manager = COMPASS::instance().dbContentManager();

@@ -25,12 +25,12 @@
 #include "task.h"
 
 class TaskManager;
-class ManageDBContentsTaskWidget;
+class ManageDBContentTaskWidget;
 
-class ManageDBContentsTask : public Task, public Configurable
+class ManageDBContentTask : public Task, public Configurable
 {
   public:
-    ManageDBContentsTask(const std::string& class_id, const std::string& instance_id,
+    ManageDBContentTask(const std::string& class_id, const std::string& instance_id,
                         TaskManager& task_manager);
 
     virtual void generateSubConfigurable(const std::string& class_id,
@@ -44,7 +44,7 @@ class ManageDBContentsTask : public Task, public Configurable
     virtual bool isRequired() { return false; }
 
   protected:
-    std::unique_ptr<ManageDBContentsTaskWidget> widget_;
+    std::unique_ptr<ManageDBContentTaskWidget> widget_;
 
     virtual void checkSubConfigurables() {}
 };

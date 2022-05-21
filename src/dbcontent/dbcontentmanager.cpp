@@ -327,7 +327,7 @@ Variable& DBContentManager::orderVariable()
 
 void DBContentManager::orderVariable(Variable& variable)
 {
-    order_variable_dbcontent_name_ = variable.dboName();
+    order_variable_dbcontent_name_ = variable.dbContentName();
     order_variable_name_ = variable.name();
 }
 

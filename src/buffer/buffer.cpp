@@ -32,10 +32,7 @@ using namespace std;
 
 unsigned int Buffer::ids_ = 0;
 
-/**
- * Creates an empty buffer withput an DBO type
- *
- */
+
 Buffer::Buffer()
 {
     logdbg << "Buffer: constructor: start";
@@ -46,12 +43,6 @@ Buffer::Buffer()
     logdbg << "Buffer: constructor: end";
 }
 
-/**
- * Creates a buffer from a PropertyList and a DBO type. Sets member to initial values.
- *
- * \param member_list PropertyList defining all properties
- * \param type DBO type
- */
 Buffer::Buffer(PropertyList properties, const string& dbcontent_name)
     : dbcontent_name_(dbcontent_name), last_one_(false)
 {

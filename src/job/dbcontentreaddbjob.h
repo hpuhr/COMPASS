@@ -15,8 +15,8 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DBOREADDBJOB_H_
-#define DBOREADDBJOB_H_
+#ifndef DBCONTENTREADDBJOB_H_
+#define DBCONTENTREADDBJOB_H_
 
 #include "boost/date_time/posix_time/posix_time.hpp"
 #include "dbcontent/variable/variableset.h"
@@ -32,7 +32,7 @@ class DBInterface;
  * Incrementally reads data record from DBO tables and writes the results into a DBDataSet.
  *
  */
-class DBOReadDBJob : public Job
+class DBContentReadDBJob : public Job
 {
     Q_OBJECT
 
@@ -40,12 +40,12 @@ class DBOReadDBJob : public Job
     void intermediateSignal(std::shared_ptr<Buffer> buffer);
 
   public:
-    DBOReadDBJob(DBInterface& db_interface, DBContent& dbobject, dbContent::VariableSet read_list,
+    DBContentReadDBJob(DBInterface& db_interface, DBContent& dbobject, dbContent::VariableSet read_list,
                  const std::vector<std::string>& extra_from_parts,
                  std::string custom_filter_clause, std::vector<dbContent::Variable*> filtered_variables,
                  bool use_order, dbContent::Variable* order_variable, bool use_order_ascending,
                  const std::string& limit_str);
-    virtual ~DBOReadDBJob();
+    virtual ~DBContentReadDBJob();
 
     virtual void run();
 
@@ -72,4 +72,4 @@ class DBOReadDBJob : public Job
     boost::posix_time::ptime stop_time_;
 };
 
-#endif /* DBOREADDBJOB_H_ */
+#endif /* DBCONTENTREADDBJOB_H_ */

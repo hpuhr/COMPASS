@@ -15,7 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "managedbobjectstaskwidget.h"
+#include "managedbcontenttaskwidget.h"
 
 #include <QHBoxLayout>
 #include <QLabel>
@@ -25,7 +25,7 @@
 #include "dbcontent/dbcontentmanager.h"
 #include "dbcontent/dbcontentmanagerwidget.h"
 
-ManageDBContentsTaskWidget::ManageDBContentsTaskWidget(ManageDBContentsTask& task, QWidget* parent)
+ManageDBContentTaskWidget::ManageDBContentTaskWidget(ManageDBContentTask& task, QWidget* parent)
     : TaskWidget(parent), task_(task)
 {
     QVBoxLayout* main_layout_ = new QVBoxLayout();
@@ -38,4 +38,4 @@ ManageDBContentsTaskWidget::ManageDBContentsTaskWidget(ManageDBContentsTask& tas
     setLayout(main_layout_);
 }
 
-void ManageDBContentsTaskWidget::expertModeChangedSlot() {}
+void ManageDBContentTaskWidget::expertModeChangedSlot() {}

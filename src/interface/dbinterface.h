@@ -19,7 +19,6 @@
 #define DBINTERFACE_H_
 
 #include "configurable.h"
-#include "dboassociationcollection.h"
 #include "dbcontent/variable/variableset.h"
 #include "propertylist.h"
 #include "sqlgenerator.h"
@@ -42,7 +41,6 @@ class BufferWriter;
 class SQLiteConnection;
 class QProgressDialog;
 class DBContent;
-class DBODataSource;
 class DBResult;
 class DBTableInfo;
 class Job;

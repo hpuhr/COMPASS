@@ -15,7 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "dboreaddbjob.h"
+#include "dbcontentreaddbjob.h"
 #include "buffer.h"
 #include "dbinterface.h"
 #include "dbcontent/dbcontent.h"
@@ -27,13 +27,13 @@
 
 using namespace dbContent;
 
-DBOReadDBJob::DBOReadDBJob(DBInterface& db_interface, DBContent& dbobject, VariableSet read_list,
+DBContentReadDBJob::DBContentReadDBJob(DBInterface& db_interface, DBContent& dbobject, VariableSet read_list,
                            const std::vector<std::string>& extra_from_parts,
                            std::string custom_filter_clause,
                            std::vector<Variable*> filtered_variables, bool use_order,
                            Variable* order_variable, bool use_order_ascending,
                            const std::string& limit_str)
-    : Job("DBOReadDBJob"),
+    : Job("DBContentReadDBJob"),
       db_interface_(db_interface),
       dbobject_(dbobject),
       read_list_(read_list),
@@ -48,16 +48,16 @@ DBOReadDBJob::DBOReadDBJob(DBInterface& db_interface, DBContent& dbobject, Varia
     assert(dbobject_.existsInDB());
 }
 
-DBOReadDBJob::~DBOReadDBJob() {}
+DBContentReadDBJob::~DBContentReadDBJob() {}
 
-void DBOReadDBJob::run()
+void DBContentReadDBJob::run()
 {
-    loginf << "DBOReadDBJob: run: " << dbobject_.name() << ": start";
+    loginf << "DBContentReadDBJob: run: " << dbobject_.name() << ": start";
     started_ = true;
 
     if (obsolete_)
     {
-        loginf << "DBOReadDBJob: run: " << dbobject_.name() << ": obsolete before prepared";
+        loginf << "DBContentReadDBJob: run: " << dbobject_.name() << ": obsolete before prepared";
         done_ = true;
         return;
     }
@@ -84,9 +84,9 @@ void DBOReadDBJob::run()
         if (obsolete_)
             break;
 
-        assert(buffer->dboName() == dbobject_.name());
+        assert(buffer->dbContentName() == dbobject_.name());
 
-        logdbg << "DBOReadDBJob: run: " << dbobject_.name() << ": intermediate signal, #buffers "
+        logdbg << "DBContentReadDBJob: run: " << dbobject_.name() << ": intermediate signal, #buffers "
                << cnt << " last one " << buffer->lastOne();
         row_count_ += buffer->size();
 
@@ -104,7 +104,7 @@ void DBOReadDBJob::run()
 
         if (!view_manager.isProcessingData() || last_buffer) // distribute data
         {
-            loginf << "DBOReadDBJob: run: " << dbobject_.name() << ": emitting intermediate read, size " << row_count_;
+            loginf << "DBContentReadDBJob: run: " << dbobject_.name() << ": emitting intermediate read, size " << row_count_;
             emit intermediateSignal(cached_buffer_);
 
             cached_buffer_ = nullptr;
@@ -112,28 +112,28 @@ void DBOReadDBJob::run()
 
         if (last_buffer)
         {
-            loginf << "DBOReadDBJob: run: " << dbobject_.name() << ": last buffer";
+            loginf << "DBContentReadDBJob: run: " << dbobject_.name() << ": last buffer";
             break;
         }
     }
 
     assert (!cached_buffer_);
 
-    logdbg << "DBOReadDBJob: run: " << dbobject_.name() << ": finalizing statement";
+    logdbg << "DBContentReadDBJob: run: " << dbobject_.name() << ": finalizing statement";
     db_interface_.finalizeReadStatement(dbobject_);
 
     stop_time_ = boost::posix_time::microsec_clock::local_time();
     boost::posix_time::time_duration diff = stop_time_ - start_time_;
 
     if (diff.total_seconds() > 0)
-        loginf << "DBOReadDBJob: run: " << dbobject_.name() << ": done after " << diff << ", "
+        loginf << "DBContentReadDBJob: run: " << dbobject_.name() << ": done after " << diff << ", "
                << 1000.0 * row_count_ / diff.total_milliseconds() << " el/s";
     else
-        loginf << "DBOReadDBJob: run: " << dbobject_.name() << ": done";
+        loginf << "DBContentReadDBJob: run: " << dbobject_.name() << ": done";
 
     done_ = true;
 
     return;
 }
 
-unsigned int DBOReadDBJob::rowCount() const { return row_count_; }
+unsigned int DBContentReadDBJob::rowCount() const { return row_count_; }

@@ -66,7 +66,7 @@ void EvaluationData::addReferenceData (DBContent& object, unsigned int line_id, 
 
     // preset variable names
 
-    string dbcontent_name = ref_buffer_->dboName();
+    string dbcontent_name = ref_buffer_->dbContentName();
 
     ref_tod_name_ = dbcontent_man.metaVariable(DBContent::meta_var_tod_.name()).getFor(dbcontent_name).name();
 
@@ -117,7 +117,7 @@ void EvaluationData::addReferenceData (DBContent& object, unsigned int line_id, 
     ref_spd_track_angle_deg_name_ = dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_track_angle_).name();
 
     set<unsigned int> active_srcs = eval_man_.activeDataSourcesRef();
-    bool use_active_srcs = (eval_man_.dboNameRef() == eval_man_.dboNameTst());
+    bool use_active_srcs = (eval_man_.dbContentNameRef() == eval_man_.dbContentNameTst());
     unsigned int num_skipped {0};
 
     unsigned int buffer_size = buffer->size();
@@ -222,7 +222,7 @@ void EvaluationData::addTestData (DBContent& object, unsigned int line_id,  std:
     tst_line_id_ = line_id;
     assert (tst_line_id_ <= 3);
 
-    string dbcontent_name = tst_buffer_->dboName();
+    string dbcontent_name = tst_buffer_->dbContentName();
 
     tst_tod_name_ = dbcontent_man.metaVariable(DBContent::meta_var_tod_.name()).getFor(dbcontent_name).name();
 
@@ -277,7 +277,7 @@ void EvaluationData::addTestData (DBContent& object, unsigned int line_id,  std:
     tst_spd_track_angle_deg_name_ = dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_track_angle_).name();
 
     set<unsigned int> active_srcs = eval_man_.activeDataSourcesRef();
-    bool use_active_srcs = (eval_man_.dboNameRef() == eval_man_.dboNameTst());
+    bool use_active_srcs = (eval_man_.dbContentNameRef() == eval_man_.dbContentNameTst());
     unsigned int num_skipped {0};
 
     unsigned int buffer_size = buffer->size();

@@ -182,7 +182,7 @@ protected:
     bool load_in_progress_{false};
     bool insert_in_progress_{false};
 
-    /// Container with all DBOs (DBO name -> DBO pointer)
+    /// Container with all DBContent (DBContent name -> DBO pointer)
     std::map<std::string, DBContent*> dbcontent_;
     std::vector<std::unique_ptr<dbContent::MetaVariable>> meta_variables_;
 

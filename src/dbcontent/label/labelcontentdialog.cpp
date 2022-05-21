@@ -115,7 +115,7 @@ void LabelContentDialog::createVariableGrid()
             {
                 VariableSelectionWidget* var_widget = new VariableSelectionWidget();
                 var_widget->setProperty("key", row*3 + col);
-                var_widget->showDBOOnly(dbcontent_name_);
+                var_widget->showDBContentOnly(dbcontent_name_);
 
                 if (dbcont_def.contains(key))
                 {

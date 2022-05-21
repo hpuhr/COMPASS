@@ -75,7 +75,7 @@ void MetaVariable::generateSubConfigurable(const std::string& class_id,
     {
         VariableDefinition* definition = new VariableDefinition(class_id, instance_id, this);
 
-        const std::string& dbcontent_name = definition->dboName();
+        const std::string& dbcontent_name = definition->dbContentName();
         std::string dbovar_name = definition->variableName();
 
         // DBOVAR LOWERCASE HACK
@@ -319,9 +319,9 @@ void MetaVariable::removeOutdatedVariables()
     {
         delete_var = false;
 
-        if (!obj_man.existsDBContent(var_it->second->dboName()))
+        if (!obj_man.existsDBContent(var_it->second->dbContentName()))
             delete_var = true;
-        else if (!obj_man.dbContent(var_it->second->dboName())
+        else if (!obj_man.dbContent(var_it->second->dbContentName())
                       .hasVariable(var_it->second->variableName()))
             delete_var = true;
 

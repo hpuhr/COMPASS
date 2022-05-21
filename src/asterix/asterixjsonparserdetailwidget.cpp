@@ -121,7 +121,7 @@ ASTERIXJSONParserDetailWidget::ASTERIXJSONParserDetailWidget(ASTERIXJSONParser& 
 
     dbo_var_sel_ = new dbContent::VariableSelectionWidget();
     dbo_var_sel_->showMetaVariables(false);
-    dbo_var_sel_->showDBOOnly(parser_.dbObjectName());
+    dbo_var_sel_->showDBContentOnly(parser_.dbObjectName());
     dbo_var_sel_->showEmptyVariable(true);
     dbo_var_sel_->setDisabled(true);
 

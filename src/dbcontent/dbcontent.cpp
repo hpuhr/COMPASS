@@ -22,7 +22,7 @@
 #include "dbcontent/dbcontentmanager.h"
 #include "dbcontent/dbcontentwidget.h"
 #include "datasourcemanager.h"
-#include "dboreaddbjob.h"
+#include "dbcontentreaddbjob.h"
 #include "dbcontent/variable/variable.h"
 #include "dbtableinfo.h"
 #include "filtermanager.h"
@@ -436,17 +436,17 @@ void DBContent::loadFiltered(VariableSet& read_set, const std::vector<std::strin
     //    DBInterface &db_interface, DBContent &dbobject, VariableSet read_list, string
     //    custom_filter_clause, Variable *order, const string &limit_str
 
-    read_job_ = shared_ptr<DBOReadDBJob>(
-                new DBOReadDBJob(
+    read_job_ = shared_ptr<DBContentReadDBJob>(
+                new DBContentReadDBJob(
                     COMPASS::instance().interface(), *this, read_set, extra_from_parts,
                     custom_filter_clause, filtered_variables,
                     use_order, order_variable, use_order_ascending, limit_str));
 
-    connect(read_job_.get(), &DBOReadDBJob::intermediateSignal,
+    connect(read_job_.get(), &DBContentReadDBJob::intermediateSignal,
             this, &DBContent::readJobIntermediateSlot, Qt::QueuedConnection);
-    connect(read_job_.get(),  &DBOReadDBJob::obsoleteSignal,
+    connect(read_job_.get(),  &DBContentReadDBJob::obsoleteSignal,
             this, &DBContent::readJobObsoleteSlot, Qt::QueuedConnection);
-    connect(read_job_.get(), &DBOReadDBJob::doneSignal,
+    connect(read_job_.get(), &DBContentReadDBJob::doneSignal,
             this, &DBContent::readJobDoneSlot, Qt::QueuedConnection);
 
     JobManager::instance().addDBJob(read_job_);
@@ -663,7 +663,7 @@ void DBContent::readJobIntermediateSlot(shared_ptr<Buffer> buffer)
     assert(buffer);
     loginf << "DBContent: " << name_ << " readJobIntermediateSlot: buffer size " << buffer->size();
 
-    DBOReadDBJob* sender = dynamic_cast<DBOReadDBJob*>(QObject::sender());
+    DBContentReadDBJob* sender = dynamic_cast<DBContentReadDBJob*>(QObject::sender());
 
     assert (sender);
     assert(sender == read_job_.get());

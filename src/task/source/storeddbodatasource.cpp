@@ -86,7 +86,7 @@ StoredDBODataSource& StoredDBODataSource::operator=(DBODataSource& other)
 {
     // id_ = other.id(); not copied, keep own
 
-    dbcontent_name_ = other.dboName();
+    dbcontent_name_ = other.dbContentName();
     name_ = other.name();
     has_short_name_ = other.hasShortName();
     if (has_short_name_)
@@ -285,7 +285,7 @@ bool StoredDBODataSource::operator==(const DBODataSource& other) const
            << " long " << (fabs(longitude_ - other.longitude()) < 1e-10) << " alt "
            << (fabs(altitude_ - other.altitude()) < 1e-10);
 
-    return (dbcontent_name_ == other.dboName()) && (name_ == other.name())
+    return (dbcontent_name_ == other.dbContentName()) && (name_ == other.name())
             &&(has_short_name_ == other.hasShortName())
             && (has_short_name_ ? short_name_ == other.shortName() : true)
             && (has_sac_ == other.hasSac()) && (has_sac_ ? sac_ == other.sac() : true)
@@ -613,7 +613,7 @@ int StoredDBODataSource::modeSRangeMax() const
     return mode_s_ir_max_;
 }
 
-std::string StoredDBODataSource::dboName() const { return dbcontent_name_; }
+std::string StoredDBODataSource::dbContentName() const { return dbcontent_name_; }
 
 unsigned int StoredDBODataSource::id() const { return id_; }
 

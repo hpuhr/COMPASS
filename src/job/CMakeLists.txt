@@ -7,7 +7,7 @@ target_sources(compass
     PUBLIC
         "${CMAKE_CURRENT_LIST_DIR}/job.h"
         "${CMAKE_CURRENT_LIST_DIR}/jobmanager.h"
-        "${CMAKE_CURRENT_LIST_DIR}/dboreaddbjob.h"
+        "${CMAKE_CURRENT_LIST_DIR}/dbcontentreaddbjob.h"
         "${CMAKE_CURRENT_LIST_DIR}/allbuffercsvexportjob.h"
         "${CMAKE_CURRENT_LIST_DIR}/buffercsvexportjob.h"
         "${CMAKE_CURRENT_LIST_DIR}/finalizedboreadjob.h"
@@ -22,7 +22,7 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/asterixjsonmappingjob.h"
         "${CMAKE_CURRENT_LIST_DIR}/asterixpostprocessjob.h"
     PRIVATE
-        "${CMAKE_CURRENT_LIST_DIR}/dboreaddbjob.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/dbcontentreaddbjob.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/finalizedboreadjob.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/allbuffercsvexportjob.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/buffercsvexportjob.cpp"

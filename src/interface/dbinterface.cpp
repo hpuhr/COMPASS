@@ -1177,7 +1177,7 @@ shared_ptr<Buffer> DBInterface::readDataChunk(const DBContent& dbobject)
 
     shared_ptr<Buffer> buffer = result->buffer();
 
-    buffer->dboName(dbobject.name());
+    buffer->dbContentName(dbobject.name());
 
     assert(buffer);
 

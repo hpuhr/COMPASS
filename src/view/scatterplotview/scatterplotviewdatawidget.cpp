@@ -364,7 +364,7 @@ bool ScatterPlotViewDataWidget::canUpdateFromDataX(std::string dbcontent_name)
     {
         data_var = &view_->dataVarX();
 
-        if (data_var->dboName() != dbcontent_name)
+        if (data_var->dbContentName() != dbcontent_name)
             return false;
     }
     assert (data_var);
@@ -535,7 +535,7 @@ void ScatterPlotViewDataWidget::updateFromDataX(std::string dbcontent_name, unsi
     {
         data_var = &view_->dataVarX();
 
-        if (data_var->dboName() != dbcontent_name)
+        if (data_var->dbContentName() != dbcontent_name)
             return;
     }
     assert (data_var);
@@ -763,7 +763,7 @@ bool ScatterPlotViewDataWidget::canUpdateFromDataY(std::string dbcontent_name)
     {
         data_var = &view_->dataVarY();
 
-        if (data_var->dboName() != dbcontent_name)
+        if (data_var->dbContentName() != dbcontent_name)
             return false;
     }
     assert (data_var);
@@ -933,7 +933,7 @@ void ScatterPlotViewDataWidget::updateFromDataY(std::string dbcontent_name, unsi
     {
         data_var = &view_->dataVarY();
 
-        if (data_var->dboName() != dbcontent_name)
+        if (data_var->dbContentName() != dbcontent_name)
             return;
     }
     assert (data_var);

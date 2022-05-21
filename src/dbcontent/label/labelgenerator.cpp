@@ -346,10 +346,10 @@ bool LabelGenerator::labelWanted(std::shared_ptr<Buffer> buffer, unsigned int in
 {
     if (filter_mode3a_active_)
     {
-        if (!dbcont_manager_.metaCanGetVariable(buffer->dboName(), DBContent::meta_var_m3a_))
+        if (!dbcont_manager_.metaCanGetVariable(buffer->dbContentName(), DBContent::meta_var_m3a_))
             return false;
 
-        dbContent::Variable& var = dbcont_manager_.metaGetVariable(buffer->dboName(), DBContent::meta_var_m3a_);
+        dbContent::Variable& var = dbcont_manager_.metaGetVariable(buffer->dbContentName(), DBContent::meta_var_m3a_);
 
         assert (buffer->has<unsigned int> (var.name()));
 
@@ -366,10 +366,10 @@ bool LabelGenerator::labelWanted(std::shared_ptr<Buffer> buffer, unsigned int in
 
     if (filter_modec_min_active_ || filter_modec_max_active_)
     {
-        if (!dbcont_manager_.metaCanGetVariable(buffer->dboName(), DBContent::meta_var_mc_))
+        if (!dbcont_manager_.metaCanGetVariable(buffer->dbContentName(), DBContent::meta_var_mc_))
             return false;
 
-        dbContent::Variable& var = dbcont_manager_.metaGetVariable(buffer->dboName(), DBContent::meta_var_mc_);
+        dbContent::Variable& var = dbcont_manager_.metaGetVariable(buffer->dbContentName(), DBContent::meta_var_mc_);
 
         assert (buffer->has<float> (var.name()));
 
@@ -392,10 +392,10 @@ bool LabelGenerator::labelWanted(std::shared_ptr<Buffer> buffer, unsigned int in
 
     if (filter_ti_active_)
     {
-        if (!dbcont_manager_.metaCanGetVariable(buffer->dboName(), DBContent::meta_var_ti_))
+        if (!dbcont_manager_.metaCanGetVariable(buffer->dbContentName(), DBContent::meta_var_ti_))
             return false;
 
-        dbContent::Variable& var = dbcont_manager_.metaGetVariable(buffer->dboName(), DBContent::meta_var_ti_);
+        dbContent::Variable& var = dbcont_manager_.metaGetVariable(buffer->dbContentName(), DBContent::meta_var_ti_);
 
         assert (buffer->has<string> (var.name()));
 
@@ -426,10 +426,10 @@ bool LabelGenerator::labelWanted(std::shared_ptr<Buffer> buffer, unsigned int in
 
     if (filter_ta_active_)
     {
-        if (!dbcont_manager_.metaCanGetVariable(buffer->dboName(), DBContent::meta_var_ta_))
+        if (!dbcont_manager_.metaCanGetVariable(buffer->dbContentName(), DBContent::meta_var_ta_))
             return false;
 
-        dbContent::Variable& var = dbcont_manager_.metaGetVariable(buffer->dboName(), DBContent::meta_var_ta_);
+        dbContent::Variable& var = dbcont_manager_.metaGetVariable(buffer->dbContentName(), DBContent::meta_var_ta_);
 
         assert (buffer->has<unsigned int> (var.name()));
 

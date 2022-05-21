@@ -87,7 +87,7 @@ private:
     QPushButton* ok_button_{nullptr};
 
     void updateTime();
-    void updateDBOAssociatedGrid();
+    void updateDBContentAssociatedGrid();
 };
 
 #endif  // CREATEARTASASSOCIATIONSSTATUSDIALOG_H
