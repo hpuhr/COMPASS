@@ -1,21 +1,25 @@
 \section{Feature Highlights}
 
+\subsection{Application modes}
+\begin{itemize} 
+    \item Offline: Recordings can be imported and larger amounts of data can be inspected and evaluated
+    \item Live: Data can be read directly from network interfaces and immediately displayed to show the current airspace situation
+\end{itemize}
+
 \subsection{Import}
 \begin{itemize}  
-    \item Support of multiple database systems, e.g. SQLite3, MySQL
-    \item Support of multiple, configurable database schemas, e.g. SCDB, SCDB Extended
-    \item Dynamic JSON import from jASTERIX, SDDL, ADS-B exchange, OpenSky Network
+    \item Support of SQLite3 database system
+%    \item Dynamic JSON import from jASTERIX, SDDL, ADS-B exchange, OpenSky Network
     \item Dynamic ASTERIX import using jASTERIX
     \item Import of (D)GPS trails from NMEA files
     \item Import of polygons from GML,KML,ESRI Shapefiles
-    \item MySQL database import and management of SCDB databases
-    \item Supported Database Objects
+    \item Supported data source types
     \begin{itemize}  
-        \item Radar plots
-        \item MLAT \& WAM target reports
-        \item ADS-B target reports
-        \item System Track updates
-        \item Reference trajectory updates
+        \item Radar
+        \item MLAT \& WAM
+        \item ADS-B
+        \item System Tracker
+        \item Reference Trajectory
     \end{itemize}
 \end{itemize}
 
@@ -43,6 +47,7 @@
     \end{itemize}
     \item Graphical data inspection using OSG View
     \begin{itemize}  
+        \item Automatic labeling of data
         \item Customizable map/terrain display based on osgEarth
         \item Customizable display of ATC surveillance data using OpenSceneGraph
         \item High-speed time-filtered display
