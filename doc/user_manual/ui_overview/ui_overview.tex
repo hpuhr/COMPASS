@@ -1,4 +1,5 @@
 \chapter{UI Overview}
+\label{sec:ui_overview}
 
 In this section, the main GUI components are described, to give an overview and introduce the different workflow options.
 
@@ -37,7 +38,7 @@ After a database was opened, the 'Import' menu becomes available, and the main w
 
 \subsection{Import Menu}
 
-Databases can be created, opened and closed using the File menu.
+Data can be imported into the database using the Import menu.
 
 \begin{figure}[H]
   \center
@@ -46,11 +47,45 @@ Databases can be created, opened and closed using the File menu.
 \end{figure}
 
 \begin{itemize}
- \item ASTERIX Recording: Import ASTERIX recording file
- \item Recend ASTERIX Recording: Import recent ASTERIX recording file
- \item ASTERIX From Network: Import ASTERIX from network interfaces in Live mode
- \item GPS Trail: Import (D)GPS trail from NMEA file
- \item View Points: Import View Points definition file
+ \item ASTERIX Recording: Import ASTERIX recording file, see \nameref{sec:ui_import_asterix}
+ \item Recent ASTERIX Recording: Import recent ASTERIX recording file, see \nameref{sec:ui_import_asterix}
+ \item ASTERIX From Network: Import ASTERIX from network interfaces in Live mode, see \nameref{sec:ui_import_asterix_network}
+ \item GPS Trail: Import (D)GPS trail from NMEA file, see \nameref{sec:ui_import_gps}
+ \item View Points: Import View Points definition file, see \nameref{sec:ui_import_viewpoints}
+\end{itemize}
+\  \\
+
+\subsection{Configuration Menu}
+
+Data sources and sectors can be configurated using the Configuration menu. Also, the current Meta variables can be inspected.
+
+\begin{figure}[H]
+  \center
+    \includegraphics[width=5cm,frame]{figures/ui_configuration_menu.png}
+  \caption{Configuration Menu}
+\end{figure}
+
+\begin{itemize}
+ \item Data Sources: Configure data sources
+ \item Meta Variables: Display current Meta variables
+ \item Sectors: Configure sectors in the database
+\end{itemize}
+\  \\
+
+\subsection{Process Menu}
+
+Post-processing tasks can be performed using the Process menu.
+
+\begin{figure}[H]
+  \center
+    \includegraphics[width=10cm,frame]{figures/ui_process_menu.png}
+  \caption{Process Menu}
+\end{figure}
+
+\begin{itemize}
+ \item Calculate Radar Plot Positions: (Re-)Calculate Radar plot position information
+ \item Calculate Associations: Find unique targets and associate target reports
+ \item Calculate Associations from ARTAS: Find targets based on ARTAS tracks and associate target reports based on ARTAS TRI information
 \end{itemize}
 \  \\
 
