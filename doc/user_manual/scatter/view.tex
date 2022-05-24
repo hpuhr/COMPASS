@@ -11,13 +11,11 @@ A ScatterPlot View displays the distribution of two numerical variables as point
 
 \section{Layout}
 
-At the top, a  tool bar is shown, showing the currently selected tool and the available actions. \\
+On the left side resides the plot area in which the data is visualized (if data has been loaded). The tool bar at the top shows the currently selected mouse interaction mode and the available actions.\\
 
-On the left side, the data is shown (if data has been loaded). \\
+On the right side resides the configuration area, which allows configuring what data is loaded and how it is displayed. The 'Reload' button on the bottom can be used to trigger a reload of the view's data.\\
 
-On the right side, a configuration area exists which allows configuration of what data is loaded and how it is displayed. \\
-
-Both areas can be resized and hidden if wanted.
+Both areas can be resized and hidden if desired.
 
 \section{Data Loading}
 
@@ -26,23 +24,22 @@ To load the data the mechanism described in Section \nameref{sec:load} or the 'R
 \begin{figure}[H]
     \hspace*{-2cm}
     \includegraphics[width=18cm,frame]{figures/scatter_loaded.png}
-  \caption{Scatterplot View after loading}
+  \caption{Scatterplot View after loading data}
 \end{figure}
 
-The value of selected variables is used for positioning on x-axis and y-axis, the color is defined by DBObject. On the bottom a legend is shown giving the total counts of all data points. \\
+%TODO_V7 i referred to 'Database Content' here, is this the official term in the doc?
+The values of the selected variables are used for positioning on the x-axis and y-axis. For each value pair a data point is generated. In the current example the WGS-84 meta-variables 'Longitude' and 'Latitude' are used, showing a similar view as the OSG View.
+The color of each data point is defined by the Database Content it belongs to.\\
 
-In the current example the meta-variables 'tod' is used, showing the overall data rate per DBObject.
+%TODO_V7 i think here it would be immensely important to tell the user why he might not see any data at all when selecting variables from two different DBContents!
 
-On the bottom a legend is shown giving the total counts of all data points. \\
-
-In the current example the WGS-84 meta-variables 'pos\_long\_deg' and 'pos\_lat\_deg' are used, showing a similiar view as OSGView.
-
+On the bottom of the plot a legend is shown, giving the total counts of all data points.
 
 \section{Usage}
 
 \subsection{Toolbar}
 
-The first symbols switch between the mouse action modes:
+The first tool buttons can be used to switch between the various mouse interaction modes:
 
 \begin{table}[H]
   \center
@@ -53,10 +50,12 @@ The first symbols switch between the mouse action modes:
     \includegraphics[width=0.5cm,frame]{../../data/icons/zoom_select_action.png} & Zoom to Rectangle & Allows zooming to the selected rectangle \\ \hline
     \includegraphics[width=0.5cm,frame]{../../data/icons/select_action.png} & Select & Allows data selection \& de-selection \\ \hline
   \end{tabular}
-  \caption{Toolbar mouse action modes}
+  \caption{Toolbar mouse interaction modes}
 \end{table}
 
-The others provide general operations (shortcut refers to keyboard shortcut):
+The others provide general actions by which the view can be modified (shortcut refers to keyboard shortcut):
+
+%TODO_V7 Only refer to keyboard shortcuts when providing them
 
 \begin{table}[H]
   \center
@@ -67,34 +66,32 @@ The others provide general operations (shortcut refers to keyboard shortcut):
     \includegraphics[width=0.5cm,frame]{../../data/icons/select_delete.png} & & Delete Selection & De-selects all target reports \\ \hline
     \includegraphics[width=0.5cm,frame]{../../data/icons/zoom_home.png} & & Zoom to Home & Pans/zooms to show all existing data \\ \hline
   \end{tabular}
-  \caption{Toolbar operations}
+  \caption{Toolbar actions}
 \end{table} 
 
 \subsection{Config Tab}
 
-The top elements define which data variables are used for the x/y-axis, which can be any numerica) variable (might require a reload operation). \\
+The top elements define which data variables are used to generate data points for the x/y-axis. Such a variable can be any numerical variable. A reload operation might be required for the selection to take effect. \\
 
-Please note that display of evaluation result data is currently not implemented. \\
-
-The 'Reload' button can be used to trigger a reload.
+Please note that visualization of evaluation result data is currently not implemented.
 
 \subsection{Scatterplot}
 
-\subsubsection{Zoom}
+\subsubsection{General Zoom}
 
-The mouse wheel can be used to zoom in or out of the presented data, the space key can be used to reset to the default zoom (euqivalent to \includegraphics[width=0.5cm,frame]{../../data/icons/zoom_home.png}).
+The mouse wheel can be used to zoom in or out of the presented data, the space key can be used to reset to the default zoom level (euqivalent to \includegraphics[width=0.5cm,frame]{../../data/icons/zoom_home.png}).
 
-\subsubsection{Navigate Action}
+\subsubsection{Navigation Mode}
 
-In the 'Navigate mode', the left mouse-button can be used to pan the viewabled data.
+In 'Navigate' mode, the left mouse-button can be used to pan the shown data.
 
-\subsubsection{Zoom to Rectangle Action}
+\subsubsection{Zoom to Rectangle Mode}
 
-In the 'Zoom to Rectangle' mode, the left mouse-button can be used to select a rectangle, to which a zoom operation is performed.
+In 'Zoom to Rectangle' mode, the left mouse-button can be used to select a rectangular region, to which a zoom operation is performed.
 
-\subsubsection{Select Action}
+\subsubsection{Selection Mode}
 
-Using the default action data can be selected. The first left mouse-button click starts selection (showing a red rectangle), the second click finalizes the selection. All data in all intersected bins is selected.
+In 'Select' mode data can be selected. The first left mouse-button click starts selection (showing a red rectangle), the second click finalizes the selection. All data points inside the rectangular area are selected.
 
 \begin{figure}[H]
     \hspace*{-2cm}
@@ -102,7 +99,7 @@ Using the default action data can be selected. The first left mouse-button click
   \caption{Scatterplot View data selection}
 \end{figure}
 
-The selected data is then presented in an extra 'Selected' column, grouping the count of all DBOObjects.
+The selected data is then presented in an extra 'Selected' entry in the legend, showing the count of all selected data points.
 
 \begin{figure}[H]
     \hspace*{-2cm}
@@ -112,15 +109,8 @@ The selected data is then presented in an extra 'Selected' column, grouping the 
 
 This allows selection of parts of the data based on the presented variable, allowing deeper analysis e.g. of dubious data. \\
 
+%TODO_V7 maybe easier selection is the wrong term when talking about removing the selection?
+%TODO_V7 lets discuss when we talk of 'points'/'data points' and 'target reports', this is mixed up a little at the moment
 The 'Invert Selection' \includegraphics[width=0.5cm,frame]{../../data/icons/select_invert.png} or 'Delete Selection' \includegraphics[width=0.5cm,frame]{../../data/icons/select_delete.png} actions allow for easier selection of the wanted target reports. \\
 
-Also, if the 'Control' key is pressed during the second click, the new selected data is added to the already existing collection.
-
-
-
-
-
-
-
-
-
+By pressing the 'Control' key during the second click, the newly selected data is added to the previous selection. This can be used to select data incrementally, making more complex selections possible.
