@@ -27,9 +27,8 @@ To load the data the mechanism described in Section \nameref{sec:load} or the 'R
   \caption{Scatterplot View after loading data}
 \end{figure}
 
-%TODO_V7 i referred to 'Database Content' here, is this the official term in the doc?
 The values of the selected variables are used for positioning on the x-axis and y-axis. For each value pair a data point is generated. In the current example the WGS-84 meta-variables 'Longitude' and 'Latitude' are used, showing a similar view as the OSG View.
-The color of each data point is defined by the Database Content it belongs to.\\
+The color of each data point is defined by the DBContent it belongs to.\\
 
 %TODO_V7 i think here it would be immensely important to tell the user why he might not see any data at all when selecting variables from two different DBContents!
 
@@ -71,7 +70,7 @@ The others provide general actions by which the view can be modified (shortcut r
 
 \subsection{Config Tab}
 
-The top elements define which data variables are used to generate data points for the x/y-axis. Such a variable can be any numerical variable. A reload operation might be required for the selection to take effect. \\
+The selection controls on the top define which data variables are used to generate data points for the x/y-axis. Such a variable can be any numerical variable. A reload operation might be required for the selection to take effect. \\
 
 Please note that visualization of evaluation result data is currently not implemented.
 
@@ -91,7 +90,7 @@ In 'Zoom to Rectangle' mode, the left mouse-button can be used to select a recta
 
 \subsubsection{Selection Mode}
 
-In 'Select' mode data can be selected. The first left mouse-button click starts selection (showing a red rectangle), the second click finalizes the selection. All data points inside the rectangular area are selected.
+In 'Select' mode, data can be selected. The first left mouse-button click starts selection (showing a red rectangle), the second click finalizes the selection. All data points inside the rectangular area are selected.
 
 \begin{figure}[H]
     \hspace*{-2cm}
@@ -107,10 +106,10 @@ The selected data is then presented in an extra 'Selected' entry in the legend, 
   \caption{Scatterplot View data selected}
 \end{figure}
 
-This allows selection of parts of the data based on the presented variable, allowing deeper analysis e.g. of dubious data. \\
+This enables selection of parts of the data based on the presented variables, allowing deeper analysis e.g. of dubious data. \\
 
 %TODO_V7 maybe easier selection is the wrong term when talking about removing the selection?
 %TODO_V7 lets discuss when we talk of 'points'/'data points' and 'target reports', this is mixed up a little at the moment
 The 'Invert Selection' \includegraphics[width=0.5cm,frame]{../../data/icons/select_invert.png} or 'Delete Selection' \includegraphics[width=0.5cm,frame]{../../data/icons/select_delete.png} actions allow for easier selection of the wanted target reports. \\
 
-By pressing the 'Control' key during the second click, the newly selected data is added to the previous selection. This can be used to select data incrementally, making more complex selections possible.
+By pressing the 'Control' key during the second click, the newly selected data is added to any previous selection. This can be used to select data incrementally, making more complex selections possible.
