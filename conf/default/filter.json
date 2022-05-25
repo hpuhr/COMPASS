@@ -33,7 +33,7 @@
         "ADSBQualityFilter": {
             "ADSBQualityFilter": {
                 "parameters": {
-                    "active": true,
+                    "active": false,
                     "changed": true,
                     "max_nacp": 5,
                     "max_nic": 5,
@@ -46,21 +46,21 @@
                     "min_sil_v1": 0,
                     "min_sil_v2": 0,
                     "name": "ADSB Quality",
-                    "use_max_nacp": true,
-                    "use_max_nic": true,
-                    "use_max_nucp": true,
-                    "use_max_sil_v1": true,
+                    "use_max_nacp": false,
+                    "use_max_nic": false,
+                    "use_max_nucp": false,
+                    "use_max_sil_v1": false,
                     "use_max_sil_v2": true,
-                    "use_min_nacp": true,
-                    "use_min_nic": true,
-                    "use_min_nucp": true,
+                    "use_min_nacp": false,
+                    "use_min_nic": false,
+                    "use_min_nucp": false,
                     "use_min_sil_v1": false,
-                    "use_min_sil_v2": false,
-                    "use_v0": true,
-                    "use_v1": true,
+                    "use_min_sil_v2": true,
+                    "use_v0": false,
+                    "use_v1": false,
                     "use_v2": true,
                     "visible": false,
-                    "widget_visible": true
+                    "widget_visible": false
                 }
             }
         },
@@ -83,7 +83,7 @@
                                 "operator": "IN",
                                 "reset_value": "0",
                                 "value": "0",
-                                "variable_dbo_name": "CAT021",
+                                "variable_dbcontent_name": "CAT021",
                                 "variable_name": "MOPS Version"
                             }
                         }
@@ -109,7 +109,7 @@
                                 "operator": "LIKE",
                                 "reset_value": "%81c20819%",
                                 "value": "%81c20819%",
-                                "variable_dbo_name": "Meta",
+                                "variable_dbcontent_name": "Meta",
                                 "variable_name": "ARTAS Hash"
                             }
                         }
@@ -135,7 +135,7 @@
                                 "operator": "IN",
                                 "reset_value": "1",
                                 "value": "1",
-                                "variable_dbo_name": "Meta",
+                                "variable_dbcontent_name": "Meta",
                                 "variable_name": "Type"
                             }
                         }
@@ -144,7 +144,7 @@
             },
             "Position": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "changed": true,
                     "name": "Position",
                     "op_and_": true,
@@ -160,8 +160,8 @@
                                 "op_and": true,
                                 "operator": "<=",
                                 "reset_value": "MAX",
-                                "value": "49.215488",
-                                "variable_dbo_name": "Meta",
+                                "value": "49.215278",
+                                "variable_dbcontent_name": "Meta",
                                 "variable_name": "Latitude"
                             }
                         },
@@ -172,8 +172,8 @@
                                 "op_and": true,
                                 "operator": ">=",
                                 "reset_value": "MIN",
-                                "value": "46.208428",
-                                "variable_dbo_name": "Meta",
+                                "value": "46.174722",
+                                "variable_dbcontent_name": "Meta",
                                 "variable_name": "Latitude"
                             }
                         },
@@ -184,8 +184,8 @@
                                 "op_and": true,
                                 "operator": "<=",
                                 "reset_value": "MAX",
-                                "value": "17.335926",
-                                "variable_dbo_name": "Meta",
+                                "value": "17.360556",
+                                "variable_dbcontent_name": "Meta",
                                 "variable_name": "Longitude"
                             }
                         },
@@ -196,8 +196,8 @@
                                 "op_and": true,
                                 "operator": ">=",
                                 "reset_value": "MIN",
-                                "value": "11.246144",
-                                "variable_dbo_name": "Meta",
+                                "value": "11.243333",
+                                "variable_dbcontent_name": "Meta",
                                 "variable_name": "Longitude"
                             }
                         }
@@ -223,7 +223,7 @@
                                 "operator": "<=",
                                 "reset_value": "MAX",
                                 "value": "09:03:43.000",
-                                "variable_dbo_name": "Meta",
+                                "variable_dbcontent_name": "Meta",
                                 "variable_name": "Time of Day"
                             }
                         },
@@ -235,7 +235,7 @@
                                 "operator": ">=",
                                 "reset_value": "MIN",
                                 "value": "08:00:23.398",
-                                "variable_dbo_name": "Meta",
+                                "variable_dbcontent_name": "Meta",
                                 "variable_name": "Time of Day"
                             }
                         }
@@ -261,7 +261,7 @@
                                 "operator": "IN",
                                 "reset_value": "4227",
                                 "value": "4227",
-                                "variable_dbo_name": "Meta",
+                                "variable_dbcontent_name": "Meta",
                                 "variable_name": "Track Number"
                             }
                         }
@@ -287,7 +287,7 @@
                                 "operator": "IN",
                                 "reset_value": "0",
                                 "value": "0",
-                                "variable_dbo_name": "Tracker",
+                                "variable_dbcontent_name": "Tracker",
                                 "variable_name": "SAC LM"
                             }
                         },
@@ -299,7 +299,7 @@
                                 "operator": "IN",
                                 "reset_value": "0",
                                 "value": "0",
-                                "variable_dbo_name": "Tracker",
+                                "variable_dbcontent_name": "Tracker",
                                 "variable_name": "SIC LM"
                             }
                         }
@@ -325,7 +325,7 @@
                                 "operator": "=",
                                 "reset_value": "N",
                                 "value": "N",
-                                "variable_dbo_name": "Tracker",
+                                "variable_dbcontent_name": "Tracker",
                                 "variable_name": "Monosensor"
                             }
                         }
@@ -351,7 +351,7 @@
                                 "operator": "=",
                                 "reset_value": "Y",
                                 "value": "Y",
-                                "variable_dbo_name": "Tracker",
+                                "variable_dbcontent_name": "Tracker",
                                 "variable_name": "Confirmed"
                             }
                         }
@@ -405,7 +405,7 @@
                     "active": false,
                     "changed": true,
                     "name": "UTNs",
-                    "utns_str": "404",
+                    "utns_str": "0",
                     "visible": false,
                     "widget_visible": true
                 }
