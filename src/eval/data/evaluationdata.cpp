@@ -47,7 +47,7 @@ EvaluationData::EvaluationData(EvaluationManager& eval_man)
 
 void EvaluationData::addReferenceData (DBContent& object, unsigned int line_id, std::shared_ptr<Buffer> buffer)
 {
-    loginf << "EvaluationData: addReferenceData: dbo " << object.name() << " size " << buffer->size();
+    loginf << "EvaluationData: addReferenceData: dbcontent " << object.name() << " size " << buffer->size();
 
     DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
 
@@ -75,19 +75,26 @@ void EvaluationData::addReferenceData (DBContent& object, unsigned int line_id, 
 
     if (dbcontent_man.metaVariable(DBContent::meta_var_ta_.name()).existsIn(dbcontent_name))
         ref_target_address_name_ = dbcontent_man.metaVariable(DBContent::meta_var_ta_.name()).getFor(dbcontent_name).name();
+    else
+        ref_target_address_name_ = "";
 
     if (dbcontent_man.metaVariable(DBContent::meta_var_ti_.name()).existsIn(dbcontent_name))
         ref_callsign_name_ = dbcontent_man.metaVariable(DBContent::meta_var_ti_.name()).getFor(dbcontent_name).name();
+    else
+        ref_callsign_name_ = "";
 
     // mc
     ref_modec_name_ = dbcontent_man.metaVariable(DBContent::meta_var_mc_.name()).getFor(dbcontent_name).name();
 
     if (dbcontent_man.metaVariable(DBContent::meta_var_mc_g_.name()).existsIn(dbcontent_name))
         ref_modec_g_name_ = dbcontent_man.metaVariable(DBContent::meta_var_mc_g_.name()).getFor(dbcontent_name).name();
+    else
+        ref_modec_g_name_ = "";
 
     if (dbcontent_man.metaVariable(DBContent::meta_var_mc_v_.name()).existsIn(dbcontent_name))
         ref_modec_v_name_ = dbcontent_man.metaVariable(DBContent::meta_var_mc_v_.name()).getFor(dbcontent_name).name();
-
+    else
+        ref_modec_v_name_ = "";
 
     if (dbcontent_name == "CAT062")
     {
@@ -100,13 +107,19 @@ void EvaluationData::addReferenceData (DBContent& object, unsigned int line_id, 
 
     if (dbcontent_man.metaVariable(DBContent::meta_var_m3a_g_.name()).existsIn(dbcontent_name))
         ref_modea_g_name_ = dbcontent_man.metaVariable(DBContent::meta_var_m3a_g_.name()).getFor(dbcontent_name).name();
+    else
+        ref_modea_g_name_ = "";
 
     if (dbcontent_man.metaVariable(DBContent::meta_var_m3a_v_.name()).existsIn(dbcontent_name))
         ref_modea_v_name_ = dbcontent_man.metaVariable(DBContent::meta_var_m3a_v_.name()).getFor(dbcontent_name).name();
+    else
+        ref_modea_v_name_ = "";
 
     // ground bit
     if (dbcontent_man.metaVariable(DBContent::meta_var_ground_bit_.name()).existsIn(dbcontent_name))
         ref_ground_bit_name_ = dbcontent_man.metaVariable(DBContent::meta_var_ground_bit_.name()).getFor(dbcontent_name).name();
+    else
+        ref_ground_bit_name_ = "";
 
     // speed & track_angle
 
@@ -205,7 +218,7 @@ void EvaluationData::addReferenceData (DBContent& object, unsigned int line_id, 
 
 void EvaluationData::addTestData (DBContent& object, unsigned int line_id,  std::shared_ptr<Buffer> buffer)
 {
-    loginf << "EvaluationData: addTestData: dbo " << object.name() << " size " << buffer->size();
+    loginf << "EvaluationData: addTestData: dbcontent " << object.name() << " size " << buffer->size();
 
     DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
 
@@ -231,18 +244,26 @@ void EvaluationData::addTestData (DBContent& object, unsigned int line_id,  std:
 
     if (dbcontent_man.metaVariable(DBContent::meta_var_ta_.name()).existsIn(dbcontent_name))
         tst_target_address_name_ = dbcontent_man.metaVariable(DBContent::meta_var_ta_.name()).getFor(dbcontent_name).name();
+    else
+        tst_target_address_name_ = "";
 
     if (dbcontent_man.metaVariable(DBContent::meta_var_ti_.name()).existsIn(dbcontent_name))
         tst_callsign_name_ = dbcontent_man.metaVariable(DBContent::meta_var_ti_.name()).getFor(dbcontent_name).name();
+    else
+        tst_callsign_name_ = "";
 
     // mc
     tst_modec_name_ = dbcontent_man.metaVariable(DBContent::meta_var_mc_.name()).getFor(dbcontent_name).name();
 
     if (dbcontent_man.metaVariable(DBContent::meta_var_mc_g_.name()).existsIn(dbcontent_name))
         tst_modec_g_name_ = dbcontent_man.metaVariable(DBContent::meta_var_mc_g_.name()).getFor(dbcontent_name).name();
+    else
+        tst_modec_g_name_ = "";
 
     if (dbcontent_man.metaVariable(DBContent::meta_var_mc_v_.name()).existsIn(dbcontent_name))
         tst_modec_v_name_ = dbcontent_man.metaVariable(DBContent::meta_var_mc_v_.name()).getFor(dbcontent_name).name();
+    else
+        tst_modec_v_name_ = "";
 
 
 //    if (dbcontent_name == "CAT062")
@@ -256,17 +277,25 @@ void EvaluationData::addTestData (DBContent& object, unsigned int line_id,  std:
 
     if (dbcontent_man.metaVariable(DBContent::meta_var_m3a_g_.name()).existsIn(dbcontent_name))
         tst_modea_g_name_ = dbcontent_man.metaVariable(DBContent::meta_var_m3a_g_.name()).getFor(dbcontent_name).name();
+    else
+        tst_modea_g_name_ = "";
 
     if (dbcontent_man.metaVariable(DBContent::meta_var_m3a_v_.name()).existsIn(dbcontent_name))
         tst_modea_v_name_ = dbcontent_man.metaVariable(DBContent::meta_var_m3a_v_.name()).getFor(dbcontent_name).name();
+    else
+        tst_modea_v_name_ = "";
 
     // ground bit
     if (dbcontent_man.metaVariable(DBContent::meta_var_ground_bit_.name()).existsIn(dbcontent_name))
         tst_ground_bit_name_ = dbcontent_man.metaVariable(DBContent::meta_var_ground_bit_.name()).getFor(dbcontent_name).name();
+    else
+        tst_ground_bit_name_ = "";
 
     // track num
     if (dbcontent_man.metaVariable(DBContent::meta_var_track_num_.name()).existsIn(dbcontent_name))
         tst_track_num_name_ = dbcontent_man.metaVariable(DBContent::meta_var_track_num_.name()).getFor(dbcontent_name).name();
+    else
+        tst_track_num_name_ = "";
 
     // speed & track_angle
 

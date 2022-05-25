@@ -135,10 +135,12 @@ void ASTERIXImportTaskWidget::addMappingsTab()
 
     add_object_parser_button_ = new QPushButton("Add");
     connect(add_object_parser_button_, SIGNAL(clicked()), this, SLOT(addParserSlot()));
+    add_object_parser_button_->setEnabled(COMPASS::instance().expertMode());
     parser_manage_layout->addWidget(add_object_parser_button_);
 
     delete_object_parser_button_ = new QPushButton("Remove");
     connect(delete_object_parser_button_, SIGNAL(clicked()), this, SLOT(removeObjectParserSlot()));
+    delete_object_parser_button_->setEnabled(COMPASS::instance().expertMode());
     parser_manage_layout->addWidget(delete_object_parser_button_);
 
     parsers_layout->addLayout(parser_manage_layout);

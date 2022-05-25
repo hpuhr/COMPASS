@@ -1134,6 +1134,7 @@ void MainWindow::importAsterixRecordingSlot()
 
         updateMenus();
 
+        COMPASS::instance().taskManager().asterixImporterTask().dialog()->updateSource();
         COMPASS::instance().taskManager().asterixImporterTask().dialog()->show();
     }
 }
