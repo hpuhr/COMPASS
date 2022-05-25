@@ -368,6 +368,8 @@ void ManageSectorsTaskWidget::selectFile(const std::string& filename)
         assert (item_it);
         file_list_->setCurrentItem(item_it);
     }
+
+    updateParseMessage();
 }
 
 void ManageSectorsTaskWidget::updateParseMessage ()
