@@ -221,6 +221,20 @@ inline int getAppendedInt(std::string text)
     return ret;
 }
 
+inline unsigned int lineFromStr(const std::string& line_str)
+{
+    assert (line_str.size());
+    unsigned int line = line_str.back() - '0';
+    assert (line >= 1 && line <= 4);
+    return line-1;
+}
+
+inline std::string lineStrFrom(unsigned int line)
+{
+    assert (line >= 1 && line <= 4);
+    return "L" + std::to_string(line + 1);
+}
+
 inline int getLeadingInt(std::string text)
 {
     boost::regex re("[0-9]+");
