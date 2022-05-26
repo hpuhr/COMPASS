@@ -183,9 +183,6 @@ void ViewPointsImportTask::checkParsedData ()
 
             for (json& ds_it : context.at("datasets").get<json::array_t>())
             {
-                if (ds_it.contains("name") && !ds_it.at("name").is_string())
-                    throw std::runtime_error("dataset '"+ds_it.dump()+"' does not contain a valid name");
-
                 if (!ds_it.contains("filename") || !ds_it.at("filename").is_string())
                     throw std::runtime_error("dataset '"+ds_it.dump()+"' does not contain a valid filename");
 
@@ -361,95 +358,28 @@ void ViewPointsImportTask::run()
 
                 ASTERIXImportTask& asterix_importer_task = task_manager_.asterixImporterTask();
 
-                // set data source info
-                if (ds_it.contains("ds_name") && ds_it.contains("ds_sac") && ds_it.contains("ds_sic"))
+                // line
+                if (ds_it.contains("line_id"))
                 {
-                    TODO_ASSERT
+                    assert (ds_it.at("line_id").is_number_unsigned());
+                    unsigned int line_id = ds_it.at("line_id");
 
-                            //                    ManageDataSourcesTask& ds_task = COMPASS::instance().taskManager().manageDataSourcesTask();
+                    loginf << "ViewPointsImportTask: import: line_id " << line_id;
 
-                            //                    assert (ds_it.at("ds_name").is_string());
-                            //                    assert (ds_it.at("ds_sac").is_number());
-                            //                    assert (ds_it.at("ds_sic").is_number());
-
-                            //                    std::string ds_name = ds_it.at("ds_name");
-                            //                    int ds_sac = ds_it.at("ds_sac");
-                            //                    assert (ds_sac >= 0);
-                            //                    int ds_sic = ds_it.at("ds_sic");
-                            //                    assert (ds_sic >= 0);
-
-                            //                    if (!ds_task.hasDataSource("Tracker", ds_sac, ds_sic)) // add if not existing
-                            //                    {
-                            //                        loginf << "ViewPointsImportTask: import: adding data source '" << ds_name << "' "
-                            //                                                       << ds_sac << "/" << ds_sic;
-                            //                        StoredDBODataSource& new_ds = ds_task.addNewStoredDataSource("Tracker");
-                            //                        new_ds.name(ds_name);
-                            //                        new_ds.sac(ds_sac);
-                            //                        new_ds.sic(ds_sic);
-                            //                    }
-                            //                    else // set name if existing
-                            //                    {
-                            //                        loginf << "ViewPointsImportTask: import: setting data source '" << ds_name << "' "
-                            //                                                       << ds_sac << "/" << ds_sic;
-                            //                        StoredDBODataSource& ds = ds_task.getDataSource("Tracker", ds_sac, ds_sic);
-                            //                        ds.name(ds_name);
-                            //                    }
+                    asterix_importer_task.fileLineID(line_id);
                 }
+                else
+                    asterix_importer_task.fileLineID(0); // import to L1 if not set
 
 
-                if (ds_it.contains("ds_sac") && ds_it.contains("ds_sic")
-                        && ds_it.contains("ds_sac_override") && ds_it.contains("ds_sic_override")
-                        && ds_it.contains("time_offset"))
+                if (ds_it.contains("time_offset"))
                 {
-                    TODO_ASSERT
+                    assert (ds_it.at("time_offset").is_number());
 
-                            //                    loginf << "ViewPointsImportTask: import: override information set";
+                    float tod_offset = ds_it.at("time_offset");
 
-                            //                    // set override information
-                            //                    asterix_importer_task.overrideActive(true);
-
-                            //                    assert (ds_it.at("ds_sac").is_number());
-                            //                    asterix_importer_task.overrideSacOrg(ds_it.at("ds_sac"));
-
-                            //                    assert (ds_it.at("ds_sic").is_number());
-                            //                    asterix_importer_task.overrideSicOrg(ds_it.at("ds_sic"));
-
-                            //                    assert (ds_it.at("ds_sac_override").is_number());
-                            //                    asterix_importer_task.overrideSacNew(ds_it.at("ds_sac_override"));
-
-                            //                    assert (ds_it.at("ds_sic_override").is_number());
-                            //                    asterix_importer_task.overrideSicNew(ds_it.at("ds_sic_override"));
-
-                            //                    assert (ds_it.at("time_offset").is_number());
-                            //                    asterix_importer_task.overrideTodOffset(ds_it.at("time_offset"));
-
-                            //                    // set new data source info
-                            //                    assert (ds_it.at("ds_name").is_string());
-                            //                    assert (ds_it.at("ds_sac_override").is_number());
-                            //                    assert (ds_it.at("ds_sic_override").is_number());
-
-                            //                    std::string ds_name = ds_it.at("ds_name");
-                            //                    int ds_sac = ds_it.at("ds_sac_override");
-                            //                    assert (ds_sac >= 0);
-                            //                    int ds_sic = ds_it.at("ds_sic_override");
-                            //                    assert (ds_sic >= 0);
-
-                            //                    if (!ds_task.hasDataSource("Tracker", ds_sac, ds_sic)) // add if not existing
-                            //                    {
-                            //                        loginf << "ViewPointsImportTask: import: adding override data source '" << ds_name << "' "
-                            //                                                       << ds_sac << "/" << ds_sic;
-                            //                        StoredDBODataSource& new_ds = ds_task.addNewStoredDataSource("Tracker");
-                            //                        new_ds.name(ds_name);
-                            //                        new_ds.sac(ds_sac);
-                            //                        new_ds.sic(ds_sic);
-                            //                    }
-                            //                    else // set name if existing
-                            //                    {
-                            //                        loginf << "ViewPointsImportTask: import: setting override data source '" << ds_name << "' "
-                            //                                                       << ds_sac << "/" << ds_sic;
-                            //                        StoredDBODataSource& ds = ds_task.getDataSource("Tracker", ds_sac, ds_sic);
-                            //                        ds.name(ds_name);
-                            //                    }
+                    asterix_importer_task.overrideTodActive(true);
+                    asterix_importer_task.overrideTodOffset(tod_offset);
                 }
                 else
                 {
