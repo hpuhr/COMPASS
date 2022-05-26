@@ -231,7 +231,7 @@ inline unsigned int lineFromStr(const std::string& line_str)
 
 inline std::string lineStrFrom(unsigned int line)
 {
-    assert (line >= 1 && line <= 4);
+    assert (line >= 0 && line <= 3);
     return "L" + std::to_string(line + 1);
 }
 
