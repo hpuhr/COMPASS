@@ -38,7 +38,7 @@ public:
     ViewPointsImportTaskWidget(ViewPointsImportTask& task, QWidget* parent = nullptr);
     virtual ~ViewPointsImportTaskWidget();
 
-    void updateContext ();
+    void updateText ();
 
 protected:
     ViewPointsImportTask& task_;

@@ -200,6 +200,17 @@ bool DBDataSource::anyLinesLoadingWanted() const
     return any_wanted;
 }
 
+void DBDataSource::disableAllLines()
+{
+    for (unsigned int cnt=0; cnt < 4; ++cnt)
+        line_loading_wanted_[cnt] = false;
+}
+
+void DBDataSource::enableAllLines()
+{
+    line_loading_wanted_.clear();
+}
+
 void DBDataSource::lineLoadingWanted(unsigned int line_id, bool wanted)
 {
     assert (line_id <= 4);

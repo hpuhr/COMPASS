@@ -36,6 +36,7 @@
 #include <QListWidget>
 #include <QMessageBox>
 
+using namespace std;
 
 ViewPointsImportTaskWidget::ViewPointsImportTaskWidget(ViewPointsImportTask& task, QWidget* parent)
     : QWidget(parent), task_(task)
@@ -50,7 +51,7 @@ ViewPointsImportTaskWidget::ViewPointsImportTaskWidget(ViewPointsImportTask& tas
     main_layout_->addWidget(context_edit_);
 
     if (task_.importFilename().size())
-        updateContext();
+        updateText();
 
     setLayout(main_layout_);
 }
@@ -59,7 +60,7 @@ ViewPointsImportTaskWidget::~ViewPointsImportTaskWidget()
 {
 }
 
-void ViewPointsImportTaskWidget::updateContext ()
+void ViewPointsImportTaskWidget::updateText ()
 {
     loginf << "ViewPointsImportTaskWidget: updateContext";
 
@@ -74,9 +75,20 @@ void ViewPointsImportTaskWidget::updateContext ()
     {
         const nlohmann::json& data = task_.currentData();
 
-        assert (data.contains("view_point_context"));
+        string text;
 
-        context_edit_->setText(data.at("view_point_context").dump(4).c_str());
+        if (data.contains("view_point_context"))
+            text = data.at("view_point_context").dump(4).c_str();;
+
+        if (data.contains("view_points"))
+        {
+            if (text.size())
+                text += "\n\n";
+
+            text = "View Points: " + to_string(data.at("view_points").size());
+        }
+
+        context_edit_->setText(text.c_str());
     }
 }
 
