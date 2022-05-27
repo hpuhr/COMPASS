@@ -46,7 +46,8 @@ std::map<Variable::Representation, std::string> Variable::representation_2_strin
     {Variable::Representation::FLOAT_PREC0, "FLOAT_PREC0"},
     {Variable::Representation::FLOAT_PREC1, "FLOAT_PREC1"},
     {Variable::Representation::FLOAT_PREC2, "FLOAT_PREC2"},
-    {Variable::Representation::FLOAT_PREC4, "FLOAT_PREC4"}};
+    {Variable::Representation::FLOAT_PREC4, "FLOAT_PREC4"},
+    {Variable::Representation::LINE_NAME, "LINE_NAME"}};
 
 std::map<std::string, Variable::Representation> Variable::string_2_representation_{
     {"STANDARD", Variable::Representation::STANDARD},
@@ -59,7 +60,8 @@ std::map<std::string, Variable::Representation> Variable::string_2_representatio
     {"FLOAT_PREC0", Variable::Representation::FLOAT_PREC0},
     {"FLOAT_PREC1", Variable::Representation::FLOAT_PREC1},
     {"FLOAT_PREC2", Variable::Representation::FLOAT_PREC2},
-    {"FLOAT_PREC4", Variable::Representation::FLOAT_PREC4}};
+    {"FLOAT_PREC4", Variable::Representation::FLOAT_PREC4},
+    {"LINE_NAME", Variable::Representation::LINE_NAME}};
 
 Variable::Representation Variable::stringToRepresentation(
     const std::string& representation_str)
@@ -479,6 +481,37 @@ std::string Variable::getValueStringFromRepresentation(
         // not found, return original
 
         return representation_str;
+    }
+    else if (representation_ == Variable::Representation::CLIMB_DESCENT)
+    {
+        if (representation_str == "LVL")
+            return "0";
+        else if (representation_str == "CLB")
+            return "1";
+        else if (representation_str == "DSC")
+            return "2";
+        else
+            return "3";
+    }
+    else if (representation_ == Variable::Representation::FLOAT_PREC0)
+    {
+        return representation_str;
+    }
+    else if (representation_ == Variable::Representation::FLOAT_PREC1)
+    {
+        return representation_str;
+    }
+    else if (representation_ == Variable::Representation::FLOAT_PREC2)
+    {
+        return representation_str;
+    }
+    else if (representation_ == Variable::Representation::FLOAT_PREC4)
+    {
+        return representation_str;
+    }
+    else if (representation_ == Variable::Representation::LINE_NAME)
+    {
+        return std::to_string(Utils::String::lineFromStr(representation_str));
     }
     else
     {

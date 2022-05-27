@@ -51,7 +51,8 @@ class Variable : public QObject, public Property, public Configurable
         FLOAT_PREC0,
         FLOAT_PREC1,
         FLOAT_PREC2,
-        FLOAT_PREC4
+        FLOAT_PREC4,
+        LINE_NAME
     };
 
     static Representation stringToRepresentation(const std::string& representation_str);
@@ -169,6 +170,10 @@ class Variable : public QObject, public Property, public Configurable
             else if (representation_ == Variable::Representation::FLOAT_PREC4)
             {
                 out << std::fixed << std::setprecision(4)<< value;
+            }
+            else if (representation_ == Variable::Representation::LINE_NAME)
+            {
+                return Utils::String::lineStrFrom(value);
             }
             else
             {

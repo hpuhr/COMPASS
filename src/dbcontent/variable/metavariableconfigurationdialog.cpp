@@ -21,7 +21,11 @@ namespace dbContent
 MetaVariableConfigurationDialog::MetaVariableConfigurationDialog(DBContentManager& dbo_man)
     : QDialog(), dbo_man_(dbo_man)
 {
-    setWindowTitle("Configure Meta Variables");
+    if (COMPASS::instance().expertMode())
+        setWindowTitle("Configure Meta Variables");
+    else
+        setWindowTitle("Show Meta Variables");
+
     setWindowFlags(Qt::Window | Qt::WindowTitleHint | Qt::CustomizeWindowHint);
 
     setModal(true);

@@ -365,7 +365,7 @@
                     "dimension": "",
                     "is_key": false,
                     "name": "Line ID",
-                    "representation_str": "STANDARD",
+                    "representation_str": "LINE_NAME",
                     "short_name": "",
                     "unit": ""
                 }

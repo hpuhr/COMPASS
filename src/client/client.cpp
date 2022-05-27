@@ -105,6 +105,8 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
              "imports view points JSON file with given filename, e.g. '/data/file1.json'")
             ("import_asterix_file", po::value<std::string>(&import_asterix_filename_),
              "imports ASTERIX file with given filename, e.g. '/data/file1.ff'")
+            ("import_asterix_file_line", po::value<std::string>(&import_asterix_file_line_),
+             "imports ASTERIX file with given line, e.g. 'L2'")
             ("import_asterix_network", po::bool_switch(&import_asterix_network_),
              "imports ASTERIX from defined network UDP streams")
             ("import_asterix_network_time_offset", po::value<std::string>(&import_asterix_network_time_offset_),
@@ -221,6 +223,12 @@ void Client::run ()
 
         if (asterix_decoder_cfg.size())
             task_man.asterixImporterTask().asterixDecoderConfig(asterix_decoder_cfg);
+
+        if (import_asterix_file_line_.size())
+        {
+            unsigned int file_line = String::lineFromStr(import_asterix_file_line_);
+            task_man.asterixImporterTask().fileLineID(file_line);
+        }
 
     }
     catch (exception& e)

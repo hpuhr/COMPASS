@@ -227,6 +227,9 @@ void DataSourcesLoadWidget::updateContent()
 
     bool recreate_required = false;
 
+    for (auto& ds_type_it : ds_type_boxes_)
+        ds_type_it.second->setChecked(ds_man_.dsTypeLoadingWanted(ds_type_it.first));
+
     if (ds_widgets_.size() != ds_man_.dbDataSources().size()) // check if same size
         recreate_required = true;
     else // check each one

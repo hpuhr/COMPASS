@@ -343,7 +343,18 @@ void DataSourceManager::setLoadDataSources (bool loading_wanted)
         load_widget_->updateContent();
 }
 
-void DataSourceManager::setLoadOnlyDataSources (std::set<unsigned int> ds_ids)
+void DataSourceManager::setLoadAllDataSourceLines ()
+{
+    loginf << "DataSourceManager: setLoadAllDataSourceLines";
+
+    for (auto& ds_it : db_data_sources_)
+        ds_it->enableAllLines();
+
+    if (load_widget_)
+        load_widget_->updateContent();
+}
+
+void DataSourceManager::setLoadOnlyDataSources (std::map<unsigned int, std::set<unsigned int>> ds_ids)
 {
     loginf << "DataSourceManager: setLoadOnlyDataSources";
 
@@ -352,8 +363,12 @@ void DataSourceManager::setLoadOnlyDataSources (std::set<unsigned int> ds_ids)
 
     for (auto ds_id_it : ds_ids)
     {
-        assert (hasDBDataSource(ds_id_it));
-        dbDataSource(ds_id_it).loadingWanted(true);
+        assert (hasDBDataSource(ds_id_it.first));
+        dbDataSource(ds_id_it.first).loadingWanted(true);
+        dbDataSource(ds_id_it.first).disableAllLines();
+
+        for (auto& line_str_it : ds_id_it.second)
+            dbDataSource(ds_id_it.first).lineLoadingWanted(line_str_it, true);
     }
 
     if (load_widget_)
@@ -632,9 +647,13 @@ std::set<std::string> DataSourceManager::wantedDSTypes()
 {
     std::set<std::string> ret;
 
-    for (auto& ds_type_it : ds_type_loading_wanted_)
-        if (ds_type_it.second)
-            ret.insert(ds_type_it.first);
+    for (auto& ds_type_it : data_source_types_)
+    {
+        if (!ds_type_loading_wanted_.count(ds_type_it)) // not in means yes
+            ret.insert(ds_type_it);
+        else if (ds_type_loading_wanted_.at(ds_type_it))
+            ret.insert(ds_type_it);
+    }
 
     return ret;
 }

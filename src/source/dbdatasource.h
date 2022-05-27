@@ -54,6 +54,8 @@ public:
 
     bool lineSpecificLoadingWanted() const;
     bool anyLinesLoadingWanted() const;
+    void disableAllLines();
+    void enableAllLines();
     void lineLoadingWanted(unsigned int line_id, bool wanted);
     bool lineLoadingWanted(unsigned int line_id) const;
     std::set<unsigned int> getLoadingWantedLines() const;

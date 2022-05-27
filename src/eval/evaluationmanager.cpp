@@ -236,26 +236,28 @@ void EvaluationManager::loadData ()
 
     // set if load for dbos
 
-    std::set<unsigned int> ds_ids;
+    std::map<unsigned int, std::set<unsigned int>> ds_ids; // ds_id + line strs
 
     DataSourceManager& ds_man = COMPASS::instance().dataSourceManager();
+
+    std::set<unsigned int> line_ref_set = {line_id_ref_};
 
     for (auto& ds_it : data_sources_ref_)
     {
         assert (ds_man.hasDBDataSource(ds_it.first));
-        ds_man.dbDataSource(ds_it.first).lineLoadingWanted(line_id_ref_, true); // set wanted line
 
         if (ds_it.second)
-            ds_ids.insert(ds_it.first);
+            ds_ids.insert(make_pair(ds_it.first, line_ref_set));
     }
+
+    std::set<unsigned int> line_tst_set = {line_id_tst_};
 
     for (auto& ds_it : data_sources_tst_)
     {
         assert (ds_man.hasDBDataSource(ds_it.first));
-        ds_man.dbDataSource(ds_it.first).lineLoadingWanted(line_id_tst_, true); // set wanted line
 
         if (ds_it.second)
-            ds_ids.insert(ds_it.first);
+            ds_ids.insert(make_pair(ds_it.first, line_tst_set));
     }
 
     ds_man.setLoadOnlyDataSources(ds_ids); // limit loaded data sources

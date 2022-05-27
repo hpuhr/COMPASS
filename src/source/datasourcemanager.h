@@ -74,7 +74,8 @@ public:
     bool lineSpecificLoadingRequired(const std::string& dbcontent_name);
 
     void setLoadDataSources (bool loading_wanted);
-    void setLoadOnlyDataSources (std::set<unsigned int> ds_ids);
+    void setLoadAllDataSourceLines ();
+    void setLoadOnlyDataSources (std::map<unsigned int, std::set<unsigned int>> ds_ids); // ds_id + line strs
     bool loadDataSourcesFiltered();
     std::map<unsigned int, std::set<unsigned int>> getLoadDataSources (); // ds_id -> wanted lines
 
@@ -109,7 +110,7 @@ protected:
 
     std::unique_ptr<DataSourcesConfigurationDialog> config_dialog_;
 
-    std::map<std::string, bool> ds_type_loading_wanted_;
+    std::map<std::string, bool> ds_type_loading_wanted_; // if not in there, wanted
 
     virtual void checkSubConfigurables();
 
