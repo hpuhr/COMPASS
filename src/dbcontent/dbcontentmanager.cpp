@@ -456,11 +456,8 @@ void DBContentManager::addLoadedData(std::map<std::string, std::shared_ptr<Buffe
 
     for (auto& buf_it : data)
     {
-        if (!buf_it.second->size())
-        {
-            logerr << "DBContentManager: addLoadedData: buffer dbo " << buf_it.first << " with 0 size";
+        if (!buf_it.second->size()) // empty buffer
             continue;
-        }
 
         if (data_.count(buf_it.first))
         {
@@ -632,8 +629,6 @@ void DBContentManager::finishLoading()
 }
 
 
-
-
 bool DBContentManager::hasAssociations() const
 {
     return has_associations_;
@@ -648,6 +643,8 @@ void DBContentManager::setAssociationsIdentifier(const std::string& assoc_id)
     associations_id_ = assoc_id;
 
    COMPASS::instance().dataSourceManager().updateWidget();
+
+   emit associationStatusChangedSignal();
 }
 
 //void DBContentManager::setAssociationsByAll()

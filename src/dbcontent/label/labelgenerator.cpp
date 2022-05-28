@@ -71,13 +71,18 @@ void LabelGenerator::generateSubConfigurable(const string& class_id, const strin
 std::vector<std::string> LabelGenerator::getLabelTexts(
         const std::string& dbcontent_name, unsigned int buffer_index)
 {
+    std::vector<std::string> tmp;
+
+
     std::map<std::string, std::shared_ptr<Buffer>> buffers = dbcont_manager_.loadedData();
-    assert (buffers.count(dbcontent_name));
+    if (!buffers.count(dbcontent_name))
+    {
+        logerr << "LabelGenerator: getLabelTexts: dbcontent_name '" << dbcontent_name << "' not in buffers";
+        return tmp;
+    }
 
     std::shared_ptr<Buffer> buffer = buffers.at(dbcontent_name);
     assert (buffer_index < buffer->size());
-
-    std::vector<std::string> tmp;
 
     using namespace dbContent;
 

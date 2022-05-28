@@ -1,7 +1,7 @@
 {
     "parameters": {
-        "db_id": "/home/sk/data/malta/delivery/20210307_1415_1600.db",
-        "use_filters": true
+        "db_id": "",
+        "use_filters": false
     },
     "sub_configs": {
         "ACADFilter": {
