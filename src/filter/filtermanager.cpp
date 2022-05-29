@@ -358,7 +358,7 @@ void FilterManager::showViewPointSlot (const ViewableDataConfig* vp)
         const json& data_sources  = data.at("data_sources");
 
         std::map<unsigned int, std::set<unsigned int>> ds_ids
-                = data_sources.get<std::map<unsigned int, std::set<unsigned int>>>();
+                = data_sources.get<std::map<unsigned int, std::set<unsigned int>>>(); // ds_id + line strs
 
         logdbg << "FilterManager: showViewPointSlot: load " << ds_ids.size() << " ds_ids";
 

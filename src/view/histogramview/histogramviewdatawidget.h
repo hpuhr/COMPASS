@@ -48,6 +48,9 @@ namespace EvaluationRequirementResult
     class SingleDubiousTrack;
     class JoinedDubiousTrack;
 
+    class SingleDubiousTarget;
+    class JoinedDubiousTarget;
+
     class SingleDetection;
     class JoinedDetection;
 

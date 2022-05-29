@@ -1281,10 +1281,10 @@ void ASTERIXImportTask::updateFileProgressDialog()
     if (!file_progress_dialog_)
     {
         file_progress_dialog_.reset(
-                    new QProgressDialog(("File '"+current_filename_+"'").c_str(), "Abort", 0, 100,
-                                        &COMPASS::instance().mainWindow()));
+                    new QProgressDialog(("File '"+current_filename_+"'").c_str(), "Abort", 0, 100));
         file_progress_dialog_->setWindowTitle("Importing ASTERIX Recording");
-        file_progress_dialog_->setWindowModality(Qt::WindowModal);
+        file_progress_dialog_->setWindowModality(Qt::ApplicationModal);
+        //postprocess_dialog.setWindowModality(Qt::ApplicationModal);
     }
 
     string text = "File '"+current_filename_+"'";

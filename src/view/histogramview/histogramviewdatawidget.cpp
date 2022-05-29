@@ -35,6 +35,8 @@
 
 #include "eval/results/dubious/dubioustracksingle.h"
 #include "eval/results/dubious/dubioustrackjoined.h"
+#include "eval/results/dubious/dubioustargetsingle.h"
+#include "eval/results/dubious/dubioustargetjoined.h"
 
 #include "eval/results/detection/joined.h"
 #include "eval/results/detection/single.h"
@@ -667,7 +669,10 @@ void HistogramViewDataWidget::updateFromResult(std::shared_ptr<EvaluationRequire
         ; //updateCountResult(static_pointer_cast<SingleExtraTrack>(result)); TODO
     else if (result->type() == "JoinedDubiousTrack")
         ; //updateCountResult(static_pointer_cast<JoinedExtraTrack>(result));
-
+    else if (result->type() == "SingleDubiousTarget")
+        ; //updateCountResult(static_pointer_cast<SingleExtraTrack>(result)); TODO
+    else if (result->type() == "JoinedDubiousTarget")
+        ; //updateCountResult(static_pointer_cast<JoinedExtraTrack>(result));
 
     else if (result->type() == "SingleDetection")
         updateCountResult(static_pointer_cast<SingleDetection>(result));

@@ -32,6 +32,7 @@
 #include "eval/requirement/extra/dataconfig.h"
 #include "eval/requirement/extra/trackconfig.h"
 #include "eval/requirement/dubious/dubioustrackconfig.h"
+#include "eval/requirement/dubious/dubioustargetconfig.h"
 #include "logger.h"
 
 #include <QInputDialog>
@@ -45,6 +46,7 @@ const std::map<std::string, std::string> Group::requirement_type_mapping_
 {
     {"EvaluationRequirementExtraDataConfig", "Extra Data"},
     {"EvaluationRequirementExtraTrackConfig", "Extra Track"},
+    {"EvaluationRequirementDubiousTargetConfig", "Dubious Target"},
     {"EvaluationRequirementDubiousTrackConfig", "Dubious Track"},
     {"EvaluationRequirementDetectionConfig", "Detection"},
     {"EvaluationRequirementIdentificationCorrectConfig", "Identification Correct"},
@@ -106,6 +108,16 @@ void Group::generateSubConfigurable(const std::string& class_id,
     {
         EvaluationRequirement::DubiousTrackConfig* config =
                 new EvaluationRequirement::DubiousTrackConfig(
+                    class_id, instance_id, *this, standard_, eval_man_);
+        logdbg << "EvaluationRequirementGroup: generateSubConfigurable: adding config " << config->name();
+
+        assert(!hasRequirementConfig(config->name()));
+        configs_.push_back(std::unique_ptr<EvaluationRequirement::BaseConfig>(config));
+    }
+    else if (class_id.compare("EvaluationRequirementDubiousTargetConfig") == 0)
+    {
+        EvaluationRequirement::DubiousTargetConfig* config =
+                new EvaluationRequirement::DubiousTargetConfig(
                     class_id, instance_id, *this, standard_, eval_man_);
         logdbg << "EvaluationRequirementGroup: generateSubConfigurable: adding config " << config->name();
 

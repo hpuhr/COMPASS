@@ -1362,6 +1362,33 @@
                                         }
                                     }
                                 },
+                                "EvaluationRequirementDubiousTargetConfig": {
+                                    "EvaluationRequirementDubiousTargetConfigDubious Target0": {
+                                        "parameters": {
+                                            "comment": "",
+                                            "dubious_prob": 0.05000000074505806,
+                                            "mark_primary_only": true,
+                                            "max_acceleration": 29.43000030517578,
+                                            "max_groundspeed_kts": 1333.0,
+                                            "max_rocd": 1000.0,
+                                            "max_turnrate": 30.0,
+                                            "maximum_comparison_time": 30.0,
+                                            "min_duration": 30.0,
+                                            "min_updates": 10,
+                                            "minimum_comparison_time": 1.0,
+                                            "name": "Dubious Target",
+                                            "prob": 0.8999999761581421,
+                                            "prob_check_type": 1,
+                                            "short_name": "DTGT",
+                                            "use_max_acceleration": true,
+                                            "use_max_groundspeed": true,
+                                            "use_max_turnrate": true,
+                                            "use_min_duration": true,
+                                            "use_min_updates": true,
+                                            "use_rocd": true
+                                        }
+                                    }
+                                },
                                 "EvaluationRequirementDubiousTrackConfig": {
                                     "EvaluationRequirementDubiousTrackConfigDubious0": {
                                         "parameters": {
@@ -1377,10 +1404,10 @@
                                             "min_duration": 30.0,
                                             "min_updates": 10,
                                             "minimum_comparison_time": 1.0,
-                                            "name": "Dubious",
+                                            "name": "Dubious Track",
                                             "prob": 0.8999999761581421,
                                             "prob_check_type": 1,
-                                            "short_name": "DT",
+                                            "short_name": "DTRK",
                                             "single_ds_id": 0,
                                             "use_max_acceleration": true,
                                             "use_max_groundspeed": true,

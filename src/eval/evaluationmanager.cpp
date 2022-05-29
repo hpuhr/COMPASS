@@ -441,6 +441,9 @@ bool EvaluationManager::canEvaluate ()
     if (!data_loaded_ || !hasCurrentStandard())
         return false;
 
+    if (!compass_.dbContentManager().hasAssociations())
+        return false;
+
     bool has_anything_to_eval = false;
 
     for (auto& sec_it : sectorsLayers())
@@ -472,6 +475,9 @@ std::string EvaluationManager::getCannotEvaluateComment()
 
     if (!anySectorsWithReq())
         return "Please set requirements for at least one sector";
+
+    if (!compass_.dbContentManager().hasAssociations())
+        return "Please run target report association";
 
     if (!data_loaded_)
         return "Please select and load reference & test data";
@@ -2282,15 +2288,15 @@ nlohmann::json::object_t EvaluationManager::getBaseViewableDataConfig ()
 
     // set data sources
 
-    std::set<unsigned int> data_sources;
+    std::map<unsigned int, std::set<unsigned int>> data_sources;
 
     for (auto& src_it : data_sources_ref_)
         if (src_it.second)
-            data_sources.insert(src_it.first);
+            data_sources[src_it.first].insert(line_id_ref_);
 
     for (auto& src_it : data_sources_tst_)
         if (src_it.second)
-            data_sources.insert(src_it.first);
+            data_sources[src_it.first].insert(line_id_tst_);
 
     data["data_sources"] = data_sources;
 
@@ -2309,7 +2315,7 @@ nlohmann::json::object_t EvaluationManager::getBaseViewableNoDataConfig ()
 {
     nlohmann::json data;
 
-    data["data_sources"] = vector<unsigned int>{};
+    data["data_sources"] = std::map<unsigned int, std::set<unsigned int>>{};
 
     return data;
 }
