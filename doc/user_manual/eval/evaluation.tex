@@ -300,6 +300,8 @@ The following requirements exist:
 \end{center}
 \ \\
 
+%TODOV7 add dubious tracks & targets
+
 If a requirement is clicked, it's configuration widget is shown on the right hand side. \\
 
 Each requirement has the following common attributes:
@@ -385,9 +387,11 @@ The 'Filter UTNs' dialog can be used to dynamically filter UTNs based on the con
 \item Remove Primary-Only Targets: Removes primary-only targets (w/o secondary attributes)
 \item Remove Mode A/C Code onlys: Removes targets without Mode S attributes
 \item Remove by Mode A Code: Removes targets having a Mode A code given in the list
+\item Mode A Code Blacklist: Whether the Mode A codes should be used as blacklist or whitelist
 \item Remove by Mode C Code: Removes targets having a Mode C code smaller than the given value
 \item Remove by Target Address: Removes targets having a Mode S target address given in the list
-\item Remove by Non-Detection of DBContent: Removes targets not being detected by a given DBOObject (e.g. sensor type)
+\item Target Address Blacklist: Whether the Target Addresses should be used as blacklist or whitelist
+\item Remove by Non-Detection of DBContent: Removes targets not being detected by a given DBContent
 \end{itemize}
 \ \\
 

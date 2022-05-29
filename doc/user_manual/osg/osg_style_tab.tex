@@ -15,7 +15,7 @@ In the 'Style' tab, several elements exist:
  \item Connect None Height: If groups are connected, whether target reports with not height information should be connected
  \item Blend Mode: Defines the drawing blend mode, allowing clearer symbols (contour) or colors (src-over).
  \item Style: Defines how geometry is styled. Please refer to Section \nameref{sec:style} for details.
- \item Render Order: Defines the drawing order of DBObjects. To bottom one is drawn first, the top one last (over all others)
+ \item Render Order: Defines the drawing order of DBContents. To bottom one is drawn first, the top one last (over all others)
  \item Update button: Triggers a redraw or reload of the geometry, becomes available after a change if needed.
 \end{itemize} 
 
@@ -27,7 +27,7 @@ In this selection the way layers are generated can be changed. \\\\
 The following items can be present in the list:\\
 
 \begin{itemize}
- \item DBObject: DBObject type, e.g. Radar, MLAT, ...
+ \item DBContent: DBContent type, e.g. Radar, MLAT, ...
  \item ds\_id: Data source identifier, e.g Radar1, Radar2, ARTAS
  \item callsign: Mode S Target Identification
  \item target\_addr: Mode S Target Address
@@ -43,24 +43,26 @@ If no values exist in the data for a layer, this data is grouped in the layer 'N
 
 The following modes exist: \\
 
+%TODOV7 correct
+
 \begin{itemize}
- \item DBObject
- \item DBObject:ds\_id
- \item DBObject:ds\_id:callsign
- \item DBObject:ds\_id:target\_addr
- \item DBObject:ds\_id:track\_num
- \item DBObject:ds\_id:mode3a\_code
- \item UTN:DBObject
- \item UTN:DBObject:ds\_id
- \item UTN:DBObject:ds\_id:target\_addr
- \item UTN:DBObject:ds\_id:track\_num
- \item UTN:DBObject:ds\_id:mode3a\_code
- \item callsign:DBObject
- \item callsign:DBObject:ds\_id 
- \item mode3a\_code:DBObject
- \item mode3a\_code:DBObject:ds\_id
- \item target\_addr:DBObject
- \item target\_addr:DBObject:ds\_id
+ \item DBContent
+ \item DBContent:ds\_id
+ \item DBContent:ds\_id:callsign
+ \item DBContent:ds\_id:target\_addr
+ \item DBContent:ds\_id:track\_num
+ \item DBContent:ds\_id:mode3a\_code
+ \item UTN:DBContent
+ \item UTN:DBContent:ds\_id
+ \item UTN:DBContent:ds\_id:target\_addr
+ \item UTN:DBContent:ds\_id:track\_num
+ \item UTN:DBContent:ds\_id:mode3a\_code
+ \item callsign:DBContent
+ \item callsign:DBContent:ds\_id 
+ \item mode3a\_code:DBContent
+ \item mode3a\_code:DBContent:ds\_id
+ \item target\_addr:DBContent
+ \item target\_addr:DBContent:ds\_id
 \end{itemize}
 \  \\
 
@@ -70,29 +72,29 @@ Please also note that after a change in the Layer mode a redraw has to be trigge
 
 As examples, a few values for the Layer mode are listed. \\
 
-\paragraph{DBObject:ds\_id}
+\paragraph{DBContent:ds\_id}
 
-In this layer mode the DBObject name is used to create the first layer, with sub-layers for each data source. This is the default mode.
+In this layer mode the DBContent name is used to create the first layer, with sub-layers for each data source. This is the default mode.
 
 \begin{figure}[H]
     \center
     \includegraphics[width=8cm,frame]{figures/osgview_group_dbo_ds.png}
-  \caption{OSG View layer mode DBObject:ds\_id}
+  \caption{OSG View layer mode DBContent:ds\_id}
 \end{figure}
 
-\paragraph{mode3a\_code:DBObject}
+\paragraph{mode3a\_code:DBContent}
 
-In this layer mode the Mode 3/A code is used to create the first layer, with sub-layers for each DBObject.
+In this layer mode the Mode 3/A code is used to create the first layer, with sub-layers for each DBContent.
 
 \begin{figure}[H]
 \center
     \includegraphics[width=8cm,frame]{figures/osgview_group_ma_dbo.png}
-  \caption{OSG View layer mode mode3a\_code:DBObject}
+  \caption{OSG View layer mode mode3a\_code:DBContent}
 \end{figure}
 
-\paragraph{UTN:DBObject}
+\paragraph{UTN:DBContent}
 
-In this layer mode the UTN is used to create the first layer, with sub-layers for each DBObject. All target reports without a UTN (not used by ARTAS) are grouped into layer 'None'.  \\
+In this layer mode the UTN is used to create the first layer, with sub-layers for each DBContent. All target reports without a UTN (not used by ARTAS) are grouped into layer 'None'.  \\
 
 An example of this mode is shown in the styling section.
 
@@ -108,13 +110,13 @@ Please note that connection lines for target reports with a time-of-day differen
 This mode (normally) makes sense in one of the following Layer modes:
 
 \begin{itemize}
- \item DBObject:ds\_id:callsign
- \item DBObject:ds\_id:target\_addr
- \item DBObject:ds\_id:track\_num
- \item UTN:DBObject:ds\_id:target\_addr
- \item UTN:DBObject:ds\_id:track\_num
- \item callsign:DBObject:ds\_id 
- \item target\_addr:DBObject:ds\_id
+ \item DBContent:ds\_id:callsign
+ \item DBContent:ds\_id:target\_addr
+ \item DBContent:ds\_id:track\_num
+ \item UTN:DBContent:ds\_id:target\_addr
+ \item UTN:DBContent:ds\_id:track\_num
+ \item callsign:DBContent:ds\_id 
+ \item target\_addr:DBContent:ds\_id
 \end{itemize}
 \  \\
 
@@ -160,7 +162,7 @@ There are two types of style presets:
 The following layer-based style presets exist:
 \begin{itemize}
  \item Default: All data is shown in the same style
- \item Layer Color per DBObject: Style is defined by DBObject type
+ \item Layer Color per DBContent: Style is defined by DBContent type
  \item Layer Color per UTN: Style is defined by UTN value
  \item Layer Color per callsign: Style is defined by callsign value
  \item Layer Color per ds\_id: Style is defined by data source
@@ -329,7 +331,7 @@ In this style, one can change the following parameters:
 
 \subsubsection{Render Order}
 
-In the render order widget, the drawing order of the drawn geometry is specified. The one at the top is drawn last (over all others), so it is useful to move the most important DBObject (for the current inspection) to the top.
+In the render order widget, the drawing order of the drawn geometry is specified. The one at the top is drawn last (over all others), so it is useful to move the most important DBContent (for the current inspection) to the top.
 
 \begin{figure}[H]
     \includegraphics[width=8cm,frame]{figures/osgview_render_order.png}
@@ -338,7 +340,7 @@ In the render order widget, the drawing order of the drawn geometry is specified
 
 Using the 'Order By' checkbox, the drawing order can be defined based on:
 \begin{itemize}
- \item DBObject: Data-source type (e.g. Tracker, Radar, ...)
+ \item DBContent: Data-source type (e.g. Tracker, Radar, ...)
  \item ds\_id: Data-source (e.g. Tracker1, Tracker2, Radar3, ...)
 \end{itemize}
 \ \\
