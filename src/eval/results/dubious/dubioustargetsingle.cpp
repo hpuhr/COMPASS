@@ -294,14 +294,15 @@ void SingleDubiousTarget::reportDetails(EvaluationResultsReport::Section& utn_re
     EvaluationResultsReport::SectionContentTable& utn_req_details_table =
             utn_req_section.getTable(tr_details_table_name_);
 
+    unsigned int detail_cnt = 0;
     for (auto& update : detail_.updates_)
     {
         utn_req_details_table.addRow(
                     {String::timeStringFromDouble(update.tod_).c_str(),
                      detail_.utn_,
                      update.dubiousReasonsString().c_str()}, // "Comment"
-                    this, {detail_.utn_});
-
+                    this, {detail_cnt});
+        ++detail_cnt;
     }
 }
 

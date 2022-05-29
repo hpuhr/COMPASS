@@ -22,6 +22,8 @@
 #include "evaluationdata.h"
 #include "stringconv.h"
 
+#include <cmath>
+
 using namespace std;
 using namespace Utils;
 
@@ -109,10 +111,8 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTarget::evaluate (
         detail_.left_sector_ = false;
         ++num_pos_inside;
 
-        if (detail_.first_inside_ && tod - detail_.tod_end_ > 300.0) // not first time and time gap too large, skip
-        {
+        if (!detail_.first_inside_ && tod - detail_.tod_end_ > 300.0) // not first time and time gap too large, skip
             continue;
-        }
 
         ++detail_.num_pos_inside_;
 
@@ -207,18 +207,50 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTarget::evaluate (
     }
 
     has_last_tod = false;
+
+    DubiousTargetUpdateDetail* last_update {nullptr};
+    Transformation trafo_;
+
+    bool ok;
+    double x_pos, y_pos;
+    double distance, t_diff, spd;
+
     for (DubiousTargetUpdateDetail& update : detail_.updates_)
     {
         if (!do_not_evaluate_target && all_updates_dubious) // mark was primarty/short track if required
             update.dubious_comments_ = all_updates_dubious_reasons;
 
-        if (!do_not_evaluate_target && use_max_groundspeed_ && target_data.hasTstMeasuredSpeedForTime(update.tod_)
-                && target_data.tstMeasuredSpeedForTime(update.tod_) > max_groundspeed_kts_)
+        if (!do_not_evaluate_target && use_max_groundspeed_)
         {
-            update.dubious_comments_["Spd"] =
-                    String::doubleToStringPrecision(target_data.tstMeasuredSpeedForTime(update.tod_), 1);
+            if (target_data.hasTstMeasuredSpeedForTime(update.tod_)
+                    && target_data.tstMeasuredSpeedForTime(update.tod_) > max_groundspeed_kts_)
+            {
+                update.dubious_comments_["MSpd"] =
+                        String::doubleToStringPrecision(target_data.tstMeasuredSpeedForTime(update.tod_), 1);
 
-            ++dubious_groundspeed_found;
+                ++dubious_groundspeed_found;
+            }
+            else if (last_update) // check last speed to last update
+            {
+                tie(ok, x_pos, y_pos) = trafo_.distanceCart(
+                            last_update->pos_.latitude_, last_update->pos_.longitude_,
+                            update.pos_.latitude_, update.pos_.longitude_);
+                distance = sqrt(pow(x_pos, 2) + pow(y_pos, 2));
+                t_diff = update.tod_ - last_update->tod_;
+                assert (t_diff >= 0);
+
+                if (t_diff > 0)
+                {
+                    spd = M_S2KNOTS * distance / t_diff;
+
+                    if(spd > max_groundspeed_kts_)
+                    {
+                        update.dubious_comments_["CSpd"] =
+                                String::doubleToStringPrecision(spd, 1);
+                        ++dubious_groundspeed_found;
+                    }
+                }
+            }
         }
 
         if (has_last_tod)
@@ -280,6 +312,8 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTarget::evaluate (
                     }
                 }
             }
+
+            last_update = &update;
         }
 
         // done
