@@ -1,15 +1,7 @@
 \chapter{Evaluation}
 \label{sec:eval} 
 
-\begin{figure}[H]
-    \hspace*{-2.5cm}
-    \includegraphics[width=19cm]{figures/eval.png}
-  \caption{Evaluation tab}
-\end{figure}
-
 The 'Evaluation' tab allows adapting/defining requirement-based standards  and compliance assessment of said standards. \\
-
-Please \textbf{note} . \\
 
 \section{Pre-Requisites \& Limitations}
 \label{sec:eval_prereq} 
@@ -24,7 +16,7 @@ Please \textbf{note} . \\
 
 While it is possible to manually remove single targets from the evaluation, the usage of correct reference data is paramount for the significance of the evaluation results. \\
 
-\includegraphics[width=0.5cm]{../../data/icons/hint.png} \textbf{Please note that the evaluation feature is currently being tested/verified and should be used for such purposes only. It should not be used as a sole basis for decision making - especially not without manually verifying the evaluation results.} \\
+\includegraphics[width=0.5cm]{../../data/icons/hint.png} \textbf{Please note that the evaluation feature should not be used as a sole basis for decision making - especially not without manually verifying the evaluation results.} \\
 
 There will be improvements in the next releases, and further verification of the results by the author and other users.
 
@@ -58,9 +50,9 @@ Also, since target secondary attributes (currently only Mode S address) are also
 \label{sec:eval_overview} 
 
 \begin{figure}[H]
-  \hspace*{-2cm}
-    \includegraphics[width=18cm,frame]{figures/eval_overview.png}
-  \caption{Evaluation overview}
+    \hspace*{-2.5cm}
+    \includegraphics[width=19cm]{figures/eval.png}
+  \caption{Evaluation tab}
 \end{figure}
 
 At the top, 6 tabs exist:
@@ -101,13 +93,15 @@ At the top, the 'Data Selection' can be performed, by selecting:
 \begin{itemize}  
 \item Reference Data:
 \begin{itemize}  
-\item DBObject: Any DBObject existing in the database
+\item DBContent: Any DBContent existing in the database
 \item Data source checkboxes: Which data sources to use
+\item Line ID: Which line to use from the data sources
 \end{itemize}
 \item Test Data:
 \begin{itemize}  
-\item DBObject: Any DBObject existing in the database
+\item DBContent: Any DBContent existing in the database
 \item Data source checkboxes: Which data sources to use
+\item Line ID: Which line to use from the data sources
 \end{itemize}
 \end{itemize}
 \ \\
@@ -393,7 +387,7 @@ The 'Filter UTNs' dialog can be used to dynamically filter UTNs based on the con
 \item Remove by Mode A Code: Removes targets having a Mode A code given in the list
 \item Remove by Mode C Code: Removes targets having a Mode C code smaller than the given value
 \item Remove by Target Address: Removes targets having a Mode S target address given in the list
-\item Remove by Non-Detection of DBObject: Removes targets not being detected by a given DBOObject (e.g. sensor type)
+\item Remove by Non-Detection of DBContent: Removes targets not being detected by a given DBOObject (e.g. sensor type)
 \end{itemize}
 \ \\
 
