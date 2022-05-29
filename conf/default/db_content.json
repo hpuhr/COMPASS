@@ -150,7 +150,16 @@
                         "12990": 3,
                         "25005": 3,
                         "25006": 2,
-                        "37494": 0
+                        "30602": 1,
+                        "30603": 3,
+                        "30604": 3,
+                        "30649": 3,
+                        "30650": 3,
+                        "37494": 0,
+                        "511": 0,
+                        "512": 1,
+                        "547": 3,
+                        "8681": 1
                     }
                 }
             }
@@ -1527,6 +1536,27 @@
                     }
                 }
             },
+            "MetaVariableTrack Begin0": {
+                "parameters": {
+                    "name": "Track Begin"
+                },
+                "sub_configs": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT062Track Begin0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT062",
+                                "variable_name": "Track Begin"
+                            }
+                        },
+                        "VariableDefinitionRefTrajTrack Begin0": {
+                            "parameters": {
+                                "dbcontent_name": "RefTraj",
+                                "variable_name": "Track Begin"
+                            }
+                        }
+                    }
+                }
+            },
             "MetaVariableTrack Climbing/Descending0": {
                 "parameters": {
                     "name": "Track Climbing/Descending"
@@ -1549,6 +1579,39 @@
                             "parameters": {
                                 "dbcontent_name": "CAT062",
                                 "variable_name": "MOM Vertical Rate"
+                            }
+                        }
+                    }
+                }
+            },
+            "MetaVariableTrack Coasting0": {
+                "parameters": {
+                    "name": "Track Coasting"
+                },
+                "sub_configs": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT010Track Coasting0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT010",
+                                "variable_name": "Track Coasting"
+                            }
+                        },
+                        "VariableDefinitionCAT020Track Coasted0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT020",
+                                "variable_name": "Track Coasted"
+                            }
+                        },
+                        "VariableDefinitionCAT062Coasting0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT062",
+                                "variable_name": "Coasting"
+                            }
+                        },
+                        "VariableDefinitionRefTrajCoasting0": {
+                            "parameters": {
+                                "dbcontent_name": "RefTraj",
+                                "variable_name": "Coasting"
                             }
                         }
                     }
