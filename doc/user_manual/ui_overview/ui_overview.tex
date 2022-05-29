@@ -129,29 +129,32 @@ Post-processing tasks can be performed using the Process menu. This menu is only
 \subfile{ui_import_data}
 \subfile{ui_configuration}
 \subfile{ui_postprocess}
-\subfile{ui_use_cases}
-
-% \subfile{task_open_database}
+\subfile{ui_data_sources}
+\subfile{ui_filters}
+%\subfile{ui_use_cases}
 
 % \subfile{task_manage_schema}
 % \subfile{task_manage_dbo}
 
-% \subfile{task_import_view_points}
-% \subfile{task_import_asterix}
 % \subfile{task_import_json}
-% \subfile{task_import_mysql}
-% \subfile{task_import_gps}
 
-% \subfile{task_manage_datasources}
-% \subfile{task_manage_sectors}
+\subsection{Views}
+The 'Add View' button \includegraphics[width=0.5cm,frame]{../../data/icons/crosshair_fat.png} on the top right in each window allows adding views to the current window or in a new window. \\
 
-% \subfile{task_calc_radar_pos}
+Each View is contained in a tab within a parent window.  At startup, per default only the main window exists, which also holds
+a ListBox view. If the main window is closed, the COMPASS client shuts down. New Views can be added using the 'Add View' button, which opens a pull-down menu. Each View can either be added to the main window ('Add Here') or into a new window ('Add in New Window'. When added, a new tab exists in the containing window. \\
 
-% \subfile{task_postprocess}
+New Views can be added either to currently existing windows as new tabs, or to a newly opened window. A window can be closed either by the close button in the window decoration, which discards all contained Views within the window.  \\
 
-% \subfile{task_associate_tr}
-% \subfile{task_associate_artas_tris}
+To close a single View, one can use the \includegraphics[width=0.5cm,frame]{../../data/icons/edit.png} button in the tab header, which frees up all its allocated resources. \\
 
-% \subfile{task_starting}
+Each View adds its required variables to the loading list for the database. During a loading process, the loading status  of a View is shown in the management tab.\\
 
+Currently, the following Views exist:
+\begin{itemize}
+ \item \nameref{sec:histo_view}
+ \item \nameref{sec:listbox_view}
+ \item \nameref{sec:osg_view}
+ \item \nameref{sec:scatter_view}
+\end{itemize}
 

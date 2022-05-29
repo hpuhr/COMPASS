@@ -8,9 +8,9 @@ Each target found is identified by a UTN, and groups together all reference/trac
 Please note that if usage of UTNs is not needed, these step does not have to be performed. If usage of the evaluation feature is wanted, running this task is required. \\
 
 \begin{figure}[H]
-  \hspace*{-2.5cm}
-    \includegraphics[width=19cm]{figures/tr_association_config.png}
-  \caption{Task: Associate Target Reports}
+  \center
+    \includegraphics[width=16cm]{figures/tr_association_config.png}
+  \caption{Associate Target Reports}
 \end{figure}
 
 The configuration of the task requires knowledge of the internals of how the associations are made. As a brief description, the following steps are performed:
@@ -40,7 +40,7 @@ Common parameters:
 
 The other parameters are discussed in following sub-sections.
 
-\subsection{Reference/Tracker UTN Creation}
+\subsubsection{Reference/Tracker UTN Creation}
 
 Track/Track Association Parameters:
 \begin{table}[H]
@@ -103,7 +103,7 @@ The exact method discussion will be added at a later time, since the algorithms 
 
 After these steps, for each target which can be created by the simple score-based association method will be used to additionally associate sensor target reports (non Reference/Tracker based target reports), as discussed in the next section.
 
-\subsection{Sensor UTN Creation}
+\subsubsection{Sensor UTN Creation}
 
 Sensor/Track Association Parameters:
 \begin{table}[H]
@@ -135,13 +135,13 @@ The following steps are performed for each sensor data source:
 \end{itemize}
 \ \\
 
-\subsection{Dubious Targets}
+\subsubsection{Dubious Targets}
 
 The dubious target check is solely based on a simple maximum speed given all associated Reference/Tracker target reports. It should be used to detect/mark possibly wrong associations, to investigate such targets later and, if possible, resolve such issues using different parameter values. \\
 
 Please note that in a special case where target reports from difference Reference/Tracker source are very close in time this check can generate a large number of false positives and should be disabled. For this reason the default value was set to a disproportionately high value.
 
-\subsection{Discussion}
+\subsubsection{Discussion}
 
 The user should be aware that, while this association feature is quite an improvement over the previous method, it is still somewhat limited. It strongly depends on the correctness of Mode S addresses, as well as the Reference/Tracker information (track number, secondary information and position information). If the mentioned information is erroneous, the made association will be sub-optimal or plainly wrong. \\
 
@@ -149,9 +149,9 @@ For the Sensor UTN Creation, the correctness of the associations strongly depend
 
 Also, for association of non Mode S sensor target reports a trade-off has to be made in the 'Maximum Acceptable Distance' parameter, especially if they are primary-only. It should be set within the limits of Reference/Tracker error plus maximum sensor error (which can still include radar bias') and the used target separation minima. This is of couse not well-suited for strongly different sensors accuracies and seperations (e.g. when mixing ground and air surveillance data). \\
 
-\subsection{Running}
+\subsubsection{Running}
 
-To run the task, click the 'Run Current Task' button. After the assocations are saved, the task is done:
+To run the task, click the 'Run' button. After the assocations are saved, the task is done:
 
 \begin{figure}[H]
   \center
