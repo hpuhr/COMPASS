@@ -37,6 +37,10 @@ To allow displaying data from different DBContent in the same system, so-called 
 
 A data source is defined by its name and SAC/SIC, and has a certain data source type (DSType). During an ASTERIX import, e.g. data source 'Wuerzburg' of DSType 'Radar' can be defined, and the respective DBContent CAT048 inserted into the database.
 
+\subsection*{Data Source Lines}
+
+For each data source, up to 4 different lines can be used (L1, L2, L3, L4). Such lines can either be used to distinguish data recorded from different network lines, but also to loaded different recording files for the same sensor. E.g. different tracker runs can be imported and analyzed by importing them into different data source lines.
+
 
 \subsection*{Unique Target Numbers}
 A \textbf{U}nique \textbf{T}arget \textbf{N}umber (UTN) groups together system track updates and/or sensor target reports.

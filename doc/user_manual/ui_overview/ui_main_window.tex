@@ -9,30 +9,43 @@ When the application is started for the first time, the main window is shown as 
   \caption{Main Window}
 \end{figure}
 
-TODO short usage story, access db, add / process data, load/display data, close app \\
-TODO links \\
+In the simplest use case, the main menubar allows to open or create a database and importing data. After this step, data of interest can be chosen using the main tab area, and loaded from the database using the 'Load' button in the main statusbar. \\
+
+The loaded data is then shown in Views located either in the main tab area or in other windows. \\
+
+The values set in the 'Data Sources' and 'Filter' tabs define the dataset loaded from the database into memory (RAM). Only the data required by the application is loaded into memory.\\
+
+Only one dataset can exist at a time. At the beginning of a loading process, the old dataset is cleared, and a new one is filled sequentially from the database. This single dataset is distributed to all existing views. \\
+
+When new Views are added, or Views require additional data, a manual re-loaded has to be performed by the user. \\
+
+To close the application either the 'File' menu can be used, or the close button in the main window decoration. \\
+
+Please \textbf{note} that using the close button in windows other than the main window only removes the respective Views, but does not close the application.
+
+Please \textbf{note} that depending on the application status, some parts of the UI are inaccessible, e.g. are only available depending whether a database was opened.
 
 \subsection{Main Menubar}
 
-TODO story db -> worflow until loading/display data \\
+A common workflow is to open or create a database using the 'File' menu. If new data is to be imported, this can be done using the 'Import' menu. After all data was imported, the 'Process' menu can be used to post-process the data (if wanted). \\
 
 At the top exists a main menubar, which allows access to the following groups:
 
 \begin{itemize}
- \item File: Open/close a database, quit application
- \item Import: Import ASTERIX, NMEA data
- \item Configuration: Configure data sources, sectors
- \item Process: Various processing tasks for imported data
+ \item \nameref{sec:ui_overview_file_menu}: Open/close a database, quit application
+ \item \nameref{sec:ui_overview_import_menu}: Import ASTERIX, NMEA data
+ \item \nameref{sec:ui_overview_config_menu}: Configure data sources, sectors
+ \item \nameref{sec:ui_overview_process_menu}: Various processing tasks for imported data
 \end{itemize}
 \  \\
 
 \subsection{Main Tab Area}
 
-TODO story what data is loaded into what views. views in other windows. add views \\
+When a database was opened and data was imported, the main tab area allows confuration what data should be loaded using the 'Data Sources' and 'Filter' tabs. Additional main features are also located here (Evaluation and View Points), after which Views are added as tabs. \\
 
 In the center, a number of tabs exist:
 \begin{itemize}
- \item Data Sources: Select which data sources should be loaded
+ \item Data Sources: Select which data sources and lines should be loaded
  \item Filter: Filter which data should be loaded
  \item Evaluation: Evaluate data according to given requirements
  \item View Points: Show/edit specific cases saved as View Points
@@ -40,9 +53,15 @@ In the center, a number of tabs exist:
 \end{itemize}
 \  \\
 
+To add additional views, the \includegraphics[width=0.5cm,frame]{../../data/icons/crosshair_fat.png} button can be used. Views can be added either to the window in which the buttons was clicked ('Add Here') or in a new window ('Add In New Window'). \\
+
+Single views can be removed using the \includegraphics[width=0.5cm,frame]{../../data/icons/edit.png} buttons in the tab (near the Views name). \\
+
+Please \textbf{note} that using the close button in windows other than the main window only removes the respective Views, but does not close the application.
+
 \subsection{Main Statusbar}
 
-TODO shows status/mode, allows loading. views also load buttons \\
+The main statusbar shows general information and contains the 'Load' button to trigger a loading process. \\
 
 In the bottom, the following is shown:
 
@@ -54,9 +73,8 @@ In the center, a number of tabs exist:
 \end{itemize}
 \  \\
 
-\subsection{Other Windows}
 
-TODO add views, close other window deletes views, not close app \\
 
-Depending on the status, some parts of the UI are inaccessible, e.g. are only available depending whether a database was opened.
+
+
 

@@ -8,6 +8,7 @@ In this section, the main GUI components are described, to give an overview and 
 \section{Main Menu}
 
 \subsection{File Menu}
+\label{sec:ui_overview_file_menu}
 
 Databases can be created, opened and closed using the File menu.
 
@@ -37,8 +38,9 @@ After a database was opened, the 'Import' menu becomes available, and the main w
 \end{figure}
 
 \subsection{Import Menu}
+\label{sec:ui_overview_import_menu}
 
-Data can be imported into the database using the Import menu.
+Data can be imported into the database using the Import menu. This menu is only accessable if a database was opened.
 
 \begin{figure}[H]
   \center
@@ -47,15 +49,31 @@ Data can be imported into the database using the Import menu.
 \end{figure}
 
 \begin{itemize}
- \item ASTERIX Recording: Import ASTERIX recording file, see \nameref{sec:ui_import_asterix}
- \item Recent ASTERIX Recording: Import recent ASTERIX recording file, see \nameref{sec:ui_import_asterix}
- \item ASTERIX From Network: Import ASTERIX from network interfaces in Live mode, see \nameref{sec:ui_import_asterix_network}
- \item GPS Trail: Import (D)GPS trail from NMEA file, see \nameref{sec:ui_import_gps}
- \item View Points: Import View Points definition file, see \nameref{sec:ui_import_viewpoints}
+ \item ASTERIX Recording: Import ASTERIX recording file
+ \begin{itemize}
+ \item see \nameref{sec:ui_import_asterix}
+ \end{itemize}
+ \item Recent ASTERIX Recording: Import recent ASTERIX recording file
+  \begin{itemize}
+ \item see \nameref{sec:ui_import_asterix}
+ \end{itemize}
+ \item ASTERIX From Network: Import ASTERIX from network interfaces in Live mode
+  \begin{itemize}
+ \item see \nameref{sec:ui_import_asterix_network}
+ \end{itemize}
+ \item GPS Trail: Import (D)GPS trail from NMEA file
+  \begin{itemize}
+ \item see \nameref{sec:ui_import_gps}
+ \end{itemize}
+ \item View Points: Import View Points definition file
+  \begin{itemize}
+ \item see \nameref{sec:ui_import_viewpoints}
+ \end{itemize}
 \end{itemize}
 \  \\
 
 \subsection{Configuration Menu}
+\label{sec:ui_overview_config_menu}
 
 Data sources and sectors can be configurated using the Configuration menu. Also, the current Meta variables can be inspected.
 
@@ -67,14 +85,24 @@ Data sources and sectors can be configurated using the Configuration menu. Also,
 
 \begin{itemize}
  \item Data Sources: Configure data sources
+  \begin{itemize}
+ \item see \nameref{sec:ui_configure_data_sources}
+ \end{itemize}
  \item Meta Variables: Display current Meta variables
+  \begin{itemize}
+ \item see \nameref{sec:configure_meta_vars}
+ \end{itemize}
  \item Sectors: Configure sectors in the database
+  \begin{itemize}
+ \item see \nameref{sec:ui_configure_sectors}
+ \end{itemize}
 \end{itemize}
 \  \\
 
 \subsection{Process Menu}
+\label{sec:ui_overview_process_menu}
 
-Post-processing tasks can be performed using the Process menu.
+Post-processing tasks can be performed using the Process menu. This menu is only accessable if a database was opened.
 
 \begin{figure}[H]
   \center
@@ -84,8 +112,17 @@ Post-processing tasks can be performed using the Process menu.
 
 \begin{itemize}
  \item Calculate Radar Plot Positions: (Re-)Calculate Radar plot position information
+   \begin{itemize}
+ \item see \nameref{sec:ui_proc_radar_plot_pos}
+ \end{itemize}
  \item Calculate Associations: Find unique targets and associate target reports
+   \begin{itemize}
+ \item see \nameref{sec:task_associate_tr}
+ \end{itemize}
  \item Calculate Associations from ARTAS: Find targets based on ARTAS tracks and associate target reports based on ARTAS TRI information
+   \begin{itemize}
+ \item see \nameref{sec:task_associate_artas_tris}
+ \end{itemize}
 \end{itemize}
 \  \\
 
