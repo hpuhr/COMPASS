@@ -44,8 +44,8 @@ ConfigurationDataSource::ConfigurationDataSource(const std::string& class_id, co
 
     assert (name_.size());
 
-    if (has_short_name_)
-        assert (short_name_.size());
+    if (has_short_name_ && !short_name_.size())
+        has_short_name_ = false;
 
 }
 
