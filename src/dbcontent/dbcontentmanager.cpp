@@ -482,6 +482,7 @@ void DBContentManager::addLoadedData(std::map<std::string, std::shared_ptr<Buffe
 
     if (something_changed)
     {
+        updateNumLoadedCounts();
         emit loadedDataSignal(data_, false);
     }
 }
@@ -786,6 +787,8 @@ void DBContentManager::finishInserting()
             emit loadedDataSignal(data_, true);
         else if (had_data)
             COMPASS::instance().viewManager().clearDataInViews();
+
+        updateNumLoadedCounts();
     }
 
     COMPASS::instance().dataSourceManager().updateWidget();
@@ -1017,6 +1020,37 @@ void DBContentManager::cutCachedData()
     for (auto& buf_it : tmp_data)
         if (!buf_it.second->size())
             data_.erase(buf_it.first);
+}
+
+void DBContentManager::updateNumLoadedCounts()
+{
+    loginf << "DBContentManager: updateNumLoadedCounts";
+
+    // ds id->dbcont->line->cnt
+    std::map<unsigned int, std::map<std::string,
+            std::map<unsigned int, unsigned int>>> loaded_counts;
+
+    for (auto& buf_it : data_)
+    {
+        assert (metaCanGetVariable(buf_it.first, DBContent::meta_var_datasource_id_));
+        assert (metaCanGetVariable(buf_it.first, DBContent::meta_var_line_id_));
+
+        Variable& ds_id_var = metaGetVariable(buf_it.first, DBContent::meta_var_datasource_id_);
+        Variable& line_id_var = metaGetVariable(buf_it.first, DBContent::meta_var_line_id_);
+
+        NullableVector<unsigned int>& ds_id_vec = buf_it.second->get<unsigned int>(ds_id_var.name());
+        NullableVector<unsigned int>& line_id_vec = buf_it.second->get<unsigned int>(line_id_var.name());
+
+        assert (ds_id_vec.isNeverNull());
+        assert (line_id_vec.isNeverNull());
+
+        unsigned int buffer_size = buf_it.second->size();
+
+        for (unsigned int cnt=0; cnt < buffer_size; ++cnt)
+            loaded_counts[ds_id_vec.get(cnt)][buf_it.first][line_id_vec.get(cnt)] += 1;
+    }
+
+    COMPASS::instance().dataSourceManager().setLoadedCounts(loaded_counts);
 }
 
 

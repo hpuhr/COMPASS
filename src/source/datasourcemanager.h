@@ -91,6 +91,9 @@ public:
     void deleteAllConfigDataSources();
     void exportDataSources(const std::string& filename);
 
+    void setLoadedCounts(std::map<unsigned int, std::map<std::string,
+                         std::map<unsigned int, unsigned int>>> loaded_counts); // ds id->dbcont->line->cnt
+
     bool loadWidgetShowCounts() const;
     void loadWidgetShowCounts(bool value);
 

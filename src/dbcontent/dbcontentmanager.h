@@ -207,6 +207,8 @@ protected:
     void filterDataSources();
     void cutCachedData();
 
+    void updateNumLoadedCounts(); // from data_
+
     void loadMaxRecordNumber();
     void loadMaxRefTrajTrackNum();
 };

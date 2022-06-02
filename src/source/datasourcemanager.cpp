@@ -253,6 +253,33 @@ void DataSourceManager::exportDataSources(const std::string& filename)
     m_info.exec();
 }
 
+// ds id->dbcont->line->cnt
+void DataSourceManager::setLoadedCounts(std::map<unsigned int, std::map<std::string,
+                                        std::map<unsigned int, unsigned int>>> loaded_counts)
+{
+    // clear num loaded
+
+    for (auto& db_src_it : db_data_sources_)
+        db_src_it->clearNumLoaded();
+
+    for (auto ds_id_it : loaded_counts)
+    {
+        assert (hasDBDataSource(ds_id_it.first));
+        DBDataSource& src = dbDataSource(ds_id_it.first);
+
+        for (auto dbcont_it : ds_id_it.second)
+        {
+            for (auto line_it : dbcont_it.second)
+            {
+                src.addNumLoaded(dbcont_it.first, line_it.first, line_it.second);
+            }
+        }
+    }
+
+    if (load_widget_ && load_widget_show_counts_)
+        load_widget_->updateContent();
+}
+
 bool DataSourceManager::loadWidgetShowCounts() const
 {
     return load_widget_show_counts_;
