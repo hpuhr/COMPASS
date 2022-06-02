@@ -193,7 +193,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> IdentificationCorrect::eval
                     || cmp_res_ti == ValueComparisonResult::Different;
 
             if (ti_correct_failed)
-                comment += "Id value failed";
+                comment += "ACID failed (" + cmp_res_ti_comment + ")";
 
             any_correct |= !ti_correct_failed;
             all_correct &= !ti_correct_failed;
@@ -210,9 +210,8 @@ std::shared_ptr<EvaluationRequirementResult::Single> IdentificationCorrect::eval
             if (ta_correct_failed)
             {
                 if (comment.size())
-                    comment += ", addr value failed";
-                else
-                    comment += "MS Addr value failed";
+                    comment += ", ";
+                comment += "ACAD failed (" + cmp_res_ta_comment + ")";
             }
 
             any_correct |= !ta_correct_failed;
@@ -230,9 +229,8 @@ std::shared_ptr<EvaluationRequirementResult::Single> IdentificationCorrect::eval
             if (ma_correct_failed)
             {
                 if (comment.size())
-                    comment += ", mode A value failed";
-                else
-                    comment += "Mode A value failed";
+                    comment += ", ";
+                comment += "M3A failed (" + cmp_res_ma_comment + ")";
             }
 
             any_correct |= !ma_correct_failed;

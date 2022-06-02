@@ -174,7 +174,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> IdentificationFalse::evalua
             ti_false = cmp_res_ti == ValueComparisonResult::Different;
 
             if (ti_false)
-                comment += "Id false";
+                comment += "ACID false (" + cmp_res_ti_comment + ")";
 
             any_false |= ti_false;
             all_false &= ti_false;
@@ -187,9 +187,9 @@ std::shared_ptr<EvaluationRequirementResult::Single> IdentificationFalse::evalua
             if (ta_false)
             {
                 if (comment.size())
-                    comment += ", addr false";
-                else
-                    comment += "Addr false";
+                    comment += ", ";
+
+                comment += "ACAD false (" + cmp_res_ta_comment + ")";
             }
 
             any_false |= ta_false;
@@ -203,9 +203,8 @@ std::shared_ptr<EvaluationRequirementResult::Single> IdentificationFalse::evalua
             if (ma_false)
             {
                 if (comment.size())
-                    comment += ", mode A false";
-                else
-                    comment += "Mode A false";
+                    comment += ", ";
+                comment += "M3A false (" + cmp_res_ma_comment + ")";
             }
 
             any_false |= ma_false;

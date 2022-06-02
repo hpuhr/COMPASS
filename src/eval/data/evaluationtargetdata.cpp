@@ -28,6 +28,8 @@
 
 //#include <ogr_spatialref.h>
 
+#include <boost/algorithm/string.hpp>
+
 #include <cassert>
 #include <algorithm>
 #include <cmath>
@@ -674,7 +676,7 @@ std::string EvaluationTargetData::refCallsignForTime (float tod) const
     NullableVector<string>& callsign_vec = eval_data_->ref_buffer_->get<string>(eval_data_->ref_callsign_name_);
     assert (!callsign_vec.isNull(index));
 
-    return callsign_vec.get(index);
+    return boost::trim_copy(callsign_vec.get(index)); // remove spaces
 }
 
 bool EvaluationTargetData::hasRefModeAForTime (float tod) const
@@ -1007,7 +1009,7 @@ std::string EvaluationTargetData::tstCallsignForTime (float tod) const
     NullableVector<string>& callsign_vec = eval_data_->tst_buffer_->get<string>(eval_data_->tst_callsign_name_);
     assert (!callsign_vec.isNull(index));
 
-    return callsign_vec.get(index);
+    return boost::trim_copy(callsign_vec.get(index)); // remove spaces
 }
 
 bool EvaluationTargetData::hasTstModeAForTime (float tod) const
