@@ -506,6 +506,7 @@ void DBContentManager::databaseOpenedSlot()
     loginf << "DBContentManager: databaseOpenedSlot";
 
     loadMaxRecordNumber();
+    loadMaxRefTrajTrackNum();
 
     if (COMPASS::instance().interface().hasProperty("associations_generated"))
     {
@@ -537,6 +538,9 @@ void DBContentManager::databaseClosedSlot()
 
     max_rec_num_ = 0;
     has_max_rec_num_ = false;
+
+    max_reftraj_track_num_ = 0;
+    has_max_reftraj_track_num_ = false;
 
     has_associations_ = false;
     associations_id_ = "";
@@ -1030,6 +1034,20 @@ void DBContentManager::maxRecordNumber(unsigned int value)
     has_max_rec_num_ = true;
 }
 
+unsigned int DBContentManager::maxRefTrajTrackNum() const
+{
+    assert (has_max_reftraj_track_num_);
+    return max_reftraj_track_num_;
+}
+
+void DBContentManager::maxRefTrajTrackNum(unsigned int value)
+{
+    logdbg << "DBContentManager: maxRefTrajTrackNum: " << value;
+
+    max_reftraj_track_num_ = value;
+    has_max_reftraj_track_num_ = true;
+}
+
 const std::map<std::string, std::shared_ptr<Buffer>>& DBContentManager::data() const
 {
     return data_;
@@ -1127,6 +1145,17 @@ void DBContentManager::loadMaxRecordNumber()
     has_max_rec_num_ = true;
 
     loginf << "DBContentManager: loadMaxRecordNumber: " << max_rec_num_;
+}
+
+void DBContentManager::loadMaxRefTrajTrackNum()
+{
+    assert (COMPASS::instance().interface().dbOpen());
+
+    max_reftraj_track_num_ = 0;
+    max_reftraj_track_num_ = COMPASS::instance().interface().getMaxRefTrackTrackNum();
+    has_max_reftraj_track_num_ = true;
+
+    loginf << "DBContentManager: loadMaxRefTrajTrackNum: " << max_reftraj_track_num_;
 }
 
 MetaVariableConfigurationDialog* DBContentManager::metaVariableConfigdialog()

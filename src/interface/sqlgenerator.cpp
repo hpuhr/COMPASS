@@ -223,17 +223,17 @@ shared_ptr<DBCommand> SQLGenerator::getDataSourcesSelectCommand()
 //    //    return getSelectCommand(object.currentMetaTable(), columns, true);
 //}
 
-std::shared_ptr<DBCommand> SQLGenerator::getMaxRecordNumberCommand(const std::string& table_name,
-                                                                   const std::string& rec_num_col_name)
+std::shared_ptr<DBCommand> SQLGenerator::getMaxUIntValueCommand(const std::string& table_name,
+                                                                const std::string& col_name)
 {
     PropertyList list;
-    list.addProperty(rec_num_col_name, PropertyDataType::UINT);
+    list.addProperty(col_name, PropertyDataType::UINT);
 
     shared_ptr<DBCommand> command = make_shared<DBCommand>(DBCommand());
 
     stringstream ss;
 
-    ss << "SELECT MAX(" << rec_num_col_name;
+    ss << "SELECT MAX(" << col_name;
 
     ss << ") FROM ";
 
@@ -564,7 +564,7 @@ string SQLGenerator::createDBUpdateStringBind(shared_ptr<Buffer> buffer,
                << "' not at last position, but '" << properties.at(size - 1).name() << "'";
 
         throw runtime_error(
-                "SQLGenerator: createDBUpdateStringBind: key_col_name not at last position");
+                    "SQLGenerator: createDBUpdateStringBind: key_col_name not at last position");
     }
 
     for (unsigned int cnt = 0; cnt < size; cnt++)

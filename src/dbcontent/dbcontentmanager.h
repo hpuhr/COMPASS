@@ -140,6 +140,10 @@ public:
     unsigned int maxRecordNumber() const;
     void maxRecordNumber(unsigned int value);
 
+    bool hasMaxRefTrajTrackNum() const { return has_max_reftraj_track_num_; }
+    unsigned int maxRefTrajTrackNum() const;
+    void maxRefTrajTrackNum(unsigned int value);
+
     const std::map<std::string, std::shared_ptr<Buffer>>& data() const;
 
     bool canGetVariable (const std::string& dbcont_name, const Property& property);
@@ -175,6 +179,9 @@ protected:
     bool has_max_rec_num_ {false};
     unsigned int max_rec_num_ {0};
 
+    bool has_max_reftraj_track_num_ {false};
+    unsigned int max_reftraj_track_num_ {0};
+
     std::map<std::string, std::shared_ptr<Buffer>> data_;
 
     std::map<std::string, std::shared_ptr<Buffer>> insert_data_;
@@ -201,6 +208,7 @@ protected:
     void cutCachedData();
 
     void loadMaxRecordNumber();
+    void loadMaxRefTrajTrackNum();
 };
 
 #endif /* DBCONTENT_DBCONTENTMANAGER_H_ */

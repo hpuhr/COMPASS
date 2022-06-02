@@ -31,15 +31,15 @@ GPSTrailImportTaskDialog::GPSTrailImportTaskDialog(GPSTrailImportTask& task)
 
     QHBoxLayout* button_layout = new QHBoxLayout();
 
-    import_button_ = new QPushButton("Import");
-    connect(import_button_, &QPushButton::clicked, this, &GPSTrailImportTaskDialog::importClickedSlot);
-    button_layout->addWidget(import_button_);
+    cancel_button_ = new QPushButton("Cancel");
+    connect(cancel_button_, &QPushButton::clicked, this, &GPSTrailImportTaskDialog::cancelClickedSlot);
+    button_layout->addWidget(cancel_button_);
 
     button_layout->addStretch();
 
-    done_button_ = new QPushButton("Done");
-    connect(done_button_, &QPushButton::clicked, this, &GPSTrailImportTaskDialog::doneClickedSlot);
-    button_layout->addWidget(done_button_);
+    import_button_ = new QPushButton("Import");
+    connect(import_button_, &QPushButton::clicked, this, &GPSTrailImportTaskDialog::importClickedSlot);
+    button_layout->addWidget(import_button_);
 
     main_layout->addLayout(button_layout);
 
@@ -60,7 +60,7 @@ void GPSTrailImportTaskDialog::importClickedSlot()
     emit importSignal();
 }
 
-void GPSTrailImportTaskDialog::doneClickedSlot()
+void GPSTrailImportTaskDialog::cancelClickedSlot()
 {
-    emit doneSignal();
+    emit cancelSignal();
 }

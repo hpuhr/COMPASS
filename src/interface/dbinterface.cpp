@@ -278,7 +278,7 @@ unsigned int DBInterface::getMaxRecordNumber(DBContent& object)
 
     boost::mutex::scoped_lock locker(connection_mutex_);
 
-    shared_ptr<DBCommand> command = sql_generator_.getMaxRecordNumberCommand(object.dbTableName(),
+    shared_ptr<DBCommand> command = sql_generator_.getMaxUIntValueCommand(object.dbTableName(),
                                                                              rec_num_var.dbColumnName());
 
     shared_ptr<DBResult> result = db_connection_->execute(*command);
@@ -295,6 +295,45 @@ unsigned int DBInterface::getMaxRecordNumber(DBContent& object)
 
     assert (!buffer->get<unsigned int>(rec_num_var.dbColumnName()).isNull(0));
     return buffer->get<unsigned int>(rec_num_var.dbColumnName()).get(0);
+}
+
+unsigned int DBInterface::getMaxRefTrackTrackNum()
+{
+    assert (dbOpen());
+
+    DBContent& reftraj_content = COMPASS::instance().dbContentManager().dbContent("RefTraj");
+
+    if(!reftraj_content.existsInDB())
+        return 0;
+
+    assert (COMPASS::instance().dbContentManager().existsMetaVariable(DBContent::meta_var_track_num_.name()));
+    assert (COMPASS::instance().dbContentManager().metaVariable(
+                DBContent::meta_var_track_num_.name()).existsIn("RefTraj"));
+
+    Variable& track_num_var = COMPASS::instance().dbContentManager().metaVariable(
+                DBContent::meta_var_track_num_.name()).getFor("RefTraj");
+
+    assert (reftraj_content.hasVariable(track_num_var.name()));
+
+    boost::mutex::scoped_lock locker(connection_mutex_);
+
+    shared_ptr<DBCommand> command = sql_generator_.getMaxUIntValueCommand(reftraj_content.dbTableName(),
+                                                                          track_num_var.dbColumnName());
+
+    shared_ptr<DBResult> result = db_connection_->execute(*command);
+
+    assert(result->containsData());
+
+    shared_ptr<Buffer> buffer = result->buffer();
+
+    if (!buffer->size())
+    {
+        logwrn << "DBInterface: getMaxRefTrackTrackNum: no max track number found";
+        return 0;
+    }
+
+    assert (!buffer->get<unsigned int>(track_num_var.dbColumnName()).isNull(0));
+    return buffer->get<unsigned int>(track_num_var.dbColumnName()).get(0);
 }
 
 

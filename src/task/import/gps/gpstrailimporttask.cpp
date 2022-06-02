@@ -99,8 +99,8 @@ GPSTrailImportTaskDialog* GPSTrailImportTask::dialog()
         connect(dialog_.get(), &GPSTrailImportTaskDialog::importSignal,
                 this, &GPSTrailImportTask::dialogImportSlot);
 
-        connect(dialog_.get(), &GPSTrailImportTaskDialog::doneSignal,
-                this, &GPSTrailImportTask::dialogDoneSlot);
+        connect(dialog_.get(), &GPSTrailImportTaskDialog::cancelSignal,
+                this, &GPSTrailImportTask::dialogCancelSlot);
     }
 
     assert(dialog_);
@@ -441,41 +441,41 @@ void GPSTrailImportTask::run()
     string dbcontent_name = "RefTraj";
     assert (dbcontent_man.existsDBContent(dbcontent_name));
 
-    assert (dbcontent_man.metaVariable(DBContent::meta_var_sac_id_.name()).existsIn(dbcontent_name));
-    assert (dbcontent_man.metaVariable(DBContent::meta_var_sic_id_.name()).existsIn(dbcontent_name));
-    assert (dbcontent_man.metaVariable(DBContent::meta_var_datasource_id_.name()).existsIn(dbcontent_name));
-    assert (dbcontent_man.metaVariable(DBContent::meta_var_line_id_.name()).existsIn(dbcontent_name));
-    assert (dbcontent_man.metaVariable(DBContent::meta_var_tod_.name()).existsIn(dbcontent_name));
-    assert (dbcontent_man.metaVariable(DBContent::meta_var_latitude_.name()).existsIn(dbcontent_name));
-    assert (dbcontent_man.metaVariable(DBContent::meta_var_longitude_.name()).existsIn(dbcontent_name));
-    assert (dbcontent_man.metaVariable(DBContent::meta_var_m3a_.name()).existsIn(dbcontent_name));
-    assert (dbcontent_man.metaVariable(DBContent::meta_var_ta_.name()).existsIn(dbcontent_name));
-    assert (dbcontent_man.metaVariable(DBContent::meta_var_ti_.name()).existsIn(dbcontent_name));
-    assert (dbcontent_man.metaVariable(DBContent::meta_var_vx_.name()).existsIn(dbcontent_name));
-    assert (dbcontent_man.metaVariable(DBContent::meta_var_vy_.name()).existsIn(dbcontent_name));
-    assert (dbcontent_man.metaVariable(DBContent::meta_var_ground_speed_.name()).existsIn(dbcontent_name));
-    assert (dbcontent_man.metaVariable(DBContent::meta_var_track_angle_.name()).existsIn(dbcontent_name));
+    assert (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_sac_id_));
+    assert (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_sic_id_));
+    assert (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_datasource_id_));
+    assert (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_line_id_));
+    assert (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_tod_));
+    assert (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_latitude_));
+    assert (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_longitude_));
+    assert (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_m3a_));
+    assert (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_ta_));
+    assert (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_ti_));
+    assert (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_track_num_));
+    assert (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_vx_));
+    assert (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_vy_));
+    assert (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_ground_speed_));
+    assert (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_track_angle_));
 
     loginf << "GPSTrailImportTask: run: getting variables";
 
     using namespace dbContent;
 
-    Variable& sac_var = dbcontent_man.metaVariable(DBContent::meta_var_sac_id_.name()).getFor(dbcontent_name);
-    Variable& sic_var = dbcontent_man.metaVariable(DBContent::meta_var_sic_id_.name()).getFor(dbcontent_name);
-    Variable& ds_id_var = dbcontent_man.metaVariable(DBContent::meta_var_datasource_id_.name()).getFor(dbcontent_name);
-    Variable& line_id_var = dbcontent_man.metaVariable(DBContent::meta_var_line_id_.name()).getFor(dbcontent_name);
-    Variable& tod_var = dbcontent_man.metaVariable(DBContent::meta_var_tod_.name()).getFor(dbcontent_name);
-    Variable& lat_var = dbcontent_man.metaVariable(DBContent::meta_var_latitude_.name()).getFor(dbcontent_name);
-    Variable& long_var = dbcontent_man.metaVariable(DBContent::meta_var_longitude_.name()).getFor(dbcontent_name);
-    Variable& m3a_var = dbcontent_man.metaVariable(DBContent::meta_var_m3a_.name()).getFor(dbcontent_name);
-    Variable& ta_var = dbcontent_man.metaVariable(DBContent::meta_var_ta_.name()).getFor(dbcontent_name);
-    Variable& ti_var = dbcontent_man.metaVariable(DBContent::meta_var_ti_.name()).getFor(dbcontent_name);
-    Variable& vx_var = dbcontent_man.metaVariable(DBContent::meta_var_vx_.name()).getFor(dbcontent_name);
-    Variable& vy_var = dbcontent_man.metaVariable(DBContent::meta_var_vy_.name()).getFor(dbcontent_name);
-    Variable& speed_var = dbcontent_man.metaVariable(DBContent::meta_var_ground_speed_.name()).getFor(dbcontent_name);
-    Variable& track_angle_var = dbcontent_man.metaVariable(DBContent::meta_var_track_angle_.name()).getFor(dbcontent_name);
-
-
+    Variable& sac_var = dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_sac_id_);
+    Variable& sic_var = dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_sic_id_);
+    Variable& ds_id_var = dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_datasource_id_);
+    Variable& line_id_var = dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_line_id_);
+    Variable& tod_var = dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_tod_);
+    Variable& lat_var = dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_latitude_);
+    Variable& long_var = dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_longitude_);
+    Variable& m3a_var = dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_m3a_);
+    Variable& ta_var = dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_ta_);
+    Variable& ti_var = dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_ti_);
+    Variable& tn_var = dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_track_num_);
+    Variable& vx_var = dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_vx_);
+    Variable& vy_var = dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_vy_);
+    Variable& speed_var = dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_ground_speed_);
+    Variable& track_angle_var = dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_track_angle_);
 
     PropertyList properties;
     properties.addProperty(sac_var.name(), PropertyDataType::UCHAR);
@@ -495,6 +495,8 @@ void GPSTrailImportTask::run()
     if (set_callsign_)
         properties.addProperty(ti_var.name(), PropertyDataType::STRING);
 
+    properties.addProperty(tn_var.name(), PropertyDataType::UINT);
+
     properties.addProperty(vx_var.name(), PropertyDataType::DOUBLE);
     properties.addProperty(vy_var.name(), PropertyDataType::DOUBLE);
     properties.addProperty(speed_var.name(), PropertyDataType::DOUBLE);
@@ -512,6 +514,8 @@ void GPSTrailImportTask::run()
     NullableVector<double>& lat_vec = buffer_->get<double>(lat_var.name());
     NullableVector<double>& long_vec = buffer_->get<double>(long_var.name());
 
+    NullableVector<unsigned int>& tn_vec = buffer_->get<unsigned int>(tn_var.name());
+
     NullableVector<double>& vx_vec = buffer_->get<double>(vx_var.name());
     NullableVector<double>& vy_vec = buffer_->get<double>(vy_var.name());
     NullableVector<double>& speed_vec = buffer_->get<double>(speed_var.name());
@@ -519,6 +523,9 @@ void GPSTrailImportTask::run()
 
     unsigned int cnt = 0;
     unsigned int ds_id = Number::dsIdFrom(ds_sac_, ds_sic_);
+
+    assert (dbcontent_man.hasMaxRefTrajTrackNum());
+    unsigned int track_num = dbcontent_man.maxRefTrajTrackNum();
 
     // config data source
     {
@@ -574,6 +581,8 @@ void GPSTrailImportTask::run()
         if (set_callsign_)
             buffer_->get<string>(ti_var.name()).set(cnt, callsign_);
 
+        tn_vec.set(cnt, track_num);
+
         if (fix_it.travelAngle != 0.0 && fix_it.speed != 0.0)
         {
             track_angle_rad = DEG2RAD * fix_it.travelAngle;
@@ -585,7 +594,7 @@ void GPSTrailImportTask::run()
             vx = sin(track_angle_rad) * speed_ms;
             vy = cos(track_angle_rad) * speed_ms;
 
-            loginf << "UGA track_angle_rad " << track_angle_rad << " spd " << speed_ms << " vx " << vx << " vy " << vy;
+            //loginf << "UGA track_angle_rad " << track_angle_rad << " spd " << speed_ms << " vx " << vx << " vy " << vy;
 
             vx_vec.set(cnt, vx);
             vy_vec.set(cnt, vy);
@@ -601,6 +610,8 @@ void GPSTrailImportTask::run()
     }
 
     //void insertData(DBOVariableSet& list, std::shared_ptr<Buffer> buffer, bool emit_change = true);
+
+    dbcontent_man.maxRefTrajTrackNum(track_num+1); // increment for next
 
     loginf << "GPSTrailImportTask: run: inserting data";
 
@@ -647,7 +658,7 @@ void GPSTrailImportTask::dialogImportSlot()
     run();
 }
 
-void GPSTrailImportTask::dialogDoneSlot()
+void GPSTrailImportTask::dialogCancelSlot()
 {
     assert (dialog_);
     dialog_->hide();

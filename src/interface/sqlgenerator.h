@@ -51,8 +51,8 @@ public:
     std::shared_ptr<DBCommand> getDataSourcesSelectCommand();
 
     //std::shared_ptr<DBCommand> getDistinctDataSourcesSelectCommand(DBContent& object);
-    std::shared_ptr<DBCommand> getMaxRecordNumberCommand(const std::string& table_name,
-                                                         const std::string& rec_num_col_name);
+    std::shared_ptr<DBCommand> getMaxUIntValueCommand(const std::string& table_name,
+                                                      const std::string& col_name);
     std::shared_ptr<DBCommand> getADSBInfoCommand(DBContent& adsb_obj);
 
     std::string getCreateAssociationTableStatement(const std::string& table_name);

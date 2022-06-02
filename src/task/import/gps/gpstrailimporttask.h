@@ -40,7 +40,7 @@ public slots:
     void insertDoneSlot();
 
     void dialogImportSlot();
-    void dialogDoneSlot();
+    void dialogCancelSlot();
 
 public:
     GPSTrailImportTask(const std::string& class_id, const std::string& instance_id,
