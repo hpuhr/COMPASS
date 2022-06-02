@@ -1151,7 +1151,6 @@ void DBContentManager::loadMaxRefTrajTrackNum()
 {
     assert (COMPASS::instance().interface().dbOpen());
 
-    max_reftraj_track_num_ = 0;
     max_reftraj_track_num_ = COMPASS::instance().interface().getMaxRefTrackTrackNum();
     has_max_reftraj_track_num_ = true;
 
