@@ -11,7 +11,7 @@
                     "changed": true,
                     "name": "Aircraft Address",
                     "op_and_": true,
-                    "values_str": "4c01e1",
+                    "values_str": "4C8070",
                     "visible": false,
                     "widget_visible": true
                 }
@@ -24,7 +24,7 @@
                     "changed": true,
                     "name": "Aircraft Identification",
                     "op_and_": true,
-                    "values_str": "null",
+                    "values_str": "AEE",
                     "visible": false,
                     "widget_visible": true
                 }
@@ -144,7 +144,7 @@
             },
             "Position": {
                 "parameters": {
-                    "active": true,
+                    "active": false,
                     "changed": true,
                     "name": "Position",
                     "op_and_": true,
@@ -160,7 +160,7 @@
                                 "op_and": true,
                                 "operator": "<=",
                                 "reset_value": "MAX",
-                                "value": "49.215278",
+                                "value": "45.958201",
                                 "variable_dbcontent_name": "Meta",
                                 "variable_name": "Latitude"
                             }
@@ -172,7 +172,7 @@
                                 "op_and": true,
                                 "operator": ">=",
                                 "reset_value": "MIN",
-                                "value": "46.174722",
+                                "value": "45.524856",
                                 "variable_dbcontent_name": "Meta",
                                 "variable_name": "Latitude"
                             }
@@ -184,7 +184,7 @@
                                 "op_and": true,
                                 "operator": "<=",
                                 "reset_value": "MAX",
-                                "value": "17.360556",
+                                "value": "16.295223",
                                 "variable_dbcontent_name": "Meta",
                                 "variable_name": "Longitude"
                             }
@@ -196,7 +196,7 @@
                                 "op_and": true,
                                 "operator": ">=",
                                 "reset_value": "MIN",
-                                "value": "11.243333",
+                                "value": "15.843169",
                                 "variable_dbcontent_name": "Meta",
                                 "variable_name": "Longitude"
                             }
@@ -267,96 +267,6 @@
                         }
                     }
                 }
-            },
-            "Tracker LU SRC": {
-                "parameters": {
-                    "active": false,
-                    "changed": true,
-                    "name": "Tracker LU SRC",
-                    "op_and_": true,
-                    "visible": false,
-                    "widget_visible": true
-                },
-                "sub_configs": {
-                    "DBFilterCondition": {
-                        "Tracker LU SAC Condition0": {
-                            "parameters": {
-                                "absolute_value": false,
-                                "display_instance_id": false,
-                                "op_and": true,
-                                "operator": "IN",
-                                "reset_value": "0",
-                                "value": "0",
-                                "variable_dbcontent_name": "Tracker",
-                                "variable_name": "SAC LM"
-                            }
-                        },
-                        "Tracker LU SIC Condition0": {
-                            "parameters": {
-                                "absolute_value": false,
-                                "display_instance_id": false,
-                                "op_and": true,
-                                "operator": "IN",
-                                "reset_value": "0",
-                                "value": "0",
-                                "variable_dbcontent_name": "Tracker",
-                                "variable_name": "SIC LM"
-                            }
-                        }
-                    }
-                }
-            },
-            "Tracker Mono Track": {
-                "parameters": {
-                    "active": false,
-                    "changed": true,
-                    "name": "Tracker Mono Track",
-                    "op_and_": true,
-                    "visible": false,
-                    "widget_visible": true
-                },
-                "sub_configs": {
-                    "DBFilterCondition": {
-                        "Tracker Mono Sources Value": {
-                            "parameters": {
-                                "absolute_value": false,
-                                "display_instance_id": false,
-                                "op_and": true,
-                                "operator": "=",
-                                "reset_value": "N",
-                                "value": "N",
-                                "variable_dbcontent_name": "Tracker",
-                                "variable_name": "Monosensor"
-                            }
-                        }
-                    }
-                }
-            },
-            "Tracker Track Confirmed": {
-                "parameters": {
-                    "active": false,
-                    "changed": true,
-                    "name": "Tracker Track Confirmed",
-                    "op_and_": true,
-                    "visible": false,
-                    "widget_visible": true
-                },
-                "sub_configs": {
-                    "DBFilterCondition": {
-                        "Tracker Track ConfirmedCondition0": {
-                            "parameters": {
-                                "absolute_value": false,
-                                "display_instance_id": false,
-                                "op_and": true,
-                                "operator": "=",
-                                "reset_value": "Y",
-                                "value": "Y",
-                                "variable_dbcontent_name": "Tracker",
-                                "variable_name": "Confirmed"
-                            }
-                        }
-                    }
-                }
             }
         },
         "Mode3AFilter": {
@@ -373,13 +283,13 @@
             }
         },
         "ModeCFilter": {
-            "Barometric Altitude": {
+            "Mode C Codes": {
                 "parameters": {
                     "active": false,
                     "changed": true,
                     "max_value": 3000.0,
                     "min_value": -1000.0,
-                    "name": "Barometric Altitude",
+                    "name": "Mode C Codes",
                     "null_wanted": false,
                     "op_and_": true,
                     "visible": false,

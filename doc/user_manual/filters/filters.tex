@@ -2,8 +2,8 @@
 \chapter{Filters}
 \label{sec:filters} 
 
-\section{Filtering}
-\label{sec:filtering}
+\section{Default Filters}
+\label{sec:default_filters}
 
 \begin{figure}[H]
     \hspace*{-2.5cm}
@@ -15,7 +15,7 @@
 
 \begin{figure}[H]
   \center
-    \includegraphics[width=8cm,frame]{figures/filter_acad.png}
+    \includegraphics[width=10cm,frame]{figures/filter_acad.png}
   \caption{Target Address filter}
 \end{figure}
 
@@ -25,49 +25,70 @@ When active, this filter forces loading of data with the given Mode S address(es
 
 \begin{figure}[H]
   \center
-    \includegraphics[width=8cm,frame]{figures/filter_acid.png}
+    \includegraphics[width=10cm,frame]{figures/filter_acid.png}
   \caption{Callsign filter}
 \end{figure}
 
 When active, this filter forces loading of data only from aircraft identifications matching the given expression. The percent operator denotes a 'any characters' placeholder. So e.g. '\%TEST\%' will match 'TEST123' or 'TEST123   ' (with spaces) or 'MYTEST'. Target reports without a given aircraft identification are not restricted by this filter.
 
-\subsection{Barometric Altitude Filter}
+\subsection{ADSB Quality Filter}
 
 \begin{figure}[H]
   \center
-    \includegraphics[width=8cm,frame]{figures/filter_baro_alt.png}
-  \caption{Barometric Altitude filter}
+    \includegraphics[width=12cm,frame]{figures/filter_adsb_quality.png}
+  \caption{ADSB quality filter}
 \end{figure}
 
-When active, this filter forces loading of data with a barometric altitude inside the given thresholds (in feet). Target reports without a barometric altitude will not be loaded.
+When active, this filter restricts the loaded ADS-B data based on the transponder MOPS version and various quality indicators. 
+
+\subsection{ADSB MOPS Filter}
+
+\begin{figure}[H]
+  \center
+    \includegraphics[width=12cm,frame]{figures/filter_adsb_mops.png}
+  \caption{ADSB quality filter}
+\end{figure}
+
+When active, this filter restricts the loaded ADS-B data based on the transponder MOPS version. Multiple values can also be given, e.g. '0', '0,1', etc. 
 
 \subsection{ARTAS Hash Code Filter}
 
 \begin{figure}[H]
   \center
-    \includegraphics[width=8cm,frame]{figures/filter_hashcode.png}
-  \caption{Hash Code filter}
+    \includegraphics[width=12cm,frame]{figures/filter_hashcode.png}
+  \caption{ARTAS Hash Code filter}
 \end{figure}
 
 When active, this filter forces loading of data only from target reports with a specific ARTAS MD5 hash code, or system track updates referencing this hash code (in their TRI information). If no hash information is available (e.g. in SASS-C Verif databases or when this information was not present in the ASTERIX data), this filter should not be used.
 
-\subsection{Mode 3/A Code Filter}
+\subsection{Detection Type Filter}
 
 \begin{figure}[H]
   \center
-    \includegraphics[width=8cm,frame]{figures/filter_mode3a.png}
-  \caption{Mode 3/A Code filter}
+    \includegraphics[width=12cm,frame]{figures/filter_detection_type.png}
+  \caption{Detection Type filter}
 \end{figure}
 
-When active, this filter forces loading of data with the given Mode A code(s), so it is possible to give multiple values (in octal notation, separated by commas). E.g. '7000' is possible, or '7000,7777'. Target reports without a given Mode A will not be loaded unless the value 'NULL' is (also) given. \\
+When active, this filter forces loading of Radar and Tracker data with the given detection type, so it is possible to give multiple values (separated by commas). E.g. '1' is possible, or '1,2,3'. Tracker target reports without a given detection type will not be loaded. \\
 
-Please note that ADS-B target reports can also contain Mode 3/A code information.
+The following detection types exist:
+\begin{itemize}
+ \item 0: No detection/unknown
+ \item 1: PSR
+ \item 2: SSR
+ \item 3: Combined (PSR+SSR)
+ \item 5: Mode S
+ \item 7: Mode S Combined (PSR+Mode S)
+\end{itemize}
+\  \\
+
+Please note that for CAT62 data the detection type reflects the most recent detection type used to update the track (last measured detection type).
 
 \subsection{Position Filter}
 
 \begin{figure}[H]
   \center
-    \includegraphics[width=8cm,frame]{figures/filter_position.png}
+    \includegraphics[width=12cm,frame]{figures/filter_position.png}
   \caption{Position filter}
 \end{figure}
 
@@ -77,7 +98,7 @@ When active, this filter forces loading of data with latitude/longitude inside t
 
 \begin{figure}[H]
   \center
-    \includegraphics[width=8cm,frame]{figures/filter_tod.png}
+    \includegraphics[width=12cm,frame]{figures/filter_tod.png}
   \caption{Time of Day filter}
 \end{figure}
 
@@ -87,7 +108,7 @@ When active, this filter forces loading of data with the time-of-day inside the 
 
 \begin{figure}[H]
   \center
-    \includegraphics[width=8cm,frame]{figures/filter_tracknum.png}
+    \includegraphics[width=12cm,frame]{figures/filter_tracknum.png}
   \caption{Track Number filter}
 \end{figure}
 
@@ -95,33 +116,38 @@ When active, this filter forces loading of data with the given track numbers, so
 
 Please note that ADS-B target reports can also contain a track number in ASTERIX, but since the information can not currently be mapped to the database (missing in schema), this filter does not influence ADS-B data loading.
 
-% \subsection{Tracker Detection Type Filter}
-% 
-% \begin{figure}[H]
-%   \center
-%     \includegraphics[width=8cm,frame]{figures/filter_trackerdettyp.png}
-%   \caption{Tracker Detection Type filter}
-% \end{figure}
-% 
-% When active, this filter forces loading of Tracker data with the given detection type, so it is possible to give multiple values (separated by commas). E.g. '1' is possible, or '1,2,3'. Tracker target reports without a given detection type will not be loaded. \\
-% 
-% The following detection types exist:
-% \begin{itemize}
-%  \item 0: No detection/unknown
-%  \item 1: PSR
-%  \item 2: SSR
-%  \item 3: Combined (PSR+SSR)
-%  \item 5: Mode S
-%  \item 7: Mode S Combined (PSR+Mode S)
-% \end{itemize}
-% \  \\
-% 
-% Please note that:
-% \begin{itemize}
-%  \item The detection type here reflects the technology used to update the track. E.g. an MLAT SSR detection + a PSR detection can form detection type 3 (Combined).
-%  \item The method used to determine the detection type is slightly different than in Verif
-%  \item The method used to determine the detection type is currently being discussed/tested by users and will be documented after being accepted.
-% \end{itemize}
+\subsection{Mode 3/A Codes Filter}
+
+\begin{figure}[H]
+  \center
+    \includegraphics[width=12cm,frame]{figures/filter_mode3a.png}
+  \caption{Mode 3/A Codes filter}
+\end{figure}
+
+When active, this filter forces loading of data with the given Mode A code(s), so it is possible to give multiple values (in octal notation, separated by commas). E.g. '7000' is possible, or '7000,7777'. Target reports without a given Mode A will not be loaded unless the value 'NULL' is (also) given. \\
+
+Please note that ADS-B target reports can also contain Mode 3/A code information.
+
+\subsection{Mode C Codes Filter}
+
+\begin{figure}[H]
+  \center
+    \includegraphics[width=8cm,frame]{figures/filter_modec.png}
+  \caption{Mode C Codes filter}
+\end{figure}
+
+When active, this filter forces loading of data with a barometric altitude inside the given thresholds (in feet). If Target reports without a barometric altitude should not be loaded can be set using the 'NULL Values' checkbox.
+
+\subsection{Primary Only}
+
+\begin{figure}[H]
+  \center
+    \includegraphics[width=12cm,frame]{figures/filter_primary_only.png}
+  \caption{Primary Only filter}
+\end{figure}
+
+When active, this filter forces loading of data without any secondary attributes.
+
 % 
 % \subsection{Tracker Multiple Sources Filter}
 % 
@@ -157,15 +183,14 @@ This filter is only available if target report associations have been generated 
 
 When active, this filter forces loading of data with the given unique target numbers (UTNs), so it is possible to give multiple values (separated by commas). E.g. '1' is possible, or '1,2,3'. Target reports without an associated UTN will not be loaded. \\
 
-\subsection{Adding a New Filter}
+\section{Adding a New Filter}
 
 A new filter can be added by clicking the \includegraphics[width=0.5cm,frame]{../../data/icons/edit.png} button in the filter tab.
 
 \begin{figure}[H]
   \center
-    \includegraphics[width=14cm,frame]{figures/filter_add.png}
+    \includegraphics[width=14cm]{figures/filter_add.png}
   \caption{Adding a filter}
-  \label{fig:filter_add}
 \end{figure}
 
 First, one has to give the filter a new (unique) name. Then, conditions have to be defined and added. A condition consists of a DBContent variable, an operator, a value, and a reset value. \\
@@ -196,26 +221,12 @@ An operator can be chosen with the drop-down menu, the supplied operators are co
 
 A reset value also has to be supplied, which can be the chosen value or a minimum/maximum value set from the database.  Whenever a database different from the previous one is opened, all filters are reset, since previous values may have become invalid.\\
 
-After a condition is defined, it has to be added using the 'Add condition' button. Existing conditions are shown in the 'Current conditions' list. Please note that for now added conditions can not be removed.
-
-\begin{figure}[H]
-  \center
-    \includegraphics[width=14cm,frame]{figures/filter_add2.png}
-  \caption{Filled out filter dialog}
-  \label{fig:filter_add2}
-\end{figure}
+After a condition is defined, it has to be added using the 'Add condition' button. Existing conditions are shown in the 'Current conditions' list. Please note that for now added conditions can not be removed. \\\\
 
 Now the described process can be repeated until a usable filter emerges, which is added using the 'Add'
 button. The process of adding a new filter can be canceled by using the 'Cancel' button, which discards all
 settings. When added, a new filter shows up immediately in the filter list and is saved to the configuration
 for persistence.
-
-\begin{figure}[H]
-  \center
-    \includegraphics[width=8cm,frame]{figures/filter_add3.png}
-  \caption{Filter added}
-  \label{fig:filter_add3}
-\end{figure}
 
 % \subsection{Managing Filters}
 % \label{sec:filter_management}

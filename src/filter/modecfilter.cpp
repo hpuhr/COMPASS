@@ -21,7 +21,7 @@ ModeCFilter::ModeCFilter(const std::string& class_id, const std::string& instanc
     registerParameter("max_value", &max_value_, 10000.0);
     registerParameter("null_wanted", &null_wanted_, false);
 
-    name_ = "Barometric Altitude";
+    name_ = "Mode C Codes";
 
     createSubConfigurables();
 }

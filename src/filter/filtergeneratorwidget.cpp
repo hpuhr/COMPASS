@@ -105,13 +105,13 @@ void FilterGeneratorWidget::createGUIElements()
     condition_value_ = new QLineEdit();
     value_layout->addWidget(condition_value_);
 
-    QPushButton* load_min = new QPushButton(tr("Load min"));
-    connect(load_min, SIGNAL(clicked()), this, SLOT(loadMin()));
-    value_layout->addWidget(load_min);
+//    QPushButton* load_min = new QPushButton(tr("Load min"));
+//    connect(load_min, SIGNAL(clicked()), this, SLOT(loadMin()));
+//    value_layout->addWidget(load_min);
 
-    QPushButton* load_max = new QPushButton(tr("Load max"));
-    connect(load_max, SIGNAL(clicked()), this, SLOT(loadMax()));
-    value_layout->addWidget(load_max);
+//    QPushButton* load_max = new QPushButton(tr("Load max"));
+//    connect(load_max, SIGNAL(clicked()), this, SLOT(loadMax()));
+//    value_layout->addWidget(load_max);
 
     value_layout->addStretch();
 
@@ -124,8 +124,8 @@ void FilterGeneratorWidget::createGUIElements()
 
     condition_reset_combo_ = new QComboBox();
     condition_reset_combo_->addItem("value");
-    condition_reset_combo_->addItem("MIN");
-    condition_reset_combo_->addItem("MAX");
+//    condition_reset_combo_->addItem("MIN");
+//    condition_reset_combo_->addItem("MAX");
     reset_layout->addWidget(condition_reset_combo_);
     reset_layout->addStretch();
 
