@@ -1,10 +1,6 @@
 \chapter{View Points}
 \label{sec:view_points} 
 
-TODO outdated \\
-
-%TODOV7
-
 The 'View Points' tab displays existing view points, allows selection, stepping and editing of view points. Additionally, view points can be imported, removed and exported.
 
 \begin{figure}[H]
@@ -33,11 +29,6 @@ A view point is a point of interest in the data persisted in the database. It ha
     position\_longitude & Center position WGS-84 longitude \\ \hline
     position\_window\_latitude & Geographic window size in WGS-84 latitude  \\ \hline
     position\_window\_longitude & Geographic window size in WGS-84 longitude  \\ \hline
-    time & Center time  \\ \hline
-    time\_window & Time window size \\ \hline
-    db\_objects & List of DBObjects to load \\ \hline
-    filters & List of filters defining which data to load \\ \hline
-    dbo\_context\_variables & List of extra content DBOVariables to load and display \\ \hline
 \end{tabularx}
 \end{table}
 \end{center}
@@ -108,7 +99,7 @@ Using the 'Edit Columns' button in the toolbar, unwanted columns can be hidden. 
 
 \begin{figure}[H]
   \centering 
-    \includegraphics[width=5cm,frame]{figures/view_points_edit_columns.png}
+    \includegraphics[width=6cm,frame]{figures/view_points_edit_columns.png}
   \caption{View Points: Edit Columns Menu}
 \end{figure}
 
@@ -173,6 +164,8 @@ There exist 3 buttons for general functions:
 \ \\
 
 \section{Stepping View Points}
+
+TODO
 
 \subsection{Management Tab} 
 When selecting a new view point, the information set in the 'db\_objects' attribute is used to select which DBObjects are loaded. The 'filters' attribute to set the filter active flags and respective conditions. After that, a loading process is triggered. \\
