@@ -620,6 +620,10 @@ void LabelGenerator::checkLabelConfig()
                              && dbcont_manager_.metaCanGetVariable(dbcont_it.first, DBContent::meta_var_ground_speed_))
                         dbcont_def[key] =
                                 dbcont_manager_.metaGetVariable(dbcont_it.first, DBContent::meta_var_ground_speed_).name();
+                    else if (row == 2 && col == 2
+                             && dbcont_manager_.metaCanGetVariable(dbcont_it.first, DBContent::meta_var_tod_))
+                        dbcont_def[key] =
+                                dbcont_manager_.metaGetVariable(dbcont_it.first, DBContent::meta_var_tod_).name();
                 }
             }
         }

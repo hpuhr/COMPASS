@@ -399,7 +399,17 @@ void DBContentManager::load()
         if (object.second->loadable() && ds_man.loadingWanted(object.first))
         {
             loginf << "DBContentManager: loadSlot: loading object " << object.first;
-            VariableSet read_set = view_man.getReadSet(object.first); // TODO add required vars for processing
+            VariableSet read_set = view_man.getReadSet(object.first);
+
+            // add required vars for processing
+            assert (metaCanGetVariable(object.first, DBContent::meta_var_rec_num_));
+            read_set.add(metaGetVariable(object.first, DBContent::meta_var_rec_num_));
+
+            assert (metaCanGetVariable(object.first, DBContent::meta_var_datasource_id_));
+            read_set.add(metaGetVariable(object.first, DBContent::meta_var_datasource_id_));
+
+            assert (metaCanGetVariable(object.first, DBContent::meta_var_line_id_));
+            read_set.add(metaGetVariable(object.first, DBContent::meta_var_line_id_));
 
             label_generator_->addVariables(object.first, read_set);
 
