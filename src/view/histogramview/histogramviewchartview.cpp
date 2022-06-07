@@ -43,48 +43,64 @@ void HistogramViewChartView::mousePressEvent(QMouseEvent* event)
 
     QPointF widget_pos = event->localPos();
 
+    //map mouse pos to chart space
     auto point = mapFromGlobal(QCursor::pos());
     auto pointF = mapToScene(point);
-    pointF = chart()->mapFromScene(point);
-    auto p = chart()->mapToValue(point, chart()->series().at(0));
+    pointF = chart()->mapFromScene(pointF);
+    auto p = chart()->mapToValue(pointF, chart()->series().at(0));
 
-    int index = (int) (p.x()+0.5);
-
-    unsigned int ui_index;
-
-    if (index < 0)
-        ui_index = 0;
-    else if (index > data_widget_->numBins())
-        ui_index = data_widget_->numBins();
-    else
-        ui_index = index;
-
-
-    logdbg << "HistogramViewChartView: mousePressEvent: x " << p.x() << " y " << p.y() << " index " << index;
+    logdbg << "HistogramViewChartView: mousePressEvent: x " << p.x() << " y " << p.y();
 
     if (!has_p1_) // first click
     {
         show_rect_ = true;
-        has_p1_ = true;
-        p1_ = widget_pos.toPoint();
-        p1_data_ = p;
-        p1_index_ = ui_index;
+        has_p1_    = true;
+        p1_        = widget_pos.toPoint();
+        p1_data_   = p;
 
-        p2_ = widget_pos.toPoint();
-        p2_data_ = p;
-        p2_index_ = ui_index;
+        p2_        = widget_pos.toPoint();
+        p2_data_   = p;
     }
     else // second click
     {
-        p2_ = widget_pos.toPoint();
+        p2_      = widget_pos.toPoint();
         p2_data_ = p;
-        p2_index_ = ui_index;
 
-        // do stuff
-        emit rectangleSelectedSignal(p1_index_, p2_index_);
+        //selected range
+        double range_min = std::min(p1_data_.x(), p2_data_.x());
+        double range_max = std::max(p1_data_.x(), p2_data_.x());
+
+        const int bins = (int)data_widget_->numBins();
+
+        if (bins > 0)
+        {
+            auto clampBinToRange = [ & ] (int& bin) 
+            {
+                //bin == binmax is the zero value bin, so clamp to [0, numbins]
+                bin = std::max(0, std::min(bin, bins));
+            };
+
+            //determine which bin centers are inside the numeric range (bin centers are at full integers, 0, 1, 2, and so on)
+            int bin_min = (int)std::ceil(range_min);
+            int bin_max = (int)std::floor(range_max);
+
+            //clamp bin ids for safety
+            clampBinToRange(bin_min);
+            clampBinToRange(bin_max);
+
+            logdbg << "HistogramViewChartView: mousePressEvent: bin range [" << bin_min << "," << bin_max << "] bins = " << bins;
+
+            //only send range when valid
+            if (bin_min <= bin_max)
+            {
+                // do stuff
+                emit rectangleSelectedSignal(bin_min, bin_max);
+            }
+        }      
 
         show_rect_ = false;
-        has_p1_ = false;
+        has_p1_    = false;
+
         update();
         this->viewport()->repaint();
     }
