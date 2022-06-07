@@ -186,18 +186,39 @@ A view point only has to contain and 'id' and 'type' attribute, but additional a
             "position_window_longitude":0.02,
             "time":666.0,
             "time_window":4.0,
-            "db_objects": [
-                "Tracker"
+            "data_sources": [
+                [
+                    12750,
+                    [
+                        0,
+                        1
+                    ]
+                ],
+                [
+                    12759,
+                    [
+                        2,
+                        3
+                    ]
+                ]
+            ],
+            "data_source_types": [
+                "Radar",
+                "RefTraj"
             ],
             "filters": {
                 "Time of Day": {
-                    "Time of Day Minimum": "05:44:58.242",
-                    "Time of Day Maximum": "05:59:57.094"
+                    "Time of Day Maximum": "16:02:00.00",
+                    "Time of Day Minimum": "16:00:00.00"
+                },
+                "UTNs": {
+                    "utns": "4"
                 }
             },
             "context_variables": {
-                "Tracker": [
-                    "calc_vertical_rate_ftm"
+                "Meta": [
+                    "Ground Bit",
+                    "Track Groundspeed"
                 ]
             }
         },
@@ -221,7 +242,8 @@ In each View Point object, the following values can be defined:
     position\_window\_longitude & Geographic window size in WGS-84 longitude, as number &    \\ \hline
     time & Center time, as number in seconds &    \\ \hline
     time\_window & Time window size, as number in seconds &    \\ \hline
-    db\_objects & List of DBObjects to load, as strings &    \\ \hline
+    data\_sources & List of data sources to load, with lists which lines to load &    \\ \hline
+    data\_source\_types & List of DSTypes to load, as strings &    \\ \hline
     filters & List of filters defining which data to load, as JSON objects &   \\ \hline
     context\_variables & List of extra content data variables to load and display &    \\ \hline
 \end{tabularx}
@@ -229,7 +251,7 @@ In each View Point object, the following values can be defined:
 \end{center}
 \ \\
 
-If the 'db\_objects' attribute is not defined, all data will be loaded.
+If the 'data_sources', 'data_source_types' or 'filters' attribute are not defined, all data will be loaded.
 
 \subsubsection{View Point Filters}
 

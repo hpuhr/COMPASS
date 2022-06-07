@@ -99,9 +99,14 @@ std::string ADSBQualityFilter::getConditionString(const std::string& dbcontent_n
 
     if (active_)
     {
+        if (!first)
+        {
+            ss << " AND";
+        }
+
         first = false;
 
-        ss << mops_col_name << " IN (";
+        ss << " " << mops_col_name << " IN (";
 
         if (use_v0_)
             ss << "0";
