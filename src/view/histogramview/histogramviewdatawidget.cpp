@@ -2116,8 +2116,7 @@ void HistogramViewDataWidget::rectangleSelectedSlot (unsigned int index1, unsign
             assert(buffer->has<bool>(current_var_name));
             NullableVector<bool>& data = buffer->get<bool>(current_var_name);
 
-            selectData<bool> (data, selected_vec, select_min_max, (bool) val_min, (bool) val_max,
-                              select_null, add_to_selection);
+            selectData<bool> (data, selected_vec, select_min_max, val_min, val_max, select_null, add_to_selection);
 
             break;
         }
@@ -2133,8 +2132,7 @@ void HistogramViewDataWidget::rectangleSelectedSlot (unsigned int index1, unsign
             assert(buffer->has<char>(current_var_name));
             NullableVector<char>& data = buffer->get<char>(current_var_name);
 
-            selectData<char> (data, selected_vec, select_min_max, (char) val_min, (char) val_max,
-                              select_null, add_to_selection);
+            selectData<char> (data, selected_vec, select_min_max, val_min, val_max, select_null, add_to_selection);
 
             break;
         }
@@ -2150,9 +2148,7 @@ void HistogramViewDataWidget::rectangleSelectedSlot (unsigned int index1, unsign
             assert(buffer->has<unsigned char>(current_var_name));
             NullableVector<unsigned char>& data = buffer->get<unsigned char>(current_var_name);
 
-            selectData<unsigned char> (data, selected_vec, select_min_max,
-                                       (unsigned char) val_min, (unsigned char) val_max,
-                                       select_null, add_to_selection);
+            selectData<unsigned char> (data, selected_vec, select_min_max, val_min, val_max, select_null, add_to_selection);
 
             break;
         }
@@ -2168,8 +2164,7 @@ void HistogramViewDataWidget::rectangleSelectedSlot (unsigned int index1, unsign
             assert(buffer->has<int>(current_var_name));
             NullableVector<int>& data = buffer->get<int>(current_var_name);
 
-            selectData<int> (data, selected_vec, select_min_max, (int) val_min, (int) val_max,
-                             select_null, add_to_selection);
+            selectData<int> (data, selected_vec, select_min_max, val_min, val_max, select_null, add_to_selection);
 
             break;
         }
@@ -2185,9 +2180,7 @@ void HistogramViewDataWidget::rectangleSelectedSlot (unsigned int index1, unsign
             assert(buffer->has<unsigned int>(current_var_name));
             NullableVector<unsigned int>& data = buffer->get<unsigned int>(current_var_name);
 
-            selectData<unsigned int> (data, selected_vec, select_min_max,
-                                      (unsigned int) val_min, (unsigned int) val_max,
-                                      select_null, add_to_selection);
+            selectData<unsigned int> (data, selected_vec, select_min_max, val_min, val_max, select_null, add_to_selection);
 
             break;
         }
@@ -2203,8 +2196,7 @@ void HistogramViewDataWidget::rectangleSelectedSlot (unsigned int index1, unsign
             assert(buffer->has<long int>(current_var_name));
             NullableVector<long int>& data = buffer->get<long int>(current_var_name);
 
-            selectData<long int> (data, selected_vec, select_min_max, (long int) val_min, (long int) val_max,
-                                  select_null, add_to_selection);
+            selectData<long int> (data, selected_vec, select_min_max, val_min, val_max, select_null, add_to_selection);
 
             break;
         }
@@ -2220,9 +2212,7 @@ void HistogramViewDataWidget::rectangleSelectedSlot (unsigned int index1, unsign
             assert(buffer->has<unsigned long>(current_var_name));
             NullableVector<unsigned long>& data = buffer->get<unsigned long>(current_var_name);
 
-            selectData<unsigned long> (data, selected_vec, select_min_max,
-                                       (unsigned long) val_min, (unsigned long) val_max,
-                                       select_null, add_to_selection);
+            selectData<unsigned long> (data, selected_vec, select_min_max, val_min, val_max, select_null, add_to_selection);
 
             break;
         }
@@ -2270,6 +2260,8 @@ void HistogramViewDataWidget::rectangleSelectedSlot (unsigned int index1, unsign
             assert(buffer->has<string>(current_var_name));
             //NullableVector<string>& data = buffer->get<string>(current_var_name);
 
+            //TODO: write type-specific template specialization for selectData
+
             break;
         }
         case PropertyDataType::JSON:
@@ -2283,6 +2275,8 @@ void HistogramViewDataWidget::rectangleSelectedSlot (unsigned int index1, unsign
 
             assert(buffer->has<nlohmann::json>(current_var_name));
             //NullableVector<string>& data = buffer->get<string>(current_var_name);
+
+            //TODO: write type-specific template specialization for selectData
 
             break;
         }
