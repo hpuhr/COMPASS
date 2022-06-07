@@ -491,6 +491,8 @@ void CreateARTASAssociationsTask::createDoneSlot()
         COMPASS::instance().interface().setProperty(DONE_PROPERTY_NAME, "1");
         COMPASS::instance().dbContentManager().setAssociationsIdentifier("ARTAS");
 
+        COMPASS::instance().interface().saveProperties();
+
         done_ = true;
     }
     else

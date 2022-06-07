@@ -115,6 +115,7 @@ void DBInterface::openDBFile(const std::string& filename, bool overwrite)
         properties_loaded_ = true;
 
         setProperty("APP_VERSION", COMPASS::instance().config().getString("version"));
+        saveProperties();
 
         assert (!existsDataSourcesTable());
         createDataSourcesTable();

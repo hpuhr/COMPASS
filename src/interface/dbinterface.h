@@ -113,6 +113,7 @@ public:
     void setProperty(const std::string& id, const std::string& value);
     std::string getProperty(const std::string& id);
     bool hasProperty(const std::string& id);
+    void saveProperties();
 
     bool existsTable(const std::string& table_name);
     void createTable(const DBContent& object);
@@ -170,7 +171,6 @@ protected:
     void insertBindStatementUpdateForCurrentIndex(std::shared_ptr<Buffer> buffer, unsigned int buffer_index);
 
     void loadProperties();
-    void saveProperties();
 
     void updateTableInfo();
 };

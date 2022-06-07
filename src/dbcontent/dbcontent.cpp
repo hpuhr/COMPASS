@@ -538,8 +538,6 @@ void DBContent::doDataSourcesBeforeInsert (shared_ptr<Buffer> buffer)
         {
 
             ds_man.dbDataSource(ds_id_it.first).addNumInserted(name_, line_cnt_it.first, line_cnt_it.second);
-            ds_man.dbDataSource(ds_id_it.first).addNumLoaded(name_, line_cnt_it.first, line_cnt_it.second);
-            // because propagated after
         }
     }
 }

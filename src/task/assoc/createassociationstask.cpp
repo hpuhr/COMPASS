@@ -563,6 +563,8 @@ void CreateAssociationsTask::createDoneSlot()
     COMPASS::instance().interface().setProperty(DONE_PROPERTY_NAME, "1");
     COMPASS::instance().dbContentManager().setAssociationsIdentifier("All");
 
+    COMPASS::instance().interface().saveProperties();
+
     done_ = true;
 
     QApplication::restoreOverrideCursor();

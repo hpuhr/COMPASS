@@ -1263,6 +1263,7 @@ void ASTERIXImportTask::checkAllDone()
         }
 
         COMPASS::instance().dataSourceManager().saveDBDataSources();
+        COMPASS::instance().interface().saveProperties();
     }
 
     logdbg << "ASTERIXImportTask: checkAllDone: done";

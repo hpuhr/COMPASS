@@ -560,6 +560,8 @@ void DataSourceManager::updateDSIdsAll()
 
 void DataSourceManager::saveDBDataSources()
 {
+    loginf << "DataSourceManager: saveDBDataSources";
+
     DBInterface& db_interface = COMPASS::instance().interface();
 
     assert(db_interface.dbOpen());

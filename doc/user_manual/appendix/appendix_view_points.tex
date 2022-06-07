@@ -3,7 +3,7 @@
 
 This section defines how the view point files have to be structured and written by view point generators (applications which generate such files). \\
 
-View point files are written in the JSON format, and includes a version number (currently version number is 0.1). \\
+View point files are written in the JSON format, and includes a version number. The current version number is 0.2, the previous version 0.1 is \textbf{not} supported. \\
 
 Please \textbf{note} that basic JSON format knowledge is required to understand the topics in this section. \\
 
@@ -29,7 +29,8 @@ The following content is commonly stored in a view point file:
  \item Description text
  \item A point in time with a time window
  \item A position with a position window
- \item A list of DBObjects to be loaded
+ \item A list of DSTypes to be loaded
+ \item A list of data sources to be loaded
  \item A list of filters
  \item A list of context variables
   \end{itemize}
@@ -44,7 +45,7 @@ Additional data in each view point is read in as is, and persisted in the databa
 
 Therefore, when generating view points, it might be useful to add such variables (e.g. for ordering according to error magnitude, priority etc.). This is recommended and will be supported further.
  
-\subsection{Version 0.1}
+\subsection{Version 0.2}
 
 The most simple example of a view points file is as follows:
 
@@ -55,18 +56,18 @@ The most simple example of a view points file is as follows:
 }
 \begin{lstlisting}[basicstyle=\small\ttfamily]
 {
-    "view_point_context": 
-    {
-        "version":"0.1"
-    },
-    "view_points": 
-    [
+    "content_type": "view_points",
+    "content_version": "0.2",
+    "view_points": [
         {
-            "id": 0,
-            "type": "Test"
-        }    
+            "id": 1,
+            "name": "All",
+            "status": "open",
+            "type": "Saved"
+        }
     ]
 }
+
 \end{lstlisting}
 \ \\
 
@@ -74,20 +75,18 @@ There is an encompassing JSON object, which contains the view point context (obj
 
 \subsubsection{View Point Context}
 
-The 'version' attribute is mandatory, and only version 0.1 is currently supported. \\
+The 'version' attribute is mandatory, and only version 0.2 is currently supported. \\
 
 In the context, optinally datasets can be added, which define related data to be imported.
 
 \begin{lstlisting}[basicstyle=\small\ttfamily]
 {
-    "view_point_context": 
-    {
-        "version": "0.1"
-        "datasets":
-        [
+    "content_type": "view_points",
+    "content_version": "0.2",
+    "view_point_context": {
+        "datasets": [
             {
-                "name": "test_data",
-                "filename": "/home/sk/demo/20190506.ff",
+                "filename": "/home/sk/data/test/asterix/test.ff"
             }
         ]
     },
@@ -96,23 +95,23 @@ In the context, optinally datasets can be added, which define related data to be
 \end{lstlisting}
 \ \\
 
-Each dataset has to have a name (indicating what the contained data is) and a filename. \\
+Each dataset has to have a filename. \\
 
 Several datasets are also possible:
 \begin{lstlisting}[basicstyle=\small\ttfamily]
 {
-    "view_point_context": 
-    {
-        "version": "0.1"
-        "datasets":
-        [
+    "content_type": "view_points",
+    "content_version": "0.2",
+    "view_point_context": {
+        "datasets": [
             {
-                "name": "test_data",
-                "filename": "/home/sk/demo/20190506.ff",
+                "filename": "/home/sk/data/test/asterix/test.ff"
             },
             {
-                "name": "other test_data",
-                "filename": "/home/sk/demo/20190507.ff",
+                "filename": "/home/sk/data/test/asterix/test2.ff"
+            },
+            {
+                "filename": "/home/sk/data/test/asterix/test3.ff"
             }
         ]
     },
@@ -121,32 +120,28 @@ Several datasets are also possible:
 \end{lstlisting}
 \ \\
 
-Each of the defined datasets will be automatically imported when using the 'Import View Points' task. \\
+Each of the defined ASTERIX datasets will be automatically imported when using the 'Import View Points' task. \\
 
-For the tracker run comparison case, additional attributes are used. The assumption is that there are two recordings, each containing a tracker run. The tracker runs will possibly also have the same SAC/SIC and a time shift, which can be currected during ASTERIX import using the features described in \nameref{sec:task_import_asterix_override}. \\
+Please note that the ASTERIX decoder settings have to be set correctly in the configuration and are the same for all files to be imported. \\
+
+For the tracker run comparison case, additional attributes are used. The assumption is that there are two recordings, each containing a tracker run, each of which will be imported into a separate line. The tracker runs will possibly also have the same SAC/SIC and a time shift, which can be corrected during ASTERIX import using the features described in \nameref{sec:task_import_asterix_override}. \\
 
 Such an import without overrides can look as follows:
 
 \begin{lstlisting}[basicstyle=\small\ttfamily]
 {
-    "view_point_context": 
-    {
-        "version": "0.1"
-        "datasets":
-        [
+    "content_type": "view_points",
+    "content_version": "0.2",
+    "view_point_context": {
+        "datasets": [
             {
-                "name": "reference_run",
-                "filename": "/home/sk/data/tracker_test/ref.ff",
-                "ds_sac":1,
-                "ds_sic":1,
-                "ds_name":"ARTAS"
+                "filename": "/home/sk/data/test/asterix/test.ff",
+                "line_id": 0
             },
             {
-                "name": "test_run",
-                "filename": "/home/sk/data/tracker_test/tst.ff",
-                "ds_sac":1,
-                "ds_sic":1,
-                "ds_name":"ARTAS2"
+                "filename": "/home/sk/data/test/asterix/test2.ff",
+                "line_id": 1,
+                "time_offset" : -60
             }
         ]
     },
@@ -155,85 +150,7 @@ Such an import without overrides can look as follows:
 \end{lstlisting}
 \ \\
 
-The optional 'ds\_sac', 'ds\_sic', 'ds\_name' are used to generate a configuration data source and therefore can set a wanted name. \\
-
-With override information:
-
-\begin{lstlisting}[basicstyle=\small\ttfamily]
-{
-    "view_point_context": 
-    {
-        "version": "0.1"
-        "datasets":
-        [
-            {
-                "name": "reference_run",
-                "filename": "/home/sk/data/tracker_test/ref.ff",
-                "ds_sac":1,
-                "ds_sic":1,
-                "ds_name":"ARTAS"
-            },
-            {
-                "name": "test_run",
-                "filename": "/home/sk/data/tracker_test/tst.ff",
-                "time_offset": -19501.8515625,
-                "ds_sac":1,
-                "ds_sic":1,
-                "ds_sac_override":1,
-                "ds_sic_override":2,
-                "ds_name":"ARTAS2"
-            }
-        ]
-    },
-    ...
-}
-\end{lstlisting}
-\ \\
-
-In this case, the 'test\_run' dataset will be time shifted by the 'time\_offset' (as Time of Day in seconds), and the SAC/SIC information for this specific data source will be changed. \\
-
-With additional information, for display purposes only:
-
-\begin{lstlisting}[basicstyle=\small\ttfamily]
-{
-    "view_point_context": 
-    {
-        "version": "0.1"
-        "start_date":"2020-01-01",
-        "time_now":"2020-01-01 12:56:32",
-        "some_additional_number": 897.953125,
-        "sensor_context":"Greenland",
-        "area_of_interest":"/path/to/aoi",        
-        "datasets":
-        [
-            {
-                "name": "reference_run",
-                "filename": "/home/sk/data/tracker_test/ref.ff",
-                "time_start": 20700.09375,
-                "time_end": 21599.8984375,
-                "ds_sac":1,
-                "ds_sic":1,
-                "ds_name":"ARTAS"
-            },
-            {
-                "name": "test_run",
-                "filename": "/home/sk/data/tracker_test/tst.ff",
-                "time_start": 40200.09375,
-                "time_end": 41099.8984375,
-                "time_offset": -19501.8515625,
-                "time_offset_stddev": 0.002255274489021976
-                "ds_sac":1,
-                "ds_sic":1,
-                "ds_sac_override":1,
-                "ds_sic_override":2,
-                "ds_name":"ARTAS2"
-            }
-        ]
-    },
-    ...
-}
-\end{lstlisting}
-\ \\
+In this case, the first dataset will be imported into line L1 (0 as L1, default line), while the second dataset will be imported in to L2 and time shifted by the 'time\_offset' (as Time of Day in seconds). \\
 
 Exact definition:
 
@@ -242,17 +159,9 @@ Exact definition:
   \begin{tabularx}{\textwidth}{ | l | X | c | X | }
     \hline
     \textbf{Key} & \textbf{Value Description} & \textbf{Required} & \textbf{Comment} \\ \hline
-    name & Name of the dataset as string & Y & Needed for identification purposes \\ \hline
     filename & File path and name (absolute) as string & Y & Needed for import \\ \hline
-    time\_start & ASTERIX tod of first message, as number in seconds & & \\ \hline
-    time\_end & ASTERIX tod of last message, as number in seconds & & \\ \hline
+    line\_id & Line ID to be used during ASTERIX import & & \\ \hline
     time\_offset & ASTERIX tod offset as reference time minus dataset time, as number in seconds & & \\ \hline
-    time\_offset\_stddev & ASTERIX tod offset standard deviation, as number in seconds$^2$ & & \\ \hline
-    ds\_name & Name of the data source, as string &  & Needed for tracker run comparison \\ \hline
-    ds\_sac & SAC of the data source, as number & & Needed for tracker run comparison \\ \hline
-    ds\_sic & SIC of the data source, as number & & Needed for tracker run comparison \\ \hline
-    ds\_sac\_override & SAC of the data source to be set in the database, as number & & Needed for tracker run comparison \\ \hline
-    ds\_sic\_override & SIC of the data source to be set in the database, as number & & Needed for tracker run comparison \\ \hline
 \end{tabularx}
 \end{table}
 \end{center}
