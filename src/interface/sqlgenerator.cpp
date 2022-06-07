@@ -274,36 +274,36 @@ shared_ptr<DBCommand> SQLGenerator::getADSBInfoCommand(DBContent& adsb_obj)
     return command;
 }
 
-string SQLGenerator::getCreateAssociationTableStatement(const string& table_name)
-{
-    stringstream ss;
+//string SQLGenerator::getCreateAssociationTableStatement(const string& table_name)
+//{
+//    stringstream ss;
 
-    ss << "CREATE TABLE " << table_name
-       << " (assoc_id INTEGER PRIMARY KEY AUTOINCREMENT, rec_num INTEGER, utn INTEGER, src_rec_num "
-          "INTEGER, ds_id INTEGER);";
+//    ss << "CREATE TABLE " << table_name
+//       << " (assoc_id INTEGER PRIMARY KEY AUTOINCREMENT, rec_num INTEGER, utn INTEGER, src_rec_num "
+//          "INTEGER, ds_id INTEGER);";
 
-    return ss.str();
-}
+//    return ss.str();
+//}
 
-shared_ptr<DBCommand> SQLGenerator::getSelectAssociationsCommand(const string& table_name)
-{
-    shared_ptr<DBCommand> command = make_shared<DBCommand>(DBCommand());
+//shared_ptr<DBCommand> SQLGenerator::getSelectAssociationsCommand(const string& table_name)
+//{
+//    shared_ptr<DBCommand> command = make_shared<DBCommand>(DBCommand());
 
-    stringstream ss;
+//    stringstream ss;
 
-    ss << "SELECT assoc_id, rec_num, utn, src_rec_num FROM " << table_name;
+//    ss << "SELECT assoc_id, rec_num, utn, src_rec_num FROM " << table_name;
 
-    PropertyList property_list;
-    property_list.addProperty("assoc_id", PropertyDataType::INT);
-    property_list.addProperty("rec_num", PropertyDataType::INT);
-    property_list.addProperty("utn", PropertyDataType::INT);
-    property_list.addProperty("src_rec_num", PropertyDataType::INT);
+//    PropertyList property_list;
+//    property_list.addProperty("assoc_id", PropertyDataType::INT);
+//    property_list.addProperty("rec_num", PropertyDataType::INT);
+//    property_list.addProperty("utn", PropertyDataType::INT);
+//    property_list.addProperty("src_rec_num", PropertyDataType::INT);
 
-    command->set(ss.str());
-    command->list(property_list);
+//    command->set(ss.str());
+//    command->list(property_list);
 
-    return command;
-}
+//    return command;
+//}
 
 string SQLGenerator::getCountStatement(const string& table)
 {
