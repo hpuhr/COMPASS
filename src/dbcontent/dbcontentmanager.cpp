@@ -43,6 +43,7 @@
 
 #include <algorithm>
 #include <chrono>
+#include <string>
 
 using namespace std;
 using namespace Utils;
@@ -85,7 +86,7 @@ double secondsSinceMidnightUTC ()
 }
 
 DBContentManager::DBContentManager(const std::string& class_id, const std::string& instance_id,
-                                 COMPASS* compass)
+                                   COMPASS* compass)
     : Configurable(class_id, instance_id, compass, "db_content.json"), compass_(*compass)
 {
     logdbg << "DBContentManager: constructor: creating subconfigurables";
@@ -133,7 +134,7 @@ dbContent::LabelGenerator& DBContentManager::labelGenerator()
 }
 
 void DBContentManager::generateSubConfigurable(const std::string& class_id,
-                                              const std::string& instance_id)
+                                               const std::string& instance_id)
 {
     logdbg << "DBContentManager: generateSubConfigurable: class_id " << class_id << " instance_id "
            << instance_id;
@@ -519,13 +520,15 @@ void DBContentManager::databaseOpenedSlot()
     loadMaxRecordNumber();
     loadMaxRefTrajTrackNum();
 
-    if (COMPASS::instance().interface().hasProperty("associations_generated"))
+    DBInterface& db_interface = COMPASS::instance().interface();
+
+    if (db_interface.hasProperty("associations_generated"))
     {
-        assert(COMPASS::instance().interface().hasProperty("associations_id"));
+        assert(db_interface.hasProperty("associations_id"));
 
         has_associations_ =
-                COMPASS::instance().interface().getProperty("associations_generated") == "1";
-        associations_id_ = COMPASS::instance().interface().getProperty("associations_id");
+                db_interface.getProperty("associations_generated") == "1";
+        associations_id_ = db_interface.getProperty("associations_id");
     }
     else
     {
@@ -533,12 +536,29 @@ void DBContentManager::databaseOpenedSlot()
         associations_id_ = "";
     }
 
+    // load min max values
+    if (db_interface.hasProperty("time_of_day_min"))
+        tod_min_ = stod(db_interface.getProperty("time_of_day_min"));
+    if (db_interface.hasProperty("time_of_day_max"))
+        tod_max_ = stod(db_interface.getProperty("time_of_day_max"));
+
+    if (db_interface.hasProperty("latitude_min"))
+        latitude_min_ = stod(db_interface.getProperty("latitude_min"));
+    if (db_interface.hasProperty("latitude_max"))
+        latitude_max_ = stod(db_interface.getProperty("latitude_max"));
+
+    if (db_interface.hasProperty("longitude_min"))
+        longitude_min_ = stod(db_interface.getProperty("longitude_min"));
+    if (db_interface.hasProperty("longitude_max"))
+        longitude_max_ = stod(db_interface.getProperty("longitude_max"));
+
     for (auto& object : dbcontent_)
         object.second->databaseOpenedSlot();
 
     targets_ = COMPASS::instance().interface().loadTargets();
 
     emit associationStatusChangedSignal();
+
 
     loginf << "DBContentManager: databaseOpenedSlot: done";
 }
@@ -560,6 +580,13 @@ void DBContentManager::databaseClosedSlot()
         object.second->databaseClosedSlot();
 
     targets_.clear();
+
+    tod_min_.reset();
+    tod_max_.reset();
+    latitude_min_.reset();
+    latitude_max_.reset();
+    longitude_min_.reset();
+    longitude_max_.reset();
 
     associationStatusChangedSignal();
 }
@@ -657,9 +684,9 @@ void DBContentManager::setAssociationsIdentifier(const std::string& assoc_id)
     has_associations_ = true;
     associations_id_ = assoc_id;
 
-   COMPASS::instance().dataSourceManager().updateWidget();
+    COMPASS::instance().dataSourceManager().updateWidget();
 
-   emit associationStatusChangedSignal();
+    emit associationStatusChangedSignal();
 }
 
 //void DBContentManager::setAssociationsByAll()
@@ -766,7 +793,117 @@ void DBContentManager::insertDone(DBContent& object)
 
 void DBContentManager::finishInserting()
 {
-    logdbg << "DBContentManager: finishInserting: all done";
+    loginf << "DBContentManager: finishInserting: all done";
+
+    // calculate min/max values
+
+    for (auto& buf_it : insert_data_)
+    {
+        string dbcont_name = buf_it.first;
+
+        assert (metaCanGetVariable(dbcont_name, DBContent::meta_var_tod_));
+        assert (metaCanGetVariable(dbcont_name, DBContent::meta_var_latitude_));
+        assert (metaCanGetVariable(dbcont_name, DBContent::meta_var_longitude_));
+
+        unsigned int buffer_size = buf_it.second->size();
+
+        //auto updateMinMaxRange = [ & ] (Property prop, const std::string& dbcont_name, )
+        // TODO template function this
+
+        // use dbcolum name since buffer has been transformed during insert
+
+        // tod
+        {
+            Variable& var = metaGetVariable(dbcont_name, DBContent::meta_var_tod_);
+            if (buf_it.second->has<float>(var.dbColumnName()))
+            {
+                NullableVector<float>& data_vec = buf_it.second->get<float>(var.dbColumnName());
+                bool has_min_max = hasMinMaxToD();
+
+                for (unsigned int cnt=0; cnt < buffer_size; cnt++)
+                {
+                    if (!data_vec.isNull(cnt))
+                    {
+                        if (has_min_max)
+                        {
+                            tod_min_ = std::min(tod_min_.get(), data_vec.get(cnt));
+                            tod_max_ = std::max(tod_max_.get(), data_vec.get(cnt));
+                        }
+                        else
+                        {
+                            tod_min_ = data_vec.get(cnt);
+                            tod_max_ = data_vec.get(cnt);
+
+                            has_min_max = true;
+                        }
+                    }
+                }
+
+                if (has_min_max)
+                {
+                    COMPASS::instance().interface().setProperty("time_of_day_min", to_string(tod_min_.get()));
+                    COMPASS::instance().interface().setProperty("time_of_day_max", to_string(tod_max_.get()));
+
+                    logdbg << "DBContentManager: finishInserting: tod min " << tod_min_.get()
+                           << " max " << tod_max_.get();
+                }
+            }
+        }
+
+        // lat & long
+        {
+            Variable& lat_var = metaGetVariable(dbcont_name, DBContent::meta_var_latitude_);
+            Variable& lon_var = metaGetVariable(dbcont_name, DBContent::meta_var_longitude_);
+
+            if (buf_it.second->has<double>(lat_var.dbColumnName())
+                    && buf_it.second->has<double>(lon_var.dbColumnName()))
+            {
+                NullableVector<double>& lat_vec = buf_it.second->get<double>(lat_var.dbColumnName());
+                NullableVector<double>& lon_vec = buf_it.second->get<double>(lon_var.dbColumnName());
+
+                bool has_min_max = hasMinMaxPosition();
+
+                for (unsigned int cnt=0; cnt < buffer_size; cnt++)
+                {
+                    if (!lat_vec.isNull(cnt) && !lon_vec.isNull(cnt))
+                    {
+                        if (has_min_max)
+                        {
+                            latitude_min_ = std::min(latitude_min_.get(), lat_vec.get(cnt));
+                            latitude_max_ = std::max(latitude_max_.get(), lat_vec.get(cnt));
+
+                            longitude_min_ = std::min(longitude_min_.get(), lon_vec.get(cnt));
+                            longitude_max_ = std::max(longitude_max_.get(), lon_vec.get(cnt));
+                        }
+                        else
+                        {
+                            latitude_min_ = lat_vec.get(cnt);
+                            latitude_max_ = lat_vec.get(cnt);
+
+                            longitude_min_ = lon_vec.get(cnt);
+                            longitude_max_ = lon_vec.get(cnt);
+
+                            has_min_max = true;
+                        }
+                    }
+                }
+
+                if (has_min_max)
+                {
+                    COMPASS::instance().interface().setProperty("latitude_min", to_string(latitude_min_.get()));
+                    COMPASS::instance().interface().setProperty("latitude_max", to_string(latitude_max_.get()));
+
+                    COMPASS::instance().interface().setProperty("longitude_min", to_string(longitude_min_.get()));
+                    COMPASS::instance().interface().setProperty("longitude_max", to_string(longitude_max_.get()));
+
+                    logdbg << "DBContentManager: finishInserting: lat min " << latitude_min_.get()
+                           << " max " << latitude_max_.get()
+                           << " lon min " << longitude_min_.get()
+                           << " max " << longitude_max_.get();
+                }
+            }
+        }
+    }
 
     if (COMPASS::instance().appMode() == AppMode::Offline || COMPASS::instance().appMode() == AppMode::LivePaused)
         insert_data_.clear();
@@ -1090,6 +1227,70 @@ void DBContentManager::maxRefTrajTrackNum(unsigned int value)
 
     max_reftraj_track_num_ = value;
     has_max_reftraj_track_num_ = true;
+}
+
+
+bool DBContentManager::hasMinMaxInfo() const
+{
+    return tod_min_.has_value() || tod_max_.has_value()
+            || latitude_min_.has_value() || latitude_max_.has_value()
+            || longitude_min_.has_value() || longitude_max_.has_value();
+}
+
+bool DBContentManager::hasMinMaxToD() const
+{
+    return tod_min_.has_value() && tod_max_.has_value();
+}
+
+void DBContentManager::setMinMaxTod(double min, double max)
+{
+    tod_min_ = min;
+    tod_max_ = max;
+
+    COMPASS::instance().interface().setProperty("time_of_day_min", to_string(tod_min_.get()));
+    COMPASS::instance().interface().setProperty("time_of_day_max", to_string(tod_max_.get()));
+}
+
+std::pair<double, double> DBContentManager::minMaxTod() const
+{
+    assert (hasMinMaxToD());
+    return {tod_min_.get(), tod_max_.get()};
+}
+
+bool DBContentManager::hasMinMaxPosition() const
+{
+    return latitude_min_.has_value() || latitude_max_.has_value()
+            || longitude_min_.has_value() || longitude_max_.has_value();
+}
+
+void DBContentManager::setMinMaxLatitude(double min, double max)
+{
+    latitude_min_ = min;
+    latitude_max_ = max;
+
+    COMPASS::instance().interface().setProperty("latitude_min", to_string(latitude_min_.get()));
+    COMPASS::instance().interface().setProperty("latitude_max", to_string(latitude_max_.get()));
+}
+
+std::pair<double, double> DBContentManager::minMaxLatitude() const
+{
+    assert (hasMinMaxPosition());
+    return {latitude_min_.get(), latitude_max_.get()};
+}
+
+void DBContentManager::setMinMaxLongitude(double min, double max)
+{
+    longitude_min_ = min;
+    longitude_max_ = max;
+
+    COMPASS::instance().interface().setProperty("longitude_min", to_string(longitude_min_.get()));
+    COMPASS::instance().interface().setProperty("longitude_max", to_string(longitude_max_.get()));
+}
+
+std::pair<double, double> DBContentManager::minMaxLongitude() const
+{
+    assert (hasMinMaxPosition());
+    return {longitude_min_.get(), longitude_max_.get()};
 }
 
 const std::map<std::string, std::shared_ptr<Buffer>>& DBContentManager::data() const

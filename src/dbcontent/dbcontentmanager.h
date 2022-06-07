@@ -23,6 +23,8 @@
 #include "singleton.h"
 #include "buffer.h"
 
+#include <boost/optional.hpp>
+
 #include <QObject>
 
 #include <vector>
@@ -144,6 +146,17 @@ public:
     unsigned int maxRefTrajTrackNum() const;
     void maxRefTrajTrackNum(unsigned int value);
 
+    bool hasMinMaxInfo() const;
+    bool hasMinMaxToD() const;
+    void setMinMaxTod(double min, double max);
+    std::pair<double, double> minMaxTod() const;
+
+    bool hasMinMaxPosition() const;
+    void setMinMaxLatitude(double min, double max);
+    std::pair<double, double> minMaxLatitude() const;
+    void setMinMaxLongitude(double min, double max);
+    std::pair<double, double> minMaxLongitude() const;
+
     const std::map<std::string, std::shared_ptr<Buffer>>& data() const;
 
     bool canGetVariable (const std::string& dbcont_name, const Property& property);
@@ -181,6 +194,13 @@ protected:
 
     bool has_max_reftraj_track_num_ {false};
     unsigned int max_reftraj_track_num_ {0};
+
+    boost::optional<float> tod_min_;
+    boost::optional<float> tod_max_;
+    boost::optional<double> latitude_min_;
+    boost::optional<double> latitude_max_;
+    boost::optional<double> longitude_min_;
+    boost::optional<double> longitude_max_;
 
     std::map<std::string, std::shared_ptr<Buffer>> data_;
 
