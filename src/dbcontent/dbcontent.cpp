@@ -549,12 +549,13 @@ void DBContent::insertDoneSlot()
 
     assert(insert_job_);
 
+    is_loadable_ = true;
+    count_ += insert_job_->buffer()->size();
+
     insert_job_ = nullptr;
     insert_active_ = false;
 
     dbo_manager_.insertDone(*this);
-
-    is_loadable_ = true;
 
     //dbo_manager_.databaseContentChangedSlot();
 

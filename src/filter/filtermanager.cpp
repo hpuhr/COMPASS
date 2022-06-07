@@ -375,6 +375,8 @@ void FilterManager::showViewPointSlot (const ViewableDataConfig* vp)
     // add filters
     use_filters_ = data.contains("filters");
 
+    disableAllFilters();
+
     if (data.contains("filters"))
     {
         const json& filters = data.at("filters");
@@ -382,8 +384,6 @@ void FilterManager::showViewPointSlot (const ViewableDataConfig* vp)
         logdbg << "FilterManager: showViewPointSlot: filter data '" << filters.dump(4) << "'";
 
         assert (filters.is_object());
-
-        disableAllFilters();
 
         for (auto& fil_it : filters.get<json::object_t>())
         {
@@ -402,6 +402,9 @@ void FilterManager::showViewPointSlot (const ViewableDataConfig* vp)
             (*it)->loadViewPointConditions(filters);
         }
     }
+
+    if (widget_)
+        widget_->updateUseFilters();
 }
 
 void FilterManager::setConfigInViewPoint (nlohmann::json& data)

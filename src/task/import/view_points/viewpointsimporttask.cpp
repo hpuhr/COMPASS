@@ -407,6 +407,13 @@ void ViewPointsImportTask::run()
 
             //task_manager_.appendSuccess("ViewPointsImportTask: import of ASTERIX files done");
 
+            boost::posix_time::ptime start_time = boost::posix_time::microsec_clock::local_time();
+            while ((boost::posix_time::microsec_clock::local_time()-start_time).total_milliseconds() < 50)
+            {
+                QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+                QThread::msleep(1);
+            }
+
             done_ = true;
 
             emit doneSignal(name_);
