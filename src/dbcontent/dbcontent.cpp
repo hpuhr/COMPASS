@@ -65,7 +65,7 @@ const Property DBContent::meta_var_track_num_ {"Track Number", PropertyDataType:
 
 const Property DBContent::meta_var_track_begin_ {"Track Begin", PropertyDataType::BOOL};
 const Property DBContent::meta_var_track_confirmed_ {"Track Confirmed", PropertyDataType::BOOL};
-const Property DBContent::meta_var_track_coasting_ {"Track Coasting", PropertyDataType::BOOL};
+const Property DBContent::meta_var_track_coasting_ {"Track Coasting", PropertyDataType::UCHAR};
 const Property DBContent::meta_var_track_end_ {"Track End", PropertyDataType::BOOL};
 
 const Property DBContent::meta_var_latitude_ {"Latitude", PropertyDataType::DOUBLE};
