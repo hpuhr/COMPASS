@@ -300,7 +300,7 @@
                     "dimension": "Time",
                     "is_key": false,
                     "name": "Time of Day",
-                    "representation_str": "STANDARD",
+                    "representation_str": "SECONDS_TO_TIME",
                     "short_name": "ToD",
                     "unit": "Second"
                 }

@@ -112,7 +112,7 @@
             },
             "Variable26": {
                 "parameters": {
-                    "data_type_str": "FLOAT",
+                    "data_type_str": "DOUBLE",
                     "db_column_name": "x",
                     "description": "Calculated position in Cartesian co-ordinates with a resolution of\n0.5m",
                     "dimension": "",
@@ -125,7 +125,7 @@
             },
             "Variable27": {
                 "parameters": {
-                    "data_type_str": "FLOAT",
+                    "data_type_str": "DOUBLE",
                     "db_column_name": "y",
                     "description": "Calculated position in Cartesian co-ordinates with a resolution of\n0.5m",
                     "dimension": "",
@@ -352,7 +352,7 @@
                     "dimension": "Speed",
                     "is_key": false,
                     "name": "Ground Speed",
-                    "representation_str": "STANDARD",
+                    "representation_str": "FLOAT_PREC1",
                     "short_name": "GSpd",
                     "unit": "Knots"
                 }
@@ -619,7 +619,7 @@
             },
             "VariableRefTrajtrack_coasted0": {
                 "parameters": {
-                    "data_type_str": "BOOL",
+                    "data_type_str": "UCHAR",
                     "db_column_name": "coasting",
                     "description": "0 Default value\n1 Age of the last received track update is higher than system dependent threshold (coasting)",
                     "dimension": "",

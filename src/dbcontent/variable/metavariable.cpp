@@ -45,6 +45,7 @@ MetaVariable::MetaVariable(const std::string& class_id, const std::string& insta
 
     createSubConfigurables();
 
+    checkSubVariables();
     updateDescription();
 }
 
@@ -229,16 +230,9 @@ PropertyDataType MetaVariable::dataType() const
 {
     assert(hasVariables());
 
-    PropertyDataType data_type = variables_.begin()->second.dataType();
+    //checked in checkSubVariables
 
-    for (auto variable_it : variables_)
-    {
-        if (variable_it.second.dataType() != data_type)
-            logerr << "MetaVariable: dataType: meta var " << name_
-                   << " has different data types in sub variables";
-    }
-
-    return data_type;
+    return variables_.begin()->second.dataType();
 }
 
 const std::string& MetaVariable::dataTypeString() const
@@ -251,16 +245,9 @@ Variable::Representation MetaVariable::representation()
 {
     assert(hasVariables());
 
-    Variable::Representation representation = variables_.begin()->second.representation();
+    //checked in checkSubVariables
 
-    for (auto variable_it : variables_)
-    {
-        if (variable_it.second.representation() != representation)
-            logerr << "MetaVariable: dataType: meta var " << name_
-                   << " has different representations in sub variables";
-    }
-
-    return representation;
+    return variables_.begin()->second.representation();
 }
 
 //std::string MetaVariable::getMinString() const
@@ -347,6 +334,32 @@ void MetaVariable::updateDescription()
     {
         description_ += "For " + variable_it.first +" ("+ variable_it.second.dataTypeString()+"):\n";
         description_ += variable_it.second.description() + "\n\n";
+    }
+}
+
+void MetaVariable::checkSubVariables()
+{
+    if (hasVariables())
+    {
+        PropertyDataType data_type = variables_.begin()->second.dataType();
+
+        for (auto variable_it : variables_)
+        {
+            if (variable_it.second.dataType() != data_type)
+                logerr << "MetaVariable: checkSubVariables: meta var " << name_
+                       << " has different data types in sub variables ("
+                       << Property::asString(data_type) << ", " << variable_it.second.dataTypeString() << ")";
+        }
+
+        string rep_str = variables_.begin()->second.representationString();
+
+        for (auto variable_it : variables_)
+        {
+            if (variable_it.second.representationString() != rep_str)
+                logerr << "MetaVariable: checkSubVariables: meta var " << name_
+                       << " has different representations in sub variables ("
+                       << rep_str << ", " << variable_it.second.representationString() << ")";
+        }
     }
 }
 

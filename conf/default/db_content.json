@@ -2207,12 +2207,6 @@
                                 "dbcontent_name": "RefTraj",
                                 "variable_name": "Record Number"
                             }
-                        },
-                        "VariableDefinitionRefTrajrec_num0": {
-                            "parameters": {
-                                "dbcontent_name": "RefTraj",
-                                "variable_name": "rec_num"
-                            }
                         }
                     }
                 }

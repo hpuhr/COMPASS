@@ -52,7 +52,7 @@ LabelGenerator::LabelGenerator(const std::string& class_id, const std::string& i
     updateTIValuesFromStr(filter_ti_values_);
 
     registerParameter("filter_ta_active", &filter_ta_active_, false);
-    registerParameter("filter_ta_values", &filter_ta_values_, "AADDCCDD");
+    registerParameter("filter_ta_values", &filter_ta_values_, "AADDCC");
     updateTAValuesFromStr(filter_ta_values_);
 
     createSubConfigurables();

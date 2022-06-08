@@ -710,7 +710,7 @@
             },
             "VariableMLATtrack_coasted0": {
                 "parameters": {
-                    "data_type_str": "BOOL",
+                    "data_type_str": "UCHAR",
                     "db_column_name": "track_coasted",
                     "description": "From 170.CST\n\n0 Not extrapolated\n1 Extrapolated",
                     "dimension": "",

@@ -528,7 +528,7 @@
             },
             "Variable26": {
                 "parameters": {
-                    "data_type_str": "FLOAT",
+                    "data_type_str": "DOUBLE",
                     "db_column_name": "x",
                     "description": "From 100.X\n\nCalculated position in Cartesian co-ordinates with a resolution of\n0.5m",
                     "dimension": "",
@@ -541,7 +541,7 @@
             },
             "Variable27": {
                 "parameters": {
-                    "data_type_str": "FLOAT",
+                    "data_type_str": "DOUBLE",
                     "db_column_name": "y",
                     "description": "From 100.Y\n\nCalculated position in Cartesian co-ordinates with a resolution of\n0.5m",
                     "dimension": "",
@@ -2231,7 +2231,7 @@
             },
             "VariableTrackertrack_coasted0": {
                 "parameters": {
-                    "data_type_str": "BOOL",
+                    "data_type_str": "UCHAR",
                     "db_column_name": "coasting",
                     "description": "From 080.CST\n\n0 Default value\n1 Age of the last received track update is higher than system dependent threshold (coasting)",
                     "dimension": "",

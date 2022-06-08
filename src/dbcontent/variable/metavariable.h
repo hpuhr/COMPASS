@@ -31,9 +31,9 @@ class MetaVariableWidget;
 
 class MetaVariable : public Configurable
 {
-  public:
+public:
     MetaVariable(const std::string& class_id, const std::string& instance_id,
-                    DBContentManager* object_manager);
+                 DBContentManager* object_manager);
     virtual ~MetaVariable();
 
     virtual void generateSubConfigurable(const std::string& class_id,
@@ -64,10 +64,10 @@ class MetaVariable : public Configurable
 
     std::string description() const;
 
-//    std::string getMinString() const;
-//    std::string getMaxString() const;
-//    std::string getMinStringRepresentation() const;
-//    std::string getMaxStringRepresentation() const;
+    //    std::string getMinString() const;
+    //    std::string getMaxString() const;
+    //    std::string getMinStringRepresentation() const;
+    //    std::string getMaxStringRepresentation() const;
 
     MetaVariableWidget* widget();
 
@@ -76,7 +76,7 @@ class MetaVariable : public Configurable
 
     void removeOutdatedVariables();
 
-  protected:
+protected:
     std::string name_;
     std::string description_;
 
@@ -91,6 +91,8 @@ class MetaVariable : public Configurable
 
     virtual void checkSubConfigurables();
     void updateDescription();
+
+    void checkSubVariables();
 };
 
 }
