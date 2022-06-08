@@ -308,16 +308,6 @@ void LabelGenerator::currentLOD(unsigned int current_lod)
 }
 
 
-LabelGeneratorWidget& LabelGenerator::widget()
-{
-    if (!widget_)
-    {
-        widget_.reset(new LabelGeneratorWidget(*this));
-    }
-
-    return *widget_.get();
-}
-
 bool LabelGenerator::autoLOD() const
 {
     return auto_lod_;

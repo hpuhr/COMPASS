@@ -11,6 +11,8 @@ namespace dbContent
 
 class LabelGenerator;
 
+// is not owned by LabelGenerator, can be deleted
+// TODO multiple instances do not update each other
 class LabelGeneratorWidget : public QWidget
 {
     Q_OBJECT

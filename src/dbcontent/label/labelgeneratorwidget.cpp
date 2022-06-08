@@ -164,7 +164,6 @@ LabelGeneratorWidget::LabelGeneratorWidget(LabelGenerator& label_generator)
 
 LabelGeneratorWidget::~LabelGeneratorWidget()
 {
-
 }
 
 void LabelGeneratorWidget::editSettingsSlot()

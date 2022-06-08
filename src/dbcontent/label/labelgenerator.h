@@ -17,7 +17,6 @@ class GeometryLeafItemLabels;
 namespace dbContent
 {
 
-class LabelGeneratorWidget;
 class LabelContentDialog;
 class VariableSet;
 
@@ -59,8 +58,6 @@ public:
 
     unsigned int currentLOD() const;
     void currentLOD(unsigned int current_lod);
-
-    LabelGeneratorWidget& widget();
 
     bool autoLOD() const;
     void autoLOD(bool auto_lod);
@@ -113,8 +110,6 @@ public:
 
 protected:
     DBContentManager& dbcont_manager_;
-
-    std::unique_ptr<LabelGeneratorWidget> widget_;
 
     bool auto_label_ {true};
     bool auto_lod_ {true};
