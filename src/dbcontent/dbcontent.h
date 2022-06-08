@@ -78,14 +78,20 @@ public:
     static const Property meta_var_m3a_;
     static const Property meta_var_m3a_g_;
     static const Property meta_var_m3a_v_;
+    static const Property meta_var_m3a_smoothed_;
     static const Property meta_var_ta_;
     static const Property meta_var_ti_;
     static const Property meta_var_mc_;
     static const Property meta_var_mc_g_;
     static const Property meta_var_mc_v_;
     static const Property meta_var_ground_bit_;
+
     static const Property meta_var_track_num_;
+    static const Property meta_var_track_begin_;
+    static const Property meta_var_track_confirmed_;
+    static const Property meta_var_track_coasting_;
     static const Property meta_var_track_end_;
+
     static const Property meta_var_latitude_;
     static const Property meta_var_longitude_;
     static const Property meta_var_detection_type_;
@@ -97,6 +103,7 @@ public:
     static const Property meta_var_vy_;
     static const Property meta_var_ground_speed_;
     static const Property meta_var_track_angle_;
+    static const Property meta_var_horizontal_man_;
 
     static const Property meta_var_x_stddev_;
     static const Property meta_var_y_stddev_;

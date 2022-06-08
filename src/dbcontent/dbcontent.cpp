@@ -54,6 +54,7 @@ const Property DBContent::meta_var_tod_ {"Time of Day", PropertyDataType::FLOAT}
 const Property DBContent::meta_var_m3a_ {"Mode 3/A Code", PropertyDataType::UINT};
 const Property DBContent::meta_var_m3a_g_ {"Mode 3/A Garbled", PropertyDataType::BOOL};
 const Property DBContent::meta_var_m3a_v_ {"Mode 3/A Valid", PropertyDataType::BOOL};
+const Property DBContent::meta_var_m3a_smoothed_ {"Mode 3/A Smoothed", PropertyDataType::BOOL};
 const Property DBContent::meta_var_ta_ {"Aircraft Address", PropertyDataType::UINT};
 const Property DBContent::meta_var_ti_ {"Aircraft Identification", PropertyDataType::STRING};
 const Property DBContent::meta_var_mc_ {"Mode C Code", PropertyDataType::FLOAT};
@@ -61,6 +62,10 @@ const Property DBContent::meta_var_mc_g_ {"Mode C Garbled", PropertyDataType::BO
 const Property DBContent::meta_var_mc_v_ {"Mode C Valid", PropertyDataType::BOOL};
 const Property DBContent::meta_var_ground_bit_ {"Ground Bit", PropertyDataType::BOOL};
 const Property DBContent::meta_var_track_num_ {"Track Number", PropertyDataType::UINT};
+
+const Property DBContent::meta_var_track_begin_ {"Track Begin", PropertyDataType::BOOL};
+const Property DBContent::meta_var_track_confirmed_ {"Track Confirmed", PropertyDataType::BOOL};
+const Property DBContent::meta_var_track_coasting_ {"Track Coasting", PropertyDataType::BOOL};
 const Property DBContent::meta_var_track_end_ {"Track End", PropertyDataType::BOOL};
 
 const Property DBContent::meta_var_latitude_ {"Latitude", PropertyDataType::DOUBLE};
@@ -74,6 +79,7 @@ const Property DBContent::meta_var_vx_ {"Vx", PropertyDataType::DOUBLE};
 const Property DBContent::meta_var_vy_ {"Vy", PropertyDataType::DOUBLE};
 const Property DBContent::meta_var_ground_speed_ {"Track Groundspeed", PropertyDataType::DOUBLE};
 const Property DBContent::meta_var_track_angle_ {"Track Angle", PropertyDataType::DOUBLE};
+const Property DBContent::meta_var_horizontal_man_ {"Track Horizontal Manoeuvre", PropertyDataType::BOOL};
 
 const Property DBContent::meta_var_x_stddev_ {"X StdDev", PropertyDataType::DOUBLE};
 const Property DBContent::meta_var_y_stddev_ {"Y StdDev", PropertyDataType::DOUBLE};

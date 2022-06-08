@@ -84,11 +84,103 @@ void ListBoxViewDataSource::generateSubConfigurable(const std::string& class_id,
 
 void ListBoxViewDataSource::checkSubConfigurables()
 {
+    DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
+
     if (!hasSet(DEFAULT_SET_NAME))
     {
         generateSubConfigurable("VariableOrderedSet", DEFAULT_SET_NAME);
         assert(hasSet(DEFAULT_SET_NAME));
         addDefaultVariables(*sets_.at(DEFAULT_SET_NAME).get());
+    }
+
+    if (!hasSet("ADS-B Quality"))
+    {
+        DBContent& cat021_cont = dbcont_man.dbContent("CAT021");
+
+        generateSubConfigurable("VariableOrderedSet", "ADS-B Quality");
+        assert(hasSet("ADS-B Quality"));
+
+        std::unique_ptr<dbContent::VariableOrderedSet>& set = sets_.at("ADS-B Quality");
+
+        addDefaultVariables(*set.get());
+
+        assert (cat021_cont.hasVariable(DBContent::var_cat021_mops_version_.name()));
+        set->add(cat021_cont.variable(DBContent::var_cat021_mops_version_.name()));
+
+        assert (cat021_cont.hasVariable(DBContent::var_cat021_nacp_.name()));
+        set->add(cat021_cont.variable(DBContent::var_cat021_nacp_.name()));
+
+        assert (cat021_cont.hasVariable(DBContent::var_cat021_sil_.name()));
+        set->add(cat021_cont.variable(DBContent::var_cat021_sil_.name()));
+
+        assert (cat021_cont.hasVariable(DBContent::var_cat021_nucp_nic_.name()));
+        set->add(cat021_cont.variable(DBContent::var_cat021_nucp_nic_.name()));
+    }
+
+    if (!hasSet("Horizontal Movement"))
+    {
+        generateSubConfigurable("VariableOrderedSet", "Horizontal Movement");
+        assert(hasSet("Horizontal Movement"));
+
+        std::unique_ptr<dbContent::VariableOrderedSet>& set = sets_.at("Horizontal Movement");
+
+        addDefaultVariables(*set.get());
+
+        if (dbcont_man.existsMetaVariable(DBContent::meta_var_track_angle_.name()))
+            set->add(dbcont_man.metaVariable(DBContent::meta_var_track_angle_.name()));
+
+        if (dbcont_man.existsMetaVariable(DBContent::meta_var_ground_speed_.name()))
+            set->add(dbcont_man.metaVariable(DBContent::meta_var_ground_speed_.name()));
+
+        if (dbcont_man.existsMetaVariable(DBContent::meta_var_horizontal_man_.name()))
+            set->add(dbcont_man.metaVariable(DBContent::meta_var_horizontal_man_.name()));
+    }
+
+    if (!hasSet("Mode A/C Info"))
+    {
+        generateSubConfigurable("VariableOrderedSet", "Mode A/C Info");
+        assert(hasSet("Mode A/C Info"));
+
+        std::unique_ptr<dbContent::VariableOrderedSet>& set = sets_.at("Mode A/C Info");
+
+        addDefaultVariables(*set.get());
+
+        if (dbcont_man.existsMetaVariable(DBContent::meta_var_m3a_g_.name()))
+            set->add(dbcont_man.metaVariable(DBContent::meta_var_m3a_g_.name()));
+
+        if (dbcont_man.existsMetaVariable(DBContent::meta_var_m3a_v_.name()))
+            set->add(dbcont_man.metaVariable(DBContent::meta_var_m3a_v_.name()));
+
+        if (dbcont_man.existsMetaVariable(DBContent::meta_var_m3a_smoothed_.name()))
+            set->add(dbcont_man.metaVariable(DBContent::meta_var_m3a_smoothed_.name()));
+
+        if (dbcont_man.existsMetaVariable(DBContent::meta_var_mc_g_.name()))
+            set->add(dbcont_man.metaVariable(DBContent::meta_var_mc_g_.name()));
+
+        if (dbcont_man.existsMetaVariable(DBContent::meta_var_mc_v_.name()))
+            set->add(dbcont_man.metaVariable(DBContent::meta_var_mc_v_.name()));
+    }
+
+    if (!hasSet("Track Lifetime"))
+    {
+        generateSubConfigurable("VariableOrderedSet", "Track Lifetime");
+        assert(hasSet("Track Lifetime"));
+
+        std::unique_ptr<dbContent::VariableOrderedSet>& set = sets_.at("Track Lifetime");
+
+        addDefaultVariables(*set.get());
+
+        if (dbcont_man.existsMetaVariable(DBContent::meta_var_track_begin_.name()))
+            set->add(dbcont_man.metaVariable(DBContent::meta_var_track_begin_.name()));
+
+        if (dbcont_man.existsMetaVariable(DBContent::meta_var_track_confirmed_.name()))
+            set->add(dbcont_man.metaVariable(DBContent::meta_var_track_confirmed_.name()));
+
+        if (dbcont_man.existsMetaVariable(DBContent::meta_var_track_coasting_.name()))
+            set->add(dbcont_man.metaVariable(DBContent::meta_var_track_coasting_.name()));
+
+        if (dbcont_man.existsMetaVariable(DBContent::meta_var_track_end_.name()))
+            set->add(dbcont_man.metaVariable(DBContent::meta_var_track_end_.name()));
     }
 }
 
@@ -291,44 +383,38 @@ void ListBoxViewDataSource::removeTemporaryVariable (const std::string& dbconten
 
 void ListBoxViewDataSource::addDefaultVariables (VariableOrderedSet& set)
 {
-    DBContentManager& obj_man = COMPASS::instance().dbContentManager();
+    DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
 
-    if (obj_man.existsMetaVariable(DBContent::meta_var_rec_num_.name()))
-        set.add(obj_man.metaVariable(DBContent::meta_var_rec_num_.name()));
+    if (dbcont_man.existsMetaVariable(DBContent::meta_var_rec_num_.name()))
+        set.add(dbcont_man.metaVariable(DBContent::meta_var_rec_num_.name()));
 
     //        Time of Day
-    if (obj_man.existsMetaVariable(DBContent::meta_var_tod_.name()))
-        set.add(obj_man.metaVariable(DBContent::meta_var_tod_.name()));
+    if (dbcont_man.existsMetaVariable(DBContent::meta_var_tod_.name()))
+        set.add(dbcont_man.metaVariable(DBContent::meta_var_tod_.name()));
 
     //        Datasource
-    if (obj_man.existsMetaVariable(DBContent::meta_var_datasource_id_.name()))
-        set.add(obj_man.metaVariable(DBContent::meta_var_datasource_id_.name()));
-
-    //        Lat/Long
-//        if (obj_man.existsMetaVariable("pos_lat_deg"))
-//            set.add(obj_man.metaVariable("pos_lat_deg"));
-//        if (obj_man.existsMetaVariable("pos_long_deg"))
-//            set.add(obj_man.metaVariable("pos_long_deg"));
+    if (dbcont_man.existsMetaVariable(DBContent::meta_var_datasource_id_.name()))
+        set.add(dbcont_man.metaVariable(DBContent::meta_var_datasource_id_.name()));
 
     //        Mode 3/A code
-    if (obj_man.existsMetaVariable(DBContent::meta_var_m3a_.name()))
-        set.add(obj_man.metaVariable(DBContent::meta_var_m3a_.name()));
+    if (dbcont_man.existsMetaVariable(DBContent::meta_var_m3a_.name()))
+        set.add(dbcont_man.metaVariable(DBContent::meta_var_m3a_.name()));
 
     //        Mode S TA
-    if (obj_man.existsMetaVariable(DBContent::meta_var_ta_.name()))
-        set.add(obj_man.metaVariable(DBContent::meta_var_ta_.name()));
+    if (dbcont_man.existsMetaVariable(DBContent::meta_var_ta_.name()))
+        set.add(dbcont_man.metaVariable(DBContent::meta_var_ta_.name()));
 
     //        Mode S Callsign
-    if (obj_man.existsMetaVariable(DBContent::meta_var_ti_.name()))
-        set.add(obj_man.metaVariable(DBContent::meta_var_ti_.name()));
+    if (dbcont_man.existsMetaVariable(DBContent::meta_var_ti_.name()))
+        set.add(dbcont_man.metaVariable(DBContent::meta_var_ti_.name()));
 
     //        Mode C
-    if (obj_man.existsMetaVariable(DBContent::meta_var_mc_.name()))
-        set.add(obj_man.metaVariable(DBContent::meta_var_mc_.name()));
+    if (dbcont_man.existsMetaVariable(DBContent::meta_var_mc_.name()))
+        set.add(dbcont_man.metaVariable(DBContent::meta_var_mc_.name()));
 
     //        Track Number
-    if (obj_man.existsMetaVariable(DBContent::meta_var_track_num_.name()))
-        set.add(obj_man.metaVariable(DBContent::meta_var_track_num_.name()));
+    if (dbcont_man.existsMetaVariable(DBContent::meta_var_track_num_.name()))
+        set.add(dbcont_man.metaVariable(DBContent::meta_var_track_num_.name()));
 }
 
 void ListBoxViewDataSource::setChangedSlot()
