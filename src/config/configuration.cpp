@@ -972,6 +972,23 @@ void Configuration::parseJSONSubConfigFile(const std::string& class_id,
     sub_configurations_.at(key).parseJSONConfigFile();
 }
 
+void Configuration::overrideJSONParameters(nlohmann::json& parameters_config)
+{
+    loginf << "Configuration class_id " << class_id_ << " instance_id " << instance_id_
+           << ": overrideJSONParameters";
+
+    // is object
+    assert(parameters_config.is_object());
+
+    // store paramaters in member
+    for (auto& it : parameters_config.items())
+    {
+        loginf << "Configuration: overrideJSONParameters: overriding '" << it.key()
+               << "' with '" << it.value().dump(0) << "'";
+        org_config_parameters_[it.key()] = it.value();
+    }
+}
+
 void Configuration::parseJSONParameters(nlohmann::json& parameters_config)
 {
     logdbg << "Configuration class_id " << class_id_ << " instance_id " << instance_id_

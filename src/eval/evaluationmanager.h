@@ -486,11 +486,8 @@ protected:
 
     void loadSectors();
 
-    //void updateReferenceDBContent();
-    //void updateReferenceDataSources();
-
-    //void updateTestDBContent();
-    //void updateTestDataSources();
+    void checkReferenceDataSources();
+    void checkTestDataSources();
 
     nlohmann::json::object_t getBaseViewableDataConfig ();
     nlohmann::json::object_t getBaseViewableNoDataConfig ();

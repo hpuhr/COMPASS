@@ -147,7 +147,7 @@ void ConfigurationManager::parseJSONConfigurationFile(const std::string& filenam
                     assert(root_configurations_.find(key) ==
                            root_configurations_.end());  // should not exist
 
-                    logdbg << "ConfigurationManager: parseJSONConfigurationFile: creating new "
+                    loginf << "ConfigurationManager: parseJSONConfigurationFile: creating new "
                               "configuration for class "
                            << class_id << " instance " << instance_id;
                     root_configurations_.insert(
@@ -176,6 +176,16 @@ void ConfigurationManager::saveConfiguration()
 {
     loginf << "ConfigurationManager: saveConfiguration";
     saveJSONConfiguration();
+}
+
+bool ConfigurationManager::hasRootConfiguration(const std::string& class_id, const std::string& instance_id)
+{
+    return root_configurations_.count({class_id, instance_id});
+}
+Configuration& ConfigurationManager::getRootConfiguration(const std::string& class_id, const std::string& instance_id)
+{
+    assert (hasRootConfiguration(class_id, instance_id));
+    return root_configurations_.at({class_id, instance_id});
 }
 
 void ConfigurationManager::saveJSONConfiguration()

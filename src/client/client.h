@@ -44,6 +44,9 @@ private:
 
     std::string create_new_sqlite3_db_filename_;
     std::string open_sqlite3_db_filename_;
+
+    std::string import_data_sources_filename_;
+
     std::string import_asterix_filename_;
     std::string import_asterix_file_line_;
 
@@ -54,7 +57,6 @@ private:
     std::string asterix_decoder_cfg;
 
     std::string import_view_points_filename_;
-
     std::string import_gps_trail_filename_;
     std::string import_sectors_filename_;
 
@@ -63,6 +65,8 @@ private:
     bool load_data_ {false};
 
     std::string export_view_points_report_filename_;
+
+    std::string evaluation_parameters_;
     bool evaluate_run_filter_ {false};
     bool evaluate_ {false};
     std::string export_eval_report_filename_;

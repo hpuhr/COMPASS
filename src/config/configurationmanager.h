@@ -66,6 +66,9 @@ class ConfigurationManager : public Singleton
     /// @brief Returns a dummy configuration which is discarded
     // Configuration &getDummyConfiguration () { return dummy_configuration_; }
 
+    bool hasRootConfiguration(const std::string& class_id, const std::string& instance_id);
+    Configuration& getRootConfiguration(const std::string& class_id, const std::string& instance_id);
+
   protected:
     bool initialized_;
     std::string main_config_filename_;

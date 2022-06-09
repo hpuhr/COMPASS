@@ -92,6 +92,7 @@ public:
     void createAndOpenNewSqlite3DB(const std::string& filename);
     void openSqlite3DB(const std::string& filename);
 
+    void importDataSourcesFile(const std::string& filename);
     void importViewPointsFile(const std::string& filename);
 
     void importASTERIXFile(const std::string& filename);
@@ -143,6 +144,9 @@ protected:
 
     bool sqlite3_open_db_ {false};
     std::string sqlite3_open_db_filename_;
+
+    bool data_sources_import_file_ {false};
+    std::string data_sources_import_filename_;
 
     bool view_points_import_file_ {false};
     std::string view_points_import_filename_;

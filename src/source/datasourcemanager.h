@@ -84,7 +84,7 @@ public:
 
     DataSourcesConfigurationDialog* configurationDialog();
 
-    void importDataSources(const std::string& filename);
+    void importDataSources(const std::string& filename); // import data sources from json
     void importDataSourcesJSONDeprecated(const nlohmann::json& j);
     void importDataSourcesJSON(const nlohmann::json& j);
 

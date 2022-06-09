@@ -507,8 +507,10 @@ void EvaluationManager::databaseOpenedSlot()
     assert (!sectors_loaded_);
     loadSectors();
 
-//    updateReferenceDataSources();
-//    updateTestDataSources();
+    // init with false values if not in cfg
+    checkReferenceDataSources();
+    checkTestDataSources();
+    saveActiveDataSources();
 
     if (!COMPASS::instance().dbContentManager().hasAssociations())
         widget()->setDisabled(false);
@@ -1201,8 +1203,6 @@ void EvaluationManager::dbContentNameRef(const std::string& name)
     loginf << "EvaluationManager: dbContentNameRef: name " << name;
 
     dbcontent_name_ref_ = name;
-
-    //updateReferenceDBContent();
 }
 
 bool EvaluationManager::hasValidReferenceDBContent ()
@@ -1457,100 +1457,49 @@ bool EvaluationManager::anySectorsWithReq()
     return any;
 }
 
-//void EvaluationManager::updateReferenceDBContent()
-//{
-//    loginf << "EvaluationManager: updateReferenceDBContent";
+void EvaluationManager::checkReferenceDataSources()
+{
+    loginf << "EvaluationManager: checkReferenceDataSources";
 
-//    data_sources_ref_.clear();
+    if (!hasValidReferenceDBContent())
+        return;
 
-//    if (!hasValidReferenceDBO())
-//        return;
+    if (COMPASS::instance().dataSourceManager().hasDataSourcesOfDBContent(dbcontent_name_ref_))
+    {
+        for (auto& ds_it : COMPASS::instance().dataSourceManager().dbDataSources())
+        {
+            if (!ds_it->hasNumInserted(dbcontent_name_ref_))
+                continue;
 
-//    if (COMPASS::instance().dataSourceManager().hasDataSourcesOfDBContent(dbcontent_name_ref_))
-//        updateReferenceDataSources();
-//}
+            string ds_id_str = to_string(ds_it->id());
 
-//void EvaluationManager::updateReferenceDataSources()
-//{
-//    loginf << "EvaluationManager: updateReferenceDataSources";
+            if (!data_sources_ref_[dbcontent_name_ref_].count(ds_id_str))
+                data_sources_ref_[dbcontent_name_ref_][ds_id_str] = false; // init with default false
+        }
+    }
+}
 
-//    assert (hasValidReferenceDBO());
+void EvaluationManager::checkTestDataSources()
+{
+    loginf << "EvaluationManager: checkTestDataSources";
 
-//    for (auto& ds_it : COMPASS::instance().dataSourceManager().dbDataSources())
-//    {
-//        if (!ds_it->hasNumInserted(dbcontent_name_ref_))
-//            continue;
+    if (!hasValidTestDBContent())
+        return;
 
-//        unsigned int ds_id = ds_it->id();
-//        string ds_id_str = to_string(ds_it->id());
+    if (COMPASS::instance().dataSourceManager().hasDataSourcesOfDBContent(dbcontent_name_tst_))
+    {
+        for (auto& ds_it : COMPASS::instance().dataSourceManager().dbDataSources())
+        {
+            if (!ds_it->hasNumInserted(dbcontent_name_tst_))
+                continue;
 
-//        if (data_sources_ref_.count(ds_id) == 0)
-//        {
-//            if (!active_sources_ref_[dbcontent_name_ref_].contains(ds_id_str))
-//                active_sources_ref_[dbcontent_name_ref_][ds_id_str] = true; // init with default true
+            string ds_id_str = to_string(ds_it->id());
 
-//            // needed for old compiler
-//            json::boolean_t& active
-//                    = active_sources_ref_[dbcontent_name_ref_][ds_id_str].get_ref<json::boolean_t&>();
-
-//            data_sources_ref_[ds_id] = active;
-
-//            //            data_sources_ref_.emplace(std::piecewise_construct,
-//            //                                      std::forward_as_tuple(ds_it->first),  // args for key
-//            //                                      std::forward_as_tuple(ds_it->first, ds_it->second.name(),
-//            //                                                            active));
-//        }
-
-//    }
-
-//}
-
-//void EvaluationManager::updateTestDBContent()
-//{
-//    loginf << "EvaluationManager: updateTestDBO";
-
-//    data_sources_tst_.clear();
-
-//    if (!hasValidTestDBO())
-//        return;
-
-//    if (COMPASS::instance().dataSourceManager().hasDataSourcesOfDBContent(dbcontent_name_tst_))
-//        updateTestDataSources();
-//}
-
-//void EvaluationManager::updateTestDataSources()
-//{
-//    loginf << "EvaluationManager: updateTestDataSources";
-
-//    assert (hasValidTestDBO());
-
-
-//    for (auto& ds_it : COMPASS::instance().dataSourceManager().dbDataSources())
-//    {
-//        if (!ds_it->hasNumInserted(dbcontent_name_tst_))
-//            continue;
-
-//        unsigned int ds_id = ds_it->id();
-//        string ds_id_str = to_string(ds_it->id());
-
-//        if (data_sources_tst_.count(ds_id) == 0)
-//        {
-//            if (!active_sources_tst_[dbcontent_name_tst_].contains(ds_id_str))
-//                active_sources_tst_[dbcontent_name_tst_][ds_id_str] = true; // init with default true
-
-//            // needed for old compiler
-//            json::boolean_t& active =
-//                    active_sources_tst_[dbcontent_name_tst_][ds_id_str].get_ref<json::boolean_t&>();
-
-//            data_sources_tst_[ds_id] = active;
-
-//            //            data_sources_tst_.emplace(std::piecewise_construct,
-//            //                                      std::forward_as_tuple(ds_it->first),  // args for key
-//            //                                      std::forward_as_tuple(ds_it->first, ds_it->second.name(),
-//            //                                                            active));
-//        }
-//    }
-//}
+            if (!data_sources_tst_[dbcontent_name_tst_].count(ds_id_str))
+                data_sources_tst_[dbcontent_name_tst_][ds_id_str] = false; // init with default false
+        }
+    }
+}
 
 void EvaluationManager::setViewableDataConfig (const nlohmann::json::object_t& data)
 {

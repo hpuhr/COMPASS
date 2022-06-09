@@ -28,6 +28,8 @@
 #include "asteriximporttask.h"
 #include "mainwindow.h"
 
+#include "json.hpp"
+
 #include <QApplication>
 #include <QMessageBox>
 #include <QSurfaceFormat>
@@ -101,6 +103,8 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
              "creates and opens new SQLite3 database with given filename, e.g. '/data/file1.db'")
             ("open_db", po::value<std::string>(&open_sqlite3_db_filename_),
              "opens existing SQLite3 database with given filename, e.g. '/data/file1.db'")
+            ("import_data_sources_file", po::value<std::string>(&import_data_sources_filename_),
+             "imports data sources JSON file with given filename, e.g. '/data/ds1.json'")
             ("import_view_points", po::value<std::string>(&import_view_points_filename_),
              "imports view points JSON file with given filename, e.g. '/data/file1.json'")
             ("import_asterix_file", po::value<std::string>(&import_asterix_filename_),
@@ -131,6 +135,8 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
             ("export_view_points_report", po::value<std::string>(&export_view_points_report_filename_),
              "export view points report after start with given filename, e.g. '/data/db2/report.tex")
             ("evaluate", po::bool_switch(&evaluate_), "run evaluation")
+            ("evaluation_parameters", po::value<std::string>(&evaluation_parameters_),
+               "evaluation parameters as JSON string, e.g. ''{\"current_standard\": \"test\", \"dbcontent_name_ref\": \"CAT062\", \"dbcontent_name_tst\": \"CAT020\"}'' (including one pair of single quotes)")
             ("evaluate_run_filter", po::bool_switch(&evaluate_run_filter_), "run evaluation filter before evaluation")
             ("export_eval_report", po::value<std::string>(&export_eval_report_filename_),
              "export evaluation report after start with given filename, e.g. '/data/eval_db2/report.tex")
@@ -205,6 +211,9 @@ void Client::run ()
 
     if (open_sqlite3_db_filename_.size())
         main_window.openSqlite3DB(open_sqlite3_db_filename_);
+
+    if (import_data_sources_filename_.size())
+        main_window.importDataSourcesFile(import_data_sources_filename_);
 
     if (import_view_points_filename_.size())
         main_window.importViewPointsFile(import_view_points_filename_);
@@ -381,6 +390,32 @@ void Client::checkAndSetupConfig()
         loginf << "COMPASSClient: configuration version " << config_version;
 
         ConfigurationManager::getInstance().init(config.getString("main_configuration_file"));
+
+        if (evaluation_parameters_.size())
+        {
+            loginf << "COMPASSClient: overriding evaluation parameters";
+            using namespace nlohmann;
+
+            try {
+                json eval_config = json::parse(evaluation_parameters_);
+
+                assert (ConfigurationManager::getInstance().hasRootConfiguration(
+                            "COMPASS", "COMPASS0"));
+                Configuration& compass_config = ConfigurationManager::getInstance().getRootConfiguration(
+                            "COMPASS", "COMPASS0");
+
+                assert (compass_config.hasSubConfiguration("EvaluationManager", "EvaluationManager0"));
+                Configuration& eval_man_config = compass_config.getSubConfiguration(
+                            "EvaluationManager", "EvaluationManager0");
+
+                eval_man_config.overrideJSONParameters(eval_config);
+            }
+            catch (exception& e)
+            {
+                logerr << "COMPASSClient: JSON parse error in '" << evaluation_parameters_ << "'";
+                throw e;
+            }
+        }
     }
     catch (exception& ex)
     {

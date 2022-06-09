@@ -484,6 +484,15 @@ void MainWindow::showViewPointsTab()
     tab_widget_->setCurrentIndex(3);
 }
 
+void MainWindow::importDataSourcesFile(const std::string& filename)
+{
+    loginf << "MainWindow: importDataSourcesFile: filename '" << filename << "'";
+
+    automatic_tasks_defined_ = true;
+    data_sources_import_file_ = true;
+    data_sources_import_filename_ = filename;
+}
+
 void MainWindow::importViewPointsFile(const std::string& filename)
 {
     loginf << "MainWindow: importViewPointsFile: filename '" << filename << "'";
@@ -636,9 +645,9 @@ void MainWindow::performAutomaticTasks ()
     loginf << "MainWindow: performAutomaticTasks";
     assert (automatic_tasks_defined_);
 
-    if (!(sqlite3_create_new_db_ || sqlite3_open_db_))
+    if (!(sqlite3_create_new_db_ || sqlite3_open_db_ || data_sources_import_file_ || quit_))
     {
-        logerr << "MainWindow: performAutomaticTasks: neither create nor open sqlite3 is set";
+        logerr << "MainWindow: performAutomaticTasks: neither create nor open db nor ds import is set";
         return;
     }
 
@@ -702,6 +711,33 @@ void MainWindow::performAutomaticTasks ()
     //        QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
 
     loginf << "MainWindow: performAutomaticTasks: waiting done";
+
+    if (data_sources_import_file_)
+    {
+        loginf << "MainWindow: performAutomaticTasks: importing data sources file '"
+               << data_sources_import_filename_ << "'";
+
+        if (!Files::fileExists(data_sources_import_filename_))
+        {
+            logerr << "MainWindow: performAutomaticTasks: data sources file '" << data_sources_import_filename_
+                   << "' does not exist";
+            return;
+        }
+
+        COMPASS::instance().dataSourceManager().importDataSources(data_sources_import_filename_);
+    }
+
+    if (!(sqlite3_create_new_db_ || sqlite3_open_db_))
+    {
+        if (quit_)
+        {
+            quitSlot();
+            return;
+        }
+
+        logerr << "MainWindow: performAutomaticTasks: tasks can not be performed since no db was opened";
+        return;
+    }
 
     if (view_points_import_file_)
     {
