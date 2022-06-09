@@ -120,8 +120,8 @@ public:
     unsigned int lineIDRef() const;
     void lineIDRef(unsigned int line_id_ref);
 
-    bool hasValidReferenceDBO ();
-    std::map<unsigned int, bool>& dataSourcesRef() { return data_sources_ref_; } // can be used to set active bool
+    bool hasValidReferenceDBContent ();
+    std::map<std::string, bool>& dataSourcesRef() { return data_sources_ref_[dbcontent_name_ref_]; } // can be used to set active bool
     std::set<unsigned int> activeDataSourcesRef();
 
     std::string dbContentNameTst() const;
@@ -130,8 +130,8 @@ public:
     unsigned int lineIDTst() const;
     void lineIDTst(unsigned int line_id_tst);
 
-    bool hasValidTestDBO ();
-    std::map<unsigned int, bool>& dataSourcesTst() { return data_sources_tst_; } // can be used to set active bool
+    bool hasValidTestDBContent ();
+    std::map<std::string, bool>& dataSourcesTst() { return data_sources_tst_[dbcontent_name_tst_]; } // can be used to set active bool
     std::set<unsigned int> activeDataSourcesTst();
 
     bool dataLoaded() const;
@@ -348,6 +348,8 @@ public:
     double resultDetailZoom() const;
     void resultDetailZoom(double result_detail_zoom);
 
+    void saveActiveDataSources(); // save to config var
+
 protected:
     COMPASS& compass_;
 
@@ -364,12 +366,12 @@ protected:
 
     std::string dbcontent_name_ref_;
     unsigned int line_id_ref_;
-    std::map<unsigned int, bool> data_sources_ref_; // ds_id -> active flag
+    std::map<std::string, std::map<std::string, bool>> data_sources_ref_ ; // db_content -> ds_id -> active flag
     nlohmann::json active_sources_ref_; // config var for data_sources_ref_
 
     std::string dbcontent_name_tst_;
     unsigned int line_id_tst_;
-    std::map<unsigned int, bool> data_sources_tst_; // ds_id -> active flag
+    std::map<std::string, std::map<std::string, bool>> data_sources_tst_; // db_content -> ds_id -> active flag
     nlohmann::json active_sources_tst_; // config var for active_sources_tst_
 
     std::string current_standard_;
@@ -484,11 +486,11 @@ protected:
 
     void loadSectors();
 
-    void updateReferenceDBContent();
-    void updateReferenceDataSources();
+    //void updateReferenceDBContent();
+    //void updateReferenceDataSources();
 
-    void updateTestDBContent();
-    void updateTestDataSources();
+    //void updateTestDBContent();
+    //void updateTestDataSources();
 
     nlohmann::json::object_t getBaseViewableDataConfig ();
     nlohmann::json::object_t getBaseViewableNoDataConfig ();
