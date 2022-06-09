@@ -455,6 +455,12 @@ bool EvaluationManager::canEvaluate ()
     if (!compass_.dbContentManager().hasAssociations())
         return false;
 
+    if (!hasSelectedReferenceDataSources())
+        return false;
+
+    if (!hasSelectedTestDataSources())
+        return false;
+
     bool has_anything_to_eval = false;
 
     for (auto& sec_it : sectorsLayers())
@@ -490,8 +496,14 @@ std::string EvaluationManager::getCannotEvaluateComment()
     if (!compass_.dbContentManager().hasAssociations())
         return "Please run target report association";
 
+    if (!hasSelectedReferenceDataSources())
+        return "Please select reference data sources";
+
+    if (!hasSelectedTestDataSources())
+        return "Please select test data sources";
+
     if (!data_loaded_)
-        return "Please select and load reference & test data";
+        return "Please load reference & test data";
 
     if (!hasCurrentStandard())
         return "Please select a standard";
@@ -510,7 +522,7 @@ void EvaluationManager::databaseOpenedSlot()
     // init with false values if not in cfg
     checkReferenceDataSources();
     checkTestDataSources();
-    saveActiveDataSources();
+    updateActiveDataSources();
 
     if (!COMPASS::instance().dbContentManager().hasAssociations())
         widget()->setDisabled(false);
@@ -1203,6 +1215,10 @@ void EvaluationManager::dbContentNameRef(const std::string& name)
     loginf << "EvaluationManager: dbContentNameRef: name " << name;
 
     dbcontent_name_ref_ = name;
+
+    checkReferenceDataSources();
+
+    widget()->updateButtons();
 }
 
 bool EvaluationManager::hasValidReferenceDBContent ()
@@ -1236,7 +1252,9 @@ void EvaluationManager::dbContentNameTst(const std::string& name)
 
     dbcontent_name_tst_ = name;
 
-    //updateTestDBContent();
+    checkTestDataSources();
+
+    widget()->updateButtons();
 }
 
 bool EvaluationManager::hasValidTestDBContent ()
@@ -1499,6 +1517,30 @@ void EvaluationManager::checkTestDataSources()
                 data_sources_tst_[dbcontent_name_tst_][ds_id_str] = false; // init with default false
         }
     }
+}
+
+bool EvaluationManager::hasSelectedReferenceDataSources()
+{
+    if (!hasValidReferenceDBContent())
+        return false;
+
+    for (auto& ds_it : data_sources_ref_[dbcontent_name_ref_])
+        if (ds_it.second)
+            return true;
+
+    return false;
+}
+
+bool EvaluationManager::hasSelectedTestDataSources()
+{
+    if (!hasValidTestDBContent())
+        return false;
+
+    for (auto& ds_it : data_sources_tst_[dbcontent_name_tst_])
+        if (ds_it.second)
+            return true;
+
+    return false;
 }
 
 void EvaluationManager::setViewableDataConfig (const nlohmann::json::object_t& data)
@@ -2622,10 +2664,12 @@ void EvaluationManager::resultDetailZoom(double result_detail_zoom)
     result_detail_zoom_ = result_detail_zoom;
 }
 
-void EvaluationManager::saveActiveDataSources() // save to config var
+void EvaluationManager::updateActiveDataSources() // save to config var
 {
     active_sources_ref_ = data_sources_ref_;
     active_sources_tst_ = data_sources_tst_;
+
+    widget_->updateButtons();
 }
 
 bool EvaluationManager::filterTargetAddressesBlacklist() const

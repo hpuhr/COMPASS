@@ -348,7 +348,10 @@ public:
     double resultDetailZoom() const;
     void resultDetailZoom(double result_detail_zoom);
 
-    void saveActiveDataSources(); // save to config var
+    void updateActiveDataSources(); // save to config var
+
+    bool hasSelectedReferenceDataSources();
+    bool hasSelectedTestDataSources();
 
 protected:
     COMPASS& compass_;

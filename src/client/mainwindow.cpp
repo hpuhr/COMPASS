@@ -1436,7 +1436,7 @@ void MainWindow::shutdown()
     if (save_configuration_)
         ConfigurationManager::getInstance().saveConfiguration();
     else
-        loginf << "MainWindow: closeEvent: configuration not saved";
+        loginf << "MainWindow: shutdown: configuration not saved";
 
     COMPASS::instance().shutdown();
 

@@ -71,6 +71,7 @@ private:
     bool evaluate_ {false};
     std::string export_eval_report_filename_;
 
+    bool no_config_save_ {false};
     bool quit_ {false};
 
     bool expert_mode_ {false};

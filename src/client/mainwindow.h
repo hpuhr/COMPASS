@@ -128,8 +128,6 @@ public:
     void updateMenus();
     void updateBottomWidget();
 
-
-
 protected:
     QTabWidget* tab_widget_{nullptr};
 

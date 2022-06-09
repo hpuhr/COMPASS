@@ -134,7 +134,8 @@ void EvaluationDataSourceWidget::updateDataSources()
     {
         ds_id = stoul(it.first);
 
-        assert (ds_man.hasDBDataSource(ds_id));
+        if (!ds_man.hasDBDataSource(ds_id))
+            continue;
 
         dbContent::DBDataSource& ds = ds_man.dbDataSource(ds_id);
 
@@ -226,7 +227,7 @@ void EvaluationDataSourceWidget::toggleDataSourceSlot()
         loginf << "EvaluationDataSourceWidget: toggleDataSource: ref id " << ds_id << " checked "
                << (check->checkState() == Qt::Checked);
 
-        COMPASS::instance().evaluationManager().saveActiveDataSources(); // save to cfg
+        COMPASS::instance().evaluationManager().updateActiveDataSources(); // save to cfg
     }
     else
     {
@@ -238,7 +239,7 @@ void EvaluationDataSourceWidget::toggleDataSourceSlot()
         loginf << "EvaluationDataSourceWidget: toggleDataSource: tst id " << ds_id << " checked "
                << (check->checkState() == Qt::Checked);
 
-        COMPASS::instance().evaluationManager().saveActiveDataSources(); // save to cfg
+        COMPASS::instance().evaluationManager().updateActiveDataSources(); // save to cfg
     }
 
     updateCheckboxesChecked();

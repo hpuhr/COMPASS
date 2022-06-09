@@ -140,6 +140,7 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
             ("evaluate_run_filter", po::bool_switch(&evaluate_run_filter_), "run evaluation filter before evaluation")
             ("export_eval_report", po::value<std::string>(&export_eval_report_filename_),
              "export evaluation report after start with given filename, e.g. '/data/eval_db2/report.tex")
+            ("no_cfg_save", po::bool_switch(&no_config_save_), "do not save configuration upon quitting")
             ("quit", po::bool_switch(&quit_), "quit after finishing all previous steps");
 
     try
@@ -205,6 +206,9 @@ void Client::run ()
     splash.raise();
 
     splash.finish(&main_window);
+
+    if (no_config_save_)
+        main_window.disableConfigurationSaving();
 
     if (create_new_sqlite3_db_filename_.size())
         main_window.createAndOpenNewSqlite3DB(create_new_sqlite3_db_filename_);
