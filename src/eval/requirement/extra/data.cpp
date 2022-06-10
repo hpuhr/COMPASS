@@ -121,7 +121,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> ExtraData::evaluate (
     EvaluationTargetPosition tst_pos;
 
     vector<ExtraDataDetail> details;
-    bool skip_no_data_details = eval_man_.resultsGenerator().skipNoDataDetails();
+    bool skip_no_data_details = eval_man_.reportSkipNoDataDetails();
 
     {
         const std::multimap<float, unsigned int>& tst_data = target_data.tstData();

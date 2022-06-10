@@ -348,6 +348,15 @@ public:
     double resultDetailZoom() const;
     void resultDetailZoom(double result_detail_zoom);
 
+    bool reportSplitResultsByMOPS() const;
+    void reportSplitResultsByMOPS(bool value);
+
+    bool reportShowAdsbInfo() const;
+    void reportShowAdsbInfo(bool value);
+
+    bool reportSkipNoDataDetails() const;
+    void reportSkipNoDataDetails(bool value);
+
     void updateActiveDataSources(); // save to config var
 
     bool hasSelectedReferenceDataSources();
@@ -463,6 +472,9 @@ protected:
     unsigned int max_sil_v2_ {0};
 
     double result_detail_zoom_ {0.0}; // in WGS84 deg
+    bool report_skip_no_data_details_ {true};
+    bool report_split_results_by_mops_ {false};
+    bool report_show_adsb_info_ {false};
 
     bool warning_shown_ {false};
 
@@ -476,7 +488,7 @@ protected:
     nlohmann::json use_requirement_; // standard_name->req_grp_name->req_grp_name->bool use
 
     EvaluationData data_;
-    std::unique_ptr<EvaluationResultsGenerator> results_gen_;
+    EvaluationResultsGenerator results_gen_;
     std::unique_ptr<EvaluationResultsReport::PDFGenerator> pdf_gen_;
 
     std::unique_ptr<ViewableDataConfig> viewable_data_cfg_;

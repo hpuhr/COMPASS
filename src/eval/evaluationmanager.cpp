@@ -61,7 +61,7 @@ using namespace std;
 using namespace nlohmann;
 
 EvaluationManager::EvaluationManager(const std::string& class_id, const std::string& instance_id, COMPASS* compass)
-    : Configurable(class_id, instance_id, compass, "eval.json"), compass_(*compass), data_(*this)
+    : Configurable(class_id, instance_id, compass, "eval.json"), compass_(*compass), data_(*this), results_gen_(*this)
 {
     registerParameter("dbcontent_name_ref", &dbcontent_name_ref_, "RefTraj");
     registerParameter("line_id_ref", &line_id_ref_, 0);
@@ -157,6 +157,12 @@ EvaluationManager::EvaluationManager(const std::string& class_id, const std::str
 
     registerParameter("result_detail_zoom", &result_detail_zoom_, 0.02);
 
+    // report stuff
+
+    registerParameter("report_skip_no_data_details", &report_skip_no_data_details_, true);
+    registerParameter("report_split_results_by_mops", &report_split_results_by_mops_, false);
+    registerParameter("report_show_adsb_info", &report_show_adsb_info_, false);
+
     registerParameter("warning_shown", &warning_shown_, false);
 
     createSubConfigurables();
@@ -208,7 +214,7 @@ void EvaluationManager::loadData ()
 
     dbcontent_man.clearData(); // clear any previously loaded data
 
-    results_gen_->clear();
+    results_gen_.clear();
 
     reference_data_loaded_ = false;
     test_data_loaded_ = false;
@@ -691,7 +697,7 @@ void EvaluationManager::evaluate ()
     assert (hasCurrentStandard());
 
     // clean previous
-    results_gen_->clear();
+    results_gen_.clear();
 
     evaluated_ = false;
 
@@ -701,7 +707,7 @@ void EvaluationManager::evaluate ()
     emit resultsChangedSignal();
 
     // eval
-    results_gen_->evaluate(data_, currentStandard());
+    results_gen_.evaluate(data_, currentStandard());
 
     evaluated_ = true;
 
@@ -842,12 +848,6 @@ void EvaluationManager::generateSubConfigurable(const std::string& class_id,
             return a->name() > b->name();
         });
     }
-    else if (class_id == "EvaluationResultsGenerator")
-    {
-        assert (!results_gen_);
-        results_gen_.reset(new EvaluationResultsGenerator(class_id, instance_id, *this));
-        assert (results_gen_);
-    }
     else if (class_id == "EvaluationResultsReportPDFGenerator")
     {
         assert (!pdf_gen_);
@@ -870,10 +870,6 @@ EvaluationManagerWidget* EvaluationManager::widget()
 
 void EvaluationManager::checkSubConfigurables()
 {
-    if (!results_gen_)
-        generateSubConfigurable("EvaluationResultsGenerator", "EvaluationResultsGenerator0");
-    assert (results_gen_);
-
     if (!pdf_gen_)
         generateSubConfigurable("EvaluationResultsReportPDFGenerator", "EvaluationResultsReportPDFGenerator0");
 
@@ -1434,8 +1430,7 @@ std::vector<std::string> EvaluationManager::currentRequirementNames()
 
 EvaluationResultsGenerator& EvaluationManager::resultsGenerator()
 {
-    assert (results_gen_);
-    return *results_gen_;
+    return results_gen_;
 }
 
 bool EvaluationManager::sectorsLoaded() const
@@ -1615,25 +1610,21 @@ void EvaluationManager::showResultId (const std::string& id)
 
 EvaluationManager::ResultIterator EvaluationManager::begin()
 {
-    assert (results_gen_);
-    return results_gen_->begin();
+    return results_gen_.begin();
 }
 EvaluationManager::ResultIterator EvaluationManager::end()
 {
-    assert (results_gen_);
-    return results_gen_->end();
+    return results_gen_.end();
 }
 
 bool EvaluationManager::hasResults()
 {
-    assert (results_gen_);
-    return results_gen_->results().size();
+    return results_gen_.results().size();
 }
 const std::map<std::string, std::map<std::string, std::shared_ptr<EvaluationRequirementResult::Base>>>&
 EvaluationManager::results() const
 {
-    assert (results_gen_);
-    return results_gen_->results(); }
+    return results_gen_.results(); }
 ;
 
 //void EvaluationManager::setUseTargetData (unsigned int utn, bool value)
@@ -1648,7 +1639,7 @@ void EvaluationManager::updateResultsToChanges ()
 {
     if (evaluated_)
     {
-        results_gen_->updateToChanges();
+        results_gen_.updateToChanges();
 
         if (widget_)
         {
@@ -2662,6 +2653,36 @@ double EvaluationManager::resultDetailZoom() const
 void EvaluationManager::resultDetailZoom(double result_detail_zoom)
 {
     result_detail_zoom_ = result_detail_zoom;
+}
+
+bool EvaluationManager::reportSkipNoDataDetails() const
+{
+    return report_skip_no_data_details_;
+}
+
+void EvaluationManager::reportSkipNoDataDetails(bool value)
+{
+    report_skip_no_data_details_ = value;
+}
+
+bool EvaluationManager::reportSplitResultsByMOPS() const
+{
+    return report_split_results_by_mops_;
+}
+
+void EvaluationManager::reportSplitResultsByMOPS(bool value)
+{
+    report_split_results_by_mops_ = value;
+}
+
+bool EvaluationManager::reportShowAdsbInfo() const
+{
+    return report_show_adsb_info_;
+}
+
+void EvaluationManager::reportShowAdsbInfo(bool value)
+{
+    report_show_adsb_info_ = value;
 }
 
 void EvaluationManager::updateActiveDataSources() // save to config var

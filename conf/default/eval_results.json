@@ -1,7 +1,0 @@
-{
-    "parameters": {
-        "show_adsb_info": false,
-        "skip_no_data_details": true,
-        "split_results_by_mops": false
-    }
-}

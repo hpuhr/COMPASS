@@ -103,16 +103,16 @@ void SingleDubiousTarget::addTargetToOverviewTable(shared_ptr<EvaluationResultsR
 {
     EvaluationResultsReport::Section& tgt_overview_section = getRequirementSection(root_item);
 
-    if (eval_man_.resultsGenerator().showAdsbInfo())
+    if (eval_man_.reportShowAdsbInfo())
         addTargetDetailsToTableADSB(tgt_overview_section, target_table_name_);
     else
         addTargetDetailsToTable(tgt_overview_section, target_table_name_);
 
-    if (eval_man_.resultsGenerator().splitResultsByMOPS()) // add to general sum table
+    if (eval_man_.reportSplitResultsByMOPS()) // add to general sum table
     {
         EvaluationResultsReport::Section& sum_section = root_item->getSection(getRequirementSumSectionID());
 
-        if (eval_man_.resultsGenerator().showAdsbInfo())
+        if (eval_man_.reportShowAdsbInfo())
             addTargetDetailsToTableADSB(sum_section, target_table_name_);
         else
             addTargetDetailsToTable(sum_section, target_table_name_);

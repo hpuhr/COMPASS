@@ -85,11 +85,6 @@
         "warning_shown": true
     },
     "sub_config_files": [
-        {
-            "class_id": "EvaluationResultsGenerator",
-            "instance_id": "EvaluationResultsGenerator0",
-            "path": "eval_results.json"
-        }
     ],
     "sub_configs": {
         "EvaluationResultsReportPDFGenerator": {

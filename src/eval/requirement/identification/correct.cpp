@@ -82,7 +82,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> IdentificationCorrect::eval
 
     string comment;
 
-    bool skip_no_data_details = eval_man_.resultsGenerator().skipNoDataDetails();
+    bool skip_no_data_details = eval_man_.reportSkipNoDataDetails();
     bool skip_detail;
 
     bool has_ground_bit;

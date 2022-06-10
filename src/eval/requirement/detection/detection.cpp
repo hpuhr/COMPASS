@@ -235,7 +235,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> Detection::evaluate (
 
     string comment;
 
-    bool skip_no_data_details = eval_man_.resultsGenerator().skipNoDataDetails();
+    bool skip_no_data_details = eval_man_.reportSkipNoDataDetails();
 
     for (auto tst_it=tst_data.begin(); tst_it != tst_data.end(); ++tst_it)
     {
