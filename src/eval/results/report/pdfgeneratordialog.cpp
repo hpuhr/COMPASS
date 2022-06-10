@@ -17,6 +17,7 @@
 
 #include "eval/results/report/pdfgeneratordialog.h"
 #include "eval/results/report/pdfgenerator.h"
+#include "evaluationmanager.h"
 #include "textfielddoublevalidator.h"
 #include "logger.h"
 
@@ -36,9 +37,9 @@ using namespace std;
 namespace EvaluationResultsReport
 {
 
-PDFGeneratorDialog::PDFGeneratorDialog(PDFGenerator& generator,
+PDFGeneratorDialog::PDFGeneratorDialog(PDFGenerator& generator, EvaluationManager& eval_man,
                                        QWidget* parent, Qt::WindowFlags f)
-    : QDialog(parent, f), generator_(generator)
+    : QDialog(parent, f), generator_(generator), eval_man_(eval_man)
 {
     setWindowFlags(Qt::Window | Qt::WindowTitleHint | Qt::CustomizeWindowHint);
 
@@ -91,7 +92,7 @@ PDFGeneratorDialog::PDFGeneratorDialog(PDFGenerator& generator,
         config_grid->addWidget(new QLabel("Author"), row, 0);
 
         author_edit_ = new QLineEdit();
-        author_edit_->setText(generator_.author().c_str());
+        author_edit_->setText(eval_man_.reportAuthor().c_str());
         connect(author_edit_, &QLineEdit::textEdited, this, &PDFGeneratorDialog::authorEditedSlot);
         config_grid->addWidget(author_edit_, row, 1);
 
@@ -99,7 +100,7 @@ PDFGeneratorDialog::PDFGeneratorDialog(PDFGenerator& generator,
         config_grid->addWidget(new QLabel("Abstract"), row, 0);
 
         abstract_edit_ = new QLineEdit();
-        abstract_edit_->setText(generator_.abstract().c_str());
+        abstract_edit_->setText(eval_man_.reportAbstract().c_str());
         connect(abstract_edit_, &QLineEdit::textEdited, this, &PDFGeneratorDialog::abstractEditedSlot);
         config_grid->addWidget(abstract_edit_, row, 1);
 
@@ -108,7 +109,7 @@ PDFGeneratorDialog::PDFGeneratorDialog(PDFGenerator& generator,
         config_grid->addWidget(new QLabel("Include Per-Target Details"), row, 0);
 
         include_target_details_check_ = new QCheckBox();
-        include_target_details_check_->setChecked(generator_.includeTargetDetails());
+        include_target_details_check_->setChecked(eval_man_.reportIncludeTargetDetails());
         connect(include_target_details_check_, &QCheckBox::clicked, this,
                 &PDFGeneratorDialog::includeTargetDetailsEditedSlot);
         config_grid->addWidget(include_target_details_check_, row, 1);
@@ -118,7 +119,7 @@ PDFGeneratorDialog::PDFGeneratorDialog(PDFGenerator& generator,
         config_grid->addWidget(new QLabel("Include Per-Target Target Report Details"), row, 0);
 
         include_target_tr_details_check_ = new QCheckBox();
-        include_target_tr_details_check_->setChecked(generator_.includeTargetTRDetails());
+        include_target_tr_details_check_->setChecked(eval_man_.reportIncludeTargetTRDetails());
         connect(include_target_tr_details_check_, &QCheckBox::clicked, this,
                 &PDFGeneratorDialog::includeTargetTRDetailsEditedSlot);
         config_grid->addWidget(include_target_tr_details_check_, row, 1);
@@ -128,7 +129,7 @@ PDFGeneratorDialog::PDFGeneratorDialog(PDFGenerator& generator,
         config_grid->addWidget(new QLabel("Maximum Table Rows"), row, 0);
 
         num_max_table_rows_edit_ = new QLineEdit();
-        num_max_table_rows_edit_->setText(QString::number(generator_.numMaxTableRows()));
+        num_max_table_rows_edit_->setText(QString::number(eval_man_.reportNumMaxTableRows()));
         connect(num_max_table_rows_edit_, &QLineEdit::textEdited, this, &PDFGeneratorDialog::numMaxTableRowsEditedSlot);
         config_grid->addWidget(num_max_table_rows_edit_, row, 1);
 
@@ -136,7 +137,7 @@ PDFGeneratorDialog::PDFGeneratorDialog(PDFGenerator& generator,
         config_grid->addWidget(new QLabel("Maximum Table Column Width"), row, 0);
 
         num_max_table_col_width_edit_ = new QLineEdit();
-        num_max_table_col_width_edit_->setText(QString::number(generator_.numMaxTableColWidth()));
+        num_max_table_col_width_edit_->setText(QString::number(eval_man_.reportNumMaxTableColWidth()));
         connect(num_max_table_col_width_edit_, &QLineEdit::textEdited,
                 this, &PDFGeneratorDialog::numMaxTableColWidthEditedSlot);
         config_grid->addWidget(num_max_table_col_width_edit_, row, 1);
@@ -146,7 +147,7 @@ PDFGeneratorDialog::PDFGeneratorDialog(PDFGenerator& generator,
         config_grid->addWidget(new QLabel("Wait On Map Loading"), row, 0);
 
         wait_on_map_loading_check_ = new QCheckBox();
-        wait_on_map_loading_check_->setChecked(generator_.waitOnMapLoading());
+        wait_on_map_loading_check_->setChecked(eval_man_.reportWaitOnMapLoading());
         connect(wait_on_map_loading_check_, &QCheckBox::clicked, this,
                 &PDFGeneratorDialog::waitOnMapLoadingEditedSlot);
         config_grid->addWidget(wait_on_map_loading_check_, row, 1);
@@ -156,7 +157,7 @@ PDFGeneratorDialog::PDFGeneratorDialog(PDFGenerator& generator,
         config_grid->addWidget(new QLabel("Run PDFLatex"), row, 0);
 
         pdflatex_check_ = new QCheckBox();
-        pdflatex_check_->setChecked(generator_.runPDFLatex());
+        pdflatex_check_->setChecked(eval_man_.reportRunPDFLatex());
 
         if (!generator_.pdfLatexFound())
             pdflatex_check_->setDisabled(true);
@@ -170,7 +171,7 @@ PDFGeneratorDialog::PDFGeneratorDialog(PDFGenerator& generator,
         config_grid->addWidget(new QLabel("Open Created PDF"), row, 0);
 
         open_pdf_check_ = new QCheckBox();
-        open_pdf_check_->setChecked(generator_.openCreatedPDF());
+        open_pdf_check_->setChecked(eval_man_.reportOpenCreatedPDF());
 
         if (!generator_.pdfLatexFound())
             open_pdf_check_->setDisabled(true);
@@ -286,26 +287,26 @@ void PDFGeneratorDialog::filenameEditedSlot()
 
 void PDFGeneratorDialog::authorEditedSlot (const QString& text)
 {
-    generator_.author(text.toStdString());
+    eval_man_.reportAuthor(text.toStdString());
 }
 
 void PDFGeneratorDialog::abstractEditedSlot(const QString& text)
 {
-    generator_.abstract(text.toStdString());
+    eval_man_.reportAbstract(text.toStdString());
 }
 
 void PDFGeneratorDialog::waitOnMapLoadingEditedSlot(bool checked)
 {
-    generator_.waitOnMapLoading(checked);
+    eval_man_.reportWaitOnMapLoading(checked);
 }
 
 void PDFGeneratorDialog::includeTargetDetailsEditedSlot(bool checked)
 {
-    generator_.includeTargetDetails(checked);
+    eval_man_.reportIncludeTargetDetails(checked);
 }
 void PDFGeneratorDialog::includeTargetTRDetailsEditedSlot(bool checked)
 {
-    generator_.includeTargetTRDetails(checked);
+    eval_man_.reportIncludeTargetTRDetails(checked);
 }
 
 void PDFGeneratorDialog::numMaxTableRowsEditedSlot(const QString& text)
@@ -318,7 +319,7 @@ void PDFGeneratorDialog::numMaxTableRowsEditedSlot(const QString& text)
     unsigned int value = text.toUInt(&ok);
 
     if (ok)
-        generator_.numMaxTableRows(value);
+        eval_man_.reportNumMaxTableRows(value);
     else
         logwrn << "PDFGeneratorDialog: numMaxTableRowsEditedSlot: unable to parse '" << value_str << "'";
 
@@ -334,7 +335,7 @@ void PDFGeneratorDialog::numMaxTableColWidthEditedSlot(const QString& text)
     unsigned int value = text.toUInt(&ok);
 
     if (ok)
-        generator_.numMaxTableColWidth(value);
+        eval_man_.reportNumMaxTableColWidth(value);
     else
         logwrn << "PDFGeneratorDialog: numMaxTableColWidthEditedSlot: unable to parse '" << value_str << "'";
 
@@ -343,12 +344,12 @@ void PDFGeneratorDialog::numMaxTableColWidthEditedSlot(const QString& text)
 
 void PDFGeneratorDialog::runPDFLatexChangedSlot (bool checked)
 {
-    generator_.runPDFLatex(checked);
+    eval_man_.reportRunPDFLatex(checked);
 }
 
 void PDFGeneratorDialog::openPDFChangedSlot (bool checked)
 {
-    generator_.openCreatedPDF(checked);
+    eval_man_.reportOpenCreatedPDF(checked);
 }
 
 void PDFGeneratorDialog::runSlot()

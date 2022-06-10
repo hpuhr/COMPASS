@@ -87,19 +87,6 @@
     "sub_config_files": [
     ],
     "sub_configs": {
-        "EvaluationResultsReportPDFGenerator": {
-            "EvaluationResultsReportPDFGenerator0": {
-                "parameters": {
-                    "abstract": "",
-                    "author": "",
-                    "num_max_table_col_width": 24,
-                    "num_max_table_rows": 1000,
-                    "open_created_pdf": true,
-                    "run_pdflatex": true,
-                    "wait_on_map_loading": true
-                }
-            }
-        },
         "EvaluationStandard": {
             "EvaluationStandard1171": {
                 "parameters": {

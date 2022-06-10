@@ -190,7 +190,7 @@ public:
     nlohmann::json::boolean_t& useRequirement(const std::string& standard_name, const std::string& group_name,
                                               const std::string& req_name);
 
-    EvaluationResultsReport::PDFGenerator& pdfGenerator() const;
+    EvaluationResultsReport::PDFGenerator& pdfGenerator();
 
     bool useUTN (unsigned int utn);
     void useUTN (unsigned int utn, bool value, bool update_td, bool update_res=true); // update target data
@@ -348,6 +348,7 @@ public:
     double resultDetailZoom() const;
     void resultDetailZoom(double result_detail_zoom);
 
+    // report stuff
     bool reportSplitResultsByMOPS() const;
     void reportSplitResultsByMOPS(bool value);
 
@@ -357,6 +358,34 @@ public:
     bool reportSkipNoDataDetails() const;
     void reportSkipNoDataDetails(bool value);
 
+    std::string reportAuthor() const;
+    void reportAuthor(const std::string& author);
+
+    std::string reportAbstract() const;
+    void reportAbstract(const std::string& abstract);
+
+    bool reportRunPDFLatex() const;
+    void reportRunPDFLatex(bool value);
+
+    bool reportOpenCreatedPDF() const;
+    void reportOpenCreatedPDF(bool value);
+
+    bool reportWaitOnMapLoading() const;
+    void reportWaitOnMapLoading(bool value);
+
+    bool reportIncludeTargetDetails() const;
+    void reportIncludeTargetDetails(bool value);
+
+    bool reportIncludeTargetTRDetails() const;
+    void reportIncludeTargetTRDetails(bool value);
+
+    unsigned int reportNumMaxTableRows() const;
+    void reportNumMaxTableRows(unsigned int value);
+
+    unsigned int reportNumMaxTableColWidth() const;
+    void reportNumMaxTableColWidth(unsigned int value);
+
+    // upaters
     void updateActiveDataSources(); // save to config var
 
     bool hasSelectedReferenceDataSources();
@@ -472,9 +501,25 @@ protected:
     unsigned int max_sil_v2_ {0};
 
     double result_detail_zoom_ {0.0}; // in WGS84 deg
+
+    // report stuff
     bool report_skip_no_data_details_ {true};
     bool report_split_results_by_mops_ {false};
     bool report_show_adsb_info_ {false};
+
+    std::string report_author_;
+    std::string report_abstract_;
+
+    bool report_include_target_details_ {false};
+    bool report_include_target_tr_details_ {false};
+
+    unsigned int report_num_max_table_rows_ {1000};
+    unsigned int report_num_max_table_col_width_ {18};
+
+    bool report_wait_on_map_loading_ {true};
+
+    bool report_run_pdflatex_ {true};
+    bool report_open_created_pdf_ {false};
 
     bool warning_shown_ {false};
 
@@ -489,7 +534,7 @@ protected:
 
     EvaluationData data_;
     EvaluationResultsGenerator results_gen_;
-    std::unique_ptr<EvaluationResultsReport::PDFGenerator> pdf_gen_;
+    EvaluationResultsReport::PDFGenerator pdf_gen_;
 
     std::unique_ptr<ViewableDataConfig> viewable_data_cfg_;
 

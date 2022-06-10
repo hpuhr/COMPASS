@@ -55,13 +55,15 @@
 #include <memory>
 #include <fstream>
 #include <cstdlib>
+#include <system.h>
 
 using namespace Utils;
 using namespace std;
 using namespace nlohmann;
 
 EvaluationManager::EvaluationManager(const std::string& class_id, const std::string& instance_id, COMPASS* compass)
-    : Configurable(class_id, instance_id, compass, "eval.json"), compass_(*compass), data_(*this), results_gen_(*this)
+    : Configurable(class_id, instance_id, compass, "eval.json"), compass_(*compass),
+      data_(*this), results_gen_(*this), pdf_gen_(*this)
 {
     registerParameter("dbcontent_name_ref", &dbcontent_name_ref_, "RefTraj");
     registerParameter("line_id_ref", &line_id_ref_, 0);
@@ -162,6 +164,32 @@ EvaluationManager::EvaluationManager(const std::string& class_id, const std::str
     registerParameter("report_skip_no_data_details", &report_skip_no_data_details_, true);
     registerParameter("report_split_results_by_mops", &report_split_results_by_mops_, false);
     registerParameter("report_show_adsb_info", &report_show_adsb_info_, false);
+
+    registerParameter("report_author", &report_author_, "");
+
+    if (!report_author_.size())
+        report_author_ = System::getUserName();
+    if (!report_author_.size())
+        report_author_ = "User";
+
+    registerParameter("report_abstract", &report_abstract_, "");
+
+    registerParameter("report_num_max_table_rows", &report_num_max_table_rows_, 1000);
+    registerParameter("report_num_max_table_col_width", &report_num_max_table_col_width_, 18);
+
+    registerParameter("report_wait_on_map_loading", &report_wait_on_map_loading_, true);
+
+    registerParameter("report_run_pdflatex", &report_run_pdflatex_, true);
+
+    registerParameter("report_open_created_pdf", &report_open_created_pdf_, false);
+
+    bool pdflatex_found = System::exec("which pdflatex").size();
+
+    if (!pdflatex_found)
+    {
+        report_run_pdflatex_ = false;
+        report_open_created_pdf_ = false;
+    }
 
     registerParameter("warning_shown", &warning_shown_, false);
 
@@ -735,8 +763,7 @@ void EvaluationManager::generateReport ()
     assert (data_loaded_);
     assert (evaluated_);
 
-    assert (pdf_gen_);
-    pdf_gen_->dialog().exec();
+    pdf_gen_.dialog().exec();
 
     if (widget_)
         widget_->updateButtons();
@@ -848,12 +875,6 @@ void EvaluationManager::generateSubConfigurable(const std::string& class_id,
             return a->name() > b->name();
         });
     }
-    else if (class_id == "EvaluationResultsReportPDFGenerator")
-    {
-        assert (!pdf_gen_);
-        pdf_gen_.reset(new EvaluationResultsReport::PDFGenerator(class_id, instance_id, *this));
-        assert (pdf_gen_);
-    }
     else
         throw std::runtime_error("EvaluationManager: generateSubConfigurable: unknown class_id " +
                                  class_id);
@@ -870,10 +891,6 @@ EvaluationManagerWidget* EvaluationManager::widget()
 
 void EvaluationManager::checkSubConfigurables()
 {
-    if (!pdf_gen_)
-        generateSubConfigurable("EvaluationResultsReportPDFGenerator", "EvaluationResultsReportPDFGenerator0");
-
-    assert (pdf_gen_);
 }
 
 bool EvaluationManager::hasSectorLayer (const std::string& layer_name)
@@ -1770,10 +1787,9 @@ json::boolean_t& EvaluationManager::useRequirement(const std::string& standard_n
     return use_requirement_[standard_name][group_name][req_name].get_ref<json::boolean_t&>();
 }
 
-EvaluationResultsReport::PDFGenerator& EvaluationManager::pdfGenerator() const
+EvaluationResultsReport::PDFGenerator& EvaluationManager::pdfGenerator()
 {
-    assert (pdf_gen_);
-    return *pdf_gen_;
+    return pdf_gen_;
 }
 
 bool EvaluationManager::useUTN (unsigned int utn)
@@ -2683,6 +2699,97 @@ bool EvaluationManager::reportShowAdsbInfo() const
 void EvaluationManager::reportShowAdsbInfo(bool value)
 {
     report_show_adsb_info_ = value;
+}
+
+std::string EvaluationManager::reportAuthor() const
+{
+    return report_author_;
+}
+
+void EvaluationManager::reportAuthor(const std::string& author)
+{
+    report_author_ = author;
+}
+
+std::string EvaluationManager::reportAbstract() const
+{
+    return report_abstract_;
+}
+
+void EvaluationManager::reportAbstract(const std::string& abstract)
+{
+    report_abstract_ = abstract;
+}
+
+bool EvaluationManager::reportRunPDFLatex() const
+{
+    return report_run_pdflatex_;
+}
+
+void EvaluationManager::reportRunPDFLatex(bool value)
+{
+    report_run_pdflatex_ = value;
+}
+
+
+bool EvaluationManager::reportOpenCreatedPDF() const
+{
+    return report_open_created_pdf_;
+}
+
+void EvaluationManager::reportOpenCreatedPDF(bool value)
+{
+    report_open_created_pdf_ = value;
+}
+
+bool EvaluationManager::reportWaitOnMapLoading() const
+{
+    return report_wait_on_map_loading_;
+}
+
+void EvaluationManager::reportWaitOnMapLoading(bool value)
+{
+    report_wait_on_map_loading_ = value;
+}
+
+bool EvaluationManager::reportIncludeTargetDetails() const
+{
+    return report_include_target_details_;
+}
+
+void EvaluationManager::reportIncludeTargetDetails(bool value)
+{
+    report_include_target_details_ = value;
+}
+
+bool EvaluationManager::reportIncludeTargetTRDetails() const
+{
+    return report_include_target_tr_details_;
+}
+
+void EvaluationManager::reportIncludeTargetTRDetails(bool value)
+{
+    report_include_target_tr_details_ = value;
+}
+
+unsigned int EvaluationManager::reportNumMaxTableRows() const
+{
+    return report_num_max_table_rows_;
+}
+
+void EvaluationManager::reportNumMaxTableRows(unsigned int value)
+{
+    report_num_max_table_rows_ = value;
+}
+
+unsigned int EvaluationManager::reportNumMaxTableColWidth() const
+{
+    return report_num_max_table_col_width_;
+}
+
+void EvaluationManager::reportNumMaxTableColWidth(unsigned int value)
+{
+    report_num_max_table_col_width_ = value;
 }
 
 void EvaluationManager::updateActiveDataSources() // save to config var
