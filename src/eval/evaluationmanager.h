@@ -376,6 +376,9 @@ public:
     bool reportIncludeTargetDetails() const;
     void reportIncludeTargetDetails(bool value);
 
+    bool reportSkipTargetsWoIssues() const;
+    void reportSkipTargetsWoIssues(bool value);
+
     bool reportIncludeTargetTRDetails() const;
     void reportIncludeTargetTRDetails(bool value);
 
@@ -390,6 +393,7 @@ public:
 
     bool hasSelectedReferenceDataSources();
     bool hasSelectedTestDataSources();
+
 
 protected:
     COMPASS& compass_;
@@ -511,6 +515,7 @@ protected:
     std::string report_abstract_;
 
     bool report_include_target_details_ {false};
+    bool report_skip_targets_wo_issues_ {false};
     bool report_include_target_tr_details_ {false};
 
     unsigned int report_num_max_table_rows_ {1000};

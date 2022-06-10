@@ -217,6 +217,7 @@ void SingleDubiousTarget::addTargetDetailsToTableADSB (
 
 void SingleDubiousTarget::addTargetDetailsToReport(shared_ptr<EvaluationResultsReport::RootItem> root_item)
 {
+    root_item->getSection(getTargetSectionID()).perTargetSection(true); // mark utn section per target
     EvaluationResultsReport::Section& utn_req_section = root_item->getSection(getTargetRequirementSectionID());
 
     if (!utn_req_section.hasTable("details_overview_table"))
@@ -267,6 +268,13 @@ void SingleDubiousTarget::addTargetDetailsToReport(shared_ptr<EvaluationResultsR
             result = req->getResultConditionStr(p_dubious_target_);
 
         utn_req_table.addRow({"Condition Fulfilled", "", result.c_str()}, this);
+
+        if (result == "Failed")
+        {
+            root_item->getSection(getTargetSectionID()).perTargetWithIssues(true); // mark utn section as with issue
+            utn_req_section.perTargetWithIssues(true);
+        }
+
     }
 
     if (has_p_dubious_target_ && p_dubious_target_ != 0.0) // TODO

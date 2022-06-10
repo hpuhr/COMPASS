@@ -46,6 +46,7 @@ public slots:
 
     void waitOnMapLoadingEditedSlot(bool checked);
     void includeTargetDetailsEditedSlot(bool checked);
+    void skipTargetDetailsWOIssuesEditedSlot(bool checked);
     void includeTargetTRDetailsEditedSlot(bool checked);
     void numMaxTableRowsEditedSlot(const QString& text);
     void numMaxTableColWidthEditedSlot(const QString& text);
@@ -82,6 +83,7 @@ protected:
     QLineEdit* abstract_edit_ {nullptr};
 
     QCheckBox* include_target_details_check_ {nullptr};
+    QCheckBox* skip_target_details_wo_issues_check_ {nullptr};
     QCheckBox* include_target_tr_details_check_ {nullptr};
 
     QLineEdit* num_max_table_rows_edit_ {nullptr};

@@ -114,6 +114,16 @@ PDFGeneratorDialog::PDFGeneratorDialog(PDFGenerator& generator, EvaluationManage
                 &PDFGeneratorDialog::includeTargetDetailsEditedSlot);
         config_grid->addWidget(include_target_details_check_, row, 1);
 
+        // skip target details w/o issues
+        ++row;
+        config_grid->addWidget(new QLabel("Skip Per-Target Details Without Issues"), row, 0);
+
+        skip_target_details_wo_issues_check_ = new QCheckBox();
+        skip_target_details_wo_issues_check_->setChecked(eval_man_.reportSkipTargetsWoIssues());
+        connect(skip_target_details_wo_issues_check_, &QCheckBox::clicked, this,
+                &PDFGeneratorDialog::skipTargetDetailsWOIssuesEditedSlot);
+        config_grid->addWidget(skip_target_details_wo_issues_check_, row, 1);
+
         // target details
         ++row;
         config_grid->addWidget(new QLabel("Include Per-Target Target Report Details"), row, 0);
@@ -304,6 +314,12 @@ void PDFGeneratorDialog::includeTargetDetailsEditedSlot(bool checked)
 {
     eval_man_.reportIncludeTargetDetails(checked);
 }
+
+void PDFGeneratorDialog::skipTargetDetailsWOIssuesEditedSlot(bool checked)
+{
+    eval_man_.reportSkipTargetsWoIssues(checked);
+}
+
 void PDFGeneratorDialog::includeTargetTRDetailsEditedSlot(bool checked)
 {
     eval_man_.reportIncludeTargetTRDetails(checked);

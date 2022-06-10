@@ -174,6 +174,10 @@ EvaluationManager::EvaluationManager(const std::string& class_id, const std::str
 
     registerParameter("report_abstract", &report_abstract_, "");
 
+    registerParameter("report_include_target_details", &report_include_target_details_, false);
+    registerParameter("report_skip_targets_wo_issues", &report_skip_targets_wo_issues_, false);
+    registerParameter("report_include_target_tr_details", &report_include_target_tr_details_, false);
+
     registerParameter("report_num_max_table_rows", &report_num_max_table_rows_, 1000);
     registerParameter("report_num_max_table_col_width", &report_num_max_table_col_width_, 18);
 
@@ -1553,6 +1557,18 @@ bool EvaluationManager::hasSelectedTestDataSources()
             return true;
 
     return false;
+}
+
+bool EvaluationManager::reportSkipTargetsWoIssues() const
+{
+    return report_skip_targets_wo_issues_;
+}
+
+void EvaluationManager::reportSkipTargetsWoIssues(bool value)
+{
+    loginf << "EvaluationManager: reportSkipTargetsWoIssues: value " << value;
+
+    report_skip_targets_wo_issues_ = value;
 }
 
 void EvaluationManager::setViewableDataConfig (const nlohmann::json::object_t& data)

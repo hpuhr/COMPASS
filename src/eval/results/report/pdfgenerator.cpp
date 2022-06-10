@@ -136,7 +136,8 @@ void PDFGenerator::run ()
         // create sections
         vector<shared_ptr<Section>> sections;
         sections.push_back(root_section);
-        root_section->addSectionsFlat(sections, eval_man_.reportIncludeTargetDetails());
+        root_section->addSectionsFlat(sections, eval_man_.reportIncludeTargetDetails(),
+                                      eval_man_.reportSkipTargetsWoIssues());
 
         unsigned int num_sections = sections.size();
 

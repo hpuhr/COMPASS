@@ -36,341 +36,349 @@ using namespace Utils;
 namespace EvaluationRequirementResult
 {
 
-    SingleModeCPresent::SingleModeCPresent(
-            const std::string& result_id, std::shared_ptr<EvaluationRequirement::Base> requirement,
-            const SectorLayer& sector_layer,
-            unsigned int utn, const EvaluationTargetData* target, EvaluationManager& eval_man,
-            int num_updates, int num_no_ref_pos, int num_pos_outside, int num_pos_inside,
-            int num_no_ref_id, int num_present_id, int num_missing_id,
-            std::vector<EvaluationRequirement::PresentDetail> details)
-        : Single("SingleModeCPresent", result_id, requirement, sector_layer, utn, target, eval_man),
-          num_updates_(num_updates), num_no_ref_pos_(num_no_ref_pos),
-          num_pos_outside_(num_pos_outside), num_pos_inside_(num_pos_inside),
-          num_no_ref_id_(num_no_ref_id),
-          num_present_id_(num_present_id), num_missing_id_(num_missing_id), details_(details)
+SingleModeCPresent::SingleModeCPresent(
+        const std::string& result_id, std::shared_ptr<EvaluationRequirement::Base> requirement,
+        const SectorLayer& sector_layer,
+        unsigned int utn, const EvaluationTargetData* target, EvaluationManager& eval_man,
+        int num_updates, int num_no_ref_pos, int num_pos_outside, int num_pos_inside,
+        int num_no_ref_id, int num_present_id, int num_missing_id,
+        std::vector<EvaluationRequirement::PresentDetail> details)
+    : Single("SingleModeCPresent", result_id, requirement, sector_layer, utn, target, eval_man),
+      num_updates_(num_updates), num_no_ref_pos_(num_no_ref_pos),
+      num_pos_outside_(num_pos_outside), num_pos_inside_(num_pos_inside),
+      num_no_ref_id_(num_no_ref_id),
+      num_present_id_(num_present_id), num_missing_id_(num_missing_id), details_(details)
+{
+    updateProbabilities();
+}
+
+void SingleModeCPresent::updateProbabilities()
+{
+    assert (num_updates_ - num_no_ref_pos_ == num_pos_inside_ + num_pos_outside_);
+    assert (num_pos_inside_ == num_no_ref_id_+num_present_id_+num_missing_id_);
+
+    if (num_no_ref_id_+num_present_id_+num_missing_id_)
     {
-        updateProbabilities();
+        p_present_ = (float)(num_no_ref_id_+num_present_id_)
+                / (float)(num_no_ref_id_+num_present_id_+num_missing_id_);
+        has_p_present_ = true;
+
+        result_usable_ = true;
+    }
+    else
+    {
+        has_p_present_ = false;
+        p_present_ = 0;
+
+        result_usable_ = false;
     }
 
-    void SingleModeCPresent::updateProbabilities()
+    updateUseFromTarget();
+}
+
+void SingleModeCPresent::addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
+{
+    logdbg << "SingleModeC " <<  requirement_->name() <<": addToReport";
+
+    // add target to requirements->group->req
+    addTargetToOverviewTable(root_item);
+
+    // add requirement requirement to targets->utn->requirements->group->req
+    addTargetDetailsToReport(root_item);
+
+    // TODO add requirement description, methods
+}
+
+void SingleModeCPresent::addTargetToOverviewTable(shared_ptr<EvaluationResultsReport::RootItem> root_item)
+{
+    addTargetDetailsToTable(getRequirementSection(root_item), target_table_name_);
+
+    if (eval_man_.reportSplitResultsByMOPS()) // add to general sum table
+        addTargetDetailsToTable(root_item->getSection(getRequirementSumSectionID()), target_table_name_);
+}
+
+void SingleModeCPresent::addTargetDetailsToTable (
+        EvaluationResultsReport::Section& section, const std::string& table_name)
+{
+    if (!section.hasTable(table_name))
+        section.addTable(table_name, 14,
+                         {"UTN", "Begin", "End", "Callsign", "TA", "MC", "MC Min", "MC Max",
+                          "#Up", "#NoRef", "#NoRefC", "#Present", "#Missing", "PP"}, true, 13);
+
+    EvaluationResultsReport::SectionContentTable& target_table = section.getTable(table_name);
+
+    QVariant pe_var;
+
+    if (has_p_present_)
+        pe_var = roundf(p_present_ * 10000.0) / 100.0;
+
+    target_table.addRow(
+                {utn_, target_->timeBeginStr().c_str(), target_->timeEndStr().c_str(),
+                 target_->callsignsStr().c_str(), target_->targetAddressesStr().c_str(),
+                 target_->modeACodesStr().c_str(), target_->modeCMinStr().c_str(), target_->modeCMaxStr().c_str(),
+                 num_updates_, num_no_ref_pos_, num_no_ref_id_, num_present_id_, num_missing_id_,
+                 pe_var}, this, {utn_});
+}
+
+void SingleModeCPresent::addTargetDetailsToReport(shared_ptr<EvaluationResultsReport::RootItem> root_item)
+{
+    root_item->getSection(getTargetSectionID()).perTargetSection(true); // mark utn section per target
+    EvaluationResultsReport::Section& utn_req_section = root_item->getSection(getTargetRequirementSectionID());
+
+    if (!utn_req_section.hasTable("details_overview_table"))
+        utn_req_section.addTable("details_overview_table", 3, {"Name", "comment", "Value"}, false);
+
+    EvaluationResultsReport::SectionContentTable& utn_req_table =
+            utn_req_section.getTable("details_overview_table");
+
+    addCommonDetails(root_item);
+
+    utn_req_table.addRow({"Use", "To be used in results", use_}, this);
+    utn_req_table.addRow({"#Up [1]", "Number of updates", num_updates_}, this);
+    utn_req_table.addRow({"#NoRef [1]", "Number of updates w/o reference position", num_no_ref_pos_}, this);
+    utn_req_table.addRow({"#NoRefPos [1]", "Number of updates w/o reference position ", num_no_ref_pos_}, this);
+    utn_req_table.addRow({"#PosInside [1]", "Number of updates inside sector", num_pos_inside_}, this);
+    utn_req_table.addRow({"#PosOutside [1]", "Number of updates outside sector", num_pos_outside_}, this);
+    utn_req_table.addRow({"#NoRefC [1]", "Number of updates without reference code", num_no_ref_id_}, this);
+    utn_req_table.addRow({"#Present [1]", "Number of updates with present tst code", num_present_id_}, this);
+    utn_req_table.addRow({"#Missing [1]", "Number of updates with missing tst code", num_missing_id_}, this);
+
+    // condition
     {
-        assert (num_updates_ - num_no_ref_pos_ == num_pos_inside_ + num_pos_outside_);
-        assert (num_pos_inside_ == num_no_ref_id_+num_present_id_+num_missing_id_);
-
-        if (num_no_ref_id_+num_present_id_+num_missing_id_)
-        {
-            p_present_ = (float)(num_no_ref_id_+num_present_id_)
-                    / (float)(num_no_ref_id_+num_present_id_+num_missing_id_);
-            has_p_present_ = true;
-
-            result_usable_ = true;
-        }
-        else
-        {
-            has_p_present_ = false;
-            p_present_ = 0;
-
-            result_usable_ = false;
-        }
-
-        updateUseFromTarget();
-    }
-
-    void SingleModeCPresent::addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
-    {
-        logdbg << "SingleModeC " <<  requirement_->name() <<": addToReport";
-
-        // add target to requirements->group->req
-        addTargetToOverviewTable(root_item);
-
-        // add requirement requirement to targets->utn->requirements->group->req
-        addTargetDetailsToReport(root_item);
-
-        // TODO add requirement description, methods
-    }
-
-    void SingleModeCPresent::addTargetToOverviewTable(shared_ptr<EvaluationResultsReport::RootItem> root_item)
-    {
-        addTargetDetailsToTable(getRequirementSection(root_item), target_table_name_);
-
-        if (eval_man_.reportSplitResultsByMOPS()) // add to general sum table
-            addTargetDetailsToTable(root_item->getSection(getRequirementSumSectionID()), target_table_name_);
-    }
-
-    void SingleModeCPresent::addTargetDetailsToTable (
-            EvaluationResultsReport::Section& section, const std::string& table_name)
-    {
-        if (!section.hasTable(table_name))
-            section.addTable(table_name, 14,
-            {"UTN", "Begin", "End", "Callsign", "TA", "MC", "MC Min", "MC Max",
-             "#Up", "#NoRef", "#NoRefC", "#Present", "#Missing", "PP"}, true, 13);
-
-        EvaluationResultsReport::SectionContentTable& target_table = section.getTable(table_name);
+        std::shared_ptr<EvaluationRequirement::ModeCPresent> req =
+                std::static_pointer_cast<EvaluationRequirement::ModeCPresent>(requirement_);
+        assert (req);
 
         QVariant pe_var;
 
         if (has_p_present_)
             pe_var = roundf(p_present_ * 10000.0) / 100.0;
 
-        target_table.addRow(
-        {utn_, target_->timeBeginStr().c_str(), target_->timeEndStr().c_str(),
-         target_->callsignsStr().c_str(), target_->targetAddressesStr().c_str(),
-         target_->modeACodesStr().c_str(), target_->modeCMinStr().c_str(), target_->modeCMaxStr().c_str(),
-         num_updates_, num_no_ref_pos_, num_no_ref_id_, num_present_id_, num_missing_id_,
-         pe_var}, this, {utn_});
+        utn_req_table.addRow({"PP [%]", "Probability of Mode C present", pe_var}, this);
+
+        utn_req_table.addRow(
+                    {"Condition", "", req->getConditionStr().c_str()}, this);
+
+        string result {"Unknown"};
+
+        if (has_p_present_)
+            result = req->getResultConditionStr(p_present_);
+
+        utn_req_table.addRow({"Condition Fulfilled", "", result.c_str()}, this);
+
+        if (result == "Failed")
+        {
+            root_item->getSection(getTargetSectionID()).perTargetWithIssues(true); // mark utn section as with issue
+            utn_req_section.perTargetWithIssues(true);
+        }
+
     }
 
-    void SingleModeCPresent::addTargetDetailsToReport(shared_ptr<EvaluationResultsReport::RootItem> root_item)
+    if (has_p_present_ && p_present_ != 1.0)
     {
-        EvaluationResultsReport::Section& utn_req_section = root_item->getSection(getTargetRequirementSectionID());
-
-        if (!utn_req_section.hasTable("details_overview_table"))
-            utn_req_section.addTable("details_overview_table", 3, {"Name", "comment", "Value"}, false);
-
-        EvaluationResultsReport::SectionContentTable& utn_req_table =
-                utn_req_section.getTable("details_overview_table");
-
-        addCommonDetails(root_item);
-
-        utn_req_table.addRow({"Use", "To be used in results", use_}, this);
-        utn_req_table.addRow({"#Up [1]", "Number of updates", num_updates_}, this);
-        utn_req_table.addRow({"#NoRef [1]", "Number of updates w/o reference position", num_no_ref_pos_}, this);
-        utn_req_table.addRow({"#NoRefPos [1]", "Number of updates w/o reference position ", num_no_ref_pos_}, this);
-        utn_req_table.addRow({"#PosInside [1]", "Number of updates inside sector", num_pos_inside_}, this);
-        utn_req_table.addRow({"#PosOutside [1]", "Number of updates outside sector", num_pos_outside_}, this);
-        utn_req_table.addRow({"#NoRefC [1]", "Number of updates without reference code", num_no_ref_id_}, this);
-        utn_req_table.addRow({"#Present [1]", "Number of updates with present tst code", num_present_id_}, this);
-        utn_req_table.addRow({"#Missing [1]", "Number of updates with missing tst code", num_missing_id_}, this);
-
-        // condition
-        {
-            std::shared_ptr<EvaluationRequirement::ModeCPresent> req =
-                    std::static_pointer_cast<EvaluationRequirement::ModeCPresent>(requirement_);
-            assert (req);
-
-            QVariant pe_var;
-
-            if (has_p_present_)
-                pe_var = roundf(p_present_ * 10000.0) / 100.0;
-
-            utn_req_table.addRow({"PP [%]", "Probability of Mode C present", pe_var}, this);
-
-            utn_req_table.addRow(
-            {"Condition", "", req->getConditionStr().c_str()}, this);
-
-            string result {"Unknown"};
-
-            if (has_p_present_)
-                result = req->getResultConditionStr(p_present_);
-
-            utn_req_table.addRow({"Condition Fulfilled", "", result.c_str()}, this);
-        }
-
-        if (has_p_present_ && p_present_ != 1.0)
-        {
-            utn_req_section.addFigure("target_errors_overview", "Target Errors Overview",
-                                      getTargetErrorsViewable());
-        }
-        else
-        {
-            utn_req_section.addText("target_errors_overview_no_figure");
-            utn_req_section.getText("target_errors_overview_no_figure").addText(
-                        "No target errors found, therefore no figure was generated.");
-        }
-
-        // add further details
-        reportDetails(utn_req_section);
+        utn_req_section.addFigure("target_errors_overview", "Target Errors Overview",
+                                  getTargetErrorsViewable());
+    }
+    else
+    {
+        utn_req_section.addText("target_errors_overview_no_figure");
+        utn_req_section.getText("target_errors_overview_no_figure").addText(
+                    "No target errors found, therefore no figure was generated.");
     }
 
-    void SingleModeCPresent::reportDetails(EvaluationResultsReport::Section& utn_req_section)
+    // add further details
+    reportDetails(utn_req_section);
+}
+
+void SingleModeCPresent::reportDetails(EvaluationResultsReport::Section& utn_req_section)
+{
+    if (!utn_req_section.hasTable(tr_details_table_name_))
+        utn_req_section.addTable(tr_details_table_name_, 11,
+                                 {"ToD", "Ref", "Ok", "#Up", "#NoRef", "#PosInside", "#PosOutside", "#NoRefC",
+                                  "#Present", "#Missing", "Comment"});
+
+    EvaluationResultsReport::SectionContentTable& utn_req_details_table =
+            utn_req_section.getTable(tr_details_table_name_);
+
+    unsigned int detail_cnt = 0;
+
+    for (auto& rq_det_it : details_)
     {
-        if (!utn_req_section.hasTable(tr_details_table_name_))
-            utn_req_section.addTable(tr_details_table_name_, 11,
-            {"ToD", "Ref", "Ok", "#Up", "#NoRef", "#PosInside", "#PosOutside", "#NoRefC",
-             "#Present", "#Missing", "Comment"});
+        utn_req_details_table.addRow(
+                    {String::timeStringFromDouble(rq_det_it.tod_).c_str(), rq_det_it.ref_exists_,
+                     !rq_det_it.is_not_ok_,
+                     rq_det_it.num_updates_, rq_det_it.num_no_ref_,
+                     rq_det_it.num_inside_, rq_det_it.num_outside_, rq_det_it.num_no_ref_id_,
+                     rq_det_it.num_present_id_, rq_det_it.num_missing_id_, rq_det_it.comment_.c_str()},
+                    this, detail_cnt);
 
-        EvaluationResultsReport::SectionContentTable& utn_req_details_table =
-                utn_req_section.getTable(tr_details_table_name_);
-
-        unsigned int detail_cnt = 0;
-
-        for (auto& rq_det_it : details_)
-        {
-            utn_req_details_table.addRow(
-            {String::timeStringFromDouble(rq_det_it.tod_).c_str(), rq_det_it.ref_exists_,
-             !rq_det_it.is_not_ok_,
-             rq_det_it.num_updates_, rq_det_it.num_no_ref_,
-             rq_det_it.num_inside_, rq_det_it.num_outside_, rq_det_it.num_no_ref_id_,
-             rq_det_it.num_present_id_, rq_det_it.num_missing_id_, rq_det_it.comment_.c_str()},
-                        this, detail_cnt);
-
-            ++detail_cnt;
-        }
+        ++detail_cnt;
     }
+}
 
 
-    bool SingleModeCPresent::hasViewableData (
-            const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
+bool SingleModeCPresent::hasViewableData (
+        const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
+{
+    if (table.name() == target_table_name_ && annotation.toUInt() == utn_)
+        return true;
+    else if (table.name() == tr_details_table_name_ && annotation.isValid() && annotation.toUInt() < details_.size())
+        return true;
+    else
+        return false;
+}
+
+std::unique_ptr<nlohmann::json::object_t> SingleModeCPresent::viewableData(
+        const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
+{
+
+    assert (hasViewableData(table, annotation));
+
+    if (table.name() == target_table_name_)
     {
-        if (table.name() == target_table_name_ && annotation.toUInt() == utn_)
-            return true;
-        else if (table.name() == tr_details_table_name_ && annotation.isValid() && annotation.toUInt() < details_.size())
-            return true;
-        else
-            return false;
+        return getTargetErrorsViewable();
     }
-
-    std::unique_ptr<nlohmann::json::object_t> SingleModeCPresent::viewableData(
-            const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
+    else if (table.name() == tr_details_table_name_ && annotation.isValid())
     {
+        unsigned int detail_cnt = annotation.toUInt();
 
-        assert (hasViewableData(table, annotation));
+        loginf << "SingleModeC: viewableData: detail_cnt " << detail_cnt;
 
-        if (table.name() == target_table_name_)
-        {
-            return getTargetErrorsViewable();
-        }
-        else if (table.name() == tr_details_table_name_ && annotation.isValid())
-        {
-            unsigned int detail_cnt = annotation.toUInt();
+        std::unique_ptr<nlohmann::json::object_t> viewable_ptr
+                = eval_man_.getViewableForEvaluation(utn_, req_grp_id_, result_id_);
+        assert (viewable_ptr);
 
-            loginf << "SingleModeC: viewableData: detail_cnt " << detail_cnt;
+        const EvaluationRequirement::PresentDetail& detail = details_.at(detail_cnt);
 
-            std::unique_ptr<nlohmann::json::object_t> viewable_ptr
-                    = eval_man_.getViewableForEvaluation(utn_, req_grp_id_, result_id_);
-            assert (viewable_ptr);
+        (*viewable_ptr)["position_latitude"] = detail.pos_tst_.latitude_;
+        (*viewable_ptr)["position_longitude"] = detail.pos_tst_.longitude_;
+        (*viewable_ptr)["position_window_latitude"] = eval_man_.resultDetailZoom();
+        (*viewable_ptr)["position_window_longitude"] = eval_man_.resultDetailZoom();
+        (*viewable_ptr)["time"] = detail.tod_;
 
-            const EvaluationRequirement::PresentDetail& detail = details_.at(detail_cnt);
-
-            (*viewable_ptr)["position_latitude"] = detail.pos_tst_.latitude_;
-            (*viewable_ptr)["position_longitude"] = detail.pos_tst_.longitude_;
-            (*viewable_ptr)["position_window_latitude"] = eval_man_.resultDetailZoom();
-            (*viewable_ptr)["position_window_longitude"] = eval_man_.resultDetailZoom();
-            (*viewable_ptr)["time"] = detail.tod_;
-
-            //            if (!detail.pos_ok_)
-            //                (*viewable_ptr)["evaluation_results"]["highlight_details"] = vector<unsigned int>{detail_cnt};
-
-            return viewable_ptr;
-        }
-        else
-            return nullptr;
-    }
-
-    std::unique_ptr<nlohmann::json::object_t> SingleModeCPresent::getTargetErrorsViewable ()
-    {
-        std::unique_ptr<nlohmann::json::object_t> viewable_ptr = eval_man_.getViewableForEvaluation(
-                    utn_, req_grp_id_, result_id_);
-
-        bool has_pos = false;
-        double lat_min, lat_max, lon_min, lon_max;
-
-        for (auto& detail_it : details_)
-        {
-            if (!detail_it.is_not_ok_)
-                continue;
-
-            if (has_pos)
-            {
-                lat_min = min(lat_min, detail_it.pos_tst_.latitude_);
-                lat_max = max(lat_max, detail_it.pos_tst_.latitude_);
-
-                lon_min = min(lon_min, detail_it.pos_tst_.longitude_);
-                lon_max = max(lon_max, detail_it.pos_tst_.longitude_);
-            }
-            else // tst pos always set
-            {
-                lat_min = detail_it.pos_tst_.latitude_;
-                lat_max = detail_it.pos_tst_.latitude_;
-
-                lon_min = detail_it.pos_tst_.longitude_;
-                lon_max = detail_it.pos_tst_.longitude_;
-
-                has_pos = true;
-            }
-        }
-
-        if (has_pos)
-        {
-            (*viewable_ptr)["position_latitude"] = (lat_max+lat_min)/2.0;
-            (*viewable_ptr)["position_longitude"] = (lon_max+lon_min)/2.0;;
-
-            double lat_w = 1.1*(lat_max-lat_min)/2.0;
-            double lon_w = 1.1*(lon_max-lon_min)/2.0;
-
-            if (lat_w < eval_man_.resultDetailZoom())
-                lat_w = eval_man_.resultDetailZoom();
-
-            if (lon_w < eval_man_.resultDetailZoom())
-                lon_w = eval_man_.resultDetailZoom();
-
-            (*viewable_ptr)["position_window_latitude"] = lat_w;
-            (*viewable_ptr)["position_window_longitude"] = lon_w;
-        }
+        //            if (!detail.pos_ok_)
+        //                (*viewable_ptr)["evaluation_results"]["highlight_details"] = vector<unsigned int>{detail_cnt};
 
         return viewable_ptr;
     }
+    else
+        return nullptr;
+}
 
-    bool SingleModeCPresent::hasReference (
-            const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
+std::unique_ptr<nlohmann::json::object_t> SingleModeCPresent::getTargetErrorsViewable ()
+{
+    std::unique_ptr<nlohmann::json::object_t> viewable_ptr = eval_man_.getViewableForEvaluation(
+                utn_, req_grp_id_, result_id_);
+
+    bool has_pos = false;
+    double lat_min, lat_max, lon_min, lon_max;
+
+    for (auto& detail_it : details_)
     {
-        if (table.name() == target_table_name_ && annotation.toUInt() == utn_)
-            return true;
-        else
-            return false;;
+        if (!detail_it.is_not_ok_)
+            continue;
+
+        if (has_pos)
+        {
+            lat_min = min(lat_min, detail_it.pos_tst_.latitude_);
+            lat_max = max(lat_max, detail_it.pos_tst_.latitude_);
+
+            lon_min = min(lon_min, detail_it.pos_tst_.longitude_);
+            lon_max = max(lon_max, detail_it.pos_tst_.longitude_);
+        }
+        else // tst pos always set
+        {
+            lat_min = detail_it.pos_tst_.latitude_;
+            lat_max = detail_it.pos_tst_.latitude_;
+
+            lon_min = detail_it.pos_tst_.longitude_;
+            lon_max = detail_it.pos_tst_.longitude_;
+
+            has_pos = true;
+        }
     }
 
-    std::string SingleModeCPresent::reference(
-            const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
+    if (has_pos)
     {
-        assert (hasReference(table, annotation));
+        (*viewable_ptr)["position_latitude"] = (lat_max+lat_min)/2.0;
+        (*viewable_ptr)["position_longitude"] = (lon_max+lon_min)/2.0;;
 
-        return "Report:Results:"+getTargetRequirementSectionID();
+        double lat_w = 1.1*(lat_max-lat_min)/2.0;
+        double lon_w = 1.1*(lon_max-lon_min)/2.0;
+
+        if (lat_w < eval_man_.resultDetailZoom())
+            lat_w = eval_man_.resultDetailZoom();
+
+        if (lon_w < eval_man_.resultDetailZoom())
+            lon_w = eval_man_.resultDetailZoom();
+
+        (*viewable_ptr)["position_window_latitude"] = lat_w;
+        (*viewable_ptr)["position_window_longitude"] = lon_w;
     }
 
-    std::shared_ptr<Joined> SingleModeCPresent::createEmptyJoined(const std::string& result_id)
-    {
-        return make_shared<JoinedModeCPresent> (result_id, requirement_, sector_layer_, eval_man_);
-    }
+    return viewable_ptr;
+}
 
-    int SingleModeCPresent::numNoRefPos() const
-    {
-        return num_no_ref_pos_;
-    }
+bool SingleModeCPresent::hasReference (
+        const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
+{
+    if (table.name() == target_table_name_ && annotation.toUInt() == utn_)
+        return true;
+    else
+        return false;;
+}
 
-    int SingleModeCPresent::numPosOutside() const
-    {
-        return num_pos_outside_;
-    }
+std::string SingleModeCPresent::reference(
+        const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
+{
+    assert (hasReference(table, annotation));
 
-    int SingleModeCPresent::numPosInside() const
-    {
-        return num_pos_inside_;
-    }
+    return "Report:Results:"+getTargetRequirementSectionID();
+}
 
-    int SingleModeCPresent::numUpdates() const
-    {
-        return num_updates_;
-    }
+std::shared_ptr<Joined> SingleModeCPresent::createEmptyJoined(const std::string& result_id)
+{
+    return make_shared<JoinedModeCPresent> (result_id, requirement_, sector_layer_, eval_man_);
+}
 
-    int SingleModeCPresent::numNoRefC() const
-    {
-        return num_no_ref_id_;
-    }
+int SingleModeCPresent::numNoRefPos() const
+{
+    return num_no_ref_pos_;
+}
 
-    int SingleModeCPresent::numPresent() const
-    {
-        return num_present_id_;
-    }
+int SingleModeCPresent::numPosOutside() const
+{
+    return num_pos_outside_;
+}
 
-    int SingleModeCPresent::numMissing() const
-    {
-        return num_missing_id_;
-    }
+int SingleModeCPresent::numPosInside() const
+{
+    return num_pos_inside_;
+}
 
-    std::vector<EvaluationRequirement::PresentDetail>& SingleModeCPresent::details()
-    {
-        return details_;
-    }
+int SingleModeCPresent::numUpdates() const
+{
+    return num_updates_;
+}
+
+int SingleModeCPresent::numNoRefC() const
+{
+    return num_no_ref_id_;
+}
+
+int SingleModeCPresent::numPresent() const
+{
+    return num_present_id_;
+}
+
+int SingleModeCPresent::numMissing() const
+{
+    return num_missing_id_;
+}
+
+std::vector<EvaluationRequirement::PresentDetail>& SingleModeCPresent::details()
+{
+    return details_;
+}
 
 }
