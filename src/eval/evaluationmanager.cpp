@@ -292,6 +292,8 @@ void EvaluationManager::loadData ()
     {
         ds_id = stoul(ds_it.first);
 
+        loginf << "EvaluationManager: loadData: ref ds_id '" << ds_it.first << "' uint " << ds_id;
+
         assert (ds_man.hasDBDataSource(ds_id));
 
         if (ds_it.second)
@@ -303,6 +305,9 @@ void EvaluationManager::loadData ()
     for (auto& ds_it : data_sources_tst_[dbcontent_name_tst_])
     {
         ds_id = stoul(ds_it.first);
+
+        loginf << "EvaluationManager: loadData: tst ds_id '" << ds_it.first << "' uint " << ds_id;
+
         assert (ds_man.hasDBDataSource(ds_id));
 
         if (ds_it.second)
@@ -1498,9 +1503,24 @@ void EvaluationManager::checkReferenceDataSources()
     if (!hasValidReferenceDBContent())
         return;
 
-    if (COMPASS::instance().dataSourceManager().hasDataSourcesOfDBContent(dbcontent_name_ref_))
+    DataSourceManager& ds_man = COMPASS::instance().dataSourceManager();
+
+    // clear out old ds_ids
+    auto ds_copy = data_sources_ref_[dbcontent_name_ref_];
+
+    unsigned int ds_id;
+    for (auto& ds_it : ds_copy)
     {
-        for (auto& ds_it : COMPASS::instance().dataSourceManager().dbDataSources())
+        ds_id = stoul(ds_it.first);
+
+        if (!ds_man.hasDBDataSource(ds_id))
+            data_sources_ref_[dbcontent_name_ref_].erase(ds_it.first);
+    }
+
+    // init non-existing ones with false
+    if (ds_man.hasDataSourcesOfDBContent(dbcontent_name_ref_))
+    {
+        for (auto& ds_it : ds_man.dbDataSources())
         {
             if (!ds_it->hasNumInserted(dbcontent_name_ref_))
                 continue;
@@ -1520,9 +1540,24 @@ void EvaluationManager::checkTestDataSources()
     if (!hasValidTestDBContent())
         return;
 
-    if (COMPASS::instance().dataSourceManager().hasDataSourcesOfDBContent(dbcontent_name_tst_))
+    DataSourceManager& ds_man = COMPASS::instance().dataSourceManager();
+
+    // clear out old ds_ids
+    auto ds_copy = data_sources_tst_[dbcontent_name_tst_];
+
+    unsigned int ds_id;
+    for (auto& ds_it : ds_copy)
     {
-        for (auto& ds_it : COMPASS::instance().dataSourceManager().dbDataSources())
+        ds_id = stoul(ds_it.first);
+
+        if (!ds_man.hasDBDataSource(ds_id))
+            data_sources_tst_[dbcontent_name_tst_].erase(ds_it.first);
+    }
+
+    // init non-existing ones with false
+    if (ds_man.hasDataSourcesOfDBContent(dbcontent_name_tst_))
+    {
+        for (auto& ds_it : ds_man.dbDataSources())
         {
             if (!ds_it->hasNumInserted(dbcontent_name_tst_))
                 continue;
