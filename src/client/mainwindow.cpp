@@ -884,6 +884,7 @@ void MainWindow::performAutomaticTasks ()
             return;
         }
 
+        trail_task.showDoneSummary(false);
         trail_task.run();
 
         while (!trail_task.done())

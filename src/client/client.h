@@ -58,6 +58,7 @@ private:
 
     std::string import_view_points_filename_;
     std::string import_gps_trail_filename_;
+    std::string import_gps_parameters_;
     std::string import_sectors_filename_;
 
     bool associate_data_ {false};

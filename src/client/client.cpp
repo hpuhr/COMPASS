@@ -128,6 +128,8 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
             //             "JSON file import schema, e.g. 'jASTERIX', 'OpenSkyNetwork', 'ADSBExchange', 'SDDL'")
             ("import_gps_trail", po::value<std::string>(&import_gps_trail_filename_),
              "imports gps trail NMEA with given filename, e.g. '/data/file2.txt'")
+            ("import_gps_parameters", po::value<std::string>(&import_gps_parameters_),
+               "import GPS parameters as JSON string, e.g. ''{\"callsign\": \"ENTRPRSE\", \"ds_name\": \"GPS Trail\", \"ds_sac\": 0, \"ds_sic\": 0, \"mode_3a_code\": 961, \"set_callsign\": true, \"set_mode_3a_code\": true, \"set_target_address\": true, \"target_address\": 16702992, \"tod_offset\": 0.0}'' (including one pair of single quotes)")
             ("import_sectors_json", po::value<std::string>(&import_sectors_filename_),
              "imports exported sectors JSON with given filename, e.g. '/data/sectors.json'")
             ("associate_data", po::bool_switch(&associate_data_), "associate target reports")
@@ -394,6 +396,36 @@ void Client::checkAndSetupConfig()
         loginf << "COMPASSClient: configuration version " << config_version;
 
         ConfigurationManager::getInstance().init(config.getString("main_configuration_file"));
+
+        if (import_gps_parameters_.size())
+        {
+            loginf << "COMPASSClient: overriding gps import parameters";
+            using namespace nlohmann;
+
+            try {
+                json gps_config = json::parse(import_gps_parameters_);
+
+                assert (ConfigurationManager::getInstance().hasRootConfiguration(
+                            "COMPASS", "COMPASS0"));
+                Configuration& compass_config = ConfigurationManager::getInstance().getRootConfiguration(
+                            "COMPASS", "COMPASS0");
+
+                assert (compass_config.hasSubConfiguration("TaskManager", "TaskManager0"));
+                Configuration& task_man_config = compass_config.getSubConfiguration(
+                            "TaskManager", "TaskManager0");
+
+                assert (task_man_config.hasSubConfiguration("GPSTrailImportTask", "GPSTrailImportTask0"));
+                Configuration& gps_task_config = task_man_config.getSubConfiguration(
+                            "GPSTrailImportTask", "GPSTrailImportTask0");
+
+                gps_task_config.overrideJSONParameters(gps_config);
+            }
+            catch (exception& e)
+            {
+                logerr << "COMPASSClient: JSON parse error in '" << import_gps_parameters_ << "'";
+                throw e;
+            }
+        }
 
         if (evaluation_parameters_.size())
         {

@@ -293,7 +293,6 @@ void EvaluationManager::loadData ()
         ds_id = stoul(ds_it.first);
 
         loginf << "EvaluationManager: loadData: ref ds_id '" << ds_it.first << "' uint " << ds_id;
-
         assert (ds_man.hasDBDataSource(ds_id));
 
         if (ds_it.second)
@@ -307,7 +306,6 @@ void EvaluationManager::loadData ()
         ds_id = stoul(ds_it.first);
 
         loginf << "EvaluationManager: loadData: tst ds_id '" << ds_it.first << "' uint " << ds_id;
-
         assert (ds_man.hasDBDataSource(ds_id));
 
         if (ds_it.second)
