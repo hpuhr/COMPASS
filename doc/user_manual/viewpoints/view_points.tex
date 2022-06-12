@@ -13,7 +13,7 @@ At the top, a toolbar is shown. In the middle, a table showing all existing view
 
 \section{View Point}
 
-A view point is a point of interest in the data persisted in the database. It has the following attributes:
+A view point is a point of interest in the data persisted in the database. It can have the following attributes:
 
 \begin{center}
  \begin{table}[H]
@@ -29,6 +29,12 @@ A view point is a point of interest in the data persisted in the database. It ha
     position\_longitude & Center position WGS-84 longitude \\ \hline
     position\_window\_latitude & Geographic window size in WGS-84 latitude  \\ \hline
     position\_window\_longitude & Geographic window size in WGS-84 longitude  \\ \hline
+    time & Center time  \\ \hline
+    time\_window & Time window size \\ \hline
+    data\_sources & Data sources and lines to be loaded \\ \hline
+    data\_sources\_types & Data source types to be loaded \\ \hline
+    filters & Filter configuration \\ \hline
+    context\_variables & Context DBContent variables to be shown \\ \hline
 \end{tabularx}
 \end{table}
 \end{center}
@@ -165,10 +171,8 @@ There exist 3 buttons for general functions:
 
 \section{Stepping View Points}
 
-TODO
-
 \subsection{Management Tab} 
-When selecting a new view point, the information set in the 'db\_objects' attribute is used to select which DBObjects are loaded. The 'filters' attribute to set the filter active flags and respective conditions. After that, a loading process is triggered. \\
+When selecting a new view point, the information set 'data\_sources' and 'data\_sources\_types' attributes are used to select which DBContent is loaded. The 'filters' attribute to set the filter active flags and respective conditions. After that, a loading process is triggered. \\
 
 \subsection{Data Selection}
 
@@ -182,7 +186,7 @@ When the loading process is finished, data is automatically selected using the '
   \caption{View Points ListBox View: Selected View Point}
 \end{figure}
 
-In the ListBox View, the variables set in the 'dbo\_context\_variables' attribute are added temporarily to the list of variables. Loaded data is presented as always. When the loading process is finished, selected data is highlighed.
+In the ListBox View, the variables set in the 'context\_variables' attribute are added temporarily to the list of variables. Loaded data is presented as always. When the loading process is finished, selected data is highlighed.
 
 
 \subsection{OSGView}

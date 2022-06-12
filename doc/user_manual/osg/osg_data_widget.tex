@@ -115,8 +115,6 @@ Labels can be shown for target reports, when the Label mode \includegraphics[wid
   \caption{OSG View Labels}
 \end{figure}
 
-Please note that if association information is present, the UTN is always shown in first position ('UTN XXX') in the label.
-
 \subsubsection{Geometry Menu}
 
 Several data-related operations can be also performed in the data widget when the Label mode \includegraphics[width=0.5cm,frame]{../../data/icons/label_action.png} is active, by a RMB click on a target report symbol.
@@ -151,23 +149,23 @@ The usage of this mode mode works exactly like the Selection mode, only that the
 
 For details about the rectangular target report labeling please refer to \nameref{sec:osgview_selection}.
 
-\subsubsection{Show Associations}
+%\subsubsection{Show Associations}
 
-Of special interest is of the case when association information is present and a 'UTN' group mode is used. Using the Geometry Menu of a layer item which generated the associations (e.g. ARTAS Tracker), the association information can be shown for each target report of the layer.
-
-\begin{figure}[H]
-    \hspace*{-2.5cm}
-    \includegraphics[width=19cm]{figures/osgview_assoc.png}
-  \caption{OSG View show ARTAS association information}
-\end{figure}
-
-These associations are gradient-coloured from the color of the system track update to color of the associated target report. Additionally, the time window filter can be used to show the timing of the data.
-
-\begin{figure}[H]
-    \hspace*{-2.5cm}
-    \includegraphics[width=19cm]{figures/osgview_assoc_time_window.png}
-  \caption{OSG View show ARTAS association information in time window}
-\end{figure}
+%Of special interest is of the case when association information is present and a 'UTN' group mode is used. Using the Geometry Menu of a layer item which generated the associations (e.g. ARTAS Tracker), the association information can be shown for each target report of the layer.
+% 
+% \begin{figure}[H]
+%     \hspace*{-2.5cm}
+%     \includegraphics[width=19cm]{figures/osgview_assoc.png}
+%   \caption{OSG View show ARTAS association information}
+% \end{figure}
+% 
+% These associations are gradient-coloured from the color of the system track update to color of the associated target report. Additionally, the time window filter can be used to show the timing of the data.
+% 
+% \begin{figure}[H]
+%     \hspace*{-2.5cm}
+%     \includegraphics[width=19cm]{figures/osgview_assoc_time_window.png}
+%   \caption{OSG View show ARTAS association information in time window}
+% \end{figure}
 
 
 \subsubsection{Distance Measurement}
@@ -288,6 +286,7 @@ The following items exist:
  \item Play button: Start/Stop the auto-play mode
  \item Update interval [s]: Auto-play mode update interval
  \item Update step [s]: Auto-play mode update step
+ \item Use Opacity: Checkbox and slide to set opacity (older target reports are made transparent)
  \item Scrollbar: Manual time-scrolling
 \end{itemize}
 \ \\
@@ -317,40 +316,6 @@ Please note that if the display check is activated for geometry without height d
 \subsubsection{Save View Point}
 
 The current filter configuration and viewed position can be saved as a new view point using the symbol \includegraphics[width=0.5cm,frame]{../../data/icons/vp_save.png} in the toolbar. When clicked, a name of the view point has to be entered by the user. 
-
-\subsubsection{Data Label Background Color}
-
-The background color for existing labels can be configured using the symbol \includegraphics[width=0.5cm,frame]{../../data/icons/label_color.png} in the toolbar.
-
-\subsubsection{Data Label Content Configuration}
-
-Existing labels can be configured using the symbol \includegraphics[width=0.5cm,frame]{../../data/icons/label_edit.png} in the toolbar.
-
-The following operations are supported:
-
-\begin{itemize}
- \item Edit: Edits which variables are shown, for each DBContent
- \item Line Break: Sets after how many variable entries a line break is used
-\end{itemize}
-
-When a edit window for a DBContent label definition is opened, a window like the following is shown:
-
-\begin{figure}[H]
-    \includegraphics[width=12cm,frame]{figures/osgview_label_edit.png}
-  \caption{OSG View Label Editing}
-\end{figure}
-
-For each DBContent, for each variable it can be selected if the value is presented (using the checkbox), and a prefix and suffix can be defined. The changes made to the prefix and suffix are made by double-clicking on the respective field, entering a new value, and setting the value by pressing enter. Upon each change, the existing labels in the OSG View are updated automatically. \\
-
-A few notes about labels:
-
-\begin{itemize}
- \item The label definition and presentation is persisted in the configuration
- \item The label colour is always the same as the target report's
- \item A variable value is only shown if it is present (not NULL)
- \item Labels are shown at the target reports position, matched to the lower-left corner
- \item A line break is given after the configured number of values. If values are not shown (NULL), the line break is still made at the same postion, to keep the value shown in the same line for all target reports.
-\end{itemize}
 
 \subsubsection{Data Label Deletion}
 
