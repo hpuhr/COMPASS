@@ -22,6 +22,8 @@ Allowed options:
                                         '/data/file1.db'
   --open_db arg                         opens existing SQLite3 database with 
                                         given filename, e.g. '/data/file1.db'
+  --import_data_sources_file arg        imports data sources JSON file with 
+                                        given filename, e.g. '/data/ds1.json'
   --import_view_points arg              imports view points JSON file with 
                                         given filename, e.g. '/data/file1.json'
   --import_asterix_file arg             imports ASTERIX file with given 
@@ -44,6 +46,16 @@ Allowed options:
                                         quotes)
   --import_gps_trail arg                imports gps trail NMEA with given 
                                         filename, e.g. '/data/file2.txt'
+  --import_gps_parameters arg           import GPS parameters as JSON string, 
+                                        e.g. ''{"callsign": "ENTRPRSE", 
+                                        "ds_name": "GPS Trail", "ds_sac": 0, 
+                                        "ds_sic": 0, "mode_3a_code": 961, 
+                                        "set_callsign": true, 
+                                        "set_mode_3a_code": true, 
+                                        "set_target_address": true, 
+                                        "target_address": 16702992, 
+                                        "tod_offset": 0.0}'' (including one 
+                                        pair of single quotes)
   --import_sectors_json arg             imports exported sectors JSON with 
                                         given filename, e.g. 
                                         '/data/sectors.json'
@@ -53,10 +65,16 @@ Allowed options:
                                         with given filename, e.g. 
                                         '/data/db2/report.tex
   --evaluate                            run evaluation
+  --evaluation_parameters arg           evaluation parameters as JSON string, 
+                                        e.g. ''{"current_standard": "test", 
+                                        "dbcontent_name_ref": "CAT062", 
+                                        "dbcontent_name_tst": "CAT020"}'' 
+                                        (including one pair of single quotes)
   --evaluate_run_filter                 run evaluation filter before evaluation
   --export_eval_report arg              export evaluation report after start 
                                         with given filename, e.g. 
                                         '/data/eval_db2/report.tex
+  --no_cfg_save                         do not save configuration upon quitting
   --quit                                quit after finishing all previous steps
 \end{lstlisting}
 \ \\
