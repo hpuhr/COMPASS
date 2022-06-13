@@ -48,7 +48,7 @@ LabelGeneratorWidget::LabelGeneratorWidget(LabelGenerator& label_generator)
     auto_label_check->setChecked(label_generator_.autoLabel());
     connect(auto_label_check, &QCheckBox::clicked,
             this, &LabelGeneratorWidget::autoLabelChangedSlot);
-    form_layout1->addRow("Auto Label", auto_label_check);
+    form_layout1->addRow("Automatic Labeling", auto_label_check);
 
     // lod
     QComboBox* lod_box = new QComboBox();
@@ -71,13 +71,18 @@ LabelGeneratorWidget::LabelGeneratorWidget(LabelGenerator& label_generator)
     LabelDSWidget* ds_widget = new LabelDSWidget(label_generator_);
     scroll_area->setWidget(ds_widget);
     scroll_area->setMinimumHeight(300);
-    scroll_area->setMaximumHeight(400);
+    //scroll_area->setMaximumHeight(400);
 
     main_layout->addWidget(scroll_area);
 
     unsigned int row=0;
 
     // filters
+
+    main_layout->addWidget(new QLabel("Label Filters"));
+
+    QFrame* filter_frame = new QFrame();
+
     QGridLayout* filter_layout = new QGridLayout();
 
     // m3a
@@ -155,9 +160,11 @@ LabelGeneratorWidget::LabelGeneratorWidget(LabelGenerator& label_generator)
             this, &LabelGeneratorWidget::filterTAChangedSlot);
     filter_layout->addWidget(filter_ta_edit, row, 1);
 
-    main_layout->addLayout(filter_layout);
+    filter_frame->setLayout(filter_layout);
 
-    main_layout->addStretch();
+    main_layout->addWidget(filter_frame);
+
+    //main_layout->addStretch();
 
     setLayout(main_layout);
 }

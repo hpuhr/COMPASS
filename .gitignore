@@ -1,5 +1,7 @@
 build/
 experimental_src/
+appimage/
+Testing/
 *.aux
 *.ego
 *.ent
