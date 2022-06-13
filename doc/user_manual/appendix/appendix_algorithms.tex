@@ -102,12 +102,12 @@ The description of the accuracy values where taken from \textit{EUROCONTROL Spec
   \begin{tabularx}{\textwidth}{ | X | l | l | }
     \hline
     \textbf{ASTERIX Data Item} & \textbf{Variable} & \textbf{Comment} \\ \hline
-     REF.PA.SDW.SDW (Latitude Component) & pos\_std\_dev\_lat\_deg &  \\ \hline
-     REF.PA.SDW.SDW (Longitude Component) & pos\_std\_dev\_long\_deg  &  \\ \hline
-     REF.PA.SDW.COV-WGS (Lat/Long Covariance Component) & pos\_std\_dev\_latlong\_corr\_coeff  &  \\ \hline
-     REF.PA.SDC.SDC (X-Component) & pos\_std\_dev\_x\_m &  \\ \hline
-     REF.PA.SDC.SDC (Y-Component) & pos\_std\_dev\_y\_m  &  \\ \hline
-     REF.PA.SDC.COV-XY (Covariance Component) & pos\_std\_dev\_correlation\_coeff  &  \\ \hline
+     REF.PA.SDW.SDW (Latitude Component) & Latitude StdDev &  \\ \hline
+     REF.PA.SDW.SDW (Longitude Component) & Longitude StdDev  &  \\ \hline
+     REF.PA.SDW.COV-WGS (Lat/Long Covariance Component) & Lat/Long Cov  &  \\ \hline
+     REF.PA.SDC.SDC (X-Component) & X StdDev &  \\ \hline
+     REF.PA.SDC.SDC (Y-Component) & Y StdDev  &  \\ \hline
+     REF.PA.SDC.COV-XY (Covariance Component) & X/Y Covariance  &  \\ \hline
 \end{tabularx}
   \caption{MLAT Position Accuracy Variables}
 \end{table}
@@ -129,11 +129,11 @@ Notes:
 
 \subsection{Radar}
 
-For each Radar plot, the DBOVariables 'ds\_id' and 'detection\_type' are used to define from which data source the plot originated, and what type of plot was measured. \\
+For each Radar plot, the DBContent Variables 'DS ID' and 'Detection Type' are used to define from which data source the plot originated, and what type of plot was measured. \\
 
-From the data source information (see \nameref{sec:task_manage_datasources_table_content}) the radar standard deviations are collected. If no data source specific values are set, the default values (see \nameref{sec:others_radar_default_accuracies}) are used. \\
+From the data source information (see \nameref{sec:configure_datasources_table_content}) the radar standard deviations are collected. If no data source specific values are set, the default values (see \nameref{sec:others_radar_default_accuracies}) are used. \\
 
-Based on the plot type defined by 'detection\_type', one (single technology) or the minimum/maximum of the standard deviations (for combined plots, defined by 'Use Radar Minimum StdDev' flag) is used. If the 'detection\_type' is not set or is 0 (no detection), the PSR values are used. \\ 
+Based on the plot type defined by 'Detection Type', one (single technology) or the minimum/maximum of the standard deviations (for combined plots, defined by 'Use Radar Minimum StdDev' flag) is used. If the 'Detection Type' is not set or is 0 (no detection), the PSR values are used. \\ 
 
 The standard deviates used for display purposes are calculated based on the range standard deviation and the azimuth standard deviation multiplied by the circumference at the given range, and are of course rotated by the measurement azimuth.
 
@@ -150,11 +150,11 @@ The description of the accuracy values where taken from \textit{EUROCONTROL Spec
   \begin{tabularx}{\textwidth}{ | X | l | l | }
     \hline
     \textbf{ASTERIX Data Item} & \textbf{Variable} & \textbf{Comment} \\ \hline
-     500.APW.APW (Latitude Component) & pos\_std\_dev\_lat\_deg &  \\ \hline
-     500.APW.APW (Longitude Component) & pos\_std\_dev\_long\_deg  &  \\ \hline
-     500.APC.APC (X-Component) & pos\_std\_dev\_x\_m &  \\ \hline
-     500.APC.APC (Y-Component) & pos\_std\_dev\_y\_m  &  \\ \hline
-     500.COV.COV (XY Covariance Component) & pos\_std\_dev\_xy\_corr\_coeff  &  \\ \hline
+     500.APW.APW (Latitude Component) & Latitude StdDev &  \\ \hline
+     500.APW.APW (Longitude Component) & Longitude StdDev  &  \\ \hline
+     500.APC.APC (X-Component) & X StdDev &  \\ \hline
+     500.APC.APC (Y-Component) & Y StdDev  &  \\ \hline
+     500.COV.COV (XY Covariance Component) & X/Y Covariance  &  \\ \hline
 \end{tabularx}
   \caption{Tracker Position Accuracy Variables}
 \end{table}

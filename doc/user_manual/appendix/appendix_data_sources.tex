@@ -1,7 +1,58 @@
 \section{Appendix: Data Sources}
 \label{sec:appendix_data_sources}
 
-% TODO_V7
+Currently two version for JSON files for data sources definitions are supported, the current and the deprecated format.
+
+\subsection{Current Format}
+
+\begin{lstlisting}
+{
+    "content_type": "data_sources",
+    "content_version": "0.2",
+    "data_sources": [
+        {
+            "ds_type": "Tracker",
+            "name": "MRTS",
+            "sac": 1,
+            "sic": 3
+        },
+        {
+            "ds_type": "Tracker",
+            "name": "ARTAS",
+            "sac": 1,
+            "sic": 4
+        },
+        {
+            "ds_type": "ADSB",
+            "info": {
+                "network_lines": {
+                    "L1": "2.192.31.24:8600",
+                    "L3": "3.192.31.25:8600"
+                }
+            },
+            "name": "ADSB",
+            "sac": 1,
+            "short_name": "WADS",
+            "sic": 5
+        },
+        {
+            "ds_type": "MLAT",
+            "info": {
+                "network_lines": {
+                    "L3": "2.192.21.24:8600",
+                    "L4": "3.192.21.25:8600"
+                }
+            },
+            "name": "MLAT1",
+            "sac": 50,
+            "short_name": "MLAT1",
+            "sic": 70
+        }
+    ]
+}
+\end{lstlisting}
+
+\subsection{Deprecated Format}
 
 \begin{lstlisting}
 {
