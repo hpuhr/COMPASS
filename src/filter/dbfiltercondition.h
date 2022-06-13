@@ -52,8 +52,8 @@ public:
     virtual ~DBFilterCondition();
 
     void invert();
-    bool filters(const std::string& dbo_name);
-    std::string getConditionString(const std::string& dbo_name, bool& first,
+    bool filters(const std::string& dbcontent_name);
+    std::string getConditionString(const std::string& dbcontent_name, bool& first,
                                    std::vector<std::string>& extra_from_parts,
                                    std::vector<dbContent::Variable*>& filtered_variables);
 
@@ -71,8 +71,8 @@ public:
     std::string getVariableName() const;
     void setVariableName(const std::string& variable_name);
 
-    bool hasVariable (const std::string& dbo_name);
-    dbContent::Variable& variable (const std::string& dbo_name);
+    bool hasVariable (const std::string& dbcontent_name);
+    dbContent::Variable& variable (const std::string& dbcontent_name);
 
     bool getAbsoluteValue() { return absolute_value_; }
     void setAbsoluteValue(bool abs) { absolute_value_ = abs; }
@@ -100,7 +100,7 @@ private:
     bool absolute_value_{false};
     std::string value_;
     std::string reset_value_;
-    std::string variable_dbo_name_;
+    std::string variable_dbcontent_name_;
     std::string variable_name_;
     bool display_instance_id_ {false};
 

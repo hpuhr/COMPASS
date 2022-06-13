@@ -35,16 +35,16 @@ DBOSpecificValuesDBFilter::DBOSpecificValuesDBFilter(const std::string& class_id
 {
     logdbg << "DBOSpecificValuesDBFilter: constructor";
 
-    registerParameter("dbo_name", &dbo_name_, "");
+    registerParameter("dbcontent_name", &dbcontent_name_, "");
     registerParameter("variable_name", &variable_name_, "");
     registerParameter("condition_operator", &condition_operator_, "");
 
     // dbobject
-    if (!COMPASS::instance().dbContentManager().existsDBContent(dbo_name_))
+    if (!COMPASS::instance().dbContentManager().existsDBContent(dbcontent_name_))
         throw std::invalid_argument("DataSourcesFilter: DataSourcesFilter: instance " +
-                                    instance_id + " has non-existing object " + dbo_name_);
+                                    instance_id + " has non-existing object " + dbcontent_name_);
 
-    object_ = &COMPASS::instance().dbContentManager().dbContent(dbo_name_);
+    object_ = &COMPASS::instance().dbContentManager().dbContent(dbcontent_name_);
     assert (object_);
 
     TODO_ASSERT
@@ -52,7 +52,7 @@ DBOSpecificValuesDBFilter::DBOSpecificValuesDBFilter(const std::string& class_id
 //    if (!object_->hasCurrentDataSourceDefinition())
 //    {
 //        logerr << "DataSourcesFilter: DataSourcesFilter: instance " + instance_id + " object "
-//               << dbo_name_ + " has no data sources";
+//               << dbcontent_name_ + " has no data sources";
 //        disabled_ = true;
 //        return;
 //    }
@@ -97,9 +97,9 @@ DBOSpecificValuesDBFilter::DBOSpecificValuesDBFilter(const std::string& class_id
 
 DBOSpecificValuesDBFilter::~DBOSpecificValuesDBFilter() {}
 
-bool DBOSpecificValuesDBFilter::filters(const std::string& dbo_type) { return dbo_name_ == dbo_type; }
+bool DBOSpecificValuesDBFilter::filters(const std::string& dbo_type) { return dbcontent_name_ == dbo_type; }
 
-std::string DBOSpecificValuesDBFilter::getConditionString(const std::string& dbo_name, bool& first,
+std::string DBOSpecificValuesDBFilter::getConditionString(const std::string& dbcontent_name, bool& first,
                                                           std::vector<std::string>& extra_from_parts,
                                                           std::vector<dbContent::Variable*>& filtered_variables)
 {
@@ -114,7 +114,7 @@ std::string DBOSpecificValuesDBFilter::getConditionString(const std::string& dbo
 
     if (active_)
     {
-        if (dbo_name == dbo_name_)
+        if (dbcontent_name == dbcontent_name_)
         {
             if (!first)
             {
@@ -142,13 +142,13 @@ std::string DBOSpecificValuesDBFilter::getConditionString(const std::string& dbo
 
                 TODO_ASSERT
 
-//                DBObject:: DataSourceIterator it = find_if(object_->dsBegin(), object_->dsEnd(),
+//                DBContent:: DataSourceIterator it = find_if(object_->dsBegin(), object_->dsEnd(),
 //                                                           [cond_name, this] (const pair<int, DBODataSource>& s) {
 //                    return s.second.hasShortName() ?
 //                                (s.second.shortName()+" "+variable_name_) == cond_name
 //                              : (s.second.name()+" "+variable_name_) == cond_name; } );
 
-//                DBObject:: DataSourceIterator it = find_if(object_->dsBegin(), object_->dsEnd(),
+//                DBContent:: DataSourceIterator it = find_if(object_->dsBegin(), object_->dsEnd(),
 //                                                           [cond_name, this] (const pair<int, DBODataSource>& s) {
 //                    return (s.second.name()+" "+variable_name_) == cond_name; } );
 
@@ -163,7 +163,7 @@ std::string DBOSpecificValuesDBFilter::getConditionString(const std::string& dbo
 //                {
 //                    bool cond_first = true;
 //                    std::string text =
-//                            conditions_.at(cnt)->getConditionString(dbo_name, cond_first, filtered_variables);
+//                            conditions_.at(cnt)->getConditionString(dbcontent_name, cond_first, filtered_variables);
 
 //                    ss << "(" << ds_column_name_ << "=" << ds_id << " AND " << text << ")";
 //                }
@@ -182,13 +182,13 @@ std::string DBOSpecificValuesDBFilter::getConditionString(const std::string& dbo
             //        for (unsigned int cnt = 0; cnt < sub_filters_.size(); cnt++)
             //        {
             //            std::string text =
-            //                sub_filters_.at(cnt)->getConditionString(dbo_name, first, filtered_variables);
+            //                sub_filters_.at(cnt)->getConditionString(dbcontent_name, first, filtered_variables);
             //            ss << text;
             //        }
         }
     }
 
-    logdbg << "DBOSpecificValuesDBFilter " << instanceId() << ": getConditionString: object " << dbo_name
+    logdbg << "DBOSpecificValuesDBFilter " << instanceId() << ": getConditionString: object " << dbcontent_name
            << " here '" << ss.str() << "' first " << first << " condition_set " << condition_set;
 
     if (condition_set)
@@ -258,7 +258,7 @@ void DBOSpecificValuesDBFilter::checkSubConfigurables()
 //            Configuration& config = addNewSubConfiguration("DBFilterCondition", ds_name);
 //            config.addParameterString("reset_value", "4227");
 //            config.addParameterString("value", "4227");
-//            config.addParameterString("variable_dbo_name", dbo_name_);
+//            config.addParameterString("variable_dbcontent_name", dbcontent_name_);
 //            config.addParameterString("variable_name", variable_name_);
 //            config.addParameterBool("op_and", false);
 //            config.addParameterString("operator", condition_operator_);

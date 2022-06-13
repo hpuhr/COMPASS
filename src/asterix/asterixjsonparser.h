@@ -122,6 +122,9 @@ private:
 
     std::string db_content_name_;
 
+    mutable bool expert_mode_init_ {false}; // whether expert_mode_ was initialized
+    mutable bool expert_mode_ {false}; // COMPASS expert mode
+
     jASTERIX::CategoryItemInfo item_info_;
 
     dbContent::VariableSet var_list_;
@@ -139,7 +142,7 @@ private:
     std::vector<std::string> not_added_dbo_variables_; // existing dbovars not in mappings
 
 
-    QStringList table_columns_ {"Active", "JSON Key", "DBObject Variable"};
+    QStringList table_columns_ {"Active", "JSON Key", "DBContent Variable"};
 
     QIcon todo_icon_;
     QIcon unknown_icon_;

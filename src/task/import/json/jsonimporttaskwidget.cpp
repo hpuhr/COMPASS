@@ -421,16 +421,16 @@ void JSONImportTaskWidget::addObjectParserSlot()
         return;
     }
 
-    SelectDBObjectDialog dialog;
+    SelectDBContentDialog dialog;
 
     int ret = dialog.exec();
 
     if (ret == QDialog::Accepted)
     {
         std::string name = dialog.name();
-        std::string dbo_name = dialog.selectedObject();
+        std::string dbcontent_name = dialog.selectedObject();
         loginf << "JSONImportTaskWidget: addObjectParserSlot: name " << name << " obj "
-               << dbo_name;
+               << dbcontent_name;
 
         JSONParsingSchema& current = task_.currentSchema();
 
@@ -443,11 +443,11 @@ void JSONImportTaskWidget::addObjectParserSlot()
             return;
         }
 
-        std::string instance = "JSONObjectParser" + name + dbo_name + "0";
+        std::string instance = "JSONObjectParser" + name + dbcontent_name + "0";
 
         Configuration& config = current.addNewSubConfiguration("JSONObjectParser", instance);
         config.addParameterString("name", name);
-        config.addParameterString("db_object_name", dbo_name);
+        config.addParameterString("dbcontent_name", dbcontent_name);
 
         current.generateSubConfigurable("JSONObjectParser", instance);
         updateParserBox();

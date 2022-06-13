@@ -37,6 +37,7 @@
 #include "acidfilter.h"
 #include "mode3afilter.h"
 #include "modecfilter.h"
+#include "primaryonlyfilter.h"
 
 #include "json.hpp"
 
@@ -99,14 +100,14 @@ void FilterManager::generateSubConfigurable(const std::string& class_id,
     }
     else if (class_id == "DBOSpecificValuesDBFilter")
     {
-        std::string dbo_name = configuration()
+        std::string dbcontent_name = configuration()
                 .getSubConfiguration(class_id, instance_id)
-                .getParameterConfigValueString("dbo_name");
+                .getParameterConfigValueString("dbcontent_name");
 
-        if (!checkDBObject(dbo_name))
+        if (!checkDBContent(dbcontent_name))
         {
             loginf << "FilterManager: generateSubConfigurable: disabling dbo specific filter "
-                   << instance_id << " for failed check dbobject '" << dbo_name << "'";
+                   << instance_id << " for failed check dbobject '" << dbcontent_name << "'";
             return;
         }
 
@@ -120,6 +121,11 @@ void FilterManager::generateSubConfigurable(const std::string& class_id,
         }
         else
             filters_.emplace_back(filter);
+    }
+    else if (class_id == "ADSBQualityFilter")
+    {
+        ADSBQualityFilter* filter = new ADSBQualityFilter(class_id, instance_id, this);
+        filters_.emplace_back(filter);
     }
     else if (class_id == "ACADFilter")
     {
@@ -185,24 +191,29 @@ void FilterManager::generateSubConfigurable(const std::string& class_id,
             configuration().removeSubConfiguration(class_id, instance_id);
         }
     }
+    else if (class_id == "PrimaryOnlyFilter")
+    {
+        PrimaryOnlyFilter* filter = new PrimaryOnlyFilter(class_id, instance_id, this);
+        filters_.emplace_back(filter);
+    }
     else
         throw std::runtime_error("FilterManager: generateSubConfigurable: unknown class_id " +
                                  class_id);
 }
 
-bool FilterManager::checkDBObject (const std::string& dbo_name)
+bool FilterManager::checkDBContent (const std::string& dbcontent_name)
 {
-    if (!COMPASS::instance().dbContentManager().existsDBContent(dbo_name))
+    if (!COMPASS::instance().dbContentManager().existsDBContent(dbcontent_name))
     {
-        loginf << "FilterManager: checkDBObject: failed because of non-existing dbobject '" << dbo_name << "'";
+        loginf << "FilterManager: checkDBContent: failed because of non-existing dbobject '" << dbcontent_name << "'";
         return false;
     }
 
-    DBContent& object = COMPASS::instance().dbContentManager().dbContent(dbo_name);
+    DBContent& object = COMPASS::instance().dbContentManager().dbContent(dbcontent_name);
 
     if (!object.existsInDB())
     {
-        loginf << "FilterManager: checkDBObject: failed because of empty dbobject '" << dbo_name << "'";
+        loginf << "FilterManager: checkDBContent: failed because of empty dbobject '" << dbcontent_name << "'";
         return false;
     }
 
@@ -232,11 +243,11 @@ void FilterManager::checkSubConfigurables()
 //    }
 }
 
-std::string FilterManager::getSQLCondition(const std::string& dbo_name,
+std::string FilterManager::getSQLCondition(const std::string& dbcontent_name,
                                            std::vector<std::string>& extra_from_parts,
                                            std::vector<dbContent::Variable*>& filtered_variables)
 {
-    assert(COMPASS::instance().dbContentManager().dbContent(dbo_name).loadable());
+    assert(COMPASS::instance().dbContentManager().dbContent(dbcontent_name).loadable());
 
     std::stringstream ss;
 
@@ -245,16 +256,16 @@ std::string FilterManager::getSQLCondition(const std::string& dbo_name,
     for (auto& filter : filters_)
     {
         loginf << "FilterManager: getSQLCondition: filter " << filter->instanceId() << " active "
-               << filter->getActive() << " filters " << dbo_name << " "
-               << filter->filters(dbo_name);
+               << filter->getActive() << " filters " << dbcontent_name << " "
+               << filter->filters(dbcontent_name);
 
-        if (filter->getActive() && filter->filters(dbo_name))
+        if (filter->getActive() && filter->filters(dbcontent_name))
         {
-            ss << filter->getConditionString(dbo_name, first, extra_from_parts, filtered_variables);
+            ss << filter->getConditionString(dbcontent_name, first, extra_from_parts, filtered_variables);
         }
     }
 
-    logdbg << "FilterManager: getSQLCondition: name " << dbo_name << " '" << ss.str() << "'";
+    logdbg << "FilterManager: getSQLCondition: name " << dbcontent_name << " '" << ss.str() << "'";
     return ss.str();
 }
 
@@ -346,7 +357,8 @@ void FilterManager::showViewPointSlot (const ViewableDataConfig* vp)
     {
         const json& data_sources  = data.at("data_sources");
 
-        std::set<unsigned int> ds_ids = data_sources.get<std::set<unsigned int>>();
+        std::map<unsigned int, std::set<unsigned int>> ds_ids
+                = data_sources.get<std::map<unsigned int, std::set<unsigned int>>>(); // ds_id + line strs
 
         logdbg << "FilterManager: showViewPointSlot: load " << ds_ids.size() << " ds_ids";
 
@@ -357,10 +369,13 @@ void FilterManager::showViewPointSlot (const ViewableDataConfig* vp)
         logdbg << "FilterManager: showViewPointSlot: load all ds_ids";
 
         ds_man.setLoadDataSources(true);
+        ds_man.setLoadAllDataSourceLines();
     }
 
     // add filters
     use_filters_ = data.contains("filters");
+
+    disableAllFilters();
 
     if (data.contains("filters"))
     {
@@ -369,8 +384,6 @@ void FilterManager::showViewPointSlot (const ViewableDataConfig* vp)
         logdbg << "FilterManager: showViewPointSlot: filter data '" << filters.dump(4) << "'";
 
         assert (filters.is_object());
-
-        disableAllFilters();
 
         for (auto& fil_it : filters.get<json::object_t>())
         {
@@ -389,6 +402,9 @@ void FilterManager::showViewPointSlot (const ViewableDataConfig* vp)
             (*it)->loadViewPointConditions(filters);
         }
     }
+
+    if (widget_)
+        widget_->updateUseFilters();
 }
 
 void FilterManager::setConfigInViewPoint (nlohmann::json& data)

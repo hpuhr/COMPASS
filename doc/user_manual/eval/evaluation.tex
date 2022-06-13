@@ -1,22 +1,14 @@
 \chapter{Evaluation}
 \label{sec:eval} 
 
-\begin{figure}[H]
-    \hspace*{-2.5cm}
-    \includegraphics[width=19cm]{../screenshots/evaluation.png}
-  \caption{Evaluation tab}
-\end{figure}
-
 The 'Evaluation' tab allows adapting/defining requirement-based standards  and compliance assessment of said standards. \\
-
-Please \textbf{note} . \\
 
 \section{Pre-Requisites \& Limitations}
 \label{sec:eval_prereq} 
 
 \begin{itemize}  
-\item Target report associations must be set (using \nameref{sec:task_associate_tr})
-\item At least 1 sector has to be defined (using \nameref{sec:task_manage_sectors})
+\item Target report associations must be set (using \nameref{sec:ui_associate_tr})
+\item At least 1 sector has to be defined (using \nameref{sec:ui_configure_sectors})
 \item Usable reference data must exist
 \item Usable test data must exist
 \end{itemize}
@@ -24,7 +16,7 @@ Please \textbf{note} . \\
 
 While it is possible to manually remove single targets from the evaluation, the usage of correct reference data is paramount for the significance of the evaluation results. \\
 
-\includegraphics[width=0.5cm]{../../data/icons/hint.png} \textbf{Please note that the evaluation feature is currently being tested/verified and should be used for such purposes only. It should not be used as a sole basis for decision making - especially not without manually verifying the evaluation results.} \\
+\includegraphics[width=0.5cm]{../../data/icons/hint.png} \textbf{Please note that the evaluation feature should not be used as a sole basis for decision making - especially not without manually verifying the evaluation results.} \\
 
 There will be improvements in the next releases, and further verification of the results by the author and other users.
 
@@ -58,9 +50,9 @@ Also, since target secondary attributes (currently only Mode S address) are also
 \label{sec:eval_overview} 
 
 \begin{figure}[H]
-  \hspace*{-2cm}
-    \includegraphics[width=18cm,frame]{../screenshots/eval_overview.png}
-  \caption{Evaluation overview}
+    \hspace*{-2.5cm}
+    \includegraphics[width=19cm]{figures/eval.png}
+  \caption{Evaluation tab}
 \end{figure}
 
 At the top, 6 tabs exist:
@@ -89,7 +81,7 @@ Below 3 buttons exist:
 
 \begin{figure}[H]
   \hspace*{-2cm}
-    \includegraphics[width=18cm,frame]{../screenshots/eval_main.png}
+    \includegraphics[width=18cm,frame]{figures/eval_main.png}
   \caption{Evaluation Main tab}
 \end{figure}
 
@@ -101,13 +93,15 @@ At the top, the 'Data Selection' can be performed, by selecting:
 \begin{itemize}  
 \item Reference Data:
 \begin{itemize}  
-\item DBObject: Any DBObject existing in the database
+\item DBContent: Any DBContent existing in the database
 \item Data source checkboxes: Which data sources to use
+\item Line ID: Which line to use from the data sources
 \end{itemize}
 \item Test Data:
 \begin{itemize}  
-\item DBObject: Any DBObject existing in the database
+\item DBContent: Any DBContent existing in the database
 \item Data source checkboxes: Which data sources to use
+\item Line ID: Which line to use from the data sources
 \end{itemize}
 \end{itemize}
 \ \\
@@ -121,7 +115,7 @@ Since 'any' type of data can be selected for evaluation, this allows for the fol
 \end{itemize}
 \ \\
 
-Of course it is also possible to use e.g. an imported GPS trail as reference (see \nameref{sec:task_import_gps}), although this is currently not tested for lack of test data. If you might be able to provide such test data, please contact the author. \\
+Of course it is also possible to use e.g. an imported GPS trail as reference (see \nameref{sec:ui_import_gps}), although this is currently not tested for lack of test data. If you might be able to provide such test data, please contact the author. \\
 
 \subsubsection{Standard}
 In the center, using the 'Standard' drop-down menu, the current standard can be selected. To create/configure the standard please use the 'Standard' tab.
@@ -142,7 +136,7 @@ For each sector layer, the requirement groups (defined in the Standard tab) can 
 
 \begin{figure}[H]
   \hspace*{-2cm}
-    \includegraphics[width=18cm,frame]{../screenshots/eval_targets_empty.png}
+    \includegraphics[width=18cm,frame]{figures/eval_targets_empty.png}
   \caption{Evaluation Targets tab}
 \end{figure}
 
@@ -172,7 +166,7 @@ After loading the data, the table can look as follows:
 
 \begin{figure}[H]
   \hspace*{-2cm}
-    \includegraphics[width=18cm,frame]{../screenshots/eval_targets_loaded.png}
+    \includegraphics[width=18cm,frame]{figures/eval_targets_loaded.png}
   \caption{Evaluation Targets tab with loaded data}
 \end{figure}
 
@@ -182,7 +176,7 @@ After loading the data, the table can look as follows:
 
 \begin{figure}[H]
   \hspace*{-2cm}
-    \includegraphics[width=18cm,frame]{../screenshots/eval_filter.png}
+    \includegraphics[width=18cm,frame]{figures/eval_filter.png}
   \caption{Evaluation Filter tab}
 \end{figure}
 
@@ -213,7 +207,7 @@ Below, the following elements exist:
 
 \begin{figure}[H]
   \hspace*{-2cm}
-    \includegraphics[width=18cm,frame]{../screenshots/eval_standard.png}
+    \includegraphics[width=18cm,frame]{figures/eval_standard.png}
   \caption{Evaluation Standard tab}
 \end{figure}
 
@@ -266,7 +260,7 @@ Below that, the current standard is shown. On the left side, a tree-view exists 
 
 \begin{figure}[H]
   \hspace*{-2cm}
-    \includegraphics[width=18cm,frame]{../screenshots/eval_standard_add_req.png}
+    \includegraphics[width=18cm,frame]{figures/eval_standard_add_req.png}
   \caption{Evaluation Standard tab: Add requirement}
 \end{figure}
 
@@ -288,8 +282,10 @@ The following requirements exist:
     \hline
     \textbf{Type} & \textbf{Description} \\ \hline
     \nameref{sec:eval_req_detection} & Calculates probability of detection  \\ \hline
-    \nameref{sec:eval_req_extra_data} & Calculates probability of unused test data (test data w/o reference data) \\ \hline
-    \nameref{sec:eval_req_extra_track} & Calculates probability of undetected tracks (reference data w/o test data) \\ \hline
+    \nameref{sec:eval_req_dubious_targets} & Calculates probability of dubious targets based on physical movement (based on test data only) \\ \hline
+    \nameref{sec:eval_req_dubious_tracks} & Calculates probability of dubious tracks from Trackers (based on test data only) \\ \hline
+    \nameref{sec:eval_req_extra_data} & Calculates probability of unused test data (based on test data only) \\ \hline
+    \nameref{sec:eval_req_extra_track} & Calculates probability of undetected tracks (based on reference data only) \\ \hline
     \nameref{sec:eval_req_id_correct} & Calculates probability of correct secondary identification \\ \hline
     \nameref{sec:eval_req_id_false} & Calculates probability of false secondary identification \\ \hline
     \nameref{sec:eval_req_m3a_false} & Calculates probability of false Mode 3/A code \\ \hline
@@ -305,6 +301,8 @@ The following requirements exist:
 \end{table}
 \end{center}
 \ \\
+
+%TODOV7 add dubious tracks & targets
 
 If a requirement is clicked, it's configuration widget is shown on the right hand side. \\
 
@@ -325,7 +323,7 @@ For detailed information about each requirement please refer to section \nameref
 
 \begin{figure}[H]
   \hspace*{-2cm}
-    \includegraphics[width=18cm,frame]{../screenshots/eval_results_empty.png}
+    \includegraphics[width=18cm,frame]{figures/eval_results_empty.png}
   \caption{Evaluation Results tab}
 \end{figure}
 
@@ -347,7 +345,7 @@ Please note that the post-processing step uses all available cores on the CPU.
 
 \begin{figure}[H]
   \centering 
-    \includegraphics[width=8cm]{../screenshots/eval_post.png}
+    \includegraphics[width=8cm]{figures/eval_post.png}
   \caption{Evaluation: Post-processing after loading}
 \end{figure}
 
@@ -359,12 +357,12 @@ After the loading and the post-processing have been performed, all targets are s
 
 \begin{figure}[H]
   \hspace*{-2cm}
-    \includegraphics[width=18cm,frame]{../screenshots/eval_targets_loaded.png}
+    \includegraphics[width=18cm,frame]{figures/eval_targets_loaded.png}
   \caption{Evaluation Targets tab after loading}
 \end{figure}
 
 \subsection{Filtering Targets}
-\label{sec:eval_run_load} 
+\label{sec:eval_filter_targets} 
 
 The Targets tab is useful for removing certain targets from the evaluation ('Use' checkbox) and inspecting already removed ones. \\
 
@@ -382,7 +380,7 @@ The 'Change Usage' button can be used for the following actions:
 The 'Filter UTNs' dialog can be used to dynamically filter UTNs based on the configurated values:
 
 \begin{figure}[H]
-    \includegraphics[width=15cm]{../screenshots/eval_filter_utns.png}
+    \includegraphics[width=15cm]{figures/eval_filter_utns.png}
   \caption{Evaluation Filter UTNs dialog}
 \end{figure}
 
@@ -391,9 +389,11 @@ The 'Filter UTNs' dialog can be used to dynamically filter UTNs based on the con
 \item Remove Primary-Only Targets: Removes primary-only targets (w/o secondary attributes)
 \item Remove Mode A/C Code onlys: Removes targets without Mode S attributes
 \item Remove by Mode A Code: Removes targets having a Mode A code given in the list
+\item Mode A Code Blacklist: Whether the Mode A codes should be used as blacklist or whitelist
 \item Remove by Mode C Code: Removes targets having a Mode C code smaller than the given value
 \item Remove by Target Address: Removes targets having a Mode S target address given in the list
-\item Remove by Non-Detection of DBObject: Removes targets not being detected by a given DBOObject (e.g. sensor type)
+\item Target Address Blacklist: Whether the Target Addresses should be used as blacklist or whitelist
+\item Remove by Non-Detection of DBContent: Removes targets not being detected by a given DBContent
 \end{itemize}
 \ \\
 
@@ -401,7 +401,7 @@ When the 'Run' button is clicked, all (enabled) targets are checked and are disa
 
 \begin{figure}[H]
   \hspace*{-2cm}
-    \includegraphics[width=18cm,frame]{../screenshots/eval_targets_filtered.png}
+    \includegraphics[width=18cm,frame]{figures/eval_targets_filtered.png}
   \caption{Evaluation Targets tab after filtering}
 \end{figure}
 
@@ -418,7 +418,7 @@ Please note that the post-processing step uses all available cores on the CPU.
 
 \begin{figure}[H]
   \centering 
-    \includegraphics[width=10cm]{../screenshots/eval_eval_status.png}
+    \includegraphics[width=10cm]{figures/eval_eval_status.png}
   \caption{Evaluation: Running evaluation status}
 \end{figure}
 
@@ -442,7 +442,7 @@ Navigation can be made more efficient by returning to the last sub-result by usi
 \subsection{Overview}
 \begin{figure}[H]
   \hspace*{-2cm}
-    \includegraphics[width=18cm,frame]{../screenshots/eval_results_overview.png}
+    \includegraphics[width=18cm,frame]{figures/eval_results_overview.png}
   \caption{Evaluation results: Overview}
 \end{figure}
 
@@ -452,7 +452,7 @@ When single-clicking a row, the respective result error are shown in the existin
 
 \begin{figure}[H]
   \hspace*{-2.5cm}
-    \includegraphics[width=19cm,frame]{../screenshots/eval_results_pd_sum_osgview.png}
+    \includegraphics[width=19cm,frame]{figures/eval_results_pd_sum_osgview.png}
   \caption{Evaluation results: Sector PD errors in OSGView}
 \end{figure}
 
@@ -462,7 +462,7 @@ When double-clicking a row, a step into the respective sector sum details is per
 
 \begin{figure}[H]
   \hspace*{-2cm}
-    \includegraphics[width=18cm,frame]{../screenshots/eval_results_sec_det_example.png}
+    \includegraphics[width=18cm,frame]{figures/eval_results_sec_det_example.png}
   \caption{Evaluation results: Sector Detail Example}
 \end{figure}
 
@@ -474,7 +474,7 @@ When single-clicking a row, the respective target data and result errors are sho
 
 \begin{figure}[H]
   \hspace*{-2.5cm}
-    \includegraphics[width=18cm,frame]{../screenshots/eval_results_pd_single_osgview.png}
+    \includegraphics[width=18cm,frame]{figures/eval_results_pd_single_osgview.png}
   \caption{Evaluation results: Target PD Errors in OSGView}
 \end{figure}
 
@@ -484,7 +484,7 @@ When double-clicking a row, a step into the respective target details is perform
 
 \begin{figure}[H]
   \hspace*{-2cm}
-    \includegraphics[width=18cm,frame]{../screenshots/eval_results_target_det_example.png}
+    \includegraphics[width=18cm,frame]{figures/eval_results_target_det_example.png}
   \caption{Evaluation results: Per-Target PD Detail Example}
 \end{figure}
 
@@ -496,7 +496,7 @@ When single-clicking a row, the respective target data and the respective single
 
 \begin{figure}[H]
   \hspace*{-2.5cm}
-    \includegraphics[width=19cm]{../screenshots/eval_results_pd_single_tr_osgview.png}
+    \includegraphics[width=19cm]{figures/eval_results_pd_single_tr_osgview.png}
   \caption{Evaluation results: Target Single PD Error in OSGView}
 \end{figure}
 
@@ -507,7 +507,7 @@ When single-clicking a row, the respective target data and the respective single
 Using the "Export PDF" button, a PDF can be generated.
 
 \begin{figure}[H]
-    \includegraphics[width=14cm]{../screenshots/eval_report.png}
+    \includegraphics[width=14cm]{figures/eval_report.png}
   \caption{Evaluation results: Generate report dialog}
 \end{figure}
 
@@ -534,7 +534,7 @@ The 'Run' button startes the export process. At the bottom, status information a
 To run the export process, click the 'Run' button.
 
 \begin{figure}[H]
-    \includegraphics[width=14cm]{../screenshots/eval_report_status.png}
+    \includegraphics[width=14cm]{figures/eval_report_status.png}
   \caption{Evaluation results: Generate report in progress}
 \end{figure}
 

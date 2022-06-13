@@ -48,6 +48,9 @@ namespace EvaluationRequirementResult
     class SingleDubiousTrack;
     class JoinedDubiousTrack;
 
+    class SingleDubiousTarget;
+    class JoinedDubiousTarget;
+
     class SingleDetection;
     class JoinedDetection;
 
@@ -179,7 +182,7 @@ protected:
     bool shows_data_ {false};
     bool data_not_in_buffer_ {false};
 
-    void updateFromData(std::string dbo_name);
+    void updateFromData(std::string dbcontent_name);
     void updateFromAllData();
     void updateFromResult(std::shared_ptr<EvaluationRequirementResult::Base> result);
     void updateCountResult (std::shared_ptr<EvaluationRequirementResult::SingleExtraData> result);
@@ -337,15 +340,19 @@ protected:
 
     void updateCounts(const std::vector<double>& data);
 
+    /**
+     * Select data based on numerical comparison with a double interval.
+     * For non numerical comparisons specialize template.
+     */
     template<typename T>
     void selectData(NullableVector<T>& data, NullableVector<bool>& selected_vec,
-                      bool select_min_max, T data_min, T data_max, bool select_null, bool add_to_selection)
+                      bool select_min_max, double data_min, double data_max, bool select_null, bool add_to_selection)
     {
         loginf << "HistogramViewDataWidget: selectData: data_min " << data_min << " data_max " << data_max
                << " select_null " << select_null << " add_to_selection " << add_to_selection;
 
         unsigned int data_size = data.size();
-        T value;
+        double value;
         bool select;
         unsigned int select_cnt = 0;
 
@@ -367,7 +374,7 @@ protected:
             if (!select_min_max)
                 continue;
 
-            value = data.get(cnt);
+            value = static_cast<double>(data.get(cnt));
 
             select = value >= data_min && value < data_max;
 

@@ -125,8 +125,11 @@ private:
 
     void storeReceivedData (unsigned int line, const char* data, unsigned int length);
 
-    void jasterix_callback(std::unique_ptr<nlohmann::json> data, unsigned int line_id, size_t num_frames,
+    void fileJasterixCallback(std::unique_ptr<nlohmann::json> data, unsigned int line_id, size_t num_frames,
                            size_t num_records, size_t numErrors);
+    void netJasterixCallback(std::unique_ptr<nlohmann::json> data, unsigned int line_id, size_t num_frames,
+                           size_t num_records, size_t numErrors);
+
     void countRecord(unsigned int category, nlohmann::json& record);
     // checks that SAC/SIC are set in all records in same data block
     void checkCAT001SacSics(nlohmann::json& data_block);

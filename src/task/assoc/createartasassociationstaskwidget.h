@@ -32,7 +32,7 @@ class QPushButton;
 class QLineEdit;
 class QCheckBox;
 
-class CreateARTASAssociationsTaskWidget : public TaskWidget
+class CreateARTASAssociationsTaskWidget : public QWidget
 {
     Q_OBJECT
 
@@ -49,8 +49,6 @@ class CreateARTASAssociationsTaskWidget : public TaskWidget
     void associationDubiousCloseTimeFutureEditSlot(QString value);
 
     void anyTrackFlagChangedSlot();
-
-    void expertModeChangedSlot();
 
   public:
     CreateARTASAssociationsTaskWidget(CreateARTASAssociationsTask& task, QWidget* parent = 0,

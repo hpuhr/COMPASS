@@ -17,7 +17,7 @@
                                 "ListBoxViewDataSource": {
                                     "ListBoxViewDataSource0": {
                                         "parameters": {
-                                            "current_set_name": "ADS-B Quality"
+                                            "current_set_name": "Horizontal Movement"
                                         },
                                         "sub_configs": {
                                             "VariableOrderedSet": {
@@ -25,59 +25,59 @@
                                                     "parameters": null,
                                                     "sub_configs": {
                                                         "VariableOrderDefinition": {
-                                                            "VariableOrderDefinition0": {
-                                                                "parameters": {
-                                                                    "dbcontent_name": "Meta",
-                                                                    "index": 0,
-                                                                    "variable_name": "Record Number"
-                                                                }
-                                                            },
                                                             "VariableOrderDefinition1": {
                                                                 "parameters": {
                                                                     "dbcontent_name": "Meta",
-                                                                    "index": 1,
+                                                                    "index": 0,
                                                                     "variable_name": "Time of Day"
+                                                                }
+                                                            },
+                                                            "VariableOrderDefinition10": {
+                                                                "parameters": {
+                                                                    "dbcontent_name": "CAT021",
+                                                                    "index": 7,
+                                                                    "variable_name": "NUCp or NIC"
                                                                 }
                                                             },
                                                             "VariableOrderDefinition2": {
                                                                 "parameters": {
                                                                     "dbcontent_name": "Meta",
-                                                                    "index": 2,
+                                                                    "index": 1,
                                                                     "variable_name": "DS ID"
                                                                 }
                                                             },
                                                             "VariableOrderDefinition3": {
                                                                 "parameters": {
                                                                     "dbcontent_name": "Meta",
-                                                                    "index": 3,
+                                                                    "index": 2,
                                                                     "variable_name": "Mode 3/A Code"
                                                                 }
                                                             },
                                                             "VariableOrderDefinition4": {
                                                                 "parameters": {
                                                                     "dbcontent_name": "Meta",
-                                                                    "index": 4,
+                                                                    "index": 3,
                                                                     "variable_name": "Aircraft Address"
                                                                 }
                                                             },
                                                             "VariableOrderDefinition5": {
                                                                 "parameters": {
                                                                     "dbcontent_name": "Meta",
-                                                                    "index": 5,
+                                                                    "index": 4,
                                                                     "variable_name": "Aircraft Identification"
                                                                 }
                                                             },
                                                             "VariableOrderDefinition6": {
                                                                 "parameters": {
                                                                     "dbcontent_name": "Meta",
-                                                                    "index": 6,
+                                                                    "index": 5,
                                                                     "variable_name": "Mode C Code"
                                                                 }
                                                             },
                                                             "VariableOrderDefinition7": {
                                                                 "parameters": {
                                                                     "dbcontent_name": "CAT021",
-                                                                    "index": 7,
+                                                                    "index": 6,
                                                                     "variable_name": "MOPS Version"
                                                                 }
                                                             },
@@ -86,6 +86,13 @@
                                                                     "dbcontent_name": "CAT021",
                                                                     "index": 8,
                                                                     "variable_name": "NACp"
+                                                                }
+                                                            },
+                                                            "VariableOrderDefinition9": {
+                                                                "parameters": {
+                                                                    "dbcontent_name": "CAT021",
+                                                                    "index": 9,
+                                                                    "variable_name": "SIL"
                                                                 }
                                                             }
                                                         }
@@ -161,78 +168,246 @@
                                                         }
                                                     }
                                                 },
-                                                "Surface": {
+                                                "Horizontal Movement": {
                                                     "parameters": null,
                                                     "sub_configs": {
                                                         "VariableOrderDefinition": {
-                                                            "VariableOrderDefinition0": {
-                                                                "parameters": {
-                                                                    "dbcontent_name": "Meta",
-                                                                    "index": 0,
-                                                                    "variable_name": "Record Number"
-                                                                }
-                                                            },
                                                             "VariableOrderDefinition1": {
                                                                 "parameters": {
                                                                     "dbcontent_name": "Meta",
-                                                                    "index": 1,
+                                                                    "index": 0,
                                                                     "variable_name": "Time of Day"
+                                                                }
+                                                            },
+                                                            "VariableOrderDefinition10": {
+                                                                "parameters": {
+                                                                    "dbcontent_name": "Meta",
+                                                                    "index": 9,
+                                                                    "variable_name": "Track Angle"
                                                                 }
                                                             },
                                                             "VariableOrderDefinition2": {
                                                                 "parameters": {
                                                                     "dbcontent_name": "Meta",
-                                                                    "index": 2,
+                                                                    "index": 1,
                                                                     "variable_name": "DS ID"
                                                                 }
                                                             },
                                                             "VariableOrderDefinition3": {
                                                                 "parameters": {
                                                                     "dbcontent_name": "Meta",
-                                                                    "index": 3,
+                                                                    "index": 2,
                                                                     "variable_name": "Mode 3/A Code"
                                                                 }
                                                             },
                                                             "VariableOrderDefinition4": {
                                                                 "parameters": {
                                                                     "dbcontent_name": "Meta",
-                                                                    "index": 4,
+                                                                    "index": 3,
                                                                     "variable_name": "Aircraft Address"
                                                                 }
                                                             },
                                                             "VariableOrderDefinition5": {
                                                                 "parameters": {
                                                                     "dbcontent_name": "Meta",
-                                                                    "index": 5,
+                                                                    "index": 4,
                                                                     "variable_name": "Aircraft Identification"
                                                                 }
                                                             },
                                                             "VariableOrderDefinition6": {
                                                                 "parameters": {
                                                                     "dbcontent_name": "Meta",
-                                                                    "index": 6,
+                                                                    "index": 5,
                                                                     "variable_name": "Mode C Code"
                                                                 }
                                                             },
                                                             "VariableOrderDefinition7": {
                                                                 "parameters": {
                                                                     "dbcontent_name": "Meta",
-                                                                    "index": 7,
+                                                                    "index": 6,
                                                                     "variable_name": "Track Number"
                                                                 }
                                                             },
                                                             "VariableOrderDefinition8": {
                                                                 "parameters": {
                                                                     "dbcontent_name": "Meta",
-                                                                    "index": 8,
-                                                                    "variable_name": "Ground Bit"
+                                                                    "index": 7,
+                                                                    "variable_name": "Track Horizontal Manoeuvre"
                                                                 }
                                                             },
                                                             "VariableOrderDefinition9": {
                                                                 "parameters": {
-                                                                    "dbcontent_name": "CAT062",
+                                                                    "dbcontent_name": "Meta",
+                                                                    "index": 8,
+                                                                    "variable_name": "Track Groundspeed"
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                },
+                                                "Mode A/C Info": {
+                                                    "parameters": null,
+                                                    "sub_configs": {
+                                                        "VariableOrderDefinition": {
+                                                            "VariableOrderDefinition1": {
+                                                                "parameters": {
+                                                                    "dbcontent_name": "Meta",
+                                                                    "index": 0,
+                                                                    "variable_name": "Time of Day"
+                                                                }
+                                                            },
+                                                            "VariableOrderDefinition10": {
+                                                                "parameters": {
+                                                                    "dbcontent_name": "Meta",
+                                                                    "index": 4,
+                                                                    "variable_name": "Mode 3/A Smoothed"
+                                                                }
+                                                            },
+                                                            "VariableOrderDefinition11": {
+                                                                "parameters": {
+                                                                    "dbcontent_name": "Meta",
+                                                                    "index": 5,
+                                                                    "variable_name": "Mode 3/A Valid"
+                                                                }
+                                                            },
+                                                            "VariableOrderDefinition2": {
+                                                                "parameters": {
+                                                                    "dbcontent_name": "Meta",
+                                                                    "index": 1,
+                                                                    "variable_name": "DS ID"
+                                                                }
+                                                            },
+                                                            "VariableOrderDefinition3": {
+                                                                "parameters": {
+                                                                    "dbcontent_name": "Meta",
+                                                                    "index": 2,
+                                                                    "variable_name": "Mode 3/A Code"
+                                                                }
+                                                            },
+                                                            "VariableOrderDefinition4": {
+                                                                "parameters": {
+                                                                    "dbcontent_name": "Meta",
+                                                                    "index": 6,
+                                                                    "variable_name": "Aircraft Address"
+                                                                }
+                                                            },
+                                                            "VariableOrderDefinition5": {
+                                                                "parameters": {
+                                                                    "dbcontent_name": "Meta",
+                                                                    "index": 7,
+                                                                    "variable_name": "Aircraft Identification"
+                                                                }
+                                                            },
+                                                            "VariableOrderDefinition6": {
+                                                                "parameters": {
+                                                                    "dbcontent_name": "Meta",
+                                                                    "index": 8,
+                                                                    "variable_name": "Mode C Code"
+                                                                }
+                                                            },
+                                                            "VariableOrderDefinition8": {
+                                                                "parameters": {
+                                                                    "dbcontent_name": "Meta",
                                                                     "index": 9,
-                                                                    "variable_name": "Flight Status ADD"
+                                                                    "variable_name": "Associations"
+                                                                }
+                                                            },
+                                                            "VariableOrderDefinition9": {
+                                                                "parameters": {
+                                                                    "dbcontent_name": "Meta",
+                                                                    "index": 3,
+                                                                    "variable_name": "Mode 3/A Garbled"
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                },
+                                                "Track Lifetime": {
+                                                    "parameters": null,
+                                                    "sub_configs": {
+                                                        "VariableOrderDefinition": {
+                                                            "VariableOrderDefinition1": {
+                                                                "parameters": {
+                                                                    "dbcontent_name": "Meta",
+                                                                    "index": 0,
+                                                                    "variable_name": "Time of Day"
+                                                                }
+                                                            },
+                                                            "VariableOrderDefinition10": {
+                                                                "parameters": {
+                                                                    "dbcontent_name": "Meta",
+                                                                    "index": 10,
+                                                                    "variable_name": "Track Coasting"
+                                                                }
+                                                            },
+                                                            "VariableOrderDefinition11": {
+                                                                "parameters": {
+                                                                    "dbcontent_name": "Meta",
+                                                                    "index": 9,
+                                                                    "variable_name": "Track Confirmed"
+                                                                }
+                                                            },
+                                                            "VariableOrderDefinition12": {
+                                                                "parameters": {
+                                                                    "dbcontent_name": "Meta",
+                                                                    "index": 11,
+                                                                    "variable_name": "Track End"
+                                                                }
+                                                            },
+                                                            "VariableOrderDefinition2": {
+                                                                "parameters": {
+                                                                    "dbcontent_name": "Meta",
+                                                                    "index": 1,
+                                                                    "variable_name": "DS ID"
+                                                                }
+                                                            },
+                                                            "VariableOrderDefinition3": {
+                                                                "parameters": {
+                                                                    "dbcontent_name": "Meta",
+                                                                    "index": 2,
+                                                                    "variable_name": "Mode 3/A Code"
+                                                                }
+                                                            },
+                                                            "VariableOrderDefinition4": {
+                                                                "parameters": {
+                                                                    "dbcontent_name": "Meta",
+                                                                    "index": 3,
+                                                                    "variable_name": "Aircraft Address"
+                                                                }
+                                                            },
+                                                            "VariableOrderDefinition5": {
+                                                                "parameters": {
+                                                                    "dbcontent_name": "Meta",
+                                                                    "index": 4,
+                                                                    "variable_name": "Aircraft Identification"
+                                                                }
+                                                            },
+                                                            "VariableOrderDefinition6": {
+                                                                "parameters": {
+                                                                    "dbcontent_name": "Meta",
+                                                                    "index": 5,
+                                                                    "variable_name": "Mode C Code"
+                                                                }
+                                                            },
+                                                            "VariableOrderDefinition7": {
+                                                                "parameters": {
+                                                                    "dbcontent_name": "Meta",
+                                                                    "index": 6,
+                                                                    "variable_name": "Track Number"
+                                                                }
+                                                            },
+                                                            "VariableOrderDefinition8": {
+                                                                "parameters": {
+                                                                    "dbcontent_name": "Meta",
+                                                                    "index": 7,
+                                                                    "variable_name": "Associations"
+                                                                }
+                                                            },
+                                                            "VariableOrderDefinition9": {
+                                                                "parameters": {
+                                                                    "dbcontent_name": "Meta",
+                                                                    "index": 8,
+                                                                    "variable_name": "Track Begin"
                                                                 }
                                                             }
                                                         }
@@ -259,7 +434,7 @@
                     "abstract": "",
                     "add_overview_screenshot": false,
                     "add_overview_table": true,
-                    "author": "sk",
+                    "author": "",
                     "export_all_unsorted": false,
                     "group_by_type": true,
                     "open_created_pdf": true,

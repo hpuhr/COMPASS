@@ -250,7 +250,11 @@ void LatexVisitor::visit(const EvaluationResultsReport::SectionContentTable* e)
             if (!include_target_details_ && (ref.rfind("Targets", 0) == 0)) // reference to details
                 ; // do not do hyperref
             else
+            {
+
+
                 row_strings[0] = "\\hyperref[sec:"+ref+"]{"+row_strings.at(0)+"}";
+            }
         }
 
         for (unsigned int cnt=0; cnt < num_cols; ++cnt)

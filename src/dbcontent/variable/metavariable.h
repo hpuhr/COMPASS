@@ -31,9 +31,9 @@ class MetaVariableWidget;
 
 class MetaVariable : public Configurable
 {
-  public:
+public:
     MetaVariable(const std::string& class_id, const std::string& instance_id,
-                    DBContentManager* object_manager);
+                 DBContentManager* object_manager);
     virtual ~MetaVariable();
 
     virtual void generateSubConfigurable(const std::string& class_id,
@@ -45,16 +45,16 @@ class MetaVariable : public Configurable
     Variable::Representation representation();
 
     /// @brief Return if variable exist in DBO of type
-    bool existsIn(const std::string& dbo_name);
+    bool existsIn(const std::string& dbcontent_name);
     /// @brief Returns variable existing in DBO of type
-    Variable& getFor(const std::string& dbo_name);
+    Variable& getFor(const std::string& dbcontent_name);
     /// @brief Return variable identifier in DBO of type
-    std::string getNameFor(const std::string& dbo_name);
+    std::string getNameFor(const std::string& dbcontent_name);
     void set(Variable& var);
 
-    void removeVariable(const std::string& dbo_name);
+    void removeVariable(const std::string& dbcontent_name);
     /// @brief Sets sub-variable name for DBO of type
-    void addVariable(const std::string& dbo_name, const std::string& dbovariable_name);
+    void addVariable(const std::string& dbcontent_name, const std::string& dbovariable_name);
 
     const std::map<std::string, Variable&>& variables() { return variables_; }
     bool uses(const Variable& variable);
@@ -64,10 +64,10 @@ class MetaVariable : public Configurable
 
     std::string description() const;
 
-//    std::string getMinString() const;
-//    std::string getMaxString() const;
-//    std::string getMinStringRepresentation() const;
-//    std::string getMaxStringRepresentation() const;
+    //    std::string getMinString() const;
+    //    std::string getMaxString() const;
+    //    std::string getMinStringRepresentation() const;
+    //    std::string getMaxStringRepresentation() const;
 
     MetaVariableWidget* widget();
 
@@ -76,7 +76,7 @@ class MetaVariable : public Configurable
 
     void removeOutdatedVariables();
 
-  protected:
+protected:
     std::string name_;
     std::string description_;
 
@@ -91,6 +91,8 @@ class MetaVariable : public Configurable
 
     virtual void checkSubConfigurables();
     void updateDescription();
+
+    void checkSubVariables();
 };
 
 }

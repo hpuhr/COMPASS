@@ -3,7 +3,7 @@
 
 \begin{figure}[H]
    \center
-    \includegraphics[width=8cm,frame]{../screenshots/osgview_style_tab.png}
+    \includegraphics[width=8cm,frame]{figures/osgview_style_tab.png}
   \caption{OSG View Style tab}
 \end{figure}
 
@@ -15,7 +15,7 @@ In the 'Style' tab, several elements exist:
  \item Connect None Height: If groups are connected, whether target reports with not height information should be connected
  \item Blend Mode: Defines the drawing blend mode, allowing clearer symbols (contour) or colors (src-over).
  \item Style: Defines how geometry is styled. Please refer to Section \nameref{sec:style} for details.
- \item Render Order: Defines the drawing order of DBObjects. To bottom one is drawn first, the top one last (over all others)
+ \item Render Order: Defines the drawing order of DBContents. To bottom one is drawn first, the top one last (over all others)
  \item Update button: Triggers a redraw or reload of the geometry, becomes available after a change if needed.
 \end{itemize} 
 
@@ -27,12 +27,13 @@ In this selection the way layers are generated can be changed. \\\\
 The following items can be present in the list:\\
 
 \begin{itemize}
- \item DBObject: DBObject type, e.g. Radar, MLAT, ...
- \item ds\_id: Data source identifier, e.g Radar1, Radar2, ARTAS
- \item callsign: Mode S Target Identification
- \item target\_addr: Mode S Target Address
- \item track\_num: Track number (local or system)
- \item mode3a\_code: Mode 3/A code
+ \item DBContent: DBContent type, e.g. Radar, MLAT, ...
+ \item DS ID: Data source identifier, e.g Radar1, Radar2, ARTAS
+ \item Aircraft Identification: Mode S Target Identification
+ \item Aircraft Address: Mode S Target Address
+ \item Track Number: Track number (local or system)
+ \item Mode 3/A Code: Mode 3/A code
+ \item Line ID: Line ID from import
  \item UTN: Unique Target Number, only available if association information is present
 \end{itemize}
 \ \\
@@ -44,23 +45,24 @@ If no values exist in the data for a layer, this data is grouped in the layer 'N
 The following modes exist: \\
 
 \begin{itemize}
- \item DBObject
- \item DBObject:ds\_id
- \item DBObject:ds\_id:callsign
- \item DBObject:ds\_id:target\_addr
- \item DBObject:ds\_id:track\_num
- \item DBObject:ds\_id:mode3a\_code
- \item UTN:DBObject
- \item UTN:DBObject:ds\_id
- \item UTN:DBObject:ds\_id:target\_addr
- \item UTN:DBObject:ds\_id:track\_num
- \item UTN:DBObject:ds\_id:mode3a\_code
- \item callsign:DBObject
- \item callsign:DBObject:ds\_id 
- \item mode3a\_code:DBObject
- \item mode3a\_code:DBObject:ds\_id
- \item target\_addr:DBObject
- \item target\_addr:DBObject:ds\_id
+\item DBContent:DS ID
+\item DBContent:DS ID:Line ID
+\item DBContent:DS ID:Line ID:Aircraft Address
+\item DBContent:DS ID:Line ID:Track Number
+\item DBContent:DS ID:Aircraft Identification
+\item DBContent:DS ID:Aircraft Address
+\item DBContent:DS ID:Track Number
+\item DBContent:DS ID:Mode 3/A Code
+\item UTN:DBContent:DS ID
+\item UTN:DBContent:DS ID:Line ID
+\item UTN:DBContent:DS ID:Aircraft Identification
+\item UTN:DBContent:DS ID:Aircraft Address
+\item UTN:DBContent:DS ID:Track Number
+\item UTN:DBContent:DS ID:Mode 3/A Code
+\item Aircraft Identification:DBContent:DS ID
+\item Mode 3/A Code:DBContent:DS ID
+\item Aircraft Address:DBContent:DS ID
+\item Aircraft Address:DBContent:DS ID:Line ID
 \end{itemize}
 \  \\
 
@@ -70,29 +72,29 @@ Please also note that after a change in the Layer mode a redraw has to be trigge
 
 As examples, a few values for the Layer mode are listed. \\
 
-\paragraph{DBObject:ds\_id}
+\paragraph{DBContent:DS ID}
 
-In this layer mode the DBObject name is used to create the first layer, with sub-layers for each data source. This is the default mode.
+In this layer mode the DBContent name is used to create the first layer, with sub-layers for each data source.
 
 \begin{figure}[H]
     \center
-    \includegraphics[width=8cm,frame]{../screenshots/osgview_group_dbo_ds.png}
-  \caption{OSG View layer mode DBObject:ds\_id}
+    \includegraphics[width=8cm,frame]{figures/osgview_group_dbcont_ds.png}
+  \caption{OSG View layer mode DBContent:DS ID}
 \end{figure}
 
-\paragraph{mode3a\_code:DBObject}
+\paragraph{Mode 3/A Code:DBContent:DS ID}
 
-In this layer mode the Mode 3/A code is used to create the first layer, with sub-layers for each DBObject.
+In this layer mode the Mode 3/A code is used to create the first layer, with sub-layers for each DBContent and data source.
 
 \begin{figure}[H]
 \center
-    \includegraphics[width=8cm,frame]{../screenshots/osgview_group_ma_dbo.png}
-  \caption{OSG View layer mode mode3a\_code:DBObject}
+    \includegraphics[width=8cm,frame]{figures/osgview_group_ma_dbcont.png}
+  \caption{OSG View layer mode Mode 3/A Code:DBContent:DS ID}
 \end{figure}
 
-\paragraph{UTN:DBObject}
+\paragraph{UTN:DBContent:DS ID}
 
-In this layer mode the UTN is used to create the first layer, with sub-layers for each DBObject. All target reports without a UTN (not used by ARTAS) are grouped into layer 'None'.  \\
+In this layer mode the UTN is used to create the first layer, with sub-layers for each DBContent. All target reports without a UTN (not used by ARTAS) are grouped into layer 'None'.  \\
 
 An example of this mode is shown in the styling section.
 
@@ -108,19 +110,23 @@ Please note that connection lines for target reports with a time-of-day differen
 This mode (normally) makes sense in one of the following Layer modes:
 
 \begin{itemize}
- \item DBObject:ds\_id:callsign
- \item DBObject:ds\_id:target\_addr
- \item DBObject:ds\_id:track\_num
- \item UTN:DBObject:ds\_id:target\_addr
- \item UTN:DBObject:ds\_id:track\_num
- \item callsign:DBObject:ds\_id 
- \item target\_addr:DBObject:ds\_id
+\item DBContent:DS ID:Line ID:Aircraft Address
+\item DBContent:DS ID:Line ID:Track Number
+\item DBContent:DS ID:Aircraft Identification
+\item DBContent:DS ID:Aircraft Address
+\item DBContent:DS ID:Track Number
+\item UTN:DBContent:DS ID:Aircraft Identification
+\item UTN:DBContent:DS ID:Aircraft Address
+\item UTN:DBContent:DS ID:Track Number
+\item Aircraft Identification:DBContent:DS ID
+\item Aircraft Address:DBContent:DS ID
+\item Aircraft Address:DBContent:DS ID:Line ID
 \end{itemize}
 \  \\
 
 \begin{figure}[H]
     \hspace*{-2.5cm}
-    \includegraphics[width=19cm,frame]{../screenshots/osgview_connect_lines.png}
+    \includegraphics[width=19cm,frame]{figures/osgview_connect_lines.png}
   \caption{OSG View Data with lines}
 \end{figure}
 
@@ -147,7 +153,7 @@ Each style can be composed of 3 elements:
 \end{itemize}
 \  \\
 
-\includegraphics[width=0.5cm]{../../data/icons/hint.png} Please note that some style presets (e.g. layer style per callsign, target\_addr, track\_num, mode3a\_code) generate lots of different (persistent) styling rules, which decreases startup speed. After using such styles it is possible to reset the styles using the 'Reset Styles' button to increase application startup speed. \\
+\includegraphics[width=0.5cm]{../../data/icons/hint.png} Please note that some style presets (e.g. layer style per ACID, ACAD, Track Number, Mode 3/A Code) generate lots of different (persistent) styling rules, which decreases startup speed. After using such styles it is possible to reset the styles using the 'Reset Styles' button to increase application startup speed. \\
 
 There are two types of style presets:
 \begin{itemize}
@@ -160,13 +166,13 @@ There are two types of style presets:
 The following layer-based style presets exist:
 \begin{itemize}
  \item Default: All data is shown in the same style
- \item Layer Color per DBObject: Style is defined by DBObject type
+ \item Layer Color per DBContent: Style is defined by DBContent type
  \item Layer Color per UTN: Style is defined by UTN value
- \item Layer Color per callsign: Style is defined by callsign value
- \item Layer Color per ds\_id: Style is defined by data source
- \item Layer Color per mode3a\_code: Style is defined by Mode 3/A code
- \item Layer Color per target\_addr: Style is defined by Mode S Target Address
- \item Layer Color per track\_num: Style is defined by track number
+ \item Layer Color per ACID: Style is defined by Mode S Target Identification value
+ \item Layer Color per DS ID: Style is defined by data source
+ \item Layer Color per Mode 3/A Code: Style is defined by Mode 3/A code
+ \item Layer Color per ACAD: Style is defined by Mode S Target Address
+ \item Layer Color per Track Number: Style is defined by track number
 \end{itemize}
 \  \\
 
@@ -181,10 +187,9 @@ The following Target report based style presets exist:
  \item Color by ADS-B Position Quality: Color is defined by the ADS-B NUCp/NACp value of the target report
  \item Color by Flight Level: Color is defined by the Mode C code/Flight level
  \item Color by Speed: Color is defined by groundspeed value
- \item Color by Radar Detection Type: Color is defined by Radar detection type (PSR, SSR, PSR+SSR, ...)
+ \item Color by Detection Type: Color is defined by Radar detection type (PSR, SSR, PSR+SSR, ...)
  \item Color by Track Angle: Color is defined by direction of movement value
- \item Color by Track Detection Type: Color is defined by Tracker detection type (PSR, SSR, Combined, ...)
- \item Color by Track Age Type: Color is defined by track age of variable (measured\_mode3a\_age\_s, modec\_age, ...)
+ \item Color by Track Age Type: Color is defined by track age of variable
 \end{itemize}
 \  \\
 
@@ -200,86 +205,73 @@ To give a few examples, some interesting Layer modes and Style preset combinatio
 
 \begin{figure}[H]
     \hspace*{-2.5cm}
-    \includegraphics[width=19cm,frame]{../screenshots/osgview_style_ds_id.png}
-  \caption{OSG View Layer color per ds\_id}
+    \includegraphics[width=19cm,frame]{figures/osgview_style_ds_id.png}
+  \caption{OSG View Layer color per DS ID}
 \end{figure}
 
 \begin{figure}[H]
     \hspace*{-2.5cm}
-    \includegraphics[width=19cm,frame]{../screenshots/osgview_style_mode3a_code.png}
-  \caption{OSG View Layer color per mode3a\_code}
+    \includegraphics[width=19cm,frame]{figures/osgview_style_mode3a_code.png}
+  \caption{OSG View Layer color per Mode 3/A Code}
 \end{figure}
 
 \begin{figure}[H]
     \hspace*{-2.5cm}
-    \includegraphics[width=19cm,frame]{../screenshots/osgview_style_track_num.png}
-  \caption{OSG View Layer color per track\_num}
+    \includegraphics[width=19cm,frame]{figures/osgview_style_track_num.png}
+  \caption{OSG View Layer color per Track Number}
 \end{figure}
 
 \begin{figure}[H]
     \hspace*{-2.5cm}
-    \includegraphics[width=19cm,frame]{../screenshots/osgview_style_utn.png}
+    \includegraphics[width=19cm,frame]{figures/osgview_style_utn.png}
   \caption{OSG View Layer color per UTN}
 \end{figure}
 
 \begin{figure}[H]
     \hspace*{-2.5cm}
-    \includegraphics[width=19cm,frame]{../screenshots/osgview_style_adsb_mops.png}
+    \includegraphics[width=19cm,frame]{figures/osgview_style_adsb_mops.png}
   \caption{OSG View Color by ADS-B MOPS version}
 \end{figure}
 
 \begin{figure}[H]
     \hspace*{-2.5cm}
-    \includegraphics[width=19cm,frame]{../screenshots/osgview_style_adsb_position_qual.png}
+    \includegraphics[width=19cm,frame]{figures/osgview_style_adsb_position_qual.png}
   \caption{OSG View Color by ADS-B position quality}
 \end{figure}
 
 \begin{figure}[H]
     \hspace*{-2.5cm}
-    \includegraphics[width=19cm,frame]{../screenshots/osgview_style_flight_level.png}
-  \caption{OSG View Color by flight level}
+    \includegraphics[width=19cm,frame]{figures/osgview_style_flight_level.png}
+  \caption{OSG View Color by Flight Level}
 \end{figure}
 
 \begin{figure}[H]
     \hspace*{-2.5cm}
-    \includegraphics[width=19cm,frame]{../screenshots/osgview_style_radar_detection_type.png}
-  \caption{OSG View Color by Radar detection type}
+    \includegraphics[width=19cm,frame]{figures/osgview_style_detection_type.png}
+  \caption{OSG View Color by Detection type}
 \end{figure}
 
 \begin{figure}[H]
     \hspace*{-2.5cm}
-    \includegraphics[width=19cm,frame]{../screenshots/osgview_style_speed.png}
-  \caption{OSG View Color by speed}
+    \includegraphics[width=19cm,frame]{figures/osgview_style_speed.png}
+  \caption{OSG View Color by Speed}
 \end{figure}
 
 \begin{figure}[H]
     \hspace*{-2.5cm}
-    \includegraphics[width=19cm,frame]{../screenshots/osgview_style_track_angle.png}
+    \includegraphics[width=19cm,frame]{figures/osgview_style_track_angle.png}
   \caption{OSG View Color by track angle}
 \end{figure}
 
 \begin{figure}[H]
-    \hspace*{-2.5cm}
-    \includegraphics[width=19cm,frame]{../screenshots/osgview_style_tracker_detection_type.png}
-  \caption{OSG View Color by track detection type}
-\end{figure}
-
-Please note that:
-\begin{itemize}
- \item The detection type here reflects the technology used to update the track. E.g. an MLAT SSR detection + a PSR detection can form detection type 3 (Combined).
- \item The method used to determine the detection type is slightly different than in Verif
- \item The method used to determine the detection type is currently being discussed/tested by users and will be documented after being accepted.
-\end{itemize}
-
-\begin{figure}[H]
-    \hspace*{-2.5cm}
-    \includegraphics[width=19cm,frame]{../screenshots/osgview_style_track_m3a_age.png}
+    \hspace*{-1.5cm}
+    \includegraphics[width=17cm,frame]{figures/osgview_style_track_m3a_age.png}
   \caption{OSG View Color by track Mode 3/A age}
 \end{figure}
 
 \begin{figure}[H]
     \hspace*{-2.5cm}
-    \includegraphics[width=19cm,frame]{../screenshots/osgview_style_track_mlt_age.png}
+    \includegraphics[width=19cm,frame]{figures/osgview_style_track_mlt_age.png}
   \caption{OSG View Color by track MLAT age}
 \end{figure}
 
@@ -287,59 +279,30 @@ Please note, in this style one can set the following parameters (by clicking the
 In this style, one can change the following parameters:
 
 \begin{itemize}
- \item Variable used (naming as in ASTERIX, mostly), i.e.:
- \begin{itemize}
-    \item measured\_alt\_baro\_age\_s
-    \item measured\_mode3a\_age\_s
-    \item modec\_age
-    \item track\_es\_age
-    \item track\_mds\_age
-    \item track\_mlt\_age
-    \item track\_psr\_age
-    \item track\_ssr\_age
-    \item track\_mhg\_age
-    \item track\_ias\_age
-    \item track\_tas\_age
-    \item track\_sal\_age
-    \item track\_fss\_age
-    \item track\_tid\_age
-    \item track\_com\_age
-    \item track\_sam\_age
-    \item track\_acs\_age
-    \item track\_bvr\_age
-    \item track\_gvr\_age
-    \item track\_ran\_age
-    \item track\_tar\_age
-    \item track\_tan\_age
-    \item track\_gsp\_age
-    \item track\_vun\_age
-    \item track\_met\_age
-    \item track\_emc\_age
-    \item track\_pos\_age
-    \item track\_gal\_age
-    \item track\_pun\_age
-    \item track\_mb\_age
-    \item track\_iar\_age
-    \item track\_mac\_age
-    \item track\_bps\_age
- \end{itemize}
+ \item Variable used (naming as in ASTERIX)
  \item Time Interval used
  \item Colors for the 4 intervals (+ None = not set color)
 \end{itemize}
 
+\begin{figure}[H]
+    \hspace*{-1.5cm}
+    \includegraphics[width=17cm,frame]{figures/osgview_style_track_ages.png}
+  \caption{OSG View Color by track ages}
+\end{figure}
+
 \subsubsection{Render Order}
 
-In the render order widget, the drawing order of the drawn geometry is specified. The one at the top is drawn last (over all others), so it is useful to move the most important DBObject (for the current inspection) to the top.
+In the render order widget, the drawing order of the drawn geometry is specified. The one at the top is drawn last (over all others), so it is useful to move the most important DBContent (for the current inspection) to the top.
 
 \begin{figure}[H]
-    \includegraphics[width=8cm,frame]{../screenshots/osgview_render_order.png}
+    \includegraphics[width=8cm,frame]{figures/osgview_render_order.png}
   \caption{OSG View render order}
 \end{figure}
 
 Using the 'Order By' checkbox, the drawing order can be defined based on:
 \begin{itemize}
- \item DBObject: Data-source type (e.g. Tracker, Radar, ...)
- \item ds\_id: Data-source (e.g. Tracker1, Tracker2, Radar3, ...)
+ \item DBContent: Data source type (e.g. Tracker, Radar, ...)
+ \item ds\_id: Data source (e.g. Tracker1, Tracker2, Radar3, ...)
 \end{itemize}
 \ \\
 

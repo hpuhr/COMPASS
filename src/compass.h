@@ -47,6 +47,8 @@ class COMPASS : public QObject, public Configurable, public Singleton
     Q_OBJECT
 
 signals:
+    void databaseOpenedSignal();
+    void databaseClosedSignal();
     void appModeSwitchSignal (AppMode app_mode);
 
 public:
@@ -77,6 +79,7 @@ protected:
     bool db_opened_{false};
     bool shut_down_{false};
 
+    bool expert_mode_ {false};
     AppMode app_mode_ {AppMode::Offline};
 
     std::unique_ptr<SimpleConfig> simple_config_;
@@ -113,6 +116,11 @@ public:
     std::string appModeStr() const;
 
     static const std::map<AppMode, std::string>& appModes2Strings();
+
+    bool expertMode() const;
+    void expertMode(bool expert_mode);
+
+    bool isShutDown() const;
 };
 
 #endif /* COMPASS_H_ */

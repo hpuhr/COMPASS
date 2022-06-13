@@ -11,12 +11,12 @@
 ViewPointsImportTaskDialog::ViewPointsImportTaskDialog(ViewPointsImportTask& task)
     : QDialog(), task_(task)
 {
-    setWindowTitle("Import ASTERIX Recording");
+    setWindowTitle("Import View Points");
     setWindowFlags(Qt::Window | Qt::WindowTitleHint | Qt::CustomizeWindowHint);
 
     setModal(true);
 
-    setMinimumSize(QSize(1000, 800));
+    setMinimumSize(QSize(400, 400));
 
     QFont font_bold;
     font_bold.setBold(true);
@@ -49,10 +49,10 @@ ViewPointsImportTaskDialog::ViewPointsImportTaskDialog(ViewPointsImportTask& tas
     update();
 }
 
-void ViewPointsImportTaskDialog::updateContext ()
+void ViewPointsImportTaskDialog::updateText ()
 {
     assert (task_widget_);
-    task_widget_->updateContext();
+    task_widget_->updateText();
 }
 
 void ViewPointsImportTaskDialog::updateButtons()

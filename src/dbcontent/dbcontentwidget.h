@@ -32,7 +32,7 @@ class DBContent;
 
 
 /**
- * @brief Edit widget for a DBObject
+ * @brief Edit widget for a DBContent
  */
 class DBContentWidget : public QWidget
 {
@@ -54,8 +54,6 @@ class DBContentWidget : public QWidget
 
     void updateDBOVarsGridSlot();
 
-    void showLabelDefinitionWidgetSlot();
-
   public:
     DBContentWidget(DBContent* object, QWidget* parent = 0, Qt::WindowFlags f = 0);
     virtual ~DBContentWidget();
@@ -65,8 +63,6 @@ class DBContentWidget : public QWidget
 
     QLineEdit* name_edit_{nullptr};
     QLineEdit* info_edit_{nullptr};
-
-    QPushButton* edit_label_button_{nullptr};
 
     QGridLayout* ds_grid_{nullptr};
 

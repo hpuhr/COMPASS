@@ -64,7 +64,7 @@ JSONObjectParser& JSONObjectParser::operator=(JSONObjectParser&& other)
 {
     name_ = other.name_;
     db_content_name_ = other.db_content_name_;
-    db_object_ = other.db_object_;
+    dbcontent_ = other.dbcontent_;
 
     json_container_key_ = other.json_container_key_;
     json_key_ = other.json_key_;
@@ -85,7 +85,7 @@ JSONObjectParser& JSONObjectParser::operator=(JSONObjectParser&& other)
     list_ = other.list_;
 
     other.configuration().updateParameterPointer("name", &name_);
-    other.configuration().updateParameterPointer("db_object_name", &db_content_name_);
+    other.configuration().updateParameterPointer("dbcontent_name", &db_content_name_);
     other.configuration().updateParameterPointer("json_key", &json_key_);
     other.configuration().updateParameterPointer("json_value", &json_value_);
     other.configuration().updateParameterPointer("override_data_source", &override_data_source_);
@@ -111,8 +111,8 @@ void JSONObjectParser::generateSubConfigurable(const std::string& class_id,
 
 DBContent& JSONObjectParser::dbObject() const
 {
-    assert(db_object_);
-    return *db_object_;
+    assert(dbcontent_);
+    return *dbcontent_;
 }
 
 std::string JSONObjectParser::JSONKey() const { return json_key_; }
@@ -145,7 +145,7 @@ void JSONObjectParser::JSONContainerKey(const std::string& key)
 
 void JSONObjectParser::initialize()
 {
-    assert(!db_object_);
+    assert(!dbcontent_);
 
     DBContentManager& obj_man = COMPASS::instance().dbContentManager();
 
@@ -153,9 +153,9 @@ void JSONObjectParser::initialize()
         logwrn << "JSONObjectParser: initialize: dbobject '" << db_content_name_
                << "' does not exist";
     else
-        db_object_ = &obj_man.dbContent(db_content_name_);
+        dbcontent_ = &obj_man.dbContent(db_content_name_);
 
-    assert(db_object_);
+    assert(dbcontent_);
 
     if (!initialized_)
     {
@@ -176,10 +176,10 @@ void JSONObjectParser::initialize()
         if (override_data_source_)
         {
             assert(data_source_variable_name_.size());
-            assert(db_object_->hasVariable(data_source_variable_name_));
+            assert(dbcontent_->hasVariable(data_source_variable_name_));
 
             list_.addProperty(data_source_variable_name_, PropertyDataType::INT);
-            var_list_.add(db_object_->variable(data_source_variable_name_));
+            var_list_.add(dbcontent_->variable(data_source_variable_name_));
         }
 
         not_parse_all_ = (json_key_ != "*") && (json_value_ != "*");
@@ -191,14 +191,14 @@ void JSONObjectParser::initialize()
 std::shared_ptr<Buffer> JSONObjectParser::getNewBuffer() const
 {
     assert(initialized_);
-    assert(db_object_);
-    return std::make_shared<Buffer>(list_, db_object_->name());
+    assert(dbcontent_);
+    return std::make_shared<Buffer>(list_, dbcontent_->name());
 }
 
 void JSONObjectParser::appendVariablesToBuffer(Buffer& buffer) const
 {
     assert(initialized_);
-    assert(db_object_);
+    assert(dbcontent_);
 
     for (auto& p_it : list_.properties())
     {
@@ -593,7 +593,7 @@ void JSONObjectParser::checkIfKeysExistsInMappings(const std::string& location,
 
         Configuration& new_cfg = configuration().addNewSubConfiguration("JSONDataMapping");
         new_cfg.addParameterString("json_key", location);
-        new_cfg.addParameterString("db_object_name", db_content_name_);
+        new_cfg.addParameterString("dbcontent_name", db_content_name_);
 
         if (is_in_array)
             new_cfg.addParameterBool("in_array", true);
@@ -637,16 +637,16 @@ void JSONObjectParser::removeMapping(unsigned int index)
 
 void JSONObjectParser::transformBuffer(Buffer& buffer, size_t index) const
 {
-    assert(db_object_);
+    assert(dbcontent_);
 
-    logdbg << "JSONObjectParser: transformBuffer: object " << db_object_->name();
+    logdbg << "JSONObjectParser: transformBuffer: object " << dbcontent_->name();
 
     assert(index < buffer.size());
 
     if (override_data_source_)
     {
         logdbg << "JSONObjectParser: transformBuffer: overiding data source for object "
-               << db_object_->name() << " ds id name '" << data_source_variable_name_ << "'";
+               << dbcontent_->name() << " ds id name '" << data_source_variable_name_ << "'";
         assert(data_source_variable_name_.size());
         assert(buffer.has<int>(data_source_variable_name_));
 

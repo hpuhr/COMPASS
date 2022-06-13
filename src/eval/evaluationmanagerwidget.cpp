@@ -123,7 +123,10 @@ void EvaluationManagerWidget::updateSectors()
 
 void EvaluationManagerWidget::updateButtons()
 {
-    load_button_->setEnabled(eval_man_.anySectorsWithReq());
+    load_button_->setEnabled(eval_man_.anySectorsWithReq()
+                             && eval_man_.hasSelectedReferenceDataSources()
+                             && eval_man_.hasSelectedTestDataSources());
+
     evaluate_button_->setEnabled(eval_man_.canEvaluate());
     gen_report_button_->setEnabled(eval_man_.canGenerateReport());
 

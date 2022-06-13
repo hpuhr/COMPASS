@@ -66,29 +66,29 @@ COMPASS::COMPASS() : Configurable("COMPASS", "COMPASS0", 0, "compass.json")
 
     // database opending
 
-    QObject::connect(db_interface_.get(), &DBInterface::databaseOpenedSignal,
+    QObject::connect(this, &COMPASS::databaseOpenedSignal,
                      dbcontent_manager_.get(), &DBContentManager::databaseOpenedSlot);
-    QObject::connect(db_interface_.get(), &DBInterface::databaseClosedSignal,
+    QObject::connect(this, &COMPASS::databaseClosedSignal,
                      dbcontent_manager_.get(), &DBContentManager::databaseClosedSlot);
 
-    QObject::connect(db_interface_.get(), &DBInterface::databaseOpenedSignal,
+    QObject::connect(this, &COMPASS::databaseOpenedSignal,
                      ds_manager_.get(), &DataSourceManager::databaseOpenedSlot);
-    QObject::connect(db_interface_.get(), &DBInterface::databaseClosedSignal,
+    QObject::connect(this, &COMPASS::databaseClosedSignal,
                      ds_manager_.get(), &DataSourceManager::databaseClosedSlot);
 
-    QObject::connect(db_interface_.get(), &DBInterface::databaseOpenedSignal,
+    QObject::connect(this, &COMPASS::databaseOpenedSignal,
                      filter_manager_.get(), &FilterManager::databaseOpenedSlot);
-    QObject::connect(db_interface_.get(), &DBInterface::databaseClosedSignal,
+    QObject::connect(this, &COMPASS::databaseClosedSignal,
                      filter_manager_.get(), &FilterManager::databaseClosedSlot);
 
-    QObject::connect(db_interface_.get(), &DBInterface::databaseOpenedSignal,
+    QObject::connect(this, &COMPASS::databaseOpenedSignal,
                      view_manager_.get(), &ViewManager::databaseOpenedSlot);
-    QObject::connect(db_interface_.get(), &DBInterface::databaseClosedSignal,
+    QObject::connect(this, &COMPASS::databaseClosedSignal,
                      view_manager_.get(), &ViewManager::databaseClosedSlot);
 
-    QObject::connect(db_interface_.get(), &DBInterface::databaseOpenedSignal,
+    QObject::connect(this, &COMPASS::databaseOpenedSignal,
                      eval_manager_.get(), &EvaluationManager::databaseOpenedSlot);
-    QObject::connect(db_interface_.get(), &DBInterface::databaseClosedSignal,
+    QObject::connect(this, &COMPASS::databaseClosedSignal,
                      eval_manager_.get(), &EvaluationManager::databaseClosedSlot);
 
     // data exchange
@@ -188,8 +188,8 @@ void COMPASS::checkSubConfigurables()
     }
     if (!dbcontent_manager_)
     {
-        addNewSubConfiguration("DBObjectManager", "DBObjectManager0");
-        generateSubConfigurable("DBObjectManager", "DBObjectManager0");
+        addNewSubConfiguration("DBContentManager", "DBContentManager0");
+        generateSubConfigurable("DBContentManager", "DBContentManager0");
         assert(dbcontent_manager_);
     }
     if (!ds_manager_)
@@ -242,6 +242,8 @@ void COMPASS::openDBFile(const std::string& filename)
 
         db_opened_ = true;
 
+        emit databaseOpenedSignal();
+
     }  catch (std::exception& e)
     {
         QMessageBox m_warning(QMessageBox::Warning, "Opening Database Failed",
@@ -275,6 +277,8 @@ void COMPASS::createNewDBFile(const std::string& filename)
     addDBFileToList(filename);
 
     db_opened_ = true;
+
+    emit databaseOpenedSignal();
 }
 
 void COMPASS::closeDB()
@@ -291,7 +295,7 @@ void COMPASS::closeDB()
 
     db_opened_ = false;
 
-    emit db_interface_->databaseClosedSignal();
+    emit databaseClosedSignal();
 }
 
 
@@ -358,6 +362,8 @@ void COMPASS::shutdown()
         return;
     }
 
+    shut_down_ = true;
+
     assert(task_manager_);
     task_manager_->shutdown();
     task_manager_ = nullptr;
@@ -375,7 +381,6 @@ void COMPASS::shutdown()
     dbcontent_manager_ = nullptr;
 
     JobManager::instance().shutdown();
-    ProjectionManager::instance().shutdown();
 
     assert(eval_manager_);
     eval_manager_->close();
@@ -397,8 +402,6 @@ void COMPASS::shutdown()
 
     //main_window_ = nullptr;
 
-    shut_down_ = true;
-
     loginf << "COMPASS: shutdown: end";
 }
 
@@ -409,6 +412,23 @@ MainWindow& COMPASS::mainWindow()
 
     assert(main_window_);
     return *main_window_;
+}
+
+bool COMPASS::isShutDown() const
+{
+    return shut_down_;
+}
+
+bool COMPASS::expertMode() const
+{
+    return expert_mode_;
+}
+
+void COMPASS::expertMode(bool expert_mode)
+{
+    loginf << "COMPASS: expertMode: setting expert mode " << expert_mode;
+
+    expert_mode_ = expert_mode;
 }
 
 AppMode COMPASS::appMode() const

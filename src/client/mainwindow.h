@@ -72,6 +72,7 @@ public slots:
 
     void importViewPointsSlot();
 
+    void calculateRadarPlotPositionsSlot();
     void calculateAssociationsARTASSlot();
     void calculateAssociationsSlot();
 
@@ -91,19 +92,33 @@ public:
     void createAndOpenNewSqlite3DB(const std::string& filename);
     void openSqlite3DB(const std::string& filename);
 
+    void importDataSourcesFile(const std::string& filename);
     void importViewPointsFile(const std::string& filename);
 
     void importASTERIXFile(const std::string& filename);
     void importASTERIXFromNetwork();
     void importASTERIXFromNetworkTimeOffset(float value);
-
     float importASTERIXFromNetworkTimeOffset();
+    int importAsterixNetworkMaxLines() const;
+    void importAsterixNetworkMaxLines(int value);
     //    void asterixFraming(const std::string& asterix_framing);
     //    void asterixDecoderConfig(const std::string& asterix_decoder_cfg);
     //    bool asterixOptionsSet() const;
     //    void setAsterixOptions();
 
+    void importGPSTrailFile(const std::string& filename);
+    void importSectorsFile(const std::string& filename);
+
+    void associateData(bool value);
+
     void loadData(bool value);
+
+    void exportViewPointsReportFile(const std::string& filename);
+    void exportEvalReportFile(const std::string& filename);
+
+    void evaluateRunFilter(bool value);
+    void evaluate(bool evaluate);
+
     void quit(bool value);
     bool quitNeeded();
 
@@ -114,7 +129,6 @@ public:
     void updateBottomWidget();
 
 protected:
-    bool started_ {false};
     QTabWidget* tab_widget_{nullptr};
 
     QPushButton* add_view_button_{nullptr};
@@ -129,6 +143,9 @@ protected:
     bool sqlite3_open_db_ {false};
     std::string sqlite3_open_db_filename_;
 
+    bool data_sources_import_file_ {false};
+    std::string data_sources_import_filename_;
+
     bool view_points_import_file_ {false};
     std::string view_points_import_filename_;
 
@@ -136,12 +153,26 @@ protected:
     std::string asterix_import_filename_;
     bool asterix_import_network_ {false};
     float asterix_import_network_time_offset_ {0};
-    //    bool set_asterix_framing_ {false};
-    //    std::string asterix_framing_;
-    //    bool set_asterix_decoder_cfg_ {false};
-    //    std::string asterix_decoder_cfg_;
+    int asterix_import_network_max_lines_ {-1};
+
+    bool gps_trail_import_file_ {false};
+    std::string gps_trail_import_filename_;
+
+    bool sectors_import_file_ {false};
+    std::string sectors_import_filename_;
+
+    bool associate_data_ {false};
 
     bool load_data_ {false};
+
+    bool export_view_points_report_ {false};
+    std::string export_view_points_report_filename_;
+
+    bool evaluate_run_filter_ {false};
+    bool evaluate_ {false};
+    bool export_eval_report_ {false};
+    std::string export_eval_report_filename_;
+
     bool quit_ {false};
 
     // menu

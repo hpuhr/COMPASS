@@ -570,7 +570,7 @@ void ASTERIXJSONParser::checkIfKeysExistsInMappings(const std::string& location,
 
         Configuration& new_cfg = configuration().addNewSubConfiguration("JSONDataMapping");
         new_cfg.addParameterString("json_key", location);
-        new_cfg.addParameterString("db_object_name", db_content_name_);
+        new_cfg.addParameterString("dbcontent_name", db_content_name_);
 
         if (is_in_array)
             new_cfg.addParameterBool("in_array", true);
@@ -730,7 +730,7 @@ QVariant ASTERIXJSONParser::data(const QModelIndex& index, int role) const
                 return QVariant();
             else if (col_name == "JSON Key")
                 return current_mapping.jsonKey().c_str();
-            else if (col_name == "DBObject Variable")
+            else if (col_name == "DBContent Variable")
                 return current_mapping.dboVariableName().c_str();
             else
                 return QVariant();
@@ -744,7 +744,7 @@ QVariant ASTERIXJSONParser::data(const QModelIndex& index, int role) const
         }
         else if (entry_type == ASTERIXJSONParser::EntryType::UnmappedDBContentVariable)
         {
-            if (col_name == "DBObject Variable")
+            if (col_name == "DBContent Variable")
                 return unmappedDBContentVariable(row).c_str();
             else
                 return QVariant();
@@ -780,7 +780,7 @@ QVariant ASTERIXJSONParser::data(const QModelIndex& index, int role) const
         else if (entry_type == ASTERIXJSONParser::EntryType::UnmappedDBContentVariable)
         {
 
-            if (col_name == "DBObject Variable")
+            if (col_name == "DBContent Variable")
                 return todo_icon_;
             else
                 return QVariant();
@@ -834,6 +834,12 @@ QModelIndex ASTERIXJSONParser::parent(const QModelIndex& index) const
 
 Qt::ItemFlags ASTERIXJSONParser::flags(const QModelIndex& index) const
 {
+    if (!expert_mode_init_)
+    {
+        expert_mode_ = COMPASS::instance().expertMode();
+        expert_mode_init_ = true;
+    }
+
     if (!index.isValid())
         return Qt::ItemIsEnabled;
 
@@ -848,9 +854,13 @@ Qt::ItemFlags ASTERIXJSONParser::flags(const QModelIndex& index) const
 
         if (mapping(row).canBeActive())
         {
-            flags |= Qt::ItemIsEnabled;
             flags |= Qt::ItemIsUserCheckable;
-            flags |= Qt::ItemIsEditable;
+
+            if (expert_mode_)
+            {
+                flags |= Qt::ItemIsEnabled;
+                flags |= Qt::ItemIsEditable;
+            }
         }
 
         return flags;

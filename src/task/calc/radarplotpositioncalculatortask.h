@@ -18,17 +18,21 @@
 #ifndef RADARPLOTPOSITIONCALCULATOR_H_
 #define RADARPLOTPOSITIONCALCULATOR_H_
 
-#include <QObject>
-#include <memory>
-
-#include "boost/date_time/posix_time/posix_time.hpp"
 #include "configurable.h"
 #include "task.h"
+#include "dbcontent/variable/variableset.h"
+#include "radarplotpositioncalculatortaskdialog.h"
+
+#include <QObject>
+
+#include "boost/date_time/posix_time/posix_time.hpp"
+
+#include <memory>
+
 
 class Buffer;
 class DBContent;
 
-class RadarPlotPositionCalculatorTaskWidget;
 class TaskManager;
 class UpdateBufferDBJob;
 
@@ -42,47 +46,22 @@ class RadarPlotPositionCalculatorTask : public Task, public Configurable
 {
     Q_OBJECT
 
-  public slots:
-    void newDataSlot(DBContent& object);
-    void loadingDoneSlot(DBContent& object);
+public slots:
+    void loadedDataDataSlot(const std::map<std::string, std::shared_ptr<Buffer>>& data, bool requires_reset);
+    void loadingDoneSlot();
 
-    void updateProgressSlot(float percent);
-    void updateDoneSlot(DBContent& object);
+    void updateDoneSlot(DBContent& db_content);
 
-  public:
+    void dialogCloseSlot();
+
+public:
     RadarPlotPositionCalculatorTask(const std::string& class_id, const std::string& instance_id,
                                     TaskManager& task_manager);
     virtual ~RadarPlotPositionCalculatorTask();
 
     bool isCalculating();
-    unsigned int getNumLoaded() { return num_loaded_; }
 
-    TaskWidget* widget();
-    virtual void deleteWidget();
-
-    std::string dbObjectStr() const;
-    void dbObjectStr(const std::string& db_object_str);
-
-    std::string keyVarStr() const;
-    void keyVarStr(const std::string& key_var_str);
-
-    std::string datasourceVarStr() const;
-    void datasourceVarStr(const std::string& datasource_var_str);
-
-    std::string rangeVarStr() const;
-    void rangeVarStr(const std::string& range_var_str);
-
-    std::string azimuthVarStr() const;
-    void azimuthVarStr(const std::string& azimuth_var_str);
-
-    std::string altitudeVarStr() const;
-    void altitudeVarStr(const std::string& altitude_var_str);
-
-    std::string latitudeVarStr() const;
-    void latitudeVarStr(const std::string& latitude_var_str);
-
-    std::string longitudeVarStr() const;
-    void longitudeVarStr(const std::string& longitude_var_str);
+    RadarPlotPositionCalculatorTaskDialog* dialog();
 
     virtual bool checkPrerequisites();
     virtual bool isRecommended();
@@ -93,46 +72,20 @@ class RadarPlotPositionCalculatorTask : public Task, public Configurable
 
     static const std::string DONE_PROPERTY_NAME;
 
-  protected:
-    std::string db_object_str_;
-    DBContent* db_object_{nullptr};
-
-    std::string key_var_str_;
-    dbContent::Variable* key_var_{nullptr};
-
-    std::string datasource_var_str_;
-    dbContent::Variable* datasource_var_{nullptr};
-
-    std::string range_var_str_;
-    dbContent::Variable* range_var_{nullptr};
-
-    std::string azimuth_var_str_;
-    dbContent::Variable* azimuth_var_{nullptr};
-
-    std::string altitude_var_str_;
-    dbContent::Variable* altitude_var_{nullptr};
-
-    std::string latitude_var_str_;
-    dbContent::Variable* latitude_var_{nullptr};
-
-    std::string longitude_var_str_;
-    dbContent::Variable* longitude_var_{nullptr};
-
-    std::shared_ptr<UpdateBufferDBJob> job_ptr_;
-
+protected:
     boost::posix_time::ptime start_time_;
     boost::posix_time::ptime stop_time_;
 
     bool calculating_{false};
 
-    unsigned int num_loaded_{0};
+    std::map<std::string, std::shared_ptr<Buffer>> data_;
+    std::set<std::string> dbcontent_done_;
 
-    std::unique_ptr<RadarPlotPositionCalculatorTaskWidget> widget_;
+    std::unique_ptr<RadarPlotPositionCalculatorTaskDialog> dialog_;
 
     QMessageBox* msg_box_{nullptr};
-    size_t target_report_count_{0};
 
-    void checkAndSetVariable(std::string& name_str, dbContent::Variable** var);
+    dbContent::VariableSet getReadSetFor(const std::string& dbcontent_name);
 };
 
 #endif /* RADARPLOTPOSITIONCALCULATOR_H_ */

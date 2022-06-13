@@ -189,7 +189,7 @@ void FilterEditWidget::addCondition()
     condition_configuration.addParameterString(
         "variable_name", condition_variable_widget_->selectedVariable().name());
     condition_configuration.addParameterString(
-        "variable_dbo_name", condition_variable_widget_->selectedVariable().dboName());
+        "variable_dbcontent_name", condition_variable_widget_->selectedVariable().dbContentName());
     condition_configuration.addParameterBool("absolute_value",
                                              condition_absolute_->checkState() == Qt::Checked);
     condition_configuration.addParameterString("value", value);

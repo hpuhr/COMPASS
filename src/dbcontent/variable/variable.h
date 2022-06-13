@@ -46,7 +46,13 @@ class Variable : public QObject, public Property, public Configurable
         DEC_TO_OCTAL,
         DEC_TO_HEX,
         FEET_TO_FLIGHTLEVEL,
-        DATA_SRC_NAME
+        DATA_SRC_NAME,
+        CLIMB_DESCENT,
+        FLOAT_PREC0,
+        FLOAT_PREC1,
+        FLOAT_PREC2,
+        FLOAT_PREC4,
+        LINE_NAME
     };
 
     static Representation stringToRepresentation(const std::string& representation_str);
@@ -70,7 +76,7 @@ class Variable : public QObject, public Property, public Configurable
     void name(const std::string& name);
 
     DBContent& object() const;
-    const std::string& dboName() const;
+    const std::string& dbContentName() const;
 
     const std::string& description() const { return description_; }
     void description(const std::string& description) { description_ = description; }
@@ -93,8 +99,8 @@ class Variable : public QObject, public Property, public Configurable
 
     DBContent& dbObject() const
     {
-        assert(db_object_);
-        return *db_object_;
+        assert(dbcontent_);
+        return *dbcontent_;
     }
 
 //    std::string getMinString();
@@ -138,6 +144,37 @@ class Variable : public QObject, public Property, public Configurable
             {
                 return getDataSourcesAsString(std::to_string(value));
             }
+            else if (representation_ == Variable::Representation::CLIMB_DESCENT)
+            {
+                if (value == 0)
+                    return "LVL";
+                else if (value == 1)
+                    return "CLB";
+                else if (value == 2)
+                    return "DSC";
+                else
+                    return "UDF";
+            }
+            else if (representation_ == Variable::Representation::FLOAT_PREC0)
+            {
+                out << std::fixed << std::setprecision(0)<< value;
+            }
+            else if (representation_ == Variable::Representation::FLOAT_PREC1)
+            {
+                out << std::fixed << std::setprecision(1)<< value;
+            }
+            else if (representation_ == Variable::Representation::FLOAT_PREC2)
+            {
+                out << std::fixed << std::setprecision(2)<< value;
+            }
+            else if (representation_ == Variable::Representation::FLOAT_PREC4)
+            {
+                out << std::fixed << std::setprecision(4)<< value;
+            }
+            else if (representation_ == Variable::Representation::LINE_NAME)
+            {
+                return Utils::String::lineStrFrom(value);
+            }
             else
             {
                 throw std::runtime_error(
@@ -176,7 +213,7 @@ private:
     static std::map<Representation, std::string> representation_2_string_;
     static std::map<std::string, Representation> string_2_representation_;
 
-    DBContent* db_object_{nullptr};
+    DBContent* dbcontent_{nullptr};
 
     std::string short_name_;
     /// Value representation type, based on enum STRING_REPRESENTATION

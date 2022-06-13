@@ -34,16 +34,16 @@ public:
                               Configurable* parent);
     virtual ~DBOSpecificValuesDBFilter() override;
 
-    virtual std::string getConditionString(const std::string& dbo_name, bool& first,
+    virtual std::string getConditionString(const std::string& dbcontent_name, bool& first,
                                            std::vector<std::string>& extra_from_parts,
                                            std::vector<dbContent::Variable*>& filtered_variables) override;
 
-    virtual bool filters(const std::string& dbo_name) override;
+    virtual bool filters(const std::string& dbcontent_name) override;
 
-    const std::string& dbObjectName() { return dbo_name_; }
+    const std::string& dbObjectName() { return dbcontent_name_; }
 
 protected:
-  std::string dbo_name_;
+  std::string dbcontent_name_;
   std::string variable_name_;
   std::string condition_operator_; // operator to be used in generated conditions
 

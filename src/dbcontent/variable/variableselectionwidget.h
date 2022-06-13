@@ -64,10 +64,10 @@ class VariableSelectionWidget : public QFrame
     bool showMetaVariablesOnly() const;
     void showMetaVariablesOnly(bool show_meta_variables_only);
 
-    void showDBOOnly(const std::string& only_dbo_name);
-    void disableShowDBOOnly();
+    void showDBContentOnly(const std::string& only_dbcontent_name);
+    void disableShowDBContentOnly();
 
-    std::string onlyDBOName() const;
+    std::string onlyDBContentName() const;
 
     bool showEmptyVariable() const;
     void showEmptyVariable(bool show_empty_variable);
@@ -78,6 +78,7 @@ class VariableSelectionWidget : public QFrame
     void showDataTypesOnly(const std::vector<PropertyDataType>& only_data_types);
     void disableShowDataTypesOnly();
 
+    void setReadOnly(bool read_only);
     void updateMenuEntries();
 
   private:
@@ -85,6 +86,7 @@ class VariableSelectionWidget : public QFrame
 
     QLabel* object_label_{nullptr};
     QLabel* variable_label_{nullptr};
+    QPushButton* sel_button_{nullptr};
     QMenu menu_;
 
     bool variable_selected_{false};
@@ -96,7 +98,7 @@ class VariableSelectionWidget : public QFrame
     bool show_meta_variables_only_{false};
 
     bool show_dbo_only_{false};
-    std::string only_dbo_name_;
+    std::string only_dbcontent_name_;
 
     bool show_data_types_only_{false};
     std::vector<PropertyDataType> only_data_types_;

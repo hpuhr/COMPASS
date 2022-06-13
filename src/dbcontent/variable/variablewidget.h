@@ -63,7 +63,7 @@ class VariableWidget : public QWidget
     void update();
 
   private:
-    /// @brief DBObject to be managed
+    /// @brief DBContent to be managed
     Variable* variable_{nullptr};
     QGridLayout* properties_layout_{nullptr};
 

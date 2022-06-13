@@ -48,6 +48,11 @@ void RS2GProjection::addCoordinateSystem(unsigned int id, double latitude_deg, d
         new RS2GCoordinateSystem(id, latitude_deg, longitude_deg, altitude_m));
 }
 
+void RS2GProjection::clearCoordinateSystems()
+{
+    coordinate_systems_.clear();
+}
+
 bool RS2GProjection::polarToWGS84(unsigned int id, double azimuth_rad, double slant_range_m,
                                   bool has_baro_altitude, double baro_altitude_ft, double& latitude,
                                   double& longitude)

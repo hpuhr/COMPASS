@@ -105,13 +105,13 @@ void FilterGeneratorWidget::createGUIElements()
     condition_value_ = new QLineEdit();
     value_layout->addWidget(condition_value_);
 
-    QPushButton* load_min = new QPushButton(tr("Load min"));
-    connect(load_min, SIGNAL(clicked()), this, SLOT(loadMin()));
-    value_layout->addWidget(load_min);
+//    QPushButton* load_min = new QPushButton(tr("Load min"));
+//    connect(load_min, SIGNAL(clicked()), this, SLOT(loadMin()));
+//    value_layout->addWidget(load_min);
 
-    QPushButton* load_max = new QPushButton(tr("Load max"));
-    connect(load_max, SIGNAL(clicked()), this, SLOT(loadMax()));
-    value_layout->addWidget(load_max);
+//    QPushButton* load_max = new QPushButton(tr("Load max"));
+//    connect(load_max, SIGNAL(clicked()), this, SLOT(loadMax()));
+//    value_layout->addWidget(load_max);
 
     value_layout->addStretch();
 
@@ -124,8 +124,8 @@ void FilterGeneratorWidget::createGUIElements()
 
     condition_reset_combo_ = new QComboBox();
     condition_reset_combo_->addItem("value");
-    condition_reset_combo_->addItem("MIN");
-    condition_reset_combo_->addItem("MAX");
+//    condition_reset_combo_->addItem("MIN");
+//    condition_reset_combo_->addItem("MAX");
     reset_layout->addWidget(condition_reset_combo_);
     reset_layout->addStretch();
 
@@ -217,7 +217,7 @@ void FilterGeneratorWidget::addCondition()
     {
         const dbContent::Variable& var = condition_variable_widget_->selectedVariable();
         data_condition.variable_name_ = var.name();
-        data_condition.variable_dbo_type_ = var.dboName();
+        data_condition.variable_dbo_type_ = var.dbContentName();
     }
     else
     {
@@ -272,7 +272,7 @@ void FilterGeneratorWidget::accept()
             configuration.addNewSubConfiguration("DBFilterCondition", condition_name);
         condition_configuration.addParameterString("operator", data_condition.operator_);
         condition_configuration.addParameterString("variable_name", data_condition.variable_name_);
-        condition_configuration.addParameterString("variable_dbo_name",
+        condition_configuration.addParameterString("variable_dbcontent_name",
                                                    data_condition.variable_dbo_type_);
         condition_configuration.addParameterBool("absolute_value", data_condition.absolute_value_);
         condition_configuration.addParameterString("value", data_condition.value_);

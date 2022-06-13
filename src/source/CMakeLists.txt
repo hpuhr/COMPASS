@@ -16,6 +16,7 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/datasourcetablemodel.h"
         "${CMAKE_CURRENT_LIST_DIR}/datasourcesconfigurationdialog.h"
         "${CMAKE_CURRENT_LIST_DIR}/dstypeselectioncombobox.h"
+        "${CMAKE_CURRENT_LIST_DIR}/datasourcecreatedialog.h"
     PRIVATE
         "${CMAKE_CURRENT_LIST_DIR}/datasourcemanager.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/datasourcebase.cpp"
@@ -26,6 +27,7 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/datasourceeditwidget.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/datasourcetablemodel.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/datasourcesconfigurationdialog.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/datasourcecreatedialog.cpp"
 )
 
 

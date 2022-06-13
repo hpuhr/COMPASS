@@ -45,19 +45,12 @@ DataSourcesLoadWidget::DataSourcesLoadWidget(DataSourceManager& ds_man)
 
     QVBoxLayout* main_layout = new QVBoxLayout();
 
-    QHBoxLayout* vlay = new QHBoxLayout();
-    vlay->setContentsMargins(0, 0, 0, 0);
-
-    // data sources, per type
-
-    type_layout_ = new QGridLayout();
-
-    vlay->addLayout(type_layout_);
-
     // button
 
-    QVBoxLayout* button_layout = new QVBoxLayout();
-    button_layout->setContentsMargins(0, 0, 0, 0);
+    QHBoxLayout* button_layout = new QHBoxLayout();
+    //button_layout->setContentsMargins(0, 0, 0, 0);
+
+    button_layout->addStretch();
 
     QPushButton* edit_button = new QPushButton();
     edit_button->setIcon(QIcon(Files::getIconFilepath("edit.png").c_str()));
@@ -67,11 +60,20 @@ DataSourcesLoadWidget::DataSourcesLoadWidget(DataSourceManager& ds_man)
     connect (edit_button, &QPushButton::clicked, this, &DataSourcesLoadWidget::editClickedSlot);
     button_layout->addWidget(edit_button);
 
-    button_layout->addStretch();
+    main_layout->addLayout(button_layout);
 
-    vlay->addLayout(button_layout);
+//    main_layout->addLayout(vlay);
 
-    main_layout->addLayout(vlay);
+//    main_layout->addStretch();
+
+//    QHBoxLayout* vlay = new QHBoxLayout();
+//    vlay->setContentsMargins(0, 0, 0, 0);
+
+    // data sources, per type
+
+    type_layout_ = new QGridLayout();
+
+    main_layout->addLayout(type_layout_);
 
     main_layout->addStretch();
 
@@ -97,17 +99,17 @@ DataSourcesLoadWidget::DataSourcesLoadWidget(DataSourceManager& ds_man)
     setLayout(main_layout);
 
     // menu
-    QAction* sel_dstyp_action = edit_menu_.addAction("Select All DSTypes");
-    connect(sel_dstyp_action, &QAction::triggered, this, &DataSourcesLoadWidget::selectAllDSTypesSlot);
+//    QAction* sel_dstyp_action = edit_menu_.addAction("Select All DSTypes");
+//    connect(sel_dstyp_action, &QAction::triggered, this, &DataSourcesLoadWidget::selectAllDSTypesSlot);
 
-    QAction* desel_dstyp_action = edit_menu_.addAction("Deselect All DSTypes");
-    connect(desel_dstyp_action, &QAction::triggered, this, &DataSourcesLoadWidget::deselectAllDSTypesSlot);
+//    QAction* desel_dstyp_action = edit_menu_.addAction("Deselect All DSTypes");
+//    connect(desel_dstyp_action, &QAction::triggered, this, &DataSourcesLoadWidget::deselectAllDSTypesSlot);
 
-    QAction* sel_ds_action = edit_menu_.addAction("Select All Data Sources");
-    connect(sel_ds_action, &QAction::triggered, this, &DataSourcesLoadWidget::selectAllDataSourcesSlot);
+//    QAction* sel_ds_action = edit_menu_.addAction("Select All Data Sources");
+//    connect(sel_ds_action, &QAction::triggered, this, &DataSourcesLoadWidget::selectAllDataSourcesSlot);
 
-    QAction* desel_ds_action = edit_menu_.addAction("Deselect All Data Sources");
-    connect(desel_ds_action, &QAction::triggered, this, &DataSourcesLoadWidget::deselectAllDataSourcesSlot);
+//    QAction* desel_ds_action = edit_menu_.addAction("Deselect All Data Sources");
+//    connect(desel_ds_action, &QAction::triggered, this, &DataSourcesLoadWidget::deselectAllDataSourcesSlot);
 
     QAction* show_cnt_action = edit_menu_.addAction("Toggle Show Counts");
     connect(show_cnt_action, &QAction::triggered, this, &DataSourcesLoadWidget::toogleShowCountsSlot);
@@ -224,6 +226,9 @@ void DataSourcesLoadWidget::updateContent()
     logdbg << "DataSourcesLoadWidget: updateContent: num data sources " << ds_man_.dbDataSources().size();
 
     bool recreate_required = false;
+
+    for (auto& ds_type_it : ds_type_boxes_)
+        ds_type_it.second->setChecked(ds_man_.dsTypeLoadingWanted(ds_type_it.first));
 
     if (ds_widgets_.size() != ds_man_.dbDataSources().size()) // check if same size
         recreate_required = true;

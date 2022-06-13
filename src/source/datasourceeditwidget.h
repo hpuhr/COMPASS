@@ -28,6 +28,9 @@ public slots:
     void addRadarRangesSlot();
     void radarRangeEditedSlot(const QString& value_str);
 
+    void addRadarAccuraciesSlot();
+    void radarAccuraciesEditedSlot(const QString& value_str);
+
     void addNetLinesSlot();
     void net1EditedSlot(const QString& value_str);
     void net2EditedSlot(const QString& value_str);
@@ -68,7 +71,6 @@ protected:
     QLineEdit* altitude_edit_{nullptr};
 
     // radar ranges
-
     QWidget* ranges_widget_{nullptr};
     QLineEdit* psr_min_edit_{nullptr};
     QLineEdit* psr_max_edit_{nullptr};
@@ -78,6 +80,17 @@ protected:
     QLineEdit* mode_s_max_edit_{nullptr};
 
     QPushButton* add_ranges_button_{nullptr};
+
+    // radar accuracies
+    QWidget* accuracies_widget_{nullptr};
+    QLineEdit* acc_psr_azm_edit_{nullptr};
+    QLineEdit* acc_psr_rng_edit_{nullptr};
+    QLineEdit* acc_ssr_azm_edit_{nullptr};
+    QLineEdit* acc_ssr_rng_edit_{nullptr};
+    QLineEdit* acc_mode_s_azm_edit_{nullptr};
+    QLineEdit* acc_mode_s_rng_edit_{nullptr};
+
+    QPushButton* add_accuracies_button_{nullptr};
 
     // net lines
     QPushButton* add_lines_button_{nullptr};

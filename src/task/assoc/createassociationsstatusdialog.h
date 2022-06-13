@@ -42,11 +42,11 @@ public:
                                    QWidget* parent=nullptr, Qt::WindowFlags f=0);
 
     void markStartTime();
+    void updateTime();
     void setDone();
 
-    void setDBODoneFlags(const std::map<std::string, bool>& dbo_done_flags);
-
-    void setAssociationStatus(const std::string& status);
+    void setStatus(const std::string& status);
+    void setAssociationsCounts(std::map<std::string, std::pair<unsigned int,unsigned int>> association_counts);
 
 private:
     CreateAssociationsTask& task_;
@@ -56,25 +56,20 @@ private:
     boost::posix_time::time_duration time_diff_;
     std::string elapsed_time_str_;
 
-    std::map<std::string, bool> dbo_done_flags_;
+    std::string status_{"Waiting"};
+    bool done_ {false};
 
-    std::string association_status_{"Waiting"};
-
-    std::map<std::string, unsigned int> association_counts_;
+    std::map<std::string, std::pair<unsigned int,unsigned int>> association_counts_; // dbcontent -> total, assoc cnt
 
     QLabel* time_label_{nullptr};
 
-    QGridLayout* dbo_done_grid_{nullptr};
+    QLabel* status_label_{nullptr};
 
-    QLabel* association_status_label_{nullptr};
-
-    QGridLayout* dbo_associated_grid_{nullptr};
+    QGridLayout* dbcont_associated_grid_{nullptr};
 
     QPushButton* ok_button_{nullptr};
 
-    void updateTime();
-    void updateDBODoneGrid();
-    void updateDBOAssociatedGrid();
+    void updateDBContentAssociatedGrid();
 };
 
 #endif // CREATEASSOCIATIONSSTATUSDIALOG_H

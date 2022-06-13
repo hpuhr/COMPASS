@@ -165,7 +165,7 @@ void MetaVariableWidget::updateSlot()
         grid_layout_->addWidget(new QLabel(obj_it.first.c_str()), row, 0);
 
         VariableSelectionWidget* var_sel = new VariableSelectionWidget(true);
-        var_sel->showDBOOnly(obj_it.first);
+        var_sel->showDBContentOnly(obj_it.first);
 
         if (variable_.existsIn(obj_it.first))
             var_sel->selectedVariable(variable_.getFor(obj_it.first));

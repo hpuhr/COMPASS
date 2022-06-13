@@ -5,6 +5,7 @@
 #include "unitselectionwidget.h"
 #include "stringconv.h"
 #include "dbcontent/dbcontent.h"
+#include "compass.h"
 #include "logger.h"
 
 #include <QLineEdit>
@@ -27,9 +28,14 @@ namespace dbContent
 VariableEditDialog::VariableEditDialog(Variable& variable, QWidget* parent, Qt::WindowFlags f)
     : QDialog(parent, f), variable_(variable)
 {
+    expert_mode_ = COMPASS::instance().expertMode();
+
     setWindowFlags(Qt::Window | Qt::WindowTitleHint); //  | Qt::CustomizeWindowHint
 
-    setWindowTitle("Edit DBContent Variable");
+    if (expert_mode_)
+        setWindowTitle("Edit DBContent Variable");
+    else
+        setWindowTitle("Show DBContent Variable");
 
     setModal(true);
 
@@ -41,17 +47,20 @@ VariableEditDialog::VariableEditDialog(Variable& variable, QWidget* parent, Qt::
     //    QLineEdit* name_edit_ {nullptr};
 
     name_edit_ = new QLineEdit(variable_.name().c_str());
+    name_edit_->setReadOnly(!expert_mode_);
     connect(name_edit_, &QLineEdit::textChanged, this, &VariableEditDialog::nameChangedSlot);
     form_layout->addRow("Name", name_edit_);
 
     //    QLineEdit* short_name_edit_ {nullptr};
     short_name_edit_ = new QLineEdit(variable_.shortName().c_str());
+    short_name_edit_->setReadOnly(!expert_mode_);
     connect(short_name_edit_, &QLineEdit::textChanged, this, &VariableEditDialog::shortNameChangedSlot);
     form_layout->addRow("Short Name", short_name_edit_);
 
     //    QTextEdit* description_edit_ {nullptr};
     description_edit_ = new QTextEdit();
     description_edit_->document()->setPlainText(variable_.description().c_str());
+    short_name_edit_->setReadOnly(!expert_mode_);
     description_edit_->setWordWrapMode(QTextOption::WrapMode::WrapAnywhere);
 
     connect(description_edit_, &QTextEdit::textChanged, this,
@@ -61,19 +70,23 @@ VariableEditDialog::VariableEditDialog(Variable& variable, QWidget* parent, Qt::
 
     //    DBOVariableDataTypeComboBox* type_combo_ {nullptr};
     type_combo_ = new VariableDataTypeComboBox(variable_.dataTypeRef(), variable_.dataTypeStringRef());
+    type_combo_->setEnabled(expert_mode_);
     form_layout->addRow("Data Type", type_combo_);
 
     //    UnitSelectionWidget* unit_sel_ {nullptr};
     unit_sel_ = new UnitSelectionWidget(variable_.dimension(), variable_.unit());
+    unit_sel_->setEnabled(expert_mode_);
     form_layout->addRow("Unit", unit_sel_);
 
     //    StringRepresentationComboBox* representation_box_ {nullptr};
     representation_box_ = new StringRepresentationComboBox(variable_.representationRef(),
                                                            variable_.representationStringRef());
+    representation_box_->setEnabled(expert_mode_);
     form_layout->addRow("Representation", representation_box_);
 
     //    QLineEdit* db_column_edit_ {nullptr};
     db_column_edit_ = new QLineEdit(variable_.dbColumnName().c_str());
+    db_column_edit_->setReadOnly(!expert_mode_);
     connect(db_column_edit_, &QLineEdit::textChanged, this, &VariableEditDialog::dbColumnChangedSlot);
     form_layout->addRow("DBColumn", db_column_edit_);
 

@@ -188,6 +188,8 @@ class Configuration
     // only use in special case of configuration copy
     void setInstanceId(const std::string& instance_id) { instance_id_ = instance_id; }
 
+    void overrideJSONParameters(nlohmann::json& parameters_config);
+
   protected:
     /// Class identifier
     std::string class_id_;

@@ -21,7 +21,7 @@ ModeCFilter::ModeCFilter(const std::string& class_id, const std::string& instanc
     registerParameter("max_value", &max_value_, 10000.0);
     registerParameter("null_wanted", &null_wanted_, false);
 
-    name_ = "Barometric Altitude";
+    name_ = "Mode C Codes";
 
     createSubConfigurables();
 }
@@ -33,13 +33,13 @@ bool ModeCFilter::filters(const std::string& dbo_type)
     return COMPASS::instance().dbContentManager().metaVariable(DBContent::meta_var_mc_.name()).existsIn(dbo_type);
 }
 
-std::string ModeCFilter::getConditionString(const std::string& dbo_name, bool& first,
+std::string ModeCFilter::getConditionString(const std::string& dbcontent_name, bool& first,
                                            std::vector<std::string>& extra_from_parts,
                                            std::vector<dbContent::Variable*>& filtered_variables)
 {
-    logdbg << "ModeCFilter: getConditionString: dbo " << dbo_name << " active " << active_;
+    logdbg << "ModeCFilter: getConditionString: dbo " << dbcontent_name << " active " << active_;
 
-    if (!COMPASS::instance().dbContentManager().metaVariable(DBContent::meta_var_mc_.name()).existsIn(dbo_name))
+    if (!COMPASS::instance().dbContentManager().metaVariable(DBContent::meta_var_mc_.name()).existsIn(dbcontent_name))
         return "";
 
     stringstream ss;
@@ -47,7 +47,7 @@ std::string ModeCFilter::getConditionString(const std::string& dbo_name, bool& f
     if (active_)
     {
         dbContent::Variable& var = COMPASS::instance().dbContentManager().metaVariable(
-                    DBContent::meta_var_mc_.name()).getFor(dbo_name);
+                    DBContent::meta_var_mc_.name()).getFor(dbcontent_name);
 
         filtered_variables.push_back(&var);
 

@@ -65,7 +65,7 @@ std::string Single::getTargetRequirementSectionID ()
 
 std::string Single::getRequirementSectionID () // TODO hack
 {
-    if (eval_man_.resultsGenerator().splitResultsByMOPS())
+    if (eval_man_.reportSplitResultsByMOPS())
     {
         string tmp = target()->mopsVersionStr();
 

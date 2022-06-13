@@ -33,6 +33,7 @@ private:
     void doTodOverride();
     void doFutureTimestampsCheck();
     void doRadarPlotPositionCalculations();
+    void doGroundSpeedCalculations();
 };
 
 #endif // ASTERIXPOSTPROCESSJOB_H

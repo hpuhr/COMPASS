@@ -38,6 +38,7 @@ void DBDataSourceWidget::updateContent()
         recreateWidgets();
 
     updateWidgets();
+
 }
 
 bool DBDataSourceWidget::needsRecreate()
@@ -45,53 +46,24 @@ bool DBDataSourceWidget::needsRecreate()
     if (!line_buttons_.size())
         return true;
 
-//    // check lines
-
-//    bool net_lines_shown = COMPASS::instance().appMode() == AppMode::LivePaused
-//            || COMPASS::instance().appMode() == AppMode::LiveRunning;
-
-//    if (last_net_lines_shown_ != net_lines_shown)
-//        return true;
-
-//    if (net_lines_shown)
-//    {
-//        // ds_id -> line str ->(ip, port)
-//        std::map<unsigned int, std::map<std::string, std::pair<std::string, unsigned int>>> net_lines =
-//                ds_man_.getNetworkLines();
-
-//        // check num lines
-//        if (net_lines.count(src_.id()) && net_lines.at(src_.id()).size() != line_buttons_.size())
-//            return true;
-//    }
-//    else // inserted
-//    {
-//        // line id -> count
-//       std::map<unsigned int, unsigned int> inserted_lines = src_.numInsertedLinesMap();
-
-//       if (inserted_lines.size() != line_buttons_.size())
-//           return true;
-//    }
-
     // check counts shown
     bool show_counts = ds_man_.loadWidgetShowCounts();
 
     if (last_show_counts_ != show_counts)
         return true;
 
-    string ds_content_name;
-
-    unsigned int ds_to_show=0;
-    for (auto& cnt_it : src_.numInsertedSummedLinesMap())
+    if (show_counts)
     {
-        ds_content_name = cnt_it.first;
+        for (auto& cnt_it : src_.numInsertedSummedLinesMap())
+        {
+            if (!content_labels_.count(cnt_it.first)) // content name, not yet created
+                return true;
+        }
 
-        if (!content_labels_.count(ds_content_name)) // not yet created
-            return true;
-
-        ++ds_to_show;
+        return src_.numInsertedSummedLinesMap().size() != content_labels_.size(); // check that not too many
     }
 
-    return ds_to_show != content_labels_.size(); // check that not too many
+    return false;
 }
 
 void DBDataSourceWidget::recreateWidgets()
@@ -218,14 +190,47 @@ void DBDataSourceWidget::updateWidgets()
     load_check_->setText(src_.name().c_str());
     load_check_->setChecked(src_.loadingWanted());
 
-    bool net_lines_shown = COMPASS::instance().appMode() == AppMode::LivePaused
-            || COMPASS::instance().appMode() == AppMode::LiveRunning;
+    AppMode app_mode = COMPASS::instance().appMode();
+
+    bool net_lines_shown = app_mode == AppMode::LivePaused
+            || app_mode == AppMode::LiveRunning;
 
     if (net_lines_shown)
     {
         // ds_id -> line str ->(ip, port)
         std::map<unsigned int, std::map<std::string, std::pair<std::string, unsigned int>>> net_lines =
                 ds_man_.getNetworkLines();
+
+        string line_str;
+
+        bool hidden;
+        bool disabled;
+
+        for (unsigned int line_cnt=0; line_cnt < 4; ++line_cnt)
+        {
+            line_str = "L"+to_string(line_cnt+1);
+
+            assert (line_buttons_.count(line_str));
+
+            hidden = !net_lines.at(src_.id()).count(line_str); // hide if no data
+
+            line_buttons_.at(line_str)->setHidden(hidden);
+
+            if (!hidden)
+            {
+                if (app_mode == AppMode::LiveRunning)
+                    disabled = !ds_man_.dbDataSource(src_.id()).numLoaded(line_cnt); // nothing loaded
+                else // AppMode::LivePaused
+                    disabled = !ds_man_.dbDataSource(src_.id()).hasNumInserted(line_cnt); // nothing inserted
+
+                line_buttons_.at(line_str)->setDisabled(disabled);
+
+                if (disabled)
+                    line_buttons_.at(line_str)->setChecked(false);
+                else
+                    line_buttons_.at(line_str)->setChecked(src_.lineLoadingWanted(line_cnt));
+            }
+        }
 
         string tooltip;
     }
@@ -236,13 +241,14 @@ void DBDataSourceWidget::updateWidgets()
 
         string line_str;
 
-        for (unsigned int cnt=0; cnt < 4; ++cnt)
+        for (unsigned int line_cnt=0; line_cnt < 4; ++line_cnt)
         {
-            line_str = "L"+to_string(cnt+1);
+            line_str = "L"+to_string(line_cnt+1);
 
             assert (line_buttons_.count(line_str));
 
-            line_buttons_.at(line_str)->setHidden(!inserted_lines.count(cnt)); // hide if no data
+            line_buttons_.at(line_str)->setChecked(src_.lineLoadingWanted(line_cnt));
+            line_buttons_.at(line_str)->setHidden(!inserted_lines.count(line_cnt)); // hide if no data
         }
     }
 

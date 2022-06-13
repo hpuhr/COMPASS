@@ -67,7 +67,7 @@ public:
     bool useFilters() const;
     void useFilters(bool useFilters);
 
-    std::string getSQLCondition(const std::string& dbo_name,
+    std::string getSQLCondition(const std::string& dbcontent_name,
                                 std::vector<std::string>& extra_from_parts,
                                 std::vector<dbContent::Variable*>& filtered_variables);
 
@@ -102,7 +102,7 @@ protected:
 
     virtual void checkSubConfigurables();
 
-    bool checkDBObject (const std::string& dbo_name); // returns true if ok
+    bool checkDBContent (const std::string& dbcontent_name); // returns true if ok
 };
 
 #endif /* FILTERMANAGER_H_ */

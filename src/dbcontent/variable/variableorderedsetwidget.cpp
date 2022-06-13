@@ -230,19 +230,19 @@ void VariableOrderedSetWidget::updateVariableListSlot()
     {
         def = it->second;
 
-        if (def->dboName() == META_OBJECT_NAME)
+        if (def->dbContentName() == META_OBJECT_NAME)
         {
             assert(manager.existsMetaVariable(def->variableName()));
             tooltip = manager.metaVariable(def->variableName()).description();
         }
         else
         {
-            assert(manager.existsDBContent(def->dboName()));
-            assert(manager.dbContent(def->dboName()).hasVariable(def->variableName()));
-            tooltip = manager.dbContent(def->dboName()).variable(def->variableName()).description();
+            assert(manager.existsDBContent(def->dbContentName()));
+            assert(manager.dbContent(def->dbContentName()).hasVariable(def->variableName()));
+            tooltip = manager.dbContent(def->dbContentName()).variable(def->variableName()).description();
         }
 
-        QListWidgetItem* item = new QListWidgetItem((def->dboName() + ", " + def->variableName()).c_str());
+        QListWidgetItem* item = new QListWidgetItem((def->dbContentName() + ", " + def->variableName()).c_str());
         item->setToolTip(tooltip.c_str());
 
         list_widget_->addItem(item);

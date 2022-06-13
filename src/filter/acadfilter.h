@@ -10,20 +10,20 @@ class ACADFilter : public DBFilter
 public:
     ACADFilter(const std::string& class_id, const std::string& instance_id,
                Configurable* parent);
-     virtual ~ACADFilter();
+    virtual ~ACADFilter();
 
-     virtual std::string getConditionString(const std::string& dbo_name, bool& first,
-                                            std::vector<std::string>& extra_from_parts,
-                                            std::vector<dbContent::Variable*>& filtered_variables) override;
+    virtual std::string getConditionString(const std::string& dbcontent_name, bool& first,
+                                           std::vector<std::string>& extra_from_parts,
+                                           std::vector<dbContent::Variable*>& filtered_variables) override;
 
-     virtual void generateSubConfigurable(const std::string& class_id,
-                                          const std::string& instance_id) override;
+    virtual void generateSubConfigurable(const std::string& class_id,
+                                         const std::string& instance_id) override;
 
-     virtual bool filters(const std::string& dbo_name) override;
-     virtual void reset() override;
+    virtual bool filters(const std::string& dbcontent_name) override;
+    virtual void reset() override;
 
-     virtual void saveViewPointConditions (nlohmann::json& filters) override;
-     virtual void loadViewPointConditions (const nlohmann::json& filters) override;
+    virtual void saveViewPointConditions (nlohmann::json& filters) override;
+    virtual void loadViewPointConditions (const nlohmann::json& filters) override;
 
     std::string valuesString() const;
     void valuesString(const std::string& values_str);

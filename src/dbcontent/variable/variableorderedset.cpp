@@ -65,7 +65,7 @@ void VariableOrderedSet::generateSubConfigurable(const std::string& class_id,
 
         DBContentManager& manager = COMPASS::instance().dbContentManager();
 
-        if (definition->dboName() == META_OBJECT_NAME)
+        if (definition->dbContentName() == META_OBJECT_NAME)
         {
             if (!manager.existsMetaVariable(definition->variableName()))
             {
@@ -75,11 +75,11 @@ void VariableOrderedSet::generateSubConfigurable(const std::string& class_id,
                 return;
             }
         }
-        else if (!manager.existsDBContent(definition->dboName()) ||
-                 !manager.dbContent(definition->dboName()).hasVariable(definition->variableName()))
+        else if (!manager.existsDBContent(definition->dbContentName()) ||
+                 !manager.dbContent(definition->dbContentName()).hasVariable(definition->variableName()))
         {
             logwrn << "VariableOrderedSet: generateSubConfigurable: outdated name "
-                   << definition->dboName() << " variable " << definition->variableName();
+                   << definition->dbContentName() << " variable " << definition->variableName();
             delete definition;
             return;
         }
@@ -103,7 +103,7 @@ void VariableOrderedSet::add(Variable& var)
         std::string var_name = var.name();
 
         Configuration& id_configuration = addNewSubConfiguration("VariableOrderDefinition");
-        id_configuration.addParameterString("dbcontent_name", var.dboName());
+        id_configuration.addParameterString("dbcontent_name", var.dbContentName());
         id_configuration.addParameterString("variable_name", var_name);
         id_configuration.addParameterUnsignedInt("index",
                                                  (unsigned int)variable_definitions_.size());
@@ -132,12 +132,12 @@ void VariableOrderedSet::add(MetaVariable& var)
     }
 }
 
-void VariableOrderedSet::add (const std::string& dbo_name, const std::string var_name)
+void VariableOrderedSet::add (const std::string& dbcontent_name, const std::string var_name)
 {
-    if (!hasVariable(dbo_name, var_name))
+    if (!hasVariable(dbcontent_name, var_name))
     {
         Configuration& id_configuration = addNewSubConfiguration("VariableOrderDefinition");
-        id_configuration.addParameterString("dbcontent_name", dbo_name);
+        id_configuration.addParameterString("dbcontent_name", dbcontent_name);
         id_configuration.addParameterString("variable_name", var_name);
         id_configuration.addParameterUnsignedInt("index",
                                                  (unsigned int)variable_definitions_.size());
@@ -212,7 +212,7 @@ void VariableOrderedSet::removeVariable(const Variable& variable)
     int index = -1;
     for (auto it : variable_definitions_)
         if (it.second->variableName() == variable.name() &&
-            it.second->dboName() == variable.dbObject().name())
+            it.second->dbContentName() == variable.dbObject().name())
         {
             index = it.first;
             break;
@@ -229,7 +229,7 @@ void VariableOrderedSet::removeMetaVariable(const MetaVariable& variable)
     int index = -1;
     for (auto it : variable_definitions_)
         if (it.second->variableName() == variable.name() &&
-            it.second->dboName() == META_OBJECT_NAME)
+            it.second->dbContentName() == META_OBJECT_NAME)
         {
             index = it.first;
             break;
@@ -303,9 +303,9 @@ void VariableOrderedSet::moveVariableDown(unsigned int index)
     emit setChangedSignal();
 }
 
-VariableSet VariableOrderedSet::getFor(const std::string& dbo_name)
+VariableSet VariableOrderedSet::getFor(const std::string& dbcontent_name)
 {
-    loginf << "VariableOrderedSet: getFor: type " << dbo_name;
+    loginf << "VariableOrderedSet: getFor: type " << dbcontent_name;
 
     DBContentManager& manager = COMPASS::instance().dbContentManager();
     VariableSet type_set;
@@ -313,26 +313,26 @@ VariableSet VariableOrderedSet::getFor(const std::string& dbo_name)
 
     for (it = variable_definitions_.begin(); it != variable_definitions_.end(); it++)
     {
-        if (it->second->dboName() == META_OBJECT_NAME)
+        if (it->second->dbContentName() == META_OBJECT_NAME)
         {
             assert(manager.existsMetaVariable(it->second->variableName()));
-            if (manager.metaVariable(it->second->variableName()).existsIn(dbo_name))
-                type_set.add(manager.metaVariable(it->second->variableName()).getFor(dbo_name));
+            if (manager.metaVariable(it->second->variableName()).existsIn(dbcontent_name))
+                type_set.add(manager.metaVariable(it->second->variableName()).getFor(dbcontent_name));
         }
-        else if (it->second->dboName() == dbo_name)
+        else if (it->second->dbContentName() == dbcontent_name)
         {
-            assert(manager.existsDBContent(dbo_name));
-            assert(manager.dbContent(dbo_name).hasVariable(it->second->variableName()));
-            type_set.add(manager.dbContent(dbo_name).variable(it->second->variableName()));
+            assert(manager.existsDBContent(dbcontent_name));
+            assert(manager.dbContent(dbcontent_name).hasVariable(it->second->variableName()));
+            type_set.add(manager.dbContent(dbcontent_name).variable(it->second->variableName()));
         }
     }
 
     return type_set;
 }
 
-VariableSet VariableOrderedSet::getExistingInDBFor(const std::string& dbo_name)
+VariableSet VariableOrderedSet::getExistingInDBFor(const std::string& dbcontent_name)
 {
-    logdbg << "VariableOrderedSet: getExistingInDBFor: type " << dbo_name;
+    logdbg << "VariableOrderedSet: getExistingInDBFor: type " << dbcontent_name;
 
     DBContentManager& manager = COMPASS::instance().dbContentManager();
     VariableSet type_set;
@@ -340,17 +340,17 @@ VariableSet VariableOrderedSet::getExistingInDBFor(const std::string& dbo_name)
 
     for (it = variable_definitions_.begin(); it != variable_definitions_.end(); it++)
     {
-        if (it->second->dboName() == META_OBJECT_NAME)
+        if (it->second->dbContentName() == META_OBJECT_NAME)
         {
             assert(manager.existsMetaVariable(it->second->variableName()));
-            if (manager.metaVariable(it->second->variableName()).existsIn(dbo_name))
-                type_set.add(manager.metaVariable(it->second->variableName()).getFor(dbo_name));
+            if (manager.metaVariable(it->second->variableName()).existsIn(dbcontent_name))
+                type_set.add(manager.metaVariable(it->second->variableName()).getFor(dbcontent_name));
         }
-        else if (it->second->dboName() == dbo_name)
+        else if (it->second->dbContentName() == dbcontent_name)
         {
-            assert(manager.existsDBContent(dbo_name));
-            assert(manager.dbContent(dbo_name).hasVariable(it->second->variableName()));
-            type_set.add(manager.dbContent(dbo_name).variable(it->second->variableName()));
+            assert(manager.existsDBContent(dbcontent_name));
+            assert(manager.dbContent(dbcontent_name).hasVariable(it->second->variableName()));
+            type_set.add(manager.dbContent(dbcontent_name).variable(it->second->variableName()));
         }
     }
 
@@ -393,7 +393,7 @@ bool VariableOrderedSet::hasVariable(const Variable& variable) const
 {
     for (auto it : variable_definitions_)
         if (it.second->variableName() == variable.name() &&
-            it.second->dboName() == variable.dbObject().name())
+            it.second->dbContentName() == variable.dbObject().name())
             return true;
 
     return false;
@@ -403,17 +403,17 @@ bool VariableOrderedSet::hasMetaVariable(const MetaVariable& variable) const
 {
     for (auto it : variable_definitions_)
         if (it.second->variableName() == variable.name() &&
-            it.second->dboName() == META_OBJECT_NAME)
+            it.second->dbContentName() == META_OBJECT_NAME)
             return true;
 
     return false;
 }
 
-bool VariableOrderedSet::hasVariable(const std::string& dbo_name, const std::string& name) const
+bool VariableOrderedSet::hasVariable(const std::string& dbcontent_name, const std::string& name) const
 {
     for (auto it : variable_definitions_)
         if (it.second->variableName() == name &&
-            it.second->dboName() == dbo_name)
+            it.second->dbContentName() == dbcontent_name)
             return true;
 
     return false;

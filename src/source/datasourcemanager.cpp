@@ -132,11 +132,11 @@ void DataSourceManager::importDataSourcesJSONDeprecated(const nlohmann::json& j)
 
     for (auto& j_dbo_it : j.items())
     {
-        std::string dbo_name = j_dbo_it.key();
+        std::string dbcontent_name = j_dbo_it.key();
 
         for (auto& j_ds_it : j_dbo_it.value().get<json::array_t>())
         {
-            loginf << "DataSourceManager: importDataSources: found dbo " << dbo_name
+            loginf << "DataSourceManager: importDataSources: found dbo " << dbcontent_name
                    << " ds '" << j_ds_it.dump(4) << "'";
 
             assert(j_ds_it.contains("dbo_name"));
@@ -210,14 +210,14 @@ void DataSourceManager::deleteAllConfigDataSources()
 
     for(auto it = config_data_sources_.begin(); it != config_data_sources_.end();)
     {
-       if(!hasDBDataSource((*it)->id())) // erase if not in db
-       {
-          it = config_data_sources_.erase(it); // erase and update it
-       }
-       else // next one
-       {
-          ++it;
-       }
+        if(!hasDBDataSource((*it)->id())) // erase if not in db
+        {
+            it = config_data_sources_.erase(it); // erase and update it
+        }
+        else // next one
+        {
+            ++it;
+        }
     }
 
     updateDSIdsAll();
@@ -251,6 +251,33 @@ void DataSourceManager::exportDataSources(const std::string& filename)
                        "File export: '"+QString(filename.c_str())+"' done.\n"
                        +QString::number(config_data_sources_.size())+" Data Sources saved.", QMessageBox::Ok);
     m_info.exec();
+}
+
+// ds id->dbcont->line->cnt
+void DataSourceManager::setLoadedCounts(std::map<unsigned int, std::map<std::string,
+                                        std::map<unsigned int, unsigned int>>> loaded_counts)
+{
+    // clear num loaded
+
+    for (auto& db_src_it : db_data_sources_)
+        db_src_it->clearNumLoaded();
+
+    for (auto ds_id_it : loaded_counts)
+    {
+        assert (hasDBDataSource(ds_id_it.first));
+        DBDataSource& src = dbDataSource(ds_id_it.first);
+
+        for (auto dbcont_it : ds_id_it.second)
+        {
+            for (auto line_it : dbcont_it.second)
+            {
+                src.addNumLoaded(dbcont_it.first, line_it.first, line_it.second);
+            }
+        }
+    }
+
+    if (load_widget_ && load_widget_show_counts_)
+        load_widget_->updateContent();
 }
 
 bool DataSourceManager::loadWidgetShowCounts() const
@@ -307,7 +334,7 @@ bool DataSourceManager::hasDSFilter (const std::string& dbcontent_name)
 
 std::vector<unsigned int> DataSourceManager::unfilteredDS (const std::string& dbcontent_name)
 {
-    assert (hasDSFilter(dbcontent_name));
+    //assert (hasDSFilter(dbcontent_name)); can also be used if no filter active
 
     std::vector<unsigned int> ds_ids;
 
@@ -343,7 +370,18 @@ void DataSourceManager::setLoadDataSources (bool loading_wanted)
         load_widget_->updateContent();
 }
 
-void DataSourceManager::setLoadOnlyDataSources (std::set<unsigned int> ds_ids)
+void DataSourceManager::setLoadAllDataSourceLines ()
+{
+    loginf << "DataSourceManager: setLoadAllDataSourceLines";
+
+    for (auto& ds_it : db_data_sources_)
+        ds_it->enableAllLines();
+
+    if (load_widget_)
+        load_widget_->updateContent();
+}
+
+void DataSourceManager::setLoadOnlyDataSources (std::map<unsigned int, std::set<unsigned int>> ds_ids)
 {
     loginf << "DataSourceManager: setLoadOnlyDataSources";
 
@@ -352,8 +390,12 @@ void DataSourceManager::setLoadOnlyDataSources (std::set<unsigned int> ds_ids)
 
     for (auto ds_id_it : ds_ids)
     {
-        assert (hasDBDataSource(ds_id_it));
-        dbDataSource(ds_id_it).loadingWanted(true);
+        assert (hasDBDataSource(ds_id_it.first));
+        dbDataSource(ds_id_it.first).loadingWanted(true);
+        dbDataSource(ds_id_it.first).disableAllLines();
+
+        for (auto& line_str_it : ds_id_it.second)
+            dbDataSource(ds_id_it.first).lineLoadingWanted(line_str_it, true);
     }
 
     if (load_widget_)
@@ -369,13 +411,15 @@ bool DataSourceManager::loadDataSourcesFiltered()
     return false;
 }
 
-std::set<unsigned int> DataSourceManager::getLoadDataSources ()
+std::map<unsigned int, std::set<unsigned int>> DataSourceManager::getLoadDataSources ()
 {
-    std::set<unsigned int> ds_to_load;
+    std::map<unsigned int, std::set<unsigned int>> ds_to_load;
 
     for (auto& ds_it : db_data_sources_)
+    {
         if (dsTypeLoadingWanted(ds_it->dsType()) && ds_it->loadingWanted())
-            ds_to_load.insert(ds_it->id());
+            ds_to_load[ds_it->id()] = ds_it->getLoadingWantedLines();
+    }
 
     return ds_to_load;
 }
@@ -434,6 +478,8 @@ void DataSourceManager::createConfigDataSource(unsigned int ds_id)
                                                   +to_string(Number::sicFromDsId(ds_id))+")");
 
     generateSubConfigurable("ConfigurationDataSource", new_cfg.getInstanceId());
+
+    updateDSIdsAll();
 }
 
 void DataSourceManager::deleteConfigDataSource(unsigned int ds_id)
@@ -514,6 +560,8 @@ void DataSourceManager::updateDSIdsAll()
 
 void DataSourceManager::saveDBDataSources()
 {
+    loginf << "DataSourceManager: saveDBDataSources";
+
     DBInterface& db_interface = COMPASS::instance().interface();
 
     assert(db_interface.dbOpen());
@@ -533,6 +581,26 @@ bool DataSourceManager::hasDBDataSource(unsigned int ds_id)
     return find_if(db_data_sources_.begin(), db_data_sources_.end(),
                    [ds_id] (const std::unique_ptr<dbContent::DBDataSource>& s)
     { return s->id() == ds_id; } ) != db_data_sources_.end();
+}
+
+bool DataSourceManager::hasDBDataSource(const std::string& ds_name)
+{
+    return find_if(db_data_sources_.begin(), db_data_sources_.end(),
+                   [ds_name] (const std::unique_ptr<dbContent::DBDataSource>& s)
+    { return (s->hasShortName() ? s->shortName() == ds_name : false)
+                || s->name() == ds_name; } ) != db_data_sources_.end();
+}
+
+unsigned int DataSourceManager::getDBDataSourceDSID(const std::string& ds_name)
+{
+    auto ds_it = find_if(db_data_sources_.begin(), db_data_sources_.end(),
+                         [ds_name] (const std::unique_ptr<dbContent::DBDataSource>& s)
+    { return (s->hasShortName() ? s->shortName() == ds_name : false)
+                || s->name() == ds_name; } );
+
+    assert (ds_it != db_data_sources_.end());
+
+    return (*ds_it)->id();
 }
 
 bool DataSourceManager::hasDataSourcesOfDBContent(const std::string dbcontent_name)
@@ -608,9 +676,13 @@ std::set<std::string> DataSourceManager::wantedDSTypes()
 {
     std::set<std::string> ret;
 
-    for (auto& ds_type_it : ds_type_loading_wanted_)
-        if (ds_type_it.second)
-            ret.insert(ds_type_it.first);
+    for (auto& ds_type_it : data_source_types_)
+    {
+        if (!ds_type_loading_wanted_.count(ds_type_it)) // not in means yes
+            ret.insert(ds_type_it);
+        else if (ds_type_loading_wanted_.at(ds_type_it))
+            ret.insert(ds_type_it);
+    }
 
     return ret;
 }
@@ -661,6 +733,47 @@ void DataSourceManager::setLoadOnlyDSTypes (std::set<std::string> ds_types)
 const std::vector<std::unique_ptr<dbContent::DBDataSource>>& DataSourceManager::dbDataSources() const
 {
     return db_data_sources_;
+}
+
+void DataSourceManager::createNetworkDBDataSources()
+{
+    unsigned int ds_id;
+
+    for (auto& ds_it : config_data_sources_)
+    {
+        ds_id = ds_it->id();
+
+        if (ds_it->hasNetworkLines())
+        {
+
+            if (!hasDBDataSource(ds_id))
+            {
+                loginf << "DataSourceManager: createNetworkDBDataSources: ds_id " << ds_id << " from config";
+
+                db_data_sources_.emplace_back(move(ds_it->getAsNewDBDS()));
+                //addNewDataSource(ds_it->id());
+            }
+
+            unsigned int line_cnt;
+            bool first = true;
+
+            for (auto& line_it : ds_it->networkLines()) // lx -> ip, port
+            {
+                line_cnt = String::getAppendedInt(line_it.first);
+                assert (line_cnt >= 0 && line_cnt <= 4);
+
+                dbDataSource(ds_it->id()).lineLoadingWanted(line_cnt - 1, first); // only load first one
+                //dbDataSource(ds_it->id()).addNumInserted()
+
+                first = false;
+            }
+        }
+    }
+
+    sortDBDataSources();
+    updateDSIdsAll();
+
+    emit dataSourcesChangedSignal();
 }
 
 std::map<unsigned int, std::map<std::string, std::pair<std::string, unsigned int>>> DataSourceManager::getNetworkLines()

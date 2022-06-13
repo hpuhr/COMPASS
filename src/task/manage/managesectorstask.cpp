@@ -235,13 +235,7 @@ void ManageSectorsTask::importFile (const std::string& layer_name, bool exclude,
     exclude_ = exclude;
     color_ = color;
 
-    task_manager_.appendInfo("ManageSectorsTask: import of file '" + current_filename_ +
-                             "' into layer '" + layer_name_ + "' started");
-
     parseCurrentFile(true);
-
-    task_manager_.appendSuccess("ManageSectorsTask: imported " + to_string(found_sectors_num_)
-                                +" sectors");
 
     QMessageBox msgBox;
     msgBox.setText(QString("Import of ")+QString::number(found_sectors_num_)+" sectors done");

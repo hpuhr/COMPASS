@@ -71,7 +71,7 @@ class HistogramView : public View
 
     HistogramViewDataWidget* getDataWidget();
 
-    virtual dbContent::VariableSet getSet(const std::string& dbo_name) override;
+    virtual dbContent::VariableSet getSet(const std::string& dbcontent_name) override;
 
     virtual void accept(LatexVisitor& v) override;
 

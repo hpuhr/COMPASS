@@ -11,12 +11,12 @@ class GPSTrailImportTaskDialog: public QDialog
     Q_OBJECT
 
 signals:
-    void doneSignal();
+    void cancelSignal();
     void importSignal();
 
 public slots:
+    void cancelClickedSlot();
     void importClickedSlot();
-    void doneClickedSlot();
 
 public:
     GPSTrailImportTaskDialog(GPSTrailImportTask& task);
@@ -28,8 +28,8 @@ protected:
 
     GPSTrailImportTaskWidget* task_widget_ {nullptr}; // owned here
 
+    QPushButton* cancel_button_{nullptr};
     QPushButton* import_button_{nullptr};
-    QPushButton* done_button_{nullptr};
 };
 
 #endif // GPSTRAILIMPORTTASKDIALOG_H

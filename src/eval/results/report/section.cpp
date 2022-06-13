@@ -200,18 +200,45 @@ namespace EvaluationResultsReport
         return num;
     }
 
-    void Section::addSectionsFlat (vector<shared_ptr<Section>>& result, bool include_target_details)
+    void Section::addSectionsFlat (vector<shared_ptr<Section>>& result, bool include_target_details,
+                                   bool report_skip_targets_wo_issues)
     {
         if (!include_target_details && compoundHeading() == "Results:Targets")
             return;
+
+        if (report_skip_targets_wo_issues && perTargetSection())
+        {
+            if (perTargetWithIssues())
+            {
+                logdbg << "Section: addSectionsFlat: not skipping section " << compoundHeading();
+            }
+            else
+            {
+                logdbg << "Section: addSectionsFlat: skipping section " << compoundHeading();
+                return;
+            }
+        }
 
         for (auto& sec_it : sub_sections_)
         {
             if (!include_target_details && sec_it->compoundHeading() == "Results:Targets")
                 continue;
 
+            if (report_skip_targets_wo_issues && sec_it->perTargetSection())
+            {
+                if (sec_it->perTargetWithIssues())
+                {
+                      logdbg << "Section: addSectionsFlat: not skipping sub-section " << compoundHeading();
+                }
+                else
+                {
+                    logdbg << "Section: addSectionsFlat: skipping sub-section" << compoundHeading();
+                    continue;
+                }
+            }
+
             result.push_back(sec_it);
-            sec_it->addSectionsFlat(result, include_target_details);
+            sec_it->addSectionsFlat(result, include_target_details, report_skip_targets_wo_issues);
         }
     }
 
@@ -224,6 +251,26 @@ namespace EvaluationResultsReport
     const vector<shared_ptr<SectionContent>>& Section::content() const
     {
         return content_;
+    }
+
+    bool Section::perTargetWithIssues() const
+    {
+        return per_target_section_with_issues_;
+    }
+
+    void Section::perTargetWithIssues(bool value)
+    {
+        per_target_section_with_issues_ = value;
+    }
+
+    bool Section::perTargetSection() const
+    {
+        return per_target_section_;
+    }
+
+    void Section::perTargetSection(bool value)
+    {
+        per_target_section_ = value;
     }
 
     Section* Section::findSubSection (const std::string& heading)

@@ -46,6 +46,8 @@ public:
     dbContent::ConfigurationDataSource& configDataSource(unsigned int ds_id);
 
     bool hasDBDataSource(unsigned int ds_id);
+    bool hasDBDataSource(const std::string& ds_name);
+    unsigned int getDBDataSourceDSID(const std::string& ds_name);
     bool hasDataSourcesOfDBContent(const std::string dbcontent_name);
     bool canAddNewDataSourceFromConfig (unsigned int ds_id);
     void addNewDataSource (unsigned int ds_id); // be sure not to call from different thread
@@ -53,6 +55,7 @@ public:
     dbContent::DBDataSource& dbDataSource(unsigned int ds_id);
     const std::vector<std::unique_ptr<dbContent::DBDataSource>>& dbDataSources() const;
 
+    void createNetworkDBDataSources();
     std::map<unsigned int, std::map<std::string, std::pair<std::string, unsigned int>>> getNetworkLines();
     //ds_id -> line str ->(ip, port)
 
@@ -71,21 +74,25 @@ public:
     bool lineSpecificLoadingRequired(const std::string& dbcontent_name);
 
     void setLoadDataSources (bool loading_wanted);
-    void setLoadOnlyDataSources (std::set<unsigned int> ds_ids);
+    void setLoadAllDataSourceLines ();
+    void setLoadOnlyDataSources (std::map<unsigned int, std::set<unsigned int>> ds_ids); // ds_id + line strs
     bool loadDataSourcesFiltered();
-    std::set<unsigned int> getLoadDataSources ();
+    std::map<unsigned int, std::set<unsigned int>> getLoadDataSources (); // ds_id -> wanted lines
 
     DataSourcesLoadWidget* loadWidget();
     void updateWidget();
 
     DataSourcesConfigurationDialog* configurationDialog();
 
-    void importDataSources(const std::string& filename);
+    void importDataSources(const std::string& filename); // import data sources from json
     void importDataSourcesJSONDeprecated(const nlohmann::json& j);
     void importDataSourcesJSON(const nlohmann::json& j);
 
     void deleteAllConfigDataSources();
     void exportDataSources(const std::string& filename);
+
+    void setLoadedCounts(std::map<unsigned int, std::map<std::string,
+                         std::map<unsigned int, unsigned int>>> loaded_counts); // ds id->dbcont->line->cnt
 
     bool loadWidgetShowCounts() const;
     void loadWidgetShowCounts(bool value);
@@ -106,7 +113,7 @@ protected:
 
     std::unique_ptr<DataSourcesConfigurationDialog> config_dialog_;
 
-    std::map<std::string, bool> ds_type_loading_wanted_;
+    std::map<std::string, bool> ds_type_loading_wanted_; // if not in there, wanted
 
     virtual void checkSubConfigurables();
 

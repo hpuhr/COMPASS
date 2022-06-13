@@ -58,15 +58,15 @@ class ScatterPlotViewDataSource : public QObject, public Configurable
     /// Variable read list
     dbContent::VariableOrderedSet* set_{nullptr};
 
-    /// Selected DBObject records
+    /// Selected DBContent records
     //ViewSelectionEntries& selection_entries_;
 
     std::vector<std::pair<std::string, std::string>> temporary_added_variables_; // not persisted, DBO->varname
 
     virtual void checkSubConfigurables();
 
-    bool addTemporaryVariable (const std::string& dbo_name, const std::string& var_name); // only to set, true of added
-    void removeTemporaryVariable (const std::string& dbo_name, const std::string& var_name); // only to set
+    bool addTemporaryVariable (const std::string& dbcontent_name, const std::string& var_name); // only to set, true of added
+    void removeTemporaryVariable (const std::string& dbcontent_name, const std::string& var_name); // only to set
 };
 
 #endif /* SCATTERPLOTVIEWDATASOURCE_H_ */

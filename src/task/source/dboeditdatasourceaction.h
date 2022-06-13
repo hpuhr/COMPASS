@@ -20,7 +20,7 @@
 
 #include <string>
 
-class DBObject;
+class DBContent;
 
 class DBOEditDataSourceAction
 {
@@ -30,7 +30,7 @@ class DBOEditDataSourceAction
 
     const std::string& getActionString() { return action_str_; }
 
-    void perform(DBObject& object, const std::string& source_type, const std::string& source_id);
+    void perform(DBContent& object, const std::string& source_type, const std::string& source_id);
 
     std::string targetType() const;
 

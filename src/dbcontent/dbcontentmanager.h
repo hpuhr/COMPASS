@@ -23,6 +23,8 @@
 #include "singleton.h"
 #include "buffer.h"
 
+#include <boost/optional.hpp>
+
 #include <QObject>
 
 #include <vector>
@@ -40,6 +42,7 @@ class Variable;
 class MetaVariable;
 class VariableSet;
 class Target;
+class LabelGenerator;
 
 }
 
@@ -72,14 +75,16 @@ public:
     virtual void generateSubConfigurable(const std::string& class_id,
                                          const std::string& instance_id);
 
+    dbContent::LabelGenerator& labelGenerator();
+
     bool existsDBContent(const std::string& dbcontent_name);
     DBContent& dbContent(const std::string& dbcontent_name);
     void deleteDBContent(const std::string& dbcontent_name);
     bool hasData();
 
-    using DBObjectIterator = typename std::map<std::string, DBContent*>::iterator;
-    DBObjectIterator begin() { return dbcontent_.begin(); }
-    DBObjectIterator end() { return dbcontent_.end(); }
+    using DBContentIterator = typename std::map<std::string, DBContent*>::iterator;
+    DBContentIterator begin() { return dbcontent_.begin(); }
+    DBContentIterator end() { return dbcontent_.end(); }
     size_t size() { return dbcontent_.size(); }
 
     bool existsMetaVariable(const std::string& var_name);
@@ -131,18 +136,26 @@ public:
 
     bool hasAssociations() const;
     void setAssociationsIdentifier(const std::string& assoc_id);
-//    void setAssociationsByAll();
-//    void removeAssociations();
-
-//    bool hasAssociationsDataSource() const;
     std::string associationsID() const;
-//    std::string associationsDataSourceName() const;
-
-    //bool isOtherDBObjectPostProcessing(DBContent& object);
 
     bool hasMaxRecordNumber() const { return has_max_rec_num_; }
     unsigned int maxRecordNumber() const;
     void maxRecordNumber(unsigned int value);
+
+    bool hasMaxRefTrajTrackNum() const { return has_max_reftraj_track_num_; }
+    unsigned int maxRefTrajTrackNum() const;
+    void maxRefTrajTrackNum(unsigned int value);
+
+    bool hasMinMaxInfo() const;
+    bool hasMinMaxToD() const;
+    void setMinMaxTod(double min, double max);
+    std::pair<double, double> minMaxTod() const;
+
+    bool hasMinMaxPosition() const;
+    void setMinMaxLatitude(double min, double max);
+    std::pair<double, double> minMaxLatitude() const;
+    void setMinMaxLongitude(double min, double max);
+    std::pair<double, double> minMaxLongitude() const;
 
     const std::map<std::string, std::shared_ptr<Buffer>>& data() const;
 
@@ -162,6 +175,8 @@ public:
 protected:
     COMPASS& compass_;
 
+    std::unique_ptr<dbContent::LabelGenerator> label_generator_;
+
     bool use_order_{false};
     bool use_order_ascending_{false};
     std::string order_variable_dbcontent_name_;
@@ -177,6 +192,16 @@ protected:
     bool has_max_rec_num_ {false};
     unsigned int max_rec_num_ {0};
 
+    bool has_max_reftraj_track_num_ {false};
+    unsigned int max_reftraj_track_num_ {0};
+
+    boost::optional<float> tod_min_;
+    boost::optional<float> tod_max_;
+    boost::optional<double> latitude_min_;
+    boost::optional<double> latitude_max_;
+    boost::optional<double> longitude_min_;
+    boost::optional<double> longitude_max_;
+
     std::map<std::string, std::shared_ptr<Buffer>> data_;
 
     std::map<std::string, std::shared_ptr<Buffer>> insert_data_;
@@ -184,7 +209,7 @@ protected:
     bool load_in_progress_{false};
     bool insert_in_progress_{false};
 
-    /// Container with all DBOs (DBO name -> DBO pointer)
+    /// Container with all DBContent (DBContent name -> DBO pointer)
     std::map<std::string, DBContent*> dbcontent_;
     std::vector<std::unique_ptr<dbContent::MetaVariable>> meta_variables_;
 
@@ -202,7 +227,10 @@ protected:
     void filterDataSources();
     void cutCachedData();
 
+    void updateNumLoadedCounts(); // from data_
+
     void loadMaxRecordNumber();
+    void loadMaxRefTrajTrackNum();
 };
 
 #endif /* DBCONTENT_DBCONTENTMANAGER_H_ */

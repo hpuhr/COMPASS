@@ -35,6 +35,8 @@
 
 #include "eval/results/dubious/dubioustracksingle.h"
 #include "eval/results/dubious/dubioustrackjoined.h"
+#include "eval/results/dubious/dubioustargetsingle.h"
+#include "eval/results/dubious/dubioustargetjoined.h"
 
 #include "eval/results/detection/joined.h"
 #include "eval/results/detection/single.h"
@@ -229,12 +231,12 @@ void HistogramViewDataWidget::loadingDoneSlot()
     updateToData();
 }
 
-void HistogramViewDataWidget::updateFromData(std::string dbo_name)
+void HistogramViewDataWidget::updateFromData(std::string dbcontent_name)
 {
-    loginf << "HistogramViewDataWidget: updateFromData: start dbo " << dbo_name;
+    loginf << "HistogramViewDataWidget: updateFromData: start dbo " << dbcontent_name;
 
-    assert (buffers_.count(dbo_name));
-    Buffer* buffer = buffers_.at(dbo_name).get();
+    assert (buffers_.count(dbcontent_name));
+    Buffer* buffer = buffers_.at(dbcontent_name).get();
 
     dbContent::Variable* data_var {nullptr};
 
@@ -247,19 +249,19 @@ void HistogramViewDataWidget::updateFromData(std::string dbo_name)
     if (view_->isDataVarMeta())
     {
         dbContent::MetaVariable& meta_var = view_->metaDataVar();
-        if (!meta_var.existsIn(dbo_name))
+        if (!meta_var.existsIn(dbcontent_name))
         {
             logwrn << "HistogramViewDataWidget: updateFromData: meta var does not exist in dbo";
             return;
         }
 
-        data_var = &meta_var.getFor(dbo_name);
+        data_var = &meta_var.getFor(dbcontent_name);
     }
     else
     {
         data_var = &view_->dataVar();
 
-        if (data_var->dboName() != dbo_name)
+        if (data_var->dbContentName() != dbcontent_name)
             return;
     }
     assert (data_var);
@@ -294,7 +296,7 @@ void HistogramViewDataWidget::updateFromData(std::string dbo_name)
             return;
         }
 
-        updateCounts<bool> (dbo_name, data, selected_vec, data_var);
+        updateCounts<bool> (dbcontent_name, data, selected_vec, data_var);
 
         break;
     }
@@ -328,7 +330,7 @@ void HistogramViewDataWidget::updateFromData(std::string dbo_name)
             return;
         }
 
-        updateCounts<char> (dbo_name, data, selected_vec, data_var);
+        updateCounts<char> (dbcontent_name, data, selected_vec, data_var);
 
         break;
     }
@@ -362,7 +364,7 @@ void HistogramViewDataWidget::updateFromData(std::string dbo_name)
             return;
         }
 
-        updateCounts<unsigned char> (dbo_name, data, selected_vec, data_var);
+        updateCounts<unsigned char> (dbcontent_name, data, selected_vec, data_var);
 
         break;
     }
@@ -396,7 +398,7 @@ void HistogramViewDataWidget::updateFromData(std::string dbo_name)
             return;
         }
 
-        updateCounts<int> (dbo_name, data, selected_vec, data_var);
+        updateCounts<int> (dbcontent_name, data, selected_vec, data_var);
 
         break;
     }
@@ -430,7 +432,7 @@ void HistogramViewDataWidget::updateFromData(std::string dbo_name)
             return;
         }
 
-        updateCounts<unsigned int> (dbo_name, data, selected_vec, data_var);
+        updateCounts<unsigned int> (dbcontent_name, data, selected_vec, data_var);
 
         break;
     }
@@ -464,7 +466,7 @@ void HistogramViewDataWidget::updateFromData(std::string dbo_name)
             return;
         }
 
-        updateCounts<long int> (dbo_name, data, selected_vec, data_var);
+        updateCounts<long int> (dbcontent_name, data, selected_vec, data_var);
 
         break;
     }
@@ -498,7 +500,7 @@ void HistogramViewDataWidget::updateFromData(std::string dbo_name)
             return;
         }
 
-        updateCounts<unsigned long> (dbo_name, data, selected_vec, data_var);
+        updateCounts<unsigned long> (dbcontent_name, data, selected_vec, data_var);
 
         break;
     }
@@ -533,7 +535,7 @@ void HistogramViewDataWidget::updateFromData(std::string dbo_name)
         }
 
 
-        updateCounts<float> (dbo_name, data, selected_vec, data_var);
+        updateCounts<float> (dbcontent_name, data, selected_vec, data_var);
 
         break;
     }
@@ -580,7 +582,7 @@ void HistogramViewDataWidget::updateFromData(std::string dbo_name)
         //        loginf << "UGA data_min " << data_min << " data_max " << data_max << " num_bins " << num_bins_
         //               << " bin_size " << bin_size_;
 
-        updateCounts<double> (dbo_name, data, selected_vec, data_var);
+        updateCounts<double> (dbcontent_name, data, selected_vec, data_var);
 
         break;
     }
@@ -618,7 +620,7 @@ void HistogramViewDataWidget::updateFromData(std::string dbo_name)
                     Property::asString(data_type));
     }
 
-    loginf << "HistogramViewDataWidget: updateFromData: done dbo " << dbo_name;
+    loginf << "HistogramViewDataWidget: updateFromData: done dbo " << dbcontent_name;
 }
 
 void HistogramViewDataWidget::updateFromAllData()
@@ -667,7 +669,10 @@ void HistogramViewDataWidget::updateFromResult(std::shared_ptr<EvaluationRequire
         ; //updateCountResult(static_pointer_cast<SingleExtraTrack>(result)); TODO
     else if (result->type() == "JoinedDubiousTrack")
         ; //updateCountResult(static_pointer_cast<JoinedExtraTrack>(result));
-
+    else if (result->type() == "SingleDubiousTarget")
+        ; //updateCountResult(static_pointer_cast<SingleExtraTrack>(result)); TODO
+    else if (result->type() == "JoinedDubiousTarget")
+        ; //updateCountResult(static_pointer_cast<JoinedExtraTrack>(result));
 
     else if (result->type() == "SingleDetection")
         updateCountResult(static_pointer_cast<SingleDetection>(result));
@@ -733,13 +738,13 @@ void HistogramViewDataWidget::updateCountResult (std::shared_ptr<EvaluationRequi
 
     assert (result);
 
-    string dbo_name = COMPASS::instance().evaluationManager().dboNameTst();
+    string dbcontent_name = COMPASS::instance().evaluationManager().dbContentNameTst();
 
     if (!counts_.size()) // first
     {
-        counts_[dbo_name].push_back(result->numOK()+result->numExtra());
-        counts_[dbo_name].push_back(result->numOK());
-        counts_[dbo_name].push_back(result->numExtra());
+        counts_[dbcontent_name].push_back(result->numOK()+result->numExtra());
+        counts_[dbcontent_name].push_back(result->numOK());
+        counts_[dbcontent_name].push_back(result->numExtra());
 
         labels_.push_back("#Check");
         labels_.push_back("#OK");
@@ -747,9 +752,9 @@ void HistogramViewDataWidget::updateCountResult (std::shared_ptr<EvaluationRequi
     }
     else // add
     {
-        counts_[dbo_name].at(0) += result->numOK()+result->numExtra();
-        counts_[dbo_name].at(1) += result->numOK();
-        counts_[dbo_name].at(2) += result->numExtra();
+        counts_[dbcontent_name].at(0) += result->numOK()+result->numExtra();
+        counts_[dbcontent_name].at(1) += result->numOK();
+        counts_[dbcontent_name].at(2) += result->numExtra();
     }
 }
 
@@ -777,13 +782,13 @@ void HistogramViewDataWidget::updateCountResult (std::shared_ptr<EvaluationRequi
 
     assert (result);
 
-    string dbo_name = COMPASS::instance().evaluationManager().dboNameTst();
+    string dbcontent_name = COMPASS::instance().evaluationManager().dbContentNameTst();
 
     if (!counts_.size()) // first
     {
-        counts_[dbo_name].push_back(result->numOK()+result->numExtra());
-        counts_[dbo_name].push_back(result->numOK());
-        counts_[dbo_name].push_back(result->numExtra());
+        counts_[dbcontent_name].push_back(result->numOK()+result->numExtra());
+        counts_[dbcontent_name].push_back(result->numOK());
+        counts_[dbcontent_name].push_back(result->numExtra());
 
         labels_.push_back("#Check");
         labels_.push_back("#OK");
@@ -791,9 +796,9 @@ void HistogramViewDataWidget::updateCountResult (std::shared_ptr<EvaluationRequi
     }
     else // add
     {
-        counts_[dbo_name].at(0) += result->numOK()+result->numExtra();
-        counts_[dbo_name].at(1) += result->numOK();
-        counts_[dbo_name].at(2) += result->numExtra();
+        counts_[dbcontent_name].at(0) += result->numOK()+result->numExtra();
+        counts_[dbcontent_name].at(1) += result->numOK();
+        counts_[dbcontent_name].at(2) += result->numExtra();
     }
 }
 
@@ -822,20 +827,20 @@ void HistogramViewDataWidget::updateCountResult (std::shared_ptr<EvaluationRequi
 
     assert (result);
 
-    string dbo_name = COMPASS::instance().evaluationManager().dboNameTst();
+    string dbcontent_name = COMPASS::instance().evaluationManager().dbContentNameTst();
 
     if (!counts_.size()) // first
     {
-        counts_[dbo_name].push_back(result->sumUIs());
-        counts_[dbo_name].push_back(result->missedUIs());
+        counts_[dbcontent_name].push_back(result->sumUIs());
+        counts_[dbcontent_name].push_back(result->missedUIs());
 
         labels_.push_back("#EUIs");
         labels_.push_back("#MUIs");
     }
     else // add
     {
-        counts_[dbo_name].at(0) += result->sumUIs();
-        counts_[dbo_name].at(1) += result->missedUIs();
+        counts_[dbcontent_name].at(0) += result->sumUIs();
+        counts_[dbcontent_name].at(1) += result->missedUIs();
     }
 }
 
@@ -1056,13 +1061,13 @@ void HistogramViewDataWidget::updateCountResult (
 
     assert (result);
 
-    string dbo_name = COMPASS::instance().evaluationManager().dboNameTst();
+    string dbcontent_name = COMPASS::instance().evaluationManager().dbContentNameTst();
 
     if (!counts_.size()) // first
     {
-        counts_[dbo_name].push_back(result->numNoRefId());
-        counts_[dbo_name].push_back(result->numCorrect());
-        counts_[dbo_name].push_back(result->numNotCorrect());
+        counts_[dbcontent_name].push_back(result->numNoRefId());
+        counts_[dbcontent_name].push_back(result->numCorrect());
+        counts_[dbcontent_name].push_back(result->numNotCorrect());
 
         labels_.push_back("#NoRef");
         labels_.push_back("#CID");
@@ -1070,9 +1075,9 @@ void HistogramViewDataWidget::updateCountResult (
     }
     else // add
     {
-        counts_[dbo_name].at(0) += result->numNoRefId();
-        counts_[dbo_name].at(1) += result->numCorrect();
-        counts_[dbo_name].at(2) += result->numNotCorrect();
+        counts_[dbcontent_name].at(0) += result->numNoRefId();
+        counts_[dbcontent_name].at(1) += result->numCorrect();
+        counts_[dbcontent_name].at(2) += result->numNotCorrect();
     }
 }
 
@@ -1101,14 +1106,14 @@ void HistogramViewDataWidget::updateCountResult (
 
     assert (result);
 
-    string dbo_name = COMPASS::instance().evaluationManager().dboNameTst();
+    string dbcontent_name = COMPASS::instance().evaluationManager().dbContentNameTst();
 
     if (!counts_.size()) // first
     {
-        counts_[dbo_name].push_back(result->numNoRefValue());
-        counts_[dbo_name].push_back(result->numUnknown());
-        counts_[dbo_name].push_back(result->numCorrect());
-        counts_[dbo_name].push_back(result->numFalse());
+        counts_[dbcontent_name].push_back(result->numNoRefValue());
+        counts_[dbcontent_name].push_back(result->numUnknown());
+        counts_[dbcontent_name].push_back(result->numCorrect());
+        counts_[dbcontent_name].push_back(result->numFalse());
 
         labels_.push_back("#NoRef");
         labels_.push_back("#Unknown");
@@ -1117,10 +1122,10 @@ void HistogramViewDataWidget::updateCountResult (
     }
     else // add
     {
-        counts_[dbo_name].at(0) += result->numNoRefValue();
-        counts_[dbo_name].at(1) += result->numUnknown();
-        counts_[dbo_name].at(2) += result->numCorrect();
-        counts_[dbo_name].at(3) += result->numFalse();
+        counts_[dbcontent_name].at(0) += result->numNoRefValue();
+        counts_[dbcontent_name].at(1) += result->numUnknown();
+        counts_[dbcontent_name].at(2) += result->numCorrect();
+        counts_[dbcontent_name].at(3) += result->numFalse();
     }
 }
 
@@ -1149,13 +1154,13 @@ void HistogramViewDataWidget::updateCountResult (std::shared_ptr<EvaluationRequi
 
     assert (result);
 
-    string dbo_name = COMPASS::instance().evaluationManager().dboNameTst();
+    string dbcontent_name = COMPASS::instance().evaluationManager().dbContentNameTst();
 
     if (!counts_.size()) // first
     {
-        counts_[dbo_name].push_back(result->numNoRefId());
-        counts_[dbo_name].push_back(result->numPresent());
-        counts_[dbo_name].push_back(result->numMissing());
+        counts_[dbcontent_name].push_back(result->numNoRefId());
+        counts_[dbcontent_name].push_back(result->numPresent());
+        counts_[dbcontent_name].push_back(result->numMissing());
 
         labels_.push_back("#NoRefId");
         labels_.push_back("#Present");
@@ -1163,9 +1168,9 @@ void HistogramViewDataWidget::updateCountResult (std::shared_ptr<EvaluationRequi
     }
     else // add
     {
-        counts_[dbo_name].at(0) += result->numNoRefId();
-        counts_[dbo_name].at(1) += result->numPresent();
-        counts_[dbo_name].at(2) += result->numMissing();
+        counts_[dbcontent_name].at(0) += result->numNoRefId();
+        counts_[dbcontent_name].at(1) += result->numPresent();
+        counts_[dbcontent_name].at(2) += result->numMissing();
     }
 }
 
@@ -1192,14 +1197,14 @@ void HistogramViewDataWidget::updateCountResult (std::shared_ptr<EvaluationRequi
 
     assert (result);
 
-    string dbo_name = COMPASS::instance().evaluationManager().dboNameTst();
+    string dbcontent_name = COMPASS::instance().evaluationManager().dbContentNameTst();
 
     if (!counts_.size()) // first
     {
-        counts_[dbo_name].push_back(result->numNoRefValue());
-        counts_[dbo_name].push_back(result->numUnknown());
-        counts_[dbo_name].push_back(result->numCorrect());
-        counts_[dbo_name].push_back(result->numFalse());
+        counts_[dbcontent_name].push_back(result->numNoRefValue());
+        counts_[dbcontent_name].push_back(result->numUnknown());
+        counts_[dbcontent_name].push_back(result->numCorrect());
+        counts_[dbcontent_name].push_back(result->numFalse());
 
         labels_.push_back("#NoRef");
         labels_.push_back("#Unknown");
@@ -1208,10 +1213,10 @@ void HistogramViewDataWidget::updateCountResult (std::shared_ptr<EvaluationRequi
     }
     else // add
     {
-        counts_[dbo_name].at(0) += result->numNoRefValue();
-        counts_[dbo_name].at(1) += result->numUnknown();
-        counts_[dbo_name].at(2) += result->numCorrect();
-        counts_[dbo_name].at(3) += result->numFalse();
+        counts_[dbcontent_name].at(0) += result->numNoRefValue();
+        counts_[dbcontent_name].at(1) += result->numUnknown();
+        counts_[dbcontent_name].at(2) += result->numCorrect();
+        counts_[dbcontent_name].at(3) += result->numFalse();
     }
 }
 
@@ -1239,13 +1244,13 @@ void HistogramViewDataWidget::updateCountResult (std::shared_ptr<EvaluationRequi
 
     assert (result);
 
-    string dbo_name = COMPASS::instance().evaluationManager().dboNameTst();
+    string dbcontent_name = COMPASS::instance().evaluationManager().dbContentNameTst();
 
     if (!counts_.size()) // first
     {
-        counts_[dbo_name].push_back(result->numNoRefC());
-        counts_[dbo_name].push_back(result->numPresent());
-        counts_[dbo_name].push_back(result->numMissing());
+        counts_[dbcontent_name].push_back(result->numNoRefC());
+        counts_[dbcontent_name].push_back(result->numPresent());
+        counts_[dbcontent_name].push_back(result->numMissing());
 
         labels_.push_back("#NoRefC");
         labels_.push_back("#Present");
@@ -1253,9 +1258,9 @@ void HistogramViewDataWidget::updateCountResult (std::shared_ptr<EvaluationRequi
     }
     else // add
     {
-        counts_[dbo_name].at(0) += result->numNoRefC();
-        counts_[dbo_name].at(1) += result->numPresent();
-        counts_[dbo_name].at(2) += result->numMissing();
+        counts_[dbcontent_name].at(0) += result->numNoRefC();
+        counts_[dbcontent_name].at(1) += result->numPresent();
+        counts_[dbcontent_name].at(2) += result->numMissing();
     }
 }
 
@@ -1282,14 +1287,14 @@ void HistogramViewDataWidget::updateCountResult (std::shared_ptr<EvaluationRequi
 
     assert (result);
 
-    string dbo_name = COMPASS::instance().evaluationManager().dboNameTst();
+    string dbcontent_name = COMPASS::instance().evaluationManager().dbContentNameTst();
 
     if (!counts_.size()) // first
     {
-        counts_[dbo_name].push_back(result->numNoRefValue());
-        counts_[dbo_name].push_back(result->numUnknown());
-        counts_[dbo_name].push_back(result->numCorrect());
-        counts_[dbo_name].push_back(result->numFalse());
+        counts_[dbcontent_name].push_back(result->numNoRefValue());
+        counts_[dbcontent_name].push_back(result->numUnknown());
+        counts_[dbcontent_name].push_back(result->numCorrect());
+        counts_[dbcontent_name].push_back(result->numFalse());
 
         labels_.push_back("#NoRef");
         labels_.push_back("#Unknown");
@@ -1298,10 +1303,10 @@ void HistogramViewDataWidget::updateCountResult (std::shared_ptr<EvaluationRequi
     }
     else // add
     {
-        counts_[dbo_name].at(0) += result->numNoRefValue();
-        counts_[dbo_name].at(1) += result->numUnknown();
-        counts_[dbo_name].at(2) += result->numCorrect();
-        counts_[dbo_name].at(3) += result->numFalse();
+        counts_[dbcontent_name].at(0) += result->numNoRefValue();
+        counts_[dbcontent_name].at(1) += result->numUnknown();
+        counts_[dbcontent_name].at(2) += result->numCorrect();
+        counts_[dbcontent_name].at(3) += result->numFalse();
     }
 }
 
@@ -1559,7 +1564,7 @@ void HistogramViewDataWidget::calculateGlobalMinMax()
     for (auto& buf_it : buffers_)
     {
         Buffer* buffer = buf_it.second.get();
-        string dbo_name = buf_it.first;
+        string dbcontent_name = buf_it.first;
 
         dbContent::Variable* data_var {nullptr};
 
@@ -1569,16 +1574,16 @@ void HistogramViewDataWidget::calculateGlobalMinMax()
         if (view_->isDataVarMeta())
         {
             dbContent::MetaVariable& meta_var = view_->metaDataVar();
-            if (!meta_var.existsIn(dbo_name))
+            if (!meta_var.existsIn(dbcontent_name))
                 continue;
 
-            data_var = &meta_var.getFor(dbo_name);
+            data_var = &meta_var.getFor(dbcontent_name);
         }
         else
         {
             data_var = &view_->dataVar();
 
-            if (data_var->dboName() != dbo_name)
+            if (data_var->dbContentName() != dbcontent_name)
                 continue;
         }
         assert (data_var);
@@ -1967,8 +1972,8 @@ void HistogramViewDataWidget::updateCounts(const std::vector<double>& data)
         }
     }
 
-    string dbo_name = COMPASS::instance().evaluationManager().dboNameTst();
-    std::vector<unsigned int>& counts = counts_[dbo_name];
+    string dbcontent_name = COMPASS::instance().evaluationManager().dbContentNameTst();
+    std::vector<unsigned int>& counts = counts_[dbcontent_name];
 
     if (!counts.size()) // set 0 bins
     {
@@ -1991,7 +1996,7 @@ void HistogramViewDataWidget::updateCounts(const std::vector<double>& data)
         counts.at(bin_number) += 1;
     }
 
-    loginf << "HistogramViewDataWidget: updateCounts: end dbo " << dbo_name;
+    loginf << "HistogramViewDataWidget: updateCounts: end dbo " << dbcontent_name;
 }
 
 void HistogramViewDataWidget::exportDataSlot(bool overwrite)
@@ -2067,24 +2072,24 @@ void HistogramViewDataWidget::rectangleSelectedSlot (unsigned int index1, unsign
 
     for (auto& buf_it : buffers_)
     {
-        string dbo_name = buf_it.first;
+        string dbcontent_name = buf_it.first;
 
         if (view_->isDataVarMeta())
         {
             dbContent::MetaVariable& meta_var = view_->metaDataVar();
-            if (!meta_var.existsIn(dbo_name))
+            if (!meta_var.existsIn(dbcontent_name))
             {
                 logwrn << "HistogramViewDataWidget: rectangleSelectedSlot: meta var does not exist in dbo";
                 continue;
             }
 
-            data_var = &meta_var.getFor(dbo_name);
+            data_var = &meta_var.getFor(dbcontent_name);
         }
         else
         {
             data_var = &view_->dataVar();
 
-            if (data_var->dboName() != dbo_name)
+            if (data_var->dbContentName() != dbcontent_name)
                 continue;
         }
         assert (data_var);
@@ -2111,8 +2116,7 @@ void HistogramViewDataWidget::rectangleSelectedSlot (unsigned int index1, unsign
             assert(buffer->has<bool>(current_var_name));
             NullableVector<bool>& data = buffer->get<bool>(current_var_name);
 
-            selectData<bool> (data, selected_vec, select_min_max, (bool) val_min, (bool) val_max,
-                              select_null, add_to_selection);
+            selectData<bool> (data, selected_vec, select_min_max, val_min, val_max, select_null, add_to_selection);
 
             break;
         }
@@ -2128,8 +2132,7 @@ void HistogramViewDataWidget::rectangleSelectedSlot (unsigned int index1, unsign
             assert(buffer->has<char>(current_var_name));
             NullableVector<char>& data = buffer->get<char>(current_var_name);
 
-            selectData<char> (data, selected_vec, select_min_max, (char) val_min, (char) val_max,
-                              select_null, add_to_selection);
+            selectData<char> (data, selected_vec, select_min_max, val_min, val_max, select_null, add_to_selection);
 
             break;
         }
@@ -2145,9 +2148,7 @@ void HistogramViewDataWidget::rectangleSelectedSlot (unsigned int index1, unsign
             assert(buffer->has<unsigned char>(current_var_name));
             NullableVector<unsigned char>& data = buffer->get<unsigned char>(current_var_name);
 
-            selectData<unsigned char> (data, selected_vec, select_min_max,
-                                       (unsigned char) val_min, (unsigned char) val_max,
-                                       select_null, add_to_selection);
+            selectData<unsigned char> (data, selected_vec, select_min_max, val_min, val_max, select_null, add_to_selection);
 
             break;
         }
@@ -2163,8 +2164,7 @@ void HistogramViewDataWidget::rectangleSelectedSlot (unsigned int index1, unsign
             assert(buffer->has<int>(current_var_name));
             NullableVector<int>& data = buffer->get<int>(current_var_name);
 
-            selectData<int> (data, selected_vec, select_min_max, (int) val_min, (int) val_max,
-                             select_null, add_to_selection);
+            selectData<int> (data, selected_vec, select_min_max, val_min, val_max, select_null, add_to_selection);
 
             break;
         }
@@ -2180,9 +2180,7 @@ void HistogramViewDataWidget::rectangleSelectedSlot (unsigned int index1, unsign
             assert(buffer->has<unsigned int>(current_var_name));
             NullableVector<unsigned int>& data = buffer->get<unsigned int>(current_var_name);
 
-            selectData<unsigned int> (data, selected_vec, select_min_max,
-                                      (unsigned int) val_min, (unsigned int) val_max,
-                                      select_null, add_to_selection);
+            selectData<unsigned int> (data, selected_vec, select_min_max, val_min, val_max, select_null, add_to_selection);
 
             break;
         }
@@ -2198,8 +2196,7 @@ void HistogramViewDataWidget::rectangleSelectedSlot (unsigned int index1, unsign
             assert(buffer->has<long int>(current_var_name));
             NullableVector<long int>& data = buffer->get<long int>(current_var_name);
 
-            selectData<long int> (data, selected_vec, select_min_max, (long int) val_min, (long int) val_max,
-                                  select_null, add_to_selection);
+            selectData<long int> (data, selected_vec, select_min_max, val_min, val_max, select_null, add_to_selection);
 
             break;
         }
@@ -2215,9 +2212,7 @@ void HistogramViewDataWidget::rectangleSelectedSlot (unsigned int index1, unsign
             assert(buffer->has<unsigned long>(current_var_name));
             NullableVector<unsigned long>& data = buffer->get<unsigned long>(current_var_name);
 
-            selectData<unsigned long> (data, selected_vec, select_min_max,
-                                       (unsigned long) val_min, (unsigned long) val_max,
-                                       select_null, add_to_selection);
+            selectData<unsigned long> (data, selected_vec, select_min_max, val_min, val_max, select_null, add_to_selection);
 
             break;
         }
@@ -2265,6 +2260,8 @@ void HistogramViewDataWidget::rectangleSelectedSlot (unsigned int index1, unsign
             assert(buffer->has<string>(current_var_name));
             //NullableVector<string>& data = buffer->get<string>(current_var_name);
 
+            //TODO: write type-specific template specialization for selectData
+
             break;
         }
         case PropertyDataType::JSON:
@@ -2278,6 +2275,8 @@ void HistogramViewDataWidget::rectangleSelectedSlot (unsigned int index1, unsign
 
             assert(buffer->has<nlohmann::json>(current_var_name));
             //NullableVector<string>& data = buffer->get<string>(current_var_name);
+
+            //TODO: write type-specific template specialization for selectData
 
             break;
         }

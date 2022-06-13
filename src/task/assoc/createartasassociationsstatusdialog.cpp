@@ -123,12 +123,12 @@ CreateARTASAssociationsStatusDialog::CreateARTASAssociationsStatusDialog(
     main_layout->addStretch();
 
     // per dbo associations
-    //    QLabel* dbo_associated_label = new QLabel("DBObject Associations");
+    //    QLabel* dbo_associated_label = new QLabel("DBContent Associations");
     //    dbo_associated_label->setFont(font_big);
     //    main_layout->addWidget(dbo_associated_label);
 
     dbo_associated_grid_ = new QGridLayout();
-    updateDBOAssociatedGrid();
+    updateDBContentAssociatedGrid();
     main_layout->addLayout(dbo_associated_grid_);
 
     main_layout->addStretch();
@@ -158,7 +158,7 @@ void CreateARTASAssociationsStatusDialog::setDone()
     assert(ok_button_);
 
     updateTime();
-    updateDBOAssociatedGrid();
+    updateDBContentAssociatedGrid();
 
     loginf << "CreateARTASAssociationsStatusDialog: setDone: done after " << elapsed_time_str_;
 
@@ -180,7 +180,7 @@ void CreateARTASAssociationsStatusDialog::setAssociationCounts(
 {
     association_counts_ = association_counts;
 
-    updateDBOAssociatedGrid();
+    updateDBContentAssociatedGrid();
 }
 
 void CreateARTASAssociationsStatusDialog::setDubiousAssociations(const size_t& dubious_associations)
@@ -238,7 +238,7 @@ void CreateARTASAssociationsStatusDialog::updateTime()
     time_label_->setText(elapsed_time_str_.c_str());
 }
 
-void CreateARTASAssociationsStatusDialog::updateDBOAssociatedGrid()
+void CreateARTASAssociationsStatusDialog::updateDBContentAssociatedGrid()
 {
     assert(dbo_associated_grid_);
 
@@ -253,7 +253,7 @@ void CreateARTASAssociationsStatusDialog::updateDBOAssociatedGrid()
         QFont font_bold;
         font_bold.setBold(true);
 
-        QLabel* dbo_label = new QLabel("DBObject");
+        QLabel* dbo_label = new QLabel("DBContent");
         dbo_label->setFont(font_bold);
         dbo_associated_grid_->addWidget(dbo_label, row, 0);
 

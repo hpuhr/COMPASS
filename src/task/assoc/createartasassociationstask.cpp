@@ -326,17 +326,19 @@ void CreateARTASAssociationsTask::run()
     checkAndSetMetaVariable(DBContent::meta_var_tod_.name(), &tod_var_);
     checkAndSetMetaVariable(DBContent::meta_var_associations_.name(), &associations_var_);
 
-    DBContentManager& object_man = COMPASS::instance().dbContentManager();
+    DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
+    dbcontent_man.clearData();
+
     DataSourceManager& ds_man = COMPASS::instance().dataSourceManager();
 
     COMPASS::instance().viewManager().disableDataDistribution(true);
 
-    connect(&object_man, &DBContentManager::loadedDataSignal,
+    connect(&dbcontent_man, &DBContentManager::loadedDataSignal,
             this, &CreateARTASAssociationsTask::loadedDataDataSlot);
-    connect(&object_man, &DBContentManager::loadingDoneSignal,
+    connect(&dbcontent_man, &DBContentManager::loadingDoneSignal,
             this, &CreateARTASAssociationsTask::loadingDoneSlot);
 
-    for (auto& dbo_it : object_man)
+    for (auto& dbo_it : dbcontent_man)
     {
         if (!dbo_it.second->hasData())
             continue;
@@ -372,7 +374,7 @@ void CreateARTASAssociationsTask::run()
 
             assert(tracker_ds_id_var_);
 
-            //        void DBObject::load (DBOVariableSet& read_set,  std::string
+            //        void DBContent::load (DBOVariableSet& read_set,  std::string
             //        custom_filter_clause,
             //                             std::vector <DBOVariable*> filtered_variables, bool
             //                             use_order, DBOVariable* order_variable, bool
@@ -382,7 +384,7 @@ void CreateARTASAssociationsTask::run()
                                         &tod_var_->getFor("CAT062"), false);
         }
         else
-            dbo_it.second->load(read_set, false, false, nullptr, false);
+            dbo_it.second->load(read_set, false, false, false, nullptr, false);
 
     }
 
@@ -489,14 +491,12 @@ void CreateARTASAssociationsTask::createDoneSlot()
         COMPASS::instance().interface().setProperty(DONE_PROPERTY_NAME, "1");
         COMPASS::instance().dbContentManager().setAssociationsIdentifier("ARTAS");
 
-        task_manager_.appendSuccess("CreateARTASAssociationsTask: done after " + time_str);
+        COMPASS::instance().interface().saveProperties();
+
         done_ = true;
     }
     else
-    {
-        task_manager_.appendWarning("CreateARTASAssociationsTask: done after " + time_str +
-                                    " without saving");
-    }
+        logwrn << "CreateARTASAssociationsTask: done after " << time_str << " without saving";
 
     QApplication::restoreOverrideCursor();
 
@@ -764,19 +764,19 @@ void CreateARTASAssociationsTask::checkAndSetMetaVariable(const std::string& nam
     }
 }
 
-VariableSet CreateARTASAssociationsTask::getReadSetFor(const std::string& dbo_name)
+VariableSet CreateARTASAssociationsTask::getReadSetFor(const std::string& dbcontent_name)
 {
     VariableSet read_set;
 
     assert(tod_var_);
-    assert(tod_var_->existsIn(dbo_name));
-    read_set.add(tod_var_->getFor(dbo_name));
+    assert(tod_var_->existsIn(dbcontent_name));
+    read_set.add(tod_var_->getFor(dbcontent_name));
 
     assert(associations_var_);
-    assert(associations_var_->existsIn(dbo_name));
-    read_set.add(associations_var_->getFor(dbo_name));
+    assert(associations_var_->existsIn(dbcontent_name));
+    read_set.add(associations_var_->getFor(dbcontent_name));
 
-    if (dbo_name == "CAT062")
+    if (dbcontent_name == "CAT062")
     {
         assert(tracker_track_num_var_);
         read_set.add(*tracker_track_num_var_);
@@ -796,14 +796,14 @@ VariableSet CreateARTASAssociationsTask::getReadSetFor(const std::string& dbo_na
     else
     {
         assert(hash_var_);
-        assert(hash_var_->existsIn(dbo_name));
-        read_set.add(hash_var_->getFor(dbo_name));
+        assert(hash_var_->existsIn(dbcontent_name));
+        read_set.add(hash_var_->getFor(dbcontent_name));
     }
 
     // must be last for update process
     assert(rec_num_var_);
-    assert(rec_num_var_->existsIn(dbo_name));
-    read_set.add(rec_num_var_->getFor(dbo_name));
+    assert(rec_num_var_->existsIn(dbcontent_name));
+    read_set.add(rec_num_var_->getFor(dbcontent_name));
 
     return read_set;
 }

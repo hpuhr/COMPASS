@@ -117,7 +117,7 @@ void CreateARTASAssociationsJob::run()
 
     saveAssociations();
 
-//    object_man.setAssociationsDataSource(tracker_dbo_name_, task_.currentDataSourceName());
+//    object_man.setAssociationsDataSource(tracker_dbcontent_name_, task_.currentDataSourceName());
 
     stop_time = boost::posix_time::microsec_clock::local_time();
 
@@ -514,7 +514,7 @@ void CreateARTASAssociationsJob::createSensorAssociations()
     bool best_match_dubious;
     string best_match_dubious_comment;
 
-    string best_match_dbo_name;
+    string best_match_dbcontent_name;
     int best_match_rec_num{-1};
     float best_match_tod{0};
     float tri_tod;
@@ -600,7 +600,7 @@ void CreateARTASAssociationsJob::createSensorAssociations()
                                         best_match_dubious_comment = "";
                                     }
 
-                                    best_match_dbo_name = dbo_it.first;
+                                    best_match_dbcontent_name = dbo_it.first;
                                     best_match_rec_num = match.first;  // rec_num
                                     best_match_tod = match.second;     // tod
                                     match_found = true;
@@ -619,7 +619,7 @@ void CreateARTASAssociationsJob::createSensorAssociations()
                                         String::timeStringFromDouble(tri_tod);
                                 }
 
-                                best_match_dbo_name = dbo_it.first;
+                                best_match_dbcontent_name = dbo_it.first;
                                 best_match_rec_num = match.first;  // rec_num
                                 best_match_tod = match.second;     // tod
                                 match_found = true;
@@ -638,11 +638,11 @@ void CreateARTASAssociationsJob::createSensorAssociations()
                         ++dubious_associations_cnt_;
                     }
 
-//                    object_man.object(best_match_dbo_name)
+//                    object_man.object(best_match_dbcontent_name)
 //                        .addAssociation(best_match_rec_num, ut_it.first, true, assoc_it.first);
 
                     // add utn to non-tracker rec_num
-                    associations_[best_match_dbo_name][best_match_rec_num] =
+                    associations_[best_match_dbcontent_name][best_match_rec_num] =
                             make_tuple(ut_it.first, std::vector<std::pair<std::string, unsigned int>>());
 
                     // add non-tracker rec_num to tracker src rec_nums
@@ -651,7 +651,7 @@ void CreateARTASAssociationsJob::createSensorAssociations()
                     assert (associations_.at(tracker_dbcontent_name_).count(assoc_it.first));
 
                     get<1>(associations_.at(tracker_dbcontent_name_).at(assoc_it.first)).push_back(
-                                {best_match_dbo_name, best_match_rec_num});
+                                {best_match_dbcontent_name, best_match_rec_num});
 
                     ++found_hashes_cnt_;
                 }
@@ -747,8 +747,8 @@ void CreateARTASAssociationsJob::createSensorHashes(DBContent& object)
         return;
     }
 
-    string dbo_name = object.name();
-    shared_ptr<Buffer> buffer = buffers_.at(dbo_name);
+    string dbcontent_name = object.name();
+    shared_ptr<Buffer> buffer = buffers_.at(dbcontent_name);
     size_t buffer_size = buffer->size();
 
     using namespace dbContent;
@@ -757,9 +757,9 @@ void CreateARTASAssociationsJob::createSensorHashes(DBContent& object)
     MetaVariable* hash_meta_var = task_.hashVar();
     MetaVariable* tod_meta_var = task_.todVar();
 
-    Variable& key_var = key_meta_var->getFor(dbo_name);
-    Variable& hash_var = hash_meta_var->getFor(dbo_name);
-    Variable& tod_var = tod_meta_var->getFor(dbo_name);
+    Variable& key_var = key_meta_var->getFor(dbcontent_name);
+    Variable& hash_var = hash_meta_var->getFor(dbcontent_name);
+    Variable& tod_var = tod_meta_var->getFor(dbcontent_name);
 
     assert(buffer->has<unsigned int>(key_var.name()));
     assert(buffer->has<string>(hash_var.name()));
@@ -786,7 +786,7 @@ void CreateARTASAssociationsJob::createSensorHashes(DBContent& object)
         // dbo -> hash -> rec_num, tod
         // map <string, multimap<string, pair<int, float>>> sensor_hashes_;
 
-        sensor_hashes_[dbo_name].emplace(hashes.get(cnt),
+        sensor_hashes_[dbcontent_name].emplace(hashes.get(cnt),
                                          make_pair(rec_nums.get(cnt), tods.get(cnt)));
     }
 }

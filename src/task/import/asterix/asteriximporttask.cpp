@@ -35,7 +35,6 @@
 #include "stringconv.h"
 #include "system.h"
 #include "taskmanager.h"
-#include "taskmanagerwidget.h"
 #include "mainwindow.h"
 #include "stringconv.h"
 
@@ -689,13 +688,6 @@ void ASTERIXImportTask::run(bool test) // , bool create_mapping_stubs
     loginf << "ASTERIXImportTask: run: filename " << current_filename_ << " test " << test_
            << " free RAM " << free_ram << " GB";
 
-    if (test_)
-        task_manager_.appendInfo("ASTERIXImportTask: test import of file '" + current_filename_ +
-                                 "' started");
-    else
-        task_manager_.appendInfo("ASTERIXImportTask: import of file '" + current_filename_ +
-                                 "' started");
-
     assert(canRun());
 
     if (import_file_)
@@ -786,7 +778,10 @@ void ASTERIXImportTask::run(bool test) // , bool create_mapping_stubs
     if (import_file_)
         decode_job_->setDecodeFile(current_filename_, current_file_framing_); // do file import
     else
+    {
+        COMPASS::instance().dataSourceManager().createNetworkDBDataSources();
         decode_job_->setDecodeUDPStreams(COMPASS::instance().dataSourceManager().getNetworkLines()); // record from network
+    }
 
 
     connect(decode_job_.get(), &ASTERIXDecodeJob::obsoleteSignal, this,
@@ -890,17 +885,27 @@ void ASTERIXImportTask::addDecodedASTERIXSlot()
             stop();
             return;
         }
-    }
 
-    // remove if break here for testing
-    if (import_file_ && maxLoadReached())
-    {
-        logdbg << "ASTERIXImportTask: addDecodedASTERIXSlot: returning since max load reached";
-        return;
+        if (maxLoadReached())
+        {
+            logdbg << "ASTERIXImportTask: addDecodedASTERIXSlot: returning since max load reached";
+            return;
+
+        }
     }
 
     if (stopped_)
         return;
+
+    if (num_packets_in_processing_ > 10)
+    {
+        logwrn << "ASTERIXImportTask: addDecodedASTERIXSlot: overload detected, packets in processing "
+               << num_packets_in_processing_ << " skipping data";
+
+        std::unique_ptr<nlohmann::json> extracted_data {decode_job_->extractedData()};
+
+        return;
+    }
 
     logdbg << "ASTERIXImportTask: addDecodedASTERIXSlot: processing data";
 
@@ -911,6 +916,12 @@ void ASTERIXImportTask::addDecodedASTERIXSlot()
     loginf << "ASTERIXImportTask: addDecodedASTERIXSlot: processing data,"
            << " num_packets_in_processing_ " << num_packets_in_processing_
            << " num_packets_total_ " << num_packets_total_;
+
+    if (!extracted_data)
+    {
+        logwrn << "ASTERIXImportTask: addDecodedASTERIXSlot: processing data empty";
+        return;
+    }
 
     // break here for testing
     //return;
@@ -1252,6 +1263,7 @@ void ASTERIXImportTask::checkAllDone()
         }
 
         COMPASS::instance().dataSourceManager().saveDBDataSources();
+        COMPASS::instance().interface().saveProperties();
     }
 
     logdbg << "ASTERIXImportTask: checkAllDone: done";
@@ -1272,7 +1284,8 @@ void ASTERIXImportTask::updateFileProgressDialog()
         file_progress_dialog_.reset(
                     new QProgressDialog(("File '"+current_filename_+"'").c_str(), "Abort", 0, 100));
         file_progress_dialog_->setWindowTitle("Importing ASTERIX Recording");
-        file_progress_dialog_->setWindowModality(Qt::WindowModal);
+        file_progress_dialog_->setWindowModality(Qt::ApplicationModal);
+        //postprocess_dialog.setWindowModality(Qt::ApplicationModal);
     }
 
     string text = "File '"+current_filename_+"'";

@@ -1,7 +1,11 @@
 #ifndef DATASOURCESCONFIGURATIONDIALOG_H
 #define DATASOURCESCONFIGURATIONDIALOG_H
 
+#include "datasourcecreatedialog.h"
+
 #include <QDialog>
+
+#include <memory>
 
 class DataSourceManager;
 class DataSourceTableModel;
@@ -20,6 +24,9 @@ signals:
 public slots:
 
     void currentRowChanged(const QModelIndex& current, const QModelIndex& previous);
+
+    void newDSClickedSlot();
+    void newDSDoneSlot();
 
     void importClickedSlot();
     void deleteAllClickedSlot();
@@ -41,6 +48,8 @@ protected:
     DataSourceTableModel* table_model_;
 
     DataSourceEditWidget* edit_widget_ {nullptr};
+
+    std::unique_ptr<DataSourceCreateDialog> create_dialog_;
 };
 
 #endif // DATASOURCESCONFIGURATIONDIALOG_H

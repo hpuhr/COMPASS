@@ -25,7 +25,6 @@
 #include "evaluationresultsgeneratorwidget.h"
 #include "sectorlayer.h"
 #include "logger.h"
-#include "configurable.h"
 
 #include <tbb/tbb.h>
 
@@ -98,15 +97,11 @@ protected:
     bool single_thread_;
 };
 
-class EvaluationResultsGenerator : public Configurable
+class EvaluationResultsGenerator
 {
 public:
-    EvaluationResultsGenerator(const std::string& class_id, const std::string& instance_id,
-                               EvaluationManager& eval_man);
+    EvaluationResultsGenerator(EvaluationManager& eval_man);
     virtual ~EvaluationResultsGenerator();
-
-    virtual void generateSubConfigurable(const std::string& class_id,
-                                         const std::string& instance_id) override;
 
     void evaluate (EvaluationData& data, EvaluationStandard& standard);
 
@@ -127,15 +122,6 @@ public:
 
     void clear();
 
-    bool splitResultsByMOPS() const;
-    void splitResultsByMOPS(bool value);
-
-    bool showAdsbInfo() const;
-    void showAdsbInfo(bool value);
-
-    bool skipNoDataDetails() const;
-    void skipNoDataDetails(bool value);
-
     EvaluationResultsGeneratorWidget& widget();
 
 protected:
@@ -143,17 +129,11 @@ protected:
 
     std::unique_ptr<EvaluationResultsGeneratorWidget> widget_;
 
-    bool skip_no_data_details_ {true};
-    bool split_results_by_mops_ {false};
-    bool show_adsb_info_ {false};
-
     EvaluationResultsReport::TreeModel results_model_;
 
     // rq group+name -> id -> result, e.g. "All:PD"->"UTN:22"-> or "SectorX:PD"->"All"
     std::map<std::string, std::map<std::string, std::shared_ptr<EvaluationRequirementResult::Base>>> results_;
     std::vector<std::shared_ptr<EvaluationRequirementResult::Base>> results_vec_; // ordered as generated
-
-    virtual void checkSubConfigurables() override;
 
     void addNonResultsContent (std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
 };

@@ -151,6 +151,11 @@ void CreateAssociationsJob::run()
     done_ = true;
 }
 
+std::map<std::string, std::pair<unsigned int, unsigned int> > CreateAssociationsJob::associationCounts() const
+{
+    return association_counts_;
+}
+
 void CreateAssociationsJob::removePreviousAssociations()
 {
     loginf << "CreateAssociationsJob: removePreviousAssociations";
@@ -993,7 +998,7 @@ void CreateAssociationsJob::saveTargets(std::map<unsigned int, Association::Targ
 }
 
 std::map<unsigned int, Association::Target> CreateAssociationsJob::createTrackedTargets(
-        const std::string& dbo_name, unsigned int ds_id)
+        const std::string& dbcontent_name, unsigned int ds_id)
 {
     map<unsigned int, Association::Target> tracker_targets; // utn -> target
 
@@ -1002,7 +1007,7 @@ std::map<unsigned int, Association::Target> CreateAssociationsJob::createTracked
     assert (ds_man.hasDBDataSource(ds_id));
     string ds_name = ds_man.dbDataSource(ds_id).name();
 
-    std::map<unsigned int, std::vector<Association::TargetReport>>& ds_id_trs = target_reports_.at(dbo_name);
+    std::map<unsigned int, std::vector<Association::TargetReport>>& ds_id_trs = target_reports_.at(dbcontent_name);
 
     if (!ds_id_trs.count(ds_id))
     {

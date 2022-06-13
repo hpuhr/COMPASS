@@ -37,7 +37,7 @@ class AllBufferCSVExportJob : public Job
                           std::map<unsigned int, std::string> number_to_dbo,
                           const std::vector<std::pair<unsigned int, unsigned int>>& row_indexes,
                           const std::string& file_name, bool overwrite, bool only_selected,
-                          bool use_presentation, bool show_associations);
+                          bool use_presentation);
     virtual ~AllBufferCSVExportJob();
 
     virtual void run();
@@ -52,7 +52,6 @@ class AllBufferCSVExportJob : public Job
     bool overwrite_;
     bool only_selected_;
     bool use_presentation_;
-    bool show_associations_;
 
     boost::posix_time::ptime start_time_;
     boost::posix_time::ptime stop_time_;

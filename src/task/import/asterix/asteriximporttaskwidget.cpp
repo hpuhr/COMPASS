@@ -68,17 +68,16 @@ void ASTERIXImportTaskWidget::addMainTab()
     {
         QFormLayout* source_layout = new QFormLayout();
 
+        source_label_ = new QLabel();
+        source_layout->addWidget(source_label_);
+
         if (task_.isImportNetwork())
         {
             loginf << "ASTERIXImportTaskWidget: addMainTab: is network import";
-
-            source_layout->addRow(new QLabel("Network"));
         }
         else
         {
             loginf << "ASTERIXImportTaskWidget: addMainTab: is file import";
-
-            source_layout->addRow("File", new QLabel(task_.importFilename().c_str()));
 
             QComboBox* file_line_box = new QComboBox();
             file_line_box->addItems({"1", "2", "3", "4"});
@@ -87,6 +86,8 @@ void ASTERIXImportTaskWidget::addMainTab()
                     this, &ASTERIXImportTaskWidget::fileLineIDEditSlot);
             source_layout->addRow("Line ID", file_line_box);
         }
+
+        updateSourceLabel();
 
         main_tab_layout->addLayout(source_layout);
     }
@@ -134,10 +135,12 @@ void ASTERIXImportTaskWidget::addMappingsTab()
 
     add_object_parser_button_ = new QPushButton("Add");
     connect(add_object_parser_button_, SIGNAL(clicked()), this, SLOT(addParserSlot()));
+    add_object_parser_button_->setEnabled(COMPASS::instance().expertMode());
     parser_manage_layout->addWidget(add_object_parser_button_);
 
     delete_object_parser_button_ = new QPushButton("Remove");
     connect(delete_object_parser_button_, SIGNAL(clicked()), this, SLOT(removeObjectParserSlot()));
+    delete_object_parser_button_->setEnabled(COMPASS::instance().expertMode());
     parser_manage_layout->addWidget(delete_object_parser_button_);
 
     parsers_layout->addLayout(parser_manage_layout);
@@ -261,9 +264,9 @@ void ASTERIXImportTaskWidget::addParserSlot()
     if (ret == QDialog::Accepted)
     {
         unsigned int cat = dialog.category();
-        std::string dbo_name = dialog.selectedObject();
+        std::string dbcontent_name = dialog.selectedObject();
         loginf << "ASTERIXImportTaskWidget: addObjectParserSlot: cat " << cat << " obj "
-               << dbo_name;
+               << dbcontent_name;
 
         std::shared_ptr<ASTERIXJSONParsingSchema> current = task_.schema();
 
@@ -280,7 +283,7 @@ void ASTERIXImportTaskWidget::addParserSlot()
 
         Configuration& config = current->addNewSubConfiguration("ASTERIXJSONParser", instance);
         config.addParameterUnsignedInt("category", cat);
-        config.addParameterString("db_object_name", dbo_name);
+        config.addParameterString("dbcontent_name", dbcontent_name);
 
         current->generateSubConfigurable("JSONObjectParser", instance);
         updateParserBox();
@@ -388,6 +391,16 @@ void ASTERIXImportTaskWidget::debugChangedSlot()
 
 //    test_button_->setDisabled(false);
 //}
+
+void ASTERIXImportTaskWidget::updateSourceLabel()
+{
+    assert (source_label_);
+
+    if (task_.isImportNetwork())
+        source_label_->setText("Source: Network");
+    else // file
+        source_label_->setText(("Source: "+task_.importFilename()).c_str());
+}
 
 ASTERIXOverrideWidget* ASTERIXImportTaskWidget::overrideWidget() const
 {

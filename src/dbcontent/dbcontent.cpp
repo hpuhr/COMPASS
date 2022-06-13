@@ -16,16 +16,13 @@
  */
 
 #include "dbcontent/dbcontent.h"
-
 #include "compass.h"
 #include "buffer.h"
 #include "dbinterface.h"
 #include "dbcontent/dbcontentmanager.h"
 #include "dbcontent/dbcontentwidget.h"
-#include "dbcontent/labeldefinition.h"
-#include "dbcontent/labeldefinitionwidget.h"
 #include "datasourcemanager.h"
-#include "dboreaddbjob.h"
+#include "dbcontentreaddbjob.h"
 #include "dbcontent/variable/variable.h"
 #include "dbtableinfo.h"
 #include "filtermanager.h"
@@ -57,6 +54,7 @@ const Property DBContent::meta_var_tod_ {"Time of Day", PropertyDataType::FLOAT}
 const Property DBContent::meta_var_m3a_ {"Mode 3/A Code", PropertyDataType::UINT};
 const Property DBContent::meta_var_m3a_g_ {"Mode 3/A Garbled", PropertyDataType::BOOL};
 const Property DBContent::meta_var_m3a_v_ {"Mode 3/A Valid", PropertyDataType::BOOL};
+const Property DBContent::meta_var_m3a_smoothed_ {"Mode 3/A Smoothed", PropertyDataType::BOOL};
 const Property DBContent::meta_var_ta_ {"Aircraft Address", PropertyDataType::UINT};
 const Property DBContent::meta_var_ti_ {"Aircraft Identification", PropertyDataType::STRING};
 const Property DBContent::meta_var_mc_ {"Mode C Code", PropertyDataType::FLOAT};
@@ -64,6 +62,10 @@ const Property DBContent::meta_var_mc_g_ {"Mode C Garbled", PropertyDataType::BO
 const Property DBContent::meta_var_mc_v_ {"Mode C Valid", PropertyDataType::BOOL};
 const Property DBContent::meta_var_ground_bit_ {"Ground Bit", PropertyDataType::BOOL};
 const Property DBContent::meta_var_track_num_ {"Track Number", PropertyDataType::UINT};
+
+const Property DBContent::meta_var_track_begin_ {"Track Begin", PropertyDataType::BOOL};
+const Property DBContent::meta_var_track_confirmed_ {"Track Confirmed", PropertyDataType::BOOL};
+const Property DBContent::meta_var_track_coasting_ {"Track Coasting", PropertyDataType::UCHAR};
 const Property DBContent::meta_var_track_end_ {"Track End", PropertyDataType::BOOL};
 
 const Property DBContent::meta_var_latitude_ {"Latitude", PropertyDataType::DOUBLE};
@@ -77,6 +79,7 @@ const Property DBContent::meta_var_vx_ {"Vx", PropertyDataType::DOUBLE};
 const Property DBContent::meta_var_vy_ {"Vy", PropertyDataType::DOUBLE};
 const Property DBContent::meta_var_ground_speed_ {"Track Groundspeed", PropertyDataType::DOUBLE};
 const Property DBContent::meta_var_track_angle_ {"Track Angle", PropertyDataType::DOUBLE};
+const Property DBContent::meta_var_horizontal_man_ {"Track Horizontal Manoeuvre", PropertyDataType::BOOL};
 
 const Property DBContent::meta_var_x_stddev_ {"X StdDev", PropertyDataType::DOUBLE};
 const Property DBContent::meta_var_y_stddev_ {"Y StdDev", PropertyDataType::DOUBLE};
@@ -85,6 +88,9 @@ const Property DBContent::meta_var_latitude_stddev_ {"Latitude StdDev", Property
 const Property DBContent::meta_var_longitude_stddev_ {"Longitude StdDev", PropertyDataType::DOUBLE};
 const Property DBContent::meta_var_latlon_cov_ {"Lat/Lon Cov", PropertyDataType::DOUBLE};
 
+const Property DBContent::meta_var_climb_descent_{"Track Climbing/Descending", PropertyDataType::UCHAR};
+const Property DBContent::meta_var_spi_{"SPI", PropertyDataType::BOOL};
+
 const Property DBContent::var_radar_range_ {"Range", PropertyDataType::DOUBLE};
 const Property DBContent::var_radar_azimuth_ {"Azimuth", PropertyDataType::DOUBLE};
 const Property DBContent::var_radar_altitude_ {"Mode C Code", PropertyDataType::FLOAT};
@@ -92,12 +98,15 @@ const Property DBContent::var_radar_altitude_ {"Mode C Code", PropertyDataType::
 const Property DBContent::var_cat021_mops_version_ {"MOPS Version", PropertyDataType::UCHAR};
 const Property DBContent::var_cat021_nacp_ {"NACp", PropertyDataType::UCHAR};
 const Property DBContent::var_cat021_nucp_nic_ {"NUCp or NIC", PropertyDataType::UCHAR};
+const Property DBContent::var_cat021_sil_ {"SIL", PropertyDataType::UCHAR};
 
 const Property DBContent::var_cat062_tris_ {"Target Report Identifiers", PropertyDataType::STRING};
 const Property DBContent::var_cat062_track_begin_ {"Track Begin", PropertyDataType::BOOL};
 const Property DBContent::var_cat062_coasting_ {"Coasting", PropertyDataType::BOOL};
 const Property DBContent::var_cat062_track_end_ {"Track End", PropertyDataType::BOOL};
 const Property DBContent::var_cat062_baro_alt_ {"Barometric Altitude Calculated", PropertyDataType::FLOAT};
+
+const Property DBContent::var_cat062_wtc_ {"Wake Turbulence Category FPL", PropertyDataType::STRING};
 
 const Property DBContent::selected_var {"selected", PropertyDataType::BOOL};
 
@@ -162,11 +171,6 @@ void DBContent::generateSubConfigurable(const string& class_id, const string& in
 
         variables_.emplace_back(new Variable(class_id, instance_id, this));
     }
-    else if (class_id == "LabelDefinition")
-    {
-        assert(!label_definition_);
-        label_definition_.reset(new dbContent::LabelDefinition(class_id, instance_id, this, dbo_manager_));
-    }
     else
         throw runtime_error("DBContent: generateSubConfigurable: unknown class_id " + class_id);
 
@@ -177,12 +181,6 @@ void DBContent::generateSubConfigurable(const string& class_id, const string& in
 void DBContent::checkSubConfigurables()
 {
     // nothing to see here
-
-    if (!label_definition_)
-    {
-        generateSubConfigurable("LabelDefinition", "LabelDefinition0");
-        assert(label_definition_);
-    }
 }
 
 bool DBContent::hasVariable(const string& name) const
@@ -312,13 +310,7 @@ DBContentWidget* DBContent::widget()
 
 void DBContent::closeWidget() { widget_ = nullptr; }
 
-dbContent::LabelDefinitionWidget* DBContent::labelDefinitionWidget()
-{
-    assert(label_definition_);
-    return label_definition_->widget();
-}
-
-void DBContent::load(VariableSet& read_set, bool use_filters, bool use_order,
+void DBContent::load(VariableSet& read_set, bool use_datasrc_filters, bool use_filters, bool use_order,
                      Variable* order_variable, bool use_order_ascending,
                      const string& limit_str)
 {
@@ -331,7 +323,7 @@ void DBContent::load(VariableSet& read_set, bool use_filters, bool use_order,
 
     DataSourceManager& ds_man = COMPASS::instance().dataSourceManager();
 
-    if (ds_man.hasDSFilter(name_))
+    if (use_datasrc_filters && (ds_man.hasDSFilter(name_) || ds_man.lineSpecificLoadingRequired(name_)))
     {
         vector<unsigned int> ds_ids_to_load = ds_man.unfilteredDS(name_);
         assert (ds_ids_to_load.size());
@@ -343,6 +335,8 @@ void DBContent::load(VariableSet& read_set, bool use_filters, bool use_order,
 
         if (ds_man.lineSpecificLoadingRequired(name_)) // ds specific line loading
         {
+            loginf << "DBContent " << name_ << ": load: line specific loading wanted";
+
             assert (hasVariable(DBContent::meta_var_line_id_.name()));
 
             Variable& line_var = variable(DBContent::meta_var_line_id_.name());
@@ -386,8 +380,9 @@ void DBContent::load(VariableSet& read_set, bool use_filters, bool use_order,
             if (ds_ids_to_load.size())
                 custom_filter_clause += ")";
         }
-        else // simple line id in statement
+        else // simple ds id in statement
         {
+            loginf << "DBContent " << name_ << ": load: no line specific loading wanted";
 
             // add to filtered vars
             filtered_variables.push_back(&datasource_var);
@@ -447,17 +442,17 @@ void DBContent::loadFiltered(VariableSet& read_set, const std::vector<std::strin
     //    DBInterface &db_interface, DBContent &dbobject, VariableSet read_list, string
     //    custom_filter_clause, Variable *order, const string &limit_str
 
-    read_job_ = shared_ptr<DBOReadDBJob>(
-                new DBOReadDBJob(
+    read_job_ = shared_ptr<DBContentReadDBJob>(
+                new DBContentReadDBJob(
                     COMPASS::instance().interface(), *this, read_set, extra_from_parts,
                     custom_filter_clause, filtered_variables,
                     use_order, order_variable, use_order_ascending, limit_str));
 
-    connect(read_job_.get(), &DBOReadDBJob::intermediateSignal,
+    connect(read_job_.get(), &DBContentReadDBJob::intermediateSignal,
             this, &DBContent::readJobIntermediateSlot, Qt::QueuedConnection);
-    connect(read_job_.get(),  &DBOReadDBJob::obsoleteSignal,
+    connect(read_job_.get(),  &DBContentReadDBJob::obsoleteSignal,
             this, &DBContent::readJobObsoleteSlot, Qt::QueuedConnection);
-    connect(read_job_.get(), &DBOReadDBJob::doneSignal,
+    connect(read_job_.get(), &DBContentReadDBJob::doneSignal,
             this, &DBContent::readJobDoneSlot, Qt::QueuedConnection);
 
     JobManager::instance().addDBJob(read_job_);
@@ -549,8 +544,6 @@ void DBContent::doDataSourcesBeforeInsert (shared_ptr<Buffer> buffer)
         {
 
             ds_man.dbDataSource(ds_id_it.first).addNumInserted(name_, line_cnt_it.first, line_cnt_it.second);
-            ds_man.dbDataSource(ds_id_it.first).addNumLoaded(name_, line_cnt_it.first, line_cnt_it.second);
-            // because propagated after
         }
     }
 }
@@ -562,12 +555,13 @@ void DBContent::insertDoneSlot()
 
     assert(insert_job_);
 
+    is_loadable_ = true;
+    count_ += insert_job_->buffer()->size();
+
     insert_job_ = nullptr;
     insert_active_ = false;
 
     dbo_manager_.insertDone(*this);
-
-    is_loadable_ = true;
 
     //dbo_manager_.databaseContentChangedSlot();
 
@@ -579,6 +573,19 @@ void DBContent::updateData(Variable& key_var, shared_ptr<Buffer> buffer)
     assert(!update_job_);
 
     assert(existsInDB());
+
+    VariableSet list;
+
+    for (auto prop_it : buffer->properties().properties())
+    {
+        assert (hasVariable(prop_it.name()));
+        list.add(variable(prop_it.name()));
+    }
+
+    assert(!insert_job_);
+
+    // transform variable names from dbovars to dbcolumns
+    buffer->transformVariables(list, false);
 
     update_job_ =
             make_shared<UpdateBufferDBJob>(COMPASS::instance().interface(), *this, key_var, buffer);
@@ -600,68 +607,68 @@ void DBContent::updateDoneSlot()
     emit updateDoneSignal(*this);
 }
 
-map<unsigned int, string> DBContent::loadLabelData(vector<unsigned int> rec_nums, int break_item_cnt)
-{
-    assert(is_loadable_);
-    assert(existsInDB());
+//map<unsigned int, string> DBContent::loadLabelData(vector<unsigned int> rec_nums, int break_item_cnt)
+//{
+//    assert(is_loadable_);
+//    assert(existsInDB());
 
-    string custom_filter_clause;
-    bool first = true;
+//    string custom_filter_clause;
+//    bool first = true;
 
-    assert (dbo_manager_.existsMetaVariable(DBContent::meta_var_rec_num_.name()));
-    assert (dbo_manager_.metaVariable(DBContent::meta_var_rec_num_.name()).existsIn(name_));
+//    assert (dbo_manager_.existsMetaVariable(DBContent::meta_var_rec_num_.name()));
+//    assert (dbo_manager_.metaVariable(DBContent::meta_var_rec_num_.name()).existsIn(name_));
 
-    Variable& rec_num_var = dbo_manager_.metaVariable(DBContent::meta_var_rec_num_.name()).getFor(name_);
+//    Variable& rec_num_var = dbo_manager_.metaVariable(DBContent::meta_var_rec_num_.name()).getFor(name_);
 
-    custom_filter_clause = rec_num_var.dbColumnName() + " in (";
-    for (auto& rec_num : rec_nums)
-    {
-        if (first)
-            first = false;
-        else
-            custom_filter_clause += ",";
+//    custom_filter_clause = rec_num_var.dbColumnName() + " in (";
+//    for (auto& rec_num : rec_nums)
+//    {
+//        if (first)
+//            first = false;
+//        else
+//            custom_filter_clause += ",";
 
-        custom_filter_clause += to_string(rec_num);
-    }
-    custom_filter_clause += ")";
+//        custom_filter_clause += to_string(rec_num);
+//    }
+//    custom_filter_clause += ")";
 
-    VariableSet read_list = label_definition_->readList();
+//    VariableSet read_list = label_definition_->readList();
 
-    if (!read_list.hasVariable(rec_num_var))
-        read_list.add(rec_num_var);
+//    if (!read_list.hasVariable(rec_num_var))
+//        read_list.add(rec_num_var);
 
-    boost::posix_time::ptime start_time = boost::posix_time::microsec_clock::local_time();
+//    boost::posix_time::ptime start_time = boost::posix_time::microsec_clock::local_time();
 
-    DBInterface& db_interface = COMPASS::instance().interface();
+//    DBInterface& db_interface = COMPASS::instance().interface();
 
-    db_interface.prepareRead(*this, read_list, {}, custom_filter_clause, {}, false, nullptr, false, "");
-    shared_ptr<Buffer> buffer = db_interface.readDataChunk(*this);
-    db_interface.finalizeReadStatement(*this);
+//    db_interface.prepareRead(*this, read_list, {}, custom_filter_clause, {}, false, nullptr, false, "");
+//    shared_ptr<Buffer> buffer = db_interface.readDataChunk(*this);
+//    db_interface.finalizeReadStatement(*this);
 
-    if (buffer->size() != rec_nums.size())
-        throw runtime_error("DBContent " + name_ +
-                            ": loadLabelData: failed to load label for " +
-                            custom_filter_clause);
+//    if (buffer->size() != rec_nums.size())
+//        throw runtime_error("DBContent " + name_ +
+//                            ": loadLabelData: failed to load label for " +
+//                            custom_filter_clause);
 
-    assert(buffer->size() == rec_nums.size());
+//    assert(buffer->size() == rec_nums.size());
 
-    map<unsigned int, string> labels =
-            label_definition_->generateLabels(rec_nums, buffer, break_item_cnt);
+//    map<unsigned int, string> labels =
+//            label_definition_->generateLabels(rec_nums, buffer, break_item_cnt);
 
-    boost::posix_time::ptime stop_time = boost::posix_time::microsec_clock::local_time();
-    boost::posix_time::time_duration diff = stop_time - start_time;
+//    boost::posix_time::ptime stop_time = boost::posix_time::microsec_clock::local_time();
+//    boost::posix_time::time_duration diff = stop_time - start_time;
 
-    logdbg << "DBContent: loadLabelData: done after " << diff.total_milliseconds() << " ms";
+//    logdbg << "DBContent: loadLabelData: done after " << diff.total_milliseconds() << " ms";
 
-    return labels;
-}
+//    return labels;
+//}
 
 void DBContent::readJobIntermediateSlot(shared_ptr<Buffer> buffer)
 {
     assert(buffer);
     loginf << "DBContent: " << name_ << " readJobIntermediateSlot: buffer size " << buffer->size();
 
-    DBOReadDBJob* sender = dynamic_cast<DBOReadDBJob*>(QObject::sender());
+    DBContentReadDBJob* sender = dynamic_cast<DBContentReadDBJob*>(QObject::sender());
 
     assert (sender);
     assert(sender == read_job_.get());
@@ -791,12 +798,6 @@ void DBContent::databaseClosedSlot()
 string DBContent::dbTableName() const
 {
     return db_table_name_;
-}
-
-void DBContent::checkLabelDefinitions()
-{
-    assert (label_definition_);
-    label_definition_->checkLabelDefinitions();
 }
 
 //bool DBContent::associationsLoaded() const

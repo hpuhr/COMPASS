@@ -35,16 +35,16 @@ void ASTERIXJSONMappingJob::run()
 
     started_ = true;
 
-    string dbo_name;
+    string dbcontent_name;
 
     for (auto& parser_it : parsers_)
     {
-        dbo_name = parser_it.second->dbObjectName();
+        dbcontent_name = parser_it.second->dbObjectName();
 
-        if (!buffers_.count(dbo_name))
-            buffers_[dbo_name] = parser_it.second->getNewBuffer();
+        if (!buffers_.count(dbcontent_name))
+            buffers_[dbcontent_name] = parser_it.second->getNewBuffer();
         else
-            parser_it.second->appendVariablesToBuffer(*buffers_.at(dbo_name));
+            parser_it.second->appendVariablesToBuffer(*buffers_.at(dbcontent_name));
     }
 
     auto process_lambda = [this](nlohmann::json& record) {
@@ -66,16 +66,16 @@ void ASTERIXJSONMappingJob::run()
 
         const unique_ptr<ASTERIXJSONParser>& parser = parsers_.at(category);
 
-        string dbo_name = parser->dbObjectName();
+        string dbcontent_name = parser->dbObjectName();
 
         logdbg << "ASTERIXJSONMappingJob: run: mapping json: cat " << category;
 
-        std::shared_ptr<Buffer>& buffer = buffers_.at(dbo_name);
+        std::shared_ptr<Buffer>& buffer = buffers_.at(dbcontent_name);
         assert(buffer);
 
         try
         {
-            logdbg << "ASTERIXJSONMappingJob: run: obj " << dbo_name << " parsing JSON";
+            logdbg << "ASTERIXJSONMappingJob: run: obj " << dbcontent_name << " parsing JSON";
 
             parsed = parser->parseJSON(record, *buffer);
 
@@ -85,14 +85,14 @@ void ASTERIXJSONMappingJob::run()
 //                //parser.transformBuffer(*buffer, buffer->size() - 1);
 //            }
 
-            logdbg << "ASTERIXJSONMappingJob: run: obj " << dbo_name << " done";
+            logdbg << "ASTERIXJSONMappingJob: run: obj " << dbcontent_name << " done";
 
             parsed_any |= parsed;
         }
         catch (exception& e)
         {
             logerr << "ASTERIXJSONMappingJob: run: caught exception '" << e.what() << "' in \n'"
-                       << record.dump(4) << "' parser dbo " << dbo_name;
+                       << record.dump(4) << "' parser dbo " << dbcontent_name;
 
             ++num_errors_;
 

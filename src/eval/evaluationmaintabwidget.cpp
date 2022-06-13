@@ -48,16 +48,16 @@ EvaluationMainTabWidget::EvaluationMainTabWidget(EvaluationManager& eval_man,
 
     // titles define which data sources to display
     data_source_ref_widget_.reset(
-                new EvaluationDataSourceWidget("Reference Data", eval_man_.dboNameRef(), eval_man_.lineIDRef()));
-    connect (data_source_ref_widget_.get(), &EvaluationDataSourceWidget::dboNameChangedSignal,
+                new EvaluationDataSourceWidget("Reference Data", eval_man_.dbContentNameRef(), eval_man_.lineIDRef()));
+    connect (data_source_ref_widget_.get(), &EvaluationDataSourceWidget::dbContentNameChangedSignal,
              this, &EvaluationMainTabWidget::dboRefNameChangedSlot);
     connect (data_source_ref_widget_.get(), &EvaluationDataSourceWidget::lineChangedSignal,
              this, &EvaluationMainTabWidget::lineRefChangedSlot);
     data_sources_layout->addWidget(data_source_ref_widget_.get());
 
     data_source_tst_widget_.reset(
-                new EvaluationDataSourceWidget("Test Data", eval_man_.dboNameTst(), eval_man_.lineIDTst()));
-    connect (data_source_tst_widget_.get(), &EvaluationDataSourceWidget::dboNameChangedSignal,
+                new EvaluationDataSourceWidget("Test Data", eval_man_.dbContentNameTst(), eval_man_.lineIDTst()));
+    connect (data_source_tst_widget_.get(), &EvaluationDataSourceWidget::dbContentNameChangedSignal,
              this, &EvaluationMainTabWidget::dboTstNameChangedSlot);
     connect (data_source_tst_widget_.get(), &EvaluationDataSourceWidget::lineChangedSignal,
              this, &EvaluationMainTabWidget::lineTstChangedSlot);
@@ -123,11 +123,11 @@ void EvaluationMainTabWidget::updateSectors()
     sector_widget_->update();
 }
 
-void EvaluationMainTabWidget::dboRefNameChangedSlot(const std::string& dbo_name)
+void EvaluationMainTabWidget::dboRefNameChangedSlot(const std::string& dbcontent_name)
 {
-    loginf << "EvaluationMainTabWidget: dboRefNameChangedSlot: name " << dbo_name;
+    loginf << "EvaluationMainTabWidget: dboRefNameChangedSlot: name " << dbcontent_name;
 
-    eval_man_.dboNameRef(dbo_name);
+    eval_man_.dbContentNameRef(dbcontent_name);
 }
 
 void EvaluationMainTabWidget::lineRefChangedSlot(unsigned int line_id)
@@ -137,11 +137,11 @@ void EvaluationMainTabWidget::lineRefChangedSlot(unsigned int line_id)
     eval_man_.lineIDRef(line_id);
 }
 
-void EvaluationMainTabWidget::dboTstNameChangedSlot(const std::string& dbo_name)
+void EvaluationMainTabWidget::dboTstNameChangedSlot(const std::string& dbcontent_name)
 {
-    loginf << "EvaluationMainTabWidget: dboTstNameChangedSlot: name " << dbo_name;
+    loginf << "EvaluationMainTabWidget: dboTstNameChangedSlot: name " << dbcontent_name;
 
-    eval_man_.dboNameTst(dbo_name);
+    eval_man_.dbContentNameTst(dbcontent_name);
 }
 
 void EvaluationMainTabWidget::lineTstChangedSlot(unsigned int line_id)

@@ -112,7 +112,7 @@ JSONDataMapping::JSONDataMapping(const std::string& class_id, const std::string&
 
 //    other.configuration().updateParameterPointer("active", &active_);
 //    other.configuration().updateParameterPointer("json_key", &json_key_);
-//    other.configuration().updateParameterPointer("db_object_name", &db_content_name_);
+//    other.configuration().updateParameterPointer("dbcontent_name", &db_content_name_);
 //    other.configuration().updateParameterPointer("dbovariable_name", &dbcontent_variable_name_);
 //    other.configuration().updateParameterPointer("mandatory", &mandatory_);
 //    other.configuration().updateParameterPointer("comment", &comment_);
@@ -165,9 +165,9 @@ void JSONDataMapping::check()
     if (db_content_name_.size() && !obj_man.existsDBContent(db_content_name_))
         assert (false);
 
-    DBContent& db_object = obj_man.dbContent(db_content_name_);
+    DBContent& dbcontent = obj_man.dbContent(db_content_name_);
 
-    if (dbcontent_variable_name_.size() && !db_object.hasVariable(dbcontent_variable_name_))
+    if (dbcontent_variable_name_.size() && !dbcontent.hasVariable(dbcontent_variable_name_))
         dbcontent_variable_name_ = "";
 
     if (active_ && !canBeActive())

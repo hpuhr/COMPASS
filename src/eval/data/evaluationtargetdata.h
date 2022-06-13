@@ -92,13 +92,13 @@ public:
     std::string timeEndStr() const;
     float timeDuration() const;
 
-    std::vector<std::string> callsigns() const;
+    std::set<std::string> callsigns() const;
     std::string callsignsStr() const;
 
-    std::vector<unsigned int> targetAddresses() const;
+    std::set<unsigned int> targetAddresses() const;
     std::string targetAddressesStr() const;
 
-    std::vector<unsigned int> modeACodes() const;
+    std::set<unsigned int> modeACodes() const;
     std::string modeACodesStr() const;
 
     bool hasModeC() const;
@@ -213,9 +213,9 @@ protected:
     std::multimap<float, unsigned int> tst_data_; // tod -> index
     mutable std::vector<unsigned int> tst_indexes_;
 
-    mutable std::vector<std::string> callsigns_;
-    mutable std::vector<unsigned int> target_addresses_;
-    mutable std::vector<unsigned int> mode_a_codes_;
+    mutable std::set<std::string> callsigns_;
+    mutable std::set<unsigned int> target_addresses_;
+    mutable std::set<unsigned int> mode_a_codes_;
 
     mutable bool has_mode_c_ {false};
     mutable float mode_c_min_ {0};

@@ -69,16 +69,16 @@ void ManageDataSourcesTask::generateSubConfigurable(const std::string& class_id,
         unsigned int id = configuration()
                               .getSubConfiguration(class_id, instance_id)
                               .getParameterConfigValueUint("id");
-        std::string dbo_name = configuration()
+        std::string dbcontent_name = configuration()
                                    .getSubConfiguration(class_id, instance_id)
-                                   .getParameterConfigValueString("dbo_name");
+                                   .getParameterConfigValueString("dbcontent_name");
 
-        assert(stored_data_sources_[dbo_name].find(id) == stored_data_sources_[dbo_name].end());
+        assert(stored_data_sources_[dbcontent_name].find(id) == stored_data_sources_[dbcontent_name].end());
 
         logdbg << "ManageDataSourcesTask: generateSubConfigurable: generating stored DS "
-               << instance_id << " with object " << dbo_name << " id " << id;
+               << instance_id << " with object " << dbcontent_name << " id " << id;
 
-        stored_data_sources_[dbo_name].emplace(std::piecewise_construct,
+        stored_data_sources_[dbcontent_name].emplace(std::piecewise_construct,
                                                std::forward_as_tuple(id),  // args for key
                                                std::forward_as_tuple(class_id, instance_id, *this));
         // args for mapped value
@@ -121,39 +121,39 @@ bool ManageDataSourcesTask::isRecommended()
     return false;
 }
 
-bool ManageDataSourcesTask::hasStoredDataSource(const std::string& dbo_name, unsigned int id)
+bool ManageDataSourcesTask::hasStoredDataSource(const std::string& dbcontent_name, unsigned int id)
 {
-    return stored_data_sources_[dbo_name].find(id) != stored_data_sources_[dbo_name].end();
+    return stored_data_sources_[dbcontent_name].find(id) != stored_data_sources_[dbcontent_name].end();
 }
 
-StoredDBODataSource& ManageDataSourcesTask::storedDataSource(const std::string& dbo_name,
+StoredDBODataSource& ManageDataSourcesTask::storedDataSource(const std::string& dbcontent_name,
                                                              unsigned int id)
 {
-    assert(hasStoredDataSource(dbo_name, id));
-    return stored_data_sources_[dbo_name].at(id);
+    assert(hasStoredDataSource(dbcontent_name, id));
+    return stored_data_sources_[dbcontent_name].at(id);
 }
 
-StoredDBODataSource& ManageDataSourcesTask::addNewStoredDataSource(const std::string& dbo_name)
+StoredDBODataSource& ManageDataSourcesTask::addNewStoredDataSource(const std::string& dbcontent_name)
 {
-    unsigned int id = stored_data_sources_[dbo_name].size()
-                          ? stored_data_sources_[dbo_name].rbegin()->first + 1
+    unsigned int id = stored_data_sources_[dbcontent_name].size()
+                          ? stored_data_sources_[dbcontent_name].rbegin()->first + 1
                           : 0;
 
-    loginf << "ManageDataSourcesTask: addNewStoredDataSource: new for object " << dbo_name << " id "
+    loginf << "ManageDataSourcesTask: addNewStoredDataSource: new for object " << dbcontent_name << " id "
            << id;
 
-    assert(!hasStoredDataSource(dbo_name, id));
+    assert(!hasStoredDataSource(dbcontent_name, id));
 
-    std::string instance_id = "StoredDBODataSource" + dbo_name + std::to_string(id);
+    std::string instance_id = "StoredDBODataSource" + dbcontent_name + std::to_string(id);
 
     Configuration& config =
         configuration().addNewSubConfiguration("StoredDBODataSource", instance_id);
     config.addParameterUnsignedInt("id", id);
-    config.addParameterString("dbo_name", dbo_name);
+    config.addParameterString("dbcontent_name", dbcontent_name);
 
     generateSubConfigurable("StoredDBODataSource", instance_id);
 
-    return storedDataSource(dbo_name, id);
+    return storedDataSource(dbcontent_name, id);
 }
 
 // void ManageDataSourcesTask::renameStoredDataSource (const std::string& name, const std::string&
@@ -173,72 +173,72 @@ StoredDBODataSource& ManageDataSourcesTask::addNewStoredDataSource(const std::st
 //    stored_data_sources_.at(new_name).name(new_name);
 //}
 
-void ManageDataSourcesTask::deleteStoredDataSource(const std::string& dbo_name, unsigned int id)
+void ManageDataSourcesTask::deleteStoredDataSource(const std::string& dbcontent_name, unsigned int id)
 {
-    assert(hasStoredDataSource(dbo_name, id));
-    stored_data_sources_[dbo_name].erase(id);
-    assert(!hasStoredDataSource(dbo_name, id));
+    assert(hasStoredDataSource(dbcontent_name, id));
+    stored_data_sources_[dbcontent_name].erase(id);
+    assert(!hasStoredDataSource(dbcontent_name, id));
 
-    if (edit_ds_widgets_[dbo_name])
-        edit_ds_widgets_[dbo_name]->update();
+    if (edit_ds_widgets_[dbcontent_name])
+        edit_ds_widgets_[dbcontent_name]->update();
 }
 
 const std::map<unsigned int, StoredDBODataSource>& ManageDataSourcesTask::storedDataSources(
-    const std::string& dbo_name)
+    const std::string& dbcontent_name)
 {
-    return stored_data_sources_[dbo_name];  // might not have ones, so use []
+    return stored_data_sources_[dbcontent_name];  // might not have ones, so use []
 }
 
 DBOEditDataSourceActionOptionsCollection ManageDataSourcesTask::getSyncOptionsFromDB(
-    const std::string& dbo_name)
+    const std::string& dbcontent_name)
 {
     DBOEditDataSourceActionOptionsCollection options_collection;
 
-    assert(COMPASS::instance().objectManager().existsDBContent(dbo_name));
+    assert(COMPASS::instance().objectManager().existsDBContent(dbcontent_name));
 
     const std::map<int, DBODataSource>& db_data_sources =
-        COMPASS::instance().objectManager().object(dbo_name).dataSources();
+        COMPASS::instance().objectManager().object(dbcontent_name).dataSources();
 
     for (auto& ds_it : db_data_sources)
     {
         assert(ds_it.first >= 0);  // todo refactor to uint?
         unsigned int id = ds_it.first;
         options_collection[id] = DBOEditDataSourceActionOptionsCreator::getSyncOptionsFromDB(
-            COMPASS::instance().objectManager().object(dbo_name), ds_it.second);
+            COMPASS::instance().objectManager().object(dbcontent_name), ds_it.second);
     }
 
     return options_collection;
 }
 
 DBOEditDataSourceActionOptionsCollection ManageDataSourcesTask::getSyncOptionsFromCfg(
-    const std::string& dbo_name)
+    const std::string& dbcontent_name)
 {
     DBOEditDataSourceActionOptionsCollection options_collection;
 
-    assert(COMPASS::instance().objectManager().existsDBContent(dbo_name));
+    assert(COMPASS::instance().objectManager().existsDBContent(dbcontent_name));
 
-    for (auto& ds_it : stored_data_sources_[dbo_name])
+    for (auto& ds_it : stored_data_sources_[dbcontent_name])
     {
         assert(ds_it.first >= 0);  // todo refactor to uint?
         unsigned int id = ds_it.first;
         options_collection[id] = DBOEditDataSourceActionOptionsCreator::getSyncOptionsFromCfg(
-            COMPASS::instance().objectManager().object(dbo_name), ds_it.second);
+            COMPASS::instance().objectManager().object(dbcontent_name), ds_it.second);
     }
 
     return options_collection;
 }
 
-DBOEditDataSourcesWidget* ManageDataSourcesTask::editDataSourcesWidget(const std::string& dbo_name)
+DBOEditDataSourcesWidget* ManageDataSourcesTask::editDataSourcesWidget(const std::string& dbcontent_name)
 {
-    if (!edit_ds_widgets_[dbo_name])
+    if (!edit_ds_widgets_[dbcontent_name])
     {
-        assert(COMPASS::instance().objectManager().existsDBContent(dbo_name));
+        assert(COMPASS::instance().objectManager().existsDBContent(dbcontent_name));
 
-        edit_ds_widgets_[dbo_name].reset(new DBOEditDataSourcesWidget(
-            *this, COMPASS::instance().objectManager().object(dbo_name)));
+        edit_ds_widgets_[dbcontent_name].reset(new DBOEditDataSourcesWidget(
+            *this, COMPASS::instance().objectManager().object(dbcontent_name)));
     }
 
-    return edit_ds_widgets_[dbo_name].get();
+    return edit_ds_widgets_[dbcontent_name].get();
 }
 
 void ManageDataSourcesTask::exportConfigDataSources()
@@ -333,14 +333,14 @@ void ManageDataSourcesTask::importConfigDataSources(const std::string& filename)
 
         for (auto& j_dbo_it : j.items())
         {
-            std::string dbo_name = j_dbo_it.key();
+            std::string dbcontent_name = j_dbo_it.key();
 
             for (auto& j_ds_it : j_dbo_it.value().get<json::array_t>())
             {
-                loginf << "ManageDataSourcesTask: importConfigDataSources: found dbo " << dbo_name
+                loginf << "ManageDataSourcesTask: importConfigDataSources: found dbo " << dbcontent_name
                        << " ds '" << j_ds_it.dump(4) << "'";
 
-                assert(j_ds_it.contains("dbo_name"));
+                assert(j_ds_it.contains("dbcontent_name"));
                 assert(j_ds_it.contains("name"));
 
                 if (j_ds_it.contains("sac") && j_ds_it.contains("sic"))
@@ -348,31 +348,31 @@ void ManageDataSourcesTask::importConfigDataSources(const std::string& filename)
                     unsigned int sac = j_ds_it.at("sac");
                     unsigned int sic = j_ds_it.at("sic");
 
-                    if (hasDataSource(dbo_name, sac, sic))
+                    if (hasDataSource(dbcontent_name, sac, sic))
                     {
                         loginf << "ManageDataSourcesTask: importConfigDataSources: setting "
                                   "existing by sac/sic "
                                << sac << "/" << sic;
-                        getDataSource(dbo_name, sac, sic).setFromJSON(j_ds_it);
+                        getDataSource(dbcontent_name, sac, sic).setFromJSON(j_ds_it);
                         continue;
                     }
                 }
 
                 std::string name = j_ds_it.at("name");
 
-                if (hasDataSource(dbo_name, name))
+                if (hasDataSource(dbcontent_name, name))
                 {
                     loginf << "ManageDataSourcesTask: importConfigDataSources: setting existing by "
                               "name "
                            << name;
-                    getDataSource(dbo_name, name).setFromJSON(j_ds_it);
+                    getDataSource(dbcontent_name, name).setFromJSON(j_ds_it);
                     continue;
                 }
 
                 loginf << "ManageDataSourcesTask: importConfigDataSources: no equivalent found, "
                           "creating new";
 
-                StoredDBODataSource& new_ds = addNewStoredDataSource(dbo_name);
+                StoredDBODataSource& new_ds = addNewStoredDataSource(dbcontent_name);
                 new_ds.setFromJSON(j_ds_it);
             }
         }
@@ -409,13 +409,13 @@ void ManageDataSourcesTask::autoSyncAllConfigDataSourcesToDB()
         "ManageDataSourcesTask: synced all configuration data sources to database");
 }
 
-bool ManageDataSourcesTask::hasDataSource(const std::string& dbo_name, unsigned int sac,
+bool ManageDataSourcesTask::hasDataSource(const std::string& dbcontent_name, unsigned int sac,
                                           unsigned int sic)
 {
-    if (!stored_data_sources_.count(dbo_name))
+    if (!stored_data_sources_.count(dbcontent_name))
         return false;
 
-    for (auto& ds_it : stored_data_sources_.at(dbo_name))
+    for (auto& ds_it : stored_data_sources_.at(dbcontent_name))
     {
         if (ds_it.second.hasSac() && ds_it.second.sac() == sac && ds_it.second.hasSic() &&
             ds_it.second.sic() == sic)
@@ -425,12 +425,12 @@ bool ManageDataSourcesTask::hasDataSource(const std::string& dbo_name, unsigned 
     return false;
 }
 
-StoredDBODataSource& ManageDataSourcesTask::getDataSource(const std::string& dbo_name,
+StoredDBODataSource& ManageDataSourcesTask::getDataSource(const std::string& dbcontent_name,
                                                           unsigned int sac, unsigned int sic)
 {
-    assert(hasDataSource(dbo_name, sac, sic));
+    assert(hasDataSource(dbcontent_name, sac, sic));
 
-    for (auto& ds_it : stored_data_sources_.at(dbo_name))
+    for (auto& ds_it : stored_data_sources_.at(dbcontent_name))
     {
         if (ds_it.second.hasSac() && ds_it.second.sac() == sac && ds_it.second.hasSic() &&
             ds_it.second.sic() == sic)
@@ -440,12 +440,12 @@ StoredDBODataSource& ManageDataSourcesTask::getDataSource(const std::string& dbo
     throw std::runtime_error("ManageDataSourcesTask: getDataSource: sac/sic not found");
 }
 
-bool ManageDataSourcesTask::hasDataSource(const std::string& dbo_name, const std::string& name)
+bool ManageDataSourcesTask::hasDataSource(const std::string& dbcontent_name, const std::string& name)
 {
-    if (!stored_data_sources_.count(dbo_name))
+    if (!stored_data_sources_.count(dbcontent_name))
         return false;
 
-    for (auto& ds_it : stored_data_sources_.at(dbo_name))
+    for (auto& ds_it : stored_data_sources_.at(dbcontent_name))
     {
         if (ds_it.second.name() == name)
             return true;
@@ -454,12 +454,12 @@ bool ManageDataSourcesTask::hasDataSource(const std::string& dbo_name, const std
     return false;
 }
 
-StoredDBODataSource& ManageDataSourcesTask::getDataSource(const std::string& dbo_name,
+StoredDBODataSource& ManageDataSourcesTask::getDataSource(const std::string& dbcontent_name,
                                                           const std::string& name)
 {
-    assert(hasDataSource(dbo_name, name));
+    assert(hasDataSource(dbcontent_name, name));
 
-    for (auto& ds_it : stored_data_sources_.at(dbo_name))
+    for (auto& ds_it : stored_data_sources_.at(dbcontent_name))
     {
         if (ds_it.second.name() == name)
             return ds_it.second;

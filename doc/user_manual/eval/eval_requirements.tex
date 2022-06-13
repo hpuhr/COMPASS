@@ -9,7 +9,7 @@ Please note that the exact requirement calculation methods are quite complex and
 \subsubsection{Configuration}
 
 \begin{figure}[H]
-    \includegraphics[width=14cm,frame]{../screenshots/eval_req_detection.png}
+    \includegraphics[width=14cm,frame]{figures/eval_req_detection.png}
   \caption{Evaluation Detection requirement}
 \end{figure}
 
@@ -81,6 +81,136 @@ Also, a table is given for all single targets, sorted by PD.
 \end{table}
 \end{center}
 
+%-------
+
+\subsection{Dubious Targets}
+\label{sec:eval_req_dubious_targets} 
+
+\subsubsection{Configuration}
+
+\begin{figure}[H]
+    \includegraphics[width=14cm,frame]{figures/eval_req_dubious_targets.png}
+   \caption{Evaluation Dubious Targets}
+\end{figure}
+
+The 'Dubious Targets' requirement can be used to check for dubious for dubious movement from data-source. This requirement checks based on test data only, so the reference data is of no importance. \\
+
+For each track number (existing in an UTN) a number of checks are performed, and a probability of dubious target report is calculated. Which checks are used can be defined as follows, but are focused on short tracks or physically dubious movement. \\
+
+\begin{itemize}  
+\item Probability [1]: Probability of dubious target
+\item Probability Check Type: $\geq$
+\item Minimum Comparison Time [s]: Skip movement checks if time between updates is smaller than the defined time
+\item Maximum Comparison Time [s]: Skip movement checks if time between updates is larger than the defined time
+\item Mark Primary-Only: Checkbox if all primary-only tracks should be counted as dubious
+\item Use Minimum Updates: Checkbox if tracks with less than the defined number of updates should be counted as dubious
+\item Minimum Updates [1]: Minimum number of updates
+\item Use Minimum Duration: Checkbox if tracks with a duration less than the defined time should be counted as dubious
+\item Minimum Duration [s]: Minimum duration
+\item Use Maximum Groundspeed: Checkbox if maximum groundspeed should be used
+\item Maximum Groundspeed [kts]: Maximum groundspeed to be considered
+\item Use Maximum Acceleration: Checkbox if maximum acceleration should be used
+\item Maximum Acceleration [$m/s^{2}$]: Maximum acceleration to be considered
+\item Use Maximum Turnrate: Checkbox if maximum turnrate should be used
+\item Turnrate Groundspeed [deg/s]: Maximum groundspeed to be considered
+\item Use Maximum ROCD: Checkbox if turnrate rate of climb/descent should be used
+\item Maximum ROCD [ft/s]: Maximum  rate of climb/descent to be considered
+\item Dubious Probability [1]: Probability of dubious target report to classify a track as dubious
+\end{itemize}
+\ \\
+
+\subsubsection{Calculation}
+
+As a summary, the test data is used to calculate the number of dubious targets in relation to the total number of targets, which gives the probability of dubios target (PDT). If this probability is larger than the required one, the requirement is failed. \\
+
+A track is be ignored (from dubious detection) if the last-updating sensor parameter is active, and the track was updated by at any point by any other sensor. \\
+
+The total track updates are marked as dubious if any of the following cases hold:
+\begin{itemize}  
+\item 'Mark Primary-Only' is used, and the track is always primary-only (no secondary attributes)
+\item 'Minimum Updates' are used, and the number of track updates is smaller than the required threshold
+\item 'Minimum Duration' is used, and the duration of the track is smaller than the required threshold
+\end{itemize}
+\ \\
+
+For the movement checks, for each track update the movement is checked. If the Minimum/Maximum Comparison Time check fails, the respective track update is skipped (not checked). \\ 
+
+The following checks can be performed:
+\begin{itemize}  
+\item 'Maximum Groundspeed': The track update's groundspeed (as output from the data source, as well as calculated from position differences) is checked against the threshold
+\item 'Maximum Acceleration': The track update's groundspeed derivative (difference to the previous value divided by time delta) is checked against the threshold
+\item 'Maximum Turnrate': The track update's track-angle derivative (difference to the previous value divided by time delta) is checked against the threshold
+\item 'Maximum ROCD': The track update's Mode C derivative (difference to the previous value divided by time delta) is checked against the threshold
+\end{itemize}
+\ \\
+
+For each track, the number of target reports failing the movement checks (PDU) is calculated and the ratio to the total number of track updates is calculated. If this ratio is larger than the 'Dubious Probability', the track is marked as dubious.
+
+\subsubsection{Result Values}
+
+\paragraph{Sector}
+
+\begin{center}
+ \begin{table}[H]
+  \begin{tabularx}{\textwidth}{ | l | X |  l | }
+    \hline
+    \textbf{Name} & \textbf{Description} & \textbf{Example} \\ \hline
+    Sector Layer & Name of the sector layer & fir\_body\_cut \\ \hline
+    Reqirement Group & Name of the requirement group & Required \\ \hline
+    Reqirement & Name of the requirement & Dubious \\ \hline
+    Num Results & Total number of results & 690 \\ \hline
+    Num Usable Results & Number of usable results & 504 \\ \hline
+    Num Unusable Results & Number of unusable results & 186 \\ \hline
+    Use & To be used in results & true \\ \hline
+    \#Pos [1] & Number of updates & 44697 \\ \hline
+    \#PosInside [1] & Number of updates inside sector & 33498 \\ \hline
+    \#PosOutside [1] & Number of updates outside sector & 11199 \\ \hline
+    \#DU [1] & Number of dubious updates inside sector & 2691 \\ \hline
+    PDU [\%] & Probability of dubious update & 8.03 \\ \hline
+    \#T [1] & Number of targets & 594 \\ \hline
+    \#DT [1] & Number of dubious targets & 394 \\ \hline
+    Duration [s] & Duration of all targets & 129462.93 \\ \hline
+    Duration Dubious [s] & Duration of dubious targets & 14551.83 \\ \hline
+    Duration Non-Dubious [s] & Duration of non-dubious targets & 114911.10 \\ \hline
+    Average Duration Dubious [s] & Average duration of dubious targets & 36.93 \\ \hline
+    Duration Ratio Dubious [\%] & Duration ratio of dubious targets & 11.24 \\ \hline
+    Duration Ratio Non-Dubious [\%] & Duration ratio of non-dubious targets & 88.76 \\ \hline
+    PDT [\%] & Probability of dubious target & 66.33 \\ \hline
+    Condition &  & <= 90.00 \\ \hline
+    Condition Fulfilled &  & Passed \\ \hline
+\end{tabularx}
+\end{table}
+\end{center}
+
+Also, a table is given for all single targets, sorted by PDT.
+
+\paragraph{Single Target}
+
+\begin{center}
+ \begin{table}[H]
+  \begin{tabularx}{\textwidth}{ | l | X |  l | }
+    \hline
+    \textbf{Name} & \textbf{Description} & \textbf{Example} \\ \hline
+    Use & To be used in results & true \\ \hline
+    \#Up [1] & Number of updates & 354 \\ \hline
+    \#PosInside [1] & Number of updates inside sector & 354 \\ \hline
+    \#PosOutside [1] & Number of updates outside sector & 0 \\ \hline
+    \#DU [1] & Number of dubious updates inside sector & 33 \\ \hline
+    PDU [\%] & Probability of dubious update & 9.32 \\ \hline
+    \#T [1] & Number of targets & 7 \\ \hline
+    \#DT [1] & Number of dubious targets & 4 \\ \hline
+    Duration [s] & Duration of all targets & 1339.86 \\ \hline
+    Duration Dubious [s] & Duration of dubious targets & 92.50 \\ \hline
+    Duration Non-Dubious [s] & Duration of non-dubious targets & 1247.36 \\ \hline
+    Average Duration Dubious [s] & Average duration of dubious targets & 23.13 \\ \hline
+    Duration Dubious Ratio [\%] & Duration ratio of dubious targets & 6.9 \\ \hline
+    Duration Non-Dubious Ration [\%] & Duration ratio of non-dubious targets & 93.1 \\ \hline
+    PDT [\%] & Probability of dubious target &  \\ \hline
+    Condition &  & <= 90.00 \\ \hline
+    Condition Fulfilled &  & Failed \\ \hline
+\end{tabularx}
+\end{table}
+\end{center}
 
 \subsection{Dubious Tracks}
 \label{sec:eval_req_dubious_tracks} 
@@ -88,7 +218,7 @@ Also, a table is given for all single targets, sorted by PD.
 \subsubsection{Configuration}
 
 \begin{figure}[H]
-    \includegraphics[width=14cm,frame]{../screenshots/eval_req_dubious_tracks.png}
+    \includegraphics[width=14cm,frame]{figures/eval_req_dubious_tracks.png}
    \caption{Evaluation Dubious Tracks}
 \end{figure}
 
@@ -219,7 +349,7 @@ Also, a table is given for all single targets, sorted by PDT.
 \subsubsection{Configuration}
 
 \begin{figure}[H]
-    \includegraphics[width=14cm,frame]{../screenshots/eval_req_extra_data.png}
+    \includegraphics[width=14cm,frame]{figures/eval_req_extra_data.png}
   \caption{Evaluation Extra Data requirement}
 \end{figure}
 
@@ -291,7 +421,7 @@ Also, a table is given for all single targets, sorted by PEx.
 \subsubsection{Configuration}
 
 \begin{figure}[H]
-    \includegraphics[width=14cm,frame]{../screenshots/eval_req_extra_track.png}
+    \includegraphics[width=14cm,frame]{figures/eval_req_extra_track.png}
   \caption{Evaluation Extra Track requirement}
 \end{figure}
 
@@ -364,7 +494,7 @@ Also, a table is given for all single targets, sorted by PEx.
 \subsubsection{Configuration}
 
 \begin{figure}[H]
-    \includegraphics[width=14cm,frame]{../screenshots/eval_req_id_correct.png}
+    \includegraphics[width=14cm,frame]{figures/eval_req_id_correct.png}
   \caption{Evaluation Identification Correct requirement}
 \end{figure}
 
@@ -441,7 +571,7 @@ Also, a table is given for all single targets, sorted by PEx.
 \subsubsection{Configuration}
 
 \begin{figure}[H]
-    \includegraphics[width=14cm,frame]{../screenshots/eval_req_id_false.png}
+    \includegraphics[width=14cm,frame]{figures/eval_req_id_false.png}
   \caption{Evaluation Identification False requirement}
 \end{figure}
 
@@ -521,7 +651,7 @@ Also, a table is given for all single targets, sorted by PF.
 \subsubsection{Configuration}
 
 \begin{figure}[H]
-    \includegraphics[width=14cm,frame]{../screenshots/eval_req_m3a_false.png}
+    \includegraphics[width=14cm,frame]{figures/eval_req_m3a_false.png}
   \caption{Evaluation Mode 3/A False requirement}
 \end{figure}
 
@@ -597,7 +727,7 @@ Also, a table is given for all single targets, sorted by PF.
 \subsubsection{Configuration}
 
 \begin{figure}[H]
-    \includegraphics[width=14cm,frame]{../screenshots/eval_req_m3a_present.png}
+    \includegraphics[width=14cm,frame]{figures/eval_req_m3a_present.png}
   \caption{Evaluation Mode 3/A Present requirement}
 \end{figure}
 
@@ -672,7 +802,7 @@ Also, a table is given for all single targets, sorted by PP.
 \subsubsection{Configuration}
 
 \begin{figure}[H]
-    \includegraphics[width=14cm,frame]{../screenshots/eval_req_mc_false.png}
+    \includegraphics[width=14cm,frame]{figures/eval_req_mc_false.png}
   \caption{Evaluation Mode C False requirement}
 \end{figure}
 
@@ -749,7 +879,7 @@ Also, a table is given for all single targets, sorted by PF.
 \subsubsection{Configuration}
 
 \begin{figure}[H]
-    \includegraphics[width=14cm,frame]{../screenshots/eval_req_mc_present.png}
+    \includegraphics[width=14cm,frame]{figures/eval_req_mc_present.png}
   \caption{Evaluation Mode C Present requirement}
 \end{figure}
 
@@ -823,7 +953,7 @@ Also, a table is given for all single targets, sorted by PP.
 \subsubsection{Configuration}
 
 \begin{figure}[H]
-    \includegraphics[width=14cm,frame]{../screenshots/eval_req_pos_across.png}
+    \includegraphics[width=14cm,frame]{figures/eval_req_pos_across.png}
   \caption{Evaluation Position Across requirement}
 \end{figure}
 
@@ -904,7 +1034,7 @@ Also, a table is given for all single targets, sorted by PACOK.
 \subsubsection{Configuration}
 
 \begin{figure}[H]
-    \includegraphics[width=14cm,frame]{../screenshots/eval_req_pos_along.png}
+    \includegraphics[width=14cm,frame]{figures/eval_req_pos_along.png}
   \caption{Evaluation Position Along requirement}
 \end{figure}
 
@@ -987,12 +1117,12 @@ Also, a table is given for all single targets, sorted by PALOK.
 This requirement can be used in 2 variations:
 
 \begin{figure}[H]
-    \includegraphics[width=14cm,frame]{../screenshots/eval_req_pos_distance_correct.png}
+    \includegraphics[width=14cm,frame]{figures/eval_req_pos_distance_correct.png}
   \caption{Evaluation Position Distance requirement for correct positions}
 \end{figure}
 
 \begin{figure}[H]
-    \includegraphics[width=14cm,frame]{../screenshots/eval_req_pos_distance_false.png}
+    \includegraphics[width=14cm,frame]{figures/eval_req_pos_distance_false.png}
   \caption{Evaluation Position Distance requirement for false positions}
 \end{figure}
 
@@ -1093,7 +1223,7 @@ Also, a table is given for all single targets, sorted by PCP.
 \subsubsection{Configuration}
 
 \begin{figure}[H]
-    \includegraphics[width=14cm,frame]{../screenshots/eval_req_pos_latency.png}
+    \includegraphics[width=14cm,frame]{figures/eval_req_pos_latency.png}
   \caption{Evaluation Position Latency requirement}
 \end{figure}
 
@@ -1174,7 +1304,7 @@ Also, a table is given for all single targets, sorted by PLTOK.
 \subsubsection{Configuration}
 
 \begin{figure}[H]
-    \includegraphics[width=14cm,frame]{../screenshots/eval_req_speed.png}
+    \includegraphics[width=14cm,frame]{figures/eval_req_speed.png}
   \caption{Evaluation Speed requirement}
 \end{figure}
 

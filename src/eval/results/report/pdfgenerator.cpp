@@ -28,7 +28,6 @@
 #include "latexdocument.h"
 #include "latexvisitor.h"
 #include "latextable.h"
-#include "system.h"
 
 #include "eval/results/report/section.h"
 #include "eval/results/report/rootitem.h"
@@ -46,55 +45,20 @@
 
 #include "boost/date_time/posix_time/posix_time.hpp"
 
+#include <system.h>
+
 using namespace std;
 using namespace Utils;
 
 namespace EvaluationResultsReport
 {
 
-PDFGenerator::PDFGenerator(const std::string& class_id, const std::string& instance_id,
-                           EvaluationManager& eval_manager)
-    : Configurable(class_id, instance_id, &eval_manager), eval_man_(eval_manager)
+PDFGenerator::PDFGenerator(EvaluationManager& eval_manager)
+    : eval_man_(eval_manager)
 {
-    registerParameter("author", &author_, "");
-
-    if (!author_.size())
-        author_ = System::getUserName();
-    if (!author_.size())
-        author_ = "User";
-
-    registerParameter("abstract", &abstract_, "");
-
     report_filename_ = "report.tex";
 
-    registerParameter("num_max_table_rows", &num_max_table_rows_, 1000);
-    registerParameter("num_max_table_col_width", &num_max_table_col_width_, 18);
-
-    registerParameter("wait_on_map_loading", &wait_on_map_loading_, true);
-
-    registerParameter("run_pdflatex", &run_pdflatex_, true);
-
-    registerParameter("open_created_pdf", &open_created_pdf_, false);
-
     pdflatex_found_ = System::exec("which pdflatex").size(); // empty if none
-
-    if (!pdflatex_found_)
-    {
-        run_pdflatex_ = false;
-        open_created_pdf_ = false;
-    }
-}
-
-void PDFGenerator::generateSubConfigurable(const std::string& class_id,
-                                           const std::string& instance_id)
-{
-    throw std::runtime_error("PDFGenerator: generateSubConfigurable: unknown class_id " +
-                             class_id);
-}
-
-void PDFGenerator::checkSubConfigurables()
-{
-    // move along sir
 }
 
 PDFGeneratorDialog& PDFGenerator::dialog()
@@ -113,9 +77,14 @@ PDFGeneratorDialog& PDFGenerator::dialog()
     }
 
     if (!dialog_)
-        dialog_.reset(new PDFGeneratorDialog(*this));
+        dialog_.reset(new PDFGeneratorDialog(*this, eval_man_));
 
     return *dialog_;
+}
+
+bool PDFGenerator::pdfLatexFound() const
+{
+    return pdflatex_found_;
 }
 
 void PDFGenerator::run ()
@@ -131,15 +100,18 @@ void PDFGenerator::run ()
         LatexDocument doc (report_path_, report_filename_);
         doc.title("OpenATS COMPASS Evaluation Report");
 
-        if (author_.size())
-            doc.author(author_);
+        if (eval_man_.reportAuthor().size())
+            doc.author(eval_man_.reportAuthor());
 
-        if (abstract_.size())
-            doc.abstract(abstract_);
+        if (eval_man_.reportAbstract().size())
+            doc.abstract(eval_man_.reportAbstract());
 
-        LatexTable::num_max_rows_ = num_max_table_rows_;
-        LatexVisitor visitor (doc, false, false, false, include_target_details_, include_target_tr_details_,
-                              num_max_table_col_width_, wait_on_map_loading_);
+        LatexTable::num_max_rows_ = eval_man_.reportNumMaxTableRows();
+        LatexVisitor visitor (doc, false, false, false,
+                              eval_man_.reportIncludeTargetDetails(),
+                              eval_man_.reportIncludeTargetTRDetails(),
+                              eval_man_.reportNumMaxTableColWidth(),
+                              eval_man_.reportWaitOnMapLoading());
 
         cancel_ = false;
         running_ = true;
@@ -164,7 +136,8 @@ void PDFGenerator::run ()
         // create sections
         vector<shared_ptr<Section>> sections;
         sections.push_back(root_section);
-        root_section->addSectionsFlat(sections, include_target_details_);
+        root_section->addSectionsFlat(sections, eval_man_.reportIncludeTargetDetails(),
+                                      eval_man_.reportSkipTargetsWoIssues());
 
         unsigned int num_sections = sections.size();
 
@@ -243,7 +216,7 @@ void PDFGenerator::run ()
 
             doc.write();
 
-            if (run_pdflatex_)
+            if (eval_man_.reportRunPDFLatex())
             {
                 std::string command_out;
                 std::string command = "cd "+report_path_+" && pdflatex --interaction=nonstopmode "+report_filename_
@@ -301,7 +274,7 @@ void PDFGenerator::run ()
 
                     dialog_->setStatus("Running pdflatex done");
 
-                    if (open_created_pdf_)
+                    if (eval_man_.reportOpenCreatedPDF())
                     {
                         std::string fullpath = report_path_+report_filename_;
 
@@ -416,99 +389,5 @@ void PDFGenerator::showDone(bool show_done)
     show_done_ = show_done;
 }
 
-std::string PDFGenerator::author() const
-{
-    return author_;
-}
-
-void PDFGenerator::author(const std::string& author)
-{
-    author_ = author;
-}
-
-std::string PDFGenerator::abstract() const
-{
-    return abstract_;
-}
-
-void PDFGenerator::abstract(const std::string& abstract)
-{
-    abstract_ = abstract;
-}
-
-bool PDFGenerator::runPDFLatex() const
-{
-    return run_pdflatex_;
-}
-
-void PDFGenerator::runPDFLatex(bool value)
-{
-    run_pdflatex_ = value;
-}
-
-bool PDFGenerator::pdfLatexFound() const
-{
-    return pdflatex_found_;
-}
-
-bool PDFGenerator::openCreatedPDF() const
-{
-    return open_created_pdf_;
-}
-
-void PDFGenerator::openCreatedPDF(bool value)
-{
-    open_created_pdf_ = value;
-}
-
-bool PDFGenerator::waitOnMapLoading() const
-{
-    return wait_on_map_loading_;
-}
-
-void PDFGenerator::waitOnMapLoading(bool value)
-{
-    wait_on_map_loading_ = value;
-}
-
-bool PDFGenerator::includeTargetDetails() const
-{
-    return include_target_details_;
-}
-
-void PDFGenerator::includeTargetDetails(bool value)
-{
-    include_target_details_ = value;
-}
-
-bool PDFGenerator::includeTargetTRDetails() const
-{
-    return include_target_tr_details_;
-}
-
-void PDFGenerator::includeTargetTRDetails(bool value)
-{
-    include_target_tr_details_ = value;
-}
-
-unsigned int PDFGenerator::numMaxTableRows() const
-{
-    return num_max_table_rows_;
-}
-
-void PDFGenerator::numMaxTableRows(unsigned int value)
-{
-    num_max_table_rows_ = value;
-}
-
-unsigned int PDFGenerator::numMaxTableColWidth() const
-{
-    return num_max_table_col_width_;
-}
-
-void PDFGenerator::numMaxTableColWidth(unsigned int value)
-{
-    num_max_table_col_width_ = value;
-}
 
 }

@@ -41,7 +41,13 @@ std::map<Variable::Representation, std::string> Variable::representation_2_strin
     {Variable::Representation::DEC_TO_OCTAL, "DEC_TO_OCTAL"},
     {Variable::Representation::DEC_TO_HEX, "DEC_TO_HEX"},
     {Variable::Representation::FEET_TO_FLIGHTLEVEL, "FEET_TO_FLIGHTLEVEL"},
-    {Variable::Representation::DATA_SRC_NAME, "DATA_SRC_NAME"}};
+    {Variable::Representation::DATA_SRC_NAME, "DATA_SRC_NAME"},
+    {Variable::Representation::CLIMB_DESCENT, "CLIMB_DESCENT"},
+    {Variable::Representation::FLOAT_PREC0, "FLOAT_PREC0"},
+    {Variable::Representation::FLOAT_PREC1, "FLOAT_PREC1"},
+    {Variable::Representation::FLOAT_PREC2, "FLOAT_PREC2"},
+    {Variable::Representation::FLOAT_PREC4, "FLOAT_PREC4"},
+    {Variable::Representation::LINE_NAME, "LINE_NAME"}};
 
 std::map<std::string, Variable::Representation> Variable::string_2_representation_{
     {"STANDARD", Variable::Representation::STANDARD},
@@ -49,7 +55,13 @@ std::map<std::string, Variable::Representation> Variable::string_2_representatio
     {"DEC_TO_OCTAL", Variable::Representation::DEC_TO_OCTAL},
     {"DEC_TO_HEX", Variable::Representation::DEC_TO_HEX},
     {"FEET_TO_FLIGHTLEVEL", Variable::Representation::FEET_TO_FLIGHTLEVEL},
-    {"DATA_SRC_NAME", Variable::Representation::DATA_SRC_NAME}};
+    {"DATA_SRC_NAME", Variable::Representation::DATA_SRC_NAME},
+    {"CLIMB_DESCENT", Variable::Representation::CLIMB_DESCENT},
+    {"FLOAT_PREC0", Variable::Representation::FLOAT_PREC0},
+    {"FLOAT_PREC1", Variable::Representation::FLOAT_PREC1},
+    {"FLOAT_PREC2", Variable::Representation::FLOAT_PREC2},
+    {"FLOAT_PREC4", Variable::Representation::FLOAT_PREC4},
+    {"LINE_NAME", Variable::Representation::LINE_NAME}};
 
 Variable::Representation Variable::stringToRepresentation(
     const std::string& representation_str)
@@ -68,7 +80,7 @@ std::string Variable::representationToString(Representation representation)
 
 Variable::Variable(const std::string& class_id, const std::string& instance_id,
                          DBContent* parent)
-    : Property(), Configurable(class_id, instance_id, parent), db_object_(parent)
+    : Property(), Configurable(class_id, instance_id, parent), dbcontent_(parent)
 {
     registerParameter("name", &name_, "");
     registerParameter("short_name", &short_name_, "");
@@ -119,8 +131,8 @@ Variable::Variable(const std::string& class_id, const std::string& instance_id,
 //    name_ = other.name_;
 //    other.name_ = "";
 
-//    db_object_ = other.db_object_;
-//    other.db_object_ = nullptr;
+//    dbcontent_ = other.dbcontent_;
+//    other.dbcontent_ = nullptr;
 
 //    representation_str_ = other.representation_str_;
 //    other.representation_str_ = "";
@@ -197,7 +209,7 @@ void Variable::generateSubConfigurable(const std::string& class_id,
 
 bool Variable::operator==(const Variable& var)
 {
-    if (dboName() != var.dboName())
+    if (dbContentName() != var.dbContentName())
         return false;
     if (data_type_ != var.data_type_)
         return false;
@@ -221,14 +233,14 @@ void Variable::checkSubConfigurables()
 
 DBContent& Variable::object() const
 {
-    assert(db_object_);
-    return *db_object_;
+    assert(dbcontent_);
+    return *dbcontent_;
 }
 
-const std::string& Variable::dboName() const
+const std::string& Variable::dbContentName() const
 {
-    assert(db_object_);
-    return db_object_->name();
+    assert(dbcontent_);
+    return dbcontent_->name();
 }
 
 void Variable::name(const std::string& name)
@@ -239,8 +251,8 @@ void Variable::name(const std::string& name)
 
 //const std::string& Variable::metaTable() const
 //{
-//    assert(db_object_);
-//    return db_object_->currentMetaTable();
+//    assert(dbcontent_);
+//    return dbcontent_->currentMetaTable();
 //}
 
 std::string Variable::dbColumnName() const
@@ -255,8 +267,8 @@ void Variable::dbColumnName(const std::string& value)
 
 std::string Variable::dbTableName() const
 {
-    assert (db_object_);
-    return db_object_->dbTableName();
+    assert (dbcontent_);
+    return dbcontent_->dbTableName();
 }
 
 std::string Variable::dbColumnIdentifier() const
@@ -268,8 +280,8 @@ std::string Variable::dbColumnIdentifier() const
 //{
 //    assert(!min_max_set_);
 
-//    assert(db_object_);
-//    logdbg << "Variable " << db_object_->name() << " " << name_ << ": setMinMax";
+//    assert(dbcontent_);
+//    logdbg << "Variable " << dbcontent_->name() << " " << name_ << ": setMinMax";
 
 //    if (!dbObject().existsInDB() || !dbObject().count())
 //    {
@@ -297,7 +309,7 @@ std::string Variable::dbColumnIdentifier() const
 
 //    assert(min_max_set_);
 
-//    logdbg << "Variable: getMinString: object " << dboName() << " name " << name()
+//    logdbg << "Variable: getMinString: object " << dbContentName() << " name " << name()
 //           << " returning " << min_;
 //    return min_;
 //}
@@ -309,7 +321,7 @@ std::string Variable::dbColumnIdentifier() const
 
 //    assert(min_max_set_);
 
-//    logdbg << "Variable: getMaxString: object " << dboName() << " name " << name()
+//    logdbg << "Variable: getMaxString: object " << dbContentName() << " name " << name()
 //           << " returning " << max_;
 //    return max_;
 //}
@@ -461,26 +473,45 @@ std::string Variable::getValueStringFromRepresentation(
     }
     else if (representation_ == Variable::Representation::DATA_SRC_NAME)
     {
-        assert(db_object_);
+        DataSourceManager& ds_man = COMPASS::instance().dataSourceManager();
 
-        TODO_ASSERT
+        if (ds_man.hasDBDataSource(representation_str))
+            return std::to_string(ds_man.getDBDataSourceDSID(representation_str));
 
-//        if (db_object_->hasDataSources())
-//        {
-//            for (auto ds_it = db_object_->dsBegin(); ds_it != db_object_->dsEnd(); ++ds_it)
-//            {
-//                if ((ds_it->second.hasShortName() &&
-//                     representation_str == ds_it->second.shortName()) ||
-//                    representation_str == ds_it->second.name())
-//                {
-//                    return std::to_string(ds_it->first);
-//                }
-//            }
-//            // not found, return original
-//        }
-        // has no datasources, return original
+        // not found, return original
 
         return representation_str;
+    }
+    else if (representation_ == Variable::Representation::CLIMB_DESCENT)
+    {
+        if (representation_str == "LVL")
+            return "0";
+        else if (representation_str == "CLB")
+            return "1";
+        else if (representation_str == "DSC")
+            return "2";
+        else
+            return "3";
+    }
+    else if (representation_ == Variable::Representation::FLOAT_PREC0)
+    {
+        return representation_str;
+    }
+    else if (representation_ == Variable::Representation::FLOAT_PREC1)
+    {
+        return representation_str;
+    }
+    else if (representation_ == Variable::Representation::FLOAT_PREC2)
+    {
+        return representation_str;
+    }
+    else if (representation_ == Variable::Representation::FLOAT_PREC4)
+    {
+        return representation_str;
+    }
+    else if (representation_ == Variable::Representation::LINE_NAME)
+    {
+        return std::to_string(Utils::String::lineFromStr(representation_str));
     }
     else
     {
@@ -750,7 +781,7 @@ void Variable::isKey(bool value)
 
 std::string Variable::getDataSourcesAsString(const std::string& value) const
 {
-    assert(db_object_);
+    assert(dbcontent_);
 
     DataSourceManager& ds_man = COMPASS::instance().dataSourceManager();
 

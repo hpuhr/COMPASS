@@ -216,14 +216,14 @@ void ViewManager::checkSubConfigurables()
     }
 }
 
-dbContent::VariableSet ViewManager::getReadSet(const std::string& dbo_name)
+dbContent::VariableSet ViewManager::getReadSet(const std::string& dbcontent_name)
 {
     dbContent::VariableSet read_set;
     dbContent::VariableSet read_set_tmp;
 
     for (auto view_it : views_)
     {
-        read_set_tmp = view_it.second->getSet(dbo_name);
+        read_set_tmp = view_it.second->getSet(dbcontent_name);
         read_set.add(read_set_tmp);
     }
     return read_set;
@@ -320,38 +320,28 @@ void ViewManager::doViewPointAfterLoad ()
         loginf << "ViewManager: doViewPointAfterLoad: time window min " << time_min << " max " << time_max;
     }
 
-    DBContentManager& object_manager = COMPASS::instance().dbContentManager();
-
-    if (!object_manager.existsMetaVariable("tod") ||
-            !object_manager.existsMetaVariable("pos_lat_deg") ||
-            !object_manager.existsMetaVariable("pos_long_deg"))
-    {
-        logerr << "ViewManager: doViewPointAfterLoad: required variables missing, quitting";
-        return;
-    }
+    DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
 
     bool selection_changed = false;
-    for (auto& dbo_it : object_manager)
+    for (auto& dbo_it : dbcont_man)
     {
-        std::string dbo_name = dbo_it.first;
+        std::string dbcontent_name = dbo_it.first;
 
-        if (!object_manager.metaVariable("tod").existsIn(dbo_name) ||
-                !object_manager.metaVariable("pos_lat_deg").existsIn(dbo_name) ||
-                !object_manager.metaVariable("pos_long_deg").existsIn(dbo_name))
+        if (!dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_tod_))
+//                 ||!dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_latitude_)
+//                 || !dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_longitude_))
         {
-            logerr << "ViewManager: doViewPointAfterLoad: required variables missing for " << dbo_name;
+            logerr << "ViewManager: doViewPointAfterLoad: required variables missing in " << dbcontent_name;
             continue;
         }
 
-        const dbContent::Variable& tod_var = object_manager.metaVariable("tod").getFor(dbo_name);
-//        const DBOVariable& latitude_var =
-//                object_manager.metaVariable("pos_lat_deg").getFor(dbo_name);
-//        const DBOVariable& longitude_var =
-//                object_manager.metaVariable("pos_long_deg").getFor(dbo_name);
+        const dbContent::Variable& tod_var = dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_tod_);
+//        const dbContent::Variable& latitude_var = dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_latitude_);
+//        const dbContent::Variable& longitude_var = dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_longitude_);
 
-        if (object_manager.data().count(dbo_it.first))
+        if (dbcont_man.data().count(dbo_it.first))
         {
-            std::shared_ptr<Buffer> buffer = object_manager.data().at(dbo_it.first);
+            std::shared_ptr<Buffer> buffer = dbcont_man.data().at(dbo_it.first);
 
             assert(buffer->has<bool>(DBContent::selected_var.name()));
             NullableVector<bool>& selected_vec = buffer->get<bool>(DBContent::selected_var.name());
@@ -409,30 +399,24 @@ void ViewManager::selectTimeWindow(float time_min, float time_max)
 {
     loginf << "ViewManager: selectTimeWindow: time_min " << time_min << " time_max " << time_max;
 
-    DBContentManager& object_manager = COMPASS::instance().dbContentManager();
-
-    if (!object_manager.existsMetaVariable("tod"))
-    {
-        logerr << "ViewManager: selectTimeWindow: required variables missing, quitting";
-        return;
-    }
+    DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
 
     bool selection_changed = false;
-    for (auto& dbo_it : object_manager)
+    for (auto& dbo_it : dbcont_man)
     {
-        std::string dbo_name = dbo_it.first;
+        std::string dbcontent_name = dbo_it.first;
 
-        if (!object_manager.metaVariable("tod").existsIn(dbo_name))
+        if (!dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_tod_))
         {
-            logerr << "ViewManager: selectTimeWindow: required variables missing for " << dbo_name;
+            logerr << "ViewManager: selectTimeWindow: required variables missing, quitting";
             continue;
         }
 
-        const dbContent::Variable& tod_var = object_manager.metaVariable("tod").getFor(dbo_name);
+        const dbContent::Variable& tod_var = dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_tod_);
 
-        if (object_manager.data().count(dbo_it.first))
+        if (dbcont_man.data().count(dbo_it.first))
         {
-            std::shared_ptr<Buffer> buffer = object_manager.data().at(dbo_it.first);
+            std::shared_ptr<Buffer> buffer = dbcont_man.data().at(dbo_it.first);
 
             assert(buffer->has<bool>(DBContent::selected_var.name()));
             NullableVector<bool>& selected_vec = buffer->get<bool>(DBContent::selected_var.name());

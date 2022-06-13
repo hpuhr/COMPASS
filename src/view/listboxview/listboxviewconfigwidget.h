@@ -50,7 +50,6 @@ class ListBoxViewConfigWidget : public QWidget
     void toggleShowOnlySeletedSlot();
     void toggleUsePresentation();
     void toggleUseOverwrite();
-    void showAssociationsSlot();
     void exportSlot();
     void exportDoneSlot(bool cancelled);
 
@@ -80,7 +79,6 @@ class ListBoxViewConfigWidget : public QWidget
 
     QCheckBox* only_selected_check_{nullptr};
     QCheckBox* presentation_check_{nullptr};
-    QCheckBox* associations_check_{nullptr};
 
     QCheckBox* overwrite_check_{nullptr};
 

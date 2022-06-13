@@ -42,6 +42,8 @@ public:
 
     virtual void run();
 
+    std::map<std::string, std::pair<unsigned int, unsigned int> > associationCounts() const;
+
 protected:
     static bool in_appimage_;
 
@@ -71,7 +73,7 @@ protected:
 
     void removePreviousAssociations();
 
-    std::map<unsigned int, Association::Target> createTrackedTargets(const std::string& dbo_name, unsigned int ds_id);
+    std::map<unsigned int, Association::Target> createTrackedTargets(const std::string& dbcontent_name, unsigned int ds_id);
     void cleanTrackerUTNs(std::map<unsigned int, Association::Target>& targets);
     std::map<unsigned int, Association::Target> selfAssociateTrackerUTNs(
             std::map<unsigned int, Association::Target>& targets);

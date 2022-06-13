@@ -68,6 +68,8 @@ public:
     void endBindTransaction();
     void finalizeBindStatement();
 
+    int changes();
+
     void bindVariable(unsigned int index, int value);
     void bindVariable(unsigned int index, double value);
     void bindVariable(unsigned int index, const std::string& value);

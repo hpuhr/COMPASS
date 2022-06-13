@@ -128,14 +128,6 @@ ListBoxViewConfigWidget::ListBoxViewConfigWidget(ListBoxView* view, QWidget* par
                 &ListBoxViewConfigWidget::toggleUsePresentation);
         cfg_layout->addWidget(presentation_check_);
 
-        associations_check_ = new QCheckBox("Show Associations");
-        associations_check_->setChecked(view_->showAssociations());
-        connect(associations_check_, &QCheckBox::clicked, this,
-                &ListBoxViewConfigWidget::showAssociationsSlot);
-        if (!view_->canShowAssociations())
-            associations_check_->setDisabled(true);
-        cfg_layout->addWidget(associations_check_);
-
         //vlayout->addStretch();
 
         overwrite_check_ = new QCheckBox("Overwrite Exported File");
@@ -377,14 +369,6 @@ void ListBoxViewConfigWidget::toggleUseOverwrite()
     bool checked = overwrite_check_->checkState() == Qt::Checked;
     logdbg << "ListBoxViewConfigWidget: toggleUseOverwrite: setting overwrite to " << checked;
     view_->overwriteCSV(checked);
-}
-
-void ListBoxViewConfigWidget::showAssociationsSlot()
-{
-    assert(associations_check_);
-    bool checked = associations_check_->checkState() == Qt::Checked;
-    logdbg << "ListBoxViewConfigWidget: showAssociationsSlot: setting to " << checked;
-    view_->showAssociations(checked);
 }
 
 void ListBoxViewConfigWidget::exportSlot()

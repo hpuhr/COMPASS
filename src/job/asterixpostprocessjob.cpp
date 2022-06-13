@@ -44,6 +44,7 @@ void ASTERIXPostprocessJob::run()
         doFutureTimestampsCheck();
 
     doRadarPlotPositionCalculations();
+    doGroundSpeedCalculations();
 
     //    boost::posix_time::time_duration time_diff = boost::posix_time::microsec_clock::local_time() - start_time;
     //    double ms = time_diff.total_milliseconds();
@@ -160,7 +161,7 @@ void ASTERIXPostprocessJob::doRadarPlotPositionCalculations()
 {
     // radar calculations
 
-    string dbo_name;
+    string dbcontent_name;
 
     string datasource_var_name;
     string range_var_name;
@@ -193,31 +194,28 @@ void ASTERIXPostprocessJob::doRadarPlotPositionCalculations()
 
     for (auto& buf_it : buffers_)
     {
-        dbo_name = buf_it.first;
+        dbcontent_name = buf_it.first;
 
-        if (dbo_name != "CAT001" && dbo_name != "CAT048")
+        if (dbcontent_name != "CAT001" && dbcontent_name != "CAT048")
             continue;
 
         shared_ptr<Buffer> buffer = buf_it.second;
         unsigned int buffer_size = buffer->size();
         assert(buffer_size);
 
-        assert (dbcont_man.existsDBContent(dbo_name));
-        DBContent& db_object = dbcont_man.dbContent(dbo_name);
+        assert (dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_datasource_id_));
+        assert (dbcont_man.canGetVariable(dbcontent_name, DBContent::var_radar_range_));
+        assert (dbcont_man.canGetVariable(dbcontent_name, DBContent::var_radar_azimuth_));
+        assert (dbcont_man.canGetVariable(dbcontent_name, DBContent::var_radar_altitude_));
+        assert (dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_latitude_));
+        assert (dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_longitude_));
 
-        assert (db_object.hasVariable(DBContent::meta_var_datasource_id_.name()));
-        assert (db_object.hasVariable(DBContent::var_radar_range_.name()));
-        assert (db_object.hasVariable(DBContent::var_radar_azimuth_.name()));
-        assert (db_object.hasVariable(DBContent::var_radar_altitude_.name()));
-        assert (db_object.hasVariable(DBContent::meta_var_latitude_.name()));
-        assert (db_object.hasVariable(DBContent::meta_var_longitude_.name()));
-
-        dbContent::Variable& datasource_var = db_object.variable(DBContent::meta_var_datasource_id_.name());
-        dbContent::Variable& range_var = db_object.variable(DBContent::var_radar_range_.name());
-        dbContent::Variable& azimuth_var = db_object.variable(DBContent::var_radar_azimuth_.name());
-        dbContent::Variable& altitude_var = db_object.variable(DBContent::var_radar_altitude_.name());
-        dbContent::Variable& latitude_var = db_object.variable(DBContent::meta_var_latitude_.name());
-        dbContent::Variable& longitude_var = db_object.variable(DBContent::meta_var_longitude_.name());
+        dbContent::Variable& datasource_var = dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_datasource_id_);
+        dbContent::Variable& range_var = dbcont_man.getVariable(dbcontent_name, DBContent::var_radar_range_);
+        dbContent::Variable& azimuth_var = dbcont_man.getVariable(dbcontent_name, DBContent::var_radar_azimuth_);
+        dbContent::Variable& altitude_var = dbcont_man.getVariable(dbcontent_name, DBContent::var_radar_altitude_);
+        dbContent::Variable& latitude_var = dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_latitude_);
+        dbContent::Variable& longitude_var = dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_longitude_);
 
         datasource_var_name = datasource_var.name();
         range_var_name = range_var.name();
@@ -382,10 +380,10 @@ void ASTERIXPostprocessJob::doRadarPlotPositionCalculations()
     //    {
     //        logdbg << "ASTERIXPostprocessJob: run: sorting buffer " << buf_it.first;
 
-    //        assert (dbo_man.existsMetaVariable(DBObject::meta_var_tod_id_.name()));
-    //        assert (dbo_man.metaVariable(DBObject::meta_var_tod_id_.name()).existsIn(buf_it.first));
+    //        assert (dbo_man.existsMetaVariable(DBContent::meta_var_tod_id_.name()));
+    //        assert (dbo_man.metaVariable(DBContent::meta_var_tod_id_.name()).existsIn(buf_it.first));
 
-    //        DBOVariable& tod_var = dbo_man.metaVariable(DBObject::meta_var_tod_id_.name()).getFor(buf_it.first);
+    //        DBOVariable& tod_var = dbo_man.metaVariable(DBContent::meta_var_tod_id_.name()).getFor(buf_it.first);
 
     //        Property prop {tod_var.name(), tod_var.dataType()};
 
@@ -396,4 +394,78 @@ void ASTERIXPostprocessJob::doRadarPlotPositionCalculations()
     //        buf_it.second->sortByProperty(prop);
     //    }
 
+}
+
+void ASTERIXPostprocessJob::doGroundSpeedCalculations()
+{
+    string dbcontent_name;
+
+    DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
+
+    string vx_var_name;
+    string vy_var_name;
+    string speed_var_name;
+    string track_angle_var_name;
+
+    double speed_ms, bearing_rad;
+
+    for (auto& buf_it : buffers_)
+    {
+        dbcontent_name = buf_it.first;
+
+        if (!dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_vx_)
+                || !dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_vy_))
+            continue;
+
+        shared_ptr<Buffer> buffer = buf_it.second;
+        unsigned int buffer_size = buffer->size();
+        assert(buffer_size);
+
+        assert (dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_ground_speed_));
+        assert (dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_track_angle_));
+
+        dbContent::Variable& vx_var = dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_vx_);
+        dbContent::Variable& vy_var = dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_vy_);
+        dbContent::Variable& speed_var = dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_ground_speed_);
+        dbContent::Variable& track_angle_var = dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_track_angle_);
+
+        vx_var_name = vx_var.name();
+        vy_var_name = vy_var.name();
+        speed_var_name = speed_var.name();
+        track_angle_var_name = track_angle_var.name();
+
+        assert (vx_var.dataType() == PropertyDataType::DOUBLE);
+        assert (vy_var.dataType() == PropertyDataType::DOUBLE);
+        assert (speed_var.dataType() == PropertyDataType::DOUBLE);
+        assert (track_angle_var.dataType() == PropertyDataType::DOUBLE);
+
+        if (!buffer->has<double>(vx_var_name) || !buffer->has<double>(vy_var_name))
+            continue; // cant calculate
+
+        if (buffer->has<double>(speed_var_name) && buffer->has<double>(track_angle_var_name))
+            continue; // no need for calculation
+
+        if (!buffer->has<double>(speed_var_name))
+            buffer->addProperty(speed_var_name, PropertyDataType::DOUBLE); // add if needed
+
+        if (!buffer->has<double>(track_angle_var_name))
+            buffer->addProperty(track_angle_var_name, PropertyDataType::DOUBLE); // add if needed
+
+        NullableVector<double>& vx_vec = buffer->get<double>(vx_var_name);
+        NullableVector<double>& vy_vec = buffer->get<double>(vy_var_name);
+        NullableVector<double>& speed_vec = buffer->get<double>(speed_var_name);
+        NullableVector<double>& track_angle_vec = buffer->get<double>(track_angle_var_name);
+
+        for (unsigned int index=0; index < buffer_size; index++)
+        {
+            if (vx_vec.isNull(index) || vy_vec.isNull(index))
+                continue;
+
+            speed_ms = sqrt(pow(vx_vec.get(index), 2)+pow(vy_vec.get(index), 2)) ; // for 1s
+            bearing_rad = atan2(vx_vec.get(index), vy_vec.get(index));
+
+            speed_vec.set(index, speed_ms * M_S2KNOTS);
+            track_angle_vec.set(index, bearing_rad * RAD2DEG);
+        }
+    }
 }

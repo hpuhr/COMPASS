@@ -115,6 +115,7 @@ void DBInterface::openDBFile(const std::string& filename, bool overwrite)
         properties_loaded_ = true;
 
         setProperty("APP_VERSION", COMPASS::instance().config().getString("version"));
+        saveProperties();
 
         assert (!existsDataSourcesTable());
         createDataSourcesTable();
@@ -151,7 +152,7 @@ void DBInterface::openDBFile(const std::string& filename, bool overwrite)
     if (!existsTargetsTable())
         createTargetsTable();
 
-    emit databaseOpenedSignal();
+    //emit databaseOpenedSignal();
 
     QApplication::restoreOverrideCursor();
 
@@ -278,7 +279,7 @@ unsigned int DBInterface::getMaxRecordNumber(DBContent& object)
 
     boost::mutex::scoped_lock locker(connection_mutex_);
 
-    shared_ptr<DBCommand> command = sql_generator_.getMaxRecordNumberCommand(object.dbTableName(),
+    shared_ptr<DBCommand> command = sql_generator_.getMaxUIntValueCommand(object.dbTableName(),
                                                                              rec_num_var.dbColumnName());
 
     shared_ptr<DBResult> result = db_connection_->execute(*command);
@@ -295,6 +296,45 @@ unsigned int DBInterface::getMaxRecordNumber(DBContent& object)
 
     assert (!buffer->get<unsigned int>(rec_num_var.dbColumnName()).isNull(0));
     return buffer->get<unsigned int>(rec_num_var.dbColumnName()).get(0);
+}
+
+unsigned int DBInterface::getMaxRefTrackTrackNum()
+{
+    assert (dbOpen());
+
+    DBContent& reftraj_content = COMPASS::instance().dbContentManager().dbContent("RefTraj");
+
+    if(!reftraj_content.existsInDB())
+        return 0;
+
+    assert (COMPASS::instance().dbContentManager().existsMetaVariable(DBContent::meta_var_track_num_.name()));
+    assert (COMPASS::instance().dbContentManager().metaVariable(
+                DBContent::meta_var_track_num_.name()).existsIn("RefTraj"));
+
+    Variable& track_num_var = COMPASS::instance().dbContentManager().metaVariable(
+                DBContent::meta_var_track_num_.name()).getFor("RefTraj");
+
+    assert (reftraj_content.hasVariable(track_num_var.name()));
+
+    boost::mutex::scoped_lock locker(connection_mutex_);
+
+    shared_ptr<DBCommand> command = sql_generator_.getMaxUIntValueCommand(reftraj_content.dbTableName(),
+                                                                          track_num_var.dbColumnName());
+
+    shared_ptr<DBResult> result = db_connection_->execute(*command);
+
+    assert(result->containsData());
+
+    shared_ptr<Buffer> buffer = result->buffer();
+
+    if (!buffer->size())
+    {
+        logwrn << "DBInterface: getMaxRefTrackTrackNum: no max track number found";
+        return 0;
+    }
+
+    assert (!buffer->get<unsigned int>(track_num_var.dbColumnName()).isNull(0));
+    return buffer->get<unsigned int>(track_num_var.dbColumnName()).get(0);
 }
 
 
@@ -992,20 +1032,20 @@ void DBInterface::saveTargets(std::map<unsigned int, std::shared_ptr<dbContent::
 }
 
 
-void DBInterface::insertBuffer(DBContent& db_object, std::shared_ptr<Buffer> buffer)
+void DBInterface::insertBuffer(DBContent& dbcontent, std::shared_ptr<Buffer> buffer)
 {
-    logdbg << "DBInterface: insertBuffer: dbo " << db_object.name() << " buffer size "
+    logdbg << "DBInterface: insertBuffer: dbo " << dbcontent.name() << " buffer size "
            << buffer->size();
 
     // create table if required
-    if (!existsTable(db_object.dbTableName()))
-        createTable(db_object);
+    if (!existsTable(dbcontent.dbTableName()))
+        createTable(dbcontent);
 
     // create record numbers & and store new max rec num
     {
-        assert (db_object.hasVariable(DBContent::meta_var_rec_num_.name()));
+        assert (dbcontent.hasVariable(DBContent::meta_var_rec_num_.name()));
 
-        Variable& rec_num_var = db_object.variable(DBContent::meta_var_rec_num_.name());
+        Variable& rec_num_var = dbcontent.variable(DBContent::meta_var_rec_num_.name());
         assert (rec_num_var.dataType() == PropertyDataType::UINT);
 
         string rec_num_col_str = rec_num_var.dbColumnName();
@@ -1029,7 +1069,7 @@ void DBInterface::insertBuffer(DBContent& db_object, std::shared_ptr<Buffer> buf
         COMPASS::instance().dbContentManager().maxRecordNumber(max_rec_num);
     }
 
-    insertBuffer(db_object.dbTableName(), buffer);
+    insertBuffer(dbcontent.dbTableName(), buffer);
 }
 
 void DBInterface::insertBuffer(const string& table_name, shared_ptr<Buffer> buffer)
@@ -1129,8 +1169,10 @@ void DBInterface::updateBuffer(const std::string& table_name, const std::string&
 
     logdbg << "DBInterface: updateBuffer: ending bind transactions";
     db_connection_->endBindTransaction();
-    logdbg << "DBInterface: update: finalizing bind statement";
+    logdbg << "DBInterface: updateBuffer: finalizing bind statement";
     db_connection_->finalizeBindStatement();
+
+    logdbg << "DBInterface: updateBuffer: changes " << db_connection_->changes() << " indexes " << to_index - from_index +1;
 }
 
 void DBInterface::prepareRead(const DBContent& dbobject, VariableSet read_list,
@@ -1175,7 +1217,7 @@ shared_ptr<Buffer> DBInterface::readDataChunk(const DBContent& dbobject)
 
     shared_ptr<Buffer> buffer = result->buffer();
 
-    buffer->dboName(dbobject.name());
+    buffer->dbContentName(dbobject.name());
 
     assert(buffer);
 
@@ -1212,7 +1254,7 @@ void DBInterface::clearTableContent(const string& table_name)
 }
 
 void DBInterface::insertBindStatementUpdateForCurrentIndex(shared_ptr<Buffer> buffer,
-                                                           unsigned int row)
+                                                           unsigned int buffer_index)
 {
     assert(buffer);
     logdbg << "DBInterface: insertBindStatementUpdateForCurrentIndex: start";
@@ -1224,21 +1266,21 @@ void DBInterface::insertBindStatementUpdateForCurrentIndex(shared_ptr<Buffer> bu
     unsigned int index_cnt = 0;
 
     logdbg << "DBInterface: insertBindStatementUpdateForCurrentIndex: starting for loop";
-    for (unsigned int cnt = 0; cnt < size; cnt++)
+    for (unsigned int property_cnt = 0; property_cnt < size; property_cnt++)
     {
-        const Property& property = list.at(cnt);
+        const Property& property = list.at(property_cnt);
         PropertyDataType data_type = property.dataType();
 
-        logdbg << "DBInterface: insertBindStatementUpdateForCurrentIndex: at cnt " << cnt << " id "
-               << property.name() << " index cnt " << index_cnt;
+//        loginf << "DBInterface: insertBindStatementUpdateForCurrentIndex: at cnt " << cnt << " id "
+//               << property.name() << " index cnt " << index_cnt;
 
-        index_cnt = cnt + 1;
+        index_cnt = property_cnt + 1;
 
-        if (buffer->isNone(property, row))
+        if (buffer->isNull(property, buffer_index))
         {
             db_connection_->bindVariableNull(index_cnt);
-            logdbg << "DBInterface: insertBindStatementUpdateForCurrentIndex: at " << cnt
-                   << " is null";
+//            logwrn << "DBInterface: insertBindStatementUpdateForCurrentIndex: at " << property.name()
+//                   << " buffer_index " << buffer_index << " is null";
             continue;
         }
 
@@ -1246,24 +1288,24 @@ void DBInterface::insertBindStatementUpdateForCurrentIndex(shared_ptr<Buffer> bu
         {
         case PropertyDataType::BOOL:
             db_connection_->bindVariable(
-                        index_cnt, static_cast<int>(buffer->get<bool>(property.name()).get(row)));
+                        index_cnt, static_cast<int>(buffer->get<bool>(property.name()).get(buffer_index)));
             break;
         case PropertyDataType::CHAR:
             db_connection_->bindVariable(
-                        index_cnt, static_cast<int>(buffer->get<char>(property.name()).get(row)));
+                        index_cnt, static_cast<int>(buffer->get<char>(property.name()).get(buffer_index)));
             break;
         case PropertyDataType::UCHAR:
             db_connection_->bindVariable(
                         index_cnt,
-                        static_cast<int>(buffer->get<unsigned char>(property.name()).get(row)));
+                        static_cast<int>(buffer->get<unsigned char>(property.name()).get(buffer_index)));
             break;
         case PropertyDataType::INT:
             db_connection_->bindVariable(
-                        index_cnt, static_cast<int>(buffer->get<int>(property.name()).get(row)));
+                        index_cnt, static_cast<int>(buffer->get<int>(property.name()).get(buffer_index)));
             break;
         case PropertyDataType::UINT:
             db_connection_->bindVariable(
-                        index_cnt, static_cast<int>(buffer->get<unsigned int>(property.name()).get(row)));
+                        index_cnt, static_cast<int>(buffer->get<unsigned int>(property.name()).get(buffer_index)));
             break;
         case PropertyDataType::LONGINT:
             assert(false);
@@ -1273,19 +1315,19 @@ void DBInterface::insertBindStatementUpdateForCurrentIndex(shared_ptr<Buffer> bu
             break;
         case PropertyDataType::FLOAT:
             db_connection_->bindVariable(
-                        index_cnt, static_cast<double>(buffer->get<float>(property.name()).get(row)));
+                        index_cnt, static_cast<double>(buffer->get<float>(property.name()).get(buffer_index)));
             break;
         case PropertyDataType::DOUBLE:
             db_connection_->bindVariable(index_cnt,
-                                         buffer->get<double>(property.name()).get(row));
+                                         buffer->get<double>(property.name()).get(buffer_index));
             break;
         case PropertyDataType::STRING:
             db_connection_->bindVariable(
-                        index_cnt, buffer->get<string>(property.name()).get(row));
+                        index_cnt, buffer->get<string>(property.name()).get(buffer_index));
             break;
         case PropertyDataType::JSON:
             db_connection_->bindVariable(
-                        index_cnt, buffer->get<nlohmann::json>(property.name()).get(row).dump());
+                        index_cnt, buffer->get<nlohmann::json>(property.name()).get(buffer_index).dump());
             break;
 
         default:

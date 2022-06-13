@@ -53,7 +53,7 @@ public slots:
     void createDoneSlot();
     void createObsoleteSlot();
 
-    void loadedDataDataSlot(const std::map<std::string, std::shared_ptr<Buffer>>& data, bool requires_reset);
+    void loadedDataSlot(const std::map<std::string, std::shared_ptr<Buffer>>& data, bool requires_reset);
     void loadingDoneSlot();
 
     void associationStatusSlot(QString status);
@@ -202,7 +202,7 @@ protected:
 
     void checkAndSetMetaVariable(const std::string& name_str, dbContent::MetaVariable** var);
 
-    dbContent::VariableSet getReadSetFor(const std::string& dbo_name);
+    dbContent::VariableSet getReadSetFor(const std::string& dbcontent_name);
 };
 
 #endif // CREATEASSOCIATIONSTASK_H

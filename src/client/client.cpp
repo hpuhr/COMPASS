@@ -25,7 +25,10 @@
 #include "logger.h"
 #include "stringconv.h"
 #include "taskmanager.h"
+#include "asteriximporttask.h"
 #include "mainwindow.h"
+
+#include "json.hpp"
 
 #include <QApplication>
 #include <QMessageBox>
@@ -65,10 +68,10 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
 
     //    QApplication::setAttribute(Qt::AA_ShareOpenGLContexts);
 
-//    QSurfaceFormat format;
-//    format.setRenderableType(QSurfaceFormat::OpenGL);
-//    format.setProfile(QSurfaceFormat::CoreProfile);
-//    format.setVersion(3,3);
+    //    QSurfaceFormat format;
+    //    format.setRenderableType(QSurfaceFormat::OpenGL);
+    //    format.setProfile(QSurfaceFormat::CoreProfile);
+    //    format.setVersion(3,3);
 
     //    QSurfaceFormat format;
     //    format.setSwapBehavior(QSurfaceFormat::SwapBehavior::SingleBuffer); //DoubleBuffer
@@ -82,59 +85,65 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
     //    format.setSamples(8);
     // QSurfaceFormat::setDefaultFormat(format);
 
-//    std::string import_json_filename;
-//    std::string import_json_schema;
-//    std::string import_gps_trail_filename;
-//    std::string import_sectors_filename;
+    //    std::string import_json_filename;
+    //    std::string import_json_schema;
 
-//    bool auto_process {false};
-//    bool associate_data {false};
 
-//    bool start {false};
-    bool load_data {false};
-//    std::string export_view_points_report_filename;
-//    bool evaluate {false};
-//    std::string export_eval_report_filename;
-    bool quit {false};
+
+
+    //    bool load_data {false};
+
+    //    bool quit {false};
 
     po::options_description desc("Allowed options");
     desc.add_options()("help", "produce help message")
             ("reset,r", po::bool_switch(&config_and_data_copy_wanted_) ,"reset user configuration and data")
+            ("expert_mode", po::bool_switch(&expert_mode_) ,"set expert mode")
             ("create_db", po::value<std::string>(&create_new_sqlite3_db_filename_),
              "creates and opens new SQLite3 database with given filename, e.g. '/data/file1.db'")
             ("open_db", po::value<std::string>(&open_sqlite3_db_filename_),
              "opens existing SQLite3 database with given filename, e.g. '/data/file1.db'")
+            ("import_data_sources_file", po::value<std::string>(&import_data_sources_filename_),
+             "imports data sources JSON file with given filename, e.g. '/data/ds1.json'")
             ("import_view_points", po::value<std::string>(&import_view_points_filename_),
              "imports view points JSON file with given filename, e.g. '/data/file1.json'")
             ("import_asterix_file", po::value<std::string>(&import_asterix_filename_),
              "imports ASTERIX file with given filename, e.g. '/data/file1.ff'")
+            ("import_asterix_file_line", po::value<std::string>(&import_asterix_file_line_),
+             "imports ASTERIX file with given line, e.g. 'L2'")
             ("import_asterix_network", po::bool_switch(&import_asterix_network_),
              "imports ASTERIX from defined network UDP streams")
             ("import_asterix_network_time_offset", po::value<std::string>(&import_asterix_network_time_offset_),
-             "imports used time offset during ASTERIX network import, in HH:MM:SS.ZZZ'")
-//            ("asterix_framing", po::value<std::string>(&asterix_framing),
-//             "sets ASTERIX framing, e.g. 'none', 'ioss', 'ioss_seq', 'rff'")
-//            ("asterix_decoder_cfg", po::value<std::string>(&asterix_decoder_cfg),
-//             "sets ASTERIX decoder config using JSON string, e.g. ''{\"10\":{\"edition\":\"0.31\"}}''"
-//             " (including one pair of single quotes)")
-//            ("import_json", po::value<std::string>(&import_json_filename),
-//             "imports JSON file with given filename, e.g. '/data/file1.json'")
-//            ("json_schema", po::value<std::string>(&import_json_schema),
-//             "JSON file import schema, e.g. 'jASTERIX', 'OpenSkyNetwork', 'ADSBExchange', 'SDDL'")
-//            ("import_gps_trail", po::value<std::string>(&import_gps_trail_filename),
-//             "imports gps trail NMEA with given filename, e.g. '/data/file2.txt'")
-//            ("import_sectors_json", po::value<std::string>(&import_sectors_filename),
-//             "imports exported sectors JSON with given filename, e.g. '/data/sectors.json'")
-//            ("auto_process", po::bool_switch(&auto_process), "start automatic processing of imported data")
-//            ("associate_data", po::bool_switch(&associate_data), "associate target reports")
-//            ("start", po::bool_switch(&start), "start after finishing previous steps")
-            ("load_data", po::bool_switch(&load_data), "load data after start")
-//            ("export_view_points_report", po::value<std::string>(&export_view_points_report_filename),
-//             "export view points report after start with given filename, e.g. '/data/db2/report.tex")
-//            ("evaluate", po::bool_switch(&evaluate), "run evaluation")
-//            ("export_eval_report", po::value<std::string>(&export_eval_report_filename),
-//             "export evaluation report after start with given filename, e.g. '/data/eval_db2/report.tex")
-            ("quit", po::bool_switch(&quit), "quit after finishing all previous steps");
+             "used time offset during ASTERIX network import, in HH:MM:SS.ZZZ'")
+            ("import_asterix_network_max_lines", po::value<int>(&import_asterix_network_max_lines_),
+             "maximum number of lines per data source during ASTERIX network import, 1..4'")
+            ("asterix_framing", po::value<std::string>(&asterix_framing),
+             "sets ASTERIX framing, e.g. 'none', 'ioss', 'ioss_seq', 'rff'")
+            ("asterix_decoder_cfg", po::value<std::string>(&asterix_decoder_cfg),
+             "sets ASTERIX decoder config using JSON string, e.g. ''{\"10\":{\"edition\":\"0.31\"}}''"
+                         " (including one pair of single quotes)")
+            //            ("import_json", po::value<std::string>(&import_json_filename),
+            //             "imports JSON file with given filename, e.g. '/data/file1.json'")
+            //            ("json_schema", po::value<std::string>(&import_json_schema),
+            //             "JSON file import schema, e.g. 'jASTERIX', 'OpenSkyNetwork', 'ADSBExchange', 'SDDL'")
+            ("import_gps_trail", po::value<std::string>(&import_gps_trail_filename_),
+             "imports gps trail NMEA with given filename, e.g. '/data/file2.txt'")
+            ("import_gps_parameters", po::value<std::string>(&import_gps_parameters_),
+               "import GPS parameters as JSON string, e.g. ''{\"callsign\": \"ENTRPRSE\", \"ds_name\": \"GPS Trail\", \"ds_sac\": 0, \"ds_sic\": 0, \"mode_3a_code\": 961, \"set_callsign\": true, \"set_mode_3a_code\": true, \"set_target_address\": true, \"target_address\": 16702992, \"tod_offset\": 0.0}'' (including one pair of single quotes)")
+            ("import_sectors_json", po::value<std::string>(&import_sectors_filename_),
+             "imports exported sectors JSON with given filename, e.g. '/data/sectors.json'")
+            ("associate_data", po::bool_switch(&associate_data_), "associate target reports")
+            ("load_data", po::bool_switch(&load_data_), "load data after start")
+            ("export_view_points_report", po::value<std::string>(&export_view_points_report_filename_),
+             "export view points report after start with given filename, e.g. '/data/db2/report.tex")
+            ("evaluate", po::bool_switch(&evaluate_), "run evaluation")
+            ("evaluation_parameters", po::value<std::string>(&evaluation_parameters_),
+               "evaluation parameters as JSON string, e.g. ''{\"current_standard\": \"test\", \"dbcontent_name_ref\": \"CAT062\", \"dbcontent_name_tst\": \"CAT020\"}'' (including one pair of single quotes)")
+            ("evaluate_run_filter", po::bool_switch(&evaluate_run_filter_), "run evaluation filter before evaluation")
+            ("export_eval_report", po::value<std::string>(&export_eval_report_filename_),
+             "export evaluation report after start with given filename, e.g. '/data/eval_db2/report.tex")
+            ("no_cfg_save", po::bool_switch(&no_config_save_), "do not save configuration upon quitting")
+            ("quit", po::bool_switch(&quit_), "quit after finishing all previous steps");
 
     try
     {
@@ -166,13 +175,11 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
     if (quit_requested_)
         return;
 
-//    if (import_json_filename.size() && !import_json_schema.size())
-//    {
-//        loginf << "COMPASSClient: schema name must be set for JSON import";
-//        return;
-//    }
-
-
+    //    if (import_json_filename.size() && !import_json_schema.size())
+    //    {
+    //        loginf << "COMPASSClient: schema name must be set for JSON import";
+    //        return;
+    //    }
 
 }
 
@@ -191,6 +198,9 @@ void Client::run ()
         QCoreApplication::processEvents();
     }
 
+    if (expert_mode_)
+        COMPASS::instance().expertMode(true);
+
     MainWindow& main_window = COMPASS::instance().mainWindow();
     splash.raise();
 
@@ -199,37 +209,49 @@ void Client::run ()
 
     splash.finish(&main_window);
 
+    if (no_config_save_)
+        main_window.disableConfigurationSaving();
+
     if (create_new_sqlite3_db_filename_.size())
         main_window.createAndOpenNewSqlite3DB(create_new_sqlite3_db_filename_);
 
     if (open_sqlite3_db_filename_.size())
         main_window.openSqlite3DB(open_sqlite3_db_filename_);
 
+    if (import_data_sources_filename_.size())
+        main_window.importDataSourcesFile(import_data_sources_filename_);
+
     if (import_view_points_filename_.size())
         main_window.importViewPointsFile(import_view_points_filename_);
 
-//    try
-//    {
-//        if (asterix_framing.size())
-//        {
-//            if (asterix_framing == "none")
-//                task_man.asterixFraming("");
-//            else
-//                task_man.asterixFraming(asterix_framing);
-//        }
+    TaskManager& task_man = COMPASS::instance().taskManager();
 
-//        if (asterix_decoder_cfg.size())
-//            task_man.asterixDecoderConfig(asterix_decoder_cfg);
+    try
+    {
+        if (asterix_framing.size())
+        {
+            if (asterix_framing == "none")
+                task_man.asterixImporterTask().asterixFileFraming("");
+            else
+                task_man.asterixImporterTask().asterixFileFraming(asterix_framing);
+        }
 
-//        if (task_man.asterixOptionsSet())
-//            task_man.setAsterixOptions();
-//    }
-//    catch (exception& e)
-//    {
-//        logerr << "COMPASSClient: setting ASTERIX options resulted in error: " << e.what();
-//        quit_requested_ = true;
-//        return;
-//    }
+        if (asterix_decoder_cfg.size())
+            task_man.asterixImporterTask().asterixDecoderConfig(asterix_decoder_cfg);
+
+        if (import_asterix_file_line_.size())
+        {
+            unsigned int file_line = String::lineFromStr(import_asterix_file_line_);
+            task_man.asterixImporterTask().fileLineID(file_line);
+        }
+
+    }
+    catch (exception& e)
+    {
+        logerr << "COMPASSClient: setting ASTERIX options resulted in error: " << e.what();
+        quit_requested_ = true;
+        return;
+    }
 
     if (import_asterix_filename_.size())
         main_window.importASTERIXFile(import_asterix_filename_);
@@ -239,38 +261,46 @@ void Client::run ()
     if (import_asterix_network_time_offset_.size())
         main_window.importASTERIXFromNetworkTimeOffset(String::timeFromString(import_asterix_network_time_offset_));
 
-//    if (import_json_filename.size())
-//        task_man.importJSONFile(import_json_filename, import_json_schema);
+    if (import_asterix_network_max_lines_ != -1)
+    {
+        if (import_asterix_network_max_lines_ < 1 || import_asterix_network_max_lines_ > 4)
+        {
+            loginf << "COMPASSClient: number of maximum network lines must be between 1 and 4";
+            main_window.quit(true);
+        }
 
-//    if (import_gps_trail_filename.size())
-//        task_man.importGPSTrailFile(import_gps_trail_filename);
+        main_window.importAsterixNetworkMaxLines(import_asterix_network_max_lines_);
+    }
 
-//    if (import_sectors_filename.size())
-//        task_man.importSectorsFile(import_sectors_filename);
+    //    if (import_json_filename.size())
+    //        task_man.importJSONFile(import_json_filename, import_json_schema);
 
-//    if (auto_process)
-//        task_man.autoProcess(auto_process);
+    if (import_gps_trail_filename_.size())
+        main_window.importGPSTrailFile(import_gps_trail_filename_);
 
-//    if (associate_data)
-//        task_man.associateData(associate_data);
+    if (import_sectors_filename_.size())
+        main_window.importSectorsFile(import_sectors_filename_);
 
-//    if (start)
-//        task_man.start(start);
+    if (associate_data_)
+        main_window.associateData(associate_data_);
 
-//    if (load_data)
-//        main_window.loadData(load_data);
+    if (load_data_)
+        main_window.loadData(load_data_);
 
-//    if (export_view_points_report_filename.size())
-//        task_man.exportViewPointsReportFile(export_view_points_report_filename);
+    if (export_view_points_report_filename_.size())
+        main_window.exportViewPointsReportFile(export_view_points_report_filename_);
 
-//    if (evaluate)
-//        task_man.evaluate(true);
+    if (evaluate_)
+        main_window.evaluate(true);
 
-//    if (export_eval_report_filename.size())
-//        task_man.exportEvalReportFile(export_eval_report_filename);
+    if (evaluate_run_filter_)
+        main_window.evaluateRunFilter(true);
 
-//    if (quit)
-//        main_window.quit(quit);
+    if (export_eval_report_filename_.size())
+        main_window.exportEvalReportFile(export_eval_report_filename_);
+
+    if (quit_)
+        main_window.quit(quit_);
 }
 
 Client::~Client()
@@ -366,6 +396,62 @@ void Client::checkAndSetupConfig()
         loginf << "COMPASSClient: configuration version " << config_version;
 
         ConfigurationManager::getInstance().init(config.getString("main_configuration_file"));
+
+        if (import_gps_parameters_.size())
+        {
+            loginf << "COMPASSClient: overriding gps import parameters";
+            using namespace nlohmann;
+
+            try {
+                json gps_config = json::parse(import_gps_parameters_);
+
+                assert (ConfigurationManager::getInstance().hasRootConfiguration(
+                            "COMPASS", "COMPASS0"));
+                Configuration& compass_config = ConfigurationManager::getInstance().getRootConfiguration(
+                            "COMPASS", "COMPASS0");
+
+                assert (compass_config.hasSubConfiguration("TaskManager", "TaskManager0"));
+                Configuration& task_man_config = compass_config.getSubConfiguration(
+                            "TaskManager", "TaskManager0");
+
+                assert (task_man_config.hasSubConfiguration("GPSTrailImportTask", "GPSTrailImportTask0"));
+                Configuration& gps_task_config = task_man_config.getSubConfiguration(
+                            "GPSTrailImportTask", "GPSTrailImportTask0");
+
+                gps_task_config.overrideJSONParameters(gps_config);
+            }
+            catch (exception& e)
+            {
+                logerr << "COMPASSClient: JSON parse error in '" << import_gps_parameters_ << "'";
+                throw e;
+            }
+        }
+
+        if (evaluation_parameters_.size())
+        {
+            loginf << "COMPASSClient: overriding evaluation parameters";
+            using namespace nlohmann;
+
+            try {
+                json eval_config = json::parse(evaluation_parameters_);
+
+                assert (ConfigurationManager::getInstance().hasRootConfiguration(
+                            "COMPASS", "COMPASS0"));
+                Configuration& compass_config = ConfigurationManager::getInstance().getRootConfiguration(
+                            "COMPASS", "COMPASS0");
+
+                assert (compass_config.hasSubConfiguration("EvaluationManager", "EvaluationManager0"));
+                Configuration& eval_man_config = compass_config.getSubConfiguration(
+                            "EvaluationManager", "EvaluationManager0");
+
+                eval_man_config.overrideJSONParameters(eval_config);
+            }
+            catch (exception& e)
+            {
+                logerr << "COMPASSClient: JSON parse error in '" << evaluation_parameters_ << "'";
+                throw e;
+            }
+        }
     }
     catch (exception& ex)
     {

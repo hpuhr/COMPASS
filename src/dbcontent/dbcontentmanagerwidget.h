@@ -19,6 +19,7 @@
 #define DBCONTENT_DBCONTENTMANAGERWIDGET_H_
 
 #include <QWidget>
+
 #include <map>
 
 class DBContent;
@@ -37,24 +38,21 @@ class QPushButton;
 class QLineEdit;
 class QComboBox;
 
-/**
- * @brief Shows all DBObjects, allows editing and adding new ones
- */
-class DBContentManagerWidget: public QWidget
+class DBContentManagerWidget : public QWidget
 {
     Q_OBJECT
 
   public slots:
-    /// @brief Adds a DBObject
+    /// @brief Adds a DBContent
     void addDBOSlot();
-    /// @brief Is called when a DBObject was changed
+    /// @brief Is called when a DBContent was changed
     void changedDBOSlot();
-    /// @brief Edits a DBObject
+    /// @brief Edits a DBContent
     void editDBOSlot();
-    /// @brief Deletes a DBObject
+    /// @brief Deletes a DBContent
     void deleteDBOSlot();
-    /// @brief Updates the DBObject list
-    void updateDBOsSlot();
+    /// @brief Updates the DBContent list
+    void updateDBContentsSlot();
 
     void addMetaVariableSlot();
     void editMetaVariableSlot();
@@ -77,7 +75,7 @@ class DBContentManagerWidget: public QWidget
   private:
     DBContentManager& object_manager_;
 
-    /// Grid with all DBObjects
+    /// Grid with all DBContents
     QGridLayout* dbobjects_grid_{nullptr};
     QGridLayout* meta_variables_grid_{nullptr};
 

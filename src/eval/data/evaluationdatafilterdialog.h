@@ -26,16 +26,18 @@ public slots:
     // ma
     void removeModeACOnlyTargetsSlot(bool checked);
     void removeModeASlot(bool checked);
+    void removeModeABlackListSlot(bool checked);
     void removeModeAValuesSlot();
     // mc
     void removeModeCSlot(bool checked);
     void removeModeCMinValueSlot();
     //ta
     void removeTASlot(bool checked);
+    void removeTABlackListSlot(bool checked);
     void removeTAValuesSlot();
     // dbo
-    void removeDBOsSlot(bool checked);
-    void removeSpecificDBOsSlot(bool checked);
+    void removeDBContentsSlot(bool checked);
+    void removeSpecificDBContentsSlot(bool checked);
 
     void runSlot();
     void cancelSlot();
@@ -57,13 +59,14 @@ protected:
 
     QCheckBox* remove_mode_ac_only_check_ {nullptr};
     QCheckBox* remove_mode_a_check_ {nullptr};
+    QCheckBox* remove_mode_a_blacklist_check_ {nullptr};
     QTextEdit* remove_mode_a_edit_ {nullptr};
 
     QCheckBox* remove_mode_c_check_ {nullptr};
     QTextEdit* remove_mode_c_min_edit_ {nullptr};
 
-
     QCheckBox* remove_ta_check_ {nullptr};
+    QCheckBox* remove_ta_blacklist_check_ {nullptr};
     QTextEdit* remove_ta_edit_ {nullptr};
 
     QCheckBox* remove_dbo_check_ {nullptr};

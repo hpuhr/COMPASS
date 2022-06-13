@@ -16,7 +16,7 @@
  */
 
 #include "dbcontent/dbcontentmanager.h"
-
+#include "dbcontent/label/labelgenerator.h"
 #include "compass.h"
 #include "mainwindow.h"
 #include "configurationmanager.h"
@@ -43,6 +43,7 @@
 
 #include <algorithm>
 #include <chrono>
+#include <string>
 
 using namespace std;
 using namespace Utils;
@@ -85,7 +86,7 @@ double secondsSinceMidnightUTC ()
 }
 
 DBContentManager::DBContentManager(const std::string& class_id, const std::string& instance_id,
-                                 COMPASS* compass)
+                                   COMPASS* compass)
     : Configurable(class_id, instance_id, compass, "db_content.json"), compass_(*compass)
 {
     logdbg << "DBContentManager: constructor: creating subconfigurables";
@@ -101,8 +102,8 @@ DBContentManager::DBContentManager(const std::string& class_id, const std::strin
 
     createSubConfigurables();
 
-    for (auto& dbo_it : dbcontent_)
-        dbo_it.second->checkLabelDefinitions();
+    assert (label_generator_);
+    label_generator_->checkLabelConfig(); // here because references meta variables
 
     qRegisterMetaType<std::shared_ptr<Buffer>>("std::shared_ptr<Buffer>"); // for dbo read job
     // for signal about new data
@@ -111,6 +112,8 @@ DBContentManager::DBContentManager(const std::string& class_id, const std::strin
 
 DBContentManager::~DBContentManager()
 {
+    loginf << "DBContentManager: dtor";
+
     data_.clear();
 
     for (auto it : dbcontent_)
@@ -121,14 +124,27 @@ DBContentManager::~DBContentManager()
 
     widget_ = nullptr;
 
+    loginf << "DBContentManager: dtor: done";
+}
+
+dbContent::LabelGenerator& DBContentManager::labelGenerator()
+{
+    assert (label_generator_);
+    return *label_generator_;
 }
 
 void DBContentManager::generateSubConfigurable(const std::string& class_id,
-                                              const std::string& instance_id)
+                                               const std::string& instance_id)
 {
     logdbg << "DBContentManager: generateSubConfigurable: class_id " << class_id << " instance_id "
            << instance_id;
-    if (class_id.compare("DBContent") == 0)
+
+    if (class_id.compare("DBContentLabelGenerator") == 0)
+    {
+        assert (!label_generator_);
+        label_generator_.reset(new dbContent::LabelGenerator(class_id, instance_id, *this));
+    }
+    else if (class_id.compare("DBContent") == 0)
     {
         DBContent* object = new DBContent(compass_, class_id, instance_id, this);
         loginf << "DBContentManager: generateSubConfigurable: adding content " << object->name();
@@ -151,7 +167,11 @@ void DBContentManager::generateSubConfigurable(const std::string& class_id,
 
 void DBContentManager::checkSubConfigurables()
 {
-    // nothing to do, must be defined in configuration
+    if (!label_generator_)
+    {
+        generateSubConfigurable("DBContentLabelGenerator", "DBContentLabelGenerator0");
+        assert (label_generator_);
+    }
 }
 
 bool DBContentManager::existsDBContent(const std::string& dbcontent_name)
@@ -308,7 +328,7 @@ Variable& DBContentManager::orderVariable()
 
 void DBContentManager::orderVariable(Variable& variable)
 {
-    order_variable_dbcontent_name_ = variable.dboName();
+    order_variable_dbcontent_name_ = variable.dbContentName();
     order_variable_name_ = variable.name();
 }
 
@@ -369,6 +389,8 @@ void DBContentManager::load()
     EvaluationManager& eval_man = COMPASS::instance().evaluationManager();
     ViewManager& view_man = COMPASS::instance().viewManager();
 
+    assert (label_generator_);
+
     for (auto& object : dbcontent_)
     {
         loginf << "DBContentManager: loadSlot: object " << object.first
@@ -378,7 +400,19 @@ void DBContentManager::load()
         if (object.second->loadable() && ds_man.loadingWanted(object.first))
         {
             loginf << "DBContentManager: loadSlot: loading object " << object.first;
-            VariableSet read_set = view_man.getReadSet(object.first); // TODO add required vars for processing
+            VariableSet read_set = view_man.getReadSet(object.first);
+
+            // add required vars for processing
+            assert (metaCanGetVariable(object.first, DBContent::meta_var_rec_num_));
+            read_set.add(metaGetVariable(object.first, DBContent::meta_var_rec_num_));
+
+            assert (metaCanGetVariable(object.first, DBContent::meta_var_datasource_id_));
+            read_set.add(metaGetVariable(object.first, DBContent::meta_var_datasource_id_));
+
+            assert (metaCanGetVariable(object.first, DBContent::meta_var_line_id_));
+            read_set.add(metaGetVariable(object.first, DBContent::meta_var_line_id_));
+
+            label_generator_->addVariables(object.first, read_set);
 
             if (eval_man.needsAdditionalVariables())
                 eval_man.addVariables(object.first, read_set);
@@ -408,7 +442,7 @@ void DBContentManager::load()
 
             // load (DBOVariableSet &read_set, bool use_filters, bool use_order, DBOVariable
             // *order_variable, bool use_order_ascending, const std::string &limit_str="")
-            object.second->load(read_set, COMPASS::instance().filterManager().useFilters(),
+            object.second->load(read_set, true, COMPASS::instance().filterManager().useFilters(),
                                 use_order_, variable, use_order_ascending_,
                                 limit_str);
 
@@ -433,11 +467,8 @@ void DBContentManager::addLoadedData(std::map<std::string, std::shared_ptr<Buffe
 
     for (auto& buf_it : data)
     {
-        if (!buf_it.second->size())
-        {
-            logerr << "DBContentManager: addLoadedData: buffer dbo " << buf_it.first << " with 0 size";
+        if (!buf_it.second->size()) // empty buffer
             continue;
-        }
 
         if (data_.count(buf_it.first))
         {
@@ -462,6 +493,7 @@ void DBContentManager::addLoadedData(std::map<std::string, std::shared_ptr<Buffe
 
     if (something_changed)
     {
+        updateNumLoadedCounts();
         emit loadedDataSignal(data_, false);
     }
 }
@@ -486,20 +518,39 @@ void DBContentManager::databaseOpenedSlot()
     loginf << "DBContentManager: databaseOpenedSlot";
 
     loadMaxRecordNumber();
+    loadMaxRefTrajTrackNum();
 
-    if (COMPASS::instance().interface().hasProperty("associations_generated"))
+    DBInterface& db_interface = COMPASS::instance().interface();
+
+    if (db_interface.hasProperty("associations_generated"))
     {
-        assert(COMPASS::instance().interface().hasProperty("associations_id"));
+        assert(db_interface.hasProperty("associations_id"));
 
         has_associations_ =
-                COMPASS::instance().interface().getProperty("associations_generated") == "1";
-        associations_id_ = COMPASS::instance().interface().getProperty("associations_id");
+                db_interface.getProperty("associations_generated") == "1";
+        associations_id_ = db_interface.getProperty("associations_id");
     }
     else
     {
         has_associations_ = false;
         associations_id_ = "";
     }
+
+    // load min max values
+    if (db_interface.hasProperty("time_of_day_min"))
+        tod_min_ = stod(db_interface.getProperty("time_of_day_min"));
+    if (db_interface.hasProperty("time_of_day_max"))
+        tod_max_ = stod(db_interface.getProperty("time_of_day_max"));
+
+    if (db_interface.hasProperty("latitude_min"))
+        latitude_min_ = stod(db_interface.getProperty("latitude_min"));
+    if (db_interface.hasProperty("latitude_max"))
+        latitude_max_ = stod(db_interface.getProperty("latitude_max"));
+
+    if (db_interface.hasProperty("longitude_min"))
+        longitude_min_ = stod(db_interface.getProperty("longitude_min"));
+    if (db_interface.hasProperty("longitude_max"))
+        longitude_max_ = stod(db_interface.getProperty("longitude_max"));
 
     for (auto& object : dbcontent_)
         object.second->databaseOpenedSlot();
@@ -508,13 +559,19 @@ void DBContentManager::databaseOpenedSlot()
 
     emit associationStatusChangedSignal();
 
+
     loginf << "DBContentManager: databaseOpenedSlot: done";
 }
 
 void DBContentManager::databaseClosedSlot()
 {
+    loginf << "DBContentManager: databaseClosedSlot";
+
     max_rec_num_ = 0;
     has_max_rec_num_ = false;
+
+    max_reftraj_track_num_ = 0;
+    has_max_reftraj_track_num_ = false;
 
     has_associations_ = false;
     associations_id_ = "";
@@ -523,6 +580,13 @@ void DBContentManager::databaseClosedSlot()
         object.second->databaseClosedSlot();
 
     targets_.clear();
+
+    tod_min_.reset();
+    tod_max_.reset();
+    latitude_min_.reset();
+    latitude_max_.reset();
+    longitude_min_.reset();
+    longitude_max_.reset();
 
     associationStatusChangedSignal();
 }
@@ -607,8 +671,6 @@ void DBContentManager::finishLoading()
 }
 
 
-
-
 bool DBContentManager::hasAssociations() const
 {
     return has_associations_;
@@ -622,7 +684,9 @@ void DBContentManager::setAssociationsIdentifier(const std::string& assoc_id)
     has_associations_ = true;
     associations_id_ = assoc_id;
 
-   COMPASS::instance().dataSourceManager().updateWidget();
+    COMPASS::instance().dataSourceManager().updateWidget();
+
+    emit associationStatusChangedSignal();
 }
 
 //void DBContentManager::setAssociationsByAll()
@@ -665,7 +729,7 @@ std::string DBContentManager::associationsID() const { return associations_id_; 
 
 //std::string DBContentManager::associationsDataSourceName() const { return associations_ds_; }
 
-//bool DBContentManager::isOtherDBObjectPostProcessing(DBContent& object)
+//bool DBContentManager::isOtherDBContentPostProcessing(DBContent& object)
 //{
 //    for (auto& dbo_it : dbcontent_)
 //        if (dbo_it.second != &object && dbo_it.second->isPostProcessing())
@@ -681,6 +745,8 @@ bool DBContentManager::loadInProgress() const
 
 void DBContentManager::clearData()
 {
+    loginf << "DBContentManager: clearData";
+
     data_.clear();
 
     COMPASS::instance().viewManager().clearDataInViews();
@@ -727,7 +793,117 @@ void DBContentManager::insertDone(DBContent& object)
 
 void DBContentManager::finishInserting()
 {
-    logdbg << "DBContentManager: finishInserting: all done";
+    loginf << "DBContentManager: finishInserting: all done";
+
+    // calculate min/max values
+
+    for (auto& buf_it : insert_data_)
+    {
+        string dbcont_name = buf_it.first;
+
+        assert (metaCanGetVariable(dbcont_name, DBContent::meta_var_tod_));
+        assert (metaCanGetVariable(dbcont_name, DBContent::meta_var_latitude_));
+        assert (metaCanGetVariable(dbcont_name, DBContent::meta_var_longitude_));
+
+        unsigned int buffer_size = buf_it.second->size();
+
+        //auto updateMinMaxRange = [ & ] (Property prop, const std::string& dbcont_name, )
+        // TODO template function this
+
+        // use dbcolum name since buffer has been transformed during insert
+
+        // tod
+        {
+            Variable& var = metaGetVariable(dbcont_name, DBContent::meta_var_tod_);
+            if (buf_it.second->has<float>(var.dbColumnName()))
+            {
+                NullableVector<float>& data_vec = buf_it.second->get<float>(var.dbColumnName());
+                bool has_min_max = hasMinMaxToD();
+
+                for (unsigned int cnt=0; cnt < buffer_size; cnt++)
+                {
+                    if (!data_vec.isNull(cnt))
+                    {
+                        if (has_min_max)
+                        {
+                            tod_min_ = std::min(tod_min_.get(), data_vec.get(cnt));
+                            tod_max_ = std::max(tod_max_.get(), data_vec.get(cnt));
+                        }
+                        else
+                        {
+                            tod_min_ = data_vec.get(cnt);
+                            tod_max_ = data_vec.get(cnt);
+
+                            has_min_max = true;
+                        }
+                    }
+                }
+
+                if (has_min_max)
+                {
+                    COMPASS::instance().interface().setProperty("time_of_day_min", to_string(tod_min_.get()));
+                    COMPASS::instance().interface().setProperty("time_of_day_max", to_string(tod_max_.get()));
+
+                    logdbg << "DBContentManager: finishInserting: tod min " << tod_min_.get()
+                           << " max " << tod_max_.get();
+                }
+            }
+        }
+
+        // lat & long
+        {
+            Variable& lat_var = metaGetVariable(dbcont_name, DBContent::meta_var_latitude_);
+            Variable& lon_var = metaGetVariable(dbcont_name, DBContent::meta_var_longitude_);
+
+            if (buf_it.second->has<double>(lat_var.dbColumnName())
+                    && buf_it.second->has<double>(lon_var.dbColumnName()))
+            {
+                NullableVector<double>& lat_vec = buf_it.second->get<double>(lat_var.dbColumnName());
+                NullableVector<double>& lon_vec = buf_it.second->get<double>(lon_var.dbColumnName());
+
+                bool has_min_max = hasMinMaxPosition();
+
+                for (unsigned int cnt=0; cnt < buffer_size; cnt++)
+                {
+                    if (!lat_vec.isNull(cnt) && !lon_vec.isNull(cnt))
+                    {
+                        if (has_min_max)
+                        {
+                            latitude_min_ = std::min(latitude_min_.get(), lat_vec.get(cnt));
+                            latitude_max_ = std::max(latitude_max_.get(), lat_vec.get(cnt));
+
+                            longitude_min_ = std::min(longitude_min_.get(), lon_vec.get(cnt));
+                            longitude_max_ = std::max(longitude_max_.get(), lon_vec.get(cnt));
+                        }
+                        else
+                        {
+                            latitude_min_ = lat_vec.get(cnt);
+                            latitude_max_ = lat_vec.get(cnt);
+
+                            longitude_min_ = lon_vec.get(cnt);
+                            longitude_max_ = lon_vec.get(cnt);
+
+                            has_min_max = true;
+                        }
+                    }
+                }
+
+                if (has_min_max)
+                {
+                    COMPASS::instance().interface().setProperty("latitude_min", to_string(latitude_min_.get()));
+                    COMPASS::instance().interface().setProperty("latitude_max", to_string(latitude_max_.get()));
+
+                    COMPASS::instance().interface().setProperty("longitude_min", to_string(longitude_min_.get()));
+                    COMPASS::instance().interface().setProperty("longitude_max", to_string(longitude_max_.get()));
+
+                    logdbg << "DBContentManager: finishInserting: lat min " << latitude_min_.get()
+                           << " max " << latitude_max_.get()
+                           << " lon min " << longitude_min_.get()
+                           << " max " << longitude_max_.get();
+                }
+            }
+        }
+    }
 
     if (COMPASS::instance().appMode() == AppMode::Offline || COMPASS::instance().appMode() == AppMode::LivePaused)
         insert_data_.clear();
@@ -739,6 +915,8 @@ void DBContentManager::finishInserting()
 
     boost::posix_time::ptime start_time = boost::posix_time::microsec_clock::local_time();
     assert (existsMetaVariable(DBContent::meta_var_tod_.name()));
+
+    bool had_data = data_.size();
 
     if (COMPASS::instance().appMode() == AppMode::LiveRunning) // do tod cleanup
     {
@@ -754,6 +932,10 @@ void DBContentManager::finishInserting()
 
         if (data_.size())
             emit loadedDataSignal(data_, true);
+        else if (had_data)
+            COMPASS::instance().viewManager().clearDataInViews();
+
+        updateNumLoadedCounts();
     }
 
     COMPASS::instance().dataSourceManager().updateWidget();
@@ -767,10 +949,14 @@ void DBContentManager::addInsertedDataToChache()
 {
     loginf << "DBContentManager: addInsertedDataToChache";
 
+    assert (label_generator_);
+
     for (auto& buf_it : insert_data_)
     {
 
         VariableSet read_set = COMPASS::instance().viewManager().getReadSet(buf_it.first);
+        label_generator_->addVariables(buf_it.first, read_set);
+
         vector<Property> buffer_properties_to_be_removed;
 
         // remove all unused
@@ -817,21 +1003,29 @@ void DBContentManager::addInsertedDataToChache()
 
 void DBContentManager::filterDataSources()
 {
-    set<unsigned int> wanted_data_sources = COMPASS::instance().dataSourceManager().getLoadDataSources();
+    std::map<unsigned int, std::set<unsigned int>> wanted_data_sources =
+            COMPASS::instance().dataSourceManager().getLoadDataSources();
 
     unsigned int buffer_size;
     vector<size_t> indexes_to_remove;
 
     for (auto& buf_it : data_)
     {
+        // remove unwanted data sources
         assert (metaVariable(DBContent::meta_var_datasource_id_.name()).existsIn(buf_it.first));
+        assert (metaVariable(DBContent::meta_var_line_id_.name()).existsIn(buf_it.first));
 
         Variable& ds_id_var = metaVariable(DBContent::meta_var_datasource_id_.name()).getFor(buf_it.first);
+        Variable& line_id_var = metaVariable(DBContent::meta_var_line_id_.name()).getFor(buf_it.first);
 
         Property ds_id_prop {ds_id_var.name(), ds_id_var.dataType()};
         assert (buf_it.second->hasProperty(ds_id_prop));
 
+        Property line_id_prop {line_id_var.name(), line_id_var.dataType()};
+        assert (buf_it.second->hasProperty(ds_id_prop));
+
         NullableVector<unsigned int>& ds_id_vec = buf_it.second->get<unsigned int>(ds_id_var.name());
+        NullableVector<unsigned int>& line_id_vec = buf_it.second->get<unsigned int>(line_id_var.name());
 
         buffer_size = buf_it.second->size();
 
@@ -841,8 +1035,10 @@ void DBContentManager::filterDataSources()
         for (unsigned int index=0; index < buffer_size; ++index)
         {
             assert (!ds_id_vec.isNull(index));
+            assert (!line_id_vec.isNull(index));
 
-            if (!wanted_data_sources.count(ds_id_vec.get(index)))
+            if (!wanted_data_sources.count(ds_id_vec.get(index)) // unwanted ds
+                    || !wanted_data_sources.at(ds_id_vec.get(index)).count(line_id_vec.get(index))) // unwanted line
                 indexes_to_remove.push_back(index);
         }
 
@@ -850,6 +1046,10 @@ void DBContentManager::filterDataSources()
                << indexes_to_remove.size() << " of " << buffer_size;
 
         buf_it.second->removeIndexes(indexes_to_remove);
+
+        // remove unwanted lines
+        indexes_to_remove.clear();
+        buffer_size = buf_it.second->size();
     }
 
     // remove empty buffers
@@ -969,6 +1169,37 @@ void DBContentManager::cutCachedData()
             data_.erase(buf_it.first);
 }
 
+void DBContentManager::updateNumLoadedCounts()
+{
+    loginf << "DBContentManager: updateNumLoadedCounts";
+
+    // ds id->dbcont->line->cnt
+    std::map<unsigned int, std::map<std::string,
+            std::map<unsigned int, unsigned int>>> loaded_counts;
+
+    for (auto& buf_it : data_)
+    {
+        assert (metaCanGetVariable(buf_it.first, DBContent::meta_var_datasource_id_));
+        assert (metaCanGetVariable(buf_it.first, DBContent::meta_var_line_id_));
+
+        Variable& ds_id_var = metaGetVariable(buf_it.first, DBContent::meta_var_datasource_id_);
+        Variable& line_id_var = metaGetVariable(buf_it.first, DBContent::meta_var_line_id_);
+
+        NullableVector<unsigned int>& ds_id_vec = buf_it.second->get<unsigned int>(ds_id_var.name());
+        NullableVector<unsigned int>& line_id_vec = buf_it.second->get<unsigned int>(line_id_var.name());
+
+        assert (ds_id_vec.isNeverNull());
+        assert (line_id_vec.isNeverNull());
+
+        unsigned int buffer_size = buf_it.second->size();
+
+        for (unsigned int cnt=0; cnt < buffer_size; ++cnt)
+            loaded_counts[ds_id_vec.get(cnt)][buf_it.first][line_id_vec.get(cnt)] += 1;
+    }
+
+    COMPASS::instance().dataSourceManager().setLoadedCounts(loaded_counts);
+}
+
 
 unsigned int DBContentManager::maxRecordNumber() const
 {
@@ -984,13 +1215,88 @@ void DBContentManager::maxRecordNumber(unsigned int value)
     has_max_rec_num_ = true;
 }
 
+unsigned int DBContentManager::maxRefTrajTrackNum() const
+{
+    assert (has_max_reftraj_track_num_);
+    return max_reftraj_track_num_;
+}
+
+void DBContentManager::maxRefTrajTrackNum(unsigned int value)
+{
+    logdbg << "DBContentManager: maxRefTrajTrackNum: " << value;
+
+    max_reftraj_track_num_ = value;
+    has_max_reftraj_track_num_ = true;
+}
+
+
+bool DBContentManager::hasMinMaxInfo() const
+{
+    return tod_min_.has_value() || tod_max_.has_value()
+            || latitude_min_.has_value() || latitude_max_.has_value()
+            || longitude_min_.has_value() || longitude_max_.has_value();
+}
+
+bool DBContentManager::hasMinMaxToD() const
+{
+    return tod_min_.has_value() && tod_max_.has_value();
+}
+
+void DBContentManager::setMinMaxTod(double min, double max)
+{
+    tod_min_ = min;
+    tod_max_ = max;
+
+    COMPASS::instance().interface().setProperty("time_of_day_min", to_string(tod_min_.get()));
+    COMPASS::instance().interface().setProperty("time_of_day_max", to_string(tod_max_.get()));
+}
+
+std::pair<double, double> DBContentManager::minMaxTod() const
+{
+    assert (hasMinMaxToD());
+    return {tod_min_.get(), tod_max_.get()};
+}
+
+bool DBContentManager::hasMinMaxPosition() const
+{
+    return latitude_min_.has_value() || latitude_max_.has_value()
+            || longitude_min_.has_value() || longitude_max_.has_value();
+}
+
+void DBContentManager::setMinMaxLatitude(double min, double max)
+{
+    latitude_min_ = min;
+    latitude_max_ = max;
+
+    COMPASS::instance().interface().setProperty("latitude_min", to_string(latitude_min_.get()));
+    COMPASS::instance().interface().setProperty("latitude_max", to_string(latitude_max_.get()));
+}
+
+std::pair<double, double> DBContentManager::minMaxLatitude() const
+{
+    assert (hasMinMaxPosition());
+    return {latitude_min_.get(), latitude_max_.get()};
+}
+
+void DBContentManager::setMinMaxLongitude(double min, double max)
+{
+    longitude_min_ = min;
+    longitude_max_ = max;
+
+    COMPASS::instance().interface().setProperty("longitude_min", to_string(longitude_min_.get()));
+    COMPASS::instance().interface().setProperty("longitude_max", to_string(longitude_max_.get()));
+}
+
+std::pair<double, double> DBContentManager::minMaxLongitude() const
+{
+    assert (hasMinMaxPosition());
+    return {longitude_min_.get(), longitude_max_.get()};
+}
+
 const std::map<std::string, std::shared_ptr<Buffer>>& DBContentManager::data() const
 {
     return data_;
 }
-
-
-
 
 bool DBContentManager::canGetVariable (const std::string& dbcont_name, const Property& property)
 {
@@ -1084,6 +1390,16 @@ void DBContentManager::loadMaxRecordNumber()
     has_max_rec_num_ = true;
 
     loginf << "DBContentManager: loadMaxRecordNumber: " << max_rec_num_;
+}
+
+void DBContentManager::loadMaxRefTrajTrackNum()
+{
+    assert (COMPASS::instance().interface().dbOpen());
+
+    max_reftraj_track_num_ = COMPASS::instance().interface().getMaxRefTrackTrackNum();
+    has_max_reftraj_track_num_ = true;
+
+    loginf << "DBContentManager: loadMaxRefTrajTrackNum: " << max_reftraj_track_num_;
 }
 
 MetaVariableConfigurationDialog* DBContentManager::metaVariableConfigdialog()

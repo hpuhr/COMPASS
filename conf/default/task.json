@@ -29,9 +29,9 @@
             "path": "task_import_gps.json"
         },
         {
-            "class_id": "ManageDBObjectsTask",
-            "instance_id": "ManageDBObjectsTask0",
-            "path": "task_manage_dbojects.json"
+            "class_id": "ManageDBContentTask",
+            "instance_id": "ManageDBContentTask0",
+            "path": "task_manage_dbcontent.json"
         },
         {
             "class_id": "ManageSectorsTask",

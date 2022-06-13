@@ -91,8 +91,5 @@ void DatabaseOpenTask::databaseOpenedSlot()
     loginf << "DatabaseOpenTask: databaseOpenedSlot";
     done_ = true;
 
-    task_manager_.appendSuccess(
-        "DatabaseOpenTask: database opened");
-
     emit doneSignal(name_);
 }

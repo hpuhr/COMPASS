@@ -19,7 +19,6 @@
 #define DBINTERFACE_H_
 
 #include "configurable.h"
-#include "dboassociationcollection.h"
 #include "dbcontent/variable/variableset.h"
 #include "propertylist.h"
 #include "sqlgenerator.h"
@@ -42,7 +41,6 @@ class BufferWriter;
 class SQLiteConnection;
 class QProgressDialog;
 class DBContent;
-class DBODataSource;
 class DBResult;
 class DBTableInfo;
 class Job;
@@ -65,9 +63,9 @@ class DBInterface : public QObject, public Configurable
     Q_OBJECT
 
 signals:
-    void databaseOpenedSignal();
+    //void databaseOpenedSignal();
     void databaseContentChangedSignal();
-    void databaseClosedSignal();
+    //void databaseClosedSignal();
 
 public:
     DBInterface(std::string class_id, std::string instance_id, COMPASS* compass);
@@ -93,7 +91,7 @@ public:
     // clears previous and saves new ones
 
     // insert data and create associated data sources
-    void insertBuffer(DBContent& db_object, std::shared_ptr<Buffer> buffer);
+    void insertBuffer(DBContent& dbcontent, std::shared_ptr<Buffer> buffer);
     void insertBuffer(const std::string& table_name, std::shared_ptr<Buffer> buffer);
 
     void updateBuffer(const std::string& table_name, const std::string& key_col, std::shared_ptr<Buffer> buffer,
@@ -115,6 +113,7 @@ public:
     void setProperty(const std::string& id, const std::string& value);
     std::string getProperty(const std::string& id);
     bool hasProperty(const std::string& id);
+    void saveProperties();
 
     bool existsTable(const std::string& table_name);
     void createTable(const DBContent& object);
@@ -145,6 +144,7 @@ public:
     void clearTableContent(const std::string& table_name);
 
     unsigned int getMaxRecordNumber(DBContent& object);
+    unsigned int getMaxRefTrackTrackNum();
 
     //std::map<unsigned int, std::tuple<std::set<unsigned int>, std::tuple<bool, unsigned int, unsigned int>,
     //std::tuple<bool, unsigned int, unsigned int>>> queryADSBInfo();
@@ -168,10 +168,9 @@ protected:
 
     virtual void checkSubConfigurables();
 
-    void insertBindStatementUpdateForCurrentIndex(std::shared_ptr<Buffer> buffer, unsigned int row);
+    void insertBindStatementUpdateForCurrentIndex(std::shared_ptr<Buffer> buffer, unsigned int buffer_index);
 
     void loadProperties();
-    void saveProperties();
 
     void updateTableInfo();
 };

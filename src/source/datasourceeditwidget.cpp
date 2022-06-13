@@ -20,12 +20,15 @@ using namespace std;
 DataSourceEditWidget::DataSourceEditWidget(DataSourceManager& ds_man, DataSourcesConfigurationDialog& dialog)
     : ds_man_(ds_man), dialog_(dialog)
 {
-    setMaximumWidth(300);
+    setMaximumWidth(400);
 
     QScrollArea* scroll_area = new QScrollArea();
     scroll_area->setWidgetResizable(true);
 
+    QWidget* main_widget = new QWidget();
+
     QVBoxLayout* main_layout = new QVBoxLayout();
+    main_layout->setSizeConstraint(QLayout::SetMinimumSize);
 
     QGridLayout* properties_layout_ = new QGridLayout();
 
@@ -119,7 +122,6 @@ DataSourceEditWidget::DataSourceEditWidget(DataSourceManager& ds_man, DataSource
     main_layout->addWidget(position_widget_);
 
     // radar ranges
-
     ranges_widget_ = new QWidget();
     ranges_widget_->setContentsMargins(0, 0, 0, 0);
 
@@ -166,7 +168,6 @@ DataSourceEditWidget::DataSourceEditWidget(DataSourceManager& ds_man, DataSource
     ranges_layout->addWidget(ssr_max_edit_, row_cnt, 1);
 
     // mode s
-    // ssr
     ++row_cnt;
     ranges_layout->addWidget(new QLabel("Mode S Minimum"), row_cnt, 0);
 
@@ -186,6 +187,7 @@ DataSourceEditWidget::DataSourceEditWidget(DataSourceManager& ds_man, DataSource
     ranges_layout->addWidget(mode_s_max_edit_, row_cnt, 1);
 
     ranges_widget_->setLayout(ranges_layout);
+    //ranges_widget_->setMinimumHeight(300);
 
     main_layout->addWidget(ranges_widget_);
 
@@ -194,12 +196,82 @@ DataSourceEditWidget::DataSourceEditWidget(DataSourceManager& ds_man, DataSource
     connect(add_ranges_button_, &QPushButton::clicked, this, &DataSourceEditWidget::addRadarRangesSlot);
     main_layout->addWidget(add_ranges_button_);
 
-    // net widget
+    // radar accuracies
+    accuracies_widget_ = new QWidget();
+    accuracies_widget_->setContentsMargins(0, 0, 0, 0);
 
-    add_lines_button_ = new QPushButton("Add Network Lines");
-    add_lines_button_->setToolTip("Adds network lines to the data source");
-    connect(add_lines_button_, &QPushButton::clicked, this, &DataSourceEditWidget::addNetLinesSlot);
-    main_layout->addWidget(add_lines_button_);
+    QGridLayout* accuracies_layout = new QGridLayout();
+    row_cnt = 0;
+    accuracies_layout->addWidget(new QLabel("Radar Accuracies"), row_cnt, 0, 1, 2);
+
+    // psr
+    ++row_cnt;
+    accuracies_layout->addWidget(new QLabel("PSR Azimuth StdDev [deg]"), row_cnt, 0);
+
+    acc_psr_azm_edit_ = new QLineEdit();
+    acc_psr_azm_edit_->setValidator(new TextFieldDoubleValidator(-180, 180, 2));
+    acc_psr_azm_edit_->setProperty("key", "primary_azimuth_stddev");
+    connect(acc_psr_azm_edit_, &QLineEdit::textEdited, this, &DataSourceEditWidget::radarAccuraciesEditedSlot);
+    accuracies_layout->addWidget(acc_psr_azm_edit_, row_cnt, 1);
+
+    ++row_cnt;
+    accuracies_layout->addWidget(new QLabel("PSR Range StdDev [m]"), row_cnt, 0);
+
+    acc_psr_rng_edit_ = new QLineEdit();
+    acc_psr_rng_edit_->setValidator(new TextFieldDoubleValidator(-50000, 50000, 2));
+    acc_psr_rng_edit_->setProperty("key", "primary_range_stddev");
+    connect(acc_psr_rng_edit_, &QLineEdit::textEdited, this, &DataSourceEditWidget::radarAccuraciesEditedSlot);
+    accuracies_layout->addWidget(acc_psr_rng_edit_, row_cnt, 1);
+
+    // ssr
+    ++row_cnt;
+    accuracies_layout->addWidget(new QLabel("SSR Azimuth StdDev [deg]"), row_cnt, 0);
+
+    acc_ssr_azm_edit_ = new QLineEdit();
+    acc_ssr_azm_edit_->setValidator(new TextFieldDoubleValidator(-180, 180, 2));
+    acc_ssr_azm_edit_->setProperty("key", "secondary_azimuth_stddev");
+    connect(acc_ssr_azm_edit_, &QLineEdit::textEdited, this, &DataSourceEditWidget::radarAccuraciesEditedSlot);
+    accuracies_layout->addWidget(acc_ssr_azm_edit_, row_cnt, 1);
+
+    ++row_cnt;
+    accuracies_layout->addWidget(new QLabel("SSR Range StdDev [m]"), row_cnt, 0);
+
+    acc_ssr_rng_edit_ = new QLineEdit();
+    acc_ssr_rng_edit_->setValidator(new TextFieldDoubleValidator(-50000, 50000, 2));
+    acc_ssr_rng_edit_->setProperty("key", "secondary_range_stddev");
+    connect(acc_ssr_rng_edit_, &QLineEdit::textEdited, this, &DataSourceEditWidget::radarAccuraciesEditedSlot);
+    accuracies_layout->addWidget(acc_ssr_rng_edit_, row_cnt, 1);
+
+    // mode s
+    ++row_cnt;
+    accuracies_layout->addWidget(new QLabel("Mode S Azimuth StdDev [deg]"), row_cnt, 0);
+
+    acc_mode_s_azm_edit_ = new QLineEdit();
+    acc_mode_s_azm_edit_->setValidator(new TextFieldDoubleValidator(-180, 180, 2));
+    acc_mode_s_azm_edit_->setProperty("key", "mode_s_azimuth_stddev");
+    connect(acc_mode_s_azm_edit_, &QLineEdit::textEdited, this, &DataSourceEditWidget::radarAccuraciesEditedSlot);
+    accuracies_layout->addWidget(acc_mode_s_azm_edit_, row_cnt, 1);
+
+    ++row_cnt;
+    accuracies_layout->addWidget(new QLabel("Mode S Range StdDev [m]"), row_cnt, 0);
+
+    acc_mode_s_rng_edit_ = new QLineEdit();
+    acc_mode_s_rng_edit_->setValidator(new TextFieldDoubleValidator(-50000, 50000, 2));
+    acc_mode_s_rng_edit_->setProperty("key", "mode_s_range_stddev");
+    connect(acc_mode_s_rng_edit_, &QLineEdit::textEdited, this, &DataSourceEditWidget::radarAccuraciesEditedSlot);
+    accuracies_layout->addWidget(acc_mode_s_rng_edit_, row_cnt, 1);
+
+    accuracies_widget_->setLayout(accuracies_layout);
+    //accuracies_widget_->setMinimumHeight(300);
+
+    main_layout->addWidget(accuracies_widget_);
+
+    add_accuracies_button_ = new QPushButton("Add Radar Accuracies");
+    add_accuracies_button_->setToolTip("Adds Radar accuracy information");
+    connect(add_accuracies_button_, &QPushButton::clicked, this, &DataSourceEditWidget::addRadarAccuraciesSlot);
+    main_layout->addWidget(add_accuracies_button_);
+
+    // net widget
 
     net_widget_ = new QWidget();
     net_widget_->setContentsMargins(0, 0, 0, 0);
@@ -231,8 +303,14 @@ DataSourceEditWidget::DataSourceEditWidget(DataSourceManager& ds_man, DataSource
     net_layout->addWidget(net_l4_edit_, 3, 1);
 
     net_widget_->setLayout(net_layout);
+    //net_widget_->setMinimumHeight(300);
 
     main_layout->addWidget(net_widget_);
+
+    add_lines_button_ = new QPushButton("Add Network Lines");
+    add_lines_button_->setToolTip("Adds network lines to the data source");
+    connect(add_lines_button_, &QPushButton::clicked, this, &DataSourceEditWidget::addNetLinesSlot);
+    main_layout->addWidget(add_lines_button_);
 
     main_layout->addStretch();
 
@@ -243,9 +321,11 @@ DataSourceEditWidget::DataSourceEditWidget(DataSourceManager& ds_man, DataSource
 
     updateContent();
 
-    scroll_area->setLayout(main_layout);
+    main_widget->setLayout(main_layout);
+    scroll_area->setWidget(main_widget);
 
-    QHBoxLayout* top_lay = new QHBoxLayout();
+    QVBoxLayout* top_lay = new QVBoxLayout();
+    top_lay->setSizeConstraint(QLayout::SetMinimumSize);
     top_lay->addWidget(scroll_area);
 
     setLayout(top_lay);
@@ -343,6 +423,8 @@ void DataSourceEditWidget::dsTypeEditedSlot(const QString& value)
     ds_man_.configDataSource(current_ds_id_).dsType(text);
 
     dialog_.updateDataSource(current_ds_id_);
+
+    updateContent();
 }
 
 void DataSourceEditWidget::latitudeEditedSlot(const QString& value_str)
@@ -430,6 +512,45 @@ void DataSourceEditWidget::radarRangeEditedSlot(const QString& value_str)
 
     assert (ds_man_.hasConfigDataSource(current_ds_id_));
     ds_man_.dbDataSource(current_ds_id_).radarRange(key, value);
+}
+
+void DataSourceEditWidget::addRadarAccuraciesSlot()
+{
+    loginf << "DataSourceEditWidget: addRadarAccuraciesSlot";
+
+    assert (has_current_ds_);
+
+    if (current_ds_in_db_)
+    {
+        assert (ds_man_.hasDBDataSource(current_ds_id_));
+        ds_man_.dbDataSource(current_ds_id_).addRadarAccuracies();
+    }
+
+    assert (ds_man_.hasConfigDataSource(current_ds_id_));
+    ds_man_.configDataSource(current_ds_id_).addRadarAccuracies();
+
+    updateContent();
+}
+
+void DataSourceEditWidget::radarAccuraciesEditedSlot(const QString& value_str)
+{
+    double value = value_str.toDouble();
+
+    QLineEdit* line_edit = dynamic_cast<QLineEdit*> (QObject::sender());
+    assert (line_edit);
+
+    string key = line_edit->property("key").toString().toStdString();
+
+    loginf << "DataSourceEditWidget: radarAccuraciesEditedSlot: key '" << key << "' value '" << value << "'";
+
+    if (current_ds_in_db_)
+    {
+        assert (ds_man_.hasDBDataSource(current_ds_id_));
+        ds_man_.dbDataSource(current_ds_id_).radarAccuracy(key, value);
+    }
+
+    assert (ds_man_.hasConfigDataSource(current_ds_id_));
+    ds_man_.dbDataSource(current_ds_id_).radarAccuracy(key, value);
 }
 
 void DataSourceEditWidget::addNetLinesSlot()
@@ -547,6 +668,8 @@ void DataSourceEditWidget::updateContent()
     assert (position_widget_);
     assert (add_ranges_button_);
     assert (ranges_widget_);
+    assert (accuracies_widget_);
+    assert (add_accuracies_button_);
     assert (add_lines_button_);
     assert (net_widget_);
     assert (delete_button_);
@@ -567,8 +690,13 @@ void DataSourceEditWidget::updateContent()
         ds_id_label_->setText("");
 
         position_widget_->setHidden(true);
+
         ranges_widget_->setHidden(true);
         add_ranges_button_->setHidden(true);
+
+        accuracies_widget_->setHidden(true);
+        add_accuracies_button_->setHidden(true);
+
         add_lines_button_->setHidden(true);
         net_widget_->setHidden(true);
 
@@ -576,258 +704,204 @@ void DataSourceEditWidget::updateContent()
     }
     else
     {
+        dbContent::DataSourceBase* ds = nullptr;
+
         if (current_ds_in_db_) // db && cfg
         {
             assert (ds_man_.hasDBDataSource(current_ds_id_));
-
-            dbContent::DBDataSource& ds = ds_man_.dbDataSource(current_ds_id_);
             assert (ds_man_.hasConfigDataSource(current_ds_id_));
-
-            name_edit_->setText(ds.name().c_str());
-            name_edit_->setDisabled(false);
-
-            if (ds.hasShortName())
-                short_name_edit_->setText(ds.shortName().c_str());
-            else
-                short_name_edit_->setText("");
-
-            short_name_edit_->setDisabled(false);
-
-            dstype_combo_->setType(ds.dsType());
-            dstype_combo_->setDisabled(false);
-
-            sac_label_->setText(QString::number(ds.sac()));
-            sic_label_->setText(QString::number(ds.sic()));
-            ds_id_label_->setText(QString::number(ds.id()));
-
-            // position
-            if (ds.dsType() == "Radar" || ds.hasPosition())
-            {
-                latitude_edit_->setText(QString::number(ds.latitude(), 'g', 12));
-                longitude_edit_->setText(QString::number(ds.longitude(), 'g', 12));
-                altitude_edit_->setText(QString::number(ds.altitude(), 'g', 12));
-            }
-            else
-                position_widget_->setHidden(true);
-
-            // ranges
-            if (ds.dsType() == "Radar")
-            {
-                if (ds.hasRadarRanges())
-                {
-                    ranges_widget_->setHidden(false);
-                    add_ranges_button_->setHidden(true);
-
-                    std::map<std::string, double> ranges = ds.radarRanges();
-
-                    // psr
-                    if (ranges.count("primary_ir_min"))
-                        psr_min_edit_->setText(QString::number(ranges.at("primary_ir_min")));
-                    else
-                        psr_min_edit_->setText("");
-
-                    if (ranges.count("primary_ir_max"))
-                        psr_max_edit_->setText(QString::number(ranges.at("primary_ir_max")));
-                    else
-                        psr_max_edit_->setText("");
-
-                    // ssr
-                    if (ranges.count("secondary_ir_min"))
-                        ssr_min_edit_->setText(QString::number(ranges.at("secondary_ir_min")));
-                    else
-                        ssr_min_edit_->setText("");
-
-                    if (ranges.count("secondary_ir_max"))
-                        ssr_max_edit_->setText(QString::number(ranges.at("secondary_ir_max")));
-                    else
-                        ssr_max_edit_->setText("");
-
-                    // mode s
-                    if (ranges.count("mode_s_ir_min"))
-                        mode_s_min_edit_->setText(QString::number(ranges.at("mode_s_ir_min")));
-                    else
-                        mode_s_min_edit_->setText("");
-
-                    if (ranges.count("mode_s_ir_max"))
-                        mode_s_max_edit_->setText(QString::number(ranges.at("mode_s_ir_max")));
-                    else
-                        mode_s_max_edit_->setText("");
-                }
-                else
-                {
-                    ranges_widget_->setHidden(true);
-                    add_ranges_button_->setHidden(false);
-                }
-            }
-            else
-            {
-                ranges_widget_->setHidden(true);
-                add_ranges_button_->setHidden(true);
-            }
-
-            // lines
-            if (ds.hasNetworkLines())
-            {
-                add_lines_button_->setHidden(true);
-                net_widget_->setHidden(false);
-
-                std::map<std::string, std::pair<std::string, unsigned int>> lines = ds.networkLines();
-
-                if (lines.count("L1"))
-                    net_l1_edit_->setText((lines.at("L1").first+":"+to_string(lines.at("L1").second)).c_str());
-                else
-                    net_l1_edit_->setText("");
-
-                if (lines.count("L2"))
-                    net_l2_edit_->setText((lines.at("L2").first+":"+to_string(lines.at("L2").second)).c_str());
-                else
-                    net_l2_edit_->setText("");
-
-                if (lines.count("L3"))
-                    net_l3_edit_->setText((lines.at("L3").first+":"+to_string(lines.at("L3").second)).c_str());
-                else
-                    net_l3_edit_->setText("");
-
-                if (lines.count("L4"))
-                    net_l4_edit_->setText((lines.at("L4").first+":"+to_string(lines.at("L4").second)).c_str());
-                else
-                    net_l4_edit_->setText("");
-
-            }
-            else
-            {
-                add_lines_button_->setHidden(false);
-                net_widget_->setHidden(true);
-            }
-
-            delete_button_->setHidden(true);
+            ds = dynamic_cast<dbContent::DataSourceBase*>(&ds_man_.dbDataSource(current_ds_id_));
         }
-        else // cfg only
+        else
         {
             assert (ds_man_.hasConfigDataSource(current_ds_id_));
+            ds = dynamic_cast<dbContent::DataSourceBase*>(&ds_man_.configDataSource(current_ds_id_));
+        }
+        assert (ds);
 
-            dbContent::ConfigurationDataSource& ds = ds_man_.configDataSource(current_ds_id_);
+        name_edit_->setText(ds->name().c_str());
+        name_edit_->setDisabled(false);
 
-            name_edit_->setText(ds.name().c_str());
-            name_edit_->setDisabled(false);
+        if (ds->hasShortName())
+            short_name_edit_->setText(ds->shortName().c_str());
+        else
+            short_name_edit_->setText("");
 
-            if (ds.hasShortName())
-                short_name_edit_->setText(ds.shortName().c_str());
-            else
-                short_name_edit_->setText("");
+        short_name_edit_->setDisabled(false);
 
-            short_name_edit_->setDisabled(false);
+        dstype_combo_->setType(ds->dsType());
+        dstype_combo_->setDisabled(false);
 
-            dstype_combo_->setType(ds.dsType());
-            dstype_combo_->setDisabled(false);
+        sac_label_->setText(QString::number(ds->sac()));
+        sic_label_->setText(QString::number(ds->sic()));
+        ds_id_label_->setText(QString::number(ds->id()));
 
-            sac_label_->setText(QString::number(ds.sac()));
-            sic_label_->setText(QString::number(ds.sic()));
-            ds_id_label_->setText(QString::number(ds.id()));
+        loginf << "DataSourceEditWidget: updateContent: ds_type " << ds->dsType()
+               << " has pos " << ds->hasPosition();
 
-            // position
-            if (ds.dsType() == "Radar" || ds.hasPosition())
+        // position
+        if (ds->dsType() == "Radar" || ds->hasPosition())
+        {
+            if (ds->hasPosition())
             {
-                latitude_edit_->setText(QString::number(ds.latitude(), 'g', 12));
-                longitude_edit_->setText(QString::number(ds.longitude(), 'g', 12));
-                altitude_edit_->setText(QString::number(ds.altitude(), 'g', 12));
-
-                position_widget_->setHidden(false);
+                latitude_edit_->setText(QString::number(ds->latitude(), 'g', 12));
+                longitude_edit_->setText(QString::number(ds->longitude(), 'g', 12));
+                altitude_edit_->setText(QString::number(ds->altitude(), 'g', 12));
             }
             else
-                position_widget_->setHidden(true);
-
-            // ranges
-            if (ds.dsType() == "Radar")
             {
-                if (ds.hasRadarRanges())
-                {
-                    ranges_widget_->setHidden(false);
-                    add_ranges_button_->setHidden(true);
+                latitude_edit_->setText("0");
+                longitude_edit_->setText("0");
+                altitude_edit_->setText("0");
+            }
 
-                    std::map<std::string, double> ranges = ds.radarRanges();
+            position_widget_->setHidden(false);
+        }
+        else
+            position_widget_->setHidden(true);
 
-                    // psr
-                    if (ranges.count("primary_ir_min"))
-                        psr_min_edit_->setText(QString::number(ranges.at("primary_ir_min")));
-                    else
-                        psr_min_edit_->setText("");
+        // ranges
+        if (ds->dsType() == "Radar")
+        {
+            if (ds->hasRadarRanges())
+            {
+                ranges_widget_->setHidden(false);
+                add_ranges_button_->setHidden(true);
 
-                    if (ranges.count("primary_ir_max"))
-                        psr_max_edit_->setText(QString::number(ranges.at("primary_ir_max")));
-                    else
-                        psr_max_edit_->setText("");
+                std::map<std::string, double> ranges = ds->radarRanges();
 
-                    // ssr
-                    if (ranges.count("secondary_ir_min"))
-                        ssr_min_edit_->setText(QString::number(ranges.at("secondary_ir_min")));
-                    else
-                        ssr_min_edit_->setText("");
-
-                    if (ranges.count("secondary_ir_max"))
-                        ssr_max_edit_->setText(QString::number(ranges.at("secondary_ir_max")));
-                    else
-                        ssr_max_edit_->setText("");
-
-                    // mode s
-                    if (ranges.count("mode_s_ir_min"))
-                        mode_s_min_edit_->setText(QString::number(ranges.at("mode_s_ir_min")));
-                    else
-                        mode_s_min_edit_->setText("");
-
-                    if (ranges.count("mode_s_ir_max"))
-                        mode_s_max_edit_->setText(QString::number(ranges.at("mode_s_ir_max")));
-                    else
-                        mode_s_max_edit_->setText("");
-                }
+                // psr
+                if (ranges.count("primary_ir_min"))
+                    psr_min_edit_->setText(QString::number(ranges.at("primary_ir_min")));
                 else
-                {
-                    ranges_widget_->setHidden(true);
-                    add_ranges_button_->setHidden(false);
-                }
+                    psr_min_edit_->setText("");
+
+                if (ranges.count("primary_ir_max"))
+                    psr_max_edit_->setText(QString::number(ranges.at("primary_ir_max")));
+                else
+                    psr_max_edit_->setText("");
+
+                // ssr
+                if (ranges.count("secondary_ir_min"))
+                    ssr_min_edit_->setText(QString::number(ranges.at("secondary_ir_min")));
+                else
+                    ssr_min_edit_->setText("");
+
+                if (ranges.count("secondary_ir_max"))
+                    ssr_max_edit_->setText(QString::number(ranges.at("secondary_ir_max")));
+                else
+                    ssr_max_edit_->setText("");
+
+                // mode s
+                if (ranges.count("mode_s_ir_min"))
+                    mode_s_min_edit_->setText(QString::number(ranges.at("mode_s_ir_min")));
+                else
+                    mode_s_min_edit_->setText("");
+
+                if (ranges.count("mode_s_ir_max"))
+                    mode_s_max_edit_->setText(QString::number(ranges.at("mode_s_ir_max")));
+                else
+                    mode_s_max_edit_->setText("");
             }
             else
             {
                 ranges_widget_->setHidden(true);
-                add_ranges_button_->setHidden(true);
+                add_ranges_button_->setHidden(false);
             }
 
-            // lines
-            if (ds.hasNetworkLines())
+            if (ds->hasRadarAccuracies())
             {
-                add_lines_button_->setHidden(true);
-                net_widget_->setHidden(false);
+                accuracies_widget_->setHidden(false);
+                add_accuracies_button_->setHidden(true);
 
-                std::map<std::string, std::pair<std::string, unsigned int>> lines = ds.networkLines();
+                std::map<std::string, double> ranges = ds->radarAccuracies();
 
-                if (lines.count("L1"))
-                    net_l1_edit_->setText((lines.at("L1").first+":"+to_string(lines.at("L1").second)).c_str());
+                // psr
+                if (ranges.count("primary_azimuth_stddev"))
+                    acc_psr_azm_edit_->setText(QString::number(ranges.at("primary_azimuth_stddev")));
                 else
-                    net_l1_edit_->setText("");
+                    acc_psr_azm_edit_->setText("");
 
-                if (lines.count("L2"))
-                    net_l2_edit_->setText((lines.at("L2").first+":"+to_string(lines.at("L2").second)).c_str());
+                if (ranges.count("primary_range_stddev"))
+                    acc_psr_rng_edit_->setText(QString::number(ranges.at("primary_range_stddev")));
                 else
-                    net_l2_edit_->setText("");
+                    acc_psr_rng_edit_->setText("");
 
-                if (lines.count("L3"))
-                    net_l3_edit_->setText((lines.at("L3").first+":"+to_string(lines.at("L3").second)).c_str());
+                // ssr
+                if (ranges.count("secondary_azimuth_stddev"))
+                    acc_ssr_azm_edit_->setText(QString::number(ranges.at("secondary_azimuth_stddev")));
                 else
-                    net_l3_edit_->setText("");
+                    acc_ssr_azm_edit_->setText("");
 
-                if (lines.count("L4"))
-                    net_l4_edit_->setText((lines.at("L4").first+":"+to_string(lines.at("L4").second)).c_str());
+                if (ranges.count("secondary_range_stddev"))
+                    acc_ssr_rng_edit_->setText(QString::number(ranges.at("secondary_range_stddev")));
                 else
-                    net_l4_edit_->setText("");
+                    acc_ssr_rng_edit_->setText("");
 
+                // mode s
+                if (ranges.count("mode_s_azimuth_stddev"))
+                    acc_mode_s_azm_edit_->setText(QString::number(ranges.at("mode_s_azimuth_stddev")));
+                else
+                    acc_mode_s_azm_edit_->setText("");
+
+                if (ranges.count("mode_s_range_stddev"))
+                    acc_mode_s_rng_edit_->setText(QString::number(ranges.at("mode_s_range_stddev")));
+                else
+                    acc_mode_s_rng_edit_->setText("");
             }
             else
             {
-                add_lines_button_->setHidden(false);
-                net_widget_->setHidden(true);
+                accuracies_widget_->setHidden(true);
+                add_accuracies_button_->setHidden(false);
             }
-
-            delete_button_->setHidden(false);
         }
+        else
+        {
+            ranges_widget_->setHidden(true);
+            add_ranges_button_->setHidden(true);
+
+            accuracies_widget_->setHidden(true);
+            add_accuracies_button_->setHidden(true);
+        }
+
+        loginf << "UGA " << ds->name() << " lines " << ds->hasNetworkLines();
+
+        // lines
+        if (ds->hasNetworkLines())
+        {
+            add_lines_button_->setHidden(true);
+            net_widget_->setHidden(false);
+
+            std::map<std::string, std::pair<std::string, unsigned int>> lines = ds->networkLines();
+
+            if (lines.count("L1"))
+                net_l1_edit_->setText((lines.at("L1").first+":"+to_string(lines.at("L1").second)).c_str());
+            else
+                net_l1_edit_->setText("");
+
+            if (lines.count("L2"))
+                net_l2_edit_->setText((lines.at("L2").first+":"+to_string(lines.at("L2").second)).c_str());
+            else
+                net_l2_edit_->setText("");
+
+            if (lines.count("L3"))
+                net_l3_edit_->setText((lines.at("L3").first+":"+to_string(lines.at("L3").second)).c_str());
+            else
+                net_l3_edit_->setText("");
+
+            if (lines.count("L4"))
+                net_l4_edit_->setText((lines.at("L4").first+":"+to_string(lines.at("L4").second)).c_str());
+            else
+                net_l4_edit_->setText("");
+
+        }
+        else
+        {
+            add_lines_button_->setHidden(false);
+            net_widget_->setHidden(true);
+        }
+
+        delete_button_->setHidden(true);
+
     }
 }

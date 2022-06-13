@@ -49,10 +49,14 @@ VariableSelectionWidget::VariableSelectionWidget(bool h_box, QWidget* parent)
     variable_label_ = new QLabel(this);
     variable_label_->setAlignment(Qt::AlignRight);
 
-    QPushButton* sel_button = new QPushButton(this);
-    sel_button->setIcon(QIcon(Files::getIconFilepath("expand.png").c_str()));
-    sel_button->setFixedSize(UI_ICON_SIZE);
-    sel_button->setFlat(UI_ICON_BUTTON_FLAT);
+    sel_button_ = new QPushButton(this);
+    sel_button_->setIcon(QIcon(Files::getIconFilepath("expand.png").c_str()));
+    sel_button_->setFixedSize(UI_ICON_SIZE);
+    sel_button_->setFlat(UI_ICON_BUTTON_FLAT);
+
+    QSizePolicy sp_retain = sel_button_->sizePolicy();
+    sp_retain.setRetainSizeWhenHidden(true);
+    sel_button_->setSizePolicy(sp_retain);
 
     if (h_box)
     {
@@ -63,7 +67,7 @@ VariableSelectionWidget::VariableSelectionWidget(bool h_box, QWidget* parent)
         layout->addWidget(object_label_);
         layout->addWidget(variable_label_);
 
-        layout->addWidget(sel_button);
+        layout->addWidget(sel_button_);
     }
     else
     {
@@ -76,7 +80,7 @@ VariableSelectionWidget::VariableSelectionWidget(bool h_box, QWidget* parent)
         select_layout->setSpacing(1);
 
         select_layout->addWidget(object_label_);
-        select_layout->addWidget(sel_button);
+        select_layout->addWidget(sel_button_);
         layout->addLayout(select_layout);
 
         layout->addWidget(variable_label_);
@@ -84,12 +88,19 @@ VariableSelectionWidget::VariableSelectionWidget(bool h_box, QWidget* parent)
     setLayout(layout);
 
     connect(&menu_, SIGNAL(triggered(QAction*)), this, SLOT(triggerSlot(QAction*)));
-    connect(sel_button, SIGNAL(clicked()), this, SLOT(showMenuSlot()));
+    connect(sel_button_, SIGNAL(clicked()), this, SLOT(showMenuSlot()));
 
     updateMenuEntries();
 }
 
 VariableSelectionWidget::~VariableSelectionWidget() {}
+
+void VariableSelectionWidget::setReadOnly(bool read_only)
+{
+    assert (sel_button_);
+
+    sel_button_->setDisabled(read_only);
+}
 
 void VariableSelectionWidget::updateMenuEntries()
 {
@@ -105,9 +116,9 @@ void VariableSelectionWidget::updateMenuEntries()
 
     if (show_dbo_only_)
     {
-        assert(dbo_man_.existsDBContent(only_dbo_name_));
+        assert(dbo_man_.existsDBContent(only_dbcontent_name_));
 
-        for (auto& var_it : dbo_man_.dbContent(only_dbo_name_).variables())
+        for (auto& var_it : dbo_man_.dbContent(only_dbcontent_name_).variables())
         {
             if (show_data_types_only_ && !showDataType(var_it->dataType()))
                 continue;
@@ -117,7 +128,7 @@ void VariableSelectionWidget::updateMenuEntries()
 
             QVariantMap vmap;
             vmap.insert(QString::fromStdString(var_it->name()),
-                        QVariant(QString::fromStdString(only_dbo_name_)));
+                        QVariant(QString::fromStdString(only_dbcontent_name_)));
             action->setData(QVariant(vmap));
         }
     }
@@ -296,10 +307,10 @@ MetaVariable& VariableSelectionWidget::selectedMetaVariable() const
     return dbo_man_.metaVariable(var_name);
 }
 
-void VariableSelectionWidget::showDBOOnly(const std::string& only_dbo_name)
+void VariableSelectionWidget::showDBContentOnly(const std::string& only_dbcontent_name)
 {
     show_dbo_only_ = true;
-    only_dbo_name_ = only_dbo_name;
+    only_dbcontent_name_ = only_dbcontent_name;
 
     assert(object_label_);
     object_label_->hide();
@@ -307,10 +318,10 @@ void VariableSelectionWidget::showDBOOnly(const std::string& only_dbo_name)
     updateMenuEntries();
 }
 
-void VariableSelectionWidget::disableShowDBOOnly()
+void VariableSelectionWidget::disableShowDBContentOnly()
 {
     show_dbo_only_ = false;
-    only_dbo_name_ = "";
+    only_dbcontent_name_ = "";
 
     assert(object_label_);
     object_label_->show();
@@ -318,7 +329,7 @@ void VariableSelectionWidget::disableShowDBOOnly()
     updateMenuEntries();
 }
 
-std::string VariableSelectionWidget::onlyDBOName() const { return only_dbo_name_; }
+std::string VariableSelectionWidget::onlyDBContentName() const { return only_dbcontent_name_; }
 
 bool VariableSelectionWidget::showEmptyVariable() const { return show_empty_variable_; }
 

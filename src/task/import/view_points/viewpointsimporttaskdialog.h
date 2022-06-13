@@ -23,7 +23,7 @@ public slots:
 public:
     ViewPointsImportTaskDialog(ViewPointsImportTask& task);
 
-    void updateContext ();
+    void updateText ();
     void updateButtons();
 
 protected:

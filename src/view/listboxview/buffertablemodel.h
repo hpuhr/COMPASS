@@ -61,7 +61,6 @@ class BufferTableModel : public QAbstractTableModel
 
     void usePresentation(bool use_presentation);
     void showOnlySelected(bool value);
-    void showAssociations(bool value);
     void reset();
 
     void updateToSelection();
@@ -81,7 +80,6 @@ class BufferTableModel : public QAbstractTableModel
 
     bool show_only_selected_{true};
     bool use_presentation_{true};
-    bool show_associations_{false};
 
     void updateRows();
 };

@@ -59,6 +59,11 @@ void OGRProjection::addCoordinateSystem(unsigned int id, double latitude_deg, do
         new OGRCoordinateSystem(id, latitude_deg, longitude_deg, altitude_m));
 }
 
+void OGRProjection::clearCoordinateSystems()
+{
+    coordinate_systems_.clear();
+}
+
 bool OGRProjection::polarToWGS84(unsigned int id, double azimuth_rad, double slant_range_m,
                                  bool has_baro_altitude, double baro_altitude_ft,
                                  double& latitude_deg, double& longitude_deg)

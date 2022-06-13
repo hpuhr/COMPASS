@@ -36,7 +36,7 @@ class SavedFile;
 class JSONParseJob;
 class JSONMappingJob;
 class ReadJSONFileJob;
-class DBObject;
+class DBContent;
 class Buffer;
 class DBOVariableSet;
 
@@ -60,7 +60,7 @@ class JSONImportTask : public Task, public Configurable
     void mapJSONObsoleteSlot();
 
     void insertProgressSlot(float percent);
-    void insertDoneSlot(DBObject& object);
+    void insertDoneSlot(DBContent& object);
 
   public:
     JSONImportTask(const std::string& class_id, const std::string& instance_id,

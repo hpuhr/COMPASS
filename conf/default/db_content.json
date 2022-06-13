@@ -1386,6 +1386,12 @@
                                 "variable_name": "Track Angle"
                             }
                         },
+                        "VariableDefinitionCAT020Track Angle0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT020",
+                                "variable_name": "Track Angle"
+                            }
+                        },
                         "VariableDefinitionCAT021Track Angle0": {
                             "parameters": {
                                 "dbcontent_name": "CAT021",
@@ -1396,6 +1402,39 @@
                             "parameters": {
                                 "dbcontent_name": "CAT048",
                                 "variable_name": "Track Angle"
+                            }
+                        },
+                        "VariableDefinitionCAT062Track Angle0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT062",
+                                "variable_name": "Track Angle"
+                            }
+                        },
+                        "VariableDefinitionRefTrajTrack Angle0": {
+                            "parameters": {
+                                "dbcontent_name": "RefTraj",
+                                "variable_name": "Track Angle"
+                            }
+                        }
+                    }
+                }
+            },
+            "MetaVariableTrack Begin0": {
+                "parameters": {
+                    "name": "Track Begin"
+                },
+                "sub_configs": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT062Track Begin0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT062",
+                                "variable_name": "Track Begin"
+                            }
+                        },
+                        "VariableDefinitionRefTrajTrack Begin0": {
+                            "parameters": {
+                                "dbcontent_name": "RefTraj",
+                                "variable_name": "Track Begin"
                             }
                         }
                     }
@@ -1417,6 +1456,45 @@
                             "parameters": {
                                 "dbcontent_name": "CAT048",
                                 "variable_name": "Track Climbing/Descending"
+                            }
+                        },
+                        "VariableDefinitionCAT062MOM Vertical Rate0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT062",
+                                "variable_name": "MOM Vertical Rate"
+                            }
+                        }
+                    }
+                }
+            },
+            "MetaVariableTrack Coasting0": {
+                "parameters": {
+                    "name": "Track Coasting"
+                },
+                "sub_configs": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT010Track Coasting0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT010",
+                                "variable_name": "Track Coasting"
+                            }
+                        },
+                        "VariableDefinitionCAT020Track Coasted0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT020",
+                                "variable_name": "Track Coasted"
+                            }
+                        },
+                        "VariableDefinitionCAT062Coasting0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT062",
+                                "variable_name": "Coasting"
+                            }
+                        },
+                        "VariableDefinitionRefTrajCoasting0": {
+                            "parameters": {
+                                "dbcontent_name": "RefTraj",
+                                "variable_name": "Coasting"
                             }
                         }
                     }
@@ -1590,6 +1668,12 @@
                                 "variable_name": "Ground Speed"
                             }
                         },
+                        "VariableDefinitionCAT020Ground Speed0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT020",
+                                "variable_name": "Ground Speed"
+                            }
+                        },
                         "VariableDefinitionCAT021Ground Speed0": {
                             "parameters": {
                                 "dbcontent_name": "CAT021",
@@ -1600,6 +1684,18 @@
                             "parameters": {
                                 "dbcontent_name": "CAT048",
                                 "variable_name": "Track Groundspeed"
+                            }
+                        },
+                        "VariableDefinitionCAT062Ground Speed0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT062",
+                                "variable_name": "Ground Speed"
+                            }
+                        },
+                        "VariableDefinitionRefTrajGround Speed0": {
+                            "parameters": {
+                                "dbcontent_name": "RefTraj",
+                                "variable_name": "Ground Speed"
                             }
                         }
                     }
@@ -2110,12 +2206,6 @@
                             "parameters": {
                                 "dbcontent_name": "RefTraj",
                                 "variable_name": "Record Number"
-                            }
-                        },
-                        "VariableDefinitionRefTrajrec_num0": {
-                            "parameters": {
-                                "dbcontent_name": "RefTraj",
-                                "variable_name": "rec_num"
                             }
                         }
                     }

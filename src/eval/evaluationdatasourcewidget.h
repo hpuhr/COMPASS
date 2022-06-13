@@ -31,18 +31,18 @@ class EvaluationDataSourceWidget : public QFrame
     Q_OBJECT
 
 signals:
-    void dboNameChangedSignal(const std::string& dbo_name);
+    void dbContentNameChangedSignal(const std::string& dbcontent_name);
     void lineChangedSignal(unsigned int line_id);
 
 protected slots:
-    void dboNameChangedSlot();
+    void dbContentNameChangedSlot();
     /// @brief Updates the sensor active checkboxes
     void toggleDataSourceSlot();
     void lineIDEditSlot(const QString& text);
 
 
 public:
-    EvaluationDataSourceWidget(const std::string& title, const std::string& dbo_name, unsigned int line_id,
+    EvaluationDataSourceWidget(const std::string& title, const std::string& dbcontent_name, unsigned int line_id,
                                QWidget* parent=nullptr, Qt::WindowFlags f=Qt::WindowFlags());
 
     virtual ~EvaluationDataSourceWidget();
@@ -51,7 +51,7 @@ public:
 
 protected:
     std::string title_;
-    std::string dbo_name_;
+    std::string dbcontent_name_;
     unsigned int line_id_;
 
     DBContentComboBox* dbo_combo_ {nullptr};

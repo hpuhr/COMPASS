@@ -21,7 +21,7 @@ const Property DBDataSource::counts_column_{"counts", PropertyDataType::STRING};
 
 DBDataSource::DBDataSource()
 {
-
+    counts_ = json::object(); // init
 }
 
 DBDataSource::~DBDataSource()
@@ -52,6 +52,17 @@ bool DBDataSource::hasNumInserted(const std::string& db_content) const
         return false;
 
     return num_inserted_.at(db_content).size();
+}
+
+bool DBDataSource::hasNumInserted(unsigned int line_id) const
+{
+    for (auto& dbcont_cnt_it : num_inserted_)
+    {
+        if (dbcont_cnt_it.second.count(line_id))
+            return true;
+    }
+
+    return false;
 }
 
 const std::map<std::string, std::map<unsigned int, unsigned int>>& DBDataSource::numInsertedMap() const
@@ -100,6 +111,19 @@ void DBDataSource::addNumInserted(const std::string& db_content, unsigned int li
 void DBDataSource::addNumLoaded(const std::string& db_content, unsigned int line_id, unsigned int num)
 {
     num_loaded_[db_content][line_id] += num;
+}
+
+unsigned int DBDataSource::numLoaded (unsigned int line_id)
+{
+    unsigned int num_loaded = 0;
+
+    for (auto& dbcont_cnt_it : num_loaded_)
+    {
+        if (dbcont_cnt_it.second.count(line_id))
+            num_loaded += dbcont_cnt_it.second.at(line_id);
+    }
+
+    return num_loaded;
 }
 
 unsigned int DBDataSource::numLoaded (const std::string& db_content)
@@ -174,6 +198,17 @@ bool DBDataSource::anyLinesLoadingWanted() const
     }
 
     return any_wanted;
+}
+
+void DBDataSource::disableAllLines()
+{
+    for (unsigned int cnt=0; cnt < 4; ++cnt)
+        line_loading_wanted_[cnt] = false;
+}
+
+void DBDataSource::enableAllLines()
+{
+    line_loading_wanted_.clear();
 }
 
 void DBDataSource::lineLoadingWanted(unsigned int line_id, bool wanted)

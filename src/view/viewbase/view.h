@@ -93,7 +93,7 @@ class View : public QObject, public Configurable
 
     void showInTabWidget();
 
-    virtual dbContent::VariableSet getSet(const std::string& dbo_name) = 0;
+    virtual dbContent::VariableSet getSet(const std::string& dbcontent_name) = 0;
 
     void viewShutdown(const std::string& err);
     void emitSelectionChange();

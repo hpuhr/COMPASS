@@ -138,14 +138,6 @@ void AllBufferTableWidget::usePresentationSlot(bool use_presentation)
     table_->resizeColumnsToContents();
 }
 
-void AllBufferTableWidget::showAssociationsSlot(bool value)
-{
-    assert(model_);
-    model_->showAssociations(value);
-    assert(table_);
-    table_->resizeColumnsToContents();
-}
-
 void AllBufferTableWidget::resetModel()
 {
     assert(model_);

@@ -16,7 +16,7 @@ ASTERIXImportTaskDialog::ASTERIXImportTaskDialog(ASTERIXImportTask& task)
 
     setModal(true);
 
-    setMinimumSize(QSize(1000, 800));
+    setMinimumSize(QSize(1200, 800));
 
     QFont font_bold;
     font_bold.setBold(true);
@@ -52,6 +52,17 @@ ASTERIXImportTaskDialog::ASTERIXImportTaskDialog(ASTERIXImportTask& task)
     setLayout(main_layout);
 
     update();
+}
+
+void ASTERIXImportTaskDialog::updateSource()
+{
+    if (task_.isImportNetwork())
+        setWindowTitle("Import ASTERIX From Network");
+    else // file
+        setWindowTitle("Import ASTERIX From File");
+
+    assert (task_widget_);
+    task_widget_->updateSourceLabel();
 }
 
 void ASTERIXImportTaskDialog::updateButtons()

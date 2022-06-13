@@ -144,13 +144,13 @@ class StoredDBODataSource : public Configurable
     void modeSRangeMax(int value);
     int modeSRangeMax() const;
 
-    std::string dboName() const;
+    std::string dbContentName() const;
 
     nlohmann::json getAsJSON();
     void setFromJSON(nlohmann::json& j);
 
   private:
-    std::string dbo_name_;
+    std::string dbcontent_name_;
     unsigned int id_{0};
     std::string name_;
     bool has_short_name_{false};

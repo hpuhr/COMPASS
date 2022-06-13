@@ -34,7 +34,7 @@ class ViewableDataConfig;
 /**
  * @brief Handles database queries and resulting data for ListBoxView
  *
- * Creates database queries for all contained DBObjects when updateData () is called and
+ * Creates database queries for all contained DBContents when updateData () is called and
  * emits signal updateData() when resulting buffer is delivered by callback. Stores Buffers
  * and handles cleanup.
  */
@@ -81,15 +81,15 @@ protected:
     //DBOVariableOrderedSet* set_{nullptr};
     std::map<std::string, std::unique_ptr<dbContent::VariableOrderedSet>> sets_;
 
-    /// Selected DBObject records
+    /// Selected DBContent records
     //ViewSelectionEntries& selection_entries_;
 
     std::vector<std::pair<std::string, std::string>> temporary_added_variables_; // not persisted, DBO->varname
 
     virtual void checkSubConfigurables();
 
-    bool addTemporaryVariable (const std::string& dbo_name, const std::string& var_name); // only to set, true of added
-    void removeTemporaryVariable (const std::string& dbo_name, const std::string& var_name); // only to set
+    bool addTemporaryVariable (const std::string& dbcontent_name, const std::string& var_name); // only to set, true of added
+    void removeTemporaryVariable (const std::string& dbcontent_name, const std::string& var_name); // only to set
 
     void addDefaultVariables (dbContent::VariableOrderedSet& set);
 };

@@ -171,13 +171,13 @@ ScatterPlotViewDataWidget* ScatterPlotView::getDataWidget()
     return widget_->getDataWidget();
 }
 
-VariableSet ScatterPlotView::getSet(const std::string& dbo_name)
+VariableSet ScatterPlotView::getSet(const std::string& dbcontent_name)
 {
     loginf << "ScatterPlotView: getSet";
 
     assert(data_source_);
 
-    VariableSet set = data_source_->getSet()->getExistingInDBFor(dbo_name);
+    VariableSet set = data_source_->getSet()->getExistingInDBFor(dbcontent_name);
 
     if (hasDataVarX())
     {
@@ -185,15 +185,15 @@ VariableSet ScatterPlotView::getSet(const std::string& dbo_name)
         {
             MetaVariable& meta_var = metaDataVarX();
 
-            if (meta_var.existsIn(dbo_name) && !set.hasVariable(meta_var.getFor(dbo_name)))
+            if (meta_var.existsIn(dbcontent_name) && !set.hasVariable(meta_var.getFor(dbcontent_name)))
             {
-                loginf << "ScatterPlotView: getSet: adding x var " << meta_var.getFor(dbo_name).name();
-                set.add(meta_var.getFor(dbo_name));
+                loginf << "ScatterPlotView: getSet: adding x var " << meta_var.getFor(dbcontent_name).name();
+                set.add(meta_var.getFor(dbcontent_name));
             }
         }
         else
         {
-            if (dataVarX().dboName() == dbo_name && !set.hasVariable(dataVarX()))
+            if (dataVarX().dbContentName() == dbcontent_name && !set.hasVariable(dataVarX()))
             {
                 loginf << "ScatterPlotView: getSet: adding x var " << dataVarX().name();
                 set.add(dataVarX());
@@ -207,15 +207,15 @@ VariableSet ScatterPlotView::getSet(const std::string& dbo_name)
         {
             MetaVariable& meta_var = metaDataVarY();
 
-            if (meta_var.existsIn(dbo_name) && !set.hasVariable(meta_var.getFor(dbo_name)))
+            if (meta_var.existsIn(dbcontent_name) && !set.hasVariable(meta_var.getFor(dbcontent_name)))
             {
-                loginf << "ScatterPlotView: getSet: adding y var " << meta_var.getFor(dbo_name).name();
-                set.add(meta_var.getFor(dbo_name));
+                loginf << "ScatterPlotView: getSet: adding y var " << meta_var.getFor(dbcontent_name).name();
+                set.add(meta_var.getFor(dbcontent_name));
             }
         }
         else
         {
-            if (dataVarY().dboName() == dbo_name && !set.hasVariable(dataVarY()))
+            if (dataVarY().dbContentName() == dbcontent_name && !set.hasVariable(dataVarY()))
             {
                 loginf << "ScatterPlotView: getSet: adding y var " << dataVarY().name();
                 set.add(dataVarY());
@@ -258,7 +258,7 @@ Variable& ScatterPlotView::dataVarX()
 
 void ScatterPlotView::dataVarX (Variable& var)
 {
-    data_var_x_dbo_ = var.dboName();
+    data_var_x_dbo_ = var.dbContentName();
     data_var_x_name_ = var.name();
     assert (hasDataVarX());
     assert (!isDataVarXMeta());
@@ -329,7 +329,7 @@ Variable& ScatterPlotView::dataVarY()
 
 void ScatterPlotView::dataVarY (Variable& var)
 {
-    data_var_y_dbo_ = var.dboName();
+    data_var_y_dbo_ = var.dbContentName();
     data_var_y_name_ = var.name();
     assert (hasDataVarY());
     assert (!isDataVarYMeta());

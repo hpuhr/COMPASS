@@ -111,7 +111,7 @@ private:
     bool active_ {true};
 
     std::string db_content_name_;
-    DBContent* db_object_{nullptr};
+    DBContent* dbcontent_{nullptr};
 
     std::string json_container_key_;  // location of container with target report data
     std::string json_key_;            // * for all

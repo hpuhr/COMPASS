@@ -60,61 +60,13 @@ ProjectionManagerWidget::ProjectionManagerWidget(ProjectionManager& proj_man, QW
 
     main_layout->addLayout(grid);
 
-    //    QLabel *world_label = new QLabel ("World Coordinates (WGS84) Info");
-    //    grid->addWidget (world_label, 0, 0);
-
-    //    world_proj_info_label_ = new QLabel (projection_manager_.getWorldPROJ4Info().c_str());
-    //    world_proj_info_label_->setWordWrap(true);
-    //    grid->addWidget (world_proj_info_label_, 0, 1);
-
-    //    QLabel *cart_label = new QLabel ("Cartesian Coordinates EPSG");
-    //    grid->addWidget (cart_label, 1, 0);
-
-    //    epsg_edit_ = new QLineEdit ();
-    //    epsg_edit_->setText(std::to_string(projection_manager_.getEPSG()).c_str());
-    //    connect (epsg_edit_, SIGNAL(returnPressed()), this, SLOT(changedEPSGSlot()));
-    //    epsg_edit_->setToolTip("Please refer to the EPSG number appropriate to your country \n"
-    //                           "under http://spatialreference.org/ref/epsg/");
-    //    grid->addWidget (epsg_edit_, 1, 1);
-
-    //    QLabel *cart_info_label = new QLabel ("Cartesian Coordinates Info");
-    //    grid->addWidget (cart_info_label, 2, 0);
-
-    //    cart_proj_info_label_ = new QLabel (projection_manager_.getCartesianPROJ4Info().c_str());
-    //    cart_proj_info_label_->setWordWrap(true);
-    //    grid->addWidget (cart_proj_info_label_, 2, 1);
-
-    //    layout->addLayout (grid);
-
     setLayout(main_layout);
 }
 
-ProjectionManagerWidget::~ProjectionManagerWidget() {}
-
-// void ProjectionManagerWidget::changedEPSGSlot ()
-//{
-//    assert (epsg_edit_);
-//    assert (cart_proj_info_label_);
-
-//    std::string value_str = epsg_edit_->text().toStdString();
-
-//    try
-//    {
-//        unsigned int value = std::stoul(value_str);
-//        ProjectionManager::instance().setNewCartesianEPSG(value);
-//        cart_proj_info_label_->setText(projection_manager_.getCartesianPROJ4Info().c_str());
-//    }
-//    catch (...)
-//    {
-//        std::string msg = "Forbidden value '"+value_str
-//                +"'\n Please refer to http://spatialreference.org/ref/epsg/ for possible
-//                numbers.";
-
-//        QMessageBox::warning ( this, "Change EPSG Value", msg.c_str());
-//        epsg_edit_->setText(std::to_string(projection_manager_.getEPSG()).c_str());
-//        return;
-//    }
-//}
+ProjectionManagerWidget::~ProjectionManagerWidget()
+{
+    loginf << "ProjectionManagerWidget: dtor";
+}
 
 void ProjectionManagerWidget::selectedObjectParserSlot(const QString& name)
 {

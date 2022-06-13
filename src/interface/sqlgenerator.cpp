@@ -201,7 +201,7 @@ shared_ptr<DBCommand> SQLGenerator::getDataSourcesSelectCommand()
     return command;
 }
 
-//shared_ptr<DBCommand> SQLGenerator::getDistinctDataSourcesSelectCommand(DBObject& object)
+//shared_ptr<DBCommand> SQLGenerator::getDistinctDataSourcesSelectCommand(DBContent& object)
 //{
 //    // "SELECT DISTINCT sensor_number__value FROM " << table_names_.at(DBO_PLOTS) << " WHERE
 //    // mapped_position__present = '1' AND sensor_number__present = '1' ORDER BY
@@ -223,17 +223,17 @@ shared_ptr<DBCommand> SQLGenerator::getDataSourcesSelectCommand()
 //    //    return getSelectCommand(object.currentMetaTable(), columns, true);
 //}
 
-std::shared_ptr<DBCommand> SQLGenerator::getMaxRecordNumberCommand(const std::string& table_name,
-                                                                   const std::string& rec_num_col_name)
+std::shared_ptr<DBCommand> SQLGenerator::getMaxUIntValueCommand(const std::string& table_name,
+                                                                const std::string& col_name)
 {
     PropertyList list;
-    list.addProperty(rec_num_col_name, PropertyDataType::UINT);
+    list.addProperty(col_name, PropertyDataType::UINT);
 
     shared_ptr<DBCommand> command = make_shared<DBCommand>(DBCommand());
 
     stringstream ss;
 
-    ss << "SELECT MAX(" << rec_num_col_name;
+    ss << "SELECT MAX(" << col_name;
 
     ss << ") FROM ";
 
@@ -274,36 +274,36 @@ shared_ptr<DBCommand> SQLGenerator::getADSBInfoCommand(DBContent& adsb_obj)
     return command;
 }
 
-string SQLGenerator::getCreateAssociationTableStatement(const string& table_name)
-{
-    stringstream ss;
+//string SQLGenerator::getCreateAssociationTableStatement(const string& table_name)
+//{
+//    stringstream ss;
 
-    ss << "CREATE TABLE " << table_name
-       << " (assoc_id INTEGER PRIMARY KEY AUTOINCREMENT, rec_num INTEGER, utn INTEGER, src_rec_num "
-          "INTEGER, ds_id INTEGER);";
+//    ss << "CREATE TABLE " << table_name
+//       << " (assoc_id INTEGER PRIMARY KEY AUTOINCREMENT, rec_num INTEGER, utn INTEGER, src_rec_num "
+//          "INTEGER, ds_id INTEGER);";
 
-    return ss.str();
-}
+//    return ss.str();
+//}
 
-shared_ptr<DBCommand> SQLGenerator::getSelectAssociationsCommand(const string& table_name)
-{
-    shared_ptr<DBCommand> command = make_shared<DBCommand>(DBCommand());
+//shared_ptr<DBCommand> SQLGenerator::getSelectAssociationsCommand(const string& table_name)
+//{
+//    shared_ptr<DBCommand> command = make_shared<DBCommand>(DBCommand());
 
-    stringstream ss;
+//    stringstream ss;
 
-    ss << "SELECT assoc_id, rec_num, utn, src_rec_num FROM " << table_name;
+//    ss << "SELECT assoc_id, rec_num, utn, src_rec_num FROM " << table_name;
 
-    PropertyList property_list;
-    property_list.addProperty("assoc_id", PropertyDataType::INT);
-    property_list.addProperty("rec_num", PropertyDataType::INT);
-    property_list.addProperty("utn", PropertyDataType::INT);
-    property_list.addProperty("src_rec_num", PropertyDataType::INT);
+//    PropertyList property_list;
+//    property_list.addProperty("assoc_id", PropertyDataType::INT);
+//    property_list.addProperty("rec_num", PropertyDataType::INT);
+//    property_list.addProperty("utn", PropertyDataType::INT);
+//    property_list.addProperty("src_rec_num", PropertyDataType::INT);
 
-    command->set(ss.str());
-    command->list(property_list);
+//    command->set(ss.str());
+//    command->list(property_list);
 
-    return command;
-}
+//    return command;
+//}
 
 string SQLGenerator::getCountStatement(const string& table)
 {
@@ -549,6 +549,8 @@ string SQLGenerator::createDBUpdateStringBind(shared_ptr<Buffer> buffer,
     // UPDATE table_name SET col1=val1,col2=value2 WHERE somecol=someval;
 
     unsigned int size = properties.size();
+    assert (size);
+
     logdbg << "SQLGenerator: createDBUpdateStringBind: creating db string";
     stringstream ss;  // create a stringstream
 
@@ -558,8 +560,11 @@ string SQLGenerator::createDBUpdateStringBind(shared_ptr<Buffer> buffer,
 
     if (key_col_name != properties.at(size - 1).name())
     {
+        logerr << "SQLGenerator::createDBUpdateStringBind: key_col_name '" << key_col_name
+               << "' not at last position, but '" << properties.at(size - 1).name() << "'";
+
         throw runtime_error(
-                "SQLGenerator: createDBUpdateStringBind: key_col_name not at last position");
+                    "SQLGenerator: createDBUpdateStringBind: key_col_name not at last position");
     }
 
     for (unsigned int cnt = 0; cnt < size; cnt++)
@@ -674,7 +679,7 @@ shared_ptr<DBCommand> SQLGenerator::getSelectCommand(
     return command;
 }
 
-//shared_ptr<DBCommand> SQLGenerator::getSelectCommand(const DBObject& object,
+//shared_ptr<DBCommand> SQLGenerator::getSelectCommand(const DBContent& object,
 //                                                     const vector<string>& columns,
 //                                                     bool distinct)
 //{

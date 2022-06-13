@@ -42,7 +42,7 @@ EvaluationResultsGeneratorWidget::EvaluationResultsGeneratorWidget(
     //++row;
 
     skip_no_data_details_check_ = new QCheckBox ();
-    skip_no_data_details_check_->setChecked(results_gen_.skipNoDataDetails());
+    skip_no_data_details_check_->setChecked(eval_man_.reportSkipNoDataDetails());
     connect(skip_no_data_details_check_, &QCheckBox::clicked,
             this, &EvaluationResultsGeneratorWidget::toggleSkipNoDataDetailsSlot);
     layout->addRow("Skip No Data Details", skip_no_data_details_check_);
@@ -51,7 +51,7 @@ EvaluationResultsGeneratorWidget::EvaluationResultsGeneratorWidget(
     //++row;
 
     split_results_by_mops_check_ = new QCheckBox ();
-    split_results_by_mops_check_->setChecked(results_gen_.splitResultsByMOPS());
+    split_results_by_mops_check_->setChecked(eval_man_.reportSplitResultsByMOPS());
     connect(split_results_by_mops_check_, &QCheckBox::clicked,
             this, &EvaluationResultsGeneratorWidget::toggleSplitResultsByMOPSSlot);
     layout->addRow("Split Results by MOPS Version", split_results_by_mops_check_);
@@ -60,7 +60,7 @@ EvaluationResultsGeneratorWidget::EvaluationResultsGeneratorWidget(
     //++row;
 
     show_adsb_info_check_ = new QCheckBox ();
-    show_adsb_info_check_->setChecked(results_gen_.showAdsbInfo());
+    show_adsb_info_check_->setChecked(eval_man_.reportShowAdsbInfo());
     connect(show_adsb_info_check_, &QCheckBox::clicked,
             this, &EvaluationResultsGeneratorWidget::toggleShowAdsbInfoSlot);
     layout->addRow("Show ADS-B Info", show_adsb_info_check_);
@@ -88,19 +88,19 @@ EvaluationResultsGeneratorWidget::~EvaluationResultsGeneratorWidget()
 void EvaluationResultsGeneratorWidget::toggleSplitResultsByMOPSSlot()
 {
     assert (split_results_by_mops_check_);
-    results_gen_.splitResultsByMOPS(split_results_by_mops_check_->checkState() == Qt::Checked);
+    eval_man_.reportSplitResultsByMOPS(split_results_by_mops_check_->checkState() == Qt::Checked);
 }
 
 void EvaluationResultsGeneratorWidget::toggleShowAdsbInfoSlot()
 {
     assert (show_adsb_info_check_);
-    results_gen_.showAdsbInfo(show_adsb_info_check_->checkState() == Qt::Checked);
+    eval_man_.reportShowAdsbInfo(show_adsb_info_check_->checkState() == Qt::Checked);
 }
 
 void EvaluationResultsGeneratorWidget::toggleSkipNoDataDetailsSlot()
 {
     assert (skip_no_data_details_check_);
-    results_gen_.skipNoDataDetails(skip_no_data_details_check_->checkState() == Qt::Checked);
+    eval_man_.reportSkipNoDataDetails(skip_no_data_details_check_->checkState() == Qt::Checked);
 }
 
 void EvaluationResultsGeneratorWidget::resultDetailZoomEditSlot(QString value)

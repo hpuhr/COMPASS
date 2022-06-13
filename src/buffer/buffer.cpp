@@ -32,10 +32,7 @@ using namespace std;
 
 unsigned int Buffer::ids_ = 0;
 
-/**
- * Creates an empty buffer withput an DBO type
- *
- */
+
 Buffer::Buffer()
 {
     logdbg << "Buffer: constructor: start";
@@ -46,14 +43,8 @@ Buffer::Buffer()
     logdbg << "Buffer: constructor: end";
 }
 
-/**
- * Creates a buffer from a PropertyList and a DBO type. Sets member to initial values.
- *
- * \param member_list PropertyList defining all properties
- * \param type DBO type
- */
-Buffer::Buffer(PropertyList properties, const string& dbo_name)
-    : dbo_name_(dbo_name), last_one_(false)
+Buffer::Buffer(PropertyList properties, const string& dbcontent_name)
+    : dbcontent_name_(dbcontent_name), last_one_(false)
 {
     logdbg << "Buffer: constructor: start";
 
@@ -71,7 +62,7 @@ Buffer::Buffer(PropertyList properties, const string& dbo_name)
  */
 Buffer::~Buffer()
 {
-    logdbg << "Buffer: destructor: dbo " << dbo_name_ << " id " << id_;
+    logdbg << "Buffer: destructor: dbo " << dbcontent_name_ << " id " << id_;
 
     properties_.clear();
 
@@ -640,46 +631,46 @@ void Buffer::printProperties()
 
 bool Buffer::firstWrite() { return data_size_ == 0; }
 
-bool Buffer::isNone(const Property& property, unsigned int row_cnt)
+bool Buffer::isNull(const Property& property, unsigned int index)
 {
     if (BUFFER_PEDANTIC_CHECKING)
-        assert(row_cnt < data_size_);
+        assert(index < data_size_);
 
     switch (property.dataType())
     {
         case PropertyDataType::BOOL:
             assert(getArrayListMap<bool>().count(property.name()));
-            return getArrayListMap<bool>().at(property.name())->isNull(row_cnt);
+            return getArrayListMap<bool>().at(property.name())->isNull(index);
         case PropertyDataType::CHAR:
             assert(getArrayListMap<char>().count(property.name()));
-            return getArrayListMap<char>().at(property.name())->isNull(row_cnt);
+            return getArrayListMap<char>().at(property.name())->isNull(index);
         case PropertyDataType::UCHAR:
             assert(getArrayListMap<unsigned char>().count(property.name()));
-            return getArrayListMap<unsigned char>().at(property.name())->isNull(row_cnt);
+            return getArrayListMap<unsigned char>().at(property.name())->isNull(index);
         case PropertyDataType::INT:
             assert(getArrayListMap<int>().count(property.name()));
-            return getArrayListMap<int>().at(property.name())->isNull(row_cnt);
+            return getArrayListMap<int>().at(property.name())->isNull(index);
         case PropertyDataType::UINT:
             assert(getArrayListMap<unsigned int>().count(property.name()));
-            return getArrayListMap<unsigned int>().at(property.name())->isNull(row_cnt);
+            return getArrayListMap<unsigned int>().at(property.name())->isNull(index);
         case PropertyDataType::LONGINT:
             assert(getArrayListMap<long int>().count(property.name()));
-            return getArrayListMap<long int>().at(property.name())->isNull(row_cnt);
+            return getArrayListMap<long int>().at(property.name())->isNull(index);
         case PropertyDataType::ULONGINT:
             assert(getArrayListMap<unsigned long int>().count(property.name()));
-            return getArrayListMap<unsigned long int>().at(property.name())->isNull(row_cnt);
+            return getArrayListMap<unsigned long int>().at(property.name())->isNull(index);
         case PropertyDataType::FLOAT:
             assert(getArrayListMap<float>().count(property.name()));
-            return getArrayListMap<float>().at(property.name())->isNull(row_cnt);
+            return getArrayListMap<float>().at(property.name())->isNull(index);
         case PropertyDataType::DOUBLE:
             assert(getArrayListMap<double>().count(property.name()));
-            return getArrayListMap<double>().at(property.name())->isNull(row_cnt);
+            return getArrayListMap<double>().at(property.name())->isNull(index);
         case PropertyDataType::STRING:
             assert(getArrayListMap<string>().count(property.name()));
-            return getArrayListMap<string>().at(property.name())->isNull(row_cnt);
+            return getArrayListMap<string>().at(property.name())->isNull(index);
         case PropertyDataType::JSON:
             assert(getArrayListMap<json>().count(property.name()));
-            return getArrayListMap<json>().at(property.name())->isNull(row_cnt);
+            return getArrayListMap<json>().at(property.name())->isNull(index);
         default:
             logerr << "Buffer: isNone: unknown property type "
                    << Property::asString(property.dataType());
@@ -690,7 +681,7 @@ bool Buffer::isNone(const Property& property, unsigned int row_cnt)
 
 void Buffer::transformVariables(dbContent::VariableSet& list, bool dbcol2dbovar)
 {
-    logdbg << "Buffer: transformVariables: dbo '" << dbo_name_ << "' dbcol2dbovar " << dbcol2dbovar;
+    logdbg << "Buffer: transformVariables: dbo '" << dbcontent_name_ << "' dbcol2dbovar " << dbcol2dbovar;
 
     vector<dbContent::Variable*>& variables = list.getSet();
     string variable_name;
@@ -894,11 +885,14 @@ shared_ptr<Buffer> Buffer::getPartialCopy(const PropertyList& partial_properties
     return tmp_buffer;
 }
 
-nlohmann::json Buffer::asJSON()
+nlohmann::json Buffer::asJSON(unsigned int max_size)
 {
     json j;
 
-    for (unsigned int cnt=0; cnt < data_size_; ++cnt)
+    if (max_size == 0)
+        max_size = data_size_;
+
+    for (unsigned int cnt=0; cnt < max_size; ++cnt)
     {
         j[cnt] = json::object();
 

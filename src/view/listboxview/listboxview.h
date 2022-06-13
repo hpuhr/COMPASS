@@ -64,7 +64,7 @@ class ListBoxView : public View
 
     ListBoxViewDataWidget* getDataWidget();
 
-    virtual dbContent::VariableSet getSet(const std::string& dbo_name) override;
+    virtual dbContent::VariableSet getSet(const std::string& dbcontent_name) override;
 
     bool usePresentation() const;
     void usePresentation(bool use_presentation);
@@ -74,10 +74,6 @@ class ListBoxView : public View
 
     bool showOnlySelected() const;
     void showOnlySelected(bool value);
-
-    bool canShowAssociations() const;
-    bool showAssociations() const;
-    void showAssociations(bool show_associations);
 
     virtual void accept(LatexVisitor& v) override;
 
@@ -89,8 +85,6 @@ class ListBoxView : public View
     bool use_presentation_{true};
 
     bool overwrite_csv_{false}; // Overwrite during export, if not, it appends
-    bool can_show_associations_{false};
-    bool show_associations_{false};
 
     virtual void checkSubConfigurables() override;
     virtual void updateSelection() override;

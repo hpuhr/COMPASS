@@ -47,7 +47,7 @@ EvaluationData::EvaluationData(EvaluationManager& eval_man)
 
 void EvaluationData::addReferenceData (DBContent& object, unsigned int line_id, std::shared_ptr<Buffer> buffer)
 {
-    loginf << "EvaluationData: addReferenceData: dbo " << object.name() << " size " << buffer->size();
+    loginf << "EvaluationData: addReferenceData: dbcontent " << object.name() << " size " << buffer->size();
 
     DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
 
@@ -66,66 +66,71 @@ void EvaluationData::addReferenceData (DBContent& object, unsigned int line_id, 
 
     // preset variable names
 
-    string dbo_name = ref_buffer_->dboName();
+    string dbcontent_name = ref_buffer_->dbContentName();
 
-    ref_tod_name_ = dbcontent_man.metaVariable(DBContent::meta_var_tod_.name()).getFor(dbo_name).name();
+    ref_tod_name_ = dbcontent_man.metaVariable(DBContent::meta_var_tod_.name()).getFor(dbcontent_name).name();
 
-    ref_latitude_name_ = dbcontent_man.metaVariable(DBContent::meta_var_latitude_.name()).getFor(dbo_name).name();
-    ref_longitude_name_ = dbcontent_man.metaVariable(DBContent::meta_var_longitude_.name()).getFor(dbo_name).name();
+    ref_latitude_name_ = dbcontent_man.metaVariable(DBContent::meta_var_latitude_.name()).getFor(dbcontent_name).name();
+    ref_longitude_name_ = dbcontent_man.metaVariable(DBContent::meta_var_longitude_.name()).getFor(dbcontent_name).name();
 
-    if (dbcontent_man.metaVariable(DBContent::meta_var_ta_.name()).existsIn(dbo_name))
-        ref_target_address_name_ = dbcontent_man.metaVariable(DBContent::meta_var_ta_.name()).getFor(dbo_name).name();
+    if (dbcontent_man.metaVariable(DBContent::meta_var_ta_.name()).existsIn(dbcontent_name))
+        ref_target_address_name_ = dbcontent_man.metaVariable(DBContent::meta_var_ta_.name()).getFor(dbcontent_name).name();
+    else
+        ref_target_address_name_ = "";
 
-    if (dbcontent_man.metaVariable(DBContent::meta_var_ti_.name()).existsIn(dbo_name))
-        ref_callsign_name_ = dbcontent_man.metaVariable(DBContent::meta_var_ti_.name()).getFor(dbo_name).name();
+    if (dbcontent_man.metaVariable(DBContent::meta_var_ti_.name()).existsIn(dbcontent_name))
+        ref_callsign_name_ = dbcontent_man.metaVariable(DBContent::meta_var_ti_.name()).getFor(dbcontent_name).name();
+    else
+        ref_callsign_name_ = "";
 
     // mc
-    ref_modec_name_ = dbcontent_man.metaVariable(DBContent::meta_var_mc_.name()).getFor(dbo_name).name();
+    ref_modec_name_ = dbcontent_man.metaVariable(DBContent::meta_var_mc_.name()).getFor(dbcontent_name).name();
 
-    if (dbcontent_man.metaVariable(DBContent::meta_var_mc_g_.name()).existsIn(dbo_name))
-        ref_modec_g_name_ = dbcontent_man.metaVariable(DBContent::meta_var_mc_g_.name()).getFor(dbo_name).name();
+    if (dbcontent_man.metaVariable(DBContent::meta_var_mc_g_.name()).existsIn(dbcontent_name))
+        ref_modec_g_name_ = dbcontent_man.metaVariable(DBContent::meta_var_mc_g_.name()).getFor(dbcontent_name).name();
+    else
+        ref_modec_g_name_ = "";
 
-    if (dbcontent_man.metaVariable(DBContent::meta_var_mc_v_.name()).existsIn(dbo_name))
-        ref_modec_v_name_ = dbcontent_man.metaVariable(DBContent::meta_var_mc_v_.name()).getFor(dbo_name).name();
+    if (dbcontent_man.metaVariable(DBContent::meta_var_mc_v_.name()).existsIn(dbcontent_name))
+        ref_modec_v_name_ = dbcontent_man.metaVariable(DBContent::meta_var_mc_v_.name()).getFor(dbcontent_name).name();
+    else
+        ref_modec_v_name_ = "";
 
-
-    if (dbo_name == "CAT062")
+    if (dbcontent_name == "CAT062")
     {
         has_ref_altitude_secondary_ = true;
         ref_altitude_secondary_name_ = DBContent::var_cat062_baro_alt_.name();
     }
 
     // m3a
-    ref_modea_name_ = dbcontent_man.metaVariable(DBContent::meta_var_m3a_.name()).getFor(dbo_name).name();
+    ref_modea_name_ = dbcontent_man.metaVariable(DBContent::meta_var_m3a_.name()).getFor(dbcontent_name).name();
 
-    if (dbcontent_man.metaVariable(DBContent::meta_var_m3a_g_.name()).existsIn(dbo_name))
-        ref_modea_g_name_ = dbcontent_man.metaVariable(DBContent::meta_var_m3a_g_.name()).getFor(dbo_name).name();
+    if (dbcontent_man.metaVariable(DBContent::meta_var_m3a_g_.name()).existsIn(dbcontent_name))
+        ref_modea_g_name_ = dbcontent_man.metaVariable(DBContent::meta_var_m3a_g_.name()).getFor(dbcontent_name).name();
+    else
+        ref_modea_g_name_ = "";
 
-    if (dbcontent_man.metaVariable(DBContent::meta_var_m3a_v_.name()).existsIn(dbo_name))
-        ref_modea_v_name_ = dbcontent_man.metaVariable(DBContent::meta_var_m3a_v_.name()).getFor(dbo_name).name();
+    if (dbcontent_man.metaVariable(DBContent::meta_var_m3a_v_.name()).existsIn(dbcontent_name))
+        ref_modea_v_name_ = dbcontent_man.metaVariable(DBContent::meta_var_m3a_v_.name()).getFor(dbcontent_name).name();
+    else
+        ref_modea_v_name_ = "";
 
     // ground bit
-    if (dbcontent_man.metaVariable(DBContent::meta_var_ground_bit_.name()).existsIn(dbo_name))
-        ref_ground_bit_name_ = dbcontent_man.metaVariable(DBContent::meta_var_ground_bit_.name()).getFor(dbo_name).name();
+    if (dbcontent_man.metaVariable(DBContent::meta_var_ground_bit_.name()).existsIn(dbcontent_name))
+        ref_ground_bit_name_ = dbcontent_man.metaVariable(DBContent::meta_var_ground_bit_.name()).getFor(dbcontent_name).name();
+    else
+        ref_ground_bit_name_ = "";
 
     // speed & track_angle
 
-    if (dbcontent_man.metaVariable(DBContent::meta_var_vx_.name()).existsIn(dbo_name))
-        ref_spd_x_ms_name_ = dbcontent_man.metaVariable(DBContent::meta_var_vx_.name()).getFor(dbo_name).name();
+    assert (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_ground_speed_));
+    assert (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_track_angle_));
 
-    if (dbcontent_man.metaVariable(DBContent::meta_var_vy_.name()).existsIn(dbo_name))
-        ref_spd_y_ms_name_ = dbcontent_man.metaVariable(DBContent::meta_var_vy_.name()).getFor(dbo_name).name();
-
-    if (dbcontent_man.metaVariable(DBContent::meta_var_ground_speed_.name()).existsIn(dbo_name))
-        ref_spd_ground_speed_kts_name_ = dbcontent_man.metaVariable(
-                    DBContent::meta_var_ground_speed_.name()).getFor(dbo_name).name();
-
-    if (dbcontent_man.metaVariable(DBContent::meta_var_track_angle_.name()).existsIn(dbo_name))
-        ref_spd_track_angle_deg_name_ = dbcontent_man.metaVariable(
-                    DBContent::meta_var_track_angle_.name()).getFor(dbo_name).name();
+    ref_spd_ground_speed_kts_name_ = dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_ground_speed_).name();
+    ref_spd_track_angle_deg_name_ = dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_track_angle_).name();
 
     set<unsigned int> active_srcs = eval_man_.activeDataSourcesRef();
-    bool use_active_srcs = (eval_man_.dboNameRef() == eval_man_.dboNameTst());
+    bool use_active_srcs = (eval_man_.dbContentNameRef() == eval_man_.dbContentNameTst());
     unsigned int num_skipped {0};
 
     unsigned int buffer_size = buffer->size();
@@ -213,7 +218,7 @@ void EvaluationData::addReferenceData (DBContent& object, unsigned int line_id, 
 
 void EvaluationData::addTestData (DBContent& object, unsigned int line_id,  std::shared_ptr<Buffer> buffer)
 {
-    loginf << "EvaluationData: addTestData: dbo " << object.name() << " size " << buffer->size();
+    loginf << "EvaluationData: addTestData: dbcontent " << object.name() << " size " << buffer->size();
 
     DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
 
@@ -230,69 +235,78 @@ void EvaluationData::addTestData (DBContent& object, unsigned int line_id,  std:
     tst_line_id_ = line_id;
     assert (tst_line_id_ <= 3);
 
-    string dbo_name = tst_buffer_->dboName();
+    string dbcontent_name = tst_buffer_->dbContentName();
 
-    tst_tod_name_ = dbcontent_man.metaVariable(DBContent::meta_var_tod_.name()).getFor(dbo_name).name();
+    tst_tod_name_ = dbcontent_man.metaVariable(DBContent::meta_var_tod_.name()).getFor(dbcontent_name).name();
 
-    tst_latitude_name_ = dbcontent_man.metaVariable(DBContent::meta_var_latitude_.name()).getFor(dbo_name).name();
-    tst_longitude_name_ = dbcontent_man.metaVariable(DBContent::meta_var_longitude_.name()).getFor(dbo_name).name();
+    tst_latitude_name_ = dbcontent_man.metaVariable(DBContent::meta_var_latitude_.name()).getFor(dbcontent_name).name();
+    tst_longitude_name_ = dbcontent_man.metaVariable(DBContent::meta_var_longitude_.name()).getFor(dbcontent_name).name();
 
-    if (dbcontent_man.metaVariable(DBContent::meta_var_ta_.name()).existsIn(dbo_name))
-        tst_target_address_name_ = dbcontent_man.metaVariable(DBContent::meta_var_ta_.name()).getFor(dbo_name).name();
+    if (dbcontent_man.metaVariable(DBContent::meta_var_ta_.name()).existsIn(dbcontent_name))
+        tst_target_address_name_ = dbcontent_man.metaVariable(DBContent::meta_var_ta_.name()).getFor(dbcontent_name).name();
+    else
+        tst_target_address_name_ = "";
 
-    if (dbcontent_man.metaVariable(DBContent::meta_var_ti_.name()).existsIn(dbo_name))
-        tst_callsign_name_ = dbcontent_man.metaVariable(DBContent::meta_var_ti_.name()).getFor(dbo_name).name();
+    if (dbcontent_man.metaVariable(DBContent::meta_var_ti_.name()).existsIn(dbcontent_name))
+        tst_callsign_name_ = dbcontent_man.metaVariable(DBContent::meta_var_ti_.name()).getFor(dbcontent_name).name();
+    else
+        tst_callsign_name_ = "";
 
     // mc
-    tst_modec_name_ = dbcontent_man.metaVariable(DBContent::meta_var_mc_.name()).getFor(dbo_name).name();
+    tst_modec_name_ = dbcontent_man.metaVariable(DBContent::meta_var_mc_.name()).getFor(dbcontent_name).name();
 
-    if (dbcontent_man.metaVariable(DBContent::meta_var_mc_g_.name()).existsIn(dbo_name))
-        tst_modec_g_name_ = dbcontent_man.metaVariable(DBContent::meta_var_mc_g_.name()).getFor(dbo_name).name();
+    if (dbcontent_man.metaVariable(DBContent::meta_var_mc_g_.name()).existsIn(dbcontent_name))
+        tst_modec_g_name_ = dbcontent_man.metaVariable(DBContent::meta_var_mc_g_.name()).getFor(dbcontent_name).name();
+    else
+        tst_modec_g_name_ = "";
 
-    if (dbcontent_man.metaVariable(DBContent::meta_var_mc_v_.name()).existsIn(dbo_name))
-        tst_modec_v_name_ = dbcontent_man.metaVariable(DBContent::meta_var_mc_v_.name()).getFor(dbo_name).name();
+    if (dbcontent_man.metaVariable(DBContent::meta_var_mc_v_.name()).existsIn(dbcontent_name))
+        tst_modec_v_name_ = dbcontent_man.metaVariable(DBContent::meta_var_mc_v_.name()).getFor(dbcontent_name).name();
+    else
+        tst_modec_v_name_ = "";
 
 
-//    if (dbo_name == "CAT062")
+//    if (dbcontent_name == "CAT062")
 //    {
 //        has_tst_altitude_secondary_ = true;
 //        tst_altitude_secondary_name_ = DBContent::var_tracker_baro_alt_.name();
 //    }
 
     // m3a
-    tst_modea_name_ = dbcontent_man.metaVariable(DBContent::meta_var_m3a_.name()).getFor(dbo_name).name();
+    tst_modea_name_ = dbcontent_man.metaVariable(DBContent::meta_var_m3a_.name()).getFor(dbcontent_name).name();
 
-    if (dbcontent_man.metaVariable(DBContent::meta_var_m3a_g_.name()).existsIn(dbo_name))
-        tst_modea_g_name_ = dbcontent_man.metaVariable(DBContent::meta_var_m3a_g_.name()).getFor(dbo_name).name();
+    if (dbcontent_man.metaVariable(DBContent::meta_var_m3a_g_.name()).existsIn(dbcontent_name))
+        tst_modea_g_name_ = dbcontent_man.metaVariable(DBContent::meta_var_m3a_g_.name()).getFor(dbcontent_name).name();
+    else
+        tst_modea_g_name_ = "";
 
-    if (dbcontent_man.metaVariable(DBContent::meta_var_m3a_v_.name()).existsIn(dbo_name))
-        tst_modea_v_name_ = dbcontent_man.metaVariable(DBContent::meta_var_m3a_v_.name()).getFor(dbo_name).name();
+    if (dbcontent_man.metaVariable(DBContent::meta_var_m3a_v_.name()).existsIn(dbcontent_name))
+        tst_modea_v_name_ = dbcontent_man.metaVariable(DBContent::meta_var_m3a_v_.name()).getFor(dbcontent_name).name();
+    else
+        tst_modea_v_name_ = "";
 
     // ground bit
-    if (dbcontent_man.metaVariable(DBContent::meta_var_ground_bit_.name()).existsIn(dbo_name))
-        tst_ground_bit_name_ = dbcontent_man.metaVariable(DBContent::meta_var_ground_bit_.name()).getFor(dbo_name).name();
+    if (dbcontent_man.metaVariable(DBContent::meta_var_ground_bit_.name()).existsIn(dbcontent_name))
+        tst_ground_bit_name_ = dbcontent_man.metaVariable(DBContent::meta_var_ground_bit_.name()).getFor(dbcontent_name).name();
+    else
+        tst_ground_bit_name_ = "";
 
     // track num
-    if (dbcontent_man.metaVariable(DBContent::meta_var_track_num_.name()).existsIn(dbo_name))
-        tst_track_num_name_ = dbcontent_man.metaVariable(DBContent::meta_var_track_num_.name()).getFor(dbo_name).name();
+    if (dbcontent_man.metaVariable(DBContent::meta_var_track_num_.name()).existsIn(dbcontent_name))
+        tst_track_num_name_ = dbcontent_man.metaVariable(DBContent::meta_var_track_num_.name()).getFor(dbcontent_name).name();
+    else
+        tst_track_num_name_ = "";
 
     // speed & track_angle
-    if (dbcontent_man.metaVariable(DBContent::meta_var_vx_.name()).existsIn(dbo_name))
-        tst_spd_x_ms_name_ = dbcontent_man.metaVariable(DBContent::meta_var_vx_.name()).getFor(dbo_name).name();
 
-    if (dbcontent_man.metaVariable(DBContent::meta_var_vy_.name()).existsIn(dbo_name))
-        tst_spd_y_ms_name_ = dbcontent_man.metaVariable(DBContent::meta_var_vy_.name()).getFor(dbo_name).name();
+    assert (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_ground_speed_));
+    assert (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_track_angle_));
 
-    if (dbcontent_man.metaVariable(DBContent::meta_var_ground_speed_.name()).existsIn(dbo_name))
-        tst_spd_ground_speed_kts_name_ = dbcontent_man.metaVariable(
-                    DBContent::meta_var_ground_speed_.name()).getFor(dbo_name).name();
-
-    if (dbcontent_man.metaVariable(DBContent::meta_var_track_angle_.name()).existsIn(dbo_name))
-        tst_spd_track_angle_deg_name_ = dbcontent_man.metaVariable(
-                    DBContent::meta_var_track_angle_.name()).getFor(dbo_name).name();
+    tst_spd_ground_speed_kts_name_ = dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_ground_speed_).name();
+    tst_spd_track_angle_deg_name_ = dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_track_angle_).name();
 
     set<unsigned int> active_srcs = eval_man_.activeDataSourcesRef();
-    bool use_active_srcs = (eval_man_.dboNameRef() == eval_man_.dboNameTst());
+    bool use_active_srcs = (eval_man_.dbContentNameRef() == eval_man_.dbContentNameTst());
     unsigned int num_skipped {0};
 
     unsigned int buffer_size = buffer->size();
