@@ -843,10 +843,7 @@ void EvaluationManager::addVariables (const std::string dbcontent_name, dbConten
     //    }
 
     // speed & track angle
-
-    assert (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_ground_speed_));
-    assert (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_track_angle_));
-
+  
     read_set.add(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_ground_speed_));
     read_set.add(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_track_angle_));
 
@@ -854,7 +851,6 @@ void EvaluationManager::addVariables (const std::string dbcontent_name, dbConten
 
     //        read_set.add(dbcontent.variable("multiple_sources")); // string
     //        read_set.add(dbcontent.variable("track_lu_ds_id")); // int
-    //    }
 
 }
 
