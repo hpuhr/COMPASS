@@ -91,6 +91,10 @@ Adds the supplied filename and creates a new SQLite3 database.
 
 Adds the supplied filename and opens an existing SQLite3 database.
 
+\subsection{--import\_data\_sources\_file filename}
+
+Adds the data sources defined in the JSON file to the configuration, as described in \nameref{sec:config_ds_export}.
+
 \subsection{--import\_view\_points filename}
 
 After a database was opened, adds the supplied filename and starts an import using the task described in \nameref{sec:ui_import_viewpoints}.
@@ -128,7 +132,7 @@ When an Import ASTERIX Task is started the given framing is used, the following 
 
 \subsection{--asterix\_decoder\_cfg 'str'}
 
-When an Import ASTERIX Task is started the given configuration is used, in which the editions and mapping can be specified for each category using a JSON string. \\
+When an Import ASTERIX task is started the given configuration is used, in which the editions and mapping can be specified for each category using a JSON string. \\
 
 Using the following string the edition 0.31 can be set for category 010:  \\
 '\{"10":\{"edition":"0.31"\}\}' (including one pair of single quotes) \\
@@ -163,6 +167,29 @@ Please note that the naming must be exactly as in the GUI, otherwise the applica
 
 After a database was opened, adds the supplied filename and starts an import using using the task described in \nameref{sec:ui_import_gps}.
 
+\subsection{--import\_gps\_parameters 'str'}
+
+When an Import GPS Trail task is started the given configuration is used, in which the data source and secondary parameters for the GPS trail is defined using a JSON string.
+
+In a nice formatting the string looks like this:
+\begin{lstlisting}[basicstyle=\small\ttfamily]
+'{
+  "callsign":"ENTRPRSE",
+  "ds_name":"GPS Trail",
+  "ds_sac":0,
+  "ds_sic":0,
+  "mode_3a_code":961,
+  "set_callsign":true,
+  "set_mode_3a_code":true,
+  "set_target_address":true,
+  "target_address":16702992,
+  "tod_offset":0.0
+}'
+\end{lstlisting}
+\ \\
+
+Please \textbf{note} that both 'mode\_3a\_code' and 'target\_address' must be given as decimal values.
+
 % \subsection{--import\_sectors\_json}
 % 
 % After a database was opened, adds imports a previously exported sectors JSON file using the following tasks:
@@ -171,6 +198,10 @@ After a database was opened, adds the supplied filename and starts an import usi
 %  \item \nameref{sec:task_manage_sectors}
 % \end{itemize}
 
+
+\subsection{--import\_sectors\_json  filename}
+
+After a database was opened, adds the sectors defined in supplied filename using the task described in \nameref{sec:ui_configure_sectors_manage}.
 
 \subsection{--associate\_data}
 
@@ -191,11 +222,62 @@ The given argument filename defines the report filename, with the report directo
 
 After opening a database a pre-configured evaluation run is triggered as described in \nameref{sec:eval}.
 
+\subsection{--import\_gps\_parameters 'str'}
+
+When an Evaluation task is started the given configuration is used, in which all parameters of the evaluation can be defined using a JSON string.
+
+In a nice formatting such a string can look like this:
+\begin{lstlisting}[basicstyle=\small\ttfamily]
+'{
+  "active_sources_ref":{
+    "CAT062":{
+      "1234":true
+    }
+  },
+  "active_sources_tst":{
+    "CAT021":{
+      "2345":true
+    }
+  },
+  "current_standard":"Dubious Targets",
+  "dbcontent_name_ref":"CAT062",
+  "dbcontent_name_tst":"CAT021",
+  "use_grp_in_sector":{
+    "Dubious Targets":{
+      "SectorName1":{
+        "Optional":false
+      },
+      "SectorName2":{
+        "Optional":false
+      },
+      "SectorName3":{
+        "Optional":true
+      },
+      "SectorName4":{
+        "Optional":false
+      }
+    }
+  }
+}'
+\end{lstlisting}
+\ \\
+
+The configuration of such parameters is rather complex, and it is recommended to contact the author if detailed information is needed.
+
+\subsection{--evaluate\_run\_filter}
+
+When an Evaluation task is started an automatic filtering of targets is performed, as configured using the 'Filter UTNs' dialog defined in \nameref{sec:eval_filter_targets}.
+
+
 \subsection{--export\_eval\_report}
 
 After a pre-configured evaluation run is was performed a report PDF is generated as described in \nameref{sec:eval}.
 
 The given argument filename defines the report filename, with the report directory as the parent directory of the given filename.
+
+\subsection{--no\_cfg\_save}
+
+When quitting the application later, no configuration changes are saved.
 
 \subsection{--quit}
 
