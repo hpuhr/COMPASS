@@ -1,7 +1,7 @@
 \subsection{Configure Data Sources}
 \label{sec:ui_configure_data_sources}
 
-This dialog allows management of data sources, as stored in the configuration as well as the database. \\
+This dialog allows management of data sources, as stored in the configuration as well as in the database. \\
 
 \begin{figure}[H]
     \hspace*{-2cm}
@@ -9,13 +9,16 @@ This dialog allows management of data sources, as stored in the configuration as
   \caption{Configure Data Sources}
 \end{figure}
 
-If data is imported from ASTERIX, data source information might be missing, so this information must either be edited manually, or loaded from a previous configuration (or previous database containing the same information). \\
+If data is imported from ASTERIX, data source information might be missing, so this information must either be edited manually, or loaded from a previous configuration (or a previous database containing the same information). \\
 
-A data source is always stored in the configuration, which means it is persisted and can be used in all new databases. It is useful to define all existing data sources in the configuration, since they are immediately used during import of data. \\
+A data source is always stored in the configuration, which means it is persistent and can be used in all new databases. 
+It is useful to define all existing data sources in the configuration, since they are immediately used during import of data. \\
 
-A data source is stored in the database only if data from said source is imported. During the import, if a data source can be found (matching SAC/SIC) in the configuration, it is automatically added to the database. \\
+A data source is stored in the database only if data from said source is imported. 
+During the import, if a data source can be found (matching SAC/SIC) in the configuration, it is automatically added to the database. \\
 
-Please \textbf{note} that currently the position of data sources is only required for \textbf{Radar} data sources (in the plot position calculation), for the others it would suffice to have SAC/SIC and name information for display purposes.
+Please \textbf{note} that currently the position of data sources is only required for \textbf{Radar} data sources (in the plot position calculation), 
+for all other data sources it would suffice to have SAC/SIC and name information for display purposes.
 
 \paragraph {Data Sources Table Content}
 \label{sec:configure_datasources_table_content}
@@ -49,7 +52,7 @@ Depending on the DSType, additional information can be set in a source. For a no
 \end{itemize}
 \ \\
 
-For sources of DSType Radar, the follwing additional information can be given:
+For sources of DSType 'Radar', the follwing additional information should be provided:
 
 \begin{itemize}
 \item Latitude: Source center position as WGS-84 latitude, as floating point number in degrees, e.g. 42.0001
@@ -58,7 +61,7 @@ For sources of DSType Radar, the follwing additional information can be given:
 \end{itemize}
 \ \\
 
-Additional optional information can be given:
+Additional optional information can be provided:
 
 \begin{figure}[H]
   \center

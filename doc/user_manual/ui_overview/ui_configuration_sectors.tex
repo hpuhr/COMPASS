@@ -1,11 +1,12 @@
 \subsection{Configure Sectors}
 \label{sec:ui_configure_sectors}
 
-This dialog allows management of sectors (as in 2.5D polygons) stored in the database. \\
+This dialog allows management of sectors (as 2.5D polygons) stored in the database. \\
 
-It is recommended if the sectors are to be used for evaluation purposes and/or if the altitude information is of use. For 2D display-only polygons it is recommended to add such information to the used map files, as described in \nameref{sec:adding_maps}. \\
+This step is recommended if the sectors are to be used for evaluation purposes and/or if the altitude information is of use. 
+For 2D display-only polygons it is recommended to add such information to the used map files, as described in \nameref{sec:adding_maps}. \\
 
-Please \textbf{note} that importing at least one sector is required for using the evaluation feature later.
+Please \textbf{note} that importing at least one sector is required for using the evaluation feature.
 
 \begin{figure}[H]
   \center
@@ -24,7 +25,7 @@ There exist 2 tabs:
 
 \subsubsection {Import Tab}
 
-In the 'File Selection' list, a list of available files is given. Entries can be added using the 'Add' button or removed using either the 'Remove' or 'Remove All' buttons. \\
+In the 'File Selection' list, a list of available files is provided. Entries can be added using the 'Add' button, or removed using either the 'Remove' or 'Remove All' buttons. \\
 
 Files are imported using the GDAL library, which can read a number of GIS files, and all encapsulated polygons or multi-polygons are written to the database with unique names. Supported common file-formats are e.g.:
 
@@ -35,7 +36,7 @@ Files are imported using the GDAL library, which can read a number of GIS files,
 \end{itemize}
 \ \\
 
-Note that only polygon information is added, and all information is assumed to be stored in the WGS84 coordinate system. \\
+Note that only polygonal information is added, and all information is assumed to be stored in the WGS84 coordinate system. \\
 
 Below a text field is given which, after selection of a file, displays the content information and/or error messages. \\\
 
@@ -48,7 +49,7 @@ After adding an example file, the 'Import' tab looks as follows:
   \caption{Configure Sectors with example file}
 \end{figure}
 
-To import a sector, select the wanted file in the file list and press the 'Import' button, after which an import dialog is shown. \\
+To import a sector, select the desired file in the file list and press the 'Import' button, after which an import dialog is shown. \\
 
 \begin{figure}[H]
     \includegraphics[width=6cm]{figures/configure_sectors_import_dialog.png}
@@ -73,7 +74,7 @@ After successful import, a confirmation message is shown. \\
   \caption{Configure Sectors Manage tab}
 \end{figure}
 
-In the Manage tab, a table listing the existing sectors is given, which allows editing/deleting of the information stored in the database. \\
+In the 'Manage' tab, a table listing the existing sectors is given, which allows editing/deleting of the information stored in the database. \\
 
 The following columns exist in the table:
 \begin{itemize}
@@ -89,7 +90,9 @@ The following columns exist in the table:
 \end{itemize}
 \ \\
 
-The 'Exclude' sector is a special case where e.g. a sector layer 'Example' has at least one normal sector 'Area', giving the 2.5d polygon in which surveillance data of interest exists. Now, to exclude target reports in a specific sector inside the bigger 'Area' sector, one or several smaller sectors can be imported (again into sector layer 'Example') and marked as 'Exclude' sectors and at best using a different color. \\
+The 'Exclude' sector is a special case where e.g. a sector layer 'Example' has at least one normal sector 'Area', giving the 2.5d polygon in which surveillance data of interest exists. 
+Now, to exclude target reports in a specific sector inside the bigger 'Area' sector, 
+one or several smaller sectors can be imported (again into sector layer 'Example') and marked as 'Exclude' sectors and at best using a different color. \\
 
 At the botton, 3 buttons exist:
 

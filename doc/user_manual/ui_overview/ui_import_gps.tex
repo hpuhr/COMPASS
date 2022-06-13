@@ -1,7 +1,7 @@
 \subsection{Import GPS Trails}
 \label{sec:ui_import_gps}
 
-This task allows importing of (D)GPS trails into the opened database, by parsing an NMEA file and writing the updates into the RefTraj DBContent.
+This task allows importing (D)GPS trails into the opened database, by parsing an NMEA file and writing the position updates into the 'RefTraj' DBContent.
 
 \begin{figure}[H]
   \center
@@ -21,7 +21,7 @@ There exist 2 tabs:
 
 At the top, a label exists indicating the file to be imported. \\
 
-Below, a text field is given which after selection of an NMEA file displays the content information and/or error messages. \\
+Below, a text field is given, which after selection of an NMEA file displays the content information and/or error messages. \\
 
 \subsubsection{Config Tab}
 
@@ -46,10 +46,10 @@ In the configuration tab, several configuration parameters can be set:
 
 \subsubsection{Running}
 
-After selecting an NMEA file, using the 'Import' button the task can be performed.
+After selecting an NMEA file, the task can be performed using the 'Import' button.
 
-Please note that based on two conditions, reference trajectory updates are skipped if:
+Please note that reference trajectory updates are skipped in the following two cases:
 \begin{itemize}
-\item the time is the same as the previous update or
-\item the quality is set to 0 (invalid position).
+\item The time is the same as the previous update
+\item The quality is set to 0 (invalid position).
 \end{itemize}
