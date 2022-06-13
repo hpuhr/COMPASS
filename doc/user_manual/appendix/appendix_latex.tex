@@ -1,0 +1,43 @@
+ \section{Appendix: Latex Installation}
+\label{sec:appendix_latex}  
+
+To be able to use the report generation (View points as well as Evaluation reports), a Latex installation has to be installed on the used workstation. \\
+
+Depending on what Linux operating system is used, the commands will differ. In this section installation instructions for a few selected OS' is provided.
+
+\subsection {Ubuntu \& Debian Variants}
+
+\begin{lstlisting}
+sudo apt-get install texlive-full 
+\end{lstlisting}
+
+\subsection {CentOS \& Fedora Variants}
+
+The following command should work:
+
+\begin{lstlisting}
+sudo yum install 'texlive-*'
+\end{lstlisting}
+
+There is still a guide which provides a more cumbersome installation - since the author does not use CentOS both options are not yet verified. For the more elaborate installtion please refer to \href{https://www.systutorials.com/how-to-install-tex-live-on-centos-7-linux/}{How To Install Tex Live on CentOS 7}.
+
+\subsection{Testing}
+
+After installtion, the following command should run an generate a similar output:
+
+\begin{lstlisting}
+$ pdflatex --version
+pdfTeX 3.14159265-2.6-1.40.21 (TeX Live 2020/Debian)
+kpathsea version 6.3.2
+Copyright 2020 Han The Thanh (pdfTeX) et al.
+There is NO warranty.  Redistribution of this software is
+covered by the terms of both the pdfTeX copyright and
+the Lesser GNU General Public License.
+For more information about these matters, see the file
+named COPYING and the pdfTeX source.
+Primary author of pdfTeX: Han The Thanh (pdfTeX) et al.
+Compiled with libpng 1.6.37; using libpng 1.6.37
+Compiled with zlib 1.2.11; using zlib 1.2.11
+Compiled with xpdf version 4.02
+\end{lstlisting}
+
