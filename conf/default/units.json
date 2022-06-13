@@ -77,37 +77,6 @@
                     }
                 }
             },
-            "Position": {
-                "parameters": null,
-                "sub_configs": {
-                    "Unit": {
-                        "Kilometer": {
-                            "parameters": {
-                                "definition": "",
-                                "factor": 0.001
-                            }
-                        },
-                        "Meter": {
-                            "parameters": {
-                                "definition": "",
-                                "factor": 1.0
-                            }
-                        },
-                        "Mile": {
-                            "parameters": {
-                                "definition": "",
-                                "factor": 0.000621371192
-                            }
-                        },
-                        "Nautical Mile": {
-                            "parameters": {
-                                "definition": "",
-                                "factor": 0.000539956803
-                            }
-                        }
-                    }
-                }
-            },
             "Speed": {
                 "parameters": null,
                 "sub_configs": {

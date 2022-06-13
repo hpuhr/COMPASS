@@ -78,6 +78,11 @@ std::string LatexDocument::toString()
           \definecolor{lbcolor}{rgb}{0.9,0.9,0.9}
           \definecolor{darkgreen}{rgb}{0.0, 0.5, 0.13}
 
+          \usepackage{silence}
+
+          \WarningFilter{latex}{Hyper reference}
+          \WarningFilter{latex}{There were undefined references}
+
           \lstset{
             basicstyle=\ttfamily,
             columns=fullflexible,
@@ -105,7 +110,7 @@ std::string LatexDocument::toString()
 
           \makeindex
 
-          \setcounter{tocdepth}{3}
+          \setcounter{tocdepth}{4}
 
           \begin{document})" << "\n";
 

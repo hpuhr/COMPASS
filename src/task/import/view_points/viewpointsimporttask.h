@@ -26,7 +26,7 @@
 
 #include "json.hpp"
 
-class ViewPointsImportTaskWidget;
+class ViewPointsImportTaskDialog;
 class TaskManager;
 class SavedFile;
 
@@ -35,6 +35,8 @@ class ViewPointsImportTask : public Task, public Configurable
     Q_OBJECT
 
 public slots:
+    void dialogImportSlot();
+    void dialogCancelSlot();
 
 public:
     ViewPointsImportTask(const std::string& class_id, const std::string& instance_id,
@@ -44,40 +46,31 @@ public:
     virtual void generateSubConfigurable(const std::string& class_id,
                                          const std::string& instance_id);
 
-    virtual TaskWidget* widget();
-    virtual void deleteWidget();
+    ViewPointsImportTaskDialog* dialog();
 
-    virtual bool checkPrerequisites();
-    virtual bool isRecommended();
-    virtual bool isRequired();
-
-    const std::map<std::string, SavedFile*>& fileList() { return file_list_; }
-    bool hasFile(const std::string& filename) { return file_list_.count(filename) > 0; }
-    void addFile(const std::string& filename);
-    void removeCurrentFilename();
-    void removeAllFiles ();
-    std::string currentFilename() const;
-    void currentFilename(const std::string& value);
+    void importFilename(const std::string& filename);
+    const std::string& importFilename() { return current_filename_; }
 
     std::string currentError() const;
 
+    virtual bool checkPrerequisites() override;
+    virtual bool isRecommended() override;
+    virtual bool isRequired() override;
+
     bool canImport ();
-    void import ();
+    virtual bool canRun() override;
+    virtual void run() override;
+    virtual void stop() override;
 
     const nlohmann::json& currentData() const;
-
-    bool finished() const;
 
 protected:
     std::string current_filename_;
     nlohmann::json current_data_;
 
-    std::map<std::string, SavedFile*> file_list_;
-
     std::string current_error_;
-    bool finished_ {false};
 
-    std::unique_ptr<ViewPointsImportTaskWidget> widget_;
+    std::unique_ptr<ViewPointsImportTaskDialog> dialog_;
 
     virtual void checkSubConfigurables() {}
 

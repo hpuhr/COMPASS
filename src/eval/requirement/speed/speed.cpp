@@ -122,7 +122,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> Speed::evaluate (
 
     vector<double> values;
 
-    bool skip_no_data_details = eval_man_.resultsGenerator().skipNoDataDetails();
+    bool skip_no_data_details = eval_man_.reportSkipNoDataDetails();
 
     bool has_ground_bit;
     bool ground_bit_set;

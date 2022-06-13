@@ -18,53 +18,34 @@
 #ifndef RADARPLOTPOSITIONCALCULATORTASKWIDGET_H_
 #define RADARPLOTPOSITIONCALCULATORTASKWIDGET_H_
 
-#include <taskwidget.h>
+#include <QWidget>
 
 class Buffer;
 class QLabel;
 class RadarPlotPositionCalculatorTask;
-class DBObjectComboBox;
-class DBOVariableSelectionWidget;
+class DBContentComboBox;
+
+namespace dbContent
+{
+class VariableSelectionWidget;
+}
 
 class QPushButton;
 
-class RadarPlotPositionCalculatorTaskWidget : public TaskWidget
+class RadarPlotPositionCalculatorTaskWidget : public QWidget
 {
     Q_OBJECT
 
   public slots:
-    void dbObjectChangedSlot();
-    void keyVarChangedSlot();
-    void datasourceVarChangedSlot();
-    void rangeVarChangedSlot();
-    void azimuthVarChangedSlot();
-    void altitudeVarChangedSlot();
-    void latitudeVarChangedSlot();
-    void longitudeVarChangedSlot();
-
-    void expertModeChangedSlot();
 
   public:
     RadarPlotPositionCalculatorTaskWidget(RadarPlotPositionCalculatorTask& task,
                                           QWidget* parent = 0, Qt::WindowFlags f = 0);
     virtual ~RadarPlotPositionCalculatorTaskWidget();
 
-    void update();
-
   protected:
     RadarPlotPositionCalculatorTask& task_;
 
-    DBObjectComboBox* object_box_{nullptr};
-    DBOVariableSelectionWidget* key_box_{nullptr};
-    DBOVariableSelectionWidget* datasource_box_{nullptr};
-    DBOVariableSelectionWidget* range_box_{nullptr};
-    DBOVariableSelectionWidget* azimuth_box_{nullptr};
-    DBOVariableSelectionWidget* altitude_box_{nullptr};
-
-    DBOVariableSelectionWidget* latitude_box_{nullptr};
-    DBOVariableSelectionWidget* longitude_box_{nullptr};
-
-    void setDBOBject(const std::string& object_name);
 };
 
 #endif /* RADARPLOTPOSITIONCALCULATORTASKWIDGET_H_ */

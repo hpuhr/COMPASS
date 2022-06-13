@@ -23,15 +23,15 @@
 #include "buffer.h"
 #include "buffercsvexportjob.h"
 #include "buffertablewidget.h"
-#include "dbobject.h"
-#include "dbobjectmanager.h"
-#include "dbovariableset.h"
+#include "dbcontent/dbcontent.h"
+#include "dbcontent/dbcontentmanager.h"
+#include "dbcontent/variable/variableset.h"
 #include "global.h"
 #include "jobmanager.h"
 #include "listboxview.h"
 #include "listboxviewdatasource.h"
 
-BufferTableModel::BufferTableModel(BufferTableWidget* table_widget, DBObject& object,
+BufferTableModel::BufferTableModel(BufferTableWidget* table_widget, DBContent& object,
                                    ListBoxViewDataSource& data_source)
     : QAbstractTableModel(table_widget),
       table_widget_(table_widget),
@@ -74,10 +74,8 @@ int BufferTableModel::columnCount(const QModelIndex& /*parent*/) const
 {
     logdbg << "BufferTableModel: columnCount: " << read_set_.getSize();
 
-    if (show_associations_)  // selected, utn
-        return read_set_.getSize() + 2;
-    else  // selected
-        return read_set_.getSize() + 1;
+    // selected
+    return read_set_.getSize() + 1;
 }
 
 QVariant BufferTableModel::headerData(int section, Qt::Orientation orientation, int role) const
@@ -93,18 +91,10 @@ QVariant BufferTableModel::headerData(int section, Qt::Orientation orientation, 
         if (col == 0)
             return QString();
 
-        if (show_associations_)
-        {
-            if (col == 1)
-                return QString("UTN");
-
-            col -= 2;  // for the actual properties
-        }
-        else
-            col -= 1;  // for the actual properties
+        col -= 1;  // for the actual properties
 
         assert(col < read_set_.getSize());
-        DBOVariable& variable = read_set_.getVariable(col);
+        dbContent::Variable& variable = read_set_.getVariable(col);
         logdbg << "BufferTableModel: headerData: col " << col << " variable " << variable.name();
         return QString(variable.name().c_str());
     }
@@ -146,12 +136,12 @@ QVariant BufferTableModel::data(const QModelIndex& index, int role) const
     {
         if (col == 0)  // selected special case
         {
-            assert(buffer_->has<bool>("selected"));
+            assert(buffer_->has<bool>(DBContent::selected_var.name()));
 
-            if (buffer_->get<bool>("selected").isNull(buffer_index))
+            if (buffer_->get<bool>(DBContent::selected_var.name()).isNull(buffer_index))
                 return Qt::Unchecked;
 
-            if (buffer_->get<bool>("selected").get(buffer_index))
+            if (buffer_->get<bool>(DBContent::selected_var.name()).get(buffer_index))
                 return Qt::Checked;
             else
                 return Qt::Unchecked;
@@ -170,39 +160,11 @@ QVariant BufferTableModel::data(const QModelIndex& index, int role) const
         if (col == 0)  // selected special case
             return QVariant();
 
-        if (show_associations_)
-        {
-            if (col == 1)
-            {
-                DBObjectManager& manager = COMPASS::instance().objectManager();
-
-                std::string dbo_name = buffer_->dboName();
-                assert(dbo_name.size());
-
-                const DBOAssociationCollection& associations =
-                    manager.object(dbo_name).associations();
-
-                assert(buffer_->has<int>("rec_num"));
-                assert(!buffer_->get<int>("rec_num").isNull(buffer_index));
-                unsigned int rec_num = buffer_->get<int>("rec_num").get(buffer_index);
-
-                if (associations.contains(rec_num))
-                {
-                    return QVariant(
-                        manager.object(dbo_name).associations().getUTNsStringFor(rec_num).c_str());
-                }
-                else
-                    return QVariant();
-            }
-
-            col -= 2;  // for the actual properties
-        }
-        else
-            col -= 1;  // for the actual properties
+        col -= 1;  // for the actual properties
 
         assert(col < read_set_.getSize());
 
-        DBOVariable& variable = read_set_.getVariable(col);
+        dbContent::Variable& variable = read_set_.getVariable(col);
         PropertyDataType data_type = variable.dataType();
 
         value_str = NULL_STRING;
@@ -274,7 +236,7 @@ QVariant BufferTableModel::data(const QModelIndex& index, int role) const
             else if (data_type == PropertyDataType::UINT)
             {
                 assert(buffer_->has<unsigned int>(property_name));
-                null = buffer_->get<unsigned int>(properties.at(col).name()).isNull(buffer_index);
+                null = buffer_->get<unsigned int>(property_name).isNull(buffer_index);
                 if (!null)
                 {
                     if (use_presentation_)
@@ -348,6 +310,15 @@ QVariant BufferTableModel::data(const QModelIndex& index, int role) const
                     value_str = buffer_->get<std::string>(property_name).getAsString(buffer_index);
                 }
             }
+            else if (data_type == PropertyDataType::JSON)
+            {
+                assert(buffer_->has<nlohmann::json>(property_name));
+                null = buffer_->get<nlohmann::json>(property_name).isNull(buffer_index);
+                if (!null)
+                {
+                    value_str = buffer_->get<nlohmann::json>(property_name).getAsString(buffer_index);
+                }
+            }
             else
                 throw std::domain_error("BufferTableWidget: show: unknown property data type");
 
@@ -373,17 +344,17 @@ bool BufferTableModel::setData(const QModelIndex& index, const QVariant& value, 
         unsigned int buffer_index = row_indexes_.at(index.row());
 
         assert(buffer_);
-        assert(buffer_->has<bool>("selected"));
+        assert(buffer_->has<bool>(DBContent::selected_var.name()));
 
         if (value == Qt::Checked)
         {
             loginf << "BufferTableModel: setData: checked row index" << buffer_index;
-            buffer_->get<bool>("selected").set(buffer_index, true);
+            buffer_->get<bool>(DBContent::selected_var.name()).set(buffer_index, true);
         }
         else
         {
             loginf << "BufferTableModel: setData: unchecked row index " << buffer_index;
-            buffer_->get<bool>("selected").set(buffer_index, false);
+            buffer_->get<bool>(DBContent::selected_var.name()).set(buffer_index, false);
         }
         assert(table_widget_);
         table_widget_->view().emitSelectionChange();
@@ -435,8 +406,8 @@ void BufferTableModel::updateRows()
     unsigned int buffer_index{0};  // index in buffer
     unsigned int buffer_size = buffer_->size();
 
-    assert(buffer_->has<bool>("selected"));
-    NullableVector<bool> selected_vec = buffer_->get<bool>("selected");
+    assert(buffer_->has<bool>(DBContent::selected_var.name()));
+    NullableVector<bool> selected_vec = buffer_->get<bool>(DBContent::selected_var.name());
 
     if (row_indexes_.size())  // get last processed index
     {
@@ -479,7 +450,7 @@ void BufferTableModel::saveAsCSV(const std::string& file_name, bool overwrite)
     assert(buffer_);
     BufferCSVExportJob* export_job =
         new BufferCSVExportJob(buffer_, read_set_, file_name, overwrite, show_only_selected_,
-                               use_presentation_, show_associations_);
+                               use_presentation_);
 
     export_job_ = std::shared_ptr<BufferCSVExportJob>(export_job);
     connect(export_job, &BufferCSVExportJob::obsoleteSignal, this,
@@ -517,14 +488,6 @@ void BufferTableModel::showOnlySelected(bool value)
     show_only_selected_ = value;
 
     updateToSelection();
-}
-
-void BufferTableModel::showAssociations(bool value)
-{
-    loginf << "BufferTableModel: showAssociations: " << value;
-    beginResetModel();
-    show_associations_ = value;
-    endResetModel();
 }
 
 void BufferTableModel::updateToSelection()

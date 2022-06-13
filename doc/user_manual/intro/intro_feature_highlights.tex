@@ -1,21 +1,25 @@
 \section{Feature Highlights}
 
+\subsection{Application modes}
+\begin{itemize} 
+    \item Offline: Recordings can be imported and larger amounts of data can be inspected and evaluated
+    \item Live: Data can be read directly from network interfaces and immediately displayed to show the current airspace situation
+\end{itemize}
+
 \subsection{Import}
 \begin{itemize}  
-    \item Support of multiple database systems, e.g. SQLite3, MySQL
-    \item Support of multiple, configurable database schemas, e.g. SCDB, SCDB Extended
-    \item Dynamic JSON import from jASTERIX, SDDL, ADS-B exchange, OpenSky Network
+    \item Support of SQLite3 database system
+%    \item Dynamic JSON import from jASTERIX, SDDL, ADS-B exchange, OpenSky Network
     \item Dynamic ASTERIX import using jASTERIX
     \item Import of (D)GPS trails from NMEA files
-    \item Import of polygons from GML,KML,ESRI Shapefiles
-    \item MySQL database import and management of SCDB databases
-    \item Supported Database Objects
+    \item Import of polygons from GML, KML, ESRI Shapefiles
+    \item Supported data source types
     \begin{itemize}  
-        \item Radar plots
-        \item MLAT \& WAM target reports
-        \item ADS-B target reports
-        \item System Track updates
-        \item Reference trajectory updates
+        \item Radar
+        \item MLAT \& WAM
+        \item ADS-B
+        \item System Tracker
+        \item Reference Trajectory
     \end{itemize}
 \end{itemize}
 
@@ -30,42 +34,43 @@
 
 \subsection{Visualization}
 \begin{itemize}  
-    \item Textual data inspection using Listbox View
+    \item Textual data inspection using ListBox View
     \begin{itemize}  
         \item Display of data as text tables
-        \item Configurable data loading of data of interest
-        \item Exporting of data as CSV
+        \item Configurable loading of data of interest
+        \item Export of data as CSV
     \end{itemize}
     \item Data distribution inspection using Histogram View
     \begin{itemize}  
         \item Display of any numeric variable or evaluation result as histogram
-        \item Linear or logarithmic axis supported
+        \item Linear or logarithmic axis
     \end{itemize}
     \item Graphical data inspection using OSG View
     \begin{itemize}  
+        \item Automatic labeling of data
         \item Customizable map/terrain display based on osgEarth
         \item Customizable display of ATC surveillance data using OpenSceneGraph
         \item High-speed time-filtered display
-        \item Numerous operations for analysis, e.g. data selection, labeling, distance measurement
+        \item Numerous features for analysis, e.g. data selection, labeling, distance measurements
         \item Configurable data layering and styling for detailed analysis
         \item Relatively low memory footprint (e.g. 16 million target reports in ~8 GB RAM)
     \end{itemize}    
     \item 2D data distribution inspection using ScatterPlot View
     \begin{itemize}  
-        \item Display of any 2 numeric variables as X/Y plot
+        \item Display of any two numeric variables as X/Y plot
     \end{itemize}
     \item Cross-view data selection and inspection
-    \item View points for efficient inspection
+    \item Storable view points for efficient inspection
 \end{itemize}
 
 \subsection{Evaluation}    
 \begin{itemize}  
-    \item Standard compliance evaluation (in development)
+    \item Standard compliance evaluation
     \begin{itemize}  
         \item Definition of standards based on configurable requirements
         \item Generalized comparison of test data vs. reference data
         \item Calculation of requirements/performance indicators
-        \item Investigation/display of results on several levels of detail
+        \item Investigation/display of results at several levels of detail
         \item Automatic removal of targets (short tracks, VFR, …) possible
         \item Manual removal of specific targets possible
         \item Export of results as report PDF

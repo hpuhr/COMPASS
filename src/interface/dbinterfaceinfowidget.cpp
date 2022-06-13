@@ -16,6 +16,7 @@
  */
 
 #include "dbinterfaceinfowidget.h"
+#include "sqliteconnection.h"
 
 #include <QGridLayout>
 #include <QHBoxLayout>
@@ -23,7 +24,7 @@
 #include <QTextEdit>
 
 #include "compass.h"
-#include "dbconnection.h"
+#include "sqliteconnection.h"
 #include "dbinterface.h"
 #include "logger.h"
 #include "stringconv.h"
@@ -50,9 +51,9 @@ DBInterfaceInfoWidget::DBInterfaceInfoWidget(DBInterface& interface, QWidget* pa
 
 DBInterfaceInfoWidget::~DBInterfaceInfoWidget() {}
 
-void DBInterfaceInfoWidget::databaseContentChangedSlot()
-{
-    assert(layout_);
-    layout_->addWidget(interface_.connection().infoWidget());
-    //layout_->addStretch();
-}
+//void DBInterfaceInfoWidget::databaseContentChangedSlot()
+//{
+//    assert(layout_);
+//    //layout_->addWidget(interface_.connection().infoWidget());
+//    //layout_->addStretch();
+//}

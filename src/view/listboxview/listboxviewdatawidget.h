@@ -29,7 +29,7 @@ class QTabWidget;
 class AllBufferTableWidget;
 class BufferTableWidget;
 class Buffer;
-class DBObject;
+class DBContent;
 
 /**
  * @brief Widget with tab containing BufferTableWidgets in ListBoxView
@@ -43,12 +43,11 @@ class ListBoxViewDataWidget : public QWidget
     void exportDoneSignal(bool cancelled);
     void showOnlySelectedSignal(bool value);
     void usePresentationSignal(bool use_presentation);
-    void showAssociationsSignal(bool value);
 
   public slots:
     void loadingStartedSlot();
     /// @brief Called when new result Buffer was delivered
-    void updateDataSlot(DBObject& object, std::shared_ptr<Buffer> buffer);
+    void updateDataSlot(const std::map<std::string, std::shared_ptr<Buffer>>& data, bool requires_reset);
     void loadingDoneSlot();
 
     void exportDataSlot(bool overwrite);
@@ -56,7 +55,6 @@ class ListBoxViewDataWidget : public QWidget
 
     void showOnlySelectedSlot(bool value);
     void usePresentationSlot(bool use_presentation);
-    void showAssociationsSlot(bool value);
 
   public:
     /// @brief Constructor
@@ -66,7 +64,7 @@ class ListBoxViewDataWidget : public QWidget
     virtual ~ListBoxViewDataWidget();
 
     /// @brief Clears the table contents
-    void clearTables();
+    void clearData();
     void resetModels();
     void updateToSelection();
 

@@ -20,7 +20,6 @@
 
 #include "configurable.h"
 #include "sectorlayer.h"
-#include "activedatasource.h"
 #include "evaluationdata.h"
 #include "evaluationresultsgenerator.h"
 #include "viewabledataconfig.h"
@@ -34,8 +33,13 @@
 
 class COMPASS;
 class EvaluationStandard;
-class DBObject;
-class DBOVariableSet;
+class DBContent;
+
+namespace dbContent {
+
+class VariableSet;
+
+}
 
 class QWidget;
 class QTabWidget;
@@ -52,8 +56,15 @@ signals:
     void resultsChangedSignal();
 
 public slots:
-    void newDataSlot(DBObject& object);
-    void loadingDoneSlot(DBObject& object);
+    void databaseOpenedSlot();
+    void databaseClosedSlot();
+    void associationStatusChangedSlot();
+
+    void loadedDataDataSlot(const std::map<std::string, std::shared_ptr<Buffer>>& data, bool requires_reset);
+    void loadingDoneSlot();
+
+//    void newDataSlot(DBContent& object);
+//    void loadingDoneSlot(DBContent& object);
 
 public:
     EvaluationManager(const std::string& class_id, const std::string& instance_id, COMPASS* compass);
@@ -63,6 +74,7 @@ public:
 
     bool canLoadData ();
     void loadData ();
+    void autofilterUTNs();
     bool canEvaluate ();
     std::string getCannotEvaluateComment();
     void evaluate ();
@@ -72,7 +84,7 @@ public:
     void close();
 
     bool needsAdditionalVariables ();
-    void addVariables (const std::string dbo_name, DBOVariableSet& read_set);
+    void addVariables (const std::string dbcontent_name, dbContent::VariableSet& read_set);
 
     virtual void generateSubConfigurable(const std::string& class_id,
                                          const std::string& instance_id) override;
@@ -80,7 +92,7 @@ public:
     EvaluationManagerWidget* widget();
 
     bool sectorsLoaded() const;
-    void loadSectors();
+    bool anySectorsWithReq();
 
     bool hasSectorLayer (const std::string& layer_name);
     //void renameSectorLayer (const std::string& name, const std::string& new_name);
@@ -102,17 +114,25 @@ public:
     void exportSectors (const std::string& filename);
     unsigned int getMaxSectorId ();
 
-    std::string dboNameRef() const;
-    void dboNameRef(const std::string& name);
-    bool hasValidReferenceDBO ();
-    std::map<int, ActiveDataSource>& dataSourcesRef() { return data_sources_ref_; }
-    std::set<int> activeDataSourcesRef();
+    std::string dbContentNameRef() const;
+    void dbContentNameRef(const std::string& name);
 
-    std::string dboNameTst() const;
-    void dboNameTst(const std::string& name);
-    bool hasValidTestDBO ();
-    std::map<int, ActiveDataSource>& dataSourcesTst() { return data_sources_tst_; }
-    std::set<int> activeDataSourcesTst();
+    unsigned int lineIDRef() const;
+    void lineIDRef(unsigned int line_id_ref);
+
+    bool hasValidReferenceDBContent ();
+    std::map<std::string, bool>& dataSourcesRef() { return data_sources_ref_[dbcontent_name_ref_]; } // can be used to set active bool
+    std::set<unsigned int> activeDataSourcesRef();
+
+    std::string dbContentNameTst() const;
+    void dbContentNameTst(const std::string& name);
+
+    unsigned int lineIDTst() const;
+    void lineIDTst(unsigned int line_id_tst);
+
+    bool hasValidTestDBContent ();
+    std::map<std::string, bool>& dataSourcesTst() { return data_sources_tst_[dbcontent_name_tst_]; } // can be used to set active bool
+    std::set<unsigned int> activeDataSourcesTst();
 
     bool dataLoaded() const;
     bool evaluated() const;
@@ -170,7 +190,7 @@ public:
     nlohmann::json::boolean_t& useRequirement(const std::string& standard_name, const std::string& group_name,
                                               const std::string& req_name);
 
-    EvaluationResultsReport::PDFGenerator& pdfGenerator() const;
+    EvaluationResultsReport::PDFGenerator& pdfGenerator();
 
     bool useUTN (unsigned int utn);
     void useUTN (unsigned int utn, bool value, bool update_td, bool update_res=true); // update target data
@@ -193,8 +213,10 @@ public:
     bool removePsrOnlyTargets() const;
     void removePsrOnlyTargets(bool value);
 
-    bool removeModeACodes() const;
-    void removeModeACodes(bool value);
+    bool filterModeACodes() const;
+    void filterModeACodes(bool value);
+    bool filterModeACodeBlacklist() const;
+    void filterModeACodeBlacklist(bool value);
 
     bool removeModeCValues() const;
     void removeModeCValues(bool value);
@@ -202,30 +224,27 @@ public:
     float removeModeCMinValue() const;
     void removeModeCMinValue(float value);
 
-    std::string removeModeACodeValues() const;
-    std::set<std::pair<int,int>> removeModeACodeData() const; // single ma,-1 or range ma1,ma2
-    void removeModeACodeValues(const std::string& value);
+    std::string filterModeACodeValues() const;
+    std::set<std::pair<int,int>> filterModeACodeData() const; // single ma,-1 or range ma1,ma2
+    void filterModeACodeValues(const std::string& value);
 
-    bool removeTargetAddresses() const;
-    void removeTargetAddresses(bool value);
+    bool filterTargetAddresses() const;
+    void filterTargetAddresses(bool value);
+    bool filterTargetAddressesBlacklist() const;
+    void filterTargetAddressesBlacklist(bool value);
 
-    std::string removeTargetAddressValues() const;
-    std::set<unsigned int> removeTargetAddressData() const;
-    void removeTargetAddressValues(const std::string& value);
+    std::string filterTargetAddressValues() const;
+    std::set<unsigned int> filterTargetAddressData() const;
+    void filterTargetAddressValues(const std::string& value);
 
     bool removeModeACOnlys() const;
     void removeModeACOnlys(bool value);
 
-    bool removeNotDetectedDBOs() const;
-    void removeNotDetectedDBOs(bool value);
+    bool removeNotDetectedDBContents() const;
+    void removeNotDetectedDBContents(bool value);
 
-    bool removeNotDetectedDBO(const std::string& dbo_name) const;
-    void removeNotDetectedDBOs(const std::string& dbo_name, bool value);
-
-    bool hasADSBInfo() const;
-    bool hasADSBInfo(unsigned int ta) const;
-    std::tuple<std::set<unsigned int>, std::tuple<bool, unsigned int, unsigned int>,
-            std::tuple<bool, unsigned int, unsigned int>> adsbInfo(unsigned int ta) const;
+    bool removeNotDetectedDBContent(const std::string& dbcontent_name) const;
+    void removeNotDetectedDBContents(const std::string& dbcontent_name, bool value);
 
     bool loadOnlySectorData() const;
     void loadOnlySectorData(bool value);
@@ -329,6 +348,51 @@ public:
     double resultDetailZoom() const;
     void resultDetailZoom(double result_detail_zoom);
 
+    // report stuff
+    bool reportSplitResultsByMOPS() const;
+    void reportSplitResultsByMOPS(bool value);
+
+    bool reportShowAdsbInfo() const;
+    void reportShowAdsbInfo(bool value);
+
+    bool reportSkipNoDataDetails() const;
+    void reportSkipNoDataDetails(bool value);
+
+    std::string reportAuthor() const;
+    void reportAuthor(const std::string& author);
+
+    std::string reportAbstract() const;
+    void reportAbstract(const std::string& abstract);
+
+    bool reportRunPDFLatex() const;
+    void reportRunPDFLatex(bool value);
+
+    bool reportOpenCreatedPDF() const;
+    void reportOpenCreatedPDF(bool value);
+
+    bool reportWaitOnMapLoading() const;
+    void reportWaitOnMapLoading(bool value);
+
+    bool reportIncludeTargetDetails() const;
+    void reportIncludeTargetDetails(bool value);
+
+    bool reportSkipTargetsWoIssues() const;
+    void reportSkipTargetsWoIssues(bool value);
+
+    bool reportIncludeTargetTRDetails() const;
+    void reportIncludeTargetTRDetails(bool value);
+
+    unsigned int reportNumMaxTableRows() const;
+    void reportNumMaxTableRows(unsigned int value);
+
+    unsigned int reportNumMaxTableColWidth() const;
+    void reportNumMaxTableColWidth(unsigned int value);
+
+    // upaters
+    void updateActiveDataSources(); // save to config var
+
+    bool hasSelectedReferenceDataSources();
+    bool hasSelectedTestDataSources();
 
 
 protected:
@@ -345,13 +409,15 @@ protected:
 
     bool evaluated_ {false};
 
-    std::string dbo_name_ref_;
-    std::map<int, ActiveDataSource> data_sources_ref_;
-    nlohmann::json active_sources_ref_;
+    std::string dbcontent_name_ref_;
+    unsigned int line_id_ref_;
+    std::map<std::string, std::map<std::string, bool>> data_sources_ref_ ; // db_content -> ds_id -> active flag
+    nlohmann::json active_sources_ref_; // config var for data_sources_ref_
 
-    std::string dbo_name_tst_;
-    std::map<int, ActiveDataSource> data_sources_tst_;
-    nlohmann::json active_sources_tst_;
+    std::string dbcontent_name_tst_;
+    unsigned int line_id_tst_;
+    std::map<std::string, std::map<std::string, bool>> data_sources_tst_; // db_content -> ds_id -> active flag
+    nlohmann::json active_sources_tst_; // config var for active_sources_tst_
 
     std::string current_standard_;
     nlohmann::json configs_;
@@ -369,14 +435,16 @@ protected:
     bool remove_psr_only_targets_ {true};
     bool remove_modeac_onlys_ {false};
 
-    bool remove_mode_a_codes_{false};
-    std::string remove_mode_a_code_values_;
+    bool filter_mode_a_codes_{false};
+    bool filter_mode_a_code_blacklist_{true};
+    std::string filter_mode_a_code_values_;
 
     bool remove_mode_c_values_{false};
     float remove_mode_c_min_value_;
 
-    bool remove_target_addresses_{false};
-    std::string remove_target_address_values_;
+    bool filter_target_addresses_{false};
+    bool filter_target_addresses_blacklist_{true};
+    std::string filter_target_address_values_;
 
     bool remove_not_detected_dbos_{false};
     nlohmann::json remove_not_detected_dbo_values_;
@@ -438,6 +506,26 @@ protected:
 
     double result_detail_zoom_ {0.0}; // in WGS84 deg
 
+    // report stuff
+    bool report_skip_no_data_details_ {true};
+    bool report_split_results_by_mops_ {false};
+    bool report_show_adsb_info_ {false};
+
+    std::string report_author_;
+    std::string report_abstract_;
+
+    bool report_include_target_details_ {false};
+    bool report_skip_targets_wo_issues_ {false};
+    bool report_include_target_tr_details_ {false};
+
+    unsigned int report_num_max_table_rows_ {1000};
+    unsigned int report_num_max_table_col_width_ {18};
+
+    bool report_wait_on_map_loading_ {true};
+
+    bool report_run_pdflatex_ {true};
+    bool report_open_created_pdf_ {false};
+
     bool warning_shown_ {false};
 
     std::unique_ptr<EvaluationManagerWidget> widget_{nullptr};
@@ -450,8 +538,8 @@ protected:
     nlohmann::json use_requirement_; // standard_name->req_grp_name->req_grp_name->bool use
 
     EvaluationData data_;
-    std::unique_ptr<EvaluationResultsGenerator> results_gen_;
-    std::unique_ptr<EvaluationResultsReport::PDFGenerator> pdf_gen_;
+    EvaluationResultsGenerator results_gen_;
+    EvaluationResultsReport::PDFGenerator pdf_gen_;
 
     std::unique_ptr<ViewableDataConfig> viewable_data_cfg_;
 
@@ -461,13 +549,10 @@ protected:
 
     virtual void checkSubConfigurables() override;
 
-    void updateReferenceDBO();
-    void updateReferenceDataSources();
-    void updateReferenceDataSourcesActive();
+    void loadSectors();
 
-    void updateTestDBO();
-    void updateTestDataSources();
-    void updateTestDataSourcesActive();
+    void checkReferenceDataSources();
+    void checkTestDataSources();
 
     nlohmann::json::object_t getBaseViewableDataConfig ();
     nlohmann::json::object_t getBaseViewableNoDataConfig ();

@@ -1,15 +1,19 @@
 {
-    "parameters": null,
+    "parameters": {
+        "db_file_list": [
+        ],
+        "last_db_filename": ""
+    },
     "sub_config_files": [
         {
-            "class_id": "DBObjectManager",
-            "instance_id": "DBObjectManager0",
-            "path": "db_object.json"
+            "class_id": "DBContentManager",
+            "instance_id": "DBContentManager0",
+            "path": "db_content.json"
         },
         {
-            "class_id": "DBSchemaManager",
-            "instance_id": "DBSchemaManager0",
-            "path": "db_schema.json"
+            "class_id": "DataSourceManager",
+            "instance_id": "DataSourceManager0",
+            "path": "data_sources.json"
         },
         {
             "class_id": "EvaluationManager",
@@ -36,37 +40,12 @@
         "DBInterface": {
             "DBInterface0": {
                 "parameters": {
-                    "read_chunk_size": 100000,
-                    "used_connection": "SQLite Connection"
+                    "read_chunk_size": 100000
                 },
                 "sub_configs": {
-                    "MySQLppConnection": {
-                        "MySQL++ Connection": {
-                            "parameters": {
-                                "used_server": "Localhost"
-                            },
-                            "sub_configs": {
-                                "MySQLServer": {
-                                    "Localhost": {
-                                        "parameters": {
-                                            "database": "skeyes2",
-                                            "host": "localhost",
-                                            "password": "sassc",
-                                            "port": 3306,
-                                            "user": "sassc"
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    },
                     "SQLiteConnection": {
                         "SQLite Connection": {
-                            "parameters": {
-                                "last_filename": ""
-                            },
-                            "sub_configs": {
-                            }
+                            "parameters": null
                         }
                     }
                 }

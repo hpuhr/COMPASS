@@ -47,6 +47,8 @@ public:
     EvaluationManagerWidget(EvaluationManager& eval_man);
     virtual ~EvaluationManagerWidget();
 
+    void updateDataSources();
+    void updateSectors();
     void updateButtons();
     void expandResults();
 

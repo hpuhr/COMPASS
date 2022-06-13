@@ -1,64 +1,167 @@
 \section{Key Concepts}
 \label{sec:key_concepts}
 
-In this section, a few key concepts are introduced to give a somewhat deeper understanding of COMPASS and to allow the reader to understand some main design choices made by the author. This should also give indications about the strengths and draw-backs of the chosen approach.
+In this section, a few key concepts are introduced to convey a somewhat deeper understanding of COMPASS, and to allow the reader to understand some main design choices made by the author. 
+This should also give indications about the strengths and draw-backs of the chosen approach.
 
 \subsection*{Database Systems}
-A database allows for storage, retrieval and filtering of the data of interest. While SQL has some definitive drawbacks, it was chosen since support of the SASS-C database SCDB was wanted.\\
-Currently  two  database  systems  are  supported: MySQL and SQLite3. \\
-MySQL  relies on an independent background service or remote server, which holds several databases and can also be accessed over a network connection.\\
-SQLite3 encapsulates a database in a single file container, which is read from a storage medium (e.g. hard drive).
+A database allows for storage, retrieval and filtering of the data of interest. While SQLite3 - being a stand-alone database - also has some drawbacks, 
+it was chosen for its performance and ease of use (compared to e.g. NoSQL databases or MySQL variants). \\\\
+SQLite3 encapsulates a database in a single file container, which is read from a storage medium (e.g. hard drive). 
+Therefore, it does not require the installation of a database service, which is one of the advantages of the current solution. \\
 
-\subsection*{Configuration}
-At startup, numerous configuration files are loaded, and at shutdown the current configuration state of COMPASS is saved.\\
-The configuration is not just a matter of storing simple parameters of components, but also what components exist. To give an example: Each existing View is saved, and when the program is started again, the previously active Views are created.  The same holds for the filters, or the database interface/schema. \\
-This way, a user can have a specific program configuration for a specific usage situation, which can be instantly reused for a different dataset, using have a completely configurable database schema or filter configuration. \\
-This allows for a high degree of flexibility, but somewhat complicates software development.
-
-\subsection*{Flexible Database Interface}
-Using such a configuration, a flexible database interface method was implemented to allow general displaying of data in different database systems and schemas.\\
-To summarize, several database schemas can be stored in configuration files, each of which is a structured collection of database tables and their logical dependencies. Such information is used in one set of Database Objects (\textbf{DBObjects}). In each database system, any database schema can be used.
-
-\subsection*{Database Objects}
-A Database Object (\textbf{DBObject}) is defined by a name and has a collection of variables. For example, radar plots and system tracks are database objects, and each has variables holding time, position, Mode 3/A codes and Mode C heights and so on. From a database, if such a DBObject is present, it can be loaded and displayed.\\
-
-To allow displaying data from different DBObjects in the same system, so-called meta-variables were introduced, which hold variables that are present in some or all DBObjects (with a possibly different name or unit).  For example, there meta-variable 'tod', which is a collection of sub-variables for each existing DBObject and the respective 'Time of Day' variable.
-
-\subsection*{Unique Target Numbers}
-A \textbf{U}nique \textbf{T}arget \textbf{N}umber (UTN) groups together system track updates and/or sensor target reports.
-Currently is (only) created based on ARTAS information (one UTN for each ARTAS track), grouping together ARTAS tracks and associated sensor target reports.
-
-\subsection*{ASTERIX Data Import}
-If surveillance data is given in EUROCONTROL's ASTERIX format, it can be decoded using the jASTERIX library. This library allows adding new framings, categories and editions based on configuration only. The resulting JSON data is then mapped to DBObject variables and imported to a selected schema. Currently, only SCDB is supported for importing, but this will be extended in the future. The mapping between JSON keys and DBObject variables is configurable, allowing for a broad usage spectrum.
-
-\subsection*{JSON Data Import}
-If surveillance data is given in the JSON format, it can be mapped to DBObject variables and imported to a selected schema. Currently, only SCDB is supported for importing, but this will be extended in the future. The mapping between JSON keys and DBObject variables is configurable, allowing for a broad usage spectrum.
-
-\subsection*{Data Loading}
-In COMPASS, a unified data loading process was chosen, meaning that only exactly one common dataset is loaded, which can be inspected using Views. When started, data is incrementally read from the database, stored in the resulting dataset, and distributed to the active Views. Each time such a loading process is triggered, all Views clear their dataset and gradually update. \\
-This makes working with the data somewhat easier to understand, since only one dataset exists, while on the other hand it does not allow several independent datasets (e.g. with different filters) to be loaded.
-
-\subsection*{Generating a Verif Database}
-\label{sec:generation}
-
-A SASS-C Verif database has to be generated before it can be opened with COMPASS.  This section describes how such
-a process can be performed, however it is by no means a complete guide. \\
-
-A complete treatment of how to generate a database using the highly sophisticated SASS-C Verif frame work  is  out  of  the  scope  of  this  document.   However, a short summary of the necessary steps will be presented here.\\
-
-\begin{itemize}  
-\item Import a previous evaluation job
-\item Set data recording path, e.g. 'somelocation/\%iffile.if'
-\item Run IRIS command
-\item Run OTR command
-\item Run CMP command with all but RA
-\item Run CMP command with just RA
+\begin{itemize}
+\item Single file container
+\begin{itemize}
+\item Can easily be copied, shared, archived, ..
+\end{itemize}
+\item SQLite3 database
+\begin{itemize}
+\item Can be read/edited with other tools
+\begin{itemize}
+\item e.g. sqlitebrowser, from Python scripts, ...
+\end{itemize}
+\item Nothing has to be additionally installed
+\end{itemize}
+\item High-performance, light-weight
 \end{itemize}
 
-After  these  steps,  a  database  was  generated  and  filled  with  data.   The  name  of  the  database  (which
-will  be  needed  during  the  opening  process)  is  equivalent  to  the  job  name,  e.g.   'job\_v7\_mainsacso\_0005', 'HelloWorld' etc. \\
+\subsection*{Configuration}
+At startup numerous configuration files are loaded, and at shutdown the current configuration state of COMPASS is saved.\\\\
 
-Please \textbf{note} that the SASS-C MySQL database name is not case sensitive ('job\_v7\_mainsacso\_0005' is the same as 'JOB\_V7\_MAINSACSO\_0005'). \\
- 
-This database can either be used directly (by connecting to it) or exported in Verif (to be imported using COMPASS). Please note that using COMPASS on a MySQL database still in use by Verif is not recommended.
+The configuration is not just a matter of storing simple parameters of components, but also what components exist. To give an example: Each existing View is saved, and when the program is started again, the previously active Views are restored. The same is true for almost all components of COMPASS. \\\\
+
+Using this configuration, a user can have a specific program configuration for a specific usage situation, which can be instantly reused for a different dataset, using a specific View or filter configuration, allowing for a high degree of flexibility and supporting numerous use-cases. \\
+
+
+\begin{itemize}
+\item Stored in a home folder for current AppImage version
+\begin{itemize}
+\item e.g. \textasciitilde/.compass/0.7.0
+\end{itemize}
+\item Read at application startup
+\item Written at application shutdown (if wanted)
+\item Not written at application crash
+\item If not existing for current version
+\begin{itemize}
+\item Default configuration copied by AppImage
+\end{itemize}
+\end{itemize}
+
+\subsection*{Data Sources \& Database Content}
+
+Data sources are (at the most basic level) defined by a name and SAC/SIC, and obtain a certain data source type (\textbf{DSType}). 
+If e.g. the data source 'Wuerzburg' of DSType 'Radar' is defined in the application, during an ASTERIX import the respective ASTERIX CAT048 data is inserted into the database and associated to the data source by SAC/SIC. \\
+
+For each data source up to 4 different \textbf{lines} can be used (L1, L2, L3, L4). 
+Such lines can either be used to distinguish data recorded from different network lines, but also to distinguish different recordings of the same data source. 
+For instance, different tracker runs can be imported and analyzed by importing them into different data source lines. \\
+
+A certain Database Content (\textbf{DBContent}) is defined by a name and obtains a collection of variables. 
+For example, CAT048 and CAT062 are types of DBContent and each has variables holding time, position, Mode 3/A code and Mode C height, and so on. 
+If such a DBContent is present, target reports can be loaded from a database and displayed.\\
+
+\begin{itemize}
+\item Data Source: Single data source, e.g. a certain Radar
+\begin{itemize}
+\item Identified by name (\textbf{DS ID}), SAC/SIC, ...
+\end{itemize}
+\item Data Source Type (\textbf{DSType})
+\begin{itemize}
+\item Type of source technology, i.e.
+\begin{itemize}
+\item Radar, MLAT, ADS-B, Tracker, RefTraj, Other
+\end{itemize}
+\end{itemize}
+\item Line Identifier (\textbf{Line ID})
+\begin{itemize}
+\item L1, L2, L3, L4
+\end{itemize}
+\item Database Content (\textbf{DBContent}) 
+\begin{itemize}
+\item Type of data, e.g. ASTERIX Formats CAT048, CAT020, CAT021, ...
+\item During import, DBContent is attributed to 
+\begin{itemize}
+\item Data source, Line ID
+\end{itemize}
+\item Contains DBContent Variables: Time of Day, Latitude, Longitude, ...
+\end{itemize}
+\end{itemize}
+
+\subsection*{ASTERIX Data Import}
+If surveillance data is given in EUROCONTROL's ASTERIX format, it can be decoded using the \textbf{jASTERIX} library. This library allows adding new framings, categories and editions based on configuration only. \\\\
+
+The resulting JSON data is then mapped to DBContent variables stored in the database. The mapping between JSON keys and DBContent variables is configurable, allowing for a broad usage spectrum.
+
+%\subsection*{JSON Data Import}
+%If surveillance data is given in the JSON format, it can be mapped to DBObject variables and imported to a selected schema. Currently, only SCDB is supported for importing, but this will be extended in the future. The mapping between JSON keys and DBObject variables is configurable, allowing for a broad usage spectrum.
+
+\subsection*{Meta Variables}
+
+To allow displaying data from different DBContent in the same system, so-called \textbf{Meta variables} were introduced, which hold variables that are present in some or all DBContent (with a possibly different name or unit). \\
+For example, there is the meta variable 'Time of Day', which is a collection of sub-variables for each existing DBContent and the respective 'Time of Day' variable. \\
+
+\begin{itemize}
+\item Each DBContent has DBContent variables
+\item The same variables exist in multiple DBContents
+\item Meta variables
+\begin{itemize}
+\item Group DBContent variables of same content
+\item Allow easier usage
+\item Can be inspected using the Configuration menu
+\end{itemize}
+\end{itemize}
+
+\subsection*{Unique Target Numbers}
+A \textbf{U}nique \textbf{T}arget \textbf{N}umber (\textbf{UTN}) groups together DBContent target reports.
+This information can be created either by a general association task or created based on ARTAS TRI information (one UTN for each ARTAS track, with the associated sensor information). \\
+
+\begin{itemize}
+\item Calculated during 'Calculate Associations' task
+\item Each unique target is attributed a unique target number (\textbf{UTN})
+\item Each target report can have
+\begin{itemize}
+\item No UTN: Not associated
+\item A single UTN: Associated to 1 target
+\item Multiple UTNs: Special case e.g. for merged PSR plots
+\end{itemize}
+\item Targets in the evaluation are identified by unique UTN
+\item UTN can group together multiple tracks / flight legs
+\item Allows comparison of data
+\begin{itemize}
+\item Find equivalent reference data for test data
+\end{itemize}
+\end{itemize}
+
+\subsection*{Data Loading}
+In COMPASS, a unified data loading process was chosen, meaning that only exactly one common dataset is loaded, which can be inspected using multiple Views. \\
+
+When started, data is incrementally read from the database, stored in the resulting dataset, and distributed to the active Views. Each time such a loading process is triggered, all Views clear their dataset and gradually update. \\
+
+This makes working with the data somewhat easier to understand, since only one dataset exists, while on the other hand it does not allow several independent datasets (e.g. with different filters) to be loaded at the same time. \\
+
+\begin{itemize}
+\item If a loading process is started, a dataset will be loaded into memory (RAM)
+\begin{itemize}
+\item DBContent as defined by data sources, filters
+\item Only contains DBContent variables that are needed at the time
+\end{itemize}
+\item Only one dataset can exist at a time
+\item Dataset is distributed and displayed in all views
+\item If additional DBContent variables are needed
+\begin{itemize}
+\item e.g. by a View
+\item a reload is required
+\end{itemize}
+\end{itemize}
+
+\subsection*{Live Mode}
+Commonly, COMPASS is used in the 'Offline' mode, which allows inspection of larger amounts of recorded ASTERIX data. \\
+
+To analyze live data from the network, a 'Live' mode exists which records data from UDP network streams, decodes the content, imports the data to the database, and immediately displays the data in the OSGView. \\
+
+The most current data (up to 5 minutes) is stored in main memory (RAM), to inspect cases of interest in the immediate past. \\
+
+The 'Live' mode can be quit, after which the application returns to the 'Offline' mode, to allow inspection of the full database as always.
+
  

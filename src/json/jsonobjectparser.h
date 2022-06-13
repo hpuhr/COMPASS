@@ -18,25 +18,31 @@
 #ifndef JSONOBJECTPARSER_H
 #define JSONOBJECTPARSER_H
 
-#include <memory>
-#include <string>
-
 #include "configurable.h"
-#include "dbovariable.h"
-#include "dbovariableset.h"
+#include "dbcontent/variable/variable.h"
+#include "dbcontent/variable/variableset.h"
 #include "format.h"
 #include "jsondatamapping.h"
 #include "jsonobjectparserwidget.h"
 #include "propertylist.h"
 #include "stringconv.h"
 
-class DBObject;
-class DBOVariable;
+#include <memory>
+#include <string>
+
 class Buffer;
+class DBContent;
+
+namespace dbContent {
+
+class Variable;
+
+}
+
 
 class JSONObjectParser : public Configurable
 {
-    using MappingIterator = std::vector<JSONDataMapping>::iterator;
+    using MappingIterator = std::vector<std::unique_ptr<JSONDataMapping>>::iterator;
 
   public:
     JSONObjectParser(const std::string& class_id, const std::string& instance_id,
@@ -47,7 +53,7 @@ class JSONObjectParser : public Configurable
     /// @brief Move constructor
     JSONObjectParser& operator=(JSONObjectParser&& other);
 
-    DBObject& dbObject() const;
+    DBContent& dbObject() const;
 
     std::string JSONKey() const;
     void JSONKey(const std::string& json_key);
@@ -69,7 +75,7 @@ class JSONObjectParser : public Configurable
     bool parseJSON(nlohmann::json& j, Buffer& buffer) const;
     void createMappingStubs(nlohmann::json& j);
 
-    const DBOVariableSet& variableList() const;
+    const dbContent::VariableSet& variableList() const;
 
     bool overrideDataSource() const;
     void overrideDataSource(bool override);
@@ -104,8 +110,8 @@ private:
     std::string name_;
     bool active_ {true};
 
-    std::string db_object_name_;
-    DBObject* db_object_{nullptr};
+    std::string db_content_name_;
+    DBContent* dbcontent_{nullptr};
 
     std::string json_container_key_;  // location of container with target report data
     std::string json_key_;            // * for all
@@ -113,7 +119,7 @@ private:
 
     std::vector<std::string> json_values_vector_;
 
-    DBOVariableSet var_list_;
+    dbContent::VariableSet var_list_;
 
     bool override_data_source_{false};
     std::string data_source_variable_name_;
@@ -126,7 +132,7 @@ private:
 
     std::unique_ptr<JSONObjectParserWidget> widget_;
 
-    std::vector<JSONDataMapping> data_mappings_;
+    std::vector<std::unique_ptr<JSONDataMapping>> data_mappings_;
 
     // returns true on successful parse
     bool parseTargetReport(const nlohmann::json& tr, Buffer& buffer, size_t row_cnt) const;

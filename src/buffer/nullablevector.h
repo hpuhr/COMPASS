@@ -18,9 +18,15 @@
 #ifndef ARRAYLIST_H_
 #define ARRAYLIST_H_
 
+
+#include "buffer.h"
+#include "property.h"
+#include "stringconv.h"
+
 #include <tbb/tbb.h>
 
 #include <QDateTime>
+
 #include <array>
 #include <bitset>
 #include <iomanip>
@@ -29,10 +35,7 @@
 #include <set>
 #include <sstream>
 #include <vector>
-
-#include "buffer.h"
-#include "property.h"
-#include "stringconv.h"
+#include <type_traits>
 
 //#include "boost/lexical_cast.hpp"
 
@@ -48,15 +51,38 @@ class NullableVector
 {
     friend class Buffer;
 
-  public:
+public:
     /// @brief Destructor
     virtual ~NullableVector() {}
 
     /// @brief Sets all elements to false
     void clear();
+    void clearData(); // removes all data
 
     /// @brief Returns const reference to a specific value
     const T get(unsigned int index);
+
+    // exists only for non-integral types
+    template<typename T_ = T, typename std::enable_if<!std::is_integral<T_>::value>::type* = nullptr>
+    T_& getRef(unsigned int index)
+    {
+        logdbg << "NullableVector " << property_.name() << ": getRef: index " << index;
+        if (BUFFER_PEDANTIC_CHECKING)
+        {
+            assert(data_.size() <= buffer_.data_size_);
+            assert(null_flags_.size() <= buffer_.data_size_);
+            assert(index < data_.size());
+        }
+
+        if (isNull(index))
+        {
+            logerr << "NullableVector " << property_.name() << ": getRef: index " << index << " is null";
+            assert (false);
+        }
+
+        return data_.at(index);
+    }
+
 
     /// @brief Returns string of a specific value
     const std::string getAsString(unsigned int index);
@@ -78,12 +104,13 @@ class NullableVector
     NullableVector<T>& operator*=(double factor);
 
     std::set<T> distinctValues(unsigned int index = 0);
+    std::map<T, unsigned int> distinctValuesWithCounts(unsigned int index = 0);
     std::tuple<bool,T,T> minMaxValues(unsigned int index = 0); // set, min, max
 
     std::map<T, std::vector<unsigned int>> distinctValuesWithIndexes(unsigned int from_index,
                                                                      unsigned int to_index);
     std::map<T, std::vector<unsigned int>> distinctValuesWithIndexes(
-        const std::vector<unsigned int>& indexes);
+            const std::vector<unsigned int>& indexes);
     std::vector<unsigned int> nullValueIndexes(unsigned int from_index, unsigned int to_index);
     std::vector<unsigned int> nullValueIndexes(const std::vector<unsigned int>& indexes);
 
@@ -94,7 +121,9 @@ class NullableVector
     /// @brief Checks if specific element is Null
     bool isNull(unsigned int index);
 
-    void checkNotNull();
+    bool isNeverNull();
+
+    void swapData (unsigned int index1, unsigned int index2);
 
     std::string propertyName() const
     {
@@ -106,7 +135,10 @@ class NullableVector
         return property_.name() + "(" + property_.dataTypeString() + ")";
     }
 
-  private:
+    std::vector<std::size_t> sortPermutation();
+    void sortByPermutation(const std::vector<std::size_t>& perm);
+
+private:
     Property property_;
     Buffer& buffer_;
     /// Data container
@@ -122,6 +154,8 @@ class NullableVector
     void addData(NullableVector<T>& other);
     void copyData(NullableVector<T>& other);
     void cutToSize(unsigned int size);
+    void cutUpToIndex(unsigned int index); // everything up to index is removed
+    void removeIndexes(const std::vector<size_t>& indexes_to_remove); // must be sorted
 
     /// @brief Constructor, only for friend Buffer
     NullableVector(Property& property, Buffer& buffer);
@@ -142,6 +176,13 @@ void NullableVector<T>::clear()
 }
 
 template <class T>
+void NullableVector<T>::clearData() // removes all data
+{
+    data_.clear();
+    null_flags_.clear();
+}
+
+template <class T>
 const T NullableVector<T>::get(unsigned int index)
 {
     logdbg << "NullableVector " << property_.name() << ": get: index " << index;
@@ -150,19 +191,12 @@ const T NullableVector<T>::get(unsigned int index)
         assert(data_.size() <= buffer_.data_size_);
         assert(null_flags_.size() <= buffer_.data_size_);
         assert(index < data_.size());
-        assert(index < data_.size());
     }
 
     if (isNull(index))
     {
-        if (BUFFER_PEDANTIC_CHECKING)
-        {
-            logerr << "NullableVector " << property_.name() << ": get: index " << index
-                   << " is null";
-            assert(false);
-        }
-
-        throw std::runtime_error("NullableVector: get of Null value " + std::to_string(index));
+        logerr << "NullableVector " << property_.name() << ": get: index " << index << " is null";
+        assert (false);
     }
 
     return data_.at(index);
@@ -328,7 +362,7 @@ void NullableVector<T>::appendFromFormat(unsigned int index, const std::string& 
     }
     else
     {
-        logerr << "NullableVector: setFromFormat: unknown format '" << format << "'";
+        logerr << "NullableVector: appendFromFormat: unknown format '" << format << "'";
         assert(false);
     }
 
@@ -361,7 +395,7 @@ void NullableVector<T>::setAllNull()
     unsigned int data_size = data_.size();
 
     for (unsigned int cnt=0; cnt < data_size; ++cnt)
-        setNull(index);
+        setNull(cnt);
 }
 
 
@@ -413,7 +447,10 @@ void NullableVector<T>::resizeNullTo(unsigned int size)
     logdbg << "NullableVector " << property_.name() << ": resizeNullTo: size " << size;
 
     if (BUFFER_PEDANTIC_CHECKING)
+    {
+        assert (size >= null_flags_.size());
         assert(null_flags_.size() <= buffer_.data_size_);
+    }
 
     if (data_.size() > null_flags_.size())  // data was set w/o null, adjust & fill with set values
         null_flags_.resize(data_.size(), false);
@@ -425,7 +462,7 @@ void NullableVector<T>::resizeNullTo(unsigned int size)
         buffer_.data_size_ = null_flags_.size();
 
     if (BUFFER_PEDANTIC_CHECKING)
-        assert(size == null_flags_.size());
+        assert(null_flags_.size() >= size); // could be larger since increase to data.size()
 }
 
 template <class T>
@@ -440,7 +477,7 @@ void NullableVector<T>::addData(NullableVector<T>& other)
     }
 
     if (!other.data_.size() &&
-        other.null_flags_.size())  // if other has null flags set, need to fill my nulls
+            other.null_flags_.size())  // if other has null flags set, need to fill my nulls
     {
         logdbg << "NullableVector " << property_.name()
                << ": addData: 1: other no data resizing null";
@@ -556,6 +593,27 @@ std::set<T> NullableVector<T>::distinctValues(unsigned int index)
 }
 
 template <class T>
+std::map<T, unsigned int> NullableVector<T>::distinctValuesWithCounts(unsigned int index)
+{
+    logdbg << "NullableVector " << property_.name() << ": distinctValuesWithCounts";
+
+    std::map<T, unsigned int> values;
+
+    T value;
+
+    for (; index < data_.size(); ++index)
+    {
+        if (!isNull(index))  // not for null
+        {
+            value = data_.at(index);
+            values[value] += 1;
+        }
+    }
+
+    return values;
+}
+
+template <class T>
 std::tuple<bool,T,T> NullableVector<T>::minMaxValues(unsigned int index)
 {
     bool set = false;
@@ -584,7 +642,7 @@ std::tuple<bool,T,T> NullableVector<T>::minMaxValues(unsigned int index)
 
 template <class T>
 std::map<T, std::vector<unsigned int>> NullableVector<T>::distinctValuesWithIndexes(
-    unsigned int from_index, unsigned int to_index)
+        unsigned int from_index, unsigned int to_index)
 {
     logdbg << "NullableVector " << property_.name() << ": distinctValuesWithIndexes";
 
@@ -594,7 +652,7 @@ std::map<T, std::vector<unsigned int>> NullableVector<T>::distinctValuesWithInde
 
     if (BUFFER_PEDANTIC_CHECKING)
     {
-        assert(to_index);
+        assert(from_index <= to_index);
         assert(from_index < buffer_.data_size_);
         assert(to_index < buffer_.data_size_);
         assert(data_.size() <= buffer_.data_size_);
@@ -622,7 +680,7 @@ std::map<T, std::vector<unsigned int>> NullableVector<T>::distinctValuesWithInde
 
 template <class T>
 std::map<T, std::vector<unsigned int>> NullableVector<T>::distinctValuesWithIndexes(
-    const std::vector<unsigned int>& indexes)
+        const std::vector<unsigned int>& indexes)
 {
     logdbg << "NullableVector " << property_.name() << ": distinctValuesWithIndexes";
 
@@ -662,7 +720,7 @@ std::vector<unsigned int> NullableVector<T>::nullValueIndexes(unsigned int from_
 
     if (BUFFER_PEDANTIC_CHECKING)
     {
-        assert(to_index);
+        assert(from_index <= to_index);
         assert(from_index < buffer_.data_size_);
         assert(to_index < buffer_.data_size_);
         assert(data_.size() <= buffer_.data_size_);
@@ -690,7 +748,7 @@ std::vector<unsigned int> NullableVector<T>::nullValueIndexes(unsigned int from_
 
 template <class T>
 std::vector<unsigned int> NullableVector<T>::nullValueIndexes(
-    const std::vector<unsigned int>& indexes)
+        const std::vector<unsigned int>& indexes)
 {
     logdbg << "NullableVector " << property_.name() << ": nullValueIndexes";
 
@@ -700,9 +758,6 @@ std::vector<unsigned int> NullableVector<T>::nullValueIndexes(
     {
         if (isNull(index))  // not for null
         {
-            if (BUFFER_PEDANTIC_CHECKING)
-                assert(index < data_.size());
-
             ret_indexes.push_back(index);
         }
     }
@@ -785,18 +840,186 @@ void NullableVector<T>::cutToSize(unsigned int size)
 }
 
 template <class T>
-void NullableVector<T>::checkNotNull()
+void NullableVector<T>::cutUpToIndex(unsigned int index) // everything up to index is removed
 {
-    logdbg << "NullableVector " << property_.name() << ": checkNotNull";
+    if (BUFFER_PEDANTIC_CHECKING)
+    {
+        loginf << "NullableVector: cutUpToIndex: index " << index << " data_size " << data_.size()
+               << " null_size " << null_flags_.size();
+    }
+
+    if (null_flags_.size())
+    {
+        if (index < null_flags_.size())
+            null_flags_.erase(null_flags_.begin(), null_flags_.begin() + index + 1);
+        else
+            null_flags_.clear(); // would have been removed
+    }
+
+    if (data_.size())
+    {
+        if (index < data_.size())
+            data_.erase(data_.begin(), data_.begin() + index + 1); // takes number of elements
+        else
+            data_.clear(); // would have been removed
+    }
+
+    if (BUFFER_PEDANTIC_CHECKING)
+    {
+        loginf << "NullableVector: cutUpToIndex: after erase index " << index << " data_size " << data_.size()
+               << " null_size " << null_flags_.size();
+    }
+
+    // size set in Buffer::cutUpToIndex
+}
+
+template <class T>
+void NullableVector<T>::removeIndexes(const std::vector<size_t>& indexes_to_remove)
+{
+    for (auto index_it = indexes_to_remove.rbegin(); index_it != indexes_to_remove.rend(); ++index_it)
+    {
+        if (*index_it < null_flags_.size())
+            null_flags_.erase(null_flags_.begin() + *index_it);
+
+        if (*index_it < data_.size())
+            data_.erase(data_.begin() + *index_it);
+    }
+}
+
+template <class T>
+bool NullableVector<T>::isNeverNull()
+{
+    logdbg << "NullableVector " << property_.name() << ": isNeverNull";
 
     for (unsigned int cnt = 0; cnt < null_flags_.size(); cnt++)
     {
         if (null_flags_.at(cnt))
+            return false;
+    }
+
+    return true;
+}
+
+template <class T>
+void NullableVector<T>::swapData (unsigned int index1, unsigned int index2)
+{
+    bool index1_null = isNull(index1);
+    bool index2_null = isNull(index2);
+
+    if (index1_null && index2_null)
+        return;
+    else if (!index1_null && !index2_null)
+    {
+        assert (index1 < data_.size());
+        assert (index2 < data_.size());
+
+        T val = get(index1);
+        set(index1, get(index2));
+        set(index2, val);
+    }
+    else if (index1_null && !index2_null)
+    {
+        assert (index2 < data_.size());
+
+        set(index1, get(index2));
+        setNull(index2);
+    }
+    else if (!index1_null && index2_null)
+    {
+        assert (index1 < data_.size());
+
+        set(index2, get(index1));
+        setNull(index1);
+    }
+}
+
+//from https://stackoverflow.com/questions/17074324/how-can-i-sort-two-vectors-in-the-same-way-with-criteria-that-uses-only-one-of
+
+template <class T>
+std::vector<std::size_t> NullableVector<T>::sortPermutation()
+{
+    //assert (isNeverNull());
+
+    //loginf << "UGA sortPermutation data size " << buffer_.size();
+
+    if (data_.size() < buffer_.size())
+        resizeDataTo(buffer_.size());
+
+    assert (data_.size() == buffer_.size());
+    std::vector<std::size_t> p (data_.size());
+
+    std::iota(p.begin(), p.end(), 0);
+    std::sort(p.begin(), p.end(),
+              [&](std::size_t i, std::size_t j){
+
+        bool is_i_null = isNull(i);
+        bool is_j_null = isNull(j);
+
+        if (is_i_null && is_j_null)
+            return false; // same not smaller
+        else if (!is_i_null && is_j_null)
+            return false; // not null < null = false
+        else if (is_i_null && !is_j_null)
+            return true; // null < not null = true
+        else
+            return data_.at(i) < data_.at(j);
+    });
+    return p;
+}
+
+template <class T>
+void NullableVector<T>::sortByPermutation(const std::vector<std::size_t>& perm)
+{
+//    std::vector<bool> done(data_.size());
+
+    std::vector<bool> done(perm.size());
+
+//    for (std::size_t i = 0; i < data_.size(); ++i)
+
+    for (std::size_t i = 0; i < perm.size(); ++i)
+    {
+        if (done.at(i))
+            continue;
+
+        assert (i < done.size());
+        done.at(i) = true;
+        std::size_t prev_j = i;
+
+        assert (i < perm.size());
+        std::size_t j = perm.at(i);
+        while (i != j)
         {
-            logerr << "cnt " << cnt << " null";
-            assert(false);
+            //std::swap(data_[prev_j], data_[j]);
+            swapData(prev_j, j);
+
+            assert (j < done.size());
+            done.at(j) = true;
+            prev_j = j;
+            assert (j < perm.size());
+            j = perm.at(j);
         }
     }
+
+
+//    for (std::size_t i = 0; i < data_.size(); ++i)
+//    {
+//        if (done[i])
+//        {
+//            continue;
+//        }
+//        done[i] = true;
+//        std::size_t prev_j = i;
+//        std::size_t j = perm[i];
+//        while (i != j)
+//        {
+//            //std::swap(data_[prev_j], data_[j]);
+//            swapData(prev_j, j);
+
+//            done[j] = true;
+//            prev_j = j;
+//            j = perm[j];
+//        }
+//    }
 }
 
 // private stuff

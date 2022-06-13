@@ -18,14 +18,14 @@
 #include "dboeditdatasourceactionoptions.h"
 
 #include "compass.h"
-#include "dbobject.h"
+#include "dbcontent/dbcontent.h"
 #include "dbodatasource.h"
 #include "dboeditdatasourceactionoptionswidget.h"
 #include "managedatasourcestask.h"
 #include "storeddbodatasource.h"
 #include "taskmanager.h"
 
-DBOEditDataSourceActionOptions::DBOEditDataSourceActionOptions(DBObject& object,
+DBOEditDataSourceActionOptions::DBOEditDataSourceActionOptions(DBContent& object,
                                                                const std::string& source_type,
                                                                const std::string& source_id)
     : object_(&object), source_type_(source_type), source_id_(source_id)
@@ -102,7 +102,7 @@ void DBOEditDataSourceActionOptions::perform()
 
 namespace DBOEditDataSourceActionOptionsCreator
 {
-DBOEditDataSourceActionOptions getSyncOptionsFromDB(DBObject& object, const DBODataSource& source)
+DBOEditDataSourceActionOptions getSyncOptionsFromDB(DBContent& object, const DBODataSource& source)
 {
     DBOEditDataSourceActionOptions options{object, "DB", std::to_string(source.id())};
     options.addPossibleAction("Add", "Config", "New");
@@ -139,7 +139,7 @@ DBOEditDataSourceActionOptions getSyncOptionsFromDB(DBObject& object, const DBOD
     return options;
 }
 
-DBOEditDataSourceActionOptions getSyncOptionsFromCfg(DBObject& object,
+DBOEditDataSourceActionOptions getSyncOptionsFromCfg(DBContent& object,
                                                      const StoredDBODataSource& source)
 {
     DBOEditDataSourceActionOptions options{object, "Config", std::to_string(source.id())};

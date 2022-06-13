@@ -41,7 +41,7 @@ public:
 
 protected:
     DBOSpecificValuesDBFilter& filter_;
-    std::string dbo_name_;
+    std::string dbcontent_name_;
 
     void updateCheckboxesChecked();
     void updateCheckboxesDisabled();

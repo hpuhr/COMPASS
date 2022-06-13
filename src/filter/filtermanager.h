@@ -18,30 +18,29 @@
 #ifndef FILTERMANAGER_H_
 #define FILTERMANAGER_H_
 
+#include "configurable.h"
+#include "singleton.h"
+#include "appmode.h"
+
 #include <QObject>
+
 #include <map>
 #include <string>
 #include <vector>
-
-#include "configurable.h"
-#include "singleton.h"
 
 class DBFilter;
 class DataSourcesFilter;
 class COMPASS;
 class FilterManagerWidget;
-class DBOVariable;
 class ViewableDataConfig;
+class Buffer;
 
-/**
- * @brief Manages all filters and generates SQL conditions
- *
- * Generates DBFilters from configuration and SensorFilters for all DBOs with data and data sources.
- * GUI classes operate on this class for setting and retrieval of the filter configuration.
- * Other modules can retrieve the filter SQL conditions when a loading process is triggered.
- *
- * \todo Generalize SQL condition w.r.t. RDL schema
- */
+namespace dbContent {
+
+class Variable;
+
+}
+
 class FilterManager : public QObject, public Configurable
 {
     Q_OBJECT
@@ -49,31 +48,32 @@ signals:
     void changedFiltersSignal();
 
 public slots:
-    void startedSlot();
-    void deleteFilterSlot(DBFilter* filter);
+
+    void databaseOpenedSlot();
+    void databaseClosedSlot();
+
+    void appModeSwitchSlot (AppMode app_mode);
+
+    //void deleteFilterSlot(DBFilter* filter);
 
     void unshowViewPointSlot (const ViewableDataConfig* vp);
     void showViewPointSlot (const ViewableDataConfig* vp);
 
 
 public:
-    /// @brief Constructor
     FilterManager(const std::string& class_id, const std::string& instance_id, COMPASS* compass);
-    /// @brief Destructor
     virtual ~FilterManager();
 
     bool useFilters() const;
     void useFilters(bool useFilters);
 
-    /// @brief Returns the SQL condition for a DBO and sets all used variable names
-    std::string getSQLCondition(const std::string& dbo_name,
-                                std::vector<DBOVariable*>& filtered_variables);
+    std::string getSQLCondition(const std::string& dbcontent_name,
+                                std::vector<std::string>& extra_from_parts,
+                                std::vector<dbContent::Variable*>& filtered_variables);
 
-    /// @brief Returns number of existing filters
     unsigned int getNumFilters();
-    /// @brief Returns filter at a given index
     DBFilter* getFilter(unsigned int index);
-    std::vector<DBFilter*>& filters() { return filters_; }
+    const std::vector<std::unique_ptr<DBFilter>>& filters() { return filters_; }
 
     bool hasFilter (const std::string& name);
     DBFilter* getFilter (const std::string& name);
@@ -81,7 +81,7 @@ public:
     virtual void generateSubConfigurable(const std::string& class_id,
                                          const std::string& instance_id);
 
-    /// @brief Resets all filters
+    // resets all filters
     void reset();
 
     FilterManagerWidget* widget();
@@ -89,21 +89,20 @@ public:
     void setConfigInViewPoint (nlohmann::json& data);
     void disableAllFilters ();
 
-    DataSourcesFilter* getDataSourcesFilter (const std::string& dbo_name);
+    void filterBuffers(std::map<std::string, std::shared_ptr<Buffer>>& data);
 
 protected:
-    /// Database definition, resets if changed
+    // database id, resets if changed
     std::string db_id_;
     bool use_filters_{false};
 
     FilterManagerWidget* widget_{nullptr};
 
-    /// Container with all DBFilters
-    std::vector<DBFilter*> filters_;
+    std::vector<std::unique_ptr<DBFilter>> filters_;
 
     virtual void checkSubConfigurables();
 
-    bool checkDBObject (const std::string& dbo_name); // returns true if ok
+    bool checkDBContent (const std::string& dbcontent_name); // returns true if ok
 };
 
 #endif /* FILTERMANAGER_H_ */

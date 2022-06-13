@@ -23,7 +23,11 @@
 
 #include "configuration.h"
 
-class DBOVariableSelectionWidget;
+namespace dbContent
+{
+class VariableSelectionWidget;
+}
+
 class QLineEdit;
 class QCheckBox;
 class QComboBox;
@@ -46,8 +50,8 @@ class FilterGeneratorWidget : public QWidget
     void filterWidgetAction(bool generated);
 
   public slots:
-    void loadMin();
-    void loadMax();
+//    void loadMin();
+//    void loadMax();
     void addCondition();
     void accept();
     void cancel();
@@ -58,7 +62,7 @@ class FilterGeneratorWidget : public QWidget
 
   protected:
     QLineEdit* filter_name_;
-    DBOVariableSelectionWidget* condition_variable_widget_;
+    dbContent::VariableSelectionWidget* condition_variable_widget_;
     QComboBox* condition_combo_;
     QCheckBox* condition_absolute_;
     QLineEdit* condition_value_;

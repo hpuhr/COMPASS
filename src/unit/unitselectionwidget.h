@@ -37,19 +37,22 @@ class UnitSelectionWidget : public QPushButton
   public:
     /// @brief Constructor TODO HACK references directly used
     UnitSelectionWidget(std::string& dimension, std::string& unit);
+    UnitSelectionWidget();
     /// @brief Destructor
     virtual ~UnitSelectionWidget();
 
     void update(std::string& dimension, std::string& unit);
+    void clear();
 
   protected:
+    bool pointers_set_ {false};
+
     /// Unit dimension reference
-    std::string& dimension_;
+    std::string* dimension_ {nullptr};
 
     /// Unit unit reference
-    std::string& unit_;
+    std::string* unit_ {nullptr};
 
-    /// Context menu
     QMenu menu_;
 
     void createMenu();

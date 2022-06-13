@@ -1,0 +1,101 @@
+\section{Appendix: Data Sources}
+\label{sec:appendix_data_sources}
+
+Currently two version for JSON files for data sources definitions are supported, the current and the deprecated format.
+
+\subsection{Current Format}
+
+\begin{lstlisting}
+{
+    "content_type": "data_sources",
+    "content_version": "0.2",
+    "data_sources": [
+        {
+            "ds_type": "Tracker",
+            "name": "MRTS",
+            "sac": 1,
+            "sic": 3
+        },
+        {
+            "ds_type": "Tracker",
+            "name": "ARTAS",
+            "sac": 1,
+            "sic": 4
+        },
+        {
+            "ds_type": "ADSB",
+            "info": {
+                "network_lines": {
+                    "L1": "2.192.31.24:8600",
+                    "L3": "3.192.31.25:8600"
+                }
+            },
+            "name": "ADSB",
+            "sac": 1,
+            "short_name": "WADS",
+            "sic": 5
+        },
+        {
+            "ds_type": "MLAT",
+            "info": {
+                "network_lines": {
+                    "L3": "2.192.21.24:8600",
+                    "L4": "3.192.21.25:8600"
+                }
+            },
+            "name": "MLAT1",
+            "sac": 50,
+            "short_name": "MLAT1",
+            "sic": 70
+        }
+    ]
+}
+\end{lstlisting}
+
+\subsection{Deprecated Format}
+
+\begin{lstlisting}
+{
+    "Radar": [
+        {
+            "altitude": 3.0,
+            "dbo_name": "Radar",
+            "latitude": 1.0,
+            "longitude": 2.0,
+            "name": "Luqa",
+            "sac": 120,
+            "short_name": "LQ",
+            "sic": 1
+        },
+        {
+            "altitude": 6.0,
+            "dbo_name": "Radar",
+            "latitude": 4.0,
+            "longitude": 5.0,
+            "name": "Dingli",
+            "sac": 120,
+            "short_name": "DG",
+            "sic": 2
+        },
+        {
+            "altitude": 9.0,
+            "dbo_name": "Radar",
+            "latitude": 7.0,
+            "longitude": 8.0,
+            "name": "Hal-Far",
+            "sac": 120,
+            "short_name": "HF",
+            "sic": 3
+        }
+    ],
+    "Tracker": [
+        {
+            "dbo_name": "Tracker",
+            "name": "ARTAS",
+            "sac": 120,
+            "short_name": "ATS",
+            "sic": 49
+        }
+    ]
+}
+\end{lstlisting}

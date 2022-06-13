@@ -20,25 +20,25 @@
 #include <QApplication>
 
 #include "compass.h"
-#include "dbobjectmanager.h"
-#include "dbobject.h"
-#include "metadbovariable.h"
+#include "dbcontent/dbcontentmanager.h"
+#include "dbcontent/dbcontent.h"
+#include "dbcontent/variable/metavariable.h"
 #include "histogramviewconfigwidget.h"
 #include "histogramviewdatasource.h"
 #include "histogramviewdatawidget.h"
 #include "histogramviewwidget.h"
 #include "logger.h"
-#include "viewselection.h"
 #include "latexvisitor.h"
 #include "evaluationmanager.h"
 
+using namespace dbContent;
 
 HistogramView::HistogramView(const std::string& class_id, const std::string& instance_id,
                              ViewContainer* w, ViewManager& view_manager)
     : View(class_id, instance_id, w, view_manager)
 {
     registerParameter("data_var_dbo", &data_var_dbo_, META_OBJECT_NAME);
-    registerParameter("data_var_name", &data_var_name_, "tod");
+    registerParameter("data_var_name", &data_var_name_, DBContent::meta_var_tod_.name());
 
     registerParameter("use_log_scale", &use_log_scale_, true);
 
@@ -60,10 +60,6 @@ HistogramView::~HistogramView()
     }
 }
 
-void HistogramView::update(bool atOnce) {}
-
-void HistogramView::clearData() {}
-
 bool HistogramView::init()
 {
     View::init();
@@ -72,23 +68,21 @@ bool HistogramView::init()
 
     assert(data_source_);
 
-    DBObjectManager& object_man = COMPASS::instance().objectManager();
-    connect(&object_man, &DBObjectManager::allLoadingDoneSignal, this, &HistogramView::allLoadingDoneSlot);
+    DBContentManager& object_man = COMPASS::instance().dbContentManager();
+    connect(&object_man, &DBContentManager::loadingDoneSignal, this, &HistogramView::allLoadingDoneSlot);
 
-    connect(data_source_, &HistogramViewDataSource::loadingStartedSignal, widget_->getDataWidget(),
-            &HistogramViewDataWidget::loadingStartedSlot);
-    connect(data_source_, &HistogramViewDataSource::updateDataSignal, widget_->getDataWidget(),
-            &HistogramViewDataWidget::updateDataSlot);
+//    connect(data_source_, &HistogramViewDataSource::loadingStartedSignal, widget_->getDataWidget(),
+//            &HistogramViewDataWidget::loadingStartedSlot);
+//    connect(data_source_, &HistogramViewDataSource::updateDataSignal, widget_->getDataWidget(),
+//            &HistogramViewDataWidget::updateDataSlot);
 
 //    connect(widget_->configWidget(), &HistogramViewConfigWidget::exportSignal,
 //            widget_->getDataWidget(), &HistogramViewDataWidget::exportDataSlot);
 //    connect(widget_->getDataWidget(), &HistogramViewDataWidget::exportDoneSignal,
 //            widget_->configWidget(), &HistogramViewConfigWidget::exportDoneSlot);
 
-    connect(widget_->configWidget(), &HistogramViewConfigWidget::reloadRequestedSignal,
-            &COMPASS::instance().objectManager(), &DBObjectManager::loadSlot);
-    connect(data_source_, &HistogramViewDataSource::loadingStartedSignal, widget_->configWidget(),
-            &HistogramViewConfigWidget::loadingStartedSlot);
+//    connect(data_source_, &HistogramViewDataSource::loadingStartedSignal, widget_->configWidget(),
+//            &HistogramViewConfigWidget::loadingStartedSlot);
 
     //    connect(this, &HistogramView::showOnlySelectedSignal, widget_->getDataWidget(),
     //            &HistogramViewDataWidget::showOnlySelectedSlot);
@@ -106,6 +100,34 @@ bool HistogramView::init()
             this, &HistogramView::resultsChangedSlot);
 
     return true;
+}
+
+void HistogramView::loadingStarted()
+{
+    loginf << "HistogramView: loadingStarted";
+
+    getDataWidget()->loadingStartedSlot();
+}
+
+void HistogramView::loadedData(const std::map<std::string, std::shared_ptr<Buffer>>& data, bool requires_reset)
+{
+    loginf << "HistogramView: loadedData";
+
+    getDataWidget()->updateDataSlot(data, requires_reset);
+}
+
+void HistogramView::loadingDone()
+{
+    loginf << "HistogramView: loadingDone";
+
+    getDataWidget()->loadingDoneSlot();
+}
+
+void HistogramView::clearData()
+{
+    loginf << "HistogramView: clearData";
+
+    getDataWidget()->clear();
 }
 
 void HistogramView::generateSubConfigurable(const std::string& class_id,
@@ -147,24 +169,24 @@ HistogramViewDataWidget* HistogramView::getDataWidget()
     return widget_->getDataWidget();
 }
 
-DBOVariableSet HistogramView::getSet(const std::string& dbo_name)
+VariableSet HistogramView::getSet(const std::string& dbcontent_name)
 {
     assert(data_source_);
 
-    DBOVariableSet set = data_source_->getSet()->getExistingInDBFor(dbo_name);
+    VariableSet set = data_source_->getSet()->getExistingInDBFor(dbcontent_name);
 
     if (hasDataVar())
     {
         if (isDataVarMeta())
         {
-            MetaDBOVariable& meta_var = metaDataVar();
+            MetaVariable& meta_var = metaDataVar();
 
-            if (meta_var.existsIn(dbo_name) && !set.hasVariable(meta_var.getFor(dbo_name)))
-                set.add(meta_var.getFor(dbo_name));
+            if (meta_var.existsIn(dbcontent_name) && !set.hasVariable(meta_var.getFor(dbcontent_name)))
+                set.add(meta_var.getFor(dbcontent_name));
         }
         else
         {
-            if (dataVar().dboName() == dbo_name && !set.hasVariable(dataVar()))
+            if (dataVar().dbContentName() == dbcontent_name && !set.hasVariable(dataVar()))
                 set.add(dataVar());
         }
     }
@@ -198,9 +220,9 @@ bool HistogramView::hasDataVar ()
         return false;
 
     if (data_var_dbo_ == META_OBJECT_NAME)
-        return COMPASS::instance().objectManager().existsMetaVariable(data_var_name_);
+        return COMPASS::instance().dbContentManager().existsMetaVariable(data_var_name_);
     else
-        return COMPASS::instance().objectManager().object(data_var_dbo_).hasVariable(data_var_name_);
+        return COMPASS::instance().dbContentManager().dbContent(data_var_dbo_).hasVariable(data_var_name_);
 }
 
 bool HistogramView::isDataVarMeta ()
@@ -208,20 +230,20 @@ bool HistogramView::isDataVarMeta ()
     return data_var_dbo_ == META_OBJECT_NAME;
 }
 
-DBOVariable& HistogramView::dataVar()
+Variable& HistogramView::dataVar()
 {
     assert (hasDataVar());
     assert (!isDataVarMeta());
-    assert (COMPASS::instance().objectManager().object(data_var_dbo_).hasVariable(data_var_name_));
+    assert (COMPASS::instance().dbContentManager().dbContent(data_var_dbo_).hasVariable(data_var_name_));
 
-    return COMPASS::instance().objectManager().object(data_var_dbo_).variable(data_var_name_);
+    return COMPASS::instance().dbContentManager().dbContent(data_var_dbo_).variable(data_var_name_);
 }
 
-void HistogramView::dataVar (DBOVariable& var)
+void HistogramView::dataVar (Variable& var)
 {
-    loginf << "HistogramView: dataVar: dbo " << var.dboName() << " name " << var.name();
+    loginf << "HistogramView: dataVar: dbo " << var.dbContentName() << " name " << var.name();
 
-    data_var_dbo_ = var.dboName();
+    data_var_dbo_ = var.dbContentName();
     data_var_name_ = var.name();
     assert (hasDataVar());
     assert (!isDataVarMeta());
@@ -233,15 +255,15 @@ void HistogramView::dataVar (DBOVariable& var)
         widget_->configWidget()->setStatus("Reload Required", true, Qt::red);
 }
 
-MetaDBOVariable& HistogramView::metaDataVar()
+MetaVariable& HistogramView::metaDataVar()
 {
     assert (hasDataVar());
     assert (isDataVarMeta());
 
-    return COMPASS::instance().objectManager().metaVariable(data_var_name_);
+    return COMPASS::instance().dbContentManager().metaVariable(data_var_name_);
 }
 
-void HistogramView::metaDataVar (MetaDBOVariable& var)
+void HistogramView::metaDataVar (MetaVariable& var)
 {
     loginf << "HistogramView: metaDataVar: name " << var.name();
 

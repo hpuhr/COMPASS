@@ -20,22 +20,43 @@
 #include "compass.h"
 #include "config.h"
 #include "configurationmanager.h"
-#include "dbobject.h"
-#include "dbobjectmanager.h"
+#include "datasourcemanager.h"
+#include "datasourcesconfigurationdialog.h"
+#include "dbcontent/dbcontent.h"
+#include "dbcontent/dbcontentmanager.h"
+#include "datasourcesloadwidget.h"
+#include "dbcontent/variable/metavariableconfigurationdialog.h"
 #include "files.h"
 #include "filtermanager.h"
+#include "filtermanagerwidget.h"
 #include "global.h"
-#include "jobmanager.h"
 #include "logger.h"
-#include "mainloadwidget.h"
 #include "stringconv.h"
 #include "taskmanager.h"
-#include "taskmanagerwidget.h"
 #include "viewmanager.h"
-#include "viewpointswidget.h"
+#include "viewpointsimporttask.h"
+#include "viewpointsimporttaskdialog.h"
+#include "viewpointsreportgenerator.h"
+#include "viewpointsreportgeneratordialog.h"
+#include "gpstrailimporttask.h"
+#include "gpstrailimporttaskdialog.h"
+#include "managesectorstask.h"
+#include "managesectorstaskdialog.h"
 #include "evaluationmanager.h"
+#include "compass.h"
+
+#include "asteriximporttask.h"
+#include "asteriximporttaskdialog.h"
+
+#include "radarplotpositioncalculatortask.h"
+#include "radarplotpositioncalculatortaskdialog.h"
+#include "createartasassociationstask.h"
+#include "createartasassociationstaskdialog.h"
+#include "createassociationstask.h"
+#include "createassociationstaskdialog.h"
 
 #include <QApplication>
+#include <QFileDialog>
 #include <QCloseEvent>
 #include <QSettings>
 #include <QStackedWidget>
@@ -43,6 +64,11 @@
 #include <QLocale>
 #include <QMessageBox>
 #include <QPushButton>
+#include <QMenu>
+#include <QMenuBar>
+#include <QThread>
+#include <QVBoxLayout>
+#include <QLabel>
 
 using namespace Utils;
 using namespace std;
@@ -60,8 +86,8 @@ MainWindow::MainWindow()
 
     setMinimumSize(QSize(1200, 900));
 
-    QIcon atsdb_icon(Files::getIconFilepath("ats.png").c_str());
-    setWindowIcon(atsdb_icon);  // for the glory of the empire
+    QIcon ats_icon(Files::getIconFilepath("ats.png").c_str());
+    setWindowIcon(ats_icon);  // for the glory of the empire
 
     QSettings settings("COMPASS", "Client");
     restoreGeometry(settings.value("MainWindow/geometry").toByteArray());
@@ -77,20 +103,28 @@ MainWindow::MainWindow()
 
     QWidget::setWindowTitle(title.c_str());
 
+    QWidget* main_widget = new QWidget();
+
+    QVBoxLayout* main_layout = new QVBoxLayout();
+    main_layout->setContentsMargins(0, 0, 0, 0);
+
+    main_widget->setLayout(main_layout);
+
+    // initialize tabs
+
     tab_widget_ = new QTabWidget();
 
-    TaskManager& task_man = COMPASS::instance().taskManager();
+    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
-    task_manager_widget_ = task_man.widget();
-    tab_widget_->addTab(task_manager_widget_, "Tasks");
+    tab_widget_->addTab(COMPASS::instance().dataSourceManager().loadWidget(), "Data Sources");
+    tab_widget_->addTab(COMPASS::instance().filterManager().widget(), "Filters");
 
-    connect(&task_man, &TaskManager::startInspectionSignal, this, &MainWindow::startSlot);
-    connect(&task_man, &TaskManager::quitRequestedSignal, this, &MainWindow::quitRequestedSlot, Qt::QueuedConnection);
+    COMPASS::instance().evaluationManager().init(tab_widget_); // adds eval widget
+    COMPASS::instance().viewManager().init(tab_widget_); // adds view points widget and view container
 
-    // management widget
-    management_widget_ = new MainLoadWidget();
+    tab_widget_->setCurrentIndex(0);
 
-    setCentralWidget(tab_widget_);
+    QApplication::restoreOverrideCursor();
 
     tab_widget_->setCurrentIndex(0);
 
@@ -102,10 +136,59 @@ MainWindow::MainWindow()
     connect(add_view_button_, &QPushButton::clicked, this, &MainWindow::showAddViewMenuSlot);
     tab_widget_->setCornerWidget(add_view_button_);
 
-    add_view_button_->setDisabled(true);
+    main_layout->addWidget(tab_widget_);
 
-    QObject::connect(this, &MainWindow::startedSignal, &COMPASS::instance().filterManager(),
-                     &FilterManager::startedSlot);
+    // bottom widget
+
+    QWidget* bottom_widget = new QWidget();
+    bottom_widget->setMaximumHeight(40);
+
+    QHBoxLayout* bottom_layout = new QHBoxLayout();
+    bottom_layout->setContentsMargins(2, 2, 2, 2);
+
+    db_label_ = new QLabel();
+    bottom_layout->addWidget(db_label_);
+
+    bottom_layout->addStretch();
+
+    status_label_ = new QLabel();
+    bottom_layout->addWidget(status_label_);
+
+    bottom_layout->addStretch();
+
+    // add status & button
+    load_button_ = new QPushButton("Load");
+    connect(load_button_, &QPushButton::clicked, this, &MainWindow::loadButtonSlot);
+    bottom_layout->addWidget(load_button_);
+
+    live_pause_button_ = new QPushButton("Pause");
+    connect(live_pause_button_, &QPushButton::clicked, this, &MainWindow::livePauseSlot);
+    bottom_layout->addWidget(live_pause_button_);
+
+    live_stop_button_ = new QPushButton("Stop");
+    connect(live_stop_button_, &QPushButton::clicked, this, &MainWindow::liveStopSlot);
+    bottom_layout->addWidget(live_stop_button_);
+
+    bottom_widget->setLayout(bottom_layout);
+
+    updateBottomWidget();
+
+    main_layout->addWidget(bottom_widget);
+
+    setCentralWidget(main_widget);
+
+    // do menus
+
+    createMenus ();
+    updateMenus ();
+
+
+    // do signal slots
+    connect (&COMPASS::instance(), &COMPASS::appModeSwitchSignal,
+             this, &MainWindow::appModeSwitchSlot);
+
+    QObject::connect(&COMPASS::instance().dbContentManager(), &DBContentManager::loadingDoneSignal,
+                     this, &MainWindow::loadingDoneSlot);
 }
 
 MainWindow::~MainWindow()
@@ -113,6 +196,274 @@ MainWindow::~MainWindow()
     logdbg << "MainWindow: destructor";
 
     // remember: this not called! insert deletes into closeEvent function
+}
+
+void MainWindow::createMenus ()
+{
+    bool expert_mode = COMPASS::instance().expertMode();
+
+    // file menu
+    QMenu* file_menu = menuBar()->addMenu(tr("&File"));
+    file_menu->setToolTipsVisible(true);
+
+    // db operations
+    new_db_action_ = new QAction(tr("&New"));
+    new_db_action_->setShortcuts(QKeySequence::New);
+    new_db_action_->setToolTip(tr("Create a new database"));
+    connect(new_db_action_, &QAction::triggered, this, &MainWindow::newDBSlot);
+    file_menu->addAction(new_db_action_);
+
+    open_existing_db_action_ = new QAction(tr("&Open"));
+    open_existing_db_action_->setShortcuts(QKeySequence::Open);
+    open_existing_db_action_->setToolTip(tr("Open an existing database"));
+    connect(open_existing_db_action_, &QAction::triggered, this, &MainWindow::openExistingDBSlot);
+    file_menu->addAction(open_existing_db_action_);
+
+    open_recent_db_menu_ = file_menu->addMenu("Open Recent");
+    open_recent_db_menu_->setToolTip(tr("Open a recent database"));
+
+    open_recent_db_menu_->addSeparator();
+
+    QAction* clear_act = new QAction("Clear");
+    connect(clear_act, &QAction::triggered, this, &MainWindow::clearExistingDBsSlot);
+    open_recent_db_menu_->addAction(clear_act);
+
+    close_db_action_ = new QAction(tr("&Close"));
+    close_db_action_->setToolTip(tr("Close opened database"));
+    connect(close_db_action_, &QAction::triggered, this, &MainWindow::closeDBSlot);
+    file_menu->addAction(close_db_action_);
+
+    file_menu->addSeparator();
+
+    // config operations
+
+    QAction* save_act = new QAction("&Save Config");
+    save_act->setShortcut(tr("Ctrl+S"));
+    connect(save_act, &QAction::triggered, this, &MainWindow::saveConfigSlot);
+    file_menu->addAction(save_act);
+
+    file_menu->addSeparator();
+
+    // quit operations
+
+    QAction* quit2_act = new QAction(tr("Quit &Without Saving Config"));
+    quit2_act->setShortcut(tr("Ctrl+W"));
+    quit2_act->setToolTip(tr("Quit the application withour saving the configuration"));
+    connect(quit2_act, &QAction::triggered, this, &MainWindow::quitWOConfigSlot);
+    file_menu->addAction(quit2_act);
+
+    QAction* quit_act = new QAction(tr("&Quit"));
+    quit_act->setShortcuts(QKeySequence::Quit);
+    //QKeySequence(tr("Ctrl+P"));
+    quit_act->setToolTip(tr("Quit the application"));
+    connect(quit_act, &QAction::triggered, this, &MainWindow::quitSlot);
+    file_menu->addAction(quit_act);
+
+    // import menu
+
+    import_menu_ = menuBar()->addMenu(tr("&Import"));
+    import_menu_->setToolTipsVisible(true);
+
+    QAction* import_ast_file_action = new QAction(tr("&ASTERIX Recording"));
+    import_ast_file_action->setShortcut(tr("Ctrl+A"));
+    import_ast_file_action->setToolTip(tr("Import ASTERIX Recording File"));
+    connect(import_ast_file_action, &QAction::triggered, this, &MainWindow::importAsterixRecordingSlot);
+    import_menu_->addAction(import_ast_file_action);
+
+    import_recent_asterix_menu_ = import_menu_->addMenu("Recent ASTERIX Recording");
+    import_recent_asterix_menu_->setToolTip(tr("Import a recent ASTERIX Recording File"));
+
+    QAction* import_ast_net_action = new QAction(tr("ASTERIX From Network"));
+    import_ast_net_action->setToolTip(tr("Import ASTERIX From Network"));
+    connect(import_ast_net_action, &QAction::triggered, this, &MainWindow::importAsterixFromNetworkSlot);
+    import_menu_->addAction(import_ast_net_action);
+
+    QAction* import_gps_file_action = new QAction(tr("&GPS Trail"));
+    import_gps_file_action->setShortcut(tr("Ctrl+G"));
+    import_gps_file_action->setToolTip(tr("Import GPS Trail File"));
+    connect(import_gps_file_action, &QAction::triggered, this, &MainWindow::importGPSTrailSlot);
+    import_menu_->addAction(import_gps_file_action);
+
+    QAction* import_vp_file_action = new QAction(tr("&View Points"));
+    import_vp_file_action->setShortcut(tr("Ctrl+V"));
+    import_vp_file_action->setToolTip(tr("Import View Points File"));
+    connect(import_vp_file_action, &QAction::triggered, this, &MainWindow::importViewPointsSlot);
+    import_menu_->addAction(import_vp_file_action);
+
+    // configuration menu
+    QMenu* config_menu = menuBar()->addMenu(tr("&Configuration"));
+    config_menu->setToolTipsVisible(true);
+
+    // configure operations
+    QAction* ds_action = new QAction(tr("Data Sources"));
+    ds_action->setToolTip(tr("Configure Data Sources"));
+    connect(ds_action, &QAction::triggered, this, &MainWindow::configureDataSourcesSlot);
+    config_menu->addAction(ds_action);
+
+    QAction* meta_action = new QAction(tr("Meta Variables"));
+
+    if (expert_mode)
+        meta_action->setToolTip(tr("Configure Meta Variables"));
+    else
+        meta_action->setToolTip(tr("Show Meta Variables"));
+
+    connect(meta_action, &QAction::triggered, this, &MainWindow::configureMetaVariablesSlot);
+    config_menu->addAction(meta_action);
+
+    sectors_action_ = new QAction(tr("Sectors"));
+    sectors_action_->setToolTip(tr("Configure Sectors (stored in Database)"));
+    connect(sectors_action_, &QAction::triggered, this, &MainWindow::configureSectorsSlot);
+    sectors_action_->setDisabled(true);
+    config_menu->addAction(sectors_action_);
+
+    // process menu
+
+    process_menu_ = menuBar()->addMenu(tr("&Process"));
+    process_menu_->setToolTipsVisible(true);
+
+    QAction* calc_radar_plpos_action = new QAction(tr("Calculate Radar Plot Positions"));
+    calc_radar_plpos_action->setToolTip(tr("Calculate Radar Plot Positios, only needed if Radar Position information"
+                                             " was changed"));
+    connect(calc_radar_plpos_action, &QAction::triggered, this, &MainWindow::calculateRadarPlotPositionsSlot);
+    process_menu_->addAction(calc_radar_plpos_action);
+
+    QAction* assoc_action = new QAction(tr("Calculate Associations"));
+    assoc_action->setToolTip(tr("Create Unique Targets based on all DB Content"));
+    connect(assoc_action, &QAction::triggered, this, &MainWindow::calculateAssociationsSlot);
+    process_menu_->addAction(assoc_action);
+
+    QAction* assoc_artas_action = new QAction(tr("Calculate Associations from ARTAS"));
+    assoc_artas_action->setToolTip(tr("Create Unique Targets based on ARTAS TRI information"));
+    connect(assoc_artas_action, &QAction::triggered, this, &MainWindow::calculateAssociationsARTASSlot);
+    process_menu_->addAction(assoc_artas_action);
+}
+
+void MainWindow::updateMenus()
+{
+    assert (new_db_action_);
+    assert (open_existing_db_action_);
+    assert (open_recent_db_menu_);
+    assert (close_db_action_);
+
+    assert (sectors_action_);
+
+    assert (import_menu_);
+
+    open_recent_db_menu_->clear();
+
+    // recent db files
+    vector<string> recent_file_list = COMPASS::instance().dbFileList();
+
+    for (auto& fn_it : recent_file_list)
+    {
+        QAction* file_act = new QAction(fn_it.c_str());
+        file_act->setData(fn_it.c_str());
+        connect(file_act, &QAction::triggered, this, &MainWindow::openRecentDBSlot);
+        open_recent_db_menu_->addAction(file_act);
+    }
+
+    if (recent_file_list.size() == 0)
+        open_recent_db_menu_->setDisabled(true);
+    else // add clear action
+    {
+        open_recent_db_menu_->addSeparator();
+
+        QAction* clear_file_act = new QAction("Clear");
+        connect(clear_file_act, &QAction::triggered, this, &MainWindow::clearExistingDBsSlot);
+        open_recent_db_menu_->addAction(clear_file_act);
+    }
+
+    bool db_open = COMPASS::instance().dbOpened();
+
+    new_db_action_->setDisabled(db_open);
+    open_existing_db_action_->setDisabled(db_open);
+
+    if (recent_file_list.size()) // is disabled otherwise
+        open_recent_db_menu_->setDisabled(db_open);
+
+    close_db_action_->setDisabled(!db_open);
+
+    sectors_action_->setDisabled(!db_open);
+
+    import_menu_->setDisabled(!db_open || COMPASS::instance().taskManager().asterixImporterTask().isRunning());
+    process_menu_->setDisabled(!db_open || COMPASS::instance().taskManager().asterixImporterTask().isRunning());
+
+    assert (import_recent_asterix_menu_);
+
+    import_recent_asterix_menu_->clear();
+
+    vector<string> recent_ast_list =  COMPASS::instance().taskManager().asterixImporterTask().fileList();
+
+    for (auto& fn_it : recent_ast_list)
+    {
+        QAction* file_act = new QAction(fn_it.c_str());
+        file_act->setData(fn_it.c_str());
+        connect(file_act, &QAction::triggered, this, &MainWindow::importRecentAsterixRecordingSlot);
+        import_recent_asterix_menu_->addAction(file_act);
+    }
+    if (recent_ast_list.size() == 0)
+        import_recent_asterix_menu_->setDisabled(true);
+    else
+    {
+        import_recent_asterix_menu_->addSeparator();
+
+        QAction* clear_file_act = new QAction("Clear");
+        connect(clear_file_act, &QAction::triggered, this, &MainWindow::clearImportRecentAsterixRecordingsSlot);
+        import_recent_asterix_menu_->addAction(clear_file_act);
+    }
+
+}
+
+void MainWindow::updateBottomWidget()
+{
+    COMPASS& compass = COMPASS::instance();
+
+    assert (db_label_);
+
+    if (compass.dbOpened())
+        db_label_->setText(("DB: "+compass.lastDbFilename()).c_str());
+    else
+        db_label_->setText("No Database");
+
+    assert (status_label_);
+    status_label_->setText(compass.appModeStr().c_str());
+
+    assert (load_button_);
+    assert (live_pause_button_);
+    assert (live_stop_button_);
+
+    AppMode app_mode = compass.appMode();
+
+    if (!compass.dbOpened())
+    {
+        load_button_->setHidden(true);
+        live_pause_button_->setHidden(true);
+        live_stop_button_->setHidden(true);
+    }
+    else if (app_mode == AppMode::Offline)
+    {
+        load_button_->setHidden(false);
+        live_pause_button_->setHidden(true);
+        live_stop_button_->setHidden(true);
+    }
+    else if (app_mode == AppMode::LivePaused)
+    {
+        load_button_->setHidden(true);
+        live_pause_button_->setHidden(false);
+        live_pause_button_->setText("Resume");
+        live_pause_button_->setDisabled(true); // not implemented yet
+        live_stop_button_->setHidden(true);
+    }
+    else if (app_mode == AppMode::LiveRunning)
+    {
+        load_button_->setHidden(true);
+        live_pause_button_->setHidden(false);
+        live_pause_button_->setText("Pause");
+        live_pause_button_->setDisabled(true); // not implemented yet
+        live_stop_button_->setHidden(false);
+    }
+    else
+        logerr << "MainWindow: updateBottomWidget: unknown app mode " << (unsigned int) COMPASS::instance().appMode();
 }
 
 void MainWindow::disableConfigurationSaving()
@@ -123,75 +474,871 @@ void MainWindow::disableConfigurationSaving()
 
 void MainWindow::showEvaluationTab()
 {
-    assert (started_);
-    assert (tab_widget_->count() > 1);
-    tab_widget_->setCurrentIndex(1);
-}
-
-void MainWindow::showViewPointsTab()
-{
-    assert (started_);
     assert (tab_widget_->count() > 2);
     tab_widget_->setCurrentIndex(2);
 }
 
-
-void MainWindow::databaseOpenedSlot() { logdbg << "MainWindow: databaseOpenedSlot"; }
-
-void MainWindow::startSlot()
+void MainWindow::showViewPointsTab()
 {
-    loginf << "MainWindow: startSlot";
-    assert (!started_);
+    assert (tab_widget_->count() > 3);
+    tab_widget_->setCurrentIndex(3);
+}
+
+void MainWindow::importDataSourcesFile(const std::string& filename)
+{
+    loginf << "MainWindow: importDataSourcesFile: filename '" << filename << "'";
+
+    automatic_tasks_defined_ = true;
+    data_sources_import_file_ = true;
+    data_sources_import_filename_ = filename;
+}
+
+void MainWindow::importViewPointsFile(const std::string& filename)
+{
+    loginf << "MainWindow: importViewPointsFile: filename '" << filename << "'";
+
+    automatic_tasks_defined_ = true;
+    view_points_import_file_ = true;
+    view_points_import_filename_ = filename;
+}
+
+
+void MainWindow::createAndOpenNewSqlite3DB(const std::string& filename)
+{
+    loginf << "MainWindow: createAndOpenNewSqlite3DB: filename '" << filename << "'";
+
+    automatic_tasks_defined_ = true;
+    sqlite3_create_new_db_ = true;
+    sqlite3_create_new_db_filename_ = filename;
+}
+
+void MainWindow::openSqlite3DB(const std::string& filename)
+{
+    loginf << "MainWindow: openSqlite3DB: filename '" << filename << "'";
+
+    automatic_tasks_defined_ = true;
+    sqlite3_open_db_ = true;
+    sqlite3_open_db_filename_ = filename;
+}
+
+void MainWindow::importASTERIXFile(const std::string& filename)
+{
+    loginf << "MainWindow: asterixImportFile: filename '" << filename << "'";
+
+    automatic_tasks_defined_ = true;
+    asterix_import_file_ = true;
+    asterix_import_filename_ = filename;
+}
+
+void MainWindow::importASTERIXFromNetwork()
+{
+    loginf << "MainWindow: importASTERIXFromNetwork";
+
+    automatic_tasks_defined_ = true;
+    asterix_import_network_ = true;
+}
+
+void MainWindow::importASTERIXFromNetworkTimeOffset(float value)
+{
+    loginf << "MainWindow: importASTERIXFromNetworkTimeOffset: offset " << String::timeStringFromDouble(value);
+
+    asterix_import_network_time_offset_ = value;
+}
+
+float MainWindow::importASTERIXFromNetworkTimeOffset()
+{
+    return asterix_import_network_time_offset_;
+}
+
+int MainWindow::importAsterixNetworkMaxLines() const
+{
+    return asterix_import_network_max_lines_;
+}
+
+void MainWindow::importAsterixNetworkMaxLines(int value)
+{
+    loginf << "MainWindow: importAsterixNetworkMaxLines: value " << value;
+
+    asterix_import_network_max_lines_ = value;
+}
+
+void MainWindow::importGPSTrailFile(const std::string& filename)
+{
+    automatic_tasks_defined_ = true;
+    gps_trail_import_file_ = true;
+    gps_trail_import_filename_ = filename;
+}
+
+void MainWindow::importSectorsFile(const std::string& filename)
+{
+    automatic_tasks_defined_ = true;
+    sectors_import_file_ = true;
+    sectors_import_filename_ = filename;
+}
+
+
+void MainWindow::associateData(bool value)
+{
+    loginf << "MainWindow: associateData: value " << value;
+
+    automatic_tasks_defined_ = true;
+    associate_data_ = value;
+}
+
+void MainWindow::loadData(bool value)
+{
+    loginf << "MainWindow: loadData: value " << value;
+
+    automatic_tasks_defined_ = true;
+    load_data_ = value;
+}
+
+void MainWindow::exportViewPointsReportFile(const std::string& filename)
+{
+    loginf << "TaskManager: exportViewPointsReport: file '" << filename << "'";
+
+    automatic_tasks_defined_ = true;
+    export_view_points_report_ = true;
+    export_view_points_report_filename_ = filename;
+}
+
+void MainWindow::exportEvalReportFile(const std::string& filename)
+{
+    automatic_tasks_defined_ = true;
+    export_eval_report_ = true;
+    export_eval_report_filename_ = filename;
+}
+
+void MainWindow::evaluateRunFilter(bool value)
+{
+    automatic_tasks_defined_ = true;
+    evaluate_run_filter_ = value;
+}
+
+void MainWindow::evaluate(bool evaluate)
+{
+    automatic_tasks_defined_ = true;
+    evaluate_ = evaluate;
+}
+
+
+void MainWindow::quit(bool value)
+{
+    loginf << "MainWindow: autoQuitAfterProcess: value " << value;
+
+    automatic_tasks_defined_ = true;
+    quit_ = value;
+}
+
+bool MainWindow::quitNeeded()
+{
+    return quit_;
+}
+
+bool MainWindow::automaticTasksDefined() const
+{
+    return automatic_tasks_defined_;
+}
+
+void MainWindow::performAutomaticTasks ()
+{
+    loginf << "MainWindow: performAutomaticTasks";
+    assert (automatic_tasks_defined_);
+
+    if (!(sqlite3_create_new_db_ || sqlite3_open_db_ || data_sources_import_file_ || quit_))
+    {
+        logerr << "MainWindow: performAutomaticTasks: neither create nor open db nor ds import is set";
+        return;
+    }
+
+    if (sqlite3_create_new_db_ && sqlite3_open_db_)
+    {
+        logerr << "MainWindow: performAutomaticTasks: both create and open sqlite3 are set";
+        return;
+    }
 
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
-//    QMessageBox* msg_box = new QMessageBox(this);
-//    msg_box->setWindowTitle("Starting");
-//    msg_box->setText("Please wait...");
-//    msg_box->setStandardButtons(0);
-//    msg_box->show();
+    if (sqlite3_create_new_db_)
+    {
+        loginf << "MainWindow: performAutomaticTasks: creating and opening new sqlite3 database '"
+               << sqlite3_create_new_db_filename_ << "'";
 
-//    boost::posix_time::ptime start_time = boost::posix_time::microsec_clock::local_time();
-//    while ((boost::posix_time::microsec_clock::local_time()-start_time).total_milliseconds() < 50)
-//    {
-//        QCoreApplication::processEvents();
-//        QThread::msleep(1);
-//    }
+        if (Files::fileExists(sqlite3_create_new_db_filename_))
+            Files::deleteFile(sqlite3_create_new_db_filename_);
 
-    emit startedSignal();
+        COMPASS::instance().openDBFile(sqlite3_create_new_db_filename_);
 
-    assert(task_manager_widget_);
-    tab_widget_->removeTab(0);
+        updateBottomWidget();
+        updateMenus();
+    }
+    else if (sqlite3_open_db_)
+    {
+        loginf << "MainWindow: performAutomaticTasks: opening existing sqlite3 database '"
+               << sqlite3_open_db_filename_ << "'";
 
-    // close any opened dbobject widgets
-    for (auto& obj_it : COMPASS::instance().objectManager())
-        obj_it.second->closeWidget();
+        if (!Files::fileExists(sqlite3_open_db_filename_))
+        {
+            logerr << "MainWindow: performAutomaticTasks: sqlite3 database '" << sqlite3_open_db_filename_
+                   << "' does not exist";
+            QApplication::restoreOverrideCursor();
+            return;
+        }
 
-    assert(management_widget_);
-    tab_widget_->addTab(management_widget_, "Load");
+        COMPASS::instance().openDBFile(sqlite3_open_db_filename_);
 
-//    start_time = boost::posix_time::microsec_clock::local_time();
-//    while ((boost::posix_time::microsec_clock::local_time()-start_time).total_milliseconds() < 50)
-//    {
-//        QCoreApplication::processEvents();
-//        QThread::msleep(1);
-//    }
-
-    COMPASS::instance().evaluationManager().init(tab_widget_); // adds eval widget
-    COMPASS::instance().viewManager().init(tab_widget_); // adds view points widget and view container
-
-    tab_widget_->setCurrentIndex(0);
-    add_view_button_->setDisabled(false);
-
-    emit JobManager::instance().databaseIdle();  // to enable ViewManager add button, slightly HACKY
-
-//    msg_box->close();
-//    delete msg_box;
+        updateBottomWidget();
+        updateMenus();
+    }
 
     QApplication::restoreOverrideCursor();
 
-    started_ = true;
+    loginf << "MainWindow: performAutomaticTasks: database opened";
+
+    // do longer wait on startup for things to settle
+    boost::posix_time::ptime start_time = boost::posix_time::microsec_clock::local_time();
+
+    while ((boost::posix_time::microsec_clock::local_time()-start_time).total_milliseconds() < 50)
+    {
+        QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+        QThread::msleep(1);
+    }
+    // does not show widget
+    //QCoreApplication::processEvents();
+
+    // does cause application halt
+    //    while (QCoreApplication::hasPendingEvents())
+    //        QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+
+    loginf << "MainWindow: performAutomaticTasks: waiting done";
+
+    if (data_sources_import_file_)
+    {
+        loginf << "MainWindow: performAutomaticTasks: importing data sources file '"
+               << data_sources_import_filename_ << "'";
+
+        if (!Files::fileExists(data_sources_import_filename_))
+        {
+            logerr << "MainWindow: performAutomaticTasks: data sources file '" << data_sources_import_filename_
+                   << "' does not exist";
+            return;
+        }
+
+        COMPASS::instance().dataSourceManager().importDataSources(data_sources_import_filename_);
+    }
+
+    if (!(sqlite3_create_new_db_ || sqlite3_open_db_))
+    {
+        if (quit_)
+        {
+            quitSlot();
+            return;
+        }
+
+        logerr << "MainWindow: performAutomaticTasks: tasks can not be performed since no db was opened";
+        return;
+    }
+
+    if (view_points_import_file_)
+    {
+        loginf << "MainWindow: performAutomaticTasks: importing view points file '"
+               << view_points_import_filename_ << "'";
+
+        if (!Files::fileExists(view_points_import_filename_))
+        {
+            logerr << "MainWindow: performAutomaticTasks: view points file '" << view_points_import_filename_
+                   << "' does not exist";
+            return;
+        }
+
+        ViewPointsImportTask& vp_import_task = COMPASS::instance().taskManager().viewPointsImportTask();
+
+        vp_import_task.importFilename(view_points_import_filename_);
+
+        assert(vp_import_task.canRun());
+        vp_import_task.showDoneSummary(false);
+
+        vp_import_task.run();
+    }
+
+    assert (!(asterix_import_file_ && asterix_import_network_)); // check done in client
+
+    if (asterix_import_file_)
+    {
+        loginf << "MainWindow: performAutomaticTasks: importing ASTERIX file '"
+               << asterix_import_filename_ << "'";
+
+        if (!Files::fileExists(asterix_import_filename_))
+        {
+            logerr << "MainWindow: performAutomaticTasks: ASTERIX file '" << asterix_import_filename_
+                   << "' does not exist";
+            return;
+        }
+
+
+        ASTERIXImportTask& ast_import_task = COMPASS::instance().taskManager().asterixImporterTask();
+
+        ast_import_task.importFilename(asterix_import_filename_);
+
+        assert(ast_import_task.canRun());
+        ast_import_task.showDoneSummary(false);
+
+        ast_import_task.run(false); // no test
+
+        while (!ast_import_task.done())
+        {
+            QCoreApplication::processEvents();
+            QThread::msleep(1);
+        }
+    }
+
+    if (asterix_import_network_)
+    {
+        loginf << "MainWindow: performAutomaticTasks: importing ASTERIX from network";
+
+        ASTERIXImportTask& ast_import_task = COMPASS::instance().taskManager().asterixImporterTask();
+
+        ast_import_task.importNetwork();
+
+        if (ast_import_task.canRun())
+        {
+            ast_import_task.showDoneSummary(false);
+
+            ast_import_task.run(false); // no test
+        }
+        else
+            logwrn << "MainWindow: performAutomaticTasks: importing ASTERIX from network not possible";
+    }
+
+
+    ////    if (json_import_file_)
+    ////    {
+    ////        loginf << "MainWindow: performAutomaticTasks: importing JSON file '"
+    ////               << json_import_filename_ << "'";
+
+    ////#if USE_JASTERIX
+    ////        if (!Files::fileExists(json_import_filename_))
+    ////        {
+    ////            logerr << "MainWindow: performAutomaticTasks: JSON file '" << asterix_import_filename_
+    ////                   << "' does not exist";
+    ////            return;
+    ////        }
+    ////#endif
+
+    ////        if(!json_import_task_->hasSchema(json_import_schema_))
+    ////        {
+    ////            logerr << "MainWindow: performAutomaticTasks: JSON schema '" << json_import_schema_
+    ////                   << "' does not exist";
+    ////            return;
+    ////        }
+
+    ////        widget_->setCurrentTask(*json_import_task_);
+    ////        if(widget_->getCurrentTaskName() != json_import_task_->name())
+    ////        {
+    ////            logerr << "MainWindow: performAutomaticTasks: wrong task '" << widget_->getCurrentTaskName()
+    ////                   << "' selected, aborting";
+    ////            return;
+    ////        }
+
+    ////        JSONImportTaskWidget* json_import_task_widget =
+    ////                dynamic_cast<JSONImportTaskWidget*>(json_import_task_->widget());
+    ////        assert(json_import_task_widget);
+
+    ////        json_import_task_widget->addFile(json_import_filename_);
+    ////        json_import_task_widget->selectFile(json_import_filename_);
+    ////        json_import_task_widget->selectSchema(json_import_schema_);
+
+    ////        assert(json_import_task_->canRun());
+    ////        json_import_task_->showDoneSummary(false);
+
+    ////        widget_->runTask(*json_import_task_);
+
+    ////        while (!json_import_task_->done())
+    ////        {
+    ////            QCoreApplication::processEvents();
+    ////            QThread::msleep(1);
+    ////        }
+
+    ////        loginf << "MainWindow: performAutomaticTasks: importing JSON file done";
+    ////    }
+
+    if (gps_trail_import_file_)
+    {
+        loginf << "MainWindow: performAutomaticTasks: importing GPS trail file '"
+               << gps_trail_import_filename_ << "'";
+
+        if (!Files::fileExists(gps_trail_import_filename_))
+        {
+            logerr << "MainWindow: performAutomaticTasks: GPS trail file '" << gps_trail_import_filename_
+                   << "' does not exist";
+            return;
+        }
+
+        GPSTrailImportTask& trail_task = COMPASS::instance().taskManager().gpsTrailImportTask();
+
+        trail_task.importFilename(gps_trail_import_filename_);
+
+        if(!trail_task.canRun())
+        {
+            logerr << "MainWindow: performAutomaticTasks: gps file can not be imported";
+            return;
+        }
+
+        trail_task.showDoneSummary(false);
+        trail_task.run();
+
+        while (!trail_task.done())
+        {
+            QCoreApplication::processEvents();
+            QThread::msleep(1);
+        }
+    }
+
+    if (sectors_import_file_)
+    {
+        loginf << "MainWindow: performAutomaticTasks: importing sectors file '"
+               << sectors_import_filename_ << "'";
+
+        if (!Files::fileExists(sectors_import_filename_))
+        {
+            logerr << "MainWindow: performAutomaticTasks: sectors file file '" << sectors_import_filename_
+                   << "' does not exist";
+            return;
+        }
+
+        COMPASS::instance().evaluationManager().importSectors(sectors_import_filename_);
+    }
+
+    if (associate_data_)
+    {
+        CreateAssociationsTask& assoc_task = COMPASS::instance().taskManager().createAssociationsTask();
+
+        if(!assoc_task.canRun())
+        {
+            logerr << "MainWindow: performAutomaticTasks: associations task can not be run";
+            return;
+        }
+
+        assoc_task.showDoneSummary(false);
+        assoc_task.run();
+
+        while (!assoc_task.done())
+        {
+            QCoreApplication::processEvents();
+            QThread::msleep(1);
+        }
+    }
+
+    if (load_data_)
+    {
+        loginf << "MainWindow: performAutomaticTasks: loading data";
+
+        DBContentManager& obj_man = COMPASS::instance().dbContentManager();
+
+        obj_man.load();
+
+        while (obj_man.loadInProgress())
+        {
+            QCoreApplication::processEvents();
+            QThread::msleep(1);
+        }
+    }
+    else
+        loginf << "MainWindow: performAutomaticTasks: not loading data";
+
+    if (export_view_points_report_)
+    {
+        loginf << "MainWindow: performAutomaticTasks: exporting view points report";
+
+        showViewPointsTab();
+
+        ViewPointsReportGenerator& gen = COMPASS::instance().viewManager().viewPointsGenerator();
+
+        ViewPointsReportGeneratorDialog& dialog = gen.dialog();
+        dialog.show();
+
+        QCoreApplication::processEvents();
+
+        gen.reportPathAndFilename(export_view_points_report_filename_);
+        gen.showDone(false);
+
+        gen.run();
+
+        while (gen.isRunning()) // not sure if needed here but what the hell
+        {
+            QCoreApplication::processEvents();
+            QThread::msleep(1);
+        }
+
+        gen.showDone(true);
+    }
+
+    if (evaluate_ || export_eval_report_)
+    {
+        loginf << "MainWindow: performAutomaticTasks: running evaluation";
+
+        showEvaluationTab();
+
+        EvaluationManager& eval_man = COMPASS::instance().evaluationManager();
+
+        if (eval_man.canLoadData())
+        {
+            loginf << "MainWindow: performAutomaticTasks: loading evaluation data";
+
+            eval_man.loadData();
+
+            while (!eval_man.dataLoaded())
+            {
+                QCoreApplication::processEvents();
+                QThread::msleep(1);
+            }
+
+            assert (eval_man.dataLoaded());
+
+            if (evaluate_run_filter_)
+                eval_man.autofilterUTNs();
+
+            if (eval_man.canEvaluate())
+            {
+                loginf << "MainWindow: performAutomaticTasks: doing evaluation";
+
+                eval_man.evaluate();
+
+                assert (eval_man.evaluated());
+
+                loginf << "MainWindow: performAutomaticTasks: evaluation done";
+
+                if (export_eval_report_)
+                {
+                    if (eval_man.canGenerateReport())
+                    {
+                        loginf << "MainWindow: performAutomaticTasks: generating report";
+
+                        EvaluationResultsReport::PDFGenerator& gen = eval_man.pdfGenerator();
+
+                        EvaluationResultsReport::PDFGeneratorDialog& dialog = gen.dialog();
+                        dialog.show();
+
+                        QCoreApplication::processEvents();
+
+                        gen.reportPathAndFilename(export_eval_report_filename_);
+                        gen.showDone(false);
+
+                        gen.run();
+
+                        while (gen.isRunning()) // not sure if needed here but what the hell
+                        {
+                            QCoreApplication::processEvents();
+                            QThread::msleep(1);
+                        }
+
+                        gen.showDone(true);
+
+                        loginf << "MainWindow: performAutomaticTasks: generating evaluation report done";
+                    }
+                    else
+                        logerr << "MainWindow: performAutomaticTasks: "
+                                      "exporting evaluation report not possible since report can't be generated";
+                }
+            }
+            else
+                logerr << "MainWindow: performAutomaticTasks: "
+                              "evaluation not possible since evaluation can not be performed";
+        }
+    }
+
+    if (quit_)
+    {
+        loginf << "MainWindow: performAutomaticTasks: quit requested";
+
+        start_time = boost::posix_time::microsec_clock::local_time();
+
+        while ((boost::posix_time::microsec_clock::local_time()-start_time).total_milliseconds() < 2000)
+        {
+            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+            QThread::msleep(1);
+        }
+
+        quitSlot();
+    }
+    else
+        loginf << "MainWindow: performAutomaticTasks: not quitting";
 }
+
+
+void MainWindow::newDBSlot()
+{
+    loginf << "MainWindow: newDBSlot";
+
+    string filename = QFileDialog::getSaveFileName(this, "New SQLite3 File").toStdString();
+
+    if (filename.size() > 0)
+    {
+        COMPASS::instance().createNewDBFile(filename);
+
+        updateBottomWidget();
+        updateMenus();
+    }
+}
+
+void MainWindow::openExistingDBSlot()
+{
+    loginf << "MainWindow: openExistingDBSlot";
+
+    string filename = QFileDialog::getOpenFileName(this, "Add SQLite3 File").toStdString();
+
+    if (filename.size() > 0)
+    {
+        COMPASS::instance().openDBFile(filename);
+
+        updateBottomWidget();
+        updateMenus();
+    }
+}
+
+void MainWindow::openRecentDBSlot()
+{
+    loginf << "MainWindow: openRecentDBSlot";
+
+    QAction* action = dynamic_cast<QAction*> (QObject::sender());
+    assert (action);
+
+    string filename = action->data().toString().toStdString();
+
+    assert (filename.size());
+
+    COMPASS::instance().openDBFile(filename);
+
+    updateBottomWidget();
+    updateMenus();
+}
+
+void MainWindow::clearExistingDBsSlot()
+{
+    loginf << "MainWindow: clearExistingDBsSlot";
+
+    COMPASS::instance().clearDBFileList();
+
+    updateBottomWidget();
+    updateMenus();
+}
+
+void MainWindow::closeDBSlot()
+{
+    loginf << "MainWindow: closeDBSlot";
+
+    COMPASS::instance().closeDB();
+
+    updateBottomWidget();
+    updateMenus();
+}
+
+void MainWindow::saveConfigSlot()
+{
+    loginf << "MainWindow: saveConfigSlot";
+
+    ConfigurationManager::getInstance().saveConfiguration();
+}
+
+void MainWindow::quitWOConfigSlot()
+{
+    loginf << "MainWindow: quitWOConfigSlot";
+
+    save_configuration_ = false;
+
+    shutdown();
+
+    QApplication::quit();
+}
+void MainWindow::quitSlot()
+{
+    loginf << "MainWindow: quitSlot";
+
+    shutdown();
+
+    QApplication::quit();
+}
+
+void MainWindow::importAsterixRecordingSlot()
+{
+    loginf << "MainWindow: importAsterixRecordingSlot";
+
+    string filename = QFileDialog::getOpenFileName(this, "Import ASTERIX File").toStdString();
+
+    if (filename.size() > 0)
+    {
+        COMPASS::instance().taskManager().asterixImporterTask().importFilename(filename); // also adds
+
+        updateMenus();
+
+        COMPASS::instance().taskManager().asterixImporterTask().dialog()->updateSource();
+        COMPASS::instance().taskManager().asterixImporterTask().dialog()->show();
+    }
+}
+
+void MainWindow::importRecentAsterixRecordingSlot()
+{
+    loginf << "MainWindow: importRecentAsterixRecordingSlot";
+
+    QAction* action = dynamic_cast<QAction*> (QObject::sender());
+    assert (action);
+
+    string filename = action->data().toString().toStdString();
+
+    assert (filename.size());
+
+    COMPASS::instance().taskManager().asterixImporterTask().importFilename(filename);
+
+    updateMenus();
+
+    COMPASS::instance().taskManager().asterixImporterTask().dialog()->updateSource();
+    COMPASS::instance().taskManager().asterixImporterTask().dialog()->show();
+}
+
+void MainWindow::clearImportRecentAsterixRecordingsSlot()
+{
+    loginf << "MainWindow: clearImportRecentAsterixRecordingsSlot";
+
+    COMPASS::instance().taskManager().asterixImporterTask().clearFileList();
+
+    updateMenus();
+}
+
+void MainWindow::importAsterixFromNetworkSlot()
+{
+    loginf << "MainWindow: importAsterixFromNetworkSlot";
+
+    COMPASS::instance().taskManager().asterixImporterTask().importNetwork();
+
+    COMPASS::instance().taskManager().asterixImporterTask().dialog()->updateSource();
+    COMPASS::instance().taskManager().asterixImporterTask().dialog()->show();
+}
+
+void MainWindow::importGPSTrailSlot()
+{
+    string filename = QFileDialog::getOpenFileName(this, "Import GPS Trail", "",
+                                                   tr("Text Files (*.nmea *.txt)")).toStdString();
+
+    if (filename.size() > 0)
+    {
+        COMPASS::instance().taskManager().gpsTrailImportTask().importFilename(filename);
+
+        updateMenus();
+
+        COMPASS::instance().taskManager().gpsTrailImportTask().dialog()->show();
+    }
+}
+
+void MainWindow::importViewPointsSlot()
+{
+    string filename = QFileDialog::getOpenFileName(this, "Import View Points", "", "*.json").toStdString();
+
+    if (filename.size() > 0)
+    {
+        COMPASS::instance().taskManager().viewPointsImportTask().importFilename(filename);
+
+        updateMenus();
+
+        COMPASS::instance().taskManager().viewPointsImportTask().dialog()->show();
+    }
+}
+
+void MainWindow::calculateRadarPlotPositionsSlot()
+{
+    loginf << "MainWindow: calculateRadarPlotPositionsSlot";
+
+    COMPASS::instance().taskManager().radarPlotPositionCalculatorTask().dialog()->show();
+}
+
+void MainWindow::calculateAssociationsARTASSlot()
+{
+    loginf << "MainWindow: calculateAssociationsARTASSlot";
+
+    COMPASS::instance().taskManager().createArtasAssociationsTask().dialog()->show();
+}
+
+void MainWindow::calculateAssociationsSlot()
+{
+    loginf << "MainWindow: calculateAssociationsSlot";
+
+    COMPASS::instance().taskManager().createAssociationsTask().dialog()->show();
+}
+
+void MainWindow::configureDataSourcesSlot()
+{
+    loginf << "MainWindow: configureDataSourcesSlot";
+
+    COMPASS::instance().dataSourceManager().configurationDialog()->show();
+}
+
+void MainWindow::configureMetaVariablesSlot()
+{
+    loginf << "MainWindow: configureMetaVariablesSlot";
+
+    COMPASS::instance().dbContentManager().metaVariableConfigdialog()->show();
+}
+
+void MainWindow::configureSectorsSlot()
+{
+    loginf << "MainWindow: configureSectorsSlot";
+
+    COMPASS::instance().taskManager().manageSectorsTask().dialog()->show();
+}
+
+//void MainWindow::startSlot()
+//{
+//    loginf << "MainWindow: startSlot";
+//    assert (!started_);
+
+//    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+
+////    QMessageBox* msg_box = new QMessageBox(this);
+////    msg_box->setWindowTitle("Starting");
+////    msg_box->setText("Please wait...");
+////    msg_box->setStandardButtons(0);
+////    msg_box->show();
+
+////    boost::posix_time::ptime start_time = boost::posix_time::microsec_clock::local_time();
+////    while ((boost::posix_time::microsec_clock::local_time()-start_time).total_milliseconds() < 50)
+////    {
+////        QCoreApplication::processEvents();
+////        QThread::msleep(1);
+////    }
+
+//    emit startedSignal();
+
+////    assert(task_manager_widget_);
+////    tab_widget_->removeTab(0);
+
+//    // close any opened dbobject widgets
+////    for (auto& obj_it : COMPASS::instance().objectManager())
+////        obj_it.second->closeWidget();
+
+//    assert(management_widget_);
+//    tab_widget_->addTab(management_widget_, "Load");
+
+////    start_time = boost::posix_time::microsec_clock::local_time();
+////    while ((boost::posix_time::microsec_clock::local_time()-start_time).total_milliseconds() < 50)
+////    {
+////        QCoreApplication::processEvents();
+////        QThread::msleep(1);
+////    }
+
+//    COMPASS::instance().evaluationManager().init(tab_widget_); // adds eval widget
+//    COMPASS::instance().viewManager().init(tab_widget_); // adds view points widget and view container
+
+//    tab_widget_->setCurrentIndex(0);
+//    add_view_button_->setDisabled(false);
+
+//    emit JobManager::instance().databaseIdle();  // to enable ViewManager add button, slightly HACKY
+
+////    msg_box->close();
+////    delete msg_box;
+
+//    QApplication::restoreOverrideCursor();
+
+//    started_ = true;
+//}
 
 void MainWindow::quitRequestedSlot()
 {
@@ -205,9 +1352,73 @@ void MainWindow::showAddViewMenuSlot()
     COMPASS::instance().viewManager().showMainViewContainerAddView();
 }
 
+void MainWindow::appModeSwitchSlot (AppMode app_mode)
+{
+    loginf << "MainWindow: appModeSwitch: app_mode " << COMPASS::instance().appModeStr();
+
+    updateBottomWidget();
+    updateMenus();
+}
+
+void MainWindow::loadButtonSlot()
+{
+    loginf << "MainWindow: loadButtonSlot";
+
+    if (COMPASS::instance().viewManager().getViews().size() == 0)
+    {
+        QMessageBox m_warning(QMessageBox::Warning, "Loading Not Possible",
+                              "There are no Views active, so loading is not possible.",
+                              QMessageBox::Ok);
+
+        m_warning.exec();
+        return;
+    }
+
+    assert(load_button_);
+
+    if (loading_)
+    {
+        load_button_->setDisabled(true);
+        COMPASS::instance().dbContentManager().quitLoading();
+        return;
+    }
+
+    loading_ = true;
+    load_button_->setText("Stop");
+
+    COMPASS::instance().dbContentManager().load();
+}
+
+void MainWindow::loadingDoneSlot()
+{
+    loginf << "MainWindow: loadingDoneSlot";
+
+    assert (load_button_);
+
+    loading_ = false;
+    load_button_->setText("Load");
+    load_button_->setDisabled(false);
+}
+
+void MainWindow::livePauseSlot()
+{
+    loginf << "MainWindow: livePauseSlot";
+
+    TODO_ASSERT
+}
+
+void MainWindow::liveStopSlot()
+{
+    loginf << "MainWindow: liveStopSlot";
+
+    COMPASS::instance().taskManager().asterixImporterTask().stop();
+
+    COMPASS::instance().appMode(AppMode::Offline);
+}
+
 void MainWindow::closeEvent(QCloseEvent* event)
 {
-    logdbg << "MainWindow: closeEvent: start";
+    loginf << "MainWindow: closeEvent";
 
     shutdown();
     event->accept();
@@ -226,7 +1437,7 @@ void MainWindow::shutdown()
     if (save_configuration_)
         ConfigurationManager::getInstance().saveConfiguration();
     else
-        loginf << "MainWindow: closeEvent: configuration not saved";
+        loginf << "MainWindow: shutdown: configuration not saved";
 
     COMPASS::instance().shutdown();
 

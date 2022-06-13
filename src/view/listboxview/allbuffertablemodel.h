@@ -21,10 +21,10 @@
 #include <QAbstractTableModel>
 #include <memory>
 
-#include "dbovariableset.h"
+#include "dbcontent/variable/variableset.h"
 
 class Buffer;
-class DBObject;
+class DBContent;
 class AllBufferCSVExportJob;
 class ListBoxViewDataSource;
 class AllBufferTableWidget;
@@ -60,7 +60,6 @@ class AllBufferTableModel : public QAbstractTableModel
 
     void usePresentation(bool use_presentation);
     void showOnlySelected(bool value);
-    void showAssociations(bool value);
     void reset();
 
     void updateToSelection();
@@ -86,7 +85,6 @@ class AllBufferTableModel : public QAbstractTableModel
 
     bool show_only_selected_{true};
     bool use_presentation_{true};
-    bool show_associations_{false};
 
     void updateTimeIndexes();
     void rebuildRowIndexes();

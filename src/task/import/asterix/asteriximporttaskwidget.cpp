@@ -20,7 +20,7 @@
 #include "asteriximporttask.h"
 #include "asterixoverridewidget.h"
 #include "logger.h"
-#include "selectdbobjectdialog.h"
+#include "dbcontent/selectdialog.h"
 
 #include <QCheckBox>
 #include <QComboBox>
@@ -36,10 +36,11 @@
 #include <QVBoxLayout>
 
 using namespace Utils;
+using namespace std;
 
 ASTERIXImportTaskWidget::ASTERIXImportTaskWidget(ASTERIXImportTask& task, QWidget* parent,
                                                  Qt::WindowFlags f)
-    : TaskWidget(parent, f), task_(task)
+    : QWidget(parent, f), task_(task)
 {
     main_layout_ = new QHBoxLayout();
 
@@ -48,11 +49,8 @@ ASTERIXImportTaskWidget::ASTERIXImportTaskWidget(ASTERIXImportTask& task, QWidge
     main_layout_->addWidget(tab_widget_);
 
     addMainTab();
-    addASTERIXConfigTab();
     addOverrideTab();
     addMappingsTab();
-
-    expertModeChangedSlot();
 
     setLayout(main_layout_);
 }
@@ -66,42 +64,38 @@ void ASTERIXImportTaskWidget::addMainTab()
 
     QVBoxLayout* main_tab_layout = new QVBoxLayout();
 
-    // file stuff
+    // source stuff
     {
-        QVBoxLayout* files_layout = new QVBoxLayout();
+        QFormLayout* source_layout = new QFormLayout();
 
-        QLabel* files_label = new QLabel("File Selection");
-        files_label->setFont(font_bold);
-        files_layout->addWidget(files_label);
+        source_label_ = new QLabel();
+        source_layout->addWidget(source_label_);
 
-        file_list_ = new QListWidget();
-        file_list_->setWordWrap(true);
-        file_list_->setTextElideMode(Qt::ElideNone);
-        file_list_->setSelectionBehavior(QAbstractItemView::SelectItems);
-        file_list_->setSelectionMode(QAbstractItemView::SingleSelection);
-        connect(file_list_, SIGNAL(itemClicked(QListWidgetItem*)), this, SLOT(selectedFileSlot()));
+        if (task_.isImportNetwork())
+        {
+            loginf << "ASTERIXImportTaskWidget: addMainTab: is network import";
+        }
+        else
+        {
+            loginf << "ASTERIXImportTaskWidget: addMainTab: is file import";
 
-        updateFileListSlot();
-        files_layout->addWidget(file_list_);
+            QComboBox* file_line_box = new QComboBox();
+            file_line_box->addItems({"1", "2", "3", "4"});
 
-        QHBoxLayout* button_layout = new QHBoxLayout();
+            connect(file_line_box, &QComboBox::currentTextChanged,
+                    this, &ASTERIXImportTaskWidget::fileLineIDEditSlot);
+            source_layout->addRow("Line ID", file_line_box);
+        }
 
-        add_file_button_ = new QPushButton("Add");
-        connect(add_file_button_, &QPushButton::clicked, this, &ASTERIXImportTaskWidget::addFileSlot);
-        button_layout->addWidget(add_file_button_);
+        updateSourceLabel();
 
-        delete_file_button_ = new QPushButton("Remove");
-        connect(delete_file_button_, &QPushButton::clicked, this, &ASTERIXImportTaskWidget::deleteFileSlot);
-        button_layout->addWidget(delete_file_button_);
-
-        delete_all_files_button_ = new QPushButton("Remove All");
-        connect(delete_all_files_button_, &QPushButton::clicked, this, &ASTERIXImportTaskWidget::deleteAllFilesSlot);
-        button_layout->addWidget(delete_all_files_button_);
-
-        files_layout->addLayout(button_layout);
-
-        main_tab_layout->addLayout(files_layout);
+        main_tab_layout->addLayout(source_layout);
     }
+
+    config_widget_ = new ASTERIXConfigWidget(task_, this);
+    main_tab_layout->addWidget(config_widget_);
+
+    main_tab_layout->addStretch();
 
     // final stuff
     {
@@ -111,35 +105,12 @@ void ASTERIXImportTaskWidget::addMainTab()
                 &ASTERIXImportTaskWidget::debugChangedSlot);
         main_tab_layout->addWidget(debug_check_);
 
-        limit_ram_check_ = new QCheckBox("Limit RAM Usage");
-        limit_ram_check_->setChecked(task_.limitRAM());
-        connect(limit_ram_check_, &QCheckBox::clicked, this,
-                &ASTERIXImportTaskWidget::limitRAMChangedSlot);
-        main_tab_layout->addWidget(limit_ram_check_);
-
-        create_mapping_stubs_button_ = new QPushButton("Create Mapping Stubs");
-        connect(create_mapping_stubs_button_, &QPushButton::clicked, this,
-                &ASTERIXImportTaskWidget::createMappingsSlot);
-        main_tab_layout->addWidget(create_mapping_stubs_button_);
-
-        test_button_ = new QPushButton("Test Import");
-        connect(test_button_, &QPushButton::clicked, this,
-                &ASTERIXImportTaskWidget::testImportSlot);
-        main_tab_layout->addWidget(test_button_);
     }
 
     QWidget* main_tab_widget = new QWidget();
     main_tab_widget->setContentsMargins(0, 0, 0, 0);
     main_tab_widget->setLayout(main_tab_layout);
     tab_widget_->addTab(main_tab_widget, "Main");
-}
-
-void ASTERIXImportTaskWidget::addASTERIXConfigTab()
-{
-    assert(tab_widget_);
-
-    config_widget_ = new ASTERIXConfigWidget(task_, this);
-    tab_widget_->addTab(config_widget_, "Decoder");
 }
 
 void ASTERIXImportTaskWidget::addOverrideTab()
@@ -163,11 +134,13 @@ void ASTERIXImportTaskWidget::addMappingsTab()
     parser_manage_layout->addWidget(object_parser_box_);
 
     add_object_parser_button_ = new QPushButton("Add");
-    connect(add_object_parser_button_, SIGNAL(clicked()), this, SLOT(addObjectParserSlot()));
+    connect(add_object_parser_button_, SIGNAL(clicked()), this, SLOT(addParserSlot()));
+    add_object_parser_button_->setEnabled(COMPASS::instance().expertMode());
     parser_manage_layout->addWidget(add_object_parser_button_);
 
     delete_object_parser_button_ = new QPushButton("Remove");
     connect(delete_object_parser_button_, SIGNAL(clicked()), this, SLOT(removeObjectParserSlot()));
+    delete_object_parser_button_->setEnabled(COMPASS::instance().expertMode());
     parser_manage_layout->addWidget(delete_object_parser_button_);
 
     parsers_layout->addLayout(parser_manage_layout);
@@ -190,90 +163,90 @@ void ASTERIXImportTaskWidget::addMappingsTab()
 
 ASTERIXImportTaskWidget::~ASTERIXImportTaskWidget() { config_widget_ = nullptr; }
 
-void ASTERIXImportTaskWidget::addFileSlot()
-{
-    QFileDialog dialog(this);
-    dialog.setWindowTitle("Add ASTERIX File(s)");
-    // dialog.setDirectory(QDir::homePath());
-    dialog.setFileMode(QFileDialog::ExistingFiles);
-    // dialog.setNameFilter(trUtf8("Splits (*.000 *.001)"));
-    QStringList fileNames;
-    if (dialog.exec())
-    {
-        for (auto& filename : dialog.selectedFiles())
-            addFile(filename.toStdString());
-    }
-}
+//void ASTERIXImportTaskWidget::addFileSlot()
+//{
+//    QFileDialog dialog(this);
+//    dialog.setWindowTitle("Add ASTERIX File(s)");
+//    // dialog.setDirectory(QDir::homePath());
+//    dialog.setFileMode(QFileDialog::ExistingFiles);
+//    // dialog.setNameFilter(trUtf8("Splits (*.000 *.001)"));
+//    QStringList fileNames;
+//    if (dialog.exec())
+//    {
+//        for (auto& filename : dialog.selectedFiles())
+//            addFile(filename.toStdString());
+//    }
+//}
 
-void ASTERIXImportTaskWidget::addFile(const std::string& filename)
-{
-    if (!task_.hasFile(filename))
-        task_.addFile(filename);
-}
+//void ASTERIXImportTaskWidget::addFile(const std::string& filename)
+//{
+//    if (!task_.hasFile(filename))
+//        task_.addFile(filename);
+//}
 
-void ASTERIXImportTaskWidget::selectFile(const std::string& filename)
-{
-    assert(task_.hasFile(filename));
-    task_.currentFilename(filename);
+//void ASTERIXImportTaskWidget::selectFile(const std::string& filename)
+//{
+//    assert(task_.hasFile(filename));
+//    task_.importFilename(filename);
 
-    QList<QListWidgetItem*> items = file_list_->findItems(filename.c_str(), Qt::MatchExactly);
-    assert (items.size() > 0);
+//    QList<QListWidgetItem*> items = file_list_->findItems(filename.c_str(), Qt::MatchExactly);
+//    assert (items.size() > 0);
 
-    for (auto item_it : items)
-    {
-        assert (item_it);
-        file_list_->setCurrentItem(item_it);
-    }
-}
+//    for (auto item_it : items)
+//    {
+//        assert (item_it);
+//        file_list_->setCurrentItem(item_it);
+//    }
+//}
 
-void ASTERIXImportTaskWidget::deleteFileSlot()
-{
-    loginf << "ASTERIXImportTaskWidget: deleteFileSlot";
+//void ASTERIXImportTaskWidget::deleteFileSlot()
+//{
+//    loginf << "ASTERIXImportTaskWidget: deleteFileSlot";
 
-    if (!file_list_->currentItem() || !task_.currentFilename().size())
-    {
-        QMessageBox m_warning(QMessageBox::Warning, "ASTERIX File Deletion Failed",
-                              "Please select a file in the list.", QMessageBox::Ok);
-        m_warning.exec();
-        return;
-    }
+//    if (!file_list_->currentItem() || !task_.importFilename().size())
+//    {
+//        QMessageBox m_warning(QMessageBox::Warning, "ASTERIX File Deletion Failed",
+//                              "Please select a file in the list.", QMessageBox::Ok);
+//        m_warning.exec();
+//        return;
+//    }
 
-    assert(task_.currentFilename().size());
-    assert(task_.hasFile(task_.currentFilename()));
-    task_.removeCurrentFilename();
-}
+//    assert(task_.importFilename().size());
+//    assert(task_.hasFile(task_.importFilename()));
+//    task_.removeCurrentFilename();
+//}
 
-void ASTERIXImportTaskWidget::deleteAllFilesSlot()
-{
-    loginf << "ASTERIXImportTaskWidget: deleteAllFilesSlot";
-    task_.removeAllFiles();
-}
+//void ASTERIXImportTaskWidget::deleteAllFiles()
+//{
+//    loginf << "ASTERIXImportTaskWidget: deleteAllFiles";
+//    task_.removeAllFiles();
+//}
 
-void ASTERIXImportTaskWidget::selectedFileSlot()
-{
-    loginf << "ASTERIXImportTaskWidget: selectedFileSlot";
-    assert(file_list_->currentItem());
+//void ASTERIXImportTaskWidget::selectedFileSlot()
+//{
+//    loginf << "ASTERIXImportTaskWidget: selectedFileSlot";
+//    assert(file_list_->currentItem());
 
-    QString filename = file_list_->currentItem()->text();
-    assert(task_.hasFile(filename.toStdString()));
-    task_.currentFilename(filename.toStdString());
-}
+//    QString filename = file_list_->currentItem()->text();
+//    assert(task_.hasFile(filename.toStdString()));
+//    task_.importFilename(filename.toStdString());
+//}
 
-void ASTERIXImportTaskWidget::updateFileListSlot()
-{
-    assert(file_list_);
+//void ASTERIXImportTaskWidget::updateFileListSlot()
+//{
+//    assert(file_list_);
 
-    file_list_->clear();
+//    file_list_->clear();
 
-    for (auto it : task_.fileList())
-    {
-        QListWidgetItem* item = new QListWidgetItem(tr(it.first.c_str()), file_list_);
-        if (it.first == task_.currentFilename())
-            file_list_->setCurrentItem(item);
-    }
-}
+//    for (auto it : task_.fileList())
+//    {
+//        QListWidgetItem* item = new QListWidgetItem(tr(it.first.c_str()), file_list_);
+//        if (it.first == task_.importFilename())
+//            file_list_->setCurrentItem(item);
+//    }
+//}
 
-void ASTERIXImportTaskWidget::addObjectParserSlot()
+void ASTERIXImportTaskWidget::addParserSlot()
 {
     if (task_.schema() == nullptr)
     {
@@ -284,33 +257,33 @@ void ASTERIXImportTaskWidget::addObjectParserSlot()
         return;
     }
 
-    SelectDBObjectDialog dialog;
+    dbContent::SelectDBContentDialog dialog;
 
     int ret = dialog.exec();
 
     if (ret == QDialog::Accepted)
     {
-        std::string name = dialog.name();
-        std::string dbo_name = dialog.selectedObject();
-        loginf << "ASTERIXImportTaskWidget: addObjectParserSlot: name " << name << " obj "
-               << dbo_name;
+        unsigned int cat = dialog.category();
+        std::string dbcontent_name = dialog.selectedObject();
+        loginf << "ASTERIXImportTaskWidget: addObjectParserSlot: cat " << cat << " obj "
+               << dbcontent_name;
 
-        std::shared_ptr<JSONParsingSchema> current = task_.schema();
+        std::shared_ptr<ASTERIXJSONParsingSchema> current = task_.schema();
 
-        if (!name.size() || current->hasObjectParser(name))
+        if (current->hasObjectParser(cat))
         {
-            QMessageBox m_warning(QMessageBox::Warning, "JSON Object Parser Adding Failed",
-                                  "Object parser name empty or already defined.", QMessageBox::Ok);
+            QMessageBox m_warning(QMessageBox::Warning, "ASTERIX JSON Parser Adding Failed",
+                                  "ASTERIX parser for category already defined.", QMessageBox::Ok);
 
             m_warning.exec();
             return;
         }
 
-        std::string instance = "JSONObjectParser" + name + dbo_name + "0";
+        std::string instance = "ASTERIXJSONParserCAT" + to_string(cat) + "0";
 
-        Configuration& config = current->addNewSubConfiguration("JSONObjectParser", instance);
-        config.addParameterString("name", name);
-        config.addParameterString("db_object_name", dbo_name);
+        Configuration& config = current->addNewSubConfiguration("ASTERIXJSONParser", instance);
+        config.addParameterUnsignedInt("category", cat);
+        config.addParameterString("dbcontent_name", dbcontent_name);
 
         current->generateSubConfigurable("JSONObjectParser", instance);
         updateParserBox();
@@ -324,13 +297,13 @@ void ASTERIXImportTaskWidget::removeObjectParserSlot()
 
     if (object_parser_box_->currentIndex() >= 0)
     {
-        std::string name = object_parser_box_->currentText().toStdString();
+        unsigned int cat = object_parser_box_->currentText().toUInt();
 
         assert(task_.schema() != nullptr);
-        std::shared_ptr<JSONParsingSchema> current = task_.schema();
+        std::shared_ptr<ASTERIXJSONParsingSchema> current = task_.schema();
 
-        assert(current->hasObjectParser(name));
-        current->removeParser(name);
+        assert(current->hasObjectParser(cat));
+        current->removeParser(cat);
 
         updateParserBox();
         selectedObjectParserSlot(object_parser_box_->currentText());
@@ -354,15 +327,31 @@ void ASTERIXImportTaskWidget::selectedObjectParserSlot(const QString& text)
     assert(text.size());
 
     assert(object_parser_box_);
-    std::string name = text.toStdString();
+    unsigned int cat = text.toUInt();
 
     assert(task_.schema() != nullptr);
-    assert(task_.schema()->hasObjectParser(name));
+    assert(task_.schema()->hasObjectParser(cat));
 
-    if (object_parser_widget_->indexOf(task_.schema()->parser(name).widget()) < 0)
-        object_parser_widget_->addWidget(task_.schema()->parser(name).widget());
+    if (object_parser_widget_->indexOf(task_.schema()->parser(cat).widget()) < 0)
+        object_parser_widget_->addWidget(task_.schema()->parser(cat).widget());
 
-    object_parser_widget_->setCurrentWidget(task_.schema()->parser(name).widget());
+    object_parser_widget_->setCurrentWidget(task_.schema()->parser(cat).widget());
+}
+
+
+void ASTERIXImportTaskWidget::fileLineIDEditSlot(const QString& text)
+{
+    loginf << "ASTERIXImportTaskWidget: fileLineIDEditSlot: value '" << text.toStdString() << "'";
+
+    bool ok;
+
+    unsigned int line_id = text.toUInt(&ok);
+
+    assert (ok);
+
+    assert (line_id > 0 && line_id <= 4);
+
+    task_.fileLineID(line_id-1);
 }
 
 void ASTERIXImportTaskWidget::updateParserBox()
@@ -376,7 +365,7 @@ void ASTERIXImportTaskWidget::updateParserBox()
     {
         for (auto& parser_it : *task_.schema())  // over all object parsers
         {
-            object_parser_box_->addItem(parser_it.first.c_str());
+            object_parser_box_->addItem(QString::number(parser_it.first));
         }
     }
 }
@@ -389,27 +378,33 @@ void ASTERIXImportTaskWidget::debugChangedSlot()
     task_.debug(box->checkState() == Qt::Checked);
 }
 
-void ASTERIXImportTaskWidget::limitRAMChangedSlot()
-{
-    QCheckBox* box = dynamic_cast<QCheckBox*>(sender());
-    assert(box);
+//void ASTERIXImportTaskWidget::runStarted()
+//{
+//    loginf << "ASTERIXImportTaskWidget: runStarted";
 
-    task_.limitRAM(box->checkState() == Qt::Checked);
+//    test_button_->setDisabled(true);
+//}
+
+//void ASTERIXImportTaskWidget::runDone()
+//{
+//    loginf << "ASTERIXImportTaskWidget: runDone";
+
+//    test_button_->setDisabled(false);
+//}
+
+void ASTERIXImportTaskWidget::updateSourceLabel()
+{
+    assert (source_label_);
+
+    if (task_.isImportNetwork())
+        source_label_->setText("Source: Network");
+    else // file
+        source_label_->setText(("Source: "+task_.importFilename()).c_str());
 }
 
-void ASTERIXImportTaskWidget::createMappingsSlot()
+ASTERIXOverrideWidget* ASTERIXImportTaskWidget::overrideWidget() const
 {
-    loginf << "ASTERIXImportTaskWidget: createMappingsSlot";
-
-    if (!task_.canImportFile())
-    {
-        QMessageBox m_warning(QMessageBox::Warning, "ASTERIX File Create Mapping Stubs Failed",
-                              "Please select a file in the list.", QMessageBox::Ok);
-        m_warning.exec();
-        return;
-    }
-
-    task_.run(false, true);
+    return override_widget_;
 }
 
 void ASTERIXImportTaskWidget::testImportSlot()
@@ -424,34 +419,5 @@ void ASTERIXImportTaskWidget::testImportSlot()
         return;
     }
 
-    task_.run(true, false);
-}
-
-void ASTERIXImportTaskWidget::expertModeChangedSlot() {}
-
-void ASTERIXImportTaskWidget::updateLimitRAM()
-{
-    assert(limit_ram_check_);
-    limit_ram_check_->setChecked(task_.limitRAM());
-}
-
-void ASTERIXImportTaskWidget::runStarted()
-{
-    loginf << "ASTERIXImportTaskWidget: runStarted";
-
-    create_mapping_stubs_button_->setDisabled(true);
-    test_button_->setDisabled(true);
-}
-
-void ASTERIXImportTaskWidget::runDone()
-{
-    loginf << "ASTERIXImportTaskWidget: runDone";
-
-    create_mapping_stubs_button_->setDisabled(false);
-    test_button_->setDisabled(false);
-}
-
-ASTERIXOverrideWidget* ASTERIXImportTaskWidget::overrideWidget() const
-{
-    return override_widget_;
+    task_.run(true);
 }

@@ -127,16 +127,16 @@ void SingleDubiousTrack::addTargetToOverviewTable(shared_ptr<EvaluationResultsRe
 {
     EvaluationResultsReport::Section& tgt_overview_section = getRequirementSection(root_item);
 
-    if (eval_man_.resultsGenerator().showAdsbInfo())
+    if (eval_man_.reportShowAdsbInfo())
         addTargetDetailsToTableADSB(tgt_overview_section, target_table_name_);
     else
         addTargetDetailsToTable(tgt_overview_section, target_table_name_);
 
-    if (eval_man_.resultsGenerator().splitResultsByMOPS()) // add to general sum table
+    if (eval_man_.reportSplitResultsByMOPS()) // add to general sum table
     {
         EvaluationResultsReport::Section& sum_section = root_item->getSection(getRequirementSumSectionID());
 
-        if (eval_man_.resultsGenerator().showAdsbInfo())
+        if (eval_man_.reportShowAdsbInfo())
             addTargetDetailsToTableADSB(sum_section, target_table_name_);
         else
             addTargetDetailsToTable(sum_section, target_table_name_);
@@ -250,7 +250,7 @@ void SingleDubiousTrack::addTargetDetailsToTableADSB (
                  num_tracks_dubious_, // "#DT"
                  reasons.c_str(),  // "Reasons"
                  p_dubious_var, // "PDT"
-                 target_->mopsVersionsStr().c_str(), // "MOPS"
+                 target_->mopsVersionStr().c_str(), // "MOPS"
                  target_->nucpNicStr().c_str(), // "NUCp/NIC"
                  target_->nacpStr().c_str()}, // "NACp"
                 this, {utn_});
@@ -259,6 +259,7 @@ void SingleDubiousTrack::addTargetDetailsToTableADSB (
 
 void SingleDubiousTrack::addTargetDetailsToReport(shared_ptr<EvaluationResultsReport::RootItem> root_item)
 {
+    root_item->getSection(getTargetSectionID()).perTargetSection(true); // mark utn section per target
     EvaluationResultsReport::Section& utn_req_section = root_item->getSection(getTargetRequirementSectionID());
 
     if (!utn_req_section.hasTable("details_overview_table"))
@@ -338,6 +339,13 @@ void SingleDubiousTrack::addTargetDetailsToReport(shared_ptr<EvaluationResultsRe
             result = req->getResultConditionStr(p_dubious_track_);
 
         utn_req_table.addRow({"Condition Fulfilled", "", result.c_str()}, this);
+
+        if (result == "Failed")
+        {
+            root_item->getSection(getTargetSectionID()).perTargetWithIssues(true); // mark utn section as with issue
+            utn_req_section.perTargetWithIssues(true);
+        }
+
     }
 
     if (has_p_dubious_track_ && p_dubious_track_ != 0.0) // TODO

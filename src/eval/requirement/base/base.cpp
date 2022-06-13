@@ -184,17 +184,17 @@ std::pair<ValueComparisonResult, std::string> Base::compareTi (
 
             if (lower_nok)
             {
-                comment += " tst value '"+target_data.tstCallsignForTime(tod)
-                        +"' ref value at "+String::timeStringFromDouble(ref_lower)
-                        + "  '"+target_data.refCallsignForTime(ref_lower)
+                comment += " tst '"+target_data.tstCallsignForTime(tod)
+                        +"' ref at "+String::timeStringFromDouble(ref_lower)
+                        + " '"+target_data.refCallsignForTime(ref_lower)
                         + "'";
             }
             else
             {
                 assert (upper_nok);
-                comment += " tst value '"+target_data.tstCallsignForTime(tod)
-                        +"' ref value at "+String::timeStringFromDouble(ref_upper)
-                        + "  '"+target_data.refCallsignForTime(ref_upper)
+                comment += " tst '"+target_data.tstCallsignForTime(tod)
+                        +"' ref at "+String::timeStringFromDouble(ref_upper)
+                        + " '"+target_data.refCallsignForTime(ref_upper)
                         + "'";
             }
 

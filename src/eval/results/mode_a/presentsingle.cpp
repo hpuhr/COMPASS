@@ -93,7 +93,7 @@ namespace EvaluationRequirementResult
     {
         addTargetDetailsToTable(getRequirementSection(root_item), target_table_name_);
 
-        if (eval_man_.resultsGenerator().splitResultsByMOPS()) // add to general sum table
+        if (eval_man_.reportSplitResultsByMOPS()) // add to general sum table
             addTargetDetailsToTable(root_item->getSection(getRequirementSumSectionID()), target_table_name_);
     }
 
@@ -122,6 +122,7 @@ namespace EvaluationRequirementResult
 
     void SingleModeAPresent::addTargetDetailsToReport(shared_ptr<EvaluationResultsReport::RootItem> root_item)
     {
+        root_item->getSection(getTargetSectionID()).perTargetSection(true); // mark utn section per target
         EvaluationResultsReport::Section& utn_req_section = root_item->getSection(getTargetRequirementSectionID());
 
         if (!utn_req_section.hasTable("details_overview_table"))
@@ -164,6 +165,13 @@ namespace EvaluationRequirementResult
                 result = req-> getResultConditionStr(p_present_);
 
             utn_req_table.addRow({"Condition Fulfilled", "", result.c_str()}, this);
+
+            if (result == "Failed")
+            {
+                root_item->getSection(getTargetSectionID()).perTargetWithIssues(true); // mark utn section as with issue
+                utn_req_section.perTargetWithIssues(true);
+            }
+
         }
 
         if (has_p_present_ && p_present_ != 1.0)

@@ -20,28 +20,22 @@
 #include "buffer.h"
 #include "createartasassociationstask.h"
 #include "dbinterface.h"
-#include "dbobject.h"
-#include "dbobjectmanager.h"
-#include "dbovariable.h"
-#include "dbtable.h"
-#include "dbtablecolumn.h"
+#include "dbcontent/dbcontent.h"
+#include "dbcontent/dbcontentmanager.h"
+#include "dbcontent/variable/variable.h"
 #include "files.h"
 #include "jobmanager.h"
 #include "jsonimporttaskwidget.h"
 #include "jsonmappingjob.h"
 #include "jsonparsejob.h"
 #include "jsonparsingschema.h"
-#include "metadbtable.h"
 #include "propertylist.h"
 #include "radarplotpositioncalculatortask.h"
 #include "readjsonfilejob.h"
 #include "savedfile.h"
 #include "stringconv.h"
 #include "taskmanager.h"
-
-#if USE_JASTERIX
 #include "asteriximporttask.h"
-#endif
 
 #include <QApplication>
 #include <QCoreApplication>
@@ -205,10 +199,8 @@ void JSONImportTask::currentFilename(const std::string& filename)
 
 bool JSONImportTask::hasSchema(const std::string& name)
 {
-#if USE_JASTERIX
     if (name == "jASTERIX")
         return true;
-#endif
 
     return schemas_.count(name) > 0;
 }
@@ -218,10 +210,8 @@ bool JSONImportTask::hasCurrentSchema()
     if (!current_schema_.size())
         return false;
 
-#if USE_JASTERIX
     if (current_schema_ == "jASTERIX")
         return true;
-#endif
 
     return schemas_.count(current_schema_) > 0;
 }
@@ -230,23 +220,17 @@ JSONParsingSchema& JSONImportTask::currentSchema()
 {
     assert(hasCurrentSchema());
 
-#if USE_JASTERIX
     if (current_schema_ == "jASTERIX")
         return *task_manager_.asterixImporterTask().schema();
     else
         return schemas_.at(current_schema_);
-#else
-    return schemas_.at(current_schema_);
-#endif
 }
 
 void JSONImportTask::removeCurrentSchema()
 {
     assert(hasCurrentSchema());
 
-#if USE_JASTERIX
     assert (current_schema_ != "jASTERIX");
-#endif
 
     schemas_.erase(current_schema_);
     assert(!hasCurrentSchema());
@@ -321,10 +305,8 @@ bool JSONImportTask::canImportFile()
     if (!current_schema_.size())
         return false;
 
-#if USE_JASTERIX
     if (current_schema_ == "jASTERIX")
         return true;
-#endif
 
     if (!schemas_.count(current_schema_))
     {
@@ -381,14 +363,10 @@ void JSONImportTask::run()
 
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
-#if USE_JASTERIX
     if (current_schema_ == "jASTERIX")
         read_json_job_ = std::make_shared<ReadJSONFileJob>(current_filename_, 1);
     else
         read_json_job_ = std::make_shared<ReadJSONFileJob>(current_filename_, num_objects_chunk);
-#else
-    read_json_job_ = std::make_shared<ReadJSONFileJob>(current_filename_, num_objects_chunk);
-#endif
 
     connect(read_json_job_.get(), &ReadJSONFileJob::readJSONFilePartSignal, this,
             &JSONImportTask::addReadJSONSlot, Qt::QueuedConnection);
@@ -490,7 +468,6 @@ void JSONImportTask::parseJSONDoneSlot()
 
     std::vector<std::string> keys;
 
-#if USE_JASTERIX
     if (current_schema_ == "jASTERIX")
     {
         //loginf << "UGA '" << json_objects->dump(4) << "'";
@@ -515,13 +492,6 @@ void JSONImportTask::parseJSONDoneSlot()
         size_t count = json_objects->at("data").size();
         logdbg << "JSONImporterTask: parseJSONDoneSlot: " << count << " parsed objects";
     }
-#else
-    assert(json_objects->contains("data")); // always written in data array
-    keys = {"data"};
-
-    size_t count = json_objects->at("data").size();
-    logdbg << "JSONImporterTask: parseJSONDoneSlot: " << count << " parsed objects";
-#endif
 
     //loginf << "UGA3";
 
@@ -615,38 +585,37 @@ void JSONImportTask::insertData(std::map<std::string, std::shared_ptr<Buffer>> j
     {
         for (auto& parser_it : current_schema)
         {
-            std::string dbo_name = parser_it.second.dbObject().name();
+            std::string dbcontent_name = parser_it.second.dbObject().name();
 
-            if (!job_buffers.count(dbo_name))
+            if (!job_buffers.count(dbcontent_name))
                 continue;
 
-            DBObject& db_object = parser_it.second.dbObject();
-            assert(db_object.hasCurrentDataSourceDefinition());
+            DBContent& dbcontent = parser_it.second.dbObject();
 
             std::string data_source_var_name = parser_it.second.dataSourceVariableName();
             assert(data_source_var_name.size());
-            assert(db_object.currentDataSourceDefinition().localKey() == data_source_var_name);
+            //assert(dbcontent.currentDataSourceDefinition().localKey() == data_source_var_name);
 
             DBOVariableSet set = parser_it.second.variableList();
 
 //            DBOVariableSet set;
 
-//            for (const auto& prop_it : job_buffers.at(dbo_name)->properties().properties())
+//            for (const auto& prop_it : job_buffers.at(dbcontent_name)->properties().properties())
 //            {
-//                assert (db_object.hasVariable(prop_it.name()));
-//                set.add(db_object.variable(prop_it.name()));
+//                assert (dbcontent.hasVariable(prop_it.name()));
+//                set.add(dbcontent.variable(prop_it.name()));
 //            }
 
 //            if (parser_it.second.overrideDataSource())
-//                set.add(db_object.variable(data_source_var_name));
+//                set.add(dbcontent.variable(data_source_var_name));
 
-            if (dbo_variable_sets_.count(dbo_name))  // add variables
+            if (dbo_variable_sets_.count(dbcontent_name))  // add variables
             {
-                assert(std::get<0>(dbo_variable_sets_.at(dbo_name)) == data_source_var_name);
-                std::get<1>(dbo_variable_sets_.at(dbo_name)).add(set);
+                assert(std::get<0>(dbo_variable_sets_.at(dbcontent_name)) == data_source_var_name);
+                std::get<1>(dbo_variable_sets_.at(dbcontent_name)).add(set);
             }
             else  // create it
-                dbo_variable_sets_[dbo_name] = std::make_tuple(data_source_var_name, set);
+                dbo_variable_sets_[dbcontent_name] = std::make_tuple(data_source_var_name, set);
         }
     }
 
@@ -658,61 +627,61 @@ void JSONImportTask::insertData(std::map<std::string, std::shared_ptr<Buffer>> j
 
     bool has_sac_sic = false;
 
-    DBObjectManager& object_manager = COMPASS::instance().objectManager();
+    DBContentManager& object_manager = COMPASS::instance().objectManager();
 
     for (auto& buf_it : job_buffers)
     {
-        std::string dbo_name = buf_it.first;
+        std::string dbcontent_name = buf_it.first;
 
         std::shared_ptr<Buffer> buffer = buf_it.second;
 
         if (!buffer->size())
         {
-            logdbg << "JSONImportTask: insertData: dbo " << dbo_name << " with empty buffer";
+            logdbg << "JSONImportTask: insertData: dbo " << dbcontent_name << " with empty buffer";
             continue;
         }
 
-        if (!dbo_variable_sets_.count(dbo_name))
+        if (!dbo_variable_sets_.count(dbcontent_name))
         {
-            logerr << "JSONImportTask: insertData: dbo " << dbo_name << " has no variable set, buffer size "
+            logerr << "JSONImportTask: insertData: dbo " << dbcontent_name << " has no variable set, buffer size "
                    << buffer->size();
             continue;
         }
 
-        assert(dbo_variable_sets_.count(dbo_name));
+        assert(dbo_variable_sets_.count(dbcontent_name));
 
-        loginf << "JSONImporterTask: insertData: insert dbo " << dbo_name << " size " << buffer->size()
+        loginf << "JSONImporterTask: insertData: insert dbo " << dbcontent_name << " size " << buffer->size()
                << " num prop " << buffer->properties().size();
         //buffer->properties().print();
 
-        assert(object_manager.existsObject(dbo_name));
-        DBObject& db_object = object_manager.object(dbo_name);
-
-        assert(db_object.hasCurrentDataSourceDefinition());
+        assert(object_manager.existsDBContent(dbcontent_name));
+        DBContent& dbcontent = object_manager.object(dbcontent_name);
 
         ++insert_active_;
 
-        has_sac_sic = db_object.hasVariable("sac") && db_object.hasVariable("sic") &&
+        has_sac_sic = dbcontent.hasVariable("sac") && dbcontent.hasVariable("sic") &&
                 buffer->has<unsigned char>("sac") && buffer->has<unsigned char>("sic");
 
-        logdbg << "JSONImportTask: insertData: " << db_object.name() << " has sac/sic "
+        logdbg << "JSONImportTask: insertData: " << dbcontent.name() << " has sac/sic "
                << has_sac_sic << " buffer size " << buffer->size();
 
-        connect(&db_object, &DBObject::insertDoneSignal, this, &JSONImportTask::insertDoneSlot,
+        connect(&dbcontent, &DBContent::insertDoneSignal, this, &JSONImportTask::insertDoneSlot,
                 Qt::UniqueConnection);
-        connect(&db_object, &DBObject::insertProgressSignal, this,
+        connect(&dbcontent, &DBContent::insertProgressSignal, this,
                 &JSONImportTask::insertProgressSlot, Qt::UniqueConnection);
 
-        std::string data_source_var_name = std::get<0>(dbo_variable_sets_.at(dbo_name));
+        std::string data_source_var_name = std::get<0>(dbo_variable_sets_.at(dbcontent_name));
 
-        logdbg << "JSONImportTask: insertData: adding new data sources in dbo " << db_object.name()
+        logdbg << "JSONImportTask: insertData: adding new data sources in dbo " << dbcontent.name()
                << " ds varname '" << data_source_var_name << "'";
+
+        TODO_ASSERT
 
         // collect existing datasources
         std::set<int> datasources_existing;
-        if (db_object.hasDataSources())
-            for (auto ds_it = db_object.dsBegin(); ds_it != db_object.dsEnd(); ++ds_it)
-                datasources_existing.insert(ds_it->first);
+//        if (dbcontent.hasDataSources())
+//            for (auto ds_it = dbcontent.dsBegin(); ds_it != dbcontent.dsEnd(); ++ds_it)
+//                datasources_existing.insert(ds_it->first);
 
         // getting key list and distinct values
         assert(buffer->properties().hasProperty(data_source_var_name));
@@ -774,26 +743,28 @@ void JSONImportTask::insertData(std::map<std::string, std::shared_ptr<Buffer>> j
                 }
             }
 
-        if (datasources_to_add.size())
-        {
-            db_object.addDataSources(datasources_to_add);
-        }
+        TODO_ASSERT
 
-        DBOVariableSet& set = std::get<1>(dbo_variable_sets_.at(dbo_name));
+//        if (datasources_to_add.size())
+//        {
+//            dbcontent.addDataSources(datasources_to_add);
+//        }
+
+        DBOVariableSet& set = std::get<1>(dbo_variable_sets_.at(dbcontent_name));
 
         loginf << "JSONImporterTask: insertData: calling dbo insert buffer size " << buffer->size()
                << " num set " << set.getSize();
 
         //set.print();
 
-        db_object.insertData(set, buffer, false);
+        dbcontent.insertData(set, buffer, false);
 
         objects_inserted_ += buffer->size();
 
-        if (db_object.name() == "Radar")
+        if (dbcontent.name() == "Radar")
             num_radar_inserted_ += buffer->size(); // store for later check
 
-        // status_widget_->addNumInserted(db_object.name(), buffer->size());
+        // status_widget_->addNumInserted(dbcontent.name(), buffer->size());
     }
 
     logdbg << "JSONImporterTask: insertData: done";
@@ -848,7 +819,7 @@ void JSONImportTask::checkAllDone()
             if (num_radar_inserted_)
             {
                 bool has_null_positions = COMPASS::instance().interface().areColumnsNull(
-                            COMPASS::instance().objectManager().object("Radar").currentMetaTable().mainTableName(),
+                            COMPASS::instance().objectManager().object("Radar").dbTableName(),
                             {"pos_lat_deg","pos_long_deg"});
 
                 loginf << "JSONImporterTask: insertDoneSlot: radar has null positions " << has_null_positions;
@@ -1013,7 +984,7 @@ void JSONImportTask::insertProgressSlot(float percent)
     logdbg << "JSONImporterTask: insertProgressSlot: " << String::percentToString(percent) << "%";
 }
 
-void JSONImportTask::insertDoneSlot(DBObject& object)
+void JSONImportTask::insertDoneSlot(DBContent& object)
 {
     logdbg << "JSONImporterTask: insertDoneSlot";
     --insert_active_;

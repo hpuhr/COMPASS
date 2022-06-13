@@ -25,15 +25,14 @@
 #include <cassert>
 
 class Buffer;
-class DBObject;
+class DBContent;
 class DBInterface;
-class DBOVariable;
 
-/**
- * @brief Buffer write job
- *
- * Writes buffer's data contents to a database table.
- */
+namespace dbContent
+{
+class Variable;
+}
+
 class UpdateBufferDBJob : public Job
 {
     Q_OBJECT
@@ -42,7 +41,7 @@ class UpdateBufferDBJob : public Job
     void updateProgressSignal(float percent);
 
   public:
-    UpdateBufferDBJob(DBInterface& db_interface, DBObject& dbobject, DBOVariable& key_var,
+    UpdateBufferDBJob(DBInterface& db_interface, DBContent& dbobject, dbContent::Variable& key_var,
                       std::shared_ptr<Buffer> buffer);
 
     virtual ~UpdateBufferDBJob();
@@ -57,8 +56,8 @@ class UpdateBufferDBJob : public Job
 
   protected:
     DBInterface& db_interface_;
-    DBObject& dbobject_;
-    DBOVariable& key_var_;
+    DBContent& dbobject_;
+    dbContent::Variable& key_var_;
     std::shared_ptr<Buffer> buffer_;
 };
 

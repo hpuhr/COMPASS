@@ -18,40 +18,64 @@
 #ifndef CLIENT_H_
 #define CLIENT_H_
 
+#include "global.h"
+
 #include <QApplication>
-#include <memory>
 
-class MainWindow;
-
-/**
- * @brief Main Class
- *
- */
 class Client : public QApplication
 {
-  public:
-    ///@brief Constructor.
+public:
     Client(int& argc, char** argv);
-    ///@brief Destructor.
     virtual ~Client();
 
-    ///@brief Re-implementation from QApplication so exceptions can be thrown in slots.
     virtual bool notify(QObject* receiver, QEvent* event);
 
     bool quitRequested() const;
-    MainWindow& mainWindow();
 
-  private:
+    void run ();
+
+private:
+
     std::string system_install_path_;
     bool quit_requested_{false};
 
     bool home_subdir_deletion_wanted_{false};
     bool config_and_data_copy_wanted_{false};
 
-    //bool config_and_data_exists_{false};
-    //bool config_and_data_copied_{false};
+    std::string create_new_sqlite3_db_filename_;
+    std::string open_sqlite3_db_filename_;
 
-    //bool upgrade_needed_{false};
+    std::string import_data_sources_filename_;
+
+    std::string import_asterix_filename_;
+    std::string import_asterix_file_line_;
+
+    bool import_asterix_network_ {false};
+    std::string import_asterix_network_time_offset_;
+    int import_asterix_network_max_lines_ {-1};
+    std::string asterix_framing;
+    std::string asterix_decoder_cfg;
+
+    std::string import_view_points_filename_;
+    std::string import_gps_trail_filename_;
+    std::string import_gps_parameters_;
+    std::string import_sectors_filename_;
+
+    bool associate_data_ {false};
+
+    bool load_data_ {false};
+
+    std::string export_view_points_report_filename_;
+
+    std::string evaluation_parameters_;
+    bool evaluate_run_filter_ {false};
+    bool evaluate_ {false};
+    std::string export_eval_report_filename_;
+
+    bool no_config_save_ {false};
+    bool quit_ {false};
+
+    bool expert_mode_ {false};
 
     void checkAndSetupConfig();
 
@@ -60,11 +84,6 @@ class Client : public QApplication
 
     void deleteCompleteHomeSubDir();
     void copyConfigurationAndData();
-    //void copyConfiguration();
-
-  protected:
-    std::unique_ptr<MainWindow> main_window_;
 };
-//}
 
 #endif /* CLIENT_H_ */

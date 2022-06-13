@@ -19,7 +19,7 @@
 #include "compass.h"
 #include "dbinterface.h"
 #include "evaluationmanager.h"
-#include "managesectorstaskwidget.h"
+#include "managesectorstaskdialog.h"
 #include "taskmanager.h"
 #include "savedfile.h"
 #include "files.h"
@@ -62,21 +62,27 @@ ManageSectorsTask::~ManageSectorsTask()
     file_list_.clear();
 }
 
-TaskWidget* ManageSectorsTask::widget()
+ManageSectorsTaskDialog* ManageSectorsTask::dialog()
 {
-    if (!widget_)
+    if (!dialog_)
     {
-        widget_.reset(new ManageSectorsTaskWidget(*this));
+        dialog_.reset(new ManageSectorsTaskDialog(*this));
 
-        connect(&task_manager_, &TaskManager::expertModeChangedSignal, widget_.get(),
-                &ManageSectorsTaskWidget::expertModeChangedSlot);
+        connect(dialog_.get(), &ManageSectorsTaskDialog::doneSignal,
+                this, &ManageSectorsTask::dialogDoneSlot);
     }
 
-    assert(widget_);
-    return widget_.get();
+    assert(dialog_);
+    return dialog_.get();
 }
 
-void ManageSectorsTask::deleteWidget() { widget_.reset(nullptr); }
+void ManageSectorsTask::dialogDoneSlot()
+{
+    assert (dialog_);
+    dialog_->hide();
+
+    emit COMPASS::instance().evaluationManager().sectorsChangedSignal();
+}
 
 void ManageSectorsTask::generateSubConfigurable(const std::string& class_id,
                                                 const std::string& instance_id)
@@ -115,11 +121,8 @@ void ManageSectorsTask::addFile(const std::string& filename)
 
     emit statusChangedSignal(name_);
 
-    if (widget_)
-    {
-        widget_->updateFileListSlot();
-        //widget_->updateText();
-    }
+    if (dialog_)
+        dialog_->updateFileList();
 }
 
 void ManageSectorsTask::removeCurrentFilename()
@@ -142,8 +145,8 @@ void ManageSectorsTask::removeCurrentFilename()
 
     emit statusChangedSignal(name_);
 
-    if (widget_)
-        widget_->updateFileListSlot();
+    if (dialog_)
+        dialog_->updateFileList();
 }
 
 void ManageSectorsTask::removeAllFiles ()
@@ -163,8 +166,8 @@ void ManageSectorsTask::removeAllFiles ()
 
     emit statusChangedSignal(name_);
 
-    if (widget_)
-        widget_->updateFileListSlot();
+    if (dialog_)
+        dialog_->updateFileList();
 }
 
 void ManageSectorsTask::currentFilename(const std::string& filename)
@@ -232,13 +235,7 @@ void ManageSectorsTask::importFile (const std::string& layer_name, bool exclude,
     exclude_ = exclude;
     color_ = color;
 
-    task_manager_.appendInfo("ManageSectorsTask: import of file '" + current_filename_ +
-                             "' into layer '" + layer_name_ + "' started");
-
     parseCurrentFile(true);
-
-    task_manager_.appendSuccess("ManageSectorsTask: imported " + to_string(found_sectors_num_)
-                                +" sectors");
 
     QMessageBox msgBox;
     msgBox.setText(QString("Import of ")+QString::number(found_sectors_num_)+" sectors done");
@@ -381,8 +378,8 @@ void ManageSectorsTask::parseCurrentFile (bool import)
         }
     }
 
-    if (widget_)
-        widget_->updateParseMessage();
+    if (dialog_)
+        dialog_->updateParseMessage();
 }
 
 void ManageSectorsTask::addPolygon (const std::string& sector_name, OGRPolygon& polygon, bool import)

@@ -188,10 +188,6 @@ void ViewContainer::generateSubConfigurable(const std::string& class_id,
     if (class_id == "ListBoxView")
     {
         views_.emplace_back(new ListBoxView(class_id, instance_id, this, view_manager_));
-        //unsigned int number = String::getAppendedInt(instance_id);
-
-//        if (number >= view_count_)
-//            view_count_ = number + 1;
 
         (*views_.rbegin())->init();
         addView(views_.rbegin()->get());
@@ -199,10 +195,6 @@ void ViewContainer::generateSubConfigurable(const std::string& class_id,
     else if (class_id == "HistogramView")
     {
         views_.emplace_back(new HistogramView(class_id, instance_id, this, view_manager_));
-        //unsigned int number = String::getAppendedInt(instance_id);
-
-//        if (number >= view_count_)
-//            view_count_ = number + 1;
 
         (*views_.rbegin())->init();
         addView(views_.rbegin()->get());
@@ -210,26 +202,23 @@ void ViewContainer::generateSubConfigurable(const std::string& class_id,
     else if (class_id == "ScatterPlotView")
     {
         views_.emplace_back(new ScatterPlotView(class_id, instance_id, this, view_manager_));
-//        unsigned int number = String::getAppendedInt(instance_id);
-
-//        if (number >= view_count_)
-//            view_count_ = number + 1;
 
         (*views_.rbegin())->init();
         addView(views_.rbegin()->get());
     }
-#if USE_EXPERIMENTAL_SOURCE == true
     else if (class_id == "OSGView")
     {
+#if USE_EXPERIMENTAL_SOURCE == true
+
         views_.emplace_back(new OSGView(class_id, instance_id, this, view_manager_));
-//        unsigned int number = String::getAppendedInt(instance_id);
-//        if (number >= view_count_)
-//            view_count_ = number + 1;
 
         (*views_.rbegin())->init();
         addView(views_.rbegin()->get());
-    }
+#else
+        loginf << "ViewContainer: generateSubConfigurable: OSGView ignored since compiled w/o experimental source";
 #endif
+
+    }
     //  else if (class_id.compare ("MosaicView") == 0)
     //  {
     //    MosaicView* view = new MosaicView ( class_id, instance_id, this );

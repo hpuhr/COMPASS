@@ -1,9 +1,24 @@
 {
     "parameters": {
-        "current_standard": "",
-        "dbo_name_ref": "RefTraj",
-        "dbo_name_tst": "Radar",
+        "active_sources_ref": {
+        },
+        "active_sources_tst": {
+            
+        },
+        "configs": {
+                   },
+        "current_standard": "Dubious Targets",
+        "dbcontent_name_ref": "CAT062",
+        "dbcontent_name_tst": "CAT021",
+        "filter_mode_a_code_blacklist": true,
+        "filter_mode_a_code_values": "7000,7777",
+        "filter_mode_a_codes": false,
+        "filter_target_address_values": "",
+        "filter_target_addresses": false,
+        "filter_target_addresses_blacklist": true,
         "generate_details": true,
+        "line_id_ref": 0,
+        "line_id_tst": 0,
         "load_time_begin": 0.0,
         "load_time_end": 0.0,
         "max_nacp": 5,
@@ -19,6 +34,8 @@
         "min_sil_v2": 4,
         "remove_mode_a_code_values": "7000,7777",
         "remove_mode_a_codes": false,
+        "remove_mode_c_min_value": 11000.0,
+        "remove_mode_c_values": false,
         "remove_mode_target_addresses": false,
         "remove_modeac_onlys": false,
         "remove_not_detected_dbo_values": {
@@ -31,216 +48,20 @@
         "remove_short_targets_min_updates": 5,
         "remove_target_address_vales": "",
         "result_detail_zoom": 0.0020000000949949026,
-        "use_adsb_filter": false,
+        "use_adsb_filter": true,
         "use_grp_in_sector": {
-            "EUROCAE ED-116": {
-                "Apron": {
-                    "Common": true
-                },
-                "FRA_ALL": {
-                    "Common": true
-                },
-                "FRA_FL100": {
-                    "Common": false
-                },
-                "FRA_FL30": {
-                    "Common": true
-                },
-                "Runways": {
-                    "Common": true
-                },
-                "Taxiways": {
-                    "Common": true
-                },
-                "fir_body_cut": {
-                    "Common": true
+            "Dub": {
+                "fir_cut_sim": {
+                    "Required": true
                 }
             },
-            "EUROCAE ED-117": {
-                "FRA_ALL": {
-                    "Airborne": false,
-                    "Airborne 2.5-5nm": false,
-                    "Airborne RT-2.5nm": false,
-                    "Apron": false,
-                    "Common": true,
-                    "Maneuvering Area": true,
-                    "Runways": true,
-                    "Stand": true,
-                    "Taxiways": true
-                }
-            },
-            "EUROCAE ED-117A": {
-                "ARTAS_Lis_DOI": {
-                    "Active Stands": true,
-                    "Apron Taxiways": true,
-                    "Common": true,
-                    "Manoeuvring Area": true
-                },
-                "DOI": {
-                    "Active Stands": true,
-                    "Apron Taxiways": true,
-                    "Common": true,
-                    "Manoeuvring Area": true
-                },
-                "FRA_ALL": {
-                    "Active Stands": false,
-                    "Apron Taxiways": false,
-                    "Common": true,
-                    "Manoeuvring Area": true
-                },
-                "FRA_FL100": {
-                    "Active Stands": false,
-                    "Apron Taxiways": false,
-                    "Common": true,
-                    "Manoeuvring Area": true
-                },
-                "FRA_FL30": {
-                    "Active Stands": false,
-                    "Apron Taxiways": false,
-                    "Common": false,
-                    "Manoeuvring Area": false
-                },
-                "LISBOA_3NM": {
-                    "Active Stands": true,
-                    "Apron Taxiways": true,
-                    "Common": true,
-                    "Manoeuvring Area": true
-                },
-                "LISBOA_5NM": {
-                    "Active Stands": true,
-                    "Apron Taxiways": true,
-                    "Common": true,
-                    "Manoeuvring Area": true
-                },
-                "LISBOA_8NM": {
-                    "Active Stands": true,
-                    "Apron Taxiways": true,
-                    "Common": true,
-                    "Manoeuvring Area": true
-                },
-                "Runways": {
-                    "Active Stands": false,
-                    "Apron Taxiways": false,
-                    "Common": true,
-                    "Manoeuvring Area": true
-                },
-                "Taxiways": {
-                    "Active Stands": false,
-                    "Apron Taxiways": false,
-                    "Common": true,
-                    "Manoeuvring Area": true
-                }
-            },
-            "EUROCAE ED-87C": {
-                "Apron": {
-                    "Active Stands": true,
-                    "Apron Taxiways": true,
-                    "Common": true,
-                    "Manoeuvring Area": true
-                },
-                "Runways": {
-                    "Active Stands": false,
-                    "Apron Taxiways": false,
-                    "Common": true,
-                    "Manoeuvring Area": true
-                },
-                "RunwaysCut": {
-                    "Active Stands": true,
-                    "Apron Taxiways": true,
-                    "Common": true,
-                    "Manoeuvring Area": true
-                },
-                "Taxiways": {
-                    "Active Stands": false,
-                    "Apron Taxiways": false,
-                    "Common": true,
-                    "Manoeuvring Area": true
-                }
-            },
-            "LOWW Special": {
-                "Apron": {
-                    "Common": true
-                },
-                "FRA_ALL": {
-                    "Common": true
-                },
-                "Runways": {
-                    "Common": true
-                },
-                "Taxiways": {
-                    "Common": true
-                }
-            },
-            "TestPorto": {
-                "ARTAS_Lis_DOI": {
-                    "3NM": true,
-                    "5NM": false,
-                    "8NM": false,
-                    "Mandatory": true
-                },
-                "FRA_ALL": {
-                    "3NM": true,
-                    "5NM": true,
-                    "8NM": true,
-                    "Mandatory": true
-                },
-                "LISBOA_3NM": {
-                    "3NM": true,
-                    "5NM": false,
-                    "8NM": false,
-                    "Mandatory": true
-                },
-                "LISBOA_5NM": {
-                    "3NM": false,
-                    "5NM": true,
-                    "8NM": false,
-                    "Mandatory": true
-                },
-                "LISBOA_8NM": {
-                    "3NM": false,
-                    "5NM": false,
-                    "8NM": true,
-                    "Mandatory": true
+            "Dubious Targets": {
+                "fir_cut_sim": {
+                    "Optional": true
                 }
             },
             "test": {
-                "ARTAS_Lis_DOI": {
-                    "Mandatory": true
-                },
-                "Apron": {
-                    "Mandatory": true
-                },
-                "DOI": {
-                    "Mandatory": true
-                },
-                "FRA_ALL": {
-                    "Mandatory": true
-                },
-                "FRA_FL100": {
-                    "Mandatory": true
-                },
-                "FRA_FL30": {
-                    "Mandatory": true
-                },
-                "LISBOA_3NM": {
-                    "Mandatory": true
-                },
-                "LISBOA_5NM": {
-                    "Mandatory": true
-                },
-                "LISBOA_8NM": {
-                    "Mandatory": true
-                },
-                "LuftraumAT": {
-                    "Mandatory": true
-                },
-                "Runways": {
-                    "Mandatory": true
-                },
-                "Taxiways": {
-                    "Mandatory": true
-                },
-                "fir_body_cut": {
+                "fir_cut_sim": {
                     "Mandatory": true
                 }
             }
@@ -261,29 +82,11 @@
         "use_v0": true,
         "use_v1": true,
         "use_v2": true,
-        "warning_shown": false
+        "warning_shown": true
     },
     "sub_config_files": [
-        {
-            "class_id": "EvaluationResultsGenerator",
-            "instance_id": "EvaluationResultsGenerator0",
-            "path": "eval_results.json"
-        }
     ],
     "sub_configs": {
-        "EvaluationResultsReportPDFGenerator": {
-            "EvaluationResultsReportPDFGenerator0": {
-                "parameters": {
-                    "abstract": "",
-                    "author": "",
-                    "num_max_table_col_width": 24,
-                    "num_max_table_rows": 1000,
-                    "open_created_pdf": true,
-                    "run_pdflatex": true,
-                    "wait_on_map_loading": true
-                }
-            }
-        },
         "EvaluationStandard": {
             "EvaluationStandard1171": {
                 "parameters": {
@@ -562,6 +365,87 @@
                                             "short_name": "RPA",
                                             "threshold_value": 12.0,
                                             "threshold_value_check_type": 1
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "EvaluationStandardDubious Targets0": {
+                "parameters": {
+                    "name": "Dubious Targets"
+                },
+                "sub_configs": {
+                    "EvaluationRequirementGroup": {
+                        "EvaluationRequirementGroupOptional0": {
+                            "parameters": {
+                                "name": "Optional"
+                            },
+                            "sub_configs": {
+                                "EvaluationRequirementDubiousTargetConfig": {
+                                    "EvaluationRequirementDubiousTargetConfigDubious0": {
+                                        "parameters": {
+                                            "comment": "",
+                                            "dubious_prob": 0.05000000074505806,
+                                            "mark_primary_only": false,
+                                            "max_acceleration": 29.43000030517578,
+                                            "max_groundspeed_kts": 1333.0,
+                                            "max_rocd": 1000.0,
+                                            "max_turnrate": 30.0,
+                                            "maximum_comparison_time": 30.0,
+                                            "min_duration": 30.0,
+                                            "min_updates": 10,
+                                            "minimum_comparison_time": 1.0,
+                                            "name": "Dubious",
+                                            "prob": 0.8999999761581421,
+                                            "prob_check_type": 1,
+                                            "short_name": "DTGT",
+                                            "use_max_acceleration": true,
+                                            "use_max_groundspeed": true,
+                                            "use_max_turnrate": true,
+                                            "use_min_duration": true,
+                                            "use_min_updates": true,
+                                            "use_rocd": true
+                                        }
+                                    }
+                                },
+                                "EvaluationRequirementPositionAlongConfig": {
+                                    "EvaluationRequirementPositionAlongConfigPosition Along0": {
+                                        "parameters": {
+                                            "comment": "",
+                                            "max_abs_value": 400.0,
+                                            "name": "Position Along",
+                                            "prob": 0.8999999761581421,
+                                            "prob_check_type": 3,
+                                            "short_name": "PALNG"
+                                        }
+                                    }
+                                },
+                                "EvaluationRequirementPositionDistanceConfig": {
+                                    "EvaluationRequirementPositionDistanceConfigPosition Offset0": {
+                                        "parameters": {
+                                            "comment": "",
+                                            "failed_values_of_interest": true,
+                                            "name": "Position Offset",
+                                            "prob": 0.8999999761581421,
+                                            "prob_check_type": 3,
+                                            "short_name": "POFF",
+                                            "threshold_value": 500.0,
+                                            "threshold_value_check_type": 1
+                                        }
+                                    }
+                                },
+                                "EvaluationRequirementPositionLatencyConfig": {
+                                    "EvaluationRequirementPositionLatencyConfigPosition Latency0": {
+                                        "parameters": {
+                                            "comment": "",
+                                            "max_abs_value": 0.5,
+                                            "name": "Position Latency",
+                                            "prob": 0.8999999761581421,
+                                            "prob_check_type": 3,
+                                            "short_name": "PLTNY"
                                         }
                                     }
                                 }
@@ -1285,10 +1169,66 @@
                                             "prob": 0.8999999761581421,
                                             "prob_check_type": 3,
                                             "short_name": "PD",
-                                            "update_interval": 1.0,
+                                            "update_interval": 2.0,
                                             "use_max_gap_length": false,
                                             "use_min_gap_length": false,
                                             "use_miss_tolerance": true
+                                        }
+                                    }
+                                },
+                                "EvaluationRequirementDubiousTargetConfig": {
+                                    "EvaluationRequirementDubiousTargetConfigDubious Target0": {
+                                        "parameters": {
+                                            "comment": "",
+                                            "dubious_prob": 0.05000000074505806,
+                                            "mark_primary_only": true,
+                                            "max_acceleration": 29.43000030517578,
+                                            "max_groundspeed_kts": 1333.0,
+                                            "max_rocd": 1000.0,
+                                            "max_turnrate": 30.0,
+                                            "maximum_comparison_time": 30.0,
+                                            "min_duration": 30.0,
+                                            "min_updates": 10,
+                                            "minimum_comparison_time": 1.0,
+                                            "name": "Dubious Target",
+                                            "prob": 0.8999999761581421,
+                                            "prob_check_type": 1,
+                                            "short_name": "DTGT",
+                                            "use_max_acceleration": true,
+                                            "use_max_groundspeed": true,
+                                            "use_max_turnrate": true,
+                                            "use_min_duration": true,
+                                            "use_min_updates": true,
+                                            "use_rocd": true
+                                        }
+                                    }
+                                },
+                                "EvaluationRequirementDubiousTrackConfig": {
+                                    "EvaluationRequirementDubiousTrackConfigDubious0": {
+                                        "parameters": {
+                                            "comment": "",
+                                            "dubious_prob": 0.05000000074505806,
+                                            "eval_only_single_ds_id": false,
+                                            "mark_primary_only": true,
+                                            "max_acceleration": 29.43000030517578,
+                                            "max_groundspeed_kts": 1333.0,
+                                            "max_rocd": 1000.0,
+                                            "max_turnrate": 30.0,
+                                            "maximum_comparison_time": 30.0,
+                                            "min_duration": 30.0,
+                                            "min_updates": 10,
+                                            "minimum_comparison_time": 1.0,
+                                            "name": "Dubious Track",
+                                            "prob": 0.8999999761581421,
+                                            "prob_check_type": 1,
+                                            "short_name": "DTRK",
+                                            "single_ds_id": 0,
+                                            "use_max_acceleration": true,
+                                            "use_max_groundspeed": true,
+                                            "use_max_turnrate": true,
+                                            "use_min_duration": true,
+                                            "use_min_updates": true,
+                                            "use_rocd": true
                                         }
                                     }
                                 },

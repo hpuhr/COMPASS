@@ -17,96 +17,82 @@
                                 "ListBoxViewDataSource": {
                                     "ListBoxViewDataSource0": {
                                         "parameters": {
-                                            "current_set_name": "Vertical Movement"
+                                            "current_set_name": "Horizontal Movement"
                                         },
                                         "sub_configs": {
-                                            "DBOVariableOrderedSet": {
-                                                "ADS-B Position Quality": {
+                                            "VariableOrderedSet": {
+                                                "ADS-B Quality": {
                                                     "parameters": null,
                                                     "sub_configs": {
-                                                        "DBOVariableOrderDefinition": {
-                                                            "DBOVariableOrderDefinition0": {
+                                                        "VariableOrderDefinition": {
+                                                            "VariableOrderDefinition1": {
                                                                 "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "rec_num",
-                                                                    "index": 0
+                                                                    "dbcontent_name": "Meta",
+                                                                    "index": 0,
+                                                                    "variable_name": "Time of Day"
                                                                 }
                                                             },
-                                                            "DBOVariableOrderDefinition1": {
+                                                            "VariableOrderDefinition10": {
                                                                 "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "tod",
-                                                                    "index": 1
+                                                                    "dbcontent_name": "CAT021",
+                                                                    "index": 7,
+                                                                    "variable_name": "NUCp or NIC"
                                                                 }
                                                             },
-                                                            "DBOVariableOrderDefinition10": {
+                                                            "VariableOrderDefinition2": {
                                                                 "parameters": {
-                                                                    "dbo_name": "ADSB",
-                                                                    "dbo_variable_name": "nucp_nic",
-                                                                    "index": 10
+                                                                    "dbcontent_name": "Meta",
+                                                                    "index": 1,
+                                                                    "variable_name": "DS ID"
                                                                 }
                                                             },
-                                                            "DBOVariableOrderDefinition11": {
+                                                            "VariableOrderDefinition3": {
                                                                 "parameters": {
-                                                                    "dbo_name": "ADSB",
-                                                                    "dbo_variable_name": "sil",
-                                                                    "index": 11
+                                                                    "dbcontent_name": "Meta",
+                                                                    "index": 2,
+                                                                    "variable_name": "Mode 3/A Code"
                                                                 }
                                                             },
-                                                            "DBOVariableOrderDefinition2": {
+                                                            "VariableOrderDefinition4": {
                                                                 "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "ds_id",
-                                                                    "index": 2
+                                                                    "dbcontent_name": "Meta",
+                                                                    "index": 3,
+                                                                    "variable_name": "Aircraft Address"
                                                                 }
                                                             },
-                                                            "DBOVariableOrderDefinition3": {
+                                                            "VariableOrderDefinition5": {
                                                                 "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "mode3a_code",
-                                                                    "index": 3
+                                                                    "dbcontent_name": "Meta",
+                                                                    "index": 4,
+                                                                    "variable_name": "Aircraft Identification"
                                                                 }
                                                             },
-                                                            "DBOVariableOrderDefinition4": {
+                                                            "VariableOrderDefinition6": {
                                                                 "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "target_addr",
-                                                                    "index": 4
+                                                                    "dbcontent_name": "Meta",
+                                                                    "index": 5,
+                                                                    "variable_name": "Mode C Code"
                                                                 }
                                                             },
-                                                            "DBOVariableOrderDefinition5": {
+                                                            "VariableOrderDefinition7": {
                                                                 "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "callsign",
-                                                                    "index": 5
+                                                                    "dbcontent_name": "CAT021",
+                                                                    "index": 6,
+                                                                    "variable_name": "MOPS Version"
                                                                 }
                                                             },
-                                                            "DBOVariableOrderDefinition6": {
+                                                            "VariableOrderDefinition8": {
                                                                 "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "modec_code_ft",
-                                                                    "index": 6
+                                                                    "dbcontent_name": "CAT021",
+                                                                    "index": 8,
+                                                                    "variable_name": "NACp"
                                                                 }
                                                             },
-                                                            "DBOVariableOrderDefinition7": {
+                                                            "VariableOrderDefinition9": {
                                                                 "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "track_num",
-                                                                    "index": 7
-                                                                }
-                                                            },
-                                                            "DBOVariableOrderDefinition8": {
-                                                                "parameters": {
-                                                                    "dbo_name": "ADSB",
-                                                                    "dbo_variable_name": "mops_version",
-                                                                    "index": 8
-                                                                }
-                                                            },
-                                                            "DBOVariableOrderDefinition9": {
-                                                                "parameters": {
-                                                                    "dbo_name": "ADSB",
-                                                                    "dbo_variable_name": "nac_p",
-                                                                    "index": 9
+                                                                    "dbcontent_name": "CAT021",
+                                                                    "index": 9,
+                                                                    "variable_name": "SIL"
                                                                 }
                                                             }
                                                         }
@@ -115,61 +101,68 @@
                                                 "Default": {
                                                     "parameters": null,
                                                     "sub_configs": {
-                                                        "DBOVariableOrderDefinition": {
-                                                            "DBOVariableOrderDefinition0": {
+                                                        "VariableOrderDefinition": {
+                                                            "VariableOrderDefinition0": {
                                                                 "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "rec_num",
-                                                                    "index": 0
+                                                                    "dbcontent_name": "Meta",
+                                                                    "index": 0,
+                                                                    "variable_name": "Record Number"
                                                                 }
                                                             },
-                                                            "DBOVariableOrderDefinition1": {
+                                                            "VariableOrderDefinition1": {
                                                                 "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "tod",
-                                                                    "index": 1
+                                                                    "dbcontent_name": "Meta",
+                                                                    "index": 1,
+                                                                    "variable_name": "Time of Day"
                                                                 }
                                                             },
-                                                            "DBOVariableOrderDefinition2": {
+                                                            "VariableOrderDefinition2": {
                                                                 "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "ds_id",
-                                                                    "index": 2
+                                                                    "dbcontent_name": "Meta",
+                                                                    "index": 2,
+                                                                    "variable_name": "DS ID"
                                                                 }
                                                             },
-                                                            "DBOVariableOrderDefinition3": {
+                                                            "VariableOrderDefinition3": {
                                                                 "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "mode3a_code",
-                                                                    "index": 3
+                                                                    "dbcontent_name": "Meta",
+                                                                    "index": 3,
+                                                                    "variable_name": "Mode 3/A Code"
                                                                 }
                                                             },
-                                                            "DBOVariableOrderDefinition4": {
+                                                            "VariableOrderDefinition4": {
                                                                 "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "target_addr",
-                                                                    "index": 4
+                                                                    "dbcontent_name": "Meta",
+                                                                    "index": 4,
+                                                                    "variable_name": "Aircraft Address"
                                                                 }
                                                             },
-                                                            "DBOVariableOrderDefinition5": {
+                                                            "VariableOrderDefinition5": {
                                                                 "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "callsign",
-                                                                    "index": 5
+                                                                    "dbcontent_name": "Meta",
+                                                                    "index": 5,
+                                                                    "variable_name": "Aircraft Identification"
                                                                 }
                                                             },
-                                                            "DBOVariableOrderDefinition6": {
+                                                            "VariableOrderDefinition6": {
                                                                 "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "modec_code_ft",
-                                                                    "index": 6
+                                                                    "dbcontent_name": "Meta",
+                                                                    "index": 6,
+                                                                    "variable_name": "Mode C Code"
                                                                 }
                                                             },
-                                                            "DBOVariableOrderDefinition7": {
+                                                            "VariableOrderDefinition7": {
                                                                 "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "track_num",
-                                                                    "index": 7
+                                                                    "dbcontent_name": "Meta",
+                                                                    "index": 7,
+                                                                    "variable_name": "Track Number"
+                                                                }
+                                                            },
+                                                            "VariableOrderDefinition8": {
+                                                                "parameters": {
+                                                                    "dbcontent_name": "Meta",
+                                                                    "index": 8,
+                                                                    "variable_name": "Associations"
                                                                 }
                                                             }
                                                         }
@@ -178,89 +171,75 @@
                                                 "Horizontal Movement": {
                                                     "parameters": null,
                                                     "sub_configs": {
-                                                        "DBOVariableOrderDefinition": {
-                                                            "DBOVariableOrderDefinition0": {
+                                                        "VariableOrderDefinition": {
+                                                            "VariableOrderDefinition1": {
                                                                 "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "rec_num",
-                                                                    "index": 0
+                                                                    "dbcontent_name": "Meta",
+                                                                    "index": 0,
+                                                                    "variable_name": "Time of Day"
                                                                 }
                                                             },
-                                                            "DBOVariableOrderDefinition1": {
+                                                            "VariableOrderDefinition10": {
                                                                 "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "tod",
-                                                                    "index": 1
+                                                                    "dbcontent_name": "Meta",
+                                                                    "index": 9,
+                                                                    "variable_name": "Track Angle"
                                                                 }
                                                             },
-                                                            "DBOVariableOrderDefinition10": {
+                                                            "VariableOrderDefinition2": {
                                                                 "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "mof_long",
-                                                                    "index": 10
+                                                                    "dbcontent_name": "Meta",
+                                                                    "index": 1,
+                                                                    "variable_name": "DS ID"
                                                                 }
                                                             },
-                                                            "DBOVariableOrderDefinition11": {
+                                                            "VariableOrderDefinition3": {
                                                                 "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "mof_trans",
-                                                                    "index": 11
+                                                                    "dbcontent_name": "Meta",
+                                                                    "index": 2,
+                                                                    "variable_name": "Mode 3/A Code"
                                                                 }
                                                             },
-                                                            "DBOVariableOrderDefinition2": {
+                                                            "VariableOrderDefinition4": {
                                                                 "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "ds_id",
-                                                                    "index": 2
+                                                                    "dbcontent_name": "Meta",
+                                                                    "index": 3,
+                                                                    "variable_name": "Aircraft Address"
                                                                 }
                                                             },
-                                                            "DBOVariableOrderDefinition3": {
+                                                            "VariableOrderDefinition5": {
                                                                 "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "mode3a_code",
-                                                                    "index": 3
+                                                                    "dbcontent_name": "Meta",
+                                                                    "index": 4,
+                                                                    "variable_name": "Aircraft Identification"
                                                                 }
                                                             },
-                                                            "DBOVariableOrderDefinition4": {
+                                                            "VariableOrderDefinition6": {
                                                                 "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "target_addr",
-                                                                    "index": 4
+                                                                    "dbcontent_name": "Meta",
+                                                                    "index": 5,
+                                                                    "variable_name": "Mode C Code"
                                                                 }
                                                             },
-                                                            "DBOVariableOrderDefinition5": {
+                                                            "VariableOrderDefinition7": {
                                                                 "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "callsign",
-                                                                    "index": 5
+                                                                    "dbcontent_name": "Meta",
+                                                                    "index": 6,
+                                                                    "variable_name": "Track Number"
                                                                 }
                                                             },
-                                                            "DBOVariableOrderDefinition6": {
+                                                            "VariableOrderDefinition8": {
                                                                 "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "modec_code_ft",
-                                                                    "index": 6
+                                                                    "dbcontent_name": "Meta",
+                                                                    "index": 7,
+                                                                    "variable_name": "Track Horizontal Manoeuvre"
                                                                 }
                                                             },
-                                                            "DBOVariableOrderDefinition7": {
+                                                            "VariableOrderDefinition9": {
                                                                 "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "track_num",
-                                                                    "index": 7
-                                                                }
-                                                            },
-                                                            "DBOVariableOrderDefinition8": {
-                                                                "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "groundspeed_kt",
-                                                                    "index": 8
-                                                                }
-                                                            },
-                                                            "DBOVariableOrderDefinition9": {
-                                                                "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "heading_deg",
-                                                                    "index": 9
+                                                                    "dbcontent_name": "Meta",
+                                                                    "index": 8,
+                                                                    "variable_name": "Track Groundspeed"
                                                                 }
                                                             }
                                                         }
@@ -269,96 +248,75 @@
                                                 "Mode A/C Info": {
                                                     "parameters": null,
                                                     "sub_configs": {
-                                                        "DBOVariableOrderDefinition": {
-                                                            "DBOVariableOrderDefinition0": {
+                                                        "VariableOrderDefinition": {
+                                                            "VariableOrderDefinition1": {
                                                                 "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "rec_num",
-                                                                    "index": 0
+                                                                    "dbcontent_name": "Meta",
+                                                                    "index": 0,
+                                                                    "variable_name": "Time of Day"
                                                                 }
                                                             },
-                                                            "DBOVariableOrderDefinition1": {
+                                                            "VariableOrderDefinition10": {
                                                                 "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "tod",
-                                                                    "index": 1
+                                                                    "dbcontent_name": "Meta",
+                                                                    "index": 4,
+                                                                    "variable_name": "Mode 3/A Smoothed"
                                                                 }
                                                             },
-                                                            "DBOVariableOrderDefinition10": {
+                                                            "VariableOrderDefinition11": {
                                                                 "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "mode3a_v",
-                                                                    "index": 8
+                                                                    "dbcontent_name": "Meta",
+                                                                    "index": 5,
+                                                                    "variable_name": "Mode 3/A Valid"
                                                                 }
                                                             },
-                                                            "DBOVariableOrderDefinition11": {
+                                                            "VariableOrderDefinition2": {
                                                                 "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "modec_g",
-                                                                    "index": 10
+                                                                    "dbcontent_name": "Meta",
+                                                                    "index": 1,
+                                                                    "variable_name": "DS ID"
                                                                 }
                                                             },
-                                                            "DBOVariableOrderDefinition12": {
+                                                            "VariableOrderDefinition3": {
                                                                 "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "modec_v",
-                                                                    "index": 11
+                                                                    "dbcontent_name": "Meta",
+                                                                    "index": 2,
+                                                                    "variable_name": "Mode 3/A Code"
                                                                 }
                                                             },
-                                                            "DBOVariableOrderDefinition2": {
+                                                            "VariableOrderDefinition4": {
                                                                 "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "ds_id",
-                                                                    "index": 2
+                                                                    "dbcontent_name": "Meta",
+                                                                    "index": 6,
+                                                                    "variable_name": "Aircraft Address"
                                                                 }
                                                             },
-                                                            "DBOVariableOrderDefinition3": {
+                                                            "VariableOrderDefinition5": {
                                                                 "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "mode3a_code",
-                                                                    "index": 5
+                                                                    "dbcontent_name": "Meta",
+                                                                    "index": 7,
+                                                                    "variable_name": "Aircraft Identification"
                                                                 }
                                                             },
-                                                            "DBOVariableOrderDefinition4": {
+                                                            "VariableOrderDefinition6": {
                                                                 "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "target_addr",
-                                                                    "index": 3
+                                                                    "dbcontent_name": "Meta",
+                                                                    "index": 8,
+                                                                    "variable_name": "Mode C Code"
                                                                 }
                                                             },
-                                                            "DBOVariableOrderDefinition5": {
+                                                            "VariableOrderDefinition8": {
                                                                 "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "callsign",
-                                                                    "index": 4
+                                                                    "dbcontent_name": "Meta",
+                                                                    "index": 9,
+                                                                    "variable_name": "Associations"
                                                                 }
                                                             },
-                                                            "DBOVariableOrderDefinition6": {
+                                                            "VariableOrderDefinition9": {
                                                                 "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "modec_code_ft",
-                                                                    "index": 9
-                                                                }
-                                                            },
-                                                            "DBOVariableOrderDefinition7": {
-                                                                "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "track_num",
-                                                                    "index": 12
-                                                                }
-                                                            },
-                                                            "DBOVariableOrderDefinition8": {
-                                                                "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "mode3a_g",
-                                                                    "index": 6
-                                                                }
-                                                            },
-                                                            "DBOVariableOrderDefinition9": {
-                                                                "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "mode3a_smo",
-                                                                    "index": 7
+                                                                    "dbcontent_name": "Meta",
+                                                                    "index": 3,
+                                                                    "variable_name": "Mode 3/A Garbled"
                                                                 }
                                                             }
                                                         }
@@ -367,180 +325,89 @@
                                                 "Track Lifetime": {
                                                     "parameters": null,
                                                     "sub_configs": {
-                                                        "DBOVariableOrderDefinition": {
-                                                            "DBOVariableOrderDefinition0": {
+                                                        "VariableOrderDefinition": {
+                                                            "VariableOrderDefinition1": {
                                                                 "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "rec_num",
-                                                                    "index": 0
+                                                                    "dbcontent_name": "Meta",
+                                                                    "index": 0,
+                                                                    "variable_name": "Time of Day"
                                                                 }
                                                             },
-                                                            "DBOVariableOrderDefinition1": {
+                                                            "VariableOrderDefinition10": {
                                                                 "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "tod",
-                                                                    "index": 1
+                                                                    "dbcontent_name": "Meta",
+                                                                    "index": 10,
+                                                                    "variable_name": "Track Coasting"
                                                                 }
                                                             },
-                                                            "DBOVariableOrderDefinition10": {
+                                                            "VariableOrderDefinition11": {
                                                                 "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "track_coasted",
-                                                                    "index": 10
+                                                                    "dbcontent_name": "Meta",
+                                                                    "index": 9,
+                                                                    "variable_name": "Track Confirmed"
                                                                 }
                                                             },
-                                                            "DBOVariableOrderDefinition11": {
+                                                            "VariableOrderDefinition12": {
                                                                 "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "track_end",
-                                                                    "index": 11
+                                                                    "dbcontent_name": "Meta",
+                                                                    "index": 11,
+                                                                    "variable_name": "Track End"
                                                                 }
                                                             },
-                                                            "DBOVariableOrderDefinition2": {
+                                                            "VariableOrderDefinition2": {
                                                                 "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "ds_id",
-                                                                    "index": 2
+                                                                    "dbcontent_name": "Meta",
+                                                                    "index": 1,
+                                                                    "variable_name": "DS ID"
                                                                 }
                                                             },
-                                                            "DBOVariableOrderDefinition3": {
+                                                            "VariableOrderDefinition3": {
                                                                 "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "mode3a_code",
-                                                                    "index": 3
+                                                                    "dbcontent_name": "Meta",
+                                                                    "index": 2,
+                                                                    "variable_name": "Mode 3/A Code"
                                                                 }
                                                             },
-                                                            "DBOVariableOrderDefinition4": {
+                                                            "VariableOrderDefinition4": {
                                                                 "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "target_addr",
-                                                                    "index": 4
+                                                                    "dbcontent_name": "Meta",
+                                                                    "index": 3,
+                                                                    "variable_name": "Aircraft Address"
                                                                 }
                                                             },
-                                                            "DBOVariableOrderDefinition5": {
+                                                            "VariableOrderDefinition5": {
                                                                 "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "callsign",
-                                                                    "index": 5
+                                                                    "dbcontent_name": "Meta",
+                                                                    "index": 4,
+                                                                    "variable_name": "Aircraft Identification"
                                                                 }
                                                             },
-                                                            "DBOVariableOrderDefinition6": {
+                                                            "VariableOrderDefinition6": {
                                                                 "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "modec_code_ft",
-                                                                    "index": 6
+                                                                    "dbcontent_name": "Meta",
+                                                                    "index": 5,
+                                                                    "variable_name": "Mode C Code"
                                                                 }
                                                             },
-                                                            "DBOVariableOrderDefinition7": {
+                                                            "VariableOrderDefinition7": {
                                                                 "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "track_num",
-                                                                    "index": 7
+                                                                    "dbcontent_name": "Meta",
+                                                                    "index": 6,
+                                                                    "variable_name": "Track Number"
                                                                 }
                                                             },
-                                                            "DBOVariableOrderDefinition8": {
+                                                            "VariableOrderDefinition8": {
                                                                 "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "track_created",
-                                                                    "index": 8
+                                                                    "dbcontent_name": "Meta",
+                                                                    "index": 7,
+                                                                    "variable_name": "Associations"
                                                                 }
                                                             },
-                                                            "DBOVariableOrderDefinition9": {
+                                                            "VariableOrderDefinition9": {
                                                                 "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "track_confirmed",
-                                                                    "index": 9
-                                                                }
-                                                            }
-                                                        }
-                                                    }
-                                                },
-                                                "Vertical Movement": {
-                                                    "parameters": null,
-                                                    "sub_configs": {
-                                                        "DBOVariableOrderDefinition": {
-                                                            "DBOVariableOrderDefinition0": {
-                                                                "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "rec_num",
-                                                                    "index": 0
-                                                                }
-                                                            },
-                                                            "DBOVariableOrderDefinition1": {
-                                                                "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "tod",
-                                                                    "index": 1
-                                                                }
-                                                            },
-                                                            "DBOVariableOrderDefinition10": {
-                                                                "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "calc_vertical_rate_ftm",
-                                                                    "index": 10
-                                                                }
-                                                            },
-                                                            "DBOVariableOrderDefinition11": {
-                                                                "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "ground_bit",
-                                                                    "index": 11
-                                                                }
-                                                            },
-                                                            "DBOVariableOrderDefinition2": {
-                                                                "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "ds_id",
-                                                                    "index": 2
-                                                                }
-                                                            },
-                                                            "DBOVariableOrderDefinition3": {
-                                                                "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "mode3a_code",
-                                                                    "index": 3
-                                                                }
-                                                            },
-                                                            "DBOVariableOrderDefinition4": {
-                                                                "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "target_addr",
-                                                                    "index": 4
-                                                                }
-                                                            },
-                                                            "DBOVariableOrderDefinition5": {
-                                                                "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "callsign",
-                                                                    "index": 5
-                                                                }
-                                                            },
-                                                            "DBOVariableOrderDefinition6": {
-                                                                "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "modec_code_ft",
-                                                                    "index": 6
-                                                                }
-                                                            },
-                                                            "DBOVariableOrderDefinition7": {
-                                                                "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "track_num",
-                                                                    "index": 7
-                                                                }
-                                                            },
-                                                            "DBOVariableOrderDefinition8": {
-                                                                "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "track_climb_desc_mode",
-                                                                    "index": 8
-                                                                }
-                                                            },
-                                                            "DBOVariableOrderDefinition9": {
-                                                                "parameters": {
-                                                                    "dbo_name": "Meta",
-                                                                    "dbo_variable_name": "mof_vert",
-                                                                    "index": 9
+                                                                    "dbcontent_name": "Meta",
+                                                                    "index": 8,
+                                                                    "variable_name": "Track Begin"
                                                                 }
                                                             }
                                                         }
@@ -565,12 +432,12 @@
             "ViewPointsReportGenerator0": {
                 "parameters": {
                     "abstract": "",
-                    "add_overview_screenshot": true,
+                    "add_overview_screenshot": false,
                     "add_overview_table": true,
-                    "author": "sk",
+                    "author": "",
                     "export_all_unsorted": false,
                     "group_by_type": true,
-                    "open_created_pdf": false,
+                    "open_created_pdf": true,
                     "run_pdflatex": true,
                     "wait_on_map_loading": true
                 }

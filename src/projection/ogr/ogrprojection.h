@@ -31,26 +31,20 @@ class OGRProjection : public Projection
     virtual ~OGRProjection();
 
     virtual void generateSubConfigurable(const std::string& class_id,
-                                         const std::string& instance_id);
+                                         const std::string& instance_id) override;
 
-    virtual bool hasCoordinateSystem(unsigned int id);
+    virtual bool hasCoordinateSystem(unsigned int id) override;
     virtual void addCoordinateSystem(unsigned int id, double latitude_deg, double longitude_deg,
-                                     double altitude_m);
+                                     double altitude_m) override;
+    virtual void clearCoordinateSystems() override;
     virtual bool polarToWGS84(unsigned int id, double azimuth_rad, double slant_range_m,
                               bool has_baro_altitude, double baro_altitude_ft, double& latitude,
-                              double& longitude);
-
-    //    std::string getWorldPROJ4Info ();
-    //    void setNewCartesianEPSG (unsigned int epsg_value);
-    //    std::string getCartesianPROJ4Info ();
-    //    unsigned int getEPSG () { return epsg_value_; }
+                              double& longitude) override;
 
   protected:
     std::map<unsigned int, std::unique_ptr<OGRCoordinateSystem>> coordinate_systems_;
 
-    // unsigned int epsg_value_;
-
-    virtual void checkSubConfigurables();
+    virtual void checkSubConfigurables() override;
 };
 
 #endif  // OGRPROJECTION_H

@@ -20,11 +20,14 @@
 
 #include <QWidget>
 
-#include "dbovariable.h"
+#include "dbcontent/variable/variable.h"
 
-class DBOVariableOrderedSetWidget;
 class HistogramView;
-class DBOVariableSelectionWidget;
+
+namespace dbContent {
+class VariableOrderedSetWidget;
+class VariableSelectionWidget;
+}
 
 class QCheckBox;
 class QLineEdit;
@@ -52,10 +55,6 @@ class HistogramViewConfigWidget : public QWidget
     void reloadRequestedSlot();
     void loadingStartedSlot();
 
-  signals:
-    //void exportSignal(bool overwrite);
-    void reloadRequestedSignal();  // reload from database
-
   public:
     HistogramViewConfigWidget(HistogramView* view, QWidget* parent = nullptr);
     virtual ~HistogramViewConfigWidget();
@@ -69,7 +68,7 @@ class HistogramViewConfigWidget : public QWidget
 
     // data variable
     QCheckBox* selected_var_check_ {nullptr}; // active if variable data is shown
-    DBOVariableSelectionWidget* select_var_ {nullptr};
+    dbContent::VariableSelectionWidget* select_var_ {nullptr};
 
     // eval
     QCheckBox* eval_results_check_ {nullptr}; // active if eval data is shown

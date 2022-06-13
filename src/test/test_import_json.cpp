@@ -24,18 +24,18 @@
 #include "client.h"
 #include "databaseopentask.h"
 #include "dbinterface.h"
-#include "dbobject.h"
-#include "dbobjectmanager.h"
-#include "dboeditdatasourceswidget.h"
+#include "dbcontent/dbcontent.h"
+#include "dbcontent/dbcontentmanager.h"
+//#include "dboeditdatasourceswidget.h"
 #include "files.h"
 #include "jsonimporttask.h"
 #include "jsonimporttaskwidget.h"
 #include "jsonparsingschema.h"
 #include "logger.h"
 #include "mainwindow.h"
-#include "managedatasourcestask.h"
-#include "managedatasourcestaskwidget.h"
-#include "postprocesstask.h"
+//#include "managedatasourcestask.h"
+//#include "managedatasourcestaskwidget.h"
+//#include "postprocesstask.h"
 #include "radarplotpositioncalculatortask.h"
 #include "sqliteconnectionwidget.h"
 #include "taskmanager.h"
@@ -89,9 +89,6 @@ TEST_CASE("COMPASS Import JSON", "[COMPASS]")
     TaskManager& task_manager = COMPASS::instance().taskManager();
     TaskManagerWidget* task_manager_widget = task_manager.widget();
 
-    DatabaseOpenTask& db_open_task = task_manager.databaseOpenTask();
-    db_open_task.useConnection("SQLite Connection");
-
     SQLiteConnectionWidget* connection_widget =
         dynamic_cast<SQLiteConnectionWidget*>(COMPASS::instance().interface().connectionWidget());
     REQUIRE(connection_widget);
@@ -103,11 +100,13 @@ TEST_CASE("COMPASS Import JSON", "[COMPASS]")
     while (client.hasPendingEvents())
         client.processEvents();
 
+    TODO_ASSERT
+
     // clear previous data sources
-    ManageDataSourcesTask& manage_ds_task = task_manager.manageDataSourcesTask();
-    task_manager_widget->setCurrentTask(manage_ds_task);
-    REQUIRE(task_manager_widget->getCurrentTaskName() == manage_ds_task.name());
-    manage_ds_task.clearConfigDataSources();
+//    ManageDataSourcesTask& manage_ds_task = task_manager.manageDataSourcesTask();
+//    task_manager_widget->setCurrentTask(manage_ds_task);
+//    REQUIRE(task_manager_widget->getCurrentTaskName() == manage_ds_task.name());
+//    manage_ds_task.clearConfigDataSources();
 
     while (client.hasPendingEvents())
         client.processEvents();
@@ -165,18 +164,18 @@ TEST_CASE("COMPASS Import JSON", "[COMPASS]")
     //        client.processEvents();
 
     // post-process
-    PostProcessTask& post_process_task = task_manager.postProcessTask();
-    task_manager_widget->setCurrentTask(post_process_task);
-    REQUIRE(task_manager_widget->getCurrentTaskName() == post_process_task.name());
-    REQUIRE(post_process_task.isRecommended());
-    REQUIRE(post_process_task.isRequired());
+//    PostProcessTask& post_process_task = task_manager.postProcessTask();
+//    task_manager_widget->setCurrentTask(post_process_task);
+//    REQUIRE(task_manager_widget->getCurrentTaskName() == post_process_task.name());
+//    REQUIRE(post_process_task.isRecommended());
+//    REQUIRE(post_process_task.isRequired());
 
-    task_manager_widget->runCurrentTaskSlot();
+//    task_manager_widget->runCurrentTaskSlot();
 
-    QThread::msleep(100);
+//    QThread::msleep(100);
 
-    while (client.hasPendingEvents() || !post_process_task.done())
-        client.processEvents();
+//    while (client.hasPendingEvents() || !post_process_task.done())
+//        client.processEvents();
 
     QThread::msleep(100);  // delay
 
@@ -189,7 +188,7 @@ TEST_CASE("COMPASS Import JSON", "[COMPASS]")
 
     QThread::msleep(100);  // delay
 
-    DBObjectManager& object_manager = COMPASS::instance().objectManager();
+    DBContentManager& object_manager = COMPASS::instance().objectManager();
     object_manager.loadSlot();
 
     while (client.hasPendingEvents() || object_manager.loadInProgress())

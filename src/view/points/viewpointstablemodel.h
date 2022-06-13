@@ -18,12 +18,12 @@
 #ifndef VIEWPOINTSTABLEMODEL_H
 #define VIEWPOINTSTABLEMODEL_H
 
+#include "viewpoint.h"
+
 #include <QAbstractItemModel>
 #include <QIcon>
 
 #include "json.hpp"
-
-#include "viewpoint.h"
 
 #include <boost/multi_index/hashed_index.hpp>
 #include <boost/multi_index/member.hpp>
@@ -69,6 +69,8 @@ public:
 
     bool setData(const QModelIndex &index, const QVariant &value, int role) override;
 
+    void loadViewPoints();
+    void clearViewPoints();
 
     bool hasViewPoint (unsigned int id);
     unsigned int saveNewViewPoint(const nlohmann::json& data, bool update=true);
@@ -82,7 +84,6 @@ public:
     void printViewPoints();
     //void saveViewPoints();
 
-    void importViewPoints (const std::string& filename);
     void exportViewPoints (const std::string& filename);
 
     //void update();

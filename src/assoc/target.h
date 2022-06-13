@@ -97,6 +97,11 @@ namespace Association
 
         void calculateSpeeds();
         void removeNonModeSTRs();
+
+        std::map <std::string, unsigned int> getDBContentCounts();
+
+        bool hasADSBMOPSVersion();
+        unsigned int getADSBMOPSVersion();
     };
 
 }

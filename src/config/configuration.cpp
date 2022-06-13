@@ -972,6 +972,23 @@ void Configuration::parseJSONSubConfigFile(const std::string& class_id,
     sub_configurations_.at(key).parseJSONConfigFile();
 }
 
+void Configuration::overrideJSONParameters(nlohmann::json& parameters_config)
+{
+    loginf << "Configuration class_id " << class_id_ << " instance_id " << instance_id_
+           << ": overrideJSONParameters";
+
+    // is object
+    assert(parameters_config.is_object());
+
+    // store paramaters in member
+    for (auto& it : parameters_config.items())
+    {
+        loginf << "Configuration: overrideJSONParameters: overriding '" << it.key()
+               << "' with '" << it.value().dump(0) << "'";
+        org_config_parameters_[it.key()] = it.value();
+    }
+}
+
 void Configuration::parseJSONParameters(nlohmann::json& parameters_config)
 {
     logdbg << "Configuration class_id " << class_id_ << " instance_id " << instance_id_
@@ -1261,6 +1278,23 @@ void Configuration::removeSubConfiguration(const std::string& class_id,
     assert(sub_configurations_.find(key) != sub_configurations_.end());
     sub_configurations_.erase(sub_configurations_.find(key));
 }
+
+void Configuration::removeSubConfigurations(const std::string& class_id)
+{
+    logdbg << "Configuration: removeSubConfigurations: me " << class_id_;
+
+    std::vector<std::pair<std::string, std::string>> to_be_removed;
+
+    for (auto& sub_it : sub_configurations_)
+    {
+        if (sub_it.first.first == class_id)
+            to_be_removed.push_back(sub_it.first);
+    }
+
+    for (auto& sub_key_it : to_be_removed)
+        sub_configurations_.erase(sub_key_it);
+}
+
 
 // void Configuration::setTemplate (bool template_flag, const std::string& template_name)
 //{

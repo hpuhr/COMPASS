@@ -94,6 +94,20 @@ class PropertyList
         logdbg << "PropertyList: addProperty: end";
     }
 
+    void addProperty(const Property& property)
+    {
+        logdbg << "PropertyList: addProperty: start";
+
+        if (hasProperty(property.name()))
+        {
+            logwrn << "PropertyList: addProperty: property " << property.name() << " already added";
+            return;
+        }
+
+        properties_.push_back(property);
+        logdbg << "PropertyList: addProperty: end";
+    }
+
     /// @brief Return container with all properties
     const std::vector<Property>& properties() const { return properties_; }
 
@@ -183,6 +197,19 @@ class PropertyList
         for (auto it : properties_)
         {
             if (it.name() == id)
+                return true;
+        }
+
+        return false;
+    }
+
+    bool hasProperty(const Property& prop) const
+    {
+        logdbg << "PropertyList: hasProperty: start";
+
+        for (auto it : properties_)
+        {
+            if (it.name() == prop.name() && it.dataType() == prop.dataType())
                 return true;
         }
 

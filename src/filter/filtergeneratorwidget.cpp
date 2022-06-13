@@ -29,11 +29,11 @@
 
 #include "compass.h"
 #include "configurationmanager.h"
-#include "dbovariable.h"
-#include "dbovariableselectionwidget.h"
+#include "dbcontent/variable/variable.h"
+#include "dbcontent/variable/variableselectionwidget.h"
 #include "filterconditionoperatorcombobox.h"
 #include "filtermanager.h"
-#include "metadbovariable.h"
+#include "dbcontent/variable/metavariable.h"
 #include "stringconv.h"
 
 using namespace Utils;
@@ -72,7 +72,7 @@ void FilterGeneratorWidget::createGUIElements()
     QGridLayout* condition_layout = new QGridLayout();
 
     QVBoxLayout* var_layout = new QVBoxLayout();
-    condition_variable_widget_ = new DBOVariableSelectionWidget();
+    condition_variable_widget_ = new dbContent::VariableSelectionWidget();
     condition_variable_widget_->showMetaVariables(true);
     condition_variable_widget_->showEmptyVariable(false);
     var_layout->addWidget(condition_variable_widget_);
@@ -105,13 +105,13 @@ void FilterGeneratorWidget::createGUIElements()
     condition_value_ = new QLineEdit();
     value_layout->addWidget(condition_value_);
 
-    QPushButton* load_min = new QPushButton(tr("Load min"));
-    connect(load_min, SIGNAL(clicked()), this, SLOT(loadMin()));
-    value_layout->addWidget(load_min);
+//    QPushButton* load_min = new QPushButton(tr("Load min"));
+//    connect(load_min, SIGNAL(clicked()), this, SLOT(loadMin()));
+//    value_layout->addWidget(load_min);
 
-    QPushButton* load_max = new QPushButton(tr("Load max"));
-    connect(load_max, SIGNAL(clicked()), this, SLOT(loadMax()));
-    value_layout->addWidget(load_max);
+//    QPushButton* load_max = new QPushButton(tr("Load max"));
+//    connect(load_max, SIGNAL(clicked()), this, SLOT(loadMax()));
+//    value_layout->addWidget(load_max);
 
     value_layout->addStretch();
 
@@ -124,8 +124,8 @@ void FilterGeneratorWidget::createGUIElements()
 
     condition_reset_combo_ = new QComboBox();
     condition_reset_combo_->addItem("value");
-    condition_reset_combo_->addItem("MIN");
-    condition_reset_combo_->addItem("MAX");
+//    condition_reset_combo_->addItem("MIN");
+//    condition_reset_combo_->addItem("MAX");
     reset_layout->addWidget(condition_reset_combo_);
     reset_layout->addStretch();
 
@@ -161,50 +161,50 @@ void FilterGeneratorWidget::createGUIElements()
     setLayout(layout);
 }
 
-void FilterGeneratorWidget::loadMin()
-{
-    assert(condition_variable_widget_);
+//void FilterGeneratorWidget::loadMin()
+//{
+//    assert(condition_variable_widget_);
 
-    std::string value;
-    if (condition_variable_widget_->hasVariable())
-    {
-        value = condition_variable_widget_->selectedVariable().getMinStringRepresentation();
-    }
-    else if (condition_variable_widget_->hasMetaVariable())
-    {
-        value = condition_variable_widget_->selectedMetaVariable().getMinStringRepresentation();
-    }
-    else
-    {
-        QMessageBox msgBox;
-        msgBox.setText("Error: No variable selected.");
-        msgBox.exec();
-        return;
-    }
-    condition_value_->setText(tr(value.c_str()));
-}
-void FilterGeneratorWidget::loadMax()
-{
-    assert(condition_variable_widget_);
+//    std::string value;
+//    if (condition_variable_widget_->hasVariable())
+//    {
+//        value = condition_variable_widget_->selectedVariable().getMinStringRepresentation();
+//    }
+//    else if (condition_variable_widget_->hasMetaVariable())
+//    {
+//        value = condition_variable_widget_->selectedMetaVariable().getMinStringRepresentation();
+//    }
+//    else
+//    {
+//        QMessageBox msgBox;
+//        msgBox.setText("Error: No variable selected.");
+//        msgBox.exec();
+//        return;
+//    }
+//    condition_value_->setText(tr(value.c_str()));
+//}
+//void FilterGeneratorWidget::loadMax()
+//{
+//    assert(condition_variable_widget_);
 
-    std::string value;
-    if (condition_variable_widget_->hasVariable())
-    {
-        value = condition_variable_widget_->selectedVariable().getMaxStringRepresentation();
-    }
-    else if (condition_variable_widget_->hasMetaVariable())
-    {
-        value = condition_variable_widget_->selectedMetaVariable().getMaxStringRepresentation();
-    }
-    else
-    {
-        QMessageBox msgBox;
-        msgBox.setText("Error: No variable selected.");
-        msgBox.exec();
-        return;
-    }
-    condition_value_->setText(tr(value.c_str()));
-}
+//    std::string value;
+//    if (condition_variable_widget_->hasVariable())
+//    {
+//        value = condition_variable_widget_->selectedVariable().getMaxStringRepresentation();
+//    }
+//    else if (condition_variable_widget_->hasMetaVariable())
+//    {
+//        value = condition_variable_widget_->selectedMetaVariable().getMaxStringRepresentation();
+//    }
+//    else
+//    {
+//        QMessageBox msgBox;
+//        msgBox.setText("Error: No variable selected.");
+//        msgBox.exec();
+//        return;
+//    }
+//    condition_value_->setText(tr(value.c_str()));
+//}
 
 void FilterGeneratorWidget::addCondition()
 {
@@ -215,14 +215,14 @@ void FilterGeneratorWidget::addCondition()
 
     if (condition_variable_widget_->hasVariable())
     {
-        const DBOVariable& var = condition_variable_widget_->selectedVariable();
+        const dbContent::Variable& var = condition_variable_widget_->selectedVariable();
         data_condition.variable_name_ = var.name();
-        data_condition.variable_dbo_type_ = var.dboName();
+        data_condition.variable_dbo_type_ = var.dbContentName();
     }
     else
     {
         assert(condition_variable_widget_->hasMetaVariable());
-        MetaDBOVariable& var = condition_variable_widget_->selectedMetaVariable();
+        dbContent::MetaVariable& var = condition_variable_widget_->selectedMetaVariable();
         data_condition.variable_name_ = var.name();
         data_condition.variable_dbo_type_ = META_OBJECT_NAME;
     }
@@ -272,7 +272,7 @@ void FilterGeneratorWidget::accept()
             configuration.addNewSubConfiguration("DBFilterCondition", condition_name);
         condition_configuration.addParameterString("operator", data_condition.operator_);
         condition_configuration.addParameterString("variable_name", data_condition.variable_name_);
-        condition_configuration.addParameterString("variable_dbo_name",
+        condition_configuration.addParameterString("variable_dbcontent_name",
                                                    data_condition.variable_dbo_type_);
         condition_configuration.addParameterBool("absolute_value", data_condition.absolute_value_);
         condition_configuration.addParameterString("value", data_condition.value_);

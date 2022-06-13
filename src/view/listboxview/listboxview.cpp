@@ -20,13 +20,12 @@
 #include <QApplication>
 
 #include "compass.h"
-#include "dbobjectmanager.h"
+#include "dbcontent/dbcontentmanager.h"
 #include "listboxviewconfigwidget.h"
 #include "listboxviewdatasource.h"
 #include "listboxviewdatawidget.h"
 #include "listboxviewwidget.h"
 #include "logger.h"
-#include "viewselection.h"
 #include "latexvisitor.h"
 
 ListBoxView::ListBoxView(const std::string& class_id, const std::string& instance_id,
@@ -36,12 +35,6 @@ ListBoxView::ListBoxView(const std::string& class_id, const std::string& instanc
     registerParameter("show_only_selected", &show_only_selected_, false);
     registerParameter("use_presentation", &use_presentation_, true);
     registerParameter("overwrite_csv", &overwrite_csv_, true);
-    registerParameter("show_associations", &show_associations_, false);
-
-    can_show_associations_ = COMPASS::instance().objectManager().hasAssociations();
-
-    if (!can_show_associations_)
-        show_associations_ = false;
 }
 
 ListBoxView::~ListBoxView()
@@ -59,10 +52,6 @@ ListBoxView::~ListBoxView()
     }
 }
 
-void ListBoxView::update(bool atOnce) {}
-
-void ListBoxView::clearData() {}
-
 bool ListBoxView::init()
 {
     View::init();
@@ -71,38 +60,63 @@ bool ListBoxView::init()
 
     assert(data_source_);
 
-    DBObjectManager& object_man = COMPASS::instance().objectManager();
-    connect(&object_man, &DBObjectManager::allLoadingDoneSignal, this, &ListBoxView::allLoadingDoneSlot);
-    connect(&object_man, &DBObjectManager::allLoadingDoneSignal,
-            widget_->getDataWidget(), &ListBoxViewDataWidget::loadingDoneSlot);
+//    DBContentManager& object_man = COMPASS::instance().dbContentManager();
+//    connect(&object_man, &DBContentManager::loadingDoneSignal,
+//            this, &ListBoxView::allLoadingDoneSlot);
+//    connect(&object_man, &DBContentManager::loadingDoneSignal,
+//            widget_->getDataWidget(), &ListBoxViewDataWidget::loadingDoneSlot);
 
-    connect(data_source_, &ListBoxViewDataSource::loadingStartedSignal, widget_->getDataWidget(),
-            &ListBoxViewDataWidget::loadingStartedSlot);
-    connect(data_source_, &ListBoxViewDataSource::updateDataSignal, widget_->getDataWidget(),
-            &ListBoxViewDataWidget::updateDataSlot);
+//    connect(data_source_, &ListBoxViewDataSource::loadingStartedSignal, widget_->getDataWidget(),
+//            &ListBoxViewDataWidget::loadingStartedSlot);
+//    connect(data_source_, &ListBoxViewDataSource::updateDataSignal, widget_->getDataWidget(),
+//            &ListBoxViewDataWidget::updateDataSlot);
 
     connect(widget_->configWidget(), &ListBoxViewConfigWidget::exportSignal,
             widget_->getDataWidget(), &ListBoxViewDataWidget::exportDataSlot);
     connect(widget_->getDataWidget(), &ListBoxViewDataWidget::exportDoneSignal,
             widget_->configWidget(), &ListBoxViewConfigWidget::exportDoneSlot);
 
-    connect(widget_->configWidget(), &ListBoxViewConfigWidget::reloadRequestedSignal,
-            &COMPASS::instance().objectManager(), &DBObjectManager::loadSlot);
-    connect(data_source_, &ListBoxViewDataSource::loadingStartedSignal, widget_->configWidget(),
-            &ListBoxViewConfigWidget::loadingStartedSlot);
+//    connect(data_source_, &ListBoxViewDataSource::loadingStartedSignal, widget_->configWidget(),
+//            &ListBoxViewConfigWidget::loadingStartedSlot);
 
-    connect(this, &ListBoxView::showOnlySelectedSignal, widget_->getDataWidget(),
-            &ListBoxViewDataWidget::showOnlySelectedSlot);
-    connect(this, &ListBoxView::usePresentationSignal, widget_->getDataWidget(),
-            &ListBoxViewDataWidget::usePresentationSlot);
-    connect(this, &ListBoxView::showAssociationsSignal, widget_->getDataWidget(),
-            &ListBoxViewDataWidget::showAssociationsSlot);
+    connect(this, &ListBoxView::showOnlySelectedSignal,
+            widget_->getDataWidget(), &ListBoxViewDataWidget::showOnlySelectedSlot);
+    connect(this, &ListBoxView::usePresentationSignal,
+            widget_->getDataWidget(), &ListBoxViewDataWidget::usePresentationSlot);
 
     widget_->getDataWidget()->showOnlySelectedSlot(show_only_selected_);
     widget_->getDataWidget()->usePresentationSlot(use_presentation_);
-    widget_->getDataWidget()->showAssociationsSlot(show_associations_);
 
     return true;
+}
+
+void ListBoxView::loadingStarted()
+{
+    loginf << "OSGView: loadingStarted";
+
+    widget_->configWidget()->loadingStartedSlot();
+    widget_->getDataWidget()->loadingStartedSlot();
+}
+
+void ListBoxView::loadedData(const std::map<std::string, std::shared_ptr<Buffer>>& data, bool requires_reset)
+{
+    loginf << "ListBoxView: loadedData";
+
+    widget_->getDataWidget()->updateDataSlot(data, requires_reset);
+}
+
+void ListBoxView::loadingDone()
+{
+    loginf << "ListBoxView: loadingDone";
+
+    widget_->configWidget()->setStatus("", false);
+
+    widget_->getDataWidget()->loadingDoneSlot();
+}
+
+void ListBoxView::clearData()
+{
+    widget_->getDataWidget()->clearData();
 }
 
 void ListBoxView::generateSubConfigurable(const std::string& class_id,
@@ -144,11 +158,11 @@ ListBoxViewDataWidget* ListBoxView::getDataWidget()
     return widget_->getDataWidget();
 }
 
-DBOVariableSet ListBoxView::getSet(const std::string& dbo_name)
+dbContent::VariableSet ListBoxView::getSet(const std::string& dbcontent_name)
 {
     assert(data_source_);
 
-    return data_source_->getSet()->getExistingInDBFor(dbo_name);
+    return data_source_->getSet()->getExistingInDBFor(dbcontent_name);
 }
 
 // void ListBoxView::selectionChanged()
@@ -189,22 +203,10 @@ void ListBoxView::showOnlySelected(bool value)
     QApplication::restoreOverrideCursor();
 }
 
-bool ListBoxView::showAssociations() const { return show_associations_; }
-
-void ListBoxView::showAssociations(bool show_associations)
-{
-    loginf << "ListBoxView: showAssociations: " << show_associations;
-    show_associations_ = show_associations;
-
-    emit showAssociationsSignal(show_associations_);
-}
-
 void ListBoxView::accept(LatexVisitor& v)
 {
     v.visit(this);
 }
-
-bool ListBoxView::canShowAssociations() const { return can_show_associations_; }
 
 void ListBoxView::updateSelection()
 {
@@ -236,11 +238,11 @@ void ListBoxView::showViewPointSlot (const ViewableDataConfig* vp)
     assert (widget_);
 }
 
-void ListBoxView::allLoadingDoneSlot()
-{
-    loginf << "ListBoxView: allLoadingDoneSlot";
-    assert(widget_);
-    widget_->configWidget()->setStatus("", false);
-    //widget_->getDataWidget()->selectFirstSelectedRow();
-}
+//void ListBoxView::allLoadingDoneSlot()
+//{
+//    loginf << "ListBoxView: allLoadingDoneSlot";
+//    assert(widget_);
+//    widget_->configWidget()->setStatus("", false);
+//    //widget_->getDataWidget()->selectFirstSelectedRow();
+//}
 

@@ -21,10 +21,10 @@
 #include <QAbstractTableModel>
 #include <memory>
 
-#include "dbovariableset.h"
+#include "dbcontent/variable/variableset.h"
 
 class Buffer;
-class DBObject;
+class DBContent;
 class BufferCSVExportJob;
 class ListBoxViewDataSource;
 class BufferTableWidget;
@@ -42,7 +42,7 @@ class BufferTableModel : public QAbstractTableModel
     void exportJobDoneSlot();
 
   public:
-    BufferTableModel(BufferTableWidget* table_widget, DBObject& object,
+    BufferTableModel(BufferTableWidget* table_widget, DBContent& object,
                      ListBoxViewDataSource& data_source);
     virtual ~BufferTableModel();
 
@@ -61,18 +61,17 @@ class BufferTableModel : public QAbstractTableModel
 
     void usePresentation(bool use_presentation);
     void showOnlySelected(bool value);
-    void showAssociations(bool value);
     void reset();
 
     void updateToSelection();
 
   protected:
     BufferTableWidget* table_widget_{nullptr};
-    DBObject& object_;
+    DBContent& object_;
     ListBoxViewDataSource& data_source_;
 
     std::shared_ptr<Buffer> buffer_;
-    DBOVariableSet read_set_;
+    dbContent::VariableSet read_set_;
 
     std::shared_ptr<BufferCSVExportJob> export_job_;
 
@@ -81,7 +80,6 @@ class BufferTableModel : public QAbstractTableModel
 
     bool show_only_selected_{true};
     bool use_presentation_{true};
-    bool show_associations_{false};
 
     void updateRows();
 };

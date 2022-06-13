@@ -21,22 +21,20 @@
 #include <sstream>
 
 #include "compass.h"
-#include "dbobject.h"
-#include "dbobjectmanager.h"
-#include "dbovariable.h"
+#include "dbcontent/dbcontent.h"
+#include "dbcontent/dbcontentmanager.h"
+#include "dbcontent/variable/variable.h"
 
 BufferCSVExportJob::BufferCSVExportJob(std::shared_ptr<Buffer> buffer,
-                                       const DBOVariableSet& read_set, const std::string& file_name,
-                                       bool overwrite, bool only_selected, bool use_presentation,
-                                       bool show_associations)
+                                       const dbContent::VariableSet& read_set, const std::string& file_name,
+                                       bool overwrite, bool only_selected, bool use_presentation)
     : Job("BufferCSVExportJob"),
       buffer_(buffer),
       read_set_(read_set),
       file_name_(file_name),
       overwrite_(overwrite),
       only_selected_(only_selected),
-      use_presentation_(use_presentation),
-      show_associations_(show_associations)
+      use_presentation_(use_presentation)
 {
     assert(file_name_.size());
 }
@@ -69,9 +67,6 @@ void BufferCSVExportJob::run()
 
         ss << "Selected";
 
-        if (show_associations_)
-            ss << ";UTN";
-
         for (size_t col = 0; col < read_set_size; col++)
         {
             // if (col != 0)
@@ -80,16 +75,14 @@ void BufferCSVExportJob::run()
         }
         output_file << ss.str() << "\n";
 
-        assert(buffer_->has<bool>("selected"));
-        NullableVector<bool> selected_vec = buffer_->get<bool>("selected");
+        assert(buffer_->has<bool>(DBContent::selected_var.name()));
+        NullableVector<bool> selected_vec = buffer_->get<bool>(DBContent::selected_var.name());
 
-        assert(buffer_->has<int>("rec_num"));
-        NullableVector<int> rec_num_vec = buffer_->get<int>("rec_num");
+        assert(buffer_->has<unsigned int>(DBContent::meta_var_rec_num_.name()));
+        NullableVector<unsigned int> rec_num_vec = buffer_->get<unsigned int>(DBContent::meta_var_rec_num_.name());
 
-        std::string dbo_name = buffer_->dboName();
-        assert(dbo_name.size());
-
-        DBObjectManager& manager = COMPASS::instance().objectManager();
+        std::string dbcontent_name = buffer_->dbContentName();
+        assert(dbcontent_name.size());
 
         for (; row < buffer_size; ++row)
         {
@@ -103,21 +96,11 @@ void BufferCSVExportJob::run()
             else
                 ss << selected_vec.get(row);
 
-            if (show_associations_)
-            {
-                ss << ";";
-
-                assert(!rec_num_vec.isNull(row));
-                unsigned int rec_num = rec_num_vec.get(row);
-
-                ss << manager.object(dbo_name).associations().getUTNsStringFor(rec_num);
-            }
-
             for (size_t col = 0; col < read_set_size; col++)
             {
                 value_str = "";
 
-                DBOVariable& variable = read_set_.getVariable(col);
+                dbContent::Variable& variable = read_set_.getVariable(col);
                 PropertyDataType data_type = variable.dataType();
 
                 std::string property_name = variable.name();
@@ -202,7 +185,7 @@ void BufferCSVExportJob::run()
                         continue;
                     }
 
-                    null = buffer_->get<unsigned int>(properties.at(col).name()).isNull(row);
+                    null = buffer_->get<unsigned int>(property_name).isNull(row);
                     if (!null)
                     {
                         if (use_presentation_)
@@ -257,7 +240,7 @@ void BufferCSVExportJob::run()
                         continue;
                     }
 
-                    null = buffer_->get<float>(properties.at(col).name()).isNull(row);
+                    null = buffer_->get<float>(property_name).isNull(row);
                     if (!null)
                     {
                         if (use_presentation_)
@@ -297,6 +280,20 @@ void BufferCSVExportJob::run()
                     if (!null)
                     {
                         value_str = buffer_->get<std::string>(property_name).getAsString(row);
+                    }
+                }
+                else if (data_type == PropertyDataType::JSON)
+                {
+                    if (!buffer_->has<nlohmann::json>(property_name))
+                    {
+                        ss << ";";
+                        continue;
+                    }
+
+                    null = buffer_->get<nlohmann::json>(property_name).isNull(row);
+                    if (!null)
+                    {
+                        value_str = buffer_->get<nlohmann::json>(property_name).getAsString(row);
                     }
                 }
                 else

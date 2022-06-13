@@ -162,6 +162,7 @@ class Configuration
     Configuration& getSubConfiguration(const std::string& class_id, const std::string& instance_id);
     /// @brief Removes a sub-configuration
     void removeSubConfiguration(const std::string& class_id, const std::string& instance_id);
+    void removeSubConfigurations(const std::string& class_id);
 
     /// @brief Returns the instance identifier
     const std::string& getInstanceId() { return instance_id_; }
@@ -186,6 +187,8 @@ class Configuration
 
     // only use in special case of configuration copy
     void setInstanceId(const std::string& instance_id) { instance_id_ = instance_id; }
+
+    void overrideJSONParameters(nlohmann::json& parameters_config);
 
   protected:
     /// Class identifier

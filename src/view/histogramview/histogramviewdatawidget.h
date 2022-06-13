@@ -20,7 +20,7 @@
 
 #include "global.h"
 #include "nullablevector.h"
-#include "dbovariable.h"
+#include "dbcontent/variable/variable.h"
 #include "histogramviewdatatoolwidget.h"
 #include "histogramviewchartview.h"
 
@@ -34,7 +34,7 @@ class HistogramViewDataSource;
 class QTabWidget;
 class QHBoxLayout;
 class Buffer;
-class DBObject;
+class DBContent;
 
 namespace EvaluationRequirementResult
 {
@@ -47,6 +47,9 @@ namespace EvaluationRequirementResult
 
     class SingleDubiousTrack;
     class JoinedDubiousTrack;
+
+    class SingleDubiousTarget;
+    class JoinedDubiousTarget;
 
     class SingleDetection;
     class JoinedDetection;
@@ -103,7 +106,7 @@ class HistogramViewDataWidget : public QWidget
   public slots:
     void loadingStartedSlot();
     /// @brief Called when new result Buffer was delivered
-    void updateDataSlot(DBObject& object, std::shared_ptr<Buffer> buffer);
+    void updateDataSlot(const std::map<std::string, std::shared_ptr<Buffer>>& data, bool requires_reset);
     void loadingDoneSlot();
 
     void exportDataSlot(bool overwrite);
@@ -179,7 +182,7 @@ protected:
     bool shows_data_ {false};
     bool data_not_in_buffer_ {false};
 
-    void updateFromData(std::string dbo_name);
+    void updateFromData(std::string dbcontent_name);
     void updateFromAllData();
     void updateFromResult(std::shared_ptr<EvaluationRequirementResult::Base> result);
     void updateCountResult (std::shared_ptr<EvaluationRequirementResult::SingleExtraData> result);
@@ -259,10 +262,10 @@ protected:
     void updateMinMax(const std::vector<double>& data);
 
     template<typename T>
-    void updateCounts(const std::string& dbo_name, NullableVector<T>& data, NullableVector<bool>& selected_vec,
-                      DBOVariable* data_var)
+    void updateCounts(const std::string& dbcontent_name, NullableVector<T>& data, NullableVector<bool>& selected_vec,
+                      dbContent::Variable* data_var)
     {
-        loginf << "HistogramViewDataWidget: updateCounts: start dbo " << dbo_name;
+        loginf << "HistogramViewDataWidget: updateCounts: start dbcontent " << dbcontent_name;
 
         if (!bin_size_valid_)
         {
@@ -274,7 +277,7 @@ protected:
         {
             for (unsigned int bin_cnt = 0; bin_cnt < num_bins_; ++bin_cnt)
             {
-                if (data_var->representation() != DBOVariable::Representation::STANDARD)
+                if (data_var->representation() != dbContent::Variable::Representation::STANDARD)
                     labels_.push_back(data_var->getAsSpecialRepresentationString(
                                           data_min_.toDouble()+bin_cnt*bin_size_+bin_size_/2.0f));
                 else
@@ -283,7 +286,7 @@ protected:
             }
         }
 
-        std::vector<unsigned int>& counts = counts_[dbo_name];
+        std::vector<unsigned int>& counts = counts_[dbcontent_name];
 
         if (!counts.size()) // set 0 bins
         {
@@ -304,7 +307,7 @@ protected:
                 if (selected)
                     ++data_null_selected_cnt_;
                 else
-                    ++data_null_cnt_[dbo_name];
+                    ++data_null_cnt_[dbcontent_name];
                 continue;
             }
 
@@ -332,20 +335,24 @@ protected:
             }
         }
 
-        loginf << "HistogramViewDataWidget: updateCounts: end dbo " << dbo_name;
+        loginf << "HistogramViewDataWidget: updateCounts: end dbo " << dbcontent_name;
     }
 
     void updateCounts(const std::vector<double>& data);
 
+    /**
+     * Select data based on numerical comparison with a double interval.
+     * For non numerical comparisons specialize template.
+     */
     template<typename T>
     void selectData(NullableVector<T>& data, NullableVector<bool>& selected_vec,
-                      bool select_min_max, T data_min, T data_max, bool select_null, bool add_to_selection)
+                      bool select_min_max, double data_min, double data_max, bool select_null, bool add_to_selection)
     {
         loginf << "HistogramViewDataWidget: selectData: data_min " << data_min << " data_max " << data_max
                << " select_null " << select_null << " add_to_selection " << add_to_selection;
 
         unsigned int data_size = data.size();
-        T value;
+        double value;
         bool select;
         unsigned int select_cnt = 0;
 
@@ -367,7 +374,7 @@ protected:
             if (!select_min_max)
                 continue;
 
-            value = data.get(cnt);
+            value = static_cast<double>(data.get(cnt));
 
             select = value >= data_min && value < data_max;
 

@@ -35,6 +35,7 @@ class Projection : public Configurable
     virtual bool hasCoordinateSystem(unsigned int id) = 0;
     virtual void addCoordinateSystem(unsigned int id, double latitude_deg, double longitude_deg,
                                      double altitude_m) = 0;
+    virtual void clearCoordinateSystems() = 0;
     virtual bool polarToWGS84(unsigned int id, double azimuth_rad, double slant_range_m,
                               bool has_baro_altitude, double baro_altitude_ft, double& latitude,
                               double& longitude) = 0;

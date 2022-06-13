@@ -29,15 +29,15 @@ class QTableView;
 class BufferTableModel;
 class QStringList;
 class Buffer;
-class DBOVariableSet;
-class DBObject;
+class VariableSet;
+class DBContent;
 class ListBoxView;
 class ListBoxViewDataSource;
 
 /**
  * @brief Widget with table representation of a Buffer's data contents
  *
- * For a specific DBObject, a table in Excel manner is created. A header is shown in the first row
+ * For a specific DBContent, a table in Excel manner is created. A header is shown in the first row
  * with the variable names from the variable read list. In the first column, checkboxes are shown
  * for un/selecting DBO records. The subsequent columns show the Buffer contents in either the
  * database view or the transformed string representation.
@@ -58,11 +58,10 @@ class BufferTableWidget : public QWidget
 
     void showOnlySelectedSlot(bool value);
     void usePresentationSlot(bool use_presentation);
-    void showAssociationsSlot(bool value);
 
   public:
     /// @brief Constructor
-    BufferTableWidget(DBObject& object, ListBoxView& view, ListBoxViewDataSource& data_source,
+    BufferTableWidget(DBContent& object, ListBoxView& view, ListBoxViewDataSource& data_source,
                       QWidget* parent = 0, Qt::WindowFlags f = 0);
     /// @brief Destructor
     virtual ~BufferTableWidget();
@@ -78,7 +77,7 @@ class BufferTableWidget : public QWidget
     void resizeColumns();
 
   protected:
-    DBObject& object_;
+    DBContent& object_;
     ListBoxView& view_;
     ListBoxViewDataSource& data_source_;
     /// Table with items

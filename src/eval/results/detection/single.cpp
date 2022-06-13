@@ -99,7 +99,7 @@ void SingleDetection::addTargetToOverviewTable(shared_ptr<EvaluationResultsRepor
 {
     addTargetDetailsToTable(getRequirementSection(root_item), target_table_name_);
 
-    if (eval_man_.resultsGenerator().splitResultsByMOPS()) // add to general sum table
+    if (eval_man_.reportSplitResultsByMOPS()) // add to general sum table
         addTargetDetailsToTable(root_item->getSection(getRequirementSumSectionID()), target_table_name_);
 }
 
@@ -132,6 +132,7 @@ void SingleDetection::addTargetDetailsToReport(shared_ptr<EvaluationResultsRepor
     if (has_pd_)
         pd_var = roundf(pd_ * 10000.0) / 100.0;
 
+    root_item->getSection(getTargetSectionID()).perTargetSection(true); // mark utn section per target
     EvaluationResultsReport::Section& utn_req_section = root_item->getSection(getTargetRequirementSectionID());
 
     if (!utn_req_section.hasTable("details_overview_table"))
@@ -162,6 +163,12 @@ void SingleDetection::addTargetDetailsToReport(shared_ptr<EvaluationResultsRepor
     assert (req);
 
     utn_req_table.addRow({"Condition", "", req->getConditionStr().c_str()}, this);
+
+    if (req->getConditionStr() == "Failed")
+    {
+        root_item->getSection(getTargetSectionID()).perTargetWithIssues(true); // mark utn section as with issue
+        utn_req_section.perTargetWithIssues(true);
+    }
 
     string result {"Unknown"};
 

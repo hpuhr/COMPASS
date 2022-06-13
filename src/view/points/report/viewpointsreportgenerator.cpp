@@ -24,12 +24,11 @@
 #include "viewpoint.h"
 #include "logger.h"
 #include "stringconv.h"
-#include "dbobjectmanager.h"
+#include "dbcontent/dbcontentmanager.h"
 #include "compass.h"
 #include "global.h"
 #include "dbinterface.h"
 #include "sqliteconnection.h"
-#include "mysqlppconnection.h"
 #include "files.h"
 #include "latexdocument.h"
 #include "latexvisitor.h"
@@ -64,18 +63,12 @@ ViewPointsReportGenerator::ViewPointsReportGenerator(const std::string& class_id
     registerParameter("abstract", &abstract_, "");
 
     SQLiteConnection* sql_con = dynamic_cast<SQLiteConnection*>(&COMPASS::instance().interface().connection());
+    assert (sql_con);
 
-    if (sql_con)
-    {
-        report_path_ = Files::getDirectoryFromPath(sql_con->lastFilename())+"/report_"
-                + Files::getFilenameFromPath(sql_con->lastFilename()) + "/";
-    }
-    else
-    {
-        MySQLppConnection* mysql_con = dynamic_cast<MySQLppConnection*>(&COMPASS::instance().interface().connection());
-        assert (mysql_con);
-        report_path_ = HOME_PATH+"/report_"+mysql_con->usedDatabase() + "/";
-    }
+    string current_filename = COMPASS::instance().lastDbFilename();
+
+    report_path_ = Files::getDirectoryFromPath(current_filename)+"/report_"
+                + Files::getFilenameFromPath(current_filename) + "/";
 
     report_filename_ = "report.tex";
 
@@ -173,7 +166,7 @@ void ViewPointsReportGenerator::run ()
             vp_ids = vp_widget->viewedViewPoints();
 
         string status_str, elapsed_time_str, remaining_time_str;
-        DBObjectManager& obj_man = COMPASS::instance().objectManager();
+        DBContentManager& obj_man = COMPASS::instance().dbContentManager();
 
         unsigned int vp_cnt = 0;
         unsigned int vp_size = vp_ids.size();

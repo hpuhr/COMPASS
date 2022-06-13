@@ -59,7 +59,7 @@ void EvaluationSectorWidget::update()
     QFont font_italic;
     font_italic.setItalic(true);
 
-    if (eval_man_.hasCurrentStandard())
+    if (eval_man_.hasCurrentStandard() && eval_man_.sectorsLoaded())
     {
         EvaluationStandard& std = eval_man_.currentStandard();
         //const string& std_name = std.name();

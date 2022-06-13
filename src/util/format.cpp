@@ -24,10 +24,11 @@
 #include "logger.h"
 
 const std::vector<std::string> no_format = {""};
+const std::vector<std::string> bool_format = {"", "invert"};
 const std::vector<std::string> integer_formats{"", "decimal", "hexadecimal", "octal"};
 
 const std::map<PropertyDataType, std::vector<std::string>> Format::format_options_{
-    {PropertyDataType::BOOL, no_format},
+    {PropertyDataType::BOOL, bool_format},
     {PropertyDataType::CHAR, integer_formats},
     {PropertyDataType::UCHAR, integer_formats},
     {PropertyDataType::INT, integer_formats},
@@ -37,8 +38,8 @@ const std::map<PropertyDataType, std::vector<std::string>> Format::format_option
     {PropertyDataType::FLOAT, no_format},
     {PropertyDataType::DOUBLE, no_format},
     {PropertyDataType::STRING,
-     {"", "bool", "bool_invert", "decimal", "hexadecimal", "octal", "epoch_tod_ms",
-      "epoch_tod_s"}}};
+        {"", "bool", "bool_invert", "decimal", "hexadecimal", "octal", "epoch_tod_ms", "epoch_tod_s"}},
+    {PropertyDataType::JSON, no_format}};
 
 void Format::set(PropertyDataType data_type, const std::string& value)
 {

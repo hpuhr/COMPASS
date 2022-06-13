@@ -24,7 +24,7 @@
 
 #include "dboeditdatasourceaction.h"
 
-class DBObject;
+class DBContent;
 class DBODataSource;
 class StoredDBODataSource;
 class DBOEditDataSourceActionOptionsWidget;
@@ -32,7 +32,7 @@ class DBOEditDataSourceActionOptionsWidget;
 class DBOEditDataSourceActionOptions
 {
   public:
-    DBOEditDataSourceActionOptions(DBObject& object, const std::string& sourceType,
+    DBOEditDataSourceActionOptions(DBContent& object, const std::string& sourceType,
                                    const std::string& sourceId);
     // none action is added by default with action_id 0
     DBOEditDataSourceActionOptions() = default;
@@ -65,7 +65,7 @@ class DBOEditDataSourceActionOptions
     void perform();
 
   private:
-    DBObject* object_{nullptr};
+    DBContent* object_{nullptr};
 
     bool perform_{false};
 
@@ -84,8 +84,8 @@ using DBOEditDataSourceActionOptionsCollection =
 
 namespace DBOEditDataSourceActionOptionsCreator
 {
-DBOEditDataSourceActionOptions getSyncOptionsFromDB(DBObject& object, const DBODataSource& source);
-DBOEditDataSourceActionOptions getSyncOptionsFromCfg(DBObject& object,
+DBOEditDataSourceActionOptions getSyncOptionsFromDB(DBContent& object, const DBODataSource& source);
+DBOEditDataSourceActionOptions getSyncOptionsFromCfg(DBContent& object,
                                                      const StoredDBODataSource& source);
 }  // namespace DBOEditDataSourceActionOptionsCreator
 

@@ -18,9 +18,9 @@
 #include "jsondatamapping.h"
 
 #include "compass.h"
-#include "dbobject.h"
-#include "dbobjectmanager.h"
-#include "dbovariable.h"
+#include "dbcontent/dbcontent.h"
+#include "dbcontent/dbcontentmanager.h"
+#include "dbcontent/variable/variable.h"
 #include "jsondatamappingwidget.h"
 #include "jsonobjectparser.h"
 #include "unit.h"
@@ -31,7 +31,7 @@
 using namespace Utils;
 
 JSONDataMapping::JSONDataMapping(const std::string& class_id, const std::string& instance_id,
-                                 JSONObjectParser& parent)
+                                 Configurable& parent)
     : Configurable(class_id, instance_id, &parent)
 {
     logdbg << "JSONDataMapping: constructor: this " << this;
@@ -39,8 +39,8 @@ JSONDataMapping::JSONDataMapping(const std::string& class_id, const std::string&
     registerParameter("active", &active_, false);
     registerParameter("json_key", &json_key_, "");
 
-    registerParameter("db_object_name", &db_object_name_, "");
-    registerParameter("dbovariable_name", &dbovariable_name_, "");
+    registerParameter("db_content_name", &db_content_name_, "");
+    registerParameter("db_content_variable_name", &dbcontent_variable_name_, "");
 
     registerParameter("comment", &comment_, "");
 
@@ -49,13 +49,20 @@ JSONDataMapping::JSONDataMapping(const std::string& class_id, const std::string&
     registerParameter("format_data_type", &format_data_type_, "");
     registerParameter("json_value_format", &json_value_format_, "");
 
+//    if (format_data_type_.size())
+//    {
+//        logdbg << "JSONDataMapping: ctor: setting format from dt " << format_data_type_
+//               << " format " << json_value_format_;
+//        json_value_format_ = Format(Property::asDataType(format_data_type_), json_value_format_);
+//    }
+
     registerParameter("dimension", &dimension_, "");
     registerParameter("unit", &unit_, "");
 
     registerParameter("in_array", &in_array_, false);
     registerParameter("append_value", &append_value_, false);
 
-    logdbg << "JSONDataMapping: ctor: dbo " << db_object_name_ << " var " << dbovariable_name_
+    logdbg << "JSONDataMapping: ctor: dbo " << db_content_name_ << " var " << dbcontent_variable_name_
            << " dim " << dimension_ << " unit " << unit_;
 
     sub_keys_ = Utils::String::split(json_key_, '.');
@@ -72,57 +79,57 @@ JSONDataMapping::JSONDataMapping(const std::string& class_id, const std::string&
     createSubConfigurables();
 }
 
-JSONDataMapping& JSONDataMapping::operator=(JSONDataMapping&& other)
-{
-    logdbg << "JSONDataMapping: operator=: this " << this << " other " << &other;
+//JSONDataMapping& JSONDataMapping::operator=(JSONDataMapping&& other)
+//{
+//    logdbg << "JSONDataMapping: operator=: this " << this << " other " << &other;
 
-    active_ = other.active_;
-    json_key_ = other.json_key_;
-    db_object_name_ = other.db_object_name_;
-    dbovariable_name_ = other.dbovariable_name_;
-    variable_ = other.variable_;
+//    active_ = other.active_;
+//    json_key_ = other.json_key_;
+//    db_content_name_ = other.db_content_name_;
+//    dbcontent_variable_name_ = other.dbcontent_variable_name_;
+//    variable_ = other.variable_;
 
-    mandatory_ = other.mandatory_;
-    comment_ = other.comment_;
-    // json_value_format_ = other.json_value_format_;
-    format_data_type_ = other.format_data_type_;
-    json_value_format_ = std::move(other.json_value_format_);
+//    mandatory_ = other.mandatory_;
+//    comment_ = other.comment_;
+//    // json_value_format_ = other.json_value_format_;
+//    format_data_type_ = other.format_data_type_;
+//    json_value_format_ = std::move(other.json_value_format_);
 
-    dimension_ = other.dimension_;
-    unit_ = other.unit_;
+//    dimension_ = other.dimension_;
+//    unit_ = other.unit_;
 
-    in_array_ = other.in_array_;
-    append_value_ = other.append_value_;
+//    in_array_ = other.in_array_;
+//    append_value_ = other.append_value_;
 
-    has_sub_keys_ = other.has_sub_keys_;
-    sub_keys_ = std::move(other.sub_keys_);
-    num_sub_keys_ = other.num_sub_keys_;
+//    has_sub_keys_ = other.has_sub_keys_;
+//    sub_keys_ = std::move(other.sub_keys_);
+//    num_sub_keys_ = other.num_sub_keys_;
 
-    if (sub_keys_.size())
-        last_key_ = sub_keys_.end() - 1;
-    if (sub_keys_.size() > 1)
-        second_to_last_key_ = sub_keys_.end() - 2;
+//    if (sub_keys_.size())
+//        last_key_ = sub_keys_.end() - 1;
+//    if (sub_keys_.size() > 1)
+//        second_to_last_key_ = sub_keys_.end() - 2;
 
-    other.configuration().updateParameterPointer("active", &active_);
-    other.configuration().updateParameterPointer("json_key", &json_key_);
-    other.configuration().updateParameterPointer("db_object_name", &db_object_name_);
-    other.configuration().updateParameterPointer("dbovariable_name", &dbovariable_name_);
-    other.configuration().updateParameterPointer("mandatory", &mandatory_);
-    other.configuration().updateParameterPointer("comment", &comment_);
-    other.configuration().updateParameterPointer("format_data_type", &format_data_type_);
-    other.configuration().updateParameterPointer("json_value_format", &json_value_format_);
-    other.configuration().updateParameterPointer("dimension", &dimension_);
-    other.configuration().updateParameterPointer("unit", &unit_);
-    other.configuration().updateParameterPointer("in_array", &in_array_);
-    other.configuration().updateParameterPointer("append_value", &append_value_);
+//    other.configuration().updateParameterPointer("active", &active_);
+//    other.configuration().updateParameterPointer("json_key", &json_key_);
+//    other.configuration().updateParameterPointer("dbcontent_name", &db_content_name_);
+//    other.configuration().updateParameterPointer("dbovariable_name", &dbcontent_variable_name_);
+//    other.configuration().updateParameterPointer("mandatory", &mandatory_);
+//    other.configuration().updateParameterPointer("comment", &comment_);
+//    other.configuration().updateParameterPointer("format_data_type", &format_data_type_);
+//    other.configuration().updateParameterPointer("json_value_format", &json_value_format_);
+//    other.configuration().updateParameterPointer("dimension", &dimension_);
+//    other.configuration().updateParameterPointer("unit", &unit_);
+//    other.configuration().updateParameterPointer("in_array", &in_array_);
+//    other.configuration().updateParameterPointer("append_value", &append_value_);
 
-    widget_ = std::move(other.widget_);
-    if (widget_)
-        widget_->setMapping(*this);
-    other.widget_ = nullptr;
+//    widget_ = std::move(other.widget_);
+//    if (widget_)
+//        widget_->setMapping(*this);
+//    other.widget_ = nullptr;
 
-    return static_cast<JSONDataMapping&>(Configurable::operator=(std::move(other)));
-}
+//    return static_cast<JSONDataMapping&>(Configurable::operator=(std::move(other)));
+//}
 
 JSONDataMapping::~JSONDataMapping() { logdbg << "JSONDataMapping: destructor: this " << this; }
 
@@ -150,7 +157,26 @@ bool JSONDataMapping::inArray() const { return in_array_; }
 
 void JSONDataMapping::inArray(bool in_array) { in_array_ = in_array; }
 
-DBOVariable& JSONDataMapping::variable() const
+
+void JSONDataMapping::check()
+{
+    DBContentManager& obj_man = COMPASS::instance().dbContentManager();
+
+    if (db_content_name_.size() && !obj_man.existsDBContent(db_content_name_))
+        assert (false);
+
+    DBContent& dbcontent = obj_man.dbContent(db_content_name_);
+
+    if (dbcontent_variable_name_.size() && !dbcontent.hasVariable(dbcontent_variable_name_))
+        dbcontent_variable_name_ = "";
+
+    if (active_ && !canBeActive())
+    {
+        active_ = false;
+    }
+}
+
+dbContent::Variable& JSONDataMapping::variable() const
 {
     assert(initialized_);
     assert(variable_);
@@ -161,21 +187,17 @@ bool JSONDataMapping::mandatory() const { return mandatory_; }
 
 void JSONDataMapping::mandatory(bool mandatory)
 {
-    loginf << "JSONDataMapping: mandatory: " << mandatory;
+    logdbg << "JSONDataMapping: mandatory: " << mandatory;
     mandatory_ = mandatory;
 }
 
 Format JSONDataMapping::jsonValueFormat() const
 {
-    assert(initialized_);
-    // assert (json_value_format_);
     return json_value_format_;
 }
 
 Format& JSONDataMapping::jsonValueFormatRef()
 {
-    assert(initialized_);
-    // assert (json_value_format_);
     return json_value_format_;
 }
 
@@ -184,19 +206,30 @@ Format& JSONDataMapping::jsonValueFormatRef()
 //    json_value_format_ = json_value_format;
 //}
 
-std::string JSONDataMapping::dbObjectName() const { return db_object_name_; }
+std::string JSONDataMapping::dbObjectName() const { return db_content_name_; }
 
 void JSONDataMapping::dboVariableName(const std::string& name)
 {
     loginf << "JSONDataMapping: dboVariableName: " << name;
 
-    dbovariable_name_ = name;
+    dbcontent_variable_name_ = name;
     initialized_ = false;
+
+    if (!dbcontent_variable_name_.size())
+        active_ = false;
 
     initialize();
 }
 
-std::string JSONDataMapping::dboVariableName() const { return dbovariable_name_; }
+std::string JSONDataMapping::dboVariableName() const { return dbcontent_variable_name_; }
+
+std::string JSONDataMapping::dimensionUnitStr()
+{
+    if (dimension_.size())
+        return dimension_ + ":" + unit_;
+    else
+        return "";
+}
 
 const std::string& JSONDataMapping::jsonKey() const { return json_key_; }
 
@@ -214,6 +247,9 @@ void JSONDataMapping::jsonKey(const std::string& json_key)
         last_key_ = sub_keys_.end() - 1;
     if (sub_keys_.size() > 1)
         second_to_last_key_ = sub_keys_.end() - 2;
+
+    if (!json_key_.size())
+        active_ = false;
 }
 
 // JSONDataMappingWidget* JSONDataMapping::widget ()
@@ -235,40 +271,32 @@ void JSONDataMapping::active(bool active)
     active_ = active;
 }
 
+bool JSONDataMapping::canBeActive() const
+{
+    return json_key_.size() && dbcontent_variable_name_.size();
+}
+
 void JSONDataMapping::initialize()
 {
     logdbg << "JSONDataMapping: initialize";
 
     assert(!initialized_);
 
-    DBObjectManager& obj_man = COMPASS::instance().objectManager();
+    DBContentManager& obj_man = COMPASS::instance().dbContentManager();
 
-    if (db_object_name_.size() && !obj_man.existsObject(db_object_name_))
-        logwrn << "JSONDataMapping: initialize: dbobject '" << db_object_name_
+    if (db_content_name_.size() && !obj_man.existsDBContent(db_content_name_))
+        logwrn << "JSONDataMapping: initialize: dbobject '" << db_content_name_
                << "' does not exist";
 
-    if (db_object_name_.size() && obj_man.existsObject(db_object_name_) &&
-            dbovariable_name_.size() && !obj_man.object(db_object_name_).hasVariable(dbovariable_name_))
-        logwrn << "JSONDataMapping: initialize: dbobject " << db_object_name_ << " variable '"
-               << dbovariable_name_ << "' does not exist";
+    if (db_content_name_.size() && obj_man.existsDBContent(db_content_name_) &&
+            dbcontent_variable_name_.size() && !obj_man.dbContent(db_content_name_).hasVariable(dbcontent_variable_name_))
+        logwrn << "JSONDataMapping: initialize: dbobject " << db_content_name_ << " variable '"
+               << dbcontent_variable_name_ << "' does not exist";
 
-    if (db_object_name_.size() && obj_man.existsObject(db_object_name_) &&
-            dbovariable_name_.size() && obj_man.object(db_object_name_).hasVariable(dbovariable_name_))
-        variable_ = &obj_man.object(db_object_name_).variable(dbovariable_name_);
+    if (db_content_name_.size() && obj_man.existsDBContent(db_content_name_) &&
+            dbcontent_variable_name_.size() && obj_man.dbContent(db_content_name_).hasVariable(dbcontent_variable_name_))
+        variable_ = &obj_man.dbContent(db_content_name_).variable(dbcontent_variable_name_);
 
-    if (format_data_type_.size())
-    {
-        logdbg << "JSONDataMapping: initialize: setting format from dt " << format_data_type_
-               << " format " << json_value_format_;
-        json_value_format_ = Format(Property::asDataType(format_data_type_), json_value_format_);
-    }
-    else if (variable_)
-    {
-        logdbg << "JSONDataMapping: initialize: setting format from variable " << variable_->name();
-        json_value_format_ = Format(variable_->dataType(), json_value_format_);
-    }
-    else
-        logdbg << "JSONDataMapping: initialize: variable not set";
 
     if (append_value_)
     {
@@ -446,6 +474,9 @@ size_t row_cnt, bool debug) const;
 template bool JSONDataMapping::findAndSetValue(const nlohmann::json& j,
 NullableVector<std::string>& array_list,
 size_t row_cnt, bool debug) const;
+template bool JSONDataMapping::findAndSetValue(const nlohmann::json& j,
+NullableVector<nlohmann::json>& array_list,
+size_t row_cnt, bool debug) const;
 
 const nlohmann::json* JSONDataMapping::findKey(const nlohmann::json& j) const
 {
@@ -597,7 +628,10 @@ void JSONDataMapping::setValue(const nlohmann::json* val_ptr, NullableVector<boo
     if (val_ptr->is_number())
     {
         unsigned int tmp = *val_ptr;
-        assert(tmp == 0 || tmp == 1);
+        if (tmp > 1)
+            logerr << "JSONDataMapping: setValue: key " << json_key_ << " json " << val_ptr->type_name()
+                   << " value '" << tmp << "' format '" << json_value_format_ << "'";
+
         tmp_bool = static_cast<bool>(tmp);
     }
     else
@@ -607,6 +641,8 @@ void JSONDataMapping::setValue(const nlohmann::json* val_ptr, NullableVector<boo
 
     if (json_value_format_ == "")
         array_list.set(row_cnt, tmp_bool);
+    else if (json_value_format_ == "invert")
+        array_list.set(row_cnt, !tmp_bool);
     else
         array_list.setFromFormat(row_cnt, json_value_format_, JSON::toString(tmp_bool));
 

@@ -1,0 +1,222 @@
+#include "acadfilter.h"
+#include "compass.h"
+#include "acadfilterwidget.h"
+#include "dbcontent/dbcontent.h"
+#include "dbcontent/dbcontentmanager.h"
+#include "dbcontent/variable/metavariable.h"
+#include "logger.h"
+#include "stringconv.h"
+
+using namespace std;
+using namespace Utils;
+using namespace nlohmann;
+using namespace dbContent;
+
+ACADFilter::ACADFilter(const std::string& class_id, const std::string& instance_id,
+                       Configurable* parent)
+    : DBFilter(class_id, instance_id, parent, false)
+{
+    registerParameter("values_str", &values_str_, "");
+    updateValuesFromStr(values_str_);
+
+    name_ = "Aircraft Address";
+
+    createSubConfigurables();
+}
+
+ACADFilter::~ACADFilter() {}
+
+bool ACADFilter::filters(const std::string& dbo_type)
+{
+    return COMPASS::instance().dbContentManager().metaVariable(DBContent::meta_var_ta_.name()).existsIn(dbo_type);
+}
+
+std::string ACADFilter::getConditionString(const std::string& dbcontent_name, bool& first,
+                                           std::vector<std::string>& extra_from_parts,
+                                           std::vector<dbContent::Variable*>& filtered_variables)
+{
+    logdbg << "ACADFilter: getConditionString: dbo " << dbcontent_name << " active " << active_;
+
+    if (!COMPASS::instance().dbContentManager().metaVariable(DBContent::meta_var_ta_.name()).existsIn(dbcontent_name))
+        return "";
+
+    stringstream ss;
+
+    if (active_ && (values_.size() || null_wanted_))
+    {
+        dbContent::Variable& var = COMPASS::instance().dbContentManager().metaVariable(
+                    DBContent::meta_var_ta_.name()).getFor(dbcontent_name);
+
+        filtered_variables.push_back(&var);
+
+        if (!first)
+        {
+            ss << " AND";
+        }
+
+        ss << " " + var.dbColumnName() << " IN (";
+
+        bool first_val = true;
+
+        for (auto val_it : values_)
+        {
+            if (!first_val)
+                ss << ",";
+
+            ss << val_it;
+
+            first_val = false;
+        }
+
+        if (null_wanted_)
+        {
+            if (!first_val)
+                ss << ",";
+
+            ss << "NULL";
+        }
+
+        ss << ")";
+
+        first = false;
+    }
+
+    logdbg << "ACADFilter: getConditionString: here '" << ss.str() << "'";
+
+    return ss.str();
+}
+
+void ACADFilter::generateSubConfigurable(const std::string& class_id, const std::string& instance_id)
+{
+    logdbg << "ACADFilter: generateSubConfigurable: class_id " << class_id;
+
+    throw std::runtime_error("ACADFilter: generateSubConfigurable: unknown class_id " + class_id);
+}
+
+void ACADFilter::checkSubConfigurables()
+{
+    logdbg << "ACADFilter: checkSubConfigurables";
+}
+
+DBFilterWidget* ACADFilter::createWidget()
+{
+    return new ACADFilterWidget(*this);
+}
+
+
+void ACADFilter::reset()
+{
+    if (widget_)
+        widget_->update();
+}
+
+void ACADFilter::saveViewPointConditions (nlohmann::json& filters)
+{
+    assert (conditions_.size() == 0);
+
+    assert (!filters.contains(name_));
+    filters[name_] = json::object();
+    json& filter = filters.at(name_);
+
+    filter["Aircraft Address Values"] = values_str_;
+}
+
+void ACADFilter::loadViewPointConditions (const nlohmann::json& filters)
+{
+    assert (conditions_.size() == 0);
+
+    assert (filters.contains(name_));
+    const json& filter = filters.at(name_);
+
+    assert (filter.contains("Aircraft Address Values"));
+    values_str_ = filter.at("Aircraft Address Values");
+
+    updateValuesFromStr(values_str_);
+
+    if (widget())
+        widget()->update();
+}
+
+std::string ACADFilter::valuesString() const
+{
+    return values_str_;
+}
+
+void ACADFilter::valuesString(const std::string& values_str)
+{
+    if (!updateValuesFromStr(values_str)) // false on failure
+        return;
+
+    values_str_ = values_str;
+}
+
+bool ACADFilter::activeInLiveMode()
+{
+    return true;
+}
+
+std::vector<size_t> ACADFilter::filterBuffer(const std::string& dbcontent_name, std::shared_ptr<Buffer> buffer)
+{
+    std::vector<size_t> to_be_removed;
+
+    if (!COMPASS::instance().dbContentManager().metaVariable(DBContent::meta_var_ta_.name()).existsIn(dbcontent_name))
+        return to_be_removed;
+
+    dbContent::Variable& var = COMPASS::instance().dbContentManager().metaVariable(
+                DBContent::meta_var_ta_.name()).getFor(dbcontent_name);
+
+    assert (buffer->has<unsigned int> (var.name()));
+
+    NullableVector<unsigned int>& data_vec = buffer->get<unsigned int> (var.name());
+
+    for (unsigned int cnt=0; cnt < buffer->size(); ++cnt)
+    {
+        if (data_vec.isNull(cnt))
+        {
+            if (!null_wanted_)
+                to_be_removed.push_back(cnt);
+
+            continue;
+        }
+        else if (!values_.count(data_vec.get(cnt)))
+            to_be_removed.push_back(cnt);
+    }
+
+    return to_be_removed;
+}
+
+bool ACADFilter::updateValuesFromStr(const std::string& values_str)
+{
+    set<unsigned int> values_tmp;
+    vector<string> split_str = String::split(values_str, ',');
+
+    bool ok = true;
+
+    null_wanted_ = false;
+
+    for (auto& tmp_str : split_str)
+    {
+        if (String::trim(tmp_str) == "NULL" || String::trim(tmp_str) == "null")
+        {
+            null_wanted_ = true;
+            continue;
+        }
+
+        unsigned int utn_tmp = QString(tmp_str.c_str()).toInt(&ok, 16);
+
+        if (!ok)
+        {
+            logerr << "ACADFilter: updateUTNSFromStr: utn '" << tmp_str << "' not valid";
+            break;
+        }
+
+        values_tmp.insert(utn_tmp);
+    }
+
+    if (!ok)
+        return false;
+
+    values_ = values_tmp;
+
+    return true;
+}

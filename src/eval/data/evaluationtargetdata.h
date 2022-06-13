@@ -92,19 +92,19 @@ public:
     std::string timeEndStr() const;
     float timeDuration() const;
 
-    std::vector<std::string> callsigns() const;
+    std::set<std::string> callsigns() const;
     std::string callsignsStr() const;
 
-    std::vector<unsigned int> targetAddresses() const;
+    std::set<unsigned int> targetAddresses() const;
     std::string targetAddressesStr() const;
 
-    std::vector<unsigned int> modeACodes() const;
+    std::set<unsigned int> modeACodes() const;
     std::string modeACodesStr() const;
 
     bool hasModeC() const;
-    int modeCMin() const;
+    float modeCMin() const;
     std::string modeCMinStr() const;
-    int modeCMax() const;
+    float modeCMax() const;
     std::string modeCMaxStr() const;
 
     bool isPrimaryOnly () const;
@@ -135,7 +135,7 @@ public:
     unsigned int refModeAForTime (float tod) const;
 
     bool hasRefModeCForTime (float tod) const; // only if set, is v, not g
-    int refModeCForTime (float tod) const;
+    float refModeCForTime (float tod) const;
 
     bool hasRefTAForTime (float tod) const;
     unsigned int refTAForTime (float tod) const;
@@ -155,7 +155,7 @@ public:
     unsigned int tstModeAForTime (float tod) const;
 
     bool hasTstModeCForTime (float tod) const; // only if set, is v, not g
-    int tstModeCForTime (float tod) const;
+    float tstModeCForTime (float tod) const;
 
     bool hasTstGroundBitForTime (float tod) const; // only if set
     bool tstGroundBitForTime (float tod) const; // true is on ground
@@ -190,8 +190,9 @@ public:
     bool hasPos() const;
 
     bool hasADSBInfo() const;
-    std::set<unsigned int> mopsVersions() const;
-    std::string mopsVersionsStr() const;
+    bool hasMOPSVersion() const;
+    unsigned int mopsVersion() const;
+    std::string mopsVersionStr() const;
 
     bool hasNucpNic() const;
     std::string nucpNicStr() const;
@@ -212,13 +213,13 @@ protected:
     std::multimap<float, unsigned int> tst_data_; // tod -> index
     mutable std::vector<unsigned int> tst_indexes_;
 
-    mutable std::vector<std::string> callsigns_;
-    mutable std::vector<unsigned int> target_addresses_;
-    mutable std::vector<unsigned int> mode_a_codes_;
+    mutable std::set<std::string> callsigns_;
+    mutable std::set<unsigned int> target_addresses_;
+    mutable std::set<unsigned int> mode_a_codes_;
 
     mutable bool has_mode_c_ {false};
-    mutable int mode_c_min_ {0};
-    mutable int mode_c_max_ {0};
+    mutable float mode_c_min_ {0};
+    mutable float mode_c_max_ {0};
 
     mutable bool has_pos_ {false};
     mutable double latitude_min_ {0};
@@ -228,7 +229,8 @@ protected:
     mutable double longitude_max_ {0};
 
     mutable bool has_adsb_info_ {false};
-    mutable std::set<unsigned int> mops_versions_;
+    mutable bool has_mops_version_ {false};
+    mutable unsigned int mops_version_;
     mutable bool has_nucp_nic_ {false};
     mutable unsigned int min_nucp_nic_, max_nucp_nic_;
     mutable bool has_nacp {false};

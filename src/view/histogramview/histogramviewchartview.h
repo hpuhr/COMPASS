@@ -37,11 +37,11 @@ protected:
     bool has_p1_ {false};
     QPoint p1_;
     QPointF p1_data_;
-    unsigned int p1_index_;
+    //unsigned int p1_index_;
 
     QPoint p2_;
     QPointF p2_data_;
-    unsigned int p2_index_;
+    //unsigned int p2_index_;
 
     void mousePressEvent(QMouseEvent* event) override;
     void mouseMoveEvent(QMouseEvent* event) override;

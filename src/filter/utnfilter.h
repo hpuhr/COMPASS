@@ -27,17 +27,18 @@ public:
               Configurable* parent);
     virtual ~UTNFilter();
 
-    virtual std::string getConditionString(const std::string& dbo_name, bool& first,
-                                           std::vector<DBOVariable*>& filtered_variables);
+    virtual std::string getConditionString(const std::string& dbcontent_name, bool& first,
+                                           std::vector<std::string>& extra_from_parts,
+                                           std::vector<dbContent::Variable*>& filtered_variables) override;
 
     virtual void generateSubConfigurable(const std::string& class_id,
-                                         const std::string& instance_id);
+                                         const std::string& instance_id) override;
 
-    virtual bool filters(const std::string& dbo_name);
-    virtual void reset();
+    virtual bool filters(const std::string& dbcontent_name) override;
+    virtual void reset() override;
 
-    virtual void saveViewPointConditions (nlohmann::json& filters);
-    virtual void loadViewPointConditions (const nlohmann::json& filters);
+    virtual void saveViewPointConditions (nlohmann::json& filters) override;
+    virtual void loadViewPointConditions (const nlohmann::json& filters) override;
 
     std::string utns() const;
     void utns(const std::string& utns);
@@ -47,6 +48,7 @@ protected:
     std::vector<unsigned int> utns_;
 
     virtual void checkSubConfigurables();
+    virtual DBFilterWidget* createWidget() override;
 
     bool updateUTNSFromStr(const std::string& utns); // returns success
 };

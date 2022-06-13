@@ -21,19 +21,23 @@
 #include <taskwidget.h>
 
 class CreateARTASAssociationsTask;
+
+namespace dbContent
+{
+class VariableSelectionWidget;
+class DBDataSourceComboBox;
+}
+
 class QPushButton;
-class DBODataSourceSelectionComboBox;
-class DBOVariableSelectionWidget;
 class QLineEdit;
 class QCheckBox;
 
-class CreateARTASAssociationsTaskWidget : public TaskWidget
+class CreateARTASAssociationsTaskWidget : public QWidget
 {
     Q_OBJECT
 
   public slots:
     void currentDataSourceChangedSlot();
-    void anyVariableChangedSlot();
 
     void endTrackTimeEditSlot(QString value);
 
@@ -46,8 +50,6 @@ class CreateARTASAssociationsTaskWidget : public TaskWidget
 
     void anyTrackFlagChangedSlot();
 
-    void expertModeChangedSlot();
-
   public:
     CreateARTASAssociationsTaskWidget(CreateARTASAssociationsTask& task, QWidget* parent = 0,
                                       Qt::WindowFlags f = 0);
@@ -59,16 +61,7 @@ class CreateARTASAssociationsTaskWidget : public TaskWidget
   protected:
     CreateARTASAssociationsTask& task_;
 
-    DBODataSourceSelectionComboBox* ds_combo_{nullptr};
-    DBOVariableSelectionWidget* ds_id_box_{nullptr};
-    DBOVariableSelectionWidget* track_num_box_{nullptr};
-    DBOVariableSelectionWidget* track_begin_box_{nullptr};
-    DBOVariableSelectionWidget* track_end_box_{nullptr};
-    DBOVariableSelectionWidget* track_coasting_box_{nullptr};
-
-    DBOVariableSelectionWidget* key_box_{nullptr};
-    DBOVariableSelectionWidget* hash_box_{nullptr};
-    DBOVariableSelectionWidget* tod_box_{nullptr};
+    dbContent::DBDataSourceComboBox* ds_combo_{nullptr};
 
     QLineEdit* end_track_time_edit_{nullptr};
 

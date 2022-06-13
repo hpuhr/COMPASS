@@ -17,8 +17,6 @@
 
 #include "jsonparsingschema.h"
 
-#include "jsonimporttask.h"
-
 JSONParsingSchema::JSONParsingSchema(const std::string& class_id, const std::string& instance_id,
                                      Configurable* parent)
     : Configurable(class_id, instance_id, parent)
@@ -59,8 +57,8 @@ void JSONParsingSchema::generateSubConfigurable(const std::string& class_id,
             name = sub_config.getParameterConfigValueString("name");
 
         if (!name.size() &&
-            sub_config.hasParameterConfigValueString("db_object_name"))  // name not set hack
-            name = sub_config.getParameterConfigValueString("db_object_name");
+            sub_config.hasParameterConfigValueString("dbcontent_name"))  // name not set hack
+            name = sub_config.getParameterConfigValueString("dbcontent_name");
 
         assert(name.size());
         assert(parsers_.find(name) == parsers_.end());

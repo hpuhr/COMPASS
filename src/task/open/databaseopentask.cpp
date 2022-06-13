@@ -19,7 +19,7 @@
 
 #include "compass.h"
 #include "databaseopentaskwidget.h"
-#include "dbconnection.h"
+#include "sqliteconnection.h"
 #include "dbinterface.h"
 #include "taskmanager.h"
 
@@ -33,13 +33,13 @@ DatabaseOpenTask::DatabaseOpenTask(const std::string& class_id, const std::strin
         "be run, but is performed using the 'Open' button.";
 }
 
-void DatabaseOpenTask::useConnection(const std::string& connection_type)
-{
-    COMPASS::instance().interface().useConnection(connection_type);
+//void DatabaseOpenTask::useConnection(const std::string& connection_type)
+//{
+//    COMPASS::instance().interface().useConnection(connection_type);
 
-    if (widget_)
-        widget_->updateUsedConnection();
-}
+//    if (widget_)
+//        widget_->updateUsedConnection();
+//}
 
 TaskWidget* DatabaseOpenTask::widget()
 {
@@ -90,10 +90,6 @@ void DatabaseOpenTask::databaseOpenedSlot()
 {
     loginf << "DatabaseOpenTask: databaseOpenedSlot";
     done_ = true;
-
-    task_manager_.appendSuccess(
-        "DatabaseOpenTask: database '" + COMPASS::instance().interface().connection().type() + ":" +
-        COMPASS::instance().interface().connection().identifier() + "' opened");
 
     emit doneSignal(name_);
 }

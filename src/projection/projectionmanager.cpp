@@ -60,11 +60,6 @@ ProjectionManager::ProjectionManager()
 
 ProjectionManager::~ProjectionManager()
 {
-    if (widget_)
-    {
-        delete widget_;
-        widget_ = nullptr;
-    }
 }
 
 void ProjectionManager::generateSubConfigurable(const std::string& class_id,
@@ -91,7 +86,7 @@ void ProjectionManager::generateSubConfigurable(const std::string& class_id,
         projections_[name].reset(new OGRProjection(class_id, instance_id, *this));
     }
     else
-        throw std::runtime_error("DBObject: generateSubConfigurable: unknown class_id " + class_id);
+        throw std::runtime_error("DBContent: generateSubConfigurable: unknown class_id " + class_id);
 }
 
 void ProjectionManager::checkSubConfigurables()
@@ -110,17 +105,6 @@ void ProjectionManager::checkSubConfigurables()
 
         configuration.addParameterString("name", "OGR");
         generateSubConfigurable("OGRProjection", configuration.getInstanceId());
-    }
-}
-
-void ProjectionManager::shutdown()
-{
-    loginf << "ProjectionManager: shutdown";
-
-    if (widget_)
-    {
-        delete widget_;
-        widget_ = nullptr;
     }
 }
 
@@ -146,6 +130,7 @@ std::map<std::string, std::unique_ptr<Projection>>& ProjectionManager::projectio
     return projections_;
 }
 
+
 // bool ProjectionManager::sdlGRS2Geo (t_CPos grs_pos, t_GPos& geo_pos)
 //{
 //    //logdbg << "ProjectionManager: sdlGRS2Geo: x_pos " << x_pos << " y_pos " << y_pos;
@@ -169,8 +154,13 @@ ProjectionManagerWidget* ProjectionManager::widget()
 {
     if (!widget_)
     {
-        widget_ = new ProjectionManagerWidget(*this);
+        widget_.reset(new ProjectionManagerWidget(*this));
     }
     assert(widget_);
-    return widget_;
+    return widget_.get();
+}
+
+void ProjectionManager::deleteWidget()
+{
+    widget_ = nullptr;
 }

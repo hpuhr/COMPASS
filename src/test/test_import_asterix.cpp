@@ -26,19 +26,18 @@
 #include "client.h"
 #include "databaseopentask.h"
 #include "dbinterface.h"
-#include "dbobject.h"
-#include "dbobjectmanager.h"
-#include "dboeditdatasourceswidget.h"
+#include "dbcontent/dbcontent.h"
+#include "dbcontent/dbcontentmanager.h"
+//#include "dboeditdatasourceswidget.h"
 #include "files.h"
 #include "logger.h"
 #include "mainwindow.h"
-#include "managedatasourcestask.h"
-#include "managedatasourcestaskwidget.h"
-#include "postprocesstask.h"
+//#include "managedatasourcestask.h"
+//#include "managedatasourcestaskwidget.h"
+//#include "postprocesstask.h"
 #include "radarplotpositioncalculatortask.h"
-#include "sqliteconnectionwidget.h"
 #include "taskmanager.h"
-#include "taskmanagerwidget.h"
+//#include "taskmanagerwidget.h"
 
 using namespace Utils;
 
@@ -62,8 +61,8 @@ TEST_CASE("COMPASS Import ASTERIX", "[COMPASS]")
     REQUIRE(!client.quitRequested());
 
     // create main window
-    client.mainWindow().show();
-    client.mainWindow().disableConfigurationSaving();
+    COMPASS::instance().mainWindow().show();
+    COMPASS::instance().mainWindow().disableConfigurationSaving();
 
     QThread::msleep(100);  // delay
 
@@ -84,64 +83,66 @@ TEST_CASE("COMPASS Import ASTERIX", "[COMPASS]")
 
     REQUIRE(!Files::fileExists(db_filename));
 
-    TaskManager& task_manager = COMPASS::instance().taskManager();
-    TaskManagerWidget* task_manager_widget = task_manager.widget();
+//    TaskManager& task_manager = COMPASS::instance().taskManager();
+//    TaskManagerWidget* task_manager_widget = task_manager.widget();
 
-    DatabaseOpenTask& db_open_task = task_manager.databaseOpenTask();
-    db_open_task.useConnection("SQLite Connection");
+    TODO_ASSERT
 
-    SQLiteConnectionWidget* connection_widget =
-        dynamic_cast<SQLiteConnectionWidget*>(COMPASS::instance().interface().connectionWidget());
-    REQUIRE(connection_widget);
+//    SQLiteConnectionWidget* connection_widget =
+//        dynamic_cast<SQLiteConnectionWidget*>(COMPASS::instance().interface().connectionWidget());
+//    REQUIRE(connection_widget);
 
-    connection_widget->addFile(db_filename);
-    connection_widget->selectFile(db_filename);
-    connection_widget->openFileSlot();
+//    connection_widget->addFile(db_filename);
+//    connection_widget->selectFile(db_filename);
+//    connection_widget->openFileSlot();
 
     while (client.hasPendingEvents())
         client.processEvents();
 
     // clear previous data sources
-    ManageDataSourcesTask& manage_ds_task = task_manager.manageDataSourcesTask();
-    task_manager_widget->setCurrentTask(manage_ds_task);
-    REQUIRE(task_manager_widget->getCurrentTaskName() == manage_ds_task.name());
-    manage_ds_task.clearConfigDataSources();
+    TODO_ASSERT
+//    ManageDataSourcesTask& manage_ds_task = task_manager.manageDataSourcesTask();
+//    task_manager_widget->setCurrentTask(manage_ds_task);
+//    REQUIRE(task_manager_widget->getCurrentTaskName() == manage_ds_task.name());
+//    manage_ds_task.clearConfigDataSources();
 
     while (client.hasPendingEvents())
         client.processEvents();
 
     // import asterix
-    ASTERIXImportTask& asterix_import_task = task_manager.asterixImporterTask();
-    task_manager_widget->setCurrentTask(asterix_import_task);
-    REQUIRE(task_manager_widget->getCurrentTaskName() == asterix_import_task.name());
-    REQUIRE(asterix_import_task.isRecommended());
+//    ASTERIXImportTask& asterix_import_task = task_manager.asterixImporterTask();
+//    task_manager_widget->setCurrentTask(asterix_import_task);
+//    REQUIRE(task_manager_widget->getCurrentTaskName() == asterix_import_task.name());
+//    REQUIRE(asterix_import_task.isRecommended());
 
-    asterix_import_task.currentFraming("ioss");
-    ASTERIXImportTaskWidget* asterix_import_task_widget =
-        dynamic_cast<ASTERIXImportTaskWidget*>(asterix_import_task.widget());
-    REQUIRE(asterix_import_task_widget);
+//    asterix_import_task.currentFraming("ioss");
+//    ASTERIXImportTaskWidget* asterix_import_task_widget =
+//        dynamic_cast<ASTERIXImportTaskWidget*>(asterix_import_task.widget());
+//    REQUIRE(asterix_import_task_widget);
 
-    asterix_import_task_widget->addFile(recording_filename);
+//    asterix_import_task_widget->addFile(recording_filename);
 
-    REQUIRE(asterix_import_task.canRun());
-    asterix_import_task.showDoneSummary(false);
+//    REQUIRE(asterix_import_task.canRun());
+//    asterix_import_task.showDoneSummary(false);
 
-    task_manager_widget->runCurrentTaskSlot();
+//    task_manager_widget->runCurrentTaskSlot();
 
-    QThread::msleep(100);
+//    QThread::msleep(100);
 
-    while (client.hasPendingEvents() || !asterix_import_task.done())
-        client.processEvents();
+//    while (client.hasPendingEvents() || !asterix_import_task.done())
+//        client.processEvents();
 
-    // set data sources
-    task_manager_widget->setCurrentTask(manage_ds_task);
-    REQUIRE(task_manager_widget->getCurrentTaskName() == manage_ds_task.name());
+    TODO_ASSERT
 
-    std::string ds_filename = data_path + "ds.json";
-    REQUIRE(Files::fileExists(ds_filename));
+//    // set data sources
+//    task_manager_widget->setCurrentTask(manage_ds_task);
+//    REQUIRE(task_manager_widget->getCurrentTaskName() == manage_ds_task.name());
 
-    manage_ds_task.importConfigDataSources(ds_filename);
-    manage_ds_task.autoSyncAllConfigDataSourcesToDB();
+//    std::string ds_filename = data_path + "ds.json";
+//    REQUIRE(Files::fileExists(ds_filename));
+
+//    manage_ds_task.importConfigDataSources(ds_filename);
+//    manage_ds_task.autoSyncAllConfigDataSourcesToDB();
 
     while (client.hasPendingEvents())
         client.processEvents();
@@ -149,49 +150,49 @@ TEST_CASE("COMPASS Import ASTERIX", "[COMPASS]")
     QThread::msleep(100);  // delay
 
     // calculate radar plot positions
-    RadarPlotPositionCalculatorTask& radar_plot_pos_calc =
-        task_manager.radarPlotPositionCalculatorTask();
+//    RadarPlotPositionCalculatorTask& radar_plot_pos_calc =
+//        task_manager.radarPlotPositionCalculatorTask();
 
-    task_manager_widget->setCurrentTask(radar_plot_pos_calc);
-    REQUIRE(task_manager_widget->getCurrentTaskName() == radar_plot_pos_calc.name());
-    REQUIRE(radar_plot_pos_calc.isRecommended());
-    radar_plot_pos_calc.showDoneSummary(false);
+//    task_manager_widget->setCurrentTask(radar_plot_pos_calc);
+//    REQUIRE(task_manager_widget->getCurrentTaskName() == radar_plot_pos_calc.name());
+//    REQUIRE(radar_plot_pos_calc.isRecommended());
+//    radar_plot_pos_calc.showDoneSummary(false);
 
-    task_manager_widget->runCurrentTaskSlot();
+//    task_manager_widget->runCurrentTaskSlot();
 
     QThread::msleep(100);
 
-    while (client.hasPendingEvents() || !radar_plot_pos_calc.done())
-        client.processEvents();
+//    while (client.hasPendingEvents() || !radar_plot_pos_calc.done())
+//        client.processEvents();
 
     // post-process
-    PostProcessTask& post_process_task = task_manager.postProcessTask();
+//    PostProcessTask& post_process_task = task_manager.postProcessTask();
 
-    task_manager_widget->setCurrentTask(post_process_task);
-    REQUIRE(task_manager_widget->getCurrentTaskName() == post_process_task.name());
-    REQUIRE(post_process_task.isRecommended());
-    REQUIRE(post_process_task.isRequired());
+//    task_manager_widget->setCurrentTask(post_process_task);
+//    REQUIRE(task_manager_widget->getCurrentTaskName() == post_process_task.name());
+//    REQUIRE(post_process_task.isRecommended());
+//    REQUIRE(post_process_task.isRequired());
 
-    task_manager_widget->runCurrentTaskSlot();
+//    task_manager_widget->runCurrentTaskSlot();
 
-    QThread::msleep(100);
+//    QThread::msleep(100);
 
-    while (client.hasPendingEvents() || !post_process_task.done())
-        client.processEvents();
+//    while (client.hasPendingEvents() || !post_process_task.done())
+//        client.processEvents();
 
-    QThread::msleep(100);  // delay
+//    QThread::msleep(100);  // delay
 
-    REQUIRE(task_manager_widget->isStartPossible());
+//    REQUIRE(task_manager_widget->isStartPossible());
 
-    task_manager_widget->startSlot();
+//    task_manager_widget->startSlot();
 
     while (client.hasPendingEvents())
         client.processEvents();
 
     QThread::msleep(100);  // delay
 
-    DBObjectManager& object_manager = COMPASS::instance().objectManager();
-    object_manager.loadSlot();
+    DBContentManager& object_manager = COMPASS::instance().dbContentManager();
+    object_manager.load();
 
     while (client.hasPendingEvents() || object_manager.loadInProgress())
         client.processEvents();
@@ -202,7 +203,7 @@ TEST_CASE("COMPASS Import ASTERIX", "[COMPASS]")
         QThread::msleep(1);  // delay
     }
 
-    client.mainWindow().close();
+    COMPASS::instance().mainWindow().close();
 
     while (client.hasPendingEvents())
         client.processEvents();

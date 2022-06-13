@@ -77,16 +77,26 @@ namespace EvaluationResultsReport
                         std::unique_ptr<nlohmann::json::object_t> viewable_data);
 
         unsigned int numSections(); // all sections contained
-        void addSectionsFlat (vector<shared_ptr<Section>>& result, bool include_target_details);
+        void addSectionsFlat (vector<shared_ptr<Section>>& result, bool include_target_details,
+                              bool report_skip_targets_wo_issues);
 
         virtual void accept(LatexVisitor& v) const;
 
         const vector<shared_ptr<SectionContent>>& content() const;
 
+        bool perTargetSection() const; // to be used for utn and sub-sections
+        void perTargetSection(bool value);
+
+        bool perTargetWithIssues() const; // te be set if requirement (any) requirement failed
+        void perTargetWithIssues(bool value);
+
     protected:
         string heading_; // name same as heading
         string parent_heading_; // e.g. "head1:head2" or ""
         EvaluationManager& eval_man_;
+
+        bool per_target_section_ {false};
+        bool per_target_section_with_issues_ {false};
 
         vector<shared_ptr<SectionContent>> content_;
 

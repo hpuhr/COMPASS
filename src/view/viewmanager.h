@@ -21,7 +21,8 @@
 #include <QObject>
 
 #include "configurable.h"
-#include "dbovariableset.h"
+#include "dbcontent/variable/variableset.h"
+#include "appmode.h"
 
 class COMPASS;
 class Buffer;
@@ -48,12 +49,26 @@ class ViewManager : public QObject, public Configurable
   public slots:
     void selectionChangedSlot();
 
+    void databaseOpenedSlot();
+    void databaseClosedSlot();
+
+    void loadingStartedSlot();
+    // all data contained, also new one. requires_reset true indicates that all shown info should be re-created,
+    // e.g. when data in the beginning was removed, or order of previously emitted data was changed, etc.
+    void loadedDataSlot (const std::map<std::string, std::shared_ptr<Buffer>>& data, bool requires_reset);
+    void loadingDoneSlot(); // emitted when all dbos have finished loading
+
+    void appModeSwitchSlot (AppMode app_mode);
+
   public:
     ViewManager(const std::string& class_id, const std::string& instance_id, COMPASS* compass);
     virtual ~ViewManager();
 
     void init(QTabWidget* tab_widget);
+    void loadViewPoints();
     void close();
+
+    void clearDataInViews();
 
     void registerView(View* view);
     void unregisterView(View* view);
@@ -73,7 +88,7 @@ class ViewManager : public QObject, public Configurable
 
     std::map<std::string, ViewContainer*> getContainers() { return containers_; }
     std::map<std::string, View*> getViews() { return views_; }
-    DBOVariableSet getReadSet(const std::string& dbo_name);
+    dbContent::VariableSet getReadSet(const std::string& dbcontent_name);
 
     //ViewManagerWidget* widget();
 
@@ -93,6 +108,12 @@ class ViewManager : public QObject, public Configurable
 
     unsigned int newViewNumber();
 
+    void disableDataDistribution(bool value);
+    // disables propagation of data to the views. used when loading is performed for processing purposes
+
+
+    bool isProcessingData() const;
+
 protected:
     COMPASS& compass_;
 
@@ -100,6 +121,7 @@ protected:
     ViewPointsWidget* view_points_widget_{nullptr};
 
     bool initialized_{false};
+    bool processing_data_ {false};
 
     QTabWidget* main_tab_widget_{nullptr};
 
@@ -115,6 +137,8 @@ protected:
     unsigned int container_count_{0};
 
     QStringList view_class_list_;
+
+    bool disable_data_distribution_ {false};
 
     virtual void checkSubConfigurables();
 };

@@ -32,7 +32,6 @@ class DatabaseOpenTaskWidget : public TaskWidget
     Q_OBJECT
 
   public slots:
-    void databaseTypeSelectSlot();
     void databaseOpenedSlot();
 
     void expertModeChangedSlot();

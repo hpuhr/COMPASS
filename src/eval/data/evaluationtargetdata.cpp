@@ -19,14 +19,16 @@
 #include "buffer.h"
 #include "logger.h"
 #include "stringconv.h"
-#include "dbovariable.h"
-#include "metadbovariable.h"
+#include "dbcontent/variable/variable.h"
+#include "dbcontent/variable/metavariable.h"
+#include "dbcontent/target.h"
 #include "compass.h"
-#include "dbobjectmanager.h"
+#include "dbcontent/dbcontentmanager.h"
 #include "evaluationmanager.h"
-//#include "projection/transformation.h"
 
 //#include <ogr_spatialref.h>
+
+#include <boost/algorithm/string.hpp>
 
 #include <cassert>
 #include <algorithm>
@@ -46,7 +48,7 @@ EvaluationTargetData::EvaluationTargetData()
 
 EvaluationTargetData::EvaluationTargetData(unsigned int utn, EvaluationData& eval_data, EvaluationManager& eval_man)
     : utn_(utn), eval_data_(&eval_data), eval_man_(&eval_man)
-      //wgs84_{new OGRSpatialReference()}, local_{new OGRSpatialReference()}
+    //wgs84_{new OGRSpatialReference()}, local_{new OGRSpatialReference()}
 {
     use_ = eval_man_->useUTN(utn_);
 
@@ -101,56 +103,66 @@ void EvaluationTargetData::finalize () const
     updateModeCMinMax();
     updatePositionMinMax();
 
-    std::set<unsigned int> mops_version;
-    std::tuple<bool, unsigned int, unsigned int> nucp_info;
-    std::tuple<bool, unsigned int, unsigned int> nacp_info;
+    DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
 
-    if (eval_man_->hasADSBInfo() && target_addresses_.size())
+    if (dbcont_man.hasTargetsInfo() && dbcont_man.existsTarget(utn_) && dbcont_man.target(utn_)->hasAdsbMOPSVersion())
     {
-        for (auto ta_it : target_addresses_)
-        {
-            if (eval_man_->hasADSBInfo(ta_it))
-            {
-                tie(mops_version, nucp_info, nacp_info) = eval_man_->adsbInfo(ta_it);
-                mops_versions_.insert(mops_version.begin(), mops_version.end());
-
-                if (get<0>(nucp_info))
-                {
-                    if (has_nucp_nic_)
-                    {
-                        min_nucp_nic_ = min (min_nucp_nic_, get<1>(nucp_info));
-                        max_nucp_nic_ = max (max_nucp_nic_, get<2>(nucp_info));
-                    }
-                    else
-                    {
-                        min_nucp_nic_ = get<1>(nucp_info);
-                        max_nucp_nic_ = get<2>(nucp_info);
-                        has_nucp_nic_ = true;
-                    }
-                }
-
-                if (get<0>(nacp_info))
-                {
-                    if (has_nacp)
-                    {
-                        min_nacp_ = min (min_nacp_, get<1>(nacp_info));
-                        max_nacp_ = max (max_nacp_, get<2>(nacp_info));
-                    }
-                    else
-                    {
-                        min_nacp_ = get<1>(nacp_info);
-                        max_nacp_ = get<2>(nacp_info);
-                        has_nacp = true;
-                    }
-                }
-            }
-        }
-
-        has_adsb_info_ = mops_versions_.size();
-        //        loginf << "UGA utn " << utn_ << " mops " << mopsVersionsStr()
-        //               << " nucp_nic " <<  (has_nucp_nic_ ? nucpNicStr() : " none ")
-        //               << " nacp "<<  (has_nacp ? nacpStr() : " none ");
+        has_adsb_info_ = true;
+        has_mops_version_ = true;
+        mops_version_ = dbcont_man.target(utn_)->adsbMOPSVersion();
     }
+
+
+    //    std::set<unsigned int> mops_version;
+    //    std::tuple<bool, unsigned int, unsigned int> nucp_info;
+    //    std::tuple<bool, unsigned int, unsigned int> nacp_info;
+
+    //    if (eval_man_->hasADSBInfo() && target_addresses_.size())
+    //    {
+    //        for (auto ta_it : target_addresses_)
+    //        {
+    //            if (eval_man_->hasADSBInfo(ta_it))
+    //            {
+    //                tie(mops_version, nucp_info, nacp_info) = eval_man_->adsbInfo(ta_it);
+    //                mops_versions_.insert(mops_version.begin(), mops_version.end());
+
+    //                if (get<0>(nucp_info))
+    //                {
+    //                    if (has_nucp_nic_)
+    //                    {
+    //                        min_nucp_nic_ = min (min_nucp_nic_, get<1>(nucp_info));
+    //                        max_nucp_nic_ = max (max_nucp_nic_, get<2>(nucp_info));
+    //                    }
+    //                    else
+    //                    {
+    //                        min_nucp_nic_ = get<1>(nucp_info);
+    //                        max_nucp_nic_ = get<2>(nucp_info);
+    //                        has_nucp_nic_ = true;
+    //                    }
+    //                }
+
+    //                if (get<0>(nacp_info))
+    //                {
+    //                    if (has_nacp)
+    //                    {
+    //                        min_nacp_ = min (min_nacp_, get<1>(nacp_info));
+    //                        max_nacp_ = max (max_nacp_, get<2>(nacp_info));
+    //                    }
+    //                    else
+    //                    {
+    //                        min_nacp_ = get<1>(nacp_info);
+    //                        max_nacp_ = get<2>(nacp_info);
+    //                        has_nacp = true;
+    //                    }
+    //                }
+    //            }
+    //        }
+
+    //        has_adsb_info_ = mops_versions_.size();
+    //        //        loginf << "UGA utn " << utn_ << " mops " << mopsVersionsStr()
+    //        //               << " nucp_nic " <<  (has_nucp_nic_ ? nucpNicStr() : " none ")
+    //        //               << " nacp "<<  (has_nacp ? nacpStr() : " none ");
+    //    }
 
     calculateTestDataMappings();
 }
@@ -217,7 +229,7 @@ float EvaluationTargetData::timeDuration() const
         return 0;
 }
 
-std::vector<unsigned int> EvaluationTargetData::modeACodes() const
+std::set<unsigned int> EvaluationTargetData::modeACodes() const
 {
     logdbg << "EvaluationTargetData: modeACodes: utn " << utn_ << " num codes " << mode_a_codes_.size();
     return mode_a_codes_;
@@ -227,11 +239,15 @@ std::string EvaluationTargetData::modeACodesStr() const
 {
     std::ostringstream out;
 
-    for (unsigned int cnt=0; cnt < mode_a_codes_.size(); ++cnt)
+    unsigned int cnt=0;
+    for (auto& ma_it : mode_a_codes_)
     {
         if (cnt != 0)
             out << ", ";
-        out << String::octStringFromInt(mode_a_codes_.at(cnt), 4, '0');
+
+        out << String::octStringFromInt(ma_it, 4, '0');
+
+        ++cnt;
     }
 
     return out.str();
@@ -242,7 +258,7 @@ bool EvaluationTargetData::hasModeC() const
     return has_mode_c_;
 }
 
-int EvaluationTargetData::modeCMin() const
+float EvaluationTargetData::modeCMin() const
 {
     assert (has_mode_c_);
     return mode_c_min_;
@@ -251,12 +267,12 @@ int EvaluationTargetData::modeCMin() const
 std::string EvaluationTargetData::modeCMinStr() const
 {
     if (has_mode_c_)
-        return to_string(mode_c_min_);
+        return to_string((int)mode_c_min_);
     else
         return "";
 }
 
-int EvaluationTargetData::modeCMax() const
+float EvaluationTargetData::modeCMax() const
 {
     assert (has_mode_c_);
     return mode_c_max_;
@@ -265,7 +281,7 @@ int EvaluationTargetData::modeCMax() const
 std::string EvaluationTargetData::modeCMaxStr() const
 {
     if (has_mode_c_)
-        return to_string(mode_c_max_);
+        return to_string((int)mode_c_max_);
     else
         return "";
 }
@@ -467,7 +483,7 @@ EvaluationTargetPosition EvaluationTargetData::refPosForTime (float tod) const
 
     NullableVector<double>& latitude_vec = eval_data_->ref_buffer_->get<double>(eval_data_->ref_latitude_name_);
     NullableVector<double>& longitude_vec = eval_data_->ref_buffer_->get<double>(eval_data_->ref_longitude_name_);
-    NullableVector<int>& altitude_vec = eval_data_->ref_buffer_->get<int>(eval_data_->ref_modec_name_);
+    NullableVector<float>& altitude_vec = eval_data_->ref_buffer_->get<float>(eval_data_->ref_modec_name_);
 
     assert (!latitude_vec.isNull(index));
     assert (!longitude_vec.isNull(index));
@@ -482,11 +498,11 @@ EvaluationTargetPosition EvaluationTargetData::refPosForTime (float tod) const
         pos.altitude_ = altitude_vec.get(index);
     }
     else if (eval_data_->has_ref_altitude_secondary_
-             && !eval_data_->ref_buffer_->get<int>(eval_data_->ref_altitude_secondary_name_).isNull(index))
+             && !eval_data_->ref_buffer_->get<float>(eval_data_->ref_altitude_secondary_name_).isNull(index))
     {
         pos.has_altitude_ = true;
         pos.altitude_calculated_ = true;
-        pos.altitude_ = eval_data_->ref_buffer_->get<int>(eval_data_->ref_altitude_secondary_name_).get(index);
+        pos.altitude_ = eval_data_->ref_buffer_->get<float>(eval_data_->ref_altitude_secondary_name_).get(index);
     }
     else // calculate
     {
@@ -513,8 +529,8 @@ EvaluationTargetPosition EvaluationTargetData::refPosForTime (float tod) const
 
 std::pair<bool, float> EvaluationTargetData::estimateRefAltitude (float tod, unsigned int index) const
 {
-    NullableVector<int>& altitude_vec = eval_data_->ref_buffer_->get<int>(eval_data_->ref_modec_name_);
-    NullableVector<float>& tods = eval_data_->ref_buffer_->get<float>("tod");
+    NullableVector<float>& altitude_vec = eval_data_->ref_buffer_->get<float>(eval_data_->ref_modec_name_);
+    NullableVector<float>& tods = eval_data_->ref_buffer_->get<float>(eval_data_->ref_tod_name_);
 
     bool found_prev {false};
     bool found_after {false};
@@ -660,7 +676,7 @@ std::string EvaluationTargetData::refCallsignForTime (float tod) const
     NullableVector<string>& callsign_vec = eval_data_->ref_buffer_->get<string>(eval_data_->ref_callsign_name_);
     assert (!callsign_vec.isNull(index));
 
-    return callsign_vec.get(index);
+    return boost::trim_copy(callsign_vec.get(index)); // remove spaces
 }
 
 bool EvaluationTargetData::hasRefModeAForTime (float tod) const
@@ -674,17 +690,17 @@ bool EvaluationTargetData::hasRefModeAForTime (float tod) const
 
     unsigned int index = it_pair.first->second;
 
-    if (eval_data_->ref_buffer_->get<int>(eval_data_->ref_modea_name_).isNull(index))
+    if (eval_data_->ref_buffer_->get<unsigned int>(eval_data_->ref_modea_name_).isNull(index))
         return false;
 
     if (eval_data_->ref_modea_v_name_.size()
-            && !eval_data_->ref_buffer_->get<string>(eval_data_->ref_modea_v_name_).isNull(index)
-            && eval_data_->ref_buffer_->get<string>(eval_data_->ref_modea_v_name_).get(index) == "N")
+            && !eval_data_->ref_buffer_->get<bool>(eval_data_->ref_modea_v_name_).isNull(index)
+            && !eval_data_->ref_buffer_->get<bool>(eval_data_->ref_modea_v_name_).get(index)) // not valid
         return false;
 
     if (eval_data_->ref_modea_g_name_.size()
-            && !eval_data_->ref_buffer_->get<string>(eval_data_->ref_modea_g_name_).isNull(index)
-            && eval_data_->ref_buffer_->get<string>(eval_data_->ref_modea_g_name_).get(index) == "Y")
+            && !eval_data_->ref_buffer_->get<bool>(eval_data_->ref_modea_g_name_).isNull(index)
+            && eval_data_->ref_buffer_->get<bool>(eval_data_->ref_modea_g_name_).get(index)) // garbled
         return false;
 
     return true;
@@ -700,7 +716,7 @@ unsigned int EvaluationTargetData::refModeAForTime (float tod) const
 
     unsigned int index = it_pair.first->second;
 
-    NullableVector<int>& modea_vec = eval_data_->ref_buffer_->get<int>(eval_data_->ref_modea_name_);
+    NullableVector<unsigned int>& modea_vec = eval_data_->ref_buffer_->get<unsigned int>(eval_data_->ref_modea_name_);
     assert (!modea_vec.isNull(index));
 
     return modea_vec.get(index);
@@ -717,23 +733,23 @@ bool EvaluationTargetData::hasRefModeCForTime (float tod) const
 
     unsigned int index = it_pair.first->second;
 
-    if (eval_data_->ref_buffer_->get<int>(eval_data_->ref_modec_name_).isNull(index))
+    if (eval_data_->ref_buffer_->get<float>(eval_data_->ref_modec_name_).isNull(index))
         return false;
 
     if (eval_data_->ref_modec_v_name_.size()
-            && !eval_data_->ref_buffer_->get<string>(eval_data_->ref_modec_v_name_).isNull(index)
-            && eval_data_->ref_buffer_->get<string>(eval_data_->ref_modec_v_name_).get(index) == "N")
+            && !eval_data_->ref_buffer_->get<bool>(eval_data_->ref_modec_v_name_).isNull(index)
+            && !eval_data_->ref_buffer_->get<bool>(eval_data_->ref_modec_v_name_).get(index)) // not valid
         return false;
 
     if (eval_data_->ref_modec_g_name_.size()
-            && !eval_data_->ref_buffer_->get<string>(eval_data_->ref_modec_g_name_).isNull(index)
-            && eval_data_->ref_buffer_->get<string>(eval_data_->ref_modec_g_name_).get(index) == "Y")
+            && !eval_data_->ref_buffer_->get<bool>(eval_data_->ref_modec_g_name_).isNull(index)
+            && eval_data_->ref_buffer_->get<bool>(eval_data_->ref_modec_g_name_).get(index)) // garbled
         return false;
 
     return true;
 }
 
-int EvaluationTargetData::refModeCForTime (float tod) const
+float EvaluationTargetData::refModeCForTime (float tod) const
 {
     assert (hasRefModeCForTime(tod));
 
@@ -743,7 +759,7 @@ int EvaluationTargetData::refModeCForTime (float tod) const
 
     unsigned int index = it_pair.first->second;
 
-    NullableVector<int>& modec_vec = eval_data_->ref_buffer_->get<int>(eval_data_->ref_modec_name_);
+    NullableVector<float>& modec_vec = eval_data_->ref_buffer_->get<float>(eval_data_->ref_modec_name_);
     assert (!modec_vec.isNull(index));
 
     return modec_vec.get(index);
@@ -761,7 +777,7 @@ bool EvaluationTargetData::hasRefTAForTime (float tod) const
     unsigned int index = it_pair.first->second;
 
     if (eval_data_->ref_target_address_name_.size()
-            && !eval_data_->ref_buffer_->get<int>(eval_data_->ref_target_address_name_).isNull(index))
+            && !eval_data_->ref_buffer_->get<unsigned int>(eval_data_->ref_target_address_name_).isNull(index))
         return true;
 
     return false;
@@ -777,9 +793,9 @@ unsigned int EvaluationTargetData::refTAForTime (float tod) const
 
     unsigned int index = it_pair.first->second;
 
-    assert (!eval_data_->ref_buffer_->get<int>(eval_data_->ref_target_address_name_).isNull(index));
+    assert (!eval_data_->ref_buffer_->get<unsigned int>(eval_data_->ref_target_address_name_).isNull(index));
 
-    return eval_data_->ref_buffer_->get<int>(eval_data_->ref_target_address_name_).get(index);
+    return eval_data_->ref_buffer_->get<unsigned int>(eval_data_->ref_target_address_name_).get(index);
 }
 
 std::pair<bool,bool> EvaluationTargetData::refGroundBitForTime (float tod) const // has gbs, gbs true
@@ -794,9 +810,9 @@ std::pair<bool,bool> EvaluationTargetData::refGroundBitForTime (float tod) const
     unsigned int index = it_pair.first->second;
 
     if (eval_data_->ref_ground_bit_name_.size()
-            && !eval_data_->ref_buffer_->get<string>(eval_data_->ref_ground_bit_name_).isNull(index))
+            && !eval_data_->ref_buffer_->get<bool>(eval_data_->ref_ground_bit_name_).isNull(index))
     {
-        return {true, eval_data_->ref_buffer_->get<string>(eval_data_->ref_ground_bit_name_).get(index) == "Y"};
+        return {true, eval_data_->ref_buffer_->get<bool>(eval_data_->ref_ground_bit_name_).get(index)};
     }
     else
         return {false, false};
@@ -854,7 +870,7 @@ EvaluationTargetPosition EvaluationTargetData::tstPosForTime (float tod) const
 
     NullableVector<double>& latitude_vec = eval_data_->tst_buffer_->get<double>(eval_data_->tst_latitude_name_);
     NullableVector<double>& longitude_vec = eval_data_->tst_buffer_->get<double>(eval_data_->tst_longitude_name_);
-    NullableVector<int>& altitude_vec = eval_data_->tst_buffer_->get<int>(eval_data_->tst_modec_name_);
+    NullableVector<float>& altitude_vec = eval_data_->tst_buffer_->get<float>(eval_data_->tst_modec_name_);
 
     assert (!latitude_vec.isNull(index));
     assert (!longitude_vec.isNull(index));
@@ -888,8 +904,8 @@ EvaluationTargetPosition EvaluationTargetData::tstPosForTime (float tod) const
 
 std::pair<bool, float> EvaluationTargetData::estimateTstAltitude (float tod, unsigned int index) const
 {
-    NullableVector<int>& altitude_vec = eval_data_->tst_buffer_->get<int>(eval_data_->tst_modec_name_);
-    NullableVector<float>& tods = eval_data_->tst_buffer_->get<float>("tod");
+    NullableVector<float>& altitude_vec = eval_data_->tst_buffer_->get<float>(eval_data_->tst_modec_name_);
+    NullableVector<float>& tods = eval_data_->tst_buffer_->get<float>(eval_data_->tst_tod_name_);
 
     bool found_prev {false};
     bool found_after {false};
@@ -993,7 +1009,7 @@ std::string EvaluationTargetData::tstCallsignForTime (float tod) const
     NullableVector<string>& callsign_vec = eval_data_->tst_buffer_->get<string>(eval_data_->tst_callsign_name_);
     assert (!callsign_vec.isNull(index));
 
-    return callsign_vec.get(index);
+    return boost::trim_copy(callsign_vec.get(index)); // remove spaces
 }
 
 bool EvaluationTargetData::hasTstModeAForTime (float tod) const
@@ -1007,17 +1023,17 @@ bool EvaluationTargetData::hasTstModeAForTime (float tod) const
 
     unsigned int index = it_pair.first->second;
 
-    if (eval_data_->tst_buffer_->get<int>(eval_data_->tst_modea_name_).isNull(index))
+    if (eval_data_->tst_buffer_->get<unsigned int>(eval_data_->tst_modea_name_).isNull(index))
         return false;
 
     if (eval_data_->tst_modea_v_name_.size()
-            && !eval_data_->tst_buffer_->get<string>(eval_data_->tst_modea_v_name_).isNull(index)
-            && eval_data_->tst_buffer_->get<string>(eval_data_->tst_modea_v_name_).get(index) == "N")
+            && !eval_data_->tst_buffer_->get<bool>(eval_data_->tst_modea_v_name_).isNull(index)
+            && !eval_data_->tst_buffer_->get<bool>(eval_data_->tst_modea_v_name_).get(index)) // not valid
         return false;
 
     if (eval_data_->tst_modea_g_name_.size()
-            && !eval_data_->tst_buffer_->get<string>(eval_data_->tst_modea_g_name_).isNull(index)
-            && eval_data_->tst_buffer_->get<string>(eval_data_->tst_modea_g_name_).get(index) == "Y")
+            && !eval_data_->tst_buffer_->get<bool>(eval_data_->tst_modea_g_name_).isNull(index)
+            && eval_data_->tst_buffer_->get<bool>(eval_data_->tst_modea_g_name_).get(index)) // garbled
         return false;
 
     return true;
@@ -1033,7 +1049,7 @@ unsigned int EvaluationTargetData::tstModeAForTime (float tod) const
 
     unsigned int index = it_pair.first->second;
 
-    NullableVector<int>& modea_vec = eval_data_->tst_buffer_->get<int>(eval_data_->tst_modea_name_);
+    NullableVector<unsigned int>& modea_vec = eval_data_->tst_buffer_->get<unsigned int>(eval_data_->tst_modea_name_);
     assert (!modea_vec.isNull(index));
 
     return modea_vec.get(index);
@@ -1050,17 +1066,17 @@ bool EvaluationTargetData::hasTstModeCForTime (float tod) const
 
     unsigned int index = it_pair.first->second;
 
-    if (eval_data_->tst_buffer_->get<int>(eval_data_->tst_modec_name_).isNull(index))
+    if (eval_data_->tst_buffer_->get<float>(eval_data_->tst_modec_name_).isNull(index))
         return false;
 
     if (eval_data_->tst_modec_v_name_.size()
-            && !eval_data_->tst_buffer_->get<string>(eval_data_->tst_modec_v_name_).isNull(index)
-            && eval_data_->tst_buffer_->get<string>(eval_data_->tst_modec_v_name_).get(index) == "N")
+            && !eval_data_->tst_buffer_->get<bool>(eval_data_->tst_modec_v_name_).isNull(index)
+            && !eval_data_->tst_buffer_->get<bool>(eval_data_->tst_modec_v_name_).get(index)) // not valid
         return false;
 
     if (eval_data_->tst_modec_g_name_.size()
-            && !eval_data_->tst_buffer_->get<string>(eval_data_->tst_modec_g_name_).isNull(index)
-            && eval_data_->tst_buffer_->get<string>(eval_data_->tst_modec_g_name_).get(index) == "Y")
+            && !eval_data_->tst_buffer_->get<bool>(eval_data_->tst_modec_g_name_).isNull(index)
+            && eval_data_->tst_buffer_->get<bool>(eval_data_->tst_modec_g_name_).get(index)) // garbled
         return false;
 
     return true;
@@ -1078,7 +1094,7 @@ bool EvaluationTargetData::hasTstGroundBitForTime (float tod) const // only if s
     unsigned int index = it_pair.first->second;
 
     if (eval_data_->tst_ground_bit_name_.size()
-            && !eval_data_->tst_buffer_->get<string>(eval_data_->tst_ground_bit_name_).isNull(index))
+            && !eval_data_->tst_buffer_->get<bool>(eval_data_->tst_ground_bit_name_).isNull(index))
         return true;
 
     return false;
@@ -1095,8 +1111,8 @@ bool EvaluationTargetData::tstGroundBitForTime (float tod) const // true is on g
     unsigned int index = it_pair.first->second;
 
     if (eval_data_->tst_ground_bit_name_.size()
-            && !eval_data_->tst_buffer_->get<string>(eval_data_->tst_ground_bit_name_).isNull(index)
-            && eval_data_->tst_buffer_->get<string>(eval_data_->tst_ground_bit_name_).get(index) == "Y")
+            && !eval_data_->tst_buffer_->get<bool>(eval_data_->tst_ground_bit_name_).isNull(index)
+            && eval_data_->tst_buffer_->get<bool>(eval_data_->tst_ground_bit_name_).get(index))
         return true;
 
     return false;
@@ -1114,7 +1130,7 @@ bool EvaluationTargetData::hasTstTAForTime (float tod) const
     unsigned int index = it_pair.first->second;
 
     if (eval_data_->tst_target_address_name_.size()
-            && !eval_data_->tst_buffer_->get<int>(eval_data_->tst_target_address_name_).isNull(index))
+            && !eval_data_->tst_buffer_->get<unsigned int>(eval_data_->tst_target_address_name_).isNull(index))
         return true;
 
     return false;
@@ -1130,12 +1146,12 @@ unsigned int EvaluationTargetData::tstTAForTime (float tod) const
 
     unsigned int index = it_pair.first->second;
 
-    assert (!eval_data_->tst_buffer_->get<int>(eval_data_->tst_target_address_name_).isNull(index));
+    assert (!eval_data_->tst_buffer_->get<unsigned int>(eval_data_->tst_target_address_name_).isNull(index));
 
-    return eval_data_->tst_buffer_->get<int>(eval_data_->tst_target_address_name_).get(index);
+    return eval_data_->tst_buffer_->get<unsigned int>(eval_data_->tst_target_address_name_).get(index);
 }
 
- // has gbs, gbs true
+// has gbs, gbs true
 pair<bool,bool> EvaluationTargetData::tstGroundBitForTimeInterpolated (float tod) const // true is on ground
 {
     if (!eval_data_->tst_ground_bit_name_.size())
@@ -1164,7 +1180,7 @@ bool EvaluationTargetData::hasTstTrackNumForTime (float tod) const
 
     unsigned int index = it_pair.first->second;
 
-    return !eval_data_->tst_buffer_->get<int>(eval_data_->tst_track_num_name_).isNull(index);
+    return !eval_data_->tst_buffer_->get<unsigned int>(eval_data_->tst_track_num_name_).isNull(index);
 }
 
 unsigned int EvaluationTargetData::tstTrackNumForTime (float tod) const
@@ -1177,7 +1193,7 @@ unsigned int EvaluationTargetData::tstTrackNumForTime (float tod) const
 
     unsigned int index = it_pair.first->second;
 
-    return eval_data_->tst_buffer_->get<int>(eval_data_->tst_track_num_name_).get(index);
+    return eval_data_->tst_buffer_->get<unsigned int>(eval_data_->tst_track_num_name_).get(index);
 }
 
 bool EvaluationTargetData::hasTstMeasuredSpeedForTime (float tod) const
@@ -1269,11 +1285,11 @@ bool EvaluationTargetData::canCheckTstMultipleSources() const
     if (!eval_data_->tst_multiple_srcs_name_.size())
         return false;
 
-    if (!eval_data_->tst_buffer_->has<string>(eval_data_->tst_multiple_srcs_name_))
+    if (!eval_data_->tst_buffer_->has<bool>(eval_data_->tst_multiple_srcs_name_))
         return false;
 
-    NullableVector<string>& tst_multiple_srcs_vec =
-            eval_data_->tst_buffer_->get<string>(eval_data_->tst_multiple_srcs_name_);
+    NullableVector<bool>& tst_multiple_srcs_vec =
+            eval_data_->tst_buffer_->get<bool>(eval_data_->tst_multiple_srcs_name_);
 
     for (auto tst_index : tst_indexes_)
     {
@@ -1288,12 +1304,12 @@ bool EvaluationTargetData::hasTstMultipleSources() const
 {
     assert (canCheckTstMultipleSources());
 
-    NullableVector<string>& tst_multiple_srcs_vec =
-            eval_data_->tst_buffer_->get<string>(eval_data_->tst_multiple_srcs_name_);
+    NullableVector<bool>& tst_multiple_srcs_vec =
+            eval_data_->tst_buffer_->get<bool>(eval_data_->tst_multiple_srcs_name_);
 
     for (auto tst_index : tst_indexes_) // one must be not null according to canCheckTstMultipleSources
     {
-        if (!tst_multiple_srcs_vec.isNull(tst_index) && tst_multiple_srcs_vec.get(tst_index) == "Y")
+        if (!tst_multiple_srcs_vec.isNull(tst_index) && tst_multiple_srcs_vec.get(tst_index))
             return true;
     }
 
@@ -1305,11 +1321,11 @@ bool EvaluationTargetData::canCheckTrackLUDSID() const
     if (!eval_data_->tst_track_lu_ds_id_name_.size())
         return false;
 
-    if (!eval_data_->tst_buffer_->has<int>(eval_data_->tst_track_lu_ds_id_name_))
+    if (!eval_data_->tst_buffer_->has<unsigned int>(eval_data_->tst_track_lu_ds_id_name_))
         return false;
 
-    NullableVector<int> tst_ls_ds_id_vec =
-            eval_data_->tst_buffer_->get<int>(eval_data_->tst_track_lu_ds_id_name_);
+    NullableVector<unsigned int> tst_ls_ds_id_vec =
+            eval_data_->tst_buffer_->get<unsigned int>(eval_data_->tst_track_lu_ds_id_name_);
 
     for (auto tst_index : tst_indexes_)
     {
@@ -1329,10 +1345,10 @@ bool EvaluationTargetData::hasSingleLUDSID() const
     assert (!hasTstMultipleSources());
 
     bool lu_ds_id_found = false;
-    int lu_ds_id;
+    unsigned int lu_ds_id;
 
-    NullableVector<int> tst_ls_ds_id_vec =
-            eval_data_->tst_buffer_->get<int>(eval_data_->tst_track_lu_ds_id_name_);
+    NullableVector<unsigned int> tst_ls_ds_id_vec =
+            eval_data_->tst_buffer_->get<unsigned int>(eval_data_->tst_track_lu_ds_id_name_);
 
     for (auto tst_index : tst_indexes_)
     {
@@ -1358,8 +1374,8 @@ unsigned int EvaluationTargetData::singleTrackLUDSID() const
 {
     assert (hasSingleLUDSID());
 
-    NullableVector<int> tst_ls_ds_id_vec =
-            eval_data_->tst_buffer_->get<int>(eval_data_->tst_track_lu_ds_id_name_);
+    NullableVector<unsigned int> tst_ls_ds_id_vec =
+            eval_data_->tst_buffer_->get<unsigned int>(eval_data_->tst_track_lu_ds_id_name_);
 
     for (auto tst_index : tst_indexes_)
     {
@@ -1371,7 +1387,7 @@ unsigned int EvaluationTargetData::singleTrackLUDSID() const
 }
 
 
-int EvaluationTargetData::tstModeCForTime (float tod) const
+float EvaluationTargetData::tstModeCForTime (float tod) const
 {
     assert (hasTstModeCForTime(tod));
 
@@ -1381,7 +1397,7 @@ int EvaluationTargetData::tstModeCForTime (float tod) const
 
     int index = it_pair.first->second;
 
-    NullableVector<int>& modec_vec = eval_data_->tst_buffer_->get<int>(eval_data_->tst_modec_name_);
+    NullableVector<float>& modec_vec = eval_data_->tst_buffer_->get<float>(eval_data_->tst_modec_name_);
     assert (!modec_vec.isNull(index));
 
     return modec_vec.get(index);
@@ -1421,26 +1437,23 @@ bool EvaluationTargetData::hasADSBInfo() const
     return has_adsb_info_;
 }
 
-std::set<unsigned int> EvaluationTargetData::mopsVersions() const
+bool EvaluationTargetData::hasMOPSVersion() const
 {
-    return mops_versions_;
+    return has_mops_version_;
 }
 
-std::string EvaluationTargetData::mopsVersionsStr() const
+unsigned int EvaluationTargetData::mopsVersion() const
 {
-    std::ostringstream out;
+    assert (has_mops_version_);
+    return mops_version_;
+}
 
-    bool first = true;
-    for (auto mops : mops_versions_)
-    {
-        if (!first)
-            out << ",";
-        out << mops;
-
-        first = false;
-    }
-
-    return out.str();
+std::string EvaluationTargetData::mopsVersionStr() const
+{
+    if (hasMOPSVersion())
+        return to_string(mopsVersion());
+    else
+        return "?";
 }
 
 std::string EvaluationTargetData::nucpNicStr() const
@@ -1453,7 +1466,7 @@ std::string EvaluationTargetData::nucpNicStr() const
             return to_string(min_nucp_nic_)+"-"+to_string(max_nucp_nic_);
     }
     else
-        return "";
+        return "?";
 }
 
 std::string EvaluationTargetData::nacpStr() const
@@ -1466,7 +1479,7 @@ std::string EvaluationTargetData::nacpStr() const
             return to_string(min_nacp_)+"-"+to_string(max_nacp_);
     }
     else
-        return "";
+        return "?";
 }
 
 bool EvaluationTargetData::hasNucpNic() const
@@ -1504,7 +1517,7 @@ bool EvaluationTargetData::hasNacp() const
 //    return tst_buffer_;
 //}
 
-std::vector<string> EvaluationTargetData::callsigns() const
+std::set<string> EvaluationTargetData::callsigns() const
 {
     return callsigns_;
 }
@@ -1513,17 +1526,20 @@ string EvaluationTargetData::callsignsStr() const
 {
     std::ostringstream out;
 
-    for (unsigned int cnt=0; cnt < callsigns_.size(); ++cnt)
+    unsigned int cnt=0;
+    for (auto& cs_it : callsigns_)
     {
         if (cnt != 0)
             out << ", ";
-        out << callsigns_.at(cnt);
+
+        out << cs_it;
+        ++cnt;
     }
 
     return out.str().c_str();
 }
 
-std::vector<unsigned int> EvaluationTargetData::targetAddresses() const
+std::set<unsigned int> EvaluationTargetData::targetAddresses() const
 {
     return target_addresses_;
 }
@@ -1532,11 +1548,14 @@ std::string EvaluationTargetData::targetAddressesStr() const
 {
     std::ostringstream out;
 
-    for (unsigned int cnt=0; cnt < target_addresses_.size(); ++cnt)
+    unsigned int cnt=0;
+    for (auto& ta_it : target_addresses_)
     {
         if (cnt != 0)
             out << ", ";
-        out << String::hexStringFromInt(target_addresses_.at(cnt), 6, '0');
+
+        out << String::hexStringFromInt(ta_it, 6, '0');
+        ++cnt;
     }
 
     return out.str().c_str();
@@ -1553,8 +1572,8 @@ void EvaluationTargetData::updateCallsigns() const
 
         for (auto& val_it : distinct_values)
         {
-            if (find(callsigns_.begin(), callsigns_.end(), val_it.first) == callsigns_.end())
-                callsigns_.push_back(val_it.first);
+            if (!callsigns_.count(val_it.first))
+                callsigns_.insert(val_it.first);
         }
     }
 
@@ -1565,8 +1584,8 @@ void EvaluationTargetData::updateCallsigns() const
 
         for (auto& val_it : distinct_values)
         {
-            if (find(callsigns_.begin(), callsigns_.end(), val_it.first) == callsigns_.end())
-                callsigns_.push_back(val_it.first);
+            if (!callsigns_.count(val_it.first))
+                callsigns_.insert(val_it.first);
         }
     }
 }
@@ -1577,25 +1596,27 @@ void EvaluationTargetData::updateTargetAddresses() const
 
     if (ref_data_.size())
     {
-        NullableVector<int>& value_vec = eval_data_->ref_buffer_->get<int>(eval_data_->ref_target_address_name_);
-        map<int, vector<unsigned int>> distinct_values = value_vec.distinctValuesWithIndexes(ref_indexes_);
+        NullableVector<unsigned int>& value_vec = eval_data_->ref_buffer_->get<unsigned int>(
+                    eval_data_->ref_target_address_name_);
+        map<unsigned int, vector<unsigned int>> distinct_values = value_vec.distinctValuesWithIndexes(ref_indexes_);
 
         for (auto& val_it : distinct_values)
         {
-            if (find(target_addresses_.begin(), target_addresses_.end(), val_it.first) == target_addresses_.end())
-                target_addresses_.push_back(val_it.first);
+            if (!target_addresses_.count(val_it.first))
+                target_addresses_.insert(val_it.first);
         }
     }
 
     if (tst_data_.size())
     {
-        NullableVector<int>& value_vec = eval_data_->tst_buffer_->get<int>(eval_data_->tst_target_address_name_);
-        map<int, vector<unsigned int>> distinct_values = value_vec.distinctValuesWithIndexes(tst_indexes_);
+        NullableVector<unsigned int>& value_vec = eval_data_->tst_buffer_->get<unsigned int>(
+                    eval_data_->tst_target_address_name_);
+        map<unsigned int, vector<unsigned int>> distinct_values = value_vec.distinctValuesWithIndexes(tst_indexes_);
 
         for (auto& val_it : distinct_values)
         {
-            if (find(target_addresses_.begin(), target_addresses_.end(), val_it.first) == target_addresses_.end())
-                target_addresses_.push_back(val_it.first);
+            if (!target_addresses_.count(val_it.first))
+                target_addresses_.insert(val_it.first);
         }
     }
 }
@@ -1608,33 +1629,35 @@ void EvaluationTargetData::updateModeACodes() const
 
     if (ref_data_.size())
     {
-        NullableVector<int>& mode_a_codes = eval_data_->ref_buffer_->get<int>(eval_data_->ref_modea_name_);
-        map<int, vector<unsigned int>> distinct_codes = mode_a_codes.distinctValuesWithIndexes(ref_indexes_);
+        NullableVector<unsigned int>& mode_a_codes = eval_data_->ref_buffer_->get<unsigned int>(
+                    eval_data_->ref_modea_name_);
+        map<unsigned int, vector<unsigned int>> distinct_codes = mode_a_codes.distinctValuesWithIndexes(ref_indexes_);
         //unsigned int null_cnt = mode_a_codes.nullValueIndexes(ref_rec_nums_).size();
 
         for (auto& ma_it : distinct_codes)
         {
-            if (find(mode_a_codes_.begin(), mode_a_codes_.end(), ma_it.first) == mode_a_codes_.end())
+            if (!mode_a_codes_.count(ma_it.first))
             {
                 logdbg << "EvaluationTargetData: updateModeACodes: utn " << utn_ << " new ref m3a "
                        << String::octStringFromInt(ma_it.first, 4, '0');
-                mode_a_codes_.push_back(ma_it.first);
+                mode_a_codes_.insert(ma_it.first);
             }
         }
     }
 
     if (tst_data_.size())
     {
-        NullableVector<int>& mode_a_codes = eval_data_->tst_buffer_->get<int>(eval_data_->tst_modea_name_);
-        map<int, vector<unsigned int>> distinct_codes = mode_a_codes.distinctValuesWithIndexes(tst_indexes_);
+        NullableVector<unsigned int>& mode_a_codes = eval_data_->tst_buffer_->get<unsigned int>(
+                    eval_data_->tst_modea_name_);
+        map<unsigned int, vector<unsigned int>> distinct_codes = mode_a_codes.distinctValuesWithIndexes(tst_indexes_);
 
         for (auto& ma_it : distinct_codes)
         {
-            if (find(mode_a_codes_.begin(), mode_a_codes_.end(), ma_it.first) == mode_a_codes_.end())
+            if (!mode_a_codes_.count(ma_it.first))
             {
                 logdbg << "EvaluationTargetData: updateModeACodes: utn " << utn_ << " new tst m3a "
                        << String::octStringFromInt(ma_it.first, 4, '0');
-                mode_a_codes_.push_back(ma_it.first);
+                mode_a_codes_.insert(ma_it.first);
             }
         }
     }
@@ -1652,8 +1675,8 @@ void EvaluationTargetData::updateModeCMinMax() const
 
     if (ref_data_.size())
     {
-        assert (eval_data_->ref_buffer_->has<int>(eval_data_->ref_modec_name_));
-        NullableVector<int>& modec_codes_ft = eval_data_->ref_buffer_->get<int>(eval_data_->ref_modec_name_);
+        assert (eval_data_->ref_buffer_->has<float>(eval_data_->ref_modec_name_));
+        NullableVector<float>& modec_codes_ft = eval_data_->ref_buffer_->get<float>(eval_data_->ref_modec_name_);
 
         for (auto ind_it : ref_indexes_)
         {
@@ -1678,8 +1701,8 @@ void EvaluationTargetData::updateModeCMinMax() const
 
     if (tst_data_.size())
     {
-        assert (eval_data_->tst_buffer_->has<int>(eval_data_->tst_modec_name_));
-        NullableVector<int>& modec_codes_ft = eval_data_->tst_buffer_->get<int>(eval_data_->tst_modec_name_);
+        assert (eval_data_->tst_buffer_->has<float>(eval_data_->tst_modec_name_));
+        NullableVector<float>& modec_codes_ft = eval_data_->tst_buffer_->get<float>(eval_data_->tst_modec_name_);
 
         for (auto ind_it : tst_indexes_)
         {
@@ -1779,7 +1802,7 @@ void EvaluationTargetData::updatePositionMinMax() const
 //    string nucp_nic_name {"nucp_nic"};
 //    string sil_name {"sil"};
 
-//    if (ref_data_.size() && ref_buffer_->dboName() == "ADSB")
+//    if (ref_data_.size() && ref_buffer_->dbContentName() == "ADSB")
 //    {
 //        assert (ref_buffer_->has<int>(mops_name));
 //        assert (ref_buffer_->has<char>(nacp_name));
@@ -1819,7 +1842,7 @@ void EvaluationTargetData::updatePositionMinMax() const
 //        }
 //    }
 
-//    if (tst_data_.size() && tst_buffer_->dboName() == "ADSB")
+//    if (tst_data_.size() && tst_buffer_->dbContentName() == "ADSB")
 //    {
 //        assert (tst_buffer_->has<int>(mops_name));
 //        assert (tst_buffer_->has<char>(nacp_name));
@@ -1895,7 +1918,7 @@ TstDataMapping EvaluationTargetData::calculateTestDataMapping(float tod) const
 
     auto lb_it = ref_data_.lower_bound(tod);
 
-    auto ub_it = ref_data_.upper_bound(tod);
+    //auto ub_it = ref_data_.upper_bound(tod);
 
     if (lb_it != ref_data_.end()) // upper tod found
     {
@@ -1941,7 +1964,7 @@ TstDataMapping EvaluationTargetData::calculateTestDataMapping(float tod) const
 
 void EvaluationTargetData::addRefPositiosToMapping (TstDataMapping& mapping) const
 {
-    if (mapping.has_ref1_  && hasRefPosForTime(mapping.tod_ref1_)
+    if (mapping.has_ref1_ && hasRefPosForTime(mapping.tod_ref1_)
             && mapping.has_ref2_ && hasRefPosForTime(mapping.tod_ref2_)) // two positions which can be interpolated
     {
         float lower = mapping.tod_ref1_;
@@ -1974,14 +1997,14 @@ void EvaluationTargetData::addRefPositiosToMapping (TstDataMapping& mapping) con
             }
             else
             {
-//                local_->SetStereographic(pos1.latitude_, pos1.longitude_, 1.0, 0.0, 0.0);
+                //                local_->SetStereographic(pos1.latitude_, pos1.longitude_, 1.0, 0.0, 0.0);
 
-//                unique_ptr<OGRCoordinateTransformation> ogr_geo2cart {
-//                    OGRCreateCoordinateTransformation(wgs84_.get(), local_.get())};
-//                assert (ogr_geo2cart);
-//                unique_ptr<OGRCoordinateTransformation> ogr_cart2geo{
-//                    OGRCreateCoordinateTransformation(local_.get(), wgs84_.get())};
-//                assert (ogr_cart2geo);
+                //                unique_ptr<OGRCoordinateTransformation> ogr_geo2cart {
+                //                    OGRCreateCoordinateTransformation(wgs84_.get(), local_.get())};
+                //                assert (ogr_geo2cart);
+                //                unique_ptr<OGRCoordinateTransformation> ogr_cart2geo{
+                //                    OGRCreateCoordinateTransformation(local_.get(), wgs84_.get())};
+                //                assert (ogr_cart2geo);
 
                 logdbg << "EvaluationTargetData: addRefPositiosToMapping: pos1 "
                        << pos1.latitude_ << ", " << pos1.longitude_;
@@ -1991,22 +2014,22 @@ void EvaluationTargetData::addRefPositiosToMapping (TstDataMapping& mapping) con
                 bool ok;
                 double x_pos, y_pos;
 
-//                if (in_appimage_) // inside appimage
-//                {
-//                    x_pos = pos2.longitude_;
-//                    y_pos = pos2.latitude_;
-//                }
-//                else
-//                {
-//                    x_pos = pos2.latitude_;
-//                    y_pos = pos2.longitude_;
-//                }
+                //                if (in_appimage_) // inside appimage
+                //                {
+                //                    x_pos = pos2.longitude_;
+                //                    y_pos = pos2.latitude_;
+                //                }
+                //                else
+                //                {
+                //                    x_pos = pos2.latitude_;
+                //                    y_pos = pos2.longitude_;
+                //                }
 
                 tie(ok, x_pos, y_pos) = trafo_.distanceCart(
                             pos1.latitude_, pos1.longitude_, pos2.latitude_, pos2.longitude_);
 
-//                logdbg << "EvaluationTargetData: addRefPositiosToMapping: geo2cart";
-//                bool ret = ogr_geo2cart->Transform(1, &x_pos, &y_pos); // wgs84 to cartesian offsets
+                //                logdbg << "EvaluationTargetData: addRefPositiosToMapping: geo2cart";
+                //                bool ret = ogr_geo2cart->Transform(1, &x_pos, &y_pos); // wgs84 to cartesian offsets
                 if (!ok)
                 {
                     logerr << "EvaluationTargetData: addRefPositiosToMapping: error with latitude " << pos2.latitude_
@@ -2072,9 +2095,9 @@ void EvaluationTargetData::addRefPositiosToMapping (TstDataMapping& mapping) con
 
                     mapping.has_ref_pos_ = true;
 
-//                    if (in_appimage_) // inside appimage
-//                        mapping.pos_ref_ = EvaluationTargetPosition(y_pos, x_pos, has_altitude, true, altitude);
-//                    else
+                    //                    if (in_appimage_) // inside appimage
+                    //                        mapping.pos_ref_ = EvaluationTargetPosition(y_pos, x_pos, has_altitude, true, altitude);
+                    //                    else
                     mapping.pos_ref_ = EvaluationTargetPosition(x_pos, y_pos, has_altitude, true, altitude);
 
                     mapping.posbased_spd_ref_.x_ = v_x;

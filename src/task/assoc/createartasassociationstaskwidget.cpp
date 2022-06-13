@@ -18,12 +18,16 @@
 #include "createartasassociationstaskwidget.h"
 
 #include "createartasassociationstask.h"
-#include "dbodatasourceselectioncombobox.h"
-#include "dbovariable.h"
-#include "dbovariableselectionwidget.h"
+#include "dbdatasourceselectioncombobox.h"
+#include "compass.h"
+#include "dbcontent/dbcontentmanager.h"
+#include "dbcontent/dbcontent.h"
+#include "dbcontent/variable/variable.h"
+#include "dbcontent/variable/variableselectionwidget.h"
 #include "logger.h"
-#include "metadbovariable.h"
+#include "dbcontent/variable/metavariable.h"
 #include "taskmanager.h"
+#include "QDoubleValidator"
 
 #include <QCheckBox>
 #include <QGridLayout>
@@ -33,10 +37,11 @@
 #include <QPushButton>
 #include <QVBoxLayout>
 
+using namespace dbContent;
 
 CreateARTASAssociationsTaskWidget::CreateARTASAssociationsTaskWidget(
         CreateARTASAssociationsTask& task, QWidget* parent, Qt::WindowFlags f)
-    : TaskWidget(parent, f), task_(task)
+    : QWidget(parent, f), task_(task)
 {
     QFont font_bold;
     font_bold.setBold(true);
@@ -48,77 +53,16 @@ CreateARTASAssociationsTaskWidget::CreateARTASAssociationsTaskWidget(
         int row_cnt = 0;
 
         // tracker data source
-        grid->addWidget(new QLabel("Tracker Data Source"), row_cnt, 0);
+        grid->addWidget(new QLabel("CAT062 Data Source"), row_cnt, 0);
 
-        assert(COMPASS::instance().objectManager().existsObject("Tracker"));
-        DBObject& dbo_tracker = COMPASS::instance().objectManager().object("Tracker");
+        assert(COMPASS::instance().dbContentManager().existsDBContent("CAT062"));
 
-        ds_combo_ = new DBODataSourceSelectionComboBox(dbo_tracker);
-        connect(ds_combo_, &DBODataSourceSelectionComboBox::changedDataSourceSignal, this,
+        ds_combo_ = new DBDataSourceComboBox();
+        ds_combo_->showDBContentOnly("CAT062");
+        connect(ds_combo_, &DBDataSourceComboBox::changedSource, this,
                 &CreateARTASAssociationsTaskWidget::currentDataSourceChangedSlot);
 
         grid->addWidget(ds_combo_, row_cnt, 1);
-
-        // tracker vars
-        row_cnt++;
-        grid->addWidget(new QLabel("Tracker Data Source ID Variable"), row_cnt, 0);
-        ds_id_box_ = new DBOVariableSelectionWidget();
-        ds_id_box_->showDBOOnly("Tracker");
-        connect(ds_id_box_, SIGNAL(selectionChanged()), this, SLOT(anyVariableChangedSlot()));
-        grid->addWidget(ds_id_box_, row_cnt, 1);
-
-        row_cnt++;
-        grid->addWidget(new QLabel("Tracker Track Number Variable"), row_cnt, 0);
-        track_num_box_ = new DBOVariableSelectionWidget();
-        track_num_box_->showDBOOnly("Tracker");
-        connect(track_num_box_, SIGNAL(selectionChanged()), this, SLOT(anyVariableChangedSlot()));
-        grid->addWidget(track_num_box_, row_cnt, 1);
-
-        row_cnt++;
-        grid->addWidget(new QLabel("Tracker Track Begin Variable"), row_cnt, 0);
-        track_begin_box_ = new DBOVariableSelectionWidget();
-        track_begin_box_->showDBOOnly("Tracker");
-        connect(track_begin_box_, SIGNAL(selectionChanged()), this, SLOT(anyVariableChangedSlot()));
-        grid->addWidget(track_begin_box_, row_cnt, 1);
-
-        row_cnt++;
-        grid->addWidget(new QLabel("Tracker Track Number Variable"), row_cnt, 0);
-        track_end_box_ = new DBOVariableSelectionWidget();
-        track_end_box_->showDBOOnly("Tracker");
-        connect(track_end_box_, SIGNAL(selectionChanged()), this, SLOT(anyVariableChangedSlot()));
-        grid->addWidget(track_end_box_, row_cnt, 1);
-
-        row_cnt++;
-        grid->addWidget(new QLabel("Tracker Track Coasting Variable"), row_cnt, 0);
-        track_coasting_box_ = new DBOVariableSelectionWidget();
-        track_coasting_box_->showDBOOnly("Tracker");
-        connect(track_coasting_box_, SIGNAL(selectionChanged()), this,
-                SLOT(anyVariableChangedSlot()));
-        grid->addWidget(track_coasting_box_, row_cnt, 1);
-
-        // meta key var
-        row_cnt++;
-        grid->addWidget(new QLabel("Key Meta Variable"), row_cnt, 0);
-        key_box_ = new DBOVariableSelectionWidget();
-        key_box_->showMetaVariablesOnly(true);
-        connect(key_box_, SIGNAL(selectionChanged()), this, SLOT(anyVariableChangedSlot()));
-        grid->addWidget(key_box_, row_cnt, 1);
-
-        // meta hash var
-        row_cnt++;
-        grid->addWidget(new QLabel("Hash Meta Variable"), row_cnt, 0);
-        hash_box_ = new DBOVariableSelectionWidget();
-        hash_box_->showMetaVariablesOnly(true);
-        connect(hash_box_, SIGNAL(selectionChanged()), this, SLOT(anyVariableChangedSlot()));
-        grid->addWidget(hash_box_, row_cnt, 1);
-
-        // meta tod var
-        row_cnt++;
-        grid->addWidget(new QLabel("Time-of-day Meta Variable"), row_cnt, 0);
-        tod_box_ = new DBOVariableSelectionWidget();
-        tod_box_->showMetaVariablesOnly(true);
-        connect(tod_box_, SIGNAL(selectionChanged()), this, SLOT(anyVariableChangedSlot()));
-        grid->addWidget(tod_box_, row_cnt, 1);
 
         // time stuff
         row_cnt++;
@@ -215,8 +159,9 @@ CreateARTASAssociationsTaskWidget::CreateARTASAssociationsTaskWidget(
             &CreateARTASAssociationsTaskWidget::anyTrackFlagChangedSlot);
     main_layout->addWidget(mark_track_coasting_associations_dubious_check_);
 
+    main_layout->addStretch();
+
     update();
-    expertModeChangedSlot();
 
     setLayout(main_layout);
 }
@@ -232,109 +177,12 @@ void CreateARTASAssociationsTaskWidget::currentDataSourceChangedSlot()
 void CreateARTASAssociationsTaskWidget::update()
 {
     if (task_.currentDataSourceName().size() &&
-            ds_combo_->hasDataSource(task_.currentDataSourceName()))
-        ds_combo_->setDataSource(task_.currentDataSourceName());
+            ds_combo_->hasDSName(task_.currentDataSourceName()))
+        ds_combo_->setDSName(task_.currentDataSourceName());
 
     if (ds_combo_->getDSName() != task_.currentDataSourceName())
         task_.currentDataSourceName(ds_combo_->getDSName());
 
-    DBObjectManager& object_man = COMPASS::instance().objectManager();
-
-    DBObject& track_object = object_man.object("Tracker");
-
-    // tracker vats
-    assert(ds_id_box_);
-    if (task_.trackerDsIdVarStr().size() && track_object.hasVariable(task_.trackerDsIdVarStr()))
-        ds_id_box_->selectedVariable(track_object.variable(task_.trackerDsIdVarStr()));
-
-    assert(track_num_box_);
-    if (task_.trackerTrackNumVarStr().size() &&
-            track_object.hasVariable(task_.trackerTrackNumVarStr()))
-        track_num_box_->selectedVariable(track_object.variable(task_.trackerTrackNumVarStr()));
-
-    assert(track_begin_box_);
-    if (task_.trackerTrackBeginVarStr().size() &&
-            track_object.hasVariable(task_.trackerTrackBeginVarStr()))
-        track_begin_box_->selectedVariable(track_object.variable(task_.trackerTrackBeginVarStr()));
-
-    assert(track_end_box_);
-    if (task_.trackerTrackEndVarStr().size() &&
-            track_object.hasVariable(task_.trackerTrackEndVarStr()))
-        track_end_box_->selectedVariable(track_object.variable(task_.trackerTrackEndVarStr()));
-
-    assert(track_coasting_box_);
-    if (task_.trackerTrackCoastingVarStr().size() &&
-            track_object.hasVariable(task_.trackerTrackCoastingVarStr()))
-        track_coasting_box_->selectedVariable(
-                    track_object.variable(task_.trackerTrackCoastingVarStr()));
-
-    // meta vars
-    assert(key_box_);
-    if (task_.keyVarStr().size() && object_man.existsMetaVariable(task_.keyVarStr()))
-        key_box_->selectedMetaVariable(object_man.metaVariable(task_.keyVarStr()));
-
-    assert(hash_box_);
-    if (task_.hashVarStr().size() && object_man.existsMetaVariable(task_.hashVarStr()))
-        hash_box_->selectedMetaVariable(object_man.metaVariable(task_.hashVarStr()));
-
-    assert(tod_box_);
-    if (task_.todVarStr().size() && object_man.existsMetaVariable(task_.todVarStr()))
-        tod_box_->selectedMetaVariable(object_man.metaVariable(task_.todVarStr()));
-
-    // track flag stuff
-}
-
-void CreateARTASAssociationsTaskWidget::anyVariableChangedSlot()
-{
-    // tracker vars
-    assert(ds_id_box_);
-    if (ds_id_box_->hasVariable())
-        task_.trackerDsIdVarStr(ds_id_box_->selectedVariable().name());
-    else
-        task_.trackerDsIdVarStr("");
-
-    assert(track_num_box_);
-    if (track_num_box_->hasVariable())
-        task_.trackerTrackNumVarStr(track_num_box_->selectedVariable().name());
-    else
-        task_.trackerTrackNumVarStr("");
-
-    assert(track_begin_box_);
-    if (track_begin_box_->hasVariable())
-        task_.trackerTrackBeginVarStr(track_begin_box_->selectedVariable().name());
-    else
-        task_.trackerTrackBeginVarStr("");
-
-    assert(track_end_box_);
-    if (track_end_box_->hasVariable())
-        task_.trackerTrackEndVarStr(track_end_box_->selectedVariable().name());
-    else
-        task_.trackerTrackEndVarStr("");
-
-    assert(track_coasting_box_);
-    if (track_coasting_box_->hasVariable())
-        task_.trackerTrackCoastingVarStr(track_coasting_box_->selectedVariable().name());
-    else
-        task_.trackerTrackCoastingVarStr("");
-
-    // meta vars
-    assert(key_box_);
-    if (key_box_->hasMetaVariable())
-        task_.keyVarStr(key_box_->selectedMetaVariable().name());
-    else
-        task_.keyVarStr("");
-
-    assert(hash_box_);
-    if (hash_box_->hasMetaVariable())
-        task_.hashVarStr(hash_box_->selectedMetaVariable().name());
-    else
-        task_.hashVarStr("");
-
-    assert(tod_box_);
-    if (tod_box_->hasMetaVariable())
-        task_.todVarStr(tod_box_->selectedMetaVariable().name());
-    else
-        task_.todVarStr("");
 }
 
 void CreateARTASAssociationsTaskWidget::endTrackTimeEditSlot(QString value)
@@ -418,33 +266,4 @@ void CreateARTASAssociationsTaskWidget::anyTrackFlagChangedSlot()
             task_.markTrackCoastingAssociationsDubious())
         task_.markTrackCoastingAssociationsDubious(
                     mark_track_coasting_associations_dubious_check_->checkState() == Qt::Checked);
-}
-
-void CreateARTASAssociationsTaskWidget::expertModeChangedSlot()
-{
-    bool expert_mode = task_.manager().expertMode();
-
-    assert(ds_id_box_);
-    ds_id_box_->setEnabled(expert_mode);
-
-    assert(track_num_box_);
-    track_num_box_->setEnabled(expert_mode);
-
-    assert(track_begin_box_);
-    track_begin_box_->setEnabled(expert_mode);
-
-    assert(track_end_box_);
-    track_end_box_->setEnabled(expert_mode);
-
-    assert(track_coasting_box_);
-    track_coasting_box_->setEnabled(expert_mode);
-
-    assert(key_box_);
-    key_box_->setEnabled(expert_mode);
-
-    assert(hash_box_);
-    hash_box_->setEnabled(expert_mode);
-
-    assert(tod_box_);
-    tod_box_->setEnabled(expert_mode);
 }

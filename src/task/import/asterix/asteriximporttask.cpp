@@ -18,28 +18,25 @@
 #include "asteriximporttask.h"
 #include "asterixcategoryconfig.h"
 #include "asteriximporttaskwidget.h"
-#include "asterixstatusdialog.h"
 #include "compass.h"
 #include "buffer.h"
 #include "configurable.h"
 #include "createartasassociationstask.h"
 #include "dbinterface.h"
-#include "dbobject.h"
-#include "dbobjectmanager.h"
-#include "dbovariable.h"
-#include "dbtable.h"
-#include "dbtablecolumn.h"
+#include "dbcontent/dbcontent.h"
+#include "dbcontent/dbcontentmanager.h"
+#include "dbcontent/variable/variable.h"
+#include "datasourcemanager.h"
 #include "files.h"
 #include "jobmanager.h"
 #include "logger.h"
-#include "postprocesstask.h"
+#include "asteriximporttaskdialog.h"
 #include "radarplotpositioncalculatortask.h"
-#include "savedfile.h"
 #include "stringconv.h"
 #include "system.h"
 #include "taskmanager.h"
-#include "taskmanagerwidget.h"
-#include "metadbtable.h"
+#include "mainwindow.h"
+#include "stringconv.h"
 
 #include <jasterix/category.h>
 #include <jasterix/edition.h>
@@ -50,17 +47,16 @@
 #include <QCoreApplication>
 #include <QMessageBox>
 #include <QThread>
+#include <QProgressDialog>
+
 #include <algorithm>
 
 using namespace Utils;
 using namespace nlohmann;
 using namespace std;
 
-const unsigned int unlimited_chunk_size = 10000;
-const unsigned int limited_chunk_size = 5000;
-
-// const unsigned int unlimited_num_json_jobs_ = 2;
-// const unsigned int limited_num_json_jobs_ = 1;
+const unsigned int unlimited_chunk_size = 4000;
+//const unsigned int limited_chunk_size = 2000;
 
 const std::string DONE_PROPERTY_NAME = "asterix_data_imported";
 
@@ -74,17 +70,11 @@ ASTERIXImportTask::ASTERIXImportTask(const std::string& class_id, const std::str
     tooltip_ = "Allows importing of ASTERIX data recording files into the opened database.";
 
     registerParameter("debug_jasterix", &debug_jasterix_, false);
-    registerParameter("limit_ram", &limit_ram_, false);
-    registerParameter("current_filename", &current_filename_, "");
-    registerParameter("current_framing", &current_framing_, "");
 
-    registerParameter("override_sac_org", &post_process_.override_sac_org_, 0);
-    registerParameter("override_sic_org", &post_process_.override_sic_org_, 0);
-    registerParameter("override_sac_new", &post_process_.override_sac_new_, 1);
-    registerParameter("override_sic_new", &post_process_.override_sic_new_, 1);
-    registerParameter("override_tod_offset", &post_process_.override_tod_offset_, 0.0);
+    registerParameter("file_list", &file_list_, json::array());
+    registerParameter("current_file_framing", &current_file_framing_, "");
 
-    createSubConfigurables();
+    registerParameter("override_tod_offset", &override_tod_offset_, 0.0);
 
     std::string jasterix_definition_path = HOME_DATA_DIRECTORY + "jasterix_definitions";
 
@@ -92,50 +82,35 @@ ASTERIXImportTask::ASTERIXImportTask(const std::string& class_id, const std::str
            << jasterix_definition_path << "'";
     assert(Files::directoryExists(jasterix_definition_path));
 
-    if (limit_ram_)
-    {
-        jASTERIX::frame_chunk_size = limited_chunk_size;
-        jASTERIX::data_block_chunk_size = limited_chunk_size;
-    }
-    else
-    {
-        jASTERIX::frame_chunk_size = unlimited_chunk_size;
-        jASTERIX::data_block_chunk_size = unlimited_chunk_size;
-    }
+    jASTERIX::frame_chunk_size = unlimited_chunk_size;
+    jASTERIX::data_block_chunk_size = unlimited_chunk_size;
 
     jasterix_ = std::make_shared<jASTERIX::jASTERIX>(jasterix_definition_path, false,
                                                      debug_jasterix_, true);
 
+    createSubConfigurables();
+
     std::vector<std::string> framings = jasterix_->framings();
-    if (std::find(framings.begin(), framings.end(), current_framing_) == framings.end())
+    if (std::find(framings.begin(), framings.end(), current_file_framing_) == framings.end())
     {
         loginf << "ASTERIXImportTask: constructor: resetting to no framing";
-        current_framing_ = "";
+        current_file_framing_ = "";
     }
 }
 
 ASTERIXImportTask::~ASTERIXImportTask()
 {
-    for (auto it : file_list_)
-        delete it.second;
-
-    file_list_.clear();
+    loginf << "ASTERIXImportTask: destructor";
 }
 
 void ASTERIXImportTask::generateSubConfigurable(const std::string& class_id,
                                                 const std::string& instance_id)
 {
-    if (class_id == "ASTERIXFile")
-    {
-        SavedFile* file = new SavedFile(class_id, instance_id, this);
-        assert(file_list_.count(file->name()) == 0);
-        file_list_.insert(std::pair<std::string, SavedFile*>(file->name(), file));
-    }
-    else if (class_id == "ASTERIXCategoryConfig")
+    if (class_id == "ASTERIXCategoryConfig")
     {
         unsigned int category = configuration()
-                                    .getSubConfiguration(class_id, instance_id)
-                                    .getParameterConfigValueUint("category");
+                .getSubConfiguration(class_id, instance_id)
+                .getParameterConfigValueUint("category");
 
         assert(category_configs_.find(category) == category_configs_.end());
 
@@ -143,20 +118,20 @@ void ASTERIXImportTask::generateSubConfigurable(const std::string& class_id,
                << instance_id << " with cat " << category;
 
         category_configs_.emplace(
-            std::piecewise_construct,
-            std::forward_as_tuple(category),                                // args for key
-            std::forward_as_tuple(category, class_id, instance_id, this));  // args for mapped value
+                    std::piecewise_construct,
+                    std::forward_as_tuple(category),                                // args for key
+                    std::forward_as_tuple(category, class_id, instance_id, this));  // args for mapped value
 
         logdbg << "ASTERIXImportTask: generateSubConfigurable: cat " << category << " decode "
                << category_configs_.at(category).decode() << " edition '"
                << category_configs_.at(category).edition() << "' ref '"
                << category_configs_.at(category).ref() << "'";
     }
-    else if (class_id == "JSONParsingSchema")
+    else if (class_id == "ASTERIXJSONParsingSchema")
     {
         std::string name = configuration()
-                               .getSubConfiguration(class_id, instance_id)
-                               .getParameterConfigValueString("name");
+                .getSubConfiguration(class_id, instance_id)
+                .getParameterConfigValueString("name");
 
         assert(schema_ == nullptr);
         assert(name == "jASTERIX");
@@ -164,14 +139,14 @@ void ASTERIXImportTask::generateSubConfigurable(const std::string& class_id,
         logdbg << "ASTERIXImportTask: generateSubConfigurable: generating schema " << instance_id
                << " with name " << name;
 
-        schema_.reset(new JSONParsingSchema(class_id, instance_id, this));
+        schema_.reset(new ASTERIXJSONParsingSchema(class_id, instance_id, *this));
     }
     else
         throw std::runtime_error("ASTERIXImportTask: generateSubConfigurable: unknown class_id " +
                                  class_id);
 }
 
-void ASTERIXImportTask::asterixFraming(const std::string& asterix_framing)
+void ASTERIXImportTask::asterixFileFraming(const std::string& asterix_framing)
 {
     loginf << "ASTERIXImportTask: asterixFraming: framing '" << asterix_framing << "'";
 
@@ -182,7 +157,7 @@ void ASTERIXImportTask::asterixFraming(const std::string& asterix_framing)
             && std::find(framings.begin(), framings.end(), asterix_framing) == framings.end())
         throw runtime_error ("ASTERIXImportTask: unknown framing '"+asterix_framing+"'");
 
-    current_framing_ = asterix_framing;
+    current_file_framing_ = asterix_framing;
 }
 
 void ASTERIXImportTask::asterixDecoderConfig(const std::string& asterix_decoder_cfg)
@@ -264,25 +239,6 @@ void ASTERIXImportTask::asterixDecoderConfig(const std::string& asterix_decoder_
 
             category_configs_.at(cat).spf(spf_ed);
         }
-
-        if (cat_cfg.contains("mapping"))
-        {
-            if (!cat_cfg.at("mapping").is_string())
-                throw runtime_error("ASTERIXImportTask: asterixDecoderConfig: cat "+to_string(cat)
-                                    +" mapping is not a string");
-
-            string mapping = cat_cfg.at("mapping");
-
-            std::vector<std::string> mappings = getPossibleMappings (cat);
-
-            if (std::find(mappings.begin(), mappings.end(), mapping) == mappings.end())
-                throw runtime_error ("ASTERIXImportTask: unknown mapping '"+mapping+"'");
-
-            loginf << "ASTERIXImportTask: asterixDecoderConfig: setting cat " << cat
-                   << " mapping '" << mapping << "'";
-
-             setActiveMapping (cat, mapping);
-        }
     }
 
 }
@@ -292,24 +248,31 @@ void ASTERIXImportTask::checkSubConfigurables()
     if (schema_ == nullptr)
     {
         Configuration& config =
-            addNewSubConfiguration("JSONParsingSchema", "JSONParsingSchemajASTERIX0");
+                addNewSubConfiguration("JSONParsingSchema", "JSONParsingSchemajASTERIX0");
         config.addParameterString("name", "jASTERIX");
         generateSubConfigurable("JSONParsingSchema", "JSONParsingSchemajASTERIX0");
     }
 }
 
-TaskWidget* ASTERIXImportTask::widget()
+ASTERIXImportTaskDialog* ASTERIXImportTask::dialog()
 {
-    if (!widget_)
+    if (!dialog_)
     {
-        widget_.reset(new ASTERIXImportTaskWidget(*this));
+        dialog_.reset(new ASTERIXImportTaskDialog(*this));
 
-        connect(&task_manager_, &TaskManager::expertModeChangedSignal, widget_.get(),
-                &ASTERIXImportTaskWidget::expertModeChangedSlot);
+        connect(dialog_.get(), &ASTERIXImportTaskDialog::testTmportSignal,
+                this, &ASTERIXImportTask::dialogTestImportSlot);
+
+        connect(dialog_.get(), &ASTERIXImportTaskDialog::importSignal,
+                this, &ASTERIXImportTask::dialogImportSlot);
+
+        connect(dialog_.get(), &ASTERIXImportTaskDialog::cancelSignal,
+                this, &ASTERIXImportTask::dialogCancelSlot);
     }
 
-    assert(widget_);
-    return widget_.get();
+    assert(dialog_);
+    return dialog_.get();
+
 }
 
 void ASTERIXImportTask::refreshjASTERIX()
@@ -324,93 +287,79 @@ void ASTERIXImportTask::refreshjASTERIX()
                                                      debug_jasterix_, true);
 
     std::vector<std::string> framings = jasterix_->framings();
-    if (std::find(framings.begin(), framings.end(), current_framing_) == framings.end())
+    if (std::find(framings.begin(), framings.end(), current_file_framing_) == framings.end())
     {
         loginf << "ASTERIXImportTask: refreshjASTERIX: resetting to no framing";
-        current_framing_ = "";
+        current_file_framing_ = "";
     }
+}
+
+std::vector<std::string> ASTERIXImportTask::fileList()
+{
+    return file_list_.get<std::vector<string>>();
 }
 
 void ASTERIXImportTask::addFile(const std::string& filename)
 {
     loginf << "ASTERIXImportTask: addFile: filename '" << filename << "'";
 
-    if (file_list_.count(filename) != 0)
-        throw std::invalid_argument("ASTERIXImportTask: addFile: name '" + filename +
-                                    "' already in use");
+    vector<string> tmp_list = file_list_.get<std::vector<string>>();
 
-    std::string instancename = filename;
-    instancename.erase(std::remove(instancename.begin(), instancename.end(), '/'),
-                       instancename.end());
+    if (find(tmp_list.begin(), tmp_list.end(), filename) == tmp_list.end())
+    {
+        loginf << "ASTERIXImportTask: addFile: adding filename '" << filename << "'";
 
-    Configuration& config = addNewSubConfiguration("ASTERIXFile", "ASTERIXFile" + instancename);
-    config.addParameterString("name", filename);
-    generateSubConfigurable("ASTERIXFile", "ASTERIXFile" + instancename);
+        tmp_list.push_back(filename);
 
-    current_filename_ = filename;
+        sort(tmp_list.begin(), tmp_list.end());
 
-    emit statusChangedSignal(name_);
-
-    if (widget_)
-        widget_->updateFileListSlot();
-}
-
-void ASTERIXImportTask::removeCurrentFilename()
-{
-    loginf << "ASTERIXImportTask: removeCurrentFilename: filename '" << current_filename_ << "'";
-
-    assert(current_filename_.size());
-    assert(hasFile(current_filename_));
-
-    if (file_list_.count(current_filename_) != 1)
-        throw std::invalid_argument("ASTERIXImportTask: removeCurrentFilename: name '" +
-                                    current_filename_ + "' not in use");
-
-    delete file_list_.at(current_filename_);
-    file_list_.erase(current_filename_);
-    current_filename_ = "";
+        file_list_ = tmp_list;
+    }
 
     emit statusChangedSignal(name_);
-
-    if (widget_)
-        widget_->updateFileListSlot();
 }
 
-void ASTERIXImportTask::removeAllFiles ()
+void ASTERIXImportTask::clearFileList ()
 {
     loginf << "ASTERIXImportTask: removeAllFiles";
 
-    while (file_list_.size())
-    {
-        delete file_list_.begin()->second;
-        file_list_.erase(file_list_.begin());
-    }
-
-    current_filename_ = "";
-
-    emit statusChangedSignal(name_);
-
-    if (widget_)
-        widget_->updateFileListSlot();
+    file_list_.clear();
 }
 
-void ASTERIXImportTask::currentFilename(const std::string& filename)
+void ASTERIXImportTask::importFilename(const std::string& filename)
 {
     loginf << "ASTERIXImportTask: currentFilename: filename '" << filename << "'";
 
-    bool had_filename = canImportFile();
-
     current_filename_ = filename;
+    import_file_ = true;
 
-    if (!had_filename)  // not on re-select
-        emit statusChangedSignal(name_);
+    addFile(filename);
+
+    if (dialog_)
+        dialog_->updateButtons();
 }
 
-const std::string& ASTERIXImportTask::currentFraming() const { return current_framing_; }
+void ASTERIXImportTask::importNetwork()
+{
+    loginf << "ASTERIXImportTask: importNetwork";
+
+    current_filename_ = "";
+    import_file_ = false;
+
+    if (dialog_)
+        dialog_->updateButtons();
+}
+
+bool ASTERIXImportTask::isImportNetwork()
+{
+    return !import_file_;
+}
+
+const std::string& ASTERIXImportTask::currentFraming() const { return current_file_framing_; }
 
 void ASTERIXImportTask::currentFraming(const std::string& current_framing)
 {
-    current_framing_ = current_framing;
+    current_file_framing_ = current_framing;
 }
 
 bool ASTERIXImportTask::hasConfiguratonFor(unsigned int category)
@@ -451,7 +400,7 @@ std::string ASTERIXImportTask::editionForCategory(unsigned int category)
 
     // check if edition exists, otherwise rest to default
     if (jasterix_->category(category)->editions().count(category_configs_.at(category).edition()) ==
-        0)
+            0)
     {
         loginf << "ASTERIXImportTask: editionForCategory: cat " << category
                << " reset to default edition";
@@ -488,7 +437,7 @@ std::string ASTERIXImportTask::refEditionForCategory(unsigned int category)
 
     // check if edition exists, otherwise rest to default
     if (category_configs_.at(category).ref().size() &&  // if value set and not exist in jASTERIX
-        jasterix_->category(category)->refEditions().count(category_configs_.at(category).ref()) ==
+            jasterix_->category(category)->refEditions().count(category_configs_.at(category).ref()) ==
             0)
     {
         loginf << "ASTERIXImportTask: refForCategory: cat " << category
@@ -526,7 +475,7 @@ std::string ASTERIXImportTask::spfEditionForCategory(unsigned int category)
 
     // check if edition exists, otherwise rest to default
     if (category_configs_.at(category).spf().size() &&  // if value set and not exist in jASTERIX
-        jasterix_->category(category)->spfEditions().count(category_configs_.at(category).spf()) ==
+            jasterix_->category(category)->spfEditions().count(category_configs_.at(category).spf()) ==
             0)
     {
         loginf << "ASTERIXImportTask: spfEditionForCategory: cat " << category
@@ -559,7 +508,7 @@ void ASTERIXImportTask::spfEditionForCategory(unsigned int category, const std::
         category_configs_.at(category).spf(spf);
 }
 
-std::shared_ptr<JSONParsingSchema> ASTERIXImportTask::schema() const { return schema_; }
+std::shared_ptr<ASTERIXJSONParsingSchema> ASTERIXImportTask::schema() const { return schema_; }
 
 bool ASTERIXImportTask::debug() const { return debug_jasterix_; }
 
@@ -571,27 +520,6 @@ void ASTERIXImportTask::debug(bool debug_jasterix)
     jasterix_->setDebug(debug_jasterix_);
 
     loginf << "ASTERIXImportTask: debug " << debug_jasterix_;
-}
-
-bool ASTERIXImportTask::limitRAM() const { return limit_ram_; }
-
-void ASTERIXImportTask::limitRAM(bool limit_ram)
-{
-    limit_ram_ = limit_ram;
-
-    if (limit_ram_)
-    {
-        jASTERIX::frame_chunk_size = limited_chunk_size;
-        jASTERIX::data_block_chunk_size = limited_chunk_size;
-    }
-    else
-    {
-        jASTERIX::frame_chunk_size = unlimited_chunk_size;
-        jASTERIX::data_block_chunk_size = unlimited_chunk_size;
-    }
-
-    if (widget_)
-        widget_->updateLimitRAM();
 }
 
 bool ASTERIXImportTask::checkPrerequisites()
@@ -610,7 +538,7 @@ bool ASTERIXImportTask::isRecommended()
     if (!checkPrerequisites())
         return false;
 
-    if (COMPASS::instance().objectManager().hasData())
+    if (COMPASS::instance().dbContentManager().hasData())
         return false;
 
     return true;
@@ -618,150 +546,46 @@ bool ASTERIXImportTask::isRecommended()
 
 bool ASTERIXImportTask::isRequired() { return false; }
 
-bool ASTERIXImportTask::overrideActive() const { return post_process_.override_active_; }
+bool ASTERIXImportTask::overrideTodActive() const { return override_tod_active_; }
 
-void ASTERIXImportTask::overrideActive(bool value)
+void ASTERIXImportTask::overrideTodActive(bool value)
 {
     loginf << "ASTERIXImportTask: overrideActive: value " << value;
 
-    post_process_.override_active_ = value;
+    override_tod_active_ = value;
 }
 
-unsigned int ASTERIXImportTask::overrideSacOrg() const { return post_process_.override_sac_org_; }
-
-void ASTERIXImportTask::overrideSacOrg(unsigned int value)
-{
-    loginf << "ASTERIXImportTask: overrideSacOrg: value " << value;
-
-    post_process_.override_sac_org_ = value;
-}
-
-unsigned int ASTERIXImportTask::overrideSicOrg() const { return post_process_.override_sic_org_; }
-
-void ASTERIXImportTask::overrideSicOrg(unsigned int value)
-{
-    loginf << "ASTERIXImportTask: overrideSicOrg: value " << value;
-
-    post_process_.override_sic_org_ = value;
-}
-
-unsigned int ASTERIXImportTask::overrideSacNew() const { return post_process_.override_sac_new_; }
-
-void ASTERIXImportTask::overrideSacNew(unsigned int value)
-{
-    loginf << "ASTERIXImportTask: overrideSacNew: value " << value;
-
-    post_process_.override_sac_new_ = value;
-}
-
-unsigned int ASTERIXImportTask::overrideSicNew() const { return post_process_.override_sic_new_; }
-
-void ASTERIXImportTask::overrideSicNew(unsigned int value)
-{
-    loginf << "ASTERIXImportTask: overrideSicNew: value " << value;
-
-    post_process_.override_sic_new_ = value;
-}
-
-float ASTERIXImportTask::overrideTodOffset() const { return post_process_.override_tod_offset_; }
+float ASTERIXImportTask::overrideTodOffset() const { return override_tod_offset_; }
 
 void ASTERIXImportTask::overrideTodOffset(float value)
 {
     loginf << "ASTERIXImportTask: overrideTodOffset: value " << value;
 
-    post_process_.override_tod_offset_ = value;
+    override_tod_offset_ = value;
 }
 
-std::vector<std::string> ASTERIXImportTask::getPossibleMappings (unsigned int cat)
+unsigned int ASTERIXImportTask::fileLineID() const
 {
-    std::vector<std::string> list;
-
-    list.push_back(""); // no mapping
-
-    assert (schema_);
-
-    std::string tmp_str;
-    unsigned int tmp_cat;
-
-    for (auto& par_it : schema_->parsers())
-    {
-        if (par_it.second.JSONKey() != "category")
-        {
-            logwrn << "ASTERIXImportTask: getPossibleMappings: parser '" << par_it.first << "' has unknown JSON key '"
-                   << par_it.second.JSONKey() << "'";
-            continue;
-        }
-
-        tmp_str = par_it.second.JSONValue();
-        tmp_cat = std::stoi(tmp_str);
-
-        if (tmp_cat == cat) // if same, add
-           list.push_back(par_it.first);
-    }
-
-    return list;
+    return file_line_id_;
 }
 
-std::string ASTERIXImportTask::getActiveMapping (unsigned int cat)
+void ASTERIXImportTask::fileLineID(unsigned int value)
 {
-    assert (schema_);
+    loginf << "ASTERIXImportTask: fileLineID: value " << value;
 
-    std::string tmp_str;
-    unsigned int tmp_cat;
-
-    for (auto& par_it : schema_->parsers())
-    {
-        if (par_it.second.JSONKey() != "category")
-        {
-            logwrn << "ASTERIXImportTask: getActiveMapping: parser '" << par_it.first << "' has unknown JSON key '"
-                   << par_it.second.JSONKey() << "'";
-            continue;
-        }
-
-        tmp_str = par_it.second.JSONValue();
-        tmp_cat = std::stoi(tmp_str);
-
-        if (tmp_cat == cat && par_it.second.active()) // if same, add
-           return par_it.first;
-    }
-
-    // none found
-    return "";
+    file_line_id_ = value;
 }
 
-void ASTERIXImportTask::setActiveMapping (unsigned int cat, const std::string& mapping_name)
+bool ASTERIXImportTask::isRunning() const
 {
-    loginf << "ASTERIXImportTask: setActiveMapping: cat " << cat << " mapping '" << mapping_name << "'";
-
-    assert (schema_);
-
-    std::string tmp_str;
-    unsigned int tmp_cat;
-
-    for (auto& par_it : schema_->parsers())
-    {
-        if (par_it.second.JSONKey() != "category")
-        {
-            logwrn << "ASTERIXImportTask: setActiveMapping: parser '" << par_it.first << "' has unknown JSON key '"
-                   << par_it.second.JSONKey() << "'";
-            continue;
-        }
-
-        tmp_str = par_it.second.JSONValue();
-        tmp_cat = std::stoi(tmp_str);
-
-        if (tmp_cat == cat) // if same, change
-            par_it.second.active(par_it.first == mapping_name);
-    }
+    return running_;
 }
-
-void ASTERIXImportTask::deleteWidget() { widget_.reset(nullptr); }
 
 bool ASTERIXImportTask::canImportFile()
 {
     if (!current_filename_.size())
         return false;
-
+    
     if (!Files::fileExists(current_filename_))
     {
         loginf << "ASTERIXImportTask: canImportFile: not possible since file '"
@@ -772,93 +596,113 @@ bool ASTERIXImportTask::canImportFile()
     return true;
 }
 
-bool ASTERIXImportTask::canRun() { return canImportFile(); }
+bool ASTERIXImportTask::canRun()
+{
+    if (import_file_)
+        return canImportFile(); // set file exists
+    else
+        return COMPASS::instance().dataSourceManager().getNetworkLines().size(); // there are network lines defined
+}
 
 void ASTERIXImportTask::run()
 {
-    run (false, false);
+    run (false);
 }
 
-void ASTERIXImportTask::run(bool test, bool create_mapping_stubs)
+void ASTERIXImportTask::stop()
+{
+    loginf << "ASTERIXImportTask: stop";
+
+    stopped_ = true;
+
+    if (decode_job_)
+        decode_job_->setObsolete();
+
+    for (auto& job_it : json_map_jobs_)
+        job_it->setObsolete();
+
+    for (auto& job_it : postprocess_jobs_)
+        job_it->setObsolete();
+
+    while(decode_job_ && !decode_job_->done())
+    {
+        loginf << "ASTERIXImportTask: stop: waiting for decode job to finish";
+
+        QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+        QThread::msleep(1);
+    }
+
+    while(json_map_jobs_.size())
+    {
+        loginf << "ASTERIXImportTask: stop: waiting for map job to finish";
+
+        QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+        QThread::msleep(1);
+    }
+
+    while(postprocess_jobs_.size())
+    {
+        loginf << "ASTERIXImportTask: stop: waiting for post-process job to finish";
+
+        QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+        QThread::msleep(1);
+    }
+
+    while (waiting_for_insert_)
+    {
+        loginf << "ASTERIXImportTask: stop: waiting for insert to finish";
+
+        QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+        QThread::msleep(1);
+    }
+
+    //    done_ = true; // set by checkAllDone
+    //    running_ = false;
+
+    loginf << "ASTERIXImportTask: stop done";
+}
+
+void ASTERIXImportTask::run(bool test) // , bool create_mapping_stubs
 {
     test_ = test;
-    create_mapping_stubs_ = create_mapping_stubs;
 
+    assert (!running_);
+
+    if (!import_file_)
+        COMPASS::instance().appMode(AppMode::LiveRunning); // set live mode
+
+    running_ = true;
     done_ = false; // since can be run multiple times
-    num_radar_inserted_ = 0;
+
+    num_packets_in_processing_ = 0;
+    num_packets_total_ = 0;
+
+    num_records_ = 0;
+
+    start_time_ = boost::posix_time::microsec_clock::local_time();
+
+    last_insert_time_ = boost::posix_time::microsec_clock::local_time();
 
     float free_ram = System::getFreeRAMinGB();
 
     loginf << "ASTERIXImportTask: run: filename " << current_filename_ << " test " << test_
-           << " create stubs " << create_mapping_stubs_ << " free RAM " << free_ram << " GB";
+           << " free RAM " << free_ram << " GB";
 
-    if (free_ram < ram_threshold && !limit_ram_)
+    assert(canRun());
+
+    if (import_file_)
     {
-        loginf << "ASTERIXImportTask: run: only " << free_ram
-               << " GB free ram, recommending limiting";
+        updateFileProgressDialog();
 
-        QMessageBox::StandardButton reply;
-        reply = QMessageBox::question(
-            nullptr, "RAM Limiting",
-            "There is only " + QString::number(free_ram) + " GB free RAM available.\n" +
-                "This will result in decreased decoding performance.\n\n" +
-                "Do you agree to limiting RAM usage?",
-            QMessageBox::Yes | QMessageBox::No);
-        if (reply == QMessageBox::Yes)
-        {
-            limitRAM(true);
-        }
-    }
-    else if (free_ram >= ram_threshold && limit_ram_)
-    {
-        loginf << "ASTERIXImportTask: run: " << free_ram
-               << " GB free ram, recommending not limiting";
+        boost::posix_time::ptime start_time = boost::posix_time::microsec_clock::local_time();
 
-        QMessageBox::StandardButton reply;
-        reply = QMessageBox::question(
-            nullptr, "RAM Limiting",
-            "There is " + QString::number(free_ram) + " GB free RAM available.\n" +
-                "This will result in increased decoding performance.\n\n" +
-                "Do you agree to increased RAM usage?",
-            QMessageBox::Yes | QMessageBox::No);
-        if (reply == QMessageBox::Yes)
+        while ((boost::posix_time::microsec_clock::local_time() - start_time).total_milliseconds() < 50)
         {
-            limitRAM(false);
+            QCoreApplication::processEvents();
         }
     }
 
-    if (test_)
-        task_manager_.appendInfo("ASTERIXImportTask: test import of file '" + current_filename_ +
-                                 "' started");
-    else if (create_mapping_stubs_)
-        task_manager_.appendInfo("ASTERIXImportTask: create mappings stubs using file '" +
-                                 current_filename_ + "' started");
-    else
-        task_manager_.appendInfo("ASTERIXImportTask: import of file '" + current_filename_ +
-                                 "' started");
-
-    if (widget_)
-        widget_->runStarted();
-
-    assert(canImportFile());
-
-    if (status_widget_)
-    {
-        logwrn << "ASTERIXImportTask: run: status widget still active";
-        status_widget_ = nullptr;
-    }
-    assert(!status_widget_);
-
-    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-
-    status_widget_ = nullptr;
-
-    status_widget_.reset(new ASTERIXStatusDialog(current_filename_, test_, create_mapping_stubs_));
-    connect(status_widget_.get(), &ASTERIXStatusDialog::closeSignal, this,
-            &ASTERIXImportTask::closeStatusDialogSlot);
-    status_widget_->markStartTime();
-
-    insert_active_ = 0;
+    insert_active_ = false;
 
     all_done_ = false;
 
@@ -867,8 +711,8 @@ void ASTERIXImportTask::run(bool test, bool create_mapping_stubs)
     assert(schema_);
 
     for (auto& map_it : *schema_)
-        if (!map_it.second.initialized())
-            map_it.second.initialize();
+        if (!map_it.second->initialized())
+            map_it.second->initialize();
 
     loginf << "ASTERIXImportTask: run: setting categories";
 
@@ -900,7 +744,7 @@ void ASTERIXImportTask::run(bool test, bool create_mapping_stubs)
         }
 
         if (cat_it.second.ref().size() &&  // only if value set
-            !jasterix_->category(cat_it.first)->hasREFEdition(cat_it.second.ref()))
+                !jasterix_->category(cat_it.first)->hasREFEdition(cat_it.second.ref()))
         {
             logwrn << "ASTERIXImportTask: run: cat " << cat_it.first << " ref '"
                    << cat_it.second.ref() << "' not defined in decoder";
@@ -908,7 +752,7 @@ void ASTERIXImportTask::run(bool test, bool create_mapping_stubs)
         }
 
         if (cat_it.second.spf().size() &&  // only if value set
-            !jasterix_->category(cat_it.first)->hasSPFEdition(cat_it.second.spf()))
+                !jasterix_->category(cat_it.first)->hasSPFEdition(cat_it.second.spf()))
         {
             logwrn << "ASTERIXImportTask: run: cat " << cat_it.first << " spf '"
                    << cat_it.second.spf() << "' not defined in decoder";
@@ -918,21 +762,27 @@ void ASTERIXImportTask::run(bool test, bool create_mapping_stubs)
         //        loginf << "ASTERIXImportTask: importFile: setting cat " <<  cat_it.first
         //               << " decode flag " << cat_it.second.decode();
         jasterix_->setDecodeCategory(cat_it.first, cat_it.second.decode());
-        //        loginf << "ASTERIXImportTask: importFile: setting cat " <<  cat_it.first
-        //               << " edition " << cat_it.second.edition();
+        loginf << "ASTERIXImportTask: run: setting cat " <<  cat_it.first
+               << " edition " << cat_it.second.edition();
         jasterix_->category(cat_it.first)->setCurrentEdition(cat_it.second.edition());
         jasterix_->category(cat_it.first)->setCurrentREFEdition(cat_it.second.ref());
         jasterix_->category(cat_it.first)->setCurrentSPFEdition(cat_it.second.spf());
-
-        // TODO mapping?
     }
 
     loginf << "ASTERIXImportTask: run: starting decode job";
 
     assert(decode_job_ == nullptr);
 
-    decode_job_ = make_shared<ASTERIXDecodeJob>(*this, current_filename_, current_framing_, test_,
-                                                post_process_);
+    decode_job_ = make_shared<ASTERIXDecodeJob>(*this, test_, post_process_);
+
+    if (import_file_)
+        decode_job_->setDecodeFile(current_filename_, current_file_framing_); // do file import
+    else
+    {
+        COMPASS::instance().dataSourceManager().createNetworkDBDataSources();
+        decode_job_->setDecodeUDPStreams(COMPASS::instance().dataSourceManager().getNetworkLines()); // record from network
+    }
+
 
     connect(decode_job_.get(), &ASTERIXDecodeJob::obsoleteSignal, this,
             &ASTERIXImportTask::decodeASTERIXObsoleteSlot, Qt::QueuedConnection);
@@ -946,13 +796,47 @@ void ASTERIXImportTask::run(bool test, bool create_mapping_stubs)
     return;
 }
 
+void ASTERIXImportTask::dialogImportSlot()
+{
+    loginf << "ASTERIXImportTask: dialogImportSlot";
+
+    assert (dialog_);
+    dialog_->hide();
+
+    assert (canRun());
+    run (false);
+}
+
+void ASTERIXImportTask::dialogTestImportSlot()
+{
+    loginf << "ASTERIXImportTask: dialogImportSlot";
+
+    assert (dialog_);
+    dialog_->hide();
+
+    assert (canRun());
+
+    run (true);
+}
+
+void ASTERIXImportTask::dialogCancelSlot()
+{
+    loginf << "ASTERIXImportTask: dialogCancelSlot";
+
+    assert (dialog_);
+    dialog_->hide();
+}
+
 void ASTERIXImportTask::decodeASTERIXDoneSlot()
 {
-    loginf << "ASTERIXImportTask: decodeASTERIXDoneSlot";
+    logdbg << "ASTERIXImportTask: decodeASTERIXDoneSlot";
+
+    if (!decode_job_) // called twice?
+        return;
 
     assert(decode_job_);
 
-    if (decode_job_->error())
+    if (!stopped_ && decode_job_->error())
     {
         loginf << "ASTERIXImportTask: decodeASTERIXDoneSlot: error";
         error_ = decode_job_->error();
@@ -960,21 +844,11 @@ void ASTERIXImportTask::decodeASTERIXDoneSlot()
 
         QMessageBox msgBox;
         msgBox.setText(
-            ("Decoding error: " + error_message_ + "\n\nPlease check the decoder settings.")
-                .c_str());
+                    ("Decoding error: " + error_message_ + "\n\nPlease check the decoder settings.")
+                    .c_str());
         msgBox.setIcon(QMessageBox::Warning);
         msgBox.exec();
     }
-    assert(status_widget_);
-
-    if (status_widget_->numErrors())
-        task_manager_.appendError(
-            "ASTERIXImportTask: " + std::to_string(status_widget_->numErrors()) +
-            " decoding errors occured");
-
-    task_manager_.appendInfo("ASTERIXImportTask: decoding done with " +
-                             std::to_string(status_widget_->numFrames()) + " frames, " +
-                             std::to_string(status_widget_->numRecords()) + " records");
 
     decode_job_ = nullptr;
 
@@ -983,365 +857,336 @@ void ASTERIXImportTask::decodeASTERIXDoneSlot()
 void ASTERIXImportTask::decodeASTERIXObsoleteSlot()
 {
     logdbg << "ASTERIXImportTask: decodeASTERIXObsoleteSlot";
+
     decode_job_ = nullptr;
 }
 
 void ASTERIXImportTask::addDecodedASTERIXSlot()
 {
-    logdbg << "ASTERIXImportTask: addDecodedASTERIX";
+    logdbg << "ASTERIXImportTask: addDecodedASTERIXSlot";
+
+    if (stopped_)
+    {
+        checkAllDone();
+        return;
+    }
 
     assert(decode_job_);
-    assert(status_widget_);
 
-    logdbg << "ASTERIXImportTask: addDecodedASTERIX: errors " << decode_job_->numErrors();
+    logdbg << "ASTERIXImportTask: addDecodedASTERIXSlot: errors " << decode_job_->numErrors()
+           << " num records " << jasterix_->numRecords();
 
-    status_widget_->numFrames(jasterix_->numFrames());
-    status_widget_->numRecords(jasterix_->numRecords());
-    status_widget_->numErrors(jasterix_->numErrors());
-    status_widget_->setCategoryCounts(decode_job_->categoryCounts());
-
-    status_widget_->show();
-
-    std::unique_ptr<nlohmann::json> extracted_data = std::move(decode_job_->extractedData());
-
-    if (!create_mapping_stubs_)  // test or import
+    if (import_file_)
     {
-        //        map_jobs_mutex_.lock();
-        //        json_map_jobs_.push_back(json_map_job);
-        //        map_jobs_mutex_.unlock();
+        updateFileProgressDialog();
 
-        while (json_map_job_)  // only one can exist at a time
+        if (file_progress_dialog_->wasCanceled())
         {
-            if (decode_job_)
-                decode_job_->pause();
-
-            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
-            QThread::msleep(1);
+            stop();
+            return;
         }
 
-        assert(!json_map_job_);
-
-        assert(schema_);
-
-        std::vector<std::string> keys;
-
-        if (current_framing_ == "")
-            keys = {"data_blocks", "content", "records"};
-        else
-            keys = {"frames", "content", "data_blocks", "content", "records"};
-
-        json_map_job_ =
-            make_shared<JSONMappingJob>(std::move(extracted_data), keys, schema_->parsers());
-
-        assert(!extracted_data);
-
-        connect(json_map_job_.get(), &JSONMappingJob::obsoleteSignal, this,
-                &ASTERIXImportTask::mapJSONObsoleteSlot, Qt::QueuedConnection);
-        connect(json_map_job_.get(), &JSONMappingJob::doneSignal, this,
-                &ASTERIXImportTask::mapJSONDoneSlot, Qt::QueuedConnection);
-
-        JobManager::instance().addNonBlockingJob(json_map_job_);
-
-        if (decode_job_)
+        if (maxLoadReached())
         {
-            if (maxLoadReached())
-                decode_job_->pause();
-            else
-                decode_job_->unpause();
+            logdbg << "ASTERIXImportTask: addDecodedASTERIXSlot: returning since max load reached";
+            return;
+
         }
     }
-    else  // create mappings
+
+    if (stopped_)
+        return;
+
+    if (num_packets_in_processing_ > 10)
     {
-        while (json_map_stub_job_)  // only one can exist at a time
-        {
-            if (decode_job_)
-                decode_job_->pause();
+        logwrn << "ASTERIXImportTask: addDecodedASTERIXSlot: overload detected, packets in processing "
+               << num_packets_in_processing_ << " skipping data";
 
-            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
-            QThread::msleep(1);
-        }
+        std::unique_ptr<nlohmann::json> extracted_data {decode_job_->extractedData()};
 
-        assert(json_map_stub_job_ == nullptr);
-
-        std::vector<std::string> keys;
-
-        if (current_framing_ == "")
-            keys = {"data_blocks", "content", "records"};
-        else
-            keys = {"frames", "content", "data_blocks", "content", "records"};
-
-        json_map_stub_job_ =
-            make_shared<JSONMappingStubsJob>(std::move(extracted_data), keys, schema_->parsers());
-        assert(!extracted_data);
-
-        connect(json_map_stub_job_.get(), &JSONMappingStubsJob::obsoleteSignal, this,
-                &ASTERIXImportTask::mapStubsObsoleteSlot, Qt::QueuedConnection);
-        connect(json_map_stub_job_.get(), &JSONMappingStubsJob::doneSignal, this,
-                &ASTERIXImportTask::mapStubsDoneSlot, Qt::QueuedConnection);
-
-        JobManager::instance().addNonBlockingJob(json_map_stub_job_);
-
-        if (decode_job_)
-            decode_job_->unpause();
+        return;
     }
+
+    logdbg << "ASTERIXImportTask: addDecodedASTERIXSlot: processing data";
+
+    std::unique_ptr<nlohmann::json> extracted_data {decode_job_->extractedData()};
+    ++num_packets_in_processing_;
+    ++num_packets_total_;
+
+    loginf << "ASTERIXImportTask: addDecodedASTERIXSlot: processing data,"
+           << " num_packets_in_processing_ " << num_packets_in_processing_
+           << " num_packets_total_ " << num_packets_total_;
+
+    if (!extracted_data)
+    {
+        logwrn << "ASTERIXImportTask: addDecodedASTERIXSlot: processing data empty";
+        return;
+    }
+
+    // break here for testing
+    //return;
+
+    if (stopped_)
+        return;
+
+    //assert(!json_map_job_);
+
+    assert(schema_);
+
+    std::vector<std::string> keys;
+
+    if (current_file_framing_ == "" || !import_file_) // force netto when doing network import
+        keys = {"data_blocks", "content", "records"};
+    else
+        keys = {"frames", "content", "data_blocks", "content", "records"};
+
+    std::shared_ptr<ASTERIXJSONMappingJob> json_map_job =
+            make_shared<ASTERIXJSONMappingJob>(std::move(extracted_data), keys, schema_->parsers());
+
+    json_map_jobs_.push_back(json_map_job);
+
+    assert(!extracted_data);
+
+    connect(json_map_job.get(), &ASTERIXJSONMappingJob::obsoleteSignal, this,
+            &ASTERIXImportTask::mapJSONObsoleteSlot, Qt::QueuedConnection);
+    connect(json_map_job.get(), &ASTERIXJSONMappingJob::doneSignal, this,
+            &ASTERIXImportTask::mapJSONDoneSlot, Qt::QueuedConnection);
+
+    JobManager::instance().addNonBlockingJob(json_map_job);
 }
 
 void ASTERIXImportTask::mapJSONDoneSlot()
 {
     logdbg << "ASTERIXImportTask: mapJSONDoneSlot";
 
-    assert(status_widget_);
+    // break here for testing
+    //    json_map_job_ = nullptr;
+    //    num_packets_in_processing_--;
 
-    //    JSONMappingJob* map_job = static_cast<JSONMappingJob*>(sender());
-    //    std::shared_ptr<JSONMappingJob> queued_map_job;
+    //    if (decode_job_ && decode_job_->hasData())
+    //        addDecodedASTERIXSlot(); // load next chunk
+    //    else
+    //        checkAllDone();
 
-    //    map_jobs_mutex_.lock();
-    //    waiting_for_map_ = true;
+    //    return;
 
-    assert(json_map_job_);
-
-    //    queued_map_job = json_map_jobs_.front();
-    //    json_map_jobs_.pop_front();
-
-    //    map_jobs_mutex_.unlock();
-    //    waiting_for_map_ = false;
-
-    //    assert (queued_map_job.get() == map_job);
-
-    status_widget_->addNumMapped(json_map_job_->numMapped());
-    status_widget_->addNumNotMapped(json_map_job_->numNotMapped());
-    status_widget_->addMappedCounts(json_map_job_->categoryMappedCounts());
-    status_widget_->addNumCreated(json_map_job_->numCreated());
-
-    std::map<std::string, std::shared_ptr<Buffer>> job_buffers =
-        std::move(json_map_job_->buffers());
-    json_map_job_ = nullptr;
-
-    if (decode_job_)
+    if (stopped_)
     {
-        if (maxLoadReached())
-            decode_job_->pause();
-        else
-            decode_job_->unpause();
+        logdbg << "ASTERIXImportTask: mapJSONDoneSlot: stopping";
+
+        json_map_jobs_.clear();
+
+        checkAllDone();
+
+        return;
+    }
+
+    ASTERIXJSONMappingJob* map_job = dynamic_cast<ASTERIXJSONMappingJob*>(QObject::sender());
+    assert(map_job);
+
+    std::map<std::string, std::shared_ptr<Buffer>> job_buffers {map_job->buffers()};
+
+    assert (json_map_jobs_.size());
+    assert (json_map_jobs_.begin()->get() == map_job);
+    map_job = nullptr;
+    json_map_jobs_.erase(json_map_jobs_.begin()); // remove
+
+    logdbg << "ASTERIXImportTask: mapJSONDoneSlot: processing, num buffers " << job_buffers.size();
+
+    if (!job_buffers.size())
+        return;
+
+    if (!test_)
+    {
+        std::shared_ptr<ASTERIXPostprocessJob> postprocess_job =
+                make_shared<ASTERIXPostprocessJob>(std::move(job_buffers),
+                                                   override_tod_active_, override_tod_offset_,
+                                                   !import_file_);
+
+        postprocess_jobs_.push_back(postprocess_job);
+
+        // check for future when net import
+
+        connect(postprocess_job.get(), &ASTERIXPostprocessJob::obsoleteSignal, this,
+                &ASTERIXImportTask::postprocessObsoleteSlot, Qt::QueuedConnection);
+        connect(postprocess_job.get(), &ASTERIXPostprocessJob::doneSignal, this,
+                &ASTERIXImportTask::postprocessDoneSlot, Qt::QueuedConnection);
+
+        JobManager::instance().addNonBlockingJob(postprocess_job);
     }
 
     if (test_)
     {
         checkAllDone();
-        return;
     }
 
-    insertData(std::move(job_buffers));
+    logdbg << "ASTERIXImportTask: mapJSONDoneSlot: done";
 }
 
 void ASTERIXImportTask::mapJSONObsoleteSlot()
 {
     logdbg << "ASTERIXImportTask: mapJSONObsoleteSlot";
-    // TODO
-}
 
-void ASTERIXImportTask::mapStubsDoneSlot()
-{
-    logdbg << "ASTERIXImportTask: mapStubsDoneSlot";
+    ASTERIXJSONMappingJob* map_job = dynamic_cast<ASTERIXJSONMappingJob*>(QObject::sender());
+    assert(map_job);
 
-    JSONMappingStubsJob* map_stubs_job = static_cast<JSONMappingStubsJob*>(sender());
-    assert(json_map_stub_job_.get() == map_stubs_job);
-
-    json_map_stub_job_ = nullptr;
-
-    schema_->updateMappings();
+    assert (json_map_jobs_.size());
+    assert (json_map_jobs_.begin()->get() == map_job);
+    map_job = nullptr;
+    json_map_jobs_.erase(json_map_jobs_.begin()); // remove
 
     checkAllDone();
+
 }
-void ASTERIXImportTask::mapStubsObsoleteSlot()
+
+void ASTERIXImportTask::postprocessDoneSlot()
 {
-    logdbg << "ASTERIXImportTask: mapStubsObsoleteSlot";
-    json_map_stub_job_ = nullptr;
+    logdbg << "ASTERIXImportTask: postprocessDoneSlot: import_file " << import_file_;
+
+    if (stopped_)
+    {
+        postprocess_jobs_.clear();
+
+        checkAllDone();
+
+        return;
+    }
+
+    ASTERIXPostprocessJob* post_job = dynamic_cast<ASTERIXPostprocessJob*>(QObject::sender());
+    assert(post_job);
+
+    std::map<std::string, std::shared_ptr<Buffer>> job_buffers {post_job->buffers()};
+
+    assert (postprocess_jobs_.size());
+    assert (postprocess_jobs_.begin()->get() == post_job);
+    post_job = nullptr;
+    postprocess_jobs_.erase(postprocess_jobs_.begin()); // remove
+
+
+    if (import_file_) // cache and insert only if time elapsed
+    {
+        //        // merge into existing buffers
+
+        //        for (auto& buf_it : job_buffers)
+        //        {
+        //            if (!buffer_cache_.count(buf_it.first)) // set if first
+        //                buffer_cache_[buf_it.first] = buf_it.second;
+        //            else // append by seize if existing
+        //                buffer_cache_.at(buf_it.first)->seizeBuffer(*buf_it.second.get());
+        //        }
+
+        //        job_buffers.clear();
+
+        //        // insert if time elapsed or all other jobs are done
+        //        if ((boost::posix_time::microsec_clock::local_time() - last_insert_time_).total_milliseconds() > 2000
+        //                || (decode_job_ == nullptr && json_map_job_ == nullptr && postprocess_job_ == nullptr))
+        //        {
+        //            logdbg << "ASTERIXImportTask: postprocessDoneSlot: doing file insert";
+
+        //            last_insert_time_ = boost::posix_time::microsec_clock::local_time();
+
+        //            std::map<std::string, std::shared_ptr<Buffer>> buffer_cache_cpy = move(buffer_cache_);
+        //            buffer_cache_.clear(); // to be safe
+
+        //            insertData(std::move(buffer_cache_cpy));
+        //        }
+
+        insertData(std::move(job_buffers));
+    }
+    else // insert immediately for network
+    {
+        logdbg << "ASTERIXImportTask: postprocessDoneSlot: doing network insert";
+
+        insertData(std::move(job_buffers));
+    }
+}
+
+void ASTERIXImportTask::postprocessObsoleteSlot()
+{
+    ASTERIXPostprocessJob* post_job = dynamic_cast<ASTERIXPostprocessJob*>(QObject::sender());
+    assert(post_job);
+
+    assert (postprocess_jobs_.size());
+    assert (postprocess_jobs_.begin()->get() == post_job);
+    post_job = nullptr;
+    postprocess_jobs_.erase(postprocess_jobs_.begin()); // remove
 }
 
 void ASTERIXImportTask::insertData(std::map<std::string, std::shared_ptr<Buffer>> job_buffers)
 {
-    logdbg << "ASTERIXImportTask: insertData: inserting into database";
+    logdbg << "ASTERIXImportTask: insertData: inserting " << job_buffers.size() << " into database";
 
-    assert (!test_ && !create_mapping_stubs_);
-
-    assert(status_widget_);
-
-    if (!dbo_variable_sets_.size())  // initialize if empty
+    if (stopped_)
     {
-        for (auto& parser_it : *schema_)
-        {
-            if (!parser_it.second.active())
-                continue;
-
-            std::string dbo_name = parser_it.second.dbObject().name();
-
-            DBObject& db_object = parser_it.second.dbObject();
-            assert(db_object.hasCurrentDataSourceDefinition());
-
-            std::string data_source_var_name = parser_it.second.dataSourceVariableName();
-            assert(data_source_var_name.size());
-            assert(db_object.currentDataSourceDefinition().localKey() == data_source_var_name);
-
-            DBOVariableSet set = parser_it.second.variableList();
-
-            if (dbo_variable_sets_.count(dbo_name))  // add variables
-            {
-                assert(std::get<0>(dbo_variable_sets_.at(dbo_name)) == data_source_var_name);
-                std::get<1>(dbo_variable_sets_.at(dbo_name)).add(set);
-            }
-            else  // create it
-                dbo_variable_sets_[dbo_name] = std::make_tuple(data_source_var_name, set);
-        }
+        checkAllDone();
+        return;
     }
 
-    while (insert_active_)
+    assert (!test_);
+
+    DBContentManager& object_manager = COMPASS::instance().dbContentManager();
+
+    while (insert_active_ && !stopped_ && object_manager.insertInProgress())
     {
+        //loginf << "ASTERIXImportTask: insertData: waiting for insert";
+
         waiting_for_insert_ = true;
+
+        logdbg << "ASTERIXImportTask: addDecodedASTERIXSlot: waiting on insert to finish";
         QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+
         QThread::msleep(1);
+
+        if (stopped_)
+        {
+            waiting_for_insert_ = false;
+
+            checkAllDone();
+            return;
+        }
     }
 
     waiting_for_insert_ = false;
 
-    bool has_sac_sic = false;
+    if (stopped_)
+    {
+        checkAllDone();
+        return;
+    }
+
+    //loginf << "ASTERIXImportTask: insertData: no more waiting for insert";
 
     assert(schema_);
 
-    DBObjectManager& object_manager = COMPASS::instance().objectManager();
+    for (auto& job_it : job_buffers)
+        num_records_ += job_it.second->size();
 
-    for (auto& buf_it : job_buffers)
-    {
-        std::string dbo_name = buf_it.first;
-        assert(dbo_variable_sets_.count(dbo_name));
-        std::shared_ptr<Buffer> buffer = buf_it.second;
+    insert_active_ = true;
 
-        if (!buffer->size())
-        {
-            loginf << "ASTERIXImportTask: insertData: dbo " << buf_it.first
-                   << " with empty buffer";
-            continue;
-        }
+    connect(&object_manager, &DBContentManager::insertDoneSignal,
+            this, &ASTERIXImportTask::insertDoneSlot, Qt::UniqueConnection);
 
-        assert(object_manager.existsObject(dbo_name));
-        DBObject& db_object = object_manager.object(dbo_name);
-
-        assert(db_object.hasCurrentDataSourceDefinition());
-
-        ++insert_active_;
-
-        has_sac_sic = db_object.hasVariable("sac") && db_object.hasVariable("sic") &&
-                      buffer->has<unsigned char>("sac") && buffer->has<unsigned char>("sic");
-
-        logdbg << "ASTERIXImportTask: insertData: " << db_object.name() << " has sac/sic "
-               << has_sac_sic << " buffer size " << buffer->size();
-
-        connect(&db_object, &DBObject::insertDoneSignal, this, &ASTERIXImportTask::insertDoneSlot,
-                Qt::UniqueConnection);
-        connect(&db_object, &DBObject::insertProgressSignal, this,
-                &ASTERIXImportTask::insertProgressSlot, Qt::UniqueConnection);
-
-        std::string data_source_var_name = std::get<0>(dbo_variable_sets_.at(dbo_name));
-
-        logdbg << "ASTERIXImportTask: insertData: adding new data sources in dbo "
-               << db_object.name() << " ds varname '" << data_source_var_name << "'";
-
-        // collect existing datasources
-        std::set<int> datasources_existing;
-        if (db_object.hasDataSources())
-            for (auto ds_it = db_object.dsBegin(); ds_it != db_object.dsEnd(); ++ds_it)
-                datasources_existing.insert(ds_it->first);
-
-        // getting key list and distinct values
-        assert(buffer->properties().hasProperty(data_source_var_name));
-        assert(buffer->properties().get(data_source_var_name).dataType() == PropertyDataType::INT);
-
-        assert(buffer->has<int>(data_source_var_name));
-        NullableVector<int>& data_source_key_list = buffer->get<int>(data_source_var_name);
-        std::set<int> data_source_keys = data_source_key_list.distinctValues();
-
-        std::map<int, std::pair<unsigned char, unsigned char>> sac_sics;  // keyvar->(sac,sic)
-        // collect sac/sics
-        if (has_sac_sic)
-        {
-            NullableVector<unsigned char>& sac_list = buffer->get<unsigned char>("sac");
-            NullableVector<unsigned char>& sic_list = buffer->get<unsigned char>("sic");
-
-            size_t size = buffer->size();
-            int key_val;
-            for (unsigned int cnt = 0; cnt < size; ++cnt)
-            {
-                key_val = data_source_key_list.get(cnt);
-
-                if (datasources_existing.count(key_val) != 0)
-                    continue;
-
-                if (sac_sics.count(key_val) == 0)
-                {
-                    logdbg << "ASTERIXImportTask: insertData: found new ds " << key_val
-                           << " for sac/sic";
-
-                    assert(!sac_list.isNull(cnt) && !sic_list.isNull(cnt));
-                    sac_sics[key_val] = std::pair<unsigned char, unsigned char>(sac_list.get(cnt),
-                                                                                sic_list.get(cnt));
-
-                    logdbg << "ASTERIXImportTask: insertData: source " << key_val << " sac "
-                           << static_cast<int>(sac_list.get(cnt)) << " sic "
-                           << static_cast<int>(sic_list.get(cnt));
-                }
-            }
-        }
-
-        // adding datasources
-        std::map<int, std::pair<int, int>> datasources_to_add;
-
-        for (auto ds_key_it : data_source_keys)
-            if (datasources_existing.count(ds_key_it) == 0 &&
-                added_data_sources_.count(ds_key_it) == 0)
-            {
-                if (datasources_to_add.count(ds_key_it) == 0)
-                {
-                    logdbg << "ASTERIXImportTask: insertData: adding new data source "
-                           << ds_key_it;
-                    if (sac_sics.count(ds_key_it) == 0)
-                        datasources_to_add[ds_key_it] = {-1, -1};
-                    else
-                        datasources_to_add[ds_key_it] = {sac_sics.at(ds_key_it).first,
-                                                         sac_sics.at(ds_key_it).second};
-
-                    added_data_sources_.insert(ds_key_it);
-                }
-            }
-
-        if (datasources_to_add.size())
-        {
-            db_object.addDataSources(datasources_to_add);
-        }
-
-        DBOVariableSet& set = std::get<1>(dbo_variable_sets_.at(dbo_name));
-        db_object.insertData(set, buffer, false);
-
-        status_widget_->addNumInserted(db_object.name(), buffer->size());
-
-        if (db_object.name() == "Radar")
-            num_radar_inserted_ += buffer->size(); // store for later check
-    }
+    object_manager.insertData(job_buffers);
 
     checkAllDone();
 
     logdbg << "JSONImporterTask: insertData: done";
 }
 
-void ASTERIXImportTask::insertProgressSlot(float percent)
-{
-    logdbg << "ASTERIXImportTask: insertProgressSlot: " << String::percentToString(percent)
-           << "%";
-}
-
-void ASTERIXImportTask::insertDoneSlot(DBObject& object)
+void ASTERIXImportTask::insertDoneSlot()
 {
     logdbg << "ASTERIXImportTask: insertDoneSlot";
-    --insert_active_;
+
+    insert_active_ = false;
+
+    --num_packets_in_processing_;
+
+    if (import_file_)
+    {
+        logdbg << "ASTERIXImportTask: insertDoneSlot: num_packets_in_processing " << num_packets_in_processing_;
+
+        updateFileProgressDialog();
+    }
 
     bool test = test_; // test_ cleared by checkAllDone
 
@@ -1349,30 +1194,22 @@ void ASTERIXImportTask::insertDoneSlot(DBObject& object)
 
     logdbg << "ASTERIXImportTask: insertDoneSlot: check done";
 
-    if (all_done_ && !test && !create_mapping_stubs_)
+    if (all_done_ && !test)
     {
         logdbg << "ASTERIXImportTask: insertDoneSlot: finalizing";
 
-        // in case data was imported, clear other task done properties
-        if (num_radar_inserted_)
-        {
-            bool has_null_positions = COMPASS::instance().interface().areColumnsNull(
-                        COMPASS::instance().objectManager().object("Radar").currentMetaTable().mainTableName(),
-                        {"pos_lat_deg","pos_long_deg"});
-
-            loginf << "ASTERIXImportTask: insertDoneSlot: radar has null positions " << has_null_positions;
-
-            COMPASS::instance().interface().setProperty(
-                        RadarPlotPositionCalculatorTask::DONE_PROPERTY_NAME, to_string(!has_null_positions));
-        }
-
-        COMPASS::instance().interface().setProperty(PostProcessTask::DONE_PROPERTY_NAME, "0");
-        COMPASS::instance().interface().setProperty(
-            CreateARTASAssociationsTask::DONE_PROPERTY_NAME, "0");
-
-        COMPASS::instance().interface().setProperty(DONE_PROPERTY_NAME, "1");
+        disconnect(&COMPASS::instance().dbContentManager(), &DBContentManager::insertDoneSignal,
+                   this, &ASTERIXImportTask::insertDoneSlot);
 
         emit doneSignal(name_);
+    }
+
+    loginf << "ASTERIXImportTask: insertDoneSlot: processed " << num_records_ << " records";
+
+    if (decode_job_ && decode_job_->hasData())
+    {
+        logdbg << "ASTERIXImportTask: insertDoneSlot: starting decoding of next chunk";
+        addDecodedASTERIXSlot(); // load next chunk
     }
 
     logdbg << "ASTERIXImportTask: insertDoneSlot: done";
@@ -1381,21 +1218,31 @@ void ASTERIXImportTask::insertDoneSlot(DBObject& object)
 void ASTERIXImportTask::checkAllDone()
 {
     logdbg << "ASTERIXImportTask: checkAllDone: all done " << all_done_ << " decode "
-           << (decode_job_ == nullptr)
-           //<< " wait map " << !waiting_for_map_
-           << " map job " << (json_map_job_ == nullptr) << " map stubs "
-           << (json_map_stub_job_ == nullptr) << " wait insert " << !waiting_for_insert_
-           << " insert active " << (insert_active_ == 0);
+           << (decode_job_ != nullptr)
+           << " map jobs " << json_map_jobs_.size()
+           << " post jobs " << postprocess_jobs_.size()
+           << " wait insert " << waiting_for_insert_
+           << " insert active " << insert_active_;
 
-    if (!all_done_ && decode_job_ == nullptr && json_map_job_ == nullptr &&
-        json_map_stub_job_ == nullptr && !waiting_for_insert_ && insert_active_ == 0)
+    if (!all_done_ && decode_job_ == nullptr && !json_map_jobs_.size() && !postprocess_jobs_.size()
+            && !waiting_for_insert_ && !insert_active_)
     {
-        loginf << "ASTERIXImportTask: checkAllDone: setting all done";
+        logdbg << "ASTERIXImportTask: checkAllDone: setting all done: total packets " << num_packets_total_;
 
-        assert(status_widget_);
-        status_widget_->setDone();
+        if (import_file_ && file_progress_dialog_)
+        {
+            file_progress_dialog_ = nullptr;
+        }
 
         all_done_ = true;
+        done_ = true; // why was this not set?
+        running_ = false;
+
+        boost::posix_time::time_duration time_diff = boost::posix_time::microsec_clock::local_time() - start_time_;
+        loginf << "ASTERIXImportTask: checkAllDone: import done after "
+               << String::timeStringFromDouble(time_diff.total_milliseconds() / 1000.0, false);
+
+        COMPASS::instance().mainWindow().updateMenus(); // re-enable import menu
 
         QApplication::restoreOverrideCursor();
 
@@ -1403,70 +1250,66 @@ void ASTERIXImportTask::checkAllDone()
 
         refreshjASTERIX();
 
-        logdbg << "ASTERIXImportTask: checkAllDone: widget done";
-
-        assert(widget_);
-        widget_->runDone();
-
         logdbg << "ASTERIXImportTask: checkAllDone: dbo content";
 
-        if (!create_mapping_stubs_ && !test_)
+        if (!test_)
             emit COMPASS::instance().interface().databaseContentChangedSignal();
 
-        task_manager_.appendInfo("ASTERIXImportTask: inserted " +
-                                 std::to_string(status_widget_->numRecordsInserted()) +
-                                 " records, rate " + status_widget_->recordsInsertedRateStr());
-
-        for (auto& db_cnt_it : status_widget_->dboInsertedCounts())
-            task_manager_.appendInfo("ASTERIXImportTask: inserted " +
-                                     std::to_string(db_cnt_it.second) + " " + db_cnt_it.first +
-                                     " records");
-
         logdbg << "ASTERIXImportTask: checkAllDone: status logging";
-
-        if (test_)
-            task_manager_.appendSuccess("ASTERIXImportTask: import test done after " +
-                                        status_widget_->elapsedTimeStr());
-        else if (create_mapping_stubs_)
-            task_manager_.appendSuccess("ASTERIXImportTask: create mapping stubs done after " +
-                                        status_widget_->elapsedTimeStr());
-        else
-        {
-            task_manager_.appendSuccess("ASTERIXImportTask: import done after " +
-                                        status_widget_->elapsedTimeStr());
-        }
-
-        //test_ = false;  // set again by widget
 
         if (!show_done_summary_)
         {
             logdbg << "ASTERIXImportTask: checkAllDone: deleting status widget";
-
-            status_widget_->close();
-            status_widget_ = nullptr;
         }
+
+        COMPASS::instance().dataSourceManager().saveDBDataSources();
+        COMPASS::instance().interface().saveProperties();
     }
 
     logdbg << "ASTERIXImportTask: checkAllDone: done";
 }
 
-void ASTERIXImportTask::closeStatusDialogSlot()
-{
-    loginf << "ASTERIXImportTask: closeStatusDialogSlot";
-
-    assert(status_widget_);
-    status_widget_->close();
-    status_widget_ = nullptr;
-
-    loginf << "ASTERIXImportTask: closeStatusDialogSlot: done";
-}
-
 bool ASTERIXImportTask::maxLoadReached()
 {
-    return insert_active_ >= 2;
+    return num_packets_in_processing_> 2;
+}
 
-    //    if (limit_ram_)
-    //        return json_map_jobs_.size() > limited_num_json_jobs_;
-    //    else
-    //        return json_map_jobs_.size() > unlimited_num_json_jobs_;
+void ASTERIXImportTask::updateFileProgressDialog()
+{
+    if (stopped_)
+        return;
+
+    if (!file_progress_dialog_)
+    {
+        file_progress_dialog_.reset(
+                    new QProgressDialog(("File '"+current_filename_+"'").c_str(), "Abort", 0, 100));
+        file_progress_dialog_->setWindowTitle("Importing ASTERIX Recording");
+        file_progress_dialog_->setWindowModality(Qt::ApplicationModal);
+        //postprocess_dialog.setWindowModality(Qt::ApplicationModal);
+    }
+
+    string text = "File '"+current_filename_+"'";
+    string rec_text;
+    string rem_text;
+
+    if (decode_job_)
+    {
+        file_progress_dialog_->setValue(decode_job_->getFileDecodingProgress());
+
+        rec_text = "\n\nRecords/s: "+to_string((unsigned int) decode_job_->getRecordsPerSecond());
+        rem_text = "Remaining: "+String::timeStringFromDouble(decode_job_->getRemainingTime() + 1.0, false);
+    }
+    else
+    {
+        rec_text = "\n\nRecords/s: Unknown";
+        rem_text = "Remaining: Unknown";
+    }
+
+    //string pack_text = "\npacks: "+to_string(num_packets_in_processing_) + " total " + to_string(num_packets_total_);
+
+    int num_filler = text.size() - rec_text.size() - rem_text.size();
+    if (num_filler < 1)
+        num_filler = 1;
+
+    file_progress_dialog_->setLabelText((text + rec_text + std::string(num_filler, ' ') + rem_text).c_str());
 }

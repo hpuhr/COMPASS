@@ -18,15 +18,15 @@
 #include "jsonimporttaskwidget.h"
 
 #include "compass.h"
-#include "dbobject.h"
-#include "dbobjectcombobox.h"
-#include "dbobjectmanager.h"
-#include "dbovariable.h"
+#include "dbcontent/dbcontent.h"
+#include "dbcontent/dbcontentcombobox.h"
+#include "dbcontent/dbcontentmanager.h"
+#include "dbcontent/variable/variable.h"
 #include "dbovariableselectionwidget.h"
 #include "jsonimporttask.h"
 #include "jsonparsingschema.h"
 #include "logger.h"
-#include "selectdbobjectdialog.h"
+#include "dbcontent/selectdialog.h"
 #include "stringconv.h"
 
 #include <QCheckBox>
@@ -369,9 +369,7 @@ void JSONImportTaskWidget::updateSchemasBox()
 
     schema_box_->clear();
 
-#if USE_JASTERIX
     schema_box_->addItem("jASTERIX");
-#endif
 
     for (auto& schema_it : task_)
     {
@@ -392,7 +390,6 @@ void JSONImportTaskWidget::updateToCurrentSchema()
 {
     updateParserBox();
 
-#if USE_JASTERIX
     if (task_.currentSchemaName() == "jASTERIX")
     {
         parser_label_->setText("Editing Only Possible in Import ASTERIX Task");
@@ -411,7 +408,6 @@ void JSONImportTaskWidget::updateToCurrentSchema()
         delete_object_parser_button_->setDisabled(false);
         object_parser_widget_->setDisabled(false);
     }
-#endif
 }
 
 void JSONImportTaskWidget::addObjectParserSlot()
@@ -425,16 +421,16 @@ void JSONImportTaskWidget::addObjectParserSlot()
         return;
     }
 
-    SelectDBObjectDialog dialog;
+    SelectDBContentDialog dialog;
 
     int ret = dialog.exec();
 
     if (ret == QDialog::Accepted)
     {
         std::string name = dialog.name();
-        std::string dbo_name = dialog.selectedObject();
+        std::string dbcontent_name = dialog.selectedObject();
         loginf << "JSONImportTaskWidget: addObjectParserSlot: name " << name << " obj "
-               << dbo_name;
+               << dbcontent_name;
 
         JSONParsingSchema& current = task_.currentSchema();
 
@@ -447,11 +443,11 @@ void JSONImportTaskWidget::addObjectParserSlot()
             return;
         }
 
-        std::string instance = "JSONObjectParser" + name + dbo_name + "0";
+        std::string instance = "JSONObjectParser" + name + dbcontent_name + "0";
 
         Configuration& config = current.addNewSubConfiguration("JSONObjectParser", instance);
         config.addParameterString("name", name);
-        config.addParameterString("db_object_name", dbo_name);
+        config.addParameterString("dbcontent_name", dbcontent_name);
 
         current.generateSubConfigurable("JSONObjectParser", instance);
         updateParserBox();
@@ -541,10 +537,8 @@ void JSONImportTaskWidget::updateParserBox()
 
     if (task_.hasCurrentSchema())
     {
-#if USE_JASTERIX
         if (task_.currentSchemaName() == "jASTERIX")
             return;
-#endif
 
         loginf << "JSONImportTaskWidget: updateParserBox: current schema " << task_.currentSchema().name();
 

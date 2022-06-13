@@ -17,8 +17,9 @@
 
 #include "adsbqualityfilter.h"
 #include "adsbqualityfilterwidget.h"
-#include "dbobject.h"
-#include "dbobjectmanager.h"
+#include "dbcontent/dbcontent.h"
+#include "dbcontent/dbcontentmanager.h"
+#include "compass.h"
 #include "logger.h"
 #include "stringconv.h"
 
@@ -67,32 +68,45 @@ ADSBQualityFilter::ADSBQualityFilter(const std::string& class_id, const std::str
     name_ = "ADSB Quality";
 
     createSubConfigurables();
-
-    assert(widget_);
 }
 
 ADSBQualityFilter::~ADSBQualityFilter() {}
 
 bool ADSBQualityFilter::filters(const std::string& dbo_type)
 {
-    return dbo_type == "ADSB";
+    loginf << "ADSBQualityFilter: filters " << dbo_type << " " << (dbo_type == "CAT021");
+
+    return dbo_type == "CAT021";
 }
 
-std::string ADSBQualityFilter::getConditionString(const std::string& dbo_name, bool& first,
-                                                  std::vector<DBOVariable*>& filtered_variables)
+std::string ADSBQualityFilter::getConditionString(const std::string& dbcontent_name, bool& first,
+                                                  std::vector<std::string>& extra_from_parts,
+                                                  std::vector<dbContent::Variable*>& filtered_variables)
 {
-    logdbg << "ADSBQualityFilter: getConditionString: dbo " << dbo_name << " active " << active_;
+    loginf << "ADSBQualityFilter: getConditionString: dbo " << dbcontent_name << " active " << active_;
 
-    if (dbo_name != "ADSB")
+    if (dbcontent_name != "CAT021")
         return "";
 
     stringstream ss;
 
+    DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
+
+    string mops_col_name = dbcont_man.getVariable("CAT021", DBContent::var_cat021_mops_version_).dbColumnName();
+    string nacp_col_name = dbcont_man.getVariable("CAT021", DBContent::var_cat021_nacp_).dbColumnName();
+    string mucp_nic_col_name = dbcont_man.getVariable("CAT021", DBContent::var_cat021_nucp_nic_).dbColumnName();
+    string sil_col_name = dbcont_man.getVariable("CAT021", DBContent::var_cat021_sil_).dbColumnName();
+
     if (active_)
     {
+        if (!first)
+        {
+            ss << " AND";
+        }
+
         first = false;
 
-        ss << "MOPS_VERSION IN (";
+        ss << " " << mops_col_name << " IN (";
 
         if (use_v0_)
             ss << "0";
@@ -116,34 +130,44 @@ std::string ADSBQualityFilter::getConditionString(const std::string& dbo_name, b
         ss << ")";
 
         if (use_min_nucp_)
-            ss << " AND ((NUCP_NIC >= " << min_nucp_ << " AND MOPS_VERSION=0) OR MOPS_VERSION IN (1,2))";
+            ss << " AND ((" << mucp_nic_col_name << " >= " << min_nucp_
+               << " AND " << mops_col_name << "=0) OR " << mops_col_name << " IN (1,2))";
 
         if (use_max_nucp_)
-            ss << " AND ((NUCP_NIC <= " << max_nucp_ << " AND MOPS_VERSION=0) OR MOPS_VERSION IN (1,2))";
+            ss << " AND ((" << mucp_nic_col_name << " <= " << max_nucp_
+               << " AND " << mops_col_name << "=0) OR " << mops_col_name << " IN (1,2))";
 
         if (use_min_nic_)
-            ss << " AND ((NUCP_NIC >= " << min_nic_ << " AND MOPS_VERSION IN (1,2)) OR MOPS_VERSION = 0)";
+            ss << " AND ((" << mucp_nic_col_name << " >= " << min_nic_
+               << " AND " << mops_col_name << " IN (1,2)) OR " << mops_col_name << " = 0)";
 
         if (use_max_nic_)
-            ss << " AND ((NUCP_NIC <= " << max_nic_ << " AND MOPS_VERSION IN (1,2)) OR MOPS_VERSION = 0)";
+            ss << " AND ((" << mucp_nic_col_name << " <= " << max_nic_
+               << " AND " << mops_col_name << " IN (1,2)) OR " << mops_col_name << " = 0)";
 
         if (use_min_nacp_)
-            ss << " AND ((NAC_P >= " << min_nacp_ << " AND MOPS_VERSION IN (1,2)) OR MOPS_VERSION = 0)";
+            ss << " AND ((" << nacp_col_name << " >= " << min_nacp_
+               << " AND " << mops_col_name << " IN (1,2)) OR " << mops_col_name << " = 0)";
 
         if (use_max_nacp_)
-            ss << " AND ((NAC_P <= " << max_nacp_ << " AND MOPS_VERSION IN (1,2)) OR MOPS_VERSION = 0)";
+            ss << " AND ((" << nacp_col_name << " <= " << max_nacp_
+               << " AND " << mops_col_name << " IN (1,2)) OR " << mops_col_name << " = 0)";
 
         if (use_min_sil_v1_)
-            ss << " AND ((SIL >= " << min_sil_v1_ << " AND MOPS_VERSION=1) OR MOPS_VERSION IN (0,2))";
+            ss << " AND ((" << sil_col_name << " >= " << min_sil_v1_
+               << " AND " << mops_col_name << "=1) OR " << mops_col_name << " IN (0,2))";
 
         if (use_max_sil_v1_)
-            ss << " AND ((SIL <= " << max_sil_v1_ << " AND MOPS_VERSION=1) OR MOPS_VERSION IN (0,2))";
+            ss << " AND ((" << sil_col_name << " <= " << max_sil_v1_
+               << " AND " << mops_col_name << "=1) OR " << mops_col_name << " IN (0,2))";
 
         if (use_min_sil_v2_)
-            ss << " AND ((SIL >= " << min_sil_v2_ << " AND MOPS_VERSION=2) OR MOPS_VERSION IN (0,1))";
+            ss << " AND ((" << sil_col_name << " >= " << min_sil_v2_
+               << " AND " << mops_col_name << "=2) OR " << mops_col_name << " IN (0,1))";
 
         if (use_max_sil_v2_)
-            ss << " AND ((SIL <= " << max_sil_v2_ << " AND MOPS_VERSION=2) OR MOPS_VERSION IN (0,1))";
+            ss << " AND ((" << sil_col_name << " <= " << max_sil_v2_
+               << " AND " << mops_col_name << "=2) OR " << mops_col_name << " IN (0,1))";
 
     }
 
@@ -158,28 +182,20 @@ void ADSBQualityFilter::generateSubConfigurable(const std::string& class_id,
 {
     logdbg << "ADSBQualityFilter: generateSubConfigurable: class_id " << class_id;
 
-    if (class_id.compare("ADSBQualityFilterWidget") == 0)
-    {
-        assert(!widget_);
-        widget_ = new ADSBQualityFilterWidget(*this, class_id, instance_id);
-    }
-    else
-        throw std::runtime_error("ADSBQualityFilter: generateSubConfigurable: unknown class_id " +
-                                 class_id);
+    throw std::runtime_error("ADSBQualityFilter: generateSubConfigurable: unknown class_id " + class_id);
 }
 
 
 void ADSBQualityFilter::checkSubConfigurables()
 {
     logdbg << "ADSBQualityFilter: checkSubConfigurables";
-
-    if (!widget_)
-    {
-        logdbg << "ADSBQualityFilter: checkSubConfigurables: generating filter widget";
-        widget_ = new ADSBQualityFilterWidget(*this, "ADSBQualityFilterWidget", instanceId() + "Widget0");
-    }
-    assert(widget_);
 }
+
+DBFilterWidget* ADSBQualityFilter::createWidget()
+{
+    return new ADSBQualityFilterWidget(*this);
+}
+
 
 void ADSBQualityFilter::reset()
 {

@@ -18,16 +18,19 @@
 #ifndef STRINGMANIPULATION_H_
 #define STRINGMANIPULATION_H_
 
+#include "global.h"
+#include "logger.h"
+#include "property.h"
+
+#include "json.hpp"
+
 #include <boost/regex.hpp>
 #include <boost/algorithm/string/replace.hpp>
+#include <boost/algorithm/string.hpp>
 
 #include <iomanip>
 #include <map>
 #include <vector>
-
-#include "global.h"
-#include "logger.h"
-#include "property.h"
 
 namespace Utils
 {
@@ -152,8 +155,17 @@ inline double timeFromString(std::string time_str, bool* ok=nullptr)
     }
 
     time = std::stod(chunks[0]) * 3600.0;
-    time += std::stod(chunks[1]) * 60.0;
-    time += std::stod(chunks[2]);
+
+    if (time >= 0)
+    {
+        time += std::stod(chunks[1]) * 60.0;
+        time += std::stod(chunks[2]);
+    }
+    else
+    {
+        time -= std::stod(chunks[1]) * 60.0;
+        time -= std::stod(chunks[2]);
+    }
 
     if (ok)
         *ok = true;
@@ -207,6 +219,20 @@ inline int getAppendedInt(std::string text)
         throw std::runtime_error("Util: getAppendedInt: no int found");
 
     return ret;
+}
+
+inline unsigned int lineFromStr(const std::string& line_str)
+{
+    assert (line_str.size());
+    unsigned int line = line_str.back() - '0';
+    assert (line >= 1 && line <= 4);
+    return line-1;
+}
+
+inline std::string lineStrFrom(unsigned int line)
+{
+    assert (line >= 0 && line <= 3);
+    return "L" + std::to_string(line + 1);
 }
 
 inline int getLeadingInt(std::string text)
@@ -278,6 +304,11 @@ inline std::string getValueString(const double& value)
     std::ostringstream out;
     out << std::setprecision(double_limit::max_digits10) << value;
     return out.str();
+}
+
+inline std::string getValueString(const nlohmann::json& value)
+{
+    return value.dump();
 }
 
 template <typename T>
@@ -361,6 +392,30 @@ inline std::string latexString(std::string str)
     boost::replace_all(str, ">", R"(\textgreater)");
 
     return str;
+}
+
+inline std::string ipFromString(const std::string& name)
+{
+    // string like "224.9.2.252:15040"
+
+    std::vector<std::string> parts = split(name, ':');
+    assert (parts.size() == 2);
+    return parts.at(0);
+}
+
+inline unsigned int portFromString(const std::string& name)
+{
+    // string like "224.9.2.252:15040"
+
+    std::vector<std::string> parts = split(name, ':');
+    assert (parts.size() == 2);
+    return stoi(parts.at(1));
+}
+
+
+inline std::string trim(const std::string& name)
+{
+    return boost::algorithm::trim_copy(name);
 }
 
 }  // namespace String

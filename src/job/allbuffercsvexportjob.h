@@ -24,24 +24,27 @@
 #include "buffer.h"
 #include "job.h"
 
-class DBOVariableOrderedSet;
+namespace dbContent
+{
+class VariableOrderedSet;
+}
 
 class AllBufferCSVExportJob : public Job
 {
   public:
     AllBufferCSVExportJob(std::map<std::string, std::shared_ptr<Buffer>> buffers,
-                          DBOVariableOrderedSet* read_set,
+                          dbContent::VariableOrderedSet* read_set,
                           std::map<unsigned int, std::string> number_to_dbo,
                           const std::vector<std::pair<unsigned int, unsigned int>>& row_indexes,
                           const std::string& file_name, bool overwrite, bool only_selected,
-                          bool use_presentation, bool show_associations);
+                          bool use_presentation);
     virtual ~AllBufferCSVExportJob();
 
     virtual void run();
 
   protected:
     std::map<std::string, std::shared_ptr<Buffer>> buffers_;
-    DBOVariableOrderedSet* read_set_;
+    dbContent::VariableOrderedSet* read_set_;
     std::map<unsigned int, std::string> number_to_dbo_;
     const std::vector<std::pair<unsigned int, unsigned int>>& row_indexes_;
 
@@ -49,7 +52,6 @@ class AllBufferCSVExportJob : public Job
     bool overwrite_;
     bool only_selected_;
     bool use_presentation_;
-    bool show_associations_;
 
     boost::posix_time::ptime start_time_;
     boost::posix_time::ptime stop_time_;

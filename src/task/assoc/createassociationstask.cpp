@@ -18,21 +18,20 @@
 #include "createassociationstask.h"
 
 #include "compass.h"
-#include "createassociationstaskwidget.h"
+#include "createassociationstaskdialog.h"
 #include "createassociationsjob.h"
 #include "dbinterface.h"
-#include "dbobject.h"
-#include "dbobjectmanager.h"
-#include "dbodatasource.h"
-#include "dbovariable.h"
-#include "dbovariableset.h"
+#include "dbcontent/dbcontent.h"
+#include "dbcontent/dbcontentmanager.h"
+#include "dbcontent/variable/variable.h"
+#include "dbcontent/variable/variableset.h"
 #include "jobmanager.h"
-#include "metadbovariable.h"
-#include "postprocesstask.h"
+#include "dbcontent/variable/metavariable.h"
 #include "stringconv.h"
 #include "taskmanager.h"
+#include "viewmanager.h"
 #include "buffer.h"
-#include "dbconnection.h"
+#include "sqliteconnection.h"
 
 #include <QApplication>
 #include <QMessageBox>
@@ -40,6 +39,7 @@
 
 using namespace std;
 using namespace Utils;
+using namespace dbContent;
 
 const std::string CreateAssociationsTask::DONE_PROPERTY_NAME = "associations_created";
 
@@ -51,18 +51,6 @@ CreateAssociationsTask::CreateAssociationsTask(const std::string& class_id,
 {
     tooltip_ =
             "Allows creation of UTNs and target report association based on Mode S Addresses.";
-
-    registerParameter("key_var_str", &key_var_str_, "rec_num");
-    registerParameter("ds_id_var_str", &ds_id_var_str_, "ds_id");
-    registerParameter("tod_var_str", &tod_var_str_, "tod");
-    registerParameter("target_addr_var_str", &target_addr_var_str_, "target_addr");
-    registerParameter("target_id_var_str", &target_id_var_str_, "callsign");
-    registerParameter("track_num_var_str", &track_num_var_str_, "track_num");
-    registerParameter("track_end_var_str", &track_end_var_str_, "track_end");
-    registerParameter("mode_3a_var_str", &mode_3a_var_str_, "mode3a_code");
-    registerParameter("mode_c_var_str", &mode_c_var_str_, "modec_code_ft");
-    registerParameter("latitude_var_str", &latitude_var_str_, "pos_lat_deg");
-    registerParameter("longitude_var_str", &longitude_var_str_, "pos_long_deg");
 
     // common
     registerParameter("associate_non_mode_s", &associate_non_mode_s_, true);
@@ -96,22 +84,23 @@ CreateAssociationsTask::CreateAssociationsTask(const std::string& class_id,
 CreateAssociationsTask::~CreateAssociationsTask() {}
 
 
-TaskWidget* CreateAssociationsTask::widget()
+CreateAssociationsTaskDialog* CreateAssociationsTask::dialog()
 {
-    if (!widget_)
+    if (!dialog_)
     {
-        widget_.reset(new CreateAssociationsTaskWidget(*this));
+        dialog_.reset(new CreateAssociationsTaskDialog(*this));
 
-        connect(&task_manager_, &TaskManager::expertModeChangedSignal, widget_.get(),
-                &CreateAssociationsTaskWidget::expertModeChangedSlot);
+        connect(dialog_.get(), &CreateAssociationsTaskDialog::runSignal,
+                this, &CreateAssociationsTask::dialogRunSlot);
+
+        connect(dialog_.get(), &CreateAssociationsTaskDialog::cancelSignal,
+                this, &CreateAssociationsTask::dialogCancelSlot);
     }
 
-    assert(widget_);
-    return widget_.get();
+    assert(dialog_);
+    return dialog_.get();
+
 }
-
-void CreateAssociationsTask::deleteWidget() { widget_.reset(nullptr); }
-
 
 bool CreateAssociationsTask::checkPrerequisites()
 {
@@ -119,9 +108,6 @@ bool CreateAssociationsTask::checkPrerequisites()
            << COMPASS::instance().interface().ready();
 
     if (!COMPASS::instance().interface().ready())
-        return false;
-
-    if (COMPASS::instance().interface().connection().type() != SQLITE_IDENTIFIER)
         return false;
 
     logdbg << "CreateAssociationsTask: checkPrerequisites: done "
@@ -134,28 +120,26 @@ bool CreateAssociationsTask::checkPrerequisites()
         return false;
 
     // check if was post-processed
-    logdbg << "CreateAssociationsTask: checkPrerequisites: post "
-           << COMPASS::instance().interface().hasProperty(PostProcessTask::DONE_PROPERTY_NAME);
+    //    logdbg << "CreateAssociationsTask: checkPrerequisites: post "
+    //           << COMPASS::instance().interface().hasProperty(PostProcessTask::DONE_PROPERTY_NAME);
 
-    if (!COMPASS::instance().interface().hasProperty(PostProcessTask::DONE_PROPERTY_NAME))
-        return false;
+    //    if (!COMPASS::instance().interface().hasProperty(PostProcessTask::DONE_PROPERTY_NAME))
+    //        return false;
 
-    logdbg << "CreateAssociationsTask: checkPrerequisites: post2 "
-           << COMPASS::instance().interface().hasProperty(PostProcessTask::DONE_PROPERTY_NAME);
+    //    logdbg << "CreateAssociationsTask: checkPrerequisites: post2 "
+    //           << COMPASS::instance().interface().hasProperty(PostProcessTask::DONE_PROPERTY_NAME);
 
-    if (COMPASS::instance().interface().getProperty(PostProcessTask::DONE_PROPERTY_NAME) != "1")
-        return false;
+    //    if (COMPASS::instance().interface().getProperty(PostProcessTask::DONE_PROPERTY_NAME) != "1")
+    //        return false;
 
     // check if hash var exists in all data
-    DBObjectManager& object_man = COMPASS::instance().objectManager();
-
-    logdbg << "CreateAssociationsTask: checkPrerequisites: tracker hashes";
-    assert (object_man.existsObject("Tracker"));
+    DBContentManager& object_man = COMPASS::instance().dbContentManager();
 
     if (!object_man.hasData())
         return false;
 
     logdbg << "CreateAssociationsTask: checkPrerequisites: ok";
+
     return true;
 }
 
@@ -171,58 +155,61 @@ bool CreateAssociationsTask::isRecommended()
 
 bool CreateAssociationsTask::canRun()
 {
-    DBObjectManager& object_man = COMPASS::instance().objectManager();
+    DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
 
-    logdbg << "CreateAssociationsTask: canRun: tracker " << object_man.existsObject("Tracker");
-
-    // meta var stuff
-    logdbg << "CreateAssociationsTask: canRun: meta vars";
-    if (!key_var_str_.size()
-            || !ds_id_var_str_.size()
-            || !tod_var_str_.size()
-            || !target_addr_var_str_.size()
-            || !target_id_var_str_.size()
-            || !track_num_var_str_.size()
-            || !track_end_var_str_.size()
-            || !mode_3a_var_str_.size()
-            || !mode_c_var_str_.size()
-            || !latitude_var_str_.size()
-            || !longitude_var_str_.size())
+    loginf << "CreateAssociationsTask: canRun: metas ";
+    if (!dbcontent_man.existsMetaVariable(DBContent::meta_var_rec_num_.name())
+            || !dbcontent_man.existsMetaVariable(DBContent::meta_var_datasource_id_.name())
+            || !dbcontent_man.existsMetaVariable(DBContent::meta_var_tod_.name())
+            || !dbcontent_man.existsMetaVariable(DBContent::meta_var_ta_.name())
+            || !dbcontent_man.existsMetaVariable(DBContent::meta_var_ti_.name())
+            || !dbcontent_man.existsMetaVariable(DBContent::meta_var_track_num_.name())
+            || !dbcontent_man.existsMetaVariable(DBContent::meta_var_track_end_.name())
+            || !dbcontent_man.existsMetaVariable(DBContent::meta_var_m3a_.name())
+            || !dbcontent_man.existsMetaVariable(DBContent::meta_var_mc_.name())
+            || !dbcontent_man.existsMetaVariable(DBContent::meta_var_latitude_.name())
+            || !dbcontent_man.existsMetaVariable(DBContent::meta_var_longitude_.name()))
         return false;
 
-    logdbg << "CreateAssociationsTask: canRun: metas ";
-    if (!object_man.existsMetaVariable(key_var_str_)
-            || !object_man.existsMetaVariable(ds_id_var_str_)
-            || !object_man.existsMetaVariable(tod_var_str_)
-            || !object_man.existsMetaVariable(target_addr_var_str_)
-            || !object_man.existsMetaVariable(target_id_var_str_)
-            || !object_man.existsMetaVariable(track_num_var_str_)
-            || !object_man.existsMetaVariable(track_end_var_str_)
-            || !object_man.existsMetaVariable(mode_3a_var_str_)
-            || !object_man.existsMetaVariable(mode_c_var_str_)
-            || !object_man.existsMetaVariable(latitude_var_str_)
-            || !object_man.existsMetaVariable(longitude_var_str_))
-        return false;
-
-    logdbg << "CreateAssociationsTask: canRun: metas in objects";
-    for (auto& dbo_it : object_man)
+    loginf << "CreateAssociationsTask: canRun: metas in dbcontent";
+    for (auto& dbo_it : dbcontent_man)
     {
-        if (!object_man.metaVariable(key_var_str_).existsIn(dbo_it.first)
-                || !object_man.metaVariable(ds_id_var_str_).existsIn(dbo_it.first)
-                || !object_man.metaVariable(tod_var_str_).existsIn(dbo_it.first)
-                || !object_man.metaVariable(target_addr_var_str_).existsIn(dbo_it.first)
-                || !object_man.metaVariable(target_id_var_str_).existsIn(dbo_it.first)
-                //|| !object_man.metaVariable(track_num_var_str_).existsIn(dbo_it.first) // not in adsb
-                //|| !object_man.metaVariable(track_end_var_str_).existsIn(dbo_it.first) // not in adsb
-                || !object_man.metaVariable(mode_3a_var_str_).existsIn(dbo_it.first)
-                || !object_man.metaVariable(mode_c_var_str_).existsIn(dbo_it.first)
-                || !object_man.metaVariable(latitude_var_str_).existsIn(dbo_it.first)
-                || !object_man.metaVariable(longitude_var_str_).existsIn(dbo_it.first)
+//        if (dbo_it.first == "RefTraj") // TODO
+//            continue;
+
+        loginf << "CreateAssociationsTask: canRun: metas in dbcontent " << dbo_it.first;
+
+        if (!dbcontent_man.metaVariable(DBContent::meta_var_rec_num_.name()).existsIn(dbo_it.first)
+                || !dbcontent_man.metaVariable(DBContent::meta_var_datasource_id_.name()).existsIn(dbo_it.first)
+                || !dbcontent_man.metaVariable(DBContent::meta_var_tod_.name()).existsIn(dbo_it.first)
+                || !dbcontent_man.metaVariable(DBContent::meta_var_m3a_.name()).existsIn(dbo_it.first)
+                || !dbcontent_man.metaVariable(DBContent::meta_var_mc_.name()).existsIn(dbo_it.first)
+                || !dbcontent_man.metaVariable(DBContent::meta_var_latitude_.name()).existsIn(dbo_it.first)
+                || !dbcontent_man.metaVariable(DBContent::meta_var_longitude_.name()).existsIn(dbo_it.first)
+                || !dbcontent_man.metaVariable(DBContent::meta_var_associations_.name()).existsIn(dbo_it.first)
                 )
             return false;
+
+        if (dbo_it.first != "CAT001")  // check metas specific track vars
+        {
+            if (!dbcontent_man.metaVariable(DBContent::meta_var_ta_.name()).existsIn(dbo_it.first)
+                    || !dbcontent_man.metaVariable(DBContent::meta_var_ti_.name()).existsIn(dbo_it.first)
+                    )
+                return false;
+        }
+
+        if (dbo_it.first != "CAT021" && dbo_it.first != "RefTraj")  // check metas specific track vars
+        {
+            if (!dbcontent_man.metaVariable(DBContent::meta_var_track_num_.name()).existsIn(dbo_it.first)
+                    || !dbcontent_man.metaVariable(DBContent::meta_var_track_end_.name()).existsIn(dbo_it.first))
+            {
+                return false;
+            }
+        }
     }
 
     logdbg << "CreateAssociationsTask: canRun: ok";
+
     return true;
 }
 
@@ -231,8 +218,6 @@ void CreateAssociationsTask::run()
     assert(canRun());
 
     loginf << "CreateAssociationsTask: run: started";
-
-    task_manager_.appendInfo("CreateAssociationsTask: started");
 
     start_time_ = boost::posix_time::microsec_clock::local_time();
 
@@ -243,38 +228,44 @@ void CreateAssociationsTask::run()
     connect(status_dialog_.get(), &CreateAssociationsStatusDialog::closeSignal, this,
             &CreateAssociationsTask::closeStatusDialogSlot);
     status_dialog_->markStartTime();
+    status_dialog_->setStatus("Loading Data");
+    status_dialog_->show();
 
-    checkAndSetMetaVariable(key_var_str_, &key_var_);
-    checkAndSetMetaVariable(ds_id_var_str_, &ds_id_var_);
-    checkAndSetMetaVariable(tod_var_str_, &tod_var_);
-    checkAndSetMetaVariable(target_addr_var_str_, &target_addr_var_);
-    checkAndSetMetaVariable(target_id_var_str_, &target_id_var_);
-    checkAndSetMetaVariable(track_num_var_str_, &track_num_var_);
-    checkAndSetMetaVariable(track_end_var_str_, &track_end_var_);
-    checkAndSetMetaVariable(mode_3a_var_str_, &mode_3a_var_);
-    checkAndSetMetaVariable(mode_c_var_str_, &mode_c_var_);
-    checkAndSetMetaVariable(latitude_var_str_, &latitude_var_);
-    checkAndSetMetaVariable(longitude_var_str_, &longitude_var_);
+    checkAndSetMetaVariable(DBContent::meta_var_rec_num_.name(), &rec_num_var_);
+    checkAndSetMetaVariable(DBContent::meta_var_datasource_id_.name(), &ds_id_var_);
+    checkAndSetMetaVariable(DBContent::meta_var_line_id_.name(), &line_id_var_);
+    checkAndSetMetaVariable(DBContent::meta_var_tod_.name(), &tod_var_);
+    checkAndSetMetaVariable(DBContent::meta_var_ta_.name(), &target_addr_var_);
+    checkAndSetMetaVariable(DBContent::meta_var_ti_.name(), &target_id_var_);
+    checkAndSetMetaVariable(DBContent::meta_var_track_num_.name(), &track_num_var_);
+    checkAndSetMetaVariable(DBContent::meta_var_track_end_.name(), &track_end_var_);
+    checkAndSetMetaVariable(DBContent::meta_var_m3a_.name(), &mode_3a_var_);
+    checkAndSetMetaVariable(DBContent::meta_var_mc_.name(), &mode_c_var_);
+    checkAndSetMetaVariable(DBContent::meta_var_latitude_.name(), &latitude_var_);
+    checkAndSetMetaVariable(DBContent::meta_var_longitude_.name(), &longitude_var_);
+    checkAndSetMetaVariable(DBContent::meta_var_associations_.name(), &associations_var_);
 
-    DBObjectManager& object_man = COMPASS::instance().objectManager();
 
-    for (auto& dbo_it : object_man)
+    DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
+    dbcontent_man.clearData();
+
+    COMPASS::instance().viewManager().disableDataDistribution(true);
+
+    connect(&dbcontent_man, &DBContentManager::loadedDataSignal,
+            this, &CreateAssociationsTask::loadedDataSlot);
+    connect(&dbcontent_man, &DBContentManager::loadingDoneSignal,
+            this, &CreateAssociationsTask::loadingDoneSlot);
+
+    for (auto& dbo_it : dbcontent_man)
     {
         if (!dbo_it.second->hasData())
             continue;
 
-        DBOVariableSet read_set = getReadSetFor(dbo_it.first);
-        connect(dbo_it.second, &DBObject::newDataSignal, this,
-                &CreateAssociationsTask::newDataSlot);
-        connect(dbo_it.second, &DBObject::loadingDoneSignal, this,
-                &CreateAssociationsTask::loadingDoneSlot);
+        VariableSet read_set = getReadSetFor(dbo_it.first);
 
-        dbo_it.second->load(read_set, false, true, &tod_var_->getFor(dbo_it.first), true);
-
-        dbo_loading_done_flags_[dbo_it.first] = false;
+        dbo_it.second->load(read_set, false, false, true, &tod_var_->getFor(dbo_it.first), true);
     }
 
-    status_dialog_->setDBODoneFlags(dbo_loading_done_flags_);
     status_dialog_->show();
 }
 
@@ -474,70 +465,73 @@ void CreateAssociationsTask::contMaxDistanceAcceptableTracker(double cont_max_di
     cont_max_distance_acceptable_tracker_ = cont_max_distance_acceptable_tracker;
 }
 
-void CreateAssociationsTask::newDataSlot(DBObject& object)
+void CreateAssociationsTask::loadedDataSlot(
+        const std::map<std::string, std::shared_ptr<Buffer>>& data, bool requires_reset)
 {
+    data_ = data;
+
+    assert (status_dialog_);
+    status_dialog_->updateTime();
 }
 
-void CreateAssociationsTask::loadingDoneSlot(DBObject& object)
+void CreateAssociationsTask::loadingDoneSlot()
 {
-    loginf << "CreateAssociationsTask: loadingDoneSlot: object " << object.name();
+    loginf << "CreateAssociationsTask: loadingDoneSlot";
 
-    disconnect(&object, &DBObject::newDataSignal, this, &CreateAssociationsTask::newDataSlot);
-    disconnect(&object, &DBObject::loadingDoneSignal, this,
-               &CreateAssociationsTask::loadingDoneSlot);
+    DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
 
-    dbo_loading_done_flags_.at(object.name()) = true;
+    disconnect(&dbcontent_man, &DBContentManager::loadedDataSignal,
+               this, &CreateAssociationsTask::loadedDataSlot);
+    disconnect(&dbcontent_man, &DBContentManager::loadingDoneSignal,
+               this, &CreateAssociationsTask::loadingDoneSlot);
 
     assert(status_dialog_);
-    status_dialog_->setDBODoneFlags(dbo_loading_done_flags_);
+    status_dialog_->setStatus("Loading done, starting association");
+
+    dbcontent_man.clearData();
+
+    COMPASS::instance().viewManager().disableDataDistribution(false);
 
     dbo_loading_done_ = true;
 
-    for (auto& done_it : dbo_loading_done_flags_)
-        if (!done_it.second)
-            dbo_loading_done_ = false;
+    loginf << "CreateAssociationsTask: loadingDoneSlot: data loading done";
 
-    if (dbo_loading_done_)
-    {
-        task_manager_.appendInfo("CreateAssociationsTask: data loading done");
-        loginf << "CreateAssociationsTask: loadingDoneSlot: data loading done";
+    //assert(!create_job_);
 
-        //assert(!create_job_);
+    create_job_ = std::make_shared<CreateAssociationsJob>(
+                *this, COMPASS::instance().interface(), data_);
 
-        std::map<std::string, std::shared_ptr<Buffer>> buffers;
+    connect(create_job_.get(), &CreateAssociationsJob::doneSignal, this,
+            &CreateAssociationsTask::createDoneSlot, Qt::QueuedConnection);
+    connect(create_job_.get(), &CreateAssociationsJob::obsoleteSignal, this,
+            &CreateAssociationsTask::createObsoleteSlot, Qt::QueuedConnection);
+    connect(create_job_.get(), &CreateAssociationsJob::statusSignal, this,
+            &CreateAssociationsTask::associationStatusSlot, Qt::QueuedConnection);
+    //        connect(create_job_.get(), &CreateAssociationsJob::saveAssociationsQuestionSignal,
+    //                this, &CreateAssociationsTask::saveAssociationsQuestionSlot,
+    //                Qt::QueuedConnection);
 
-        DBObjectManager& object_man = COMPASS::instance().objectManager();
+    JobManager::instance().addDBJob(create_job_);
 
-        for (auto& dbo_it : object_man)
-        {
-            if (!dbo_it.second->hasData())
-                continue;
+}
 
-            buffers[dbo_it.first] = dbo_it.second->data();
+void CreateAssociationsTask::dialogRunSlot()
+{
+    loginf << "CreateAssociationsTask: dialogRunSlot";
 
-            loginf << "CreateAssociationsTask: loadingDoneSlot: object " << object.name()
-                   << " data " << buffers[dbo_it.first]->size();
+    assert (dialog_);
+    dialog_->hide();
 
-            dbo_it.second->clearData();
-        }
+    assert (canRun());
+    run ();
+}
 
-        create_job_ = std::make_shared<CreateAssociationsJob>(
-                    *this, COMPASS::instance().interface(), buffers);
+void CreateAssociationsTask::dialogCancelSlot()
+{
+    loginf << "CreateAssociationsTask: dialogCancelSlot";
 
-        connect(create_job_.get(), &CreateAssociationsJob::doneSignal, this,
-                &CreateAssociationsTask::createDoneSlot, Qt::QueuedConnection);
-        connect(create_job_.get(), &CreateAssociationsJob::obsoleteSignal, this,
-                &CreateAssociationsTask::createObsoleteSlot, Qt::QueuedConnection);
-        connect(create_job_.get(), &CreateAssociationsJob::statusSignal, this,
-                &CreateAssociationsTask::associationStatusSlot, Qt::QueuedConnection);
-        //        connect(create_job_.get(), &CreateAssociationsJob::saveAssociationsQuestionSignal,
-        //                this, &CreateAssociationsTask::saveAssociationsQuestionSlot,
-        //                Qt::QueuedConnection);
-
-        JobManager::instance().addDBJob(create_job_);
-
-        status_dialog_->setAssociationStatus("In Progress");
-    }
+    assert (dialog_);
+    dialog_->hide();
 }
 
 void CreateAssociationsTask::createDoneSlot()
@@ -546,8 +540,11 @@ void CreateAssociationsTask::createDoneSlot()
 
     create_job_done_ = true;
 
-    status_dialog_->setAssociationStatus("Done");
+    status_dialog_->setStatus("Done");
 
+    assert (create_job_);
+
+    status_dialog_->setAssociationsCounts(create_job_->associationCounts());
     status_dialog_->setDone();
 
     if (!show_done_summary_)
@@ -563,7 +560,11 @@ void CreateAssociationsTask::createDoneSlot()
 
     COMPASS::instance().interface().setProperty(DONE_PROPERTY_NAME, "1");
 
-    task_manager_.appendSuccess("CreateAssociationsTask: done after " + time_str);
+    COMPASS::instance().interface().setProperty(DONE_PROPERTY_NAME, "1");
+    COMPASS::instance().dbContentManager().setAssociationsIdentifier("All");
+
+    COMPASS::instance().interface().saveProperties();
+
     done_ = true;
 
     QApplication::restoreOverrideCursor();
@@ -579,7 +580,7 @@ void CreateAssociationsTask::createObsoleteSlot()
 void CreateAssociationsTask::associationStatusSlot(QString status)
 {
     assert(status_dialog_);
-    status_dialog_->setAssociationStatus(status.toStdString());
+    status_dialog_->setStatus(status.toStdString());
 }
 
 void CreateAssociationsTask::closeStatusDialogSlot()
@@ -589,82 +590,88 @@ void CreateAssociationsTask::closeStatusDialogSlot()
     status_dialog_ = nullptr;
 }
 
-MetaDBOVariable* CreateAssociationsTask::keyVar() const
+MetaVariable* CreateAssociationsTask::keyVar() const
 {
-    assert (key_var_);
-    return key_var_;
+    assert (rec_num_var_);
+    return rec_num_var_;
 }
 
-MetaDBOVariable* CreateAssociationsTask::dsIdVar() const
+MetaVariable* CreateAssociationsTask::dsIdVar() const
 {
-    assert (key_var_);
+    assert (ds_id_var_);
     return ds_id_var_;
 }
 
-MetaDBOVariable* CreateAssociationsTask::targetAddrVar() const
+MetaVariable* CreateAssociationsTask::lineIdVar() const
+{
+    assert (line_id_var_);
+    return line_id_var_;
+}
+
+
+MetaVariable* CreateAssociationsTask::targetAddrVar() const
 {
     assert (target_addr_var_);
     return target_addr_var_;
 }
 
-MetaDBOVariable* CreateAssociationsTask::todVar() const
+MetaVariable* CreateAssociationsTask::todVar() const
 {
     assert (tod_var_);
     return tod_var_;
 }
 
-MetaDBOVariable* CreateAssociationsTask::targetIdVar() const
+MetaVariable* CreateAssociationsTask::targetIdVar() const
 {
     assert (target_id_var_);
     return target_id_var_;
 }
 
-MetaDBOVariable* CreateAssociationsTask::trackNumVar() const
+MetaVariable* CreateAssociationsTask::trackNumVar() const
 {
     assert (track_num_var_);
     return track_num_var_;
 }
 
-MetaDBOVariable* CreateAssociationsTask::trackEndVar() const
+MetaVariable* CreateAssociationsTask::trackEndVar() const
 {
     assert (track_end_var_);
     return track_end_var_;
 }
 
-MetaDBOVariable* CreateAssociationsTask::mode3AVar() const
+MetaVariable* CreateAssociationsTask::mode3AVar() const
 {
     assert (mode_3a_var_);
     return mode_3a_var_;
 }
 
-MetaDBOVariable* CreateAssociationsTask::modeCVar() const
+MetaVariable* CreateAssociationsTask::modeCVar() const
 {
     assert (mode_c_var_);
     return mode_c_var_;
 }
 
-MetaDBOVariable* CreateAssociationsTask::latitudeVar() const
+MetaVariable* CreateAssociationsTask::latitudeVar() const
 {
     assert (latitude_var_);
     return latitude_var_;
 }
 
-MetaDBOVariable* CreateAssociationsTask::longitudeVar() const
+MetaVariable* CreateAssociationsTask::longitudeVar() const
 {
     assert (longitude_var_);
     return longitude_var_;
 }
 
-void CreateAssociationsTask::checkAndSetMetaVariable(std::string& name_str,
-                                                     MetaDBOVariable** var)
+void CreateAssociationsTask::checkAndSetMetaVariable(const std::string& name_str,
+                                                     MetaVariable** var)
 {
-    DBObjectManager& object_man = COMPASS::instance().objectManager();
+    DBContentManager& object_man = COMPASS::instance().dbContentManager();
 
     if (!object_man.existsMetaVariable(name_str))
     {
         loginf << "CreateAssociationsTask: checkAndSetMetaVariable: var " << name_str
                << " does not exist";
-        name_str = "";
         var = nullptr;
     }
     else
@@ -676,53 +683,69 @@ void CreateAssociationsTask::checkAndSetMetaVariable(std::string& name_str,
     }
 }
 
-DBOVariableSet CreateAssociationsTask::getReadSetFor(const std::string& dbo_name)
+VariableSet CreateAssociationsTask::getReadSetFor(const std::string& dbcontent_name)
 {
-    DBOVariableSet read_set;
-
-    assert(key_var_);
-    assert(key_var_->existsIn(dbo_name));
-    read_set.add(key_var_->getFor(dbo_name));
+    VariableSet read_set;
 
     assert(ds_id_var_);
-    assert(ds_id_var_->existsIn(dbo_name));
-    read_set.add(ds_id_var_->getFor(dbo_name));
+    assert(ds_id_var_->existsIn(dbcontent_name));
+    read_set.add(ds_id_var_->getFor(dbcontent_name));
+
+    assert(line_id_var_);
+    assert(line_id_var_->existsIn(dbcontent_name));
+    read_set.add(line_id_var_->getFor(dbcontent_name));
 
     assert(tod_var_);
-    assert(tod_var_->existsIn(dbo_name));
-    read_set.add(tod_var_->getFor(dbo_name));
+    assert(tod_var_->existsIn(dbcontent_name));
+    read_set.add(tod_var_->getFor(dbcontent_name));
 
     assert(target_addr_var_);
-    assert(target_addr_var_->existsIn(dbo_name));
-    read_set.add(target_addr_var_->getFor(dbo_name));
+    if(target_addr_var_->existsIn(dbcontent_name))
+        read_set.add(target_addr_var_->getFor(dbcontent_name));
 
     assert(target_id_var_);
-    assert(target_id_var_->existsIn(dbo_name));
-    read_set.add(target_id_var_->getFor(dbo_name));
+    if(target_id_var_->existsIn(dbcontent_name))
+        read_set.add(target_id_var_->getFor(dbcontent_name));
 
     assert(track_num_var_);
-    if(track_num_var_->existsIn(dbo_name))
-        read_set.add(track_num_var_->getFor(dbo_name));
+    if(track_num_var_->existsIn(dbcontent_name))
+        read_set.add(track_num_var_->getFor(dbcontent_name));
 
     assert(track_end_var_);
-    if(track_end_var_->existsIn(dbo_name))
-        read_set.add(track_end_var_->getFor(dbo_name));
+    if(track_end_var_->existsIn(dbcontent_name))
+        read_set.add(track_end_var_->getFor(dbcontent_name));
 
     assert(mode_3a_var_);
-    assert(mode_3a_var_->existsIn(dbo_name));
-    read_set.add(mode_3a_var_->getFor(dbo_name));
+    assert(mode_3a_var_->existsIn(dbcontent_name));
+    read_set.add(mode_3a_var_->getFor(dbcontent_name));
 
     assert(mode_c_var_);
-    assert(mode_c_var_->existsIn(dbo_name));
-    read_set.add(mode_c_var_->getFor(dbo_name));
+    assert(mode_c_var_->existsIn(dbcontent_name));
+    read_set.add(mode_c_var_->getFor(dbcontent_name));
 
     assert(latitude_var_);
-    assert(latitude_var_->existsIn(dbo_name));
-    read_set.add(latitude_var_->getFor(dbo_name));
+    assert(latitude_var_->existsIn(dbcontent_name));
+    read_set.add(latitude_var_->getFor(dbcontent_name));
 
     assert(longitude_var_);
-    assert(longitude_var_->existsIn(dbo_name));
-    read_set.add(longitude_var_->getFor(dbo_name));
+    assert(longitude_var_->existsIn(dbcontent_name));
+    read_set.add(longitude_var_->getFor(dbcontent_name));
+
+    assert(associations_var_);
+    assert(associations_var_->existsIn(dbcontent_name));
+    read_set.add(associations_var_->getFor(dbcontent_name));
+
+    // must be last for update process
+    assert(rec_num_var_);
+    assert(rec_num_var_->existsIn(dbcontent_name));
+    read_set.add(rec_num_var_->getFor(dbcontent_name));
+
+    if (dbcontent_name == "CAT021")
+    {
+        read_set.add(COMPASS::instance().dbContentManager().dbContent("CAT021").variable(
+                         DBContent::var_cat021_mops_version_.name()));
+    }
+
 
     return read_set;
 }

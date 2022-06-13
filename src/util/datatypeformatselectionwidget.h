@@ -18,11 +18,13 @@
 #ifndef DATATYPEFORMATSELECTIONWIDGET_H
 #define DATATYPEFORMATSELECTIONWIDGET_H
 
+#include "format.h"
+#include "property.h"
+
 #include <QMenu>
 #include <QPushButton>
 
-#include "format.h"
-#include "property.h"
+#include <memory>
 
 /**
  * @brief Sets a Unit using a context menu
@@ -40,15 +42,21 @@ class DataTypeFormatSelectionWidget : public QPushButton
   public:
     /// @brief Constructor, references directly used
     DataTypeFormatSelectionWidget(std::string& data_type_str, Format& format);
+    DataTypeFormatSelectionWidget();
     /// @brief Destructor
     virtual ~DataTypeFormatSelectionWidget();
 
+    void update(std::string& data_type_str, Format& format);
+    void clear();
+
   protected:
-    std::string& data_type_str_;
-    Format& format_;
+    bool pointers_set_ {false};
+
+    std::string* data_type_str_ {nullptr};
+    Format* format_ {nullptr};
 
     /// Context menu
-    QMenu menu_;
+    std::unique_ptr<QMenu> menu_ {nullptr};
 
     void showValues();
     void createMenu();

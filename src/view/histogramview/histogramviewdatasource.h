@@ -22,9 +22,8 @@
 
 #include "buffer.h"
 #include "configurable.h"
-#include "dbovariable.h"
-#include "dbovariableorderedset.h"
-#include "viewselection.h"
+#include "dbcontent/variable/variable.h"
+#include "dbcontent/variable/variableorderedset.h"
 
 class Job;
 class ViewableDataConfig;
@@ -33,14 +32,10 @@ class HistogramViewDataSource : public QObject, public Configurable
 {
     Q_OBJECT
   public slots:
-    void loadingStartedSlot();
-    void newDataSlot(DBObject& object);
-    void loadingDoneSlot(DBObject& object);
 
   signals:
-    void loadingStartedSignal();
     /// @brief Emitted when resulting buffer was delivered
-    void updateDataSignal(DBObject& object, std::shared_ptr<Buffer> buffer);
+    void updateDataSignal(DBContent& object, std::shared_ptr<Buffer> buffer);
 
   public:
     /// @brief Constructor
@@ -53,7 +48,7 @@ class HistogramViewDataSource : public QObject, public Configurable
                                          const std::string& instance_id);
 
     /// @brief Returns variable read list
-    DBOVariableOrderedSet* getSet()
+    dbContent::VariableOrderedSet* getSet()
     {
         assert(set_);
         return set_;
@@ -63,17 +58,17 @@ class HistogramViewDataSource : public QObject, public Configurable
 
   protected:
     /// Variable read list
-    DBOVariableOrderedSet* set_{nullptr};
+    dbContent::VariableOrderedSet* set_{nullptr};
 
-    /// Selected DBObject records
-    ViewSelectionEntries& selection_entries_;
+    /// Selected DBContent records
+    //ViewSelectionEntries& selection_entries_;
 
     std::vector<std::pair<std::string, std::string>> temporary_added_variables_; // not persisted, DBO->varname
 
     virtual void checkSubConfigurables();
 
-    bool addTemporaryVariable (const std::string& dbo_name, const std::string& var_name); // only to set, true of added
-    void removeTemporaryVariable (const std::string& dbo_name, const std::string& var_name); // only to set
+    bool addTemporaryVariable (const std::string& dbcontent_name, const std::string& var_name); // only to set, true of added
+    void removeTemporaryVariable (const std::string& dbcontent_name, const std::string& var_name); // only to set
 };
 
 #endif /* HISTOGRAMVIEWDATASOURCE_H_ */

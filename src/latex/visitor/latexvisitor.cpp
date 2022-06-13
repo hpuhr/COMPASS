@@ -38,7 +38,7 @@
 #include "eval/results/report/sectioncontenttext.h"
 #include "eval/results/report/sectioncontentfigure.h"
 #include "compass.h"
-#include "dbobjectmanager.h"
+#include "dbcontent/dbcontentmanager.h"
 #include "viewmanager.h"
 #include "files.h"
 
@@ -250,7 +250,11 @@ void LatexVisitor::visit(const EvaluationResultsReport::SectionContentTable* e)
             if (!include_target_details_ && (ref.rfind("Targets", 0) == 0)) // reference to details
                 ; // do not do hyperref
             else
+            {
+
+
                 row_strings[0] = "\\hyperref[sec:"+ref+"]{"+row_strings.at(0)+"}";
+            }
         }
 
         for (unsigned int cnt=0; cnt < num_cols; ++cnt)
@@ -286,7 +290,7 @@ void LatexVisitor::visit(const EvaluationResultsReport::SectionContentFigure* e)
 
     ignore_listbox_views_ = true;
 
-    DBObjectManager& obj_man = COMPASS::instance().objectManager();
+    DBContentManager& obj_man = COMPASS::instance().dbContentManager();
     ViewManager& view_man = COMPASS::instance().viewManager();
 
     while (QCoreApplication::hasPendingEvents())
@@ -461,7 +465,7 @@ void LatexVisitor::visit(OSGView* e)
 
     if (add_overview_screenshot_) // overview screenshot
     {
-        data_widget->zoomHomeSlot();
+        data_widget->zoomToDataSlot(); // TODO wrong
         data_widget->addDataMarker();
 
         QImage overview_screenshot = data_widget->grabFrameBuffer();

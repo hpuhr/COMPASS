@@ -16,8 +16,9 @@
  */
 
 #include "listboxviewconfigwidget.h"
-#include "dbobjectmanager.h"
-#include "dbovariableorderedsetwidget.h"
+#include "compass.h"
+#include "dbcontent/dbcontentmanager.h"
+#include "dbcontent/variable/variableorderedsetwidget.h"
 #include "listboxview.h"
 #include "listboxviewdatasource.h"
 #include "logger.h"
@@ -126,14 +127,6 @@ ListBoxViewConfigWidget::ListBoxViewConfigWidget(ListBoxView* view, QWidget* par
         connect(presentation_check_, &QCheckBox::clicked, this,
                 &ListBoxViewConfigWidget::toggleUsePresentation);
         cfg_layout->addWidget(presentation_check_);
-
-        associations_check_ = new QCheckBox("Show Associations");
-        associations_check_->setChecked(view_->showAssociations());
-        connect(associations_check_, &QCheckBox::clicked, this,
-                &ListBoxViewConfigWidget::showAssociationsSlot);
-        if (!view_->canShowAssociations())
-            associations_check_->setDisabled(true);
-        cfg_layout->addWidget(associations_check_);
 
         //vlayout->addStretch();
 
@@ -378,14 +371,6 @@ void ListBoxViewConfigWidget::toggleUseOverwrite()
     view_->overwriteCSV(checked);
 }
 
-void ListBoxViewConfigWidget::showAssociationsSlot()
-{
-    assert(associations_check_);
-    bool checked = associations_check_->checkState() == Qt::Checked;
-    logdbg << "ListBoxViewConfigWidget: showAssociationsSlot: setting to " << checked;
-    view_->showAssociations(checked);
-}
-
 void ListBoxViewConfigWidget::exportSlot()
 {
     logdbg << "ListBoxViewConfigWidget: exportSlot";
@@ -419,7 +404,8 @@ void ListBoxViewConfigWidget::reloadWantedSlot()
 void ListBoxViewConfigWidget::reloadRequestedSlot()
 {
     assert(reload_needed_);
-    emit reloadRequestedSignal();
+
+    COMPASS::instance().dbContentManager().load();
     reload_needed_ = false;
 
     updateUpdateButton();
@@ -479,13 +465,9 @@ void ListBoxViewConfigWidget::updateSetWidget()
         return;
     }
 
-    //    while (set_stack_->count() > 0)  // remove all widgets
-    //        set_stack_->removeWidget(set_stack_->widget(0));
-    //    return;
-
     assert (view_->getDataSource()->hasCurrentSet());
 
-    connect(view_->getDataSource()->getSet(), &DBOVariableOrderedSet::variableAddedChangedSignal,
+    connect(view_->getDataSource()->getSet(), &dbContent::VariableOrderedSet::variableAddedChangedSignal,
             this, &ListBoxViewConfigWidget::reloadWantedSlot, Qt::UniqueConnection);
 
     QWidget* set_widget = view_->getDataSource()->getSet()->widget();

@@ -65,7 +65,7 @@ protected slots:
     void maxSILv2PEditedSlot (const QString& text);
 
 public:
-    ADSBQualityFilterWidget(ADSBQualityFilter& filter, const std::string& class_id, const std::string& instance_id);
+    ADSBQualityFilterWidget(ADSBQualityFilter& filter);
     virtual ~ADSBQualityFilterWidget();
 
     virtual void update();

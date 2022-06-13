@@ -39,6 +39,13 @@ bool fileExists(const std::string& path)
     return check_file.exists() && check_file.isFile();
 }
 
+size_t fileSize(const std::string& path)
+{
+    verifyFileExists(path);
+
+    return boost::filesystem::file_size(path);
+}
+
 void verifyFileExists(const std::string& path)
 {
     if (!fileExists(path))
@@ -119,6 +126,13 @@ QStringList getFilesInDirectory(const std::string& path)
 std::string getIconFilepath(const std::string& filename)
 {
     std::string filepath = HOME_DATA_DIRECTORY + "icons/" + filename;
+    verifyFileExists(filepath);
+    return filepath;
+}
+
+std::string getImageFilepath(const std::string& filename)
+{
+    std::string filepath = HOME_DATA_DIRECTORY + "images/" + filename;
     verifyFileExists(filepath);
     return filepath;
 }

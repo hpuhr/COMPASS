@@ -19,10 +19,10 @@
 #include "scatterplotview.h"
 #include "compass.h"
 #include "buffer.h"
-#include "dbobjectmanager.h"
-#include "dbobject.h"
-#include "dbovariable.h"
-#include "metadbovariable.h"
+#include "dbcontent/dbcontentmanager.h"
+#include "dbcontent/dbcontent.h"
+#include "dbcontent/variable/variable.h"
+#include "dbcontent/variable/metavariable.h"
 #include "scatterplotviewdatasource.h"
 #include "scatterplotviewchartview.h"
 #include "logger.h"
@@ -44,6 +44,7 @@
 QT_CHARTS_USE_NAMESPACE
 
 using namespace std;
+using namespace dbContent;
 
 ScatterPlotViewDataWidget::ScatterPlotViewDataWidget(ScatterPlotView* view, ScatterPlotViewDataSource* data_source,
                                                      QWidget* parent, Qt::WindowFlags f)
@@ -56,11 +57,13 @@ ScatterPlotViewDataWidget::ScatterPlotViewDataWidget(ScatterPlotView* view, Scat
 
     setLayout(main_layout_);
 
-    colors_["Radar"] = QColor("#00FF00");
-    colors_["MLAT"] = QColor("#FF0000");
-    colors_["ADSB"] = QColor("#6666FF");
+    colors_["CAT001"] = QColor("#00FF00");
+    colors_["CAT010"] = QColor("#FFCC00");
+    colors_["CAT020"] = QColor("#FF0000");
+    colors_["CAT021"] = QColor("#6666FF");
+    colors_["CAT048"] = QColor("#00FF00");
     colors_["RefTraj"] = QColor("#FFA500");
-    colors_["Tracker"] = QColor("#CCCCCC");
+    colors_["CAT062"] = QColor("#CCCCCC");
 
     // shortcuts
     {
@@ -167,79 +170,80 @@ void ScatterPlotViewDataWidget::loadingStartedSlot()
     clear();
 }
 
-void ScatterPlotViewDataWidget::updateDataSlot(DBObject& object, std::shared_ptr<Buffer> buffer)
+void ScatterPlotViewDataWidget::updateDataSlot(
+        const std::map<std::string, std::shared_ptr<Buffer>>& data, bool requires_reset)
 {
     logdbg << "ScatterPlotViewDataWidget: updateDataSlot: start";
 
-    if (!buffer->size())
-        return;
-
-    string dbo_name = object.name();
-    buffers_[dbo_name] = buffer;
-
-    unsigned int current_size = buffer->size();
-
-    logdbg << "ScatterPlotViewDataWidget: updateDataSlot: before x " << x_values_[dbo_name].size()
-           << " y " << y_values_[dbo_name].size();
-
-    assert (x_values_[dbo_name].size() == y_values_[dbo_name].size());
-    assert (x_values_[dbo_name].size() == selected_values_[dbo_name].size());
-    assert (x_values_[dbo_name].size() == rec_num_values_[dbo_name].size());
-
-    loginf << "ScatterPlotViewDataWidget: updateDataSlot: dbo " << dbo_name
-           << " canUpdateFromDataX " << canUpdateFromDataX(dbo_name)
-           << " canUpdateFromDataY " << canUpdateFromDataY(dbo_name);
-
-    if (canUpdateFromDataX(dbo_name) && canUpdateFromDataY(dbo_name))
-    {
-        loginf << "ScatterPlotViewDataWidget: updateDataSlot: updating data";
-
-        // add selected flags & rec_nums
-        assert (buffer->has<bool>("selected"));
-        assert (buffer->has<int>("rec_num"));
-
-        NullableVector<bool>& selected_vec = buffer->get<bool>("selected");
-        NullableVector<int>& rec_num_vec = buffer->get<int>("rec_num");
-
-        std::vector<bool>& selected_data = selected_values_[dbo_name];
-        std::vector<unsigned int>& rec_num_data = rec_num_values_[dbo_name];
-
-        unsigned int last_size = 0;
-
-        if (buffer_x_counts_.count(dbo_name))
-            last_size = buffer_x_counts_.at(dbo_name);
-
-        for (unsigned int cnt=last_size; cnt < current_size; ++cnt)
-        {
-            if (selected_vec.isNull(cnt))
-                selected_data.push_back(false);
-            else
-                selected_data.push_back(selected_vec.get(cnt));
-
-            assert (!rec_num_vec.isNull(cnt));
-            rec_num_data.push_back(rec_num_vec.get(cnt));
-        }
-
-        updateFromDataX(dbo_name, current_size);
-        updateFromDataY(dbo_name, current_size);
-    }
-    else
-        logdbg << "ScatterPlotViewDataWidget: updateDataSlot: " << dbo_name
-               << " update not possible";
-
-
-    logdbg << "ScatterPlotViewDataWidget: updateDataSlot: after x " << x_values_[dbo_name].size()
-           << " y " << y_values_[dbo_name].size();
-
-    assert (x_values_[dbo_name].size() == y_values_[dbo_name].size());
-    assert (x_values_[dbo_name].size() == selected_values_[dbo_name].size());
-    assert (x_values_[dbo_name].size() == rec_num_values_[dbo_name].size());
-
-    logdbg << "ScatterPlotViewDataWidget: updateDataSlot: end";
+    buffers_ = data;
 }
 
 void ScatterPlotViewDataWidget::loadingDoneSlot()
 {
+    for (auto& buf_it : buffers_)
+    {
+        string dbcontent_name = buf_it.first;
+        std::shared_ptr<Buffer> buffer = buf_it.second;
+
+        unsigned int current_size = buffer->size();
+
+        logdbg << "ScatterPlotViewDataWidget: loadingDoneSlot: before x " << x_values_[dbcontent_name].size()
+               << " y " << y_values_[dbcontent_name].size();
+
+        assert (x_values_[dbcontent_name].size() == y_values_[dbcontent_name].size());
+        assert (x_values_[dbcontent_name].size() == selected_values_[dbcontent_name].size());
+        assert (x_values_[dbcontent_name].size() == rec_num_values_[dbcontent_name].size());
+
+        loginf << "ScatterPlotViewDataWidget: loadingDoneSlot: dbo " << dbcontent_name
+               << " canUpdateFromDataX " << canUpdateFromDataX(dbcontent_name)
+               << " canUpdateFromDataY " << canUpdateFromDataY(dbcontent_name);
+
+        if (canUpdateFromDataX(dbcontent_name) && canUpdateFromDataY(dbcontent_name))
+        {
+            loginf << "ScatterPlotViewDataWidget: loadingDoneSlot: updating data";
+
+            // add selected flags & rec_nums
+            assert (buffer->has<bool>(DBContent::selected_var.name()));
+            assert (buffer->has<unsigned int>(DBContent::meta_var_rec_num_.name()));
+
+            NullableVector<bool>& selected_vec = buffer->get<bool>(DBContent::selected_var.name());
+            NullableVector<unsigned int>& rec_num_vec = buffer->get<unsigned int>(DBContent::meta_var_rec_num_.name());
+
+            std::vector<bool>& selected_data = selected_values_[dbcontent_name];
+            std::vector<unsigned int>& rec_num_data = rec_num_values_[dbcontent_name];
+
+            unsigned int last_size = 0;
+
+            if (buffer_x_counts_.count(dbcontent_name))
+                last_size = buffer_x_counts_.at(dbcontent_name);
+
+            for (unsigned int cnt=last_size; cnt < current_size; ++cnt)
+            {
+                if (selected_vec.isNull(cnt))
+                    selected_data.push_back(false);
+                else
+                    selected_data.push_back(selected_vec.get(cnt));
+
+                assert (!rec_num_vec.isNull(cnt));
+                rec_num_data.push_back(rec_num_vec.get(cnt));
+            }
+
+            updateFromDataX(dbcontent_name, current_size);
+            updateFromDataY(dbcontent_name, current_size);
+        }
+        else
+            logdbg << "ScatterPlotViewDataWidget: loadingDoneSlot: " << dbcontent_name
+                   << " update not possible";
+
+
+        logdbg << "ScatterPlotViewDataWidget: loadingDoneSlot: after x " << x_values_[dbcontent_name].size()
+               << " y " << y_values_[dbcontent_name].size();
+
+        assert (x_values_[dbcontent_name].size() == y_values_[dbcontent_name].size());
+        assert (x_values_[dbcontent_name].size() == selected_values_[dbcontent_name].size());
+        assert (x_values_[dbcontent_name].size() == rec_num_values_[dbcontent_name].size());
+    }
+
     updateMinMax();
 
     updateChart();
@@ -286,8 +290,8 @@ void ScatterPlotViewDataWidget::invertSelectionSlot()
 
     for (auto& buf_it : buffers_)
     {
-        assert (buf_it.second->has<bool>("selected"));
-        NullableVector<bool>& selected_vec = buf_it.second->get<bool>("selected");
+        assert (buf_it.second->has<bool>(DBContent::selected_var.name()));
+        NullableVector<bool>& selected_vec = buf_it.second->get<bool>(DBContent::selected_var.name());
 
         for (unsigned int cnt=0; cnt < buf_it.second->size(); ++cnt)
         {
@@ -307,8 +311,8 @@ void ScatterPlotViewDataWidget::clearSelectionSlot()
 
     for (auto& buf_it : buffers_)
     {
-        assert (buf_it.second->has<bool>("selected"));
-        NullableVector<bool>& selected_vec = buf_it.second->get<bool>("selected");
+        assert (buf_it.second->has<bool>(DBContent::selected_var.name()));
+        NullableVector<bool>& selected_vec = buf_it.second->get<bool>(DBContent::selected_var.name());
 
         for (unsigned int cnt=0; cnt < buf_it.second->size(); ++cnt)
             selected_vec.set(cnt, false);
@@ -336,31 +340,31 @@ void ScatterPlotViewDataWidget::resetZoomSlot()
     }
 }
 
-bool ScatterPlotViewDataWidget::canUpdateFromDataX(std::string dbo_name)
+bool ScatterPlotViewDataWidget::canUpdateFromDataX(std::string dbcontent_name)
 {
-    if (!buffers_.count(dbo_name))
+    if (!buffers_.count(dbcontent_name))
         return false;
 
-    Buffer* buffer = buffers_.at(dbo_name).get();
+    Buffer* buffer = buffers_.at(dbcontent_name).get();
 
-    DBOVariable* data_var {nullptr};
+    Variable* data_var {nullptr};
 
     if (!view_->hasDataVarX())
         return false;
 
     if (view_->isDataVarXMeta())
     {
-        MetaDBOVariable& meta_var = view_->metaDataVarX();
-        if (!meta_var.existsIn(dbo_name))
+        MetaVariable& meta_var = view_->metaDataVarX();
+        if (!meta_var.existsIn(dbcontent_name))
             return false;
 
-        data_var = &meta_var.getFor(dbo_name);
+        data_var = &meta_var.getFor(dbcontent_name);
     }
     else
     {
         data_var = &view_->dataVarX();
 
-        if (data_var->dboName() != dbo_name)
+        if (data_var->dbContentName() != dbcontent_name)
             return false;
     }
     assert (data_var);
@@ -368,7 +372,7 @@ bool ScatterPlotViewDataWidget::canUpdateFromDataX(std::string dbo_name)
     PropertyDataType data_type = data_var->dataType();
     string current_var_name = data_var->name();
 
-    logdbg << "ScatterPlotViewDataWidget: canUpdateFromDataX: dbo " << dbo_name << " var "  << current_var_name;
+    logdbg << "ScatterPlotViewDataWidget: canUpdateFromDataX: dbo " << dbcontent_name << " var "  << current_var_name;
 
     switch (data_type)
     {
@@ -481,6 +485,7 @@ bool ScatterPlotViewDataWidget::canUpdateFromDataX(std::string dbo_name)
         break;
     }
     case PropertyDataType::STRING:
+    case PropertyDataType::JSON:
     {
         return false;
 
@@ -495,19 +500,19 @@ bool ScatterPlotViewDataWidget::canUpdateFromDataX(std::string dbo_name)
     }
 }
 
-void ScatterPlotViewDataWidget::updateFromDataX(std::string dbo_name, unsigned int current_size)
+void ScatterPlotViewDataWidget::updateFromDataX(std::string dbcontent_name, unsigned int current_size)
 {
-    logdbg << "ScatterPlotViewDataWidget: updateFromDataX: dbo_name " << dbo_name << " current_size " << current_size;
+    logdbg << "ScatterPlotViewDataWidget: updateFromDataX: dbcontent_name " << dbcontent_name << " current_size " << current_size;
 
-    assert (buffers_.count(dbo_name));
-    Buffer* buffer = buffers_.at(dbo_name).get();
+    assert (buffers_.count(dbcontent_name));
+    Buffer* buffer = buffers_.at(dbcontent_name).get();
 
 
     unsigned int last_size = 0;
 
-    if (buffer_x_counts_.count(dbo_name))
-        last_size = buffer_x_counts_.at(dbo_name);
-    DBOVariable* data_var {nullptr};
+    if (buffer_x_counts_.count(dbcontent_name))
+        last_size = buffer_x_counts_.at(dbcontent_name);
+    Variable* data_var {nullptr};
 
     if (!view_->hasDataVarX())
     {
@@ -517,20 +522,20 @@ void ScatterPlotViewDataWidget::updateFromDataX(std::string dbo_name, unsigned i
 
     if (view_->isDataVarXMeta())
     {
-        MetaDBOVariable& meta_var = view_->metaDataVarX();
-        if (!meta_var.existsIn(dbo_name))
+        MetaVariable& meta_var = view_->metaDataVarX();
+        if (!meta_var.existsIn(dbcontent_name))
         {
             logwrn << "ScatterPlotViewDataWidget: updateFromDataX: meta var does not exist in dbo";
             return;
         }
 
-        data_var = &meta_var.getFor(dbo_name);
+        data_var = &meta_var.getFor(dbcontent_name);
     }
     else
     {
         data_var = &view_->dataVarX();
 
-        if (data_var->dboName() != dbo_name)
+        if (data_var->dbContentName() != dbcontent_name)
             return;
     }
     assert (data_var);
@@ -554,8 +559,8 @@ void ScatterPlotViewDataWidget::updateFromDataX(std::string dbo_name, unsigned i
         assert(buffer->has<bool>(current_var_name));
         NullableVector<bool>& data = buffer->get<bool>(current_var_name);
 
-        appendData(data, x_values_[dbo_name], last_size, current_size);
-        buffer_x_counts_[dbo_name] = current_size;
+        appendData(data, x_values_[dbcontent_name], last_size, current_size);
+        buffer_x_counts_[dbcontent_name] = current_size;
 
         break;
     }
@@ -571,8 +576,8 @@ void ScatterPlotViewDataWidget::updateFromDataX(std::string dbo_name, unsigned i
         assert(buffer->has<char>(current_var_name));
         NullableVector<char>& data = buffer->get<char>(current_var_name);
 
-        appendData(data, x_values_[dbo_name], last_size, current_size);
-        buffer_x_counts_[dbo_name] = current_size;
+        appendData(data, x_values_[dbcontent_name], last_size, current_size);
+        buffer_x_counts_[dbcontent_name] = current_size;
 
         break;
     }
@@ -588,8 +593,8 @@ void ScatterPlotViewDataWidget::updateFromDataX(std::string dbo_name, unsigned i
         assert(buffer->has<unsigned char>(current_var_name));
         NullableVector<unsigned char>& data = buffer->get<unsigned char>(current_var_name);
 
-        appendData(data, x_values_[dbo_name], last_size, current_size);
-        buffer_x_counts_[dbo_name] = current_size;
+        appendData(data, x_values_[dbcontent_name], last_size, current_size);
+        buffer_x_counts_[dbcontent_name] = current_size;
 
         break;
     }
@@ -605,8 +610,8 @@ void ScatterPlotViewDataWidget::updateFromDataX(std::string dbo_name, unsigned i
         assert(buffer->has<int>(current_var_name));
         NullableVector<int>& data = buffer->get<int>(current_var_name);
 
-        appendData(data, x_values_[dbo_name], last_size, current_size);
-        buffer_x_counts_[dbo_name] = current_size;
+        appendData(data, x_values_[dbcontent_name], last_size, current_size);
+        buffer_x_counts_[dbcontent_name] = current_size;
 
         break;
     }
@@ -622,8 +627,8 @@ void ScatterPlotViewDataWidget::updateFromDataX(std::string dbo_name, unsigned i
         assert(buffer->has<unsigned int>(current_var_name));
         NullableVector<unsigned int>& data = buffer->get<unsigned int>(current_var_name);
 
-        appendData(data, x_values_[dbo_name], last_size, current_size);
-        buffer_x_counts_[dbo_name] = current_size;
+        appendData(data, x_values_[dbcontent_name], last_size, current_size);
+        buffer_x_counts_[dbcontent_name] = current_size;
 
         break;
     }
@@ -639,8 +644,8 @@ void ScatterPlotViewDataWidget::updateFromDataX(std::string dbo_name, unsigned i
         assert(buffer->has<long int>(current_var_name));
         NullableVector<long int>& data = buffer->get<long int>(current_var_name);
 
-        appendData(data, x_values_[dbo_name], last_size, current_size);
-        buffer_x_counts_[dbo_name] = current_size;
+        appendData(data, x_values_[dbcontent_name], last_size, current_size);
+        buffer_x_counts_[dbcontent_name] = current_size;
 
         break;
     }
@@ -656,8 +661,8 @@ void ScatterPlotViewDataWidget::updateFromDataX(std::string dbo_name, unsigned i
         assert(buffer->has<unsigned long>(current_var_name));
         NullableVector<unsigned long>& data = buffer->get<unsigned long>(current_var_name);
 
-        appendData(data, x_values_[dbo_name], last_size, current_size);
-        buffer_x_counts_[dbo_name] = current_size;
+        appendData(data, x_values_[dbcontent_name], last_size, current_size);
+        buffer_x_counts_[dbcontent_name] = current_size;
 
         break;
     }
@@ -673,8 +678,8 @@ void ScatterPlotViewDataWidget::updateFromDataX(std::string dbo_name, unsigned i
         assert(buffer->has<float>(current_var_name));
         NullableVector<float>& data = buffer->get<float>(current_var_name);
 
-        appendData(data, x_values_[dbo_name], last_size, current_size);
-        buffer_x_counts_[dbo_name] = current_size;
+        appendData(data, x_values_[dbcontent_name], last_size, current_size);
+        buffer_x_counts_[dbcontent_name] = current_size;
 
         break;
     }
@@ -690,8 +695,8 @@ void ScatterPlotViewDataWidget::updateFromDataX(std::string dbo_name, unsigned i
         assert(buffer->has<double>(current_var_name));
         NullableVector<double>& data = buffer->get<double>(current_var_name);
 
-        appendData(data, x_values_[dbo_name], last_size, current_size);
-        buffer_x_counts_[dbo_name] = current_size;
+        appendData(data, x_values_[dbcontent_name], last_size, current_size);
+        buffer_x_counts_[dbcontent_name] = current_size;
 
         break;
     }
@@ -709,6 +714,20 @@ void ScatterPlotViewDataWidget::updateFromDataX(std::string dbo_name, unsigned i
 
         break;
     }
+    case PropertyDataType::JSON:
+    {
+        if (!buffer->has<nlohmann::json>(current_var_name))
+        {
+            logdbg << "ScatterPlotViewDataWidget: updateFromDataX: buffer does not contain " << current_var_name;
+            x_var_not_in_buffer_ = true;
+            return;
+        }
+
+        assert(buffer->has<nlohmann::json>(current_var_name));
+        //NullableVector<string>& data = buffer->get<string>(current_var_name);
+
+        break;
+    }
     default:
         logerr << "ScatterPlotViewDataWidget: updateFromDataX: impossible for property type "
                << Property::asString(data_type);
@@ -717,41 +736,41 @@ void ScatterPlotViewDataWidget::updateFromDataX(std::string dbo_name, unsigned i
                     Property::asString(data_type));
     }
 
-    logdbg << "ScatterPlotViewDataWidget: updateFromDataX: updated size " << buffer_x_counts_.at(dbo_name);
+    logdbg << "ScatterPlotViewDataWidget: updateFromDataX: updated size " << buffer_x_counts_.at(dbcontent_name);
 }
 
-bool ScatterPlotViewDataWidget::canUpdateFromDataY(std::string dbo_name)
+bool ScatterPlotViewDataWidget::canUpdateFromDataY(std::string dbcontent_name)
 {
-    if (!buffers_.count(dbo_name))
+    if (!buffers_.count(dbcontent_name))
         return false;
 
-    Buffer* buffer = buffers_.at(dbo_name).get();
+    Buffer* buffer = buffers_.at(dbcontent_name).get();
 
-    DBOVariable* data_var {nullptr};
+    Variable* data_var {nullptr};
 
     if (!view_->hasDataVarY())
         return false;
 
     if (view_->isDataVarYMeta())
     {
-        MetaDBOVariable& meta_var = view_->metaDataVarY();
-        if (!meta_var.existsIn(dbo_name))
+        MetaVariable& meta_var = view_->metaDataVarY();
+        if (!meta_var.existsIn(dbcontent_name))
             return false;
 
-        data_var = &meta_var.getFor(dbo_name);
+        data_var = &meta_var.getFor(dbcontent_name);
     }
     else
     {
         data_var = &view_->dataVarY();
 
-        if (data_var->dboName() != dbo_name)
+        if (data_var->dbContentName() != dbcontent_name)
             return false;
     }
     assert (data_var);
     PropertyDataType data_type = data_var->dataType();
     string current_var_name = data_var->name();
 
-    logdbg << "ScatterPlotViewDataWidget: canUpdateFromDataY: dbo " << dbo_name << " var "  << current_var_name;
+    logdbg << "ScatterPlotViewDataWidget: canUpdateFromDataY: dbo " << dbcontent_name << " var "  << current_var_name;
 
     switch (data_type)
     {
@@ -864,6 +883,7 @@ bool ScatterPlotViewDataWidget::canUpdateFromDataY(std::string dbo_name)
         break;
     }
     case PropertyDataType::STRING:
+    case PropertyDataType::JSON:
     {
         return false;
 
@@ -878,19 +898,19 @@ bool ScatterPlotViewDataWidget::canUpdateFromDataY(std::string dbo_name)
     }
 }
 
-void ScatterPlotViewDataWidget::updateFromDataY(std::string dbo_name, unsigned int current_size)
+void ScatterPlotViewDataWidget::updateFromDataY(std::string dbcontent_name, unsigned int current_size)
 {
-    logdbg << "ScatterPlotViewDataWidget: updateFromDataY: dbo_name " << dbo_name << " current_size " << current_size;
+    logdbg << "ScatterPlotViewDataWidget: updateFromDataY: dbcontent_name " << dbcontent_name << " current_size " << current_size;
 
-    assert (buffers_.count(dbo_name));
-    Buffer* buffer = buffers_.at(dbo_name).get();
+    assert (buffers_.count(dbcontent_name));
+    Buffer* buffer = buffers_.at(dbcontent_name).get();
 
     unsigned int last_size = 0;
 
-    if (buffer_y_counts_.count(dbo_name))
-        last_size = buffer_y_counts_.at(dbo_name);
+    if (buffer_y_counts_.count(dbcontent_name))
+        last_size = buffer_y_counts_.at(dbcontent_name);
 
-    DBOVariable* data_var {nullptr};
+    Variable* data_var {nullptr};
 
     if (!view_->hasDataVarY())
     {
@@ -900,20 +920,20 @@ void ScatterPlotViewDataWidget::updateFromDataY(std::string dbo_name, unsigned i
 
     if (view_->isDataVarYMeta())
     {
-        MetaDBOVariable& meta_var = view_->metaDataVarY();
-        if (!meta_var.existsIn(dbo_name))
+        MetaVariable& meta_var = view_->metaDataVarY();
+        if (!meta_var.existsIn(dbcontent_name))
         {
             logwrn << "ScatterPlotViewDataWidget: updateFromDataY: meta var does not eyist in dbo";
             return;
         }
 
-        data_var = &meta_var.getFor(dbo_name);
+        data_var = &meta_var.getFor(dbcontent_name);
     }
     else
     {
         data_var = &view_->dataVarY();
 
-        if (data_var->dboName() != dbo_name)
+        if (data_var->dbContentName() != dbcontent_name)
             return;
     }
     assert (data_var);
@@ -937,8 +957,8 @@ void ScatterPlotViewDataWidget::updateFromDataY(std::string dbo_name, unsigned i
         assert(buffer->has<bool>(current_var_name));
         NullableVector<bool>& data = buffer->get<bool>(current_var_name);
 
-        appendData(data, y_values_[dbo_name], last_size, current_size);
-        buffer_y_counts_[dbo_name] = current_size;
+        appendData(data, y_values_[dbcontent_name], last_size, current_size);
+        buffer_y_counts_[dbcontent_name] = current_size;
 
         break;
     }
@@ -954,8 +974,8 @@ void ScatterPlotViewDataWidget::updateFromDataY(std::string dbo_name, unsigned i
         assert(buffer->has<char>(current_var_name));
         NullableVector<char>& data = buffer->get<char>(current_var_name);
 
-        appendData(data, y_values_[dbo_name], last_size, current_size);
-        buffer_y_counts_[dbo_name] = current_size;
+        appendData(data, y_values_[dbcontent_name], last_size, current_size);
+        buffer_y_counts_[dbcontent_name] = current_size;
 
         break;
     }
@@ -971,8 +991,8 @@ void ScatterPlotViewDataWidget::updateFromDataY(std::string dbo_name, unsigned i
         assert(buffer->has<unsigned char>(current_var_name));
         NullableVector<unsigned char>& data = buffer->get<unsigned char>(current_var_name);
 
-        appendData(data, y_values_[dbo_name], last_size, current_size);
-        buffer_y_counts_[dbo_name] = current_size;
+        appendData(data, y_values_[dbcontent_name], last_size, current_size);
+        buffer_y_counts_[dbcontent_name] = current_size;
 
         break;
     }
@@ -988,8 +1008,8 @@ void ScatterPlotViewDataWidget::updateFromDataY(std::string dbo_name, unsigned i
         assert(buffer->has<int>(current_var_name));
         NullableVector<int>& data = buffer->get<int>(current_var_name);
 
-        appendData(data, y_values_[dbo_name], last_size, current_size);
-        buffer_y_counts_[dbo_name] = current_size;
+        appendData(data, y_values_[dbcontent_name], last_size, current_size);
+        buffer_y_counts_[dbcontent_name] = current_size;
 
         break;
     }
@@ -1005,8 +1025,8 @@ void ScatterPlotViewDataWidget::updateFromDataY(std::string dbo_name, unsigned i
         assert(buffer->has<unsigned int>(current_var_name));
         NullableVector<unsigned int>& data = buffer->get<unsigned int>(current_var_name);
 
-        appendData(data, y_values_[dbo_name], last_size, current_size);
-        buffer_y_counts_[dbo_name] = current_size;
+        appendData(data, y_values_[dbcontent_name], last_size, current_size);
+        buffer_y_counts_[dbcontent_name] = current_size;
 
         break;
     }
@@ -1022,8 +1042,8 @@ void ScatterPlotViewDataWidget::updateFromDataY(std::string dbo_name, unsigned i
         assert(buffer->has<long int>(current_var_name));
         NullableVector<long int>& data = buffer->get<long int>(current_var_name);
 
-        appendData(data, y_values_[dbo_name], last_size, current_size);
-        buffer_y_counts_[dbo_name] = current_size;
+        appendData(data, y_values_[dbcontent_name], last_size, current_size);
+        buffer_y_counts_[dbcontent_name] = current_size;
 
         break;
     }
@@ -1039,8 +1059,8 @@ void ScatterPlotViewDataWidget::updateFromDataY(std::string dbo_name, unsigned i
         assert(buffer->has<unsigned long>(current_var_name));
         NullableVector<unsigned long>& data = buffer->get<unsigned long>(current_var_name);
 
-        appendData(data, y_values_[dbo_name], last_size, current_size);
-        buffer_y_counts_[dbo_name] = current_size;
+        appendData(data, y_values_[dbcontent_name], last_size, current_size);
+        buffer_y_counts_[dbcontent_name] = current_size;
 
         break;
     }
@@ -1056,8 +1076,8 @@ void ScatterPlotViewDataWidget::updateFromDataY(std::string dbo_name, unsigned i
         assert(buffer->has<float>(current_var_name));
         NullableVector<float>& data = buffer->get<float>(current_var_name);
 
-        appendData(data, y_values_[dbo_name], last_size, current_size);
-        buffer_y_counts_[dbo_name] = current_size;
+        appendData(data, y_values_[dbcontent_name], last_size, current_size);
+        buffer_y_counts_[dbcontent_name] = current_size;
 
         break;
     }
@@ -1073,8 +1093,8 @@ void ScatterPlotViewDataWidget::updateFromDataY(std::string dbo_name, unsigned i
         assert(buffer->has<double>(current_var_name));
         NullableVector<double>& data = buffer->get<double>(current_var_name);
 
-        appendData(data, y_values_[dbo_name], last_size, current_size);
-        buffer_y_counts_[dbo_name] = current_size;
+        appendData(data, y_values_[dbcontent_name], last_size, current_size);
+        buffer_y_counts_[dbcontent_name] = current_size;
 
         break;
     }
@@ -1092,6 +1112,20 @@ void ScatterPlotViewDataWidget::updateFromDataY(std::string dbo_name, unsigned i
 
         break;
     }
+    case PropertyDataType::JSON:
+    {
+        if (!buffer->has<nlohmann::json>(current_var_name))
+        {
+            logdbg << "ScatterPlotViewDataWidget: updateFromDataY: buffer does not contain " << current_var_name;
+            y_var_not_in_buffer_ = true;
+            return;
+        }
+
+        assert(buffer->has<nlohmann::json>(current_var_name));
+        //NullableVector<string>& data = buffer->get<string>(current_var_name);
+
+        break;
+    }
     default:
         logerr << "ScatterPlotViewDataWidget: updateFromDataY: impossible for property type "
                << Property::asString(data_type);
@@ -1100,7 +1134,7 @@ void ScatterPlotViewDataWidget::updateFromDataY(std::string dbo_name, unsigned i
                     Property::asString(data_type));
     }
 
-    logdbg << "ScatterPlotViewDataWidget: updateFromDataY: updated size " << buffer_y_counts_.at(dbo_name);
+    logdbg << "ScatterPlotViewDataWidget: updateFromDataY: updated size " << buffer_y_counts_.at(dbcontent_name);
 
 }
 
@@ -1170,11 +1204,12 @@ void ScatterPlotViewDataWidget::updateFromAllData()
 
         if (canUpdateFromDataX(buf_it.first) && canUpdateFromDataY(buf_it.first))
         {
-            assert (buf_it.second->has<bool>("selected"));
-            assert (buf_it.second->has<int>("rec_num"));
+            assert (buf_it.second->has<bool>(DBContent::selected_var.name()));
+            assert (buf_it.second->has<unsigned int>(DBContent::meta_var_rec_num_.name()));
 
-            NullableVector<bool>& selected_vec = buf_it.second->get<bool>("selected");
-            NullableVector<int>& rec_num_vec = buf_it.second->get<int>("rec_num");
+            NullableVector<bool>& selected_vec = buf_it.second->get<bool>(DBContent::selected_var.name());
+            NullableVector<unsigned int>& rec_num_vec = buf_it.second->get<unsigned int>(
+                        DBContent::meta_var_rec_num_.name());
 
             std::vector<bool>& selected_data = selected_values_[buf_it.first];
             std::vector<unsigned int>& rec_num_data = rec_num_values_[buf_it.first];
@@ -1390,13 +1425,14 @@ void ScatterPlotViewDataWidget::selectData (double x_min, double x_max, double y
     unsigned int sel_cnt = 0;
     for (auto& buf_it : buffers_)
     {
-        assert (buf_it.second->has<bool>("selected"));
-        NullableVector<bool>& selected_vec = buf_it.second->get<bool>("selected");
+        assert (buf_it.second->has<bool>(DBContent::selected_var.name()));
+        NullableVector<bool>& selected_vec = buf_it.second->get<bool>(DBContent::selected_var.name());
 
-        assert (buf_it.second->has<int>("rec_num"));
-        NullableVector<int>& rec_num_vec = buf_it.second->get<int>("rec_num");
+        assert (buf_it.second->has<unsigned int>(DBContent::meta_var_rec_num_.name()));
+        NullableVector<unsigned int>& rec_num_vec = buf_it.second->get<unsigned int>(
+                    DBContent::meta_var_rec_num_.name());
 
-        std::map<int, std::vector<unsigned int>> rec_num_indexes =
+        std::map<unsigned int, std::vector<unsigned int>> rec_num_indexes =
                 rec_num_vec.distinctValuesWithIndexes(0, rec_num_vec.size());
         // rec_num -> index
 

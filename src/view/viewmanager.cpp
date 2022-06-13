@@ -29,10 +29,10 @@
 #include "viewpointswidget.h"
 #include "files.h"
 #include "filtermanager.h"
-#include "dbobjectmanager.h"
-#include "dbobject.h"
-#include "metadbovariable.h"
-#include "dbovariable.h"
+#include "dbcontent/dbcontentmanager.h"
+#include "dbcontent/dbcontent.h"
+#include "dbcontent/variable/metavariable.h"
+#include "dbcontent/variable/variable.h"
 #include "viewpointstablemodel.h"
 #include "viewpointsreportgenerator.h"
 #include "viewpointsreportgeneratordialog.h"
@@ -64,12 +64,17 @@ void ViewManager::init(QTabWidget* tab_widget)
     assert(tab_widget);
     assert(!main_tab_widget_);
     assert(!initialized_);
+
     main_tab_widget_ = tab_widget;
+
+    connect (&COMPASS::instance(), &COMPASS::appModeSwitchSignal,
+             this, &ViewManager::appModeSwitchSlot);
+
+    // view point stuff
 
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
     view_points_widget_ = new ViewPointsWidget(*this);
-    //view_points_widget_->setAutoFillBackground(true);
 
     QApplication::restoreOverrideCursor();
 
@@ -94,6 +99,13 @@ void ViewManager::init(QTabWidget* tab_widget)
     initialized_ = true;
 
     createSubConfigurables();
+}
+
+
+void ViewManager::loadViewPoints()
+{
+    assert (view_points_widget_);
+    view_points_widget_->loadViewPoints();
 }
 
 void ViewManager::close()
@@ -204,14 +216,14 @@ void ViewManager::checkSubConfigurables()
     }
 }
 
-DBOVariableSet ViewManager::getReadSet(const std::string& dbo_name)
+dbContent::VariableSet ViewManager::getReadSet(const std::string& dbcontent_name)
 {
-    DBOVariableSet read_set;
-    DBOVariableSet read_set_tmp;
+    dbContent::VariableSet read_set;
+    dbContent::VariableSet read_set_tmp;
 
     for (auto view_it : views_)
     {
-        read_set_tmp = view_it.second->getSet(dbo_name);
+        read_set_tmp = view_it.second->getSet(dbcontent_name);
         read_set.add(read_set_tmp);
     }
     return read_set;
@@ -237,12 +249,12 @@ void ViewManager::setCurrentViewPoint (const ViewableDataConfig* viewable)
 
     view_point_data_selected_ = false;
 
-    loginf << "ViewManager: setCurrentViewPoint: setting current view point"; // << " data: '"
-    //<< view_points_widget_->tableModel()->viewPoint(current_view_point_).data().dump(4) << "'";
+    loginf << "ViewManager: setCurrentViewPoint: setting current view point data: '"
+    << viewable->data().dump(4) << "'";
 
     emit showViewPointSignal(current_viewable_);
 
-    COMPASS::instance().objectManager().loadSlot();
+    COMPASS::instance().dbContentManager().load();
 }
 
 
@@ -308,47 +320,31 @@ void ViewManager::doViewPointAfterLoad ()
         loginf << "ViewManager: doViewPointAfterLoad: time window min " << time_min << " max " << time_max;
     }
 
-    DBObjectManager& object_manager = COMPASS::instance().objectManager();
-
-    if (!object_manager.existsMetaVariable("tod") ||
-            !object_manager.existsMetaVariable("pos_lat_deg") ||
-            !object_manager.existsMetaVariable("pos_long_deg"))
-    {
-        logerr << "ViewManager: doViewPointAfterLoad: required variables missing, quitting";
-        return;
-    }
+    DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
 
     bool selection_changed = false;
-    for (auto& dbo_it : object_manager)
+    for (auto& dbo_it : dbcont_man)
     {
-        std::string dbo_name = dbo_it.first;
+        std::string dbcontent_name = dbo_it.first;
 
-        if (!object_manager.metaVariable("tod").existsIn(dbo_name) ||
-                !object_manager.metaVariable("pos_lat_deg").existsIn(dbo_name) ||
-                !object_manager.metaVariable("pos_long_deg").existsIn(dbo_name))
+        if (!dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_tod_))
+//                 ||!dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_latitude_)
+//                 || !dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_longitude_))
         {
-            logerr << "ViewManager: doViewPointAfterLoad: required variables missing for " << dbo_name;
+            logerr << "ViewManager: doViewPointAfterLoad: required variables missing in " << dbcontent_name;
             continue;
         }
 
-        const DBOVariable& tod_var = object_manager.metaVariable("tod").getFor(dbo_name);
-        const DBOVariable& latitude_var =
-                object_manager.metaVariable("pos_lat_deg").getFor(dbo_name);
-        const DBOVariable& longitude_var =
-                object_manager.metaVariable("pos_long_deg").getFor(dbo_name);
+        const dbContent::Variable& tod_var = dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_tod_);
+//        const dbContent::Variable& latitude_var = dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_latitude_);
+//        const dbContent::Variable& longitude_var = dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_longitude_);
 
-        if (!tod_var.existsInDB() || !latitude_var.existsInDB() || !longitude_var.existsInDB())
+        if (dbcont_man.data().count(dbo_it.first))
         {
-            logdbg << "ViewManager: doViewPointAfterLoad: required variables not in db for " << dbo_name;
-            continue;
-        }
+            std::shared_ptr<Buffer> buffer = dbcont_man.data().at(dbo_it.first);
 
-        std::shared_ptr<Buffer> buffer = dbo_it.second->data();
-
-        if (buffer)
-        {
-            assert(buffer->has<bool>("selected"));
-            NullableVector<bool>& selected_vec = buffer->get<bool>("selected");
+            assert(buffer->has<bool>(DBContent::selected_var.name()));
+            NullableVector<bool>& selected_vec = buffer->get<bool>(DBContent::selected_var.name());
 
             assert(buffer->has<float>(tod_var.name()));
             NullableVector<float>& tods = buffer->get<float>(tod_var.name());
@@ -403,39 +399,27 @@ void ViewManager::selectTimeWindow(float time_min, float time_max)
 {
     loginf << "ViewManager: selectTimeWindow: time_min " << time_min << " time_max " << time_max;
 
-    DBObjectManager& object_manager = COMPASS::instance().objectManager();
-
-    if (!object_manager.existsMetaVariable("tod"))
-    {
-        logerr << "ViewManager: selectTimeWindow: required variables missing, quitting";
-        return;
-    }
+    DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
 
     bool selection_changed = false;
-    for (auto& dbo_it : object_manager)
+    for (auto& dbo_it : dbcont_man)
     {
-        std::string dbo_name = dbo_it.first;
+        std::string dbcontent_name = dbo_it.first;
 
-        if (!object_manager.metaVariable("tod").existsIn(dbo_name))
+        if (!dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_tod_))
         {
-            logerr << "ViewManager: selectTimeWindow: required variables missing for " << dbo_name;
+            logerr << "ViewManager: selectTimeWindow: required variables missing, quitting";
             continue;
         }
 
-        const DBOVariable& tod_var = object_manager.metaVariable("tod").getFor(dbo_name);
+        const dbContent::Variable& tod_var = dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_tod_);
 
-        if (!tod_var.existsInDB())
+        if (dbcont_man.data().count(dbo_it.first))
         {
-            logdbg << "ViewManager: selectTimeWindow: required variables not in db for " << dbo_name;
-            continue;
-        }
+            std::shared_ptr<Buffer> buffer = dbcont_man.data().at(dbo_it.first);
 
-        std::shared_ptr<Buffer> buffer = dbo_it.second->data();
-
-        if (buffer)
-        {
-            assert(buffer->has<bool>("selected"));
-            NullableVector<bool>& selected_vec = buffer->get<bool>("selected");
+            assert(buffer->has<bool>(DBContent::selected_var.name()));
+            NullableVector<bool>& selected_vec = buffer->get<bool>(DBContent::selected_var.name());
 
             assert(buffer->has<float>(tod_var.name()));
             NullableVector<float>& tods = buffer->get<float>(tod_var.name());
@@ -502,10 +486,22 @@ unsigned int ViewManager::newViewNumber()
     return max_number + 1;
 }
 
+void ViewManager::disableDataDistribution(bool value)
+{
+    loginf << "ViewManager: disableDataDistribution: value " << value;
+
+    disable_data_distribution_ = value;
+}
+
+bool ViewManager::isProcessingData() const
+{
+    return processing_data_;
+}
+
 ViewContainerWidget* ViewManager::addNewContainerWidget()
 {
     logdbg << "ViewManager: addNewContainerWidget";
-
+    
     container_count_++;
     std::string container_widget_name = "ViewWindow" + std::to_string(container_count_);
 
@@ -514,6 +510,14 @@ ViewContainerWidget* ViewManager::addNewContainerWidget()
 
     assert(container_widgets_.count(container_widget_name) == 1);
     return container_widgets_.at(container_widget_name);
+}
+
+void ViewManager::clearDataInViews()
+{
+    for (auto& view_it : views_)
+    {
+        view_it.second->clearData();
+    }
 }
 
 void ViewManager::registerView(View* view)
@@ -616,6 +620,73 @@ void ViewManager::selectionChangedSlot()
     loginf << "ViewManager: selectionChangedSlot";
     emit selectionChangedSignal();
 }
+
+void ViewManager::databaseOpenedSlot()
+{
+    loginf << "ViewManager: databaseOpenedSlot";
+
+    for (auto& view_it : views_)
+        view_it.second->databaseOpened();
+}
+
+void ViewManager::databaseClosedSlot()
+{
+    loginf << "ViewManager: databaseClosedSlot";
+
+    clearDataInViews();
+
+    for (auto& view_it : views_)
+        view_it.second->databaseClosed();
+}
+
+void ViewManager::loadingStartedSlot()
+{
+    if (disable_data_distribution_)
+        return;
+
+    loginf << "ViewManager: loadingStartedSlot";
+
+    for (auto& view_it : views_)
+        view_it.second->loadingStarted();
+}
+
+// all data contained, also new one. requires_reset true indicates that all shown info should be re-created,
+// e.g. when data in the beginning was removed, or order of previously emitted data was changed, etc.
+void ViewManager::loadedDataSlot (const std::map<std::string, std::shared_ptr<Buffer>>& data, bool requires_reset)
+{
+    if (disable_data_distribution_)
+        return;
+    loginf << "ViewManager: loadedDataSlot: reset " << requires_reset;
+
+    processing_data_ = true;
+
+    for (auto& view_it : views_)
+        view_it.second->loadedData(data, requires_reset);
+
+    processing_data_ = false;
+
+    loginf << "ViewManager: loadedDataSlot: done";
+}
+
+void ViewManager::loadingDoneSlot() // emitted when all dbos have finished loading
+{
+    if (disable_data_distribution_)
+        return;
+
+    loginf << "ViewManager: loadingDoneSlot";
+
+    for (auto& view_it : views_)
+        view_it.second->loadingDone();
+}
+
+void ViewManager::appModeSwitchSlot (AppMode app_mode)
+{
+    loginf << "ViewManager: appModeSwitchSlot: app_mode " << COMPASS::instance().appModeStr();
+
+    for (auto& view_it : views_)
+        view_it.second->appModeSwitch(app_mode);
+}
+
 
 // void ViewManager::saveViewAsTemplate (View *view, std::string template_name)
 //{

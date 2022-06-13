@@ -22,8 +22,8 @@
 #include "compass.h"
 #include "configuration.h"
 #include "configurationmanager.h"
-#include "dbobject.h"
-#include "dbobjectmanager.h"
+#include "dbcontent/dbcontent.h"
+#include "dbcontent/dbcontentmanager.h"
 #include "job.h"
 #include "logger.h"
 #include "viewpoint.h"
@@ -35,26 +35,13 @@
 
 using namespace std;
 using namespace nlohmann;
+using namespace dbContent;
 
 HistogramViewDataSource::HistogramViewDataSource(const std::string& class_id,
                                              const std::string& instance_id, Configurable* parent)
     : QObject(),
-      Configurable(class_id, instance_id, parent),
-      selection_entries_(ViewSelection::getInstance().getEntries())
+      Configurable(class_id, instance_id, parent)
 {
-    // registerParameter ("use_selection", &use_selection_, true);
-
-    connect(&COMPASS::instance().objectManager(), SIGNAL(loadingStartedSignal()), this,
-            SLOT(loadingStartedSlot()));
-
-    for (auto& obj_it : COMPASS::instance().objectManager())
-    {
-        connect(obj_it.second, SIGNAL(newDataSignal(DBObject&)), this,
-                SLOT(newDataSlot(DBObject&)));
-        connect(obj_it.second, SIGNAL(loadingDoneSignal(DBObject&)), this,
-                SLOT(loadingDoneSlot(DBObject&)));
-    }
-
     createSubConfigurables();
 }
 
@@ -75,10 +62,10 @@ void HistogramViewDataSource::generateSubConfigurable(const std::string& class_i
     logdbg << "HistogramViewDataSource: generateSubConfigurable: class_id " << class_id
            << " instance_id " << instance_id;
 
-    if (class_id.compare("DBOVariableOrderedSet") == 0)
+    if (class_id.compare("VariableOrderedSet") == 0)
     {
         assert(set_ == 0);
-        set_ = new DBOVariableOrderedSet(class_id, instance_id, this);
+        set_ = new VariableOrderedSet(class_id, instance_id, this);
     }
     else
         throw std::runtime_error(
@@ -89,10 +76,10 @@ void HistogramViewDataSource::checkSubConfigurables()
 {
     if (set_ == nullptr)
     {
-        generateSubConfigurable("DBOVariableOrderedSet", "DBOVariableOrderedSet0");
+        generateSubConfigurable("VariableOrderedSet", "VariableOrderedSet0");
         assert(set_);
 
-        DBObjectManager& obj_man = COMPASS::instance().objectManager();
+        DBContentManager& obj_man = COMPASS::instance().dbContentManager();
 
         if (obj_man.existsMetaVariable("rec_num"))
             set_->add(obj_man.metaVariable("rec_num"));
@@ -131,7 +118,7 @@ void HistogramViewDataSource::showViewPoint (const ViewableDataConfig* vp)
 
         for (auto& obj_it : context_variables.get<json::object_t>())
         {
-            string dbo_name = obj_it.first;
+            string dbcontent_name = obj_it.first;
             json& variable_names = obj_it.second;
 
             assert (variable_names.is_array());
@@ -140,24 +127,24 @@ void HistogramViewDataSource::showViewPoint (const ViewableDataConfig* vp)
             {
                 string var_name = var_it;
 
-                if (addTemporaryVariable(dbo_name, var_name))
+                if (addTemporaryVariable(dbcontent_name, var_name))
                 {
-                    loginf << "HistogramViewDataSource: showViewPoint: added var " << dbo_name << ", " << var_name;
-                    temporary_added_variables_.push_back({dbo_name, var_name});
+                    loginf << "HistogramViewDataSource: showViewPoint: added var " << dbcontent_name << ", " << var_name;
+                    temporary_added_variables_.push_back({dbcontent_name, var_name});
                 }
             }
         }
     }
 }
 
-bool HistogramViewDataSource::addTemporaryVariable (const std::string& dbo_name, const std::string& var_name)
+bool HistogramViewDataSource::addTemporaryVariable (const std::string& dbcontent_name, const std::string& var_name)
 {
-    DBObjectManager& obj_man = COMPASS::instance().objectManager();
+    DBContentManager& obj_man = COMPASS::instance().dbContentManager();
 
-    if (dbo_name == META_OBJECT_NAME)
+    if (dbcontent_name == META_OBJECT_NAME)
     {
         assert (obj_man.existsMetaVariable(var_name));
-        MetaDBOVariable& meta_var = obj_man.metaVariable(var_name);
+        MetaVariable& meta_var = obj_man.metaVariable(var_name);
         if (!set_->hasMetaVariable(meta_var))
         {
             set_->add(meta_var);
@@ -168,11 +155,11 @@ bool HistogramViewDataSource::addTemporaryVariable (const std::string& dbo_name,
     }
     else
     {
-        assert (obj_man.existsObject(dbo_name));
-        DBObject& obj = obj_man.object(dbo_name);
+        assert (obj_man.existsDBContent(dbcontent_name));
+        DBContent& obj = obj_man.dbContent(dbcontent_name);
 
         assert (obj.hasVariable(var_name));
-        DBOVariable& var = obj.variable(var_name);
+        Variable& var = obj.variable(var_name);
 
         if (!set_->hasVariable(var))
         {
@@ -184,46 +171,26 @@ bool HistogramViewDataSource::addTemporaryVariable (const std::string& dbo_name,
     }
 }
 
-void HistogramViewDataSource::removeTemporaryVariable (const std::string& dbo_name, const std::string& var_name)
+void HistogramViewDataSource::removeTemporaryVariable (const std::string& dbcontent_name, const std::string& var_name)
 {
-    DBObjectManager& obj_man = COMPASS::instance().objectManager();
+    DBContentManager& obj_man = COMPASS::instance().dbContentManager();
 
-    if (dbo_name == META_OBJECT_NAME)
+    if (dbcontent_name == META_OBJECT_NAME)
     {
         assert (obj_man.existsMetaVariable(var_name));
-        MetaDBOVariable& meta_var = obj_man.metaVariable(var_name);
+        MetaVariable& meta_var = obj_man.metaVariable(var_name);
         assert (set_->hasMetaVariable(meta_var));
         set_->removeMetaVariable(meta_var);
     }
     else
     {
-        assert (obj_man.existsObject(dbo_name));
-        DBObject& obj = obj_man.object(dbo_name);
+        assert (obj_man.existsDBContent(dbcontent_name));
+        DBContent& obj = obj_man.dbContent(dbcontent_name);
 
         assert (obj.hasVariable(var_name));
-        DBOVariable& var = obj.variable(var_name);
+        Variable& var = obj.variable(var_name);
         assert (set_->hasVariable(var));
         set_->removeVariable(var);
     }
 }
 
-void HistogramViewDataSource::loadingStartedSlot()
-{
-    logdbg << "HistogramViewDataSource: loadingStartedSlot";
-    emit loadingStartedSignal();
-}
-
-void HistogramViewDataSource::newDataSlot(DBObject& object)
-{
-    logdbg << "HistogramViewDataSource: newDataSlot: object " << object.name();
-
-    std::shared_ptr<Buffer> buffer = object.data();
-    assert(buffer);
-
-    emit updateDataSignal(object, buffer);
-}
-
-void HistogramViewDataSource::loadingDoneSlot(DBObject& object)
-{
-    logdbg << "HistogramViewDataSource: loadingDoneSlot: object " << object.name();
-}

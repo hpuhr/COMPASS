@@ -20,7 +20,7 @@
 
 #include "global.h"
 #include "nullablevector.h"
-#include "dbovariable.h"
+#include "dbcontent/variable/variable.h"
 #include "scatterplotviewdatatoolwidget.h"
 #include "scatterplotviewchartview.h"
 
@@ -35,7 +35,7 @@ class ScatterPlotViewDataSource;
 //class QTabWidget;
 class QHBoxLayout;
 class Buffer;
-class DBObject;
+class DBContent;
 
 namespace QtCharts {
     class QChart;
@@ -63,7 +63,7 @@ class ScatterPlotViewDataWidget : public QWidget
   public slots:
     void loadingStartedSlot();
     /// @brief Called when new result Buffer was delivered
-    void updateDataSlot(DBObject& object, std::shared_ptr<Buffer> buffer);
+    void updateDataSlot(const std::map<std::string, std::shared_ptr<Buffer>>& data, bool requires_reset);
     void loadingDoneSlot();
 
     void toolChangedSlot(ScatterPlotViewDataTool selected, QCursor cursor);
@@ -137,10 +137,10 @@ protected:
 
     unsigned int nan_value_cnt_ {0};
 
-    bool canUpdateFromDataX(std::string dbo_name);
-    void updateFromDataX(std::string dbo_name, unsigned int current_size);
-    bool canUpdateFromDataY(std::string dbo_name);
-    void updateFromDataY(std::string dbo_name, unsigned int current_size);
+    bool canUpdateFromDataX(std::string dbcontent_name);
+    void updateFromDataX(std::string dbcontent_name, unsigned int current_size);
+    bool canUpdateFromDataY(std::string dbcontent_name);
+    void updateFromDataY(std::string dbcontent_name, unsigned int current_size);
     void updateMinMax();
     void updateFromAllData();
     void updateChart();

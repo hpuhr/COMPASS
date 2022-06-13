@@ -19,16 +19,11 @@
 
 #include "dbfilter.h"
 #include "dbfilterwidget.h"
-#include "datasourcesfilter.h"
-#include "dbschema.h"
-#include "dbschemamanager.h"
-#include "dbschemawidget.h"
-#include "dbtable.h"
 #include "filtergeneratorwidget.h"
 #include "filtermanager.h"
 #include "global.h"
 #include "logger.h"
-#include "metadbtable.h"
+#include "util/files.h"
 
 #include <QComboBox>
 #include <QHBoxLayout>
@@ -39,58 +34,81 @@
 #include <QVBoxLayout>
 #include <QCheckBox>
 
+using namespace Utils;
+
 FilterManagerWidget::FilterManagerWidget(FilterManager& filter_manager, QWidget* parent,
                                          Qt::WindowFlags f)
-    : QFrame(parent),
+    : QWidget(parent),
       filter_manager_(filter_manager),
-      filter_generator_widget_(nullptr),
-      add_button_(nullptr)
+      filter_generator_widget_(nullptr)
 {
-    unsigned int frame_width = FRAME_SIZE;
     QFont font_bold;
     font_bold.setBold(true);
 
-    setFrameStyle(QFrame::Panel | QFrame::Raised);
-    setLineWidth(frame_width);
-
     QVBoxLayout* layout = new QVBoxLayout();
 
-    QLabel* filter_label = new QLabel(tr("Filters"));
-    filter_label->setFont(font_bold);
-    layout->addWidget(filter_label);
+    // top
+    QHBoxLayout* top_layout = new QHBoxLayout();
 
     // use filters stuff
     filters_check_ = new QCheckBox("Use Filters");
     filters_check_->setChecked(filter_manager_.useFilters());
     connect(filters_check_, &QCheckBox::clicked, this, &FilterManagerWidget::toggleUseFilters);
-    layout->addWidget(filters_check_);
+    top_layout->addWidget(filters_check_);
 
-    QHBoxLayout* filter_layout = new QHBoxLayout();
+    top_layout->addStretch();
 
-    QVBoxLayout* ds_filter_parent_layout = new QVBoxLayout();
-    ds_filter_layout_ = new QVBoxLayout();
+    QPushButton* edit_button = new QPushButton();
+    edit_button->setIcon(QIcon(Files::getIconFilepath("edit.png").c_str()));
+    edit_button->setFixedSize(UI_ICON_SIZE);
+    edit_button->setFlat(UI_ICON_BUTTON_FLAT);
+    edit_button->setToolTip(tr("Filter Options"));
+    connect (edit_button, &QPushButton::clicked, this, &FilterManagerWidget::editClickedSlot);
+    top_layout->addWidget(edit_button);
 
-    ds_filter_parent_layout->addLayout(ds_filter_layout_);
-    ds_filter_parent_layout->addStretch();
+    QAction* show_cnt_action = edit_menu_.addAction("Add New Filter");
+    connect(show_cnt_action, &QAction::triggered, this, &FilterManagerWidget::addFilterSlot);
 
-    filter_layout->addLayout(ds_filter_parent_layout);
+    layout->addLayout(top_layout);
 
-    other_filter_layout_ = new QVBoxLayout();
-    filter_layout->addLayout(other_filter_layout_);
+    layout->addSpacing(15);
 
-    layout->addLayout(filter_layout);
+    // add two filter columns
+    QHBoxLayout* ds_filter_parent_layout = new QHBoxLayout();
+
+    {
+        QVBoxLayout* ds_filter_layout0_parent = new QVBoxLayout();
+        ds_filter_layout0_ = new QVBoxLayout();
+        ds_filter_layout0_parent->addLayout(ds_filter_layout0_);
+        ds_filter_layout0_parent->addStretch();
+
+        ds_filter_parent_layout->addLayout(ds_filter_layout0_parent);
+    }
+
+    {
+        QVBoxLayout* ds_filter_layout1_parent = new QVBoxLayout();
+        ds_filter_layout1_ = new QVBoxLayout();
+        ds_filter_layout1_parent->addLayout(ds_filter_layout1_);
+        ds_filter_layout1_parent->addStretch();
+
+        ds_filter_parent_layout->addLayout(ds_filter_layout1_parent);
+    }
+
+    layout->addLayout(ds_filter_parent_layout);
 
     layout->addStretch();
 
-    QHBoxLayout* button_layout = new QHBoxLayout();
+//    QHBoxLayout* button_layout = new QHBoxLayout();
 
-    add_button_ = new QPushButton(tr("Add Filter"));
-    connect(add_button_, SIGNAL(clicked()), this, SLOT(addFilterSlot()));
-    button_layout->addWidget(add_button_);
+//    add_button_ = new QPushButton(tr("Add Filter"));
+//    connect(add_button_, SIGNAL(clicked()), this, SLOT(addFilterSlot()));
+//    button_layout->addWidget(add_button_);
 
-    layout->addLayout(button_layout);
+//    layout->addLayout(button_layout);
 
     setLayout(layout);
+
+    updateFiltersSlot();
 
     setDisabled(true);
 }
@@ -119,6 +137,10 @@ void FilterManagerWidget::updateUseFilters ()
     filters_check_->setChecked(filter_manager_.useFilters());
 }
 
+void FilterManagerWidget::editClickedSlot()
+{
+    edit_menu_.exec(QCursor::pos());
+}
 
 void FilterManagerWidget::addFilterSlot()
 {
@@ -132,25 +154,32 @@ void FilterManagerWidget::addFilterSlot()
 
 void FilterManagerWidget::updateFiltersSlot()
 {
-    assert(ds_filter_layout_);
+    assert(ds_filter_layout0_);
 
     QLayoutItem* child;
-    while ((child = ds_filter_layout_->takeAt(0)) != 0)
-        ds_filter_layout_->removeItem(child);
+    while ((child = ds_filter_layout0_->takeAt(0)))
+        ds_filter_layout0_->removeItem(child);
 
-    assert(other_filter_layout_);
-    while ((child = other_filter_layout_->takeAt(0)) != 0)
-        other_filter_layout_->removeItem(child);
+    assert(ds_filter_layout1_);
 
-    std::vector<DBFilter*>& filters = filter_manager_.filters();
-    for (auto it : filters)
+    while ((child = ds_filter_layout1_->takeAt(0)))
+        ds_filter_layout1_->removeItem(child);
+
+    auto& filters = filter_manager_.filters();
+
+    unsigned int num_filters_break = filters.size() / 2;
+    unsigned int cnt = 0;
+
+    for (auto& it : filters)
     {
         loginf << "FilterManagerWidget: updateFiltersSlot: filter " << it->getName();
 
-        if (dynamic_cast<DataSourcesFilter*>(it))
-            ds_filter_layout_->addWidget(it->widget());
+        if (cnt < num_filters_break)
+            ds_filter_layout0_->addWidget(it->widget());
         else
-            other_filter_layout_->addWidget(it->widget());
+            ds_filter_layout1_->addWidget(it->widget());
+
+        ++cnt;
     }
 }
 

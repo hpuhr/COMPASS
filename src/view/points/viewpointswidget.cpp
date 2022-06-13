@@ -21,10 +21,12 @@
 #include "logger.h"
 #include "viewpointstablemodel.h"
 #include "compass.h"
-#include "dbobjectmanager.h"
+#include "mainwindow.h"
+#include "dbcontent/dbcontentmanager.h"
 #include "viewpointstoolwidget.h"
 #include "viewpointsreportgenerator.h"
 #include "viewpointsreportgeneratordialog.h"
+#include "dbinterface.h"
 
 #include <QTableView>
 #include <QVBoxLayout>
@@ -116,10 +118,10 @@ ViewPointsWidget::ViewPointsWidget(ViewManager& view_manager)
 
     setLayout(main_layout);
 
-    DBObjectManager& dbo_man = COMPASS::instance().objectManager();
+    DBContentManager& dbo_man = COMPASS::instance().dbContentManager();
 
-    connect (&dbo_man, &DBObjectManager::loadingStartedSignal, this, &ViewPointsWidget::loadingStartedSlot);
-    connect (&dbo_man, &DBObjectManager::allLoadingDoneSignal, this, &ViewPointsWidget::allLoadingDoneSlot);
+    connect (&dbo_man, &DBContentManager::loadingStartedSignal, this, &ViewPointsWidget::loadingStartedSlot);
+    connect (&dbo_man, &DBContentManager::loadingDoneSignal, this, &ViewPointsWidget::allLoadingDoneSlot);
 
     // shortcuts
     {
@@ -141,10 +143,28 @@ ViewPointsWidget::ViewPointsWidget(ViewManager& view_manager)
         QShortcut* p_shortcut = new QShortcut(QKeySequence(tr("Up", "Previous")), this);
         connect (p_shortcut, &QShortcut::activated, this, &ViewPointsWidget::selectPreviousSlot);
     }
+
+
+    QObject::connect(&COMPASS::instance(), &COMPASS::databaseOpenedSignal,
+                     this, &ViewPointsWidget::databaseOpenedSlot);
+    QObject::connect(&COMPASS::instance(), &COMPASS::databaseClosedSignal,
+                     this, &ViewPointsWidget::databaseClosedSlot);
 }
 
 ViewPointsWidget::~ViewPointsWidget()
 {
+}
+
+void ViewPointsWidget::loadViewPoints()
+{
+    loginf << "ViewPointsWidget: loadViewPoints";
+
+    assert (table_model_);
+    table_model_->loadViewPoints();
+
+    assert (table_view_);
+    table_view_->resizeColumnsToContents();
+    table_view_->resizeRowsToContents();
 }
 
 
@@ -380,6 +400,22 @@ void ViewPointsWidget::editCommentSlot()
 //    loginf << "ViewPointsWidget: closeCurrentSelectNext";
 //}
 
+void ViewPointsWidget::databaseOpenedSlot()
+{
+    loginf << "ViewPointsWidget: databaseOpenedSlot";
+
+    loadViewPoints();
+}
+
+void ViewPointsWidget::databaseClosedSlot()
+{
+    loginf << "ViewPointsWidget: databaseClosedSlot";
+
+    assert (table_model_);
+    table_model_->clearViewPoints();
+}
+
+
 void ViewPointsWidget::exportSlot()
 {
     loginf << "ViewPointsWidget: exportSlot";
@@ -433,24 +469,9 @@ void ViewPointsWidget::importSlot()
 {
     loginf << "ViewPointsWidget: importSlot";
 
-    QFileDialog dialog(this);
-    dialog.setWindowTitle("Import View Points JSON");
-    // dialog.setDirectory(QDir::homePath());
-    dialog.setFileMode(QFileDialog::ExistingFile);
-    dialog.setNameFilter(trUtf8("JSON (*.json)"));
+    COMPASS::instance().mainWindow().importViewPointsSlot();
 
-    QStringList fileNames;
-    if (dialog.exec())
-    {
-        assert (table_model_);
-
-        for (auto& filename : dialog.selectedFiles())
-        {
-            table_model_->importViewPoints(filename.toStdString());
-
-            resizeColumnsToContents();
-        }
-    }
+    resizeColumnsToContents();
 }
 
 void ViewPointsWidget::currentRowChanged(const QModelIndex& current, const QModelIndex& previous)
