@@ -18,9 +18,9 @@ For the following distributions, the AppImage was reported to have issues:
 \end{itemize}
 \ \\
 
-If you have tried other OS' as the ones listed here, it would be appreciated if you could provide feedback about your experiences to \href{mailto:compass@openats.at}{compass@openats.at}.\\
+If you have tried other operating systems as the ones listed here, it would be appreciated if you could provide feedback about your experience to \href{mailto:compass@openats.at}{compass@openats.at}.\\
 
-Other OS' (e.g. Windows or Mac) are currently not supported.
+Other operating systems (e.g. Windows or Mac) are currently not supported.
 
 \subsection{Recommended Hardware}
 
@@ -35,7 +35,7 @@ The application will perform best on a workstation with at least the following m
 
 Depending on the loaded datasize, more RAM or a better graphics card might be of advantage. \\
 
-\includegraphics[width=0.5cm]{../../data/icons/hint.png} Please note that other graphics cards (Intel, Matrox) will in good probability also work, but are not supported. \\\\
+\includegraphics[width=0.5cm]{../../data/icons/hint.png} Please \textbf{note} that other graphics cards (Intel, Matrox) will in good probability also work, but are not supported. \\\\
 
 An optimal setup could be similiar to:
 
@@ -68,7 +68,7 @@ Output might look like this:
 01:00.0 VGA compatible controller: NVIDIA Corporation GP104 [GeForce GTX 1080]
 \end{lstlisting}
 
-To find out which graphics card and driver are being used, the program \textit{glxinfo} can to be used (might have to be installed). Please execute the following command:
+To find out which graphics card and driver are being used, the program \textit{glxinfo} can be used (might have to be installed). Please execute the following command:
 
 \begin{lstlisting}
 glxinfo | grep OpenGL
@@ -94,7 +94,7 @@ OpenGL ES profile shading language version string: OpenGL ES GLSL ES 3.20
 OpenGL ES profile extensions:
 \end{lstlisting}
 
-This gives several important points:
+This reveals several important points:
 
 \begin{itemize}  
 \item OpenGL vendor string: This is the grapics card driver. Only NVidia or ATI ones are supported.
@@ -141,13 +141,13 @@ OpenGL ES profile extensions:
 In such cases, the following issues can be expected and will currently not be addressed:
 
 \begin{itemize} 
-\item Application might not even start (OpenGl version error)
-\item Slow display performance (OpenGl emulation be CPU-based Mesa driver)
-\item Graphical display errors (wrong colours, artefacts, etc) 
+\item Application might not even start (OpenGL version error)
+\item Slow display performance (OpenGL emulation by CPU-based Mesa driver)
+\item Graphical display errors (wrong colors, artefacts, etc.) 
 \end{itemize} 
 
 Please know that they might also work, but no guarantees or support can be given at this moment. \\
 
-If you encounter a white-only OSGView and shader errors are logged in the console log, please refer to \nameref{ref:issue_shaders}.
+If you encounter a white-only OSGView and shader errors are present in the console log, please refer to \nameref{ref:issue_shaders}.
 
 
