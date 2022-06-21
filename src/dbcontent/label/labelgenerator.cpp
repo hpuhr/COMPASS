@@ -697,11 +697,21 @@ void LabelGenerator::addVariables (const std::string& dbcontent_name, dbContent:
     }
 }
 
+float LabelGenerator::labelDistance() const
+{
+    return label_distance_;
+}
+
+void LabelGenerator::labelDistance(float label_distance)
+{
+    label_distance_ = label_distance;
+}
+
 bool LabelGenerator::updateM3AValuesFromStr(const std::string& values)
 {
     set<unsigned int> values_tmp;
     vector<string> split_str = String::split(values, ',');
-
+    
     bool ok = true;
 
     filter_m3a_null_wanted_ = false;

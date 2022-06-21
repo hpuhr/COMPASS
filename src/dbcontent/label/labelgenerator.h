@@ -62,6 +62,9 @@ public:
     bool autoLOD() const;
     void autoLOD(bool auto_lod);
 
+    float labelDistance() const;
+    void labelDistance(float label_distance);
+
     void addLabelDSID(unsigned int ds_id);
     void removeLabelDSID(unsigned int ds_id);
     const std::set<unsigned int>& labelDSIDs() const;
@@ -116,6 +119,7 @@ protected:
     unsigned int current_lod_ {3}; // 1, 2, 3
 
     nlohmann::json label_directions_;
+    float label_distance_ {0.5}; // 0 ... 1
 
     nlohmann::json label_config_;
 
