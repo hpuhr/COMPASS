@@ -102,6 +102,7 @@ public:
     void filterModecNullWanted(bool value);
 
     LabelDirection labelDirection (unsigned int ds_id);
+    float labelDirectionAngle (unsigned int ds_id);
     void labelDirection (unsigned int ds_id, LabelDirection direction);
 
     void editLabelContents(const std::string& dbcontent_name);

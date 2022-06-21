@@ -639,6 +639,21 @@ LabelDirection LabelGenerator::labelDirection (unsigned int ds_id)
     }
 }
 
+float LabelGenerator::labelDirectionAngle (unsigned int ds_id)
+{
+    LabelDirection direction = labelDirection(ds_id);
+
+    if (direction == LEFT_UP)
+        return DEG2RAD * 135.0;
+    else if (direction == RIGHT_UP)
+        return DEG2RAD * 45.0;
+    else if (direction == LEFT_DOWN)
+        return DEG2RAD * 225.0;
+    else // RIGHT_DOWN
+        return DEG2RAD * 315.0;
+}
+
+
 void LabelGenerator::labelDirection (unsigned int ds_id, LabelDirection direction)
 {
     label_directions_[to_string(ds_id)] = direction;
