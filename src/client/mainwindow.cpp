@@ -182,7 +182,6 @@ MainWindow::MainWindow()
     createMenus ();
     updateMenus ();
 
-
     // do signal slots
     connect (&COMPASS::instance(), &COMPASS::appModeSwitchSignal,
              this, &MainWindow::appModeSwitchSlot);
@@ -317,7 +316,6 @@ void MainWindow::createMenus ()
     config_menu->addAction(sectors_action_);
 
     // process menu
-
     process_menu_ = menuBar()->addMenu(tr("&Process"));
     process_menu_->setToolTipsVisible(true);
 
@@ -336,6 +334,13 @@ void MainWindow::createMenus ()
     assoc_artas_action->setToolTip(tr("Create Unique Targets based on ARTAS TRI information"));
     connect(assoc_artas_action, &QAction::triggered, this, &MainWindow::calculateAssociationsARTASSlot);
     process_menu_->addAction(assoc_artas_action);
+
+    //tests
+    #if 1
+    QAction* test_action = new QAction(tr("Run test code"));
+    config_menu->addAction(test_action);
+    connect(test_action, &QAction::triggered, this, &MainWindow::runTestCodeSlot);
+    #endif
 }
 
 void MainWindow::updateMenus()
@@ -1426,7 +1431,6 @@ void MainWindow::closeEvent(QCloseEvent* event)
     logdbg << "MainWindow: closeEvent: done";
 }
 
-
 void MainWindow::shutdown()
 {
     QSettings settings("COMPASS", "Client");
@@ -1452,3 +1456,198 @@ void MainWindow::shutdown()
 //{
 //    logdbg << "MainWindow: keyPressEvent '" << event->text().toStdString() << "'";
 //}
+
+////////////////////////////////////////////////////////////////////////////////////////
+// TEST ZONE
+//
+#include <QTimer>
+#include <QPainter>
+#include <QCheckBox>
+#include <QTime>
+
+#include <Eigen/Core>
+
+#include "dbcontent/label/labelplacement.h"
+
+void MainWindow::runTestCodeSlot()
+{
+    QDialog dlg;
+
+    QVBoxLayout* layoutv = new QVBoxLayout;
+    dlg.setLayout(layoutv);
+
+    QLabel* label = new QLabel;
+    label->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+
+    bool runs = false;
+
+    QPushButton* runButton = new QPushButton("Run");
+    QPushButton* closeButton = new QPushButton("Close");
+    QCheckBox* autoCheckBox = new QCheckBox("Place automatically");
+
+    layoutv->addWidget(label);
+    layoutv->addWidget(runButton);
+    layoutv->addWidget(autoCheckBox);
+    layoutv->addWidget(closeButton);
+
+    connect(closeButton, &QPushButton::pressed, &dlg, &QDialog::accept);
+
+    auto runCB = [&] () 
+    {
+        if (runs)
+            runButton->setText("Run");
+        else
+            runButton->setText("Pause");
+
+        runs = !runs;
+    };
+
+    connect(runButton, &QPushButton::pressed, runCB);
+
+    int n          = 100; //number of objects
+    int baseSpeed  = 10;  //base speed in pixels
+    int radius     = 5;   //location marker radius in pixels
+    int w_label    = 40;  //width of a label in pixels
+    int h_label    = 15;  //height of label in pixels
+    int label_offs = 15;  //offset of label from marker
+
+    std::vector<Eigen::Vector2d> positions(n);
+    std::vector<double> speeds(n);
+    std::vector<Eigen::Vector2d> directions(n);
+
+    struct Label
+    {
+        double x_anchor;
+        double y_anchor;
+        double x;
+        double y;
+        double w;
+        double h;
+    };
+    std::vector<Label> labels(n);
+
+    //init random labels/positions
+    for (int i = 0; i < n; ++i)
+    {
+        positions[ i ].setRandom();
+        directions[ i ].setRandom();
+        directions[ i ].normalize();
+
+        positions[ i ] += Eigen::Vector2d(1, 1);
+        positions[ i ] *= 0.5;
+
+        Eigen::Vector2d v;
+        v.setRandom();
+
+        speeds[ i ] = 0.9 + 0.1 * v.x();
+    }
+
+    //updates the display every time the timer elapses
+    auto updateCB = [ & ] () 
+    {
+        if (!runs)
+            return;
+
+        int w = label->width();
+        int h = label->height();
+
+        //init display image
+        QImage img(w, h, QImage::Format_RGB32);
+        img.fill(Qt::white);
+        QPainter p(&img);
+
+        //update position and init labels
+        for (int i = 0; i < n; ++i)
+        {
+            //update to new position
+            double pos_x_px = w * positions[ i ].x();
+            double pos_y_px = h * positions[ i ].y();
+            pos_x_px += directions[ i ].x() * baseSpeed * speeds[ i ];
+            pos_y_px += directions[ i ].y() * baseSpeed * speeds[ i ];
+
+            positions[ i ] = Eigen::Vector2d(pos_x_px / w, pos_y_px / h);
+
+            //init label to new position
+            auto& l = labels[ i ];
+            l.x_anchor = pos_x_px;
+            l.y_anchor = pos_y_px;
+            l.x = pos_x_px + label_offs;
+            l.y = pos_y_px - label_offs;
+            l.w = w_label;
+            l.h = h_label;
+        }
+
+        //place labels automatically
+        if (autoCheckBox->isChecked())
+        {
+            QTime t;
+            t.restart();
+
+            LabelPlacementEngine labelPlacement;
+            auto& settings = labelPlacement.settings();
+            settings.fb_avoid_anchors = true;
+
+            //collect labels to place
+            for (int i = 0; i < n; ++i)
+            {
+                std::string lid = std::to_string(i);
+
+                const auto& l = labels[ i ];
+                double xi = l.x;
+                double yi = l.y;
+                labelPlacement.addLabel(lid, l.x_anchor, l.y_anchor, l.w, l.h, true, &xi, &yi);
+            }
+
+            //run placement
+            labelPlacement.placeLabels();
+
+            //retrieve optimized position
+            for (int i = 0; i < n; ++i)
+            {
+                auto& l = labels[ i ];
+                const auto& l_opt = labelPlacement.getLabel(i);
+                l.x = l_opt.x;
+                l.y = l_opt.y;
+            }
+
+            std::cout << "Auto placement of labels in " << t.restart() << std::endl;
+        }
+        
+        //draw labels and stuff
+        for (int i = 0; i < n; ++i)
+        {
+            double pos_x_px = w * positions[ i ].x();
+            double pos_y_px = h * positions[ i ].y();
+
+            const auto& l = labels[ i ];
+
+            p.save();
+            p.setBrush(QBrush(Qt::black, Qt::BrushStyle::SolidPattern));
+            p.drawEllipse(QPointF(pos_x_px, pos_y_px), radius, radius);
+            p.restore();
+
+            p.save();
+            p.drawLine(QPointF(l.x_anchor, l.y_anchor), QPointF(l.x, l.y));
+            p.restore();
+
+            p.save();
+            p.drawRect(l.x, l.y, l.w, l.h);
+            p.restore();
+        }
+        
+        //show new canva
+        label->setPixmap(QPixmap::fromImage(img));
+
+        std::cout << "UPDATE! " << label->width() << "x" << label->height() << std::endl;
+    };
+
+    //run update every 1s
+    QTimer t;
+    t.setInterval(1000);
+    t.setSingleShot(false);
+    connect(&t, &QTimer::timeout, updateCB);
+    t.start();
+
+    dlg.resize(1024, 768);
+    dlg.exec();
+}
