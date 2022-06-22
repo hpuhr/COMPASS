@@ -7,6 +7,7 @@ using namespace Utils;
 using namespace std;
 using namespace nlohmann;
 
+const string update_interval_key = "update_interval";
 const string position_key = "position";
 const std::string radar_range_key = "radar_range";
 const std::string radar_accuracy_key = "radar_accuracy";
@@ -102,6 +103,30 @@ std::string DataSourceBase::infoStr()
 {
     return info_.dump();
 }
+
+bool DataSourceBase::hasUpdateInterval() const
+{
+    return info_.contains(update_interval_key) && info_.at(update_interval_key) != 0;
+}
+
+void DataSourceBase::removeUpdateInterval()
+{
+    if (info_.contains(update_interval_key))
+        info_.erase(update_interval_key);
+}
+
+void DataSourceBase::updateInterval (float value)
+{
+    info_.at(update_interval_key) = value;
+}
+
+float DataSourceBase::updateInterval () const
+{
+    assert (hasUpdateInterval());
+
+    return info_.at(update_interval_key);
+}
+
 
 bool DataSourceBase::hasPosition() const
 {
