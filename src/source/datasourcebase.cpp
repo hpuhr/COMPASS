@@ -117,7 +117,7 @@ void DataSourceBase::removeUpdateInterval()
 
 void DataSourceBase::updateInterval (float value)
 {
-    info_.at(update_interval_key) = value;
+    info_[update_interval_key] = value;
 }
 
 float DataSourceBase::updateInterval () const

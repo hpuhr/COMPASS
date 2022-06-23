@@ -734,6 +734,8 @@ void DataSourceEditWidget::updateContent()
         sic_label_->setText("");
         ds_id_label_->setText("");
 
+        update_interval_edit_->setText("");
+
         position_widget_->setHidden(true);
 
         ranges_widget_->setHidden(true);
@@ -780,6 +782,11 @@ void DataSourceEditWidget::updateContent()
         sac_label_->setText(QString::number(ds->sac()));
         sic_label_->setText(QString::number(ds->sic()));
         ds_id_label_->setText(QString::number(ds->id()));
+
+        if (ds->hasUpdateInterval())
+            update_interval_edit_->setText(QString::number(ds->updateInterval()));
+        else
+            update_interval_edit_->setText("");
 
         loginf << "DataSourceEditWidget: updateContent: ds_type " << ds->dsType()
                << " has pos " << ds->hasPosition();
