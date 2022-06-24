@@ -63,6 +63,14 @@ LabelGeneratorWidget::LabelGeneratorWidget(LabelGenerator& label_generator)
             this, &LabelGeneratorWidget::lodChangedSlot);
     form_layout1->addRow(tr("Level of Detail"), lod_box);
 
+    // declutter
+
+    QCheckBox* declutter_box = new QCheckBox();
+    declutter_box->setChecked(label_generator_.declutterLabels());
+    connect(declutter_box, &QCheckBox::clicked,
+            this, &LabelGeneratorWidget::declutterLabelsChangedSlot);
+    form_layout1->addRow(tr("Declutter Labels"), declutter_box);
+
     main_layout->addLayout(form_layout1);
 
     QScrollArea* scroll_area = new QScrollArea();
@@ -219,6 +227,13 @@ void LabelGeneratorWidget::lodChangedSlot(const QString& text)
         label_generator_.autoLOD(false);
         label_generator_.currentLOD(stoul(lod));
     }
+}
+
+void LabelGeneratorWidget::declutterLabelsChangedSlot(bool checked)
+{
+    loginf << "DBContentLabelGeneratorWidget: declutterLabelsChangedSlot: checked " << checked;
+
+    label_generator_.declutterLabels(checked);
 }
 
 void LabelGeneratorWidget::filterMode3AActiveChangedSlot(bool checked)

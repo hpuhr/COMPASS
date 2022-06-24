@@ -712,6 +712,18 @@ void LabelGenerator::addVariables (const std::string& dbcontent_name, dbContent:
     }
 }
 
+bool LabelGenerator::declutterLabels() const
+{
+    return declutter_labels_;
+}
+
+void LabelGenerator::declutterLabels(bool declutter_labels)
+{
+    declutter_labels_ = declutter_labels;
+
+    emit labelOptionsChangedSignal();
+}
+
 float LabelGenerator::labelDistance() const
 {
     return label_distance_;

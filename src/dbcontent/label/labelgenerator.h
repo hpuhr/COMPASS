@@ -112,12 +112,17 @@ public:
 
     void addVariables (const std::string& dbcontent_name, dbContent::VariableSet& read_set);
 
+    bool declutterLabels() const;
+    void declutterLabels(bool declutter_labels);
+
 protected:
     DBContentManager& dbcont_manager_;
 
     bool auto_label_ {true};
     bool auto_lod_ {true};
     unsigned int current_lod_ {3}; // 1, 2, 3
+
+    bool declutter_labels_ {true};
 
     nlohmann::json label_directions_;
     float label_distance_ {0.5}; // 0 ... 1

@@ -24,6 +24,8 @@ public slots:
     void autoLabelChangedSlot(bool checked);
     void lodChangedSlot(const QString& text);
 
+    void declutterLabelsChangedSlot(bool checked);
+
     void filterMode3AActiveChangedSlot(bool checked);
     void filterMode3AChangedSlot(const QString& text);
 
