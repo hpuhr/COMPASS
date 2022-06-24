@@ -119,7 +119,7 @@ std::vector<std::string> LabelGenerator::getLabelTexts(
         tmp.push_back(main_id);
     }
 
-    if (current_lod_ == 1)
+    if (round(current_lod_) == 1)
         return tmp;
 
     // 1,2
@@ -132,7 +132,7 @@ std::vector<std::string> LabelGenerator::getLabelTexts(
     acid.erase(std::remove(acid.begin(), acid.end(), ' '), acid.end());
     tmp.push_back(acid);
 
-    if (current_lod_ == 3)
+    if (round(current_lod_) == 3)
     {
         // 1,3
         tmp.push_back(getVariableValue(dbcontent_name, 0*3+2, buffer, buffer_index));
@@ -159,7 +159,7 @@ std::vector<std::string> LabelGenerator::getLabelTexts(
 
     tmp.push_back(mc);
 
-    if (current_lod_ == 2)
+    if (round(current_lod_) == 2)
         return tmp;
 
     // 2,3
@@ -286,20 +286,32 @@ void LabelGenerator::autoLabel(bool auto_label)
 
 void LabelGenerator::autoAdustCurrentLOD(unsigned int num_labels_on_screen)
 {
-    loginf << "DBContentLabelGenerator: autoAdustCurrentLOD: num labels on screen "
-           << num_labels_on_screen;
+    float old_lod = current_lod_;
 
-    if (num_labels_on_screen < 20)
+    if (num_labels_on_screen < 25)
         current_lod_ = 3;
-    else if (num_labels_on_screen < 40)
+    else if (num_labels_on_screen < 50)
         current_lod_ = 2;
     else
         current_lod_ = 1;
+
+    loginf << "DBContentLabelGenerator: autoAdustCurrentLOD: old " << old_lod << " current " << current_lod_;
+
+    current_lod_ = (old_lod + current_lod_) / 2;
+
+    if (current_lod_ < 1)
+        current_lod_ = 1;
+    else if (current_lod_ > 3)
+        current_lod_ = 3;
+
+    loginf << "DBContentLabelGenerator: autoAdustCurrentLOD: num labels on screen "
+           << num_labels_on_screen << " old " << (unsigned int) old_lod
+           << " current " << round(current_lod_) << " float " << current_lod_;
 }
 
 unsigned int LabelGenerator::currentLOD() const
 {
-    return current_lod_;
+    return round(current_lod_);
 }
 
 void LabelGenerator::currentLOD(unsigned int current_lod)

@@ -120,7 +120,7 @@ protected:
 
     bool auto_label_ {true};
     bool auto_lod_ {true};
-    unsigned int current_lod_ {3}; // 1, 2, 3
+    float current_lod_ {1}; // 1, 2, 3, float for filter function
 
     bool declutter_labels_ {true};
 
