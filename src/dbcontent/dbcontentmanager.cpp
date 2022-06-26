@@ -412,6 +412,9 @@ void DBContentManager::load()
             assert (metaCanGetVariable(object.first, DBContent::meta_var_line_id_));
             read_set.add(metaGetVariable(object.first, DBContent::meta_var_line_id_));
 
+            assert (metaCanGetVariable(object.first, DBContent::meta_var_associations_));
+            read_set.add(metaGetVariable(object.first, DBContent::meta_var_associations_));
+
             label_generator_->addVariables(object.first, read_set);
 
             if (eval_man.needsAdditionalVariables())

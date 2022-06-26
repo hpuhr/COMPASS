@@ -36,6 +36,7 @@ LabelGenerator::LabelGenerator(const std::string& class_id, const std::string& i
     registerParameter("auto_label", &auto_label_, true);
     registerParameter("label_directions", &label_directions_, json::object());
     registerParameter("label_config", &label_config_, json::object());
+    registerParameter("declutter_labels", &declutter_labels_, true);
 
     registerParameter("filter_mode3a_active", &filter_mode3a_active_, false);
     registerParameter("filter_mode3a_values", &filter_mode3a_values_, "7000,7777");
@@ -86,6 +87,8 @@ std::vector<std::string> LabelGenerator::getLabelTexts(
 
     using namespace dbContent;
 
+    Variable& assoc_var = dbcont_manager_.metaGetVariable(dbcontent_name, DBContent::meta_var_associations_);
+
     Variable* acid_var {nullptr};
     if (dbcont_manager_.metaCanGetVariable(dbcontent_name, DBContent::meta_var_ti_))
         acid_var = &dbcont_manager_.metaGetVariable(dbcontent_name, DBContent::meta_var_ti_);
@@ -101,7 +104,13 @@ std::vector<std::string> LabelGenerator::getLabelTexts(
     {
         string main_id("?");
 
-        if (acid_var && buffer->has<string>(acid_var->name())
+        if (buffer->has<nlohmann::json>(assoc_var.name())
+                && !buffer->get<nlohmann::json>(assoc_var.name()).isNull(buffer_index))
+        {
+            main_id = buffer->get<nlohmann::json>(assoc_var.name()).get(buffer_index).dump();
+            main_id = main_id.substr(1, main_id.size()-2); // remove first and last chars []
+        }
+        else if (acid_var && buffer->has<string>(acid_var->name())
                 && !buffer->get<string>(acid_var->name()).isNull(buffer_index))
         {
             main_id = buffer->get<string>(acid_var->name()).get(buffer_index);
@@ -289,16 +298,17 @@ void LabelGenerator::autoAdustCurrentLOD(unsigned int num_labels_on_screen)
     float old_lod = current_lod_;
 
     if (num_labels_on_screen < 25)
-        current_lod_ = 3;
+        current_lod_ = (2*old_lod + 3) / 3;
     else if (num_labels_on_screen < 50)
-        current_lod_ = 2;
+        current_lod_ = (2*old_lod + 2) / 3;
+    else if (num_labels_on_screen < 75)
+        current_lod_ = (2*old_lod + 1) / 3;
     else
         current_lod_ = 1;
 
-    loginf << "DBContentLabelGenerator: autoAdustCurrentLOD: old " << old_lod << " current " << current_lod_;
+    //loginf << "DBContentLabelGenerator: autoAdustCurrentLOD: old " << old_lod << " current " << current_lod_;
 
-    current_lod_ = (old_lod + current_lod_) / 2;
-
+    // failsafe
     if (current_lod_ < 1)
         current_lod_ = 1;
     else if (current_lod_ > 3)
@@ -328,6 +338,8 @@ bool LabelGenerator::autoLOD() const
 void LabelGenerator::autoLOD(bool auto_lod)
 {
     auto_lod_ = auto_lod;
+
+    emit labelOptionsChangedSignal();
 }
 
 void LabelGenerator::addLabelDSID(unsigned int ds_id)
@@ -733,7 +745,10 @@ void LabelGenerator::declutterLabels(bool declutter_labels)
 {
     declutter_labels_ = declutter_labels;
 
-    emit labelOptionsChangedSignal();
+    if (!declutter_labels_)
+        emit labelClearAllSignal(); // since since do not update otherwise - reason unknown
+
+    emit labelOptionsChangedSignal(); // updates
 }
 
 float LabelGenerator::labelDistance() const

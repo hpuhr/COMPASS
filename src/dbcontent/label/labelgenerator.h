@@ -34,6 +34,7 @@ class LabelGenerator : public QObject, public Configurable
 
 signals:
     void labelOptionsChangedSignal();
+    void labelClearAllSignal();
 
 
 public slots:
