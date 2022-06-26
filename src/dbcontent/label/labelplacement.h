@@ -26,12 +26,12 @@ public:
         //settings for method 'ForceBased'
         int     fb_max_iter        = 500;   //maximum number of iterations
         double  fb_precision       = 0.01;  //precision = convergence limit
-        double  fb_expand_x        = 1.2;   //bounding box expansion in x direction (TODO: per avoidance type)
+        double  fb_expand_x        = 1.1;   //bounding box expansion in x direction (TODO: per avoidance type)
         double  fb_expand_y        = 1.1;   //bounding box expansion in y direction (TODO: per avoidance type)
         bool    fb_avoid_labels    = true;  //avoid other labels (should be on)
         bool    fb_avoid_anchors   = false; //avoid anchor locations (= positions the labels are attached to)
         bool    fb_avoid_objects   = false; //avoid objects added as 'fb_additional_objects'
-        double  fb_weight_labels   = 0.25;  //force weight for label avoidance (TODO: separate x and y part)
+        double  fb_weight_labels   = 0.5;  //force weight for label avoidance (TODO: separate x and y part)
         double  fb_weight_anchors  = 0.5;   //force weight for anchor avoidance (TODO: separate x and y part)
         double  fb_weight_objects  = 0.25;  //force weight for object avoidance (TODO: separate x and y part)
         Objects fb_additional_objects;      //additional objects to avoid, must be enabled by 'fb_avoid_objects'
