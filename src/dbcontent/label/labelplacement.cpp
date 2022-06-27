@@ -1,9 +1,22 @@
 
 #include "labelplacement.h"
+#include "labelplacement_force.h"
+#include "labelplacement_spring.h"
 
 #include <limits>
+#include <iostream>
 
 #include <Eigen/Core>
+
+#include <QPainter>
+#include <QDialog>
+#include <QVBoxLayout>
+#include <QPushButton>
+#include <QComboBox>
+#include <QCheckBox>
+#include <QLabel>
+#include <QTimer>
+#include <QTime>
 
 /**
  */
@@ -119,6 +132,8 @@ bool LabelPlacementEngine::placeLabels()
     bool ok = false;
     if (settings_.method == Method::ForceBased)
         ok = placeLabelsForceBased();
+    else if (settings_.method == Method::SpringBased)
+        ok = placeLabelsSpringBased();
     else
         return false; //unknown method
 
@@ -130,329 +145,6 @@ bool LabelPlacementEngine::placeLabels()
     }
 
     return true;
-}
-
-//general helpers
-namespace
-{
-    /**
-     * Collect the (scaled) bounding boxes for all given labels.
-     */
-    std::vector<QRectF> collectBoundingBoxes(const std::vector<LabelPlacementEngine::Label>& labels, 
-                                             double tx, 
-                                             double ty)
-    {
-        if (labels.empty())
-            return {};
-
-        size_t n = labels.size();
-
-        std::vector<QRectF> bboxes(n);
-        for (size_t i = 0; i < n; ++i)
-        {
-            const auto& l = labels[ i ];
-            if (!l.active)
-                continue;
-            bboxes[ i ] = l.boundingBox(tx, ty);
-        }
-
-        return std::move(bboxes);
-    }
-}
-
-//helpers for the force-based approach.
-//see: https://github.com/Phlya/adjustText
-namespace forcebased
-{
-    /**
-     */
-    int sign(double v)
-    {
-        if (v < 0)
-            return -1;
-        if (v > 0)
-            return 1;
-        return 0;
-    }
-
-    /**
-     */
-    QPointF overlapDisplacement(const QRectF& bbox, double x, double y)
-    {
-        QPointF c = bbox.center();
-
-        int dir_x = sign(c.x() - x);
-        int dir_y = sign(c.y() - y);
-
-        double dx = dir_x == 0 ? 0 : (dir_x == -1 ? x - bbox.right()  : x - bbox.left());
-        double dy = dir_y == 0 ? 0 : (dir_y == -1 ? y - bbox.bottom() : y - bbox.top() );
-
-        return {dx, dy};
-    }
-
-    /**
-     */
-    void repelFromLabels(std::vector<Eigen::Vector2d>& movements,
-                         Eigen::Vector2d& total,
-                         const std::vector<LabelPlacementEngine::Label>& labels, double tx, double ty)
-    {
-        /*"""
-        Repel texts from each other while expanding their bounding boxes by expand
-        (x, y), e.g. (1.2, 1.2) would multiply width and height by 1.2.
-        Requires a renderer to get the actual sizes of the text, and to that end
-        either one needs to be directly provided, or the axes have to be specified,
-        and the renderer is then got from the axes object.
-        """
-        ax = ax or plt.gca()
-        r = renderer or get_renderer(ax.get_figure())
-        bboxes = get_bboxes(texts, r, expand, ax=ax)
-        xmins = [bbox.xmin for bbox in bboxes]
-        xmaxs = [bbox.xmax for bbox in bboxes]
-        ymaxs = [bbox.ymax for bbox in bboxes]
-        ymins = [bbox.ymin for bbox in bboxes]
-
-        overlaps_x = np.zeros((len(bboxes), len(bboxes)))
-        overlaps_y = np.zeros_like(overlaps_x)
-        overlap_directions_x = np.zeros_like(overlaps_x)
-        overlap_directions_y = np.zeros_like(overlaps_y)
-        for i, bbox1 in enumerate(bboxes):
-            overlaps = get_points_inside_bbox(
-                xmins * 2 + xmaxs * 2, (ymins + ymaxs) * 2, bbox1
-            ) % len(bboxes)
-            overlaps = np.unique(overlaps)
-            for j in overlaps:
-                bbox2 = bboxes[j]
-                x, y = bbox1.intersection(bbox1, bbox2).size
-                overlaps_x[i, j] = x
-                overlaps_y[i, j] = y
-                direction = np.sign(bbox1.extents - bbox2.extents)[:2]
-                overlap_directions_x[i, j] = direction[0]
-                overlap_directions_y[i, j] = direction[1]
-
-        move_x = overlaps_x * overlap_directions_x
-        move_y = overlaps_y * overlap_directions_y
-
-        delta_x = move_x.sum(axis=1)
-        delta_y = move_y.sum(axis=1)
-
-        q = np.sum(overlaps_x), np.sum(overlaps_y)
-        if move:
-            move_texts(texts, delta_x, delta_y, bboxes, ax=ax)
-        return delta_x, delta_y, q*/
-
-        size_t n = labels.size();
-
-        movements.assign(n, Eigen::Vector2d(0, 0));
-        total = Eigen::Vector2d(0, 0);
-
-        if (n <= 1)
-            return;
-
-        std::vector<QRectF> bboxes = collectBoundingBoxes(labels, tx, ty);
-
-        for (size_t i = 0; i < n; ++i)
-        {
-            const auto& l = labels[ i ];
-            if (!l.active)
-                continue;
-
-            const auto& bbox = bboxes[ i ];
-
-            for (size_t j = 0; j < n; ++j)
-            {
-                if (i == j)
-                    continue;
-
-                const auto& l2 = labels[ j ];
-                if (!l2.active)
-                    continue;
-
-                const auto& bbox2 = bboxes[ j ];
-
-                if (!bbox.intersects(bbox2))
-                    continue;
-
-                auto r_isec = bbox & bbox2;
-                if (r_isec.isEmpty())
-                    continue;
-
-                double dx = r_isec.width();
-                double dy = r_isec.height();
-                int    sx = sign(bbox.left() - bbox2.left());
-                int    sy = sign(bbox.top()  - bbox2.top() );
-
-                movements[ i ] += Eigen::Vector2d(dx * sx, dy * sy);
-                total          += Eigen::Vector2d(dx, dy);
-            }
-        }
-    }
-
-    /**
-     */
-    void repelFromObjects(std::vector<Eigen::Vector2d>& movements,
-                          Eigen::Vector2d& total,
-                          const std::vector<QRectF>& objects,
-                          const std::vector<LabelPlacementEngine::Label>& labels, 
-                          double tx, 
-                          double ty)
-    {
-        /*"""
-        Repel texts from other objects' bboxes while expanding their (texts')
-        bounding boxes by expand (x, y), e.g. (1.2, 1.2) would multiply width and
-        height by 1.2.
-        Requires a renderer to get the actual sizes of the text, and to that end
-        either one needs to be directly provided, or the axes have to be specified,
-        and the renderer is then got from the axes object.
-        """
-        ax = ax or plt.gca()
-        r = renderer or get_renderer(ax.get_figure())
-
-        bboxes = get_bboxes(texts, r, expand, ax=ax)
-
-        overlaps_x = np.zeros((len(bboxes), len(add_bboxes)))
-        overlaps_y = np.zeros_like(overlaps_x)
-        overlap_directions_x = np.zeros_like(overlaps_x)
-        overlap_directions_y = np.zeros_like(overlaps_y)
-
-        for i, bbox1 in enumerate(bboxes):
-            for j, bbox2 in enumerate(add_bboxes):
-                try:
-                    x, y = bbox1.intersection(bbox1, bbox2).size
-                    direction = np.sign(bbox1.extents - bbox2.extents)[:2]
-                    overlaps_x[i, j] = x
-                    overlaps_y[i, j] = y
-                    overlap_directions_x[i, j] = direction[0]
-                    overlap_directions_y[i, j] = direction[1]
-                except AttributeError:
-                    pass
-
-        move_x = overlaps_x * overlap_directions_x
-        move_y = overlaps_y * overlap_directions_y
-
-        delta_x = move_x.sum(axis=1)
-        delta_y = move_y.sum(axis=1)
-
-        q = np.sum(overlaps_x), np.sum(overlaps_y)
-        if move:
-            move_texts(texts, delta_x, delta_y, bboxes, ax=ax)
-        return delta_x, delta_y, q*/
-
-        size_t n = labels.size();
-
-        movements.assign(n, Eigen::Vector2d(0, 0));
-        total = Eigen::Vector2d(0, 0);
-
-        size_t no = objects.size();
-        if (no < 1)
-            return;
-
-        std::vector<QRectF> bboxes = collectBoundingBoxes(labels, tx, ty);
-
-        for (size_t i = 0; i < n; ++i)
-        {
-            const auto& l = labels[ i ];
-            if (!l.active)
-                continue;
-
-            const auto& bbox = bboxes[ i ];
-
-            for (size_t j = 0; j < no; ++j)
-            {
-                const auto& bbox2 = objects[ j ];
-                if (bbox2.isEmpty())
-                    continue;
-
-                if (!bbox.intersects(bbox2))
-                    continue;
-
-                auto r_isec = bbox & bbox2;
-                if (r_isec.isEmpty())
-                    continue;
-
-                double dx = r_isec.width();
-                double dy = r_isec.height();
-                int    sx = sign(bbox.left() - bbox2.left());
-                int    sy = sign(bbox.top()  - bbox2.top() );
-
-                movements[ i ] += Eigen::Vector2d(dx * sx, dy * sy);
-                total          += Eigen::Vector2d(dx, dy);
-            }
-        }
-    }
-
-    /**
-     */
-    void repelFromPoints(std::vector<Eigen::Vector2d>& movements,
-                         Eigen::Vector2d& total,
-                         const std::vector<QPointF>& points,
-                         const std::vector<LabelPlacementEngine::Label>& labels, 
-                         double tx, 
-                         double ty)
-    {
-        /*""
-        Repel texts from all points specified by x and y while expanding their
-        (texts'!) bounding boxes by expandby  (x, y), e.g. (1.2, 1.2)
-        would multiply both width and height by 1.2.
-        Requires a renderer to get the actual sizes of the text, and to that end
-        either one needs to be directly provided, or the axes have to be specified,
-        and the renderer is then got from the axes object.
-        """
-        assert len(x) == len(y)
-        ax = ax or plt.gca()
-        r = renderer or get_renderer(ax.get_figure())
-        bboxes = get_bboxes(texts, r, expand, ax=ax)
-
-        # move_x[i,j] is the x displacement of the i'th text caused by the j'th point
-        move_x = np.zeros((len(bboxes), len(x)))
-        move_y = np.zeros((len(bboxes), len(x)))
-        for i, bbox in enumerate(bboxes):
-            xy_in = get_points_inside_bbox(x, y, bbox)
-            for j in xy_in:
-                xp, yp = x[j], y[j]
-                dx, dy = overlap_bbox_and_point(bbox, xp, yp)
-
-                move_x[i, j] = dx
-                move_y[i, j] = dy
-
-        delta_x = move_x.sum(axis=1)
-        delta_y = move_y.sum(axis=1)
-        q = np.sum(np.abs(move_x)), np.sum(np.abs(move_y))
-        if move:
-            move_texts(texts, delta_x, delta_y, bboxes, ax=ax)
-        return delta_x, delta_y, q*/
-
-        size_t n = labels.size();
-
-        movements.assign(n, Eigen::Vector2d(0, 0));
-        total = Eigen::Vector2d(0, 0);
-
-        size_t np = points.size();
-        if (np < 1)
-            return;
-
-        std::vector<QRectF> bboxes = collectBoundingBoxes(labels, tx, ty);
-
-        for (size_t i = 0; i < n; ++i)
-        {
-            const auto& l = labels[ i ];
-            if (!l.active)
-                continue;
-
-            const auto& bbox = bboxes[ i ];
-
-            for (size_t j = 0; j < np; ++j)
-            {
-                const auto& point = points[ j ];
-                if (!bbox.contains(point))
-                    continue;
-
-                auto d = overlapDisplacement(bbox, point.x(), point.y());
-
-                movements[ i ] += Eigen::Vector2d(d.x(), d.y());
-                total          += Eigen::Vector2d(std::fabs(d.x()), std::fabs(d.y()));
-            }
-        }
-    }
 }
 
 /**
@@ -795,15 +487,31 @@ bool LabelPlacementEngine::placeLabelsForceBased()
         //compute various displacements by repelling from certain types of obstacles
         if (settings_.fb_avoid_labels)
         {
-            forcebased::repelFromLabels(displacements_labels, total_labels, labels_, settings_.fb_expand_x, settings_.fb_expand_y);
+            label_placement::force::repelFromLabels(displacements_labels, 
+                                                    total_labels, 
+                                                    labels_, 
+                                                    settings_.fb_expand_x, 
+                                                    settings_.fb_expand_y, 
+                                                    settings_.fb_force_type);
         }        
         if (settings_.fb_avoid_anchors)
         {
-            forcebased::repelFromPoints(displacements_anchors, total_anchors, anchors, labels_, settings_.fb_expand_x, settings_.fb_expand_y);
+            label_placement::force::repelFromPoints(displacements_anchors, 
+                                                    total_anchors, 
+                                                    anchors, labels_, 
+                                                    settings_.fb_expand_x, 
+                                                    settings_.fb_expand_y, 
+                                                    settings_.fb_force_type);
         }
         if (settings_.fb_avoid_objects && !settings_.fb_additional_objects.empty())
         {
-            forcebased::repelFromObjects(displacements_objects, total_objects, settings_.fb_additional_objects, labels_, settings_.fb_expand_x, settings_.fb_expand_y);
+            label_placement::force::repelFromObjects(displacements_objects, 
+                                                     total_objects, 
+                                                     settings_.fb_additional_objects, 
+                                                     labels_, 
+                                                     settings_.fb_expand_x, 
+                                                     settings_.fb_expand_y, 
+                                                     settings_.fb_force_type);
         }
 
         //sum up individual displacements using weights
@@ -833,4 +541,381 @@ bool LabelPlacementEngine::placeLabelsForceBased()
 
     //convergence or max iter reached
     return true;
+}
+
+/**
+ */
+bool LabelPlacementEngine::placeLabelsSpringBased()
+{
+    return false;
+}
+
+/**
+ */
+void LabelPlacementEngine::showData(const TestConfig& test_config) const
+{
+    size_t n = labels_.size();
+
+    if (n < 2)
+        return;
+
+    std::vector<TestLabel> test_labels(n);
+    for (size_t i = 0; i < n; ++i)
+    {
+        const auto& l = labels_[ i ];
+
+        auto& tl = test_labels[ i ];
+        tl.x        = l.x;
+        tl.y        = l.y;
+        tl.x_anchor = l.x_anchor;
+        tl.y_anchor = l.y_anchor;
+        tl.x_init   = l.x_last;
+        tl.y_init   = l.y_last;
+        tl.w        = l.w;
+        tl.h        = l.h;
+        tl.txt      = l.id;
+    }
+
+    //convert coords to test window size in pixels
+    convertToScreen(test_config, test_labels);
+
+    //create test dialog
+    QDialog dlg;
+
+    QVBoxLayout* layoutv = new QVBoxLayout;
+    dlg.setLayout(layoutv);
+
+    QLabel* label = new QLabel;
+    label->setFixedSize(test_config.width, test_config.height);
+
+    bool runs = false;
+
+    QPushButton* closeButton = new QPushButton("Close");
+
+    layoutv->addWidget(label);
+    layoutv->addWidget(closeButton);
+
+    QObject::connect(closeButton, &QPushButton::pressed, &dlg, &QDialog::accept);
+
+    QImage img(test_config.width, test_config.height, QImage::Format_RGB32);
+    img.fill(Qt::white);
+
+    renderTestFrame(img, test_labels, test_config);
+        
+    label->setPixmap(QPixmap::fromImage(img));
+
+    dlg.setWindowModality(Qt::WindowModality::ApplicationModal);
+    dlg.exec();
+}
+
+/**
+ */
+void LabelPlacementEngine::runTest(const TestConfig& test_config) const
+{
+    std::vector<Label> labels;
+
+    int n = test_config.num_objects;
+
+    std::vector<TestLabel> test_labels(n);
+
+    //init random labels/positions
+    for (int i = 0; i < n; ++i)
+    {
+        auto& l = test_labels[ i ];
+
+        Eigen::Vector2d pos, dir;
+        pos.setRandom();
+        dir.setRandom();
+        dir.normalize();
+
+        pos += Eigen::Vector2d(1, 1);
+        pos *= 0.5;
+
+        Eigen::Vector2d v;
+        v.setRandom();
+
+        double speed = 0.9 + 0.1 * v.x();
+
+        l.x        = pos.x();
+        l.y        = pos.y();
+        l.x_anchor = l.x;
+        l.y_anchor = l.y;
+        l.x_init   = l.x;
+        l.y_init   = l.y;
+        l.w        = test_config.label_w_px;
+        l.h        = test_config.label_h_px;
+        l.dirx     = dir.x();
+        l.diry     = dir.y();
+        l.speed    = speed;
+        l.txt      = "Test" + std::to_string(i); //unique id is important
+    }
+
+    //convert coords to test window size in pixels
+    convertToScreen(test_config, test_labels);
+
+    //show test data in dialog
+    runTest(test_labels, test_config);
+}
+
+/**
+ */
+void LabelPlacementEngine::runTest(const std::vector<TestLabel>& test_labels,
+                                   const TestConfig& test_config) const
+{
+    std::vector<TestLabel> labels = test_labels;
+
+    //create test dialog
+    QDialog dlg;
+
+    QVBoxLayout* layoutv = new QVBoxLayout;
+    dlg.setLayout(layoutv);
+
+    QLabel* label = new QLabel;
+    label->setFixedSize(test_config.width, test_config.height);
+
+    bool runs = false;
+
+    QPushButton* runButton = new QPushButton("Run");
+    QPushButton* closeButton = new QPushButton("Close");
+    QCheckBox* autoCheckBox = new QCheckBox("Place automatically");
+    QComboBox* autoCombo = new QComboBox;
+    autoCombo->addItem("Simple");
+    autoCombo->addItem("Exact");
+
+    layoutv->addWidget(label);
+    layoutv->addWidget(runButton);
+    layoutv->addWidget(autoCheckBox);
+    layoutv->addWidget(autoCombo);
+    layoutv->addWidget(closeButton);
+
+    QObject::connect(closeButton, &QPushButton::pressed, &dlg, &QDialog::accept);
+
+    //callback for the run button
+    auto runCB = [&] () 
+    {
+        if (runs)
+            runButton->setText("Run");
+        else
+            runButton->setText("Pause");
+
+        runs = !runs;
+    };
+
+    QObject::connect(runButton, &QPushButton::pressed, runCB);
+
+    int n = (int)test_labels.size();
+
+    //updates the display every time the timer elapses
+    auto updateCB = [ & ] () 
+    {
+        if (!runs || n < 1)
+            return;
+
+        const int w = label->width();
+        const int h = label->height();
+
+        //init display image
+        QImage img(w, h, QImage::Format_RGB32);
+        img.fill(Qt::white);
+
+        //update position and init labels
+        for (int i = 0; i < n; ++i)
+        {
+            auto& l = labels[ i ];
+
+            //this is in label space
+            l.x_anchor += l.dirx * test_config.speed_px * l.speed;
+            l.y_anchor += l.diry * test_config.speed_px * l.speed;
+            l.x = l.x_anchor + test_config.label_offs_px;
+            l.y = l.y_anchor - test_config.label_offs_px;
+            l.x_init = l.x;
+            l.y_init = l.y;
+        }
+
+        //place labels automatically if desired
+        if (autoCheckBox->isChecked())
+        {
+            QTime t;
+            t.restart();
+
+            LabelPlacementEngine::ForceType ftype = 
+                autoCombo->currentIndex() == 0 ? LabelPlacementEngine::ForceType::Simple : LabelPlacementEngine::ForceType::Exact;
+
+            LabelPlacementEngine labelPlacement;
+            auto& settings = labelPlacement.settings();
+            settings.fb_avoid_anchors = true;
+            settings.fb_force_type = ftype;
+
+            //collect labels to place
+            for (int i = 0; i < n; ++i)
+            {
+                auto& l = labels[ i ];
+                labelPlacement.addLabel(l.txt, l.x_anchor, l.y_anchor, l.w, l.h, true, &l.x, &l.y);
+            }
+
+            //run placement
+            labelPlacement.placeLabels();
+
+            //retrieve optimized position
+            for (int i = 0; i < n; ++i)
+            {
+                auto& l = labels[ i ];
+                const auto& l_opt = labelPlacement.getLabel(i);
+                l.x = l_opt.x;
+                l.y = l_opt.y;
+            }
+
+            std::cout << "Auto placement of labels in " << t.restart() << std::endl;
+        }
+        
+        renderTestFrame(img, labels, test_config);
+        
+        //show new canva
+        label->setPixmap(QPixmap::fromImage(img));
+
+        std::cout << "UPDATE! " << label->width() << "x" << label->height() << std::endl;
+    };
+
+    //run update every 1s
+    QTimer t;
+    t.setInterval(test_config.interval_ms);
+    t.setSingleShot(false);
+    QObject::connect(&t, &QTimer::timeout, updateCB);
+    t.start();
+
+    dlg.exec();
+}
+
+/**
+ */
+void LabelPlacementEngine::renderTestFrame(QImage& img, 
+                                           const std::vector<TestLabel>& labels,
+                                           const TestConfig& test_config) const
+{
+    QPainter p(&img);
+
+    for (const auto& l : labels)
+    {
+        //draw markers
+        p.save();
+        p.setBrush(QBrush(Qt::black, Qt::BrushStyle::SolidPattern));
+        p.drawEllipse(QPointF(l.x_anchor, l.y_anchor), test_config.radius_px, test_config.radius_px);
+        p.restore();
+
+        //draw connection lines
+        p.save();
+        p.drawLine(QPointF(l.x_anchor, l.y_anchor), QPointF(l.x, l.y));
+        p.restore();
+
+        //draw labels
+        p.save();
+        p.drawRect(l.x, l.y, l.w, l.h);
+        p.restore();
+
+        if (l.x_init.has_value() && l.y_init.has_value())
+        {
+            p.save();
+            p.setBrush(QBrush(Qt::red, Qt::BrushStyle::SolidPattern));
+            p.drawEllipse(QPointF(l.x_init.value(), l.y_init.value()), 2, 2);
+            p.restore();
+
+            p.save();
+            QPen pen;
+            pen.setColor(Qt::red);
+            pen.setStyle(Qt::PenStyle::DotLine);
+            p.setPen(pen);
+            p.drawLine(QPointF(l.x_init.value(), l.y_init.value()), QPointF(l.x, l.y));
+            p.restore();
+        }
+    }
+}
+
+/**
+ */
+void LabelPlacementEngine::convertToScreen(const TestConfig& test_config, 
+                                           std::vector<TestLabel>& test_labels) const
+{
+    int n = (int)test_labels.size();
+    if (n < 2)
+        return;
+
+    //determine bounds
+    double xmin = std::numeric_limits<double>::max();
+    double ymin = std::numeric_limits<double>::max();
+    double xmax = std::numeric_limits<double>::min();
+    double ymax = std::numeric_limits<double>::min();
+
+    auto checkPos = [ & ] (double x, double y) 
+    {
+        if (x < xmin)
+            xmin = x;
+        if (y < ymin)
+            ymin = y;
+        if (x > xmax)
+            xmax = x;
+        if (y > ymax)
+            ymax = y;
+    };
+ 
+    double label_w_max = 0;
+    double label_h_max = 0;
+    for (int i = 0; i < n; ++i)
+    {
+        const auto& l = test_labels[ i ];
+
+        checkPos(l.x, l.y);
+        checkPos(l.x_anchor, l.y_anchor);
+
+        if (l.x_init.has_value() && l.y_init.has_value())
+            checkPos(*l.x_init, *l.y_init);
+
+        if (l.w > label_w_max)
+            label_w_max = l.w;
+        if (l.h > label_h_max)
+            label_h_max = l.h;
+    }
+
+    const double ws = test_config.width  - 2 * label_w_max;
+    const double hs = test_config.height - 2 * label_h_max;
+
+    const double w = xmax - xmin;
+    const double h = ymax - ymin;
+
+    //fit bounds into test window size
+    double scale = 1.0;
+
+    const double inner_aspect_ratio = w / h;
+    const double outer_aspect_ratio = ws / hs;
+    if (inner_aspect_ratio < outer_aspect_ratio) 
+        scale = hs / h;
+    else
+        scale = ws / w;
+
+    double offsx = label_w_max + (ws - w * scale) * 0.5;
+    double offsy = label_h_max + (hs - h * scale) * 0.5;
+
+    auto fitPos = [ & ] (double& x, double& y) 
+    {
+        x -= xmin;
+        y -= ymin;
+        x *= scale;
+        y *= scale;
+        x += offsx;
+        y += offsy;
+
+        if (test_config.flip_y)
+            y = test_config.height - y;
+    };
+
+    //transform label positions to test window space
+    for (int i = 0; i < n; ++i)
+    {
+        auto& l = test_labels[ i ];
+
+        fitPos(l.x, l.y);
+        fitPos(l.x_anchor, l.y_anchor);
+
+        if (l.x_init.has_value() && l.y_init.has_value())
+            fitPos(l.x_init.value(), l.y_init.value());
+    }   
 }
