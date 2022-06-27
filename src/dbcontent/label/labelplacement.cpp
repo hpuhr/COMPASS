@@ -917,5 +917,8 @@ void LabelPlacementEngine::convertToScreen(const TestConfig& test_config,
 
         if (l.x_init.has_value() && l.y_init.has_value())
             fitPos(l.x_init.value(), l.y_init.value());
+
+        l.w *= scale;
+        l.h *= scale;
     }   
 }
