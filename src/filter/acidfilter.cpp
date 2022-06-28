@@ -182,18 +182,35 @@ std::vector<size_t> ACIDFilter::filterBuffer(const std::string& dbcontent_name, 
     if (!COMPASS::instance().dbContentManager().metaVariable(DBContent::meta_var_ti_.name()).existsIn(dbcontent_name))
         return to_be_removed;
 
-    dbContent::Variable& var = COMPASS::instance().dbContentManager().metaVariable(
+    dbContent::Variable& acid_var = COMPASS::instance().dbContentManager().metaVariable(
                 DBContent::meta_var_ti_.name()).getFor(dbcontent_name);
 
-    assert (buffer->has<string> (var.name()));
+    assert (buffer->has<string> (acid_var.name()));
 
-    NullableVector<string>& data_vec = buffer->get<string> (var.name());
+    NullableVector<string>& acid_vec = buffer->get<string> (acid_var.name());
+
+    dbContent::Variable* cs_fpl_var {nullptr}; // only set in cat062
+    NullableVector<string>* cs_fpl_vec {nullptr}; // only set in cat062
+
+    if (dbcontent_name == "CAT062")
+    {
+        assert (COMPASS::instance().dbContentManager().canGetVariable(
+                    dbcontent_name, DBContent::var_cat062_callsign_fpl_));
+
+        cs_fpl_var = &COMPASS::instance().dbContentManager().getVariable(
+                    dbcontent_name, DBContent::var_cat062_callsign_fpl_);
+
+        assert (buffer->has<string> (cs_fpl_var->name()));
+
+        cs_fpl_vec = &buffer->get<string> (cs_fpl_var->name());
+    }
 
     bool found;
 
     for (unsigned int cnt=0; cnt < buffer->size(); ++cnt)
     {
-        if (data_vec.isNull(cnt)) // null or not found
+        if (acid_vec.isNull(cnt)
+                || cs_fpl_vec != nullptr ? cs_fpl_vec->isNull(cnt) : false) // null or not found
         {
             if (!null_wanted_)
                 to_be_removed.push_back(cnt);
@@ -206,10 +223,22 @@ std::vector<size_t> ACIDFilter::filterBuffer(const std::string& dbcontent_name, 
 
             for (auto& val_it : values_)
             {
-                if (data_vec.get(cnt).find(val_it) != std::string::npos)
+                if (acid_vec.get(cnt).find(val_it) != std::string::npos)
                 {
                     found = true;
                     break;
+                }
+            }
+
+            if (cs_fpl_vec)
+            {
+                for (auto& val_it : values_)
+                {
+                    if (cs_fpl_vec->get(cnt).find(val_it) != std::string::npos)
+                    {
+                        found = true;
+                        break;
+                    }
                 }
             }
 
