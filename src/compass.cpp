@@ -52,6 +52,9 @@ COMPASS::COMPASS() : Configurable("COMPASS", "COMPASS0", 0, "compass.json")
     registerParameter("last_db_filename", &last_db_filename_, "");
     registerParameter("db_file_list", &db_file_list_, json::array());
 
+    registerParameter("hide_evaluation", &hide_evaluation_, false);
+    registerParameter("hide_viewpoints", &hide_viewpoints_, false);
+
     JobManager::instance().start();
 
     createSubConfigurables();
@@ -412,6 +415,16 @@ MainWindow& COMPASS::mainWindow()
 
     assert(main_window_);
     return *main_window_;
+}
+
+bool COMPASS::hideViewpoints() const
+{
+    return hide_viewpoints_;
+}
+
+bool COMPASS::hideEvaluation() const
+{
+    return hide_evaluation_;
 }
 
 bool COMPASS::isShutDown() const

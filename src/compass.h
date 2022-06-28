@@ -82,6 +82,9 @@ protected:
     bool expert_mode_ {false};
     AppMode app_mode_ {AppMode::Offline};
 
+    bool hide_evaluation_ {false};
+    bool hide_viewpoints_ {false};
+
     std::unique_ptr<SimpleConfig> simple_config_;
     std::unique_ptr<DBInterface> db_interface_;
     std::unique_ptr<DBContentManager> dbcontent_manager_;
@@ -121,6 +124,8 @@ public:
     void expertMode(bool expert_mode);
 
     bool isShutDown() const;
+    bool hideEvaluation() const;
+    bool hideViewpoints() const;
 };
 
 #endif /* COMPASS_H_ */

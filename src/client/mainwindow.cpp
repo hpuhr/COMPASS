@@ -126,7 +126,7 @@ MainWindow::MainWindow()
 
     QApplication::restoreOverrideCursor();
 
-    tab_widget_->setCurrentIndex(0);
+    //tab_widget_->setCurrentIndex(0);
 
     add_view_button_ = new QPushButton();
     add_view_button_->setIcon(QIcon(Files::getIconFilepath("crosshair_fat.png").c_str()));
@@ -283,11 +283,14 @@ void MainWindow::createMenus ()
     connect(import_gps_file_action, &QAction::triggered, this, &MainWindow::importGPSTrailSlot);
     import_menu_->addAction(import_gps_file_action);
 
-    QAction* import_vp_file_action = new QAction(tr("&View Points"));
-    import_vp_file_action->setShortcut(tr("Ctrl+V"));
-    import_vp_file_action->setToolTip(tr("Import View Points File"));
-    connect(import_vp_file_action, &QAction::triggered, this, &MainWindow::importViewPointsSlot);
-    import_menu_->addAction(import_vp_file_action);
+    if (!COMPASS::instance().hideViewpoints())
+    {
+        QAction* import_vp_file_action = new QAction(tr("&View Points"));
+        import_vp_file_action->setShortcut(tr("Ctrl+V"));
+        import_vp_file_action->setToolTip(tr("Import View Points File"));
+        connect(import_vp_file_action, &QAction::triggered, this, &MainWindow::importViewPointsSlot);
+        import_menu_->addAction(import_vp_file_action);
+    }
 
     // configuration menu
     QMenu* config_menu = menuBar()->addMenu(tr("&Configuration"));
@@ -336,11 +339,11 @@ void MainWindow::createMenus ()
     process_menu_->addAction(assoc_artas_action);
 
     //tests
-    #if 1
+#if 1
     QAction* test_action = new QAction(tr("Run test code"));
     config_menu->addAction(test_action);
     connect(test_action, &QAction::triggered, this, &MainWindow::runTestCodeSlot);
-    #endif
+#endif
 }
 
 void MainWindow::updateMenus()
@@ -480,12 +483,14 @@ void MainWindow::disableConfigurationSaving()
 void MainWindow::showEvaluationTab()
 {
     assert (tab_widget_->count() > 2);
+    assert (!COMPASS::instance().hideEvaluation());
     tab_widget_->setCurrentIndex(2);
 }
 
 void MainWindow::showViewPointsTab()
 {
     assert (tab_widget_->count() > 3);
+    assert (!COMPASS::instance().hideViewpoints());
     tab_widget_->setCurrentIndex(3);
 }
 
@@ -1473,7 +1478,7 @@ void MainWindow::shutdown()
 void MainWindow::runTestCodeSlot()
 {
     LabelPlacementEngine::TestConfig config;
-    
+
     LabelPlacementEngine lpe;
     lpe.runTest(config);
 }

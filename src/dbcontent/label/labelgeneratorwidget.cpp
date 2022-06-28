@@ -48,7 +48,7 @@ LabelGeneratorWidget::LabelGeneratorWidget(LabelGenerator& label_generator)
     auto_label_check->setChecked(label_generator_.autoLabel());
     connect(auto_label_check, &QCheckBox::clicked,
             this, &LabelGeneratorWidget::autoLabelChangedSlot);
-    form_layout1->addRow("Automatic Labeling", auto_label_check);
+    form_layout1->addRow("Show Automatic Labels", auto_label_check);
 
     // lod
     QComboBox* lod_box = new QComboBox();
@@ -86,6 +86,8 @@ LabelGeneratorWidget::LabelGeneratorWidget(LabelGenerator& label_generator)
     unsigned int row=0;
 
     // filters
+
+    main_layout->addSpacing(10);
 
     main_layout->addWidget(new QLabel("Label Filters"));
 

@@ -79,7 +79,9 @@ void ViewManager::init(QTabWidget* tab_widget)
     QApplication::restoreOverrideCursor();
 
     assert(view_points_widget_);
-    tab_widget->addTab(view_points_widget_, "View Points");
+
+    if (!COMPASS::instance().hideViewpoints())
+        tab_widget->addTab(view_points_widget_, "View Points");
 
     FilterManager& filter_man = COMPASS::instance().filterManager();
 
