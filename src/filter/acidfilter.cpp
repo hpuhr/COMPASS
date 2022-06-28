@@ -26,9 +26,13 @@ ACIDFilter::ACIDFilter(const std::string& class_id, const std::string& instance_
 
 ACIDFilter::~ACIDFilter() {}
 
-bool ACIDFilter::filters(const std::string& dbo_type)
+bool ACIDFilter::filters(const std::string& dbcont_type)
 {
-    return COMPASS::instance().dbContentManager().metaVariable(DBContent::meta_var_ti_.name()).existsIn(dbo_type);
+    if (dbcont_type == "CAT062")
+        return true; // acid and callsign fpl
+    else
+        return COMPASS::instance().dbContentManager().metaVariable(
+                    DBContent::meta_var_ti_.name()).existsIn(dbcont_type);
 }
 
 std::string ACIDFilter::getConditionString(const std::string& dbcontent_name, bool& first,
@@ -44,10 +48,21 @@ std::string ACIDFilter::getConditionString(const std::string& dbcontent_name, bo
 
     if (active_  && (values_.size() || null_wanted_))
     {
-        dbContent::Variable& var = COMPASS::instance().dbContentManager().metaVariable(
+        dbContent::Variable& acid_var = COMPASS::instance().dbContentManager().metaVariable(
                     DBContent::meta_var_ti_.name()).getFor(dbcontent_name);
 
-        filtered_variables.push_back(&var);
+        filtered_variables.push_back(&acid_var);
+
+        dbContent::Variable* cs_fpl_var {nullptr}; // only set in cat062
+
+        if (dbcontent_name == "CAT062")
+        {
+            assert (COMPASS::instance().dbContentManager().canGetVariable(
+                        dbcontent_name, DBContent::var_cat062_callsign_fpl_));
+
+            cs_fpl_var = &COMPASS::instance().dbContentManager().getVariable(
+                        dbcontent_name, DBContent::var_cat062_callsign_fpl_);
+        }
 
         if (!first)
             ss << " AND";
@@ -61,7 +76,12 @@ std::string ACIDFilter::getConditionString(const std::string& dbcontent_name, bo
             if (!first_val)
                 ss << " OR";
 
-             ss << " " << var.dbColumnName()  << " LIKE '%" << val_it << "%'";
+             ss << " (" << acid_var.dbColumnName()  << " LIKE '%" << val_it << "%'";
+
+             if (cs_fpl_var)
+                ss << " OR " << cs_fpl_var->dbColumnName()  << " LIKE '%" << val_it << "%'";
+
+             ss << ")";
 
             first_val = false;
         }
@@ -71,7 +91,12 @@ std::string ACIDFilter::getConditionString(const std::string& dbcontent_name, bo
             if (!first_val)
                 ss << " OR";
 
-            ss << " " << var.dbColumnName()  << " IS NULL";
+            ss << " (" << acid_var.dbColumnName()  << " IS NULL";
+
+            if (cs_fpl_var)
+               ss << " OR " << cs_fpl_var->dbColumnName()  << " IS NULL";
+
+            ss << ")";
         }
 
         ss << ")";
@@ -79,7 +104,7 @@ std::string ACIDFilter::getConditionString(const std::string& dbcontent_name, bo
         first = false;
     }
 
-    logdbg << "ACIDFilter: getConditionString: here '" << ss.str() << "'";
+    loginf << "ACIDFilter: getConditionString: here '" << ss.str() << "'";
 
     return ss.str();
 }

@@ -107,6 +107,7 @@ const Property DBContent::var_cat062_track_end_ {"Track End", PropertyDataType::
 const Property DBContent::var_cat062_baro_alt_ {"Barometric Altitude Calculated", PropertyDataType::FLOAT};
 
 const Property DBContent::var_cat062_wtc_ {"Wake Turbulence Category FPL", PropertyDataType::STRING};
+const Property DBContent::var_cat062_callsign_fpl_ {"Callsign FPL", PropertyDataType::STRING};
 
 const Property DBContent::selected_var {"selected", PropertyDataType::BOOL};
 
