@@ -116,6 +116,9 @@ public:
     bool declutterLabels() const;
     void declutterLabels(bool declutter_labels);
 
+    bool showDeclutteringInfoOnce() const;
+    void showDeclutteringInfoOnce(bool value);
+
 protected:
     DBContentManager& dbcont_manager_;
 
@@ -124,6 +127,7 @@ protected:
     float current_lod_ {1}; // 1, 2, 3, float for filter function
 
     bool declutter_labels_ {true};
+    bool show_decluttering_info_once_ {false};
 
     nlohmann::json label_directions_;
     float label_distance_ {0.5}; // 0 ... 1

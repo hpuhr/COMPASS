@@ -751,6 +751,16 @@ void LabelGenerator::declutterLabels(bool declutter_labels)
     emit labelOptionsChangedSignal(); // updates
 }
 
+bool LabelGenerator::showDeclutteringInfoOnce() const
+{
+    return show_decluttering_info_once_;
+}
+
+void LabelGenerator::showDeclutteringInfoOnce(bool show_decluttering_info_once)
+{
+    show_decluttering_info_once_ = show_decluttering_info_once;
+}
+
 float LabelGenerator::labelDistance() const
 {
     return label_distance_;
