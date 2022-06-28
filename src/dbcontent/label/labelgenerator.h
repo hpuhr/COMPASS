@@ -52,9 +52,6 @@ public:
     bool autoLabel() const;
     void autoLabel(bool auto_label);
 
-//    void registerLeafItemLabel (GeometryLeafItemLabels& item_label);
-//    void unregisterLeafItemLabel (GeometryLeafItemLabels& item_label);
-
     void autoAdustCurrentLOD(unsigned int num_labels_on_screen);
 
     unsigned int currentLOD() const;
@@ -106,6 +103,9 @@ public:
     float labelDirectionAngle (unsigned int ds_id);
     void labelDirection (unsigned int ds_id, LabelDirection direction);
 
+    unsigned int labelLine (unsigned int ds_id); // returns 0...3
+    void labelLine (unsigned int ds_id, unsigned int line);
+
     void editLabelContents(const std::string& dbcontent_name);
 
     void checkLabelConfig();
@@ -119,6 +119,8 @@ public:
     bool showDeclutteringInfoOnce() const;
     void showDeclutteringInfoOnce(bool value);
 
+    unsigned int maxDeclutterlabels() const;
+
 protected:
     DBContentManager& dbcont_manager_;
 
@@ -127,10 +129,13 @@ protected:
     float current_lod_ {1}; // 1, 2, 3, float for filter function
 
     bool declutter_labels_ {true};
+    unsigned int max_declutter_labels_ {200};
     bool show_decluttering_info_once_ {false};
 
     nlohmann::json label_directions_;
     float label_distance_ {0.5}; // 0 ... 1
+
+    nlohmann::json label_lines_;
 
     nlohmann::json label_config_;
 

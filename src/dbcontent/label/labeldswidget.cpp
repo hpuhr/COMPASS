@@ -4,6 +4,7 @@
 #include "dbcontent/label/labelgenerator.h"
 #include "logger.h"
 #include "files.h"
+#include "stringconv.h"
 
 #include <QHBoxLayout>
 #include <QMenu>
@@ -32,7 +33,7 @@ LabelDSWidget::LabelDSWidget(LabelGenerator& label_generator, QWidget* parent,
 //    updateListSlot();
 
 //    connect(list_widget_, &QListWidget::itemClicked,
-//            this, &DBContentLabelDSWidget::itemClickedSlot);
+//            this, &LabelDSWidget::itemClickedSlot);
 
 //    main_layout->addWidget(list_widget_);
 
@@ -80,6 +81,7 @@ void LabelDSWidget::updateListSlot()
     }
 
     direction_buttons_.clear();
+    line_buttons_.clear();
 
     unsigned int row=0;
 
@@ -90,13 +92,13 @@ void LabelDSWidget::updateListSlot()
     src_label->setFont(font_bold);
     ds_grid_->addWidget(src_label, row, 0);
 
-//    QLabel* line_label = new QLabel("Line");
-//    line_label->setFont(font_bold);
-//    ds_grid_->addWidget(line_label, row, 1);
+    QLabel* line_label = new QLabel("Line");
+    line_label->setFont(font_bold);
+    ds_grid_->addWidget(line_label, row, 1);
 
     QLabel* dir_label = new QLabel("Direction");
     dir_label->setFont(font_bold);
-    ds_grid_->addWidget(dir_label, row, 1);;
+    ds_grid_->addWidget(dir_label, row, 2);;
 
     DataSourceManager& ds_man = COMPASS::instance().dataSourceManager();
 
@@ -112,8 +114,15 @@ void LabelDSWidget::updateListSlot()
         connect(box, &QCheckBox::clicked, this, &LabelDSWidget::sourceClickedSlot);
         ds_grid_->addWidget(box, row, 0);
 
-//        QLabel* test = new QLabel("L1");
-//        ds_grid_->addWidget(test, row, 1);
+        QPushButton* line = new QPushButton(String::lineStrFrom(label_generator_.labelLine(ds_it->id())).c_str());
+        line->setProperty("ds_id", ds_it->id());
+        line->setFixedWidth(2*UI_ICON_SIZE.width());
+        //direction->setFixedSize(UI_ICON_SIZE);
+        line->setFlat(UI_ICON_BUTTON_FLAT);
+        connect(line, &QPushButton::clicked, this, &LabelDSWidget::changeLineSlot);
+        ds_grid_->addWidget(line, row, 1);
+
+        line_buttons_[ds_it->id()] = line;
 
         QPushButton* direction = new QPushButton();
         direction->setProperty("ds_id", ds_it->id());
@@ -122,7 +131,7 @@ void LabelDSWidget::updateListSlot()
         //direction->setFixedSize(UI_ICON_SIZE);
         direction->setFlat(UI_ICON_BUTTON_FLAT);
         connect(direction, &QPushButton::clicked, this, &LabelDSWidget::changeDirectionSlot);
-        ds_grid_->addWidget(direction, row, 1);
+        ds_grid_->addWidget(direction, row, 2);
 
         direction_buttons_[ds_it->id()] = direction;
 
@@ -178,6 +187,41 @@ void LabelDSWidget::sourceClickedSlot()
         label_generator_.removeLabelDSID(ds_id);
     else
         label_generator_.addLabelDSID(ds_id);
+}
+
+void LabelDSWidget::changeLineSlot()
+{
+    QPushButton* widget = static_cast<QPushButton*>(sender());
+    assert(widget);
+
+    QVariant ds_id_var = widget->property("ds_id");
+    unsigned int ds_id = ds_id_var.value<unsigned int>();
+
+    loginf << "OSGViewConfigLabelDSWidget: changeLineSlot: ds_id " << ds_id;
+
+    QMenu menu;
+
+    QAction* l1_action = menu.addAction("L1");
+    l1_action->setProperty("ds_id", ds_id);
+    l1_action->setProperty("line", 0);
+    connect(l1_action, &QAction::triggered, this, &LabelDSWidget::selectLineSlot);
+
+    QAction* l2_action = menu.addAction("L2");
+    l2_action->setProperty("ds_id", ds_id);
+    l2_action->setProperty("line", 1);
+    connect(l2_action, &QAction::triggered, this, &LabelDSWidget::selectLineSlot);
+
+    QAction* l3_action = menu.addAction("L3");
+    l3_action->setProperty("ds_id", ds_id);
+    l3_action->setProperty("line", 2);
+    connect(l3_action, &QAction::triggered, this, &LabelDSWidget::selectLineSlot);
+
+    QAction* l4_action = menu.addAction("L4");
+    l4_action->setProperty("ds_id", ds_id);
+    l4_action->setProperty("line", 3);
+    connect(l4_action, &QAction::triggered, this, &LabelDSWidget::selectLineSlot);
+
+    menu.exec(QCursor::pos());
 }
 
 void LabelDSWidget::changeDirectionSlot()
@@ -240,13 +284,30 @@ void LabelDSWidget::selectDirectionSlot()
     unsigned int dir = dir_var.value<unsigned int>();
     assert (dir <= 3);
 
-    loginf << "DBContentLabelDSWidget: selectDirectionSlot: ds_id " << ds_id << " dir " << dir;
+    loginf << "LabelDSWidget: selectDirectionSlot: ds_id " << ds_id << " dir " << dir;
 
     LabelDirection direction = LabelDirection(dir);
     label_generator_.labelDirection(ds_id, direction);
 
     assert (direction_buttons_.count(ds_id));
     direction_buttons_.at(ds_id)->setIcon(iconForDirection(direction));
+}
+
+void LabelDSWidget::selectLineSlot()
+{
+    QVariant ds_id_var = sender()->property("ds_id");
+    unsigned int ds_id = ds_id_var.value<unsigned int>();
+
+    QVariant line_var = sender()->property("line");
+    unsigned int line = line_var.value<unsigned int>();
+    assert (line <= 3);
+
+    loginf << "LabelDSWidget: selectLineSlot: ds_id " << ds_id << " line " << line;
+
+    label_generator_.labelLine(ds_id, line);
+
+    assert (line_buttons_.count(ds_id));
+    line_buttons_.at(ds_id)->setText(String::lineStrFrom(line).c_str());
 }
 
 }
