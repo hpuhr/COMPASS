@@ -170,6 +170,14 @@ LabelGeneratorWidget::LabelGeneratorWidget(LabelGenerator& label_generator)
             this, &LabelGeneratorWidget::filterTAChangedSlot);
     filter_layout->addWidget(filter_ta_edit, row, 1);
 
+    // psr only
+    ++row;
+    QCheckBox* filter_psr_box = new QCheckBox("Primary Only");
+    filter_psr_box->setChecked(label_generator_.filterPrimaryOnlyActive());
+    connect(filter_psr_box, &QCheckBox::clicked,
+            this, &LabelGeneratorWidget::filterPSROnlyActiveChangedSlot);
+    filter_layout->addWidget(filter_psr_box, row, 0);
+
     filter_frame->setLayout(filter_layout);
 
     main_layout->addWidget(filter_frame);
@@ -324,6 +332,13 @@ void LabelGeneratorWidget::filterTAChangedSlot(const QString& text)
     loginf << "DBContentLabelGeneratorWidget: filterTAChangedSlot: value " << values;
 
     label_generator_.filterTAValues(values);
+}
+
+void LabelGeneratorWidget::filterPSROnlyActiveChangedSlot(bool checked)
+{
+    loginf << "DBContentLabelGeneratorWidget: filterPSROnlyActiveChangedSlot: checked " << checked;
+
+    label_generator_.filterPrimaryOnlyActive(checked);
 }
 
 }

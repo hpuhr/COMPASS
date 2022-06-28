@@ -58,6 +58,8 @@ LabelGenerator::LabelGenerator(const std::string& class_id, const std::string& i
     registerParameter("filter_ta_values", &filter_ta_values_, "AADDCC");
     updateTAValuesFromStr(filter_ta_values_);
 
+    registerParameter("filter_primary_only_activ", &filter_primary_only_active_, false);
+
     createSubConfigurables();
 }
 
@@ -371,14 +373,16 @@ bool LabelGenerator::labelWanted(unsigned int ds_id)
 
 bool LabelGenerator::labelWanted(std::shared_ptr<Buffer> buffer, unsigned int index)
 {
+    string dbcont_name = buffer->dbContentName();
+
     // check line
     {
-        assert (dbcont_manager_.metaCanGetVariable(buffer->dbContentName(), DBContent::meta_var_line_id_));
+        assert (dbcont_manager_.metaCanGetVariable(dbcont_name, DBContent::meta_var_line_id_));
         dbContent::Variable& line_var = dbcont_manager_.metaGetVariable(
-                    buffer->dbContentName(), DBContent::meta_var_line_id_);
-        assert (dbcont_manager_.metaCanGetVariable(buffer->dbContentName(), DBContent::meta_var_datasource_id_));
+                    dbcont_name, DBContent::meta_var_line_id_);
+        assert (dbcont_manager_.metaCanGetVariable(dbcont_name, DBContent::meta_var_datasource_id_));
         dbContent::Variable& ds_id_var = dbcont_manager_.metaGetVariable(
-                    buffer->dbContentName(), DBContent::meta_var_datasource_id_);
+                    dbcont_name, DBContent::meta_var_datasource_id_);
 
 
         assert (buffer->has<unsigned int> (line_var.name()));
@@ -396,10 +400,10 @@ bool LabelGenerator::labelWanted(std::shared_ptr<Buffer> buffer, unsigned int in
 
     if (filter_mode3a_active_)
     {
-        if (!dbcont_manager_.metaCanGetVariable(buffer->dbContentName(), DBContent::meta_var_m3a_))
+        if (!dbcont_manager_.metaCanGetVariable(dbcont_name, DBContent::meta_var_m3a_))
             return false;
 
-        dbContent::Variable& var = dbcont_manager_.metaGetVariable(buffer->dbContentName(), DBContent::meta_var_m3a_);
+        dbContent::Variable& var = dbcont_manager_.metaGetVariable(dbcont_name, DBContent::meta_var_m3a_);
 
         assert (buffer->has<unsigned int> (var.name()));
 
@@ -416,10 +420,10 @@ bool LabelGenerator::labelWanted(std::shared_ptr<Buffer> buffer, unsigned int in
 
     if (filter_modec_min_active_ || filter_modec_max_active_)
     {
-        if (!dbcont_manager_.metaCanGetVariable(buffer->dbContentName(), DBContent::meta_var_mc_))
+        if (!dbcont_manager_.metaCanGetVariable(dbcont_name, DBContent::meta_var_mc_))
             return false;
 
-        dbContent::Variable& var = dbcont_manager_.metaGetVariable(buffer->dbContentName(), DBContent::meta_var_mc_);
+        dbContent::Variable& var = dbcont_manager_.metaGetVariable(dbcont_name, DBContent::meta_var_mc_);
 
         assert (buffer->has<float> (var.name()));
 
@@ -440,20 +444,35 @@ bool LabelGenerator::labelWanted(std::shared_ptr<Buffer> buffer, unsigned int in
         }
     }
 
-    if (filter_ti_active_)
+    if (filter_ti_active_) // TODO add callsign FPL
     {
-        if (!dbcont_manager_.metaCanGetVariable(buffer->dbContentName(), DBContent::meta_var_ti_))
+        if (!dbcont_manager_.metaCanGetVariable(dbcont_name, DBContent::meta_var_ti_))
             return false;
 
-        dbContent::Variable& var = dbcont_manager_.metaGetVariable(buffer->dbContentName(), DBContent::meta_var_ti_);
+        dbContent::Variable& acid_var = dbcont_manager_.metaGetVariable(dbcont_name, DBContent::meta_var_ti_);
 
-        assert (buffer->has<string> (var.name()));
+        assert (buffer->has<string> (acid_var.name()));
 
-        NullableVector<string>& data_vec = buffer->get<string> (var.name());
+        NullableVector<string>& acid_vec = buffer->get<string> (acid_var.name());
 
-        if (data_vec.isNull(index))
+        dbContent::Variable* cs_fpl_var {nullptr}; // only set in cat062
+        NullableVector<string>* cs_fpl_vec {nullptr}; // only set in cat062
+
+        if (dbcont_name == "CAT062")
         {
-            if (!filter_ti_null_wanted_)
+            assert (dbcont_manager_.canGetVariable(dbcont_name, DBContent::var_cat062_callsign_fpl_));
+
+            cs_fpl_var = &dbcont_manager_.getVariable(dbcont_name, DBContent::var_cat062_callsign_fpl_);
+
+            assert (buffer->has<string> (cs_fpl_var->name()));
+
+            cs_fpl_vec = &buffer->get<string> (cs_fpl_var->name());
+        }
+
+        if (acid_vec.isNull(index))
+        {
+            if (!filter_ti_null_wanted_
+                    || cs_fpl_vec != nullptr ? cs_fpl_vec->isNull(index) : false)
                 return false; // null not wanted
         }
         else
@@ -462,10 +481,22 @@ bool LabelGenerator::labelWanted(std::shared_ptr<Buffer> buffer, unsigned int in
 
             for (auto& val_it : filter_ti_values_set_)
             {
-                if (data_vec.get(index).find(val_it) != std::string::npos)
+                if (acid_vec.get(index).find(val_it) != std::string::npos)
                 {
                     found = true;
                     break;
+                }
+            }
+
+            if (cs_fpl_vec)
+            {
+                for (auto& val_it : filter_ti_values_set_)
+                {
+                    if (cs_fpl_vec->get(index).find(val_it) != std::string::npos)
+                    {
+                        found = true;
+                        break;
+                    }
                 }
             }
 
@@ -476,10 +507,10 @@ bool LabelGenerator::labelWanted(std::shared_ptr<Buffer> buffer, unsigned int in
 
     if (filter_ta_active_)
     {
-        if (!dbcont_manager_.metaCanGetVariable(buffer->dbContentName(), DBContent::meta_var_ta_))
+        if (!dbcont_manager_.metaCanGetVariable(dbcont_name, DBContent::meta_var_ta_))
             return false;
 
-        dbContent::Variable& var = dbcont_manager_.metaGetVariable(buffer->dbContentName(), DBContent::meta_var_ta_);
+        dbContent::Variable& var = dbcont_manager_.metaGetVariable(dbcont_name, DBContent::meta_var_ta_);
 
         assert (buffer->has<unsigned int> (var.name()));
 
@@ -492,6 +523,62 @@ bool LabelGenerator::labelWanted(std::shared_ptr<Buffer> buffer, unsigned int in
         }
         else if (!filter_ta_values_set_.count(data_vec.get(index)))
             return false; // set and not in values
+    }
+
+    if (filter_primary_only_active_)
+    {
+        NullableVector<unsigned int>* m3a_vec {nullptr};
+        if (dbcont_manager_.metaCanGetVariable(dbcont_name, DBContent::meta_var_m3a_))
+        {
+            dbContent::Variable& var = dbcont_manager_.metaGetVariable(dbcont_name, DBContent::meta_var_m3a_);
+            assert (buffer->has<unsigned int> (var.name()));
+            m3a_vec = &buffer->get<unsigned int> (var.name());
+        }
+
+        NullableVector<float>* mc_vec {nullptr};
+        if (dbcont_manager_.metaCanGetVariable(dbcont_name, DBContent::meta_var_mc_))
+        {
+            dbContent::Variable& var = dbcont_manager_.metaGetVariable(dbcont_name, DBContent::meta_var_mc_);
+            assert (buffer->has<float> (var.name()));
+            mc_vec = &buffer->get<float> (var.name());
+        }
+
+        NullableVector<unsigned int>* ta_vec {nullptr};
+        if (dbcont_manager_.metaCanGetVariable(dbcont_name, DBContent::meta_var_ta_))
+        {
+            dbContent::Variable& var = dbcont_manager_.metaGetVariable(dbcont_name, DBContent::meta_var_ta_);
+            assert (buffer->has<unsigned int> (var.name()));
+            ta_vec = &buffer->get<unsigned int> (var.name());
+        }
+
+        NullableVector<string>* ti_vec {nullptr};
+        if (dbcont_manager_.metaCanGetVariable(dbcont_name, DBContent::meta_var_ti_))
+        {
+            dbContent::Variable& var = dbcont_manager_.metaGetVariable(dbcont_name, DBContent::meta_var_ti_);
+            assert (buffer->has<string> (var.name()));
+            ti_vec = &buffer->get<string> (var.name());
+        }
+
+        NullableVector<unsigned char>* type_vec {nullptr};
+        if (dbcont_manager_.metaCanGetVariable(dbcont_name, DBContent::meta_var_detection_type_))
+        {
+            dbContent::Variable& var = dbcont_manager_.metaGetVariable(dbcont_name, DBContent::meta_var_detection_type_);
+            assert (buffer->has<unsigned char> (var.name()));
+            type_vec = &buffer->get<unsigned char> (var.name());
+        }
+
+        std::set<unsigned char> psr_detection {1,3,6,7};
+
+        if (m3a_vec && !m3a_vec->isNull(index))
+            return false;
+        else if (mc_vec && !mc_vec->isNull(index))
+            return false;
+        else if (ta_vec && !ta_vec->isNull(index))
+            return false;
+        else if (ti_vec && !ti_vec->isNull(index))
+            return false;
+        else if (type_vec && !type_vec->isNull(index) && !psr_detection.count(type_vec->get(index)))
+            return false;
     }
 
     return true;
@@ -815,6 +902,18 @@ void LabelGenerator::showDeclutteringInfoOnce(bool show_decluttering_info_once)
 unsigned int LabelGenerator::maxDeclutterlabels() const
 {
     return max_declutter_labels_;
+}
+
+bool LabelGenerator::filterPrimaryOnlyActive() const
+{
+    return filter_primary_only_active_;
+}
+
+void LabelGenerator::filterPrimaryOnlyActive(bool value)
+{
+    loginf << "LabelGenerator: filterPrimaryOnlyActive: value " << value;
+
+    filter_primary_only_active_ = value;
 }
 
 float LabelGenerator::labelDistance() const

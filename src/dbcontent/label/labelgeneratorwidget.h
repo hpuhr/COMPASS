@@ -41,6 +41,8 @@ public slots:
     void filterTAActiveChangedSlot(bool checked);
     void filterTAChangedSlot(const QString& text);
 
+    void filterPSROnlyActiveChangedSlot(bool checked);
+
 public:
     LabelGeneratorWidget(LabelGenerator& label_generator);
     virtual ~LabelGeneratorWidget();

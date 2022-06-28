@@ -121,6 +121,9 @@ public:
 
     unsigned int maxDeclutterlabels() const;
 
+    bool filterPrimaryOnlyActive() const;
+    void filterPrimaryOnlyActive(bool value);
+
 protected:
     DBContentManager& dbcont_manager_;
 
@@ -161,6 +164,8 @@ protected:
     std::string filter_ta_values_;
     std::set<unsigned int> filter_ta_values_set_; // dec
     bool filter_ta_null_wanted_ {false};
+
+    bool filter_primary_only_active_ {false};
 
     //std::set<GeometryLeafItemLabels*> item_labels_;
     std::unique_ptr<LabelContentDialog> label_edit_dialog_;
