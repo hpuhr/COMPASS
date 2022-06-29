@@ -60,6 +60,8 @@ LabelGenerator::LabelGenerator(const std::string& class_id, const std::string& i
 
     registerParameter("filter_primary_only_activ", &filter_primary_only_active_, false);
 
+    registerParameter("label_opacity", &label_opacity_, 0.9);
+
     createSubConfigurables();
 }
 
@@ -913,6 +915,16 @@ void LabelGenerator::filterPrimaryOnlyActive(bool value)
     loginf << "LabelGenerator: filterPrimaryOnlyActive: value " << value;
 
     filter_primary_only_active_ = value;
+}
+
+float LabelGenerator::labelOpacity() const
+{
+    return label_opacity_;
+}
+
+void LabelGenerator::labelOpacity(float label_opacity)
+{
+    label_opacity_ = label_opacity;
 }
 
 float LabelGenerator::labelDistance() const

@@ -43,6 +43,8 @@ public slots:
 
     void filterPSROnlyActiveChangedSlot(bool checked);
 
+    void opacitySliderChangedSlot(int value);
+
 public:
     LabelGeneratorWidget(LabelGenerator& label_generator);
     virtual ~LabelGeneratorWidget();

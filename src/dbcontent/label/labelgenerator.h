@@ -124,6 +124,9 @@ public:
     bool filterPrimaryOnlyActive() const;
     void filterPrimaryOnlyActive(bool value);
 
+    float labelOpacity() const;
+    void labelOpacity(float label_opacity);
+
 protected:
     DBContentManager& dbcont_manager_;
 
@@ -166,6 +169,8 @@ protected:
     bool filter_ta_null_wanted_ {false};
 
     bool filter_primary_only_active_ {false};
+
+    float label_opacity_ {0.9};
 
     //std::set<GeometryLeafItemLabels*> item_labels_;
     std::unique_ptr<LabelContentDialog> label_edit_dialog_;

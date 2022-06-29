@@ -16,6 +16,7 @@
 #include <QPushButton>
 #include <QScrollArea>
 #include <QMenu>
+#include <QSlider>
 
 using namespace std;
 using namespace Utils;
@@ -63,8 +64,21 @@ LabelGeneratorWidget::LabelGeneratorWidget(LabelGenerator& label_generator)
             this, &LabelGeneratorWidget::lodChangedSlot);
     form_layout1->addRow(tr("Level of Detail"), lod_box);
 
-    // declutter
+    // opacity
 
+    QSlider* opacity_slider = new QSlider(Qt::Horizontal);
+    opacity_slider->setMinimum(0);
+    opacity_slider->setMaximum(100);
+    opacity_slider->setSingleStep(1);
+    opacity_slider->setSliderPosition((1.0 - label_generator_.labelOpacity()) * 100);
+    opacity_slider->setMaximumWidth(100);
+
+    connect (opacity_slider, &QSlider::valueChanged,
+             this, &LabelGeneratorWidget::opacitySliderChangedSlot);
+
+    form_layout1->addRow(tr("Label Opacity"), opacity_slider);
+
+    // declutter
     QCheckBox* declutter_box = new QCheckBox();
     declutter_box->setChecked(label_generator_.declutterLabels());
     connect(declutter_box, &QCheckBox::clicked,
@@ -339,6 +353,17 @@ void LabelGeneratorWidget::filterPSROnlyActiveChangedSlot(bool checked)
     loginf << "DBContentLabelGeneratorWidget: filterPSROnlyActiveChangedSlot: checked " << checked;
 
     label_generator_.filterPrimaryOnlyActive(checked);
+}
+
+void LabelGeneratorWidget::opacitySliderChangedSlot(int value)
+{
+    logdbg << "LabelGeneratorWidget: opacitySliderChangedSlot: value " << value;
+
+    float new_op = 1 - ((float) value) / 100.0;
+
+    logdbg << "LabelGeneratorWidget: opacitySliderChangedSlot: new_op " << new_op;
+
+    label_generator_.labelOpacity(new_op);
 }
 
 }
