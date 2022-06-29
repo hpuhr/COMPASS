@@ -444,7 +444,7 @@ bool LabelGenerator::labelWanted(std::shared_ptr<Buffer> buffer, unsigned int in
         }
     }
 
-    if (filter_ti_active_) // TODO add callsign FPL
+    if (filter_ti_active_)
     {
         if (!dbcont_manager_.metaCanGetVariable(dbcont_name, DBContent::meta_var_ti_))
             return false;
@@ -465,14 +465,13 @@ bool LabelGenerator::labelWanted(std::shared_ptr<Buffer> buffer, unsigned int in
             cs_fpl_var = &dbcont_manager_.getVariable(dbcont_name, DBContent::var_cat062_callsign_fpl_);
 
             assert (buffer->has<string> (cs_fpl_var->name()));
-
             cs_fpl_vec = &buffer->get<string> (cs_fpl_var->name());
         }
 
         if (acid_vec.isNull(index))
         {
             if (!filter_ti_null_wanted_
-                    || cs_fpl_vec != nullptr ? cs_fpl_vec->isNull(index) : false)
+                    || (cs_fpl_vec != nullptr ? cs_fpl_vec->isNull(index) : false))
                 return false; // null not wanted
         }
         else
@@ -488,7 +487,7 @@ bool LabelGenerator::labelWanted(std::shared_ptr<Buffer> buffer, unsigned int in
                 }
             }
 
-            if (cs_fpl_vec)
+            if (cs_fpl_vec && !cs_fpl_vec->isNull(index))
             {
                 for (auto& val_it : filter_ti_values_set_)
                 {

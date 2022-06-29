@@ -62,6 +62,12 @@ public:
 
     DBDataSourceWidget* widget();
 
+    bool hasMaxToD(unsigned int line) const;
+    void maxToD(unsigned int line, float value);
+    float maxToD(unsigned int line) const;
+
+    bool hasLiveData(unsigned int line, float current_tod) const;
+
 protected:
     unsigned int id_{0};
 
@@ -73,6 +79,8 @@ protected:
     std::map<std::string, std::map<unsigned int, unsigned int>> num_inserted_; // db_content -> line id -> count
 
     std::map<unsigned int, bool> line_loading_wanted_; // not contained means true
+
+    std::map<unsigned int, float> max_line_tods_; // only used in live mode, line -> max tod
 
     std::unique_ptr<DBDataSourceWidget> widget_;
 };

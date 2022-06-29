@@ -36,54 +36,18 @@
 #include "evaluationmanager.h"
 #include "filtermanager.h"
 #include "util/number.h"
+#include "util/system.h"
 #include "dbcontent/variable/metavariableconfigurationdialog.h"
 
 #include <QApplication>
 #include <QMessageBox>
 
 #include <algorithm>
-#include <chrono>
 #include <string>
 
 using namespace std;
 using namespace Utils;
 using namespace dbContent;
-
-// move to somewhere else?
-double secondsSinceMidnightUTC ()
-{
-    using namespace boost::posix_time;
-
-    auto p_time = microsec_clock::universal_time (); // UTC.
-    return (p_time.time_of_day().total_milliseconds() / 1000.0);
-
-    ////    auto now = std::chrono::system_clock::now(); // system_clock
-    ////    time_t tnow = std::chrono::system_clock::to_time_t(now);
-
-    ////    loginf << " now is " << std::ctime(&tnow);
-
-    ////    //tm *date = std::localtime(&tnow); // local
-    ////    tm *date = std::gmtime(&tnow); // utc
-    ////    date->tm_hour = 0;
-    ////    date->tm_min = 0;
-    ////    date->tm_sec = 0;
-    ////    auto midnight = std::chrono::system_clock::from_time_t(std::mktime(date));
-
-    ////    double tod = std::chrono::duration<double>(now-midnight).count();
-
-    //////    auto now = std::chrono::system_clock::now();
-    //////    auto today = floor<days>(now);
-    //////    auto tod = duration_cast<seconds>(now - today);
-
-    ////    using namespace std::chrono;
-    ////    using namespace std;
-    ////    using days = duration<int, ratio<86400>>;
-    ////    seconds last_midnight =
-    ////        time_point_cast<days>(system_clock::now()).time_since_epoch();
-    ////    loginf << "UGA " <<  last_midnight.count() << String::timeStringFromDouble(last_midnight.count());
-
-    //    return tod;
-}
 
 DBContentManager::DBContentManager(const std::string& class_id, const std::string& instance_id,
                                    COMPASS* compass)
@@ -1070,7 +1034,7 @@ void DBContentManager::cutCachedData()
     bool max_time_set = false;
     float min_tod_found, max_tod_found;
 
-    float max_time = secondsSinceMidnightUTC();
+    float max_time = System::secondsSinceMidnightUTC();
 
     float time_offset = COMPASS::instance().mainWindow().importASTERIXFromNetworkTimeOffset();
 
