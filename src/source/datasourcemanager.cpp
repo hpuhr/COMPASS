@@ -745,7 +745,6 @@ void DataSourceManager::createNetworkDBDataSources()
 
         if (ds_it->hasNetworkLines())
         {
-
             if (!hasDBDataSource(ds_id))
             {
                 loginf << "DataSourceManager: createNetworkDBDataSources: ds_id " << ds_id << " from config";

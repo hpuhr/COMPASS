@@ -107,6 +107,7 @@ const Property DBContent::var_cat062_track_end_ {"Track End", PropertyDataType::
 const Property DBContent::var_cat062_baro_alt_ {"Barometric Altitude Calculated", PropertyDataType::FLOAT};
 
 const Property DBContent::var_cat062_wtc_ {"Wake Turbulence Category FPL", PropertyDataType::STRING};
+const Property DBContent::var_cat062_callsign_fpl_ {"Callsign FPL", PropertyDataType::STRING};
 
 const Property DBContent::selected_var {"selected", PropertyDataType::BOOL};
 
@@ -504,24 +505,34 @@ void DBContent::doDataSourcesBeforeInsert (shared_ptr<Buffer> buffer)
 
     assert (hasVariable(DBContent::meta_var_datasource_id_.name()));
 
+    // ds
     Variable& datasource_var = variable(DBContent::meta_var_datasource_id_.name());
     assert (datasource_var.dataType() == PropertyDataType::UINT);
 
     string datasource_col_str = datasource_var.dbColumnName();
     assert (buffer->has<unsigned int>(datasource_col_str));
 
+    // line
     Variable& line_var = variable(DBContent::meta_var_line_id_.name());
     assert (line_var.dataType() == PropertyDataType::UINT);
 
     string line_col_str = line_var.dbColumnName();
     assert (buffer->has<unsigned int>(line_col_str));
 
+    // tod
+    Variable& tod_var = variable(DBContent::meta_var_tod_.name());
+    assert (tod_var.dataType() == PropertyDataType::FLOAT);
+    string tod_col_str = tod_var.dbColumnName();
+    assert (buffer->has<float>(tod_col_str));
+
     DataSourceManager& ds_man = COMPASS::instance().dataSourceManager();
 
     NullableVector<unsigned int>& datasource_vec = buffer->get<unsigned int>(datasource_col_str);
     NullableVector<unsigned int>& line_vec = buffer->get<unsigned int>(line_col_str);
+    NullableVector<float>& tod_vec = buffer->get<float>(tod_col_str);
 
     map<unsigned int, map<unsigned int, unsigned int>> line_counts; // ds_id -> line -> cnt
+    map<unsigned int, map<unsigned int, float>> line_tods; // ds_id -> line-> last tod
 
     unsigned int buffer_size = buffer->size();
 
@@ -531,19 +542,26 @@ void DBContent::doDataSourcesBeforeInsert (shared_ptr<Buffer> buffer)
     for (unsigned int cnt=0; cnt < buffer_size; ++cnt)
     {
         line_counts[datasource_vec.get(cnt)][line_vec.get(cnt)]++;
+
+        if (!tod_vec.isNull(cnt))
+            line_tods[datasource_vec.get(cnt)][line_vec.get(cnt)] = tod_vec.get(cnt);
     }
 
     for (auto& ds_id_it : line_counts) // ds_id -> line -> cnt
     {
+        // add s
         if (!ds_man.hasDBDataSource(ds_id_it.first))
             ds_man.addNewDataSource(ds_id_it.first);
 
         assert (ds_man.hasDBDataSource(ds_id_it.first));
 
         for (auto& line_cnt_it : ds_id_it.second) // line -> cnt
-        {
-
             ds_man.dbDataSource(ds_id_it.first).addNumInserted(name_, line_cnt_it.first, line_cnt_it.second);
+
+        if (line_tods.count(ds_id_it.first))
+        {
+            for (auto& line_tod_it : line_tods.at(ds_id_it.first))
+                ds_man.dbDataSource(ds_id_it.first).maxToD(line_tod_it.first, line_tod_it.second);
         }
     }
 }

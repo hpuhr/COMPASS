@@ -222,8 +222,6 @@ void ASTERIXDecodeJob::doFileDecoding()
 
 void ASTERIXDecodeJob::doUDPStreamDecoding()
 {
-    loginf << "ASTERIXDecodeJob: doUDPStreamDecoding";
-
     assert (decode_udp_streams_);
 
     boost::asio::io_context io_context;
@@ -235,6 +233,8 @@ void ASTERIXDecodeJob::doUDPStreamDecoding()
     vector<unique_ptr<UDPReceiver>> udp_receivers;
 
     int max_lines = COMPASS::instance().mainWindow().importAsterixNetworkMaxLines();
+
+    loginf << "ASTERIXDecodeJob: doUDPStreamDecoding: max lines " << max_lines;
 
     for (auto& ds_it : ds_lines_)
     {
