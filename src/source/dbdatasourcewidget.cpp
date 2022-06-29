@@ -218,16 +218,19 @@ void DBDataSourceWidget::updateWidgets()
             assert (line_buttons_.count(line_str));
             button = line_buttons_.at(line_str);
 
-            hidden = !net_lines.at(src_.id()).count(line_str); // hide if no data
+            hidden = !net_lines.at(src_.id()).count(line_str); // hide if not defined
 
             button->setHidden(hidden);
 
             if (!hidden)
             {
-                //if (app_mode == AppMode::LiveRunning)
-                //    disabled = !ds_man_.dbDataSource(src_.id()).hasNumInserted(line_cnt); // nothing loaded
-                //else // AppMode::LivePaused
-                    disabled = !ds_man_.dbDataSource(src_.id()).hasNumInserted(line_cnt); // nothing inserted
+                if (app_mode == AppMode::LivePaused)
+                {
+                    disabled = !ds_man_.dbDataSource(src_.id()).hasNumInserted(line_cnt);
+                    // nothing inserted, can not be loaded
+                }
+                else // AppMode::LiveRunning
+                    disabled = false; // never disabled
 
                 button->setDisabled(disabled);
 
@@ -256,7 +259,7 @@ void DBDataSourceWidget::updateWidgets()
                     else
                     {
                         QPalette pal = button->palette();
-                        pal.setColor(QPalette::Button, QColor(Qt::yellow));
+                        pal.setColor(QPalette::Button, QColor(Qt::lightGray));
                         button->setAutoFillBackground(true);
                         button->setPalette(pal);
                         button->update();

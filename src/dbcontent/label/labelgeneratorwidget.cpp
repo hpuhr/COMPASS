@@ -105,7 +105,11 @@ LabelGeneratorWidget::LabelGeneratorWidget(LabelGenerator& label_generator)
 
     main_layout->addWidget(new QLabel("Label Filters"));
 
+    QScrollArea* scroll_area2 = new QScrollArea();
+    scroll_area2->setWidgetResizable(true);
+
     QFrame* filter_frame = new QFrame();
+    scroll_area2->setWidget(filter_frame);
 
     QGridLayout* filter_layout = new QGridLayout();
 
@@ -194,7 +198,8 @@ LabelGeneratorWidget::LabelGeneratorWidget(LabelGenerator& label_generator)
 
     filter_frame->setLayout(filter_layout);
 
-    main_layout->addWidget(filter_frame);
+    //main_layout->addWidget(filter_frame);
+    main_layout->addWidget(scroll_area2);
 
     //main_layout->addStretch();
 
