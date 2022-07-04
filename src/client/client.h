@@ -61,6 +61,7 @@ private:
     std::string import_gps_parameters_;
     std::string import_sectors_filename_;
 
+    bool calculate_radar_plot_positions_ {false};
     bool associate_data_ {false};
 
     bool load_data_ {false};
@@ -71,6 +72,8 @@ private:
     bool evaluate_run_filter_ {false};
     bool evaluate_ {false};
     std::string export_eval_report_filename_;
+
+    std::string max_fps_;
 
     bool no_config_save_ {false};
     bool quit_ {false};

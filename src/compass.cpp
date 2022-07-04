@@ -414,6 +414,28 @@ MainWindow& COMPASS::mainWindow()
     return *main_window_;
 }
 
+
+unsigned int COMPASS::maxFPS() const
+{
+    return max_fps_;
+}
+
+void COMPASS::maxFPS(unsigned int max_fps)
+{
+    max_fps_ = max_fps;
+}
+
+bool COMPASS::hideViewpoints() const
+{
+    return hide_viewpoints_;
+}
+
+bool COMPASS::hideEvaluation() const
+{
+    return hide_evaluation_;
+}
+
+
 bool COMPASS::isShutDown() const
 {
     return shut_down_;

@@ -624,37 +624,41 @@ void ASTERIXImportTask::stop()
     for (auto& job_it : postprocess_jobs_)
         job_it->setObsolete();
 
+    queued_job_buffers_.clear();
+
     while(decode_job_ && !decode_job_->done())
     {
         loginf << "ASTERIXImportTask: stop: waiting for decode job to finish";
 
-        QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+        if (QCoreApplication::hasPendingEvents())
+            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+
         QThread::msleep(1);
     }
 
     while(json_map_jobs_.size())
     {
         loginf << "ASTERIXImportTask: stop: waiting for map job to finish";
-
-        QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+        if (QCoreApplication::hasPendingEvents())
+            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
         QThread::msleep(1);
     }
 
     while(postprocess_jobs_.size())
     {
         loginf << "ASTERIXImportTask: stop: waiting for post-process job to finish";
-
-        QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+        if (QCoreApplication::hasPendingEvents())
+            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
         QThread::msleep(1);
     }
 
-    while (waiting_for_insert_)
-    {
-        loginf << "ASTERIXImportTask: stop: waiting for insert to finish";
-
-        QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
-        QThread::msleep(1);
-    }
+//    while (insertData)
+//    {
+//        loginf << "ASTERIXImportTask: stop: waiting for insert to finish";
+//        if (QCoreApplication::hasPendingEvents())
+//            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+//        QThread::msleep(1);
+//    }
 
     //    done_ = true; // set by checkAllDone
     //    running_ = false;
@@ -698,7 +702,7 @@ void ASTERIXImportTask::run(bool test) // , bool create_mapping_stubs
 
         while ((boost::posix_time::microsec_clock::local_time() - start_time).total_milliseconds() < 50)
         {
-            QCoreApplication::processEvents();
+            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
         }
     }
 
@@ -886,18 +890,17 @@ void ASTERIXImportTask::addDecodedASTERIXSlot()
             return;
         }
 
-        if (maxLoadReached())
+        if (maxLoadReached()) // break if too many packets in process, this slot is called again from insertDoneSlot
         {
             logdbg << "ASTERIXImportTask: addDecodedASTERIXSlot: returning since max load reached";
             return;
-
         }
     }
 
     if (stopped_)
         return;
 
-    if (num_packets_in_processing_ > 10)
+    if (num_packets_in_processing_ > 10) // network special case
     {
         logwrn << "ASTERIXImportTask: addDecodedASTERIXSlot: overload detected, packets in processing "
                << num_packets_in_processing_ << " skipping data";
@@ -1062,42 +1065,13 @@ void ASTERIXImportTask::postprocessDoneSlot()
     post_job = nullptr;
     postprocess_jobs_.erase(postprocess_jobs_.begin()); // remove
 
-
-    if (import_file_) // cache and insert only if time elapsed
+    // queue data
+    if (!stopped_)
     {
-        //        // merge into existing buffers
+        queued_job_buffers_.emplace_back(std::move(job_buffers));
 
-        //        for (auto& buf_it : job_buffers)
-        //        {
-        //            if (!buffer_cache_.count(buf_it.first)) // set if first
-        //                buffer_cache_[buf_it.first] = buf_it.second;
-        //            else // append by seize if existing
-        //                buffer_cache_.at(buf_it.first)->seizeBuffer(*buf_it.second.get());
-        //        }
-
-        //        job_buffers.clear();
-
-        //        // insert if time elapsed or all other jobs are done
-        //        if ((boost::posix_time::microsec_clock::local_time() - last_insert_time_).total_milliseconds() > 2000
-        //                || (decode_job_ == nullptr && json_map_job_ == nullptr && postprocess_job_ == nullptr))
-        //        {
-        //            logdbg << "ASTERIXImportTask: postprocessDoneSlot: doing file insert";
-
-        //            last_insert_time_ = boost::posix_time::microsec_clock::local_time();
-
-        //            std::map<std::string, std::shared_ptr<Buffer>> buffer_cache_cpy = move(buffer_cache_);
-        //            buffer_cache_.clear(); // to be safe
-
-        //            insertData(std::move(buffer_cache_cpy));
-        //        }
-
-        insertData(std::move(job_buffers));
-    }
-    else // insert immediately for network
-    {
-        logdbg << "ASTERIXImportTask: postprocessDoneSlot: doing network insert";
-
-        insertData(std::move(job_buffers));
+        if (!insert_active_)
+            insertData();
     }
 }
 
@@ -1112,8 +1086,15 @@ void ASTERIXImportTask::postprocessObsoleteSlot()
     postprocess_jobs_.erase(postprocess_jobs_.begin()); // remove
 }
 
-void ASTERIXImportTask::insertData(std::map<std::string, std::shared_ptr<Buffer>> job_buffers)
+void ASTERIXImportTask::insertData()
 {
+    insert_active_ = true;
+
+    assert (queued_job_buffers_.size());
+
+    std::map<std::string, std::shared_ptr<Buffer>> job_buffers = *queued_job_buffers_.begin();
+    queued_job_buffers_.erase(queued_job_buffers_.begin());
+
     logdbg << "ASTERIXImportTask: insertData: inserting " << job_buffers.size() << " into database";
 
     if (stopped_)
@@ -1124,35 +1105,37 @@ void ASTERIXImportTask::insertData(std::map<std::string, std::shared_ptr<Buffer>
 
     assert (!test_);
 
-    DBContentManager& object_manager = COMPASS::instance().dbContentManager();
+    DBContentManager& dbcont_manager = COMPASS::instance().dbContentManager();
 
-    while (insert_active_ && !stopped_ && object_manager.insertInProgress())
-    {
-        //loginf << "ASTERIXImportTask: insertData: waiting for insert";
+//    while (insert_active_ && !stopped_ && dbcont_manager.insertInProgress())
+//    {
+//        //loginf << "ASTERIXImportTask: insertData: waiting for insert";
 
-        waiting_for_insert_ = true;
+//        waiting_for_insert_ = true;
 
-        logdbg << "ASTERIXImportTask: addDecodedASTERIXSlot: waiting on insert to finish";
-        QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+//        logdbg << "ASTERIXImportTask: addDecodedASTERIXSlot: waiting on insert to finish";
 
-        QThread::msleep(1);
+//        if (QCoreApplication::hasPendingEvents())
+//            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
 
-        if (stopped_)
-        {
-            waiting_for_insert_ = false;
+//        QThread::msleep(1);
 
-            checkAllDone();
-            return;
-        }
-    }
+//        if (stopped_)
+//        {
+//            waiting_for_insert_ = false;
 
-    waiting_for_insert_ = false;
+//            checkAllDone();
+//            return;
+//        }
+//    }
 
-    if (stopped_)
-    {
-        checkAllDone();
-        return;
-    }
+//    waiting_for_insert_ = false;
+
+//    if (stopped_)
+//    {
+//        checkAllDone();
+//        return;
+//    }
 
     //loginf << "ASTERIXImportTask: insertData: no more waiting for insert";
 
@@ -1161,12 +1144,10 @@ void ASTERIXImportTask::insertData(std::map<std::string, std::shared_ptr<Buffer>
     for (auto& job_it : job_buffers)
         num_records_ += job_it.second->size();
 
-    insert_active_ = true;
-
-    connect(&object_manager, &DBContentManager::insertDoneSignal,
+    connect(&dbcont_manager, &DBContentManager::insertDoneSignal,
             this, &ASTERIXImportTask::insertDoneSlot, Qt::UniqueConnection);
 
-    object_manager.insertData(job_buffers);
+    dbcont_manager.insertData(job_buffers);
 
     checkAllDone();
 
@@ -1187,6 +1168,9 @@ void ASTERIXImportTask::insertDoneSlot()
 
         updateFileProgressDialog();
     }
+
+    if (queued_job_buffers_.size())
+        insertData();
 
     bool test = test_; // test_ cleared by checkAllDone
 
@@ -1221,11 +1205,11 @@ void ASTERIXImportTask::checkAllDone()
            << (decode_job_ != nullptr)
            << " map jobs " << json_map_jobs_.size()
            << " post jobs " << postprocess_jobs_.size()
-           << " wait insert " << waiting_for_insert_
+           << " queued insert " << queued_job_buffers_.size()
            << " insert active " << insert_active_;
 
     if (!all_done_ && decode_job_ == nullptr && !json_map_jobs_.size() && !postprocess_jobs_.size()
-            && !waiting_for_insert_ && !insert_active_)
+            && !queued_job_buffers_.size() && !insert_active_)
     {
         logdbg << "ASTERIXImportTask: checkAllDone: setting all done: total packets " << num_packets_total_;
 
@@ -1271,7 +1255,7 @@ void ASTERIXImportTask::checkAllDone()
 
 bool ASTERIXImportTask::maxLoadReached()
 {
-    return num_packets_in_processing_> 2;
+    return num_packets_in_processing_ > 2;
 }
 
 void ASTERIXImportTask::updateFileProgressDialog()

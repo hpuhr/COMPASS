@@ -171,16 +171,15 @@ protected:
     std::shared_ptr<ASTERIXDecodeJob> decode_job_;
 
     std::vector<std::shared_ptr<ASTERIXJSONMappingJob>> json_map_jobs_;
-
     std::vector<std::shared_ptr<ASTERIXPostprocessJob>> postprocess_jobs_;
+    std::vector<std::map<std::string, std::shared_ptr<Buffer>>> queued_job_buffers_;
 
-    //std::map<std::string, std::shared_ptr<Buffer>> buffer_cache_; // to be used for file import
     boost::posix_time::ptime last_insert_time_;
 
     bool error_{false};
     std::string error_message_;
 
-    bool waiting_for_insert_{false};
+    //bool waiting_for_insert_{false};
     bool insert_active_{false};
 
     std::set<int> added_data_sources_;
@@ -189,7 +188,7 @@ protected:
 
     virtual void checkSubConfigurables() override;
 
-    void insertData(std::map<std::string, std::shared_ptr<Buffer>> job_buffers);
+    void insertData(); // inserts queued job buffers
     void checkAllDone();
 
     bool maxLoadReached();
