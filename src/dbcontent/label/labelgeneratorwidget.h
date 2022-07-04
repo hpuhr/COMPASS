@@ -24,6 +24,8 @@ public slots:
     void autoLabelChangedSlot(bool checked);
     void lodChangedSlot(const QString& text);
 
+    void declutterLabelsChangedSlot(bool checked);
+
     void filterMode3AActiveChangedSlot(bool checked);
     void filterMode3AChangedSlot(const QString& text);
 
@@ -38,6 +40,10 @@ public slots:
 
     void filterTAActiveChangedSlot(bool checked);
     void filterTAChangedSlot(const QString& text);
+
+    void filterPSROnlyActiveChangedSlot(bool checked);
+
+    void opacitySliderChangedSlot(int value);
 
 public:
     LabelGeneratorWidget(LabelGenerator& label_generator);

@@ -86,6 +86,15 @@ DataSourceEditWidget::DataSourceEditWidget(DataSourceManager& ds_man, DataSource
     properties_layout_->addWidget(ds_id_label_, row, 1);
     row++;
 
+    // update interval
+
+    properties_layout_->addWidget(new QLabel("Update Interval [s]"), row, 0);
+
+    update_interval_edit_ = new QLineEdit();
+    update_interval_edit_->setValidator(new TextFieldDoubleValidator(0, 90, 3));
+    connect(update_interval_edit_, &QLineEdit::textEdited, this, &DataSourceEditWidget::updateIntervalEditedSlot);
+    properties_layout_->addWidget(update_interval_edit_, row, 1);
+
     main_layout->addLayout(properties_layout_);
 
     // position_widget_
@@ -427,6 +436,42 @@ void DataSourceEditWidget::dsTypeEditedSlot(const QString& value)
     updateContent();
 }
 
+void DataSourceEditWidget::updateIntervalEditedSlot(const QString& value_str)
+{
+    string text = value_str.toStdString();
+
+    loginf << "DataSourceEditWidget: updateIntervalEditedSlot: '" << text << "'";
+
+    if (!value_str.size()) // remove if empty
+    {
+        if (current_ds_in_db_)
+        {
+            assert (ds_man_.hasDBDataSource(current_ds_id_));
+
+            if (ds_man_.dbDataSource(current_ds_id_).hasUpdateInterval())
+                ds_man_.dbDataSource(current_ds_id_).removeUpdateInterval();
+        }
+
+        assert (ds_man_.hasConfigDataSource(current_ds_id_));
+
+        if (ds_man_.configDataSource(current_ds_id_).hasUpdateInterval())
+            ds_man_.configDataSource(current_ds_id_).removeUpdateInterval();
+
+        return;
+    }
+
+    float value = value_str.toFloat();
+
+    if (current_ds_in_db_)
+    {
+        assert (ds_man_.hasDBDataSource(current_ds_id_));
+        ds_man_.dbDataSource(current_ds_id_).updateInterval(value);
+    }
+
+    assert (ds_man_.hasConfigDataSource(current_ds_id_));
+    ds_man_.configDataSource(current_ds_id_).updateInterval(value);
+}
+
 void DataSourceEditWidget::latitudeEditedSlot(const QString& value_str)
 {
     double value = value_str.toDouble();
@@ -689,6 +734,8 @@ void DataSourceEditWidget::updateContent()
         sic_label_->setText("");
         ds_id_label_->setText("");
 
+        update_interval_edit_->setText("");
+
         position_widget_->setHidden(true);
 
         ranges_widget_->setHidden(true);
@@ -735,6 +782,11 @@ void DataSourceEditWidget::updateContent()
         sac_label_->setText(QString::number(ds->sac()));
         sic_label_->setText(QString::number(ds->sic()));
         ds_id_label_->setText(QString::number(ds->id()));
+
+        if (ds->hasUpdateInterval())
+            update_interval_edit_->setText(QString::number(ds->updateInterval()));
+        else
+            update_interval_edit_->setText("");
 
         loginf << "DataSourceEditWidget: updateContent: ds_type " << ds->dsType()
                << " has pos " << ds->hasPosition();

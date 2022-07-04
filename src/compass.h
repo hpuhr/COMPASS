@@ -132,6 +132,7 @@ public:
 
     unsigned int maxFPS() const;
     void maxFPS(unsigned int max_fps);
+
 };
 
 #endif /* COMPASS_H_ */

@@ -21,6 +21,8 @@ public slots:
     void shortNameEditedSlot(const QString& value);
     void dsTypeEditedSlot(const QString& value);
 
+    void updateIntervalEditedSlot(const QString& value_str);
+
     void latitudeEditedSlot(const QString& value_str);
     void longitudeEditedSlot(const QString& value_str);
     void altitudeEditedSlot(const QString& value_str);
@@ -63,6 +65,9 @@ protected:
     QLabel* sac_label_{nullptr};
     QLabel* sic_label_{nullptr};
     QLabel* ds_id_label_{nullptr};
+
+    // update_interval
+    QLineEdit* update_interval_edit_{nullptr};
 
     // position
     QWidget* position_widget_{nullptr};

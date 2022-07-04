@@ -81,6 +81,9 @@ public slots:
 
     void appModeSwitchSlot (AppMode app_mode);
 
+private slots:
+    void runTestCodeSlot();
+
 public:
     MainWindow();
     virtual ~MainWindow();

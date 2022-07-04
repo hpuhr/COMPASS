@@ -2,6 +2,7 @@
 #include "compass.h"
 #include "datasourcemanager.h"
 #include "stringconv.h"
+#include "util/system.h"
 
 #include <QGridLayout>
 #include <QCheckBox>
@@ -206,29 +207,61 @@ void DBDataSourceWidget::updateWidgets()
         bool hidden;
         bool disabled;
 
+        QPushButton* button;
+
+        float max_time = System::secondsSinceMidnightUTC();
+
         for (unsigned int line_cnt=0; line_cnt < 4; ++line_cnt)
         {
             line_str = "L"+to_string(line_cnt+1);
 
             assert (line_buttons_.count(line_str));
+            button = line_buttons_.at(line_str);
 
             hidden = !net_lines.at(src_.id()).count(line_str); // hide if no data
 
-            line_buttons_.at(line_str)->setHidden(hidden);
+            button->setHidden(hidden);
 
             if (!hidden)
             {
-                if (app_mode == AppMode::LiveRunning)
-                    disabled = !ds_man_.dbDataSource(src_.id()).numLoaded(line_cnt); // nothing loaded
-                else // AppMode::LivePaused
+                //if (app_mode == AppMode::LiveRunning)
+                //    disabled = !ds_man_.dbDataSource(src_.id()).hasNumInserted(line_cnt); // nothing loaded
+                //else // AppMode::LivePaused
                     disabled = !ds_man_.dbDataSource(src_.id()).hasNumInserted(line_cnt); // nothing inserted
 
-                line_buttons_.at(line_str)->setDisabled(disabled);
+                button->setDisabled(disabled);
 
                 if (disabled)
-                    line_buttons_.at(line_str)->setChecked(false);
+                {
+                    button->setChecked(false);
+
+                    QPalette pal = button->palette();
+                    pal.setColor(QPalette::Button, QColor(Qt::lightGray));
+                    button->setAutoFillBackground(true);
+                    button->setPalette(pal);
+                    button->update();
+                }
                 else
-                    line_buttons_.at(line_str)->setChecked(src_.lineLoadingWanted(line_cnt));
+                {
+                    button->setChecked(src_.lineLoadingWanted(line_cnt));
+
+                    if (src_.hasLiveData(line_cnt, max_time))
+                    {
+                        QPalette pal = button->palette();
+                        pal.setColor(QPalette::Button, QColor(Qt::green));
+                        button->setAutoFillBackground(true);
+                        button->setPalette(pal);
+                        button->update();
+                    }
+                    else
+                    {
+                        QPalette pal = button->palette();
+                        pal.setColor(QPalette::Button, QColor(Qt::yellow));
+                        button->setAutoFillBackground(true);
+                        button->setPalette(pal);
+                        button->update();
+                    }
+                }
             }
         }
 

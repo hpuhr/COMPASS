@@ -102,6 +102,18 @@ std::string PrimaryOnlyFilter::getConditionString(const std::string& dbcontent_n
         first = false;
     }
 
+    if (cont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_detection_type_))
+    {
+        dbContent::Variable& var = cont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_detection_type_);
+        filtered_variables.push_back(&var);
+
+        if (!first)
+            ss << " AND";
+
+        ss << " " + var.dbColumnName() << " IN (1,3,6,7)";
+
+        first = false;
+    }
 
     logdbg << "PrimaryOnlyFilter: getConditionString: here '" << ss.str() << "'";
 
@@ -202,6 +214,16 @@ std::vector<size_t> PrimaryOnlyFilter::filterBuffer(const std::string& dbcontent
         ti_vec = &buffer->get<string> (var.name());
     }
 
+    NullableVector<unsigned char>* type_vec {nullptr};
+    if (cont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_detection_type_))
+    {
+        dbContent::Variable& var = cont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_detection_type_);
+        assert (buffer->has<unsigned char> (var.name()));
+        type_vec = &buffer->get<unsigned char> (var.name());
+    }
+
+    std::set<unsigned char> psr_detection {1,3,6,7};
+
     for (unsigned int cnt=0; cnt < buffer->size(); ++cnt)
     {
         if (m3a_vec && !m3a_vec->isNull(cnt))
@@ -211,6 +233,8 @@ std::vector<size_t> PrimaryOnlyFilter::filterBuffer(const std::string& dbcontent
         else if (ta_vec && !ta_vec->isNull(cnt))
             to_be_removed.push_back(cnt);
         else if (ti_vec && !ti_vec->isNull(cnt))
+            to_be_removed.push_back(cnt);
+        else if (type_vec && !type_vec->isNull(cnt) && !psr_detection.count(type_vec->get(cnt)))
             to_be_removed.push_back(cnt);
     }
 
