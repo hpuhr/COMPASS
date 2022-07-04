@@ -85,6 +85,8 @@ protected:
     bool hide_evaluation_ {false};
     bool hide_viewpoints_ {false};
 
+    unsigned int max_fps_ {30};
+
     std::unique_ptr<SimpleConfig> simple_config_;
     std::unique_ptr<DBInterface> db_interface_;
     std::unique_ptr<DBContentManager> dbcontent_manager_;
@@ -124,8 +126,13 @@ public:
     void expertMode(bool expert_mode);
 
     bool isShutDown() const;
+
     bool hideEvaluation() const;
     bool hideViewpoints() const;
+
+    unsigned int maxFPS() const;
+    void maxFPS(unsigned int max_fps);
+
 };
 
 #endif /* COMPASS_H_ */

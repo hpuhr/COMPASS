@@ -443,6 +443,16 @@ void DBContent::loadFiltered(VariableSet& read_set, const std::vector<std::strin
     //    DBInterface &db_interface, DBContent &dbobject, VariableSet read_list, string
     //    custom_filter_clause, Variable *order, const string &limit_str
 
+    // add required vars for processing
+    assert (dbo_manager_.metaCanGetVariable(name_, DBContent::meta_var_rec_num_));
+    read_set.add(dbo_manager_.metaGetVariable(name_, DBContent::meta_var_rec_num_));
+
+    assert (dbo_manager_.metaCanGetVariable(name_, DBContent::meta_var_datasource_id_));
+    read_set.add(dbo_manager_.metaGetVariable(name_, DBContent::meta_var_datasource_id_));
+
+    assert (dbo_manager_.metaCanGetVariable(name_, DBContent::meta_var_line_id_));
+    read_set.add(dbo_manager_.metaGetVariable(name_, DBContent::meta_var_line_id_));
+
     read_job_ = shared_ptr<DBContentReadDBJob>(
                 new DBContentReadDBJob(
                     COMPASS::instance().interface(), *this, read_set, extra_from_parts,

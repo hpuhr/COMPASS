@@ -132,6 +132,8 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
                "import GPS parameters as JSON string, e.g. ''{\"callsign\": \"ENTRPRSE\", \"ds_name\": \"GPS Trail\", \"ds_sac\": 0, \"ds_sic\": 0, \"mode_3a_code\": 961, \"set_callsign\": true, \"set_mode_3a_code\": true, \"set_target_address\": true, \"target_address\": 16702992, \"tod_offset\": 0.0}'' (including one pair of single quotes)")
             ("import_sectors_json", po::value<std::string>(&import_sectors_filename_),
              "imports exported sectors JSON with given filename, e.g. '/data/sectors.json'")
+            ("calculate_radar_plot_positions", po::bool_switch(&calculate_radar_plot_positions_),
+             "calculate radar plot positions")
             ("associate_data", po::bool_switch(&associate_data_), "associate target reports")
             ("load_data", po::bool_switch(&load_data_), "load data after start")
             ("export_view_points_report", po::value<std::string>(&export_view_points_report_filename_),
@@ -142,6 +144,7 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
             ("evaluate_run_filter", po::bool_switch(&evaluate_run_filter_), "run evaluation filter before evaluation")
             ("export_eval_report", po::value<std::string>(&export_eval_report_filename_),
              "export evaluation report after start with given filename, e.g. '/data/eval_db2/report.tex")
+            ("max_fps", po::value<std::string>(&max_fps_), "maximum fps for display in OSGView'")
             ("no_cfg_save", po::bool_switch(&no_config_save_), "do not save configuration upon quitting")
             ("quit", po::bool_switch(&quit_), "quit after finishing all previous steps");
 
@@ -200,6 +203,9 @@ void Client::run ()
 
     if (expert_mode_)
         COMPASS::instance().expertMode(true);
+
+    if (max_fps_.size())
+        COMPASS::instance().maxFPS(stoul(max_fps_));
 
     MainWindow& main_window = COMPASS::instance().mainWindow();
     splash.raise();
@@ -280,6 +286,9 @@ void Client::run ()
 
     if (import_sectors_filename_.size())
         main_window.importSectorsFile(import_sectors_filename_);
+
+    if (calculate_radar_plot_positions_)
+        main_window.calculateRadarPlotPositions(calculate_radar_plot_positions_);
 
     if (associate_data_)
         main_window.associateData(associate_data_);
