@@ -61,6 +61,7 @@ private:
     std::string import_gps_parameters_;
     std::string import_sectors_filename_;
 
+    bool calculate_radar_plot_positions_ {false};
     bool associate_data_ {false};
 
     bool load_data_ {false};
