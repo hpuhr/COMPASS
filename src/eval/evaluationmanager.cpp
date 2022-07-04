@@ -294,6 +294,10 @@ void EvaluationManager::loadData ()
         ds_id = stoul(ds_it.first);
 
         loginf << "EvaluationManager: loadData: ref ds_id '" << ds_it.first << "' uint " << ds_id;
+
+        for (auto& line_it : line_ref_set)
+               loginf << " line " << line_it;
+
         assert (ds_man.hasDBDataSource(ds_id));
 
         if (ds_it.second)
@@ -307,10 +311,19 @@ void EvaluationManager::loadData ()
         ds_id = stoul(ds_it.first);
 
         loginf << "EvaluationManager: loadData: tst ds_id '" << ds_it.first << "' uint " << ds_id;
+
+        for (auto& line_it : line_tst_set)
+            loginf << " line " << line_it;
+
         assert (ds_man.hasDBDataSource(ds_id));
 
         if (ds_it.second)
-            ds_ids.insert(make_pair(ds_id, line_tst_set));
+        {
+            if (ds_ids.count(ds_id)) // same ds id
+                ds_ids.at(ds_id).insert(line_tst_set.begin(), line_tst_set.end());
+            else
+                ds_ids.insert(make_pair(ds_id, line_tst_set));
+        }
     }
 
     ds_man.setLoadOnlyDataSources(ds_ids); // limit loaded data sources
