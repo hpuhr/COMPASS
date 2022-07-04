@@ -628,31 +628,33 @@ void ASTERIXImportTask::stop()
     {
         loginf << "ASTERIXImportTask: stop: waiting for decode job to finish";
 
-        QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+        if (QCoreApplication::hasPendingEvents())
+            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+
         QThread::msleep(1);
     }
 
     while(json_map_jobs_.size())
     {
         loginf << "ASTERIXImportTask: stop: waiting for map job to finish";
-
-        QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+        if (QCoreApplication::hasPendingEvents())
+            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
         QThread::msleep(1);
     }
 
     while(postprocess_jobs_.size())
     {
         loginf << "ASTERIXImportTask: stop: waiting for post-process job to finish";
-
-        QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+        if (QCoreApplication::hasPendingEvents())
+            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
         QThread::msleep(1);
     }
 
     while (waiting_for_insert_)
     {
         loginf << "ASTERIXImportTask: stop: waiting for insert to finish";
-
-        QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+        if (QCoreApplication::hasPendingEvents())
+            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
         QThread::msleep(1);
     }
 
@@ -698,7 +700,7 @@ void ASTERIXImportTask::run(bool test) // , bool create_mapping_stubs
 
         while ((boost::posix_time::microsec_clock::local_time() - start_time).total_milliseconds() < 50)
         {
-            QCoreApplication::processEvents();
+            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
         }
     }
 
@@ -1133,7 +1135,8 @@ void ASTERIXImportTask::insertData(std::map<std::string, std::shared_ptr<Buffer>
         waiting_for_insert_ = true;
 
         logdbg << "ASTERIXImportTask: addDecodedASTERIXSlot: waiting on insert to finish";
-        QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+        if (QCoreApplication::hasPendingEvents())
+            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
 
         QThread::msleep(1);
 

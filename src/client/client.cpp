@@ -142,6 +142,7 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
             ("evaluate_run_filter", po::bool_switch(&evaluate_run_filter_), "run evaluation filter before evaluation")
             ("export_eval_report", po::value<std::string>(&export_eval_report_filename_),
              "export evaluation report after start with given filename, e.g. '/data/eval_db2/report.tex")
+            ("max_fps", po::value<std::string>(&max_fps_), "maximum fps for display in OSGView'")
             ("no_cfg_save", po::bool_switch(&no_config_save_), "do not save configuration upon quitting")
             ("quit", po::bool_switch(&quit_), "quit after finishing all previous steps");
 
@@ -200,6 +201,9 @@ void Client::run ()
 
     if (expert_mode_)
         COMPASS::instance().expertMode(true);
+
+    if (max_fps_.size())
+        COMPASS::instance().maxFPS(stoul(max_fps_));
 
     MainWindow& main_window = COMPASS::instance().mainWindow();
     splash.raise();
