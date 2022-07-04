@@ -29,6 +29,6 @@ namespace label_placement
             bboxes[ i ] = l.boundingBox(tx, ty);
         }
 
-        return std::move(bboxes);
+        return bboxes;
     }
 }

@@ -11,9 +11,11 @@
 #include <QPainter>
 #include <QDialog>
 #include <QVBoxLayout>
+#include <QHBoxLayout>
 #include <QPushButton>
 #include <QComboBox>
 #include <QCheckBox>
+#include <QDoubleSpinBox>
 #include <QLabel>
 #include <QTimer>
 #include <QTime>
@@ -455,12 +457,20 @@ bool LabelPlacementEngine::placeLabelsForceBased()
 
     //collect anchor points
     std::vector<QPointF> anchors;
+    std::vector<QRectF>  anchor_regions;
     anchors.reserve(n);
     for (const auto& l : labels_)
     {
         if (!l.active)
             continue;
+        
         anchors.emplace_back(l.x_anchor, l.y_anchor);
+
+        if (settings_.fb_anchor_radius > 0)
+        {
+            const double r = settings_.fb_anchor_radius;
+            anchor_regions.emplace_back(l.x_anchor - r, l.y_anchor - r, 2 * r, 2 * r);
+        }
     }
 
     std::vector<Eigen::Vector2d> displacements(n);
@@ -468,6 +478,12 @@ bool LabelPlacementEngine::placeLabelsForceBased()
     std::vector<Eigen::Vector2d> displacements_labels(n);
     std::vector<Eigen::Vector2d> displacements_anchors(n);
     std::vector<Eigen::Vector2d> displacements_objects(n);
+    std::vector<Eigen::Vector2d> displacements_roi(n);
+
+    bool   converged = false;
+    double last_dx   = 0.0;
+    double last_dy   = 0.0;
+    int    used_iter = -1;
     
     //iterate up to max iterations
     for (int i = 0; i < settings_.fb_max_iter; ++i)
@@ -477,12 +493,14 @@ bool LabelPlacementEngine::placeLabelsForceBased()
         displacements_labels.assign(n, {0, 0});
         displacements_anchors.assign(n, {0, 0});
         displacements_objects.assign(n, {0, 0});
+        displacements_roi.assign(n, {0, 0});
            
         Eigen::Vector2d total(0, 0);
 
         Eigen::Vector2d total_labels(0, 0);
         Eigen::Vector2d total_anchors(0, 0);
         Eigen::Vector2d total_objects(0, 0);
+        Eigen::Vector2d total_roi(0, 0);
 
         //compute various displacements by repelling from certain types of obstacles
         if (settings_.fb_avoid_labels)
@@ -496,36 +514,71 @@ bool LabelPlacementEngine::placeLabelsForceBased()
         }        
         if (settings_.fb_avoid_anchors)
         {
-            label_placement::force::repelFromPoints(displacements_anchors, 
-                                                    total_anchors, 
-                                                    anchors, labels_, 
-                                                    settings_.fb_expand_x, 
-                                                    settings_.fb_expand_y, 
-                                                    settings_.fb_force_type);
+            if (settings_.fb_anchor_radius > 0)
+            {
+                label_placement::force::repelFromObjects(displacements_anchors, 
+                                                         total_anchors, 
+                                                         anchor_regions, 
+                                                         labels_, 
+                                                         settings_.fb_expand_x, 
+                                                         settings_.fb_expand_y, 
+                                                         settings_.fb_force_type);
+            }
+            else
+            {
+                label_placement::force::repelFromPoints(displacements_anchors, 
+                                                        total_anchors, 
+                                                        anchors, 
+                                                        labels_, 
+                                                        settings_.fb_expand_x, 
+                                                        settings_.fb_expand_y, 
+                                                        settings_.fb_force_type);
+            }
+            
         }
-        if (settings_.fb_avoid_objects && !settings_.fb_additional_objects.empty())
+        if (settings_.fb_avoid_objects && !settings_.additional_objects.empty())
         {
             label_placement::force::repelFromObjects(displacements_objects, 
                                                      total_objects, 
-                                                     settings_.fb_additional_objects, 
+                                                     settings_.additional_objects, 
                                                      labels_, 
                                                      settings_.fb_expand_x, 
                                                      settings_.fb_expand_y, 
                                                      settings_.fb_force_type);
         }
+        if (settings_.fb_avoid_roi && !settings_.roi.isEmpty())
+        {
+            label_placement::force::repelFromROI(displacements_roi,
+                                                 total_roi,
+                                                 settings_.roi,
+                                                 labels_,
+                                                 settings_.fb_expand_x, 
+                                                 settings_.fb_expand_y, 
+                                                 settings_.fb_force_type);
+        }
 
         //sum up individual displacements using weights
         for (size_t j = 0; j < n; ++j)
         {
-            displacements[ j ] += displacements_labels[  j ] * settings_.fb_weight_labels;
+            displacements[ j ] += displacements_labels [ j ] * settings_.fb_weight_labels;
             displacements[ j ] += displacements_anchors[ j ] * settings_.fb_weight_anchors;
             displacements[ j ] += displacements_objects[ j ] * settings_.fb_weight_objects;
+            displacements[ j ] += displacements_roi    [ j ] * settings_.fb_weight_roi;
         }
 
         //sum up total absolute movement
         total += total_labels;
         total += total_anchors;
         total += total_objects;
+        total += total_roi;
+
+        // if (settings_.verbose)
+        // {
+        //     std::cout << "   labels:  " << total_labels.x() << " / " << total_labels.y() << std::endl;
+        //     std::cout << "   anchors: " << total_anchors.x() << " / " << total_anchors.y() << std::endl;
+        //     std::cout << "   objects: " << total_objects.x() << " / " << total_objects.y() << std::endl;
+        //     std::cout << "   roi:     " << total_roi.x() << " / " << total_roi.y() << std::endl;
+        // }
 
         //move labels
         for (size_t j = 0; j < n; ++j)
@@ -533,11 +586,22 @@ bool LabelPlacementEngine::placeLabelsForceBased()
             labels_[ j ].x += displacements[ j ].x();
             labels_[ j ].y += displacements[ j ].y();
         }
+
+        last_dx = total.x();
+        last_dy = total.y();
         
         //convergence if total movement is below precomputed threshold
-        if (total.x() <= tol_x || total.y() < tol_y)
+        if (total.x() <= tol_x && total.y() < tol_y)
+        {
+            converged = true;
+            used_iter = i + 1;
+
             break;
+        }
     }
+
+    if (settings_.verbose)
+        std::cout << (converged ? "CONVERGED" : "MAX ITER") << " dx: " << last_dx << "/" << tol_x << " dy: " << last_dy << "/" << tol_y << std::endl;
 
     //convergence or max iter reached
     return true;
@@ -576,8 +640,21 @@ void LabelPlacementEngine::showData(const TestConfig& test_config) const
         tl.txt      = l.id;
     }
 
+    auto config = test_config;
+    
+    if (settings_.fb_avoid_anchors && settings_.fb_anchor_radius > 0)
+    {
+        config.radius        = settings_.fb_anchor_radius;
+        config.avoid_anchors = true;
+    }
+    if (settings_.fb_avoid_roi && !settings_.roi.isEmpty())
+    {
+        config.roi       = settings_.roi;
+        config.avoid_roi = true;
+    }
+
     //convert coords to test window size in pixels
-    convertToScreen(test_config, test_labels);
+    computeScreenTransform(config, test_labels);
 
     //create test dialog
     QDialog dlg;
@@ -586,9 +663,7 @@ void LabelPlacementEngine::showData(const TestConfig& test_config) const
     dlg.setLayout(layoutv);
 
     QLabel* label = new QLabel;
-    label->setFixedSize(test_config.width, test_config.height);
-
-    bool runs = false;
+    label->setFixedSize(config.width, config.height);
 
     QPushButton* closeButton = new QPushButton("Close");
 
@@ -597,10 +672,10 @@ void LabelPlacementEngine::showData(const TestConfig& test_config) const
 
     QObject::connect(closeButton, &QPushButton::pressed, &dlg, &QDialog::accept);
 
-    QImage img(test_config.width, test_config.height, QImage::Format_RGB32);
+    QImage img(config.width, config.height, QImage::Format_RGB32);
     img.fill(Qt::white);
 
-    renderTestFrame(img, test_labels, test_config);
+    renderTestFrame(img, test_labels, config);
         
     label->setPixmap(QPixmap::fromImage(img));
 
@@ -642,16 +717,18 @@ void LabelPlacementEngine::runTest(const TestConfig& test_config) const
         l.y_anchor = l.y;
         l.x_init   = l.x;
         l.y_init   = l.y;
-        l.w        = test_config.label_w_px;
-        l.h        = test_config.label_h_px;
+        l.w        = test_config.label_w;
+        l.h        = test_config.label_h;
         l.dirx     = dir.x();
         l.diry     = dir.y();
         l.speed    = speed;
         l.txt      = "Test" + std::to_string(i); //unique id is important
     }
 
+    test_config.roi = QRectF(0, 0, 1, 1);
+
     //convert coords to test window size in pixels
-    convertToScreen(test_config, test_labels);
+    computeScreenTransform(test_config, test_labels);
 
     //show test data in dialog
     runTest(test_labels, test_config);
@@ -662,30 +739,56 @@ void LabelPlacementEngine::runTest(const TestConfig& test_config) const
 void LabelPlacementEngine::runTest(const std::vector<TestLabel>& test_labels,
                                    const TestConfig& test_config) const
 {
+    auto config = test_config;
+
     std::vector<TestLabel> labels = test_labels;
 
     //create test dialog
     QDialog dlg;
 
-    QVBoxLayout* layoutv = new QVBoxLayout;
-    dlg.setLayout(layoutv);
+    QHBoxLayout* layouth = new QHBoxLayout;
+    dlg.setLayout(layouth);
 
     QLabel* label = new QLabel;
-    label->setFixedSize(test_config.width, test_config.height);
+    label->setFixedSize(config.width, config.height);
 
     bool runs = false;
 
+    QVBoxLayout* layoutv = new QVBoxLayout;
+
+    layouth->addWidget(label);
+    layouth->addLayout(layoutv);
+
     QPushButton* runButton = new QPushButton("Run");
     QPushButton* closeButton = new QPushButton("Close");
-    QCheckBox* autoCheckBox = new QCheckBox("Place automatically");
-    QComboBox* autoCombo = new QComboBox;
-    autoCombo->addItem("Simple");
-    autoCombo->addItem("Exact");
 
-    layoutv->addWidget(label);
-    layoutv->addWidget(runButton);
-    layoutv->addWidget(autoCheckBox);
+    QCheckBox* avoidAnchorsBox = new QCheckBox("Avoid anchors");
+    QCheckBox* avoidROIBox = new QCheckBox("Avoid ROI");
+
+    QDoubleSpinBox* radiusBox = new QDoubleSpinBox;
+    radiusBox->setDecimals(6);
+    radiusBox->setMinimum(0);
+    radiusBox->setMaximum(1000);
+    radiusBox->setValue(config.radius);
+
+    QComboBox* autoCombo = new QComboBox;
+    autoCombo->addItem("None", QVariant(-1));
+    autoCombo->addItem("Force", QVariant((int)LabelPlacementEngine::Method::ForceBased));
+    autoCombo->addItem("Spring", QVariant((int)LabelPlacementEngine::Method::SpringBased));
+
+    QComboBox* forceCombo = new QComboBox;
+    forceCombo->addItem("Simple", QVariant((int)LabelPlacementEngine::ForceType::Simple));
+    forceCombo->addItem("Exact", QVariant((int)LabelPlacementEngine::ForceType::Exact));
+
     layoutv->addWidget(autoCombo);
+    layoutv->addWidget(forceCombo);
+    layoutv->addWidget(avoidAnchorsBox);
+    layoutv->addWidget(avoidROIBox);
+    layoutv->addWidget(radiusBox);
+
+    layoutv->addSpacerItem(new QSpacerItem(5, 5, QSizePolicy::Fixed, QSizePolicy::Expanding));
+
+    layoutv->addWidget(runButton);
     layoutv->addWidget(closeButton);
 
     QObject::connect(closeButton, &QPushButton::pressed, &dlg, &QDialog::accept);
@@ -711,8 +814,12 @@ void LabelPlacementEngine::runTest(const std::vector<TestLabel>& test_labels,
         if (!runs || n < 1)
             return;
 
-        const int w = label->width();
-        const int h = label->height();
+        config.radius = radiusBox->value();
+        config.avoid_roi = avoidROIBox->isChecked();
+        config.avoid_anchors = avoidAnchorsBox->isChecked();
+
+        const int w = test_config.width;
+        const int h = test_config.height;
 
         //init display image
         QImage img(w, h, QImage::Format_RGB32);
@@ -724,27 +831,43 @@ void LabelPlacementEngine::runTest(const std::vector<TestLabel>& test_labels,
             auto& l = labels[ i ];
 
             //this is in label space
-            l.x_anchor += l.dirx * test_config.speed_px * l.speed;
-            l.y_anchor += l.diry * test_config.speed_px * l.speed;
-            l.x = l.x_anchor + test_config.label_offs_px;
-            l.y = l.y_anchor - test_config.label_offs_px;
+            l.x_anchor += l.dirx * config.speed * l.speed;
+            l.y_anchor += l.diry * config.speed * l.speed;
+
+            if (config.avoid_roi && !config.roi.isEmpty())
+            {
+                if (l.x_anchor < config.roi.left() || l.y_anchor < config.roi.top() || l.x_anchor > config.roi.right() || l.y_anchor > config.roi.bottom())
+                {
+                    l.dirx *= -1;
+                    l.diry *= -1;
+                }
+            }
+
+            l.x = l.x_anchor + config.label_offs;
+            l.y = l.y_anchor - config.label_offs;
             l.x_init = l.x;
             l.y_init = l.y;
         }
 
+        int mode = autoCombo->currentData().toInt();
+
         //place labels automatically if desired
-        if (autoCheckBox->isChecked())
+        if (mode >= 0)
         {
             QTime t;
             t.restart();
 
-            LabelPlacementEngine::ForceType ftype = 
-                autoCombo->currentIndex() == 0 ? LabelPlacementEngine::ForceType::Simple : LabelPlacementEngine::ForceType::Exact;
+            LabelPlacementEngine::Method    method = (LabelPlacementEngine::Method)mode;
+            LabelPlacementEngine::ForceType ftype  = (LabelPlacementEngine::ForceType)forceCombo->currentData().toInt();
 
             LabelPlacementEngine labelPlacement;
             auto& settings = labelPlacement.settings();
-            settings.fb_avoid_anchors = true;
-            settings.fb_force_type = ftype;
+            settings.method           = method;
+            settings.fb_avoid_anchors = config.avoid_anchors;
+            settings.fb_force_type    = ftype;
+            settings.fb_anchor_radius = config.radius;
+            settings.fb_avoid_roi     = config.avoid_roi;
+            settings.roi              = config.roi;
 
             //collect labels to place
             for (int i = 0; i < n; ++i)
@@ -768,7 +891,7 @@ void LabelPlacementEngine::runTest(const std::vector<TestLabel>& test_labels,
             std::cout << "Auto placement of labels in " << t.restart() << std::endl;
         }
         
-        renderTestFrame(img, labels, test_config);
+        renderTestFrame(img, labels, config);
         
         //show new canva
         label->setPixmap(QPixmap::fromImage(img));
@@ -778,7 +901,7 @@ void LabelPlacementEngine::runTest(const std::vector<TestLabel>& test_labels,
 
     //run update every 1s
     QTimer t;
-    t.setInterval(test_config.interval_ms);
+    t.setInterval(config.interval_ms);
     t.setSingleShot(false);
     QObject::connect(&t, &QTimer::timeout, updateCB);
     t.start();
@@ -794,29 +917,85 @@ void LabelPlacementEngine::renderTestFrame(QImage& img,
 {
     QPainter p(&img);
 
+    auto convert = [ & ] (double& x, double& y, bool scale_only) 
+    {
+        if (test_config.screen_transform)
+            test_config.screen_transform(x, y, scale_only);
+    };
+    auto convertBBox = [ & ] (double& x, double& y, double w, double h) 
+    {
+        if (test_config.screen_transform_bbox)
+            test_config.screen_transform_bbox(x, y, w, h);
+    };
+
+    if (test_config.avoid_roi && !test_config.roi.isEmpty())
+    {
+        double x0 = test_config.roi.left();
+        double y0 = test_config.roi.top();
+        double x1 = test_config.roi.right();
+        double y1 = test_config.roi.bottom();
+
+        convert(x0, y0, false);
+        convert(x1, y1, false);
+
+        double xmin = std::min(x0, x1);
+        double ymin = std::min(y0, y1);
+        double xmax = std::max(x0, x1);
+        double ymax = std::max(y0, y1);
+
+        QPen pen;
+        pen.setColor(Qt::blue);
+        pen.setStyle(Qt::PenStyle::DotLine);
+
+        p.save();
+        p.setPen(pen);
+        p.drawRect(xmin, ymin, xmax - xmin, ymax - ymin);
+        p.restore();
+    }
+
     for (const auto& l : labels)
     {
+        double x  = l.x;
+        double y  = l.y;
+        double xa = l.x_anchor;
+        double ya = l.y_anchor;
+        double xi = l.x_init.has_value() ? l.x_init.value() : 0.0;
+        double yi = l.y_init.has_value() ? l.y_init.value() : 0.0;
+        double w  = l.w;
+        double h  = l.h;
+
+        double rx = test_config.radius;
+        double ry = test_config.radius;
+
+        //convert from data space to screen space
+        convertBBox(x, y, w, h);
+
+        convert(xa, ya, false);
+        convert(xi, yi, false);
+        convert(rx, ry, true);
+
         //draw markers
         p.save();
         p.setBrush(QBrush(Qt::black, Qt::BrushStyle::SolidPattern));
-        p.drawEllipse(QPointF(l.x_anchor, l.y_anchor), test_config.radius_px, test_config.radius_px);
+        p.drawEllipse(QPointF(xa, ya), rx, ry);
         p.restore();
 
         //draw connection lines
         p.save();
-        p.drawLine(QPointF(l.x_anchor, l.y_anchor), QPointF(l.x, l.y));
+        p.drawLine(QPointF(xa, ya), QPointF(x, y));
         p.restore();
 
         //draw labels
         p.save();
-        p.drawRect(l.x, l.y, l.w, l.h);
+        p.drawRect(x, y, w, h);
         p.restore();
 
+        //draw label paths
         if (l.x_init.has_value() && l.y_init.has_value())
         {
             p.save();
             p.setBrush(QBrush(Qt::red, Qt::BrushStyle::SolidPattern));
-            p.drawEllipse(QPointF(l.x_init.value(), l.y_init.value()), 2, 2);
+            p.drawEllipse(QPointF(xi, yi), 2, 2);
             p.restore();
 
             p.save();
@@ -824,7 +1003,7 @@ void LabelPlacementEngine::renderTestFrame(QImage& img,
             pen.setColor(Qt::red);
             pen.setStyle(Qt::PenStyle::DotLine);
             p.setPen(pen);
-            p.drawLine(QPointF(l.x_init.value(), l.y_init.value()), QPointF(l.x, l.y));
+            p.drawLine(QPointF(xi, yi), QPointF(x, y));
             p.restore();
         }
     }
@@ -832,9 +1011,12 @@ void LabelPlacementEngine::renderTestFrame(QImage& img,
 
 /**
  */
-void LabelPlacementEngine::convertToScreen(const TestConfig& test_config, 
-                                           std::vector<TestLabel>& test_labels) const
+void LabelPlacementEngine::computeScreenTransform(const TestConfig& test_config, 
+                                                  const std::vector<TestLabel>& test_labels) const                                
 {
+    test_config.screen_transform      = TestConfig::ScreenTransform();
+    test_config.screen_transform_bbox = TestConfig::ScreenTransformBBox();
+
     int n = (int)test_labels.size();
     if (n < 2)
         return;
@@ -875,13 +1057,21 @@ void LabelPlacementEngine::convertToScreen(const TestConfig& test_config,
             label_h_max = l.h;
     }
 
-    const double ws = test_config.width  - 2 * label_w_max;
-    const double hs = test_config.height - 2 * label_h_max;
+    if (!test_config.roi.isEmpty())
+    {
+        xmin = test_config.roi.left();
+        ymin = test_config.roi.top();
+        xmax = test_config.roi.right();
+        ymax = test_config.roi.bottom();
+    }
+
+    const double ws = test_config.width;
+    const double hs = test_config.height;
 
     const double w = xmax - xmin;
     const double h = ymax - ymin;
 
-    //fit bounds into test window size
+    //fit data window into test window size
     double scale = 1.0;
 
     const double inner_aspect_ratio = w / h;
@@ -891,34 +1081,54 @@ void LabelPlacementEngine::convertToScreen(const TestConfig& test_config,
     else
         scale = ws / w;
 
-    double offsx = label_w_max + (ws - w * scale) * 0.5;
-    double offsy = label_h_max + (hs - h * scale) * 0.5;
+    //center the fitted window
+    double offsx = (ws - w * scale) * 0.5;
+    double offsy = (hs - h * scale) * 0.5;
 
-    auto fitPos = [ & ] (double& x, double& y) 
+    const int h_win = test_config.height;
+
+    bool flipy = test_config.flip_y;
+
+    //store screen transform function to config
+    auto screen_transform_func = [ = ] (double& x, double& y, bool scale_only) 
+    {
+        if (!scale_only)
+        {
+            x -= xmin;
+            y -= ymin;
+        }
+        x *= scale;
+        y *= scale;
+        if (!scale_only)
+        {
+            x += offsx;
+            y += offsy;
+
+            if (flipy)
+            {
+                y = h_win - y;
+            }
+        }
+    };
+    auto screen_transform_bbox_func = [ = ] (double& x, double& y, double& w, double& h) 
     {
         x -= xmin;
-        y -= ymin;
+        y -= ymin;   
         x *= scale;
         y *= scale;
         x += offsx;
         y += offsy;
-
-        if (test_config.flip_y)
-            y = test_config.height - y;
+        if (flipy)
+        {
+            y = h_win - y;
+            y -= h;
+        }
+        w *= scale;
+        h *= scale;
     };
 
-    //transform label positions to test window space
-    for (int i = 0; i < n; ++i)
-    {
-        auto& l = test_labels[ i ];
+    test_config.screen_transform      = screen_transform_func;
+    test_config.screen_transform_bbox = screen_transform_bbox_func;
 
-        fitPos(l.x, l.y);
-        fitPos(l.x_anchor, l.y_anchor);
 
-        if (l.x_init.has_value() && l.y_init.has_value())
-            fitPos(l.x_init.value(), l.y_init.value());
-
-        l.w *= scale;
-        l.h *= scale;
-    }   
 }
