@@ -52,6 +52,7 @@ public:
     void addRadarRanges();
     std::map<std::string, double> radarRanges() const;
     void radarRange (const std::string& key, const double range);
+    void removeRadarRange(const std::string& key);
 
     bool hasRadarAccuracies() const;
     void addRadarAccuracies();

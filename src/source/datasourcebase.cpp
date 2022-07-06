@@ -181,6 +181,12 @@ void DataSourceBase::radarRange (const std::string& key, const double range)
     info_[radar_range_key][key] = range;
 }
 
+void DataSourceBase::removeRadarRange(const std::string& key)
+{
+    if (info_.at(radar_range_key).contains(key))
+        info_.at(radar_range_key).erase(key);
+}
+
 bool DataSourceBase::hasRadarAccuracies() const
 {
     return info_.contains(radar_accuracy_key);
