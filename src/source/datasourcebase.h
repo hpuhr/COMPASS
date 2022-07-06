@@ -36,6 +36,11 @@ public:
     nlohmann::json& info(); // for direct use, var->value
     std::string infoStr();
 
+    bool hasUpdateInterval() const;
+    void removeUpdateInterval();
+    void updateInterval (float value);
+    float updateInterval () const;
+
     bool hasPosition() const;
     bool hasFullPosition() const;
 

@@ -212,7 +212,8 @@ void EvaluationManager::init(QTabWidget* tab_widget)
 
     initialized_ = true;
 
-    tab_widget->addTab(widget(), "Evaluation");
+    if (!COMPASS::instance().hideEvaluation())
+        tab_widget->addTab(widget(), "Evaluation");
 
     widget()->setDisabled(true);
 

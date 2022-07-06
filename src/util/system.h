@@ -21,7 +21,8 @@
 //#include <sys/sysinfo.h>
 //#include <stdint.h>
 
-#include <sstream>
+//#include <sstream>
+#include <string>
 
 namespace Utils
 {
@@ -32,6 +33,8 @@ extern float getFreeRAMinGB();
 extern std::string exec(const std::string& cmd);
 
 extern std::string getUserName();
+
+extern double secondsSinceMidnightUTC();
 
 }  // namespace System
 }  // namespace Utils

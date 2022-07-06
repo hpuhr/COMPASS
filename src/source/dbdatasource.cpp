@@ -247,4 +247,28 @@ DBDataSourceWidget* DBDataSource::widget()
     return widget_.get();
 }
 
+bool DBDataSource::hasMaxToD(unsigned int line) const
+{
+    return max_line_tods_.count(line);
+}
+
+void DBDataSource::maxToD(unsigned int line, float value)
+{
+    max_line_tods_[line] = value;
+}
+
+float DBDataSource::maxToD(unsigned int line) const
+{
+    assert (hasMaxToD(line));
+    return max_line_tods_.at(line);
+}
+
+bool DBDataSource::hasLiveData(unsigned int line, float current_tod) const
+{
+    if (hasMaxToD(line) && hasUpdateInterval())
+        return current_tod - maxToD(line) < updateInterval() + 2; // 2s max latency
+    else
+        return false;
+}
+
 }

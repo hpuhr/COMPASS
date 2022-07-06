@@ -22,8 +22,10 @@ class LabelDSWidget : public QWidget
   public slots:
     void updateListSlot();
     void sourceClickedSlot();
+    void changeLineSlot();
     void changeDirectionSlot();
     void selectDirectionSlot();
+    void selectLineSlot();
 
 public:
     LabelDSWidget(LabelGenerator& label_generator, QWidget* parent = 0,
@@ -42,6 +44,7 @@ protected:
 
     QGridLayout* ds_grid_{nullptr};
 
+    std::map<unsigned int, QPushButton*> line_buttons_;
     std::map<unsigned int, QPushButton*> direction_buttons_;
 
     QIcon& iconForDirection(LabelDirection direction);

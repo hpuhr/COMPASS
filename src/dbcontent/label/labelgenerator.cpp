@@ -35,7 +35,10 @@ LabelGenerator::LabelGenerator(const std::string& class_id, const std::string& i
 {
     registerParameter("auto_label", &auto_label_, true);
     registerParameter("label_directions", &label_directions_, json::object());
+    registerParameter("label_lines", &label_lines_, json::object());
     registerParameter("label_config", &label_config_, json::object());
+    registerParameter("declutter_labels", &declutter_labels_, true);
+    registerParameter("max_declutter_labels", &max_declutter_labels_, 200);
 
     registerParameter("filter_mode3a_active", &filter_mode3a_active_, false);
     registerParameter("filter_mode3a_values", &filter_mode3a_values_, "7000,7777");
@@ -54,6 +57,10 @@ LabelGenerator::LabelGenerator(const std::string& class_id, const std::string& i
     registerParameter("filter_ta_active", &filter_ta_active_, false);
     registerParameter("filter_ta_values", &filter_ta_values_, "AADDCC");
     updateTAValuesFromStr(filter_ta_values_);
+
+    registerParameter("filter_primary_only_activ", &filter_primary_only_active_, false);
+
+    registerParameter("label_opacity", &label_opacity_, 0.9);
 
     createSubConfigurables();
 }
@@ -86,6 +93,8 @@ std::vector<std::string> LabelGenerator::getLabelTexts(
 
     using namespace dbContent;
 
+    Variable& assoc_var = dbcont_manager_.metaGetVariable(dbcontent_name, DBContent::meta_var_associations_);
+
     Variable* acid_var {nullptr};
     if (dbcont_manager_.metaCanGetVariable(dbcontent_name, DBContent::meta_var_ti_))
         acid_var = &dbcont_manager_.metaGetVariable(dbcontent_name, DBContent::meta_var_ti_);
@@ -101,8 +110,14 @@ std::vector<std::string> LabelGenerator::getLabelTexts(
     {
         string main_id("?");
 
-        if (acid_var && buffer->has<string>(acid_var->name())
-                && !buffer->get<string>(acid_var->name()).isNull(buffer_index))
+        if (buffer->has<nlohmann::json>(assoc_var.name())
+                && !buffer->get<nlohmann::json>(assoc_var.name()).isNull(buffer_index))
+        {
+            main_id = buffer->get<nlohmann::json>(assoc_var.name()).get(buffer_index).dump();
+            main_id = main_id.substr(1, main_id.size()-2); // remove first and last chars []
+        }
+        else if (acid_var && buffer->has<string>(acid_var->name())
+                 && !buffer->get<string>(acid_var->name()).isNull(buffer_index))
         {
             main_id = buffer->get<string>(acid_var->name()).get(buffer_index);
             main_id.erase(std::remove(main_id.begin(), main_id.end(), ' '), main_id.end());
@@ -119,7 +134,7 @@ std::vector<std::string> LabelGenerator::getLabelTexts(
         tmp.push_back(main_id);
     }
 
-    if (current_lod_ == 1)
+    if (round(current_lod_) == 1)
         return tmp;
 
     // 1,2
@@ -132,7 +147,7 @@ std::vector<std::string> LabelGenerator::getLabelTexts(
     acid.erase(std::remove(acid.begin(), acid.end(), ' '), acid.end());
     tmp.push_back(acid);
 
-    if (current_lod_ == 3)
+    if (round(current_lod_) == 3)
     {
         // 1,3
         tmp.push_back(getVariableValue(dbcontent_name, 0*3+2, buffer, buffer_index));
@@ -159,7 +174,7 @@ std::vector<std::string> LabelGenerator::getLabelTexts(
 
     tmp.push_back(mc);
 
-    if (current_lod_ == 2)
+    if (round(current_lod_) == 2)
         return tmp;
 
     // 2,3
@@ -173,92 +188,92 @@ std::vector<std::string> LabelGenerator::getLabelTexts(
     {
 
 
-//        bool calc_vx_vy;
-//        string var1, var2;
-//        bool cant_calculate = false;
-//        double speed_ms;
+        //        bool calc_vx_vy;
+        //        string var1, var2;
+        //        bool cant_calculate = false;
+        //        double speed_ms;
 
-//        if (dbcont_manager_.metaVariable(DBContent::meta_var_vx_.name()).existsIn(dbcontent_name)
-//                && buffer->has<double>(
-//                    dbcont_manager_.metaVariable(DBContent::meta_var_vx_.name()).getFor(dbcontent_name).name())
-//                && dbcont_manager_.metaVariable(DBContent::meta_var_vy_.name()).existsIn(dbcontent_name)
-//                && buffer->has<double>(
-//                    dbcont_manager_.metaVariable(DBContent::meta_var_vy_.name()).getFor(dbcontent_name).name()))
-//        {
-//            // calculate based on vx, vy
-//            calc_vx_vy = true;
+        //        if (dbcont_manager_.metaVariable(DBContent::meta_var_vx_.name()).existsIn(dbcontent_name)
+        //                && buffer->has<double>(
+        //                    dbcont_manager_.metaVariable(DBContent::meta_var_vx_.name()).getFor(dbcontent_name).name())
+        //                && dbcont_manager_.metaVariable(DBContent::meta_var_vy_.name()).existsIn(dbcontent_name)
+        //                && buffer->has<double>(
+        //                    dbcont_manager_.metaVariable(DBContent::meta_var_vy_.name()).getFor(dbcontent_name).name()))
+        //        {
+        //            // calculate based on vx, vy
+        //            calc_vx_vy = true;
 
-//            var1 = dbcont_manager_.metaVariable(DBContent::meta_var_vx_.name()).getFor(dbcontent_name).name();
-//            var2 = dbcont_manager_.metaVariable(DBContent::meta_var_vy_.name()).getFor(dbcontent_name).name();
-//        }
-//        else if (dbcont_manager_.metaVariable(DBContent::meta_var_ground_speed_.name()).existsIn(dbcontent_name)
-//                 && buffer->has<double>(
-//                     dbcont_manager_.metaVariable(DBContent::meta_var_ground_speed_.name()).getFor(dbcontent_name).name()))
-//        {
-//            // calculate based on spd, track angle
-//            calc_vx_vy = false;
+        //            var1 = dbcont_manager_.metaVariable(DBContent::meta_var_vx_.name()).getFor(dbcontent_name).name();
+        //            var2 = dbcont_manager_.metaVariable(DBContent::meta_var_vy_.name()).getFor(dbcontent_name).name();
+        //        }
+        //        else if (dbcont_manager_.metaVariable(DBContent::meta_var_ground_speed_.name()).existsIn(dbcontent_name)
+        //                 && buffer->has<double>(
+        //                     dbcont_manager_.metaVariable(DBContent::meta_var_ground_speed_.name()).getFor(dbcontent_name).name()))
+        //        {
+        //            // calculate based on spd, track angle
+        //            calc_vx_vy = false;
 
-//            var1 = dbcont_manager_.metaVariable(DBContent::meta_var_ground_speed_.name()).getFor(dbcontent_name).name();
-//        }
-//        else
-//            cant_calculate = true;
+        //            var1 = dbcont_manager_.metaVariable(DBContent::meta_var_ground_speed_.name()).getFor(dbcontent_name).name();
+        //        }
+        //        else
+        //            cant_calculate = true;
 
-//        if (cant_calculate)
-//            tmp.push_back(""); // cant
-//        else
-//        {
-//            if (calc_vx_vy)
-//            {
-//                NullableVector<double>& vxs = buffer->get<double>(var1);
-//                NullableVector<double>& vys = buffer->get<double>(var2);
+        //        if (cant_calculate)
+        //            tmp.push_back(""); // cant
+        //        else
+        //        {
+        //            if (calc_vx_vy)
+        //            {
+        //                NullableVector<double>& vxs = buffer->get<double>(var1);
+        //                NullableVector<double>& vys = buffer->get<double>(var2);
 
-//                if (!vxs.isNull(buffer_index) && !vys.isNull(buffer_index))
-//                {
-//                    speed_ms = sqrt(pow(vxs.get(buffer_index), 2)+pow(vys.get(buffer_index), 2));
-//                    tmp.push_back(String::doubleToStringPrecision(speed_ms * M_S2KNOTS, 2));
-//                }
-//                else
-//                    tmp.push_back(""); // cant
-//            }
-//            else
-//            {
-//                NullableVector<double>& speeds = buffer->get<double>(var1);
+        //                if (!vxs.isNull(buffer_index) && !vys.isNull(buffer_index))
+        //                {
+        //                    speed_ms = sqrt(pow(vxs.get(buffer_index), 2)+pow(vys.get(buffer_index), 2));
+        //                    tmp.push_back(String::doubleToStringPrecision(speed_ms * M_S2KNOTS, 2));
+        //                }
+        //                else
+        //                    tmp.push_back(""); // cant
+        //            }
+        //            else
+        //            {
+        //                NullableVector<double>& speeds = buffer->get<double>(var1);
 
-//                if (!speeds.isNull(buffer_index))
-//                {
-//                    speed_ms = speeds.get(buffer_index);
-//                    tmp.push_back(String::doubleToStringPrecision(speed_ms, 2)); // should be kts
-//                }
-//                else
-//                    tmp.push_back(""); // cant
-//            }
-//        }
+        //                if (!speeds.isNull(buffer_index))
+        //                {
+        //                    speed_ms = speeds.get(buffer_index);
+        //                    tmp.push_back(String::doubleToStringPrecision(speed_ms, 2)); // should be kts
+        //                }
+        //                else
+        //                    tmp.push_back(""); // cant
+        //            }
+        //        }
     }
 
     // 3,2
     tmp.push_back(getVariableValue(dbcontent_name, 2*3+1, buffer, buffer_index));
 
-//    Variable* c_d_var {nullptr};
-//    if (dbcont_manager_.metaCanGetVariable(dbcontent_name, DBContent::meta_var_climb_descent_))
-//        c_d_var = &dbcont_manager_.metaGetVariable(dbcontent_name, DBContent::meta_var_climb_descent_);
+    //    Variable* c_d_var {nullptr};
+    //    if (dbcont_manager_.metaCanGetVariable(dbcontent_name, DBContent::meta_var_climb_descent_))
+    //        c_d_var = &dbcont_manager_.metaGetVariable(dbcontent_name, DBContent::meta_var_climb_descent_);
 
-//    string c_d;
+    //    string c_d;
 
-//    if (c_d_var && buffer->has<unsigned char>(c_d_var->name()) &&
-//            !buffer->get<unsigned char>(c_d_var->name()).isNull(buffer_index))
-//        c_d = c_d_var->getAsSpecialRepresentationString((buffer->get<unsigned char>(c_d_var->name()).get(buffer_index)));
+    //    if (c_d_var && buffer->has<unsigned char>(c_d_var->name()) &&
+    //            !buffer->get<unsigned char>(c_d_var->name()).isNull(buffer_index))
+    //        c_d = c_d_var->getAsSpecialRepresentationString((buffer->get<unsigned char>(c_d_var->name()).get(buffer_index)));
 
-//    tmp.push_back(c_d);
+    //    tmp.push_back(c_d);
 
     // 3,3
 
     tmp.push_back(getVariableValue(dbcontent_name, 2*3+2, buffer, buffer_index));
 
-//    if (dbcontent_name == "CAT062" && buffer->has<string>(DBContent::var_cat062_wtc_.name())
-//            && !buffer->get<string>(DBContent::var_cat062_wtc_.name()).isNull(buffer_index))
-//        tmp.push_back(buffer->get<string>(DBContent::var_cat062_wtc_.name()).get(buffer_index));
-//    else
-//        tmp.push_back("");
+    //    if (dbcontent_name == "CAT062" && buffer->has<string>(DBContent::var_cat062_wtc_.name())
+    //            && !buffer->get<string>(DBContent::var_cat062_wtc_.name()).isNull(buffer_index))
+    //        tmp.push_back(buffer->get<string>(DBContent::var_cat062_wtc_.name()).get(buffer_index));
+    //    else
+    //        tmp.push_back("");
 
     //        Variable& tod_var = dbcont_manager_.metaGetVariable(dbcontent_name, DBContent::meta_var_tod_);
     //        string tod;
@@ -286,20 +301,33 @@ void LabelGenerator::autoLabel(bool auto_label)
 
 void LabelGenerator::autoAdustCurrentLOD(unsigned int num_labels_on_screen)
 {
-    loginf << "DBContentLabelGenerator: autoAdustCurrentLOD: num labels on screen "
-           << num_labels_on_screen;
+    float old_lod = current_lod_;
 
-    if (num_labels_on_screen < 20)
-        current_lod_ = 3;
-    else if (num_labels_on_screen < 40)
-        current_lod_ = 2;
+    if (num_labels_on_screen < 25)
+        current_lod_ = (2*old_lod + 3) / 3;
+    else if (num_labels_on_screen < 50)
+        current_lod_ = (2*old_lod + 2) / 3;
+    else if (num_labels_on_screen < 75)
+        current_lod_ = (2*old_lod + 1) / 3;
     else
         current_lod_ = 1;
+
+    //loginf << "DBContentLabelGenerator: autoAdustCurrentLOD: old " << old_lod << " current " << current_lod_;
+
+    // failsafe
+    if (current_lod_ < 1)
+        current_lod_ = 1;
+    else if (current_lod_ > 3)
+        current_lod_ = 3;
+
+    loginf << "DBContentLabelGenerator: autoAdustCurrentLOD: num labels on screen "
+           << num_labels_on_screen << " old " << (unsigned int) old_lod
+           << " current " << round(current_lod_) << " float " << current_lod_;
 }
 
 unsigned int LabelGenerator::currentLOD() const
 {
-    return current_lod_;
+    return round(current_lod_);
 }
 
 void LabelGenerator::currentLOD(unsigned int current_lod)
@@ -316,6 +344,8 @@ bool LabelGenerator::autoLOD() const
 void LabelGenerator::autoLOD(bool auto_lod)
 {
     auto_lod_ = auto_lod;
+
+    emit labelOptionsChangedSignal();
 }
 
 void LabelGenerator::addLabelDSID(unsigned int ds_id)
@@ -345,12 +375,37 @@ bool LabelGenerator::labelWanted(unsigned int ds_id)
 
 bool LabelGenerator::labelWanted(std::shared_ptr<Buffer> buffer, unsigned int index)
 {
+    string dbcont_name = buffer->dbContentName();
+
+    // check line
+    {
+        assert (dbcont_manager_.metaCanGetVariable(dbcont_name, DBContent::meta_var_line_id_));
+        dbContent::Variable& line_var = dbcont_manager_.metaGetVariable(
+                    dbcont_name, DBContent::meta_var_line_id_);
+        assert (dbcont_manager_.metaCanGetVariable(dbcont_name, DBContent::meta_var_datasource_id_));
+        dbContent::Variable& ds_id_var = dbcont_manager_.metaGetVariable(
+                    dbcont_name, DBContent::meta_var_datasource_id_);
+
+
+        assert (buffer->has<unsigned int> (line_var.name()));
+        assert (buffer->has<unsigned int> (ds_id_var.name()));
+
+        NullableVector<unsigned int>& line_vec = buffer->get<unsigned int> (line_var.name());
+        assert (!line_vec.isNull(index));
+
+        NullableVector<unsigned int>& ds_id_vec = buffer->get<unsigned int> (ds_id_var.name());
+        assert (!ds_id_vec.isNull(index));
+
+        if (labelLine(ds_id_vec.get(index)) != line_vec.get(index))
+            return false;
+    }
+
     if (filter_mode3a_active_)
     {
-        if (!dbcont_manager_.metaCanGetVariable(buffer->dbContentName(), DBContent::meta_var_m3a_))
+        if (!dbcont_manager_.metaCanGetVariable(dbcont_name, DBContent::meta_var_m3a_))
             return false;
 
-        dbContent::Variable& var = dbcont_manager_.metaGetVariable(buffer->dbContentName(), DBContent::meta_var_m3a_);
+        dbContent::Variable& var = dbcont_manager_.metaGetVariable(dbcont_name, DBContent::meta_var_m3a_);
 
         assert (buffer->has<unsigned int> (var.name()));
 
@@ -367,10 +422,10 @@ bool LabelGenerator::labelWanted(std::shared_ptr<Buffer> buffer, unsigned int in
 
     if (filter_modec_min_active_ || filter_modec_max_active_)
     {
-        if (!dbcont_manager_.metaCanGetVariable(buffer->dbContentName(), DBContent::meta_var_mc_))
+        if (!dbcont_manager_.metaCanGetVariable(dbcont_name, DBContent::meta_var_mc_))
             return false;
 
-        dbContent::Variable& var = dbcont_manager_.metaGetVariable(buffer->dbContentName(), DBContent::meta_var_mc_);
+        dbContent::Variable& var = dbcont_manager_.metaGetVariable(dbcont_name, DBContent::meta_var_mc_);
 
         assert (buffer->has<float> (var.name()));
 
@@ -393,18 +448,32 @@ bool LabelGenerator::labelWanted(std::shared_ptr<Buffer> buffer, unsigned int in
 
     if (filter_ti_active_)
     {
-        if (!dbcont_manager_.metaCanGetVariable(buffer->dbContentName(), DBContent::meta_var_ti_))
+        if (!dbcont_manager_.metaCanGetVariable(dbcont_name, DBContent::meta_var_ti_))
             return false;
 
-        dbContent::Variable& var = dbcont_manager_.metaGetVariable(buffer->dbContentName(), DBContent::meta_var_ti_);
+        dbContent::Variable& acid_var = dbcont_manager_.metaGetVariable(dbcont_name, DBContent::meta_var_ti_);
 
-        assert (buffer->has<string> (var.name()));
+        assert (buffer->has<string> (acid_var.name()));
 
-        NullableVector<string>& data_vec = buffer->get<string> (var.name());
+        NullableVector<string>& acid_vec = buffer->get<string> (acid_var.name());
 
-        if (data_vec.isNull(index))
+        dbContent::Variable* cs_fpl_var {nullptr}; // only set in cat062
+        NullableVector<string>* cs_fpl_vec {nullptr}; // only set in cat062
+
+        if (dbcont_name == "CAT062")
         {
-            if (!filter_ti_null_wanted_)
+            assert (dbcont_manager_.canGetVariable(dbcont_name, DBContent::var_cat062_callsign_fpl_));
+
+            cs_fpl_var = &dbcont_manager_.getVariable(dbcont_name, DBContent::var_cat062_callsign_fpl_);
+
+            assert (buffer->has<string> (cs_fpl_var->name()));
+            cs_fpl_vec = &buffer->get<string> (cs_fpl_var->name());
+        }
+
+        if (acid_vec.isNull(index))
+        {
+            if (!filter_ti_null_wanted_
+                    || (cs_fpl_vec != nullptr ? cs_fpl_vec->isNull(index) : false))
                 return false; // null not wanted
         }
         else
@@ -413,10 +482,22 @@ bool LabelGenerator::labelWanted(std::shared_ptr<Buffer> buffer, unsigned int in
 
             for (auto& val_it : filter_ti_values_set_)
             {
-                if (data_vec.get(index).find(val_it) != std::string::npos)
+                if (acid_vec.get(index).find(val_it) != std::string::npos)
                 {
                     found = true;
                     break;
+                }
+            }
+
+            if (cs_fpl_vec && !cs_fpl_vec->isNull(index))
+            {
+                for (auto& val_it : filter_ti_values_set_)
+                {
+                    if (cs_fpl_vec->get(index).find(val_it) != std::string::npos)
+                    {
+                        found = true;
+                        break;
+                    }
                 }
             }
 
@@ -427,10 +508,10 @@ bool LabelGenerator::labelWanted(std::shared_ptr<Buffer> buffer, unsigned int in
 
     if (filter_ta_active_)
     {
-        if (!dbcont_manager_.metaCanGetVariable(buffer->dbContentName(), DBContent::meta_var_ta_))
+        if (!dbcont_manager_.metaCanGetVariable(dbcont_name, DBContent::meta_var_ta_))
             return false;
 
-        dbContent::Variable& var = dbcont_manager_.metaGetVariable(buffer->dbContentName(), DBContent::meta_var_ta_);
+        dbContent::Variable& var = dbcont_manager_.metaGetVariable(dbcont_name, DBContent::meta_var_ta_);
 
         assert (buffer->has<unsigned int> (var.name()));
 
@@ -443,6 +524,62 @@ bool LabelGenerator::labelWanted(std::shared_ptr<Buffer> buffer, unsigned int in
         }
         else if (!filter_ta_values_set_.count(data_vec.get(index)))
             return false; // set and not in values
+    }
+
+    if (filter_primary_only_active_)
+    {
+        NullableVector<unsigned int>* m3a_vec {nullptr};
+        if (dbcont_manager_.metaCanGetVariable(dbcont_name, DBContent::meta_var_m3a_))
+        {
+            dbContent::Variable& var = dbcont_manager_.metaGetVariable(dbcont_name, DBContent::meta_var_m3a_);
+            assert (buffer->has<unsigned int> (var.name()));
+            m3a_vec = &buffer->get<unsigned int> (var.name());
+        }
+
+        NullableVector<float>* mc_vec {nullptr};
+        if (dbcont_manager_.metaCanGetVariable(dbcont_name, DBContent::meta_var_mc_))
+        {
+            dbContent::Variable& var = dbcont_manager_.metaGetVariable(dbcont_name, DBContent::meta_var_mc_);
+            assert (buffer->has<float> (var.name()));
+            mc_vec = &buffer->get<float> (var.name());
+        }
+
+        NullableVector<unsigned int>* ta_vec {nullptr};
+        if (dbcont_manager_.metaCanGetVariable(dbcont_name, DBContent::meta_var_ta_))
+        {
+            dbContent::Variable& var = dbcont_manager_.metaGetVariable(dbcont_name, DBContent::meta_var_ta_);
+            assert (buffer->has<unsigned int> (var.name()));
+            ta_vec = &buffer->get<unsigned int> (var.name());
+        }
+
+        NullableVector<string>* ti_vec {nullptr};
+        if (dbcont_manager_.metaCanGetVariable(dbcont_name, DBContent::meta_var_ti_))
+        {
+            dbContent::Variable& var = dbcont_manager_.metaGetVariable(dbcont_name, DBContent::meta_var_ti_);
+            assert (buffer->has<string> (var.name()));
+            ti_vec = &buffer->get<string> (var.name());
+        }
+
+        NullableVector<unsigned char>* type_vec {nullptr};
+        if (dbcont_manager_.metaCanGetVariable(dbcont_name, DBContent::meta_var_detection_type_))
+        {
+            dbContent::Variable& var = dbcont_manager_.metaGetVariable(dbcont_name, DBContent::meta_var_detection_type_);
+            assert (buffer->has<unsigned char> (var.name()));
+            type_vec = &buffer->get<unsigned char> (var.name());
+        }
+
+        std::set<unsigned char> psr_detection {1,3,6,7};
+
+        if (m3a_vec && !m3a_vec->isNull(index))
+            return false;
+        else if (mc_vec && !mc_vec->isNull(index))
+            return false;
+        else if (ta_vec && !ta_vec->isNull(index))
+            return false;
+        else if (ti_vec && !ti_vec->isNull(index))
+            return false;
+        else if (type_vec && !type_vec->isNull(index) && !psr_detection.count(type_vec->get(index)))
+            return false;
     }
 
     return true;
@@ -639,6 +776,21 @@ LabelDirection LabelGenerator::labelDirection (unsigned int ds_id)
     }
 }
 
+float LabelGenerator::labelDirectionAngle (unsigned int ds_id)
+{
+    LabelDirection direction = labelDirection(ds_id);
+
+    if (direction == LEFT_UP)
+        return DEG2RAD * 135.0;
+    else if (direction == RIGHT_UP)
+        return DEG2RAD * 45.0;
+    else if (direction == LEFT_DOWN)
+        return DEG2RAD * 225.0;
+    else // RIGHT_DOWN
+        return DEG2RAD * 315.0;
+}
+
+
 void LabelGenerator::labelDirection (unsigned int ds_id, LabelDirection direction)
 {
     label_directions_[to_string(ds_id)] = direction;
@@ -655,6 +807,32 @@ void LabelGenerator::editLabelContents(const std::string& dbcontent_name)
 
     label_edit_dialog_->show();
 }
+
+unsigned int LabelGenerator::labelLine (unsigned int ds_id) // returns 0...3
+{
+    string key = to_string(ds_id);
+
+    if (label_lines_.contains(key))
+    {
+        unsigned int line = label_lines_.at(key);
+        assert (line <= 3);
+        return line;
+    }
+    else
+    {
+        unsigned int line = 0;
+        label_lines_[key] = line;
+        return line;
+    }
+}
+
+void LabelGenerator::labelLine (unsigned int ds_id, unsigned int line)
+{
+    assert (line <= 3);
+    string key = to_string(ds_id);
+    label_lines_[key] = line;
+}
+
 
 void LabelGenerator::editLabelContentsDoneSlot()
 {
@@ -697,11 +875,73 @@ void LabelGenerator::addVariables (const std::string& dbcontent_name, dbContent:
     }
 }
 
+bool LabelGenerator::declutterLabels() const
+{
+    return declutter_labels_;
+}
+
+void LabelGenerator::declutterLabels(bool declutter_labels)
+{
+    declutter_labels_ = declutter_labels;
+
+    if (!declutter_labels_)
+        emit labelClearAllSignal(); // since since do not update otherwise - reason unknown
+
+    emit labelOptionsChangedSignal(); // updates
+}
+
+bool LabelGenerator::showDeclutteringInfoOnce() const
+{
+    return show_decluttering_info_once_;
+}
+
+void LabelGenerator::showDeclutteringInfoOnce(bool show_decluttering_info_once)
+{
+    show_decluttering_info_once_ = show_decluttering_info_once;
+}
+
+unsigned int LabelGenerator::maxDeclutterlabels() const
+{
+    return max_declutter_labels_;
+}
+
+bool LabelGenerator::filterPrimaryOnlyActive() const
+{
+    return filter_primary_only_active_;
+}
+
+void LabelGenerator::filterPrimaryOnlyActive(bool value)
+{
+    loginf << "LabelGenerator: filterPrimaryOnlyActive: value " << value;
+
+    filter_primary_only_active_ = value;
+}
+
+float LabelGenerator::labelOpacity() const
+{
+    return label_opacity_;
+}
+
+void LabelGenerator::labelOpacity(float label_opacity)
+{
+    label_opacity_ = label_opacity;
+}
+
+float LabelGenerator::labelDistance() const
+{
+    return label_distance_;
+}
+
+void LabelGenerator::labelDistance(float label_distance)
+{
+    label_distance_ = label_distance;
+}
+
 bool LabelGenerator::updateM3AValuesFromStr(const std::string& values)
 {
     set<unsigned int> values_tmp;
     vector<string> split_str = String::split(values, ',');
-
+    
     bool ok = true;
 
     filter_m3a_null_wanted_ = false;

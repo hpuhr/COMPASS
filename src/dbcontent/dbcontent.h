@@ -132,6 +132,7 @@ public:
     static const Property var_cat062_baro_alt_;
 
     static const Property var_cat062_wtc_;
+    static const Property var_cat062_callsign_fpl_;
 
     static const Property selected_var;
 
