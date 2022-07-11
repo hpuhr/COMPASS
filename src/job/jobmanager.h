@@ -38,9 +38,9 @@ class Job;
 class JobManager : public QThread, public Singleton, public Configurable
 {
     Q_OBJECT
-  signals:
-    void databaseBusy();
-    void databaseIdle();
+//  signals:
+//    void databaseBusy();
+//    void databaseIdle();
 
   public:
     virtual ~JobManager();
@@ -76,8 +76,8 @@ class JobManager : public QThread, public Singleton, public Configurable
     volatile bool stop_requested_;
     volatile bool stopped_;
 
-    bool changed_{false};
-    bool really_update_widget_{false};
+    //bool changed_{false};
+    //bool really_update_widget_{false};
 
     std::shared_ptr<Job> active_blocking_job_;
     tbb::concurrent_queue<std::shared_ptr<Job>> blocking_jobs_;

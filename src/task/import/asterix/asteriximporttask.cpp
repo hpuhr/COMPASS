@@ -696,7 +696,11 @@ void ASTERIXImportTask::run(bool test) // , bool create_mapping_stubs
 
     if (import_file_)
     {
-        updateFileProgressDialog();
+        last_file_progress_time_ = boost::posix_time::microsec_clock::local_time();
+
+        updateFileProgressDialog(true);
+
+        file_progress_dialog_->show();
 
         boost::posix_time::ptime start_time = boost::posix_time::microsec_clock::local_time();
 
@@ -1147,6 +1151,8 @@ void ASTERIXImportTask::insertData()
     connect(&dbcont_manager, &DBContentManager::insertDoneSignal,
             this, &ASTERIXImportTask::insertDoneSlot, Qt::UniqueConnection);
 
+    //insert_start_time_ = boost::posix_time::microsec_clock::local_time();
+
     dbcont_manager.insertData(job_buffers);
 
     checkAllDone();
@@ -1168,6 +1174,14 @@ void ASTERIXImportTask::insertDoneSlot()
 
         updateFileProgressDialog();
     }
+
+//    double insert_time_ms = (double)(
+//                boost::posix_time::microsec_clock::local_time() - insert_start_time_).total_microseconds() / 1000.0;
+
+//    total_insert_time_ms_ += insert_time_ms;
+
+//    loginf << "UGA insert time " << insert_time_ms
+//           << " ms total " << total_insert_time_ms_/1000.0 << " s" ;
 
     if (queued_job_buffers_.size())
         insertData();
@@ -1258,7 +1272,7 @@ bool ASTERIXImportTask::maxLoadReached()
     return num_packets_in_processing_ > 2;
 }
 
-void ASTERIXImportTask::updateFileProgressDialog()
+void ASTERIXImportTask::updateFileProgressDialog(bool force)
 {
     if (stopped_)
         return;
@@ -1270,7 +1284,17 @@ void ASTERIXImportTask::updateFileProgressDialog()
         file_progress_dialog_->setWindowTitle("Importing ASTERIX Recording");
         file_progress_dialog_->setWindowModality(Qt::ApplicationModal);
         //postprocess_dialog.setWindowModality(Qt::ApplicationModal);
+
+        force = true;
     }
+
+    if (!force
+            && (boost::posix_time::microsec_clock::local_time() - last_file_progress_time_).total_milliseconds() < 500)
+    {
+        return;
+    }
+
+    last_file_progress_time_ = boost::posix_time::microsec_clock::local_time();
 
     string text = "File '"+current_filename_+"'";
     string rec_text;

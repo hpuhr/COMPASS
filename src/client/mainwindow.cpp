@@ -795,7 +795,9 @@ void MainWindow::performAutomaticTasks ()
 
         while (!ast_import_task.done())
         {
-            QCoreApplication::processEvents();
+            if (QCoreApplication::hasPendingEvents())
+                QCoreApplication::processEvents();
+
             QThread::msleep(1);
         }
     }
