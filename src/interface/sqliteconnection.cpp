@@ -55,8 +55,10 @@ void SQLiteConnection::openFile(const std::string& file_name)
 
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
-    int result = sqlite3_open_v2(file_name.c_str(), &db_handle_, //":memory:"
+    int result = sqlite3_open_v2(file_name.c_str(), &db_handle_,
                                  SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE, NULL);
+
+//    int result = sqlite3_open(":memory:", &db_handle_);
 
     if (result != SQLITE_OK)
     {
@@ -67,14 +69,13 @@ void SQLiteConnection::openFile(const std::string& file_name)
         sqlite3_close(db_handle_);
         throw std::runtime_error("SQLiteConnection: openFile: error");
     }
+
     char* sErrMsg = 0;
     sqlite3_exec(db_handle_, "PRAGMA SYNCHRONOUS = OFF", NULL, NULL, &sErrMsg);
     sqlite3_exec(db_handle_, "PRAGMA TEMP_STORE = 2", NULL, NULL, &sErrMsg);
     sqlite3_exec(db_handle_, "PRAGMA JOURNAL_MODE = OFF", NULL, NULL, &sErrMsg);
     sqlite3_exec(db_handle_, "PRAGMA LOCKING_MODE = EXCLUSIVE", NULL, NULL, &sErrMsg);
     sqlite3_exec(db_handle_, "PRAGMA CACHE_SIZE = 500", NULL, NULL, &sErrMsg);
-
-
 
     //sqlite3_exec(db_handle_, "PRAGMA locking_mode = EXCLUSIVE", NULL, NULL, &sErrMsg);
 
