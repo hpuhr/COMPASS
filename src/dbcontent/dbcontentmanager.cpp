@@ -761,6 +761,7 @@ void DBContentManager::insertData(std::map<std::string, std::shared_ptr<Buffer>>
     assert (!insert_data_.size());
 
     insert_in_progress_ = true;
+    logdbg << "DBContentManager: insertData: insert in progress " << insert_in_progress_;
 
     insert_data_ = data;
 
@@ -793,7 +794,7 @@ void DBContentManager::insertDone(DBContent& object)
 
 void DBContentManager::finishInserting()
 {
-    loginf << "DBContentManager: finishInserting: all done";
+    logdbg << "DBContentManager: finishInserting: all done";
 
     // calculate min/max values
 
@@ -909,6 +910,7 @@ void DBContentManager::finishInserting()
         insert_data_.clear();
 
     insert_in_progress_ = false;
+    logdbg << "DBContentManager: finishInserting: insert in progress " << insert_in_progress_;
     emit insertDoneSignal();
 
     // add inserted to loaded data

@@ -188,6 +188,7 @@ protected:
 
     std::set<int> added_data_sources_;
 
+    bool insert_slot_connected_ {false};
     bool all_done_{false};
 
     virtual void checkSubConfigurables() override;
