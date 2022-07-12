@@ -112,6 +112,7 @@ public:
     void importGPSTrailFile(const std::string& filename);
     void importSectorsFile(const std::string& filename);
 
+    void calculateRadarPlotPositions(bool value);
     void associateData(bool value);
 
     void loadData(bool value);
@@ -164,6 +165,7 @@ protected:
     bool sectors_import_file_ {false};
     std::string sectors_import_filename_;
 
+    bool calculate_radar_plot_postions_ {false};
     bool associate_data_ {false};
 
     bool load_data_ {false};

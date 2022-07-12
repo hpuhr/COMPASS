@@ -587,6 +587,14 @@ void MainWindow::importSectorsFile(const std::string& filename)
 }
 
 
+void MainWindow::calculateRadarPlotPositions(bool value)
+{
+    loginf << "MainWindow: calculateRadarPlotPositions: value " << value;
+
+    automatic_tasks_defined_ = true;
+    calculate_radar_plot_postions_ = value;
+}
+
 void MainWindow::associateData(bool value)
 {
     loginf << "MainWindow: associateData: value " << value;
@@ -797,7 +805,9 @@ void MainWindow::performAutomaticTasks ()
 
         while (!ast_import_task.done())
         {
-            QCoreApplication::processEvents();
+            if (QCoreApplication::hasPendingEvents())
+                QCoreApplication::processEvents();
+
             QThread::msleep(1);
         }
     }
@@ -917,6 +927,26 @@ void MainWindow::performAutomaticTasks ()
         }
 
         COMPASS::instance().evaluationManager().importSectors(sectors_import_filename_);
+    }
+
+    if (calculate_radar_plot_postions_)
+    {
+        RadarPlotPositionCalculatorTask& task = COMPASS::instance().taskManager().radarPlotPositionCalculatorTask();
+
+        if(!task.canRun())
+        {
+            logerr << "MainWindow: performAutomaticTasks: calculate radar plot positions task can not be run";
+            return;
+        }
+
+        task.showDoneSummary(false);
+        task.run();
+
+        while (!task.done())
+        {
+            QCoreApplication::processEvents();
+            QThread::msleep(1);
+        }
     }
 
     if (associate_data_)

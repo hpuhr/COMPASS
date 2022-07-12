@@ -5,6 +5,7 @@
 #include "labelplacement_helpers.h"
 
 #include <vector>
+#include <iostream>
 
 #include <Eigen/Core>
 
@@ -75,7 +76,9 @@ namespace force
                          ForceType force)
     {
         if (!bbox.intersects(bbox2))
+        {
             return {0, 0};
+        }
 
         if (force == ForceType::Simple)
         {
@@ -263,6 +266,11 @@ namespace force
 
         std::vector<QRectF> bboxes = collectBoundingBoxes(labels, tx, ty);
 
+        auto coutBBox = [ & ] (const QRectF& bbox) 
+        {
+            std::cout << "(" << bbox.x() << "," << bbox.y() << "," << bbox.width() << "x" << bbox.height() << ")"; 
+        };
+
         for (size_t i = 0; i < n; ++i)
         {
             const auto& l = labels[ i ];
@@ -276,6 +284,12 @@ namespace force
                 const auto& bbox2 = objects[ j ];
                 if (bbox2.isEmpty())
                     continue;
+
+                // std::cout << "      ";
+                // coutBBox(bbox);
+                // std::cout << " ";
+                // coutBBox(bbox2);
+                // std::cout << " => " << bbox.intersects(bbox2) << std::endl;
 
                 auto offset = repelFromBox(bbox, bbox2, force);
 
@@ -355,6 +369,50 @@ namespace force
                 movements[ i ] += Eigen::Vector2d(offset.x(), offset.y());
                 total          += Eigen::Vector2d(std::fabs(offset.x()), std::fabs(offset.y()));
             }
+        }
+    }
+
+    /**
+     */
+    void repelFromROI(std::vector<Eigen::Vector2d>& movements,
+                      Eigen::Vector2d& total,
+                      const QRectF& roi,
+                      const std::vector<Label>& labels, 
+                      double tx, 
+                      double ty,
+                      ForceType force)
+    {
+        size_t n = labels.size();
+
+        movements.assign(n, Eigen::Vector2d(0, 0));
+        total = Eigen::Vector2d(0, 0);
+
+        if (roi.isEmpty())
+            return;
+
+        std::vector<QRectF> bboxes = collectBoundingBoxes(labels, tx, ty);
+
+        for (size_t i = 0; i < n; ++i)
+        {
+            const auto& l = labels[ i ];
+            if (!l.active)
+                continue;
+
+            const auto& bbox = bboxes[ i ];
+
+            double dx = 0;
+            double dy = 0;
+            if (bbox.left() < roi.left())
+                dx = roi.left() - bbox.left();
+            if (bbox.right() > roi.right())
+                dx = roi.right() - bbox.right();
+            if (bbox.top() < roi.top())
+                dy = roi.top() - bbox.top();
+            if (bbox.bottom() > roi.bottom())
+                dy = roi.bottom() - bbox.bottom();
+
+            movements[ i ] += Eigen::Vector2d(dx, dy);
+            total          += Eigen::Vector2d(std::fabs(dx), std::fabs(dy));
         }
     }
 

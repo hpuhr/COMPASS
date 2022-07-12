@@ -57,7 +57,7 @@ void JobManager::addDBJob(std::shared_ptr<Job> job)
 {
     queued_db_jobs_.push(job);
 
-    emit databaseBusy();
+    //emit databaseBusy();
 }
 
 void JobManager::cancelJob(std::shared_ptr<Job> job) { job->setObsolete(); }
@@ -89,8 +89,8 @@ void JobManager::run()
         if (stop_requested_ && !hasAnyJobs())
             break;
 
-        changed_ = false;
-        really_update_widget_ = false;
+//        changed_ = false;
+//        really_update_widget_ = false;
 
         if (hasBlockingJobs())
             handleBlockingJobs();
@@ -101,11 +101,13 @@ void JobManager::run()
         if (hasDBJobs())
             handleDBJobs();
 
-        if (!stop_requested_ && changed_ && !hasDBJobs())
-            emit databaseIdle();
+//        if (!stop_requested_ && changed_ && !hasDBJobs())
+//            emit databaseIdle();
 
-        // QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
-        msleep(1);
+        if (QCoreApplication::hasPendingEvents())
+            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+        else
+            msleep(1);
 
 //        if ((boost::posix_time::microsec_clock::local_time() - log_time_).total_seconds() > 1)
 //        {
@@ -156,8 +158,8 @@ void JobManager::handleBlockingJobs()
             assert(!active_blocking_job_->started());
             QThreadPool::globalInstance()->start(active_blocking_job_.get());
 
-            changed_ = true;
-            really_update_widget_ = !hasBlockingJobs();
+            //changed_ = true;
+            //really_update_widget_ = !hasBlockingJobs();
         }
     }
 }
@@ -200,8 +202,8 @@ void JobManager::handleNonBlockingJobs()
             {
                 // QThreadPool::globalInstance()->start(active_non_blocking_job_.get());
 
-                changed_ = true;
-                really_update_widget_ = !hasNonBlockingJobs();
+                //changed_ = true;
+                //really_update_widget_ = !hasNonBlockingJobs();
             }
         }
         else  // no jobs left
@@ -241,8 +243,8 @@ void JobManager::handleDBJobs()
         {
             QThreadPool::globalInstance()->start(active_db_job_.get());
 
-            changed_ = true;
-            really_update_widget_ = !hasDBJobs();
+            //changed_ = true;
+            //really_update_widget_ = !hasDBJobs();
         }
     }
 }

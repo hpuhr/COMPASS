@@ -342,11 +342,12 @@ DataSourceEditWidget::DataSourceEditWidget(DataSourceManager& ds_man, DataSource
 
 void DataSourceEditWidget::showID(unsigned int ds_id)
 {
-    loginf << "DataSourceEditWidget: showID: id " << ds_id;
-
     has_current_ds_ = true;
     current_ds_id_ = ds_id;
     current_ds_in_db_ = ds_man_.hasDBDataSource(current_ds_id_);
+
+    loginf << "DataSourceEditWidget: showID: id " << ds_id << " in db " << current_ds_in_db_;
+
     assert (ds_man_.hasConfigDataSource(current_ds_id_));
 
     updateContent();
@@ -540,12 +541,29 @@ void DataSourceEditWidget::addRadarRangesSlot()
 
 void DataSourceEditWidget::radarRangeEditedSlot(const QString& value_str)
 {
-    double value = value_str.toDouble();
-
     QLineEdit* line_edit = dynamic_cast<QLineEdit*> (QObject::sender());
     assert (line_edit);
 
     string key = line_edit->property("key").toString().toStdString();
+
+    if (!value_str.size() || value_str.toDouble() == 0)
+    {
+        // remove key
+        loginf << "DataSourceEditWidget: radarRangeEditedSlot: removing key '" << key << "'";
+
+        if (current_ds_in_db_)
+        {
+            assert (ds_man_.hasDBDataSource(current_ds_id_));
+            ds_man_.dbDataSource(current_ds_id_).removeRadarRange(key);
+        }
+
+        assert (ds_man_.hasConfigDataSource(current_ds_id_));
+        ds_man_.configDataSource(current_ds_id_).removeRadarRange(key);
+
+        return;
+    }
+
+    double value = value_str.toDouble();
 
     loginf << "DataSourceEditWidget: radarRangeEditedSlot: key '" << key << "' value '" << value << "'";
 
@@ -556,7 +574,7 @@ void DataSourceEditWidget::radarRangeEditedSlot(const QString& value_str)
     }
 
     assert (ds_man_.hasConfigDataSource(current_ds_id_));
-    ds_man_.dbDataSource(current_ds_id_).radarRange(key, value);
+    ds_man_.configDataSource(current_ds_id_).radarRange(key, value);
 }
 
 void DataSourceEditWidget::addRadarAccuraciesSlot()
@@ -595,7 +613,7 @@ void DataSourceEditWidget::radarAccuraciesEditedSlot(const QString& value_str)
     }
 
     assert (ds_man_.hasConfigDataSource(current_ds_id_));
-    ds_man_.dbDataSource(current_ds_id_).radarAccuracy(key, value);
+    ds_man_.configDataSource(current_ds_id_).radarAccuracy(key, value);
 }
 
 void DataSourceEditWidget::addNetLinesSlot()
