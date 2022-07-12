@@ -181,9 +181,14 @@ protected:
 
     //bool waiting_for_insert_{false};
     bool insert_active_{false};
+    //boost::posix_time::ptime insert_start_time_;
+    //double total_insert_time_ms_ {0};
+
+    boost::posix_time::ptime last_file_progress_time_;
 
     std::set<int> added_data_sources_;
 
+    bool insert_slot_connected_ {false};
     bool all_done_{false};
 
     virtual void checkSubConfigurables() override;
@@ -192,7 +197,7 @@ protected:
     void checkAllDone();
 
     bool maxLoadReached();
-    void updateFileProgressDialog();
+    void updateFileProgressDialog(bool force=false);
 };
 
 #endif  // ASTERIXIMPORTTASK_H

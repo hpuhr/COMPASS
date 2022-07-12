@@ -34,6 +34,7 @@
 #include "files.h"
 
 #include <QMessageBox>
+#include <QApplication>
 
 #include <osgDB/Registry>
 
@@ -46,7 +47,6 @@ using namespace Utils;
 COMPASS::COMPASS() : Configurable("COMPASS", "COMPASS0", 0, "compass.json")
 {
     logdbg << "COMPASS: constructor: start";
-
     simple_config_.reset(new SimpleConfig("config.json"));
 
     registerParameter("last_db_filename", &last_db_filename_, "");
