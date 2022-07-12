@@ -96,6 +96,9 @@ ASTERIXImportTask::ASTERIXImportTask(const std::string& class_id, const std::str
         loginf << "ASTERIXImportTask: constructor: resetting to no framing";
         current_file_framing_ = "";
     }
+
+    logdbg << "ASTERIXImportTask: constructor: thread " << QThread::currentThreadId()
+           << " main " << QApplication::instance()->thread()->currentThreadId();
 }
 
 ASTERIXImportTask::~ASTERIXImportTask()
@@ -696,7 +699,11 @@ void ASTERIXImportTask::run(bool test) // , bool create_mapping_stubs
 
     if (import_file_)
     {
-        updateFileProgressDialog();
+        last_file_progress_time_ = boost::posix_time::microsec_clock::local_time();
+
+        updateFileProgressDialog(true);
+
+        file_progress_dialog_->show();
 
         boost::posix_time::ptime start_time = boost::posix_time::microsec_clock::local_time();
 
@@ -706,6 +713,7 @@ void ASTERIXImportTask::run(bool test) // , bool create_mapping_stubs
         }
     }
 
+    assert (!insert_active_);
     insert_active_ = false;
 
     all_done_ = false;
@@ -882,7 +890,7 @@ void ASTERIXImportTask::addDecodedASTERIXSlot()
 
     if (import_file_)
     {
-        updateFileProgressDialog();
+        //updateFileProgressDialog();
 
         if (file_progress_dialog_->wasCanceled())
         {
@@ -1071,7 +1079,11 @@ void ASTERIXImportTask::postprocessDoneSlot()
         queued_job_buffers_.emplace_back(std::move(job_buffers));
 
         if (!insert_active_)
+        {
+            logdbg << "ASTERIXImportTask: postprocessDoneSlot: inserting, thread " << QThread::currentThreadId();
+            assert (!COMPASS::instance().dbContentManager().insertInProgress());
             insertData();
+        }
     }
 }
 
@@ -1088,6 +1100,9 @@ void ASTERIXImportTask::postprocessObsoleteSlot()
 
 void ASTERIXImportTask::insertData()
 {
+    logdbg << "ASTERIXImportTask: insertData: thread " << QThread::currentThreadId();
+
+    assert (!insert_active_);
     insert_active_ = true;
 
     assert (queued_job_buffers_.size());
@@ -1095,7 +1110,8 @@ void ASTERIXImportTask::insertData()
     std::map<std::string, std::shared_ptr<Buffer>> job_buffers = *queued_job_buffers_.begin();
     queued_job_buffers_.erase(queued_job_buffers_.begin());
 
-    logdbg << "ASTERIXImportTask: insertData: inserting " << job_buffers.size() << " into database";
+    logdbg << "ASTERIXImportTask: insertData: inserting " << job_buffers.size() << " into database, thread "
+           << QThread::currentThreadId();
 
     if (stopped_)
     {
@@ -1144,8 +1160,16 @@ void ASTERIXImportTask::insertData()
     for (auto& job_it : job_buffers)
         num_records_ += job_it.second->size();
 
-    connect(&dbcont_manager, &DBContentManager::insertDoneSignal,
-            this, &ASTERIXImportTask::insertDoneSlot, Qt::UniqueConnection);
+    if (!insert_slot_connected_)
+    {
+        loginf << "JSONImporterTask: insertData: connecting slot";
+
+        connect(&dbcont_manager, &DBContentManager::insertDoneSignal,
+                this, &ASTERIXImportTask::insertDoneSlot, Qt::QueuedConnection);
+        insert_slot_connected_ = true;
+    }
+
+    //insert_start_time_ = boost::posix_time::microsec_clock::local_time();
 
     dbcont_manager.insertData(job_buffers);
 
@@ -1158,10 +1182,6 @@ void ASTERIXImportTask::insertDoneSlot()
 {
     logdbg << "ASTERIXImportTask: insertDoneSlot";
 
-    insert_active_ = false;
-
-    --num_packets_in_processing_;
-
     if (import_file_)
     {
         logdbg << "ASTERIXImportTask: insertDoneSlot: num_packets_in_processing " << num_packets_in_processing_;
@@ -1169,8 +1189,35 @@ void ASTERIXImportTask::insertDoneSlot()
         updateFileProgressDialog();
     }
 
+    // has to be after file progress dialog update since calls processEvents and thus creates race condition
+    assert (insert_active_);
+    insert_active_ = false;
+    assert (!COMPASS::instance().dbContentManager().insertInProgress());
+
+    --num_packets_in_processing_;
+
+//    double insert_time_ms = (double)(
+//                boost::posix_time::microsec_clock::local_time() - insert_start_time_).total_microseconds() / 1000.0;
+
+//    total_insert_time_ms_ += insert_time_ms;
+
+//    loginf << "UGA insert time " << insert_time_ms
+//           << " ms total " << total_insert_time_ms_/1000.0 << " s" ;
+
     if (queued_job_buffers_.size())
+    {
+        logdbg << "ASTERIXImportTask: insertDoneSlot: inserting, thread " << QThread::currentThreadId()
+               << " main " << QApplication::instance()->thread()->currentThreadId();
         insertData();
+    }
+
+    loginf << "ASTERIXImportTask: insertDoneSlot: processed " << num_records_ << " records";
+
+    if (decode_job_ && decode_job_->hasData())
+    {
+        logdbg << "ASTERIXImportTask: insertDoneSlot: starting decoding of next chunk";
+        addDecodedASTERIXSlot(); // load next chunk
+    }
 
     bool test = test_; // test_ cleared by checkAllDone
 
@@ -1184,16 +1231,9 @@ void ASTERIXImportTask::insertDoneSlot()
 
         disconnect(&COMPASS::instance().dbContentManager(), &DBContentManager::insertDoneSignal,
                    this, &ASTERIXImportTask::insertDoneSlot);
+        insert_slot_connected_ = false;
 
         emit doneSignal(name_);
-    }
-
-    loginf << "ASTERIXImportTask: insertDoneSlot: processed " << num_records_ << " records";
-
-    if (decode_job_ && decode_job_->hasData())
-    {
-        logdbg << "ASTERIXImportTask: insertDoneSlot: starting decoding of next chunk";
-        addDecodedASTERIXSlot(); // load next chunk
     }
 
     logdbg << "ASTERIXImportTask: insertDoneSlot: done";
@@ -1258,7 +1298,7 @@ bool ASTERIXImportTask::maxLoadReached()
     return num_packets_in_processing_ > 2;
 }
 
-void ASTERIXImportTask::updateFileProgressDialog()
+void ASTERIXImportTask::updateFileProgressDialog(bool force)
 {
     if (stopped_)
         return;
@@ -1270,7 +1310,17 @@ void ASTERIXImportTask::updateFileProgressDialog()
         file_progress_dialog_->setWindowTitle("Importing ASTERIX Recording");
         file_progress_dialog_->setWindowModality(Qt::ApplicationModal);
         //postprocess_dialog.setWindowModality(Qt::ApplicationModal);
+
+        force = true;
     }
+
+    if (!force
+            && (boost::posix_time::microsec_clock::local_time() - last_file_progress_time_).total_milliseconds() < 500)
+    {
+        return;
+    }
+
+    last_file_progress_time_ = boost::posix_time::microsec_clock::local_time();
 
     string text = "File '"+current_filename_+"'";
     string rec_text;
