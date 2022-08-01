@@ -2,9 +2,12 @@
 #pragma once
 
 #include <string>
+#include <vector>
 
 #include <QRectF>
 #include <QPointF>
+
+#include <boost/optional.hpp>
 
 
 namespace label_placement
@@ -20,14 +23,12 @@ namespace label_placement
             y = y_last;
         }
 
+        /**
+         * Check if the label is properly initialized.
+         */
         bool isInit() const 
         {
             return (w > 0 && h > 0 && !id.empty());
-        }
-
-        bool isShown() const 
-        {
-            return (active && !outside && !hidden);
         }
 
         /**
@@ -53,6 +54,9 @@ namespace label_placement
             return bbox;
         }
 
+        /**
+         * Compute the center of the label's bounding box.
+         */
         QPointF midPoint() const
         {
             return QPointF(x + w / 2, y + h / 2);
@@ -69,20 +73,65 @@ namespace label_placement
         double      w        = 0; //label width
         double      h        = 0; //Label height
 
-        bool        active  = true;  //label is active (=will be included in the optimization)
-        bool        outside = false; //label out of bounds TODO
-        bool        hidden  = false; //label hidden by the generator during placement TODO 
+        boost::optional<double> x_ref; //a reference x position, which is deemed 'optimal' and MIGHT get enforced by a label algorithm
+        boost::optional<double> y_ref; //a reference y position, which is deemed 'optimal' and MIGHT get enforced by a label algorithm
     };
 
     enum class Method
     {
-        ForceBased = 0, //simple force based approach
-        SpringBased
+        ForceBasedSimple = 0, //simple force based approach, just repels into ANY direction to avoid label conflicts
+        ForceBasedExtended,   //extended force based approach, tries to estimate the correct repel force directions
+        ForceBasedExact       //exact approach, computes the correct repel force directions using intersections
     };
 
-    enum class ForceType
+    enum ForceDirection
     {
-        Simple = 0, //just get me out of nah, not physically correct but cheap
-        Exact       //repel in a physically accurate way
+        X = 0, //compute forces into x direction only
+        Y,     //compute forces into y direction only
+        XY     //compute forces into x and y directions
+    };
+
+    enum StickyPosition
+    {
+        None = 0, //do not enforce
+        InitPos,  //enforce sticking to the initial position of the label
+        RefPos,   //enforce sticking to the desired reference position of the label (if available)
+        Anchor    //enforce sticking to the anchor position of the label
+    };
+
+    struct Settings
+    {
+        typedef std::vector<QRectF> Objects;
+
+        Method method = Method::ForceBasedSimple; //used label placement approach
+        QRectF roi;                               //region of interest, MIGHT be enforced by a specific labeling algorithm
+
+        //settings for methods'ForceBasedSimple' and 'ForceBasedExtended'
+        int       fb_max_iter        = 500;   //maximum number of iterations
+        double    fb_precision       = 0.001;  //precision = convergence limit
+        double    fb_expand_x        = 1.2;   //bounding box expansion in x direction (TODO: per avoidance type)
+        double    fb_expand_y        = 1.1;   //bounding box expansion in y direction (TODO: per avoidance type)
+        bool      fb_avoid_labels    = true;  //avoid other labels (should be on)
+        bool      fb_avoid_anchors   = false; //avoid anchor locations (= positions the labels are attached to)
+        bool      fb_avoid_objects   = false; //avoid objects added as 'fb_additional_objects'
+        bool      fb_avoid_roi       = false; //avoid region of interest specified in 'roi'
+        double    fb_weight_labels   = 0.2;   //force weight for label avoidance (TODO: separate x and y part)
+        double    fb_weight_anchors  = 0.4;   //force weight for anchor avoidance (TODO: separate x and y part)
+        double    fb_weight_objects  = 0.2;   //force weight for object avoidance (TODO: separate x and y part)
+        double    fb_weight_roi      = 0.2;   //force weight for roi avoidance (TODO: separate x and y part)
+        double    fb_anchor_radius   = 0.0;   //repel radius around anchors if 'fb_avoid_anchors' is on
+
+        //settings for method 'ForceBasedExact'
+        int            fbe_max_iter      = 500;
+        double         fbe_force_push    = 1e-06;
+        double         fbe_force_pull    = 1e-06;
+        int            fbe_max_overlaps  = 10; 
+        double         fbe_anchor_radius = 0.0;
+        ForceDirection fbe_force_dir     = ForceDirection::XY;
+        StickyPosition fbe_sticky_pos    = StickyPosition::InitPos;
+
+        bool verbose = true;
+
+        Objects additional_objects; //additional objects to avoid, must be enabled by 'fb_avoid_objects'
     };
 }
