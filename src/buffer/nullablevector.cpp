@@ -17,6 +17,8 @@
 
 #include "nullablevector.h"
 
+#include "util/tbbhack.h"
+
 template <>
 NullableVector<bool>& NullableVector<bool>::operator*=(double factor)
 {

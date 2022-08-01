@@ -34,7 +34,7 @@
 
 #include <cassert>
 
-#include <tbb/tbb.h>
+#include "util/tbbhack.h"
 
 #include <boost/thread/mutex.hpp>
 

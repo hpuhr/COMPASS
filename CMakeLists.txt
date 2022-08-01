@@ -16,7 +16,7 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 message("  Platform: Linux")
-add_definitions ( -UNDEBUG -Wall -std=c++11)
+add_definitions ( -UNDEBUG -Wall -std=c++11) # -DQT_NO_KEYWORDS
 
 #-Wno-deprecated-declarations -Wno-ignored-attributes -Wno-misleading-indentation for new compiler and old libs
 # -UNDEBUG for enabling asserts in release buils (until testing/error management is improved)
@@ -153,6 +153,7 @@ target_link_libraries ( compass
     ${LibArchive_LIBRARIES}
     ${JSONCPP_LIBRARY}
     ${TBB_LIBRARIES}
+    TBB::tbb
     ${OPENSSL_CRYPTO_LIBRARY}
     NemaTode::NemaTode
     )

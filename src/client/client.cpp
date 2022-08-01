@@ -35,6 +35,8 @@
 #include <QSurfaceFormat>
 #include <QSplashScreen>
 
+#include "util/tbbhack.h"
+
 #include <boost/filesystem.hpp>
 #include <boost/program_options.hpp>
 #include "boost/date_time/posix_time/posix_time.hpp"
@@ -42,8 +44,6 @@
 #include <string>
 #include <locale.h>
 #include <thread>
-
-#include <tbb/tbb.h>
 
 #if USE_EXPERIMENTAL_SOURCE == true
 #include <osgDB/Registry>
@@ -64,7 +64,7 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
 
     APP_FILENAME = argv[0];
 
-    tbb::task_scheduler_init guard(std::thread::hardware_concurrency());
+    //tbb::task_scheduler_init guard(std::thread::hardware_concurrency());
 
     //    QApplication::setAttribute(Qt::AA_ShareOpenGLContexts);
 
