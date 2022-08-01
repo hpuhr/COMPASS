@@ -24,8 +24,6 @@ namespace label_placement
         for (size_t i = 0; i < n; ++i)
         {
             const auto& l = labels[ i ];
-            if (!l.active)
-                continue;
             bboxes[ i ] = l.boundingBox(tx, ty);
         }
 
