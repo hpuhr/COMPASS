@@ -460,6 +460,7 @@ bool JSONObjectParser::parseTargetReport(const nlohmann::json& tr, Buffer& buffe
 
                 break;
             }
+            case PropertyDataType::TIMESTAMP: // not possible for timestamp
             default:
                 logerr << "JSONObjectParser: parseTargetReport: impossible for property type "
                        << Property::asString(data_type);

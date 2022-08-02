@@ -486,6 +486,7 @@ bool ScatterPlotViewDataWidget::canUpdateFromDataX(std::string dbcontent_name)
     }
     case PropertyDataType::STRING:
     case PropertyDataType::JSON:
+    case PropertyDataType::TIMESTAMP:
     {
         return false;
 
@@ -728,6 +729,20 @@ void ScatterPlotViewDataWidget::updateFromDataX(std::string dbcontent_name, unsi
 
         break;
     }
+    case PropertyDataType::TIMESTAMP:
+    {
+        if (!buffer->has<boost::posix_time::ptime>(current_var_name))
+        {
+            logdbg << "ScatterPlotViewDataWidget: updateFromDataX: buffer does not contain " << current_var_name;
+            x_var_not_in_buffer_ = true;
+            return;
+        }
+
+        assert(buffer->has<boost::posix_time::ptime>(current_var_name));
+        //NullableVector<string>& data = buffer->get<string>(current_var_name);
+
+        break;
+    }
     default:
         logerr << "ScatterPlotViewDataWidget: updateFromDataX: impossible for property type "
                << Property::asString(data_type);
@@ -884,6 +899,7 @@ bool ScatterPlotViewDataWidget::canUpdateFromDataY(std::string dbcontent_name)
     }
     case PropertyDataType::STRING:
     case PropertyDataType::JSON:
+    case PropertyDataType::TIMESTAMP:
     {
         return false;
 
@@ -1122,6 +1138,20 @@ void ScatterPlotViewDataWidget::updateFromDataY(std::string dbcontent_name, unsi
         }
 
         assert(buffer->has<nlohmann::json>(current_var_name));
+        //NullableVector<string>& data = buffer->get<string>(current_var_name);
+
+        break;
+    }
+    case PropertyDataType::TIMESTAMP:
+    {
+        if (!buffer->has<boost::posix_time::ptime>(current_var_name))
+        {
+            logdbg << "ScatterPlotViewDataWidget: updateFromDataY: buffer does not contain " << current_var_name;
+            y_var_not_in_buffer_ = true;
+            return;
+        }
+
+        assert(buffer->has<boost::posix_time::ptime>(current_var_name));
         //NullableVector<string>& data = buffer->get<string>(current_var_name);
 
         break;

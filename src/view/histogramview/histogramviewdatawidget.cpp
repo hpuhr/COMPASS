@@ -612,6 +612,19 @@ void HistogramViewDataWidget::updateFromData(std::string dbcontent_name)
 
         break;
     }
+    case PropertyDataType::TIMESTAMP:
+    {
+        if (!buffer->has<boost::posix_time::ptime>(current_var_name))
+        {
+            loginf << "HistogramViewDataWidget: updateFromData: buffer does not contain " << current_var_name;
+            return;
+        }
+
+        assert(buffer->has<boost::posix_time::ptime>(current_var_name));
+        //NullableVector<string>& data = buffer->get<string>(current_var_name);
+
+        break;
+    }
     default:
         logerr << "HistogramViewDataWidget: updateFromData: impossible for property type "
                << Property::asString(data_type);
@@ -1765,6 +1778,22 @@ void HistogramViewDataWidget::calculateGlobalMinMax()
             }
 
             assert(buffer->has<nlohmann::json>(current_var_name));
+//            NullableVector<nlohmann::json>& data = buffer->get<nlohmann::json>(current_var_name);
+//            updateMinMax (data);
+
+            break;
+        }
+        case PropertyDataType::TIMESTAMP:
+        {
+            if (!buffer->has<boost::posix_time::ptime>(current_var_name))
+            {
+                loginf << "HistogramViewDataWidget: calculateGlobalMinMax: buffer does not contain "
+                       << current_var_name;
+                data_not_in_buffer_ = true;
+                return;
+            }
+
+            assert(buffer->has<boost::posix_time::ptime>(current_var_name));
 //            NullableVector<nlohmann::json>& data = buffer->get<nlohmann::json>(current_var_name);
 //            updateMinMax (data);
 
