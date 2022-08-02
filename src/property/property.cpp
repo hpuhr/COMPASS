@@ -35,7 +35,8 @@ const std::map<PropertyDataType, std::string>& Property::dataTypes2Strings()
         {PropertyDataType::FLOAT, "FLOAT"},
         {PropertyDataType::DOUBLE, "DOUBLE"},
         {PropertyDataType::STRING, "STRING"},
-        {PropertyDataType::JSON, "JSON"}};
+        {PropertyDataType::JSON, "JSON"},
+        {PropertyDataType::TIMESTAMP, "TIMESTAMP"}};
     return *map;
 }
 
@@ -52,7 +53,8 @@ const std::map<PropertyDataType, std::string>& Property::dbDataTypes2Strings()
         {PropertyDataType::FLOAT, "FLOAT"},
         {PropertyDataType::DOUBLE, "DOUBLE"},
         {PropertyDataType::STRING, "TEXT"},
-        {PropertyDataType::JSON, "TEXT"}};
+        {PropertyDataType::JSON, "TEXT"},
+        {PropertyDataType::TIMESTAMP, "BIGINT"}};
     return *map;
 }
 
@@ -69,7 +71,8 @@ const std::map<std::string, PropertyDataType>& Property::strings2DataTypes()
         {"FLOAT", PropertyDataType::FLOAT},
         {"DOUBLE", PropertyDataType::DOUBLE},
         {"STRING", PropertyDataType::STRING},
-        {"JSON", PropertyDataType::JSON}};
+        {"JSON", PropertyDataType::JSON},
+        {"TIMESTAMP", PropertyDataType::TIMESTAMP}};
     return *map;
 }
 

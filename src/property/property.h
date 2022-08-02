@@ -33,7 +33,8 @@ enum class PropertyDataType
     FLOAT,
     DOUBLE,
     STRING,
-    JSON
+    JSON,
+    TIMESTAMP
 };
 
 /**
