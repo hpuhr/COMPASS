@@ -31,6 +31,8 @@
 #include <QProgressDialog>
 #include <QLabel>
 
+#include "util/tbbhack.h"
+
 #include "boost/date_time/posix_time/posix_time.hpp"
 
 #include <sstream>
@@ -432,9 +434,27 @@ void EvaluationData::finalize ()
 
     string remaining_time_str;
 
-    EvaluateTargetsFinalizeTask* t = new (tbb::task::allocate_root()) EvaluateTargetsFinalizeTask(
-                target_data_, done_flags, done);
-    tbb::task::enqueue(*t);
+//    EvaluateTargetsFinalizeTask* t = new (tbb::task::allocate_root()) EvaluateTargetsFinalizeTask(
+//                target_data_, done_flags, done);
+//    tbb::task::enqueue(*t);
+
+    tbb::task_group g;
+
+    loginf << "UGA1";
+
+    g.run([&] {
+        unsigned int num_targets = target_data_.size();
+
+        tbb::parallel_for(uint(0), num_targets, [&](unsigned int cnt)
+        {
+            target_data_[cnt].finalize();
+            done_flags[cnt] = true;
+        });
+
+        done = true;
+    });
+
+    loginf << "UGA2";
 
     postprocess_dialog_.setValue(0);
 

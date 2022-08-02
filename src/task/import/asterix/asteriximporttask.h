@@ -34,9 +34,6 @@
 #include <memory>
 #include <mutex>
 
-
-//#include <tbb/concurrent_queue.h>
-
 class TaskManager;
 
 class ASTERIXCategoryConfig;
@@ -179,7 +176,6 @@ protected:
     bool error_{false};
     std::string error_message_;
 
-    //bool waiting_for_insert_{false};
     bool insert_active_{false};
     //boost::posix_time::ptime insert_start_time_;
     //double total_insert_time_ms_ {0};

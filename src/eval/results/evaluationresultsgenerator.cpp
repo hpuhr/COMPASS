@@ -43,9 +43,10 @@
 #include <QLabel>
 #include <QMessageBox>
 
+#include "util/tbbhack.h"
+
 #include "boost/date_time/posix_time/posix_time.hpp"
 
-#include <tbb/tbb.h>
 
 using namespace std;
 using namespace EvaluationRequirementResult;
@@ -158,9 +159,41 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
                 bool task_done = false;
 
                 // generate results
-                EvaluateTask* t = new (tbb::task::allocate_root()) EvaluateTask(
-                            results, utns, data, req, *sec_it, done_flags, task_done, false);
-                tbb::task::enqueue(*t);
+//                EvaluateTask* t = new (tbb::task::allocate_root()) EvaluateTask(
+//                            results, utns, data, req, *sec_it, done_flags, task_done, false);
+//                tbb::task::enqueue(*t);
+
+                const SectorLayer& sector_layer = *sec_it;
+                bool single_thread = false;
+
+                tbb::task_group g;
+
+                g.run([&] {
+                    loginf << "EvaluateTask: execute: starting";
+
+                    unsigned int num_utns = utns.size();
+                    assert (done_flags.size() == num_utns);
+
+                    if (single_thread)
+                    {
+                        for(unsigned int utn_cnt=0; utn_cnt < num_utns; ++utn_cnt)
+                        {
+                            results[utn_cnt] = req->evaluate(data.targetData(utns.at(utn_cnt)), req, sector_layer);
+                            done_flags[utn_cnt] = true;
+                        }
+                    }
+                    else
+                    {
+                        tbb::parallel_for(uint(0), num_utns, [&](unsigned int utn_cnt)
+                        {
+                            results[utn_cnt] = req->evaluate(data.targetData(utns.at(utn_cnt)), req, sector_layer);
+                            done_flags[utn_cnt] = true;
+                        });
+                    }
+
+                    for(unsigned int utn_cnt=0; utn_cnt < num_utns; ++utn_cnt)
+                        assert (results[utn_cnt]);
+                });
 
                 unsigned int tmp_done_cnt;
 

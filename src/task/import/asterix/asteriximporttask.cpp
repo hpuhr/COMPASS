@@ -890,8 +890,6 @@ void ASTERIXImportTask::addDecodedASTERIXSlot()
 
     if (import_file_)
     {
-        //updateFileProgressDialog();
-
         if (file_progress_dialog_->wasCanceled())
         {
             stop();
@@ -934,13 +932,8 @@ void ASTERIXImportTask::addDecodedASTERIXSlot()
         return;
     }
 
-    // break here for testing
-    //return;
-
     if (stopped_)
         return;
-
-    //assert(!json_map_job_);
 
     assert(schema_);
 
@@ -969,17 +962,6 @@ void ASTERIXImportTask::addDecodedASTERIXSlot()
 void ASTERIXImportTask::mapJSONDoneSlot()
 {
     logdbg << "ASTERIXImportTask: mapJSONDoneSlot";
-
-    // break here for testing
-    //    json_map_job_ = nullptr;
-    //    num_packets_in_processing_--;
-
-    //    if (decode_job_ && decode_job_->hasData())
-    //        addDecodedASTERIXSlot(); // load next chunk
-    //    else
-    //        checkAllDone();
-
-    //    return;
 
     if (stopped_)
     {
@@ -1122,38 +1104,6 @@ void ASTERIXImportTask::insertData()
     assert (!test_);
 
     DBContentManager& dbcont_manager = COMPASS::instance().dbContentManager();
-
-//    while (insert_active_ && !stopped_ && dbcont_manager.insertInProgress())
-//    {
-//        //loginf << "ASTERIXImportTask: insertData: waiting for insert";
-
-//        waiting_for_insert_ = true;
-
-//        logdbg << "ASTERIXImportTask: addDecodedASTERIXSlot: waiting on insert to finish";
-
-//        if (QCoreApplication::hasPendingEvents())
-//            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
-
-//        QThread::msleep(1);
-
-//        if (stopped_)
-//        {
-//            waiting_for_insert_ = false;
-
-//            checkAllDone();
-//            return;
-//        }
-//    }
-
-//    waiting_for_insert_ = false;
-
-//    if (stopped_)
-//    {
-//        checkAllDone();
-//        return;
-//    }
-
-    //loginf << "ASTERIXImportTask: insertData: no more waiting for insert";
 
     assert(schema_);
 
@@ -1309,7 +1259,6 @@ void ASTERIXImportTask::updateFileProgressDialog(bool force)
                     new QProgressDialog(("File '"+current_filename_+"'").c_str(), "Abort", 0, 100));
         file_progress_dialog_->setWindowTitle("Importing ASTERIX Recording");
         file_progress_dialog_->setWindowModality(Qt::ApplicationModal);
-        //postprocess_dialog.setWindowModality(Qt::ApplicationModal);
 
         force = true;
     }
