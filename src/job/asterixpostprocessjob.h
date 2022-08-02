@@ -32,6 +32,7 @@ private:
 
     void doTodOverride();
     void doFutureTimestampsCheck();
+    void doTimeStampCalculation();
     void doRadarPlotPositionCalculations();
     void doGroundSpeedCalculations();
 };

@@ -31,10 +31,9 @@
 #include <boost/bind.hpp>
 #include <boost/thread.hpp>
 #include <boost/interprocess/sync/scoped_lock.hpp>
+
 #include <chrono>
 #include <thread>
-
-
 #include <memory>
 
 using namespace nlohmann;

@@ -43,6 +43,7 @@ void ASTERIXPostprocessJob::run()
     if (do_timestamp_checks_)
         doFutureTimestampsCheck();
 
+    doTimeStampCalculation();
     doRadarPlotPositionCalculations();
     doGroundSpeedCalculations();
 
@@ -155,6 +156,51 @@ void ASTERIXPostprocessJob::doFutureTimestampsCheck()
     for (auto& buf_it : tmp_data)
         if (!buf_it.second->size())
             buffers_.erase(buf_it.first);
+}
+
+void ASTERIXPostprocessJob::doTimeStampCalculation()
+{
+    DBContentManager& obj_man = COMPASS::instance().dbContentManager();
+
+    unsigned int buffer_size;
+
+    for (auto& buf_it : buffers_)
+    {
+        buffer_size = buf_it.second->size();
+
+        // tod
+        assert (obj_man.metaVariable(DBContent::meta_var_tod_.name()).existsIn(buf_it.first));
+        dbContent::Variable& tod_var = obj_man.metaVariable(DBContent::meta_var_tod_.name()).getFor(buf_it.first);
+
+        Property tod_prop {tod_var.name(), tod_var.dataType()};
+        assert (buf_it.second->hasProperty(tod_prop));
+
+        NullableVector<float>& tod_vec = buf_it.second->get<float>(tod_var.name());
+
+        // timestamp
+        assert (obj_man.metaVariable(DBContent::meta_var_timestamp_.name()).existsIn(buf_it.first));
+        dbContent::Variable& timestamp_var = obj_man.metaVariable(DBContent::meta_var_timestamp_.name()).getFor(buf_it.first);
+
+        Property timestamp_prop {timestamp_var.name(), timestamp_var.dataType()};
+        assert (!buf_it.second->hasProperty(timestamp_prop));
+        buf_it.second->addProperty(timestamp_prop);
+
+        NullableVector<boost::posix_time::ptime>& timestamp_vec =
+                buf_it.second->get<boost::posix_time::ptime>(timestamp_var.name());
+
+        float tod;
+        boost::posix_time::ptime epoch(boost::gregorian::date(1970, 1, 1));
+
+        for (unsigned int index=0; index < buffer_size; ++index)
+        {
+            if (!tod_vec.isNull(index))
+            {
+                tod = tod_vec.get(index);
+
+                timestamp_vec.set(index, epoch + boost::posix_time::millisec((unsigned int) tod * 1000));
+            }
+        }
+    }
 }
 
 void ASTERIXPostprocessJob::doRadarPlotPositionCalculations()

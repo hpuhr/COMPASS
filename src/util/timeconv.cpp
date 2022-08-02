@@ -23,7 +23,6 @@ namespace Time
 {
 
 std::string str_format = "%Y-%m-%d %H:%M:%S.%F";
-boost::posix_time::time_input_facet str_facet (str_format.c_str());
 
 boost::posix_time::ptime fromLong(unsigned long value)
 {
@@ -51,7 +50,9 @@ long toLong(boost::posix_time::ptime value)
 std::string toString(boost::posix_time::ptime value)
 {
     std::stringstream date_stream;
-    date_stream.imbue(std::locale(date_stream.getloc(), &str_facet));
+    boost::posix_time::time_input_facet* str_facet = new boost::posix_time::time_input_facet(str_format.c_str());
+
+    date_stream.imbue(std::locale(date_stream.getloc(), str_facet));
     date_stream << value;
 
     return date_stream.str();

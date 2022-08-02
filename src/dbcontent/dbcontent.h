@@ -75,6 +75,7 @@ public:
     static const Property meta_var_sic_id_;
     static const Property meta_var_line_id_;
     static const Property meta_var_tod_;
+    static const Property meta_var_timestamp_;
     static const Property meta_var_m3a_;
     static const Property meta_var_m3a_g_;
     static const Property meta_var_m3a_v_;
