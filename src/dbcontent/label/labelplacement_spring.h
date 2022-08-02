@@ -542,11 +542,6 @@ namespace force_exact
         //Not doing the normalization would result in range-dependent effects!
         auto data_frame = dataFrame(labels);
 
-        if (settings.verbose)
-        {
-            loginf << "data frame = (" << data_frame.left() << "," << data_frame.top() << " " << data_frame.width() << "x" << data_frame.height() << ")";
-        }
-
         const double anchor_radius = settings.fbe_anchor_radius;
    
         //some magic numbers
@@ -606,7 +601,7 @@ namespace force_exact
             //choose appropraite 'sticky position'
             if (settings.fbe_sticky_pos == StickyPosition::InitPos)
             {
-                sticky_positions[ i ] = text_boxes[ i ].center();        
+                sticky_positions[ i ] = text_boxes[ i ].center();
             }          
             else if (settings.fbe_sticky_pos == StickyPosition::Anchor)
             {
@@ -643,6 +638,9 @@ namespace force_exact
         double force_push = settings.fbe_force_push;
         double force_pull = settings.fbe_force_pull;
 
+        int too_many_overlaps_happened = 0;
+        int overlaps_detected          = 0;
+
         while (n_overlaps && iter < settings.fbe_max_iter) 
         {
             iter      += 1;
@@ -657,7 +655,10 @@ namespace force_exact
                 try
                 {
                     if (iter == 2 && total_overlaps[ i ] > settings.fbe_max_overlaps) 
+                    {
                         too_many_overlaps[ i ] = true;
+                        ++too_many_overlaps_happened;
+                    }
         
                     if (too_many_overlaps[ i ])
                         continue;
@@ -681,6 +682,7 @@ namespace force_exact
                             // Repel the box from its data point.
                             if (intersectCircleRect(anchor_regions[ i ], text_boxes[ i ])) 
                             {
+                                overlaps_detected   += 1;
                                 n_overlaps          += 1;
                                 i_overlaps           = true;
                                 total_overlaps[ i ] += 1;
@@ -697,6 +699,7 @@ namespace force_exact
                             // Repel the box from other data points.
                             if (intersectCircleRect(anchor_regions[ j ], text_boxes[ i ])) 
                             {
+                                overlaps_detected   += 1;
                                 n_overlaps          += 1;
                                 i_overlaps           = true;
                                 total_overlaps[ i ] += 1;
@@ -711,6 +714,7 @@ namespace force_exact
                             // Repel the box from overlapping boxes.
                             if (text_boxes[ i ].intersects(text_boxes[ j ])) 
                             {
+                                overlaps_detected   += 1;
                                 n_overlaps          += 1;
                                 i_overlaps           = true;  
                                 total_overlaps[ i ] += 1;
@@ -725,6 +729,7 @@ namespace force_exact
                             // Repel the box from other data points.
                             if (intersectCircleRect(anchor_regions[ j ], text_boxes[ i ])) 
                             {
+                                overlaps_detected   += 1;
                                 n_overlaps          += 1;
                                 i_overlaps           = true;
                                 total_overlaps[ i ] += 1;
@@ -758,6 +763,8 @@ namespace force_exact
 
                     auto v_old = velocities[ i ];
                     velocities[ i ] = overlap_multiplier * velocities[ i ] * (text_box_widths[ i ] + 1e-6) * velocity_decay + f;
+
+
 
                     if (velocities[ i ].x() != velocities[ i ].x() || velocities[ i ].y() != velocities[ i ].y())
                     {
@@ -818,7 +825,7 @@ namespace force_exact
         if (settings.verbose)
         {
             bool converged = (iter < settings.fbe_max_iter);
-            loginf << (converged ? "CONVERGED" : "MAX ITER") << " remaining overlaps: " << n_overlaps;
+            loginf << (converged ? "CONVERGED" : "MAX ITER") << " remaining overlaps: " << n_overlaps << ", too many overlaps: " << too_many_overlaps_happened << ", overlaps detected: " << overlaps_detected;
         }
 
         //write optimized positions to labels

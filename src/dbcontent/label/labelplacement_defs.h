@@ -122,10 +122,10 @@ namespace label_placement
         double    fb_anchor_radius   = 0.0;   //repel radius around anchors if 'fb_avoid_anchors' is on
 
         //settings for method 'ForceBasedExact'
-        int            fbe_max_iter      = 3000;
+        int            fbe_max_iter      = 10000;
         double         fbe_force_push    = 1e-06; //defined for normalized data in [0,1]!
         double         fbe_force_pull    = 1e-06; //defined for normalized data in [0,1]!
-        int            fbe_max_overlaps  = 10; 
+        int            fbe_max_overlaps  = 10000; 
         double         fbe_anchor_radius = 0.0;
         ForceDirection fbe_force_dir     = ForceDirection::XY;
         StickyPosition fbe_sticky_pos    = StickyPosition::InitPos;
