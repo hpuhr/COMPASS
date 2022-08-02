@@ -1579,6 +1579,19 @@
                     "unit": ""
                 }
             },
+            "VariableTrackerTimestamp0": {
+                "parameters": {
+                    "data_type_str": "TIMESTAMP",
+                    "db_column_name": "timestamp",
+                    "description": "Epoch timestamp based on Time of Day",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Timestamp",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
             "VariableTrackeralt_baro_more_reliable0": {
                 "parameters": {
                     "data_type_str": "BOOL",
