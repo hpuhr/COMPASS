@@ -1279,6 +1279,25 @@ std::string LabelGenerator::getVariableValue(const std::string& dbcontent_name, 
 
         break;
     }
+    case PropertyDataType::TIMESTAMP:
+    {
+        if (!buffer->has<boost::posix_time::ptime>(varname))
+            return "";
+        else
+        {
+            NullableVector<boost::posix_time::ptime>& values = buffer->get<boost::posix_time::ptime>(varname);
+
+            if (values.isNull(index))
+                return "";
+
+            assert (var.representation() == Variable::Representation::STANDARD); // only 1 representation
+            value = values.getAsString(index);
+
+            return value;
+        }
+
+        break;
+    }
     default:
         logerr << "LabelGenerator: getVariableValue: impossible for property type "
                  << Property::asString(data_type);

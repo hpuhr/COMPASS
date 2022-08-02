@@ -463,6 +463,7 @@ bool ASTERIXJSONParser::parseTargetReport(const nlohmann::json& tr, Buffer& buff
 
                 break;
             }
+            case PropertyDataType::TIMESTAMP: // not possible for timestamp
             default:
                 logerr << "ASTERIXJSONParser: parseTargetReport: impossible for property type "
                          << Property::asString(data_type);
