@@ -20,10 +20,12 @@ using namespace nlohmann;
 using namespace Utils;
 
 ASTERIXPostprocessJob::ASTERIXPostprocessJob(map<string, shared_ptr<Buffer>> buffers,
+                                             const boost::posix_time::ptime& date,
                                              bool override_tod_active, float override_tod_offset,
                                              bool do_timestamp_checks)
     : Job("ASTERIXPostprocessJob"),
-      buffers_(move(buffers)), override_tod_active_(override_tod_active), override_tod_offset_(override_tod_offset),
+      buffers_(move(buffers)), date_(date),
+      override_tod_active_(override_tod_active), override_tod_offset_(override_tod_offset),
       do_timestamp_checks_(do_timestamp_checks)
 {
     network_time_offset_ = COMPASS::instance().mainWindow().importASTERIXFromNetworkTimeOffset();
@@ -189,7 +191,8 @@ void ASTERIXPostprocessJob::doTimeStampCalculation()
                 buf_it.second->get<boost::posix_time::ptime>(timestamp_var.name());
 
         float tod;
-        boost::posix_time::ptime epoch(boost::gregorian::date(1970, 1, 1));
+        //boost::posix_time::ptime epoch(boost::gregorian::date(1970, 1, 1));
+        boost::posix_time::ptime timestamp;
 
         for (unsigned int index=0; index < buffer_size; ++index)
         {
@@ -197,7 +200,12 @@ void ASTERIXPostprocessJob::doTimeStampCalculation()
             {
                 tod = tod_vec.get(index);
 
-                timestamp_vec.set(index, epoch + boost::posix_time::millisec((unsigned int) tod * 1000));
+                timestamp = date_ + boost::posix_time::millisec((unsigned int) (tod * 1000));
+
+//                loginf << " epoch " << Time::toString(epoch) << " tod " << String::timeStringFromDouble(tod)
+//                       << " timestamp " << Time::toString(timestamp);
+
+                timestamp_vec.set(index, timestamp);
             }
         }
     }

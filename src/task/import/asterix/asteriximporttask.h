@@ -133,6 +133,9 @@ class ASTERIXImportTask : public Task, public Configurable
     unsigned int fileLineID() const;
     void fileLineID(unsigned int value);
 
+    const boost::posix_time::ptime &date() const;
+    void date(const boost::posix_time::ptime& date);
+
 protected:
     bool debug_jasterix_;
     std::shared_ptr<jASTERIX::jASTERIX> jasterix_;
@@ -144,6 +147,7 @@ protected:
     std::string current_filename_;
     std::string current_file_framing_;
     unsigned int file_line_id_ {0};
+    boost::posix_time::ptime date_;
 
     bool test_{false};
 

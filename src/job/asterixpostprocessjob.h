@@ -3,6 +3,8 @@
 
 #include "job.h"
 
+#include "boost/date_time/posix_time/ptime.hpp"
+
 #include <memory>
 #include <map>
 
@@ -13,6 +15,7 @@ class ASTERIXPostprocessJob : public Job
 {
 public:
     ASTERIXPostprocessJob(std::map<std::string, std::shared_ptr<Buffer>> buffers,
+                          const boost::posix_time::ptime& date,
                           bool override_tod_active, float override_tod_offset, bool do_timestamp_checks);
 
     virtual ~ASTERIXPostprocessJob();
@@ -23,6 +26,8 @@ public:
 
 private:
     std::map<std::string, std::shared_ptr<Buffer>> buffers_;
+
+    boost::posix_time::ptime date_;
 
     bool override_tod_active_{false};
     float override_tod_offset_{0};

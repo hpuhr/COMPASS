@@ -16,33 +16,32 @@
  */
 
 #include "timeconv.h"
+#include "logger.h"
 
 namespace Utils
 {
 namespace Time
 {
 
-std::string str_format = "%Y-%m-%d %H:%M:%S.%F";
+std::string str_format = "%Y-%m-%d %H:%M:%S.%f";
+std::string date_str_format = "%Y-%m-%d";
+boost::posix_time::ptime epoch(boost::gregorian::date(1970, 1, 1));
 
 boost::posix_time::ptime fromLong(unsigned long value)
 {
-    time_t seconds_since_epoch = floor(value / 1000);
-    long milliseconds_since_second =
-        floor((value - static_cast<long>(seconds_since_epoch)) * 1000);
-    boost::posix_time::ptime result = boost::posix_time::from_time_t(seconds_since_epoch);
-    boost::posix_time::time_duration fractional_seconds(0, 0, 0, milliseconds_since_second * 1000); // microseconds
-    result += fractional_seconds;
+    boost::posix_time::ptime timestamp;
 
-    return result;
+    timestamp = epoch + boost::posix_time::millisec(value);
+
+    return timestamp;
 }
 
 long toLong(boost::posix_time::ptime value)
 {
     long result;
 
-    const boost::posix_time::ptime epoch = boost::posix_time::from_time_t(0);
     boost::posix_time::time_duration duration = value - epoch;
-    result = duration.total_milliseconds(); // duration.total_seconds() * 1000 +
+    result = duration.total_milliseconds();
 
     return result;
 }
@@ -50,12 +49,15 @@ long toLong(boost::posix_time::ptime value)
 std::string toString(boost::posix_time::ptime value)
 {
     std::stringstream date_stream;
-    boost::posix_time::time_input_facet* str_facet = new boost::posix_time::time_input_facet(str_format.c_str());
 
-    date_stream.imbue(std::locale(date_stream.getloc(), str_facet));
+    date_stream.imbue(std::locale(date_stream.getloc(), new boost::posix_time::time_facet(str_format.c_str())));
     date_stream << value;
 
-    return date_stream.str();
+    std::string tmp = date_stream.str();
+
+    tmp.erase(tmp.length()-3); // remove microseconds since not supported by boost
+
+    return tmp;
 }
 
 std::string toString(unsigned long value)
@@ -63,6 +65,22 @@ std::string toString(unsigned long value)
    return toString(fromLong(value));
 }
 
+std::string toDateString(boost::posix_time::ptime value)
+{
+    std::stringstream date_stream;
+
+    date_stream.imbue(std::locale(date_stream.getloc(), new boost::posix_time::time_facet(date_str_format.c_str())));
+    date_stream << value;
+
+    //loginf << "UGA1 " << Time::toString(value) << " " << date_stream.str();
+
+    return date_stream.str();
+}
+
+boost::posix_time::ptime fromDateString(std::string value)
+{
+    return boost::posix_time::ptime(boost::gregorian::from_string(value));
+}
 
 }
 

@@ -60,7 +60,7 @@ const unsigned int unlimited_chunk_size = 4000;
 
 const std::string DONE_PROPERTY_NAME = "asterix_data_imported";
 
-const float ram_threshold = 4.0;
+//const float ram_threshold = 4.0;
 
 ASTERIXImportTask::ASTERIXImportTask(const std::string& class_id, const std::string& instance_id,
                                      TaskManager& task_manager)
@@ -73,6 +73,8 @@ ASTERIXImportTask::ASTERIXImportTask(const std::string& class_id, const std::str
 
     registerParameter("file_list", &file_list_, json::array());
     registerParameter("current_file_framing", &current_file_framing_, "");
+
+    date_ = boost::posix_time::ptime(boost::gregorian::day_clock::universal_day());
 
     registerParameter("override_tod_offset", &override_tod_offset_, 0.0);
 
@@ -579,6 +581,16 @@ void ASTERIXImportTask::fileLineID(unsigned int value)
     file_line_id_ = value;
 }
 
+const boost::posix_time::ptime &ASTERIXImportTask::date() const
+{
+    return date_;
+}
+
+void ASTERIXImportTask::date(const boost::posix_time::ptime& date)
+{
+    date_ = date;
+}
+
 bool ASTERIXImportTask::isRunning() const
 {
     return running_;
@@ -992,7 +1004,7 @@ void ASTERIXImportTask::mapJSONDoneSlot()
     if (!test_)
     {
         std::shared_ptr<ASTERIXPostprocessJob> postprocess_job =
-                make_shared<ASTERIXPostprocessJob>(std::move(job_buffers),
+                make_shared<ASTERIXPostprocessJob>(std::move(job_buffers), date_,
                                                    override_tod_active_, override_tod_offset_,
                                                    !import_file_);
 

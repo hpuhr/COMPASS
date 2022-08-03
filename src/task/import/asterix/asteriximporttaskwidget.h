@@ -47,6 +47,7 @@ class ASTERIXImportTaskWidget : public QWidget
     void selectedObjectParserSlot(const QString& text);
 
     void fileLineIDEditSlot(const QString& text);
+    void dateChangedSlot(QDate date);
 
     void debugChangedSlot();
     void testImportSlot();
