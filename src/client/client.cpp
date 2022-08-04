@@ -111,6 +111,10 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
              "imports ASTERIX file with given filename, e.g. '/data/file1.ff'")
             ("import_asterix_file_line", po::value<std::string>(&import_asterix_file_line_),
              "imports ASTERIX file with given line, e.g. 'L2'")
+            ("import_asterix_date", po::value<std::string>(&import_asterix_date_),
+             "imports ASTERIX file with given date, in YYYY-MM-DD format e.g. '2020-04-20'")
+            ("import_asterix_file_time_offset", po::value<std::string>(&import_asterix_file_time_offset_),
+             "used time offset during ASTERIX file import Time of Day override, in HH:MM:SS.ZZZ'")
             ("import_asterix_network", po::bool_switch(&import_asterix_network_),
              "imports ASTERIX from defined network UDP streams")
             ("import_asterix_network_time_offset", po::value<std::string>(&import_asterix_network_time_offset_),
@@ -249,6 +253,29 @@ void Client::run ()
         {
             unsigned int file_line = String::lineFromStr(import_asterix_file_line_);
             task_man.asterixImporterTask().fileLineID(file_line);
+        }
+
+        if (import_asterix_date_.size())
+        {
+            task_man.asterixImporterTask().date(Time::fromDateString(import_asterix_date_));
+        }
+
+        if (import_asterix_file_time_offset_.size())
+        {
+            bool ok {true};
+
+            double time_offset = String::timeFromString(import_asterix_file_time_offset_, &ok);
+
+            if (!ok)
+            {
+                logerr << "COMPASSClient: import_asterix_file_time_offset set to invalid value '"
+                       << import_asterix_file_time_offset_ << "'";
+                quit_requested_ = true;
+                return;
+            }
+
+            task_man.asterixImporterTask().overrideTodActive(true);
+            task_man.asterixImporterTask().overrideTodOffset(time_offset);
         }
 
     }

@@ -27,13 +27,18 @@ public:
 private:
     std::map<std::string, std::shared_ptr<Buffer>> buffers_;
 
-    boost::posix_time::ptime date_;
-
     bool override_tod_active_{false};
     float override_tod_offset_{0};
 
     bool do_timestamp_checks_;
     float network_time_offset_ {0};
+
+    // static vars for timestamp / timejump handling
+    static bool current_date_set_;
+    static boost::posix_time::ptime current_date_;
+    static boost::posix_time::ptime previous_date_;
+    static bool did_recent_time_jump_; // indicator if recently a time jump was performed
+    static bool had_late_time_; // indicator if time late before 24h mark occured
 
     void doTodOverride();
     void doFutureTimestampsCheck();
