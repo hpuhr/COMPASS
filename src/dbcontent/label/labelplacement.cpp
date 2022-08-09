@@ -231,6 +231,15 @@ void LabelPlacementEngine::runTest(const TestConfig& test_config) const
 
     std::vector<TestLabel> test_labels(n);
 
+    double range = 1000.0;
+
+    auto config = test_config;
+    config.speed      *= range;
+    config.radius     *= range;
+    config.label_w    *= range;
+    config.label_h    *= range;
+    config.label_offs *= range;
+
     //init random labels/positions
     for (int i = 0; i < n; ++i)
     {
@@ -243,6 +252,7 @@ void LabelPlacementEngine::runTest(const TestConfig& test_config) const
 
         pos += Eigen::Vector2d(1, 1);
         pos *= 0.5;
+        pos *= range;
 
         Eigen::Vector2d v;
         v.setRandom();
@@ -256,13 +266,13 @@ void LabelPlacementEngine::runTest(const TestConfig& test_config) const
 
         l.label.x_anchor = pos.x();
         l.label.y_anchor = pos.y();
-        l.label.x        = l.label.x_anchor + test_config.label_offs;
-        l.label.y        = l.label.y_anchor - test_config.label_offs;
+        l.label.x        = l.label.x_anchor + config.label_offs;
+        l.label.y        = l.label.y_anchor - config.label_offs;
         l.label.x_last   = l.label.x;
         l.label.y_last   = l.label.y;
         
-        l.label.w        = test_config.label_w;
-        l.label.h        = test_config.label_h;
+        l.label.w        = config.label_w;
+        l.label.h        = config.label_h;
 
         l.x_init         = l.label.x;
         l.y_init         = l.label.y;
@@ -274,13 +284,13 @@ void LabelPlacementEngine::runTest(const TestConfig& test_config) const
         l.color          = QColor(col.x() * 255, col.y() * 255, col.z() * 255);
     }
 
-    test_config.roi = QRectF(0, 0, 1, 1);
+    config.roi = QRectF(0, 0, range, range);
 
     //convert coords to test window size in pixels
-    computeScreenTransform(test_config, test_labels);
+    computeScreenTransform(config, test_labels);
 
     //show test data in dialog
-    runTest(test_labels, test_config);
+    runTest(test_labels, config);
 }
 
 /**
@@ -320,7 +330,7 @@ void LabelPlacementEngine::runTest(const std::vector<TestLabel>& test_labels,
     QDoubleSpinBox* radiusBox = new QDoubleSpinBox;
     radiusBox->setDecimals(6);
     radiusBox->setMinimum(0);
-    radiusBox->setMaximum(1000);
+    radiusBox->setMaximum(10000000);
     radiusBox->setValue(config.radius);
 
     QComboBox* autoCombo = new QComboBox;
@@ -403,8 +413,8 @@ void LabelPlacementEngine::runTest(const std::vector<TestLabel>& test_labels,
 
             l.label.x = l.label.x_anchor + config.label_offs;
             l.label.y = l.label.y_anchor - config.label_offs;
-            l.x_init      = l.label.x;
-            l.y_init      = l.label.y;
+            l.x_init  = l.label.x;
+            l.y_init  = l.label.y;
         }
 
         int mode = autoCombo->currentData().toInt();
