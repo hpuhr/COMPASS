@@ -3,6 +3,7 @@
 
 #include "labelplacement_defs.h"
 #include "labelplacement_helpers.h"
+#include "logger.h"
 
 #include <vector>
 #include <iostream>
@@ -817,14 +818,6 @@ namespace force
             total += total_objects;
             total += total_roi;
 
-            // if (settings_.verbose)
-            // {
-            //     std::cout << "   labels:  " << total_labels.x() << " / " << total_labels.y() << std::endl;
-            //     std::cout << "   anchors: " << total_anchors.x() << " / " << total_anchors.y() << std::endl;
-            //     std::cout << "   objects: " << total_objects.x() << " / " << total_objects.y() << std::endl;
-            //     std::cout << "   roi:     " << total_roi.x() << " / " << total_roi.y() << std::endl;
-            // }
-
             //move labels
             for (size_t j = 0; j < n; ++j)
             {
@@ -846,7 +839,7 @@ namespace force
         }
 
         if (settings.verbose)
-            std::cout << (converged ? "CONVERGED" : "MAX ITER") << " dx: " << last_dx << "/" << tol_x << " dy: " << last_dy << "/" << tol_y << std::endl;
+            loginf << (converged ? "CONVERGED" : "MAX ITER") << " dx: " << last_dx << "/" << tol_x << " dy: " << last_dy << "/" << tol_y;
 
         //convergence or max iter reached
         return true;

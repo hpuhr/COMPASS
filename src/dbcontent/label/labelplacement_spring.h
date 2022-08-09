@@ -2,6 +2,7 @@
 #pragma once
 
 #include "labelplacement_defs.h"
+#include "logger.h"
 
 #include <vector>
 
@@ -536,6 +537,11 @@ namespace force_exact
         if (nl < 1)
             return true;
 
+        //get data frame for normalization.
+        //Note: for this method to work, all data is internally normalized.
+        //Not doing the normalization would result in range-dependent effects!
+        auto data_frame = dataFrame(labels);
+
         const double anchor_radius = settings.fbe_anchor_radius;
    
         //some magic numbers
@@ -547,7 +553,7 @@ namespace force_exact
         const int    line_clash_interval = 5;
 
         //init anchor points
-        std::vector<QPointF> anchor_points(nl); 
+        std::vector<QPointF> anchor_points(nl);
         std::vector<Circle>  anchor_regions(nl);
         for (size_t i = 0; i < nl; ++i) 
         {
@@ -556,6 +562,11 @@ namespace force_exact
             anchor_regions[ i ].pos    = QPointF(l.x_anchor, l.y_anchor);
             anchor_regions[ i ].radius = anchor_radius;
             anchor_points [ i ]        = anchor_regions[ i ].pos;
+
+            //normalize anchor data
+            normalizeData(anchor_regions[ i ].pos, data_frame);
+            normalizeData(anchor_regions[ i ].radius, data_frame);
+            normalizeData(anchor_points [ i ], data_frame);   
         }
 
         //init text boxes
@@ -569,6 +580,16 @@ namespace force_exact
             text_boxes     [ i ] = l.boundingBox();
             text_box_widths[ i ] = l.w;
 
+            boost::optional<QPointF> ref_pos;
+            if (l.x_ref.has_value() && l.y_ref.has_value())
+                ref_pos = QPointF(l.x_ref.value(), l.y_ref.value());
+
+            //normalize text box data
+            normalizeData(text_boxes[ i ], data_frame);
+            normalizeData(text_box_widths[ i ], data_frame);
+            if (ref_pos.has_value())
+                normalizeData(ref_pos.value(), data_frame);
+
             // add a tiny bit of jitter to each text box at the start.
             // don't add jitter if the user wants to repel in just one direction.
             const double jitter = Eigen::Vector2d().setRandom().x() * settings.fbe_force_push;
@@ -579,21 +600,36 @@ namespace force_exact
 
             //choose appropraite 'sticky position'
             if (settings.fbe_sticky_pos == StickyPosition::InitPos)
-                sticky_positions[ i ] = text_boxes[ i ].center();        
+            {
+                sticky_positions[ i ] = text_boxes[ i ].center();
+            }          
             else if (settings.fbe_sticky_pos == StickyPosition::Anchor)
-                sticky_positions[ i ] = anchor_points [ i ];
-            else if (settings.fbe_sticky_pos == StickyPosition::RefPos && l.x_ref.has_value() && l.y_ref.has_value())
-                sticky_positions[ i ] = QPointF(l.x_ref.value(), l.y_ref.value());
+            {
+                sticky_positions[ i ] = anchor_points[ i ];
+            }        
+            else if (settings.fbe_sticky_pos == StickyPosition::RefPos && ref_pos.has_value())
+            {
+                sticky_positions[ i ] = ref_pos.value();
+            }
         }
 
         //rescale box widths to be in the range [0,1]
         rescale(text_box_widths);
 
+        //normalize anchor radius
+        double anchor_radius_frame = anchor_radius;
+        normalizeData(anchor_radius_frame, data_frame);
+
+        //normalize roi
+        QRectF roi = settings.roi;
+        if (!roi.isEmpty())
+            normalizeData(roi, data_frame);
+
         QPointF f, ci, cj;
 
         std::vector<QPointF> velocities(nl, QPointF(0, 0));
-        std::vector<double> total_overlaps(nl, 0);
-        std::vector<bool>   too_many_overlaps(nl, false);
+        std::vector<double>  total_overlaps(nl, 0);
+        std::vector<bool>    too_many_overlaps(nl, false);
 
         int  iter       = 0;
         int  n_overlaps = 1;
@@ -601,6 +637,9 @@ namespace force_exact
 
         double force_push = settings.fbe_force_push;
         double force_pull = settings.fbe_force_pull;
+
+        int too_many_overlaps_happened = 0;
+        int overlaps_detected          = 0;
 
         while (n_overlaps && iter < settings.fbe_max_iter) 
         {
@@ -616,7 +655,10 @@ namespace force_exact
                 try
                 {
                     if (iter == 2 && total_overlaps[ i ] > settings.fbe_max_overlaps) 
+                    {
                         too_many_overlaps[ i ] = true;
+                        ++too_many_overlaps_happened;
+                    }
         
                     if (too_many_overlaps[ i ])
                         continue;
@@ -640,11 +682,12 @@ namespace force_exact
                             // Repel the box from its data point.
                             if (intersectCircleRect(anchor_regions[ i ], text_boxes[ i ])) 
                             {
+                                overlaps_detected   += 1;
                                 n_overlaps          += 1;
                                 i_overlaps           = true;
                                 total_overlaps[ i ] += 1;
 
-                                f = f + repelForce(ci, anchor_points[ i ], anchor_radius * force_point_size * force_push, settings.fbe_force_dir);
+                                f = f + repelForce(ci, anchor_points[ i ], anchor_radius_frame * force_point_size * force_push, settings.fbe_force_dir);
                             }
                         } 
                         else if (too_many_overlaps[j]) 
@@ -656,11 +699,12 @@ namespace force_exact
                             // Repel the box from other data points.
                             if (intersectCircleRect(anchor_regions[ j ], text_boxes[ i ])) 
                             {
+                                overlaps_detected   += 1;
                                 n_overlaps          += 1;
                                 i_overlaps           = true;
                                 total_overlaps[ i ] += 1;
 
-                                f = f + repelForce(ci, anchor_points[ j ], anchor_radius * force_point_size * force_push, settings.fbe_force_dir);
+                                f = f + repelForce(ci, anchor_points[ j ], anchor_radius_frame * force_point_size * force_push, settings.fbe_force_dir);
                             }
                         } 
                         else 
@@ -670,6 +714,7 @@ namespace force_exact
                             // Repel the box from overlapping boxes.
                             if (text_boxes[ i ].intersects(text_boxes[ j ])) 
                             {
+                                overlaps_detected   += 1;
                                 n_overlaps          += 1;
                                 i_overlaps           = true;  
                                 total_overlaps[ i ] += 1;
@@ -684,11 +729,12 @@ namespace force_exact
                             // Repel the box from other data points.
                             if (intersectCircleRect(anchor_regions[ j ], text_boxes[ i ])) 
                             {
+                                overlaps_detected   += 1;
                                 n_overlaps          += 1;
                                 i_overlaps           = true;
                                 total_overlaps[ i ] += 1;
 
-                                f = f + repelForce(ci, anchor_points[ j ], anchor_radius * force_point_size * force_push, settings.fbe_force_dir);
+                                f = f + repelForce(ci, anchor_points[ j ], anchor_radius_frame * force_point_size * force_push, settings.fbe_force_dir);
                             }
                         }
                     }
@@ -718,6 +764,8 @@ namespace force_exact
                     auto v_old = velocities[ i ];
                     velocities[ i ] = overlap_multiplier * velocities[ i ] * (text_box_widths[ i ] + 1e-6) * velocity_decay + f;
 
+
+
                     if (velocities[ i ].x() != velocities[ i ].x() || velocities[ i ].y() != velocities[ i ].y())
                     {
                         std::stringstream ss;
@@ -726,10 +774,10 @@ namespace force_exact
                     }
 
                     text_boxes[ i ].translate(velocities[ i ]);
-                    
+
                     // put text boxes back within roi if specified
-                    if (!settings.roi.isEmpty())
-                        text_boxes[ i ] = putWithinBounds(text_boxes[ i ], settings.roi);
+                    if (!roi.isEmpty())
+                        text_boxes[ i ] = putWithinBounds(text_boxes[ i ], roi);
 
                     // look for line clashes
                     // if (n_overlaps == 0 || iter % line_clash_interval == 0) 
@@ -768,17 +816,26 @@ namespace force_exact
                 }
                 catch (const std::runtime_error& err)
                 {
-                    std::cout << "encountered error in iteration " << iter << " @label" << i << ": " << err.what() << std::endl;
+                    logerr << "encountered error in iteration " << iter << " @label" << i << ": " << err.what();
                     return false;
                 }
             } // loop through all text labels
         } // while any overlaps exist and we haven't reached max iterations
 
+        if (settings.verbose)
+        {
+            bool converged = (iter < settings.fbe_max_iter);
+            loginf << (converged ? "CONVERGED" : "MAX ITER") << " remaining overlaps: " << n_overlaps << ", too many overlaps: " << too_many_overlaps_happened << ", overlaps detected: " << overlaps_detected;
+        }
+
         //write optimized positions to labels
         for (size_t i = 0; i < nl; ++i) 
         {
-            labels[ i ].x = text_boxes[ i ].left();
-            labels[ i ].y = text_boxes[ i ].top();
+            QPointF opt = text_boxes[ i ].topLeft();
+            denormalizeData(opt, data_frame);
+
+            labels[ i ].x = opt.x();
+            labels[ i ].y = opt.y();
 
             //std::cout << "label" << i << " moved to " << labels[ i ].x << "," << labels[ i ].y << std::endl;
         }

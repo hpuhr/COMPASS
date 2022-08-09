@@ -58,6 +58,8 @@ public:
      */
     struct TestLabel
     {
+        TestLabel() : color(255, 255, 255) {}
+
         std::string txt;                //test label screen text
 
         boost::optional<double> x_init; //test label init x position for movement visualization
