@@ -4,6 +4,8 @@
 #include "source/datasourcebase.h"
 #include "property.h"
 
+#include "boost/date_time/posix_time/ptime.hpp"
+
 #include <set>
 
 namespace dbContent
@@ -62,11 +64,11 @@ public:
 
     DBDataSourceWidget* widget();
 
-    bool hasMaxToD(unsigned int line) const;
-    void maxToD(unsigned int line, float value);
-    float maxToD(unsigned int line) const;
+    bool hasMaxTimestamp(unsigned int line) const;
+    void maxTimestamp(unsigned int line, boost::posix_time::ptime value);
+    boost::posix_time::ptime maxTimestamp(unsigned int line) const;
 
-    bool hasLiveData(unsigned int line, float current_tod) const;
+    bool hasLiveData(unsigned int line, boost::posix_time::ptime current_ts) const;
 
 protected:
     unsigned int id_{0};

@@ -209,13 +209,13 @@ void SingleDetection::reportDetails(EvaluationResultsReport::Section& utn_req_se
     {
         if (rq_det_it.d_tod_.isValid())
             utn_req_details_table.addRow(
-                        {String::timeStringFromDouble(rq_det_it.tod_).c_str(),
+                        {Time::toString(rq_det_it.timestamp_).c_str(),
                          String::timeStringFromDouble(rq_det_it.d_tod_.toFloat()).c_str(),
                          rq_det_it.ref_exists_, rq_det_it.missed_uis_, rq_det_it.comment_.c_str()},
                         this, detail_cnt);
         else
             utn_req_details_table.addRow(
-                        {String::timeStringFromDouble(rq_det_it.tod_).c_str(),
+                        {Time::toString(rq_det_it.timestamp_).c_str(),
                          rq_det_it.d_tod_,
                          rq_det_it.ref_exists_, rq_det_it.missed_uis_,
                          rq_det_it.comment_.c_str()},
@@ -261,7 +261,7 @@ std::unique_ptr<nlohmann::json::object_t> SingleDetection::viewableData(
         (*viewable_ptr)["position_longitude"] = detail.pos_current_.longitude_;
         (*viewable_ptr)["position_window_latitude"] = eval_man_.resultDetailZoom();
         (*viewable_ptr)["position_window_longitude"] = eval_man_.resultDetailZoom();
-        (*viewable_ptr)["time"] = detail.tod_;
+        (*viewable_ptr)["timestamp"] = Time::toString(detail.timestamp_);
 
         if (detail.miss_occurred_)
             (*viewable_ptr)["evaluation_results"]["highlight_details"] = vector<unsigned int>{detail_cnt};

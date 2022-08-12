@@ -71,7 +71,7 @@
                             "4": "Mode C Code",
                             "5": "DS ID",
                             "6": "Track Groundspeed",
-                            "8": "Time of Day"
+                            "8": "Timestamp"
                         },
                         "CAT010": {
                             "0": "Best available Identification",
@@ -81,7 +81,7 @@
                             "4": "Mode C Code",
                             "5": "DS ID",
                             "6": "Ground Speed",
-                            "8": "Time of Day"
+                            "8": "Timestamp"
                         },
                         "CAT020": {
                             "0": "Best available Identification",
@@ -91,7 +91,7 @@
                             "4": "Mode C Code",
                             "5": "DS ID",
                             "6": "Ground Speed",
-                            "8": "Time of Day"
+                            "8": "Timestamp"
                         },
                         "CAT021": {
                             "0": "Best available Identification",
@@ -101,7 +101,7 @@
                             "4": "Mode C Code",
                             "5": "DS ID",
                             "6": "Ground Speed",
-                            "8": "Time of Day"
+                            "8": "Timestamp"
                         },
                         "CAT048": {
                             "0": "Best available Identification",
@@ -111,7 +111,7 @@
                             "4": "Mode C Code",
                             "5": "DS ID",
                             "6": "Track Groundspeed",
-                            "8": "Time of Day"
+                            "8": "Timestamp"
                         },
                         "CAT062": {
                             "0": "Best available Identification",
@@ -121,7 +121,7 @@
                             "4": "Mode C Code LM",
                             "5": "DS ID",
                             "6": "Ground Speed",
-                            "8": "Time of Day"
+                            "8": "Timestamp"
                         },
                         "RefTraj": {
                             "0": "Best available Identification",
@@ -131,7 +131,7 @@
                             "4": "Mode C Code",
                             "5": "DS ID",
                             "6": "Ground Speed",
-                            "8": "Time of Day"
+                            "8": "Timestamp"
                         }
                     },
                     "label_directions": {

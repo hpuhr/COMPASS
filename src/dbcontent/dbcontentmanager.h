@@ -147,9 +147,9 @@ public:
     void maxRefTrajTrackNum(unsigned int value);
 
     bool hasMinMaxInfo() const;
-    bool hasMinMaxToD() const;
-    void setMinMaxTod(double min, double max);
-    std::pair<double, double> minMaxTod() const;
+    bool hasMinMaxTimestamp() const;
+    void setMinMaxTimestamp(boost::posix_time::ptime min, boost::posix_time::ptime max);
+    std::pair<boost::posix_time::ptime, boost::posix_time::ptime> minMaxTimestamp() const;
 
     bool hasMinMaxPosition() const;
     void setMinMaxLatitude(double min, double max);
@@ -195,8 +195,8 @@ protected:
     bool has_max_reftraj_track_num_ {false};
     unsigned int max_reftraj_track_num_ {0};
 
-    boost::optional<float> tod_min_;
-    boost::optional<float> tod_max_;
+    boost::optional<boost::posix_time::ptime> timestamp_min_;
+    boost::optional<boost::posix_time::ptime> timestamp_max_;
     boost::optional<double> latitude_min_;
     boost::optional<double> latitude_max_;
     boost::optional<double> longitude_min_;

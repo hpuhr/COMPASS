@@ -201,7 +201,7 @@ void SingleExtraData::reportDetails(EvaluationResultsReport::Section& utn_req_se
     for (auto& rq_det_it : details_)
     {
         utn_req_details_table.addRow(
-                    {String::timeStringFromDouble(rq_det_it.tod_).c_str(),
+                    {Time::toString(rq_det_it.timestamp_).c_str(),
                      rq_det_it.inside_, rq_det_it.extra_,
                      rq_det_it.ref_exists_, rq_det_it.comment_.c_str()},
                     this, detail_cnt);
@@ -244,7 +244,7 @@ std::unique_ptr<nlohmann::json::object_t> SingleExtraData::viewableData(
         (*viewable_ptr)["position_longitude"] = detail.pos_current_.longitude_;
         (*viewable_ptr)["position_window_latitude"] = eval_man_.resultDetailZoom();
         (*viewable_ptr)["position_window_longitude"] = eval_man_.resultDetailZoom();
-        (*viewable_ptr)["time"] = detail.tod_;
+        (*viewable_ptr)["timestamp"] = Time::toString(detail.timestamp_);
 
         return viewable_ptr;
     }

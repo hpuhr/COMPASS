@@ -40,6 +40,7 @@
 using namespace std;
 using namespace Utils;
 using namespace nlohmann;
+using namespace boost::posix_time;
 
 EvaluationData::EvaluationData(EvaluationManager& eval_man)
     : eval_man_(eval_man)
@@ -70,7 +71,7 @@ void EvaluationData::addReferenceData (DBContent& object, unsigned int line_id, 
 
     string dbcontent_name = ref_buffer_->dbContentName();
 
-    ref_tod_name_ = dbcontent_man.metaVariable(DBContent::meta_var_tod_.name()).getFor(dbcontent_name).name();
+    ref_timestamp_name_ = dbcontent_man.metaVariable(DBContent::meta_var_timestamp_.name()).getFor(dbcontent_name).name();
 
     ref_latitude_name_ = dbcontent_man.metaVariable(DBContent::meta_var_latitude_.name()).getFor(dbcontent_name).name();
     ref_longitude_name_ = dbcontent_man.metaVariable(DBContent::meta_var_longitude_.name()).getFor(dbcontent_name).name();
@@ -140,8 +141,8 @@ void EvaluationData::addReferenceData (DBContent& object, unsigned int line_id, 
 //    assert (buffer->has<unsigned int>(DBContent::meta_var_rec_num_.name()));
 //    NullableVector<unsigned int>& rec_nums = buffer->get<unsigned int>(DBContent::meta_var_rec_num_.name());
 
-    assert (buffer->has<float>(ref_tod_name_));
-    NullableVector<float>& tods = buffer->get<float>(ref_tod_name_);
+    assert (buffer->has<ptime>(ref_timestamp_name_));
+    NullableVector<ptime>& ts_vec = buffer->get<ptime>(ref_timestamp_name_);
 
     assert (buffer->has<unsigned int>(DBContent::meta_var_datasource_id_.name()));
     NullableVector<unsigned int>& ds_ids = buffer->get<unsigned int>(DBContent::meta_var_datasource_id_.name());
@@ -153,7 +154,7 @@ void EvaluationData::addReferenceData (DBContent& object, unsigned int line_id, 
     NullableVector<json>& assoc_vec = buffer->get<json>(DBContent::meta_var_associations_.name());
 
     //unsigned int rec_num;
-    float tod;
+    ptime timestamp;
     vector<unsigned int> utn_vec;
 
     loginf << "EvaluationData: addReferenceData: adding target data";
@@ -177,10 +178,10 @@ void EvaluationData::addReferenceData (DBContent& object, unsigned int line_id, 
         }
 
         //assert (!rec_nums.isNull(cnt));
-        assert (!tods.isNull(cnt));
+        assert (!ts_vec.isNull(cnt));
 
         //rec_num = rec_nums.get(cnt);
-        tod = tods.get(cnt);
+        timestamp = ts_vec.get(cnt);
 
         if (assoc_vec.isNull(cnt))
             utn_vec.clear();
@@ -207,7 +208,7 @@ void EvaluationData::addReferenceData (DBContent& object, unsigned int line_id, 
             //            if (!targetData(utn_it).hasRefBuffer())
             //                target_data_.modify(index_it, [buffer](EvaluationTargetData& t) { t.setRefBuffer(buffer); });
 
-            target_data_.modify(index_it, [tod, cnt](EvaluationTargetData& t) { t.addRefIndex(tod, cnt); });
+            target_data_.modify(index_it, [timestamp, cnt](EvaluationTargetData& t) { t.addRefIndex(timestamp, cnt); });
 
             ++associated_ref_cnt_;
         }
@@ -239,7 +240,7 @@ void EvaluationData::addTestData (DBContent& object, unsigned int line_id,  std:
 
     string dbcontent_name = tst_buffer_->dbContentName();
 
-    tst_tod_name_ = dbcontent_man.metaVariable(DBContent::meta_var_tod_.name()).getFor(dbcontent_name).name();
+    tst_timestamp_name_ = dbcontent_man.metaVariable(DBContent::meta_var_timestamp_.name()).getFor(dbcontent_name).name();
 
     tst_latitude_name_ = dbcontent_man.metaVariable(DBContent::meta_var_latitude_.name()).getFor(dbcontent_name).name();
     tst_longitude_name_ = dbcontent_man.metaVariable(DBContent::meta_var_longitude_.name()).getFor(dbcontent_name).name();
@@ -316,8 +317,9 @@ void EvaluationData::addTestData (DBContent& object, unsigned int line_id,  std:
 //    assert (buffer->has<unsigned int>(DBContent::meta_var_rec_num_.name()));
 //    NullableVector<unsigned int>& rec_nums = buffer->get<unsigned int>(DBContent::meta_var_rec_num_.name());
 
-    assert (buffer->has<float>(DBContent::meta_var_tod_.name()));
-    NullableVector<float>& tods = buffer->get<float>(DBContent::meta_var_tod_.name());
+    assert (buffer->has<ptime>(DBContent::meta_var_timestamp_.name()));
+    NullableVector<ptime>& ts_vec = buffer->get<boost::posix_time::ptime>(
+                DBContent::meta_var_timestamp_.name());
 
     assert (buffer->has<unsigned int>(DBContent::meta_var_datasource_id_.name()));
     NullableVector<unsigned int>& ds_ids = buffer->get<unsigned int>(DBContent::meta_var_datasource_id_.name());
@@ -329,7 +331,7 @@ void EvaluationData::addTestData (DBContent& object, unsigned int line_id,  std:
     NullableVector<json>& assoc_vec = buffer->get<json>(DBContent::meta_var_associations_.name());
 
     //unsigned int rec_num;
-    float tod;
+    boost::posix_time::ptime timestamp;
     vector<unsigned int> utn_vec;
 
     loginf << "EvaluationData: addTestData: adding target data";
@@ -353,10 +355,10 @@ void EvaluationData::addTestData (DBContent& object, unsigned int line_id,  std:
         }
 
         //assert (!rec_nums.isNull(cnt));
-        assert (!tods.isNull(cnt));
+        assert (!ts_vec.isNull(cnt));
 
         //rec_num = rec_nums.get(cnt);
-        tod = tods.get(cnt);
+        timestamp = ts_vec.get(cnt);
 
         if (assoc_vec.isNull(cnt))
             utn_vec.clear();
@@ -383,7 +385,7 @@ void EvaluationData::addTestData (DBContent& object, unsigned int line_id,  std:
             //            if (!targetData(utn_it).hasRefBuffer())
             //                target_data_.modify(index_it, [buffer](EvaluationTargetData& t) { t.setRefBuffer(buffer); });
 
-            target_data_.modify(index_it, [tod, cnt](EvaluationTargetData& t) { t.addTstIndex(tod, cnt); });
+            target_data_.modify(index_it, [timestamp, cnt](EvaluationTargetData& t) { t.addTstIndex(timestamp, cnt); });
 
             ++associated_tst_cnt_;
         }

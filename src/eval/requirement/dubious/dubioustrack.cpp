@@ -24,6 +24,7 @@
 
 using namespace std;
 using namespace Utils;
+using namespace boost::posix_time;
 
 namespace EvaluationRequirement
 {
@@ -43,7 +44,7 @@ DubiousTrack::DubiousTrack(
       eval_only_single_ds_id_(eval_only_single_ds_id), single_ds_id_(single_ds_id),
       minimum_comparison_time_(minimum_comparison_time), maximum_comparison_time_(maximum_comparison_time),
       mark_primary_only_(mark_primary_only), use_min_updates_(use_min_updates), min_updates_(min_updates),
-      use_min_duration_(use_min_duration), min_duration_(min_duration),
+      use_min_duration_(use_min_duration), min_duration_(Time::partialSeconds(min_duration)),
       use_max_groundspeed_(use_max_groundspeed), max_groundspeed_kts_(max_groundspeed_kts),
       use_max_acceleration_(use_max_acceleration), max_acceleration_(max_acceleration),
       use_max_turnrate_(use_max_turnrate), max_turnrate_(max_turnrate),
@@ -61,7 +62,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTrack::evaluate (
            << " use_min_updates " << use_min_updates_ << " min_updates " << min_updates_
            << " use_min_duration " << use_min_duration_ << " min_duration " << min_duration_;
 
-    const std::multimap<float, unsigned int>& tst_data = target_data.tstData();
+    const std::multimap<ptime, unsigned int>& tst_data = target_data.tstData();
 
     unsigned int track_num;
     bool track_num_missing_reported {false};
@@ -72,7 +73,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTrack::evaluate (
 
     bool is_inside;
 
-    float tod{0};
+    ptime timestamp;
 
     unsigned int num_updates {0};
     unsigned int num_pos_outside {0};
@@ -130,31 +131,31 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTrack::evaluate (
 
     for (const auto& tst_id : tst_data)
     {
-        tod = tst_id.first;
+        timestamp = tst_id.first;
 
-        if (!target_data.hasTstTrackNumForTime(tod))
+        if (!target_data.hasTstTrackNumForTime(timestamp))
         {
             if (!track_num_missing_reported)
             {
                 logwrn << "EvaluationRequirementDubiousTrack '" << name_ << "': evaluate: utn " << target_data.utn_
-                       << " has no track number at time " << String::timeStringFromDouble(tod);
+                       << " has no track number at time " << Time::toString(timestamp);
                 track_num_missing_reported = true;
             }
             continue;
         }
 
-        track_num = target_data.tstTrackNumForTime(tod);
+        track_num = target_data.tstTrackNumForTime(timestamp);
 
         ++num_updates;
 
         // check if inside based on test position only
 
-        tst_pos = target_data.tstPosForTime(tod);
+        tst_pos = target_data.tstPosForTime(timestamp);
 
-        has_ground_bit = target_data.hasTstGroundBitForTime(tod);
+        has_ground_bit = target_data.hasTstGroundBitForTime(timestamp);
 
         if (has_ground_bit)
-            ground_bit_set = target_data.tstGroundBitForTime(tod);
+            ground_bit_set = target_data.tstGroundBitForTime(timestamp);
         else
             ground_bit_set = false;
 
@@ -175,9 +176,9 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTrack::evaluate (
         // find corresponding track
         if (tracks.count(track_num)) // exists
         {
-            assert (tod >= tracks.at(track_num).tod_end_);
+            assert (timestamp >= tracks.at(track_num).tod_end_);
 
-            if (tod - tracks.at(track_num).tod_end_ > 300.0) // time gap too large, new track
+            if (timestamp - tracks.at(track_num).tod_end_ > seconds(300)) // time gap too large, new track
             {
                 finished_tracks.emplace_back(tracks.at(track_num));
                 tracks.erase(track_num);
@@ -188,7 +189,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTrack::evaluate (
         {
             tracks.emplace(std::piecewise_construct,
                            std::forward_as_tuple(track_num),  // args for key
-                           std::forward_as_tuple(track_num, tod));
+                           std::forward_as_tuple(track_num, timestamp));
         }
 
         assert (tracks.count(track_num));
@@ -198,12 +199,12 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTrack::evaluate (
         ++num_pos_inside;
         ++current_detail.num_pos_inside_;
 
-        current_detail.updates_.emplace_back(tod, tst_pos);
+        current_detail.updates_.emplace_back(timestamp, tst_pos);
 
         if (current_detail.first_inside_) // do detail time & pos
         {
-            current_detail.tod_begin_ = tod;
-            current_detail.tod_end_ = tod;
+            current_detail.tod_begin_ = timestamp;
+            current_detail.tod_end_ = timestamp;
 
             current_detail.pos_begin_ = tst_pos;
             current_detail.pos_last_ = tst_pos;
@@ -212,7 +213,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTrack::evaluate (
         }
         else
         {
-            current_detail.tod_end_ = tod;
+            current_detail.tod_end_ = timestamp;
             assert (current_detail.tod_end_ >= current_detail.tod_begin_);
             current_detail.duration_ = current_detail.tod_end_ - current_detail.tod_begin_;
 
@@ -221,11 +222,11 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTrack::evaluate (
 
         // do stats
         if (!current_detail.has_mode_ac_
-                && (target_data.hasTstModeAForTime(tod) || target_data.hasTstModeCForTime(tod)))
+                && (target_data.hasTstModeAForTime(timestamp) || target_data.hasTstModeCForTime(timestamp)))
             current_detail.has_mode_ac_  = true;
 
         if (!current_detail.has_mode_s_
-                && (target_data.hasTstTAForTime(tod) || target_data.hasTstCallsignForTime(tod)))
+                && (target_data.hasTstTAForTime(timestamp) || target_data.hasTstCallsignForTime(timestamp)))
             current_detail.has_mode_s_  = true;
     }
 
@@ -252,7 +253,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTrack::evaluate (
     std::map<std::string, std::string> all_updates_dubious_reasons;
 
     bool has_last_tod;
-    float last_tod;
+    ptime last_tod;
     float time_diff;
     float acceleration;
     float track_angle1, track_angle2, turnrate;
@@ -288,10 +289,10 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTrack::evaluate (
         if (!do_not_evaluate_target && use_min_duration_ && !track_detail.left_sector_
                 && track_detail.duration_ < min_duration_)
         {
-            track_detail.dubious_reasons_["Dur."] = String::doubleToStringPrecision(track_detail.duration_, 1);
+            track_detail.dubious_reasons_["Dur."] = Time::toString(track_detail.duration_, 1);
 
             all_updates_dubious = true;
-            all_updates_dubious_reasons["Dur."] = String::doubleToStringPrecision(track_detail.duration_, 1);
+            all_updates_dubious_reasons["Dur."] = Time::toString(track_detail.duration_, 1);
         }
 
 
@@ -301,28 +302,28 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTrack::evaluate (
             if (!do_not_evaluate_target && all_updates_dubious) // mark was primarty/short track if required
                 update.dubious_comments_ = all_updates_dubious_reasons;
 
-            if (!do_not_evaluate_target && use_max_groundspeed_ && target_data.hasTstMeasuredSpeedForTime(update.tod_)
-                    && target_data.tstMeasuredSpeedForTime(update.tod_) > max_groundspeed_kts_)
+            if (!do_not_evaluate_target && use_max_groundspeed_ && target_data.hasTstMeasuredSpeedForTime(update.timestamp_)
+                    && target_data.tstMeasuredSpeedForTime(update.timestamp_) > max_groundspeed_kts_)
             {
                 update.dubious_comments_["Spd"] =
-                        String::doubleToStringPrecision(target_data.tstMeasuredSpeedForTime(update.tod_), 1);
+                        String::doubleToStringPrecision(target_data.tstMeasuredSpeedForTime(update.timestamp_), 1);
 
                 ++dubious_groundspeed_found;
             }
 
             if (has_last_tod)
             {
-                assert (update.tod_ >= last_tod);
-                time_diff = update.tod_ - last_tod;
+                assert (update.timestamp_ >= last_tod);
+                time_diff = Time::partialSeconds(update.timestamp_ - last_tod);
 
                 if (!do_not_evaluate_target && time_diff >= minimum_comparison_time_
                         && time_diff <= maximum_comparison_time_)
                 {
-                    if (use_max_acceleration_ && target_data.hasTstMeasuredSpeedForTime(update.tod_)
+                    if (use_max_acceleration_ && target_data.hasTstMeasuredSpeedForTime(update.timestamp_)
                             && target_data.hasTstMeasuredSpeedForTime(last_tod))
                     {
 
-                        acceleration = fabs(target_data.tstMeasuredSpeedForTime(update.tod_)
+                        acceleration = fabs(target_data.tstMeasuredSpeedForTime(update.timestamp_)
                                             - target_data.tstMeasuredSpeedForTime(last_tod)) * KNOTS2M_S / time_diff;
 
                         if (acceleration > max_acceleration_)
@@ -335,10 +336,10 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTrack::evaluate (
                     }
 
                     if (!do_not_evaluate_target && use_max_turnrate_
-                            && target_data.hasTstMeasuredTrackAngleForTime(update.tod_)
+                            && target_data.hasTstMeasuredTrackAngleForTime(update.timestamp_)
                             && target_data.hasTstMeasuredTrackAngleForTime(last_tod))
                     {
-                        track_angle1 = target_data.tstMeasuredTrackAngleForTime(update.tod_);
+                        track_angle1 = target_data.tstMeasuredTrackAngleForTime(update.timestamp_);
                         track_angle2 = target_data.tstMeasuredTrackAngleForTime(last_tod);
 
                         turnrate = fabs(RAD2DEG*atan2(sin(DEG2RAD*(track_angle1-track_angle2)),
@@ -353,11 +354,11 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTrack::evaluate (
                         }
                     }
 
-                    if (!do_not_evaluate_target && use_rocd_ && target_data.hasTstModeCForTime(update.tod_)
+                    if (!do_not_evaluate_target && use_rocd_ && target_data.hasTstModeCForTime(update.timestamp_)
                             && target_data.hasTstModeCForTime(last_tod))
                     {
 
-                        rocd = fabs(target_data.tstModeCForTime(update.tod_)
+                        rocd = fabs(target_data.tstModeCForTime(update.timestamp_)
                                             - target_data.tstModeCForTime(last_tod)) / time_diff;
 
                         if (rocd > max_rocd_)
@@ -372,7 +373,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTrack::evaluate (
             }
 
             // done
-            last_tod = update.tod_;
+            last_tod = update.timestamp_;
             has_last_tod = true;
         }
 
@@ -446,7 +447,7 @@ bool DubiousTrack::useMinDuration() const
 
 float DubiousTrack::minDuration() const
 {
-    return min_duration_;
+    return Time::partialSeconds(min_duration_);
 }
 
 bool DubiousTrack::useMaxAcceleration() const

@@ -18,11 +18,13 @@
 #ifndef VIEWMANAGER_H_
 #define VIEWMANAGER_H_
 
-#include <QObject>
-
 #include "configurable.h"
 #include "dbcontent/variable/variableset.h"
 #include "appmode.h"
+
+#include <QObject>
+
+#include "boost/date_time/posix_time/ptime.hpp"
 
 class COMPASS;
 class Buffer;
@@ -100,7 +102,7 @@ class ViewManager : public QObject, public Configurable
     void unsetCurrentViewPoint ();
 
     void doViewPointAfterLoad ();
-    void selectTimeWindow(float time_min, float time_max);
+    void selectTimeWindow(boost::posix_time::ptime ts_min, boost::posix_time::ptime ts_max);
 
     void showMainViewContainerAddView();
 

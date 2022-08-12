@@ -74,11 +74,11 @@ void JoinedDubiousTarget::addToValues (std::shared_ptr<SingleDubiousTarget> sing
     if (single_result->detail().is_dubious_)
         num_utns_dubious_ += 1;
 
-    duration_all_ += single_result->detail().duration_;
+    duration_all_ += Time::partialSeconds(single_result->detail().duration_);
     if (single_result->detail().is_dubious_)
-        duration_dubious_ += single_result->detail().duration_;
+        duration_dubious_ += Time::partialSeconds(single_result->detail().duration_);
     else
-        duration_nondub_ += single_result->detail().duration_;
+        duration_nondub_ += Time::partialSeconds(single_result->detail().duration_);
 
     details_.push_back(single_result->detail());
 

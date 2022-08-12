@@ -314,7 +314,7 @@ void SingleSpeed::reportDetails(EvaluationResultsReport::Section& utn_req_sectio
     for (auto& rq_det_it : details_)
     {
         utn_req_details_table.addRow(
-                    {String::timeStringFromDouble(rq_det_it.tod_).c_str(),
+                    {Time::toString(rq_det_it.timestamp_).c_str(),
                      !rq_det_it.has_ref_pos_, rq_det_it.pos_inside_,
                      rq_det_it.offset_,  // "Distance"
                      rq_det_it.check_passed_, // CP"
@@ -364,7 +364,7 @@ std::unique_ptr<nlohmann::json::object_t> SingleSpeed::viewableData(
         (*viewable_ptr)["position_longitude"] = detail.tst_pos_.longitude_;
         (*viewable_ptr)["position_window_latitude"] = eval_man_.resultDetailZoom();
         (*viewable_ptr)["position_window_longitude"] = eval_man_.resultDetailZoom();
-        (*viewable_ptr)["time"] = detail.tod_;
+        (*viewable_ptr)["timestamp"] = Time::toString(detail.timestamp_);
 
         if (!detail.check_passed_)
             (*viewable_ptr)["evaluation_results"]["highlight_details"] = vector<unsigned int>{detail_cnt};

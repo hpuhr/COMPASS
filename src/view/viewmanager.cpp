@@ -36,6 +36,7 @@
 #include "viewpointstablemodel.h"
 #include "viewpointsreportgenerator.h"
 #include "viewpointsreportgeneratordialog.h"
+#include "util/timeconv.h"
 
 #include "json.hpp"
 
@@ -294,32 +295,34 @@ void ViewManager::doViewPointAfterLoad ()
 
     logdbg << "ViewManager: doViewPointAfterLoad: data '" << data.dump(4) << "'";
 
-    bool contains_time = data.contains("time");
-    float time;
-    bool contains_time_window = data.contains("time_window");
-    float time_window, time_min, time_max;
+    bool vp_contains_timestamp = data.contains("timestamp");
+    boost::posix_time::ptime vp_timestamp;
+    bool vp_contains_time_window = data.contains("time_window");
+    float vp_time_window;
+    boost::posix_time::ptime vp_ts_min, vp_ts_max;
 
-    if (!contains_time)
+    if (!vp_contains_timestamp)
     {
         loginf << "ViewManager: doViewPointAfterLoad: no time given";
         return; // nothing to do
     }
     else
     {
-        assert (data.at("time").is_number());
-        time = data.at("time");
+        assert (data.at("timestamp").is_string());
+        vp_timestamp = Time::fromString(data.at("timestamp"));
 
-        loginf << "ViewManager: doViewPointAfterLoad: time " << time;
+        loginf << "ViewManager: doViewPointAfterLoad: time " << Time::toString(vp_timestamp);
     }
 
-    if (contains_time_window)
+    if (vp_contains_time_window)
     {
         assert (data.at("time_window").is_number());
-        time_window = data.at("time_window");
-        time_min = time-time_window/2.0;
-        time_max = time+time_window/2.0;
+        vp_time_window = data.at("time_window");
+        vp_ts_min = vp_timestamp - Time::partialSeconds(vp_time_window / 2.0);
+        vp_ts_max = vp_timestamp + Time::partialSeconds(vp_time_window / 2.0);
 
-        loginf << "ViewManager: doViewPointAfterLoad: time window min " << time_min << " max " << time_max;
+        loginf << "ViewManager: doViewPointAfterLoad: time window min " << Time::toString(vp_ts_min)
+               << " max " << Time::toString(vp_ts_max);
     }
 
     DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
@@ -329,7 +332,7 @@ void ViewManager::doViewPointAfterLoad ()
     {
         std::string dbcontent_name = dbo_it.first;
 
-        if (!dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_tod_))
+        if (!dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_timestamp_))
 //                 ||!dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_latitude_)
 //                 || !dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_longitude_))
         {
@@ -337,7 +340,7 @@ void ViewManager::doViewPointAfterLoad ()
             continue;
         }
 
-        const dbContent::Variable& tod_var = dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_tod_);
+        const dbContent::Variable& ts_var = dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_timestamp_);
 //        const dbContent::Variable& latitude_var = dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_latitude_);
 //        const dbContent::Variable& longitude_var = dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_longitude_);
 
@@ -348,8 +351,8 @@ void ViewManager::doViewPointAfterLoad ()
             assert(buffer->has<bool>(DBContent::selected_var.name()));
             NullableVector<bool>& selected_vec = buffer->get<bool>(DBContent::selected_var.name());
 
-            assert(buffer->has<float>(tod_var.name()));
-            NullableVector<float>& tods = buffer->get<float>(tod_var.name());
+            assert(buffer->has<boost::posix_time::ptime>(ts_var.name()));
+            NullableVector<boost::posix_time::ptime>& tods = buffer->get<boost::posix_time::ptime>(ts_var.name());
 //            assert(buffer->has<double>(latitude_var.name()));
 //            NullableVector<double>& latitudes = buffer->get<double>(latitude_var.name());
 //            assert(buffer->has<double>(longitude_var.name()));
@@ -357,29 +360,29 @@ void ViewManager::doViewPointAfterLoad ()
 
             unsigned int buffer_size = buffer->size();
 
-            bool tod_null;
-            float tod;
+            bool ts_null;
+            boost::posix_time::ptime timestamp;
 
             for (unsigned int cnt =0; cnt < buffer_size; ++cnt)
             {
-                tod_null = tods.isNull(cnt);
+                ts_null = tods.isNull(cnt);
 
-                if (tod_null)
+                if (ts_null)
                     continue; // nothing to do
 
-                tod = tods.get(cnt);
+                timestamp = tods.get(cnt);
 
-                if (contains_time_window)
+                if (vp_contains_time_window)
                 {
-                    if (tod >= time_min && tod <= time_max)
+                    if (timestamp >= vp_ts_min && timestamp <= vp_ts_max)
                     {
                         selected_vec.set(cnt, true);
                         selection_changed = true;
 
-                        logdbg << "ViewManager: doViewPointAfterLoad: time " << tod << " selected ";
+                        logdbg << "ViewManager: doViewPointAfterLoad: time " << timestamp << " selected ";
                     }
                 }
-                else if (contains_time && tod == time)
+                else if (vp_contains_timestamp && timestamp == vp_timestamp)
                 {
                     selected_vec.set(cnt, true);
                     selection_changed = true;
@@ -397,9 +400,9 @@ void ViewManager::doViewPointAfterLoad ()
     }
 }
 
-void ViewManager::selectTimeWindow(float time_min, float time_max)
+void ViewManager::selectTimeWindow(boost::posix_time::ptime ts_min, boost::posix_time::ptime ts_max)
 {
-    loginf << "ViewManager: selectTimeWindow: time_min " << time_min << " time_max " << time_max;
+    loginf << "ViewManager: selectTimeWindow: ts_min " << ts_min << " ts_max " << ts_max;
 
     DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
 
@@ -408,13 +411,13 @@ void ViewManager::selectTimeWindow(float time_min, float time_max)
     {
         std::string dbcontent_name = dbo_it.first;
 
-        if (!dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_tod_))
+        if (!dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_timestamp_))
         {
             logerr << "ViewManager: selectTimeWindow: required variables missing, quitting";
             continue;
         }
 
-        const dbContent::Variable& tod_var = dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_tod_);
+        const dbContent::Variable& ts_var = dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_timestamp_);
 
         if (dbcont_man.data().count(dbo_it.first))
         {
@@ -423,29 +426,29 @@ void ViewManager::selectTimeWindow(float time_min, float time_max)
             assert(buffer->has<bool>(DBContent::selected_var.name()));
             NullableVector<bool>& selected_vec = buffer->get<bool>(DBContent::selected_var.name());
 
-            assert(buffer->has<float>(tod_var.name()));
-            NullableVector<float>& tods = buffer->get<float>(tod_var.name());
+            assert(buffer->has<boost::posix_time::ptime>(ts_var.name()));
+            NullableVector<boost::posix_time::ptime>& ts_vec = buffer->get<boost::posix_time::ptime>(ts_var.name());
 
             unsigned int buffer_size = buffer->size();
 
             bool tod_null;
-            float tod;
+            boost::posix_time::ptime timestamp;
 
             for (unsigned int cnt =0; cnt < buffer_size; ++cnt)
             {
-                tod_null = tods.isNull(cnt);
+                tod_null = ts_vec.isNull(cnt);
 
                 if (tod_null)
                     continue; // nothing to do
 
-                tod = tods.get(cnt);
+                timestamp = ts_vec.get(cnt);
 
-                if (tod >= time_min && tod <= time_max)
+                if (timestamp >= ts_min && timestamp <= ts_max)
                 {
                     selected_vec.set(cnt, true);
                     selection_changed = true;
 
-                    logdbg << "ViewManager: selectTimeWindow: time " << tod << " selected ";
+                    logdbg << "ViewManager: selectTimeWindow: time " << timestamp << " selected ";
 
                 }
             }

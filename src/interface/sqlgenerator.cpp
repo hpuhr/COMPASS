@@ -138,9 +138,9 @@ string SQLGenerator::getCreateTableStatement(const DBContent& object)
 
     // CREATE [UNIQUE] INDEX index_name ON table_name(column_list);
 
-    ss << "\nCREATE INDEX TOD_INDEX_" << object.name() << " ON " << object.dbTableName() << "(";
+    ss << "\nCREATE INDEX TIMESTAMP_INDEX_" << object.name() << " ON " << object.dbTableName() << "(";
     ss << COMPASS::instance().dbContentManager().metaGetVariable(
-              object.name(), DBContent::meta_var_tod_).dbColumnName()
+              object.name(), DBContent::meta_var_timestamp_).dbColumnName()
        << ");";
 
     ss << "\nCREATE INDEX DS_ID_INDEX_" << object.name() << " ON " << object.dbTableName() << "(";

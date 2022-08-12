@@ -25,7 +25,19 @@ namespace Time
 
 std::string str_format = "%Y-%m-%d %H:%M:%S.%f";
 std::string date_str_format = "%Y-%m-%d";
+std::string time_str_format = "%H:%M:%S.%f";
 boost::posix_time::ptime epoch(boost::gregorian::date(1970, 1, 1));
+
+boost::posix_time::ptime fromString(std::string value)
+{
+    boost::posix_time::ptime timestamp;
+
+    std::istringstream iss(value);
+    iss.imbue(std::locale(iss.getloc(), new boost::posix_time::time_facet(str_format.c_str())));
+    //iss.imbue(std::locale(std::locale::classic(), tif));
+    iss >> timestamp;
+    return timestamp;
+}
 
 boost::posix_time::ptime fromLong(unsigned long value)
 {
@@ -46,19 +58,51 @@ long toLong(boost::posix_time::ptime value)
     return result;
 }
 
-std::string toString(boost::posix_time::ptime value)
+std::string toString(boost::posix_time::ptime value, unsigned int partial_digits)
 {
-    std::stringstream date_stream;
+    std::ostringstream date_stream;
 
     date_stream.imbue(std::locale(date_stream.getloc(), new boost::posix_time::time_facet(str_format.c_str())));
     date_stream << value;
 
     std::string tmp = date_stream.str();
 
-    tmp.erase(tmp.length()-3); // remove microseconds since not supported by boost
+    if (partial_digits == 3) // only remove microsecs
+        tmp.erase(tmp.length()-3); // remove microseconds since not supported by boost
+    else if (partial_digits == 0) // remove all partials and point
+        tmp.erase(tmp.length()-7);
+    else
+        tmp.erase(tmp.length()-3-(3-partial_digits));
 
     return tmp;
 }
+
+std::string toString(boost::posix_time::time_duration duration, unsigned int partial_digits)
+{
+    std::ostringstream date_stream;
+
+    date_stream.imbue(std::locale(date_stream.getloc(), new boost::posix_time::time_facet(time_str_format.c_str())));
+    date_stream << duration;
+
+    std::string tmp = date_stream.str();
+
+    if (partial_digits == 3) // only remove microsecs
+        tmp.erase(tmp.length()-3); // remove microseconds since not supported by boost
+    else if (partial_digits == 0) // remove all partials and point
+        tmp.erase(tmp.length()-7);
+    else
+        tmp.erase(tmp.length()-3-(3-partial_digits));
+
+    return tmp;
+
+//    std::ostringstream os;
+//    auto f = new boost::posix_time::time_facet(time_str_format.c_str());
+//    f->time_duration_format(time_str_format.c_str());
+//    os.imbue(std::locale(std::locale::classic(), f));
+//    os << duration;
+//    return os.str();
+}
+
 
 std::string toString(unsigned long value)
 {
@@ -80,6 +124,37 @@ std::string toDateString(boost::posix_time::ptime value)
 boost::posix_time::ptime fromDateString(std::string value)
 {
     return boost::posix_time::ptime(boost::gregorian::from_string(value));
+}
+
+boost::posix_time::ptime currentUTCTime()
+{
+    return boost::posix_time::microsec_clock::universal_time();
+}
+
+boost::posix_time::time_duration partialSeconds(double seconds, bool ignore_full_seconds)
+// can be negative but not exceed maxint seconds
+{
+    int full_seconds = (int) seconds;
+    int partial_microseconds = 1000000 * (seconds - full_seconds);
+
+    boost::posix_time::time_duration value;
+
+    if (!ignore_full_seconds)
+        value = boost::posix_time::seconds(full_seconds);
+
+    value += boost::posix_time::microseconds(partial_microseconds);
+
+    return value;
+}
+
+double partialSeconds(boost::posix_time::time_duration seconds)
+{
+    double value {0.0};
+
+    value = seconds.total_seconds();
+    value += (double) seconds.total_microseconds() / 1000000.0;
+
+    return value;
 }
 
 }

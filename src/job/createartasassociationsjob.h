@@ -20,6 +20,9 @@
 
 #include "job.h"
 
+#include "boost/date_time/posix_time/ptime.hpp"
+#include "boost/date_time/posix_time/posix_time_duration.hpp"
+
 class CreateARTASAssociationsTask;
 class DBInterface;
 class Buffer;
@@ -29,10 +32,10 @@ struct UniqueARTASTrack
 {
     int utn;
     int track_num;
-    std::map<int, std::pair<std::string, float>> rec_nums_tris_;  // rec_num -> (tri, tod)
+    std::map<int, std::pair<std::string, boost::posix_time::ptime>> rec_nums_tris_;  // rec_num -> (tri, timestamp)
     // std::vector<int> track_nums_;
-    float first_tod_;
-    float last_tod_;
+    boost::posix_time::ptime first_ts_;
+    boost::posix_time::ptime last_ts_;
 };
 
 class CreateARTASAssociationsJob : public Job
@@ -66,24 +69,24 @@ protected:
     DBInterface& db_interface_;
     std::map<std::string, std::shared_ptr<Buffer>> buffers_;
 
-    float misses_acceptable_time_{0};  // time delta at beginning/end of recording where misses are acceptable
+    boost::posix_time::time_duration misses_acceptable_time_;  // time delta at beginning/end of recording where misses are acceptable
 
-    float association_time_past_{0};  // time_delta for which associations are considered into past time
-    float association_time_future_{0};  // time_delta for which associations are considered into future time
+    boost::posix_time::time_duration association_time_past_;  // time_delta for which associations are considered into past time
+    boost::posix_time::time_duration association_time_future_;  // time_delta for which associations are considered into future time
 
-    float associations_dubious_distant_time_{0};
+    boost::posix_time::time_duration associations_dubious_distant_time_;
     // time delta of tou where association is dubious bc too distant in time
-    float association_dubious_close_time_past_{0};
+    boost::posix_time::time_duration association_dubious_close_time_past_;
     // time delta of tou where association is dubious when multible hashes exist
-    float association_dubious_close_time_future_{0};
+    boost::posix_time::time_duration association_dubious_close_time_future_;
     // time delta of tou where association is dubious when multible hashes exist
 
     const std::string tracker_dbcontent_name_{"CAT062"};
     const std::string associations_src_name_{"ARTAS"};
     std::map<int, UniqueARTASTrack> finished_tracks_;  // utn -> unique track
 
-    // dbo -> hash -> rec_num, tod
-    std::map<std::string, std::multimap<std::string, std::pair<int, float>>> sensor_hashes_;
+    // dbo -> hash -> rec_num, timestamp
+    std::map<std::string, std::multimap<std::string, std::pair<int, boost::posix_time::ptime>>> sensor_hashes_;
 
     std::map<std::string,
         std::map<unsigned int,
@@ -91,8 +94,8 @@ protected:
     // dbcontent -> rec_num -> <utn, src rec_nums (dbcontent, rec_num)>
 
 
-    float first_track_tod_{0};
-    float last_track_tod_{0};
+    boost::posix_time::ptime first_track_ts_;
+    boost::posix_time::ptime last_track_ts_;
 
     size_t ignored_track_updates_cnt_{0};
     size_t acceptable_missing_hashes_cnt_{0};
@@ -119,10 +122,10 @@ protected:
 
     void removePreviousAssociations();
 
-    bool isPossibleAssociation(float tod_track, float tod_target);
-    bool isAssociationInDubiousDistantTime(float tod_track, float tod_target);
-    bool isAssociationHashCollisionInDubiousTime(float tod_track, float tod_target);
-    bool isTimeAtBeginningOrEnd(float tod_track);
+    bool isPossibleAssociation(boost::posix_time::ptime ts_track, boost::posix_time::ptime ts_target);
+    bool isAssociationInDubiousDistantTime(boost::posix_time::ptime ts_track, boost::posix_time::ptime ts_target);
+    bool isAssociationHashCollisionInDubiousTime(boost::posix_time::ptime ts_track, boost::posix_time::ptime ts_target);
+    bool isTimeAtBeginningOrEnd(boost::posix_time::ptime ts_track);
 };
 
 #endif  // CREATEARTASASSOCIATIONSJOB_H

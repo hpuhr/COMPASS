@@ -2,7 +2,7 @@
 #include "compass.h"
 #include "datasourcemanager.h"
 #include "stringconv.h"
-#include "util/system.h"
+#include "util/timeconv.h"
 
 #include <QGridLayout>
 #include <QCheckBox>
@@ -209,7 +209,7 @@ void DBDataSourceWidget::updateWidgets()
 
         QPushButton* button;
 
-        float max_time = System::secondsSinceMidnightUTC();
+        boost::posix_time::ptime current_time = Time::currentUTCTime();
 
         for (unsigned int line_cnt=0; line_cnt < 4; ++line_cnt)
         {
@@ -248,7 +248,7 @@ void DBDataSourceWidget::updateWidgets()
                 {
                     button->setChecked(src_.lineLoadingWanted(line_cnt));
 
-                    if (src_.hasLiveData(line_cnt, max_time))
+                    if (src_.hasLiveData(line_cnt, current_time))
                     {
                         QPalette pal = button->palette();
                         pal.setColor(QPalette::Button, QColor(Qt::green));

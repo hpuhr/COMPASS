@@ -38,7 +38,7 @@ HistogramView::HistogramView(const std::string& class_id, const std::string& ins
     : View(class_id, instance_id, w, view_manager)
 {
     registerParameter("data_var_dbo", &data_var_dbo_, META_OBJECT_NAME);
-    registerParameter("data_var_name", &data_var_name_, DBContent::meta_var_tod_.name());
+    registerParameter("data_var_name", &data_var_name_, DBContent::meta_var_timestamp_.name());
 
     registerParameter("use_log_scale", &use_log_scale_, true);
 

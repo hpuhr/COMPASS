@@ -22,6 +22,9 @@
 #include "assoc/targetreport.h"
 #include "assoc/target.h"
 
+#include "boost/date_time/posix_time/ptime.hpp"
+#include "boost/date_time/posix_time/posix_time_duration.hpp"
+
 class CreateAssociationsTask;
 class DBInterface;
 class Buffer;

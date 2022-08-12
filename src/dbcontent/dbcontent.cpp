@@ -50,7 +50,7 @@ const Property DBContent::meta_var_datasource_id_ {"DS ID", PropertyDataType::UI
 const Property DBContent::meta_var_sac_id_ {"SAC", PropertyDataType::UCHAR};
 const Property DBContent::meta_var_sic_id_ {"SIC", PropertyDataType::UCHAR};
 const Property DBContent::meta_var_line_id_ {"Line ID", PropertyDataType::UINT};
-const Property DBContent::meta_var_tod_ {"Time of Day", PropertyDataType::FLOAT};
+const Property DBContent::meta_var_time_of_day_ {"Time of Day", PropertyDataType::FLOAT};
 const Property DBContent::meta_var_timestamp_ {"Timestamp", PropertyDataType::TIMESTAMP};
 const Property DBContent::meta_var_m3a_ {"Mode 3/A Code", PropertyDataType::UINT};
 const Property DBContent::meta_var_m3a_g_ {"Mode 3/A Garbled", PropertyDataType::BOOL};
@@ -530,20 +530,20 @@ void DBContent::doDataSourcesBeforeInsert (shared_ptr<Buffer> buffer)
     string line_col_str = line_var.dbColumnName();
     assert (buffer->has<unsigned int>(line_col_str));
 
-    // tod
-    Variable& tod_var = variable(DBContent::meta_var_tod_.name());
-    assert (tod_var.dataType() == PropertyDataType::FLOAT);
-    string tod_col_str = tod_var.dbColumnName();
-    assert (buffer->has<float>(tod_col_str));
+    // timestamp
+    Variable& timestamp_var = variable(DBContent::meta_var_timestamp_.name());
+    assert (timestamp_var.dataType() == PropertyDataType::TIMESTAMP);
+    string timestamp_col_str = timestamp_var.dbColumnName();
+    assert (buffer->has<boost::posix_time::ptime>(timestamp_col_str));
 
     DataSourceManager& ds_man = COMPASS::instance().dataSourceManager();
 
     NullableVector<unsigned int>& datasource_vec = buffer->get<unsigned int>(datasource_col_str);
     NullableVector<unsigned int>& line_vec = buffer->get<unsigned int>(line_col_str);
-    NullableVector<float>& tod_vec = buffer->get<float>(tod_col_str);
+    NullableVector<boost::posix_time::ptime>& timestamp_vec = buffer->get<boost::posix_time::ptime>(timestamp_col_str);
 
     map<unsigned int, map<unsigned int, unsigned int>> line_counts; // ds_id -> line -> cnt
-    map<unsigned int, map<unsigned int, float>> line_tods; // ds_id -> line-> last tod
+    map<unsigned int, map<unsigned int, boost::posix_time::ptime>> line_tods; // ds_id -> line-> last timestamp
 
     unsigned int buffer_size = buffer->size();
 
@@ -554,8 +554,8 @@ void DBContent::doDataSourcesBeforeInsert (shared_ptr<Buffer> buffer)
     {
         line_counts[datasource_vec.get(cnt)][line_vec.get(cnt)]++;
 
-        if (!tod_vec.isNull(cnt))
-            line_tods[datasource_vec.get(cnt)][line_vec.get(cnt)] = tod_vec.get(cnt);
+        if (!timestamp_vec.isNull(cnt))
+            line_tods[datasource_vec.get(cnt)][line_vec.get(cnt)] = timestamp_vec.get(cnt);
     }
 
     for (auto& ds_id_it : line_counts) // ds_id -> line -> cnt
@@ -572,7 +572,7 @@ void DBContent::doDataSourcesBeforeInsert (shared_ptr<Buffer> buffer)
         if (line_tods.count(ds_id_it.first))
         {
             for (auto& line_tod_it : line_tods.at(ds_id_it.first))
-                ds_man.dbDataSource(ds_id_it.first).maxToD(line_tod_it.first, line_tod_it.second);
+                ds_man.dbDataSource(ds_id_it.first).maxTimestamp(line_tod_it.first, line_tod_it.second);
         }
     }
 }

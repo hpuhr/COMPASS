@@ -28,12 +28,19 @@ namespace Utils
 namespace Time
 {
 
+extern boost::posix_time::ptime fromString(std::string value);
 extern boost::posix_time::ptime fromLong(unsigned long value);
 extern long toLong(boost::posix_time::ptime value);
-extern std::string toString(boost::posix_time::ptime value);
+extern std::string toString(boost::posix_time::ptime value, unsigned int partial_digits=3);
+extern std::string toString(boost::posix_time::time_duration duration, unsigned int partial_digits=3);
 extern std::string toString(unsigned long value);
 extern std::string toDateString(boost::posix_time::ptime value);
 extern boost::posix_time::ptime fromDateString(std::string value);
+extern boost::posix_time::ptime currentUTCTime();
+// can be negative but not exceed maxint seconds
+extern boost::posix_time::time_duration partialSeconds(double seconds, bool ignore_full_seconds=false);
+extern double partialSeconds(boost::posix_time::time_duration seconds);
+
 
 }  // namespace Time
 

@@ -60,6 +60,7 @@
 using namespace Utils;
 using namespace std;
 using namespace nlohmann;
+using namespace boost::posix_time;
 
 EvaluationManager::EvaluationManager(const std::string& class_id, const std::string& instance_id, COMPASS* compass)
     : Configurable(class_id, instance_id, compass, "eval.json"), compass_(*compass),
@@ -541,15 +542,15 @@ std::string EvaluationManager::getCannotEvaluateComment()
     if (!sectors_loaded_)
         return "No Database loaded";
 
+    if (!compass_.dbContentManager().hasAssociations())
+        return "Please run target report association";
+
     // no sector
     if (!sectorsLayers().size())
         return "Please add at least one sector";
 
     if (!anySectorsWithReq())
         return "Please set requirements for at least one sector";
-
-    if (!compass_.dbContentManager().hasAssociations())
-        return "Please run target report association";
 
     if (!hasSelectedReferenceDataSources())
         return "Please select reference data sources";
@@ -812,7 +813,7 @@ void EvaluationManager::addVariables (const std::string dbcontent_name, dbConten
     read_set.add(dbcontent_man.metaVariable(DBContent::meta_var_datasource_id_.name()).getFor(dbcontent_name));
     read_set.add(dbcontent_man.metaVariable(DBContent::meta_var_line_id_.name()).getFor(dbcontent_name));
     read_set.add(dbcontent_man.metaVariable(DBContent::meta_var_associations_.name()).getFor(dbcontent_name));
-    read_set.add(dbcontent_man.metaVariable(DBContent::meta_var_tod_.name()).getFor(dbcontent_name));
+    read_set.add(dbcontent_man.metaVariable(DBContent::meta_var_timestamp_.name()).getFor(dbcontent_name));
     read_set.add(dbcontent_man.metaVariable(DBContent::meta_var_latitude_.name()).getFor(dbcontent_name));
     read_set.add(dbcontent_man.metaVariable(DBContent::meta_var_longitude_.name()).getFor(dbcontent_name));
 
@@ -1741,25 +1742,20 @@ void EvaluationManager::showSurroundingData (unsigned int utn)
 
     const EvaluationTargetData& target_data = data_.targetData(utn);
 
-    float time_begin = target_data.timeBegin();
-    time_begin -= 60.0;
+    ptime time_begin = target_data.timeBegin();
+    time_begin -= seconds(60);
 
-    if (time_begin < 0)
-        time_begin = 0;
-
-    float time_end = target_data.timeEnd();
-    time_end += 60.0;
-
-    if (time_end > 24*60*60)
-        time_end = 24*60*60;
+    ptime time_end = target_data.timeEnd();
+    time_end += seconds(60);
 
     //    "Time of Day": {
     //    "Time of Day Maximum": "05:56:32.297",
     //    "Time of Day Minimum": "05:44:58.445"
     //    },
 
-    data["filters"]["Time of Day"]["Time of Day Maximum"] = String::timeStringFromDouble(time_end);
-    data["filters"]["Time of Day"]["Time of Day Minimum"] = String::timeStringFromDouble(time_begin);
+    // TODO_TIMESTAMP
+    data["filters"]["Time of Day"]["Time of Day Maximum"] = Time::toString(time_end);
+    data["filters"]["Time of Day"]["Time of Day Minimum"] = Time::toString(time_begin);
 
     //    "Aircraft Address": {
     //    "Aircraft Address Values": "FEFE10"
@@ -1978,6 +1974,8 @@ void EvaluationManager::filterUTNs ()
 
     bool tmp_match;
 
+    time_duration short_duration = Time::partialSeconds(remove_short_targets_min_duration_);
+
     for (auto& target_it : data_)
     {
         if (!target_it.use())
@@ -1988,7 +1986,7 @@ void EvaluationManager::filterUTNs ()
 
         if (remove_short_targets_
                 && (target_it.numUpdates() < remove_short_targets_min_updates_
-                    || target_it.timeDuration() < remove_short_targets_min_duration_))
+                    || target_it.timeDuration() < short_duration))
         {
             use = false;
             comment = "Short track";

@@ -205,7 +205,7 @@ void SingleIdentificationFalse::reportDetails(EvaluationResultsReport::Section& 
     for (auto& rq_det_it : details_)
     {
         utn_req_details_table.addRow(
-                    {String::timeStringFromDouble(rq_det_it.tod_).c_str(), rq_det_it.ref_exists_,
+                    {Time::toString(rq_det_it.timestamp_).c_str(), rq_det_it.ref_exists_,
                      !rq_det_it.is_not_ok_,
                      rq_det_it.num_updates_, rq_det_it.num_no_ref_,
                      rq_det_it.num_inside_, rq_det_it.num_outside_, rq_det_it.num_unknown_id_,
@@ -254,7 +254,7 @@ std::unique_ptr<nlohmann::json::object_t> SingleIdentificationFalse::viewableDat
         (*viewable_ptr)["position_longitude"] = detail.pos_tst_.longitude_;
         (*viewable_ptr)["position_window_latitude"] = eval_man_.resultDetailZoom();
         (*viewable_ptr)["position_window_longitude"] = eval_man_.resultDetailZoom();
-        (*viewable_ptr)["time"] = detail.tod_;
+        (*viewable_ptr)["timestamp"] = Time::toString(detail.timestamp_);
 
         //            if (!detail.pos_ok_)
         //                (*viewable_ptr)["evaluation_results"]["highlight_details"] = vector<unsigned int>{detail_cnt};

@@ -83,9 +83,9 @@ void ASTERIXPostprocessJob::doTodOverride()
     {
         buffer_size = buf_it.second->size();
 
-        assert (obj_man.metaVariable(DBContent::meta_var_tod_.name()).existsIn(buf_it.first));
+        assert (obj_man.metaVariable(DBContent::meta_var_time_of_day_.name()).existsIn(buf_it.first));
 
-        dbContent::Variable& tod_var = obj_man.metaVariable(DBContent::meta_var_tod_.name()).getFor(buf_it.first);
+        dbContent::Variable& tod_var = obj_man.metaVariable(DBContent::meta_var_time_of_day_.name()).getFor(buf_it.first);
 
         Property tod_prop {tod_var.name(), tod_var.dataType()};
 
@@ -133,9 +133,9 @@ void ASTERIXPostprocessJob::doFutureTimestampsCheck()
     {
         buffer_size = buf_it.second->size();
 
-        assert (obj_man.metaVariable(DBContent::meta_var_tod_.name()).existsIn(buf_it.first));
+        assert (obj_man.metaVariable(DBContent::meta_var_time_of_day_.name()).existsIn(buf_it.first));
 
-        dbContent::Variable& tod_var = obj_man.metaVariable(DBContent::meta_var_tod_.name()).getFor(buf_it.first);
+        dbContent::Variable& tod_var = obj_man.metaVariable(DBContent::meta_var_time_of_day_.name()).getFor(buf_it.first);
 
         Property tod_prop {tod_var.name(), tod_var.dataType()};
 
@@ -186,8 +186,8 @@ void ASTERIXPostprocessJob::doTimeStampCalculation()
         buffer_size = buf_it.second->size();
 
         // tod
-        assert (obj_man.metaVariable(DBContent::meta_var_tod_.name()).existsIn(buf_it.first));
-        dbContent::Variable& tod_var = obj_man.metaVariable(DBContent::meta_var_tod_.name()).getFor(buf_it.first);
+        assert (obj_man.metaVariable(DBContent::meta_var_time_of_day_.name()).existsIn(buf_it.first));
+        dbContent::Variable& tod_var = obj_man.metaVariable(DBContent::meta_var_time_of_day_.name()).getFor(buf_it.first);
 
         Property tod_prop {tod_var.name(), tod_var.dataType()};
         assert (buf_it.second->hasProperty(tod_prop));

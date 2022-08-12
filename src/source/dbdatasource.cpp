@@ -1,8 +1,10 @@
 #include "source/dbdatasource.h"
 #include "source/dbdatasourcewidget.h"
+#include "util/timeconv.h"
 #include "logger.h"
 
 using namespace nlohmann;
+using namespace Utils;
 
 namespace dbContent
 {
@@ -247,26 +249,26 @@ DBDataSourceWidget* DBDataSource::widget()
     return widget_.get();
 }
 
-bool DBDataSource::hasMaxToD(unsigned int line) const
+bool DBDataSource::hasMaxTimestamp(unsigned int line) const
 {
     return max_line_tods_.count(line);
 }
 
-void DBDataSource::maxToD(unsigned int line, float value)
+void DBDataSource::maxTimestamp(unsigned int line, boost::posix_time::ptime value)
 {
-    max_line_tods_[line] = value;
+    max_line_tods_[line] = Time::toLong(value);
 }
 
-float DBDataSource::maxToD(unsigned int line) const
+boost::posix_time::ptime DBDataSource::maxTimestamp(unsigned int line) const
 {
-    assert (hasMaxToD(line));
-    return max_line_tods_.at(line);
+    assert (hasMaxTimestamp(line));
+    return Time::fromLong(max_line_tods_.at(line));
 }
 
-bool DBDataSource::hasLiveData(unsigned int line, float current_tod) const
+bool DBDataSource::hasLiveData(unsigned int line, boost::posix_time::ptime current_ts) const
 {
-    if (hasMaxToD(line) && hasUpdateInterval())
-        return current_tod - maxToD(line) < updateInterval() + 2; // 2s max latency
+    if (hasMaxTimestamp(line) && hasUpdateInterval())
+        return (current_ts - maxTimestamp(line)).total_milliseconds()/1000.0 < updateInterval() + 2; // 2s max latency
     else
         return false;
 }

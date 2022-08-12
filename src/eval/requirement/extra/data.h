@@ -23,6 +23,8 @@
 
 #include <QVariant>
 
+#include "boost/date_time/posix_time/ptime.hpp"
+
 namespace EvaluationRequirement
 {
 
@@ -30,14 +32,14 @@ class ExtraDataDetail
 {
 public:
     ExtraDataDetail(
-            float tod, EvaluationTargetPosition pos_current, bool inside, bool extra, bool ref_exists,
+            boost::posix_time::ptime timestamp, EvaluationTargetPosition pos_current, bool inside, bool extra, bool ref_exists,
             const std::string& comment)
-        : tod_(tod), pos_current_(pos_current), inside_(inside), extra_(extra), ref_exists_(ref_exists),
+        : timestamp_(timestamp), pos_current_(pos_current), inside_(inside), extra_(extra), ref_exists_(ref_exists),
           comment_(comment)
     {
     }
 
-    float tod_ {0};
+    boost::posix_time::ptime timestamp_;
     EvaluationTargetPosition pos_current_;
     bool inside_ {false};
     bool extra_ {false};
@@ -66,7 +68,7 @@ public:
             const SectorLayer& sector_layer) override;
 
 protected:
-    float min_duration_{0};
+    boost::posix_time::time_duration min_duration_;
     unsigned int min_num_updates_ {0};
     bool ignore_primary_only_ {true};
 };

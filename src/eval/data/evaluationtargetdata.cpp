@@ -36,6 +36,7 @@
 
 using namespace std;
 using namespace Utils;
+using namespace boost::posix_time;
 
 //bool EvaluationTargetData::in_appimage_ {getenv("APPDIR")};
 
@@ -60,14 +61,14 @@ EvaluationTargetData::~EvaluationTargetData()
 
 }
 
-void EvaluationTargetData::addRefIndex (float tod, unsigned int index)
+void EvaluationTargetData::addRefIndex (boost::posix_time::ptime timestamp, unsigned int index)
 {
-    ref_data_.insert({tod, index});
+    ref_data_.insert({timestamp, index});
 }
 
-void EvaluationTargetData::addTstIndex (float tod, unsigned int index)
+void EvaluationTargetData::addTstIndex (boost::posix_time::ptime timestamp, unsigned int index)
 {
-    tst_data_.insert({tod, index});
+    tst_data_.insert({timestamp, index});
 }
 
 bool EvaluationTargetData::hasData() const
@@ -181,7 +182,7 @@ unsigned int EvaluationTargetData::numTstUpdates () const
     return tst_data_.size();
 }
 
-float EvaluationTargetData::timeBegin() const
+ptime EvaluationTargetData::timeBegin() const
 {
     if (ref_data_.size() && tst_data_.size())
         return min(ref_data_.begin()->first, tst_data_.begin()->first);
@@ -196,12 +197,12 @@ float EvaluationTargetData::timeBegin() const
 std::string EvaluationTargetData::timeBeginStr() const
 {
     if (hasData())
-        return String::timeStringFromDouble(timeBegin()).c_str();
+        return Time::toString(timeBegin());
     else
         return "";
 }
 
-float EvaluationTargetData::timeEnd() const
+ptime EvaluationTargetData::timeEnd() const
 {
     if (ref_data_.size() && tst_data_.size())
         return max(ref_data_.rbegin()->first, tst_data_.rbegin()->first);
@@ -216,17 +217,17 @@ float EvaluationTargetData::timeEnd() const
 std::string EvaluationTargetData::timeEndStr() const
 {
     if (hasData())
-        return String::timeStringFromDouble(timeEnd()).c_str();
+        return Time::toString(timeEnd());
     else
         return "";
 }
 
-float EvaluationTargetData::timeDuration() const
+time_duration EvaluationTargetData::timeDuration() const
 {
     if (hasData())
         return timeEnd() - timeBegin();
     else
-        return 0;
+        return {};
 }
 
 std::set<unsigned int> EvaluationTargetData::modeACodes() const
@@ -303,34 +304,34 @@ void EvaluationTargetData::use(bool use)
     use_ = use;
 }
 
-const std::multimap<float, unsigned int>& EvaluationTargetData::refData() const
+const std::multimap<ptime, unsigned int>& EvaluationTargetData::refData() const
 {
     return ref_data_;
 }
 
 
-const std::multimap<float, unsigned int>& EvaluationTargetData::tstData() const
+const std::multimap<ptime, unsigned int>& EvaluationTargetData::tstData() const
 {
     return tst_data_;
 }
 
-bool EvaluationTargetData::hasRefDataForTime (float tod, float d_max) const
+bool EvaluationTargetData::hasRefDataForTime (ptime timestamp, time_duration d_max) const
 {
-    assert (test_data_mappings_.count(tod));
-    TstDataMapping& mapping = test_data_mappings_.at(tod);
+    assert (test_data_mappings_.count(timestamp));
+    TstDataMapping& mapping = test_data_mappings_.at(timestamp);
 
     if (!mapping.has_ref1_ && !mapping.has_ref2_) // no ref data
         return false;
 
     if (mapping.has_ref1_ && mapping.has_ref2_) // interpolated
     {
-        assert (mapping.tod_ref1_ <= tod);
-        assert (mapping.tod_ref2_ >= tod);
+        assert (mapping.timestamp_ref1_ <= timestamp);
+        assert (mapping.timestamp_ref2_ >= timestamp);
 
-        if (tod - mapping.tod_ref1_ > d_max) // lower to far
+        if (timestamp - mapping.timestamp_ref1_ > d_max) // lower to far
             return false;
 
-        if (mapping.tod_ref2_ - tod > d_max) // upper to far
+        if (mapping.timestamp_ref2_ - timestamp > d_max) // upper to far
             return false;
 
         return true;
@@ -339,46 +340,47 @@ bool EvaluationTargetData::hasRefDataForTime (float tod, float d_max) const
     return false;
 }
 
-std::pair<float, float> EvaluationTargetData::refTimesFor (float tod, float d_max)  const
+std::pair<ptime, ptime> EvaluationTargetData::refTimesFor (
+        boost::posix_time::ptime timestamp, time_duration d_max)  const
 {
-    assert (test_data_mappings_.count(tod));
-    TstDataMapping& mapping = test_data_mappings_.at(tod);
+    assert (test_data_mappings_.count(timestamp));
+    TstDataMapping& mapping = test_data_mappings_.at(timestamp);
 
     if (!mapping.has_ref1_ && !mapping.has_ref2_) // no ref data
-        return {-1, -1};
+        return {{}, {}};
 
     if (mapping.has_ref1_ && mapping.has_ref2_) // interpolated
     {
-        assert (mapping.tod_ref1_ <= tod);
-        assert (mapping.tod_ref2_ >= tod);
+        assert (mapping.timestamp_ref1_ <= timestamp);
+        assert (mapping.timestamp_ref2_ >= timestamp);
 
-        if (tod - mapping.tod_ref1_ > d_max) // lower to far
-            return {-1, -1};
+        if (timestamp - mapping.timestamp_ref1_ > d_max) // lower to far
+            return {{}, {}};
 
-        if (mapping.tod_ref2_ - tod > d_max) // upper to far
-            return {-1, -1};
+        if (mapping.timestamp_ref2_ - timestamp > d_max) // upper to far
+            return {{}, {}};
 
-        return {mapping.tod_ref1_, mapping.tod_ref2_};
+        return {mapping.timestamp_ref1_, mapping.timestamp_ref2_};
     }
 
-    return {-1, -1};
+    return {{}, {}};
 }
 
 std::pair<EvaluationTargetPosition, bool>  EvaluationTargetData::interpolatedRefPosForTime (
-        float tod, float d_max) const
+        ptime timestamp, time_duration d_max) const
 {
-    assert (test_data_mappings_.count(tod));
-    TstDataMapping& mapping = test_data_mappings_.at(tod);
+    assert (test_data_mappings_.count(timestamp));
+    TstDataMapping& mapping = test_data_mappings_.at(timestamp);
 
     if (!mapping.has_ref1_ && !mapping.has_ref2_) // no ref data
         return {{}, false};
 
     if (mapping.has_ref1_ && mapping.has_ref2_) // interpolated
     {
-        assert (mapping.tod_ref1_ <= tod);
-        assert (mapping.tod_ref2_ >= tod);
+        assert (mapping.timestamp_ref1_ <= timestamp);
+        assert (mapping.timestamp_ref2_ >= timestamp);
 
-        if (tod - mapping.tod_ref1_ > d_max) // lower to far
+        if (timestamp - mapping.timestamp_ref1_ > d_max) // lower to far
         {
             //            if (utn_ == debug_utn)
             //                loginf << "EvaluationTargetData: interpolatedRefPosForTime: lower too far";
@@ -386,7 +388,7 @@ std::pair<EvaluationTargetPosition, bool>  EvaluationTargetData::interpolatedRef
             return {{}, false};
         }
 
-        if (mapping.tod_ref2_ - tod > d_max) // upper to far
+        if (mapping.timestamp_ref2_ - timestamp > d_max) // upper to far
         {
             //            if (utn_ == debug_utn)
             //                loginf << "EvaluationTargetData: interpolatedRefPosForTime: upper too far";
@@ -415,20 +417,20 @@ std::pair<EvaluationTargetPosition, bool>  EvaluationTargetData::interpolatedRef
 }
 
 std::pair<EvaluationTargetVelocity, bool>  EvaluationTargetData::interpolatedRefPosBasedSpdForTime (
-        float tod, float d_max) const
+        ptime timestamp, time_duration d_max) const
 {
-    assert (test_data_mappings_.count(tod));
-    TstDataMapping& mapping = test_data_mappings_.at(tod);
+    assert (test_data_mappings_.count(timestamp));
+    TstDataMapping& mapping = test_data_mappings_.at(timestamp);
 
     if (!mapping.has_ref1_ && !mapping.has_ref2_) // no ref data
         return {{}, false};
 
     if (mapping.has_ref1_ && mapping.has_ref2_) // interpolated
     {
-        assert (mapping.tod_ref1_ <= tod);
-        assert (mapping.tod_ref2_ >= tod);
+        assert (mapping.timestamp_ref1_ <= timestamp);
+        assert (mapping.timestamp_ref2_ >= timestamp);
 
-        if (tod - mapping.tod_ref1_ > d_max) // lower to far
+        if (timestamp - mapping.timestamp_ref1_ > d_max) // lower to far
         {
             //            if (utn_ == debug_utn)
             //                loginf << "EvaluationTargetData: interpolatedRefPosForTime: lower too far";
@@ -436,7 +438,7 @@ std::pair<EvaluationTargetVelocity, bool>  EvaluationTargetData::interpolatedRef
             return {{}, false};
         }
 
-        if (mapping.tod_ref2_ - tod > d_max) // upper to far
+        if (mapping.timestamp_ref2_ - timestamp > d_max) // upper to far
         {
             //            if (utn_ == debug_utn)
             //                loginf << "EvaluationTargetData: interpolatedRefPosForTime: upper too far";
@@ -464,16 +466,16 @@ std::pair<EvaluationTargetVelocity, bool>  EvaluationTargetData::interpolatedRef
     return {{}, false};
 }
 
-bool EvaluationTargetData::hasRefPosForTime (float tod) const
+bool EvaluationTargetData::hasRefPosForTime (ptime timestamp) const
 {
-    return ref_data_.count(tod);
+    return ref_data_.count(timestamp);
 }
 
-EvaluationTargetPosition EvaluationTargetData::refPosForTime (float tod) const
+EvaluationTargetPosition EvaluationTargetData::refPosForTime (ptime timestamp) const
 {
-    assert (hasRefPosForTime(tod));
+    assert (hasRefPosForTime(timestamp));
 
-    auto it_pair = ref_data_.equal_range(tod);
+    auto it_pair = ref_data_.equal_range(timestamp);
 
     assert (it_pair.first != ref_data_.end());
 
@@ -509,7 +511,7 @@ EvaluationTargetPosition EvaluationTargetData::refPosForTime (float tod) const
         bool found;
         float alt_calc;
 
-        tie(found,alt_calc) = estimateRefAltitude(tod, index);
+        tie(found,alt_calc) = estimateRefAltitude(timestamp, index);
 
         if (found)
         {
@@ -527,27 +529,29 @@ EvaluationTargetPosition EvaluationTargetData::refPosForTime (float tod) const
     return pos;
 }
 
-std::pair<bool, float> EvaluationTargetData::estimateRefAltitude (float tod, unsigned int index) const
+std::pair<bool, float> EvaluationTargetData::estimateRefAltitude (ptime timestamp, unsigned int index) const
 {
     NullableVector<float>& altitude_vec = eval_data_->ref_buffer_->get<float>(eval_data_->ref_modec_name_);
-    NullableVector<float>& tods = eval_data_->ref_buffer_->get<float>(eval_data_->ref_tod_name_);
+    NullableVector<ptime>& ts_vec = eval_data_->ref_buffer_->get<ptime>(eval_data_->ref_timestamp_name_);
 
     bool found_prev {false};
     bool found_after {false};
 
     // search for prev index
-    float tod_prev;
+    ptime timestamp_prev;
     auto prev_it = find(ref_indexes_.begin(), ref_indexes_.end(), index);
     assert (prev_it != ref_indexes_.end());
 
     auto after_it = prev_it;
 
-    while (prev_it != ref_indexes_.end() && tod - tods.get(*prev_it) < 120.0)
+    const time_duration max_tdiff = seconds(120);
+
+    while (prev_it != ref_indexes_.end() && timestamp - ts_vec.get(*prev_it) < max_tdiff)
     {
         if (!altitude_vec.isNull(*prev_it))
         {
             found_prev = true;
-            tod_prev = tods.get(*prev_it);
+            timestamp_prev = ts_vec.get(*prev_it);
 
             //            if (utn_ == debug_utn)
             //                loginf << "EvaluationTargetData: refPosForTime: found prev at tod "
@@ -574,9 +578,9 @@ std::pair<bool, float> EvaluationTargetData::estimateRefAltitude (float tod, uns
     //    }
 
     // search after index
-    float tod_after;
+    ptime timestamp_after;
 
-    while (after_it != ref_indexes_.end() && tods.get(*after_it) - tod < 120.0)
+    while (after_it != ref_indexes_.end() && ts_vec.get(*after_it) - timestamp < max_tdiff)
     {
         //        if (utn_ == debug_utn)
         //            loginf << "EvaluationTargetData: refPosForTime: checking after tod "
@@ -585,7 +589,7 @@ std::pair<bool, float> EvaluationTargetData::estimateRefAltitude (float tod, uns
         if (!altitude_vec.isNull(*after_it))
         {
             found_after = true;
-            tod_after = tods.get(*after_it);
+            timestamp_after = ts_vec.get(*after_it);
 
             //            if (utn_ == debug_utn)
             //                loginf << "EvaluationTargetData: refPosForTime: found after at tod "
@@ -610,19 +614,21 @@ std::pair<bool, float> EvaluationTargetData::estimateRefAltitude (float tod, uns
         float alt_prev = altitude_vec.get(*prev_it);
         float alt_after = altitude_vec.get(*after_it);
 
-        if (tod_after <= tod_prev || tod_prev >= tod)
+        if (timestamp_after <= timestamp_prev || timestamp_prev >= timestamp)
         {
-            logerr << "EvaluationTargetData::estimateRefAltitude tod_prev " << tod_prev << " tod "
-                   << tod << " tod_after " << tod_after;
+            logerr << "EvaluationTargetData::estimateRefAltitude ts_prev " << Time::toString(timestamp_prev)
+                   << " ts " << Time::toString(timestamp)
+                   << " ts_after " << Time::toString(timestamp_after);
+
             return {false, 0}; // should never happen
         }
 
         float d_alt_ft = alt_after - alt_prev;
-        float d_t = tod_after - tod_prev;
+        float d_t = Time::partialSeconds(timestamp_after - timestamp_prev);
 
         float alt_spd_ft_s = d_alt_ft/d_t;
 
-        float d_t2 = tod - tod_prev;
+        float d_t2 = Time::partialSeconds(timestamp - timestamp_prev);
 
         float alt_calc = alt_prev + alt_spd_ft_s*d_t2;
 
@@ -633,9 +639,9 @@ std::pair<bool, float> EvaluationTargetData::estimateRefAltitude (float tod, uns
 
         return {true, alt_calc};
     }
-    else if (found_prev && tod - tod_prev < 120.0)
+    else if (found_prev && timestamp - timestamp_prev < max_tdiff)
         return {true, altitude_vec.get(*prev_it)};
-    else if (found_after && tod_after - tod < 120.0)
+    else if (found_after && timestamp_after - timestamp < max_tdiff)
         return {true, altitude_vec.get(*after_it)};
     else
     {
@@ -647,12 +653,12 @@ std::pair<bool, float> EvaluationTargetData::estimateRefAltitude (float tod, uns
     }
 }
 
-bool EvaluationTargetData::hasRefCallsignForTime (float tod) const
+bool EvaluationTargetData::hasRefCallsignForTime (ptime timestamp) const
 {
-    if (!ref_data_.count(tod))
+    if (!ref_data_.count(timestamp))
         return false;
 
-    auto it_pair = ref_data_.equal_range(tod);
+    auto it_pair = ref_data_.equal_range(timestamp);
 
     assert (it_pair.first != ref_data_.end());
 
@@ -663,11 +669,11 @@ bool EvaluationTargetData::hasRefCallsignForTime (float tod) const
     return !callsign_vec.isNull(index);
 }
 
-std::string EvaluationTargetData::refCallsignForTime (float tod) const
+std::string EvaluationTargetData::refCallsignForTime (ptime timestamp) const
 {
-    assert (hasRefCallsignForTime(tod));
+    assert (hasRefCallsignForTime(timestamp));
 
-    auto it_pair = ref_data_.equal_range(tod);
+    auto it_pair = ref_data_.equal_range(timestamp);
 
     assert (it_pair.first != ref_data_.end());
 
@@ -679,12 +685,12 @@ std::string EvaluationTargetData::refCallsignForTime (float tod) const
     return boost::trim_copy(callsign_vec.get(index)); // remove spaces
 }
 
-bool EvaluationTargetData::hasRefModeAForTime (float tod) const
+bool EvaluationTargetData::hasRefModeAForTime (ptime timestamp) const
 {
-    if (!ref_data_.count(tod))
+    if (!ref_data_.count(timestamp))
         return false;
 
-    auto it_pair = ref_data_.equal_range(tod);
+    auto it_pair = ref_data_.equal_range(timestamp);
 
     assert (it_pair.first != ref_data_.end());
 
@@ -706,11 +712,11 @@ bool EvaluationTargetData::hasRefModeAForTime (float tod) const
     return true;
 }
 
-unsigned int EvaluationTargetData::refModeAForTime (float tod) const
+unsigned int EvaluationTargetData::refModeAForTime (ptime timestamp) const
 {
-    assert (hasRefModeAForTime(tod));
+    assert (hasRefModeAForTime(timestamp));
 
-    auto it_pair = ref_data_.equal_range(tod);
+    auto it_pair = ref_data_.equal_range(timestamp);
 
     assert (it_pair.first != ref_data_.end());
 
@@ -722,12 +728,12 @@ unsigned int EvaluationTargetData::refModeAForTime (float tod) const
     return modea_vec.get(index);
 }
 
-bool EvaluationTargetData::hasRefModeCForTime (float tod) const
+bool EvaluationTargetData::hasRefModeCForTime (ptime timestamp) const
 {
-    if (!ref_data_.count(tod))
+    if (!ref_data_.count(timestamp))
         return false;
 
-    auto it_pair = ref_data_.equal_range(tod);
+    auto it_pair = ref_data_.equal_range(timestamp);
 
     assert (it_pair.first != ref_data_.end());
 
@@ -749,11 +755,11 @@ bool EvaluationTargetData::hasRefModeCForTime (float tod) const
     return true;
 }
 
-float EvaluationTargetData::refModeCForTime (float tod) const
+float EvaluationTargetData::refModeCForTime (ptime timestamp) const
 {
-    assert (hasRefModeCForTime(tod));
+    assert (hasRefModeCForTime(timestamp));
 
-    auto it_pair = ref_data_.equal_range(tod);
+    auto it_pair = ref_data_.equal_range(timestamp);
 
     assert (it_pair.first != ref_data_.end());
 
@@ -765,12 +771,12 @@ float EvaluationTargetData::refModeCForTime (float tod) const
     return modec_vec.get(index);
 }
 
-bool EvaluationTargetData::hasRefTAForTime (float tod) const
+bool EvaluationTargetData::hasRefTAForTime (ptime timestamp) const
 {
-    if (!ref_data_.count(tod))
+    if (!ref_data_.count(timestamp))
         return false;
 
-    auto it_pair = ref_data_.equal_range(tod);
+    auto it_pair = ref_data_.equal_range(timestamp);
 
     assert (it_pair.first != ref_data_.end());
 
@@ -783,11 +789,11 @@ bool EvaluationTargetData::hasRefTAForTime (float tod) const
     return false;
 }
 
-unsigned int EvaluationTargetData::refTAForTime (float tod) const
+unsigned int EvaluationTargetData::refTAForTime (ptime timestamp) const
 {
-    assert (hasRefTAForTime(tod));
+    assert (hasRefTAForTime(timestamp));
 
-    auto it_pair = ref_data_.equal_range(tod);
+    auto it_pair = ref_data_.equal_range(timestamp);
 
     assert (it_pair.first != ref_data_.end());
 
@@ -798,12 +804,12 @@ unsigned int EvaluationTargetData::refTAForTime (float tod) const
     return eval_data_->ref_buffer_->get<unsigned int>(eval_data_->ref_target_address_name_).get(index);
 }
 
-std::pair<bool,bool> EvaluationTargetData::refGroundBitForTime (float tod) const // has gbs, gbs true
+std::pair<bool,bool> EvaluationTargetData::refGroundBitForTime (ptime timestamp) const // has gbs, gbs true
 {
-    if (!ref_data_.count(tod))
+    if (!ref_data_.count(timestamp))
         return {false, false};
 
-    auto it_pair = ref_data_.equal_range(tod);
+    auto it_pair = ref_data_.equal_range(timestamp);
 
     assert (it_pair.first != ref_data_.end());
 
@@ -818,49 +824,49 @@ std::pair<bool,bool> EvaluationTargetData::refGroundBitForTime (float tod) const
         return {false, false};
 }
 
-std::pair<bool,bool> EvaluationTargetData::interpolatedRefGroundBitForTime (float tod, float d_max) const
+std::pair<bool,bool> EvaluationTargetData::interpolatedRefGroundBitForTime (ptime timestamp, time_duration d_max) const
 // has gbs, gbs true
 {
-    assert (test_data_mappings_.count(tod));
+    assert (test_data_mappings_.count(timestamp));
 
     bool has_gbs = false;
     bool gbs = false;
 
-    TstDataMapping& mapping = test_data_mappings_.at(tod);
+    TstDataMapping& mapping = test_data_mappings_.at(timestamp);
 
     if (!mapping.has_ref1_ && !mapping.has_ref2_) // no ref data
         return {has_gbs, gbs};
 
     if (mapping.has_ref1_ && mapping.has_ref2_) // interpolated
     {
-        assert (mapping.tod_ref1_ <= tod);
-        assert (mapping.tod_ref2_ >= tod);
+        assert (mapping.timestamp_ref1_ <= timestamp);
+        assert (mapping.timestamp_ref2_ >= timestamp);
 
-        if (tod - mapping.tod_ref1_ > d_max) // lower to far
+        if (timestamp - mapping.timestamp_ref1_ > d_max) // lower to far
             return {has_gbs, gbs};
 
-        if (mapping.tod_ref2_ - tod > d_max) // upper to far
+        if (mapping.timestamp_ref2_ - timestamp > d_max) // upper to far
             return {has_gbs, gbs};
 
-        tie (has_gbs, gbs) = refGroundBitForTime(mapping.tod_ref1_);
+        tie (has_gbs, gbs) = refGroundBitForTime(mapping.timestamp_ref1_);
 
         if (!gbs)
-            tie (has_gbs, gbs) = refGroundBitForTime(mapping.tod_ref2_);
+            tie (has_gbs, gbs) = refGroundBitForTime(mapping.timestamp_ref2_);
     }
 
     return {has_gbs, gbs};
 }
 
-bool EvaluationTargetData::hasTstPosForTime (float tod) const
+bool EvaluationTargetData::hasTstPosForTime (ptime timestamp) const
 {
-    return tst_data_.count(tod);
+    return tst_data_.count(timestamp);
 }
 
-EvaluationTargetPosition EvaluationTargetData::tstPosForTime (float tod) const
+EvaluationTargetPosition EvaluationTargetData::tstPosForTime (ptime timestamp) const
 {
-    assert (hasTstPosForTime(tod));
+    assert (hasTstPosForTime(timestamp));
 
-    auto it_pair = tst_data_.equal_range(tod);
+    auto it_pair = tst_data_.equal_range(timestamp);
 
     assert (it_pair.first != tst_data_.end());
 
@@ -889,7 +895,7 @@ EvaluationTargetPosition EvaluationTargetData::tstPosForTime (float tod) const
         bool found;
         float alt_calc;
 
-        tie(found,alt_calc) = estimateTstAltitude(tod, index);
+        tie(found,alt_calc) = estimateTstAltitude(timestamp, index);
 
         if (found)
         {
@@ -902,27 +908,29 @@ EvaluationTargetPosition EvaluationTargetData::tstPosForTime (float tod) const
     return pos;
 }
 
-std::pair<bool, float> EvaluationTargetData::estimateTstAltitude (float tod, unsigned int index) const
+std::pair<bool, float> EvaluationTargetData::estimateTstAltitude (ptime timestamp, unsigned int index) const
 {
     NullableVector<float>& altitude_vec = eval_data_->tst_buffer_->get<float>(eval_data_->tst_modec_name_);
-    NullableVector<float>& tods = eval_data_->tst_buffer_->get<float>(eval_data_->tst_tod_name_);
+    NullableVector<ptime>& ts_vec = eval_data_->tst_buffer_->get<ptime>(eval_data_->tst_timestamp_name_);
 
     bool found_prev {false};
     bool found_after {false};
 
     // search for prev index
-    float tod_prev;
+    ptime timestamp_prev;
     auto prev_it = find(tst_indexes_.begin(), tst_indexes_.end(), index);
     assert (prev_it != tst_indexes_.end());
 
     auto after_it = prev_it;
 
-    while (prev_it != tst_indexes_.end() && tod - tods.get(*prev_it) < 120.0)
+    const time_duration max_tdiff = seconds(120);
+
+    while (prev_it != tst_indexes_.end() && timestamp - ts_vec.get(*prev_it) < max_tdiff)
     {
         if (!altitude_vec.isNull(*prev_it))
         {
             found_prev = true;
-            tod_prev = tods.get(*prev_it);
+            timestamp_prev = ts_vec.get(*prev_it);
 
             break;
         }
@@ -934,14 +942,14 @@ std::pair<bool, float> EvaluationTargetData::estimateTstAltitude (float tod, uns
     }
 
     // search after index
-    float tod_after;
+    ptime timestamp_after;
 
-    while (after_it != tst_indexes_.end() && tods.get(*after_it) - tod < 120.0)
+    while (after_it != tst_indexes_.end() && ts_vec.get(*after_it) - timestamp < max_tdiff)
     {
         if (!altitude_vec.isNull(*after_it))
         {
             found_after = true;
-            tod_after = tods.get(*after_it);
+            timestamp_after = ts_vec.get(*after_it);
 
             break;
         }
@@ -953,27 +961,28 @@ std::pair<bool, float> EvaluationTargetData::estimateTstAltitude (float tod, uns
         float alt_prev = altitude_vec.get(*prev_it);
         float alt_after = altitude_vec.get(*after_it);
 
-        if (tod_after <= tod_prev || tod_prev >= tod)
+        if (timestamp_after <= timestamp_prev || timestamp_prev >= timestamp)
         {
-            logerr << "EvaluationTargetData::estimateRefAltitude tod_prev " << tod_prev << " tod "
-                   << tod << " tod_after " << tod_after;
+            logerr << "EvaluationTargetData: estimateTstAltitude ts_prev " << Time::toString(timestamp_prev)
+                   << " ts " << Time::toString(timestamp)
+                   << " ts_after " << Time::toString(timestamp_after);
             return {false, 0}; // should never happen
         }
 
         float d_alt_ft = alt_after - alt_prev;
-        float d_t = tod_after - tod_prev;
+        float d_t = Time::partialSeconds(timestamp_after - timestamp_prev);
 
         float alt_spd_ft_s = d_alt_ft/d_t;
 
-        float d_t2 = tod - tod_prev;
+        float d_t2 = Time::partialSeconds(timestamp - timestamp_prev);
 
         float alt_calc = alt_prev + alt_spd_ft_s*d_t2;
 
         return {true, alt_calc};
     }
-    else if (found_prev && tod - tod_prev < 120.0)
+    else if (found_prev && timestamp - timestamp_prev < max_tdiff)
         return {true, altitude_vec.get(*prev_it)};
-    else if (found_after && tod_after - tod < 120.0)
+    else if (found_after && timestamp_after - timestamp < max_tdiff)
         return {true, altitude_vec.get(*after_it)};
     else
     {
@@ -981,12 +990,12 @@ std::pair<bool, float> EvaluationTargetData::estimateTstAltitude (float tod, uns
     }
 }
 
-bool EvaluationTargetData::hasTstCallsignForTime (float tod) const
+bool EvaluationTargetData::hasTstCallsignForTime (ptime timestamp) const
 {
-    if (!tst_data_.count(tod))
+    if (!tst_data_.count(timestamp))
         return false;
 
-    auto it_pair = tst_data_.equal_range(tod);
+    auto it_pair = tst_data_.equal_range(timestamp);
 
     assert (it_pair.first != tst_data_.end());
 
@@ -996,11 +1005,11 @@ bool EvaluationTargetData::hasTstCallsignForTime (float tod) const
     return !callsign_vec.isNull(index);
 }
 
-std::string EvaluationTargetData::tstCallsignForTime (float tod) const
+std::string EvaluationTargetData::tstCallsignForTime (ptime timestamp) const
 {
-    assert (hasTstCallsignForTime(tod));
+    assert (hasTstCallsignForTime(timestamp));
 
-    auto it_pair = tst_data_.equal_range(tod);
+    auto it_pair = tst_data_.equal_range(timestamp);
 
     assert (it_pair.first != tst_data_.end());
 
@@ -1012,12 +1021,12 @@ std::string EvaluationTargetData::tstCallsignForTime (float tod) const
     return boost::trim_copy(callsign_vec.get(index)); // remove spaces
 }
 
-bool EvaluationTargetData::hasTstModeAForTime (float tod) const
+bool EvaluationTargetData::hasTstModeAForTime (ptime timestamp) const
 {
-    if (!tst_data_.count(tod))
+    if (!tst_data_.count(timestamp))
         return false;
 
-    auto it_pair = tst_data_.equal_range(tod);
+    auto it_pair = tst_data_.equal_range(timestamp);
 
     assert (it_pair.first != tst_data_.end());
 
@@ -1039,11 +1048,11 @@ bool EvaluationTargetData::hasTstModeAForTime (float tod) const
     return true;
 }
 
-unsigned int EvaluationTargetData::tstModeAForTime (float tod) const
+unsigned int EvaluationTargetData::tstModeAForTime (ptime timestamp) const
 {
-    assert (hasTstModeAForTime(tod));
+    assert (hasTstModeAForTime(timestamp));
 
-    auto it_pair = tst_data_.equal_range(tod);
+    auto it_pair = tst_data_.equal_range(timestamp);
 
     assert (it_pair.first != tst_data_.end());
 
@@ -1055,12 +1064,12 @@ unsigned int EvaluationTargetData::tstModeAForTime (float tod) const
     return modea_vec.get(index);
 }
 
-bool EvaluationTargetData::hasTstModeCForTime (float tod) const
+bool EvaluationTargetData::hasTstModeCForTime (ptime timestamp) const
 {
-    if (!tst_data_.count(tod))
+    if (!tst_data_.count(timestamp))
         return false;
 
-    auto it_pair = tst_data_.equal_range(tod);
+    auto it_pair = tst_data_.equal_range(timestamp);
 
     assert (it_pair.first != tst_data_.end());
 
@@ -1082,12 +1091,12 @@ bool EvaluationTargetData::hasTstModeCForTime (float tod) const
     return true;
 }
 
-bool EvaluationTargetData::hasTstGroundBitForTime (float tod) const // only if set
+bool EvaluationTargetData::hasTstGroundBitForTime (ptime timestamp) const // only if set
 {
-    if (!tst_data_.count(tod))
+    if (!tst_data_.count(timestamp))
         return false;
 
-    auto it_pair = tst_data_.equal_range(tod);
+    auto it_pair = tst_data_.equal_range(timestamp);
 
     assert (it_pair.first != tst_data_.end());
 
@@ -1100,11 +1109,11 @@ bool EvaluationTargetData::hasTstGroundBitForTime (float tod) const // only if s
     return false;
 }
 
-bool EvaluationTargetData::tstGroundBitForTime (float tod) const // true is on ground
+bool EvaluationTargetData::tstGroundBitForTime (ptime timestamp) const // true is on ground
 {
-    assert (hasTstGroundBitForTime(tod));
+    assert (hasTstGroundBitForTime(timestamp));
 
-    auto it_pair = tst_data_.equal_range(tod);
+    auto it_pair = tst_data_.equal_range(timestamp);
 
     assert (it_pair.first != tst_data_.end());
 
@@ -1118,12 +1127,12 @@ bool EvaluationTargetData::tstGroundBitForTime (float tod) const // true is on g
     return false;
 }
 
-bool EvaluationTargetData::hasTstTAForTime (float tod) const
+bool EvaluationTargetData::hasTstTAForTime (ptime timestamp) const
 {
-    if (!tst_data_.count(tod))
+    if (!tst_data_.count(timestamp))
         return false;
 
-    auto it_pair = tst_data_.equal_range(tod);
+    auto it_pair = tst_data_.equal_range(timestamp);
 
     assert (it_pair.first != tst_data_.end());
 
@@ -1136,11 +1145,11 @@ bool EvaluationTargetData::hasTstTAForTime (float tod) const
     return false;
 }
 
-unsigned int EvaluationTargetData::tstTAForTime (float tod) const
+unsigned int EvaluationTargetData::tstTAForTime (ptime timestamp) const
 {
-    assert (hasTstTAForTime(tod));
+    assert (hasTstTAForTime(timestamp));
 
-    auto it_pair = tst_data_.equal_range(tod);
+    auto it_pair = tst_data_.equal_range(timestamp);
 
     assert (it_pair.first != tst_data_.end());
 
@@ -1152,29 +1161,31 @@ unsigned int EvaluationTargetData::tstTAForTime (float tod) const
 }
 
 // has gbs, gbs true
-pair<bool,bool> EvaluationTargetData::tstGroundBitForTimeInterpolated (float tod) const // true is on ground
+pair<bool,bool> EvaluationTargetData::tstGroundBitForTimeInterpolated (ptime timestamp) const // true is on ground
 {
     if (!eval_data_->tst_ground_bit_name_.size())
         return pair<bool,bool>(false, false);
 
-    DataMappingTimes times = findTstTimes(tod);
+    DataMappingTimes times = findTstTimes(timestamp);
 
-    if (times.has_other1_ && fabs(tod - times.tod_other1_) < 15.0 && hasTstGroundBitForTime(times.tod_other1_)
-            && tstGroundBitForTime(times.tod_other1_))
+    if (times.has_other1_ && (timestamp - times.timestamp_other1_).abs() < seconds(15)
+            && hasTstGroundBitForTime(times.timestamp_other1_)
+            && tstGroundBitForTime(times.timestamp_other1_))
         return pair<bool,bool> (true, true);
 
-    if (times.has_other2_ && fabs(tod - times.tod_other2_) < 15.0 && hasTstGroundBitForTime(times.tod_other2_))
-        return pair<bool,bool> (true, tstGroundBitForTime(times.tod_other2_));
+    if (times.has_other2_ && (timestamp - times.timestamp_other2_).abs() < seconds(15)
+            && hasTstGroundBitForTime(times.timestamp_other2_))
+        return pair<bool,bool> (true, tstGroundBitForTime(times.timestamp_other2_));
 
     return pair<bool,bool>(false, false);
 }
 
-bool EvaluationTargetData::hasTstTrackNumForTime (float tod) const
+bool EvaluationTargetData::hasTstTrackNumForTime (ptime timestamp) const
 {
     if (!eval_data_->tst_track_num_name_.size())
         return false;
 
-    auto it_pair = tst_data_.equal_range(tod);
+    auto it_pair = tst_data_.equal_range(timestamp);
 
     assert (it_pair.first != tst_data_.end());
 
@@ -1183,11 +1194,11 @@ bool EvaluationTargetData::hasTstTrackNumForTime (float tod) const
     return !eval_data_->tst_buffer_->get<unsigned int>(eval_data_->tst_track_num_name_).isNull(index);
 }
 
-unsigned int EvaluationTargetData::tstTrackNumForTime (float tod) const
+unsigned int EvaluationTargetData::tstTrackNumForTime (ptime timestamp) const
 {
-    assert (hasTstTrackNumForTime(tod));
+    assert (hasTstTrackNumForTime(timestamp));
 
-    auto it_pair = tst_data_.equal_range(tod);
+    auto it_pair = tst_data_.equal_range(timestamp);
 
     assert (it_pair.first != tst_data_.end());
 
@@ -1196,13 +1207,13 @@ unsigned int EvaluationTargetData::tstTrackNumForTime (float tod) const
     return eval_data_->tst_buffer_->get<unsigned int>(eval_data_->tst_track_num_name_).get(index);
 }
 
-bool EvaluationTargetData::hasTstMeasuredSpeedForTime (float tod) const
+bool EvaluationTargetData::hasTstMeasuredSpeedForTime (ptime timestamp) const
 {
     if (!eval_data_->tst_spd_ground_speed_kts_name_.size()
             && (!eval_data_->tst_spd_x_ms_name_.size() || !eval_data_->tst_spd_y_ms_name_.size()))
         return false;
 
-    auto it_pair = tst_data_.equal_range(tod);
+    auto it_pair = tst_data_.equal_range(timestamp);
 
     assert (it_pair.first != tst_data_.end());
 
@@ -1215,11 +1226,11 @@ bool EvaluationTargetData::hasTstMeasuredSpeedForTime (float tod) const
                 && !eval_data_->tst_buffer_->get<double>(eval_data_->tst_spd_y_ms_name_).isNull(index);
 }
 
-float EvaluationTargetData::tstMeasuredSpeedForTime (float tod) const // m/s
+float EvaluationTargetData::tstMeasuredSpeedForTime (ptime timestamp) const // m/s
 {
-    assert (hasTstMeasuredSpeedForTime(tod));
+    assert (hasTstMeasuredSpeedForTime(timestamp));
 
-    auto it_pair = tst_data_.equal_range(tod);
+    auto it_pair = tst_data_.equal_range(timestamp);
 
     assert (it_pair.first != tst_data_.end());
 
@@ -1238,13 +1249,13 @@ float EvaluationTargetData::tstMeasuredSpeedForTime (float tod) const // m/s
     }
 }
 
-bool EvaluationTargetData::hasTstMeasuredTrackAngleForTime (float tod) const
+bool EvaluationTargetData::hasTstMeasuredTrackAngleForTime (ptime timestamp) const
 {
     if (!eval_data_->tst_spd_track_angle_deg_name_.size()
             && (!eval_data_->tst_spd_x_ms_name_.size() || !eval_data_->tst_spd_y_ms_name_.size()))
         return false;
 
-    auto it_pair = tst_data_.equal_range(tod);
+    auto it_pair = tst_data_.equal_range(timestamp);
 
     assert (it_pair.first != tst_data_.end());
 
@@ -1257,11 +1268,11 @@ bool EvaluationTargetData::hasTstMeasuredTrackAngleForTime (float tod) const
                 && !eval_data_->tst_buffer_->get<double>(eval_data_->tst_spd_y_ms_name_).isNull(index);
 }
 
-float EvaluationTargetData::tstMeasuredTrackAngleForTime (float tod) const // deg
+float EvaluationTargetData::tstMeasuredTrackAngleForTime (ptime timestamp) const // deg
 {
-    assert (hasTstMeasuredTrackAngleForTime(tod));
+    assert (hasTstMeasuredTrackAngleForTime(timestamp));
 
-    auto it_pair = tst_data_.equal_range(tod);
+    auto it_pair = tst_data_.equal_range(timestamp);
 
     assert (it_pair.first != tst_data_.end());
 
@@ -1387,11 +1398,11 @@ unsigned int EvaluationTargetData::singleTrackLUDSID() const
 }
 
 
-float EvaluationTargetData::tstModeCForTime (float tod) const
+float EvaluationTargetData::tstModeCForTime (ptime timestamp) const
 {
-    assert (hasTstModeCForTime(tod));
+    assert (hasTstModeCForTime(timestamp));
 
-    auto it_pair = tst_data_.equal_range(tod);
+    auto it_pair = tst_data_.equal_range(timestamp);
 
     assert (it_pair.first != tst_data_.end());
 
@@ -1906,34 +1917,34 @@ void EvaluationTargetData::calculateTestDataMappings() const
            << test_data_mappings_.size() << " ref pos " << cnt;
 }
 
-TstDataMapping EvaluationTargetData::calculateTestDataMapping(float tod) const
+TstDataMapping EvaluationTargetData::calculateTestDataMapping(ptime timestamp) const
 {
     TstDataMapping ret;
 
-    ret.tod_ = tod;
+    ret.timestamp_ = timestamp;
 
     //    Return iterator to lower bound
     //    Returns an iterator pointing to the first element in the container whose key is not considered to go
     //    before k (i.e., either it is equivalent or goes after).
 
-    auto lb_it = ref_data_.lower_bound(tod);
+    auto lb_it = ref_data_.lower_bound(timestamp);
 
     //auto ub_it = ref_data_.upper_bound(tod);
 
     if (lb_it != ref_data_.end()) // upper tod found
     {
-        assert (lb_it->first >= tod);
+        assert (lb_it->first >= timestamp);
 
         // save upper value
         ret.has_ref2_ = true;
-        ret.tod_ref2_ = lb_it->first;
+        ret.timestamp_ref2_ = lb_it->first;
 
         // search lower values by decrementing iterator
-        while (lb_it != ref_data_.end() && (tod < lb_it->first || lb_it->first == ret.tod_ref2_))
+        while (lb_it != ref_data_.end() && (timestamp < lb_it->first || lb_it->first == ret.timestamp_ref2_))
         {
             if (lb_it == ref_data_.begin()) // exit condition on first value
             {
-                if (tod < lb_it->first) // set as not found
+                if (timestamp < lb_it->first) // set as not found
                     lb_it = ref_data_.end();
 
                 break;
@@ -1942,18 +1953,18 @@ TstDataMapping EvaluationTargetData::calculateTestDataMapping(float tod) const
             lb_it--;
         }
 
-        if (lb_it != ref_data_.end() && lb_it->first != ret.tod_ref2_) // lower tod found
+        if (lb_it != ref_data_.end() && lb_it->first != ret.timestamp_ref2_) // lower tod found
         {
-            assert (tod >= lb_it->first);
+            assert (timestamp >= lb_it->first);
 
             // add lower value
             ret.has_ref1_ = true;
-            ret.tod_ref1_ = lb_it->first;
+            ret.timestamp_ref1_ = lb_it->first;
         }
         else // not found, clear previous
         {
             ret.has_ref2_ = false;
-            ret.tod_ref2_ = 0.0;
+            ret.timestamp_ref2_ = {};
         }
     }
 
@@ -1964,15 +1975,15 @@ TstDataMapping EvaluationTargetData::calculateTestDataMapping(float tod) const
 
 void EvaluationTargetData::addRefPositiosToMapping (TstDataMapping& mapping) const
 {
-    if (mapping.has_ref1_ && hasRefPosForTime(mapping.tod_ref1_)
-            && mapping.has_ref2_ && hasRefPosForTime(mapping.tod_ref2_)) // two positions which can be interpolated
+    if (mapping.has_ref1_ && hasRefPosForTime(mapping.timestamp_ref1_)
+            && mapping.has_ref2_ && hasRefPosForTime(mapping.timestamp_ref2_)) // two positions which can be interpolated
     {
-        float lower = mapping.tod_ref1_;
-        float upper = mapping.tod_ref2_;
+        ptime lower = mapping.timestamp_ref1_;
+        ptime upper = mapping.timestamp_ref2_;
 
         EvaluationTargetPosition pos1 = refPosForTime(lower);
         EvaluationTargetPosition pos2 = refPosForTime(upper);
-        float d_t = upper - lower;
+        float d_t = Time::partialSeconds(upper - lower);
 
         logdbg << "EvaluationTargetData: addRefPositiosToMapping: d_t " << d_t;
 
@@ -2045,7 +2056,7 @@ void EvaluationTargetData::addRefPositiosToMapping (TstDataMapping& mapping) con
                     double v_y = y_pos/d_t;
                     logdbg << "EvaluationTargetData: addRefPositiosToMapping: v_x " << v_x << " v_y " << v_y;
 
-                    float d_t2 = mapping.tod_ - lower;
+                    float d_t2 = Time::partialSeconds(mapping.timestamp_ - lower);
                     logdbg << "EvaluationTargetData: addRefPositiosToMapping: d_t2 " << d_t2;
 
                     assert (d_t2 >= 0);
@@ -2113,15 +2124,15 @@ void EvaluationTargetData::addRefPositiosToMapping (TstDataMapping& mapping) con
 
 void EvaluationTargetData::addRefPositiosToMappingFast (TstDataMapping& mapping) const
 {
-    if (mapping.has_ref1_ && hasRefPosForTime(mapping.tod_ref1_)
-            && mapping.has_ref2_ && hasRefPosForTime(mapping.tod_ref2_)) // two positions which can be interpolated
+    if (mapping.has_ref1_ && hasRefPosForTime(mapping.timestamp_ref1_)
+            && mapping.has_ref2_ && hasRefPosForTime(mapping.timestamp_ref2_)) // two positions which can be interpolated
     {
-        float lower = mapping.tod_ref1_;
-        float upper = mapping.tod_ref2_;
+        ptime lower = mapping.timestamp_ref1_;
+        ptime upper = mapping.timestamp_ref2_;
 
         EvaluationTargetPosition pos1 = refPosForTime(lower);
         EvaluationTargetPosition pos2 = refPosForTime(upper);
-        float d_t = upper - lower;
+        float d_t = Time::partialSeconds(upper - lower);
 
         logdbg << "EvaluationTargetData: addRefPositiosToMappingFast: d_t " << d_t;
 
@@ -2146,7 +2157,7 @@ void EvaluationTargetData::addRefPositiosToMappingFast (TstDataMapping& mapping)
 
                 logdbg << "EvaluationTargetData: interpolatedPosForTimeFast: v_x " << v_lat << " v_y " << v_long;
 
-                float d_t2 = mapping.tod_  - lower;
+                float d_t2 = Time::partialSeconds(mapping.timestamp_  - lower);
                 logdbg << "EvaluationTargetData: interpolatedPosForTimeFast: d_t2 " << d_t2;
 
                 assert (d_t2 >= 0);
@@ -2192,32 +2203,32 @@ void EvaluationTargetData::addRefPositiosToMappingFast (TstDataMapping& mapping)
     // else do nothing
 }
 
-DataMappingTimes EvaluationTargetData::findTstTimes(float tod_ref) const // ref tod
+DataMappingTimes EvaluationTargetData::findTstTimes(ptime timestamp_ref) const // ref tod
 {
     DataMappingTimes ret;
 
-    ret.tod_ = tod_ref;
+    ret.timestamp_ = timestamp_ref;
 
     //    Return iterator to lower bound
     //    Returns an iterator pointing to the first element in the container whose key is not considered to go
     //    before k (i.e., either it is equivalent or goes after).
 
-    auto lb_it = tst_data_.lower_bound(tod_ref);
+    auto lb_it = tst_data_.lower_bound(timestamp_ref);
 
     if (lb_it != tst_data_.end()) // upper tod found
     {
-        assert (lb_it->first >= tod_ref);
+        assert (lb_it->first >= timestamp_ref);
 
         // save upper value
         ret.has_other2_ = true;
-        ret.tod_other2_ = lb_it->first;
+        ret.timestamp_other2_ = lb_it->first;
 
         // search lower values by decrementing iterator
-        while (lb_it != tst_data_.end() && (tod_ref < lb_it->first || lb_it->first == ret.tod_other2_))
+        while (lb_it != tst_data_.end() && (timestamp_ref < lb_it->first || lb_it->first == ret.timestamp_other2_))
         {
             if (lb_it == tst_data_.begin()) // exit condition on first value
             {
-                if (tod_ref < lb_it->first) // set as not found
+                if (timestamp_ref < lb_it->first) // set as not found
                     lb_it = tst_data_.end();
 
                 break;
@@ -2226,18 +2237,18 @@ DataMappingTimes EvaluationTargetData::findTstTimes(float tod_ref) const // ref 
             lb_it--;
         }
 
-        if (lb_it != tst_data_.end() && lb_it->first != ret.tod_other2_) // lower tod found
+        if (lb_it != tst_data_.end() && lb_it->first != ret.timestamp_other2_) // lower tod found
         {
-            assert (tod_ref >= lb_it->first);
+            assert (timestamp_ref >= lb_it->first);
 
             // add lower value
             ret.has_other1_ = true;
-            ret.tod_other1_ = lb_it->first;
+            ret.timestamp_other1_ = lb_it->first;
         }
         else // not found, clear previous
         {
             ret.has_other2_ = false;
-            ret.tod_other2_ = 0.0;
+            ret.timestamp_other2_ = {};
         }
     }
 

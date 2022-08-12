@@ -20,6 +20,9 @@
 
 #include "eval/requirement/base/comparisontype.h"
 
+#include "boost/date_time/posix_time/posix_time.hpp"
+#include "boost/date_time/time_duration.hpp"
+
 #include <string>
 #include <memory>
 
@@ -82,14 +85,18 @@ protected:
 
     bool compareValue (double val, double threshold, COMPARISON_TYPE check_type);
 
-    std::pair<ValueComparisonResult, std::string> compareTi (float tod, const EvaluationTargetData& target_data,
-                                                             float max_ref_time_diff); // tod tst
-    std::pair<ValueComparisonResult, std::string> compareTa (float tod, const EvaluationTargetData& target_data,
-                                                             float max_ref_time_diff); // tod tst
-    std::pair<ValueComparisonResult, std::string> compareModeA (float tod, const EvaluationTargetData& target_data,
-                                                             float max_ref_time_diff); // tod tst
-    std::pair<ValueComparisonResult, std::string> compareModeC (float tod, const EvaluationTargetData& target_data,
-                                                             float max_ref_time_diff, float max_val_diff); // tod tst
+    std::pair<ValueComparisonResult, std::string> compareTi (
+            boost::posix_time::ptime timestamp, const EvaluationTargetData& target_data,
+            boost::posix_time::time_duration max_ref_time_diff); // tst timestamp
+    std::pair<ValueComparisonResult, std::string> compareTa (
+            boost::posix_time::ptime timestamp, const EvaluationTargetData& target_data,
+            boost::posix_time::time_duration max_ref_time_diff); // tst timestamp
+    std::pair<ValueComparisonResult, std::string> compareModeA (
+            boost::posix_time::ptime timestamp, const EvaluationTargetData& target_data,
+            boost::posix_time::time_duration max_ref_time_diff); // tst timestamp
+    std::pair<ValueComparisonResult, std::string> compareModeC (
+            boost::posix_time::ptime timestamp, const EvaluationTargetData& target_data,
+            boost::posix_time::time_duration max_ref_time_diff, float max_val_diff); // tod tst
 };
 
 }

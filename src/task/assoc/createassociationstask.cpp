@@ -160,7 +160,7 @@ bool CreateAssociationsTask::canRun()
     loginf << "CreateAssociationsTask: canRun: metas ";
     if (!dbcontent_man.existsMetaVariable(DBContent::meta_var_rec_num_.name())
             || !dbcontent_man.existsMetaVariable(DBContent::meta_var_datasource_id_.name())
-            || !dbcontent_man.existsMetaVariable(DBContent::meta_var_tod_.name())
+            || !dbcontent_man.existsMetaVariable(DBContent::meta_var_timestamp_.name())
             || !dbcontent_man.existsMetaVariable(DBContent::meta_var_ta_.name())
             || !dbcontent_man.existsMetaVariable(DBContent::meta_var_ti_.name())
             || !dbcontent_man.existsMetaVariable(DBContent::meta_var_track_num_.name())
@@ -181,7 +181,7 @@ bool CreateAssociationsTask::canRun()
 
         if (!dbcontent_man.metaVariable(DBContent::meta_var_rec_num_.name()).existsIn(dbo_it.first)
                 || !dbcontent_man.metaVariable(DBContent::meta_var_datasource_id_.name()).existsIn(dbo_it.first)
-                || !dbcontent_man.metaVariable(DBContent::meta_var_tod_.name()).existsIn(dbo_it.first)
+                || !dbcontent_man.metaVariable(DBContent::meta_var_timestamp_.name()).existsIn(dbo_it.first)
                 || !dbcontent_man.metaVariable(DBContent::meta_var_m3a_.name()).existsIn(dbo_it.first)
                 || !dbcontent_man.metaVariable(DBContent::meta_var_mc_.name()).existsIn(dbo_it.first)
                 || !dbcontent_man.metaVariable(DBContent::meta_var_latitude_.name()).existsIn(dbo_it.first)
@@ -234,7 +234,7 @@ void CreateAssociationsTask::run()
     checkAndSetMetaVariable(DBContent::meta_var_rec_num_.name(), &rec_num_var_);
     checkAndSetMetaVariable(DBContent::meta_var_datasource_id_.name(), &ds_id_var_);
     checkAndSetMetaVariable(DBContent::meta_var_line_id_.name(), &line_id_var_);
-    checkAndSetMetaVariable(DBContent::meta_var_tod_.name(), &tod_var_);
+    checkAndSetMetaVariable(DBContent::meta_var_timestamp_.name(), &ts_var_);
     checkAndSetMetaVariable(DBContent::meta_var_ta_.name(), &target_addr_var_);
     checkAndSetMetaVariable(DBContent::meta_var_ti_.name(), &target_id_var_);
     checkAndSetMetaVariable(DBContent::meta_var_track_num_.name(), &track_num_var_);
@@ -263,7 +263,7 @@ void CreateAssociationsTask::run()
 
         VariableSet read_set = getReadSetFor(dbo_it.first);
 
-        dbo_it.second->load(read_set, false, false, true, &tod_var_->getFor(dbo_it.first), true);
+        dbo_it.second->load(read_set, false, false, true, &ts_var_->getFor(dbo_it.first), true);
     }
 
     status_dialog_->show();
@@ -615,10 +615,10 @@ MetaVariable* CreateAssociationsTask::targetAddrVar() const
     return target_addr_var_;
 }
 
-MetaVariable* CreateAssociationsTask::todVar() const
+MetaVariable* CreateAssociationsTask::timestampVar() const
 {
-    assert (tod_var_);
-    return tod_var_;
+    assert (ts_var_);
+    return ts_var_;
 }
 
 MetaVariable* CreateAssociationsTask::targetIdVar() const
@@ -695,9 +695,9 @@ VariableSet CreateAssociationsTask::getReadSetFor(const std::string& dbcontent_n
     assert(line_id_var_->existsIn(dbcontent_name));
     read_set.add(line_id_var_->getFor(dbcontent_name));
 
-    assert(tod_var_);
-    assert(tod_var_->existsIn(dbcontent_name));
-    read_set.add(tod_var_->getFor(dbcontent_name));
+    assert(ts_var_);
+    assert(ts_var_->existsIn(dbcontent_name));
+    read_set.add(ts_var_->getFor(dbcontent_name));
 
     assert(target_addr_var_);
     if(target_addr_var_->existsIn(dbcontent_name))
