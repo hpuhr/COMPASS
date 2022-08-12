@@ -1291,7 +1291,9 @@ std::string LabelGenerator::getVariableValue(const std::string& dbcontent_name, 
                 return "";
 
             assert (var.representation() == Variable::Representation::STANDARD); // only 1 representation
-            value = values.getAsString(index);
+            //value = values.getAsString(index);
+
+            value = Time::toTimeString(values.get(index)); // only display as HH:SS:MM:ZZZ
 
             return value;
         }

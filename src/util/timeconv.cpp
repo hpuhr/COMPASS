@@ -22,19 +22,20 @@ namespace Utils
 {
 namespace Time
 {
+using namespace std;
 
-std::string str_format = "%Y-%m-%d %H:%M:%S.%f";
-std::string date_str_format = "%Y-%m-%d";
-std::string time_str_format = "%H:%M:%S.%f";
+string str_format = "%Y-%m-%d %H:%M:%S.%f";
+string date_str_format = "%Y-%m-%d";
+string time_str_format = "%H:%M:%S.%f";
 boost::posix_time::ptime epoch(boost::gregorian::date(1970, 1, 1));
 
-boost::posix_time::ptime fromString(std::string value)
+boost::posix_time::ptime fromString(string value)
 {
     boost::posix_time::ptime timestamp;
 
-    std::istringstream iss(value);
-    iss.imbue(std::locale(iss.getloc(), new boost::posix_time::time_facet(str_format.c_str())));
-    //iss.imbue(std::locale(std::locale::classic(), tif));
+    istringstream iss(value);
+    iss.imbue(locale(iss.getloc(), new boost::posix_time::time_facet(str_format.c_str())));
+    //iss.imbue(locale(locale::classic(), tif));
     iss >> timestamp;
     return timestamp;
 }
@@ -58,14 +59,14 @@ long toLong(boost::posix_time::ptime value)
     return result;
 }
 
-std::string toString(boost::posix_time::ptime value, unsigned int partial_digits)
+string toString(boost::posix_time::ptime value, unsigned int partial_digits)
 {
-    std::ostringstream date_stream;
+    ostringstream date_stream;
 
-    date_stream.imbue(std::locale(date_stream.getloc(), new boost::posix_time::time_facet(str_format.c_str())));
+    date_stream.imbue(locale(date_stream.getloc(), new boost::posix_time::time_facet(str_format.c_str())));
     date_stream << value;
 
-    std::string tmp = date_stream.str();
+    string tmp = date_stream.str();
 
     if (partial_digits == 3) // only remove microsecs
         tmp.erase(tmp.length()-3); // remove microseconds since not supported by boost
@@ -77,14 +78,14 @@ std::string toString(boost::posix_time::ptime value, unsigned int partial_digits
     return tmp;
 }
 
-std::string toString(boost::posix_time::time_duration duration, unsigned int partial_digits)
+string toString(boost::posix_time::time_duration duration, unsigned int partial_digits)
 {
-    std::ostringstream date_stream;
+    ostringstream date_stream;
 
-    date_stream.imbue(std::locale(date_stream.getloc(), new boost::posix_time::time_facet(time_str_format.c_str())));
+    date_stream.imbue(locale(date_stream.getloc(), new boost::posix_time::time_facet(time_str_format.c_str())));
     date_stream << duration;
 
-    std::string tmp = date_stream.str();
+    string tmp = date_stream.str();
 
     if (partial_digits == 3) // only remove microsecs
         tmp.erase(tmp.length()-3); // remove microseconds since not supported by boost
@@ -95,25 +96,40 @@ std::string toString(boost::posix_time::time_duration duration, unsigned int par
 
     return tmp;
 
-//    std::ostringstream os;
+//    ostringstream os;
 //    auto f = new boost::posix_time::time_facet(time_str_format.c_str());
 //    f->time_duration_format(time_str_format.c_str());
-//    os.imbue(std::locale(std::locale::classic(), f));
+//    os.imbue(locale(locale::classic(), f));
 //    os << duration;
 //    return os.str();
 }
 
 
-std::string toString(unsigned long value)
+string toString(unsigned long value)
 {
    return toString(fromLong(value));
 }
 
-std::string toDateString(boost::posix_time::ptime value)
+string toTimeString(boost::posix_time::ptime value)
 {
-    std::stringstream date_stream;
+    stringstream date_stream;
 
-    date_stream.imbue(std::locale(date_stream.getloc(), new boost::posix_time::time_facet(date_str_format.c_str())));
+    date_stream.imbue(locale(date_stream.getloc(), new boost::posix_time::time_facet(time_str_format.c_str())));
+    date_stream << value;
+
+    //loginf << "UGA1 " << Time::toString(value) << " " << date_stream.str();
+
+    string tmp = date_stream.str();
+    tmp.erase(tmp.length()-3);
+
+    return tmp;
+}
+
+string toDateString(boost::posix_time::ptime value)
+{
+    stringstream date_stream;
+
+    date_stream.imbue(locale(date_stream.getloc(), new boost::posix_time::time_facet(date_str_format.c_str())));
     date_stream << value;
 
     //loginf << "UGA1 " << Time::toString(value) << " " << date_stream.str();
@@ -121,7 +137,7 @@ std::string toDateString(boost::posix_time::ptime value)
     return date_stream.str();
 }
 
-boost::posix_time::ptime fromDateString(std::string value)
+boost::posix_time::ptime fromDateString(string value)
 {
     return boost::posix_time::ptime(boost::gregorian::from_string(value));
 }
