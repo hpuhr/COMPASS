@@ -39,6 +39,7 @@
 #include "util/system.h"
 #include "util/timeconv.h"
 #include "dbcontent/variable/metavariableconfigurationdialog.h"
+#include "dbcontentdeletedbjob.h"
 
 #include <QApplication>
 #include <QMessageBox>
@@ -71,6 +72,8 @@ DBContentManager::DBContentManager(const std::string& class_id, const std::strin
     registerParameter("use_limit", &use_limit_, false);
     registerParameter("limit_min", &limit_min_, 0);
     registerParameter("limit_max", &limit_max_, 100000);
+
+    registerParameter("max_live_data_age", &max_live_data_age_, 10);
 
     createSubConfigurables();
 
@@ -170,6 +173,20 @@ void DBContentManager::deleteDBContent(const std::string& dbcontent_name)
     dbcontent_.erase(dbcontent_name);
 
     emit dbObjectsChangedSignal();
+}
+
+void DBContentManager::deleteDBContent(boost::posix_time::ptime before_timestamp)
+{
+    loginf << "DBContentManager: deleteDBContent";
+
+    assert (!delete_job_);
+
+    delete_job_ = make_shared<DBContentDeleteDBJob>(COMPASS::instance().interface(), before_timestamp);
+
+    connect(delete_job_.get(), &DBContentDeleteDBJob::doneSignal, this, &DBContentManager::deleteJobDoneSlot,
+            Qt::QueuedConnection);
+    JobManager::instance().addDBJob(delete_job_);
+
 }
 
 bool DBContentManager::hasData()
@@ -625,6 +642,15 @@ void DBContentManager::loadingDone(DBContent& object)
         logdbg << "DBContentManager: loadingDoneSlot: not done";
 }
 
+void DBContentManager::deleteJobDoneSlot()
+{
+    loginf << "DBContentManager: deleteJobDoneSlot";
+
+    assert (delete_job_);
+
+    delete_job_ = nullptr;
+}
+
 void DBContentManager::metaDialogOKSlot()
 {
     assert (meta_cfg_dialog_);
@@ -843,6 +869,19 @@ void DBContentManager::finishInserting()
     logdbg << "DBContentManager: finishInserting: insert in progress " << insert_in_progress_;
     emit insertDoneSignal();
 
+    // start clearing old data
+
+    if (COMPASS::instance().appMode() == AppMode::LiveRunning)
+    {
+        using namespace boost::posix_time;
+
+        ptime old_time = Time::currentUTCTime() - minutes(max_live_data_age_);
+
+        loginf << "DBContentManager: finishInserting: deleting data before " << Time::toString(old_time);
+
+        deleteDBContent(old_time);
+    }
+
     // add inserted to loaded data
 
     boost::posix_time::ptime start_time = boost::posix_time::microsec_clock::local_time();
@@ -1037,7 +1076,7 @@ void DBContentManager::cutCachedData()
             }
         }
         else
-            logwrn << "DBContentManager: cutCachedData: buffer " << buf_it.first << " has not tod for min/max";
+            logwrn << "DBContentManager: cutCachedData: buffer " << buf_it.first << " has not timestamp for min/max";
     }
 
     if (max_time_set)
@@ -1049,7 +1088,7 @@ void DBContentManager::cutCachedData()
 
     loginf << "DBContentManager: cutCachedData: min_ts " << Time::toString(min_ts)
               //<< " data min " << String::timeStringFromDouble(min_tod_found)
-           << " max_ts" << Time::toString(max_ts);
+           << " max_ts " << Time::toString(max_ts);
     //<< " utc " << String::timeStringFromDouble(secondsSinceMidnighUTC());
 
     for (auto& buf_it : data_)

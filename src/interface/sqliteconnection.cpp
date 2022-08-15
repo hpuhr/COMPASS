@@ -473,7 +473,8 @@ void SQLiteConnection::readRowIntoBuffer(const PropertyList& list, unsigned int 
                 {
                     logdbg << "SQLiteConnection: readRowIntoBuffer: unsigned int index " << index
                            << " property '" << prop.name()
-                           << "' value " << Time::toString(static_cast<unsigned long>(sqlite3_column_int64(statement_, cnt)));
+                           << "' value " << Time::toStringLong(
+                                  static_cast<unsigned long>(sqlite3_column_int64(statement_, cnt)));
 
                     buffer->get<boost::posix_time::ptime>(prop.name())
                             .set(index, Time::fromLong(static_cast<unsigned long>(sqlite3_column_int64(statement_, cnt))));

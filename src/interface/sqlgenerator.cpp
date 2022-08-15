@@ -30,6 +30,7 @@
 #include "propertylist.h"
 #include "stringconv.h"
 #include "source/dbdatasource.h"
+#include "util/timeconv.h"
 
 #include <algorithm>
 #include <iomanip>
@@ -198,6 +199,26 @@ shared_ptr<DBCommand> SQLGenerator::getDataSourcesSelectCommand()
     command->set(ss.str());
     command->list(list);
 
+    return command;
+}
+
+std::shared_ptr<DBCommand> SQLGenerator::getDeleteCommand(
+        const DBContent& dbcontent, boost::posix_time::ptime before_timestamp)
+{
+    //DELETE FROM table WHERE search_condition;
+
+    stringstream ss;
+
+    ss << "DELETE FROM " << dbcontent.dbTableName();
+    ss << " WHERE " << COMPASS::instance().dbContentManager().metaGetVariable(
+              dbcontent.name(), DBContent::meta_var_timestamp_).dbColumnName();
+
+    ss << " < " << Time::toLong(before_timestamp) << ";";
+
+    loginf << "SQLGenerator: getDeleteCommand: sql '" << ss.str() << "'";
+
+    shared_ptr<DBCommand> command = make_shared<DBCommand>(DBCommand());
+    command->set(ss.str());
     return command;
 }
 

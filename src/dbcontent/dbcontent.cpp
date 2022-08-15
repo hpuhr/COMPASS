@@ -26,7 +26,6 @@
 #include "dbcontent/variable/variable.h"
 #include "dbtableinfo.h"
 #include "filtermanager.h"
-#include "finalizedboreadjob.h"
 #include "insertbufferdbjob.h"
 #include "jobmanager.h"
 #include "propertylist.h"
@@ -195,7 +194,7 @@ bool DBContent::hasVariable(const string& name) const
     //return variables_.find(name) != variables_.end();
 }
 
-Variable& DBContent::variable(const string& name)
+Variable& DBContent::variable(const string& name) const
 {
     assert(hasVariable(name));
 

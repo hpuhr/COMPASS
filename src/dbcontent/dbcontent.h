@@ -38,7 +38,6 @@ class Job;
 class DBContentReadDBJob;
 class InsertBufferDBJob;
 class UpdateBufferDBJob;
-//class FinalizeDBOReadJob;
 class DBContentManager;
 
 namespace dbContent
@@ -61,7 +60,6 @@ public slots:
     void readJobIntermediateSlot(std::shared_ptr<Buffer> buffer);
     void readJobObsoleteSlot();
     void readJobDoneSlot();
-    //void finalizeReadJobDoneSlot();
 
     void insertDoneSlot();
 
@@ -142,7 +140,7 @@ public:
     virtual ~DBContent();
 
     bool hasVariable(const std::string& name) const;
-    dbContent::Variable& variable(const std::string& name);
+    dbContent::Variable& variable(const std::string& name) const;
     void renameVariable(const std::string& name, const std::string& new_name);
     void deleteVariable(const std::string& name);
 

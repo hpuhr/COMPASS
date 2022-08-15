@@ -26,25 +26,19 @@ class Buffer;
 class DBContent;
 class DBInterface;
 
-/**
- * @brief DBO reading job
- *
- * Incrementally reads data record from DBO tables and writes the results into a DBDataSet.
- *
- */
 class DBContentReadDBJob : public Job
 {
     Q_OBJECT
 
-  signals:
+signals:
     void intermediateSignal(std::shared_ptr<Buffer> buffer);
 
-  public:
-    DBContentReadDBJob(DBInterface& db_interface, DBContent& dbobject, dbContent::VariableSet read_list,
-                 const std::vector<std::string>& extra_from_parts,
-                 std::string custom_filter_clause, std::vector<dbContent::Variable*> filtered_variables,
-                 bool use_order, dbContent::Variable* order_variable, bool use_order_ascending,
-                 const std::string& limit_str);
+public:
+    DBContentReadDBJob(DBInterface& db_interface, DBContent& dbcontent, dbContent::VariableSet read_list,
+                       const std::vector<std::string>& extra_from_parts,
+                       std::string custom_filter_clause, std::vector<dbContent::Variable*> filtered_variables,
+                       bool use_order, dbContent::Variable* order_variable, bool use_order_ascending,
+                       const std::string& limit_str);
     virtual ~DBContentReadDBJob();
 
     virtual void run();
@@ -53,9 +47,9 @@ class DBContentReadDBJob : public Job
 
     unsigned int rowCount() const;
 
-  protected:
+protected:
     DBInterface& db_interface_;
-    DBContent& dbobject_;
+    DBContent& dbcontent_;
     dbContent::VariableSet read_list_;
     std::vector<std::string> extra_from_parts_;
     std::string custom_filter_clause_;

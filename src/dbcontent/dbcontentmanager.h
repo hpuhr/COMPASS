@@ -34,6 +34,7 @@ class COMPASS;
 class DBContent;
 class DBContentManagerWidget;
 class DBSchemaManager;
+class DBContentDeleteDBJob;
 
 namespace dbContent {
 
@@ -53,6 +54,8 @@ class DBContentManager : public QObject, public Configurable
 public slots:
     void databaseOpenedSlot();
     void databaseClosedSlot();
+
+    void deleteJobDoneSlot();
 
     void metaDialogOKSlot();
 
@@ -80,6 +83,7 @@ public:
     bool existsDBContent(const std::string& dbcontent_name);
     DBContent& dbContent(const std::string& dbcontent_name);
     void deleteDBContent(const std::string& dbcontent_name);
+    void deleteDBContent(boost::posix_time::ptime before_timestamp);
     bool hasData();
 
     using DBContentIterator = typename std::map<std::string, DBContent*>::iterator;
@@ -195,6 +199,8 @@ protected:
     bool has_max_reftraj_track_num_ {false};
     unsigned int max_reftraj_track_num_ {0};
 
+    unsigned int max_live_data_age_ {10};
+
     boost::optional<boost::posix_time::ptime> timestamp_min_;
     boost::optional<boost::posix_time::ptime> timestamp_max_;
     boost::optional<double> latitude_min_;
@@ -218,6 +224,8 @@ protected:
     std::unique_ptr<DBContentManagerWidget> widget_;
 
     std::unique_ptr<dbContent::MetaVariableConfigurationDialog> meta_cfg_dialog_;
+
+    std::shared_ptr<DBContentDeleteDBJob> delete_job_{nullptr};
 
     virtual void checkSubConfigurables();
     void finishLoading();

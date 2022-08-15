@@ -105,7 +105,7 @@ string toString(boost::posix_time::time_duration duration, unsigned int partial_
 }
 
 
-string toString(unsigned long value)
+string toStringLong(unsigned long value)
 {
    return toString(fromLong(value));
 }
@@ -167,8 +167,10 @@ double partialSeconds(boost::posix_time::time_duration seconds)
 {
     double value {0.0};
 
-    value = seconds.total_seconds();
-    value += (double) seconds.total_microseconds() / 1000000.0;
+    //loginf << " UTA " << seconds.total_seconds() << " " << (double) seconds.total_microseconds() / 1000000.0;
+
+    //value = seconds.total_seconds();
+    value = (double) seconds.total_microseconds() / 1000000.0;
 
     return value;
 }

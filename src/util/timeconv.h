@@ -33,7 +33,7 @@ extern boost::posix_time::ptime fromLong(unsigned long value);
 extern long toLong(boost::posix_time::ptime value);
 extern std::string toString(boost::posix_time::ptime value, unsigned int partial_digits=3);
 extern std::string toString(boost::posix_time::time_duration duration, unsigned int partial_digits=3);
-extern std::string toString(unsigned long value);
+extern std::string toStringLong(unsigned long value);
 extern std::string toTimeString(boost::posix_time::ptime value);
 extern std::string toDateString(boost::posix_time::ptime value);
 extern boost::posix_time::ptime fromDateString(std::string value);

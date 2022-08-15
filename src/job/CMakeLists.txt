@@ -10,7 +10,7 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/dbcontentreaddbjob.h"
         "${CMAKE_CURRENT_LIST_DIR}/allbuffercsvexportjob.h"
         "${CMAKE_CURRENT_LIST_DIR}/buffercsvexportjob.h"
-        "${CMAKE_CURRENT_LIST_DIR}/finalizedboreadjob.h"
+        "${CMAKE_CURRENT_LIST_DIR}/dbcontentdeletedbjob.h"
         "${CMAKE_CURRENT_LIST_DIR}/insertbufferdbjob.h"
         "${CMAKE_CURRENT_LIST_DIR}/updatebufferdbjob.h"
         "${CMAKE_CURRENT_LIST_DIR}/readjsonfilejob.h"
@@ -23,7 +23,7 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/asterixpostprocessjob.h"
     PRIVATE
         "${CMAKE_CURRENT_LIST_DIR}/dbcontentreaddbjob.cpp"
-        "${CMAKE_CURRENT_LIST_DIR}/finalizedboreadjob.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/dbcontentdeletedbjob.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/allbuffercsvexportjob.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/buffercsvexportjob.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/insertbufferdbjob.cpp"
