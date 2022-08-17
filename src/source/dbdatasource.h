@@ -82,7 +82,7 @@ protected:
 
     std::map<unsigned int, bool> line_loading_wanted_; // not contained means true
 
-    std::map<unsigned int, float> max_line_tods_; // only used in live mode, line -> max tod
+    std::map<unsigned int, unsigned long> max_line_tods_; // only used in live mode, line -> max tod
 
     std::unique_ptr<DBDataSourceWidget> widget_;
 };

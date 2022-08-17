@@ -943,6 +943,13 @@ void DBContentManager::addInsertedDataToChache()
             buf_it.second->deleteProperty(prop_it);
         }
 
+        // add assoc property if required
+        Variable& assoc_var = metaGetVariable(buf_it.first, DBContent::meta_var_associations_);
+        Property assoc_prop (assoc_var.dbColumnName(), assoc_var.dataType());
+
+        if (!buf_it.second->hasProperty(assoc_prop))
+            buf_it.second->addProperty(assoc_prop);
+
         // change db column names to dbo var names
         buf_it.second->transformVariables(read_set, true);
 

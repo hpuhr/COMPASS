@@ -5,6 +5,7 @@
 
 using namespace nlohmann;
 using namespace Utils;
+using namespace std;
 
 namespace dbContent
 {
@@ -267,10 +268,22 @@ boost::posix_time::ptime DBDataSource::maxTimestamp(unsigned int line) const
 
 bool DBDataSource::hasLiveData(unsigned int line, boost::posix_time::ptime current_ts) const
 {
+    bool ret;
+
     if (hasMaxTimestamp(line) && hasUpdateInterval())
-        return (current_ts - maxTimestamp(line)).total_milliseconds()/1000.0 < updateInterval() + 2; // 2s max latency
+        ret = (current_ts - maxTimestamp(line)).total_milliseconds()/1000.0 < updateInterval() + 2; // 2s max latency
     else
-        return false;
+        ret = false;
+
+//    if (hasMaxTimestamp(line))
+//        loginf << "DBDataSource: hasLiveData: name " << name_ << " current_ts " << Time::toString(current_ts)
+//               << " hasMax " << hasMaxTimestamp(line) << " hasUI " << hasUpdateInterval()
+//               << " maxTS " << Time::toString(maxTimestamp(line))
+//               << " diff " << Time::toString(current_ts - maxTimestamp(line)) << " ret " << ret;
+//    else
+//        loginf << "DBDataSource: hasLiveData: name " << name_ << " no maxTS";
+
+    return ret;
 }
 
 }
