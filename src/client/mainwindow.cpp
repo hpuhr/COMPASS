@@ -459,7 +459,6 @@ void MainWindow::updateBottomWidget()
         load_button_->setHidden(true);
         live_pause_button_->setHidden(false);
         live_pause_button_->setText("Resume");
-        live_pause_button_->setDisabled(true); // not implemented yet
         live_stop_button_->setHidden(true);
     }
     else if (app_mode == AppMode::LiveRunning)
@@ -467,7 +466,6 @@ void MainWindow::updateBottomWidget()
         load_button_->setHidden(true);
         live_pause_button_->setHidden(false);
         live_pause_button_->setText("Pause");
-        live_pause_button_->setDisabled(true); // not implemented yet
         live_stop_button_->setHidden(false);
     }
     else
@@ -1444,14 +1442,12 @@ void MainWindow::livePauseSlot()
 {
     loginf << "MainWindow: livePauseSlot";
 
-    TODO_ASSERT
+    COMPASS::instance().appMode(AppMode::LivePaused);
 }
 
 void MainWindow::liveStopSlot()
 {
     loginf << "MainWindow: liveStopSlot";
-
-    COMPASS::instance().taskManager().asterixImporterTask().stop();
 
     COMPASS::instance().appMode(AppMode::Offline);
 }

@@ -49,7 +49,7 @@ class COMPASS : public QObject, public Configurable, public Singleton
 signals:
     void databaseOpenedSignal();
     void databaseClosedSignal();
-    void appModeSwitchSignal (AppMode app_mode);
+    void appModeSwitchSignal (AppMode app_mode_previous, AppMode app_mode_current);
 
 public:
     virtual ~COMPASS();

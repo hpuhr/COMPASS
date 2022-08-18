@@ -463,12 +463,12 @@ void FilterManager::databaseClosedSlot()
         widget_->setDisabled(true);
 }
 
-void FilterManager::appModeSwitchSlot (AppMode app_mode)
+void FilterManager::appModeSwitchSlot (AppMode app_mode_previous, AppMode app_mode_current)
 {
     loginf << "FilterManager: appModeSwitchSlot";
 
     for (auto& fil_it : filters_)
-        fil_it->updateToAppMode(app_mode);
+        fil_it->updateToAppMode(app_mode_current);
 }
 
 //void FilterManager::startedSlot()

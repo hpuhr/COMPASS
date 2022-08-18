@@ -691,6 +691,7 @@ void ASTERIXImportTask::run(bool test) // , bool create_mapping_stubs
         COMPASS::instance().appMode(AppMode::LiveRunning); // set live mode
 
     running_ = true;
+    stopped_ = false;
     done_ = false; // since can be run multiple times
 
     num_packets_in_processing_ = 0;
@@ -1199,6 +1200,40 @@ void ASTERIXImportTask::insertDoneSlot()
     }
 
     logdbg << "ASTERIXImportTask: insertDoneSlot: done";
+}
+
+void ASTERIXImportTask::appModeSwitchSlot (AppMode app_mode_previous, AppMode app_mode_current)
+{
+    loginf << "ASTERIXImportTask: appModeSwitchSlot: current " << toString(app_mode_current)
+           << " new " << toString(app_mode_previous) << " running " << running_;
+
+    if (!running_) // then nothing to do
+        return;
+
+    if (app_mode_current == AppMode::LiveRunning)
+    {
+        assert (app_mode_previous == AppMode::LivePaused || app_mode_previous == AppMode::Offline);
+
+        if (app_mode_previous == AppMode::LivePaused)
+        {
+            // resume paused -> running
+        }
+        else
+            ; // nothing to do, normal startup
+
+    }
+    else if (app_mode_current == AppMode::LivePaused)
+    {
+        assert (app_mode_previous == AppMode::LiveRunning); // can only happend from running
+
+        // enter paused state
+    }
+    else if (app_mode_current == AppMode::Offline)
+    {
+        assert (app_mode_previous == AppMode::LiveRunning || app_mode_previous == AppMode::LivePaused);
+
+        stop();
+    }
 }
 
 void ASTERIXImportTask::checkAllDone()

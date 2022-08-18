@@ -684,12 +684,12 @@ void ViewManager::loadingDoneSlot() // emitted when all dbos have finished loadi
         view_it.second->loadingDone();
 }
 
-void ViewManager::appModeSwitchSlot (AppMode app_mode)
+void ViewManager::appModeSwitchSlot (AppMode app_mode_previous, AppMode app_mode_current)
 {
     loginf << "ViewManager: appModeSwitchSlot: app_mode " << COMPASS::instance().appModeStr();
 
     for (auto& view_it : views_)
-        view_it.second->appModeSwitch(app_mode);
+        view_it.second->appModeSwitch(app_mode_previous, app_mode_current);
 }
 
 

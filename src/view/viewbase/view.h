@@ -78,7 +78,7 @@ class View : public QObject, public Configurable
 
     virtual void clearData()=0; // clear shown data in view
 
-    virtual void appModeSwitch (AppMode app_mode) {};
+    virtual void appModeSwitch (AppMode app_mode_previous, AppMode app_mode_current) {};
 
     unsigned int getKey();
     const std::string& getName() const;

@@ -27,6 +27,7 @@
 #include "jsonmappingstubsjob.h"
 #include "asterixjsonparsingschema.h"
 #include "task.h"
+#include "appmode.h"
 
 #include <QObject>
 
@@ -67,6 +68,8 @@ class ASTERIXImportTask : public Task, public Configurable
     void postprocessObsoleteSlot();
 
     void insertDoneSlot();
+
+    void appModeSwitchSlot (AppMode app_mode_previous, AppMode app_mode_current);
 
   public:
     ASTERIXImportTask(const std::string& class_id, const std::string& instance_id,
@@ -155,6 +158,7 @@ protected:
     float override_tod_offset_{0};
 
     bool running_ {false};
+
     unsigned int num_packets_in_processing_{0};
     unsigned int num_packets_total_{0};
 
