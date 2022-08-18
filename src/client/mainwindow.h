@@ -56,7 +56,7 @@ public slots:
     void loadButtonSlot();
     void loadingDoneSlot();
 
-    void livePauseSlot();
+    void livePauseResumeSlot();
     void liveStopSlot();
 
     void configureDataSourcesSlot();
@@ -205,7 +205,7 @@ protected:
     QLabel* status_label_{nullptr};
     QPushButton* load_button_{nullptr};
 
-    QPushButton* live_pause_button_{nullptr};
+    QPushButton* live_pause_resume_button_{nullptr};
     QPushButton* live_stop_button_{nullptr};
 
     void createMenus ();

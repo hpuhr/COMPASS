@@ -1210,6 +1210,8 @@ void ASTERIXImportTask::appModeSwitchSlot (AppMode app_mode_previous, AppMode ap
     if (!running_) // then nothing to do
         return;
 
+    assert (decode_job_);
+
     if (app_mode_current == AppMode::LiveRunning)
     {
         assert (app_mode_previous == AppMode::LivePaused || app_mode_previous == AppMode::Offline);
@@ -1217,6 +1219,7 @@ void ASTERIXImportTask::appModeSwitchSlot (AppMode app_mode_previous, AppMode ap
         if (app_mode_previous == AppMode::LivePaused)
         {
             // resume paused -> running
+            decode_job_->resumeLiveNetworkData(true);
         }
         else
             ; // nothing to do, normal startup
@@ -1227,6 +1230,7 @@ void ASTERIXImportTask::appModeSwitchSlot (AppMode app_mode_previous, AppMode ap
         assert (app_mode_previous == AppMode::LiveRunning); // can only happend from running
 
         // enter paused state
+        decode_job_->cacheLiveNetworkData();
     }
     else if (app_mode_current == AppMode::Offline)
     {

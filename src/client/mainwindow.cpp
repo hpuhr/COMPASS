@@ -151,23 +151,26 @@ MainWindow::MainWindow()
 
     bottom_layout->addStretch();
 
+    // add status & button
+
     status_label_ = new QLabel();
     bottom_layout->addWidget(status_label_);
 
-    bottom_layout->addStretch();
-
-    // add status & button
-    load_button_ = new QPushButton("Load");
-    connect(load_button_, &QPushButton::clicked, this, &MainWindow::loadButtonSlot);
-    bottom_layout->addWidget(load_button_);
-
-    live_pause_button_ = new QPushButton("Pause");
-    connect(live_pause_button_, &QPushButton::clicked, this, &MainWindow::livePauseSlot);
-    bottom_layout->addWidget(live_pause_button_);
+    live_pause_resume_button_ = new QPushButton("Pause");
+    connect(live_pause_resume_button_, &QPushButton::clicked, this, &MainWindow::livePauseResumeSlot);
+    bottom_layout->addWidget(live_pause_resume_button_);
 
     live_stop_button_ = new QPushButton("Stop");
     connect(live_stop_button_, &QPushButton::clicked, this, &MainWindow::liveStopSlot);
     bottom_layout->addWidget(live_stop_button_);
+
+    bottom_layout->addStretch();
+
+    // load button
+
+    load_button_ = new QPushButton("Load");
+    connect(load_button_, &QPushButton::clicked, this, &MainWindow::loadButtonSlot);
+    bottom_layout->addWidget(load_button_);
 
     bottom_widget->setLayout(bottom_layout);
 
@@ -437,7 +440,7 @@ void MainWindow::updateBottomWidget()
     status_label_->setText(compass.appModeStr().c_str());
 
     assert (load_button_);
-    assert (live_pause_button_);
+    assert (live_pause_resume_button_);
     assert (live_stop_button_);
 
     AppMode app_mode = compass.appMode();
@@ -445,27 +448,31 @@ void MainWindow::updateBottomWidget()
     if (!compass.dbOpened())
     {
         load_button_->setHidden(true);
-        live_pause_button_->setHidden(true);
+
+        live_pause_resume_button_->setHidden(true);
         live_stop_button_->setHidden(true);
     }
     else if (app_mode == AppMode::Offline)
     {
         load_button_->setHidden(false);
-        live_pause_button_->setHidden(true);
+
+        live_pause_resume_button_->setHidden(true);
         live_stop_button_->setHidden(true);
     }
     else if (app_mode == AppMode::LivePaused)
     {
-        load_button_->setHidden(true);
-        live_pause_button_->setHidden(false);
-        live_pause_button_->setText("Resume");
+        load_button_->setHidden(false);
+
+        live_pause_resume_button_->setHidden(false);
+        live_pause_resume_button_->setText("Resume");
         live_stop_button_->setHidden(true);
     }
     else if (app_mode == AppMode::LiveRunning)
     {
         load_button_->setHidden(true);
-        live_pause_button_->setHidden(false);
-        live_pause_button_->setText("Pause");
+
+        live_pause_resume_button_->setHidden(false);
+        live_pause_resume_button_->setText("Pause");
         live_stop_button_->setHidden(false);
     }
     else
@@ -1438,11 +1445,18 @@ void MainWindow::loadingDoneSlot()
     load_button_->setDisabled(false);
 }
 
-void MainWindow::livePauseSlot()
+void MainWindow::livePauseResumeSlot()
 {
     loginf << "MainWindow: livePauseSlot";
 
-    COMPASS::instance().appMode(AppMode::LivePaused);
+    AppMode app_mode = COMPASS::instance().appMode();
+
+    assert (app_mode == AppMode::LivePaused || AppMode::LiveRunning);
+
+    if (app_mode == AppMode::LiveRunning)
+        COMPASS::instance().appMode(AppMode::LivePaused);
+    else // AppMode::LivePaused)
+        COMPASS::instance().appMode(AppMode::LiveRunning);
 }
 
 void MainWindow::liveStopSlot()

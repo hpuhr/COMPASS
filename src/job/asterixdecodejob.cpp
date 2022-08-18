@@ -285,14 +285,12 @@ void ASTERIXDecodeJob::doUDPStreamDecoding()
         {
             boost::mutex::scoped_lock lock(receive_buffers_mutex_);
 
-            if (receive_buffer_sizes_.size() // any data received
+            if (!in_live_paused_state_ && receive_buffer_sizes_.size() // not paused, any data received, 1sec passed
                     && (boost::posix_time::microsec_clock::local_time()
                         - last_receive_decode_time_).total_milliseconds() > 1000)
             {
-                loginf << "ASTERIXDecodeJob: doUDPStreamDecoding: processing "
+                loginf << "ASTERIXDecodeJob: doUDPStreamDecoding: copying data "
                        << receive_buffer_sizes_.size() << " buffers  max " << MAX_ALL_RECEIVE_SIZE;
-
-                loginf << "ASTERIXDecodeJob: doUDPStreamDecoding: copying data";
 
                 // copy data
                 for (auto& size_it : receive_buffer_sizes_)
@@ -662,6 +660,29 @@ float ASTERIXDecodeJob::getRemainingTime() const
 size_t ASTERIXDecodeJob::countTotal() const
 {
     return count_total_;
+}
+
+void ASTERIXDecodeJob::cacheLiveNetworkData()
+{
+    loginf << "ASTERIXDecodeJob: cacheLiveNetworkData";
+
+    in_live_paused_state_ = true;
+}
+
+void ASTERIXDecodeJob::resumeLiveNetworkData(bool discard_cache)
+{
+    loginf << "ASTERIXDecodeJob: resumeLiveNetworkData: discard cache " << discard_cache;
+
+    if (discard_cache)
+    {
+        boost::mutex::scoped_lock lock(receive_buffers_mutex_);
+
+        receive_buffer_sizes_.clear();
+    }
+
+    in_live_paused_state_ = false;
+
+    receive_semaphore_.post(); // wake up loop
 }
 
 size_t ASTERIXDecodeJob::numErrors() const { return num_errors_; }
