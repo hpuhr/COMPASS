@@ -5,6 +5,7 @@ include_directories (
 
 target_sources(compass
     PUBLIC
+        "${CMAKE_CURRENT_LIST_DIR}/labeldirection.h"
         "${CMAKE_CURRENT_LIST_DIR}/labelgenerator.h"
         "${CMAKE_CURRENT_LIST_DIR}/labelgeneratorwidget.h"
         "${CMAKE_CURRENT_LIST_DIR}/labeldswidget.h"

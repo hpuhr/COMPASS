@@ -3,6 +3,7 @@
 
 #include "configurable.h"
 #include "json.hpp"
+#include "labeldirection.h"
 
 #include <osg/Matrixd>
 
@@ -19,14 +20,6 @@ namespace dbContent
 
 class LabelContentDialog;
 class VariableSet;
-
-enum LabelDirection
-{
-    LEFT_UP=0,
-    RIGHT_UP,
-    LEFT_DOWN,
-    RIGHT_DOWN
-};
 
 class LabelGenerator : public QObject, public Configurable
 {
