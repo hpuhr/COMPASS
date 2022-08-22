@@ -442,7 +442,7 @@ void LatexVisitor::visit(OSGView* e)
     if (wait_on_map_loading_)
         data_widget->waitUntilMapLoaded();
 
-    data_widget->clearMouseCoordinates();
+    //data_widget->clearMouseCoordinates();
 
     // normal screenshot
 
