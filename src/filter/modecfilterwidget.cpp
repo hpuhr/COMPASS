@@ -58,6 +58,12 @@ void ModeCFilterWidget::update()
 
 void ModeCFilterWidget::minValueEditedSlot(const QString& value)
 {
+    if (!value.size())
+    {
+        loginf << "ModeCFilterWidget: minValueEditedSlot: skipping empty string";
+        return;
+    }
+
     bool ok;
 
     float value_float = value.toFloat(&ok);
@@ -70,6 +76,12 @@ void ModeCFilterWidget::minValueEditedSlot(const QString& value)
 
 void ModeCFilterWidget::maxValueEditedSlot(const QString& value)
 {
+    if (!value.size())
+    {
+        loginf << "ModeCFilterWidget: maxValueEditedSlot: skipping empty string";
+        return;
+    }
+
     bool ok;
 
     float value_float = value.toFloat(&ok);
