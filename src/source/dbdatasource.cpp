@@ -150,6 +150,15 @@ unsigned int DBDataSource::numLoaded (const std::string& db_content, unsigned in
     return 0;
 }
 
+bool DBDataSource::hasNumLoaded (unsigned int line_id) // for any DBContent
+{
+    for (auto& loaded_it : num_loaded_)
+        if (loaded_it.second.count(line_id))
+            return true;
+
+    return false;
+}
+
 void DBDataSource::clearNumLoaded()
 {
     num_loaded_.clear();

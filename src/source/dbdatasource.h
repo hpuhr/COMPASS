@@ -46,6 +46,7 @@ public:
     unsigned int numLoaded (unsigned int line_id);
     unsigned int numLoaded (const std::string& db_content);
     unsigned int numLoaded (const std::string& db_content, unsigned int line_id);
+    bool hasNumLoaded (unsigned int line_id); // for any DBContent
     void clearNumLoaded();
 
     virtual unsigned int id() const override; // from saved db content
