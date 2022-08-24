@@ -6,6 +6,8 @@
 #include "dbcontent/variable/variableset.h"
 #include "dbcontent/label/labelgeneratorwidget.h"
 #include "dbcontent/label/labelcontentdialog.h"
+#include "datasourcemanager.h"
+#include "dbdatasource.h"
 #include "logger.h"
 #include "util/stringconv.h"
 #include "util/number.h"
@@ -820,7 +822,16 @@ unsigned int LabelGenerator::labelLine (unsigned int ds_id) // returns 0...3
     }
     else
     {
+        DataSourceManager& ds_man = COMPASS::instance().dataSourceManager();
+        assert (ds_man.hasDBDataSource(ds_id));
+
+        dbContent::DBDataSource& ds = ds_man.dbDataSource(ds_id);
+
         unsigned int line = 0;
+
+        if (ds.hasAnyNumLoaded())
+            line = ds.getFirstLoadedLine();
+
         label_lines_[key] = line;
         return line;
     }
@@ -831,6 +842,55 @@ void LabelGenerator::labelLine (unsigned int ds_id, unsigned int line)
     assert (line <= 3);
     string key = to_string(ds_id);
     label_lines_[key] = line;
+}
+
+// updates lines to be label according to available lines with loaded data
+void LabelGenerator::updateAvailableLabelLines()
+{
+    logdbg << "LabelGenerator: updateAvailableLabelLines";
+
+    unsigned int ds_id;
+    unsigned int line_id;
+
+    DataSourceManager& ds_man = COMPASS::instance().dataSourceManager();
+
+    bool something_changed {false};
+
+    for (auto& line_it : label_lines_.get<std::map<std::string, unsigned int>>())
+    {
+        ds_id = std::atoi(line_it.first.c_str());
+        line_id = line_it.second;
+
+        if (!ds_man.hasDBDataSource(ds_id)) // check if existing in current db
+            continue;
+
+        dbContent::DBDataSource& ds = ds_man.dbDataSource(ds_id);
+
+        if (ds.hasAnyNumLoaded())
+        {
+            if (ds.hasNumLoaded(line_id)) // check if current line id has data
+                continue; // has data in current line
+            else // set to first line with data
+            {
+                labelLine(ds_id, ds.getFirstLoadedLine());
+                something_changed = true;
+            }
+        }
+        else // set to first line as default
+        {
+            labelLine(ds_id, 0);
+            something_changed = true;
+        }
+
+        logdbg << "LabelGenerator: updateAvailableLabelLines: ds_id " << ds_id
+               << " new line " << labelLine(ds_id);
+    }
+
+    if (something_changed)
+    {
+        logdbg << "LabelGenerator: updateAvailableLabelLines: emitting change";
+        emit labelLinesChangedSignal();
+    }
 }
 
 

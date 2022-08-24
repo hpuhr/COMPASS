@@ -159,6 +159,36 @@ bool DBDataSource::hasNumLoaded (unsigned int line_id) // for any DBContent
     return false;
 }
 
+bool DBDataSource::hasAnyNumLoaded () // for any DBContent, line
+{
+    for (auto& loaded_it : num_loaded_)
+    {
+        for (auto& loaded_line_it : loaded_it.second)
+        {
+            if (loaded_line_it.second)
+                return true;
+        }
+    }
+
+    return false;
+}
+
+unsigned int DBDataSource::getFirstLoadedLine() // for any DBContent
+{
+    assert (hasAnyNumLoaded());
+
+    for (auto& loaded_it : num_loaded_)
+    {
+        for (auto& loaded_line_it : loaded_it.second)
+        {
+            if (loaded_line_it.second)
+                return loaded_line_it.first;
+        }
+    }
+
+    assert (false); // should never happen
+}
+
 void DBDataSource::clearNumLoaded()
 {
     num_loaded_.clear();

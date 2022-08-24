@@ -666,6 +666,8 @@ void DBContentManager::finishLoading()
 
     emit loadingDoneSignal();
 
+    COMPASS::instance().dbContentManager().labelGenerator().updateAvailableLabelLines(); // update available lines
+
     QApplication::restoreOverrideCursor();
 }
 
@@ -910,6 +912,8 @@ void DBContentManager::finishInserting()
     }
 
     COMPASS::instance().dataSourceManager().updateWidget();
+
+    COMPASS::instance().dbContentManager().labelGenerator().updateAvailableLabelLines(); // update available lines
 
     boost::posix_time::time_duration time_diff = boost::posix_time::microsec_clock::local_time() - start_time;
     logdbg << "DBContentManager: finishInserting: processing took "

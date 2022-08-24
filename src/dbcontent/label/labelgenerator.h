@@ -27,6 +27,7 @@ class LabelGenerator : public QObject, public Configurable
 
 signals:
     void labelOptionsChangedSignal();
+    void labelLinesChangedSignal();
     void labelClearAllSignal();
 
 
@@ -98,6 +99,7 @@ public:
 
     unsigned int labelLine (unsigned int ds_id); // returns 0...3
     void labelLine (unsigned int ds_id, unsigned int line);
+    void updateAvailableLabelLines(); // updates lines to be label according to available lines with loaded data
 
     void editLabelContents(const std::string& dbcontent_name);
 

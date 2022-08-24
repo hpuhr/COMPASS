@@ -1,6 +1,7 @@
 #include "dbcontent/label/labeldswidget.h"
 #include "compass.h"
 #include "datasourcemanager.h"
+#include "dbcontentmanager.h"
 #include "dbcontent/label/labelgenerator.h"
 #include "logger.h"
 #include "files.h"
@@ -58,7 +59,10 @@ LabelDSWidget::LabelDSWidget(LabelGenerator& label_generator, QWidget* parent,
 
 
     connect(&COMPASS::instance().dataSourceManager(), &DataSourceManager::dataSourcesChangedSignal,
-            this, &LabelDSWidget::updateListSlot);
+            this, &LabelDSWidget::updateListSlot); // update if data sources changed
+
+    connect(&COMPASS::instance().dbContentManager().labelGenerator(), &LabelGenerator::labelLinesChangedSignal,
+            this, &LabelDSWidget::updateListSlot); // update if lines changed
 }
 
 LabelDSWidget::~LabelDSWidget()
