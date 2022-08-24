@@ -6,6 +6,7 @@
 #include "logger.h"
 #include "files.h"
 #include "gui/rangeedit.h"
+#include "textfielddoublevalidator.h"
 
 #include <QFormLayout>
 #include <QComboBox>
@@ -142,10 +143,10 @@ LabelGeneratorWidget::LabelGeneratorWidget(LabelGenerator& label_generator)
         filter_layout->addWidget(filter_modec_min_box, row, 0);
 
         QLineEdit* filter_modec_min_edit = new QLineEdit();
-        filter_modec_min_edit->setText(QString::number(label_generator_.filterModecMinValue(), 'f', Precision));
-        auto validator0 = new QDoubleValidator(ModeCMin, ModeCMax, Precision, filter_modec_min_edit);
+        auto validator0 = new TextFieldDoubleValidator(ModeCMin, ModeCMax, Precision);
         validator0->setNotation(QDoubleValidator::Notation::StandardNotation);
         filter_modec_min_edit->setValidator(validator0);
+        filter_modec_min_edit->setText(QString::number(label_generator_.filterModecMinValue(), 'f', Precision)); 
         connect(filter_modec_min_edit, &QLineEdit::textEdited,
                 this, &LabelGeneratorWidget::filterModeCMinChangedSlot);
         filter_layout->addWidget(filter_modec_min_edit, row, 1);
@@ -158,10 +159,10 @@ LabelGeneratorWidget::LabelGeneratorWidget(LabelGenerator& label_generator)
         filter_layout->addWidget(filter_modec_max_box, row, 0);
 
         QLineEdit* filter_modec_max_edit = new QLineEdit();
-        filter_modec_max_edit->setText(QString::number(label_generator_.filterModecMaxValue(), 'f', Precision));
-        auto validator1 = new QDoubleValidator(ModeCMin, ModeCMax, Precision, filter_modec_max_edit);
+        auto validator1 = new TextFieldDoubleValidator(ModeCMin, ModeCMax, Precision);
         validator1->setNotation(QDoubleValidator::Notation::StandardNotation);
         filter_modec_max_edit->setValidator(validator1);
+        filter_modec_max_edit->setText(QString::number(label_generator_.filterModecMaxValue(), 'f', Precision));
         connect(filter_modec_max_edit, &QLineEdit::textEdited,
                 this, &LabelGeneratorWidget::filterModeCMaxChangedSlot);
         filter_layout->addWidget(filter_modec_max_edit, row, 1);
