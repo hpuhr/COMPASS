@@ -332,6 +332,17 @@ protected:
     rangeedit::SerializableRange<T> range_;
 };
 
-//CONVENIENCE TYPEDEFS 
-typedef RangeEditT<float>  RangeEditFloat;
-typedef RangeEditT<double> RangeEditDouble;
+#define DECLARE_RANGE_EDIT(Type,ClassName)                         \
+    class ClassName : public RangeEditT<Type>                      \
+    {                                                              \
+    public:                                                        \
+        ClassName(int slider_steps = 1000,                         \
+                  int precision = 6,                               \
+                  QWidget* parent = nullptr)                       \
+            : RangeEditT<Type>(slider_steps, precision, parent) {} \
+        virtual ~ClassName() = default;                            \
+    };
+
+//CONVENIENCE
+DECLARE_RANGE_EDIT(float,  RangeEditFloat)
+DECLARE_RANGE_EDIT(double, RangeEditDouble)
