@@ -5,6 +5,7 @@
 #include "dbcontentmanager.h"
 #include "logger.h"
 #include "files.h"
+#include "gui/rangeedit.h"
 
 #include <QFormLayout>
 #include <QComboBox>
@@ -127,31 +128,53 @@ LabelGeneratorWidget::LabelGeneratorWidget(LabelGenerator& label_generator)
     filter_layout->addWidget(filter_mode3a_edit, row, 1);
 
     // mc
-    ++row;
-    QCheckBox* filter_modec_min_box = new QCheckBox("Mode C Min [FL]");
-    filter_modec_min_box->setChecked(label_generator_.filterModecMinActive());
-    connect(filter_modec_min_box, &QCheckBox::clicked,
-            this, &LabelGeneratorWidget::filterModeCMinActiveChangedSlot);
-    filter_layout->addWidget(filter_modec_min_box, row, 0);
+    {
+        const int   SliderSteps =  1000;
+        const int   Precision   =  2;
+        const float ModeCMin    = -100.0f;
+        const float ModeCMax    =  500.0f;
 
-    QLineEdit* filter_modec_min_edit = new QLineEdit();
-    filter_modec_min_edit->setText(QString::number(label_generator_.filterModecMinValue()));
-    connect(filter_modec_min_edit, &QLineEdit::textEdited,
-            this, &LabelGeneratorWidget::filterModeCMinChangedSlot);
-    filter_layout->addWidget(filter_modec_min_edit, row, 1);
+        ++row;
+        QCheckBox* filter_modec_min_box = new QCheckBox("Mode C Min [FL]");
+        filter_modec_min_box->setChecked(label_generator_.filterModecMinActive());
+        connect(filter_modec_min_box, &QCheckBox::clicked,
+                this, &LabelGeneratorWidget::filterModeCMinActiveChangedSlot);
+        filter_layout->addWidget(filter_modec_min_box, row, 0);
 
-    ++row;
-    QCheckBox* filter_modec_max_box = new QCheckBox("Mode C Max [FL]");
-    filter_modec_max_box->setChecked(label_generator_.filterModecMaxActive());
-    connect(filter_modec_max_box, &QCheckBox::clicked,
-            this, &LabelGeneratorWidget::filterModeCMaxActiveChangedSlot);
-    filter_layout->addWidget(filter_modec_max_box, row, 0);
+        QLineEdit* filter_modec_min_edit = new QLineEdit();
+        filter_modec_min_edit->setText(QString::number(label_generator_.filterModecMinValue(), 'f', Precision));
+        auto validator0 = new QDoubleValidator(ModeCMin, ModeCMax, Precision, filter_modec_min_edit);
+        validator0->setNotation(QDoubleValidator::Notation::StandardNotation);
+        filter_modec_min_edit->setValidator(validator0);
+        connect(filter_modec_min_edit, &QLineEdit::textEdited,
+                this, &LabelGeneratorWidget::filterModeCMinChangedSlot);
+        filter_layout->addWidget(filter_modec_min_edit, row, 1);
 
-    QLineEdit* filter_modec_max_edit = new QLineEdit();
-    filter_modec_max_edit->setText(QString::number(label_generator_.filterModecMaxValue()));
-    connect(filter_modec_max_edit, &QLineEdit::textEdited,
-            this, &LabelGeneratorWidget::filterModeCMaxChangedSlot);
-    filter_layout->addWidget(filter_modec_max_edit, row, 1);
+        ++row;
+        QCheckBox* filter_modec_max_box = new QCheckBox("Mode C Max [FL]");
+        filter_modec_max_box->setChecked(label_generator_.filterModecMaxActive());
+        connect(filter_modec_max_box, &QCheckBox::clicked,
+                this, &LabelGeneratorWidget::filterModeCMaxActiveChangedSlot);
+        filter_layout->addWidget(filter_modec_max_box, row, 0);
+
+        QLineEdit* filter_modec_max_edit = new QLineEdit();
+        filter_modec_max_edit->setText(QString::number(label_generator_.filterModecMaxValue(), 'f', Precision));
+        auto validator1 = new QDoubleValidator(ModeCMin, ModeCMax, Precision, filter_modec_max_edit);
+        validator1->setNotation(QDoubleValidator::Notation::StandardNotation);
+        filter_modec_max_edit->setValidator(validator1);
+        connect(filter_modec_max_edit, &QLineEdit::textEdited,
+                this, &LabelGeneratorWidget::filterModeCMaxChangedSlot);
+        filter_layout->addWidget(filter_modec_max_edit, row, 1);
+
+        ++row;
+        const QString limit0 = QString::number(ModeCMin, 'f', Precision);
+        const QString limit1 = QString::number(ModeCMax, 'f', Precision);
+        RangeEditFloat* filter_modec_range_edit = new RangeEditFloat(SliderSteps, Precision);
+        filter_modec_range_edit->setLimits(limit0, limit1);
+        filter_modec_range_edit->connectToFields(filter_modec_min_edit, 
+                                                 filter_modec_max_edit);
+        filter_layout->addWidget(filter_modec_range_edit, row, 1);
+    }
 
     ++row;
     QCheckBox* filter_modec_null_box = new QCheckBox("Mode C NULL");
