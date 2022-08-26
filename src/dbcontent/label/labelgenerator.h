@@ -42,6 +42,7 @@ public:
     virtual void generateSubConfigurable(const std::string& class_id, const std::string& instance_id);
 
     std::vector<std::string> getLabelTexts(const std::string& dbcontent_name, unsigned int buffer_index);
+    std::vector<std::string> getFullTexts(const std::string& dbcontent_name, unsigned int buffer_index);
 
     bool autoLabel() const;
     void autoLabel(bool auto_label);

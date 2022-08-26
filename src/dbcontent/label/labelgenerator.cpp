@@ -289,6 +289,206 @@ std::vector<std::string> LabelGenerator::getLabelTexts(
     return tmp;
 }
 
+std::vector<std::string> LabelGenerator::getFullTexts(const std::string& dbcontent_name, unsigned int buffer_index)
+{
+    std::vector<std::string> tmp;
+
+    std::map<std::string, std::shared_ptr<Buffer>> buffers = dbcont_manager_.loadedData();
+    if (!buffers.count(dbcontent_name))
+    {
+        logerr << "LabelGenerator: getFullTexts: dbcontent_name '" << dbcontent_name << "' not in buffers";
+        return tmp;
+    }
+
+    DBContent& db_content = dbcont_manager_.dbContent(dbcontent_name);
+
+    std::shared_ptr<Buffer> buffer = buffers.at(dbcontent_name);
+    assert (buffer_index < buffer->size());
+
+    using namespace dbContent;
+
+    string value_str;
+    string property_name;
+    bool null;
+    bool use_presentation;
+
+    tmp.push_back("Variable");
+    tmp.push_back("Value");
+    tmp.push_back("Description");
+    tmp.push_back("Unit");
+
+    for (auto& var_it : db_content.variables())
+    {
+        if (buffer->hasProperty(*var_it.get()))
+        {
+            property_name = var_it->name();
+            PropertyDataType data_type = var_it->dataType();
+
+            use_presentation = var_it->representation() != Variable::Representation::STANDARD;
+
+            value_str = NULL_STRING;
+
+            if (data_type == PropertyDataType::BOOL)
+            {
+                assert(buffer->has<bool>(property_name));
+                null = buffer->get<bool>(property_name).isNull(buffer_index);
+                if (!null)
+                {
+                    if (use_presentation)
+                        value_str = var_it->getRepresentationStringFromValue(
+                                    buffer->get<bool>(property_name).getAsString(buffer_index));
+                    else
+                        value_str = buffer->get<bool>(property_name).getAsString(buffer_index);
+                }
+            }
+            else if (data_type == PropertyDataType::CHAR)
+            {
+                assert(buffer->has<char>(property_name));
+                null = buffer->get<char>(property_name).isNull(buffer_index);
+                if (!null)
+                {
+                    if (use_presentation)
+                        value_str = var_it->getRepresentationStringFromValue(
+                                    buffer->get<char>(property_name).getAsString(buffer_index));
+                    else
+                        value_str = buffer->get<char>(property_name).getAsString(buffer_index);
+                }
+            }
+            else if (data_type == PropertyDataType::UCHAR)
+            {
+                assert(buffer->has<unsigned char>(property_name));
+                null = buffer->get<unsigned char>(property_name).isNull(buffer_index);
+                if (!null)
+                {
+                    if (use_presentation)
+                        value_str = var_it->getRepresentationStringFromValue(
+                                    buffer->get<unsigned char>(property_name).getAsString(buffer_index));
+                    else
+                        value_str =
+                                buffer->get<unsigned char>(property_name).getAsString(buffer_index);
+                }
+            }
+            else if (data_type == PropertyDataType::INT)
+            {
+                assert(buffer->has<int>(property_name));
+                null = buffer->get<int>(property_name).isNull(buffer_index);
+                if (!null)
+                {
+                    if (use_presentation)
+                        value_str = var_it->getRepresentationStringFromValue(
+                                    buffer->get<int>(property_name).getAsString(buffer_index));
+                    else
+                        value_str = buffer->get<int>(property_name).getAsString(buffer_index);
+                }
+            }
+            else if (data_type == PropertyDataType::UINT)
+            {
+                assert(buffer->has<unsigned int>(property_name));
+                null = buffer->get<unsigned int>(property_name).isNull(buffer_index);
+                if (!null)
+                {
+                    if (use_presentation)
+                        value_str = var_it->getRepresentationStringFromValue(
+                                    buffer->get<unsigned int>(property_name).getAsString(buffer_index));
+                    else
+                        value_str =
+                                buffer->get<unsigned int>(property_name).getAsString(buffer_index);
+                }
+            }
+            else if (data_type == PropertyDataType::LONGINT)
+            {
+                assert(buffer->has<long int>(property_name));
+                null = buffer->get<long int>(property_name).isNull(buffer_index);
+                if (!null)
+                {
+                    if (use_presentation)
+                        value_str = var_it->getRepresentationStringFromValue(
+                                    buffer->get<long int>(property_name).getAsString(buffer_index));
+                    else
+                        value_str = buffer->get<long int>(property_name).getAsString(buffer_index);
+                }
+            }
+            else if (data_type == PropertyDataType::ULONGINT)
+            {
+                assert(buffer->has<unsigned long int>(property_name));
+                null = buffer->get<unsigned long int>(property_name).isNull(buffer_index);
+                if (!null)
+                {
+                    if (use_presentation)
+                        value_str = var_it->getRepresentationStringFromValue(
+                                    buffer->get<unsigned long int>(property_name)
+                                    .getAsString(buffer_index));
+                    else
+                        value_str =
+                                buffer->get<unsigned long int>(property_name).getAsString(buffer_index);
+                }
+            }
+            else if (data_type == PropertyDataType::FLOAT)
+            {
+                assert(buffer->has<float>(property_name));
+                null = buffer->get<float>(property_name).isNull(buffer_index);
+                if (!null)
+                {
+                    if (use_presentation)
+                        value_str = var_it->getRepresentationStringFromValue(
+                                    buffer->get<float>(property_name).getAsString(buffer_index));
+                    else
+                        value_str = buffer->get<float>(property_name).getAsString(buffer_index);
+                }
+            }
+            else if (data_type == PropertyDataType::DOUBLE)
+            {
+                assert(buffer->has<double>(property_name));
+                null = buffer->get<double>(property_name).isNull(buffer_index);
+                if (!null)
+                {
+                    if (use_presentation)
+                        value_str = var_it->getRepresentationStringFromValue(
+                                    buffer->get<double>(property_name).getAsString(buffer_index));
+                    else
+                        value_str = buffer->get<double>(property_name).getAsString(buffer_index);
+                }
+            }
+            else if (data_type == PropertyDataType::STRING)
+            {
+                assert(buffer->has<std::string>(property_name));
+                null = buffer->get<std::string>(property_name).isNull(buffer_index);
+                if (!null)
+                {
+                    value_str = buffer->get<std::string>(property_name).getAsString(buffer_index);
+                }
+            }
+            else if (data_type == PropertyDataType::JSON)
+            {
+                assert(buffer->has<nlohmann::json>(property_name));
+                null = buffer->get<nlohmann::json>(property_name).isNull(buffer_index);
+                if (!null)
+                {
+                    value_str = buffer->get<nlohmann::json>(property_name).getAsString(buffer_index);
+                }
+            }
+            else if (data_type == PropertyDataType::TIMESTAMP)
+            {
+                assert(buffer->has<boost::posix_time::ptime>(property_name));
+                null = buffer->get<boost::posix_time::ptime>(property_name).isNull(buffer_index);
+                if (!null)
+                {
+                    value_str = buffer->get<boost::posix_time::ptime>(property_name).getAsString(buffer_index);
+                }
+            }
+            else
+                throw std::domain_error("LabelGenerator: getFullTexts: unknown property data type");
+
+            tmp.push_back(property_name);
+            tmp.push_back(value_str);
+            tmp.push_back(var_it->description());
+            tmp.push_back(var_it->dimensionUnitStr());
+        }
+    }
+
+    return tmp;
+}
+
 bool LabelGenerator::autoLabel() const
 {
     return auto_label_;
@@ -1362,7 +1562,7 @@ std::string LabelGenerator::getVariableValue(const std::string& dbcontent_name, 
     }
     default:
         logerr << "LabelGenerator: getVariableValue: impossible for property type "
-                 << Property::asString(data_type);
+               << Property::asString(data_type);
         throw std::runtime_error(
                     "LabelGenerator: getVariableValue: impossible property type " +
                     Property::asString(data_type));

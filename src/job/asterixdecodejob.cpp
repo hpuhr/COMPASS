@@ -51,6 +51,8 @@ public:
           socket_(io_context),
           data_callback_(data_callback)
     {
+        // udp::endpoint(boost::asio::ip::address_v4::any(), port)
+
         data_ = new char[MAX_UDP_READ_SIZE];
 
         //loginf << "ctor: " << sender_ip_ << ":" << port_;
@@ -61,6 +63,14 @@ public:
 
         socket_.set_option(boost::asio::ip::multicast::join_group(
                                boost::asio::ip::address::from_string(sender_ip)));
+
+
+//        std::string address_listen = "1.2.3.4";
+//        std::string address_mcast = "224.0.0.0";
+//        boost::system::error_code ec;
+//        boost::asio::ip::address listen_addr = boost::asio::ip::address::from_string(address_listen, ec);
+//        boost::asio::ip::address mcast_addr = boost::asio::ip::address::from_string(address_mcast, ec);
+//        socket_.set_option(boost::asio::ip::multicast::join_group(mcast_addr.to_v4(), listen_addr.to_v4()), ec);
 
         socket_.async_receive_from(
                     boost::asio::buffer(data_, MAX_UDP_READ_SIZE), sender_endpoint_,
@@ -86,6 +96,8 @@ public:
             //sender_endpoint_.address().to_string()+":"+to_string(sender_endpoint_.port()),
             data_callback_(data_, bytes_recvd);
         }
+
+        //sender_endpoint_.address() should be set to sender ip
 
         socket_.async_receive_from(
                     boost::asio::buffer(data_, MAX_UDP_READ_SIZE), sender_endpoint_,
