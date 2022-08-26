@@ -314,7 +314,7 @@ std::vector<std::string> LabelGenerator::getFullTexts(const std::string& dbconte
 
     tmp.push_back("Variable");
     tmp.push_back("Value");
-    tmp.push_back("Description");
+    //tmp.push_back("Description");
     tmp.push_back("Unit");
 
     for (auto& var_it : db_content.variables())
@@ -481,7 +481,7 @@ std::vector<std::string> LabelGenerator::getFullTexts(const std::string& dbconte
 
             tmp.push_back(property_name);
             tmp.push_back(value_str);
-            tmp.push_back(var_it->description());
+            //tmp.push_back(var_it->description());
             tmp.push_back(var_it->dimensionUnitStr());
         }
     }
