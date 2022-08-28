@@ -25,7 +25,7 @@ HistogramViewDataToolWidget::HistogramViewDataToolWidget(HistogramView* view, QW
     // tool actions
     {
         QAction* select_action = toolbar_->addAction(
-            QIcon(Files::getIconFilepath("select_action.png").c_str()), "Select");
+            QIcon(Files::getIconFilepath("interaction.png").c_str()), "Select");
         select_button_ = dynamic_cast<QToolButton*>(toolbar_->widgetForAction(select_action));
         assert(select_button_);
         select_button_->setCheckable(true);
