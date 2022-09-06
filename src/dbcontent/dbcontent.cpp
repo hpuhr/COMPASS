@@ -702,7 +702,7 @@ void DBContent::readJobIntermediateSlot(shared_ptr<Buffer> buffer)
     assert(sender == read_job_.get());
 
     // check variables
-    vector<Variable*>& variables = sender->readList().getSet();
+    const vector<Variable*>& variables = sender->readList().getSet();
     const PropertyList& properties = buffer->properties();
 
     for (auto var_it : variables)

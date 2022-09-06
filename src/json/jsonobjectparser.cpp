@@ -109,7 +109,7 @@ void JSONObjectParser::generateSubConfigurable(const std::string& class_id,
         throw std::runtime_error("JSONObjectParser: generateSubConfigurable: unknown class_id " + class_id);
 }
 
-DBContent& JSONObjectParser::dbObject() const
+DBContent& JSONObjectParser::dbContent() const
 {
     assert(dbcontent_);
     return *dbcontent_;
@@ -889,7 +889,7 @@ JSONObjectParserWidget* JSONObjectParser::widget()
     return widget_.get();  // needed for qt integration, not pretty
 }
 
-std::string JSONObjectParser::dbObjectName() const { return db_content_name_; }
+std::string JSONObjectParser::dbContentName() const { return db_content_name_; }
 
 void JSONObjectParser::setMappingActive(JSONDataMapping& mapping, bool active)
 {

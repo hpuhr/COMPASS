@@ -725,7 +725,7 @@ void Buffer::transformVariables(dbContent::VariableSet& list, bool dbcol2dbovar)
 {
     logdbg << "Buffer: transformVariables: dbo '" << dbcontent_name_ << "' dbcol2dbovar " << dbcol2dbovar;
 
-    vector<dbContent::Variable*>& variables = list.getSet();
+    const vector<dbContent::Variable*>& variables = list.getSet();
     string variable_name;
     string db_column_name;
 

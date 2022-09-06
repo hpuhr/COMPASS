@@ -24,8 +24,8 @@
 #include "databaseopentaskwidget.h"
 #include "dbcontent/dbcontentmanager.h"
 //#include "dboeditdatasourceswidget.h"
-//#include "jsonimporttask.h"
-//#include "jsonimporttaskwidget.h"
+#include "jsonimporttask.h"
+#include "jsonimporttaskwidget.h"
 #include "jsonparsingschema.h"
 //#include "managedatasourcestask.h"
 //#include "managedatasourcestaskwidget.h"
@@ -122,13 +122,13 @@ void TaskManager::generateSubConfigurable(const std::string& class_id,
         assert(view_points_import_task_);
         addTask(class_id, view_points_import_task_.get());
     }
-//    else if (class_id.compare("JSONImportTask") == 0)
-//    {
-//        assert(!json_import_task_);
-//        json_import_task_.reset(new JSONImportTask(class_id, instance_id, *this));
-//        assert(json_import_task_);
-//        addTask(class_id, json_import_task_.get());
-//    }
+    else if (class_id.compare("JSONImportTask") == 0)
+    {
+        assert(!json_import_task_);
+        json_import_task_.reset(new JSONImportTask(class_id, instance_id, *this));
+        assert(json_import_task_);
+        addTask(class_id, json_import_task_.get());
+    }
     else if (class_id.compare("GPSTrailImportTask") == 0)
     {
         assert(!gps_trail_import_task_);
@@ -221,11 +221,11 @@ void TaskManager::checkSubConfigurables()
         assert(view_points_import_task_);
     }
 
-//    if (!json_import_task_)
-//    {
-//        generateSubConfigurable("JSONImportTask", "JSONImportTask0");
-//        assert(json_import_task_);
-//    }
+    if (!json_import_task_)
+    {
+        generateSubConfigurable("JSONImportTask", "JSONImportTask0");
+        assert(json_import_task_);
+    }
 
     if (!gps_trail_import_task_)
     {
@@ -395,11 +395,11 @@ ViewPointsImportTask& TaskManager::viewPointsImportTask() const
     return *view_points_import_task_;
 }
 
-//JSONImportTask& TaskManager::jsonImporterTask() const
-//{
-//    assert(json_import_task_);
-//    return *json_import_task_;
-//}
+JSONImportTask& TaskManager::jsonImporterTask() const
+{
+    assert(json_import_task_);
+    return *json_import_task_;
+}
 
 GPSTrailImportTask& TaskManager::gpsTrailImportTask() const
 {

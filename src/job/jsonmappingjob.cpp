@@ -31,7 +31,7 @@ using namespace nlohmann;
 
 JSONMappingJob::JSONMappingJob(std::unique_ptr<nlohmann::json> data,
                                const std::vector<std::string>& data_record_keys,
-                               const std::map<std::string, JSONObjectParser>& parsers)
+                               const std::map<std::string, std::unique_ptr<JSONObjectParser>>& parsers)
     : Job("JSONMappingJob"),
       data_(std::move(data)),
       data_record_keys_(data_record_keys),
@@ -54,14 +54,14 @@ void JSONMappingJob::run()
 
     for (auto& parser_it : parsers_)
     {
-        if (!parser_it.second.active())
+        if (!parser_it.second->active())
             continue;
 
-        if (!buffers_.count(parser_it.second.dbObject().name()))
-            buffers_[parser_it.second.dbObject().name()] = parser_it.second.getNewBuffer();
+        if (!buffers_.count(parser_it.second->dbContentName()))
+            buffers_[parser_it.second->dbContentName()] = parser_it.second->getNewBuffer();
         else
-            parser_it.second.appendVariablesToBuffer(
-                *buffers_.at(parser_it.second.dbObject().name()));
+            parser_it.second->appendVariablesToBuffer(
+                *buffers_.at(parser_it.second->dbContentName()));
     }
 
     auto process_lambda = [this](nlohmann::json& record) {
@@ -78,32 +78,32 @@ void JSONMappingJob::run()
 
         for (auto& map_it : parsers_)
         {
-            if (!map_it.second.active())
+            if (!map_it.second->active())
                 continue;
 
-            logdbg << "JSONMappingJob: run: mapping json: obj " << map_it.second.dbObject().name();
-            std::shared_ptr<Buffer>& buffer = buffers_.at(map_it.second.dbObject().name());
+            logdbg << "JSONMappingJob: run: mapping json: obj " << map_it.second->dbContentName();
+            std::shared_ptr<Buffer>& buffer = buffers_.at(map_it.second->dbContentName());
             assert(buffer);
             try
             {
-                logdbg << "JSONMappingJob: run: obj " << map_it.second.dbObject().name() << " parsing JSON";
+                logdbg << "JSONMappingJob: run: obj " << map_it.second->dbContentName() << " parsing JSON";
 
-                parsed = map_it.second.parseJSON(record, *buffer);
+                parsed = map_it.second->parseJSON(record, *buffer);
 
                 if (parsed)
                 {
-                    logdbg << "JSONMappingJob: run: obj " << map_it.second.dbObject().name() << " transforming buffer";
-                    map_it.second.transformBuffer(*buffer, buffer->size() - 1);
+                    logdbg << "JSONMappingJob: run: obj " << map_it.second->dbContentName() << " transforming buffer";
+                    map_it.second->transformBuffer(*buffer, buffer->size() - 1);
                 }
 
-                logdbg << "JSONMappingJob: run: obj " << map_it.second.dbObject().name() << " done";
+                logdbg << "JSONMappingJob: run: obj " << map_it.second->dbContentName() << " done";
 
                 parsed_any |= parsed;
             }
             catch (exception& e)
             {
                 logerr << "JSONMappingJob: run: caught exception '" << e.what() << "' in \n'"
-                       << record.dump(4) << "' parser " << map_it.second.dbObject().name();
+                       << record.dump(4) << "' parser " << map_it.second->dbContentName();
 
                 ++num_errors_;
 

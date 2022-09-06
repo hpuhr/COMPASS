@@ -53,7 +53,7 @@ class JSONObjectParser : public Configurable
     /// @brief Move constructor
     JSONObjectParser& operator=(JSONObjectParser&& other);
 
-    DBContent& dbObject() const;
+    DBContent& dbContent() const;
 
     std::string JSONKey() const;
     void JSONKey(const std::string& json_key);
@@ -94,7 +94,7 @@ class JSONObjectParser : public Configurable
 
     JSONObjectParserWidget* widget();
 
-    std::string dbObjectName() const;
+    std::string dbContentName() const;
 
     void setMappingActive(JSONDataMapping& mapping, bool active);
 

@@ -43,7 +43,7 @@ class VariableSet
     bool add(Variable& var);
     bool add(const Variable& var);
     /// @brief Adds another set of variables
-    bool add(VariableSet& set);
+    bool add(const VariableSet& set);
     /// @brief Adds variables for a given type from a given set of variables
     // bool addOnly (DBOVariableSet &set, const std::string &dbo_type);
     /// @brief Removes variable at a given index
@@ -62,7 +62,7 @@ class VariableSet
     // DBOVariableSet *clone ();
 
     /// @brief Returns container with all variables
-    std::vector<Variable*>& getSet() { return set_; }
+    const std::vector<Variable*>& getSet() const { return set_; }
     /// @brief Returns variable at a given index
     Variable& getVariable(unsigned int index) const;
 

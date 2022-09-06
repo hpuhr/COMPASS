@@ -38,6 +38,12 @@ class JSONMappingJob;
 class ReadJSONFileJob;
 class DBContent;
 class Buffer;
+
+namespace dbContent
+{
+    class VariableSet;
+}
+
 class DBOVariableSet;
 
 class QMessageBox;
@@ -46,7 +52,7 @@ class JSONImportTask : public Task, public Configurable
 {
     Q_OBJECT
 
-    using JSONParsingSchemaIterator = std::map<std::string, JSONParsingSchema>::iterator;
+    using JSONParsingSchemaIterator = std::map<std::string, std::shared_ptr<JSONParsingSchema>>::iterator;
 
   public slots:
     void addReadJSONSlot();
@@ -59,8 +65,8 @@ class JSONImportTask : public Task, public Configurable
     void mapJSONDoneSlot();
     void mapJSONObsoleteSlot();
 
-    void insertProgressSlot(float percent);
-    void insertDoneSlot(DBContent& object);
+    //void insertProgressSlot(float percent);
+    void insertDoneSlot();
 
   public:
     JSONImportTask(const std::string& class_id, const std::string& instance_id,
@@ -88,8 +94,9 @@ class JSONImportTask : public Task, public Configurable
     JSONParsingSchemaIterator begin() { return schemas_.begin(); }
     JSONParsingSchemaIterator end() { return schemas_.end(); }
     bool hasSchema(const std::string& name);
-    bool hasCurrentSchema();
-    JSONParsingSchema& currentSchema();
+    bool hasCurrentSchema() const;
+    bool hasJSONSchema() const;
+    std::shared_ptr<JSONParsingSchema> currentJSONSchema();
     void removeCurrentSchema();
 
     std::string currentSchemaName() const;
@@ -109,14 +116,14 @@ class JSONImportTask : public Task, public Configurable
 
     std::unique_ptr<JSONImportTaskWidget> widget_;
 
-    std::string current_schema_;
-    std::map<std::string, JSONParsingSchema> schemas_;
+    std::string current_schema_name_;
+    std::map<std::string, std::shared_ptr<JSONParsingSchema>> schemas_;
 
     ASTERIXPostProcess post_process_;
 
     size_t insert_active_{0};
 
-    std::map<std::string, std::tuple<std::string, DBOVariableSet>> dbo_variable_sets_;
+    std::map<std::string, std::tuple<std::string, dbContent::VariableSet>> dbcont_variable_sets_;
     std::set<int> added_data_sources_;
 
     std::shared_ptr<ReadJSONFileJob> read_json_job_;
@@ -140,9 +147,10 @@ class JSONImportTask : public Task, public Configurable
     size_t objects_not_mapped_{0};
 
     size_t objects_created_{0};
-    size_t objects_inserted_{0};
+    size_t records_inserted_{0};
 
-    unsigned int num_radar_inserted_ {0};
+    //unsigned int num_radar_inserted_ {0};
+    bool insert_slot_connected_ {false};
     bool all_done_{false};
 
     size_t statistics_calc_objects_inserted_{0};

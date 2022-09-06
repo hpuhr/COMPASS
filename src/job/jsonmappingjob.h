@@ -32,7 +32,7 @@ class JSONMappingJob : public Job
   public:
     JSONMappingJob(std::unique_ptr<nlohmann::json> data,
                    const std::vector<std::string>& data_record_keys,
-                   const std::map<std::string, JSONObjectParser>& parsers);
+                   const std::map<std::string, std::unique_ptr<JSONObjectParser>>& parsers); // TODO ugly
     // json obj moved, mappings referenced
     virtual ~JSONMappingJob();
 
@@ -59,7 +59,7 @@ private:
     std::unique_ptr<nlohmann::json> data_;
     const std::vector<std::string> data_record_keys_;
 
-    const std::map<std::string, JSONObjectParser>& parsers_;
+    const std::map<std::string, std::unique_ptr<JSONObjectParser>>& parsers_;
 
     std::map<std::string, std::shared_ptr<Buffer>> buffers_;
 };

@@ -22,7 +22,7 @@
 #include "dbcontent/dbcontentcombobox.h"
 #include "dbcontent/dbcontentmanager.h"
 #include "dbcontent/variable/variable.h"
-#include "dbovariableselectionwidget.h"
+#include "dbcontent/variable/variableselectionwidget.h"
 #include "jsonimporttask.h"
 #include "jsonparsingschema.h"
 #include "logger.h"
@@ -43,6 +43,7 @@
 #include <QVBoxLayout>
 
 using namespace Utils;
+using namespace std;
 
 JSONImportTaskWidget::JSONImportTaskWidget(JSONImportTask& task, QWidget* parent, Qt::WindowFlags f)
     : TaskWidget(parent, f), task_(task)
@@ -421,20 +422,19 @@ void JSONImportTaskWidget::addObjectParserSlot()
         return;
     }
 
-    SelectDBContentDialog dialog;
+    dbContent::SelectDBContentDialog dialog;
 
     int ret = dialog.exec();
 
     if (ret == QDialog::Accepted)
     {
-        std::string name = dialog.name();
         std::string dbcontent_name = dialog.selectedObject();
-        loginf << "JSONImportTaskWidget: addObjectParserSlot: name " << name << " obj "
+        loginf << "JSONImportTaskWidget: addObjectParserSlot: dbcontent_name "
                << dbcontent_name;
 
-        JSONParsingSchema& current = task_.currentSchema();
+        shared_ptr<JSONParsingSchema> current = task_.currentJSONSchema();
 
-        if (!name.size() || current.hasObjectParser(name))
+        if (!dbcontent_name.size() || current->hasObjectParser(dbcontent_name))
         {
             QMessageBox m_warning(QMessageBox::Warning, "JSON Object Parser Adding Failed",
                                   "Object parser name empty or already defined.", QMessageBox::Ok);
@@ -443,13 +443,12 @@ void JSONImportTaskWidget::addObjectParserSlot()
             return;
         }
 
-        std::string instance = "JSONObjectParser" + name + dbcontent_name + "0";
+        std::string instance = "JSONObjectParser" + dbcontent_name + "0";
 
-        Configuration& config = current.addNewSubConfiguration("JSONObjectParser", instance);
-        config.addParameterString("name", name);
+        Configuration& config = current->addNewSubConfiguration("JSONObjectParser", instance);
         config.addParameterString("dbcontent_name", dbcontent_name);
 
-        current.generateSubConfigurable("JSONObjectParser", instance);
+        current->generateSubConfigurable("JSONObjectParser", instance);
         updateParserBox();
     }
 }
@@ -462,10 +461,10 @@ void JSONImportTaskWidget::removeObjectParserSlot()
         std::string name = object_parser_box_->currentText().toStdString();
 
         assert(task_.hasCurrentSchema());
-        JSONParsingSchema& current = task_.currentSchema();
+        shared_ptr<JSONParsingSchema> current = task_.currentJSONSchema();
 
-        assert(current.hasObjectParser(name));
-        current.removeParser(name);
+        assert(current->hasObjectParser(name));
+        current->removeParser(name);
 
         updateParserBox();
     }
@@ -486,13 +485,13 @@ void JSONImportTaskWidget::selectedObjectParserSlot(const QString& text)
         std::string name = object_parser_box_->currentText().toStdString();
 
         assert(task_.hasCurrentSchema());
-        assert(task_.currentSchema().hasObjectParser(name));
+        assert(task_.currentJSONSchema()->hasObjectParser(name));
         assert(object_parser_widget_);
 
-        if (object_parser_widget_->indexOf(task_.currentSchema().parser(name).widget()) < 0)
-            object_parser_widget_->addWidget(task_.currentSchema().parser(name).widget());
+        if (object_parser_widget_->indexOf(task_.currentJSONSchema()->parser(name).widget()) < 0)
+            object_parser_widget_->addWidget(task_.currentJSONSchema()->parser(name).widget());
 
-        object_parser_widget_->setCurrentWidget(task_.currentSchema().parser(name).widget());
+        object_parser_widget_->setCurrentWidget(task_.currentJSONSchema()->parser(name).widget());
     }
 }
 
@@ -540,9 +539,9 @@ void JSONImportTaskWidget::updateParserBox()
         if (task_.currentSchemaName() == "jASTERIX")
             return;
 
-        loginf << "JSONImportTaskWidget: updateParserBox: current schema " << task_.currentSchema().name();
+        loginf << "JSONImportTaskWidget: updateParserBox: current schema " << task_.currentJSONSchema()->name();
 
-        for (auto& parser_it : task_.currentSchema())
+        for (auto& parser_it : *task_.currentJSONSchema())
         {
             object_parser_box_->addItem(parser_it.first.c_str());
         }
