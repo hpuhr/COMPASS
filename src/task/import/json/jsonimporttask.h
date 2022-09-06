@@ -23,6 +23,7 @@
 #include "jsonparsingschema.h"
 #include "task.h"
 #include "asterixpostprocess.h"
+#include "asterixpostprocessjob.h"
 
 #include <QObject>
 #include <memory>
@@ -68,7 +69,9 @@ class JSONImportTask : public Task, public Configurable
     void mapJSONDoneSlot();
     void mapJSONObsoleteSlot();
 
-    //void insertProgressSlot(float percent);
+    void postprocessDoneSlot();
+    void postprocessObsoleteSlot();
+
     void insertDoneSlot();
 
   public:
@@ -86,7 +89,7 @@ class JSONImportTask : public Task, public Configurable
     virtual void run();
 
     void importFilename(const std::string& filename);
-    const std::string& importFilename() { return current_filename_; }
+    const std::string& importFilename() { return import_filename_; }
 
     JSONParsingSchemaIterator begin() { return schemas_.begin(); }
     JSONParsingSchemaIterator end() { return schemas_.end(); }
@@ -114,7 +117,7 @@ class JSONImportTask : public Task, public Configurable
     void date(const boost::posix_time::ptime& date);
 
   protected:
-    std::string current_filename_;
+    std::string import_filename_;
 
     std::unique_ptr<JSONImportTaskDialog> dialog_;
 
@@ -134,6 +137,7 @@ class JSONImportTask : public Task, public Configurable
     std::shared_ptr<ReadJSONFileJob> read_json_job_;
     std::shared_ptr<JSONParseJob> json_parse_job_;
     std::vector<std::shared_ptr<JSONMappingJob>> json_map_jobs_;
+    std::vector<std::shared_ptr<ASTERIXPostprocessJob>> postprocess_jobs_;
 
     bool test_{false};
 

@@ -126,8 +126,8 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
             ("asterix_decoder_cfg", po::value<std::string>(&asterix_decoder_cfg),
              "sets ASTERIX decoder config using JSON string, e.g. ''{\"10\":{\"edition\":\"0.31\"}}''"
                          " (including one pair of single quotes)")
-            //            ("import_json", po::value<std::string>(&import_json_filename),
-            //             "imports JSON file with given filename, e.g. '/data/file1.json'")
+            ("import_json", po::value<std::string>(&import_json_filename_),
+             "imports JSON file with given filename, e.g. '/data/file1.json'")
             //            ("json_schema", po::value<std::string>(&import_json_schema),
             //             "JSON file import schema, e.g. 'jASTERIX', 'OpenSkyNetwork', 'ADSBExchange', 'SDDL'")
             ("import_gps_trail", po::value<std::string>(&import_gps_trail_filename_),
@@ -305,8 +305,8 @@ void Client::run ()
         main_window.importAsterixNetworkMaxLines(import_asterix_network_max_lines_);
     }
 
-    //    if (import_json_filename.size())
-    //        task_man.importJSONFile(import_json_filename, import_json_schema);
+    if (import_json_filename_.size())
+        main_window.importJSONFile(import_json_filename_); // , import_json_schema
 
     if (import_gps_trail_filename_.size())
         main_window.importGPSTrailFile(import_gps_trail_filename_);

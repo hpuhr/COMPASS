@@ -111,6 +111,8 @@ public:
     //    bool asterixOptionsSet() const;
     //    void setAsterixOptions();
 
+    void importJSONFile(const std::string& filename);
+
     void importGPSTrailFile(const std::string& filename);
     void importSectorsFile(const std::string& filename);
 
@@ -160,6 +162,8 @@ protected:
     bool asterix_import_network_ {false};
     float asterix_import_network_time_offset_ {0};
     int asterix_import_network_max_lines_ {-1};
+
+    std::string json_import_filename_;
 
     bool gps_trail_import_file_ {false};
     std::string gps_trail_import_filename_;

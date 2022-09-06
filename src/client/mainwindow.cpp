@@ -585,6 +585,15 @@ void MainWindow::importAsterixNetworkMaxLines(int value)
     asterix_import_network_max_lines_ = value;
 }
 
+void MainWindow::importJSONFile(const std::string& filename)
+{
+    loginf << "MainWindow: importJSONFile: filename '" << filename << "'";
+
+    automatic_tasks_defined_ = true;
+
+    json_import_filename_ = filename;
+}
+
 void MainWindow::importGPSTrailFile(const std::string& filename)
 {
     automatic_tasks_defined_ = true;
@@ -844,56 +853,65 @@ void MainWindow::performAutomaticTasks ()
     }
 
 
-    ////    if (json_import_file_)
-    ////    {
-    ////        loginf << "MainWindow: performAutomaticTasks: importing JSON file '"
-    ////               << json_import_filename_ << "'";
+    if (json_import_filename_.size())
+    {
+        loginf << "MainWindow: performAutomaticTasks: importing JSON file '"
+               << json_import_filename_ << "'";
 
-    ////#if USE_JASTERIX
-    ////        if (!Files::fileExists(json_import_filename_))
-    ////        {
-    ////            logerr << "MainWindow: performAutomaticTasks: JSON file '" << asterix_import_filename_
-    ////                   << "' does not exist";
-    ////            return;
-    ////        }
-    ////#endif
+        if (!Files::fileExists(json_import_filename_))
+        {
+            logerr << "MainWindow: performAutomaticTasks: JSON file '" << json_import_filename_
+                   << "' does not exist";
+            return;
+        }
 
-    ////        if(!json_import_task_->hasSchema(json_import_schema_))
-    ////        {
-    ////            logerr << "MainWindow: performAutomaticTasks: JSON schema '" << json_import_schema_
-    ////                   << "' does not exist";
-    ////            return;
-    ////        }
+        //        if(!json_import_task_->hasSchema(json_import_schema_))
+        //        {
+        //            logerr << "MainWindow: performAutomaticTasks: JSON schema '" << json_import_schema_
+        //                   << "' does not exist";
+        //            return;
+        //        }
 
-    ////        widget_->setCurrentTask(*json_import_task_);
-    ////        if(widget_->getCurrentTaskName() != json_import_task_->name())
-    ////        {
-    ////            logerr << "MainWindow: performAutomaticTasks: wrong task '" << widget_->getCurrentTaskName()
-    ////                   << "' selected, aborting";
-    ////            return;
-    ////        }
+        //        widget_->setCurrentTask(*json_import_task_);
+        //        if(widget_->getCurrentTaskName() != json_import_task_->name())
+        //        {
+        //            logerr << "MainWindow: performAutomaticTasks: wrong task '" << widget_->getCurrentTaskName()
+        //                   << "' selected, aborting";
+        //            return;
+        //        }
 
-    ////        JSONImportTaskWidget* json_import_task_widget =
-    ////                dynamic_cast<JSONImportTaskWidget*>(json_import_task_->widget());
-    ////        assert(json_import_task_widget);
+        //        JSONImportTaskWidget* json_import_task_widget =
+        //                dynamic_cast<JSONImportTaskWidget*>(json_import_task_->widget());
+        //        assert(json_import_task_widget);
 
-    ////        json_import_task_widget->addFile(json_import_filename_);
-    ////        json_import_task_widget->selectFile(json_import_filename_);
-    ////        json_import_task_widget->selectSchema(json_import_schema_);
+        //        json_import_task_widget->addFile(json_import_filename_);
+        //        json_import_task_widget->selectFile(json_import_filename_);
+        //        json_import_task_widget->selectSchema(json_import_schema_);
 
-    ////        assert(json_import_task_->canRun());
-    ////        json_import_task_->showDoneSummary(false);
+        //        assert(json_import_task_->canRun());
+        //        json_import_task_->showDoneSummary(false);
 
-    ////        widget_->runTask(*json_import_task_);
+        //        widget_->runTask(*json_import_task_);
 
-    ////        while (!json_import_task_->done())
-    ////        {
-    ////            QCoreApplication::processEvents();
-    ////            QThread::msleep(1);
-    ////        }
+        JSONImportTask& json_import_task = COMPASS::instance().taskManager().jsonImporterTask();
 
-    ////        loginf << "MainWindow: performAutomaticTasks: importing JSON file done";
-    ////    }
+        json_import_task.importFilename(json_import_filename_);
+
+        assert(json_import_task.canRun());
+        json_import_task.showDoneSummary(false);
+
+        json_import_task.run(); // no test
+
+        while (!json_import_task.done())
+        {
+            if (QCoreApplication::hasPendingEvents())
+                QCoreApplication::processEvents();
+
+            QThread::msleep(1);
+        }
+
+        loginf << "MainWindow: performAutomaticTasks: importing JSON file done";
+    }
 
     if (gps_trail_import_file_)
     {

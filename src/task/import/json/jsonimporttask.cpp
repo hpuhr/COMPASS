@@ -63,6 +63,8 @@ JSONImportTask::JSONImportTask(const std::string& class_id, const std::string& i
 
     registerParameter("current_schema_name", &current_schema_name_, "");
 
+    date_ = boost::posix_time::ptime(boost::gregorian::day_clock::universal_day());
+
     createSubConfigurables();
 }
 
@@ -115,7 +117,7 @@ void JSONImportTask::importFilename(const std::string& filename)
 {
     loginf << "JSONImporterTask: importFilename: filename '" << filename << "'";
 
-    current_filename_ = filename;
+    import_filename_ = filename;
 
     if (dialog_)
         dialog_->updateSource();
@@ -245,12 +247,12 @@ void JSONImportTask::date(const boost::posix_time::ptime& date)
 
 bool JSONImportTask::canImportFile()
 {
-    if (!current_filename_.size())
+    if (!import_filename_.size())
         return false;
 
-    if (!Files::fileExists(current_filename_))
+    if (!Files::fileExists(import_filename_))
     {
-        loginf << "JSONImporterTask: canImportFile: not possible since file '" << current_filename_
+        loginf << "JSONImporterTask: canImportFile: not possible since file '" << import_filename_
                << "does not exist";
         return false;
     }
@@ -274,7 +276,7 @@ bool JSONImportTask::canRun() { return canImportFile(); }
 
 void JSONImportTask::run()
 {
-    loginf << "JSONImporterTask: run: filename '" << current_filename_ << "' test " << test_;
+    loginf << "JSONImporterTask: run: filename '" << import_filename_ << "' test " << test_;
 
     done_ = false; // since can be run multiple times
 
@@ -319,9 +321,9 @@ void JSONImportTask::run()
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
     if (current_schema_name_ == "jASTERIX")
-        read_json_job_ = std::make_shared<ReadJSONFileJob>(current_filename_, 1);
+        read_json_job_ = std::make_shared<ReadJSONFileJob>(import_filename_, 1);
     else
-        read_json_job_ = std::make_shared<ReadJSONFileJob>(current_filename_, num_objects_chunk);
+        read_json_job_ = std::make_shared<ReadJSONFileJob>(import_filename_, num_objects_chunk);
 
     connect(read_json_job_.get(), &ReadJSONFileJob::readJSONFilePartSignal, this,
             &JSONImportTask::addReadJSONSlot, Qt::QueuedConnection);
@@ -469,7 +471,7 @@ void JSONImportTask::parseJSONDoneSlot()
         }
 
         json_map_job = std::make_shared<JSONMappingJob>(
-                    std::move(json_objects), keys,
+                    std::move(json_objects), keys, file_line_id_,
                     COMPASS::instance().taskManager().asterixImporterTask().schema()->parsers());
 
         //loginf << "UGA2";
@@ -485,7 +487,7 @@ void JSONImportTask::parseJSONDoneSlot()
         assert (hasJSONSchema());
 
         json_map_job = std::make_shared<JSONMappingJob>(
-                    std::move(json_objects), keys, currentJSONSchema()->parsers());
+                    std::move(json_objects), keys, file_line_id_, currentJSONSchema()->parsers());
     }
 
     assert (json_map_job);
@@ -560,12 +562,80 @@ void JSONImportTask::mapJSONDoneSlot()
             read_json_job_->unpause();
     }
 
-    insertData(std::move(job_buffers));
+    std::shared_ptr<ASTERIXPostprocessJob> postprocess_job =
+            make_shared<ASTERIXPostprocessJob>(std::move(job_buffers), date_,
+                                               false, 0, // bool override_tod_active, float override_tod_offset
+                                               false); // bool do_timestamp_checks
+
+    postprocess_jobs_.push_back(postprocess_job);
+
+    // check for future when net import
+
+    connect(postprocess_job.get(), &ASTERIXPostprocessJob::obsoleteSignal, this,
+            &JSONImportTask::postprocessObsoleteSlot, Qt::QueuedConnection);
+    connect(postprocess_job.get(), &ASTERIXPostprocessJob::doneSignal, this,
+            &JSONImportTask::postprocessDoneSlot, Qt::QueuedConnection);
+
+    JobManager::instance().addNonBlockingJob(postprocess_job);
+
+    //insertData(std::move(job_buffers));
 
     logdbg << "JSONImporterTask: mapJSONDoneSlot: done";
 }
 
 void JSONImportTask::mapJSONObsoleteSlot() { logdbg << "JSONImporterTask: mapJSONObsoleteSlot"; }
+
+
+void JSONImportTask::postprocessDoneSlot()
+{
+    logdbg << "JSONImportTask: postprocessDoneSlot: import_file " << import_filename_;
+
+    if (stopped_)
+    {
+        postprocess_jobs_.clear();
+
+        checkAllDone();
+
+        return;
+    }
+
+    ASTERIXPostprocessJob* post_job = dynamic_cast<ASTERIXPostprocessJob*>(QObject::sender());
+    assert(post_job);
+
+    std::map<std::string, std::shared_ptr<Buffer>> job_buffers {post_job->buffers()};
+
+    assert (postprocess_jobs_.size());
+    assert (postprocess_jobs_.begin()->get() == post_job);
+    post_job = nullptr;
+    postprocess_jobs_.erase(postprocess_jobs_.begin()); // remove
+
+    insertData(std::move(job_buffers));
+
+    // queue data
+//    if (!stopped_)
+//    {
+//        queued_job_buffers_.emplace_back(std::move(job_buffers));
+
+//        if (!insert_active_)
+//        {
+//            logdbg << "JSONImportTask: postprocessDoneSlot: inserting, thread " << QThread::currentThreadId();
+//            assert (!COMPASS::instance().dbContentManager().insertInProgress());
+//            insertData();
+//        }
+//    }
+}
+
+void JSONImportTask::postprocessObsoleteSlot()
+{
+    ASTERIXPostprocessJob* post_job = dynamic_cast<ASTERIXPostprocessJob*>(QObject::sender());
+    assert(post_job);
+
+    assert (postprocess_jobs_.size());
+    assert (postprocess_jobs_.begin()->get() == post_job);
+    post_job = nullptr;
+    postprocess_jobs_.erase(postprocess_jobs_.begin()); // remove
+}
+
 
 void JSONImportTask::insertData(std::map<std::string, std::shared_ptr<Buffer>> job_buffers)
 {
@@ -591,6 +661,8 @@ void JSONImportTask::insertData(std::map<std::string, std::shared_ptr<Buffer>> j
         insert_slot_connected_ = true;
     }
 
+
+    ++insert_active_;
     dbcont_manager.insertData(job_buffers);
 
     // checkAllDone();
@@ -788,10 +860,11 @@ void JSONImportTask::checkAllDone()
 
     loginf << "JSONImporterTask: checkAllDone: all done " << all_done_ << " read "
            << (read_json_job_ == nullptr) << " parse jobs " << (json_parse_job_ == nullptr)
-           << " map jobs " << json_map_jobs_.empty() << " insert active " << (insert_active_ == 0);
+           << " map jobs " << json_map_jobs_.empty() << " post jobs " << postprocess_jobs_.empty()
+           << " insert active " << (insert_active_ == 0);
 
     if (!all_done_ && read_json_job_ == nullptr && json_parse_job_ == nullptr &&
-            json_map_jobs_.size() == 0 && insert_active_ == 0)
+            json_map_jobs_.size() == 0 && postprocess_jobs_.size() == 0 && insert_active_ == 0)
     {
         stop_time_ = boost::posix_time::microsec_clock::local_time();
 
@@ -864,7 +937,7 @@ void JSONImportTask::updateMsgBox()
 
     std::string msg;
 
-    msg = "File '" + current_filename_ + "'\n";
+    msg = "File '" + import_filename_ + "'\n";
 
     stop_time_ = boost::posix_time::microsec_clock::local_time();
 
@@ -975,7 +1048,7 @@ bool JSONImportTask::maxLoadReached()
 
 void JSONImportTask::insertDoneSlot()
 {
-    logdbg << "JSONImporterTask: insertDoneSlot";
+    loginf << "JSONImporterTask: insertDoneSlot";
     --insert_active_;
 
     bool test = test_; // test_ cleared by checkAllDone
@@ -985,7 +1058,7 @@ void JSONImportTask::insertDoneSlot()
 
     if (all_done_ && !test)
     {
-        logdbg << "JSONImporterTask: insertDoneSlot: finalizing";
+        loginf << "JSONImporterTask: insertDoneSlot: finalizing";
 
         disconnect(&COMPASS::instance().dbContentManager(), &DBContentManager::insertDoneSignal,
                    this, &JSONImportTask::insertDoneSlot);
@@ -994,5 +1067,5 @@ void JSONImportTask::insertDoneSlot()
         //emit doneSignal(name_); emitted in checkAllDone
     }
 
-    logdbg << "JSONImporterTask: insertDoneSlot: done";
+    loginf << "JSONImporterTask: insertDoneSlot: done";
 }

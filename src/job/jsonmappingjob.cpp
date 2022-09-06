@@ -32,10 +32,11 @@ using namespace nlohmann;
 
 JSONMappingJob::JSONMappingJob(std::unique_ptr<nlohmann::json> data,
                                const std::vector<std::string>& data_record_keys,
+                               unsigned int line_id,
                                const std::map<std::string, std::unique_ptr<JSONObjectParser>>& parsers)
     : Job("JSONMappingJob"),
       data_(std::move(data)),
-      data_record_keys_(data_record_keys),
+      data_record_keys_(data_record_keys), line_id_(line_id),
       json_parsers_(&parsers), asterix_parsers_(nullptr)
 {
     logdbg << "JSONMappingJob: ctor";
@@ -43,10 +44,11 @@ JSONMappingJob::JSONMappingJob(std::unique_ptr<nlohmann::json> data,
 
 JSONMappingJob::JSONMappingJob(std::unique_ptr<nlohmann::json> data,
                const std::vector<std::string>& data_record_keys,
+                               unsigned int line_id,
                const std::map<unsigned int, std::unique_ptr<ASTERIXJSONParser>>& parsers)
     : Job("JSONMappingJob"),
       data_(std::move(data)),
-      data_record_keys_(data_record_keys),
+      data_record_keys_(data_record_keys), line_id_(line_id),
       json_parsers_(nullptr), asterix_parsers_(&parsers)
 {
     logdbg << "JSONMappingJob: ctor";
@@ -67,8 +69,11 @@ void JSONMappingJob::run()
 
     if (json_parsers_)
         parseJSON();
-
-
+    else
+    {
+        assert (asterix_parsers_);
+        parseASTERIX();
+    }
 
     if (obsolete_)
     {
@@ -133,6 +138,8 @@ void JSONMappingJob::parseJSON()
 
         unsigned int category{0};
         bool has_cat = record.contains("category");
+
+        record["line_id"] = line_id_;
 
         if (has_cat)
             category = record.at("category");
@@ -215,6 +222,8 @@ void JSONMappingJob::parseASTERIX()
         assert (record.contains("category"));
 
         category = record.at("category");
+
+        record["line_id"] = line_id_;
 
         bool parsed{false};
         bool parsed_any{false};

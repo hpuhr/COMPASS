@@ -58,6 +58,8 @@ private:
     std::string asterix_framing;
     std::string asterix_decoder_cfg;
 
+    std::string import_json_filename_;
+
     std::string import_view_points_filename_;
     std::string import_gps_trail_filename_;
     std::string import_gps_parameters_;
