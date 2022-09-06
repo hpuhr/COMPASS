@@ -834,7 +834,7 @@ void ASTERIXImportTask::dialogImportSlot()
 
 void ASTERIXImportTask::dialogTestImportSlot()
 {
-    loginf << "ASTERIXImportTask: dialogImportSlot";
+    loginf << "ASTERIXImportTask: dialogTestImportSlot";
 
     assert (dialog_);
     dialog_->hide();

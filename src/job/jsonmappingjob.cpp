@@ -43,7 +43,7 @@ JSONMappingJob::JSONMappingJob(std::unique_ptr<nlohmann::json> data,
 
 JSONMappingJob::JSONMappingJob(std::unique_ptr<nlohmann::json> data,
                const std::vector<std::string>& data_record_keys,
-               const std::map<std::string, std::unique_ptr<ASTERIXJSONParser>>& parsers)
+               const std::map<unsigned int, std::unique_ptr<ASTERIXJSONParser>>& parsers)
     : Job("JSONMappingJob"),
       data_(std::move(data)),
       data_record_keys_(data_record_keys),
@@ -212,52 +212,59 @@ void JSONMappingJob::parseASTERIX()
         //loginf << "UGA '" << record.dump(4) << "'";
 
         unsigned int category{0};
-        bool has_cat = record.contains("category");
+        assert (record.contains("category"));
 
-        if (has_cat)
-            category = record.at("category");
+        category = record.at("category");
 
         bool parsed{false};
         bool parsed_any{false};
 
-        for (auto& map_it : *asterix_parsers_)
+        if (!asterix_parsers_->count(category))
+            return;
+
+        const unique_ptr<ASTERIXJSONParser>& parser = asterix_parsers_->at(category);
+
+        string dbcontent_name = parser->dbContentName();
+
+        logdbg << "ASTERIXJSONMappingJob: run: mapping json: cat " << category;
+
+        std::shared_ptr<Buffer>& buffer = buffers_.at(dbcontent_name);
+        assert(buffer);
+
+        try
         {
-            logdbg << "JSONMappingJob: parseASTERIX: mapping json: obj " << map_it.second->dbContentName();
+            logdbg << "ASTERIXJSONMappingJob: run: obj " << dbcontent_name << " parsing JSON";
 
-            std::shared_ptr<Buffer>& buffer = buffers_.at(map_it.second->dbContentName());
-            assert(buffer);
+            parsed = parser->parseJSON(record, *buffer);
 
-            try
-            {
-                logdbg << "JSONMappingJob: parseASTERIX: obj " << map_it.second->dbContentName() << " parsing JSON";
+//            if (parsed)
+//            {
+//                logdbg << "ASTERIXJSONMappingJob: run: obj " << parser.dbObject().name() << " transforming buffer";
+//                //parser.transformBuffer(*buffer, buffer->size() - 1);
+//            }
 
-                parsed = map_it.second->parseJSON(record, *buffer);
+            logdbg << "ASTERIXJSONMappingJob: run: obj " << dbcontent_name << " done";
 
-                logdbg << "JSONMappingJob: parseASTERIX: obj " << map_it.second->dbContentName() << " done";
+            parsed_any |= parsed;
+        }
+        catch (exception& e)
+        {
+            logerr << "ASTERIXJSONMappingJob: run: caught exception '" << e.what() << "' in \n'"
+                       << record.dump(4) << "' parser dbo " << dbcontent_name;
 
-                parsed_any |= parsed;
-            }
-            catch (exception& e)
-            {
-                logerr << "JSONMappingJob: parseASTERIX: caught exception '" << e.what() << "' in \n'"
-                       << record.dump(4) << "' parser " << map_it.second->dbContentName();
+            ++num_errors_;
 
-                ++num_errors_;
-
-                continue;
-            }
+            return;
         }
 
         if (parsed_any)
         {
-            if (has_cat)
-                category_mapped_counts_[category].first += 1;
+            category_mapped_counts_[category].first += 1;
             ++num_mapped_;
         }
         else
         {
-            if (has_cat)
-                category_mapped_counts_[category].second += 1;
+            category_mapped_counts_[category].second += 1;
             ++num_not_mapped_;
         }
     };

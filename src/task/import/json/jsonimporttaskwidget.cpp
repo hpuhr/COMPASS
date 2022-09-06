@@ -28,6 +28,7 @@
 #include "logger.h"
 #include "dbcontent/selectdialog.h"
 #include "stringconv.h"
+#include "util/timeconv.h"
 
 #include <QCheckBox>
 #include <QFileDialog>
@@ -41,6 +42,7 @@
 #include <QPushButton>
 #include <QStackedWidget>
 #include <QVBoxLayout>
+#include <QDateEdit>
 
 using namespace Utils;
 using namespace std;
@@ -70,40 +72,38 @@ void JSONImportTaskWidget::addMainTab()
 
     QVBoxLayout* main_tab_layout = new QVBoxLayout();
 
-    // file stuff
     {
-        QLabel* files_label = new QLabel("File Selection");
-        files_label->setFont(font_bold);
-        main_tab_layout->addWidget(files_label);
+        QFormLayout* source_layout = new QFormLayout();
 
-        file_list_ = new QListWidget();
-        file_list_->setWordWrap(true);
-        file_list_->setTextElideMode(Qt::ElideNone);
-        file_list_->setSelectionBehavior(QAbstractItemView::SelectItems);
-        file_list_->setSelectionMode(QAbstractItemView::SingleSelection);
-        connect(file_list_, SIGNAL(itemClicked(QListWidgetItem*)), this, SLOT(selectedFileSlot()));
+        source_label_ = new QLabel();
+        source_layout->addWidget(source_label_);
 
-        updateFileListSlot();
-        main_tab_layout->addWidget(file_list_);
-    }
+        // line
+        QComboBox* file_line_box = new QComboBox();
+        file_line_box->addItems({"1", "2", "3", "4"});
 
-    // file button stuff
-    {
-        QHBoxLayout* button_layout = new QHBoxLayout();
+        connect(file_line_box, &QComboBox::currentTextChanged,
+                this, &JSONImportTaskWidget::fileLineIDEditSlot);
+        source_layout->addRow("Line ID", file_line_box);
 
-        add_file_button_ = new QPushButton("Add");
-        connect(add_file_button_, &QPushButton::clicked, this, &JSONImportTaskWidget::addFileSlot);
-        button_layout->addWidget(add_file_button_);
+        // date
+        QDateEdit* date_edit = new QDateEdit();
+        date_edit->setDisplayFormat("yyyy-MM-dd");
 
-        delete_file_button_ = new QPushButton("Remove");
-        connect(delete_file_button_, &QPushButton::clicked, this, &JSONImportTaskWidget::deleteFileSlot);
-        button_layout->addWidget(delete_file_button_);
+        //loginf << "UGA " << Time::toDateString(task_.date());
 
-        delete_all_files_button_ = new QPushButton("Remove All");
-        connect(delete_all_files_button_, &QPushButton::clicked, this, &JSONImportTaskWidget::deleteAllFilesSlot);
-        button_layout->addWidget(delete_all_files_button_);
+        QDate date = QDate::fromString(Time::toDateString(task_.date()).c_str(), "yyyy-MM-dd");
+        //loginf << "UGA2 " << date.toString().toStdString();
 
-        main_tab_layout->addLayout(button_layout);
+        date_edit->setDate(date);
+
+        connect(date_edit, &QDateEdit::dateChanged,
+                this, &JSONImportTaskWidget::dateChangedSlot);
+        source_layout->addRow("UTC Day", date_edit);
+
+        updateSourceLabel();
+
+        main_tab_layout->addLayout(source_layout);
     }
 
     main_tab_layout->addStretch();
@@ -206,35 +206,9 @@ void JSONImportTaskWidget::addMappingsTab()
 
 JSONImportTaskWidget::~JSONImportTaskWidget() {}
 
-void JSONImportTaskWidget::addFile(const std::string& filename)
+void JSONImportTaskWidget::updateSourceLabel()
 {
-    if (!task_.hasFile(filename))
-        task_.addFile(filename);
-}
-
-void JSONImportTaskWidget::addFileSlot()
-{
-    QString filename = QFileDialog::getOpenFileName(this, tr("Add JSON File"));
-
-    if (filename.size() > 0)
-        addFile(filename.toStdString());
-}
-
-void JSONImportTaskWidget::selectFile(const std::string& filename)
-{
-    assert(task_.hasFile(filename));
-    task_.currentFilename(filename);
-
-    assert (file_list_);
-    QList<QListWidgetItem*> items = file_list_->findItems(filename.c_str(), Qt::MatchExactly);
-    assert (items.size() > 0);
-
-    for (auto item_it : items)
-    {
-        assert (item_it);
-        file_list_->setCurrentItem(item_it);
-    }
-
+    source_label_->setText(("Source: "+task_.importFilename()).c_str());
 }
 
 void JSONImportTaskWidget::selectSchema(const std::string& schema_name)
@@ -244,55 +218,6 @@ void JSONImportTaskWidget::selectSchema(const std::string& schema_name)
 
     updateToCurrentSchema();
 
-}
-
-void JSONImportTaskWidget::deleteFileSlot()
-{
-    loginf << "JSONImportTaskWidget: deleteFileSlot";
-
-    if (!file_list_->currentItem() || !task_.currentFilename().size())
-    {
-        QMessageBox m_warning(QMessageBox::Warning, "JSON File Deletion Failed",
-                              "Please select a file in the list.", QMessageBox::Ok);
-        m_warning.exec();
-        return;
-    }
-
-    assert(task_.currentFilename().size());
-    assert(task_.hasFile(task_.currentFilename()));
-    task_.removeCurrentFilename();
-}
-
-void JSONImportTaskWidget::deleteAllFilesSlot()
-{
-    loginf << "JSONImportTaskWidget: deleteAllFilesSlot";
-    task_.removeAllFiles();
-}
-
-
-void JSONImportTaskWidget::selectedFileSlot()
-{
-    logdbg << "JSONImportTaskWidget: selectedFileSlot";
-    assert(file_list_->currentItem());
-
-    QString filename = file_list_->currentItem()->text();
-    assert(task_.hasFile(filename.toStdString()));
-
-    task_.currentFilename(filename.toStdString());
-}
-
-void JSONImportTaskWidget::updateFileListSlot()
-{
-    assert(file_list_);
-
-    file_list_->clear();
-
-    for (auto it : task_.fileList())
-    {
-        QListWidgetItem* item = new QListWidgetItem(tr(it.first.c_str()), file_list_);
-        if (it.first == task_.currentFilename())
-            file_list_->setCurrentItem(item);
-    }
 }
 
 void JSONImportTaskWidget::addSchemaSlot()
@@ -496,6 +421,31 @@ void JSONImportTaskWidget::selectedObjectParserSlot(const QString& text)
 }
 
 void JSONImportTaskWidget::expertModeChangedSlot() {}
+
+
+void JSONImportTaskWidget::fileLineIDEditSlot(const QString& text)
+{
+    loginf << "JSONImportTaskWidget: fileLineIDEditSlot: value '" << text.toStdString() << "'";
+
+    bool ok;
+
+    unsigned int line_id = text.toUInt(&ok);
+
+    assert (ok);
+
+    assert (line_id > 0 && line_id <= 4);
+
+    task_.fileLineID(line_id-1);
+}
+
+void JSONImportTaskWidget::dateChangedSlot(QDate date)
+{
+    string tmp = date.toString("yyyy-MM-dd").toStdString();
+
+    loginf << "ASTERIXImportTaskWidget: dateChangedSlot: " << tmp;
+
+    task_.date(Time::fromDateString(tmp));
+}
 
 void JSONImportTaskWidget::testImportSlot()
 {

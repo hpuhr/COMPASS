@@ -31,8 +31,7 @@
 #include "boost/date_time/posix_time/posix_time.hpp"
 
 class TaskManager;
-class JSONImportTaskWidget;
-class SavedFile;
+class JSONImportTaskDialog;
 class JSONParseJob;
 class JSONMappingJob;
 class ReadJSONFileJob;
@@ -55,6 +54,10 @@ class JSONImportTask : public Task, public Configurable
     using JSONParsingSchemaIterator = std::map<std::string, std::shared_ptr<JSONParsingSchema>>::iterator;
 
   public slots:
+    void dialogImportSlot();
+    void dialogTestImportSlot();
+    void dialogCancelSlot();
+
     void addReadJSONSlot();
     void readJSONFileDoneSlot();
     void readJSONFileObsoleteSlot();
@@ -73,8 +76,7 @@ class JSONImportTask : public Task, public Configurable
                    TaskManager& task_manager);
     virtual ~JSONImportTask();
 
-    virtual TaskWidget* widget();
-    virtual void deleteWidget();
+    JSONImportTaskDialog* dialog();
 
     virtual void generateSubConfigurable(const std::string& class_id,
                                          const std::string& instance_id);
@@ -83,13 +85,8 @@ class JSONImportTask : public Task, public Configurable
     virtual bool canRun();
     virtual void run();
 
-    const std::map<std::string, SavedFile*>& fileList() { return file_list_; }
-    bool hasFile(const std::string& filename) { return file_list_.count(filename) > 0; }
-    void addFile(const std::string& filename);
-    void removeCurrentFilename();
-    void removeAllFiles ();
-    void currentFilename(const std::string& filename);
-    const std::string& currentFilename() { return current_filename_; }
+    void importFilename(const std::string& filename);
+    const std::string& importFilename() { return current_filename_; }
 
     JSONParsingSchemaIterator begin() { return schemas_.begin(); }
     JSONParsingSchemaIterator end() { return schemas_.end(); }
@@ -110,14 +107,22 @@ class JSONImportTask : public Task, public Configurable
 
     size_t objectsInserted() const;
 
+    unsigned int fileLineID() const;
+    void fileLineID(unsigned int value);
+
+    const boost::posix_time::ptime &date() const;
+    void date(const boost::posix_time::ptime& date);
+
   protected:
-    std::map<std::string, SavedFile*> file_list_;
     std::string current_filename_;
 
-    std::unique_ptr<JSONImportTaskWidget> widget_;
+    std::unique_ptr<JSONImportTaskDialog> dialog_;
 
     std::string current_schema_name_;
     std::map<std::string, std::shared_ptr<JSONParsingSchema>> schemas_;
+
+    unsigned int file_line_id_ {0};
+    boost::posix_time::ptime date_;
 
     ASTERIXPostProcess post_process_;
 

@@ -47,6 +47,8 @@
 
 #include "asteriximporttask.h"
 #include "asteriximporttaskdialog.h"
+#include "jsonimporttask.h"
+#include "jsonimporttaskdialog.h"
 
 #include "radarplotpositioncalculatortask.h"
 #include "radarplotpositioncalculatortaskdialog.h"
@@ -279,6 +281,12 @@ void MainWindow::createMenus ()
     import_ast_net_action->setToolTip(tr("Import ASTERIX From Network"));
     connect(import_ast_net_action, &QAction::triggered, this, &MainWindow::importAsterixFromNetworkSlot);
     import_menu_->addAction(import_ast_net_action);
+
+    QAction* import_json_file_action = new QAction(tr("&JSON Recording"));
+    import_json_file_action->setShortcut(tr("Ctrl+J"));
+    import_json_file_action->setToolTip(tr("Import JSON Recording File"));
+    connect(import_json_file_action, &QAction::triggered, this, &MainWindow::importJSONRecordingSlot);
+    import_menu_->addAction(import_json_file_action);
 
     QAction* import_gps_file_action = new QAction(tr("&GPS Trail"));
     import_gps_file_action->setShortcut(tr("Ctrl+G"));
@@ -1257,6 +1265,22 @@ void MainWindow::importAsterixFromNetworkSlot()
 
     COMPASS::instance().taskManager().asterixImporterTask().dialog()->updateSource();
     COMPASS::instance().taskManager().asterixImporterTask().dialog()->show();
+}
+
+void MainWindow::importJSONRecordingSlot()
+{
+    string filename = QFileDialog::getOpenFileName(this, "Import JSON File", "", "JSON Files (*.json *.zip)").toStdString();
+
+    if (filename.size() > 0)
+    {
+        COMPASS::instance().taskManager().jsonImporterTask().importFilename(filename); // also adds
+
+        updateMenus();
+
+        COMPASS::instance().taskManager().jsonImporterTask().dialog()->updateSource();
+        COMPASS::instance().taskManager().jsonImporterTask().dialog()->show();
+    }
+
 }
 
 void MainWindow::importGPSTrailSlot()

@@ -25,14 +25,13 @@
 #include "dbcontent/variable/variable.h"
 #include "files.h"
 #include "jobmanager.h"
-#include "jsonimporttaskwidget.h"
+#include "jsonimporttaskdialog.h"
 #include "jsonmappingjob.h"
 #include "jsonparsejob.h"
 #include "jsonparsingschema.h"
 #include "propertylist.h"
 #include "radarplotpositioncalculatortask.h"
 #include "readjsonfilejob.h"
-#include "savedfile.h"
 #include "stringconv.h"
 #include "taskmanager.h"
 #include "asteriximporttask.h"
@@ -62,7 +61,6 @@ JSONImportTask::JSONImportTask(const std::string& class_id, const std::string& i
 {
     tooltip_ = "Allows importing of JSON data in several variants into the opened database.";
 
-    registerParameter("current_filename", &current_filename_, "");
     registerParameter("current_schema_name", &current_schema_name_, "");
 
     createSubConfigurables();
@@ -70,22 +68,12 @@ JSONImportTask::JSONImportTask(const std::string& class_id, const std::string& i
 
 JSONImportTask::~JSONImportTask()
 {
-    for (auto it : file_list_)
-        delete it.second;
-
-    file_list_.clear();
 }
 
 void JSONImportTask::generateSubConfigurable(const std::string& class_id,
                                              const std::string& instance_id)
 {
-    if (class_id == "JSONFile")
-    {
-        SavedFile* file = new SavedFile(class_id, instance_id, this);
-        assert(file_list_.count(file->name()) == 0);
-        file_list_.insert(std::pair<std::string, SavedFile*>(file->name(), file));
-    }
-    else if (class_id == "JSONParsingSchema")
+    if (class_id == "JSONParsingSchema")
     {
         std::string name = configuration()
                 .getSubConfiguration(class_id, instance_id)
@@ -96,10 +84,6 @@ void JSONImportTask::generateSubConfigurable(const std::string& class_id,
         logdbg << "JSONImporterTask: generateSubConfigurable: generating schema " << instance_id
                << " with name " << name;
 
-//        schemas_.emplace(
-//                    std::piecewise_construct,
-//                    std::forward_as_tuple(name),                          // args for key
-//                    std::forward_as_tuple(class_id, instance_id, this));  // args for mapped value
         schemas_[name] = make_shared<JSONParsingSchema>(class_id, instance_id, this);
     }
     else
@@ -107,95 +91,35 @@ void JSONImportTask::generateSubConfigurable(const std::string& class_id,
                                  class_id);
 }
 
-TaskWidget* JSONImportTask::widget()
+JSONImportTaskDialog* JSONImportTask::dialog()
 {
-    if (!widget_)
+    if (!dialog_)
     {
-        widget_.reset(new JSONImportTaskWidget(*this));
+        dialog_.reset(new JSONImportTaskDialog(*this));
 
-        connect(&task_manager_, &TaskManager::expertModeChangedSignal, widget_.get(),
-                &JSONImportTaskWidget::expertModeChangedSlot);
+        connect(dialog_.get(), &JSONImportTaskDialog::testTmportSignal,
+                this, &JSONImportTask::dialogTestImportSlot);
+
+        connect(dialog_.get(), &JSONImportTaskDialog::importSignal,
+                this, &JSONImportTask::dialogImportSlot);
+
+        connect(dialog_.get(), &JSONImportTaskDialog::cancelSignal,
+                this, &JSONImportTask::dialogCancelSlot);
     }
 
-    assert(widget_);
-    return widget_.get();
+    assert(dialog_);
+    return dialog_.get();
 }
 
-void JSONImportTask::deleteWidget() { widget_.reset(nullptr); }
-
-void JSONImportTask::addFile(const std::string& filename)
+void JSONImportTask::importFilename(const std::string& filename)
 {
-    loginf << "JSONImporterTask: addFile: filename '" << filename << "'";
-
-    if (file_list_.count(filename) != 0)
-        throw std::invalid_argument("JSONImporterTask: addFile: name '" + filename +
-                                    "' already in use");
-
-    std::string instancename = filename;
-    instancename.erase(std::remove(instancename.begin(), instancename.end(), '/'),
-                       instancename.end());
-
-    Configuration& config = addNewSubConfiguration("JSONFile", "JSONFile" + instancename);
-    config.addParameterString("name", filename);
-    generateSubConfigurable("JSONFile", "JSONFile" + instancename);
-
-    current_filename_ = filename;  // set as current
-
-    emit statusChangedSignal(name_);
-
-    if (widget_)
-        widget_->updateFileListSlot();
-}
-
-void JSONImportTask::removeCurrentFilename()
-{
-    loginf << "JSONImporterTask: removeCurrentFilename: filename '" << current_filename_ << "'";
-
-    assert(current_filename_.size());
-    assert(hasFile(current_filename_));
-
-    if (file_list_.count(current_filename_) != 1)
-        throw std::invalid_argument("JSONImporterTask: addFile: name '" + current_filename_ +
-                                    "' not in use");
-
-    delete file_list_.at(current_filename_);
-    file_list_.erase(current_filename_);
-    current_filename_ = "";
-
-    emit statusChangedSignal(name_);
-
-    if (widget_)
-        widget_->updateFileListSlot();
-}
-
-void JSONImportTask::removeAllFiles ()
-{
-    loginf << "JSONImportTask: removeAllFiles";
-
-    while (file_list_.size())
-    {
-        delete file_list_.begin()->second;
-        file_list_.erase(file_list_.begin());
-    }
-
-    current_filename_ = "";
-
-    emit statusChangedSignal(name_);
-
-    if (widget_)
-        widget_->updateFileListSlot();
-}
-
-void JSONImportTask::currentFilename(const std::string& filename)
-{
-    loginf << "JSONImporterTask: currentFilename: filename '" << filename << "'";
+    loginf << "JSONImporterTask: importFilename: filename '" << filename << "'";
 
     current_filename_ = filename;
 
-    if (widget_)
-        widget_->updateFileListSlot();
+    if (dialog_)
+        dialog_->updateSource();
 
-    emit statusChangedSignal(name_);
 }
 
 bool JSONImportTask::hasSchema(const std::string& name)
@@ -296,6 +220,29 @@ void JSONImportTask::test(bool test) { test_ = test; }
 
 size_t JSONImportTask::objectsInserted() const { return records_inserted_; }
 
+unsigned int JSONImportTask::fileLineID() const
+{
+    return file_line_id_;
+}
+
+void JSONImportTask::fileLineID(unsigned int value)
+{
+    loginf << "JSONImportTask: fileLineID: value " << value;
+
+    file_line_id_ = value;
+}
+
+const boost::posix_time::ptime &JSONImportTask::date() const
+{
+    return date_;
+}
+
+void JSONImportTask::date(const boost::posix_time::ptime& date)
+{
+    date_ = date;
+}
+
+
 bool JSONImportTask::canImportFile()
 {
     if (!current_filename_.size())
@@ -337,9 +284,6 @@ void JSONImportTask::run()
         tmp = "test import of file ";
     else
         tmp = "import of file ";
-
-    if (widget_)
-        widget_->runStarted();
 
     start_time_ = boost::posix_time::microsec_clock::local_time();
 
@@ -391,6 +335,38 @@ void JSONImportTask::run()
     updateMsgBox();
 
     logdbg << "JSONImporterTask: run done";
+}
+
+void JSONImportTask::dialogImportSlot()
+{
+    loginf << "JSONImportTask: dialogImportSlot";
+
+    assert (dialog_);
+    dialog_->hide();
+
+    assert (canRun());
+    run();
+}
+
+void JSONImportTask::dialogTestImportSlot()
+{
+    loginf << "JSONImportTask: dialogImportSlot";
+
+    assert (dialog_);
+    dialog_->hide();
+
+    assert (canRun());
+    test_ = true;
+
+    run();
+
+}
+void JSONImportTask::dialogCancelSlot()
+{
+    loginf << "JSONImportTask: dialogCancelSlot";
+
+    assert (dialog_);
+    dialog_->hide();
 }
 
 void JSONImportTask::addReadJSONSlot()
@@ -493,8 +469,8 @@ void JSONImportTask::parseJSONDoneSlot()
         }
 
         json_map_job = std::make_shared<JSONMappingJob>(
-                    std::move(json_objects), keys, currentJSONSchema()->parsers());
-        TODO_ASSERT
+                    std::move(json_objects), keys,
+                    COMPASS::instance().taskManager().asterixImporterTask().schema()->parsers());
 
         //loginf << "UGA2";
     }
@@ -832,9 +808,6 @@ void JSONImportTask::checkAllDone()
 
         if (!test_)
             emit COMPASS::instance().interface().databaseContentChangedSignal();
-
-        if (widget_)
-            widget_->runDone();
 
         double records_per_second = records_inserted_ / (diff.total_milliseconds() / 1000.0);
 

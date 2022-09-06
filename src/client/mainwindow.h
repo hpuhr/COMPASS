@@ -68,6 +68,8 @@ public slots:
     void clearImportRecentAsterixRecordingsSlot();
     void importAsterixFromNetworkSlot();
 
+    void importJSONRecordingSlot();
+
     void importGPSTrailSlot();
 
     void importViewPointsSlot();

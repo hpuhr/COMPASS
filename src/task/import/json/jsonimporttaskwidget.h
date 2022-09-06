@@ -40,13 +40,10 @@ class JSONImportTaskWidget : public TaskWidget
     Q_OBJECT
 
   public slots:
-    void testImportSlot();
+    void fileLineIDEditSlot(const QString& text);
+    void dateChangedSlot(QDate date);
 
-    void addFileSlot();
-    void deleteFileSlot();
-    void deleteAllFilesSlot();
-    void selectedFileSlot();
-    void updateFileListSlot();
+    void testImportSlot();
 
     void addSchemaSlot();
     void removeSchemaSlot();
@@ -62,8 +59,8 @@ class JSONImportTaskWidget : public TaskWidget
     JSONImportTaskWidget(JSONImportTask& task, QWidget* parent = 0, Qt::WindowFlags f = 0);
     virtual ~JSONImportTaskWidget();
 
-    void addFile(const std::string& filename);
-    void selectFile(const std::string& filename);
+    void updateSourceLabel();
+
     void selectSchema(const std::string& schema_name);
 
     void runStarted();
@@ -75,6 +72,8 @@ class JSONImportTaskWidget : public TaskWidget
     QHBoxLayout* main_layout_{nullptr};
 
     QTabWidget* tab_widget_{nullptr};
+
+    QLabel* source_label_{nullptr};
 
     QListWidget* file_list_{nullptr};
     QPushButton* add_file_button_{nullptr};
