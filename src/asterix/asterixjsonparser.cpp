@@ -101,7 +101,7 @@ void ASTERIXJSONParser::doMappingChecks()
     not_added_dbo_variables_.clear();
 
 
-    for (auto& dbovar_it : dbObject().variables())
+    for (auto& dbovar_it : dbContent().variables())
     {
         if (!hasDBContentVariableMapped(dbovar_it->name()))
             not_added_dbo_variables_.push_back(dbovar_it->name());
@@ -243,7 +243,7 @@ const std::vector<std::string>& ASTERIXJSONParser::notAddedJSONKeys() const
     return not_added_json_keys_;
 }
 
-DBContent& ASTERIXJSONParser::dbObject() const
+DBContent& ASTERIXJSONParser::dbContent() const
 {
 
     DBContentManager& obj_man = COMPASS::instance().dbContentManager();
@@ -630,7 +630,7 @@ ASTERIXJSONParserWidget* ASTERIXJSONParser::widget()
     return widget_.get();  // needed for qt integration, not pretty
 }
 
-std::string ASTERIXJSONParser::dbObjectName() const { return db_content_name_; }
+std::string ASTERIXJSONParser::dbContentName() const { return db_content_name_; }
 
 void ASTERIXJSONParser::setMappingActive(JSONDataMapping& mapping, bool active)
 {

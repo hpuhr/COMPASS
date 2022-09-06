@@ -21,6 +21,7 @@
 #include "dbcontent/dbcontent.h"
 #include "json.h"
 #include "jsonobjectparser.h"
+#include "asterixjsonparser.h"
 #include "logger.h"
 
 #include <exception>
@@ -35,9 +36,21 @@ JSONMappingJob::JSONMappingJob(std::unique_ptr<nlohmann::json> data,
     : Job("JSONMappingJob"),
       data_(std::move(data)),
       data_record_keys_(data_record_keys),
-      parsers_(parsers)
+      json_parsers_(&parsers), asterix_parsers_(nullptr)
 {
     logdbg << "JSONMappingJob: ctor";
+}
+
+JSONMappingJob::JSONMappingJob(std::unique_ptr<nlohmann::json> data,
+               const std::vector<std::string>& data_record_keys,
+               const std::map<std::string, std::unique_ptr<ASTERIXJSONParser>>& parsers)
+    : Job("JSONMappingJob"),
+      data_(std::move(data)),
+      data_record_keys_(data_record_keys),
+      json_parsers_(nullptr), asterix_parsers_(&parsers)
+{
+    logdbg << "JSONMappingJob: ctor";
+
 }
 
 JSONMappingJob::~JSONMappingJob()
@@ -52,88 +65,10 @@ void JSONMappingJob::run()
 
     started_ = true;
 
-    for (auto& parser_it : parsers_)
-    {
-        if (!parser_it.second->active())
-            continue;
+    if (json_parsers_)
+        parseJSON();
 
-        if (!buffers_.count(parser_it.second->dbContentName()))
-            buffers_[parser_it.second->dbContentName()] = parser_it.second->getNewBuffer();
-        else
-            parser_it.second->appendVariablesToBuffer(
-                *buffers_.at(parser_it.second->dbContentName()));
-    }
 
-    auto process_lambda = [this](nlohmann::json& record) {
-        //loginf << "UGA '" << record.dump(4) << "'";
-
-        unsigned int category{0};
-        bool has_cat = record.contains("category");
-
-        if (has_cat)
-            category = record.at("category");
-
-        bool parsed{false};
-        bool parsed_any{false};
-
-        for (auto& map_it : parsers_)
-        {
-            if (!map_it.second->active())
-                continue;
-
-            logdbg << "JSONMappingJob: run: mapping json: obj " << map_it.second->dbContentName();
-            std::shared_ptr<Buffer>& buffer = buffers_.at(map_it.second->dbContentName());
-            assert(buffer);
-            try
-            {
-                logdbg << "JSONMappingJob: run: obj " << map_it.second->dbContentName() << " parsing JSON";
-
-                parsed = map_it.second->parseJSON(record, *buffer);
-
-                if (parsed)
-                {
-                    logdbg << "JSONMappingJob: run: obj " << map_it.second->dbContentName() << " transforming buffer";
-                    map_it.second->transformBuffer(*buffer, buffer->size() - 1);
-                }
-
-                logdbg << "JSONMappingJob: run: obj " << map_it.second->dbContentName() << " done";
-
-                parsed_any |= parsed;
-            }
-            catch (exception& e)
-            {
-                logerr << "JSONMappingJob: run: caught exception '" << e.what() << "' in \n'"
-                       << record.dump(4) << "' parser " << map_it.second->dbContentName();
-
-                ++num_errors_;
-
-                continue;
-            }
-        }
-
-        if (parsed_any)
-        {
-            if (has_cat)
-                category_mapped_counts_[category].first += 1;
-            ++num_mapped_;
-        }
-        else
-        {
-            if (has_cat)
-                category_mapped_counts_[category].second += 1;
-            ++num_not_mapped_;
-        }
-    };
-
-    if (obsolete_)
-    {
-        done_ = true;
-        return;
-    }
-    assert(data_);
-    logdbg << "JSONMappingJob: run: applying JSON function";
-    JSON::applyFunctionToValues(*data_.get(), data_record_keys_, data_record_keys_.begin(),
-                                process_lambda, false);
 
     if (obsolete_)
     {
@@ -175,4 +110,167 @@ std::map<unsigned int, std::pair<size_t, size_t>> JSONMappingJob::categoryMapped
 size_t JSONMappingJob::numErrors() const
 {
     return num_errors_;
+}
+
+void JSONMappingJob::parseJSON()
+{
+    assert (!asterix_parsers_);
+
+    for (auto& parser_it : *json_parsers_)
+    {
+        if (!parser_it.second->active())
+            continue;
+
+        if (!buffers_.count(parser_it.second->dbContentName()))
+            buffers_[parser_it.second->dbContentName()] = parser_it.second->getNewBuffer();
+        else
+            parser_it.second->appendVariablesToBuffer(
+                *buffers_.at(parser_it.second->dbContentName()));
+    }
+
+    auto process_lambda = [this](nlohmann::json& record) {
+        //loginf << "UGA '" << record.dump(4) << "'";
+
+        unsigned int category{0};
+        bool has_cat = record.contains("category");
+
+        if (has_cat)
+            category = record.at("category");
+
+        bool parsed{false};
+        bool parsed_any{false};
+
+        for (auto& map_it : *json_parsers_)
+        {
+            if (!map_it.second->active())
+                continue;
+
+            logdbg << "JSONMappingJob: parseJSON: mapping json: obj " << map_it.second->dbContentName();
+            std::shared_ptr<Buffer>& buffer = buffers_.at(map_it.second->dbContentName());
+            assert(buffer);
+            try
+            {
+                logdbg << "JSONMappingJob: parseJSON: obj " << map_it.second->dbContentName() << " parsing JSON";
+
+                parsed = map_it.second->parseJSON(record, *buffer);
+
+                logdbg << "JSONMappingJob: parseJSON: obj " << map_it.second->dbContentName() << " done";
+
+                parsed_any |= parsed;
+            }
+            catch (exception& e)
+            {
+                logerr << "JSONMappingJob: parseJSON: caught exception '" << e.what() << "' in \n'"
+                       << record.dump(4) << "' parser " << map_it.second->dbContentName();
+
+                ++num_errors_;
+
+                continue;
+            }
+        }
+
+        if (parsed_any)
+        {
+            if (has_cat)
+                category_mapped_counts_[category].first += 1;
+            ++num_mapped_;
+        }
+        else
+        {
+            if (has_cat)
+                category_mapped_counts_[category].second += 1;
+            ++num_not_mapped_;
+        }
+    };
+
+    if (obsolete_)
+    {
+        done_ = true;
+        return;
+    }
+    assert(data_);
+    logdbg << "JSONMappingJob: parseJSON: applying JSON function";
+
+    JSON::applyFunctionToValues(*data_.get(), data_record_keys_, data_record_keys_.begin(),
+                                process_lambda, false);
+}
+
+void JSONMappingJob::parseASTERIX()
+{
+    assert (!json_parsers_);
+
+    for (auto& parser_it : *asterix_parsers_)
+    {
+        if (!buffers_.count(parser_it.second->dbContentName()))
+            buffers_[parser_it.second->dbContentName()] = parser_it.second->getNewBuffer();
+        else
+            parser_it.second->appendVariablesToBuffer(
+                *buffers_.at(parser_it.second->dbContentName()));
+    }
+
+    auto process_lambda = [this](nlohmann::json& record) {
+        //loginf << "UGA '" << record.dump(4) << "'";
+
+        unsigned int category{0};
+        bool has_cat = record.contains("category");
+
+        if (has_cat)
+            category = record.at("category");
+
+        bool parsed{false};
+        bool parsed_any{false};
+
+        for (auto& map_it : *asterix_parsers_)
+        {
+            logdbg << "JSONMappingJob: parseASTERIX: mapping json: obj " << map_it.second->dbContentName();
+
+            std::shared_ptr<Buffer>& buffer = buffers_.at(map_it.second->dbContentName());
+            assert(buffer);
+
+            try
+            {
+                logdbg << "JSONMappingJob: parseASTERIX: obj " << map_it.second->dbContentName() << " parsing JSON";
+
+                parsed = map_it.second->parseJSON(record, *buffer);
+
+                logdbg << "JSONMappingJob: parseASTERIX: obj " << map_it.second->dbContentName() << " done";
+
+                parsed_any |= parsed;
+            }
+            catch (exception& e)
+            {
+                logerr << "JSONMappingJob: parseASTERIX: caught exception '" << e.what() << "' in \n'"
+                       << record.dump(4) << "' parser " << map_it.second->dbContentName();
+
+                ++num_errors_;
+
+                continue;
+            }
+        }
+
+        if (parsed_any)
+        {
+            if (has_cat)
+                category_mapped_counts_[category].first += 1;
+            ++num_mapped_;
+        }
+        else
+        {
+            if (has_cat)
+                category_mapped_counts_[category].second += 1;
+            ++num_not_mapped_;
+        }
+    };
+
+    if (obsolete_)
+    {
+        done_ = true;
+        return;
+    }
+
+    assert(data_);
+    logdbg << "JSONMappingJob: parseASTERIX: applying JSON function";
+
+    JSON::applyFunctionToValues(*data_.get(), data_record_keys_, data_record_keys_.begin(),
+                                process_lambda, false);
 }

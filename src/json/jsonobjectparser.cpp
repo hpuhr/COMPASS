@@ -58,6 +58,8 @@ JSONObjectParser::JSONObjectParser(const std::string& class_id, const std::strin
     createSubConfigurables();
 
     json_values_vector_ = String::split(json_value_, ',');
+
+    assert (!override_data_source_); // TODO reimplement
 }
 
 JSONObjectParser& JSONObjectParser::operator=(JSONObjectParser&& other)
@@ -172,6 +174,8 @@ void JSONObjectParser::initialize()
             list_.addProperty( mapping->variable().name(),  mapping->variable().dataType());
             var_list_.add( mapping->variable());
         }
+
+        assert (!override_data_source_); // TODO reimplement
 
         if (override_data_source_)
         {
@@ -636,228 +640,6 @@ void JSONObjectParser::removeMapping(unsigned int index)
     logdbg << "JSONObjectParser: removeMapping: size " << data_mappings_.size();
 }
 
-void JSONObjectParser::transformBuffer(Buffer& buffer, size_t index) const
-{
-    assert(dbcontent_);
-
-    logdbg << "JSONObjectParser: transformBuffer: object " << dbcontent_->name();
-
-    assert(index < buffer.size());
-
-    if (override_data_source_)
-    {
-        logdbg << "JSONObjectParser: transformBuffer: overiding data source for object "
-               << dbcontent_->name() << " ds id name '" << data_source_variable_name_ << "'";
-        assert(data_source_variable_name_.size());
-        assert(buffer.has<int>(data_source_variable_name_));
-
-        NullableVector<int>& ds_id_vector = buffer.get<int>(data_source_variable_name_);
-
-        ds_id_vector.set(index, 0);
-    }
-
-//    for (auto& data_it : data_mappings_)
-//    {
-//        if (!data_it.active())
-//            continue;
-
-//        if (data_it.dimension() != data_it.variable().dimension())
-//            logwrn << "JSONObjectParser: transformBuffer: variable " << data_it.variable().name()
-//                   << " has differing dimensions " << data_it.dimension() << " "
-//                   << data_it.variable().dimension();
-//        else if (data_it.unit() != data_it.variable().unit())  // do unit conversion stuff
-//        {
-//            logdbg << "JSONObjectParser: transformBuffer: variable " << data_it.variable().name()
-//                   << " of same dimension has different units " << data_it.unit() << " "
-//                   << data_it.variable().unit();
-
-//            if (!UnitManager::instance().hasDimension(data_it.dimension()))
-//            {
-//                logerr << "JSONObjectParser: transformBuffer: unknown dimension '"
-//                       << data_it.dimension() << "'";
-//                throw std::runtime_error("JSONObjectParser: transformBuffer: unknown dimension '" +
-//                                         data_it.dimension() + "'");
-//            }
-
-//            const Dimension& dimension =
-//                    UnitManager::instance().dimension(data_it.variable().dimension());
-//            double factor;
-
-//            if (!dimension.hasUnit(data_it.unit()))
-//                logerr << "JSONObjectParser: transformBuffer: dimension '" << data_it.dimension()
-//                       << "' has unknown unit '" << data_it.unit() << "'";
-
-//            if (!dimension.hasUnit(data_it.variable().unit()))
-//                logerr << "JSONObjectParser: transformBuffer: dimension '"
-//                       << data_it.variable().dimension() << "' has unknown unit '"
-//                       << data_it.variable().unit() << "'";
-
-//            factor = dimension.getFactor(data_it.unit(), data_it.variable().unit());
-//            std::string current_var_name = data_it.variable().name();
-//            PropertyDataType data_type = data_it.variable().dataType();
-
-//            logdbg << "JSONObjectParser: transformBuffer: variable " << data_it.variable().name()
-//                   << " correct unit transformation with factor " << factor << " data unit "
-//                   << data_it.unit() << " variable unit " << data_it.variable().unit();
-
-//            try
-//            {
-
-//            switch (data_type)
-//            {
-//            case PropertyDataType::BOOL:
-//            {
-//                assert(buffer.has<bool>(current_var_name));
-
-//                NullableVector<bool>& array_list = buffer.get<bool>(current_var_name);
-
-//                if (array_list.isNull(index))
-//                    break;
-
-//                logwrn << "JSONObjectParser: transformBuffer: double multiplication of boolean "
-//                          "variable "
-//                       << current_var_name << " factor " << factor;
-//                array_list.set(index, array_list.get(index) * factor);
-//                break;
-//            }
-//            case PropertyDataType::CHAR:
-//            {
-//                assert(buffer.has<char>(current_var_name));
-//                NullableVector<char>& array_list = buffer.get<char>(current_var_name);
-
-//                if (array_list.isNull(index))
-//                    break;
-
-//                logwrn << "JSONObjectParser: transformBuffer: double multiplication of char "
-//                          "variable "
-//                       << current_var_name << " factor " << factor;
-//                array_list.set(index, array_list.get(index) * factor);
-//                break;
-//            }
-//            case PropertyDataType::UCHAR:
-//            {
-//                assert(buffer.has<unsigned char>(current_var_name));
-//                NullableVector<unsigned char>& array_list =
-//                        buffer.get<unsigned char>(current_var_name);
-
-//                if (array_list.isNull(index))
-//                    break;
-
-//                logwrn << "JSONObjectParser: transformBuffer: double multiplication of "
-//                          "unsigned char variable "
-//                       << current_var_name << " factor " << factor;
-//                array_list.set(index, array_list.get(index) * factor);
-//                break;
-//            }
-//            case PropertyDataType::INT:
-//            {
-//                assert(buffer.has<int>(current_var_name));
-//                NullableVector<int>& array_list = buffer.get<int>(current_var_name);
-
-//                if (array_list.isNull(index))
-//                    break;
-
-//                logdbg << "JSONObjectParser: transformBuffer: double multiplication of int "
-//                          "variable "
-//                       << current_var_name << " factor " << factor;
-//                array_list.set(index, array_list.get(index) * factor);
-//                break;
-//            }
-//            case PropertyDataType::UINT:
-//            {
-//                assert(buffer.has<unsigned int>(current_var_name));
-//                NullableVector<unsigned int>& array_list =
-//                        buffer.get<unsigned int>(current_var_name);
-
-//                if (array_list.isNull(index))
-//                    break;
-
-//                logdbg << "JSONObjectParser: transformBuffer: double multiplication of uint "
-//                          "variable "
-//                       << current_var_name << " factor " << factor;
-//                array_list.set(index, array_list.get(index) * factor);
-//                break;
-//            }
-//            case PropertyDataType::LONGINT:
-//            {
-//                assert(buffer.has<long int>(current_var_name));
-//                NullableVector<long int>& array_list = buffer.get<long int>(current_var_name);
-
-//                if (array_list.isNull(index))
-//                    break;
-
-//                logdbg << "JSONObjectParser: transformBuffer: double multiplication of long "
-//                          "int variable "
-//                       << current_var_name << " factor " << factor;
-//                array_list.set(index, array_list.get(index) * factor);
-//                break;
-//            }
-//            case PropertyDataType::ULONGINT:
-//            {
-//                assert(buffer.has<unsigned long>(current_var_name));
-//                NullableVector<unsigned long>& array_list =
-//                        buffer.get<unsigned long>(current_var_name);
-
-//                if (array_list.isNull(index))
-//                    break;
-
-//                logdbg << "JSONObjectParser: transformBuffer: double multiplication of "
-//                          "unsigned long int variable "
-//                       << current_var_name << " factor " << factor;
-//                array_list.set(index, array_list.get(index) * factor);
-//                break;
-//            }
-//            case PropertyDataType::FLOAT:
-//            {
-//                assert(buffer.has<float>(current_var_name));
-//                NullableVector<float>& array_list = buffer.get<float>(current_var_name);
-
-//                if (array_list.isNull(index))
-//                    break;
-
-//                logdbg << "JSONObjectParser: transformBuffer: double multiplication of float "
-//                          "variable "
-//                       << current_var_name << " factor " << factor;
-//                array_list.set(index, array_list.get(index) * factor);
-//                break;
-//            }
-//            case PropertyDataType::DOUBLE:
-//            {
-//                assert(buffer.has<double>(current_var_name));
-//                NullableVector<double>& array_list = buffer.get<double>(current_var_name);
-
-//                if (array_list.isNull(index))
-//                    break;
-
-//                logdbg << "JSONObjectParser: transformBuffer: double multiplication of double "
-//                          "variable "
-//                       << current_var_name << " factor " << factor;
-//                array_list.set(index, array_list.get(index) * factor);
-//                break;
-//            }
-//            case PropertyDataType::STRING:
-//                logerr << "JSONObjectParser: transformBuffer: unit transformation for string "
-//                          "variable "
-//                       << data_it.variable().name() << " impossible";
-//                break;
-//            default:
-//                logerr << "JSONObjectParser: transformBuffer: unknown property type "
-//                       << Property::asString(data_type);
-//                throw std::runtime_error(
-//                            "JSONObjectParser: transformBuffer: unknown property type " +
-//                            Property::asString(data_type));
-//            }
-
-//            }
-//            catch (exception& e)
-//            {
-//                logerr << "JSONObjectParser: transformBuffer: caught exception '" << e.what() << "' in var "
-//                       << data_it.variable().name() << " mapping " << data_it.jsonKey();
-//                throw e;
-//            }
-//        }
-    //}
-}
 
 const dbContent::VariableSet& JSONObjectParser::variableList() const { return var_list_; }
 
@@ -866,6 +648,8 @@ bool JSONObjectParser::overrideDataSource() const { return override_data_source_
 void JSONObjectParser::overrideDataSource(bool override)
 {
     loginf << "JSONObjectParser: overrideDataSource: " << override;
+
+    assert (!override); // TODO reimplement
     override_data_source_ = override;
 }
 

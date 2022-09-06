@@ -69,8 +69,6 @@ class JSONObjectParser : public Configurable
     bool hasMapping(unsigned int index) const;
     void removeMapping(unsigned int index);
 
-    void transformBuffer(Buffer& buffer, size_t index) const;
-
     // returs true on successful parse
     bool parseJSON(nlohmann::json& j, Buffer& buffer) const;
     void createMappingStubs(nlohmann::json& j);
