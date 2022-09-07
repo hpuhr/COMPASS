@@ -36,6 +36,7 @@
 #include "boost/date_time/posix_time/posix_time.hpp"
 
 #include <sstream>
+#include <future>
 
 using namespace std;
 using namespace Utils;
@@ -440,11 +441,7 @@ void EvaluationData::finalize ()
 //                target_data_, done_flags, done);
 //    tbb::task::enqueue(*t);
 
-    tbb::task_group g;
-
-    loginf << "UGA1";
-
-    g.run([&] {
+    std::future<void> pending_future = std::async(std::launch::async, [&] {
         unsigned int num_targets = target_data_.size();
 
         tbb::parallel_for(uint(0), num_targets, [&](unsigned int cnt)
@@ -454,9 +451,26 @@ void EvaluationData::finalize ()
         });
 
         done = true;
+
     });
 
-    loginf << "UGA2";
+//    tbb::task_group g;
+
+//    loginf << "UGA1";
+
+//    g.run([&] {
+//        unsigned int num_targets = target_data_.size();
+
+//        tbb::parallel_for(uint(0), num_targets, [&](unsigned int cnt)
+//        {
+//            target_data_[cnt].finalize();
+//            done_flags[cnt] = true;
+//        });
+
+//        done = true;
+//    });
+
+//    loginf << "UGA2";
 
     postprocess_dialog_.setValue(0);
 

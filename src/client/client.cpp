@@ -64,6 +64,8 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
 
     APP_FILENAME = argv[0];
 
+    //tbb::task_scheduler_init(4);
+
     //tbb::task_scheduler_init guard(std::thread::hardware_concurrency());
 
     //    QApplication::setAttribute(Qt::AA_ShareOpenGLContexts);
@@ -192,7 +194,10 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
 
 void Client::run ()
 {
-    loginf << "COMPASSClient: started with " << std::thread::hardware_concurrency() << " threads";
+    //loginf << "COMPASSClient: started with " << std::thread::hardware_concurrency() << " threads";
+
+//    loginf << "COMPASSClient: default number of threads " << tbb::info::default_concurrency()
+//           << " max " << tbb::this_task_arena::max_concurrency();
 
     QPixmap pixmap(Files::getImageFilepath("logo.png").c_str());
     QSplashScreen splash(pixmap);

@@ -641,14 +641,30 @@ void JSONImportTask::insertData(std::map<std::string, std::shared_ptr<Buffer>> j
 {
     loginf << "JSONImporterTask: insertData: inserting into database";
 
-    while (insert_active_)
+    if (!job_buffers.size())
     {
-        QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
-        QThread::msleep(1);
+        loginf << "JSONImporterTask: insertData: no job buffers";
+        return;
     }
+
+    unsigned int old_records_size = records_inserted_;
 
     for (auto& job_it : job_buffers)
         records_inserted_ += job_it.second->size();
+
+    if (records_inserted_ == old_records_size)
+    {
+        loginf << "JSONImporterTask: insertData: no data in job buffers";
+        return;
+    }
+
+    while (insert_active_)
+    {
+        loginf << "JSONImporterTask: insertData: waiting on insert done";
+
+        QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+        QThread::msleep(1);
+    }
 
     DBContentManager& dbcont_manager = COMPASS::instance().dbContentManager();
 
@@ -660,7 +676,6 @@ void JSONImportTask::insertData(std::map<std::string, std::shared_ptr<Buffer>> j
                 this, &JSONImportTask::insertDoneSlot, Qt::QueuedConnection);
         insert_slot_connected_ = true;
     }
-
 
     ++insert_active_;
     dbcont_manager.insertData(job_buffers);
