@@ -160,6 +160,11 @@ void EvaluationData::addReferenceData (DBContent& object, unsigned int line_id, 
 
     loginf << "EvaluationData: addReferenceData: adding target data";
 
+    loginf << "EvaluationData: addReferenceData: use_active_srcs " << use_active_srcs;
+
+    for (auto ds_id : active_srcs)
+        loginf << "EvaluationData: addReferenceData: " << ds_id;
+
     for (unsigned int cnt=0; cnt < buffer_size; ++cnt)
     {
         assert (!ds_ids.isNull(cnt));
@@ -309,7 +314,7 @@ void EvaluationData::addTestData (DBContent& object, unsigned int line_id,  std:
     tst_spd_ground_speed_kts_name_ = dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_ground_speed_).name();
     tst_spd_track_angle_deg_name_ = dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_track_angle_).name();
 
-    set<unsigned int> active_srcs = eval_man_.activeDataSourcesRef();
+    set<unsigned int> active_srcs = eval_man_.activeDataSourcesTst();
     bool use_active_srcs = (eval_man_.dbContentNameRef() == eval_man_.dbContentNameTst());
     unsigned int num_skipped {0};
 
@@ -336,6 +341,11 @@ void EvaluationData::addTestData (DBContent& object, unsigned int line_id,  std:
     vector<unsigned int> utn_vec;
 
     loginf << "EvaluationData: addTestData: adding target data";
+
+    loginf << "EvaluationData: addReferenceData: use_active_srcs " << use_active_srcs;
+
+    for (auto ds_id : active_srcs)
+        loginf << "EvaluationData: addReferenceData: " << ds_id;
 
     for (unsigned int cnt=0; cnt < buffer_size; ++cnt)
     {
