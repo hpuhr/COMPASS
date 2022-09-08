@@ -65,12 +65,6 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
 
     APP_FILENAME = argv[0];
 
-    //tbb::task_scheduler_init (16); // TODO ENABLE in appimage
-
-    oneapi::tbb::global_control global_limit(oneapi::tbb::global_control::max_allowed_parallelism, 16); // TODO DISABLE in appimage
-
-    //tbb::global_control global_limit(tbb::global_control::max_allowed_parallelism, 16);
-
     //    QApplication::setAttribute(Qt::AA_ShareOpenGLContexts);
 
     //    QSurfaceFormat format;
@@ -197,7 +191,25 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
 
 void Client::run ()
 {
-    //loginf << "COMPASSClient: started with " << std::thread::hardware_concurrency() << " threads";
+    unsigned int num_threads = std::thread::hardware_concurrency();
+
+// #define TBB_VERSION_MAJOR 4
+
+#if TBB_VERSION_MAJOR <= 4
+    loginf << "COMPASSClient: started with " << num_threads << " threads (tbb old)";
+    tbb::task_scheduler_init init {num_threads};
+    // TODO ENABLE in appimage
+#else
+    loginf << "COMPASSClient: started with " << num_threads << " threads";
+    tbb::global_control global_limit(tbb::global_control::max_allowed_parallelism, num_threads);
+    // TODO DISABLE in appimage
+#endif
+
+//#define TBB_VERSION_MAJOR 2021
+//    oneapi::tbb::global_control global_limit(oneapi::tbb::global_control::max_allowed_parallelism,
+//                                             num_threads); // TODO DISABLE in appimage
+
+    //tbb::global_control global_limit(tbb::global_control::max_allowed_parallelism, 16);
 
 //    loginf << "COMPASSClient: default number of threads " << tbb::info::default_concurrency()
 //           << " max " << tbb::this_task_arena::max_concurrency();
