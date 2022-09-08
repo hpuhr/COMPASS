@@ -58,15 +58,18 @@ namespace po = boost::program_options;
 
 std::string APP_FILENAME;
 
+
 Client::Client(int& argc, char** argv) : QApplication(argc, argv)
 {
     setlocale(LC_ALL, "C");
 
     APP_FILENAME = argv[0];
 
-    //tbb::task_scheduler_init(4);
+    //tbb::task_scheduler_init (16); // TODO ENABLE in appimage
 
-    //tbb::task_scheduler_init guard(std::thread::hardware_concurrency());
+    oneapi::tbb::global_control global_limit(oneapi::tbb::global_control::max_allowed_parallelism, 16); // TODO DISABLE in appimage
+
+    //tbb::global_control global_limit(tbb::global_control::max_allowed_parallelism, 16);
 
     //    QApplication::setAttribute(Qt::AA_ShareOpenGLContexts);
 
