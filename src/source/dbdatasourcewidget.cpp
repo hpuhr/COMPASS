@@ -199,7 +199,7 @@ void DBDataSourceWidget::updateWidgets()
     if (net_lines_shown)
     {
         // ds_id -> line str ->(ip, port)
-        std::map<unsigned int, std::map<std::string, std::pair<std::string, unsigned int>>> net_lines =
+        std::map<unsigned int, std::map<std::string, std::shared_ptr<DataSourceLineInfo>>> net_lines =
                 ds_man_.getNetworkLines();
 
         string line_str;

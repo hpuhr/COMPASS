@@ -2,6 +2,7 @@
 #define DBCONTENT_DATASOURCEBASE_H
 
 #include <json.hpp>
+#include "datasourcelineinfo.h"
 
 #include <string>
 
@@ -66,7 +67,7 @@ public:
 
     bool hasNetworkLines() const;
     void addNetworkLines();
-    std::map<std::string, std::pair<std::string, unsigned int>> networkLines() const;
+    std::map<std::string, std::shared_ptr<DataSourceLineInfo>> networkLines() const;
     void networkLine (const std::string& key, const std::string ip_port);
 
     void setFromJSONDeprecated (const nlohmann::json& j);
@@ -84,6 +85,10 @@ protected:
     std::string short_name_;
 
     nlohmann::json info_;
+
+    std::map<std::string, std::shared_ptr<DataSourceLineInfo>> line_info_;
+
+    void parseNetworkLineInfo();
 };
 
 }

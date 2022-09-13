@@ -775,10 +775,10 @@ void DataSourceManager::createNetworkDBDataSources()
     emit dataSourcesChangedSignal();
 }
 
-std::map<unsigned int, std::map<std::string, std::pair<std::string, unsigned int>>> DataSourceManager::getNetworkLines()
+std::map<unsigned int, std::map<std::string, std::shared_ptr<DataSourceLineInfo>>> DataSourceManager::getNetworkLines()
 {
     // ds_id -> line str ->(ip, port)
-    std::map<unsigned int, std::map<std::string, std::pair<std::string, unsigned int>>> lines;
+    std::map<unsigned int, std::map<std::string, std::shared_ptr<DataSourceLineInfo>>> lines;
 
     for (auto& ds_it : config_data_sources_)
     {

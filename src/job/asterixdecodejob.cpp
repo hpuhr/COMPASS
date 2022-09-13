@@ -149,7 +149,7 @@ void ASTERIXDecodeJob::setDecodeFile (const std::string& filename,
 
 
 void ASTERIXDecodeJob::setDecodeUDPStreams (
-        const std::map<unsigned int, std::map<std::string, std::pair<std::string, unsigned int>>>& ds_lines)
+        const std::map<unsigned int, std::map<std::string, std::shared_ptr<DataSourceLineInfo>>>& ds_lines)
 {
     ds_lines_ = ds_lines;
 
@@ -160,7 +160,7 @@ void ASTERIXDecodeJob::setDecodeUDPStreams (
         loginf << ds_it.first << ":";
 
         for (auto& line_it : ds_it.second)
-            loginf << "\t" << line_it.first << " " << line_it.second.first << ":" << line_it.second.second;
+            loginf << "\t" << line_it.first << " " << line_it.second->asString();
     }
 
     decode_udp_streams_ = true;
@@ -255,8 +255,8 @@ void ASTERIXDecodeJob::doUDPStreamDecoding()
 
         for (auto& line_it : ds_it.second)
         {
-            ip = line_it.second.first;
-            port = line_it.second.second;
+            ip = line_it.second->mcastIP();
+            port = line_it.second->mcastPort();
 
             line = String::getAppendedInt(line_it.first);
             assert (line >= 1 && line <= 4);

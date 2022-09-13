@@ -942,27 +942,28 @@ void DataSourceEditWidget::updateContent()
             add_lines_button_->setHidden(true);
             net_widget_->setHidden(false);
 
-            std::map<std::string, std::pair<std::string, unsigned int>> lines = ds->networkLines();
+            std::map<std::string, std::shared_ptr<DataSourceLineInfo>> lines = ds->networkLines();
 
-            if (lines.count("L1"))
-                net_l1_edit_->setText((lines.at("L1").first+":"+to_string(lines.at("L1").second)).c_str());
-            else
-                net_l1_edit_->setText("");
+            TODO_ASSERT
+//            if (lines.count("L1"))
+//                net_l1_edit_->setText((lines.at("L1").first+":"+to_string(lines.at("L1").second)).c_str());
+//            else
+//                net_l1_edit_->setText("");
 
-            if (lines.count("L2"))
-                net_l2_edit_->setText((lines.at("L2").first+":"+to_string(lines.at("L2").second)).c_str());
-            else
-                net_l2_edit_->setText("");
+//            if (lines.count("L2"))
+//                net_l2_edit_->setText((lines.at("L2").first+":"+to_string(lines.at("L2").second)).c_str());
+//            else
+//                net_l2_edit_->setText("");
 
-            if (lines.count("L3"))
-                net_l3_edit_->setText((lines.at("L3").first+":"+to_string(lines.at("L3").second)).c_str());
-            else
-                net_l3_edit_->setText("");
+//            if (lines.count("L3"))
+//                net_l3_edit_->setText((lines.at("L3").first+":"+to_string(lines.at("L3").second)).c_str());
+//            else
+//                net_l3_edit_->setText("");
 
-            if (lines.count("L4"))
-                net_l4_edit_->setText((lines.at("L4").first+":"+to_string(lines.at("L4").second)).c_str());
-            else
-                net_l4_edit_->setText("");
+//            if (lines.count("L4"))
+//                net_l4_edit_->setText((lines.at("L4").first+":"+to_string(lines.at("L4").second)).c_str());
+//            else
+//                net_l4_edit_->setText("");
 
         }
         else

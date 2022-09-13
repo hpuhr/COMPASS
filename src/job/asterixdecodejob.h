@@ -20,14 +20,15 @@
 
 #include <functional>
 
+#include "job.h"
+#include "json.hpp"
+#include "datasourcelineinfo.h"
+
 #include <boost/asio.hpp>
 #include <boost/array.hpp>
 #include <boost/interprocess/sync/interprocess_semaphore.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/thread/mutex.hpp>
-
-#include "job.h"
-#include "json.hpp"
 
 class ASTERIXImportTask;
 class ASTERIXPostProcess;
@@ -49,7 +50,7 @@ class ASTERIXDecodeJob : public Job
                         const std::string& framing);
 
     void setDecodeUDPStreams (
-            const std::map<unsigned int, std::map<std::string, std::pair<std::string, unsigned int>>>& ds_lines);
+            const std::map<unsigned int, std::map<std::string, std::shared_ptr<DataSourceLineInfo>>>& ds_lines);
     // ds_id -> (ip,port)
 
     virtual void run() override;
@@ -91,7 +92,7 @@ private:
     std::string framing_;
 
     bool decode_udp_streams_ {false};
-    std::map<unsigned int, std::map<std::string, std::pair<std::string, unsigned int>>> ds_lines_;
+    std::map<unsigned int, std::map<std::string, std::shared_ptr<DataSourceLineInfo>>> ds_lines_;
     // ds_id -> line str ->(ip, port)
 
     //volatile bool pause_{false};
