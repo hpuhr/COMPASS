@@ -14,6 +14,7 @@
 #include <QLabel>
 #include <QMessageBox>
 #include <QScrollArea>
+#include <QFormLayout>
 
 using namespace std;
 
@@ -282,10 +283,20 @@ DataSourceEditWidget::DataSourceEditWidget(DataSourceManager& ds_man, DataSource
 
     // net widget
 
+    QFont font_bold;
+    font_bold.setBold(true);
+
     net_widget_ = new QWidget();
     net_widget_->setContentsMargins(0, 0, 0, 0);
 
-    QGridLayout* net_layout = new QGridLayout();
+    QVBoxLayout* net_wiget_layout = new QVBoxLayout();
+
+    QLabel* net_lines_label = new QLabel("Network Lines");
+    net_lines_label->setFont(font_bold);
+    net_wiget_layout->addWidget(net_lines_label);
+
+    QFormLayout* net_layout = new QFormLayout();
+
     string line_str;
 
     for (unsigned int cnt=0; cnt < 4; ++cnt)
@@ -294,8 +305,6 @@ DataSourceEditWidget::DataSourceEditWidget(DataSourceManager& ds_man, DataSource
 
         QLabel* line_label = new QLabel(line_str.c_str());
         line_label->setAlignment(Qt::AlignLeft | Qt::AlignTop);
-
-        net_layout->addWidget(line_label, cnt, 0);
 
         QGridLayout* line_layout = new QGridLayout();
 
@@ -338,10 +347,12 @@ DataSourceEditWidget::DataSourceEditWidget(DataSourceManager& ds_man, DataSource
         line_layout->addWidget(sender_edit, 3, 1);
         net_edits_[line_str].push_back(sender_edit);
 
-        net_layout->addLayout(line_layout, cnt, 1);
+        net_layout->addRow(line_label, line_layout);
     }
 
-    net_widget_->setLayout(net_layout);
+    net_wiget_layout->addLayout(net_layout);
+
+    net_widget_->setLayout(net_wiget_layout);
     //net_widget_->setMinimumHeight(300);
 
     main_layout->addWidget(net_widget_);
