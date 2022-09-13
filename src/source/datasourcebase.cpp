@@ -291,11 +291,32 @@ std::map<std::string, std::shared_ptr<DataSourceLineInfo>> DataSourceBase::netwo
     return line_info_;
 }
 
-void DataSourceBase::networkLine (const std::string& key, const std::string ip_port)
+bool DataSourceBase::hasNetworkLine (const std::string& key) const
+{
+    return line_info_.count(key);
+}
+
+void DataSourceBase::createNetworkLine (const std::string& key)
+{
+    assert (!hasNetworkLine(key));
+
+    json& network_lines = info_.at(network_lines_key);
+    assert (network_lines.is_object());
+
+    network_lines[key] = json::object();
+    line_info_[key] = make_shared<DataSourceLineInfo>(key, network_lines.at(key));
+
+    assert (hasNetworkLine(key));
+}
+
+std::shared_ptr<DataSourceLineInfo> DataSourceBase::networkLine (const std::string& key)
 {
     assert (key == "L1" || key == "L2" || key == "L3" || key == "L4");
 
-    info_[network_lines_key][key] = ip_port;
+    if (!hasNetworkLine(key))
+        createNetworkLine(key);
+
+    return line_info_.at(key);
 }
 
 void DataSourceBase::setFromJSONDeprecated (const nlohmann::json& j)

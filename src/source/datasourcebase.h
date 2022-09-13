@@ -68,7 +68,9 @@ public:
     bool hasNetworkLines() const;
     void addNetworkLines();
     std::map<std::string, std::shared_ptr<DataSourceLineInfo>> networkLines() const;
-    void networkLine (const std::string& key, const std::string ip_port);
+    bool hasNetworkLine (const std::string& key) const;
+    void createNetworkLine (const std::string& key);
+    std::shared_ptr<DataSourceLineInfo> networkLine (const std::string& key); // creates if not exists
 
     void setFromJSONDeprecated (const nlohmann::json& j);
     void setFromJSON (const nlohmann::json& j);

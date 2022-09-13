@@ -286,30 +286,60 @@ DataSourceEditWidget::DataSourceEditWidget(DataSourceManager& ds_man, DataSource
     net_widget_->setContentsMargins(0, 0, 0, 0);
 
     QGridLayout* net_layout = new QGridLayout();
+    string line_str;
 
-    net_layout->addWidget(new QLabel("Line1"), 0, 0);
+    for (unsigned int cnt=0; cnt < 4; ++cnt)
+    {
+        line_str = "L"+QString::number(cnt+1).toStdString();
 
-    net_l1_edit_ = new QLineEdit();
-    connect(net_l1_edit_, &QLineEdit::textEdited, this, &DataSourceEditWidget::net1EditedSlot);
-    net_layout->addWidget(net_l1_edit_, 0, 1);
+        QLabel* line_label = new QLabel(line_str.c_str());
+        line_label->setAlignment(Qt::AlignLeft | Qt::AlignTop);
 
-    net_layout->addWidget(new QLabel("Line2"), 1, 0);
+        net_layout->addWidget(line_label, cnt, 0);
 
-    net_l2_edit_ = new QLineEdit();
-    connect(net_l2_edit_, &QLineEdit::textEdited, this, &DataSourceEditWidget::net2EditedSlot);
-    net_layout->addWidget(net_l2_edit_, 1, 1);
+        QGridLayout* line_layout = new QGridLayout();
 
-    net_layout->addWidget(new QLabel("Line3"), 2, 0);
+        // listen
+        line_layout->addWidget(new QLabel("Listen IP"), 0, 0);
 
-    net_l3_edit_ = new QLineEdit();
-    connect(net_l3_edit_, &QLineEdit::textEdited, this, &DataSourceEditWidget::net3EditedSlot);
-    net_layout->addWidget(net_l3_edit_, 2, 1);
+        QLineEdit* listen_edit = new QLineEdit();
+        connect(listen_edit, &QLineEdit::textEdited, this, &DataSourceEditWidget::netLineEditedSlot);
+        listen_edit->setProperty("line", line_str.c_str());
+        listen_edit->setProperty("item", "Listen IP");
+        line_layout->addWidget(listen_edit, 0, 1);
+        net_edits_[line_str].push_back(listen_edit);
 
-    net_layout->addWidget(new QLabel("Line4"), 3, 0);
+        // mcast
+        line_layout->addWidget(new QLabel("MCast IP"), 1, 0);
 
-    net_l4_edit_ = new QLineEdit();
-    connect(net_l4_edit_, &QLineEdit::textEdited, this, &DataSourceEditWidget::net4EditedSlot);
-    net_layout->addWidget(net_l4_edit_, 3, 1);
+        QLineEdit* sender_ip_edit = new QLineEdit();
+        connect(sender_ip_edit, &QLineEdit::textEdited, this, &DataSourceEditWidget::netLineEditedSlot);
+        sender_ip_edit->setProperty("line", line_str.c_str());
+        sender_ip_edit->setProperty("item", "MCast IP");
+        line_layout->addWidget(sender_ip_edit, 1, 1);
+        net_edits_[line_str].push_back(sender_ip_edit);
+
+        line_layout->addWidget(new QLabel("MCast Port"), 2, 0);
+
+        QLineEdit* sender_port_edit = new QLineEdit();
+        connect(sender_port_edit, &QLineEdit::textEdited, this, &DataSourceEditWidget::netLineEditedSlot);
+        sender_port_edit->setProperty("line", line_str.c_str());
+        sender_port_edit->setProperty("item", "MCast Port");
+        line_layout->addWidget(sender_port_edit, 2, 1);
+        net_edits_[line_str].push_back(sender_port_edit);
+
+        // sender
+        line_layout->addWidget(new QLabel("Sender IP"), 3, 0);
+
+        QLineEdit* sender_edit = new QLineEdit();
+        connect(sender_edit, &QLineEdit::textEdited, this, &DataSourceEditWidget::netLineEditedSlot);
+        sender_edit->setProperty("line", line_str.c_str());
+        sender_edit->setProperty("item", "Sender IP");
+        line_layout->addWidget(sender_edit, 3, 1);
+        net_edits_[line_str].push_back(sender_edit);
+
+        net_layout->addLayout(line_layout, cnt, 1);
+    }
 
     net_widget_->setLayout(net_layout);
     //net_widget_->setMinimumHeight(300);
@@ -634,76 +664,70 @@ void DataSourceEditWidget::addNetLinesSlot()
     updateContent();
 }
 
-void DataSourceEditWidget::net1EditedSlot(const QString& value_str)
+void DataSourceEditWidget::netLineEditedSlot(const QString& value_str)
 {
-    string value = value_str.toStdString();
+    QLineEdit* edit = dynamic_cast<QLineEdit*> (sender());
+    assert (edit);
 
-    loginf << "DataSourceEditWidget: net1EditedSlot: '" << value << "'";
+    string line_id = edit->property("line").toString().toStdString();
+    string item = edit->property("item").toString().toStdString();
+
+    assert (line_id == "L1" || line_id == "L2" || line_id == "L3" || line_id == "L4");
+    assert (item == "Listen IP" || item == "MCast IP" || item == "MCast Port" || item == "Sender IP");
 
     assert (has_current_ds_);
 
-    if (current_ds_in_db_)
+    if (item == "Listen IP" || item == "MCast IP" || item == "Sender IP")
     {
-        assert (ds_man_.hasDBDataSource(current_ds_id_));
-        ds_man_.dbDataSource(current_ds_id_).networkLine("L1", value);
+        string value = value_str.toStdString();
+
+        loginf << "DataSourceEditWidget: netLineEditedSlot: " << line_id << " " << item << " ip '" << value << "'";
+
+        if (current_ds_in_db_)
+            assert (ds_man_.hasDBDataSource(current_ds_id_));
+
+        assert (ds_man_.hasConfigDataSource(current_ds_id_));
+
+        if (item == "Listen IP")
+        {
+            if (current_ds_in_db_)
+                ds_man_.dbDataSource(current_ds_id_).networkLine("L1")->listenIP(value);
+
+            ds_man_.configDataSource(current_ds_id_).networkLine("L1")->listenIP(value);
+        }
+        else if (item == "MCast IP")
+        {
+            if (current_ds_in_db_)
+                ds_man_.dbDataSource(current_ds_id_).networkLine("L1")->mcastIP(value);
+
+            ds_man_.configDataSource(current_ds_id_).networkLine("L1")->mcastIP(value);
+        }
+        else // Sender IP
+        {
+            if (current_ds_in_db_)
+                ds_man_.dbDataSource(current_ds_id_).networkLine("L1")->listenIP(value);
+
+            ds_man_.configDataSource(current_ds_id_).networkLine("L1")->listenIP(value);
+        }
     }
-
-    assert (ds_man_.hasConfigDataSource(current_ds_id_));
-    ds_man_.configDataSource(current_ds_id_).networkLine("L1", value);
-}
-
-void DataSourceEditWidget::net2EditedSlot(const QString& value_str)
-{
-    string value = value_str.toStdString();
-
-    loginf << "DataSourceEditWidget: net2EditedSlot: '" << value << "'";
-
-    assert (has_current_ds_);
-
-    if (current_ds_in_db_)
+    else // MCast Port
     {
-        assert (ds_man_.hasDBDataSource(current_ds_id_));
-        ds_man_.dbDataSource(current_ds_id_).networkLine("L2", value);
+        unsigned int value = value_str.toUInt();
+
+        loginf << "DataSourceEditWidget: netLineEditedSlot: " << line_id << " " << item << " port '" << value << "'";
+
+        if (current_ds_in_db_)
+            assert (ds_man_.hasDBDataSource(current_ds_id_));
+
+        assert (ds_man_.hasConfigDataSource(current_ds_id_));
+
+        assert (item == "MCast Port");
+
+            if (current_ds_in_db_)
+                ds_man_.dbDataSource(current_ds_id_).networkLine("L1")->mcastPort(value);
+
+            ds_man_.configDataSource(current_ds_id_).networkLine("L1")->mcastPort(value);
     }
-
-    assert (ds_man_.hasConfigDataSource(current_ds_id_));
-    ds_man_.configDataSource(current_ds_id_).networkLine("L2", value);
-}
-
-void DataSourceEditWidget::net3EditedSlot(const QString& value_str)
-{
-    string value = value_str.toStdString();
-
-    loginf << "DataSourceEditWidget: net3EditedSlot: '" << value << "'";
-
-    assert (has_current_ds_);
-
-    if (current_ds_in_db_)
-    {
-        assert (ds_man_.hasDBDataSource(current_ds_id_));
-        ds_man_.dbDataSource(current_ds_id_).networkLine("L3", value);
-    }
-
-    assert (ds_man_.hasConfigDataSource(current_ds_id_));
-    ds_man_.configDataSource(current_ds_id_).networkLine("L3", value);
-}
-
-void DataSourceEditWidget::net4EditedSlot(const QString& value_str)
-{
-    string value = value_str.toStdString();
-
-    loginf << "DataSourceEditWidget: net4EditedSlot: '" << value << "'";
-
-    assert (has_current_ds_);
-
-    if (current_ds_in_db_)
-    {
-        assert (ds_man_.hasDBDataSource(current_ds_id_));
-        ds_man_.dbDataSource(current_ds_id_).networkLine("L4", value);
-    }
-
-    assert (ds_man_.hasConfigDataSource(current_ds_id_));
-    ds_man_.configDataSource(current_ds_id_).networkLine("L4", value);
 }
 
 void DataSourceEditWidget::deleteSlot()
@@ -934,8 +958,6 @@ void DataSourceEditWidget::updateContent()
             add_accuracies_button_->setHidden(true);
         }
 
-        loginf << "UGA " << ds->name() << " lines " << ds->hasNetworkLines();
-
         // lines
         if (ds->hasNetworkLines())
         {
@@ -944,27 +966,33 @@ void DataSourceEditWidget::updateContent()
 
             std::map<std::string, std::shared_ptr<DataSourceLineInfo>> lines = ds->networkLines();
 
-            TODO_ASSERT
-//            if (lines.count("L1"))
-//                net_l1_edit_->setText((lines.at("L1").first+":"+to_string(lines.at("L1").second)).c_str());
-//            else
-//                net_l1_edit_->setText("");
+            for (auto& edit_it : net_edits_) // line -> edits
+            {
+                assert (edit_it.second.size() == 4);
 
-//            if (lines.count("L2"))
-//                net_l2_edit_->setText((lines.at("L2").first+":"+to_string(lines.at("L2").second)).c_str());
-//            else
-//                net_l2_edit_->setText("");
+                if (lines.count(edit_it.first)) // exists, set
+                {
+                    std::shared_ptr<DataSourceLineInfo> line = lines.at(edit_it.first);
 
-//            if (lines.count("L3"))
-//                net_l3_edit_->setText((lines.at("L3").first+":"+to_string(lines.at("L3").second)).c_str());
-//            else
-//                net_l3_edit_->setText("");
+                    if (line->hasListenIP())
+                        edit_it.second.at(0)->setText(line->listenIP().c_str());
+                    else
+                        edit_it.second.at(0)->setText("");
 
-//            if (lines.count("L4"))
-//                net_l4_edit_->setText((lines.at("L4").first+":"+to_string(lines.at("L4").second)).c_str());
-//            else
-//                net_l4_edit_->setText("");
+                    edit_it.second.at(1)->setText(line->mcastIP().c_str());
+                    edit_it.second.at(2)->setText(QString::number(line->mcastPort()));
 
+                    if (line->hasSenderIP())
+                        edit_it.second.at(3)->setText(line->senderIP().c_str());
+                    else
+                        edit_it.second.at(3)->setText("");
+                }
+                else // nope, clear
+                {
+                    for (auto edit_ptr : edit_it.second)
+                        edit_ptr->setText("");
+                }
+            }
         }
         else
         {
