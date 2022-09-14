@@ -24,7 +24,6 @@
 #include "json.hpp"
 #include "datasourcelineinfo.h"
 
-#include <boost/asio.hpp>
 #include <boost/array.hpp>
 #include <boost/interprocess/sync/interprocess_semaphore.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
