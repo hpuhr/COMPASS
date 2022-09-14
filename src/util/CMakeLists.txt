@@ -16,8 +16,6 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/system.h"
         "${CMAKE_CURRENT_LIST_DIR}/logger.h"
         "${CMAKE_CURRENT_LIST_DIR}/format.h"
-        "${CMAKE_CURRENT_LIST_DIR}/formatselectionwidget.h"
-        "${CMAKE_CURRENT_LIST_DIR}/datatypeformatselectionwidget.h"
         "${CMAKE_CURRENT_LIST_DIR}/tbbhack.h"
         "${CMAKE_CURRENT_LIST_DIR}/timeconv.h"
     PRIVATE
@@ -28,8 +26,6 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/number.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/json.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/system.cpp"
-        "${CMAKE_CURRENT_LIST_DIR}/formatselectionwidget.cpp"
-        "${CMAKE_CURRENT_LIST_DIR}/datatypeformatselectionwidget.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/timeconv.cpp"
 )
 

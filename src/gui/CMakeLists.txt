@@ -12,7 +12,11 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/rangeedit.h"
         "${CMAKE_CURRENT_LIST_DIR}/rangeslider.h"
         "${CMAKE_CURRENT_LIST_DIR}/rangeslider_p.h"
+        "${CMAKE_CURRENT_LIST_DIR}/formatselectionwidget.h"
+        "${CMAKE_CURRENT_LIST_DIR}/datatypeformatselectionwidget.h"
     PRIVATE
         "${CMAKE_CURRENT_LIST_DIR}/rangeedit.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/rangeslider.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/formatselectionwidget.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/datatypeformatselectionwidget.cpp"
 )
