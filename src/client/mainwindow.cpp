@@ -350,11 +350,11 @@ void MainWindow::createMenus ()
     process_menu_->addAction(assoc_artas_action);
 
     //tests
-#if 1
-    QAction* test_action = new QAction(tr("Run test code"));
-    config_menu->addAction(test_action);
-    connect(test_action, &QAction::triggered, this, &MainWindow::runTestCodeSlot);
-#endif
+//#if 1
+//    QAction* test_action = new QAction(tr("Run test code"));
+//    config_menu->addAction(test_action);
+//    connect(test_action, &QAction::triggered, this, &MainWindow::runTestCodeSlot);
+//#endif
 }
 
 void MainWindow::updateMenus()

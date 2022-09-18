@@ -702,23 +702,23 @@ void DataSourceEditWidget::netLineEditedSlot(const QString& value_str)
         if (item == "Listen IP")
         {
             if (current_ds_in_db_)
-                ds_man_.dbDataSource(current_ds_id_).networkLine("L1")->listenIP(value);
+                ds_man_.dbDataSource(current_ds_id_).networkLine(line_id)->listenIP(value);
 
-            ds_man_.configDataSource(current_ds_id_).networkLine("L1")->listenIP(value);
+            ds_man_.configDataSource(current_ds_id_).networkLine(line_id)->listenIP(value);
         }
         else if (item == "MCast IP")
         {
             if (current_ds_in_db_)
-                ds_man_.dbDataSource(current_ds_id_).networkLine("L1")->mcastIP(value);
+                ds_man_.dbDataSource(current_ds_id_).networkLine(line_id)->mcastIP(value);
 
-            ds_man_.configDataSource(current_ds_id_).networkLine("L1")->mcastIP(value);
+            ds_man_.configDataSource(current_ds_id_).networkLine(line_id)->mcastIP(value);
         }
         else // Sender IP
         {
             if (current_ds_in_db_)
-                ds_man_.dbDataSource(current_ds_id_).networkLine("L1")->listenIP(value);
+                ds_man_.dbDataSource(current_ds_id_).networkLine(line_id)->listenIP(value);
 
-            ds_man_.configDataSource(current_ds_id_).networkLine("L1")->listenIP(value);
+            ds_man_.configDataSource(current_ds_id_).networkLine(line_id)->listenIP(value);
         }
     }
     else // MCast Port
@@ -735,9 +735,9 @@ void DataSourceEditWidget::netLineEditedSlot(const QString& value_str)
         assert (item == "MCast Port");
 
             if (current_ds_in_db_)
-                ds_man_.dbDataSource(current_ds_id_).networkLine("L1")->mcastPort(value);
+                ds_man_.dbDataSource(current_ds_id_).networkLine(line_id)->mcastPort(value);
 
-            ds_man_.configDataSource(current_ds_id_).networkLine("L1")->mcastPort(value);
+            ds_man_.configDataSource(current_ds_id_).networkLine(line_id)->mcastPort(value);
     }
 }
 

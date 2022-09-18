@@ -41,81 +41,6 @@ using namespace nlohmann;
 using namespace Utils;
 using namespace std;
 
-//using boost::asio::ip::udp;
-
-//class UDPReceiver
-//{
-//public:
-//    UDPReceiver(boost::asio::io_context& io_context, const std::string& sender_ip, unsigned int port,
-//                std::function<void(const char*, unsigned int)> data_callback) // const std::string&,
-//        : socket_endpoint_(boost::asio::ip::address::from_string(sender_ip), port),
-//          socket_(io_context),
-//          data_callback_(data_callback)
-//    {
-//        // udp::endpoint(boost::asio::ip::address_v4::any(), port)
-
-//        data_ = new char[MAX_UDP_READ_SIZE];
-
-//        //loginf << "ctor: " << sender_ip_ << ":" << port_;
-//        socket_.open(socket_endpoint_.protocol());
-
-//        socket_.set_option(boost::asio::ip::udp::socket::reuse_address(true));
-//        socket_.bind(socket_endpoint_);
-
-//        socket_.set_option(boost::asio::ip::multicast::join_group(
-//                               boost::asio::ip::address::from_string(sender_ip)));
-
-
-////        std::string address_listen = "1.2.3.4";
-////        std::string address_mcast = "224.0.0.0";
-////        boost::system::error_code ec;
-////        boost::asio::ip::address listen_addr = boost::asio::ip::address::from_string(address_listen, ec);
-////        boost::asio::ip::address mcast_addr = boost::asio::ip::address::from_string(address_mcast, ec);
-////        socket_.set_option(boost::asio::ip::multicast::join_group(mcast_addr.to_v4(), listen_addr.to_v4()), ec);
-
-//        socket_.async_receive_from(
-//                    boost::asio::buffer(data_, MAX_UDP_READ_SIZE), sender_endpoint_,
-//                    boost::bind(&UDPReceiver::handle_receive_from, this,
-//                                boost::asio::placeholders::error,
-//                                boost::asio::placeholders::bytes_transferred));
-//    }
-
-//    void handle_receive_from(const boost::system::error_code& error,
-//                             size_t bytes_recvd)
-//    {
-//        //loginf << "handle_receive_from: from " << sender_ip_ << ":" << port_ << " bytes " << bytes_recvd;
-
-//        if (error && error != boost::asio::error::message_size)
-//        {
-//            logerr << "UDPReceiver: handle_receive_from: from "
-//                   << sender_endpoint_.address().to_string()+":"+to_string(sender_endpoint_.port())
-//                   << " error " << error;
-//            return;
-//        }
-//        else
-//        {
-//            //sender_endpoint_.address().to_string()+":"+to_string(sender_endpoint_.port()),
-//            data_callback_(data_, bytes_recvd);
-//        }
-
-//        //sender_endpoint_.address() should be set to sender ip
-
-//        socket_.async_receive_from(
-//                    boost::asio::buffer(data_, MAX_UDP_READ_SIZE), sender_endpoint_,
-//                    boost::bind(&UDPReceiver::handle_receive_from, this,
-//                                boost::asio::placeholders::error,
-//                                boost::asio::placeholders::bytes_transferred));
-//    }
-
-//private:
-//    boost::asio::ip::udp::endpoint socket_endpoint_;
-//    boost::asio::ip::udp::endpoint sender_endpoint_;
-//    boost::asio::ip::udp::socket socket_;
-
-//    std::function<void(const char*, unsigned int)> data_callback_; // const std::string&,
-//    char* data_ {nullptr};
-//};
-
 ASTERIXDecodeJob::ASTERIXDecodeJob(ASTERIXImportTask& task, bool test,
                                    ASTERIXPostProcess& post_process)
     : Job("ASTERIXDecodeJob"),
@@ -238,8 +163,6 @@ void ASTERIXDecodeJob::doUDPStreamDecoding()
 
     boost::asio::io_context io_context;
 
-    string ip;
-    unsigned int port;
     unsigned int line;
 
     vector<unique_ptr<ASTERIXUDPReceiver>> udp_receivers;
@@ -256,21 +179,18 @@ void ASTERIXDecodeJob::doUDPStreamDecoding()
 
         for (auto& line_it : ds_it.second)
         {
-            ip = line_it.second->mcastIP();
-            port = line_it.second->mcastPort();
-
             line = String::getAppendedInt(line_it.first);
             assert (line >= 1 && line <= 4);
             line--; // technical counting starts at 0
 
             loginf << "ASTERIXDecodeJob: doUDPStreamDecoding: setting up ds_id " << ds_it.first
-                   << " line " << line << " ip " << ip << ":" << port;
+                   << " line " << line << " info " << line_it.second->asString();
 
             auto data_callback = [this,line](const char* data, unsigned int length) {
                 this->storeReceivedData(line, data, length);
             };
 
-            udp_receivers.emplace_back(new ASTERIXUDPReceiver(io_context, ip, port, data_callback));
+            udp_receivers.emplace_back(new ASTERIXUDPReceiver(io_context, line_it.second, data_callback));
 
             ++line_cnt;
 

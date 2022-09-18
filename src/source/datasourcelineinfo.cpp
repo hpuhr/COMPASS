@@ -48,7 +48,7 @@ bool DataSourceLineInfo::hasListenIP() const
 const std::string DataSourceLineInfo::listenIP() const
 {
     assert (hasListenIP());
-    assert (config_.at(mcast_port_key).is_string());
+    assert (config_.at(listen_ip_key).is_string());
     return config_.at(listen_ip_key);
 }
 
@@ -107,7 +107,7 @@ std::string DataSourceLineInfo::asString() const
 
     ss << "mcast " << mcastIP() << ":" << mcastPort();
 
-    if (hasListenIP())
+    if (hasSenderIP())
         ss << ";sender " << senderIP();
 
     return ss.str();
