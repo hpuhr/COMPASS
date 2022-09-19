@@ -293,6 +293,7 @@ void DataSourcesLoadWidget::clearAndCreateContent()
 
     QFont font_bold;
     font_bold.setBold(true);
+    font_bold.setPointSize(ds_man_.dsFontSize());
 
     unsigned int row = 0;
     unsigned int col = 0;
@@ -328,7 +329,7 @@ void DataSourcesLoadWidget::clearAndCreateContent()
         connect(dstyp_box, &QCheckBox::clicked,
                 this, &DataSourcesLoadWidget::loadDSTypeChangedSlot);
 
-        dstyp_box->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+        dstyp_box->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Preferred);
 
         type_layout_->addWidget(dstyp_box, row, col);
 

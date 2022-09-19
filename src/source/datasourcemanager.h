@@ -100,8 +100,12 @@ public:
     bool loadWidgetShowLines() const;
     void loadWidgetShowLines(bool value);
 
+    unsigned int dsFontSize() const;
+
 protected:
     COMPASS& compass_;
+
+    unsigned int ds_font_size_ {12};
 
     std::vector<std::unique_ptr<dbContent::ConfigurationDataSource>> config_data_sources_;
     std::vector<std::unique_ptr<dbContent::DBDataSource>> db_data_sources_;

@@ -27,6 +27,8 @@ DataSourceManager::DataSourceManager(const std::string& class_id, const std::str
     registerParameter("load_widget_show_counts", &load_widget_show_counts_, true);
     registerParameter("load_widget_show_lines", &load_widget_show_lines_, true);
 
+    registerParameter("ds_font_size", &ds_font_size_, 12);
+
     createSubConfigurables();
 
     updateDSIdsAll();
@@ -136,7 +138,7 @@ void DataSourceManager::importDataSourcesJSONDeprecated(const nlohmann::json& j)
 
         for (auto& j_ds_it : j_dbo_it.value().get<json::array_t>())
         {
-            loginf << "DataSourceManager: importDataSources: found dbo " << dbcontent_name
+            loginf << "DataSourceManager: importDataSources: found dbcontent " << dbcontent_name
                    << " ds '" << j_ds_it.dump(4) << "'";
 
             assert(j_ds_it.contains("dbo_name"));
@@ -308,6 +310,11 @@ void DataSourceManager::loadWidgetShowLines(bool value)
 
     if (load_widget_)
         load_widget_->updateContent();
+}
+
+unsigned int DataSourceManager::dsFontSize() const
+{
+    return ds_font_size_;
 }
 
 bool DataSourceManager::loadingWanted (const std::string& dbcontent_name)

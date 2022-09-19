@@ -87,14 +87,18 @@ void DBDataSourceWidget::recreateWidgets()
     loaded_cnt_labels_.clear();
     total_cnt_labels_.clear();
 
+    QFont font;
+    font.setPointSize(ds_man_.dsFontSize());
+
     // update load check
     load_check_ = new QCheckBox(src_.name().c_str());
+    load_check_->setFont(font);
     connect(load_check_, &QCheckBox::clicked, this, &DBDataSourceWidget::loadingChangedSlot);
 
     unsigned int row = 0;
 
     grid_layout_->addWidget(load_check_, row, 0, 1, 2);
-    grid_layout_->addWidget(createLinesWidget(), row, 2, 1, 2);
+    grid_layout_->addWidget(createLinesWidget(), row, 2, 1, 2, Qt::AlignLeft);
     ++row;
 
     if (show_counts)

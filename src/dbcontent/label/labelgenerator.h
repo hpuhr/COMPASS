@@ -176,8 +176,10 @@ protected:
     bool updateTIValuesFromStr(const std::string& values);
     bool updateTAValuesFromStr(const std::string& values);
 
+    std::string getVariableName(const std::string& dbcontent_name, unsigned int key);
     std::string getVariableValue(const std::string& dbcontent_name, unsigned int key,
                                  std::shared_ptr<Buffer>& buffer, unsigned int index);
+    std::string getVariableUnit(const std::string& dbcontent_name, unsigned int key);
 };
 
 }

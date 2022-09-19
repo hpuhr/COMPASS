@@ -187,104 +187,12 @@ std::vector<std::string> LabelGenerator::getLabelTexts(
     // 3,1
     tmp.push_back(getVariableValue(dbcontent_name, 2*3+0, buffer, buffer_index));
 
-    {
-
-
-        //        bool calc_vx_vy;
-        //        string var1, var2;
-        //        bool cant_calculate = false;
-        //        double speed_ms;
-
-        //        if (dbcont_manager_.metaVariable(DBContent::meta_var_vx_.name()).existsIn(dbcontent_name)
-        //                && buffer->has<double>(
-        //                    dbcont_manager_.metaVariable(DBContent::meta_var_vx_.name()).getFor(dbcontent_name).name())
-        //                && dbcont_manager_.metaVariable(DBContent::meta_var_vy_.name()).existsIn(dbcontent_name)
-        //                && buffer->has<double>(
-        //                    dbcont_manager_.metaVariable(DBContent::meta_var_vy_.name()).getFor(dbcontent_name).name()))
-        //        {
-        //            // calculate based on vx, vy
-        //            calc_vx_vy = true;
-
-        //            var1 = dbcont_manager_.metaVariable(DBContent::meta_var_vx_.name()).getFor(dbcontent_name).name();
-        //            var2 = dbcont_manager_.metaVariable(DBContent::meta_var_vy_.name()).getFor(dbcontent_name).name();
-        //        }
-        //        else if (dbcont_manager_.metaVariable(DBContent::meta_var_ground_speed_.name()).existsIn(dbcontent_name)
-        //                 && buffer->has<double>(
-        //                     dbcont_manager_.metaVariable(DBContent::meta_var_ground_speed_.name()).getFor(dbcontent_name).name()))
-        //        {
-        //            // calculate based on spd, track angle
-        //            calc_vx_vy = false;
-
-        //            var1 = dbcont_manager_.metaVariable(DBContent::meta_var_ground_speed_.name()).getFor(dbcontent_name).name();
-        //        }
-        //        else
-        //            cant_calculate = true;
-
-        //        if (cant_calculate)
-        //            tmp.push_back(""); // cant
-        //        else
-        //        {
-        //            if (calc_vx_vy)
-        //            {
-        //                NullableVector<double>& vxs = buffer->get<double>(var1);
-        //                NullableVector<double>& vys = buffer->get<double>(var2);
-
-        //                if (!vxs.isNull(buffer_index) && !vys.isNull(buffer_index))
-        //                {
-        //                    speed_ms = sqrt(pow(vxs.get(buffer_index), 2)+pow(vys.get(buffer_index), 2));
-        //                    tmp.push_back(String::doubleToStringPrecision(speed_ms * M_S2KNOTS, 2));
-        //                }
-        //                else
-        //                    tmp.push_back(""); // cant
-        //            }
-        //            else
-        //            {
-        //                NullableVector<double>& speeds = buffer->get<double>(var1);
-
-        //                if (!speeds.isNull(buffer_index))
-        //                {
-        //                    speed_ms = speeds.get(buffer_index);
-        //                    tmp.push_back(String::doubleToStringPrecision(speed_ms, 2)); // should be kts
-        //                }
-        //                else
-        //                    tmp.push_back(""); // cant
-        //            }
-        //        }
-    }
-
     // 3,2
     tmp.push_back(getVariableValue(dbcontent_name, 2*3+1, buffer, buffer_index));
-
-    //    Variable* c_d_var {nullptr};
-    //    if (dbcont_manager_.metaCanGetVariable(dbcontent_name, DBContent::meta_var_climb_descent_))
-    //        c_d_var = &dbcont_manager_.metaGetVariable(dbcontent_name, DBContent::meta_var_climb_descent_);
-
-    //    string c_d;
-
-    //    if (c_d_var && buffer->has<unsigned char>(c_d_var->name()) &&
-    //            !buffer->get<unsigned char>(c_d_var->name()).isNull(buffer_index))
-    //        c_d = c_d_var->getAsSpecialRepresentationString((buffer->get<unsigned char>(c_d_var->name()).get(buffer_index)));
-
-    //    tmp.push_back(c_d);
 
     // 3,3
 
     tmp.push_back(getVariableValue(dbcontent_name, 2*3+2, buffer, buffer_index));
-
-    //    if (dbcontent_name == "CAT062" && buffer->has<string>(DBContent::var_cat062_wtc_.name())
-    //            && !buffer->get<string>(DBContent::var_cat062_wtc_.name()).isNull(buffer_index))
-    //        tmp.push_back(buffer->get<string>(DBContent::var_cat062_wtc_.name()).get(buffer_index));
-    //    else
-    //        tmp.push_back("");
-
-    //        Variable& tod_var = dbcont_manager_.metaGetVariable(dbcontent_name, DBContent::meta_var_tod_);
-    //        string tod;
-
-    //        if (buffer->has<float>(tod_var.name()) &&
-    //                !buffer->get<float>(tod_var.name()).isNull(buffer_index))
-    //            tod = String::timeStringFromDouble(buffer->get<float>(tod_var.name()).get(buffer_index));
-
-    //        tmp.push_back(tod);
 
     return tmp;
 }
@@ -317,8 +225,198 @@ std::vector<std::string> LabelGenerator::getFullTexts(const std::string& dbconte
     //tmp.push_back("Description");
     tmp.push_back("Unit");
 
+    // do common label parts
+    set<string> used_varnames;
+    {
+        using namespace dbContent;
+
+        Variable& assoc_var = dbcont_manager_.metaGetVariable(dbcontent_name, DBContent::meta_var_associations_);
+
+        Variable* acid_var {nullptr};
+        if (dbcont_manager_.metaCanGetVariable(dbcontent_name, DBContent::meta_var_ti_))
+            acid_var = &dbcont_manager_.metaGetVariable(dbcontent_name, DBContent::meta_var_ti_);
+
+        Variable* acad_var {nullptr};
+        if (dbcont_manager_.metaCanGetVariable(dbcontent_name, DBContent::meta_var_ta_))
+            acad_var = &dbcont_manager_.metaGetVariable(dbcontent_name, DBContent::meta_var_ta_);
+
+        Variable& m3a_var = dbcont_manager_.metaGetVariable(dbcontent_name, DBContent::meta_var_m3a_);
+
+        string varname, value, unit;
+
+        // first row
+        // 1x1
+        {
+            varname = "Best Available Identification";
+            value = "?";
+            unit = "";
+
+            if (buffer->has<nlohmann::json>(assoc_var.name())
+                    && !buffer->get<nlohmann::json>(assoc_var.name()).isNull(buffer_index))
+            {
+                value = buffer->get<nlohmann::json>(assoc_var.name()).get(buffer_index).dump();
+                value = value.substr(1, value.size()-2); // remove first and last chars []
+                value += " ("+assoc_var.name()+")";
+            }
+            else if (acid_var && buffer->has<string>(acid_var->name())
+                     && !buffer->get<string>(acid_var->name()).isNull(buffer_index))
+            {
+                value = buffer->get<string>(acid_var->name()).get(buffer_index);
+                value.erase(std::remove(value.begin(), value.end(), ' '), value.end());
+                value += " ("+acid_var->name()+")";
+            }
+            else if (acad_var && buffer->has<unsigned int>(acad_var->name()) &&
+                     !buffer->get<unsigned int>(acad_var->name()).isNull(buffer_index))
+            {
+                value = acad_var->getAsSpecialRepresentationString(
+                            buffer->get<unsigned int>(acad_var->name()).get(buffer_index));
+                value += " ("+acad_var->name()+")";
+            }
+            else if (buffer->has<unsigned int>(m3a_var.name()) &&
+                     !buffer->get<unsigned int>(m3a_var.name()).isNull(buffer_index))
+            {
+                value = m3a_var.getAsSpecialRepresentationString(
+                            buffer->get<unsigned int>(m3a_var.name()).get(buffer_index));
+                value += " ("+m3a_var.name()+")";
+            }
+
+            tmp.push_back(varname);
+            tmp.push_back(value);
+            tmp.push_back(unit);
+        }
+
+        // 1,2
+        varname = "";
+        value = "";
+        unit = "";
+
+        if (acid_var)
+        {
+            varname = acid_var->name();
+
+            if (buffer->has<string>(acid_var->name())
+                    && !buffer->get<string>(acid_var->name()).isNull(buffer_index))
+            {
+
+                value = buffer->get<string>(acid_var->name()).get(buffer_index);
+                value.erase(std::remove(value.begin(), value.end(), ' '), value.end());
+            }
+
+            used_varnames.insert(varname);
+        }
+        tmp.push_back(varname);
+        tmp.push_back(value);
+        tmp.push_back(unit);
+
+        unsigned int index;
+
+        // 1,3
+        {
+            index = 0*3+2;
+            varname = getVariableName(dbcontent_name, index);
+            tmp.push_back(varname);
+            tmp.push_back(getVariableValue(dbcontent_name, index, buffer, buffer_index));
+            tmp.push_back(getVariableUnit(dbcontent_name, index));
+
+            if (varname.size())
+                used_varnames.insert(varname);
+        }
+
+        // row 2
+
+        // 2,1
+        varname = "";
+        value = "";
+        unit = "";
+
+        varname = m3a_var.name();
+        if (buffer->has<unsigned int>(m3a_var.name()) &&
+                !buffer->get<unsigned int>(m3a_var.name()).isNull(buffer_index))
+        {
+            value = m3a_var.getAsSpecialRepresentationString(buffer->get<unsigned int>(m3a_var.name()).get(buffer_index));
+        }
+        tmp.push_back(varname);
+        tmp.push_back(value);
+        tmp.push_back(unit);
+
+        if (varname.size())
+            used_varnames.insert(varname);
+
+        // 2,2
+        Variable& mc_var = dbcont_manager_.metaGetVariable(dbcontent_name, DBContent::meta_var_mc_);
+        varname = mc_var.name();
+        value = "";
+        unit = mc_var.dimensionUnitStr();
+
+        if (buffer->has<float>(mc_var.name()) &&
+                !buffer->get<float>(mc_var.name()).isNull(buffer_index))
+        {
+            value = String::doubleToStringPrecision(buffer->get<float>(mc_var.name()).get(buffer_index),0);
+        }
+        tmp.push_back(varname);
+        tmp.push_back(value);
+        tmp.push_back(unit);
+
+        if (varname.size())
+            used_varnames.insert(varname);
+
+
+        // 2,3
+        index = 1*3+2;
+        varname = getVariableName(dbcontent_name, index);
+        tmp.push_back(varname);
+        tmp.push_back(getVariableValue(dbcontent_name, index, buffer, buffer_index));
+        tmp.push_back(getVariableUnit(dbcontent_name, index));
+
+        if (varname.size())
+            used_varnames.insert(varname);
+
+        // row 3
+
+        // 3,1
+        index = 2*3+0;
+        varname = getVariableName(dbcontent_name, index);
+
+        tmp.push_back(varname);
+        tmp.push_back(getVariableValue(dbcontent_name, index, buffer, buffer_index));
+        tmp.push_back(getVariableUnit(dbcontent_name, index));
+
+        if (varname.size())
+            used_varnames.insert(varname);
+
+        // 3,2
+        index = 2*3+1;
+        varname = getVariableName(dbcontent_name, index);
+
+        tmp.push_back(varname);
+        tmp.push_back(getVariableValue(dbcontent_name, index, buffer, buffer_index));
+        tmp.push_back(getVariableUnit(dbcontent_name, index));
+
+        if (varname.size())
+            used_varnames.insert(varname);
+
+        // 3,3
+        index = 2*3+2;
+        varname = getVariableName(dbcontent_name, index);
+
+        tmp.push_back(varname);
+        tmp.push_back(getVariableValue(dbcontent_name, index, buffer, buffer_index));
+        tmp.push_back(getVariableUnit(dbcontent_name, index));
+
+        if (varname.size())
+            used_varnames.insert(varname);
+    }
+
+    // do rest, first an empty line
+    tmp.push_back("");
+    tmp.push_back("");
+    tmp.push_back("");
+
     for (auto& var_it : db_content.variables())
     {
+        if (used_varnames.count(var_it->name())) // skip if used
+            continue;
+
         if (buffer->hasProperty(*var_it.get()))
         {
             property_name = var_it->name();
@@ -485,6 +583,8 @@ std::vector<std::string> LabelGenerator::getFullTexts(const std::string& dbconte
             tmp.push_back(var_it->dimensionUnitStr());
         }
     }
+
+    assert (tmp.size() % 3 == 0);
 
     return tmp;
 }
@@ -1292,6 +1392,21 @@ bool LabelGenerator::updateTAValuesFromStr(const std::string& values)
     return true;
 }
 
+std::string LabelGenerator::getVariableName(const std::string& dbcontent_name, unsigned int key)
+{
+    assert (key != 0);
+    assert (label_config_.contains(dbcontent_name));
+
+    json& dbcont_def = label_config_.at(dbcontent_name);
+
+    if (!dbcont_def.contains(to_string(key)))
+        return "";
+
+    string varname = dbcont_def.at(to_string(key));
+
+    return varname;
+}
+
 std::string LabelGenerator::getVariableValue(const std::string& dbcontent_name, unsigned int key,
                                              std::shared_ptr<Buffer>& buffer, unsigned int index)
 {
@@ -1568,6 +1683,25 @@ std::string LabelGenerator::getVariableValue(const std::string& dbcontent_name, 
                     Property::asString(data_type));
     }
 
+}
+
+std::string LabelGenerator::getVariableUnit(const std::string& dbcontent_name, unsigned int key)
+{
+    assert (key != 0);
+    assert (label_config_.contains(dbcontent_name));
+
+    json& dbcont_def = label_config_.at(dbcontent_name);
+
+    if (!dbcont_def.contains(to_string(key)))
+        return "";
+
+    string varname = dbcont_def.at(to_string(key));
+
+    DBContent& db_content = dbcont_manager_.dbContent(dbcontent_name);
+
+    assert (db_content.hasVariable(varname));
+
+    return db_content.variable(varname).dimensionUnitStr();
 }
 
 }
