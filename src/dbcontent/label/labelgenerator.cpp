@@ -772,22 +772,30 @@ bool LabelGenerator::labelWanted(std::shared_ptr<Buffer> buffer, unsigned int in
             cs_fpl_vec = &buffer->get<string> (cs_fpl_var->name());
         }
 
-        if (acid_vec.isNull(index))
+//        if (acid_vec.isNull(index))
+//        {
+//            if (!filter_ti_null_wanted_
+//                    || (cs_fpl_vec != nullptr ? cs_fpl_vec->isNull(index) : false))
+//                return false; // null not wanted
+//        }
+        if (acid_vec.isNull(index)
+                && (cs_fpl_vec != nullptr ? cs_fpl_vec->isNull(index) : true)) // null or not found
         {
-            if (!filter_ti_null_wanted_
-                    || (cs_fpl_vec != nullptr ? cs_fpl_vec->isNull(index) : false))
-                return false; // null not wanted
+            return filter_ti_null_wanted_;
         }
         else
         {
             bool found = false;
 
-            for (auto& val_it : filter_ti_values_set_)
+            if (!acid_vec.isNull(index))
             {
-                if (acid_vec.get(index).find(val_it) != std::string::npos)
+                for (auto& val_it : filter_ti_values_set_)
                 {
-                    found = true;
-                    break;
+                    if (acid_vec.get(index).find(val_it) != std::string::npos)
+                    {
+                        found = true;
+                        break;
+                    }
                 }
             }
 
