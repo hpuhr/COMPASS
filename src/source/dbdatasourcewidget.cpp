@@ -46,6 +46,7 @@ unsigned int DBDataSourceWidget::getLabelMinWidth()
 {
     if (load_check_)
         return load_check_->minimumSizeHint().width();
+
     else return 0;
 }
 
@@ -264,6 +265,9 @@ void DBDataSourceWidget::updateWidgets()
                 else
                 {
                     button->setChecked(src_.lineLoadingWanted(line_cnt));
+
+                    logdbg << "DBDataSourceWidget: updateWidgets: src " << src_.name()
+                           << " " << line_str << " live " << src_.hasLiveData(line_cnt, current_time);
 
                     if (src_.hasLiveData(line_cnt, current_time))
                     {

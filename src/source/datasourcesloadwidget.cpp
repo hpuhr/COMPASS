@@ -50,19 +50,19 @@ DataSourcesLoadWidget::DataSourcesLoadWidget(DataSourceManager& ds_man)
     QScrollArea* scroll_area = new QScrollArea();
     scroll_area->setWidgetResizable(true);
     scroll_area->setContentsMargins(0, 0, 0, 0);
-    scroll_area->setStyleSheet("    QWidget{ background-color: white } "
-                               "    QScrollBar{ background-color: none } ");
-    //QScrollBar{ background-color: none }
+//    scroll_area->setStyleSheet(" QAbstractScrollArea { background-color: transparent; }"
+//                               " QWidget#scrollAreaWidgetContents{ background-color: transparent; }");
 
     sub_layout->addWidget(scroll_area);
 
     QWidget* sub_widget = new QWidget();
     sub_widget->setContentsMargins(0, 0, 0, 0);
+    //sub_widget->setStyleSheet("background-color: white"); // works but overrides line colors
 
     scroll_area->setWidget(sub_widget);
 
     QVBoxLayout* main_layout = new QVBoxLayout();
-    main_layout->setContentsMargins(1, 1, 1, 1);
+    //main_layout->setContentsMargins(1, 1, 1, 1);
 
     // button
 
