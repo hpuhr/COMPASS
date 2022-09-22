@@ -105,7 +105,7 @@ public:
 protected:
     COMPASS& compass_;
 
-    unsigned int ds_font_size_ {12};
+    unsigned int ds_font_size_ {10};
 
     std::vector<std::unique_ptr<dbContent::ConfigurationDataSource>> config_data_sources_;
     std::vector<std::unique_ptr<dbContent::DBDataSource>> db_data_sources_;

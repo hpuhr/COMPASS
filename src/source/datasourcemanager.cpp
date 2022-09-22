@@ -27,7 +27,7 @@ DataSourceManager::DataSourceManager(const std::string& class_id, const std::str
     registerParameter("load_widget_show_counts", &load_widget_show_counts_, true);
     registerParameter("load_widget_show_lines", &load_widget_show_lines_, true);
 
-    registerParameter("ds_font_size", &ds_font_size_, 12);
+    registerParameter("ds_font_size", &ds_font_size_, 10);
 
     createSubConfigurables();
 

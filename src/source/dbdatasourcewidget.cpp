@@ -42,6 +42,19 @@ void DBDataSourceWidget::updateContent()
 
 }
 
+unsigned int DBDataSourceWidget::getLabelMinWidth()
+{
+    if (load_check_)
+        return load_check_->minimumSizeHint().width();
+    else return 0;
+}
+
+void DBDataSourceWidget::updateLabelMinWidth(unsigned int width)
+{
+    if (load_check_)
+        load_check_->setMinimumWidth(width);
+}
+
 bool DBDataSourceWidget::needsRecreate()
 {
     if (!line_buttons_.size())
