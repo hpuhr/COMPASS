@@ -340,6 +340,12 @@ void ASTERIXDecodeJob::fileJasterixCallback(std::unique_ptr<nlohmann::json> data
     //loginf << "ASTERIXDecodeJob: fileJasterixCallback: data '" << data->dump(2) << "'";
     loginf << "ASTERIXDecodeJob: fileJasterixCallback: line_id " << line_id << " num_records " << num_records;
 
+    if (num_records == 0)
+    {
+        loginf << "ASTERIXDecodeJob: fileJasterixCallback: omitting zero data";
+        return;
+    }
+
     assert(!extracted_data_);
     extracted_data_ = std::move(data);
     assert(extracted_data_);
