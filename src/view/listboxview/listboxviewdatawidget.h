@@ -18,7 +18,8 @@
 #ifndef LISTBOXVIEWDATAWIDGET_H_
 #define LISTBOXVIEWDATAWIDGET_H_
 
-#include <QWidget>
+#include "viewdatawidget.h"
+
 #include <memory>
 
 #include "global.h"
@@ -35,31 +36,15 @@ class DBContent;
  * @brief Widget with tab containing BufferTableWidgets in ListBoxView
  *
  */
-class ListBoxViewDataWidget : public QWidget
+class ListBoxViewDataWidget : public ViewDataWidget
 {
     Q_OBJECT
-
-  signals:
-    void exportDoneSignal(bool cancelled);
-    void showOnlySelectedSignal(bool value);
-    void usePresentationSignal(bool use_presentation);
-
-  public slots:
-    void loadingStartedSlot();
-    /// @brief Called when new result Buffer was delivered
-    void updateDataSlot(const std::map<std::string, std::shared_ptr<Buffer>>& data, bool requires_reset);
-    void loadingDoneSlot();
-
-    void exportDataSlot(bool overwrite);
-    void exportDoneSlot(bool cancelled);
-
-    void showOnlySelectedSlot(bool value);
-    void usePresentationSlot(bool use_presentation);
-
-  public:
+public:
     /// @brief Constructor
-    ListBoxViewDataWidget(ListBoxView* view, ListBoxViewDataSource* data_source,
-                          QWidget* parent = nullptr, Qt::WindowFlags f = 0);
+    ListBoxViewDataWidget(ListBoxView* view, 
+                          ListBoxViewDataSource* data_source,
+                          QWidget* parent = nullptr, 
+                          Qt::WindowFlags f = 0);
     /// @brief Destructor
     virtual ~ListBoxViewDataWidget();
 
@@ -72,17 +57,36 @@ class ListBoxViewDataWidget : public QWidget
 
     AllBufferTableWidget* getAllBufferTableWidget ();
 
-  protected:
-    ListBoxView* view_{nullptr};
+signals:
+    void exportDoneSignal(bool cancelled);
+    void showOnlySelectedSignal(bool value);
+    void usePresentationSignal(bool use_presentation);
+
+public slots:
+    void loadingStartedSlot();
+    /// @brief Called when new result Buffer was delivered
+    void updateDataSlot(const std::map<std::string, std::shared_ptr<Buffer>>& data, bool requires_reset);
+    void loadingDoneSlot();
+
+    void exportDataSlot(bool overwrite);
+    void exportDoneSlot(bool cancelled);
+
+    void showOnlySelectedSlot(bool value);
+    void usePresentationSlot(bool use_presentation);
+
+protected:
+    virtual void toolChanged_impl(int mode) override;
+
+    ListBoxView*           view_{nullptr};
     /// Data source
     ListBoxViewDataSource* data_source_{nullptr};
     /// Main tab widget
-    QTabWidget* tab_widget_{nullptr};
+    QTabWidget*            tab_widget_{nullptr};
     /// Container with all table widgets
-    AllBufferTableWidget* all_buffer_table_widget_{nullptr};
+    AllBufferTableWidget*  all_buffer_table_widget_{nullptr};
 
     std::map<std::string, std::shared_ptr<Buffer>> buffers_;
-    std::map<std::string, BufferTableWidget*> buffer_tables_;
+    std::map<std::string, BufferTableWidget*>      buffer_tables_;
 };
 
 #endif /* LISTBOXVIEWDATAWIDGET_H_ */
