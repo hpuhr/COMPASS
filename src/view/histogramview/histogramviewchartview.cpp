@@ -9,190 +9,151 @@
 namespace QtCharts
 {
 
-HistogramViewChartView::HistogramViewChartView (
-        HistogramViewDataWidget* data_widget, QChart* chart, QWidget* parent)
-    : QChartView(chart, parent), data_widget_(data_widget)
+/**
+ */
+HistogramViewChartView::HistogramViewChartView(HistogramViewDataWidget* data_widget, 
+                                               QChart* chart, 
+                                               QWidget* parent)
+:   ChartView   (chart, parent)
+,   data_widget_(data_widget  )
 {
     assert (data_widget_);
 }
 
-HistogramViewChartView::~HistogramViewChartView()
+/**
+ */
+HistogramViewChartView::~HistogramViewChartView() = default;
+
+/**
+ */
+bool HistogramViewChartView::handleMousePress(Qt::MouseButtons buttons, const QPointF& widget_pos)
 {
-
-}
-
-//void HistogramViewChartView::seriesPressedSlot(int index, QBarSet* barset)
-//{
-//    loginf << "HistogramViewChartView: seriesPressedSlot: point index " << index
-//           << " barset " << barset->label().toStdString();
-
-//}
-
-//void HistogramViewChartView::seriesReleasedSlot(int index, QBarSet *barset)
-//{
-//    loginf << "HistogramViewChartView: seriesReleasedSlot: point index " << index
-//           << " barset " << barset->label().toStdString();
-
-//    //loginf << "HistogramViewChartView: seriesReleasedSlot";
-//}
-
-void HistogramViewChartView::mousePressEvent(QMouseEvent* event)
-{
-    logdbg << "HistogramViewChartView: mousePressEvent: rect ev x " << event->pos().x()
-           << " y " << event->pos().y() << " has_p1 " << has_p1_;
-
-    QPointF widget_pos = event->localPos();
-
-    //map mouse pos to chart space
-    auto point = mapFromGlobal(QCursor::pos());
-    auto pointF = mapToScene(point);
-    pointF = chart()->mapFromScene(pointF);
-    auto p = chart()->mapToValue(pointF, chart()->series().at(0));
-
-    logdbg << "HistogramViewChartView: mousePressEvent: x " << p.x() << " y " << p.y();
-
-    if (!has_p1_) // first click
+    if (buttons & Qt::LeftButton)
     {
-        show_rect_ = true;
-        has_p1_    = true;
-        p1_        = widget_pos.toPoint();
-        p1_data_   = p;
+        auto tool = data_widget_->selectedTool();
 
-        p2_        = widget_pos.toPoint();
-        p2_data_   = p;
-    }
-    else // second click
-    {
-        p2_      = widget_pos.toPoint();
-        p2_data_ = p;
-
-        //selected range
-        double range_min = std::min(p1_data_.x(), p2_data_.x());
-        double range_max = std::max(p1_data_.x(), p2_data_.x());
-
-        const int bins = (int)data_widget_->numBins();
-
-        if (bins > 0)
+        if (tool == HG_SELECT_TOOL)
         {
-            auto clampBinToRange = [ & ] (int& bin) 
-            {
-                //bin == binmax is the zero value bin, so clamp to [0, numbins]
-                bin = std::max(0, std::min(bin, bins));
-            };
+            logdbg << "HistogramViewChartView: handleMousePress: RECT x " << widget_pos.x() << " y " << widget_pos.y();
 
-            //determine which bin centers are inside the numeric range (bin centers are at full integers, 0, 1, 2, and so on)
-            int bin_min = (int)std::ceil(range_min);
-            int bin_max = (int)std::floor(range_max);
+            // view widget coordinates to chart coordinates
+            QPointF p = widgetToChart(widget_pos);
 
-            //clamp bin ids for safety
-            clampBinToRange(bin_min);
-            clampBinToRange(bin_max);
+            p1_      = widget_pos.toPoint();
+            p1_data_ = p;
 
-            logdbg << "HistogramViewChartView: mousePressEvent: bin range [" << bin_min << "," << bin_max << "] bins = " << bins;
+            p2_      = widget_pos.toPoint();
+            p2_data_ = p;
 
-            //only send range when valid
-            if (bin_min <= bin_max)
-            {
-                // do stuff
-                emit rectangleSelectedSignal(bin_min, bin_max);
-            }
-        }      
+            beginSelection(p1_, p2_, p1_data_, p2_data_);
 
-        show_rect_ = false;
-        has_p1_    = false;
-
-        update();
-        this->viewport()->repaint();
+            return true;
+        }
     }
-
-    event->accept();
-    return;
-
-    //QChartView::mousePressEvent(event);
+    return false;
 }
 
-
-
-void HistogramViewChartView::mouseMoveEvent(QMouseEvent* event)
+/**
+ */
+bool HistogramViewChartView::handleMouseMove(Qt::MouseButtons buttons, const QPointF& widget_pos)
 {
-    if (has_p1_)
+    if (buttons & Qt::LeftButton)
     {
-        logdbg << "HistogramViewChartView: mouseMoveEvent: rect ev x " << event->pos().x()
-               << " y " << event->pos().y();
+        auto tool = data_widget_->selectedTool();
 
-        // Start with the view widget coordinates
-        QPointF widget_pos = event->localPos();
-        // view->mapToScene: widget (view) coordinates -> scene coordinates
-        QPointF scene_pos = mapToScene(QPoint(static_cast<int>(widget_pos.x()), static_cast<int>(widget_pos.y())));
-        // chart->mapFromScene: scene coordinates -> chart item coordinates
-        QPointF chart_item_pos = chart()->mapFromScene(scene_pos);
-        // chart->mapToValue: chart item coordinates -> value in a given series.
-        QPointF p = chart()->mapToValue(chart_item_pos);
+        if (tool == HG_SELECT_TOOL && isSelectionEnabled())
+        {
+            logdbg << "HistogramViewChartView: handleMouseMove: RECT x " << widget_pos.x() << " y " << widget_pos.y();
 
-        logdbg << "HistogramViewChartView: mouseMoveEvent: x " << p.x() << " y " << p.y();
+            // view widget coordinates to chart coordinates
+            QPointF p = widgetToChart(widget_pos);
 
-        p2_ = widget_pos.toPoint();
-        p2_data_ = p;
+            p2_      = widget_pos.toPoint();
+            p2_data_ = p;
 
-        update();
+            updateSelection(p1_, p2_, p1_data_, p2_data_);
 
-        event->accept();
-
-        this->viewport()->repaint();
-        return;
+            return true;
+        }
     }
-
-    setCursor(data_widget_->currentCursor());
-
-    //QChartView::mouseMoveEvent(event);
-    QChartView::mouseMoveEvent(event);
+    return false;
 }
 
-void HistogramViewChartView::mouseReleaseEvent(QMouseEvent* event)
+/**
+ */
+bool HistogramViewChartView::handleMouseRelease(Qt::MouseButtons buttons, const QPointF& widget_pos)
 {
-    logdbg << "HistogramViewChartView: mouseReleaseEvent: ev x " << event->pos().x() << " y " << event->pos().y();
+    if (buttons & Qt::LeftButton)
+    {
+        auto tool = data_widget_->selectedTool();
 
-    QChartView::mouseReleaseEvent(event);
+        if (tool == HG_SELECT_TOOL && isSelectionEnabled())
+        {
+            logdbg << "HistogramViewChartView: handleMouseRelease: RECT x " << widget_pos.x() << " y " << widget_pos.y();
+
+            // view widget coordinates to chart coordinates
+            QPointF p = widgetToChart(widget_pos);
+
+            p2_      = widget_pos.toPoint();
+            p2_data_ = p;
+
+            logdbg << "ScatterPlotViewChartView: handleMouseRelease: REGION p1 " << p1_data_.x() << "," << p1_data_.y() << " p2 " << p2_data_.x() << "," << p2_data_.y();
+
+            updateSelection(p1_, p2_, p1_data_, p2_data_);
+            sendSelectedBins();
+            endSelection();
+
+            return true;
+        }
+    }
+    return false;
 }
 
+/**
+ */
+void HistogramViewChartView::sendSelectedBins()
+{
+    const int bins = (int)data_widget_->numBins();
+
+    if (bins > 0)
+    {
+        auto clampBinToRange = [ & ] (int& bin) 
+        {
+            //bin == binmax is the zero value bin, so clamp to [0, numbins]
+            bin = std::max(0, std::min(bin, bins));
+        };
+
+        auto region = selectedChartRegion();
+
+        //determine which bin centers are inside the numeric range (bin centers are at full integers, 0, 1, 2, and so on)
+        int bin_min = (int)std::ceil(region.left());
+        int bin_max = (int)std::floor(region.right());
+
+        //clamp bin ids for safety
+        clampBinToRange(bin_min);
+        clampBinToRange(bin_max);
+
+        logdbg << "HistogramViewChartView: sendSelectedBins: bin range [" << bin_min << "," << bin_max << "] bins = " << bins;
+
+        //only send range when valid
+        if (bin_min <= bin_max)
+        {
+            // do stuff
+            emit rectangleSelectedSignal(bin_min, bin_max);
+        }
+    } 
+}
+
+/**
+ */
 void HistogramViewChartView::wheelEvent(QWheelEvent* event)
 {
-    qreal factor = event->angleDelta().y() > 0 ? 1.1 : 0.9;
-    chart()->zoom(factor);
-    event->accept();
+    //zooming using the wheel only makes sense if some kind of navigation in the chart plane is supported
+    //qreal factor = event->angleDelta().y() > 0 ? 1.1 : 0.9;
+    //chart()->zoom(factor);
+    //event->accept();
+    
     QChartView::wheelEvent(event);
-}
-
-void HistogramViewChartView::paintEvent (QPaintEvent *e)
-{
-    logdbg << "HistogramViewChartView: paintEvent: show_rect " << show_rect_;
-
-    QChartView::paintEvent(e);
-
-    if (show_rect_)
-    {
-        logdbg << "HistogramViewChartView: paintEvent: rect";
-
-        if (!rectangle_)
-        {
-            rectangle_ = new QRubberBand(QRubberBand::Rectangle, viewport());
-
-            QPalette pal;
-            pal.setBrush(QPalette::Highlight, QBrush(Qt::red));
-            rectangle_->setPalette(pal);
-        }
-
-        QPoint p_min {std::min(p1_.x(), p2_.x()), std::min(p1_.y(), p2_.y())};
-        QPoint p_max {std::max(p1_.x(), p2_.x()), std::max(p1_.y(), p2_.y())};
-
-        rectangle_->setGeometry(QRect(p_min, p_max));
-        rectangle_->show();
-    }
-    else if (rectangle_)
-    {
-        delete rectangle_;
-        rectangle_ = nullptr;
-    }
 }
 
 }

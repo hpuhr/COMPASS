@@ -18,7 +18,7 @@
 #ifndef SCATTERPLOTVIEWCONFIGWIDGET_H_
 #define SCATTERPLOTVIEWCONFIGWIDGET_H_
 
-#include <QWidget>
+#include "viewconfigwidget.h"
 
 #include "dbcontent/variable/variable.h"
 
@@ -39,7 +39,7 @@ class QLabel;
  * @brief Widget with configuration elements for a ScatterPlotView
  *
  */
-class ScatterPlotViewConfigWidget : public QWidget
+class ScatterPlotViewConfigWidget : public ViewConfigWidget
 {
     Q_OBJECT
 
@@ -54,7 +54,7 @@ class ScatterPlotViewConfigWidget : public QWidget
     ScatterPlotViewConfigWidget(ScatterPlotView* view, QWidget* parent = nullptr);
     virtual ~ScatterPlotViewConfigWidget();
 
-    void setStatus (const std::string& status, bool visible, QColor color = Qt::black);
+    virtual void setStatus(const QString& status, bool visible, const QColor& color = Qt::black) override;
 
   protected:
     ScatterPlotView* view_;

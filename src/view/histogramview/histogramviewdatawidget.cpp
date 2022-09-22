@@ -91,36 +91,12 @@ using namespace EvaluationRequirementResult;
 
 HistogramViewDataWidget::HistogramViewDataWidget(HistogramView* view, HistogramViewDataSource* data_source,
                                                  QWidget* parent, Qt::WindowFlags f)
-    : QWidget(parent, f), view_(view), data_source_(data_source)
+    : ViewDataWidget(parent, f), view_(view), data_source_(data_source)
 {
     assert(data_source_);
     setContentsMargins(0, 0, 0, 0);
 
     main_layout_ = new QHBoxLayout();
-
-    //    chart_series_ = new QBarSeries();
-
-    //    chart_ = new QChart();
-    //    chart_->addSeries(chart_series_);
-    //    chart_->layout()->setContentsMargins(0, 0, 0, 0);
-    //    chart_->setBackgroundRoundness(0);
-
-    //    chart_->legend()->setVisible(true);
-    //    chart_->legend()->setAlignment(Qt::AlignBottom);
-
-    //    chart_view_ = new HistogramViewChartView(this, chart_);
-    //    chart_view_->setRenderHint(QPainter::Antialiasing);
-    //chart_view_->setRubberBand(QChartView::RectangleRubberBand);
-
-    //    connect (chart_series_, &QBarSeries::clicked,
-    //             chart_view_, &HistogramViewChartView::seriesPressedSlot);
-    //    connect (chart_series_, &QBarSeries::released,
-    //             chart_view_, &HistogramViewChartView::seriesReleasedSlot);
-
-    //    connect (chart_view_, &HistogramViewChartView::rectangleSelectedSignal,
-    //             this, &HistogramViewDataWidget::rectangleSelectedSlot, Qt::ConnectionType::QueuedConnection);
-
-    //    layout->addWidget(chart_view_);
 
     setLayout(main_layout_);
 
@@ -2047,7 +2023,7 @@ void HistogramViewDataWidget::resetZoomSlot()
         chart_view_->chart()->zoomReset();
 }
 
-void HistogramViewDataWidget::rectangleSelectedSlot (unsigned int index1, unsigned int index2)
+void HistogramViewDataWidget::selectData(unsigned int index1, unsigned int index2)
 {
     loginf << "HistogramViewDataWidget: rectangleSelectedSlot: index1 " << index1 << " index2 " << index2;
 
@@ -2321,6 +2297,15 @@ void HistogramViewDataWidget::rectangleSelectedSlot (unsigned int index1, unsign
     emit view_->selectionChangedSignal();
 }
 
+void HistogramViewDataWidget::rectangleSelectedSlot (unsigned int index1, unsigned int index2)
+{
+    if (selected_tool_ == HG_SELECT_TOOL)
+    {
+        selectData(index1, index2);
+    }
+    endTool();
+}
+
 void HistogramViewDataWidget::invertSelectionSlot()
 {
     loginf << "HistogramViewDataWidget: invertSelectionSlot";
@@ -2358,51 +2343,12 @@ void HistogramViewDataWidget::clearSelectionSlot()
     emit view_->selectionChangedSignal();
 }
 
-//void HistogramViewDataWidget::showOnlySelectedSlot(bool value)
-//{
-//    loginf << "HistogramViewDataWidget: showOnlySelectedSlot: " << value;
-//    emit showOnlySelectedSignal(value);
-//}
+/**
+ */
+void HistogramViewDataWidget::toolChanged_impl(int mode)
+{
+    selected_tool_ = (HistogramViewDataTool)mode;
 
-//void HistogramViewDataWidget::usePresentationSlot(bool use_presentation)
-//{
-//    loginf << "HistogramViewDataWidget: usePresentationSlot";
-
-//    emit usePresentationSignal(use_presentation);
-//}
-
-//void HistogramViewDataWidget::showAssociationsSlot(bool value)
-//{
-//    loginf << "HistogramViewDataWidget: showAssociationsSlot: " << value;
-//    emit showAssociationsSignal(value);
-//}
-
-//void HistogramViewDataWidget::resetModels()
-//{
-//    if (all_buffer_table_widget_)
-//        all_buffer_table_widget_->resetModel();
-
-//    for (auto& table_widget_it : buffer_tables_)
-//        table_widget_it.second->resetModel();
-//}
-
-//void HistogramViewDataWidget::updateToSelection()
-//{
-//    if (all_buffer_table_widget_)
-//        all_buffer_table_widget_->updateToSelection();
-
-//    for (auto& table_widget_it : buffer_tables_)
-//        table_widget_it.second->updateToSelection();
-//}
-
-//void HistogramViewDataWidget::selectFirstSelectedRow()
-//{
-//    if (all_buffer_table_widget_)
-//        all_buffer_table_widget_->selectSelectedRows();
-//}
-
-//AllBufferTableWidget* HistogramViewDataWidget::getAllBufferTableWidget ()
-//{
-//    assert (all_buffer_table_widget_);
-//    return all_buffer_table_widget_;
-//}
+    if (chart_view_)
+        chart_view_->onToolChanged();
+}
