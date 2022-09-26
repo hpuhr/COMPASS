@@ -39,6 +39,7 @@ LabelGenerator::LabelGenerator(const std::string& class_id, const std::string& i
     registerParameter("label_directions", &label_directions_, json::object());
     registerParameter("label_lines", &label_lines_, json::object());
     registerParameter("label_config", &label_config_, json::object());
+    registerParameter("label_ds_ids", &label_ds_ids_, json::object());
     registerParameter("declutter_labels", &declutter_labels_, true);
     registerParameter("max_declutter_labels", &max_declutter_labels_, 200);
 
@@ -652,27 +653,40 @@ void LabelGenerator::autoLOD(bool auto_lod)
 
 void LabelGenerator::addLabelDSID(unsigned int ds_id)
 {
-    label_ds_ids_.insert(ds_id);
+    label_ds_ids_[to_string(ds_id)] = true;
 
     emit labelOptionsChangedSignal();
 }
 
 void LabelGenerator::removeLabelDSID(unsigned int ds_id)
 {
-    assert (label_ds_ids_.count(ds_id));
-    label_ds_ids_.erase(ds_id);
+    label_ds_ids_[to_string(ds_id)] = false;
 
     emit labelOptionsChangedSignal();
 }
 
-const std::set<unsigned int>& LabelGenerator::labelDSIDs() const
+//const std::map<unsigned int, bool> LabelGenerator::labelDSIDs() const
+//{
+//    return label_ds_ids_.get<std::map<unsigned int, bool>>();
+//}
+
+bool LabelGenerator::anyDSIDLabelWanted()
 {
-    return label_ds_ids_;
+    for (auto& ds_it : label_ds_ids_.get<std::map<string, bool>>())
+    {
+        if (ds_it.second)
+            return true;
+    }
+
+    return false;
 }
 
 bool LabelGenerator::labelWanted(unsigned int ds_id)
 {
-    return label_ds_ids_.count(ds_id);
+    if (label_ds_ids_.contains(to_string(ds_id)))
+        return label_ds_ids_.at(to_string(ds_id));
+    else
+        return false;
 }
 
 bool LabelGenerator::labelWanted(std::shared_ptr<Buffer> buffer, unsigned int index)
@@ -697,6 +711,9 @@ bool LabelGenerator::labelWanted(std::shared_ptr<Buffer> buffer, unsigned int in
 
         NullableVector<unsigned int>& ds_id_vec = buffer->get<unsigned int> (ds_id_var.name());
         assert (!ds_id_vec.isNull(index));
+
+        if (!labelWanted(ds_id_vec.get(index)))
+            return false;
 
         if (labelLine(ds_id_vec.get(index)) != line_vec.get(index))
             return false;

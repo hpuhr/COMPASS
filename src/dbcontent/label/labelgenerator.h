@@ -60,7 +60,7 @@ public:
 
     void addLabelDSID(unsigned int ds_id);
     void removeLabelDSID(unsigned int ds_id);
-    const std::set<unsigned int>& labelDSIDs() const;
+    bool anyDSIDLabelWanted();
     bool labelWanted(unsigned int ds_id);
     bool labelWanted(std::shared_ptr<Buffer> buffer, unsigned int index);
 
@@ -141,7 +141,7 @@ protected:
 
     nlohmann::json label_config_;
 
-    std::set<unsigned int> label_ds_ids_;
+    nlohmann::json label_ds_ids_; // dsid str -> label flag
 
     bool filter_mode3a_active_;
     std::string filter_mode3a_values_;
