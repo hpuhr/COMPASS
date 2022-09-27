@@ -80,16 +80,20 @@ ASTERIXUDPReceiver::ASTERIXUDPReceiver(boost::asio::io_context& io_context, //co
     }
 
     //    socket.set_option(boost::asio::ip::multicast::join_group(mcast_addr.to_v4(), listen_addr.to_v4()), ec);
-    if (has_listen_address)
-        socket_.set_option(boost::asio::ip::multicast::join_group(
-                               mcast_addr.to_v4(), listen_addr.to_v4()), ec);
-    else
-        socket_.set_option(boost::asio::ip::multicast::join_group(
-                               mcast_addr.to_v4()), ec);
-    if (ec)
+
+    if (mcast_addr.is_multicast())
     {
-        logerr << "ASTERIXUDPReceiver: ctor: socket join group error " << ec.message();
-        return;
+        if (has_listen_address)
+            socket_.set_option(boost::asio::ip::multicast::join_group(
+                                   mcast_addr.to_v4(), listen_addr.to_v4()), ec);
+        else
+            socket_.set_option(boost::asio::ip::multicast::join_group(
+                                   mcast_addr.to_v4()), ec);
+        if (ec)
+        {
+            logerr << "ASTERIXUDPReceiver: ctor: socket join group error " << ec.message();
+            return;
+        }
     }
 
     if (line_info_->hasSenderIP())

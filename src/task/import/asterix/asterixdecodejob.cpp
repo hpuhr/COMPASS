@@ -279,6 +279,8 @@ void ASTERIXDecodeJob::doUDPStreamDecoding()
                     assert(!extracted_data_);
                 else
                     extracted_data_ = nullptr;
+
+                resuming_cached_data_ = false; // in case of resume action
             }
         }
     }
@@ -339,6 +341,12 @@ void ASTERIXDecodeJob::fileJasterixCallback(std::unique_ptr<nlohmann::json> data
 
     //loginf << "ASTERIXDecodeJob: fileJasterixCallback: data '" << data->dump(2) << "'";
     loginf << "ASTERIXDecodeJob: fileJasterixCallback: line_id " << line_id << " num_records " << num_records;
+
+    if (num_records == 0)
+    {
+        loginf << "ASTERIXDecodeJob: fileJasterixCallback: omitting zero data";
+        return;
+    }
 
     assert(!extracted_data_);
     extracted_data_ = std::move(data);
@@ -612,10 +620,17 @@ void ASTERIXDecodeJob::resumeLiveNetworkData(bool discard_cache)
 
         receive_buffer_sizes_.clear();
     }
+    else
+        resuming_cached_data_ = true;
 
     in_live_paused_state_ = false;
 
     receive_semaphore_.post(); // wake up loop
+}
+
+bool ASTERIXDecodeJob::resumingCachedData() const
+{
+    return resuming_cached_data_;
 }
 
 size_t ASTERIXDecodeJob::numErrors() const { return num_errors_; }

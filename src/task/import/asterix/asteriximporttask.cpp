@@ -48,6 +48,8 @@
 #include <QMessageBox>
 #include <QThread>
 #include <QProgressDialog>
+#include <QMessageBox>
+#include <QPushButton>
 
 #include <algorithm>
 
@@ -77,6 +79,8 @@ ASTERIXImportTask::ASTERIXImportTask(const std::string& class_id, const std::str
     date_ = boost::posix_time::ptime(boost::gregorian::day_clock::universal_day());
 
     registerParameter("override_tod_offset", &override_tod_offset_, 0.0);
+
+    registerParameter("ask_discard_cache_on_resume", &ask_discard_cache_on_resume_, true);
 
     std::string jasterix_definition_path = HOME_DATA_DIRECTORY + "jasterix_definitions";
 
@@ -1219,7 +1223,37 @@ void ASTERIXImportTask::appModeSwitchSlot (AppMode app_mode_previous, AppMode ap
         if (app_mode_previous == AppMode::LivePaused)
         {
             // resume paused -> running
-            decode_job_->resumeLiveNetworkData(true);
+
+            bool discard_cache = false;
+
+            if (ask_discard_cache_on_resume_)
+            {
+                QMessageBox::StandardButton reply;
+                reply = QMessageBox::question(nullptr, "Resuming into Live: Running",
+                                              "Would you like to import cached ASTERIX data?",
+                                              QMessageBox::Yes|QMessageBox::No);
+                if (reply == QMessageBox::No)
+                    discard_cache = true;
+            }
+
+            QMessageBox m_info (QMessageBox::Information, "Resuming into Live: Running",
+                                  "Importing cached ASTERIX data. Please wait.", QMessageBox::Ok);
+            m_info.button(QMessageBox::Ok)->hide();
+            m_info.show();
+
+            loginf << "ASTERIXImportTask: appModeSwitchSlot: resuming";
+
+            decode_job_->resumeLiveNetworkData(discard_cache);
+
+            while (decode_job_->resumingCachedData())
+            {
+                QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+                QThread::msleep(1);
+            }
+
+            loginf << "ASTERIXImportTask: appModeSwitchSlot: resume done";
+
+            m_info.close();
         }
         else
             ; // nothing to do, normal startup

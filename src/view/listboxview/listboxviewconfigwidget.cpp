@@ -38,8 +38,9 @@
 using namespace Utils;
 using namespace std;
 
-ListBoxViewConfigWidget::ListBoxViewConfigWidget(ListBoxView* view, QWidget* parent)
-    : QWidget(parent), view_(view)
+ListBoxViewConfigWidget::ListBoxViewConfigWidget(ListBoxView* view, 
+                                                 QWidget* parent)
+:   ViewConfigWidget(parent), view_(view)
 {
     QTabWidget* tab_widget = new QTabWidget(this);
     tab_widget->setStyleSheet("QTabBar::tab { height: 42px; }");
@@ -170,13 +171,12 @@ ListBoxViewConfigWidget::ListBoxViewConfigWidget(ListBoxView* view, QWidget* par
     setStatus("No Data Loaded", true);
 }
 
-ListBoxViewConfigWidget::~ListBoxViewConfigWidget() {}
+ListBoxViewConfigWidget::~ListBoxViewConfigWidget() = default;
 
-void ListBoxViewConfigWidget::setStatus (const std::string& status, bool visible, QColor color)
+void ListBoxViewConfigWidget::setStatus(const QString& text, bool visible, const QColor& color)
 {
     assert (status_label_);
-    status_label_->setText(status.c_str());
-    //status_label_->setStyleSheet("QLabel { color : "+color.name()+"; }");
+    status_label_->setText(text);
 
     QPalette palette = status_label_->palette();
     palette.setColor(status_label_->foregroundRole(), color);

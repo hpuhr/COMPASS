@@ -157,6 +157,8 @@ protected:
     bool override_tod_active_{false};
     float override_tod_offset_{0};
 
+    bool ask_discard_cache_on_resume_ {true};
+
     bool running_ {false};
 
     unsigned int num_packets_in_processing_{0};

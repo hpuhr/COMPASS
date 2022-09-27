@@ -166,7 +166,7 @@ void HistogramView::checkSubConfigurables()
 HistogramViewDataWidget* HistogramView::getDataWidget()
 {
     assert (widget_);
-    return widget_->getDataWidget();
+    return widget_->getViewDataWidget();
 }
 
 VariableSet HistogramView::getSet(const std::string& dbcontent_name)
@@ -249,10 +249,10 @@ void HistogramView::dataVar (Variable& var)
     assert (!isDataVarMeta());
 
     assert (widget_);
-    widget_->getDataWidget()->updateToData();
+    widget_->getViewDataWidget()->updateToData();
 
-    if (widget_->getDataWidget()->dataNotInBuffer())
-        widget_->configWidget()->setStatus("Reload Required", true, Qt::red);
+    if (widget_->getViewDataWidget()->dataNotInBuffer())
+        widget_->getViewConfigWidget()->setStatus("Reload Required", true, Qt::red);
 }
 
 MetaVariable& HistogramView::metaDataVar()
@@ -273,10 +273,10 @@ void HistogramView::metaDataVar (MetaVariable& var)
     assert (isDataVarMeta());
 
     assert (widget_);
-    widget_->getDataWidget()->updateToData();
+    widget_->getViewDataWidget()->updateToData();
 
-    if (widget_->getDataWidget()->dataNotInBuffer())
-        widget_->configWidget()->setStatus("Reload Required", true, Qt::red);
+    if (widget_->getViewDataWidget()->dataNotInBuffer())
+        widget_->getViewConfigWidget()->setStatus("Reload Required", true, Qt::red);
 }
 
 
@@ -295,7 +295,7 @@ void HistogramView::updateSelection()
     loginf << "HistogramView: updateSelection";
     assert(widget_);
     
-    widget_->getDataWidget()->updateToData();
+    widget_->getViewDataWidget()->updateToData();
 
     //    if (show_only_selected_)
     //        widget_->getDataWidget()->updateToSelection();
@@ -323,7 +323,7 @@ void HistogramView::showResults(bool value)
 {
     show_results_ = value;
 
-    widget_->configWidget()->updateEvalConfig();
+    widget_->getViewConfigWidget()->updateEvalConfig();
 
     if (show_results_)
         getDataWidget()->updateResults();
@@ -345,7 +345,7 @@ void HistogramView::evalResultGrpReq(const std::string& value)
 
     eval_results_grpreq_ = value;
 
-    widget_->getDataWidget()->updateResults();
+    widget_->getViewDataWidget()->updateResults();
 }
 
 std::string HistogramView::evalResultsID() const
@@ -362,7 +362,7 @@ void HistogramView::evalResultsID(const std::string& value)
 
     eval_results_id_ = value;
 
-    widget_->getDataWidget()->updateResults();
+    widget_->getViewDataWidget()->updateResults();
 }
 
 void HistogramView::showViewPointSlot (const ViewableDataConfig* vp)
@@ -407,8 +407,8 @@ void HistogramView::resultsChangedSlot()
         }
     }
 
-    widget_->configWidget()->updateEvalConfig();
-    widget_->getDataWidget()->updateResults();
+    widget_->getViewConfigWidget()->updateEvalConfig();
+    widget_->getViewDataWidget()->updateResults();
 }
 
 void HistogramView::allLoadingDoneSlot()
@@ -416,8 +416,8 @@ void HistogramView::allLoadingDoneSlot()
     loginf << "HistogramView: allLoadingDoneSlot";
     assert(widget_);
 
-    widget_->configWidget()->setDisabled(false);
-    widget_->configWidget()->setStatus("", false);
+    widget_->getViewConfigWidget()->setDisabled(false);
+    widget_->getViewConfigWidget()->setStatus("", false);
 
     if (current_view_point_ && current_view_point_->data().contains("evaluation_results"))
     {

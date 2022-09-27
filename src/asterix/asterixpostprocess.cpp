@@ -38,10 +38,10 @@ void ASTERIXPostProcess::postProcess(unsigned int category, nlohmann::json& reco
     if (!record.contains("010"))
     {
         logwrn << "ASTERIXPostProcess: postProcess: record without item 010: '" << record.dump(4)
-               << "', setting 0/0";
+               << "', setting 256/256";
 
         record["010"]["SAC"] = 0;
-        record["010"]["SIC"] = 0;
+        record["010"]["SIC"] = 255;
     }
 
     assert (record.at("010").contains("SAC"));

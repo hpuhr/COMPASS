@@ -71,21 +71,21 @@ bool ListBoxView::init()
 //    connect(data_source_, &ListBoxViewDataSource::updateDataSignal, widget_->getDataWidget(),
 //            &ListBoxViewDataWidget::updateDataSlot);
 
-    connect(widget_->configWidget(), &ListBoxViewConfigWidget::exportSignal,
-            widget_->getDataWidget(), &ListBoxViewDataWidget::exportDataSlot);
-    connect(widget_->getDataWidget(), &ListBoxViewDataWidget::exportDoneSignal,
-            widget_->configWidget(), &ListBoxViewConfigWidget::exportDoneSlot);
+    connect(widget_->getViewConfigWidget(), &ListBoxViewConfigWidget::exportSignal,
+            widget_->getViewDataWidget(), &ListBoxViewDataWidget::exportDataSlot);
+    connect(widget_->getViewDataWidget(), &ListBoxViewDataWidget::exportDoneSignal,
+            widget_->getViewConfigWidget(), &ListBoxViewConfigWidget::exportDoneSlot);
 
 //    connect(data_source_, &ListBoxViewDataSource::loadingStartedSignal, widget_->configWidget(),
 //            &ListBoxViewConfigWidget::loadingStartedSlot);
 
     connect(this, &ListBoxView::showOnlySelectedSignal,
-            widget_->getDataWidget(), &ListBoxViewDataWidget::showOnlySelectedSlot);
+            widget_->getViewDataWidget(), &ListBoxViewDataWidget::showOnlySelectedSlot);
     connect(this, &ListBoxView::usePresentationSignal,
-            widget_->getDataWidget(), &ListBoxViewDataWidget::usePresentationSlot);
+            widget_->getViewDataWidget(), &ListBoxViewDataWidget::usePresentationSlot);
 
-    widget_->getDataWidget()->showOnlySelectedSlot(show_only_selected_);
-    widget_->getDataWidget()->usePresentationSlot(use_presentation_);
+    widget_->getViewDataWidget()->showOnlySelectedSlot(show_only_selected_);
+    widget_->getViewDataWidget()->usePresentationSlot(use_presentation_);
 
     return true;
 }
@@ -94,29 +94,29 @@ void ListBoxView::loadingStarted()
 {
     loginf << "OSGView: loadingStarted";
 
-    widget_->configWidget()->loadingStartedSlot();
-    widget_->getDataWidget()->loadingStartedSlot();
+    widget_->getViewConfigWidget()->loadingStartedSlot();
+    widget_->getViewDataWidget()->loadingStartedSlot();
 }
 
 void ListBoxView::loadedData(const std::map<std::string, std::shared_ptr<Buffer>>& data, bool requires_reset)
 {
     loginf << "ListBoxView: loadedData";
 
-    widget_->getDataWidget()->updateDataSlot(data, requires_reset);
+    widget_->getViewDataWidget()->updateDataSlot(data, requires_reset);
 }
 
 void ListBoxView::loadingDone()
 {
     loginf << "ListBoxView: loadingDone";
 
-    widget_->configWidget()->setStatus("", false);
+    widget_->getViewConfigWidget()->setStatus("", false);
 
-    widget_->getDataWidget()->loadingDoneSlot();
+    widget_->getViewDataWidget()->loadingDoneSlot();
 }
 
 void ListBoxView::clearData()
 {
-    widget_->getDataWidget()->clearData();
+    widget_->getViewDataWidget()->clearData();
 }
 
 void ListBoxView::generateSubConfigurable(const std::string& class_id,
@@ -155,7 +155,7 @@ void ListBoxView::checkSubConfigurables()
 ListBoxViewDataWidget* ListBoxView::getDataWidget()
 {
     assert (widget_);
-    return widget_->getDataWidget();
+    return widget_->getViewDataWidget();
 }
 
 dbContent::VariableSet ListBoxView::getSet(const std::string& dbcontent_name)
@@ -214,9 +214,9 @@ void ListBoxView::updateSelection()
     assert(widget_);
 
     if (show_only_selected_)
-        widget_->getDataWidget()->updateToSelection();
+        widget_->getViewDataWidget()->updateToSelection();
     else
-        widget_->getDataWidget()->resetModels();  // just updates the checkboxes
+        widget_->getViewDataWidget()->resetModels();  // just updates the checkboxes
 }
 
 void ListBoxView::unshowViewPointSlot (const ViewableDataConfig* vp)
@@ -245,4 +245,3 @@ void ListBoxView::showViewPointSlot (const ViewableDataConfig* vp)
 //    widget_->configWidget()->setStatus("", false);
 //    //widget_->getDataWidget()->selectFirstSelectedRow();
 //}
-

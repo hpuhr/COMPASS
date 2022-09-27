@@ -20,42 +20,36 @@
 
 #include "viewwidget.h"
 
+#include "scatterplotviewconfigwidget.h"
+#include "scatterplotviewdatawidget.h"
+#include "scatterplotview.h"
+
 class ScatterPlotView;
 class ScatterPlotViewDataToolWidget;
-class ScatterPlotViewDataWidget;
-class ScatterPlotViewConfigWidget;
 
 class QSplitter;
 class QTabWidget;
 
 class ScatterPlotViewWidget : public ViewWidget
 {
-  public:
+public:
+    enum Mode
+    {
+        SelectionMode = 0,
+        ZoomRectMode
+    };
+
     /// @brief Constructor
     ScatterPlotViewWidget(const std::string& class_id, const std::string& instance_id,
                       Configurable* config_parent, ScatterPlotView* view, QWidget* parent = NULL);
     /// @brief Destructor
     virtual ~ScatterPlotViewWidget();
 
-    /// @brief Toggles visibility of the config widget
-    void toggleConfigWidget();
-
-    /// @brief Returns the config widget
-    ScatterPlotViewConfigWidget* configWidget();
-
     /// @brief Returns the basis view
     ScatterPlotView* getView() { return (ScatterPlotView*)view_; }
-    /// @brief Returns the data widget
-    ScatterPlotViewDataWidget* getDataWidget() { return data_widget_; }
 
-  protected:
-    ScatterPlotViewDataToolWidget* tool_widget_{nullptr};
-
-    QSplitter* main_splitter_{nullptr};
-    /// Data widget with data display
-    ScatterPlotViewDataWidget* data_widget_{nullptr};
-    /// Config widget with configuration elements
-    ScatterPlotViewConfigWidget* config_widget_{nullptr};
+    virtual ScatterPlotViewDataWidget* getViewDataWidget() override final;
+    virtual ScatterPlotViewConfigWidget* getViewConfigWidget() override final;
 };
 
 #endif /* SCATTERPLOTVIEWWIDGET_H_ */

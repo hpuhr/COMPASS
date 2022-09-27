@@ -52,7 +52,6 @@ ModeCFilterWidget::ModeCFilterWidget(ModeCFilter& filter)
 
 ModeCFilterWidget::~ModeCFilterWidget()
 {
-
 }
 
 void ModeCFilterWidget::update()

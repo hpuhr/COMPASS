@@ -106,15 +106,13 @@ void LabelDSWidget::updateListSlot()
 
     DataSourceManager& ds_man = COMPASS::instance().dataSourceManager();
 
-    set<unsigned int> selected = label_generator_.labelDSIDs();
-
     for (const auto& ds_it : ds_man.dbDataSources())
     {
         ++row;
 
         QCheckBox* box = new QCheckBox(ds_it->name().c_str());
         box->setProperty("ds_id", ds_it->id());
-        box->setChecked(selected.count(ds_it->id()));
+        box->setChecked(label_generator_.labelWanted(ds_it->id()));
         connect(box, &QCheckBox::clicked, this, &LabelDSWidget::sourceClickedSlot);
         ds_grid_->addWidget(box, row, 0);
 
@@ -187,7 +185,7 @@ void LabelDSWidget::sourceClickedSlot()
 
     loginf << "OSGViewConfigLabelDSWidget: sourceClickedSlot: ds_id " << ds_id;
 
-    if (label_generator_.labelDSIDs().count(ds_id))
+    if (label_generator_.labelWanted(ds_id))
         label_generator_.removeLabelDSID(ds_id);
     else
         label_generator_.addLabelDSID(ds_id);

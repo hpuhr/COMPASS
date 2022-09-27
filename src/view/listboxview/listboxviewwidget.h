@@ -19,10 +19,10 @@
 #define LISTBOXVIEWWIDGET_H_
 
 #include "viewwidget.h"
+#include "listboxviewdatawidget.h"
+#include "listboxviewconfigwidget.h"
 
 class ListBoxView;
-class ListBoxViewDataWidget;
-class ListBoxViewConfigWidget;
 
 class QSplitter;
 class QTabWidget;
@@ -37,28 +37,19 @@ class ListBoxViewWidget : public ViewWidget
 {
   public:
     /// @brief Constructor
-    ListBoxViewWidget(const std::string& class_id, const std::string& instance_id,
-                      Configurable* config_parent, ListBoxView* view, QWidget* parent = NULL);
+    ListBoxViewWidget(const std::string& class_id, 
+                      const std::string& instance_id,
+                      Configurable* config_parent, 
+                      ListBoxView* view, 
+                      QWidget* parent = NULL);
     /// @brief Destructor
     virtual ~ListBoxViewWidget();
 
-    /// @brief Toggles visibility of the config widget
-    void toggleConfigWidget();
-
-    /// @brief Returns the config widget
-    ListBoxViewConfigWidget* configWidget();
-
     /// @brief Returns the basis view
     ListBoxView* getView() { return (ListBoxView*)view_; }
-    /// @brief Returns the data widget
-    ListBoxViewDataWidget* getDataWidget() { return data_widget_; }
 
-  protected:
-    QSplitter* main_splitter_{nullptr};
-    /// Data widget with data display
-    ListBoxViewDataWidget* data_widget_{nullptr};
-    /// Config widget with configuration elements
-    ListBoxViewConfigWidget* config_widget_{nullptr};
+    virtual ListBoxViewDataWidget* getViewDataWidget() override final;
+    virtual ListBoxViewConfigWidget* getViewConfigWidget() override final;
 };
 
 #endif /* LISTBOXVIEWWIDGET_H_ */

@@ -23,8 +23,8 @@
 #include "dbcontent/variable/variable.h"
 #include "histogramviewdatatoolwidget.h"
 #include "histogramviewchartview.h"
+#include "viewdatawidget.h"
 
-#include <QWidget>
 #include <QVariant>
 
 #include <memory>
@@ -93,7 +93,7 @@ namespace EvaluationRequirementResult
  * @brief Widget with tab containing BufferTableWidgets in HistogramView
  *
  */
-class HistogramViewDataWidget : public QWidget
+class HistogramViewDataWidget : public ViewDataWidget
 {
     Q_OBJECT
 
@@ -173,7 +173,7 @@ protected:
     std::map<std::string, QColor> colors_;
 
     QCursor current_cursor_{Qt::CrossCursor};
-    HistogramViewDataTool selected_tool_{HG_SELECT_TOOL};
+    HistogramViewDataTool selected_tool_{HG_DEFAULT_TOOL};
 
     QHBoxLayout* main_layout_ {nullptr};
 
@@ -181,6 +181,10 @@ protected:
 
     bool shows_data_ {false};
     bool data_not_in_buffer_ {false};
+
+    virtual void toolChanged_impl(int mode) override;
+
+    void selectData(unsigned int index1, unsigned int index2);
 
     void updateFromData(std::string dbcontent_name);
     void updateFromAllData();
