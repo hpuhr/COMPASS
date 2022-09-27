@@ -348,6 +348,13 @@ void GPSTrailImportTask::parseCurrentFile ()
             return;
         }
 
+        if (gps.fix.timestamp.year == 1970)
+        {
+            loginf << "GPSTrailImportTask: parseCurrentFile: skipping timestamp w/o time sync (1970)";
+            ++gps_fixes_skipped_time_cnt_;
+            return;
+        }
+
         quality_counts_[gps.fix.quality] += 1;
 
         gps_fixes_.push_back(gps.fix);

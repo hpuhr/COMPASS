@@ -6,9 +6,9 @@ echo "App name: $1";
 #$1 --reset --quit
 mkdir -p ~/data/test/tmp/
 $1 --import_data_sources_file ~/data/test/test3/ASMGCS_Sensor.json --quit
-$1 --create_db ~/data/test/tmp/test3.db --import_asterix_file ~/data/test/test3/REC_ASMGCS_ADSB_20220307.atx --import_asterix_file_line L1 --asterix_framing none --quit
-$1 --open_db ~/data/test/tmp/test3.db --import_asterix_file ~/data/test/test3/REC_ASMGCS_MLAT_20220307.atx --import_asterix_file_line L1 --asterix_framing none --quit
-$1 --open_db ~/data/test/tmp/test3.db --import_asterix_file ~/data/test/test3/REC_ASMGCS_TRACKER_20220307.atx --import_asterix_file_line L1 --asterix_framing none --quit
+$1 --create_db ~/data/test/tmp/test3.db --import_asterix_file ~/data/test/test3/REC_ASMGCS_ADSB_20220307.atx --import_asterix_file_line L1 --asterix_framing none --import_asterix_date 2022-03-07 --quit
+$1 --open_db ~/data/test/tmp/test3.db --import_asterix_file ~/data/test/test3/REC_ASMGCS_MLAT_20220307.atx --import_asterix_file_line L1 --asterix_framing none --import_asterix_date 2022-03-07 --quit
+$1 --open_db ~/data/test/tmp/test3.db --import_asterix_file ~/data/test/test3/REC_ASMGCS_TRACKER_20220307.atx --import_asterix_file_line L1 --asterix_framing none --import_asterix_date 2022-03-07 --quit
 $1 --open_db ~/data/test/tmp/test3.db --import_sectors_json ~/data/test/test3/ASMGCS_Polygon.json --quit
 # first trail
 $1 --open_db ~/data/test/tmp/test3.db --import_gps_trail ~/data/test/test3/MobaXterm_COM8StandardSerialoverBluetoothlinkCOM8_20220307_110934.txt --import_gps_parameters '{"callsign": "TEH01", "ds_name": "GPS Trail", "ds_sac": 0, "ds_sic": 0, "set_callsign": true,  "set_mode_3a_code": false,  "set_target_address": true, "target_address": 5250912, "tod_offset": 0.0}'  --quit
