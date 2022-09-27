@@ -2,6 +2,7 @@
     "parameters": {
         "limit_max": 1000000,
         "limit_min": 0,
+        "max_live_data_age": 10,
         "order_variable_dbcontent_name": "Meta",
         "order_variable_name": "Time of Day",
         "use_filters": false,
