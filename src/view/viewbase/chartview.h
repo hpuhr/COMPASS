@@ -3,6 +3,8 @@
 
 #include <QChartView>
 
+#include <memory>
+
 class QRubberBand;
 
 namespace QtCharts

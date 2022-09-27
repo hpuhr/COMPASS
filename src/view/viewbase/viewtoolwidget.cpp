@@ -6,6 +6,8 @@
 #include <QToolButton>
 #include <QApplication>
 
+#include <cassert>
+
 /**
  */
 ViewToolWidget::ViewToolWidget(ViewToolSwitcher* tool_switcher, QWidget* parent)
