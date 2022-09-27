@@ -92,7 +92,15 @@ ENV QTLIBDIR="${QTDIR}/gcc_64/"
 #RUN cd OpenSceneGraph-OpenSceneGraph-3.4.1/build && make install
 
 RUN add-apt-repository ppa:ubuntugis/ppa
-RUN apt-get update && apt-get --only-upgrade install libgdal-dev  -y
+RUN apt-get update
+#RUN sudo add-apt-repository ppa:ubuntugis/ubuntugis-unstable
+#RUN apt-get update && apt-get --only-upgrade install libgdal-dev  -y
+#RUN ls /usr/share/gdal
+
+RUN  wget http://download.osgeo.org/gdal/2.2.0/gdal220.zip
+RUN unzip gdal220.zip
+RUN cd gdal-2.2.0 && ./configure
+RUN cd gdal-2.2.0 && make -j 8 && make install
 
 RUN apt-get install libgif-dev -y
 
