@@ -279,6 +279,8 @@ void ASTERIXDecodeJob::doUDPStreamDecoding()
                     assert(!extracted_data_);
                 else
                     extracted_data_ = nullptr;
+
+                resuming_cached_data_ = false; // in case of resume action
             }
         }
     }
@@ -618,10 +620,17 @@ void ASTERIXDecodeJob::resumeLiveNetworkData(bool discard_cache)
 
         receive_buffer_sizes_.clear();
     }
+    else
+        resuming_cached_data_ = true;
 
     in_live_paused_state_ = false;
 
     receive_semaphore_.post(); // wake up loop
+}
+
+bool ASTERIXDecodeJob::resumingCachedData() const
+{
+    return resuming_cached_data_;
 }
 
 size_t ASTERIXDecodeJob::numErrors() const { return num_errors_; }
