@@ -510,7 +510,6 @@ void HistogramViewDataWidget::updateFromData(std::string dbcontent_name)
             return;
         }
 
-
         updateCounts<float> (dbcontent_name, data, selected_vec, data_var);
 
         break;
@@ -597,7 +596,31 @@ void HistogramViewDataWidget::updateFromData(std::string dbcontent_name)
         }
 
         assert(buffer->has<boost::posix_time::ptime>(current_var_name));
-        //NullableVector<string>& data = buffer->get<string>(current_var_name);
+        NullableVector<boost::posix_time::ptime>& data = buffer->get<boost::posix_time::ptime>(current_var_name);
+
+        bool min_max_set {true};
+        boost::posix_time::ptime data_min, data_max;
+
+        tie(min_max_set, data_min, data_max) = data.minMaxValues();
+
+        qlonglong data_min_q = static_cast<qlonglong>(Utils::Time::toLong(data_min));
+        qlonglong data_max_q = static_cast<qlonglong>(Utils::Time::toLong(data_max));
+
+        if (!min_max_set)
+        {
+            logwrn << "HistogramViewDataWidget: updateFromData: no data set in buffer";
+            return;
+        }
+
+        if (!bin_size_valid_ ||
+                (data_min_.isValid() && data_max_.isValid() && (data_min_q < data_min_.toLongLong()
+                                                             || data_max_q > data_max_.toLongLong())))
+        {
+            updateFromAllData(); // clear, recalc min/max, update
+            return;
+        }
+
+        updateCounts<boost::posix_time::ptime> (dbcontent_name, data, selected_vec, data_var);
 
         break;
     }
@@ -1770,8 +1793,8 @@ void HistogramViewDataWidget::calculateGlobalMinMax()
             }
 
             assert(buffer->has<boost::posix_time::ptime>(current_var_name));
-//            NullableVector<nlohmann::json>& data = buffer->get<nlohmann::json>(current_var_name);
-//            updateMinMax (data);
+            NullableVector<boost::posix_time::ptime>& data = buffer->get<boost::posix_time::ptime>(current_var_name);
+            updateMinMax (data);
 
             break;
         }
@@ -1786,7 +1809,13 @@ void HistogramViewDataWidget::calculateGlobalMinMax()
 
     if (data_max_.isValid() && data_min_.isValid())
     {
-        bin_size_ = (data_max_.toDouble()-data_min_.toDouble())/((double)num_bins_-1);
+        auto time0 = Utils::Time::fromLong(data_min_.toLongLong());
+        auto time1 = Utils::Time::fromLong(data_max_.toLongLong());
+
+        std::cout << "BEGIN: " << Utils::Time::toDateString(time0) << " - " << Utils::Time::toTimeString(time0) << std::endl;
+        std::cout << "END:   " << Utils::Time::toDateString(time1) << " - " << Utils::Time::toTimeString(time1) << std::endl;
+
+        bin_size_ = binSize(data_min_, data_max_, num_bins_);
         bin_size_valid_ = true;
     }
     else
@@ -1895,6 +1924,34 @@ void HistogramViewDataWidget::updateMinMax(NullableVector<unsigned long int>& da
     }
 }
 
+void HistogramViewDataWidget::updateMinMax(NullableVector<boost::posix_time::ptime>& data)
+{
+    bool min_max_set {true};
+    boost::posix_time::ptime data_min, data_max;
+
+    std::tie(min_max_set, data_min, data_max) = data.minMaxValues();
+
+    auto data_min_num = (qlonglong)Utils::Time::toLong(data_min);
+    auto data_max_num = (qlonglong)Utils::Time::toLong(data_max);
+
+    QVariant min_var = QVariant::fromValue(data_min_num);
+    QVariant max_var = QVariant::fromValue(data_max_num);
+
+    if (data_min_.isValid() && data_max_.isValid())
+    {
+        if (min_var < data_min_)
+            data_min_ = min_var;
+
+        if (max_var > data_max_)
+            data_max_ = max_var;
+    }
+    else
+    {
+        data_min_ = min_var;
+        data_max_ = max_var;
+    }
+}
+
 void HistogramViewDataWidget::updateMinMax(const std::vector<double>& data)
 {
     bool min_max_set {false};
@@ -1944,7 +2001,7 @@ void HistogramViewDataWidget::updateMinMax(const std::vector<double>& data)
 
     if (data_max_.isValid() && data_min_.isValid())
     {
-        bin_size_ = (data_max_.toDouble()-data_min_.toDouble())/((double)num_bins_-1);
+        bin_size_ = binSize(data_min_, data_max, num_bins_);
         bin_size_valid_ = true;
     }
     else
@@ -1973,7 +2030,6 @@ void HistogramViewDataWidget::updateCounts(const std::vector<double>& data)
             //                                      data_min_.toDouble()+bin_cnt*bin_size_+bin_size_/2.0f));
             //            else
             labels_.push_back(std::to_string(data_min_.toDouble()+bin_cnt*bin_size_+bin_size_/2.0f));
-
         }
     }
 
@@ -2030,8 +2086,7 @@ void HistogramViewDataWidget::selectData(unsigned int index1, unsigned int index
     unsigned int min_index = min(index1, index2);
     unsigned int max_index = max(index1, index2);
 
-    bool select_null = max_index == num_bins_;
-
+    bool select_null    = max_index == num_bins_;
     bool select_min_max = !(min_index == max_index && max_index == num_bins_); // not b´oth num bins
 
     if (select_null)
@@ -2060,8 +2115,11 @@ void HistogramViewDataWidget::selectData(unsigned int index1, unsigned int index
         return;
     }
 
-    double val_min = min_index * bin_size_ + data_min_.toDouble();
-    double val_max = (max_index+1) * bin_size_ + data_min_.toDouble();
+    double val_min_zerobased =  min_index    * bin_size_;
+    double val_max_zerobased = (max_index+1) * bin_size_;
+
+    double val_min = val_min_zerobased + data_min_.toDouble();
+    double val_max = val_max_zerobased + data_min_.toDouble();
 
     //bin_number = (unsigned int) ((data.get(cnt)-data_min_.toDouble())/bin_size_);
 
@@ -2121,7 +2179,7 @@ void HistogramViewDataWidget::selectData(unsigned int index1, unsigned int index
             assert(buffer->has<bool>(current_var_name));
             NullableVector<bool>& data = buffer->get<bool>(current_var_name);
 
-            selectData<bool> (data, selected_vec, select_min_max, val_min, val_max, select_null, add_to_selection);
+            selectData<bool> (data, selected_vec, select_min_max, min_index, max_index, select_null, add_to_selection);
 
             break;
         }
@@ -2137,7 +2195,7 @@ void HistogramViewDataWidget::selectData(unsigned int index1, unsigned int index
             assert(buffer->has<char>(current_var_name));
             NullableVector<char>& data = buffer->get<char>(current_var_name);
 
-            selectData<char> (data, selected_vec, select_min_max, val_min, val_max, select_null, add_to_selection);
+            selectData<char> (data, selected_vec, select_min_max, min_index, max_index, select_null, add_to_selection);
 
             break;
         }
@@ -2153,7 +2211,7 @@ void HistogramViewDataWidget::selectData(unsigned int index1, unsigned int index
             assert(buffer->has<unsigned char>(current_var_name));
             NullableVector<unsigned char>& data = buffer->get<unsigned char>(current_var_name);
 
-            selectData<unsigned char> (data, selected_vec, select_min_max, val_min, val_max, select_null, add_to_selection);
+            selectData<unsigned char> (data, selected_vec, select_min_max, min_index, max_index, select_null, add_to_selection);
 
             break;
         }
@@ -2169,7 +2227,7 @@ void HistogramViewDataWidget::selectData(unsigned int index1, unsigned int index
             assert(buffer->has<int>(current_var_name));
             NullableVector<int>& data = buffer->get<int>(current_var_name);
 
-            selectData<int> (data, selected_vec, select_min_max, val_min, val_max, select_null, add_to_selection);
+            selectData<int> (data, selected_vec, select_min_max, min_index, max_index, select_null, add_to_selection);
 
             break;
         }
@@ -2185,7 +2243,7 @@ void HistogramViewDataWidget::selectData(unsigned int index1, unsigned int index
             assert(buffer->has<unsigned int>(current_var_name));
             NullableVector<unsigned int>& data = buffer->get<unsigned int>(current_var_name);
 
-            selectData<unsigned int> (data, selected_vec, select_min_max, val_min, val_max, select_null, add_to_selection);
+            selectData<unsigned int> (data, selected_vec, select_min_max, min_index, max_index, select_null, add_to_selection);
 
             break;
         }
@@ -2201,7 +2259,7 @@ void HistogramViewDataWidget::selectData(unsigned int index1, unsigned int index
             assert(buffer->has<long int>(current_var_name));
             NullableVector<long int>& data = buffer->get<long int>(current_var_name);
 
-            selectData<long int> (data, selected_vec, select_min_max, val_min, val_max, select_null, add_to_selection);
+            selectData<long int> (data, selected_vec, select_min_max, min_index, max_index, select_null, add_to_selection);
 
             break;
         }
@@ -2217,7 +2275,7 @@ void HistogramViewDataWidget::selectData(unsigned int index1, unsigned int index
             assert(buffer->has<unsigned long>(current_var_name));
             NullableVector<unsigned long>& data = buffer->get<unsigned long>(current_var_name);
 
-            selectData<unsigned long> (data, selected_vec, select_min_max, val_min, val_max, select_null, add_to_selection);
+            selectData<unsigned long> (data, selected_vec, select_min_max, min_index, max_index, select_null, add_to_selection);
 
             break;
         }
@@ -2233,7 +2291,7 @@ void HistogramViewDataWidget::selectData(unsigned int index1, unsigned int index
             assert(buffer->has<float>(current_var_name));
             NullableVector<float>& data = buffer->get<float>(current_var_name);
 
-            selectData<float> (data, selected_vec, select_min_max, val_min, val_max, select_null, add_to_selection);
+            selectData<float> (data, selected_vec, select_min_max, min_index, max_index, select_null, add_to_selection);
 
             break;
         }
@@ -2249,7 +2307,7 @@ void HistogramViewDataWidget::selectData(unsigned int index1, unsigned int index
             assert(buffer->has<double>(current_var_name));
             NullableVector<double>& data = buffer->get<double>(current_var_name);
 
-            selectData<double> (data, selected_vec, select_min_max, val_min, val_max, select_null, add_to_selection);
+            selectData<double> (data, selected_vec, select_min_max, min_index, max_index, select_null, add_to_selection);
 
             break;
         }
@@ -2282,6 +2340,22 @@ void HistogramViewDataWidget::selectData(unsigned int index1, unsigned int index
             //NullableVector<string>& data = buffer->get<string>(current_var_name);
 
             //TODO: write type-specific template specialization for selectData
+
+            break;
+        }
+        case PropertyDataType::TIMESTAMP:
+        {
+            if (!buffer->has<boost::posix_time::ptime>(current_var_name))
+            {
+                loginf << "HistogramViewDataWidget: rectangleSelectedSlot: buffer does not contain "
+                       << current_var_name;
+                return;
+            }
+
+            assert(buffer->has<boost::posix_time::ptime>(current_var_name));
+            NullableVector<boost::posix_time::ptime>& data = buffer->get<boost::posix_time::ptime>(current_var_name);
+
+            selectData<boost::posix_time::ptime> (data, selected_vec, select_min_max, min_index, max_index, select_null, add_to_selection, &data_min_);
 
             break;
         }

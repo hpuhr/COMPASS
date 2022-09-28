@@ -167,4 +167,24 @@ protected:
     void selectData (double x_min, double x_max, double y_min, double y_max);
 };
 
+template<>
+inline void ScatterPlotViewDataWidget::appendData<boost::posix_time::ptime>(NullableVector<boost::posix_time::ptime>& data, 
+                                                                            std::vector<double>& target, 
+                                                                            unsigned int last_size,
+                unsigned int current_size)
+{
+    for (unsigned int cnt=last_size; cnt < current_size; ++cnt)
+    {
+        if (data.isNull(cnt))
+        {
+            target.push_back(std::numeric_limits<double>::signaling_NaN());
+            continue;
+        }
+
+        long t = Utils::Time::toLong(data.get(cnt));
+            
+        target.push_back(t);
+    }
+}
+
 #endif /* SCATTERPLOTVIEWDATAWIDGET_H_ */

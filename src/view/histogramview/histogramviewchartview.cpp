@@ -81,7 +81,7 @@ bool HistogramViewChartView::handleMouseMove(Qt::MouseButtons buttons, const QPo
 
 /**
  */
-bool HistogramViewChartView::handleMouseRelease(Qt::MouseButtons buttons, const QPointF& widget_pos)
+bool HistogramViewChartView::handleMouseRelease(Qt::MouseButtons buttons, const QPointF& widget_pos, bool update_pos)
 {
     if (buttons & Qt::LeftButton)
     {
@@ -94,9 +94,12 @@ bool HistogramViewChartView::handleMouseRelease(Qt::MouseButtons buttons, const 
             // view widget coordinates to chart coordinates
             QPointF p = widgetToChart(widget_pos);
 
-            p2_      = widget_pos.toPoint();
-            p2_data_ = p;
-
+            if (update_pos)
+            {
+                p2_      = widget_pos.toPoint();
+                p2_data_ = p;
+            }
+            
             logdbg << "ScatterPlotViewChartView: handleMouseRelease: REGION p1 " << p1_data_.x() << "," << p1_data_.y() << " p2 " << p2_data_.x() << "," << p2_data_.y();
 
             updateSelection(p1_, p2_, p1_data_, p2_data_);
