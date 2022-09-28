@@ -251,7 +251,6 @@ void ScatterPlotViewDataWidget::loadingDoneSlot()
     }
 
     updateMinMax();
-
     updateChart();
 }
 
@@ -274,6 +273,8 @@ void ScatterPlotViewDataWidget::rectangleSelectedSlot (QPointF p1, QPointF p2)
         if (selected_tool_ == SP_ZOOM_RECT_TOOL)
         {
             loginf << "ScatterPlotViewDataWidget: rectangleSelectedSlot: zoom";
+
+            //TODO: prevent from going nuts when zero rect is passed!
 
             if (chart_view_->chart()->axisX() && chart_view_->chart()->axisY())
             {
@@ -495,9 +496,20 @@ bool ScatterPlotViewDataWidget::canUpdateFromDataX(std::string dbcontent_name)
 
         break;
     }
+    case PropertyDataType::TIMESTAMP:
+    {
+        if (!buffer->has<boost::posix_time::ptime>(current_var_name))
+        {
+            x_var_not_in_buffer_ = true;
+            return false;
+        }
+        else
+            return true;
+
+        break;
+    }
     case PropertyDataType::STRING:
     case PropertyDataType::JSON:
-    case PropertyDataType::TIMESTAMP:
     {
         return false;
 
@@ -750,7 +762,10 @@ void ScatterPlotViewDataWidget::updateFromDataX(std::string dbcontent_name, unsi
         }
 
         assert(buffer->has<boost::posix_time::ptime>(current_var_name));
-        //NullableVector<string>& data = buffer->get<string>(current_var_name);
+        NullableVector<boost::posix_time::ptime>& data = buffer->get<boost::posix_time::ptime>(current_var_name);
+
+        appendData(data, x_values_[dbcontent_name], last_size, current_size);
+        buffer_x_counts_[dbcontent_name] = current_size;
 
         break;
     }
@@ -908,9 +923,20 @@ bool ScatterPlotViewDataWidget::canUpdateFromDataY(std::string dbcontent_name)
 
         break;
     }
+    case PropertyDataType::TIMESTAMP:
+    {
+        if (!buffer->has<boost::posix_time::ptime>(current_var_name))
+        {
+            y_var_not_in_buffer_ = true;
+            return false;
+        }
+        else
+            return true;
+
+        break;
+    }
     case PropertyDataType::STRING:
     case PropertyDataType::JSON:
-    case PropertyDataType::TIMESTAMP:
     {
         return false;
 
@@ -1163,7 +1189,11 @@ void ScatterPlotViewDataWidget::updateFromDataY(std::string dbcontent_name, unsi
         }
 
         assert(buffer->has<boost::posix_time::ptime>(current_var_name));
-        //NullableVector<string>& data = buffer->get<string>(current_var_name);
+
+        NullableVector<boost::posix_time::ptime>& data = buffer->get<boost::posix_time::ptime>(current_var_name);
+
+        appendData(data, y_values_[dbcontent_name], last_size, current_size);
+        buffer_y_counts_[dbcontent_name] = current_size;
 
         break;
     }

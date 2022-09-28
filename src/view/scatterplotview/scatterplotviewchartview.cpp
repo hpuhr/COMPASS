@@ -57,10 +57,12 @@ bool ScatterPlotViewChartView::handleMousePress(Qt::MouseButtons buttons, const 
         }
         else if (tool == SP_ZOOM_RECT_TOOL || tool == SP_SELECT_TOOL)
         {
-            logdbg << "ScatterPlotViewChartView: handleMousePress: RECT x " << widget_pos.x() << " y " << widget_pos.y();
+            loginf << "ScatterPlotViewChartView: handleMousePress: RECT x " << widget_pos.x() << " y " << widget_pos.y();
 
             // view widget coordinates to chart coordinates
             QPointF p = widgetToChart(widget_pos);
+
+            loginf << "ScatterPlotViewChartView: handleMousePress: RECT xc " << p.x() << " yc " << p.y();
 
             p1_      = widget_pos.toPoint();
             p1_data_ = p;
@@ -121,7 +123,7 @@ bool ScatterPlotViewChartView::handleMouseMove(Qt::MouseButtons buttons, const Q
 
 /**
  */
-bool ScatterPlotViewChartView::handleMouseRelease(Qt::MouseButtons buttons, const QPointF& widget_pos)
+bool ScatterPlotViewChartView::handleMouseRelease(Qt::MouseButtons buttons, const QPointF& widget_pos, bool update_pos)
 {
     if (buttons & Qt::LeftButton)
     {
@@ -137,15 +139,20 @@ bool ScatterPlotViewChartView::handleMouseRelease(Qt::MouseButtons buttons, cons
         }
         else if ((tool == SP_ZOOM_RECT_TOOL || tool == SP_SELECT_TOOL) && isSelectionEnabled())
         {
-            logdbg << "ScatterPlotViewChartView: handleMouseRelease: RECT x " << widget_pos.x() << " y " << widget_pos.y();
+            loginf << "ScatterPlotViewChartView: handleMouseRelease: RECT x " << widget_pos.x() << " y " << widget_pos.y();
 
             // view widget coordinates to chart coordinates
             QPointF p = widgetToChart(widget_pos);
 
-            p2_      = widget_pos.toPoint();
-            p2_data_ = p;
+            loginf << "ScatterPlotViewChartView: handleMouseRelease: RECT xc " << p.x() << " yc " << p.y();
 
-            logdbg << "ScatterPlotViewChartView: handleMouseRelease: REGION p1 " << p1_data_.x() << "," << p1_data_.y() << " p2 " << p2_data_.x() << "," << p2_data_.y();
+            if (update_pos)
+            {
+                p2_      = widget_pos.toPoint();
+                p2_data_ = p;
+            }
+            
+            loginf << "ScatterPlotViewChartView: handleMouseRelease: REGION p1 " << p1_data_.x() << "," << p1_data_.y() << " p2 " << p2_data_.x() << "," << p2_data_.y();
 
             updateSelection(p1_, p2_, p1_data_, p2_data_);
             sendSelectedRegion();

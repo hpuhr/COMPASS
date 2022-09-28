@@ -71,7 +71,8 @@ ScatterPlotViewConfigWidget::ScatterPlotViewConfigWidget(ScatterPlotView* view, 
                                           PropertyDataType::LONGINT,
                                           PropertyDataType::ULONGINT,
                                           PropertyDataType::FLOAT,
-                                          PropertyDataType::DOUBLE});
+                                          PropertyDataType::DOUBLE,
+                                          PropertyDataType::TIMESTAMP});
         if (view_->hasDataVarX())
         {
             if (view_->isDataVarXMeta())
@@ -96,7 +97,8 @@ ScatterPlotViewConfigWidget::ScatterPlotViewConfigWidget(ScatterPlotView* view, 
                                           PropertyDataType::LONGINT,
                                           PropertyDataType::ULONGINT,
                                           PropertyDataType::FLOAT,
-                                          PropertyDataType::DOUBLE});
+                                          PropertyDataType::DOUBLE,
+                                          PropertyDataType::TIMESTAMP});
         if (view_->hasDataVarY())
         {
             if (view_->isDataVarYMeta())

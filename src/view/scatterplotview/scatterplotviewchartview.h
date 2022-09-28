@@ -34,7 +34,7 @@ protected:
     virtual void wheelEvent(QWheelEvent* event) override;
 
     virtual bool handleMousePress(Qt::MouseButtons buttons, const QPointF& widget_pos) override;
-    virtual bool handleMouseRelease(Qt::MouseButtons buttons, const QPointF& widget_pos) override;
+    virtual bool handleMouseRelease(Qt::MouseButtons buttons, const QPointF& widget_pos, bool update_pos) override;
     virtual bool handleMouseMove(Qt::MouseButtons buttons, const QPointF& widget_pos) override;
 
     ScatterPlotViewDataWidget* data_widget_ {nullptr};

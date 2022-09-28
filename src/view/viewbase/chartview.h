@@ -38,7 +38,7 @@ protected:
     virtual void mouseReleaseEvent(QMouseEvent* event) override final;
 
     virtual bool handleMousePress(Qt::MouseButtons buttons, const QPointF& widget_pos) = 0;
-    virtual bool handleMouseRelease(Qt::MouseButtons buttons, const QPointF& widget_pos) = 0;
+    virtual bool handleMouseRelease(Qt::MouseButtons buttons, const QPointF& widget_pos, bool update_pos) = 0;
     virtual bool handleMouseMove(Qt::MouseButtons buttons, const QPointF& widget_pos) = 0;
 
     QPointF widgetToChart(const QPointF& pos) const;
