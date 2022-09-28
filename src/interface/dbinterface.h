@@ -58,6 +58,13 @@ class Variable;
 class Target;
 }
 
+extern const std::string PROP_TIMESTAMP_MIN_NAME;
+extern const std::string PROP_TIMESTAMP_MAX_NAME;
+extern const std::string PROP_LATITUDE_MIN_NAME;
+extern const std::string PROP_LATITUDE_MAX_NAME;
+extern const std::string PROP_LONGITUDE_MIN_NAME;
+extern const std::string PROP_LONGITUDE_MAX_NAME;
+
 class DBInterface : public QObject, public Configurable
 {
     Q_OBJECT

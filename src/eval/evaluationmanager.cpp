@@ -42,6 +42,7 @@
 #include "dbcontent/variable/variableorderedset.h"
 #include "sqliteconnection.h"
 #include "stringconv.h"
+#include "util/timeconv.h"
 
 #include "json.hpp"
 
@@ -114,9 +115,15 @@ EvaluationManager::EvaluationManager(const std::string& class_id, const std::str
     // load filter
     registerParameter("use_load_filter", &use_load_filter_, false);
 
-    registerParameter("use_time_filter", &use_time_filter_, false);
-    registerParameter("load_time_begin", &load_time_begin_, 0);
-    registerParameter("load_time_end", &load_time_end_, 0);
+    registerParameter("use_timestamp_filter", &use_timestamp_filter_, false);
+    registerParameter("load_timestamp_begin", &load_timestamp_begin_str_, "");
+    registerParameter("load_timestamp_end", &load_timestamp_end_str_, "");
+
+    if (load_timestamp_begin_str_.size())
+        load_timestamp_begin_ = Time::fromString(load_timestamp_begin_str_);
+
+    if (load_timestamp_end_str_.size())
+        load_timestamp_end_ = Time::fromString(load_timestamp_end_str_);
 
     registerParameter("use_adsb_filter", &use_adsb_filter_, false);
     registerParameter("use_v0", &use_v0_, true);
@@ -410,17 +417,17 @@ void EvaluationManager::loadData ()
     // other filters
     if (use_load_filter_)
     {
-        if (use_time_filter_)
+        if (use_timestamp_filter_)
         {
-            assert (fil_man.hasFilter("Time of Day"));
-            DBFilter* fil = fil_man.getFilter("Time of Day");
+            assert (fil_man.hasFilter("Timestamp"));
+            DBFilter* fil = fil_man.getFilter("Timestamp");
 
             fil->setActive(true);
 
             json filter;
 
-            filter["Time of Day"]["Time of Day Minimum"] = String::timeStringFromDouble(load_time_begin_);
-            filter["Time of Day"]["Time of Day Maximum"] = String::timeStringFromDouble(load_time_end_);
+            filter["Timestamp"]["Timestamp Minimum"] = Time::toString(load_timestamp_begin_);
+            filter["Timestamp"]["Timestamp Maximum"] = Time::toString(load_timestamp_end_);
 
             fil->loadViewPointConditions(filter);
         }
@@ -580,8 +587,19 @@ void EvaluationManager::databaseOpenedSlot()
     checkTestDataSources();
     updateActiveDataSources();
 
-    if (!COMPASS::instance().dbContentManager().hasAssociations())
+    DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
+
+    if (!dbcont_man.hasAssociations())
         widget()->setDisabled(false);
+
+    if (dbcont_man.hasMinMaxTimestamp())
+    {
+        std::pair<boost::posix_time::ptime , boost::posix_time::ptime> minmax_ts =  dbcont_man.minMaxTimestamp();
+        loadTimestampBegin(get<0>(minmax_ts));
+        loadTimestampEnd(get<1>(minmax_ts));
+
+        widget()->updateFilterWidget();
+    }
 
     widget()->updateDataSources();
     widget()->updateSectors();
@@ -1748,14 +1766,14 @@ void EvaluationManager::showSurroundingData (unsigned int utn)
     ptime time_end = target_data.timeEnd();
     time_end += seconds(60);
 
-    //    "Time of Day": {
-    //    "Time of Day Maximum": "05:56:32.297",
-    //    "Time of Day Minimum": "05:44:58.445"
+    //    "Timestamp": {
+    //    "Timestamp Maximum": "05:56:32.297",
+    //    "Timestamp Minimum": "05:44:58.445"
     //    },
 
     // TODO_TIMESTAMP
-    data[VP_FILTERS_KEY]["Time of Day"]["Time of Day Maximum"] = Time::toString(time_end);
-    data[VP_FILTERS_KEY]["Time of Day"]["Time of Day Minimum"] = Time::toString(time_begin);
+    data[VP_FILTERS_KEY]["Timestamp"]["Timestamp Maximum"] = Time::toString(time_end);
+    data[VP_FILTERS_KEY]["Timestamp"]["Timestamp Minimum"] = Time::toString(time_begin);
 
     //    "Aircraft Address": {
     //    "Aircraft Address Values": "FEFE10"
@@ -1772,7 +1790,7 @@ void EvaluationManager::showSurroundingData (unsigned int utn)
 
     //    VP_FILTERS_KEY: {
     //    "Barometric Altitude": {
-    //    "Barometric Altitude Maxmimum": "43000",
+    //    "Barometric Altitude Maximum": "43000",
     //    "Barometric Altitude Minimum": "500"
     //    },
 
@@ -2652,37 +2670,41 @@ void EvaluationManager::useLoadFilter(bool value)
     use_load_filter_ = value;
 }
 
-bool EvaluationManager::useTimeFilter() const
+bool EvaluationManager::useTimestampFilter() const
 {
-    return use_time_filter_;
+    return use_timestamp_filter_;
 }
 
-void EvaluationManager::useTimeFilter(bool value)
+void EvaluationManager::useTimestampFilter(bool value)
 {
     loginf << "EvaluationManager: useTimeFilter: value " << value;
-    use_time_filter_ = value;
+    use_timestamp_filter_ = value;
 }
 
-float EvaluationManager::loadTimeBegin() const
+boost::posix_time::ptime EvaluationManager::loadTimestampBegin() const
 {
-    return load_time_begin_;
+    return load_timestamp_begin_;
 }
 
-void EvaluationManager::loadTimeBegin(float value)
+void EvaluationManager::loadTimestampBegin(boost::posix_time::ptime value)
 {
-    loginf << "EvaluationManager: loadTimeBegin: value " << value;
-    load_time_begin_ = value;
+    loginf << "EvaluationManager: loadTimeBegin: value " << Time::toString(value);
+
+    load_timestamp_begin_ = value;
+    load_timestamp_begin_str_ = Time::toString(load_timestamp_begin_);
 }
 
-float EvaluationManager::loadTimeEnd() const
+boost::posix_time::ptime EvaluationManager::loadTimestampEnd() const
 {
-    return load_time_end_;
+    return load_timestamp_end_;
 }
 
-void EvaluationManager::loadTimeEnd(float value)
+void EvaluationManager::loadTimestampEnd(boost::posix_time::ptime value)
 {
-    loginf << "EvaluationManager: loadTimeEnd: value " << value;
-    load_time_end_ = value;
+    loginf << "EvaluationManager: loadTimeEnd: value " << Time::toString(value);
+
+    load_timestamp_end_ = value;
+    load_timestamp_end_str_ = Time::toString(load_timestamp_end_);
 }
 
 bool EvaluationManager::useASDBFilter() const

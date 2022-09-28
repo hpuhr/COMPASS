@@ -9,6 +9,8 @@
 #include <QGridLayout>
 #include <QCheckBox>
 #include <QLineEdit>
+#include <QDateTime>
+#include <QDateTimeEdit>
 
 using namespace Utils;
 
@@ -28,23 +30,33 @@ EvaluationFilterTabWidget::EvaluationFilterTabWidget(EvaluationManager& eval_man
 
     // time
     ++row;
-    use_time_check_ = new QCheckBox ("Use Time Filter");
+    use_time_check_ = new QCheckBox ("Use Timestamp Filter");
     connect(use_time_check_, &QCheckBox::clicked, this, &EvaluationFilterTabWidget::toggleUseTimeSlot);
     layout->addWidget(use_time_check_, row, 0);
 
     ++row;
-    layout->addWidget(new QLabel("Time Begin"), row, 0);
+    layout->addWidget(new QLabel("Timestamp Begin"), row, 0);
 
-    time_begin_edit_ = new QLineEdit();
-    connect(time_begin_edit_, &QLineEdit::textEdited, this, &EvaluationFilterTabWidget::timeBeginEditedSlot);
+    time_begin_edit_ = new QDateTimeEdit(QDateTime::currentDateTime());
+    time_begin_edit_->setDisplayFormat(Time::QT_DATETIME_FORMAT.c_str());
+    connect(time_begin_edit_, &QDateTimeEdit::dateTimeChanged, this, &EvaluationFilterTabWidget::timeBeginEditedSlot);
     layout->addWidget(time_begin_edit_, row, 1);
 
-    ++row;
-    layout->addWidget(new QLabel("Time End"), row, 0);
+//    time_begin_edit_ = new QLineEdit();
+//    connect(time_begin_edit_, &QLineEdit::textEdited, this, &EvaluationFilterTabWidget::timeBeginEditedSlot);
+//    layout->addWidget(time_begin_edit_, row, 1);
 
-    time_end_edit_ = new QLineEdit();
-    connect(time_end_edit_, &QLineEdit::textEdited, this, &EvaluationFilterTabWidget::timeEndEditedSlot);
+    ++row;
+    layout->addWidget(new QLabel("Timestamp End"), row, 0);
+
+    time_end_edit_ = new QDateTimeEdit(QDateTime::currentDateTime());
+    time_end_edit_->setDisplayFormat(Time::QT_DATETIME_FORMAT.c_str());
+    connect(time_end_edit_, &QDateTimeEdit::dateTimeChanged, this, &EvaluationFilterTabWidget::timeEndEditedSlot);
     layout->addWidget(time_end_edit_, row, 1);
+
+//    time_end_edit_ = new QLineEdit();
+//    connect(time_end_edit_, &QLineEdit::textEdited, this, &EvaluationFilterTabWidget::timeEndEditedSlot);
+//    layout->addWidget(time_end_edit_, row, 1);
 
     // adsb
     ++row;
@@ -198,37 +210,31 @@ void EvaluationFilterTabWidget::toggleUseFiltersSlot()
 void EvaluationFilterTabWidget::toggleUseTimeSlot()
 {
     assert (use_time_check_);
-    eval_man_.useTimeFilter(use_time_check_->checkState() == Qt::Checked);
+    eval_man_.useTimestampFilter(use_time_check_->checkState() == Qt::Checked);
 
     update();
 }
 
-void EvaluationFilterTabWidget::timeBeginEditedSlot (const QString& text)
+void EvaluationFilterTabWidget::timeBeginEditedSlot (const QDateTime& datetime)
 {
-    double val;
-    bool ok;
+    if (update_active_)
+        return;
 
-    val = String::timeFromString(text.toStdString(), &ok);
+    loginf << "EvaluationFilterTabWidget: timeBeginEditedSlot: value "
+           << datetime.toString(Time::QT_DATETIME_FORMAT.c_str()).toStdString();
 
-    if (!ok)
-        logwrn << "EvaluationFilterTabWidget: timeBeginEditedSlot: unable to parse value '"
-               << text.toStdString() << "'";
-    else
-        eval_man_.loadTimeBegin(val);
+    eval_man_.loadTimestampBegin(Time::fromString(datetime.toString(Time::QT_DATETIME_FORMAT.c_str()).toStdString()));
 }
 
-void EvaluationFilterTabWidget::timeEndEditedSlot (const QString& text)
+void EvaluationFilterTabWidget::timeEndEditedSlot (const QDateTime& datetime)
 {
-    double val;
-    bool ok;
+    if (update_active_)
+        return;
 
-    val = String::timeFromString(text.toStdString(), &ok);
+    loginf << "EvaluationFilterTabWidget: timeEndEditedSlot: value "
+           << datetime.toString(Time::QT_DATETIME_FORMAT.c_str()).toStdString();
 
-    if (!ok)
-        logwrn << "EvaluationFilterTabWidget: timeEndEditedSlot: unable to parse value '"
-               << text.toStdString() << "'";
-    else
-        eval_man_.loadTimeEnd(val);
+    eval_man_.loadTimestampEnd(Time::fromString(datetime.toString(Time::QT_DATETIME_FORMAT.c_str()).toStdString()));
 }
 
 void EvaluationFilterTabWidget::toggleUseADSBSlot()
@@ -485,16 +491,24 @@ void EvaluationFilterTabWidget::update()
 
     // time filter
     assert (use_time_check_);
-    use_time_check_->setChecked(eval_man_.useTimeFilter());
+    use_time_check_->setChecked(eval_man_.useTimestampFilter());
     use_time_check_->setEnabled(use_filter);
 
+    update_active_ = true;
+
     assert (time_begin_edit_);
-    time_begin_edit_->setText(String::timeStringFromDouble(eval_man_.loadTimeBegin()).c_str());
-    time_begin_edit_->setEnabled(use_filter && eval_man_.useTimeFilter());
+    //time_begin_edit_->setText(String::timeStringFromDouble(eval_man_.loadTimestampBegin()).c_str());
+    time_begin_edit_->setDateTime(QDateTime::fromString(Time::toString(eval_man_.loadTimestampBegin()).c_str(),
+                                                 Time::QT_DATETIME_FORMAT.c_str()));
+    time_begin_edit_->setEnabled(use_filter && eval_man_.useTimestampFilter());
 
     assert (time_end_edit_);
-    time_end_edit_->setText(String::timeStringFromDouble(eval_man_.loadTimeEnd()).c_str());
-    time_end_edit_->setEnabled(use_filter && eval_man_.useTimeFilter());
+    //time_end_edit_->setText(String::timeStringFromDouble(eval_man_.loadTimestampEnd()).c_str());
+    time_end_edit_->setDateTime(QDateTime::fromString(Time::toString(eval_man_.loadTimestampEnd()).c_str(),
+                                                 Time::QT_DATETIME_FORMAT.c_str()));
+    time_end_edit_->setEnabled(use_filter && eval_man_.useTimestampFilter());
+
+    update_active_ = false;
 
     bool use_adsb_filter = use_filter && eval_man_.useASDBFilter();
 

@@ -38,6 +38,7 @@
 #include "mode3afilter.h"
 #include "modecfilter.h"
 #include "primaryonlyfilter.h"
+#include "timestampfilter.h"
 
 #include "json.hpp"
 
@@ -147,6 +148,11 @@ void FilterManager::generateSubConfigurable(const std::string& class_id,
         ModeCFilter* filter = new ModeCFilter(class_id, instance_id, this);
         filters_.emplace_back(filter);
     }
+    else if (class_id == "TimestampFilter")
+    {
+        TimestampFilter* filter = new TimestampFilter(class_id, instance_id, this);
+        filters_.emplace_back(filter);
+    }
     else if (class_id == "UTNFilter")
     {
         try
@@ -228,7 +234,16 @@ void FilterManager::checkSubConfigurables()
 
     if (std::find_if(filters_.begin(), filters_.end(),
                      [&classid](const unique_ptr<DBFilter>& x) { return x->classId() == classid;}) == filters_.end())
-    { // not UTN filter
+    { // no UTN filter
+        addNewSubConfiguration(classid, classid+"0");
+        generateSubConfigurable(classid, classid+"0");
+    }
+
+    classid = "TimestampFilter";
+
+    if (std::find_if(filters_.begin(), filters_.end(),
+                     [&classid](const unique_ptr<DBFilter>& x) { return x->classId() == classid;}) == filters_.end())
+    { // no UTN filter
         addNewSubConfiguration(classid, classid+"0");
         generateSubConfigurable(classid, classid+"0");
     }
@@ -453,6 +468,9 @@ void FilterManager::databaseOpenedSlot()
 
     if (widget_)
         widget_->setDisabled(false);
+
+    assert (hasFilter("Timestamp"));
+    getFilter("Timestamp")->reset();
 }
 
 void FilterManager::databaseClosedSlot()

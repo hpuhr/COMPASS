@@ -24,6 +24,8 @@ namespace Time
 {
 using namespace std;
 
+const std::string QT_DATETIME_FORMAT {"yyyy-MM-dd hh:mm:ss.zzz"};
+
 string str_format = "%Y-%m-%d %H:%M:%S.%f";
 string date_str_format = "%Y-%m-%d";
 string time_str_format = "%H:%M:%S.%f";
@@ -34,8 +36,10 @@ boost::posix_time::ptime fromString(string value)
     boost::posix_time::ptime timestamp;
 
     istringstream iss(value);
-    iss.imbue(locale(iss.getloc(), new boost::posix_time::time_facet(str_format.c_str())));
-    //iss.imbue(locale(locale::classic(), tif));
+
+    // small f not working due to boost bug
+    iss.imbue(std::locale(std::locale::classic(), new boost::posix_time::time_input_facet("%Y-%m-%d %H:%M:%S%F")));
+
     iss >> timestamp;
     return timestamp;
 }

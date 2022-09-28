@@ -51,12 +51,7 @@ using namespace std;
 using namespace Utils;
 using namespace dbContent;
 
-const string timestamp_min_name {"timestamp_min"};
-const string timestamp_max_name {"timestamp_max"};
-const string latitude_min_name {"latitude_min"};
-const string latitude_max_name {"latitude_max"};
-const string longitude_min_name {"longitude_min"};
-const string longitude_max_name {"longitude_max"};
+
 
 DBContentManager::DBContentManager(const std::string& class_id, const std::string& instance_id,
                                    COMPASS* compass)
@@ -527,20 +522,20 @@ void DBContentManager::databaseOpenedSlot()
     }
 
     // load min max values
-    if (db_interface.hasProperty(timestamp_min_name))
-        timestamp_min_ = Time::fromLong(stol(db_interface.getProperty(timestamp_min_name)));
-    if (db_interface.hasProperty(timestamp_max_name))
-        timestamp_max_ = Time::fromLong(stol(db_interface.getProperty(timestamp_max_name)));
+    if (db_interface.hasProperty(PROP_TIMESTAMP_MIN_NAME))
+        timestamp_min_ = Time::fromLong(stol(db_interface.getProperty(PROP_TIMESTAMP_MIN_NAME)));
+    if (db_interface.hasProperty(PROP_TIMESTAMP_MAX_NAME))
+        timestamp_max_ = Time::fromLong(stol(db_interface.getProperty(PROP_TIMESTAMP_MAX_NAME)));
 
-    if (db_interface.hasProperty(latitude_min_name))
-        latitude_min_ = stod(db_interface.getProperty(latitude_min_name));
-    if (db_interface.hasProperty(latitude_max_name))
-        latitude_max_ = stod(db_interface.getProperty(latitude_max_name));
+    if (db_interface.hasProperty(PROP_LATITUDE_MIN_NAME))
+        latitude_min_ = stod(db_interface.getProperty(PROP_LATITUDE_MIN_NAME));
+    if (db_interface.hasProperty(PROP_LATITUDE_MAX_NAME))
+        latitude_max_ = stod(db_interface.getProperty(PROP_LATITUDE_MAX_NAME));
 
-    if (db_interface.hasProperty(longitude_min_name))
-        longitude_min_ = stod(db_interface.getProperty(longitude_min_name));
-    if (db_interface.hasProperty(longitude_max_name))
-        longitude_max_ = stod(db_interface.getProperty(longitude_max_name));
+    if (db_interface.hasProperty(PROP_LONGITUDE_MIN_NAME))
+        longitude_min_ = stod(db_interface.getProperty(PROP_LONGITUDE_MIN_NAME));
+    if (db_interface.hasProperty(PROP_LONGITUDE_MAX_NAME))
+        longitude_max_ = stod(db_interface.getProperty(PROP_LONGITUDE_MAX_NAME));
 
     for (auto& object : dbcontent_)
         object.second->databaseOpenedSlot();
@@ -798,9 +793,9 @@ void DBContentManager::finishInserting()
 
                 if (has_min_max)
                 {
-                    COMPASS::instance().interface().setProperty(timestamp_min_name,
+                    COMPASS::instance().interface().setProperty(PROP_TIMESTAMP_MIN_NAME,
                                                                 to_string(Time::toLong(timestamp_min_.get())));
-                    COMPASS::instance().interface().setProperty(timestamp_max_name,
+                    COMPASS::instance().interface().setProperty(PROP_TIMESTAMP_MAX_NAME,
                                                                 to_string(Time::toLong(timestamp_max_.get())));
 
                     logdbg << "DBContentManager: finishInserting: tod min " << timestamp_min_.get()
@@ -849,11 +844,11 @@ void DBContentManager::finishInserting()
 
                 if (has_min_max)
                 {
-                    COMPASS::instance().interface().setProperty(latitude_min_name, to_string(latitude_min_.get()));
-                    COMPASS::instance().interface().setProperty(latitude_max_name, to_string(latitude_max_.get()));
+                    COMPASS::instance().interface().setProperty(PROP_LATITUDE_MIN_NAME, to_string(latitude_min_.get()));
+                    COMPASS::instance().interface().setProperty(PROP_LATITUDE_MAX_NAME, to_string(latitude_max_.get()));
 
-                    COMPASS::instance().interface().setProperty(longitude_min_name, to_string(longitude_min_.get()));
-                    COMPASS::instance().interface().setProperty(longitude_max_name, to_string(longitude_max_.get()));
+                    COMPASS::instance().interface().setProperty(PROP_LONGITUDE_MIN_NAME, to_string(longitude_min_.get()));
+                    COMPASS::instance().interface().setProperty(PROP_LONGITUDE_MAX_NAME, to_string(longitude_max_.get()));
 
                     logdbg << "DBContentManager: finishInserting: lat min " << latitude_min_.get()
                            << " max " << latitude_max_.get()

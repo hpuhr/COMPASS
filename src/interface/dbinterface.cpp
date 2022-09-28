@@ -55,6 +55,13 @@ using namespace Utils;
 using namespace std;
 using namespace dbContent;
 
+const string PROP_TIMESTAMP_MIN_NAME {"timestamp_min"};
+const string PROP_TIMESTAMP_MAX_NAME {"timestamp_max"};
+const string PROP_LATITUDE_MIN_NAME {"latitude_min"};
+const string PROP_LATITUDE_MAX_NAME {"latitude_max"};
+const string PROP_LONGITUDE_MIN_NAME {"longitude_min"};
+const string PROP_LONGITUDE_MAX_NAME {"longitude_max"};
+
 DBInterface::DBInterface(string class_id, string instance_id, COMPASS* compass)
     : Configurable(class_id, instance_id, compass), sql_generator_(*this)
 {

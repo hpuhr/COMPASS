@@ -50,6 +50,7 @@ public:
     void updateDataSources();
     void updateSectors();
     void updateButtons();
+    void updateFilterWidget();
     void expandResults();
 
     void showResultId (const std::string& id);

@@ -27,6 +27,7 @@ namespace Utils
 {
 namespace Time
 {
+extern const std::string QT_DATETIME_FORMAT;
 
 extern boost::posix_time::ptime fromString(std::string value);
 extern boost::posix_time::ptime fromLong(unsigned long value);
