@@ -1633,7 +1633,7 @@ void EvaluationManager::showUTN (unsigned int utn)
     loginf << "EvaluationManager: showUTN: utn " << utn;
 
     nlohmann::json data = getBaseViewableDataConfig();
-    data["filters"]["UTNs"]["utns"] = to_string(utn);
+    data[VP_FILTERS_KEY]["UTNs"]["utns"] = to_string(utn);
 
     loginf << "EvaluationManager: showUTN: showing";
     setViewableDataConfig(data);
@@ -1642,7 +1642,7 @@ void EvaluationManager::showUTN (unsigned int utn)
 std::unique_ptr<nlohmann::json::object_t> EvaluationManager::getViewableForUTN (unsigned int utn)
 {
     nlohmann::json::object_t data = getBaseViewableDataConfig();
-    data["filters"]["UTNs"]["utns"] = to_string(utn);
+    data[VP_FILTERS_KEY]["UTNs"]["utns"] = to_string(utn);
 
     return std::unique_ptr<nlohmann::json::object_t>{new nlohmann::json::object_t(move(data))};
 }
@@ -1652,11 +1652,11 @@ std::unique_ptr<nlohmann::json::object_t> EvaluationManager::getViewableForEvalu
 {
     nlohmann::json::object_t data = getBaseViewableNoDataConfig();
 
-    data["evaluation_results"]["show_results"] = true;
-    data["evaluation_results"]["req_grp_id"] = req_grp_id;
-    data["evaluation_results"]["result_id"] = result_id;
+    data[VP_EVAL_KEY][VP_EVAL_SHOW_RES_KEY] = true;
+    data[VP_EVAL_KEY][VP_EVAL_REQGRP_ID_KEY] = req_grp_id;
+    data[VP_EVAL_KEY][VP_EVAL_RES_ID_KEY] = result_id;
 
-    data["show_sectors"] = vector<string>({String::split(req_grp_id, ':').at(0)});
+    data[VP_SHOWSEC_KEY] = vector<string>({String::split(req_grp_id, ':').at(0)});
 
     return std::unique_ptr<nlohmann::json::object_t>{new nlohmann::json::object_t(move(data))};
 }
@@ -1665,13 +1665,13 @@ std::unique_ptr<nlohmann::json::object_t> EvaluationManager::getViewableForEvalu
         unsigned int utn, const std::string& req_grp_id, const std::string& result_id)
 {
     nlohmann::json::object_t data = getBaseViewableDataConfig();
-    data["filters"]["UTNs"]["utns"] = to_string(utn);
+    data[VP_FILTERS_KEY]["UTNs"]["utns"] = to_string(utn);
 
-    data["evaluation_results"]["show_results"] = true;
-    data["evaluation_results"]["req_grp_id"] = req_grp_id;
-    data["evaluation_results"]["result_id"] = result_id;
+    data[VP_EVAL_KEY][VP_EVAL_SHOW_RES_KEY] = true;
+    data[VP_EVAL_KEY][VP_EVAL_REQGRP_ID_KEY] = req_grp_id;
+    data[VP_EVAL_KEY][VP_EVAL_RES_ID_KEY] = result_id;
 
-    data["show_sectors"] = vector<string>({String::split(req_grp_id, ':').at(0)});
+    data[VP_SHOWSEC_KEY] = vector<string>({String::split(req_grp_id, ':').at(0)});
 
     return std::unique_ptr<nlohmann::json::object_t>{new nlohmann::json::object_t(move(data))};
 }
@@ -1729,7 +1729,7 @@ void EvaluationManager::updateResultsToChanges ()
 void EvaluationManager::showFullUTN (unsigned int utn)
 {
     nlohmann::json::object_t data;
-    data["filters"]["UTNs"]["utns"] = to_string(utn);
+    data[VP_FILTERS_KEY]["UTNs"]["utns"] = to_string(utn);
 
     setViewableDataConfig(data);
 }
@@ -1754,23 +1754,23 @@ void EvaluationManager::showSurroundingData (unsigned int utn)
     //    },
 
     // TODO_TIMESTAMP
-    data["filters"]["Time of Day"]["Time of Day Maximum"] = Time::toString(time_end);
-    data["filters"]["Time of Day"]["Time of Day Minimum"] = Time::toString(time_begin);
+    data[VP_FILTERS_KEY]["Time of Day"]["Time of Day Maximum"] = Time::toString(time_end);
+    data[VP_FILTERS_KEY]["Time of Day"]["Time of Day Minimum"] = Time::toString(time_begin);
 
     //    "Aircraft Address": {
     //    "Aircraft Address Values": "FEFE10"
     //    },
     if (target_data.targetAddresses().size())
-        data["filters"]["Aircraft Address"]["Aircraft Address Values"] = target_data.targetAddressesStr()+",NULL";
+        data[VP_FILTERS_KEY]["Aircraft Address"]["Aircraft Address Values"] = target_data.targetAddressesStr()+",NULL";
 
     //    "Mode 3/A Code": {
     //    "Mode 3/A Code Values": "7000"
     //    }
 
     if (target_data.modeACodes().size())
-        data["filters"]["Mode 3/A Codes"]["Mode 3/A Codes Values"] = target_data.modeACodesStr()+",NULL";
+        data[VP_FILTERS_KEY]["Mode 3/A Codes"]["Mode 3/A Codes Values"] = target_data.modeACodesStr()+",NULL";
 
-    //    "filters": {
+    //    VP_FILTERS_KEY: {
     //    "Barometric Altitude": {
     //    "Barometric Altitude Maxmimum": "43000",
     //    "Barometric Altitude Minimum": "500"
@@ -1793,10 +1793,10 @@ void EvaluationManager::showSurroundingData (unsigned int utn)
 
     if (target_data.hasPos())
     {
-        data["filters"]["Position"]["Latitude Maximum"] = to_string(target_data.latitudeMax()+0.2);
-        data["filters"]["Position"]["Latitude Minimum"] = to_string(target_data.latitudeMin()-0.2);
-        data["filters"]["Position"]["Longitude Maximum"] = to_string(target_data.longitudeMax()+0.2);
-        data["filters"]["Position"]["Longitude Minimum"] = to_string(target_data.longitudeMin()-0.2);
+        data[VP_FILTERS_KEY]["Position"]["Latitude Maximum"] = to_string(target_data.latitudeMax()+0.2);
+        data[VP_FILTERS_KEY]["Position"]["Latitude Minimum"] = to_string(target_data.latitudeMin()-0.2);
+        data[VP_FILTERS_KEY]["Position"]["Longitude Maximum"] = to_string(target_data.longitudeMax()+0.2);
+        data[VP_FILTERS_KEY]["Position"]["Longitude Minimum"] = to_string(target_data.longitudeMin()-0.2);
     }
 
     setViewableDataConfig(data);
@@ -2370,10 +2370,10 @@ nlohmann::json::object_t EvaluationManager::getBaseViewableDataConfig ()
 
     if (load_only_sector_data_ && min_max_pos_set_)
     {
-        data["filters"]["Position"]["Latitude Maximum"] = to_string(latitude_max_);
-        data["filters"]["Position"]["Latitude Minimum"] = to_string(latitude_min_);
-        data["filters"]["Position"]["Longitude Maximum"] = to_string(longitude_max_);
-        data["filters"]["Position"]["Longitude Minimum"] = to_string(longitude_min_);
+        data[VP_FILTERS_KEY]["Position"]["Latitude Maximum"] = to_string(latitude_max_);
+        data[VP_FILTERS_KEY]["Position"]["Latitude Minimum"] = to_string(latitude_min_);
+        data[VP_FILTERS_KEY]["Position"]["Longitude Maximum"] = to_string(longitude_max_);
+        data[VP_FILTERS_KEY]["Position"]["Longitude Minimum"] = to_string(longitude_min_);
     }
 
     return data;

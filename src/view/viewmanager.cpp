@@ -295,9 +295,9 @@ void ViewManager::doViewPointAfterLoad ()
 
     logdbg << "ViewManager: doViewPointAfterLoad: data '" << data.dump(4) << "'";
 
-    bool vp_contains_timestamp = data.contains("timestamp");
+    bool vp_contains_timestamp = data.contains(VP_TIMESTAMP_KEY);
     boost::posix_time::ptime vp_timestamp;
-    bool vp_contains_time_window = data.contains("time_window");
+    bool vp_contains_time_window = data.contains(VP_TIME_WIN_KEY);
     float vp_time_window;
     boost::posix_time::ptime vp_ts_min, vp_ts_max;
 
@@ -308,16 +308,16 @@ void ViewManager::doViewPointAfterLoad ()
     }
     else
     {
-        assert (data.at("timestamp").is_string());
-        vp_timestamp = Time::fromString(data.at("timestamp"));
+        assert (data.at(VP_TIMESTAMP_KEY).is_string());
+        vp_timestamp = Time::fromString(data.at(VP_TIMESTAMP_KEY));
 
         loginf << "ViewManager: doViewPointAfterLoad: time " << Time::toString(vp_timestamp);
     }
 
     if (vp_contains_time_window)
     {
-        assert (data.at("time_window").is_number());
-        vp_time_window = data.at("time_window");
+        assert (data.at(VP_TIME_WIN_KEY).is_number());
+        vp_time_window = data.at(VP_TIME_WIN_KEY);
         vp_ts_min = vp_timestamp - Time::partialSeconds(vp_time_window / 2.0);
         vp_ts_max = vp_timestamp + Time::partialSeconds(vp_time_window / 2.0);
 

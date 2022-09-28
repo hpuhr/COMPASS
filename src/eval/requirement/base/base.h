@@ -19,6 +19,7 @@
 #define EVALUATIONREQUIREMENT_H
 
 #include "eval/requirement/base/comparisontype.h"
+#include "viewpoint.h"
 
 #include "boost/date_time/posix_time/posix_time.hpp"
 #include "boost/date_time/time_duration.hpp"

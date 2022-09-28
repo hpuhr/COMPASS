@@ -137,8 +137,8 @@ QVariant ViewPointsTableModel::data(const QModelIndex& index, int role) const
         //                return QVariant();
 
         // s1.find(s2) != std::string::npos
-        if (data.is_number() && col_name.find("time") != std::string::npos)
-            return String::timeStringFromDouble(data).c_str();
+//        if (data.is_number() && col_name.find(VP_TIMESTAMP_KEY) != std::string::npos)
+//            return Time::toString(data).c_str();
 
         if (data.is_boolean())
             return data.get<bool>();
@@ -152,14 +152,14 @@ QVariant ViewPointsTableModel::data(const QModelIndex& index, int role) const
     {
         assert (index.column() < table_columns_.size());
 
-        if (table_columns_.at(index.column()) == "status")
+        if (table_columns_.at(index.column()).toStdString() == VP_STATUS_KEY)
         {
             assert (index.row() >= 0);
             assert (index.row() < view_points_.size());
 
             const ViewPoint& vp = view_points_.at(index.row());
 
-            const json& data = vp.data().at("status");
+            const json& data = vp.data().at(VP_STATUS_KEY);
             assert (data.is_string());
 
             std::string status = data;
@@ -211,7 +211,7 @@ Qt::ItemFlags ViewPointsTableModel::flags(const QModelIndex &index) const
 
     assert (index.column() < table_columns_.size());
 
-    if (table_columns_.at(index.column()) == "comment")
+    if (table_columns_.at(index.column()).toStdString() == VP_COMMENT_KEY)
         return QAbstractItemModel::flags(index) | Qt::ItemIsEditable;
     else
         return QAbstractItemModel::flags(index);
@@ -301,9 +301,9 @@ void ViewPointsTableModel::updateTypes()
     {
         const nlohmann::json& data = vp_it.data();
 
-        assert (data.contains("type"));
+        assert (data.contains(VP_TYPE_KEY));
 
-        const string& type = data.at("type");
+        const string& type = data.at(VP_TYPE_KEY);
 
         if (!types_.contains(type.c_str()))
             types_.append(type.c_str());
@@ -329,9 +329,9 @@ void ViewPointsTableModel::updateStatuses()
     {
         const nlohmann::json& data = vp_it.data();
 
-        assert (data.contains("status"));
+        assert (data.contains(VP_STATUS_KEY));
 
-        const string& status = data.at("status");
+        const string& status = data.at(VP_STATUS_KEY);
 
         if (!statuses_.contains(status.c_str()))
             statuses_.append(status.c_str());
@@ -381,7 +381,7 @@ unsigned int ViewPointsTableModel::saveNewViewPoint(const nlohmann::json& data, 
     assert (!hasViewPoint(new_id));
 
     nlohmann::json new_data = data;
-    new_data["id"] = new_id;
+    new_data[VP_ID_KEY] = new_id;
 
     saveNewViewPoint(new_id, new_data, update); // auto increments max_id
 

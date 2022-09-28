@@ -28,6 +28,7 @@
 #include "viewpointsimporttask.h"
 #include "viewpointsimporttaskwidget.h"
 #include "global.h"
+#include "viewpoint.h"
 
 #include "asteriximporttask.h"
 #include "asteriximporttaskwidget.h"
@@ -230,10 +231,10 @@ void ViewPointsImportTask::checkParsedData ()
 
     for (auto& vp_it : view_points.get<json::array_t>())
     {
-        if (!vp_it.contains("id") || !vp_it.at("id").is_number())
+        if (!vp_it.contains(VP_ID_KEY) || !vp_it.at(VP_ID_KEY).is_number())
             throw std::runtime_error("view point '"+vp_it.dump()+"' does not contain a valid id");
 
-        if (!vp_it.contains("type") || !vp_it.at("type").is_string())
+        if (!vp_it.contains(VP_TYPE_KEY) || !vp_it.at(VP_TYPE_KEY).is_string())
             throw std::runtime_error("view point '"+vp_it.dump()+"' does not contain a valid type");
     }
 
@@ -311,12 +312,12 @@ void ViewPointsImportTask::run()
     unsigned int id;
     for (auto& vp_it : view_points.get<json::array_t>())
     {
-        assert (vp_it.contains("id"));
+        assert (vp_it.contains(VP_ID_KEY));
 
-        id = vp_it.at("id");
+        id = vp_it.at(VP_ID_KEY);
 
-        if (!vp_it.contains("status"))
-            vp_it["status"] = "open";
+        if (!vp_it.contains(VP_STATUS_KEY))
+            vp_it[VP_STATUS_KEY] = "open";
 
         db_interface.setViewPoint(id, vp_it.dump());
     }

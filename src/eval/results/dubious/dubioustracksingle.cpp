@@ -444,14 +444,14 @@ std::unique_ptr<nlohmann::json::object_t> SingleDubiousTrack::viewableData(
         const EvaluationRequirement::DubiousTrackUpdateDetail& update_detail =
                 detail.updates_.at(per_detail_update_cnt);
 
-        (*viewable_ptr)["position_latitude"] = update_detail.pos_.latitude_;
-        (*viewable_ptr)["position_longitude"] = update_detail.pos_.longitude_;
-        (*viewable_ptr)["position_window_latitude"] = eval_man_.resultDetailZoom();
-        (*viewable_ptr)["position_window_longitude"] = eval_man_.resultDetailZoom();
-        (*viewable_ptr)["timestamp"] = Time::toString(update_detail.timestamp_);
+        (*viewable_ptr)[VP_POS_LAT_KEY] = update_detail.pos_.latitude_;
+        (*viewable_ptr)[VP_POS_LON_KEY] = update_detail.pos_.longitude_;
+        (*viewable_ptr)[VP_POS_WIN_LAT_KEY] = eval_man_.resultDetailZoom();
+        (*viewable_ptr)[VP_POS_WIN_LON_KEY] = eval_man_.resultDetailZoom();
+        (*viewable_ptr)[VP_TIMESTAMP_KEY] = Time::toString(update_detail.timestamp_);
 
         if (update_detail.dubious_comments_.size())
-            (*viewable_ptr)["evaluation_results"]["highlight_details"] = vector<unsigned int>{detail_update_cnt};
+            (*viewable_ptr)[VP_EVAL_KEY][VP_EVAL_HIGHDET_KEY] = vector<unsigned int>{detail_update_cnt};
 
         return viewable_ptr;
     }

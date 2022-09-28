@@ -25,15 +25,41 @@
 
 using namespace nlohmann;
 
+const std::string VP_ID_KEY {"id"};
+const std::string VP_NAME_KEY {"name"};
+const std::string VP_TYPE_KEY {"type"};
+const std::string VP_STATUS_KEY {"status"};
+const std::string VP_COMMENT_KEY {"comment"};
+
+const std::string VP_DS_TYPES_KEY {"data_source_types"};
+const std::string VP_DS_KEY {"data_sources"};
+const std::string VP_FILTERS_KEY {"filters"};
+
+const std::string VP_POS_LAT_KEY {"position_latitude"};
+const std::string VP_POS_LON_KEY {"position_longitude"};
+const std::string VP_POS_WIN_LAT_KEY {"position_window_latitude"};
+const std::string VP_POS_WIN_LON_KEY {"position_window_longitude"};
+
+const std::string VP_TIMESTAMP_KEY {"timestamp"};
+const std::string VP_TIME_WIN_KEY {"time_window"};
+
+const std::string VP_EVAL_KEY {"evaluation_results"};
+const std::string VP_EVAL_SHOW_RES_KEY {"show_results"};
+const std::string VP_EVAL_REQGRP_ID_KEY {"req_grp_id"};
+const std::string VP_EVAL_RES_ID_KEY {"result_id"};
+const std::string VP_EVAL_HIGHDET_KEY {"highlight_details"};
+
+const std::string VP_SHOWSEC_KEY {"show_sectors"};
+
 ViewPoint::ViewPoint(unsigned int id, const nlohmann::json::object_t& data, ViewManager& view_manager, bool needs_save)
     : ViewableDataConfig(data), id_(id), view_manager_(view_manager)
 {
-    assert (data_.contains("id"));
-    assert (data_.at("id") == id_);
+    assert (data_.contains(VP_ID_KEY));
+    assert (data_.at(VP_ID_KEY) == id_);
 
-    if (!data_.contains("status"))
+    if (!data_.contains(VP_STATUS_KEY))
     {
-        data_["status"] = "open";
+        data_[VP_STATUS_KEY] = "open";
         needs_save = true;
     }
 
@@ -93,12 +119,12 @@ ViewPoint::ViewPoint(unsigned int id, const nlohmann::json::object_t& data, View
 ViewPoint::ViewPoint(unsigned int id, const std::string& json_str, ViewManager& view_manager, bool needs_save)
     : ViewableDataConfig(json_str), id_(id), view_manager_(view_manager)
 {
-    assert (data_.contains("id"));
-    assert (data_.at("id") == id_);
+    assert (data_.contains(VP_ID_KEY));
+    assert (data_.at(VP_ID_KEY) == id_);
 
-    if (!data_.contains("status"))
+    if (!data_.contains(VP_STATUS_KEY))
     {
-        data_["status"] = "open";
+        data_[VP_STATUS_KEY] = "open";
         needs_save = true;
     }
 
@@ -110,13 +136,13 @@ unsigned int ViewPoint::id() const { return id_; }
 
 void ViewPoint::setStatus (const std::string& status)
 {
-    data_["status"] = status;
+    data_[VP_STATUS_KEY] = status;
     save();
 }
 
 void ViewPoint::setComment (const std::string& comment)
 {
-    data_["comment"] = comment;
+    data_[VP_COMMENT_KEY] = comment;
     save();
 }
 
