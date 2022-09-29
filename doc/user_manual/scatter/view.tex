@@ -11,7 +11,7 @@ A ScatterPlot View displays the distribution of two numerical variables as point
 
 \section{Layout}
 
-On the left side resides the plot area in which the data is visualized (if data has been loaded). The tool bar at the top shows the currently selected mouse interaction mode and the available actions.\\
+On the left side resides the plot area in which the data is visualized (if data has been loaded). The tool bar at the top shows the currently selected tool and the available actions.\\
 
 On the right side resides the configuration area, which allows configuring what data is loaded and how it is displayed. The 'Reload' button on the bottom can be used to trigger a reload of the view's data.\\
 
@@ -27,7 +27,8 @@ To load the data the mechanism described in Section \nameref{sec:ui_overview} or
   \caption{Scatterplot View after loading data}
 \end{figure}
 
-The values of the selected variables are used for positioning on the x-axis and y-axis. For each value pair a data point is generated. In the current example the WGS-84 meta-variables 'Longitude' and 'Latitude' are used, showing a similar view as the OSG View.
+The values of the selected variables are used for positioning on the x-axis and y-axis. For each value pair a data point is generated. 
+In the current example the WGS-84 meta-variables 'Longitude' and 'Latitude' are used, showing a similar view as the OSG View.
 The color of each data point is defined by the DBContent it belongs to.\\
 
 %TODO_V7 i think here it would be immensely important to tell the user why he might not see any data at all when selecting variables from two different DBContents!
@@ -38,23 +39,21 @@ On the bottom of the plot a legend is shown, giving the total counts of all data
 
 \subsection{Toolbar}
 
-The first tool buttons can be used to switch between the various mouse interaction modes:
+The first buttons can be used to switch between the available tools (shortcut refers to keyboard shortcut).
 
 \begin{table}[H]
   \center
-  \begin{tabular}{ | l | l | l |}
+  \begin{tabular}{ | l | l | l | l |}
     \hline
-    \textbf{Icon} & \textbf{Text} &  \textbf{Description} \\ \hline
-    \includegraphics[width=0.5cm,frame]{../../data/icons/navigate.png} & Navigate & Allows navigation of the data \\ \hline
-    \includegraphics[width=0.5cm,frame]{../../data/icons/zoom_select_action.png} & Zoom to Rectangle & Allows zooming to the selected rectangle \\ \hline
-    \includegraphics[width=0.5cm,frame]{../../data/icons/select_action.png} & Select & Allows data selection \& de-selection \\ \hline
+    \textbf{Icon} & \textbf{Shortcut} & \textbf{Text} &  \textbf{Description} \\ \hline
+    \includegraphics[width=0.5cm,frame]{../../data/icons/select_action.png} & S & Select & Allows data selection \& de-selection \\ \hline
+    \includegraphics[width=0.5cm,frame]{../../data/icons/zoom_select_action.png} & R & Zoom to Rectangle & Allows zooming to the selected rectangle \\ \hline
+    
   \end{tabular}
-  \caption{Toolbar mouse interaction modes}
+  \caption{Toolbar: Available tools}
 \end{table}
 
-The others provide general actions by which the view can be modified (shortcut refers to keyboard shortcut):
-
-%TODO_V7 Only refer to keyboard shortcuts when providing them
+The others provide general actions by which the view can be modified.
 
 \begin{table}[H]
   \center
@@ -63,9 +62,9 @@ The others provide general actions by which the view can be modified (shortcut r
     \textbf{Icon} & \textbf{Shortcut} &\textbf{Text} &  \textbf{Description} \\ \hline
     \includegraphics[width=0.5cm,frame]{../../data/icons/select_invert.png} & & Invert Selection & Selects all de-selected \& vice versa \\ \hline
     \includegraphics[width=0.5cm,frame]{../../data/icons/select_delete.png} & & Delete Selection & De-selects all target reports \\ \hline
-    \includegraphics[width=0.5cm,frame]{../../data/icons/zoom_home.png} & & Zoom to Home & Pans/zooms to show all existing data \\ \hline
+    \includegraphics[width=0.5cm,frame]{../../data/icons/zoom_home.png} & Space & Zoom to Home & Pans/zooms to show all existing data \\ \hline
   \end{tabular}
-  \caption{Toolbar actions}
+  \caption{Toolbar: Available actions}
 \end{table} 
 
 \subsection{Config Tab}
@@ -76,21 +75,9 @@ Please note that visualization of evaluation result data is currently not implem
 
 \subsection{Scatterplot}
 
-\subsubsection{General Zoom}
+\subsubsection{Selection Tool}
 
-The mouse wheel can be used to zoom in or out of the presented data, the space key can be used to reset to the default zoom level (euqivalent to \includegraphics[width=0.5cm,frame]{../../data/icons/zoom_home.png}).
-
-\subsubsection{Navigation Mode}
-
-In 'Navigate' mode, the left mouse-button can be used to pan the shown data.
-
-\subsubsection{Zoom to Rectangle Mode}
-
-In 'Zoom to Rectangle' mode, the left mouse-button can be used to select a rectangular region, to which a zoom operation is performed.
-
-\subsubsection{Selection Mode}
-
-In 'Select' mode, data can be selected. The first left mouse-button click starts selection (showing a red rectangle), the second click finalizes the selection. All data points inside the rectangular area are selected.
+If the 'Select' tool is active, data can be selected. Using the left mouse-button a red selection rectangle can be spanned across all data points that should be selected.
 
 \begin{figure}[H]
     \hspace*{-2cm}
@@ -110,6 +97,15 @@ This enables selection of parts of the data based on the presented variables, al
 
 %TODO_V7 maybe easier selection is the wrong term when talking about removing the selection?
 %TODO_V7 lets discuss when we talk of 'points'/'data points' and 'target reports', this is mixed up a little at the moment
-The 'Invert Selection' \includegraphics[width=0.5cm,frame]{../../data/icons/select_invert.png} or 'Delete Selection' \includegraphics[width=0.5cm,frame]{../../data/icons/select_delete.png} actions allow for easier selection of the wanted target reports. \\
+The 'Invert Selection' \includegraphics[width=0.5cm,frame]{../../data/icons/select_invert.png} or 'Delete Selection' \includegraphics[width=0.5cm,frame]{../../data/icons/select_delete.png} actions 
+allow for easier selection of the wanted target reports. \\
 
-By pressing the 'Control' key during the second click, the newly selected data is added to any previous selection. This can be used to select data incrementally, making more complex selections possible.
+By pressing the 'Control' key while selecting, the newly selected data is added to any previous selection. This can be used to select data incrementally, making more complex selections possible.
+
+\subsubsection{Zoom to Rectangle Tool}
+
+Using the 'Zoom to Rectangle' tool, the left mouse-button can be used to select a rectangular region, to which a zoom operation is performed.
+
+\subsubsection{General Zoom}
+
+The mouse wheel can be used to zoom in or out of the presented data, the 'Space' key can be used to reset to the default zoom level (equivalent to \includegraphics[width=0.5cm,frame]{../../data/icons/zoom_home.png}).
