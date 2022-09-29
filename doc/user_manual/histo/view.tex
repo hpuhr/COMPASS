@@ -12,7 +12,7 @@ A Histogram View displays the distribution of one numerical variable as a histog
 \section{Layout}
 
 On the left side resides the plot area in which the histogram is shown (if data has been loaded). 
-The tool bar at the top shows the currently selected mouse interaction mode and the available actions.\\
+The tool bar at the top shows the currently selected tool and the available actions.\\
 
 On the right side resides the configuration area, which allows configuring what data is loaded and how it is displayed.
 The 'Reload' button on the bottom can be used to trigger a reload of the view's data.\\
@@ -37,27 +37,29 @@ On the y-axis the bin sizes per DBContent are shown, either in linear or logarit
 Below the histogram a legend is shown, giving the total counts of all data points. \\
 
 % TODO_V7 Per DBContent - correct?
-In the current example the meta-variable 'Time of Day' is used, showing the overall data rate per DBContent.
+In the current example the meta-variable 'Timestamp' is used, showing the overall data rate per DBContent.
 
 \section{Usage}
 
 \subsection{Toolbar}
 
 %TODO_V7 Maybe we could reformulate that, as only one button/mode is available after all?
-The first tool buttons can be used to switch between mouse interaction modes, currently only one mode is available.
+The first button can be used to activate the selection tool (shortcut refers to keyboard shortcut). 
+
+Note that an active tool can always be ended by pressing the 'Escape' key. 
 
 \begin{table}[H]
   \center
-  \begin{tabular}{ | l | l | l |}
+  \begin{tabular}{ | l | l | l | l |}
     \hline
-    \textbf{Icon} & \textbf{Text} &  \textbf{Description} \\ \hline
-    \includegraphics[width=0.5cm,frame]{../../data/icons/select_action.png} & Select & Allows data selection \& de-selection \\ \hline
+    \textbf{Icon} & \textbf{Shortcut} & \textbf{Text} & \textbf{Description} \\ \hline
+    \includegraphics[width=0.5cm,frame]{../../data/icons/select_action.png} & S & Select & Allows data selection \& de-selection \\ \hline
   \end{tabular}
-  \caption{Toolbar mouse interaction modes}
+  \caption{Toolbar: Available tools}
 \end{table}
 
 %TODO_V7 Only refer to keyboard shortcuts when providing them
-The others provide general operations (shortcut refers to keyboard shortcut):
+The others provide general operations.
 
 \begin{table}[H]
   \center
@@ -66,9 +68,9 @@ The others provide general operations (shortcut refers to keyboard shortcut):
     \textbf{Icon} & \textbf{Shortcut} &\textbf{Text} &  \textbf{Description} \\ \hline
     \includegraphics[width=0.5cm,frame]{../../data/icons/select_invert.png} & & Invert Selection & Selects all de-selected \& vice versa \\ \hline
     \includegraphics[width=0.5cm,frame]{../../data/icons/select_delete.png} & & Delete Selection & De-selects all target reports \\ \hline
-    \includegraphics[width=0.5cm,frame]{../../data/icons/zoom_home.png} & & Zoom to Home & Pans/zooms to show all existing data \\ \hline
+    %\includegraphics[width=0.5cm,frame]{../../data/icons/zoom_home.png} & Space & Zoom to Home & Pans/zooms to show all existing data \\ \hline
   \end{tabular}
-  \caption{Toolbar operations}
+  \caption{Toolbar: Available operations}
 \end{table} 
 
 \subsection{Config Tab}
@@ -78,7 +80,6 @@ The elements on the top define which data is visualized in the histogram. \\
 Any numerical variable can be visualized by checking the 'Show Variable Data' box and selecting a variable in the selection control below.
 A reload operation might be required for the selection to take effect. \\
 
-% TODO_V7 what was meant by 'if triggered'? Clicking the check box or some external event?
 Result data can be visualized by checking the 'Show Evaluation Result Data' box. 
 In this case the the 'Requirement' and 'Result' fields indicate which evaluation result is presented. \\
 
@@ -86,13 +87,13 @@ The 'Logarithmic Y Scale' checkbox can be used to switch between linear and loga
 
 \subsection{Histogram}
 
-\subsubsection{Zoom}
+%\subsubsection{Zoom}
 
-The mouse wheel can be used to zoom in or out of the presented data. This is in the current presentation only useful in limited circumstances. The space key can be used to reset to the default zoom level (euqivalent to \includegraphics[width=0.5cm,frame]{../../data/icons/zoom_home.png}).
+%The mouse wheel can be used to zoom in or out of the presented data. This is in the current presentation only useful in limited circumstances. The space key can be used to reset to the default zoom level (euqivalent to \includegraphics[width=0.5cm,frame]{../../data/icons/zoom_home.png}).
 
-\subsubsection{Selection Mode}
+\subsubsection{Selection Tool}
 
-In 'Select' mode, data can be selected. The first left mouse-button click starts selection (showing a red rectangle), the second click finalizes the selection. The data contained in all intersected bins is selected.
+If the 'Select' tool is active, data can be selected. Using the left mouse-button a red selection rectangle can be spanned across all bins that should be selected.
 
 \begin{figure}[H]
     \hspace*{-2cm}
@@ -112,11 +113,11 @@ This enables selection of parts of the data based on the presented variable, all
 
 The 'Invert Selection' \includegraphics[width=0.5cm,frame]{../../data/icons/select_invert.png} or 'Delete Selection' \includegraphics[width=0.5cm,frame]{../../data/icons/select_delete.png} actions allow for easier selection of the wanted target reports. \\
 
-By pressing the 'Control' key during the second click, the newly selected data is added to any previous selection. This can be used to select data incrementally, making more complex selections possible.
+By pressing the 'Control' key while selecting, the newly selected data is added to any previous selection. This can be used to select data incrementally, making more complex selections possible.
 
 \subsection{Evaluation Result}
 
-If - using the Evaluation feature - a requirement result is presented, the respective data is shown in the histogram.
+If a requirement result is presented by using the Evaluation feature, the respective data is shown in the histogram.
 
 %TODO_V7: Add updated evaluation figures
 \begin{figure}[H]

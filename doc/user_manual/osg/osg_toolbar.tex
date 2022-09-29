@@ -1,41 +1,43 @@
 \section{Toolbar}
 
-The first 4 symbols switch between the mouse action modes, the others provide specific options.
+The first buttons switch between the available tools, which can be used to interact with the display (shortcut refers to keyboard shortcut).
 
-\begin{table}[H]
-  \center
-  \begin{tabular}{ | l | l | l |}
-    \hline
-    \textbf{Icon} & \textbf{Text} &  \textbf{Description} \\ \hline
-    \includegraphics[width=0.5cm,frame]{../../data/icons/navigate.png} & Navigate & Allows navigation of the map only \\ \hline
-    \includegraphics[width=0.5cm,frame]{../../data/icons/measure_action.png} & Measure & Allows map distance measuring and navigation of the map \\ \hline
-    \includegraphics[width=0.5cm,frame]{../../data/icons/select_action.png} & Select & Allows data selection \& de-selection \\ \hline
-  \end{tabular}
-  \caption{Toolbar mouse action modes}
-\end{table}
-
-The others provide general display modes or operations (shortcut refers to keyboard shortcut):
+Note that an active tool can always be ended by pressing the 'Escape' key. 
 
 \begin{table}[H]
   \center
   \begin{tabular}{ | l | l | l | l |}
     \hline
-    \textbf{Icon} & \textbf{Shortcut} &\textbf{Text} &  \textbf{Description} \\ \hline
+    \textbf{Icon} & \textbf{Shortcut} & \textbf{Text} & \textbf{Description} \\ \hline
+    \includegraphics[width=0.5cm,frame]{../../data/icons/select_action.png} & S & Select & Allows data selection \& de-selection \\ \hline
+    \includegraphics[width=0.5cm,frame]{../../data/icons/measure_action.png} & M & Measure & Allows map distance measuring and navigation of the map \\ \hline
+  \end{tabular}
+  \caption{Toolbar: Available tools}
+\end{table}
+
+The others provide general display modes or operations.
+
+\begin{table}[H]
+  \center
+  \begin{tabular}{ | l | l | l | m{8cm} |}
+    \hline
+    \textbf{Icon} & \textbf{Shortcut} &\textbf{Text} & \textbf{Description} \\ \hline
     \includegraphics[width=0.5cm,frame]{../../data/icons/time.png} & & Toggle Time Filter & Enable/disable time filter \\ \hline
     \includegraphics[width=0.5cm,frame]{../../data/icons/depth.png} & & Toggle Depth Check & Enable/disable depth check. Disabled in 2d mode. \\ \hline
     \includegraphics[width=0.5cm,frame]{../../data/icons/vp_save.png} & & Save View Point & Save current view as new view point \\ \hline
     %\includegraphics[width=0.5cm,frame]{../../data/icons/label_color.png} & & Edit Label Color & Set background color for all labels \\ \hline
     %\includegraphics[width=0.5cm,frame]{../../data/icons/label_edit.png} & & Edit Label Content & Edit the content for labels \\ \hline
-    \includegraphics[width=0.5cm,frame]{../../data/icons/label_delete.png} & & Deletes All Labels & Deletes all existing labels \\ \hline
-    \includegraphics[width=0.5cm,frame]{../../data/icons/measurement_delete.png} & & Deletes All Measurements & Deletes all existing measurements \\ \hline 
-    \includegraphics[width=0.5cm,frame]{../../data/icons/select_color.png} & & Edit Selection Color & Set selection color \\ \hline
+    %\includegraphics[width=0.5cm,frame]{../../data/icons/label_delete.png} & & Deletes All Labels & Deletes all existing labels \\ \hline
+    %\includegraphics[width=0.5cm,frame]{../../data/icons/measurement_delete.png} & & Deletes All Measurements & Deletes all existing measurements \\ \hline 
+    %\includegraphics[width=0.5cm,frame]{../../data/icons/select_color.png} & & Edit Selection Color & Set selection color \\ \hline
+    \includegraphics[width=0.5cm,frame]{../../data/icons/select_invert.png} & & Toggle Show Only Selected & When active only selected target reports are shown (possibly by cross-selection via other views) \\ \hline
     \includegraphics[width=0.5cm,frame]{../../data/icons/select_invert.png} & & Invert Selection & Selects all de-selected \& vice versa \\ \hline
-    \includegraphics[width=0.5cm,frame]{../../data/icons/select_delete.png} & & Delete Selection & De-selects all target reports \\ \hline
-    \includegraphics[width=0.5cm,frame]{../../data/icons/text_invert.png} & & Overlay Text Color Invert & Changes Overlay Text Color \\ \hline
+    %\includegraphics[width=0.5cm,frame]{../../data/icons/select_delete.png} & & Delete Selection & De-selects all target reports \\ \hline
+    %\includegraphics[width=0.5cm,frame]{../../data/icons/text_invert.png} & & Overlay Text Color Invert & Changes Overlay Text Color \\ \hline
     \includegraphics[width=0.5cm,frame]{../../data/icons/3d.png} or \includegraphics[width=0.5cm,frame]{../../data/icons/2d.png} & D & Switch Map Dimensions & Changes between 3D/2D display \\ \hline
     \includegraphics[width=0.5cm,frame]{../../data/icons/zoom_home.png} & H & Zoom to Home & Pans/zooms to show all existing data \\ \hline
     \includegraphics[width=0.5cm,frame]{../../data/icons/zoom_geometry.png} & Z & Zoom to Loaded Data & Pans/zooms to show currently loaded data \\ \hline
     \includegraphics[width=0.5cm,frame]{../../data/icons/configuration.png} & C & Toggle Configuration Panel & Shows/hides the configuration panel \\ \hline
   \end{tabular}
-  \caption{Toolbar operations}
+  \caption{Toolbar: Available actions}
 \end{table} 
