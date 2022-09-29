@@ -30,6 +30,11 @@ Allowed options:
                                         filename, e.g. '/data/file1.ff'
   --import_asterix_file_line arg        imports ASTERIX file with given line, 
                                         e.g. 'L2'
+  --import_asterix_date arg             imports ASTERIX file with given date, 
+                                        in YYYY-MM-DD format e.g. '2020-04-20'
+  --import_asterix_file_time_offset arg used time offset during ASTERIX file 
+                                        import Time of Day override, in 
+                                        HH:MM:SS.ZZZ'
   --import_asterix_network              imports ASTERIX from defined network 
                                         UDP streams
   --import_asterix_network_time_offset arg
@@ -44,6 +49,8 @@ Allowed options:
                                         string, e.g. ''{"10":{"edition":"0.31"}
                                         }'' (including one pair of single 
                                         quotes)
+  --import_json arg                     imports JSON file with given filename, 
+                                        e.g. '/data/file1.json'
   --import_gps_trail arg                imports gps trail NMEA with given 
                                         filename, e.g. '/data/file2.txt'
   --import_gps_parameters arg           import GPS parameters as JSON string, 
@@ -59,6 +66,7 @@ Allowed options:
   --import_sectors_json arg             imports exported sectors JSON with 
                                         given filename, e.g. 
                                         '/data/sectors.json'
+  --calculate_radar_plot_positions      calculate radar plot positions
   --associate_data                      associate target reports
   --load_data                           load data after start
   --export_view_points_report arg       export view points report after start 
@@ -74,8 +82,10 @@ Allowed options:
   --export_eval_report arg              export evaluation report after start 
                                         with given filename, e.g. 
                                         '/data/eval_db2/report.tex
+  --max_fps arg                         maximum fps for display in OSGView'
   --no_cfg_save                         do not save configuration upon quitting
   --quit                                quit after finishing all previous steps
+
 \end{lstlisting}
 \ \\
 
@@ -106,6 +116,12 @@ After a database was opened, adds the supplied filename and starts an import usi
 \subsection{--import\_asterix\_file\_line arg}
 
 If an import using the task described in \nameref{sec:ui_import_asterix} is started, it will use the given line identifier (L1 ...L4).
+
+
+\subsection{--import\_asterix\_date arg}
+
+If an import using the task described in \nameref{sec:ui_import_asterix} is started, it will use the import date in YYYY-mm-DD format.
+
 
 \subsection{--import\_asterix\_network}
 
@@ -162,6 +178,9 @@ For one or a number of categories, the following options can be set:
 
 Please note that the naming must be exactly as in the GUI, otherwise the application quits with an error message.
 
+\subsection{--import\_json\_file filename}
+
+After a database was opened, adds the supplied filename and starts an import using the task described in \nameref{sec:ui_import_json}.
 
 \subsection{--import\_gps\_trail filename}
 
@@ -278,6 +297,10 @@ The given argument filename defines the report filename, with the report directo
 \subsection{--no\_cfg\_save}
 
 When quitting the application later, no configuration changes are saved.
+
+\subsection{--max\_fps arg}
+
+Uses the given integer as maximum frames-per-second number in OSGView, allows lessening the workload for slower workstations or when using remote-access. Default is 30, for increased performance 10 or 15 are suitable values.
 
 \subsection{--quit}
 
