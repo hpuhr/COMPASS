@@ -462,7 +462,7 @@ inline std::string HistogramViewDataWidget::stringRepresentation<boost::posix_ti
 
     unsigned long v_long = static_cast<unsigned long>(v);
 
-    return Utils::Time::toDateString(Utils::Time::fromLong(v_long)) + " - " + Utils::Time::toTimeString(Utils::Time::fromLong(v_long));
+    return Utils::Time::toString(Utils::Time::fromLong(v_long));
 }
 
 template<>
