@@ -39,7 +39,8 @@ const std::map<PropertyDataType, std::vector<std::string>> Format::format_option
     {PropertyDataType::DOUBLE, no_format},
     {PropertyDataType::STRING,
         {"", "bool", "bool_invert", "decimal", "hexadecimal", "octal", "epoch_tod_ms", "epoch_tod_s"}},
-    {PropertyDataType::JSON, no_format}};
+    {PropertyDataType::JSON, no_format},
+    {PropertyDataType::TIMESTAMP, no_format}};
 
 void Format::set(PropertyDataType data_type, const std::string& value)
 {

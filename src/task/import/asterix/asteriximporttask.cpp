@@ -48,6 +48,8 @@
 #include <QMessageBox>
 #include <QThread>
 #include <QProgressDialog>
+#include <QMessageBox>
+#include <QPushButton>
 
 #include <algorithm>
 
@@ -60,7 +62,7 @@ const unsigned int unlimited_chunk_size = 4000;
 
 const std::string DONE_PROPERTY_NAME = "asterix_data_imported";
 
-const float ram_threshold = 4.0;
+//const float ram_threshold = 4.0;
 
 ASTERIXImportTask::ASTERIXImportTask(const std::string& class_id, const std::string& instance_id,
                                      TaskManager& task_manager)
@@ -74,7 +76,11 @@ ASTERIXImportTask::ASTERIXImportTask(const std::string& class_id, const std::str
     registerParameter("file_list", &file_list_, json::array());
     registerParameter("current_file_framing", &current_file_framing_, "");
 
+    date_ = boost::posix_time::ptime(boost::gregorian::day_clock::universal_day());
+
     registerParameter("override_tod_offset", &override_tod_offset_, 0.0);
+
+    registerParameter("ask_discard_cache_on_resume", &ask_discard_cache_on_resume_, true);
 
     std::string jasterix_definition_path = HOME_DATA_DIRECTORY + "jasterix_definitions";
 
@@ -579,6 +585,16 @@ void ASTERIXImportTask::fileLineID(unsigned int value)
     file_line_id_ = value;
 }
 
+const boost::posix_time::ptime &ASTERIXImportTask::date() const
+{
+    return date_;
+}
+
+void ASTERIXImportTask::date(const boost::posix_time::ptime& date)
+{
+    date_ = date;
+}
+
 bool ASTERIXImportTask::isRunning() const
 {
     return running_;
@@ -679,6 +695,7 @@ void ASTERIXImportTask::run(bool test) // , bool create_mapping_stubs
         COMPASS::instance().appMode(AppMode::LiveRunning); // set live mode
 
     running_ = true;
+    stopped_ = false;
     done_ = false; // since can be run multiple times
 
     num_packets_in_processing_ = 0;
@@ -821,7 +838,7 @@ void ASTERIXImportTask::dialogImportSlot()
 
 void ASTERIXImportTask::dialogTestImportSlot()
 {
-    loginf << "ASTERIXImportTask: dialogImportSlot";
+    loginf << "ASTERIXImportTask: dialogTestImportSlot";
 
     assert (dialog_);
     dialog_->hide();
@@ -992,7 +1009,7 @@ void ASTERIXImportTask::mapJSONDoneSlot()
     if (!test_)
     {
         std::shared_ptr<ASTERIXPostprocessJob> postprocess_job =
-                make_shared<ASTERIXPostprocessJob>(std::move(job_buffers),
+                make_shared<ASTERIXPostprocessJob>(std::move(job_buffers), date_,
                                                    override_tod_active_, override_tod_offset_,
                                                    !import_file_);
 
@@ -1187,6 +1204,74 @@ void ASTERIXImportTask::insertDoneSlot()
     }
 
     logdbg << "ASTERIXImportTask: insertDoneSlot: done";
+}
+
+void ASTERIXImportTask::appModeSwitchSlot (AppMode app_mode_previous, AppMode app_mode_current)
+{
+    loginf << "ASTERIXImportTask: appModeSwitchSlot: current " << toString(app_mode_current)
+           << " new " << toString(app_mode_previous) << " running " << running_;
+
+    if (!running_) // then nothing to do
+        return;
+
+    assert (decode_job_);
+
+    if (app_mode_current == AppMode::LiveRunning)
+    {
+        assert (app_mode_previous == AppMode::LivePaused || app_mode_previous == AppMode::Offline);
+
+        if (app_mode_previous == AppMode::LivePaused)
+        {
+            // resume paused -> running
+
+            bool discard_cache = false;
+
+            if (ask_discard_cache_on_resume_)
+            {
+                QMessageBox::StandardButton reply;
+                reply = QMessageBox::question(nullptr, "Resuming into Live: Running",
+                                              "Would you like to import cached ASTERIX data?",
+                                              QMessageBox::Yes|QMessageBox::No);
+                if (reply == QMessageBox::No)
+                    discard_cache = true;
+            }
+
+            QMessageBox m_info (QMessageBox::Information, "Resuming into Live: Running",
+                                  "Importing cached ASTERIX data. Please wait.", QMessageBox::Ok);
+            m_info.button(QMessageBox::Ok)->hide();
+            m_info.show();
+
+            loginf << "ASTERIXImportTask: appModeSwitchSlot: resuming";
+
+            decode_job_->resumeLiveNetworkData(discard_cache);
+
+            while (decode_job_->resumingCachedData())
+            {
+                QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+                QThread::msleep(1);
+            }
+
+            loginf << "ASTERIXImportTask: appModeSwitchSlot: resume done";
+
+            m_info.close();
+        }
+        else
+            ; // nothing to do, normal startup
+
+    }
+    else if (app_mode_current == AppMode::LivePaused)
+    {
+        assert (app_mode_previous == AppMode::LiveRunning); // can only happend from running
+
+        // enter paused state
+        decode_job_->cacheLiveNetworkData();
+    }
+    else if (app_mode_current == AppMode::Offline)
+    {
+        assert (app_mode_previous == AppMode::LiveRunning || app_mode_previous == AppMode::LivePaused);
+
+        stop();
+    }
 }
 
 void ASTERIXImportTask::checkAllDone()

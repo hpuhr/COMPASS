@@ -22,6 +22,8 @@
 #include "evaluationtargetvelocity.h"
 #include "projection/transformation.h"
 
+#include "boost/date_time/posix_time/ptime.hpp"
+
 #include <map>
 #include <memory>
 #include <vector>
@@ -39,13 +41,13 @@ class EvaluationManager;
 class TstDataMapping // mapping to respective ref data
 {
 public:
-    float tod_ {0}; // tod of test
+    boost::posix_time::ptime timestamp_; // timestmap of test
 
     bool has_ref1_ {false};
-    float tod_ref1_ {0};
+    boost::posix_time::ptime timestamp_ref1_;
 
     bool has_ref2_ {false};
-    float tod_ref2_ {0};
+    boost::posix_time::ptime timestamp_ref2_;
 
     bool has_ref_pos_ {false};
     EvaluationTargetPosition pos_ref_;
@@ -55,13 +57,13 @@ public:
 class DataMappingTimes // mapping to respective tst data
 {
 public:
-    float tod_ {0}; // tod of test
+    boost::posix_time::ptime timestamp_; // tod of test
 
     bool has_other1_ {false};
-    float tod_other1_ {0};
+    boost::posix_time::ptime timestamp_other1_;
 
     bool has_other2_ {false};
-    float tod_other2_ {0};
+    boost::posix_time::ptime timestamp_other2_;
 };
 
 class EvaluationTargetData
@@ -71,8 +73,8 @@ public:
     EvaluationTargetData(unsigned int utn, EvaluationData& eval_data, EvaluationManager& eval_man);
     virtual ~EvaluationTargetData();
 
-    void addRefIndex (float tod, unsigned int index);
-    void addTstIndex (float tod, unsigned int index);
+    void addRefIndex (boost::posix_time::ptime timestamp, unsigned int index);
+    void addTstIndex (boost::posix_time::ptime timestamp, unsigned int index);
 
     bool hasData() const;
     bool hasRefData () const;
@@ -86,11 +88,11 @@ public:
     unsigned int numRefUpdates () const;
     unsigned int numTstUpdates () const;
 
-    float timeBegin() const;
+    boost::posix_time::ptime timeBegin() const;
     std::string timeBeginStr() const;
-    float timeEnd() const;
+    boost::posix_time::ptime timeEnd() const;
     std::string timeEndStr() const;
-    float timeDuration() const;
+    boost::posix_time::time_duration timeDuration() const;
 
     std::set<std::string> callsigns() const;
     std::string callsignsStr() const;
@@ -112,68 +114,74 @@ public:
     bool use() const;
     void use(bool use);
 
-    const std::multimap<float, unsigned int>& refData() const;
-    const std::multimap<float, unsigned int>& tstData() const;
+    const std::multimap<boost::posix_time::ptime, unsigned int>& refData() const;
+    const std::multimap<boost::posix_time::ptime, unsigned int>& tstData() const;
 
     // ref
-    bool hasRefDataForTime (float tod, float d_max) const;
-    std::pair<float, float> refTimesFor (float tod, float d_max) const; // lower/upper times, -1 if not existing
-    std::pair<EvaluationTargetPosition, bool> interpolatedRefPosForTime (float tod, float d_max) const;
-    // bool ok
-    std::pair<EvaluationTargetVelocity, bool> interpolatedRefPosBasedSpdForTime (float tod, float d_max) const;
+    bool hasRefDataForTime (boost::posix_time::ptime timestamp, boost::posix_time::time_duration d_max) const;
+    std::pair<boost::posix_time::ptime, boost::posix_time::ptime> refTimesFor (
+            boost::posix_time::ptime timestamp, boost::posix_time::time_duration d_max) const;
+    // lower/upper times, {} if not existing
 
-    bool hasRefPosForTime (float tod) const;
-    EvaluationTargetPosition refPosForTime (float tod) const;
-    EvaluationTargetVelocity refPosBasedSpdForTime (float tod) const;
-    std::pair<bool, float> estimateRefAltitude (float tod, unsigned int index) const;
+    std::pair<EvaluationTargetPosition, bool> interpolatedRefPosForTime (
+            boost::posix_time::ptime timestamp, boost::posix_time::time_duration d_max) const;
+    // bool ok
+    std::pair<EvaluationTargetVelocity, bool> interpolatedRefPosBasedSpdForTime (
+            boost::posix_time::ptime timestamp, boost::posix_time::time_duration d_max) const;
+
+    bool hasRefPosForTime (boost::posix_time::ptime timestamp) const;
+    EvaluationTargetPosition refPosForTime (boost::posix_time::ptime timestamp) const;
+    EvaluationTargetVelocity refPosBasedSpdForTime (boost::posix_time::ptime timestamp) const;
+    std::pair<bool, float> estimateRefAltitude (boost::posix_time::ptime timestamp, unsigned int index) const;
     // estimate ref baro alt at tod,index TODO should be replaced by real altitude reconstructor
 
-    bool hasRefCallsignForTime (float tod) const;
-    std::string refCallsignForTime (float tod) const;
+    bool hasRefCallsignForTime (boost::posix_time::ptime timestamp) const;
+    std::string refCallsignForTime (boost::posix_time::ptime timestamp) const;
 
-    bool hasRefModeAForTime (float tod) const; // only if set, is v, not g
-    unsigned int refModeAForTime (float tod) const;
+    bool hasRefModeAForTime (boost::posix_time::ptime timestamp) const; // only if set, is v, not g
+    unsigned int refModeAForTime (boost::posix_time::ptime timestamp) const;
 
-    bool hasRefModeCForTime (float tod) const; // only if set, is v, not g
-    float refModeCForTime (float tod) const;
+    bool hasRefModeCForTime (boost::posix_time::ptime timestamp) const; // only if set, is v, not g
+    float refModeCForTime (boost::posix_time::ptime timestamp) const;
 
-    bool hasRefTAForTime (float tod) const;
-    unsigned int refTAForTime (float tod) const;
+    bool hasRefTAForTime (boost::posix_time::ptime timestamp) const;
+    unsigned int refTAForTime (boost::posix_time::ptime timestamp) const;
 
-    std::pair<bool,bool> refGroundBitForTime (float tod) const; // has gbs, gbs true
-    std::pair<bool,bool> interpolatedRefGroundBitForTime (float tod, float d_max) const; // has gbs, gbs true
+    std::pair<bool,bool> refGroundBitForTime (boost::posix_time::ptime timestamp) const; // has gbs, gbs true
+    std::pair<bool,bool> interpolatedRefGroundBitForTime (
+            boost::posix_time::ptime timestamp, boost::posix_time::time_duration d_max) const; // has gbs, gbs true
 
     // test
-    bool hasTstPosForTime (float tod) const;
-    EvaluationTargetPosition tstPosForTime (float tod) const;
-    std::pair<bool, float> estimateTstAltitude (float tod, unsigned int index) const;
+    bool hasTstPosForTime (boost::posix_time::ptime timestamp) const;
+    EvaluationTargetPosition tstPosForTime (boost::posix_time::ptime timestamp) const;
+    std::pair<bool, float> estimateTstAltitude (boost::posix_time::ptime timestamp, unsigned int index) const;
 
-    bool hasTstCallsignForTime (float tod) const;
-    std::string tstCallsignForTime (float tod) const;
+    bool hasTstCallsignForTime (boost::posix_time::ptime timestamp) const;
+    std::string tstCallsignForTime (boost::posix_time::ptime timestamp) const;
 
-    bool hasTstModeAForTime (float tod) const; // only if set, is v, not g
-    unsigned int tstModeAForTime (float tod) const;
+    bool hasTstModeAForTime (boost::posix_time::ptime timestamp) const; // only if set, is v, not g
+    unsigned int tstModeAForTime (boost::posix_time::ptime timestamp) const;
 
-    bool hasTstModeCForTime (float tod) const; // only if set, is v, not g
-    float tstModeCForTime (float tod) const;
+    bool hasTstModeCForTime (boost::posix_time::ptime timestamp) const; // only if set, is v, not g
+    float tstModeCForTime (boost::posix_time::ptime timestamp) const;
 
-    bool hasTstGroundBitForTime (float tod) const; // only if set
-    bool tstGroundBitForTime (float tod) const; // true is on ground
+    bool hasTstGroundBitForTime (boost::posix_time::ptime timestamp) const; // only if set
+    bool tstGroundBitForTime (boost::posix_time::ptime timestamp) const; // true is on ground
 
-    bool hasTstTAForTime (float tod) const;
-    unsigned int tstTAForTime (float tod) const;
+    bool hasTstTAForTime (boost::posix_time::ptime timestamp) const;
+    unsigned int tstTAForTime (boost::posix_time::ptime timestamp) const;
 
-    std::pair<bool,bool> tstGroundBitForTimeInterpolated (float tod) const; // has gbs, gbs true
+    std::pair<bool,bool> tstGroundBitForTimeInterpolated (boost::posix_time::ptime timestamp) const; // has gbs, gbs true
 
-    bool hasTstTrackNumForTime (float tod) const;
-    unsigned int tstTrackNumForTime (float tod) const;
+    bool hasTstTrackNumForTime (boost::posix_time::ptime timestamp) const;
+    unsigned int tstTrackNumForTime (boost::posix_time::ptime timestamp) const;
 
     // speed, track angle
-    bool hasTstMeasuredSpeedForTime (float tod) const;
-    float tstMeasuredSpeedForTime (float tod) const; // m/s
+    bool hasTstMeasuredSpeedForTime (boost::posix_time::ptime timestamp) const;
+    float tstMeasuredSpeedForTime (boost::posix_time::ptime timestamp) const; // m/s
 
-    bool hasTstMeasuredTrackAngleForTime (float tod) const;
-    float tstMeasuredTrackAngleForTime (float tod) const; // deg
+    bool hasTstMeasuredTrackAngleForTime (boost::posix_time::ptime timestamp) const;
+    float tstMeasuredTrackAngleForTime (boost::posix_time::ptime timestamp) const; // deg
 
     bool canCheckTstMultipleSources() const;
     bool hasTstMultipleSources() const;
@@ -207,10 +215,10 @@ protected:
 
     bool use_ {true};
 
-    std::multimap<float, unsigned int> ref_data_; // tod -> index
+    std::multimap<boost::posix_time::ptime, unsigned int> ref_data_; // timestamp -> index
     mutable std::vector<unsigned int> ref_indexes_;
 
-    std::multimap<float, unsigned int> tst_data_; // tod -> index
+    std::multimap<boost::posix_time::ptime, unsigned int> tst_data_; // timestamp -> index
     mutable std::vector<unsigned int> tst_indexes_;
 
     mutable std::set<std::string> callsigns_;
@@ -236,7 +244,7 @@ protected:
     mutable bool has_nacp {false};
     mutable unsigned int min_nacp_, max_nacp_;
 
-    mutable std::map<float, TstDataMapping> test_data_mappings_;
+    mutable std::map<boost::posix_time::ptime, TstDataMapping> test_data_mappings_;
 
 //    std::unique_ptr<OGRSpatialReference> wgs84_;
 //    mutable std::unique_ptr<OGRSpatialReference> local_;
@@ -252,11 +260,11 @@ protected:
     //void updateADSBInfo() const;
 
     void calculateTestDataMappings() const;
-    TstDataMapping calculateTestDataMapping(float tod) const; // test tod
+    TstDataMapping calculateTestDataMapping(boost::posix_time::ptime timestamp) const; // test tod
     void addRefPositiosToMapping (TstDataMapping& mapping) const;
     void addRefPositiosToMappingFast (TstDataMapping& mapping) const;
 
-    DataMappingTimes findTstTimes(float tod_ref) const; // ref tod
+    DataMappingTimes findTstTimes(boost::posix_time::ptime timestamp_ref) const; // ref tod
 };
 
 #endif // EVALUATIONTARGETDATA_H

@@ -27,6 +27,7 @@
 #include "jsonmappingstubsjob.h"
 #include "asterixjsonparsingschema.h"
 #include "task.h"
+#include "appmode.h"
 
 #include <QObject>
 
@@ -67,6 +68,8 @@ class ASTERIXImportTask : public Task, public Configurable
     void postprocessObsoleteSlot();
 
     void insertDoneSlot();
+
+    void appModeSwitchSlot (AppMode app_mode_previous, AppMode app_mode_current);
 
   public:
     ASTERIXImportTask(const std::string& class_id, const std::string& instance_id,
@@ -133,6 +136,9 @@ class ASTERIXImportTask : public Task, public Configurable
     unsigned int fileLineID() const;
     void fileLineID(unsigned int value);
 
+    const boost::posix_time::ptime &date() const;
+    void date(const boost::posix_time::ptime& date);
+
 protected:
     bool debug_jasterix_;
     std::shared_ptr<jASTERIX::jASTERIX> jasterix_;
@@ -144,13 +150,17 @@ protected:
     std::string current_filename_;
     std::string current_file_framing_;
     unsigned int file_line_id_ {0};
+    boost::posix_time::ptime date_;
 
     bool test_{false};
 
     bool override_tod_active_{false};
     float override_tod_offset_{0};
 
+    bool ask_discard_cache_on_resume_ {true};
+
     bool running_ {false};
+
     unsigned int num_packets_in_processing_{0};
     unsigned int num_packets_total_{0};
 

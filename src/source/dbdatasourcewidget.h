@@ -32,6 +32,9 @@ public:
 
     void updateContent();
 
+    unsigned int getLabelMinWidth();
+    void updateLabelMinWidth(unsigned int width);
+
 protected:
     DBDataSource& src_;
     DataSourceManager& ds_man_;

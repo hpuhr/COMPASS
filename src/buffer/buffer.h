@@ -23,6 +23,8 @@
 
 #include "json.hpp"
 
+#include "boost/date_time/posix_time/posix_time.hpp"
+
 #include <memory>
 #include <tuple>
 #include <unordered_map>
@@ -48,7 +50,8 @@ typedef std::tuple<std::map<std::string, std::shared_ptr<NullableVector<bool>>>,
                    std::map<std::string, std::shared_ptr<NullableVector<float>>>,
                    std::map<std::string, std::shared_ptr<NullableVector<double>>>,
                    std::map<std::string, std::shared_ptr<NullableVector<std::string>>>,
-                   std::map<std::string, std::shared_ptr<NullableVector<nlohmann::json>>>>
+                   std::map<std::string, std::shared_ptr<NullableVector<nlohmann::json>>>,
+                   std::map<std::string, std::shared_ptr<NullableVector<boost::posix_time::ptime>>>>
     ArrayListMapTupel;
 
 template <class T, class Tuple>

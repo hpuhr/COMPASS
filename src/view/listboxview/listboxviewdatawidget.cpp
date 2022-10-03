@@ -30,9 +30,11 @@
 #include "listboxviewdatasource.h"
 #include "logger.h"
 
-ListBoxViewDataWidget::ListBoxViewDataWidget(ListBoxView* view, ListBoxViewDataSource* data_source,
-                                             QWidget* parent, Qt::WindowFlags f)
-    : QWidget(parent, f), view_(view), data_source_(data_source)
+ListBoxViewDataWidget::ListBoxViewDataWidget(ListBoxView* view, 
+                                             ListBoxViewDataSource* data_source,
+                                             QWidget* parent, 
+                                             Qt::WindowFlags f)
+:   ViewDataWidget(parent, f), view_(view), data_source_(data_source)
 {
     assert(data_source_);
 
@@ -202,4 +204,9 @@ AllBufferTableWidget* ListBoxViewDataWidget::getAllBufferTableWidget ()
 {
     assert (all_buffer_table_widget_);
     return all_buffer_table_widget_;
+}
+
+void ListBoxViewDataWidget::toolChanged_impl(int mode)
+{
+    //nothing to do here
 }

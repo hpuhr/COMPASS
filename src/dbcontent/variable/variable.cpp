@@ -438,6 +438,10 @@ std::string Variable::getRepresentationStringFromValue(const std::string& value_
             throw std::invalid_argument(
                 "Variable: getRepresentationStringFromValue: representation of json variable"
                 " impossible");
+    case PropertyDataType::TIMESTAMP:
+        throw std::invalid_argument(
+            "Variable: getRepresentationStringFromValue: representation of timestamp variable"
+            " impossible");
         default:
             logerr << "Variable: getRepresentationStringFromValue:: unknown property type "
                    << Property::asString(data_type_);
@@ -602,6 +606,9 @@ std::string Variable::multiplyString(const std::string& value_str, double factor
         case PropertyDataType::JSON:
             throw std::invalid_argument(
                 "Variable: multiplyString: multiplication of json variable impossible");
+        case PropertyDataType::TIMESTAMP:
+            throw std::invalid_argument(
+                "Variable: multiplyString: multiplication of timestamp variable impossible");
         default:
             logerr << "Variable: multiplyString:: unknown property type "
                    << Property::asString(data_type_);
@@ -676,6 +683,9 @@ const std::string& Variable::getLargerValueString(const std::string& value_a_str
         case PropertyDataType::JSON:
             throw std::invalid_argument(
                 "Variable: getLargerValueString: operation on json variable impossible");
+        case PropertyDataType::TIMESTAMP:
+            throw std::invalid_argument(
+                "Variable: getLargerValueString: operation on timestamp variable impossible");
         default:
             logerr << "Variable: getLargerValueString:: unknown property type "
                    << Property::asString(data_type_);
@@ -746,6 +756,9 @@ const std::string& Variable::getSmallerValueString(const std::string& value_a_st
         case PropertyDataType::JSON:
             throw std::invalid_argument(
                 "Variable: getSmallerValueString: operation on json variable impossible");
+        case PropertyDataType::TIMESTAMP:
+            throw std::invalid_argument(
+                "Variable: getSmallerValueString: operation on timestamp variable impossible");
         default:
             logerr << "Variable: getSmallerValueString:: unknown property type "
                    << Property::asString(data_type_);

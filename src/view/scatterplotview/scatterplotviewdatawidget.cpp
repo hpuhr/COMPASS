@@ -30,9 +30,11 @@
 #include <QHBoxLayout>
 #include <QMessageBox>
 #include <QTabWidget>
+#include <QStackedLayout>
 
 //#include <QtCharts/QChartView>
 #include <QtCharts/QScatterSeries>
+#include <QtCharts/QLineSeries>
 #include <QtCharts/QLegend>
 #include <QtCharts/QValueAxis>
 #include <QGraphicsLayout>
@@ -46,9 +48,11 @@ QT_CHARTS_USE_NAMESPACE
 using namespace std;
 using namespace dbContent;
 
-ScatterPlotViewDataWidget::ScatterPlotViewDataWidget(ScatterPlotView* view, ScatterPlotViewDataSource* data_source,
-                                                     QWidget* parent, Qt::WindowFlags f)
-    : QWidget(parent, f), view_(view), data_source_(data_source)
+ScatterPlotViewDataWidget::ScatterPlotViewDataWidget(ScatterPlotView* view, 
+                                                     ScatterPlotViewDataSource* data_source,
+                                                     QWidget* parent, 
+                                                     Qt::WindowFlags f)
+    : ViewDataWidget(parent, f), view_(view), data_source_(data_source)
 {
     assert(data_source_);
     setContentsMargins(0, 0, 0, 0);
@@ -131,11 +135,6 @@ ScatterPlotViewDataTool ScatterPlotViewDataWidget::selectedTool() const
     return selected_tool_;
 }
 
-QCursor ScatterPlotViewDataWidget::currentCursor() const
-{
-    return current_cursor_;
-}
-
 bool ScatterPlotViewDataWidget::showsData() const
 {
     return shows_data_;
@@ -151,7 +150,6 @@ bool ScatterPlotViewDataWidget::yVarNotInBuffer() const
     return y_var_not_in_buffer_;
 }
 
-
 QPixmap ScatterPlotViewDataWidget::renderPixmap()
 {
     assert (chart_view_);
@@ -163,6 +161,14 @@ QPixmap ScatterPlotViewDataWidget::renderPixmap()
 unsigned int ScatterPlotViewDataWidget::nullValueCnt() const
 {
     return nan_value_cnt_;
+}
+
+QRectF ScatterPlotViewDataWidget::getDataBounds() const
+{
+    if (!has_x_min_max_ || !has_y_min_max_)
+        return QRectF();
+
+    return QRectF(x_min_, y_min_, x_max_ - x_min_, y_max_ - y_min_);
 }
 
 void ScatterPlotViewDataWidget::loadingStartedSlot()
@@ -245,15 +251,17 @@ void ScatterPlotViewDataWidget::loadingDoneSlot()
     }
 
     updateMinMax();
-
     updateChart();
 }
 
-
-void ScatterPlotViewDataWidget::toolChangedSlot(ScatterPlotViewDataTool selected, QCursor cursor)
+/**
+ */
+void ScatterPlotViewDataWidget::toolChanged_impl(int mode)
 {
-    current_cursor_ = cursor;
-    selected_tool_ = selected;
+    selected_tool_ = (ScatterPlotViewDataTool)mode;
+
+    if (chart_view_)
+        chart_view_->onToolChanged();
 }
 
 void ScatterPlotViewDataWidget::rectangleSelectedSlot (QPointF p1, QPointF p2)
@@ -265,6 +273,8 @@ void ScatterPlotViewDataWidget::rectangleSelectedSlot (QPointF p1, QPointF p2)
         if (selected_tool_ == SP_ZOOM_RECT_TOOL)
         {
             loginf << "ScatterPlotViewDataWidget: rectangleSelectedSlot: zoom";
+
+            //TODO: prevent from going nuts when zero rect is passed!
 
             if (chart_view_->chart()->axisX() && chart_view_->chart()->axisY())
             {
@@ -282,6 +292,8 @@ void ScatterPlotViewDataWidget::rectangleSelectedSlot (QPointF p1, QPointF p2)
             throw std::runtime_error("ScatterPlotViewDataWidget: rectangleSelectedSlot: unknown tool "
                                      +to_string((unsigned int)selected_tool_));
     }
+
+    endTool();
 }
 
 void ScatterPlotViewDataWidget::invertSelectionSlot()
@@ -475,6 +487,18 @@ bool ScatterPlotViewDataWidget::canUpdateFromDataX(std::string dbcontent_name)
     case PropertyDataType::DOUBLE:
     {
         if (!buffer->has<double>(current_var_name))
+        {
+            x_var_not_in_buffer_ = true;
+            return false;
+        }
+        else
+            return true;
+
+        break;
+    }
+    case PropertyDataType::TIMESTAMP:
+    {
+        if (!buffer->has<boost::posix_time::ptime>(current_var_name))
         {
             x_var_not_in_buffer_ = true;
             return false;
@@ -728,6 +752,23 @@ void ScatterPlotViewDataWidget::updateFromDataX(std::string dbcontent_name, unsi
 
         break;
     }
+    case PropertyDataType::TIMESTAMP:
+    {
+        if (!buffer->has<boost::posix_time::ptime>(current_var_name))
+        {
+            logdbg << "ScatterPlotViewDataWidget: updateFromDataX: buffer does not contain " << current_var_name;
+            x_var_not_in_buffer_ = true;
+            return;
+        }
+
+        assert(buffer->has<boost::posix_time::ptime>(current_var_name));
+        NullableVector<boost::posix_time::ptime>& data = buffer->get<boost::posix_time::ptime>(current_var_name);
+
+        appendData(data, x_values_[dbcontent_name], last_size, current_size);
+        buffer_x_counts_[dbcontent_name] = current_size;
+
+        break;
+    }
     default:
         logerr << "ScatterPlotViewDataWidget: updateFromDataX: impossible for property type "
                << Property::asString(data_type);
@@ -873,6 +914,18 @@ bool ScatterPlotViewDataWidget::canUpdateFromDataY(std::string dbcontent_name)
     case PropertyDataType::DOUBLE:
     {
         if (!buffer->has<double>(current_var_name))
+        {
+            y_var_not_in_buffer_ = true;
+            return false;
+        }
+        else
+            return true;
+
+        break;
+    }
+    case PropertyDataType::TIMESTAMP:
+    {
+        if (!buffer->has<boost::posix_time::ptime>(current_var_name))
         {
             y_var_not_in_buffer_ = true;
             return false;
@@ -1126,6 +1179,24 @@ void ScatterPlotViewDataWidget::updateFromDataY(std::string dbcontent_name, unsi
 
         break;
     }
+    case PropertyDataType::TIMESTAMP:
+    {
+        if (!buffer->has<boost::posix_time::ptime>(current_var_name))
+        {
+            logdbg << "ScatterPlotViewDataWidget: updateFromDataY: buffer does not contain " << current_var_name;
+            y_var_not_in_buffer_ = true;
+            return;
+        }
+
+        assert(buffer->has<boost::posix_time::ptime>(current_var_name));
+
+        NullableVector<boost::posix_time::ptime>& data = buffer->get<boost::posix_time::ptime>(current_var_name);
+
+        appendData(data, y_values_[dbcontent_name], last_size, current_size);
+        buffer_y_counts_[dbcontent_name] = current_size;
+
+        break;
+    }
     default:
         logerr << "ScatterPlotViewDataWidget: updateFromDataY: impossible for property type "
                << Property::asString(data_type);
@@ -1337,14 +1408,6 @@ void ScatterPlotViewDataWidget::updateChart()
 
             chart_series->setName((data.first+" ("+to_string(sum_cnt)+")").c_str());
             chart->addSeries(chart_series);
-
-            //            if (selected_chart_series)
-            //            {
-            //                connect (chart_series, &QScatterSeries::pressed,
-            //                         chart_view_, &ScatterPlotViewChartView::seriesPressedSlot);
-            //                connect (chart_series, &QScatterSeries::released,
-            //                         chart_view_, &ScatterPlotViewChartView::seriesReleasedSlot);
-            //            }
         }
     }
 
@@ -1360,14 +1423,6 @@ void ScatterPlotViewDataWidget::updateChart()
 
         selected_chart_series->setName(("Selected ("+to_string(selected_cnt)+")").c_str());
         chart->addSeries(selected_chart_series);
-
-        //        if (selected_chart_series)
-        //        {
-        //            connect (selected_chart_series, &QScatterSeries::pressed,
-        //                     chart_view_, &ScatterPlotViewChartView::seriesPressedSlot);
-        //            connect (selected_chart_series, &QScatterSeries::released,
-        //                     chart_view_, &ScatterPlotViewChartView::seriesReleasedSlot);
-        //        }
     }
 
     chart->createDefaultAxes();
@@ -1389,11 +1444,15 @@ void ScatterPlotViewDataWidget::updateChart()
 
     connect (chart_view_.get(), &ScatterPlotViewChartView::rectangleSelectedSignal,
              this, &ScatterPlotViewDataWidget::rectangleSelectedSlot, Qt::ConnectionType::QueuedConnection);
+
     // queued needed, otherwise crash when signal is emitted in ScatterPlotViewChartView::seriesReleasedSlot
 
     for (auto series_it : chart->series())
     {
         QScatterSeries* scat_series = dynamic_cast<QScatterSeries*>(series_it);
+        if (!scat_series)
+            continue;
+
         assert (scat_series);
 
         connect (scat_series, &QScatterSeries::pressed,
@@ -1409,7 +1468,7 @@ void ScatterPlotViewDataWidget::updateChart()
 
 void ScatterPlotViewDataWidget::mouseMoveEvent(QMouseEvent* event)
 {
-    setCursor(current_cursor_);
+    //setCursor(current_cursor_);
     //osgEarth::QtGui::ViewerWidget::mouseMoveEvent(event);
 
     QWidget::mouseMoveEvent(event);

@@ -139,7 +139,7 @@ public:
     std::shared_ptr<Buffer> ref_buffer_;
     unsigned int ref_line_id_;
 
-    std::string ref_tod_name_;
+    std::string ref_timestamp_name_;
     std::string ref_latitude_name_;
     std::string ref_longitude_name_;
     std::string ref_target_address_name_;
@@ -167,7 +167,7 @@ public:
     std::shared_ptr<Buffer> tst_buffer_;
     unsigned int tst_line_id_;
 
-    std::string tst_tod_name_;
+    std::string tst_timestamp_name_;
     std::string tst_latitude_name_;
     std::string tst_longitude_name_;
     std::string tst_target_address_name_;

@@ -47,6 +47,8 @@
 
 #include "boost/date_time/posix_time/posix_time.hpp"
 
+#include <future>
+
 
 using namespace std;
 using namespace EvaluationRequirementResult;
@@ -166,10 +168,10 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
                 const SectorLayer& sector_layer = *sec_it;
                 bool single_thread = false;
 
-                tbb::task_group g;
+//                int num_threads = oneapi::tbb::info::default_concurrency();
+//                loginf << "EvaluateTask: execute: starting, num_threads " << num_threads;
 
-                g.run([&] {
-                    loginf << "EvaluateTask: execute: starting";
+                std::future<void> pending_future = std::async(std::launch::async, [&] {
 
                     unsigned int num_utns = utns.size();
                     assert (done_flags.size() == num_utns);
@@ -186,6 +188,7 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
                     {
                         tbb::parallel_for(uint(0), num_utns, [&](unsigned int utn_cnt)
                         {
+                            //assert(num_threads == oneapi::tbb::this_task_arena::max_concurrency());
                             results[utn_cnt] = req->evaluate(data.targetData(utns.at(utn_cnt)), req, sector_layer);
                             done_flags[utn_cnt] = true;
                         });
@@ -193,7 +196,38 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
 
                     for(unsigned int utn_cnt=0; utn_cnt < num_utns; ++utn_cnt)
                         assert (results[utn_cnt]);
+
+                    task_done = true;
                 });
+
+//                tbb::task_group g;
+
+//                g.run([&] {
+//                    loginf << "EvaluateTask: execute: starting";
+
+//                    unsigned int num_utns = utns.size();
+//                    assert (done_flags.size() == num_utns);
+
+//                    if (single_thread)
+//                    {
+//                        for(unsigned int utn_cnt=0; utn_cnt < num_utns; ++utn_cnt)
+//                        {
+//                            results[utn_cnt] = req->evaluate(data.targetData(utns.at(utn_cnt)), req, sector_layer);
+//                            done_flags[utn_cnt] = true;
+//                        }
+//                    }
+//                    else
+//                    {
+//                        tbb::parallel_for(uint(0), num_utns, [&](unsigned int utn_cnt)
+//                        {
+//                            results[utn_cnt] = req->evaluate(data.targetData(utns.at(utn_cnt)), req, sector_layer);
+//                            done_flags[utn_cnt] = true;
+//                        });
+//                    }
+
+//                    for(unsigned int utn_cnt=0; utn_cnt < num_utns; ++utn_cnt)
+//                        assert (results[utn_cnt]);
+//                });
 
                 unsigned int tmp_done_cnt;
 

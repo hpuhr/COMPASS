@@ -34,19 +34,19 @@ ScatterPlotViewDataToolWidget::ScatterPlotViewDataToolWidget(ScatterPlotView* vi
     }
 
     {
-        QAction* zoom_action_ =
-            toolbar_->addAction(QIcon(Files::getIconFilepath("zoom_select_action.png").c_str()), "Zoom to Rectangle");
-        zoom_rect_button_ = dynamic_cast<QToolButton*>(toolbar_->widgetForAction(zoom_action_));
-        assert(zoom_rect_button_);
-        zoom_rect_button_->setCheckable(true);
-    }
-
-    {
         QAction* select_action = toolbar_->addAction(
             QIcon(Files::getIconFilepath("select_action.png").c_str()), "Select");
         select_button_ = dynamic_cast<QToolButton*>(toolbar_->widgetForAction(select_action));
         assert(select_button_);
         select_button_->setCheckable(true);
+    }
+
+    {
+        QAction* zoom_action_ =
+            toolbar_->addAction(QIcon(Files::getIconFilepath("zoom_select_action.png").c_str()), "Zoom to Rectangle");
+        zoom_rect_button_ = dynamic_cast<QToolButton*>(toolbar_->widgetForAction(zoom_action_));
+        assert(zoom_rect_button_);
+        zoom_rect_button_->setCheckable(true);
     }
 
     QWidget* empty = new QWidget();

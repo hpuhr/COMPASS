@@ -210,7 +210,7 @@ std::vector<size_t> ACIDFilter::filterBuffer(const std::string& dbcontent_name, 
     for (unsigned int cnt=0; cnt < buffer->size(); ++cnt)
     {
         if (acid_vec.isNull(cnt)
-                || (cs_fpl_vec != nullptr ? cs_fpl_vec->isNull(cnt) : false)) // null or not found
+                && (cs_fpl_vec != nullptr ? cs_fpl_vec->isNull(cnt) : true)) // null or not found
         {
             if (!null_wanted_)
                 to_be_removed.push_back(cnt);
@@ -221,12 +221,15 @@ std::vector<size_t> ACIDFilter::filterBuffer(const std::string& dbcontent_name, 
         {
             found = false;
 
-            for (auto& val_it : values_)
+            if (!acid_vec.isNull(cnt))
             {
-                if (acid_vec.get(cnt).find(val_it) != std::string::npos)
+                for (auto& val_it : values_)
                 {
-                    found = true;
-                    break;
+                    if (acid_vec.get(cnt).find(val_it) != std::string::npos)
+                    {
+                        found = true;
+                        break;
+                    }
                 }
             }
 

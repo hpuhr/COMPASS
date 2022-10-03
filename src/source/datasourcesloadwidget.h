@@ -77,6 +77,7 @@ private:
     void clearAndCreateContent();
 
     void clear();
+    void arrangeSourceWidgetWidths();
 };
 
 #endif /* DATASOURCESLOADWIDGET_H_ */

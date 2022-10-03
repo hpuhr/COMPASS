@@ -21,6 +21,7 @@
 #include "global.h"
 #include "logger.h"
 #include "property.h"
+#include "util/timeconv.h"
 
 #include "json.hpp"
 
@@ -310,6 +311,12 @@ inline std::string getValueString(const nlohmann::json& value)
 {
     return value.dump();
 }
+
+inline std::string getValueString(const boost::posix_time::ptime& value)
+{
+    return Time::toString(value);
+}
+
 
 template <typename T>
 std::string getValueString(T value)

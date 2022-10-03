@@ -17,6 +17,9 @@
 
 #include "histogramviewwidget.h"
 #include "histogramviewdatatoolwidget.h"
+#include "files.h"
+#include "viewtoolswitcher.h"
+#include "viewtoolwidget.h"
 
 #include <QHBoxLayout>
 #include <QSettings>
@@ -24,104 +27,62 @@
 #include <QTabWidget>
 
 #include "histogramview.h"
-#include "histogramviewconfigwidget.h"
-#include "histogramviewdatawidget.h"
 
 /*
  */
 HistogramViewWidget::HistogramViewWidget(const std::string& class_id, const std::string& instance_id,
                                      Configurable* config_parent, HistogramView* view,
                                      QWidget* parent)
-    : ViewWidget(class_id, instance_id, config_parent, view, parent),
-      data_widget_(nullptr),
-      config_widget_(nullptr)
+    : ViewWidget(class_id, instance_id, config_parent, view, parent)
 {
-    //setAutoFillBackground(true);
+    createStandardLayout();
 
-    QHBoxLayout* hlayout = new QHBoxLayout;
-    hlayout->setContentsMargins(0, 0, 0, 0);
+    auto data_widget = new HistogramViewDataWidget(getView(), view->getDataSource());
+    setDataWidget(data_widget);
 
-    main_splitter_ = new QSplitter();
-    main_splitter_->setOrientation(Qt::Horizontal);
+    auto config_widget = new HistogramViewConfigWidget(getView());
+    setConfigWidget(config_widget);
 
-    QSettings settings("COMPASS", instanceId().c_str());
+    typedef HistogramViewDataTool Tool;
 
-    {  // data widget
-        QWidget* data_layout_widget = new QWidget();
-        QSizePolicy sp_left(QSizePolicy::Preferred, QSizePolicy::Preferred);
-        sp_left.setHorizontalStretch(5);
-        data_layout_widget->setSizePolicy(sp_left);
-        data_layout_widget->setContentsMargins(0, 0, 0, 0);
+    auto icon = [ = ] (const std::string& fn) 
+    {
+        return QIcon(Utils::Files::getIconFilepath(fn).c_str());
+    };
 
-        QVBoxLayout* data_layout = new QVBoxLayout;
-        data_layout->setContentsMargins(0, 0, 0, 0);
+    getViewToolSwitcher()->addTool(Tool::HG_DEFAULT_TOOL, "", "", QIcon(), Qt::ArrowCursor);
+    getViewToolSwitcher()->addTool(Tool::HG_SELECT_TOOL, "Select", "S", icon("select_action.png"), Qt::CrossCursor);
+    getViewToolSwitcher()->setDefaultTool(Tool::HG_DEFAULT_TOOL);
 
-        tool_widget_ = new HistogramViewDataToolWidget(view, this);
-        tool_widget_->setContentsMargins(0, 0, 0, 0);
-        data_layout->addWidget(tool_widget_);
+    //we could add the default action if we wanted
+    getViewToolWidget()->addTool(Tool::HG_SELECT_TOOL);
 
-        data_widget_ = new HistogramViewDataWidget(getView(), view->getDataSource());
-        //data_widget_->setAutoFillBackground(true);
-//        QSizePolicy sp_left(QSizePolicy::Preferred, QSizePolicy::Preferred);
-//        sp_left.setHorizontalStretch(3);
-//        data_widget_->setSizePolicy(sp_left);
-        data_layout->addWidget(data_widget_);
+    getViewToolWidget()->addSeparator();
 
-        //main_splitter_->addWidget(data_widget_);
-        data_layout_widget->setLayout(data_layout);
-        main_splitter_->addWidget(data_layout_widget);
-    }
+    getViewToolWidget()->addActionCallback("Invert Selection", [=] () { data_widget->invertSelectionSlot(); }, icon("select_invert.png"));
+    getViewToolWidget()->addActionCallback("Delete Selection", [=] () { data_widget->clearSelectionSlot(); }, icon("select_delete.png"));
 
-    {  // config widget
-        config_widget_ = new HistogramViewConfigWidget(getView());
-        //config_widget_->setAutoFillBackground(true);
-        QSizePolicy sp_right(QSizePolicy::Preferred, QSizePolicy::Preferred);
-        sp_right.setHorizontalStretch(1);
-        config_widget_->setSizePolicy(sp_right);
+    getViewToolWidget()->addSeparator();
 
-        // hlayout->addWidget( config_widget_ );
-        main_splitter_->addWidget(config_widget_);
-    }
-
-    main_splitter_->restoreState(settings.value("mainSplitterSizes").toByteArray());
-    hlayout->addWidget(main_splitter_);
-
-    setLayout(hlayout);
-    setContentsMargins(0, 0, 0, 0);
-
-    setFocusPolicy(Qt::StrongFocus);
-
-    // connect stuff here
-
-//    connect(tool_widget_, &HistogramViewDataToolWidget::toolChangedSignal, data_widget_,
-//            &HistogramViewDataWidget::toolChangedSlot);
-
-    connect(tool_widget_, &HistogramViewDataToolWidget::invertSelectionSignal, data_widget_,
-            &HistogramViewDataWidget::invertSelectionSlot);
-    connect(tool_widget_, &HistogramViewDataToolWidget::clearSelectionSignal, data_widget_,
-            &HistogramViewDataWidget::clearSelectionSlot);
-
-    connect(tool_widget_, &HistogramViewDataToolWidget::zoomToHomeSignal, data_widget_,
-            &HistogramViewDataWidget::resetZoomSlot);
+    getViewToolWidget()->addActionCallback("Zoom to Home", [=] () { data_widget->resetZoomSlot(); }, icon("zoom_home.png"), "Space");
 }
 
 /*
  */
 HistogramViewWidget::~HistogramViewWidget()
 {
-    QSettings settings("COMPASS", instanceId().c_str());
-    settings.setValue("mainSplitterSizes", main_splitter_->saveState());
 }
 
-/*
+/**
  */
-void HistogramViewWidget::toggleConfigWidget()
+HistogramViewDataWidget* HistogramViewWidget::getViewDataWidget()
 {
-    assert(config_widget_);
-    bool vis = config_widget_->isVisible();
-    config_widget_->setVisible(!vis);
+    return dynamic_cast<HistogramViewDataWidget*>(ViewWidget::getViewDataWidget());
 }
 
-/*
+/**
  */
-HistogramViewConfigWidget* HistogramViewWidget::configWidget() { return config_widget_; }
+HistogramViewConfigWidget* HistogramViewWidget::getViewConfigWidget()
+{
+    return dynamic_cast<HistogramViewConfigWidget*>(ViewWidget::getViewConfigWidget());
+}

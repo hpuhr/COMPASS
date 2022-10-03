@@ -463,11 +463,14 @@ void COMPASS::appMode(const AppMode& app_mode)
 {
     if (app_mode_ != app_mode)
     {
+        AppMode last_app_mode = app_mode_;
+
         app_mode_ = app_mode;
 
-        loginf << "COMPASS: appMode: app_mode " << appModeStr();
+        loginf << "COMPASS: appMode: app_mode_current " << toString(app_mode_)
+               << " previous " << toString(last_app_mode);
 
-        emit appModeSwitchSignal(app_mode_);
+        emit appModeSwitchSignal(last_app_mode, app_mode_);
     }
 }
 

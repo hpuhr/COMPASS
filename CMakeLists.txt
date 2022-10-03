@@ -1,7 +1,7 @@
 set(COMPASS_PATH "${CMAKE_CURRENT_SOURCE_DIR}")
 message("  Path: ${COMPASS_PATH}")
 
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.3)
 
 set ( CMAKE_BUILD_TYPE RelWithDebInfo ) #Debug RelWithDebInfo Release
 
@@ -122,30 +122,20 @@ include_directories (
     ${LibArchive_INCLUDE_DIRS}
     ${EIGEN3_INCLUDE_DIR}
     ${JSONCPP_INCLUDE_DIR}
-    )
-
-link_directories(
-    ${Boost_LIBRARY_DIR}
-    )
-
-IF (jASTERIX_FOUND)
-include_directories (
     ${jASTERIX_INCLUDE_DIR}
     )
 
 link_directories(
+    ${Boost_LIBRARY_DIR}
     ${jASTERIX_LIBRARIES}
     )
-
-target_link_libraries ( compass
-    ${jASTERIX_LIBRARIES})
-ENDIF()
 
 target_link_libraries ( compass
     Qt5::Widgets
     Qt5::Core
     Qt5::OpenGL
     Qt5::Charts
+    ${jASTERIX_LIBRARIES}
     ${Boost_LIBRARIES}
     ${LOG4CPP_LIBRARIES}
     ${GDAL_LIBRARIES}

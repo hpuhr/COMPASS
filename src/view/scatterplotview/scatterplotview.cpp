@@ -168,7 +168,7 @@ void ScatterPlotView::checkSubConfigurables()
 ScatterPlotViewDataWidget* ScatterPlotView::getDataWidget()
 {
     assert (widget_);
-    return widget_->getDataWidget();
+    return widget_->getViewDataWidget();
 }
 
 VariableSet ScatterPlotView::getSet(const std::string& dbcontent_name)
@@ -264,7 +264,7 @@ void ScatterPlotView::dataVarX (Variable& var)
     assert (!isDataVarXMeta());
 
     assert (widget_);
-    widget_->getDataWidget()->updatePlot();
+    widget_->getViewDataWidget()->updatePlot();
 
     updateStatus();
 }
@@ -285,7 +285,7 @@ void ScatterPlotView::metaDataVarX (MetaVariable& var)
     assert (isDataVarXMeta());
 
     assert (widget_);
-    widget_->getDataWidget()->updatePlot();
+    widget_->getViewDataWidget()->updatePlot();
 
     updateStatus();
 }
@@ -335,7 +335,7 @@ void ScatterPlotView::dataVarY (Variable& var)
     assert (!isDataVarYMeta());
 
     assert (widget_);
-    widget_->getDataWidget()->updatePlot();
+    widget_->getViewDataWidget()->updatePlot();
 
     updateStatus();
 }
@@ -356,7 +356,7 @@ void ScatterPlotView::metaDataVarY (MetaVariable& var)
     assert (isDataVarYMeta());
 
     assert (widget_);
-    widget_->getDataWidget()->updatePlot();
+    widget_->getViewDataWidget()->updatePlot();
 
     updateStatus();
 }
@@ -378,7 +378,7 @@ void ScatterPlotView::updateSelection()
     loginf << "ScatterPlotView: updateSelection";
     assert(widget_);
 
-    widget_->getDataWidget()->updatePlot();
+    widget_->getViewDataWidget()->updatePlot();
 
     //    if (show_only_selected_)
     //        widget_->getDataWidget()->updateToSelection();
@@ -410,8 +410,8 @@ void ScatterPlotView::allLoadingDoneSlot()
     loginf << "ScatterPlotView: allLoadingDoneSlot";
     assert(widget_);
 
-    widget_->configWidget()->setDisabled(false);
-    widget_->configWidget()->setStatus("", false);
+    widget_->getViewConfigWidget()->setDisabled(false);
+    widget_->getViewConfigWidget()->setStatus("", false);
 
     getDataWidget()->loadingDoneSlot(); // updates plot
 
@@ -420,10 +420,9 @@ void ScatterPlotView::allLoadingDoneSlot()
 
 void ScatterPlotView::updateStatus()
 {
-    if (widget_->getDataWidget()->xVarNotInBuffer() || widget_->getDataWidget()->yVarNotInBuffer())
-        widget_->configWidget()->setStatus("Reload Required", true, Qt::red);
+    if (widget_->getViewDataWidget()->xVarNotInBuffer() || widget_->getViewDataWidget()->yVarNotInBuffer())
+        widget_->getViewConfigWidget()->setStatus("Reload Required", true, Qt::red);
     else
-        widget_->configWidget()->setStatus(
-                    "Loaded with "+to_string(widget_->getDataWidget()->nullValueCnt())+" NULL values", true);
+        widget_->getViewConfigWidget()->setStatus(
+                    "Loaded with "+QString::number(widget_->getViewDataWidget()->nullValueCnt())+" NULL values", true);
 }
-

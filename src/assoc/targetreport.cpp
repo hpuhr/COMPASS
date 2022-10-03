@@ -34,8 +34,8 @@ std::string TargetReport::asStr()
 {
     stringstream ss;
 
-    ss << "dbo " << dbcontent_name_ << " ds_id " << ds_id_ << " rec_num " << rec_num_
-       << " tod " << String::timeStringFromDouble(tod_);
+    ss << "dbcont " << dbcontent_name_ << " ds_id " << ds_id_ << " rec_num " << rec_num_
+       << " ts " << Time::toString(timestamp_);
 
     if (has_ta_)
         ss << " ta " << String::hexStringFromInt(ta_, 6, '0');

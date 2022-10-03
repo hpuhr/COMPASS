@@ -23,6 +23,8 @@
 
 #include <QVariant>
 
+#include "boost/date_time/posix_time/ptime.hpp"
+
 namespace EvaluationRequirement
 {
 
@@ -30,14 +32,14 @@ class ExtraTrackDetail
 {
 public:
     ExtraTrackDetail(
-            float tod, EvaluationTargetPosition pos_current, bool inside, QVariant track_num, bool extra,
+            boost::posix_time::ptime timestmap, EvaluationTargetPosition pos_current, bool inside, QVariant track_num, bool extra,
             const std::string& comment)
-        : tod_(tod), pos_current_(pos_current), track_num_(track_num), inside_(inside),
+        : timestamp_(timestmap), pos_current_(pos_current), track_num_(track_num), inside_(inside),
           extra_(extra), comment_(comment)
     {
     }
 
-    float tod_ {0};
+    boost::posix_time::ptime timestamp_;
     EvaluationTargetPosition pos_current_;
     QVariant track_num_;
     bool inside_ {false};
@@ -65,7 +67,7 @@ public:
             const SectorLayer& sector_layer) override;
 
 protected:
-    float min_duration_{0};
+    boost::posix_time::time_duration min_duration_;
     unsigned int min_num_updates_ {0};
     bool ignore_primary_only_ {true};
 };

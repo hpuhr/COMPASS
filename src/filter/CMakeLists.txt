@@ -29,6 +29,8 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/modecfilterwidget.h"
         "${CMAKE_CURRENT_LIST_DIR}/primaryonlyfilter.h"
         "${CMAKE_CURRENT_LIST_DIR}/primaryonlyfilterwidget.h"
+        "${CMAKE_CURRENT_LIST_DIR}/timestampfilter.h"
+        "${CMAKE_CURRENT_LIST_DIR}/timestampfilterwidget.h"
     PRIVATE
         "${CMAKE_CURRENT_LIST_DIR}/dbfilter.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/dbfiltercondition.cpp"
@@ -52,6 +54,8 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/modecfilterwidget.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/primaryonlyfilter.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/primaryonlyfilterwidget.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/timestampfilter.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/timestampfilterwidget.cpp"
 )
 
 

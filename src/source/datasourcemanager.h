@@ -56,7 +56,7 @@ public:
     const std::vector<std::unique_ptr<dbContent::DBDataSource>>& dbDataSources() const;
 
     void createNetworkDBDataSources();
-    std::map<unsigned int, std::map<std::string, std::pair<std::string, unsigned int>>> getNetworkLines();
+    std::map<unsigned int, std::map<std::string, std::shared_ptr<DataSourceLineInfo>>> getNetworkLines();
     //ds_id -> line str ->(ip, port)
 
     void saveDBDataSources();
@@ -100,8 +100,12 @@ public:
     bool loadWidgetShowLines() const;
     void loadWidgetShowLines(bool value);
 
+    unsigned int dsFontSize() const;
+
 protected:
     COMPASS& compass_;
+
+    unsigned int ds_font_size_ {10};
 
     std::vector<std::unique_ptr<dbContent::ConfigurationDataSource>> config_data_sources_;
     std::vector<std::unique_ptr<dbContent::DBDataSource>> db_data_sources_;

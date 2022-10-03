@@ -1,5 +1,4 @@
 #include "modecfilter.h"
-
 #include "compass.h"
 #include "modecfilterwidget.h"
 #include "dbcontent/dbcontent.h"
@@ -110,7 +109,7 @@ void ModeCFilter::saveViewPointConditions (nlohmann::json& filters)
     json& filter = filters.at(name_);
 
     filter["Barometric Altitude Minimum"] = min_value_;
-    filter["Barometric Altitude Maxmimum"] = max_value_;
+    filter["Barometric Altitude Maximum"] = max_value_;
     filter["Barometric Altitude NULL"] = null_wanted_;
 }
 
@@ -124,8 +123,8 @@ void ModeCFilter::loadViewPointConditions (const nlohmann::json& filters)
     assert (filter.contains("Barometric Altitude Minimum"));
     min_value_ = filter.at("Barometric Altitude Minimum");
 
-    assert (filter.contains("Barometric Altitude Maxmimum"));
-    max_value_ = filter.at("Barometric Altitude Maxmimum");
+    assert (filter.contains("Barometric Altitude Maximum"));
+    max_value_ = filter.at("Barometric Altitude Maximum");
 
     if (filter.contains("Barometric Altitude NULL"))
         null_wanted_ = filter.at("Barometric Altitude NULL");

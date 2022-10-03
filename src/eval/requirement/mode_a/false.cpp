@@ -26,6 +26,7 @@
 
 using namespace std;
 using namespace Utils;
+using namespace boost::posix_time;
 
 namespace EvaluationRequirement
 {
@@ -42,11 +43,11 @@ namespace EvaluationRequirement
     {
         logdbg << "EvaluationRequirementModeAFalse '" << name_ << "': evaluate: utn " << target_data.utn_;
 
-        float max_ref_time_diff = eval_man_.maxRefTimeDiff();
+        time_duration max_ref_time_diff = Time::partialSeconds(eval_man_.maxRefTimeDiff());
 
-        const std::multimap<float, unsigned int>& tst_data = target_data.tstData();
+        const std::multimap<ptime, unsigned int>& tst_data = target_data.tstData();
 
-        float tod{0};
+        ptime timestamp;
 
         int num_updates {0};
         int num_no_ref_pos {0};
@@ -86,13 +87,13 @@ namespace EvaluationRequirement
 
             ++num_updates;
 
-            tod = tst_id.first;
-            pos_current = target_data.tstPosForTime(tod);
+            timestamp = tst_id.first;
+            pos_current = target_data.tstPosForTime(timestamp);
 
-            if (!target_data.hasRefDataForTime (tod, max_ref_time_diff))
+            if (!target_data.hasRefDataForTime (timestamp, max_ref_time_diff))
             {
                 if (!skip_no_data_details)
-                    details.push_back({tod, pos_current,
+                    details.push_back({timestamp, pos_current,
                                        false, {}, false, // ref_exists, pos_inside,
                                        num_updates, num_no_ref_pos+num_no_ref_val, num_pos_inside, num_pos_outside,
                                        num_unknown, num_correct, num_false, "No reference data"});
@@ -101,7 +102,7 @@ namespace EvaluationRequirement
                 continue;
             }
 
-            ret_pos = target_data.interpolatedRefPosForTime(tod, max_ref_time_diff);
+            ret_pos = target_data.interpolatedRefPosForTime(timestamp, max_ref_time_diff);
 
             ref_pos = ret_pos.first;
             ok = ret_pos.second;
@@ -109,7 +110,7 @@ namespace EvaluationRequirement
             if (!ok)
             {
                 if (!skip_no_data_details)
-                    details.push_back({tod, pos_current,
+                    details.push_back({timestamp, pos_current,
                                        false, {}, false, // ref_exists, pos_inside,
                                        num_updates, num_no_ref_pos+num_no_ref_val, num_pos_inside, num_pos_outside,
                                        num_unknown, num_correct, num_false, "No reference position"});
@@ -119,22 +120,23 @@ namespace EvaluationRequirement
             }
             ref_exists = true;
 
-            has_ground_bit = target_data.hasTstGroundBitForTime(tod);
+            has_ground_bit = target_data.hasTstGroundBitForTime(timestamp);
 
             if (has_ground_bit)
-                ground_bit_set = target_data.tstGroundBitForTime(tod);
+                ground_bit_set = target_data.tstGroundBitForTime(timestamp);
             else
                 ground_bit_set = false;
 
             if (!ground_bit_set)
-                tie(has_ground_bit, ground_bit_set) = target_data.interpolatedRefGroundBitForTime(tod, 15.0);
+                tie(has_ground_bit, ground_bit_set) = target_data.interpolatedRefGroundBitForTime(
+                            timestamp, seconds(15));
 
             is_inside = sector_layer.isInside(ref_pos, has_ground_bit, ground_bit_set);
 
             if (!is_inside)
             {
                 if (!skip_no_data_details)
-                    details.push_back({tod, pos_current,
+                    details.push_back({timestamp, pos_current,
                                        ref_exists, is_inside, false, // ref_exists, pos_inside,
                                        num_updates, num_no_ref_pos+num_no_ref_val, num_pos_inside, num_pos_outside,
                                        num_unknown, num_correct, num_false, "Outside sector"});
@@ -144,7 +146,7 @@ namespace EvaluationRequirement
             }
             ++num_pos_inside;
 
-            tie(cmp_res, comment) = compareModeA(tod, target_data, max_ref_time_diff);
+            tie(cmp_res, comment) = compareModeA(timestamp, target_data, max_ref_time_diff);
 
             code_ok = true;
             if (cmp_res == ValueComparisonResult::Unknown_NoRefData)
@@ -175,7 +177,7 @@ namespace EvaluationRequirement
                                     +to_string(cmp_res));
 
             if (!skip_detail)
-                details.push_back({tod, pos_current,
+                details.push_back({timestamp, pos_current,
                                    ref_exists, is_inside, !code_ok,
                                    num_updates, num_no_ref_pos+num_no_ref_val, num_pos_inside, num_pos_outside,
                                    num_unknown, num_correct, num_false, comment});

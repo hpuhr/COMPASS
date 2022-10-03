@@ -2,6 +2,7 @@
     "parameters": {
         "limit_max": 1000000,
         "limit_min": 0,
+        "max_live_data_age": 10,
         "order_variable_dbcontent_name": "Meta",
         "order_variable_name": "Time of Day",
         "use_filters": false,
@@ -47,6 +48,167 @@
         }
     ],
     "sub_configs": {
+        "DBContentLabelGenerator": {
+            "DBContentLabelGenerator0": {
+                "parameters": {
+                    "auto_label": true,
+                    "declutter_labels": true,
+                    "filter_mode3a_active": false,
+                    "filter_mode3a_values": "7000,7777",
+                    "filter_modec_max_active": false,
+                    "filter_modec_max_value": 400.0,
+                    "filter_modec_min_active": false,
+                    "filter_modec_min_value": 100.0,
+                    "filter_modec_null_wanted": false,
+                    "filter_primary_only_activ": false,
+                    "filter_ta_active": false,
+                    "filter_ta_values": "AADDCC",
+                    "filter_ti_active": false,
+                    "filter_ti_values": "OE",
+                    "label_config": {
+                        "CAT001": {
+                            "0": "Best available Identification",
+                            "3": "Mode 3/A Code",
+                            "4": "Mode C Code",
+                            "5": "DS ID",
+                            "6": "Track Groundspeed",
+                            "8": "Timestamp"
+                        },
+                        "CAT010": {
+                            "0": "Best available Identification",
+                            "1": "Aircraft Identification",
+                            "2": "Aircraft Address",
+                            "3": "Mode 3/A Code",
+                            "4": "Mode C Code",
+                            "5": "DS ID",
+                            "6": "Ground Speed",
+                            "8": "Timestamp"
+                        },
+                        "CAT020": {
+                            "0": "Best available Identification",
+                            "1": "Aircraft Identification",
+                            "2": "Aircraft Address",
+                            "3": "Mode 3/A Code",
+                            "4": "Mode C Code",
+                            "5": "DS ID",
+                            "6": "Ground Speed",
+                            "8": "Timestamp"
+                        },
+                        "CAT021": {
+                            "0": "Best available Identification",
+                            "1": "Aircraft Identification",
+                            "2": "Aircraft Address",
+                            "3": "Mode 3/A Code",
+                            "4": "Mode C Code",
+                            "5": "DS ID",
+                            "6": "Ground Speed",
+                            "8": "Timestamp"
+                        },
+                        "CAT048": {
+                            "0": "Best available Identification",
+                            "1": "Aircraft Identification",
+                            "2": "Aircraft Address",
+                            "3": "Mode 3/A Code",
+                            "4": "Mode C Code",
+                            "5": "DS ID",
+                            "6": "Track Groundspeed",
+                            "8": "Timestamp"
+                        },
+                        "CAT062": {
+                            "0": "Best available Identification",
+                            "1": "Aircraft Identification",
+                            "2": "Aircraft Address",
+                            "3": "Mode 3/A Code",
+                            "4": "Mode C Code LM",
+                            "5": "DS ID",
+                            "6": "Ground Speed",
+                            "8": "Timestamp"
+                        },
+                        "RefTraj": {
+                            "0": "Best available Identification",
+                            "1": "Aircraft Identification",
+                            "2": "Aircraft Address",
+                            "3": "Mode 3/A Code",
+                            "4": "Mode C Code",
+                            "5": "DS ID",
+                            "6": "Ground Speed",
+                            "8": "Timestamp"
+                        }
+                    },
+                    "label_directions": {
+                        "0": 3,
+                        "12241": 1,
+                        "12639": 3,
+                        "12750": 2,
+                        "12757": 2,
+                        "12759": 1,
+                        "12760": 2,
+                        "12761": 2,
+                        "12762": 3,
+                        "12763": 0,
+                        "12770": 3,
+                        "12798": 3,
+                        "12820": 1,
+                        "12821": 3,
+                        "12822": 1,
+                        "12823": 0,
+                        "12824": 1,
+                        "12825": 3,
+                        "12826": 2,
+                        "12827": 3,
+                        "12828": 2,
+                        "12830": 2,
+                        "12831": 3,
+                        "12990": 1,
+                        "25005": 3,
+                        "25006": 3,
+                        "265": 3,
+                        "30602": 3,
+                        "30603": 0,
+                        "30604": 1,
+                        "30649": 3,
+                        "30650": 1,
+                        "37494": 3,
+                        "511": 1,
+                        "512": 3,
+                        "547": 3,
+                        "6427": 3,
+                        "6495": 3,
+                        "8681": 3
+                    },
+                    "label_lines": {
+                        "12241": 0,
+                        "12639": 0,
+                        "12750": 0,
+                        "12757": 0,
+                        "12759": 0,
+                        "12760": 0,
+                        "12761": 0,
+                        "12762": 0,
+                        "12763": 0,
+                        "12770": 0,
+                        "12798": 0,
+                        "12820": 0,
+                        "12821": 0,
+                        "12822": 0,
+                        "12823": 0,
+                        "12824": 0,
+                        "12825": 0,
+                        "12826": 0,
+                        "12827": 0,
+                        "12828": 0,
+                        "12830": 0,
+                        "12831": 0,
+                        "12990": 0,
+                        "25005": 0,
+                        "25006": 0,
+                        "37494": 0
+                    },
+                    "label_opacity": 0.8399999737739563,
+                    "max_declutter_labels": 100
+                }
+            }
+        },
         "MetaVariable": {
             "MetaVariableARTAS Hash0": {
                 "parameters": {
@@ -1363,6 +1525,57 @@
                             "parameters": {
                                 "dbcontent_name": "RefTraj",
                                 "variable_name": "Time of Day"
+                            }
+                        }
+                    }
+                }
+            },
+            "MetaVariableTimestamp0": {
+                "parameters": {
+                    "name": "Timestamp"
+                },
+                "sub_configs": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT001Timestamp0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT001",
+                                "variable_name": "Timestamp"
+                            }
+                        },
+                        "VariableDefinitionCAT010Timestamp0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT010",
+                                "variable_name": "Timestamp"
+                            }
+                        },
+                        "VariableDefinitionCAT020Timestamp0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT020",
+                                "variable_name": "Timestamp"
+                            }
+                        },
+                        "VariableDefinitionCAT021Timestamp0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT021",
+                                "variable_name": "Timestamp"
+                            }
+                        },
+                        "VariableDefinitionCAT048Timestamp0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT048",
+                                "variable_name": "Timestamp"
+                            }
+                        },
+                        "VariableDefinitionCAT062Timestamp0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT062",
+                                "variable_name": "Timestamp"
+                            }
+                        },
+                        "VariableDefinitionRefTrajTimestamp0": {
+                            "parameters": {
+                                "dbcontent_name": "RefTraj",
+                                "variable_name": "Timestamp"
                             }
                         }
                     }

@@ -53,7 +53,7 @@ class JSONObjectParser : public Configurable
     /// @brief Move constructor
     JSONObjectParser& operator=(JSONObjectParser&& other);
 
-    DBContent& dbObject() const;
+    DBContent& dbContent() const;
 
     std::string JSONKey() const;
     void JSONKey(const std::string& json_key);
@@ -68,8 +68,6 @@ class JSONObjectParser : public Configurable
     MappingIterator end() { return data_mappings_.end(); }
     bool hasMapping(unsigned int index) const;
     void removeMapping(unsigned int index);
-
-    void transformBuffer(Buffer& buffer, size_t index) const;
 
     // returs true on successful parse
     bool parseJSON(nlohmann::json& j, Buffer& buffer) const;
@@ -94,7 +92,7 @@ class JSONObjectParser : public Configurable
 
     JSONObjectParserWidget* widget();
 
-    std::string dbObjectName() const;
+    std::string dbContentName() const;
 
     void setMappingActive(JSONDataMapping& mapping, bool active);
 

@@ -19,6 +19,7 @@
 #define JSONPARSINGSCHEMA_H
 
 #include <vector>
+#include <memory>
 
 #include "configurable.h"
 #include "jsonobjectparser.h"
@@ -27,7 +28,7 @@
 
 class JSONParsingSchema : public Configurable
 {
-    using JSONObjectParserIterator = std::map<std::string, JSONObjectParser>::iterator;
+    using JSONObjectParserIterator = std::map<std::string, std::unique_ptr<JSONObjectParser>>::iterator;
 
   public:
     JSONParsingSchema(const std::string& class_id, const std::string& instance_id,
@@ -41,7 +42,7 @@ class JSONParsingSchema : public Configurable
     JSONObjectParserIterator begin() { return parsers_.begin(); }
     JSONObjectParserIterator end() { return parsers_.end(); }
 
-    std::map<std::string, JSONObjectParser>& parsers() { return parsers_; }
+    std::map<std::string, std::unique_ptr<JSONObjectParser>>& parsers() { return parsers_; }
     bool hasObjectParser(const std::string& name) { return parsers_.count(name) > 0; }
     JSONObjectParser& parser(const std::string& name);
     void removeParser(const std::string& name);
@@ -56,7 +57,7 @@ class JSONParsingSchema : public Configurable
 
   private:
     std::string name_;
-    std::map<std::string, JSONObjectParser> parsers_;
+    std::map<std::string, std::unique_ptr<JSONObjectParser>> parsers_;
 
   protected:
     virtual void checkSubConfigurables() {}

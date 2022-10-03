@@ -24,8 +24,8 @@
 #include "databaseopentaskwidget.h"
 #include "dbcontent/dbcontentmanager.h"
 //#include "dboeditdatasourceswidget.h"
-//#include "jsonimporttask.h"
-//#include "jsonimporttaskwidget.h"
+#include "jsonimporttask.h"
+#include "jsonimporttaskwidget.h"
 #include "jsonparsingschema.h"
 //#include "managedatasourcestask.h"
 //#include "managedatasourcestaskwidget.h"
@@ -83,6 +83,10 @@ TaskManager::TaskManager(const std::string& class_id, const std::string& instanc
 
     for (auto& task_it : task_list_)  // check that all tasks in list exist
         assert(tasks_.count(task_it));
+
+    assert (asterix_importer_task_);
+    connect (compass, &COMPASS::appModeSwitchSignal,
+             asterix_importer_task_.get(), &ASTERIXImportTask::appModeSwitchSlot);
 }
 
 TaskManager::~TaskManager() {}
@@ -118,13 +122,13 @@ void TaskManager::generateSubConfigurable(const std::string& class_id,
         assert(view_points_import_task_);
         addTask(class_id, view_points_import_task_.get());
     }
-//    else if (class_id.compare("JSONImportTask") == 0)
-//    {
-//        assert(!json_import_task_);
-//        json_import_task_.reset(new JSONImportTask(class_id, instance_id, *this));
-//        assert(json_import_task_);
-//        addTask(class_id, json_import_task_.get());
-//    }
+    else if (class_id.compare("JSONImportTask") == 0)
+    {
+        assert(!json_import_task_);
+        json_import_task_.reset(new JSONImportTask(class_id, instance_id, *this));
+        assert(json_import_task_);
+        addTask(class_id, json_import_task_.get());
+    }
     else if (class_id.compare("GPSTrailImportTask") == 0)
     {
         assert(!gps_trail_import_task_);
@@ -217,11 +221,11 @@ void TaskManager::checkSubConfigurables()
         assert(view_points_import_task_);
     }
 
-//    if (!json_import_task_)
-//    {
-//        generateSubConfigurable("JSONImportTask", "JSONImportTask0");
-//        assert(json_import_task_);
-//    }
+    if (!json_import_task_)
+    {
+        generateSubConfigurable("JSONImportTask", "JSONImportTask0");
+        assert(json_import_task_);
+    }
 
     if (!gps_trail_import_task_)
     {
@@ -391,11 +395,11 @@ ViewPointsImportTask& TaskManager::viewPointsImportTask() const
     return *view_points_import_task_;
 }
 
-//JSONImportTask& TaskManager::jsonImporterTask() const
-//{
-//    assert(json_import_task_);
-//    return *json_import_task_;
-//}
+JSONImportTask& TaskManager::jsonImporterTask() const
+{
+    assert(json_import_task_);
+    return *json_import_task_;
+}
 
 GPSTrailImportTask& TaskManager::gpsTrailImportTask() const
 {

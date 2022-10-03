@@ -46,7 +46,7 @@ void JSONMappingStubsJob::run()
         for (auto& map_it : parsers_)
         {
             logdbg << "JSONMappingStubsJob: run: mapping json: obj "
-                   << map_it.second.dbObject().name();
+                   << map_it.second.dbContentName();
             map_it.second.createMappingStubs(record);
         }
     };

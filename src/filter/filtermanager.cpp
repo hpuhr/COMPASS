@@ -38,6 +38,7 @@
 #include "mode3afilter.h"
 #include "modecfilter.h"
 #include "primaryonlyfilter.h"
+#include "timestampfilter.h"
 
 #include "json.hpp"
 
@@ -147,6 +148,11 @@ void FilterManager::generateSubConfigurable(const std::string& class_id,
         ModeCFilter* filter = new ModeCFilter(class_id, instance_id, this);
         filters_.emplace_back(filter);
     }
+    else if (class_id == "TimestampFilter")
+    {
+        TimestampFilter* filter = new TimestampFilter(class_id, instance_id, this);
+        filters_.emplace_back(filter);
+    }
     else if (class_id == "UTNFilter")
     {
         try
@@ -228,7 +234,16 @@ void FilterManager::checkSubConfigurables()
 
     if (std::find_if(filters_.begin(), filters_.end(),
                      [&classid](const unique_ptr<DBFilter>& x) { return x->classId() == classid;}) == filters_.end())
-    { // not UTN filter
+    { // no UTN filter
+        addNewSubConfiguration(classid, classid+"0");
+        generateSubConfigurable(classid, classid+"0");
+    }
+
+    classid = "TimestampFilter";
+
+    if (std::find_if(filters_.begin(), filters_.end(),
+                     [&classid](const unique_ptr<DBFilter>& x) { return x->classId() == classid;}) == filters_.end())
+    { // no UTN filter
         addNewSubConfiguration(classid, classid+"0");
         generateSubConfigurable(classid, classid+"0");
     }
@@ -335,9 +350,9 @@ void FilterManager::showViewPointSlot (const ViewableDataConfig* vp)
     DataSourceManager& ds_man = COMPASS::instance().dataSourceManager();
 
     // add all data source types that need loading
-    if (data.contains("data_source_types")) // the listed ones should be loaded
+    if (data.contains(VP_DS_TYPES_KEY)) // the listed ones should be loaded
     {
-        const json& data_source_types  = data.at("data_source_types");
+        const json& data_source_types  = data.at(VP_DS_TYPES_KEY);
 
         std::set<std::string> ds_types = data_source_types.get<std::set<std::string>>();
 
@@ -353,9 +368,9 @@ void FilterManager::showViewPointSlot (const ViewableDataConfig* vp)
     }
 
     // add all data sources that need loading
-    if (data.contains("data_sources")) // the listed ones should be loaded
+    if (data.contains(VP_DS_KEY)) // the listed ones should be loaded
     {
-        const json& data_sources  = data.at("data_sources");
+        const json& data_sources  = data.at(VP_DS_KEY);
 
         std::map<unsigned int, std::set<unsigned int>> ds_ids
                 = data_sources.get<std::map<unsigned int, std::set<unsigned int>>>(); // ds_id + line strs
@@ -373,13 +388,13 @@ void FilterManager::showViewPointSlot (const ViewableDataConfig* vp)
     }
 
     // add filters
-    use_filters_ = data.contains("filters");
+    use_filters_ = data.contains(VP_FILTERS_KEY);
 
     disableAllFilters();
 
-    if (data.contains("filters"))
+    if (data.contains(VP_FILTERS_KEY))
     {
-        const json& filters = data.at("filters");
+        const json& filters = data.at(VP_FILTERS_KEY);
 
         logdbg << "FilterManager: showViewPointSlot: filter data '" << filters.dump(4) << "'";
 
@@ -414,16 +429,16 @@ void FilterManager::setConfigInViewPoint (nlohmann::json& data)
     DataSourceManager& ds_man = COMPASS::instance().dataSourceManager();
 
     if (ds_man.dsTypeFiltered()) // ds types filters active
-        data["data_source_types"] = ds_man.wantedDSTypes(); // add all data sources that need loading
+        data[VP_DS_TYPES_KEY] = ds_man.wantedDSTypes(); // add all data sources that need loading
 
     if (ds_man.loadDataSourcesFiltered()) // ds filters active
-        data["data_sources"] = ds_man.getLoadDataSources(); // add all data sources that need loading
+        data[VP_DS_KEY] = ds_man.getLoadDataSources(); // add all data sources that need loading
 
     // add filters
     if (use_filters_)
     {
-        data["filters"] = json::object();
-        json& filters = data.at("filters");
+        data[VP_FILTERS_KEY] = json::object();
+        json& filters = data.at(VP_FILTERS_KEY);
 
         for (auto& fil_it : filters_)
         {
@@ -453,6 +468,9 @@ void FilterManager::databaseOpenedSlot()
 
     if (widget_)
         widget_->setDisabled(false);
+
+    assert (hasFilter("Timestamp"));
+    getFilter("Timestamp")->reset();
 }
 
 void FilterManager::databaseClosedSlot()
@@ -463,12 +481,12 @@ void FilterManager::databaseClosedSlot()
         widget_->setDisabled(true);
 }
 
-void FilterManager::appModeSwitchSlot (AppMode app_mode)
+void FilterManager::appModeSwitchSlot (AppMode app_mode_previous, AppMode app_mode_current)
 {
     loginf << "FilterManager: appModeSwitchSlot";
 
     for (auto& fil_it : filters_)
-        fil_it->updateToAppMode(app_mode);
+        fil_it->updateToAppMode(app_mode_current);
 }
 
 //void FilterManager::startedSlot()

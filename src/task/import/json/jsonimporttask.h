@@ -23,6 +23,7 @@
 #include "jsonparsingschema.h"
 #include "task.h"
 #include "asterixpostprocess.h"
+#include "asterixpostprocessjob.h"
 
 #include <QObject>
 #include <memory>
@@ -31,13 +32,18 @@
 #include "boost/date_time/posix_time/posix_time.hpp"
 
 class TaskManager;
-class JSONImportTaskWidget;
-class SavedFile;
+class JSONImportTaskDialog;
 class JSONParseJob;
 class JSONMappingJob;
 class ReadJSONFileJob;
 class DBContent;
 class Buffer;
+
+namespace dbContent
+{
+    class VariableSet;
+}
+
 class DBOVariableSet;
 
 class QMessageBox;
@@ -46,9 +52,13 @@ class JSONImportTask : public Task, public Configurable
 {
     Q_OBJECT
 
-    using JSONParsingSchemaIterator = std::map<std::string, JSONParsingSchema>::iterator;
+    using JSONParsingSchemaIterator = std::map<std::string, std::shared_ptr<JSONParsingSchema>>::iterator;
 
   public slots:
+    void dialogImportSlot();
+    void dialogTestImportSlot();
+    void dialogCancelSlot();
+
     void addReadJSONSlot();
     void readJSONFileDoneSlot();
     void readJSONFileObsoleteSlot();
@@ -59,16 +69,17 @@ class JSONImportTask : public Task, public Configurable
     void mapJSONDoneSlot();
     void mapJSONObsoleteSlot();
 
-    void insertProgressSlot(float percent);
-    void insertDoneSlot(DBContent& object);
+    void postprocessDoneSlot();
+    void postprocessObsoleteSlot();
+
+    void insertDoneSlot();
 
   public:
     JSONImportTask(const std::string& class_id, const std::string& instance_id,
                    TaskManager& task_manager);
     virtual ~JSONImportTask();
 
-    virtual TaskWidget* widget();
-    virtual void deleteWidget();
+    JSONImportTaskDialog* dialog();
 
     virtual void generateSubConfigurable(const std::string& class_id,
                                          const std::string& instance_id);
@@ -77,19 +88,15 @@ class JSONImportTask : public Task, public Configurable
     virtual bool canRun();
     virtual void run();
 
-    const std::map<std::string, SavedFile*>& fileList() { return file_list_; }
-    bool hasFile(const std::string& filename) { return file_list_.count(filename) > 0; }
-    void addFile(const std::string& filename);
-    void removeCurrentFilename();
-    void removeAllFiles ();
-    void currentFilename(const std::string& filename);
-    const std::string& currentFilename() { return current_filename_; }
+    void importFilename(const std::string& filename);
+    const std::string& importFilename() { return import_filename_; }
 
     JSONParsingSchemaIterator begin() { return schemas_.begin(); }
     JSONParsingSchemaIterator end() { return schemas_.end(); }
     bool hasSchema(const std::string& name);
-    bool hasCurrentSchema();
-    JSONParsingSchema& currentSchema();
+    bool hasCurrentSchema() const;
+    bool hasJSONSchema() const;
+    std::shared_ptr<JSONParsingSchema> currentJSONSchema();
     void removeCurrentSchema();
 
     std::string currentSchemaName() const;
@@ -103,25 +110,34 @@ class JSONImportTask : public Task, public Configurable
 
     size_t objectsInserted() const;
 
+    unsigned int fileLineID() const;
+    void fileLineID(unsigned int value);
+
+    const boost::posix_time::ptime &date() const;
+    void date(const boost::posix_time::ptime& date);
+
   protected:
-    std::map<std::string, SavedFile*> file_list_;
-    std::string current_filename_;
+    std::string import_filename_;
 
-    std::unique_ptr<JSONImportTaskWidget> widget_;
+    std::unique_ptr<JSONImportTaskDialog> dialog_;
 
-    std::string current_schema_;
-    std::map<std::string, JSONParsingSchema> schemas_;
+    std::string current_schema_name_;
+    std::map<std::string, std::shared_ptr<JSONParsingSchema>> schemas_;
+
+    unsigned int file_line_id_ {0};
+    boost::posix_time::ptime date_;
 
     ASTERIXPostProcess post_process_;
 
     size_t insert_active_{0};
 
-    std::map<std::string, std::tuple<std::string, DBOVariableSet>> dbo_variable_sets_;
+    std::map<std::string, std::tuple<std::string, dbContent::VariableSet>> dbcont_variable_sets_;
     std::set<int> added_data_sources_;
 
     std::shared_ptr<ReadJSONFileJob> read_json_job_;
     std::shared_ptr<JSONParseJob> json_parse_job_;
     std::vector<std::shared_ptr<JSONMappingJob>> json_map_jobs_;
+    std::vector<std::shared_ptr<ASTERIXPostprocessJob>> postprocess_jobs_;
 
     bool test_{false};
 
@@ -140,9 +156,10 @@ class JSONImportTask : public Task, public Configurable
     size_t objects_not_mapped_{0};
 
     size_t objects_created_{0};
-    size_t objects_inserted_{0};
+    size_t records_inserted_{0};
 
-    unsigned int num_radar_inserted_ {0};
+    //unsigned int num_radar_inserted_ {0};
+    bool insert_slot_connected_ {false};
     bool all_done_{false};
 
     size_t statistics_calc_objects_inserted_{0};

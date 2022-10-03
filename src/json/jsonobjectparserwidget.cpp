@@ -65,7 +65,7 @@ JSONObjectParserWidget::JSONObjectParserWidget(JSONObjectParser& parser, QWidget
 
         ++row;
         grid->addWidget(new QLabel("DBContent"), row, 0);
-        grid->addWidget(new QLabel(parser_->dbObjectName().c_str()), row, 1);
+        grid->addWidget(new QLabel(parser_->dbContentName().c_str()), row, 1);
 
         ++row;
         grid->addWidget(new QLabel("JSON Container Key"), row, 0);
@@ -363,7 +363,7 @@ void JSONObjectParserWidget::addNewMappingSlot()
 
     Configuration& new_cfg = parser_->configuration().addNewSubConfiguration("JSONDataMapping");
     new_cfg.addParameterString("json_key", new_cfg.getInstanceId());
-    new_cfg.addParameterString("dbcontent_name", parser_->dbObjectName());
+    new_cfg.addParameterString("dbcontent_name", parser_->dbContentName());
 
     parser_->generateSubConfigurable("JSONDataMapping", new_cfg.getInstanceId());
 

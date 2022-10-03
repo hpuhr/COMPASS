@@ -81,19 +81,13 @@ The following operations exist, depending on the mouse action modes (set in the 
 \end{table}
 
 \subsection{Status Information}
+%DONE
 
 In the lower-left corner, the data status information is given:
 
 \begin{itemize}
- \item Status
-\begin{itemize}
- \item Idle: Nothing to do
- \item Loading: Loading in progress
- \item Done: Loading/redraw done
- \item Redrawing: Redraw in progress
-\end{itemize}
- \item Time Begin: First timestamp in the data, in HH:MM:SS
- \item Time End: last timestamp in the data, in HH:MM:SS
+ \item Begin: First timestamp in the data, in YYYY-MM-DD HH:MM:SS
+ \item End: Last timestamp in the data, in YYYY-MM-DD HH:MM:SS
  \item Loaded: Number of loaded target reports (from the database)
  \item Skipped: Number of not-drawn target reports
  \item Drawn: Number of drawn target reports
@@ -101,13 +95,13 @@ In the lower-left corner, the data status information is given:
 \end{itemize}
 \  \\
 
-In the upper-right corner, the COMPASS version is shown. In the lower-right corner, the current coordinates (map coordinates under the mouse cursor) are shown. 
+In the upper-right corner, the COMPASS version is shown. %In the lower-right corner, the current coordinates (map coordinates under the mouse cursor) are shown. 
 
 \subsection{Data Operations}
 
 \subsubsection{Data Labeling}
 
-Labels can be shown for target reports, when the Label mode \includegraphics[width=0.5cm,frame]{../../data/icons/label_action.png} is active. Simply do a LMB click on a target report symbol.
+Labels can be shown for target reports. Simply do a LMB click on a target report symbol.
 
 \begin{figure}[H]
     \hspace*{-2.5cm}
@@ -117,7 +111,7 @@ Labels can be shown for target reports, when the Label mode \includegraphics[wid
 
 \subsubsection{Geometry Menu}
 
-Several data-related operations can be also performed in the data widget when the Label mode \includegraphics[width=0.5cm,frame]{../../data/icons/label_action.png} is active, by a RMB click on a target report symbol.
+Several data-related operations can be also performed in the data widget when the Label mode is active, by a RMB click on a target report symbol.
 
 \begin{figure}[H]
     \hspace*{-2.5cm}
@@ -137,7 +131,7 @@ Depending on the grouping mode in the 'Config' tab, different parent layer items
 
 \subsubsection{Label Multiple}
 
-Multiple target reports can be selected when the Label Multiple mode \includegraphics[width=0.5cm,frame]{../../data/icons/label_multiple_action.png} is active. \\
+Multiple target reports can be selected when the Label Multiple mode is active. \\
 
 The usage of this mode mode works exactly like the Selection mode, only that the target reports are not selected but each one is labeled. If more then 100 target reports are labeled, only the first 100 ones are labeled and an error message is shown.
 
@@ -167,12 +161,14 @@ For details about the rectangular target report labeling please refer to \namere
 %   \caption{OSG View show ARTAS association information in time window}
 % \end{figure}
 
-
 \subsubsection{Distance Measurement}
+%DONE
 
-Distance measurements can be made when the Measure mode \includegraphics[width=0.5cm,frame]{../../data/icons/measure_action.png} is active. If 'Use height' (section \nameref{sec:others_height}) is not checked, measurements are done as follows:
+Distance measurements can be made when the 'Measure' tool \includegraphics[width=0.5cm,frame]{../../data/icons/measure_action.png} is active. 
+If 'Use height' (section \nameref{sec:others_height}) is not checked, measurements are done as follows.
 
-Simply do a LMB click on a target report or a position on the map to start the measurement.
+Simply do a LMB click on a target report or a position on the map to start the measurement, 
+then drag the mouse to a suitable end position and release the LMB to finish the measurement.
 
 \begin{figure}[H]
     \hspace*{-2.5cm}
@@ -180,7 +176,7 @@ Simply do a LMB click on a target report or a position on the map to start the m
   \caption{OSG View measurement}
 \end{figure}
 
-During the measurement, the following information is shown in the top-left corner:
+During measurement, the following information is shown in the top-left corner.
 
 \begin{itemize}
  \item Distance (km): Great-circle distance using the haversine formula, in meters or kilometers.
@@ -188,15 +184,14 @@ During the measurement, the following information is shown in the top-left corne
  \item  Bearing (deg): Bearing from point 1 to point 2, in degrees from true north.
 \end{itemize}
 
-Then do a second LMB click on the map on a point of interest to finish the measurement.
-
 \begin{figure}[H]
     \hspace*{-2.5cm}
     \includegraphics[width=19cm,frame]{figures/osgview_measure2.png}
   \caption{OSG View measurement done}
 \end{figure}
 
-If 'Use height' (section \nameref{sec:others_height}) is checked, measurements are calculated in the same way as previously (ground distance), but for each target report with height a connecting line to the respective ground position is displayed. \\
+If 'Use height' (section \nameref{sec:others_height}) is checked, measurements are calculated in the same way as previously (ground distance), 
+but for each target report with height a connecting line to the respective ground position is displayed. \\
 
 For a measurement between two target reports with height information, the measurement will be displayed as follows:
 

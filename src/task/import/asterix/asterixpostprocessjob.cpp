@@ -19,14 +19,31 @@ using namespace std;
 using namespace nlohmann;
 using namespace Utils;
 
+
+bool ASTERIXPostprocessJob::current_date_set_ = false;
+boost::posix_time::ptime ASTERIXPostprocessJob::current_date_;
+boost::posix_time::ptime ASTERIXPostprocessJob::previous_date_;
+bool ASTERIXPostprocessJob::did_recent_time_jump_ = false;
+bool ASTERIXPostprocessJob::had_late_time_ = false;
+
 ASTERIXPostprocessJob::ASTERIXPostprocessJob(map<string, shared_ptr<Buffer>> buffers,
+                                             const boost::posix_time::ptime& date,
                                              bool override_tod_active, float override_tod_offset,
                                              bool do_timestamp_checks)
     : Job("ASTERIXPostprocessJob"),
-      buffers_(move(buffers)), override_tod_active_(override_tod_active), override_tod_offset_(override_tod_offset),
+      buffers_(move(buffers)),
+      override_tod_active_(override_tod_active), override_tod_offset_(override_tod_offset),
       do_timestamp_checks_(do_timestamp_checks)
 {
     network_time_offset_ = COMPASS::instance().mainWindow().importASTERIXFromNetworkTimeOffset();
+
+    if (!current_date_set_) // init if first time
+    {
+        current_date_ = date;
+        previous_date_ = current_date_;
+
+        current_date_set_ = true;
+    }
 }
 
 ASTERIXPostprocessJob::~ASTERIXPostprocessJob() { logdbg << "ASTERIXPostprocessJob: dtor"; }
@@ -43,6 +60,7 @@ void ASTERIXPostprocessJob::run()
     if (do_timestamp_checks_)
         doFutureTimestampsCheck();
 
+    doTimeStampCalculation();
     doRadarPlotPositionCalculations();
     doGroundSpeedCalculations();
 
@@ -65,9 +83,9 @@ void ASTERIXPostprocessJob::doTodOverride()
     {
         buffer_size = buf_it.second->size();
 
-        assert (obj_man.metaVariable(DBContent::meta_var_tod_.name()).existsIn(buf_it.first));
+        assert (obj_man.metaVariable(DBContent::meta_var_time_of_day_.name()).existsIn(buf_it.first));
 
-        dbContent::Variable& tod_var = obj_man.metaVariable(DBContent::meta_var_tod_.name()).getFor(buf_it.first);
+        dbContent::Variable& tod_var = obj_man.metaVariable(DBContent::meta_var_time_of_day_.name()).getFor(buf_it.first);
 
         Property tod_prop {tod_var.name(), tod_var.dataType()};
 
@@ -104,7 +122,7 @@ void ASTERIXPostprocessJob::doFutureTimestampsCheck()
 
     using namespace boost::posix_time;
 
-    auto p_time = microsec_clock::universal_time (); // UTC.
+    auto p_time = microsec_clock::universal_time (); // UTC
 
     double tod_now_utc = (p_time.time_of_day().total_milliseconds() / 1000.0) + network_time_offset_ + 1.0; // up to 1 sec ok
 
@@ -115,9 +133,9 @@ void ASTERIXPostprocessJob::doFutureTimestampsCheck()
     {
         buffer_size = buf_it.second->size();
 
-        assert (obj_man.metaVariable(DBContent::meta_var_tod_.name()).existsIn(buf_it.first));
+        assert (obj_man.metaVariable(DBContent::meta_var_time_of_day_.name()).existsIn(buf_it.first));
 
-        dbContent::Variable& tod_var = obj_man.metaVariable(DBContent::meta_var_tod_.name()).getFor(buf_it.first);
+        dbContent::Variable& tod_var = obj_man.metaVariable(DBContent::meta_var_time_of_day_.name()).getFor(buf_it.first);
 
         Property tod_prop {tod_var.name(), tod_var.dataType()};
 
@@ -155,6 +173,101 @@ void ASTERIXPostprocessJob::doFutureTimestampsCheck()
     for (auto& buf_it : tmp_data)
         if (!buf_it.second->size())
             buffers_.erase(buf_it.first);
+}
+
+void ASTERIXPostprocessJob::doTimeStampCalculation()
+{
+    DBContentManager& obj_man = COMPASS::instance().dbContentManager();
+
+    unsigned int buffer_size;
+
+    for (auto& buf_it : buffers_)
+    {
+        buffer_size = buf_it.second->size();
+
+        // tod
+        assert (obj_man.metaVariable(DBContent::meta_var_time_of_day_.name()).existsIn(buf_it.first));
+        dbContent::Variable& tod_var = obj_man.metaVariable(DBContent::meta_var_time_of_day_.name()).getFor(buf_it.first);
+
+        Property tod_prop {tod_var.name(), tod_var.dataType()};
+        assert (buf_it.second->hasProperty(tod_prop));
+
+        NullableVector<float>& tod_vec = buf_it.second->get<float>(tod_var.name());
+
+        // timestamp
+        assert (obj_man.metaVariable(DBContent::meta_var_timestamp_.name()).existsIn(buf_it.first));
+        dbContent::Variable& timestamp_var = obj_man.metaVariable(DBContent::meta_var_timestamp_.name()).getFor(buf_it.first);
+
+        Property timestamp_prop {timestamp_var.name(), timestamp_var.dataType()};
+        assert (!buf_it.second->hasProperty(timestamp_prop));
+        buf_it.second->addProperty(timestamp_prop);
+
+        NullableVector<boost::posix_time::ptime>& timestamp_vec =
+                buf_it.second->get<boost::posix_time::ptime>(timestamp_var.name());
+
+        float tod;
+        //boost::posix_time::ptime epoch(boost::gregorian::date(1970, 1, 1));
+        boost::posix_time::ptime timestamp;
+        bool in_vicinity_of_24h_time = false; // within 5min of 24hrs
+        bool outside_vicinity_of_24h_time = false; // outside of 10min to 24hrs
+
+        for (unsigned int index=0; index < buffer_size; ++index)
+        {
+            if (!tod_vec.isNull(index))
+            {
+                tod = tod_vec.get(index);
+
+                had_late_time_ |= (tod >= (tod_24h - 300.0)); // within last 5min before midnight
+
+                in_vicinity_of_24h_time = tod <= 300.0 || tod >= (tod_24h - 300.0); // within 10 minutes of midnight
+
+                if (tod > tod_24h/2) // late
+                    outside_vicinity_of_24h_time = tod <= tod_24h - 600.0;
+                else // early
+                    outside_vicinity_of_24h_time = tod >= 600.0 ;
+
+                if (in_vicinity_of_24h_time)
+                    loginf << "ASTERIXPostprocessJob: doTimeStampCalculation: tod " << String::timeStringFromDouble(tod)
+                           << " in 24h vicinity, had_late_time_ " << had_late_time_
+                           << " did_recent_time_jump " << did_recent_time_jump_;
+
+                if (did_recent_time_jump_ && outside_vicinity_of_24h_time) // clear if set and 10min outside again
+                {
+                    loginf << "ASTERIXPostprocessJob: doTimeStampCalculation: clearing did_recent_time_jump_";
+                    did_recent_time_jump_ = false;
+                }
+
+                if (in_vicinity_of_24h_time) // check if timejump and assign timestamp to correct day
+                {
+                    // check if timejump (if not yet done)
+                    if (!did_recent_time_jump_ && had_late_time_ && tod <= 300.0) // not yet handled timejump
+                    {
+                        current_date_ += boost::posix_time::seconds((unsigned int) tod_24h);
+                        previous_date_ = current_date_ - boost::posix_time::seconds((unsigned int) tod_24h);
+
+                        loginf << "ASTERIXPostprocessJob: doTimeStampCalculation: detected time-jump from "
+                               << " current " << Time::toDateString(current_date_)
+                               << " previous " << Time::toDateString(previous_date_);
+
+                        did_recent_time_jump_ = true;
+                    }
+
+                    if (tod <= 300.0) // early time of current day
+                        timestamp = current_date_ + boost::posix_time::millisec((unsigned int) (tod * 1000));
+                    else // late time of previous day
+                        timestamp = previous_date_ + boost::posix_time::millisec((unsigned int) (tod * 1000));
+                }
+                else // normal timestamp
+                    timestamp = current_date_ + boost::posix_time::millisec((unsigned int) (tod * 1000));
+
+                if (in_vicinity_of_24h_time)
+                    logdbg << "ASTERIXPostprocessJob: doTimeStampCalculation: tod " << String::timeStringFromDouble(tod)
+                           << " timestamp " << Time::toString(timestamp);
+
+                timestamp_vec.set(index, timestamp);
+            }
+        }
+    }
 }
 
 void ASTERIXPostprocessJob::doRadarPlotPositionCalculations()

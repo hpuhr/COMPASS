@@ -91,9 +91,9 @@ public:
 
     void setStatus (const QModelIndex &row_index, const std::string& value);
 
-    int typeColumn () { return table_columns_.indexOf("type"); }
-    int statusColumn () { return table_columns_.indexOf("status"); }
-    int commentColumn () { return table_columns_.indexOf("comment"); }
+    int typeColumn () { return table_columns_.indexOf(VP_TYPE_KEY.c_str()); }
+    int statusColumn () { return table_columns_.indexOf(VP_STATUS_KEY.c_str()); }
+    int commentColumn () { return table_columns_.indexOf(VP_COMMENT_KEY.c_str()); }
     //int columnIndex (QString name);
 
     bool updateTableColumns(); // true if changed
@@ -111,7 +111,8 @@ public:
 private:
     ViewManager& view_manager_;
 
-    QStringList default_table_columns_ {"id", "name", "type", "status", "comment"};
+    QStringList default_table_columns_ {VP_ID_KEY.c_str(), VP_NAME_KEY.c_str(), VP_TYPE_KEY.c_str(),
+                VP_STATUS_KEY.c_str(), VP_COMMENT_KEY.c_str()};
     QStringList table_columns_;
 
     QStringList types_;

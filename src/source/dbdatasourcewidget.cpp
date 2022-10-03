@@ -2,7 +2,7 @@
 #include "compass.h"
 #include "datasourcemanager.h"
 #include "stringconv.h"
-#include "util/system.h"
+#include "util/timeconv.h"
 
 #include <QGridLayout>
 #include <QCheckBox>
@@ -40,6 +40,20 @@ void DBDataSourceWidget::updateContent()
 
     updateWidgets();
 
+}
+
+unsigned int DBDataSourceWidget::getLabelMinWidth()
+{
+    if (load_check_)
+        return load_check_->minimumSizeHint().width();
+
+    else return 0;
+}
+
+void DBDataSourceWidget::updateLabelMinWidth(unsigned int width)
+{
+    if (load_check_)
+        load_check_->setMinimumWidth(width);
 }
 
 bool DBDataSourceWidget::needsRecreate()
@@ -87,14 +101,18 @@ void DBDataSourceWidget::recreateWidgets()
     loaded_cnt_labels_.clear();
     total_cnt_labels_.clear();
 
+    QFont font;
+    font.setPointSize(ds_man_.dsFontSize());
+
     // update load check
     load_check_ = new QCheckBox(src_.name().c_str());
+    load_check_->setFont(font);
     connect(load_check_, &QCheckBox::clicked, this, &DBDataSourceWidget::loadingChangedSlot);
 
     unsigned int row = 0;
 
     grid_layout_->addWidget(load_check_, row, 0, 1, 2);
-    grid_layout_->addWidget(createLinesWidget(), row, 2, 1, 2);
+    grid_layout_->addWidget(createLinesWidget(), row, 2, 1, 2, Qt::AlignLeft);
     ++row;
 
     if (show_counts)
@@ -199,7 +217,7 @@ void DBDataSourceWidget::updateWidgets()
     if (net_lines_shown)
     {
         // ds_id -> line str ->(ip, port)
-        std::map<unsigned int, std::map<std::string, std::pair<std::string, unsigned int>>> net_lines =
+        std::map<unsigned int, std::map<std::string, std::shared_ptr<DataSourceLineInfo>>> net_lines =
                 ds_man_.getNetworkLines();
 
         string line_str;
@@ -209,7 +227,7 @@ void DBDataSourceWidget::updateWidgets()
 
         QPushButton* button;
 
-        float max_time = System::secondsSinceMidnightUTC();
+        boost::posix_time::ptime current_time = Time::currentUTCTime();
 
         for (unsigned int line_cnt=0; line_cnt < 4; ++line_cnt)
         {
@@ -248,7 +266,10 @@ void DBDataSourceWidget::updateWidgets()
                 {
                     button->setChecked(src_.lineLoadingWanted(line_cnt));
 
-                    if (src_.hasLiveData(line_cnt, max_time))
+                    logdbg << "DBDataSourceWidget: updateWidgets: src " << src_.name()
+                           << " " << line_str << " live " << src_.hasLiveData(line_cnt, current_time);
+
+                    if (src_.hasLiveData(line_cnt, current_time))
                     {
                         QPalette pal = button->palette();
                         pal.setColor(QPalette::Button, QColor(Qt::green));

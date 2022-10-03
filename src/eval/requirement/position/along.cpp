@@ -29,6 +29,7 @@
 
 using namespace std;
 using namespace Utils;
+using namespace boost::posix_time;
 
 namespace EvaluationRequirement
 {
@@ -53,9 +54,9 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionAlong::evaluate (
     logdbg << "EvaluationRequirementPositionAlong '" << name_ << "': evaluate: utn " << target_data.utn_
            << " max_abs_value " << max_abs_value_;
 
-    float max_ref_time_diff = eval_man_.maxRefTimeDiff();
+    time_duration max_ref_time_diff = Time::partialSeconds(eval_man_.maxRefTimeDiff());
 
-    const std::multimap<float, unsigned int>& tst_data = target_data.tstData();
+    const std::multimap<ptime, unsigned int>& tst_data = target_data.tstData();
 
     unsigned int num_pos {0};
     unsigned int num_no_ref {0};
@@ -67,7 +68,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionAlong::evaluate (
 
     std::vector<EvaluationRequirement::PositionDetail> details;
 
-    float tod{0};
+    ptime timestamp;
 
     OGRSpatialReference wgs84;
     wgs84.SetWellKnownGeogCS("WGS84");
@@ -104,15 +105,15 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionAlong::evaluate (
     {
         ++num_pos;
 
-        tod = tst_id.first;
-        tst_pos = target_data.tstPosForTime(tod);
+        timestamp = tst_id.first;
+        tst_pos = target_data.tstPosForTime(timestamp);
 
         along_ok = true;
 
-        if (!target_data.hasRefDataForTime (tod, max_ref_time_diff))
+        if (!target_data.hasRefDataForTime (timestamp, max_ref_time_diff))
         {
             if (!skip_no_data_details)
-                details.push_back({tod, tst_pos,
+                details.push_back({timestamp, tst_pos,
                                    false, {}, // has_ref_pos, ref_pos
                                    {}, {}, along_ok, // pos_inside, value, value_ok,
                                    num_pos, num_no_ref, num_pos_inside, num_pos_outside,
@@ -123,7 +124,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionAlong::evaluate (
             continue;
         }
 
-        ret_pos = target_data.interpolatedRefPosForTime(tod, max_ref_time_diff);
+        ret_pos = target_data.interpolatedRefPosForTime(timestamp, max_ref_time_diff);
 
         ref_pos = ret_pos.first;
         ok = ret_pos.second;
@@ -131,7 +132,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionAlong::evaluate (
         if (!ok)
         {
             if (!skip_no_data_details)
-                details.push_back({tod, tst_pos,
+                details.push_back({timestamp, tst_pos,
                                    false, {}, // has_ref_pos, ref_pos
                                    {}, {}, along_ok, // pos_inside, value, value_ok
                                    num_pos, num_no_ref, num_pos_inside, num_pos_outside,
@@ -142,27 +143,27 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionAlong::evaluate (
             continue;
         }
 
-        ret_spd = target_data.interpolatedRefPosBasedSpdForTime(tod, max_ref_time_diff);
+        ret_spd = target_data.interpolatedRefPosBasedSpdForTime(timestamp, max_ref_time_diff);
 
         ref_spd = ret_spd.first;
         assert (ret_pos.second); // must be set of ref pos exists
 
-        has_ground_bit = target_data.hasTstGroundBitForTime(tod);
+        has_ground_bit = target_data.hasTstGroundBitForTime(timestamp);
 
         if (has_ground_bit)
-            ground_bit_set = target_data.tstGroundBitForTime(tod);
+            ground_bit_set = target_data.tstGroundBitForTime(timestamp);
         else
             ground_bit_set = false;
 
         if (!ground_bit_set)
-            tie(has_ground_bit, ground_bit_set) = target_data.interpolatedRefGroundBitForTime(tod, 15.0);
+            tie(has_ground_bit, ground_bit_set) = target_data.interpolatedRefGroundBitForTime(timestamp, seconds(15));
 
         is_inside = sector_layer.isInside(ref_pos, has_ground_bit, ground_bit_set);
 
         if (!is_inside)
         {
             if (!skip_no_data_details)
-                details.push_back({tod, tst_pos,
+                details.push_back({timestamp, tst_pos,
                                    true, ref_pos, // has_ref_pos, ref_pos
                                    is_inside, {}, along_ok, // pos_inside, value, value_ok
                                    num_pos, num_no_ref, num_pos_inside, num_pos_outside,
@@ -191,7 +192,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionAlong::evaluate (
         ok = ogr_geo2cart->Transform(1, &x_pos, &y_pos); // wgs84 to cartesian offsets
         if (!ok)
         {
-            details.push_back({tod, tst_pos,
+            details.push_back({timestamp, tst_pos,
                                true, ref_pos, // has_ref_pos, ref_pos
                                is_inside, {}, along_ok, // pos_inside, value, value_ok
                                num_pos, num_no_ref, num_pos_inside, num_pos_outside,
@@ -206,7 +207,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionAlong::evaluate (
 
         if (std::isnan(angle))
         {
-            details.push_back({tod, tst_pos,
+            details.push_back({timestamp, tst_pos,
                                true, ref_pos, // has_ref_pos, ref_pos
                                is_inside, {}, along_ok, // pos_inside, value, value_ok
                                num_pos, num_no_ref, num_pos_inside, num_pos_outside,
@@ -232,7 +233,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionAlong::evaluate (
             comment = "";
         }
 
-        details.push_back({tod, tst_pos,
+        details.push_back({timestamp, tst_pos,
                            true, ref_pos,
                            is_inside, d_along, along_ok, // pos_inside, value, value_ok
                            num_pos, num_no_ref, num_pos_inside, num_pos_outside,
