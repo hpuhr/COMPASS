@@ -2013,7 +2013,7 @@ void HistogramViewDataWidget::updateMinMax(const std::vector<double>& data)
 
 void HistogramViewDataWidget::updateCounts(const std::vector<double>& data)
 {
-    loginf << "HistogramViewDataWidget: updateCounts: from result";
+    loginf << "HistogramViewDataWidget: updateCounts: from result, label size " << labels_.size();
 
     if (!bin_size_valid_)
     {
@@ -2045,15 +2045,17 @@ void HistogramViewDataWidget::updateCounts(const std::vector<double>& data)
     unsigned int bin_number;
     unsigned int data_size = data.size();
 
+    assert (num_bins_);
+
     for (unsigned int cnt=0; cnt < data_size; ++cnt)
     {
         bin_number = (unsigned int) ((data.at(cnt)-data_min_.toDouble())/bin_size_);
 
-        if (bin_number >= num_bins_)
-            logerr << "HistogramViewDataWidget: updateFromData: bin_size " << bin_size_
-                   << " bin number " << bin_number << " data " << data.at(cnt);
+        assert (bin_number <= num_bins_);
 
-        assert (bin_number < num_bins_);
+        if (bin_number == num_bins_) // check for 1 max value which is num_bins_
+            bin_number = num_bins_ - 1;
+
         counts.at(bin_number) += 1;
     }
 

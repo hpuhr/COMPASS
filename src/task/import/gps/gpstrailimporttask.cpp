@@ -538,6 +538,8 @@ void GPSTrailImportTask::run()
     assert (dbcontent_man.hasMaxRefTrajTrackNum());
     unsigned int track_num = dbcontent_man.maxRefTrajTrackNum();
 
+    loginf << "GPSTrailImportTask: run: max reftraj track num " << track_num;
+
     // config data source
     {
         DataSourceManager& src_man = COMPASS::instance().dataSourceManager();

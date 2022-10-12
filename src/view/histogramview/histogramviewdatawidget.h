@@ -349,9 +349,9 @@ protected:
             //map to bin
             bin_number = binFromValue(data.get(cnt), data_min_, bin_size_);
 
-            if (bin_number >= num_bins_)
-                logerr << "HistogramViewDataWidget: updateFromData: bin_size " << bin_size_
-                       << " bin number " << bin_number << " data " << data.get(cnt);
+//            if (bin_number >= num_bins_)
+//                logerr << "HistogramViewDataWidget: updateFromData: bin_size " << bin_size_
+//                       << " bin number " << bin_number << " data " << data.get(cnt);
 
             assert (bin_number < num_bins_);
 
