@@ -94,7 +94,7 @@
                     "name": "Range",
                     "representation_str": "STANDARD",
                     "short_name": "RHO",
-                    "unit": "Meter"
+                    "unit": "Nautical Mile"
                 }
             },
             "Variable15": {

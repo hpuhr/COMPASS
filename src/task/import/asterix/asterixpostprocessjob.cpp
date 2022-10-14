@@ -309,7 +309,7 @@ void ASTERIXPostprocessJob::doRadarPlotPositionCalculations()
     {
         dbcontent_name = buf_it.first;
 
-        if (dbcontent_name != "CAT001" && dbcontent_name != "CAT048")
+        if (dbcontent_name != "CAT001" && dbcontent_name != "CAT010" && dbcontent_name != "CAT048")
             continue;
 
         shared_ptr<Buffer> buffer = buf_it.second;
@@ -348,11 +348,12 @@ void ASTERIXPostprocessJob::doRadarPlotPositionCalculations()
         assert (buffer->has<double>(range_var_name));
         assert (buffer->has<double>(azimuth_var_name));
         assert (buffer->has<float>(altitude_var_name));
-        assert (!buffer->has<double>(latitude_var_name));
-        assert (!buffer->has<double>(longitude_var_name));
 
-        buffer->addProperty(latitude_var_name, PropertyDataType::DOUBLE);
-        buffer->addProperty(longitude_var_name, PropertyDataType::DOUBLE);
+        if (!buffer->has<double>(latitude_var_name))
+            buffer->addProperty(latitude_var_name, PropertyDataType::DOUBLE);
+
+        if (!buffer->has<double>(longitude_var_name))
+            buffer->addProperty(longitude_var_name, PropertyDataType::DOUBLE);
 
         transformation_errors = 0;
 
@@ -450,8 +451,16 @@ void ASTERIXPostprocessJob::doRadarPlotPositionCalculations()
                 continue;
             }
 
+            if (!latitude_vec.isNull(cnt) && !longitude_vec.isNull(cnt))
+            {
+                logdbg << "ASTERIXPostprocessJob: run: position already set";
+                continue;
+            }
+
             azimuth_deg = azimuth_vec.get(cnt);
             range_nm = range_vec.get(cnt);
+
+            loginf << "azimuth_deg " << azimuth_deg << " range_nm " << range_nm;
 
             has_altitude = !altitude_vec.isNull(cnt);
             if (has_altitude)
