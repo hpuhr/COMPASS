@@ -460,7 +460,7 @@ void ASTERIXPostprocessJob::doRadarPlotPositionCalculations()
             azimuth_deg = azimuth_vec.get(cnt);
             range_nm = range_vec.get(cnt);
 
-            loginf << "azimuth_deg " << azimuth_deg << " range_nm " << range_nm;
+            //loginf << "azimuth_deg " << azimuth_deg << " range_nm " << range_nm;
 
             has_altitude = !altitude_vec.isNull(cnt);
             if (has_altitude)

@@ -88,7 +88,7 @@
             },
             "JSONDataMapping107": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
                     "comment": "",
                     "db_content_name": "CAT048",
@@ -392,7 +392,7 @@
             },
             "JSONDataMapping38": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
                     "comment": "Type number, value 2",
                     "db_content_name": "CAT048",
@@ -472,7 +472,7 @@
             },
             "JSONDataMapping42": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
                     "comment": "Type number, value 1, weird mapping",
                     "db_content_name": "CAT048",
@@ -888,18 +888,18 @@
             },
             "JSONDataMapping87": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
                     "comment": "Type number, value 2.900390625",
                     "db_content_name": "CAT048",
                     "db_content_variable_name": "PSR Plot Runlength",
-                    "dimension": "",
+                    "dimension": "Angle",
                     "format_data_type": "",
                     "in_array": false,
                     "json_key": "130.PRL.value",
                     "json_value_format": "",
                     "mandatory": false,
-                    "unit": ""
+                    "unit": "Degree"
                 }
             },
             "JSONDataMapping9": {

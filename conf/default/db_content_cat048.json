@@ -619,7 +619,7 @@
             },
             "VariableRadarssr_runlength_deg0": {
                 "parameters": {
-                    "data_type_str": "INT",
+                    "data_type_str": "DOUBLE",
                     "db_column_name": "ssr_plot_runlength",
                     "description": "From 130.SRL.value\n\nFrom 130.SRL\n\nSSR plot runlength",
                     "dimension": "Angle",

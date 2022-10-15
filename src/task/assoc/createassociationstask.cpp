@@ -72,6 +72,9 @@ CreateAssociationsTask::CreateAssociationsTask(const std::string& class_id,
     registerParameter("prob_min_time_overlap_tracker", &prob_min_time_overlap_tracker_, 0.5); //kb 0.7
     registerParameter("max_speed_tracker_kts", &max_speed_tracker_kts_, 100000);
 
+    registerParameter("cont_max_time_diff_tracker", &cont_max_time_diff_tracker_, 30.0);
+    registerParameter("cont_max_distance_acceptable_tracker", &cont_max_distance_acceptable_tracker_, 1852.0);
+
     // sensor
     registerParameter("max_time_diff_sensor", &max_time_diff_sensor_, 15.0);
     registerParameter("max_distance_acceptable_sensor", &max_distance_acceptable_sensor_, 2*NM2M);
