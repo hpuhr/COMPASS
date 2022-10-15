@@ -34,10 +34,10 @@ RadarPlotPositionCalculatorTaskDialog::RadarPlotPositionCalculatorTaskDialog(Rad
 
     button_layout->addStretch();
 
-    QPushButton* ok_button = new QPushButton("OK");
-    connect(ok_button, &QPushButton::clicked,
+    ok_button_ = new QPushButton("OK");
+    connect(ok_button_, &QPushButton::clicked,
             this, &RadarPlotPositionCalculatorTaskDialog::okClickedSlot);
-    button_layout->addWidget(ok_button);
+    button_layout->addWidget(ok_button_);
 
     main_layout->addLayout(button_layout);
 
@@ -53,6 +53,11 @@ RadarPlotPositionCalculatorTaskDialog::~RadarPlotPositionCalculatorTaskDialog()
 bool RadarPlotPositionCalculatorTaskDialog::runWanted() const
 {
     return run_wanted_;
+}
+
+void RadarPlotPositionCalculatorTaskDialog::updateCanRun()
+{
+    ok_button_->setEnabled(task_.canRun());
 }
 
 void RadarPlotPositionCalculatorTaskDialog::okClickedSlot()
