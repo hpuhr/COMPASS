@@ -201,7 +201,16 @@ void Client::run ()
     // TODO ENABLE in appimage
 #else
     loginf << "COMPASSClient: started with " << num_threads << " threads";
-    tbb::global_control global_limit(tbb::global_control::max_allowed_parallelism, num_threads);
+    //tbb::global_control global_limit(tbb::global_control::max_allowed_parallelism, num_threads);
+
+//    cpu_set_t mask;
+//    int       status;
+//    CPU_ZERO(&mask);
+//    const auto NUMCORES = sysconf(_SC_NPROCESSORS_ONLN);
+//    for (int64_t core = 0; core < NUMCORES; core++) CPU_SET(core, &mask);
+//    sched_setaffinity(0, sizeof(cpu_set_t), &mask);
+
+
     // TODO DISABLE in appimage
 #endif
 

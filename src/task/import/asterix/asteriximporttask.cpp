@@ -595,6 +595,30 @@ void ASTERIXImportTask::date(const boost::posix_time::ptime& date)
     date_ = date;
 }
 
+bool ASTERIXImportTask::resumingFromLiveInProgress() const
+{
+    return resuming_from_live_in_progress_;
+}
+
+void ASTERIXImportTask::resumingFromLiveInProgress(bool value)
+{
+    loginf << "ASTERIXImportTask: resumingFromLiveInProgress: value " << value;
+
+    if (decode_job_ && decode_job_->resumingCachedData())
+    {
+        loginf << "ASTERIXImportTask: resumingFromLiveInProgress: value " << value
+               << " ignored since decoder resume active";
+        return;
+    }
+
+    resuming_from_live_in_progress_ = value;
+
+    assert (m_info_);
+    m_info_->close();
+
+    m_info_ = nullptr;
+}
+
 bool ASTERIXImportTask::isRunning() const
 {
     return running_;
@@ -1236,24 +1260,23 @@ void ASTERIXImportTask::appModeSwitchSlot (AppMode app_mode_previous, AppMode ap
                     discard_cache = true;
             }
 
-            QMessageBox m_info (QMessageBox::Information, "Resuming into Live: Running",
-                                  "Importing cached ASTERIX data. Please wait.", QMessageBox::Ok);
-            m_info.button(QMessageBox::Ok)->hide();
-            m_info.show();
+            m_info_ = new QMessageBox (QMessageBox::Information, "Resuming into Live: Running",
+                                       "Importing cached ASTERIX data. Please wait.", QMessageBox::Ok);
+            m_info_->button(QMessageBox::Ok)->hide();
+            m_info_->show();
 
             loginf << "ASTERIXImportTask: appModeSwitchSlot: resuming";
 
+            resuming_from_live_in_progress_ = true;
+
             decode_job_->resumeLiveNetworkData(discard_cache);
 
-            while (decode_job_->resumingCachedData())
-            {
-                QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
-                QThread::msleep(1);
-            }
-
-            loginf << "ASTERIXImportTask: appModeSwitchSlot: resume done";
-
-            m_info.close();
+            // TODO check if required
+//            while (decode_job_->resumingCachedData())
+//            {
+//                QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+//                QThread::msleep(1);
+//            }
         }
         else
             ; // nothing to do, normal startup

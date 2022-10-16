@@ -665,8 +665,17 @@ void ViewManager::loadedDataSlot (const std::map<std::string, std::shared_ptr<Bu
 
     processing_data_ = true;
 
+    using namespace boost::posix_time;
+    ptime tmp_time;
+
     for (auto& view_it : views_)
+    {
+        tmp_time = microsec_clock::local_time();
         view_it.second->loadedData(data, requires_reset);
+
+        logdbg << "ViewManager: loadedDataSlot: " << view_it.first << " took "
+               << String::timeStringFromDouble((microsec_clock::local_time() - tmp_time).total_milliseconds() / 1000.0, true);
+    }
 
     processing_data_ = false;
 

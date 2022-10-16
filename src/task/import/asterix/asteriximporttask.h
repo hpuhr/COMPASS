@@ -30,6 +30,7 @@
 #include "appmode.h"
 
 #include <QObject>
+#include <QMessageBox>
 
 #include <deque>
 #include <memory>
@@ -139,6 +140,9 @@ class ASTERIXImportTask : public Task, public Configurable
     const boost::posix_time::ptime &date() const;
     void date(const boost::posix_time::ptime& date);
 
+    bool resumingFromLiveInProgress() const;
+    void resumingFromLiveInProgress(bool value);
+
 protected:
     bool debug_jasterix_;
     std::shared_ptr<jASTERIX::jASTERIX> jasterix_;
@@ -160,6 +164,9 @@ protected:
     bool ask_discard_cache_on_resume_ {true};
 
     bool running_ {false};
+
+    QMessageBox* m_info_ {nullptr};
+    bool resuming_from_live_in_progress_ {false};
 
     unsigned int num_packets_in_processing_{0};
     unsigned int num_packets_total_{0};
