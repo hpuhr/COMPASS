@@ -57,8 +57,8 @@ void ASTERIXPostprocessJob::run()
     if (override_tod_active_)
         doTodOverride();
 
-    if (do_timestamp_checks_)
-        doFutureTimestampsCheck();
+//    if (do_timestamp_checks_) // out of sync issue during 24h replay
+//        doFutureTimestampsCheck();
 
     doTimeStampCalculation();
     doRadarPlotPositionCalculations();
@@ -124,10 +124,12 @@ void ASTERIXPostprocessJob::doFutureTimestampsCheck()
 
     auto p_time = microsec_clock::universal_time (); // UTC
 
-    double tod_now_utc = (p_time.time_of_day().total_milliseconds() / 1000.0) + network_time_offset_ + 1.0; // up to 1 sec ok
+    double tod_utc_max = (p_time - Time::partialSeconds(network_time_offset_ + 360.0)).time_of_day().total_milliseconds() / 1000.0; // up to 1 sec ok
+
+    bool in_vicinity_of_24h_time = tod_utc_max <= 60.0 || tod_utc_max >= (tod_24h - 60.0);
 
     loginf << "ASTERIXPostprocessJob: doFutureTimestampsCheck: maximum time is "
-           << String::timeStringFromDouble(tod_now_utc);
+           << String::timeStringFromDouble(tod_utc_max);
 
     for (auto& buf_it : buffers_)
     {
@@ -153,15 +155,33 @@ void ASTERIXPostprocessJob::doFutureTimestampsCheck()
 
         for (unsigned int index=0; index < buffer_size; ++index)
         {
-            if (!tod_vec.isNull(index) && tod_vec.get(index) > tod_now_utc)
+            if (!tod_vec.isNull(index))
             {
-                logwrn << "ASTERIXPostprocessJob: doFutureTimestampsCheck: doing " << buf_it.first
-                       << " cutoff tod index " << index
-                       << " tod " << String::timeStringFromDouble(tod_vec.get(index));
+                if (in_vicinity_of_24h_time)
+                {
+                     // not at end of day and bigger than max
+                    if (tod_vec.get(index) < (tod_24h - 60.0) && tod_vec.get(index) > tod_utc_max)
+                    {
+                        logwrn << "ASTERIXPostprocessJob: doFutureTimestampsCheck: doing " << buf_it.first
+                               << " cutoff tod index " << index
+                               << " tod " << String::timeStringFromDouble(tod_vec.get(index));
 
-                buf_it.second->cutToSize(index);
+                        buf_it.second->cutToSize(index);
+                        break;
+                    }
+                }
+                else
+                {
+                    if (tod_vec.get(index) > tod_utc_max)
+                    {
+                        logwrn << "ASTERIXPostprocessJob: doFutureTimestampsCheck: doing " << buf_it.first
+                               << " cutoff tod index " << index
+                               << " tod " << String::timeStringFromDouble(tod_vec.get(index));
 
-                break;
+                        buf_it.second->cutToSize(index);
+                        break;
+                    }
+                }
             }
         }
     }
@@ -227,7 +247,7 @@ void ASTERIXPostprocessJob::doTimeStampCalculation()
                     outside_vicinity_of_24h_time = tod >= 600.0 ;
 
                 if (in_vicinity_of_24h_time)
-                    loginf << "ASTERIXPostprocessJob: doTimeStampCalculation: tod " << String::timeStringFromDouble(tod)
+                    logdbg << "ASTERIXPostprocessJob: doTimeStampCalculation: tod " << String::timeStringFromDouble(tod)
                            << " in 24h vicinity, had_late_time_ " << had_late_time_
                            << " did_recent_time_jump " << did_recent_time_jump_;
 
@@ -258,11 +278,19 @@ void ASTERIXPostprocessJob::doTimeStampCalculation()
                         timestamp = previous_date_ + boost::posix_time::millisec((unsigned int) (tod * 1000));
                 }
                 else // normal timestamp
+                {
                     timestamp = current_date_ + boost::posix_time::millisec((unsigned int) (tod * 1000));
+                }
 
                 if (in_vicinity_of_24h_time)
                     logdbg << "ASTERIXPostprocessJob: doTimeStampCalculation: tod " << String::timeStringFromDouble(tod)
                            << " timestamp " << Time::toString(timestamp);
+
+                if (outside_vicinity_of_24h_time)
+                {
+                    did_recent_time_jump_ = false;
+                    had_late_time_ = false;
+                }
 
                 timestamp_vec.set(index, timestamp);
             }

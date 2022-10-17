@@ -1096,6 +1096,24 @@ void ASTERIXImportTask::postprocessDoneSlot()
     post_job = nullptr;
     postprocess_jobs_.erase(postprocess_jobs_.begin()); // remove
 
+    // check if still data in buffers, could be empty
+
+    unsigned int buffer_cnt {0};
+
+    for (auto& buf_it : job_buffers)
+        buffer_cnt += buf_it.second->size();
+
+    if (buffer_cnt == 0)
+    {
+        // quit
+        assert (num_packets_in_processing_);
+        --num_packets_in_processing_;
+
+        checkAllDone();
+
+        return;
+    }
+
     // queue data
     if (!stopped_)
     {
