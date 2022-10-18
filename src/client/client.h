@@ -55,6 +55,7 @@ private:
     bool import_asterix_network_ {false};
     std::string import_asterix_network_time_offset_;
     int import_asterix_network_max_lines_ {-1};
+    bool import_asterix_network_ignore_future_ts_ {false};
     std::string asterix_framing;
     std::string asterix_decoder_cfg;
 

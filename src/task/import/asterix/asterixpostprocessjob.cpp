@@ -57,8 +57,8 @@ void ASTERIXPostprocessJob::run()
     if (override_tod_active_)
         doTodOverride();
 
-//    if (do_timestamp_checks_) // out of sync issue during 24h replay
-//        doFutureTimestampsCheck();
+    if (do_timestamp_checks_) // out of sync issue during 24h replay
+        doFutureTimestampsCheck();
 
     doTimeStampCalculation();
     doRadarPlotPositionCalculations();

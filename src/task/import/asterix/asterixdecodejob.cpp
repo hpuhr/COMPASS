@@ -535,19 +535,22 @@ void ASTERIXDecodeJob::netJasterixCallback(std::unique_ptr<nlohmann::json> data,
     //    while (!obsolete_ && pause_)  // block decoder until unpaused
     //        QThread::msleep(1);
 
-    if (extracted_data_)
+    if (tmp_extracted_data->at("data_blocks").size())
     {
-        // add to existing data
-        assert(extracted_data_->is_object());
-        assert(extracted_data_->contains("data_blocks"));
-        assert(extracted_data_->at("data_blocks").is_array());
+        if (extracted_data_)
+        {
+            // add to existing data
+            assert(extracted_data_->is_object());
+            assert(extracted_data_->contains("data_blocks"));
+            assert(extracted_data_->at("data_blocks").is_array());
 
-        extracted_data_->at("data_blocks").insert(extracted_data_->at("data_blocks").end(),
-                                                  tmp_extracted_data->at("data_blocks").begin(),
-                                                  tmp_extracted_data->at("data_blocks").end());
+            extracted_data_->at("data_blocks").insert(extracted_data_->at("data_blocks").end(),
+                                                      tmp_extracted_data->at("data_blocks").begin(),
+                                                      tmp_extracted_data->at("data_blocks").end());
+        }
+        else
+            extracted_data_ = std::move(tmp_extracted_data);
     }
-    else
-        extracted_data_ = std::move(tmp_extracted_data);
 
 }
 

@@ -619,6 +619,12 @@ void ASTERIXImportTask::resumingFromLiveInProgress(bool value)
     m_info_ = nullptr;
 }
 
+void ASTERIXImportTask::importAsterixNetworkIgnoreFutureTimestamp (bool value)
+{
+    loginf << "ASTERIXImportTask: importAsterixNetworkIgnoreFutureTimestamp: value " << value;
+    network_ignore_future_ts_ = value;
+}
+
 bool ASTERIXImportTask::isRunning() const
 {
     return running_;
@@ -1030,12 +1036,17 @@ void ASTERIXImportTask::mapJSONDoneSlot()
     if (!job_buffers.size())
         return;
 
+    bool check_future_ts = !import_file_;
+
+    if (network_ignore_future_ts_)
+        check_future_ts = false;
+
     if (!test_)
     {
         std::shared_ptr<ASTERIXPostprocessJob> postprocess_job =
                 make_shared<ASTERIXPostprocessJob>(std::move(job_buffers), date_,
                                                    override_tod_active_, override_tod_offset_,
-                                                   !import_file_);
+                                                   check_future_ts);
 
         postprocess_jobs_.push_back(postprocess_job);
 

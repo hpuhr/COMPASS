@@ -120,6 +120,8 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
              "used time offset during ASTERIX network import, in HH:MM:SS.ZZZ'")
             ("import_asterix_network_max_lines", po::value<int>(&import_asterix_network_max_lines_),
              "maximum number of lines per data source during ASTERIX network import, 1..4'")
+            ("import_asterix_network_ignore_future_ts", po::bool_switch(&import_asterix_network_ignore_future_ts_),
+             "ignore future timestamps during ASTERIX network import'")
             ("asterix_framing", po::value<std::string>(&asterix_framing),
              "sets ASTERIX framing, e.g. 'none', 'ioss', 'ioss_seq', 'rff'")
             ("asterix_decoder_cfg", po::value<std::string>(&asterix_decoder_cfg),
@@ -307,6 +309,10 @@ void Client::run ()
             task_man.asterixImporterTask().overrideTodOffset(time_offset);
         }
 
+        if (import_asterix_network_ignore_future_ts_)
+        {
+           task_man.asterixImporterTask().importAsterixNetworkIgnoreFutureTimestamp(true);
+        }
     }
     catch (exception& e)
     {

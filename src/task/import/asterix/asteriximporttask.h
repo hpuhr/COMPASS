@@ -143,6 +143,8 @@ class ASTERIXImportTask : public Task, public Configurable
     bool resumingFromLiveInProgress() const;
     void resumingFromLiveInProgress(bool value);
 
+    void importAsterixNetworkIgnoreFutureTimestamp (bool value);
+
 protected:
     bool debug_jasterix_;
     std::shared_ptr<jASTERIX::jASTERIX> jasterix_;
@@ -167,6 +169,7 @@ protected:
 
     QMessageBox* m_info_ {nullptr};
     bool resuming_from_live_in_progress_ {false};
+    bool network_ignore_future_ts_ {false};
 
     unsigned int num_packets_in_processing_{0};
     unsigned int num_packets_total_{0};
