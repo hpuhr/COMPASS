@@ -83,7 +83,6 @@ public:
         return data_.at(index);
     }
 
-
     /// @brief Returns string of a specific value
     const std::string getAsString(unsigned int index);
 
@@ -645,6 +644,36 @@ std::tuple<bool,T,T> NullableVector<T>::minMaxValues(unsigned int index)
     }
 
     return std::tuple<bool,T,T> {set, min, max};
+}
+
+/**
+ * Special case for booleans.
+ */
+template <>
+inline std::tuple<bool,bool,bool> NullableVector<bool>::minMaxValues(unsigned int index)
+{
+    bool set = false;
+    char min, max;
+
+    for (; index < data_.size(); ++index)
+    {
+        if (!isNull(index))  // not for null
+        {
+            if (!set)
+            {
+                min = (char)data_.at(index);
+                max = (char)data_.at(index);
+                set = true;
+            }
+            else
+            {
+                min = std::min(min, (char)data_.at(index));
+                max = std::max(max, (char)data_.at(index));
+            }
+        }
+    }
+
+    return std::tuple<bool,bool,bool> {set, min, max};
 }
 
 template <class T>

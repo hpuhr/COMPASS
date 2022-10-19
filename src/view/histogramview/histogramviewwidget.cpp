@@ -52,10 +52,12 @@ HistogramViewWidget::HistogramViewWidget(const std::string& class_id, const std:
 
     getViewToolSwitcher()->addTool(Tool::HG_DEFAULT_TOOL, "", "", QIcon(), Qt::ArrowCursor);
     getViewToolSwitcher()->addTool(Tool::HG_SELECT_TOOL, "Select", "S", icon("select_action.png"), Qt::CrossCursor);
+    getViewToolSwitcher()->addTool(Tool::HG_ZOOM_TOOL, "Zoom", "Z", icon("select_action.png"), Qt::CrossCursor);
     getViewToolSwitcher()->setDefaultTool(Tool::HG_DEFAULT_TOOL);
 
     //we could add the default action if we wanted
     getViewToolWidget()->addTool(Tool::HG_SELECT_TOOL);
+    getViewToolWidget()->addTool(Tool::HG_ZOOM_TOOL);
 
     getViewToolWidget()->addSeparator();
 

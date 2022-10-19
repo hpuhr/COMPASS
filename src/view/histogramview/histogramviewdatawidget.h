@@ -24,6 +24,7 @@
 #include "histogramviewdatatoolwidget.h"
 #include "histogramviewchartview.h"
 #include "viewdatawidget.h"
+#include "histogram.h"
 
 #include <QVariant>
 
@@ -35,6 +36,7 @@ class QTabWidget;
 class QHBoxLayout;
 class Buffer;
 class DBContent;
+class HistogramGenerator;
 
 namespace EvaluationRequirementResult
 {
@@ -149,15 +151,37 @@ class HistogramViewDataWidget : public ViewDataWidget
     QPixmap renderPixmap();
 
 protected:
+    static const unsigned int NumBins     = 20;
+    static const int          LabelAngleX = 85;
+
+    static const QColor ColorSelected;
+    static const QColor ColorCAT001;
+    static const QColor ColorCAT010;
+    static const QColor ColorCAT020;
+    static const QColor ColorCAT021;
+    static const QColor ColorCAT048;
+    static const QColor ColorCAT062;
+    static const QColor ColorRefTraj;
+
+    struct HistogramData
+    {
+        std::vector<unsigned int> counts;
+        std::vector<std::string>  labels;
+        unsigned int              null_values     = 0;
+        unsigned int              selected_values = 0;
+    };
+
     HistogramView* view_{nullptr};
     /// Data source
     HistogramViewDataSource* data_source_{nullptr};
 
     std::map<std::string, std::shared_ptr<Buffer>> buffers_;
 
-    unsigned int num_bins_{20};
+    unsigned int num_bins_{NumBins};
     std::map<std::string, std::vector<unsigned int>> counts_;
     std::vector<unsigned int> selected_counts_;
+
+    std::map<std::string, HistogramData> histogram_data_;
 
     std::map<std::string, unsigned int> data_null_cnt_;
     unsigned int data_null_selected_cnt_{0};
@@ -179,12 +203,15 @@ protected:
 
     std::unique_ptr<QtCharts::HistogramViewChartView> chart_view_;
 
+    std::unique_ptr<HistogramGenerator> histogram_generator_;
+
     bool shows_data_ {false};
     bool data_not_in_buffer_ {false};
 
     virtual void toolChanged_impl(int mode) override;
 
     void selectData(unsigned int index1, unsigned int index2);
+    void zoomToSubrange(unsigned int index1, unsigned int index2);
 
     void updateFromData(std::string dbcontent_name);
     void updateFromAllData();
@@ -228,14 +255,94 @@ protected:
     virtual void mouseMoveEvent(QMouseEvent* event) override;
 
     template<typename T>
+    void generateHistogram(const std::string& dbcontent_name, 
+                           NullableVector<T>& data, 
+                           NullableVector<bool>& selected_vec,
+                           dbContent::Variable* data_var)
+    {
+        loginf << "HistogramViewDataWidget: generateHistogram: start dbcontent " << dbcontent_name;
+
+
+
+        
+
+
+
+        if (!labels_.size()) // set labels
+        {
+            for (unsigned int bin_cnt = 0; bin_cnt < num_bins_; ++bin_cnt)
+            {
+                const std::string s = stringRepresentation<T>(data_var, data_min_, bin_cnt, bin_size_);
+
+                std::cout << "LABEL " << s << std::endl;
+
+                labels_.push_back(s);
+            }
+        }
+
+        std::vector<unsigned int>& counts = counts_[dbcontent_name];
+
+        if (!counts.size()) // set 0 bins
+        {
+            for (unsigned int bin_cnt = 0; bin_cnt < num_bins_; ++bin_cnt)
+                counts.push_back(0);
+        }
+
+        unsigned int bin_number;
+        unsigned int data_size = data.size();
+        bool selected;
+
+        for (unsigned int cnt=0; cnt < data_size; ++cnt)
+        {
+            selected = !selected_vec.isNull(cnt) && selected_vec.get(cnt);
+
+            if (data.isNull(cnt))
+            {
+                if (selected)
+                    ++data_null_selected_cnt_;
+                else
+                    ++data_null_cnt_[dbcontent_name];
+                continue;
+            }
+
+            //map to bin
+            bin_number = binFromValue(data.get(cnt), data_min_, bin_size_);
+
+            if (bin_number >= num_bins_)
+                logerr << "HistogramViewDataWidget: updateFromData: bin_size " << bin_size_
+                       << " bin number " << bin_number << " data " << data.get(cnt);
+
+            assert (bin_number < num_bins_);
+
+            if (selected) // is selected
+            {
+                if (!selected_counts_.size()) // set 0 bins
+                {
+                    for (unsigned int bin_cnt = 0; bin_cnt < num_bins_; ++bin_cnt)
+                        selected_counts_.push_back(0);
+                }
+
+                selected_counts_.at(bin_number) += 1;
+            }
+            else
+            {
+                counts.at(bin_number) += 1;
+            }
+        }
+
+        loginf << "HistogramViewDataWidget: updateCounts: end dbo " << dbcontent_name;
+    }
+
+
+
+
+    template<typename T>
     void updateMinMax(NullableVector<T>& data)
     {
         bool min_max_set {true};
         T data_min, data_max;
 
         std::tie(min_max_set, data_min, data_max) = data.minMaxValues();
-
-//        loginf << "UGA min_max_set " << min_max_set << " data_min " << data_min << " data_max " << data_max;
 
         if (!min_max_set)
             return;
@@ -256,8 +363,6 @@ protected:
             data_min_ = min_var;
             data_max_ = max_var;
         }
-//        loginf << "UGA2 data_min_ " << data_min_.toString().toStdString()
-//               << " data_max_ " << data_max_.toString().toStdString();
     }
 
     void updateMinMax(NullableVector<std::string>& data);
@@ -504,5 +609,7 @@ inline std::string HistogramViewDataWidget::stringRepresentation<double>(dbConte
 
     return s;
 }
+
+
 
 #endif /* HISTOGRAMVIEWDATAWIDGET_H_ */

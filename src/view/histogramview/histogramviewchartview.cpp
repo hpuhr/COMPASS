@@ -32,7 +32,8 @@ bool HistogramViewChartView::handleMousePress(Qt::MouseButtons buttons, const QP
     {
         auto tool = data_widget_->selectedTool();
 
-        if (tool == HG_SELECT_TOOL)
+        if (tool == HG_SELECT_TOOL ||
+            tool == HG_ZOOM_TOOL)
         {
             logdbg << "HistogramViewChartView: handleMousePress: RECT x " << widget_pos.x() << " y " << widget_pos.y();
 
@@ -61,19 +62,23 @@ bool HistogramViewChartView::handleMouseMove(Qt::MouseButtons buttons, const QPo
     {
         auto tool = data_widget_->selectedTool();
 
-        if (tool == HG_SELECT_TOOL && isSelectionEnabled())
+        if (tool == HG_SELECT_TOOL ||
+            tool == HG_ZOOM_TOOL)
         {
-            logdbg << "HistogramViewChartView: handleMouseMove: RECT x " << widget_pos.x() << " y " << widget_pos.y();
+            if (isSelectionEnabled())
+            {
+                logdbg << "HistogramViewChartView: handleMouseMove: RECT x " << widget_pos.x() << " y " << widget_pos.y();
 
-            // view widget coordinates to chart coordinates
-            QPointF p = widgetToChart(widget_pos);
+                // view widget coordinates to chart coordinates
+                QPointF p = widgetToChart(widget_pos);
 
-            p2_      = widget_pos.toPoint();
-            p2_data_ = p;
+                p2_      = widget_pos.toPoint();
+                p2_data_ = p;
 
-            updateSelection(p1_, p2_, p1_data_, p2_data_);
+                updateSelection(p1_, p2_, p1_data_, p2_data_);
 
-            return true;
+                return true;
+            }
         }
     }
     return false;
@@ -87,26 +92,30 @@ bool HistogramViewChartView::handleMouseRelease(Qt::MouseButtons buttons, const 
     {
         auto tool = data_widget_->selectedTool();
 
-        if (tool == HG_SELECT_TOOL && isSelectionEnabled())
+        if (tool == HG_SELECT_TOOL ||
+            tool == HG_ZOOM_TOOL)
         {
-            logdbg << "HistogramViewChartView: handleMouseRelease: RECT x " << widget_pos.x() << " y " << widget_pos.y();
-
-            // view widget coordinates to chart coordinates
-            QPointF p = widgetToChart(widget_pos);
-
-            if (update_pos)
+            if (isSelectionEnabled())
             {
-                p2_      = widget_pos.toPoint();
-                p2_data_ = p;
-            }
-            
-            logdbg << "ScatterPlotViewChartView: handleMouseRelease: REGION p1 " << p1_data_.x() << "," << p1_data_.y() << " p2 " << p2_data_.x() << "," << p2_data_.y();
+                logdbg << "HistogramViewChartView: handleMouseRelease: RECT x " << widget_pos.x() << " y " << widget_pos.y();
 
-            updateSelection(p1_, p2_, p1_data_, p2_data_);
-            sendSelectedBins();
-            endSelection();
+                // view widget coordinates to chart coordinates
+                QPointF p = widgetToChart(widget_pos);
 
-            return true;
+                if (update_pos)
+                {
+                    p2_      = widget_pos.toPoint();
+                    p2_data_ = p;
+                }
+                
+                logdbg << "ScatterPlotViewChartView: handleMouseRelease: REGION p1 " << p1_data_.x() << "," << p1_data_.y() << " p2 " << p2_data_.x() << "," << p2_data_.y();
+
+                updateSelection(p1_, p2_, p1_data_, p2_data_);
+                sendSelectedBins();
+                endSelection();
+
+                return true;
+            }  
         }
     }
     return false;
