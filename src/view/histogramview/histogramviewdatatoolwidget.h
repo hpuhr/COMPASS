@@ -9,7 +9,8 @@
 enum HistogramViewDataTool
 {
     HG_DEFAULT_TOOL = 0,
-    HG_SELECT_TOOL
+    HG_SELECT_TOOL,
+    HG_ZOOM_TOOL
 };
 
 class QToolButton;

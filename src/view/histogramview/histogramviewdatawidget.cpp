@@ -27,6 +27,7 @@
 #include "histogramviewchartview.h"
 #include "logger.h"
 #include "evaluationmanager.h"
+#include "histogramgenerator.h"
 
 #include "eval/results/extra/datasingle.h"
 #include "eval/results/extra/datajoined.h"
@@ -86,9 +87,22 @@
 
 QT_CHARTS_USE_NAMESPACE
 
+#define USE_NEW_SHIT
+
 using namespace std;
 using namespace EvaluationRequirementResult;
 
+const QColor HistogramViewDataWidget::ColorSelected = Qt::yellow; // darker than yellow #808000
+const QColor HistogramViewDataWidget::ColorCAT001   = QColor("#00FF00");
+const QColor HistogramViewDataWidget::ColorCAT010   = QColor("#FFCC00");
+const QColor HistogramViewDataWidget::ColorCAT020   = QColor("#FF0000");
+const QColor HistogramViewDataWidget::ColorCAT021   = QColor("#6666FF");
+const QColor HistogramViewDataWidget::ColorCAT048   = QColor("#00FF00");
+const QColor HistogramViewDataWidget::ColorCAT062   = QColor("#CCCCCC");
+const QColor HistogramViewDataWidget::ColorRefTraj  = QColor("#FFA500");
+
+/**
+ */
 HistogramViewDataWidget::HistogramViewDataWidget(HistogramView* view, HistogramViewDataSource* data_source,
                                                  QWidget* parent, Qt::WindowFlags f)
     : ViewDataWidget(parent, f), view_(view), data_source_(data_source)
@@ -100,13 +114,14 @@ HistogramViewDataWidget::HistogramViewDataWidget(HistogramView* view, HistogramV
 
     setLayout(main_layout_);
 
-    colors_["CAT001"] = QColor("#00FF00");
-    colors_["CAT010"] = QColor("#FFCC00");
-    colors_["CAT020"] = QColor("#FF0000");
-    colors_["CAT021"] = QColor("#6666FF");
-    colors_["CAT048"] = QColor("#00FF00");
-    colors_["RefTraj"] = QColor("#FFA500");
-    colors_["CAT062"] = QColor("#CCCCCC");
+    //@TODO: these strings should be defined globally
+    colors_["CAT001" ] = ColorCAT001;
+    colors_["CAT010" ] = ColorCAT010;
+    colors_["CAT020" ] = ColorCAT020;
+    colors_["CAT021" ] = ColorCAT021;
+    colors_["CAT048" ] = ColorCAT048;
+    colors_["CAT062" ] = ColorCAT062;
+    colors_["RefTraj"] = ColorRefTraj;
 
     // shortcuts
     {
@@ -115,10 +130,12 @@ HistogramViewDataWidget::HistogramViewDataWidget(HistogramView* view, HistogramV
     }
 }
 
-HistogramViewDataWidget::~HistogramViewDataWidget()
-{
-}
+/**
+ */
+HistogramViewDataWidget::~HistogramViewDataWidget() = default;
 
+/**
+ */
 void HistogramViewDataWidget::updateToData()
 {
     loginf << "HistogramViewDataWidget: update";
@@ -150,6 +167,8 @@ void HistogramViewDataWidget::clear ()
     chart_view_.reset(nullptr);
     shows_data_ = false;
     data_not_in_buffer_ = false;
+
+    histogram_generator_.reset();
 }
 
 unsigned int HistogramViewDataWidget::numBins() const
@@ -189,21 +208,20 @@ void HistogramViewDataWidget::loadingStartedSlot()
     updateChart();
 }
 
-void HistogramViewDataWidget::updateDataSlot(
-        const std::map<std::string, std::shared_ptr<Buffer>>& data, bool requires_reset)
+void HistogramViewDataWidget::updateDataSlot(const std::map<std::string, std::shared_ptr<Buffer>>& data, 
+                                             bool requires_reset)
 {
     logdbg << "HistogramViewDataWidget: updateDataSlot: start";
 
     buffers_ = data;
 
-    //updateFromData(object.name());
+    histogram_generator_.reset(); //makes no sense any more
 
     logdbg << "HistogramViewDataWidget: updateDataSlot: end";
 }
 
 void HistogramViewDataWidget::loadingDoneSlot()
 {
-    //updateChart();
     updateToData();
 }
 
@@ -639,6 +657,109 @@ void HistogramViewDataWidget::updateFromAllData()
 {
     loginf << "HistogramViewDataWidget: updateFromAllData";
 
+#ifdef USE_NEW_SHIT
+
+    dbContent::Variable*     data_var = nullptr;
+    dbContent::MetaVariable* meta_var = nullptr;
+
+    if (!view_->hasDataVar())
+    {
+        logwrn << "HistogramViewDataWidget: updateFromAllData: no data var";
+        return;
+    }
+
+    if (view_->isDataVarMeta())
+        meta_var = &view_->metaDataVar();
+    else
+        data_var = &view_->dataVar();
+
+    assert (meta_var || data_var);
+
+    auto data_type = meta_var ? meta_var->dataType() : data_var->dataType();
+
+    histogram_generator_.reset();
+
+    switch (data_type)
+    {
+        case PropertyDataType::BOOL:
+        {
+            histogram_generator_.reset(new HistogramGeneratorT<bool>);
+            break;
+        }
+        case PropertyDataType::CHAR:
+        {
+            histogram_generator_.reset(new HistogramGeneratorT<char>);
+            break;
+        }
+        case PropertyDataType::UCHAR:
+        {
+            histogram_generator_.reset(new HistogramGeneratorT<unsigned char>);
+            break;
+        }
+        case PropertyDataType::INT:
+        {
+            histogram_generator_.reset(new HistogramGeneratorT<int>);
+            break;
+        }
+        case PropertyDataType::UINT:
+        {
+            histogram_generator_.reset(new HistogramGeneratorT<unsigned int>);
+            break;
+        }
+        case PropertyDataType::LONGINT:
+        {
+            histogram_generator_.reset(new HistogramGeneratorT<long int>);
+            break;
+        }
+        case PropertyDataType::ULONGINT:
+        {
+            histogram_generator_.reset(new HistogramGeneratorT<unsigned long int>);
+            break;
+        }
+        case PropertyDataType::FLOAT:
+        {
+            histogram_generator_.reset(new HistogramGeneratorT<float>);
+            break;
+        }
+        case PropertyDataType::DOUBLE:
+        {
+            histogram_generator_.reset(new HistogramGeneratorT<double>);
+            break;
+        }
+        case PropertyDataType::STRING:
+        {
+            histogram_generator_.reset(new HistogramGeneratorT<std::string>);
+            break;
+        }
+        case PropertyDataType::JSON:
+        {
+            //@TODO
+            break;
+        }
+        case PropertyDataType::TIMESTAMP:
+        {
+            histogram_generator_.reset(new HistogramGeneratorT<boost::posix_time::ptime>);
+            break;
+        }
+        default:
+        {
+            const std::string msg = "HistogramViewDataWidget: updateFromAllData: impossible for property type " + Property::asString(data_type);
+
+            logerr << msg;
+            throw std::runtime_error(msg);
+        }
+    }
+
+    if (!histogram_generator_)
+        return;
+
+    histogram_generator_->setVariable(data_var);
+    histogram_generator_->setMetaVariable(meta_var);
+    histogram_generator_->updateFromBuffers(buffers_);
+    //histogram_generator_->print();
+    
+#else
+
     counts_.clear();
     selected_counts_.clear();
     data_null_cnt_.clear();
@@ -660,6 +781,8 @@ void HistogramViewDataWidget::updateFromAllData()
 
     for (auto& buf_it : buffers_)
         updateFromData(buf_it.first);
+
+#endif
 
     loginf << "HistogramViewDataWidget: updateFromAllData: done";
 }
@@ -787,7 +910,6 @@ void HistogramViewDataWidget::updateCountResult (std::shared_ptr<EvaluationRequi
     }
 }
 
-
 void HistogramViewDataWidget::updateCountResult (std::shared_ptr<EvaluationRequirementResult::SingleExtraTrack> result)
 {
     logdbg << "HistogramViewDataWidget: showResult: single extra track";
@@ -814,7 +936,6 @@ void HistogramViewDataWidget::updateCountResult (std::shared_ptr<EvaluationRequi
     }
 }
 
-
 void HistogramViewDataWidget::updateCountResult (std::shared_ptr<EvaluationRequirementResult::JoinedExtraTrack> result)
 {
     logdbg << "HistogramViewDataWidget: showResult: joined track";
@@ -831,7 +952,6 @@ void HistogramViewDataWidget::updateCountResult (std::shared_ptr<EvaluationRequi
             updateCountResult (static_pointer_cast<SingleExtraTrack>(result_it));
     }
 }
-
 
 void HistogramViewDataWidget::updateCountResult (std::shared_ptr<EvaluationRequirementResult::SingleDetection> result)
 {
@@ -856,7 +976,6 @@ void HistogramViewDataWidget::updateCountResult (std::shared_ptr<EvaluationRequi
     }
 }
 
-
 void HistogramViewDataWidget::updateCountResult (std::shared_ptr<EvaluationRequirementResult::JoinedDetection> result)
 {
     logdbg << "HistogramViewDataWidget: showResult: joined detection";
@@ -874,7 +993,6 @@ void HistogramViewDataWidget::updateCountResult (std::shared_ptr<EvaluationRequi
     }
 }
 
-
 void HistogramViewDataWidget::updateCountResult (
         std::shared_ptr<EvaluationRequirementResult::SinglePositionDistance> result)
 {
@@ -885,7 +1003,6 @@ void HistogramViewDataWidget::updateCountResult (
     updateMinMax (values);
     updateCounts(values);
 }
-
 
 void HistogramViewDataWidget::updateCountResult (
         std::shared_ptr<EvaluationRequirementResult::JoinedPositionDistance> result)
@@ -915,7 +1032,6 @@ void HistogramViewDataWidget::updateCountResult (
     }
 }
 
-
 void HistogramViewDataWidget::updateCountResult (
         std::shared_ptr<EvaluationRequirementResult::SinglePositionAlong> result)
 {
@@ -926,7 +1042,6 @@ void HistogramViewDataWidget::updateCountResult (
     updateMinMax (values);
     updateCounts(values);
 }
-
 
 void HistogramViewDataWidget::updateCountResult (
         std::shared_ptr<EvaluationRequirementResult::JoinedPositionAlong> result)
@@ -956,7 +1071,6 @@ void HistogramViewDataWidget::updateCountResult (
     }
 }
 
-
 void HistogramViewDataWidget::updateCountResult (
         std::shared_ptr<EvaluationRequirementResult::SinglePositionAcross> result)
 {
@@ -967,7 +1081,6 @@ void HistogramViewDataWidget::updateCountResult (
     updateMinMax (values);
     updateCounts(values);
 }
-
 
 void HistogramViewDataWidget::updateCountResult (
         std::shared_ptr<EvaluationRequirementResult::JoinedPositionAcross> result)
@@ -997,7 +1110,6 @@ void HistogramViewDataWidget::updateCountResult (
     }
 }
 
-
 void HistogramViewDataWidget::updateCountResult (
         std::shared_ptr<EvaluationRequirementResult::SinglePositionLatency> result)
 {
@@ -1009,7 +1121,6 @@ void HistogramViewDataWidget::updateCountResult (
     updateCounts(values);
     updateChart();
 }
-
 
 void HistogramViewDataWidget::updateCountResult (
         std::shared_ptr<EvaluationRequirementResult::JoinedPositionLatency> result)
@@ -1065,7 +1176,6 @@ void HistogramViewDataWidget::updateCountResult (
     }
 }
 
-
 void HistogramViewDataWidget::updateCountResult (
         std::shared_ptr<EvaluationRequirementResult::SingleIdentificationCorrect> result)
 {
@@ -1092,7 +1202,6 @@ void HistogramViewDataWidget::updateCountResult (
         counts_[dbcontent_name].at(2) += result->numNotCorrect();
     }
 }
-
 
 void HistogramViewDataWidget::updateCountResult (
         std::shared_ptr<EvaluationRequirementResult::JoinedIdentificationCorrect> result)
@@ -1141,7 +1250,6 @@ void HistogramViewDataWidget::updateCountResult (
     }
 }
 
-
 void HistogramViewDataWidget::updateCountResult (
         std::shared_ptr<EvaluationRequirementResult::JoinedIdentificationFalse> result)
 {
@@ -1158,7 +1266,6 @@ void HistogramViewDataWidget::updateCountResult (
             updateCountResult (static_pointer_cast<SingleIdentificationFalse>(result_it));
     }
 }
-
 
 void HistogramViewDataWidget::updateCountResult (std::shared_ptr<EvaluationRequirementResult::SingleModeAPresent> result)
 {
@@ -1185,7 +1292,6 @@ void HistogramViewDataWidget::updateCountResult (std::shared_ptr<EvaluationRequi
         counts_[dbcontent_name].at(2) += result->numMissing();
     }
 }
-
 
 void HistogramViewDataWidget::updateCountResult (std::shared_ptr<EvaluationRequirementResult::JoinedModeAPresent> result)
 {
@@ -1232,7 +1338,6 @@ void HistogramViewDataWidget::updateCountResult (std::shared_ptr<EvaluationRequi
     }
 }
 
-
 void HistogramViewDataWidget::updateCountResult (std::shared_ptr<EvaluationRequirementResult::JoinedModeAFalse> result)
 {
     logdbg << "HistogramViewDataWidget: showResult: joined mode 3/a false";
@@ -1248,7 +1353,6 @@ void HistogramViewDataWidget::updateCountResult (std::shared_ptr<EvaluationRequi
             updateCountResult (static_pointer_cast<SingleModeAFalse>(result_it));
     }
 }
-
 
 void HistogramViewDataWidget::updateCountResult (std::shared_ptr<EvaluationRequirementResult::SingleModeCPresent> result)
 {
@@ -1275,7 +1379,6 @@ void HistogramViewDataWidget::updateCountResult (std::shared_ptr<EvaluationRequi
         counts_[dbcontent_name].at(2) += result->numMissing();
     }
 }
-
 
 void HistogramViewDataWidget::updateCountResult (std::shared_ptr<EvaluationRequirementResult::JoinedModeCPresent> result)
 {
@@ -1322,7 +1425,6 @@ void HistogramViewDataWidget::updateCountResult (std::shared_ptr<EvaluationRequi
     }
 }
 
-
 void HistogramViewDataWidget::updateCountResult (std::shared_ptr<EvaluationRequirementResult::JoinedModeCFalse> result)
 {
     logdbg << "HistogramViewDataWidget: showResult: joined mode c";
@@ -1342,6 +1444,153 @@ void HistogramViewDataWidget::updateCountResult (std::shared_ptr<EvaluationRequi
 void HistogramViewDataWidget::updateChart()
 {
     loginf << "HistogramViewDataWidget: updateChart";
+
+#ifdef USE_NEW_SHIT
+
+    chart_view_.reset(nullptr);
+
+    //create chart
+    QChart* chart = new QChart();
+    chart->setBackgroundRoundness(0);
+    chart->layout()->setContentsMargins(0, 0, 0, 0);
+    chart->legend()->setVisible(true);
+    chart->legend()->setAlignment(Qt::AlignBottom);
+
+    //create bar series
+    QBarSeries* chart_series = new QBarSeries();
+    chart->addSeries(chart_series);
+
+    //create chart view
+    chart_view_.reset(new HistogramViewChartView(this, chart));
+    chart_view_->setRenderHint(QPainter::Antialiasing);
+    //chart_view_->setRubberBand(QChartView::RectangleRubberBand);
+
+    //    connect (chart_series_, &QBarSeries::clicked,
+    //             chart_view_, &HistogramViewChartView::seriesPressedSlot);
+    //    connect (chart_series_, &QBarSeries::released,
+    //             chart_view_, &HistogramViewChartView::seriesReleasedSlot);
+
+    connect (chart_view_.get(), &HistogramViewChartView::rectangleSelectedSignal,
+             this, &HistogramViewDataWidget::rectangleSelectedSlot, Qt::ConnectionType::QueuedConnection);
+
+    main_layout_->addWidget(chart_view_.get());
+
+    if (!histogram_generator_)
+        return;
+
+    const auto& results = histogram_generator_->getResults();
+
+    bool show_results  = view_->showResults();
+    bool use_log_scale = view_->useLogScale();
+    bool add_null      = results.hasNullValues();
+    bool has_selected  = results.hasSelectedValues();
+
+    unsigned int max_count = 0;
+
+    auto addCount = [ & ] (QBarSet* set, unsigned int count) 
+    {
+        if (count > max_count)
+            max_count = count;
+
+        if (use_log_scale && count == 0)
+            *set << 10e-3; // Logarithms of zero and negative values are undefined.
+        else
+            *set << count;
+    };
+
+    //generate a bar set for each DBContent
+    for (const auto& elem : results.db_content_results)
+    {
+        const auto& r = elem.second;
+
+        const QString bar_legend_name = QString::fromStdString(elem.first) + " (" + QString::number(r.valid_count) + ")";
+
+        QBarSet* set = new QBarSet(bar_legend_name);
+
+        for (const auto& bin : r.bins)
+            addCount(set, bin.isSelected() ? 0 : bin.count);
+        
+        if (add_null)
+            addCount(set, r.nullSelected() ? 0 : r.null_count);
+        
+        set->setColor(colors_[elem.first]);
+        chart_series->append(set);
+    }
+
+    //generate selected bar set
+    if (has_selected)
+    {
+        const QString bar_legend_name = "Selected (" + QString::number(results.selected_count + results.null_selected_count) + ")";
+
+        QBarSet* set = new QBarSet(bar_legend_name);
+
+        for (auto bin : results.selected_counts)
+            addCount(set, bin);
+
+        if (add_null)
+            addCount(set, results.null_selected_count);
+
+        set->setColor(ColorSelected); 
+        chart_series->append(set);
+    }
+
+    //create categories
+    QStringList categories;
+    if (!results.db_content_results.empty())
+    {
+        const auto& r = results.db_content_results.begin()->second;
+        for (const auto& b : r.bins)
+            categories << QString::fromStdString(b.label);
+    }
+
+    if (add_null)
+        categories << "NULL";
+
+    //create x axis
+    QBarCategoryAxis* chart_x_axis = new QBarCategoryAxis;
+    chart_x_axis->setLabelsAngle(LabelAngleX);
+    chart_x_axis->append(categories);
+
+    if (show_results)
+        chart_x_axis->setTitleText((view_->evalResultGrpReq() + ":" + view_->evalResultsID()).c_str());
+    else
+        chart_x_axis->setTitleText((view_->dataVarDBO() + ": " + view_->dataVarName()).c_str());
+
+    chart->addAxis(chart_x_axis, Qt::AlignBottom);
+    chart_series->attachAxis(chart_x_axis);
+
+    //create y axis
+    QAbstractAxis* chart_y_axis = nullptr;
+
+    if (use_log_scale)
+    {
+        QLogValueAxis* tmp_chart_y_axis = new QLogValueAxis();
+        tmp_chart_y_axis->setLabelFormat("%g");
+        tmp_chart_y_axis->setBase(10.0);
+        //tmp_chart_y_axis->setMinorTickCount(10);
+        //tmp_chart_y_axis->setMinorTickCount(-1);
+        tmp_chart_y_axis->setRange(10e-2, std::pow(10.0, 1 + std::ceil(std::log10(max_count))));
+
+        chart_y_axis = tmp_chart_y_axis;
+    }
+    else
+    {
+        chart_y_axis = new QValueAxis();
+        chart_y_axis->setRange(0, max_count);
+    }
+    assert (chart_y_axis);
+
+    chart_y_axis->setTitleText("Count");
+
+    chart->addAxis(chart_y_axis, Qt::AlignLeft);
+    chart_series->attachAxis(chart_y_axis);
+
+    //update chart
+    chart->update();
+
+    shows_data_ = true;
+
+#else
 
     if (chart_view_)
         chart_view_.reset(nullptr);
@@ -1387,8 +1636,7 @@ void HistogramViewDataWidget::updateChart()
     main_layout_->addWidget(chart_view_.get());
 
     bool use_log_scale = view_->useLogScale();
-
-    bool add_null = data_null_cnt_.size() || data_null_selected_cnt_;
+    bool add_null      = data_null_cnt_.size() || data_null_selected_cnt_;
 
     if (add_null && !data_null_cnt_.size()) // null to be shown, but no dbo counts, only selected
     {
@@ -1511,6 +1759,8 @@ void HistogramViewDataWidget::updateChart()
     //chart_->setTitle("Simple barchart example");
 
     shows_data_ = true;
+
+#endif
 
     loginf << "HistogramViewDataWidget: updateChart: done";
 }
@@ -1809,12 +2059,6 @@ void HistogramViewDataWidget::calculateGlobalMinMax()
 
     if (data_max_.isValid() && data_min_.isValid())
     {
-        auto time0 = Utils::Time::fromLong(data_min_.toLongLong());
-        auto time1 = Utils::Time::fromLong(data_max_.toLongLong());
-
-        std::cout << "BEGIN: " << Utils::Time::toDateString(time0) << " - " << Utils::Time::toTimeString(time0) << std::endl;
-        std::cout << "END:   " << Utils::Time::toDateString(time1) << " - " << Utils::Time::toTimeString(time1) << std::endl;
-
         bin_size_ = binSize(data_min_, data_max_, num_bins_);
         bin_size_valid_ = true;
     }
@@ -2082,6 +2326,13 @@ void HistogramViewDataWidget::resetZoomSlot()
 void HistogramViewDataWidget::selectData(unsigned int index1, unsigned int index2)
 {
     loginf << "HistogramViewDataWidget: rectangleSelectedSlot: index1 " << index1 << " index2 " << index2;
+
+#ifdef USE_NEW_SHIT
+
+    if (histogram_generator_)
+        histogram_generator_->select(buffers_, index1, index2);
+
+#else
 
     unsigned int min_index = min(index1, index2);
     unsigned int max_index = max(index1, index2);
@@ -2368,7 +2619,19 @@ void HistogramViewDataWidget::selectData(unsigned int index1, unsigned int index
         }
     }
 
+#endif
+
     emit view_->selectionChangedSignal();
+}
+
+void HistogramViewDataWidget::zoomToSubrange(unsigned int index1, unsigned int index2)
+{
+    if (histogram_generator_)
+    {
+        histogram_generator_->zoom(buffers_, index1, index2);
+
+        updateChart();
+    } 
 }
 
 void HistogramViewDataWidget::rectangleSelectedSlot (unsigned int index1, unsigned int index2)
@@ -2376,6 +2639,10 @@ void HistogramViewDataWidget::rectangleSelectedSlot (unsigned int index1, unsign
     if (selected_tool_ == HG_SELECT_TOOL)
     {
         selectData(index1, index2);
+    }
+    else if (selected_tool_ == HG_ZOOM_TOOL)
+    {
+        zoomToSubrange(index1, index2);
     }
     endTool();
 }
