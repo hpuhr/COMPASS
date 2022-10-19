@@ -84,6 +84,9 @@ COMPASS::COMPASS() : Configurable("COMPASS", "COMPASS0", 0, "compass.json")
     QObject::connect(this, &COMPASS::databaseClosedSignal,
                      filter_manager_.get(), &FilterManager::databaseClosedSlot);
 
+    QObject::connect(ds_manager_.get(), &DataSourceManager::dataSourcesChangedSignal,
+                     filter_manager_.get(), &FilterManager::dataSourcesChangedSlot);
+
     QObject::connect(this, &COMPASS::databaseOpenedSignal,
                      view_manager_.get(), &ViewManager::databaseOpenedSlot);
     QObject::connect(this, &COMPASS::databaseClosedSignal,

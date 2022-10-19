@@ -39,6 +39,7 @@
 #include "modecfilter.h"
 #include "primaryonlyfilter.h"
 #include "timestampfilter.h"
+#include "trackertracknumberfilter.h"
 
 #include "json.hpp"
 
@@ -153,6 +154,11 @@ void FilterManager::generateSubConfigurable(const std::string& class_id,
         TimestampFilter* filter = new TimestampFilter(class_id, instance_id, this);
         filters_.emplace_back(filter);
     }
+    else if (class_id == "TrackerTrackNumberFilter")
+    {
+        TrackerTrackNumberFilter* filter = new TrackerTrackNumberFilter(class_id, instance_id, this);
+        filters_.emplace_back(filter);
+    }
     else if (class_id == "UTNFilter")
     {
         try
@@ -248,6 +254,14 @@ void FilterManager::checkSubConfigurables()
         generateSubConfigurable(classid, classid+"0");
     }
 
+    classid = "TrackerTrackNumberFilter";
+
+    if (std::find_if(filters_.begin(), filters_.end(),
+                     [&classid](const unique_ptr<DBFilter>& x) { return x->classId() == classid;}) == filters_.end())
+    { // no UTN filter
+        addNewSubConfiguration(classid, classid+"0");
+        generateSubConfigurable(classid, classid+"0");
+    }
 //    classid = "ADSBQualityFilter";
 
 //    if (std::find_if(filters_.begin(), filters_.end(),
@@ -479,6 +493,18 @@ void FilterManager::databaseClosedSlot()
 
     if (widget_)
         widget_->setDisabled(true);
+}
+
+void FilterManager::dataSourcesChangedSlot()
+{
+    loginf << "FilterManager: dataSourcesChangedSlot";
+
+    if (hasFilter("Tracker Track Number"))
+    {
+        TrackerTrackNumberFilter* filter = dynamic_cast<TrackerTrackNumberFilter*>(getFilter("Tracker Track Number"));
+        assert (filter);
+        filter->updateDataSourcesSlot();
+    }
 }
 
 void FilterManager::appModeSwitchSlot (AppMode app_mode_previous, AppMode app_mode_current)

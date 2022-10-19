@@ -31,6 +31,8 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/primaryonlyfilterwidget.h"
         "${CMAKE_CURRENT_LIST_DIR}/timestampfilter.h"
         "${CMAKE_CURRENT_LIST_DIR}/timestampfilterwidget.h"
+        "${CMAKE_CURRENT_LIST_DIR}/trackertracknumberfilter.h"
+        "${CMAKE_CURRENT_LIST_DIR}/trackertracknumberfilterwidget.h"
     PRIVATE
         "${CMAKE_CURRENT_LIST_DIR}/dbfilter.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/dbfiltercondition.cpp"
@@ -56,6 +58,8 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/primaryonlyfilterwidget.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/timestampfilter.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/timestampfilterwidget.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/trackertracknumberfilter.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/trackertracknumberfilterwidget.cpp"        
 )
 
 
