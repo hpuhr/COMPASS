@@ -20,10 +20,19 @@ class ChartView : public QtCharts::QChartView
 {
     Q_OBJECT
 public:
+    enum class SelectionStyle
+    {
+        XY = 0,
+        X
+    };
+
     ChartView(QtCharts::QChart* chart, QWidget* parent = nullptr);
     virtual ~ChartView();
 
+    void setSelectionStyle(SelectionStyle style) { selection_style_ = style; }
     void setDataBounds(const QRectF& r);
+
+    void addLegendOnlyItem(const QString& name, const QColor& color); 
 
     virtual void onToolChanged();
 
@@ -76,4 +85,5 @@ private:
     std::unique_ptr<QRubberBand> rubber_band_;
     QtCharts::QAreaSeries*       selection_box_    = nullptr;
     bool                         enable_selection_ = false;
+    SelectionStyle               selection_style_  = SelectionStyle::XY;
 };

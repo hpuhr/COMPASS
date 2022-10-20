@@ -27,21 +27,31 @@ class HistogramGenerator
 public:
     static const unsigned int DefaultNumBins = 20;
 
+    /**
+     * Histogram generation type.
+     */
     enum class HistogramType
     {
-        Range = 0, //the histogram is generated from a certain data range and a number of bins inbetween
-        Category   //the histogram is generated from a fixed number of values (categories)
+        Range = 0, //the histogram is generated from a certain data range and a number of equally sized bins inbetween
+        Category   //the histogram is generated from a fixed number of values that need to match (categories)
     };
 
+    /**
+     * Current histogram configuration.
+     */
     struct Config
     {
         HistogramType type     = HistogramType::Range; //histogram generation type
         unsigned int  num_bins = DefaultNumBins;       //number of histogram bins to be generated
     };
 
+    /**
+     * Additional data tracked for each histogram bin.
+     */
     struct AdditionBinData
     {
-        unsigned int selected = 0;
+        unsigned int count    = 0;
+        unsigned int selected = 0; //number of selected data values in bin
     };
 
     /**
@@ -61,41 +71,40 @@ public:
 
         unsigned int null_count          = 0; //number of encountered null values
         unsigned int null_selected_count = 0; //number of encountered selected null values
-        unsigned int not_inserted_count  = 0; //number of encountered non-insertable values
+        unsigned int not_inserted_count  = 0; //number of encountered non-insertable values (e.g. out of histogram range)
     };
 
     typedef std::map<std::string, IntermediateData> DBContentIntermediateData;
 
+    /**
+     * Result bin.
+     */
     struct Bin
     {
-        bool isSelected() const
-        {
-            return (selected > 0 && selected == count);
-        }
-
         unsigned int count    = 0; //number of data points in this bin
         unsigned int selected = 0; //number of selected data points in this bin
         std::string  label;        //label describing this bin
     };
 
+    /**
+     * Result for a certain DBContent.
+     */
     struct Result
     {
-        bool nullSelected() const
-        {
-            return (null_selected_count > 0 && null_selected_count == null_count);
-        }
-
         std::vector<Bin> bins;                    //resulting histogram bins
         unsigned int     valid_count         = 0; //number of valid data values in result
         unsigned int     selected_count      = 0; //number of selected data values in result
         unsigned int     null_count          = 0; //number of encountered null values in result
         unsigned int     null_selected_count = 0; //number of encountered selected null values in result
-        unsigned int     not_inserted_count  = 0; //number of encountered non-insertable values in result
+        unsigned int     not_inserted_count  = 0; //number of encountered non-insertable values in result (e.g. out of histogram range)
         unsigned int     max_count           = 0; //maximum encountered bin count
     };
 
     typedef std::map<std::string, Result> DBContentResults; 
 
+    /**
+     * Result structure.
+     */
     struct Results
     {
         bool hasNullValues() const
@@ -106,6 +115,10 @@ public:
         {
             return (selected_count > 0 || null_selected_count > 0);
         }
+        bool hasOutOfRangeValues() const
+        {
+            return (not_inserted_count > 0);
+        }
         
         DBContentResults          db_content_results;      //results per DBContent
         std::vector<unsigned int> valid_counts;            //valid data per bin (over multiple db contents)
@@ -114,7 +127,7 @@ public:
         unsigned int              selected_count      = 0; //total selected valid data    
         unsigned int              null_count          = 0; //total null data
         unsigned int              null_selected_count = 0; //total selected null data 
-        unsigned int              not_inserted_count  = 0; //total non-insertable data
+        unsigned int              not_inserted_count  = 0; //total non-insertable data (e.g. out of histogram range)
         unsigned int              max_count           = 0; //total maximum bin count
     };
 
@@ -136,20 +149,23 @@ public:
     bool hasValidResult() const;
     bool subRangeActive() const { return sub_range_active_; }
 
+    void setBufferData(Data* data);
     void setVariable(dbContent::Variable* variable);
     void setMetaVariable(dbContent::MetaVariable* variable);
 
     virtual void reset();
 
-    void updateFromBuffers(Data& data);
+    void updateFromBufferData();
     void updateFromEvaluation(const std::string& eval_grpreq, const std::string& eval_id);
 
-    bool select(Data& data, unsigned int bin0, unsigned int bin1);
-    bool zoom(Data& data, unsigned int bin0, unsigned int bin1);
+    bool refill();
+    bool select(unsigned int bin0, unsigned int bin1);
+    bool zoom(unsigned int bin0, unsigned int bin1);
 
     void print() const;
     
 protected:
+    virtual void prepareForRefill();
     virtual bool scanBuffer_impl(const std::string& db_content, Buffer& buffer) = 0;
     virtual bool prepareHistograms() = 0;
     virtual bool addBuffer(const std::string& db_content, Buffer& buffer) = 0;
@@ -173,6 +189,7 @@ protected:
 private:
     bool scanBuffer(const std::string& db_content, Buffer& buffer);
 
+    Data*                    buffer_data_   = nullptr; //governed buffer data
     dbContent::Variable*     variable_      = nullptr; //governed variable
     dbContent::MetaVariable* meta_variable_ = nullptr; //governed meta-variable
 
@@ -205,6 +222,7 @@ public:
 
 protected:
     /**
+     * Returns the buffers distinct (unique) values.
      */
     std::set<T> distinctValues(NullableVector<T>& data) const
     {
@@ -260,6 +278,7 @@ protected:
     }
 
     /**
+     * Generates a configuration depending on the collected information (e.g. distinct values, extrema, etc.).
      */
     Config generateConfig() const
     {
@@ -290,6 +309,21 @@ protected:
     }
 
     /**
+     * Prepares the data structures for a refill.
+     */
+    void prepareForRefill() override final
+    {
+        HistogramGenerator::prepareForRefill();
+
+        //reset histograms
+        for (auto& elem : histograms_)
+            elem.second.resetBins();
+
+        initIntermediateData();
+    }
+
+    /**
+     * Inits the intermediate data structures based on the current configuration.
      */
     void initIntermediateData()
     {
@@ -396,20 +430,35 @@ protected:
             //value null?
             if (is_null)
             {
-                ++interm_data.null_count;
                 if (selected)
+                {
                     ++interm_data.null_selected_count;
-                    
+                }
+                else 
+                {
+                    ++interm_data.null_count;
+                }
                 continue;
             }
 
-            //add to histogram
-            int bin_idx = histogram.add(data.get(cnt));
+            //find bin
+            //@TODO: we use the histogram as a bin finder and store the counts externally,
+            //but we could also add some "extra data" to each histogram bin in the future,
+            //in order to track multiple per-bin counts inside the histogram.
+            int bin_idx = histogram.findBin(data.get(cnt));
 
             if (bin_idx < 0)   // is non-insertable?
+            {
                 ++interm_data.not_inserted_count;
+            }
             else if (selected) // is selected?
+            {
                 ++interm_data.bin_data.at(bin_idx).selected;
+            }
+            else //just your typical valid-unselected-joe
+            {
+                ++interm_data.bin_data.at(bin_idx).count;
+            }
         }
 
         return true;
@@ -441,20 +490,20 @@ protected:
 
             for (size_t i = 0; i < h.numBins(); ++i)
             {
-                const auto& bin            = h.getBin(i);
-                const auto& bin_additional = d.bin_data.at(i);
-                auto&       res_bin        = r.bins.at(i);
+                const auto& h_bin    = h.getBin(i);
+                const auto& bin_data = d.bin_data.at(i);
+                auto&       res_bin  = r.bins.at(i);
 
                 //extract bin data
-                res_bin.count    = bin.count;
-                res_bin.selected = bin_additional.selected;
+                res_bin.count    = bin_data.count;
+                res_bin.selected = bin_data.selected;
 
                 //extract label
                 if (variable)
-                    res_bin.label = bin.label(variable);
+                    res_bin.label = h_bin.label(variable);
 
                 //per db content counts
-                r.valid_count += res_bin.count;
+                r.valid_count    += res_bin.count;
                 r.selected_count += res_bin.selected;
 
                 if (res_bin.count > r.max_count)

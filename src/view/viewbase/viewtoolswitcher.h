@@ -4,6 +4,7 @@
 #include <QString>
 #include <QIcon>
 #include <QCursor>
+#include <QKeySequence>
 
 class QWidget;
 class QShortcut;
@@ -19,12 +20,12 @@ class ViewToolSwitcher : public QObject
 public:
     struct Tool
     {
-        int        id = -1;
-        QString    name;
-        QString    key_combination;
-        QIcon      icon;
-        QCursor    cursor;
-        QShortcut* shortcut = nullptr;
+        int          id = -1;
+        QString      name;
+        QKeySequence key_combination;
+        QIcon        icon;
+        QCursor      cursor;
+        QShortcut*   shortcut = nullptr;
     };
 
     ViewToolSwitcher() = default;
@@ -35,7 +36,7 @@ public:
 
     void addTool(int id, 
                  const QString& name, 
-                 const QString& key_combination = QString(), 
+                 const QKeySequence& key_combination = QKeySequence(), 
                  const QIcon& icon = QIcon(), 
                  const QCursor& cursor = QCursor());
     
