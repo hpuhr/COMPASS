@@ -286,62 +286,64 @@ All possible filters existing in COMPASS can be set using view points, e.g.:
 {
         ...
         {
-            "id": 0,
-            "name": "all filters",
-            "position_latitude": 47.550205341739996,
-            "position_longitude": 14.672879071070001,
-            "position_window_latitude": 4.913833554478789,
-            "position_window_longitude": 7.054962643339518,
-            "status": "open",
-            "type": "Saved",
-            "db_objects": [
+            "data_source_types": [
+                "Other",
+                "RefTraj",
                 "Tracker"
             ],
             "filters": {
-                "Barometric Altitude": {
-                    "Barometric Altitude Maxmimum": "43000",
-                    "Barometric Altitude Minimum": "500"
+                "ADSBMOPS": {
+                    "ADSBMOPSCondition0": "0"
                 },
-                "Callsign": {
-                    "Callsign Values": "%TEST%"
+                "Aircraft Address": {
+                    "Aircraft Address Values": "3cc0c4"
                 },
-                "Hash Code": {
-                    "HashCode Values": "%81c20819%"
+                "Aircraft Identification": {
+                    "Aircraft Identification Values": "teh01,teh08"
                 },
-                "Mode 3/A Code": {
-                    "Mode 3/A Code Values": "7000"
+                "Detection Type": {
+                    "Radar Detection TypeCondition0": "1"
+                },
+                "Mode 3/A Codes": {
+                    "Mode 3/A Codes Values": "4547"
+                },
+                "Mode C Codes": {
+                    "Barometric Altitude Maximum": 24210.0,
+                    "Barometric Altitude Minimum": 230.0,
+                    "Barometric Altitude NULL": false
                 },
                 "Position": {
-                    "Latitude Maximum": "50.78493920733",
-                    "Latitude Minimum": "44.31547147615",
-                    "Longitude Maximum": "20.76559892354",
-                    "Longitude Minimum": "8.5801592186"
+                    "Latitude Maximum": "49.215488",
+                    "Latitude Minimum": "46.208428",
+                    "Longitude Maximum": "17.335926",
+                    "Longitude Minimum": "11.246144"
                 },
-                "Target Address": {
-                    "Target Address Values": "FEFE10"
+                "Timestamp": {
+                    "Timestamp Maximum": "2022-10-20 16:07:59.264",
+                    "Timestamp Minimum": "2022-10-19 15:37:58.116"
                 },
-                "Time of Day": {
-                    "Time of Day Maximum": "05:56:32.297",
-                    "Time of Day Minimum": "05:44:58.445"
-                },
-                "Tracker Data Sources": {
-                    "active_sources": [
-                        13040,
-                        13041
-                    ]
-                },
-                "Tracker Detection Type": {
-                    "Tracker Detection Types": "1"
-                },
-                "Tracker Multiple Sources": {
-                    "Tracker Multiple Sources Value": "N"
+                "Track Number": {
+                    "Track Number Values": "4547"
                 },
                 "Tracker Track Number": {
-                    "ARTAS_REF track_num": "7287",
-                    "ARTAS_TST track_num": "4479"
+                    "Values": {
+                        "12990": {
+                            "0": "4171",
+                            "1": "4281",
+                            "2": "4197"
+                        }
+                    }
                 }
-            }
-        },
+            },
+            "id": 3,
+            "name": "sk",
+            "position_latitude": 44.925597197536945,
+            "position_longitude": 10.942831791785709,
+            "position_window_latitude": 3.955006961478041,
+            "position_window_longitude": 5.390988117653051,
+            "status": "open",
+            "type": "Saved"
+        }
         ...
 }
 \end{lstlisting}        

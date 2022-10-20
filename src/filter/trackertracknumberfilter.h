@@ -33,6 +33,7 @@ public:
 
     void setTrackerTrackNum(unsigned int ds_id, unsigned int line_id, const std::string& value);
     std::map<unsigned int, std::map<unsigned int, std::string>> getActiveTrackerTrackNums ();
+    std::map<std::string, std::map<std::string, std::string>> getActiveTrackerTrackNumsStr ();
     // ds_id -> line -> track nums
 
 protected:

@@ -159,17 +159,17 @@ When active, this filter forces loading of data without any secondary attributes
 % 
 % When active, this filter forces loading of Tracker data with the multiple sources flag, e.g. 'Y' (only track updates formed from multiple sources) or 'N' (only track updates formed using 1 source). Tracker target reports without such information will not be loaded.
 % 
-% \subsection{Tracker Track Number Filter}
-% 
-% \begin{figure}[H]
-%   \center
-%     \includegraphics[width=8cm,frame]{figures/filter_trackertracknum.png}
-%   \caption{Tracker Track Number filter}
-% \end{figure}
-% 
-% This filter works similiar to the 'Track Number' filter, but filters only DBObject Tracker, and allows for track numbers specific for each data source. E.g. '1' is possible, or '1,2,3', or '*' (all tracks).\\
-% 
-% It can be used when e.g. several Tracker runs were added, so that track numbers (from the same target) for each run can be specified seperately. \\
+\subsection{Tracker Track Number Filter}
+
+\begin{figure}[H]
+  \center
+    \includegraphics[width=12cm,frame]{figures/filter_trackertracknum.png}
+  \caption{Tracker Track Number filter}
+\end{figure}
+
+This filter works similiar to the 'Track Number' filter, but filters only CAT062 data, and allows for track numbers specific for each data source and existing lines, e.g. '1' or '1,2,3'.\\
+
+It can be used when e.g. several Tracker runs were added in diifferent lines, so that track numbers (from the same target) for each run can be specified seperately. \\
 
 \subsection{Timestamp Filter}
 

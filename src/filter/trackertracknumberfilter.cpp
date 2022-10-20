@@ -132,8 +132,8 @@ void TrackerTrackNumberFilter::saveViewPointConditions (nlohmann::json& filters)
 
     json& filter = filters.at(name_);
 
-    assert (!filter.contains("values"));
-    filter["values"] = getActiveTrackerTrackNums();
+    assert (!filter.contains("Values"));
+    filter["Values"] = getActiveTrackerTrackNumsStr();
 }
 
 void TrackerTrackNumberFilter::loadViewPointConditions (const nlohmann::json& filters)
@@ -145,10 +145,10 @@ void TrackerTrackNumberFilter::loadViewPointConditions (const nlohmann::json& fi
     assert (filters.contains(name_));
     const json& filter = filters.at(name_);
 
-    assert (filter.contains("values"));
+    assert (filter.contains("Values"));
 
     std::map<std::string, std::map<std::string, std::string>> vp_values =
-            filter.at("values").get<std::map<std::string, std::map<std::string, std::string>>>();
+            filter.at("Values").get<std::map<std::string, std::map<std::string, std::string>>>();
 
     for (auto& ds_it : vp_values)
     {
@@ -212,6 +212,44 @@ std::map<unsigned int, std::map<unsigned int, std::string>> TrackerTrackNumberFi
 
     return active_values;
 }
+
+std::map<std::string, std::map<std::string, std::string>> TrackerTrackNumberFilter::getActiveTrackerTrackNumsStr ()
+{
+    // ds_id -> line_id -> values
+    std::map<std::string, std::map<std::string, std::string>> saved_values =
+            tracker_track_nums_.get<std::map<std::string, std::map<std::string, std::string>>>();
+
+    std::map<std::string, std::map<std::string, std::string>> active_values;
+
+    for (auto& ds_it : COMPASS::instance().dataSourceManager().dbDataSources())
+    {
+        if (ds_it->dsType() != "Tracker")
+            continue;
+
+        if (!ds_it->hasNumInserted())
+            continue;
+
+        string ds_id_str = to_string(ds_it->id());
+
+        std::map<unsigned int, unsigned int> line_cnts = ds_it->numInsertedLinesMap();
+
+        for (auto& line_cnt_it : line_cnts)
+        {
+            if (line_cnt_it.second == 0)
+                continue;
+
+            string line_id_str = to_string(line_cnt_it.first);
+
+            if (saved_values.count(ds_id_str) && saved_values.at(ds_id_str).count(line_id_str))
+                active_values[to_string(ds_it->id())][line_id_str] = saved_values.at(ds_id_str).at(line_id_str);
+            else
+                active_values[to_string(ds_it->id())][line_id_str] = "";
+        }
+    }
+
+    return active_values;
+}
+
 
 void TrackerTrackNumberFilter::updateDataSourcesSlot()
 {
