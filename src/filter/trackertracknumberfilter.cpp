@@ -147,11 +147,18 @@ void TrackerTrackNumberFilter::loadViewPointConditions (const nlohmann::json& fi
 
     assert (filter.contains("values"));
 
-    std::map<std::string, std::string> vp_values = filter.at("values").get<std::map<std::string, std::string>>();
+    std::map<std::string, std::map<std::string, std::string>> vp_values =
+            filter.at("values").get<std::map<std::string, std::map<std::string, std::string>>>();
 
-    for (auto& val_it : vp_values)
+    for (auto& ds_it : vp_values)
     {
-        tracker_track_nums_[val_it.first] = val_it.second;
+        for (auto& line_it : ds_it.second)
+        {
+            if (!tracker_track_nums_.contains(ds_it.first))
+                tracker_track_nums_[ds_it.first] = json::object();
+
+            tracker_track_nums_[ds_it.first][line_it.first] = line_it.second;
+        }
     }
 
     if (widget())
