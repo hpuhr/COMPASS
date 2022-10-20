@@ -4,6 +4,7 @@
 #include <map>
 
 #include <QToolBar>
+#include <QKeySequence>
 
 class ViewToolSwitcher;
 
@@ -25,7 +26,7 @@ public:
     void addActionCallback(const QString& name,
                            const Callback& cb,
                            const QIcon& icon = QIcon(),
-                           const QString& key_combination = QString());
+                           const QKeySequence& key_combination = QKeySequence());
     void addSeparator();
 
 private:

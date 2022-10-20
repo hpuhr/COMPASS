@@ -17,6 +17,8 @@ HistogramViewChartView::HistogramViewChartView(HistogramViewDataWidget* data_wid
 :   ChartView   (chart, parent)
 ,   data_widget_(data_widget  )
 {
+    setSelectionStyle(SelectionStyle::X);
+
     assert (data_widget_);
 }
 

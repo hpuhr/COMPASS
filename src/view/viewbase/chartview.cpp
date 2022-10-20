@@ -6,6 +6,7 @@
 #include <QChart>
 #include <QAreaSeries>
 #include <QLineSeries>
+#include <QXYSeries>
 
 //#define USE_CHART_SERIES_BASED_SELECTION_BOX
 
@@ -114,6 +115,8 @@ void ChartView::updateSelectionBox(const QRectF& region)
     selection_box_->upperSeries()->append(region.left() , region.bottom());
     selection_box_->upperSeries()->append(region.right(), region.bottom());
 
+    //@TODO: implement SelectionStyle
+
     selection_box_->show();
 }
 
@@ -131,7 +134,19 @@ void ChartView::updateRubberBand(const QRectF& region)
         return;
     }
 
-    rubber_band_->setGeometry(region.toRect());
+    if (selection_style_ == SelectionStyle::XY || !chart())
+    {
+        rubber_band_->setGeometry(region.toRect());
+    }
+    else 
+    {
+        auto x0 = region.left();
+        auto x1 = region.right();
+        auto y0 = this->chart()->plotArea().top();
+        auto y1 = this->chart()->plotArea().bottom();
+        rubber_band_->setGeometry(QRectF(x0, y0, x1 - x0, y1 - y0).toRect());
+    }
+    
     rubber_band_->show();
 }
 
@@ -238,7 +253,7 @@ bool ChartView::isSelectionEnabled() const
  */
 void ChartView::seriesPressedSlot(const QPointF& point)
 {
-    QPointF p = chart()->mapToPosition(point); // widget pos
+    QPointF p = widgetFromChart(point); // widget pos
 
     logdbg << "ChartView: seriesPressedSlot: x " << point.x() << " y " << point.y();
 
@@ -252,7 +267,7 @@ void ChartView::seriesPressedSlot(const QPointF& point)
  */
 void ChartView::seriesReleasedSlot(const QPointF& point)
 {
-    QPointF p = chart()->mapToPosition(point); // widget pos
+    QPointF p = widgetFromChart(point); // widget pos
 
     logdbg << "ChartView: seriesReleasedSlot: x " << point.x() << " y " << point.y();
 
@@ -318,4 +333,19 @@ void ChartView::paintEvent(QPaintEvent *e)
 #else
     updateRubberBand(selected_region_widget_);
 #endif
+}
+
+/**
+ */
+void ChartView::addLegendOnlyItem(const QString& name, const QColor& color)
+{
+    if (!chart())
+        return;
+
+    QtCharts::QLineSeries* series = new QtCharts::QLineSeries;
+    series->setName(name);
+    series->setColor(color);
+    series->show();
+
+    chart()->addSeries(series);
 }

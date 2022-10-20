@@ -59,7 +59,7 @@ void ViewToolWidget::addTool(int id)
 void ViewToolWidget::addActionCallback(const QString& name,
                                        const Callback& cb,
                                        const QIcon& icon,
-                                       const QString& key_combination)
+                                       const QKeySequence& key_combination)
 {
     QAction* action = new QAction;
     
@@ -67,10 +67,10 @@ void ViewToolWidget::addActionCallback(const QString& name,
 
     if (!key_combination.isEmpty())
     {
-        full_name += " [" + key_combination + "]";
+        full_name += " [" + key_combination.toString() + "]";
 
         action->setShortcut(key_combination);
-        action->setShortcutContext(Qt::ShortcutContext::WidgetShortcut);
+        action->setShortcutContext(Qt::ShortcutContext::WindowShortcut); //@TODO: optimal context?
     }
 
     action->setText(full_name);

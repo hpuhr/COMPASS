@@ -50,9 +50,9 @@ ScatterPlotViewWidget::ScatterPlotViewWidget(const std::string& class_id, const 
         return QIcon(Utils::Files::getIconFilepath(fn).c_str());
     };
 
-    getViewToolSwitcher()->addTool(Tool::SP_NAVIGATE_TOOL, "Navigate", "", QIcon(), Qt::OpenHandCursor);
-    getViewToolSwitcher()->addTool(Tool::SP_SELECT_TOOL, "Select", "S", icon("select_action.png"), Qt::CrossCursor);
-    getViewToolSwitcher()->addTool(Tool::SP_ZOOM_RECT_TOOL, "Zoom to Rectangle", "R", icon("zoom_select_action.png"), Qt::CrossCursor);
+    getViewToolSwitcher()->addTool(Tool::SP_NAVIGATE_TOOL, "Navigate", {}, QIcon(), Qt::OpenHandCursor);
+    getViewToolSwitcher()->addTool(Tool::SP_SELECT_TOOL, "Select", Qt::Key_S, icon("select_action.png"), Qt::CrossCursor);
+    getViewToolSwitcher()->addTool(Tool::SP_ZOOM_RECT_TOOL, "Zoom to Rectangle", Qt::Key_R, icon("zoom_select_action.png"), Qt::CrossCursor);
 
     getViewToolSwitcher()->setDefaultTool(Tool::SP_NAVIGATE_TOOL);
     
@@ -66,7 +66,7 @@ ScatterPlotViewWidget::ScatterPlotViewWidget(const std::string& class_id, const 
 
     getViewToolWidget()->addSeparator();
 
-    getViewToolWidget()->addActionCallback("Zoom to Home", [=] () { data_widget->resetZoomSlot(); }, icon("zoom_home.png"), "Space");
+    getViewToolWidget()->addActionCallback("Zoom to Home", [=] () { data_widget->resetZoomSlot(); }, icon("zoom_home.png"), Qt::Key_Space);
 }
 
 /**

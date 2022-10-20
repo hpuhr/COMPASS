@@ -168,6 +168,14 @@ public:
 
     /**
      */
+    void resetBins()
+    {
+        for (auto& b : bins_)
+            b.reset();
+    }
+
+    /**
+     */
     size_t numBins() const
     {
         return bins_.size();
@@ -242,17 +250,25 @@ public:
     {
         int bin_idx = findBin(v);
 
-        //no bin found?
-        if (bin_idx < 0)
+        increment(bin_idx);
+
+        return bin_idx;
+    }
+
+    /**
+     * Increment the given bin.
+     */
+    void increment(int idx) 
+    {
+        //invalid bin?
+        if (idx < 0)
         {
             not_found_bin_.add();
-            return -1;
+            return;
         }
 
         //increment bin
-        bins_.at(bin_idx).add();
-
-        return bin_idx;
+        bins_.at(idx).add();
     }
 
     /**

@@ -49,7 +49,7 @@ void ViewToolSwitcher::setDefaultTool(int default_id, bool send_update)
  */
 void ViewToolSwitcher::addTool(int id, 
                                const QString& name, 
-                               const QString& key_combination, 
+                               const QKeySequence& key_combination, 
                                const QIcon& icon, 
                                const QCursor& cursor)
 {
@@ -65,7 +65,7 @@ void ViewToolSwitcher::addTool(int id,
 
     if (!key_combination.isEmpty())
     {
-        t.name += " [" + key_combination + "]";
+        t.name += " [" + key_combination.toString() + "]";
 
         t.shortcut = new QShortcut(key_combination, data_widget_);
         connect(t.shortcut, &QShortcut::activated, [ = ] () { this->setCurrentTool(id); });

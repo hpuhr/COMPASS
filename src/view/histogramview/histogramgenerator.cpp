@@ -24,10 +24,27 @@ void HistogramGenerator::setMetaVariable(dbContent::MetaVariable* variable)
 
 /**
  */
+void HistogramGenerator::setBufferData(Data* data)
+{
+    reset();
+
+    buffer_data_ = data;
+}
+
+/**
+ */
 void HistogramGenerator::reset()
 {
     sub_range_active_  = false;
     scanned_content_   = {};
+    intermediate_data_ = {};
+    results_           = {};
+}
+
+/**
+ */
+void HistogramGenerator::prepareForRefill()
+{
     intermediate_data_ = {};
     results_           = {};
 }
@@ -68,32 +85,20 @@ dbContent::Variable* HistogramGenerator::currentVariable(const std::string& db_c
 }
 
 /**
+ * Refills the histograms using buffer data.
  */
-void HistogramGenerator::updateFromBuffers(std::map<std::string, std::shared_ptr<Buffer>>& data)
+bool HistogramGenerator::refill()
 {
-    //reset content
-    reset();
+    loginf << "HistogramGenerator: Refilling...";
 
-    loginf << "HistogramGenerator: Scanning buffers...";
+    if (!buffer_data_)
+        return false;
 
-    //scan all buffers (min-max etc.)
-    for (auto& elem : data)
-    {
-        bool ok = scanBuffer(elem.first, *elem.second);
-
-        if (!ok)
-            logwrn << "HistogramGenerator: Could not scan buffer of DBContent " << elem.first;
-    }
-
-    loginf << "HistogramGenerator: Preparing histograms...";
-
-    //prepare histograms
-    prepareHistograms();
-
-    loginf << "HistogramGenerator: Adding buffers...";
+    //empty/prealloc some data etc.
+    prepareForRefill();
 
     //add all buffers
-    for (auto& elem : data)
+    for (auto& elem : *buffer_data_)
     {
         bool ok = addBuffer(elem.first, *elem.second);
 
@@ -106,6 +111,41 @@ void HistogramGenerator::updateFromBuffers(std::map<std::string, std::shared_ptr
     //create results
     finalizeResults();
 
+    loginf << "HistogramGenerator: Refilled!";
+
+    return true;
+}
+
+/**
+ * Completely updates using the governed buffer data.
+ */
+void HistogramGenerator::updateFromBufferData()
+{
+    if (!buffer_data_)
+        return;
+
+    //reset content
+    reset();
+
+    loginf << "HistogramGenerator: Scanning buffers...";
+
+    //scan all buffers (min-max etc.)
+    for (auto& elem : *buffer_data_)
+    {
+        bool ok = scanBuffer(elem.first, *elem.second);
+
+        if (!ok)
+            logwrn << "HistogramGenerator: Could not scan buffer of DBContent " << elem.first;
+    }
+
+    loginf << "HistogramGenerator: Preparing histograms...";
+
+    //prepare histograms
+    prepareHistograms();
+
+    //refill data
+    refill();
+
     loginf << "HistogramGenerator: Generated histograms!";
 }
 
@@ -117,6 +157,7 @@ void HistogramGenerator::updateFromEvaluation(const std::string& eval_grpreq, co
 }
 
 /**
+ * Scans the buffer, thus collecting important information used for histogram generation.
  */
 bool HistogramGenerator::scanBuffer(const std::string& db_content, Buffer& buffer)
 {
@@ -132,8 +173,11 @@ bool HistogramGenerator::scanBuffer(const std::string& db_content, Buffer& buffe
 /**
  * Selects the given sub range of bins in the data (the histograms should be regenerated afterwards).
  */
-bool HistogramGenerator::select(Data& data, unsigned int bin0, unsigned int bin1)
+bool HistogramGenerator::select(unsigned int bin0, unsigned int bin1)
 {
+    if (!buffer_data_)
+        return false;
+
     //selection needs a valid result
     if (!hasValidResult())
         return false;
@@ -156,7 +200,7 @@ bool HistogramGenerator::select(Data& data, unsigned int bin0, unsigned int bin1
     bool ok = true;
 
     //run selection on all buffers
-    for (auto& elem : data)
+    for (auto& elem : *buffer_data_)
     {
         ok = ok && selectBuffer(elem.first, *elem.second, bin0, bin1, select_min_max, select_null, add_to_selection);
     }
@@ -167,9 +211,12 @@ bool HistogramGenerator::select(Data& data, unsigned int bin0, unsigned int bin1
 /**
  * Zooms to the given subrange of bins and refills the data.
  */
-bool HistogramGenerator::zoom(Data& data, unsigned int bin0, unsigned int bin1)
+bool HistogramGenerator::zoom(unsigned int bin0, unsigned int bin1)
 {
     loginf << "HistogramGenerator: Zooming to bin range...";
+
+    if (!buffer_data_)
+        return false;
 
     if (!hasValidResult())
         return false;
@@ -186,21 +233,9 @@ bool HistogramGenerator::zoom(Data& data, unsigned int bin0, unsigned int bin1)
 
     sub_range_active_ = true;
 
-    loginf << "HistogramGenerator: Readding buffers...";
-
-    //readd all buffers
-    for (auto& elem : data)
-    {
-        bool ok = addBuffer(elem.first, *elem.second);
-
-        if (!ok)
-            logwrn << "HistogramGenerator: Could not readd buffer of DBContent " << elem.first;
-    }
-
-    loginf << "HistogramGenerator: Finalizing results for zoom level...";
-
-    //create results
-    finalizeResults();
+    //refill histograms
+    if (!refill())
+        return false;
 
     loginf << "HistogramGenerator: Zooming finished!";
 
