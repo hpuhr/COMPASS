@@ -65,8 +65,8 @@ DBContentManager::DBContentManager(const std::string& class_id, const std::strin
 
     registerParameter("use_order", &use_order_, false);
     registerParameter("use_order_ascending", &use_order_ascending_, false);
-    registerParameter("order_variable_dbcontent_name", &order_variable_dbcontent_name_, "");
-    registerParameter("order_variable_name", &order_variable_name_, "");
+    registerParameter("order_variable_dbcontent_name", &order_variable_dbcontent_name_, "Meta");
+    registerParameter("order_variable_name", &order_variable_name_, "Timestamp");
 
     registerParameter("use_limit", &use_limit_, false);
     registerParameter("limit_min", &limit_min_, 0);
