@@ -49,31 +49,53 @@ std::string TrackerTrackNumberFilter::getConditionString(const std::string& dbco
     assert (COMPASS::instance().dbContentManager().metaVariable(
                 DBContent::meta_var_track_num_.name()).existsIn(dbcontent_name));
 
-    if (active_ && getActiveTrackerTrackNums().size())
+    // ds_id -> line_id -> values
+    std::map<unsigned int, std::map<unsigned int, std::string>> active_tns = getActiveTrackerTrackNums();
+
+    if (active_ && active_tns.size())
     {
         dbContent::Variable& ds_id_var = COMPASS::instance().dbContentManager().metaVariable(
                     DBContent::meta_var_datasource_id_.name()).getFor(dbcontent_name);
         filtered_variables.push_back(&ds_id_var);
 
+        dbContent::Variable& line_var = COMPASS::instance().dbContentManager().metaVariable(
+                    DBContent::meta_var_line_id_.name()).getFor(dbcontent_name);
+        filtered_variables.push_back(&line_var);
+
+
         dbContent::Variable& tn_var = COMPASS::instance().dbContentManager().metaVariable(
                     DBContent::meta_var_track_num_.name()).getFor(dbcontent_name);
         filtered_variables.push_back(&tn_var);
 
-        for (auto& val_it : getActiveTrackerTrackNums())
+        if (!first)
         {
-
-            if (!first)
-            {
-                ss << " AND";
-            }
-
-            ss << " (" + ds_id_var.dbColumnName() << " = " << val_it.first;
-            ss << " AND " << tn_var.dbColumnName() << " IN (" << val_it.second << ")";
-
-            ss << ")";
-
-            first = false;
+            ss << " AND ";
         }
+
+        ss << "(";
+
+        bool first_inside = true;
+
+        for (auto& ds_it : active_tns)
+        {
+            for (auto& line_it : ds_it.second)
+            {
+                if (!first_inside)
+                {
+                    ss << " OR ";
+                }
+
+                ss << " (" + ds_id_var.dbColumnName() << " = " << ds_it.first;
+                ss << " AND " + line_var.dbColumnName() << " = " << line_it.first;
+                ss << " AND " << tn_var.dbColumnName() << " IN (" << line_it.second << "))";
+
+                first_inside = false;
+            }
+        }
+
+        ss << ")";
+
+        first = false;
     }
 
     loginf << "TrackerTrackNumberFilter: getConditionString: here '" << ss.str() << "'";
@@ -136,18 +158,24 @@ void TrackerTrackNumberFilter::loadViewPointConditions (const nlohmann::json& fi
         widget()->update();
 }
 
-void TrackerTrackNumberFilter::setTrackerTrackNum(unsigned int ds_id, const std::string& value)
+void TrackerTrackNumberFilter::setTrackerTrackNum(unsigned int ds_id, unsigned int line_id, const std::string& value)
 {
-    loginf << "TrackerTrackNumberFilter: setTrackerTrackNum: ds_id " << ds_id << " value '" << value << "'";
+    loginf << "TrackerTrackNumberFilter: setTrackerTrackNum: ds_id " << ds_id
+           << " line_id " << line_id << " value '" << value << "'";
 
-    tracker_track_nums_[to_string(ds_id)] = value;
+    if (!tracker_track_nums_.contains(to_string(ds_id)))
+        tracker_track_nums_[to_string(ds_id)] = json::object();
+
+    tracker_track_nums_[to_string(ds_id)][to_string(line_id)] = value;
 }
 
-std::map<unsigned int, std::string> TrackerTrackNumberFilter::getActiveTrackerTrackNums ()
+std::map<unsigned int, std::map<unsigned int, std::string>> TrackerTrackNumberFilter::getActiveTrackerTrackNums ()
 {
-    std::map<std::string, std::string> saved_values = tracker_track_nums_.get<std::map<std::string, std::string>>();
+    // ds_id -> line_id -> values
+    std::map<std::string, std::map<std::string, std::string>> saved_values =
+            tracker_track_nums_.get<std::map<std::string, std::map<std::string, std::string>>>();
 
-    std::map<unsigned int, std::string> active_values;
+    std::map<unsigned int, std::map<unsigned int, std::string>> active_values;
 
     for (auto& ds_it : COMPASS::instance().dataSourceManager().dbDataSources())
     {
@@ -159,10 +187,20 @@ std::map<unsigned int, std::string> TrackerTrackNumberFilter::getActiveTrackerTr
 
         string ds_id_str = to_string(ds_it->id());
 
-        if (saved_values.count(ds_id_str))
-            active_values[ds_it->id()] = saved_values.at(ds_id_str);
-        else
-            active_values[ds_it->id()] = "";
+        std::map<unsigned int, unsigned int> line_cnts = ds_it->numInsertedLinesMap();
+
+        for (auto& line_cnt_it : line_cnts)
+        {
+            if (line_cnt_it.second == 0)
+                continue;
+
+            string line_id_str = to_string(line_cnt_it.first);
+
+            if (saved_values.count(ds_id_str) && saved_values.at(ds_id_str).count(line_id_str))
+                active_values[ds_it->id()][line_cnt_it.first] = saved_values.at(ds_id_str).at(line_id_str);
+            else
+                active_values[ds_it->id()][line_cnt_it.first] = "";
+        }
     }
 
     return active_values;

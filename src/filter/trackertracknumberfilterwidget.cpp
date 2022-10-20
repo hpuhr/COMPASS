@@ -3,6 +3,7 @@
 #include "datasourcemanager.h"
 #include "compass.h"
 #include "logger.h"
+#include "stringconv.h"
 
 #include <QFormLayout>
 #include <QLabel>
@@ -45,19 +46,24 @@ void TrackerTrackNumberFilterWidget::update()
 
     DataSourceManager& ds_man = COMPASS::instance().dataSourceManager();
 
-    // ds_id -> values
-    std::map<unsigned int, std::string> active_values = filter_.getActiveTrackerTrackNums();
+    // ds_id -> line_id -> values
+    std::map<unsigned int, std::map<unsigned int, std::string>> active_values = filter_.getActiveTrackerTrackNums();
     std::string ds_name;
 
-    for (auto& val_it : active_values)
+    for (auto& ds_it : active_values)
     {
-        assert (ds_man.hasDBDataSource(val_it.first));
-        ds_name = ds_man.dbDataSource(val_it.first).name();
+        for (auto& line_it : ds_it.second)
+        {
+            assert (ds_man.hasDBDataSource(ds_it.first));
+            ds_name = ds_man.dbDataSource(ds_it.first).name();
 
-        QLineEdit* value_edit = new QLineEdit(val_it.second.c_str());
-        value_edit->setProperty("ds_id", val_it.first);
-        connect(value_edit, &QLineEdit::textEdited, this, &TrackerTrackNumberFilterWidget::valueEditedSlot);
-        main_layout_->addRow((ds_name + " Track Number IN").c_str(), value_edit);
+            QLineEdit* value_edit = new QLineEdit(line_it.second.c_str());
+            value_edit->setProperty("ds_id", ds_it.first);
+            value_edit->setProperty("line_id", line_it.first);
+            connect(value_edit, &QLineEdit::textEdited, this, &TrackerTrackNumberFilterWidget::valueEditedSlot);
+            main_layout_->addRow((ds_name + " " + String::lineStrFrom(line_it.first)
+                                  + " Track Number IN").c_str(), value_edit);
+        }
     }
 }
 
@@ -68,11 +74,12 @@ void TrackerTrackNumberFilterWidget::valueEditedSlot(const QString& value)
     assert (value_edit);
 
     unsigned int ds_id = value_edit->property("ds_id").toUInt();
+    unsigned int line_id = value_edit->property("line_id").toUInt();
 
     loginf << "TrackerTrackNumberFilterWidget: valueEditedSlot: ds_id " << ds_id
            << " value '" << value.toStdString() << "'";
 
-    filter_.setTrackerTrackNum(ds_id, value.toStdString());
+    filter_.setTrackerTrackNum(ds_id, line_id, value.toStdString());
 }
 
 //void TrackerTrackNumberFilterWidget::minDateTimeChanged(const QDateTime& datetime)

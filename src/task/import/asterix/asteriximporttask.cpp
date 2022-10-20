@@ -1374,6 +1374,7 @@ void ASTERIXImportTask::checkAllDone()
         }
 
         COMPASS::instance().dataSourceManager().saveDBDataSources();
+        emit COMPASS::instance().dataSourceManager().dataSourcesChangedSignal();
         COMPASS::instance().interface().saveProperties();
     }
 

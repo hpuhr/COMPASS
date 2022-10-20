@@ -31,11 +31,12 @@ public:
     virtual void saveViewPointConditions (nlohmann::json& filters) override;
     virtual void loadViewPointConditions (const nlohmann::json& filters) override;
 
-    void setTrackerTrackNum(unsigned int ds_id, const std::string& value);
-    std::map<unsigned int, std::string> getActiveTrackerTrackNums ();
+    void setTrackerTrackNum(unsigned int ds_id, unsigned int line_id, const std::string& value);
+    std::map<unsigned int, std::map<unsigned int, std::string>> getActiveTrackerTrackNums ();
+    // ds_id -> line -> track nums
 
 protected:
-    nlohmann::json tracker_track_nums_; // ds_id -> track nums
+    nlohmann::json tracker_track_nums_; // ds_id -> line -> track nums
 
     virtual void checkSubConfigurables() override;
     virtual DBFilterWidget* createWidget() override;
