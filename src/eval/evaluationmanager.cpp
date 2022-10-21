@@ -50,6 +50,7 @@
 #include <QApplication>
 #include <QCoreApplication>
 #include <QThread>
+#include <QMessageBox>
 
 #include "boost/date_time/posix_time/posix_time.hpp"
 
@@ -654,11 +655,34 @@ void EvaluationManager::loadingDoneSlot()
     loginf << "EvaluationManager: loadingDoneSlot: line ref " << line_id_ref_ << " tst " << line_id_tst_;
 
     std::map<std::string, std::shared_ptr<Buffer>> data = dbcontent_man.loadedData();
-    assert (data.count(dbcontent_name_ref_));
+    if (!data.count(dbcontent_name_ref_))
+    {
+        QMessageBox m_warning(QMessageBox::Warning, "Loading Data Failed",
+                              "No reference data was loaded.",
+                              QMessageBox::Ok);
+        m_warning.exec();
+
+        if (widget_)
+            widget_->updateButtons();
+
+        return;
+    }
+
     data_.addReferenceData(dbcontent_man.dbContent(dbcontent_name_ref_), line_id_ref_, data.at(dbcontent_name_ref_));
     reference_data_loaded_ = true;
 
-    assert (data.count(dbcontent_name_tst_));
+    if (!data.count(dbcontent_name_tst_))
+    {
+        QMessageBox m_warning(QMessageBox::Warning, "Loading Data Failed",
+                              "No test data was loaded.",
+                              QMessageBox::Ok);
+        m_warning.exec();
+
+        if (widget_)
+            widget_->updateButtons();
+
+        return;
+    }
     data_.addTestData(dbcontent_man.dbContent(dbcontent_name_tst_), line_id_tst_, data.at(dbcontent_name_tst_));
     test_data_loaded_ = true;
 
