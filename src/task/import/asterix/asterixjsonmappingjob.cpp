@@ -39,7 +39,7 @@ void ASTERIXJSONMappingJob::run()
 
     for (auto& parser_it : parsers_)
     {
-        dbcontent_name = parser_it.second->dbObjectName();
+        dbcontent_name = parser_it.second->dbContentName();
 
         if (!buffers_.count(dbcontent_name))
             buffers_[dbcontent_name] = parser_it.second->getNewBuffer();
@@ -66,7 +66,7 @@ void ASTERIXJSONMappingJob::run()
 
         const unique_ptr<ASTERIXJSONParser>& parser = parsers_.at(category);
 
-        string dbcontent_name = parser->dbObjectName();
+        string dbcontent_name = parser->dbContentName();
 
         logdbg << "ASTERIXJSONMappingJob: run: mapping json: cat " << category;
 

@@ -349,6 +349,15 @@ QVariant AllBufferTableModel::data(const QModelIndex& index, int role) const
                     value_str = buffer->get<nlohmann::json>(property_name).getAsString(buffer_index);
                 }
             }
+            else if (data_type == PropertyDataType::TIMESTAMP)
+            {
+                assert(buffer->has<boost::posix_time::ptime>(property_name));
+                null = buffer->get<boost::posix_time::ptime>(property_name).isNull(buffer_index);
+                if (!null)
+                {
+                    value_str = buffer->get<boost::posix_time::ptime>(property_name).getAsString(buffer_index);
+                }
+            }
             else
                 throw std::domain_error("BufferTableWidget: show: unknown property data type");
 
@@ -472,6 +481,8 @@ void AllBufferTableModel::updateTimeIndexes()
 
     unsigned int num_time_none;
 
+    DBContentManager& dbcont_manager = COMPASS::instance().dbContentManager();
+
     for (auto& buf_it : buffers_)
     {
         buffer_index = 0;
@@ -491,19 +502,18 @@ void AllBufferTableModel::updateTimeIndexes()
             logdbg << "AllBufferTableModel: updateTimeIndexes: new " << dbcontent_name
                    << " data, last index " << buffer_index << " size " << buf_it.second->size();
 
-            DBContentManager& object_manager = COMPASS::instance().dbContentManager();
-            const dbContent::Variable& tod_var =
-                    object_manager.metaVariable(DBContent::meta_var_tod_.name()).getFor(dbcontent_name);
+            const dbContent::Variable& ts_var =
+                    dbcont_manager.metaVariable(DBContent::meta_var_timestamp_.name()).getFor(dbcontent_name);
 
-            assert(buf_it.second->has<float>(tod_var.name()));
-            NullableVector<float>& tods = buf_it.second->get<float>(tod_var.name());
+            assert(buf_it.second->has<boost::posix_time::ptime>(ts_var.name()));
+            NullableVector<boost::posix_time::ptime>& ts_vec = buf_it.second->get<boost::posix_time::ptime>(ts_var.name());
 
             assert(buf_it.second->has<bool>(DBContent::selected_var.name()));
             NullableVector<bool> selected_vec = buf_it.second->get<bool>(DBContent::selected_var.name());
 
             for (; buffer_index < buffer_size; ++buffer_index)
             {
-                if (tods.isNull(buffer_index))
+                if (ts_vec.isNull(buffer_index))
                 {
                     num_time_none++;
                     continue;
@@ -516,10 +526,10 @@ void AllBufferTableModel::updateTimeIndexes()
 
                     if (selected_vec.get(buffer_index))  // add if set
                         time_to_indexes_.insert(std::make_pair(
-                            tods.get(buffer_index), std::make_pair(dbo_num, buffer_index)));
+                            ts_vec.get(buffer_index), std::make_pair(dbo_num, buffer_index)));
                 }
                 else
-                    time_to_indexes_.insert(std::make_pair(tods.get(buffer_index),
+                    time_to_indexes_.insert(std::make_pair(ts_vec.get(buffer_index),
                                                            std::make_pair(dbo_num, buffer_index)));
             }
 

@@ -23,6 +23,9 @@
 
 #include <QVariant>
 
+#include "boost/date_time/posix_time/ptime.hpp"
+#include "boost/date_time/time_duration.hpp"
+
 #include <cassert>
 
 namespace EvaluationRequirement
@@ -31,12 +34,12 @@ namespace EvaluationRequirement
 class DubiousTrackUpdateDetail
 {
 public:
-    DubiousTrackUpdateDetail(float tod, EvaluationTargetPosition pos)
-        : tod_(tod), pos_(pos)
+    DubiousTrackUpdateDetail(boost::posix_time::ptime timestamp, EvaluationTargetPosition pos)
+        : timestamp_(timestamp), pos_(pos)
     {
     }
 
-    float tod_ {0};
+    boost::posix_time::ptime timestamp_;
     EvaluationTargetPosition pos_;
     std::map<std::string, std::string> dubious_comments_;
 
@@ -67,8 +70,8 @@ public:
 class DubiousTrackDetail
 {
 public:
-    DubiousTrackDetail(unsigned int track_num, float tod_begin)
-        : track_num_(track_num), tod_begin_(tod_begin)
+    DubiousTrackDetail(unsigned int track_num, boost::posix_time::ptime ts_begin)
+        : track_num_(track_num), tod_begin_(ts_begin)
     {
         tod_end_ = tod_begin_;
     }
@@ -76,9 +79,9 @@ public:
     bool first_inside_ {true};
 
     unsigned int track_num_ {0};
-    float tod_begin_ {0};
-    float tod_end_ {0};
-    float duration_ {0};
+    boost::posix_time::ptime tod_begin_;
+    boost::posix_time::ptime tod_end_;
+    boost::posix_time::time_duration duration_;
     //std::vector<float> tods_inside_;
 
     unsigned int num_pos_inside_{0};
@@ -180,7 +183,7 @@ protected:
     unsigned int min_updates_ {10};
 
     bool use_min_duration_ {true};
-    float min_duration_ {30.0};
+    boost::posix_time::time_duration min_duration_ {boost::posix_time::seconds(30)};
 
     bool use_max_groundspeed_ {true};
     float max_groundspeed_kts_ {1333.0};

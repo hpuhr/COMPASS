@@ -35,16 +35,22 @@ void ASTERIXPostProcess::postProcess(unsigned int category, nlohmann::json& reco
     int sac{-1};
     int sic{-1};
 
-    if (record.contains("010"))
+    if (!record.contains("010"))
     {
-        assert (record.at("010").contains("SAC"));
-        sac = record.at("010").at("SAC");
+        logwrn << "ASTERIXPostProcess: postProcess: record without item 010: '" << record.dump(4)
+               << "', setting 256/256";
 
-        assert (record.at("010").contains("SIC"));
-        sic = record.at("010").at("SIC");
-
-        record["ds_id"] = Number::dsIdFrom(sac, sic);
+        record["010"]["SAC"] = 0;
+        record["010"]["SIC"] = 255;
     }
+
+    assert (record.at("010").contains("SAC"));
+    sac = record.at("010").at("SAC");
+
+    assert (record.at("010").contains("SIC"));
+    sic = record.at("010").at("SIC");
+
+    record["ds_id"] = Number::dsIdFrom(sac, sic);
 
     if (category == 1)  // CAT001 coversion hack
         postProcessCAT001(sac, sic, record);

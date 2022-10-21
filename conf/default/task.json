@@ -29,6 +29,11 @@
             "path": "task_import_gps.json"
         },
         {
+            "class_id": "JSONImportTask",
+            "instance_id": "JSONImportTask0",
+            "path": "task_import_json.json"
+        },
+        {
             "class_id": "ManageDBContentTask",
             "instance_id": "ManageDBContentTask0",
             "path": "task_manage_dbcontent.json"

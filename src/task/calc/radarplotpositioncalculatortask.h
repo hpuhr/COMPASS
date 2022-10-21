@@ -47,7 +47,7 @@ class RadarPlotPositionCalculatorTask : public Task, public Configurable
     Q_OBJECT
 
 public slots:
-    void loadedDataDataSlot(const std::map<std::string, std::shared_ptr<Buffer>>& data, bool requires_reset);
+    void loadedDataSlot(const std::map<std::string, std::shared_ptr<Buffer>>& data, bool requires_reset);
     void loadingDoneSlot();
 
     void updateDoneSlot(DBContent& db_content);

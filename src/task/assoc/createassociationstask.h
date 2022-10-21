@@ -70,7 +70,7 @@ public:
     dbContent::MetaVariable* keyVar() const;
     dbContent::MetaVariable* dsIdVar() const;
     dbContent::MetaVariable* lineIdVar() const;
-    dbContent::MetaVariable* todVar() const;
+    dbContent::MetaVariable* timestampVar() const;
     dbContent::MetaVariable* targetAddrVar() const;
     dbContent::MetaVariable* targetIdVar() const;
     dbContent::MetaVariable* trackNumVar() const;
@@ -147,7 +147,7 @@ protected:
     dbContent::MetaVariable* rec_num_var_{nullptr};
     dbContent::MetaVariable* ds_id_var_{nullptr};
     dbContent::MetaVariable* line_id_var_{nullptr};
-    dbContent::MetaVariable* tod_var_{nullptr};
+    dbContent::MetaVariable* ts_var_{nullptr};
     dbContent::MetaVariable* target_addr_var_{nullptr};
     dbContent::MetaVariable* target_id_var_{nullptr};
     dbContent::MetaVariable* track_num_var_{nullptr};

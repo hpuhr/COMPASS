@@ -17,6 +17,8 @@
 
 #include "jsonparsingschema.h"
 
+using namespace std;
+
 JSONParsingSchema::JSONParsingSchema(const std::string& class_id, const std::string& instance_id,
                                      Configurable* parent)
     : Configurable(class_id, instance_id, parent)
@@ -66,10 +68,12 @@ void JSONParsingSchema::generateSubConfigurable(const std::string& class_id,
         logdbg << "JSONParsingSchema: generateSubConfigurable: generating schema " << instance_id
                << " with name " << name;
 
-        parsers_.emplace(
-            std::piecewise_construct,
-            std::forward_as_tuple(name),                          // args for key
-            std::forward_as_tuple(class_id, instance_id, this));  // args for mapped value
+//        parsers_.emplace(
+//            std::piecewise_construct,
+//            std::forward_as_tuple(name),                          // args for key
+//            std::forward_as_tuple(class_id, instance_id, this));  // args for mapped value
+
+        parsers_[name].reset(new JSONObjectParser (class_id, instance_id, this));
     }
     else
         throw std::runtime_error("JSONImporterTask: generateSubConfigurable: unknown class_id " +
@@ -83,7 +87,7 @@ void JSONParsingSchema::name(const std::string& name) { name_ = name; }
 JSONObjectParser& JSONParsingSchema::parser(const std::string& name)
 {
     assert(hasObjectParser(name));
-    return parsers_.at(name);
+    return *parsers_.at(name);
 }
 
 void JSONParsingSchema::removeParser(const std::string& name)
@@ -95,5 +99,5 @@ void JSONParsingSchema::removeParser(const std::string& name)
 void JSONParsingSchema::updateMappings()
 {
     for (auto& p_it : parsers_)
-        p_it.second.updateMappings();
+        p_it.second->updateMappings();
 }

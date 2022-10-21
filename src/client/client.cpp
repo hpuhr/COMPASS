@@ -35,6 +35,8 @@
 #include <QSurfaceFormat>
 #include <QSplashScreen>
 
+#include "util/tbbhack.h"
+
 #include <boost/filesystem.hpp>
 #include <boost/program_options.hpp>
 #include "boost/date_time/posix_time/posix_time.hpp"
@@ -42,8 +44,6 @@
 #include <string>
 #include <locale.h>
 #include <thread>
-
-#include <tbb/tbb.h>
 
 #if USE_EXPERIMENTAL_SOURCE == true
 #include <osgDB/Registry>
@@ -58,13 +58,12 @@ namespace po = boost::program_options;
 
 std::string APP_FILENAME;
 
+
 Client::Client(int& argc, char** argv) : QApplication(argc, argv)
 {
     setlocale(LC_ALL, "C");
 
     APP_FILENAME = argv[0];
-
-    tbb::task_scheduler_init guard(std::thread::hardware_concurrency());
 
     //    QApplication::setAttribute(Qt::AA_ShareOpenGLContexts);
 
@@ -111,19 +110,25 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
              "imports ASTERIX file with given filename, e.g. '/data/file1.ff'")
             ("import_asterix_file_line", po::value<std::string>(&import_asterix_file_line_),
              "imports ASTERIX file with given line, e.g. 'L2'")
+            ("import_asterix_date", po::value<std::string>(&import_asterix_date_),
+             "imports ASTERIX file with given date, in YYYY-MM-DD format e.g. '2020-04-20'")
+            ("import_asterix_file_time_offset", po::value<std::string>(&import_asterix_file_time_offset_),
+             "used time offset during ASTERIX file import Time of Day override, in HH:MM:SS.ZZZ'")
             ("import_asterix_network", po::bool_switch(&import_asterix_network_),
              "imports ASTERIX from defined network UDP streams")
             ("import_asterix_network_time_offset", po::value<std::string>(&import_asterix_network_time_offset_),
              "used time offset during ASTERIX network import, in HH:MM:SS.ZZZ'")
             ("import_asterix_network_max_lines", po::value<int>(&import_asterix_network_max_lines_),
              "maximum number of lines per data source during ASTERIX network import, 1..4'")
+            ("import_asterix_network_ignore_future_ts", po::bool_switch(&import_asterix_network_ignore_future_ts_),
+             "ignore future timestamps during ASTERIX network import'")
             ("asterix_framing", po::value<std::string>(&asterix_framing),
              "sets ASTERIX framing, e.g. 'none', 'ioss', 'ioss_seq', 'rff'")
             ("asterix_decoder_cfg", po::value<std::string>(&asterix_decoder_cfg),
              "sets ASTERIX decoder config using JSON string, e.g. ''{\"10\":{\"edition\":\"0.31\"}}''"
                          " (including one pair of single quotes)")
-            //            ("import_json", po::value<std::string>(&import_json_filename),
-            //             "imports JSON file with given filename, e.g. '/data/file1.json'")
+            ("import_json", po::value<std::string>(&import_json_filename_),
+             "imports JSON file with given filename, e.g. '/data/file1.json'")
             //            ("json_schema", po::value<std::string>(&import_json_schema),
             //             "JSON file import schema, e.g. 'jASTERIX', 'OpenSkyNetwork', 'ADSBExchange', 'SDDL'")
             ("import_gps_trail", po::value<std::string>(&import_gps_trail_filename_),
@@ -188,7 +193,37 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
 
 void Client::run ()
 {
-    loginf << "COMPASSClient: started with " << std::thread::hardware_concurrency() << " threads";
+    unsigned int num_threads = std::thread::hardware_concurrency();
+
+// #define TBB_VERSION_MAJOR 4
+
+#if TBB_VERSION_MAJOR <= 4
+    loginf << "COMPASSClient: started with " << num_threads << " threads (tbb old)";
+    tbb::task_scheduler_init init {num_threads};
+    // TODO ENABLE in appimage
+#else
+    loginf << "COMPASSClient: started with " << num_threads << " threads";
+    //tbb::global_control global_limit(tbb::global_control::max_allowed_parallelism, num_threads);
+
+//    cpu_set_t mask;
+//    int       status;
+//    CPU_ZERO(&mask);
+//    const auto NUMCORES = sysconf(_SC_NPROCESSORS_ONLN);
+//    for (int64_t core = 0; core < NUMCORES; core++) CPU_SET(core, &mask);
+//    sched_setaffinity(0, sizeof(cpu_set_t), &mask);
+
+
+    // TODO DISABLE in appimage
+#endif
+
+//#define TBB_VERSION_MAJOR 2021
+//    oneapi::tbb::global_control global_limit(oneapi::tbb::global_control::max_allowed_parallelism,
+//                                             num_threads); // TODO DISABLE in appimage
+
+    //tbb::global_control global_limit(tbb::global_control::max_allowed_parallelism, 16);
+
+//    loginf << "COMPASSClient: default number of threads " << tbb::info::default_concurrency()
+//           << " max " << tbb::this_task_arena::max_concurrency();
 
     QPixmap pixmap(Files::getImageFilepath("logo.png").c_str());
     QSplashScreen splash(pixmap);
@@ -251,6 +286,33 @@ void Client::run ()
             task_man.asterixImporterTask().fileLineID(file_line);
         }
 
+        if (import_asterix_date_.size())
+        {
+            task_man.asterixImporterTask().date(Time::fromDateString(import_asterix_date_));
+        }
+
+        if (import_asterix_file_time_offset_.size())
+        {
+            bool ok {true};
+
+            double time_offset = String::timeFromString(import_asterix_file_time_offset_, &ok);
+
+            if (!ok)
+            {
+                logerr << "COMPASSClient: import_asterix_file_time_offset set to invalid value '"
+                       << import_asterix_file_time_offset_ << "'";
+                quit_requested_ = true;
+                return;
+            }
+
+            task_man.asterixImporterTask().overrideTodActive(true);
+            task_man.asterixImporterTask().overrideTodOffset(time_offset);
+        }
+
+        if (import_asterix_network_ignore_future_ts_)
+        {
+           task_man.asterixImporterTask().importAsterixNetworkIgnoreFutureTimestamp(true);
+        }
     }
     catch (exception& e)
     {
@@ -278,8 +340,8 @@ void Client::run ()
         main_window.importAsterixNetworkMaxLines(import_asterix_network_max_lines_);
     }
 
-    //    if (import_json_filename.size())
-    //        task_man.importJSONFile(import_json_filename, import_json_schema);
+    if (import_json_filename_.size())
+        main_window.importJSONFile(import_json_filename_); // , import_json_schema
 
     if (import_gps_trail_filename_.size())
         main_window.importGPSTrailFile(import_gps_trail_filename_);

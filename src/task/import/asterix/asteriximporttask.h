@@ -27,15 +27,14 @@
 #include "jsonmappingstubsjob.h"
 #include "asterixjsonparsingschema.h"
 #include "task.h"
+#include "appmode.h"
 
 #include <QObject>
+#include <QMessageBox>
 
 #include <deque>
 #include <memory>
 #include <mutex>
-
-
-//#include <tbb/concurrent_queue.h>
 
 class TaskManager;
 
@@ -70,6 +69,8 @@ class ASTERIXImportTask : public Task, public Configurable
     void postprocessObsoleteSlot();
 
     void insertDoneSlot();
+
+    void appModeSwitchSlot (AppMode app_mode_previous, AppMode app_mode_current);
 
   public:
     ASTERIXImportTask(const std::string& class_id, const std::string& instance_id,
@@ -136,6 +137,14 @@ class ASTERIXImportTask : public Task, public Configurable
     unsigned int fileLineID() const;
     void fileLineID(unsigned int value);
 
+    const boost::posix_time::ptime &date() const;
+    void date(const boost::posix_time::ptime& date);
+
+    bool resumingFromLiveInProgress() const;
+    void resumingFromLiveInProgress(bool value);
+
+    void importAsterixNetworkIgnoreFutureTimestamp (bool value);
+
 protected:
     bool debug_jasterix_;
     std::shared_ptr<jASTERIX::jASTERIX> jasterix_;
@@ -147,13 +156,21 @@ protected:
     std::string current_filename_;
     std::string current_file_framing_;
     unsigned int file_line_id_ {0};
+    boost::posix_time::ptime date_;
 
     bool test_{false};
 
     bool override_tod_active_{false};
     float override_tod_offset_{0};
 
+    bool ask_discard_cache_on_resume_ {true};
+
     bool running_ {false};
+
+    QMessageBox* m_info_ {nullptr};
+    bool resuming_from_live_in_progress_ {false};
+    bool network_ignore_future_ts_ {false};
+
     unsigned int num_packets_in_processing_{0};
     unsigned int num_packets_total_{0};
 
@@ -179,7 +196,6 @@ protected:
     bool error_{false};
     std::string error_message_;
 
-    //bool waiting_for_insert_{false};
     bool insert_active_{false};
     //boost::posix_time::ptime insert_start_time_;
     //double total_insert_time_ms_ {0};

@@ -44,13 +44,18 @@ Depending on the DSType, additional information can be set in a source. For a no
 \item ID: Number indentifier (unique)
 \item Network Line information
 \begin{itemize}
-    \item 4 different lines are possible, each with an 'IP:Port' syntax, e.g.
+    \item 4 different lines are possible, each with 
     \begin{itemize}
-    \item '1.2.3.4:5'
-\end{itemize}
+      \item Listen IP (optional, defines used network interface and IGMP requests)
+      \item Multicast IP
+      \item Multicast port
+      \item Sender IP (optional, for filtering purposes)
+    \end{itemize}
 \end{itemize}
 \end{itemize}
 \ \\
+
+Please note that if e.g. only Multicast IP and port are set, and the Multicast IP is set to a non-multicast one (outside of 224.0.0.0 to 239.255.255.255), a local replay is possible (without multi-casting). \\
 
 For sources of DSType 'Radar', the follwing additional information should be provided:
 

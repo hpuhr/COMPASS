@@ -26,6 +26,7 @@
 #include "dbcontent/variable/variable.h"
 #include "dbcontent/variable/metavariable.h"
 #include "stringconv.h"
+#include "util/timeconv.h"
 
 #include <QThread>
 #include <QCoreApplication>
@@ -42,15 +43,15 @@ CreateARTASAssociationsJob::CreateARTASAssociationsJob(
     map<string, shared_ptr<Buffer>> buffers)
     : Job("CreateARTASAssociationsJob"), task_(task), db_interface_(db_interface), buffers_(buffers)
 {
-    misses_acceptable_time_ = task_.missesAcceptableTime();
+    misses_acceptable_time_ = Time::partialSeconds(task_.missesAcceptableTime());
 
-    association_time_past_ = task_.associationTimePast();
-    association_time_future_ = task_.associationTimeFuture();  // will be negative time diff
+    association_time_past_ = Time::partialSeconds(task_.associationTimePast());
+    association_time_future_ = Time::partialSeconds(task_.associationTimeFuture());  // will be negative time diff
 
-    associations_dubious_distant_time_ = task_.associationsDubiousDistantTime();
-    association_dubious_close_time_past_ = task_.associationDubiousCloseTimePast();
+    associations_dubious_distant_time_ = Time::partialSeconds(task_.associationsDubiousDistantTime());
+    association_dubious_close_time_past_ = Time::partialSeconds(task_.associationDubiousCloseTimePast());
     association_dubious_close_time_future_ =
-        task_.associationDubiousCloseTimeFuture();  // will be negative time diff
+        Time::partialSeconds(task_.associationDubiousCloseTimeFuture());  // will be negative time diff
 }
 
 CreateARTASAssociationsJob::~CreateARTASAssociationsJob() {}
@@ -167,7 +168,7 @@ void CreateARTASAssociationsJob::createUTNS()
     assert(buffer->has<string>(task_.trackerTRIsVar()->name()));
 
     assert(buffer->has<unsigned int>(task_.keyVar()->getNameFor(tracker_dbcontent_name_)));
-    assert(buffer->has<float>(task_.todVar()->getNameFor(tracker_dbcontent_name_)));
+    assert(buffer->has<boost::posix_time::ptime>(task_.timestampVar()->getNameFor(tracker_dbcontent_name_)));
 
     NullableVector<unsigned int> track_nums = buffer->get<unsigned int>(task_.trackerTrackNumVar()->name());
     NullableVector<bool> track_begins = buffer->get<bool>(task_.trackerTrackBeginVar()->name());
@@ -175,8 +176,10 @@ void CreateARTASAssociationsJob::createUTNS()
     NullableVector<bool> track_coastings = buffer->get<bool>(task_.trackerCoastingVar()->name());
     NullableVector<string> tri_hashes = buffer->get<string>(task_.trackerTRIsVar()->name());
 
-    NullableVector<unsigned int> rec_nums = buffer->get<unsigned int>(task_.keyVar()->getNameFor(tracker_dbcontent_name_));
-    NullableVector<float> tods = buffer->get<float>(task_.todVar()->getNameFor(tracker_dbcontent_name_));
+    NullableVector<unsigned int> rec_nums = buffer->get<unsigned int>(
+                task_.keyVar()->getNameFor(tracker_dbcontent_name_));
+    NullableVector<boost::posix_time::ptime> ts_vec = buffer->get<boost::posix_time::ptime>(
+                task_.timestampVar()->getNameFor(tracker_dbcontent_name_));
 
     map<int, UniqueARTASTrack> current_tracks;  // utn -> unique track
     map<int, int> current_track_mappings;       // track_num -> utn
@@ -197,14 +200,15 @@ void CreateARTASAssociationsJob::createUTNS()
     bool ignore_track_coasting_associations = task_.ignoreTrackCoastingAssociations();
 
     int rec_num;
-    float tod;
+    boost::posix_time::ptime timestamp;
 
     int utn;
     // bool new_track_created;
     bool finish_previous_track;
     bool ignore_update;
 
-    float track_end_time = task_.endTrackTime();  // time-delta after which begin a new track
+    boost::posix_time::time_duration track_end_time = Time::partialSeconds(task_.endTrackTime());
+    // time-delta after which begin a new track
 
     for (size_t cnt = 0; cnt < buffer_size; ++cnt)
     {
@@ -241,14 +245,14 @@ void CreateARTASAssociationsJob::createUTNS()
         assert(!rec_nums.isNull(cnt));
         rec_num = rec_nums.get(cnt);
 
-        assert(!tods.isNull(cnt));
-        tod = tods.get(cnt);
+        assert(!ts_vec.isNull(cnt));
+        timestamp = ts_vec.get(cnt);
 
         // was loaded as sorted in time
         if (cnt == 0)  // store first time
-            first_track_tod_ = tod;
+            first_track_ts_ = timestamp;
 
-        last_track_tod_ = tod;  // store last time
+        last_track_ts_ = timestamp;  // store last time
 
         if (track_begin_set && track_begin && current_track_mappings.count(track_num))
         {
@@ -260,12 +264,12 @@ void CreateARTASAssociationsJob::createUTNS()
 
         // check if existed but last update was more than 10m ago
         if (!finish_previous_track && current_track_mappings.count(track_num) &&
-            tod - current_tracks.at(current_track_mappings.at(track_num)).last_tod_ >
+            timestamp - current_tracks.at(current_track_mappings.at(track_num)).last_ts_ >
                 track_end_time)
         {
             logdbg << "CreateARTASAssociationsJob: createUTNS: finalizing track utn "
                    << current_track_mappings.at(track_num) << " since tod difference "
-                   << tod - current_tracks.at(current_track_mappings.at(track_num)).last_tod_;
+                   << timestamp - current_tracks.at(current_track_mappings.at(track_num)).last_ts_;
 
             finish_previous_track = true;
         }
@@ -283,7 +287,7 @@ void CreateARTASAssociationsJob::createUTNS()
         if (!current_track_mappings.count(track_num))  // new track where none existed
         {
             logdbg << "CreateARTASAssociationsJob: createUTNS: new track utn " << utn_cnt
-                   << " track num " << track_num << " tod " << String::timeStringFromDouble(tod)
+                   << " track num " << track_num << " tod " << Time::toString(timestamp)
                    << " begin " << (track_begin_set ? to_string(track_begin) : " not set");
 
             utn = utn_cnt;
@@ -293,7 +297,7 @@ void CreateARTASAssociationsJob::createUTNS()
 
             current_tracks[utn].utn = utn;
             current_tracks[utn].track_num = track_num;
-            current_tracks[utn].first_tod_ = tod;
+            current_tracks[utn].first_ts_ = timestamp;
 
             // new_track_created = true;
         }
@@ -302,7 +306,7 @@ void CreateARTASAssociationsJob::createUTNS()
 
         assert(current_tracks.count(utn));
         UniqueARTASTrack& unique_track = current_tracks.at(utn);
-        unique_track.last_tod_ = tod;
+        unique_track.last_ts_ = timestamp;
 
         // add tris if not to be ignored
         ignore_update =
@@ -313,11 +317,11 @@ void CreateARTASAssociationsJob::createUTNS()
         {
             logdbg << "CreateARTASAssociationsJob: createUTNS: ignoring rec num " << rec_num;
             // add empty tri so that at least track update is associated
-            unique_track.rec_nums_tris_[rec_num] = make_pair("", tod);
+            unique_track.rec_nums_tris_[rec_num] = make_pair("", timestamp);
             ++ignored_track_updates_cnt_;
         }
         else
-            unique_track.rec_nums_tris_[rec_num] = make_pair(tri, tod);
+            unique_track.rec_nums_tris_[rec_num] = make_pair(tri, timestamp);
 
         if (track_end_set && track_end)
         {
@@ -516,13 +520,13 @@ void CreateARTASAssociationsJob::createSensorAssociations()
 
     string best_match_dbcontent_name;
     int best_match_rec_num{-1};
-    float best_match_tod{0};
-    float tri_tod;
+    boost::posix_time::ptime best_match_ts;
+    boost::posix_time::ptime tri_ts;
 
-    typedef multimap<string, pair<int, float>>::iterator HashIterator;
+    typedef multimap<string, pair<int, boost::posix_time::ptime>>::iterator HashIterator;
     pair<HashIterator, HashIterator> possible_hash_matches;
 
-    assert(first_track_tod_ > 0);  // has to be set
+    assert(!first_track_ts_.is_not_a_date_time());  // has to be set
 
     emit statusSignal("Creating Associations");
     for (auto& ut_it : finished_tracks_)  // utn -> UAT, for each unqique target
@@ -536,7 +540,7 @@ void CreateARTASAssociationsJob::createSensorAssociations()
                 continue;
 
             tri_splits = String::split(assoc_it.second.first, ';');
-            tri_tod = assoc_it.second.second;
+            tri_ts = assoc_it.second.second;
 
             for (auto& tri : tri_splits)  // for each referenced hash
             {
@@ -556,9 +560,9 @@ void CreateARTASAssociationsJob::createSensorAssociations()
                         for (HashIterator it = possible_hash_matches.first;
                              it != possible_hash_matches.second; ++it)
                         {
-                            pair<int, float>& match = it->second;  // rec_num, tod
+                            pair<int, boost::posix_time::ptime>& match = it->second;  // rec_num, tod
 
-                            if (!isPossibleAssociation(tri_tod, match.second))
+                            if (!isPossibleAssociation(tri_ts, match.second))
                                 continue;
 
                             if (match_found)
@@ -568,14 +572,14 @@ void CreateARTASAssociationsJob::createSensorAssociations()
                                        << tri << "' in dbo " << dbo_it.first << " rec num "
                                        << match.first;
 
-                                if (isAssociationHashCollisionInDubiousTime(tri_tod,
-                                                                            best_match_tod) &&
-                                    isAssociationHashCollisionInDubiousTime(tri_tod, match.second))
+                                if (isAssociationHashCollisionInDubiousTime(tri_ts,
+                                                                            best_match_ts) &&
+                                    isAssociationHashCollisionInDubiousTime(tri_ts, match.second))
                                 {
                                     best_match_dubious = true;
                                     best_match_dubious_comment =
                                         tri + " has multiple matches in close time at " +
-                                        String::timeStringFromDouble(tri_tod);
+                                        Time::toString(tri_ts);
                                 }
                                 else  // not dubious
                                 {
@@ -584,15 +588,15 @@ void CreateARTASAssociationsJob::createSensorAssociations()
                                 }
 
                                 // store if closer in time
-                                if (fabs(tri_tod - match.second) < fabs(tri_tod - best_match_tod))
+                                if ((tri_ts - match.second).abs() < (tri_ts - best_match_ts).abs())
                                 {
-                                    if (isAssociationInDubiousDistantTime(tri_tod, match.second))
+                                    if (isAssociationInDubiousDistantTime(tri_ts, match.second))
                                     {
                                         best_match_dubious = true;
                                         best_match_dubious_comment =
                                             tri + " in too distant time (" +
-                                            to_string(tri_tod - match.second) + "s) at " +
-                                            String::timeStringFromDouble(tri_tod);
+                                            Time::toString(tri_ts - match.second) + ") at " +
+                                            Time::toString(tri_ts);
                                     }
                                     else  // not dubious
                                     {
@@ -602,7 +606,7 @@ void CreateARTASAssociationsJob::createSensorAssociations()
 
                                     best_match_dbcontent_name = dbo_it.first;
                                     best_match_rec_num = match.first;  // rec_num
-                                    best_match_tod = match.second;     // tod
+                                    best_match_ts = match.second;     // tod
                                     match_found = true;
                                 }
 
@@ -610,18 +614,18 @@ void CreateARTASAssociationsJob::createSensorAssociations()
                             }
                             else  // store as best match
                             {
-                                if (isAssociationInDubiousDistantTime(tri_tod, match.second))
+                                if (isAssociationInDubiousDistantTime(tri_ts, match.second))
                                 {
                                     best_match_dubious = true;
                                     best_match_dubious_comment =
                                         tri + " in too distant time (" +
-                                        to_string(tri_tod - match.second) + "s) at " +
-                                        String::timeStringFromDouble(tri_tod);
+                                        Time::toString(tri_ts - match.second) + "s) at " +
+                                        Time::toString(tri_ts);
                                 }
 
                                 best_match_dbcontent_name = dbo_it.first;
                                 best_match_rec_num = match.first;  // rec_num
-                                best_match_tod = match.second;     // tod
+                                best_match_ts = match.second;     // tod
                                 match_found = true;
                             }
                         }
@@ -659,17 +663,17 @@ void CreateARTASAssociationsJob::createSensorAssociations()
                 {
                     logdbg << "CreateARTASAssociationsJob: createSensorAssociations: utn "
                            << ut_it.first << " has missing hash '" << tri << "' at "
-                           << String::timeStringFromDouble(tri_tod);
+                           << Time::toString(tri_ts);
 
                     // assert (tri_tod-first_track_tod_ >= 0);
 
-                    if (isTimeAtBeginningOrEnd(tri_tod))
+                    if (isTimeAtBeginningOrEnd(tri_ts))
                         ++acceptable_missing_hashes_cnt_;
                     else
                     {
                         loginf << "CreateARTASAssociationsJob: createSensorAssociations: utn "
                                << ut_it.first << " has missing hash '" << tri << "' at "
-                               << String::timeStringFromDouble(tri_tod);
+                               << Time::toString(tri_ts);
 
                         missing_hashes_.emplace(tri, make_pair(ut_it.first, assoc_it.first));
                         ++missing_hashes_cnt_;
@@ -705,36 +709,37 @@ void CreateARTASAssociationsJob::removePreviousAssociations()
     }
 }
 
-bool CreateARTASAssociationsJob::isPossibleAssociation(float tod_track, float tod_target)
+bool CreateARTASAssociationsJob::isPossibleAssociation(boost::posix_time::ptime ts_track,
+                                                       boost::posix_time::ptime ts_target)
 {
-    if (tod_target > tod_track)  // target update in the future
-        return tod_target - tod_track <= association_time_future_;
+    if (ts_target > ts_track)  // target update in the future
+        return ts_target - ts_track <= association_time_future_;
     else  // target update in the past (or same time)
-        return tod_track - tod_target <= association_time_past_;
+        return ts_track - ts_target <= association_time_past_;
 }
 
-bool CreateARTASAssociationsJob::isAssociationInDubiousDistantTime(float tod_track,
-                                                                   float tod_target)
+bool CreateARTASAssociationsJob::isAssociationInDubiousDistantTime(boost::posix_time::ptime ts_track,
+                                                                   boost::posix_time::ptime ts_target)
 {
-    if (tod_target > tod_track)  // target update in the future
+    if (ts_target > ts_track)  // target update in the future
         return false;            // only measured in the past
     else                         // target update in the past (or same time)
-        return tod_track - tod_target >= associations_dubious_distant_time_;
+        return ts_track - ts_target >= associations_dubious_distant_time_;
 }
 
-bool CreateARTASAssociationsJob::isAssociationHashCollisionInDubiousTime(float tod_track,
-                                                                         float tod_target)
+bool CreateARTASAssociationsJob::isAssociationHashCollisionInDubiousTime(boost::posix_time::ptime ts_track,
+                                                                         boost::posix_time::ptime ts_target)
 {
-    if (tod_target > tod_track)  // target update in the future
-        return tod_target - tod_track <= association_dubious_close_time_future_;
+    if (ts_target > ts_track)  // target update in the future
+        return ts_target - ts_track <= association_dubious_close_time_future_;
     else  // target update in the past (or same time)
-        return tod_track - tod_target <= association_dubious_close_time_past_;
+        return ts_track - ts_target <= association_dubious_close_time_past_;
 }
 
-bool CreateARTASAssociationsJob::isTimeAtBeginningOrEnd(float tod_track)
+bool CreateARTASAssociationsJob::isTimeAtBeginningOrEnd(boost::posix_time::ptime ts_track)
 {
-    return (fabs(tod_track - first_track_tod_) <= misses_acceptable_time_) ||
-           (fabs(last_track_tod_ - tod_track) <= misses_acceptable_time_);
+    return ((ts_track - first_track_ts_).abs() <= misses_acceptable_time_) ||
+           ((last_track_ts_ - ts_track).abs() <= misses_acceptable_time_);
 }
 
 void CreateARTASAssociationsJob::createSensorHashes(DBContent& object)
@@ -755,39 +760,39 @@ void CreateARTASAssociationsJob::createSensorHashes(DBContent& object)
 
     MetaVariable* key_meta_var = task_.keyVar();
     MetaVariable* hash_meta_var = task_.hashVar();
-    MetaVariable* tod_meta_var = task_.todVar();
+    MetaVariable* ts_meta_var = task_.timestampVar();
 
     Variable& key_var = key_meta_var->getFor(dbcontent_name);
     Variable& hash_var = hash_meta_var->getFor(dbcontent_name);
-    Variable& tod_var = tod_meta_var->getFor(dbcontent_name);
+    Variable& ts_var = ts_meta_var->getFor(dbcontent_name);
 
     assert(buffer->has<unsigned int>(key_var.name()));
     assert(buffer->has<string>(hash_var.name()));
-    assert(buffer->has<float>(tod_var.name()));
+    assert(buffer->has<boost::posix_time::ptime>(ts_var.name()));
 
     NullableVector<unsigned int> rec_nums = buffer->get<unsigned int>(key_var.name());
     NullableVector<string> hashes = buffer->get<string>(hash_var.name());
-    NullableVector<float> tods = buffer->get<float>(tod_var.name());
+    NullableVector<boost::posix_time::ptime> ts_vec = buffer->get<boost::posix_time::ptime>(ts_var.name());
 
     for (size_t cnt = 0; cnt < buffer_size; ++cnt)
     {
         assert(!rec_nums.isNull(cnt));
         assert(!hashes.isNull(cnt));
 
-        if (tods.isNull(cnt))
+        if (ts_vec.isNull(cnt))
         {
             logwrn << "CreateARTASAssociationsJob: createSensorHashes: rec_num "
                    << rec_nums.get(cnt) << " of dbo " << object.name() << " has no time, skipping";
             continue;
         }
 
-        assert(!tods.isNull(cnt));
+        assert(!ts_vec.isNull(cnt));
 
         // dbo -> hash -> rec_num, tod
         // map <string, multimap<string, pair<int, float>>> sensor_hashes_;
 
         sensor_hashes_[dbcontent_name].emplace(hashes.get(cnt),
-                                         make_pair(rec_nums.get(cnt), tods.get(cnt)));
+                                         make_pair(rec_nums.get(cnt), ts_vec.get(cnt)));
     }
 }
 

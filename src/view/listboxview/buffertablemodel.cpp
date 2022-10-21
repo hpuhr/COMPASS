@@ -319,6 +319,15 @@ QVariant BufferTableModel::data(const QModelIndex& index, int role) const
                     value_str = buffer_->get<nlohmann::json>(property_name).getAsString(buffer_index);
                 }
             }
+            else if (data_type == PropertyDataType::TIMESTAMP)
+            {
+                assert(buffer_->has<boost::posix_time::ptime>(property_name));
+                null = buffer_->get<boost::posix_time::ptime>(property_name).isNull(buffer_index);
+                if (!null)
+                {
+                    value_str = buffer_->get<boost::posix_time::ptime>(property_name).getAsString(buffer_index);
+                }
+            }
             else
                 throw std::domain_error("BufferTableWidget: show: unknown property data type");
 

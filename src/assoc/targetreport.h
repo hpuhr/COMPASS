@@ -4,6 +4,8 @@
 #include <string>
 #include <vector>
 
+#include "boost/date_time/posix_time/ptime.hpp"
+
 namespace Association
 {
     using namespace std;
@@ -19,7 +21,7 @@ namespace Association
         unsigned int ds_id_{0};
         unsigned int line_id_{0};
         unsigned int rec_num_{0};
-        float tod_{0};
+        boost::posix_time::ptime timestamp_;
 
         // mode s
         bool has_ta_{false};

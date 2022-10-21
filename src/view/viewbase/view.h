@@ -78,7 +78,7 @@ class View : public QObject, public Configurable
 
     virtual void clearData()=0; // clear shown data in view
 
-    virtual void appModeSwitch (AppMode app_mode) {};
+    virtual void appModeSwitch (AppMode app_mode_previous, AppMode app_mode_current) {};
 
     unsigned int getKey();
     const std::string& getName() const;
@@ -88,8 +88,6 @@ class View : public QObject, public Configurable
 
     /// @brief Returns the view's widget, override this method in derived classes.
     ViewWidget* getWidget() { return widget_; }
-    /// @brief Returns the view's model, override this method in derived classes.
-    //ViewModel* getModel() { return model_; }
 
     void showInTabWidget();
 
@@ -111,8 +109,6 @@ class View : public QObject, public Configurable
     ViewContainer* container_;
     /// The widget containing the view's widget
     QWidget* central_widget_;
-
-    // bool selection_change_emitted_ {false};
 
     void constructWidget();
     //void setModel(ViewModel* model);

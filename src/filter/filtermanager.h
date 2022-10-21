@@ -51,8 +51,9 @@ public slots:
 
     void databaseOpenedSlot();
     void databaseClosedSlot();
+    void dataSourcesChangedSlot();
 
-    void appModeSwitchSlot (AppMode app_mode);
+    void appModeSwitchSlot (AppMode app_mode_previous, AppMode app_mode_current);
 
     //void deleteFilterSlot(DBFilter* filter);
 

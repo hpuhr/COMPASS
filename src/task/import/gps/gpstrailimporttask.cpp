@@ -348,6 +348,13 @@ void GPSTrailImportTask::parseCurrentFile ()
             return;
         }
 
+        if (gps.fix.timestamp.year == 1970)
+        {
+            loginf << "GPSTrailImportTask: parseCurrentFile: skipping timestamp w/o time sync (1970)";
+            ++gps_fixes_skipped_time_cnt_;
+            return;
+        }
+
         quality_counts_[gps.fix.quality] += 1;
 
         gps_fixes_.push_back(gps.fix);
@@ -445,7 +452,8 @@ void GPSTrailImportTask::run()
     assert (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_sic_id_));
     assert (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_datasource_id_));
     assert (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_line_id_));
-    assert (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_tod_));
+    assert (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_time_of_day_));
+    assert (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_timestamp_));
     assert (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_latitude_));
     assert (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_longitude_));
     assert (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_m3a_));
@@ -465,7 +473,8 @@ void GPSTrailImportTask::run()
     Variable& sic_var = dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_sic_id_);
     Variable& ds_id_var = dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_datasource_id_);
     Variable& line_id_var = dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_line_id_);
-    Variable& tod_var = dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_tod_);
+    Variable& tod_var = dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_time_of_day_);
+    Variable& ts_var = dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_timestamp_);
     Variable& lat_var = dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_latitude_);
     Variable& long_var = dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_longitude_);
     Variable& m3a_var = dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_m3a_);
@@ -483,6 +492,7 @@ void GPSTrailImportTask::run()
     properties.addProperty(ds_id_var.name(), PropertyDataType::UINT);
     properties.addProperty(line_id_var.name(), PropertyDataType::UINT);
     properties.addProperty(tod_var.name(), PropertyDataType::FLOAT);
+    properties.addProperty(ts_var.name(), PropertyDataType::TIMESTAMP);
     properties.addProperty(lat_var.name(), PropertyDataType::DOUBLE);
     properties.addProperty(long_var.name(), PropertyDataType::DOUBLE);
 
@@ -511,6 +521,7 @@ void GPSTrailImportTask::run()
     NullableVector<unsigned int>& ds_id_vec = buffer_->get<unsigned int>(ds_id_var.name());
     NullableVector<unsigned int>& line_id_vec = buffer_->get<unsigned int>(line_id_var.name());
     NullableVector<float>& tod_vec = buffer_->get<float>(tod_var.name());
+    NullableVector<boost::posix_time::ptime>& ts_vec = buffer_->get<boost::posix_time::ptime>(ts_var.name());
     NullableVector<double>& lat_vec = buffer_->get<double>(lat_var.name());
     NullableVector<double>& long_vec = buffer_->get<double>(long_var.name());
 
@@ -526,6 +537,8 @@ void GPSTrailImportTask::run()
 
     assert (dbcontent_man.hasMaxRefTrajTrackNum());
     unsigned int track_num = dbcontent_man.maxRefTrajTrackNum();
+
+    loginf << "GPSTrailImportTask: run: max reftraj track num " << track_num;
 
     // config data source
     {
@@ -544,15 +557,29 @@ void GPSTrailImportTask::run()
     }
 
     float tod;
+    boost::posix_time::ptime timestamp;
     double speed_ms, track_angle_rad, vx, vy;
 
     loginf << "GPSTrailImportTask: run: filling buffer";
 
     for (auto& fix_it : gps_fixes_)
     {
-        tod = fix_it.timestamp.hour*3600.0 + fix_it.timestamp.min*60.0+fix_it.timestamp.sec;
-
+        // tod
+        tod = fix_it.timestamp.hour*3600.0 + fix_it.timestamp.min*60.0 + fix_it.timestamp.sec;
         tod += tod_offset_;
+
+        // timestamp
+        // bpt::ptime(bg::date(1970, 1, 1));
+
+        timestamp = boost::posix_time::ptime(boost::gregorian::date(fix_it.timestamp.year,
+                                                                    fix_it.timestamp.month,
+                                                                    fix_it.timestamp.day),
+                                             boost::posix_time::time_duration(fix_it.timestamp.hour,
+                                                                              fix_it.timestamp.min,
+                                                                              fix_it.timestamp.sec)
+                                             + Time::partialSeconds(fix_it.timestamp.sec, true)); // add partial w/o s
+
+        timestamp += Time::partialSeconds(tod_offset_); // add time offset
 
         // check for out-of-bounds because of midnight-jump
         while (tod < 0.0f)
@@ -569,6 +596,7 @@ void GPSTrailImportTask::run()
         line_id_vec.set(cnt, line_id_);
 
         tod_vec.set(cnt, tod);
+        ts_vec.set(cnt, timestamp);
         lat_vec.set(cnt, fix_it.latitude);
         long_vec.set(cnt, fix_it.longitude);
 

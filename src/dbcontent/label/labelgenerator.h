@@ -3,6 +3,7 @@
 
 #include "configurable.h"
 #include "json.hpp"
+#include "labeldirection.h"
 
 #include <osg/Matrixd>
 
@@ -20,20 +21,13 @@ namespace dbContent
 class LabelContentDialog;
 class VariableSet;
 
-enum LabelDirection
-{
-    LEFT_UP=0,
-    RIGHT_UP,
-    LEFT_DOWN,
-    RIGHT_DOWN
-};
-
 class LabelGenerator : public QObject, public Configurable
 {
     Q_OBJECT
 
 signals:
     void labelOptionsChangedSignal();
+    void labelLinesChangedSignal();
     void labelClearAllSignal();
 
 
@@ -48,6 +42,7 @@ public:
     virtual void generateSubConfigurable(const std::string& class_id, const std::string& instance_id);
 
     std::vector<std::string> getLabelTexts(const std::string& dbcontent_name, unsigned int buffer_index);
+    std::vector<std::string> getFullTexts(const std::string& dbcontent_name, unsigned int buffer_index);
 
     bool autoLabel() const;
     void autoLabel(bool auto_label);
@@ -65,7 +60,7 @@ public:
 
     void addLabelDSID(unsigned int ds_id);
     void removeLabelDSID(unsigned int ds_id);
-    const std::set<unsigned int>& labelDSIDs() const;
+    bool anyDSIDLabelWanted();
     bool labelWanted(unsigned int ds_id);
     bool labelWanted(std::shared_ptr<Buffer> buffer, unsigned int index);
 
@@ -105,6 +100,7 @@ public:
 
     unsigned int labelLine (unsigned int ds_id); // returns 0...3
     void labelLine (unsigned int ds_id, unsigned int line);
+    void updateAvailableLabelLines(); // updates lines to be label according to available lines with loaded data
 
     void editLabelContents(const std::string& dbcontent_name);
 
@@ -145,7 +141,7 @@ protected:
 
     nlohmann::json label_config_;
 
-    std::set<unsigned int> label_ds_ids_;
+    nlohmann::json label_ds_ids_; // dsid str -> label flag
 
     bool filter_mode3a_active_;
     std::string filter_mode3a_values_;
@@ -180,8 +176,10 @@ protected:
     bool updateTIValuesFromStr(const std::string& values);
     bool updateTAValuesFromStr(const std::string& values);
 
+    std::string getVariableName(const std::string& dbcontent_name, unsigned int key);
     std::string getVariableValue(const std::string& dbcontent_name, unsigned int key,
                                  std::shared_ptr<Buffer>& buffer, unsigned int index);
+    std::string getVariableUnit(const std::string& dbcontent_name, unsigned int key);
 };
 
 }

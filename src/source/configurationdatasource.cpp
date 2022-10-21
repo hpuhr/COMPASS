@@ -47,6 +47,7 @@ ConfigurationDataSource::ConfigurationDataSource(const std::string& class_id, co
     if (has_short_name_ && !short_name_.size())
         has_short_name_ = false;
 
+    parseNetworkLineInfo();
 }
 
 ConfigurationDataSource::~ConfigurationDataSource()
@@ -102,6 +103,8 @@ void ConfigurationDataSource::setFromJSON(const json& j)
         info_ = j["info"];
     else
         info_ = nullptr;
+
+    parseNetworkLineInfo();
 }
 
 DBDataSource* ConfigurationDataSource::getAsNewDBDS()

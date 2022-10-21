@@ -20,14 +20,14 @@
 
 #include <functional>
 
-#include <boost/asio.hpp>
+#include "job.h"
+#include "json.hpp"
+#include "datasourcelineinfo.h"
+
 #include <boost/array.hpp>
 #include <boost/interprocess/sync/interprocess_semaphore.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/thread/mutex.hpp>
-
-#include "job.h"
-#include "json.hpp"
 
 class ASTERIXImportTask;
 class ASTERIXPostProcess;
@@ -49,7 +49,7 @@ class ASTERIXDecodeJob : public Job
                         const std::string& framing);
 
     void setDecodeUDPStreams (
-            const std::map<unsigned int, std::map<std::string, std::pair<std::string, unsigned int>>>& ds_lines);
+            const std::map<unsigned int, std::map<std::string, std::shared_ptr<DataSourceLineInfo>>>& ds_lines);
     // ds_id -> (ip,port)
 
     virtual void run() override;
@@ -77,6 +77,11 @@ class ASTERIXDecodeJob : public Job
 
     size_t countTotal() const;
 
+    void cacheLiveNetworkData();
+    void resumeLiveNetworkData(bool discard_cache);
+
+    bool resumingCachedData() const;
+
 private:
     ASTERIXImportTask& task_;
     bool test_{false};
@@ -88,7 +93,7 @@ private:
     std::string framing_;
 
     bool decode_udp_streams_ {false};
-    std::map<unsigned int, std::map<std::string, std::pair<std::string, unsigned int>>> ds_lines_;
+    std::map<unsigned int, std::map<std::string, std::shared_ptr<DataSourceLineInfo>>> ds_lines_;
     // ds_id -> line str ->(ip, port)
 
     //volatile bool pause_{false};
@@ -104,6 +109,9 @@ private:
 
     bool error_{false};
     std::string error_message_;
+
+    bool in_live_paused_state_ {false};
+    bool resuming_cached_data_ {false};
 
     boost::interprocess::interprocess_semaphore receive_semaphore_;
     std::map<unsigned int, std::unique_ptr<boost::array<char, MAX_ALL_RECEIVE_SIZE>>> receive_buffers_copy_; // line->buf

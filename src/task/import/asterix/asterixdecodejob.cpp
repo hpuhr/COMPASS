@@ -23,6 +23,7 @@
 #include "compass.h"
 #include "mainwindow.h"
 #include "util/files.h"
+#include "asterixudpreceiver.h"
 
 #include <jasterix/jasterix.h>
 
@@ -31,78 +32,14 @@
 #include <boost/bind.hpp>
 #include <boost/thread.hpp>
 #include <boost/interprocess/sync/scoped_lock.hpp>
+
 #include <chrono>
 #include <thread>
-
-
 #include <memory>
 
 using namespace nlohmann;
 using namespace Utils;
 using namespace std;
-
-//using boost::asio::ip::udp;
-
-class UDPReceiver
-{
-public:
-    UDPReceiver(boost::asio::io_context& io_context, const std::string& sender_ip, unsigned int port,
-                std::function<void(const char*, unsigned int)> data_callback) // const std::string&,
-        : socket_endpoint_(boost::asio::ip::address::from_string(sender_ip), port),
-          socket_(io_context),
-          data_callback_(data_callback)
-    {
-        data_ = new char[MAX_UDP_READ_SIZE];
-
-        //loginf << "ctor: " << sender_ip_ << ":" << port_;
-        socket_.open(socket_endpoint_.protocol());
-
-        socket_.set_option(boost::asio::ip::udp::socket::reuse_address(true));
-        socket_.bind(socket_endpoint_);
-
-        socket_.set_option(boost::asio::ip::multicast::join_group(
-                               boost::asio::ip::address::from_string(sender_ip)));
-
-        socket_.async_receive_from(
-                    boost::asio::buffer(data_, MAX_UDP_READ_SIZE), sender_endpoint_,
-                    boost::bind(&UDPReceiver::handle_receive_from, this,
-                                boost::asio::placeholders::error,
-                                boost::asio::placeholders::bytes_transferred));
-    }
-
-    void handle_receive_from(const boost::system::error_code& error,
-                             size_t bytes_recvd)
-    {
-        //loginf << "handle_receive_from: from " << sender_ip_ << ":" << port_ << " bytes " << bytes_recvd;
-
-        if (error && error != boost::asio::error::message_size)
-        {
-            logerr << "UDPReceiver: handle_receive_from: from "
-                   << sender_endpoint_.address().to_string()+":"+to_string(sender_endpoint_.port())
-                   << " error " << error;
-            return;
-        }
-        else
-        {
-            //sender_endpoint_.address().to_string()+":"+to_string(sender_endpoint_.port()),
-            data_callback_(data_, bytes_recvd);
-        }
-
-        socket_.async_receive_from(
-                    boost::asio::buffer(data_, MAX_UDP_READ_SIZE), sender_endpoint_,
-                    boost::bind(&UDPReceiver::handle_receive_from, this,
-                                boost::asio::placeholders::error,
-                                boost::asio::placeholders::bytes_transferred));
-    }
-
-private:
-    boost::asio::ip::udp::endpoint socket_endpoint_;
-    boost::asio::ip::udp::endpoint sender_endpoint_;
-    boost::asio::ip::udp::socket socket_;
-
-    std::function<void(const char*, unsigned int)> data_callback_; // const std::string&,
-    char* data_ {nullptr};
-};
 
 ASTERIXDecodeJob::ASTERIXDecodeJob(ASTERIXImportTask& task, bool test,
                                    ASTERIXPostProcess& post_process)
@@ -138,7 +75,7 @@ void ASTERIXDecodeJob::setDecodeFile (const std::string& filename,
 
 
 void ASTERIXDecodeJob::setDecodeUDPStreams (
-        const std::map<unsigned int, std::map<std::string, std::pair<std::string, unsigned int>>>& ds_lines)
+        const std::map<unsigned int, std::map<std::string, std::shared_ptr<DataSourceLineInfo>>>& ds_lines)
 {
     ds_lines_ = ds_lines;
 
@@ -149,7 +86,7 @@ void ASTERIXDecodeJob::setDecodeUDPStreams (
         loginf << ds_it.first << ":";
 
         for (auto& line_it : ds_it.second)
-            loginf << "\t" << line_it.first << " " << line_it.second.first << ":" << line_it.second.second;
+            loginf << "\t" << line_it.first << " " << line_it.second->asString();
     }
 
     decode_udp_streams_ = true;
@@ -226,11 +163,9 @@ void ASTERIXDecodeJob::doUDPStreamDecoding()
 
     boost::asio::io_context io_context;
 
-    string ip;
-    unsigned int port;
     unsigned int line;
 
-    vector<unique_ptr<UDPReceiver>> udp_receivers;
+    vector<unique_ptr<ASTERIXUDPReceiver>> udp_receivers;
 
     int max_lines = COMPASS::instance().mainWindow().importAsterixNetworkMaxLines();
 
@@ -244,21 +179,18 @@ void ASTERIXDecodeJob::doUDPStreamDecoding()
 
         for (auto& line_it : ds_it.second)
         {
-            ip = line_it.second.first;
-            port = line_it.second.second;
-
             line = String::getAppendedInt(line_it.first);
             assert (line >= 1 && line <= 4);
             line--; // technical counting starts at 0
 
             loginf << "ASTERIXDecodeJob: doUDPStreamDecoding: setting up ds_id " << ds_it.first
-                   << " line " << line << " ip " << ip << ":" << port;
+                   << " line " << line << " info " << line_it.second->asString();
 
             auto data_callback = [this,line](const char* data, unsigned int length) {
                 this->storeReceivedData(line, data, length);
             };
 
-            udp_receivers.emplace_back(new UDPReceiver(io_context, ip, port, data_callback));
+            udp_receivers.emplace_back(new ASTERIXUDPReceiver(io_context, line_it.second, data_callback));
 
             ++line_cnt;
 
@@ -286,14 +218,12 @@ void ASTERIXDecodeJob::doUDPStreamDecoding()
         {
             boost::mutex::scoped_lock lock(receive_buffers_mutex_);
 
-            if (receive_buffer_sizes_.size() // any data received
+            if (!in_live_paused_state_ && receive_buffer_sizes_.size() // not paused, any data received, 1sec passed
                     && (boost::posix_time::microsec_clock::local_time()
                         - last_receive_decode_time_).total_milliseconds() > 1000)
             {
-                loginf << "ASTERIXDecodeJob: doUDPStreamDecoding: processing "
+                loginf << "ASTERIXDecodeJob: doUDPStreamDecoding: copying data "
                        << receive_buffer_sizes_.size() << " buffers  max " << MAX_ALL_RECEIVE_SIZE;
-
-                loginf << "ASTERIXDecodeJob: doUDPStreamDecoding: copying data";
 
                 // copy data
                 for (auto& size_it : receive_buffer_sizes_)
@@ -349,6 +279,8 @@ void ASTERIXDecodeJob::doUDPStreamDecoding()
                     assert(!extracted_data_);
                 else
                     extracted_data_ = nullptr;
+
+                resuming_cached_data_ = false; // in case of resume action
             }
         }
     }
@@ -409,6 +341,12 @@ void ASTERIXDecodeJob::fileJasterixCallback(std::unique_ptr<nlohmann::json> data
 
     //loginf << "ASTERIXDecodeJob: fileJasterixCallback: data '" << data->dump(2) << "'";
     loginf << "ASTERIXDecodeJob: fileJasterixCallback: line_id " << line_id << " num_records " << num_records;
+
+    if (num_records == 0)
+    {
+        loginf << "ASTERIXDecodeJob: fileJasterixCallback: omitting zero data";
+        return;
+    }
 
     assert(!extracted_data_);
     extracted_data_ = std::move(data);
@@ -597,19 +535,22 @@ void ASTERIXDecodeJob::netJasterixCallback(std::unique_ptr<nlohmann::json> data,
     //    while (!obsolete_ && pause_)  // block decoder until unpaused
     //        QThread::msleep(1);
 
-    if (extracted_data_)
+    if (tmp_extracted_data->at("data_blocks").size())
     {
-        // add to existing data
-        assert(extracted_data_->is_object());
-        assert(extracted_data_->contains("data_blocks"));
-        assert(extracted_data_->at("data_blocks").is_array());
+        if (extracted_data_)
+        {
+            // add to existing data
+            assert(extracted_data_->is_object());
+            assert(extracted_data_->contains("data_blocks"));
+            assert(extracted_data_->at("data_blocks").is_array());
 
-        extracted_data_->at("data_blocks").insert(extracted_data_->at("data_blocks").end(),
-                                                  tmp_extracted_data->at("data_blocks").begin(),
-                                                  tmp_extracted_data->at("data_blocks").end());
+            extracted_data_->at("data_blocks").insert(extracted_data_->at("data_blocks").end(),
+                                                      tmp_extracted_data->at("data_blocks").begin(),
+                                                      tmp_extracted_data->at("data_blocks").end());
+        }
+        else
+            extracted_data_ = std::move(tmp_extracted_data);
     }
-    else
-        extracted_data_ = std::move(tmp_extracted_data);
 
 }
 
@@ -663,6 +604,36 @@ float ASTERIXDecodeJob::getRemainingTime() const
 size_t ASTERIXDecodeJob::countTotal() const
 {
     return count_total_;
+}
+
+void ASTERIXDecodeJob::cacheLiveNetworkData()
+{
+    loginf << "ASTERIXDecodeJob: cacheLiveNetworkData";
+
+    in_live_paused_state_ = true;
+}
+
+void ASTERIXDecodeJob::resumeLiveNetworkData(bool discard_cache)
+{
+    loginf << "ASTERIXDecodeJob: resumeLiveNetworkData: discard cache " << discard_cache;
+
+    if (discard_cache)
+    {
+        boost::mutex::scoped_lock lock(receive_buffers_mutex_);
+
+        receive_buffer_sizes_.clear();
+    }
+    else
+        resuming_cached_data_ = true;
+
+    in_live_paused_state_ = false;
+
+    receive_semaphore_.post(); // wake up loop
+}
+
+bool ASTERIXDecodeJob::resumingCachedData() const
+{
+    return resuming_cached_data_;
 }
 
 size_t ASTERIXDecodeJob::numErrors() const { return num_errors_; }

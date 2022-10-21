@@ -201,7 +201,7 @@ void SingleExtraData::reportDetails(EvaluationResultsReport::Section& utn_req_se
     for (auto& rq_det_it : details_)
     {
         utn_req_details_table.addRow(
-                    {String::timeStringFromDouble(rq_det_it.tod_).c_str(),
+                    {Time::toString(rq_det_it.timestamp_).c_str(),
                      rq_det_it.inside_, rq_det_it.extra_,
                      rq_det_it.ref_exists_, rq_det_it.comment_.c_str()},
                     this, detail_cnt);
@@ -240,11 +240,11 @@ std::unique_ptr<nlohmann::json::object_t> SingleExtraData::viewableData(
 
         const EvaluationRequirement::ExtraDataDetail& detail = details_.at(detail_cnt);
 
-        (*viewable_ptr)["position_latitude"] = detail.pos_current_.latitude_;
-        (*viewable_ptr)["position_longitude"] = detail.pos_current_.longitude_;
-        (*viewable_ptr)["position_window_latitude"] = eval_man_.resultDetailZoom();
-        (*viewable_ptr)["position_window_longitude"] = eval_man_.resultDetailZoom();
-        (*viewable_ptr)["time"] = detail.tod_;
+        (*viewable_ptr)[VP_POS_LAT_KEY] = detail.pos_current_.latitude_;
+        (*viewable_ptr)[VP_POS_LON_KEY] = detail.pos_current_.longitude_;
+        (*viewable_ptr)[VP_POS_WIN_LAT_KEY] = eval_man_.resultDetailZoom();
+        (*viewable_ptr)[VP_POS_WIN_LON_KEY] = eval_man_.resultDetailZoom();
+        (*viewable_ptr)[VP_TIMESTAMP_KEY] = Time::toString(detail.timestamp_);
 
         return viewable_ptr;
     }
@@ -296,8 +296,8 @@ std::unique_ptr<nlohmann::json::object_t> SingleExtraData::getTargetErrorsViewab
 
     //    if (has_pos)
     //    {
-    //        (*viewable_ptr)["position_latitude"] = (lat_max+lat_min)/2.0;
-    //        (*viewable_ptr)["position_longitude"] = (lon_max+lon_min)/2.0;;
+    //        (*viewable_ptr)[VP_POS_LAT_KEY] = (lat_max+lat_min)/2.0;
+    //        (*viewable_ptr)[VP_POS_LON_KEY] = (lon_max+lon_min)/2.0;;
 
     //        double lat_w = 1.1*(lat_max-lat_min)/2.0;
     //        double lon_w = 1.1*(lon_max-lon_min)/2.0;
@@ -308,8 +308,8 @@ std::unique_ptr<nlohmann::json::object_t> SingleExtraData::getTargetErrorsViewab
     //        if (lon_w < eval_man_.resultDetailZoom())
     //            lon_w = eval_man_.resultDetailZoom();
 
-    //        (*viewable_ptr)["position_window_latitude"] = lat_w;
-    //        (*viewable_ptr)["position_window_longitude"] = lon_w;
+    //        (*viewable_ptr)[VP_POS_WIN_LAT_KEY] = lat_w;
+    //        (*viewable_ptr)[VP_POS_WIN_LON_KEY] = lon_w;
     //    }
 
     return viewable_ptr;

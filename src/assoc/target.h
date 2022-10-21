@@ -4,6 +4,9 @@
 #include "evaluationtargetposition.h"
 #include "projection/transformation.h"
 
+#include "boost/date_time/posix_time/ptime.hpp"
+#include "boost/date_time/time_duration.hpp"
+
 #include <vector>
 #include <string>
 #include <map>
@@ -33,13 +36,12 @@ namespace Association
         unsigned int utn_{0};
         bool tmp_ {false};
 
-        //bool has_ta_ {false};
         std::set<unsigned int> tas_;
         std::set<unsigned int> mas_;
 
-        bool has_tod_ {false};
-        float tod_min_ {0};
-        float tod_max_ {0};
+        bool has_timestamps_ {false};
+        boost::posix_time::ptime timestamp_min_;
+        boost::posix_time::ptime timestamp_max_;
 
         bool has_speed_ {false};
         double speed_min_ {0};
@@ -47,7 +49,7 @@ namespace Association
         double speed_max_ {0};
 
         vector<TargetReport*> assoc_trs_;
-        std::map<float, unsigned int> timed_indexes_;
+        std::map<boost::posix_time::ptime, unsigned int> timed_indexes_;
         std::set <unsigned int> ds_ids_;
         std::set <std::pair<unsigned int, unsigned int>> track_nums_; // ds_it, tn
 
@@ -69,30 +71,42 @@ namespace Association
         std::string asStr() const;
         std::string timeStr() const;
 
-        bool isTimeInside (float tod) const;
-        bool hasDataForTime (float tod, float d_max) const;
-        std::pair<float, float> timesFor (float tod, float d_max) const; // lower/upper times, -1 if not existing
-        std::pair<EvaluationTargetPosition, bool> interpolatedPosForTime (float tod, float d_max) const;
-        std::pair<EvaluationTargetPosition, bool> interpolatedPosForTimeFast (float tod, float d_max) const;
+        bool isTimeInside (boost::posix_time::ptime timestamp) const;
+        bool hasDataForTime (boost::posix_time::ptime timestamp, boost::posix_time::time_duration d_max) const;
+        std::pair<boost::posix_time::ptime, boost::posix_time::ptime> timesFor (
+                boost::posix_time::ptime timestamp, boost::posix_time::time_duration d_max) const;
+        // lower/upper times, -1 if not existing
 
-        bool hasDataForExactTime (float tod) const;
-        TargetReport& dataForExactTime (float tod) const;
-        EvaluationTargetPosition posForExactTime (float tod) const;
+        std::pair<EvaluationTargetPosition, bool> interpolatedPosForTime (
+                boost::posix_time::ptime timestamp, boost::posix_time::time_duration d_max) const;
+        std::pair<EvaluationTargetPosition, bool> interpolatedPosForTimeFast (
+                boost::posix_time::ptime timestamp, boost::posix_time::time_duration d_max) const;
+
+        bool hasDataForExactTime (boost::posix_time::ptime timestamp) const;
+        TargetReport& dataForExactTime (boost::posix_time::ptime timestamp) const;
+        EvaluationTargetPosition posForExactTime (boost::posix_time::ptime timestamp) const;
 
         float duration () const;
         bool timeOverlaps (const Target& other) const;
         float probTimeOverlaps (const Target& other) const; // ratio of overlap, measured by shortest target
 
-        std::tuple<std::vector<float>, std::vector<float>, std::vector<float>> compareModeACodes (
-                const Target& other, float max_time_diff) const;
+        std::tuple<std::vector<boost::posix_time::ptime>,
+                   std::vector<boost::posix_time::ptime>,
+                   std::vector<boost::posix_time::ptime>> compareModeACodes (
+                const Target& other, boost::posix_time::time_duration max_time_diff) const;
         // unknown, same, different
-        CompareResult compareModeACode (bool has_ma, unsigned int ma, float tod, float max_time_diff) const;
+        CompareResult compareModeACode (
+                bool has_ma, unsigned int ma, boost::posix_time::ptime timestamp,
+                boost::posix_time::time_duration max_time_diff) const;
 
-        std::tuple<std::vector<float>, std::vector<float>, std::vector<float>> compareModeCCodes (
-                const Target& other, const std::vector<float>& timestamps,
-                float max_time_diff, float max_alt_diff, bool debug) const;
-        CompareResult compareModeCCode (bool has_mc, float mc, float tod,
-                                        float max_time_diff, float max_alt_diff, bool debug) const;
+        std::tuple<std::vector<boost::posix_time::ptime>,
+                   std::vector<boost::posix_time::ptime>,
+                   std::vector<boost::posix_time::ptime>> compareModeCCodes (
+                const Target& other, const std::vector<boost::posix_time::ptime>& timestamps,
+                boost::posix_time::time_duration max_time_diff, float max_alt_diff, bool debug) const;
+        CompareResult compareModeCCode (bool has_mc, float mc, boost::posix_time::ptime timestamp,
+                                        boost::posix_time::time_duration max_time_diff, float max_alt_diff,
+                                        bool debug) const;
         // unknown, same, different timestamps from this
 
         void calculateSpeeds();

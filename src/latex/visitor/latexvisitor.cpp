@@ -76,19 +76,19 @@ void LatexVisitor::visit(const ViewPoint* e)
 
     const nlohmann::json& j_data = e->data();
 
-    assert (j_data.contains("name"));
-    string name = String::latexString(j_data.at("name"));
+    assert (j_data.contains(VP_NAME_KEY));
+    string name = String::latexString(j_data.at(VP_NAME_KEY));
 
-    assert (j_data.contains("type"));
-    string type = String::latexString(j_data.at("type"));
+    assert (j_data.contains(VP_TYPE_KEY));
+    string type = String::latexString(j_data.at(VP_TYPE_KEY));
 
-    assert (j_data.contains("status"));
-    string status = j_data.at("status");
+    assert (j_data.contains(VP_STATUS_KEY));
+    string status = j_data.at(VP_STATUS_KEY);
 
     string comment;
 
-    if (j_data.contains("comment"))
-        comment = String::latexString(j_data.at("comment"));
+    if (j_data.contains(VP_COMMENT_KEY))
+        comment = String::latexString(j_data.at(VP_COMMENT_KEY));
 
     // overview table
     if (add_overview_table_)
@@ -111,17 +111,18 @@ void LatexVisitor::visit(const ViewPoint* e)
     sec.addTable("Info", 2, {"Key","Value"}, "| l | X |");
     LatexTable& info_table = sec.getTable("Info");
 
-    info_table.addRow({"id", to_string(e->id())});
-    info_table.addRow({"name", j_data.at("name")});
-    info_table.addRow({"type", j_data.at("type")});
-    info_table.addRow({"status", status});
+    info_table.addRow({VP_ID_KEY, to_string(e->id())});
+    info_table.addRow({VP_NAME_KEY, j_data.at(VP_NAME_KEY)});
+    info_table.addRow({VP_TYPE_KEY, j_data.at(VP_TYPE_KEY)});
+    info_table.addRow({VP_STATUS_KEY, status});
 
     for (auto& j_it : j_data.items())
     {
         if (!j_it.value().is_primitive())
             continue;
 
-        if (j_it.key() == "id" || j_it.key() == "name" || j_it.key() == "type" || j_it.key() == "status")
+        if (j_it.key() == VP_ID_KEY || j_it.key() == VP_NAME_KEY
+                || j_it.key() == VP_TYPE_KEY || j_it.key() == VP_STATUS_KEY)
             continue;
 
         info_table.addRow({j_it.key(), JSON::toString(j_it.value())});
@@ -134,7 +135,8 @@ void LatexVisitor::visit(const ViewPoint* e)
         LatexSection& overview_sec = report_.getSection("Overview");
 
         if (!overview_sec.hasTable("ViewPoints Overview"))
-            overview_sec.addTable("ViewPoints Overview", 6, {"id","name","type", "status", "comment", ""},
+            overview_sec.addTable("ViewPoints Overview", 6,
+                                  {VP_ID_KEY , VP_NAME_KEY, VP_TYPE_KEY, VP_STATUS_KEY, VP_COMMENT_KEY, ""},
                                   "| l | l | l | l | X | l |", false);
 
         LatexTable& overview_table = overview_sec.getTable("ViewPoints Overview");
@@ -442,7 +444,7 @@ void LatexVisitor::visit(OSGView* e)
     if (wait_on_map_loading_)
         data_widget->waitUntilMapLoaded();
 
-    data_widget->clearMouseCoordinates();
+    //data_widget->clearMouseCoordinates();
 
     // normal screenshot
 

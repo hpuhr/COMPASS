@@ -23,7 +23,7 @@
 #include "property.h"
 #include "stringconv.h"
 
-#include <tbb/tbb.h>
+//#include <tbb/tbb.h>
 
 #include <QDateTime>
 
@@ -557,15 +557,21 @@ NullableVector<T>& NullableVector<T>::operator*=(double factor)
 
     unsigned int data_size = data_.size();
 
-    tbb::parallel_for(uint(0), data_size, [&](unsigned int cnt) {
-        if (!isNull(cnt))
-        {
-            data_.at(cnt) *= factor;
-        }
-    });
+//    tbb::parallel_for(uint(0), data_size, [&](unsigned int cnt) {
+//        if (!isNull(cnt))
+//        {
+//            data_.at(cnt) *= factor;
+//        }
+//    });
 
-    //    for (auto &data_it : data_)
-    //        data_it *= factor;
+    for (unsigned int cnt=0; cnt < data_size; ++cnt)
+    {
+        if (!isNull(cnt))
+            data_.at(cnt) *= factor;
+    }
+
+//    for (auto &data_it : data_)
+//        data_it *= factor;
 
     return *this;
 }
@@ -786,13 +792,19 @@ void NullableVector<T>::convertToStandardFormat(const std::string& from_format)
 
     unsigned int data_size = data_.size();
 
-    tbb::parallel_for(uint(0), data_size, [&](unsigned int cnt) {
+//    tbb::parallel_for(uint(0), data_size, [&](unsigned int cnt) {
+//        if (!isNull(cnt))
+//        {
+//            // value_str = std::to_string(data_.at(cnt));
+//            data_.at(cnt) = std::stoi(std::to_string(data_.at(cnt)), 0, 8);
+//        }
+//    });
+
+    for (unsigned int cnt=0; cnt < data_size; ++cnt)
+    {
         if (!isNull(cnt))
-        {
-            // value_str = std::to_string(data_.at(cnt));
             data_.at(cnt) = std::stoi(std::to_string(data_.at(cnt)), 0, 8);
-        }
-    });
+    }
 
     //    for (unsigned int cnt=0; cnt < data_size; cnt++)
     //    {

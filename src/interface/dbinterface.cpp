@@ -34,6 +34,7 @@
 #include "unit.h"
 #include "unitmanager.h"
 #include "files.h"
+#include "util/timeconv.h"
 #include "sector.h"
 #include "sectorlayer.h"
 #include "evaluationmanager.h"
@@ -53,6 +54,13 @@
 using namespace Utils;
 using namespace std;
 using namespace dbContent;
+
+const string PROP_TIMESTAMP_MIN_NAME {"timestamp_min"};
+const string PROP_TIMESTAMP_MAX_NAME {"timestamp_max"};
+const string PROP_LATITUDE_MIN_NAME {"latitude_min"};
+const string PROP_LATITUDE_MAX_NAME {"latitude_max"};
+const string PROP_LONGITUDE_MIN_NAME {"longitude_min"};
+const string PROP_LONGITUDE_MAX_NAME {"longitude_max"};
 
 DBInterface::DBInterface(string class_id, string instance_id, COMPASS* compass)
     : Configurable(class_id, instance_id, compass), sql_generator_(*this)
@@ -1236,6 +1244,18 @@ void DBInterface::finalizeReadStatement(const DBContent& dbobject)
     db_connection_->finalizeCommand();
 }
 
+void DBInterface::deleteBefore(const DBContent& dbcontent, boost::posix_time::ptime before_timestamp)
+{
+    connection_mutex_.lock();
+    assert(db_connection_);
+
+    std::shared_ptr<DBCommand> command = sql_generator_.getDeleteCommand(dbcontent, before_timestamp);
+
+    db_connection_->execute(*command.get());
+
+    connection_mutex_.unlock();
+}
+
 void DBInterface::createPropertiesTable()
 {
     assert(!existsPropertiesTable());
@@ -1301,17 +1321,18 @@ void DBInterface::insertBindStatementUpdateForCurrentIndex(shared_ptr<Buffer> bu
             break;
         case PropertyDataType::INT:
             db_connection_->bindVariable(
-                        index_cnt, static_cast<int>(buffer->get<int>(property.name()).get(buffer_index)));
+                        index_cnt, buffer->get<int>(property.name()).get(buffer_index));
             break;
         case PropertyDataType::UINT:
             db_connection_->bindVariable(
                         index_cnt, static_cast<int>(buffer->get<unsigned int>(property.name()).get(buffer_index)));
             break;
         case PropertyDataType::LONGINT:
-            assert(false);
+            db_connection_->bindVariable(index_cnt, buffer->get<long>(property.name()).get(buffer_index));
             break;
         case PropertyDataType::ULONGINT:
-            assert(false);
+            db_connection_->bindVariable(
+                        index_cnt, static_cast<long>(buffer->get<unsigned long>(property.name()).get(buffer_index)));
             break;
         case PropertyDataType::FLOAT:
             db_connection_->bindVariable(
@@ -1329,7 +1350,10 @@ void DBInterface::insertBindStatementUpdateForCurrentIndex(shared_ptr<Buffer> bu
             db_connection_->bindVariable(
                         index_cnt, buffer->get<nlohmann::json>(property.name()).get(buffer_index).dump());
             break;
-
+        case PropertyDataType::TIMESTAMP:
+            db_connection_->bindVariable(
+                        index_cnt, Time::toLong(buffer->get<boost::posix_time::ptime>(property.name()).get(buffer_index)));
+            break;
         default:
             logerr << "Buffer: insertBindStatementUpdateForCurrentIndex: unknown property type "
                        << Property::asString(data_type);

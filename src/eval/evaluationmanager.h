@@ -31,6 +31,8 @@
 
 #include "json.hpp"
 
+#include "boost/date_time/posix_time/posix_time.hpp"
+
 class COMPASS;
 class EvaluationStandard;
 class DBContent;
@@ -327,14 +329,14 @@ public:
     bool useLoadFilter() const;
     void useLoadFilter(bool value);
 
-    bool useTimeFilter() const;
-    void useTimeFilter(bool value);
+    bool useTimestampFilter() const;
+    void useTimestampFilter(bool value);
 
-    float loadTimeBegin() const;
-    void loadTimeBegin(float value);
+    boost::posix_time::ptime loadTimestampBegin() const;
+    void loadTimestampBegin(boost::posix_time::ptime value);
 
-    float loadTimeEnd() const;
-    void loadTimeEnd(float value);
+    boost::posix_time::ptime loadTimestampEnd() const;
+    void loadTimestampEnd(boost::posix_time::ptime value);
 
     bool useASDBFilter() const;
     void useASDBFilter(bool value);
@@ -460,9 +462,11 @@ protected:
     // load filter
     bool use_load_filter_ {false};
 
-    bool use_time_filter_ {false};
-    float load_time_begin_ {0};
-    float load_time_end_ {0};
+    bool use_timestamp_filter_ {false};
+    std::string load_timestamp_begin_str_;
+    boost::posix_time::ptime load_timestamp_begin_;
+    std::string load_timestamp_end_str_;
+    boost::posix_time::ptime load_timestamp_end_;
 
     bool use_adsb_filter_ {false};
     bool use_v0_ {false};

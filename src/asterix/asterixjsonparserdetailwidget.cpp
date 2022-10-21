@@ -121,7 +121,7 @@ ASTERIXJSONParserDetailWidget::ASTERIXJSONParserDetailWidget(ASTERIXJSONParser& 
 
     dbo_var_sel_ = new dbContent::VariableSelectionWidget();
     dbo_var_sel_->showMetaVariables(false);
-    dbo_var_sel_->showDBContentOnly(parser_.dbObjectName());
+    dbo_var_sel_->showDBContentOnly(parser_.dbContentName());
     dbo_var_sel_->showEmptyVariable(true);
     dbo_var_sel_->setDisabled(true);
 
@@ -369,12 +369,12 @@ void ASTERIXJSONParserDetailWidget::showDBContentVariable (const std::string& va
 
         dbo_var_sel_->setEnabled(expert_mode_);
 
-        assert (parser_.dbObject().hasVariable(var_name));
-        dbo_var_sel_->selectedVariable(parser_.dbObject().variable(var_name));
+        assert (parser_.dbContent().hasVariable(var_name));
+        dbo_var_sel_->selectedVariable(parser_.dbContent().variable(var_name));
         dbo_var_data_type_label_->setText(dbo_var_sel_->selectedVariable().dataTypeString().c_str());
 
         dbo_var_comment_edit_->setEnabled(expert_mode_);
-        dbo_var_comment_edit_->setText(parser_.dbObject().variable(var_name).description().c_str());
+        dbo_var_comment_edit_->setText(parser_.dbContent().variable(var_name).description().c_str());
 
         if (mapping_exists)
         {
@@ -522,7 +522,7 @@ void ASTERIXJSONParserDetailWidget::mappingDBContentVariableChangedSlot()
 
         Configuration& new_cfg = parser_.configuration().addNewSubConfiguration("JSONDataMapping");
         new_cfg.addParameterString("json_key", json_key);
-        new_cfg.addParameterString("db_content_name", parser_.dbObjectName());
+        new_cfg.addParameterString("db_content_name", parser_.dbContentName());
         new_cfg.addParameterString("db_content_variable_name", dbo_var_sel_->selectedVariable().name());
 
         parser_.generateSubConfigurable("JSONDataMapping", new_cfg.getInstanceId());
@@ -599,7 +599,7 @@ void ASTERIXJSONParserDetailWidget::createNewDBVariableSlot()
         name = *parts.rbegin();
 
 
-    dbContent::VariableCreateDialog dialog (parser_.dbObject(), name, description, this);
+    dbContent::VariableCreateDialog dialog (parser_.dbContent(), name, description, this);
 
     int ret = dialog.exec();
 
@@ -609,9 +609,9 @@ void ASTERIXJSONParserDetailWidget::createNewDBVariableSlot()
 
         // create new dbo var
         {
-            assert (!parser_.dbObject().hasVariable(dialog.name()));
+            assert (!parser_.dbContent().hasVariable(dialog.name()));
 
-            Configuration& new_cfg = parser_.dbObject().configuration().addNewSubConfiguration("Variable");
+            Configuration& new_cfg = parser_.dbContent().configuration().addNewSubConfiguration("Variable");
             new_cfg.addParameterString("name", dialog.name());
             new_cfg.addParameterString("short_name", dialog.shortName());
             new_cfg.addParameterString("description", dialog.description());
@@ -621,9 +621,9 @@ void ASTERIXJSONParserDetailWidget::createNewDBVariableSlot()
             new_cfg.addParameterString("dimension", dialog.dimension());
             new_cfg.addParameterString("unit", dialog.unit());
 
-            parser_.dbObject().generateSubConfigurable("Variable", new_cfg.getInstanceId());
+            parser_.dbContent().generateSubConfigurable("Variable", new_cfg.getInstanceId());
 
-            assert (parser_.dbObject().hasVariable(dialog.name()));
+            assert (parser_.dbContent().hasVariable(dialog.name()));
         }
 
 
@@ -641,7 +641,7 @@ void ASTERIXJSONParserDetailWidget::createNewDBVariableSlot()
 
             Configuration& new_cfg = parser_.configuration().addNewSubConfiguration("JSONDataMapping");
             new_cfg.addParameterString("json_key", json_key);
-            new_cfg.addParameterString("db_content_name", parser_.dbObjectName());
+            new_cfg.addParameterString("db_content_name", parser_.dbContentName());
             new_cfg.addParameterString("db_content_variable_name", dialog.name());
 
             parser_.generateSubConfigurable("JSONDataMapping", new_cfg.getInstanceId());
@@ -695,8 +695,8 @@ void ASTERIXJSONParserDetailWidget::deleteDBVariableSlot()
     loginf << "ASTERIXJSONParserDetailWidget: deleteDBVariableSlot: deleting var '" << dbovar_name << "'";
 
     // delete variable
-    assert (parser_.dbObject().hasVariable(dbovar_name));
-    parser_.dbObject().deleteVariable(dbovar_name);loginf << "ASTERIXJSONParserDetailWidget: deleteDBVariableSlot";
+    assert (parser_.dbContent().hasVariable(dbovar_name));
+    parser_.dbContent().deleteVariable(dbovar_name);loginf << "ASTERIXJSONParserDetailWidget: deleteDBVariableSlot";
 
 
     if (entry_type_ == ASTERIXJSONParser::EntryType::ExistingMapping)

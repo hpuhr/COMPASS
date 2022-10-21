@@ -7,6 +7,8 @@
 class QCheckBox;
 class QLineEdit;
 
+class RangeEditFloat;
+
 class ModeCFilterWidget : public DBFilterWidget
 {
 
@@ -24,11 +26,14 @@ public:
     virtual void update();
 
 protected:
+    static const int Precision = 2;
+
     ModeCFilter& filter_;
 
     QLineEdit* min_value_edit_ {nullptr};
     QLineEdit* max_value_edit_ {nullptr};
     QCheckBox* null_check_ {nullptr};
+    RangeEditFloat* range_edit_ {nullptr};
 };
 
 #endif // MODECFILTERWIDGET_H

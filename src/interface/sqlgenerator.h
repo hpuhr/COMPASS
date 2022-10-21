@@ -18,9 +18,11 @@
 #ifndef SQLGENERATOR_H_
 #define SQLGENERATOR_H_
 
-#include <memory>
-
 #include "dbcontent/variable/variableset.h"
+
+#include "boost/date_time/posix_time/posix_time.hpp"
+
+#include <memory>
 
 class Buffer;
 class DBCommand;
@@ -49,6 +51,8 @@ public:
     //                                                const std::vector<std::string>& columns,
     //                                                bool distinct = false);
     std::shared_ptr<DBCommand> getDataSourcesSelectCommand();
+
+    std::shared_ptr<DBCommand> getDeleteCommand(const DBContent& dbcontent, boost::posix_time::ptime before_timestamp);
 
     //std::shared_ptr<DBCommand> getDistinctDataSourcesSelectCommand(DBContent& object);
     std::shared_ptr<DBCommand> getMaxUIntValueCommand(const std::string& table_name,

@@ -17,7 +17,7 @@
                                 "ListBoxViewDataSource": {
                                     "ListBoxViewDataSource0": {
                                         "parameters": {
-                                            "current_set_name": "Horizontal Movement"
+                                            "current_set_name": "Default"
                                         },
                                         "sub_configs": {
                                             "VariableOrderedSet": {
@@ -29,7 +29,7 @@
                                                                 "parameters": {
                                                                     "dbcontent_name": "Meta",
                                                                     "index": 0,
-                                                                    "variable_name": "Time of Day"
+                                                                    "variable_name": "Timestamp"
                                                                 }
                                                             },
                                                             "VariableOrderDefinition10": {
@@ -102,66 +102,59 @@
                                                     "parameters": null,
                                                     "sub_configs": {
                                                         "VariableOrderDefinition": {
-                                                            "VariableOrderDefinition0": {
-                                                                "parameters": {
-                                                                    "dbcontent_name": "Meta",
-                                                                    "index": 0,
-                                                                    "variable_name": "Record Number"
-                                                                }
-                                                            },
                                                             "VariableOrderDefinition1": {
                                                                 "parameters": {
                                                                     "dbcontent_name": "Meta",
-                                                                    "index": 1,
-                                                                    "variable_name": "Time of Day"
+                                                                    "index": 0,
+                                                                    "variable_name": "Timestamp"
                                                                 }
                                                             },
                                                             "VariableOrderDefinition2": {
                                                                 "parameters": {
                                                                     "dbcontent_name": "Meta",
-                                                                    "index": 2,
+                                                                    "index": 1,
                                                                     "variable_name": "DS ID"
                                                                 }
                                                             },
                                                             "VariableOrderDefinition3": {
                                                                 "parameters": {
                                                                     "dbcontent_name": "Meta",
-                                                                    "index": 3,
+                                                                    "index": 2,
                                                                     "variable_name": "Mode 3/A Code"
                                                                 }
                                                             },
                                                             "VariableOrderDefinition4": {
                                                                 "parameters": {
                                                                     "dbcontent_name": "Meta",
-                                                                    "index": 4,
+                                                                    "index": 3,
                                                                     "variable_name": "Aircraft Address"
                                                                 }
                                                             },
                                                             "VariableOrderDefinition5": {
                                                                 "parameters": {
                                                                     "dbcontent_name": "Meta",
-                                                                    "index": 5,
+                                                                    "index": 4,
                                                                     "variable_name": "Aircraft Identification"
                                                                 }
                                                             },
                                                             "VariableOrderDefinition6": {
                                                                 "parameters": {
                                                                     "dbcontent_name": "Meta",
-                                                                    "index": 6,
+                                                                    "index": 5,
                                                                     "variable_name": "Mode C Code"
                                                                 }
                                                             },
                                                             "VariableOrderDefinition7": {
                                                                 "parameters": {
                                                                     "dbcontent_name": "Meta",
-                                                                    "index": 7,
+                                                                    "index": 6,
                                                                     "variable_name": "Track Number"
                                                                 }
                                                             },
                                                             "VariableOrderDefinition8": {
                                                                 "parameters": {
                                                                     "dbcontent_name": "Meta",
-                                                                    "index": 8,
+                                                                    "index": 7,
                                                                     "variable_name": "Associations"
                                                                 }
                                                             }
@@ -176,7 +169,7 @@
                                                                 "parameters": {
                                                                     "dbcontent_name": "Meta",
                                                                     "index": 0,
-                                                                    "variable_name": "Time of Day"
+                                                                    "variable_name": "Timestamp"
                                                                 }
                                                             },
                                                             "VariableOrderDefinition10": {
@@ -253,7 +246,7 @@
                                                                 "parameters": {
                                                                     "dbcontent_name": "Meta",
                                                                     "index": 0,
-                                                                    "variable_name": "Time of Day"
+                                                                    "variable_name": "Timestamp"
                                                                 }
                                                             },
                                                             "VariableOrderDefinition10": {
@@ -330,7 +323,7 @@
                                                                 "parameters": {
                                                                     "dbcontent_name": "Meta",
                                                                     "index": 0,
-                                                                    "variable_name": "Time of Day"
+                                                                    "variable_name": "Timestamp"
                                                                 }
                                                             },
                                                             "VariableOrderDefinition10": {

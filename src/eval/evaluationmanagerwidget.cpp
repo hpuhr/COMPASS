@@ -142,6 +142,12 @@ void EvaluationManagerWidget::updateButtons()
     }
 }
 
+void EvaluationManagerWidget::updateFilterWidget()
+{
+    assert (filter_widget_);
+    filter_widget_->update();
+}
+
 void EvaluationManagerWidget::expandResults()
 {
     assert (results_tab_widget_);

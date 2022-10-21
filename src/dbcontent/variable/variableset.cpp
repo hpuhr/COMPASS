@@ -51,14 +51,13 @@ bool VariableSet::add(const Variable& var)
     return false;
 }
 
-bool VariableSet::add(VariableSet& set)
+bool VariableSet::add(const VariableSet& set)
 {
-    std::vector<Variable*>& setset = set.getSet();
-    std::vector<Variable*>::iterator it;
+    const std::vector<Variable*>& setset = set.getSet();
 
     bool added = false;
 
-    for (it = setset.begin(); it != setset.end(); it++)
+    for (auto it = setset.begin(); it != setset.end(); it++)
     {
         if (find(set_.begin(), set_.end(), *it) == set_.end())
         {
@@ -164,13 +163,13 @@ bool VariableSet::intersect(VariableSet& set)
     set_.clear();
     bool added = false;
 
-    std::vector<Variable*>& setset = set.getSet();
-    std::vector<Variable*>::iterator it;
-    std::vector<Variable*>::iterator it2;
+    const std::vector<Variable*>& setset = set.getSet();
+//    std::vector<Variable*>::iterator it;
+//    std::vector<Variable*>::iterator it2;
 
-    for (it = org_set.begin(); it != org_set.end(); it++)  // traverse original list
+    for (auto it = org_set.begin(); it != org_set.end(); it++)  // traverse original list
     {
-        it2 = find(setset.begin(), setset.end(), *it);
+        auto it2 = find(setset.begin(), setset.end(), *it);
         if (it2 == setset.end())  // other set hasn't var
         {
             changed_ = true;

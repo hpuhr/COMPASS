@@ -26,6 +26,10 @@
 
 using namespace std;
 using namespace Utils;
+using namespace boost::posix_time;
+
+#include "boost/date_time/posix_time/ptime.hpp"
+#include "boost/date_time/time_duration.hpp"
 
 namespace EvaluationRequirement
 {
@@ -43,7 +47,7 @@ DubiousTarget::DubiousTarget(
     : Base(name, short_name, group_name, prob, prob_check_type, eval_man),
       minimum_comparison_time_(minimum_comparison_time), maximum_comparison_time_(maximum_comparison_time),
       mark_primary_only_(mark_primary_only), use_min_updates_(use_min_updates), min_updates_(min_updates),
-      use_min_duration_(use_min_duration), min_duration_(min_duration),
+      use_min_duration_(use_min_duration), min_duration_(Time::partialSeconds(min_duration)),
       use_max_groundspeed_(use_max_groundspeed), max_groundspeed_kts_(max_groundspeed_kts),
       use_max_acceleration_(use_max_acceleration), max_acceleration_(max_acceleration),
       use_max_turnrate_(use_max_turnrate), max_turnrate_(max_turnrate),
@@ -61,7 +65,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTarget::evaluate (
            << " use_min_updates " << use_min_updates_ << " min_updates " << min_updates_
            << " use_min_duration " << use_min_duration_ << " min_duration " << min_duration_;
 
-    const std::multimap<float, unsigned int>& tst_data = target_data.tstData();
+    const std::multimap<ptime, unsigned int>& tst_data = target_data.tstData();
 
     EvaluationTargetPosition tst_pos;
     bool has_ground_bit;
@@ -69,7 +73,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTarget::evaluate (
 
     bool is_inside;
 
-    float tod{0};
+    ptime timestamp;
 
     unsigned int num_updates {0};
     unsigned int num_pos_outside {0};
@@ -82,18 +86,18 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTarget::evaluate (
 
     for (const auto& tst_id : tst_data)
     {
-        tod = tst_id.first;
+        timestamp = tst_id.first;
 
         ++num_updates;
 
         // check if inside based on test position only
 
-        tst_pos = target_data.tstPosForTime(tod);
+        tst_pos = target_data.tstPosForTime(timestamp);
 
-        has_ground_bit = target_data.hasTstGroundBitForTime(tod);
+        has_ground_bit = target_data.hasTstGroundBitForTime(timestamp);
 
         if (has_ground_bit)
-            ground_bit_set = target_data.tstGroundBitForTime(tod);
+            ground_bit_set = target_data.tstGroundBitForTime(timestamp);
         else
             ground_bit_set = false;
 
@@ -111,17 +115,17 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTarget::evaluate (
         detail_.left_sector_ = false;
         ++num_pos_inside;
 
-        if (!detail_.first_inside_ && tod - detail_.tod_end_ > 300.0) // not first time and time gap too large, skip
+        if (!detail_.first_inside_ && timestamp - detail_.tod_end_ > seconds(300)) // not first time and time gap too large, skip
             continue;
 
         ++detail_.num_pos_inside_;
 
-        detail_.updates_.emplace_back(tod, tst_pos);
+        detail_.updates_.emplace_back(timestamp, tst_pos);
 
         if (detail_.first_inside_) // do detail time & pos
         {
-            detail_.tod_begin_ = tod;
-            detail_.tod_end_ = tod;
+            detail_.tod_begin_ = timestamp;
+            detail_.tod_end_ = timestamp;
 
             detail_.pos_begin_ = tst_pos;
             detail_.pos_last_ = tst_pos;
@@ -130,7 +134,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTarget::evaluate (
         }
         else
         {
-            detail_.tod_end_ = tod;
+            detail_.tod_end_ = timestamp;
             assert (detail_.tod_end_ >= detail_.tod_begin_);
             detail_.duration_ = detail_.tod_end_ - detail_.tod_begin_;
 
@@ -139,11 +143,11 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTarget::evaluate (
 
         // do stats
         if (!detail_.has_mode_ac_
-                && (target_data.hasTstModeAForTime(tod) || target_data.hasTstModeCForTime(tod)))
+                && (target_data.hasTstModeAForTime(timestamp) || target_data.hasTstModeCForTime(timestamp)))
             detail_.has_mode_ac_  = true;
 
         if (!detail_.has_mode_s_
-                && (target_data.hasTstTAForTime(tod) || target_data.hasTstCallsignForTime(tod)))
+                && (target_data.hasTstTAForTime(timestamp) || target_data.hasTstCallsignForTime(timestamp)))
             detail_.has_mode_s_  = true;
     }
 
@@ -166,7 +170,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTarget::evaluate (
     std::map<std::string, std::string> all_updates_dubious_reasons;
 
     bool has_last_tod;
-    float last_tod;
+    ptime last_timestamp;
     float time_diff;
     float acceleration;
     float track_angle1, track_angle2, turnrate;
@@ -200,10 +204,10 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTarget::evaluate (
     if (!do_not_evaluate_target && use_min_duration_ && !detail_.left_sector_
             && detail_.duration_ < min_duration_)
     {
-        detail_.dubious_reasons_["Dur."] = String::doubleToStringPrecision(detail_.duration_, 1);
+        detail_.dubious_reasons_["Dur."] = Time::toString(detail_.duration_, 1);
 
         all_updates_dubious = true;
-        all_updates_dubious_reasons["Dur."] = String::doubleToStringPrecision(detail_.duration_, 1);
+        all_updates_dubious_reasons["Dur."] = Time::toString(detail_.duration_, 1);
     }
 
     has_last_tod = false;
@@ -222,11 +226,11 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTarget::evaluate (
 
         if (!do_not_evaluate_target && use_max_groundspeed_)
         {
-            if (target_data.hasTstMeasuredSpeedForTime(update.tod_)
-                    && target_data.tstMeasuredSpeedForTime(update.tod_) > max_groundspeed_kts_)
+            if (target_data.hasTstMeasuredSpeedForTime(update.timestamp_)
+                    && target_data.tstMeasuredSpeedForTime(update.timestamp_) > max_groundspeed_kts_)
             {
                 update.dubious_comments_["MSpd"] =
-                        String::doubleToStringPrecision(target_data.tstMeasuredSpeedForTime(update.tod_), 1);
+                        String::doubleToStringPrecision(target_data.tstMeasuredSpeedForTime(update.timestamp_), 1);
 
                 ++dubious_groundspeed_found;
             }
@@ -236,7 +240,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTarget::evaluate (
                             last_update->pos_.latitude_, last_update->pos_.longitude_,
                             update.pos_.latitude_, update.pos_.longitude_);
                 distance = sqrt(pow(x_pos, 2) + pow(y_pos, 2));
-                t_diff = update.tod_ - last_update->tod_;
+                t_diff = Time::partialSeconds(update.timestamp_ - last_update->timestamp_);
                 assert (t_diff >= 0);
 
                 if (t_diff > 0)
@@ -255,18 +259,18 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTarget::evaluate (
 
         if (has_last_tod)
         {
-            assert (update.tod_ >= last_tod);
-            time_diff = update.tod_ - last_tod;
+            assert (update.timestamp_ >= last_timestamp);
+            time_diff = Time::partialSeconds(update.timestamp_ - last_timestamp);
 
             if (!do_not_evaluate_target && time_diff >= minimum_comparison_time_
                     && time_diff <= maximum_comparison_time_)
             {
-                if (use_max_acceleration_ && target_data.hasTstMeasuredSpeedForTime(update.tod_)
-                        && target_data.hasTstMeasuredSpeedForTime(last_tod))
+                if (use_max_acceleration_ && target_data.hasTstMeasuredSpeedForTime(update.timestamp_)
+                        && target_data.hasTstMeasuredSpeedForTime(last_timestamp))
                 {
 
-                    acceleration = fabs(target_data.tstMeasuredSpeedForTime(update.tod_)
-                                        - target_data.tstMeasuredSpeedForTime(last_tod)) * KNOTS2M_S / time_diff;
+                    acceleration = fabs(target_data.tstMeasuredSpeedForTime(update.timestamp_)
+                                        - target_data.tstMeasuredSpeedForTime(last_timestamp)) * KNOTS2M_S / time_diff;
 
                     if (acceleration > max_acceleration_)
                     {
@@ -278,11 +282,11 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTarget::evaluate (
                 }
 
                 if (!do_not_evaluate_target && use_max_turnrate_
-                        && target_data.hasTstMeasuredTrackAngleForTime(update.tod_)
-                        && target_data.hasTstMeasuredTrackAngleForTime(last_tod))
+                        && target_data.hasTstMeasuredTrackAngleForTime(update.timestamp_)
+                        && target_data.hasTstMeasuredTrackAngleForTime(last_timestamp))
                 {
-                    track_angle1 = target_data.tstMeasuredTrackAngleForTime(update.tod_);
-                    track_angle2 = target_data.tstMeasuredTrackAngleForTime(last_tod);
+                    track_angle1 = target_data.tstMeasuredTrackAngleForTime(update.timestamp_);
+                    track_angle2 = target_data.tstMeasuredTrackAngleForTime(last_timestamp);
 
                     turnrate = fabs(RAD2DEG*atan2(sin(DEG2RAD*(track_angle1-track_angle2)),
                                                   cos(DEG2RAD*(track_angle1-track_angle2)))) / time_diff; // turn angle rate
@@ -296,12 +300,12 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTarget::evaluate (
                     }
                 }
 
-                if (!do_not_evaluate_target && use_rocd_ && target_data.hasTstModeCForTime(update.tod_)
-                        && target_data.hasTstModeCForTime(last_tod))
+                if (!do_not_evaluate_target && use_rocd_ && target_data.hasTstModeCForTime(update.timestamp_)
+                        && target_data.hasTstModeCForTime(last_timestamp))
                 {
 
-                    rocd = fabs(target_data.tstModeCForTime(update.tod_)
-                                - target_data.tstModeCForTime(last_tod)) / time_diff;
+                    rocd = fabs(target_data.tstModeCForTime(update.timestamp_)
+                                - target_data.tstModeCForTime(last_timestamp)) / time_diff;
 
                     if (rocd > max_rocd_)
                     {
@@ -317,7 +321,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTarget::evaluate (
         }
 
         // done
-        last_tod = update.tod_;
+        last_timestamp = update.timestamp_;
         has_last_tod = true;
     }
 
@@ -387,7 +391,7 @@ bool DubiousTarget::useMinDuration() const
 
 float DubiousTarget::minDuration() const
 {
-    return min_duration_;
+    return Time::partialSeconds(min_duration_);
 }
 
 bool DubiousTarget::useMaxAcceleration() const

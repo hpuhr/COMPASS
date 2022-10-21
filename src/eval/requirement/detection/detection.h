@@ -30,16 +30,16 @@ class DetectionDetail
 {
 public:
     DetectionDetail(
-            float tod, QVariant d_tod,
+            boost::posix_time::ptime timestamp, QVariant d_tod,
             bool miss_occurred, EvaluationTargetPosition pos_current,
             bool ref_exists, int missed_uis, const std::string& comment)
-        : tod_(tod), d_tod_(d_tod), miss_occurred_(miss_occurred), pos_current_(pos_current),
+        : timestamp_(timestamp), d_tod_(d_tod), miss_occurred_(miss_occurred), pos_current_(pos_current),
           ref_exists_(ref_exists), missed_uis_(missed_uis),
           comment_(comment)
     {
     }
 
-    float tod_ {0};
+    boost::posix_time::ptime timestamp_;
     QVariant d_tod_;
     bool miss_occurred_ {false};
 
