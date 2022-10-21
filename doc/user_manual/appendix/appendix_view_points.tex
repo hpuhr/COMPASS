@@ -136,12 +136,13 @@ Such an import without overrides can look as follows:
         "datasets": [
             {
                 "filename": "/home/sk/data/test/asterix/test.ff",
-                "line_id": 0
+                "line_id": 0,
+                "date": "2021-01-02"
             },
             {
                 "filename": "/home/sk/data/test/asterix/test2.ff",
                 "line_id": 1,
-                "time_offset" : -60
+                "time_offset": -60
             }
         ]
     },
@@ -150,7 +151,7 @@ Such an import without overrides can look as follows:
 \end{lstlisting}
 \ \\
 
-In this case, the first dataset will be imported into line L1 (0 as L1, default line), while the second dataset will be imported in to L2 and time shifted by the 'time\_offset' (as Time of Day in seconds). \\
+In this case, the first dataset will be imported into line L1 (0 as L1, default line) with a date '2021-01-02', while the second dataset will be imported in to L2 and time shifted by the 'time\_offset' (as Time of Day in seconds). \\
 
 Exact definition:
 

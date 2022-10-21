@@ -387,6 +387,19 @@ void ViewPointsImportTask::run()
                     loginf << "ViewPointsImportTask: import: override information not set";
                     asterix_importer_task.overrideTodActive(false);
                 }
+
+                if (ds_it.contains("date"))
+                {
+                    assert (ds_it.at("date").is_string());
+                    string date_str = ds_it.at("date");
+
+                    loginf << "ViewPointsImportTask: import: date " << date_str;
+
+                    boost::posix_time::ptime date = Time::fromDateString(date_str);
+
+                    asterix_importer_task.date(date);
+                }
+
                 asterix_importer_task.importFilename(filename);
 
                 assert(asterix_importer_task.canRun());
