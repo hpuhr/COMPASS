@@ -747,7 +747,7 @@ void DBContentManager::insertDone(DBContent& object)
 
 void DBContentManager::finishInserting()
 {
-    loginf << "DBContentManager: finishInserting";
+    logdbg << "DBContentManager: finishInserting";
 
     using namespace boost::posix_time;
 
@@ -758,7 +758,7 @@ void DBContentManager::finishInserting()
     for (auto& buf_it : insert_data_)
         insert_cnt += buf_it.second->size();
 
-    loginf << "DBContentManager: finishInserting: size " << insert_cnt;
+    logdbg << "DBContentManager: finishInserting: size " << insert_cnt;
 
     assert (existsMetaVariable(DBContent::meta_var_timestamp_.name()));
 

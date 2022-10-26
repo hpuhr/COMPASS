@@ -126,7 +126,7 @@ void ASTERIXPostprocessJob::doFutureTimestampsCheck()
 
     auto p_time = microsec_clock::universal_time (); // UTC
 
-    double tod_utc_max = (p_time - Time::partialSeconds(network_time_offset_ + 360.0)).time_of_day().total_milliseconds() / 1000.0; // up to 1 sec ok
+    double tod_utc_max = (p_time + Time::partialSeconds(network_time_offset_ + 360.0)).time_of_day().total_milliseconds() / 1000.0; // up to 1 sec ok
 
     bool in_vicinity_of_24h_time = tod_utc_max <= 60.0 || tod_utc_max >= (tod_24h - 60.0);
 
@@ -294,7 +294,7 @@ void ASTERIXPostprocessJob::doTimeStampCalculation()
                     had_late_time_ = false;
                 }
 
-                loginf << "ASTERIXPostprocessJob: doTimeStampCalculation: tod " << String::timeStringFromDouble(tod)
+                logdbg << "ASTERIXPostprocessJob: doTimeStampCalculation: tod " << String::timeStringFromDouble(tod)
                        << " ts " << Time::toString(timestamp);
 
                 timestamp_vec.set(index, timestamp);

@@ -969,7 +969,7 @@ void ASTERIXImportTask::addDecodedASTERIXSlot()
     ++num_packets_in_processing_;
     ++num_packets_total_;
 
-    loginf << "ASTERIXImportTask: addDecodedASTERIXSlot: processing data,"
+    logdbg << "ASTERIXImportTask: addDecodedASTERIXSlot: processing data,"
            << " num_packets_in_processing_ " << num_packets_in_processing_
            << " num_packets_total_ " << num_packets_total_;
 
@@ -1231,7 +1231,7 @@ void ASTERIXImportTask::insertDoneSlot()
         insertData();
     }
 
-    loginf << "ASTERIXImportTask: insertDoneSlot: processed " << num_records_ << " records";
+    logdbg << "ASTERIXImportTask: insertDoneSlot: processed " << num_records_ << " records";
 
     if (decode_job_ && decode_job_->hasData())
     {
