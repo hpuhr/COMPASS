@@ -72,6 +72,7 @@ HistogramGeneratorResults::HistogramGeneratorResults(const std::string& eval_grp
  */
 bool HistogramGeneratorResults::hasData() const
 {
+    //check if stored result id exists in evaluation manager
     EvaluationManager& eval_man = COMPASS::instance().evaluationManager();
     if (!eval_man.hasResults())
         return false;
