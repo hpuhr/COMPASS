@@ -43,6 +43,8 @@ public:
 
     virtual bool hasData() const override;
 
+    bool dataNotInBuffer() const { return data_not_in_buffer_; }
+
 protected:
     dbContent::Variable* currentVariable(const std::string& db_content) const;
     Data* currentData() { return buffer_data_; }
@@ -56,11 +58,14 @@ protected:
                               bool select_min_max,
                               bool select_null, 
                               bool add_to_selection) = 0;
+    
+    void setDataNotInBuffer(bool ok) { data_not_in_buffer_ = ok; }
 
 private:
-    Data*                    buffer_data_   = nullptr; //governed buffer data
-    dbContent::Variable*     variable_      = nullptr; //governed variable
-    dbContent::MetaVariable* meta_variable_ = nullptr; //governed meta-variable
+    Data*                    buffer_data_        = nullptr; //governed buffer data
+    dbContent::Variable*     variable_           = nullptr; //governed variable
+    dbContent::MetaVariable* meta_variable_      = nullptr; //governed meta-variable
+    bool                     data_not_in_buffer_ = false;
 };
 
 /**
@@ -245,8 +250,10 @@ private:
      */
     void resetInternal()
     {
-        histograms_     = {};
-        histogram_init_ = {};
+        histograms_         = {};
+        histogram_init_     = {};
+        
+        setDataNotInBuffer(false);
     }
 
     /**
@@ -296,13 +303,20 @@ private:
     bool scanBuffer(const std::string& db_content, Buffer& buffer)
     {
         auto variable = currentVariable(db_content);
+
+        //variable not available for dbcontent
         if (!variable)
             return false;
 
         std::string current_var_name = variable->name();
 
         if (!buffer.has<T>(current_var_name))
+        {
+            //the variable should be part of the db content, but it is missing.
+            //this hints that a reload is needed, so log it
+            setDataNotInBuffer(true);
             return false;
+        }
 
         NullableVector<T>& data = buffer.get<T>(current_var_name);
         
