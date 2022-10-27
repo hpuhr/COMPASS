@@ -1,3 +1,18 @@
+/*
+ * This file is part of OpenATS COMPASS.
+ *
+ * COMPASS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * COMPASS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * You should have received a copy of the GNU General Public License
+ * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
+ */
 
 #pragma once
 
@@ -108,7 +123,7 @@ inline std::string HistogramBinT<float>::label(dbContent::Variable* data_var) co
     const auto mid = midValue();
     
     std::string s;
-    if (data_var->representation() != dbContent::Variable::Representation::STANDARD)
+    if (data_var && data_var->representation() != dbContent::Variable::Representation::STANDARD)
         s = data_var->getAsSpecialRepresentationString(mid);
     else
         s = std::to_string(mid);
@@ -121,7 +136,7 @@ inline std::string HistogramBinT<double>::label(dbContent::Variable* data_var) c
     const auto mid = midValue();
     
     std::string s;
-    if (data_var->representation() != dbContent::Variable::Representation::STANDARD)
+    if (data_var && data_var->representation() != dbContent::Variable::Representation::STANDARD)
         s = data_var->getAsSpecialRepresentationString(mid);
     else
         s = std::to_string(mid);
@@ -145,6 +160,26 @@ inline std::string HistogramBinT<boost::posix_time::ptime>::label(dbContent::Var
 }
 
 /**
+ * Current histogram configuration.
+ */
+struct HistogramConfig
+{
+    static const unsigned int DefaultBins = 20;
+
+    /**
+     * Histogram generation type.
+     */
+    enum class Type
+    {
+        Range = 0, //the histogram is generated from a certain data range and a number of equally sized bins inbetween
+        Category   //the histogram is generated from a fixed number of values that need to match (categories)
+    };
+
+    Type          type     = Type::Range; //histogram generation type
+    unsigned int  num_bins = DefaultBins; //number of histogram bins to be generated
+};
+
+/**
  * A templated histogram.
  */
 template<typename T> 
@@ -155,7 +190,7 @@ public:
     virtual ~HistogramT() = default;
 
     /**
-     * Reset the histogram.
+     * Resets the histogram.
      */
     void clear()
     {
@@ -164,9 +199,13 @@ public:
         categories_.clear();
         step_size_ = {};
         not_found_bin_.reset();
+
+        config_ = {};
+        config_.num_bins = 0;
     }
 
     /**
+     * Resets all bins to zero.
      */
     void resetBins()
     {
@@ -178,10 +217,19 @@ public:
      */
     size_t numBins() const
     {
-        return bins_.size();
+        return config_.num_bins;
     }
 
     /**
+     * Returns the current configuration of the histogram.
+     */
+    HistogramConfig configuration() const
+    {
+        return config_;
+    }
+
+    /**
+     * Returns the given bin.
      */
     const HistogramBinT<T>& getBin(size_t idx) const
     {
@@ -189,6 +237,7 @@ public:
     }
 
     /**
+     * Collects all bin counts.
      */
     std::vector<uint32_t> counts() const
     {
@@ -202,6 +251,7 @@ public:
     }
 
     /**
+     * Returns the number of values which could not be added to the histogram range.
      */
     uint32_t unassignedCount() const
     {
@@ -224,8 +274,11 @@ public:
     void createFromCategories(const std::vector<T>& categories)
     {
         size_t n = categories.size();
-
+        
         clear();
+
+        config_.type     = HistogramConfig::Type::Category;
+        config_.num_bins = n;
 
         if (n < 1)
             return;
@@ -256,22 +309,32 @@ public:
     }
 
     /**
+     * Add the given values to the histogram.
+     */
+    void add(const std::vector<T>& values)
+    {
+        for (const auto& v : values)
+            add(v);
+    }
+
+    /**
      * Increment the given bin.
      */
-    void increment(int idx) 
+    void increment(int idx, uint32_t count = 1) 
     {
         //invalid bin?
         if (idx < 0)
         {
-            not_found_bin_.add();
+            not_found_bin_.add(count);
             return;
         }
 
         //increment bin
-        bins_.at(idx).add();
+        bins_.at(idx).add(count);
     }
 
     /**
+     * Tries to find the bin the given value is part of, return -1 if not found.
      */
     int findBin(const T& v) const
     {
@@ -284,6 +347,44 @@ public:
 
         //search bin range for correct bin
         return findBinLinear(v, &bin_range.first, &bin_range.second);
+    }
+
+    /**
+     * Zooms to the given bin range, permanently dropping all other (outer) bins.
+     */
+    bool zoom(unsigned int bin0, unsigned int bin1, const boost::optional<size_t>& n = boost::optional<size_t>())
+    {
+        if (numBins() < 1 ||
+            bin1 < bin0 ||
+            bin1 >= numBins())
+            return false;
+
+        //all bins selected?
+        if (bin0 == 0 && bin1 == numBins() - 1)
+            return true;
+
+        if (config_.type == HistogramConfig::Type::Category)
+        {
+            //recreate histograms from subcategories 
+            std::vector<T> categories;
+            for (unsigned int i = bin0; i <= bin1; ++i)
+                categories.push_back(getBin(i).min_value);
+
+            createFromCategories(categories);
+        }
+        else // Type::Range
+        {
+            //recreate histogram from subrange
+            const auto& b0 = getBin(bin0);
+            const auto& b1 = getBin(bin1);
+
+            auto min_value = b0.min_value;
+            auto max_value = b1.max_value;
+
+            createFromRange(n.has_value() ? n.value() : HistogramConfig::DefaultBins, min_value, max_value);
+        }
+
+        return true;
     }
 
     /**
@@ -329,18 +430,18 @@ private:
     {
         clear();
 
+        config_.type     = HistogramConfig::Type::Range;
+        config_.num_bins = 0;
+
         if (n < 1)
             return;
-
-        bins_.resize(n);
-        ranges_.resize(n);
 
         const Tinternal min_value_int = convertToInternal<Tinternal>(min_value);
         const Tinternal max_value_int = convertToInternal<Tinternal>(max_value);
 
         if (max_value_int - min_value_int == 0)
             return;
-
+        
         //compute suitable step size
         //@TODO: integer types should check if the number of integer values in the range is below n!
         Tinternal step_size_int = (max_value_int - min_value_int) / (Tinternal)n;
@@ -357,6 +458,11 @@ private:
 
         //should never happen
         assert(n > 0);
+
+        bins_.resize(n);
+        ranges_.resize(n);
+
+        config_.num_bins = n;
 
         //create bins
         for (size_t i = 0; i < n; ++i)
@@ -553,6 +659,7 @@ private:
         return -1;
     }
 
+    HistogramConfig               config_;
     std::vector<HistogramBinT<T>> bins_;
     std::map<T,int>               categories_;
     std::vector<T>                ranges_;

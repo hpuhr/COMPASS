@@ -28,6 +28,8 @@
 #include "logger.h"
 #include "evaluationmanager.h"
 #include "histogramgenerator.h"
+#include "histogramgeneratorbuffer.h"
+#include "histogramgeneratorresults.h"
 
 #include "eval/results/extra/datasingle.h"
 #include "eval/results/extra/datajoined.h"
@@ -286,52 +288,52 @@ void HistogramViewDataWidget::updateFromAllData()
     {
         case PropertyDataType::BOOL:
         {
-            histogram_generator_.reset(new HistogramGeneratorT<bool>);
+            histogram_generator_.reset(new HistogramGeneratorBufferT<bool>(&buffers_, data_var, meta_var));
             break;
         }
         case PropertyDataType::CHAR:
         {
-            histogram_generator_.reset(new HistogramGeneratorT<char>);
+            histogram_generator_.reset(new HistogramGeneratorBufferT<char>(&buffers_, data_var, meta_var));
             break;
         }
         case PropertyDataType::UCHAR:
         {
-            histogram_generator_.reset(new HistogramGeneratorT<unsigned char>);
+            histogram_generator_.reset(new HistogramGeneratorBufferT<unsigned char>(&buffers_, data_var, meta_var));
             break;
         }
         case PropertyDataType::INT:
         {
-            histogram_generator_.reset(new HistogramGeneratorT<int>);
+            histogram_generator_.reset(new HistogramGeneratorBufferT<int>(&buffers_, data_var, meta_var));
             break;
         }
         case PropertyDataType::UINT:
         {
-            histogram_generator_.reset(new HistogramGeneratorT<unsigned int>);
+            histogram_generator_.reset(new HistogramGeneratorBufferT<unsigned int>(&buffers_, data_var, meta_var));
             break;
         }
         case PropertyDataType::LONGINT:
         {
-            histogram_generator_.reset(new HistogramGeneratorT<long int>);
+            histogram_generator_.reset(new HistogramGeneratorBufferT<long int>(&buffers_, data_var, meta_var));
             break;
         }
         case PropertyDataType::ULONGINT:
         {
-            histogram_generator_.reset(new HistogramGeneratorT<unsigned long int>);
+            histogram_generator_.reset(new HistogramGeneratorBufferT<unsigned long int>(&buffers_, data_var, meta_var));
             break;
         }
         case PropertyDataType::FLOAT:
         {
-            histogram_generator_.reset(new HistogramGeneratorT<float>);
+            histogram_generator_.reset(new HistogramGeneratorBufferT<float>(&buffers_, data_var, meta_var));
             break;
         }
         case PropertyDataType::DOUBLE:
         {
-            histogram_generator_.reset(new HistogramGeneratorT<double>);
+            histogram_generator_.reset(new HistogramGeneratorBufferT<double>(&buffers_, data_var, meta_var));
             break;
         }
         case PropertyDataType::STRING:
         {
-            histogram_generator_.reset(new HistogramGeneratorT<std::string>);
+            histogram_generator_.reset(new HistogramGeneratorBufferT<std::string>(&buffers_, data_var, meta_var));
             break;
         }
         case PropertyDataType::JSON:
@@ -341,7 +343,7 @@ void HistogramViewDataWidget::updateFromAllData()
         }
         case PropertyDataType::TIMESTAMP:
         {
-            histogram_generator_.reset(new HistogramGeneratorT<boost::posix_time::ptime>);
+            histogram_generator_.reset(new HistogramGeneratorBufferT<boost::posix_time::ptime>(&buffers_, data_var, meta_var));
             break;
         }
         default:
@@ -356,10 +358,7 @@ void HistogramViewDataWidget::updateFromAllData()
     if (!histogram_generator_)
         return;
 
-    histogram_generator_->setBufferData(&buffers_);
-    histogram_generator_->setVariable(data_var);
-    histogram_generator_->setMetaVariable(meta_var);
-    histogram_generator_->updateFromBufferData();
+    histogram_generator_->update();
     //histogram_generator_->print();
 
     loginf << "HistogramViewDataWidget: updateFromAllData: done";
@@ -423,7 +422,7 @@ void HistogramViewDataWidget::updateChart()
     };
 
     //generate a bar set for each DBContent
-    for (const auto& elem : results.db_content_results)
+    for (const auto& elem : results.content_results)
     {
         const auto& r = elem.second;
 
@@ -460,9 +459,9 @@ void HistogramViewDataWidget::updateChart()
 
     //create categories
     QStringList categories;
-    if (!results.db_content_results.empty())
+    if (!results.content_results.empty())
     {
-        const auto& r = results.db_content_results.begin()->second;
+        const auto& r = results.content_results.begin()->second;
         for (const auto& b : r.bins)
             categories << QString::fromStdString(b.label);
     }
@@ -1363,54 +1362,18 @@ void HistogramViewDataWidget::updateResults()
 {
     loginf << "HistogramViewDataWidget: updateResults";
 
+    histogram_generator_.reset();
+
     EvaluationManager& eval_man = COMPASS::instance().evaluationManager();
 
     if (eval_man.hasResults() && view_->showResults())
     {
-        counts_.clear();
-        selected_counts_.clear();
-        data_null_selected_cnt_ = 0;
-        data_null_cnt_.clear();
-        labels_.clear();
-
-        max_bin_cnt_ = 0;
-
-        data_min_.clear();
-        data_max_.clear();
-
-        bin_size_valid_ = false;
-        bin_size_ = 0;
-
-        shows_data_ = false;
-        data_not_in_buffer_ = false;
-
         string eval_grpreq = view_->evalResultGrpReq();
-        string eval_id = view_->evalResultsID();
+        string eval_id     = view_->evalResultsID();
 
-        // check if ids are set
-        if (!eval_grpreq.size() || !eval_id.size())
-            return;
-
-        const std::map<std::string, std::map<std::string, std::shared_ptr<EvaluationRequirementResult::Base>>>& results =
-                eval_man.results();
-
-        // check if ids are in result
-        if (!results.count(eval_grpreq) || !results.at(eval_grpreq).count(eval_id))
-        {
-            logwrn << "HistogramViewDataWidget: updateResults: ids set but not in results";
-            return;
-        }
-
-        std::shared_ptr<EvaluationRequirementResult::Base> result = results.at(eval_grpreq).at(eval_id);
-        assert (result);
-        updateFromResult(result);
+        histogram_generator_.reset(new HistogramGeneratorResults(eval_grpreq, eval_id));
+        histogram_generator_->update();
     }
-
-    //    osg_layer_model_->beginResetModel();
-    //    osg_layer_model_->resultsItem().update();
-    //    osg_layer_model_->endResetModel();
-
-    //    drawSlot();
 }
 
 /**

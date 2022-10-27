@@ -1,115 +1,75 @@
+/*
+ * This file is part of OpenATS COMPASS.
+ *
+ * COMPASS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * COMPASS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * You should have received a copy of the GNU General Public License
+ * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
+ */
 
 #include "histogramgenerator.h"
 #include "logger.h"
 
-#include <QApplication>
-
 /**
- */
-void HistogramGenerator::setVariable(dbContent::Variable* variable)
-{
-    reset();
-
-    variable_ = variable;
-}
-
-/**
- */
-void HistogramGenerator::setMetaVariable(dbContent::MetaVariable* variable)
-{
-    reset();
-
-    meta_variable_ = variable;
-}
-
-/**
- */
-void HistogramGenerator::setBufferData(Data* data)
-{
-    reset();
-
-    buffer_data_ = data;
-}
-
-/**
+ * Resets all data.
  */
 void HistogramGenerator::reset()
 {
+    num_bins_          = 0;
     sub_range_active_  = false;
-    scanned_content_   = {};
     intermediate_data_ = {};
     results_           = {};
+
+    reset_impl();
 }
 
 /**
- */
-void HistogramGenerator::prepareForRefill()
+ */    
+unsigned int HistogramGenerator::currentBins() const 
 {
-    intermediate_data_ = {};
-    results_           = {};
+    return num_bins_;
 }
 
 /**
+ * Checks if a valid result is available.
  */
 bool HistogramGenerator::hasValidResult() const
 {
-    return (config_.num_bins > 0 && 
-            !results_.db_content_results.empty() &&
-            results_.db_content_results.size() == intermediate_data_.size());
+    return (num_bins_ > 0 && 
+            !results_.content_results.empty() &&
+            results_.content_results.size() == intermediate_data_.size());
 }
 
 /**
- */
-dbContent::Variable* HistogramGenerator::currentVariable(const std::string& db_content) const
-{
-    dbContent::Variable* data_var = nullptr;
-
-    if (meta_variable_)
-    {
-        if (!meta_variable_->existsIn(db_content))
-        {
-            logwrn << "HistogramGenerator: currentVariable: meta var does not exist in dbo";
-            return nullptr;
-        }
-        data_var = &meta_variable_->getFor(db_content);
-    }
-    else
-    {
-        data_var = variable_;
-
-        if (data_var && data_var->dbContentName() != db_content)
-            return nullptr;
-    }
-
-    return data_var;
-}
-
-/**
- * Refills the histograms using buffer data.
+ * Refills the existing histograms and generates new result data.
  */
 bool HistogramGenerator::refill()
 {
     loginf << "HistogramGenerator: Refilling...";
 
-    if (!buffer_data_)
+    if (!hasData())
         return false;
 
-    //empty/prealloc some data etc.
-    prepareForRefill();
+    //reset computed data
+    intermediate_data_ = {};
+    results_           = {};
 
-    //add all buffers
-    for (auto& elem : *buffer_data_)
-    {
-        bool ok = addBuffer(elem.first, *elem.second);
-
-        if (!ok)
-            logwrn << "HistogramGenerator: Could not add buffer of DBContent " << elem.first;
-    }
+    //run refill in derived classes
+    if (!refill_impl())
+        return false;
 
     loginf << "HistogramGenerator: Finalizing results...";
 
-    //create results
-    finalizeResults();
+    //compile results from intermediate data
+    if (!finalizeResults())
+        return false;
 
     loginf << "HistogramGenerator: Refilled!";
 
@@ -117,65 +77,35 @@ bool HistogramGenerator::refill()
 }
 
 /**
- * Completely updates using the governed buffer data.
+ * Runs a complete update.
  */
-void HistogramGenerator::updateFromBufferData()
+void HistogramGenerator::update()
 {
-    if (!buffer_data_)
+    loginf << "HistogramGenerator: Running update...";
+
+    if (!hasData())
         return;
 
     //reset content
     reset();
 
-    loginf << "HistogramGenerator: Scanning buffers...";
-
-    //scan all buffers (min-max etc.)
-    for (auto& elem : *buffer_data_)
-    {
-        bool ok = scanBuffer(elem.first, *elem.second);
-
-        if (!ok)
-            logwrn << "HistogramGenerator: Could not scan buffer of DBContent " << elem.first;
-    }
-
-    loginf << "HistogramGenerator: Preparing histograms...";
-
-    //prepare histograms
-    prepareHistograms();
+    //generate histograms before refill (if implemented in derived class)
+    generateHistograms_impl();
 
     //refill data
     refill();
 
-    loginf << "HistogramGenerator: Generated histograms!";
+    loginf << "HistogramGenerator: Updated!";
 }
 
 /**
- */
-void HistogramGenerator::updateFromEvaluation(const std::string& eval_grpreq, const std::string& eval_id)
-{
-    //@TODO
-}
-
-/**
- * Scans the buffer, thus collecting important information used for histogram generation.
- */
-bool HistogramGenerator::scanBuffer(const std::string& db_content, Buffer& buffer)
-{
-    if (!scanBuffer_impl(db_content, buffer))
-        return false;
-
-    //register scanned content
-    scanned_content_.insert(db_content);
-
-    return true;
-}
-
-/**
- * Selects the given sub range of bins in the data (the histograms should be regenerated afterwards).
+ * Selects the given sub range of bins in the data.
  */
 bool HistogramGenerator::select(unsigned int bin0, unsigned int bin1)
 {
-    if (!buffer_data_)
+    loginf << "HistogramGenerator: Selecting...";
+
+    if (!hasData())
         return false;
 
     //selection needs a valid result
@@ -186,36 +116,27 @@ bool HistogramGenerator::select(unsigned int bin0, unsigned int bin1)
     unsigned int min_index = std::min(bin0, bin1);
     unsigned int max_index = std::max(bin0, bin1);
 
-    //determine some options
-    auto num_bins = currentBins();
-
-    bool select_null    = max_index == num_bins;
-    bool select_min_max = !(min_index == max_index && max_index == num_bins); // not b´oth num bins
-
-    if (select_null)
-        max_index -= 1;
-
-    bool add_to_selection = QApplication::keyboardModifiers() & Qt::ControlModifier;
-
-    bool ok = true;
-
-    //run selection on all buffers
-    for (auto& elem : *buffer_data_)
-    {
-        ok = ok && selectBuffer(elem.first, *elem.second, bin0, bin1, select_min_max, select_null, add_to_selection);
-    }
-
-    return ok;
+    //selection is implemented in derived classes
+    return select_impl(min_index, max_index);
 }
 
 /**
- * Zooms to the given subrange of bins and refills the data.
+ * Selection stub.
+ */
+bool HistogramGenerator::select_impl(unsigned int bin0, unsigned int bin1)
+{
+    throw std::runtime_error("HistogramGenerator::select_impl: not implemented yet");
+    return false;
+}
+
+/**
+ * Zooms to the given subrange of bins.
  */
 bool HistogramGenerator::zoom(unsigned int bin0, unsigned int bin1)
 {
     loginf << "HistogramGenerator: Zooming to bin range...";
 
-    if (!buffer_data_)
+    if (!hasData())
         return false;
 
     if (!hasValidResult())
@@ -224,11 +145,11 @@ bool HistogramGenerator::zoom(unsigned int bin0, unsigned int bin1)
     unsigned int min_index = std::min(bin0, bin1);
     unsigned int max_index = std::max(bin0, bin1);
 
-    min_index = std::min(min_index, config_.num_bins - 1);
-    max_index = std::min(max_index, config_.num_bins - 1);
+    min_index = std::min(min_index, num_bins_ - 1);
+    max_index = std::min(max_index, num_bins_ - 1);
 
-    //try to rearrange the histograms using the given zoom range
-    if(!zoomToSubrange(min_index, max_index))
+    //zooming is implemented in derived classes.
+    if (!zoom_impl(min_index, max_index))
         return false;
 
     sub_range_active_ = true;
@@ -243,10 +164,84 @@ bool HistogramGenerator::zoom(unsigned int bin0, unsigned int bin1)
 }
 
 /**
+ * Zoom stub.
+ */
+bool HistogramGenerator::zoom_impl(unsigned int bin0, unsigned int bin1)
+{
+    throw std::runtime_error("HistogramGenerator::zoom_impl: not implemented yet");
+    return false;
+}
+
+/**
+ * Extracts histogram data from intermediate results and stores it to the final results.
+ */
+bool HistogramGenerator::finalizeResults()
+{
+    results_  = {};
+    num_bins_ = 0;
+
+    if (!intermediate_data_.empty())
+    {
+        num_bins_ = (unsigned int)intermediate_data_.begin()->second.bin_data.size();
+    }
+
+    results_.valid_counts.assign(num_bins_, 0);
+    results_.selected_counts.assign(num_bins_, 0);
+
+    for (auto& elem : intermediate_data_)
+    {
+        const auto& d = elem.second;
+        auto&       r = results_.content_results[ elem.first ];
+
+        r.bins.resize(d.bin_data.size());
+
+        r.null_count          = d.null_count;
+        r.null_selected_count = d.null_selected_count;
+        r.not_inserted_count  = d.not_inserted_count;
+
+        for (size_t i = 0; i < d.bin_data.size(); ++i)
+        {
+            const auto& bin_data = d.bin_data.at(i);
+            auto&       res_bin  = r.bins.at(i);
+
+            res_bin = bin_data;
+
+            //per db content counts
+            r.valid_count    += res_bin.count;
+            r.selected_count += res_bin.selected;
+
+            if (res_bin.count > r.max_count)
+                r.max_count = res_bin.count;
+
+            //per bin counts
+            results_.valid_counts   [ i ] += res_bin.count;
+            results_.selected_counts[ i ] += res_bin.selected;
+        }
+
+        //total counts
+        results_.valid_count         += r.valid_count;
+        results_.selected_count      += r.selected_count;
+        results_.null_count          += r.null_count;
+        results_.null_selected_count += r.null_selected_count;
+        results_.not_inserted_count  += r.not_inserted_count;
+        
+        if (r.max_count > results_.max_count)
+            results_.max_count = r.max_count;
+
+        num_bins_ = (int)r.bins.size();
+    }
+
+    assert(subRangeActive() || results_.not_inserted_count == 0);
+
+    return true;
+}
+
+/**
+ * Prints the result to the command line.
  */
 void HistogramGenerator::print() const
 {
-    for (const auto& elem : results_.db_content_results)
+    for (const auto& elem : results_.content_results)
     {
         const auto& r = elem.second;
 
