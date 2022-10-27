@@ -224,6 +224,9 @@ private:
     std::string eval_grpreq_;
     std::string eval_id_;
 
-    std::map<std::string, HistogramT<std::string>> histograms_static_;
-    std::map<std::string, HistogramT<double>>      histograms_fp_;
+    //@TODO: this could get us in trouble if we need more and more types of histograms
+    //how to integrate this more gracefully?
+    // -> maybe generate the needed histograms on the fly and do not even hold them as members?
+    std::map<std::string, HistogramT<std::string>> histograms_static_; //static category histogram
+    std::map<std::string, HistogramT<double>>      histograms_fp_;     //floating point histogram
 };
