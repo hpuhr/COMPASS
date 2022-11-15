@@ -389,17 +389,7 @@ void DBContentManager::load()
             VariableSet read_set = view_man.getReadSet(object.first);
 
             // add required vars for processing
-            assert (metaCanGetVariable(object.first, DBContent::meta_var_rec_num_));
-            read_set.add(metaGetVariable(object.first, DBContent::meta_var_rec_num_));
-
-            assert (metaCanGetVariable(object.first, DBContent::meta_var_datasource_id_));
-            read_set.add(metaGetVariable(object.first, DBContent::meta_var_datasource_id_));
-
-            assert (metaCanGetVariable(object.first, DBContent::meta_var_line_id_));
-            read_set.add(metaGetVariable(object.first, DBContent::meta_var_line_id_));
-
-            assert (metaCanGetVariable(object.first, DBContent::meta_var_associations_));
-            read_set.add(metaGetVariable(object.first, DBContent::meta_var_associations_));
+            addStandardVariables(object.first, read_set);
 
             label_generator_->addVariables(object.first, read_set);
 
@@ -1036,6 +1026,7 @@ void DBContentManager::addInsertedDataToChache()
         std::advance(buf_it, buffer_cnt);
 
         VariableSet read_set = COMPASS::instance().viewManager().getReadSet(buf_it->first);
+        addStandardVariables(buf_it->first, read_set);
         label_generator_->addVariables(buf_it->first, read_set);
 
         vector<Property> buffer_properties_to_be_removed;
@@ -1162,61 +1153,9 @@ void DBContentManager::cutCachedData()
 {
     unsigned int buffer_size;
 
-//    bool max_time_set = false;
-//    boost::posix_time::ptime min_ts_found, max_ts_found;
-
-//    boost::posix_time::ptime max_ts = Time::currentUTCTime();
-
-//    float time_offset = COMPASS::instance().mainWindow().importASTERIXFromNetworkTimeOffset();
-
-//    loginf << "DBContentManager: cutCachedData: max_time " << Time::toString(max_ts)
-//           << " time offset " << String::timeStringFromDouble(time_offset)
-//           << " float " << time_offset;
-
-//    max_ts += boost::posix_time::milliseconds((int) (time_offset * 1000.0));;
-
-//    for (auto& buf_it : data_)
-//    {
-//        assert (metaVariable(DBContent::meta_var_timestamp_.name()).existsIn(buf_it.first));
-
-//        Variable& ts_var = metaVariable(DBContent::meta_var_timestamp_.name()).getFor(buf_it.first);
-
-//        Property ts_prop {ts_var.name(), ts_var.dataType()};
-
-//        if(buf_it.second->hasProperty(ts_prop))
-//        {
-//            NullableVector<boost::posix_time::ptime>& timestamp_vec = buf_it.second->get<boost::posix_time::ptime>(
-//                        ts_var.name());
-
-//            auto minmax = timestamp_vec.minMaxValues();
-//            assert (get<0>(minmax)); // there is minmax
-
-//            if (max_time_set)
-//            {
-//                min_ts_found = min(min_ts_found, get<1>(minmax));
-//                max_ts_found = max(max_ts_found, get<2>(minmax));
-//            }
-//            else
-//            {
-//                min_ts_found = get<1>(minmax);
-//                max_ts_found = get<2>(minmax);
-//                max_time_set = true;
-//            }
-//        }
-//        else
-//            logwrn << "DBContentManager: cutCachedData: buffer " << buf_it.first << " has not timestamp for min/max";
-//    }
-
-//    if (max_time_set)
-//        loginf << "DBContentManager: cutCachedData: data time min " << Time::toString(min_ts_found)
-//               << " max " << Time::toString(max_ts_found);
-
     boost::posix_time::ptime min_ts = Time::currentUTCTime() - boost::posix_time::minutes(5); // max - 5min
 
     loginf << "DBContentManager: cutCachedData: min_ts " << Time::toString(min_ts);
-              //<< " data min " << String::timeStringFromDouble(min_tod_found)
-           //<< " max_ts " << Time::toString(max_ts);
-    //<< " utc " << String::timeStringFromDouble(secondsSinceMidnighUTC());
 
     for (auto& buf_it : data_)
     {
@@ -1500,6 +1439,24 @@ void DBContentManager::loadMaxRefTrajTrackNum()
     has_max_reftraj_track_num_ = true;
 
     loginf << "DBContentManager: loadMaxRefTrajTrackNum: " << max_reftraj_track_num_;
+}
+
+void DBContentManager::addStandardVariables(std::string dbcont_name, dbContent::VariableSet& read_set)
+{
+    assert (metaCanGetVariable(dbcont_name, DBContent::meta_var_rec_num_));
+    read_set.add(metaGetVariable(dbcont_name, DBContent::meta_var_rec_num_));
+
+    assert (metaCanGetVariable(dbcont_name, DBContent::meta_var_datasource_id_));
+    read_set.add(metaGetVariable(dbcont_name, DBContent::meta_var_datasource_id_));
+
+    assert (metaCanGetVariable(dbcont_name, DBContent::meta_var_line_id_));
+    read_set.add(metaGetVariable(dbcont_name, DBContent::meta_var_line_id_));
+
+    assert (metaCanGetVariable(dbcont_name, DBContent::meta_var_timestamp_));
+    read_set.add(metaGetVariable(dbcont_name, DBContent::meta_var_timestamp_));
+
+    assert (metaCanGetVariable(dbcont_name, DBContent::meta_var_associations_));
+    read_set.add(metaGetVariable(dbcont_name, DBContent::meta_var_associations_));
 }
 
 MetaVariableConfigurationDialog* DBContentManager::metaVariableConfigdialog()

@@ -44,6 +44,7 @@ class MetaVariable;
 class VariableSet;
 class Target;
 class LabelGenerator;
+class VariableSet;
 
 }
 
@@ -239,6 +240,8 @@ protected:
 
     void loadMaxRecordNumber();
     void loadMaxRefTrajTrackNum();
+
+    void addStandardVariables(std::string dbcont_name, dbContent::VariableSet& read_set);
 };
 
 #endif /* DBCONTENT_DBCONTENTMANAGER_H_ */
