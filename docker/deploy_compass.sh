@@ -12,6 +12,8 @@ cp /usr/lib/libcompass.a appimage/appdir/lib/
 cp -r /usr/lib/osgPlugins-3.6.5 appimage/appdir/lib/
 cp -r /usr/lib64/osgPlugins-3.6.5/ appimage/appdir/lib/
 cp /usr/lib64/libosgEarth* appimage/appdir/lib/
+cp -r /usr/lib/libproj.so.0.7.0 appimage/appdir/lib/libproj.so
+chrpath -r '$ORIGIN' appimage/appdir/lib/libproj.so
 #cp /usr/lib64/osgdb_* appimage/appdir/lib/
 
 #chrpath -r '$ORIGIN' appimage/appdir/lib/*
