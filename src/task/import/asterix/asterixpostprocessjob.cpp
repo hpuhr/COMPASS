@@ -57,6 +57,9 @@ void ASTERIXPostprocessJob::run()
     if (override_tod_active_)
         doTodOverride();
 
+    if (network_time_offset_)
+        doNetworkTimeOverride();
+
     if (do_timestamp_checks_) // out of sync issue during 24h replay
         doFutureTimestampsCheck();
 
@@ -114,6 +117,49 @@ void ASTERIXPostprocessJob::doTodOverride()
     }
 }
 
+void ASTERIXPostprocessJob::doNetworkTimeOverride()
+{
+    assert (network_time_offset_);
+
+    DBContentManager& obj_man = COMPASS::instance().dbContentManager();
+
+    unsigned int buffer_size;
+
+    for (auto& buf_it : buffers_)
+    {
+        buffer_size = buf_it.second->size();
+
+        assert (obj_man.metaVariable(DBContent::meta_var_time_of_day_.name()).existsIn(buf_it.first));
+
+        dbContent::Variable& tod_var = obj_man.metaVariable(DBContent::meta_var_time_of_day_.name()).getFor(buf_it.first);
+
+        Property tod_prop {tod_var.name(), tod_var.dataType()};
+
+        assert (buf_it.second->hasProperty(tod_prop));
+
+        NullableVector<float>& tod_vec = buf_it.second->get<float>(tod_var.name());
+
+        for (unsigned int index=0; index < buffer_size; ++index)
+        {
+            if (!tod_vec.isNull(index))
+            {
+                float& tod_ref = tod_vec.getRef(index);
+
+                tod_ref += network_time_offset_;
+
+                // check for out-of-bounds because of midnight-jump
+                while (tod_ref < 0.0f)
+                    tod_ref += tod_24h;
+                while (tod_ref > tod_24h)
+                    tod_ref -= tod_24h;
+
+                assert(tod_ref >= 0.0f);
+                assert(tod_ref <= tod_24h);
+            }
+        }
+    }
+}
+
 void ASTERIXPostprocessJob::doFutureTimestampsCheck()
 {
     DBContentManager& obj_man = COMPASS::instance().dbContentManager();
@@ -124,8 +170,8 @@ void ASTERIXPostprocessJob::doFutureTimestampsCheck()
 
     auto p_time = microsec_clock::universal_time (); // UTC
 
-    double tod_utc_max = (p_time - Time::partialSeconds(network_time_offset_) + Time::partialSeconds(360.0)
-                          ).time_of_day().total_milliseconds() / 1000.0; // up to 1 sec ok
+    double tod_utc_max = (p_time + Time::partialSeconds(300.0)).time_of_day().total_milliseconds() / 1000.0;
+    // up to 5min ok
 
     bool in_vicinity_of_24h_time = tod_utc_max <= 60.0 || tod_utc_max >= (tod_24h - 60.0);
 

@@ -117,7 +117,7 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
             ("import_asterix_network", po::bool_switch(&import_asterix_network_),
              "imports ASTERIX from defined network UDP streams")
             ("import_asterix_network_time_offset", po::value<std::string>(&import_asterix_network_time_offset_),
-             "used time offset during ASTERIX network import, in HH:MM:SS.ZZZ'")
+             "additive time offset during ASTERIX network import, in HH:MM:SS.ZZZ'")
             ("import_asterix_network_max_lines", po::value<int>(&import_asterix_network_max_lines_),
              "maximum number of lines per data source during ASTERIX network import, 1..4'")
             ("import_asterix_network_ignore_future_ts", po::bool_switch(&import_asterix_network_ignore_future_ts_),

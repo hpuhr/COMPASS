@@ -1165,14 +1165,15 @@ void DBContentManager::cutCachedData()
 //    bool max_time_set = false;
 //    boost::posix_time::ptime min_ts_found, max_ts_found;
 
-    boost::posix_time::ptime max_ts = Time::currentUTCTime();
+//    boost::posix_time::ptime max_ts = Time::currentUTCTime();
 
-    float time_offset = COMPASS::instance().mainWindow().importASTERIXFromNetworkTimeOffset();
+//    float time_offset = COMPASS::instance().mainWindow().importASTERIXFromNetworkTimeOffset();
 
-    loginf << "DBContentManager: cutCachedData: max_time " << Time::toString(max_ts)
-           << " time offset " << String::timeStringFromDouble(time_offset);
+//    loginf << "DBContentManager: cutCachedData: max_time " << Time::toString(max_ts)
+//           << " time offset " << String::timeStringFromDouble(time_offset)
+//           << " float " << time_offset;
 
-    max_ts += boost::posix_time::milliseconds((unsigned int) (time_offset*1000.0));;
+//    max_ts += boost::posix_time::milliseconds((int) (time_offset * 1000.0));;
 
 //    for (auto& buf_it : data_)
 //    {
@@ -1210,11 +1211,11 @@ void DBContentManager::cutCachedData()
 //        loginf << "DBContentManager: cutCachedData: data time min " << Time::toString(min_ts_found)
 //               << " max " << Time::toString(max_ts_found);
 
-    boost::posix_time::ptime min_ts = max_ts - boost::posix_time::minutes(5); // max - 5min
+    boost::posix_time::ptime min_ts = Time::currentUTCTime() - boost::posix_time::minutes(5); // max - 5min
 
-    loginf << "DBContentManager: cutCachedData: finishInserting min_ts " << Time::toString(min_ts)
+    loginf << "DBContentManager: cutCachedData: min_ts " << Time::toString(min_ts);
               //<< " data min " << String::timeStringFromDouble(min_tod_found)
-           << " max_ts " << Time::toString(max_ts);
+           //<< " max_ts " << Time::toString(max_ts);
     //<< " utc " << String::timeStringFromDouble(secondsSinceMidnighUTC());
 
     for (auto& buf_it : data_)
