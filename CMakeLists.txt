@@ -79,6 +79,12 @@ message("  OPENSSL_CRYPTO_LIBRARY: ${OPENSSL_CRYPTO_LIBRARY}")
 
 find_package(NemaTode REQUIRED CONFIG)
 
+# google profiler not working
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pg")
+#set (CMAKE_SHARED_LINKER_FLAGS "-pg")
+#set(CMAKE_EXE_LINKER_FLAGS "-pg")
+
+
 add_library(compass "")
 
 message("Install path: ${CMAKE_INSTALL_PREFIX}")
@@ -147,7 +153,6 @@ target_link_libraries ( compass
     ${OPENSSL_CRYPTO_LIBRARY}
     NemaTode::NemaTode
     )
-
 
 # installation stuff
 

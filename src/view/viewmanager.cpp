@@ -661,6 +661,7 @@ void ViewManager::loadedDataSlot (const std::map<std::string, std::shared_ptr<Bu
 {
     if (disable_data_distribution_)
         return;
+
     loginf << "ViewManager: loadedDataSlot: reset " << requires_reset;
 
     processing_data_ = true;
