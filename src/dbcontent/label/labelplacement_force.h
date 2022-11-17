@@ -5,6 +5,8 @@
 #include "labelplacement_helpers.h"
 #include "logger.h"
 
+#include "tbbhack.h"
+
 #include <vector>
 #include <iostream>
 
@@ -168,8 +170,9 @@ namespace force
 
         std::vector<QRectF> bboxes = collectBoundingBoxes(labels, tx, ty);
 
-        for (size_t i = 0; i < n; ++i)
-        {
+//        for (size_t i = 0; i < n; ++i)
+//        {
+        tbb::parallel_for(size_t(0), n, [&](size_t i) {
             const auto& l = labels[ i ];
 
             const auto& bbox = bboxes[ i ];
@@ -188,7 +191,8 @@ namespace force
                 movements[ i ] += Eigen::Vector2d(offset.x(), offset.y());
                 total          += Eigen::Vector2d(std::fabs(offset.x()), std::fabs(offset.y()));
             }
-        }
+          });
+//        }
     }
 
     /**
@@ -258,8 +262,9 @@ namespace force
             std::cout << "(" << bbox.x() << "," << bbox.y() << "," << bbox.width() << "x" << bbox.height() << ")"; 
         };
 
-        for (size_t i = 0; i < n; ++i)
-        {
+        //for (size_t i = 0; i < n; ++i)
+        //{
+        tbb::parallel_for(size_t(0), n, [&](size_t i) {
             const auto& l = labels[ i ];
 
             const auto& bbox = bboxes[ i ];
@@ -281,7 +286,8 @@ namespace force
                 movements[ i ] += Eigen::Vector2d(offset.x(), offset.y());
                 total          += Eigen::Vector2d(std::fabs(offset.x()), std::fabs(offset.y()));
             }
-        }
+        //}
+        });
     }
 
     /**
@@ -337,8 +343,9 @@ namespace force
 
         std::vector<QRectF> bboxes = collectBoundingBoxes(labels, tx, ty);
 
-        for (size_t i = 0; i < n; ++i)
-        {
+//        for (size_t i = 0; i < n; ++i)
+//        {
+         tbb::parallel_for(size_t(0), n, [&](size_t i) {
             const auto& l = labels[ i ];
 
             const auto& bbox = bboxes[ i ];
@@ -352,7 +359,8 @@ namespace force
                 movements[ i ] += Eigen::Vector2d(offset.x(), offset.y());
                 total          += Eigen::Vector2d(std::fabs(offset.x()), std::fabs(offset.y()));
             }
-        }
+        //}
+        });
     }
 
     /**
@@ -374,8 +382,9 @@ namespace force
 
         std::vector<QRectF> bboxes = collectBoundingBoxes(labels, tx, ty);
 
-        for (size_t i = 0; i < n; ++i)
-        {
+//        for (size_t i = 0; i < n; ++i)
+//        {
+          tbb::parallel_for(size_t(0), n, [&](size_t i) {
             const auto& l = labels[ i ];
 
             const auto& bbox = bboxes[ i ];
@@ -393,7 +402,8 @@ namespace force
 
             movements[ i ] += Eigen::Vector2d(dx, dy);
             total          += Eigen::Vector2d(std::fabs(dx), std::fabs(dy));
-        }
+        //}
+        });
     }
 
     /**
