@@ -946,7 +946,7 @@ void DBContentManager::finishInserting()
         // filter ds took 00:00:13.266 full 00:00:13.395
         filterDataSources();
 
-        logdbg << "DBContentManager: finishInserting: filter ds took "
+        loginf << "DBContentManager: finishInserting: filterDataSources took "
                << String::timeStringFromDouble((microsec_clock::local_time() - tmp_time).total_milliseconds() / 1000.0, true)
                << " full " << String::timeStringFromDouble((microsec_clock::local_time() - start_time).total_milliseconds() / 1000.0, true);
 
@@ -1086,17 +1086,16 @@ void DBContentManager::addInsertedDataToChache()
 
 void DBContentManager::filterDataSources()
 {
+    logdbg << "DBContentManager: filterDataSources";
+
     std::map<unsigned int, std::set<unsigned int>> wanted_data_sources =
             COMPASS::instance().dataSourceManager().getLoadDataSources();
 
-//    unsigned int buffer_size;
-//    vector<size_t> indexes_to_remove;
-
-    unsigned int num_buffers = insert_data_.size();
+    unsigned int num_buffers = data_.size();
 
     tbb::parallel_for(uint(0), num_buffers, [&](unsigned int buffer_cnt)
     {
-        std::map<std::string, std::shared_ptr<Buffer>>::iterator buf_it = insert_data_.begin();
+        std::map<std::string, std::shared_ptr<Buffer>>::iterator buf_it = data_.begin();
         std::advance(buf_it, buffer_cnt);
 
         // remove unwanted data sources
@@ -1130,7 +1129,7 @@ void DBContentManager::filterDataSources()
                 indexes_to_remove.push_back(index);
         }
 
-        loginf << "DBContentManager: filterDataSources: in " << buf_it->first << " remove "
+        logdbg << "DBContentManager: filterDataSources: in " << buf_it->first << " remove "
                << indexes_to_remove.size() << " of " << buffer_size;
 
         // remove unwanted indexes
