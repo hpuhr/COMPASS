@@ -112,7 +112,7 @@ void ASTERIXDecodeJob::run()
         doUDPStreamDecoding();
 
     if (!obsolete_)
-        assert(extracted_data_ == nullptr);
+        assert(extracted_data_.size() == 0);
 
     done_ = true;
 
@@ -272,13 +272,13 @@ void ASTERIXDecodeJob::doUDPStreamDecoding()
                 loginf << "ASTERIXDecodeJob: doUDPStreamDecoding: emitting signal";
                 emit decodedASTERIXSignal();
 
-                while (!obsolete_ && extracted_data_)  // block decoder until extracted records have been moved out
+                while (!obsolete_ && extracted_data_.size())  // block decoder until extracted records have been moved out
                     QThread::msleep(1);
 
-                if (!obsolete_)
-                    assert(!extracted_data_);
-                else
-                    extracted_data_ = nullptr;
+//                if (!obsolete_)
+//                    assert(extracted_data_.size() == 0);
+//                else
+//                    extracted_data_ = nullptr;
 
                 resuming_cached_data_ = false; // in case of resume action
             }
@@ -348,10 +348,11 @@ void ASTERIXDecodeJob::fileJasterixCallback(std::unique_ptr<nlohmann::json> data
         return;
     }
 
-    assert(!extracted_data_);
-    extracted_data_ = std::move(data);
-    assert(extracted_data_);
-    assert(extracted_data_->is_object());
+    assert(!extracted_data_.size());
+    extracted_data_.emplace_back(std::move(data));
+    assert(extracted_data_.size());
+    assert(extracted_data_.back());
+    assert(extracted_data_.back()->is_object());
 
     num_frames_ = num_frames;
     num_records_ = num_records;
@@ -375,12 +376,12 @@ void ASTERIXDecodeJob::fileJasterixCallback(std::unique_ptr<nlohmann::json> data
 
     if (framing_ == "")
     {
-        assert(extracted_data_->contains("data_blocks"));
-        assert(extracted_data_->at("data_blocks").is_array());
+        assert(extracted_data_.back()->contains("data_blocks"));
+        assert(extracted_data_.back()->at("data_blocks").is_array());
 
         std::vector<std::string> keys{"content", "records"};
 
-        for (json& data_block : extracted_data_->at("data_blocks"))
+        for (json& data_block : extracted_data_.back()->at("data_blocks"))
         {
             if (!data_block.contains("category"))
             {
@@ -406,12 +407,12 @@ void ASTERIXDecodeJob::fileJasterixCallback(std::unique_ptr<nlohmann::json> data
     }
     else
     {
-        assert(extracted_data_->contains("frames"));
-        assert(extracted_data_->at("frames").is_array());
+        assert(extracted_data_.back()->contains("frames"));
+        assert(extracted_data_.back()->at("frames").is_array());
 
         std::vector<std::string> keys{"content", "records"};
 
-        for (json& frame : extracted_data_->at("frames"))
+        for (json& frame : extracted_data_.back()->at("frames"))
         {
             if (!frame.contains("content"))  // frame with errors
                 continue;
@@ -456,13 +457,13 @@ void ASTERIXDecodeJob::fileJasterixCallback(std::unique_ptr<nlohmann::json> data
 
     emit decodedASTERIXSignal();
 
-    while (!obsolete_ && extracted_data_)  // block decoder until extracted records have been moved out
+    while (!obsolete_ && extracted_data_.size())  // block decoder until extracted records have been moved out
         QThread::msleep(1);
 
-    if (!obsolete_)
-        assert(!extracted_data_);
-    else
-        extracted_data_ = nullptr;
+//    if (!obsolete_)
+//        assert(!extracted_data_);
+//    else
+//        extracted_data_ = nullptr;
 }
 
 void ASTERIXDecodeJob::netJasterixCallback(std::unique_ptr<nlohmann::json> data, unsigned int line_id, size_t num_frames,
@@ -480,7 +481,7 @@ void ASTERIXDecodeJob::netJasterixCallback(std::unique_ptr<nlohmann::json> data,
     //loginf << "ASTERIXDecodeJob: fileJasterixCallback: data '" << data->dump(2) << "'";
     loginf << "ASTERIXDecodeJob: netJasterixCallback: line_id " << line_id << " num_records " << num_records;
 
-    std::unique_ptr<nlohmann::json> tmp_extracted_data = std::move(data);
+    //std::unique_ptr<nlohmann::json> tmp_extracted_data = std::move(data);
 
     num_frames_ = num_frames;
     num_records_ = num_records;
@@ -503,12 +504,12 @@ void ASTERIXDecodeJob::netJasterixCallback(std::unique_ptr<nlohmann::json> data,
     max_index_ = 0;
 
     assert (framing_ == "");
-    assert(tmp_extracted_data->contains("data_blocks"));
-    assert(tmp_extracted_data->at("data_blocks").is_array());
+    assert(data->contains("data_blocks"));
+    assert(data->at("data_blocks").is_array());
 
     std::vector<std::string> keys{"content", "records"};
 
-    for (json& data_block : tmp_extracted_data->at("data_blocks"))
+    for (json& data_block : data->at("data_blocks"))
     {
         if (!data_block.contains("category"))
         {
@@ -535,23 +536,25 @@ void ASTERIXDecodeJob::netJasterixCallback(std::unique_ptr<nlohmann::json> data,
     //    while (!obsolete_ && pause_)  // block decoder until unpaused
     //        QThread::msleep(1);
 
-    if (tmp_extracted_data->at("data_blocks").size())
+    if (data->at("data_blocks").size())
     {
-        if (extracted_data_)
-        {
-            // add to existing data
-            assert(extracted_data_->is_object());
-            assert(extracted_data_->contains("data_blocks"));
-            assert(extracted_data_->at("data_blocks").is_array());
-            assert(tmp_extracted_data->at("data_blocks").is_array());
+//        if (extracted_data_)
+//        {
+//            // add to existing data
+//            assert(extracted_data_->is_object());
+//            assert(extracted_data_->contains("data_blocks"));
+//            assert(extracted_data_->at("data_blocks").is_array());
+//            assert(tmp_extracted_data->at("data_blocks").is_array());
 
-            if (tmp_extracted_data->at("data_blocks").size())
-                extracted_data_->at("data_blocks").insert(extracted_data_->at("data_blocks").end(),
-                                                          tmp_extracted_data->at("data_blocks").begin(),
-                                                          tmp_extracted_data->at("data_blocks").end());
-        }
-        else
-            extracted_data_ = std::move(tmp_extracted_data);
+//            if (tmp_extracted_data->at("data_blocks").size())
+//                extracted_data_->at("data_blocks").insert(extracted_data_->at("data_blocks").end(),
+//                                                          tmp_extracted_data->at("data_blocks").begin(),
+//                                                          tmp_extracted_data->at("data_blocks").end());
+//        }
+//        else
+//            extracted_data_ = std::move(tmp_extracted_data);
+
+        extracted_data_.emplace_back(std::move(data));
     }
 
 }

@@ -341,7 +341,7 @@ void ASTERIXPostprocessJob::doTimeStampCalculation()
                     had_late_time_ = false;
                 }
 
-                loginf << "ASTERIXPostprocessJob: doTimeStampCalculation: tod " << String::timeStringFromDouble(tod)
+                logdbg << "ASTERIXPostprocessJob: doTimeStampCalculation: tod " << String::timeStringFromDouble(tod)
                        << " ts " << Time::toString(timestamp);
 
                 timestamp_vec.set(index, timestamp);

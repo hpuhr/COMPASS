@@ -958,14 +958,14 @@ void ASTERIXImportTask::addDecodedASTERIXSlot()
         logwrn << "ASTERIXImportTask: addDecodedASTERIXSlot: overload detected, packets in processing "
                << num_packets_in_processing_ << " skipping data";
 
-        std::unique_ptr<nlohmann::json> extracted_data {decode_job_->extractedData()};
+        std::vector<std::unique_ptr<nlohmann::json>> extracted_data {decode_job_->extractedData()};
 
         return;
     }
 
     logdbg << "ASTERIXImportTask: addDecodedASTERIXSlot: processing data";
 
-    std::unique_ptr<nlohmann::json> extracted_data {decode_job_->extractedData()};
+    std::vector<std::unique_ptr<nlohmann::json>> extracted_data {decode_job_->extractedData()};
     ++num_packets_in_processing_;
     ++num_packets_total_;
 
@@ -973,7 +973,7 @@ void ASTERIXImportTask::addDecodedASTERIXSlot()
            << " num_packets_in_processing_ " << num_packets_in_processing_
            << " num_packets_total_ " << num_packets_total_;
 
-    if (!extracted_data)
+    if (!extracted_data.size())
     {
         logwrn << "ASTERIXImportTask: addDecodedASTERIXSlot: processing data empty";
         return;
@@ -996,7 +996,7 @@ void ASTERIXImportTask::addDecodedASTERIXSlot()
 
     json_map_jobs_.push_back(json_map_job);
 
-    assert(!extracted_data);
+    assert(!extracted_data.size());
 
     connect(json_map_job.get(), &ASTERIXJSONMappingJob::obsoleteSignal, this,
             &ASTERIXImportTask::mapJSONObsoleteSlot, Qt::QueuedConnection);
