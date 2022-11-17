@@ -18,6 +18,9 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 message("  Platform: Linux")
 add_definitions ( -UNDEBUG -Wall -std=c++11) # -DQT_NO_KEYWORDS
 
+set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
+set(THREADS_PREFER_PTHREAD_FLAG TRUE)
+
 #-Wno-deprecated-declarations -Wno-ignored-attributes -Wno-misleading-indentation for new compiler and old libs
 # -UNDEBUG for enabling asserts in release buils (until testing/error management is improved)
 
@@ -37,9 +40,9 @@ set(CMAKE_AUTOMOC ON)
 #add_definitions(${Qt5Widgets_DEFINITIONS})
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${Qt5Widgets_EXECUTABLE_COMPILE_FLAGS}")
 
-find_package ( Boost REQUIRED COMPONENTS regex system program_options filesystem iostreams thread)
-message("  Boost_INCLUDE_DIR: ${Boost_INCLUDE_DIR}")
-message("  Boost_LIBRARY_DIR: ${Boost_LIBRARY_DIR}")
+find_package ( Boost 1.73.0 REQUIRED COMPONENTS regex system program_options filesystem iostreams thread)
+message("  Boost_INCLUDE_DIRS: ${Boost_INCLUDE_DIRS}")
+message("  Boost_LIBRARIES: ${Boost_LIBRARIES}")
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH};${COMPASS_PATH}/cmake_modules)
 message("  CMAKE_MODULE_PATH: ${CMAKE_MODULE_PATH}") 
@@ -84,6 +87,7 @@ find_package(NemaTode REQUIRED CONFIG)
 #set (CMAKE_SHARED_LINKER_FLAGS "-pg")
 #set(CMAKE_EXE_LINKER_FLAGS "-pg")
 
+find_package(Threads REQUIRED)
 
 add_library(compass "")
 
@@ -152,6 +156,7 @@ target_link_libraries ( compass
     TBB::tbb
     ${OPENSSL_CRYPTO_LIBRARY}
     NemaTode::NemaTode
+    Threads::Threads
     )
 
 # installation stuff

@@ -76,6 +76,8 @@ void ASTERIXPostprocessJob::run()
 
 void ASTERIXPostprocessJob::doTodOverride()
 {
+    loginf << "ASTERIXPostprocessJob: doTodOverride: offset " << override_tod_offset_;
+
     assert (override_tod_active_);
 
     DBContentManager& obj_man = COMPASS::instance().dbContentManager();
@@ -338,6 +340,9 @@ void ASTERIXPostprocessJob::doTimeStampCalculation()
                     did_recent_time_jump_ = false;
                     had_late_time_ = false;
                 }
+
+                loginf << "ASTERIXPostprocessJob: doTimeStampCalculation: tod " << String::timeStringFromDouble(tod)
+                       << " ts " << Time::toString(timestamp);
 
                 timestamp_vec.set(index, timestamp);
             }
