@@ -966,18 +966,19 @@ void ASTERIXImportTask::addDecodedASTERIXSlot()
     logdbg << "ASTERIXImportTask: addDecodedASTERIXSlot: processing data";
 
     std::vector<std::unique_ptr<nlohmann::json>> extracted_data {decode_job_->extractedData()};
+
+    if (!extracted_data.size())
+    {
+        loginf << "ASTERIXImportTask: addDecodedASTERIXSlot: processing data empty";
+        return;
+    }
+
     ++num_packets_in_processing_;
     ++num_packets_total_;
 
     loginf << "ASTERIXImportTask: addDecodedASTERIXSlot: processing data,"
            << " num_packets_in_processing_ " << num_packets_in_processing_
            << " num_packets_total_ " << num_packets_total_;
-
-    if (!extracted_data.size())
-    {
-        logwrn << "ASTERIXImportTask: addDecodedASTERIXSlot: processing data empty";
-        return;
-    }
 
     if (stopped_)
         return;
@@ -1034,7 +1035,11 @@ void ASTERIXImportTask::mapJSONDoneSlot()
     logdbg << "ASTERIXImportTask: mapJSONDoneSlot: processing, num buffers " << job_buffers.size();
 
     if (!job_buffers.size())
+    {
+        assert (num_packets_in_processing_);
+        num_packets_in_processing_--;
         return;
+    }
 
     bool check_future_ts = !import_file_;
 
