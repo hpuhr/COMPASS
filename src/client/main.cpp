@@ -39,11 +39,6 @@ int main(int argc, char** argv)
 
         if (COMPASS::instance().mainWindow().automaticTasksDefined())
         {
-//            QThread::msleep(10);
-
-//            while (QCoreApplication::hasPendingEvents())
-//                QCoreApplication::processEvents();
-
             COMPASS::instance().mainWindow().performAutomaticTasks();
 
             if (COMPASS::instance().mainWindow().quitNeeded())

@@ -29,6 +29,7 @@
 #include "mainwindow.h"
 
 #include "json.hpp"
+#include "util/tbbhack.h"
 
 #include <QApplication>
 #include <QMessageBox>
@@ -57,7 +58,6 @@ using namespace Utils;
 namespace po = boost::program_options;
 
 std::string APP_FILENAME;
-
 
 Client::Client(int& argc, char** argv) : QApplication(argc, argv)
 {
@@ -126,7 +126,7 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
              "sets ASTERIX framing, e.g. 'none', 'ioss', 'ioss_seq', 'rff'")
             ("asterix_decoder_cfg", po::value<std::string>(&asterix_decoder_cfg),
              "sets ASTERIX decoder config using JSON string, e.g. ''{\"10\":{\"edition\":\"0.31\"}}''"
-                         " (including one pair of single quotes)")
+             " (including one pair of single quotes)")
             ("import_json", po::value<std::string>(&import_json_filename_),
              "imports JSON file with given filename, e.g. '/data/file1.json'")
             //            ("json_schema", po::value<std::string>(&import_json_schema),
@@ -134,7 +134,7 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
             ("import_gps_trail", po::value<std::string>(&import_gps_trail_filename_),
              "imports gps trail NMEA with given filename, e.g. '/data/file2.txt'")
             ("import_gps_parameters", po::value<std::string>(&import_gps_parameters_),
-               "import GPS parameters as JSON string, e.g. ''{\"callsign\": \"ENTRPRSE\", \"ds_name\": \"GPS Trail\", \"ds_sac\": 0, \"ds_sic\": 0, \"mode_3a_code\": 961, \"set_callsign\": true, \"set_mode_3a_code\": true, \"set_target_address\": true, \"target_address\": 16702992, \"tod_offset\": 0.0}'' (including one pair of single quotes)")
+             "import GPS parameters as JSON string, e.g. ''{\"callsign\": \"ENTRPRSE\", \"ds_name\": \"GPS Trail\", \"ds_sac\": 0, \"ds_sic\": 0, \"mode_3a_code\": 961, \"set_callsign\": true, \"set_mode_3a_code\": true, \"set_target_address\": true, \"target_address\": 16702992, \"tod_offset\": 0.0}'' (including one pair of single quotes)")
             ("import_sectors_json", po::value<std::string>(&import_sectors_filename_),
              "imports exported sectors JSON with given filename, e.g. '/data/sectors.json'")
             ("calculate_radar_plot_positions", po::bool_switch(&calculate_radar_plot_positions_),
@@ -145,7 +145,7 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
              "export view points report after start with given filename, e.g. '/data/db2/report.tex")
             ("evaluate", po::bool_switch(&evaluate_), "run evaluation")
             ("evaluation_parameters", po::value<std::string>(&evaluation_parameters_),
-               "evaluation parameters as JSON string, e.g. ''{\"current_standard\": \"test\", \"dbcontent_name_ref\": \"CAT062\", \"dbcontent_name_tst\": \"CAT020\"}'' (including one pair of single quotes)")
+             "evaluation parameters as JSON string, e.g. ''{\"current_standard\": \"test\", \"dbcontent_name_ref\": \"CAT062\", \"dbcontent_name_tst\": \"CAT020\"}'' (including one pair of single quotes)")
             ("evaluate_run_filter", po::bool_switch(&evaluate_run_filter_), "run evaluation filter before evaluation")
             ("export_eval_report", po::value<std::string>(&export_eval_report_filename_),
              "export evaluation report after start with given filename, e.g. '/data/eval_db2/report.tex")
@@ -193,37 +193,23 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
 
 void Client::run ()
 {
-    unsigned int num_threads = std::thread::hardware_concurrency();
-
-// #define TBB_VERSION_MAJOR 4
+    // #define TBB_VERSION_MAJOR 4
 
 #if TBB_VERSION_MAJOR <= 4
+
+    // in appimage
+
+    unsigned int num_threads = std::thread::hardware_concurrency();
+
     loginf << "COMPASSClient: started with " << num_threads << " threads (tbb old)";
     tbb::task_scheduler_init init {num_threads};
-    // TODO ENABLE in appimage
+
 #else
+
+    int num_threads = oneapi::tbb::info::default_concurrency();
+
     loginf << "COMPASSClient: started with " << num_threads << " threads";
-    //tbb::global_control global_limit(tbb::global_control::max_allowed_parallelism, num_threads);
-
-//    cpu_set_t mask;
-//    int       status;
-//    CPU_ZERO(&mask);
-//    const auto NUMCORES = sysconf(_SC_NPROCESSORS_ONLN);
-//    for (int64_t core = 0; core < NUMCORES; core++) CPU_SET(core, &mask);
-//    sched_setaffinity(0, sizeof(cpu_set_t), &mask);
-
-
-    // TODO DISABLE in appimage
 #endif
-
-//#define TBB_VERSION_MAJOR 2021
-//    oneapi::tbb::global_control global_limit(oneapi::tbb::global_control::max_allowed_parallelism,
-//                                             num_threads); // TODO DISABLE in appimage
-
-    //tbb::global_control global_limit(tbb::global_control::max_allowed_parallelism, 16);
-
-//    loginf << "COMPASSClient: default number of threads " << tbb::info::default_concurrency()
-//           << " max " << tbb::this_task_arena::max_concurrency();
 
     QPixmap pixmap(Files::getImageFilepath("logo.png").c_str());
     QSplashScreen splash(pixmap);
@@ -311,7 +297,7 @@ void Client::run ()
 
         if (import_asterix_network_ignore_future_ts_)
         {
-           task_man.asterixImporterTask().importAsterixNetworkIgnoreFutureTimestamp(true);
+            task_man.asterixImporterTask().importAsterixNetworkIgnoreFutureTimestamp(true);
         }
     }
     catch (exception& e)
@@ -372,6 +358,9 @@ void Client::run ()
 
     if (quit_)
         main_window.quit(quit_);
+
+    loginf << "COMPASSClient: testing parallel for";
+
 }
 
 Client::~Client()

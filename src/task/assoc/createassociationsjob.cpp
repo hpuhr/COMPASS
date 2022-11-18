@@ -31,11 +31,11 @@
 #include "evaluationmanager.h"
 #include "util/timeconv.h"
 
-#include <cassert>
-
 #include "util/tbbhack.h"
 
 #include <boost/thread/mutex.hpp>
+
+#include <cassert>
 
 using namespace std;
 using namespace Utils;
