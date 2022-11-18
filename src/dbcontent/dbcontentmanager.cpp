@@ -1154,7 +1154,8 @@ void DBContentManager::cutCachedData()
 
     boost::posix_time::ptime min_ts = Time::currentUTCTime() - boost::posix_time::minutes(5); // max - 5min
 
-    loginf << "DBContentManager: cutCachedData: min_ts " << Time::toString(min_ts);
+    loginf << "DBContentManager: cutCachedData: current ts " << Time::toString(Time::currentUTCTime())
+           << " min_ts " << Time::toString(min_ts);
 
     for (auto& buf_it : data_)
     {
@@ -1177,12 +1178,13 @@ void DBContentManager::cutCachedData()
             {
                 if (!ts_vec.isNull(index) && ts_vec.get(index) > min_ts)
                 {
-                    logdbg << "DBContentManager: cutCachedData: found " << buf_it.first
+                    loginf << "DBContentManager: cutCachedData: found " << buf_it.first
                            << " cutoff tod index " << index
                            << " ts " << Time::toString(ts_vec.get(index));
                     break;
                 }
             }
+            // index == buffer_size if none bigger than min_ts
 
             if (index) // index found
             {
@@ -1190,7 +1192,8 @@ void DBContentManager::cutCachedData()
 
                 loginf << "DBContentManager: cutCachedData: cutting " << buf_it.first
                        << " up to index " << index
-                       << " total size " << buffer_size;
+                       << " total size " << buffer_size
+                       << " index time " << Time::toString(ts_vec.get(index));
                 assert (index < buffer_size);
                 buf_it.second->cutUpToIndex(index);
             }
