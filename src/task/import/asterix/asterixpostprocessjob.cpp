@@ -162,6 +162,9 @@ void ASTERIXPostprocessJob::doNetworkTimeOverride()
     }
 }
 
+const double TMAX_FUTURE_OFFSET = 3*60.0;
+const double T24H_OFFSET = 5*60.0;
+
 void ASTERIXPostprocessJob::doFutureTimestampsCheck()
 {
     DBContentManager& obj_man = COMPASS::instance().dbContentManager();
@@ -172,13 +175,14 @@ void ASTERIXPostprocessJob::doFutureTimestampsCheck()
 
     auto p_time = microsec_clock::universal_time (); // UTC
 
-    double tod_utc_max = (p_time + Time::partialSeconds(300.0)).time_of_day().total_milliseconds() / 1000.0;
+    double current_time_utc = p_time.time_of_day().total_milliseconds() / 1000.0;
+    double tod_utc_max = (p_time + Time::partialSeconds(TMAX_FUTURE_OFFSET)).time_of_day().total_milliseconds() / 1000.0;
     // up to 5min ok
 
-    bool in_vicinity_of_24h_time = tod_utc_max <= 60.0 || tod_utc_max >= (tod_24h - 60.0);
+    bool in_vicinity_of_24h_time = current_time_utc <= T24H_OFFSET || current_time_utc >= (tod_24h - T24H_OFFSET);
 
     loginf << "ASTERIXPostprocessJob: doFutureTimestampsCheck: maximum time is "
-           << String::timeStringFromDouble(tod_utc_max);
+           << String::timeStringFromDouble(tod_utc_max) << " 24h vicinity " << in_vicinity_of_24h_time;
 
     for (auto& buf_it : buffers_)
     {
@@ -201,7 +205,6 @@ void ASTERIXPostprocessJob::doFutureTimestampsCheck()
                    << " min tod " << String::timeStringFromDouble(get<1>(min_max_tod))
                    << " max " << String::timeStringFromDouble(get<2>(min_max_tod));
 
-
         for (unsigned int index=0; index < buffer_size; ++index)
         {
             if (!tod_vec.isNull(index))
@@ -209,9 +212,9 @@ void ASTERIXPostprocessJob::doFutureTimestampsCheck()
                 if (in_vicinity_of_24h_time)
                 {
                      // not at end of day and bigger than max
-                    if (tod_vec.get(index) < (tod_24h - 60.0) && tod_vec.get(index) > tod_utc_max)
+                    if (tod_vec.get(index) < (tod_24h - T24H_OFFSET) && tod_vec.get(index) > tod_utc_max)
                     {
-                        logwrn << "ASTERIXPostprocessJob: doFutureTimestampsCheck: doing " << buf_it.first
+                        logwrn << "ASTERIXPostprocessJob: doFutureTimestampsCheck: vic doing " << buf_it.first
                                << " cutoff tod index " << index
                                << " tod " << String::timeStringFromDouble(tod_vec.get(index));
 
