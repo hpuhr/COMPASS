@@ -132,8 +132,13 @@ void DBContentManager::generateSubConfigurable(const std::string& class_id,
                << meta_var->name();
 
         assert(!existsMetaVariable(meta_var->name()));
-        meta_variables_.emplace(meta_var->name(), meta_var);
+        //meta_variables_.emplace(meta_var->name(), meta_var);
         //meta_variables_.emplace_back(meta_var);
+
+        meta_variables_.emplace(
+                    std::piecewise_construct,
+                    std::forward_as_tuple(meta_var->name()),   // args for key
+                    std::forward_as_tuple(meta_var));  // args for mapped value
     }
     else
         throw std::runtime_error("DBContentManager: generateSubConfigurable: unknown class_id " +
@@ -1204,7 +1209,7 @@ void DBContentManager::cutCachedData()
                 loginf << "DBContentManager: cutCachedData: cutting " << buf_it.first
                        << " up to index " << index
                        << " total size " << buffer_size
-                       << " index time " << Time::toString(ts_vec.get(index));
+                       << " index time " << (ts_vec.isNull(index) ? "null" : Time::toString(ts_vec.get(index)));
                 assert (index < buffer_size);
                 buf_it.second->cutUpToIndex(index);
             }

@@ -168,7 +168,12 @@ void DBContent::generateSubConfigurable(const string& class_id, const string& in
         logdbg << "DBContent: generateSubConfigurable: generating variable " << instance_id
                << " with name " << var->name();
 
-        variables_.emplace(var->name(), var);
+        //variables_.emplace(var->name(), var);
+
+        variables_.emplace(
+                    std::piecewise_construct,
+                    std::forward_as_tuple(var->name()),   // args for key
+                    std::forward_as_tuple(var));  // args for mapped value
     }
     else
         throw runtime_error("DBContent: generateSubConfigurable: unknown class_id " + class_id);
