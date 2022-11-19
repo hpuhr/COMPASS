@@ -123,9 +123,9 @@ void VariableOrderedSetWidget::updateMenuEntries()
 
     for (auto& meta_it : COMPASS::instance().dbContentManager().metaVariables())
     {
-        QAction* action = meta_menu->addAction(meta_it->name().c_str());
-        action->setToolTip(meta_it->description().c_str());
-        action->setData(QVariantMap({{meta_it->name().c_str(),QVariant(META_OBJECT_NAME.c_str())}}));
+        QAction* action = meta_menu->addAction(meta_it.first.c_str());
+        action->setToolTip(meta_it.second->description().c_str());
+        action->setData(QVariantMap({{meta_it.first.c_str(),QVariant(META_OBJECT_NAME.c_str())}}));
     }
 
     for (auto& object_it : COMPASS::instance().dbContentManager())
@@ -135,9 +135,9 @@ void VariableOrderedSetWidget::updateMenuEntries()
 
         for (auto& var_it : object_it.second->variables())
         {
-            QAction* action = m2->addAction(var_it->name().c_str());
-            action->setToolTip(var_it->description().c_str());
-            action->setData(QVariantMap({{var_it->name().c_str(), QVariant(object_it.first.c_str())}}));
+            QAction* action = m2->addAction(var_it.first.c_str());
+            action->setToolTip(var_it.second->description().c_str());
+            action->setData(QVariantMap({{var_it.first.c_str(), QVariant(object_it.first.c_str())}}));
         }
     }
 }

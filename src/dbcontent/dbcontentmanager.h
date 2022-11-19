@@ -96,7 +96,7 @@ public:
     dbContent::MetaVariable& metaVariable(const std::string& var_name);
     void renameMetaVariable(const std::string& old_var_name, const std::string& new_var_name);
     void deleteMetaVariable(const std::string& var_name);
-    const std::vector<std::unique_ptr<dbContent::MetaVariable>>& metaVariables() { return meta_variables_; }
+    const std::map<std::string, std::unique_ptr<dbContent::MetaVariable>>& metaVariables() { return meta_variables_; }
 
     bool usedInMetaVariable(const dbContent::Variable& variable);
     dbContent::MetaVariableConfigurationDialog* metaVariableConfigdialog();
@@ -218,7 +218,7 @@ protected:
 
     /// Container with all DBContent (DBContent name -> DBO pointer)
     std::map<std::string, DBContent*> dbcontent_;
-    std::vector<std::unique_ptr<dbContent::MetaVariable>> meta_variables_;
+    std::map<std::string, std::unique_ptr<dbContent::MetaVariable>> meta_variables_;
 
     std::map<unsigned int, std::shared_ptr<dbContent::Target>> targets_;
 

@@ -106,7 +106,7 @@ void MetaVariableConfigurationDialog::updateList()
     unsigned int row_cnt = 0;
     for (auto& met_it : dbo_man_.metaVariables())
     {
-        QListWidgetItem* item = new QListWidgetItem(met_it->name().c_str());
+        QListWidgetItem* item = new QListWidgetItem(met_it.first.c_str());
         list_widget_->insertItem(row_cnt, item);
         ++row_cnt;
     }
@@ -154,10 +154,10 @@ void MetaVariableConfigurationDialog::addAllMetaVariablesSlot()
     {
         for (auto& var_it : obj_it.second->variables())
         {
-            if (dbo_man_.usedInMetaVariable(*var_it.get()))
+            if (dbo_man_.usedInMetaVariable(*var_it.second.get()))
             {
                 loginf << "MetaVariableConfigurationDialog: addAllMetaVariablesSlot: not adding dbovariable "
-                       << var_it->name() << " since already used";
+                       << var_it.first << " since already used";
                 continue;
             }
 
@@ -169,8 +169,8 @@ void MetaVariableConfigurationDialog::addAllMetaVariablesSlot()
                 if (obj_it == obj_it2)
                     continue;
 
-                if (obj_it2.second->hasVariable(var_it->name()) &&
-                        var_it->dataType() == obj_it2.second->variable(var_it->name()).dataType())
+                if (obj_it2.second->hasVariable(var_it.first) &&
+                        var_it.second->dataType() == obj_it2.second->variable(var_it.first).dataType())
                 {
                     found_dbos.push_back(obj_it2.first);
                 }
@@ -178,23 +178,23 @@ void MetaVariableConfigurationDialog::addAllMetaVariablesSlot()
 
             if (found_dbos.size() > 1)
             {
-                if (!dbo_man_.existsMetaVariable(var_it->name()))
+                if (!dbo_man_.existsMetaVariable(var_it.first))
                 {
                     loginf
                             << "MetaVariableConfigurationDialog: addAllMetaVariablesSlot: adding meta variable "
-                        << var_it->name();
+                        << var_it.first;
 
-                    std::string instance = "MetaVariable" + var_it->name() + "0";
+                    std::string instance = "MetaVariable" + var_it.first + "0";
 
                     Configuration& config =
                             dbo_man_.addNewSubConfiguration("MetaVariable", instance);
-                    config.addParameterString("name", var_it->name());
+                    config.addParameterString("name", var_it.first);
 
                     dbo_man_.generateSubConfigurable("MetaVariable", instance);
                 }
 
-                assert(dbo_man_.existsMetaVariable(var_it->name()));
-                MetaVariable& meta_var = dbo_man_.metaVariable(var_it->name());
+                assert(dbo_man_.existsMetaVariable(var_it.first));
+                MetaVariable& meta_var = dbo_man_.metaVariable(var_it.first);
 
                 for (auto dbo_it2 = found_dbos.begin(); dbo_it2 != found_dbos.end(); dbo_it2++)
                 {
@@ -202,8 +202,8 @@ void MetaVariableConfigurationDialog::addAllMetaVariablesSlot()
                     {
                         loginf << "MetaVariableConfigurationDialog: addAllMetaVariablesSlot: adding meta "
                                   "variable "
-                               << var_it->name() << " dbo variable " << var_it->name();
-                        meta_var.addVariable(*dbo_it2, var_it->name());
+                               << var_it.first << " dbo variable " << var_it.first;
+                        meta_var.addVariable(*dbo_it2, var_it.first);
                     }
                 }
 

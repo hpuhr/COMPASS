@@ -132,7 +132,8 @@ void DBContentManager::generateSubConfigurable(const std::string& class_id,
                << meta_var->name();
 
         assert(!existsMetaVariable(meta_var->name()));
-        meta_variables_.emplace_back(meta_var);
+        meta_variables_.emplace(meta_var->name(), meta_var);
+        //meta_variables_.emplace_back(meta_var);
     }
     else
         throw std::runtime_error("DBContentManager: generateSubConfigurable: unknown class_id " +
@@ -199,29 +200,39 @@ bool DBContentManager::hasData()
 
 bool DBContentManager::existsMetaVariable(const std::string& var_name)
 {
-    return std::find_if(meta_variables_.begin(), meta_variables_.end(),
-                        [var_name](const std::unique_ptr<MetaVariable>& var) -> bool { return var->name() == var_name; })
-            != meta_variables_.end();
+//    return std::find_if(meta_variables_.begin(), meta_variables_.end(),
+//                        [var_name](const std::unique_ptr<MetaVariable>& var) -> bool { return var->name() == var_name; })
+//            != meta_variables_.end();
+
+    return meta_variables_.count(var_name);
 }
 
 MetaVariable& DBContentManager::metaVariable(const std::string& var_name)
 {
     logdbg << "DBContentManager: metaVariable: name " << var_name;
 
-    assert(existsMetaVariable(var_name));
+//    assert(existsMetaVariable(var_name));
 
-    auto it = std::find_if(meta_variables_.begin(), meta_variables_.end(),
-                           [var_name](const std::unique_ptr<MetaVariable>& var) -> bool { return var->name() == var_name; });
+//    auto it = std::find_if(meta_variables_.begin(), meta_variables_.end(),
+//                           [var_name](const std::unique_ptr<MetaVariable>& var) -> bool { return var->name() == var_name; });
 
-    assert (it != meta_variables_.end());
+//    assert (it != meta_variables_.end());
 
-    return *it->get();
+//    return *it->get();
+
+    assert (meta_variables_.count(var_name));
+    return *(meta_variables_.at(var_name).get());
 }
 
 void DBContentManager::renameMetaVariable(const std::string& old_var_name, const std::string& new_var_name)
 {
     assert(existsMetaVariable(old_var_name));
-    metaVariable(old_var_name).name(new_var_name);
+
+    std::unique_ptr<dbContent::MetaVariable> meta_var = std::move(meta_variables_.at(old_var_name));
+    meta_variables_.erase(old_var_name);
+    meta_var->name(new_var_name);
+    meta_variables_.emplace(new_var_name, std::move(meta_var));
+
 
     if (meta_cfg_dialog_)
     {
@@ -235,12 +246,12 @@ void DBContentManager::deleteMetaVariable(const std::string& var_name)
     logdbg << "DBContentManager: deleteMetaVariable: name " << var_name;
     assert(existsMetaVariable(var_name));
 
-    auto it = std::find_if(meta_variables_.begin(), meta_variables_.end(),
-                           [var_name](const std::unique_ptr<MetaVariable>& var) -> bool { return var->name() == var_name; });
+//    auto it = std::find_if(meta_variables_.begin(), meta_variables_.end(),
+//                           [var_name](const std::unique_ptr<MetaVariable>& var) -> bool { return var->name() == var_name; });
 
-    assert (it != meta_variables_.end());
+//    assert (it != meta_variables_.end());
 
-    meta_variables_.erase(it);
+    meta_variables_.erase(var_name);
 
     if (meta_cfg_dialog_)
     {
@@ -252,7 +263,7 @@ void DBContentManager::deleteMetaVariable(const std::string& var_name)
 bool DBContentManager::usedInMetaVariable(const Variable& variable)
 {
     for (auto& meta_it : meta_variables_)
-        if (meta_it->uses(variable))
+        if (meta_it.second->uses(variable))
             return true;
 
     return false;
@@ -1410,6 +1421,27 @@ void DBContentManager::saveTargets()
 {
     COMPASS::instance().interface().saveTargets(targets_);
 }
+
+//void DBContentManager::updateMetaVarNames()
+//{
+//    loginf << "DBContentManager::updateMetaVarNames";
+
+//    //std::map<std::string, std::unique_ptr<dbContent::MetaVariable>> tmp_meta_variables = std::move(meta_variables_);
+//    std::map<std::string, std::unique_ptr<dbContent::MetaVariable>> tmp_meta_variables;
+
+//    tmp_meta_variables.insert(make_move_iterator(std::begin(meta_variables_)),
+//                              make_move_iterator(std::end(meta_variables_)));
+//    assert (!meta_variables_.size());
+
+//    for (auto it = tmp_meta_variables.begin(); it != tmp_meta_variables.end() /* not hoisted */; /* no increment */)
+//    {
+//        meta_variables_.emplace(it->second->name(), std::move(it->second));
+//        it = tmp_meta_variables.erase(it);
+//    }
+
+//    meta_variables_.insert(make_move_iterator(std::begin(tmp_meta_variables)),
+//                              make_move_iterator(std::end(tmp_meta_variables)));
+//}
 
 bool DBContentManager::insertInProgress() const
 {

@@ -100,11 +100,10 @@ void ASTERIXJSONParser::doMappingChecks()
     // update not mapped dbo vars
     not_added_dbo_variables_.clear();
 
-
     for (auto& dbovar_it : dbContent().variables())
     {
-        if (!hasDBContentVariableMapped(dbovar_it->name()))
-            not_added_dbo_variables_.push_back(dbovar_it->name());
+        if (!hasDBContentVariableMapped(dbovar_it.first))
+            not_added_dbo_variables_.push_back(dbovar_it.first);
     }
 
     mapping_checks_dirty_ = false;

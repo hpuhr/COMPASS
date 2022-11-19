@@ -124,13 +124,13 @@ DBContent::DBContent(COMPASS& compass, const string& class_id, const string& ins
 
     assert (db_table_name_.size());
 
-    constructor_active_ = true;
+    //constructor_active_ = true;
 
     createSubConfigurables();
 
-    constructor_active_ = false;
+    //constructor_active_ = false;
 
-    sortContent();
+    //sortContent();
 
     logdbg << "DBContent: constructor: created with instance_id " << instanceId() << " name "
            << name_;
@@ -157,26 +157,24 @@ void DBContent::generateSubConfigurable(const string& class_id, const string& in
     logdbg << "DBContent: generateSubConfigurable: generating variable " << instance_id;
     if (class_id == "Variable")
     {
-        string var_name = configuration()
-                .getSubConfiguration(class_id, instance_id)
-                .getParameterConfigValueString("name");
+        Variable* var = new Variable(class_id, instance_id, this);
 
-        if (hasVariable(var_name))
+        if (hasVariable(var->name()))
             logerr << "DBContent: generateSubConfigurable: duplicate variable " << instance_id
-                   << " with name '" << var_name << "'";
+                   << " with name '" << var->name() << "'";
 
-        assert(!hasVariable(var_name));
+        assert(!hasVariable(var->name()));
 
         logdbg << "DBContent: generateSubConfigurable: generating variable " << instance_id
-               << " with name " << var_name;
+               << " with name " << var->name();
 
-        variables_.emplace_back(new Variable(class_id, instance_id, this));
+        variables_.emplace(var->name(), var);
     }
     else
         throw runtime_error("DBContent: generateSubConfigurable: unknown class_id " + class_id);
 
-    if (!constructor_active_)
-        sortContent();
+//    if (!constructor_active_)
+//        sortContent();
 }
 
 void DBContent::checkSubConfigurables()
@@ -186,42 +184,57 @@ void DBContent::checkSubConfigurables()
 
 bool DBContent::hasVariable(const string& name) const
 {
-    auto iter = find_if(variables_.begin(), variables_.end(),
-                        [name](const unique_ptr<Variable>& var) { return var->name() == name;});
+//    auto iter = find_if(variables_.begin(), variables_.end(),
+//                        [name](const unique_ptr<Variable>& var) { return var->name() == name;});
 
-    return iter != variables_.end();
+//    return iter != variables_.end();
 
     //return variables_.find(name) != variables_.end();
+
+    return variables_.count(name);
 }
 
 Variable& DBContent::variable(const string& name) const
 {
     assert(hasVariable(name));
 
-    auto iter = find_if(variables_.begin(), variables_.end(),
-                        [name](const unique_ptr<Variable>& var) { return var->name() == name;});
+//    auto iter = find_if(variables_.begin(), variables_.end(),
+//                        [name](const unique_ptr<Variable>& var) { return var->name() == name;});
 
-    assert (iter != variables_.end());
-    assert (iter->get());
+//    assert (iter != variables_.end());
+//    assert (iter->get());
 
-    return *iter->get();
+//    return *iter->get();
+
+    return *(variables_.at(name).get());
 }
 
-void DBContent::renameVariable(const string& name, const string& new_name)
+void DBContent::renameVariable(const string& old_name, const string& new_name)
 {
-    loginf << "DBContent: renameVariable: name " << name << " new_name " << new_name;
-
-    string old_name = name; // since passed by reference, which will be changed
+    loginf << "DBContent: renameVariable: name " << old_name << " new_name " << new_name;
 
     assert(hasVariable(old_name));
     assert(!hasVariable(new_name));
 
-    variable(old_name).name(new_name);
+    std::unique_ptr<Variable> var = std::move(variables_.at(old_name));
+    variables_.erase(old_name);
+    var->name(new_name);
+    variables_.emplace(new_name, std::move(var));
 
-    loginf << "DBContent: renameVariable: has old var '" << old_name << "' " << hasVariable(old_name);
     assert(!hasVariable(old_name));
-    loginf << "DBContent: renameVariable: has var '" << new_name << "' " << hasVariable(new_name);
     assert(hasVariable(new_name));
+
+//    string old_name = name; // since passed by reference, which will be changed
+
+//    assert(hasVariable(old_name));
+//    assert(!hasVariable(new_name));
+
+//    variable(old_name).name(new_name);
+
+//    loginf << "DBContent: renameVariable: has old var '" << old_name << "' " << hasVariable(old_name);
+//    assert(!hasVariable(old_name));
+//    loginf << "DBContent: renameVariable: has var '" << new_name << "' " << hasVariable(new_name);
+//    assert(hasVariable(new_name));
 
 }
 
@@ -229,22 +242,31 @@ void DBContent::deleteVariable(const string& name)
 {
     assert(hasVariable(name));
 
-    auto iter = find_if(variables_.begin(), variables_.end(),
-                        [name](const unique_ptr<Variable>& var) { return var->name() == name;});
-    assert (iter != variables_.end());
+//    auto iter = find_if(variables_.begin(), variables_.end(),
+//                        [name](const unique_ptr<Variable>& var) { return var->name() == name;});
+//    assert (iter != variables_.end());
 
-    variables_.erase(iter);
+    variables_.erase(name);
     assert(!hasVariable(name));
 }
 
-bool DBContent::hasVariableDBColumnName(const std::string& name) const
+bool DBContent::hasVariableDBColumnName(const std::string& col_name) const
 {
-    auto iter = find_if(variables_.begin(), variables_.end(),
-                        [name](const unique_ptr<Variable>& var) { return var->dbColumnName() == name;});
+//    auto iter = find_if(variables_.begin(), variables_.end(),
+//                        [col_name](const unique_ptr<Variable>& var) { return var->dbColumnName() == col_name;});
 
-    logdbg << "DBContent: hasVariableDBColumnName: name '" << name << "' " << (iter != variables_.end());
+//    logdbg << "DBContent: hasVariableDBColumnName: name '" << name << "' " << (iter != variables_.end());
 
-    return iter != variables_.end();
+//    return iter != variables_.end();
+
+    for (const auto& var : variables_)
+    {
+        if (var.second->dbColumnName() == col_name)
+            return true;
+    }
+
+    return false;
+
 }
 
 //string DBContent::associationsTableName()
@@ -256,8 +278,8 @@ bool DBContent::hasVariableDBColumnName(const std::string& name) const
 
 bool DBContent::hasKeyVariable()
 {
-    for (auto& var_it : variables_)
-        if (var_it->isKey())
+    for (const auto& var_it : variables_)
+        if (var_it.second->isKey())
             return true;
 
     return false;
@@ -267,12 +289,12 @@ Variable& DBContent::getKeyVariable()
 {
     assert(hasKeyVariable());
 
-    for (auto& var_it : variables_)  // search in any
-        if (var_it->isKey())
+    for (const auto& var_it : variables_)  // search in any
+        if (var_it.second->isKey())
         {
             loginf << "DBContent " << name() << ": getKeyVariable: returning first found var "
-                   << var_it->name();
-            return *var_it.get();
+                   << var_it.first;
+            return *var_it.second.get();
         }
 
     throw runtime_error("DBContent: getKeyVariable: no key variable found");
@@ -963,14 +985,14 @@ bool DBContent::existsInDB() const
 //    loginf << "DBContent " << name_ << ": saveAssociations: done";
 //}
 
-void DBContent::sortContent()
-{
-    sort(variables_.begin(), variables_.end(),
-         [](const std::unique_ptr<Variable>& a, const std::unique_ptr<Variable>& b) -> bool
-    {
-        return a->name() < b->name();
-    });
-}
+//void DBContent::sortContent()
+//{
+//    sort(variables_.begin(), variables_.end(),
+//         [](const std::unique_ptr<Variable>& a, const std::unique_ptr<Variable>& b) -> bool
+//    {
+//        return a->name() < b->name();
+//    });
+//}
 
 void DBContent::checkStaticVariable(const Property& property)
 {
