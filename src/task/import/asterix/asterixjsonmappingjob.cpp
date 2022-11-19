@@ -113,10 +113,12 @@ void ASTERIXJSONMappingJob::run()
 
     for (auto& data_slice : data_)
     {
-        assert(data_slice);
-        logdbg << "ASTERIXJSONMappingJob: run: applying JSON function";
-        JSON::applyFunctionToValues(*data_slice.get(), data_record_keys_, data_record_keys_.begin(),
-                                    process_lambda, false);
+        if (data_slice)
+        {
+            logdbg << "ASTERIXJSONMappingJob: run: applying JSON function";
+            JSON::applyFunctionToValues(*data_slice.get(), data_record_keys_, data_record_keys_.begin(),
+                                        process_lambda, false);
+        }
     }
 
     std::map<std::string, std::shared_ptr<Buffer>> not_empty_buffers;
