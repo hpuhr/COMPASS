@@ -359,8 +359,6 @@ void Client::run ()
     if (quit_)
         main_window.quit(quit_);
 
-    loginf << "COMPASSClient: testing parallel for";
-
 }
 
 Client::~Client()

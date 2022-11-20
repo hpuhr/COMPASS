@@ -24,7 +24,7 @@ cp /usr/lib64/libosgEarth* appimage/appdir/lib/
 if [[ $1 == "oldos" ]]
 then
   cp -r /usr/lib/libproj.so.0.7.0 appimage/appdir/lib/libproj.so
-  #chrpath -r '$ORIGIN' appimage/appdir/lib/libproj.so
+#  chrpath -r '$ORIGIN' appimage/appdir/lib/libproj.so
 fi
 #cp /usr/lib64/osgdb_* appimage/appdir/lib/
 
