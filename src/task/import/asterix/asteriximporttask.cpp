@@ -625,6 +625,11 @@ void ASTERIXImportTask::importAsterixNetworkIgnoreFutureTimestamp (bool value)
     network_ignore_future_ts_ = value;
 }
 
+unsigned int ASTERIXImportTask::numPacketsInProcessing() const
+{
+    return num_packets_in_processing_;
+}
+
 bool ASTERIXImportTask::isRunning() const
 {
     return running_;
