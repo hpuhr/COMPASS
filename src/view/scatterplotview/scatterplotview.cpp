@@ -132,6 +132,14 @@ void ScatterPlotView::clearData()
     getDataWidget()->clear();
 }
 
+void ScatterPlotView::appModeSwitch (AppMode app_mode_previous, AppMode app_mode_current)
+{
+    loginf << "ScatterPlotView: appModeSwitch: app_mode " << toString(app_mode_current)
+           << " prev " << toString(app_mode_previous);
+
+    widget_->getViewConfigWidget()->appModeSwitch(app_mode_current);
+}
+
 void ScatterPlotView::generateSubConfigurable(const std::string& class_id,
                                             const std::string& instance_id)
 {
@@ -420,7 +428,10 @@ void ScatterPlotView::allLoadingDoneSlot()
 
 void ScatterPlotView::updateStatus()
 {
-    if (widget_->getViewDataWidget()->xVarNotInBuffer() || widget_->getViewDataWidget()->yVarNotInBuffer())
+    if (COMPASS::instance().appMode() != AppMode::LiveRunning)
+        return;
+
+    if ((widget_->getViewDataWidget()->xVarNotInBuffer() || widget_->getViewDataWidget()->yVarNotInBuffer()))
         widget_->getViewConfigWidget()->setStatus("Reload Required", true, Qt::red);
     else
         widget_->getViewConfigWidget()->setStatus(

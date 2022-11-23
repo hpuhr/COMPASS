@@ -19,8 +19,8 @@
 #define HISTOGRAMVIEWCONFIGWIDGET_H_
 
 #include "viewconfigwidget.h"
-
 #include "dbcontent/variable/variable.h"
+#include "appmode.h"
 
 class HistogramView;
 
@@ -62,6 +62,8 @@ class HistogramViewConfigWidget : public ViewConfigWidget
     void updateEvalConfig();
 
     virtual void setStatus(const QString& text, bool visible, const QColor& color = Qt::black) override;
+
+    void appModeSwitch (AppMode app_mode);
 
   protected:
     HistogramView* view_;
