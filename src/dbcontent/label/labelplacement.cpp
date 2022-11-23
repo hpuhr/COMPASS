@@ -465,7 +465,7 @@ void LabelPlacementEngine::runTest(const std::vector<TestLabel>& test_labels,
                 l.label.y = l_opt.y;
             }
 
-            std::cout << "Auto placement of labels in " << t.restart() << std::endl;
+            loginf << "LabelPlacementEngine: runTest: Auto placement of labels in " << t.restart();
         }
         
         renderTestFrame(img, labels, config);
@@ -473,7 +473,7 @@ void LabelPlacementEngine::runTest(const std::vector<TestLabel>& test_labels,
         //show new canva
         label->setPixmap(QPixmap::fromImage(img));
 
-        std::cout << "UPDATE! " << label->width() << "x" << label->height() << std::endl;
+        loginf << "LabelPlacementEngine: runTest: UPDATE! " << label->width() << "x" << label->height();
     };
 
     //run update every 1s

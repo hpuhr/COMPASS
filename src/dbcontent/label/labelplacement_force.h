@@ -259,7 +259,8 @@ namespace force
 
         auto coutBBox = [ & ] (const QRectF& bbox) 
         {
-            std::cout << "(" << bbox.x() << "," << bbox.y() << "," << bbox.width() << "x" << bbox.height() << ")"; 
+            loginf << "label_placement: force: repelFromObjects: ("
+                   << bbox.x() << "," << bbox.y() << "," << bbox.width() << "x" << bbox.height() << ")";
         };
 
         //for (size_t i = 0; i < n; ++i)
