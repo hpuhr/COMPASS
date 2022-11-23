@@ -271,7 +271,7 @@ bool ACIDFilter::updateValuesFromStr(const std::string& values_str)
             continue;
         }
 
-        values_tmp.insert(boost::algorithm::to_upper_copy(tmp_str));
+        values_tmp.insert(boost::algorithm::to_upper_copy(String::trim(tmp_str)));
     }
 
     values_ = values_tmp;
