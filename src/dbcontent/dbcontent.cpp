@@ -388,7 +388,7 @@ void DBContent::load(VariableSet& read_set, bool use_datasrc_filters, bool use_f
                 else
                     custom_filter_clause += " (";
 
-                custom_filter_clause += "(" + datasource_var.dbColumnName() + " = " + to_string(ds_id_it);
+                custom_filter_clause += " (" + datasource_var.dbColumnName() + " = " + to_string(ds_id_it);
                 custom_filter_clause += " AND " + line_var.dbColumnName() + " IN (";
 
                 bool first = true;
@@ -431,11 +431,16 @@ void DBContent::load(VariableSet& read_set, bool use_datasrc_filters, bool use_f
 
     if (use_filters)
     {
-        if (custom_filter_clause.size())
-            custom_filter_clause += " AND ";
+        string filter_sql = COMPASS::instance().filterManager().getSQLCondition(
+                    name_, extra_from_parts, filtered_variables);
 
-        custom_filter_clause +=
-                COMPASS::instance().filterManager().getSQLCondition(name_, extra_from_parts, filtered_variables);
+        if (filter_sql.size())
+        {
+            if (custom_filter_clause.size())
+                custom_filter_clause += " AND ";
+
+            custom_filter_clause += filter_sql;
+        }
     }
 
     loginf << "DBContent: load: filter '" << custom_filter_clause << "'";
