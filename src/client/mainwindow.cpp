@@ -304,14 +304,14 @@ void MainWindow::createMenus ()
     }
 
     // configuration menu
-    QMenu* config_menu = menuBar()->addMenu(tr("&Configuration"));
-    config_menu->setToolTipsVisible(true);
+    config_menu_ = menuBar()->addMenu(tr("&Configuration"));
+    config_menu_->setToolTipsVisible(true);
 
     // configure operations
     QAction* ds_action = new QAction(tr("Data Sources"));
     ds_action->setToolTip(tr("Configure Data Sources"));
     connect(ds_action, &QAction::triggered, this, &MainWindow::configureDataSourcesSlot);
-    config_menu->addAction(ds_action);
+    config_menu_->addAction(ds_action);
 
     QAction* meta_action = new QAction(tr("Meta Variables"));
 
@@ -321,13 +321,13 @@ void MainWindow::createMenus ()
         meta_action->setToolTip(tr("Show Meta Variables"));
 
     connect(meta_action, &QAction::triggered, this, &MainWindow::configureMetaVariablesSlot);
-    config_menu->addAction(meta_action);
+    config_menu_->addAction(meta_action);
 
     sectors_action_ = new QAction(tr("Sectors"));
     sectors_action_->setToolTip(tr("Configure Sectors (stored in Database)"));
     connect(sectors_action_, &QAction::triggered, this, &MainWindow::configureSectorsSlot);
     sectors_action_->setDisabled(true);
-    config_menu->addAction(sectors_action_);
+    config_menu_->addAction(sectors_action_);
 
     // process menu
     process_menu_ = menuBar()->addMenu(tr("&Process"));
@@ -368,6 +368,9 @@ void MainWindow::updateMenus()
 
     assert (import_menu_);
 
+    bool in_live_running = COMPASS::instance().appMode() == AppMode::LiveRunning;
+    bool in_live_paused = COMPASS::instance().appMode() == AppMode::LivePaused;
+
     open_recent_db_menu_->clear();
 
     // recent db files
@@ -394,18 +397,20 @@ void MainWindow::updateMenus()
 
     bool db_open = COMPASS::instance().dbOpened();
 
-    new_db_action_->setDisabled(db_open);
-    open_existing_db_action_->setDisabled(db_open);
+    new_db_action_->setDisabled(db_open || in_live_running);
+    open_existing_db_action_->setDisabled(db_open || in_live_running);
 
     if (recent_file_list.size()) // is disabled otherwise
-        open_recent_db_menu_->setDisabled(db_open);
+        open_recent_db_menu_->setDisabled(db_open || in_live_running);
 
-    close_db_action_->setDisabled(!db_open);
+    close_db_action_->setDisabled(!db_open || in_live_running);
 
-    sectors_action_->setDisabled(!db_open);
+    sectors_action_->setDisabled(!db_open || in_live_running);
 
-    import_menu_->setDisabled(!db_open || COMPASS::instance().taskManager().asterixImporterTask().isRunning());
-    process_menu_->setDisabled(!db_open || COMPASS::instance().taskManager().asterixImporterTask().isRunning());
+    import_menu_->setDisabled(!db_open || COMPASS::instance().taskManager().asterixImporterTask().isRunning()
+                              || in_live_running || in_live_paused);
+    process_menu_->setDisabled(!db_open || COMPASS::instance().taskManager().asterixImporterTask().isRunning()
+                               || in_live_running || in_live_paused);
 
     assert (import_recent_asterix_menu_);
 
@@ -431,6 +436,9 @@ void MainWindow::updateMenus()
         import_recent_asterix_menu_->addAction(clear_file_act);
     }
 
+    assert (config_menu_);
+    config_menu_->setDisabled(!db_open || COMPASS::instance().taskManager().asterixImporterTask().isRunning()
+                          || in_live_running || in_live_paused);
 }
 
 void MainWindow::updateBottomWidget()
@@ -473,7 +481,7 @@ void MainWindow::updateBottomWidget()
 
         live_pause_resume_button_->setHidden(false);
         live_pause_resume_button_->setText("Resume");
-        live_stop_button_->setHidden(true);
+        live_stop_button_->setHidden(false);
     }
     else if (app_mode == AppMode::LiveRunning)
     {

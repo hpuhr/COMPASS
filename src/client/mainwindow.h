@@ -202,6 +202,9 @@ protected:
 
     QMenu* import_recent_asterix_menu_ {nullptr};
 
+    // configuration menu
+    QMenu* config_menu_ {nullptr};
+
     // process menu
     QMenu* process_menu_ {nullptr};
 
