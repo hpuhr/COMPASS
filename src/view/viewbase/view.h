@@ -89,6 +89,7 @@ class View : public QObject, public Configurable
     /// @brief Returns the view's widget, override this method in derived classes.
     ViewWidget* getWidget() { return widget_; }
 
+    void enableInTabWidget(bool value);
     void showInTabWidget();
 
     virtual dbContent::VariableSet getSet(const std::string& dbcontent_name) = 0;

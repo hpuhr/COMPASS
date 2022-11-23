@@ -81,7 +81,7 @@ public slots:
     void quitRequestedSlot();
     void showAddViewMenuSlot();
 
-    void appModeSwitchSlot (AppMode app_mode);
+    void appModeSwitchSlot (AppMode app_mode_previous, AppMode app_mode_current);
 
 private slots:
     void runTestCodeSlot();

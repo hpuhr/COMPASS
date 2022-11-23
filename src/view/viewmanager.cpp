@@ -699,7 +699,14 @@ void ViewManager::appModeSwitchSlot (AppMode app_mode_previous, AppMode app_mode
     loginf << "ViewManager: appModeSwitchSlot: app_mode " << COMPASS::instance().appModeStr();
 
     for (auto& view_it : views_)
+    {
         view_it.second->appModeSwitch(app_mode_previous, app_mode_current);
+
+        if (app_mode_current == AppMode::LiveRunning)
+            view_it.second->enableInTabWidget(view_it.second->classId() == "OSGView");
+        else
+            view_it.second->enableInTabWidget(true);
+    }
 }
 
 

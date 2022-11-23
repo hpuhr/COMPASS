@@ -44,6 +44,8 @@
 #include "managesectorstaskdialog.h"
 #include "evaluationmanager.h"
 #include "compass.h"
+#include "viewwidget.h"
+#include "view.h"
 
 #include "asteriximporttask.h"
 #include "asteriximporttaskdialog.h"
@@ -503,16 +505,26 @@ void MainWindow::disableConfigurationSaving()
 
 void MainWindow::showEvaluationTab()
 {
-    assert (tab_widget_->count() > 2);
     assert (!COMPASS::instance().hideEvaluation());
+
+    assert (tab_widget_->count() > 2);
     tab_widget_->setCurrentIndex(2);
 }
 
 void MainWindow::showViewPointsTab()
 {
-    assert (tab_widget_->count() > 3);
     assert (!COMPASS::instance().hideViewpoints());
-    tab_widget_->setCurrentIndex(3);
+
+    if (COMPASS::instance().hideEvaluation())
+    {
+        assert (tab_widget_->count() > 2);
+        tab_widget_->setCurrentIndex(2);
+    }
+    else
+    {
+        assert (tab_widget_->count() > 3);
+        tab_widget_->setCurrentIndex(3);
+    }
 }
 
 void MainWindow::importDataSourcesFile(const std::string& filename)
@@ -1447,9 +1459,32 @@ void MainWindow::showAddViewMenuSlot()
     COMPASS::instance().viewManager().showMainViewContainerAddView();
 }
 
-void MainWindow::appModeSwitchSlot (AppMode app_mode)
+void MainWindow::appModeSwitchSlot (AppMode app_mode_previous, AppMode app_mode_current)
 {
-    loginf << "MainWindow: appModeSwitch: app_mode " << COMPASS::instance().appModeStr();
+    bool enable_tabs = app_mode_current == AppMode::Offline;
+
+    loginf << "MainWindow: appModeSwitch: app_mode " << COMPASS::instance().appModeStr()
+           << " enable_tabs " << enable_tabs;
+
+    if (COMPASS::instance().hideEvaluation() && COMPASS::instance().hideViewpoints())
+    {
+        // nothing
+    }
+    else if (!COMPASS::instance().hideEvaluation() && !COMPASS::instance().hideViewpoints())
+    {
+        // both
+        assert (tab_widget_->count() > 3); // 2 eval, 3 vp
+
+        tab_widget_->setTabEnabled(2, enable_tabs);
+        tab_widget_->setTabEnabled(3, enable_tabs);
+    }
+    else
+    {
+        // one
+        assert (tab_widget_->count() > 2); // 2 is the other
+
+        tab_widget_->setTabEnabled(2, enable_tabs);
+    }
 
     updateBottomWidget();
     updateMenus();
