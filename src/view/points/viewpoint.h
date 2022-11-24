@@ -23,6 +23,31 @@
 class ViewManager;
 class LatexVisitor;
 
+extern const std::string VP_ID_KEY;
+extern const std::string VP_NAME_KEY;
+extern const std::string VP_TYPE_KEY;
+extern const std::string VP_STATUS_KEY;
+extern const std::string VP_COMMENT_KEY;
+
+extern const std::string VP_DS_TYPES_KEY;
+extern const std::string VP_DS_KEY;
+extern const std::string VP_FILTERS_KEY;
+
+extern const std::string VP_POS_LAT_KEY;
+extern const std::string VP_POS_LON_KEY;
+extern const std::string VP_POS_WIN_LAT_KEY;
+extern const std::string VP_POS_WIN_LON_KEY;
+extern const std::string VP_TIMESTAMP_KEY;
+extern const std::string VP_TIME_WIN_KEY;
+
+extern const std::string VP_EVAL_KEY;
+extern const std::string VP_EVAL_SHOW_RES_KEY;
+extern const std::string VP_EVAL_REQGRP_ID_KEY;
+extern const std::string VP_EVAL_RES_ID_KEY;
+extern const std::string VP_EVAL_HIGHDET_KEY;
+
+extern const std::string VP_SHOWSEC_KEY;
+
 class ViewPoint : public ViewableDataConfig
 {
   public:

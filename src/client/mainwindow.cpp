@@ -44,9 +44,13 @@
 #include "managesectorstaskdialog.h"
 #include "evaluationmanager.h"
 #include "compass.h"
+#include "viewwidget.h"
+#include "view.h"
 
 #include "asteriximporttask.h"
 #include "asteriximporttaskdialog.h"
+#include "jsonimporttask.h"
+#include "jsonimporttaskdialog.h"
 
 #include "radarplotpositioncalculatortask.h"
 #include "radarplotpositioncalculatortaskdialog.h"
@@ -151,23 +155,26 @@ MainWindow::MainWindow()
 
     bottom_layout->addStretch();
 
+    // add status & button
+
     status_label_ = new QLabel();
     bottom_layout->addWidget(status_label_);
 
-    bottom_layout->addStretch();
-
-    // add status & button
-    load_button_ = new QPushButton("Load");
-    connect(load_button_, &QPushButton::clicked, this, &MainWindow::loadButtonSlot);
-    bottom_layout->addWidget(load_button_);
-
-    live_pause_button_ = new QPushButton("Pause");
-    connect(live_pause_button_, &QPushButton::clicked, this, &MainWindow::livePauseSlot);
-    bottom_layout->addWidget(live_pause_button_);
+    live_pause_resume_button_ = new QPushButton("Pause");
+    connect(live_pause_resume_button_, &QPushButton::clicked, this, &MainWindow::livePauseResumeSlot);
+    bottom_layout->addWidget(live_pause_resume_button_);
 
     live_stop_button_ = new QPushButton("Stop");
     connect(live_stop_button_, &QPushButton::clicked, this, &MainWindow::liveStopSlot);
     bottom_layout->addWidget(live_stop_button_);
+
+    bottom_layout->addStretch();
+
+    // load button
+
+    load_button_ = new QPushButton("Load");
+    connect(load_button_, &QPushButton::clicked, this, &MainWindow::loadButtonSlot);
+    bottom_layout->addWidget(load_button_);
 
     bottom_widget->setLayout(bottom_layout);
 
@@ -277,6 +284,12 @@ void MainWindow::createMenus ()
     connect(import_ast_net_action, &QAction::triggered, this, &MainWindow::importAsterixFromNetworkSlot);
     import_menu_->addAction(import_ast_net_action);
 
+    QAction* import_json_file_action = new QAction(tr("&JSON Recording"));
+    import_json_file_action->setShortcut(tr("Ctrl+J"));
+    import_json_file_action->setToolTip(tr("Import JSON Recording File"));
+    connect(import_json_file_action, &QAction::triggered, this, &MainWindow::importJSONRecordingSlot);
+    import_menu_->addAction(import_json_file_action);
+
     QAction* import_gps_file_action = new QAction(tr("&GPS Trail"));
     import_gps_file_action->setShortcut(tr("Ctrl+G"));
     import_gps_file_action->setToolTip(tr("Import GPS Trail File"));
@@ -293,14 +306,14 @@ void MainWindow::createMenus ()
     }
 
     // configuration menu
-    QMenu* config_menu = menuBar()->addMenu(tr("&Configuration"));
-    config_menu->setToolTipsVisible(true);
+    config_menu_ = menuBar()->addMenu(tr("&Configuration"));
+    config_menu_->setToolTipsVisible(true);
 
     // configure operations
     QAction* ds_action = new QAction(tr("Data Sources"));
     ds_action->setToolTip(tr("Configure Data Sources"));
     connect(ds_action, &QAction::triggered, this, &MainWindow::configureDataSourcesSlot);
-    config_menu->addAction(ds_action);
+    config_menu_->addAction(ds_action);
 
     QAction* meta_action = new QAction(tr("Meta Variables"));
 
@@ -310,13 +323,13 @@ void MainWindow::createMenus ()
         meta_action->setToolTip(tr("Show Meta Variables"));
 
     connect(meta_action, &QAction::triggered, this, &MainWindow::configureMetaVariablesSlot);
-    config_menu->addAction(meta_action);
+    config_menu_->addAction(meta_action);
 
     sectors_action_ = new QAction(tr("Sectors"));
     sectors_action_->setToolTip(tr("Configure Sectors (stored in Database)"));
     connect(sectors_action_, &QAction::triggered, this, &MainWindow::configureSectorsSlot);
     sectors_action_->setDisabled(true);
-    config_menu->addAction(sectors_action_);
+    config_menu_->addAction(sectors_action_);
 
     // process menu
     process_menu_ = menuBar()->addMenu(tr("&Process"));
@@ -339,11 +352,11 @@ void MainWindow::createMenus ()
     process_menu_->addAction(assoc_artas_action);
 
     //tests
-#if 1
-    QAction* test_action = new QAction(tr("Run test code"));
-    config_menu->addAction(test_action);
-    connect(test_action, &QAction::triggered, this, &MainWindow::runTestCodeSlot);
-#endif
+//#if 1
+//    QAction* test_action = new QAction(tr("Run test code"));
+//    config_menu->addAction(test_action);
+//    connect(test_action, &QAction::triggered, this, &MainWindow::runTestCodeSlot);
+//#endif
 }
 
 void MainWindow::updateMenus()
@@ -356,6 +369,9 @@ void MainWindow::updateMenus()
     assert (sectors_action_);
 
     assert (import_menu_);
+
+    bool in_live_running = COMPASS::instance().appMode() == AppMode::LiveRunning;
+    bool in_live_paused = COMPASS::instance().appMode() == AppMode::LivePaused;
 
     open_recent_db_menu_->clear();
 
@@ -383,18 +399,20 @@ void MainWindow::updateMenus()
 
     bool db_open = COMPASS::instance().dbOpened();
 
-    new_db_action_->setDisabled(db_open);
-    open_existing_db_action_->setDisabled(db_open);
+    new_db_action_->setDisabled(db_open || in_live_running);
+    open_existing_db_action_->setDisabled(db_open || in_live_running);
 
     if (recent_file_list.size()) // is disabled otherwise
-        open_recent_db_menu_->setDisabled(db_open);
+        open_recent_db_menu_->setDisabled(db_open || in_live_running);
 
-    close_db_action_->setDisabled(!db_open);
+    close_db_action_->setDisabled(!db_open || in_live_running);
 
-    sectors_action_->setDisabled(!db_open);
+    sectors_action_->setDisabled(!db_open || in_live_running);
 
-    import_menu_->setDisabled(!db_open || COMPASS::instance().taskManager().asterixImporterTask().isRunning());
-    process_menu_->setDisabled(!db_open || COMPASS::instance().taskManager().asterixImporterTask().isRunning());
+    import_menu_->setDisabled(!db_open || COMPASS::instance().taskManager().asterixImporterTask().isRunning()
+                              || in_live_running || in_live_paused);
+    process_menu_->setDisabled(!db_open || COMPASS::instance().taskManager().asterixImporterTask().isRunning()
+                               || in_live_running || in_live_paused);
 
     assert (import_recent_asterix_menu_);
 
@@ -420,6 +438,9 @@ void MainWindow::updateMenus()
         import_recent_asterix_menu_->addAction(clear_file_act);
     }
 
+    assert (config_menu_);
+    config_menu_->setDisabled(!db_open || COMPASS::instance().taskManager().asterixImporterTask().isRunning()
+                          || in_live_running || in_live_paused);
 }
 
 void MainWindow::updateBottomWidget()
@@ -437,7 +458,7 @@ void MainWindow::updateBottomWidget()
     status_label_->setText(compass.appModeStr().c_str());
 
     assert (load_button_);
-    assert (live_pause_button_);
+    assert (live_pause_resume_button_);
     assert (live_stop_button_);
 
     AppMode app_mode = compass.appMode();
@@ -445,29 +466,31 @@ void MainWindow::updateBottomWidget()
     if (!compass.dbOpened())
     {
         load_button_->setHidden(true);
-        live_pause_button_->setHidden(true);
+
+        live_pause_resume_button_->setHidden(true);
         live_stop_button_->setHidden(true);
     }
     else if (app_mode == AppMode::Offline)
     {
         load_button_->setHidden(false);
-        live_pause_button_->setHidden(true);
+
+        live_pause_resume_button_->setHidden(true);
         live_stop_button_->setHidden(true);
     }
     else if (app_mode == AppMode::LivePaused)
     {
-        load_button_->setHidden(true);
-        live_pause_button_->setHidden(false);
-        live_pause_button_->setText("Resume");
-        live_pause_button_->setDisabled(true); // not implemented yet
-        live_stop_button_->setHidden(true);
+        load_button_->setHidden(false);
+
+        live_pause_resume_button_->setHidden(false);
+        live_pause_resume_button_->setText("Resume");
+        live_stop_button_->setHidden(false);
     }
     else if (app_mode == AppMode::LiveRunning)
     {
         load_button_->setHidden(true);
-        live_pause_button_->setHidden(false);
-        live_pause_button_->setText("Pause");
-        live_pause_button_->setDisabled(true); // not implemented yet
+
+        live_pause_resume_button_->setHidden(false);
+        live_pause_resume_button_->setText("Pause");
         live_stop_button_->setHidden(false);
     }
     else
@@ -482,16 +505,26 @@ void MainWindow::disableConfigurationSaving()
 
 void MainWindow::showEvaluationTab()
 {
-    assert (tab_widget_->count() > 2);
     assert (!COMPASS::instance().hideEvaluation());
+
+    assert (tab_widget_->count() > 2);
     tab_widget_->setCurrentIndex(2);
 }
 
 void MainWindow::showViewPointsTab()
 {
-    assert (tab_widget_->count() > 3);
     assert (!COMPASS::instance().hideViewpoints());
-    tab_widget_->setCurrentIndex(3);
+
+    if (COMPASS::instance().hideEvaluation())
+    {
+        assert (tab_widget_->count() > 2);
+        tab_widget_->setCurrentIndex(2);
+    }
+    else
+    {
+        assert (tab_widget_->count() > 3);
+        tab_widget_->setCurrentIndex(3);
+    }
 }
 
 void MainWindow::importDataSourcesFile(const std::string& filename)
@@ -570,6 +603,15 @@ void MainWindow::importAsterixNetworkMaxLines(int value)
     loginf << "MainWindow: importAsterixNetworkMaxLines: value " << value;
 
     asterix_import_network_max_lines_ = value;
+}
+
+void MainWindow::importJSONFile(const std::string& filename)
+{
+    loginf << "MainWindow: importJSONFile: filename '" << filename << "'";
+
+    automatic_tasks_defined_ = true;
+
+    json_import_filename_ = filename;
 }
 
 void MainWindow::importGPSTrailFile(const std::string& filename)
@@ -805,7 +847,9 @@ void MainWindow::performAutomaticTasks ()
 
         while (!ast_import_task.done())
         {
-            QCoreApplication::processEvents();
+            if (QCoreApplication::hasPendingEvents())
+                QCoreApplication::processEvents();
+
             QThread::msleep(1);
         }
     }
@@ -829,56 +873,65 @@ void MainWindow::performAutomaticTasks ()
     }
 
 
-    ////    if (json_import_file_)
-    ////    {
-    ////        loginf << "MainWindow: performAutomaticTasks: importing JSON file '"
-    ////               << json_import_filename_ << "'";
+    if (json_import_filename_.size())
+    {
+        loginf << "MainWindow: performAutomaticTasks: importing JSON file '"
+               << json_import_filename_ << "'";
 
-    ////#if USE_JASTERIX
-    ////        if (!Files::fileExists(json_import_filename_))
-    ////        {
-    ////            logerr << "MainWindow: performAutomaticTasks: JSON file '" << asterix_import_filename_
-    ////                   << "' does not exist";
-    ////            return;
-    ////        }
-    ////#endif
+        if (!Files::fileExists(json_import_filename_))
+        {
+            logerr << "MainWindow: performAutomaticTasks: JSON file '" << json_import_filename_
+                   << "' does not exist";
+            return;
+        }
 
-    ////        if(!json_import_task_->hasSchema(json_import_schema_))
-    ////        {
-    ////            logerr << "MainWindow: performAutomaticTasks: JSON schema '" << json_import_schema_
-    ////                   << "' does not exist";
-    ////            return;
-    ////        }
+        //        if(!json_import_task_->hasSchema(json_import_schema_))
+        //        {
+        //            logerr << "MainWindow: performAutomaticTasks: JSON schema '" << json_import_schema_
+        //                   << "' does not exist";
+        //            return;
+        //        }
 
-    ////        widget_->setCurrentTask(*json_import_task_);
-    ////        if(widget_->getCurrentTaskName() != json_import_task_->name())
-    ////        {
-    ////            logerr << "MainWindow: performAutomaticTasks: wrong task '" << widget_->getCurrentTaskName()
-    ////                   << "' selected, aborting";
-    ////            return;
-    ////        }
+        //        widget_->setCurrentTask(*json_import_task_);
+        //        if(widget_->getCurrentTaskName() != json_import_task_->name())
+        //        {
+        //            logerr << "MainWindow: performAutomaticTasks: wrong task '" << widget_->getCurrentTaskName()
+        //                   << "' selected, aborting";
+        //            return;
+        //        }
 
-    ////        JSONImportTaskWidget* json_import_task_widget =
-    ////                dynamic_cast<JSONImportTaskWidget*>(json_import_task_->widget());
-    ////        assert(json_import_task_widget);
+        //        JSONImportTaskWidget* json_import_task_widget =
+        //                dynamic_cast<JSONImportTaskWidget*>(json_import_task_->widget());
+        //        assert(json_import_task_widget);
 
-    ////        json_import_task_widget->addFile(json_import_filename_);
-    ////        json_import_task_widget->selectFile(json_import_filename_);
-    ////        json_import_task_widget->selectSchema(json_import_schema_);
+        //        json_import_task_widget->addFile(json_import_filename_);
+        //        json_import_task_widget->selectFile(json_import_filename_);
+        //        json_import_task_widget->selectSchema(json_import_schema_);
 
-    ////        assert(json_import_task_->canRun());
-    ////        json_import_task_->showDoneSummary(false);
+        //        assert(json_import_task_->canRun());
+        //        json_import_task_->showDoneSummary(false);
 
-    ////        widget_->runTask(*json_import_task_);
+        //        widget_->runTask(*json_import_task_);
 
-    ////        while (!json_import_task_->done())
-    ////        {
-    ////            QCoreApplication::processEvents();
-    ////            QThread::msleep(1);
-    ////        }
+        JSONImportTask& json_import_task = COMPASS::instance().taskManager().jsonImporterTask();
 
-    ////        loginf << "MainWindow: performAutomaticTasks: importing JSON file done";
-    ////    }
+        json_import_task.importFilename(json_import_filename_);
+
+        assert(json_import_task.canRun());
+        json_import_task.showDoneSummary(false);
+
+        json_import_task.run(); // no test
+
+        while (!json_import_task.done())
+        {
+            if (QCoreApplication::hasPendingEvents())
+                QCoreApplication::processEvents();
+
+            QThread::msleep(1);
+        }
+
+        loginf << "MainWindow: performAutomaticTasks: importing JSON file done";
+    }
 
     if (gps_trail_import_file_)
     {
@@ -1252,6 +1305,22 @@ void MainWindow::importAsterixFromNetworkSlot()
     COMPASS::instance().taskManager().asterixImporterTask().dialog()->show();
 }
 
+void MainWindow::importJSONRecordingSlot()
+{
+    string filename = QFileDialog::getOpenFileName(this, "Import JSON File", "", "JSON Files (*.json *.zip)").toStdString();
+
+    if (filename.size() > 0)
+    {
+        COMPASS::instance().taskManager().jsonImporterTask().importFilename(filename); // also adds
+
+        updateMenus();
+
+        COMPASS::instance().taskManager().jsonImporterTask().dialog()->updateSource();
+        COMPASS::instance().taskManager().jsonImporterTask().dialog()->show();
+    }
+
+}
+
 void MainWindow::importGPSTrailSlot()
 {
     string filename = QFileDialog::getOpenFileName(this, "Import GPS Trail", "",
@@ -1390,9 +1459,32 @@ void MainWindow::showAddViewMenuSlot()
     COMPASS::instance().viewManager().showMainViewContainerAddView();
 }
 
-void MainWindow::appModeSwitchSlot (AppMode app_mode)
+void MainWindow::appModeSwitchSlot (AppMode app_mode_previous, AppMode app_mode_current)
 {
-    loginf << "MainWindow: appModeSwitch: app_mode " << COMPASS::instance().appModeStr();
+    bool enable_tabs = app_mode_current == AppMode::Offline;
+
+    loginf << "MainWindow: appModeSwitch: app_mode " << COMPASS::instance().appModeStr()
+           << " enable_tabs " << enable_tabs;
+
+    if (COMPASS::instance().hideEvaluation() && COMPASS::instance().hideViewpoints())
+    {
+        // nothing
+    }
+    else if (!COMPASS::instance().hideEvaluation() && !COMPASS::instance().hideViewpoints())
+    {
+        // both
+        assert (tab_widget_->count() > 3); // 2 eval, 3 vp
+
+        tab_widget_->setTabEnabled(2, enable_tabs);
+        tab_widget_->setTabEnabled(3, enable_tabs);
+    }
+    else
+    {
+        // one
+        assert (tab_widget_->count() > 2); // 2 is the other
+
+        tab_widget_->setTabEnabled(2, enable_tabs);
+    }
 
     updateBottomWidget();
     updateMenus();
@@ -1438,18 +1530,23 @@ void MainWindow::loadingDoneSlot()
     load_button_->setDisabled(false);
 }
 
-void MainWindow::livePauseSlot()
+void MainWindow::livePauseResumeSlot()
 {
     loginf << "MainWindow: livePauseSlot";
 
-    TODO_ASSERT
+    AppMode app_mode = COMPASS::instance().appMode();
+
+    assert (app_mode == AppMode::LivePaused || AppMode::LiveRunning);
+
+    if (app_mode == AppMode::LiveRunning)
+        COMPASS::instance().appMode(AppMode::LivePaused);
+    else // AppMode::LivePaused)
+        COMPASS::instance().appMode(AppMode::LiveRunning);
 }
 
 void MainWindow::liveStopSlot()
 {
     loginf << "MainWindow: liveStopSlot";
-
-    COMPASS::instance().taskManager().asterixImporterTask().stop();
 
     COMPASS::instance().appMode(AppMode::Offline);
 }

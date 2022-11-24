@@ -29,7 +29,7 @@ class COMPASS;
 class DatabaseOpenTask;
 class ManageDBContentTask;
 class CreateARTASAssociationsTask;
-//class JSONImportTask;
+class JSONImportTask;
 class GPSTrailImportTask;
 class ASTERIXImportTask;
 class ViewPointsImportTask;
@@ -92,7 +92,7 @@ class TaskManager : public QObject, public Configurable
     //ManageDataSourcesTask& manageDataSourcesTask() const;
     ASTERIXImportTask& asterixImporterTask() const;
     ViewPointsImportTask& viewPointsImportTask() const;
-    //JSONImportTask& jsonImporterTask() const;
+    JSONImportTask& jsonImporterTask() const;
     GPSTrailImportTask& gpsTrailImportTask() const;
     //ManageDataSourcesTask& manageDatasourcesTask() const;
     ManageSectorsTask& manageSectorsTask() const;
@@ -185,7 +185,7 @@ protected:
     std::unique_ptr<ManageDBContentTask> manage_dbobjects_task_;
     std::unique_ptr<ASTERIXImportTask> asterix_importer_task_;
     std::unique_ptr<ViewPointsImportTask> view_points_import_task_;
-    //std::unique_ptr<JSONImportTask> json_import_task_;
+    std::unique_ptr<JSONImportTask> json_import_task_;
     std::unique_ptr<GPSTrailImportTask> gps_trail_import_task_;
     //std::unique_ptr<ManageDataSourcesTask> manage_datasources_task_;
     std::unique_ptr<ManageSectorsTask> manage_sectors_task_;

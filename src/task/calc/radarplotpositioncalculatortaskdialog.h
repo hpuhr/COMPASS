@@ -26,10 +26,14 @@ public:
 
     bool runWanted() const;
 
+    void updateCanRun();
+
 protected:
     RadarPlotPositionCalculatorTask& task_;
 
     std::unique_ptr<RadarPlotPositionCalculatorTaskWidget> widget_;
+
+    QPushButton* ok_button_ {nullptr};
 
     bool run_wanted_ {false};
 };

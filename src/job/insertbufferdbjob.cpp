@@ -61,8 +61,8 @@ void InsertBufferDBJob::run()
     boost::posix_time::time_duration diff = loading_stop_time - loading_start_time;
     load_time = diff.total_milliseconds() / 1000.0;
 
-    logdbg << "InsertBufferDBJob: run: buffer write done (" << doubleToStringPrecision(load_time, 2)
-           << " s).";
+    logdbg << "InsertBufferDBJob: run: buffer write done (" << doubleToStringPrecision(diff.total_milliseconds(), 2)
+           << " ms).";
     done_ = true;
 }
 

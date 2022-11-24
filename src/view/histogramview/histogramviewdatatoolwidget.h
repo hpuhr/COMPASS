@@ -8,12 +8,8 @@
 
 enum HistogramViewDataTool
 {
-    //HG_NAVIGATE_TOOL = 0,
-    //SP_ZOOM_RECT_TOOL,
-    //LABEL_TOOL,
-    //MEASURE_TOOL,
-    HG_SELECT_TOOL = 0
-    //LABEL_MULTIPLE_TOOL
+    HG_DEFAULT_TOOL = 0,
+    HG_SELECT_TOOL
 };
 
 class QToolButton;

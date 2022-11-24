@@ -23,6 +23,7 @@
 #include "dbcontent/variable/variable.h"
 #include "scatterplotviewdatatoolwidget.h"
 #include "scatterplotviewchartview.h"
+#include "viewdatawidget.h"
 
 #include <QWidget>
 #include <QVariant>
@@ -32,6 +33,7 @@
 
 class ScatterPlotView;
 class ScatterPlotViewDataSource;
+
 //class QTabWidget;
 class QHBoxLayout;
 class Buffer;
@@ -51,7 +53,7 @@ namespace QtCharts {
  * @brief Widget with tab containing BufferTableWidgets in ScatterPlotView
  *
  */
-class ScatterPlotViewDataWidget : public QWidget
+class ScatterPlotViewDataWidget : public ViewDataWidget
 {
     Q_OBJECT
 
@@ -66,8 +68,6 @@ class ScatterPlotViewDataWidget : public QWidget
     void updateDataSlot(const std::map<std::string, std::shared_ptr<Buffer>>& data, bool requires_reset);
     void loadingDoneSlot();
 
-    void toolChangedSlot(ScatterPlotViewDataTool selected, QCursor cursor);
-
     void rectangleSelectedSlot (QPointF p1, QPointF p2);
 
     void invertSelectionSlot();
@@ -81,8 +81,10 @@ class ScatterPlotViewDataWidget : public QWidget
 
   public:
     /// @brief Constructor
-    ScatterPlotViewDataWidget(ScatterPlotView* view, ScatterPlotViewDataSource* data_source,
-                          QWidget* parent = nullptr, Qt::WindowFlags f = 0);
+    ScatterPlotViewDataWidget(ScatterPlotView* view, 
+                              ScatterPlotViewDataSource* data_source,
+                              QWidget* parent = nullptr, 
+                              Qt::WindowFlags f = 0);
     /// @brief Destructor
     virtual ~ScatterPlotViewDataWidget();
 
@@ -90,11 +92,12 @@ class ScatterPlotViewDataWidget : public QWidget
     void clear();
 
     ScatterPlotViewDataTool selectedTool() const;
-    QCursor currentCursor() const;
 
     bool showsData() const;
     bool xVarNotInBuffer() const;
     bool yVarNotInBuffer() const;
+
+    QRectF getDataBounds() const;
 
     QPixmap renderPixmap();
 
@@ -123,7 +126,6 @@ protected:
 
     std::map<std::string, QColor> colors_;
 
-    QCursor current_cursor_{Qt::OpenHandCursor};
     ScatterPlotViewDataTool selected_tool_{SP_NAVIGATE_TOOL};
 
     QHBoxLayout* main_layout_ {nullptr};
@@ -145,6 +147,8 @@ protected:
     void updateFromAllData();
     void updateChart();
 
+    virtual void toolChanged_impl(int mode) override;
+
     template<typename T>
     void appendData(NullableVector<T>& data, std::vector<double>& target, unsigned int last_size,
                     unsigned int current_size)
@@ -162,5 +166,25 @@ protected:
 
     void selectData (double x_min, double x_max, double y_min, double y_max);
 };
+
+template<>
+inline void ScatterPlotViewDataWidget::appendData<boost::posix_time::ptime>(NullableVector<boost::posix_time::ptime>& data, 
+                                                                            std::vector<double>& target, 
+                                                                            unsigned int last_size,
+                unsigned int current_size)
+{
+    for (unsigned int cnt=last_size; cnt < current_size; ++cnt)
+    {
+        if (data.isNull(cnt))
+        {
+            target.push_back(std::numeric_limits<double>::signaling_NaN());
+            continue;
+        }
+
+        long t = Utils::Time::toLong(data.get(cnt));
+            
+        target.push_back(t);
+    }
+}
 
 #endif /* SCATTERPLOTVIEWDATAWIDGET_H_ */

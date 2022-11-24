@@ -18,10 +18,13 @@
 #ifndef ALLBUFFERTABLEMODEL_H
 #define ALLBUFFERTABLEMODEL_H
 
-#include <QAbstractTableModel>
-#include <memory>
-
 #include "dbcontent/variable/variableset.h"
+
+#include <QAbstractTableModel>
+
+#include "boost/date_time/posix_time/ptime.hpp"
+
+#include <memory>
 
 class Buffer;
 class DBContent;
@@ -79,8 +82,8 @@ class AllBufferTableModel : public QAbstractTableModel
 
     std::map<std::string, unsigned int> dbo_last_processed_index_;
 
-    std::multimap<float, std::pair<unsigned int, unsigned int>>
-        time_to_indexes_;                                             // tod -> [dbo num,index]
+    std::multimap<boost::posix_time::ptime, std::pair<unsigned int, unsigned int>> time_to_indexes_;
+    // timestamp -> [dbo num,index]
     std::vector<std::pair<unsigned int, unsigned int>> row_indexes_;  // row index -> dbo num,index
 
     bool show_only_selected_{true};

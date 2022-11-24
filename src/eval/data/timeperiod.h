@@ -19,6 +19,10 @@
 #define TIMEPERIOD_H
 
 #include "stringconv.h"
+#include "util/timeconv.h"
+
+#include "boost/date_time/posix_time/ptime.hpp"
+#include "boost/date_time/time_duration.hpp"
 
 #include <vector>
 #include <cassert>
@@ -28,21 +32,21 @@
 class TimePeriod
 {
 public:
-    TimePeriod (float begin, float end)
+    TimePeriod (boost::posix_time::ptime begin, boost::posix_time::ptime end)
         : begin_(begin), end_(end)
     {
         assert (end_ >= begin_);
     }
 
-    bool isInside (float time) const
+    bool isInside (boost::posix_time::ptime time) const
     {
         return (begin_ <= time) && (time <= end_);
     }
 
-    bool isCloseToEnd (float time, float max_time_d) const
+    bool isCloseToEnd (boost::posix_time::ptime time, boost::posix_time::time_duration max_time_d) const
     {
         assert (time >= end_);
-        return fabs(time-end_) <= max_time_d;
+        return (time-end_).abs() <= max_time_d;
     }
 
     //    void addToBegin (float time)
@@ -50,35 +54,35 @@ public:
     //        begin_ = time;
     //    }
 
-    void extend (float time)
+    void extend (boost::posix_time::ptime time)
     {
         assert (time >= end_);
         end_ = time;
     }
 
-    float begin() const
+    boost::posix_time::ptime begin() const
     {
         return begin_;
     }
 
-    float end() const
+    boost::posix_time::ptime end() const
     {
         return end_;
     }
 
-    float duration() const
+    boost::posix_time::time_duration duration() const
     {
         return end_ - begin_;
     }
 
     std::string str() const
     {
-        return "["+Utils::String::timeStringFromDouble(begin_)+","+Utils::String::timeStringFromDouble(end_)+"]";
+        return "["+Utils::Time::toString(begin_)+","+Utils::Time::toString(end_)+"]";
     }
 
 protected:
-    float begin_ {0};
-    float end_ {0};
+    boost::posix_time::ptime begin_;
+    boost::posix_time::ptime end_;
 };
 
 class TimePeriodCollection
@@ -95,7 +99,7 @@ public:
         periods_.push_back(period);
     }
 
-    bool isInside (float time)
+    bool isInside (boost::posix_time::ptime time)
     {
         for (const auto& period_it : periods_)
             if (period_it.isInside(time))
@@ -104,16 +108,16 @@ public:
         return false;
     }
 
-    unsigned int getPeriodIndex (float time)
+    unsigned int getPeriodIndex (boost::posix_time::ptime time)
     {
         for (unsigned int cnt=0; cnt < periods_.size(); ++cnt)
             if (periods_.at(cnt).isInside(time))
                 return cnt;
 
-        throw std::runtime_error("TimePeriodCollection: time "+std::to_string(time)+" not inside");
+        throw std::runtime_error("TimePeriodCollection: time "+Utils::Time::toString(time)+" not inside");
     }
 
-    int getPeriodMaxIndexBefore (float time) // -1 if none
+    int getPeriodMaxIndexBefore (boost::posix_time::ptime time) // -1 if none
     {
         int index {-1};
 
@@ -131,13 +135,13 @@ public:
     TimePeriodIterator begin() { return periods_.begin(); }
     TimePeriodIterator end() { return periods_.end(); }
 
-    float totalBegin()
+    boost::posix_time::ptime totalBegin()
     {
         assert (periods_.size());
         return periods_.at(0).begin();
     }
 
-    float totalEnd()
+    boost::posix_time::ptime totalEnd()
     {
         assert (periods_.size());
         return periods_.rbegin()->end();
@@ -175,7 +179,7 @@ public:
         return tmp;
     }
 
-    void removeSmallPeriods (float min_duraiton)
+    void removeSmallPeriods (boost::posix_time::time_duration min_duraiton)
     {
         std::vector<TimePeriod> tmp_periods;
 
@@ -193,7 +197,7 @@ public:
         unsigned int sum_uis = 0;
 
         for (auto& period_it : periods_)
-            sum_uis += floor(period_it.duration()/update_interval);
+            sum_uis += floor(Utils::Time::partialSeconds(period_it.duration())/update_interval);
 
         return sum_uis;
     }

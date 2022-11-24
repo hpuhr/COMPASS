@@ -29,7 +29,7 @@ A view point is a point of interest in the data persisted in the database. It ca
     position\_longitude & Center position WGS-84 longitude \\ \hline
     position\_window\_latitude & Geographic window size in WGS-84 latitude  \\ \hline
     position\_window\_longitude & Geographic window size in WGS-84 longitude  \\ \hline
-    time & Center time  \\ \hline
+    timestamp & Center timestamp in YYYY-mm-DD HH:MM:SSS.ZZZ  \\ \hline
     time\_window & Time window size \\ \hline
     data\_sources & Data sources and lines to be loaded \\ \hline
     data\_sources\_types & Data source types to be loaded \\ \hline
@@ -197,7 +197,10 @@ In the ListBox View, the variables set in the 'context\_variables' attribute are
   \caption{View Points OSGView: Selected View Point}
 \end{figure}
 
-Loaded data is presented as always and can be adapted to a users needs. After loading, the presented data is centered/zoomed according to the 'position\_latitude', 'position\_longitude', 'position\_window\_latitude', 'position\_window\_longitude' attributes. If these are not set, the center/zoom is adapted to encompass all of the loaded data.
+Loaded data is presented as always and can be adapted to a users needs. After loading, the presented data is centered/zoomed according to the 'position\_latitude', 'position\_longitude', 'position\_window\_latitude', 'position\_window\_longitude' attributes. If these are not set, the center/zoom is adapted to encompass all of the loaded data. \\
+
+Please \textbf{note} that using view points in 3D maps is currently not recommended, since the zoom-to-data function does not work well with small data geometry. If a view point is used with a 3D map, a warning is shown (only once per COMPASS usage, but ignored for subsequent usages).
+
 
 \subsection{After Selection}
 

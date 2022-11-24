@@ -36,7 +36,7 @@ using namespace Utils;
 using namespace dbContent;
 
 ScatterPlotViewConfigWidget::ScatterPlotViewConfigWidget(ScatterPlotView* view, QWidget* parent)
-    : QWidget(parent), view_(view)
+    : ViewConfigWidget(parent), view_(view)
 {
     //QVBoxLayout* vlayout = new QVBoxLayout;
 
@@ -71,7 +71,8 @@ ScatterPlotViewConfigWidget::ScatterPlotViewConfigWidget(ScatterPlotView* view, 
                                           PropertyDataType::LONGINT,
                                           PropertyDataType::ULONGINT,
                                           PropertyDataType::FLOAT,
-                                          PropertyDataType::DOUBLE});
+                                          PropertyDataType::DOUBLE,
+                                          PropertyDataType::TIMESTAMP});
         if (view_->hasDataVarX())
         {
             if (view_->isDataVarXMeta())
@@ -96,7 +97,8 @@ ScatterPlotViewConfigWidget::ScatterPlotViewConfigWidget(ScatterPlotView* view, 
                                           PropertyDataType::LONGINT,
                                           PropertyDataType::ULONGINT,
                                           PropertyDataType::FLOAT,
-                                          PropertyDataType::DOUBLE});
+                                          PropertyDataType::DOUBLE,
+                                          PropertyDataType::TIMESTAMP});
         if (view_->hasDataVarY())
         {
             if (view_->isDataVarYMeta())
@@ -135,12 +137,14 @@ ScatterPlotViewConfigWidget::ScatterPlotViewConfigWidget(ScatterPlotView* view, 
     setStatus("No Data Loaded", true);
 }
 
-ScatterPlotViewConfigWidget::~ScatterPlotViewConfigWidget() {}
+ScatterPlotViewConfigWidget::~ScatterPlotViewConfigWidget() 
+{
+}
 
-void ScatterPlotViewConfigWidget::setStatus (const std::string& status, bool visible, QColor color)
+void ScatterPlotViewConfigWidget::setStatus(const QString& status, bool visible, const QColor& color)
 {
     assert (status_label_);
-    status_label_->setText(status.c_str());
+    status_label_->setText(status);
     //status_label_->setStyleSheet("QLabel { color : "+color.name()+"; }");
 
     QPalette palette = status_label_->palette();
@@ -148,6 +152,14 @@ void ScatterPlotViewConfigWidget::setStatus (const std::string& status, bool vis
     status_label_->setPalette(palette);
 
     status_label_->setVisible(visible);
+}
+
+void ScatterPlotViewConfigWidget::appModeSwitch (AppMode app_mode)
+{
+    assert (reload_button_);
+    reload_button_->setHidden(app_mode == AppMode::LiveRunning);
+    assert (status_label_);
+    status_label_->setHidden(app_mode == AppMode::LiveRunning);
 }
 
 void ScatterPlotViewConfigWidget::selectedVariableXChangedSlot()

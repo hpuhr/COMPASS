@@ -18,29 +18,30 @@
 #ifndef JOBMANAGER_H_
 #define JOBMANAGER_H_
 
+#include "configurable.h"
+#include "singleton.h"
+
 #ifndef Q_MOC_RUN
 #include <boost/date_time/posix_time/posix_time.hpp>
 #endif
 
-#include <tbb/concurrent_queue.h>
-
 #include <QMutex>
 #include <QThread>
+
+#include "util/tbbhack.h"
+
 #include <list>
 #include <memory>
-
-#include "configurable.h"
-#include "singleton.h"
 
 class WorkerThread;
 class Job;
 
 class JobManager : public QThread, public Singleton, public Configurable
 {
-    Q_OBJECT
-  signals:
-    void databaseBusy();
-    void databaseIdle();
+//    Q_OBJECT
+//  signals:
+//    void databaseBusy();
+//    void databaseIdle();
 
   public:
     virtual ~JobManager();
@@ -76,8 +77,8 @@ class JobManager : public QThread, public Singleton, public Configurable
     volatile bool stop_requested_;
     volatile bool stopped_;
 
-    bool changed_{false};
-    bool really_update_widget_{false};
+    //bool changed_{false};
+    //bool really_update_widget_{false};
 
     std::shared_ptr<Job> active_blocking_job_;
     tbb::concurrent_queue<std::shared_ptr<Job>> blocking_jobs_;

@@ -19,7 +19,6 @@ namespace dbContent
 
 DataSourceBase::DataSourceBase()
 {
-
 }
 
 std::string DataSourceBase::dsType() const
@@ -92,6 +91,8 @@ const std::string& DataSourceBase::shortName() const
 void DataSourceBase::info(const std::string& info)
 {
     info_ = json::parse(info);
+
+    parseNetworkLineInfo();
 }
 
 nlohmann::json& DataSourceBase::info()
@@ -247,49 +248,75 @@ void DataSourceBase::addNetworkLines()
     info_[network_lines_key] = json::object();
 }
 
-std::map<std::string, std::pair<std::string, unsigned int>> DataSourceBase::networkLines() const
+//std::map<std::string, std::pair<std::string, unsigned int>> DataSourceBase::networkLines() const
+//{
+//    assert (hasNetworkLines());
+
+//    std::map<std::string, std::pair<std::string, unsigned int>> ret;
+//    set<string> existing_lines; // to check
+
+//    const json& network_lines = info_.at(network_lines_key);
+//    assert (network_lines.is_object());
+
+//    string ip;
+//    unsigned int port;
+
+//    for (auto& line_it : network_lines.get<json::object_t>())  // iterate over array
+//    {
+//        assert (line_it.first == "L1" || line_it.first == "L2" || line_it.first == "L3" || line_it.first == "L4");
+
+//        assert (line_it.second.is_string());
+
+//        if (line_it.second.size() == 0) // empty string
+//            continue;
+
+//        ip = String::ipFromString(line_it.second);
+//        port = String::portFromString(line_it.second);
+
+//        if (existing_lines.count(ip+":"+to_string(port)))
+//        {
+//            logwrn << "DataSourceBase: networkLines: source " << name_
+//                   << " line " << ip << ":" << port
+//                   << " already in use";
+//        }
+//        else
+//            ret[line_it.first] = {ip, port};
+//    }
+
+//    return ret;
+//}
+
+std::map<std::string, std::shared_ptr<DataSourceLineInfo>> DataSourceBase::networkLines() const
 {
-    assert (hasNetworkLines());
-
-    std::map<std::string, std::pair<std::string, unsigned int>> ret;
-    set<string> existing_lines; // to check
-
-    const json& network_lines = info_.at(network_lines_key);
-    assert (network_lines.is_object());
-
-    string ip;
-    unsigned int port;
-
-    for (auto& line_it : network_lines.get<json::object_t>())  // iterate over array
-    {
-        assert (line_it.first == "L1" || line_it.first == "L2" || line_it.first == "L3" || line_it.first == "L4");
-
-        assert (line_it.second.is_string());
-
-        if (line_it.second.size() == 0) // empty string
-            continue;
-
-        ip = String::ipFromString(line_it.second);
-        port = String::portFromString(line_it.second);
-
-        if (existing_lines.count(ip+":"+to_string(port)))
-        {
-            logwrn << "DataSourceBase: networkLines: source " << name_
-                   << " line " << ip << ":" << port
-                   << " already in use";
-        }
-        else
-            ret[line_it.first] = {ip, port};
-    }
-
-    return ret;
+    return line_info_;
 }
 
-void DataSourceBase::networkLine (const std::string& key, const std::string ip_port)
+bool DataSourceBase::hasNetworkLine (const std::string& key) const
+{
+    return line_info_.count(key);
+}
+
+void DataSourceBase::createNetworkLine (const std::string& key)
+{
+    assert (!hasNetworkLine(key));
+
+    json& network_lines = info_.at(network_lines_key);
+    assert (network_lines.is_object());
+
+    network_lines[key] = json::object();
+    line_info_[key] = make_shared<DataSourceLineInfo>(key, network_lines.at(key));
+
+    assert (hasNetworkLine(key));
+}
+
+std::shared_ptr<DataSourceLineInfo> DataSourceBase::networkLine (const std::string& key)
 {
     assert (key == "L1" || key == "L2" || key == "L3" || key == "L4");
 
-    info_[network_lines_key][key] = ip_port;
+    if (!hasNetworkLine(key))
+        createNetworkLine(key);
+
+    return line_info_.at(key);
 }
 
 void DataSourceBase::setFromJSONDeprecated (const nlohmann::json& j)
@@ -445,6 +472,29 @@ void DataSourceBase::setFromJSON (const nlohmann::json& j)
     //    "sic": 0
     assert(j.contains("sic"));
     sic_ = j.at("sic");
+
+    if (hasNetworkLines())
+        parseNetworkLineInfo();
+}
+
+void DataSourceBase::parseNetworkLineInfo()
+{
+    logdbg << "DataSourceBase: parseLineInfo: " << sac() << "/" << sic();
+
+    line_info_.clear();
+
+    if (info_.count(network_lines_key))
+    {
+        json& network_lines = info_.at(network_lines_key);
+        assert (network_lines.is_object());
+
+        for (auto& line_it : network_lines.get<json::object_t>())  // iterate over array
+        {
+            assert (line_it.first == "L1" || line_it.first == "L2" || line_it.first == "L3" || line_it.first == "L4");
+
+            line_info_[line_it.first] = make_shared<DataSourceLineInfo>(line_it.first, network_lines.at(line_it.first));
+        }
+    }
 }
 
 }

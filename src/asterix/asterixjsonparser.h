@@ -41,7 +41,7 @@ public:
     ASTERIXJSONParser(const std::string& class_id, const std::string& instance_id,
                       Configurable* parent, ASTERIXImportTask& task);
 
-    DBContent& dbObject() const;
+    DBContent& dbContent() const;
 
     MappingIterator begin() { return data_mappings_.begin(); }
     MappingIterator end() { return data_mappings_.end(); }
@@ -65,7 +65,7 @@ public:
 
     ASTERIXJSONParserWidget* widget();
 
-    std::string dbObjectName() const;
+    std::string dbContentName() const;
 
     void setMappingActive(JSONDataMapping& mapping, bool active);
 

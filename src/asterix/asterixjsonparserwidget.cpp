@@ -150,7 +150,7 @@ void ASTERIXJSONParserWidget::keyPressEvent(QKeyEvent* event)
 
         // copy content
 
-        DBContent& dbcontent = parser_.dbObject();
+        DBContent& dbcontent = parser_.dbContent();
         const auto& cat_info = parser_.categoryItemInfo();
         string dbovar_name;
         string json_key;

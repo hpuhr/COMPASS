@@ -34,6 +34,7 @@
 #include "files.h"
 
 #include <QMessageBox>
+#include <QApplication>
 
 #include <osgDB/Registry>
 
@@ -46,7 +47,6 @@ using namespace Utils;
 COMPASS::COMPASS() : Configurable("COMPASS", "COMPASS0", 0, "compass.json")
 {
     logdbg << "COMPASS: constructor: start";
-
     simple_config_.reset(new SimpleConfig("config.json"));
 
     registerParameter("last_db_filename", &last_db_filename_, "");
@@ -83,6 +83,9 @@ COMPASS::COMPASS() : Configurable("COMPASS", "COMPASS0", 0, "compass.json")
                      filter_manager_.get(), &FilterManager::databaseOpenedSlot);
     QObject::connect(this, &COMPASS::databaseClosedSignal,
                      filter_manager_.get(), &FilterManager::databaseClosedSlot);
+
+    QObject::connect(ds_manager_.get(), &DataSourceManager::dataSourcesChangedSignal,
+                     filter_manager_.get(), &FilterManager::dataSourcesChangedSlot);
 
     QObject::connect(this, &COMPASS::databaseOpenedSignal,
                      view_manager_.get(), &ViewManager::databaseOpenedSlot);
@@ -463,11 +466,14 @@ void COMPASS::appMode(const AppMode& app_mode)
 {
     if (app_mode_ != app_mode)
     {
+        AppMode last_app_mode = app_mode_;
+
         app_mode_ = app_mode;
 
-        loginf << "COMPASS: appMode: app_mode " << appModeStr();
+        loginf << "COMPASS: appMode: app_mode_current " << toString(app_mode_)
+               << " previous " << toString(last_app_mode);
 
-        emit appModeSwitchSignal(app_mode_);
+        emit appModeSwitchSignal(last_app_mode, app_mode_);
     }
 }
 

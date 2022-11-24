@@ -366,6 +366,21 @@ void AllBufferCSVExportJob::run()
                             buffer->get<nlohmann::json>(property_name).getAsString(buffer_index);
                     }
                 }
+                else if (data_type == PropertyDataType::TIMESTAMP)
+                {
+                    if (!buffer->has<boost::posix_time::ptime>(property_name))
+                    {
+                        ss << ";";
+                        continue;
+                    }
+
+                    null = buffer->get<boost::posix_time::ptime>(property_name).isNull(buffer_index);
+                    if (!null)
+                    {
+                        value_str =
+                            buffer->get<boost::posix_time::ptime>(property_name).getAsString(buffer_index);
+                    }
+                }
                 else
                     throw std::domain_error(
                         "AllBufferCSVExportJob: run: unknown property data type");

@@ -34,10 +34,7 @@ public slots:
     void radarAccuraciesEditedSlot(const QString& value_str);
 
     void addNetLinesSlot();
-    void net1EditedSlot(const QString& value_str);
-    void net2EditedSlot(const QString& value_str);
-    void net3EditedSlot(const QString& value_str);
-    void net4EditedSlot(const QString& value_str);
+    void netLineEditedSlot(const QString& value_str);
 
     void deleteSlot();
 
@@ -101,10 +98,7 @@ protected:
     QPushButton* add_lines_button_{nullptr};
 
     QWidget* net_widget_{nullptr};
-    QLineEdit* net_l1_edit_{nullptr};
-    QLineEdit* net_l2_edit_{nullptr};
-    QLineEdit* net_l3_edit_{nullptr};
-    QLineEdit* net_l4_edit_{nullptr};
+    std::map<std::string, std::vector<QLineEdit*>> net_edits_; // L1 -> edits (listen, mcastip, mcastport, sender)
 
     QPushButton* delete_button_{nullptr};
 };

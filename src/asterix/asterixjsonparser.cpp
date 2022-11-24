@@ -100,11 +100,10 @@ void ASTERIXJSONParser::doMappingChecks()
     // update not mapped dbo vars
     not_added_dbo_variables_.clear();
 
-
-    for (auto& dbovar_it : dbObject().variables())
+    for (auto& dbovar_it : dbContent().variables())
     {
-        if (!hasDBContentVariableMapped(dbovar_it->name()))
-            not_added_dbo_variables_.push_back(dbovar_it->name());
+        if (!hasDBContentVariableMapped(dbovar_it.first))
+            not_added_dbo_variables_.push_back(dbovar_it.first);
     }
 
     mapping_checks_dirty_ = false;
@@ -243,7 +242,7 @@ const std::vector<std::string>& ASTERIXJSONParser::notAddedJSONKeys() const
     return not_added_json_keys_;
 }
 
-DBContent& ASTERIXJSONParser::dbObject() const
+DBContent& ASTERIXJSONParser::dbContent() const
 {
 
     DBContentManager& obj_man = COMPASS::instance().dbContentManager();
@@ -463,6 +462,7 @@ bool ASTERIXJSONParser::parseTargetReport(const nlohmann::json& tr, Buffer& buff
 
                 break;
             }
+            case PropertyDataType::TIMESTAMP: // not possible for timestamp
             default:
                 logerr << "ASTERIXJSONParser: parseTargetReport: impossible for property type "
                          << Property::asString(data_type);
@@ -629,7 +629,7 @@ ASTERIXJSONParserWidget* ASTERIXJSONParser::widget()
     return widget_.get();  // needed for qt integration, not pretty
 }
 
-std::string ASTERIXJSONParser::dbObjectName() const { return db_content_name_; }
+std::string ASTERIXJSONParser::dbContentName() const { return db_content_name_; }
 
 void ASTERIXJSONParser::setMappingActive(JSONDataMapping& mapping, bool active)
 {

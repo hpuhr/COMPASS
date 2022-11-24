@@ -1,8 +1,11 @@
 #include "source/dbdatasource.h"
 #include "source/dbdatasourcewidget.h"
+#include "util/timeconv.h"
 #include "logger.h"
 
 using namespace nlohmann;
+using namespace Utils;
+using namespace std;
 
 namespace dbContent
 {
@@ -147,6 +150,45 @@ unsigned int DBDataSource::numLoaded (const std::string& db_content, unsigned in
     return 0;
 }
 
+bool DBDataSource::hasNumLoaded (unsigned int line_id) // for any DBContent
+{
+    for (auto& loaded_it : num_loaded_)
+        if (loaded_it.second.count(line_id))
+            return true;
+
+    return false;
+}
+
+bool DBDataSource::hasAnyNumLoaded () // for any DBContent, line
+{
+    for (auto& loaded_it : num_loaded_)
+    {
+        for (auto& loaded_line_it : loaded_it.second)
+        {
+            if (loaded_line_it.second)
+                return true;
+        }
+    }
+
+    return false;
+}
+
+unsigned int DBDataSource::getFirstLoadedLine() // for any DBContent
+{
+    assert (hasAnyNumLoaded());
+
+    for (auto& loaded_it : num_loaded_)
+    {
+        for (auto& loaded_line_it : loaded_it.second)
+        {
+            if (loaded_line_it.second)
+                return loaded_line_it.first;
+        }
+    }
+
+    assert (false); // should never happen
+}
+
 void DBDataSource::clearNumLoaded()
 {
     num_loaded_.clear();
@@ -247,28 +289,40 @@ DBDataSourceWidget* DBDataSource::widget()
     return widget_.get();
 }
 
-bool DBDataSource::hasMaxToD(unsigned int line) const
+bool DBDataSource::hasMaxTimestamp(unsigned int line) const
 {
     return max_line_tods_.count(line);
 }
 
-void DBDataSource::maxToD(unsigned int line, float value)
+void DBDataSource::maxTimestamp(unsigned int line, boost::posix_time::ptime value)
 {
-    max_line_tods_[line] = value;
+    max_line_tods_[line] = Time::toLong(value);
 }
 
-float DBDataSource::maxToD(unsigned int line) const
+boost::posix_time::ptime DBDataSource::maxTimestamp(unsigned int line) const
 {
-    assert (hasMaxToD(line));
-    return max_line_tods_.at(line);
+    assert (hasMaxTimestamp(line));
+    return Time::fromLong(max_line_tods_.at(line));
 }
 
-bool DBDataSource::hasLiveData(unsigned int line, float current_tod) const
+bool DBDataSource::hasLiveData(unsigned int line, boost::posix_time::ptime current_ts) const
 {
-    if (hasMaxToD(line) && hasUpdateInterval())
-        return current_tod - maxToD(line) < updateInterval() + 2; // 2s max latency
+    bool ret;
+
+    if (hasMaxTimestamp(line) && hasUpdateInterval())
+        ret = (current_ts - maxTimestamp(line)).total_milliseconds()/1000.0 < updateInterval() + 2; // 2s max latency
     else
-        return false;
+        ret = false;
+
+//    if (hasMaxTimestamp(line))
+//        loginf << "DBDataSource: hasLiveData: name " << name_ << " current_ts " << Time::toString(current_ts)
+//               << " hasMax " << hasMaxTimestamp(line) << " hasUI " << hasUpdateInterval()
+//               << " maxTS " << Time::toString(maxTimestamp(line))
+//               << " diff " << Time::toString(current_ts - maxTimestamp(line)) << " ret " << ret;
+//    else
+//        loginf << "DBDataSource: hasLiveData: name " << name_ << " no maxTS";
+
+    return ret;
 }
 
 }

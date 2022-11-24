@@ -44,16 +44,16 @@ public:
     const std::string& dataTypeString() const;
     Variable::Representation representation();
 
-    /// @brief Return if variable exist in DBO of type
+    /// @brief Return if variable exist in DBContent
     bool existsIn(const std::string& dbcontent_name);
-    /// @brief Returns variable existing in DBO of type
+    /// @brief Returns variable existing in DBContent
     Variable& getFor(const std::string& dbcontent_name);
-    /// @brief Return variable identifier in DBO of type
+    /// @brief Return variable identifier in DBContent
     std::string getNameFor(const std::string& dbcontent_name);
     void set(Variable& var);
 
     void removeVariable(const std::string& dbcontent_name);
-    /// @brief Sets sub-variable name for DBO of type
+    /// @brief Sets sub-variable name for DBContent
     void addVariable(const std::string& dbcontent_name, const std::string& dbovariable_name);
 
     const std::map<std::string, Variable&>& variables() { return variables_; }

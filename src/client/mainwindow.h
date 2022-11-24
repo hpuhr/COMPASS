@@ -56,7 +56,7 @@ public slots:
     void loadButtonSlot();
     void loadingDoneSlot();
 
-    void livePauseSlot();
+    void livePauseResumeSlot();
     void liveStopSlot();
 
     void configureDataSourcesSlot();
@@ -67,6 +67,8 @@ public slots:
     void importRecentAsterixRecordingSlot();
     void clearImportRecentAsterixRecordingsSlot();
     void importAsterixFromNetworkSlot();
+
+    void importJSONRecordingSlot();
 
     void importGPSTrailSlot();
 
@@ -79,7 +81,7 @@ public slots:
     void quitRequestedSlot();
     void showAddViewMenuSlot();
 
-    void appModeSwitchSlot (AppMode app_mode);
+    void appModeSwitchSlot (AppMode app_mode_previous, AppMode app_mode_current);
 
 private slots:
     void runTestCodeSlot();
@@ -108,6 +110,8 @@ public:
     //    void asterixDecoderConfig(const std::string& asterix_decoder_cfg);
     //    bool asterixOptionsSet() const;
     //    void setAsterixOptions();
+
+    void importJSONFile(const std::string& filename);
 
     void importGPSTrailFile(const std::string& filename);
     void importSectorsFile(const std::string& filename);
@@ -159,6 +163,8 @@ protected:
     float asterix_import_network_time_offset_ {0};
     int asterix_import_network_max_lines_ {-1};
 
+    std::string json_import_filename_;
+
     bool gps_trail_import_file_ {false};
     std::string gps_trail_import_filename_;
 
@@ -196,6 +202,9 @@ protected:
 
     QMenu* import_recent_asterix_menu_ {nullptr};
 
+    // configuration menu
+    QMenu* config_menu_ {nullptr};
+
     // process menu
     QMenu* process_menu_ {nullptr};
 
@@ -205,7 +214,7 @@ protected:
     QLabel* status_label_{nullptr};
     QPushButton* load_button_{nullptr};
 
-    QPushButton* live_pause_button_{nullptr};
+    QPushButton* live_pause_resume_button_{nullptr};
     QPushButton* live_stop_button_{nullptr};
 
     void createMenus ();

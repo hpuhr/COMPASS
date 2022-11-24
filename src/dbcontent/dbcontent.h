@@ -38,7 +38,6 @@ class Job;
 class DBContentReadDBJob;
 class InsertBufferDBJob;
 class UpdateBufferDBJob;
-//class FinalizeDBOReadJob;
 class DBContentManager;
 
 namespace dbContent
@@ -61,7 +60,6 @@ public slots:
     void readJobIntermediateSlot(std::shared_ptr<Buffer> buffer);
     void readJobObsoleteSlot();
     void readJobDoneSlot();
-    //void finalizeReadJobDoneSlot();
 
     void insertDoneSlot();
 
@@ -74,7 +72,8 @@ public:
     static const Property meta_var_sac_id_;
     static const Property meta_var_sic_id_;
     static const Property meta_var_line_id_;
-    static const Property meta_var_tod_;
+    static const Property meta_var_time_of_day_;
+    static const Property meta_var_timestamp_; // boost::posix_time::ptime
     static const Property meta_var_m3a_;
     static const Property meta_var_m3a_g_;
     static const Property meta_var_m3a_v_;
@@ -141,13 +140,13 @@ public:
     virtual ~DBContent();
 
     bool hasVariable(const std::string& name) const;
-    dbContent::Variable& variable(const std::string& name);
+    dbContent::Variable& variable(const std::string& name) const;
     void renameVariable(const std::string& name, const std::string& new_name);
     void deleteVariable(const std::string& name);
 
-    const std::vector<std::unique_ptr<dbContent::Variable>>& variables() const { return variables_; }
+    const std::map<std::string, std::unique_ptr<dbContent::Variable>>& variables() const { return variables_; }
 
-    bool hasVariableDBColumnName(const std::string& name) const;
+    bool hasVariableDBColumnName(const std::string& col_name) const;
 
     size_t numVariables() const { return variables_.size(); }
 
@@ -206,7 +205,7 @@ protected:
     std::string db_table_name_;
     std::string ds_type_;
 
-    bool constructor_active_ {false};
+    //bool constructor_active_ {false};
 
     bool is_loadable_{false};  // loadable on its own
     size_t count_{0};
@@ -218,7 +217,7 @@ protected:
     std::shared_ptr<UpdateBufferDBJob> update_job_{nullptr};
 
     /// Container with all variables (variable identifier -> variable pointer)
-    std::vector<std::unique_ptr<dbContent::Variable>> variables_;
+    std::map<std::string, std::unique_ptr<dbContent::Variable>> variables_;
 
     std::unique_ptr<DBContentWidget> widget_;
 
@@ -228,7 +227,7 @@ protected:
 
     //std::string associationsTableName();
 
-    void sortContent();
+    //void sortContent();
 
     void checkStaticVariable(const Property& property);
 

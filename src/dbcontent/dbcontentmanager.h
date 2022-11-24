@@ -34,6 +34,7 @@ class COMPASS;
 class DBContent;
 class DBContentManagerWidget;
 class DBSchemaManager;
+class DBContentDeleteDBJob;
 
 namespace dbContent {
 
@@ -43,6 +44,7 @@ class MetaVariable;
 class VariableSet;
 class Target;
 class LabelGenerator;
+class VariableSet;
 
 }
 
@@ -53,6 +55,8 @@ class DBContentManager : public QObject, public Configurable
 public slots:
     void databaseOpenedSlot();
     void databaseClosedSlot();
+
+    void deleteJobDoneSlot();
 
     void metaDialogOKSlot();
 
@@ -80,6 +84,7 @@ public:
     bool existsDBContent(const std::string& dbcontent_name);
     DBContent& dbContent(const std::string& dbcontent_name);
     void deleteDBContent(const std::string& dbcontent_name);
+    void deleteDBContent(boost::posix_time::ptime before_timestamp);
     bool hasData();
 
     using DBContentIterator = typename std::map<std::string, DBContent*>::iterator;
@@ -91,7 +96,7 @@ public:
     dbContent::MetaVariable& metaVariable(const std::string& var_name);
     void renameMetaVariable(const std::string& old_var_name, const std::string& new_var_name);
     void deleteMetaVariable(const std::string& var_name);
-    const std::vector<std::unique_ptr<dbContent::MetaVariable>>& metaVariables() { return meta_variables_; }
+    const std::map<std::string, std::unique_ptr<dbContent::MetaVariable>>& metaVariables() { return meta_variables_; }
 
     bool usedInMetaVariable(const dbContent::Variable& variable);
     dbContent::MetaVariableConfigurationDialog* metaVariableConfigdialog();
@@ -147,9 +152,9 @@ public:
     void maxRefTrajTrackNum(unsigned int value);
 
     bool hasMinMaxInfo() const;
-    bool hasMinMaxToD() const;
-    void setMinMaxTod(double min, double max);
-    std::pair<double, double> minMaxTod() const;
+    bool hasMinMaxTimestamp() const;
+    void setMinMaxTimestamp(boost::posix_time::ptime min, boost::posix_time::ptime max);
+    std::pair<boost::posix_time::ptime, boost::posix_time::ptime> minMaxTimestamp() const;
 
     bool hasMinMaxPosition() const;
     void setMinMaxLatitude(double min, double max);
@@ -195,8 +200,10 @@ protected:
     bool has_max_reftraj_track_num_ {false};
     unsigned int max_reftraj_track_num_ {0};
 
-    boost::optional<float> tod_min_;
-    boost::optional<float> tod_max_;
+    unsigned int max_live_data_age_ {10};
+
+    boost::optional<boost::posix_time::ptime> timestamp_min_;
+    boost::optional<boost::posix_time::ptime> timestamp_max_;
     boost::optional<double> latitude_min_;
     boost::optional<double> latitude_max_;
     boost::optional<double> longitude_min_;
@@ -211,13 +218,15 @@ protected:
 
     /// Container with all DBContent (DBContent name -> DBO pointer)
     std::map<std::string, DBContent*> dbcontent_;
-    std::vector<std::unique_ptr<dbContent::MetaVariable>> meta_variables_;
+    std::map<std::string, std::unique_ptr<dbContent::MetaVariable>> meta_variables_;
 
     std::map<unsigned int, std::shared_ptr<dbContent::Target>> targets_;
 
     std::unique_ptr<DBContentManagerWidget> widget_;
 
     std::unique_ptr<dbContent::MetaVariableConfigurationDialog> meta_cfg_dialog_;
+
+    std::shared_ptr<DBContentDeleteDBJob> delete_job_{nullptr};
 
     virtual void checkSubConfigurables();
     void finishLoading();
@@ -231,6 +240,8 @@ protected:
 
     void loadMaxRecordNumber();
     void loadMaxRefTrajTrackNum();
+
+    void addStandardVariables(std::string dbcont_name, dbContent::VariableSet& read_set);
 };
 
 #endif /* DBCONTENT_DBCONTENTMANAGER_H_ */

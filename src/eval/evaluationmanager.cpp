@@ -42,6 +42,7 @@
 #include "dbcontent/variable/variableorderedset.h"
 #include "sqliteconnection.h"
 #include "stringconv.h"
+#include "util/timeconv.h"
 
 #include "json.hpp"
 
@@ -49,6 +50,7 @@
 #include <QApplication>
 #include <QCoreApplication>
 #include <QThread>
+#include <QMessageBox>
 
 #include "boost/date_time/posix_time/posix_time.hpp"
 
@@ -60,6 +62,7 @@
 using namespace Utils;
 using namespace std;
 using namespace nlohmann;
+using namespace boost::posix_time;
 
 EvaluationManager::EvaluationManager(const std::string& class_id, const std::string& instance_id, COMPASS* compass)
     : Configurable(class_id, instance_id, compass, "eval.json"), compass_(*compass),
@@ -113,9 +116,15 @@ EvaluationManager::EvaluationManager(const std::string& class_id, const std::str
     // load filter
     registerParameter("use_load_filter", &use_load_filter_, false);
 
-    registerParameter("use_time_filter", &use_time_filter_, false);
-    registerParameter("load_time_begin", &load_time_begin_, 0);
-    registerParameter("load_time_end", &load_time_end_, 0);
+    registerParameter("use_timestamp_filter", &use_timestamp_filter_, false);
+    registerParameter("load_timestamp_begin", &load_timestamp_begin_str_, "");
+    registerParameter("load_timestamp_end", &load_timestamp_end_str_, "");
+
+    if (load_timestamp_begin_str_.size())
+        load_timestamp_begin_ = Time::fromString(load_timestamp_begin_str_);
+
+    if (load_timestamp_end_str_.size())
+        load_timestamp_end_ = Time::fromString(load_timestamp_end_str_);
 
     registerParameter("use_adsb_filter", &use_adsb_filter_, false);
     registerParameter("use_v0", &use_v0_, true);
@@ -409,17 +418,17 @@ void EvaluationManager::loadData ()
     // other filters
     if (use_load_filter_)
     {
-        if (use_time_filter_)
+        if (use_timestamp_filter_)
         {
-            assert (fil_man.hasFilter("Time of Day"));
-            DBFilter* fil = fil_man.getFilter("Time of Day");
+            assert (fil_man.hasFilter("Timestamp"));
+            DBFilter* fil = fil_man.getFilter("Timestamp");
 
             fil->setActive(true);
 
             json filter;
 
-            filter["Time of Day"]["Time of Day Minimum"] = String::timeStringFromDouble(load_time_begin_);
-            filter["Time of Day"]["Time of Day Maximum"] = String::timeStringFromDouble(load_time_end_);
+            filter["Timestamp"]["Timestamp Minimum"] = Time::toString(load_timestamp_begin_);
+            filter["Timestamp"]["Timestamp Maximum"] = Time::toString(load_timestamp_end_);
 
             fil->loadViewPointConditions(filter);
         }
@@ -541,15 +550,15 @@ std::string EvaluationManager::getCannotEvaluateComment()
     if (!sectors_loaded_)
         return "No Database loaded";
 
+    if (!compass_.dbContentManager().hasAssociations())
+        return "Please run target report association";
+
     // no sector
     if (!sectorsLayers().size())
         return "Please add at least one sector";
 
     if (!anySectorsWithReq())
         return "Please set requirements for at least one sector";
-
-    if (!compass_.dbContentManager().hasAssociations())
-        return "Please run target report association";
 
     if (!hasSelectedReferenceDataSources())
         return "Please select reference data sources";
@@ -579,8 +588,19 @@ void EvaluationManager::databaseOpenedSlot()
     checkTestDataSources();
     updateActiveDataSources();
 
-    if (!COMPASS::instance().dbContentManager().hasAssociations())
+    DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
+
+    if (!dbcont_man.hasAssociations())
         widget()->setDisabled(false);
+
+    if (dbcont_man.hasMinMaxTimestamp())
+    {
+        std::pair<boost::posix_time::ptime , boost::posix_time::ptime> minmax_ts =  dbcont_man.minMaxTimestamp();
+        loadTimestampBegin(get<0>(minmax_ts));
+        loadTimestampEnd(get<1>(minmax_ts));
+
+        widget()->updateFilterWidget();
+    }
 
     widget()->updateDataSources();
     widget()->updateSectors();
@@ -635,11 +655,34 @@ void EvaluationManager::loadingDoneSlot()
     loginf << "EvaluationManager: loadingDoneSlot: line ref " << line_id_ref_ << " tst " << line_id_tst_;
 
     std::map<std::string, std::shared_ptr<Buffer>> data = dbcontent_man.loadedData();
-    assert (data.count(dbcontent_name_ref_));
+    if (!data.count(dbcontent_name_ref_))
+    {
+        QMessageBox m_warning(QMessageBox::Warning, "Loading Data Failed",
+                              "No reference data was loaded.",
+                              QMessageBox::Ok);
+        m_warning.exec();
+
+        if (widget_)
+            widget_->updateButtons();
+
+        return;
+    }
+
     data_.addReferenceData(dbcontent_man.dbContent(dbcontent_name_ref_), line_id_ref_, data.at(dbcontent_name_ref_));
     reference_data_loaded_ = true;
 
-    assert (data.count(dbcontent_name_tst_));
+    if (!data.count(dbcontent_name_tst_))
+    {
+        QMessageBox m_warning(QMessageBox::Warning, "Loading Data Failed",
+                              "No test data was loaded.",
+                              QMessageBox::Ok);
+        m_warning.exec();
+
+        if (widget_)
+            widget_->updateButtons();
+
+        return;
+    }
     data_.addTestData(dbcontent_man.dbContent(dbcontent_name_tst_), line_id_tst_, data.at(dbcontent_name_tst_));
     test_data_loaded_ = true;
 
@@ -812,7 +855,7 @@ void EvaluationManager::addVariables (const std::string dbcontent_name, dbConten
     read_set.add(dbcontent_man.metaVariable(DBContent::meta_var_datasource_id_.name()).getFor(dbcontent_name));
     read_set.add(dbcontent_man.metaVariable(DBContent::meta_var_line_id_.name()).getFor(dbcontent_name));
     read_set.add(dbcontent_man.metaVariable(DBContent::meta_var_associations_.name()).getFor(dbcontent_name));
-    read_set.add(dbcontent_man.metaVariable(DBContent::meta_var_tod_.name()).getFor(dbcontent_name));
+    read_set.add(dbcontent_man.metaVariable(DBContent::meta_var_timestamp_.name()).getFor(dbcontent_name));
     read_set.add(dbcontent_man.metaVariable(DBContent::meta_var_latitude_.name()).getFor(dbcontent_name));
     read_set.add(dbcontent_man.metaVariable(DBContent::meta_var_longitude_.name()).getFor(dbcontent_name));
 
@@ -1632,7 +1675,7 @@ void EvaluationManager::showUTN (unsigned int utn)
     loginf << "EvaluationManager: showUTN: utn " << utn;
 
     nlohmann::json data = getBaseViewableDataConfig();
-    data["filters"]["UTNs"]["utns"] = to_string(utn);
+    data[VP_FILTERS_KEY]["UTNs"]["utns"] = to_string(utn);
 
     loginf << "EvaluationManager: showUTN: showing";
     setViewableDataConfig(data);
@@ -1641,7 +1684,7 @@ void EvaluationManager::showUTN (unsigned int utn)
 std::unique_ptr<nlohmann::json::object_t> EvaluationManager::getViewableForUTN (unsigned int utn)
 {
     nlohmann::json::object_t data = getBaseViewableDataConfig();
-    data["filters"]["UTNs"]["utns"] = to_string(utn);
+    data[VP_FILTERS_KEY]["UTNs"]["utns"] = to_string(utn);
 
     return std::unique_ptr<nlohmann::json::object_t>{new nlohmann::json::object_t(move(data))};
 }
@@ -1651,11 +1694,11 @@ std::unique_ptr<nlohmann::json::object_t> EvaluationManager::getViewableForEvalu
 {
     nlohmann::json::object_t data = getBaseViewableNoDataConfig();
 
-    data["evaluation_results"]["show_results"] = true;
-    data["evaluation_results"]["req_grp_id"] = req_grp_id;
-    data["evaluation_results"]["result_id"] = result_id;
+    data[VP_EVAL_KEY][VP_EVAL_SHOW_RES_KEY] = true;
+    data[VP_EVAL_KEY][VP_EVAL_REQGRP_ID_KEY] = req_grp_id;
+    data[VP_EVAL_KEY][VP_EVAL_RES_ID_KEY] = result_id;
 
-    data["show_sectors"] = vector<string>({String::split(req_grp_id, ':').at(0)});
+    data[VP_SHOWSEC_KEY] = vector<string>({String::split(req_grp_id, ':').at(0)});
 
     return std::unique_ptr<nlohmann::json::object_t>{new nlohmann::json::object_t(move(data))};
 }
@@ -1664,13 +1707,13 @@ std::unique_ptr<nlohmann::json::object_t> EvaluationManager::getViewableForEvalu
         unsigned int utn, const std::string& req_grp_id, const std::string& result_id)
 {
     nlohmann::json::object_t data = getBaseViewableDataConfig();
-    data["filters"]["UTNs"]["utns"] = to_string(utn);
+    data[VP_FILTERS_KEY]["UTNs"]["utns"] = to_string(utn);
 
-    data["evaluation_results"]["show_results"] = true;
-    data["evaluation_results"]["req_grp_id"] = req_grp_id;
-    data["evaluation_results"]["result_id"] = result_id;
+    data[VP_EVAL_KEY][VP_EVAL_SHOW_RES_KEY] = true;
+    data[VP_EVAL_KEY][VP_EVAL_REQGRP_ID_KEY] = req_grp_id;
+    data[VP_EVAL_KEY][VP_EVAL_RES_ID_KEY] = result_id;
 
-    data["show_sectors"] = vector<string>({String::split(req_grp_id, ':').at(0)});
+    data[VP_SHOWSEC_KEY] = vector<string>({String::split(req_grp_id, ':').at(0)});
 
     return std::unique_ptr<nlohmann::json::object_t>{new nlohmann::json::object_t(move(data))};
 }
@@ -1728,7 +1771,7 @@ void EvaluationManager::updateResultsToChanges ()
 void EvaluationManager::showFullUTN (unsigned int utn)
 {
     nlohmann::json::object_t data;
-    data["filters"]["UTNs"]["utns"] = to_string(utn);
+    data[VP_FILTERS_KEY]["UTNs"]["utns"] = to_string(utn);
 
     setViewableDataConfig(data);
 }
@@ -1741,42 +1784,37 @@ void EvaluationManager::showSurroundingData (unsigned int utn)
 
     const EvaluationTargetData& target_data = data_.targetData(utn);
 
-    float time_begin = target_data.timeBegin();
-    time_begin -= 60.0;
+    ptime time_begin = target_data.timeBegin();
+    time_begin -= seconds(60);
 
-    if (time_begin < 0)
-        time_begin = 0;
+    ptime time_end = target_data.timeEnd();
+    time_end += seconds(60);
 
-    float time_end = target_data.timeEnd();
-    time_end += 60.0;
-
-    if (time_end > 24*60*60)
-        time_end = 24*60*60;
-
-    //    "Time of Day": {
-    //    "Time of Day Maximum": "05:56:32.297",
-    //    "Time of Day Minimum": "05:44:58.445"
+    //    "Timestamp": {
+    //    "Timestamp Maximum": "05:56:32.297",
+    //    "Timestamp Minimum": "05:44:58.445"
     //    },
 
-    data["filters"]["Time of Day"]["Time of Day Maximum"] = String::timeStringFromDouble(time_end);
-    data["filters"]["Time of Day"]["Time of Day Minimum"] = String::timeStringFromDouble(time_begin);
+    // TODO_TIMESTAMP
+    data[VP_FILTERS_KEY]["Timestamp"]["Timestamp Maximum"] = Time::toString(time_end);
+    data[VP_FILTERS_KEY]["Timestamp"]["Timestamp Minimum"] = Time::toString(time_begin);
 
     //    "Aircraft Address": {
     //    "Aircraft Address Values": "FEFE10"
     //    },
     if (target_data.targetAddresses().size())
-        data["filters"]["Aircraft Address"]["Aircraft Address Values"] = target_data.targetAddressesStr()+",NULL";
+        data[VP_FILTERS_KEY]["Aircraft Address"]["Aircraft Address Values"] = target_data.targetAddressesStr()+",NULL";
 
     //    "Mode 3/A Code": {
     //    "Mode 3/A Code Values": "7000"
     //    }
 
     if (target_data.modeACodes().size())
-        data["filters"]["Mode 3/A Codes"]["Mode 3/A Codes Values"] = target_data.modeACodesStr()+",NULL";
+        data[VP_FILTERS_KEY]["Mode 3/A Codes"]["Mode 3/A Codes Values"] = target_data.modeACodesStr()+",NULL";
 
-    //    "filters": {
+    //    VP_FILTERS_KEY: {
     //    "Barometric Altitude": {
-    //    "Barometric Altitude Maxmimum": "43000",
+    //    "Barometric Altitude Maximum": "43000",
     //    "Barometric Altitude Minimum": "500"
     //    },
 
@@ -1797,10 +1835,10 @@ void EvaluationManager::showSurroundingData (unsigned int utn)
 
     if (target_data.hasPos())
     {
-        data["filters"]["Position"]["Latitude Maximum"] = to_string(target_data.latitudeMax()+0.2);
-        data["filters"]["Position"]["Latitude Minimum"] = to_string(target_data.latitudeMin()-0.2);
-        data["filters"]["Position"]["Longitude Maximum"] = to_string(target_data.longitudeMax()+0.2);
-        data["filters"]["Position"]["Longitude Minimum"] = to_string(target_data.longitudeMin()-0.2);
+        data[VP_FILTERS_KEY]["Position"]["Latitude Maximum"] = to_string(target_data.latitudeMax()+0.2);
+        data[VP_FILTERS_KEY]["Position"]["Latitude Minimum"] = to_string(target_data.latitudeMin()-0.2);
+        data[VP_FILTERS_KEY]["Position"]["Longitude Maximum"] = to_string(target_data.longitudeMax()+0.2);
+        data[VP_FILTERS_KEY]["Position"]["Longitude Minimum"] = to_string(target_data.longitudeMin()-0.2);
     }
 
     setViewableDataConfig(data);
@@ -1978,6 +2016,8 @@ void EvaluationManager::filterUTNs ()
 
     bool tmp_match;
 
+    time_duration short_duration = Time::partialSeconds(remove_short_targets_min_duration_);
+
     for (auto& target_it : data_)
     {
         if (!target_it.use())
@@ -1988,7 +2028,7 @@ void EvaluationManager::filterUTNs ()
 
         if (remove_short_targets_
                 && (target_it.numUpdates() < remove_short_targets_min_updates_
-                    || target_it.timeDuration() < remove_short_targets_min_duration_))
+                    || target_it.timeDuration() < short_duration))
         {
             use = false;
             comment = "Short track";
@@ -2372,10 +2412,10 @@ nlohmann::json::object_t EvaluationManager::getBaseViewableDataConfig ()
 
     if (load_only_sector_data_ && min_max_pos_set_)
     {
-        data["filters"]["Position"]["Latitude Maximum"] = to_string(latitude_max_);
-        data["filters"]["Position"]["Latitude Minimum"] = to_string(latitude_min_);
-        data["filters"]["Position"]["Longitude Maximum"] = to_string(longitude_max_);
-        data["filters"]["Position"]["Longitude Minimum"] = to_string(longitude_min_);
+        data[VP_FILTERS_KEY]["Position"]["Latitude Maximum"] = to_string(latitude_max_);
+        data[VP_FILTERS_KEY]["Position"]["Latitude Minimum"] = to_string(latitude_min_);
+        data[VP_FILTERS_KEY]["Position"]["Longitude Maximum"] = to_string(longitude_max_);
+        data[VP_FILTERS_KEY]["Position"]["Longitude Minimum"] = to_string(longitude_min_);
     }
 
     return data;
@@ -2654,37 +2694,41 @@ void EvaluationManager::useLoadFilter(bool value)
     use_load_filter_ = value;
 }
 
-bool EvaluationManager::useTimeFilter() const
+bool EvaluationManager::useTimestampFilter() const
 {
-    return use_time_filter_;
+    return use_timestamp_filter_;
 }
 
-void EvaluationManager::useTimeFilter(bool value)
+void EvaluationManager::useTimestampFilter(bool value)
 {
     loginf << "EvaluationManager: useTimeFilter: value " << value;
-    use_time_filter_ = value;
+    use_timestamp_filter_ = value;
 }
 
-float EvaluationManager::loadTimeBegin() const
+boost::posix_time::ptime EvaluationManager::loadTimestampBegin() const
 {
-    return load_time_begin_;
+    return load_timestamp_begin_;
 }
 
-void EvaluationManager::loadTimeBegin(float value)
+void EvaluationManager::loadTimestampBegin(boost::posix_time::ptime value)
 {
-    loginf << "EvaluationManager: loadTimeBegin: value " << value;
-    load_time_begin_ = value;
+    loginf << "EvaluationManager: loadTimeBegin: value " << Time::toString(value);
+
+    load_timestamp_begin_ = value;
+    load_timestamp_begin_str_ = Time::toString(load_timestamp_begin_);
 }
 
-float EvaluationManager::loadTimeEnd() const
+boost::posix_time::ptime EvaluationManager::loadTimestampEnd() const
 {
-    return load_time_end_;
+    return load_timestamp_end_;
 }
 
-void EvaluationManager::loadTimeEnd(float value)
+void EvaluationManager::loadTimestampEnd(boost::posix_time::ptime value)
 {
-    loginf << "EvaluationManager: loadTimeEnd: value " << value;
-    load_time_end_ = value;
+    loginf << "EvaluationManager: loadTimeEnd: value " << Time::toString(value);
+
+    load_timestamp_end_ = value;
+    load_timestamp_end_str_ = Time::toString(load_timestamp_end_);
 }
 
 bool EvaluationManager::useASDBFilter() const

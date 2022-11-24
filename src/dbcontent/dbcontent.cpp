@@ -26,7 +26,6 @@
 #include "dbcontent/variable/variable.h"
 #include "dbtableinfo.h"
 #include "filtermanager.h"
-#include "finalizedboreadjob.h"
 #include "insertbufferdbjob.h"
 #include "jobmanager.h"
 #include "propertylist.h"
@@ -50,7 +49,8 @@ const Property DBContent::meta_var_datasource_id_ {"DS ID", PropertyDataType::UI
 const Property DBContent::meta_var_sac_id_ {"SAC", PropertyDataType::UCHAR};
 const Property DBContent::meta_var_sic_id_ {"SIC", PropertyDataType::UCHAR};
 const Property DBContent::meta_var_line_id_ {"Line ID", PropertyDataType::UINT};
-const Property DBContent::meta_var_tod_ {"Time of Day", PropertyDataType::FLOAT};
+const Property DBContent::meta_var_time_of_day_ {"Time of Day", PropertyDataType::FLOAT};
+const Property DBContent::meta_var_timestamp_ {"Timestamp", PropertyDataType::TIMESTAMP};
 const Property DBContent::meta_var_m3a_ {"Mode 3/A Code", PropertyDataType::UINT};
 const Property DBContent::meta_var_m3a_g_ {"Mode 3/A Garbled", PropertyDataType::BOOL};
 const Property DBContent::meta_var_m3a_v_ {"Mode 3/A Valid", PropertyDataType::BOOL};
@@ -124,13 +124,13 @@ DBContent::DBContent(COMPASS& compass, const string& class_id, const string& ins
 
     assert (db_table_name_.size());
 
-    constructor_active_ = true;
+    //constructor_active_ = true;
 
     createSubConfigurables();
 
-    constructor_active_ = false;
+    //constructor_active_ = false;
 
-    sortContent();
+    //sortContent();
 
     logdbg << "DBContent: constructor: created with instance_id " << instanceId() << " name "
            << name_;
@@ -157,26 +157,29 @@ void DBContent::generateSubConfigurable(const string& class_id, const string& in
     logdbg << "DBContent: generateSubConfigurable: generating variable " << instance_id;
     if (class_id == "Variable")
     {
-        string var_name = configuration()
-                .getSubConfiguration(class_id, instance_id)
-                .getParameterConfigValueString("name");
+        Variable* var = new Variable(class_id, instance_id, this);
 
-        if (hasVariable(var_name))
+        if (hasVariable(var->name()))
             logerr << "DBContent: generateSubConfigurable: duplicate variable " << instance_id
-                   << " with name '" << var_name << "'";
+                   << " with name '" << var->name() << "'";
 
-        assert(!hasVariable(var_name));
+        assert(!hasVariable(var->name()));
 
         logdbg << "DBContent: generateSubConfigurable: generating variable " << instance_id
-               << " with name " << var_name;
+               << " with name " << var->name();
 
-        variables_.emplace_back(new Variable(class_id, instance_id, this));
+        //variables_.emplace(var->name(), var);
+
+        variables_.emplace(
+                    std::piecewise_construct,
+                    std::forward_as_tuple(var->name()),   // args for key
+                    std::forward_as_tuple(var));  // args for mapped value
     }
     else
         throw runtime_error("DBContent: generateSubConfigurable: unknown class_id " + class_id);
 
-    if (!constructor_active_)
-        sortContent();
+//    if (!constructor_active_)
+//        sortContent();
 }
 
 void DBContent::checkSubConfigurables()
@@ -186,42 +189,57 @@ void DBContent::checkSubConfigurables()
 
 bool DBContent::hasVariable(const string& name) const
 {
-    auto iter = find_if(variables_.begin(), variables_.end(),
-                        [name](const unique_ptr<Variable>& var) { return var->name() == name;});
+//    auto iter = find_if(variables_.begin(), variables_.end(),
+//                        [name](const unique_ptr<Variable>& var) { return var->name() == name;});
 
-    return iter != variables_.end();
+//    return iter != variables_.end();
 
     //return variables_.find(name) != variables_.end();
+
+    return variables_.count(name);
 }
 
-Variable& DBContent::variable(const string& name)
+Variable& DBContent::variable(const string& name) const
 {
     assert(hasVariable(name));
 
-    auto iter = find_if(variables_.begin(), variables_.end(),
-                        [name](const unique_ptr<Variable>& var) { return var->name() == name;});
+//    auto iter = find_if(variables_.begin(), variables_.end(),
+//                        [name](const unique_ptr<Variable>& var) { return var->name() == name;});
 
-    assert (iter != variables_.end());
-    assert (iter->get());
+//    assert (iter != variables_.end());
+//    assert (iter->get());
 
-    return *iter->get();
+//    return *iter->get();
+
+    return *(variables_.at(name).get());
 }
 
-void DBContent::renameVariable(const string& name, const string& new_name)
+void DBContent::renameVariable(const string& old_name, const string& new_name)
 {
-    loginf << "DBContent: renameVariable: name " << name << " new_name " << new_name;
-
-    string old_name = name; // since passed by reference, which will be changed
+    loginf << "DBContent: renameVariable: name " << old_name << " new_name " << new_name;
 
     assert(hasVariable(old_name));
     assert(!hasVariable(new_name));
 
-    variable(old_name).name(new_name);
+    std::unique_ptr<Variable> var = std::move(variables_.at(old_name));
+    variables_.erase(old_name);
+    var->name(new_name);
+    variables_.emplace(new_name, std::move(var));
 
-    loginf << "DBContent: renameVariable: has old var '" << old_name << "' " << hasVariable(old_name);
     assert(!hasVariable(old_name));
-    loginf << "DBContent: renameVariable: has var '" << new_name << "' " << hasVariable(new_name);
     assert(hasVariable(new_name));
+
+//    string old_name = name; // since passed by reference, which will be changed
+
+//    assert(hasVariable(old_name));
+//    assert(!hasVariable(new_name));
+
+//    variable(old_name).name(new_name);
+
+//    loginf << "DBContent: renameVariable: has old var '" << old_name << "' " << hasVariable(old_name);
+//    assert(!hasVariable(old_name));
+//    loginf << "DBContent: renameVariable: has var '" << new_name << "' " << hasVariable(new_name);
+//    assert(hasVariable(new_name));
 
 }
 
@@ -229,22 +247,31 @@ void DBContent::deleteVariable(const string& name)
 {
     assert(hasVariable(name));
 
-    auto iter = find_if(variables_.begin(), variables_.end(),
-                        [name](const unique_ptr<Variable>& var) { return var->name() == name;});
-    assert (iter != variables_.end());
+//    auto iter = find_if(variables_.begin(), variables_.end(),
+//                        [name](const unique_ptr<Variable>& var) { return var->name() == name;});
+//    assert (iter != variables_.end());
 
-    variables_.erase(iter);
+    variables_.erase(name);
     assert(!hasVariable(name));
 }
 
-bool DBContent::hasVariableDBColumnName(const std::string& name) const
+bool DBContent::hasVariableDBColumnName(const std::string& col_name) const
 {
-    auto iter = find_if(variables_.begin(), variables_.end(),
-                        [name](const unique_ptr<Variable>& var) { return var->dbColumnName() == name;});
+//    auto iter = find_if(variables_.begin(), variables_.end(),
+//                        [col_name](const unique_ptr<Variable>& var) { return var->dbColumnName() == col_name;});
 
-    logdbg << "DBContent: hasVariableDBColumnName: name '" << name << "' " << (iter != variables_.end());
+//    logdbg << "DBContent: hasVariableDBColumnName: name '" << name << "' " << (iter != variables_.end());
 
-    return iter != variables_.end();
+//    return iter != variables_.end();
+
+    for (const auto& var : variables_)
+    {
+        if (var.second->dbColumnName() == col_name)
+            return true;
+    }
+
+    return false;
+
 }
 
 //string DBContent::associationsTableName()
@@ -256,8 +283,8 @@ bool DBContent::hasVariableDBColumnName(const std::string& name) const
 
 bool DBContent::hasKeyVariable()
 {
-    for (auto& var_it : variables_)
-        if (var_it->isKey())
+    for (const auto& var_it : variables_)
+        if (var_it.second->isKey())
             return true;
 
     return false;
@@ -267,12 +294,12 @@ Variable& DBContent::getKeyVariable()
 {
     assert(hasKeyVariable());
 
-    for (auto& var_it : variables_)  // search in any
-        if (var_it->isKey())
+    for (const auto& var_it : variables_)  // search in any
+        if (var_it.second->isKey())
         {
             loginf << "DBContent " << name() << ": getKeyVariable: returning first found var "
-                   << var_it->name();
-            return *var_it.get();
+                   << var_it.first;
+            return *var_it.second.get();
         }
 
     throw runtime_error("DBContent: getKeyVariable: no key variable found");
@@ -361,7 +388,7 @@ void DBContent::load(VariableSet& read_set, bool use_datasrc_filters, bool use_f
                 else
                     custom_filter_clause += " (";
 
-                custom_filter_clause += "(" + datasource_var.dbColumnName() + " = " + to_string(ds_id_it);
+                custom_filter_clause += " (" + datasource_var.dbColumnName() + " = " + to_string(ds_id_it);
                 custom_filter_clause += " AND " + line_var.dbColumnName() + " IN (";
 
                 bool first = true;
@@ -404,11 +431,16 @@ void DBContent::load(VariableSet& read_set, bool use_datasrc_filters, bool use_f
 
     if (use_filters)
     {
-        if (custom_filter_clause.size())
-            custom_filter_clause += " AND ";
+        string filter_sql = COMPASS::instance().filterManager().getSQLCondition(
+                    name_, extra_from_parts, filtered_variables);
 
-        custom_filter_clause +=
-                COMPASS::instance().filterManager().getSQLCondition(name_, extra_from_parts, filtered_variables);
+        if (filter_sql.size())
+        {
+            if (custom_filter_clause.size())
+                custom_filter_clause += " AND ";
+
+            custom_filter_clause += filter_sql;
+        }
     }
 
     loginf << "DBContent: load: filter '" << custom_filter_clause << "'";
@@ -529,20 +561,20 @@ void DBContent::doDataSourcesBeforeInsert (shared_ptr<Buffer> buffer)
     string line_col_str = line_var.dbColumnName();
     assert (buffer->has<unsigned int>(line_col_str));
 
-    // tod
-    Variable& tod_var = variable(DBContent::meta_var_tod_.name());
-    assert (tod_var.dataType() == PropertyDataType::FLOAT);
-    string tod_col_str = tod_var.dbColumnName();
-    assert (buffer->has<float>(tod_col_str));
+    // timestamp
+    Variable& timestamp_var = variable(DBContent::meta_var_timestamp_.name());
+    assert (timestamp_var.dataType() == PropertyDataType::TIMESTAMP);
+    string timestamp_col_str = timestamp_var.dbColumnName();
+    assert (buffer->has<boost::posix_time::ptime>(timestamp_col_str));
 
     DataSourceManager& ds_man = COMPASS::instance().dataSourceManager();
 
     NullableVector<unsigned int>& datasource_vec = buffer->get<unsigned int>(datasource_col_str);
     NullableVector<unsigned int>& line_vec = buffer->get<unsigned int>(line_col_str);
-    NullableVector<float>& tod_vec = buffer->get<float>(tod_col_str);
+    NullableVector<boost::posix_time::ptime>& timestamp_vec = buffer->get<boost::posix_time::ptime>(timestamp_col_str);
 
     map<unsigned int, map<unsigned int, unsigned int>> line_counts; // ds_id -> line -> cnt
-    map<unsigned int, map<unsigned int, float>> line_tods; // ds_id -> line-> last tod
+    map<unsigned int, map<unsigned int, boost::posix_time::ptime>> line_tods; // ds_id -> line-> last timestamp
 
     unsigned int buffer_size = buffer->size();
 
@@ -553,8 +585,8 @@ void DBContent::doDataSourcesBeforeInsert (shared_ptr<Buffer> buffer)
     {
         line_counts[datasource_vec.get(cnt)][line_vec.get(cnt)]++;
 
-        if (!tod_vec.isNull(cnt))
-            line_tods[datasource_vec.get(cnt)][line_vec.get(cnt)] = tod_vec.get(cnt);
+        if (!timestamp_vec.isNull(cnt))
+            line_tods[datasource_vec.get(cnt)][line_vec.get(cnt)] = timestamp_vec.get(cnt);
     }
 
     for (auto& ds_id_it : line_counts) // ds_id -> line -> cnt
@@ -571,7 +603,7 @@ void DBContent::doDataSourcesBeforeInsert (shared_ptr<Buffer> buffer)
         if (line_tods.count(ds_id_it.first))
         {
             for (auto& line_tod_it : line_tods.at(ds_id_it.first))
-                ds_man.dbDataSource(ds_id_it.first).maxToD(line_tod_it.first, line_tod_it.second);
+                ds_man.dbDataSource(ds_id_it.first).maxTimestamp(line_tod_it.first, line_tod_it.second);
         }
     }
 }
@@ -702,7 +734,7 @@ void DBContent::readJobIntermediateSlot(shared_ptr<Buffer> buffer)
     assert(sender == read_job_.get());
 
     // check variables
-    vector<Variable*>& variables = sender->readList().getSet();
+    const vector<Variable*>& variables = sender->readList().getSet();
     const PropertyList& properties = buffer->properties();
 
     for (auto var_it : variables)
@@ -963,14 +995,14 @@ bool DBContent::existsInDB() const
 //    loginf << "DBContent " << name_ << ": saveAssociations: done";
 //}
 
-void DBContent::sortContent()
-{
-    sort(variables_.begin(), variables_.end(),
-         [](const std::unique_ptr<Variable>& a, const std::unique_ptr<Variable>& b) -> bool
-    {
-        return a->name() < b->name();
-    });
-}
+//void DBContent::sortContent()
+//{
+//    sort(variables_.begin(), variables_.end(),
+//         [](const std::unique_ptr<Variable>& a, const std::unique_ptr<Variable>& b) -> bool
+//    {
+//        return a->name() < b->name();
+//    });
+//}
 
 void DBContent::checkStaticVariable(const Property& property)
 {

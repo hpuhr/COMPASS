@@ -8,6 +8,7 @@
 #include <map>
 
 #include <QRectF>
+#include <QColor>
 
 #include <boost/optional.hpp>
 
@@ -18,67 +19,58 @@ class QImage;
 class LabelPlacementEngine
 {
 public:
-    typedef label_placement::Method    Method;
-    typedef label_placement::ForceType ForceType;
-    typedef label_placement::Label     Label;
-
-    struct Settings
-    {
-        typedef std::vector<QRectF> Objects;
-
-        Method method = Method::ForceBased;
-
-        QRectF roi; //TODO 
-
-        //settings for methods 'ForceBasedXXX'
-        ForceType fb_force_type      = ForceType::Simple;
-        int       fb_max_iter        = 500;   //maximum number of iterations
-        double    fb_precision       = 0.01;  //precision = convergence limit
-        double    fb_expand_x        = 1.2;   //bounding box expansion in x direction (TODO: per avoidance type)
-        double    fb_expand_y        = 1.1;   //bounding box expansion in y direction (TODO: per avoidance type)
-        bool      fb_avoid_labels    = true;  //avoid other labels (should be on)
-        bool      fb_avoid_anchors   = false; //avoid anchor locations (= positions the labels are attached to)
-        bool      fb_avoid_objects   = false; //avoid objects added as 'fb_additional_objects'
-        double    fb_weight_labels   = 0.25;  //force weight for label avoidance (TODO: separate x and y part)
-        double    fb_weight_anchors  = 0.5;   //force weight for anchor avoidance (TODO: separate x and y part)
-        double    fb_weight_objects  = 0.25;  //force weight for object avoidance (TODO: separate x and y part)
-        double    fb_anchor_radius   = 0.0;   //repel radius around anchors if 'fb_avoid_anchors' is on
-        Objects   fb_additional_objects;      //additional objects to avoid, must be enabled by 'fb_avoid_objects'
-    };
-
+    typedef label_placement::Method   Method;
+    typedef label_placement::Label    Label;
+    typedef label_placement::Settings Settings;
+    
+    /**
+     * Configuration for test/debug output
+     */
     struct TestConfig
     { 
+        typedef std::function<void(double&, double&, bool)>             ScreenTransform;
+        typedef std::function<void(double&, double&, double&, double&)> ScreenTransformBBox;
+
         int width  = 1024;
         int height = 768;
 
         int num_objects = 100;
         int interval_ms = 1000;
-        int speed_px    = 10;
 
-        int radius_px      = 5;
-        int label_w_px     = 40;
-        int label_h_px     = 15;
-        int label_offs_px  = 15;
+        double speed      = 0.01;
+        double radius     = 0.005;
 
-        bool flip_y = false;
+        double label_w    = 0.04;
+        double label_h    = 0.015;
+        double label_offs = 0.015;
+
+        bool flip_y        = false;
+        bool avoid_anchors = false;
+        bool avoid_roi     = false;
+
+        mutable QRectF              roi;
+        mutable ScreenTransform     screen_transform;
+        mutable ScreenTransformBBox screen_transform_bbox;
     };
 
+    /**
+     * Test label for test/debug output
+     */
     struct TestLabel
     {
-        std::string txt;
+        TestLabel() : color(255, 255, 255) {}
 
-        boost::optional<double> x_init;
-        boost::optional<double> y_init;
+        std::string txt;                //test label screen text
 
-        double x;
-        double y;
-        double w;
-        double h;
-        double x_anchor;
-        double y_anchor;
-        double dirx;
-        double diry;
-        double speed;
+        boost::optional<double> x_init; //test label init x position for movement visualization
+        boost::optional<double> y_init; //test label init y position for movement visualization
+
+        double dirx;  //x movement direction
+        double diry;  //y movement direction
+        double speed; //movement speed
+
+        Label  label;  //test label data
+        QColor color;  //test label color
     };
 
     LabelPlacementEngine();
@@ -89,9 +81,10 @@ public:
                   double y_anchor,
                   double w,
                   double h,
-                  bool active = true, 
                   double* x_init = nullptr, 
-                  double* y_init = nullptr);
+                  double* y_init = nullptr,
+                  double* x_ref = nullptr,
+                  double* y_ref = nullptr);
     const Label& getLabel(size_t idx) const;
     const Label* getLabel(const std::string& id) const;
     void removeLabel(size_t idx);
@@ -107,11 +100,9 @@ public:
 
 private:
     void revertPlacements();
-    bool placeLabelsForceBased();
-    bool placeLabelsSpringBased();
 
-    void convertToScreen(const TestConfig& test_config, 
-                         std::vector<TestLabel>& test_labels) const;
+    void computeScreenTransform(const TestConfig& test_config, 
+                                const std::vector<TestLabel>& test_labels) const;
     void runTest(const std::vector<TestLabel>& test_labels,
                  const TestConfig& test_config) const;
     void renderTestFrame(QImage& img, 

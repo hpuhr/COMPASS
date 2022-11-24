@@ -283,9 +283,12 @@ bool RS2GCoordinateSystem::geocentric2Geodesic(Eigen::Vector3d& input)
 {
     double d_xy = sqrt(pow(input[0], 2) + pow(input[1], 2));
 
-    double G = atan(input[1] / input[0]);
+    //double G = atan(input[1] / input[0]);
+    double G = atan2(input[1], input[0]);
 
-    double L = atan(input[2] / (d_xy * (1 - EE_A * EE_E2 / sqrt(pow(d_xy, 2) + pow(input[2], 2)))));
+    //double L = atan(input[2] / (d_xy * (1 - EE_A * EE_E2 / sqrt(pow(d_xy, 2) + pow(input[2], 2)))));
+    double L = atan2(input[2], (d_xy * (1 - EE_A * EE_E2 / sqrt(pow(d_xy, 2) + pow(input[2], 2)))));
+
     double eta = EE_A / sqrt(1 - EE_E2 * pow(sin(L), 2));
     double H = d_xy / cos(L) - eta;
 
@@ -298,7 +301,9 @@ bool RS2GCoordinateSystem::geocentric2Geodesic(Eigen::Vector3d& input)
     while (fabs(L - Li) > PRECISION_GEODESIC)
     {
         Li = L;
-        L = atan(input[2] * (1 + H / eta) / (d_xy * (1 - EE_E2 + H / eta)));
+        //L = atan(input[2] * (1 + H / eta) / (d_xy * (1 - EE_E2 + H / eta)));
+        L = atan2(input[2] * (1 + H / eta), (d_xy * (1 - EE_E2 + H / eta)));
+
         eta = EE_A / sqrt(1 - EE_E2 * pow(sin(L), 2));
         H = d_xy / cos(L) - eta;
     }

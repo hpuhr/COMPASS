@@ -27,7 +27,7 @@
 
 using namespace dbContent;
 
-DBContentReadDBJob::DBContentReadDBJob(DBInterface& db_interface, DBContent& dbobject, VariableSet read_list,
+DBContentReadDBJob::DBContentReadDBJob(DBInterface& db_interface, DBContent& dbcontent, VariableSet read_list,
                            const std::vector<std::string>& extra_from_parts,
                            std::string custom_filter_clause,
                            std::vector<Variable*> filtered_variables, bool use_order,
@@ -35,7 +35,7 @@ DBContentReadDBJob::DBContentReadDBJob(DBInterface& db_interface, DBContent& dbo
                            const std::string& limit_str)
     : Job("DBContentReadDBJob"),
       db_interface_(db_interface),
-      dbobject_(dbobject),
+      dbcontent_(dbcontent),
       read_list_(read_list),
       extra_from_parts_(extra_from_parts),
       custom_filter_clause_(custom_filter_clause),
@@ -45,26 +45,26 @@ DBContentReadDBJob::DBContentReadDBJob(DBInterface& db_interface, DBContent& dbo
       use_order_ascending_(use_order_ascending),
       limit_str_(limit_str)
 {
-    assert(dbobject_.existsInDB());
+    assert(dbcontent_.existsInDB());
 }
 
 DBContentReadDBJob::~DBContentReadDBJob() {}
 
 void DBContentReadDBJob::run()
 {
-    loginf << "DBContentReadDBJob: run: " << dbobject_.name() << ": start";
+    loginf << "DBContentReadDBJob: run: " << dbcontent_.name() << ": start";
     started_ = true;
 
     if (obsolete_)
     {
-        loginf << "DBContentReadDBJob: run: " << dbobject_.name() << ": obsolete before prepared";
+        loginf << "DBContentReadDBJob: run: " << dbcontent_.name() << ": obsolete before prepared";
         done_ = true;
         return;
     }
 
     start_time_ = boost::posix_time::microsec_clock::local_time();
 
-    db_interface_.prepareRead(dbobject_, read_list_, extra_from_parts_, custom_filter_clause_, filtered_variables_,
+    db_interface_.prepareRead(dbcontent_, read_list_, extra_from_parts_, custom_filter_clause_, filtered_variables_,
                               use_order_, order_variable_, use_order_ascending_, limit_str_);
 
     unsigned int cnt = 0;
@@ -75,7 +75,7 @@ void DBContentReadDBJob::run()
 
     while (!obsolete_)
     {
-        std::shared_ptr<Buffer> buffer = db_interface_.readDataChunk(dbobject_);
+        std::shared_ptr<Buffer> buffer = db_interface_.readDataChunk(dbcontent_);
         assert(buffer);
         last_buffer = buffer->lastOne();
 
@@ -84,9 +84,9 @@ void DBContentReadDBJob::run()
         if (obsolete_)
             break;
 
-        assert(buffer->dbContentName() == dbobject_.name());
+        assert(buffer->dbContentName() == dbcontent_.name());
 
-        logdbg << "DBContentReadDBJob: run: " << dbobject_.name() << ": intermediate signal, #buffers "
+        logdbg << "DBContentReadDBJob: run: " << dbcontent_.name() << ": intermediate signal, #buffers "
                << cnt << " last one " << buffer->lastOne();
         row_count_ += buffer->size();
 
@@ -104,7 +104,7 @@ void DBContentReadDBJob::run()
 
         if (!view_manager.isProcessingData() || last_buffer) // distribute data
         {
-            loginf << "DBContentReadDBJob: run: " << dbobject_.name() << ": emitting intermediate read, size " << row_count_;
+            loginf << "DBContentReadDBJob: run: " << dbcontent_.name() << ": emitting intermediate read, size " << row_count_;
             emit intermediateSignal(cached_buffer_);
 
             cached_buffer_ = nullptr;
@@ -112,24 +112,24 @@ void DBContentReadDBJob::run()
 
         if (last_buffer)
         {
-            loginf << "DBContentReadDBJob: run: " << dbobject_.name() << ": last buffer";
+            loginf << "DBContentReadDBJob: run: " << dbcontent_.name() << ": last buffer";
             break;
         }
     }
 
     assert (!cached_buffer_);
 
-    logdbg << "DBContentReadDBJob: run: " << dbobject_.name() << ": finalizing statement";
-    db_interface_.finalizeReadStatement(dbobject_);
+    logdbg << "DBContentReadDBJob: run: " << dbcontent_.name() << ": finalizing statement";
+    db_interface_.finalizeReadStatement(dbcontent_);
 
     stop_time_ = boost::posix_time::microsec_clock::local_time();
     boost::posix_time::time_duration diff = stop_time_ - start_time_;
 
     if (diff.total_seconds() > 0)
-        loginf << "DBContentReadDBJob: run: " << dbobject_.name() << ": done after " << diff << ", "
+        loginf << "DBContentReadDBJob: run: " << dbcontent_.name() << ": done after " << diff << ", "
                << 1000.0 * row_count_ / diff.total_milliseconds() << " el/s";
     else
-        loginf << "DBContentReadDBJob: run: " << dbobject_.name() << ": done";
+        loginf << "DBContentReadDBJob: run: " << dbcontent_.name() << ": done";
 
     done_ = true;
 

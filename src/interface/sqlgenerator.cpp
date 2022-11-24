@@ -30,6 +30,7 @@
 #include "propertylist.h"
 #include "stringconv.h"
 #include "source/dbdatasource.h"
+#include "util/timeconv.h"
 
 #include <algorithm>
 #include <iomanip>
@@ -119,11 +120,11 @@ string SQLGenerator::getCreateTableStatement(const DBContent& object)
     unsigned int cnt = 0;
     for (auto& var_it : object.variables())
     {
-        ss << var_it->dbColumnName();
+        ss << var_it.second->dbColumnName();
 
-        data_type = var_it->dbDataTypeString();
+        data_type = var_it.second->dbDataTypeString();
 
-        if (var_it->isKey())
+        if (var_it.second->isKey())
             ss << " INTEGER PRIMARY KEY NOT NULL"; // AUTOINCREMENT
         else
             ss << " " << data_type;
@@ -138,9 +139,9 @@ string SQLGenerator::getCreateTableStatement(const DBContent& object)
 
     // CREATE [UNIQUE] INDEX index_name ON table_name(column_list);
 
-    ss << "\nCREATE INDEX TOD_INDEX_" << object.name() << " ON " << object.dbTableName() << "(";
+    ss << "\nCREATE INDEX TIMESTAMP_INDEX_" << object.name() << " ON " << object.dbTableName() << "(";
     ss << COMPASS::instance().dbContentManager().metaGetVariable(
-              object.name(), DBContent::meta_var_tod_).dbColumnName()
+              object.name(), DBContent::meta_var_timestamp_).dbColumnName()
        << ");";
 
     ss << "\nCREATE INDEX DS_ID_INDEX_" << object.name() << " ON " << object.dbTableName() << "(";
@@ -198,6 +199,26 @@ shared_ptr<DBCommand> SQLGenerator::getDataSourcesSelectCommand()
     command->set(ss.str());
     command->list(list);
 
+    return command;
+}
+
+std::shared_ptr<DBCommand> SQLGenerator::getDeleteCommand(
+        const DBContent& dbcontent, boost::posix_time::ptime before_timestamp)
+{
+    //DELETE FROM table WHERE search_condition;
+
+    stringstream ss;
+
+    ss << "DELETE FROM " << dbcontent.dbTableName();
+    ss << " WHERE " << COMPASS::instance().dbContentManager().metaGetVariable(
+              dbcontent.name(), DBContent::meta_var_timestamp_).dbColumnName();
+
+    ss << " < " << Time::toLong(before_timestamp) << ";";
+
+    loginf << "SQLGenerator: getDeleteCommand: sql '" << ss.str() << "'";
+
+    shared_ptr<DBCommand> command = make_shared<DBCommand>(DBCommand());
+    command->set(ss.str());
     return command;
 }
 
@@ -328,15 +349,15 @@ shared_ptr<DBCommand> SQLGenerator::getTableSelectMinMaxNormalStatement(const DB
     for (auto& var_it : object.variables())
     {
         logdbg << "SQLGenerator: getTableSelectMinMaxNormalStatement: current name "
-               << var_it->name();
+               << var_it.first;
 
         if (!first)
             ss << ",";
 
-        ss << "MIN(" << var_it->dbColumnName() << "),MAX(" << var_it->dbColumnName() << ")";
+        ss << "MIN(" << var_it.second->dbColumnName() << "),MAX(" << var_it.second->dbColumnName() << ")";
 
-        command_list.addProperty(var_it->dbColumnName() + "MIN", PropertyDataType::STRING);
-        command_list.addProperty(var_it->dbColumnName() + "MAX", PropertyDataType::STRING);
+        command_list.addProperty(var_it.second->dbColumnName() + "MIN", PropertyDataType::STRING);
+        command_list.addProperty(var_it.second->dbColumnName() + "MAX", PropertyDataType::STRING);
 
         first = false;
     }

@@ -26,6 +26,7 @@
 #include "stringconv.h"
 #include "unit.h"
 #include "unitmanager.h"
+#include "util/timeconv.h"
 
 using namespace nlohmann;
 using namespace std;
@@ -77,6 +78,7 @@ Buffer::~Buffer()
     getArrayListMap<double>().clear();
     getArrayListMap<string>().clear();
     getArrayListMap<json>().clear();
+    getArrayListMap<boost::posix_time::ptime>().clear();
 
     data_size_ = 0;
 
@@ -173,6 +175,11 @@ void Buffer::addProperty(string id, PropertyDataType type)
             getArrayListMap<json>()[id] = shared_ptr<NullableVector<json>>(
                 new NullableVector<json>(property, *this));
             break;
+    case PropertyDataType::TIMESTAMP:
+        assert(getArrayListMap<boost::posix_time::ptime>().count(id) == 0);
+        getArrayListMap<boost::posix_time::ptime>()[id] = shared_ptr<NullableVector<boost::posix_time::ptime>>(
+            new NullableVector<boost::posix_time::ptime>(property, *this));
+        break;
         default:
             logerr << "Buffer: addProperty: unknown property type " << Property::asString(type);
             throw runtime_error("Buffer: addProperty: unknown property type " +
@@ -252,6 +259,11 @@ void Buffer::deleteProperty(const Property& property)
         remove<json> (property.name());
         assert (!has<json>(property.name()));
         break;
+    case PropertyDataType::TIMESTAMP:
+        assert (has<boost::posix_time::ptime>(property.name()));
+        remove<boost::posix_time::ptime> (property.name());
+        assert (!has<boost::posix_time::ptime>(property.name()));
+        break;
     default:
         logerr << "Buffer: deleteProperty: unknown property type "
                    << Property::asString(property.dataType());
@@ -302,6 +314,9 @@ void Buffer::sortByProperty(const Property& property)
     case PropertyDataType::JSON:
         perm = get<json> (property.name()).sortPermutation();
         break;
+    case PropertyDataType::TIMESTAMP:
+        perm = get<boost::posix_time::ptime> (property.name()).sortPermutation();
+        break;
     default:
         logerr << "Buffer: sortByProperty: unknown property type "
                    << Property::asString(property.dataType());
@@ -351,6 +366,9 @@ void Buffer::sortByProperty(const Property& property)
         case PropertyDataType::JSON:
             get<json> (prop_it.name()).sortByPermutation(perm);
             break;
+        case PropertyDataType::TIMESTAMP:
+            get<boost::posix_time::ptime> (prop_it.name()).sortByPermutation(perm);
+            break;
         default:
             logerr << "Buffer: sortByProperty: unknown property type "
                        << Property::asString(property.dataType());
@@ -382,6 +400,7 @@ void Buffer::seizeBuffer(Buffer& org_buffer)
     seizeArrayListMap<double>(org_buffer);
     seizeArrayListMap<string>(org_buffer);
     seizeArrayListMap<json>(org_buffer);
+    seizeArrayListMap<boost::posix_time::ptime>(org_buffer);
 
     data_size_ += org_buffer.data_size_;
 
@@ -417,6 +436,8 @@ void Buffer::cutToSize(size_t size)
         it.second->cutToSize(size);
     for (auto& it : getArrayListMap<json>())
         it.second->cutToSize(size);
+    for (auto& it : getArrayListMap<boost::posix_time::ptime>())
+        it.second->cutToSize(size);
 
     data_size_ = size;
 }
@@ -449,6 +470,8 @@ void Buffer::cutUpToIndex(size_t index) // everything up to index is removed
             assert (it.second->size() <= data_size_);
         for (auto& it : getArrayListMap<json>())
             assert (it.second->size() <= data_size_);
+        for (auto& it : getArrayListMap<boost::posix_time::ptime>())
+            assert (it.second->size() <= data_size_);
 
         loginf << "Buffer: cutUpToIndex: index " << index << " data_size_ " << data_size_;
     }
@@ -474,6 +497,8 @@ void Buffer::cutUpToIndex(size_t index) // everything up to index is removed
     for (auto& it : getArrayListMap<string>())
         it.second->cutUpToIndex(index);
     for (auto& it : getArrayListMap<json>())
+        it.second->cutUpToIndex(index);
+    for (auto& it : getArrayListMap<boost::posix_time::ptime>())
         it.second->cutUpToIndex(index);
 
     data_size_ -= index+1;
@@ -504,6 +529,9 @@ void Buffer::cutUpToIndex(size_t index) // everything up to index is removed
             assert (it.second->size() <= data_size_);
         for (auto& it : getArrayListMap<json>())
             assert (it.second->size() <= data_size_);
+        for (auto& it : getArrayListMap<boost::posix_time::ptime>())
+            assert (it.second->size() <= data_size_);
+
     }
 }
 
@@ -535,6 +563,8 @@ void Buffer::removeIndexes(const std::vector<size_t>& indexes_to_remove)
             assert (it.second->size() <= data_size_);
         for (auto& it : getArrayListMap<json>())
             assert (it.second->size() <= data_size_);
+        for (auto& it : getArrayListMap<boost::posix_time::ptime>())
+            assert (it.second->size() <= data_size_);
 
         loginf << "Buffer: removeIndexes: indexes " << indexes_to_remove.size() << " data_size_ " << data_size_;
     }
@@ -563,6 +593,9 @@ void Buffer::removeIndexes(const std::vector<size_t>& indexes_to_remove)
             it.second->clearData();
         for (auto& it : getArrayListMap<json>())
             it.second->clearData();
+        for (auto& it : getArrayListMap<boost::posix_time::ptime>())
+            it.second->clearData();
+
     }
     else
     {
@@ -588,6 +621,9 @@ void Buffer::removeIndexes(const std::vector<size_t>& indexes_to_remove)
             it.second->removeIndexes(indexes_to_remove);
         for (auto& it : getArrayListMap<json>())
             it.second->removeIndexes(indexes_to_remove);
+        for (auto& it : getArrayListMap<boost::posix_time::ptime>())
+            it.second->removeIndexes(indexes_to_remove);
+
     }
 
     data_size_ -= indexes_to_remove.size();
@@ -618,6 +654,9 @@ void Buffer::removeIndexes(const std::vector<size_t>& indexes_to_remove)
             assert (it.second->size() <= data_size_);
         for (auto& it : getArrayListMap<json>())
             assert (it.second->size() <= data_size_);
+        for (auto& it : getArrayListMap<boost::posix_time::ptime>())
+            assert (it.second->size() <= data_size_);
+
     }
 }
 
@@ -671,6 +710,9 @@ bool Buffer::isNull(const Property& property, unsigned int index)
         case PropertyDataType::JSON:
             assert(getArrayListMap<json>().count(property.name()));
             return getArrayListMap<json>().at(property.name())->isNull(index);
+        case PropertyDataType::TIMESTAMP:
+            assert(getArrayListMap<boost::posix_time::ptime>().count(property.name()));
+            return getArrayListMap<boost::posix_time::ptime>().at(property.name())->isNull(index);
         default:
             logerr << "Buffer: isNone: unknown property type "
                    << Property::asString(property.dataType());
@@ -683,7 +725,7 @@ void Buffer::transformVariables(dbContent::VariableSet& list, bool dbcol2dbovar)
 {
     logdbg << "Buffer: transformVariables: dbo '" << dbcontent_name_ << "' dbcol2dbovar " << dbcol2dbovar;
 
-    vector<dbContent::Variable*>& variables = list.getSet();
+    const vector<dbContent::Variable*>& variables = list.getSet();
     string variable_name;
     string db_column_name;
 
@@ -791,6 +833,11 @@ void Buffer::transformVariables(dbContent::VariableSet& list, bool dbcol2dbovar)
                     rename<json>(current_var_name, transformed_var_name);
                     break;
                 }
+                case PropertyDataType::TIMESTAMP:
+                {
+                    rename<boost::posix_time::ptime>(current_var_name, transformed_var_name);
+                    break;
+                }
                 default:
                     logerr << "Buffer: transformVariables: unknown property type "
                            << Property::asString(data_type);
@@ -858,7 +905,7 @@ shared_ptr<Buffer> Buffer::getPartialCopy(const PropertyList& partial_properties
                 tmp_buffer->get<float>(prop.name()).copyData(get<float>(prop.name()));
                 break;
             case PropertyDataType::DOUBLE:
-                logdbg << "Buffer: getPartialCopy: adding bool property " << prop.name()
+                logdbg << "Buffer: getPartialCopy: adding DOUBLE property " << prop.name()
                           << " size " << get<double>(prop.name()).size();
                 tmp_buffer->get<double>(prop.name()).copyData(get<double>(prop.name()));
                 break;
@@ -871,6 +918,11 @@ shared_ptr<Buffer> Buffer::getPartialCopy(const PropertyList& partial_properties
                 logdbg << "Buffer: getPartialCopy: adding JSON property " << prop.name()
                           << " size " << get<json>(prop.name()).size();
                 tmp_buffer->get<json>(prop.name()).copyData(get<json>(prop.name()));
+                break;
+            case PropertyDataType::TIMESTAMP:
+                logdbg << "Buffer: getPartialCopy: adding TIMESTAMP property " << prop.name()
+                          << " size " << get<boost::posix_time::ptime>(prop.name()).size();
+                tmp_buffer->get<boost::posix_time::ptime>(prop.name()).copyData(get<boost::posix_time::ptime>(prop.name()));
                 break;
             default:
                 logerr << "Buffer: getPartialCopy: unknown property type "
@@ -929,6 +981,10 @@ nlohmann::json Buffer::asJSON(unsigned int max_size)
         for (auto& it : getArrayListMap<json>())
             if (!it.second->isNull(cnt))
                 j[cnt][it.second->propertyName()] = it.second->get(cnt);
+        for (auto& it : getArrayListMap<boost::posix_time::ptime>())
+            if (!it.second->isNull(cnt))
+                j[cnt][it.second->propertyName()] = Utils::Time::toString(it.second->get(cnt));
+
     }
 
     return j;

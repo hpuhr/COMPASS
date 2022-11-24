@@ -77,7 +77,7 @@ public:
     dbContent::Variable* trackerTRIsVar() const;
     dbContent::MetaVariable* keyVar() const;
     dbContent::MetaVariable* hashVar() const;
-    dbContent::MetaVariable* todVar() const;
+    dbContent::MetaVariable* timestampVar() const;
 
     float endTrackTime() const;
     void endTrackTime(float end_track_time);
@@ -133,7 +133,7 @@ protected:
 
     dbContent::MetaVariable* rec_num_var_{nullptr};
     dbContent::MetaVariable* hash_var_{nullptr}; // contains artas md5 for target reports, tris for tracker
-    dbContent::MetaVariable* tod_var_{nullptr};
+    dbContent::MetaVariable* timestamp_var_{nullptr};
     dbContent::MetaVariable* associations_var_{nullptr};
 
     boost::posix_time::ptime start_time_;

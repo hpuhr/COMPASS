@@ -92,6 +92,16 @@ void ViewContainer::addView(const std::string& class_name)
     generateSubConfigurable(class_name, class_name + std::to_string(view_manager_.newViewNumber()));
 }
 
+void ViewContainer::enableViewTab(QWidget* widget, bool value)
+{
+    assert (widget);
+
+    int index = tab_widget_->indexOf(widget);
+
+    assert (index >= 0); // check if has widget
+    tab_widget_->setTabEnabled(index, value);;
+}
+
 void ViewContainer::showView(QWidget* widget)
 {
     assert (widget);

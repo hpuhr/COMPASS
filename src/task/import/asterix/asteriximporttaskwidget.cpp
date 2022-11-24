@@ -21,6 +21,7 @@
 #include "asterixoverridewidget.h"
 #include "logger.h"
 #include "dbcontent/selectdialog.h"
+#include "util/timeconv.h"
 
 #include <QCheckBox>
 #include <QComboBox>
@@ -34,6 +35,7 @@
 #include <QPushButton>
 #include <QStackedWidget>
 #include <QVBoxLayout>
+#include <QDateEdit>
 
 using namespace Utils;
 using namespace std;
@@ -79,12 +81,28 @@ void ASTERIXImportTaskWidget::addMainTab()
         {
             loginf << "ASTERIXImportTaskWidget: addMainTab: is file import";
 
+            // line
             QComboBox* file_line_box = new QComboBox();
             file_line_box->addItems({"1", "2", "3", "4"});
 
             connect(file_line_box, &QComboBox::currentTextChanged,
                     this, &ASTERIXImportTaskWidget::fileLineIDEditSlot);
             source_layout->addRow("Line ID", file_line_box);
+
+            // date
+            QDateEdit* date_edit = new QDateEdit();
+            date_edit->setDisplayFormat("yyyy-MM-dd");
+
+            //loginf << "UGA " << Time::toDateString(task_.date());
+
+            QDate date = QDate::fromString(Time::toDateString(task_.date()).c_str(), "yyyy-MM-dd");
+            //loginf << "UGA2 " << date.toString().toStdString();
+
+            date_edit->setDate(date);
+
+            connect(date_edit, &QDateEdit::dateChanged,
+                    this, &ASTERIXImportTaskWidget::dateChangedSlot);
+            source_layout->addRow("UTC Day", date_edit);
         }
 
         updateSourceLabel();
@@ -352,6 +370,15 @@ void ASTERIXImportTaskWidget::fileLineIDEditSlot(const QString& text)
     assert (line_id > 0 && line_id <= 4);
 
     task_.fileLineID(line_id-1);
+}
+
+void ASTERIXImportTaskWidget::dateChangedSlot(QDate date)
+{
+    string tmp = date.toString("yyyy-MM-dd").toStdString();
+
+    loginf << "ASTERIXImportTaskWidget: dateChangedSlot: " << tmp;
+
+    task_.date(Time::fromDateString(tmp));
 }
 
 void ASTERIXImportTaskWidget::updateParserBox()

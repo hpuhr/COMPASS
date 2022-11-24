@@ -29,11 +29,14 @@
 #include "mainwindow.h"
 
 #include "json.hpp"
+#include "util/tbbhack.h"
 
 #include <QApplication>
 #include <QMessageBox>
 #include <QSurfaceFormat>
 #include <QSplashScreen>
+
+#include "util/tbbhack.h"
 
 #include <boost/filesystem.hpp>
 #include <boost/program_options.hpp>
@@ -42,8 +45,6 @@
 #include <string>
 #include <locale.h>
 #include <thread>
-
-#include <tbb/tbb.h>
 
 #if USE_EXPERIMENTAL_SOURCE == true
 #include <osgDB/Registry>
@@ -63,8 +64,6 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
     setlocale(LC_ALL, "C");
 
     APP_FILENAME = argv[0];
-
-    tbb::task_scheduler_init guard(std::thread::hardware_concurrency());
 
     //    QApplication::setAttribute(Qt::AA_ShareOpenGLContexts);
 
@@ -111,25 +110,31 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
              "imports ASTERIX file with given filename, e.g. '/data/file1.ff'")
             ("import_asterix_file_line", po::value<std::string>(&import_asterix_file_line_),
              "imports ASTERIX file with given line, e.g. 'L2'")
+            ("import_asterix_date", po::value<std::string>(&import_asterix_date_),
+             "imports ASTERIX file with given date, in YYYY-MM-DD format e.g. '2020-04-20'")
+            ("import_asterix_file_time_offset", po::value<std::string>(&import_asterix_file_time_offset_),
+             "used time offset during ASTERIX file import Time of Day override, in HH:MM:SS.ZZZ'")
             ("import_asterix_network", po::bool_switch(&import_asterix_network_),
              "imports ASTERIX from defined network UDP streams")
             ("import_asterix_network_time_offset", po::value<std::string>(&import_asterix_network_time_offset_),
-             "used time offset during ASTERIX network import, in HH:MM:SS.ZZZ'")
+             "additive time offset during ASTERIX network import, in HH:MM:SS.ZZZ'")
             ("import_asterix_network_max_lines", po::value<int>(&import_asterix_network_max_lines_),
              "maximum number of lines per data source during ASTERIX network import, 1..4'")
+            ("import_asterix_network_ignore_future_ts", po::bool_switch(&import_asterix_network_ignore_future_ts_),
+             "ignore future timestamps during ASTERIX network import'")
             ("asterix_framing", po::value<std::string>(&asterix_framing),
              "sets ASTERIX framing, e.g. 'none', 'ioss', 'ioss_seq', 'rff'")
             ("asterix_decoder_cfg", po::value<std::string>(&asterix_decoder_cfg),
              "sets ASTERIX decoder config using JSON string, e.g. ''{\"10\":{\"edition\":\"0.31\"}}''"
-                         " (including one pair of single quotes)")
-            //            ("import_json", po::value<std::string>(&import_json_filename),
-            //             "imports JSON file with given filename, e.g. '/data/file1.json'")
+             " (including one pair of single quotes)")
+            ("import_json", po::value<std::string>(&import_json_filename_),
+             "imports JSON file with given filename, e.g. '/data/file1.json'")
             //            ("json_schema", po::value<std::string>(&import_json_schema),
             //             "JSON file import schema, e.g. 'jASTERIX', 'OpenSkyNetwork', 'ADSBExchange', 'SDDL'")
             ("import_gps_trail", po::value<std::string>(&import_gps_trail_filename_),
              "imports gps trail NMEA with given filename, e.g. '/data/file2.txt'")
             ("import_gps_parameters", po::value<std::string>(&import_gps_parameters_),
-               "import GPS parameters as JSON string, e.g. ''{\"callsign\": \"ENTRPRSE\", \"ds_name\": \"GPS Trail\", \"ds_sac\": 0, \"ds_sic\": 0, \"mode_3a_code\": 961, \"set_callsign\": true, \"set_mode_3a_code\": true, \"set_target_address\": true, \"target_address\": 16702992, \"tod_offset\": 0.0}'' (including one pair of single quotes)")
+             "import GPS parameters as JSON string, e.g. ''{\"callsign\": \"ENTRPRSE\", \"ds_name\": \"GPS Trail\", \"ds_sac\": 0, \"ds_sic\": 0, \"mode_3a_code\": 961, \"set_callsign\": true, \"set_mode_3a_code\": true, \"set_target_address\": true, \"target_address\": 16702992, \"tod_offset\": 0.0}'' (including one pair of single quotes)")
             ("import_sectors_json", po::value<std::string>(&import_sectors_filename_),
              "imports exported sectors JSON with given filename, e.g. '/data/sectors.json'")
             ("calculate_radar_plot_positions", po::bool_switch(&calculate_radar_plot_positions_),
@@ -140,7 +145,7 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
              "export view points report after start with given filename, e.g. '/data/db2/report.tex")
             ("evaluate", po::bool_switch(&evaluate_), "run evaluation")
             ("evaluation_parameters", po::value<std::string>(&evaluation_parameters_),
-               "evaluation parameters as JSON string, e.g. ''{\"current_standard\": \"test\", \"dbcontent_name_ref\": \"CAT062\", \"dbcontent_name_tst\": \"CAT020\"}'' (including one pair of single quotes)")
+             "evaluation parameters as JSON string, e.g. ''{\"current_standard\": \"test\", \"dbcontent_name_ref\": \"CAT062\", \"dbcontent_name_tst\": \"CAT020\"}'' (including one pair of single quotes)")
             ("evaluate_run_filter", po::bool_switch(&evaluate_run_filter_), "run evaluation filter before evaluation")
             ("export_eval_report", po::value<std::string>(&export_eval_report_filename_),
              "export evaluation report after start with given filename, e.g. '/data/eval_db2/report.tex")
@@ -188,7 +193,23 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
 
 void Client::run ()
 {
-    loginf << "COMPASSClient: started with " << std::thread::hardware_concurrency() << " threads";
+    // #define TBB_VERSION_MAJOR 4
+
+#if TBB_VERSION_MAJOR <= 4
+
+    // in appimage
+
+    unsigned int num_threads = std::thread::hardware_concurrency();
+
+    loginf << "COMPASSClient: started with " << num_threads << " threads (tbb old)";
+    tbb::task_scheduler_init init {num_threads};
+
+#else
+
+    int num_threads = oneapi::tbb::info::default_concurrency();
+
+    loginf << "COMPASSClient: started with " << num_threads << " threads";
+#endif
 
     QPixmap pixmap(Files::getImageFilepath("logo.png").c_str());
     QSplashScreen splash(pixmap);
@@ -251,6 +272,33 @@ void Client::run ()
             task_man.asterixImporterTask().fileLineID(file_line);
         }
 
+        if (import_asterix_date_.size())
+        {
+            task_man.asterixImporterTask().date(Time::fromDateString(import_asterix_date_));
+        }
+
+        if (import_asterix_file_time_offset_.size())
+        {
+            bool ok {true};
+
+            double time_offset = String::timeFromString(import_asterix_file_time_offset_, &ok);
+
+            if (!ok)
+            {
+                logerr << "COMPASSClient: import_asterix_file_time_offset set to invalid value '"
+                       << import_asterix_file_time_offset_ << "'";
+                quit_requested_ = true;
+                return;
+            }
+
+            task_man.asterixImporterTask().overrideTodActive(true);
+            task_man.asterixImporterTask().overrideTodOffset(time_offset);
+        }
+
+        if (import_asterix_network_ignore_future_ts_)
+        {
+            task_man.asterixImporterTask().importAsterixNetworkIgnoreFutureTimestamp(true);
+        }
     }
     catch (exception& e)
     {
@@ -278,8 +326,8 @@ void Client::run ()
         main_window.importAsterixNetworkMaxLines(import_asterix_network_max_lines_);
     }
 
-    //    if (import_json_filename.size())
-    //        task_man.importJSONFile(import_json_filename, import_json_schema);
+    if (import_json_filename_.size())
+        main_window.importJSONFile(import_json_filename_); // , import_json_schema
 
     if (import_gps_trail_filename_.size())
         main_window.importGPSTrailFile(import_gps_trail_filename_);
@@ -310,6 +358,7 @@ void Client::run ()
 
     if (quit_)
         main_window.quit(quit_);
+
 }
 
 Client::~Client()

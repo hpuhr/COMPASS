@@ -33,6 +33,7 @@
 #include <QMessageBox>
 #include <QPushButton>
 #include <QVBoxLayout>
+#include <QScrollArea>
 
 using namespace std;
 using namespace Utils;
@@ -43,7 +44,25 @@ DataSourcesLoadWidget::DataSourcesLoadWidget(DataSourceManager& ds_man)
     QFont font_bold;
     font_bold.setBold(true);
 
+    QVBoxLayout* sub_layout = new QVBoxLayout();
+    sub_layout->setContentsMargins(0, 0, 0, 0);
+
+    QScrollArea* scroll_area = new QScrollArea();
+    scroll_area->setWidgetResizable(true);
+    scroll_area->setContentsMargins(0, 0, 0, 0);
+//    scroll_area->setStyleSheet(" QAbstractScrollArea { background-color: transparent; }"
+//                               " QWidget#scrollAreaWidgetContents{ background-color: transparent; }");
+
+    sub_layout->addWidget(scroll_area);
+
+    QWidget* sub_widget = new QWidget();
+    sub_widget->setContentsMargins(0, 0, 0, 0);
+    //sub_widget->setStyleSheet("background-color: white"); // works but overrides line colors
+
+    scroll_area->setWidget(sub_widget);
+
     QVBoxLayout* main_layout = new QVBoxLayout();
+    //main_layout->setContentsMargins(1, 1, 1, 1);
 
     // button
 
@@ -96,7 +115,9 @@ DataSourcesLoadWidget::DataSourcesLoadWidget(DataSourceManager& ds_man)
 
     updateContent();
 
-    setLayout(main_layout);
+    sub_widget->setLayout(main_layout);
+
+    setLayout(sub_layout);
 
     // menu
 //    QAction* sel_dstyp_action = edit_menu_.addAction("Select All DSTypes");
@@ -269,6 +290,8 @@ void DataSourcesLoadWidget::updateContent()
     }
     else
         associations_label_->setText("None");
+
+    arrangeSourceWidgetWidths();
 }
 
 void DataSourcesLoadWidget::clear()
@@ -285,6 +308,24 @@ void DataSourcesLoadWidget::clear()
         type_layout_->removeItem(item);
 }
 
+void DataSourcesLoadWidget::arrangeSourceWidgetWidths()
+{
+    loginf << "DataSourcesLoadWidget: arrangeSourceWidgetWidths";
+
+    unsigned int min_width = 0;
+
+    for (auto& widget_it : ds_widgets_)
+        min_width = max(min_width, widget_it.second->getLabelMinWidth());
+
+    if (min_width)
+    {
+        loginf << "DataSourcesLoadWidget: arrangeSourceWidgetWidths: setting width " << min_width;
+
+        for (auto& widget_it : ds_widgets_)
+            widget_it.second->updateLabelMinWidth(min_width);
+    }
+}
+
 void DataSourcesLoadWidget::clearAndCreateContent()
 {
     logdbg << "DataSourcesLoadWidget: clearAndCreateContent";
@@ -293,6 +334,7 @@ void DataSourcesLoadWidget::clearAndCreateContent()
 
     QFont font_bold;
     font_bold.setBold(true);
+    font_bold.setPointSize(ds_man_.dsFontSize());
 
     unsigned int row = 0;
     unsigned int col = 0;
@@ -314,7 +356,7 @@ void DataSourcesLoadWidget::clearAndCreateContent()
     {
         logdbg << "DataSourcesLoadWidget: clearAndCreateContent: typ " << ds_type_name << " cnt " << dstyp_cnt;
 
-        if (ds_type_name == "MLAT" || ds_type_name == "Tracker" || ds_type_name == "Other")  // break into next column
+        if (ds_type_name == "MLAT" || ds_type_name == "Tracker")  // break into next column
         {
             row = 0;
             col++;
@@ -328,7 +370,7 @@ void DataSourcesLoadWidget::clearAndCreateContent()
         connect(dstyp_box, &QCheckBox::clicked,
                 this, &DataSourcesLoadWidget::loadDSTypeChangedSlot);
 
-        dstyp_box->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+        dstyp_box->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Preferred);
 
         type_layout_->addWidget(dstyp_box, row, col);
 

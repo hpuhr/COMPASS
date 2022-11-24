@@ -74,12 +74,12 @@ void SingleDubiousTrack::update()
 
         for (auto& detail_it : details_)
         {
-            track_duration_all_ += detail_it.duration_;
+            track_duration_all_ += Time::partialSeconds(detail_it.duration_);
 
             if (detail_it.is_dubious_)
-                track_duration_dubious_ += detail_it.duration_;
+                track_duration_dubious_ += Time::partialSeconds(detail_it.duration_);
             else
-                track_duration_nondub_ += detail_it.duration_;
+                track_duration_nondub_ += Time::partialSeconds(detail_it.duration_);
         }
     }
     else
@@ -380,7 +380,7 @@ void SingleDubiousTrack::reportDetails(EvaluationResultsReport::Section& utn_req
         for (auto& update : rq_det_it.updates_)
         {
             utn_req_details_table.addRow(
-                        {String::timeStringFromDouble(update.tod_).c_str(),
+                        {Time::toString(update.timestamp_).c_str(),
                          rq_det_it.track_num_,
                          update.dubiousReasonsString().c_str()}, // "Comment"
                         this, {detail_update_cnt});
@@ -444,14 +444,14 @@ std::unique_ptr<nlohmann::json::object_t> SingleDubiousTrack::viewableData(
         const EvaluationRequirement::DubiousTrackUpdateDetail& update_detail =
                 detail.updates_.at(per_detail_update_cnt);
 
-        (*viewable_ptr)["position_latitude"] = update_detail.pos_.latitude_;
-        (*viewable_ptr)["position_longitude"] = update_detail.pos_.longitude_;
-        (*viewable_ptr)["position_window_latitude"] = eval_man_.resultDetailZoom();
-        (*viewable_ptr)["position_window_longitude"] = eval_man_.resultDetailZoom();
-        (*viewable_ptr)["time"] = update_detail.tod_;
+        (*viewable_ptr)[VP_POS_LAT_KEY] = update_detail.pos_.latitude_;
+        (*viewable_ptr)[VP_POS_LON_KEY] = update_detail.pos_.longitude_;
+        (*viewable_ptr)[VP_POS_WIN_LAT_KEY] = eval_man_.resultDetailZoom();
+        (*viewable_ptr)[VP_POS_WIN_LON_KEY] = eval_man_.resultDetailZoom();
+        (*viewable_ptr)[VP_TIMESTAMP_KEY] = Time::toString(update_detail.timestamp_);
 
         if (update_detail.dubious_comments_.size())
-            (*viewable_ptr)["evaluation_results"]["highlight_details"] = vector<unsigned int>{detail_update_cnt};
+            (*viewable_ptr)[VP_EVAL_KEY][VP_EVAL_HIGHDET_KEY] = vector<unsigned int>{detail_update_cnt};
 
         return viewable_ptr;
     }

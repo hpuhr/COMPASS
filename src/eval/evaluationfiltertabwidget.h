@@ -10,6 +10,7 @@ class EvaluationManagerWidget;
 
 class QLineEdit;
 class QCheckBox;
+class QDateTimeEdit;
 
 class EvaluationFilterTabWidget : public QWidget
 {
@@ -19,8 +20,8 @@ private slots:
     void toggleUseFiltersSlot();
 
     void toggleUseTimeSlot();
-    void timeBeginEditedSlot (const QString& text);
-    void timeEndEditedSlot (const QString& text);
+    void timeBeginEditedSlot (const QDateTime& datetime);
+    void timeEndEditedSlot (const QDateTime& datetime);
 
     void toggleUseADSBSlot();
     void toggleUseV0Slot();
@@ -64,8 +65,8 @@ protected:
     QCheckBox* use_filter_check_{nullptr};
 
     QCheckBox* use_time_check_{nullptr};
-    QLineEdit* time_begin_edit_{nullptr};
-    QLineEdit* time_end_edit_{nullptr};
+    QDateTimeEdit* time_begin_edit_{nullptr};
+    QDateTimeEdit* time_end_edit_{nullptr};
 
     QCheckBox* use_adsb_check_{nullptr};
 
@@ -107,6 +108,8 @@ protected:
 
     QCheckBox* use_max_sil_v2_check_{nullptr};
     QLineEdit* max_sil_v2_edit_{nullptr};
+
+    bool update_active_ {false};
 };
 
 #endif // EVALUATIONFILTERTABWIDGET_H

@@ -222,8 +222,8 @@ namespace EvaluationRequirementResult
         tie(lat_min, lat_max) = sector_layer_.getMinMaxLatitude();
         tie(lon_min, lon_max) = sector_layer_.getMinMaxLongitude();
 
-        (*viewable_ptr)["position_latitude"] = (lat_max+lat_min)/2.0;
-        (*viewable_ptr)["position_longitude"] = (lon_max+lon_min)/2.0;;
+        (*viewable_ptr)[VP_POS_LAT_KEY] = (lat_max+lat_min)/2.0;
+        (*viewable_ptr)[VP_POS_LON_KEY] = (lon_max+lon_min)/2.0;;
 
         double lat_w = 1.1*(lat_max-lat_min)/2.0;
         double lon_w = 1.1*(lon_max-lon_min)/2.0;
@@ -234,8 +234,8 @@ namespace EvaluationRequirementResult
         if (lon_w < eval_man_.resultDetailZoom())
             lon_w = eval_man_.resultDetailZoom();
 
-        (*viewable_ptr)["position_window_latitude"] = lat_w;
-        (*viewable_ptr)["position_window_longitude"] = lon_w;
+        (*viewable_ptr)[VP_POS_WIN_LAT_KEY] = lat_w;
+        (*viewable_ptr)[VP_POS_WIN_LON_KEY] = lon_w;
 
         return viewable_ptr;
     }

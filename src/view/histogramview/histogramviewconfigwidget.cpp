@@ -37,7 +37,7 @@
 using namespace Utils;
 
 HistogramViewConfigWidget::HistogramViewConfigWidget(HistogramView* view, QWidget* parent)
-    : QWidget(parent), view_(view)
+    : ViewConfigWidget(parent), view_(view)
 {
     assert(view_);
 
@@ -241,10 +241,10 @@ void HistogramViewConfigWidget::updateEvalConfig()
     selected_var_check_->setChecked(!view_->showResults());
 }
 
-void HistogramViewConfigWidget::setStatus (const std::string& status, bool visible, QColor color)
+void HistogramViewConfigWidget::setStatus (const QString& text, bool visible, const QColor& color)
 {
     assert (status_label_);
-    status_label_->setText(status.c_str());
+    status_label_->setText(text);
     //status_label_->setStyleSheet("QLabel { color : "+color.name()+"; }");
 
     QPalette palette = status_label_->palette();
@@ -252,6 +252,14 @@ void HistogramViewConfigWidget::setStatus (const std::string& status, bool visib
     status_label_->setPalette(palette);
 
     status_label_->setVisible(visible);
+}
+
+void HistogramViewConfigWidget::appModeSwitch (AppMode app_mode)
+{
+    assert (reload_button_);
+    reload_button_->setHidden(app_mode == AppMode::LiveRunning);
+    assert (status_label_);
+    status_label_->setHidden(app_mode == AppMode::LiveRunning);
 }
 
 void HistogramViewConfigWidget::reloadRequestedSlot()

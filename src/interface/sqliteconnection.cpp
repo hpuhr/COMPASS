@@ -27,6 +27,7 @@
 #include "savedfile.h"
 #include "stringconv.h"
 #include "files.h"
+#include "util/timeconv.h"
 
 #include <QApplication>
 
@@ -55,8 +56,10 @@ void SQLiteConnection::openFile(const std::string& file_name)
 
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
-    int result = sqlite3_open_v2(file_name.c_str(), &db_handle_, //":memory:"
+    int result = sqlite3_open_v2(file_name.c_str(), &db_handle_,
                                  SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE, NULL);
+
+//    int result = sqlite3_open(":memory:", &db_handle_);
 
     if (result != SQLITE_OK)
     {
@@ -67,14 +70,13 @@ void SQLiteConnection::openFile(const std::string& file_name)
         sqlite3_close(db_handle_);
         throw std::runtime_error("SQLiteConnection: openFile: error");
     }
+
     char* sErrMsg = 0;
     sqlite3_exec(db_handle_, "PRAGMA SYNCHRONOUS = OFF", NULL, NULL, &sErrMsg);
     sqlite3_exec(db_handle_, "PRAGMA TEMP_STORE = 2", NULL, NULL, &sErrMsg);
     sqlite3_exec(db_handle_, "PRAGMA JOURNAL_MODE = OFF", NULL, NULL, &sErrMsg);
     sqlite3_exec(db_handle_, "PRAGMA LOCKING_MODE = EXCLUSIVE", NULL, NULL, &sErrMsg);
     sqlite3_exec(db_handle_, "PRAGMA CACHE_SIZE = 500", NULL, NULL, &sErrMsg);
-
-
 
     //sqlite3_exec(db_handle_, "PRAGMA locking_mode = EXCLUSIVE", NULL, NULL, &sErrMsg);
 
@@ -183,6 +185,12 @@ void SQLiteConnection::bindVariable(unsigned int index, const std::string& value
 {
     logdbg << "SQLiteConnection: bindVariable: index " << index << " value '" << value << "'";
     sqlite3_bind_text(statement_, index, value.c_str(), -1, SQLITE_TRANSIENT);
+}
+
+void SQLiteConnection::bindVariable(unsigned int index, long value)
+{
+    logdbg << "SQLiteConnection: bindVariable: index " << index << " value '" << value << "'";
+    sqlite3_bind_int64(statement_, index, value);
 }
 
 void SQLiteConnection::bindVariableNull(unsigned int index)
@@ -372,6 +380,34 @@ void SQLiteConnection::readRowIntoBuffer(const PropertyList& list, unsigned int 
                     logdbg << "SQLiteConnection: readRowIntoBuffer: unsigned int index " << index
                            << " property '" << prop.name() << " is null";
                 break;
+            case PropertyDataType::LONGINT:
+                if (sqlite3_column_type(statement_, cnt) != SQLITE_NULL)
+                {
+                    logdbg << "SQLiteConnection: readRowIntoBuffer: int index " << index
+                           << " property '" << prop.name()
+                           << "' value " << sqlite3_column_int64(statement_, cnt);
+
+                    buffer->get<long>(prop.name())
+                            .set(index, sqlite3_column_int64(statement_, cnt));
+                }
+                else
+                    logdbg << "SQLiteConnection: readRowIntoBuffer: int index " << index
+                           << " property '" << prop.name() << " is null";
+                break;
+            case PropertyDataType::ULONGINT:
+                if (sqlite3_column_type(statement_, cnt) != SQLITE_NULL)
+                {
+                    logdbg << "SQLiteConnection: readRowIntoBuffer: unsigned int index " << index
+                           << " property '" << prop.name()
+                           << "' value " << static_cast<unsigned long>(sqlite3_column_int64(statement_, cnt));
+
+                    buffer->get<unsigned long>(prop.name())
+                            .set(index, static_cast<unsigned long>(sqlite3_column_int64(statement_, cnt)));
+                }
+                else
+                    logdbg << "SQLiteConnection: readRowIntoBuffer: unsigned int index " << index
+                           << " property '" << prop.name() << " is null";
+                break;
             case PropertyDataType::FLOAT:
                 if (sqlite3_column_type(statement_, cnt) != SQLITE_NULL)
                 {
@@ -430,6 +466,21 @@ void SQLiteConnection::readRowIntoBuffer(const PropertyList& list, unsigned int 
                 }
                 else
                     logdbg << "SQLiteConnection: readRowIntoBuffer: string index " << index
+                           << " property '" << prop.name() << " is null";
+                break;
+            case PropertyDataType::TIMESTAMP:
+                if (sqlite3_column_type(statement_, cnt) != SQLITE_NULL)
+                {
+                    logdbg << "SQLiteConnection: readRowIntoBuffer: unsigned int index " << index
+                           << " property '" << prop.name()
+                           << "' value " << Time::toStringLong(
+                                  static_cast<unsigned long>(sqlite3_column_int64(statement_, cnt)));
+
+                    buffer->get<boost::posix_time::ptime>(prop.name())
+                            .set(index, Time::fromLong(static_cast<unsigned long>(sqlite3_column_int64(statement_, cnt))));
+                }
+                else
+                    logdbg << "SQLiteConnection: readRowIntoBuffer: unsigned int index " << index
                            << " property '" << prop.name() << " is null";
                 break;
             default:

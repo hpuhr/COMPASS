@@ -112,7 +112,7 @@ DubiousTargetConfigWidget::DubiousTargetConfigWidget(DubiousTargetConfig& cfg)
     connect(use_max_acceleration_check_, &QCheckBox::clicked,
             this, &DubiousTargetConfigWidget::toggleUseMaxAccelerationSlot);
 
-    form_layout_->addRow("Use Maximum Groundspeed", use_max_acceleration_check_);
+    form_layout_->addRow("Use Maximum Acceleration", use_max_acceleration_check_);
 
     // max accel
     max_acceleration_edit_ = new QLineEdit(QString::number(config().maxAcceleration()));

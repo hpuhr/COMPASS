@@ -388,31 +388,31 @@ void ListBoxViewDataSource::addDefaultVariables (VariableOrderedSet& set)
     if (dbcont_man.existsMetaVariable(DBContent::meta_var_rec_num_.name()))
         set.add(dbcont_man.metaVariable(DBContent::meta_var_rec_num_.name()));
 
-    //        Time of Day
-    if (dbcont_man.existsMetaVariable(DBContent::meta_var_tod_.name()))
-        set.add(dbcont_man.metaVariable(DBContent::meta_var_tod_.name()));
+    // Timestamp
+    if (dbcont_man.existsMetaVariable(DBContent::meta_var_timestamp_.name()))
+        set.add(dbcont_man.metaVariable(DBContent::meta_var_timestamp_.name()));
 
-    //        Datasource
+    // Datasource
     if (dbcont_man.existsMetaVariable(DBContent::meta_var_datasource_id_.name()))
         set.add(dbcont_man.metaVariable(DBContent::meta_var_datasource_id_.name()));
 
-    //        Mode 3/A code
+    // Mode 3/A code
     if (dbcont_man.existsMetaVariable(DBContent::meta_var_m3a_.name()))
         set.add(dbcont_man.metaVariable(DBContent::meta_var_m3a_.name()));
 
-    //        Mode S TA
+    // Mode S TA
     if (dbcont_man.existsMetaVariable(DBContent::meta_var_ta_.name()))
         set.add(dbcont_man.metaVariable(DBContent::meta_var_ta_.name()));
 
-    //        Mode S Callsign
+    // Mode S Callsign
     if (dbcont_man.existsMetaVariable(DBContent::meta_var_ti_.name()))
         set.add(dbcont_man.metaVariable(DBContent::meta_var_ti_.name()));
 
-    //        Mode C
+    // Mode C
     if (dbcont_man.existsMetaVariable(DBContent::meta_var_mc_.name()))
         set.add(dbcont_man.metaVariable(DBContent::meta_var_mc_.name()));
 
-    //        Track Number
+    // Track Number
     if (dbcont_man.existsMetaVariable(DBContent::meta_var_track_num_.name()))
         set.add(dbcont_man.metaVariable(DBContent::meta_var_track_num_.name()));
 }

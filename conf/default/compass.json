@@ -2,7 +2,9 @@
     "parameters": {
         "db_file_list": [
         ],
-        "last_db_filename": ""
+        "hide_evaluation": false,
+        "hide_viewpoints": false,
+        "last_db_filename": "/home/sk/data/austria/live_test/test.db"
     },
     "sub_config_files": [
         {

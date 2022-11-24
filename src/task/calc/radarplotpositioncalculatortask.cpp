@@ -71,6 +71,8 @@ RadarPlotPositionCalculatorTaskDialog* RadarPlotPositionCalculatorTask::dialog()
                 this, &RadarPlotPositionCalculatorTask::dialogCloseSlot);
     }
 
+    dialog_->updateCanRun();
+
     assert(dialog_);
     return dialog_.get();
 }
@@ -84,10 +86,12 @@ bool RadarPlotPositionCalculatorTask::checkPrerequisites()
         done_ =
                 COMPASS::instance().interface().getProperty(DONE_PROPERTY_NAME) == "1";  // set done flag
 
-    if (!COMPASS::instance().dbContentManager().existsDBContent("Radar"))
+    DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
+
+    if (!dbcont_man.existsDBContent("Radar"))
         return false;
 
-    return COMPASS::instance().dbContentManager().dbContent("Radar").hasData();
+    return dbcont_man.dbContent("Radar").hasData();
 }
 
 bool RadarPlotPositionCalculatorTask::isRecommended()
@@ -102,15 +106,33 @@ bool RadarPlotPositionCalculatorTask::isRequired() { return false; }
 
 bool RadarPlotPositionCalculatorTask::canRun()
 {
-    if (!COMPASS::instance().dbContentManager().existsDBContent("CAT001")
-            && !COMPASS::instance().dbContentManager().existsDBContent("CAT048"))
+    DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
+
+    if (!dbcont_man.existsDBContent("CAT001")
+            && !dbcont_man.existsDBContent("CAT010")
+            && !dbcont_man.existsDBContent("CAT048"))
         return false;
 
-    if (!COMPASS::instance().dbContentManager().dbContent("CAT001").loadable()
-            && !COMPASS::instance().dbContentManager().dbContent("CAT048").loadable())
+    if (!dbcont_man.dbContent("CAT001").loadable()
+            && !dbcont_man.dbContent("CAT010").loadable()
+            && !dbcont_man.dbContent("CAT048").loadable())
         return false;
 
-    return true;
+    const std::vector<std::unique_ptr<dbContent::DBDataSource>>& db_srcs =
+            COMPASS::instance().dataSourceManager().dbDataSources();
+
+    bool found_radar_with_data = false;
+    for (const auto& src : db_srcs)
+    {
+        if (src->dsType() == "Radar" && src->hasNumInserted())
+        {
+            found_radar_with_data = true;
+            break;
+        }
+
+    }
+
+    return found_radar_with_data;
 }
 
 void RadarPlotPositionCalculatorTask::run()
@@ -129,7 +151,7 @@ void RadarPlotPositionCalculatorTask::run()
     COMPASS::instance().viewManager().disableDataDistribution(true);
 
     connect(&dbcontent_man, &DBContentManager::loadedDataSignal,
-            this, &RadarPlotPositionCalculatorTask::loadedDataDataSlot);
+            this, &RadarPlotPositionCalculatorTask::loadedDataSlot);
     connect(&dbcontent_man, &DBContentManager::loadingDoneSignal,
             this, &RadarPlotPositionCalculatorTask::loadingDoneSlot);
 
@@ -149,7 +171,7 @@ void RadarPlotPositionCalculatorTask::run()
 
     for (auto& dbo_it : dbcontent_man)
     {
-        if (dbo_it.first != "CAT001" && dbo_it.first != "CAT048")
+        if (dbo_it.first != "CAT001" && dbo_it.first != "CAT010" && dbo_it.first != "CAT048")
             continue;
 
         if (!dbo_it.second->hasData())
@@ -158,11 +180,11 @@ void RadarPlotPositionCalculatorTask::run()
         VariableSet read_set = getReadSetFor(dbo_it.first);
 
         dbo_it.second->load(read_set, false, false, true,
-                            &dbcontent_man.metaGetVariable(dbo_it.first, DBContent::meta_var_tod_), true);
+                            &dbcontent_man.metaGetVariable(dbo_it.first, DBContent::meta_var_timestamp_), true);
     }
 }
 
-void RadarPlotPositionCalculatorTask::loadedDataDataSlot(
+void RadarPlotPositionCalculatorTask::loadedDataSlot(
         const std::map<std::string, std::shared_ptr<Buffer>>& data, bool requires_reset)
 {
     data_ = data;
@@ -175,7 +197,7 @@ void RadarPlotPositionCalculatorTask::loadingDoneSlot()
     DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
 
     disconnect(&dbcontent_man, &DBContentManager::loadedDataSignal,
-               this, &RadarPlotPositionCalculatorTask::loadedDataDataSlot);
+               this, &RadarPlotPositionCalculatorTask::loadedDataSlot);
     disconnect(&dbcontent_man, &DBContentManager::loadingDoneSignal,
                this, &RadarPlotPositionCalculatorTask::loadingDoneSlot);
 
@@ -200,7 +222,7 @@ void RadarPlotPositionCalculatorTask::loadingDoneSlot()
     for (auto& buf_it : data_)
     {
         dbcontent_name = buf_it.first;
-        assert (dbcontent_name == "CAT001" || dbcontent_name == "CAT048");
+        assert (dbcontent_name == "CAT001" || dbcontent_name == "CAT010" || dbcontent_name == "CAT048");
 
         assert (msg_box_);
         msg_box_->setText(("Processing "+dbcontent_name+" data").c_str());

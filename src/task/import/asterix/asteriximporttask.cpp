@@ -48,6 +48,8 @@
 #include <QMessageBox>
 #include <QThread>
 #include <QProgressDialog>
+#include <QMessageBox>
+#include <QPushButton>
 
 #include <algorithm>
 
@@ -60,7 +62,7 @@ const unsigned int unlimited_chunk_size = 4000;
 
 const std::string DONE_PROPERTY_NAME = "asterix_data_imported";
 
-const float ram_threshold = 4.0;
+//const float ram_threshold = 4.0;
 
 ASTERIXImportTask::ASTERIXImportTask(const std::string& class_id, const std::string& instance_id,
                                      TaskManager& task_manager)
@@ -74,7 +76,11 @@ ASTERIXImportTask::ASTERIXImportTask(const std::string& class_id, const std::str
     registerParameter("file_list", &file_list_, json::array());
     registerParameter("current_file_framing", &current_file_framing_, "");
 
+    date_ = boost::posix_time::ptime(boost::gregorian::day_clock::universal_day());
+
     registerParameter("override_tod_offset", &override_tod_offset_, 0.0);
+
+    registerParameter("ask_discard_cache_on_resume", &ask_discard_cache_on_resume_, true);
 
     std::string jasterix_definition_path = HOME_DATA_DIRECTORY + "jasterix_definitions";
 
@@ -96,6 +102,9 @@ ASTERIXImportTask::ASTERIXImportTask(const std::string& class_id, const std::str
         loginf << "ASTERIXImportTask: constructor: resetting to no framing";
         current_file_framing_ = "";
     }
+
+    logdbg << "ASTERIXImportTask: constructor: thread " << QThread::currentThreadId()
+           << " main " << QApplication::instance()->thread()->currentThreadId();
 }
 
 ASTERIXImportTask::~ASTERIXImportTask()
@@ -576,6 +585,51 @@ void ASTERIXImportTask::fileLineID(unsigned int value)
     file_line_id_ = value;
 }
 
+const boost::posix_time::ptime &ASTERIXImportTask::date() const
+{
+    return date_;
+}
+
+void ASTERIXImportTask::date(const boost::posix_time::ptime& date)
+{
+    date_ = date;
+}
+
+bool ASTERIXImportTask::resumingFromLiveInProgress() const
+{
+    return resuming_from_live_in_progress_;
+}
+
+void ASTERIXImportTask::resumingFromLiveInProgress(bool value)
+{
+    loginf << "ASTERIXImportTask: resumingFromLiveInProgress: value " << value;
+
+    if (decode_job_ && decode_job_->resumingCachedData())
+    {
+        loginf << "ASTERIXImportTask: resumingFromLiveInProgress: value " << value
+               << " ignored since decoder resume active";
+        return;
+    }
+
+    resuming_from_live_in_progress_ = value;
+
+    assert (m_info_);
+    m_info_->close();
+
+    m_info_ = nullptr;
+}
+
+void ASTERIXImportTask::importAsterixNetworkIgnoreFutureTimestamp (bool value)
+{
+    loginf << "ASTERIXImportTask: importAsterixNetworkIgnoreFutureTimestamp: value " << value;
+    network_ignore_future_ts_ = value;
+}
+
+unsigned int ASTERIXImportTask::numPacketsInProcessing() const
+{
+    return num_packets_in_processing_;
+}
+
 bool ASTERIXImportTask::isRunning() const
 {
     return running_;
@@ -676,6 +730,7 @@ void ASTERIXImportTask::run(bool test) // , bool create_mapping_stubs
         COMPASS::instance().appMode(AppMode::LiveRunning); // set live mode
 
     running_ = true;
+    stopped_ = false;
     done_ = false; // since can be run multiple times
 
     num_packets_in_processing_ = 0;
@@ -696,7 +751,11 @@ void ASTERIXImportTask::run(bool test) // , bool create_mapping_stubs
 
     if (import_file_)
     {
-        updateFileProgressDialog();
+        last_file_progress_time_ = boost::posix_time::microsec_clock::local_time();
+
+        updateFileProgressDialog(true);
+
+        file_progress_dialog_->show();
 
         boost::posix_time::ptime start_time = boost::posix_time::microsec_clock::local_time();
 
@@ -706,6 +765,7 @@ void ASTERIXImportTask::run(bool test) // , bool create_mapping_stubs
         }
     }
 
+    assert (!insert_active_);
     insert_active_ = false;
 
     all_done_ = false;
@@ -813,7 +873,7 @@ void ASTERIXImportTask::dialogImportSlot()
 
 void ASTERIXImportTask::dialogTestImportSlot()
 {
-    loginf << "ASTERIXImportTask: dialogImportSlot";
+    loginf << "ASTERIXImportTask: dialogTestImportSlot";
 
     assert (dialog_);
     dialog_->hide();
@@ -882,8 +942,6 @@ void ASTERIXImportTask::addDecodedASTERIXSlot()
 
     if (import_file_)
     {
-        updateFileProgressDialog();
-
         if (file_progress_dialog_->wasCanceled())
         {
             stop();
@@ -905,14 +963,21 @@ void ASTERIXImportTask::addDecodedASTERIXSlot()
         logwrn << "ASTERIXImportTask: addDecodedASTERIXSlot: overload detected, packets in processing "
                << num_packets_in_processing_ << " skipping data";
 
-        std::unique_ptr<nlohmann::json> extracted_data {decode_job_->extractedData()};
+        std::vector<std::unique_ptr<nlohmann::json>> extracted_data {decode_job_->extractedData()};
 
         return;
     }
 
     logdbg << "ASTERIXImportTask: addDecodedASTERIXSlot: processing data";
 
-    std::unique_ptr<nlohmann::json> extracted_data {decode_job_->extractedData()};
+    std::vector<std::unique_ptr<nlohmann::json>> extracted_data {decode_job_->extractedData()};
+
+    if (!extracted_data.size())
+    {
+        loginf << "ASTERIXImportTask: addDecodedASTERIXSlot: processing data empty";
+        return;
+    }
+
     ++num_packets_in_processing_;
     ++num_packets_total_;
 
@@ -920,19 +985,8 @@ void ASTERIXImportTask::addDecodedASTERIXSlot()
            << " num_packets_in_processing_ " << num_packets_in_processing_
            << " num_packets_total_ " << num_packets_total_;
 
-    if (!extracted_data)
-    {
-        logwrn << "ASTERIXImportTask: addDecodedASTERIXSlot: processing data empty";
-        return;
-    }
-
-    // break here for testing
-    //return;
-
     if (stopped_)
         return;
-
-    //assert(!json_map_job_);
 
     assert(schema_);
 
@@ -948,7 +1002,7 @@ void ASTERIXImportTask::addDecodedASTERIXSlot()
 
     json_map_jobs_.push_back(json_map_job);
 
-    assert(!extracted_data);
+    assert(!extracted_data.size());
 
     connect(json_map_job.get(), &ASTERIXJSONMappingJob::obsoleteSignal, this,
             &ASTERIXImportTask::mapJSONObsoleteSlot, Qt::QueuedConnection);
@@ -961,17 +1015,6 @@ void ASTERIXImportTask::addDecodedASTERIXSlot()
 void ASTERIXImportTask::mapJSONDoneSlot()
 {
     logdbg << "ASTERIXImportTask: mapJSONDoneSlot";
-
-    // break here for testing
-    //    json_map_job_ = nullptr;
-    //    num_packets_in_processing_--;
-
-    //    if (decode_job_ && decode_job_->hasData())
-    //        addDecodedASTERIXSlot(); // load next chunk
-    //    else
-    //        checkAllDone();
-
-    //    return;
 
     if (stopped_)
     {
@@ -997,14 +1040,23 @@ void ASTERIXImportTask::mapJSONDoneSlot()
     logdbg << "ASTERIXImportTask: mapJSONDoneSlot: processing, num buffers " << job_buffers.size();
 
     if (!job_buffers.size())
+    {
+        assert (num_packets_in_processing_);
+        num_packets_in_processing_--;
         return;
+    }
+
+    bool check_future_ts = !import_file_;
+
+    if (network_ignore_future_ts_)
+        check_future_ts = false;
 
     if (!test_)
     {
         std::shared_ptr<ASTERIXPostprocessJob> postprocess_job =
-                make_shared<ASTERIXPostprocessJob>(std::move(job_buffers),
+                make_shared<ASTERIXPostprocessJob>(std::move(job_buffers), date_,
                                                    override_tod_active_, override_tod_offset_,
-                                                   !import_file_);
+                                                   check_future_ts);
 
         postprocess_jobs_.push_back(postprocess_job);
 
@@ -1065,13 +1117,35 @@ void ASTERIXImportTask::postprocessDoneSlot()
     post_job = nullptr;
     postprocess_jobs_.erase(postprocess_jobs_.begin()); // remove
 
+    // check if still data in buffers, could be empty
+
+    unsigned int buffer_cnt {0};
+
+    for (auto& buf_it : job_buffers)
+        buffer_cnt += buf_it.second->size();
+
+    if (buffer_cnt == 0)
+    {
+        // quit
+        assert (num_packets_in_processing_);
+        --num_packets_in_processing_;
+
+        checkAllDone();
+
+        return;
+    }
+
     // queue data
     if (!stopped_)
     {
         queued_job_buffers_.emplace_back(std::move(job_buffers));
 
         if (!insert_active_)
+        {
+            logdbg << "ASTERIXImportTask: postprocessDoneSlot: inserting, thread " << QThread::currentThreadId();
+            assert (!COMPASS::instance().dbContentManager().insertInProgress());
             insertData();
+        }
     }
 }
 
@@ -1088,6 +1162,9 @@ void ASTERIXImportTask::postprocessObsoleteSlot()
 
 void ASTERIXImportTask::insertData()
 {
+    logdbg << "ASTERIXImportTask: insertData: thread " << QThread::currentThreadId();
+
+    assert (!insert_active_);
     insert_active_ = true;
 
     assert (queued_job_buffers_.size());
@@ -1095,7 +1172,8 @@ void ASTERIXImportTask::insertData()
     std::map<std::string, std::shared_ptr<Buffer>> job_buffers = *queued_job_buffers_.begin();
     queued_job_buffers_.erase(queued_job_buffers_.begin());
 
-    logdbg << "ASTERIXImportTask: insertData: inserting " << job_buffers.size() << " into database";
+    logdbg << "ASTERIXImportTask: insertData: inserting " << job_buffers.size() << " into database, thread "
+           << QThread::currentThreadId();
 
     if (stopped_)
     {
@@ -1107,45 +1185,21 @@ void ASTERIXImportTask::insertData()
 
     DBContentManager& dbcont_manager = COMPASS::instance().dbContentManager();
 
-//    while (insert_active_ && !stopped_ && dbcont_manager.insertInProgress())
-//    {
-//        //loginf << "ASTERIXImportTask: insertData: waiting for insert";
-
-//        waiting_for_insert_ = true;
-
-//        logdbg << "ASTERIXImportTask: addDecodedASTERIXSlot: waiting on insert to finish";
-
-//        if (QCoreApplication::hasPendingEvents())
-//            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
-
-//        QThread::msleep(1);
-
-//        if (stopped_)
-//        {
-//            waiting_for_insert_ = false;
-
-//            checkAllDone();
-//            return;
-//        }
-//    }
-
-//    waiting_for_insert_ = false;
-
-//    if (stopped_)
-//    {
-//        checkAllDone();
-//        return;
-//    }
-
-    //loginf << "ASTERIXImportTask: insertData: no more waiting for insert";
-
     assert(schema_);
 
     for (auto& job_it : job_buffers)
         num_records_ += job_it.second->size();
 
-    connect(&dbcont_manager, &DBContentManager::insertDoneSignal,
-            this, &ASTERIXImportTask::insertDoneSlot, Qt::UniqueConnection);
+    if (!insert_slot_connected_)
+    {
+        loginf << "JSONImporterTask: insertData: connecting slot";
+
+        connect(&dbcont_manager, &DBContentManager::insertDoneSignal,
+                this, &ASTERIXImportTask::insertDoneSlot, Qt::QueuedConnection);
+        insert_slot_connected_ = true;
+    }
+
+    //insert_start_time_ = boost::posix_time::microsec_clock::local_time();
 
     dbcont_manager.insertData(job_buffers);
 
@@ -1158,10 +1212,6 @@ void ASTERIXImportTask::insertDoneSlot()
 {
     logdbg << "ASTERIXImportTask: insertDoneSlot";
 
-    insert_active_ = false;
-
-    --num_packets_in_processing_;
-
     if (import_file_)
     {
         logdbg << "ASTERIXImportTask: insertDoneSlot: num_packets_in_processing " << num_packets_in_processing_;
@@ -1169,8 +1219,35 @@ void ASTERIXImportTask::insertDoneSlot()
         updateFileProgressDialog();
     }
 
+    // has to be after file progress dialog update since calls processEvents and thus creates race condition
+    assert (insert_active_);
+    insert_active_ = false;
+    assert (!COMPASS::instance().dbContentManager().insertInProgress());
+
+    --num_packets_in_processing_;
+
+//    double insert_time_ms = (double)(
+//                boost::posix_time::microsec_clock::local_time() - insert_start_time_).total_microseconds() / 1000.0;
+
+//    total_insert_time_ms_ += insert_time_ms;
+
+//    loginf << "UGA insert time " << insert_time_ms
+//           << " ms total " << total_insert_time_ms_/1000.0 << " s" ;
+
     if (queued_job_buffers_.size())
+    {
+        logdbg << "ASTERIXImportTask: insertDoneSlot: inserting, thread " << QThread::currentThreadId()
+               << " main " << QApplication::instance()->thread()->currentThreadId();
         insertData();
+    }
+
+    loginf << "ASTERIXImportTask: insertDoneSlot: processed " << num_records_ << " records";
+
+    if (decode_job_ && decode_job_->hasData())
+    {
+        logdbg << "ASTERIXImportTask: insertDoneSlot: starting decoding of next chunk";
+        addDecodedASTERIXSlot(); // load next chunk
+    }
 
     bool test = test_; // test_ cleared by checkAllDone
 
@@ -1184,19 +1261,79 @@ void ASTERIXImportTask::insertDoneSlot()
 
         disconnect(&COMPASS::instance().dbContentManager(), &DBContentManager::insertDoneSignal,
                    this, &ASTERIXImportTask::insertDoneSlot);
+        insert_slot_connected_ = false;
 
         emit doneSignal(name_);
     }
 
-    loginf << "ASTERIXImportTask: insertDoneSlot: processed " << num_records_ << " records";
-
-    if (decode_job_ && decode_job_->hasData())
-    {
-        logdbg << "ASTERIXImportTask: insertDoneSlot: starting decoding of next chunk";
-        addDecodedASTERIXSlot(); // load next chunk
-    }
-
     logdbg << "ASTERIXImportTask: insertDoneSlot: done";
+}
+
+void ASTERIXImportTask::appModeSwitchSlot (AppMode app_mode_previous, AppMode app_mode_current)
+{
+    loginf << "ASTERIXImportTask: appModeSwitchSlot: current " << toString(app_mode_current)
+           << " new " << toString(app_mode_previous) << " running " << running_;
+
+    if (!running_) // then nothing to do
+        return;
+
+    assert (decode_job_);
+
+    if (app_mode_current == AppMode::LiveRunning)
+    {
+        assert (app_mode_previous == AppMode::LivePaused || app_mode_previous == AppMode::Offline);
+
+        if (app_mode_previous == AppMode::LivePaused)
+        {
+            // resume paused -> running
+
+            bool discard_cache = false;
+
+            if (ask_discard_cache_on_resume_)
+            {
+                QMessageBox::StandardButton reply;
+                reply = QMessageBox::question(nullptr, "Resuming into Live: Running",
+                                              "Would you like to import cached ASTERIX data?",
+                                              QMessageBox::Yes|QMessageBox::No);
+                if (reply == QMessageBox::No)
+                    discard_cache = true;
+            }
+
+            m_info_ = new QMessageBox (QMessageBox::Information, "Resuming into Live: Running",
+                                       "Importing cached ASTERIX data. Please wait.", QMessageBox::Ok);
+            m_info_->button(QMessageBox::Ok)->hide();
+            m_info_->show();
+
+            loginf << "ASTERIXImportTask: appModeSwitchSlot: resuming";
+
+            resuming_from_live_in_progress_ = true;
+
+            decode_job_->resumeLiveNetworkData(discard_cache);
+
+            // TODO check if required
+//            while (decode_job_->resumingCachedData())
+//            {
+//                QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+//                QThread::msleep(1);
+//            }
+        }
+        else
+            ; // nothing to do, normal startup
+
+    }
+    else if (app_mode_current == AppMode::LivePaused)
+    {
+        assert (app_mode_previous == AppMode::LiveRunning); // can only happend from running
+
+        // enter paused state
+        decode_job_->cacheLiveNetworkData();
+    }
+    else if (app_mode_current == AppMode::Offline)
+    {
+        assert (app_mode_previous == AppMode::LiveRunning || app_mode_previous == AppMode::LivePaused);
+
+        stop();
+    }
 }
 
 void ASTERIXImportTask::checkAllDone()
@@ -1247,6 +1384,7 @@ void ASTERIXImportTask::checkAllDone()
         }
 
         COMPASS::instance().dataSourceManager().saveDBDataSources();
+        emit COMPASS::instance().dataSourceManager().dataSourcesChangedSignal();
         COMPASS::instance().interface().saveProperties();
     }
 
@@ -1258,7 +1396,7 @@ bool ASTERIXImportTask::maxLoadReached()
     return num_packets_in_processing_ > 2;
 }
 
-void ASTERIXImportTask::updateFileProgressDialog()
+void ASTERIXImportTask::updateFileProgressDialog(bool force)
 {
     if (stopped_)
         return;
@@ -1269,8 +1407,17 @@ void ASTERIXImportTask::updateFileProgressDialog()
                     new QProgressDialog(("File '"+current_filename_+"'").c_str(), "Abort", 0, 100));
         file_progress_dialog_->setWindowTitle("Importing ASTERIX Recording");
         file_progress_dialog_->setWindowModality(Qt::ApplicationModal);
-        //postprocess_dialog.setWindowModality(Qt::ApplicationModal);
+
+        force = true;
     }
+
+    if (!force
+            && (boost::posix_time::microsec_clock::local_time() - last_file_progress_time_).total_milliseconds() < 500)
+    {
+        return;
+    }
+
+    last_file_progress_time_ = boost::posix_time::microsec_clock::local_time();
 
     string text = "File '"+current_filename_+"'";
     string rec_text;

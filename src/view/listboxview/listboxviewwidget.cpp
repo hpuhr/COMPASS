@@ -28,71 +28,36 @@
 
 /*
  */
-ListBoxViewWidget::ListBoxViewWidget(const std::string& class_id, const std::string& instance_id,
-                                     Configurable* config_parent, ListBoxView* view,
+ListBoxViewWidget::ListBoxViewWidget(const std::string& class_id, 
+                                     const std::string& instance_id,
+                                     Configurable* config_parent, 
+                                     ListBoxView* view,
                                      QWidget* parent)
-    : ViewWidget(class_id, instance_id, config_parent, view, parent),
-      data_widget_(nullptr),
-      config_widget_(nullptr)
+:   ViewWidget(class_id, instance_id, config_parent, view, parent)
 {
-    //setAutoFillBackground(true);
+    createStandardLayout();
 
-    QHBoxLayout* hlayout = new QHBoxLayout;
+    auto data_widget = new ListBoxViewDataWidget(getView(), view->getDataSource());
+    setDataWidget(data_widget);
 
-    main_splitter_ = new QSplitter();
-    main_splitter_->setOrientation(Qt::Horizontal);
-
-    QSettings settings("COMPASS", instanceId().c_str());
-
-    {  // data widget
-        data_widget_ = new ListBoxViewDataWidget(getView(), view->getDataSource());
-        //data_widget_->setAutoFillBackground(true);
-        QSizePolicy sp_left(QSizePolicy::Preferred, QSizePolicy::Preferred);
-        sp_left.setHorizontalStretch(3);
-        data_widget_->setSizePolicy(sp_left);
-
-        main_splitter_->addWidget(data_widget_);
-    }
-
-    {  // config widget
-        config_widget_ = new ListBoxViewConfigWidget(getView());
-        //config_widget_->setAutoFillBackground(true);
-        QSizePolicy sp_right(QSizePolicy::Preferred, QSizePolicy::Preferred);
-        sp_right.setHorizontalStretch(1);
-        config_widget_->setSizePolicy(sp_right);
-
-        // hlayout->addWidget( config_widget_ );
-        main_splitter_->addWidget(config_widget_);
-    }
-
-    main_splitter_->restoreState(settings.value("mainSplitterSizes").toByteArray());
-    hlayout->addWidget(main_splitter_);
-
-    setLayout(hlayout);
-
-    setFocusPolicy(Qt::StrongFocus);
-
-    // connect stuff here
-    // connect( config_widget_, SIGNAL(variableChanged()), this, SLOT(variableChangedSlot()) );
+    auto config_widget = new ListBoxViewConfigWidget(getView());
+    setConfigWidget(config_widget);
 }
 
 /*
  */
-ListBoxViewWidget::~ListBoxViewWidget()
+ListBoxViewWidget::~ListBoxViewWidget() = default;
+
+/**
+ */
+ListBoxViewDataWidget* ListBoxViewWidget::getViewDataWidget()
 {
-    QSettings settings("COMPASS", instanceId().c_str());
-    settings.setValue("mainSplitterSizes", main_splitter_->saveState());
+    return dynamic_cast<ListBoxViewDataWidget*>(ViewWidget::getViewDataWidget());
 }
 
-/*
+/**
  */
-void ListBoxViewWidget::toggleConfigWidget()
+ListBoxViewConfigWidget* ListBoxViewWidget::getViewConfigWidget()
 {
-    assert(config_widget_);
-    bool vis = config_widget_->isVisible();
-    config_widget_->setVisible(!vis);
+    return dynamic_cast<ListBoxViewConfigWidget*>(ViewWidget::getViewConfigWidget());
 }
-
-/*
- */
-ListBoxViewConfigWidget* ListBoxViewWidget::configWidget() { return config_widget_; }

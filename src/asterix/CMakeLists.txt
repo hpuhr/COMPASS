@@ -3,10 +3,6 @@ include_directories (
     "${CMAKE_CURRENT_LIST_DIR}"
     )
 
-IF (jASTERIX_FOUND)
-
-MESSAGE(STATUS "Including ASTERIX code")
-
 target_sources(compass
     PUBLIC
         "${CMAKE_CURRENT_LIST_DIR}/asterixconfigwidget.h"
@@ -20,6 +16,7 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/asterixjsonparserwidget.h"        
         "${CMAKE_CURRENT_LIST_DIR}/asterixjsonparserdetailwidget.h"
         "${CMAKE_CURRENT_LIST_DIR}/asterixjsonparsingschema.h"        
+        "${CMAKE_CURRENT_LIST_DIR}/asterixpostprocess.h"
     PRIVATE
         "${CMAKE_CURRENT_LIST_DIR}/asterixconfigwidget.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/asterixoverridewidget.cpp"
@@ -27,13 +24,10 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/asterixjsonparserwidget.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/asterixjsonparserdetailwidget.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/asterixjsonparsingschema.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/asterixpostprocess.cpp"
 )
-
-ENDIF()
 
 target_sources(compass
     PUBLIC
-        "${CMAKE_CURRENT_LIST_DIR}/asterixpostprocess.h"
     PRIVATE
-        "${CMAKE_CURRENT_LIST_DIR}/asterixpostprocess.cpp"
     )

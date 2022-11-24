@@ -18,9 +18,9 @@
 #ifndef LISTBOXVIEWCONFIGWIDGET_H_
 #define LISTBOXVIEWCONFIGWIDGET_H_
 
-#include <QWidget>
-
+#include "viewconfigwidget.h"
 #include "dbcontent/variable/variable.h"
+#include "appmode.h"
 
 class VariableOrderedSetWidget;
 class ListBoxView;
@@ -36,11 +36,18 @@ class QStackedWidget;
  * @brief Widget with configuration elements for a ListBoxView
  *
  */
-class ListBoxViewConfigWidget : public QWidget
+class ListBoxViewConfigWidget : public ViewConfigWidget
 {
     Q_OBJECT
+public:
+    ListBoxViewConfigWidget(ListBoxView* view, QWidget* parent = nullptr);
+    virtual ~ListBoxViewConfigWidget();
 
-  public slots:
+    virtual void setStatus(const QString& text, bool visible, const QColor& color = Qt::black) override;
+
+    void appModeSwitch (AppMode app_mode);
+
+public slots:
     void selectedSetSlot(const QString& text);
     void addSetSlot();
     void copySetSlot();
@@ -57,41 +64,35 @@ class ListBoxViewConfigWidget : public QWidget
     void reloadRequestedSlot();
     void loadingStartedSlot();
 
-  signals:
+signals:
     void exportSignal(bool overwrite);
 
-  public:
-    ListBoxViewConfigWidget(ListBoxView* view, QWidget* parent = nullptr);
-    virtual ~ListBoxViewConfigWidget();
-
-    void setStatus (const std::string& status, bool visible, QColor color = Qt::black);
-
-  protected:
-    ListBoxView* view_;
-
-    QComboBox* set_box_{nullptr};
-    QPushButton* add_set_button_{nullptr};
-    QPushButton* copy_set_button_{nullptr};
-    QPushButton* rename_set_button_{nullptr};
-    QPushButton* remove_set_button_{nullptr};
-
-    QStackedWidget* set_stack_{nullptr};
-
-    QCheckBox* only_selected_check_{nullptr};
-    QCheckBox* presentation_check_{nullptr};
-
-    QCheckBox* overwrite_check_{nullptr};
-
-    QPushButton* export_button_{nullptr};
-
-    QLabel* status_label_ {nullptr};
-    QPushButton* update_button_{nullptr};
-    bool reload_needed_{true};
-
+protected:
     void updateUpdateButton();
     void updateSetBox();
     void updateSetButtons();
     void updateSetWidget();
+
+    ListBoxView*    view_;
+
+    QComboBox*      set_box_{nullptr};
+    QPushButton*    add_set_button_{nullptr};
+    QPushButton*    copy_set_button_{nullptr};
+    QPushButton*    rename_set_button_{nullptr};
+    QPushButton*    remove_set_button_{nullptr};
+
+    QStackedWidget* set_stack_{nullptr};
+
+    QCheckBox*      only_selected_check_{nullptr};
+    QCheckBox*      presentation_check_{nullptr};
+
+    QCheckBox*      overwrite_check_{nullptr};
+
+    QPushButton*    export_button_{nullptr};
+
+    QLabel*         status_label_ {nullptr};
+    QPushButton*    update_button_{nullptr};
+    bool            reload_needed_{true};
 };
 
 #endif /* LISTBOXVIEWCONFIGWIDGET_H_ */

@@ -18,9 +18,9 @@
 #ifndef HISTOGRAMVIEWCONFIGWIDGET_H_
 #define HISTOGRAMVIEWCONFIGWIDGET_H_
 
-#include <QWidget>
-
+#include "viewconfigwidget.h"
 #include "dbcontent/variable/variable.h"
+#include "appmode.h"
 
 class HistogramView;
 
@@ -38,7 +38,7 @@ class QLabel;
  * @brief Widget with configuration elements for a HistogramView
  *
  */
-class HistogramViewConfigWidget : public QWidget
+class HistogramViewConfigWidget : public ViewConfigWidget
 {
     Q_OBJECT
 
@@ -61,7 +61,9 @@ class HistogramViewConfigWidget : public QWidget
 
     void updateEvalConfig();
 
-    void setStatus (const std::string& status, bool visible, QColor color = Qt::black);
+    virtual void setStatus(const QString& text, bool visible, const QColor& color = Qt::black) override;
+
+    void appModeSwitch (AppMode app_mode);
 
   protected:
     HistogramView* view_;

@@ -12,6 +12,8 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/createassociationstaskwidget.h"
         "${CMAKE_CURRENT_LIST_DIR}/createassociationstaskdialog.h"
         "${CMAKE_CURRENT_LIST_DIR}/createassociationsstatusdialog.h"
+        "${CMAKE_CURRENT_LIST_DIR}/createartasassociationsjob.h"
+        "${CMAKE_CURRENT_LIST_DIR}/createassociationsjob.h"
     PRIVATE
         "${CMAKE_CURRENT_LIST_DIR}/createartasassociationstask.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/createartasassociationstaskwidget.cpp"
@@ -21,4 +23,6 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/createassociationstaskwidget.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/createassociationstaskdialog.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/createassociationsstatusdialog.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/createartasassociationsjob.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/createassociationsjob.cpp"        
 )

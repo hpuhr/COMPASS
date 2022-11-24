@@ -29,6 +29,7 @@
 
 using namespace std;
 using namespace Utils;
+using namespace boost::posix_time;
 
 namespace EvaluationRequirement
 {
@@ -79,9 +80,9 @@ std::shared_ptr<EvaluationRequirementResult::Single> Speed::evaluate (
     logdbg << "EvaluationRequirementSpeed '" << name_ << "': evaluate: utn " << target_data.utn_
            << " threshold_value " << threshold_value_ << " threshold_value_check_type " << threshold_value_check_type_;
 
-    float max_ref_time_diff = eval_man_.maxRefTimeDiff();
+    time_duration max_ref_time_diff = Time::partialSeconds(eval_man_.maxRefTimeDiff());
 
-    const std::multimap<float, unsigned int>& tst_data = target_data.tstData();
+    const std::multimap<ptime, unsigned int>& tst_data = target_data.tstData();
 
     unsigned int num_pos {0};
     unsigned int num_no_ref {0};
@@ -96,7 +97,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> Speed::evaluate (
 
     std::vector<EvaluationRequirement::SpeedDetail> details;
 
-    float tod{0};
+    ptime timestamp;
 
     OGRSpatialReference wgs84;
     wgs84.SetWellKnownGeogCS("WGS84");
@@ -131,15 +132,15 @@ std::shared_ptr<EvaluationRequirementResult::Single> Speed::evaluate (
     {
         ++num_pos;
 
-        tod = tst_id.first;
-        tst_pos = target_data.tstPosForTime(tod);
+        timestamp = tst_id.first;
+        tst_pos = target_data.tstPosForTime(timestamp);
 
         comp_passed = false;
 
-        if (!target_data.hasRefDataForTime (tod, max_ref_time_diff))
+        if (!target_data.hasRefDataForTime (timestamp, max_ref_time_diff))
         {
             if (!skip_no_data_details)
-                details.push_back({tod, tst_pos,
+                details.push_back({timestamp, tst_pos,
                                    false, {}, // has_ref_pos, ref_pos
                                    {}, {}, comp_passed, // pos_inside, value, check_passed
                                    num_pos, num_no_ref, num_pos_inside, num_pos_outside,
@@ -150,12 +151,12 @@ std::shared_ptr<EvaluationRequirementResult::Single> Speed::evaluate (
             continue;
         }
 
-        tie(ref_pos, ok) = target_data.interpolatedRefPosForTime(tod, max_ref_time_diff);
+        tie(ref_pos, ok) = target_data.interpolatedRefPosForTime(timestamp, max_ref_time_diff);
 
         if (!ok)
         {
             if (!skip_no_data_details)
-                details.push_back({tod, tst_pos,
+                details.push_back({timestamp, tst_pos,
                                    false, {}, // has_ref_pos, ref_pos
                                    {}, {}, comp_passed, // pos_inside, value, check_passed
                                    num_pos, num_no_ref, num_pos_inside, num_pos_outside,
@@ -166,22 +167,22 @@ std::shared_ptr<EvaluationRequirementResult::Single> Speed::evaluate (
             continue;
         }
 
-        has_ground_bit = target_data.hasTstGroundBitForTime(tod);
+        has_ground_bit = target_data.hasTstGroundBitForTime(timestamp);
 
         if (has_ground_bit)
-            ground_bit_set = target_data.tstGroundBitForTime(tod);
+            ground_bit_set = target_data.tstGroundBitForTime(timestamp);
         else
             ground_bit_set = false;
 
         if (!ground_bit_set)
-            tie(has_ground_bit, ground_bit_set) = target_data.interpolatedRefGroundBitForTime(tod, 15.0);
+            tie(has_ground_bit, ground_bit_set) = target_data.interpolatedRefGroundBitForTime(timestamp, seconds(15));
 
         is_inside = sector_layer.isInside(ref_pos, has_ground_bit, ground_bit_set);
 
         if (!is_inside)
         {
             if (!skip_no_data_details)
-                details.push_back({tod, tst_pos,
+                details.push_back({timestamp, tst_pos,
                                    true, ref_pos, // has_ref_pos, ref_pos
                                    is_inside, {}, comp_passed, // pos_inside, value, check_passed
                                    num_pos, num_no_ref, num_pos_inside, num_pos_outside,
@@ -192,12 +193,12 @@ std::shared_ptr<EvaluationRequirementResult::Single> Speed::evaluate (
         }
         ++num_pos_inside;
 
-        tie (ref_spd, ok) = target_data.interpolatedRefPosBasedSpdForTime(tod, max_ref_time_diff);
+        tie (ref_spd, ok) = target_data.interpolatedRefPosBasedSpdForTime(timestamp, max_ref_time_diff);
 
         if (!ok)
         {
             if (!skip_no_data_details)
-                details.push_back({tod, tst_pos,
+                details.push_back({timestamp, tst_pos,
                                    false, {}, // has_ref_pos, ref_pos
                                    {}, {}, comp_passed, // pos_inside, value, check_passed
                                    num_pos, num_no_ref, num_pos_inside, num_pos_outside,
@@ -210,10 +211,10 @@ std::shared_ptr<EvaluationRequirementResult::Single> Speed::evaluate (
 
         // ref_spd ok
 
-        if (!target_data.hasTstMeasuredSpeedForTime(tod))
+        if (!target_data.hasTstMeasuredSpeedForTime(timestamp))
         {
             if (!skip_no_data_details)
-                details.push_back({tod, tst_pos,
+                details.push_back({timestamp, tst_pos,
                                    false, {}, // has_ref_pos, ref_pos
                                    {}, {}, comp_passed, // pos_inside, value, check_passed
                                    num_pos, num_no_ref, num_pos_inside, num_pos_outside,
@@ -224,7 +225,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> Speed::evaluate (
             continue;
         }
 
-        tst_spd_ms = target_data.tstMeasuredSpeedForTime (tod);
+        tst_spd_ms = target_data.tstMeasuredSpeedForTime (timestamp);
         spd_diff = fabs(ref_spd.speed_ - tst_spd_ms);
 
         if (use_percent_if_higher_ && tst_spd_ms * threshold_percent_ > threshold_value_) // use percent based threshold
@@ -246,7 +247,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> Speed::evaluate (
             comment = "Failed";
         }
 
-        details.push_back({tod, tst_pos,
+        details.push_back({timestamp, tst_pos,
                            true, ref_pos,
                            is_inside, spd_diff, comp_passed, // pos_inside, value, check_passed
                            num_pos, num_no_ref, num_pos_inside, num_pos_outside,
