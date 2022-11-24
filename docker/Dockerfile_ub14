@@ -102,25 +102,16 @@ ENV QTLIBDIR="${QTDIR}/gcc_64/"
 #RUN cd OpenSceneGraph-OpenSceneGraph-3.4.1/build && make -j 16
 #RUN cd OpenSceneGraph-OpenSceneGraph-3.4.1/build && make install
 
-#RUN add-apt-repository ppa:ubuntugis/ppa
-#RUN add-apt-repository ppa:ubuntugis/ubuntugis-unstable
-#RUN apt-cache show libgdal-dev | grep Version
-#RUN apt-get update
+RUN add-apt-repository ppa:ubuntugis/ppa
+RUN apt-get update
+#RUN sudo add-apt-repository ppa:ubuntugis/ubuntugis-unstable
 #RUN apt-get update && apt-get --only-upgrade install libgdal-dev  -y
 #RUN ls /usr/share/gdal
 
-#RUN wget http://download.osgeo.org/gdal/2.2.0/gdal220.zip
-#RUN unzip gdal220.zip
-#RUN cd gdal-2.2.0 && ./configure
-#RUN cd gdal-2.2.0 && make -j  && make install
-
-RUN apt-get remove libgdal-dev -y
-RUN wget http://download.osgeo.org/gdal/2.2.0/gdal-2.2.0.tar.gz
-RUN tar xvfz gdal-2.2.0.tar.gz
-RUN cd gdal-2.2.0 && ./configure --prefix=/usr/
-RUN cd gdal-2.2.0 && make -j 16
-RUN cd gdal-2.2.0 && make install
-RUN ldconfig
+RUN  wget http://download.osgeo.org/gdal/2.2.0/gdal220.zip
+RUN unzip gdal220.zip
+RUN cd gdal-2.2.0 && ./configure
+RUN cd gdal-2.2.0 && make -j 8 && make install
 
 RUN apt-get install libgif-dev -y
 RUN apt-get install libjpeg-dev -y
@@ -147,8 +138,8 @@ RUN wget https://github.com/protocolbuffers/protobuf/releases/download/v3.19.1/p
 RUN unzip protobuf-cpp-3.19.1.zip
 RUN cd protobuf-3.19.1 && ./autogen.sh
 RUN cd protobuf-3.19.1 && ./configure
-RUN cd protobuf-3.19.1 && make -j 16
-#RUN cd protobuf-3.19.1 && make check
+RUN cd protobuf-3.19.1 && make
+RUN cd protobuf-3.19.1 && make check
 RUN cd protobuf-3.19.1 && make install
 RUN cd protobuf-3.19.1 && ldconfig # refresh shared library cache.
 
@@ -159,7 +150,7 @@ RUN echo '    set(Protobuf_INCLUDE_DIR ${PROTOBUF_INCLUDE_DIR})    ' >> /usr/sha
 RUN echo '    set(Protobuf_LIBRARIES ${PROTOBUF_LIBRARIES})    ' >> /usr/share/cmake-3.7/Modules/FindProtobuf.cmake
 RUN echo 'endif()' >> /usr/share/cmake-3.7/Modules/FindProtobuf.cmake
 
-RUN wget https://github.com/gwaldron/osgearth/archive/refs/tags/osgearth-3.2.zip
+RUN wget https://github.com/gwaldron/osgearth/archive/osgearth-3.2.zip
 RUN unzip osgearth-3.2.zip
 RUN mkdir osgearth-osgearth-3.2/build
 RUN cd osgearth-osgearth-3.2/build && cmake -DCMAKE_CXX_FLAGS=-std=c++11 -DOSGEARTH_BUILD_TESTS=OFF -DOSGEARTH_BUILD_EXAMPLES=OFF -DCMAKE_INSTALL_PREFIX=/usr --config Release ..
@@ -185,6 +176,7 @@ RUN mkdir jasper
 RUN cd jasper && wget http://ftp.us.debian.org/debian/pool/main/j/jasper/libjasper1_1.900.1-debian1-2.4+deb8u3_amd64.deb
 RUN cd jasper && wget http://ftp.us.debian.org/debian/pool/main/j/jasper/libjasper-dev_1.900.1-debian1-2.4+deb8u3_amd64.deb
 RUN cd jasper && dpkg -i *.deb
+
 
 RUN apt-get install libproj-dev -y
 
