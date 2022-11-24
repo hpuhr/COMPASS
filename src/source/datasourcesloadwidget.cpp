@@ -310,7 +310,7 @@ void DataSourcesLoadWidget::clear()
 
 void DataSourcesLoadWidget::arrangeSourceWidgetWidths()
 {
-    loginf << "DataSourcesLoadWidget: arrangeSourceWidgetWidths";
+    logdbg << "DataSourcesLoadWidget: arrangeSourceWidgetWidths";
 
     unsigned int min_width = 0;
 
@@ -319,7 +319,7 @@ void DataSourcesLoadWidget::arrangeSourceWidgetWidths()
 
     if (min_width)
     {
-        loginf << "DataSourcesLoadWidget: arrangeSourceWidgetWidths: setting width " << min_width;
+        logdbg << "DataSourcesLoadWidget: arrangeSourceWidgetWidths: setting width " << min_width;
 
         for (auto& widget_it : ds_widgets_)
             widget_it.second->updateLabelMinWidth(min_width);
