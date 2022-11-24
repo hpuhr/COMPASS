@@ -19,8 +19,8 @@
 #define SCATTERPLOTVIEWCONFIGWIDGET_H_
 
 #include "viewconfigwidget.h"
-
 #include "dbcontent/variable/variable.h"
+#include "appmode.h"
 
 namespace dbContent
 {
@@ -55,6 +55,8 @@ class ScatterPlotViewConfigWidget : public ViewConfigWidget
     virtual ~ScatterPlotViewConfigWidget();
 
     virtual void setStatus(const QString& status, bool visible, const QColor& color = Qt::black) override;
+
+    void appModeSwitch (AppMode app_mode);
 
   protected:
     ScatterPlotView* view_;

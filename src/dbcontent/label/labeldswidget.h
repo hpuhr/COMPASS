@@ -48,6 +48,8 @@ protected:
     std::map<unsigned int, QPushButton*> direction_buttons_;
 
     QIcon& iconForDirection(LabelDirection direction);
+
+    std::map<std::string, std::string> old_sources_;
 };
 
 }

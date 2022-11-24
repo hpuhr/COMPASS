@@ -366,7 +366,7 @@ void DBContentWidget::updateDBOVarsGridSlot()
         row++;
         col = 0;
 
-        Variable& variable = *var_it.get();
+        Variable& variable = *var_it.second.get();
 
         // QVariant data = QVariant(qMetaTypeId<QObject*>(), var_it.second);
         // QVariant data = QVariant::fromValue(dynamic_cast<QObject*>(var_it.second));
@@ -374,7 +374,7 @@ void DBContentWidget::updateDBOVarsGridSlot()
 
         // logdbg  << "DBContentWidget updateDBOVarsGrid: creating variable row for " << it->first
         // << " name";
-        QLineEdit* name_edit = new QLineEdit(var_it->name().c_str());
+        QLineEdit* name_edit = new QLineEdit(var_it.first.c_str());
         name_edit->setMaximumWidth(200);
         name_edit->setProperty("variable", data);
         connect(name_edit, SIGNAL(returnPressed()), this, SLOT(editDBContentVariableNameSlot()));
@@ -383,7 +383,7 @@ void DBContentWidget::updateDBOVarsGridSlot()
         // logdbg  << "DBContentWidget updateDBOVarsGrid: creating variable row for " << it->first
         // << " info";
         col++;
-        QLineEdit* description_edit = new QLineEdit(var_it->description().c_str());
+        QLineEdit* description_edit = new QLineEdit(var_it.second->description().c_str());
         description_edit->setMaximumWidth(300);
         description_edit->setProperty("variable", data);
         connect(description_edit, SIGNAL(returnPressed()), this,
@@ -397,7 +397,7 @@ void DBContentWidget::updateDBOVarsGridSlot()
 
         col++;
         UnitSelectionWidget* unit_sel =
-            new UnitSelectionWidget(var_it->dimension(), var_it->unit());
+            new UnitSelectionWidget(var_it.second->dimension(), var_it.second->unit());
         dbovars_grid_->addWidget(unit_sel, row, col);
 
         col++;

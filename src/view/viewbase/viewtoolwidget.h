@@ -1,9 +1,10 @@
 
 #pragma once
 
-#include <map>
-
 #include <QToolBar>
+
+#include <map>
+#include <functional>
 
 class ViewToolSwitcher;
 

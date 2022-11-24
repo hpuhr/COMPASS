@@ -145,6 +145,8 @@ class ASTERIXImportTask : public Task, public Configurable
 
     void importAsterixNetworkIgnoreFutureTimestamp (bool value);
 
+    unsigned int numPacketsInProcessing() const;
+
 protected:
     bool debug_jasterix_;
     std::shared_ptr<jASTERIX::jASTERIX> jasterix_;

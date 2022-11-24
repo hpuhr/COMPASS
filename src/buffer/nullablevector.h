@@ -106,6 +106,7 @@ public:
     std::set<T> distinctValues(unsigned int index = 0);
     std::map<T, unsigned int> distinctValuesWithCounts(unsigned int index = 0);
     std::tuple<bool,T,T> minMaxValues(unsigned int index = 0); // set, min, max
+    std::tuple<bool,T,T> minMaxValuesSorted(unsigned int index = 0); // set, min, max
 
     std::map<T, std::vector<unsigned int>> distinctValuesWithIndexes(unsigned int from_index,
                                                                      unsigned int to_index);
@@ -645,6 +646,46 @@ std::tuple<bool,T,T> NullableVector<T>::minMaxValues(unsigned int index)
 
     return std::tuple<bool,T,T> {set, min, max};
 }
+
+template <class T>
+std::tuple<bool,T,T> NullableVector<T>::minMaxValuesSorted(unsigned int index)
+{
+    bool min_set = false;
+    bool max_set = false;
+    T min, max;
+
+    if (!data_.size())
+        return std::tuple<bool,T,T> {min_set && max_set, min, max};
+
+    for (unsigned int tmp_index=index; tmp_index < data_.size(); ++tmp_index)
+    {
+        if (!isNull(tmp_index))  // not for null
+        {
+            if (!min_set)
+            {
+                min = data_.at(tmp_index);
+                min_set = true;
+                break;
+            }
+        }
+    }
+
+    for (int tmp_index=data_.size()-1; tmp_index >= index; --tmp_index)
+    {
+        if (!isNull(tmp_index))  // not for null
+        {
+            if (!max_set)
+            {
+                max = data_.at(tmp_index);
+                max_set = true;
+                break;
+            }
+        }
+    }
+
+    return std::tuple<bool,T,T> {min_set && max_set, min, max};
+}
+
 
 template <class T>
 std::map<T, std::vector<unsigned int>> NullableVector<T>::distinctValuesWithIndexes(

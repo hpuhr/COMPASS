@@ -15,7 +15,7 @@ class Buffer;
 class ASTERIXJSONMappingJob : public Job
 {
   public:
-    ASTERIXJSONMappingJob(std::unique_ptr<nlohmann::json> data,
+    ASTERIXJSONMappingJob(std::vector<std::unique_ptr<nlohmann::json>> data,
                    const std::vector<std::string>& data_record_keys,
                    const std::map<unsigned int, std::unique_ptr<ASTERIXJSONParser>>& parsers);
     // json obj moved, mappings referenced
@@ -41,7 +41,7 @@ private:
     size_t num_errors_{0};        // number of failed parses
     size_t num_created_{0};       // number of created objects from parsing
 
-    std::unique_ptr<nlohmann::json> data_;
+    std::vector<std::unique_ptr<nlohmann::json>> data_;
     const std::vector<std::string> data_record_keys_;
 
     const std::map<unsigned int, std::unique_ptr<ASTERIXJSONParser>>& parsers_;

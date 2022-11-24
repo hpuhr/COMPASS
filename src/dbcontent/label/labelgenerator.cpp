@@ -415,15 +415,15 @@ std::vector<std::string> LabelGenerator::getFullTexts(const std::string& dbconte
 
     for (auto& var_it : db_content.variables())
     {
-        if (used_varnames.count(var_it->name())) // skip if used
+        if (used_varnames.count(var_it.first)) // skip if used
             continue;
 
-        if (buffer->hasProperty(*var_it.get()))
+        if (buffer->hasProperty(*var_it.second.get()))
         {
-            property_name = var_it->name();
-            PropertyDataType data_type = var_it->dataType();
+            property_name = var_it.first;
+            PropertyDataType data_type = var_it.second->dataType();
 
-            use_presentation = var_it->representation() != Variable::Representation::STANDARD;
+            use_presentation = var_it.second->representation() != Variable::Representation::STANDARD;
 
             value_str = NULL_STRING;
 
@@ -434,7 +434,7 @@ std::vector<std::string> LabelGenerator::getFullTexts(const std::string& dbconte
                 if (!null)
                 {
                     if (use_presentation)
-                        value_str = var_it->getRepresentationStringFromValue(
+                        value_str = var_it.second->getRepresentationStringFromValue(
                                     buffer->get<bool>(property_name).getAsString(buffer_index));
                     else
                         value_str = buffer->get<bool>(property_name).getAsString(buffer_index);
@@ -447,7 +447,7 @@ std::vector<std::string> LabelGenerator::getFullTexts(const std::string& dbconte
                 if (!null)
                 {
                     if (use_presentation)
-                        value_str = var_it->getRepresentationStringFromValue(
+                        value_str = var_it.second->getRepresentationStringFromValue(
                                     buffer->get<char>(property_name).getAsString(buffer_index));
                     else
                         value_str = buffer->get<char>(property_name).getAsString(buffer_index);
@@ -460,7 +460,7 @@ std::vector<std::string> LabelGenerator::getFullTexts(const std::string& dbconte
                 if (!null)
                 {
                     if (use_presentation)
-                        value_str = var_it->getRepresentationStringFromValue(
+                        value_str = var_it.second->getRepresentationStringFromValue(
                                     buffer->get<unsigned char>(property_name).getAsString(buffer_index));
                     else
                         value_str =
@@ -474,7 +474,7 @@ std::vector<std::string> LabelGenerator::getFullTexts(const std::string& dbconte
                 if (!null)
                 {
                     if (use_presentation)
-                        value_str = var_it->getRepresentationStringFromValue(
+                        value_str = var_it.second->getRepresentationStringFromValue(
                                     buffer->get<int>(property_name).getAsString(buffer_index));
                     else
                         value_str = buffer->get<int>(property_name).getAsString(buffer_index);
@@ -487,7 +487,7 @@ std::vector<std::string> LabelGenerator::getFullTexts(const std::string& dbconte
                 if (!null)
                 {
                     if (use_presentation)
-                        value_str = var_it->getRepresentationStringFromValue(
+                        value_str = var_it.second->getRepresentationStringFromValue(
                                     buffer->get<unsigned int>(property_name).getAsString(buffer_index));
                     else
                         value_str =
@@ -501,7 +501,7 @@ std::vector<std::string> LabelGenerator::getFullTexts(const std::string& dbconte
                 if (!null)
                 {
                     if (use_presentation)
-                        value_str = var_it->getRepresentationStringFromValue(
+                        value_str = var_it.second->getRepresentationStringFromValue(
                                     buffer->get<long int>(property_name).getAsString(buffer_index));
                     else
                         value_str = buffer->get<long int>(property_name).getAsString(buffer_index);
@@ -514,7 +514,7 @@ std::vector<std::string> LabelGenerator::getFullTexts(const std::string& dbconte
                 if (!null)
                 {
                     if (use_presentation)
-                        value_str = var_it->getRepresentationStringFromValue(
+                        value_str = var_it.second->getRepresentationStringFromValue(
                                     buffer->get<unsigned long int>(property_name)
                                     .getAsString(buffer_index));
                     else
@@ -529,7 +529,7 @@ std::vector<std::string> LabelGenerator::getFullTexts(const std::string& dbconte
                 if (!null)
                 {
                     if (use_presentation)
-                        value_str = var_it->getRepresentationStringFromValue(
+                        value_str = var_it.second->getRepresentationStringFromValue(
                                     buffer->get<float>(property_name).getAsString(buffer_index));
                     else
                         value_str = buffer->get<float>(property_name).getAsString(buffer_index);
@@ -542,7 +542,7 @@ std::vector<std::string> LabelGenerator::getFullTexts(const std::string& dbconte
                 if (!null)
                 {
                     if (use_presentation)
-                        value_str = var_it->getRepresentationStringFromValue(
+                        value_str = var_it.second->getRepresentationStringFromValue(
                                     buffer->get<double>(property_name).getAsString(buffer_index));
                     else
                         value_str = buffer->get<double>(property_name).getAsString(buffer_index);
@@ -581,7 +581,7 @@ std::vector<std::string> LabelGenerator::getFullTexts(const std::string& dbconte
             tmp.push_back(property_name);
             tmp.push_back(value_str);
             //tmp.push_back(var_it->description());
-            tmp.push_back(var_it->dimensionUnitStr());
+            tmp.push_back(var_it.second->dimensionUnitStr());
         }
     }
 

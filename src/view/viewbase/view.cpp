@@ -111,6 +111,12 @@ void View::databaseClosed()
  */
 const std::string& View::getName() const { return instanceId(); }
 
+void View::enableInTabWidget(bool value)
+{
+    assert (container_);
+    container_->enableViewTab(getCentralWidget(), value);
+}
+
 void View::showInTabWidget()
 {
     assert (container_);

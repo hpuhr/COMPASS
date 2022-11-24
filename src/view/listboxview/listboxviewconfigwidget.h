@@ -19,8 +19,8 @@
 #define LISTBOXVIEWCONFIGWIDGET_H_
 
 #include "viewconfigwidget.h"
-
 #include "dbcontent/variable/variable.h"
+#include "appmode.h"
 
 class VariableOrderedSetWidget;
 class ListBoxView;
@@ -44,6 +44,8 @@ public:
     virtual ~ListBoxViewConfigWidget();
 
     virtual void setStatus(const QString& text, bool visible, const QColor& color = Qt::black) override;
+
+    void appModeSwitch (AppMode app_mode);
 
 public slots:
     void selectedSetSlot(const QString& text);

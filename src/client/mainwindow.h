@@ -81,7 +81,7 @@ public slots:
     void quitRequestedSlot();
     void showAddViewMenuSlot();
 
-    void appModeSwitchSlot (AppMode app_mode);
+    void appModeSwitchSlot (AppMode app_mode_previous, AppMode app_mode_current);
 
 private slots:
     void runTestCodeSlot();
@@ -201,6 +201,9 @@ protected:
     QMenu* import_menu_ {nullptr};
 
     QMenu* import_recent_asterix_menu_ {nullptr};
+
+    // configuration menu
+    QMenu* config_menu_ {nullptr};
 
     // process menu
     QMenu* process_menu_ {nullptr};

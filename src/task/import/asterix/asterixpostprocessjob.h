@@ -41,6 +41,7 @@ private:
     static bool had_late_time_; // indicator if time late before 24h mark occured
 
     void doTodOverride();
+    void doNetworkTimeOverride();
     void doFutureTimestampsCheck();
     void doTimeStampCalculation();
     void doRadarPlotPositionCalculations();

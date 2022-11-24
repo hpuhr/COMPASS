@@ -130,6 +130,14 @@ void HistogramView::clearData()
     getDataWidget()->clear();
 }
 
+void HistogramView::appModeSwitch (AppMode app_mode_previous, AppMode app_mode_current)
+{
+    loginf << "HistogramView: appModeSwitch: app_mode " << toString(app_mode_current)
+           << " prev " << toString(app_mode_previous);
+
+    widget_->getViewConfigWidget()->appModeSwitch(app_mode_current);
+}
+
 void HistogramView::generateSubConfigurable(const std::string& class_id,
                                             const std::string& instance_id)
 {
@@ -251,7 +259,7 @@ void HistogramView::dataVar (Variable& var)
     assert (widget_);
     widget_->getViewDataWidget()->updateToData();
 
-    if (widget_->getViewDataWidget()->dataNotInBuffer())
+    if (COMPASS::instance().appMode() != AppMode::LiveRunning && widget_->getViewDataWidget()->dataNotInBuffer())
         widget_->getViewConfigWidget()->setStatus("Reload Required", true, Qt::red);
 }
 
@@ -275,7 +283,7 @@ void HistogramView::metaDataVar (MetaVariable& var)
     assert (widget_);
     widget_->getViewDataWidget()->updateToData();
 
-    if (widget_->getViewDataWidget()->dataNotInBuffer())
+    if (COMPASS::instance().appMode() != AppMode::LiveRunning && widget_->getViewDataWidget()->dataNotInBuffer())
         widget_->getViewConfigWidget()->setStatus("Reload Required", true, Qt::red);
 }
 

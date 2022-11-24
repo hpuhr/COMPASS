@@ -625,6 +625,11 @@ void ASTERIXImportTask::importAsterixNetworkIgnoreFutureTimestamp (bool value)
     network_ignore_future_ts_ = value;
 }
 
+unsigned int ASTERIXImportTask::numPacketsInProcessing() const
+{
+    return num_packets_in_processing_;
+}
+
 bool ASTERIXImportTask::isRunning() const
 {
     return running_;
@@ -958,26 +963,27 @@ void ASTERIXImportTask::addDecodedASTERIXSlot()
         logwrn << "ASTERIXImportTask: addDecodedASTERIXSlot: overload detected, packets in processing "
                << num_packets_in_processing_ << " skipping data";
 
-        std::unique_ptr<nlohmann::json> extracted_data {decode_job_->extractedData()};
+        std::vector<std::unique_ptr<nlohmann::json>> extracted_data {decode_job_->extractedData()};
 
         return;
     }
 
     logdbg << "ASTERIXImportTask: addDecodedASTERIXSlot: processing data";
 
-    std::unique_ptr<nlohmann::json> extracted_data {decode_job_->extractedData()};
+    std::vector<std::unique_ptr<nlohmann::json>> extracted_data {decode_job_->extractedData()};
+
+    if (!extracted_data.size())
+    {
+        loginf << "ASTERIXImportTask: addDecodedASTERIXSlot: processing data empty";
+        return;
+    }
+
     ++num_packets_in_processing_;
     ++num_packets_total_;
 
     loginf << "ASTERIXImportTask: addDecodedASTERIXSlot: processing data,"
            << " num_packets_in_processing_ " << num_packets_in_processing_
            << " num_packets_total_ " << num_packets_total_;
-
-    if (!extracted_data)
-    {
-        logwrn << "ASTERIXImportTask: addDecodedASTERIXSlot: processing data empty";
-        return;
-    }
 
     if (stopped_)
         return;
@@ -996,7 +1002,7 @@ void ASTERIXImportTask::addDecodedASTERIXSlot()
 
     json_map_jobs_.push_back(json_map_job);
 
-    assert(!extracted_data);
+    assert(!extracted_data.size());
 
     connect(json_map_job.get(), &ASTERIXJSONMappingJob::obsoleteSignal, this,
             &ASTERIXImportTask::mapJSONObsoleteSlot, Qt::QueuedConnection);
@@ -1034,7 +1040,11 @@ void ASTERIXImportTask::mapJSONDoneSlot()
     logdbg << "ASTERIXImportTask: mapJSONDoneSlot: processing, num buffers " << job_buffers.size();
 
     if (!job_buffers.size())
+    {
+        assert (num_packets_in_processing_);
+        num_packets_in_processing_--;
         return;
+    }
 
     bool check_future_ts = !import_file_;
 

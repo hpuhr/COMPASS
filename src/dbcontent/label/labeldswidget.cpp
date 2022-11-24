@@ -74,6 +74,16 @@ void LabelDSWidget::updateListSlot()
 {
     loginf << "OSGViewConfigLabelDSWidget: updateListSlot";
 
+    DataSourceManager& ds_man = COMPASS::instance().dataSourceManager();
+
+    std::map<std::string, std::string> current_sources;
+    for (const auto& ds_it : ds_man.dbDataSources())
+        current_sources[ds_it->name()] = String::lineStrFrom(label_generator_.labelLine(ds_it->id()))
+                + to_string((unsigned int)label_generator_.labelDirection(ds_it->id()));
+
+    if (old_sources_ == current_sources)
+        return;
+
     assert(ds_grid_);
 
     QLayoutItem* child;
@@ -104,7 +114,6 @@ void LabelDSWidget::updateListSlot()
     dir_label->setFont(font_bold);
     ds_grid_->addWidget(dir_label, row, 2);;
 
-    DataSourceManager& ds_man = COMPASS::instance().dataSourceManager();
 
     for (const auto& ds_it : ds_man.dbDataSources())
     {
@@ -136,43 +145,9 @@ void LabelDSWidget::updateListSlot()
         ds_grid_->addWidget(direction, row, 2);
 
         direction_buttons_[ds_it->id()] = direction;
-
-//        QListWidgetItem* new_item = new QListWidgetItem;
-//        new_item->setText(ds_man.dbDataSource(ds_id_it).name().c_str());
-//        new_item->setData(Qt::UserRole, ds_id_it);
-
-//        if (selected.count(ds_id_it))
-//            new_item->setSelected(true);
-
-//        list_widget_->addItem(new_item);
     }
 
-//    assert(list_widget_);
-
-//    list_widget_->clear();
-
-//    DataSourceManager& ds_man = COMPASS::instance().dataSourceManager();
-
-//    set<unsigned int> selected = label_generator_.labelDSIDs();
-
-//    for (auto ds_id_it : ds_man.getAllDsIDs())
-//    {
-//        if (!ds_man.hasDBDataSource(ds_id_it))
-//            continue;
-
-//        QListWidgetItem* new_item = new QListWidgetItem;
-//        new_item->setText(ds_man.dbDataSource(ds_id_it).name().c_str());
-//        new_item->setData(Qt::UserRole, ds_id_it);
-
-//        if (selected.count(ds_id_it))
-//            new_item->setSelected(true);
-
-//        list_widget_->addItem(new_item);
-//    }
-
-//    // list_widget_->setMaximumHeight(items.size()*list_widget_->sizeHintForRow(0));
-
-//    list_widget_->sortItems();
+    old_sources_ = current_sources;
 }
 
 void LabelDSWidget::sourceClickedSlot()

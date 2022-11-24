@@ -22,7 +22,6 @@
 #include "listboxviewdatasource.h"
 
 class ListBoxViewWidget;
-//class ListBoxViewDataSource;
 class ListBoxViewDataWidget;
 
 class ListBoxView : public View
@@ -31,7 +30,6 @@ class ListBoxView : public View
   public slots:
     virtual void unshowViewPointSlot (const ViewableDataConfig* vp) override;
     virtual void showViewPointSlot (const ViewableDataConfig* vp) override;
-    //void allLoadingDoneSlot();
 
   signals:
     void showOnlySelectedSignal(bool value);
@@ -51,6 +49,7 @@ class ListBoxView : public View
 
     virtual void clearData() override;
 
+    virtual void appModeSwitch (AppMode app_mode_previous, AppMode app_mode_current) override;
 
     virtual void generateSubConfigurable(const std::string& class_id,
                                          const std::string& instance_id) override;

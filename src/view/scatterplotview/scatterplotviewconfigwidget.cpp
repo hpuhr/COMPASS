@@ -154,6 +154,14 @@ void ScatterPlotViewConfigWidget::setStatus(const QString& status, bool visible,
     status_label_->setVisible(visible);
 }
 
+void ScatterPlotViewConfigWidget::appModeSwitch (AppMode app_mode)
+{
+    assert (reload_button_);
+    reload_button_->setHidden(app_mode == AppMode::LiveRunning);
+    assert (status_label_);
+    status_label_->setHidden(app_mode == AppMode::LiveRunning);
+}
+
 void ScatterPlotViewConfigWidget::selectedVariableXChangedSlot()
 {
     loginf << "ScatterPlotViewConfigWidget: selectedVariableChangedSlot";

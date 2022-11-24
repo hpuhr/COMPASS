@@ -185,6 +185,16 @@ void ListBoxViewConfigWidget::setStatus(const QString& text, bool visible, const
     status_label_->setVisible(visible);
 }
 
+void ListBoxViewConfigWidget::appModeSwitch (AppMode app_mode)
+{
+    assert (update_button_);
+    update_button_->setHidden(app_mode == AppMode::LiveRunning);
+    assert (status_label_);
+    status_label_->setHidden(app_mode == AppMode::LiveRunning);
+    assert (export_button_);
+    export_button_->setHidden(app_mode == AppMode::LiveRunning);
+}
+
 void ListBoxViewConfigWidget::selectedSetSlot(const QString& text)
 {
     string name = text.toStdString();

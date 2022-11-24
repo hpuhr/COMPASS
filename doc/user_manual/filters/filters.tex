@@ -29,7 +29,7 @@ When active, this filter forces loading of data with the given Mode S address(es
   \caption{Callsign filter}
 \end{figure}
 
-When active, this filter forces loading of data only from aircraft identifications matching the given expression. The percent operator denotes a 'any characters' placeholder. So e.g. '\%TEST\%' will match 'TEST123' or 'TEST123   ' (with spaces) or 'MYTEST'. Target reports without a given aircraft identification are not restricted by this filter.
+When active, this filter forces loading of data only from aircraft identifications matching the given expression. So e.g. 'TEST' will match 'TEST123' or 'TEST123   ' (with spaces) or 'MYTEST'. Target reports without a given aircraft identification are not restricted by this filter. If multiple values are entered (separated by comma), any in-between space characters are removed, so 'TEST1,TEST2' will give the same result as 'TEST1 , TEST2'.
 
 \subsection{ADSB Quality Filter}
 

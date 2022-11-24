@@ -120,11 +120,11 @@ string SQLGenerator::getCreateTableStatement(const DBContent& object)
     unsigned int cnt = 0;
     for (auto& var_it : object.variables())
     {
-        ss << var_it->dbColumnName();
+        ss << var_it.second->dbColumnName();
 
-        data_type = var_it->dbDataTypeString();
+        data_type = var_it.second->dbDataTypeString();
 
-        if (var_it->isKey())
+        if (var_it.second->isKey())
             ss << " INTEGER PRIMARY KEY NOT NULL"; // AUTOINCREMENT
         else
             ss << " " << data_type;
@@ -349,15 +349,15 @@ shared_ptr<DBCommand> SQLGenerator::getTableSelectMinMaxNormalStatement(const DB
     for (auto& var_it : object.variables())
     {
         logdbg << "SQLGenerator: getTableSelectMinMaxNormalStatement: current name "
-               << var_it->name();
+               << var_it.first;
 
         if (!first)
             ss << ",";
 
-        ss << "MIN(" << var_it->dbColumnName() << "),MAX(" << var_it->dbColumnName() << ")";
+        ss << "MIN(" << var_it.second->dbColumnName() << "),MAX(" << var_it.second->dbColumnName() << ")";
 
-        command_list.addProperty(var_it->dbColumnName() + "MIN", PropertyDataType::STRING);
-        command_list.addProperty(var_it->dbColumnName() + "MAX", PropertyDataType::STRING);
+        command_list.addProperty(var_it.second->dbColumnName() + "MIN", PropertyDataType::STRING);
+        command_list.addProperty(var_it.second->dbColumnName() + "MAX", PropertyDataType::STRING);
 
         first = false;
     }
