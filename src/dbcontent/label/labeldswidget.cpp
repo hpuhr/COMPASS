@@ -72,7 +72,7 @@ LabelDSWidget::~LabelDSWidget()
 
 void LabelDSWidget::updateListSlot()
 {
-    loginf << "OSGViewConfigLabelDSWidget: updateListSlot";
+    logdbg << "LabelDSWidget: updateListSlot";
 
     DataSourceManager& ds_man = COMPASS::instance().dataSourceManager();
 
