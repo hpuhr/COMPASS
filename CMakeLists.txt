@@ -82,12 +82,6 @@ message("  OPENSSL_CRYPTO_LIBRARY: ${OPENSSL_CRYPTO_LIBRARY}")
 
 find_package(NemaTode REQUIRED CONFIG)
 
-
-# google profiler not working
-#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pg")
-#set (CMAKE_SHARED_LINKER_FLAGS "-pg")
-#set(CMAKE_EXE_LINKER_FLAGS "-pg")
-
 find_package(Threads REQUIRED)
 
 add_library(compass "")
