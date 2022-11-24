@@ -199,7 +199,7 @@ void Client::run ()
 
     // in appimage
 
-    unsigned int num_threads = std::thread::hardware_concurrency();
+    int num_threads = tbb::task_scheduler_init::default_num_threads();;
 
     loginf << "COMPASSClient: started with " << num_threads << " threads (tbb old)";
     tbb::task_scheduler_init init {num_threads};
@@ -207,6 +207,8 @@ void Client::run ()
 #else
 
     int num_threads = oneapi::tbb::info::default_concurrency();
+
+    oneapi::tbb::global_control global_limit(oneapi::tbb::global_control::max_allowed_parallelism, num_threads);
 
     loginf << "COMPASSClient: started with " << num_threads << " threads";
 #endif
