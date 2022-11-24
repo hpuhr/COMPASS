@@ -120,14 +120,14 @@ void VariableSelectionWidget::updateMenuEntries()
 
         for (auto& var_it : dbo_man_.dbContent(only_dbcontent_name_).variables())
         {
-            if (show_data_types_only_ && !showDataType(var_it->dataType()))
+            if (show_data_types_only_ && !showDataType(var_it.second->dataType()))
                 continue;
 
-            QAction* action = menu_.addAction(var_it->name().c_str());
-            action->setToolTip(var_it->description().c_str());
+            QAction* action = menu_.addAction(var_it.first.c_str());
+            action->setToolTip(var_it.second->description().c_str());
 
             QVariantMap vmap;
-            vmap.insert(QString::fromStdString(var_it->name()),
+            vmap.insert(QString::fromStdString(var_it.first),
                         QVariant(QString::fromStdString(only_dbcontent_name_)));
             action->setData(QVariant(vmap));
         }
@@ -139,14 +139,14 @@ void VariableSelectionWidget::updateMenuEntries()
             QMenu* meta_menu = menu_.addMenu(QString::fromStdString(META_OBJECT_NAME));
             for (auto& meta_it : dbo_man_.metaVariables())
             {
-                if (show_data_types_only_ && !showDataType(meta_it->dataType()))
+                if (show_data_types_only_ && !showDataType(meta_it.second->dataType()))
                     continue;
 
-                QAction* action = meta_menu->addAction(QString::fromStdString(meta_it->name()));
-                action->setToolTip(meta_it->description().c_str());
+                QAction* action = meta_menu->addAction(QString::fromStdString(meta_it.first));
+                action->setToolTip(meta_it.second->description().c_str());
 
                 QVariantMap vmap;
-                vmap.insert(QString::fromStdString(meta_it->name()),
+                vmap.insert(QString::fromStdString(meta_it.first),
                             QVariant(QString::fromStdString(META_OBJECT_NAME)));
                 action->setData(QVariant(vmap));
             }
@@ -161,14 +161,14 @@ void VariableSelectionWidget::updateMenuEntries()
 
             for (auto& var_it : object_it.second->variables())
             {
-                if (show_data_types_only_ && !showDataType(var_it->dataType()))
+                if (show_data_types_only_ && !showDataType(var_it.second->dataType()))
                     continue;
 
-                QAction* action = m2->addAction(QString::fromStdString(var_it->name()));
-                action->setToolTip(var_it->description().c_str());
+                QAction* action = m2->addAction(QString::fromStdString(var_it.first));
+                action->setToolTip(var_it.second->description().c_str());
 
                 QVariantMap vmap;
-                vmap.insert(QString::fromStdString(var_it->name()),
+                vmap.insert(QString::fromStdString(var_it.first),
                             QVariant(QString::fromStdString(object_it.first)));
                 action->setData(QVariant(vmap));
             }

@@ -144,9 +144,9 @@ public:
     void renameVariable(const std::string& name, const std::string& new_name);
     void deleteVariable(const std::string& name);
 
-    const std::vector<std::unique_ptr<dbContent::Variable>>& variables() const { return variables_; }
+    const std::map<std::string, std::unique_ptr<dbContent::Variable>>& variables() const { return variables_; }
 
-    bool hasVariableDBColumnName(const std::string& name) const;
+    bool hasVariableDBColumnName(const std::string& col_name) const;
 
     size_t numVariables() const { return variables_.size(); }
 
@@ -205,7 +205,7 @@ protected:
     std::string db_table_name_;
     std::string ds_type_;
 
-    bool constructor_active_ {false};
+    //bool constructor_active_ {false};
 
     bool is_loadable_{false};  // loadable on its own
     size_t count_{0};
@@ -217,7 +217,7 @@ protected:
     std::shared_ptr<UpdateBufferDBJob> update_job_{nullptr};
 
     /// Container with all variables (variable identifier -> variable pointer)
-    std::vector<std::unique_ptr<dbContent::Variable>> variables_;
+    std::map<std::string, std::unique_ptr<dbContent::Variable>> variables_;
 
     std::unique_ptr<DBContentWidget> widget_;
 
@@ -227,7 +227,7 @@ protected:
 
     //std::string associationsTableName();
 
-    void sortContent();
+    //void sortContent();
 
     void checkStaticVariable(const Property& property);
 

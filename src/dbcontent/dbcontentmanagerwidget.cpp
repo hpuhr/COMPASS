@@ -322,10 +322,10 @@ void DBContentManagerWidget::addAllMetaVariablesSlot()
     {
         for (auto& var_it : obj_it.second->variables())
         {
-            if (object_manager_.usedInMetaVariable(*var_it.get()))
+            if (object_manager_.usedInMetaVariable(*var_it.second.get()))
             {
                 loginf << "DBContentManagerWidget: addAllMetaVariablesSlot: not adding dbovariable "
-                       << var_it->name() << " since already used";
+                       << var_it.first << " since already used";
                 continue;
             }
 
@@ -337,8 +337,8 @@ void DBContentManagerWidget::addAllMetaVariablesSlot()
                 if (obj_it == obj_it2)
                     continue;
 
-                if (obj_it2.second->hasVariable(var_it->name()) &&
-                    var_it->dataType() == obj_it2.second->variable(var_it->name()).dataType())
+                if (obj_it2.second->hasVariable(var_it.first) &&
+                    var_it.second->dataType() == obj_it2.second->variable(var_it.first).dataType())
                 {
                     found_dbos.push_back(obj_it2.first);
                 }
@@ -346,23 +346,22 @@ void DBContentManagerWidget::addAllMetaVariablesSlot()
 
             if (found_dbos.size() > 1)
             {
-                if (!object_manager_.existsMetaVariable(var_it->name()))
+                if (!object_manager_.existsMetaVariable(var_it.first))
                 {
-                    loginf
-                        << "DBContentManagerWidget: addAllMetaVariablesSlot: adding meta variable "
-                        << var_it->name();
+                    loginf << "DBContentManagerWidget: addAllMetaVariablesSlot: adding meta variable "
+                        << var_it.first;
 
-                    std::string instance = "MetaVariable" + var_it->name() + "0";
+                    std::string instance = "MetaVariable" + var_it.first + "0";
 
                     Configuration& config =
                         object_manager_.addNewSubConfiguration("MetaVariable", instance);
-                    config.addParameterString("name", var_it->name());
+                    config.addParameterString("name", var_it.first);
 
                     object_manager_.generateSubConfigurable("MetaVariable", instance);
                 }
 
-                assert(object_manager_.existsMetaVariable(var_it->name()));
-                MetaVariable& meta_var = object_manager_.metaVariable(var_it->name());
+                assert(object_manager_.existsMetaVariable(var_it.first));
+                MetaVariable& meta_var = object_manager_.metaVariable(var_it.first);
 
                 for (auto dbo_it2 = found_dbos.begin(); dbo_it2 != found_dbos.end(); dbo_it2++)
                 {
@@ -370,8 +369,8 @@ void DBContentManagerWidget::addAllMetaVariablesSlot()
                     {
                         loginf << "DBContentManagerWidget: addAllMetaVariablesSlot: adding meta "
                                   "variable "
-                               << var_it->name() << " dbo variable " << var_it->name();
-                        meta_var.addVariable(*dbo_it2, var_it->name());
+                               << var_it.first << " dbo variable " << var_it.first;
+                        meta_var.addVariable(*dbo_it2, var_it.first);
                     }
                 }
 
@@ -417,14 +416,14 @@ void DBContentManagerWidget::updateMetaVariablesSlot()
 
     for (auto& var_it : object_manager_.metaVariables())
     {
-        assert (var_it.get());
+        assert (var_it.second.get());
 
-        QLabel* name = new QLabel(var_it->name().c_str());
+        QLabel* name = new QLabel(var_it.first.c_str());
         meta_variables_grid_->addWidget(name, row, 0);
 
         QLabel* datatype = new QLabel();
-        if (var_it->hasVariables())
-            datatype->setText(var_it->dataTypeString().c_str());
+        if (var_it.second->hasVariables())
+            datatype->setText(var_it.second->dataTypeString().c_str());
         meta_variables_grid_->addWidget(datatype, row, 1);
 
         QPushButton* edit = new QPushButton();
@@ -435,7 +434,7 @@ void DBContentManagerWidget::updateMetaVariablesSlot()
         // edit->setDisabled(!active || !unlocked_);
         connect(edit, SIGNAL(clicked()), this, SLOT(editMetaVariableSlot()));
         meta_variables_grid_->addWidget(edit, row, 2);
-        edit_meta_buttons_[edit] = var_it.get();
+        edit_meta_buttons_[edit] = var_it.second.get();
 
         QPushButton* del = new QPushButton();
         del->setIcon(del_icon);
@@ -445,7 +444,7 @@ void DBContentManagerWidget::updateMetaVariablesSlot()
         // del->setDisabled(!unlocked_);
         connect(del, SIGNAL(clicked()), this, SLOT(deleteMetaVariableSlot()));
         meta_variables_grid_->addWidget(del, row, 3);
-        delete_meta_buttons_[del] = var_it.get();
+        delete_meta_buttons_[del] = var_it.second.get();
 
         row++;
     }

@@ -254,6 +254,14 @@ void HistogramViewConfigWidget::setStatus (const QString& text, bool visible, co
     status_label_->setVisible(visible);
 }
 
+void HistogramViewConfigWidget::appModeSwitch (AppMode app_mode)
+{
+    assert (reload_button_);
+    reload_button_->setHidden(app_mode == AppMode::LiveRunning);
+    assert (status_label_);
+    status_label_->setHidden(app_mode == AppMode::LiveRunning);
+}
+
 void HistogramViewConfigWidget::reloadRequestedSlot()
 {
     COMPASS::instance().dbContentManager().load();

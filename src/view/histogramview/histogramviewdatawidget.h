@@ -315,7 +315,7 @@ protected:
             {
                 const std::string s = stringRepresentation<T>(data_var, data_min_, bin_cnt, bin_size_);
 
-                std::cout << "LABEL " << s << std::endl;
+                logdbg << "HistogramViewDataWidget: updateCounts: LABEL " << s;
 
                 labels_.push_back(s);
             }

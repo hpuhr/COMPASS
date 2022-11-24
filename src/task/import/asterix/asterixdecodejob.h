@@ -62,14 +62,14 @@ class ASTERIXDecodeJob : public Job
 //    void pause() { pause_ = true; }
 //    void unpause() { pause_ = false; }
 
-    bool hasData() { return extracted_data_ != 0;}
+    bool hasData() { return extracted_data_.size();}
 
     bool error() const;
     std::string errorMessage() const;
 
     std::map<unsigned int, size_t> categoryCounts() const;
 
-    std::unique_ptr<nlohmann::json> extractedData() { return std::move(extracted_data_); } // ds_id -> (ip,port)
+    std::vector<std::unique_ptr<nlohmann::json>> extractedData() { return std::move(extracted_data_); } // ds_id -> (ip,port)
 
     float getFileDecodingProgress() const;
     float getRecordsPerSecond() const;
@@ -123,7 +123,7 @@ private:
 
     boost::posix_time::ptime last_receive_decode_time_;
 
-    std::unique_ptr<nlohmann::json> extracted_data_;
+    std::vector<std::unique_ptr<nlohmann::json>> extracted_data_;
 
     size_t count_total_ {0};
     std::map<unsigned int, size_t> category_counts_;

@@ -13,7 +13,7 @@ using namespace std;
 using namespace Utils;
 using namespace nlohmann;
 
-ASTERIXJSONMappingJob::ASTERIXJSONMappingJob(std::unique_ptr<nlohmann::json> data,
+ASTERIXJSONMappingJob::ASTERIXJSONMappingJob(std::vector<std::unique_ptr<nlohmann::json>> data,
                                              const std::vector<std::string>& data_record_keys,
                                              const std::map<unsigned int, std::unique_ptr<ASTERIXJSONParser>>& parsers)
     : Job("ASTERIXJSONMappingJob"),
@@ -111,10 +111,15 @@ void ASTERIXJSONMappingJob::run()
         }
     };
 
-    assert(data_);
-    logdbg << "ASTERIXJSONMappingJob: run: applying JSON function";
-    JSON::applyFunctionToValues(*data_.get(), data_record_keys_, data_record_keys_.begin(),
-                                process_lambda, false);
+    for (auto& data_slice : data_)
+    {
+        if (data_slice)
+        {
+            logdbg << "ASTERIXJSONMappingJob: run: applying JSON function";
+            JSON::applyFunctionToValues(*data_slice.get(), data_record_keys_, data_record_keys_.begin(),
+                                        process_lambda, false);
+        }
+    }
 
     std::map<std::string, std::shared_ptr<Buffer>> not_empty_buffers;
 
@@ -129,8 +134,9 @@ void ASTERIXJSONMappingJob::run()
     }
     buffers_ = not_empty_buffers;  // cleaner
 
+    data_.clear();
+
     done_ = true;
-    data_ = nullptr;
 
     logdbg << "ASTERIXJSONMappingJob: run: done: mapped " << num_created_ << " skipped "
            << num_not_mapped_;
