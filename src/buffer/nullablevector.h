@@ -715,7 +715,6 @@ std::tuple<bool,T,T> NullableVector<T>::minMaxValuesSorted(unsigned int index)
     return std::tuple<bool,T,T> {min_set && max_set, min, max};
 }
 
-
 template <class T>
 std::map<T, std::vector<unsigned int>> NullableVector<T>::distinctValuesWithIndexes(
         unsigned int from_index, unsigned int to_index)
