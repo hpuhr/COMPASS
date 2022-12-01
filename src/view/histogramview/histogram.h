@@ -299,11 +299,11 @@ public:
     /**
      * Add the given value to the histogram.
      */
-    int add(const T& v)
+    int add(const T& v, uint32_t count = 1)
     {
         int bin_idx = findBin(v);
 
-        increment(bin_idx);
+        increment(bin_idx, count);
 
         return bin_idx;
     }

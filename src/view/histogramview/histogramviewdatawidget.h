@@ -73,12 +73,8 @@ class HistogramViewDataWidget : public ViewDataWidget
     /// @brief Destructor
     virtual ~HistogramViewDataWidget();
 
-    void updateToData();
-    void updateChart();
-
-    void updateResults();
-
     void clear();
+    void updateView();
 
     unsigned int numBins() const;
 
@@ -91,6 +87,15 @@ class HistogramViewDataWidget : public ViewDataWidget
     QPixmap renderPixmap();
 
 protected:
+    virtual void toolChanged_impl(int mode) override;
+
+    void updateChart();
+    void updateFromData();
+    void updateFromResults();
+
+    void selectData(unsigned int index1, unsigned int index2);
+    void zoomToSubrange(unsigned int index1, unsigned int index2);
+
     static const unsigned int NumBins     = 20;
     static const int          LabelAngleX = 85;
 
@@ -103,9 +108,8 @@ protected:
     static const QColor       ColorCAT062;
     static const QColor       ColorRefTraj;
 
-    HistogramView* view_{nullptr};
-
-    /// Data source
+    QHBoxLayout*             main_layout_{nullptr};
+    HistogramView*           view_       {nullptr};
     HistogramViewDataSource* data_source_{nullptr};
 
     std::map<std::string, std::shared_ptr<Buffer>> buffers_;
@@ -114,20 +118,11 @@ protected:
     QCursor                                        current_cursor_{Qt::CrossCursor};
     HistogramViewDataTool                          selected_tool_ {HG_DEFAULT_TOOL};
 
-    QHBoxLayout* main_layout_ {nullptr};
-
     std::unique_ptr<QtCharts::HistogramViewChartView> chart_view_;
     std::unique_ptr<HistogramGenerator>               histogram_generator_;
 
-    bool shows_data_ {false};
+    bool shows_data_         {false};
     bool data_not_in_buffer_ {false};
-
-    virtual void toolChanged_impl(int mode) override;
-
-    void selectData(unsigned int index1, unsigned int index2);
-    void zoomToSubrange(unsigned int index1, unsigned int index2);
-    void updateFromAllData();
-    void updateFromResult(std::shared_ptr<EvaluationRequirementResult::Base> result);
 };
 
 #endif /* HISTOGRAMVIEWDATAWIDGET_H_ */

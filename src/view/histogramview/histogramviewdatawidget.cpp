@@ -227,24 +227,28 @@ void HistogramViewDataWidget::updateDataSlot(const std::map<std::string, std::sh
  */
 void HistogramViewDataWidget::loadingDoneSlot()
 {
-    updateToData();
+    updateView();
 }
 
 /**
  */
-void HistogramViewDataWidget::updateToData()
+void HistogramViewDataWidget::updateView()
 {
-    loginf << "HistogramViewDataWidget: update";
+    if (view_->showResults())
+        updateFromResults();
+    else
+        updateFromData();
 
-    updateFromAllData();
     updateChart();
 }
 
 /**
  */
-void HistogramViewDataWidget::updateFromAllData()
+void HistogramViewDataWidget::updateFromData()
 {
     loginf << "HistogramViewDataWidget: updateFromAllData";
+
+    histogram_generator_.reset();
 
     shows_data_         = false;
     data_not_in_buffer_ = false;
@@ -269,8 +273,6 @@ void HistogramViewDataWidget::updateFromAllData()
     auto data_type = meta_var ? meta_var->dataType() : data_var->dataType();
 
     //create histogram generator of conrete data type matching the variable's
-    histogram_generator_.reset();
-
     switch (data_type)
     {
         case PropertyDataType::BOOL:
@@ -342,25 +344,27 @@ void HistogramViewDataWidget::updateFromAllData()
         }
     }
 
-    if (!histogram_generator_)
-        return;
+    if (histogram_generator_)
+    {
+        histogram_generator_->update();
+        //histogram_generator_->print();
 
-    histogram_generator_->update();
-    //histogram_generator_->print();
+        HistogramGeneratorBuffer* generator = dynamic_cast<HistogramGeneratorBuffer*>(histogram_generator_.get());
+        assert(generator);
 
-    HistogramGeneratorBuffer* generator = dynamic_cast<HistogramGeneratorBuffer*>(histogram_generator_.get());
-    assert(generator);
-
-    data_not_in_buffer_ = generator->dataNotInBuffer();
+        data_not_in_buffer_ = generator->dataNotInBuffer();
+    }
 
     loginf << "HistogramViewDataWidget: updateFromAllData: done";
 }
 
 /**
  */
-void HistogramViewDataWidget::updateResults()
+void HistogramViewDataWidget::updateFromResults()
 {
     loginf << "HistogramViewDataWidget: updateResults";
+
+    histogram_generator_.reset();
 
     EvaluationManager& eval_man = COMPASS::instance().evaluationManager();
 
@@ -373,12 +377,13 @@ void HistogramViewDataWidget::updateResults()
         string eval_id     = view_->evalResultsID();
 
         histogram_generator_.reset(new HistogramGeneratorResults(eval_grpreq, eval_id));
-        histogram_generator_->update();
     }
+
+    if (histogram_generator_)
+        histogram_generator_->update();
 
     loginf << "HistogramViewDataWidget: updateResults: done";
 }
-
 
 /**
  */
@@ -649,7 +654,7 @@ void HistogramViewDataWidget::resetZoomSlot()
     {
         //@TODO: we could implement this in the histogram generator instead of a complete view update, 
         //but it would need a data refill anyway...
-        updateToData();
+        updateFromData();
     }
     else if (chart_view_ && chart_view_->chart())
     {

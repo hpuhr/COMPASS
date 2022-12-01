@@ -128,6 +128,8 @@ private:
     void updateCountResult (std::shared_ptr<EvaluationRequirementResult::SingleModeCFalse> result);
     void updateCountResult (std::shared_ptr<EvaluationRequirementResult::JoinedModeCFalse> result);
 
+    void addStaticResult(const std::vector<std::string>& ids, const std::vector<unsigned int>& counts);
+
     template<typename T>
     void collectIntermediateData(const std::string& db_content, const HistogramT<T>& histogram)
     {
