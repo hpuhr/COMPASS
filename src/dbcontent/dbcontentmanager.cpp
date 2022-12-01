@@ -367,25 +367,34 @@ void DBContentManager::load()
 {
     logdbg << "DBContentManager: loadSlot";
 
+    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+
+    if (load_in_progress_)
+    {
+        loginf << "DBContentManager: loadSlot: quitting previous load";
+
+        for (auto& object : dbcontent_)
+        {
+            if (object.second->isLoading())
+                object.second->quitLoading();
+        }
+
+        while (load_in_progress_) // JobManager::instance().hasDBJobs()
+        {
+            loginf << "DBContentManager: loadSlot: previous load to finish";
+
+            QCoreApplication::processEvents();
+            QThread::msleep(1);
+        }
+    }
+
+    loginf << "DBContentManager: loadSlot: starting loading";
+
     data_.clear();
 
     load_in_progress_ = true;
 
     bool load_job_created = false;
-
-    loginf << "DBContentManager: loadSlot: loading associations";
-
-    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-
-    while (JobManager::instance().hasDBJobs())
-    {
-        logdbg << "DBContentManager: loadSlot: waiting on association loading";
-
-        QCoreApplication::processEvents();
-        QThread::msleep(5);
-    }
-
-    loginf << "DBContentManager: loadSlot: starting loading";
 
     DataSourceManager& ds_man =  COMPASS::instance().dataSourceManager();
     EvaluationManager& eval_man = COMPASS::instance().evaluationManager();
@@ -502,10 +511,15 @@ void DBContentManager::quitLoading()
 {
     loginf << "DBContentManager: quitLoading";
 
-    for (auto& object : dbcontent_)
-        object.second->quitLoading();
+    assert (load_in_progress_);
 
-    load_in_progress_ = true;  // TODO
+    for (auto& object : dbcontent_)
+    {
+        if (object.second->isLoading())
+            object.second->quitLoading();
+    }
+
+    //load_in_progress_ = true;  // TODO
 }
 
 void DBContentManager::databaseOpenedSlot()

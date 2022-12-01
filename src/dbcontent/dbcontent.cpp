@@ -461,12 +461,8 @@ void DBContent::loadFiltered(VariableSet& read_set, const std::vector<std::strin
 
     // do not load associations, should be done in DBContentManager::load
 
-    if (read_job_)
-    {
-        JobManager::instance().cancelJob(read_job_);
-        read_job_ = nullptr;
-    }
-    //read_job_data_.clear();
+    assert (!read_job_);
+
 
     //    for (auto job_it : finalize_jobs_)
     //        JobManager::instance().cancelJob(job_it);
