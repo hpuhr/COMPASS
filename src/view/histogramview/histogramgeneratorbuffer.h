@@ -238,9 +238,11 @@ protected:
             return false;
 
         for (auto& elem : histograms_)
+        {
             if (!elem.second.zoom(bin0, bin1))
                 return false;
-
+        }
+        
         return true;
     }
 
