@@ -534,7 +534,7 @@ void HistogramViewDataWidget::updateChart()
     {
         auto outlier_count = results.not_inserted_count;
 
-        const QString name = "Outliers: " + QString::number(outlier_count);
+        const QString name = "Out of range: " + QString::number(outlier_count);
 
         chart_view_->addLegendOnlyItem(name, QColor(255, 255, 0));
     }
@@ -652,9 +652,7 @@ void HistogramViewDataWidget::resetZoomSlot()
 
     if (histogram_generator_ && histogram_generator_->subRangeActive())
     {
-        //@TODO: we could implement this in the histogram generator instead of a complete view update, 
-        //but it would need a data refill anyway...
-        updateFromData();
+        updateView();
     }
     else if (chart_view_ && chart_view_->chart())
     {

@@ -75,6 +75,7 @@ class HistogramViewDataWidget : public ViewDataWidget
 
     void clear();
     void updateView();
+    void updateChart();
 
     unsigned int numBins() const;
 
@@ -89,7 +90,6 @@ class HistogramViewDataWidget : public ViewDataWidget
 protected:
     virtual void toolChanged_impl(int mode) override;
 
-    void updateChart();
     void updateFromData();
     void updateFromResults();
 

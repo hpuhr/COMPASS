@@ -30,6 +30,7 @@ class VariableSelectionWidget;
 }
 
 class QCheckBox;
+class QRadioButton;
 class QLineEdit;
 class QPushButton;
 class QLabel;
@@ -43,8 +44,7 @@ class HistogramViewConfigWidget : public ViewConfigWidget
     Q_OBJECT
 
   public slots:
-    void showSelectedVariableDataSlot();
-    void showEvaluationResultDataSlot();
+    void dataSourceToggled();
     void selectedVariableChangedSlot();
 
     void toggleLogScale();
@@ -59,28 +59,31 @@ class HistogramViewConfigWidget : public ViewConfigWidget
     HistogramViewConfigWidget(HistogramView* view, QWidget* parent = nullptr);
     virtual ~HistogramViewConfigWidget();
 
-    void updateEvalConfig();
+    void updateConfig();
 
     virtual void setStatus(const QString& text, bool visible, const QColor& color = Qt::black) override;
 
     void appModeSwitch (AppMode app_mode);
 
   protected:
+    void updateEvalConfig();
+
     HistogramView* view_;
 
     // data variable
-    QCheckBox* selected_var_check_ {nullptr}; // active if variable data is shown
-    dbContent::VariableSelectionWidget* select_var_ {nullptr};
+    QRadioButton*                       selected_var_check_ {nullptr}; // active if variable data is shown
+    QWidget*                            selected_var_widget_{nullptr};
+    dbContent::VariableSelectionWidget* select_var_         {nullptr};
 
     // eval
-    QCheckBox* eval_results_check_ {nullptr}; // active if eval data is shown
-    QLabel* eval_results_grpreq_label_{nullptr};
-    QLabel* eval_results_id_label_{nullptr};
+    QRadioButton* eval_results_check_       {nullptr}; // active if eval data is shown
+    QWidget*      eval_results_widget_      {nullptr};
+    QLabel*       eval_results_grpreq_label_{nullptr};
+    QLabel*       eval_results_id_label_    {nullptr};
 
-    QCheckBox* log_check_ {nullptr};
-    //QPushButton* export_button_{nullptr};
-
-    QLabel* status_label_ {nullptr};
+    // general
+    QCheckBox*   log_check_    {nullptr};
+    QLabel*      status_label_ {nullptr};
     QPushButton* reload_button_{nullptr};
 };
 

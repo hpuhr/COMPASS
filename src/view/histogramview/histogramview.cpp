@@ -33,6 +33,8 @@
 
 using namespace dbContent;
 
+/**
+ */
 HistogramView::HistogramView(const std::string& class_id, const std::string& instance_id,
                              ViewContainer* w, ViewManager& view_manager)
     : View(class_id, instance_id, w, view_manager)
@@ -45,6 +47,8 @@ HistogramView::HistogramView(const std::string& class_id, const std::string& ins
     // create sub done in init
 }
 
+/**
+ */
 HistogramView::~HistogramView()
 {
     if (data_source_)
@@ -60,6 +64,8 @@ HistogramView::~HistogramView()
     }
 }
 
+/**
+ */
 bool HistogramView::init()
 {
     View::init();
@@ -102,6 +108,8 @@ bool HistogramView::init()
     return true;
 }
 
+/**
+ */
 void HistogramView::loadingStarted()
 {
     loginf << "HistogramView: loadingStarted";
@@ -109,6 +117,8 @@ void HistogramView::loadingStarted()
     getDataWidget()->loadingStartedSlot();
 }
 
+/**
+ */
 void HistogramView::loadedData(const std::map<std::string, std::shared_ptr<Buffer>>& data, bool requires_reset)
 {
     loginf << "HistogramView: loadedData";
@@ -116,6 +126,8 @@ void HistogramView::loadedData(const std::map<std::string, std::shared_ptr<Buffe
     getDataWidget()->updateDataSlot(data, requires_reset);
 }
 
+/**
+ */
 void HistogramView::loadingDone()
 {
     loginf << "HistogramView: loadingDone";
@@ -123,6 +135,8 @@ void HistogramView::loadingDone()
     getDataWidget()->loadingDoneSlot();
 }
 
+/**
+ */
 void HistogramView::clearData()
 {
     loginf << "HistogramView: clearData";
@@ -130,6 +144,8 @@ void HistogramView::clearData()
     getDataWidget()->clear();
 }
 
+/**
+ */
 void HistogramView::appModeSwitch (AppMode app_mode_previous, AppMode app_mode_current)
 {
     loginf << "HistogramView: appModeSwitch: app_mode " << toString(app_mode_current)
@@ -138,6 +154,8 @@ void HistogramView::appModeSwitch (AppMode app_mode_previous, AppMode app_mode_c
     widget_->getViewConfigWidget()->appModeSwitch(app_mode_current);
 }
 
+/**
+ */
 void HistogramView::generateSubConfigurable(const std::string& class_id,
                                             const std::string& instance_id)
 {
@@ -158,6 +176,8 @@ void HistogramView::generateSubConfigurable(const std::string& class_id,
                                  class_id);
 }
 
+/**
+ */
 void HistogramView::checkSubConfigurables()
 {
     if (!data_source_)
@@ -171,12 +191,16 @@ void HistogramView::checkSubConfigurables()
     }
 }
 
+/**
+ */
 HistogramViewDataWidget* HistogramView::getDataWidget()
 {
     assert (widget_);
     return widget_->getViewDataWidget();
 }
 
+/**
+ */
 VariableSet HistogramView::getSet(const std::string& dbcontent_name)
 {
     assert(data_source_);
@@ -202,16 +226,22 @@ VariableSet HistogramView::getSet(const std::string& dbcontent_name)
     return set;
 }
 
+/**
+ */
 void HistogramView::accept(LatexVisitor& v)
 {
     v.visit(this);
 }
 
+/**
+ */
 bool HistogramView::useLogScale() const
 {
     return use_log_scale_;
 }
 
+/**
+ */
 void HistogramView::useLogScale(bool use_log_scale)
 {
     use_log_scale_ = use_log_scale;
@@ -219,9 +249,11 @@ void HistogramView::useLogScale(bool use_log_scale)
     HistogramViewDataWidget* data_widget = dynamic_cast<HistogramViewDataWidget*>(getDataWidget());
     assert (data_widget);
 
-    data_widget->updateView();
+    data_widget->updateChart();
 }
 
+/**
+ */
 bool HistogramView::hasDataVar ()
 {
     if (!data_var_dbo_.size() || !data_var_name_.size())
@@ -233,11 +265,15 @@ bool HistogramView::hasDataVar ()
         return COMPASS::instance().dbContentManager().dbContent(data_var_dbo_).hasVariable(data_var_name_);
 }
 
+/**
+ */
 bool HistogramView::isDataVarMeta ()
 {
     return data_var_dbo_ == META_OBJECT_NAME;
 }
 
+/**
+ */
 Variable& HistogramView::dataVar()
 {
     assert (hasDataVar());
@@ -247,6 +283,8 @@ Variable& HistogramView::dataVar()
     return COMPASS::instance().dbContentManager().dbContent(data_var_dbo_).variable(data_var_name_);
 }
 
+/**
+ */
 void HistogramView::dataVar (Variable& var)
 {
     loginf << "HistogramView: dataVar: dbo " << var.dbContentName() << " name " << var.name();
@@ -263,6 +301,8 @@ void HistogramView::dataVar (Variable& var)
         widget_->getViewConfigWidget()->setStatus("Reload Required", true, Qt::red);
 }
 
+/**
+ */
 MetaVariable& HistogramView::metaDataVar()
 {
     assert (hasDataVar());
@@ -271,6 +311,8 @@ MetaVariable& HistogramView::metaDataVar()
     return COMPASS::instance().dbContentManager().metaVariable(data_var_name_);
 }
 
+/**
+ */
 void HistogramView::metaDataVar (MetaVariable& var)
 {
     loginf << "HistogramView: metaDataVar: name " << var.name();
@@ -287,17 +329,22 @@ void HistogramView::metaDataVar (MetaVariable& var)
         widget_->getViewConfigWidget()->setStatus("Reload Required", true, Qt::red);
 }
 
-
+/**
+ */
 std::string HistogramView::dataVarDBO() const
 {
     return data_var_dbo_;
 }
 
+/**
+ */
 std::string HistogramView::dataVarName() const
 {
     return data_var_name_;
 }
 
+/**
+ */
 void HistogramView::updateSelection()
 {
     loginf << "HistogramView: updateSelection";
@@ -311,6 +358,8 @@ void HistogramView::updateSelection()
     //        widget_->getDataWidget()->resetModels();  // just updates the checkboxes
 }
 
+/**
+ */
 void HistogramView::unshowViewPointSlot (const ViewableDataConfig* vp)
 {
     loginf << "HistogramView: unshowViewPoint";
@@ -322,24 +371,31 @@ void HistogramView::unshowViewPointSlot (const ViewableDataConfig* vp)
     current_view_point_ = nullptr;
 }
 
+/**
+ */
 bool HistogramView::showResults() const
 {
     return show_results_;
 }
 
+/**
+ */
 void HistogramView::showResults(bool value)
 {
     show_results_ = value;
 
-    widget_->getViewConfigWidget()->updateEvalConfig();
-    widget_->getViewDataWidget()->updateView();
+    onShowResultsChanged();
 }
 
+/**
+ */
 std::string HistogramView::evalResultGrpReq() const
 {
     return eval_results_grpreq_;
 }
 
+/**
+ */
 void HistogramView::evalResultGrpReq(const std::string& value)
 {
     if (eval_results_grpreq_ == value)
@@ -352,11 +408,15 @@ void HistogramView::evalResultGrpReq(const std::string& value)
     widget_->getViewDataWidget()->updateView();
 }
 
+/**
+ */
 std::string HistogramView::evalResultsID() const
 {
     return eval_results_id_;
 }
 
+/**
+ */
 void HistogramView::evalResultsID(const std::string& value)
 {
     if (eval_results_id_ == value)
@@ -369,6 +429,15 @@ void HistogramView::evalResultsID(const std::string& value)
     widget_->getViewDataWidget()->updateView();
 }
 
+/**
+ */
+bool HistogramView::hasResultID() const
+{
+    return (!evalResultGrpReq().empty() && !evalResultsID().empty());
+}
+
+/**
+ */
 void HistogramView::showViewPointSlot (const ViewableDataConfig* vp)
 {
     loginf << "HistogramView: showViewPoint";
@@ -383,6 +452,16 @@ void HistogramView::showViewPointSlot (const ViewableDataConfig* vp)
     //widget_->getDataWidget()->resetViewPointZoomed(); // TODO
 }
 
+/**
+ */
+void HistogramView::onShowResultsChanged()
+{
+    widget_->getViewConfigWidget()->updateConfig();
+    widget_->getViewDataWidget()->updateView();
+}
+
+/**
+ */
 void HistogramView::resultsChangedSlot()
 {
     loginf << "HistogramView: resultsChangedSlot";
@@ -411,10 +490,18 @@ void HistogramView::resultsChangedSlot()
         }
     }
 
-    widget_->getViewConfigWidget()->updateEvalConfig();
-    widget_->getViewDataWidget()->updateView();
+    //reset result visualization if result id is bad
+    if (show_results_ && !hasResultID())
+    {
+        show_results_ = false;
+    }
+
+    //update on result change
+    onShowResultsChanged();
 }
 
+/**
+ */
 void HistogramView::allLoadingDoneSlot()
 {
     loginf << "HistogramView: allLoadingDoneSlot";
@@ -425,14 +512,15 @@ void HistogramView::allLoadingDoneSlot()
 
     if (current_view_point_ && current_view_point_->data().contains("evaluation_results"))
     {
+        //infer result visualization from view point
         const nlohmann::json& data = current_view_point_->data();
         assert (data.at("evaluation_results").contains("show_results"));
         assert (data.at("evaluation_results").contains("req_grp_id"));
         assert (data.at("evaluation_results").contains("result_id"));
 
-        show_results_ = data.at("evaluation_results").at("show_results");
+        show_results_        = data.at("evaluation_results").at("show_results");
         eval_results_grpreq_ = data.at("evaluation_results").at("req_grp_id");
-        eval_results_id_ = data.at("evaluation_results").at("result_id");
+        eval_results_id_     = data.at("evaluation_results").at("result_id");
 
         //show_results_ = true;
 
@@ -451,8 +539,7 @@ void HistogramView::allLoadingDoneSlot()
     }
     else
     {
-        show_results_ = false;
-        getDataWidget()->loadingDoneSlot();
+        //do not show results
+        showResults(false);
     }
 }
-

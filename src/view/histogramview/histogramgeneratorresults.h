@@ -130,6 +130,8 @@ private:
 
     void addStaticResult(const std::vector<std::string>& ids, const std::vector<unsigned int>& counts);
 
+    /**
+     */
     template<typename T>
     void collectIntermediateData(const std::string& db_content, const HistogramT<T>& histogram)
     {
@@ -148,6 +150,8 @@ private:
         }
     }
 
+    /**
+     */
     template<typename T>
     void collectIntermediateData(const std::map<std::string, HistogramT<T>>& histograms)
     {
@@ -155,6 +159,8 @@ private:
             collectIntermediateData(elem.first, elem.second);
     }
 
+    /**
+     */
     template<typename T>
     bool zoomHistogram(HistogramT<T>& histogram,
                        unsigned int bin0, 
@@ -163,6 +169,8 @@ private:
         return histogram.zoom(bin0, bin1);
     }
 
+    /**
+     */
     template<typename T>
     bool zoomHistograms(std::map<std::string, HistogramT<T>>& histograms, 
                         unsigned int bin0, 
@@ -178,43 +186,63 @@ private:
         return true;
     }
 
+    /**
+     */
     template<typename T>
     void addFloatingPointResult(const std::string& dbcontent_name, std::shared_ptr<T> result)
     {
         const std::vector<double>& values = result->values();
 
+        //note: histograms are created on-the-fly if they do not exist, otherwise they are reused
+        bool init_histogram = histograms_fp_.empty();
+
         auto& h = histograms_fp_[ dbcontent_name ];
 
-        HistogramInitializer<double> init;
-        init.scan(values);
+        //init histogram?
+        if (init_histogram)
+        {
+            HistogramInitializer<double> init;
+            init.scan(values);
 
-        auto config = init.currentConfiguration();
-        init.initHistogram(h, config);
-
+            auto config = init.currentConfiguration();
+            init.initHistogram(h, config);
+        }
+        
+        //add result data
         h.add(values);
     }
 
+    /**
+     */
     template<typename T, typename Tsub, typename Tbase>
     void addFloatingPointResults(const std::string& dbcontent_name, std::shared_ptr<T> result)
     {
         std::vector<std::shared_ptr<Tbase>>& results = result->results();
 
+        //note: histograms are created on-the-fly if they do not exist, otherwise they are reused
+        bool init_histogram = histograms_fp_.empty();
+
         auto& h = histograms_fp_[ dbcontent_name ];
 
-        HistogramInitializer<double> init;
-
-        for (auto& result_it : results) // calculate global min max
+        //init histogram?
+        if (init_histogram)
         {
-            std::shared_ptr<Tsub> single_result = std::static_pointer_cast<Tsub>(result_it);
+            HistogramInitializer<double> init;
 
-            if (single_result->use())
-                init.scan(single_result->values());
+            for (auto& result_it : results) // calculate global min max
+            {
+                std::shared_ptr<Tsub> single_result = std::static_pointer_cast<Tsub>(result_it);
+
+                if (single_result->use())
+                    init.scan(single_result->values());
+            }
+
+            auto config = init.currentConfiguration();
+            init.initHistogram(h, config);
         }
 
-        auto config = init.currentConfiguration();
-        init.initHistogram(h, config);
-
-        for (auto& result_it : results) // calculate global min max
+        //add result data
+        for (auto& result_it : results)
         {
             std::shared_ptr<Tsub> single_result = std::static_pointer_cast<Tsub>(result_it);
 

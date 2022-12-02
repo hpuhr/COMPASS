@@ -135,10 +135,10 @@ protected:
     //implements data reset
     virtual void reset_impl() = 0;
 
-    //(optional) implements generation of histograms before refill (could also be computed on the fly in refill_impl())
+    //(optional) implements generation of histograms before refill (could also be generated on the fly in refill_impl())
     virtual bool generateHistograms_impl() { return true; }
 
-    //implements refill behavior, which is redistribution of the data into the existing histograms
+    //implements refill behavior, which is redistribution of the data into the already existing histograms
     virtual bool refill_impl() = 0;
 
     //(optional) implements selection if the given bin range in the data

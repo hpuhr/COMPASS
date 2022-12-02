@@ -205,7 +205,6 @@ void Client::run ()
     tbb::task_scheduler_init init {num_threads};
 
 #else
-
     int num_threads = oneapi::tbb::info::default_concurrency();
 
     loginf << "COMPASSClient: started with " << num_threads << " threads";

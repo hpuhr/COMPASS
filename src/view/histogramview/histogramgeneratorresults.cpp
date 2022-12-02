@@ -96,6 +96,7 @@ bool HistogramGeneratorResults::hasData() const
  */
 void HistogramGeneratorResults::reset_impl()
 {
+    //clear histograms
     histograms_static_ = {};
     histograms_fp_     = {};
 }
@@ -126,7 +127,7 @@ bool HistogramGeneratorResults::refill_impl()
     std::shared_ptr<EvaluationRequirementResult::Base> result = results.at(eval_grpreq_).at(eval_id_);
     assert (result);
 
-    //update
+    //update counts
     updateFromResult(result);
 
     //collect data
@@ -182,23 +183,18 @@ void HistogramGeneratorResults::addStaticResult(const std::vector<std::string>& 
 
     string dbcontent_name = COMPASS::instance().evaluationManager().dbContentNameTst();
 
-    //note: histograms are created on-the-fly if they do not exist, otherwise they are reused.
-    if (histograms_static_.empty()) // first
-    {
-        auto& h = histograms_static_[dbcontent_name];
+    //note: histograms are created on-the-fly if they do not exist, otherwise they are reused
+    bool init_histogram = histograms_static_.empty();
 
+    auto& h = histograms_static_[dbcontent_name];
+
+    if (init_histogram)
+    {
         h.createFromCategories(ids);
-
-        for (size_t i = 0; i < ids.size(); ++i)
-            h.add(ids[ i ], counts[ i ]);
     }
-    else // add
-    {
-        auto& h = histograms_static_[dbcontent_name];
 
-        for (size_t i = 0; i < ids.size(); ++i)
-            h.add(ids[ i ], counts[ i ]);
-    }
+    for (size_t i = 0; i < ids.size(); ++i)
+        h.add(ids[ i ], counts[ i ]);
 }
 
 /**
