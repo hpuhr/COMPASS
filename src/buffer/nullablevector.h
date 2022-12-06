@@ -485,7 +485,7 @@ void NullableVector<T>::addData(NullableVector<T>& other)
         resizeNullTo(buffer_.data_size_);
         logdbg << "NullableVector " << property_.name() << ": addData: 1: inserting null";
         null_flags_.insert(null_flags_.end(), other.null_flags_.begin(), other.null_flags_.end());
-        goto DONE;
+        return;
     }
 
     if (other.data_.size() && !other.null_flags_.size())  // if other has everything set
@@ -505,7 +505,7 @@ void NullableVector<T>::addData(NullableVector<T>& other)
 
         logdbg << "NullableVector " << property_.name() << ": addData: 2: inserting data";
         data_.insert(data_.end(), other.data_.begin(), other.data_.end());
-        goto DONE;
+        return;
     }
 
     logdbg << "NullableVector " << property_.name()
@@ -526,9 +526,7 @@ void NullableVector<T>::addData(NullableVector<T>& other)
     logdbg << "NullableVector " << property_.name() << ": addData: 3: inserting data";
     data_.insert(data_.end(), other.data_.begin(), other.data_.end());
 
-DONE:
     // size is adjusted in Buffer::seizeBuffer
-
     logdbg << "NullableVector " << property_.name() << ": addData: end";
 }
 
