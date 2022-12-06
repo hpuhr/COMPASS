@@ -72,7 +72,8 @@ DBContentManager::DBContentManager(const std::string& class_id, const std::strin
     registerParameter("limit_min", &limit_min_, 0);
     registerParameter("limit_max", &limit_max_, 100000);
 
-    registerParameter("max_live_data_age", &max_live_data_age_, 10);
+    registerParameter("max_live_data_age_cache", &max_live_data_age_cache_, 5);
+    registerParameter("max_live_data_age_db", &max_live_data_age_db_, 60);
 
     createSubConfigurables();
 
@@ -925,7 +926,7 @@ void DBContentManager::finishInserting()
     {
         using namespace boost::posix_time;
 
-        ptime old_time = Time::currentUTCTime() - minutes(max_live_data_age_);
+        ptime old_time = Time::currentUTCTime() - minutes(max_live_data_age_db_);
 
         logdbg << "DBContentManager: finishInserting: deleting data before " << Time::toString(old_time);
 
@@ -1182,7 +1183,8 @@ void DBContentManager::cutCachedData()
 {
     unsigned int buffer_size;
 
-    boost::posix_time::ptime min_ts = Time::currentUTCTime() - boost::posix_time::minutes(5); // max - 5min
+    boost::posix_time::ptime min_ts = Time::currentUTCTime() - boost::posix_time::minutes(max_live_data_age_cache_);
+    // max - x minutes
 
     loginf << "DBContentManager: cutCachedData: current ts " << Time::toString(Time::currentUTCTime())
            << " min_ts " << Time::toString(min_ts);

@@ -200,7 +200,8 @@ protected:
     bool has_max_reftraj_track_num_ {false};
     unsigned int max_reftraj_track_num_ {0};
 
-    unsigned int max_live_data_age_ {10};
+    unsigned int max_live_data_age_cache_ {5};
+    unsigned int max_live_data_age_db_ {60};
 
     boost::optional<boost::posix_time::ptime> timestamp_min_;
     boost::optional<boost::posix_time::ptime> timestamp_max_;
