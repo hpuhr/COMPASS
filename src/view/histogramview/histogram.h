@@ -22,9 +22,32 @@
 #include <string>
 #include <vector>
 #include <memory>
+#include <cmath>
 
 #include <boost/date_time.hpp>
 #include <boost/optional.hpp>
+
+namespace histogram_helpers
+{
+    /**
+     * Check for finite values on all needed data types.
+     */
+    template<typename T>
+    inline bool checkFinite(const T& v)
+    {
+        return std::isfinite(v);
+    }
+    template<>
+    inline bool checkFinite<std::string>(const std::string& v)
+    {
+        return true;
+    }
+    template<>
+    inline bool checkFinite<boost::posix_time::ptime>(const boost::posix_time::ptime& v)
+    {
+        return true;
+    }
+}
 
 /**
  * Templated histogram bin.
@@ -338,6 +361,9 @@ public:
      */
     int findBin(const T& v) const
     {
+        if (!histogram_helpers::checkFinite(v))
+            return -1;
+
         //estimate bin range to search
         auto bin_range = estimateTargetBin(v);
 
@@ -428,6 +454,11 @@ private:
     template<typename Tinternal = T>
     void createFromRangeT(size_t n, const T& min_value, const T& max_value)
     {
+        if (!histogram_helpers::checkFinite<T>(min_value) || 
+            !histogram_helpers::checkFinite<T>(max_value) || 
+            min_value > max_value)
+            throw std::runtime_error("HistogramT::createFromRangeT: invalid range");
+
         clear();
 
         config_.type     = HistogramConfig::Type::Range;
@@ -438,6 +469,11 @@ private:
 
         const Tinternal min_value_int = convertToInternal<Tinternal>(min_value);
         const Tinternal max_value_int = convertToInternal<Tinternal>(max_value);
+
+        if (!histogram_helpers::checkFinite<Tinternal>(min_value_int) || 
+            !histogram_helpers::checkFinite<Tinternal>(max_value_int) || 
+            min_value_int > max_value_int)
+            throw std::runtime_error("HistogramT::createFromRangeT: invalid internal range");
 
         if (max_value_int - min_value_int == 0)
             return;
@@ -595,6 +631,18 @@ private:
     }
 
     /**
+     * Checks if the value is in histogram range.
+     */
+    bool isInRange(const T& v) const
+    {
+        //categories might not even be sorted, so this check makes no sense
+        if (config_.type == HistogramConfig::Type::Category)
+            return true;
+
+        return (v >= bins_.front().min_value && v <= bins_.back().max_value);
+    }
+
+    /**
      * Estimates a bin range the given value might be part of.
      */
     std::pair<int,int> estimateTargetBin(const T& v) const
@@ -603,7 +651,7 @@ private:
             return {-1, -1};
 
         //not in bin range?
-        if (v < bins_.front().min_value || v > bins_.back().max_value)
+        if (!isInRange(v))
             return {-1, -1};
 
         //try different methods to estimate bin quickly, depending on what clues are available

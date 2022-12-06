@@ -102,6 +102,9 @@ public:
 
         for (const T& v : data)
         {
+            if (!std::isfinite(v))
+                continue;
+
             if (!data_min.has_value() || v < data_min.value())
                 data_min = v;
             if (!data_max.has_value() || v > data_max.value())
@@ -202,7 +205,9 @@ protected:
      */
     std::set<T> distinctValues(const std::vector<T>& data) const
     {
-        return std::set<T>(data.begin(), data.end());
+        std::vector<T> data_cpy = data;
+        std::remove_if(data_cpy.begin(), data_cpy.end(), [] (const T& v) { return !histogram_helpers::checkFinite<T>(v); });
+        return std::set<T>(data_cpy.begin(), data_cpy.end());
     }
 
     boost::optional<T>           data_min_;

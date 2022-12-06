@@ -191,10 +191,19 @@ void HistogramGeneratorResults::addStaticResult(const std::vector<std::string>& 
     if (init_histogram)
     {
         h.createFromCategories(ids);
+
+        //loginf << "Creating result from categories";
+        //for (const auto& id : ids)
+        //    loginf << "   " << id;
     }
 
+    //loginf << "Adding values";
+
     for (size_t i = 0; i < ids.size(); ++i)
+    {
         h.add(ids[ i ], counts[ i ]);
+        //loginf << "   " << ids[ i ] << " : " << counts[ i ];
+    }
 }
 
 /**

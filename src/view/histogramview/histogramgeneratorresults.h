@@ -201,15 +201,22 @@ private:
         //init histogram?
         if (init_histogram)
         {
+            //loginf << "Creating histogram from flotaing point values";
+
             HistogramInitializer<double> init;
             init.scan(values);
 
             auto config = init.currentConfiguration();
             init.initHistogram(h, config);
         }
+
+        //loginf << "Adding values";
         
         //add result data
         h.add(values);
+
+        //for (auto v : values)
+        //    loginf << "   " << v;
     }
 
     /**
@@ -227,6 +234,8 @@ private:
         //init histogram?
         if (init_histogram)
         {
+            //loginf << "Creating histogram from flotaing point values";
+
             HistogramInitializer<double> init;
 
             for (auto& result_it : results) // calculate global min max
@@ -241,13 +250,20 @@ private:
             init.initHistogram(h, config);
         }
 
+        //loginf << "Adding values";
+
         //add result data
         for (auto& result_it : results)
         {
             std::shared_ptr<Tsub> single_result = std::static_pointer_cast<Tsub>(result_it);
 
             if (single_result->use())
+            {
                 h.add(single_result->values());
+
+                //for (auto v : single_result->values())
+                //    loginf << "   " << v;
+            }
         }
     }
 
