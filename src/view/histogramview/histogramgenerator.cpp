@@ -142,6 +142,10 @@ bool HistogramGenerator::zoom(unsigned int bin0, unsigned int bin1)
     if (!hasValidResult())
         return false;
 
+    //both bins oor -> do nothing
+    if (bin0 >= num_bins_ && bin1 >= num_bins_)
+        return false;
+
     unsigned int min_index = std::min(bin0, bin1);
     unsigned int max_index = std::max(bin0, bin1);
 
