@@ -82,6 +82,7 @@ public:
                                          const std::string& instance_id);
 
     void openDBFile(const std::string& filename, bool overwrite);
+    void exportDBFile(const std::string& filename);
     void closeDBFile();
     bool dbOpen();
 

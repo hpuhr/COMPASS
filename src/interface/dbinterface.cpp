@@ -167,6 +167,19 @@ void DBInterface::openDBFile(const std::string& filename, bool overwrite)
     loginf << "DBInterface: openDBFile: done";
 }
 
+void DBInterface::exportDBFile(const std::string& filename)
+{
+    assert (dbOpen());
+
+    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+
+    boost::mutex::scoped_lock locker(connection_mutex_);
+
+    db_connection_->exportFile(filename);
+
+    QApplication::restoreOverrideCursor();
+}
+
 void DBInterface::closeDBFile()
 {
     loginf << "DBInterface: closeDBFile";

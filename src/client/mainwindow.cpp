@@ -230,6 +230,11 @@ void MainWindow::createMenus ()
 
     open_recent_db_menu_->addSeparator();
 
+    export_db_action_ = new QAction("&Export");
+    export_db_action_->setToolTip(tr("Export database into file"));
+    connect(export_db_action_, &QAction::triggered, this, &MainWindow::exportDBSlot);
+    file_menu->addAction(export_db_action_);
+
     QAction* clear_act = new QAction("Clear");
     connect(clear_act, &QAction::triggered, this, &MainWindow::clearExistingDBsSlot);
     open_recent_db_menu_->addAction(clear_act);
@@ -405,6 +410,7 @@ void MainWindow::updateMenus()
     if (recent_file_list.size()) // is disabled otherwise
         open_recent_db_menu_->setDisabled(db_open || in_live_running);
 
+    export_db_action_->setDisabled(!db_open || in_live_running);
     close_db_action_->setDisabled(!db_open || in_live_running);
 
     sectors_action_->setDisabled(!db_open || in_live_running);
@@ -1202,6 +1208,18 @@ void MainWindow::openRecentDBSlot()
 
     updateBottomWidget();
     updateMenus();
+}
+
+void MainWindow::exportDBSlot()
+{
+    loginf << "MainWindow: exportDBSlot";
+
+    string filename = QFileDialog::getSaveFileName(this, "Export DB SQLite3 File").toStdString();
+
+    if (filename.size() > 0)
+    {
+        COMPASS::instance().exportDBFile(filename);
+    }
 }
 
 void MainWindow::clearExistingDBsSlot()

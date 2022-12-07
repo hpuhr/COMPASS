@@ -33,7 +33,7 @@
 
 #include <cstring>
 
-
+using namespace std;
 using namespace Utils;
 
 SQLiteConnection::SQLiteConnection(const std::string& class_id, const std::string& instance_id,
@@ -52,7 +52,7 @@ SQLiteConnection::~SQLiteConnection()
 
 void SQLiteConnection::openFile(const std::string& file_name)
 {
-    loginf << "SQLiteConnection: openFile: " << file_name;
+    loginf << "SQLiteConnection: openFile: '" << file_name << "'";
 
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
@@ -83,6 +83,20 @@ void SQLiteConnection::openFile(const std::string& file_name)
     db_opened_ = true;
 
     QApplication::restoreOverrideCursor();
+}
+
+void SQLiteConnection::exportFile(const std::string& file_name)
+{
+    loginf << "SQLiteConnection: exportFile: file '" << file_name << "'";
+    assert (db_opened_);
+
+    string tmp_sql = "VACUUM INTO '"+file_name+"';";
+
+    loginf << "SQLiteConnection: exportFile: sql '" << tmp_sql << "'";
+
+    char* sErrMsg = 0;
+    sqlite3_exec(db_handle_, tmp_sql.c_str(), NULL, NULL, &sErrMsg);
+
 }
 
 void SQLiteConnection::disconnect()

@@ -287,6 +287,16 @@ void COMPASS::createNewDBFile(const std::string& filename)
     emit databaseOpenedSignal();
 }
 
+void COMPASS::exportDBFile(const std::string& filename)
+{
+    loginf << "COMPASS: exportDBFile: exporting as file '" << filename << "'";
+
+    assert (db_opened_);
+    assert (db_interface_);
+
+    db_interface_->exportDBFile(filename);
+}
+
 void COMPASS::closeDB()
 {
     loginf << "COMPASS: closeDB: closing db file '" << last_db_filename_ << "'";
