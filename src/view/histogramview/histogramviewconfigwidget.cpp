@@ -193,6 +193,8 @@ HistogramViewConfigWidget::HistogramViewConfigWidget(HistogramView* view, QWidge
 
         vlayout->addWidget(info_widget_);
         vlayout->addSpacerItem(new QSpacerItem(5, 10, QSizePolicy::Fixed, QSizePolicy::Fixed));
+
+        updateInfo();
     }
 
     QFont font_status;
@@ -376,11 +378,38 @@ void HistogramViewConfigWidget::onDisplayChange_impl()
  */
 void HistogramViewConfigWidget::updateInfo()
 {
-    auto info = view_->getDataWidget()->getViewInfo();
+    HistogramViewDataWidget::ViewInfo info;
 
-    info_range_min_label_->setText(info.min.isEmpty() ? "-" : info.min);
-    info_range_max_label_->setText(info.max.isEmpty() ? "-" : info.max);
-    info_oor_label_->setText(info.out_of_range == 0 ? "None" : QString::number(info.out_of_range));
+    if (view_ && view_->hasDataWidget())
+        info = view_->getDataWidget()->getViewInfo();
 
-    info_zoom_label->setVisible(info.zoom_active);
+    auto setItalic = [ = ] (QLabel* label, bool ok) 
+    {
+        QFont f = label->font();
+        f.setItalic(ok);
+        label->setFont(f);
+    };
+
+    auto setText = [ = ] (QLabel* label, const QString& txt, bool italic)
+    {
+        label->setText(txt);
+        setItalic(label, italic);
+    };
+
+    if (!info.has_result)
+    {
+        setText(info_range_min_label_, "-", false);
+        setText(info_range_max_label_, "-", false);
+        setText(info_oor_label_      , "-", false);
+
+        info_zoom_label->setVisible(false);
+    }
+    else 
+    {
+        setText(info_range_min_label_, info.min.isEmpty()     ? "Not available" : info.min, info.min.isEmpty());
+        setText(info_range_max_label_, info.max.isEmpty()     ? "Not available" : info.max, info.max.isEmpty());
+        setText(info_oor_label_      , QString::number(info.out_of_range), false);
+
+        info_zoom_label->setVisible(info.zoom_active);
+    }
 }

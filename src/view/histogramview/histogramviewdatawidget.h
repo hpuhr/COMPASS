@@ -92,6 +92,7 @@ class HistogramViewDataWidget : public ViewDataWidget
         QString  min;
         QString  max;
         uint32_t out_of_range = 0;
+        bool     has_result   = false;
         bool     zoom_active  = false;
     };
 

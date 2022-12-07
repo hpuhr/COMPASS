@@ -71,6 +71,7 @@ class HistogramView : public View
         return data_source_;
     }
 
+    bool hasDataWidget() const;
     HistogramViewDataWidget* getDataWidget();
 
     virtual dbContent::VariableSet getSet(const std::string& dbcontent_name) override;

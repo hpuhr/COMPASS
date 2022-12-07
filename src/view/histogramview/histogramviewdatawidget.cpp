@@ -671,7 +671,7 @@ void HistogramViewDataWidget::resetZoomSlot()
  */
 HistogramViewDataWidget::ViewInfo HistogramViewDataWidget::getViewInfo() const
 {
-    if (!histogram_generator_)
+    if (!histogram_generator_ || !histogram_generator_->hasValidResult())
         return {};
 
     auto range       = histogram_generator_->currentRangeAsLabels();
@@ -683,6 +683,7 @@ HistogramViewDataWidget::ViewInfo HistogramViewDataWidget::getViewInfo() const
     vi.min          = QString::fromStdString(range.first);
     vi.max          = QString::fromStdString(range.second);
     vi.out_of_range = results.not_inserted_count;
+    vi.has_result   = true;
     vi.zoom_active  = zoom_active;
 
     return vi;
