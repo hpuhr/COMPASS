@@ -55,14 +55,6 @@ public:
                Configurable* config_parent, View* view, QWidget* parent = nullptr);
     virtual ~ViewWidget();
 
-//    virtual void mousePressEvent(QMouseEvent* e);
-//    virtual void mouseReleaseEvent(QMouseEvent* e);
-//    virtual void mouseMoveEvent(QMouseEvent* e);
-//    virtual void wheelEvent(QWheelEvent* e);
-//    virtual void keyPressEvent(QKeyEvent* e);
-//    virtual void keyReleaseEvent(QKeyEvent* e);
-//    virtual void mouseDoubleClickEvent(QMouseEvent* e);
-
     View* getView() { return view_; }
 
     void toggleConfigWidget();
@@ -74,15 +66,20 @@ protected:
     ViewToolWidget* getViewToolWidget() { return tool_widget_; }
     ViewToolSwitcher* getViewToolSwitcher() { return tool_switcher_.get(); }
 
+    QIcon getIcon(const std::string& fn) const;
+
     void setDataWidget(ViewDataWidget* w);
     void setConfigWidget(ViewConfigWidget* w);
 
     void createStandardLayout();
+    void addConfigWidgetToggle();
 
     /// The view the widget is part of
     View* view_;
 
 private:
+    void connectWidgets();
+
     QSplitter*      main_splitter_           = nullptr;
     QWidget*        data_widget_container_   = nullptr;
     QWidget*        config_widget_container_ = nullptr;

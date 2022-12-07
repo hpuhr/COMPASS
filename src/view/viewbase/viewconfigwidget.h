@@ -10,4 +10,12 @@ public:
     virtual ~ViewConfigWidget() = default;
 
     virtual void setStatus(const QString& text, bool visible, const QColor& color = Qt::black) = 0;
+
+    void onDisplayChange()
+    {
+        onDisplayChange_impl();
+    }
+
+protected:
+    virtual void onDisplayChange_impl() {}
 };
