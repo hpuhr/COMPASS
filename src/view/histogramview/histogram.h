@@ -75,11 +75,26 @@ struct HistogramBinT
     }
 
     /**
-     * Generates a label string for the bin.
      */
     std::string label(dbContent::Variable* data_var) const
     {
-        return std::to_string(midValue());
+        return generateLabel(midValue(), data_var);
+    }
+
+    /**
+     * Generates a label string for the bins minimum value.
+     */
+    std::string labelMin(dbContent::Variable* data_var) const
+    {
+        return generateLabel(min_value, data_var);
+    }
+
+    /**
+     * Generates a label string for the bins maximum value.
+     */
+    std::string labelMax(dbContent::Variable* data_var) const
+    {
+        return generateLabel(max_value, data_var);
     }
 
     /**
@@ -98,6 +113,14 @@ struct HistogramBinT
 
 private:
     /**
+     * Generates a label string for the bin.
+     */
+    std::string generateLabel(const T& value, dbContent::Variable* data_var) const
+    {
+        return std::to_string(value);
+    }
+
+    /**
      * Checks if v is inside r_min and r_max.
      */
     template<typename Tr>
@@ -112,6 +135,11 @@ private:
 
 template<>
 inline std::string HistogramBinT<std::string>::midValue() const
+{
+    return min_value;
+}
+template<>
+inline bool HistogramBinT<bool>::midValue() const
 {
     return min_value;
 }
@@ -141,45 +169,41 @@ inline bool HistogramBinT<boost::posix_time::ptime>::isInside(const boost::posix
 }
 
 template<>
-inline std::string HistogramBinT<float>::label(dbContent::Variable* data_var) const
+inline std::string HistogramBinT<float>::generateLabel(const float& value, dbContent::Variable* data_var) const
 {
-    const auto mid = midValue();
-    
     std::string s;
     if (data_var && data_var->representation() != dbContent::Variable::Representation::STANDARD)
-        s = data_var->getAsSpecialRepresentationString(mid);
+        s = data_var->getAsSpecialRepresentationString(value);
     else
-        s = std::to_string(mid);
+        s = std::to_string(value);
 
     return s;
 }
 template<>
-inline std::string HistogramBinT<double>::label(dbContent::Variable* data_var) const
+inline std::string HistogramBinT<double>::generateLabel(const double& value, dbContent::Variable* data_var) const
 {
-    const auto mid = midValue();
-    
     std::string s;
     if (data_var && data_var->representation() != dbContent::Variable::Representation::STANDARD)
-        s = data_var->getAsSpecialRepresentationString(mid);
+        s = data_var->getAsSpecialRepresentationString(value);
     else
-        s = std::to_string(mid);
+        s = std::to_string(value);
 
     return s;
 }
 template<>
-inline std::string HistogramBinT<std::string>::label(dbContent::Variable* data_var) const
+inline std::string HistogramBinT<std::string>::generateLabel(const std::string& value, dbContent::Variable* data_var) const
 {
-    return min_value;
+    return value;
 }
 template<>
-inline std::string HistogramBinT<bool>::label(dbContent::Variable* data_var) const
+inline std::string HistogramBinT<bool>::generateLabel(const bool& value, dbContent::Variable* data_var) const
 {
-    return (min_value ? "true" : "false");
+    return (value ? "true" : "false");
 }
 template<>
-inline std::string HistogramBinT<boost::posix_time::ptime>::label(dbContent::Variable* data_var) const
+inline std::string HistogramBinT<boost::posix_time::ptime>::generateLabel(const boost::posix_time::ptime& value, dbContent::Variable* data_var) const
 {
-    return Utils::Time::toString(midValue());
+    return Utils::Time::toString(value);
 }
 
 /**
@@ -198,8 +222,9 @@ struct HistogramConfig
         Category   //the histogram is generated from a fixed number of values that need to match (categories)
     };
 
-    Type          type     = Type::Range; //histogram generation type
-    unsigned int  num_bins = DefaultBins; //number of histogram bins to be generated
+    Type          type        = Type::Range; //histogram generation type
+    unsigned int  num_bins    = DefaultBins; //number of histogram bins to be generated
+    bool          sorted_bins = true;
 };
 
 /**
@@ -294,14 +319,15 @@ public:
      * Creation from discrete categories. Values MUST match one of these category values to be added.
      * E.g. useful for strings or small range enums.
      */
-    void createFromCategories(const std::vector<T>& categories)
+    void createFromCategories(const std::vector<T>& categories, bool categories_are_sorted = false)
     {
         size_t n = categories.size();
         
         clear();
 
-        config_.type     = HistogramConfig::Type::Category;
-        config_.num_bins = n;
+        config_.type        = HistogramConfig::Type::Category;
+        config_.num_bins    = n;
+        config_.sorted_bins = categories_are_sorted;
 
         if (n < 1)
             return;
@@ -461,8 +487,9 @@ private:
 
         clear();
 
-        config_.type     = HistogramConfig::Type::Range;
-        config_.num_bins = 0;
+        config_.type        = HistogramConfig::Type::Range;
+        config_.num_bins    = 0;
+        config_.sorted_bins = true;
 
         if (n < 1)
             return;

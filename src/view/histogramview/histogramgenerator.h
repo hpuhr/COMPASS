@@ -21,6 +21,8 @@
 #include <memory>
 #include <string>
 
+#include <QString>
+
 /**
  * Base class for histogram generation.
  * Completely independent of the analyzed data.
@@ -31,13 +33,22 @@ class HistogramGenerator
 {
 public:
     /**
+     */
+    struct BinLabels
+    {
+        std::string label;
+        std::string label_min;
+        std::string label_max;
+    };
+
+    /**
      * Result bin.
      */
     struct BinData
     {
         unsigned int count    = 0; //number of data points in this bin
         unsigned int selected = 0; //number of selected data points in this bin
-        std::string  label;        //label describing this bin
+        BinLabels    labels;       //labels describing this bin
     };
 
     /**
@@ -54,6 +65,8 @@ public:
         }
 
         std::vector<BinData> bin_data;        //per bin data
+
+        bool         bins_are_sorted     = false;
 
         unsigned int null_count          = 0; //number of encountered null values
         unsigned int null_selected_count = 0; //number of encountered selected null values
@@ -74,6 +87,8 @@ public:
         unsigned int         null_selected_count = 0; //number of encountered selected null values in result
         unsigned int         not_inserted_count  = 0; //number of encountered non-insertable values in result (e.g. out of histogram range)
         unsigned int         max_count           = 0; //maximum encountered bin count
+
+        bool                 bins_are_sorted     = false;
     };
 
     typedef std::map<std::string, ContentResult> ContentResults;
@@ -128,6 +143,8 @@ public:
     bool zoom(unsigned int bin0, unsigned int bin1);
 
     void print() const;
+
+    std::pair<std::string, std::string> currentRangeAsLabels() const;
 
     virtual bool hasData() const = 0;
     

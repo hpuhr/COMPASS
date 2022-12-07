@@ -274,29 +274,38 @@ private:
             auto& d = intermediate_data_[ elem.first ];
             d.init(elem.second.numBins());
 
+            d.bins_are_sorted = elem.second.configuration().sorted_bins;
+
             //generate labels
             for (size_t i = 0; i < elem.second.numBins(); ++i)
-                d.bin_data[ i ].label = labelForBin((int)i);
+                d.bin_data[ i ].labels = labelsForBin((int)i);
         }
     }
 
     /**
      * Ask the histogram for a nice bin label.
      */
-    std::string labelForBin(int bin) const
+    BinLabels labelsForBin(int bin) const
     {
         if (bin < 0 || histograms_.empty())
-            return "";
+            return {};
 
         auto it = histograms_.begin();
         if (bin >= (int)it->second.numBins())
-            return "";
+            return {};
 
         auto var = currentVariable(it->first);
         if (!var)
-            return "";
+            return {};
 
-        return it->second.getBin(bin).label(var);
+        const auto& b = it->second.getBin(bin);
+
+        BinLabels labels;
+        labels.label     = b.label(var);
+        labels.label_min = b.labelMin(var);
+        labels.label_max = b.labelMax(var);
+
+        return labels;
     }
 
     /**

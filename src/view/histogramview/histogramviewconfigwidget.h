@@ -34,6 +34,7 @@ class QRadioButton;
 class QLineEdit;
 class QPushButton;
 class QLabel;
+class GroupBox;
 
 /**
  * @brief Widget with configuration elements for a HistogramView
@@ -67,6 +68,9 @@ class HistogramViewConfigWidget : public ViewConfigWidget
 
   protected:
     void updateEvalConfig();
+    void updateInfo();
+
+    virtual void onDisplayChange_impl() override;
 
     HistogramView* view_;
 
@@ -81,10 +85,17 @@ class HistogramViewConfigWidget : public ViewConfigWidget
     QLabel*       eval_results_grpreq_label_{nullptr};
     QLabel*       eval_results_id_label_    {nullptr};
 
+    // histogram info
+    GroupBox*     info_widget_          = nullptr;
+    QLabel*       info_range_min_label_ = nullptr;
+    QLabel*       info_range_max_label_ = nullptr;
+    QLabel*       info_oor_label_       = nullptr;
+    QLabel*       info_zoom_label       = nullptr;
+
     // general
-    QCheckBox*   log_check_    {nullptr};
-    QLabel*      status_label_ {nullptr};
-    QPushButton* reload_button_{nullptr};
+    QCheckBox*    log_check_    {nullptr};
+    QLabel*       status_label_ {nullptr};
+    QPushButton*  reload_button_{nullptr};
 };
 
 #endif /* HISTOGRAMVIEWCONFIGWIDGET_H_ */

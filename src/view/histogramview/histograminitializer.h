@@ -159,10 +159,17 @@ public:
         unsigned int num_distinct_values = distinct_values_.value().size();
 
         //distinct values in data less than bins -> reduce bins and generate histogram from discrete categories
-        if (std::is_same<T, std::string>::value || num_distinct_values < config.num_bins)
+        if (std::is_same<T, std::string>::value)
         {
-            config.num_bins = num_distinct_values;
-            config.type     = HistogramConfig::Type::Category;
+            config.num_bins    = num_distinct_values;
+            config.type        = HistogramConfig::Type::Category;
+            config.sorted_bins = false;
+        }
+        else if(num_distinct_values < config.num_bins)
+        {
+            config.num_bins    = num_distinct_values;
+            config.type        = HistogramConfig::Type::Category;
+            config.sorted_bins = std::is_arithmetic<T>::value;
         }
 
         return config;

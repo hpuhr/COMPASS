@@ -484,7 +484,7 @@ void HistogramViewDataWidget::updateChart()
     {
         const auto& r = results.content_results.begin()->second;
         for (const auto& b : r.bins)
-            categories << QString::fromStdString(b.label);
+            categories << QString::fromStdString(b.labels.label);
     }
 
     if (add_null)
@@ -529,6 +529,7 @@ void HistogramViewDataWidget::updateChart()
     chart->addAxis(chart_y_axis, Qt::AlignLeft);
     chart_series->attachAxis(chart_y_axis);
 
+#if 0
     //add outliers to legend
     if (results.hasOutOfRangeValues())
     {
@@ -538,11 +539,15 @@ void HistogramViewDataWidget::updateChart()
 
         chart_view_->addLegendOnlyItem(name, QColor(255, 255, 0));
     }
+#endif
 
     //update chart
     chart->update();
 
     shows_data_ = true;
+
+    //signal display changed to whom it may concern
+    emit displayChanged();
 
     loginf << "HistogramViewDataWidget: updateChart: done";
 }
@@ -660,4 +665,25 @@ void HistogramViewDataWidget::resetZoomSlot()
         //@TODO: actually not needed any more
         chart_view_->chart()->zoomReset();
     }
+}
+
+/**
+ */
+HistogramViewDataWidget::ViewInfo HistogramViewDataWidget::getViewInfo() const
+{
+    if (!histogram_generator_)
+        return {};
+
+    auto range       = histogram_generator_->currentRangeAsLabels();
+    auto zoom_active = histogram_generator_->subRangeActive();
+
+    const auto& results = histogram_generator_->getResults();
+    
+    ViewInfo vi;
+    vi.min          = QString::fromStdString(range.first);
+    vi.max          = QString::fromStdString(range.second);
+    vi.out_of_range = results.not_inserted_count;
+    vi.zoom_active  = zoom_active;
+
+    return vi;
 }

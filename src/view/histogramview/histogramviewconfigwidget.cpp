@@ -16,6 +16,7 @@
  */
 
 #include "histogramviewconfigwidget.h"
+#include "histogramviewdatawidget.h"
 #include "compass.h"
 #include "dbcontent/dbcontentmanager.h"
 #include "dbcontent/variable/variableselectionwidget.h"
@@ -23,6 +24,7 @@
 #include "histogramviewdatasource.h"
 #include "logger.h"
 #include "stringconv.h"
+#include "groupbox.h"
 
 #include <QCheckBox>
 #include <QLabel>
@@ -134,8 +136,6 @@ HistogramViewConfigWidget::HistogramViewConfigWidget(HistogramView* view, QWidge
             cfg_layout->addWidget(eval_results_widget_);
         }
 
-        updateConfig();
-
         //general
         {
             log_check_ = new QCheckBox("Logarithmic Y Scale");
@@ -146,14 +146,54 @@ HistogramViewConfigWidget::HistogramViewConfigWidget(HistogramView* view, QWidge
 
             cfg_layout->addWidget(log_check_);
         }
-        
+
         cfg_layout->addStretch();
+
+        updateConfig();
+        
         cfg_widget->setLayout(cfg_layout);
 
         tab_widget->addTab(cfg_widget, "Config");
     }
 
     vlayout->addWidget(tab_widget);
+
+    //info widget
+    {
+        info_widget_ = new GroupBox("Histogram Range");
+
+        info_range_min_label_ = new QLabel("-");
+        info_range_max_label_ = new QLabel("-");
+        info_oor_label_       = new QLabel("None");
+        info_zoom_label       = new QLabel("Zoom active");
+
+        QFont f = info_zoom_label->font();
+        f.setItalic(true);
+
+        info_zoom_label->setFont(f);
+        info_zoom_label->setVisible(false);
+
+        QGridLayout* layout = new QGridLayout;
+        info_widget_->setLayout(layout);
+
+        QLabel* min_label = new QLabel("Minimum:");
+        QLabel* max_label = new QLabel("Maximum:");
+        QLabel* oor_label = new QLabel("Out of range values:");
+        min_label->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
+        max_label->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
+        oor_label->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
+
+        layout->addWidget(min_label, 0, 0);
+        layout->addWidget(max_label, 1, 0);
+        layout->addWidget(oor_label, 2, 0);
+        layout->addWidget(info_range_min_label_, 0, 1);
+        layout->addWidget(info_range_max_label_, 1, 1);
+        layout->addWidget(info_oor_label_      , 2, 1);
+        layout->addWidget(info_zoom_label      , 3, 1);
+
+        vlayout->addWidget(info_widget_);
+        vlayout->addSpacerItem(new QSpacerItem(5, 10, QSizePolicy::Fixed, QSizePolicy::Fixed));
+    }
 
     QFont font_status;
     font_status.setItalic(true);
@@ -323,4 +363,24 @@ void HistogramViewConfigWidget::loadingStartedSlot()
     setDisabled(true); // reenabled in view
 
     setStatus("Loading Data", true);
+}
+
+/**
+ */
+void HistogramViewConfigWidget::onDisplayChange_impl() 
+{
+    updateInfo();
+}
+
+/**
+ */
+void HistogramViewConfigWidget::updateInfo()
+{
+    auto info = view_->getDataWidget()->getViewInfo();
+
+    info_range_min_label_->setText(info.min.isEmpty() ? "-" : info.min);
+    info_range_max_label_->setText(info.max.isEmpty() ? "-" : info.max);
+    info_oor_label_->setText(info.out_of_range == 0 ? "None" : QString::number(info.out_of_range));
+
+    info_zoom_label->setVisible(info.zoom_active);
 }

@@ -139,6 +139,7 @@ private:
         data.bin_data.resize(histogram.numBins());
 
         data.not_inserted_count = histogram.unassignedCount();
+        data.bins_are_sorted    = histogram.configuration().sorted_bins;
 
         for (size_t i = 0; i < histogram.numBins(); ++i)
         {
@@ -146,7 +147,9 @@ private:
             auto&       dbin = data.bin_data[ i ];
 
             dbin.count = bin.count;
-            dbin.label = bin.label(nullptr);
+            dbin.labels.label     = bin.label(nullptr);
+            dbin.labels.label_min = bin.labelMin(nullptr);
+            dbin.labels.label_max = bin.labelMax(nullptr);
         }
     }
 

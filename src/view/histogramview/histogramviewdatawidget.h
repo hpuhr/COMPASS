@@ -87,6 +87,16 @@ class HistogramViewDataWidget : public ViewDataWidget
 
     QPixmap renderPixmap();
 
+    struct ViewInfo
+    {
+        QString  min;
+        QString  max;
+        uint32_t out_of_range = 0;
+        bool     zoom_active  = false;
+    };
+
+    ViewInfo getViewInfo() const;
+
 protected:
     virtual void toolChanged_impl(int mode) override;
 

@@ -199,6 +199,8 @@ bool HistogramGenerator::finalizeResults()
         r.null_selected_count = d.null_selected_count;
         r.not_inserted_count  = d.not_inserted_count;
 
+        r.bins_are_sorted     = d.bins_are_sorted;
+
         for (size_t i = 0; i < d.bin_data.size(); ++i)
         {
             const auto& bin_data = d.bin_data.at(i);
@@ -249,7 +251,7 @@ void HistogramGenerator::print() const
 
         std::cout << "  ";
         for (const auto& bin : r.bins)
-            std::cout << "[" << bin.label << ": " << bin.count << "]"; 
+            std::cout << "[" << bin.labels.label << ": " << bin.count << "]"; 
         std::cout << std::endl;
 
         std::cout << "  null:            " << r.null_count << std::endl;
@@ -258,4 +260,20 @@ void HistogramGenerator::print() const
         
         std::cout << std::endl;
     }
+}
+
+/**
+ */
+std::pair<std::string, std::string> HistogramGenerator::currentRangeAsLabels() const
+{
+    if (!hasValidResult())
+        return {};
+
+    if (!results_.content_results.begin()->second.bins_are_sorted)
+        return {};
+
+    const auto& bin_data0 = results_.content_results.begin()->second.bins.front();
+    const auto& bin_data1 = results_.content_results.begin()->second.bins.back();
+
+    return std::make_pair(bin_data0.labels.label_min, bin_data1.labels.label_max);
 }

@@ -142,6 +142,8 @@ void ViewWidget::setDataWidget(ViewDataWidget* w)
 
     data_widget_ = w;
     data_widget_->setToolSwitcher(tool_switcher_.get());
+
+    connectWidgets();
 }
 
 /**
@@ -163,6 +165,16 @@ void ViewWidget::setConfigWidget(ViewConfigWidget* w)
     layout->addWidget(w);
 
     config_widget_ = w;
+
+    connectWidgets();
+}
+
+/**
+ */
+void ViewWidget::connectWidgets()
+{
+    if (config_widget_ && data_widget_)
+        connect(data_widget_, &ViewDataWidget::displayChanged, config_widget_, &ViewConfigWidget::onDisplayChange);
 }
 
 /**
