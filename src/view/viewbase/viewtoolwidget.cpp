@@ -54,6 +54,33 @@ void ViewToolWidget::addTool(int id)
     addAction(action);
 }
 
+namespace 
+{
+    /**
+     */
+    QAction* generateCallbackAction(const QString& name,
+                                    const QIcon& icon,
+                                    const QKeySequence& key_combination)
+    {
+        QAction* action = new QAction;
+    
+        QString full_name = name;
+
+        if (!key_combination.isEmpty())
+        {
+            full_name += " [" + key_combination.toString() + "]";
+
+            action->setShortcut(key_combination);
+            action->setShortcutContext(Qt::ShortcutContext::WindowShortcut); //@TODO: optimal context?
+        }
+
+        action->setText(full_name);
+        action->setIcon(icon);
+
+        return action;
+    }
+}
+
 /**
  */
 void ViewToolWidget::addActionCallback(const QString& name,
@@ -61,21 +88,8 @@ void ViewToolWidget::addActionCallback(const QString& name,
                                        const QIcon& icon,
                                        const QKeySequence& key_combination)
 {
-    QAction* action = new QAction;
+    QAction* action = generateCallbackAction(name, icon, key_combination);
     
-    QString full_name = name;
-
-    if (!key_combination.isEmpty())
-    {
-        full_name += " [" + key_combination.toString() + "]";
-
-        action->setShortcut(key_combination);
-        action->setShortcutContext(Qt::ShortcutContext::WindowShortcut); //@TODO: optimal context?
-    }
-
-    action->setText(full_name);
-    action->setIcon(icon);
-
     connect(action, &QAction::triggered, cb);
 
     addAction(action);
@@ -83,7 +97,24 @@ void ViewToolWidget::addActionCallback(const QString& name,
 
 /**
  */
-void ViewToolWidget::addSeparator()
+void ViewToolWidget::addActionCallback(const QString& name,
+                                       const ToggleCallback& cb,
+                                       const QIcon& icon,
+                                       const QKeySequence& key_combination,
+                                       bool checked)
+{
+    QAction* action = generateCallbackAction(name, icon, key_combination);
+    action->setCheckable(true);
+    action->setChecked(checked);
+    
+    connect(action, &QAction::toggled, cb);
+
+    addAction(action);
+}
+
+/**
+ */
+void ViewToolWidget::addSpacer()
 {
     QWidget* w = new QWidget;
     w->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);

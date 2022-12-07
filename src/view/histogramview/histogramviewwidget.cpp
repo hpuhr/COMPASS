@@ -59,14 +59,17 @@ HistogramViewWidget::HistogramViewWidget(const std::string& class_id, const std:
     getViewToolWidget()->addTool(Tool::HG_SELECT_TOOL);
     getViewToolWidget()->addTool(Tool::HG_ZOOM_TOOL);
 
-    getViewToolWidget()->addSeparator();
+    getViewToolWidget()->addSpacer();
 
     getViewToolWidget()->addActionCallback("Invert Selection", [=] () { data_widget->invertSelectionSlot(); }, icon("select_invert.png"));
     getViewToolWidget()->addActionCallback("Delete Selection", [=] () { data_widget->clearSelectionSlot(); }, icon("select_delete.png"));
 
-    getViewToolWidget()->addSeparator();
+    getViewToolWidget()->addSpacer();
 
     getViewToolWidget()->addActionCallback("Zoom to Home", [=] () { data_widget->resetZoomSlot(); }, icon("zoom_home.png"), Qt::Key_Space);
+
+    getViewToolWidget()->addSeparator();
+    addConfigWidgetToggle();
 }
 
 /*

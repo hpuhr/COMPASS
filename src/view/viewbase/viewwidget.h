@@ -66,10 +66,13 @@ protected:
     ViewToolWidget* getViewToolWidget() { return tool_widget_; }
     ViewToolSwitcher* getViewToolSwitcher() { return tool_switcher_.get(); }
 
+    QIcon getIcon(const std::string& fn) const;
+
     void setDataWidget(ViewDataWidget* w);
     void setConfigWidget(ViewConfigWidget* w);
 
     void createStandardLayout();
+    void addConfigWidgetToggle();
 
     /// The view the widget is part of
     View* view_;

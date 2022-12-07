@@ -21,6 +21,7 @@
 #include "viewdatawidget.h"
 #include "viewconfigwidget.h"
 #include "viewtoolswitcher.h"
+#include "files.h"
 
 #include <QVBoxLayout>
 #include <QSplitter>
@@ -120,6 +121,11 @@ void ViewWidget::createStandardLayout()
     setLayout(hlayout);
 
     setFocusPolicy(Qt::StrongFocus);
+
+    //deactivate collapsing of children
+    main_splitter_->setChildrenCollapsible(false); 
+    for (int i = 0; i < main_splitter_->count(); ++i)
+        main_splitter_->setCollapsible(i, false);
 }
 
 /**
@@ -181,10 +187,23 @@ void ViewWidget::connectWidgets()
  */
 void ViewWidget::toggleConfigWidget()
 {
-    auto config_widget = getViewConfigWidget();
-    if (config_widget)
+    if (config_widget_container_)
     {
-        bool vis = config_widget->isVisible();
-        config_widget->setVisible(!vis);
+        bool vis = config_widget_container_->isVisible();
+        config_widget_container_->setVisible(!vis);
     }
+}
+
+/**
+ */
+void ViewWidget::addConfigWidgetToggle()
+{
+    getViewToolWidget()->addActionCallback("Toggle Configuration Panel", [=] (bool on) { this->toggleConfigWidget(); }, getIcon("configuration.png"), Qt::Key_C, true);
+}
+
+/**
+ */
+QIcon ViewWidget::getIcon(const std::string& fn) const
+{
+    return QIcon(Utils::Files::getIconFilepath(fn).c_str());
 }
