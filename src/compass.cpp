@@ -239,6 +239,8 @@ void COMPASS::openDBFile(const std::string& filename)
 
     last_db_filename_ = filename;
 
+    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+
     try
     {
         db_interface_->openDBFile(filename, false);
@@ -253,12 +255,14 @@ void COMPASS::openDBFile(const std::string& filename)
     }  catch (std::exception& e)
     {
         QMessageBox m_warning(QMessageBox::Warning, "Opening Database Failed",
-                                          e.what(), QMessageBox::Ok);
+                              e.what(), QMessageBox::Ok);
         m_warning.exec();
 
         db_opened_ = false;
     }
 
+
+    QApplication::restoreOverrideCursor();
 }
 
 void COMPASS::createNewDBFile(const std::string& filename)
@@ -483,7 +487,38 @@ void COMPASS::appMode(const AppMode& app_mode)
         loginf << "COMPASS: appMode: app_mode_current " << toString(app_mode_)
                << " previous " << toString(last_app_mode);
 
+        QMessageBox* msg_box{nullptr};
+
+        QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+
+        if (app_mode == AppMode::LivePaused)
+        {
+            msg_box = new QMessageBox;
+            assert(msg_box);
+            msg_box->setWindowTitle("Switching to Live:Paused");
+            msg_box->setText("Loading data");
+            msg_box->setStandardButtons(QMessageBox::NoButton);
+            msg_box->show();
+        }
+
         emit appModeSwitchSignal(last_app_mode, app_mode_);
+
+        if (app_mode == AppMode::LivePaused)
+        {
+            dbcontent_manager_->load();
+
+            while (dbcontent_manager_->loadInProgress())
+            {
+                QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+                QThread::msleep(10);
+            }
+
+            assert(msg_box);
+            msg_box->close();
+            delete msg_box;
+        }
+
+        QApplication::restoreOverrideCursor();
     }
 }
 
@@ -502,7 +537,7 @@ std::string COMPASS::appModeStr() const
 const std::map<AppMode, std::string>& COMPASS::appModes2Strings()
 {
     static const auto* map = new std::map<AppMode, std::string>
-        {{AppMode::Offline, "Offline Mode"},
+    {{AppMode::Offline, "Offline Mode"},
         {AppMode::LiveRunning, "Live Mode: Running"},
         {AppMode::LivePaused, "Live Mode: Paused"}};
 
