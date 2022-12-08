@@ -1187,8 +1187,15 @@ void ASTERIXImportTask::insertData()
 
     assert(schema_);
 
+    unsigned int current_num_records = 0;
+
     for (auto& job_it : job_buffers)
+    {
+        current_num_records += job_it.second->size();
         num_records_ += job_it.second->size();
+    }
+
+    loginf << "ASTERIXImportTask: insertData: inserting " << current_num_records << " records/s";
 
     if (!insert_slot_connected_)
     {
