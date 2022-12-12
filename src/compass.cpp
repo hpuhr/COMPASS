@@ -32,6 +32,7 @@
 #include "evaluationmanager.h"
 #include "mainwindow.h"
 #include "files.h"
+#include "asteriximporttask.h"
 
 #include <QMessageBox>
 #include <QApplication>
@@ -500,6 +501,9 @@ void COMPASS::appMode(const AppMode& app_mode)
             msg_box->setStandardButtons(QMessageBox::NoButton);
             msg_box->show();
         }
+
+        // do manually to be first and avoid trailing inserts
+        taskManager().asterixImporterTask().appModeSwitchSlot(last_app_mode, app_mode_);
 
         emit appModeSwitchSignal(last_app_mode, app_mode_);
 

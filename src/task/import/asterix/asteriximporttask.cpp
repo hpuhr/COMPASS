@@ -958,7 +958,7 @@ void ASTERIXImportTask::addDecodedASTERIXSlot()
     if (stopped_)
         return;
 
-    if (num_packets_in_processing_ > 10) // network special case
+    if (!resuming_from_live_in_progress_ && num_packets_in_processing_ > 10) // network special case
     {
         logwrn << "ASTERIXImportTask: addDecodedASTERIXSlot: overload detected, packets in processing "
                << num_packets_in_processing_ << " skipping data";

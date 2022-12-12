@@ -730,7 +730,12 @@ void DBContentManager::insertData(std::map<std::string, std::shared_ptr<Buffer>>
 {
     logdbg << "DBContentManager: insertData";
 
-    assert (!load_in_progress_);
+    while (load_in_progress_) // pending insert
+    {
+        QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+        QThread::msleep(1);
+    }
+
     assert (!insert_in_progress_);
     assert (!insert_data_.size());
 
