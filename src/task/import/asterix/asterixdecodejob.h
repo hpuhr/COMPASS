@@ -33,7 +33,7 @@ class ASTERIXImportTask;
 class ASTERIXPostProcess;
 
 const unsigned int MAX_UDP_READ_SIZE=1024*1024;
-const unsigned int MAX_ALL_RECEIVE_SIZE=10*1024*1024; // increase leads to segmentation?
+const unsigned int MAX_ALL_RECEIVE_SIZE=100*1024*1024;
 
 class ASTERIXDecodeJob : public Job
 {
