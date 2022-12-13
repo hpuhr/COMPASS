@@ -21,12 +21,12 @@ DBContentDeleteDBJob::~DBContentDeleteDBJob() {}
 
 void DBContentDeleteDBJob::run()
 {
-    loginf << "DBContentDeleteDBJob: run: start";
+    logdbg << "DBContentDeleteDBJob: run: start";
     started_ = true;
 
     if (obsolete_)
     {
-        loginf << "DBContentDeleteDBJob: run: obsolete before prepared";
+        logdbg << "DBContentDeleteDBJob: run: obsolete before prepared";
         done_ = true;
         return;
     }
@@ -40,13 +40,13 @@ void DBContentDeleteDBJob::run()
         if (!dbcont_it.second->existsInDB())
             continue;
 
-        loginf << "DBContentReadDBJob: run: deleting dbcontent for " << dbcont_it.first;
+        logdbg << "DBContentDeleteDBJob: run: deleting dbcontent for " << dbcont_it.first;
         db_interface_.deleteBefore(*dbcont_it.second, before_timestamp_);
     }
 
     boost::posix_time::time_duration diff = boost::posix_time::microsec_clock::local_time() - start_time;
 
-    loginf << "DBContentReadDBJob: run: done after " << Time::toString(diff);
+    logdbg << "DBContentDeleteDBJob: run: done after " << Time::toString(diff);
 
     done_ = true;
 

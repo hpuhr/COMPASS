@@ -307,7 +307,7 @@ void ASTERIXDecodeJob::storeReceivedData (unsigned int line, const char* data, u
     boost::mutex::scoped_lock lock(receive_buffers_mutex_);
 
     if (in_live_paused_state_)
-        loginf << "ASTERIXDecodeJob: storeReceivedData: line " << line << " existing "
+        logdbg << "ASTERIXDecodeJob: storeReceivedData: line " << line << " existing "
                << receive_buffer_sizes_[line] << " adding " << length;
 
     if (length + receive_buffer_sizes_[line] >= MAX_ALL_RECEIVE_SIZE)

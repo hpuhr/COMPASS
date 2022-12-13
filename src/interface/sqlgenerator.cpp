@@ -215,7 +215,7 @@ std::shared_ptr<DBCommand> SQLGenerator::getDeleteCommand(
 
     ss << " < " << Time::toLong(before_timestamp) << ";";
 
-    loginf << "SQLGenerator: getDeleteCommand: sql '" << ss.str() << "'";
+    logdbg << "SQLGenerator: getDeleteCommand: sql '" << ss.str() << "'";
 
     shared_ptr<DBCommand> command = make_shared<DBCommand>(DBCommand());
     command->set(ss.str());

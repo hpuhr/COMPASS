@@ -1215,7 +1215,7 @@ void DBContentManager::cutCachedData()
             {
                 if (!ts_vec.isNull(index) && ts_vec.get(index) > min_ts)
                 {
-                    loginf << "DBContentManager: cutCachedData: found " << buf_it.first
+                    logdbg << "DBContentManager: cutCachedData: found " << buf_it.first
                            << " cutoff tod index " << index
                            << " ts " << Time::toString(ts_vec.get(index));
                     break;
@@ -1227,7 +1227,7 @@ void DBContentManager::cutCachedData()
             {
                 index--; // cut at previous
 
-                loginf << "DBContentManager: cutCachedData: cutting " << buf_it.first
+                logdbg << "DBContentManager: cutCachedData: cutting " << buf_it.first
                        << " up to index " << index
                        << " total size " << buffer_size
                        << " index time " << (ts_vec.isNull(index) ? "null" : Time::toString(ts_vec.get(index)));
