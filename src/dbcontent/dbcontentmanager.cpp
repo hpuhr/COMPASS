@@ -803,6 +803,8 @@ void DBContentManager::finishInserting()
     // ts calc for resume action
     bool insert_ts_larger_2s {false};
 
+    boost::posix_time::ptime min_time_found; // for max latency calculation
+
     for (auto& buf_it : insert_data_)
     {
         string dbcont_name = buf_it.first;
@@ -833,6 +835,12 @@ void DBContentManager::finishInserting()
 
                 if (has_vec_min_max)
                 {
+                    // set min time found
+                    if (min_time_found.is_not_a_date_time())
+                        min_time_found = ts_vec_min;
+                    else
+                        min_time_found = min(min_time_found, ts_vec_min);
+
                     if (hasMinMaxTimestamp())
                     {
                         timestamp_min_ = std::min(timestamp_min_.get(), ts_vec_min);
@@ -1032,7 +1040,9 @@ void DBContentManager::finishInserting()
 
         tmp_time = microsec_clock::local_time();
 
-
+        if (!min_time_found.is_not_a_date_time())
+            loginf << "DBContentManager: finishInserting: max latency "
+                   << Time::toString(Time::currentUTCTime() - min_time_found);
     }
 
     COMPASS::instance().dataSourceManager().updateWidget();
