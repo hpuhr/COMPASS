@@ -521,6 +521,10 @@ void COMPASS::appMode(const AppMode& app_mode)
             msg_box->close();
             delete msg_box;
         }
+        else if (app_mode == AppMode::LiveRunning)
+        {
+            dbcontent_manager_->clearData();
+        }
 
         QApplication::restoreOverrideCursor();
     }
