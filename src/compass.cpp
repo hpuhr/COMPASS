@@ -523,7 +523,7 @@ void COMPASS::appMode(const AppMode& app_mode)
         }
         else if (app_mode == AppMode::LiveRunning)
         {
-            dbcontent_manager_->clearData();
+
         }
 
         QApplication::restoreOverrideCursor();
