@@ -218,7 +218,7 @@ void ASTERIXDecodeJob::doUDPStreamDecoding()
         {
             boost::mutex::scoped_lock lock(receive_buffers_mutex_);
 
-            if (!in_live_paused_state_ && receive_buffer_sizes_.size() // not paused, any data received, 1sec passed
+            if (receive_buffer_sizes_.size() // not paused, any data received, 1sec passed
                     && (boost::posix_time::microsec_clock::local_time()
                         - last_receive_decode_time_).total_milliseconds() > 1000)
             {
@@ -275,12 +275,6 @@ void ASTERIXDecodeJob::doUDPStreamDecoding()
                 while (!obsolete_ && extracted_data_.size())  // block decoder until extracted records have been moved out
                     QThread::msleep(1);
 
-//                if (!obsolete_)
-//                    assert(extracted_data_.size() == 0);
-//                else
-//                    extracted_data_ = nullptr;
-
-                resuming_cached_data_ = false; // in case of resume action
             }
         }
     }
@@ -305,10 +299,6 @@ void ASTERIXDecodeJob::storeReceivedData (unsigned int line, const char* data, u
     //loginf << "ASTERIXDecodeJob: storeReceivedData: sender " << sender_id;
 
     boost::mutex::scoped_lock lock(receive_buffers_mutex_);
-
-    if (in_live_paused_state_)
-        logdbg << "ASTERIXDecodeJob: storeReceivedData: line " << line << " existing "
-               << receive_buffer_sizes_[line] << " adding " << length;
 
     if (length + receive_buffer_sizes_[line] >= MAX_ALL_RECEIVE_SIZE)
     {
@@ -613,36 +603,6 @@ float ASTERIXDecodeJob::getRemainingTime() const
 size_t ASTERIXDecodeJob::countTotal() const
 {
     return count_total_;
-}
-
-void ASTERIXDecodeJob::cacheLiveNetworkData()
-{
-    loginf << "ASTERIXDecodeJob: cacheLiveNetworkData";
-
-    in_live_paused_state_ = true;
-}
-
-void ASTERIXDecodeJob::resumeLiveNetworkData(bool discard_cache)
-{
-    loginf << "ASTERIXDecodeJob: resumeLiveNetworkData: discard cache " << discard_cache;
-
-    if (discard_cache)
-    {
-        boost::mutex::scoped_lock lock(receive_buffers_mutex_);
-
-        receive_buffer_sizes_.clear();
-    }
-    else
-        resuming_cached_data_ = true;
-
-    in_live_paused_state_ = false;
-
-    receive_semaphore_.post(); // wake up loop
-}
-
-bool ASTERIXDecodeJob::resumingCachedData() const
-{
-    return resuming_cached_data_;
 }
 
 size_t ASTERIXDecodeJob::numErrors() const { return num_errors_; }

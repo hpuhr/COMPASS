@@ -1007,22 +1007,10 @@ void DBContentManager::finishInserting()
             tmp_time = microsec_clock::local_time();
         }
 
-        auto& asterix_import_task = COMPASS::instance().taskManager().asterixImporterTask();
-
-        // check if still resuming and everything has caught up
-        if (asterix_import_task.resumingFromLiveInProgress() && !insert_ts_larger_2s)
-        {
-            loginf << "DBContentManager: finishInserting: disabling resuming";
-            asterix_import_task.resumingFromLiveInProgress(false);
-        }
-
         logdbg << "DBContentManager: finishInserting: distributing data";
 
         if (data_.size())
-        {
-            if (!asterix_import_task.resumingFromLiveInProgress()) // only distribute if not resuming
-                emit loadedDataSignal(data_, true);
-        }
+            emit loadedDataSignal(data_, true);
         else if (had_data)
             COMPASS::instance().viewManager().clearDataInViews();
 

@@ -80,8 +80,6 @@ ASTERIXImportTask::ASTERIXImportTask(const std::string& class_id, const std::str
 
     registerParameter("override_tod_offset", &override_tod_offset_, 0.0);
 
-    registerParameter("ask_discard_cache_on_resume", &ask_discard_cache_on_resume_, true);
-
     std::string jasterix_definition_path = HOME_DATA_DIRECTORY + "jasterix_definitions";
 
     loginf << "ASTERIXImportTask: constructor: jasterix definition path '"
@@ -595,30 +593,6 @@ void ASTERIXImportTask::date(const boost::posix_time::ptime& date)
     date_ = date;
 }
 
-bool ASTERIXImportTask::resumingFromLiveInProgress() const
-{
-    return resuming_from_live_in_progress_;
-}
-
-void ASTERIXImportTask::resumingFromLiveInProgress(bool value)
-{
-    loginf << "ASTERIXImportTask: resumingFromLiveInProgress: value " << value;
-
-    if (decode_job_ && decode_job_->resumingCachedData())
-    {
-        loginf << "ASTERIXImportTask: resumingFromLiveInProgress: value " << value
-               << " ignored since decoder resume active";
-        return;
-    }
-
-    resuming_from_live_in_progress_ = value;
-
-    assert (m_info_);
-    m_info_->close();
-
-    m_info_ = nullptr;
-}
-
 void ASTERIXImportTask::importAsterixNetworkIgnoreFutureTimestamp (bool value)
 {
     loginf << "ASTERIXImportTask: importAsterixNetworkIgnoreFutureTimestamp: value " << value;
@@ -958,7 +932,7 @@ void ASTERIXImportTask::addDecodedASTERIXSlot()
     if (stopped_)
         return;
 
-    if (!resuming_from_live_in_progress_ && num_packets_in_processing_ > 10) // network special case
+    if (num_packets_in_processing_ > 10) // network special case
     {
         logwrn << "ASTERIXImportTask: addDecodedASTERIXSlot: overload detected, packets in processing "
                << num_packets_in_processing_ << " skipping data";
@@ -1140,9 +1114,10 @@ void ASTERIXImportTask::postprocessDoneSlot()
     // queue data
     if (!stopped_)
     {
+        // TODO change to append
         queued_job_buffers_.emplace_back(std::move(job_buffers));
 
-        if (!insert_active_)
+        if (!insert_active_ && !COMPASS::instance().dbContentManager().loadInProgress())
         {
             logdbg << "ASTERIXImportTask: postprocessDoneSlot: inserting, thread " << QThread::currentThreadId();
             assert (!COMPASS::instance().dbContentManager().insertInProgress());
@@ -1291,51 +1266,10 @@ void ASTERIXImportTask::appModeSwitchSlot (AppMode app_mode_previous, AppMode ap
     if (app_mode_current == AppMode::LiveRunning)
     {
         assert (app_mode_previous == AppMode::LivePaused || app_mode_previous == AppMode::Offline);
-
-        if (app_mode_previous == AppMode::LivePaused)
-        {
-            // resume paused -> running
-
-            bool discard_cache = false;
-
-            if (ask_discard_cache_on_resume_)
-            {
-                QMessageBox::StandardButton reply;
-                reply = QMessageBox::question(nullptr, "Resuming into Live: Running",
-                                              "Would you like to import cached ASTERIX data?",
-                                              QMessageBox::Yes|QMessageBox::No);
-                if (reply == QMessageBox::No)
-                    discard_cache = true;
-            }
-
-            m_info_ = new QMessageBox (QMessageBox::Information, "Resuming into Live: Running",
-                                       "Importing cached ASTERIX data. Please wait.", QMessageBox::Ok);
-            m_info_->button(QMessageBox::Ok)->hide();
-            m_info_->show();
-
-            loginf << "ASTERIXImportTask: appModeSwitchSlot: resuming";
-
-            resuming_from_live_in_progress_ = true;
-
-            decode_job_->resumeLiveNetworkData(discard_cache);
-
-            // TODO check if required
-//            while (decode_job_->resumingCachedData())
-//            {
-//                QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
-//                QThread::msleep(1);
-//            }
-        }
-        else
-            ; // nothing to do, normal startup
-
     }
     else if (app_mode_current == AppMode::LivePaused)
     {
         assert (app_mode_previous == AppMode::LiveRunning); // can only happend from running
-
-        // enter paused state
-        decode_job_->cacheLiveNetworkData();
     }
     else if (app_mode_current == AppMode::Offline)
     {
