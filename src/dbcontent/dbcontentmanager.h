@@ -154,6 +154,8 @@ public:
     std::shared_ptr<dbContent::Target> target(unsigned int utn);
     void saveTargets();
 
+    unsigned int maxLiveDataAgeCache() const;
+
 protected:
     COMPASS& compass_;
 

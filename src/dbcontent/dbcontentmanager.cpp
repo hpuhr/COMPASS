@@ -305,7 +305,8 @@ void DBContentManager::load(const std::string& custom_filter_clause)
 
     loginf << "DBContentManager: loadSlot: starting loading";
 
-    data_.clear();
+    //data_.clear();
+    clearData();
 
     load_in_progress_ = true;
 
@@ -698,7 +699,6 @@ void DBContentManager::finishInserting()
     tmp_time = microsec_clock::local_time();
 
     // ts calc for resume action
-    bool insert_ts_larger_2s {false};
 
     boost::posix_time::ptime min_time_found; // for max latency calculation
 
@@ -748,9 +748,6 @@ void DBContentManager::finishInserting()
                         timestamp_min_ = ts_vec_min;
                         timestamp_max_ = ts_vec_max;
                     }
-
-                    if ((ts_vec_max - ts_vec_min) > seconds(2))
-                        insert_ts_larger_2s = true;
                 }
             }
         }
@@ -1341,6 +1338,11 @@ std::shared_ptr<dbContent::Target> DBContentManager::target(unsigned int utn)
 void DBContentManager::saveTargets()
 {
     COMPASS::instance().interface().saveTargets(targets_);
+}
+
+unsigned int DBContentManager::maxLiveDataAgeCache() const
+{
+    return max_live_data_age_cache_;
 }
 
 //void DBContentManager::updateMetaVarNames()

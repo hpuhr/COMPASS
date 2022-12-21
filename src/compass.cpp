@@ -492,24 +492,52 @@ void COMPASS::appMode(const AppMode& app_mode)
 
         QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
-        if (app_mode == AppMode::LivePaused)
+        if (last_app_mode == AppMode::LiveRunning && app_mode == AppMode::LivePaused)
         {
+            // switch first, load after
+            // do manually to be first and avoid trailing inserts
+            taskManager().asterixImporterTask().appModeSwitchSlot(last_app_mode, app_mode_);
+
+            emit appModeSwitchSignal(last_app_mode, app_mode_);
+
+            // load all data in db
             msg_box = new QMessageBox;
             assert(msg_box);
-            msg_box->setWindowTitle("Switching to Live:Paused");
+            msg_box->setWindowTitle(("Switching to "+toString(app_mode_)).c_str());
             msg_box->setText("Loading data");
             msg_box->setStandardButtons(QMessageBox::NoButton);
             msg_box->show();
-        }
 
-        // do manually to be first and avoid trailing inserts
-        taskManager().asterixImporterTask().appModeSwitchSlot(last_app_mode, app_mode_);
-
-        emit appModeSwitchSignal(last_app_mode, app_mode_);
-
-        if (app_mode == AppMode::LivePaused)
-        {
             dbcontent_manager_->load();
+
+            while (dbcontent_manager_->loadInProgress())
+            {
+                QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+                QThread::msleep(10);
+            }
+
+            msg_box->close();
+            delete msg_box;
+        }
+        else if (last_app_mode == AppMode::LivePaused && app_mode == AppMode::LiveRunning)
+        {
+            // load first, switch after to add to existing cache
+
+            msg_box = new QMessageBox;
+            assert(msg_box);
+            msg_box->setWindowTitle(("Switching to "+toString(app_mode_)).c_str());
+            msg_box->setText("Loading data");
+            msg_box->setStandardButtons(QMessageBox::NoButton);
+            msg_box->show();
+
+            boost::posix_time::ptime min_ts =
+                    Time::currentUTCTime() - boost::posix_time::minutes(dbcontent_manager_->maxLiveDataAgeCache());
+
+            string custom_filter = "timestamp >= " + to_string(Time::toLong(min_ts));
+
+            loginf << "COMPASS: appMode: resuming with custom filter load '" << custom_filter << "'";
+
+            dbcontent_manager_->load(custom_filter);
 
             while (dbcontent_manager_->loadInProgress())
             {
@@ -520,10 +548,18 @@ void COMPASS::appMode(const AppMode& app_mode)
             assert(msg_box);
             msg_box->close();
             delete msg_box;
-        }
-        else if (app_mode == AppMode::LiveRunning)
-        {
 
+            // switch later to add to loaded cache
+            taskManager().asterixImporterTask().appModeSwitchSlot(last_app_mode, app_mode_);
+
+            emit appModeSwitchSignal(last_app_mode, app_mode_);
+        }
+        else
+        {
+            // just do it
+            taskManager().asterixImporterTask().appModeSwitchSlot(last_app_mode, app_mode_);
+
+            emit appModeSwitchSignal(last_app_mode, app_mode_);
         }
 
         QApplication::restoreOverrideCursor();
