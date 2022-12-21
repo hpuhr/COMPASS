@@ -162,13 +162,10 @@ public:
 
     bool loadable() const { return is_loadable_; }
 
-    void load(dbContent::VariableSet& read_set, bool use_datasrc_filters, bool use_filters, bool use_order,
-              dbContent::Variable* order_variable, bool use_order_ascending,
-              const std::string& limit_str = ""); // main load function
-    void loadFiltered(dbContent::VariableSet& read_set, const std::vector<std::string>& extra_from_parts,
-                      std::string custom_filter_clause, std::vector<dbContent::Variable*> filtered_variables,
-                      bool use_order, dbContent::Variable* order_variable, bool use_order_ascending,
-                      const std::string& limit_str = ""); // load function for custom filtering
+    void load(dbContent::VariableSet& read_set, bool use_datasrc_filters, bool use_filters,
+              const std::string& custom_filter_clause=""); // main load function
+    void loadFiltered(dbContent::VariableSet& read_set, std::string custom_filter_clause);
+    // load function for custom filtering
     void quitLoading();
 
     void insertData(std::shared_ptr<Buffer> buffer);

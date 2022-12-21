@@ -272,9 +272,7 @@ void FilterManager::checkSubConfigurables()
 //    }
 }
 
-std::string FilterManager::getSQLCondition(const std::string& dbcontent_name,
-                                           std::vector<std::string>& extra_from_parts,
-                                           std::vector<dbContent::Variable*>& filtered_variables)
+std::string FilterManager::getSQLCondition(const std::string& dbcontent_name)
 {
     assert(COMPASS::instance().dbContentManager().dbContent(dbcontent_name).loadable());
 
@@ -290,7 +288,7 @@ std::string FilterManager::getSQLCondition(const std::string& dbcontent_name,
 
         if (filter->getActive() && filter->filters(dbcontent_name))
         {
-            ss << filter->getConditionString(dbcontent_name, first, extra_from_parts, filtered_variables);
+            ss << filter->getConditionString(dbcontent_name, first);
         }
     }
 

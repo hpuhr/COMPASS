@@ -179,8 +179,7 @@ void RadarPlotPositionCalculatorTask::run()
 
         VariableSet read_set = getReadSetFor(dbo_it.first);
 
-        dbo_it.second->load(read_set, false, false, true,
-                            &dbcontent_man.metaGetVariable(dbo_it.first, DBContent::meta_var_timestamp_), true);
+        dbo_it.second->load(read_set, false, false);
     }
 }
 

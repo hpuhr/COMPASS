@@ -1196,12 +1196,9 @@ void DBInterface::updateBuffer(const std::string& table_name, const std::string&
     logdbg << "DBInterface: updateBuffer: changes " << db_connection_->changes() << " indexes " << to_index - from_index +1;
 }
 
-void DBInterface::prepareRead(const DBContent& dbobject, VariableSet read_list,
-                              const std::vector<std::string>& extra_from_parts,
-                              string custom_filter_clause,
-                              vector<Variable*> filtered_variables, bool use_order,
-                              Variable* order_variable, bool use_order_ascending,
-                              const string& limit)
+void DBInterface::prepareRead(
+        const DBContent& dbobject, VariableSet read_list, string custom_filter_clause,
+        bool use_order, Variable* order_variable)
 {
     assert(db_connection_);
 
@@ -1210,8 +1207,7 @@ void DBInterface::prepareRead(const DBContent& dbobject, VariableSet read_list,
     connection_mutex_.lock();
 
     shared_ptr<DBCommand> read = sql_generator_.getSelectCommand(
-                dbobject, read_list, extra_from_parts, custom_filter_clause, use_order,
-                order_variable, use_order_ascending, limit);
+                dbobject, read_list, custom_filter_clause, use_order, order_variable);
 
     logdbg << "DBInterface: prepareRead: dbo " << dbobject.name() << " sql '" << read->get() << "'";
     db_connection_->prepareCommand(read);

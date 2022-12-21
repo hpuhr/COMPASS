@@ -35,9 +35,7 @@ bool ACIDFilter::filters(const std::string& dbcont_type)
                     DBContent::meta_var_ti_.name()).existsIn(dbcont_type);
 }
 
-std::string ACIDFilter::getConditionString(const std::string& dbcontent_name, bool& first,
-                                           std::vector<std::string>& extra_from_parts,
-                                           std::vector<dbContent::Variable*>& filtered_variables)
+std::string ACIDFilter::getConditionString(const std::string& dbcontent_name, bool& first)
 {
     logdbg << "ACIDFilter: getConditionString: dbo " << dbcontent_name << " active " << active_;
 
@@ -50,8 +48,6 @@ std::string ACIDFilter::getConditionString(const std::string& dbcontent_name, bo
     {
         dbContent::Variable& acid_var = COMPASS::instance().dbContentManager().metaVariable(
                     DBContent::meta_var_ti_.name()).getFor(dbcontent_name);
-
-        filtered_variables.push_back(&acid_var);
 
         dbContent::Variable* cs_fpl_var {nullptr}; // only set in cat062
 

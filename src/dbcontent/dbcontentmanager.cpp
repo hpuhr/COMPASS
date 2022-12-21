@@ -63,15 +63,6 @@ DBContentManager::DBContentManager(const std::string& class_id, const std::strin
 {
     logdbg << "DBContentManager: constructor: creating subconfigurables";
 
-    registerParameter("use_order", &use_order_, false);
-    registerParameter("use_order_ascending", &use_order_ascending_, false);
-    registerParameter("order_variable_dbcontent_name", &order_variable_dbcontent_name_, "Meta");
-    registerParameter("order_variable_name", &order_variable_name_, "Timestamp");
-
-    registerParameter("use_limit", &use_limit_, false);
-    registerParameter("limit_min", &limit_min_, 0);
-    registerParameter("limit_max", &limit_max_, 100000);
-
     registerParameter("max_live_data_age_cache", &max_live_data_age_cache_, 5);
     registerParameter("max_live_data_age_db", &max_live_data_age_db_, 60);
 
@@ -286,87 +277,10 @@ DBContentManagerWidget* DBContentManager::widget()
     return widget_.get();
 }
 
-bool DBContentManager::useLimit() const { return use_limit_; }
 
-void DBContentManager::useLimit(bool use_limit) { use_limit_ = use_limit; }
-
-unsigned int DBContentManager::limitMin() const { return limit_min_; }
-
-void DBContentManager::limitMin(unsigned int limit_min)
+void DBContentManager::load(const std::string& custom_filter_clause)
 {
-    limit_min_ = limit_min;
-    loginf << "DBContentManager: limitMin: " << limit_min_;
-}
-
-unsigned int DBContentManager::limitMax() const { return limit_max_; }
-
-void DBContentManager::limitMax(unsigned int limit_max)
-{
-    limit_max_ = limit_max;
-    loginf << "DBContentManager: limitMax: " << limit_max_;
-}
-
-bool DBContentManager::useOrder() const { return use_order_; }
-
-void DBContentManager::useOrder(bool use_order) { use_order_ = use_order; }
-
-bool DBContentManager::useOrderAscending() const { return use_order_ascending_; }
-
-void DBContentManager::useOrderAscending(bool use_order_ascending)
-{
-    use_order_ascending_ = use_order_ascending;
-}
-
-bool DBContentManager::hasOrderVariable()
-{
-    if (existsDBContent(order_variable_dbcontent_name_))
-        if (dbContent(order_variable_dbcontent_name_).hasVariable(order_variable_name_))
-            return true;
-    return false;
-}
-
-Variable& DBContentManager::orderVariable()
-{
-    assert(hasOrderVariable());
-    return dbContent(order_variable_dbcontent_name_).variable(order_variable_name_);
-}
-
-void DBContentManager::orderVariable(Variable& variable)
-{
-    order_variable_dbcontent_name_ = variable.dbContentName();
-    order_variable_name_ = variable.name();
-}
-
-bool DBContentManager::hasOrderMetaVariable()
-{
-    if (order_variable_dbcontent_name_ == META_OBJECT_NAME)
-        return existsMetaVariable(order_variable_name_);
-
-    return false;
-}
-
-MetaVariable& DBContentManager::orderMetaVariable()
-{
-    assert(hasOrderMetaVariable());
-    return metaVariable(order_variable_name_);
-}
-
-void DBContentManager::orderMetaVariable(MetaVariable& variable)
-{
-    order_variable_dbcontent_name_ = META_OBJECT_NAME;
-    order_variable_name_ = variable.name();
-}
-
-void DBContentManager::clearOrderVariable()
-{
-    order_variable_dbcontent_name_ = "";
-    order_variable_name_ = "";
-}
-
-
-void DBContentManager::load()
-{
-    logdbg << "DBContentManager: loadSlot";
+    logdbg << "DBContentManager: loadSlot: custom_filter_clause '" << custom_filter_clause << "'";
 
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
@@ -429,27 +343,10 @@ void DBContentManager::load()
                 continue;
             }
 
-            std::string limit_str = "";
-            if (use_limit_)
-            {
-                limit_str = std::to_string(limit_min_) + "," + std::to_string(limit_max_);
-                logdbg << "DBContentManager: loadSlot: use limit str " << limit_str;
-            }
-
-            Variable* variable = nullptr;
-
-            assert (hasOrderVariable() || hasOrderMetaVariable());
-
-            if (hasOrderVariable())
-                variable = &orderVariable();
-            if (hasOrderMetaVariable())
-                variable = &orderMetaVariable().getFor(object.first);
-
-            // load (DBOVariableSet &read_set, bool use_filters, bool use_order, DBOVariable
-            // *order_variable, bool use_order_ascending, const std::string &limit_str="")
+            // load(dbContent::VariableSet& read_set, bool use_datasrc_filters, bool use_filters,
+            // const std::string& custom_filter_clause="")
             object.second->load(read_set, true, COMPASS::instance().filterManager().useFilters(),
-                                use_order_, variable, use_order_ascending_,
-                                limit_str);
+                                custom_filter_clause);
 
             load_job_created = true;
         }

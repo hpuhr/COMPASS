@@ -106,10 +106,8 @@ public:
                       int from_index = -1, int to_index = -1);  // no indexes means full buffer
 
     void prepareRead(const DBContent& dbcontent, dbContent::VariableSet read_list,
-                     const std::vector<std::string>& extra_from_parts,
-                     std::string custom_filter_clause, std::vector<dbContent::Variable*> filtered_variables,
-                     bool use_order = false, dbContent::Variable* order_variable = nullptr,
-                     bool use_order_ascending = false, const std::string& limit = "");
+                     std::string custom_filter_clause,
+                     bool use_order = false, dbContent::Variable* order_variable = nullptr);
 
     std::shared_ptr<Buffer> readDataChunk(const DBContent& dbcontent);
     void finalizeReadStatement(const DBContent& dbcontent);

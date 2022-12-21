@@ -622,9 +622,8 @@ string SQLGenerator::createDBUpdateStringBind(shared_ptr<Buffer> buffer,
 
 
 shared_ptr<DBCommand> SQLGenerator::getSelectCommand(
-        const DBContent& object, VariableSet read_list,
-        std::vector<std::string> extra_from_parts, const string& filter, bool use_order,
-        Variable* order_variable, bool use_order_ascending, const string& limit)
+        const DBContent& object, VariableSet read_list, const string& filter,
+        bool use_order, Variable* order_variable)
 {
     logdbg << "SQLGenerator: getSelectCommand: dbo " << object.name()
            << " read list size " << read_list.getSize();
@@ -663,9 +662,13 @@ shared_ptr<DBCommand> SQLGenerator::getSelectCommand(
 
     ss << " FROM " << table_db_name;  // << table->getAllTableNames();
 
+    // check associations json_each
+    if (filter.find("json_each.value") != std::string::npos)
+        ss << ", json_each("+object.dbTableName()+".associations)";
+
     // add extra from parts
-    for (auto& from_part : extra_from_parts)
-        ss << ", " << from_part;
+//    for (auto& from_part : extra_from_parts)
+//        ss << ", " << from_part;
 
     logdbg << "SQLGenerator: getSelectCommand: filtering statement";
     // add filter statement
@@ -678,16 +681,7 @@ shared_ptr<DBCommand> SQLGenerator::getSelectCommand(
 
         ss << " ORDER BY " << order_variable->dbColumnName();
 
-        if (use_order_ascending)
-            ss << " ASC";
-        else
-            ss << " DESC";
-    }
-
-    if (limit.size() > 0)
-    {
-        ss << " LIMIT " << limit;
-        logdbg << "SQLGenerator: getSelectCommand: limiting";
+        ss << " ASC";
     }
 
     ss << ";";
