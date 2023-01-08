@@ -42,7 +42,9 @@ DataSourceLineInfo::DataSourceLineInfo(const std::string& key, nlohmann::json& c
 
 bool DataSourceLineInfo::hasListenIP() const
 {
-    return config_.contains(listen_ip_key);
+    return config_.contains(listen_ip_key)
+            && config_.at(listen_ip_key).is_string()
+            && std::string(config_.at(listen_ip_key)).size();
 }
 
 const std::string DataSourceLineInfo::listenIP() const
