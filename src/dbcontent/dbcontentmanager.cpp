@@ -1057,13 +1057,13 @@ void DBContentManager::filterDataSources()
                 indexes_to_remove.push_back(index);
         }
 
-        logdbg << "DBContentManager: filterDataSources: in " << buf_it->first << " remove "
+        loginf << "DBContentManager: filterDataSources: in " << buf_it->first << " remove "
                << indexes_to_remove.size() << " of " << buffer_size;
 
         // remove unwanted indexes
         if (indexes_to_remove.size())
         {
-            buf_it->second->removeIndexes(indexes_to_remove);
+            buf_it->second->removeIndexes(indexes_to_remove); // huge cost here
         }
         //buffer_size = buf_it.second->size();
     });

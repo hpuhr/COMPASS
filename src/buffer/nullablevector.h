@@ -927,14 +927,42 @@ void NullableVector<T>::cutUpToIndex(unsigned int index) // everything up to ind
 template <class T>
 void NullableVector<T>::removeIndexes(const std::vector<size_t>& indexes_to_remove)
 {
-    for (auto index_it = indexes_to_remove.rbegin(); index_it != indexes_to_remove.rend(); ++index_it)
-    {
-        if (*index_it < null_flags_.size())
-            null_flags_.erase(null_flags_.begin() + *index_it);
+    // iterator to size cnt
+    //
+    //for (auto index_it = indexes_to_remove.rbegin(); index_it != indexes_to_remove.rend(); ++index_it)
+    //{
+    //    if (*index_it < null_flags_.size())
+    //        null_flags_.erase(null_flags_.begin() + *index_it);
+    //
+    //    if (*index_it < data_.size())
+    //        data_.erase(data_.begin() + *index_it);
+    //}
 
-        if (*index_it < data_.size())
-            data_.erase(data_.begin() + *index_it);
+    size_t n  = data_.size();
+    size_t nr = indexes_to_remove.size();
+
+    size_t idx_old = 0; //old index in data to copy from
+    size_t idx_new = 0; //new index in data to copy to
+
+    //for all indices to be removed...
+    for (size_t i = 0; i < nr; ++i)
+    {
+        const size_t idx_tbr = indexes_to_remove[ i ];
+
+        //..copy from current index in data up to item to be removed into new position
+        while (idx_old < idx_tbr)
+            data_[ idx_new++ ] = data_[ idx_old++ ];
+
+        //skip index to be removed
+        ++idx_old;
     }
+
+    //copy any data beyond last index to be removed
+    while (idx_old < n)
+        data_[ idx_new++ ] = data_[ idx_old++ ];
+
+    //chop remaining unneeded space
+    data_.resize(n - nr);
 }
 
 template <class T>
