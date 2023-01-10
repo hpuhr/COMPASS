@@ -53,10 +53,6 @@ In the time filter elements, at maximum 5 minutes of past data is available. In 
 Using the time scrollbar, past data can be inspected, which is kept until it becomes outdated (older than 5 minutes) or the scrollbar is moved to the most right position. In this position, the displayed time window will again follow the most recent time.
 
 
-\section{Long-Term Running}
-
-The application is optimized for long-term runnning, and can be run continuously. During Live mode, data older than 1 hour is removed from the database. \\
-
 \section{Overload Detection}
 
 The ASTERIX Import task as well as the OSGView can detect and handle overload situations. If the real-time processing is not possible with the used workstation, display latency builds up - resulting in ASTERIX data queuing up. \\
@@ -72,7 +68,16 @@ If such a latency is larger than 3 seconds,  existing OSGViews skip drawing unti
 
 If the latency exceeds 11 seconds, ASTERIX data is skipped - therefore not decoded, added to the database, or displayed.
 
+\section{Minimal User Setup}
 
+
+
+
+\section{Long-Term Running}
+
+The application is optimized for long-term runnning, and can be run continuously. During Live mode, data older than 1 hour is removed from the database. \\
+
+In this use case, usage of a rotating log file (as described in \nameref{sec:appendix_logging_rotate}) is recommened.
 
 
 
