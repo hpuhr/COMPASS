@@ -59,7 +59,6 @@ The ASTERIX Import task as well as the OSGView can detect and handle overload si
 
 If such a latency is larger than 3 seconds,  existing OSGViews skip drawing until re-synchronization is possible (display latency $<$ 3s). During such an overload, the OSGViews show a red overload message on the bottom right, with the display latency in seconds. After such an overload, no loss of data occured and all data is displayed. \\
 
-
 \begin{figure}[H]
     \hspace*{-2.5cm}
     \includegraphics[width=19cm,frame]{figures/osgview_overload.png}
@@ -68,16 +67,46 @@ If such a latency is larger than 3 seconds,  existing OSGViews skip drawing unti
 
 If the latency exceeds 11 seconds, ASTERIX data is skipped - therefore not decoded, added to the database, or displayed.
 
-\section{Minimal User Setup}
-
-
-
-
 \section{Long-Term Running}
 
 The application is optimized for long-term runnning, and can be run continuously. During Live mode, data older than 1 hour is removed from the database. \\
 
 In this use case, usage of a rotating log file (as described in \nameref{sec:appendix_logging_rotate}) is recommened.
+
+\section{Configuration Options of Interest}
+
+Since the Live mode may be set up for users which only use COMPASS for limited use cases, a number of configuration options were added to allow for a simpler usage. The listed files exist in the configuration folder in the 'conf/default' subfolder.
+
+\subsection{Hide Evaluation and View Points}
+
+To hide the respective tabs in the main window, in the file 'compass.json' change:
+
+\begin{lstlisting}
+...
+        "hide_evaluation": false,
+        "hide_viewpoints": false,
+...        
+\end{lstlisting}
+
+to:
+\begin{lstlisting}
+...
+        "hide_evaluation": true,
+        "hide_viewpoints": true,
+...        
+\end{lstlisting}
+
+\subsection{Change Cache or Database Time Duration}
+
+Per default, the RAM cache is limited to 5 minutes, while the database content is limited to 60 minutes. To change these durations (if workstation performance allows for it), the following values can be set in the file 'db\_content.json' (values in minutes):
+
+\begin{lstlisting}
+...
+        "max_live_data_age_cache": 5,
+        "max_live_data_age_db": 60,
+...        
+\end{lstlisting}
+
 
 
 
