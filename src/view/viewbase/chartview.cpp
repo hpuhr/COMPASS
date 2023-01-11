@@ -15,7 +15,7 @@ ChartView::ChartView(QtCharts::QChart* chart, SelectionStyle sel_style, QWidget*
 :   QChartView(chart, parent)
 ,   sel_style_(sel_style)
 {
-    createDisplayElements();
+    createDisplayElements(chart);
 }
 
 /**
@@ -50,7 +50,7 @@ QPointF ChartView::widgetFromChart(const QPointF& pos) const
 /**
  * Creates the needed display elements.
  */
-void ChartView::createDisplayElements()
+void ChartView::createDisplayElements(QtCharts::QChart* chart)
 {
     if (sel_style_ == SelectionStyle::SeriesArea)
     {
@@ -62,7 +62,7 @@ void ChartView::createDisplayElements()
         b.setColor(SelectionColor);
         b.setStyle(Qt::BrushStyle::SolidPattern);
         
-        QPen p(Qt::red, 2);
+        QPen p(Qt::red);
         p.setStyle(Qt::PenStyle::DashLine);
 
         selection_box_ = new QtCharts::QAreaSeries(selection_box_upper, selection_box_lower);
@@ -71,20 +71,28 @@ void ChartView::createDisplayElements()
 
         updateSelectionBox(QRectF());
 
-        chart()->addSeries(selection_box_);
+        chart->addSeries(selection_box_);
+
+        //note: attaching the axis should be called after adding the series to the chart
+        selection_box_->attachAxis(chart->axisX());
+        selection_box_->attachAxis(chart->axisY());
     }
     else if (sel_style_ == SelectionStyle::SeriesLines)
     {
-        QPen p(Qt::red, 2);
-        //p.setStyle(Qt::PenStyle::DashLine);
+        QPen p(Qt::red);
+        p.setStyle(Qt::PenStyle::DashLine);
 
         selection_lines_ = new QtCharts::QLineSeries;
-        selection_lines_->setPen(p);
         selection_lines_->setUseOpenGL(true);
-
+        selection_lines_->setPen(p);
+        
         updateSelectionLines(QRectF());
 
-        chart()->addSeries(selection_lines_);
+        chart->addSeries(selection_lines_);
+
+        //note: attaching the axis should be called after adding the series to the chart
+        selection_lines_->attachAxis(chart->axisX());
+        selection_lines_->attachAxis(chart->axisY());
     }
     else //SelectionStyle::RubberBand
     {
@@ -156,10 +164,14 @@ void ChartView::updateSelectionLines(const QRectF& region)
         if (!data_bounds_.isEmpty())
             configLines(data_bounds_);
 
+        std::cout << "HIDE selection box" << std::endl;
+
         selection_lines_->hide();
 
         return;
     }
+
+    std::cout << "SHOW selection box" << std::endl;
 
     configLines(region);
 

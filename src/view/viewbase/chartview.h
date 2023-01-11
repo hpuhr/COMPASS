@@ -24,7 +24,7 @@ public:
     enum class SelectionStyle
     {
         RubberBand = 0,
-        SeriesArea,
+        SeriesArea, 
         SeriesLines //gl accelerated lines
     };
 
@@ -70,7 +70,7 @@ protected:
     bool isSelectionEnabled() const;
 
 private:
-    void createDisplayElements();
+    void createDisplayElements(QtCharts::QChart* chart);
 
     void clearSelection();
     void updateSelectionBox(const QRectF& region);
