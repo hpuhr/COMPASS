@@ -1,0 +1,118 @@
+\section{Appendix: Logging}
+\label{sec:appendix_logging}
+ 
+Logging in COMPASS is performed using the log4cpp library (see \href{https://log4cpp.sourceforge.net/}{Link}). At startup of the application, the logging behaviour is defined using a log4cpp.properties file (located in the configuration folder).
+
+A default file is defined as follows:
+\begin{lstlisting}
+# log4cpp.properties
+
+log4cpp.rootCategory=DEBUG, consoleAppender #, fileAppender
+#log4cpp.category.sub1=INFO, A1, A2
+#log4cpp.category.sub1.sub2=INFO, A3
+
+log4cpp.appender.consoleAppender=ConsoleAppender
+log4cpp.appender.consoleAppender.layout=PatternLayout
+log4cpp.appender.consoleAppender.layout.ConversionPattern=[%p] %m%n 
+#log4cpp.appender.consoleAppender.layout.ConversionPattern=%d [%p] %m%n 
+
+#log4cpp.appender.fileAppender=FileAppender
+#log4cpp.appender.fileAppender.fileName=log.txt
+#log4cpp.appender.fileAppender.layout=PatternLayout
+
+#log4cpp.appender.A2=FileAppender
+#log4cpp.appender.A2.threshold=WARN
+#log4cpp.appender.A2.fileName=A2.log
+#log4cpp.appender.A2.layout=PatternLayout
+#log4cpp.appender.A2.layout.ConversionPattern=%d [%p] %m%n 
+
+#log4cpp.appender.A3=RollingFileAppender
+#log4cpp.appender.A3.fileName=A3.log
+#log4cpp.appender.A3.maxFileSize=200
+#log4cpp.appender.A3.maxBackupIndex=1
+#log4cpp.appender.A3.layout=PatternLayout
+#log4cpp.appender.A3.layout.ConversionPattern=%d [%p] %m%n 
+\end{lstlisting}
+
+Per default, only a console-log is defined.
+
+\subsection{Log Formatting}
+The format of the log message can be changed using the 'ConversionPattern' setting, the following contents are possible:
+\begin{lstlisting}
+%% - a single percent sign
+%c - the category
+%d - the date\n Date format: The date format character may be followed by a date format specifier enclosed between braces. For example, %d{%H:%M:%S,%l} or %d{%d %m %Y %H:%M:%S,%l}. If no date format specifier is given then the following format is used: "Wed Jan 02 02:03:55 1980". The date format specifier admits the same syntax as the ANSI C function strftime, with 1 addition. The addition is the specifier %l for milliseconds, padded with zeros to make 3 digits.
+%m - the message
+%n - the platform specific line separator
+%p - the priority
+%r - milliseconds since this layout was created.
+%R - seconds since Jan 1, 1970
+%u - clock ticks since process start
+%x - the NDC
+\end{lstlisting}
+
+A common setting to include date and timing information would be:
+
+\begin{lstlisting}
+...
+log4cpp.appender.consoleAppender.layout.ConversionPattern=%d{%Y-%m-%d %H:%M:%S.%l} [%p] %m%n
+...
+\end{lstlisting}
+
+which would result in log messages like:
+\begin{lstlisting}
+2023-01-10 14:16:58.085 [INFO] SQLiteConnection: constructor: SQLITE_VERSION 3.37.2
+\end{lstlisting}
+
+
+\subsection{Log File}
+
+To (additionally to the console log) create a log 'compass\_log.txt' file, the log4cpp.properties file can be changed as follows:
+
+\begin{lstlisting}
+# log4cpp.properties
+
+log4cpp.rootCategory=DEBUG, consoleAppender, fileAppender
+
+log4cpp.appender.consoleAppender=ConsoleAppender
+log4cpp.appender.consoleAppender.layout=PatternLayout
+log4cpp.appender.consoleAppender.layout.ConversionPattern=%d{%Y-%m-%d %H:%M:%S.%l} [%p] %m%n
+
+log4cpp.appender.fileAppender=FileAppender
+log4cpp.appender.fileAppender.fileName=compass_log.txt
+log4cpp.appender.fileAppender.layout=PatternLayout
+log4cpp.appender.fileAppender.layout.ConversionPattern=%d{%Y-%m-%d %H:%M:%S.%l} [%p] %m%n
+\end{lstlisting}
+
+The log4cpp library always appends to created log files in when using FileAppender's.
+
+
+\subsection{Rotating Log File}
+\label{sec:appendix_logging_rotate}
+
+To (additionally to the console log) create a rotating log (for 24h operation), the log4cpp.properties file can be changed as in the following example. Also, a log file with all warnings (and errors) was added.
+
+\begin{lstlisting}
+# log4cpp.properties
+
+log4cpp.rootCategory=DEBUG, consoleAppender, warningFileAppender, rollingFileAppender
+
+log4cpp.appender.consoleAppender=ConsoleAppender
+log4cpp.appender.consoleAppender.layout=PatternLayout
+log4cpp.appender.consoleAppender.layout.ConversionPattern=%d{%Y-%m-%d %H:%M:%S.%l} [%p] %m%n
+
+log4cpp.appender.warningFileAppender=FileAppender
+log4cpp.appender.warningFileAppender.fileName=compass_warn_log.txt
+log4cpp.appender.warningFileAppender.threshold=WARN
+log4cpp.appender.warningFileAppender.layout=PatternLayout
+log4cpp.appender.warningFileAppender.layout.ConversionPattern=%d{%Y-%m-%d %H:%M:%S.%l} [%p] %m%n
+
+log4cpp.appender.rollingFileAppender=RollingFileAppender
+log4cpp.appender.rollingFileAppender.fileName=compass_log.txt
+log4cpp.appender.rollingFileAppender.maxFileSize=100000000
+log4cpp.appender.rollingFileAppender.maxBackupIndex=5
+log4cpp.appender.rollingFileAppender.layout=PatternLayout
+log4cpp.appender.rollingFileAppender.layout.ConversionPattern=%d{%Y-%m-%d %H:%M:%S.%l} [%p] %m%n
+\end{lstlisting}
+
+The maxFileSize is the maximumum file size in bytes (100 MB in example) after which a new file will be created, of which only maxBackupIndex (5) can exist and are used in rotation.
