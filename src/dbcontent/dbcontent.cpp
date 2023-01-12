@@ -367,21 +367,31 @@ void DBContent::load(dbContent::VariableSet& read_set, bool use_datasrc_filters,
             Variable& line_var = variable(DBContent::meta_var_line_id_.name());
             assert (line_var.dataType() == PropertyDataType::UINT);
 
+            bool any_added = false;
+
             for (auto ds_id_it : ds_ids_to_load)
             {
                 assert (ds_man.hasDBDataSource(ds_id_it));
 
                 DBDataSource& src = ds_man.dbDataSource(ds_id_it);
 
-                if (!src.anyLinesLoadingWanted()) // check if any lines should be loaded
-                    continue;
-
+                // prefix
                 if (filter_clause.size())
                     filter_clause += " OR";
                 else
                     filter_clause += " (";
 
+                // add data source specific part
                 filter_clause += " (" + datasource_var.dbColumnName() + " = " + to_string(ds_id_it);
+
+                if (!src.anyLinesLoadingWanted()) // check if any lines should be loaded
+                {
+                    filter_clause += " AND " + line_var.dbColumnName() + " IN ())"; // empty lines to load
+
+                    any_added = true;
+                    continue;
+                }
+
                 filter_clause += " AND " + line_var.dbColumnName() + " IN (";
 
                 bool first = true;
@@ -396,9 +406,11 @@ void DBContent::load(dbContent::VariableSet& read_set, bool use_datasrc_filters,
                 }
 
                 filter_clause += "))";
+
+                any_added = true;
             }
 
-            if (ds_ids_to_load.size())
+            if (ds_ids_to_load.size() && any_added)
                 filter_clause += ")";
         }
         else // simple ds id in statement
