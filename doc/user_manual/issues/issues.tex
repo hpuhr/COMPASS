@@ -94,6 +94,24 @@ Please \textbf{verify} that the installed graphics card and driver in use match 
 
 Only if this is the case, please collect the output of \textit{glxinfo} and create an issue report as stated below.
 
+\subsection{ADS-B Target Reports Not Shown}
+
+If imported ADS-B target reports are not displayed in the OSGView, one cause can be that the latitude/longitude position information is only given in it's high precision data item in ASTERIX. So e.g. instead of the 'Latitude' variable, the 'Latitude HP' variable holds the respective information in COMPASS. This could be inspected e.g. using the Histogram or the Scatterplot views. \\
+
+To change the usage of the position information, (once) start the COMPASS application using the '--expert\_mode' command line option, (after opening any database) and step into the Configuration $\rightarrow$ Configure Meta Variables dialog. \\
+
+In said dialog, change both the 'Latiude' and 'Longitude' meta-variables to use the CAT021 'Latitude HP' and 'Longitude HP'.
+
+\begin{figure}[H]
+    \includegraphics[width=12cm,frame]{figures/meta_latitude_hr.png}
+\end{figure}
+
+After these changes, restart the application and (to be safe) re-create the respective database. \\
+
+Please note that, to use the old configuration (e.g. for older ADS-B data) these configuration changes have to be reverted. This issue will be resolved in a future version.
+
+
+
 \section{Reporting Issues}
 
 There are several ways of reporting issues. The following steps have to be taken:
@@ -179,6 +197,7 @@ from /lib/x86_64-linux-gnu/libglib-2.0.so.0
 \end{verbatim}
 
 This is called a stacktrace. Please copy all of this text so that it can be subitted with the issue report.
+
 
 \subsection{Issue Reporting}
 

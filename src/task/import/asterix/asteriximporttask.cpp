@@ -1109,8 +1109,6 @@ void ASTERIXImportTask::postprocessDoneSlot()
         return;
     }
 
-    loginf << ": inserting " << buffer_cnt << " records";
-
     // queue data
     if (!stopped_)
     {
