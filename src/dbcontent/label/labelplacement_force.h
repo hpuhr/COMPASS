@@ -110,7 +110,7 @@ namespace force
     /**
      */
     void repelFromLabels(std::vector<Eigen::Vector2d>& movements,
-                         Eigen::Vector2d& total,
+                         std::vector<Eigen::Vector2d>& totals,
                          const std::vector<Label>& labels, 
                          double tx, 
                          double ty,
@@ -163,7 +163,7 @@ namespace force
         size_t n = labels.size();
 
         movements.assign(n, Eigen::Vector2d(0, 0));
-        total = Eigen::Vector2d(0, 0);
+        totals.assign(n, Eigen::Vector2d(0, 0));
 
         if (n <= 1)
             return;
@@ -189,7 +189,7 @@ namespace force
                 auto offset = repelFromBox(bbox, bbox2, simple);
 
                 movements[ i ] += Eigen::Vector2d(offset.x(), offset.y());
-                total          += Eigen::Vector2d(std::fabs(offset.x()), std::fabs(offset.y()));
+                totals[ i ]    += Eigen::Vector2d(std::fabs(offset.x()), std::fabs(offset.y()));
             }
           });
 //        }
@@ -198,7 +198,7 @@ namespace force
     /**
      */
     void repelFromObjects(std::vector<Eigen::Vector2d>& movements,
-                          Eigen::Vector2d& total,
+                          std::vector<Eigen::Vector2d>& totals,
                           const std::vector<QRectF>& objects,
                           const std::vector<Label>& labels, 
                           double tx, 
@@ -249,7 +249,7 @@ namespace force
         size_t n = labels.size();
 
         movements.assign(n, Eigen::Vector2d(0, 0));
-        total = Eigen::Vector2d(0, 0);
+        totals.assign(n, Eigen::Vector2d(0, 0));
 
         size_t no = objects.size();
         if (no < 1)
@@ -285,7 +285,7 @@ namespace force
                 auto offset = repelFromBox(bbox, bbox2, simple);
 
                 movements[ i ] += Eigen::Vector2d(offset.x(), offset.y());
-                total          += Eigen::Vector2d(std::fabs(offset.x()), std::fabs(offset.y()));
+                totals[ i ]    += Eigen::Vector2d(std::fabs(offset.x()), std::fabs(offset.y()));
             }
         //}
         });
@@ -294,7 +294,7 @@ namespace force
     /**
      */
     void repelFromPoints(std::vector<Eigen::Vector2d>& movements,
-                         Eigen::Vector2d& total,
+                         std::vector<Eigen::Vector2d>& totals,
                          const std::vector<QPointF>& points,
                          const std::vector<Label>& labels, 
                          double tx, 
@@ -336,7 +336,7 @@ namespace force
         size_t n = labels.size();
 
         movements.assign(n, Eigen::Vector2d(0, 0));
-        total = Eigen::Vector2d(0, 0);
+        totals.assign(n, Eigen::Vector2d(0, 0));
 
         size_t np = points.size();
         if (np < 1)
@@ -358,7 +358,7 @@ namespace force
                 auto offset = repelFromPosition(bbox, point.x(), point.y(), simple);
 
                 movements[ i ] += Eigen::Vector2d(offset.x(), offset.y());
-                total          += Eigen::Vector2d(std::fabs(offset.x()), std::fabs(offset.y()));
+                totals[ i ]    += Eigen::Vector2d(std::fabs(offset.x()), std::fabs(offset.y()));
             }
         //}
         });
@@ -367,7 +367,7 @@ namespace force
     /**
      */
     void repelFromROI(std::vector<Eigen::Vector2d>& movements,
-                      Eigen::Vector2d& total,
+                      std::vector<Eigen::Vector2d>& totals,
                       const QRectF& roi,
                       const std::vector<Label>& labels, 
                       double tx, 
@@ -376,17 +376,18 @@ namespace force
         size_t n = labels.size();
 
         movements.assign(n, Eigen::Vector2d(0, 0));
-        total = Eigen::Vector2d(0, 0);
+        totals.assign(n, Eigen::Vector2d(0, 0));
 
         if (roi.isEmpty())
             return;
+        
 
         std::vector<QRectF> bboxes = collectBoundingBoxes(labels, tx, ty);
 
 //        for (size_t i = 0; i < n; ++i)
 //        {
           tbb::parallel_for(size_t(0), n, [&](size_t i) {
-            const auto& l = labels[ i ];
+            //const auto& l = labels[ i ];
 
             const auto& bbox = bboxes[ i ];
 
@@ -402,7 +403,7 @@ namespace force
                 dy = roi.bottom() - bbox.bottom();
 
             movements[ i ] += Eigen::Vector2d(dx, dy);
-            total          += Eigen::Vector2d(std::fabs(dx), std::fabs(dy));
+            totals[ i ]    += Eigen::Vector2d(std::fabs(dx), std::fabs(dy));
         //}
         });
     }
@@ -735,6 +736,7 @@ namespace force
         std::vector<Eigen::Vector2d> displacements_anchors(n);
         std::vector<Eigen::Vector2d> displacements_objects(n);
         std::vector<Eigen::Vector2d> displacements_roi(n);
+        std::vector<Eigen::Vector2d> totals(n);
 
         bool   converged = false;
         double last_dx   = 0.0;
@@ -742,6 +744,12 @@ namespace force
         int    used_iter = -1;
         
         bool simple_mode = settings.method == Method::ForceBasedSimple;
+
+        auto sumUpTotals = [ & ] (Eigen::Vector2d& total, const std::vector<Eigen::Vector2d>& totals)
+        {
+            for (const auto& t : totals)
+                total += t;
+        };
 
         //iterate up to max iterations
         for (int i = 0; i < settings.fb_max_iter; ++i)
@@ -752,9 +760,9 @@ namespace force
             displacements_anchors.assign(n, {0, 0});
             displacements_objects.assign(n, {0, 0});
             displacements_roi.assign(n, {0, 0});
+            totals.assign(n, {0, 0});
             
             Eigen::Vector2d total(0, 0);
-
             Eigen::Vector2d total_labels(0, 0);
             Eigen::Vector2d total_anchors(0, 0);
             Eigen::Vector2d total_objects(0, 0);
@@ -764,54 +772,59 @@ namespace force
             if (settings.fb_avoid_labels)
             {
                 label_placement::force::repelFromLabels(displacements_labels, 
-                                                        total_labels, 
+                                                        totals, 
                                                         labels, 
                                                         settings.fb_expand_x, 
                                                         settings.fb_expand_y, 
                                                         simple_mode);
+                sumUpTotals(total_labels, totals);
             }        
             if (settings.fb_avoid_anchors)
             {
                 if (settings.fb_anchor_radius > 0)
                 {
                     label_placement::force::repelFromObjects(displacements_anchors, 
-                                                            total_anchors, 
-                                                            anchor_regions, 
-                                                            labels, 
-                                                            settings.fb_expand_x, 
-                                                            settings.fb_expand_y, 
-                                                            simple_mode);
+                                                             totals, 
+                                                             anchor_regions, 
+                                                             labels, 
+                                                             settings.fb_expand_x, 
+                                                             settings.fb_expand_y, 
+                                                             simple_mode);
+                    sumUpTotals(total_anchors, totals);
                 }
                 else
                 {
                     label_placement::force::repelFromPoints(displacements_anchors, 
-                                                            total_anchors, 
+                                                            totals, 
                                                             anchors, 
                                                             labels, 
                                                             settings.fb_expand_x, 
                                                             settings.fb_expand_y, 
                                                             simple_mode);
+                    sumUpTotals(total_anchors, totals);
                 }
                 
             }
             if (settings.fb_avoid_objects && !settings.additional_objects.empty())
             {
                 label_placement::force::repelFromObjects(displacements_objects, 
-                                                        total_objects, 
-                                                        settings.additional_objects, 
-                                                        labels, 
-                                                        settings.fb_expand_x, 
-                                                        settings.fb_expand_y, 
-                                                        simple_mode);
+                                                         totals, 
+                                                         settings.additional_objects, 
+                                                         labels, 
+                                                         settings.fb_expand_x, 
+                                                         settings.fb_expand_y, 
+                                                         simple_mode);
+                sumUpTotals(total_objects, totals);
             }
             if (settings.fb_avoid_roi && !settings.roi.isEmpty())
             {
                 label_placement::force::repelFromROI(displacements_roi,
-                                                    total_roi,
-                                                    settings.roi,
-                                                    labels,
-                                                    settings.fb_expand_x, 
-                                                    settings.fb_expand_y);
+                                                     totals,
+                                                     settings.roi,
+                                                     labels,
+                                                     settings.fb_expand_x, 
+                                                     settings.fb_expand_y);
+                sumUpTotals(total_roi, totals);
             }
 
             //sum up individual displacements using weights
