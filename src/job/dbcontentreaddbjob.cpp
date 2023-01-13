@@ -18,6 +18,7 @@
 #include "dbcontentreaddbjob.h"
 #include "buffer.h"
 #include "dbinterface.h"
+#include "dbcontentmanager.h"
 #include "dbcontent/dbcontent.h"
 #include "dbcontent/variable/variable.h"
 #include "logger.h"
@@ -28,24 +29,22 @@
 using namespace dbContent;
 
 DBContentReadDBJob::DBContentReadDBJob(DBInterface& db_interface, DBContent& dbcontent, VariableSet read_list,
-                           const std::vector<std::string>& extra_from_parts,
-                           std::string custom_filter_clause,
-                           std::vector<Variable*> filtered_variables, bool use_order,
-                           Variable* order_variable, bool use_order_ascending,
-                           const std::string& limit_str)
+                           std::string custom_filter_clause)
     : Job("DBContentReadDBJob"),
       db_interface_(db_interface),
       dbcontent_(dbcontent),
       read_list_(read_list),
-      extra_from_parts_(extra_from_parts),
-      custom_filter_clause_(custom_filter_clause),
-      filtered_variables_(filtered_variables),
-      use_order_(use_order),
-      order_variable_(order_variable),
-      use_order_ascending_(use_order_ascending),
-      limit_str_(limit_str)
+      custom_filter_clause_(custom_filter_clause)
 {
     assert(dbcontent_.existsInDB());
+
+    use_order_ = true; // always order
+    assert (COMPASS::instance().dbContentManager().metaCanGetVariable(
+                dbcontent_.name(), DBContent::meta_var_timestamp_));
+
+    // always order by timestamp
+    order_variable_ = &COMPASS::instance().dbContentManager().metaGetVariable(
+                dbcontent_.name(), DBContent::meta_var_timestamp_);
 }
 
 DBContentReadDBJob::~DBContentReadDBJob() {}
@@ -64,8 +63,8 @@ void DBContentReadDBJob::run()
 
     start_time_ = boost::posix_time::microsec_clock::local_time();
 
-    db_interface_.prepareRead(dbcontent_, read_list_, extra_from_parts_, custom_filter_clause_, filtered_variables_,
-                              use_order_, order_variable_, use_order_ascending_, limit_str_);
+    db_interface_.prepareRead(dbcontent_, read_list_, custom_filter_clause_,
+                              use_order_, order_variable_);
 
     unsigned int cnt = 0;
 

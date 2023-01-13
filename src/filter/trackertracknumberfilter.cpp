@@ -32,9 +32,7 @@ bool TrackerTrackNumberFilter::filters(const std::string& dbcontent_name)
     return dbcontent_name == "CAT062";
 }
 
-std::string TrackerTrackNumberFilter::getConditionString(const std::string& dbcontent_name, bool& first,
-                                                         std::vector<std::string>& extra_from_parts,
-                                                         std::vector<dbContent::Variable*>& filtered_variables)
+std::string TrackerTrackNumberFilter::getConditionString(const std::string& dbcontent_name, bool& first)
 {
     logdbg << "TrackerTrackNumberFilter: getConditionString: dbo " << dbcontent_name << " active " << active_;
 
@@ -56,16 +54,12 @@ std::string TrackerTrackNumberFilter::getConditionString(const std::string& dbco
     {
         dbContent::Variable& ds_id_var = COMPASS::instance().dbContentManager().metaVariable(
                     DBContent::meta_var_datasource_id_.name()).getFor(dbcontent_name);
-        filtered_variables.push_back(&ds_id_var);
 
         dbContent::Variable& line_var = COMPASS::instance().dbContentManager().metaVariable(
                     DBContent::meta_var_line_id_.name()).getFor(dbcontent_name);
-        filtered_variables.push_back(&line_var);
-
 
         dbContent::Variable& tn_var = COMPASS::instance().dbContentManager().metaVariable(
                     DBContent::meta_var_track_num_.name()).getFor(dbcontent_name);
-        filtered_variables.push_back(&tn_var);
 
         if (!first)
         {

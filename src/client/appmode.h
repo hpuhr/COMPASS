@@ -14,11 +14,11 @@ enum AppMode
 inline std::string toString(AppMode app_mode)
 {
     if (app_mode == AppMode::Offline)
-        return "AppMode::Offline";
+        return "Offline";
     else if (app_mode == AppMode::LiveRunning)
-        return "AppMode::LiveRunning";
+        return "Live:Running";
     else if (app_mode == AppMode::LivePaused)
-        return "AppMode::LivePaused";
+        return "Live:Paused";
     else
         throw std::runtime_error("Unkown AppMode "+std::to_string((unsigned int)app_mode));
 }

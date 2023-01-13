@@ -37,9 +37,7 @@ bool TimestampFilter::filters(const std::string& dbo_type)
                 DBContent::meta_var_timestamp_.name()).existsIn(dbo_type);
 }
 
-std::string TimestampFilter::getConditionString(const std::string& dbcontent_name, bool& first,
-                                           std::vector<std::string>& extra_from_parts,
-                                           std::vector<dbContent::Variable*>& filtered_variables)
+std::string TimestampFilter::getConditionString(const std::string& dbcontent_name, bool& first)
 {
     logdbg << "TimestampFilter: getConditionString: dbo " << dbcontent_name << " active " << active_;
 
@@ -53,8 +51,6 @@ std::string TimestampFilter::getConditionString(const std::string& dbcontent_nam
     {
         dbContent::Variable& var = COMPASS::instance().dbContentManager().metaVariable(
                     DBContent::meta_var_timestamp_.name()).getFor(dbcontent_name);
-
-        filtered_variables.push_back(&var);
 
         if (!first)
         {

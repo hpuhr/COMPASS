@@ -225,14 +225,39 @@ void Buffer::renameArrayListMapEntry(const std::string& id, const std::string& i
 }
 
 template <typename T>
-void Buffer::seizeArrayListMap(Buffer& org_buffer)
+void Buffer::seizeArrayListMap(Buffer& other_buffer)
 {
-    assert(getArrayListMap<T>().size() == org_buffer.getArrayListMap<T>().size());
+    //assert(getArrayListMap<T>().size() == other_buffer.getArrayListMap<T>().size());
 
-    for (auto it : getArrayListMap<T>())
-        it.second->addData(*org_buffer.getArrayListMap<T>().at(it.first));
+//    loginf << "Buffer: seizeArrayListMap: this properties";
+//    printProperties();
+//    loginf << "Buffer: seizeArrayListMap: other properties";
+//    other_buffer.printProperties();
 
-    org_buffer.getArrayListMap<T>().clear();
+    // add all properties of other vector
+    for(auto& prop_it : other_buffer.properties().properties())
+    {
+        logdbg << "Buffer: seizeArrayListMap: checking prop name '" << prop_it.name() << "' type "
+               << prop_it.dataTypeString() << " contained " << hasProperty(prop_it);
+
+        if (!hasProperty(prop_it))
+        {
+            logdbg << "Buffer: seizeArrayListMap: adding prop name '" << prop_it.name() << "' type "
+                   << prop_it.dataTypeString();
+            addProperty(prop_it);
+        }
+    }
+
+    for (auto& it : other_buffer.getArrayListMap<T>())
+    {
+        logdbg << "Buffer: seizeArrayListMap: seizing '" << it.first << "'";
+        assert (other_buffer.properties().hasProperty(it.first));
+
+        assert (getArrayListMap<T>().count(it.first));
+        getArrayListMap<T>().at(it.first)->addData(*it.second);
+    }
+
+    other_buffer.getArrayListMap<T>().clear();
 }
 
 #endif /* BUFFER_H_ */

@@ -57,6 +57,7 @@ public:
     virtual ~SQLiteConnection();
 
     void openFile(const std::string& file_name);
+    void exportFile(const std::string& file_name);
 
     virtual void disconnect();
 

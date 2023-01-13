@@ -222,7 +222,7 @@ void LatexVisitor::visit(const EvaluationResultsReport::SectionContentTable* e)
         {
             for (unsigned int cnt=0; cnt < num_cols; ++cnt)
             {
-                if (row_strings[cnt].size() > max_table_col_width_)
+                if (cnt > 2 && row_strings[cnt].size() > max_table_col_width_)
                 {
                     std::string::size_type space_pos = row_strings[cnt].rfind(' ', max_table_col_width_);
                     std::string::size_type comma_pos = row_strings[cnt].rfind(',', max_table_col_width_);

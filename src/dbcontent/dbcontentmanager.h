@@ -101,7 +101,7 @@ public:
     bool usedInMetaVariable(const dbContent::Variable& variable);
     dbContent::MetaVariableConfigurationDialog* metaVariableConfigdialog();
 
-    void load();
+    void load(const std::string& custom_filter_clause="");
     void addLoadedData(std::map<std::string, std::shared_ptr<Buffer>> data);
     std::map<std::string, std::shared_ptr<Buffer>> loadedData();
     void loadingDone(DBContent& object); // to be called by dbo when it's loading is finished
@@ -113,29 +113,6 @@ public:
     bool insertInProgress() const;
 
     DBContentManagerWidget* widget();
-
-    bool useLimit() const;
-    void useLimit(bool useLimit);
-
-    unsigned int limitMin() const;
-    void limitMin(unsigned int limitMin);
-
-    unsigned int limitMax() const;
-    void limitMax(unsigned int limitMax);
-
-    bool useOrder() const;
-    void useOrder(bool useOrder);
-
-    bool useOrderAscending() const;
-    void useOrderAscending(bool useOrderAscending);
-
-    bool hasOrderVariable();
-    dbContent::Variable& orderVariable();
-    void orderVariable(dbContent::Variable& variable);
-    bool hasOrderMetaVariable();
-    dbContent::MetaVariable& orderMetaVariable();
-    void orderMetaVariable(dbContent::MetaVariable& variable);
-    void clearOrderVariable();
 
     void quitLoading();
 
@@ -177,19 +154,12 @@ public:
     std::shared_ptr<dbContent::Target> target(unsigned int utn);
     void saveTargets();
 
+    unsigned int maxLiveDataAgeCache() const;
+
 protected:
     COMPASS& compass_;
 
     std::unique_ptr<dbContent::LabelGenerator> label_generator_;
-
-    bool use_order_{false};
-    bool use_order_ascending_{false};
-    std::string order_variable_dbcontent_name_;
-    std::string order_variable_name_;
-
-    bool use_limit_{false};
-    unsigned int limit_min_{0};
-    unsigned int limit_max_{100000};
 
     bool has_associations_{false};
     std::string associations_id_;
@@ -200,7 +170,8 @@ protected:
     bool has_max_reftraj_track_num_ {false};
     unsigned int max_reftraj_track_num_ {0};
 
-    unsigned int max_live_data_age_ {10};
+    unsigned int max_live_data_age_cache_ {5};
+    unsigned int max_live_data_age_db_ {60};
 
     boost::optional<boost::posix_time::ptime> timestamp_min_;
     boost::optional<boost::posix_time::ptime> timestamp_max_;
@@ -242,6 +213,7 @@ protected:
     void loadMaxRefTrajTrackNum();
 
     void addStandardVariables(std::string dbcont_name, dbContent::VariableSet& read_set);
+
 };
 
 #endif /* DBCONTENT_DBCONTENTMANAGER_H_ */

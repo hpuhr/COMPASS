@@ -317,6 +317,94 @@ unsigned int DataSourceManager::dsFontSize() const
     return ds_font_size_;
 }
 
+void DataSourceManager::selectAllDSTypes()
+{
+    ds_type_loading_wanted_.clear();
+
+    if (load_widget_)
+        load_widget_->updateContent();
+}
+
+void DataSourceManager::deselectAllDSTypes()
+{
+    for (const auto& ds_type_it : data_source_types_)
+        ds_type_loading_wanted_[ds_type_it] = false;
+
+    if (load_widget_)
+        load_widget_->updateContent();
+}
+
+void DataSourceManager::selectAllDataSources()
+{
+    for (const auto& ds_it : db_data_sources_)
+        ds_it->loadingWanted(true);
+
+    if (load_widget_)
+        load_widget_->updateContent();
+}
+
+void DataSourceManager::deselectAllDataSources()
+{
+    for (const auto& ds_it : db_data_sources_)
+        ds_it->loadingWanted(false);
+
+    if (load_widget_)
+        load_widget_->updateContent();
+}
+
+void DataSourceManager::selectDSTypeSpecificDataSources (const std::string& ds_type)
+{
+    assert (find(data_source_types_.begin(), data_source_types_.end(), ds_type) != data_source_types_.end());
+
+    for (const auto& ds_it : db_data_sources_)
+    {
+        if (ds_it->dsType() == ds_type)
+            ds_it->loadingWanted(true);
+    }
+
+    if (load_widget_)
+        load_widget_->updateContent();
+}
+
+void DataSourceManager::deselectDSTypeSpecificDataSources (const std::string& ds_type)
+{
+    assert (find(data_source_types_.begin(), data_source_types_.end(), ds_type) != data_source_types_.end());
+
+    for (const auto& ds_it : db_data_sources_)
+    {
+        if (ds_it->dsType() == ds_type)
+            ds_it->loadingWanted(false);
+    }
+
+    if (load_widget_)
+        load_widget_->updateContent();
+}
+
+void DataSourceManager::deselectAllLines()
+{
+    for (const auto& ds_it : db_data_sources_)
+    {
+        ds_it->disableAllLines();
+    }
+
+    if (load_widget_)
+        load_widget_->updateContent();
+}
+void DataSourceManager::selectSpecificLineSlot(unsigned int line_id)
+{
+
+    for (const auto& ds_it : db_data_sources_)
+    {
+        ds_it->disableAllLines();
+
+        if (ds_it->hasNumInserted(line_id))
+            ds_it->lineLoadingWanted(line_id, true);
+    }
+
+    if (load_widget_)
+        load_widget_->updateContent();
+}
+
 bool DataSourceManager::loadingWanted (const std::string& dbcontent_name)
 {
     for (auto& ds_it : db_data_sources_)

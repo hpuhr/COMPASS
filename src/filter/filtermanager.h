@@ -68,9 +68,7 @@ public:
     bool useFilters() const;
     void useFilters(bool useFilters);
 
-    std::string getSQLCondition(const std::string& dbcontent_name,
-                                std::vector<std::string>& extra_from_parts,
-                                std::vector<dbContent::Variable*>& filtered_variables);
+    std::string getSQLCondition(const std::string& dbcontent_name);
 
     unsigned int getNumFilters();
     DBFilter* getFilter(unsigned int index);

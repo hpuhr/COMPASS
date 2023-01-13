@@ -40,9 +40,7 @@ bool PrimaryOnlyFilter::filters(const std::string& dbcontent_name)
     return false;
 }
 
-std::string PrimaryOnlyFilter::getConditionString(const std::string& dbcontent_name, bool& first,
-                                           std::vector<std::string>& extra_from_parts,
-                                           std::vector<dbContent::Variable*>& filtered_variables)
+std::string PrimaryOnlyFilter::getConditionString(const std::string& dbcontent_name, bool& first)
 {
     logdbg << "PrimaryOnlyFilter: getConditionString: dbo " << dbcontent_name << " active " << active_;
 
@@ -53,7 +51,6 @@ std::string PrimaryOnlyFilter::getConditionString(const std::string& dbcontent_n
     if (cont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_m3a_))
     {
         dbContent::Variable& var = cont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_m3a_);
-        filtered_variables.push_back(&var);
 
         if (!first)
             ss << " AND";
@@ -66,7 +63,6 @@ std::string PrimaryOnlyFilter::getConditionString(const std::string& dbcontent_n
     if (cont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_mc_))
     {
         dbContent::Variable& var = cont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_mc_);
-        filtered_variables.push_back(&var);
 
         if (!first)
             ss << " AND";
@@ -79,7 +75,6 @@ std::string PrimaryOnlyFilter::getConditionString(const std::string& dbcontent_n
     if (cont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_ta_))
     {
         dbContent::Variable& var = cont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_ta_);
-        filtered_variables.push_back(&var);
 
         if (!first)
             ss << " AND";
@@ -92,7 +87,6 @@ std::string PrimaryOnlyFilter::getConditionString(const std::string& dbcontent_n
     if (cont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_ti_))
     {
         dbContent::Variable& var = cont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_ti_);
-        filtered_variables.push_back(&var);
 
         if (!first)
             ss << " AND";
@@ -105,7 +99,6 @@ std::string PrimaryOnlyFilter::getConditionString(const std::string& dbcontent_n
     if (cont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_detection_type_))
     {
         dbContent::Variable& var = cont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_detection_type_);
-        filtered_variables.push_back(&var);
 
         if (!first)
             ss << " AND";

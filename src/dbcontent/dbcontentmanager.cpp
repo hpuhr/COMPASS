@@ -63,16 +63,8 @@ DBContentManager::DBContentManager(const std::string& class_id, const std::strin
 {
     logdbg << "DBContentManager: constructor: creating subconfigurables";
 
-    registerParameter("use_order", &use_order_, false);
-    registerParameter("use_order_ascending", &use_order_ascending_, false);
-    registerParameter("order_variable_dbcontent_name", &order_variable_dbcontent_name_, "Meta");
-    registerParameter("order_variable_name", &order_variable_name_, "Timestamp");
-
-    registerParameter("use_limit", &use_limit_, false);
-    registerParameter("limit_min", &limit_min_, 0);
-    registerParameter("limit_max", &limit_max_, 100000);
-
-    registerParameter("max_live_data_age", &max_live_data_age_, 10);
+    registerParameter("max_live_data_age_cache", &max_live_data_age_cache_, 5);
+    registerParameter("max_live_data_age_db", &max_live_data_age_db_, 60);
 
     createSubConfigurables();
 
@@ -285,107 +277,40 @@ DBContentManagerWidget* DBContentManager::widget()
     return widget_.get();
 }
 
-bool DBContentManager::useLimit() const { return use_limit_; }
 
-void DBContentManager::useLimit(bool use_limit) { use_limit_ = use_limit; }
-
-unsigned int DBContentManager::limitMin() const { return limit_min_; }
-
-void DBContentManager::limitMin(unsigned int limit_min)
+void DBContentManager::load(const std::string& custom_filter_clause)
 {
-    limit_min_ = limit_min;
-    loginf << "DBContentManager: limitMin: " << limit_min_;
-}
+    logdbg << "DBContentManager: loadSlot: custom_filter_clause '" << custom_filter_clause << "'";
 
-unsigned int DBContentManager::limitMax() const { return limit_max_; }
+    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
-void DBContentManager::limitMax(unsigned int limit_max)
-{
-    limit_max_ = limit_max;
-    loginf << "DBContentManager: limitMax: " << limit_max_;
-}
+    if (load_in_progress_)
+    {
+        loginf << "DBContentManager: loadSlot: quitting previous load";
 
-bool DBContentManager::useOrder() const { return use_order_; }
+        for (auto& object : dbcontent_)
+        {
+            if (object.second->isLoading())
+                object.second->quitLoading();
+        }
 
-void DBContentManager::useOrder(bool use_order) { use_order_ = use_order; }
+        while (load_in_progress_) // JobManager::instance().hasDBJobs()
+        {
+            loginf << "DBContentManager: loadSlot: previous load to finish";
 
-bool DBContentManager::useOrderAscending() const { return use_order_ascending_; }
+            QCoreApplication::processEvents();
+            QThread::msleep(1);
+        }
+    }
 
-void DBContentManager::useOrderAscending(bool use_order_ascending)
-{
-    use_order_ascending_ = use_order_ascending;
-}
+    loginf << "DBContentManager: loadSlot: starting loading";
 
-bool DBContentManager::hasOrderVariable()
-{
-    if (existsDBContent(order_variable_dbcontent_name_))
-        if (dbContent(order_variable_dbcontent_name_).hasVariable(order_variable_name_))
-            return true;
-    return false;
-}
-
-Variable& DBContentManager::orderVariable()
-{
-    assert(hasOrderVariable());
-    return dbContent(order_variable_dbcontent_name_).variable(order_variable_name_);
-}
-
-void DBContentManager::orderVariable(Variable& variable)
-{
-    order_variable_dbcontent_name_ = variable.dbContentName();
-    order_variable_name_ = variable.name();
-}
-
-bool DBContentManager::hasOrderMetaVariable()
-{
-    if (order_variable_dbcontent_name_ == META_OBJECT_NAME)
-        return existsMetaVariable(order_variable_name_);
-
-    return false;
-}
-
-MetaVariable& DBContentManager::orderMetaVariable()
-{
-    assert(hasOrderMetaVariable());
-    return metaVariable(order_variable_name_);
-}
-
-void DBContentManager::orderMetaVariable(MetaVariable& variable)
-{
-    order_variable_dbcontent_name_ = META_OBJECT_NAME;
-    order_variable_name_ = variable.name();
-}
-
-void DBContentManager::clearOrderVariable()
-{
-    order_variable_dbcontent_name_ = "";
-    order_variable_name_ = "";
-}
-
-
-void DBContentManager::load()
-{
-    logdbg << "DBContentManager: loadSlot";
-
-    data_.clear();
+    //data_.clear();
+    clearData();
 
     load_in_progress_ = true;
 
     bool load_job_created = false;
-
-    loginf << "DBContentManager: loadSlot: loading associations";
-
-    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-
-    while (JobManager::instance().hasDBJobs())
-    {
-        logdbg << "DBContentManager: loadSlot: waiting on association loading";
-
-        QCoreApplication::processEvents();
-        QThread::msleep(5);
-    }
-
-    loginf << "DBContentManager: loadSlot: starting loading";
 
     DataSourceManager& ds_man =  COMPASS::instance().dataSourceManager();
     EvaluationManager& eval_man = COMPASS::instance().evaluationManager();
@@ -419,27 +344,10 @@ void DBContentManager::load()
                 continue;
             }
 
-            std::string limit_str = "";
-            if (use_limit_)
-            {
-                limit_str = std::to_string(limit_min_) + "," + std::to_string(limit_max_);
-                logdbg << "DBContentManager: loadSlot: use limit str " << limit_str;
-            }
-
-            Variable* variable = nullptr;
-
-            assert (hasOrderVariable() || hasOrderMetaVariable());
-
-            if (hasOrderVariable())
-                variable = &orderVariable();
-            if (hasOrderMetaVariable())
-                variable = &orderMetaVariable().getFor(object.first);
-
-            // load (DBOVariableSet &read_set, bool use_filters, bool use_order, DBOVariable
-            // *order_variable, bool use_order_ascending, const std::string &limit_str="")
+            // load(dbContent::VariableSet& read_set, bool use_datasrc_filters, bool use_filters,
+            // const std::string& custom_filter_clause="")
             object.second->load(read_set, true, COMPASS::instance().filterManager().useFilters(),
-                                use_order_, variable, use_order_ascending_,
-                                limit_str);
+                                custom_filter_clause);
 
             load_job_created = true;
         }
@@ -502,10 +410,15 @@ void DBContentManager::quitLoading()
 {
     loginf << "DBContentManager: quitLoading";
 
-    for (auto& object : dbcontent_)
-        object.second->quitLoading();
+    assert (load_in_progress_);
 
-    load_in_progress_ = true;  // TODO
+    for (auto& object : dbcontent_)
+    {
+        if (object.second->isLoading())
+            object.second->quitLoading();
+    }
+
+    //load_in_progress_ = true;  // TODO
 }
 
 void DBContentManager::databaseOpenedSlot()
@@ -715,7 +628,12 @@ void DBContentManager::insertData(std::map<std::string, std::shared_ptr<Buffer>>
 {
     logdbg << "DBContentManager: insertData";
 
-    assert (!load_in_progress_);
+    while (load_in_progress_) // pending insert
+    {
+        QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+        QThread::msleep(1);
+    }
+
     assert (!insert_in_progress_);
     assert (!insert_data_.size());
 
@@ -781,7 +699,8 @@ void DBContentManager::finishInserting()
     tmp_time = microsec_clock::local_time();
 
     // ts calc for resume action
-    bool insert_ts_larger_2s {false};
+
+    boost::posix_time::ptime min_time_found; // for max latency calculation
 
     for (auto& buf_it : insert_data_)
     {
@@ -813,6 +732,12 @@ void DBContentManager::finishInserting()
 
                 if (has_vec_min_max)
                 {
+                    // set min time found
+                    if (min_time_found.is_not_a_date_time())
+                        min_time_found = ts_vec_min;
+                    else
+                        min_time_found = min(min_time_found, ts_vec_min);
+
                     if (hasMinMaxTimestamp())
                     {
                         timestamp_min_ = std::min(timestamp_min_.get(), ts_vec_min);
@@ -823,9 +748,6 @@ void DBContentManager::finishInserting()
                         timestamp_min_ = ts_vec_min;
                         timestamp_max_ = ts_vec_max;
                     }
-
-                    if ((ts_vec_max - ts_vec_min) > seconds(2))
-                        insert_ts_larger_2s = true;
                 }
             }
         }
@@ -911,7 +833,7 @@ void DBContentManager::finishInserting()
     {
         using namespace boost::posix_time;
 
-        ptime old_time = Time::currentUTCTime() - minutes(max_live_data_age_);
+        ptime old_time = Time::currentUTCTime() - minutes(max_live_data_age_db_);
 
         logdbg << "DBContentManager: finishInserting: deleting data before " << Time::toString(old_time);
 
@@ -979,22 +901,10 @@ void DBContentManager::finishInserting()
             tmp_time = microsec_clock::local_time();
         }
 
-        auto& asterix_import_task = COMPASS::instance().taskManager().asterixImporterTask();
-
-        // check if still resuming and everything has caught up
-        if (asterix_import_task.resumingFromLiveInProgress() && !insert_ts_larger_2s)
-        {
-            loginf << "DBContentManager: finishInserting: disabling resuming";
-            asterix_import_task.resumingFromLiveInProgress(false);
-        }
-
         logdbg << "DBContentManager: finishInserting: distributing data";
 
         if (data_.size())
-        {
-            if (!asterix_import_task.resumingFromLiveInProgress()) // only distribute if not resuming
-                emit loadedDataSignal(data_, true);
-        }
+            emit loadedDataSignal(data_, true);
         else if (had_data)
             COMPASS::instance().viewManager().clearDataInViews();
 
@@ -1012,7 +922,9 @@ void DBContentManager::finishInserting()
 
         tmp_time = microsec_clock::local_time();
 
-
+        if (!min_time_found.is_not_a_date_time())
+            loginf << "DBContentManager: finishInserting: max latency "
+                   << Time::toString(Time::currentUTCTime() - min_time_found);
     }
 
     COMPASS::instance().dataSourceManager().updateWidget();
@@ -1151,7 +1063,7 @@ void DBContentManager::filterDataSources()
         // remove unwanted indexes
         if (indexes_to_remove.size())
         {
-            buf_it->second->removeIndexes(indexes_to_remove);
+            buf_it->second->removeIndexes(indexes_to_remove); // huge cost here
         }
         //buffer_size = buf_it.second->size();
     });
@@ -1168,7 +1080,8 @@ void DBContentManager::cutCachedData()
 {
     unsigned int buffer_size;
 
-    boost::posix_time::ptime min_ts = Time::currentUTCTime() - boost::posix_time::minutes(5); // max - 5min
+    boost::posix_time::ptime min_ts = Time::currentUTCTime() - boost::posix_time::minutes(max_live_data_age_cache_);
+    // max - x minutes
 
     loginf << "DBContentManager: cutCachedData: current ts " << Time::toString(Time::currentUTCTime())
            << " min_ts " << Time::toString(min_ts);
@@ -1194,7 +1107,7 @@ void DBContentManager::cutCachedData()
             {
                 if (!ts_vec.isNull(index) && ts_vec.get(index) > min_ts)
                 {
-                    loginf << "DBContentManager: cutCachedData: found " << buf_it.first
+                    logdbg << "DBContentManager: cutCachedData: found " << buf_it.first
                            << " cutoff tod index " << index
                            << " ts " << Time::toString(ts_vec.get(index));
                     break;
@@ -1206,7 +1119,7 @@ void DBContentManager::cutCachedData()
             {
                 index--; // cut at previous
 
-                loginf << "DBContentManager: cutCachedData: cutting " << buf_it.first
+                logdbg << "DBContentManager: cutCachedData: cutting " << buf_it.first
                        << " up to index " << index
                        << " total size " << buffer_size
                        << " index time " << (ts_vec.isNull(index) ? "null" : Time::toString(ts_vec.get(index)));
@@ -1425,6 +1338,11 @@ std::shared_ptr<dbContent::Target> DBContentManager::target(unsigned int utn)
 void DBContentManager::saveTargets()
 {
     COMPASS::instance().interface().saveTargets(targets_);
+}
+
+unsigned int DBContentManager::maxLiveDataAgeCache() const
+{
+    return max_live_data_age_cache_;
 }
 
 //void DBContentManager::updateMetaVarNames()

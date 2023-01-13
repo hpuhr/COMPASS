@@ -42,14 +42,9 @@ public:
                                          const std::string& key_col_name, std::string table_name);
 
     std::shared_ptr<DBCommand> getSelectCommand(
-            const DBContent& object, dbContent::VariableSet read_list,
-            std::vector<std::string> extra_from_parts, const std::string& filter,
-            bool use_order = false, dbContent::Variable* order_variable = nullptr,
-            bool use_order_ascending = false, const std::string& limit = "");
+            const DBContent& object, dbContent::VariableSet read_list, const std::string& filter,
+            bool use_order = false, dbContent::Variable* order_variable = nullptr);
 
-    //    std::shared_ptr<DBCommand> getSelectCommand(const DBContent& object,
-    //                                                const std::vector<std::string>& columns,
-    //                                                bool distinct = false);
     std::shared_ptr<DBCommand> getDataSourcesSelectCommand();
 
     std::shared_ptr<DBCommand> getDeleteCommand(const DBContent& dbcontent, boost::posix_time::ptime before_timestamp);

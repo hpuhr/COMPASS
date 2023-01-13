@@ -1327,6 +1327,7 @@ void ScatterPlotViewDataWidget::updateChart()
     logdbg << "ScatterPlotViewDataWidget: updateChart";
 
     assert (main_layout_);
+
     chart_view_.reset(nullptr);
 
     QChart* chart = new QChart();
@@ -1343,12 +1344,37 @@ void ScatterPlotViewDataWidget::updateChart()
         return;
     }
 
-    QScatterSeries* selected_chart_series {nullptr};
     unsigned int value_cnt {0};
     unsigned int dbo_value_cnt {0};
     nan_value_cnt_ = 0;
     unsigned int selected_cnt {0};
 
+    const double MarkerSize = 8.0;
+
+    //generate needed series and sort pointers
+    //qtcharts when rendering opengl will sort the series into a map using the pointer of the series as a key
+    std::vector<QScatterSeries*> series(x_values_.size() + 1);
+    for (size_t i = 0; i < series.size(); ++i)
+    {
+        series[ i ] = new QScatterSeries;
+        series[ i ]->setMarkerShape(QScatterSeries::MarkerShapeCircle);
+        series[ i ]->setMarkerSize(MarkerSize);
+        series[ i ]->setUseOpenGL(true);
+    }
+    std::sort(series.begin(), series.end()); //sort pointers to obtain correct render order
+
+    //the biggest pointer is thus the one for the selection, so the selection will be rendered on top
+    QScatterSeries* selected_series = series.back();
+    selected_series->setColor(Qt::yellow);
+
+    //distribute sorted pointers to dbcontent types
+    std::map<std::string, QScatterSeries*> series_map;
+    {
+        int cnt = 0;
+        for (auto it = x_values_.begin(); it != x_values_.end(); ++it)
+            series_map[ it->first ] = series[ cnt++ ];
+    }
+    
     for (auto& data : x_values_)
     {
         dbo_value_cnt = 0;
@@ -1358,10 +1384,7 @@ void ScatterPlotViewDataWidget::updateChart()
         vector<bool>& selected_values = selected_values_[data.first];
         //vector<unsigned int>& rec_num_values = rec_num_values_[data.first];
 
-        QScatterSeries* chart_series = new QScatterSeries();
-        chart_series->setMarkerShape(QScatterSeries::MarkerShapeCircle);
-        chart_series->setMarkerSize(8.0);
-        chart_series->setUseOpenGL(true);
+        QScatterSeries* chart_series = series_map[ data.first ];
         chart_series->setColor(colors_[data.first]);
 
         assert (x_values.size() == y_values.size());
@@ -1378,15 +1401,7 @@ void ScatterPlotViewDataWidget::updateChart()
 
                 if (selected_values.at(cnt))
                 {
-                    if (!selected_chart_series)
-                    {
-                        selected_chart_series = new QScatterSeries();
-                        selected_chart_series->setMarkerShape(QScatterSeries::MarkerShapeCircle);
-                        selected_chart_series->setMarkerSize(8.0);
-                        selected_chart_series->setUseOpenGL(true);
-                        selected_chart_series->setColor(Qt::yellow);
-                    }
-                    selected_chart_series->append(x_values.at(cnt), y_values.at(cnt));
+                    selected_series->append(x_values.at(cnt), y_values.at(cnt));
                     ++selected_cnt;
                 }
                 else
@@ -1409,6 +1424,10 @@ void ScatterPlotViewDataWidget::updateChart()
             chart_series->setName((data.first+" ("+to_string(sum_cnt)+")").c_str());
             chart->addSeries(chart_series);
         }
+        else
+        {
+            delete chart_series;
+        }
     }
 
     if (!value_cnt)
@@ -1417,12 +1436,19 @@ void ScatterPlotViewDataWidget::updateChart()
         return;
     }
 
-    if (selected_chart_series)
+    if (selected_cnt > 0)
     {
         logdbg << "ScatterPlotViewDataWidget: updateChart: adding " << " Selected (" << selected_cnt << ")";
 
-        selected_chart_series->setName(("Selected ("+to_string(selected_cnt)+")").c_str());
-        chart->addSeries(selected_chart_series);
+        //add series for selected values
+        selected_series->setName(("Selected ("+to_string(selected_cnt)+")").c_str());
+        chart->addSeries(selected_series);
+    }
+    else
+    {
+        //series for selection not needed
+        delete selected_series;
+        selected_series = nullptr;
     }
 
     chart->createDefaultAxes();

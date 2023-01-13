@@ -12,9 +12,7 @@ public:
                Configurable* parent);
     virtual ~ACADFilter();
 
-    virtual std::string getConditionString(const std::string& dbcontent_name, bool& first,
-                                           std::vector<std::string>& extra_from_parts,
-                                           std::vector<dbContent::Variable*>& filtered_variables) override;
+    virtual std::string getConditionString(const std::string& dbcontent_name, bool& first) override;
 
     virtual void generateSubConfigurable(const std::string& class_id,
                                          const std::string& instance_id) override;

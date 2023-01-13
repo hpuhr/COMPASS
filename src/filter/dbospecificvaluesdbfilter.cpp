@@ -99,9 +99,7 @@ DBOSpecificValuesDBFilter::~DBOSpecificValuesDBFilter() {}
 
 bool DBOSpecificValuesDBFilter::filters(const std::string& dbo_type) { return dbcontent_name_ == dbo_type; }
 
-std::string DBOSpecificValuesDBFilter::getConditionString(const std::string& dbcontent_name, bool& first,
-                                                          std::vector<std::string>& extra_from_parts,
-                                                          std::vector<dbContent::Variable*>& filtered_variables)
+std::string DBOSpecificValuesDBFilter::getConditionString(const std::string& dbcontent_name, bool& first)
 {
     assert(!unusable_);
 

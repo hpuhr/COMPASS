@@ -338,16 +338,13 @@ DBContentWidget* DBContent::widget()
 
 void DBContent::closeWidget() { widget_ = nullptr; }
 
-void DBContent::load(VariableSet& read_set, bool use_datasrc_filters, bool use_filters, bool use_order,
-                     Variable* order_variable, bool use_order_ascending,
-                     const string& limit_str)
+void DBContent::load(dbContent::VariableSet& read_set, bool use_datasrc_filters, bool use_filters,
+                     const std::string& custom_filter_clause)
 {
     assert(is_loadable_);
     assert(existsInDB());
 
-    string custom_filter_clause;
-    std::vector<std::string> extra_from_parts;
-    vector<Variable*> filtered_variables;
+    string filter_clause;
 
     DataSourceManager& ds_man = COMPASS::instance().dataSourceManager();
 
@@ -370,9 +367,7 @@ void DBContent::load(VariableSet& read_set, bool use_datasrc_filters, bool use_f
             Variable& line_var = variable(DBContent::meta_var_line_id_.name());
             assert (line_var.dataType() == PropertyDataType::UINT);
 
-            // add to filtered vars
-            filtered_variables.push_back(&datasource_var);
-            filtered_variables.push_back(&line_var);
+            bool any_added = false;
 
             for (auto ds_id_it : ds_ids_to_load)
             {
@@ -380,100 +375,96 @@ void DBContent::load(VariableSet& read_set, bool use_datasrc_filters, bool use_f
 
                 DBDataSource& src = ds_man.dbDataSource(ds_id_it);
 
-                if (!src.anyLinesLoadingWanted()) // check if any lines should be loaded
-                    continue;
-
-                if (custom_filter_clause.size())
-                    custom_filter_clause += " OR";
+                // prefix
+                if (filter_clause.size())
+                    filter_clause += " OR";
                 else
-                    custom_filter_clause += " (";
+                    filter_clause += " (";
 
-                custom_filter_clause += " (" + datasource_var.dbColumnName() + " = " + to_string(ds_id_it);
-                custom_filter_clause += " AND " + line_var.dbColumnName() + " IN (";
+                // add data source specific part
+                filter_clause += " (" + datasource_var.dbColumnName() + " = " + to_string(ds_id_it);
+
+                if (!src.anyLinesLoadingWanted()) // check if any lines should be loaded
+                {
+                    filter_clause += " AND " + line_var.dbColumnName() + " IN ())"; // empty lines to load
+
+                    any_added = true;
+                    continue;
+                }
+
+                filter_clause += " AND " + line_var.dbColumnName() + " IN (";
 
                 bool first = true;
                 for (auto line_it : src.getLoadingWantedLines())
                 {
                     if (!first)
-                        custom_filter_clause += ",";
+                        filter_clause += ",";
 
-                    custom_filter_clause += to_string(line_it);
+                    filter_clause += to_string(line_it);
 
                     first = false;
                 }
 
-                custom_filter_clause += "))";
+                filter_clause += "))";
+
+                any_added = true;
             }
 
-            if (ds_ids_to_load.size())
-                custom_filter_clause += ")";
+            if (ds_ids_to_load.size() && any_added)
+                filter_clause += ")";
         }
         else // simple ds id in statement
         {
             loginf << "DBContent " << name_ << ": load: no line specific loading wanted";
 
-            // add to filtered vars
-            filtered_variables.push_back(&datasource_var);
-
-            custom_filter_clause = datasource_var.dbColumnName() + " IN (";
+            filter_clause = datasource_var.dbColumnName() + " IN (";
 
             for (auto ds_id_it = ds_ids_to_load.begin(); ds_id_it != ds_ids_to_load.end(); ++ds_id_it)
             {
                 if (ds_id_it != ds_ids_to_load.begin())
-                    custom_filter_clause += ",";
+                    filter_clause += ",";
 
-                custom_filter_clause += to_string(*ds_id_it);
+                filter_clause += to_string(*ds_id_it);
             }
 
-            custom_filter_clause += ")";
+            filter_clause += ")";
         }
     }
 
     if (use_filters)
     {
-        string filter_sql = COMPASS::instance().filterManager().getSQLCondition(
-                    name_, extra_from_parts, filtered_variables);
+        string filter_sql = COMPASS::instance().filterManager().getSQLCondition(name_);
 
         if (filter_sql.size())
         {
-            if (custom_filter_clause.size())
-                custom_filter_clause += " AND ";
+            if (filter_clause.size())
+                filter_clause += " AND ";
 
-            custom_filter_clause += filter_sql;
+            filter_clause += filter_sql;
         }
     }
 
-    loginf << "DBContent: load: filter '" << custom_filter_clause << "'";
+    if (custom_filter_clause.size())
+    {
+        if (filter_clause.size())
+            filter_clause += " AND ";
 
-    loadFiltered(read_set, extra_from_parts, custom_filter_clause, filtered_variables, use_order, order_variable,
-                 use_order_ascending, limit_str);
+        filter_clause += custom_filter_clause;
+    }
+
+    loginf << "DBContent: load: filter_clause '" << filter_clause << "'";
+
+    loadFiltered(read_set, filter_clause);
 }
 
-void DBContent::loadFiltered(VariableSet& read_set, const std::vector<std::string>& extra_from_parts,
-                             string custom_filter_clause, vector<Variable*> filtered_variables,
-                             bool use_order, Variable* order_variable, bool use_order_ascending,
-                             const string& limit_str)
+void DBContent::loadFiltered(dbContent::VariableSet& read_set, std::string custom_filter_clause)
 {
     logdbg << "DBContent: loadFiltered: name " << name_ << " loadable " << is_loadable_;
 
     assert(is_loadable_);
     assert(existsInDB());
 
-    // do not load associations, should be done in DBContentManager::load
-
-    if (read_job_)
-    {
-        JobManager::instance().cancelJob(read_job_);
-        read_job_ = nullptr;
-    }
-    //read_job_data_.clear();
-
-    //    for (auto job_it : finalize_jobs_)
-    //        JobManager::instance().cancelJob(job_it);
-    //    finalize_jobs_.clear();
-
-    //    DBInterface &db_interface, DBContent &dbobject, VariableSet read_list, string
-    //    custom_filter_clause, Variable *order, const string &limit_str
+    assert (!read_job_);
 
     // add required vars for processing
     assert (dbo_manager_.metaCanGetVariable(name_, DBContent::meta_var_rec_num_));
@@ -486,10 +477,7 @@ void DBContent::loadFiltered(VariableSet& read_set, const std::vector<std::strin
     read_set.add(dbo_manager_.metaGetVariable(name_, DBContent::meta_var_line_id_));
 
     read_job_ = shared_ptr<DBContentReadDBJob>(
-                new DBContentReadDBJob(
-                    COMPASS::instance().interface(), *this, read_set, extra_from_parts,
-                    custom_filter_clause, filtered_variables,
-                    use_order, order_variable, use_order_ascending, limit_str));
+                new DBContentReadDBJob(COMPASS::instance().interface(), *this, read_set, custom_filter_clause));
 
     connect(read_job_.get(), &DBContentReadDBJob::intermediateSignal,
             this, &DBContent::readJobIntermediateSlot, Qt::QueuedConnection);

@@ -17,8 +17,8 @@ namespace QtCharts
 ScatterPlotViewChartView::ScatterPlotViewChartView (ScatterPlotViewDataWidget* data_widget, 
                                                     QChart* chart, 
                                                     QWidget* parent)
-:   ChartView   (chart, parent)
-,   data_widget_(data_widget  )
+:   ChartView   (chart, ChartView::SelectionStyle::RubberBand, parent)
+,   data_widget_(data_widget)
 {
     assert (data_widget_);
 }

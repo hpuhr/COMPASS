@@ -178,7 +178,7 @@ class PropertyList
                                      " does not exists");
 
         unsigned int cnt = 0;
-        for (auto it : properties_)
+        for (auto& it : properties_)
         {
             if (it.name() == id)
             {
@@ -194,7 +194,7 @@ class PropertyList
     {
         logdbg << "PropertyList: hasProperty: start";
 
-        for (auto it : properties_)
+        for (auto& it : properties_)
         {
             if (it.name() == id)
                 return true;
@@ -207,7 +207,7 @@ class PropertyList
     {
         logdbg << "PropertyList: hasProperty: start";
 
-        for (auto it : properties_)
+        for (auto& it : properties_)
         {
             if (it.name() == prop.name() && it.dataType() == prop.dataType())
                 return true;
@@ -228,7 +228,7 @@ class PropertyList
 
     void print () const
     {
-        for (auto it : properties_)
+        for (auto& it : properties_)
         {
             loginf << "Property id '" << it.name() << "' type " << it.dataTypeString();
         }

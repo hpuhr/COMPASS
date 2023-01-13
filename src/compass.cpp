@@ -32,6 +32,7 @@
 #include "evaluationmanager.h"
 #include "mainwindow.h"
 #include "files.h"
+#include "asteriximporttask.h"
 
 #include <QMessageBox>
 #include <QApplication>
@@ -239,6 +240,8 @@ void COMPASS::openDBFile(const std::string& filename)
 
     last_db_filename_ = filename;
 
+    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+
     try
     {
         db_interface_->openDBFile(filename, false);
@@ -253,12 +256,14 @@ void COMPASS::openDBFile(const std::string& filename)
     }  catch (std::exception& e)
     {
         QMessageBox m_warning(QMessageBox::Warning, "Opening Database Failed",
-                                          e.what(), QMessageBox::Ok);
+                              e.what(), QMessageBox::Ok);
         m_warning.exec();
 
         db_opened_ = false;
     }
 
+
+    QApplication::restoreOverrideCursor();
 }
 
 void COMPASS::createNewDBFile(const std::string& filename)
@@ -285,6 +290,16 @@ void COMPASS::createNewDBFile(const std::string& filename)
     db_opened_ = true;
 
     emit databaseOpenedSignal();
+}
+
+void COMPASS::exportDBFile(const std::string& filename)
+{
+    loginf << "COMPASS: exportDBFile: exporting as file '" << filename << "'";
+
+    assert (db_opened_);
+    assert (db_interface_);
+
+    db_interface_->exportDBFile(filename);
 }
 
 void COMPASS::closeDB()
@@ -473,7 +488,81 @@ void COMPASS::appMode(const AppMode& app_mode)
         loginf << "COMPASS: appMode: app_mode_current " << toString(app_mode_)
                << " previous " << toString(last_app_mode);
 
-        emit appModeSwitchSignal(last_app_mode, app_mode_);
+        QMessageBox* msg_box{nullptr};
+
+        QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+
+        if (last_app_mode == AppMode::LiveRunning && app_mode == AppMode::LivePaused)
+        {
+            // switch first, load after
+            // do manually to be first and avoid trailing inserts
+            taskManager().asterixImporterTask().appModeSwitchSlot(last_app_mode, app_mode_);
+
+            emit appModeSwitchSignal(last_app_mode, app_mode_);
+
+            // load all data in db
+            msg_box = new QMessageBox;
+            assert(msg_box);
+            msg_box->setWindowTitle(("Switching to "+toString(app_mode_)).c_str());
+            msg_box->setText("Loading data");
+            msg_box->setStandardButtons(QMessageBox::NoButton);
+            msg_box->show();
+
+            dbcontent_manager_->load();
+
+            while (dbcontent_manager_->loadInProgress())
+            {
+                QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+                QThread::msleep(10);
+            }
+
+            msg_box->close();
+            delete msg_box;
+        }
+        else if (last_app_mode == AppMode::LivePaused && app_mode == AppMode::LiveRunning)
+        {
+            // load first, switch after to add to existing cache
+
+            msg_box = new QMessageBox;
+            assert(msg_box);
+            msg_box->setWindowTitle(("Switching to "+toString(app_mode_)).c_str());
+            msg_box->setText("Loading data");
+            msg_box->setStandardButtons(QMessageBox::NoButton);
+            msg_box->show();
+
+            boost::posix_time::ptime min_ts =
+                    Time::currentUTCTime() - boost::posix_time::minutes(dbcontent_manager_->maxLiveDataAgeCache());
+
+            string custom_filter = "timestamp >= " + to_string(Time::toLong(min_ts));
+
+            loginf << "COMPASS: appMode: resuming with custom filter load '" << custom_filter << "'";
+
+            dbcontent_manager_->load(custom_filter);
+
+            while (dbcontent_manager_->loadInProgress())
+            {
+                QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+                QThread::msleep(10);
+            }
+
+            assert(msg_box);
+            msg_box->close();
+            delete msg_box;
+
+            // switch later to add to loaded cache
+            taskManager().asterixImporterTask().appModeSwitchSlot(last_app_mode, app_mode_);
+
+            emit appModeSwitchSignal(last_app_mode, app_mode_);
+        }
+        else
+        {
+            // just do it
+            taskManager().asterixImporterTask().appModeSwitchSlot(last_app_mode, app_mode_);
+
+            emit appModeSwitchSignal(last_app_mode, app_mode_);
+        }
+
+        QApplication::restoreOverrideCursor();
     }
 }
 
@@ -492,7 +581,7 @@ std::string COMPASS::appModeStr() const
 const std::map<AppMode, std::string>& COMPASS::appModes2Strings()
 {
     static const auto* map = new std::map<AppMode, std::string>
-        {{AppMode::Offline, "Offline Mode"},
+    {{AppMode::Offline, "Offline Mode"},
         {AppMode::LiveRunning, "Live Mode: Running"},
         {AppMode::LivePaused, "Live Mode: Paused"}};
 

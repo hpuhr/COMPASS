@@ -7,16 +7,15 @@
 #include <QAreaSeries>
 #include <QLineSeries>
 
-//#define USE_CHART_SERIES_BASED_SELECTION_BOX
-
 const QColor ChartView::SelectionColor = Qt::red;
 
 /**
  */
-ChartView::ChartView(QtCharts::QChart* chart, QWidget* parent)
+ChartView::ChartView(QtCharts::QChart* chart, SelectionStyle sel_style, QWidget* parent)
 :   QChartView(chart, parent)
+,   sel_style_(sel_style)
 {
-    createDisplayElements();
+    createDisplayElements(chart);
 }
 
 /**
@@ -51,36 +50,60 @@ QPointF ChartView::widgetFromChart(const QPointF& pos) const
 /**
  * Creates the needed display elements.
  */
-void ChartView::createDisplayElements()
+void ChartView::createDisplayElements(QtCharts::QChart* chart)
 {
-#ifdef USE_CHART_SERIES_BASED_SELECTION_BOX
-    //add a selection box
-    auto selection_box_lower = new QtCharts::QLineSeries;
-    auto selection_box_upper = new QtCharts::QLineSeries;
+    if (sel_style_ == SelectionStyle::SeriesArea)
+    {
+        //add a selection box
+        auto selection_box_lower = new QtCharts::QLineSeries;
+        auto selection_box_upper = new QtCharts::QLineSeries;
 
-    QBrush b;
-    b.setColor(SelectionColor);
-    b.setStyle(Qt::BrushStyle::SolidPattern);
+        QBrush b;
+        b.setColor(SelectionColor);
+        b.setStyle(Qt::BrushStyle::SolidPattern);
+        
+        QPen p(Qt::red);
+        p.setStyle(Qt::PenStyle::DashLine);
+
+        selection_box_ = new QtCharts::QAreaSeries(selection_box_upper, selection_box_lower);
+        selection_box_->setBrush(b);
+        selection_box_->setPen(p);
+
+        updateSelectionBox(QRectF());
+
+        chart->addSeries(selection_box_);
+
+        //note: attaching the axis should be called after adding the series to the chart
+        selection_box_->attachAxis(chart->axisX());
+        selection_box_->attachAxis(chart->axisY());
+    }
+    else if (sel_style_ == SelectionStyle::SeriesLines)
+    {
+        QPen p(Qt::red);
+        p.setStyle(Qt::PenStyle::DashLine);
+
+        selection_lines_ = new QtCharts::QLineSeries;
+        selection_lines_->setUseOpenGL(true);
+        selection_lines_->setPen(p);
+        
+        updateSelectionLines(QRectF());
+
+        chart->addSeries(selection_lines_);
+
+        //note: attaching the axis should be called after adding the series to the chart
+        selection_lines_->attachAxis(chart->axisX());
+        selection_lines_->attachAxis(chart->axisY());
+    }
+    else //SelectionStyle::RubberBand
+    {
+        rubber_band_.reset(new QRubberBand(QRubberBand::Rectangle, viewport()));
     
-    QPen p(Qt::red);
-    p.setStyle(Qt::PenStyle::DashLine);
-
-    selection_box_ = new QtCharts::QAreaSeries(selection_box_upper, selection_box_lower);
-    selection_box_->setBrush(b);
-    selection_box_->setPen(p);
-
-    updateSelectionBox(QRectF());
-
-    chart()->addSeries(selection_box_);
-#else
-    rubber_band_.reset(new QRubberBand(QRubberBand::Rectangle, viewport()));
-    
-    QPalette pal;
-    pal.setBrush(QPalette::Highlight, QBrush(SelectionColor));
-    rubber_band_->setPalette(pal);
-    
-    updateRubberBand(QRectF());
-#endif
+        QPalette pal;
+        pal.setBrush(QPalette::Highlight, QBrush(SelectionColor));
+        rubber_band_->setPalette(pal);
+        
+        updateRubberBand(QRectF());
+    }
 }
 
 /**
@@ -115,6 +138,44 @@ void ChartView::updateSelectionBox(const QRectF& region)
     selection_box_->upperSeries()->append(region.right(), region.bottom());
 
     selection_box_->show();
+}
+
+/**
+ * 
+ */
+void ChartView::updateSelectionLines(const QRectF& region)
+{
+    if (!selection_lines_)
+        return;
+
+    selection_lines_->clear();
+
+    auto configLines =  [ & ] (const QRectF& r) 
+    {
+        selection_lines_->append(r.left() , r.top());
+        selection_lines_->append(r.right(), r.top()   );
+        selection_lines_->append(r.right(), r.bottom());
+        selection_lines_->append(r.left() , r.bottom());
+        selection_lines_->append(r.left() , r.top());
+    };
+
+    if (region.isEmpty() || !enable_selection_)
+    {
+        if (!data_bounds_.isEmpty())
+            configLines(data_bounds_);
+
+        std::cout << "HIDE selection box" << std::endl;
+
+        selection_lines_->hide();
+
+        return;
+    }
+
+    std::cout << "SHOW selection box" << std::endl;
+
+    configLines(region);
+
+    selection_lines_->show();
 }
 
 /**
@@ -312,10 +373,10 @@ void ChartView::paintEvent(QPaintEvent *e)
     //call base
     QChartView::paintEvent(e);
 
-    //update selection display
-#ifdef USE_CHART_SERIES_BASED_SELECTION_BOX
-    updateSelectionBox(selected_region_chart_);
-#else
-    updateRubberBand(selected_region_widget_);
-#endif
+    if (sel_style_ == SelectionStyle::SeriesArea)
+        updateSelectionBox(selected_region_chart_);
+    else if (sel_style_ == SelectionStyle::SeriesLines)
+        updateSelectionLines(selected_region_chart_);
+    else //SelectionStyle::RubberBand
+        updateRubberBand(selected_region_widget_);
 }
