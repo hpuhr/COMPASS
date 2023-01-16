@@ -68,12 +68,6 @@ ScatterPlotViewDataWidget::ScatterPlotViewDataWidget(ScatterPlotView* view,
     colors_["CAT048"] = QColor("#00FF00");
     colors_["RefTraj"] = QColor("#FFA500");
     colors_["CAT062"] = QColor("#CCCCCC");
-
-    // shortcuts
-    {
-        QShortcut* space_shortcut = new QShortcut(QKeySequence(Qt::Key_Space), this);
-        connect (space_shortcut, &QShortcut::activated, this, &ScatterPlotViewDataWidget::resetZoomSlot);
-    }
 }
 
 ScatterPlotViewDataWidget::~ScatterPlotViewDataWidget()

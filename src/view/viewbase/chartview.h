@@ -31,7 +31,10 @@ public:
     ChartView(QtCharts::QChart* chart, SelectionStyle sel_style, QWidget* parent = nullptr);
     virtual ~ChartView();
 
+    void setSelectionStyle(SelectionStyle style) { selection_style_ = style; }
     void setDataBounds(const QRectF& r);
+
+    void addLegendOnlyItem(const QString& name, const QColor& color); 
 
     virtual void onToolChanged();
 
@@ -87,4 +90,5 @@ private:
     QtCharts::QAreaSeries*       selection_box_    = nullptr;
     QtCharts::QLineSeries*       selection_lines_  = nullptr;
     bool                         enable_selection_ = false;
+    SelectionStyle               selection_style_  = SelectionStyle::XY;
 };

@@ -205,7 +205,6 @@ void Client::run ()
     tbb::task_scheduler_init init {num_threads};
 
 #else
-
     int num_threads = oneapi::tbb::info::default_concurrency();
 
     oneapi::tbb::global_control global_limit(oneapi::tbb::global_control::max_allowed_parallelism, num_threads);

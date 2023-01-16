@@ -71,6 +71,7 @@ class HistogramView : public View
         return data_source_;
     }
 
+    bool hasDataWidget() const;
     HistogramViewDataWidget* getDataWidget();
 
     virtual dbContent::VariableSet getSet(const std::string& dbcontent_name) override;
@@ -100,6 +101,8 @@ class HistogramView : public View
     std::string evalResultsID() const;
     void evalResultsID(const std::string& value);
 
+    bool hasResultID() const;
+
     bool hasViewPoint () { return current_view_point_ != nullptr; }
     const ViewableDataConfig& viewPoint() { assert (hasViewPoint()); return *current_view_point_; }
 
@@ -122,6 +125,8 @@ protected:
 
     virtual void checkSubConfigurables() override;
     virtual void updateSelection() override;
+
+    void onShowResultsChanged();
 };
 
 #endif /* HISTOGRAMVIEW_H_ */
