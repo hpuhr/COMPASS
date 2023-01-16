@@ -140,9 +140,6 @@ class ASTERIXImportTask : public Task, public Configurable
     const boost::posix_time::ptime &date() const;
     void date(const boost::posix_time::ptime& date);
 
-    bool resumingFromLiveInProgress() const;
-    void resumingFromLiveInProgress(bool value);
-
     void importAsterixNetworkIgnoreFutureTimestamp (bool value);
 
     unsigned int numPacketsInProcessing() const;
@@ -165,12 +162,8 @@ protected:
     bool override_tod_active_{false};
     float override_tod_offset_{0};
 
-    bool ask_discard_cache_on_resume_ {true};
-
     bool running_ {false};
 
-    QMessageBox* m_info_ {nullptr};
-    bool resuming_from_live_in_progress_ {false};
     bool network_ignore_future_ts_ {false};
 
     unsigned int num_packets_in_processing_{0};

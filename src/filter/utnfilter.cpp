@@ -59,9 +59,7 @@ bool UTNFilter::filters(const std::string& dbo_type)
     return true;
 }
 
-std::string UTNFilter::getConditionString(const std::string& dbcontent_name, bool& first,
-                                          std::vector<std::string>& extra_from_parts,
-                                          std::vector<dbContent::Variable*>& filtered_variables)
+std::string UTNFilter::getConditionString(const std::string& dbcontent_name, bool& first)
 {
     logdbg << "UTNFilter: getConditionString: dbo " << dbcontent_name << " active " << active_;
 
@@ -76,11 +74,9 @@ std::string UTNFilter::getConditionString(const std::string& dbcontent_name, boo
         assert (dbcontent_man.existsDBContent(dbcontent_name));
 
         assert (dbcontent_man.metaVariable(DBContent::meta_var_associations_.name()).existsIn(dbcontent_name));
-        Variable& assoc_var = dbcontent_man.metaVariable(DBContent::meta_var_associations_.name()).getFor(dbcontent_name);
+        //Variable& assoc_var = dbcontent_man.metaVariable(DBContent::meta_var_associations_.name()).getFor(dbcontent_name);
 
-        extra_from_parts.push_back("json_each("+dbcontent_man.dbContent(dbcontent_name).dbTableName()+".associations)");
-
-        filtered_variables.push_back(&assoc_var);
+        //extra_from_parts.push_back("json_each("+dbcontent_man.dbContent(dbcontent_name).dbTableName()+".associations)");
 
         if (!first)
         {

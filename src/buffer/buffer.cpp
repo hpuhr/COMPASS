@@ -387,8 +387,6 @@ void Buffer::seizeBuffer(Buffer& org_buffer)
 
     logdbg << "Buffer: seizeBuffer: size " << size() << " other size " << org_buffer.size();
 
-    org_buffer.properties_.clear();
-
     seizeArrayListMap<bool>(org_buffer);
     seizeArrayListMap<char>(org_buffer);
     seizeArrayListMap<unsigned char>(org_buffer);
@@ -401,6 +399,8 @@ void Buffer::seizeBuffer(Buffer& org_buffer)
     seizeArrayListMap<string>(org_buffer);
     seizeArrayListMap<json>(org_buffer);
     seizeArrayListMap<boost::posix_time::ptime>(org_buffer);
+
+    org_buffer.properties_.clear();
 
     data_size_ += org_buffer.data_size_;
 

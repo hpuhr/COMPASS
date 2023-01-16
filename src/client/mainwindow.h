@@ -45,6 +45,7 @@ public slots:
     void newDBSlot();
     void openExistingDBSlot();
     void openRecentDBSlot();
+    void exportDBSlot();
     void clearExistingDBsSlot();
     void closeDBSlot();
 
@@ -192,6 +193,7 @@ protected:
     QAction* new_db_action_ {nullptr};
     QAction* open_existing_db_action_ {nullptr};
     QMenu* open_recent_db_menu_ {nullptr};
+    QAction* export_db_action_ {nullptr};
     QAction* close_db_action_ {nullptr};
 
     // configure sectors

@@ -120,17 +120,54 @@ DataSourcesLoadWidget::DataSourcesLoadWidget(DataSourceManager& ds_man)
     setLayout(sub_layout);
 
     // menu
-//    QAction* sel_dstyp_action = edit_menu_.addAction("Select All DSTypes");
-//    connect(sel_dstyp_action, &QAction::triggered, this, &DataSourcesLoadWidget::selectAllDSTypesSlot);
+    QAction* sel_dstyp_action = edit_menu_.addAction("Select All DSTypes");
+    connect(sel_dstyp_action, &QAction::triggered, this, &DataSourcesLoadWidget::selectAllDSTypesSlot);
 
-//    QAction* desel_dstyp_action = edit_menu_.addAction("Deselect All DSTypes");
-//    connect(desel_dstyp_action, &QAction::triggered, this, &DataSourcesLoadWidget::deselectAllDSTypesSlot);
+    QAction* desel_dstyp_action = edit_menu_.addAction("Deselect All DSTypes");
+    connect(desel_dstyp_action, &QAction::triggered, this, &DataSourcesLoadWidget::deselectAllDSTypesSlot);
 
-//    QAction* sel_ds_action = edit_menu_.addAction("Select All Data Sources");
-//    connect(sel_ds_action, &QAction::triggered, this, &DataSourcesLoadWidget::selectAllDataSourcesSlot);
+    edit_menu_.addSeparator();
 
-//    QAction* desel_ds_action = edit_menu_.addAction("Deselect All Data Sources");
-//    connect(desel_ds_action, &QAction::triggered, this, &DataSourcesLoadWidget::deselectAllDataSourcesSlot);
+    QMenu* select_ds = edit_menu_.addMenu("Select Data Sources");
+
+    QAction* sel_ds_action = select_ds->addAction("All");
+    connect(sel_ds_action, &QAction::triggered, this, &DataSourcesLoadWidget::selectAllDataSourcesSlot);
+
+    for (const auto& ds_type_it : ds_man_.data_source_types_)
+    {
+        QAction* action = select_ds->addAction(("From "+ds_type_it).c_str());
+        action->setProperty("ds_type", ds_type_it.c_str());
+        connect(action, &QAction::triggered, this, &DataSourcesLoadWidget::selectDSTypeSpecificDataSourcesSlot);
+    }
+
+    QMenu* deselect_ds = edit_menu_.addMenu("Deselect Data Sources");
+
+    QAction* desel_ds_action = deselect_ds->addAction("All");
+    connect(desel_ds_action, &QAction::triggered, this, &DataSourcesLoadWidget::deselectAllDataSourcesSlot);
+
+
+    for (const auto& ds_type_it : ds_man_.data_source_types_)
+    {
+        QAction* action = deselect_ds->addAction(("From "+ds_type_it).c_str());
+        action->setProperty("ds_type", ds_type_it.c_str());
+        connect(action, &QAction::triggered, this, &DataSourcesLoadWidget::deselectDSTypeSpecificDataSourcesSlot);
+    }
+
+    edit_menu_.addSeparator();
+
+    QMenu* set_lines = edit_menu_.addMenu("Set Line");
+
+    QAction* desel_line_action = set_lines->addAction("Deselect All");
+    connect(desel_line_action, &QAction::triggered, this, &DataSourcesLoadWidget::deselectAllLinesSlot);
+
+    for (unsigned int cnt=0; cnt < 4; ++cnt)
+    {
+        QAction* desel_line_action = set_lines->addAction(("Select "+String::lineStrFrom(cnt)).c_str());
+        desel_line_action->setProperty("line_id", cnt);
+        connect(desel_line_action, &QAction::triggered, this, &DataSourcesLoadWidget::selectSpecificLineSlot);
+    }
+
+    edit_menu_.addSeparator();
 
     QAction* show_cnt_action = edit_menu_.addAction("Toggle Show Counts");
     connect(show_cnt_action, &QAction::triggered, this, &DataSourcesLoadWidget::toogleShowCountsSlot);
@@ -179,19 +216,71 @@ void DataSourcesLoadWidget::editClickedSlot()
 void DataSourcesLoadWidget::selectAllDSTypesSlot()
 {
     loginf << "DataSourcesLoadWidget: selectAllDSTypesSlot";
+
+    ds_man_.selectAllDSTypes();
+
 }
 void DataSourcesLoadWidget::deselectAllDSTypesSlot()
 {
     loginf << "DataSourcesLoadWidget: deselectAllDSTypesSlot";
+
+    ds_man_.deselectAllDSTypes();
 }
 
 void DataSourcesLoadWidget::selectAllDataSourcesSlot()
 {
     loginf << "DataSourcesLoadWidget: selectAllDataSourcesSlot";
+
+    ds_man_.selectAllDataSources();
 }
 void DataSourcesLoadWidget::deselectAllDataSourcesSlot()
 {
     loginf << "DataSourcesLoadWidget: deselectAllDataSourcesSlot";
+
+    ds_man_.deselectAllDataSources();
+}
+
+void DataSourcesLoadWidget::selectDSTypeSpecificDataSourcesSlot()
+{
+    QAction* action = dynamic_cast<QAction*>(sender());
+    assert (action);
+
+    string ds_type = action->property("ds_type").toString().toStdString();
+
+    loginf << "DataSourcesLoadWidget: selectDSTypeSpecificDataSourcesSlot: ds_type '" << ds_type << "'";
+
+    ds_man_.selectDSTypeSpecificDataSources(ds_type);
+}
+
+void DataSourcesLoadWidget::deselectDSTypeSpecificDataSourcesSlot()
+{
+    QAction* action = dynamic_cast<QAction*>(sender());
+    assert (action);
+
+    string ds_type = action->property("ds_type").toString().toStdString();
+
+    loginf << "DataSourcesLoadWidget: deselectDSTypeSpecificDataSourcesSlot: ds_type '" << ds_type << "'";
+
+    ds_man_.deselectDSTypeSpecificDataSources(ds_type);
+}
+
+void DataSourcesLoadWidget::deselectAllLinesSlot()
+{
+    loginf << "DataSourcesLoadWidget: deselectAllLinesSlot";
+
+    ds_man_.deselectAllLines();
+}
+
+void DataSourcesLoadWidget::selectSpecificLineSlot()
+{
+    QAction* action = dynamic_cast<QAction*>(sender());
+    assert (action);
+
+    unsigned int line_id = action->property("line_id").toUInt();
+
+    loginf << "DataSourcesLoadWidget: selectSpecificLineSlot: line_id " << line_id;
+
+    ds_man_.selectSpecificLineSlot(line_id);
 }
 
 void DataSourcesLoadWidget::toogleShowCountsSlot()

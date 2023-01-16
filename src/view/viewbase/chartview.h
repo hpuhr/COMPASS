@@ -11,6 +11,7 @@ namespace QtCharts
 {
     class QChart;
     class QAreaSeries;
+    class QLineSeries;
 }
 
 /**
@@ -22,11 +23,12 @@ class ChartView : public QtCharts::QChartView
 public:
     enum class SelectionStyle
     {
-        XY = 0,
-        X
+        RubberBand = 0,
+        SeriesArea, 
+        SeriesLines //gl accelerated lines
     };
 
-    ChartView(QtCharts::QChart* chart, QWidget* parent = nullptr);
+    ChartView(QtCharts::QChart* chart, SelectionStyle sel_style, QWidget* parent = nullptr);
     virtual ~ChartView();
 
     void setSelectionStyle(SelectionStyle style) { selection_style_ = style; }
@@ -71,19 +73,22 @@ protected:
     bool isSelectionEnabled() const;
 
 private:
-    void createDisplayElements();
+    void createDisplayElements(QtCharts::QChart* chart);
 
     void clearSelection();
     void updateSelectionBox(const QRectF& region);
+    void updateSelectionLines(const QRectF& region);
     void updateRubberBand(const QRectF& region);
 
     static const QColor SelectionColor;
 
+    SelectionStyle               sel_style_;
     QRectF                       data_bounds_;
     QRectF                       selected_region_widget_;
     QRectF                       selected_region_chart_;
     std::unique_ptr<QRubberBand> rubber_band_;
     QtCharts::QAreaSeries*       selection_box_    = nullptr;
+    QtCharts::QLineSeries*       selection_lines_  = nullptr;
     bool                         enable_selection_ = false;
     SelectionStyle               selection_style_  = SelectionStyle::XY;
 };

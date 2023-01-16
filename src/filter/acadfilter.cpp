@@ -31,9 +31,7 @@ bool ACADFilter::filters(const std::string& dbo_type)
     return COMPASS::instance().dbContentManager().metaVariable(DBContent::meta_var_ta_.name()).existsIn(dbo_type);
 }
 
-std::string ACADFilter::getConditionString(const std::string& dbcontent_name, bool& first,
-                                           std::vector<std::string>& extra_from_parts,
-                                           std::vector<dbContent::Variable*>& filtered_variables)
+std::string ACADFilter::getConditionString(const std::string& dbcontent_name, bool& first)
 {
     logdbg << "ACADFilter: getConditionString: dbo " << dbcontent_name << " active " << active_;
 
@@ -46,8 +44,6 @@ std::string ACADFilter::getConditionString(const std::string& dbcontent_name, bo
     {
         dbContent::Variable& var = COMPASS::instance().dbContentManager().metaVariable(
                     DBContent::meta_var_ta_.name()).getFor(dbcontent_name);
-
-        filtered_variables.push_back(&var);
 
         if (!first)
         {

@@ -33,7 +33,7 @@ class ASTERIXImportTask;
 class ASTERIXPostProcess;
 
 const unsigned int MAX_UDP_READ_SIZE=1024*1024;
-const unsigned int MAX_ALL_RECEIVE_SIZE=10*1024*1024; // increase leads to segmentation?
+const unsigned int MAX_ALL_RECEIVE_SIZE=100*1024*1024;
 
 class ASTERIXDecodeJob : public Job
 {
@@ -77,11 +77,6 @@ class ASTERIXDecodeJob : public Job
 
     size_t countTotal() const;
 
-    void cacheLiveNetworkData();
-    void resumeLiveNetworkData(bool discard_cache);
-
-    bool resumingCachedData() const;
-
 private:
     ASTERIXImportTask& task_;
     bool test_{false};
@@ -109,9 +104,6 @@ private:
 
     bool error_{false};
     std::string error_message_;
-
-    bool in_live_paused_state_ {false};
-    bool resuming_cached_data_ {false};
 
     boost::interprocess::interprocess_semaphore receive_semaphore_;
     std::map<unsigned int, std::unique_ptr<boost::array<char, MAX_ALL_RECEIVE_SIZE>>> receive_buffers_copy_; // line->buf

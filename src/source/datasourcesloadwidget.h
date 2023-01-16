@@ -51,6 +51,11 @@ public slots:
 
     void selectAllDataSourcesSlot();
     void deselectAllDataSourcesSlot();
+    void selectDSTypeSpecificDataSourcesSlot();
+    void deselectDSTypeSpecificDataSourcesSlot();
+
+    void deselectAllLinesSlot();
+    void selectSpecificLineSlot();
 
     void toogleShowCountsSlot();
 

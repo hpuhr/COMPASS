@@ -266,7 +266,7 @@ void CreateAssociationsTask::run()
 
         VariableSet read_set = getReadSetFor(dbo_it.first);
 
-        dbo_it.second->load(read_set, false, false, true, &ts_var_->getFor(dbo_it.first), true);
+        dbo_it.second->load(read_set, false, false);
     }
 
     status_dialog_->show();

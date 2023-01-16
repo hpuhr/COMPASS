@@ -31,9 +31,7 @@ bool Mode3AFilter::filters(const std::string& dbo_type)
     return COMPASS::instance().dbContentManager().metaVariable(DBContent::meta_var_m3a_.name()).existsIn(dbo_type);
 }
 
-std::string Mode3AFilter::getConditionString(const std::string& dbcontent_name, bool& first,
-                                           std::vector<std::string>& extra_from_parts,
-                                           std::vector<dbContent::Variable*>& filtered_variables)
+std::string Mode3AFilter::getConditionString(const std::string& dbcontent_name, bool& first)
 {
     logdbg << "Mode3AFilter: getConditionString: dbo " << dbcontent_name << " active " << active_;
 
@@ -46,8 +44,6 @@ std::string Mode3AFilter::getConditionString(const std::string& dbcontent_name, 
     {
         dbContent::Variable& var = COMPASS::instance().dbContentManager().metaVariable(
                     DBContent::meta_var_m3a_.name()).getFor(dbcontent_name);
-
-        filtered_variables.push_back(&var);
 
         if (!first)
         {

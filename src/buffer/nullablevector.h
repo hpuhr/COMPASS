@@ -27,6 +27,8 @@
 
 #include <QDateTime>
 
+#include "boost/date_time/posix_time/posix_time.hpp"
+
 #include <array>
 #include <bitset>
 #include <iomanip>
@@ -484,7 +486,7 @@ void NullableVector<T>::addData(NullableVector<T>& other)
         resizeNullTo(buffer_.data_size_);
         logdbg << "NullableVector " << property_.name() << ": addData: 1: inserting null";
         null_flags_.insert(null_flags_.end(), other.null_flags_.begin(), other.null_flags_.end());
-        goto DONE;
+        return;
     }
 
     if (other.data_.size() && !other.null_flags_.size())  // if other has everything set
@@ -504,7 +506,7 @@ void NullableVector<T>::addData(NullableVector<T>& other)
 
         logdbg << "NullableVector " << property_.name() << ": addData: 2: inserting data";
         data_.insert(data_.end(), other.data_.begin(), other.data_.end());
-        goto DONE;
+        return;
     }
 
     logdbg << "NullableVector " << property_.name()
@@ -525,9 +527,7 @@ void NullableVector<T>::addData(NullableVector<T>& other)
     logdbg << "NullableVector " << property_.name() << ": addData: 3: inserting data";
     data_.insert(data_.end(), other.data_.begin(), other.data_.end());
 
-DONE:
     // size is adjusted in Buffer::seizeBuffer
-
     logdbg << "NullableVector " << property_.name() << ": addData: end";
 }
 
@@ -557,12 +557,12 @@ NullableVector<T>& NullableVector<T>::operator*=(double factor)
 
     unsigned int data_size = data_.size();
 
-//    tbb::parallel_for(uint(0), data_size, [&](unsigned int cnt) {
-//        if (!isNull(cnt))
-//        {
-//            data_.at(cnt) *= factor;
-//        }
-//    });
+    //    tbb::parallel_for(uint(0), data_size, [&](unsigned int cnt) {
+    //        if (!isNull(cnt))
+    //        {
+    //            data_.at(cnt) *= factor;
+    //        }
+    //    });
 
     for (unsigned int cnt=0; cnt < data_size; ++cnt)
     {
@@ -570,8 +570,8 @@ NullableVector<T>& NullableVector<T>::operator*=(double factor)
             data_.at(cnt) *= factor;
     }
 
-//    for (auto &data_it : data_)
-//        data_it *= factor;
+    //    for (auto &data_it : data_)
+    //        data_it *= factor;
 
     return *this;
 }
@@ -861,13 +861,13 @@ void NullableVector<T>::convertToStandardFormat(const std::string& from_format)
 
     unsigned int data_size = data_.size();
 
-//    tbb::parallel_for(uint(0), data_size, [&](unsigned int cnt) {
-//        if (!isNull(cnt))
-//        {
-//            // value_str = std::to_string(data_.at(cnt));
-//            data_.at(cnt) = std::stoi(std::to_string(data_.at(cnt)), 0, 8);
-//        }
-//    });
+    //    tbb::parallel_for(uint(0), data_size, [&](unsigned int cnt) {
+    //        if (!isNull(cnt))
+    //        {
+    //            // value_str = std::to_string(data_.at(cnt));
+    //            data_.at(cnt) = std::stoi(std::to_string(data_.at(cnt)), 0, 8);
+    //        }
+    //    });
 
     for (unsigned int cnt=0; cnt < data_size; ++cnt)
     {
@@ -957,13 +957,104 @@ void NullableVector<T>::cutUpToIndex(unsigned int index) // everything up to ind
 template <class T>
 void NullableVector<T>::removeIndexes(const std::vector<size_t>& indexes_to_remove)
 {
-    for (auto index_it = indexes_to_remove.rbegin(); index_it != indexes_to_remove.rend(); ++index_it)
-    {
-        if (*index_it < null_flags_.size())
-            null_flags_.erase(null_flags_.begin() + *index_it);
+    // iterator to size cnt
 
-        if (*index_it < data_.size())
-            data_.erase(data_.begin() + *index_it);
+//    {
+
+//        for (auto index_it = indexes_to_remove.rbegin(); index_it != indexes_to_remove.rend(); ++index_it)
+//        {
+//            if (*index_it < null_flags_copy.size())
+//                null_flags_copy.erase(null_flags_copy.begin() + *index_it);
+
+//            if (*index_it < data_copy.size())
+//                data_copy.erase(data_copy.begin() + *index_it);
+//        }
+
+//    }
+
+    {
+        size_t data_rm_cnt = 0;
+        size_t data_idx_old = 0; //old index in data to copy from
+        size_t data_idx_new = 0; //new index in data to copy to
+
+        //for all indices to be removed... in data
+        for (size_t i = 0; i < indexes_to_remove.size(); ++i)
+        {
+            const size_t idx_tbr = indexes_to_remove[ i ];
+
+
+            //..copy from current index in data up to item to be removed into new position
+
+            if (idx_tbr < data_.size())
+            {
+                while (data_idx_old < idx_tbr)
+                {
+                    data_[ data_idx_new ] = data_[ data_idx_old ];
+
+                    data_idx_new++;
+                    data_idx_old++;
+                }
+
+                //skip index to be removed
+                ++data_idx_old;
+                data_rm_cnt++; // count how many where removed
+            }
+        }
+
+        //copy any data beyond last index to be removed
+        while (data_idx_old < data_.size())
+        {
+            data_[ data_idx_new ] = data_[ data_idx_old ];
+
+            data_idx_new++;
+            data_idx_old++;
+        }
+
+        //chop remaining unneeded space
+        assert (data_rm_cnt <= data_.size());
+        data_.resize(data_.size() - data_rm_cnt);
+    }
+
+    {
+        size_t null_rm_cnt = 0;
+
+        size_t null_idx_old = 0; //old index in data to copy from
+        size_t null_idx_new = 0; //new index in data to copy to
+
+        //for all indices to be removed... in null
+        for (size_t i = 0; i < indexes_to_remove.size(); ++i)
+        {
+            const size_t idx_tbr = indexes_to_remove[ i ];
+
+            //..copy from current index in null up to item to be removed into new position
+
+            if (idx_tbr < null_flags_.size())
+            {
+                while (null_idx_old < idx_tbr)
+                {
+                    null_flags_[ null_idx_new ] = null_flags_[ null_idx_old ];
+
+                    null_idx_new++;
+                    null_idx_old++;
+                }
+
+                //skip index to be removed
+                ++null_idx_old;
+                null_rm_cnt++; // count how many where removed
+            }
+        }
+
+        //copy any null beyond last index to be removed
+        while (null_idx_old < null_flags_.size())
+        {
+            null_flags_[ null_idx_new ] = null_flags_[ null_idx_old ];
+
+            null_idx_new++;
+            null_idx_old++;
+        }
+
+        assert (null_rm_cnt <= null_flags_.size());
+        null_flags_.resize(null_flags_.size() - null_rm_cnt);
     }
 }
 
@@ -1051,11 +1142,11 @@ std::vector<std::size_t> NullableVector<T>::sortPermutation()
 template <class T>
 void NullableVector<T>::sortByPermutation(const std::vector<std::size_t>& perm)
 {
-//    std::vector<bool> done(data_.size());
+    //    std::vector<bool> done(data_.size());
 
     std::vector<bool> done(perm.size());
 
-//    for (std::size_t i = 0; i < data_.size(); ++i)
+    //    for (std::size_t i = 0; i < data_.size(); ++i)
 
     for (std::size_t i = 0; i < perm.size(); ++i)
     {
@@ -1082,25 +1173,25 @@ void NullableVector<T>::sortByPermutation(const std::vector<std::size_t>& perm)
     }
 
 
-//    for (std::size_t i = 0; i < data_.size(); ++i)
-//    {
-//        if (done[i])
-//        {
-//            continue;
-//        }
-//        done[i] = true;
-//        std::size_t prev_j = i;
-//        std::size_t j = perm[i];
-//        while (i != j)
-//        {
-//            //std::swap(data_[prev_j], data_[j]);
-//            swapData(prev_j, j);
+    //    for (std::size_t i = 0; i < data_.size(); ++i)
+    //    {
+    //        if (done[i])
+    //        {
+    //            continue;
+    //        }
+    //        done[i] = true;
+    //        std::size_t prev_j = i;
+    //        std::size_t j = perm[i];
+    //        while (i != j)
+    //        {
+    //            //std::swap(data_[prev_j], data_[j]);
+    //            swapData(prev_j, j);
 
-//            done[j] = true;
-//            prev_j = j;
-//            j = perm[j];
-//        }
-//    }
+    //            done[j] = true;
+    //            prev_j = j;
+    //            j = perm[j];
+    //        }
+    //    }
 }
 
 // private stuff

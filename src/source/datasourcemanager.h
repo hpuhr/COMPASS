@@ -102,6 +102,20 @@ public:
 
     unsigned int dsFontSize() const;
 
+    // selection stuff
+
+    void selectAllDSTypes();
+    void deselectAllDSTypes();
+
+    void selectAllDataSources();
+    void deselectAllDataSources();
+
+    void selectDSTypeSpecificDataSources (const std::string& ds_type);
+    void deselectDSTypeSpecificDataSources (const std::string& ds_type);
+
+    void deselectAllLines();
+    void selectSpecificLineSlot(unsigned int line_id);
+
 protected:
     COMPASS& compass_;
 

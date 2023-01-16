@@ -29,11 +29,14 @@ The following maps are commonly available:
  \ \\
  
  Please note that for each map marked with \textbf{*} a 3D version (as listed) and a 2D version (with filename suffix '\_2d') exists. Each of them contains similiar content, but changes the display mode to 3D/2D upon selection. \\
+
+ \textbf{Note}: If a map is selected which only contains either a 2D or 3D version, 
+ the 'Switch Map Dimensions' button \includegraphics[width=0.5cm,frame]{../../data/icons/2d.png}/\includegraphics[width=0.5cm,frame]{../../data/icons/3d.png} in the toolbar will be deactivated.\\
  
 The map loading and display in based on the osgEarth library (\url{http://osgearth.org/}), as are to map file definitions.  \\
 
 The map which can be set using this dialog is simply a file list from the folder '\textasciitilde/.compass/data/maps'. So, changes can be made to the supplied ones or custom user maps can be added to this folder. \\
-Please refer to section \nameref{sec:adding_maps} for further details.
+Please refer to section \nameref{sec:appendix_maps} for further details.
 
 \newpage
 \paragraph{ArcGIS Map}
@@ -110,176 +113,4 @@ Please note that this map includes an elevation layer, so mountains are modeled 
   \caption{OSG View ReadyMap detailed elevation}
 \end{figure}
 
-\paragraph{Adding/Changing Map Files}
-\label{sec:adding_maps}
 
-As with all configuration, a local version is kept in the home folder of the user. The map files are loaded from the hidden folder '\textasciitilde/.compass/data/maps' ('\textasciitilde' is the user's home directory, like /home/user).
-
-\begin{figure}[H]
-    \includegraphics[width=10cm,frame]{figures/osgview_maps_config.png}
-  \caption{Maps Folder}
-\end{figure}
-
-In this folder, the previosly discussed maps exist as osgEarth '.earth' files. If new .earth files are added, or the content of such files is changed, they can be used from the OSGView after a restart.
-
-The easiest example is the 'minimal\_new.earth' file, which uses an ESRI shapefile from the subfolder 'shapefiles' to display the national borders.
-
-\begin{lstlisting}
-<map name="Wordwide Line Vectors" type="geocentric">
-  
-    <options>
-        <lighting>false</lighting>
-        <terrain>
-            <min_tile_range_factor>8</min_tile_range_factor>
-            <color>#000000FF</color>
-        </terrain>
-      
-    </options>
-
-    <feature_source name="world-data" driver="ogr">
-        <url>shapefiles/TM_WORLD_BORDERS-0.3.shp</url>
-        <convert type="line"/>
-    </feature_source>
-    
-    <feature_model name="world_boundaries" feature_source="world-data">
-        
-        <layout tile_size="100000"  paged="true">
-            <level max_range="1e10"/>
-        </layout>
-                
-        <styles>
-            <style type="text/css">
-                world {
-                   stroke:                   #ffff00;
-                   stroke-width:             2px;
-                   stroke-tessellation-size: 1km;
-                   render-lighting:          false;
-                   altitude-clamping:        none;
-                   render-depth-test: false;
-                }            
-            </style>
-        </styles>
-        
-    </feature_model>
- 
-
-</map>
-\end{lstlisting}
-
-The world background colour is set using the 'terrain color' tag. The name of the shapefile is given using the 'url' tag, the line colour and width is set in the style below. Basically a user can add their own files to the 'shapefiles' folder, and simply duplicate the 'feature\_model' part with their own ESRI shapefiles. This could the look like this:
-
-\begin{lstlisting}
-<map name="Wordwide Line Vectors" type="geocentric">
-  
-    <options>
-        <lighting>false</lighting>
-         <terrain color="#101010ff"/>
-    </options>
-
-    <feature_source name="world-data" driver="ogr">
-        <url>shapefiles/TM_WORLD_BORDERS-0.3.shp</url>
-        <convert type="line"/>
-    </feature_source>
-    
-    <feature_model name="world_boundaries" feature_source="world-data">
-        
-        <layout tile_size="100000"  paged="true">
-            <level max_range="1e10"/>
-        </layout>
-                
-        <styles>
-            <style type="text/css">
-                world {
-                   stroke:                   #ffff00;
-                   stroke-width:             2px;
-                   stroke-tessellation-size: 1km;
-                   render-lighting:          false;
-                   altitude-clamping:        none;
-                   render-depth-test: false;                   
-                }            
-            </style>
-        </styles>
-        
-    </feature_model>
-  
-    <feature_model name="doi">
-        <features name="wolrd" driver="ogr">
-            <url>shapefiles/doi.shp</url>
-            <build_spatial_index>true</build_spatial_index>
-            <ogr_driver>ESRI Shapefile</ogr_driver>
-            <convert type="line"/>
-        </features>        
-
-        <layout tile_size="100000">
-            <level max_range="1e10"/>
-        </layout>
-
-        <styles>
-            <style type="text/css">
-                states {
-                   stroke:          #00ff00; 
-                   stroke-width:    2px;
-                   render-depth-test: false;
-                }                    
-            </style>
-        </styles>        
-    </feature_model>
-</map>
-\end{lstlisting}
-
-While a number of formats are supported, to add a KML file, add the following part to a 'map' (as previously):
-
-\begin{lstlisting}
-     <feature_model name="wam_area">
-        <features name="wam_area" driver="ogr">
-            <url>shapefiles/wam_area.kml</url>
-            <ogr_driver>LIBKML</ogr_driver>
-            <build_spatial_index>true</build_spatial_index>
-        </features>        
-
-        <styles>
-            <style type="text/css">
-                states {
-                   stroke:          #0000ff; 
-                   stroke-width:    2px;
-                   render-depth-test: false;
-                }                    
-            </style>
-        </styles>        
-    </feature_model>
-\end{lstlisting}
-
-To add a GML file, add the following part to a 'map' (as previously):
-
-\begin{lstlisting}
-   <model driver="feature_geom" name="gml" cache_enabled="false">
-    <features driver="ogr">
-	<ogr_driver>GML</ogr_driver>
-        <url>shapefiles/example.gml</url>
-        <caching_policy usage="no_cache"/>
-    </features>
-   </model>
-\end{lstlisting}
-
-To add a GeoTIFF file, add the following part to a 'map' (as previously):
-
-\begin{lstlisting}
-    <image driver="gdal" name="tiff" cache_enabled="false" visible="false">
-        <url>/usr/share/osgearth/data/world.tif</url>
-        <caching_policy usage="no_cache"/>
-    </image>
-\end{lstlisting}
-
-To add a graticule (latitude/longitude grid), add the following part to a 'map' (as previously):
-
-\begin{lstlisting}
-    <geodetic_graticule name="Graticule" visible="true">
-        <color>#ffff007f</color>
-        <label_color>#ffffffff</label_color>
-        <grid_lines>20</grid_lines>
-        <resolutions>10 5.0 2.0 1.0 0.5 0.25 0.125 0.0625 0.03125</resolutions>
-    </geodetic_graticule>
-\end{lstlisting}
-
-
-For further information please refer to the osgEarth user manual \url{https://buildmedia.readthedocs.org/media/pdf/osgearth/latest/osgearth.pdf}, e.g. in Section Features \& Symbology.

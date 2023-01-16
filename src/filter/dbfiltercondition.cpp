@@ -104,9 +104,7 @@ bool DBFilterCondition::filters(const std::string& dbcontent_name)
     return hasVariable(dbcontent_name);
 }
 
-std::string DBFilterCondition::getConditionString(const std::string& dbcontent_name, bool& first,
-                                                  std::vector<std::string>& extra_from_parts,
-                                                  std::vector<dbContent::Variable*>& filtered_variables)
+std::string DBFilterCondition::getConditionString(const std::string& dbcontent_name, bool& first)
 {
     logdbg << "DBFilterCondition: getConditionString: object " << dbcontent_name << " first " << first;
     assert(usable_);
@@ -164,10 +162,6 @@ std::string DBFilterCondition::getConditionString(const std::string& dbcontent_n
         ss << variable_prefix << db_table_name << "." << db_column_name << variable_suffix;
         ss << " " << operator_ << val_str;
     }
-
-    if (find(filtered_variables.begin(), filtered_variables.end(), &var) ==
-            filtered_variables.end())
-        filtered_variables.push_back(&var);
 
     if (ss.str().size())
         loginf << "DBFilterCondition " << instanceId() << ": getConditionString: '" << ss.str()

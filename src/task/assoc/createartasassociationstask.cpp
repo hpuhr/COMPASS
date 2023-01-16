@@ -380,11 +380,10 @@ void CreateARTASAssociationsTask::run()
             //                             use_order, DBOVariable* order_variable, bool
             //                             use_order_ascending, const std::string &limit_str)
 
-            dbo_it.second->loadFiltered(read_set, {}, custom_filter_clause, {tracker_ds_id_var_}, false,
-                                        &timestamp_var_->getFor("CAT062"), false);
+            dbo_it.second->loadFiltered(read_set, custom_filter_clause);
         }
         else
-            dbo_it.second->load(read_set, false, false, false, nullptr, false);
+            dbo_it.second->load(read_set, false, false);
 
     }
 

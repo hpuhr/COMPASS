@@ -59,6 +59,7 @@ public:
 
     void openDBFile(const std::string& filename);
     void createNewDBFile(const std::string& filename);
+    void exportDBFile(const std::string& filename);
     bool dbOpened();
     void closeDB();
 
