@@ -33,7 +33,7 @@ HistogramViewChartView::HistogramViewChartView(HistogramViewDataWidget* data_wid
 :   ChartView   (chart, ChartView::SelectionStyle::RubberBand, parent)
 ,   data_widget_(data_widget)
 {
-    setSelectionStyle(SelectionStyle::X);
+    setSelectionAxes(SelectionAxes::X);
 
     assert (data_widget_);
 }
