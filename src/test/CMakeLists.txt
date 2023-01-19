@@ -5,11 +5,15 @@ include_directories (
 
 target_sources(compass
 PUBLIC
+    "${CMAKE_CURRENT_LIST_DIR}/test_lab.h"
+    "${CMAKE_CURRENT_LIST_DIR}/test_lab_phil.h"
     "${CMAKE_CURRENT_LIST_DIR}/ui_test_event_injections.h"
     "${CMAKE_CURRENT_LIST_DIR}/ui_test_widget_setters.h"
     "${CMAKE_CURRENT_LIST_DIR}/ui_test_set.h"
     "${CMAKE_CURRENT_LIST_DIR}/ui_test_find.h"
 PRIVATE
+    "${CMAKE_CURRENT_LIST_DIR}/test_lab.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/test_lab_phil.cpp"
     "${CMAKE_CURRENT_LIST_DIR}/ui_test_event_injections.cpp"
     "${CMAKE_CURRENT_LIST_DIR}/ui_test_set.cpp"
 )

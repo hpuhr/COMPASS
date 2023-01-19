@@ -74,6 +74,12 @@
 #include <QVBoxLayout>
 #include <QLabel>
 
+//#define SHOW_DEBUG_MENU
+
+#ifdef SHOW_DEBUG_MENU
+#include "test_lab.h"
+#endif
+
 using namespace Utils;
 using namespace std;
 
@@ -137,6 +143,7 @@ MainWindow::MainWindow()
     add_view_button_->setFixedSize(UI_ICON_SIZE);
     add_view_button_->setFlat(UI_ICON_BUTTON_FLAT);
     add_view_button_->setToolTip(tr("Add view"));
+    add_view_button_->setObjectName("main_window_add_view_button");
     connect(add_view_button_, &QPushButton::clicked, this, &MainWindow::showAddViewMenuSlot);
     tab_widget_->setCornerWidget(add_view_button_);
 
@@ -210,6 +217,7 @@ void MainWindow::createMenus ()
 
     // file menu
     QMenu* file_menu = menuBar()->addMenu(tr("&File"));
+    file_menu->setObjectName("main_window_file_menu");
     file_menu->setToolTipsVisible(true);
 
     // db operations
@@ -230,7 +238,8 @@ void MainWindow::createMenus ()
 
     open_recent_db_menu_->addSeparator();
 
-    export_db_action_ = new QAction("&Export");
+    export_db_action_ = new QAction("&Export", file_menu);
+    export_db_action_->setObjectName("main_window_exportdb_action");
     export_db_action_->setToolTip(tr("Export database into file"));
     connect(export_db_action_, &QAction::triggered, this, &MainWindow::exportDBSlot);
     file_menu->addAction(export_db_action_);
@@ -356,12 +365,9 @@ void MainWindow::createMenus ()
     connect(assoc_artas_action, &QAction::triggered, this, &MainWindow::calculateAssociationsARTASSlot);
     process_menu_->addAction(assoc_artas_action);
 
-    //tests
-//#if 1
-//    QAction* test_action = new QAction(tr("Run test code"));
-//    config_menu->addAction(test_action);
-//    connect(test_action, &QAction::triggered, this, &MainWindow::runTestCodeSlot);
-//#endif
+#ifdef SHOW_DEBUG_MENU
+    createDebugMenu();
+#endif
 }
 
 void MainWindow::updateMenus()
@@ -1605,23 +1611,13 @@ void MainWindow::shutdown()
 //    logdbg << "MainWindow: keyPressEvent '" << event->text().toStdString() << "'";
 //}
 
-////////////////////////////////////////////////////////////////////////////////////////
-// TEST ZONE
-//
-#include <QTimer>
-#include <QPainter>
-#include <QCheckBox>
-#include <QTime>
-#include <QComboBox>
-
-#include <Eigen/Core>
-
-#include "dbcontent/label/labelplacement.h"
-
-void MainWindow::runTestCodeSlot()
+void MainWindow::createDebugMenu()
 {
-    LabelPlacementEngine::TestConfig config;
+#ifdef SHOW_DEBUG_MENU
+    auto debug_menu = menuBar()->addMenu("Debug");
 
-    LabelPlacementEngine lpe;
-    lpe.runTest(config);
+    {
+        TestLabCollection().appendTestLabs(debug_menu);
+    }
+#endif
 }

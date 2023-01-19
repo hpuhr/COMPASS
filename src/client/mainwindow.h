@@ -84,9 +84,6 @@ public slots:
 
     void appModeSwitchSlot (AppMode app_mode_previous, AppMode app_mode_current);
 
-private slots:
-    void runTestCodeSlot();
-
 public:
     MainWindow();
     virtual ~MainWindow();
@@ -220,6 +217,7 @@ protected:
     QPushButton* live_stop_button_{nullptr};
 
     void createMenus ();
+    void createDebugMenu();
 
     /// @brief Called when application closes
     void closeEvent(QCloseEvent* event);
