@@ -17,6 +17,7 @@
 
 #include "viewmanager.h"
 #include "compass.h"
+#include "mainwindow.h"
 #include "buffer.h"
 #include "logger.h"
 #include "stringconv.h"
@@ -514,7 +515,12 @@ ViewContainerWidget* ViewManager::addNewContainerWidget()
     generateSubConfigurable("ViewContainerWidget", container_widget_name);
 
     assert(container_widgets_.count(container_widget_name) == 1);
-    return container_widgets_.at(container_widget_name);
+
+    //set main window as parent
+    auto cwidget = container_widgets_.at(container_widget_name);
+    cwidget->setParent(&COMPASS::instance().mainWindow());
+
+    return cwidget;
 }
 
 void ViewManager::clearDataInViews()
