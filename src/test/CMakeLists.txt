@@ -7,6 +7,7 @@ target_sources(compass
 PUBLIC
     "${CMAKE_CURRENT_LIST_DIR}/test_lab.h"
     "${CMAKE_CURRENT_LIST_DIR}/test_lab_phil.h"
+    "${CMAKE_CURRENT_LIST_DIR}/ui_test_common.h"
     "${CMAKE_CURRENT_LIST_DIR}/ui_test_event_injections.h"
     "${CMAKE_CURRENT_LIST_DIR}/ui_test_widget_setters.h"
     "${CMAKE_CURRENT_LIST_DIR}/ui_test_set.h"
