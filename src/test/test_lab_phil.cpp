@@ -1,6 +1,9 @@
 
 #include "test_lab_phil.h"
 
+#include "compass.h"
+#include "mainwindow.h"
+
 #include <iostream>
 
 #include <QMenu>
@@ -20,9 +23,11 @@
 #include <QSlider>
 #include <QMenuBar>
 #include <QMessageBox>
+#include <QLabel>
 
 #include "ui_test_event_injections.h"
 #include "ui_test_set.h"
+#include "ui_test_common.h"
 
 /**
 */
@@ -31,11 +36,16 @@ TestLabPhil::TestLabPhil()
 {
 }
 
+#define ADD_TEST(name, func) \
+    addTest(menu, name, [ = ] () { return TestLabPhil::func(); });
+
 /**
 */
 void TestLabPhil::addTestsToMenu_impl(QMenu* menu)
 {
-    addTest(menu, "UI injection test", [ = ] () { return TestLabPhil::uiInjectionTest(); });
+    ADD_TEST("UI Injection Test", uiInjectionTest);
+    ADD_TEST("Generate Object Name Test", uiObjectNameGenerationTest);
+    ADD_TEST("UI Set Test", uiSetTest);
 }
 
 /**
@@ -199,6 +209,73 @@ bool TestLabPhil::uiInjectionTest()
     d_layout->addWidget(mw);
 
     dlg.resize(800, 600);
+    dlg.exec();
+
+    return true;
+}
+
+/**
+*/
+bool TestLabPhil::uiObjectNameGenerationTest()
+{
+    auto testObjNameGen = [ & ] (const QString& str)
+    {
+        QString res = ui_test::generateObjectName(str);
+        std::cout << "Object name: '" << str.toStdString() << "' => '" << res.toStdString() << "'" << std::endl;
+    } ;
+
+    testObjNameGen("  My Func  1   ");
+    testObjNameGen(" My Func 2:  ");
+    testObjNameGen(" My Func 3 :  ");
+    testObjNameGen("My Func 4...");
+    testObjNameGen("My Func 5 - The Best...");
+
+    return true;
+}
+
+/**
+*/
+bool TestLabPhil::uiSetTest()
+{
+    auto main_window = &COMPASS::instance().mainWindow();
+
+    QDialog dlg;
+    QVBoxLayout* layoutv = new QVBoxLayout;
+    QHBoxLayout* layouth = new QHBoxLayout;
+    dlg.setLayout(layoutv);
+
+    layoutv->addLayout(layouth);
+
+    layouth->addWidget(new QLabel("Object: "));
+
+    QLineEdit* obj_edit = new QLineEdit;
+    layouth->addWidget(obj_edit);
+
+    layouth->addWidget(new QLabel("Value: "));
+
+    QLineEdit* value_edit = new QLineEdit;
+    layouth->addWidget(value_edit);
+
+    QPushButton* button = new QPushButton("Set");
+    layouth->addWidget(button);
+
+    QLabel* status_label = new QLabel("");
+
+    layoutv->addWidget(status_label);
+    layoutv->addStretch();
+
+    auto cb = [ = ] () 
+    {
+        QString obj   = obj_edit->text();
+        QString value = value_edit->text();
+
+        bool ok = ui_test::setUIElement(main_window, obj, value);
+
+        status_label->setText(ok ? "Success" : "Failed");
+    };
+
+    QObject::connect(button, &QPushButton::pressed, cb);
+
     dlg.exec();
 
     return true;

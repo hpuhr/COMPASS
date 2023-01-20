@@ -16,4 +16,6 @@ protected:
 
 private:
     static bool uiInjectionTest();
+    static bool uiObjectNameGenerationTest();
+    static bool uiSetTest();
 };
