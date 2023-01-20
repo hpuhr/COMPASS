@@ -19,6 +19,7 @@
 
 #include <string>
 #include <vector>
+#include <functional>
 
 #include <QString>
 #include <QKeySequence>
@@ -49,6 +50,13 @@ namespace ui_test
                           Qt::MouseButton button = Qt::LeftButton, 
                           int delay = -1);
 
+    typedef std::function<bool()> EventFunc;
+
+    bool injectPostModalEvent(QWidget* root,
+                              const QString& obj_name,
+                              const EventFunc& modal_trigger_cb,
+                              const EventFunc& post_modal_cb);
+
     //special ui trigger events
     bool injectMenuBarEvent(QWidget* root,
                             const QString& obj_name,
@@ -58,6 +66,8 @@ namespace ui_test
                          const QString& obj_name,
                          const QStringList& path_to_action,
                          int delay = -1);
+    bool injectPopupMenuEvent(const QStringList& path_to_action,
+                              int delay = -1);
     bool injectComboBoxEditEvent(QWidget* root,
                                  const QString& obj_name,
                                  const QString& entry_txt,
