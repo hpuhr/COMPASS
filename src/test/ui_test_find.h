@@ -2,6 +2,9 @@
 #pragma once
 
 #include "logger.h"
+#include "compass.h"
+#include "viewmanager.h"
+#include "viewcontainerwidget.h"
 
 #include <QWidget>
 #include <QWindow>
@@ -43,13 +46,34 @@ inline void logObjectError(const QString& prefix,
     loginf << prefix.toStdString() << ": Object " << objectName(obj_name) + " " + err.toStdString();
 }
 
-inline std::pair<FindObjectErrCode, QObject*> findObject(QWidget* parent, const QString& obj_name = "")
+inline std::pair<FindObjectErrCode, QObject*> findObjectNoPath(QObject* parent, const QString& obj_name = "")
 {
     if (!parent)
         return std::make_pair(FindObjectErrCode::Invalid, nullptr);
 
     if (obj_name.isEmpty() || parent->objectName() == obj_name)
         return std::make_pair(FindObjectErrCode::NoError, parent);
+
+    //UGLY HACK, ViewContainerWidget should be a non-modal QDialog instead of a free-floating QWidget
+    {
+        if (obj_name.startsWith("window"))
+        {
+            QString num = QString(obj_name).remove("window");
+            bool ok;
+            int idx = num.toInt(&ok);
+
+            if (ok)
+            {
+                QString view_container_name = "ViewWindow" + num;
+
+                auto container = COMPASS::instance().viewManager().containerWidget(view_container_name.toStdString());
+                if (!container)
+                    return std::make_pair(FindObjectErrCode::NotFound, nullptr);
+
+                return std::make_pair(FindObjectErrCode::NoError, container);
+            }
+        }
+    }
 
     QObject* obj = parent->findChild<QObject*>(obj_name, Qt::FindChildrenRecursively);
     if (!obj)
@@ -58,8 +82,43 @@ inline std::pair<FindObjectErrCode, QObject*> findObject(QWidget* parent, const 
     return std::make_pair(FindObjectErrCode::NoError, obj);
 }
 
+inline std::pair<FindObjectErrCode, QObject*> findObject(QObject* parent, const QString& obj_name = "")
+{
+    if (!parent)
+        return std::make_pair(FindObjectErrCode::Invalid, nullptr);
+
+    if (obj_name.isEmpty() || parent->objectName() == obj_name)
+        return std::make_pair(FindObjectErrCode::NoError, parent);
+
+    int idx = obj_name.indexOf("|");
+
+    //no path? use that version
+    if (idx < 0)
+        return findObjectNoPath(parent, obj_name);
+
+    //split into path
+    QStringList path = obj_name.split("|");
+
+    //traverse the given object path and jump from child to child
+    QObject* last_obj = parent;
+    for (const QString& sub_obj : path)
+    {
+        std::cout << "looking for object '" << sub_obj.toStdString() << "'" << std::endl; 
+
+        auto obj = findObjectNoPath(last_obj, sub_obj.trimmed());
+        if (obj.first != FindObjectErrCode::NoError)
+            return std::make_pair(obj.first, nullptr);
+
+        std::cout << "   FOUND" << std::endl;
+
+        last_obj = obj.second;
+    }
+
+    return std::make_pair(FindObjectErrCode::NoError, last_obj);
+}
+
 template<class T>
-inline std::pair<FindObjectErrCode, T*> findObjectAs(QWidget* parent, const QString& obj_name = "")
+inline std::pair<FindObjectErrCode, T*> findObjectAs(QObject* parent, const QString& obj_name = "")
 {
     auto obj = findObject(parent, obj_name);
     if (obj.first != FindObjectErrCode::NoError)
@@ -72,12 +131,12 @@ inline std::pair<FindObjectErrCode, T*> findObjectAs(QWidget* parent, const QStr
     return std::make_pair(FindObjectErrCode::NoError, obj_cast);
 }
 template<>
-inline std::pair<FindObjectErrCode, QObject*> findObjectAs(QWidget* parent, const QString& obj_name)
+inline std::pair<FindObjectErrCode, QObject*> findObjectAs(QObject* parent, const QString& obj_name)
 {
     return findObject(parent, obj_name);
 }
 template<>
-inline std::pair<FindObjectErrCode, QWidget*> findObjectAs(QWidget* parent, const QString& obj_name)
+inline std::pair<FindObjectErrCode, QWidget*> findObjectAs(QObject* parent, const QString& obj_name)
 {
     auto obj = findObject(parent, obj_name);
     if (obj.first != FindObjectErrCode::NoError)
@@ -89,7 +148,7 @@ inline std::pair<FindObjectErrCode, QWidget*> findObjectAs(QWidget* parent, cons
     return std::make_pair(FindObjectErrCode::NoError, dynamic_cast<QWidget*>(obj.second));
 }
 template<>
-inline std::pair<FindObjectErrCode, QWindow*> findObjectAs(QWidget* parent, const QString& obj_name)
+inline std::pair<FindObjectErrCode, QWindow*> findObjectAs(QObject* parent, const QString& obj_name)
 {
     auto obj = findObject(parent, obj_name);
     if (obj.first != FindObjectErrCode::NoError)

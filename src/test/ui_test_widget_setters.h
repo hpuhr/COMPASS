@@ -14,6 +14,7 @@
 #include <QSlider>
 #include <QPushButton>
 #include <QCheckBox>
+#include <QRadioButton>
 
 #include <QWidget>
 #include <QString>
@@ -159,6 +160,11 @@ namespace ui_test
     {
         //just push the button
         return ui_test::injectClickEvent(widget, "", -1, -1, Qt::LeftButton, delay);
+    }
+    template<>
+    inline bool setUIElement(QRadioButton* widget, const QString& value, int delay)
+    {
+        return ui_test::injectClickEvent(widget, "", 2, 2, Qt::LeftButton, delay);
     }
     template<>
     inline bool setUIElement(QCheckBox* widget, const QString& value, int delay)

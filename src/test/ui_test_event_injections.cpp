@@ -241,14 +241,16 @@ bool injectMenuBarEvent(QWidget* root,
     //iterate over path strings
     for (size_t i = 0; i < np; ++i)
     {
+        QString p = path[ i ].trimmed();
+
         //all path items should be menus except the last one
         bool is_menu = (i < np - 1);
 
         //find action in current menu for given item text
-        current_action = findAction(current_menu, path[ i ], is_menu);
+        current_action = findAction(current_menu, p, is_menu);
         if (!current_action)
         {
-            loginf << "injectMainMenuEvent: Item text '" << path[ i ].toStdString() << "' not found";
+            loginf << "injectMainMenuEvent: Item text '" << p.toStdString() << "' not found";
             return false;
         }
 
@@ -378,14 +380,14 @@ bool injectToolSelectionEvent(QWidget* root,
 
     auto removeShortcut = [ & ] (const QString& txt) 
     {
-        int idx = txt.lastIndexOf(" [");
+        int idx = txt.lastIndexOf("[");
         if (idx < 0)
             return txt;
 
         QString ret = txt;
         ret.truncate(idx);
 
-        return ret;
+        return ret.trimmed();
     };
 
     int      idx    = -1;

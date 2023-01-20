@@ -74,7 +74,7 @@
 #include <QVBoxLayout>
 #include <QLabel>
 
-//#define SHOW_DEBUG_MENU
+#define SHOW_DEBUG_MENU
 
 #ifdef SHOW_DEBUG_MENU
 #include "test_lab.h"
@@ -123,6 +123,7 @@ MainWindow::MainWindow()
     // initialize tabs
 
     tab_widget_ = new QTabWidget();
+    tab_widget_->setObjectName("container0");
 
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 

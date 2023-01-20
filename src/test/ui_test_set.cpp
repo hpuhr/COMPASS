@@ -43,6 +43,7 @@ bool setUIElement(QWidget* parent,
     TRY_INVOKE_UI_SETTER(QSlider, w.second, value, delay)
     TRY_INVOKE_UI_SETTER(QCheckBox, w.second, value, delay)
     TRY_INVOKE_UI_SETTER(QPushButton, w.second, value, delay)
+    TRY_INVOKE_UI_SETTER(QRadioButton, w.second, value, delay)
 
     //type of widget could not be processed
     return false;

@@ -29,6 +29,7 @@
 #include "view.h"
 #include "viewcontainer.h"
 #include "viewmanager.h"
+#include "ui_test_common.h"
 
 #if USE_EXPERIMENTAL_SOURCE == true
 #include "osgview.h"
@@ -131,7 +132,12 @@ void ViewContainer::addView(View* view)
     QWidget* w = view->getCentralWidget();
     assert(w);
 
-    int index = tab_widget_->addTab(w, QString::fromStdString(view->getName()));
+    const QString view_name = QString::fromStdString(view->getName());
+
+    int index = tab_widget_->addTab(w, view_name);
+
+    //generate and set a nice object name which can be used to identify the view widget in the object hierarchy
+    UI_TEST_OBJ_NAME(w, view_name)
 
     QPushButton* manage_button = new QPushButton();
     manage_button->setIcon(QIcon(Files::getIconFilepath("edit.png").c_str()));

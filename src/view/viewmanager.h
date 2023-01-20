@@ -92,6 +92,17 @@ class ViewManager : public QObject, public Configurable
     std::map<std::string, View*> getViews() { return views_; }
     dbContent::VariableSet getReadSet(const std::string& dbcontent_name);
 
+    //@TODO: needed because of view container widget hack in ui_test_find.h
+    //remove if no longer needed!
+    ViewContainerWidget* containerWidget(const std::string& container_widget_name)
+    {
+        auto it = container_widgets_.find(container_widget_name);
+        if (it == container_widgets_.end())
+            return nullptr;
+
+        return it->second;
+    }
+
     //ViewManagerWidget* widget();
 
     ViewPointsWidget* viewPointsWidget() const;

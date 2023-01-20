@@ -25,6 +25,7 @@
 #include "logger.h"
 #include "stringconv.h"
 #include "groupbox.h"
+#include "ui_test_common.h"
 
 #include <QCheckBox>
 #include <QLabel>
@@ -140,6 +141,7 @@ HistogramViewConfigWidget::HistogramViewConfigWidget(HistogramView* view, QWidge
         {
             log_check_ = new QCheckBox("Logarithmic Y Scale");
             log_check_->setChecked(view_->useLogScale());
+            UI_TEST_OBJ_NAME(log_check_, log_check_->text())
 
             connect(log_check_, &QCheckBox::clicked, this,
                     &HistogramViewConfigWidget::toggleLogScale);
@@ -206,6 +208,8 @@ HistogramViewConfigWidget::HistogramViewConfigWidget(HistogramView* view, QWidge
     vlayout->addWidget(status_label_);
 
     reload_button_ = new QPushButton("Reload");
+    UI_TEST_OBJ_NAME(reload_button_, reload_button_->text())
+    
     connect(reload_button_, &QPushButton::clicked, this,
             &HistogramViewConfigWidget::reloadRequestedSlot);
     vlayout->addWidget(reload_button_);
