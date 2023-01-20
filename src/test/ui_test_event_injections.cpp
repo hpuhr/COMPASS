@@ -1,3 +1,19 @@
+/*
+ * This file is part of OpenATS COMPASS.
+ *
+ * COMPASS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * COMPASS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
+ */
 
 #include "ui_test_event_injections.h"
 #include "ui_test_find.h"
@@ -17,7 +33,9 @@
 #include <QDoubleSpinBox>
 #include <QSlider>
 #include <QCheckBox>
+#include <QAbstractButton>
 #include <QTest>
+#include <QTimer>
 
 namespace ui_test
 {
@@ -180,13 +198,198 @@ bool injectClickEvent(QWidget* root,
     return true;
 }
 
+namespace
+{
+    /**
+     * Traverses the given menu via the given menu path (= a list of menu entry labels)
+     * by injecting click events onto the menu and its submenus/actions.
+     */
+    bool traverseMenu(QWidget* menu_widget, const QStringList& menu_path, int delay)
+    {
+        //finds the action with the given text in the given widget (widget functionality used by qmenu and qmenubar)
+        auto findAction = [ = ] (QWidget* w, const QString& txt, bool is_menu)
+        {
+            for (auto a : w->actions())
+            {
+                if (!a || a->isSeparator() || (is_menu && !a->menu()))
+                    continue;
+
+                QString txt_cur = a->text();
+                if (txt_cur.startsWith("&"))
+                    txt_cur = txt_cur.mid(1);
+
+                if (txt_cur == txt)
+                    return a;
+            }
+            return (QAction*)nullptr;
+        };
+
+        //get the geometry of the given action in the given menu widget
+        auto actionGeometry = [ = ] (QWidget* w, QAction* action)
+        {
+            QMenu*    menu     = dynamic_cast<QMenu*>(w);
+            QMenuBar* menu_bar = dynamic_cast<QMenuBar*>(w);
+
+            //the menu widget could be either a QMenu or a QMenuBar
+            if (menu)
+                return menu->actionGeometry(action);
+            if (menu_bar)
+                return menu_bar->actionGeometry(action);
+
+            return QRect();
+        };
+
+        size_t np = menu_path.size();
+
+        QWidget* current_menu   = menu_widget;  //we start with the main menu
+        QAction* current_action = nullptr;
+
+        //iterate over path strings
+        for (size_t i = 0; i < np; ++i)
+        {
+            QString p = menu_path[ i ].trimmed();
+
+            //all path items should be menus except the last one
+            bool is_menu = (i < np - 1);
+
+            //find action in current menu for given item text
+            current_action = findAction(current_menu, p, is_menu);
+            if (!current_action)
+            {
+                loginf << "traverseMenu: Item text '" << p.toStdString() << "' not found";
+                return false;
+            }
+
+            //get geometry of action in menu
+            QRect r = actionGeometry(current_menu, current_action);
+
+            //inject click at action
+            if (!injectClickEvent(current_menu, "", r.x() + r.width() / 2, r.y() + r.height() / 2, Qt::LeftButton, delay))
+                return false;
+
+            //set current menu to the menu associated with the current action
+            if (is_menu)
+                current_menu = current_action->menu();
+        }
+
+        loginf << "traverseMenu: Final action is '" << current_action->text().toStdString() << "'";
+
+        return true;
+    }
+
+    /**
+     * Traverses the given menu by injecting key events, in search for the given string.
+     */
+    QAction* traverseMenuFor(QWidget* menu, const QString& text, bool is_menu, int delay)
+    {
+        auto activeAction = [ = ] (QWidget* w)
+        {
+            QMenu*    menu     = dynamic_cast<QMenu*>(w);
+            QMenuBar* menu_bar = dynamic_cast<QMenuBar*>(w);
+
+            //the menu widget could be either a QMenu or a QMenuBar
+            if (menu)
+                return menu->activeAction();
+            if (menu_bar)
+                return menu_bar->activeAction();
+
+            return (QAction*)nullptr;
+        };
+
+        auto checkActiveAction = [ & ] ()
+        {
+            //the active action is the currently highlighted action
+            auto active = activeAction(menu);
+            if (!active)
+                return false;
+
+            //std::cout << "text: " << active->text().toStdString() << ", searched: " << text.toStdString() << std::endl;
+
+            return (active->text() == text && (!is_menu || active->menu()));
+        };
+
+        const int n = menu->actions().count();
+
+        //injects the given key and stops if the active action is the sought one, or if n injections are reached
+        auto runFinder = [ & ] (Qt::Key key)
+        {
+            int cnt = 0;
+            while (!checkActiveAction() && cnt++ <= n)
+                if (!injectKeyEvent(menu, "", key, delay))
+                    return false;
+
+            return true;
+        };
+
+        //run up and down the menu in search for the right action
+        if (!runFinder(Qt::Key_Down) || !runFinder(Qt::Key_Up))
+            return nullptr;
+
+        //is the active action the sought one?
+        if (!checkActiveAction())
+            return nullptr;
+
+        return activeAction(menu);
+    }
+
+    /**
+     * Traverses the given menu via the given menu path (= a list of menu entry labels)
+     * by injecting key events onto the menu and its submenus.
+     */
+    bool traverseMenuKeys(QWidget* menu_widget, const QStringList& menu_path, int delay, bool close)
+    {
+        size_t np = menu_path.size();
+
+        QWidget* current_menu   = menu_widget;  //we start with the main menu
+        QAction* current_action = nullptr;
+
+        //iterate over path strings
+        for (size_t i = 0; i < np; ++i)
+        {
+            QString p = menu_path[ i ].trimmed();
+
+            //all path items should be menus except the last one
+            bool is_menu = (i < np - 1);
+
+            //find action in current menu for given item text
+            current_action = traverseMenuFor(current_menu, p, is_menu, delay);
+            if (!current_action)
+            {
+                loginf << "traverseMenuKeys: Item text '" << p.toStdString() << "' not found";
+                return false;
+            }
+
+            //set current menu to the menu associated with the current action
+            if (is_menu)
+            {
+                current_menu = current_action->menu();
+
+                //move right to step into the new menu
+                if (!injectKeyEvent(current_menu, "", Qt::Key_Right, delay))
+                    return false;
+            }
+        }
+
+        loginf << "traverseMenu: Final action is '" << current_action->text().toStdString() << "'";
+
+        //fire the final action via enter key
+        if (!injectKeyEvent(current_menu, "", Qt::Key_Enter, delay))
+            return false;
+
+        //if desired we can close the menu, which is normally done by pressing escape
+        if (menu_widget->isVisible() && close && !injectKeyEvent(menu_widget, "", Qt::Key_Escape, delay))
+            return false;
+
+        return true;
+    }
+}
+
 /**
  * Injects a trigger event to a subitem of the given menu bar.
- * @TODO: Maybe it would be nice to solve this with injected keyboard events rather than mouse events?
  */
 bool injectMenuBarEvent(QWidget* root,
                         const QString& obj_name,
-                        const QStringList& path,
+                        const QStringList& path_to_action,
                         int delay)
 {
     auto obj = findObjectAs<QMenuBar>(root, obj_name);
@@ -197,78 +400,33 @@ bool injectMenuBarEvent(QWidget* root,
     }
 
     //@TODO: should this return false?
-    if (path.empty())
+    if (path_to_action.empty())
         return true;
+    
+    return traverseMenu(obj.second, path_to_action, delay);
+}
 
-    //finds the action with the given text in the given widget (widget functionality used by qmenu and qmenubar)
-    auto findAction = [ = ] (QWidget* w, const QString& txt, bool is_menu)
+/**
+ * Injects a trigger event to a subitem of the given menu.
+ */
+bool injectMenuEvent(QWidget* root,
+                     const QString& obj_name,
+                     const QStringList& path_to_action,
+                     int delay)
+{
+    auto obj = findObjectAs<QMenu>(root, obj_name);
+    if (obj.first != FindObjectErrCode::NoError)
     {
-        for (auto a : w->actions())
-        {
-            if (!a || a->isSeparator() || (is_menu && !a->menu()))
-                continue;
-
-            QString txt_cur = a->text();
-            if (txt_cur.startsWith("&"))
-                txt_cur = txt_cur.mid(1);
-
-            if (txt_cur == txt)
-                return a;
-        }
-        return (QAction*)nullptr;
-    };
-
-    //get the geometry of the given action in the given menu widget
-    auto actionGeometry = [ = ] (QWidget* w, QAction* action)
-    {
-        QMenu*    menu     = dynamic_cast<QMenu*>(w);
-        QMenuBar* menu_bar = dynamic_cast<QMenuBar*>(w);
-
-        //the menu widget could be either a QMenu or a QMenuBar
-        if (menu)
-            return menu->actionGeometry(action);
-        if (menu_bar)
-            return menu_bar->actionGeometry(action);
-
-        return QRect();
-    };
-
-    size_t np = path.size();
-
-    QWidget* current_menu   = obj.second;  //we start with the main menu
-    QAction* current_action = nullptr;
-
-    //iterate over path strings
-    for (size_t i = 0; i < np; ++i)
-    {
-        QString p = path[ i ].trimmed();
-
-        //all path items should be menus except the last one
-        bool is_menu = (i < np - 1);
-
-        //find action in current menu for given item text
-        current_action = findAction(current_menu, p, is_menu);
-        if (!current_action)
-        {
-            loginf << "injectMainMenuEvent: Item text '" << p.toStdString() << "' not found";
-            return false;
-        }
-
-        //get geometry of action in menu
-        QRect r = actionGeometry(current_menu, current_action);
-
-        //inject click at action
-        if (!injectClickEvent(current_menu, "", r.x() + 1, r.y() + 1, Qt::LeftButton, delay))
-            return false;
-
-        //set current menu to the menu associated with the current action
-        if (is_menu)
-            current_menu = current_action->menu();
+        logObjectError("injectMenuEvent", obj_name, obj.first);
+        return false;
     }
 
-    loginf << "injectMainMenuEvent: Final action is '" << current_action->text().toStdString() << "'";
+    //@TODO: should this return false?
+    if (path_to_action.empty())
+        return true;
     
-    return true;
+    //seems that for popup menus the key based traversal works better
+    return traverseMenuKeys(obj.second, path_to_action, delay, true);
 }
 
 /**
@@ -560,7 +718,7 @@ bool injectSliderEditEvent(QWidget* root,
 }
 
 /**
- * 
+ * Injects a mouse click into the given combo box object, in order to achieve the desired state.
  */
 bool injectCheckBoxEvent(QWidget* root,
                          const QString& obj_name,
@@ -583,6 +741,66 @@ bool injectCheckBoxEvent(QWidget* root,
         return false;
 
     return obj.second->isChecked() == on;
+}
+
+/**
+ * Traverses the menu opened by a click on the given button object.
+ * Expects that a click on the button will open a popup menu,
+ * which is traversed along the given path.
+ */
+bool injectButtonMenuEvent(QWidget* root,
+                           const QString& obj_name,
+                           const QStringList& path_to_action,
+                           int delay)
+{
+    auto obj = findObjectAs<QAbstractButton>(root, obj_name);
+    if (obj.first != FindObjectErrCode::NoError)
+    {
+        logObjectError("injectButtonMenuEvent", obj_name, obj.first);
+        return false;
+    }
+
+    bool found_menu     = false;
+    bool processed_menu = false;
+
+    //we queue in what should happen after the menu is shown as an event beforehand via single shot timer
+    auto cb = [ & ] ()
+    {
+        //is there an active popup?
+        auto popup = QApplication::activePopupWidget();
+        if (!popup)
+            return;
+
+        //popup should be a menu
+        QMenu* menu = dynamic_cast<QMenu*>(popup);
+        if (!menu)
+            return;
+
+        found_menu     = true;
+
+        //traverse menu
+        processed_menu = injectMenuEvent(popup, "", path_to_action, delay);
+    };
+    QTimer::singleShot(0, cb);
+
+    //should trigger the menu and afterwards our callback should be processed
+    bool click_ok = injectClickEvent(obj.second, "", -1, -1, Qt::LeftButton, delay);
+
+    //to be on the safe side we process events here, so our callback is processed no matter what
+    QApplication::processEvents();
+
+    //check if ok
+    if (!click_ok)
+        return false;
+    if (!found_menu)
+    {
+        loginf << "injectButtonMenuEvent: No active popup menu found";
+        return false; 
+    }
+    if (!processed_menu) //log message generated by menu event injection
+        return false;
+    
+    return true;
 }
 
 } // namespace ui_test

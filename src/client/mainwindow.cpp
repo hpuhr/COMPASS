@@ -46,6 +46,7 @@
 #include "compass.h"
 #include "viewwidget.h"
 #include "view.h"
+#include "ui_test_common.h"
 
 #include "asteriximporttask.h"
 #include "asteriximporttaskdialog.h"
@@ -139,12 +140,14 @@ MainWindow::MainWindow()
 
     //tab_widget_->setCurrentIndex(0);
 
+    const QString tool_tip = "Add view";
+
     add_view_button_ = new QPushButton();
+    UI_TEST_OBJ_NAME(add_view_button_, tool_tip);
     add_view_button_->setIcon(QIcon(Files::getIconFilepath("crosshair_fat.png").c_str()));
     add_view_button_->setFixedSize(UI_ICON_SIZE);
     add_view_button_->setFlat(UI_ICON_BUTTON_FLAT);
-    add_view_button_->setToolTip(tr("Add view"));
-    add_view_button_->setObjectName("main_window_add_view_button");
+    add_view_button_->setToolTip(tr(tool_tip.toStdString().c_str()));
     connect(add_view_button_, &QPushButton::clicked, this, &MainWindow::showAddViewMenuSlot);
     tab_widget_->setCornerWidget(add_view_button_);
 

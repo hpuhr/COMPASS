@@ -1,3 +1,19 @@
+/*
+ * This file is part of OpenATS COMPASS.
+ *
+ * COMPASS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * COMPASS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
+ */
 
 #include "ui_test_set.h"
 #include "ui_test_find.h"
@@ -44,6 +60,8 @@ bool setUIElement(QWidget* parent,
     TRY_INVOKE_UI_SETTER(QCheckBox, w.second, value, delay)
     TRY_INVOKE_UI_SETTER(QPushButton, w.second, value, delay)
     TRY_INVOKE_UI_SETTER(QRadioButton, w.second, value, delay)
+    TRY_INVOKE_UI_SETTER(QToolButton, w.second, value, delay)
+    TRY_INVOKE_UI_SETTER(QAbstractButton, w.second, value, delay) //for all other buttons which were not handled before
 
     //type of widget could not be processed
     return false;
