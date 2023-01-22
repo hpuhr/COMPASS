@@ -139,6 +139,7 @@ public:
 
 protected:
     QTabWidget* tab_widget_{nullptr};
+    QCheckBox* use_filters_{nullptr};
 
     QPushButton* add_view_button_{nullptr};
 

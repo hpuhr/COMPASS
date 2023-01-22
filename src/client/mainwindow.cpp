@@ -73,6 +73,7 @@
 #include <QThread>
 #include <QVBoxLayout>
 #include <QLabel>
+#include <QCheckBox>
 
 using namespace Utils;
 using namespace std;
@@ -122,6 +123,13 @@ MainWindow::MainWindow()
 
     tab_widget_->addTab(COMPASS::instance().dataSourceManager().loadWidget(), "Data Sources");
     tab_widget_->addTab(COMPASS::instance().filterManager().widget(), "Filters");
+
+    QTabBar *tabBar = tab_widget_->tabBar();
+
+    use_filters_ = new QCheckBox();
+
+    tabBar->setTabButton(1, QTabBar::LeftSide, COMPASS::instance().filterManager().widget()->filtersCheckBox());
+    //tabBar->setTabButton(0, QTabBar::RightSide, new QLabel("label0"));
 
     COMPASS::instance().evaluationManager().init(tab_widget_); // adds eval widget
     COMPASS::instance().viewManager().init(tab_widget_); // adds view points widget and view container
