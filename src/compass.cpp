@@ -56,6 +56,8 @@ COMPASS::COMPASS() : Configurable("COMPASS", "COMPASS0", 0, "compass.json")
     registerParameter("hide_evaluation", &hide_evaluation_, false);
     registerParameter("hide_viewpoints", &hide_viewpoints_, false);
 
+    registerParameter("disable_live_to_offline_switch", &disable_live_to_offline_switch_, false);
+
     JobManager::instance().start();
 
     createSubConfigurables();
@@ -433,6 +435,11 @@ MainWindow& COMPASS::mainWindow()
 
     assert(main_window_);
     return *main_window_;
+}
+
+bool COMPASS::disableLiveToOfflineSwitch() const
+{
+    return disable_live_to_offline_switch_;
 }
 
 unsigned int COMPASS::maxFPS() const

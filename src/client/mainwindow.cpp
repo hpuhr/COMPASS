@@ -170,9 +170,13 @@ MainWindow::MainWindow()
     connect(live_pause_resume_button_, &QPushButton::clicked, this, &MainWindow::livePauseResumeSlot);
     bottom_layout->addWidget(live_pause_resume_button_);
 
-    live_stop_button_ = new QPushButton("Stop");
-    connect(live_stop_button_, &QPushButton::clicked, this, &MainWindow::liveStopSlot);
-    bottom_layout->addWidget(live_stop_button_);
+    if (!COMPASS::instance().disableLiveToOfflineSwitch())
+    {
+        live_stop_button_ = new QPushButton("Stop");
+        connect(live_stop_button_, &QPushButton::clicked, this, &MainWindow::liveStopSlot);
+
+        bottom_layout->addWidget(live_stop_button_);
+    }
 
     bottom_layout->addStretch();
 
@@ -471,7 +475,6 @@ void MainWindow::updateBottomWidget()
 
     assert (load_button_);
     assert (live_pause_resume_button_);
-    assert (live_stop_button_);
 
     AppMode app_mode = compass.appMode();
 
@@ -480,14 +483,18 @@ void MainWindow::updateBottomWidget()
         load_button_->setHidden(true);
 
         live_pause_resume_button_->setHidden(true);
-        live_stop_button_->setHidden(true);
+
+        if (live_stop_button_)
+            live_stop_button_->setHidden(true);
     }
     else if (app_mode == AppMode::Offline)
     {
         load_button_->setHidden(false);
 
         live_pause_resume_button_->setHidden(true);
-        live_stop_button_->setHidden(true);
+
+        if (live_stop_button_)
+            live_stop_button_->setHidden(true);
     }
     else if (app_mode == AppMode::LivePaused)
     {
@@ -495,7 +502,9 @@ void MainWindow::updateBottomWidget()
 
         live_pause_resume_button_->setHidden(false);
         live_pause_resume_button_->setText("Resume");
-        live_stop_button_->setHidden(false);
+
+        if (live_stop_button_)
+            live_stop_button_->setHidden(false);
     }
     else if (app_mode == AppMode::LiveRunning)
     {
@@ -503,7 +512,9 @@ void MainWindow::updateBottomWidget()
 
         live_pause_resume_button_->setHidden(false);
         live_pause_resume_button_->setText("Pause");
-        live_stop_button_->setHidden(false);
+
+        if (live_stop_button_)
+            live_stop_button_->setHidden(false);
     }
     else
         logerr << "MainWindow: updateBottomWidget: unknown app mode " << (unsigned int) COMPASS::instance().appMode();

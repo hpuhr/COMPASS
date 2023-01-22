@@ -85,6 +85,7 @@ protected:
 
     bool hide_evaluation_ {false};
     bool hide_viewpoints_ {false};
+    bool disable_live_to_offline_switch_ {false};
 
     unsigned int max_fps_ {30};
 
@@ -134,6 +135,7 @@ public:
     unsigned int maxFPS() const;
     void maxFPS(unsigned int max_fps);
 
+    bool disableLiveToOfflineSwitch() const;
 };
 
 #endif /* COMPASS_H_ */

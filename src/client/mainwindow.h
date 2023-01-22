@@ -217,7 +217,7 @@ protected:
     QPushButton* load_button_{nullptr};
 
     QPushButton* live_pause_resume_button_{nullptr};
-    QPushButton* live_stop_button_{nullptr};
+    QPushButton* live_stop_button_{nullptr}; // optional button, may be nullptr
 
     void createMenus ();
 
