@@ -126,8 +126,6 @@ MainWindow::MainWindow()
 
     QTabBar *tabBar = tab_widget_->tabBar();
 
-    use_filters_ = new QCheckBox();
-
     tabBar->setTabButton(1, QTabBar::LeftSide, COMPASS::instance().filterManager().widget()->filtersCheckBox());
     //tabBar->setTabButton(0, QTabBar::RightSide, new QLabel("label0"));
 
