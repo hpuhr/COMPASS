@@ -131,8 +131,7 @@ std::vector<std::string> LabelGenerator::getLabelTexts(
                         buffer->get<unsigned int>(acad_var->name()).get(buffer_index));
         else if (buffer->has<unsigned int>(m3a_var.name()) &&
                  !buffer->get<unsigned int>(m3a_var.name()).isNull(buffer_index))
-            main_id = m3a_var.getAsSpecialRepresentationString(
-                        buffer->get<unsigned int>(m3a_var.name()).get(buffer_index));
+            main_id = getMode3AText(dbcontent_name, buffer_index, buffer);
 
         tmp.push_back(main_id);
     }
@@ -163,7 +162,7 @@ std::vector<std::string> LabelGenerator::getLabelTexts(
 
     if (buffer->has<unsigned int>(m3a_var.name()) &&
             !buffer->get<unsigned int>(m3a_var.name()).isNull(buffer_index))
-        m3a = m3a_var.getAsSpecialRepresentationString(buffer->get<unsigned int>(m3a_var.name()).get(buffer_index));
+        m3a = getMode3AText(dbcontent_name, buffer_index, buffer);
 
     tmp.push_back(m3a);
 
@@ -173,7 +172,7 @@ std::vector<std::string> LabelGenerator::getLabelTexts(
 
     if (buffer->has<float>(mc_var.name()) &&
             !buffer->get<float>(mc_var.name()).isNull(buffer_index))
-        mc = String::doubleToStringPrecision(buffer->get<float>(mc_var.name()).get(buffer_index)/100.0,2);
+        mc = getModeCText(dbcontent_name, buffer_index, buffer);
 
     tmp.push_back(mc);
 
@@ -276,8 +275,7 @@ std::vector<std::string> LabelGenerator::getFullTexts(const std::string& dbconte
             else if (buffer->has<unsigned int>(m3a_var.name()) &&
                      !buffer->get<unsigned int>(m3a_var.name()).isNull(buffer_index))
             {
-                value = m3a_var.getAsSpecialRepresentationString(
-                            buffer->get<unsigned int>(m3a_var.name()).get(buffer_index));
+                value = getMode3AText(dbcontent_name, buffer_index, buffer);
                 value += " ("+m3a_var.name()+")";
             }
 
@@ -334,7 +332,7 @@ std::vector<std::string> LabelGenerator::getFullTexts(const std::string& dbconte
         if (buffer->has<unsigned int>(m3a_var.name()) &&
                 !buffer->get<unsigned int>(m3a_var.name()).isNull(buffer_index))
         {
-            value = m3a_var.getAsSpecialRepresentationString(buffer->get<unsigned int>(m3a_var.name()).get(buffer_index));
+            value = getMode3AText(dbcontent_name, buffer_index, buffer);
         }
         tmp.push_back(varname);
         tmp.push_back(value);
@@ -352,7 +350,7 @@ std::vector<std::string> LabelGenerator::getFullTexts(const std::string& dbconte
         if (buffer->has<float>(mc_var.name()) &&
                 !buffer->get<float>(mc_var.name()).isNull(buffer_index))
         {
-            value = String::doubleToStringPrecision(buffer->get<float>(mc_var.name()).get(buffer_index),0);
+            value = getModeCText(dbcontent_name, buffer_index, buffer);
         }
         tmp.push_back(varname);
         tmp.push_back(value);
@@ -1258,6 +1256,44 @@ void LabelGenerator::addVariables (const std::string& dbcontent_name, dbContent:
         if (!read_set.hasVariable(var))
             read_set.add(var);
     }
+
+    // "Mode C Garbled"
+    if (dbcont_manager_.metaCanGetVariable(dbcontent_name, DBContent::meta_var_mc_g_))
+    {
+        Variable& var = dbcont_manager_.metaGetVariable(dbcontent_name, DBContent::meta_var_mc_g_);
+        if (!read_set.hasVariable(var))
+            read_set.add(var);
+    }
+    // "Mode C Valid"
+    if (dbcont_manager_.metaCanGetVariable(dbcontent_name, DBContent::meta_var_mc_v_))
+    {
+        Variable& var = dbcont_manager_.metaGetVariable(dbcontent_name, DBContent::meta_var_mc_v_);
+        if (!read_set.hasVariable(var))
+            read_set.add(var);
+    }
+
+    // "Mode 3/A Valid"
+    if (dbcont_manager_.metaCanGetVariable(dbcontent_name, DBContent::meta_var_m3a_smoothed_))
+    {
+        Variable& var = dbcont_manager_.metaGetVariable(dbcontent_name, DBContent::meta_var_m3a_smoothed_);
+        if (!read_set.hasVariable(var))
+            read_set.add(var);
+    }
+    // "Mode 3/A Garbled"
+    if (dbcont_manager_.metaCanGetVariable(dbcontent_name, DBContent::meta_var_m3a_g_))
+    {
+        Variable& var = dbcont_manager_.metaGetVariable(dbcontent_name, DBContent::meta_var_m3a_g_);
+        if (!read_set.hasVariable(var))
+            read_set.add(var);
+    }
+
+    // "Mode 3/A Smoothed"
+    if (dbcont_manager_.metaCanGetVariable(dbcontent_name, DBContent::meta_var_m3a_v_))
+    {
+        Variable& var = dbcont_manager_.metaGetVariable(dbcontent_name, DBContent::meta_var_m3a_v_);
+        if (!read_set.hasVariable(var))
+            read_set.add(var);
+    }
 }
 
 bool LabelGenerator::declutterLabels() const
@@ -1727,6 +1763,106 @@ std::string LabelGenerator::getVariableUnit(const std::string& dbcontent_name, u
     assert (db_content.hasVariable(varname));
 
     return db_content.variable(varname).dimensionUnitStr();
+}
+
+std::string LabelGenerator::getMode3AText (const std::string& dbcontent_name,
+                                           unsigned int buffer_index, std::shared_ptr<Buffer>& buffer)
+{
+    string text;
+
+    Variable& m3a_var = dbcont_manager_.metaGetVariable(dbcontent_name, DBContent::meta_var_m3a_);
+
+    if (buffer->has<unsigned int>(m3a_var.name()) &&
+                     !buffer->get<unsigned int>(m3a_var.name()).isNull(buffer_index))
+    {
+        text = m3a_var.getAsSpecialRepresentationString(
+                    buffer->get<unsigned int>(m3a_var.name()).get(buffer_index));
+
+        bool valid=false, garbled=false, smoothed=false;
+
+        // "Mode 3/A Valid"
+        if (dbcont_manager_.metaCanGetVariable(dbcontent_name, DBContent::meta_var_m3a_v_))
+        {
+            Variable& var = dbcont_manager_.metaGetVariable(dbcontent_name, DBContent::meta_var_m3a_v_);
+
+            if (buffer->has<bool>(var.name()) && !buffer->get<bool>(var.name()).isNull(buffer_index))
+                valid = buffer->get<bool>(var.name()).get(buffer_index);
+        }
+        // "Mode 3/A Garbled"
+        if (dbcont_manager_.metaCanGetVariable(dbcontent_name, DBContent::meta_var_m3a_g_))
+        {
+            Variable& var = dbcont_manager_.metaGetVariable(dbcontent_name, DBContent::meta_var_m3a_g_);
+
+            if (buffer->has<bool>(var.name()) && !buffer->get<bool>(var.name()).isNull(buffer_index))
+                garbled = buffer->get<bool>(var.name()).get(buffer_index);
+        }
+
+        // "Mode 3/A Smoothed"
+        if (dbcont_manager_.metaCanGetVariable(dbcontent_name, DBContent::meta_var_m3a_smoothed_))
+        {
+            Variable& var = dbcont_manager_.metaGetVariable(dbcontent_name, DBContent::meta_var_m3a_smoothed_);
+
+            if (buffer->has<bool>(var.name()) && !buffer->get<bool>(var.name()).isNull(buffer_index))
+                smoothed = buffer->get<bool>(var.name()).get(buffer_index);
+        }
+
+        if (!valid || garbled || smoothed)
+            text += " ";
+
+        if (!valid)
+            text += "I";
+
+        if (garbled)
+            text += "G";
+
+        if (smoothed)
+            text += "S";
+    }
+
+    return text;
+}
+std::string LabelGenerator::getModeCText (const std::string& dbcontent_name,
+                                          unsigned int buffer_index, std::shared_ptr<Buffer>& buffer)
+{
+    string text;
+
+    Variable& mc_var = dbcont_manager_.metaGetVariable(dbcontent_name, DBContent::meta_var_mc_);
+
+    if (buffer->has<float>(mc_var.name()) &&
+                     !buffer->get<float>(mc_var.name()).isNull(buffer_index))
+    {
+        text = String::doubleToStringPrecision(buffer->get<float>(mc_var.name()).get(buffer_index)/100.0,2);
+
+        bool valid=false, garbled=false;
+
+        // "Mode CValid"
+        if (dbcont_manager_.metaCanGetVariable(dbcontent_name, DBContent::meta_var_mc_v_))
+        {
+            Variable& var = dbcont_manager_.metaGetVariable(dbcontent_name, DBContent::meta_var_mc_v_);
+
+            if (buffer->has<bool>(var.name()) && !buffer->get<bool>(var.name()).isNull(buffer_index))
+                valid = buffer->get<bool>(var.name()).get(buffer_index);
+        }
+        // "Mode C Garbled"
+        if (dbcont_manager_.metaCanGetVariable(dbcontent_name, DBContent::meta_var_mc_g_))
+        {
+            Variable& var = dbcont_manager_.metaGetVariable(dbcontent_name, DBContent::meta_var_mc_g_);
+
+            if (buffer->has<bool>(var.name()) && !buffer->get<bool>(var.name()).isNull(buffer_index))
+                garbled = buffer->get<bool>(var.name()).get(buffer_index);
+        }
+
+        if (!valid || garbled)
+            text += " ";
+
+        if (!valid)
+            text += "I";
+
+        if (garbled)
+            text += "G";
+    }
+
+    return text;
 }
 
 }

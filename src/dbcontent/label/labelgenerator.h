@@ -180,6 +180,11 @@ protected:
     std::string getVariableValue(const std::string& dbcontent_name, unsigned int key,
                                  std::shared_ptr<Buffer>& buffer, unsigned int index);
     std::string getVariableUnit(const std::string& dbcontent_name, unsigned int key);
+
+    std::string getMode3AText (const std::string& dbcontent_name,
+                               unsigned int buffer_index, std::shared_ptr<Buffer>& buffer);
+    std::string getModeCText (const std::string& dbcontent_name,
+                              unsigned int buffer_index, std::shared_ptr<Buffer>& buffer);
 };
 
 }
