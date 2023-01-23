@@ -225,7 +225,7 @@ void ViewManager::enableStoredReadSets()
 
     for (const auto& cont_it : COMPASS::instance().dbContentManager())
     {
-        loginf << "ViewManager: enableStoredReadSets: stored readset for '" << cont_it.first << "'";
+        logdbg << "ViewManager: enableStoredReadSets: stored readset for '" << cont_it.first << "'";
         tmp_stored_readset_[cont_it.first] = getReadSet(cont_it.first);
     }
 
@@ -243,7 +243,7 @@ dbContent::VariableSet ViewManager::getReadSet(const std::string& dbcontent_name
 {
     if (use_tmp_stored_readset_)
     {
-        loginf << "ViewManager: getReadSet: stored readset for '" << dbcontent_name << "'";
+        logdbg << "ViewManager: getReadSet: stored readset for '" << dbcontent_name << "'";
         assert (tmp_stored_readset_.count(dbcontent_name));
         return tmp_stored_readset_.at(dbcontent_name);
     }
@@ -558,7 +558,7 @@ void ViewManager::resetToStartupConfiguration()
         //containers_.erase(first_it);  // TODO CAUSES SEGFAULT, FIX THIS
     }
 
-    loginf << "ViewManager: resetToStartupConfiguration: view points generator";
+    logdbg << "ViewManager: resetToStartupConfiguration: view points generator";
     view_points_report_gen_->setTmpDisableRemoveConfigOnDelete(true);
     view_points_report_gen_ = nullptr;
 
