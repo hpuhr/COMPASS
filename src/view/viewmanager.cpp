@@ -541,9 +541,10 @@ void ViewManager::resetToStartupConfiguration()
     {
         auto first_it = container_widgets_.begin();
         logdbg << "ViewManager: resetToStartupConfiguration: deleting container widget " << first_it->first;
-        delete first_it->second; // deletes the respective view container, which removes itself from this
 
         first_it->second->setTmpDisableRemoveConfigOnDelete(true);
+        delete first_it->second; // deletes the respective view container, which removes itself from this
+
         container_widgets_.erase(first_it);
     }
 
