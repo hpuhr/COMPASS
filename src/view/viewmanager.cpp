@@ -219,8 +219,35 @@ void ViewManager::checkSubConfigurables()
     }
 }
 
+void ViewManager::enableStoredReadSets()
+{
+    loginf << "ViewManager: enableStoredReadSets";
+
+    for (const auto& cont_it : COMPASS::instance().dbContentManager())
+    {
+        loginf << "ViewManager: enableStoredReadSets: stored readset for '" << cont_it.first << "'";
+        tmp_stored_readset_[cont_it.first] = getReadSet(cont_it.first);
+    }
+
+    use_tmp_stored_readset_ = true;
+}
+void ViewManager::disableStoredReadSets()
+{
+    loginf << "ViewManager: disableStoredReadSets";
+
+    use_tmp_stored_readset_ = false;
+    tmp_stored_readset_.clear();
+}
+
 dbContent::VariableSet ViewManager::getReadSet(const std::string& dbcontent_name)
 {
+    if (use_tmp_stored_readset_)
+    {
+        loginf << "ViewManager: getReadSet: stored readset for '" << dbcontent_name << "'";
+        assert (tmp_stored_readset_.count(dbcontent_name));
+        return tmp_stored_readset_.at(dbcontent_name);
+    }
+
     dbContent::VariableSet read_set;
     dbContent::VariableSet read_set_tmp;
 
@@ -501,6 +528,43 @@ void ViewManager::disableDataDistribution(bool value)
 bool ViewManager::isProcessingData() const
 {
     return processing_data_;
+}
+
+void ViewManager::resetToStartupConfiguration()
+{
+    loginf << "ViewManager: resetToStartupConfiguration";
+
+    enableStoredReadSets();
+
+    logdbg << "ViewManager: resetToStartupConfiguration: deleting container widgets";
+    while (container_widgets_.size())
+    {
+        auto first_it = container_widgets_.begin();
+        logdbg << "ViewManager: resetToStartupConfiguration: deleting container widget " << first_it->first;
+        delete first_it->second; // deletes the respective view container, which removes itself from this
+
+        first_it->second->setTmpDisableRemoveConfigOnDelete(true);
+        container_widgets_.erase(first_it);
+    }
+
+    logdbg << "ViewManager: resetToStartupConfiguration: deleting containers size " << containers_.size();
+    while (containers_.size())
+    {
+        auto first_it = containers_.begin();
+        logdbg << "ViewManager: resetToStartupConfiguration: deleting container " << first_it->first;
+
+        first_it->second->setTmpDisableRemoveConfigOnDelete(true);
+        delete first_it->second;
+        //containers_.erase(first_it);  // TODO CAUSES SEGFAULT, FIX THIS
+    }
+
+    loginf << "ViewManager: resetToStartupConfiguration: view points generator";
+    view_points_report_gen_->setTmpDisableRemoveConfigOnDelete(true);
+    view_points_report_gen_ = nullptr;
+
+    createSubConfigurables();
+
+    disableStoredReadSets();
 }
 
 ViewContainerWidget* ViewManager::addNewContainerWidget()

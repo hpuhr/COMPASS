@@ -352,7 +352,7 @@ void MainWindow::createMenus ()
 
     QAction* calc_radar_plpos_action = new QAction(tr("Calculate Radar Plot Positions"));
     calc_radar_plpos_action->setToolTip(tr("Calculate Radar Plot Positios, only needed if Radar Position information"
-                                             " was changed"));
+                                           " was changed"));
     connect(calc_radar_plpos_action, &QAction::triggered, this, &MainWindow::calculateRadarPlotPositionsSlot);
     process_menu_->addAction(calc_radar_plpos_action);
 
@@ -366,12 +366,23 @@ void MainWindow::createMenus ()
     connect(assoc_artas_action, &QAction::triggered, this, &MainWindow::calculateAssociationsARTASSlot);
     process_menu_->addAction(assoc_artas_action);
 
+
+    // process menu
+    ui_menu_ = menuBar()->addMenu(tr("&UI"));
+    ui_menu_->setToolTipsVisible(true);
+
+    QAction* reset_views_action = new QAction(tr("Reset Views"));
+    reset_views_action->setToolTip(tr("Reset Data Sources, Filters and Views to startup configuration"));
+    connect(reset_views_action, &QAction::triggered, this, &MainWindow::resetViewsMenuSlot);
+    ui_menu_->addAction(reset_views_action);
+
+
     //tests
-//#if 1
-//    QAction* test_action = new QAction(tr("Run test code"));
-//    config_menu->addAction(test_action);
-//    connect(test_action, &QAction::triggered, this, &MainWindow::runTestCodeSlot);
-//#endif
+    //#if 1
+    //    QAction* test_action = new QAction(tr("Run test code"));
+    //    config_menu->addAction(test_action);
+    //    connect(test_action, &QAction::triggered, this, &MainWindow::runTestCodeSlot);
+    //#endif
 }
 
 void MainWindow::updateMenus()
@@ -456,7 +467,7 @@ void MainWindow::updateMenus()
 
     assert (config_menu_);
     config_menu_->setDisabled(!db_open || COMPASS::instance().taskManager().asterixImporterTask().isRunning()
-                          || in_live_running || in_live_paused);
+                              || in_live_running || in_live_paused);
 }
 
 void MainWindow::updateBottomWidget()
@@ -1152,12 +1163,12 @@ void MainWindow::performAutomaticTasks ()
                     }
                     else
                         logerr << "MainWindow: performAutomaticTasks: "
-                                      "exporting evaluation report not possible since report can't be generated";
+                                  "exporting evaluation report not possible since report can't be generated";
                 }
             }
             else
                 logerr << "MainWindow: performAutomaticTasks: "
-                              "evaluation not possible since evaluation can not be performed";
+                          "evaluation not possible since evaluation can not be performed";
         }
     }
 
@@ -1492,6 +1503,61 @@ void MainWindow::showAddViewMenuSlot()
 {
     loginf << "MainWindow: showAddViewMenuSlot";
     COMPASS::instance().viewManager().showMainViewContainerAddView();
+}
+
+void MainWindow::resetViewsMenuSlot()
+{
+    loginf << "MainWindow: resetViewsMenuSlot";
+
+    QMessageBox::StandardButton reply;
+    reply = QMessageBox::question(
+                nullptr, "Reset Views",
+                "Confirm to reset Data Sources, Filters and Views to startup configuration?",
+                QMessageBox::Yes|QMessageBox::No);
+
+    if (reply == QMessageBox::Yes)
+    {
+        QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+
+        QMessageBox msg_box;
+        msg_box.setWindowTitle("Resetting");
+        msg_box.setText( "Please wait...");
+        msg_box.setStandardButtons(QMessageBox::NoButton);
+        msg_box.setWindowModality(Qt::ApplicationModal);
+        msg_box.show();
+
+        boost::posix_time::ptime start_time = boost::posix_time::microsec_clock::local_time();
+
+        setVisible(false);
+
+        while ((boost::posix_time::microsec_clock::local_time()-start_time).total_milliseconds() < 50)
+        {
+            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+            QThread::msleep(1);
+        }
+
+        // reset stuff
+        COMPASS::instance().dataSourceManager().resetToStartupConfiguration();
+
+        COMPASS::instance().filterManager().resetToStartupConfiguration();
+
+        COMPASS::instance().viewManager().resetToStartupConfiguration();
+
+         // set AppMode
+        if (COMPASS::instance().appMode() == AppMode::LivePaused)
+            COMPASS::instance().appMode(AppMode::LiveRunning);
+        else
+        {
+            COMPASS::instance().viewManager().appModeSwitchSlot(
+                        COMPASS::instance().appMode(), COMPASS::instance().appMode());
+        }
+
+        msg_box.close();
+
+        setVisible(true);
+
+        QApplication::restoreOverrideCursor();
+    }
 }
 
 void MainWindow::appModeSwitchSlot (AppMode app_mode_previous, AppMode app_mode_current)

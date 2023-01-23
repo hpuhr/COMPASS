@@ -82,6 +82,8 @@ public slots:
     void quitRequestedSlot();
     void showAddViewMenuSlot();
 
+    void resetViewsMenuSlot();
+
     void appModeSwitchSlot (AppMode app_mode_previous, AppMode app_mode_current);
 
 private slots:
@@ -209,6 +211,9 @@ protected:
 
     // process menu
     QMenu* process_menu_ {nullptr};
+
+    // ui menu
+    QMenu* ui_menu_ {nullptr};
 
     bool loading_{false};
 

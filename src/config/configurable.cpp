@@ -136,7 +136,8 @@ Configurable::~Configurable()
     {
         logdbg << "Configurable: destructor: class_id " << class_id_ << " instance_id "
                << instance_id_ << ": removal from parent";
-        parent_->removeChildConfigurable(*this);
+        parent_->removeChildConfigurable(*this, !tmp_disable_remove_config_on_delete_);
+        // in case cfg to be used later, see ViewManager::resetToStartupConfiguration
     }
 
     if (is_root_)
@@ -324,6 +325,18 @@ bool Configurable::hasSubConfigurable(const std::string& class_id, const std::st
 {
     assert(configuration_);
     return (children_.find(class_id + instance_id) != children_.end());
+}
+
+void Configurable::setTmpDisableRemoveConfigOnDelete(bool value)
+{
+    loginf << "Configurable::setTmpDisableRemoveConfigOnDelete: value " << value;
+
+    tmp_disable_remove_config_on_delete_ = value;
+
+    for (auto it = children_.begin(); it != children_.end(); it++)
+    {
+        it->second.setTmpDisableRemoveConfigOnDelete(value);
+    }
 }
 
 // void Configurable::saveConfigurationAsTemplate (const std::string& template_name)
