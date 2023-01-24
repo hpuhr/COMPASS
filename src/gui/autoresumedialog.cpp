@@ -5,6 +5,8 @@
 #include <QPushButton>
 #include <QVBoxLayout>
 
+#include <cassert>
+
 AutoResumeDialog::AutoResumeDialog(unsigned int resume_time_s, QWidget *parent, Qt::WindowFlags f)
     : QDialog(parent, f)
 {

@@ -59,8 +59,6 @@
 #include "createassociationstask.h"
 #include "createassociationstaskdialog.h"
 
-#include "autoresumedialog.h"
-
 #include <QApplication>
 #include <QFileDialog>
 #include <QCloseEvent>

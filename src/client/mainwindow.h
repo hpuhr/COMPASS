@@ -20,8 +20,11 @@
 
 #include "global.h"
 #include "appmode.h"
+#include "autoresumedialog.h"
 
 #include <QMainWindow>
+
+#include <memory>
 
 class QLabel;
 class QPushButton;
@@ -36,7 +39,6 @@ class DBSelectionWidget;
 class DBSchemaManagerWidget;
 class DBContentManagerWidget;
 class MainLoadWidget;
-class AutoResumeDialog;
 
 class MainWindow : public QMainWindow
 {
