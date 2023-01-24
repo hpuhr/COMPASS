@@ -117,6 +117,8 @@ class ViewManager : public QObject, public Configurable
 
     void resetToStartupConfiguration();
 
+    bool isInitialized() const;
+
 protected:
     COMPASS& compass_;
 

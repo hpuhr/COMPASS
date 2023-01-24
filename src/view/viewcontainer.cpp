@@ -29,6 +29,7 @@
 #include "view.h"
 #include "viewcontainer.h"
 #include "viewmanager.h"
+#include "compass.h"
 
 #if USE_EXPERIMENTAL_SOURCE == true
 #include "osgview.h"
@@ -58,6 +59,8 @@ ViewContainer::ViewContainer(const std::string& class_id, const std::string& ins
     logdbg << "ViewContainer: ctor: window " << window_cnt_;
     assert(tab_widget_);
 
+    disable_add_remove_views_ = COMPASS::instance().disableAddRemoveViews();
+
     if (window_cnt != 0)
     {
         QPushButton* add_button = new QPushButton(tab_widget_);
@@ -65,6 +68,7 @@ ViewContainer::ViewContainer(const std::string& class_id, const std::string& ins
         add_button->setFixedSize(UI_ICON_SIZE);
         add_button->setFlat(UI_ICON_BUTTON_FLAT);
         add_button->setToolTip(tr("Add view"));
+        add_button->setDisabled(disable_add_remove_views_);
         connect(add_button, &QPushButton::clicked, this, &ViewContainer::showAddViewMenuSlot);
         tab_widget_->setCornerWidget(add_button);
     }
@@ -89,6 +93,7 @@ ViewContainer::~ViewContainer()
 
 void ViewContainer::addView(const std::string& class_name)
 {
+    assert (!disable_add_remove_views_);
     generateSubConfigurable(class_name, class_name + std::to_string(view_manager_.newViewNumber()));
 }
 
@@ -139,12 +144,15 @@ void ViewContainer::addView(View* view)
     manage_button->setFlat(UI_ICON_BUTTON_FLAT);
     manage_button->setToolTip(tr("Manage view"));
     manage_button->setProperty("view_instance_id", view->instanceId().c_str());
+    manage_button->setDisabled(disable_add_remove_views_);
     connect(manage_button, SIGNAL(clicked()), this, SLOT(showViewMenuSlot()));
     tab_widget_->tabBar()->setTabButton(index, QTabBar::RightSide, manage_button);
 }
 
 void ViewContainer::deleteViewSlot()
 {
+    assert (!disable_add_remove_views_);
+
     QAction* action = dynamic_cast<QAction*>(sender());
     assert (action);
 
@@ -163,6 +171,8 @@ void ViewContainer::deleteViewSlot()
 
 void ViewContainer::addNewViewSlot()
 {
+    assert (!disable_add_remove_views_);
+
     QAction* action = dynamic_cast<QAction*>(sender());
     assert (action);
 
@@ -260,6 +270,7 @@ std::string ViewContainer::getWindowName()
 void ViewContainer::showAddViewMenuSlot()
 {
     loginf << "ViewContainer: showAddViewMenuSlot: window " << window_cnt_;
+    assert (!disable_add_remove_views_);
 
     QMenu menu;
 
@@ -287,6 +298,8 @@ void ViewContainer::showAddViewMenuSlot()
 void ViewContainer::showViewMenuSlot()
 {
     loginf << "ViewContainer: showViewMenuSlot: window " << window_cnt_;
+
+    assert (!disable_add_remove_views_);
 
     QPushButton* button = dynamic_cast<QPushButton*>(sender());
     assert (button);

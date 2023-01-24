@@ -197,6 +197,7 @@ protected:
     QMenu* open_recent_db_menu_ {nullptr};
     QAction* export_db_action_ {nullptr};
     QAction* close_db_action_ {nullptr};
+    QAction* quit_wo_cfg_sav_action_ {nullptr};
 
     // configure sectors
     QAction* sectors_action_ {nullptr};

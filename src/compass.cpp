@@ -57,6 +57,11 @@ COMPASS::COMPASS() : Configurable("COMPASS", "COMPASS0", 0, "compass.json")
     registerParameter("hide_viewpoints", &hide_viewpoints_, false);
 
     registerParameter("disable_live_to_offline_switch", &disable_live_to_offline_switch_, false);
+    registerParameter("disable_menu_config_save", &disable_menu_config_save_, false);
+
+    registerParameter("disable_osgview_rotate", &disable_osgview_rotate_, false);
+
+    registerParameter("disable_add_remove_views", &disable_add_remove_views_, false);
 
     JobManager::instance().start();
 
@@ -300,8 +305,32 @@ void COMPASS::exportDBFile(const std::string& filename)
 
     assert (db_opened_);
     assert (db_interface_);
+    assert (!db_export_in_progress_);
+
+    db_export_in_progress_ = true;
+
+    boost::posix_time::ptime start_time = boost::posix_time::microsec_clock::local_time();
+
+    QMessageBox* msg_box = new QMessageBox;
+
+    msg_box->setWindowTitle("Exporting Database");
+    msg_box->setText("Please wait ...");
+    msg_box->setStandardButtons(QMessageBox::NoButton);
+    msg_box->setWindowModality(Qt::ApplicationModal);
+    msg_box->show();
+
+    while ((boost::posix_time::microsec_clock::local_time()-start_time).total_milliseconds() < 50)
+    {
+        QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+        QThread::msleep(1);
+    }
 
     db_interface_->exportDBFile(filename);
+
+    msg_box->close();
+    delete msg_box;
+
+    db_export_in_progress_ = false;
 }
 
 void COMPASS::closeDB()
@@ -435,6 +464,26 @@ MainWindow& COMPASS::mainWindow()
 
     assert(main_window_);
     return *main_window_;
+}
+
+bool COMPASS::dbExportInProgress() const
+{
+    return db_export_in_progress_;
+}
+
+bool COMPASS::disableAddRemoveViews() const
+{
+    return disable_add_remove_views_;
+}
+
+bool COMPASS::disableOSGViewRotate() const
+{
+    return disable_osgview_rotate_;
+}
+
+bool COMPASS::disableMenuConfigSave() const
+{
+    return disable_menu_config_save_;
 }
 
 bool COMPASS::disableLiveToOfflineSwitch() const

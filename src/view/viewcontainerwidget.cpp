@@ -17,11 +17,6 @@
 
 #include "viewcontainerwidget.h"
 
-#include <QMoveEvent>
-#include <QResizeEvent>
-#include <QTabWidget>
-#include <QVBoxLayout>
-
 #include "compass.h"
 #include "config.h"
 #include "files.h"
@@ -29,6 +24,12 @@
 #include "stringconv.h"
 #include "viewcontainer.h"
 #include "viewmanager.h"
+
+#include <QMoveEvent>
+#include <QResizeEvent>
+#include <QTabWidget>
+#include <QVBoxLayout>
+#include <QMessageBox>
 
 using namespace Utils;
 
@@ -49,8 +50,8 @@ ViewContainerWidget::ViewContainerWidget(const std::string& class_id,
 
     name_ = "Window" + std::to_string(String::getAppendedInt(instanceId()));
 
-    QIcon atsdb_icon(Files::getIconFilepath("ats.png").c_str());
-    setWindowIcon(atsdb_icon);  // for the glory of the empire
+    QIcon ats_icon(Files::getIconFilepath("ats.png").c_str());
+    setWindowIcon(ats_icon);  // for the glory of the empire
 
     std::string title = "OpenATS COMPASS v" + COMPASS::instance().config().getString("version") + " " + name_;
     QWidget::setWindowTitle(title.c_str());
@@ -71,6 +72,9 @@ ViewContainerWidget::ViewContainerWidget(const std::string& class_id,
     setAttribute(Qt::WA_DeleteOnClose, true);
 
     createSubConfigurables();
+
+    if (COMPASS::instance().disableAddRemoveViews())
+        setWindowFlags(Qt::Window | Qt::WindowMinimizeButtonHint | Qt::WindowMaximizeButtonHint);
 
     show();
 
@@ -118,7 +122,7 @@ ViewContainer& ViewContainerWidget::viewContainer() const { return *view_contain
 void ViewContainerWidget::closeEvent(QCloseEvent* event)
 {
     loginf << "ViewContainerWidget: closeEvent: instance " << instanceId();
-    //view_manager_.deleteContainerWidget(instanceId());
+
     view_manager_.removeContainerWidget(instanceId());
     QWidget::closeEvent(event);
 }

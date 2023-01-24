@@ -1122,7 +1122,8 @@ void ASTERIXImportTask::postprocessDoneSlot()
         // TODO change to append
         queued_job_buffers_.emplace_back(std::move(job_buffers));
 
-        if (!insert_active_ && !COMPASS::instance().dbContentManager().loadInProgress())
+        if (!insert_active_ && !COMPASS::instance().dbExportInProgress()
+                && !COMPASS::instance().dbContentManager().loadInProgress())
         {
             logdbg << "ASTERIXImportTask: postprocessDoneSlot: inserting, thread " << QThread::currentThreadId();
             assert (!COMPASS::instance().dbContentManager().insertInProgress());

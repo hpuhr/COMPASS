@@ -100,12 +100,6 @@ MainWindow::MainWindow()
     assert(COMPASS::instance().config().existsId("version"));
     std::string title = "OpenATS COMPASS v" + COMPASS::instance().config().getString("version");
 
-    if (COMPASS::instance().config().existsId("save_config_on_exit"))
-    {
-        save_configuration_ = COMPASS::instance().config().getBool("save_config_on_exit");
-        loginf << "MainWindow: constructor: save configuration on exit " << save_configuration_;
-    }
-
     QWidget::setWindowTitle(title.c_str());
 
     QWidget* main_widget = new QWidget();
@@ -143,6 +137,8 @@ MainWindow::MainWindow()
     add_view_button_->setFixedSize(UI_ICON_SIZE);
     add_view_button_->setFlat(UI_ICON_BUTTON_FLAT);
     add_view_button_->setToolTip(tr("Add view"));
+    add_view_button_->setDisabled(COMPASS::instance().disableAddRemoveViews());
+
     connect(add_view_button_, &QPushButton::clicked, this, &MainWindow::showAddViewMenuSlot);
     tab_widget_->setCornerWidget(add_view_button_);
 
@@ -258,20 +254,22 @@ void MainWindow::createMenus ()
 
     // config operations
 
-    QAction* save_act = new QAction("&Save Config");
-    save_act->setShortcut(tr("Ctrl+S"));
-    connect(save_act, &QAction::triggered, this, &MainWindow::saveConfigSlot);
-    file_menu->addAction(save_act);
+    if (!COMPASS::instance().disableMenuConfigSave())
+    {
+        QAction* save_act = new QAction("&Save Config");
+        save_act->setShortcut(tr("Ctrl+S"));
+        connect(save_act, &QAction::triggered, this, &MainWindow::saveConfigSlot);
+        file_menu->addAction(save_act);
 
-    file_menu->addSeparator();
+        file_menu->addSeparator();
+    }
 
     // quit operations
-
-    QAction* quit2_act = new QAction(tr("Quit &Without Saving Config"));
-    quit2_act->setShortcut(tr("Ctrl+W"));
-    quit2_act->setToolTip(tr("Quit the application withour saving the configuration"));
-    connect(quit2_act, &QAction::triggered, this, &MainWindow::quitWOConfigSlot);
-    file_menu->addAction(quit2_act);
+    quit_wo_cfg_sav_action_ = new QAction(tr("Quit &Without Saving Config"));
+    quit_wo_cfg_sav_action_->setShortcut(tr("Ctrl+W"));
+    quit_wo_cfg_sav_action_->setToolTip(tr("Quit the application withour saving the configuration"));
+    connect(quit_wo_cfg_sav_action_, &QAction::triggered, this, &MainWindow::quitWOConfigSlot);
+    file_menu->addAction(quit_wo_cfg_sav_action_);
 
     QAction* quit_act = new QAction(tr("&Quit"));
     quit_act->setShortcuts(QKeySequence::Quit);
@@ -372,7 +370,8 @@ void MainWindow::createMenus ()
     ui_menu_->setToolTipsVisible(true);
 
     QAction* reset_views_action = new QAction(tr("Reset Views"));
-    reset_views_action->setToolTip(tr("Reset Data Sources, Filters and Views to startup configuration"));
+    reset_views_action->setToolTip(
+                "Enable all data sources, disable all filters and reset Views to startup configuration");
     connect(reset_views_action, &QAction::triggered, this, &MainWindow::resetViewsMenuSlot);
     ui_menu_->addAction(reset_views_action);
 
@@ -398,6 +397,8 @@ void MainWindow::updateMenus()
 
     bool in_live_running = COMPASS::instance().appMode() == AppMode::LiveRunning;
     bool in_live_paused = COMPASS::instance().appMode() == AppMode::LivePaused;
+
+    bool in_live = in_live_running || in_live_paused;
 
     open_recent_db_menu_->clear();
 
@@ -425,21 +426,21 @@ void MainWindow::updateMenus()
 
     bool db_open = COMPASS::instance().dbOpened();
 
-    new_db_action_->setDisabled(db_open || in_live_running);
-    open_existing_db_action_->setDisabled(db_open || in_live_running);
+    new_db_action_->setDisabled(db_open || in_live);
+    open_existing_db_action_->setDisabled(db_open || in_live);
 
     if (recent_file_list.size()) // is disabled otherwise
-        open_recent_db_menu_->setDisabled(db_open || in_live_running);
+        open_recent_db_menu_->setDisabled(db_open || in_live);
 
     export_db_action_->setDisabled(!db_open || in_live_running);
-    close_db_action_->setDisabled(!db_open || in_live_running);
+    close_db_action_->setDisabled(!db_open || in_live);
 
     sectors_action_->setDisabled(!db_open || in_live_running);
 
     import_menu_->setDisabled(!db_open || COMPASS::instance().taskManager().asterixImporterTask().isRunning()
-                              || in_live_running || in_live_paused);
+                              || in_live);
     process_menu_->setDisabled(!db_open || COMPASS::instance().taskManager().asterixImporterTask().isRunning()
-                               || in_live_running || in_live_paused);
+                               || in_live);
 
     assert (import_recent_asterix_menu_);
 
@@ -467,7 +468,7 @@ void MainWindow::updateMenus()
 
     assert (config_menu_);
     config_menu_->setDisabled(!db_open || COMPASS::instance().taskManager().asterixImporterTask().isRunning()
-                              || in_live_running || in_live_paused);
+                              || in_live);
 }
 
 void MainWindow::updateBottomWidget()
@@ -535,6 +536,9 @@ void MainWindow::disableConfigurationSaving()
 {
     logdbg << "MainWindow: disableConfigurationSaving";
     save_configuration_ = false;
+
+    assert (quit_wo_cfg_sav_action_);
+    quit_wo_cfg_sav_action_->setEnabled(save_configuration_);
 }
 
 void MainWindow::showEvaluationTab()
@@ -1274,6 +1278,8 @@ void MainWindow::saveConfigSlot()
 {
     loginf << "MainWindow: saveConfigSlot";
 
+    assert (!COMPASS::instance().disableMenuConfigSave());
+
     ConfigurationManager::getInstance().saveConfiguration();
 }
 
@@ -1502,6 +1508,8 @@ void MainWindow::quitRequestedSlot()
 void MainWindow::showAddViewMenuSlot()
 {
     loginf << "MainWindow: showAddViewMenuSlot";
+
+    assert (!COMPASS::instance().disableAddRemoveViews());
     COMPASS::instance().viewManager().showMainViewContainerAddView();
 }
 
@@ -1512,7 +1520,7 @@ void MainWindow::resetViewsMenuSlot()
     QMessageBox::StandardButton reply;
     reply = QMessageBox::question(
                 nullptr, "Reset Views",
-                "Confirm to reset Data Sources, Filters and Views to startup configuration?",
+                "Confirm to enable all data sources, disable all filters and reset Views to startup configuration?",
                 QMessageBox::Yes|QMessageBox::No);
 
     if (reply == QMessageBox::Yes)

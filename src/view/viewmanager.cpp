@@ -568,6 +568,11 @@ void ViewManager::resetToStartupConfiguration()
     disableStoredReadSets();
 }
 
+bool ViewManager::isInitialized() const
+{
+    return initialized_;
+}
+
 ViewContainerWidget* ViewManager::addNewContainerWidget()
 {
     logdbg << "ViewManager: addNewContainerWidget";
