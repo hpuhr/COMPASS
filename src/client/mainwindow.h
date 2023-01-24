@@ -30,11 +30,13 @@ class QCheckBox;
 class QMenu;
 class QPushButton;
 class QAction;
+class QTimer;
 
 class DBSelectionWidget;
 class DBSchemaManagerWidget;
 class DBContentManagerWidget;
 class MainLoadWidget;
+class AutoResumeDialog;
 
 class MainWindow : public QMainWindow
 {
@@ -85,6 +87,10 @@ public slots:
     void resetViewsMenuSlot();
 
     void appModeSwitchSlot (AppMode app_mode_previous, AppMode app_mode_current);
+
+    void autoResumeTimerSlot();
+    void autoResumeResumeSlot();
+    void autoResumeStaySlot();
 
 private slots:
     void runTestCodeSlot();
@@ -216,14 +222,17 @@ protected:
     // ui menu
     QMenu* ui_menu_ {nullptr};
 
-    bool loading_{false};
+    bool loading_ {false};
 
-    QLabel* db_label_{nullptr};
-    QLabel* status_label_{nullptr};
-    QPushButton* load_button_{nullptr};
+    QLabel* db_label_ {nullptr};
+    QLabel* status_label_ {nullptr};
+    QPushButton* load_button_ {nullptr};
 
-    QPushButton* live_pause_resume_button_{nullptr};
-    QPushButton* live_stop_button_{nullptr}; // optional button, may be nullptr
+    QPushButton* live_pause_resume_button_ {nullptr};
+    QPushButton* live_stop_button_ {nullptr}; // optional button, may be nullptr
+
+    std::unique_ptr<AutoResumeDialog> auto_resume_dialog_;
+    QTimer* auto_resume_timer_ {nullptr};
 
     void createMenus ();
 

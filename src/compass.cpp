@@ -63,6 +63,13 @@ COMPASS::COMPASS() : Configurable("COMPASS", "COMPASS0", 0, "compass.json")
 
     registerParameter("disable_add_remove_views", &disable_add_remove_views_, false);
 
+    registerParameter("auto_live_running_resume_ask_time", &auto_live_running_resume_ask_time_, 60);
+    registerParameter("auto_live_running_resume_ask_wait_time", &auto_live_running_resume_ask_wait_time_, 1);
+
+    assert (auto_live_running_resume_ask_time_ > 0);
+    assert (auto_live_running_resume_ask_wait_time_ > 0);
+    assert (auto_live_running_resume_ask_time_ > auto_live_running_resume_ask_wait_time_);
+
     JobManager::instance().start();
 
     createSubConfigurables();
@@ -464,6 +471,16 @@ MainWindow& COMPASS::mainWindow()
 
     assert(main_window_);
     return *main_window_;
+}
+
+unsigned int COMPASS::autoLiveRunningResumeAskWaitTime() const
+{
+    return auto_live_running_resume_ask_wait_time_;
+}
+
+unsigned int COMPASS::autoLiveRunningResumeAskTime() const
+{
+    return auto_live_running_resume_ask_time_;
 }
 
 bool COMPASS::dbExportInProgress() const

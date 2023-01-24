@@ -90,6 +90,9 @@ protected:
     bool disable_osgview_rotate_ {false};
     bool disable_add_remove_views_ {false};
 
+    unsigned int auto_live_running_resume_ask_time_ {60}; // minutes
+    unsigned int auto_live_running_resume_ask_wait_time_ {1}; // minutes
+
     unsigned int max_fps_ {30};
 
     std::unique_ptr<SimpleConfig> simple_config_;
@@ -145,6 +148,9 @@ public:
     bool disableOSGViewRotate() const;
     bool disableAddRemoveViews() const;
     bool dbExportInProgress() const;
+
+    unsigned int autoLiveRunningResumeAskTime() const; // min
+    unsigned int autoLiveRunningResumeAskWaitTime() const; // min
 };
 
 #endif /* COMPASS_H_ */

@@ -59,6 +59,8 @@
 #include "createassociationstask.h"
 #include "createassociationstaskdialog.h"
 
+#include "autoresumedialog.h"
+
 #include <QApplication>
 #include <QFileDialog>
 #include <QCloseEvent>
@@ -74,6 +76,7 @@
 #include <QVBoxLayout>
 #include <QLabel>
 #include <QCheckBox>
+#include <QTimer>
 
 using namespace Utils;
 using namespace std;
@@ -1597,6 +1600,65 @@ void MainWindow::appModeSwitchSlot (AppMode app_mode_previous, AppMode app_mode_
 
     updateBottomWidget();
     updateMenus();
+
+    if (app_mode_current == AppMode::LivePaused)
+    {
+        assert (!auto_resume_timer_);
+
+        auto_resume_timer_ = new QTimer();
+
+        connect(auto_resume_timer_, &QTimer::timeout, this, &MainWindow::autoResumeTimerSlot);
+        auto_resume_timer_->start(COMPASS::instance().autoLiveRunningResumeAskTime() * 60 * 1000); // min -> ms
+    }
+    else if (auto_resume_timer_)
+    {
+        delete auto_resume_timer_;
+        auto_resume_timer_ = nullptr;
+    }
+
+    if (auto_resume_dialog_)
+    {
+        auto_resume_dialog_->close();
+        auto_resume_dialog_ = nullptr;
+    }
+}
+
+void MainWindow::autoResumeTimerSlot()
+{
+    loginf << "MainWindow: autoResumeTimerSlot";
+
+    assert (!auto_resume_dialog_);
+
+    auto_resume_dialog_.reset(new AutoResumeDialog(COMPASS::instance().autoLiveRunningResumeAskWaitTime() * 60));
+    // min to s
+    connect (auto_resume_dialog_.get(), &AutoResumeDialog::resumeSignal, this, &MainWindow::autoResumeResumeSlot);
+    connect (auto_resume_dialog_.get(), &AutoResumeDialog::stayPausedSignal, this, &MainWindow::autoResumeStaySlot);
+
+    auto_resume_dialog_->show();
+}
+
+void MainWindow::autoResumeResumeSlot()
+{
+    loginf << "MainWindow: autoResumeResumeSlot";
+
+    assert (auto_resume_dialog_);
+    auto_resume_dialog_->close();
+
+    auto_resume_dialog_ = nullptr;
+
+    livePauseResumeSlot();
+}
+
+void MainWindow::autoResumeStaySlot()
+{
+    loginf << "MainWindow: autoResumeStaySlot";
+
+    auto_resume_dialog_->close();
+
+    auto_resume_dialog_ = nullptr;
+
+    // restart timer
+    auto_resume_timer_->start(COMPASS::instance().autoLiveRunningResumeAskTime() * 60 * 1000); // min -> ms
 }
 
 void MainWindow::loadButtonSlot()
