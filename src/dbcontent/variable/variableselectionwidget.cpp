@@ -195,6 +195,8 @@ void VariableSelectionWidget::showMenuSlot() { menu_.exec(QCursor::pos()); }
 
 void VariableSelectionWidget::triggerSlot(QAction* action)
 {
+    std::cout << "TRIGGERED!!!!!!!!!!!!" << std::endl;
+
     assert(object_label_);
     assert(variable_label_);
 
@@ -371,6 +373,11 @@ void VariableSelectionWidget::showMetaVariables(bool show_meta_variables)
 {
     show_meta_variables_ = show_meta_variables;
     updateMenuEntries();
+}
+
+QPushButton* VariableSelectionWidget::selectionButton() const
+{
+    return sel_button_;
 }
 
 }

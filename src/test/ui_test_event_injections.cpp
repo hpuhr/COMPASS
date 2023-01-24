@@ -29,6 +29,7 @@
 #include <QTabWidget>
 #include <QToolBar>
 #include <QLineEdit>
+#include <QTextEdit>
 #include <QSpinBox>
 #include <QDoubleSpinBox>
 #include <QSlider>
@@ -68,6 +69,7 @@ bool injectKeyEvent(QWidget* root,
 bool injectKeysEvent(QWidget* root,
                      const QString& obj_name,
                      const QString& keys, 
+                     PageBreakMode pb_mode,
                      int delay)
 {
     auto w = findObjectAs<QWidget>(root, obj_name);
@@ -81,9 +83,54 @@ bool injectKeysEvent(QWidget* root,
     if (keys.isEmpty())
         return true;
 
-    loginf << "Injecting key sequence " << keys.toStdString();
+    //split text at page breaks
+    QStringList lines = keys.split(QRegExp("\n|\r\n|\r"), Qt::KeepEmptyParts);
 
-    QTest::keyClicks(w.second, keys, Qt::NoModifier, delay);
+    const int nl = lines.count();
+
+    auto logLine = [ & ] (const QString& line) { loginf << "injectKeysEvent: Injecting key sequence " << line.toStdString(); };
+
+    if (pb_mode == PageBreakMode::Forbidden)
+    {
+        if (nl != 1 || lines[ 0 ].isEmpty())
+        {
+            loginf << "injectKeysEvent: Page break found but forbidden";
+            return false;
+        }
+        //inject single line
+        logLine(lines[ 0 ]);
+        QTest::keyClicks(w.second, lines[ 0 ], Qt::NoModifier, delay);
+    }
+    else if (pb_mode == PageBreakMode::Remove)
+    {
+        //inject all non-empty lineS
+        for (int i = 0; i < nl; ++i)
+        {
+            if (!lines[ i ].isEmpty())
+            {
+                logLine(lines[ i ]);
+                QTest::keyClicks(w.second, lines[ i ], Qt::NoModifier, delay);
+            }  
+        }      
+    }
+    else if (pb_mode == PageBreakMode::SplitText)
+    {
+        for (int i = 0; i < nl; ++i)
+        {
+            //inject non-empty text lines
+            if (!lines[ i ].isEmpty())
+            {
+                logLine(lines[ i ]);
+                QTest::keyClicks(w.second, lines[ i ], Qt::NoModifier, delay);
+            }
+            //inject newlines as enter keys
+            if (i < nl - 1)
+            {
+                loginf << "injectKeysEvent: Injecting page break";
+                QTest::keyClick(w.second, Qt::Key_Enter, Qt::NoModifier, delay);
+            }    
+        }
+    }
 
     return true;
 }
@@ -349,8 +396,7 @@ namespace
         {
             int cnt = 0;
             while (!checkActiveAction() && cnt++ <= n)
-                if (!injectKeyEvent(menu, "", key, delay))
-                    return false;
+                QTest::keyEvent(QTest::KeyAction::Click, menu, key, Qt::NoModifier, delay);
 
             return true;
         };
@@ -377,6 +423,20 @@ namespace
         QWidget* current_menu   = menu_widget;  //we start with the main menu
         QAction* current_action = nullptr;
 
+        auto setActive = [ = ] (QWidget* w, QAction* action)
+        {
+            QMenu*    menu     = dynamic_cast<QMenu*>(w);
+            QMenuBar* menu_bar = dynamic_cast<QMenuBar*>(w);
+
+            //the menu widget could be either a QMenu or a QMenuBar
+            if (menu)
+                menu->setActiveAction(action);
+            if (menu_bar)
+                menu_bar->setActiveAction(action);
+
+            return (QAction*)nullptr;
+        };
+
         //iterate over path strings
         for (size_t i = 0; i < np; ++i)
         {
@@ -396,22 +456,18 @@ namespace
             //set current menu to the menu associated with the current action
             if (is_menu)
             {
-                current_menu = current_action->menu();
-
                 //move right to step into the new menu
                 if (!injectKeyEvent(current_menu, "", Qt::Key_Right, delay))
                     return false;
+
+                current_menu = current_action->menu();
             }
         }
 
         loginf << "traverseMenu: Final action is '" << current_action->text().toStdString() << "'";
 
         //fire the final action via enter key
-        if (!injectKeyEvent(current_menu, "", Qt::Key_Enter, delay))
-            return false;
-
-        //if desired we can close the menu, which is normally done by pressing escape
-        if (menu_widget->isVisible() && close && !injectKeyEvent(menu_widget, "", Qt::Key_Escape, delay))
+        if (!injectKeyEvent(current_menu, "", Qt::Key_Return, delay))
             return false;
 
         return true;
@@ -645,7 +701,7 @@ bool injectToolSelectionEvent(QWidget* root,
 }
 
 /**
- * Clears the given line edit object (via event injections) and injects new text into it.
+ * Injects new text into the given edit object (clearing the old content).
  */
 bool injectLineEditEvent(QWidget* root,
                          const QString& obj_name,
@@ -659,12 +715,39 @@ bool injectLineEditEvent(QWidget* root,
         return false;
     }
 
-    //clear line edit
+    //highlight text
     if (!injectKeyCmdEvent(obj.second, "", Qt::CTRL | Qt::Key_A))
         return false;
  
     //fill with new content
-    if (!injectKeysEvent(obj.second, "", text, delay))
+    if (!injectKeysEvent(obj.second, "", text, PageBreakMode::Forbidden, delay))
+        return false;
+
+    return true;
+}
+
+/**
+ * Injects new text into the given edit object (clearing the old content).
+ * The given text may contain line breaks.
+ */
+bool injectTextEditEvent(QWidget* root,
+                         const QString& obj_name,
+                         const QString& text,
+                         int delay)
+{
+    auto obj = findObjectAs<QTextEdit>(root, obj_name);
+    if (obj.first != FindObjectErrCode::NoError)
+    {
+        logObjectError("injectTextEditEvent", obj_name, obj.first);
+        return false;
+    }
+
+    //highlight text
+    if (!injectKeyCmdEvent(obj.second, "", Qt::CTRL | Qt::Key_A))
+        return false;
+
+    //fill with new content
+    if (!injectKeysEvent(obj.second, "", text, PageBreakMode::SplitText, delay))
         return false;
 
     return true;
@@ -692,7 +775,7 @@ bool injectSpinBoxEvent(QWidget* root,
         return false;
  
     //fill with new content
-    if (!injectKeysEvent(obj.second, "", txt, delay))
+    if (!injectKeysEvent(obj.second, "", txt, PageBreakMode::Forbidden, delay))
         return false;
 
     return (obj.second->value() == value);
@@ -722,7 +805,7 @@ bool injectDoubleSpinBoxEvent(QWidget* root,
         return false;
  
     //fill with new content
-    if (!injectKeysEvent(obj.second, "", txt, delay))
+    if (!injectKeysEvent(obj.second, "", txt, PageBreakMode::Forbidden, delay))
         return false;
 
     return (obj.second->value() == value_trunc);
@@ -811,6 +894,8 @@ bool injectCheckBoxEvent(QWidget* root,
 bool injectButtonMenuEvent(QWidget* root,
                            const QString& obj_name,
                            const QStringList& path_to_action,
+                           int x,
+                           int y,
                            int delay)
 {
     auto obj = findObjectAs<QAbstractButton>(root, obj_name);
@@ -820,7 +905,7 @@ bool injectButtonMenuEvent(QWidget* root,
         return false;
     }
 
-    return injectPostModalEvent([ = ] () { return injectClickEvent(obj.second, "", -1, -1, Qt::LeftButton, delay); },
+    return injectPostModalEvent([ = ] () { return injectClickEvent(obj.second, "", x, y, Qt::LeftButton, delay); },
                                 [ = ] () { return injectPopupMenuEvent(path_to_action, delay); });
 }
 

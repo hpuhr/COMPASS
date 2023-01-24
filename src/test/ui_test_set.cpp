@@ -16,26 +16,27 @@
  */
 
 #include "ui_test_set.h"
+#include "ui_test_set_native.h"
 #include "ui_test_find.h"
-#include "ui_test_widget_setters.h"
-#include "ui_test_event_injections.h"
+#include "ui_test_adapters.h"
 
-#include <QObject>
 #include <QWidget>
 
 /**
- * Attempts a cast of the given widget to the given type and invokes
- * the templated value setter if the cast succeeds.
+ * Tries to invoke the given adapter and returns true if the adapter matched the passed widget's type.
  */
-#define TRY_INVOKE_UI_SETTER(WidgetType, widget, value, delay)                               \
-    if (dynamic_cast<WidgetType*>(widget))                                                \
-        return setUIElement<WidgetType>(dynamic_cast<WidgetType*>(widget), value, delay);
+#define TRY_INVOKE_ADAPTER(WidgetType, widget, value, delay)                 \
+    {                                                                        \
+        if (UITestAdapter::setUIElement<WidgetType>(widget, value, delay))   \
+            return true;                                                     \
+    }                                                  
 
 namespace ui_test
 {
 
 /**
  * Widget type agnostic value setter.
+ * Includes checks on adapters.
  */
 bool setUIElement(QWidget* parent, 
                   const QString& obj_name, 
@@ -45,26 +46,12 @@ bool setUIElement(QWidget* parent,
     auto w = findObjectAs<QWidget>(parent, obj_name);
     if (w.first != FindObjectErrCode::NoError)
         return false;
+    
+    //here we can add adapters for special widgets defined in ui_test_adapters.h
+    TRY_INVOKE_ADAPTER(dbContent::VariableSelectionWidget, w.second, value, delay)
 
-    //declare setters for each type of widget here
-    //corresponding template specializations need to be defined in 
-    //ui_test_widget_setters.h
-    TRY_INVOKE_UI_SETTER(QMenuBar, w.second, value, delay)
-    TRY_INVOKE_UI_SETTER(QComboBox, w.second, value, delay)
-    TRY_INVOKE_UI_SETTER(QTabWidget, w.second, value, delay)
-    TRY_INVOKE_UI_SETTER(QToolBar, w.second, value, delay)
-    TRY_INVOKE_UI_SETTER(QLineEdit, w.second, value, delay)
-    TRY_INVOKE_UI_SETTER(QSpinBox, w.second, value, delay)
-    TRY_INVOKE_UI_SETTER(QDoubleSpinBox, w.second, value, delay)
-    TRY_INVOKE_UI_SETTER(QSlider, w.second, value, delay)
-    TRY_INVOKE_UI_SETTER(QCheckBox, w.second, value, delay)
-    TRY_INVOKE_UI_SETTER(QPushButton, w.second, value, delay)
-    TRY_INVOKE_UI_SETTER(QRadioButton, w.second, value, delay)
-    TRY_INVOKE_UI_SETTER(QToolButton, w.second, value, delay)
-    TRY_INVOKE_UI_SETTER(QAbstractButton, w.second, value, delay) //for all other buttons which were not handled before
-
-    //type of widget could not be processed
-    return false;
+    //type of widget could not be processed, try native Qt types
+    return setUIElementNative(parent, obj_name, value, delay);
 }
 
 } // namespace ui_test

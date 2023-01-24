@@ -78,6 +78,7 @@ HistogramViewConfigWidget::HistogramViewConfigWidget(HistogramView* view, QWidge
             selected_var_widget_->setLayout(selected_var_layout);
 
             select_var_ = new dbContent::VariableSelectionWidget();
+            select_var_->setObjectName("variable_selection");
             select_var_->showMetaVariables(true);
             select_var_->showDataTypesOnly({PropertyDataType::BOOL,
                                             PropertyDataType::CHAR,

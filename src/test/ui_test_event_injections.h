@@ -31,6 +31,16 @@ class QWidget;
  */
 namespace ui_test
 {
+    /**
+     * How to deal with page breaks (\n, \r) in injected key strings.
+     */
+    enum class PageBreakMode
+    {
+        Forbidden = 0, //fail if a page break is encountered
+        Remove,        //remove page breaks
+        SplitText      //split text at page breaks and inject page breaks as enter keys
+    };
+
     //basic ui trigger events
     bool injectKeyEvent(QWidget* root,
                         const QString& obj_name, 
@@ -39,6 +49,7 @@ namespace ui_test
     bool injectKeysEvent(QWidget* root,
                          const QString& obj_name, 
                          const QString& keys, 
+                         PageBreakMode pb_mode,
                          int delay = -1);
     bool injectKeyCmdEvent(QWidget* root,
                            const QString& obj_name,
@@ -84,6 +95,10 @@ namespace ui_test
                              const QString& obj_name,
                              const QString& text,
                              int delay = -1);
+    bool injectTextEditEvent(QWidget* root,
+                             const QString& obj_name,
+                             const QString& text,
+                             int delay = -1);
     bool injectSpinBoxEvent(QWidget* root,
                             const QString& obj_name,
                             int value,
@@ -103,5 +118,7 @@ namespace ui_test
     bool injectButtonMenuEvent(QWidget* root,
                                const QString& obj_name,
                                const QStringList& path_to_action,
+                               int x = -1,
+                               int y = -1,
                                int delay = -1);
 } // namespace ui_test

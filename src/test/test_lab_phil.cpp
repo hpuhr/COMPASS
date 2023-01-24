@@ -34,6 +34,7 @@
 #include <QSpinBox>
 #include <QDoubleSpinBox>
 #include <QLineEdit>
+#include <QTextEdit>
 #include <QPushButton>
 #include <QToolBar>
 #include <QSlider>
@@ -159,6 +160,10 @@ bool TestLabPhil::uiInjectionTest()
     line_edit->setObjectName("line_edit");
     layout_f->addWidget(line_edit);
 
+    QTextEdit* text_edit = new QTextEdit;
+    text_edit->setObjectName("text_edit");
+    layout_f->addWidget(text_edit);
+
     QComboBox* combo_box = new QComboBox;
     combo_box->setObjectName("combo_box");
     combo_box->addItem("Item 1");
@@ -194,6 +199,7 @@ bool TestLabPhil::uiInjectionTest()
     add_injection_callback([ = ]() { ui_test::injectSpinBoxEvent(mw, "spin_box", 666); }, "SpinBoxText");
     add_injection_callback([ = ]() { ui_test::injectDoubleSpinBoxEvent(mw, "dbl_spin_box", 666.666); }, "DblSpinBoxText");
     add_injection_callback([ = ]() { ui_test::injectLineEditEvent(mw, "line_edit", "Belsnickel is here"); }, "LineEditText");
+    add_injection_callback([ = ]() { ui_test::injectTextEditEvent(mw, "text_edit", "Cheer or fear\nBelsnickel is here"); }, "TextEditText");
     add_injection_callback([ = ]() { ui_test::injectComboBoxEditEvent(mw, "combo_box", "Item 2"); }, "ComboSelection");
     add_injection_callback([ = ]() { ui_test::injectClickEvent(mw, "check_box", 2, 2); }, "CheckBoxClick");
     add_injection_callback([ = ]() { ui_test::injectClickEvent(mw, "push_button"); }, "ButtonClick");
@@ -207,6 +213,7 @@ bool TestLabPhil::uiInjectionTest()
     add_injection_callback([ = ]() { ui_test::setUIElement(mw, "spin_box", "666"); }, "SpinBoxText");
     add_injection_callback([ = ]() { ui_test::setUIElement(mw, "dbl_spin_box", "666.666"); }, "DblSpinBoxText");
     add_injection_callback([ = ]() { ui_test::setUIElement(mw, "line_edit", "Belsnickel is here"); }, "LineEditText");
+    add_injection_callback([ = ]() { ui_test::setUIElement(mw, "text_edit", "Cheer or fear\nBelsnickel is here\n"); }, "TextEditText");
     add_injection_callback([ = ]() { ui_test::setUIElement(mw, "combo_box", "Item 2"); }, "ComboSelection");
     add_injection_callback([ = ]() { ui_test::setUIElement(mw, "check_box", "true"); }, "CheckBoxClick");
     add_injection_callback([ = ]() { ui_test::setUIElement(mw, "push_button", ""); }, "ButtonClick");
@@ -291,6 +298,12 @@ bool TestLabPhil::uiSetTest()
     };
 
     QObject::connect(button, &QPushButton::pressed, cb);
+
+    QString init_obj = "";
+    QString init_val = "";
+
+    obj_edit->setText(init_obj);
+    value_edit->setText(init_val);
 
     dlg.exec();
 

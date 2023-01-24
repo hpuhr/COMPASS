@@ -17,17 +17,18 @@
 
 #pragma once
 
-#include "ui_test_common.h"
+#include "ui_test_adapter.h"
 
-class QWidget;
-class QString;
+#include "dbcontent/variable/variableselectionwidget.h"
 
-namespace ui_test
+UI_TEST_DEFINE_ADAPTER(dbContent::VariableSelectionWidget, w)
 {
-    
-    bool setUIElement(QWidget* parent, 
-                      const QString& obj_name, 
-                      const QString& value, 
-                      int delay = -1);
+    if (!w)
+        return {};
 
-} // namespace ui_test
+    //reroute set event to selection button
+    AdapterRerouteResult res;
+    res.widget = (QWidget*)w->selectionButton();
+
+    return res;
+}

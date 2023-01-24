@@ -15,19 +15,8 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#pragma once
+#pragma once 
 
-#include "ui_test_common.h"
-
-class QWidget;
-class QString;
-
-namespace ui_test
-{
-    
-    bool setUIElement(QWidget* parent, 
-                      const QString& obj_name, 
-                      const QString& value, 
-                      int delay = -1);
-
-} // namespace ui_test
+/**
+ * @TODO: write test runner
+ */

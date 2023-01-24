@@ -24,10 +24,11 @@ class QString;
 
 namespace ui_test
 {
-    
-    bool setUIElement(QWidget* parent, 
-                      const QString& obj_name, 
-                      const QString& value, 
-                      int delay = -1);
+
+    bool setUIElementNative(QWidget* parent, 
+                            const QString& obj_name, 
+                            const QString& value, 
+                            int delay = -1,
+                            const SetUIHint& hint = SetUIHint());
 
 } // namespace ui_test

@@ -25,6 +25,21 @@
 namespace ui_test
 {
 
+/**
+ * Event hint, e.g. where an injected click should happen.
+ */
+struct SetUIHint
+{
+    bool valid() const
+    {
+        return (x >= 0 ||
+                y >= 0);
+    }
+
+    int x = -1; //x-pos of event
+    int y = -1; //y-pos of event
+};
+
 inline QString generateObjectName(const QString& text)
 {
     QString obj_name = text.toLower();

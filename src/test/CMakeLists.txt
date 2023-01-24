@@ -10,12 +10,16 @@ PUBLIC
     "${CMAKE_CURRENT_LIST_DIR}/ui_test_common.h"
     "${CMAKE_CURRENT_LIST_DIR}/ui_test_event_injections.h"
     "${CMAKE_CURRENT_LIST_DIR}/ui_test_widget_setters.h"
+    "${CMAKE_CURRENT_LIST_DIR}/ui_test_set_native.h"
     "${CMAKE_CURRENT_LIST_DIR}/ui_test_set.h"
     "${CMAKE_CURRENT_LIST_DIR}/ui_test_find.h"
+    "${CMAKE_CURRENT_LIST_DIR}/ui_test_adapter.h"
+    "${CMAKE_CURRENT_LIST_DIR}/ui_test_adapters.h"
 PRIVATE
     "${CMAKE_CURRENT_LIST_DIR}/test_lab.cpp"
     "${CMAKE_CURRENT_LIST_DIR}/test_lab_phil.cpp"
     "${CMAKE_CURRENT_LIST_DIR}/ui_test_event_injections.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/ui_test_set_native.cpp"
     "${CMAKE_CURRENT_LIST_DIR}/ui_test_set.cpp"
 )
 

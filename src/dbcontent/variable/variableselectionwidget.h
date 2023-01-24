@@ -81,6 +81,8 @@ class VariableSelectionWidget : public QFrame
     void setReadOnly(bool read_only);
     void updateMenuEntries();
 
+    QPushButton* selectionButton() const;
+
   private:
     DBContentManager& dbo_man_;
 
