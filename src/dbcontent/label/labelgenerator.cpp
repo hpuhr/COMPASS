@@ -663,6 +663,23 @@ void LabelGenerator::removeLabelDSID(unsigned int ds_id)
     emit labelOptionsChangedSignal();
 }
 
+void LabelGenerator::labelAllDSIDs()
+{
+    DataSourceManager& ds_man = COMPASS::instance().dataSourceManager();
+
+    for (const auto& ds_it : ds_man.dbDataSources())
+        label_ds_ids_[to_string(ds_it->id())] = true;
+
+    emit labelOptionsChangedSignal();
+}
+
+void LabelGenerator::labelNoDSIDs()
+{
+    label_ds_ids_.clear();
+
+    emit labelOptionsChangedSignal();
+}
+
 //const std::map<unsigned int, bool> LabelGenerator::labelDSIDs() const
 //{
 //    return label_ds_ids_.get<std::map<unsigned int, bool>>();

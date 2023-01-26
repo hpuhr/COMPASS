@@ -60,6 +60,8 @@ public:
 
     void addLabelDSID(unsigned int ds_id);
     void removeLabelDSID(unsigned int ds_id);
+    void labelAllDSIDs();
+    void labelNoDSIDs();
     bool anyDSIDLabelWanted();
     bool labelWanted(unsigned int ds_id);
     bool labelWanted(std::shared_ptr<Buffer> buffer, unsigned int index);
