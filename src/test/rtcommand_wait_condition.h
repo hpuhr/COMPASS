@@ -50,11 +50,15 @@ namespace rtcommand
     class WaitConditionSignal : public WaitCondition
     {
     public:
-        WaitConditionSignal(QObject* parent,
-                            const QString& obj_name,
+        WaitConditionSignal(const QString& obj_name,
                             const QString& signal,
-                            int timeout_ms = -1);
+                            int timeout_ms = -1,
+                            QObject* parent = nullptr);
         virtual ~WaitConditionSignal();
+
+        static QSignalSpy* createSpy(const QString& obj_name,
+                                     const QString& signal,
+                                     QObject* parent = nullptr);
 
         virtual bool valid() const override;
         virtual bool expired() const override;
@@ -91,5 +95,6 @@ namespace rtcommand
     };
 
     bool waitForCondition(const WaitCondition& condition);
+    bool waitForCondition(const std::function<bool()>& condition, int timeout_ms = -1);
 
 } // namespace rtcommand

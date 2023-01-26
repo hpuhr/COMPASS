@@ -23,6 +23,13 @@ namespace rtcommand
 
 /**
  */
+RTCommandChain::RTCommandChain(RTCommandChain&& other)
+{
+    commands_ = std::move(other.commands_);
+}
+
+/**
+ */
 void RTCommandChain::addCommand(RTCommand* cmd)
 {
     commands_.emplace(cmd);
@@ -30,13 +37,13 @@ void RTCommandChain::addCommand(RTCommand* cmd)
 
 /**
  */
-void RTCommandChain::appendWaitCondition(const RTCommandWaitCondition& condition)
+void RTCommandChain::attachWaitCondition(const RTCommandWaitCondition& condition)
 {
     if (commands_.empty())
         throw std::runtime_error("RTCommandChain::appendWaitCondition: no command to append to");
 
     auto last = commands_.back().get();
-    last->conditions.push_back(condition);
+    last->condition = condition;
 }
 
 /**
@@ -70,7 +77,7 @@ RTCommandChain& RTCommandChain::waitForSignal(const QString& obj, const QString&
     wc.value      = signal;
     wc.timeout_ms = timeout_ms;
 
-    appendWaitCondition(wc);
+    attachWaitCondition(wc);
 
     return *this;
 }
@@ -83,7 +90,7 @@ RTCommandChain& RTCommandChain::waitFor(int msec)
     wc.type       = RTCommandWaitCondition::Type::Delay;
     wc.timeout_ms = msec;
 
-    appendWaitCondition(wc);
+    attachWaitCondition(wc);
 
     return *this;
 }

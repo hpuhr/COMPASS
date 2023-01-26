@@ -59,6 +59,38 @@ struct RTCommandWaitCondition
 typedef std::vector<RTCommandWaitCondition> RTCommandWaitConditions;
 
 /**
+*/
+struct RTCommandResult
+{
+    enum class CmdState
+    {
+        Fresh = 0,
+        BadConfig,
+        Failed,
+        Success
+    };
+
+    enum class WaitConditionState
+    {
+        Unknown = 0,
+        BadInit,
+        Failed,
+        Success
+    };
+
+    bool success() const
+    {
+        return (wc_state == WaitConditionState::Success && cmd_state == CmdState::Success);
+    }
+
+    QString generateMessage() const;
+
+    WaitConditionState wc_state  = WaitConditionState::Unknown;
+    CmdState           cmd_state = CmdState::Fresh;
+    QString            cmd_msg;
+};
+
+/**
  */
 struct RTCommand
 {
@@ -67,11 +99,18 @@ struct RTCommand
     virtual QString name() const = 0;
     virtual QString description() const { return ""; }
 
-    int                     delay = -1;
-    RTCommandWaitConditions conditions;
+    int                    delay = -1;
+    RTCommandWaitCondition condition;
+
+    const RTCommandResult& result() const { return res; }
 
 protected:
     virtual bool run_impl() const = 0;
+
+private:
+    friend class RTCommandRunner;
+
+    mutable RTCommandResult res;
 };
 
 /**

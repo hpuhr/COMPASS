@@ -36,6 +36,7 @@ public:
     typedef std::queue<RTCommandPtr>   RTCommands;
 
     RTCommandChain() = default;
+    RTCommandChain(RTCommandChain&& other);
     virtual ~RTCommandChain() = default;
 
     RTCommandChain& empty();
@@ -49,7 +50,7 @@ public:
 
 protected:
     void addCommand(RTCommand* cmd);
-    void appendWaitCondition(const RTCommandWaitCondition& condition);
+    void attachWaitCondition(const RTCommandWaitCondition& condition);
 
 private:
     Q_DISABLE_COPY(RTCommandChain)

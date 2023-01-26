@@ -45,6 +45,9 @@
 #include "ui_test_event_injections.h"
 #include "ui_test_set.h"
 #include "ui_test_common.h"
+#include "rtcommand_runner.h"
+#include "rtcommand_chain.h"
+#include "rtcommand_runner_stash.h"
 
 /**
 */
@@ -204,7 +207,7 @@ bool TestLabPhil::uiInjectionTest()
     add_injection_callback([ = ]() { ui_test::injectComboBoxEditEvent(mw, "combo_box", "Item 2"); }, "ComboSelection");
     add_injection_callback([ = ]() { ui_test::injectClickEvent(mw, "check_box", 2, 2); }, "CheckBoxClick");
     add_injection_callback([ = ]() { ui_test::injectClickEvent(mw, "push_button"); }, "ButtonClick");
-    add_injection_callback([ = ]() { ui_test::injectKeyCmdEvent(mw, "main_window", QKeySequence("Alt+M")); }, "MainMenuCommand");
+    add_injection_callback([ = ]() { ui_test::injectKeyCmdEvent(mw, "main_window", Qt::Key_M, Qt::AltModifier); }, "MainMenuCommand");
     add_injection_callback([ = ]() { ui_test::injectMenuBarEvent(mw, "menu_bar", { "Menu 1", "Menu 3", "Action 4" }); }, "MainMenuAction");
     add_injection_callback([ = ]() { ui_test::injectMenuBarEvent(mw, "menu_bar", { "Menu 2", "Action 6" }); }, "MainMenuCheckableAction");
     add_injection_callback([ = ]() { ui_test::injectTabSelectionEvent(mw, "tab_widget", "Tab 2"); }, "TabSelection");
@@ -315,5 +318,33 @@ bool TestLabPhil::uiSetTest()
 */
 bool TestLabPhil::uiTestRunnerTest()
 {
+    rtcommand::RTCommandRunnerStash stash;
+    rtcommand::RTCommandRunner runner(&stash);
+
+    rtcommand::RTCommandRunner* runner_ptr = &runner;
+
+    QDialog dlg;
+    QHBoxLayout* layout = new QHBoxLayout;
+    dlg.setLayout(layout);
+
+    QPushButton* button = new QPushButton("Run");
+    layout->addWidget(button);
+
+    auto cb = [ = ] ()
+    {
+        rtcommand::RTCommandChain c;
+        c.uiset("histogramview2.reload", "").waitForSignal("histogramview2.data_widget", "dataLoaded(void)", 10000)
+         .uiset("histogramview2.reload", "").waitForSignal("histogramview2.data_widget", "dataLoaded(void)", 10000)
+         .uiset("histogramview2.reload", "").waitForSignal("histogramview2.data_widget", "dataLoaded(void)", 10000)
+         .uiset("histogramview2.reload", "").waitForSignal("histogramview2.data_widget", "dataLoaded(void)", 10000)
+         .uiset("histogramview2.reload", "").waitForSignal("histogramview2.data_widget", "dataLoaded(void)", 10000);
+
+        runner_ptr->addCommands(std::move(c));
+    };
+
+    QObject::connect(button, &QPushButton::pressed, cb);
+
+    dlg.exec();
+
     return true;
 }

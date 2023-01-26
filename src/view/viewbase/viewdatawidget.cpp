@@ -7,6 +7,7 @@
 ViewDataWidget::ViewDataWidget(QWidget* parent, Qt::WindowFlags f)
 :   QWidget(parent, f)
 {
+    setObjectName("data_widget");
 }
 
 /**

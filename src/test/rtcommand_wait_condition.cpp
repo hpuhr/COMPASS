@@ -16,33 +16,64 @@
  */
 
 #include "rtcommand_wait_condition.h"
+#include "rtcommand.h"
 
 #include "ui_test_find.h"
 
 #include <QSignalSpy>
 #include <QElapsedTimer>
+#include <QMainWindow>
 
 namespace rtcommand
 {
 
+/*****************************************************************************
+ * WaitConditionSignal
+ *****************************************************************************/
+
 /**
  */
-WaitConditionSignal::WaitConditionSignal(QObject* parent,
-                                         const QString& obj_name, 
+WaitConditionSignal::WaitConditionSignal(const QString& obj_name,
                                          const QString& signal,
-                                         int timeout_ms)
+                                         int timeout_ms,
+                                         QObject* parent)
 :   WaitCondition(timeout_ms)
 {
-    auto obj = ui_test::findObject(parent, obj_name);
-    if (obj.first == ui_test::FindObjectErrCode::NoError)
-    {
-        spy_.reset(new QSignalSpy(obj.second, SIGNAL(signal.toStdString().c_str())));
-    }
+    spy_.reset(createSpy(obj_name, signal, parent));
 }
 
 /**
  */
 WaitConditionSignal::~WaitConditionSignal() = default;
+
+/**
+ */
+QSignalSpy* WaitConditionSignal::createSpy(const QString& obj_name,
+                                           const QString& signal,
+                                           QObject* parent)
+{
+    if (!parent)
+    {
+        auto main_window = mainWindow();
+        if (!main_window)
+            return nullptr;
+
+        parent = main_window;
+    }
+    
+    auto obj = ui_test::findObject(parent, obj_name);
+    if (obj.first != ui_test::FindObjectErrCode::NoError)
+        return nullptr;
+    
+    auto spy = new QSignalSpy(obj.second, ("2" + signal.toStdString()).c_str());
+    if (!spy->isValid())
+    {
+        delete spy;
+        return nullptr;
+    }
+
+    return spy;
+}
 
 /**
  */
@@ -67,6 +98,10 @@ bool WaitConditionSignal::wait() const
     
     return spy_->wait(timeout_ms_);
 }
+
+/*****************************************************************************
+ * WaitConditionDelay
+ *****************************************************************************/
 
 /**
  */
@@ -121,5 +156,23 @@ bool waitForCondition(const WaitCondition& condition)
 
     return condition.wait();
 }
+
+/**
+ * Wait for the given condition to expire.
+ */
+bool waitForCondition(const std::function<bool()>& condition, int timeout_ms)
+{
+    if (!condition)
+        return false;
+
+    QElapsedTimer t;
+    t.start();
+
+    while (!condition() && (timeout_ms < 0 || t.elapsed() < timeout_ms))
+        QThread::msleep(10);
+
+    return true;
+}
+
 
 } // namespace rtcommand

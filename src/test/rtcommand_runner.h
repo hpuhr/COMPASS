@@ -19,15 +19,19 @@
 
 #include <memory>
 
+#include <QObject>
 #include <QThread>
 
 #include "util/tbbhack.h"
+
+class QSignalSpy;
 
 namespace rtcommand
 {
 
 struct RTCommand;
 class RTCommandChain;
+class RTCommandRunnerStash;
 
 /**
  */
@@ -35,7 +39,7 @@ class RTCommandRunner : public QThread
 {
     Q_OBJECT
 public:
-    RTCommandRunner();
+    RTCommandRunner(RTCommandRunnerStash* stash);
     virtual ~RTCommandRunner();
 
     void addCommand(std::unique_ptr<RTCommand>&& cmd);
@@ -47,7 +51,19 @@ protected:
     virtual void run() override;
 
 private:
+    void addCommand_internal(RTCommand* cmd);
+
+    bool initWaitCondition(RTCommand* cmd);
+    bool execWaitCondition(RTCommand* cmd);
+    bool cleanupWaitCondition(RTCommand* cmd);
+    bool executeCommand(RTCommand* cmd);
+
+    void logMsg(const std::string& msg, RTCommand* cmd = nullptr);
+
+    RTCommandRunnerStash* stash_;
+
     tbb::concurrent_queue<std::shared_ptr<RTCommand>> commands_;
+    tbb::concurrent_queue<std::shared_ptr<RTCommand>> processed_commands_;
 };
 
 } // namespace rtcommand

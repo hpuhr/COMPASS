@@ -106,14 +106,14 @@ inline std::pair<FindObjectErrCode, QObject*> findObject(QObject* parent, const 
     if (obj_name.isEmpty() || parent->objectName() == obj_name)
         return std::make_pair(FindObjectErrCode::NoError, parent);
 
-    int idx = obj_name.indexOf("|");
+    int idx = obj_name.indexOf(".");
 
     //no path? use that version
     if (idx < 0)
         return findObjectNoPath(parent, obj_name);
 
     //split into path
-    QStringList path = obj_name.split("|");
+    QStringList path = obj_name.split(".");
 
     //traverse the given object path and jump from child to child
     QObject* last_obj = parent;
