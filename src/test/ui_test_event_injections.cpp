@@ -84,7 +84,8 @@ bool injectKeysEvent(QWidget* root,
         return true;
 
     //split text at page breaks
-    QStringList lines = keys.split(QRegExp("\n|\r\n|\r"), Qt::KeepEmptyParts);
+    //@TODO: Add Qt::KeepEmptyParts in future Qt version
+    QStringList lines = keys.split(QRegExp("\n|\r\n|\r"));
 
     const int nl = lines.count();
 
@@ -137,10 +138,13 @@ bool injectKeysEvent(QWidget* root,
 
 /**
  * Injects (modified) key command(s) into windows or widgets.
+ * @TODO: In future Qt versions base this function on QTest::keySequence() and QKeySequence.
  */
 bool injectKeyCmdEvent(QWidget* root,
-                       const QString& obj_name, 
-                       const QKeySequence& command)
+                       const QString& obj_name,
+                       const Qt::Key& key,
+                       Qt::KeyboardModifiers modifier,
+                       int delay)
 {
     auto obj = findObject(root, obj_name);
     if (obj.first != FindObjectErrCode::NoError)
@@ -153,42 +157,21 @@ bool injectKeyCmdEvent(QWidget* root,
         logObjectError("injectKeyCmdEvent", obj_name, FindObjectErrCode::WrongType);
         return false;
     }
-
-    //nothing to do?
-    if (command.isEmpty())
-        return true;
-
-    //check if command is valid
-    QString cmd_str;
-    try
-    {
-        cmd_str = command.toString(QKeySequence::NativeText);
-    }
-    catch(...)
-    {
-        loginf << "injectKeyCmdEvent: Unrecognized key command";
-        return false;
-    }
-    if (cmd_str.isEmpty())
-    {
-        loginf << "injectKeyCmdEvent: Unrecognized key command";
-        return false;
-    }
     
     auto injectionMsg = [ & ] (const std::string& obj_type) 
     {
-        loginf << "Injecting command '" << cmd_str.toStdString();
+        loginf << "Injecting command";
     };
  
     if (obj.second->isWidgetType())
     {
         injectionMsg("widget");
-        QTest::keySequence(dynamic_cast<QWidget*>(obj.second), command);
+        QTest::keyClick(dynamic_cast<QWidget*>(obj.second), key, modifier, delay);
     }
     else //window
     {
         injectionMsg("window");
-        QTest::keySequence(dynamic_cast<QWindow*>(obj.second), command);
+        QTest::keyClick(dynamic_cast<QWindow*>(obj.second), key, modifier, delay);
     }
 
     return true;
@@ -251,13 +234,6 @@ bool injectClickEvent(QWidget* root,
 bool injectPostModalEvent(const EventFunc& modal_trigger_cb,
                           const EventFunc& post_modal_cb)
 {
-    // auto w = findObjectAs<QWidget>(root, obj_name);
-    // if (w.first != FindObjectErrCode::NoError)
-    // {
-    //     logObjectError("injectPostModalEvent", obj_name, w.first);
-    //     return false;
-    // }
-
     bool post_call_ok = false;
 
     //we queue in what should happen after the modal object is shown as an event beforehand via single shot timer
@@ -422,20 +398,6 @@ namespace
 
         QWidget* current_menu   = menu_widget;  //we start with the main menu
         QAction* current_action = nullptr;
-
-        auto setActive = [ = ] (QWidget* w, QAction* action)
-        {
-            QMenu*    menu     = dynamic_cast<QMenu*>(w);
-            QMenuBar* menu_bar = dynamic_cast<QMenuBar*>(w);
-
-            //the menu widget could be either a QMenu or a QMenuBar
-            if (menu)
-                menu->setActiveAction(action);
-            if (menu_bar)
-                menu_bar->setActiveAction(action);
-
-            return (QAction*)nullptr;
-        };
 
         //iterate over path strings
         for (size_t i = 0; i < np; ++i)
@@ -716,7 +678,7 @@ bool injectLineEditEvent(QWidget* root,
     }
 
     //highlight text
-    if (!injectKeyCmdEvent(obj.second, "", Qt::CTRL | Qt::Key_A))
+    if (!injectKeyCmdEvent(obj.second, "", Qt::Key_A, Qt::ControlModifier, delay))
         return false;
  
     //fill with new content
@@ -743,7 +705,7 @@ bool injectTextEditEvent(QWidget* root,
     }
 
     //highlight text
-    if (!injectKeyCmdEvent(obj.second, "", Qt::CTRL | Qt::Key_A))
+    if (!injectKeyCmdEvent(obj.second, "", Qt::Key_A, Qt::ControlModifier, delay))
         return false;
 
     //fill with new content
@@ -771,7 +733,7 @@ bool injectSpinBoxEvent(QWidget* root,
     QString txt = QString::number(value);
 
     //clear line edit
-    if (!injectKeyCmdEvent(obj.second, "", Qt::CTRL | Qt::Key_A))
+    if (!injectKeyCmdEvent(obj.second, "", Qt::Key_A, Qt::ControlModifier, delay))
         return false;
  
     //fill with new content
@@ -801,7 +763,7 @@ bool injectDoubleSpinBoxEvent(QWidget* root,
     double value_trunc = txt.toDouble();
 
     //clear line edit
-    if (!injectKeyCmdEvent(obj.second, "", Qt::CTRL | Qt::Key_A))
+    if (!injectKeyCmdEvent(obj.second, "", Qt::Key_A, Qt::ControlModifier, delay))
         return false;
  
     //fill with new content

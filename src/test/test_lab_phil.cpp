@@ -63,6 +63,7 @@ void TestLabPhil::addTestsToMenu_impl(QMenu* menu)
     ADD_TEST("UI Injection Test", uiInjectionTest);
     ADD_TEST("Generate Object Name Test", uiObjectNameGenerationTest);
     ADD_TEST("UI Set Test", uiSetTest);
+    ADD_TEST("Test Runner Test", uiTestRunnerTest)
 }
 
 /**
@@ -217,7 +218,7 @@ bool TestLabPhil::uiInjectionTest()
     add_injection_callback([ = ]() { ui_test::setUIElement(mw, "combo_box", "Item 2"); }, "ComboSelection");
     add_injection_callback([ = ]() { ui_test::setUIElement(mw, "check_box", "true"); }, "CheckBoxClick");
     add_injection_callback([ = ]() { ui_test::setUIElement(mw, "push_button", ""); }, "ButtonClick");
-    add_injection_callback([ = ]() { ui_test::injectKeyCmdEvent(mw, "main_window", QKeySequence("Alt+M")); }, "MainMenuCommand");
+    add_injection_callback([ = ]() { ui_test::injectKeyCmdEvent(mw, "main_window", Qt::Key_M, Qt::AltModifier); }, "MainMenuCommand");
     add_injection_callback([ = ]() { ui_test::setUIElement(mw, "menu_bar", "Menu 1|Menu 3|Action 4"); }, "MainMenuAction");
     add_injection_callback([ = ]() { ui_test::setUIElement(mw, "menu_bar", "Menu 2|Action 6"); }, "MainMenuCheckableAction");
     add_injection_callback([ = ]() { ui_test::setUIElement(mw, "tab_widget", "Tab 2"); }, "TabSelection");
@@ -307,5 +308,12 @@ bool TestLabPhil::uiSetTest()
 
     dlg.exec();
 
+    return true;
+}
+
+/**
+*/
+bool TestLabPhil::uiTestRunnerTest()
+{
     return true;
 }

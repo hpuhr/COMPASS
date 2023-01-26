@@ -53,7 +53,9 @@ namespace ui_test
                          int delay = -1);
     bool injectKeyCmdEvent(QWidget* root,
                            const QString& obj_name,
-                           const QKeySequence& command);
+                           const Qt::Key& key,
+                           Qt::KeyboardModifiers modifier,
+                           int delay = -1);
     bool injectClickEvent(QWidget* root,
                           const QString& obj_name, 
                           int x = -1, 

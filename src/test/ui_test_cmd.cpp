@@ -15,8 +15,23 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#pragma once 
+#include "ui_test_cmd.h"
+#include "ui_test_set.h"
+
+#include <QMainWindow>
+
+namespace ui_test
+{
 
 /**
- * @TODO: write test runner
  */
+bool RTCommandUISet::run_impl() const
+{
+    auto main_window = rtcommand::mainWindow();
+    if (!main_window)
+        return false;
+
+    return setUIElement(main_window, obj, value, delay);
+}
+
+}

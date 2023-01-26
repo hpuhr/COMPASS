@@ -15,25 +15,39 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#pragma once
+#pragma once 
 
-#include "ui_test_adapter.h"
+#include <memory>
 
-#include "dbcontent/variable/variableselectionwidget.h"
+#include <QThread>
 
-namespace ui_test
+#include "util/tbbhack.h"
+
+namespace rtcommand
 {
 
-UI_TEST_DEFINE_ADAPTER(dbContent::VariableSelectionWidget, w)
+struct RTCommand;
+class RTCommandChain;
+
+/**
+ */
+class RTCommandRunner : public QThread
 {
-    if (!w)
-        return {};
+    Q_OBJECT
+public:
+    RTCommandRunner();
+    virtual ~RTCommandRunner();
 
-    //reroute set event to selection button
-    AdapterRerouteResult res;
-    res.widget = (QWidget*)w->selectionButton();
+    void addCommand(std::unique_ptr<RTCommand>&& cmd);
+    void addCommands(RTCommandChain&& cmds);
 
-    return res;
-}
+    int numCommands() const;
 
-} // namespace ui_test
+protected:
+    virtual void run() override;
+
+private:
+    tbb::concurrent_queue<std::shared_ptr<RTCommand>> commands_;
+};
+
+} // namespace rtcommand

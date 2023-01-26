@@ -17,23 +17,18 @@
 
 #pragma once
 
-#include "ui_test_adapter.h"
-
-#include "dbcontent/variable/variableselectionwidget.h"
+#include "rtcommand.h"
 
 namespace ui_test
 {
 
-UI_TEST_DEFINE_ADAPTER(dbContent::VariableSelectionWidget, w)
+/**
+ */
+struct RTCommandUISet : public rtcommand::RTCommandObjectValue 
 {
-    if (!w)
-        return {};
+    virtual QString name() const override { return "uiset"; }
+protected:
+    virtual bool run_impl() const override;
+};
 
-    //reroute set event to selection button
-    AdapterRerouteResult res;
-    res.widget = (QWidget*)w->selectionButton();
-
-    return res;
 }
-
-} // namespace ui_test

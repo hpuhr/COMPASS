@@ -30,7 +30,7 @@ class QString;
 
 #define UI_TEST_DEFINE_ADAPTER(WidgetType, var_name) \
     template<>                                       \
-    boost::optional<ui_test::UITestAdapter::AdapterRerouteResult> ui_test::UITestAdapter::rerouteWidget(WidgetType* var_name)
+    boost::optional<UITestAdapter::AdapterRerouteResult> UITestAdapter::rerouteWidget(WidgetType* var_name)
 
 namespace ui_test
 {
@@ -86,4 +86,4 @@ public:
     }
 };
 
-}
+} // namespace ui_test
