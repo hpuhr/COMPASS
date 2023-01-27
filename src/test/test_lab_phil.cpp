@@ -333,11 +333,8 @@ bool TestLabPhil::uiTestRunnerTest()
     auto cb = [ = ] ()
     {
         rtcommand::RTCommandChain c;
-        c.uiset("histogramview2.reload", "").waitForSignal("histogramview2.data_widget", "dataLoaded(void)", 10000)
-         .uiset("histogramview2.reload", "").waitForSignal("histogramview2.data_widget", "dataLoaded(void)", 10000)
-         .uiset("histogramview2.reload", "").waitForSignal("histogramview2.data_widget", "dataLoaded(void)", 10000)
-         .uiset("histogramview2.reload", "").waitForSignal("histogramview2.data_widget", "dataLoaded(void)", 10000)
-         .uiset("histogramview2.reload", "").waitForSignal("histogramview2.data_widget", "dataLoaded(void)", 10000);
+        c.uiset("histogramview2.reload", "").waitForSignal("histogramview2", "dataLoaded", 10000)
+         .uiset("histogramview2.reload", "").waitForSignal("histogramview2", "dataLoaded", 10000);
 
         runner_ptr->addCommands(std::move(c));
     };

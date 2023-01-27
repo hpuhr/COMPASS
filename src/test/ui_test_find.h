@@ -17,11 +17,6 @@
 
 #pragma once
 
-#include "logger.h"
-#include "compass.h"
-#include "viewmanager.h"
-#include "viewcontainerwidget.h"
-
 #include <QWidget>
 #include <QWindow>
 #include <QString>
@@ -37,102 +32,14 @@ enum class FindObjectErrCode
     WrongType
 };
 
-inline std::string objectName(const QString& obj_name)
-{
-    if (obj_name.isEmpty())
-        return "";
-    return "'" + obj_name.toStdString() + "'";
-}
+std::string objectName(const QString& obj_name);
+void logObjectError(const QString& prefix, const QString& obj_name, FindObjectErrCode code);
+std::pair<FindObjectErrCode, QObject*> findObjectNoPath(QObject* parent, const QString& obj_name = "");
+std::pair<FindObjectErrCode, QObject*> findObject(QObject* parent, const QString& obj_name = "");
+std::pair<QObject*, int> findSignal(QObject* parent, const QString& signal_name);
 
-inline void logObjectError(const QString& prefix, 
-                           const QString& obj_name,
-                           FindObjectErrCode code)
-{
-    if (code == FindObjectErrCode::NoError)
-        return;
-
-    QString err = "yielded unknown error";
-    if (code == FindObjectErrCode::Invalid)
-        err = "is invalid";
-    else if (code == FindObjectErrCode::NotFound)
-        err = "not found";
-    else if (code == FindObjectErrCode::WrongType)
-        err = "has wrong type";
-    
-    loginf << prefix.toStdString() << ": Object " << objectName(obj_name) + " " + err.toStdString();
-}
-
-inline std::pair<FindObjectErrCode, QObject*> findObjectNoPath(QObject* parent, const QString& obj_name = "")
-{
-    if (!parent)
-        return std::make_pair(FindObjectErrCode::Invalid, nullptr);
-
-    if (obj_name.isEmpty() || parent->objectName() == obj_name)
-        return std::make_pair(FindObjectErrCode::NoError, parent);
-
-    //UGLY HACK, ViewContainerWidget should be a non-modal QDialog instead of a free-floating QWidget
-    {
-        if (obj_name.startsWith("window"))
-        {
-            QString num = QString(obj_name).remove("window");
-            bool ok;
-            int idx = num.toInt(&ok);
-
-            if (ok)
-            {
-                QString view_container_name = "ViewWindow" + num;
-
-                auto container = COMPASS::instance().viewManager().containerWidget(view_container_name.toStdString());
-                if (!container)
-                    return std::make_pair(FindObjectErrCode::NotFound, nullptr);
-
-                return std::make_pair(FindObjectErrCode::NoError, container);
-            }
-        }
-    }
-
-    QObject* obj = parent->findChild<QObject*>(obj_name, Qt::FindChildrenRecursively);
-    if (!obj)
-        return std::make_pair(FindObjectErrCode::NotFound, nullptr);
-
-    return std::make_pair(FindObjectErrCode::NoError, obj);
-}
-
-inline std::pair<FindObjectErrCode, QObject*> findObject(QObject* parent, const QString& obj_name = "")
-{
-    if (!parent)
-        return std::make_pair(FindObjectErrCode::Invalid, nullptr);
-
-    if (obj_name.isEmpty() || parent->objectName() == obj_name)
-        return std::make_pair(FindObjectErrCode::NoError, parent);
-
-    int idx = obj_name.indexOf(".");
-
-    //no path? use that version
-    if (idx < 0)
-        return findObjectNoPath(parent, obj_name);
-
-    //split into path
-    QStringList path = obj_name.split(".");
-
-    //traverse the given object path and jump from child to child
-    QObject* last_obj = parent;
-    for (const QString& sub_obj : path)
-    {
-        std::cout << "looking for object '" << sub_obj.toStdString() << "'" << std::endl; 
-
-        auto obj = findObjectNoPath(last_obj, sub_obj.trimmed());
-        if (obj.first != FindObjectErrCode::NoError)
-            return std::make_pair(obj.first, nullptr);
-
-        std::cout << "   FOUND" << std::endl;
-
-        last_obj = obj.second;
-    }
-
-    return std::make_pair(FindObjectErrCode::NoError, last_obj);
-}
-
+/**
+ */
 template<class T>
 inline std::pair<FindObjectErrCode, T*> findObjectAs(QObject* parent, const QString& obj_name = "")
 {

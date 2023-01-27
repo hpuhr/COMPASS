@@ -81,8 +81,6 @@ int RTCommandRunner::numCommands() const
  */
 bool RTCommandRunner::initWaitCondition(RTCommand* cmd)
 {
-    
-
     if (!cmd || !stash_)    
         throw std::runtime_error("RTCommandRunner::initWaitCondition: Bad init");
 

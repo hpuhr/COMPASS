@@ -20,6 +20,8 @@
 
 #include "ui_test_find.h"
 
+#include <iostream>
+
 #include <QSignalSpy>
 #include <QElapsedTimer>
 #include <QMainWindow>
@@ -61,11 +63,27 @@ QSignalSpy* WaitConditionSignal::createSpy(const QString& obj_name,
         parent = main_window;
     }
     
+    //find object by its object name
     auto obj = ui_test::findObject(parent, obj_name);
     if (obj.first != ui_test::FindObjectErrCode::NoError)
         return nullptr;
+
+    //if no datatype is attached to signal string, we assume it is of void type
+    QString signal_str = signal;
+    if (!signal_str.endsWith(")"))
+        signal_str += "()";
+
+    //find signal in objects subtree
+    auto signal_obj = ui_test::findSignal(obj.second, signal_str);
+    if (!signal_obj.first || signal_obj.second < 0)
+    {
+        return nullptr;
+    }
+
+    //get signal
+    auto sig = signal_obj.first->metaObject()->method(signal_obj.second);
     
-    auto spy = new QSignalSpy(obj.second, ("2" + signal.toStdString()).c_str());
+    auto spy = new QSignalSpy(signal_obj.first, sig);
     if (!spy->isValid())
     {
         delete spy;
@@ -168,11 +186,18 @@ bool waitForCondition(const std::function<bool()>& condition, int timeout_ms)
     QElapsedTimer t;
     t.start();
 
-    while (!condition() && (timeout_ms < 0 || t.elapsed() < timeout_ms))
+    bool timeout = false;
+    while (!condition())
+    {
+        if (timeout_ms >= 0 && t.elapsed() >= timeout_ms)
+        {
+            timeout = true;
+            break;
+        }
         QThread::msleep(10);
+    }
 
-    return true;
+    return !timeout;
 }
-
 
 } // namespace rtcommand

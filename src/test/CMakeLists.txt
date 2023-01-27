@@ -28,6 +28,7 @@ PRIVATE
     "${CMAKE_CURRENT_LIST_DIR}/ui_test_event_injections.cpp"
     "${CMAKE_CURRENT_LIST_DIR}/ui_test_set_native.cpp"
     "${CMAKE_CURRENT_LIST_DIR}/ui_test_set.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/ui_test_find.cpp"
     "${CMAKE_CURRENT_LIST_DIR}/ui_test_cmd.cpp"
     
     "${CMAKE_CURRENT_LIST_DIR}/rtcommand.cpp"
