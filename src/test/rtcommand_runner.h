@@ -34,6 +34,7 @@ class RTCommandChain;
 class RTCommandRunnerStash;
 
 /**
+ * Class for executing runtime commands in a separate thread.
  */
 class RTCommandRunner : public QThread
 {

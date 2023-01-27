@@ -41,6 +41,7 @@ QMainWindow* mainWindow()
 }
 
 /**
+ * Create a wait condition object from the current type.
  */
 std::unique_ptr<WaitCondition> RTCommandWaitCondition::create() const
 {
@@ -67,17 +68,18 @@ std::unique_ptr<WaitCondition> RTCommandWaitCondition::create() const
 }
 
 /**
+ * Generates a string describing the commands current state.
  */
-QString RTCommandResult::generateMessage() const
+QString RTCommand::generateStateString() const
 {
     QString msg;
-    if (wc_state == WaitConditionState::BadInit)
+    if (condition.state() == WaitConditionState::BadInit)
         msg = "Could not init wait condition";
     else if (cmd_state == CmdState::BadConfig)
         msg = "Badly configured command";
     else if (cmd_state == CmdState::Failed)
         msg = "Command failed";
-    else if (wc_state == WaitConditionState::Failed)
+    else if (condition.state() == WaitConditionState::Failed)
         msg = "Wait condition failed";
     else if (success())
         msg = "Success";
@@ -88,27 +90,28 @@ QString RTCommandResult::generateMessage() const
 }
 
 /**
+ * Run the command and track state.
  */
 bool RTCommand::run() const
 {
-    res.cmd_state = RTCommandResult::CmdState::Fresh;
-    res.cmd_msg   = "";
+    cmd_state = CmdState::Fresh;
+    cmd_msg   = "";
 
     //command configuration valid?
     if (!valid())
     {
-        res.cmd_state = RTCommandResult::CmdState::BadConfig;
+        cmd_state = CmdState::BadConfig;
         return false;
     }
         
     //run command
     if (!run_impl())
     {
-        res.cmd_state = RTCommandResult::CmdState::Failed;
+        cmd_state = CmdState::Failed;
         return false;
     }
-        
-    res.cmd_state = RTCommandResult::CmdState::Success;
+    
+    cmd_state = CmdState::Success;
     return true;
 }
 

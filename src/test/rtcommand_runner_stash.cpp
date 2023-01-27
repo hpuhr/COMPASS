@@ -27,15 +27,14 @@ namespace rtcommand
 
 /**
 */
-RTCommandRunnerStash::RTCommandRunnerStash()
-{
-}
+RTCommandRunnerStash::RTCommandRunnerStash() = default;
 
 /**
 */
 RTCommandRunnerStash::~RTCommandRunnerStash() = default;
 
 /**
+ * Checks if the signal of the currently installed QSignalSpy has already been received.
 */
 bool RTCommandRunnerStash::spySignalReceived() const
 {
@@ -43,6 +42,7 @@ bool RTCommandRunnerStash::spySignalReceived() const
 }
 
 /**
+ * Install a QSignalSpy for a signal in the given QObject's subtree.
 */
 bool RTCommandRunnerStash::spyForSignal(const QString& obj_name, const QString& signal_name)
 {
@@ -51,6 +51,7 @@ bool RTCommandRunnerStash::spyForSignal(const QString& obj_name, const QString& 
 }
 
 /**
+ * Remove the currently installed QSignalSpy.
 */
 void RTCommandRunnerStash::removeSpy()
 {
@@ -58,10 +59,11 @@ void RTCommandRunnerStash::removeSpy()
 }
 
 /**
+ * Execute the given runtime command.
 */
 bool RTCommandRunnerStash::executeCommand(const RTCommand* command) const
 {
-    if (!command || !command->valid())
+    if (!command)
         return false;
 
     return command->run();

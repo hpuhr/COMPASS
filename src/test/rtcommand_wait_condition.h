@@ -29,6 +29,7 @@ namespace rtcommand
 {
 
     /**
+     * Base for the implementation of a wait condition.
     */
     class WaitCondition
     {
@@ -36,12 +37,12 @@ namespace rtcommand
         WaitCondition(int timeout_ms = -1) : timeout_ms_(timeout_ms) {}
         virtual ~WaitCondition() = default;
 
-        virtual bool valid() const = 0;
-        virtual bool expired() const = 0;
-        virtual bool wait() const = 0;
+        virtual bool valid() const = 0;   //is the wc correctly configured?
+        virtual bool expired() const = 0; //is the wc already expired?
+        virtual bool wait() const = 0;    //block until the wait condition is expired
 
     protected:
-        int timeout_ms_;
+        int timeout_ms_; //timeout for wait()
     };
 
     /**
@@ -72,7 +73,7 @@ namespace rtcommand
     };
 
     /**
-     * Condition waiting for a certain amount of time.
+     * Condition waiting for a certain amount of time in milliseconds.
      */
     class WaitConditionDelay : public WaitCondition
     {

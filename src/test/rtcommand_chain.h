@@ -28,7 +28,8 @@ namespace rtcommand
 {
 
 /**
-*/
+ * Chain of runtime commands.
+ */
 class RTCommandChain
 {
 public:

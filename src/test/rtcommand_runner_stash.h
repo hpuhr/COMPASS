@@ -29,7 +29,9 @@ namespace rtcommand
 struct RTCommand;
 
 /**
-*/
+ * Obtains data structures and calls for the command runner 
+ * needed to reside in the main thread.
+ */
 class RTCommandRunnerStash : public QObject
 {
     Q_OBJECT

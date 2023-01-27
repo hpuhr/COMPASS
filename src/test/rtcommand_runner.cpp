@@ -40,6 +40,7 @@ RTCommandRunner::RTCommandRunner(RTCommandRunnerStash* stash)
 RTCommandRunner::~RTCommandRunner() = default;
 
 /**
+ * Add a single command to the execution queue and restart the command runner.
  */
 void RTCommandRunner::addCommand(std::unique_ptr<RTCommand>&& cmd)
 {
@@ -51,13 +52,14 @@ void RTCommandRunner::addCommand(std::unique_ptr<RTCommand>&& cmd)
 }
 
 /**
-*/
+ */
 void RTCommandRunner::addCommand_internal(RTCommand* cmd)
 {
     commands_.push(std::shared_ptr<RTCommand>(cmd));
 }
 
 /**
+ * Add a chain of commands to the execution queue and restart the command runner.
  */
 void RTCommandRunner::addCommands(RTCommandChain&& cmds)
 {
@@ -70,6 +72,7 @@ void RTCommandRunner::addCommands(RTCommandChain&& cmds)
 }
 
 /**
+ * (Estimated) number of commands remaining in the execution queue.
  */
 int RTCommandRunner::numCommands() const
 {
@@ -84,11 +87,11 @@ bool RTCommandRunner::initWaitCondition(RTCommand* cmd)
     if (!cmd || !stash_)    
         throw std::runtime_error("RTCommandRunner::initWaitCondition: Bad init");
 
-    const auto& c = cmd->condition;
+    auto& c = cmd->condition;
 
     if (c.type == RTCommandWaitCondition::Type::Signal)
     {
-        //register signal spy
+        //register signal spy in main thread and block until finished
         bool ok      = false;
         bool invoked = QMetaObject::invokeMethod(stash_, "spyForSignal", Qt::BlockingQueuedConnection,
                                                  Q_RETURN_ARG(bool, ok),
@@ -96,7 +99,7 @@ bool RTCommandRunner::initWaitCondition(RTCommand* cmd)
                                                  Q_ARG(QString, c.value));
         if (!invoked || !ok)
         {
-            cmd->res.wc_state = RTCommandResult::WaitConditionState::BadInit;
+            c.wc_state = WaitConditionState::BadInit;
             return false;
         }   
     }
@@ -112,7 +115,7 @@ bool RTCommandRunner::execWaitCondition(RTCommand* cmd)
     if (!cmd || !stash_)
         throw std::runtime_error("RTCommandRunner::execWaitCondition: Bad init");
 
-    const auto& c = cmd->condition;
+    auto& c = cmd->condition;
 
     bool ok = true;
 
@@ -125,8 +128,8 @@ bool RTCommandRunner::execWaitCondition(RTCommand* cmd)
         ok = waitForCondition(WaitConditionDelay(c.timeout_ms));
     }
 
-    cmd->res.wc_state = ok ? RTCommandResult::WaitConditionState::Success : 
-                             RTCommandResult::WaitConditionState::Failed;
+    c.wc_state = ok ? WaitConditionState::Success : 
+                      WaitConditionState::Failed;
     return ok;
 }
 
@@ -142,6 +145,7 @@ bool RTCommandRunner::cleanupWaitCondition(RTCommand* cmd)
 
     if (c.type == RTCommandWaitCondition::Type::Signal)
     {
+        //remove signal spy in main thread and block until finished
         if (!QMetaObject::invokeMethod(stash_, "removeSpy", Qt::BlockingQueuedConnection))
             return false;
     }
@@ -158,14 +162,16 @@ bool RTCommandRunner::executeCommand(RTCommand* cmd)
 
     logMsg("Executing...", cmd);
 
+    //execute command in main thread and block until finished
     bool ok      = false;
     bool invoked = QMetaObject::invokeMethod(stash_, "executeCommand", Qt::BlockingQueuedConnection,
                                              Q_RETURN_ARG(bool, ok),
                                              Q_ARG(const RTCommand*, cmd));
     bool succeeded = (ok && invoked);
 
+    //if invoking the execution failed, we set the commands state to failed
     if (!invoked)
-        cmd->res.cmd_state = RTCommandResult::CmdState::Failed;
+        cmd->cmd_state = CmdState::Failed;
 
     logMsg(std::string("[") + (succeeded ? "Succeded" : "Failed") + "]", cmd);
 
@@ -184,6 +190,7 @@ void RTCommandRunner::logMsg(const std::string& msg, RTCommand* cmd)
 }
 
 /**
+ * Thread execution.
  */
 void RTCommandRunner::run()
 {
@@ -193,7 +200,7 @@ void RTCommandRunner::run()
     auto processCommand = [ & ] (RTCommand* cmd)
     {
         //reset state
-        cmd->res = {};
+        cmd->resetState();
 
         //init wait condition and execute command
         if (initWaitCondition(cmd) &&
@@ -206,9 +213,10 @@ void RTCommandRunner::run()
         //always try to clean up wait condition
         cleanupWaitCondition(cmd);
 
-        logMsg(cmd->result().generateMessage().toStdString(), cmd);
+        logMsg("Ended with state '" + cmd->generateStateString().toStdString() + "'", cmd);
     };
 
+    //process commands in queue until empty
     while (!commands_.empty())
     {
         std::shared_ptr<RTCommand> cmd;
