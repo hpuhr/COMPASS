@@ -24,6 +24,7 @@
 #include "global.h"
 #include "dbcontent/variable/metavariable.h"
 #include "logger.h"
+#include "test/ui_test_conversions.h"
 
 #include <QGridLayout>
 #include <QLabel>
@@ -375,8 +376,21 @@ void VariableSelectionWidget::showMetaVariables(bool show_meta_variables)
     updateMenuEntries();
 }
 
-QPushButton* VariableSelectionWidget::selectionButton() const
+boost::optional<QString> VariableSelectionWidget::uiGet(const QString& what) const
 {
+    QString obj_str = object_label_->text();
+    QString var_str = variable_label_->text();
+
+    QStringList strings;
+    strings.push_back(obj_str);
+    strings.push_back(var_str);
+
+    return ui_test::conversions::stringFromValue<QStringList>(strings);
+}
+
+QWidget* VariableSelectionWidget::uiRerouteToNative() const
+{
+    //selection button functions as a menu triggering button and can be handled by native qt ui injections.
     return sel_button_;
 }
 

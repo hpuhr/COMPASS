@@ -15,9 +15,10 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "ui_test_set_native.h"
+#include "ui_test_setget_native.h"
 #include "ui_test_find.h"
 #include "ui_test_widget_setters.h"
+#include "ui_test_widget_getters.h"
 
 #include <QWidget>
 
@@ -27,7 +28,15 @@
  */
 #define TRY_INVOKE_UI_SETTER(WidgetType, widget, value, delay, hint)                            \
     if (dynamic_cast<WidgetType*>(widget))                                                      \
-        return setUIElement<WidgetType>(dynamic_cast<WidgetType*>(widget), value, delay, hint);                                               
+        return setUIElement<WidgetType>(dynamic_cast<WidgetType*>(widget), value, delay, hint);
+
+/**
+ * Attempts a cast of the given widget to the given type and invokes
+ * the templated value getter if the cast succeeds.
+ */
+#define TRY_INVOKE_UI_GETTER(WidgetType, widget, what)                                 \
+    if (dynamic_cast<WidgetType*>(widget))                                             \
+        return getUIElementValue<WidgetType>(dynamic_cast<WidgetType*>(widget), what);
 
 namespace ui_test
 {
@@ -49,6 +58,7 @@ bool setUIElementNative(QWidget* parent,
     //declare setters for each type of widget here
     //corresponding template specializations need to be defined in 
     //ui_test_widget_setters.h
+    TRY_INVOKE_UI_SETTER(QLabel, w.second, value, delay, hint)
     TRY_INVOKE_UI_SETTER(QMenuBar, w.second, value, delay, hint)
     TRY_INVOKE_UI_SETTER(QComboBox, w.second, value, delay, hint)
     TRY_INVOKE_UI_SETTER(QTabWidget, w.second, value, delay, hint)
@@ -65,6 +75,34 @@ bool setUIElementNative(QWidget* parent,
     TRY_INVOKE_UI_SETTER(QAbstractButton, w.second, value, delay, hint) //for all other buttons which were not handled before
 
     return false;
+}
+
+/**
+ * Widget type agnostic value getter.
+ * Checks on native Qt widgets.
+ */
+boost::optional<QString> getUIElementNative(QWidget* parent, 
+                                            const QString& obj_name,
+                                            const QString& what)
+{
+    auto w = findObjectAs<QObject>(parent, obj_name);
+    if (w.first != FindObjectErrCode::NoError)
+        return {};
+
+    TRY_INVOKE_UI_GETTER(QLabel, w.second, what)
+    TRY_INVOKE_UI_GETTER(QMenuBar, w.second, what)
+    TRY_INVOKE_UI_GETTER(QComboBox, w.second, what)
+    TRY_INVOKE_UI_GETTER(QTabWidget, w.second, what)
+    TRY_INVOKE_UI_GETTER(QToolBar, w.second, what)
+    TRY_INVOKE_UI_GETTER(QLineEdit, w.second, what)
+    TRY_INVOKE_UI_GETTER(QTextEdit, w.second, what)
+    TRY_INVOKE_UI_GETTER(QSpinBox, w.second, what)
+    TRY_INVOKE_UI_GETTER(QDoubleSpinBox, w.second, what)
+    TRY_INVOKE_UI_GETTER(QSlider, w.second, what)
+    //...maybe add special button getters
+    TRY_INVOKE_UI_GETTER(QAbstractButton, w.second, what) //for all other buttons which were not handled before
+
+    return {};
 }
 
 } // namespace ui_test

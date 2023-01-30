@@ -43,7 +43,7 @@
 #include <QLabel>
 
 #include "ui_test_event_injections.h"
-#include "ui_test_set.h"
+#include "ui_test_setget.h"
 #include "ui_test_common.h"
 #include "rtcommand_runner.h"
 #include "rtcommand_chain.h"
@@ -66,6 +66,7 @@ void TestLabPhil::addTestsToMenu_impl(QMenu* menu)
     ADD_TEST("UI Injection Test", uiInjectionTest);
     ADD_TEST("Generate Object Name Test", uiObjectNameGenerationTest);
     ADD_TEST("UI Set Test", uiSetTest);
+    ADD_TEST("UI Get Test", uiGetTest);
     ADD_TEST("Test Runner Test", uiTestRunnerTest)
 }
 
@@ -247,7 +248,7 @@ bool TestLabPhil::uiObjectNameGenerationTest()
 {
     auto testObjNameGen = [ & ] (const QString& str)
     {
-        QString res = ui_test::generateObjectName(str);
+        QString res = ui_test::normalizedObjectName(str);
         std::cout << "Object name: '" << str.toStdString() << "' => '" << res.toStdString() << "'" << std::endl;
     } ;
 
@@ -299,6 +300,60 @@ bool TestLabPhil::uiSetTest()
         bool ok = ui_test::setUIElement(main_window, obj, value);
 
         status_label->setText(ok ? "Success" : "Failed");
+    };
+
+    QObject::connect(button, &QPushButton::pressed, cb);
+
+    QString init_obj = "";
+    QString init_val = "";
+
+    obj_edit->setText(init_obj);
+    value_edit->setText(init_val);
+
+    dlg.exec();
+
+    return true;
+}
+
+/**
+*/
+bool TestLabPhil::uiGetTest()
+{
+    auto main_window = &COMPASS::instance().mainWindow();
+
+    QDialog dlg;
+    QVBoxLayout* layoutv = new QVBoxLayout;
+    QHBoxLayout* layouth = new QHBoxLayout;
+    dlg.setLayout(layoutv);
+
+    layoutv->addLayout(layouth);
+
+    layouth->addWidget(new QLabel("Object: "));
+
+    QLineEdit* obj_edit = new QLineEdit;
+    layouth->addWidget(obj_edit);
+
+    layouth->addWidget(new QLabel("What: "));
+
+    QLineEdit* value_edit = new QLineEdit;
+    layouth->addWidget(value_edit);
+
+    QPushButton* button = new QPushButton("Get");
+    layouth->addWidget(button);
+
+    QLabel* status_label = new QLabel("");
+
+    layoutv->addWidget(status_label);
+    layoutv->addStretch();
+
+    auto cb = [ = ] () 
+    {
+        QString obj  = obj_edit->text();
+        QString what = value_edit->text();
+
+        auto res = ui_test::getUIElement(main_window, obj, what);
+
+        status_label->setText(res.has_value() ? res.value() : "Failed");
     };
 
     QObject::connect(button, &QPushButton::pressed, cb);

@@ -20,7 +20,7 @@
 #include <QString>
 #include <QRegularExpression>
 
-#define UI_TEST_OBJ_NAME(widget_ptr, display_name) widget_ptr->setObjectName(ui_test::generateObjectName(display_name));
+#define UI_TEST_OBJ_NAME(widget_ptr, display_name) widget_ptr->setObjectName(ui_test::normalizedObjectName(display_name));
 
 namespace ui_test
 {
@@ -40,7 +40,9 @@ struct SetUIHint
     int y = -1; //y-pos of event
 };
 
-inline QString generateObjectName(const QString& text)
+/**
+ */
+inline QString normalizedObjectName(const QString& text)
 {
     QString obj_name = text.toLower();
     obj_name.remove(QRegularExpression("^[-.:\\s]+"));
@@ -48,6 +50,41 @@ inline QString generateObjectName(const QString& text)
     obj_name.replace(QRegularExpression("[-.:\\s]+"), "_");
 
     return obj_name;
+}
+
+/**
+ */
+inline QString normalizedToolName(const QString& text)
+{
+    int idx = text.lastIndexOf("[");
+    if (idx < 0)
+        return text;
+
+    QString ret = text;
+    ret.truncate(idx);
+
+    return ret.trimmed();
+}
+
+/**
+ */
+inline QString normalizedMenuName(const QString& text)
+{
+    QString txt = text;
+    if (txt.startsWith("&"))
+        txt = txt.mid(1);
+
+    return txt.trimmed();
+}
+
+/**
+ */
+inline QString normalizedActionName(const QString& text)
+{
+    QString txt = text.trimmed();
+    txt.remove(QRegularExpression("[.]+$"));
+
+    return txt;
 }
 
 } // namespace ui_test

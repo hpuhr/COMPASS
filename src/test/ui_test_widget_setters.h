@@ -19,6 +19,7 @@
 
 #include "ui_test_event_injections.h"
 #include "ui_test_common.h"
+#include "ui_test_conversions.h"
 
 #include <QMenu>
 #include <QMenuBar>
@@ -34,6 +35,7 @@
 #include <QToolButton>
 #include <QCheckBox>
 #include <QRadioButton>
+#include <QLabel>
 
 #include <QWidget>
 #include <QString>
@@ -43,72 +45,7 @@
 
 namespace ui_test
 {
-    /**
-     * Value conversions from string values to specific value types.
-     */
-    namespace conversions
-    {
-        template<typename T>
-        inline boost::optional<T> valueFromString(const QString& value)
-        {
-            return {};
-        }
-        template<>
-        inline boost::optional<int> valueFromString(const QString& value)
-        {
-            if (value.isEmpty())
-                return {};
-
-            bool ok;
-            int ret = value.toInt(&ok);
-
-            if (!ok)
-                return {};
-
-            return ret;
-        }
-        template<>
-        inline boost::optional<double> valueFromString(const QString& value)
-        {
-            if (value.isEmpty())
-                return {};
-
-            bool ok;
-            double ret = value.toDouble(&ok);
-
-            if (!ok)
-                return {};
-
-            return ret;
-        }
-        template<>
-        inline boost::optional<QStringList> valueFromString(const QString& value)
-        {
-            if (value.isEmpty())
-                return {};
-            
-            QStringList strings = value.split("|");
-            if (strings.empty())
-                return {};
-
-            return strings;
-        }
-        template<>
-        inline boost::optional<bool> valueFromString(const QString& value)
-        {
-            if (value.isEmpty())
-                return {};
-
-            if (value == "true")
-                return true;
-            else if (value == "false")
-                return false;
-
-            //unknown value
-            return {};
-        }
-    }
-
+    
     /**
      * Invoke widget specific event injectors here and
      * feed them with values they understand.
@@ -118,6 +55,13 @@ namespace ui_test
     inline bool setUIElement(T* widget, const QString& value, int delay = -1, const SetUIHint& hint = SetUIHint())
     {
         return false;
+    }
+    template<>
+    inline bool setUIElement(QLabel* widget, const QString& value, int delay, const SetUIHint& hint)
+    {
+        //just for completeness
+        widget->setText(value);
+        return true;
     }
     template<>
     inline bool setUIElement(QMenuBar* widget, const QString& value, int delay, const SetUIHint& hint)

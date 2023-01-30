@@ -31,4 +31,13 @@ protected:
     virtual bool run_impl() const override;
 };
 
+/**
+ */
+struct RTCommandUIGet : public rtcommand::RTCommandObjectValue 
+{
+    virtual QString name() const override { return "uiset"; }
+protected:
+    virtual bool run_impl() const override;
+};
+
 }

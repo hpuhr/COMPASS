@@ -19,16 +19,21 @@
 
 #include "ui_test_common.h"
 
+#include <boost/optional.hpp>
+
 class QWidget;
 class QString;
 
 namespace ui_test
 {
+    
+    bool setUIElement(QWidget* parent, 
+                      const QString& obj_name, 
+                      const QString& value, 
+                      int delay = -1);
 
-    bool setUIElementNative(QWidget* parent, 
-                            const QString& obj_name, 
-                            const QString& value, 
-                            int delay = -1,
-                            const SetUIHint& hint = SetUIHint());
+    boost::optional<QString> getUIElement(QWidget* parent, 
+                                          const QString& obj_name,
+                                          const QString& what);
 
 } // namespace ui_test

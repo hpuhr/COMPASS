@@ -17,23 +17,25 @@
 
 #pragma once
 
-#include "ui_test_adapter.h"
+#include "ui_test_common.h"
 
-#include "dbcontent/variable/variableselectionwidget.h"
+#include <boost/optional.hpp>
+
+#include <QString>
+
+class QWidget;
 
 namespace ui_test
 {
 
-UI_TEST_DEFINE_ADAPTER(dbContent::VariableSelectionWidget, w)
-{
-    if (!w)
-        return {};
+    bool setUIElementNative(QWidget* parent, 
+                            const QString& obj_name, 
+                            const QString& value, 
+                            int delay = -1,
+                            const SetUIHint& hint = SetUIHint());
 
-    //reroute set event to selection button
-    AdapterRerouteResult res;
-    res.widget = (QWidget*)w->selectionButton();
-
-    return res;
-}
+    boost::optional<QString> getUIElementNative(QWidget* parent, 
+                                                const QString& obj_name,
+                                                const QString& what);
 
 } // namespace ui_test

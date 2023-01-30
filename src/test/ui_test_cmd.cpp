@@ -16,7 +16,7 @@
  */
 
 #include "ui_test_cmd.h"
-#include "ui_test_set.h"
+#include "ui_test_setget.h"
 
 #include <QMainWindow>
 

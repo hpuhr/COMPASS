@@ -17,6 +17,7 @@
 
 #include "ui_test_event_injections.h"
 #include "ui_test_find.h"
+#include "ui_test_common.h"
 #include "logger.h"
 
 #include <QApplication>
@@ -271,10 +272,8 @@ namespace
                 if (!a || a->isSeparator() || (is_menu && !a->menu()))
                     continue;
 
-                QString txt_cur = a->text();
-                if (txt_cur.startsWith("&"))
-                    txt_cur = txt_cur.mid(1);
-
+                QString txt_cur = is_menu ? normalizedMenuName(a->text()) : 
+                                            normalizedActionName(a->text());
                 if (txt_cur == txt)
                     return a;
             }
@@ -357,12 +356,12 @@ namespace
         {
             //the active action is the currently highlighted action
             auto active = activeAction(menu);
-            if (!active)
+            if (!active || (is_menu && !active->menu()))
                 return false;
 
-            //std::cout << "text: " << active->text().toStdString() << ", searched: " << text.toStdString() << std::endl;
-
-            return (active->text() == text && (!is_menu || active->menu()));
+            QString txt_cur = is_menu ? normalizedMenuName(active->text()) : 
+                                        normalizedActionName(active->text());
+            return (txt_cur == text);
         };
 
         const int n = menu->actions().count();
@@ -614,18 +613,6 @@ bool injectToolSelectionEvent(QWidget* root,
         return false;
     }
 
-    auto removeShortcut = [ & ] (const QString& txt) 
-    {
-        int idx = txt.lastIndexOf("[");
-        if (idx < 0)
-            return txt;
-
-        QString ret = txt;
-        ret.truncate(idx);
-
-        return ret.trimmed();
-    };
-
     int      idx    = -1;
     QAction* action = nullptr;
     for (int i = 0; i < obj.second->actions().count(); ++i)
@@ -634,7 +621,7 @@ bool injectToolSelectionEvent(QWidget* root,
         if (a->isSeparator())
             continue;
 
-        const QString tn = removeShortcut(a->text());
+        const QString tn = normalizedToolName(a->text());
         if (tn == tool_name)
         {
             idx    = i;

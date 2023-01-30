@@ -34,5 +34,6 @@ private:
     static bool uiInjectionTest();
     static bool uiObjectNameGenerationTest();
     static bool uiSetTest();
+    static bool uiGetTest();
     static bool uiTestRunnerTest();
 };
