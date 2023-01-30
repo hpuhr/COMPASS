@@ -59,6 +59,10 @@
 #include "createassociationstask.h"
 #include "createassociationstaskdialog.h"
 
+#ifdef USE_EXPERIMENTAL_SOURCE
+#include "geometrytreeitem.h"
+#endif
+
 #include <QApplication>
 #include <QFileDialog>
 #include <QCloseEvent>
@@ -372,7 +376,8 @@ void MainWindow::createMenus ()
 
     QAction* reset_views_action = new QAction(tr("Reset Views"));
     reset_views_action->setToolTip(
-                "Enable all data sources, disable all filters and reset Views to startup configuration");
+                "Enable all data sources, reset labels,\n"
+                "disable all filters and reset Views to startup configuration");
     connect(reset_views_action, &QAction::triggered, this, &MainWindow::resetViewsMenuSlot);
     ui_menu_->addAction(reset_views_action);
 
@@ -1521,7 +1526,8 @@ void MainWindow::resetViewsMenuSlot()
     QMessageBox::StandardButton reply;
     reply = QMessageBox::question(
                 nullptr, "Reset Views",
-                "Confirm to enable all data sources, disable all filters and reset Views to startup configuration?",
+                "Confirm to enable all data sources, reset labels,\n"
+                "disable all filters and reset Views to startup configuration?",
                 QMessageBox::Yes|QMessageBox::No);
 
     if (reply == QMessageBox::Yes)
@@ -1546,9 +1552,15 @@ void MainWindow::resetViewsMenuSlot()
         }
 
         // reset stuff
+        COMPASS::instance().dbContentManager().resetToStartupConfiguration();
+
         COMPASS::instance().dataSourceManager().resetToStartupConfiguration();
 
         COMPASS::instance().filterManager().resetToStartupConfiguration();
+
+#ifdef USE_EXPERIMENTAL_SOURCE
+    GeometryTreeItem::clearHiddenIdentifierStrs(); // clears hidden layers
+#endif
 
         COMPASS::instance().viewManager().resetToStartupConfiguration();
 

@@ -329,7 +329,7 @@ bool Configurable::hasSubConfigurable(const std::string& class_id, const std::st
 
 void Configurable::setTmpDisableRemoveConfigOnDelete(bool value)
 {
-    loginf << "Configurable::setTmpDisableRemoveConfigOnDelete: value " << value;
+    logdbg << "Configurable::setTmpDisableRemoveConfigOnDelete: value " << value;
 
     tmp_disable_remove_config_on_delete_ = value;
 
