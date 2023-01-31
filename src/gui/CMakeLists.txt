@@ -5,6 +5,7 @@ include_directories (
 
 target_sources(compass
     PUBLIC
+        "${CMAKE_CURRENT_LIST_DIR}/autoresumedialog.h"
         "${CMAKE_CURRENT_LIST_DIR}/invalidqlineedit.h"
         "${CMAKE_CURRENT_LIST_DIR}/textfielddoublevalidator.h"
         "${CMAKE_CURRENT_LIST_DIR}/textfieldhexvalidator.h"
@@ -16,6 +17,7 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/datatypeformatselectionwidget.h"
         "${CMAKE_CURRENT_LIST_DIR}/groupbox.h"
     PRIVATE
+        "${CMAKE_CURRENT_LIST_DIR}/autoresumedialog.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/rangeedit.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/rangeslider.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/formatselectionwidget.cpp"

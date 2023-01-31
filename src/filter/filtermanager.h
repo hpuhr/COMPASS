@@ -90,6 +90,8 @@ public:
 
     void filterBuffers(std::map<std::string, std::shared_ptr<Buffer>>& data);
 
+    void resetToStartupConfiguration();
+
 protected:
     // database id, resets if changed
     std::string db_id_;

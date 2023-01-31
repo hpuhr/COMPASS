@@ -76,6 +76,8 @@ ASTERIXImportTask::ASTERIXImportTask(const std::string& class_id, const std::str
     registerParameter("file_list", &file_list_, json::array());
     registerParameter("current_file_framing", &current_file_framing_, "");
 
+    registerParameter("num_packets_overload", &num_packets_overload_, 60);
+
     date_ = boost::posix_time::ptime(boost::gregorian::day_clock::universal_day());
 
     registerParameter("override_tod_offset", &override_tod_offset_, 0.0);
@@ -932,12 +934,17 @@ void ASTERIXImportTask::addDecodedASTERIXSlot()
     if (stopped_)
         return;
 
-    if (num_packets_in_processing_ > 10) // network special case
+    if (num_packets_in_processing_ > num_packets_overload_) // network special case
     {
         logwrn << "ASTERIXImportTask: addDecodedASTERIXSlot: overload detected, packets in processing "
                << num_packets_in_processing_ << " skipping data";
 
         std::vector<std::unique_ptr<nlohmann::json>> extracted_data {decode_job_->extractedData()};
+
+        // issue: if all packets are already in queued_job_buffers_, no insert will be started
+        // try to resume after being in overload for too long
+        if (!insert_active_ && queued_job_buffers_.size())
+            insertData(); // will call itself again if required
 
         return;
     }
@@ -1115,7 +1122,8 @@ void ASTERIXImportTask::postprocessDoneSlot()
         // TODO change to append
         queued_job_buffers_.emplace_back(std::move(job_buffers));
 
-        if (!insert_active_ && !COMPASS::instance().dbContentManager().loadInProgress())
+        if (!insert_active_ && !COMPASS::instance().dbExportInProgress()
+                && !COMPASS::instance().dbContentManager().loadInProgress())
         {
             logdbg << "ASTERIXImportTask: postprocessDoneSlot: inserting, thread " << QThread::currentThreadId();
             assert (!COMPASS::instance().dbContentManager().insertInProgress());

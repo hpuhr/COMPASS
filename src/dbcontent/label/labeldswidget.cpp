@@ -27,16 +27,12 @@ LabelDSWidget::LabelDSWidget(LabelGenerator& label_generator, QWidget* parent,
                                                        Qt::WindowFlags f)
     : QWidget(parent, f), label_generator_(label_generator)
 {
+    arrow_lu_ = QIcon(Files::getIconFilepath("arrow_lu.png").c_str());
+    arrow_ru_ = QIcon(Files::getIconFilepath("arrow_ru.png").c_str());
+    arrow_ld_ = QIcon(Files::getIconFilepath("arrow_ld.png").c_str());
+    arrow_rd_ = QIcon(Files::getIconFilepath("arrow_rd.png").c_str());
+
     QVBoxLayout* main_layout = new QVBoxLayout();
-
-//    list_widget_ = new QListWidget();
-//    list_widget_->setSelectionMode(QListWidget::MultiSelection);
-//    updateListSlot();
-
-//    connect(list_widget_, &QListWidget::itemClicked,
-//            this, &LabelDSWidget::itemClickedSlot);
-
-//    main_layout->addWidget(list_widget_);
 
     ds_grid_ = new QGridLayout();
     ds_grid_->setContentsMargins(2,2,2,2);
@@ -44,19 +40,7 @@ LabelDSWidget::LabelDSWidget(LabelGenerator& label_generator, QWidget* parent,
     updateListSlot();
     main_layout->addLayout(ds_grid_);
 
-//    QIcon arrow_lu_;
-//    QIcon arrow_ru_;
-//    QIcon arrow_ld_;
-//    QIcon arrow_rd_;
-
-    arrow_lu_ = QIcon(Files::getIconFilepath("arrow_lu.png").c_str());
-    arrow_ru_ = QIcon(Files::getIconFilepath("arrow_ru.png").c_str());
-    arrow_ld_ = QIcon(Files::getIconFilepath("arrow_ld.png").c_str());
-    arrow_rd_ = QIcon(Files::getIconFilepath("arrow_rd.png").c_str());
-
-
     setLayout(main_layout);
-
 
     connect(&COMPASS::instance().dataSourceManager(), &DataSourceManager::dataSourcesChangedSignal,
             this, &LabelDSWidget::updateListSlot); // update if data sources changed
@@ -67,7 +51,6 @@ LabelDSWidget::LabelDSWidget(LabelGenerator& label_generator, QWidget* parent,
 
 LabelDSWidget::~LabelDSWidget()
 {
-
 }
 
 void LabelDSWidget::updateListSlot()
@@ -113,7 +96,6 @@ void LabelDSWidget::updateListSlot()
     QLabel* dir_label = new QLabel("Direction");
     dir_label->setFont(font_bold);
     ds_grid_->addWidget(dir_label, row, 2);;
-
 
     for (const auto& ds_it : ds_man.dbDataSources())
     {

@@ -66,6 +66,7 @@ class ViewContainer : public QObject, public Configurable
     QTabWidget* tab_widget_{nullptr};
 
     int window_cnt_{0};
+    bool disable_add_remove_views_ {false};
 
     std::vector<std::unique_ptr<View>> views_;
 

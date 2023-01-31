@@ -113,8 +113,11 @@ class ViewManager : public QObject, public Configurable
     void disableDataDistribution(bool value);
     // disables propagation of data to the views. used when loading is performed for processing purposes
 
-
     bool isProcessingData() const;
+
+    void resetToStartupConfiguration();
+
+    bool isInitialized() const;
 
 protected:
     COMPASS& compass_;
@@ -142,7 +145,13 @@ protected:
 
     bool disable_data_distribution_ {false};
 
+    bool use_tmp_stored_readset_ {false};
+    std::map<std::string, dbContent::VariableSet> tmp_stored_readset_;
+
     virtual void checkSubConfigurables();
+
+    void enableStoredReadSets();
+    void disableStoredReadSets();
 };
 
 #endif /* VIEWMANAGER_H_ */

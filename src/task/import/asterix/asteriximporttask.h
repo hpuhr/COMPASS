@@ -166,6 +166,7 @@ protected:
 
     bool network_ignore_future_ts_ {false};
 
+    unsigned int num_packets_overload_ {60};
     unsigned int num_packets_in_processing_{0};
     unsigned int num_packets_total_{0};
 

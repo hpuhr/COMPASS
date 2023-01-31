@@ -519,6 +519,15 @@ std::map<unsigned int, std::set<unsigned int>> DataSourceManager::getLoadDataSou
     return ds_to_load;
 }
 
+void DataSourceManager::resetToStartupConfiguration()
+{
+    loginf << "DataSourceManager: resetToStartupConfiguration";
+
+    selectAllDSTypes();
+    selectAllDataSources();
+    selectSpecificLineSlot(0);
+}
+
 void DataSourceManager::databaseOpenedSlot()
 {
 
