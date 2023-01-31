@@ -28,6 +28,7 @@ find_package(Qt5Widgets)
 find_package(Qt5Core)
 find_package(Qt5OpenGL)
 find_package(Qt5Charts)
+find_package(Qt5Test)
 
 message("Qt Widgets version: ${Qt5Widgets_VERSION}")
 
@@ -119,6 +120,7 @@ include_directories (
     ${Qt5Widgets_INCLUDE_DIRS}
     ${Qt5OpenGL_INCLUDE_DIRS}
     ${Qt5Charts_INCLUDE_DIRS}
+    ${Qt5Test_INCLUDE_DIRS}
     ${Boost_INCLUDE_DIRS}
     ${SQLITE3_INCLUDE_DIR}
     ${LOG4CPP_INCLUDE_DIR}
@@ -140,6 +142,7 @@ target_link_libraries ( compass
     Qt5::Core
     Qt5::OpenGL
     Qt5::Charts
+    Qt5::Test
     ${jASTERIX_LIBRARIES}
     ${Boost_LIBRARIES}
     ${LOG4CPP_LIBRARIES}

@@ -584,6 +584,7 @@ ViewContainerWidget* ViewManager::addNewContainerWidget()
     generateSubConfigurable("ViewContainerWidget", container_widget_name);
 
     assert(container_widgets_.count(container_widget_name) == 1);
+
     return container_widgets_.at(container_widget_name);
 }
 

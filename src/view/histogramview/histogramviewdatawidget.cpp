@@ -228,6 +228,7 @@ void HistogramViewDataWidget::updateDataSlot(const std::map<std::string, std::sh
 void HistogramViewDataWidget::loadingDoneSlot()
 {
     updateView();
+    emit dataLoaded();
 }
 
 /**

@@ -29,6 +29,7 @@
 #include "view.h"
 #include "viewcontainer.h"
 #include "viewmanager.h"
+#include "ui_test_common.h"
 #include "compass.h"
 
 #if USE_EXPERIMENTAL_SOURCE == true
@@ -63,12 +64,16 @@ ViewContainer::ViewContainer(const std::string& class_id, const std::string& ins
 
     if (window_cnt != 0)
     {
+        const QString tool_tip = "Add view";
+
         QPushButton* add_button = new QPushButton(tab_widget_);
+        UI_TEST_OBJ_NAME(add_button, tool_tip);
         add_button->setIcon(QIcon(Files::getIconFilepath("crosshair_fat.png").c_str()));
         add_button->setFixedSize(UI_ICON_SIZE);
         add_button->setFlat(UI_ICON_BUTTON_FLAT);
-        add_button->setToolTip(tr("Add view"));
+        add_button->setToolTip(tr(tool_tip.toStdString().c_str()));
         add_button->setDisabled(disable_add_remove_views_);
+
         connect(add_button, &QPushButton::clicked, this, &ViewContainer::showAddViewMenuSlot);
         tab_widget_->setCornerWidget(add_button);
     }
@@ -136,7 +141,12 @@ void ViewContainer::addView(View* view)
     QWidget* w = view->getCentralWidget();
     assert(w);
 
-    int index = tab_widget_->addTab(w, QString::fromStdString(view->getName()));
+    const QString view_name = QString::fromStdString(view->getName());
+
+    int index = tab_widget_->addTab(w, view_name);
+
+    //generate and set a nice object name which can be used to identify the view widget in the object hierarchy
+    UI_TEST_OBJ_NAME(w, view_name)
 
     QPushButton* manage_button = new QPushButton();
     manage_button->setIcon(QIcon(Files::getIconFilepath("edit.png").c_str()));
@@ -292,6 +302,7 @@ void ViewContainer::showAddViewMenuSlot()
         connect (action, &QAction::triggered, this, &ViewContainer::addNewViewSlot);
     }
 
+    menu.setObjectName("add_view_menu");
     menu.exec(QCursor::pos());
 }
 

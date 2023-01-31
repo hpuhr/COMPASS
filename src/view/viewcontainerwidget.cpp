@@ -24,6 +24,7 @@
 #include "stringconv.h"
 #include "viewcontainer.h"
 #include "viewmanager.h"
+#include "ui_test_common.h"
 
 #include <QMoveEvent>
 #include <QResizeEvent>
@@ -34,7 +35,8 @@
 using namespace Utils;
 
 ViewContainerWidget::ViewContainerWidget(const std::string& class_id,
-                                         const std::string& instance_id, ViewManager* view_manager)
+                                         const std::string& instance_id, 
+                                         ViewManager* view_manager)
     : QWidget(nullptr),
       Configurable(class_id, instance_id, view_manager),
       view_manager_(*view_manager)
@@ -50,8 +52,12 @@ ViewContainerWidget::ViewContainerWidget(const std::string& class_id,
 
     name_ = "Window" + std::to_string(String::getAppendedInt(instanceId()));
 
-    QIcon ats_icon(Files::getIconFilepath("ats.png").c_str());
-    setWindowIcon(ats_icon);  // for the glory of the empire
+
+    //set a nice object name by which we can differentiate multiple windows in qt's object hierarchy
+    UI_TEST_OBJ_NAME(this, QString::fromStdString(name_))
+
+    QIcon atsdb_icon(Files::getIconFilepath("ats.png").c_str());
+    setWindowIcon(atsdb_icon);  // for the glory of the empire
 
     std::string title = "OpenATS COMPASS v" + COMPASS::instance().config().getString("version") + " " + name_;
     QWidget::setWindowTitle(title.c_str());
