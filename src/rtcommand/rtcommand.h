@@ -29,22 +29,14 @@ class QMainWindow;
 #define DECLARE_RTCOMMAND(Name)                                         \
 public:                                                                 \
     static QString staticName() { return #Name; }                       \
-    static bool registerCommand();                                      \
+    static void init() { is_registered_ = true; }                       \
 protected:                                                              \
     virtual QString name_impl() const override { return staticName(); } \
 private:                                                                \
-    friend class RTCommandRegistry;                                     \
     static bool is_registered_;
 
-#define IMPLEMENT_RTCOMMAND(Class)      \
-    bool Class::is_registered_ = false; \
-    bool Class::registerCommand()       \
-    {                                   \
-        if (is_registered_)             \
-            return false;               \
-        is_registered_ = true;          \
-        return rtcommand::RTCommandRegistry::instance().registerCommand(staticName(), [] () { return new Class; }); \
-    }
+#define REGISTER_RTCOMMAND(Class) \
+    bool Class::is_registered_ = rtcommand::RTCommandRegistry::instance().registerCommand(Class::staticName(), [] () { return new Class; });
 
 namespace rtcommand
 {
@@ -192,9 +184,9 @@ struct RTCommandObjectValue : public RTCommandObject
 */
 struct RTCommandEmpty : public RTCommand 
 {
-protected:
-    virtual bool run_impl() const override { return true; }
     DECLARE_RTCOMMAND(empty)
+protected:
+    virtual bool run_impl() const override { return true; } 
 };
 
 } // namespace rtcommand

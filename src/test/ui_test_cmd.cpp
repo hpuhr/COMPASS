@@ -21,8 +21,8 @@
 
 #include <QMainWindow>
 
-IMPLEMENT_RTCOMMAND(ui_test::RTCommandUISet)
-IMPLEMENT_RTCOMMAND(ui_test::RTCommandUIGet)
+REGISTER_RTCOMMAND(ui_test::RTCommandUISet)
+REGISTER_RTCOMMAND(ui_test::RTCommandUIGet)
 
 namespace ui_test
 {
