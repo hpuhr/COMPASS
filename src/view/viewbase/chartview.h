@@ -27,12 +27,17 @@ public:
         SeriesArea, 
         SeriesLines //gl accelerated lines
     };
+    enum class SelectionAxes
+    {
+        X = 0,
+        XY
+    };
 
     ChartView(QtCharts::QChart* chart, SelectionStyle sel_style, QWidget* parent = nullptr);
     virtual ~ChartView();
 
-    void setSelectionStyle(SelectionStyle style) { selection_style_ = style; }
     void setDataBounds(const QRectF& r);
+    void setSelectionAxes(SelectionAxes axes) { selection_axes_ = axes; }
 
     void addLegendOnlyItem(const QString& name, const QColor& color); 
 
@@ -90,5 +95,6 @@ private:
     QtCharts::QAreaSeries*       selection_box_    = nullptr;
     QtCharts::QLineSeries*       selection_lines_  = nullptr;
     bool                         enable_selection_ = false;
-    SelectionStyle               selection_style_  = SelectionStyle::XY;
+    SelectionStyle               selection_style_  = SelectionStyle::RubberBand;
+    SelectionAxes                selection_axes_   = SelectionAxes::XY;
 };

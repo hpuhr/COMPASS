@@ -19,6 +19,7 @@
 #define DBCONTENT_VARIABLESELECTIONWIDGET_H
 
 #include "property.h"
+#include "test/ui_test_testable.h"
 
 #include <QFrame>
 #include <QMenu>
@@ -34,7 +35,7 @@ namespace dbContent
 class Variable;
 class MetaVariable;
 
-class VariableSelectionWidget : public QFrame
+class VariableSelectionWidget : public QFrame, public ui_test::UITestable
 {
     Q_OBJECT
 
@@ -80,6 +81,9 @@ class VariableSelectionWidget : public QFrame
 
     void setReadOnly(bool read_only);
     void updateMenuEntries();
+
+    virtual boost::optional<QString> uiGet(const QString& what = QString()) const override;
+    virtual QWidget* uiRerouteToNative() const override;
 
   private:
     DBContentManager& dbo_man_;

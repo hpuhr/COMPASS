@@ -42,6 +42,12 @@ class SimpleConfig;
 class EvaluationManager;
 class MainWindow;
 
+namespace rtcommand
+{
+    class RTCommandRunnerStash;
+    class RTCommandRunner;
+}
+
 class COMPASS : public QObject, public Configurable, public Singleton
 {
     Q_OBJECT
@@ -71,6 +77,7 @@ public:
     ViewManager& viewManager();
     SimpleConfig& config();
     EvaluationManager& evaluationManager();
+    rtcommand::RTCommandRunner& rtCmdRunner();
 
     void shutdown();
 
@@ -103,6 +110,9 @@ protected:
     std::unique_ptr<TaskManager> task_manager_;
     std::unique_ptr<ViewManager> view_manager_;
     std::unique_ptr<EvaluationManager> eval_manager_;
+
+    std::unique_ptr<rtcommand::RTCommandRunnerStash> rt_cmd_runner_stash_;
+    std::unique_ptr<rtcommand::RTCommandRunner>      rt_cmd_runner_;
 
     std::string last_db_filename_;
     nlohmann::json db_file_list_;

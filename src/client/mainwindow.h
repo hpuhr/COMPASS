@@ -94,9 +94,6 @@ public slots:
     void autoResumeResumeSlot();
     void autoResumeStaySlot();
 
-private slots:
-    void runTestCodeSlot();
-
 public:
     MainWindow();
     virtual ~MainWindow();
@@ -237,6 +234,7 @@ protected:
     QTimer* auto_resume_timer_ {nullptr};
 
     void createMenus ();
+    void createDebugMenu();
 
     /// @brief Called when application closes
     void closeEvent(QCloseEvent* event);

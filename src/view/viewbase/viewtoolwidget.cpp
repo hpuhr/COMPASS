@@ -17,6 +17,8 @@ ViewToolWidget::ViewToolWidget(ViewToolSwitcher* tool_switcher, QWidget* parent)
     assert(tool_switcher_);
 
     connect(tool_switcher_, &ViewToolSwitcher::toolChanged, this, &ViewToolWidget::toolSwitched);
+
+    setObjectName("tool_bar");
 }
 
 /**
