@@ -110,7 +110,9 @@ class Configurable
     /// @brief Returns key identifier (class_id + instance_id)
     const std::string& keyId() const { return key_id_; }
 
-  private:
+    void setTmpDisableRemoveConfigOnDelete(bool value); // disabled removal of cfg on delete of instance
+
+private:
     /// Class identifier
     std::string class_id_;
     /// Instance identifier
@@ -122,6 +124,8 @@ class Configurable
     /// Configuration
     Configuration* configuration_{nullptr};
     bool is_root_{false};
+
+    bool tmp_disable_remove_config_on_delete_ {false};
 
     /// Container for all sub-configurables (class id + instance id -> Configurable)
     std::map<std::string, Configurable&> children_;

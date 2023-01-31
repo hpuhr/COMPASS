@@ -51,10 +51,10 @@ FilterManagerWidget::FilterManagerWidget(FilterManager& filter_manager, QWidget*
     QHBoxLayout* top_layout = new QHBoxLayout();
 
     // use filters stuff
-    filters_check_ = new QCheckBox("Use Filters");
+    filters_check_ = new QCheckBox();
     filters_check_->setChecked(filter_manager_.useFilters());
     connect(filters_check_, &QCheckBox::clicked, this, &FilterManagerWidget::toggleUseFilters);
-    top_layout->addWidget(filters_check_);
+    //top_layout->addWidget(filters_check_);
 
     top_layout->addStretch();
 
@@ -120,6 +120,12 @@ FilterManagerWidget::~FilterManagerWidget()
         delete filter_generator_widget_;
         filter_generator_widget_ = nullptr;
     }
+}
+
+QCheckBox *FilterManagerWidget::filtersCheckBox() const
+{
+    assert (filters_check_);
+    return filters_check_;
 }
 
 void FilterManagerWidget::toggleUseFilters()

@@ -60,6 +60,10 @@
 #include "createassociationstask.h"
 #include "createassociationstaskdialog.h"
 
+#ifdef USE_EXPERIMENTAL_SOURCE
+#include "geometrytreeitem.h"
+#endif
+
 #include <QApplication>
 #include <QFileDialog>
 #include <QCloseEvent>
@@ -74,6 +78,8 @@
 #include <QThread>
 #include <QVBoxLayout>
 #include <QLabel>
+#include <QCheckBox>
+#include <QTimer>
 
 #define SHOW_DEBUG_MENU
 
@@ -106,12 +112,6 @@ MainWindow::MainWindow()
     assert(COMPASS::instance().config().existsId("version"));
     std::string title = "OpenATS COMPASS v" + COMPASS::instance().config().getString("version");
 
-    if (COMPASS::instance().config().existsId("save_config_on_exit"))
-    {
-        save_configuration_ = COMPASS::instance().config().getBool("save_config_on_exit");
-        loginf << "MainWindow: constructor: save configuration on exit " << save_configuration_;
-    }
-
     QWidget::setWindowTitle(title.c_str());
 
     QWidget* main_widget = new QWidget();
@@ -131,6 +131,11 @@ MainWindow::MainWindow()
     tab_widget_->addTab(COMPASS::instance().dataSourceManager().loadWidget(), "Data Sources");
     tab_widget_->addTab(COMPASS::instance().filterManager().widget(), "Filters");
 
+    QTabBar *tabBar = tab_widget_->tabBar();
+
+    tabBar->setTabButton(1, QTabBar::LeftSide, COMPASS::instance().filterManager().widget()->filtersCheckBox());
+    //tabBar->setTabButton(0, QTabBar::RightSide, new QLabel("label0"));
+
     COMPASS::instance().evaluationManager().init(tab_widget_); // adds eval widget
     COMPASS::instance().viewManager().init(tab_widget_); // adds view points widget and view container
 
@@ -148,6 +153,8 @@ MainWindow::MainWindow()
     add_view_button_->setFixedSize(UI_ICON_SIZE);
     add_view_button_->setFlat(UI_ICON_BUTTON_FLAT);
     add_view_button_->setToolTip(tr(tool_tip.toStdString().c_str()));
+    add_view_button_->setDisabled(COMPASS::instance().disableAddRemoveViews());
+
     connect(add_view_button_, &QPushButton::clicked, this, &MainWindow::showAddViewMenuSlot);
     tab_widget_->setCornerWidget(add_view_button_);
 
@@ -175,9 +182,13 @@ MainWindow::MainWindow()
     connect(live_pause_resume_button_, &QPushButton::clicked, this, &MainWindow::livePauseResumeSlot);
     bottom_layout->addWidget(live_pause_resume_button_);
 
-    live_stop_button_ = new QPushButton("Stop");
-    connect(live_stop_button_, &QPushButton::clicked, this, &MainWindow::liveStopSlot);
-    bottom_layout->addWidget(live_stop_button_);
+    if (!COMPASS::instance().disableLiveToOfflineSwitch())
+    {
+        live_stop_button_ = new QPushButton("Stop");
+        connect(live_stop_button_, &QPushButton::clicked, this, &MainWindow::liveStopSlot);
+
+        bottom_layout->addWidget(live_stop_button_);
+    }
 
     bottom_layout->addStretch();
 
@@ -261,20 +272,22 @@ void MainWindow::createMenus ()
 
     // config operations
 
-    QAction* save_act = new QAction("&Save Config");
-    save_act->setShortcut(tr("Ctrl+S"));
-    connect(save_act, &QAction::triggered, this, &MainWindow::saveConfigSlot);
-    file_menu->addAction(save_act);
+    if (!COMPASS::instance().disableMenuConfigSave())
+    {
+        QAction* save_act = new QAction("&Save Config");
+        save_act->setShortcut(tr("Ctrl+S"));
+        connect(save_act, &QAction::triggered, this, &MainWindow::saveConfigSlot);
+        file_menu->addAction(save_act);
 
-    file_menu->addSeparator();
+        file_menu->addSeparator();
+    }
 
     // quit operations
-
-    QAction* quit2_act = new QAction(tr("Quit &Without Saving Config"));
-    quit2_act->setShortcut(tr("Ctrl+W"));
-    quit2_act->setToolTip(tr("Quit the application withour saving the configuration"));
-    connect(quit2_act, &QAction::triggered, this, &MainWindow::quitWOConfigSlot);
-    file_menu->addAction(quit2_act);
+    quit_wo_cfg_sav_action_ = new QAction(tr("Quit &Without Saving Config"));
+    quit_wo_cfg_sav_action_->setShortcut(tr("Ctrl+W"));
+    quit_wo_cfg_sav_action_->setToolTip(tr("Quit the application withour saving the configuration"));
+    connect(quit_wo_cfg_sav_action_, &QAction::triggered, this, &MainWindow::quitWOConfigSlot);
+    file_menu->addAction(quit_wo_cfg_sav_action_);
 
     QAction* quit_act = new QAction(tr("&Quit"));
     quit_act->setShortcuts(QKeySequence::Quit);
@@ -355,7 +368,7 @@ void MainWindow::createMenus ()
 
     QAction* calc_radar_plpos_action = new QAction(tr("Calculate Radar Plot Positions"));
     calc_radar_plpos_action->setToolTip(tr("Calculate Radar Plot Positios, only needed if Radar Position information"
-                                             " was changed"));
+                                           " was changed"));
     connect(calc_radar_plpos_action, &QAction::triggered, this, &MainWindow::calculateRadarPlotPositionsSlot);
     process_menu_->addAction(calc_radar_plpos_action);
 
@@ -372,6 +385,18 @@ void MainWindow::createMenus ()
 #ifdef SHOW_DEBUG_MENU
     createDebugMenu();
 #endif
+
+    // process menu
+    ui_menu_ = menuBar()->addMenu(tr("&UI"));
+    ui_menu_->setToolTipsVisible(true);
+
+    QAction* reset_views_action = new QAction(tr("Reset Views"));
+    reset_views_action->setToolTip(
+                "Enable all data sources, reset labels,\n"
+                "disable all filters and reset Views to startup configuration");
+    connect(reset_views_action, &QAction::triggered, this, &MainWindow::resetViewsMenuSlot);
+    ui_menu_->addAction(reset_views_action);
+
 }
 
 void MainWindow::updateMenus()
@@ -387,6 +412,8 @@ void MainWindow::updateMenus()
 
     bool in_live_running = COMPASS::instance().appMode() == AppMode::LiveRunning;
     bool in_live_paused = COMPASS::instance().appMode() == AppMode::LivePaused;
+
+    bool in_live = in_live_running || in_live_paused;
 
     open_recent_db_menu_->clear();
 
@@ -414,21 +441,21 @@ void MainWindow::updateMenus()
 
     bool db_open = COMPASS::instance().dbOpened();
 
-    new_db_action_->setDisabled(db_open || in_live_running);
-    open_existing_db_action_->setDisabled(db_open || in_live_running);
+    new_db_action_->setDisabled(db_open || in_live);
+    open_existing_db_action_->setDisabled(db_open || in_live);
 
     if (recent_file_list.size()) // is disabled otherwise
-        open_recent_db_menu_->setDisabled(db_open || in_live_running);
+        open_recent_db_menu_->setDisabled(db_open || in_live);
 
     export_db_action_->setDisabled(!db_open || in_live_running);
-    close_db_action_->setDisabled(!db_open || in_live_running);
+    close_db_action_->setDisabled(!db_open || in_live);
 
     sectors_action_->setDisabled(!db_open || in_live_running);
 
     import_menu_->setDisabled(!db_open || COMPASS::instance().taskManager().asterixImporterTask().isRunning()
-                              || in_live_running || in_live_paused);
+                              || in_live);
     process_menu_->setDisabled(!db_open || COMPASS::instance().taskManager().asterixImporterTask().isRunning()
-                               || in_live_running || in_live_paused);
+                               || in_live);
 
     assert (import_recent_asterix_menu_);
 
@@ -456,7 +483,7 @@ void MainWindow::updateMenus()
 
     assert (config_menu_);
     config_menu_->setDisabled(!db_open || COMPASS::instance().taskManager().asterixImporterTask().isRunning()
-                          || in_live_running || in_live_paused);
+                              || in_live);
 }
 
 void MainWindow::updateBottomWidget()
@@ -475,7 +502,6 @@ void MainWindow::updateBottomWidget()
 
     assert (load_button_);
     assert (live_pause_resume_button_);
-    assert (live_stop_button_);
 
     AppMode app_mode = compass.appMode();
 
@@ -484,14 +510,18 @@ void MainWindow::updateBottomWidget()
         load_button_->setHidden(true);
 
         live_pause_resume_button_->setHidden(true);
-        live_stop_button_->setHidden(true);
+
+        if (live_stop_button_)
+            live_stop_button_->setHidden(true);
     }
     else if (app_mode == AppMode::Offline)
     {
         load_button_->setHidden(false);
 
         live_pause_resume_button_->setHidden(true);
-        live_stop_button_->setHidden(true);
+
+        if (live_stop_button_)
+            live_stop_button_->setHidden(true);
     }
     else if (app_mode == AppMode::LivePaused)
     {
@@ -499,7 +529,9 @@ void MainWindow::updateBottomWidget()
 
         live_pause_resume_button_->setHidden(false);
         live_pause_resume_button_->setText("Resume");
-        live_stop_button_->setHidden(false);
+
+        if (live_stop_button_)
+            live_stop_button_->setHidden(false);
     }
     else if (app_mode == AppMode::LiveRunning)
     {
@@ -507,7 +539,9 @@ void MainWindow::updateBottomWidget()
 
         live_pause_resume_button_->setHidden(false);
         live_pause_resume_button_->setText("Pause");
-        live_stop_button_->setHidden(false);
+
+        if (live_stop_button_)
+            live_stop_button_->setHidden(false);
     }
     else
         logerr << "MainWindow: updateBottomWidget: unknown app mode " << (unsigned int) COMPASS::instance().appMode();
@@ -517,6 +551,9 @@ void MainWindow::disableConfigurationSaving()
 {
     logdbg << "MainWindow: disableConfigurationSaving";
     save_configuration_ = false;
+
+    assert (quit_wo_cfg_sav_action_);
+    quit_wo_cfg_sav_action_->setEnabled(save_configuration_);
 }
 
 void MainWindow::showEvaluationTab()
@@ -1145,12 +1182,12 @@ void MainWindow::performAutomaticTasks ()
                     }
                     else
                         logerr << "MainWindow: performAutomaticTasks: "
-                                      "exporting evaluation report not possible since report can't be generated";
+                                  "exporting evaluation report not possible since report can't be generated";
                 }
             }
             else
                 logerr << "MainWindow: performAutomaticTasks: "
-                              "evaluation not possible since evaluation can not be performed";
+                          "evaluation not possible since evaluation can not be performed";
         }
     }
 
@@ -1255,6 +1292,8 @@ void MainWindow::closeDBSlot()
 void MainWindow::saveConfigSlot()
 {
     loginf << "MainWindow: saveConfigSlot";
+
+    assert (!COMPASS::instance().disableMenuConfigSave());
 
     ConfigurationManager::getInstance().saveConfiguration();
 }
@@ -1484,7 +1523,71 @@ void MainWindow::quitRequestedSlot()
 void MainWindow::showAddViewMenuSlot()
 {
     loginf << "MainWindow: showAddViewMenuSlot";
+
+    assert (!COMPASS::instance().disableAddRemoveViews());
     COMPASS::instance().viewManager().showMainViewContainerAddView();
+}
+
+void MainWindow::resetViewsMenuSlot()
+{
+    loginf << "MainWindow: resetViewsMenuSlot";
+
+    QMessageBox::StandardButton reply;
+    reply = QMessageBox::question(
+                nullptr, "Reset Views",
+                "Confirm to enable all data sources, reset labels,\n"
+                "disable all filters and reset Views to startup configuration?",
+                QMessageBox::Yes|QMessageBox::No);
+
+    if (reply == QMessageBox::Yes)
+    {
+        QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+
+        QMessageBox msg_box;
+        msg_box.setWindowTitle("Resetting");
+        msg_box.setText( "Please wait...");
+        msg_box.setStandardButtons(QMessageBox::NoButton);
+        msg_box.setWindowModality(Qt::ApplicationModal);
+        msg_box.show();
+
+        boost::posix_time::ptime start_time = boost::posix_time::microsec_clock::local_time();
+
+        setVisible(false);
+
+        while ((boost::posix_time::microsec_clock::local_time()-start_time).total_milliseconds() < 50)
+        {
+            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+            QThread::msleep(1);
+        }
+
+        // reset stuff
+        COMPASS::instance().dbContentManager().resetToStartupConfiguration();
+
+        COMPASS::instance().dataSourceManager().resetToStartupConfiguration();
+
+        COMPASS::instance().filterManager().resetToStartupConfiguration();
+
+#ifdef USE_EXPERIMENTAL_SOURCE
+    GeometryTreeItem::clearHiddenIdentifierStrs(); // clears hidden layers
+#endif
+
+        COMPASS::instance().viewManager().resetToStartupConfiguration();
+
+         // set AppMode
+        if (COMPASS::instance().appMode() == AppMode::LivePaused)
+            COMPASS::instance().appMode(AppMode::LiveRunning);
+        else
+        {
+            COMPASS::instance().viewManager().appModeSwitchSlot(
+                        COMPASS::instance().appMode(), COMPASS::instance().appMode());
+        }
+
+        msg_box.close();
+
+        setVisible(true);
+
+        QApplication::restoreOverrideCursor();
+    }
 }
 
 void MainWindow::appModeSwitchSlot (AppMode app_mode_previous, AppMode app_mode_current)
@@ -1516,6 +1619,65 @@ void MainWindow::appModeSwitchSlot (AppMode app_mode_previous, AppMode app_mode_
 
     updateBottomWidget();
     updateMenus();
+
+    if (app_mode_current == AppMode::LivePaused)
+    {
+        assert (!auto_resume_timer_);
+
+        auto_resume_timer_ = new QTimer();
+
+        connect(auto_resume_timer_, &QTimer::timeout, this, &MainWindow::autoResumeTimerSlot);
+        auto_resume_timer_->start(COMPASS::instance().autoLiveRunningResumeAskTime() * 60 * 1000); // min -> ms
+    }
+    else if (auto_resume_timer_)
+    {
+        delete auto_resume_timer_;
+        auto_resume_timer_ = nullptr;
+    }
+
+    if (auto_resume_dialog_)
+    {
+        auto_resume_dialog_->close();
+        auto_resume_dialog_ = nullptr;
+    }
+}
+
+void MainWindow::autoResumeTimerSlot()
+{
+    loginf << "MainWindow: autoResumeTimerSlot";
+
+    assert (!auto_resume_dialog_);
+
+    auto_resume_dialog_.reset(new AutoResumeDialog(COMPASS::instance().autoLiveRunningResumeAskWaitTime() * 60));
+    // min to s
+    connect (auto_resume_dialog_.get(), &AutoResumeDialog::resumeSignal, this, &MainWindow::autoResumeResumeSlot);
+    connect (auto_resume_dialog_.get(), &AutoResumeDialog::stayPausedSignal, this, &MainWindow::autoResumeStaySlot);
+
+    auto_resume_dialog_->show();
+}
+
+void MainWindow::autoResumeResumeSlot()
+{
+    loginf << "MainWindow: autoResumeResumeSlot";
+
+    assert (auto_resume_dialog_);
+    auto_resume_dialog_->close();
+
+    auto_resume_dialog_ = nullptr;
+
+    livePauseResumeSlot();
+}
+
+void MainWindow::autoResumeStaySlot()
+{
+    loginf << "MainWindow: autoResumeStaySlot";
+
+    auto_resume_dialog_->close();
+
+    auto_resume_dialog_ = nullptr;
+
+    // restart timer
+    auto_resume_timer_->start(COMPASS::instance().autoLiveRunningResumeAskTime() * 60 * 1000); // min -> ms
 }
 
 void MainWindow::loadButtonSlot()

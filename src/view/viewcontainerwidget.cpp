@@ -17,11 +17,6 @@
 
 #include "viewcontainerwidget.h"
 
-#include <QMoveEvent>
-#include <QResizeEvent>
-#include <QTabWidget>
-#include <QVBoxLayout>
-
 #include "compass.h"
 #include "config.h"
 #include "files.h"
@@ -30,6 +25,12 @@
 #include "viewcontainer.h"
 #include "viewmanager.h"
 #include "ui_test_common.h"
+
+#include <QMoveEvent>
+#include <QResizeEvent>
+#include <QTabWidget>
+#include <QVBoxLayout>
+#include <QMessageBox>
 
 using namespace Utils;
 
@@ -50,6 +51,7 @@ ViewContainerWidget::ViewContainerWidget(const std::string& class_id,
     registerParameter("min_height", &min_height_, 900);
 
     name_ = "Window" + std::to_string(String::getAppendedInt(instanceId()));
+
 
     //set a nice object name by which we can differentiate multiple windows in qt's object hierarchy
     UI_TEST_OBJ_NAME(this, QString::fromStdString(name_))
@@ -76,6 +78,9 @@ ViewContainerWidget::ViewContainerWidget(const std::string& class_id,
     setAttribute(Qt::WA_DeleteOnClose, true);
 
     createSubConfigurables();
+
+    if (COMPASS::instance().disableAddRemoveViews())
+        setWindowFlags(Qt::Window | Qt::WindowMinimizeButtonHint | Qt::WindowMaximizeButtonHint);
 
     show();
 
@@ -123,7 +128,7 @@ ViewContainer& ViewContainerWidget::viewContainer() const { return *view_contain
 void ViewContainerWidget::closeEvent(QCloseEvent* event)
 {
     loginf << "ViewContainerWidget: closeEvent: instance " << instanceId();
-    //view_manager_.deleteContainerWidget(instanceId());
+
     view_manager_.removeContainerWidget(instanceId());
     QWidget::closeEvent(event);
 }

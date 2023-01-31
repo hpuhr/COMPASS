@@ -40,7 +40,7 @@ LabelGeneratorWidget::LabelGeneratorWidget(LabelGenerator& label_generator)
     ed_edit->setFlat(UI_ICON_BUTTON_FLAT);
     connect(ed_edit, &QPushButton::clicked,
             this, &LabelGeneratorWidget::editSettingsSlot);
-    ed_edit->setToolTip("Edit Label Contents");
+    ed_edit->setToolTip("Edit Label Settings");
     edit_layout->addWidget(ed_edit);
 
     main_layout->addLayout(edit_layout);
@@ -238,6 +238,16 @@ void LabelGeneratorWidget::editSettingsSlot()
 {
     QMenu menu;
 
+    QAction* action_all = new QAction("Label All", this);
+    connect (action_all, &QAction::triggered, this, &LabelGeneratorWidget::labelAllDSSlot);
+    menu.addAction(action_all);
+
+    QAction* action_none = new QAction("Label None", this);
+    connect (action_none, &QAction::triggered, this, &LabelGeneratorWidget::labelNoDSSlot);
+    menu.addAction(action_none);
+
+    menu.addSeparator();
+
     for (auto& db_cont_it : COMPASS::instance().dbContentManager())
     {
         QAction* action = new QAction(("Edit "+db_cont_it.first).c_str(), this);
@@ -258,6 +268,20 @@ void LabelGeneratorWidget::editDBContentSlot()
     loginf << "DBContentLabelGeneratorWidget: editDBContentSlot: dbcontent " << dbcontent_name;
 
     label_generator_.editLabelContents(dbcontent_name);
+}
+
+void LabelGeneratorWidget::labelAllDSSlot()
+{
+    loginf << "LabelGeneratorWidget: labelAllDSSlot";
+
+    label_generator_.labelAllDSIDs();
+}
+
+void LabelGeneratorWidget::labelNoDSSlot()
+{
+    loginf << "LabelGeneratorWidget: labelNoDSSlot";
+
+    label_generator_.labelNoDSIDs();
 }
 
 void LabelGeneratorWidget::autoLabelChangedSlot(bool checked)

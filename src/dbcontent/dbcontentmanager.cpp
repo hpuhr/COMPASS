@@ -105,19 +105,19 @@ void DBContentManager::generateSubConfigurable(const std::string& class_id,
     logdbg << "DBContentManager: generateSubConfigurable: class_id " << class_id << " instance_id "
            << instance_id;
 
-    if (class_id.compare("DBContentLabelGenerator") == 0)
+    if (class_id == "DBContentLabelGenerator")
     {
         assert (!label_generator_);
         label_generator_.reset(new dbContent::LabelGenerator(class_id, instance_id, *this));
     }
-    else if (class_id.compare("DBContent") == 0)
+    else if (class_id == "DBContent")
     {
         DBContent* object = new DBContent(compass_, class_id, instance_id, this);
         loginf << "DBContentManager: generateSubConfigurable: adding content " << object->name();
         assert(!dbcontent_.count(object->name()));
         dbcontent_[object->name()] = object;
     }
-    else if (class_id.compare("MetaVariable") == 0)
+    else if (class_id == "MetaVariable")
     {
         MetaVariable* meta_var = new MetaVariable(class_id, instance_id, this);
         logdbg << "DBContentManager: generateSubConfigurable: adding meta var type "
@@ -1343,6 +1343,19 @@ void DBContentManager::saveTargets()
 unsigned int DBContentManager::maxLiveDataAgeCache() const
 {
     return max_live_data_age_cache_;
+}
+
+void DBContentManager::resetToStartupConfiguration()
+{
+    if (label_generator_)
+    {
+        label_generator_->setTmpDisableRemoveConfigOnDelete(true);
+
+        label_generator_ = nullptr;
+
+        generateSubConfigurable("DBContentLabelGenerator", "DBContentLabelGenerator0");
+        assert (label_generator_);
+    }
 }
 
 //void DBContentManager::updateMetaVarNames()

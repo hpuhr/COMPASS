@@ -21,6 +21,9 @@ public slots:
     void editSettingsSlot();
     void editDBContentSlot();
 
+    void labelAllDSSlot();
+    void labelNoDSSlot();
+
     void autoLabelChangedSlot(bool checked);
     void lodChangedSlot(const QString& text);
 

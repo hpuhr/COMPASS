@@ -20,8 +20,11 @@
 
 #include "global.h"
 #include "appmode.h"
+#include "autoresumedialog.h"
 
 #include <QMainWindow>
+
+#include <memory>
 
 class QLabel;
 class QPushButton;
@@ -30,6 +33,7 @@ class QCheckBox;
 class QMenu;
 class QPushButton;
 class QAction;
+class QTimer;
 
 class DBSelectionWidget;
 class DBSchemaManagerWidget;
@@ -82,7 +86,13 @@ public slots:
     void quitRequestedSlot();
     void showAddViewMenuSlot();
 
+    void resetViewsMenuSlot();
+
     void appModeSwitchSlot (AppMode app_mode_previous, AppMode app_mode_current);
+
+    void autoResumeTimerSlot();
+    void autoResumeResumeSlot();
+    void autoResumeStaySlot();
 
 public:
     MainWindow();
@@ -192,6 +202,7 @@ protected:
     QMenu* open_recent_db_menu_ {nullptr};
     QAction* export_db_action_ {nullptr};
     QAction* close_db_action_ {nullptr};
+    QAction* quit_wo_cfg_sav_action_ {nullptr};
 
     // configure sectors
     QAction* sectors_action_ {nullptr};
@@ -207,14 +218,20 @@ protected:
     // process menu
     QMenu* process_menu_ {nullptr};
 
-    bool loading_{false};
+    // ui menu
+    QMenu* ui_menu_ {nullptr};
 
-    QLabel* db_label_{nullptr};
-    QLabel* status_label_{nullptr};
-    QPushButton* load_button_{nullptr};
+    bool loading_ {false};
 
-    QPushButton* live_pause_resume_button_{nullptr};
-    QPushButton* live_stop_button_{nullptr};
+    QLabel* db_label_ {nullptr};
+    QLabel* status_label_ {nullptr};
+    QPushButton* load_button_ {nullptr};
+
+    QPushButton* live_pause_resume_button_ {nullptr};
+    QPushButton* live_stop_button_ {nullptr}; // optional button, may be nullptr
+
+    std::unique_ptr<AutoResumeDialog> auto_resume_dialog_;
+    QTimer* auto_resume_timer_ {nullptr};
 
     void createMenus ();
     void createDebugMenu();
