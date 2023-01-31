@@ -17,12 +17,6 @@ PUBLIC
     "${CMAKE_CURRENT_LIST_DIR}/ui_test_setget.h"
     "${CMAKE_CURRENT_LIST_DIR}/ui_test_find.h"
     "${CMAKE_CURRENT_LIST_DIR}/ui_test_cmd.h"
-
-    "${CMAKE_CURRENT_LIST_DIR}/rtcommand.h"
-    "${CMAKE_CURRENT_LIST_DIR}/rtcommand_chain.h"
-    "${CMAKE_CURRENT_LIST_DIR}/rtcommand_runner.h"
-    "${CMAKE_CURRENT_LIST_DIR}/rtcommand_runner_stash.h"
-    "${CMAKE_CURRENT_LIST_DIR}/rtcommand_wait_condition.h"
 PRIVATE
     "${CMAKE_CURRENT_LIST_DIR}/test_lab.cpp"
     "${CMAKE_CURRENT_LIST_DIR}/test_lab_phil.cpp"
@@ -31,12 +25,6 @@ PRIVATE
     "${CMAKE_CURRENT_LIST_DIR}/ui_test_setget.cpp"
     "${CMAKE_CURRENT_LIST_DIR}/ui_test_find.cpp"
     "${CMAKE_CURRENT_LIST_DIR}/ui_test_cmd.cpp"
-    
-    "${CMAKE_CURRENT_LIST_DIR}/rtcommand.cpp"
-    "${CMAKE_CURRENT_LIST_DIR}/rtcommand_chain.cpp"
-    "${CMAKE_CURRENT_LIST_DIR}/rtcommand_runner.cpp"
-    "${CMAKE_CURRENT_LIST_DIR}/rtcommand_runner_stash.cpp"
-    "${CMAKE_CURRENT_LIST_DIR}/rtcommand_wait_condition.cpp"
 )
 
 set ( TEST_DATA_PATH "/home/sk/data/test/" )

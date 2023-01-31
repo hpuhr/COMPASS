@@ -40,6 +40,8 @@ class RTCommandRunner : public QThread
 {
     Q_OBJECT
 public:
+    typedef size_t CmdID;
+
     RTCommandRunner(RTCommandRunnerStash* stash);
     virtual ~RTCommandRunner();
 
@@ -64,7 +66,6 @@ private:
     RTCommandRunnerStash* stash_;
 
     tbb::concurrent_queue<std::shared_ptr<RTCommand>> commands_;
-    tbb::concurrent_queue<std::shared_ptr<RTCommand>> processed_commands_;
 };
 
 } // namespace rtcommand

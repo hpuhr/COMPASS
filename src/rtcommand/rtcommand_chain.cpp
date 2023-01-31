@@ -16,7 +16,7 @@
  */
 
 #include "rtcommand_chain.h"
-#include "ui_test_cmd.h"
+//include "ui_test_cmd.h"
 
 namespace rtcommand
 {
@@ -99,12 +99,12 @@ RTCommandChain& RTCommandChain::waitFor(int msec)
  */
 RTCommandChain& RTCommandChain::uiset(const QString& obj, const QString& value, int delay)
 {
-    auto c = new ui_test::RTCommandUISet;
-    c->obj   = obj;
-    c->value = value;
-    c->delay = delay;
+    // auto c = new ui_test::RTCommandUISet;
+    // c->obj   = obj;
+    // c->value = value;
+    // c->delay = delay;
 
-    addCommand(c);
+    // addCommand(c);
 
     return *this;
 }

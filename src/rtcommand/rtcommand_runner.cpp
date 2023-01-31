@@ -99,7 +99,7 @@ bool RTCommandRunner::initWaitCondition(RTCommand* cmd)
                                                  Q_ARG(QString, c.value));
         if (!invoked || !ok)
         {
-            c.wc_state = WaitConditionState::BadInit;
+            cmd->result_.wc_state = WaitConditionState::BadInit;
             return false;
         }   
     }
@@ -115,9 +115,9 @@ bool RTCommandRunner::execWaitCondition(RTCommand* cmd)
     if (!cmd || !stash_)
         throw std::runtime_error("RTCommandRunner::execWaitCondition: Bad init");
 
-    auto& c = cmd->condition;
-
     bool ok = true;
+
+    const auto& c = cmd->condition;
 
     if (c.type == RTCommandWaitCondition::Type::Signal)
     {
@@ -128,8 +128,8 @@ bool RTCommandRunner::execWaitCondition(RTCommand* cmd)
         ok = waitForCondition(WaitConditionDelay(c.timeout_ms));
     }
 
-    c.wc_state = ok ? WaitConditionState::Success : 
-                      WaitConditionState::Failed;
+    cmd->result_.wc_state = ok ? WaitConditionState::Success : 
+                                 WaitConditionState::Failed;
     return ok;
 }
 
@@ -171,7 +171,7 @@ bool RTCommandRunner::executeCommand(RTCommand* cmd)
 
     //if invoking the execution failed, we set the commands state to failed
     if (!invoked)
-        cmd->cmd_state = CmdState::Failed;
+        cmd->result_.cmd_state = CmdState::Failed;
 
     logMsg(std::string("[") + (succeeded ? "Succeded" : "Failed") + "]", cmd);
 
@@ -200,7 +200,7 @@ void RTCommandRunner::run()
     auto processCommand = [ & ] (RTCommand* cmd)
     {
         //reset state
-        cmd->resetState();
+        cmd->resetResult();
 
         //init wait condition and execute command
         if (initWaitCondition(cmd) &&
@@ -213,7 +213,7 @@ void RTCommandRunner::run()
         //always try to clean up wait condition
         cleanupWaitCondition(cmd);
 
-        logMsg("Ended with state '" + cmd->generateStateString().toStdString() + "'", cmd);
+        logMsg("Ended with state '" + cmd->result().toString().toStdString() + "'", cmd);
     };
 
     //process commands in queue until empty

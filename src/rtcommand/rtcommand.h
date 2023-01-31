@@ -18,12 +18,33 @@
 #pragma once
 
 #include <QString>
+#include <QVariant>
 
 #include <memory>
 #include <vector>
 
 class QObject;
 class QMainWindow;
+
+#define DECLARE_RTCOMMAND(Name)                                         \
+public:                                                                 \
+    static QString staticName() { return #Name; }                       \
+    static bool registerCommand();                                      \
+protected:                                                              \
+    virtual QString name_impl() const override { return staticName(); } \
+private:                                                                \
+    friend class RTCommandRegistry;                                     \
+    static bool is_registered_;
+
+#define IMPLEMENT_RTCOMMAND(Class)      \
+    bool Class::is_registered_ = false; \
+    bool Class::registerCommand()       \
+    {                                   \
+        if (is_registered_)             \
+            return false;               \
+        is_registered_ = true;          \
+        return rtcommand::RTCommandRegistry::instance().registerCommand(staticName(), [] () { return new Class; }); \
+    }
 
 namespace rtcommand
 {
@@ -55,6 +76,35 @@ enum class WaitConditionState
 };
 
 /**
+*/
+struct RTCommandResult
+{
+    bool success() const
+    { 
+        //as the wait condition might be extremely important for any upcoming commands, 
+        //its state is part of the successful execution of a command
+        return (wc_state == WaitConditionState::Success && cmd_state == CmdState::Success);
+    }
+
+    void reset()
+    {
+        wc_state  = WaitConditionState::Unknown;
+        cmd_state = CmdState::Fresh;
+        cmd_msg   = "";
+
+        data      = QVariant();
+    }
+
+    QString toString() const;
+
+    WaitConditionState wc_state  = WaitConditionState::Unknown; // wait condition state
+    CmdState           cmd_state = CmdState::Fresh;             // execution state
+    QString            cmd_msg;                                 // optional execution result message 
+
+    QVariant           data;      // command result data
+};
+
+/**
  * Represents a wait condition which is evaluated after a command has been executed.
  */
 struct RTCommandWaitCondition
@@ -71,8 +121,6 @@ struct RTCommandWaitCondition
         return (type != Type::None);
     }
 
-    WaitConditionState state() const { return wc_state; }
-
     std::unique_ptr<WaitCondition> create() const;
 
     Type    type = Type::None; //type of wait condition
@@ -80,16 +128,6 @@ struct RTCommandWaitCondition
     QString value;             //string value for the condition, e.g. a signal name
     int     timeout_ms = -1;   //Type::Signal: timeout if the signal wasn't received
                                //Type::Delay:  amount of time to wait
-private:
-    friend class RTCommandRunner;
-    friend struct RTCommand;
-
-    void resetState()
-    {
-        wc_state = WaitConditionState::Unknown;
-    }
-
-    mutable WaitConditionState wc_state = WaitConditionState::Success; // the current execution state
 };
 
 /**
@@ -98,7 +136,7 @@ private:
 struct RTCommand
 {
     bool run() const;
-    virtual QString name() const = 0;
+    virtual QString name() const { return name_impl(); };
     virtual QString description() const { return ""; }
 
     virtual bool valid() const 
@@ -110,34 +148,21 @@ struct RTCommand
     int                    delay = -1; //delay used during command execution (e.g. for each UI injection)
     RTCommandWaitCondition condition;  //condition to wait for after executing the command. 
 
-    CmdState state() const { return cmd_state; }
-    const QString& stateMsg() const { return cmd_msg; }
-
-    bool success() const
-    {
-        //as the wait condition might be extremely important for any upcoming commands, 
-        //its state is part of the successful execution of a command
-        return (condition.state() == WaitConditionState::Success && state() == CmdState::Success);
-    }
-
-    QString generateStateString() const;
+    const RTCommandResult& result() const { return result_; };
 
 protected:
+    void setResultData(const QVariant& d) const { result_.data = d; }
+    void setResultMessage(const QString& m) const { result_.cmd_msg = m; }
+
     virtual bool run_impl() const = 0;
+    virtual QString name_impl() const = 0;
 
 private:
     friend class RTCommandRunner;
 
-    void resetState()
-    {
-        cmd_state = CmdState::Fresh;
-        cmd_msg   = "";
+    void resetResult() const { result_.reset(); }
 
-        condition.resetState();
-    }
-
-    mutable CmdState cmd_state = CmdState::Fresh; // the current execution state
-    mutable QString  cmd_msg;                     // optional message for current execution state
+    mutable RTCommandResult result_;
 };
 
 /**
@@ -167,9 +192,9 @@ struct RTCommandObjectValue : public RTCommandObject
 */
 struct RTCommandEmpty : public RTCommand 
 {
-    virtual QString name() const override { return "empty"; }
 protected:
     virtual bool run_impl() const override { return true; }
+    DECLARE_RTCOMMAND(empty)
 };
 
 } // namespace rtcommand

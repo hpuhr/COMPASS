@@ -39,14 +39,16 @@ public:
     RTCommandRunnerStash();
     virtual ~RTCommandRunnerStash();
 
-    bool spySignalReceived() const;
-
-public slots:
+private slots:
     bool spyForSignal(const QString& obj_name, const QString& signal_name);
     void removeSpy();
     bool executeCommand(const RTCommand* command) const;
     
 private:
+    friend class RTCommandRunner;
+
+    bool spySignalReceived() const;
+
     std::unique_ptr<QSignalSpy> spy_;
 };
 

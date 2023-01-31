@@ -26,7 +26,7 @@ namespace ui_test
  */
 struct RTCommandUISet : public rtcommand::RTCommandObjectValue 
 {
-    virtual QString name() const override { return "uiset"; }
+    DECLARE_RTCOMMAND(uiset)
 protected:
     virtual bool run_impl() const override;
 };
@@ -35,9 +35,9 @@ protected:
  */
 struct RTCommandUIGet : public rtcommand::RTCommandObjectValue 
 {
-    virtual QString name() const override { return "uiset"; }
+    DECLARE_RTCOMMAND(uiget)
 protected:
     virtual bool run_impl() const override;
 };
 
-}
+} // namespace ui_test

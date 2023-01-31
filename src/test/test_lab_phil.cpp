@@ -48,6 +48,8 @@
 #include "rtcommand_runner.h"
 #include "rtcommand_chain.h"
 #include "rtcommand_runner_stash.h"
+#include "ui_test_cmd.h"
+#include "rtcommand_registry.h"
 
 /**
 */

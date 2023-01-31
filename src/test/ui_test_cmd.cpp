@@ -17,8 +17,12 @@
 
 #include "ui_test_cmd.h"
 #include "ui_test_setget.h"
+#include "rtcommand_registry.h"
 
 #include <QMainWindow>
+
+IMPLEMENT_RTCOMMAND(ui_test::RTCommandUISet)
+IMPLEMENT_RTCOMMAND(ui_test::RTCommandUIGet)
 
 namespace ui_test
 {
@@ -32,6 +36,23 @@ bool RTCommandUISet::run_impl() const
         return false;
 
     return setUIElement(main_window, obj, value, delay);
+}
+
+/**
+ */
+bool RTCommandUIGet::run_impl() const
+{
+    auto main_window = rtcommand::mainWindow();
+    if (!main_window)
+        return false;
+
+    auto res = getUIElement(main_window, obj, value);
+    if (!res.has_value())
+        return false;
+
+    setResultData(QVariant(res.value()));
+
+    return true;
 }
 
 }
