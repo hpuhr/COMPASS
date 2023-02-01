@@ -5,6 +5,7 @@ include_directories (
 
 target_sources(compass
     PUBLIC
+        "${CMAKE_CURRENT_LIST_DIR}/rtcommand_defs.h"
         "${CMAKE_CURRENT_LIST_DIR}/rtcommand.h"
         "${CMAKE_CURRENT_LIST_DIR}/rtcommand_chain.h"
         "${CMAKE_CURRENT_LIST_DIR}/rtcommand_runner.h"
@@ -20,5 +21,3 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/rtcommand_wait_condition.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/rtcommand_manager.cpp"
 )
-
-

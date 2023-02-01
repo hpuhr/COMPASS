@@ -81,9 +81,16 @@ QSignalSpy* WaitConditionSignal::createSpy(const QString& obj_name,
     }
 
     //get signal
+#if 0
+    //@TODO: activate in new qt version! cause this is the way to go...
     auto sig = signal_obj.first->metaObject()->method(signal_obj.second);
-    
     auto spy = new QSignalSpy(signal_obj.first, sig);
+#else
+    //@TODO: DEactivate in new qt version!
+    //this emulates the SIGNAL() macro = hacky
+    auto spy = new QSignalSpy(signal_obj.first, ("2" + signal_str).toStdString().c_str());
+#endif
+
     if (!spy->isValid())
     {
         delete spy;

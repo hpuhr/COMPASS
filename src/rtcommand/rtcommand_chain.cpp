@@ -28,6 +28,13 @@ RTCommandChain::RTCommandChain(RTCommandChain&& other)
 }
 
 /**
+*/
+void RTCommandChain::append(std::unique_ptr<RTCommand>&& cmd)
+{
+    addCommand(cmd.release());
+}
+
+/**
  */
 void RTCommandChain::addCommand(RTCommand* cmd)
 {

@@ -17,6 +17,8 @@
 
 #pragma once
 
+#include "rtcommand_defs.h"
+
 #include <QString>
 #include <QVariant>
 
@@ -46,57 +48,6 @@ class WaitCondition;
 QMainWindow* mainWindow();
 
 /**
- * The execution state a command can be in.
- */
-enum class CmdState
-{
-    Fresh = 0,
-    BadConfig,
-    Failed,
-    Success
-};
-
-/**
- * The execution state a wait condition can be in.
- */
-enum class WaitConditionState
-{
-    Unknown = 0,
-    BadInit,
-    Failed,
-    Success
-};
-
-/**
-*/
-struct RTCommandResult
-{
-    bool success() const
-    { 
-        //as the wait condition might be extremely important for any upcoming commands, 
-        //its state is part of the successful execution of a command
-        return (wc_state == WaitConditionState::Success && cmd_state == CmdState::Success);
-    }
-
-    void reset()
-    {
-        wc_state  = WaitConditionState::Unknown;
-        cmd_state = CmdState::Fresh;
-        cmd_msg   = "";
-
-        data      = QVariant();
-    }
-
-    QString toString() const;
-
-    WaitConditionState wc_state  = WaitConditionState::Unknown; // wait condition state
-    CmdState           cmd_state = CmdState::Fresh;             // execution state
-    QString            cmd_msg;                                 // optional execution result message 
-
-    QVariant           data;      // command result data
-};
-
-/**
  * Represents a wait condition which is evaluated after a command has been executed.
  */
 struct RTCommandWaitCondition
@@ -113,7 +64,8 @@ struct RTCommandWaitCondition
         return (type != Type::None);
     }
 
-    std::unique_ptr<WaitCondition> create() const;
+    void setSignal(const QString& obj_name, const QString& signal_name, int timeout_in_ms = -1);
+    void setDelay(int ms);
 
     Type    type = Type::None; //type of wait condition
     QString obj;               //QObject name
@@ -143,7 +95,7 @@ struct RTCommand
     const RTCommandResult& result() const { return result_; };
 
 protected:
-    void setResultData(const QVariant& d) const { result_.data = d; }
+    void setResultData(const QString& d) const { result_.data = d; }
     void setResultMessage(const QString& m) const { result_.cmd_msg = m; }
 
     virtual bool run_impl() const = 0;

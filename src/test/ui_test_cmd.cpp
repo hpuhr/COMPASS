@@ -50,7 +50,7 @@ bool RTCommandUIGet::run_impl() const
     if (!res.has_value())
         return false;
 
-    setResultData(QVariant(res.value()));
+    setResultData(res.value());
 
     return true;
 }

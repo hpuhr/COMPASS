@@ -40,8 +40,10 @@ public:
     RTCommandChain(RTCommandChain&& other);
     virtual ~RTCommandChain() = default;
 
-    const RTCommands& commands() const { return commands_; }
+    void append(std::unique_ptr<RTCommand>&& cmd);
     RTCommandPtr pop();
+
+    const RTCommands& commands() const { return commands_; }
 
 protected:
     void addCommand(RTCommand* cmd);

@@ -44,7 +44,6 @@ class MainWindow;
 
 namespace rtcommand
 {
-    class RTCommandRunnerStash;
     class RTCommandRunner;
 }
 
@@ -111,8 +110,7 @@ protected:
     std::unique_ptr<ViewManager> view_manager_;
     std::unique_ptr<EvaluationManager> eval_manager_;
 
-    std::unique_ptr<rtcommand::RTCommandRunnerStash> rt_cmd_runner_stash_;
-    std::unique_ptr<rtcommand::RTCommandRunner>      rt_cmd_runner_;
+    std::unique_ptr<rtcommand::RTCommandRunner> rt_cmd_runner_;
 
     std::string last_db_filename_;
     nlohmann::json db_file_list_;

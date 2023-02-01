@@ -17,55 +17,42 @@
 
 #pragma once 
 
+#include "rtcommand_defs.h"
+
 #include <memory>
-
-#include <QObject>
-#include <QThread>
-
-#include "util/tbbhack.h"
-
-class QSignalSpy;
+#include <future>
+#include <vector>
 
 namespace rtcommand
 {
 
 struct RTCommand;
-class RTCommandChain;
-class RTCommandRunnerStash;
+class  RTCommandChain;
+class  RTCommandRunnerStash;
 
 /**
  * Class for executing runtime commands in a separate thread.
  */
-class RTCommandRunner : public QThread
+class RTCommandRunner
 {
-    Q_OBJECT
 public:
-    typedef size_t CmdID;
+    typedef std::vector<RTCommandResult> Results;
 
-    RTCommandRunner(RTCommandRunnerStash* stash);
+    RTCommandRunner();
     virtual ~RTCommandRunner();
 
-    void addCommand(std::unique_ptr<RTCommand>&& cmd);
-    void addCommands(RTCommandChain&& cmds);
-
-    int numCommands() const;
-
-protected:
-    virtual void run() override;
+    std::future<Results> runCommand(std::unique_ptr<RTCommand>&& cmd);
+    std::future<Results> runCommands(RTCommandChain&& cmds);
 
 private:
-    void addCommand_internal(RTCommand* cmd);
+    static void runCommand(RTCommand* cmd, RTCommandRunnerStash* stash);
+    static bool initWaitCondition(RTCommand* cmd, RTCommandRunnerStash* stash);
+    static bool execWaitCondition(RTCommand* cmd, RTCommandRunnerStash* stash);
+    static bool cleanupWaitCondition(RTCommand* cmd, RTCommandRunnerStash* stash);
+    static bool executeCommand(RTCommand* cmd, RTCommandRunnerStash* stash);
+    static void logMsg(const std::string& msg, RTCommand* cmd = nullptr);
 
-    bool initWaitCondition(RTCommand* cmd);
-    bool execWaitCondition(RTCommand* cmd);
-    bool cleanupWaitCondition(RTCommand* cmd);
-    bool executeCommand(RTCommand* cmd);
-
-    void logMsg(const std::string& msg, RTCommand* cmd = nullptr);
-
-    RTCommandRunnerStash* stash_;
-
-    tbb::concurrent_queue<std::shared_ptr<RTCommand>> commands_;
+    std::unique_ptr<RTCommandRunnerStash> stash_;
 };
 
 } // namespace rtcommand

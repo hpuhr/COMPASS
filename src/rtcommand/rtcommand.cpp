@@ -82,31 +82,22 @@ QString RTCommandResult::toString() const
  * RTCommandWaitCondition
  ***************************************************************************************/
 
-/**
- * Create a wait condition object from the current type.
- */
-std::unique_ptr<WaitCondition> RTCommandWaitCondition::create() const
+void RTCommandWaitCondition::setSignal(const QString& obj_name, 
+                                       const QString& signal_name, 
+                                       int timeout_in_ms)
 {
-    if (!isSet())
-        return {};
+    *this      = {};
+    type       = Type::Signal;
+    obj        = obj_name;
+    value      = signal_name;
+    timeout_ms = timeout_in_ms;
+}
 
-    auto main_window = mainWindow();
-    if (!main_window)
-        return {};
-
-    if (type == Type::Signal)
-    {
-        return std::unique_ptr<WaitCondition>(new WaitConditionSignal(obj, 
-                                                                      value, 
-                                                                      timeout_ms,
-                                                                      main_window));
-    }
-    else if (type == Type::Delay)
-    {
-        return std::unique_ptr<WaitCondition>(new WaitConditionDelay(timeout_ms));
-    }
-
-    return {};
+void RTCommandWaitCondition::setDelay(int ms)
+{
+    *this      = {};
+    type       = Type::Delay;
+    timeout_ms = ms;
 }
 
 /***************************************************************************************

@@ -47,7 +47,7 @@
 #include "ui_test_common.h"
 #include "rtcommand_runner.h"
 #include "rtcommand_chain.h"
-#include "rtcommand_runner_stash.h"
+#include "rtcommand.h"
 #include "ui_test_cmd.h"
 
 /**
@@ -374,9 +374,7 @@ bool TestLabPhil::uiGetTest()
 */
 bool TestLabPhil::uiTestRunnerTest()
 {
-    rtcommand::RTCommandRunnerStash stash;
-    rtcommand::RTCommandRunner runner(&stash);
-
+    rtcommand::RTCommandRunner runner;
     rtcommand::RTCommandRunner* runner_ptr = &runner;
 
     QDialog dlg;
@@ -386,11 +384,27 @@ bool TestLabPhil::uiTestRunnerTest()
     QPushButton* button = new QPushButton("Run");
     layout->addWidget(button);
 
+    std::future<rtcommand::RTCommandRunner::Results> result;
+    auto result_ptr = &result;
+
     auto cb = [ = ] ()
     {
         rtcommand::RTCommandChain c;
 
-        runner_ptr->addCommands(std::move(c));
+        auto addReloadCmd = [ & ] () 
+        {
+            std::unique_ptr<ui_test::RTCommandUISet> cmd(new ui_test::RTCommandUISet);
+            cmd->obj   = "histogramview2.reload";
+            cmd->value = "";
+            cmd->condition.setSignal("histogramview2", "dataLoaded", 10000);
+
+            c.append(std::move(cmd));
+        };
+
+        addReloadCmd();
+        addReloadCmd();
+
+        *result_ptr = runner_ptr->runCommands(std::move(c));
     };
 
     QObject::connect(button, &QPushButton::pressed, cb);

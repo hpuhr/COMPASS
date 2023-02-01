@@ -34,7 +34,6 @@
 #include "files.h"
 #include "asteriximporttask.h"
 #include "rtcommand_runner.h"
-#include "rtcommand_runner_stash.h"
 #include "rtcommand_manager.h"
 
 #include <QMessageBox>
@@ -86,8 +85,7 @@ COMPASS::COMPASS() : Configurable("COMPASS", "COMPASS0", 0, "compass.json")
     assert(view_manager_);
     assert(eval_manager_);
 
-    rt_cmd_runner_stash_.reset(new rtcommand::RTCommandRunnerStash);
-    rt_cmd_runner_.reset(new rtcommand::RTCommandRunner(rt_cmd_runner_stash_.get()));
+    rt_cmd_runner_.reset(new rtcommand::RTCommandRunner);
 
     // database opending
 
