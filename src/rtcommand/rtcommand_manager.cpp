@@ -23,6 +23,19 @@ void RTCommandManager::run()
 
     //boost::posix_time::ptime log_time_ = boost::posix_time::microsec_clock::local_time();
 
+
+    loginf<< "RTCommandManager: run: creating socket";
+    boost::asio::io_context io_context;
+
+    server s(io_context, port_num_);
+
+
+    loginf<< "RTCommandManager: run: running io context";
+    io_context.run();
+
+
+    loginf<< "RTCommandManager: run: starting loop";
+
     while (1)
     {
         if (stop_requested_) //  && !hasAnyJobs()
