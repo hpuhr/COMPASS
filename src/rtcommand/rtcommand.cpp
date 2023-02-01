@@ -26,7 +26,7 @@
 #include <QApplication>
 #include <QWindow>
 
-IMPLEMENT_RTCOMMAND(rtcommand::RTCommandEmpty)
+REGISTER_RTCOMMAND(rtcommand::RTCommandEmpty)
 
 namespace rtcommand
 {
