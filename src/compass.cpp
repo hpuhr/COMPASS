@@ -35,6 +35,7 @@
 #include "asteriximporttask.h"
 #include "rtcommand_runner.h"
 #include "rtcommand_runner_stash.h"
+#include "rtcommand_manager.h"
 
 #include <QMessageBox>
 #include <QApplication>
@@ -73,6 +74,7 @@ COMPASS::COMPASS() : Configurable("COMPASS", "COMPASS0", 0, "compass.json")
     assert (auto_live_running_resume_ask_time_ > auto_live_running_resume_ask_wait_time_);
 
     JobManager::instance().start();
+    RTCommandManager::instance().start();
 
     createSubConfigurables();
 
@@ -450,6 +452,7 @@ void COMPASS::shutdown()
         dbcontent_manager_->saveTargets();
     dbcontent_manager_ = nullptr;
 
+    RTCommandManager::instance().shutdown();
     JobManager::instance().shutdown();
 
     assert(eval_manager_);
