@@ -40,4 +40,10 @@ protected:
     virtual bool run_impl() const override;
 };
 
+inline void initUITestCommands()
+{
+    RTCommandUISet::init();
+    RTCommandUIGet::init();
+}
+
 } // namespace ui_test

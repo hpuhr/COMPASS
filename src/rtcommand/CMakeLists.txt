@@ -11,6 +11,7 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/rtcommand_runner_stash.h"
         "${CMAKE_CURRENT_LIST_DIR}/rtcommand_wait_condition.h"
         "${CMAKE_CURRENT_LIST_DIR}/rtcommand_manager.h"
+        "${CMAKE_CURRENT_LIST_DIR}/rtcommand_registry.h"
     PRIVATE
         "${CMAKE_CURRENT_LIST_DIR}/rtcommand.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/rtcommand_chain.cpp"

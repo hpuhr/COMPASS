@@ -189,4 +189,22 @@ protected:
     virtual bool run_impl() const override { return true; } 
 };
 
+/**
+*/
+struct RTCommandTestInit : public RTCommand 
+{
+    DECLARE_RTCOMMAND(test_init)
+protected:
+    virtual bool run_impl() const override { return true; } 
+};
+
+/**
+*/
+struct RTCommandTestRegistrator : public RTCommand 
+{
+    DECLARE_RTCOMMAND(test_registrator)
+protected:
+    virtual bool run_impl() const override { return true; } 
+};
+
 } // namespace rtcommand

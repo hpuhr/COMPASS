@@ -40,12 +40,6 @@ public:
     RTCommandChain(RTCommandChain&& other);
     virtual ~RTCommandChain() = default;
 
-    RTCommandChain& empty();
-    RTCommandChain& waitForSignal(const QString& obj, const QString& signal, int timeout_ms = -1);
-    RTCommandChain& waitFor(int msec);
-
-    RTCommandChain& uiset(const QString& obj, const QString& value, int delay = -1);
-
     const RTCommands& commands() const { return commands_; }
     RTCommandPtr pop();
 

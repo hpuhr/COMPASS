@@ -34,7 +34,7 @@ namespace rtcommand
 class RTCommandRegistry : public Singleton
 {
 public:
-    typedef std::function<rtcommand::RTCommand*()> CreatorFunc;
+    typedef std::function<RTCommand*()> CreatorFunc;
 
     virtual ~RTCommandRegistry() = default;
 
@@ -54,6 +54,16 @@ protected:
     RTCommandRegistry() = default;
 
     std::map<QString, CreatorFunc> commands_;
+};
+
+template <typename T>
+struct RTCommandRegistrator
+{
+    RTCommandRegistrator(const QString& name)
+    {
+        std::cout << "RTCommandRegistrator: '" << name.toStdString() << "'" << std::endl;
+        RTCommandRegistry::instance().registerCommand(name, [] () { return new T; });
+    };
 };
 
 } // namespace rtcommand

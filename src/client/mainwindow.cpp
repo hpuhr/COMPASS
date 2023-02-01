@@ -60,6 +60,8 @@
 #include "createassociationstask.h"
 #include "createassociationstaskdialog.h"
 
+#include "test/ui_test_cmd.h"
+
 #ifdef USE_EXPERIMENTAL_SOURCE
 #include "geometrytreeitem.h"
 #endif
@@ -217,6 +219,9 @@ MainWindow::MainWindow()
 
     QObject::connect(&COMPASS::instance().dbContentManager(), &DBContentManager::loadingDoneSignal,
                      this, &MainWindow::loadingDoneSlot);
+
+    //init ui related commands
+    ui_test::initUITestCommands();
 }
 
 MainWindow::~MainWindow()

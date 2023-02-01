@@ -16,7 +16,6 @@
  */
 
 #include "rtcommand_chain.h"
-//include "ui_test_cmd.h"
 
 namespace rtcommand
 {
@@ -57,56 +56,6 @@ RTCommandChain::RTCommandPtr RTCommandChain::pop()
     commands_.pop();
 
     return ptr;
-}
-
-/**
- */
-RTCommandChain& RTCommandChain::empty()
-{
-    addCommand(new RTCommandEmpty);
-    return *this;
-}
-
-/**
- */
-RTCommandChain& RTCommandChain::waitForSignal(const QString& obj, const QString& signal, int timeout_ms)
-{
-    RTCommandWaitCondition wc;
-    wc.type       = RTCommandWaitCondition::Type::Signal;
-    wc.obj        = obj;
-    wc.value      = signal;
-    wc.timeout_ms = timeout_ms;
-
-    attachWaitCondition(wc);
-
-    return *this;
-}
-
-/**
- */
-RTCommandChain& RTCommandChain::waitFor(int msec)
-{
-    RTCommandWaitCondition wc;
-    wc.type       = RTCommandWaitCondition::Type::Delay;
-    wc.timeout_ms = msec;
-
-    attachWaitCondition(wc);
-
-    return *this;
-}
-
-/**
- */
-RTCommandChain& RTCommandChain::uiset(const QString& obj, const QString& value, int delay)
-{
-    // auto c = new ui_test::RTCommandUISet;
-    // c->obj   = obj;
-    // c->value = value;
-    // c->delay = delay;
-
-    // addCommand(c);
-
-    return *this;
 }
 
 } // namespace rtcommand

@@ -49,7 +49,6 @@
 #include "rtcommand_chain.h"
 #include "rtcommand_runner_stash.h"
 #include "ui_test_cmd.h"
-#include "rtcommand_registry.h"
 
 /**
 */
@@ -390,8 +389,6 @@ bool TestLabPhil::uiTestRunnerTest()
     auto cb = [ = ] ()
     {
         rtcommand::RTCommandChain c;
-        c.uiset("histogramview2.reload", "").waitForSignal("histogramview2", "dataLoaded", 10000)
-         .uiset("histogramview2.reload", "").waitForSignal("histogramview2", "dataLoaded", 10000);
 
         runner_ptr->addCommands(std::move(c));
     };
