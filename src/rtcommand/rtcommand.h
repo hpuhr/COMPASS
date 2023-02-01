@@ -28,6 +28,15 @@
 class QObject;
 class QMainWindow;
 
+/**
+ * Add in command class declaration.
+ * 
+ * struct RTCommandExample : public RTCommand
+ * {
+ *     DECLARE_RTCOMMAND(example, "just an example command")
+ *     ...
+ * }
+ */
 #define DECLARE_RTCOMMAND(Name, Description)                                          \
 public:                                                                               \
     static QString staticName() { return #Name; }                                     \
@@ -39,6 +48,17 @@ protected:                                                                      
 private:                                                                              \
     static bool is_registered_;
 
+/**
+ * Add on top of cpp file (if possible outside of any namespace).
+ * 
+ * #include "rtcommandexample.h"
+ * 
+ * REGISTER_RTCOMMAND({any_needed_namespace::}RTCommandExample)
+ * 
+ * RTCommandExample::RTCommandExample()
+ * {
+ *     ...
+ */
 #define REGISTER_RTCOMMAND(Class) \
     bool Class::is_registered_ = rtcommand::RTCommandRegistry::instance().registerCommand(Class::staticName(), Class::staticDescription(), [] () { return new Class; });
 
@@ -91,8 +111,7 @@ struct RTCommand
         return !name().isEmpty(); 
     };
 
-    int                    delay = -1; //delay used during command execution (e.g. for each UI injection)
-    RTCommandWaitCondition condition;  //condition to wait for after executing the command. 
+    RTCommandWaitCondition condition;  //condition to wait for after executing the command.
 
     const RTCommandResult& result() const { return result_; };
 
@@ -102,7 +121,7 @@ protected:
 
     virtual bool run_impl() const = 0;
 
-    //implemented by DECLARE_RTCOMMAND macro
+    //!implemented by DECLARE_RTCOMMAND macro!
     virtual QString name_impl() const = 0;
     virtual QString description_impl() const = 0;
 

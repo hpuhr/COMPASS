@@ -40,7 +40,7 @@ RTCommandRunner::RTCommandRunner()
 RTCommandRunner::~RTCommandRunner() = default;
 
 /**
- * Add a single command to the execution queue and restart the command runner.
+ * Asynchronously run the given command and return a future containing the execution state.
  */
 std::future<RTCommandRunner::Results> RTCommandRunner::runCommand(std::unique_ptr<RTCommand>&& cmd)
 {
@@ -51,7 +51,7 @@ std::future<RTCommandRunner::Results> RTCommandRunner::runCommand(std::unique_pt
 }
 
 /**
- * Add a chain of commands to the execution queue and restart the command runner.
+ * Asynchronously run the given commands and return a future containing the execution states.
  */
 std::future<RTCommandRunner::Results> RTCommandRunner::runCommands(RTCommandChain&& cmds)
 {
@@ -148,6 +148,7 @@ bool RTCommandRunner::cleanupWaitCondition(RTCommand* cmd, RTCommandRunnerStash*
 }
 
 /**
+ * Executes the given command in the main thread.
  */
 bool RTCommandRunner::executeCommand(RTCommand* cmd, RTCommandRunnerStash* stash)
 {
@@ -184,7 +185,7 @@ void RTCommandRunner::logMsg(const std::string& msg, RTCommand* cmd)
 }
 
 /**
- * Thread execution.
+ * Runs the given command in the main thread and handles any set wait conditions.
  */
 void RTCommandRunner::runCommand(RTCommand* cmd, RTCommandRunnerStash* stash)
 {

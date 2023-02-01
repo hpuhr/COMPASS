@@ -35,7 +35,7 @@ bool RTCommandUISet::run_impl() const
     if (!main_window)
         return false;
 
-    return setUIElement(main_window, obj, value, delay);
+    return setUIElement(main_window, obj, value, injection_delay);
 }
 
 /**

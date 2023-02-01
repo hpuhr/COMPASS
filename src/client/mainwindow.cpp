@@ -83,7 +83,7 @@
 #include <QCheckBox>
 #include <QTimer>
 
-#define SHOW_DEBUG_MENU
+//#define SHOW_DEBUG_MENU
 
 #ifdef SHOW_DEBUG_MENU
 #include "test_lab.h"
@@ -387,11 +387,7 @@ void MainWindow::createMenus ()
     connect(assoc_artas_action, &QAction::triggered, this, &MainWindow::calculateAssociationsARTASSlot);
     process_menu_->addAction(assoc_artas_action);
 
-#ifdef SHOW_DEBUG_MENU
-    createDebugMenu();
-#endif
-
-    // process menu
+    // ui menu
     ui_menu_ = menuBar()->addMenu(tr("&UI"));
     ui_menu_->setToolTipsVisible(true);
 
@@ -402,6 +398,10 @@ void MainWindow::createMenus ()
     connect(reset_views_action, &QAction::triggered, this, &MainWindow::resetViewsMenuSlot);
     ui_menu_->addAction(reset_views_action);
 
+#ifdef SHOW_DEBUG_MENU
+    //debug menu (internal)
+    createDebugMenu();
+#endif
 }
 
 void MainWindow::updateMenus()

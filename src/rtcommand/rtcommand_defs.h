@@ -45,7 +45,8 @@ enum class WaitConditionState
 };
 
 /**
-*/
+ * Keeps track of runtime command execution result and state (including the state of the command's wait condition).
+ */
 struct RTCommandResult
 {
     bool success() const
@@ -72,9 +73,11 @@ struct RTCommandResult
 };
 
 /**
+ * Describes a runtime command.
 */
 struct RTCommandDescription
 {
+    QString name;
     QString description;
 };
 

@@ -423,9 +423,12 @@ bool TestLabPhil::availableRTCommandsTest()
 {
     const auto& cmds = rtcommand::RTCommandRegistry::instance().availableCommands();
 
-    for (const auto& cmd : cmds)
+    for (const auto& elem : cmds)
     {
-        std::cout << cmd.first.toStdString() << " - " << cmd.second.description.toStdString() << std::endl;
+        const auto& cmd_description = elem.second;
+
+        std::cout << cmd_description.name.toStdString() << " - " << 
+                     cmd_description.description.toStdString() << std::endl;
     }
 
     return true;

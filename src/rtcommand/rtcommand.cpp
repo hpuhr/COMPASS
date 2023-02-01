@@ -54,7 +54,7 @@ QMainWindow* mainWindow()
  ***************************************************************************************/
 
 /**
- * Generates a string describing the result.
+ * Generates a string describing the result state.
  */
 QString RTCommandResult::toString() const
 {
@@ -82,6 +82,9 @@ QString RTCommandResult::toString() const
  * RTCommandWaitCondition
  ***************************************************************************************/
 
+/**
+ * Configures the wait condition as 'signal' type.
+ */
 void RTCommandWaitCondition::setSignal(const QString& obj_name, 
                                        const QString& signal_name, 
                                        int timeout_in_ms)
@@ -93,6 +96,9 @@ void RTCommandWaitCondition::setSignal(const QString& obj_name,
     timeout_ms = timeout_in_ms;
 }
 
+/**
+ * Configures the wait condition as 'delay' type.
+ */
 void RTCommandWaitCondition::setDelay(int ms)
 {
     *this      = {};

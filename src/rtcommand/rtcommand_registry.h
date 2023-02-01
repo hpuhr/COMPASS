@@ -31,7 +31,9 @@ namespace rtcommand
 {
 
 /**
-*/
+ * Registry/Factory for runtime commands.
+ * Keeps track of registered runtime commands and spawns command templates given a registered command name.
+ */
 class RTCommandRegistry : public Singleton
 {
 public:
@@ -46,6 +48,9 @@ public:
         return instance;
     }
 
+    /**
+     * Registers a command.
+     */
     bool registerCommand(const QString& name, const QString& description, CreatorFunc func)
     {
         std::cout << "Registering command '" << name.toStdString() << "'" << std::endl;
@@ -55,6 +60,7 @@ public:
         if (inserted)
         {
             RTCommandDescription d;
+            d.name        = name;
             d.description = description;
 
             commands_.insert(std::make_pair(name, d));
@@ -63,10 +69,20 @@ public:
         return inserted;
     }
 
+    /**
+     * Returns names and descriptions for all available/registered commands.
+     */
     const AvailableCommands& availableCommands() const { return commands_; }
+
+    /**
+     * Cheacks if a command of the given name is registered.
+     */
     bool hasCommand(const QString& name) { return commands_.find(name) != commands_.end(); }
 
-    std::unique_ptr<RTCommand> createCommand(const QString& name)
+    /**
+     * Creates an unconfigured command template given a registered command name.
+     */
+    std::unique_ptr<RTCommand> createCommandTemplate(const QString& name)
     {
         auto it = creators_.find(name);
         if (it == creators_.end() || !it->second)

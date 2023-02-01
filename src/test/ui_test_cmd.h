@@ -22,9 +22,16 @@
 namespace ui_test
 {
 
+/** 
+ */
+struct RTCommandUIInjection : public rtcommand::RTCommandObjectValue 
+{
+    int injection_delay = -1; //delay used for each UI injection
+};
+
 /**
  */
-struct RTCommandUISet : public rtcommand::RTCommandObjectValue 
+struct RTCommandUISet : public RTCommandUIInjection
 {
     DECLARE_RTCOMMAND(uiset, "sets an ui element to the given value")
 protected:
@@ -40,6 +47,8 @@ protected:
     virtual bool run_impl() const override;
 };
 
+/**
+*/
 inline void initUITestCommands()
 {
     RTCommandUISet::init();

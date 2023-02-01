@@ -32,6 +32,8 @@ class  RTCommandRunnerStash;
 
 /**
  * Class for executing runtime commands in a separate thread.
+ * 
+ * !This class is supposed to be created inside the main thread to work correctly!
  */
 class RTCommandRunner
 {
