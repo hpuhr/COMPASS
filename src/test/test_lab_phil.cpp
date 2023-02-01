@@ -45,10 +45,12 @@
 #include "ui_test_event_injections.h"
 #include "ui_test_setget.h"
 #include "ui_test_common.h"
+#include "ui_test_cmd.h"
+
 #include "rtcommand_runner.h"
 #include "rtcommand_chain.h"
 #include "rtcommand.h"
-#include "ui_test_cmd.h"
+#include "rtcommand_registry.h"
 
 /**
 */
@@ -64,11 +66,12 @@ TestLabPhil::TestLabPhil()
 */
 void TestLabPhil::addTestsToMenu_impl(QMenu* menu)
 {
-    ADD_TEST("UI Injection Test", uiInjectionTest);
-    ADD_TEST("Generate Object Name Test", uiObjectNameGenerationTest);
-    ADD_TEST("UI Set Test", uiSetTest);
-    ADD_TEST("UI Get Test", uiGetTest);
+    ADD_TEST("UI Injection Test", uiInjectionTest)
+    ADD_TEST("Generate Object Name Test", uiObjectNameGenerationTest)
+    ADD_TEST("UI Set Test", uiSetTest)
+    ADD_TEST("UI Get Test", uiGetTest)
     ADD_TEST("Test Runner Test", uiTestRunnerTest)
+    ADD_TEST("Available RTCommands Test", availableRTCommandsTest)
 }
 
 /**
@@ -410,6 +413,20 @@ bool TestLabPhil::uiTestRunnerTest()
     QObject::connect(button, &QPushButton::pressed, cb);
 
     dlg.exec();
+
+    return true;
+}
+
+/**
+*/
+bool TestLabPhil::availableRTCommandsTest()
+{
+    const auto& cmds = rtcommand::RTCommandRegistry::instance().availableCommands();
+
+    for (const auto& cmd : cmds)
+    {
+        std::cout << cmd.first.toStdString() << " - " << cmd.second.description.toStdString() << std::endl;
+    }
 
     return true;
 }

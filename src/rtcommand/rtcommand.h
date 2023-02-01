@@ -28,17 +28,19 @@
 class QObject;
 class QMainWindow;
 
-#define DECLARE_RTCOMMAND(Name)                                         \
-public:                                                                 \
-    static QString staticName() { return #Name; }                       \
-    static void init() { is_registered_ = true; }                       \
-protected:                                                              \
-    virtual QString name_impl() const override { return staticName(); } \
-private:                                                                \
+#define DECLARE_RTCOMMAND(Name, Description)                                          \
+public:                                                                               \
+    static QString staticName() { return #Name; }                                     \
+    static QString staticDescription() { return Description; }                        \
+    static void init() { is_registered_ = true; }                                     \
+protected:                                                                            \
+    virtual QString name_impl() const override { return staticName(); }               \
+    virtual QString description_impl() const override { return staticDescription(); } \
+private:                                                                              \
     static bool is_registered_;
 
 #define REGISTER_RTCOMMAND(Class) \
-    bool Class::is_registered_ = rtcommand::RTCommandRegistry::instance().registerCommand(Class::staticName(), [] () { return new Class; });
+    bool Class::is_registered_ = rtcommand::RTCommandRegistry::instance().registerCommand(Class::staticName(), Class::staticDescription(), [] () { return new Class; });
 
 namespace rtcommand
 {
@@ -80,8 +82,8 @@ struct RTCommandWaitCondition
 struct RTCommand
 {
     bool run() const;
-    virtual QString name() const { return name_impl(); };
-    virtual QString description() const { return ""; }
+    QString name() const { return name_impl(); };
+    QString description() const { return description_impl(); }
 
     virtual bool valid() const 
     { 
@@ -99,7 +101,10 @@ protected:
     void setResultMessage(const QString& m) const { result_.cmd_msg = m; }
 
     virtual bool run_impl() const = 0;
+
+    //implemented by DECLARE_RTCOMMAND macro
     virtual QString name_impl() const = 0;
+    virtual QString description_impl() const = 0;
 
 private:
     friend class RTCommandRunner;
@@ -136,25 +141,7 @@ struct RTCommandObjectValue : public RTCommandObject
 */
 struct RTCommandEmpty : public RTCommand 
 {
-    DECLARE_RTCOMMAND(empty)
-protected:
-    virtual bool run_impl() const override { return true; } 
-};
-
-/**
-*/
-struct RTCommandTestInit : public RTCommand 
-{
-    DECLARE_RTCOMMAND(test_init)
-protected:
-    virtual bool run_impl() const override { return true; } 
-};
-
-/**
-*/
-struct RTCommandTestRegistrator : public RTCommand 
-{
-    DECLARE_RTCOMMAND(test_registrator)
+    DECLARE_RTCOMMAND(empty, "the empty command...does...nothing")
 protected:
     virtual bool run_impl() const override { return true; } 
 };

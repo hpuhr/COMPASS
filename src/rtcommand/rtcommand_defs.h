@@ -71,4 +71,11 @@ struct RTCommandResult
     QString            data; // command result data (most likely json)
 };
 
+/**
+*/
+struct RTCommandDescription
+{
+    QString description;
+};
+
 } // namespace rtcommand

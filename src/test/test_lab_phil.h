@@ -36,4 +36,5 @@ private:
     static bool uiSetTest();
     static bool uiGetTest();
     static bool uiTestRunnerTest();
+    static bool availableRTCommandsTest();
 };

@@ -26,7 +26,7 @@ namespace ui_test
  */
 struct RTCommandUISet : public rtcommand::RTCommandObjectValue 
 {
-    DECLARE_RTCOMMAND(uiset)
+    DECLARE_RTCOMMAND(uiset, "sets an ui element to the given value")
 protected:
     virtual bool run_impl() const override;
 };
@@ -35,7 +35,7 @@ protected:
  */
 struct RTCommandUIGet : public rtcommand::RTCommandObjectValue 
 {
-    DECLARE_RTCOMMAND(uiget)
+    DECLARE_RTCOMMAND(uiget, "retrieves the value of the given ui element")
 protected:
     virtual bool run_impl() const override;
 };
