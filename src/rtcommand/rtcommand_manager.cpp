@@ -1,8 +1,16 @@
 #include "rtcommand_manager.h"
+#include "tcpserver.h"
+#include "stringconv.h"
 
 #include "logger.h"
 
 #include <QCoreApplication>
+
+#include <boost/bind.hpp>
+#include <boost/thread.hpp>
+
+using namespace std;
+using namespace Utils;
 
 RTCommandManager::RTCommandManager()
     : Configurable("RTCommandManager", "RTCommandManager0", 0, "rtcommand.json"),
@@ -21,18 +29,15 @@ void RTCommandManager::run()
 {
     loginf<< "RTCommandManager: run: start";
 
-    //boost::posix_time::ptime log_time_ = boost::posix_time::microsec_clock::local_time();
-
-
-    loginf<< "RTCommandManager: run: creating socket";
+    loginf<< "RTCommandManager: run: io context";
     boost::asio::io_context io_context;
 
-    server s(io_context, port_num_);
-
+    TCPServer server (io_context, port_num_);
 
     loginf<< "RTCommandManager: run: running io context";
-    io_context.run();
 
+    boost::thread t(boost::bind(&boost::asio::io_context::run, &io_context));
+    t.detach();
 
     loginf<< "RTCommandManager: run: starting loop";
 
@@ -41,17 +46,28 @@ void RTCommandManager::run()
         if (stop_requested_) //  && !hasAnyJobs()
             break;
 
-//        if (hasBlockingJobs())
-//            handleBlockingJobs();
+        if (server.hasSession() && server.hasStrData())
+        {
+            logdbg << "RTCommandManager: run: getting commands";
 
-        if (QCoreApplication::hasPendingEvents())
-            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
-        else
-            msleep(1);
+            std::vector<std::string> cmds = server.getStrData();
 
+            loginf<< "RTCommandManager: run: got " << cmds.size() << " commands '" << String::compress(cmds, ';');
+
+            server.sendStrData("accepted '"+String::compress(cmds, ';')+"'\n");
+
+            //loginf<< "RTCommandManager: run: sent " << cmds.size() << " commands";
+        }
+
+        // do commands
+
+        msleep(1);
     }
 
-    //assert(!hasBlockingJobs());
+    io_context.stop();
+    assert (io_context.stopped());
+
+    t.timed_join(100);
 
     stopped_ = true;
     loginf << "RTCommandManager: run: stopped";
@@ -64,20 +80,20 @@ void RTCommandManager::shutdown()
 
     stop_requested_ = true;
 
-//    if (active_db_job_)
-//        active_db_job_->setObsolete();
+    //    if (active_db_job_)
+    //        active_db_job_->setObsolete();
 
-//    for (auto job_it = queued_db_jobs_.unsafe_begin(); job_it != queued_db_jobs_.unsafe_end();
-//         ++job_it)
-//        (*job_it)->setObsolete();
+    //    for (auto job_it = queued_db_jobs_.unsafe_begin(); job_it != queued_db_jobs_.unsafe_end();
+    //         ++job_it)
+    //        (*job_it)->setObsolete();
 
-//    while (hasAnyJobs())
-//    {
-//        loginf << "JobManager: shutdown: waiting on jobs to finish: db " << hasDBJobs()
-//               << " blocking " << hasBlockingJobs() << " non-locking " << hasNonBlockingJobs();
+    //    while (hasAnyJobs())
+    //    {
+    //        loginf << "JobManager: shutdown: waiting on jobs to finish: db " << hasDBJobs()
+    //               << " blocking " << hasBlockingJobs() << " non-locking " << hasNonBlockingJobs();
 
-//        msleep(1000);
-//    }
+    //        msleep(1000);
+    //    }
 
     while (!stopped_)
     {
@@ -85,8 +101,8 @@ void RTCommandManager::shutdown()
         msleep(1000);
     }
 
-//    assert(!active_blocking_job_);
-//    assert(blocking_jobs_.empty());
+    //    assert(!active_blocking_job_);
+    //    assert(blocking_jobs_.empty());
 
     loginf << "RTCommandManager: shutdown: done";
 }

@@ -9,7 +9,6 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/asteriximporttaskdialog.h"
         "${CMAKE_CURRENT_LIST_DIR}/asterixjsonmappingjob.h"
         "${CMAKE_CURRENT_LIST_DIR}/asterixpostprocessjob.h"
-        "${CMAKE_CURRENT_LIST_DIR}/asterixudpreceiver.h"
         "${CMAKE_CURRENT_LIST_DIR}/asterixdecodejob.h"
     PRIVATE
         "${CMAKE_CURRENT_LIST_DIR}/asteriximporttask.cpp"
@@ -17,7 +16,6 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/asteriximporttaskdialog.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/asterixjsonmappingjob.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/asterixpostprocessjob.cpp"
-        "${CMAKE_CURRENT_LIST_DIR}/asterixudpreceiver.cpp"        
         "${CMAKE_CURRENT_LIST_DIR}/asterixdecodejob.cpp"
 )
 
