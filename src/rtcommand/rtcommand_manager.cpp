@@ -52,9 +52,10 @@ void RTCommandManager::run()
 
             std::vector<std::string> cmds = server.getStrData();
 
-            loginf<< "RTCommandManager: run: got " << cmds.size() << " commands '" << String::compress(cmds, ';');
+            loginf<< "RTCommandManager: run: got " << cmds.size() << " commands '"
+                  << String::compress(cmds, ';') << "'";
 
-            server.sendStrData("accepted '"+String::compress(cmds, ';')+"'\n");
+            server.sendStrData("accepted '"+String::compress(cmds, ';')+"'");
 
             //loginf<< "RTCommandManager: run: sent " << cmds.size() << " commands";
         }

@@ -72,6 +72,9 @@ void TCPSession::do_write(std::size_t length)
 TCPServer::TCPServer(boost::asio::io_context& io_context, short port)
     : acceptor_(io_context, boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), port))
 {
+    int one = 1;
+    setsockopt(acceptor_.native_handle(), SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &one, sizeof(one));
+
     do_accept();
 }
 
