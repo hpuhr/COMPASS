@@ -97,10 +97,13 @@ void RTCommandManager::run()
 
             loginf<< "RTCommandManager: run: result wait done, success " << cmd_result.success();
 
-            if (cmd_result.success())
-                server.sendStrData("successfully run command, result '"+cmd_result.toString().toStdString()+"'");
-            else
-                server.sendStrData("failed command, result '"+cmd_result.toString().toStdString()+"'");
+            if (server.hasSession())
+            {
+                if (cmd_result.success())
+                    server.sendStrData("successfully run command, result '"+cmd_result.toString().toStdString()+"'");
+                else
+                    server.sendStrData("failed command, result '"+cmd_result.toString().toStdString()+"'");
+            }
         }
 
         msleep(1);
