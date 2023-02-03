@@ -17,6 +17,8 @@
 
 #pragma once 
 
+#include <vector>
+
 #include <QWidget>
 
 class QTextEdit;
@@ -45,9 +47,14 @@ private:
 
     void processCommand();
     void log(const QString& txt, LogType log_type = LogType::Plain);
+    void lastCmd();
+    void nextCmd();
 
     QTextEdit*   cmd_backlog_;
     QLineEdit*   cmd_edit_;
+
+    int                  current_command_ = -1;
+    std::vector<QString> commands_;
 };
 
 } // namespace rtcommand

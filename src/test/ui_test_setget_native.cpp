@@ -67,7 +67,8 @@ bool setUIElementNative(QWidget* parent,
     TRY_INVOKE_UI_SETTER(QTextEdit, w.second, value, delay, hint)
     TRY_INVOKE_UI_SETTER(QSpinBox, w.second, value, delay, hint)
     TRY_INVOKE_UI_SETTER(QDoubleSpinBox, w.second, value, delay, hint)
-    TRY_INVOKE_UI_SETTER(QSlider, w.second, value, delay, hint)
+    TRY_INVOKE_UI_SETTER(QScrollBar, w.second, value, delay, hint)
+    TRY_INVOKE_UI_SETTER(QAbstractSlider, w.second, value, delay, hint) //for all other sliders which were not handled before
     TRY_INVOKE_UI_SETTER(QCheckBox, w.second, value, delay, hint)
     TRY_INVOKE_UI_SETTER(QPushButton, w.second, value, delay, hint)
     TRY_INVOKE_UI_SETTER(QRadioButton, w.second, value, delay, hint)
@@ -98,7 +99,7 @@ boost::optional<QString> getUIElementNative(QWidget* parent,
     TRY_INVOKE_UI_GETTER(QTextEdit, w.second, what)
     TRY_INVOKE_UI_GETTER(QSpinBox, w.second, what)
     TRY_INVOKE_UI_GETTER(QDoubleSpinBox, w.second, what)
-    TRY_INVOKE_UI_GETTER(QSlider, w.second, what)
+    TRY_INVOKE_UI_GETTER(QAbstractSlider, w.second, what)
     //...maybe add special button getters
     TRY_INVOKE_UI_GETTER(QAbstractButton, w.second, what) //for all other buttons which were not handled before
 

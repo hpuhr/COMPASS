@@ -246,6 +246,8 @@ void ScatterPlotViewDataWidget::loadingDoneSlot()
 
     updateMinMax();
     updateChart();
+
+    emit dataLoaded();
 }
 
 /**

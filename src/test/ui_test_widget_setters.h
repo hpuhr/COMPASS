@@ -30,7 +30,8 @@
 #include <QTextEdit>
 #include <QSpinBox>
 #include <QDoubleSpinBox>
-#include <QSlider>
+#include <QAbstractSlider>
+#include <QScrollBar>
 #include <QPushButton>
 #include <QToolButton>
 #include <QCheckBox>
@@ -116,13 +117,22 @@ namespace ui_test
         return ui_test::injectDoubleSpinBoxEvent(widget, "", v.value(), delay);
     }
     template<>
-    inline bool setUIElement(QSlider* widget, const QString& value, int delay, const SetUIHint& hint)
+    inline bool setUIElement(QAbstractSlider* widget, const QString& value, int delay, const SetUIHint& hint)
     {
         auto v = conversions::valueFromString<double>(value);
         if (!v)
             return false;
 
         return ui_test::injectSliderEditEvent(widget, "", v.value(), delay);
+    }
+    template<>
+    inline bool setUIElement(QScrollBar* widget, const QString& value, int delay, const SetUIHint& hint)
+    {
+        auto v = conversions::valueFromString<double>(value);
+        if (!v)
+            return false;
+
+        return ui_test::injectScrollEditEvent(widget, "", v.value(), delay);
     }
 
     namespace

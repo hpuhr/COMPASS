@@ -17,11 +17,14 @@
 
 #include "rtcommand_shell.h"
 #include "rtcommand_registry.h"
+#include "rtcommand_manager.h"
 
 #include <QTextEdit>
 #include <QLineEdit>
 #include <QHBoxLayout>
 #include <QVBoxLayout>
+#include <QShortcut>
+#include <QProcess>
 
 namespace rtcommand
 {
@@ -42,9 +45,22 @@ RTCommandShell::RTCommandShell(QWidget* parent)
     cmd_edit_ = new QLineEdit;
     layout->addWidget(cmd_edit_);
 
-    cmd_edit_->setFocusPolicy(Qt::FocusPolicy::StrongFocus);
-
     connect(cmd_edit_, &QLineEdit::returnPressed, this, &RTCommandShell::processCommand);
+
+    auto s_last = new QShortcut(cmd_edit_);
+    s_last->setKey(Qt::Key_Up);
+    connect(s_last, &QShortcut::activated, this, &RTCommandShell::lastCmd);
+
+    auto s_next = new QShortcut(cmd_edit_);
+    s_next->setKey(Qt::Key_Down);
+    connect(s_next, &QShortcut::activated, this, &RTCommandShell::nextCmd);
+
+    cmd_edit_->setFocusPolicy(Qt::FocusPolicy::StrongFocus);
+    cmd_edit_->setCursorPosition(0);
+
+    commands_.push_back("uiset --object=window5.osgview1.reload");
+    commands_.push_back("uiset --object=window5.osgview1.toolbar --value=\"Toggle Time Filter\"");
+    commands_.push_back("uiset --object=window5.osgview1.timefilter.slider --value=0.5");
 }
 
 /**
@@ -52,32 +68,21 @@ RTCommandShell::RTCommandShell(QWidget* parent)
 void RTCommandShell::processCommand()
 {
     QString line = cmd_edit_->text().trimmed();
-
+    
     cmd_edit_->setText("");
 
     if (line.isEmpty())
         return;
 
-    QStringList parts = line.split(" ");
-    if (parts.count() < 1)
-        return;
+    current_command_ = -1;
+    commands_.push_back(line);
 
-    QString cmd = parts.front();
-    if (cmd.isEmpty())
-        return;
+    bool ok = RTCommandManager::instance().injectCommand(line.toStdString());
 
-    const auto& cmds = RTCommandRegistry::instance().availableCommands();
-
-    auto it = cmds.find(cmd);
-    if (it == cmds.end())
-    {
-        log("Command '" + cmd + "' not recognized", LogType::Error);
-        return;
-    }
-
-    const auto& descr = it->second;
-    
-    log(descr.name + "\n    " + descr.description, LogType::Success);
+    if (ok)
+        log(line, LogType::Success);
+    else
+        log("[Error] Creating command '" + line + "' failed", LogType::Error);
 }
 
 /**
@@ -97,6 +102,42 @@ void RTCommandShell::log(const QString& txt, LogType log_type)
     backlog += "<text color=\"" + color + "\">" + txt + "</text><br>";
 
     cmd_backlog_->setHtml(backlog);
+}
+
+/**
+*/
+void RTCommandShell::lastCmd()
+{
+    int n = (int)commands_.size();
+    if (n == 0)
+        return;
+
+    current_command_ = current_command_ < 0 ? n - 1 : std::max(0, current_command_ - 1);
+    cmd_edit_->setText(commands_[ current_command_ ]);
+    cmd_edit_->setCursorPosition(cmd_edit_->text().count());
+}
+
+/**
+*/
+void RTCommandShell::nextCmd()
+{
+    int n = (int)commands_.size();
+    if (n == 0)
+        return;
+
+    if (current_command_ < 0)
+        return;
+    
+    ++current_command_;
+    if (current_command_ == n)
+    {
+        cmd_edit_->setText("");
+        current_command_ = -1;
+        return;
+    }
+
+    cmd_edit_->setText(commands_[ current_command_ ]);
+    cmd_edit_->setCursorPosition(cmd_edit_->text().count());
 }
 
 } // namespace rtcommand

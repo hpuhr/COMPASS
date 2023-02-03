@@ -23,6 +23,7 @@
 #include "scatterplotviewdatasource.h"
 #include "logger.h"
 #include "stringconv.h"
+#include "test/ui_test_common.h"
 
 #include <QCheckBox>
 #include <QLabel>
@@ -128,6 +129,7 @@ ScatterPlotViewConfigWidget::ScatterPlotViewConfigWidget(ScatterPlotView* view, 
     vlayout->addWidget(status_label_);
 
     reload_button_ = new QPushButton("Reload");
+    UI_TEST_OBJ_NAME(reload_button_, reload_button_->text())
     connect(reload_button_, &QPushButton::clicked, this,
             &ScatterPlotViewConfigWidget::reloadRequestedSlot);
     vlayout->addWidget(reload_button_);

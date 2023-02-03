@@ -128,6 +128,8 @@ void ListBoxViewDataWidget::loadingDoneSlot()
     }
 
     selectFirstSelectedRow();
+
+    emit dataLoaded();
 }
 
 void ListBoxViewDataWidget::exportDataSlot(bool overwrite)

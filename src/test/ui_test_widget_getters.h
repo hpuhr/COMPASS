@@ -29,7 +29,7 @@
 #include <QTextEdit>
 #include <QSpinBox>
 #include <QDoubleSpinBox>
-#include <QSlider>
+#include <QAbstractSlider>
 #include <QPushButton>
 #include <QToolButton>
 #include <QCheckBox>
@@ -149,7 +149,7 @@ namespace ui_test
         return conversions::stringFromValue<double>(widget->value(), widget->decimals());
     }
     template<>
-    inline boost::optional<QString> getUIElementValue(QSlider* widget, const QString& what)
+    inline boost::optional<QString> getUIElementValue(QAbstractSlider* widget, const QString& what)
     {
         const double t = (double)(widget->value() - widget->minimum()) / (double)(widget->maximum() - widget->minimum());
         const double p = t * 100.0;

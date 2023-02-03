@@ -36,6 +36,7 @@
 #include <QSlider>
 #include <QCheckBox>
 #include <QAbstractButton>
+#include <QScrollBar>
 #include <QTest>
 #include <QTimer>
 
@@ -760,6 +761,51 @@ bool injectDoubleSpinBoxEvent(QWidget* root,
     return (obj.second->value() == value_trunc);
 }
 
+namespace 
+{
+    bool findSliderValue(QAbstractSlider* slider, double percent, bool invert, int delay)
+    {
+        double t         = std::min(1.0, std::max(0.0, percent / 100.0));
+        int    value     = (1.0 - t) * slider->minimum() + t * slider->maximum();
+
+        int    single_step = slider->singleStep();
+        int    page_step   = slider->pageStep();
+
+        auto computeMaxSteps = [ = ] (int v, int vtarget, int step)
+        {
+            return std::abs(v - vtarget) / step + 2;
+        };
+
+        //first inject page steps until we are below page step accuracy
+        {
+            const int max_steps_page = computeMaxSteps(value, slider->value(), page_step);
+
+            Qt::Key key_plus  = !invert ? Qt::Key_PageUp   : Qt::Key_PageDown;
+            Qt::Key key_minus = !invert ? Qt::Key_PageDown : Qt::Key_PageUp;
+
+            int cnt = 0;
+            while (std::abs(value - slider->value()) >= page_step && cnt++ <= max_steps_page)
+                if (!injectKeyEvent(slider, "", slider->value() <= value ? key_plus : key_minus, delay))
+                    return false;
+        }
+
+        //then inject single steps until we are below single step accuracy (usually single step size = 1, resulting in the sought target value)
+        {
+            const int max_steps_single = computeMaxSteps(value, slider->value(), single_step);
+
+            Qt::Key key_plus  = !invert ? Qt::Key_Right : Qt::Key_Left;
+            Qt::Key key_minus = !invert ? Qt::Key_Left  : Qt::Key_Right;
+        
+            int cnt = 0;
+            while (std::abs(value - slider->value()) >= single_step && cnt++ <= max_steps_single)
+                if (!injectKeyEvent(slider, "", slider->value() <= value ? key_plus :  key_minus, delay))
+                    return false;
+        }
+
+        return (std::abs(value - slider->value()) < single_step);
+    }
+}
+
 /**
  * Injects a slider edit action into the given slider object.
  * The given percent [0,100] will result in a discrete slider value between the slider's minimum() and maximum().
@@ -772,41 +818,36 @@ bool injectSliderEditEvent(QWidget* root,
                            double percent,
                            int delay)
 {
-    auto obj = findObjectAs<QSlider>(root, obj_name);
+    auto obj = findObjectAs<QAbstractSlider>(root, obj_name);
     if (obj.first != FindObjectErrCode::NoError)
     {
         logObjectError("injectSliderEditEvent", obj_name, obj.first);
         return false;
     }
 
-    double t         = std::min(1.0, std::max(0.0, percent / 100.0));
-    int    value     = (1.0 - t) * obj.second->minimum() + t * obj.second->maximum();
+    return findSliderValue(obj.second, percent, false, delay);
+}
 
-    int    single_step = obj.second->singleStep();
-    int    page_step   = obj.second->pageStep();
-
-    auto computeMaxSteps = [ = ] (int v, int vtarget, int step)
+/**
+ * Injects a scroll edit action into the given scrollbar object.
+ * The given percent [0,100] will result in a discrete slider value between the slider's minimum() and maximum().
+ * Note that first pageStep()'s will be injected to get a rough position, and the singleStep()'s will be used for fine tuning.
+ * Thus, depending on the slider range and the page step size, a certain number of slider changes will be triggered.
+ * Also note that if the single step size is bigger than 1, an exact result cannot be guaranteed.
+ */
+bool injectScrollEditEvent(QWidget* root,
+                           const QString& obj_name,
+                           double percent,
+                           int delay)
+{
+    auto obj = findObjectAs<QScrollBar>(root, obj_name);
+    if (obj.first != FindObjectErrCode::NoError)
     {
-        return std::abs(v - vtarget) / step + 2;
-    };
+        logObjectError("injectScrollEditEvent", obj_name, obj.first);
+        return false;
+    }
 
-    const int max_steps_page = computeMaxSteps(value, obj.second->value(), page_step);
-
-    //first inject page steps until we are below page step accuracy
-    int cnt = 0;
-    while (std::abs(value - obj.second->value()) >= page_step && cnt++ <= max_steps_page)
-        if (!injectKeyEvent(obj.second, "", obj.second->value() <= value ? Qt::Key_PageUp : Qt::Key_PageDown, delay))
-            return false;
-
-    const int max_steps_single = computeMaxSteps(value, obj.second->value(), single_step);
-
-    //then inject single steps until we are below single step accuracy (usually single step size = 1, resulting in the sought target value)
-    cnt = 0;
-    while (std::abs(value - obj.second->value()) >= single_step && cnt++ <= max_steps_single)
-        if (!injectKeyEvent(obj.second, "", obj.second->value() <= value ? Qt::Key_Right : Qt::Key_Left, delay))
-            return false;
-
-    return (std::abs(value - obj.second->value()) < single_step);
+    return findSliderValue(obj.second, percent, true, delay);
 }
 
 /**

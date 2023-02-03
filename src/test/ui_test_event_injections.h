@@ -113,6 +113,10 @@ namespace ui_test
                                const QString& obj_name,
                                double percent,
                                int delay = -1);
+    bool injectScrollEditEvent(QWidget* root,
+                               const QString& obj_name,
+                               double percent,
+                               int delay = -1);
     bool injectCheckBoxEvent(QWidget* root,
                              const QString& obj_name,
                              bool on,

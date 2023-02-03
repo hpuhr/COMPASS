@@ -181,6 +181,7 @@ MainWindow::MainWindow()
     bottom_layout->addWidget(status_label_);
 
     live_pause_resume_button_ = new QPushButton("Pause");
+    live_pause_resume_button_->setObjectName("livebutton");
     connect(live_pause_resume_button_, &QPushButton::clicked, this, &MainWindow::livePauseResumeSlot);
     bottom_layout->addWidget(live_pause_resume_button_);
 

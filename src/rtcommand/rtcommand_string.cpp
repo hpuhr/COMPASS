@@ -26,6 +26,7 @@
 
 #include <QStringList>
 #include <QRegularExpression>
+#include <QProcess>
 
 namespace rtcommand
 {
@@ -34,7 +35,7 @@ namespace
 {
     QStringList splitCommand(const QString& cmd)
     {
-        return cmd.trimmed().split(QRegularExpression("[\\s]+"));
+        return QProcess::splitCommand(cmd);
     }
 }
 

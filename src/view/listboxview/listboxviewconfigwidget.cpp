@@ -23,6 +23,7 @@
 #include "listboxviewdatasource.h"
 #include "logger.h"
 #include "stringconv.h"
+#include "test/ui_test_common.h"
 
 #include <QComboBox>
 #include <QCheckBox>
@@ -161,6 +162,7 @@ ListBoxViewConfigWidget::ListBoxViewConfigWidget(ListBoxView* view,
     vlayout->addWidget(status_label_);
 
     update_button_ = new QPushButton("Reload");
+    UI_TEST_OBJ_NAME(update_button_, update_button_->text())
     connect(update_button_, &QPushButton::clicked, this,
             &ListBoxViewConfigWidget::reloadRequestedSlot);
     update_button_->setEnabled(reload_needed_);
