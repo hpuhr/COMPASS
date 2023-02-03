@@ -21,6 +21,7 @@
 #include "mainwindow.h"
 
 #include <iostream>
+#include <sstream>
 
 #include <QMenu>
 #include <QDialog>
@@ -51,6 +52,10 @@
 #include "rtcommand_chain.h"
 #include "rtcommand.h"
 #include "rtcommand_registry.h"
+#include "rtcommand_shell.h"
+#include "rtcommand_string.h"
+
+#include <boost/program_options.hpp>
 
 /**
 */
@@ -72,6 +77,8 @@ void TestLabPhil::addTestsToMenu_impl(QMenu* menu)
     ADD_TEST("UI Get Test", uiGetTest)
     ADD_TEST("Test Runner Test", uiTestRunnerTest)
     ADD_TEST("Available RTCommands Test", availableRTCommandsTest)
+    ADD_TEST("Command Shell Test", cmdShellTest)
+    ADD_TEST("boost::po Test", boostPOTest)
 }
 
 /**
@@ -431,5 +438,88 @@ bool TestLabPhil::availableRTCommandsTest()
                      cmd_description.description.toStdString() << std::endl;
     }
 
+    return true;
+}
+
+/**
+*/
+bool TestLabPhil::cmdShellTest()
+{
+    QDialog dlg;
+    QHBoxLayout* layout = new QHBoxLayout;
+    dlg.setLayout(layout);
+
+    rtcommand::RTCommandShell* shell = new rtcommand::RTCommandShell(&dlg);
+    layout->addWidget(shell);
+
+    dlg.resize(400, 500);
+    dlg.exec();
+
+    return true;
+}
+
+/**
+*/
+bool TestLabPhil::boostPOTest()
+{
+    rtcommand::RTCommandString cmd_creator("uiset");
+    cmd_creator.append("object", "histogramview2.reload", false, true)
+               .append("value", "", false, true)
+               .append("wait_condition", "signal;histogramview2;dataLoaded;10000", false, true);
+
+    const QString cmd = cmd_creator.cmd();
+
+    {
+        std::cout << "Command to process: " << cmd.toStdString() << std::endl;
+        std::cout << std::endl;
+
+        rtcommand::RTCommandString cmd_string(cmd);
+        if (!cmd_string.valid())
+        {
+            std::cout << "Error: Command string not valid" << std::endl;
+            return false;
+        }
+
+        const QString cmd_name = cmd_string.cmdName();
+
+        std::cout << "Creating command template from name '" << cmd_name.toStdString() << "'" << std::endl;
+
+        if (!rtcommand::RTCommandRegistry::instance().hasCommand(cmd_name))
+        {
+            std::cout << "Error: Command not registered" << std::endl;
+            return false;
+        }
+
+        auto cmdObj = rtcommand::RTCommandRegistry::instance().createCommandTemplate(cmd_name);
+        if (!cmdObj)
+        {
+            std::cout << "Error: Command nullptr" << std::endl;
+            return false;
+        }
+
+        std::cout << "Configuring command template..." << std::endl;
+
+        if (!cmdObj->configure(cmd_string.cmd()))
+        {
+            std::cout << "Error: Command could not be configured" << std::endl;
+            return false;
+        }
+
+        std::cout << "Configured command!" << std::endl;
+        std::cout << std::endl;
+
+        std::cout << "Command name:              " << cmdObj->name().toStdString() << std::endl;
+        std::cout << "Command condition type:    " << (int)cmdObj->condition.type << std::endl;
+        std::cout << "Command condition obj:     " << cmdObj->condition.obj.toStdString() << std::endl;
+        std::cout << "Command condition val:     " << cmdObj->condition.value.toStdString() << std::endl;
+        std::cout << "Command condition timeout: " << cmdObj->condition.timeout_ms << std::endl;
+
+        ui_test::RTCommandUISet* setcmd = dynamic_cast<ui_test::RTCommandUISet*>(cmdObj.get());
+
+        std::cout << "UI delay:                  " << setcmd->injection_delay << std::endl;
+        std::cout << "UI object:                 " << setcmd->obj.toStdString() << std::endl;
+        std::cout << "UI object value:           " << setcmd->value.toStdString() << std::endl;
+    }
+    
     return true;
 }

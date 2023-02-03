@@ -24,27 +24,35 @@ namespace ui_test
 
 /** 
  */
-struct RTCommandUIInjection : public rtcommand::RTCommandObjectValue 
+struct RTCommandUIInjection : public rtcommand::RTCommandObject
 {
     int injection_delay = -1; //delay used for each UI injection
+    
+    DECLARE_RTCOMMAND_OPTIONS
 };
 
 /**
  */
 struct RTCommandUISet : public RTCommandUIInjection
 {
-    DECLARE_RTCOMMAND(uiset, "sets an ui element to the given value")
+    QString value;
 protected:
     virtual bool run_impl() const override;
+
+    DECLARE_RTCOMMAND(uiset, "sets an ui element to the given value")
+    DECLARE_RTCOMMAND_OPTIONS
 };
 
 /**
  */
-struct RTCommandUIGet : public rtcommand::RTCommandObjectValue 
+struct RTCommandUIGet : public rtcommand::RTCommandObject
 {
-    DECLARE_RTCOMMAND(uiget, "retrieves the value of the given ui element")
+    QString what;
 protected:
     virtual bool run_impl() const override;
+
+    DECLARE_RTCOMMAND(uiget, "retrieves the value of the given ui element")
+    DECLARE_RTCOMMAND_OPTIONS
 };
 
 /**

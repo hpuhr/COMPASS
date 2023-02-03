@@ -15,28 +15,39 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#pragma once
+#pragma once 
 
-#include "test_lab.h"
+#include <QWidget>
+
+class QTextEdit;
+class QLineEdit;
+
+namespace rtcommand
+{
 
 /**
-*/
-class TestLabPhil : public TestLab
+ * 
+ */
+class RTCommandShell : public QWidget 
 {
 public:
-    TestLabPhil();
-    virtual ~TestLabPhil() = default;
-
-protected:
-    void addTestsToMenu_impl(QMenu* menu) override final;
+    RTCommandShell(QWidget* parent = nullptr);
+    virtual ~RTCommandShell() = default;
 
 private:
-    static bool uiInjectionTest();
-    static bool uiObjectNameGenerationTest();
-    static bool uiSetTest();
-    static bool uiGetTest();
-    static bool uiTestRunnerTest();
-    static bool availableRTCommandsTest();
-    static bool cmdShellTest();
-    static bool boostPOTest();
+    enum class LogType 
+    {
+        Plain = 0,
+        Warning,
+        Error,
+        Success
+    };
+
+    void processCommand();
+    void log(const QString& txt, LogType log_type = LogType::Plain);
+
+    QTextEdit*   cmd_backlog_;
+    QLineEdit*   cmd_edit_;
 };
+
+} // namespace rtcommand

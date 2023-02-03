@@ -18,6 +18,7 @@
 #pragma once
 
 #include "rtcommand_defs.h"
+#include "rtcommand_macros.h"
 
 #include <QString>
 #include <QVariant>
@@ -28,39 +29,14 @@
 class QObject;
 class QMainWindow;
 
-/**
- * Add in command class declaration.
- * 
- * struct RTCommandExample : public RTCommand
- * {
- *     DECLARE_RTCOMMAND(example, "just an example command")
- *     ...
- * }
- */
-#define DECLARE_RTCOMMAND(Name, Description)                                          \
-public:                                                                               \
-    static QString staticName() { return #Name; }                                     \
-    static QString staticDescription() { return Description; }                        \
-    static void init() { is_registered_ = true; }                                     \
-protected:                                                                            \
-    virtual QString name_impl() const override { return staticName(); }               \
-    virtual QString description_impl() const override { return staticDescription(); } \
-private:                                                                              \
-    static bool is_registered_;
-
-/**
- * Add on top of cpp file (if possible outside of any namespace).
- * 
- * #include "rtcommandexample.h"
- * 
- * REGISTER_RTCOMMAND({any_needed_namespace::}RTCommandExample)
- * 
- * RTCommandExample::RTCommandExample()
- * {
- *     ...
- */
-#define REGISTER_RTCOMMAND(Class) \
-    bool Class::is_registered_ = rtcommand::RTCommandRegistry::instance().registerCommand(Class::staticName(), Class::staticDescription(), [] () { return new Class; });
+namespace boost
+{
+    namespace program_options
+    {
+        class options_description;
+        class variables_map;
+    }
+}
 
 namespace rtcommand
 {
@@ -88,6 +64,7 @@ struct RTCommandWaitCondition
 
     void setSignal(const QString& obj_name, const QString& signal_name, int timeout_in_ms = -1);
     void setDelay(int ms);
+    bool setFromString(const QString& config_string);
 
     Type    type = Type::None; //type of wait condition
     QString obj;               //QObject name
@@ -101,6 +78,12 @@ struct RTCommandWaitCondition
  */
 struct RTCommand
 {
+    typedef boost::program_options::options_description OptionsDescription;
+    typedef boost::program_options::variables_map       VariablesMap;
+
+    RTCommand();
+    virtual ~RTCommand();
+
     bool run() const;
     QString name() const { return name_impl(); };
     QString description() const { return description_impl(); }
@@ -111,15 +94,20 @@ struct RTCommand
         return !name().isEmpty(); 
     };
 
-    RTCommandWaitCondition condition;  //condition to wait for after executing the command.
-
     const RTCommandResult& result() const { return result_; };
+
+    bool configure(const QString& cmd);
+
+    RTCommandWaitCondition condition;  //condition to wait for after executing the command.
 
 protected:
     void setResultData(const QString& d) const { result_.data = d; }
     void setResultMessage(const QString& m) const { result_.cmd_msg = m; }
 
+    //implements command specific behaviour
     virtual bool run_impl() const = 0;
+    virtual bool collectOptions_impl(OptionsDescription& options) = 0;
+    virtual bool assignVariables_impl(const VariablesMap& variables) = 0;
 
     //!implemented by DECLARE_RTCOMMAND macro!
     virtual QString name_impl() const = 0;
@@ -128,9 +116,12 @@ protected:
 private:
     friend class RTCommandRunner;
 
+    bool collectOptions(boost::program_options::options_description& options);
+    bool assignVariables(const boost::program_options::variables_map& variables);
+
     void resetResult() const { result_.reset(); }
 
-    mutable RTCommandResult result_;
+    mutable RTCommandResult result_; //command result struct containing execution state info and command result data
 };
 
 /**
@@ -145,14 +136,8 @@ struct RTCommandObject : public RTCommand
     }
 
     QString obj;
-};
 
-/**
- * Command targeting a specific QObject with a specific value (e.g. a setter).
- */
-struct RTCommandObjectValue : public RTCommandObject
-{
-    QString value;
+    DECLARE_RTCOMMAND_OPTIONS
 };
 
 /**
@@ -160,9 +145,11 @@ struct RTCommandObjectValue : public RTCommandObject
 */
 struct RTCommandEmpty : public RTCommand 
 {
-    DECLARE_RTCOMMAND(empty, "the empty command...does...nothing")
 protected:
     virtual bool run_impl() const override { return true; } 
+
+    DECLARE_RTCOMMAND(empty, "the empty command...does...nothing")
+    DECLARE_RTCOMMAND_NOOPTIONS
 };
 
 } // namespace rtcommand
