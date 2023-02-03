@@ -79,12 +79,6 @@ void ASTERIXJSONMappingJob::run()
 
             parsed = parser->parseJSON(record, *buffer);
 
-//            if (parsed)
-//            {
-//                logdbg << "ASTERIXJSONMappingJob: run: obj " << parser.dbObject().name() << " transforming buffer";
-//                //parser.transformBuffer(*buffer, buffer->size() - 1);
-//            }
-
             logdbg << "ASTERIXJSONMappingJob: run: obj " << dbcontent_name << " done";
 
             parsed_any |= parsed;
