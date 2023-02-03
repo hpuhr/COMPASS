@@ -1,4 +1,4 @@
-#include "rtcommand_manager.h"
+﻿#include "rtcommand_manager.h"
 #include "rtcommand_string.h"
 #include "rtcommand_runner.h"
 #include "tcpserver.h"
@@ -82,9 +82,14 @@ void RTCommandManager::run()
 
             rtcommand::RTCommandRunner& cmd_runner = COMPASS::instance().rtCmdRunner();
 
-            std::future<std::vector<rtcommand::RTCommandResult>> current_result = cmd_runner.runCommand(
-                        move(command_queue_.front()));
-            command_queue_.pop();
+            std::future<std::vector<rtcommand::RTCommandResult>> current_result;
+
+            {
+                boost::mutex::scoped_lock lock(command_queue_mutex_);
+
+                current_result = cmd_runner.runCommand( move(command_queue_.front()));
+                command_queue_.pop();
+            }
 
             loginf<< "RTCommandManager: run: waiting for result";
 
@@ -161,7 +166,11 @@ bool RTCommandManager::injectCommand(const std::string& cmd_str)
     if (!rtcmd_inst)
         return false;
 
-    command_queue_.push(move(rtcmd_inst));
+    {
+        boost::mutex::scoped_lock lock(command_queue_mutex_);
+
+        command_queue_.push(move(rtcmd_inst));
+    }
 
     return true;
 }
