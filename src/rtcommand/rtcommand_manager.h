@@ -6,8 +6,9 @@
 #include "logger.h"
 #include "rtcommand_defs.h"
 
-
 #include <QThread>
+
+#include <boost/thread/mutex.hpp>
 
 #include <cstdlib>
 #include <iostream>
@@ -46,6 +47,7 @@ protected:
     unsigned int port_num_ {27960};
 
     std::queue<std::unique_ptr<rtcommand::RTCommand>> command_queue_;
+    boost::mutex command_queue_mutex_;
 
 //    bool command_active_ {false};
 //    std::future<rtcommand::RTCommandResult> current_result_;
