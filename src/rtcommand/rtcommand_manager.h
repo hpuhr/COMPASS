@@ -4,6 +4,8 @@
 #include "configurable.h"
 #include "singleton.h"
 #include "logger.h"
+#include "rtcommand_defs.h"
+
 
 #include <QThread>
 
@@ -11,9 +13,16 @@
 #include <iostream>
 #include <memory>
 #include <utility>
+#include <queue>
+#include <future>
 
 // netcat call for console
 // netcat 127.0.0.1 27960
+
+namespace rtcommand
+{
+    struct RTCommand;
+}
 
 class RTCommandManager : public QThread, public Singleton, public Configurable
 {
@@ -28,11 +37,18 @@ public:
         return instance;
     }
 
+    bool injectCommand(const std::string& cmd_str); // true on success, false on failed
+
 protected:
     volatile bool stop_requested_;
     volatile bool stopped_;
 
     unsigned int port_num_ {27960};
+
+    std::queue<std::unique_ptr<rtcommand::RTCommand>> command_queue_;
+
+//    bool command_active_ {false};
+//    std::future<rtcommand::RTCommandResult> current_result_;
 
     RTCommandManager();
 

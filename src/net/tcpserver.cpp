@@ -67,6 +67,8 @@ void TCPSession::do_write(std::size_t length)
     {
         assert (!ec);
     });
+
+    //do_read();
 }
 
 TCPServer::TCPServer(boost::asio::io_context& io_context, short port)

@@ -1,6 +1,10 @@
 #include "rtcommand_manager.h"
+#include "rtcommand_string.h"
+#include "rtcommand_runner.h"
 #include "tcpserver.h"
 #include "stringconv.h"
+#include "rtcommand.h"
+#include "compass.h"
 
 #include "logger.h"
 
@@ -55,12 +59,49 @@ void RTCommandManager::run()
             loginf<< "RTCommandManager: run: got " << cmds.size() << " commands '"
                   << String::compress(cmds, ';') << "'";
 
-            server.sendStrData("accepted '"+String::compress(cmds, ';')+"'");
+            // create commands from strings
+            for (const auto& cmd_str : cmds)
+            {
+                if (injectCommand(cmd_str)) // success
+                {
+                    server.sendStrData("accepted '"+cmd_str+"'");
 
-            //loginf<< "RTCommandManager: run: sent " << cmds.size() << " commands";
+                    loginf<< "RTCommandManager: run: added commend " << cmd_str << " to queue, size "
+                          << command_queue_.size();
+                }
+                else
+                    server.sendStrData("refused '"+cmd_str+"'");
+            }
         }
 
         // do commands
+
+        if (command_queue_.size())
+        {
+            loginf<< "RTCommandManager: run: issuing command";
+
+            rtcommand::RTCommandRunner& cmd_runner = COMPASS::instance().rtCmdRunner();
+
+            std::future<std::vector<rtcommand::RTCommandResult>> current_result = cmd_runner.runCommand(
+                        move(command_queue_.front()));
+            command_queue_.pop();
+
+            loginf<< "RTCommandManager: run: waiting for result";
+
+            current_result.wait();
+
+            std::vector<rtcommand::RTCommandResult> results = current_result.get();
+            assert (results.size() == 1);
+
+            rtcommand::RTCommandResult cmd_result = results.at(0);
+
+            loginf<< "RTCommandManager: run: result wait done, success " << cmd_result.success();
+
+            if (cmd_result.success())
+                server.sendStrData("successfully run command, result '"+cmd_result.toString().toStdString()+"'");
+            else
+                server.sendStrData("failed command, result '"+cmd_result.toString().toStdString()+"'");
+        }
 
         msleep(1);
     }
@@ -106,4 +147,18 @@ void RTCommandManager::shutdown()
     //    assert(blocking_jobs_.empty());
 
     loginf << "RTCommandManager: shutdown: done";
+}
+
+bool RTCommandManager::injectCommand(const std::string& cmd_str)
+{
+    rtcommand::RTCommandString cmd_inst (QString(cmd_str.c_str())); // todo change to std str
+
+    auto rtcmd_inst = cmd_inst.issue();
+
+    if (!rtcmd_inst)
+        return false;
+
+    command_queue_.push(move(rtcmd_inst));
+
+    return true;
 }
