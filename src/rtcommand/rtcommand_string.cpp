@@ -16,6 +16,9 @@
  */
 
 #include "rtcommand_string.h"
+#include "rtcommand_registry.h"
+
+#include "logger.h"
 
 #include <iostream>
 
@@ -42,6 +45,10 @@ RTCommandString::RTCommandString(const QString& cmd)
 {
     cmd_name_ = extractName();
 }
+
+/**
+*/
+RTCommandString::~RTCommandString() = default;
 
 /**
 */
@@ -175,6 +182,47 @@ bool RTCommandString::parse(boost::program_options::variables_map& vm,
     }
 
     return true;
+}
+
+/**
+*/
+std::unique_ptr<RTCommand> RTCommandString::issue() const
+{
+    if (!valid())
+    {
+        loginf << "Error: Command string not valid";
+        return nullptr;
+    }
+
+    const QString cmd_str  = cmd();
+    const QString cmd_name = cmdName();
+
+    loginf << "Command to process: " << cmd_str.toStdString();
+    loginf << "";
+    loginf << "Creating command template from name '" << cmd_name.toStdString() << "'";
+
+    if (!rtcommand::RTCommandRegistry::instance().hasCommand(cmd_name))
+    {
+        loginf << "Error: Command not registered";
+        return nullptr;
+    }
+
+    auto cmdObj = rtcommand::RTCommandRegistry::instance().createCommandTemplate(cmd_name);
+    if (!cmdObj)
+    {
+        loginf << "Error: Command nullptr";
+        return nullptr;
+    }
+
+    loginf << "Configuring command template...";
+
+    if (!cmdObj->configure(cmd_str))
+    {
+        loginf << "Error: Command could not be configured";
+        return nullptr;
+    }
+
+    return cmdObj;
 }
 
 } // namespace rtcommand

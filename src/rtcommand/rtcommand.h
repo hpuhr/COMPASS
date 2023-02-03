@@ -119,6 +119,8 @@ private:
     bool collectOptions(boost::program_options::options_description& options);
     bool assignVariables(const boost::program_options::variables_map& variables);
 
+    void printHelpInformation();
+
     void resetResult() const { result_.reset(); }
 
     mutable RTCommandResult result_; //command result struct containing execution state info and command result data

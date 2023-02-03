@@ -182,7 +182,8 @@ bool RTCommand::collectOptions(boost::program_options::options_description& opti
     {
         //add basic command options here
         ADD_RTCOMMAND_OPTIONS(options)
-            ("wait_condition", po::value<std::string>()->default_value(""), "wait condition config string");
+            ("wait_condition", po::value<std::string>()->default_value(""), "wait condition config string")
+            ("help,h", "show command help information");
 
         //collect from derived 
         ok = collectOptions_impl(options);
@@ -307,6 +308,13 @@ bool RTCommand::configure(const QString& cmd)
     }
 
     return true;
+}
+
+/**
+*/
+void RTCommand::printHelpInformation()
+{
+    //@TODO
 }
 
 /***************************************************************************************
