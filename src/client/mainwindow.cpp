@@ -236,6 +236,8 @@ void MainWindow::createMenus ()
 {
     bool expert_mode = COMPASS::instance().expertMode();
 
+    menuBar()->setObjectName("mainmenu");
+
     // file menu
     QMenu* file_menu = menuBar()->addMenu(tr("&File"));
     file_menu->setObjectName("main_window_file_menu");
@@ -1540,7 +1542,7 @@ void MainWindow::resetViewsMenuSlot()
 
     QMessageBox::StandardButton reply;
     reply = QMessageBox::question(
-                nullptr, "Reset Views",
+                this, "Reset Views",
                 "Confirm to enable all data sources, reset labels,\n"
                 "disable all filters and reset Views to startup configuration?",
                 QMessageBox::Yes|QMessageBox::No);

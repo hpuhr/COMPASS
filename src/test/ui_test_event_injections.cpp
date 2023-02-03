@@ -39,6 +39,7 @@
 #include <QScrollBar>
 #include <QTest>
 #include <QTimer>
+#include <QDialog>
 
 namespace ui_test
 {
@@ -897,6 +898,29 @@ bool injectButtonMenuEvent(QWidget* root,
 
     return injectPostModalEvent([ = ] () { return injectClickEvent(obj.second, "", x, y, Qt::LeftButton, delay); },
                                 [ = ] () { return injectPopupMenuEvent(path_to_action, delay); });
+}
+
+/**
+*/
+bool injectDialogEvent(QWidget* root,
+                           const QString& obj_name,
+                           bool accept,
+                           int delay)
+{
+    auto obj = findObjectAs<QDialog>(root, obj_name);
+    if (obj.first != FindObjectErrCode::NoError)
+    {
+        logObjectError("injectDialogEvent", obj_name, obj.first);
+        return false;
+    }
+
+    //@TODO: with events!
+    if (accept)
+        obj.second->accept();
+    else
+        obj.second->reject();
+
+    return true;
 }
 
 } // namespace ui_test

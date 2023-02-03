@@ -26,7 +26,7 @@ namespace ui_test
  */
 struct RTCommandUIInjection : public rtcommand::RTCommandObject
 {
-    int injection_delay = -1; //delay used for each UI injection
+    int  injection_delay = -1; //delay used for each UI injection
     
     DECLARE_RTCOMMAND_OPTIONS
 };

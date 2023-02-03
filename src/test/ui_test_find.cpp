@@ -60,7 +60,7 @@ std::pair<FindObjectErrCode, QObject*> findObjectNoPath(QObject* parent, const Q
     if (!parent)
         return std::make_pair(FindObjectErrCode::Invalid, nullptr);
 
-    if (obj_name.isEmpty() || parent->objectName() == obj_name)
+    if (obj_name.isEmpty() || parent->objectName() == obj_name || obj_name == "self")
         return std::make_pair(FindObjectErrCode::NoError, parent);
 
     //UGLY HACK, ViewContainerWidget should be a non-modal QDialog instead of a free-floating QWidget

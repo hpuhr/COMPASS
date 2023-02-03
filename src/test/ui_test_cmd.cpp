@@ -22,6 +22,7 @@
 #include <boost/program_options.hpp>
 
 #include <QMainWindow>
+#include <QDialog>
 
 REGISTER_RTCOMMAND(ui_test::RTCommandUISet)
 REGISTER_RTCOMMAND(ui_test::RTCommandUIGet)
@@ -62,11 +63,20 @@ bool RTCommandUIInjection::assignVariables_impl(const VariablesMap& variables)
  */
 bool RTCommandUISet::run_impl() const
 {
-    auto main_window = rtcommand::mainWindow();
-    if (!main_window)
+    QWidget* parent = nullptr;
+    if (is_modal_dialog)
+    {
+        parent = rtcommand::activeDialog();
+    }
+    else
+    {
+        parent = rtcommand::mainWindow();
+    }
+
+    if (!parent)
         return false;
 
-    return setUIElement(main_window, obj, value, injection_delay);
+    return setUIElement(parent, obj, value, injection_delay);
 }
 
 /**

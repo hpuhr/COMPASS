@@ -37,6 +37,7 @@
 #include <QCheckBox>
 #include <QRadioButton>
 #include <QLabel>
+#include <QDialog>
 
 #include <QWidget>
 #include <QString>
@@ -199,5 +200,19 @@ namespace ui_test
     {
         //default button fallback
         return buttonEvent(widget, value, true, delay, hint);
+    }
+
+    template<>
+    inline bool setUIElement(QDialog* widget, const QString& value, int delay, const SetUIHint& hint)
+    {
+        bool accept;
+        if (value == "accept")
+            accept = true;
+        else if (value == "reject")
+            accept = false;
+        else
+            return false; //invalid value
+
+        return injectDialogEvent(widget, "", accept, delay);
     }
 } // namespace ui_test

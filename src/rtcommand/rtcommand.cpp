@@ -28,6 +28,7 @@
 #include <QMainWindow>
 #include <QApplication>
 #include <QWindow>
+#include <QDialog>
 
 REGISTER_RTCOMMAND(rtcommand::RTCommandEmpty)
 
@@ -50,6 +51,21 @@ QMainWindow* mainWindow()
             return mw;
     }
     return nullptr;
+}
+
+/**
+*/
+QDialog* activeDialog()
+{
+    QWidget* w = qApp->activeModalWidget();
+    if (!w)
+        return nullptr;
+
+    QDialog* dlg = dynamic_cast<QDialog*>(w);
+    if (!dlg)
+        return nullptr;
+
+    return dlg;
 }
 
 /***************************************************************************************
@@ -327,7 +343,8 @@ bool RTCommandObject::collectOptions_impl(OptionsDescription& options)
 {
     //add basic command options here
     ADD_RTCOMMAND_OPTIONS(options)
-        ("object,o", po::value<std::string>()->required(), "name of an ui object");
+        ("object,o", po::value<std::string>()->required(), "name of an ui object")
+        ("dialog", "object is the current modal dialog");
     return true;
 }
 
@@ -336,6 +353,7 @@ bool RTCommandObject::collectOptions_impl(OptionsDescription& options)
 bool RTCommandObject::assignVariables_impl(const VariablesMap& variables)
 {
     RTCOMMAND_GET_QSTRING_OR_FAIL(variables, "object", obj)
+    RTCOMMAND_CHECK_VAR(variables, "dialog", is_modal_dialog)
     return true;
 }
 

@@ -127,4 +127,8 @@ namespace ui_test
                                int x = -1,
                                int y = -1,
                                int delay = -1);
+    bool injectDialogEvent(QWidget* root,
+                           const QString& obj_name,
+                           bool accept,
+                           int delay = -1);
 } // namespace ui_test

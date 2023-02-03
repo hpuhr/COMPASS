@@ -28,6 +28,7 @@
 
 class QObject;
 class QMainWindow;
+class QDialog;
 
 namespace boost
 {
@@ -44,6 +45,7 @@ namespace rtcommand
 class WaitCondition;
 
 QMainWindow* mainWindow();
+QDialog* activeDialog();
 
 /**
  * Represents a wait condition which is evaluated after a command has been executed.
@@ -138,6 +140,7 @@ struct RTCommandObject : public RTCommand
     }
 
     QString obj;
+    bool    is_modal_dialog = false;
 
     DECLARE_RTCOMMAND_OPTIONS
 };

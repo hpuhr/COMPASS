@@ -75,6 +75,8 @@ bool setUIElementNative(QWidget* parent,
     TRY_INVOKE_UI_SETTER(QToolButton, w.second, value, delay, hint)
     TRY_INVOKE_UI_SETTER(QAbstractButton, w.second, value, delay, hint) //for all other buttons which were not handled before
 
+    TRY_INVOKE_UI_SETTER(QDialog, w.second, value, delay, hint)
+
     return false;
 }
 

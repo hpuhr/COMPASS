@@ -88,6 +88,9 @@ protected:                                                                     \
  * Can be used when deriving RTCommand::assignVariables_impl() to either retrieve a value 
  * from the given set of variables or return with false.
  */
+#define RTCOMMAND_CHECK_VAR(Variables, Name, BoolVar) \
+    BoolVar = Variables.count(Name) > 0;
+
 #define RTCOMMAND_GET_VAR_OR_FAIL(Variables, Name, Type, Var) \
     if (!Variables.count(Name))                               \
         return false;                                         \

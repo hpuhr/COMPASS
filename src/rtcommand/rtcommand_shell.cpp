@@ -58,9 +58,9 @@ RTCommandShell::RTCommandShell(QWidget* parent)
     cmd_edit_->setFocusPolicy(Qt::FocusPolicy::StrongFocus);
     cmd_edit_->setCursorPosition(0);
 
-    commands_.push_back("uiset --object=window5.osgview1.reload");
-    commands_.push_back("uiset --object=window5.osgview1.toolbar --value=\"Toggle Time Filter\"");
-    commands_.push_back("uiset --object=window5.osgview1.timefilter.slider --value=0.5");
+    //commands_.push_back("uiset --object=window5.osgview1.reload");
+    //commands_.push_back("uiset --object=window5.osgview1.toolbar --value=\"Toggle Time Filter\"");
+    //commands_.push_back("uiset --object=window5.osgview1.timefilter.slider --value=0.5");
 }
 
 /**
