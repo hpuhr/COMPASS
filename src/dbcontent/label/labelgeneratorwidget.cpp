@@ -92,8 +92,8 @@ LabelGeneratorWidget::LabelGeneratorWidget(LabelGenerator& label_generator)
     QScrollArea* scroll_area = new QScrollArea();
     scroll_area->setWidgetResizable(true);
 
-    LabelDSWidget* ds_widget = new LabelDSWidget(label_generator_);
-    scroll_area->setWidget(ds_widget);
+    label_ds_widget_ = new LabelDSWidget(label_generator_);
+    scroll_area->setWidget(label_ds_widget_);
     scroll_area->setMinimumHeight(300);
     //scroll_area->setMaximumHeight(400);
 
@@ -275,6 +275,9 @@ void LabelGeneratorWidget::labelAllDSSlot()
     loginf << "LabelGeneratorWidget: labelAllDSSlot";
 
     label_generator_.labelAllDSIDs();
+
+    if (label_ds_widget_)
+        label_ds_widget_->updateListSlot();
 }
 
 void LabelGeneratorWidget::labelNoDSSlot()
@@ -282,6 +285,9 @@ void LabelGeneratorWidget::labelNoDSSlot()
     loginf << "LabelGeneratorWidget: labelNoDSSlot";
 
     label_generator_.labelNoDSIDs();
+
+    if (label_ds_widget_)
+        label_ds_widget_->updateListSlot();
 }
 
 void LabelGeneratorWidget::autoLabelChangedSlot(bool checked)

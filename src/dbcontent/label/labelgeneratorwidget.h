@@ -10,6 +10,7 @@ namespace dbContent
 {
 
 class LabelGenerator;
+class LabelDSWidget;
 
 // is not owned by LabelGenerator, can be deleted
 // TODO multiple instances do not update each other
@@ -54,6 +55,8 @@ public:
 
 protected:
     LabelGenerator& label_generator_;
+
+    LabelDSWidget* label_ds_widget_ {nullptr};
 };
 
 }
