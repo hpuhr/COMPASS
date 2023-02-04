@@ -33,9 +33,44 @@ namespace rtcommand
 
 namespace 
 {
-    QStringList splitCommand(const QString& cmd)
+    QStringList splitCommand(const QString& command)
     {
-        return QProcess::splitCommand(cmd);
+        //return QProcess::splitCommand(cmd); // does only exist in Qt 5.15+
+
+        QStringList args;
+        QString tmp;
+        int quoteCount = 0;
+        bool inQuote = false;
+        // handle quoting. tokens can be surrounded by double quotes
+        // "hello world". three consecutive double quotes represent
+        // the quote character itself.
+        for (int i = 0; i < command.size(); ++i) {
+            if (command.at(i) == QLatin1Char('"')) {
+                ++quoteCount;
+                if (quoteCount == 3) {
+                    // third consecutive quote
+                    quoteCount = 0;
+                    tmp += command.at(i);
+                }
+                continue;
+            }
+            if (quoteCount) {
+                if (quoteCount == 1)
+                    inQuote = !inQuote;
+                quoteCount = 0;
+            }
+            if (!inQuote && command.at(i).isSpace()) {
+                if (!tmp.isEmpty()) {
+                    args += tmp;
+                    tmp.clear();
+                }
+            } else {
+                tmp += command.at(i);
+            }
+        }
+        if (!tmp.isEmpty())
+            args += tmp;
+        return args;
     }
 }
 

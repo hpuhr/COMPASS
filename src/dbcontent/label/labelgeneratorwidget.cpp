@@ -277,7 +277,7 @@ void LabelGeneratorWidget::labelAllDSSlot()
     label_generator_.labelAllDSIDs();
 
     if (label_ds_widget_)
-        label_ds_widget_->updateListSlot();
+        label_ds_widget_->forceUpdateList();
 }
 
 void LabelGeneratorWidget::labelNoDSSlot()
@@ -287,7 +287,7 @@ void LabelGeneratorWidget::labelNoDSSlot()
     label_generator_.labelNoDSIDs();
 
     if (label_ds_widget_)
-        label_ds_widget_->updateListSlot();
+        label_ds_widget_->forceUpdateList();
 }
 
 void LabelGeneratorWidget::autoLabelChangedSlot(bool checked)

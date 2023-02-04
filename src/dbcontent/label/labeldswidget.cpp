@@ -53,6 +53,13 @@ LabelDSWidget::~LabelDSWidget()
 {
 }
 
+void LabelDSWidget::forceUpdateList()
+{
+    old_sources_.clear();
+
+    updateListSlot();
+}
+
 void LabelDSWidget::updateListSlot()
 {
     logdbg << "LabelDSWidget: updateListSlot";

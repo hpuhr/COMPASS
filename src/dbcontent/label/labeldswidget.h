@@ -32,6 +32,8 @@ public:
                                Qt::WindowFlags f = 0);
     virtual ~LabelDSWidget();
 
+    void forceUpdateList();
+
 protected:
     LabelGenerator& label_generator_;
 
