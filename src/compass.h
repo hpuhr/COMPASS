@@ -95,6 +95,7 @@ protected:
     bool disable_menu_config_save_ {false};
     bool disable_osgview_rotate_ {false};
     bool disable_add_remove_views_ {false};
+    bool disable_confirm_reset_views_ {false};
 
     unsigned int auto_live_running_resume_ask_time_ {60}; // minutes
     unsigned int auto_live_running_resume_ask_wait_time_ {1}; // minutes
@@ -159,6 +160,7 @@ public:
 
     unsigned int autoLiveRunningResumeAskTime() const; // min
     unsigned int autoLiveRunningResumeAskWaitTime() const; // min
+    bool disableConfirmResetViews() const;
 };
 
 #endif /* COMPASS_H_ */

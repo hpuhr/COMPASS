@@ -485,6 +485,11 @@ MainWindow& COMPASS::mainWindow()
     return *main_window_;
 }
 
+bool COMPASS::disableConfirmResetViews() const
+{
+    return disable_confirm_reset_views_;
+}
+
 unsigned int COMPASS::autoLiveRunningResumeAskWaitTime() const
 {
     return auto_live_running_resume_ask_wait_time_;

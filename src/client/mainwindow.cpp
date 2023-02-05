@@ -1541,11 +1541,18 @@ void MainWindow::resetViewsMenuSlot()
     loginf << "MainWindow: resetViewsMenuSlot";
 
     QMessageBox::StandardButton reply;
-    reply = QMessageBox::question(
-                this, "Reset Views",
-                "Confirm to enable all data sources, reset labels,\n"
-                "disable all filters and reset Views to startup configuration?",
-                QMessageBox::Yes|QMessageBox::No);
+
+    if (COMPASS::instance().disableConfirmResetViews())
+        reply = QMessageBox::Yes;
+    else
+    {
+
+        reply = QMessageBox::question(
+                    this, "Reset Views",
+                    "Confirm to enable all data sources, reset labels,\n"
+                    "disable all filters and reset Views to startup configuration?",
+                    QMessageBox::Yes|QMessageBox::No);
+    }
 
     if (reply == QMessageBox::Yes)
     {
@@ -1576,12 +1583,12 @@ void MainWindow::resetViewsMenuSlot()
         COMPASS::instance().filterManager().resetToStartupConfiguration();
 
 #ifdef USE_EXPERIMENTAL_SOURCE
-    GeometryTreeItem::clearHiddenIdentifierStrs(); // clears hidden layers
+        GeometryTreeItem::clearHiddenIdentifierStrs(); // clears hidden layers
 #endif
 
         COMPASS::instance().viewManager().resetToStartupConfiguration();
 
-         // set AppMode
+        // set AppMode
         if (COMPASS::instance().appMode() == AppMode::LivePaused)
             COMPASS::instance().appMode(AppMode::LiveRunning);
         else

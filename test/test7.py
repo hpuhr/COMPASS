@@ -48,6 +48,8 @@ def switch_live_mode(serversocket, server):
     data, _ = serversocket.recvfrom(1024)
     print("switch_live_mode result sent: '{}'".format(data.decode()))
     
+    time.sleep(5)
+    
     
 def reset_views(serversocket, server):        
     
