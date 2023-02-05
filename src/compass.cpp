@@ -68,6 +68,8 @@ COMPASS::COMPASS() : Configurable("COMPASS", "COMPASS0", 0, "compass.json")
     registerParameter("auto_live_running_resume_ask_time", &auto_live_running_resume_ask_time_, 60);
     registerParameter("auto_live_running_resume_ask_wait_time", &auto_live_running_resume_ask_wait_time_, 1);
 
+    registerParameter("disable_confirm_reset_views", &disable_confirm_reset_views_, false);
+
     assert (auto_live_running_resume_ask_time_ > 0);
     assert (auto_live_running_resume_ask_wait_time_ > 0);
     assert (auto_live_running_resume_ask_time_ > auto_live_running_resume_ask_wait_time_);

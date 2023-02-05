@@ -31,7 +31,7 @@ def set_slider_values(serversocket, server, num_times, wait_time_s):
         
         time.sleep(wait_time_s)
 
-def switch_live_mode(serversocket, server):
+def switch_live_mode(serversocket, server, wait_time_s):
 
     # uiset --object=livebutton --wait_condition="signal;WINDOW.OSGVIEW;dataLoaded;TIMEOUT"
     cmd_str = "uiset --object=livebutton --wait_condition=\"signal;{};dataLoaded;10000\"".format(osgview_str)
@@ -48,10 +48,10 @@ def switch_live_mode(serversocket, server):
     data, _ = serversocket.recvfrom(1024)
     print("switch_live_mode result sent: '{}'".format(data.decode()))
     
-    time.sleep(5)
+    time.sleep(wait_time_s)
     
     
-def reset_views(serversocket, server):        
+def reset_views(serversocket, server, wait_time_s):        
     
     #uiset --object=mainmenu --value="UI|Reset Views"
     cmd_str = "uiset --object=mainmenu --value=\"UI|Reset Views\""
@@ -66,7 +66,7 @@ def reset_views(serversocket, server):
     data, _ = serversocket.recvfrom(1024)
     print("reset_views result sent: '{}'".format(data.decode()))
         
-    time.sleep(5)
+    time.sleep(wait_time_s)
     
     
 def main():
@@ -90,7 +90,7 @@ def main():
         # assume in live running
         
         if random.randint(0, 1) == 1: # switch to live paused
-            switch_live_mode(serversocket, server)
+            switch_live_mode(serversocket, server, 10)
             switched_to_live_paused = True
         else:
             switched_to_live_paused = False
@@ -100,9 +100,9 @@ def main():
         
         if switched_to_live_paused:
             if random.randint(0, 1) == 1: # switch to live running
-                switch_live_mode(serversocket, server)
+                switch_live_mode(serversocket, server, 10)
             else:
-                reset_views(serversocket, server)
+                reset_views(serversocket, server, 20)
     
     #for cnt in range(5):
     #    switch_live_mode(serversocket, server)
