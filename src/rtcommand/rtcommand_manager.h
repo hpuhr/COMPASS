@@ -28,6 +28,8 @@ namespace rtcommand
 class RTCommandManager : public QThread, public Singleton, public Configurable
 {
 public:
+    static bool open_port_;
+
     virtual ~RTCommandManager();
 
     void shutdown();

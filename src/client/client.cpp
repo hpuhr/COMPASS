@@ -27,6 +27,7 @@
 #include "taskmanager.h"
 #include "asteriximporttask.h"
 #include "mainwindow.h"
+#include "rtcommand_manager.h"
 
 #include "json.hpp"
 #include "util/tbbhack.h"
@@ -151,6 +152,7 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
              "export evaluation report after start with given filename, e.g. '/data/eval_db2/report.tex")
             ("max_fps", po::value<std::string>(&max_fps_), "maximum fps for display in OSGView'")
             ("no_cfg_save", po::bool_switch(&no_config_save_), "do not save configuration upon quitting")
+            ("open_rt_cmd_port", po::bool_switch(&open_rt_cmd_port_), "open runtime command port (default at 27960)")
             ("quit", po::bool_switch(&quit_), "quit after finishing all previous steps");
 
     try
@@ -222,6 +224,9 @@ void Client::run ()
     {
         QCoreApplication::processEvents();
     }
+
+    if (open_rt_cmd_port_)
+        RTCommandManager::open_port_ = true; // has to be done before COMPASS ctor is called
 
     if (expert_mode_)
         COMPASS::instance().expertMode(true);

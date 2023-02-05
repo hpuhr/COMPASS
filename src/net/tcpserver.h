@@ -38,6 +38,8 @@ public:
     TCPServer(boost::asio::io_context& io_context, short port);
     virtual ~TCPServer();
 
+    void start();
+
     bool hasSession();
 
     bool hasStrData();
@@ -46,9 +48,10 @@ public:
     void sendStrData(const std::string& str);
 
 private:
-
     boost::asio::ip::tcp::acceptor acceptor_;
     std::shared_ptr<TCPSession> session_;
+
+    bool started_ {false};
 
     void do_accept();
 };

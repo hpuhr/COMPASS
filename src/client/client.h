@@ -81,6 +81,8 @@ private:
     std::string max_fps_;
 
     bool no_config_save_ {false};
+
+    bool open_rt_cmd_port_ {false};
     bool quit_ {false};
 
     bool expert_mode_ {false};

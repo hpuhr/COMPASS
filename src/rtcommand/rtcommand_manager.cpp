@@ -16,6 +16,8 @@
 using namespace std;
 using namespace Utils;
 
+bool RTCommandManager::open_port_ {false};
+
 RTCommandManager::RTCommandManager()
     : Configurable("RTCommandManager", "RTCommandManager0", 0, "rtcommand.json"),
       stop_requested_(false), stopped_(false)
@@ -34,14 +36,22 @@ void RTCommandManager::run()
     loginf<< "RTCommandManager: run: start";
 
     loginf<< "RTCommandManager: run: io context";
+
     boost::asio::io_context io_context;
 
     TCPServer server (io_context, port_num_);
 
-    loginf<< "RTCommandManager: run: running io context";
+    boost::thread t;
 
-    boost::thread t(boost::bind(&boost::asio::io_context::run, &io_context));
-    t.detach();
+    if (open_port_)
+    {
+        loginf<< "RTCommandManager: run: running io context for rt command port";
+
+        server.start();
+
+        t = boost::thread (boost::bind(&boost::asio::io_context::run, &io_context));
+        t.detach();
+    }
 
     loginf<< "RTCommandManager: run: starting loop";
 
@@ -50,7 +60,7 @@ void RTCommandManager::run()
         if (stop_requested_) //  && !hasAnyJobs()
             break;
 
-        if (server.hasSession() && server.hasStrData())
+        if (open_port_ && server.hasSession() && server.hasStrData())
         {
             logdbg << "RTCommandManager: run: getting commands";
 
@@ -87,7 +97,7 @@ void RTCommandManager::run()
             {
                 boost::mutex::scoped_lock lock(command_queue_mutex_);
 
-                current_result = cmd_runner.runCommand( move(command_queue_.front()));
+                current_result = cmd_runner.runCommand(move(command_queue_.front()));
                 command_queue_.pop();
             }
 
@@ -102,7 +112,7 @@ void RTCommandManager::run()
 
             loginf<< "RTCommandManager: run: result wait done, success " << cmd_result.success();
 
-            if (server.hasSession())
+            if (open_port_ && server.hasSession())
             {
                 if (cmd_result.success())
                     server.sendStrData("successfully run command, result '"+cmd_result.toString().toStdString()+"'");
@@ -114,10 +124,13 @@ void RTCommandManager::run()
         msleep(1);
     }
 
-    io_context.stop();
-    assert (io_context.stopped());
+    if (open_port_)
+    {
+        io_context.stop();
+        assert (io_context.stopped());
 
-    t.timed_join(100);
+        t.timed_join(100);
+    }
 
     stopped_ = true;
     loginf << "RTCommandManager: run: stopped";
