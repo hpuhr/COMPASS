@@ -1558,6 +1558,9 @@ void MainWindow::resetViewsMenuSlot()
     {
         QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
+        assert (tab_widget_);
+        int index = tab_widget_->currentIndex();
+
         QMessageBox msg_box;
         msg_box.setWindowTitle("Resetting");
         msg_box.setText( "Please wait...");
@@ -1598,6 +1601,8 @@ void MainWindow::resetViewsMenuSlot()
         }
 
         msg_box.close();
+
+        tab_widget_->setCurrentIndex(index);
 
         setVisible(true);
 
