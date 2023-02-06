@@ -163,6 +163,7 @@ bool RTCommandRunner::executeCommand(RTCommand* cmd, RTCommandRunnerStash* stash
     wrapper.command = cmd;
 
     //execute command in main thread and block until finished
+    //@TODO: handle thread cleanup
     bool ok      = true;
     bool invoked = cmd->execute_async ? QMetaObject::invokeMethod(stash, "executeCommandAsync", 
                                                                   Qt::QueuedConnection,
