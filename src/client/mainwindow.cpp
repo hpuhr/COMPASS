@@ -83,7 +83,7 @@
 #include <QCheckBox>
 #include <QTimer>
 
-#define SHOW_DEBUG_MENU
+//#define SHOW_DEBUG_MENU
 
 #ifdef SHOW_DEBUG_MENU
 #include "test_lab.h"

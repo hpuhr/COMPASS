@@ -30,7 +30,7 @@ namespace rtcommand
 
 /**
 */
-struct RTCommandRunnerInput
+struct RTCommandMetaTypeWrapper
 {
     const rtcommand::RTCommand* command = nullptr;
 };
@@ -52,8 +52,8 @@ public:
 private slots:
     bool spyForSignal(const QString& obj_name, const QString& signal_name);
     void removeSpy();
-    bool executeCommand(RTCommandRunnerInput input) const;
-    void executeCommandAsync(RTCommandRunnerInput input) const;
+    bool executeCommand(RTCommandMetaTypeWrapper wrapper) const;
+    void executeCommandAsync(RTCommandMetaTypeWrapper wrapper) const;
     
 private:
     friend class RTCommandRunner;
@@ -65,4 +65,4 @@ private:
 
 } // namespace rtcommand
 
-Q_DECLARE_METATYPE(RTCommandRunnerInput)
+Q_DECLARE_METATYPE(RTCommandMetaTypeWrapper)

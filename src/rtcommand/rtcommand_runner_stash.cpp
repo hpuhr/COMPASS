@@ -61,21 +61,21 @@ void RTCommandRunnerStash::removeSpy()
 /**
  * Execute the given runtime command.
 */
-bool RTCommandRunnerStash::executeCommand(RTCommandRunnerInput input) const
+bool RTCommandRunnerStash::executeCommand(RTCommandMetaTypeWrapper wrapper) const
 {
-    if (!input.command)
+    if (!wrapper.command)
         return false;
 
-    return input.command->run();
+    return wrapper.command->run();
 }
 
 /**
  * Execute the given runtime command async.
 */
-void RTCommandRunnerStash::executeCommandAsync(RTCommandRunnerInput input) const
+void RTCommandRunnerStash::executeCommandAsync(RTCommandMetaTypeWrapper wrapper) const
 {
-    if (input.command)
-        input.command->run();
+    if (wrapper.command)
+        wrapper.command->run();
 }
 
 } // namespace rtcommand

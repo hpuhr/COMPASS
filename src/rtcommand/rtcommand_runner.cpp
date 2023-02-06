@@ -155,22 +155,22 @@ bool RTCommandRunner::executeCommand(RTCommand* cmd, RTCommandRunnerStash* stash
     if (!cmd || !stash)
         throw std::runtime_error("RTCommandRunner::executeCommand: Bad init");
 
-    qRegisterMetaType<RTCommandRunnerInput>();
+    qRegisterMetaType<RTCommandMetaTypeWrapper>();
 
     logMsg("Executing...", cmd);
 
-    RTCommandRunnerInput input;
-    input.command = cmd;
+    RTCommandMetaTypeWrapper wrapper;
+    wrapper.command = cmd;
 
     //execute command in main thread and block until finished
     bool ok      = true;
     bool invoked = cmd->execute_async ? QMetaObject::invokeMethod(stash, "executeCommandAsync", 
                                                                   Qt::QueuedConnection,
-                                                                  Q_ARG(RTCommandRunnerInput, input)) :
+                                                                  Q_ARG(RTCommandMetaTypeWrapper, wrapper)) :
                                         QMetaObject::invokeMethod(stash, "executeCommand", 
                                                                   Qt::BlockingQueuedConnection,
                                                                   Q_RETURN_ARG(bool, ok),
-                                                                  Q_ARG(RTCommandRunnerInput, input));
+                                                                  Q_ARG(RTCommandMetaTypeWrapper, wrapper));
     bool succeeded = (ok && invoked);
 
     //if invoking the execution failed, we set the commands state to failed
