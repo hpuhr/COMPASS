@@ -61,12 +61,21 @@ void RTCommandRunnerStash::removeSpy()
 /**
  * Execute the given runtime command.
 */
-bool RTCommandRunnerStash::executeCommand(const RTCommand* command) const
+bool RTCommandRunnerStash::executeCommand(RTCommandRunnerInput input) const
 {
-    if (!command)
+    if (!input.command)
         return false;
 
-    return command->run();
+    return input.command->run();
+}
+
+/**
+ * Execute the given runtime command async.
+*/
+void RTCommandRunnerStash::executeCommandAsync(RTCommandRunnerInput input) const
+{
+    if (input.command)
+        input.command->run();
 }
 
 } // namespace rtcommand

@@ -100,7 +100,9 @@ struct RTCommand
 
     bool configure(const QString& cmd);
 
-    RTCommandWaitCondition condition;  //condition to wait for after executing the command.
+    RTCommandWaitCondition condition;             //condition to wait for after executing the command.
+    bool                   execute_async = false; //if true execution will immediately return after deploying the command to the main thread's event loop,
+                                                  //if false execution will wait for the command to finish running in the main thread
 
 protected:
     void setResultData(const QString& d) const { result_.data = d; }
@@ -108,8 +110,8 @@ protected:
 
     //implements command specific behaviour
     virtual bool run_impl() const = 0;
-    virtual bool collectOptions_impl(OptionsDescription& options) = 0;
-    virtual bool assignVariables_impl(const VariablesMap& variables) = 0;
+    virtual void collectOptions_impl(OptionsDescription& options) = 0;
+    virtual void assignVariables_impl(const VariablesMap& variables) = 0;
 
     //!implemented by DECLARE_RTCOMMAND macro!
     virtual QString name_impl() const = 0;
@@ -126,23 +128,6 @@ private:
     void resetResult() const { result_.reset(); }
 
     mutable RTCommandResult result_; //command result struct containing execution state info and command result data
-};
-
-/**
- * Command targeting a specific QObject.
- */
-struct RTCommandObject : public RTCommand
-{
-    virtual bool valid() const override
-    {
-        //the object name must not be empty
-        return (RTCommand::valid() && !obj.isEmpty());
-    }
-
-    QString obj;
-    bool    is_modal_dialog = false;
-
-    DECLARE_RTCOMMAND_OPTIONS
 };
 
 /**

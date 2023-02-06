@@ -20,6 +20,8 @@
 #include "rtcommand_registry.h"
 #include "rtcommand_string.h"
 
+#include "logger.h"
+
 #include <iostream>
 
 #include <boost/program_options.hpp>
@@ -192,24 +194,29 @@ RTCommand::~RTCommand() = default;
  */
 bool RTCommand::collectOptions(boost::program_options::options_description& options)
 {
-    bool ok;
-
     try
     {
         //add basic command options here
         ADD_RTCOMMAND_OPTIONS(options)
             ("wait_condition", po::value<std::string>()->default_value(""), "wait condition config string")
+            ("async", "enables asynchrous command execution, meaning execution will return immediately after the command has been deployed to the main thread")
             ("help,h", "show command help information");
 
         //collect from derived 
-        ok = collectOptions_impl(options);
+        collectOptions_impl(options);
+    }
+    catch(const std::exception& ex)
+    {
+        logerr << "RTCommand::collectOptions(): Error: " << ex.what();
+        return false;
     }
     catch(...)
     {
-        ok = false;
+        logerr << "RTCommand::collectOptions(): Unknown error";
+        return false;
     }
 
-    return ok;
+    return true;
 }
 
 /**
@@ -217,30 +224,33 @@ bool RTCommand::collectOptions(boost::program_options::options_description& opti
  */
 bool RTCommand::assignVariables(const boost::program_options::variables_map& variables)
 {
-    bool ok;
-
     try
     {
         //assign basic options here
         QString condition_config_str;
-        RTCOMMAND_GET_QSTRING_OR_FAIL(variables, "wait_condition", condition_config_str)
+        RTCOMMAND_GET_QSTRING_OR_THROW(variables, "wait_condition", condition_config_str)
 
         if (!condition_config_str.isEmpty() &&
             !condition.setFromString(condition_config_str))
-        {
-            std::cout << "Could not configure condition!" << std::endl;
-            return false;
-        }
+            throw ("Could not configure condition");
+
+        RTCOMMAND_CHECK_VAR(variables, "async", execute_async)
 
         //assign in derived 
-        ok = assignVariables_impl(variables);
+        assignVariables_impl(variables);
+    }
+    catch(const std::exception& ex)
+    {
+        logerr << "RTCommand::assignVariables(): Error: " << ex.what();
+        return false;
     }
     catch(...)
     {
-        ok = false;
+        logerr << "RTCommand::assignVariables(): Unknown error";
+        return false;
     }
 
-    return ok;
+    return true;
 }
 
 /**
@@ -331,30 +341,6 @@ bool RTCommand::configure(const QString& cmd)
 void RTCommand::printHelpInformation()
 {
     //@TODO
-}
-
-/***************************************************************************************
- * RTCommandObject
- ***************************************************************************************/
-
-/**
- */
-bool RTCommandObject::collectOptions_impl(OptionsDescription& options)
-{
-    //add basic command options here
-    ADD_RTCOMMAND_OPTIONS(options)
-        ("object,o", po::value<std::string>()->required(), "name of an ui object")
-        ("dialog", "object is the current modal dialog");
-    return true;
-}
-
-/**
- */
-bool RTCommandObject::assignVariables_impl(const VariablesMap& variables)
-{
-    RTCOMMAND_GET_QSTRING_OR_FAIL(variables, "object", obj)
-    RTCOMMAND_CHECK_VAR(variables, "dialog", is_modal_dialog)
-    return true;
 }
 
 } // namespace rtcommand

@@ -187,7 +187,7 @@ bool RTCommandString::parse(boost::program_options::variables_map& vm,
     }
     catch (const std::exception& ex)
     {
-        std::cout << "Error parsing command: " << ex.what() << std::endl;
+        //std::cout << "Error parsing command: " << ex.what() << std::endl;
         return false;
     }
 
@@ -226,7 +226,7 @@ std::unique_ptr<RTCommand> RTCommandString::issue() const
 {
     if (!valid())
     {
-        loginf << "Error: Command string not valid";
+        logerr << "RTCommandString::issue(): Command string not valid";
         return nullptr;
     }
 
@@ -234,19 +234,18 @@ std::unique_ptr<RTCommand> RTCommandString::issue() const
     const QString cmd_name = cmdName();
 
     loginf << "Command to process: " << cmd_str.toStdString();
-    loginf << "";
     loginf << "Creating command template from name '" << cmd_name.toStdString() << "'";
 
     if (!rtcommand::RTCommandRegistry::instance().hasCommand(cmd_name))
     {
-        loginf << "Error: Command not registered";
+        logerr << "RTCommandString::issue(): Command not registered";
         return nullptr;
     }
 
     auto cmdObj = rtcommand::RTCommandRegistry::instance().createCommandTemplate(cmd_name);
     if (!cmdObj)
     {
-        loginf << "Error: Command nullptr";
+        logerr << "RTCommandString::issue(): Registry returned nullptr";
         return nullptr;
     }
 
@@ -254,7 +253,7 @@ std::unique_ptr<RTCommand> RTCommandString::issue() const
 
     if (!cmdObj->configure(cmd_str))
     {
-        loginf << "Error: Command could not be configured";
+        loginf << "RTCommandString::issue(): Command could not be configured";
         return nullptr;
     }
 

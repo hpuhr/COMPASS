@@ -50,7 +50,7 @@ void logObjectError(const QString& prefix,
     else if (code == FindObjectErrCode::WrongType)
         err = "has wrong type";
     
-    loginf << prefix.toStdString() << ": Object " << objectName(obj_name) + " " + err.toStdString();
+    logerr << prefix.toStdString() << ": Object " << objectName(obj_name) + " " + err.toStdString();
 }
 
 /**
@@ -60,7 +60,7 @@ std::pair<FindObjectErrCode, QObject*> findObjectNoPath(QObject* parent, const Q
     if (!parent)
         return std::make_pair(FindObjectErrCode::Invalid, nullptr);
 
-    if (obj_name.isEmpty() || parent->objectName() == obj_name || obj_name == "self")
+    if (obj_name.isEmpty() || parent->objectName() == obj_name)
         return std::make_pair(FindObjectErrCode::NoError, parent);
 
     //UGLY HACK, ViewContainerWidget should be a non-modal QDialog instead of a free-floating QWidget
@@ -114,13 +114,13 @@ std::pair<FindObjectErrCode, QObject*> findObject(QObject* parent, const QString
     QObject* last_obj = parent;
     for (const QString& sub_obj : path)
     {
-        std::cout << "looking for object '" << sub_obj.toStdString() << "'" << std::endl; 
+        loginf << "looking for object '" << sub_obj.toStdString() << "'"; 
 
         auto obj = findObjectNoPath(last_obj, sub_obj.trimmed());
         if (obj.first != FindObjectErrCode::NoError)
             return std::make_pair(obj.first, nullptr);
 
-        std::cout << "   FOUND" << std::endl;
+        loginf << "   FOUND";
 
         last_obj = obj.second;
     }

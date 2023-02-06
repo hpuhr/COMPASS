@@ -30,29 +30,82 @@ REGISTER_RTCOMMAND(ui_test::RTCommandUIGet)
 namespace ui_test
 {
 
+/***************************************************************************************
+ * RTCommandObject
+ ***************************************************************************************/
+
+const std::string RTCommandUIObject::ParentMainWindowString  = "mainwindow";
+const std::string RTCommandUIObject::ParentModalDialogString = "dialog";
+
+/**
+ */
+void RTCommandUIObject::collectOptions_impl(OptionsDescription& options)
+{
+    //add basic command options here
+    ADD_RTCOMMAND_OPTIONS(options)
+        ("object,o", po::value<std::string>()->default_value(""), "name of an ui object")
+        ("parent", po::value<std::string>()->default_value(ParentMainWindowString), "parent ui object");
+}
+
+/**
+ */
+void RTCommandUIObject::assignVariables_impl(const VariablesMap& variables)
+{
+    RTCOMMAND_GET_QSTRING_OR_THROW(variables, "object", obj)
+
+    std::string parent_str;
+    RTCOMMAND_GET_VAR_OR_THROW(variables, "parent", std::string, parent_str)
+    parent = parentFromString(parent_str);
+}
+
+/**
+ */
+RTCommandUIObject::Parent RTCommandUIObject::parentFromString(const std::string& str)
+{
+    if (str == ParentMainWindowString)
+        return Parent::MainWindow;
+    else if (str == ParentModalDialogString)
+        return Parent::ModalDialog;
+
+    throw ("Unknown string");
+    return Parent::MainWindow;
+}
+
+/**
+*/
+QWidget* RTCommandUIObject::parentWidget() const
+{
+    if (parent == Parent::MainWindow)
+        return rtcommand::mainWindow();
+    else if (parent == Parent::ModalDialog)
+        return rtcommand::activeDialog();
+
+    return nullptr;
+}
+
 /*************************************************************************
  * RTCommandUIInjection
  *************************************************************************/
 
 /**
  */
-bool RTCommandUIInjection::collectOptions_impl(OptionsDescription& options)
+void RTCommandUIInjection::collectOptions_impl(OptionsDescription& options)
 {
     ADD_RTCOMMAND_OPTIONS(options)
         ("uidelay", po::value<int>()->default_value(-1), "delay added after injected ui events");
 
     //call base
-    return RTCommandObject::collectOptions_impl(options);
+    RTCommandUIObject::collectOptions_impl(options);
 }
 
 /**
  */
-bool RTCommandUIInjection::assignVariables_impl(const VariablesMap& variables)
+void RTCommandUIInjection::assignVariables_impl(const VariablesMap& variables)
 {
-    RTCOMMAND_GET_VAR_OR_FAIL(variables, "uidelay", int, injection_delay)
+    RTCOMMAND_GET_VAR_OR_THROW(variables, "uidelay", int, injection_delay)
 
     //call base
-    return RTCommandObject::assignVariables_impl(variables);
+    RTCommandUIObject::assignVariables_impl(variables);
 }
 
 /*************************************************************************
@@ -63,16 +116,7 @@ bool RTCommandUIInjection::assignVariables_impl(const VariablesMap& variables)
  */
 bool RTCommandUISet::run_impl() const
 {
-    QWidget* parent = nullptr;
-    if (is_modal_dialog)
-    {
-        parent = rtcommand::activeDialog();
-    }
-    else
-    {
-        parent = rtcommand::mainWindow();
-    }
-
+    QWidget* parent = parentWidget();
     if (!parent)
         return false;
 
@@ -81,26 +125,23 @@ bool RTCommandUISet::run_impl() const
 
 /**
  */
-bool RTCommandUISet::collectOptions_impl(OptionsDescription& options)
+void RTCommandUISet::collectOptions_impl(OptionsDescription& options)
 {
     ADD_RTCOMMAND_OPTIONS(options)
         ("value,v", po::value<std::string>()->default_value(""), "new value to set");
 
     //call base
-    return RTCommandUIInjection::collectOptions_impl(options);
+    RTCommandUIInjection::collectOptions_impl(options);
 }
 
 /**
  */
-bool RTCommandUISet::assignVariables_impl(const VariablesMap& variables)
+void RTCommandUISet::assignVariables_impl(const VariablesMap& variables)
 {
-    for (const auto& v : variables)
-        std::cout << "   " << v.first << std::endl;
-
-    RTCOMMAND_GET_QSTRING_OR_FAIL(variables, "value", value)
+    RTCOMMAND_GET_QSTRING_OR_THROW(variables, "value", value)
 
     //call base
-    return RTCommandUIInjection::assignVariables_impl(variables);
+    RTCommandUIInjection::assignVariables_impl(variables);
 }
 
 /*************************************************************************
@@ -111,11 +152,11 @@ bool RTCommandUISet::assignVariables_impl(const VariablesMap& variables)
  */
 bool RTCommandUIGet::run_impl() const
 {
-    auto main_window = rtcommand::mainWindow();
-    if (!main_window)
+    QWidget* parent = parentWidget();
+    if (!parent)
         return false;
 
-    auto res = getUIElement(main_window, obj, what);
+    auto res = getUIElement(parent, obj, what);
     if (!res.has_value())
         return false;
 
@@ -124,26 +165,25 @@ bool RTCommandUIGet::run_impl() const
     return true;
 }
 
-
 /**
  */
-bool RTCommandUIGet::collectOptions_impl(OptionsDescription& options)
+void RTCommandUIGet::collectOptions_impl(OptionsDescription& options)
 {
     ADD_RTCOMMAND_OPTIONS(options)
         ("what,w", po::value<std::string>()->default_value(""), "which value to retrieve from the ui element (empty = default behavior)");
 
     //call base
-    return RTCommandObject::collectOptions_impl(options);
+    RTCommandUIObject::collectOptions_impl(options);
 }
 
 /**
  */
-bool RTCommandUIGet::assignVariables_impl(const VariablesMap& variables)
+void RTCommandUIGet::assignVariables_impl(const VariablesMap& variables)
 {
-    RTCOMMAND_GET_QSTRING_OR_FAIL(variables, "what", what)
+    RTCOMMAND_GET_QSTRING_OR_THROW(variables, "what", what)
 
     //call base
-    return RTCommandObject::assignVariables_impl(variables);
+    RTCommandUIObject::assignVariables_impl(variables);
 }
 
 }

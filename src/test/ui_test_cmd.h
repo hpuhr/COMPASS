@@ -18,13 +18,40 @@
 #pragma once
 
 #include "rtcommand.h"
+#include "rtcommand_macros.h"
 
 namespace ui_test
 {
 
+/**
+ * Command targeting a specific QObject.
+ */
+struct RTCommandUIObject : public rtcommand::RTCommand
+{
+    enum class Parent
+    {
+        MainWindow = 0,
+        ModalDialog
+    };
+
+    QString obj;
+    Parent  parent = Parent::MainWindow;
+
+protected:
+    QWidget* parentWidget() const;
+
+private:
+    static const std::string ParentMainWindowString;
+    static const std::string ParentModalDialogString;
+
+    static Parent parentFromString(const std::string& str);
+    
+    DECLARE_RTCOMMAND_OPTIONS
+};
+
 /** 
  */
-struct RTCommandUIInjection : public rtcommand::RTCommandObject
+struct RTCommandUIInjection : public RTCommandUIObject
 {
     int  injection_delay = -1; //delay used for each UI injection
     
@@ -45,7 +72,7 @@ protected:
 
 /**
  */
-struct RTCommandUIGet : public rtcommand::RTCommandObject
+struct RTCommandUIGet : public RTCommandUIObject
 {
     QString what;
 protected:

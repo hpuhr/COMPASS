@@ -155,13 +155,22 @@ bool RTCommandRunner::executeCommand(RTCommand* cmd, RTCommandRunnerStash* stash
     if (!cmd || !stash)
         throw std::runtime_error("RTCommandRunner::executeCommand: Bad init");
 
+    qRegisterMetaType<RTCommandRunnerInput>();
+
     logMsg("Executing...", cmd);
 
+    RTCommandRunnerInput input;
+    input.command = cmd;
+
     //execute command in main thread and block until finished
-    bool ok      = false;
-    bool invoked = QMetaObject::invokeMethod(stash, "executeCommand", Qt::BlockingQueuedConnection,
-                                             Q_RETURN_ARG(bool, ok),
-                                             Q_ARG(const RTCommand*, cmd));
+    bool ok      = true;
+    bool invoked = cmd->execute_async ? QMetaObject::invokeMethod(stash, "executeCommandAsync", 
+                                                                  Qt::QueuedConnection,
+                                                                  Q_ARG(RTCommandRunnerInput, input)) :
+                                        QMetaObject::invokeMethod(stash, "executeCommand", 
+                                                                  Qt::BlockingQueuedConnection,
+                                                                  Q_RETURN_ARG(bool, ok),
+                                                                  Q_ARG(RTCommandRunnerInput, input));
     bool succeeded = (ok && invoked);
 
     //if invoking the execution failed, we set the commands state to failed
@@ -179,9 +188,9 @@ void RTCommandRunner::logMsg(const std::string& msg, RTCommand* cmd)
 {
     std::string prefix = (cmd ? "Command '" + cmd->name().toStdString() + "': " : "");
 
-    std::cout << " ---------------------------------------------------------------" << std::endl;
-    std::cout << "| " << prefix << msg << std::endl;
-    std::cout << " ---------------------------------------------------------------" << std::endl;
+    loginf << " ---------------------------------------------------------------";
+    loginf << "| " << prefix << msg;
+    loginf << " ---------------------------------------------------------------";
 }
 
 /**

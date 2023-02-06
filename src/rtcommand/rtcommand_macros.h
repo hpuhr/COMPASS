@@ -27,7 +27,7 @@
  *     DECLARE_RTCOMMAND(example, "just an example command")
  * };
  */
-#define DECLARE_RTCOMMAND(Name, Description)                                     \
+#define DECLARE_RTCOMMAND(Name, Description)                                          \
 public:                                                                               \
     static QString staticName() { return #Name; }                                     \
     static QString staticDescription() { return Description; }                        \
@@ -63,10 +63,10 @@ private:                                                                        
  *     DECLARE_RTCOMMAND_NOOPTIONS
  * };
  */
-#define DECLARE_RTCOMMAND_NOOPTIONS                                                            \
-protected:                                                                                     \
-    virtual bool collectOptions_impl(OptionsDescription& options) override { return true; }    \
-    virtual bool assignVariables_impl(const VariablesMap& variables) override { return true; }
+#define DECLARE_RTCOMMAND_NOOPTIONS                                              \
+protected:                                                                       \
+    virtual void collectOptions_impl(OptionsDescription& options) override {}    \
+    virtual void assignVariables_impl(const VariablesMap& variables) override {}
 
 /**
  * Overrides the abstract option related methods, to be implemented in source.
@@ -81,8 +81,8 @@ protected:                                                                      
  */
 #define DECLARE_RTCOMMAND_OPTIONS                                              \
 protected:                                                                     \
-    virtual bool collectOptions_impl(OptionsDescription& options) override;    \
-    virtual bool assignVariables_impl(const VariablesMap& variables) override;
+    virtual void collectOptions_impl(OptionsDescription& options) override;    \
+    virtual void assignVariables_impl(const VariablesMap& variables) override;
 
 /**
  * Can be used when deriving RTCommand::assignVariables_impl() to either retrieve a value 
@@ -91,16 +91,16 @@ protected:                                                                     \
 #define RTCOMMAND_CHECK_VAR(Variables, Name, BoolVar) \
     BoolVar = Variables.count(Name) > 0;
 
-#define RTCOMMAND_GET_VAR_OR_FAIL(Variables, Name, Type, Var) \
-    if (!Variables.count(Name))                               \
-        return false;                                         \
+#define RTCOMMAND_GET_VAR_OR_THROW(Variables, Name, Type, Var)                                         \
+    if (!Variables.count(Name))                                                                        \
+        throw std::runtime_error(std::string("Could not retrieve rtcommand variable '") + Name + "'"); \
     Var = Variables[Name].as<Type>();
 
-#define RTCOMMAND_GET_QSTRING_OR_FAIL(Variables, Name, Var)                 \
-    {                                                                       \
-        std::string _##Var;                                                 \
-        RTCOMMAND_GET_VAR_OR_FAIL(Variables, Name, std::string, _##Var)     \
-        Var = QString::fromStdString(_##Var);                               \
+#define RTCOMMAND_GET_QSTRING_OR_THROW(Variables, Name, Var)             \
+    {                                                                    \
+        std::string _##Var;                                              \
+        RTCOMMAND_GET_VAR_OR_THROW(Variables, Name, std::string, _##Var) \
+        Var = QString::fromStdString(_##Var);                            \
     }
 
 #define ADD_RTCOMMAND_OPTIONS(Options)     \

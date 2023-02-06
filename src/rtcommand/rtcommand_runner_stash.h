@@ -25,8 +25,18 @@ class QSignalSpy;
 
 namespace rtcommand
 {
+    struct RTCommand;
+}
 
-struct RTCommand;
+/**
+*/
+struct RTCommandRunnerInput
+{
+    const rtcommand::RTCommand* command = nullptr;
+};
+
+namespace rtcommand
+{
 
 /**
  * Obtains data structures and calls for the command runner 
@@ -42,7 +52,8 @@ public:
 private slots:
     bool spyForSignal(const QString& obj_name, const QString& signal_name);
     void removeSpy();
-    bool executeCommand(const RTCommand* command) const;
+    bool executeCommand(RTCommandRunnerInput input) const;
+    void executeCommandAsync(RTCommandRunnerInput input) const;
     
 private:
     friend class RTCommandRunner;
@@ -53,3 +64,5 @@ private:
 };
 
 } // namespace rtcommand
+
+Q_DECLARE_METATYPE(RTCommandRunnerInput)
