@@ -38,8 +38,6 @@ using namespace std;
 using namespace Utils;
 using namespace boost::posix_time;
 
-//bool EvaluationTargetData::in_appimage_ {getenv("APPDIR")};
-
 //const unsigned int debug_utn = 3275;
 
 EvaluationTargetData::EvaluationTargetData()

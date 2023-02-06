@@ -47,9 +47,14 @@ using namespace std;
 using namespace nlohmann;
 using namespace Utils;
 
+const bool COMPASS::is_app_image_ = {getenv("APPDIR") != nullptr};
+
 COMPASS::COMPASS() : Configurable("COMPASS", "COMPASS0", 0, "compass.json")
 {
     logdbg << "COMPASS: constructor: start";
+
+    std::cout << "APPIMAGE: " << (is_app_image_ ? "yes" : "no") << std::endl;
+
     simple_config_.reset(new SimpleConfig("config.json"));
 
     registerParameter("last_db_filename", &last_db_filename_, "");

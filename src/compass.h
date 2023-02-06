@@ -97,6 +97,8 @@ protected:
     bool disable_add_remove_views_ {false};
     bool disable_confirm_reset_views_ {false};
 
+    static const bool is_app_image_;
+
     unsigned int auto_live_running_resume_ask_time_ {60}; // minutes
     unsigned int auto_live_running_resume_ask_wait_time_ {1}; // minutes
 
@@ -138,6 +140,8 @@ public:
     AppMode appMode() const;
     void appMode(const AppMode& app_mode);
     std::string appModeStr() const;
+
+    static bool isAppImage() { return is_app_image_; }
 
     static const std::map<AppMode, std::string>& appModes2Strings();
 

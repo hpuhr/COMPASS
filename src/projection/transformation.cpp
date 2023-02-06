@@ -1,9 +1,10 @@
 #include "transformation.h"
 #include "logger.h"
+#include "compass.h"
 
 #include <ogr_spatialref.h>
 
-bool Transformation::in_appimage_ {getenv("APPDIR") != nullptr};
+bool Transformation::in_appimage_ = COMPASS::isAppImage();
 const double Transformation::max_wgs_dist_ {0.5};
 
 Transformation::Transformation()
@@ -160,7 +161,7 @@ void Transformation::updateIfRequired(double lat1, double long1)
 
 
 //////////////////////////////////////////////
-bool FixedTransformation::in_appimage_ {getenv("APPDIR") != nullptr};
+bool FixedTransformation::in_appimage_ = COMPASS::isAppImage();
 const double FixedTransformation::max_wgs_dist_ {0.5};
 
 FixedTransformation::FixedTransformation(double lat1, double long1)
