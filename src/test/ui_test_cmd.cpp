@@ -59,6 +59,7 @@ void RTCommandUIObject::assignVariables_impl(const VariablesMap& variables)
 }
 
 /**
+ * Returns a suitable parent mode given a string identifier.
  */
 RTCommandUIObject::Parent RTCommandUIObject::parentFromString(const std::string& str)
 {
@@ -72,6 +73,7 @@ RTCommandUIObject::Parent RTCommandUIObject::parentFromString(const std::string&
 }
 
 /**
+ * Returns the parent widget matching the current parent mode.
 */
 QWidget* RTCommandUIObject::parentWidget() const
 {

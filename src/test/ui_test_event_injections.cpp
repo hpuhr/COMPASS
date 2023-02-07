@@ -766,65 +766,93 @@ bool injectDoubleSpinBoxEvent(QWidget* root,
 
 namespace 
 {
+    /**
+     * Finds a suitable slider value for the given percentage by injecting page keys into the slider.
+    */
     bool findSliderValue(QAbstractSlider* slider, double percent, bool invert, int delay)
     {
         double t         = std::min(1.0, std::max(0.0, percent / 100.0));
-        int    value     = (1.0 - t) * slider->minimum() + t * slider->maximum();
+        int    smin      = slider->minimum();
+        int    smax      = slider->maximum();
+        int    value     = (1.0 - t) * smin + t * smax;
 
-        //std::cout << "min:         " << slider->minimum() << std::endl;
-        //std::cout << "max:         " << slider->maximum() << std::endl;
-        //std::cout << "current:     " << slider->value() << std::endl;
-        //std::cout << "t:           " << t << std::endl;
-        //std::cout << "value:       " << value << std::endl;
+        //value already matches?
+        if (slider->value() == value)
+            return true;
 
-        int    single_step = slider->singleStep();
-        int    page_step   = slider->pageStep();
+        //strange slider config?
+        if (smin >= smax)
+            return false;
 
-        //std::cout << "single step: " << single_step << std::endl;
-        //std::cout << "page step:   " << page_step << std::endl;
-
+        //computes a safe maximum number of steps the injections should need to reach the given step accuracy
         auto computeMaxSteps = [ = ] (int v, int vtarget, int step)
         {
             return std::abs(v - vtarget) / step + 2;
         };
 
-        //first inject page steps until we are below page step accuracy
+        //iterates until the current value is at max 'step' values away from the target value
+        auto findValue = [ = ] (int step)
         {
-            const int max_steps_page = computeMaxSteps(value, slider->value(), page_step);
+            slider->setPageStep(step);
 
-            //std::cout << "max page steps: " << max_steps_page << std::endl;
+            //step limit in case the injections have no effect
+            const int max_steps = computeMaxSteps(value, slider->value(), step);
+
+            logdbg << "current step size: " << step << ", max steps: " << max_steps;
 
             Qt::Key key_plus  = !invert ? Qt::Key_PageUp   : Qt::Key_PageDown;
             Qt::Key key_minus = !invert ? Qt::Key_PageDown : Qt::Key_PageUp;
 
             int cnt = 0;
-            while (std::abs(value - slider->value()) >= page_step && cnt++ <= max_steps_page)
+            while (std::abs(value - slider->value()) >= step && cnt++ < max_steps)
                 if (!injectKeyEvent(slider, "", slider->value() <= value ? key_plus : key_minus, delay))
-                    return false;
+                    return -1;
 
-            //std::cout << "remaining: " << std::abs(value - slider->value()) << " after " << cnt << "/" << max_steps_page << " iteration(s)" << std::endl;
-        }
+            logdbg << "   => remaining: " << std::abs(value - slider->value()) << " after " << cnt << "/" << max_steps << " iteration(s)";
 
-        //then inject single steps until we are below single step accuracy (usually single step size = 1, resulting in the sought target value)
+            return cnt;
+        };
+
+        const int page_step_orig = slider->pageStep(); //save back original page step
+        const int steps_decr     = 5;                  //step decrease rate
+
+        //computes current step size
+        auto stepSize = [ = ] ()
         {
-            const int max_steps_single = computeMaxSteps(value, slider->value(), single_step);
+            return std::max(1, std::abs(value - slider->value()) / steps_decr);
+        };
 
-            //std::cout << "max single steps: " << max_steps_single << std::endl;
-
-            Qt::Key key_plus  = (!invert || COMPASS::isAppImage()) ? Qt::Key_Right : Qt::Key_Left;
-            Qt::Key key_minus = (!invert || COMPASS::isAppImage()) ? Qt::Key_Left  : Qt::Key_Right;
-        
-            int cnt = 0;
-            while (std::abs(value - slider->value()) >= single_step && cnt++ <= max_steps_single)
-                if (!injectKeyEvent(slider, "", slider->value() <= value ? key_plus :  key_minus, delay))
-                    return false;
-
-            //std::cout << "remaining: " << std::abs(value - slider->value()) << " after " << cnt << "/" << max_steps_single << " iteration(s)" << std::endl;
+        //iteratively modify slider until target value is reached
+        bool ok = true;
+        int total_steps = 0;
+        try
+        {
+            int step;            
+            do
+            {
+                step = stepSize();
+                int local_steps = findValue(step);
+                if (local_steps < 0)
+                    throw std::runtime_error("Bad injection");
+                total_steps += local_steps;
+            } 
+            while (step > 1);
+        }
+        catch (...)
+        {
+            ok = false;
         }
 
-        //std::cout << "final value: " << slider->value() << ", target: " << value << ", remaining: " << std::abs(value - slider->value()) << std::endl;
+        //!set page step back to original value!
+        slider->setPageStep(page_step_orig);
 
-        return (std::abs(value - slider->value()) < single_step);
+        if (!ok)
+            return false;
+
+        logdbg << "final value: " << slider->value() << ", target: " << value
+               << ", remaining: " << std::abs(value - slider->value()) << ", #steps: " << total_steps;
+
+        return (value - slider->value() == 0);
     }
 }
 
@@ -922,11 +950,12 @@ bool injectButtonMenuEvent(QWidget* root,
 }
 
 /**
+ * Accepts or rejects a dialog window.
 */
 bool injectDialogEvent(QWidget* root,
-                           const QString& obj_name,
-                           bool accept,
-                           int delay)
+                       const QString& obj_name,
+                       bool accept,
+                       int delay)
 {
     auto obj = findObjectAs<QDialog>(root, obj_name);
     if (obj.first != FindObjectErrCode::NoError)
