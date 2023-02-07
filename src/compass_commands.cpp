@@ -8,13 +8,13 @@
 
 using namespace Utils;
 
-
-REGISTER_RTCOMMAND(compass::RTCommandOpenFileDB)
+REGISTER_RTCOMMAND(compass::RTCommandOpenDB)
+REGISTER_RTCOMMAND(compass::RTCommandCloseDB)
 
 namespace compass
 {
 
-bool RTCommandOpenFileDB::valid() const
+bool RTCommandOpenDB::valid() const
 {
     if (!filename_.size())
         return false;
@@ -25,7 +25,9 @@ bool RTCommandOpenFileDB::valid() const
     return RTCommand::valid();
 }
 
-bool RTCommandOpenFileDB::run_impl() const
+// open db
+
+bool RTCommandOpenDB::run_impl() const
 {
     if (!filename_.size())
         return false;
@@ -41,19 +43,27 @@ bool RTCommandOpenFileDB::run_impl() const
     return COMPASS::instance().dbOpened();
 }
 
-/**
- */
-void RTCommandOpenFileDB::collectOptions_impl(OptionsDescription& options)
+void RTCommandOpenDB::collectOptions_impl(OptionsDescription& options)
 {
     ADD_RTCOMMAND_OPTIONS(options)
         ("filename,f", po::value<std::string>()->required(), "given filename, e.g. ’/data/file1.db’");
 }
 
-/**
- */
-void RTCommandOpenFileDB::assignVariables_impl(const VariablesMap& variables)
+void RTCommandOpenDB::assignVariables_impl(const VariablesMap& variables)
 {
     RTCOMMAND_GET_VAR_OR_THROW(variables, "filename", std::string, filename_)
+}
+
+// close db
+
+bool RTCommandCloseDB::run_impl() const
+{
+    if (!COMPASS::instance().dbOpened())
+        return false;
+
+    COMPASS::instance().closeDB();
+
+    return !COMPASS::instance().dbOpened();
 }
 
 }
