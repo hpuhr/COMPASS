@@ -17,7 +17,7 @@
 
 #pragma once 
 
-#include "rtcommand_defs.h"
+#include "rtcommand_result.h"
 
 #include <memory>
 #include <future>

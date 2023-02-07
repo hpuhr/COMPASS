@@ -16,6 +16,7 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/rtcommand_registry.h"
         "${CMAKE_CURRENT_LIST_DIR}/rtcommand_shell.h"
         "${CMAKE_CURRENT_LIST_DIR}/rtcommand_string.h"
+        "${CMAKE_CURRENT_LIST_DIR}/rtcommand_result.h"
     PRIVATE
         "${CMAKE_CURRENT_LIST_DIR}/rtcommand.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/rtcommand_chain.cpp"
@@ -25,4 +26,5 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/rtcommand_manager.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/rtcommand_shell.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/rtcommand_string.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/rtcommand_result.cpp"
 )

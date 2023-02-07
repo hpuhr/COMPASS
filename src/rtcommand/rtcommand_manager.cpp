@@ -4,6 +4,7 @@
 #include "tcpserver.h"
 #include "stringconv.h"
 #include "rtcommand.h"
+#include "rtcommand_result.h"
 #include "compass.h"
 
 #include "logger.h"
@@ -115,9 +116,9 @@ void RTCommandManager::run()
             if (open_port_ && server.hasSession())
             {
                 if (cmd_result.success())
-                    server.sendStrData("successfully run command, result '"+cmd_result.toString().toStdString()+"'");
+                    server.sendStrData("successfully run command, result '"+cmd_result.stateToString()+"'");
                 else
-                    server.sendStrData("failed command, result '"+cmd_result.toString().toStdString()+"'");
+                    server.sendStrData("failed command, result '"+cmd_result.stateToString()+"'");
             }
         }
 

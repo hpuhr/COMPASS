@@ -18,6 +18,7 @@
 #pragma once
 
 #include "rtcommand_defs.h"
+#include "rtcommand_result.h"
 #include "rtcommand_macros.h"
 
 #include <QString>
@@ -110,8 +111,8 @@ struct RTCommand
                                                   //if false execution will wait for the command to finish running in the main thread
 
 protected:
-    void setResultData(const QString& d) const { result_.data = d; }
-    void setResultMessage(const QString& m) const { result_.cmd_msg = m; }
+    void setResultMessage(const std::string& m) const { result_.cmd_msg = m; }
+    void setJSONReply(const nlohmann::json& json_reply) { result_.reply_data = json_reply; }
 
     //implements command specific behaviour
     virtual bool run_impl() const = 0;

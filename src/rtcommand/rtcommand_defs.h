@@ -19,6 +19,8 @@
 
 #include <QString>
 
+#include "json.h"
+
 namespace rtcommand
 {
 
@@ -42,34 +44,6 @@ enum class WaitConditionState
     BadInit,
     Failed,
     Success
-};
-
-/**
- * Keeps track of runtime command execution result and state (including the state of the command's wait condition).
- */
-struct RTCommandResult
-{
-    bool success() const
-    { 
-        //as the wait condition might be extremely important for any upcoming commands, 
-        //its state is part of the successful execution of a command
-        return (wc_state == WaitConditionState::Success && cmd_state == CmdState::Success);
-    }
-
-    void reset()
-    {
-        wc_state  = WaitConditionState::Unknown;
-        cmd_state = CmdState::Fresh;
-        cmd_msg   = "";
-    }
-
-    QString toString() const;
-
-    WaitConditionState wc_state  = WaitConditionState::Unknown; // wait condition state
-    CmdState           cmd_state = CmdState::Fresh;             // execution state
-    QString            cmd_msg;                                 // optional execution result message 
-
-    QString            data; // command result data (most likely json)
 };
 
 /**

@@ -73,35 +73,6 @@ QDialog* activeDialog()
 }
 
 /***************************************************************************************
- * RTCommandResult
- ***************************************************************************************/
-
-/**
- * Generates a string describing the result state.
- */
-QString RTCommandResult::toString() const
-{
-    QString s;
-    if (wc_state == WaitConditionState::BadInit)
-        s = "Could not init wait condition";
-    else if (cmd_state == CmdState::BadConfig)
-        s = "Badly configured command";
-    else if (cmd_state == CmdState::Failed)
-        s = "Command failed";
-    else if (wc_state == WaitConditionState::Failed)
-        s = "Wait condition failed";
-    else if (cmd_state == CmdState::Success && wc_state == WaitConditionState::Success)
-        s = "Success";
-    else
-        s = "Strange state";
-
-    if (!cmd_msg.isEmpty())
-        s += " (" + cmd_msg + ")";
-
-    return s;
-}
-
-/***************************************************************************************
  * RTCommandWaitCondition
  ***************************************************************************************/
 

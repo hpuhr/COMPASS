@@ -169,7 +169,8 @@ bool RTCommandUIGet::run_impl() const
     if (!res.has_value())
         return false;
 
-    setResultData(res.value());
+    //@TODO
+    //setResultData(res.value());
 
     return true;
 }

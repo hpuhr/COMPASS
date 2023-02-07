@@ -216,7 +216,7 @@ void RTCommandRunner::runCommand(RTCommand* cmd, RTCommandRunnerStash* stash)
     //always try to clean up wait condition
     cleanupWaitCondition(cmd, stash);
 
-    logMsg("Ended with state '" + cmd->result().toString().toStdString() + "'", cmd);
+    logMsg("Ended with state '" + cmd->result().stateToString() + "'", cmd);
 }
 
 } // namespace rtcommand
