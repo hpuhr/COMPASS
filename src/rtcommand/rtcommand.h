@@ -43,6 +43,7 @@ namespace rtcommand
 {
 
 class WaitCondition;
+class RTCommandString;
 
 QMainWindow* mainWindow();
 QDialog* activeDialog();
@@ -98,7 +99,8 @@ struct RTCommand
 
     const RTCommandResult& result() const { return result_; };
 
-    bool configure(const QString& cmd);
+    bool configure(const RTCommandString& cmd);
+    bool collectOptions(boost::program_options::options_description& options);
 
     RTCommandWaitCondition condition;             //condition to wait for after executing the command.
     bool                   execute_async = false; //if true execution will immediately return after deploying the command to the main thread's event loop,
@@ -120,7 +122,6 @@ protected:
 private:
     friend class RTCommandRunner;
 
-    bool collectOptions(boost::program_options::options_description& options);
     bool assignVariables(const boost::program_options::variables_map& variables);
 
     void printHelpInformation();
@@ -140,6 +141,19 @@ protected:
 
     DECLARE_RTCOMMAND(empty, "the empty command...does...nothing")
     DECLARE_RTCOMMAND_NOOPTIONS
+};
+
+/**
+ * The help command.
+*/
+struct RTCommandHelp : public RTCommand 
+{
+    QString command;
+protected:
+    virtual bool run_impl() const override;
+
+    DECLARE_RTCOMMAND(help, "the help command, generates help information")
+    DECLARE_RTCOMMAND_OPTIONS
 };
 
 } // namespace rtcommand

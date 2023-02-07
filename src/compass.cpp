@@ -35,6 +35,7 @@
 #include "asteriximporttask.h"
 #include "rtcommand_runner.h"
 #include "rtcommand_manager.h"
+#include "rtcommand.h"
 
 #include <QMessageBox>
 #include <QApplication>
@@ -137,6 +138,8 @@ COMPASS::COMPASS() : Configurable("COMPASS", "COMPASS0", 0, "compass.json")
              filter_manager_.get(), &FilterManager::appModeSwitchSlot);
 
     qRegisterMetaType<AppMode>("AppMode");
+
+    rtcommand::RTCommandHelp::init();
 
     logdbg << "COMPASS: constructor: end";
 }

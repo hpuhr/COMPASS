@@ -53,6 +53,7 @@ public:
                             bool is_short = false, 
                             bool quote = false);
 
+    bool hasHelpOption() const;
     bool parse(boost::program_options::variables_map& vm, 
                const boost::program_options::options_description& d,
                bool drop_quotes = true) const;

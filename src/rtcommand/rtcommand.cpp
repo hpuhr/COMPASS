@@ -25,6 +25,7 @@
 #include <iostream>
 
 #include <boost/program_options.hpp>
+#include <boost/optional.hpp>
 
 #include <QObject>
 #include <QMainWindow>
@@ -33,6 +34,7 @@
 #include <QDialog>
 
 REGISTER_RTCOMMAND(rtcommand::RTCommandEmpty)
+REGISTER_RTCOMMAND(rtcommand::RTCommandHelp)
 
 namespace rtcommand
 {
@@ -291,21 +293,19 @@ bool RTCommand::run() const
 /**
  * Configure the command struct using the given command string.
  */
-bool RTCommand::configure(const QString& cmd)
+bool RTCommand::configure(const RTCommandString& cmd)
 {
-    //check if command is basically valid
-    RTCommandString cmd_str(cmd);
-    if (!cmd_str.valid())
+    if (!cmd.valid())
     {
         //std::cout << "RTCommand::configure: Passed command not valid" << std::endl;
         return false;
     }
 
     //does the command even concern me?
-    if (name() != cmd_str.cmdName())
+    if (name() != cmd.cmdName())
     {
         //std::cout << "RTCommand::configure: Name '" << name().toStdString() 
-        //          << "' does not match command name '" << cmd_str.cmdName().toStdString() << "'" << std::endl;
+        //          << "' does not match command name '" << cmd.cmdName().toStdString() << "'" << std::endl;
         return false;
     }
 
@@ -320,7 +320,7 @@ bool RTCommand::configure(const QString& cmd)
 
     //parse command using collected options description
     po::variables_map vm;
-    if (!cmd_str.parse(vm, od))
+    if (!cmd.parse(vm, od))
     {
         //std::cout << "RTCommand::configure: Could not parse command" << std::endl;
         return false;
@@ -341,6 +341,71 @@ bool RTCommand::configure(const QString& cmd)
 void RTCommand::printHelpInformation()
 {
     //@TODO
+}
+
+/***************************************************************************************
+ * RTCommandHelp
+ ***************************************************************************************/
+
+/**
+ */
+bool RTCommandHelp::run_impl() const
+{
+    if (command.isEmpty())
+    {
+        const auto& cmds = RTCommandRegistry::instance().availableCommands();
+
+        loginf << "Available commands: ";
+        loginf << "";
+
+        for (const auto& elem : cmds)
+        {
+            loginf << "   " << elem.first.toStdString();
+            loginf << "      " << elem.second.description.toStdString();
+        }
+    }
+    else
+    {
+        if (!RTCommandRegistry::instance().hasCommand(command))
+            return false;
+
+        auto cmd =  RTCommandRegistry::instance().createCommandTemplate(command);
+        if (!cmd)
+            return false;
+
+        boost::program_options::options_description options;
+        if (!cmd->collectOptions(options))
+            return false;
+
+        loginf << cmd->name().toStdString();
+        loginf << "";
+        loginf << "   " << cmd->description().toStdString();
+        loginf << "";
+        
+        for (const auto& o : options.options())
+        {
+            loginf << "   " << o->long_name() << " " << o->format_name();
+            loginf << "      " << o->description();
+            loginf << "";
+        }
+    }
+
+    return true;
+}
+
+/**
+ */
+void RTCommandHelp::collectOptions_impl(OptionsDescription& options)
+{
+    ADD_RTCOMMAND_OPTIONS(options)
+        ("command", po::value<std::string>()->default_value(""), "command to retrieve help information for");
+}
+
+/**
+ */
+void RTCommandHelp::assignVariables_impl(const VariablesMap& variables)
+{
+    RTCOMMAND_GET_QSTRING_OR_THROW(variables, "command", command)
 }
 
 } // namespace rtcommand

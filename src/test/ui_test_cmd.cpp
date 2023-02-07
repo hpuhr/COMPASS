@@ -43,8 +43,8 @@ void RTCommandUIObject::collectOptions_impl(OptionsDescription& options)
 {
     //add basic command options here
     ADD_RTCOMMAND_OPTIONS(options)
-        ("object,o", po::value<std::string>()->default_value(""), "name of an ui object")
-        ("parent", po::value<std::string>()->default_value(ParentMainWindowString), "parent ui object");
+        ("object,o", po::value<std::string>()->default_value(""), "name of an ui element, object names separated by '.', e.g. 'window1.osgview1.toolbar'")
+        ("parent", po::value<std::string>()->default_value(ParentMainWindowString), "parent ui element, 'mainwindow' = main window of application, 'dialog' = current modal dialog");
 }
 
 /**
@@ -94,7 +94,7 @@ QWidget* RTCommandUIObject::parentWidget() const
 void RTCommandUIInjection::collectOptions_impl(OptionsDescription& options)
 {
     ADD_RTCOMMAND_OPTIONS(options)
-        ("uidelay", po::value<int>()->default_value(-1), "delay added after injected ui events");
+        ("uidelay", po::value<int>()->default_value(-1), "delay added after each injected ui event");
 
     //call base
     RTCommandUIObject::collectOptions_impl(options);
@@ -130,7 +130,7 @@ bool RTCommandUISet::run_impl() const
 void RTCommandUISet::collectOptions_impl(OptionsDescription& options)
 {
     ADD_RTCOMMAND_OPTIONS(options)
-        ("value,v", po::value<std::string>()->default_value(""), "new value to set");
+        ("value,v", po::value<std::string>()->default_value(""), "new value to set, content depending on the addressed ui element");
 
     //call base
     RTCommandUIInjection::collectOptions_impl(options);

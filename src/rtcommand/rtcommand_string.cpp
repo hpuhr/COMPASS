@@ -157,13 +157,36 @@ RTCommandString& RTCommandString::append(const QString& name,
 
 /**
 */
+bool RTCommandString::hasHelpOption() const
+{
+    if (cmd_.isEmpty() || !valid())
+        return false;
+
+    QStringList parts = splitCommand(cmd_);
+    int argc = parts.count();
+
+    if (argc < 1)
+        return false;
+
+    for (int i = 1; i < argc; ++i)
+    {
+        QString s = parts[ i ].trimmed();
+        if (s == "-h" || s == "--help")
+            return true;
+    }
+
+    return false;
+}
+
+/**
+*/
 bool RTCommandString::parse(boost::program_options::variables_map& vm, 
                             const boost::program_options::options_description& d,
                             bool drop_quotes) const
 {
     namespace po = boost::program_options;
 
-    if (cmd_.isEmpty())
+    if (cmd_.isEmpty() || !valid())
         return false;
 
     QStringList parts = splitCommand(cmd_);
@@ -187,7 +210,7 @@ bool RTCommandString::parse(boost::program_options::variables_map& vm,
     }
     catch (const std::exception& ex)
     {
-        //std::cout << "Error parsing command: " << ex.what() << std::endl;
+        std::cout << "Error parsing command: " << ex.what() << std::endl;
         return false;
     }
 
@@ -242,6 +265,18 @@ std::unique_ptr<RTCommand> RTCommandString::issue() const
         return nullptr;
     }
 
+    //preparse command for help option
+    if (hasHelpOption())
+    {
+        //help option detected, return help command
+        loginf << "Help option detected...";
+
+        auto cmd_help = new RTCommandHelp;
+        cmd_help->command = cmd_name;
+        
+        return std::unique_ptr<RTCommand>(cmd_help);
+    }
+
     auto cmdObj = rtcommand::RTCommandRegistry::instance().createCommandTemplate(cmd_name);
     if (!cmdObj)
     {
@@ -251,7 +286,7 @@ std::unique_ptr<RTCommand> RTCommandString::issue() const
 
     loginf << "Configuring command template...";
 
-    if (!cmdObj->configure(cmd_str))
+    if (!cmdObj->configure(*this))
     {
         loginf << "RTCommandString::issue(): Command could not be configured";
         return nullptr;
