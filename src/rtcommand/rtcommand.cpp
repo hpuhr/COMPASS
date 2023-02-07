@@ -335,7 +335,7 @@ bool RTCommand::configure(const RTCommandString& cmd)
         return false;
     }
 
-    return true;
+    return valid();
 }
 
 /**
