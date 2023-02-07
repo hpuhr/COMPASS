@@ -63,9 +63,10 @@ private:                                                                        
  *     DECLARE_RTCOMMAND_NOOPTIONS
  * };
  */
-#define DECLARE_RTCOMMAND_NOOPTIONS                                              \
-protected:                                                                       \
-    virtual void collectOptions_impl(OptionsDescription& options) override {}    \
+#define DECLARE_RTCOMMAND_NOOPTIONS                                                 \
+protected:                                                                          \
+    virtual void collectOptions_impl(OptionsDescription& options,                   \
+                                     PosOptionsDescription& positional) override {} \
     virtual void assignVariables_impl(const VariablesMap& variables) override {}
 
 /**
@@ -79,9 +80,10 @@ protected:                                                                      
  *     DECLARE_RTCOMMAND_OPTIONS
  * };
  */
-#define DECLARE_RTCOMMAND_OPTIONS                                              \
-protected:                                                                     \
-    virtual void collectOptions_impl(OptionsDescription& options) override;    \
+#define DECLARE_RTCOMMAND_OPTIONS                                                 \
+protected:                                                                        \
+    virtual void collectOptions_impl(OptionsDescription& options,                 \
+                                     PosOptionsDescription& positional) override; \
     virtual void assignVariables_impl(const VariablesMap& variables) override;
 
 /**
@@ -106,3 +108,6 @@ protected:                                                                     \
 #define ADD_RTCOMMAND_OPTIONS(Options)     \
     namespace po = boost::program_options; \
     Options.add_options()
+
+#define ADD_RTCOMMAND_POS_OPTION(PosOptions, Name, PosInt) \
+    PosOptions.add(Name, PosInt);

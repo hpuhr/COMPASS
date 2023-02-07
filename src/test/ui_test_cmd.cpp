@@ -39,12 +39,15 @@ const std::string RTCommandUIObject::ParentModalDialogString = "dialog";
 
 /**
  */
-void RTCommandUIObject::collectOptions_impl(OptionsDescription& options)
+void RTCommandUIObject::collectOptions_impl(OptionsDescription& options,
+                                            PosOptionsDescription& positional)
 {
     //add basic command options here
     ADD_RTCOMMAND_OPTIONS(options)
         ("object,o", po::value<std::string>()->default_value(""), "name of an ui element, object names separated by '.', e.g. 'window1.osgview1.toolbar'")
         ("parent", po::value<std::string>()->default_value(ParentMainWindowString), "parent ui element, 'mainwindow' = main window of application, 'dialog' = current modal dialog");
+
+    ADD_RTCOMMAND_POS_OPTION(positional, "object", 1)
 }
 
 /**
@@ -91,13 +94,14 @@ QWidget* RTCommandUIObject::parentWidget() const
 
 /**
  */
-void RTCommandUIInjection::collectOptions_impl(OptionsDescription& options)
+void RTCommandUIInjection::collectOptions_impl(OptionsDescription& options,
+                                               PosOptionsDescription& positional)
 {
     ADD_RTCOMMAND_OPTIONS(options)
         ("uidelay", po::value<int>()->default_value(-1), "delay added after each injected ui event");
 
     //call base
-    RTCommandUIObject::collectOptions_impl(options);
+    RTCommandUIObject::collectOptions_impl(options, positional);
 }
 
 /**
@@ -127,13 +131,16 @@ bool RTCommandUISet::run_impl() const
 
 /**
  */
-void RTCommandUISet::collectOptions_impl(OptionsDescription& options)
+void RTCommandUISet::collectOptions_impl(OptionsDescription& options,
+                                         PosOptionsDescription& positional)
 {
     ADD_RTCOMMAND_OPTIONS(options)
         ("value,v", po::value<std::string>()->default_value(""), "new value to set, content depending on the addressed ui element");
 
+    ADD_RTCOMMAND_POS_OPTION(positional, "value", 2)
+
     //call base
-    RTCommandUIInjection::collectOptions_impl(options);
+    RTCommandUIInjection::collectOptions_impl(options, positional);
 }
 
 /**
@@ -169,13 +176,16 @@ bool RTCommandUIGet::run_impl() const
 
 /**
  */
-void RTCommandUIGet::collectOptions_impl(OptionsDescription& options)
+void RTCommandUIGet::collectOptions_impl(OptionsDescription& options,
+                                         PosOptionsDescription& positional)
 {
     ADD_RTCOMMAND_OPTIONS(options)
         ("what,w", po::value<std::string>()->default_value(""), "which value to retrieve from the ui element (empty = default behavior)");
 
+    ADD_RTCOMMAND_POS_OPTION(positional, "what", 2)
+
     //call base
-    RTCommandUIObject::collectOptions_impl(options);
+    RTCommandUIObject::collectOptions_impl(options, positional);
 }
 
 /**

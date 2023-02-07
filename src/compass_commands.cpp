@@ -43,10 +43,13 @@ bool RTCommandOpenDB::run_impl() const
     return COMPASS::instance().dbOpened();
 }
 
-void RTCommandOpenDB::collectOptions_impl(OptionsDescription& options)
+void RTCommandOpenDB::collectOptions_impl(OptionsDescription& options,
+                                          PosOptionsDescription& positional)
 {
     ADD_RTCOMMAND_OPTIONS(options)
         ("filename,f", po::value<std::string>()->required(), "given filename, e.g. ’/data/file1.db’");
+
+    ADD_RTCOMMAND_POS_OPTION(positional, "filename", 1)
 }
 
 void RTCommandOpenDB::assignVariables_impl(const VariablesMap& variables)

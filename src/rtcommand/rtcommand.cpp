@@ -194,7 +194,8 @@ RTCommand::~RTCommand() = default;
 /**
  * Collects command option descriptions throughout the class hierarchy.
  */
-bool RTCommand::collectOptions(boost::program_options::options_description& options)
+bool RTCommand::collectOptions(OptionsDescription& options,
+                               PosOptionsDescription& positional)
 {
     try
     {
@@ -205,7 +206,7 @@ bool RTCommand::collectOptions(boost::program_options::options_description& opti
             ("help,h", "show command help information");
 
         //collect from derived 
-        collectOptions_impl(options);
+        collectOptions_impl(options, positional);
     }
     catch(const std::exception& ex)
     {
@@ -311,8 +312,9 @@ bool RTCommand::configure(const RTCommandString& cmd)
 
     //collect options description
     namespace po = boost::program_options;
-    po::options_description od;
-    if (!collectOptions(od))
+    OptionsDescription od;
+    PosOptionsDescription pod;
+    if (!collectOptions(od, pod))
     {
         //std::cout << "RTCommand::configure: Could not collect options" << std::endl;
         return false;
@@ -320,7 +322,7 @@ bool RTCommand::configure(const RTCommandString& cmd)
 
     //parse command using collected options description
     po::variables_map vm;
-    if (!cmd.parse(vm, od))
+    if (!cmd.parse(vm, od, pod))
     {
         //std::cout << "RTCommand::configure: Could not parse command" << std::endl;
         return false;
@@ -374,7 +376,8 @@ bool RTCommandHelp::run_impl() const
             return false;
 
         boost::program_options::options_description options;
-        if (!cmd->collectOptions(options))
+        boost::program_options::positional_options_description p_options;
+        if (!cmd->collectOptions(options, p_options))
             return false;
 
         loginf << cmd->name().toStdString();
@@ -395,10 +398,13 @@ bool RTCommandHelp::run_impl() const
 
 /**
  */
-void RTCommandHelp::collectOptions_impl(OptionsDescription& options)
+void RTCommandHelp::collectOptions_impl(OptionsDescription& options, 
+                                        PosOptionsDescription& positional)
 {
     ADD_RTCOMMAND_OPTIONS(options)
         ("command", po::value<std::string>()->default_value(""), "command to retrieve help information for");
+
+    ADD_RTCOMMAND_POS_OPTION(positional, "command", 1)
 }
 
 /**

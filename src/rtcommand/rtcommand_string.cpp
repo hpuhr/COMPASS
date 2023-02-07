@@ -182,6 +182,7 @@ bool RTCommandString::hasHelpOption() const
 */
 bool RTCommandString::parse(boost::program_options::variables_map& vm, 
                             const boost::program_options::options_description& d,
+                            const boost::program_options::positional_options_description& pod,
                             bool drop_quotes) const
 {
     namespace po = boost::program_options;
@@ -205,7 +206,7 @@ bool RTCommandString::parse(boost::program_options::variables_map& vm,
     
     try
     {
-        po::store(po::parse_command_line(argc, argv.data(), d), vm);
+        po::store(po::command_line_parser(argc, argv.data()).options(d).positional(pod).run(), vm);
         po::notify(vm);
     }
     catch (const std::exception& ex)

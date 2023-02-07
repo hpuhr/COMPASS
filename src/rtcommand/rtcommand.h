@@ -35,6 +35,7 @@ namespace boost
     namespace program_options
     {
         class options_description;
+        class positional_options_description;
         class variables_map;
     }
 }
@@ -81,8 +82,9 @@ struct RTCommandWaitCondition
  */
 struct RTCommand
 {
-    typedef boost::program_options::options_description OptionsDescription;
-    typedef boost::program_options::variables_map       VariablesMap;
+    typedef boost::program_options::options_description            OptionsDescription;
+    typedef boost::program_options::positional_options_description PosOptionsDescription;
+    typedef boost::program_options::variables_map                  VariablesMap;
 
     RTCommand();
     virtual ~RTCommand();
@@ -100,7 +102,8 @@ struct RTCommand
     const RTCommandResult& result() const { return result_; };
 
     bool configure(const RTCommandString& cmd);
-    bool collectOptions(boost::program_options::options_description& options);
+    bool collectOptions(OptionsDescription& options,
+                        PosOptionsDescription& positional);
 
     RTCommandWaitCondition condition;             //condition to wait for after executing the command.
     bool                   execute_async = false; //if true execution will immediately return after deploying the command to the main thread's event loop,
@@ -112,7 +115,8 @@ protected:
 
     //implements command specific behaviour
     virtual bool run_impl() const = 0;
-    virtual void collectOptions_impl(OptionsDescription& options) = 0;
+    virtual void collectOptions_impl(OptionsDescription& options, 
+                                     PosOptionsDescription& positional) = 0;
     virtual void assignVariables_impl(const VariablesMap& variables) = 0;
 
     //!implemented by DECLARE_RTCOMMAND macro!

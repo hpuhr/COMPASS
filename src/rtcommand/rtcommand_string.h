@@ -26,6 +26,7 @@ namespace boost
     namespace program_options
     {
         class options_description;
+        class positional_options_description;
         class variables_map;
     }
 }
@@ -56,6 +57,7 @@ public:
     bool hasHelpOption() const;
     bool parse(boost::program_options::variables_map& vm, 
                const boost::program_options::options_description& d,
+               const boost::program_options::positional_options_description& pod,
                bool drop_quotes = true) const;
 
     std::unique_ptr<RTCommand> issue() const;
