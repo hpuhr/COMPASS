@@ -166,7 +166,9 @@ RTCommandImportViewPointsFile::RTCommandImportViewPointsFile()
     : rtcommand::RTCommand()
 {
     condition.type = rtcommand::RTCommandWaitCondition::Type::Signal;
-    //condition.obj = ""
+    condition.obj = "compass.taskmanager.viewpointsimporttask";
+    condition.value = "importDoneSignal";
+    //condition.timeout_ms = -1; // think about max duration
 }
 
 bool RTCommandImportViewPointsFile::valid() const
@@ -203,6 +205,11 @@ bool RTCommandImportViewPointsFile::run_impl() const
 
     vp_import_task.run();
 
+    // if shitty
+    setResultMessage("VP error case 3");
+    return false;
+
+    // if ok
     return true;
 }
 

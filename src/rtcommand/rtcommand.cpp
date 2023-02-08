@@ -19,6 +19,9 @@
 #include "rtcommand_wait_condition.h"
 #include "rtcommand_registry.h"
 #include "rtcommand_string.h"
+#include "stringconv.h"
+#include "ui_test_find.h"
+#include "compass.h"
 
 #include "logger.h"
 
@@ -35,6 +38,9 @@
 
 REGISTER_RTCOMMAND(rtcommand::RTCommandEmpty)
 REGISTER_RTCOMMAND(rtcommand::RTCommandHelp)
+
+using namespace std;
+using namespace Utils;
 
 namespace rtcommand
 {
@@ -70,6 +76,37 @@ QDialog* activeDialog()
         return nullptr;
 
     return dlg;
+}
+
+std::pair<rtcommand::FindObjectErrCode, QObject*> getCommandReceiver(const std::string& object_path)
+{
+    vector<string> parts = String::split(object_path, '.');
+
+    if (!parts.size())
+        return {rtcommand::FindObjectErrCode::NotFound, nullptr};
+
+    string first_part = parts.at(0);
+    parts.erase(parts.begin());
+    string remainder = String::compress(parts, '.');
+
+    if (first_part == "mainwindow")
+        return ui_test::findObject(mainWindow(), remainder.c_str());
+    else if (first_part == "dialog")
+        return ui_test::findObject(activeDialog(), remainder.c_str());
+    else if (first_part == "compass")
+    {
+        std::pair<rtcommand::FindObjectErrCode, Configurable*> ret
+                = COMPASS::instance().findSubConfigurable(remainder);
+
+        QObject* obj_casted = dynamic_cast<QObject*> (ret.second);
+
+        if (!obj_casted)
+            return {rtcommand::FindObjectErrCode::WrongType, nullptr};
+
+        return {rtcommand::FindObjectErrCode::NoError, obj_casted};
+    }
+
+    return {rtcommand::FindObjectErrCode::NotFound, nullptr};
 }
 
 /***************************************************************************************

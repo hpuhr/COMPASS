@@ -49,6 +49,7 @@ class RTCommandString;
 
 QMainWindow* mainWindow();
 QDialog* activeDialog();
+std::pair<rtcommand::FindObjectErrCode, QObject*> getCommandReceiver(const std::string& object_path); // mainwindow.osgview1, dialog.obj2, compass.child1
 
 /**
  * Represents a wait condition which is evaluated after a command has been executed.

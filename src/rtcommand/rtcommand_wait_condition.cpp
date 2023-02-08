@@ -54,6 +54,7 @@ QSignalSpy* WaitConditionSignal::createSpy(const QString& obj_name,
                                            const QString& signal,
                                            QObject* parent)
 {
+    // TODO REMOVE PARENT
     if (!parent)
     {
         auto main_window = mainWindow();
@@ -64,7 +65,7 @@ QSignalSpy* WaitConditionSignal::createSpy(const QString& obj_name,
     }
     
     //find object by its object name
-    auto obj = ui_test::findObject(parent, obj_name);
+    auto obj = rtcommand::getCommandReceiver(obj_name.toStdString());
     if (obj.first != rtcommand::FindObjectErrCode::NoError)
         return nullptr;
 
