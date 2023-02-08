@@ -281,7 +281,7 @@ bool RTCommand::run() const
         result_.cmd_msg   = "";
 
         //command configuration valid?
-        if (!valid(nullptr))
+        if (!valid().is_valid)
         {
             result_.cmd_state = CmdState::BadConfig;
             return false;
@@ -377,7 +377,7 @@ bool RTCommand::configure(const RTCommandString& cmd)
         return false;
     }
 
-    return valid(nullptr);
+    return valid().is_valid;
 }
 
 /***************************************************************************************

@@ -88,6 +88,8 @@ struct RTCommand
     typedef boost::program_options::positional_options_description PosOptionsDescription;
     typedef boost::program_options::variables_map                  VariablesMap;
 
+    
+
     RTCommand();
     virtual ~RTCommand();
 
@@ -96,11 +98,11 @@ struct RTCommand
     QString name() const { return name_impl(); };
     QString description() const { return description_impl(); }
 
-    virtual bool valid(QString* errMsg) const
+    virtual IsValid valid() const
     { 
         //the command name must not be empty
         CHECK_RTCOMMAND_INVALID_CONDITION(name().isEmpty(), "Command obtains no valid name")
-        return true; 
+        return true;
     };
 
     const RTCommandResult& result() const { return result_; };
@@ -139,7 +141,7 @@ private:
     friend class RTCommandVoid;
 
     bool assignVariables(const boost::program_options::variables_map& variables);
-    
+
     void resetResult() const { result_.reset(); }
 
     mutable RTCommandResult result_; //command result struct containing execution state info and command result data

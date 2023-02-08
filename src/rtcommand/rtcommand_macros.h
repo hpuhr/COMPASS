@@ -121,7 +121,5 @@ protected:                                                                      
 #define CHECK_RTCOMMAND_INVALID_CONDITION(ErrCondition, ErrMsg) \
     if (ErrCondition)                                           \
     {                                                           \
-        if (errMsg)                                             \
-            *errMsg = ErrMsg;                                   \
-        return false;                                           \
+        return rtcommand::IsValid(false, ErrMsg);               \
     }

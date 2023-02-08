@@ -25,6 +25,17 @@ namespace rtcommand
 {
 
 /**
+ * Error code for object retrieval.
+ */
+enum class FindObjectErrCode
+{
+    NoError = 0,
+    Invalid,
+    NotFound,
+    WrongType
+};
+
+/**
  * The execution state a command can be in.
  */
 enum class CmdState
@@ -50,21 +61,23 @@ enum class WaitConditionState
 
 /**
  * Describes a runtime command.
-*/
+ */
 struct RTCommandDescription
 {
     QString name;
     QString description;
 };
 
-
-enum class FindObjectErrCode
+/**
+ * Validity struct for RTCommand. 
+ */
+struct IsValid
 {
-    NoError = 0,
-    Invalid,
-    NotFound,
-    WrongType
-};
+    IsValid() = default;
+    IsValid(bool valid, const std::string& msg = "") : is_valid(valid), message(msg) {}
 
+    bool        is_valid = false;
+    std::string message;
+};
 
 } // namespace rtcommand
