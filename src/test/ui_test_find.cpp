@@ -18,8 +18,6 @@
 #include "ui_test_find.h"
 #include "logger.h"
 #include "compass.h"
-#include "viewmanager.h"
-#include "viewcontainerwidget.h"
 
 using namespace rtcommand;
 
@@ -64,27 +62,6 @@ std::pair<FindObjectErrCode, QObject*> findObjectNoPath(QObject* parent, const Q
 
     if (obj_name.isEmpty() || parent->objectName() == obj_name)
         return std::make_pair(FindObjectErrCode::NoError, parent);
-
-    //UGLY HACK, ViewContainerWidget should be a non-modal QDialog instead of a free-floating QWidget
-    {
-        if (obj_name.startsWith("window"))
-        {
-            QString num = QString(obj_name).remove("window");
-            bool ok;
-            int idx = num.toInt(&ok);
-
-            if (ok)
-            {
-                QString view_container_name = "ViewWindow" + num;
-
-                auto container = COMPASS::instance().viewManager().containerWidget(view_container_name.toStdString());
-                if (!container)
-                    return std::make_pair(FindObjectErrCode::NotFound, nullptr);
-
-                return std::make_pair(FindObjectErrCode::NoError, container);
-            }
-        }
-    }
 
     QObject* obj = parent->findChild<QObject*>(obj_name, Qt::FindChildrenRecursively);
     if (!obj)

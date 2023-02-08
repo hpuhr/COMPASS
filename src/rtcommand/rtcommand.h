@@ -49,7 +49,21 @@ class RTCommandString;
 
 QMainWindow* mainWindow();
 QDialog* activeDialog();
-std::pair<rtcommand::FindObjectErrCode, QObject*> getCommandReceiver(const std::string& object_path); // mainwindow.osgview1, dialog.obj2, compass.child1
+std::pair<FindObjectErrCode, QObject*> getCommandReceiver(const std::string& object_path); // mainwindow.osgview1, dialog.obj2, compass.child1
+
+template <typename T>
+inline std::pair<FindObjectErrCode, T*> getCommandReceiverAs(const std::string& object_path)
+{
+    auto obj = getCommandReceiver(object_path);
+    if (obj.first != FindObjectErrCode::NoError)
+        return std::make_pair(obj.first, nullptr);
+
+    auto obj_cast = dynamic_cast<T*>(obj.second);
+    if (!obj_cast)
+        return std::make_pair(FindObjectErrCode::WrongType, nullptr);
+
+    return std::make_pair(FindObjectErrCode::NoError, obj_cast);
+}
 
 /**
  * Represents a wait condition which is evaluated after a command has been executed.
@@ -87,8 +101,6 @@ struct RTCommand
     typedef boost::program_options::options_description            OptionsDescription;
     typedef boost::program_options::positional_options_description PosOptionsDescription;
     typedef boost::program_options::variables_map                  VariablesMap;
-
-    
 
     RTCommand();
     virtual ~RTCommand();

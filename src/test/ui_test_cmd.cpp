@@ -34,9 +34,6 @@ namespace ui_test
  * RTCommandObject
  ***************************************************************************************/
 
-const std::string RTCommandUIObject::ParentMainWindowString  = "mainwindow";
-const std::string RTCommandUIObject::ParentModalDialogString = "dialog";
-
 /**
  */
 void RTCommandUIObject::collectOptions_impl(OptionsDescription& options,
@@ -44,8 +41,7 @@ void RTCommandUIObject::collectOptions_impl(OptionsDescription& options,
 {
     //add basic command options here
     ADD_RTCOMMAND_OPTIONS(options)
-        ("object,o", po::value<std::string>()->default_value(""), "name of an ui element, object names separated by '.', e.g. 'window1.osgview1.toolbar'")
-        ("parent", po::value<std::string>()->default_value(ParentMainWindowString), "parent ui element, 'mainwindow' = main window of application, 'dialog' = current modal dialog");
+        ("object,o", po::value<std::string>()->default_value(""), "name of an ui element, object names separated by '.', e.g. 'mainwindow.window1.osgview1.toolbar'");
 
     ADD_RTCOMMAND_POS_OPTION(positional, "object", 1)
 }
@@ -55,37 +51,6 @@ void RTCommandUIObject::collectOptions_impl(OptionsDescription& options,
 void RTCommandUIObject::assignVariables_impl(const VariablesMap& variables)
 {
     RTCOMMAND_GET_QSTRING_OR_THROW(variables, "object", obj)
-
-    std::string parent_str;
-    RTCOMMAND_GET_VAR_OR_THROW(variables, "parent", std::string, parent_str)
-    parent = parentFromString(parent_str);
-}
-
-/**
- * Returns a suitable parent mode given a string identifier.
- */
-RTCommandUIObject::Parent RTCommandUIObject::parentFromString(const std::string& str)
-{
-    if (str == ParentMainWindowString)
-        return Parent::MainWindow;
-    else if (str == ParentModalDialogString)
-        return Parent::ModalDialog;
-
-    throw ("Unknown string");
-    return Parent::MainWindow;
-}
-
-/**
- * Returns the parent widget matching the current parent mode.
-*/
-QWidget* RTCommandUIObject::parentWidget() const
-{
-    if (parent == Parent::MainWindow)
-        return rtcommand::mainWindow();
-    else if (parent == Parent::ModalDialog)
-        return rtcommand::activeDialog();
-
-    return nullptr;
 }
 
 /*************************************************************************
@@ -122,11 +87,14 @@ void RTCommandUIInjection::assignVariables_impl(const VariablesMap& variables)
  */
 bool RTCommandUISet::run_impl() const
 {
-    QWidget* parent = parentWidget();
-    if (!parent)
+    auto receiver = rtcommand::getCommandReceiverAs<QWidget>(obj.toStdString());
+    if (receiver.first != rtcommand::FindObjectErrCode::NoError)
+    {
+        std::cout << "RECEIVER IS NULL" << std::endl;
         return false;
+    }
 
-    return setUIElement(parent, obj, value, injection_delay);
+    return setUIElement(receiver.second, "", value, injection_delay);
 }
 
 /**
@@ -161,11 +129,11 @@ void RTCommandUISet::assignVariables_impl(const VariablesMap& variables)
  */
 bool RTCommandUIGet::run_impl() const
 {
-    QWidget* parent = parentWidget();
-    if (!parent)
+    auto receiver = rtcommand::getCommandReceiverAs<QWidget>(obj.toStdString());
+    if (receiver.first != rtcommand::FindObjectErrCode::NoError)
         return false;
 
-    auto res = getUIElement(parent, obj, what);
+    auto res = getUIElement(receiver.second, "", what);
     if (!res.has_value())
         return false;
 

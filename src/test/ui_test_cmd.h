@@ -28,23 +28,14 @@ namespace ui_test
  */
 struct RTCommandUIObject : public rtcommand::RTCommand
 {
-    enum class Parent
-    {
-        MainWindow = 0,
-        ModalDialog
-    };
-
     QString obj;
-    Parent  parent = Parent::MainWindow;
 
-protected:
-    QWidget* parentWidget() const;
-
-private:
-    static const std::string ParentMainWindowString;
-    static const std::string ParentModalDialogString;
-
-    static Parent parentFromString(const std::string& str);
+    virtual rtcommand::IsValid valid() const override 
+    {
+        CHECK_RTCOMMAND_INVALID_CONDITION(obj.isEmpty(), "Object path must not be empty")
+        
+        return rtcommand::RTCommand::valid(); 
+    }
     
     DECLARE_RTCOMMAND_OPTIONS
 };
