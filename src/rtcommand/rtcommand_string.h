@@ -51,8 +51,8 @@ public:
 
     RTCommandString& append(const QString& name, 
                             const QString& value, 
-                            bool is_short = false, 
-                            bool quote = false);
+                            bool cmd_is_short_format = false, 
+                            bool quote_value = false);
 
     bool hasHelpOption() const;
     bool parse(boost::program_options::variables_map& vm, 
@@ -65,8 +65,8 @@ public:
 private:
     QString extractName() const;
     QString quoteString(const QString& s) const;
-    QString paramFull(const QString& name, const QString& value, bool quote) const;
-    QString paramShort(const QString& name, const QString& value, bool quote) const;
+    QString paramFull(const QString& name, const QString& value, bool quote_value) const;
+    QString paramShort(const QString& name, const QString& value, bool quote_value) const;
 
     QString cmd_name_;
     QString cmd_;

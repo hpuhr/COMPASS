@@ -19,6 +19,8 @@ using namespace Utils;
 
 bool RTCommandManager::open_port_ {false};
 
+/**
+ */
 RTCommandManager::RTCommandManager()
     : Configurable("RTCommandManager", "RTCommandManager0", 0, "rtcommand.json"),
       stop_requested_(false), stopped_(false)
@@ -28,10 +30,12 @@ RTCommandManager::RTCommandManager()
     registerParameter("port_num", &port_num_, 27960);
 }
 
-
+/**
+ */
 RTCommandManager::~RTCommandManager() { loginf << "JobManager: destructor"; }
 
-
+/**
+ */
 void RTCommandManager::run()
 {
     loginf<< "RTCommandManager: run: start";
@@ -73,7 +77,7 @@ void RTCommandManager::run()
             // create commands from strings
             for (const auto& cmd_str : cmds)
             {
-                if (injectCommand(cmd_str)) // success
+                if (addCommand(cmd_str)) // success
                 {
                     server.sendStrData("accepted '"+cmd_str+"'");
 
@@ -137,7 +141,8 @@ void RTCommandManager::run()
     loginf << "RTCommandManager: run: stopped";
 }
 
-
+/**
+ */
 void RTCommandManager::shutdown()
 {
     loginf << "RTCommandManager: shutdown";
@@ -171,7 +176,9 @@ void RTCommandManager::shutdown()
     loginf << "RTCommandManager: shutdown: done";
 }
 
-bool RTCommandManager::injectCommand(const std::string& cmd_str)
+/**
+ */
+bool RTCommandManager::addCommand(const std::string& cmd_str)
 {
     rtcommand::RTCommandString cmd_inst (QString(cmd_str.c_str())); // todo change to std str
 

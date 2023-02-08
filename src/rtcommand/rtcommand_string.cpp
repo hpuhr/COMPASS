@@ -79,6 +79,7 @@ namespace
 RTCommandString::RTCommandString(const QString& cmd)
 :   cmd_(cmd.trimmed())
 {
+    //extract command name and store
     cmd_name_ = extractName();
 }
 
@@ -87,7 +88,8 @@ RTCommandString::RTCommandString(const QString& cmd)
 RTCommandString::~RTCommandString() = default;
 
 /**
-*/
+ * Extracts the command name from the current command string.
+ */
 QString RTCommandString::extractName() const
 {
     if (cmd_.isEmpty())
@@ -115,48 +117,53 @@ QString RTCommandString::cmd() const
 }
 
 /**
-*/
+ */
 bool RTCommandString::valid() const
 {
     return (!cmd_name_.isEmpty());
 }
 
 /**
-*/
+ * Sets the given string under quotes. 
+ */
 QString RTCommandString::quoteString(const QString& s) const
 { 
     return "\"" + s + "\"";
 }
 
 /**
-*/
-QString RTCommandString::paramFull(const QString& name, const QString& value, bool quote) const
+ * Generates a full format command string (--name=value).
+ */
+QString RTCommandString::paramFull(const QString& name, const QString& value, bool quote_value) const
 { 
-    return "--" + name + "=" + (quote ? quoteString(value) : value); 
+    return "--" + name + "=" + (quote_value ? quoteString(value) : value); 
 }
 
 /**
-*/
-QString RTCommandString::paramShort(const QString& name, const QString& value, bool quote) const
+ * Generates a short format command string (-name value).
+ */
+QString RTCommandString::paramShort(const QString& name, const QString& value, bool quote_value) const
 { 
-    return "-" + name + " " + (quote ? quoteString(value) : value); 
+    return "-" + name + " " + (quote_value ? quoteString(value) : value); 
 }
 
 /**
-*/
+ * Appends a new command option to the command string.
+ */
 RTCommandString& RTCommandString::append(const QString& name, 
                                          const QString& value, 
-                                         bool is_short, 
-                                         bool quote)
+                                         bool cmd_is_short_format, 
+                                         bool quote_value)
 {  
     cmd_ += " ";
-    cmd_ += (is_short ? paramShort(name, value, quote) : 
-                        paramFull (name, value, quote));
+    cmd_ += (cmd_is_short_format ? paramShort(name, value, quote_value) : 
+                                   paramFull (name, value, quote_value));
     return (*this);
 }
 
 /**
-*/
+ * Checks if the current command string obtains the help option (--help or -h).
+ */
 bool RTCommandString::hasHelpOption() const
 {
     if (cmd_.isEmpty() || !valid())
@@ -170,8 +177,8 @@ bool RTCommandString::hasHelpOption() const
 
     for (int i = 1; i < argc; ++i)
     {
-        QString s = parts[ i ].trimmed();
-        if (s == "-h" || s == "--help")
+        auto s = parts[ i ].trimmed().toStdString();
+        if (s == RTCommand::HelpOptionCmdShort || s == RTCommand::HelpOptionCmdFull)
             return true;
     }
 
@@ -179,7 +186,8 @@ bool RTCommandString::hasHelpOption() const
 }
 
 /**
-*/
+ * Parses the current command string for the provided program option description.
+ */
 bool RTCommandString::parse(boost::program_options::variables_map& vm, 
                             const boost::program_options::options_description& d,
                             const boost::program_options::positional_options_description& pod,
@@ -245,6 +253,7 @@ bool RTCommandString::parse(boost::program_options::variables_map& vm,
 }
 
 /**
+ * Issues a pre-configured rtcommand object using the currently stored command string.
 */
 std::unique_ptr<RTCommand> RTCommandString::issue() const
 {

@@ -77,7 +77,7 @@ void RTCommandShell::processCommand()
     current_command_ = -1;
     commands_.push_back(line);
 
-    bool ok = RTCommandManager::instance().injectCommand(line.toStdString());
+    bool ok = RTCommandManager::instance().addCommand(line.toStdString());
 
     if (ok)
         log(line, LogType::Success);

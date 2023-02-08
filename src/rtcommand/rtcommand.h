@@ -96,10 +96,11 @@ struct RTCommand
     QString name() const { return name_impl(); };
     QString description() const { return description_impl(); }
 
-    virtual bool valid() const 
+    virtual bool valid(QString* errMsg) const
     { 
         //the command name must not be empty
-        return !name().isEmpty(); 
+        CHECK_RTCOMMAND_INVALID_CONDITION(name().isEmpty(), "Command obtains no valid name")
+        return true; 
     };
 
     const RTCommandResult& result() const { return result_; };
@@ -111,6 +112,12 @@ struct RTCommand
     RTCommandWaitCondition condition;             //condition to wait for after executing the command.
     bool                   execute_async = false; //if true execution will immediately return after deploying the command to the main thread's event loop,
                                                   //if false execution will wait for the command to finish running in the main thread
+
+    static const std::string HelpOptionFull;
+    static const std::string HelpOptionShort;
+    static const std::string HelpOption;
+    static const std::string HelpOptionCmdFull;
+    static const std::string HelpOptionCmdShort;
 
 protected:
     void setResultMessage(const std::string& m) const { result_.cmd_msg = m; }
@@ -129,11 +136,10 @@ protected:
 
 private:
     friend class RTCommandRunner;
+    friend class RTCommandVoid;
 
     bool assignVariables(const boost::program_options::variables_map& variables);
-
-    void printHelpInformation();
-
+    
     void resetResult() const { result_.reset(); }
 
     mutable RTCommandResult result_; //command result struct containing execution state info and command result data
@@ -141,7 +147,7 @@ private:
 
 /**
  * The empty command (can be used e.g. to execute a wait condition only).
-*/
+ */
 struct RTCommandEmpty : public RTCommand 
 {
 protected:
@@ -153,7 +159,7 @@ protected:
 
 /**
  * The help command.
-*/
+ */
 struct RTCommandHelp : public RTCommand 
 {
     QString command;

@@ -25,6 +25,10 @@ namespace rtcommand
     struct RTCommand;
 }
 
+/**
+ * Class for listening for and processing string commands at runtime,
+ * either coming externally from a TCP port or internally from the application itself.
+ */
 class RTCommandManager : public QThread, public Singleton, public Configurable
 {
 public:
@@ -40,7 +44,7 @@ public:
         return instance;
     }
 
-    bool injectCommand(const std::string& cmd_str); // true on success, false on failed
+    bool addCommand(const std::string& cmd_str); // true on success, false on failed
 
 protected:
     volatile bool stop_requested_;

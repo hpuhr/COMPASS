@@ -105,9 +105,23 @@ protected:                                                                      
         Var = QString::fromStdString(_##Var);                            \
     }
 
+/**
+ * Can be used when deriving RTCommand::collectOptions_impl() to add options and positional option mappings.
+ */
 #define ADD_RTCOMMAND_OPTIONS(Options)     \
     namespace po = boost::program_options; \
     Options.add_options()
 
 #define ADD_RTCOMMAND_POS_OPTION(PosOptions, Name, PosInt) \
     PosOptions.add(Name, PosInt);
+
+/**
+ * Can be used when overriding RTCommand::valid() to check for certain conditions.
+ */
+#define CHECK_RTCOMMAND_INVALID_CONDITION(ErrCondition, ErrMsg) \
+    if (ErrCondition)                                           \
+    {                                                           \
+        if (errMsg)                                             \
+            *errMsg = ErrMsg;                                   \
+        return false;                                           \
+    }

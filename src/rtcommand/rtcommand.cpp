@@ -191,6 +191,12 @@ bool RTCommandWaitCondition::setFromString(const QString& config_string)
  * RTCommand
  ***************************************************************************************/
 
+const std::string RTCommand::HelpOptionFull     = "help";
+const std::string RTCommand::HelpOptionShort    = "h"; 
+const std::string RTCommand::HelpOption         = HelpOptionFull + "," + HelpOptionShort;
+const std::string RTCommand::HelpOptionCmdFull  = "--" + HelpOptionFull;
+const std::string RTCommand::HelpOptionCmdShort =  "-" + HelpOptionShort; 
+
 /**
  */
 RTCommand::RTCommand() = default;
@@ -211,7 +217,7 @@ bool RTCommand::collectOptions(OptionsDescription& options,
         ADD_RTCOMMAND_OPTIONS(options)
             ("wait_condition", po::value<std::string>()->default_value(""), "wait condition config string")
             ("async", "enables asynchrous command execution, meaning execution will return immediately after the command has been deployed to the main thread")
-            ("help,h", "show command help information");
+            (HelpOption.c_str(), "show command help information");
 
         //collect from derived 
         collectOptions_impl(options, positional);
@@ -275,7 +281,7 @@ bool RTCommand::run() const
         result_.cmd_msg   = "";
 
         //command configuration valid?
-        if (!valid())
+        if (!valid(nullptr))
         {
             result_.cmd_state = CmdState::BadConfig;
             return false;
@@ -371,14 +377,7 @@ bool RTCommand::configure(const RTCommandString& cmd)
         return false;
     }
 
-    return valid();
-}
-
-/**
-*/
-void RTCommand::printHelpInformation()
-{
-    //@TODO
+    return valid(nullptr);
 }
 
 /***************************************************************************************
