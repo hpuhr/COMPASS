@@ -102,6 +102,10 @@ public:
     void showEvaluationTab();
     void showViewPointsTab();
 
+    void openExistingDB(const std::string& filename);
+    void createDB(const std::string& filename);
+
+    // command line functions
     void createAndOpenNewSqlite3DB(const std::string& filename);
     void openSqlite3DB(const std::string& filename);
 
@@ -141,6 +145,7 @@ public:
     bool automaticTasksDefined() const;
     void performAutomaticTasks ();
 
+    // others
     void updateMenus();
     void updateBottomWidget();
 

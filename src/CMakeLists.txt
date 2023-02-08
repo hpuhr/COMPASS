@@ -33,10 +33,8 @@ include_directories (
 target_sources(compass
     PUBLIC
     "${CMAKE_CURRENT_LIST_DIR}/compass.h"
-    "${CMAKE_CURRENT_LIST_DIR}/compass_commands.h"
     PRIVATE
     "${CMAKE_CURRENT_LIST_DIR}/compass.cpp"
-    "${CMAKE_CURRENT_LIST_DIR}/compass_commands.cpp"
 )
 
 

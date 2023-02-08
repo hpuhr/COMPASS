@@ -16,7 +16,7 @@
  */
 
 #include "mainwindow.h"
-
+#include "mainwindow_commands.h"
 #include "compass.h"
 #include "config.h"
 #include "configurationmanager.h"
@@ -223,6 +223,11 @@ MainWindow::MainWindow()
 
     //init ui related commands
     ui_test::initUITestCommands();
+
+    main_window::RTCommandOpenDB::init();
+    main_window::RTCommandCreateDB::init();
+    main_window::RTCommandCloseDB::init();
+    main_window::RTCommandQuit::init();
 }
 
 MainWindow::~MainWindow()
@@ -604,6 +609,26 @@ void MainWindow::importViewPointsFile(const std::string& filename)
     automatic_tasks_defined_ = true;
     view_points_import_file_ = true;
     view_points_import_filename_ = filename;
+}
+
+void MainWindow::openExistingDB(const std::string& filename)
+{
+    loginf << "MainWindow: openExistingDB: filename '" << filename << "'";
+
+    COMPASS::instance().openDBFile(filename);
+
+    updateBottomWidget();
+    updateMenus();
+}
+
+void MainWindow::createDB(const std::string& filename)
+{
+    loginf << "MainWindow: createDB: filename '" << filename << "'";
+
+    COMPASS::instance().createNewDBFile(filename);
+
+    updateBottomWidget();
+    updateMenus();
 }
 
 
@@ -1225,27 +1250,17 @@ void MainWindow::newDBSlot()
     string filename = QFileDialog::getSaveFileName(this, "New SQLite3 File").toStdString();
 
     if (filename.size() > 0)
-    {
-        COMPASS::instance().createNewDBFile(filename);
-
-        updateBottomWidget();
-        updateMenus();
-    }
+        createDB(filename);
 }
 
 void MainWindow::openExistingDBSlot()
 {
     loginf << "MainWindow: openExistingDBSlot";
 
-    string filename = QFileDialog::getOpenFileName(this, "Add SQLite3 File").toStdString();
+    string filename = QFileDialog::getOpenFileName(this, "Open SQLite3 File").toStdString();
 
     if (filename.size() > 0)
-    {
-        COMPASS::instance().openDBFile(filename);
-
-        updateBottomWidget();
-        updateMenus();
-    }
+        openExistingDB(filename);
 }
 
 void MainWindow::openRecentDBSlot()
@@ -1259,10 +1274,7 @@ void MainWindow::openRecentDBSlot()
 
     assert (filename.size());
 
-    COMPASS::instance().openDBFile(filename);
-
-    updateBottomWidget();
-    updateMenus();
+    openExistingDB(filename);
 }
 
 void MainWindow::exportDBSlot()

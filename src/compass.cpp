@@ -36,7 +36,6 @@
 #include "rtcommand_runner.h"
 #include "rtcommand_manager.h"
 #include "rtcommand.h"
-#include "compass_commands.h"
 
 #include <QMessageBox>
 #include <QApplication>
@@ -141,7 +140,6 @@ COMPASS::COMPASS() : Configurable("COMPASS", "COMPASS0", 0, "compass.json")
     qRegisterMetaType<AppMode>("AppMode");
 
     rtcommand::RTCommandHelp::init();
-    compass::RTCommandOpenDB::init();
 
     logdbg << "COMPASS: constructor: end";
 }
