@@ -44,6 +44,10 @@ struct RTCommandResult
         //its state is part of the successful execution of a command
         return (wc_state == WaitConditionState::Success && cmd_state == CmdState::Success);
     }
+    bool readyForCheck() const 
+    {
+        return (wc_state == WaitConditionState::Success && cmd_state == CmdState::Executed);
+    }
 
     void reset();
 

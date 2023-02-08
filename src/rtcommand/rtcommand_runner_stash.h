@@ -32,7 +32,7 @@ namespace rtcommand
 */
 struct RTCommandMetaTypeWrapper
 {
-    const rtcommand::RTCommand* command = nullptr;
+    std::shared_ptr<rtcommand::RTCommand> command;
 };
 
 namespace rtcommand

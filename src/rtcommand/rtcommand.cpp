@@ -305,8 +305,8 @@ bool RTCommand::checkResult() const
 {
     try
     { 
-        //result wasn't executed correctly?
-        if (result_.cmd_state != CmdState::Executed)
+        //result ready to be checked? (means execution and wait condition were both successful)
+        if (!result().readyForCheck())
             return false;
 
         //run check

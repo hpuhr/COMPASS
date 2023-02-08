@@ -47,12 +47,12 @@ public:
     std::future<Results> runCommands(RTCommandChain&& cmds);
 
 private:
-    static void runCommand(RTCommand* cmd, RTCommandRunnerStash* stash);
-    static bool initWaitCondition(RTCommand* cmd, RTCommandRunnerStash* stash);
-    static bool execWaitCondition(RTCommand* cmd, RTCommandRunnerStash* stash);
-    static bool cleanupWaitCondition(RTCommand* cmd, RTCommandRunnerStash* stash);
-    static bool executeCommand(RTCommand* cmd, RTCommandRunnerStash* stash);
-    static bool postCheckCommand(RTCommand* cmd, RTCommandRunnerStash* stash);
+    static void runCommand(std::shared_ptr<RTCommand> cmd, RTCommandRunnerStash* stash);
+    static bool initWaitCondition(std::shared_ptr<RTCommand>, RTCommandRunnerStash* stash);
+    static bool execWaitCondition(std::shared_ptr<RTCommand>, RTCommandRunnerStash* stash);
+    static bool cleanupWaitCondition(std::shared_ptr<RTCommand>, RTCommandRunnerStash* stash);
+    static bool executeCommand(std::shared_ptr<RTCommand>, RTCommandRunnerStash* stash);
+    static bool postCheckCommand(std::shared_ptr<RTCommand>, RTCommandRunnerStash* stash);
     static void logMsg(const std::string& msg, RTCommand* cmd = nullptr);
 
     std::unique_ptr<RTCommandRunnerStash> stash_;
