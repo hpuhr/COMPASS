@@ -54,6 +54,7 @@ private slots:
     void removeSpy();
     bool executeCommand(RTCommandMetaTypeWrapper wrapper) const;
     void executeCommandAsync(RTCommandMetaTypeWrapper wrapper) const;
+    bool postCheckCommand(RTCommandMetaTypeWrapper wrapper) const;
     
 private:
     friend class RTCommandRunner;

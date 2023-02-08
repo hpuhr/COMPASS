@@ -92,6 +92,7 @@ struct RTCommand
     virtual ~RTCommand();
 
     bool run() const;
+    bool checkResult() const;
     QString name() const { return name_impl(); };
     QString description() const { return description_impl(); }
 
@@ -117,6 +118,7 @@ protected:
 
     //implements command specific behaviour
     virtual bool run_impl() const = 0;
+    virtual bool checkResult_impl() const { return true; }
     virtual void collectOptions_impl(OptionsDescription& options, 
                                      PosOptionsDescription& positional) = 0;
     virtual void assignVariables_impl(const VariablesMap& variables) = 0;

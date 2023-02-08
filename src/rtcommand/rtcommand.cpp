@@ -284,7 +284,35 @@ bool RTCommand::run() const
         //run command
         if (!run_impl())
         {
-            result_.cmd_state = CmdState::Failed;
+            result_.cmd_state = CmdState::ExecFailed;
+            return false;
+        }
+        
+        result_.cmd_state = CmdState::Executed;
+    }
+    catch(...)
+    {
+        result_.cmd_state = CmdState::ExecFailed;
+        return false;
+    }
+
+    return true;
+}
+
+/**
+*/
+bool RTCommand::checkResult() const
+{
+    try
+    { 
+        //result wasn't executed correctly?
+        if (result_.cmd_state != CmdState::Executed)
+            return false;
+
+        //run check
+        if (!checkResult_impl())
+        {
+            result_.cmd_state = CmdState::ResultCheckFailed;
             return false;
         }
         
@@ -292,7 +320,7 @@ bool RTCommand::run() const
     }
     catch(...)
     {
-        result_.cmd_state = CmdState::Failed;
+        result_.cmd_state = CmdState::ResultCheckFailed;
         return false;
     }
 

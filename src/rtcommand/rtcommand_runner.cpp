@@ -25,6 +25,8 @@
 
 #include <QApplication>
 
+#include <boost/date_time/posix_time/posix_time.hpp>
+
 namespace rtcommand
 {
 
@@ -176,7 +178,39 @@ bool RTCommandRunner::executeCommand(RTCommand* cmd, RTCommandRunnerStash* stash
 
     //if invoking the execution failed, we set the commands state to failed
     if (!invoked)
-        cmd->result_.cmd_state = CmdState::Failed;
+        cmd->result_.cmd_state = CmdState::ExecFailed;
+
+    logMsg(std::string("[") + (succeeded ? "Succeeded" : "Failed") + "]", cmd);
+
+    return succeeded;
+}
+
+/**
+ * Executes the given command in the main thread.
+ */
+bool RTCommandRunner::postCheckCommand(RTCommand* cmd, RTCommandRunnerStash* stash)
+{
+    if (!cmd || !stash)
+        throw std::runtime_error("RTCommandRunner::postCheckCommand: Bad init");
+
+    qRegisterMetaType<RTCommandMetaTypeWrapper>();
+
+    logMsg("Checking result...", cmd);
+
+    RTCommandMetaTypeWrapper wrapper;
+    wrapper.command = cmd;
+
+    //check command result in main thread and block until finished
+    bool ok      = true;
+    bool invoked = QMetaObject::invokeMethod(stash, "postCheckCommand", 
+                                             Qt::BlockingQueuedConnection,
+                                             Q_RETURN_ARG(bool, ok),
+                                             Q_ARG(RTCommandMetaTypeWrapper, wrapper));
+    bool succeeded = (ok && invoked);
+
+    //if invoking the execution failed, we set the commands state to failed
+    if (!invoked)
+        cmd->result_.cmd_state = CmdState::ResultCheckFailed;
 
     logMsg(std::string("[") + (succeeded ? "Succeeded" : "Failed") + "]", cmd);
 
@@ -205,12 +239,24 @@ void RTCommandRunner::runCommand(RTCommand* cmd, RTCommandRunnerStash* stash)
     //reset state
     cmd->resetResult();
 
-    //init wait condition and execute command
-    if (initWaitCondition(cmd, stash) &&
-        executeCommand(cmd, stash))
+    //init wait condition
+    if (initWaitCondition(cmd, stash))
     {
-        // if execution went well -> execute wait condition
-        execWaitCondition(cmd, stash);
+        boost::posix_time::ptime start_time = boost::posix_time::microsec_clock::local_time();
+
+        //execute command
+        if (executeCommand(cmd, stash))
+        {
+            // if execution went well -> execute wait condition
+            if (execWaitCondition(cmd, stash))
+            {
+                //post check result
+                postCheckCommand(cmd, stash);
+            }
+        }
+
+        boost::posix_time::ptime end_time = boost::posix_time::microsec_clock::local_time();
+        cmd->result_.runtime = end_time - start_time;
     }
 
     //always try to clean up wait condition

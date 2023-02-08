@@ -25,6 +25,9 @@
 
 #include "json.h"
 
+#include <boost/date_time/posix_time/posix_time_duration.hpp>
+#include <boost/optional.hpp>
+
 namespace rtcommand
 {
 
@@ -33,6 +36,8 @@ namespace rtcommand
  */
 struct RTCommandResult
 {
+    typedef boost::posix_time::time_duration Duration;
+
     bool success() const
     { 
         //as the wait condition might be extremely important for any upcoming commands, 
@@ -40,12 +45,7 @@ struct RTCommandResult
         return (wc_state == WaitConditionState::Success && cmd_state == CmdState::Success);
     }
 
-    void reset()
-    {
-        wc_state  = WaitConditionState::Unknown;
-        cmd_state = CmdState::Fresh;
-        cmd_msg   = "";
-    }
+    void reset();
 
     std::string toJSONReplyString() const;
     std::string stateToString() const;
@@ -54,7 +54,8 @@ struct RTCommandResult
     CmdState           cmd_state = CmdState::Fresh;             // execution state
     std::string        cmd_msg;                                 // optional execution result message 
 
-    nlohmann::json     reply_data;                              // command result data
+    boost::optional<Duration> runtime;                          // time for execution
+    nlohmann::json            reply_data;                       // command result data
 };
 
 } // namespace rtcommand

@@ -78,4 +78,15 @@ void RTCommandRunnerStash::executeCommandAsync(RTCommandMetaTypeWrapper wrapper)
         wrapper.command->run();
 }
 
+/**
+ * 
+*/
+bool RTCommandRunnerStash::postCheckCommand(RTCommandMetaTypeWrapper wrapper) const
+{
+    if (!wrapper.command)
+        return false;
+
+    return wrapper.command->checkResult();
+}
+
 } // namespace rtcommand

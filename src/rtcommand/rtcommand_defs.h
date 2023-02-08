@@ -31,7 +31,9 @@ enum class CmdState
 {
     Fresh = 0,
     BadConfig,
-    Failed,
+    ExecFailed,
+    ResultCheckFailed,
+    Executed,
     Success
 };
 

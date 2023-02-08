@@ -52,6 +52,7 @@ private:
     static bool execWaitCondition(RTCommand* cmd, RTCommandRunnerStash* stash);
     static bool cleanupWaitCondition(RTCommand* cmd, RTCommandRunnerStash* stash);
     static bool executeCommand(RTCommand* cmd, RTCommandRunnerStash* stash);
+    static bool postCheckCommand(RTCommand* cmd, RTCommandRunnerStash* stash);
     static void logMsg(const std::string& msg, RTCommand* cmd = nullptr);
 
     std::unique_ptr<RTCommandRunnerStash> stash_;
