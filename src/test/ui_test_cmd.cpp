@@ -97,21 +97,21 @@ QWidget* RTCommandUIObject::parentWidget() const
 void RTCommandUIInjection::collectOptions_impl(OptionsDescription& options,
                                                PosOptionsDescription& positional)
 {
-    ADD_RTCOMMAND_OPTIONS(options)
-        ("uidelay", po::value<int>()->default_value(-1), "delay added after each injected ui event");
-
     //call base
     RTCommandUIObject::collectOptions_impl(options, positional);
+
+    ADD_RTCOMMAND_OPTIONS(options)
+        ("uidelay", po::value<int>()->default_value(-1), "delay added after each injected ui event");
 }
 
 /**
  */
 void RTCommandUIInjection::assignVariables_impl(const VariablesMap& variables)
 {
-    RTCOMMAND_GET_VAR_OR_THROW(variables, "uidelay", int, injection_delay)
-
     //call base
     RTCommandUIObject::assignVariables_impl(variables);
+
+    RTCOMMAND_GET_VAR_OR_THROW(variables, "uidelay", int, injection_delay)
 }
 
 /*************************************************************************
@@ -134,23 +134,23 @@ bool RTCommandUISet::run_impl() const
 void RTCommandUISet::collectOptions_impl(OptionsDescription& options,
                                          PosOptionsDescription& positional)
 {
+    //call base
+    RTCommandUIInjection::collectOptions_impl(options, positional);
+
     ADD_RTCOMMAND_OPTIONS(options)
         ("value,v", po::value<std::string>()->default_value(""), "new value to set, content depending on the addressed ui element");
 
     ADD_RTCOMMAND_POS_OPTION(positional, "value", 2)
-
-    //call base
-    RTCommandUIInjection::collectOptions_impl(options, positional);
 }
 
 /**
  */
 void RTCommandUISet::assignVariables_impl(const VariablesMap& variables)
 {
-    RTCOMMAND_GET_QSTRING_OR_THROW(variables, "value", value)
-
     //call base
     RTCommandUIInjection::assignVariables_impl(variables);
+
+    RTCOMMAND_GET_QSTRING_OR_THROW(variables, "value", value)
 }
 
 /*************************************************************************
@@ -180,23 +180,23 @@ bool RTCommandUIGet::run_impl() const
 void RTCommandUIGet::collectOptions_impl(OptionsDescription& options,
                                          PosOptionsDescription& positional)
 {
+    //call base
+    RTCommandUIObject::collectOptions_impl(options, positional);
+
     ADD_RTCOMMAND_OPTIONS(options)
         ("what,w", po::value<std::string>()->default_value(""), "which value to retrieve from the ui element (empty = default behavior)");
 
     ADD_RTCOMMAND_POS_OPTION(positional, "what", 2)
-
-    //call base
-    RTCommandUIObject::collectOptions_impl(options, positional);
 }
 
 /**
  */
 void RTCommandUIGet::assignVariables_impl(const VariablesMap& variables)
 {
-    RTCOMMAND_GET_QSTRING_OR_THROW(variables, "what", what)
-
     //call base
     RTCommandUIObject::assignVariables_impl(variables);
+
+    RTCOMMAND_GET_QSTRING_OR_THROW(variables, "what", what)
 }
 
 }
