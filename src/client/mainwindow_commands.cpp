@@ -1,6 +1,9 @@
 #include "mainwindow_commands.h"
 #include "mainwindow.h"
 #include "compass.h"
+#include "datasourcemanager.h"
+#include "taskmanager.h"
+#include "viewpointsimporttask.h"
 #include "logger.h"
 #include "util/files.h"
 #include "rtcommand_registry.h"
@@ -107,6 +110,112 @@ void RTCommandCreateDB::collectOptions_impl(OptionsDescription& options,
 }
 
 void RTCommandCreateDB::assignVariables_impl(const VariablesMap& variables)
+{
+    RTCOMMAND_GET_VAR_OR_THROW(variables, "filename", std::string, filename_)
+}
+
+// import ds
+
+bool RTCommandImportDataSourcesFile::valid() const
+{
+    if (!filename_.size())
+        return false;
+
+    if (!Files::fileExists(filename_))
+        return false;
+
+    return RTCommand::valid();
+}
+
+bool RTCommandImportDataSourcesFile::run_impl() const
+{
+    if (!filename_.size())
+        return false;
+
+    if (!Files::fileExists(filename_))
+        return false;
+
+    if (COMPASS::instance().dbOpened())
+        return false;
+
+    if (COMPASS::instance().appMode() != AppMode::Offline) // to be sure
+        return false;
+
+    COMPASS::instance().dataSourceManager().importDataSources(filename_);
+
+    return true;
+}
+
+void RTCommandImportDataSourcesFile::collectOptions_impl(OptionsDescription& options,
+                                          PosOptionsDescription& positional)
+{
+    ADD_RTCOMMAND_OPTIONS(options)
+        ("filename,f", po::value<std::string>()->required(), "given filename, e.g. ’/data/file1.json'");
+
+    ADD_RTCOMMAND_POS_OPTION(positional, "filename", 1) // give position
+}
+
+void RTCommandImportDataSourcesFile::assignVariables_impl(const VariablesMap& variables)
+{
+    RTCOMMAND_GET_VAR_OR_THROW(variables, "filename", std::string, filename_)
+}
+
+// import vp
+
+RTCommandImportViewPointsFile::RTCommandImportViewPointsFile()
+    : rtcommand::RTCommand()
+{
+    condition.type = rtcommand::RTCommandWaitCondition::Type::Signal;
+    //condition.obj = ""
+}
+
+bool RTCommandImportViewPointsFile::valid() const
+{
+    if (!filename_.size())
+        return false;
+
+    if (!Files::fileExists(filename_))
+        return false;
+
+    return RTCommand::valid();
+}
+
+bool RTCommandImportViewPointsFile::run_impl() const
+{
+    if (!filename_.size())
+        return false;
+
+    if (!Files::fileExists(filename_))
+        return false;
+
+    if (COMPASS::instance().dbOpened())
+        return false;
+
+    if (COMPASS::instance().appMode() != AppMode::Offline) // to be sure
+        return false;
+
+    ViewPointsImportTask& vp_import_task = COMPASS::instance().taskManager().viewPointsImportTask();
+
+    vp_import_task.importFilename(filename_);
+
+    assert(vp_import_task.canRun());
+    vp_import_task.showDoneSummary(false);
+
+    vp_import_task.run();
+
+    return true;
+}
+
+void RTCommandImportViewPointsFile::collectOptions_impl(OptionsDescription& options,
+                                          PosOptionsDescription& positional)
+{
+    ADD_RTCOMMAND_OPTIONS(options)
+        ("filename,f", po::value<std::string>()->required(), "given filename, e.g. ’/data/file1.json’");
+
+    ADD_RTCOMMAND_POS_OPTION(positional, "filename", 1) // give position
+}
+
+void RTCommandImportViewPointsFile::assignVariables_impl(const VariablesMap& variables)
 {
     RTCOMMAND_GET_VAR_OR_THROW(variables, "filename", std::string, filename_)
 }

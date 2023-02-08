@@ -21,6 +21,8 @@
 #include "viewmanager.h"
 #include "viewcontainerwidget.h"
 
+using namespace rtcommand;
+
 namespace ui_test
 {
 

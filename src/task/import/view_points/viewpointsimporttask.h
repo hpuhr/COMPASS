@@ -34,6 +34,9 @@ class ViewPointsImportTask : public Task, public Configurable
 {
     Q_OBJECT
 
+signals:
+    void importDoneSignal();
+
 public slots:
     void dialogImportSlot();
     void dialogCancelSlot();

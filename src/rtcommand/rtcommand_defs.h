@@ -55,4 +55,14 @@ struct RTCommandDescription
     QString description;
 };
 
+
+enum class FindObjectErrCode
+{
+    NoError = 0,
+    Invalid,
+    NotFound,
+    WrongType
+};
+
+
 } // namespace rtcommand

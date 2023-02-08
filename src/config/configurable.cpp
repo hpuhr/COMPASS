@@ -19,7 +19,11 @@
 
 #include "configuration.h"
 #include "configurationmanager.h"
+#include "stringconv.h"
 #include "logger.h"
+
+using namespace std;
+using namespace Utils;
 
 /**
  * \param class_id Class identifier
@@ -325,6 +329,52 @@ bool Configurable::hasSubConfigurable(const std::string& class_id, const std::st
 {
     assert(configuration_);
     return (children_.find(class_id + instance_id) != children_.end());
+}
+
+std::pair<rtcommand::FindObjectErrCode, Configurable*> Configurable::findSubConfigurable(const std::string& approx_name)
+{
+    vector<string> parts = String::split(approx_name, '.');
+
+    if (!parts.size())
+        return {rtcommand::FindObjectErrCode::NotFound, nullptr};
+
+    Configurable* child {this};
+
+    for (const auto& part : parts)
+    {
+        child = child->getApproximateChildNamed(part);
+
+        if (!child)
+            return {rtcommand::FindObjectErrCode::NotFound, nullptr};
+    }
+
+    return {rtcommand::FindObjectErrCode::NoError, child};
+}
+
+Configurable* Configurable::getApproximateChildNamed (const std::string& approx_name)
+{
+    // find exact instance id
+    auto exact_instance_iter = std::find_if(children_.begin(), children_.end(),
+                            [approx_name](const pair<std::string, Configurable&>& child_iter) -> bool {
+        return child_iter.second.instanceId() == approx_name; });
+
+    if (exact_instance_iter != children_.end())
+        return &exact_instance_iter->second;
+
+    // check if class_id, take first match
+
+    auto class_id_match_iter = std::find_if(children_.begin(), children_.end(),
+                            [approx_name](const pair<std::string, Configurable&>& child_iter) -> bool {
+        return child_iter.second.classId() == approx_name; });
+
+    if (class_id_match_iter != children_.end())
+    {
+        loginf << "Configurable: getApproximateChildNamed: key_id " << key_id_ << " found approximate name '"
+               << approx_name << "' with child instance_id " << class_id_match_iter->second.instanceId();
+        return &class_id_match_iter->second;
+    }
+
+    return nullptr;
 }
 
 void Configurable::setTmpDisableRemoveConfigOnDelete(bool value)

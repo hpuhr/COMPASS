@@ -65,7 +65,7 @@ QSignalSpy* WaitConditionSignal::createSpy(const QString& obj_name,
     
     //find object by its object name
     auto obj = ui_test::findObject(parent, obj_name);
-    if (obj.first != ui_test::FindObjectErrCode::NoError)
+    if (obj.first != rtcommand::FindObjectErrCode::NoError)
         return nullptr;
 
     //if no datatype is attached to signal string, we assume it is of void type

@@ -18,6 +18,7 @@
 #include "ui_test_event_injections.h"
 #include "ui_test_find.h"
 #include "ui_test_common.h"
+#include "rtcommand_defs.h"
 
 #include "logger.h"
 #include "compass.h"
@@ -55,7 +56,7 @@ bool injectKeyEvent(QWidget* root,
                     int delay)
 {
     auto w = findObjectAs<QWidget>(root, obj_name);
-    if (w.first != FindObjectErrCode::NoError)
+    if (w.first != rtcommand::FindObjectErrCode::NoError)
     {
         logObjectError("injectKeyEvent", obj_name, w.first);
         return false;
@@ -78,7 +79,7 @@ bool injectKeysEvent(QWidget* root,
                      int delay)
 {
     auto w = findObjectAs<QWidget>(root, obj_name);
-    if (w.first != FindObjectErrCode::NoError)
+    if (w.first != rtcommand::FindObjectErrCode::NoError)
     {
         logObjectError("injectKeysEvent", obj_name, w.first);
         return false;
@@ -152,14 +153,14 @@ bool injectKeyCmdEvent(QWidget* root,
                        int delay)
 {
     auto obj = findObject(root, obj_name);
-    if (obj.first != FindObjectErrCode::NoError)
+    if (obj.first != rtcommand::FindObjectErrCode::NoError)
     {
         logObjectError("injectKeyCmdEvent", obj_name, obj.first);
         return false;
     }
     if (!obj.second->isWidgetType() && !obj.second->isWindowType())
     {
-        logObjectError("injectKeyCmdEvent", obj_name, FindObjectErrCode::WrongType);
+        logObjectError("injectKeyCmdEvent", obj_name, rtcommand::FindObjectErrCode::WrongType);
         return false;
     }
     
@@ -193,7 +194,7 @@ bool injectClickEvent(QWidget* root,
                       int delay)
 {
     auto obj = findObject(root, obj_name);
-    if (obj.first != FindObjectErrCode::NoError)
+    if (obj.first != rtcommand::FindObjectErrCode::NoError)
     {
         logObjectError("injectClickEvent", obj_name, obj.first);
         return false;
@@ -201,7 +202,7 @@ bool injectClickEvent(QWidget* root,
 
     if (!obj.second->isWidgetType() && !obj.second->isWindowType())
     {
-        logObjectError("injectClickEvent", obj_name, FindObjectErrCode::WrongType);
+        logObjectError("injectClickEvent", obj_name, rtcommand::FindObjectErrCode::WrongType);
         return false;
     }
 
@@ -448,7 +449,7 @@ bool injectMenuBarEvent(QWidget* root,
                         int delay)
 {
     auto obj = findObjectAs<QMenuBar>(root, obj_name);
-    if (obj.first != FindObjectErrCode::NoError)
+    if (obj.first != rtcommand::FindObjectErrCode::NoError)
     {
         logObjectError("injectMenuBarEvent", obj_name, obj.first);
         return false;
@@ -470,7 +471,7 @@ bool injectMenuEvent(QWidget* root,
                      int delay)
 {
     auto obj = findObjectAs<QMenu>(root, obj_name);
-    if (obj.first != FindObjectErrCode::NoError)
+    if (obj.first != rtcommand::FindObjectErrCode::NoError)
     {
         logObjectError("injectMenuEvent", obj_name, obj.first);
         return false;
@@ -494,7 +495,7 @@ bool injectPopupMenuEvent(const QStringList& path_to_action,
     auto popup = QApplication::activePopupWidget();
     if (!popup)
     {
-        logObjectError("injectPopupMenuEvent", "popup", FindObjectErrCode::NotFound);
+        logObjectError("injectPopupMenuEvent", "popup", rtcommand::FindObjectErrCode::NotFound);
         return false;
     }
 
@@ -502,7 +503,7 @@ bool injectPopupMenuEvent(const QStringList& path_to_action,
     QMenu* menu = dynamic_cast<QMenu*>(popup);
     if (!menu)
     {
-        logObjectError("injectPopupMenuEvent", "popup", FindObjectErrCode::WrongType);
+        logObjectError("injectPopupMenuEvent", "popup", rtcommand::FindObjectErrCode::WrongType);
         return false;
     }
 
@@ -520,7 +521,7 @@ bool injectComboBoxEditEvent(QWidget* root,
                              int delay)
 {
     auto obj = findObjectAs<QComboBox>(root, obj_name);
-    if (obj.first != FindObjectErrCode::NoError)
+    if (obj.first != rtcommand::FindObjectErrCode::NoError)
     {
         logObjectError("injectComboBoxEditEvent", obj_name, obj.first);
         return false;
@@ -557,7 +558,7 @@ bool injectTabSelectionEvent(QWidget* root,
                              int delay)
 {
     auto obj = findObjectAs<QTabWidget>(root, obj_name);
-    if (obj.first != FindObjectErrCode::NoError)
+    if (obj.first != rtcommand::FindObjectErrCode::NoError)
     {
         logObjectError("injectTabSelectionEvent", obj_name, obj.first);
         return false;
@@ -611,7 +612,7 @@ bool injectToolSelectionEvent(QWidget* root,
                               int delay)
 {
     auto obj = findObjectAs<QToolBar>(root, obj_name);
-    if (obj.first != FindObjectErrCode::NoError)
+    if (obj.first != rtcommand::FindObjectErrCode::NoError)
     {
         logObjectError("injectToolSelectionEvent", obj_name, obj.first);
         return false;
@@ -662,7 +663,7 @@ bool injectLineEditEvent(QWidget* root,
                          int delay)
 {
     auto obj = findObjectAs<QLineEdit>(root, obj_name);
-    if (obj.first != FindObjectErrCode::NoError)
+    if (obj.first != rtcommand::FindObjectErrCode::NoError)
     {
         logObjectError("injectLineEditEvent", obj_name, obj.first);
         return false;
@@ -689,7 +690,7 @@ bool injectTextEditEvent(QWidget* root,
                          int delay)
 {
     auto obj = findObjectAs<QTextEdit>(root, obj_name);
-    if (obj.first != FindObjectErrCode::NoError)
+    if (obj.first != rtcommand::FindObjectErrCode::NoError)
     {
         logObjectError("injectTextEditEvent", obj_name, obj.first);
         return false;
@@ -715,7 +716,7 @@ bool injectSpinBoxEvent(QWidget* root,
                         int delay)
 {
     auto obj = findObjectAs<QSpinBox>(root, obj_name);
-    if (obj.first != FindObjectErrCode::NoError)
+    if (obj.first != rtcommand::FindObjectErrCode::NoError)
     {
         logObjectError("injectSpinBoxEvent", obj_name, obj.first);
         return false;
@@ -744,7 +745,7 @@ bool injectDoubleSpinBoxEvent(QWidget* root,
                               int delay)
 {
     auto obj = findObjectAs<QDoubleSpinBox>(root, obj_name);
-    if (obj.first != FindObjectErrCode::NoError)
+    if (obj.first != rtcommand::FindObjectErrCode::NoError)
     {
         logObjectError("injectDoubleSpinBoxEvent", obj_name, obj.first);
         return false;
@@ -869,7 +870,7 @@ bool injectSliderEditEvent(QWidget* root,
                            int delay)
 {
     auto obj = findObjectAs<QAbstractSlider>(root, obj_name);
-    if (obj.first != FindObjectErrCode::NoError)
+    if (obj.first != rtcommand::FindObjectErrCode::NoError)
     {
         logObjectError("injectSliderEditEvent", obj_name, obj.first);
         return false;
@@ -891,7 +892,7 @@ bool injectScrollEditEvent(QWidget* root,
                            int delay)
 {
     auto obj = findObjectAs<QScrollBar>(root, obj_name);
-    if (obj.first != FindObjectErrCode::NoError)
+    if (obj.first != rtcommand::FindObjectErrCode::NoError)
     {
         logObjectError("injectScrollEditEvent", obj_name, obj.first);
         return false;
@@ -909,7 +910,7 @@ bool injectCheckBoxEvent(QWidget* root,
                          int delay)
 {
     auto obj = findObjectAs<QCheckBox>(root, obj_name);
-    if (obj.first != FindObjectErrCode::NoError)
+    if (obj.first != rtcommand::FindObjectErrCode::NoError)
     {
         logObjectError("injectCheckBoxEvent", obj_name, obj.first);
         return false;
@@ -939,7 +940,7 @@ bool injectButtonMenuEvent(QWidget* root,
                            int delay)
 {
     auto obj = findObjectAs<QAbstractButton>(root, obj_name);
-    if (obj.first != FindObjectErrCode::NoError)
+    if (obj.first != rtcommand::FindObjectErrCode::NoError)
     {
         logObjectError("injectButtonMenuEvent", obj_name, obj.first);
         return false;
@@ -958,7 +959,7 @@ bool injectDialogEvent(QWidget* root,
                        int delay)
 {
     auto obj = findObjectAs<QDialog>(root, obj_name);
-    if (obj.first != FindObjectErrCode::NoError)
+    if (obj.first != rtcommand::FindObjectErrCode::NoError)
     {
         logObjectError("injectDialogEvent", obj_name, obj.first);
         return false;

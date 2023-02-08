@@ -19,6 +19,7 @@
 #include "ui_test_setget_native.h"
 #include "ui_test_find.h"
 #include "ui_test_testable.h"
+#include "rtcommand_defs.h"
 
 #include <QWidget>
 
@@ -35,7 +36,7 @@ bool setUIElement(QWidget* parent,
                   int delay)
 {
     auto w = findObjectAs<QWidget>(parent, obj_name);
-    if (w.first != FindObjectErrCode::NoError)
+    if (w.first != rtcommand::FindObjectErrCode::NoError)
         return false;
 
     UITestable* w_test = dynamic_cast<UITestable*>(w.second);
@@ -70,7 +71,7 @@ boost::optional<QString> getUIElement(QWidget* parent,
                                       const QString& what)
 {
     auto w = findObjectAs<QWidget>(parent, obj_name);
-    if (w.first != FindObjectErrCode::NoError)
+    if (w.first != rtcommand::FindObjectErrCode::NoError)
         return {};
 
     UITestable* w_test = dynamic_cast<UITestable*>(w.second);

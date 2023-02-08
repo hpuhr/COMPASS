@@ -88,6 +88,8 @@ TaskManager::TaskManager(const std::string& class_id, const std::string& instanc
 //    assert (asterix_importer_task_);
 //    connect (compass, &COMPASS::appModeSwitchSignal,
 //             asterix_importer_task_.get(), &ASTERIXImportTask::appModeSwitchSlot);
+
+    setObjectName("TaskManager");
 }
 
 TaskManager::~TaskManager() {}

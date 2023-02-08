@@ -22,6 +22,7 @@
 #include <assert.h>
 
 #include "configuration.h"
+#include "rtcommand_defs.h"
 
 #include <map>
 #include <vector>
@@ -87,6 +88,10 @@ class Configurable
                                          const std::string& instance_id);
     /// @brief Returns if a specified sub-configurable exists
     bool hasSubConfigurable(const std::string& class_id, const std::string& instance_id);
+    // finds by approx name, either exact instance id or first matching class id
+    std::pair<rtcommand::FindObjectErrCode, Configurable*> findSubConfigurable(const std::string& approx_name);
+    // returns nullptr if not found
+    Configurable* getApproximateChildNamed (const std::string& approx_name);
 
     Configurable& parent()
     {

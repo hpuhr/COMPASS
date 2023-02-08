@@ -62,6 +62,8 @@ ViewPointsImportTask::ViewPointsImportTask(const std::string& class_id, const st
     createSubConfigurables(); // no thing
 
     current_error_ = "No filename set";
+
+    setObjectName("ViewPointsImportTask");
 }
 
 ViewPointsImportTask::~ViewPointsImportTask()

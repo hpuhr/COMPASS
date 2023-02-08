@@ -19,6 +19,7 @@
 #include "ui_test_find.h"
 #include "ui_test_widget_setters.h"
 #include "ui_test_widget_getters.h"
+#include "rtcommand_defs.h"
 
 #include <QWidget>
 
@@ -52,7 +53,7 @@ bool setUIElementNative(QWidget* parent,
                         const SetUIHint& hint)
 {
     auto w = findObjectAs<QWidget>(parent, obj_name);
-    if (w.first != FindObjectErrCode::NoError)
+    if (w.first != rtcommand::FindObjectErrCode::NoError)
         return false;
 
     //declare setters for each type of widget here
@@ -89,7 +90,7 @@ boost::optional<QString> getUIElementNative(QWidget* parent,
                                             const QString& what)
 {
     auto w = findObjectAs<QObject>(parent, obj_name);
-    if (w.first != FindObjectErrCode::NoError)
+    if (w.first != rtcommand::FindObjectErrCode::NoError)
         return {};
 
     TRY_INVOKE_UI_GETTER(QLabel, w.second, what)
