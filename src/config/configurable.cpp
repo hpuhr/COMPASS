@@ -22,6 +22,8 @@
 #include "stringconv.h"
 #include "logger.h"
 
+#include <boost/algorithm/string.hpp>
+
 using namespace std;
 using namespace Utils;
 
@@ -354,9 +356,11 @@ std::pair<rtcommand::FindObjectErrCode, Configurable*> Configurable::findSubConf
 Configurable* Configurable::getApproximateChildNamed (const std::string& approx_name)
 {
     // find exact instance id
+    std::string approx_name_lower = boost::algorithm::to_lower_copy(approx_name);
+
     auto exact_instance_iter = std::find_if(children_.begin(), children_.end(),
-                            [approx_name](const pair<std::string, Configurable&>& child_iter) -> bool {
-        return child_iter.second.instanceId() == approx_name; });
+                            [approx_name_lower](const pair<std::string, Configurable&>& child_iter) -> bool {
+        return boost::algorithm::to_lower_copy(child_iter.second.instanceId()) == approx_name_lower; });
 
     if (exact_instance_iter != children_.end())
         return &exact_instance_iter->second;
@@ -364,8 +368,8 @@ Configurable* Configurable::getApproximateChildNamed (const std::string& approx_
     // check if class_id, take first match
 
     auto class_id_match_iter = std::find_if(children_.begin(), children_.end(),
-                            [approx_name](const pair<std::string, Configurable&>& child_iter) -> bool {
-        return child_iter.second.classId() == approx_name; });
+                            [approx_name_lower](const pair<std::string, Configurable&>& child_iter) -> bool {
+        return boost::algorithm::to_lower_copy(child_iter.second.classId()) == approx_name_lower; });
 
     if (class_id_match_iter != children_.end())
     {

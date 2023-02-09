@@ -4,19 +4,24 @@
 #include "datasourcemanager.h"
 #include "taskmanager.h"
 #include "viewpointsimporttask.h"
+#include "asteriximporttask.h"
 #include "logger.h"
 #include "util/files.h"
 #include "rtcommand_registry.h"
+#include "stringconv.h"
 
 #include <QTimer>
 
 #include <boost/program_options.hpp>
 
+using namespace std;
 using namespace Utils;
 
 REGISTER_RTCOMMAND(main_window::RTCommandOpenDB)
 REGISTER_RTCOMMAND(main_window::RTCommandCreateDB)
 REGISTER_RTCOMMAND(main_window::RTCommandCloseDB)
+REGISTER_RTCOMMAND(main_window::RTCommandImportViewPointsFile)
+REGISTER_RTCOMMAND(main_window::RTCommandImportASTERIXFile)
 REGISTER_RTCOMMAND(main_window::RTCommandQuit)
 
 namespace main_window
@@ -24,13 +29,10 @@ namespace main_window
 
 // open db
 
-bool RTCommandOpenDB::valid() const
+rtcommand::IsValid  RTCommandOpenDB::valid() const
 {
-    if (!filename_.size())
-        return false;
-
-    if (!Files::fileExists(filename_))
-        return false;
+    CHECK_RTCOMMAND_INVALID_CONDITION(!filename_.size(), "Filename empty")
+    CHECK_RTCOMMAND_INVALID_CONDITION(!Files::fileExists(filename_), string("File '")+filename_+"' does not exist")
 
     return RTCommand::valid();
 }
@@ -38,16 +40,28 @@ bool RTCommandOpenDB::valid() const
 bool RTCommandOpenDB::run_impl() const
 {
     if (!filename_.size())
+    {
+        setResultMessage("Filename empty");
         return false;
+    }
 
     if (!Files::fileExists(filename_))
+    {
+        setResultMessage("File '"+filename_+"' does not exist");
         return false;
+    }
 
     if (COMPASS::instance().dbOpened())
+    {
+        setResultMessage("Database already opened");
         return false;
+    }
 
     if (COMPASS::instance().appMode() != AppMode::Offline) // to be sure
+    {
+        setResultMessage("Wrong application mode "+COMPASS::instance().appModeStr());
         return false;
+    }
 
     MainWindow* main_window = dynamic_cast<MainWindow*> (rtcommand::mainWindow());
     assert (main_window);
@@ -73,10 +87,9 @@ void RTCommandOpenDB::assignVariables_impl(const VariablesMap& variables)
 
 // create db
 
-bool RTCommandCreateDB::valid() const
+rtcommand::IsValid  RTCommandCreateDB::valid() const
 {
-    if (!filename_.size())
-        return false;
+    CHECK_RTCOMMAND_INVALID_CONDITION(!filename_.size(), "Filename empty")
 
     return RTCommand::valid();
 }
@@ -84,13 +97,22 @@ bool RTCommandCreateDB::valid() const
 bool RTCommandCreateDB::run_impl() const
 {
     if (!filename_.size())
+    {
+        setResultMessage("Filename empty");
         return false;
+    }
 
     if (COMPASS::instance().dbOpened())
+    {
+        setResultMessage("Database already opened");
         return false;
+    }
 
     if (COMPASS::instance().appMode() != AppMode::Offline) // to be sure
+    {
+        setResultMessage("Wrong application mode "+COMPASS::instance().appModeStr());
         return false;
+    }
 
     MainWindow* main_window = dynamic_cast<MainWindow*> (rtcommand::mainWindow());
     assert (main_window);
@@ -116,13 +138,10 @@ void RTCommandCreateDB::assignVariables_impl(const VariablesMap& variables)
 
 // import ds
 
-bool RTCommandImportDataSourcesFile::valid() const
+rtcommand::IsValid  RTCommandImportDataSourcesFile::valid() const
 {
-    if (!filename_.size())
-        return false;
-
-    if (!Files::fileExists(filename_))
-        return false;
+    CHECK_RTCOMMAND_INVALID_CONDITION(!filename_.size(), "Filename empty")
+    CHECK_RTCOMMAND_INVALID_CONDITION(!Files::fileExists(filename_), string("File '")+filename_+"' does not exist")
 
     return RTCommand::valid();
 }
@@ -130,16 +149,28 @@ bool RTCommandImportDataSourcesFile::valid() const
 bool RTCommandImportDataSourcesFile::run_impl() const
 {
     if (!filename_.size())
+    {
+        setResultMessage("Filename empty");
         return false;
+    }
 
     if (!Files::fileExists(filename_))
+    {
+        setResultMessage("File '"+filename_+"' does not exist");
         return false;
+    }
 
-    if (COMPASS::instance().dbOpened())
+    if (!COMPASS::instance().dbOpened())
+    {
+        setResultMessage("Database not opened");
         return false;
+    }
 
     if (COMPASS::instance().appMode() != AppMode::Offline) // to be sure
+    {
+        setResultMessage("Wrong application mode "+COMPASS::instance().appModeStr());
         return false;
+    }
 
     COMPASS::instance().dataSourceManager().importDataSources(filename_);
 
@@ -165,19 +196,16 @@ void RTCommandImportDataSourcesFile::assignVariables_impl(const VariablesMap& va
 RTCommandImportViewPointsFile::RTCommandImportViewPointsFile()
     : rtcommand::RTCommand()
 {
-    condition.type = rtcommand::RTCommandWaitCondition::Type::Signal;
-    condition.obj = "compass.taskmanager.viewpointsimporttask";
-    condition.value = "importDoneSignal";
+//    condition.type = rtcommand::RTCommandWaitCondition::Type::Signal;
+//    condition.obj = "compass.taskmanager.viewpointsimporttask";
+//    condition.value = "importDoneSignal";
     //condition.timeout_ms = -1; // think about max duration
 }
 
-bool RTCommandImportViewPointsFile::valid() const
+rtcommand::IsValid  RTCommandImportViewPointsFile::valid() const
 {
-    if (!filename_.size())
-        return false;
-
-    if (!Files::fileExists(filename_))
-        return false;
+    CHECK_RTCOMMAND_INVALID_CONDITION(!filename_.size(), "Filename empty")
+    CHECK_RTCOMMAND_INVALID_CONDITION(!Files::fileExists(filename_), string("File '")+filename_+"' does not exist")
 
     return RTCommand::valid();
 }
@@ -185,29 +213,46 @@ bool RTCommandImportViewPointsFile::valid() const
 bool RTCommandImportViewPointsFile::run_impl() const
 {
     if (!filename_.size())
+    {
+        setResultMessage("Filename empty");
         return false;
+    }
 
     if (!Files::fileExists(filename_))
+    {
+        setResultMessage("File '"+filename_+"' does not exist");
         return false;
+    }
 
-    if (COMPASS::instance().dbOpened())
+    if (!COMPASS::instance().dbOpened())
+    {
+        setResultMessage("Database not opened");
         return false;
+    }
 
     if (COMPASS::instance().appMode() != AppMode::Offline) // to be sure
+    {
+        setResultMessage("Wrong application mode "+COMPASS::instance().appModeStr());
         return false;
-
+    }
     ViewPointsImportTask& vp_import_task = COMPASS::instance().taskManager().viewPointsImportTask();
 
     vp_import_task.importFilename(filename_);
 
-    assert(vp_import_task.canRun());
+    if (!vp_import_task.canRun())
+    {
+        setResultMessage("Import error '"+vp_import_task.currentError()+"'");
+        return false;
+    }
+
     vp_import_task.showDoneSummary(false);
 
     vp_import_task.run();
+    assert (vp_import_task.done());
 
     // if shitty
-    setResultMessage("VP error case 3");
-    return false;
+    //setResultMessage("VP error case 3");
+    //return false;
 
     // if ok
     return true;
@@ -226,6 +271,180 @@ void RTCommandImportViewPointsFile::assignVariables_impl(const VariablesMap& var
 {
     RTCOMMAND_GET_VAR_OR_THROW(variables, "filename", std::string, filename_)
 }
+
+// import asterix file
+
+RTCommandImportASTERIXFile::RTCommandImportASTERIXFile()
+    : rtcommand::RTCommand()
+{
+    condition.type = rtcommand::RTCommandWaitCondition::Type::Signal;
+    condition.obj = "compass.taskmanager.asteriximporttask";
+    condition.value = "doneSignal(std::string)";
+    condition.timeout_ms = -1; // think about max duration
+}
+
+rtcommand::IsValid  RTCommandImportASTERIXFile::valid() const
+{
+    CHECK_RTCOMMAND_INVALID_CONDITION(!filename_.size(), "Filename empty")
+    CHECK_RTCOMMAND_INVALID_CONDITION(!Files::fileExists(filename_), "File '"+filename_+"' does not exist")
+
+    if (framing_.size()) // ’none’, ’ioss’, ’ioss_seq’, ’rff’
+    {
+        CHECK_RTCOMMAND_INVALID_CONDITION(
+                    !(framing_ == "none" || framing_ == "ioss" || framing_ == "ioss_seq" || framing_ == "rff"),
+                    string("Framing '")+framing_+"' does not exist")
+    }
+
+    if (line_id_.size())
+    {
+        CHECK_RTCOMMAND_INVALID_CONDITION(
+                    !(line_id_ == "L1" || line_id_ == "L2" || line_id_ == "L3" || line_id_ == "L4"),
+                    "Line '"+line_id_+"' does not exist")
+    }
+
+    if (date_str_.size())
+    {
+        boost::posix_time::ptime date = Time::fromDateString(date_str_);
+        CHECK_RTCOMMAND_INVALID_CONDITION(!date.is_not_a_date_time(), "Given date '"+date_str_+"' invalid")
+    }
+
+    if (time_offset_str_.size())
+    {
+        bool ok {true};
+
+        String::timeFromString(time_offset_str_, &ok);
+
+        CHECK_RTCOMMAND_INVALID_CONDITION(!ok, "Given time offset '"+time_offset_str_+"' invalid")
+    }
+
+    return RTCommand::valid();
+}
+
+bool RTCommandImportASTERIXFile::run_impl() const
+{
+    if (!filename_.size())
+    {
+        setResultMessage("Filename empty");
+        return false;
+    }
+
+    if (!Files::fileExists(filename_))
+    {
+        setResultMessage("File '"+filename_+"' does not exist");
+        return false;
+    }
+
+    if (!COMPASS::instance().dbOpened())
+    {
+        setResultMessage("Database not opened");
+        return false;
+    }
+
+    if (COMPASS::instance().appMode() != AppMode::Offline) // to be sure
+    {
+        setResultMessage("Wrong application mode "+COMPASS::instance().appModeStr());
+        return false;
+    }
+
+    ASTERIXImportTask& import_task = COMPASS::instance().taskManager().asterixImporterTask();
+
+    try
+    {
+        if (framing_.size())
+        {
+            if (framing_ == "none")
+                import_task.asterixFileFraming("");
+            else
+                import_task.asterixFileFraming(framing_);
+        }
+
+        if (line_id_.size())
+        {
+            unsigned int file_line = String::lineFromStr(line_id_);
+            import_task.fileLineID(file_line);
+        }
+
+        if (date_str_.size())
+        {
+            import_task.date(Time::fromDateString(date_str_));
+        }
+
+        if (time_offset_str_.size())
+        {
+            bool ok {true};
+
+            double time_offset = String::timeFromString(time_offset_str_, &ok);
+            assert (ok); // was checked in valid
+
+            import_task.overrideTodActive(true);
+            import_task.overrideTodOffset(time_offset);
+        }
+    }
+    catch (exception& e)
+    {
+        logerr << "RTCommandImportASTERIXFile: run_impl: setting ASTERIX options resulted in error: " << e.what();
+        setResultMessage(string("Setting ASTERIX options resulted in error: ")+e.what());
+        return false;
+    }
+
+    assert (filename_.size());
+
+//    MainWindow* main_window = dynamic_cast<MainWindow*> (rtcommand::mainWindow());
+//    assert (main_window);
+
+//    main_window->importASTERIXFile(filename_);
+
+    import_task.importFilename(filename_);
+
+    if (!import_task.canRun())
+    {
+        setResultMessage("ASTERIX task can not be run"); // should never happen, checked before
+        return false;
+    }
+
+    import_task.showDoneSummary(false);
+
+    import_task.run(false); // no test
+
+    // handle errors
+
+    // if shitty
+    //setResultMessage("VP error case 3");
+    //return false;
+
+    // if ok
+    return true;
+}
+
+void RTCommandImportASTERIXFile::collectOptions_impl(OptionsDescription& options,
+                                          PosOptionsDescription& positional)
+{
+    ADD_RTCOMMAND_OPTIONS(options)
+        ("filename", po::value<std::string>()->required(), "given filename, e.g. ’/data/file1.json’");
+    ADD_RTCOMMAND_OPTIONS(options)
+        ("framing,f", po::value<std::string>()->default_value(""),
+         "imports ASTERIX file with given  ASTERIX framing, e.g. ’none’, ’ioss’, ’ioss_seq’, ’rff’");
+    ADD_RTCOMMAND_OPTIONS(options)
+        ("line,l", po::value<std::string>()->default_value(""), "imports ASTERIX file with given line e.g. ’L2’");
+    ADD_RTCOMMAND_OPTIONS(options)
+        ("date,d", po::value<std::string>()->default_value(""),
+         "imports ASTERIX file with given date, in YYYY-MM-DD format e.g. ’2020-04-20’");
+    ADD_RTCOMMAND_OPTIONS(options)
+        ("time_offset,t", po::value<std::string>()->default_value(""),
+         "imports ASTERIX file with given Time of Day override, in HH:MM:SS.ZZZ’");
+
+    ADD_RTCOMMAND_POS_OPTION(positional, "filename", 1) // give position
+}
+
+void RTCommandImportASTERIXFile::assignVariables_impl(const VariablesMap& variables)
+{
+    RTCOMMAND_GET_VAR_OR_THROW(variables, "filename", std::string, filename_)
+    RTCOMMAND_GET_VAR_OR_THROW(variables, "framing", std::string, framing_)
+    RTCOMMAND_GET_VAR_OR_THROW(variables, "line", std::string, line_id_)
+    RTCOMMAND_GET_VAR_OR_THROW(variables, "date", std::string, date_str_)
+    RTCOMMAND_GET_VAR_OR_THROW(variables, "time_offset", std::string, time_offset_str_)
+}
+
 
 // close db
 

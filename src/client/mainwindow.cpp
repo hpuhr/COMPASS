@@ -226,6 +226,8 @@ MainWindow::MainWindow()
 
     main_window::RTCommandOpenDB::init();
     main_window::RTCommandCreateDB::init();
+    main_window::RTCommandImportViewPointsFile::init();
+    main_window::RTCommandImportASTERIXFile::init();
     main_window::RTCommandCloseDB::init();
     main_window::RTCommandQuit::init();
 }
@@ -920,7 +922,6 @@ void MainWindow::performAutomaticTasks ()
                    << "' does not exist";
             return;
         }
-
 
         ASTERIXImportTask& ast_import_task = COMPASS::instance().taskManager().asterixImporterTask();
 
