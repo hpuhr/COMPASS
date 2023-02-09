@@ -20,12 +20,52 @@
 #include <vector>
 
 #include <QWidget>
+#include <QDialog>
 
 class QTextEdit;
 class QLineEdit;
+class QListWidgetItem;
+class QListWidget;
 
 namespace rtcommand
 {
+
+/**
+ * 
+ */
+class RTCommandBacklogWidget : public QWidget
+{
+    Q_OBJECT
+public:
+    RTCommandBacklogWidget(QWidget* parent = nullptr);
+    virtual ~RTCommandBacklogWidget() = default;
+
+signals:
+    void commandSelected(const QString&);
+
+private:
+    void updateList();
+    void clearSelected();
+    void clearAll();
+    void acceptCommandItem(QListWidgetItem* item);
+
+    QListWidget* command_list_ = nullptr;
+};
+
+/**
+ * 
+ */
+class RTCommandBacklogDialog : public QDialog
+{
+public:
+    RTCommandBacklogDialog(QWidget* parent = nullptr);
+    virtual ~RTCommandBacklogDialog() = default;
+
+    const QString& selectedCommand() const { return selected_command_; }
+
+private:
+    QString selected_command_;
+};
 
 /**
  * 
@@ -45,16 +85,20 @@ private:
         Success
     };
 
+    void resetLocalBacklog();
+    void updateCommandFromLocalBacklog();
+    void showBacklog();
     void processCommand();
     void log(const QString& txt, LogType log_type = LogType::Plain);
+
     void lastCmd();
     void nextCmd();
 
-    QTextEdit*   cmd_backlog_;
+    QTextEdit*   cmd_shell_;
     QLineEdit*   cmd_edit_;
 
-    int                  current_command_ = -1;
-    std::vector<QString> commands_;
+    std::vector<std::string> local_backlog_;
+    int                      local_backlog_index_ = -1;
 };
 
 } // namespace rtcommand
