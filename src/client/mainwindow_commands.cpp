@@ -22,6 +22,8 @@ REGISTER_RTCOMMAND(main_window::RTCommandCreateDB)
 REGISTER_RTCOMMAND(main_window::RTCommandCloseDB)
 REGISTER_RTCOMMAND(main_window::RTCommandImportViewPointsFile)
 REGISTER_RTCOMMAND(main_window::RTCommandImportASTERIXFile)
+REGISTER_RTCOMMAND(main_window::RTCommandImportASTERIXNetworkStart)
+REGISTER_RTCOMMAND(main_window::RTCommandImportASTERIXNetworkStop)
 REGISTER_RTCOMMAND(main_window::RTCommandQuit)
 
 namespace main_window
@@ -445,6 +447,155 @@ void RTCommandImportASTERIXFile::assignVariables_impl(const VariablesMap& variab
     RTCOMMAND_GET_VAR_OR_THROW(variables, "time_offset", std::string, time_offset_str_)
 }
 
+// import asterix network
+
+RTCommandImportASTERIXNetworkStart::RTCommandImportASTERIXNetworkStart()
+    : rtcommand::RTCommand()
+{
+    condition.type = rtcommand::RTCommandWaitCondition::Type::Delay;
+    condition.timeout_ms = 500; // think about max duration
+}
+
+rtcommand::IsValid  RTCommandImportASTERIXNetworkStart::valid() const
+{
+    if (time_offset_str_.size())
+    {
+        bool ok {true};
+
+        String::timeFromString(time_offset_str_, &ok);
+
+        CHECK_RTCOMMAND_INVALID_CONDITION(!ok, "Given time offset '"+time_offset_str_+"' invalid")
+    }
+
+    return RTCommand::valid();
+}
+
+bool RTCommandImportASTERIXNetworkStart::run_impl() const
+{
+    if (!COMPASS::instance().dbOpened())
+    {
+        setResultMessage("Database not opened");
+        return false;
+    }
+
+    if (COMPASS::instance().appMode() != AppMode::Offline) // to be sure
+    {
+        setResultMessage("Wrong application mode "+COMPASS::instance().appModeStr());
+        return false;
+    }
+
+    ASTERIXImportTask& import_task = COMPASS::instance().taskManager().asterixImporterTask();
+
+    try
+    {
+        if (time_offset_str_.size())
+        {
+            bool ok {true};
+
+            double time_offset = String::timeFromString(time_offset_str_, &ok);
+            assert (ok); // was checked in valid
+
+            import_task.overrideTodActive(true);
+            import_task.overrideTodOffset(time_offset);
+        }
+    }
+    catch (exception& e)
+    {
+        logerr << "RTCommandImportASTERIXFile: run_impl: setting ASTERIX options resulted in error: " << e.what();
+        setResultMessage(string("Setting ASTERIX options resulted in error: ")+e.what());
+        return false;
+    }
+
+    import_task.importNetwork();
+
+    if (!import_task.canRun())
+    {
+        setResultMessage("ASTERIX task can not be run"); // should never happen, checked before
+        return false;
+    }
+
+    import_task.showDoneSummary(false);
+
+    import_task.run(false); // no test
+
+    // handle errors
+
+    // if shitty
+    //setResultMessage("VP error case 3");
+    //return false;
+
+    // if ok
+    return true;
+}
+
+void RTCommandImportASTERIXNetworkStart::collectOptions_impl(OptionsDescription& options,
+                                          PosOptionsDescription& positional)
+{
+    ADD_RTCOMMAND_OPTIONS(options)
+        ("time_offset,t", po::value<std::string>()->default_value(""),
+         "imports ASTERIX file with given Time of Day override, in HH:MM:SS.ZZZ’");
+
+    ADD_RTCOMMAND_OPTIONS(options)
+        ("max_lines,m", po::value<int>()->default_value(-1),
+         "maximum number of lines per data source during ASTERIX network import, 1..4");
+
+    ADD_RTCOMMAND_OPTIONS(options)("ignore_future_ts,i","ignore future timestamps");
+}
+
+void RTCommandImportASTERIXNetworkStart::assignVariables_impl(const VariablesMap& variables)
+{
+    RTCOMMAND_GET_VAR_OR_THROW(variables, "time_offset", std::string, time_offset_str_)
+    RTCOMMAND_GET_VAR_OR_THROW(variables, "max_lines", int, max_lines_)
+    RTCOMMAND_CHECK_VAR(variables, "ignore_future_ts", ignore_future_ts_)
+}
+
+// import asterix network stop
+
+RTCommandImportASTERIXNetworkStop::RTCommandImportASTERIXNetworkStop()
+    : rtcommand::RTCommand()
+{
+    condition.type = rtcommand::RTCommandWaitCondition::Type::Delay;
+    condition.timeout_ms = 500; // think about max duration
+}
+
+bool RTCommandImportASTERIXNetworkStop::run_impl() const
+{
+    if (!COMPASS::instance().dbOpened())
+    {
+        setResultMessage("Database not opened");
+        return false;
+    }
+
+    if (COMPASS::instance().appMode() == AppMode::Offline) // to be sure
+    {
+        setResultMessage("Wrong application mode "+COMPASS::instance().appModeStr());
+        return false;
+    }
+
+    ASTERIXImportTask& import_task = COMPASS::instance().taskManager().asterixImporterTask();
+
+    if (!import_task.isRunning() || !import_task.isImportNetwork())
+    {
+        setResultMessage("No ASTERIX network import running");
+        return false;
+    }
+
+    import_task.showDoneSummary(false);
+
+    MainWindow* main_window = dynamic_cast<MainWindow*> (rtcommand::mainWindow());
+    assert (main_window);
+
+    main_window->liveStopSlot();
+
+    // handle errors
+
+    // if shitty
+    //setResultMessage("VP error case 3");
+    //return false;
+
+    // if ok
+    return true;
+}
 
 // close db
 

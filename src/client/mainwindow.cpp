@@ -228,6 +228,8 @@ MainWindow::MainWindow()
     main_window::RTCommandCreateDB::init();
     main_window::RTCommandImportViewPointsFile::init();
     main_window::RTCommandImportASTERIXFile::init();
+    main_window::RTCommandImportASTERIXNetworkStart::init();
+    main_window::RTCommandImportASTERIXNetworkStop::init();
     main_window::RTCommandCloseDB::init();
     main_window::RTCommandQuit::init();
 }

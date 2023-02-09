@@ -85,6 +85,37 @@ protected:
     DECLARE_RTCOMMAND_OPTIONS
 };
 
+// import_asterix_network
+struct RTCommandImportASTERIXNetworkStart : public rtcommand::RTCommand
+{
+    std::string time_offset_str_;
+    int max_lines_ {-1};
+    bool ignore_future_ts_ {false};
+
+    virtual rtcommand::IsValid valid() const override;
+
+    RTCommandImportASTERIXNetworkStart();
+
+protected:
+    virtual bool run_impl() const override;
+
+    DECLARE_RTCOMMAND(import_asterix_network, "imports ASTERIX from defined network UDP streams")
+    DECLARE_RTCOMMAND_OPTIONS
+};
+
+// import_asterix_network_stop
+struct RTCommandImportASTERIXNetworkStop : public rtcommand::RTCommand
+{
+    RTCommandImportASTERIXNetworkStop();
+
+protected:
+    virtual bool run_impl() const override;
+
+    DECLARE_RTCOMMAND(import_asterix_network_stop, "stops import ASTERIX from network")
+    DECLARE_RTCOMMAND_NOOPTIONS
+};
+
+
 // close_db
 struct RTCommandCloseDB : public rtcommand::RTCommand
 {
