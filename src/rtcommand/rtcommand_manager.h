@@ -5,6 +5,7 @@
 #include "singleton.h"
 #include "logger.h"
 #include "rtcommand_defs.h"
+#include "json.h"
 
 #include <QThread>
 
@@ -46,6 +47,9 @@ public:
 
     bool addCommand(const std::string& cmd_str); // true on success, false on failed
 
+    std::vector<std::string> commandBacklog() const;
+    void clearBacklog();
+
 protected:
     volatile bool stop_requested_;
     volatile bool stopped_;
@@ -61,7 +65,13 @@ protected:
     RTCommandManager();
 
 private:
+    static const size_t BacklogSize = 100;
+
     void run();
+
+    void addToBacklog(const std::string& cmd);
+
+    nlohmann::json command_backlog_;
 };
 
 #endif // RTCOMMANDRECEIVER_H

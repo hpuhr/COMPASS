@@ -28,6 +28,7 @@ RTCommandManager::RTCommandManager()
     loginf << "JobManager: constructor";
 
     registerParameter("port_num", &port_num_, 27960);
+    registerParameter("db_file_list", &command_backlog_, nlohmann::json::array());
 }
 
 /**
@@ -180,6 +181,11 @@ void RTCommandManager::shutdown()
  */
 bool RTCommandManager::addCommand(const std::string& cmd_str)
 {
+    if (cmd_str.empty())
+        return false;
+
+    addToBacklog(cmd_str);
+
     rtcommand::RTCommandString cmd_inst (QString(cmd_str.c_str())); // todo change to std str
 
     auto rtcmd_inst = cmd_inst.issue();
@@ -194,4 +200,31 @@ bool RTCommandManager::addCommand(const std::string& cmd_str)
     }
 
     return true;
+}
+
+/**
+*/
+void RTCommandManager::addToBacklog(const std::string& cmd)
+{
+    command_backlog_.push_back(cmd);
+
+    if (command_backlog_.size() > BacklogSize)
+    {
+        size_t offs = command_backlog_.size() - BacklogSize;
+        command_backlog_.erase(command_backlog_.begin(), command_backlog_.begin() + offs);
+    }
+}
+
+/**
+*/
+void RTCommandManager::clearBacklog()
+{
+    command_backlog_.clear();
+}
+
+/**
+*/
+std::vector<std::string> RTCommandManager::commandBacklog() const
+{
+    return command_backlog_.get<std::vector<std::string>>();
 }

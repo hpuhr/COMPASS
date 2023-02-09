@@ -51,6 +51,9 @@ QMainWindow* mainWindow();
 QDialog* activeDialog();
 std::pair<FindObjectErrCode, QObject*> getCommandReceiver(const std::string& object_path); // mainwindow.osgview1, dialog.obj2, compass.child1
 
+/**
+ * Obtains the command receiver with the given path casted to T*.
+ */
 template <typename T>
 inline std::pair<FindObjectErrCode, T*> getCommandReceiverAs(const std::string& object_path)
 {
