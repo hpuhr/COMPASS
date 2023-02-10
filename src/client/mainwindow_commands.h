@@ -115,6 +115,88 @@ protected:
     DECLARE_RTCOMMAND_NOOPTIONS
 };
 
+// import_json
+struct RTCommandImportJSONFile : public rtcommand::RTCommand
+{
+    std::string filename_;
+
+    virtual rtcommand::IsValid valid() const override;
+
+    RTCommandImportJSONFile();
+
+protected:
+    virtual bool run_impl() const override;
+
+    DECLARE_RTCOMMAND(import_json, "imports JSON file with given filename, e.g. ’/data/file1.json’")
+    DECLARE_RTCOMMAND_OPTIONS
+};
+
+// import_gps
+struct RTCommandImportGPSTrail : public rtcommand::RTCommand
+{
+    std::string filename_;
+
+    virtual rtcommand::IsValid valid() const override;
+
+    RTCommandImportGPSTrail();
+
+protected:
+    virtual bool run_impl() const override;
+
+    DECLARE_RTCOMMAND(import_gps_trail, "imports gps trail NMEA with given filename, e.g. ’/data/file2.txt’")
+    DECLARE_RTCOMMAND_OPTIONS
+};
+
+// import_sectors_json
+struct RTCommandImportSectorsJSON : public rtcommand::RTCommand
+{
+    std::string filename_;
+
+    virtual rtcommand::IsValid valid() const override;
+
+protected:
+    virtual bool run_impl() const override;
+
+    DECLARE_RTCOMMAND(import_sectors_json,
+                      "imports exported sectors JSON with given filename, e.g. ’/data/sectors.json’")
+    DECLARE_RTCOMMAND_OPTIONS
+};
+
+// calc radar plot pos
+struct RTCommandCalculateRadarPlotPositions : public rtcommand::RTCommand
+{
+    RTCommandCalculateRadarPlotPositions();
+
+protected:
+    virtual bool run_impl() const override;
+
+    DECLARE_RTCOMMAND(calculate_radar_plot_positions , "calculate radar plot positions")
+    DECLARE_RTCOMMAND_NOOPTIONS
+};
+
+// calc assoc
+struct RTCommandCalculateAssociations : public rtcommand::RTCommand
+{
+    RTCommandCalculateAssociations();
+
+protected:
+    virtual bool run_impl() const override;
+
+    DECLARE_RTCOMMAND(associate_data, "associate target reports")
+    DECLARE_RTCOMMAND_NOOPTIONS
+};
+
+// load data
+struct RTCommandLoadData : public rtcommand::RTCommand
+{
+    RTCommandLoadData();
+
+protected:
+    virtual bool run_impl() const override;
+
+    DECLARE_RTCOMMAND(load_data, "load data")
+    DECLARE_RTCOMMAND_NOOPTIONS
+};
 
 // close_db
 struct RTCommandCloseDB : public rtcommand::RTCommand

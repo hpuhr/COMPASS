@@ -5,6 +5,11 @@
 #include "taskmanager.h"
 #include "viewpointsimporttask.h"
 #include "asteriximporttask.h"
+#include "jsonimporttask.h"
+#include "gpstrailimporttask.h"
+#include "evaluationmanager.h"
+#include "radarplotpositioncalculatortask.h"
+#include "createassociationstask.h"
 #include "logger.h"
 #include "util/files.h"
 #include "rtcommand_registry.h"
@@ -24,6 +29,12 @@ REGISTER_RTCOMMAND(main_window::RTCommandImportViewPointsFile)
 REGISTER_RTCOMMAND(main_window::RTCommandImportASTERIXFile)
 REGISTER_RTCOMMAND(main_window::RTCommandImportASTERIXNetworkStart)
 REGISTER_RTCOMMAND(main_window::RTCommandImportASTERIXNetworkStop)
+REGISTER_RTCOMMAND(main_window::RTCommandImportJSONFile)
+REGISTER_RTCOMMAND(main_window::RTCommandImportGPSTrail)
+REGISTER_RTCOMMAND(main_window::RTCommandImportSectorsJSON)
+REGISTER_RTCOMMAND(main_window::RTCommandCalculateRadarPlotPositions)
+REGISTER_RTCOMMAND(main_window::RTCommandCalculateAssociations)
+REGISTER_RTCOMMAND(main_window::RTCommandLoadData)
 REGISTER_RTCOMMAND(main_window::RTCommandQuit)
 
 namespace main_window
@@ -198,10 +209,6 @@ void RTCommandImportDataSourcesFile::assignVariables_impl(const VariablesMap& va
 RTCommandImportViewPointsFile::RTCommandImportViewPointsFile()
     : rtcommand::RTCommand()
 {
-//    condition.type = rtcommand::RTCommandWaitCondition::Type::Signal;
-//    condition.obj = "compass.taskmanager.viewpointsimporttask";
-//    condition.value = "importDoneSignal";
-    //condition.timeout_ms = -1; // think about max duration
 }
 
 rtcommand::IsValid  RTCommandImportViewPointsFile::valid() const
@@ -390,11 +397,6 @@ bool RTCommandImportASTERIXFile::run_impl() const
     }
 
     assert (filename_.size());
-
-//    MainWindow* main_window = dynamic_cast<MainWindow*> (rtcommand::mainWindow());
-//    assert (main_window);
-
-//    main_window->importASTERIXFile(filename_);
 
     import_task.importFilename(filename_);
 
@@ -592,6 +594,321 @@ bool RTCommandImportASTERIXNetworkStop::run_impl() const
     // if shitty
     //setResultMessage("VP error case 3");
     //return false;
+
+    // if ok
+    return true;
+}
+
+// import json
+RTCommandImportJSONFile::RTCommandImportJSONFile()
+    : rtcommand::RTCommand()
+{
+    condition.type = rtcommand::RTCommandWaitCondition::Type::Signal;
+    condition.obj = "compass.taskmanager.jsonimporttask";
+    condition.value = "doneSignal(std::string)";
+    condition.timeout_ms = -1; // think about max duration
+}
+
+rtcommand::IsValid  RTCommandImportJSONFile::valid() const
+{
+    CHECK_RTCOMMAND_INVALID_CONDITION(!filename_.size(), "Filename empty")
+    CHECK_RTCOMMAND_INVALID_CONDITION(!Files::fileExists(filename_), string("File '")+filename_+"' does not exist")
+
+    return RTCommand::valid();
+}
+
+bool RTCommandImportJSONFile::run_impl() const
+{
+    if (!filename_.size())
+    {
+        setResultMessage("Filename empty");
+        return false;
+    }
+
+    if (!Files::fileExists(filename_))
+    {
+        setResultMessage("File '"+filename_+"' does not exist");
+        return false;
+    }
+
+    if (!COMPASS::instance().dbOpened())
+    {
+        setResultMessage("Database not opened");
+        return false;
+    }
+
+    if (COMPASS::instance().appMode() != AppMode::Offline) // to be sure
+    {
+        setResultMessage("Wrong application mode "+COMPASS::instance().appModeStr());
+        return false;
+    }
+
+    JSONImportTask& import_task = COMPASS::instance().taskManager().jsonImporterTask();
+
+    import_task.importFilename(filename_);
+
+    if (!import_task.canRun())
+    {
+        setResultMessage("JSON import task can not be run");
+        return false;
+    }
+
+    import_task.showDoneSummary(false);
+
+    import_task.run();
+
+    return true;
+}
+
+void RTCommandImportJSONFile::collectOptions_impl(OptionsDescription& options,
+                                          PosOptionsDescription& positional)
+{
+    ADD_RTCOMMAND_OPTIONS(options)
+        ("filename,f", po::value<std::string>()->required(), "given filename, e.g. ’/data/file1.json’");
+
+    ADD_RTCOMMAND_POS_OPTION(positional, "filename", 1) // give position
+}
+
+void RTCommandImportJSONFile::assignVariables_impl(const VariablesMap& variables)
+{
+    RTCOMMAND_GET_VAR_OR_THROW(variables, "filename", std::string, filename_)
+}
+
+// import gps trail
+RTCommandImportGPSTrail::RTCommandImportGPSTrail()
+    : rtcommand::RTCommand()
+{
+    condition.type = rtcommand::RTCommandWaitCondition::Type::Signal;
+    condition.obj = "compass.taskmanager.gpstrailimporttask";
+    condition.value = "doneSignal(std::string)";
+    condition.timeout_ms = -1; // think about max duration
+}
+
+rtcommand::IsValid  RTCommandImportGPSTrail::valid() const
+{
+    CHECK_RTCOMMAND_INVALID_CONDITION(!filename_.size(), "Filename empty")
+    CHECK_RTCOMMAND_INVALID_CONDITION(!Files::fileExists(filename_), string("File '")+filename_+"' does not exist")
+
+    return RTCommand::valid();
+}
+
+bool RTCommandImportGPSTrail::run_impl() const
+{
+    if (!filename_.size())
+    {
+        setResultMessage("Filename empty");
+        return false;
+    }
+
+    if (!Files::fileExists(filename_))
+    {
+        setResultMessage("File '"+filename_+"' does not exist");
+        return false;
+    }
+
+    if (!COMPASS::instance().dbOpened())
+    {
+        setResultMessage("Database not opened");
+        return false;
+    }
+
+    if (COMPASS::instance().appMode() != AppMode::Offline) // to be sure
+    {
+        setResultMessage("Wrong application mode "+COMPASS::instance().appModeStr());
+        return false;
+    }
+
+    GPSTrailImportTask& import_task = COMPASS::instance().taskManager().gpsTrailImportTask();
+
+    import_task.importFilename(filename_);
+
+    if (!import_task.canRun())
+    {
+        setResultMessage("GPS trail import task can not be run");
+        return false;
+    }
+
+    import_task.showDoneSummary(false);
+
+    import_task.run();
+
+    return true;
+}
+
+void RTCommandImportGPSTrail::collectOptions_impl(OptionsDescription& options,
+                                          PosOptionsDescription& positional)
+{
+    ADD_RTCOMMAND_OPTIONS(options)
+        ("filename,f", po::value<std::string>()->required(), "given filename, e.g. ’/data/file1.json’");
+
+    ADD_RTCOMMAND_POS_OPTION(positional, "filename", 1) // give position
+}
+
+void RTCommandImportGPSTrail::assignVariables_impl(const VariablesMap& variables)
+{
+    RTCOMMAND_GET_VAR_OR_THROW(variables, "filename", std::string, filename_)
+}
+
+// import sectors json
+rtcommand::IsValid  RTCommandImportSectorsJSON::valid() const
+{
+    CHECK_RTCOMMAND_INVALID_CONDITION(!filename_.size(), "Filename empty")
+    CHECK_RTCOMMAND_INVALID_CONDITION(!Files::fileExists(filename_), string("File '")+filename_+"' does not exist")
+
+    return RTCommand::valid();
+}
+
+bool RTCommandImportSectorsJSON::run_impl() const
+{
+    if (!filename_.size())
+    {
+        setResultMessage("Filename empty");
+        return false;
+    }
+
+    if (!Files::fileExists(filename_))
+    {
+        setResultMessage("File '"+filename_+"' does not exist");
+        return false;
+    }
+
+    if (!COMPASS::instance().dbOpened())
+    {
+        setResultMessage("Database not opened");
+        return false;
+    }
+
+    if (COMPASS::instance().appMode() != AppMode::Offline) // to be sure
+    {
+        setResultMessage("Wrong application mode "+COMPASS::instance().appModeStr());
+        return false;
+    }
+
+    COMPASS::instance().evaluationManager().importSectors(filename_);
+
+    return true;
+}
+
+void RTCommandImportSectorsJSON::collectOptions_impl(OptionsDescription& options,
+                                          PosOptionsDescription& positional)
+{
+    ADD_RTCOMMAND_OPTIONS(options)
+        ("filename,f", po::value<std::string>()->required(), "given filename, e.g. ’/data/file1.json’");
+
+    ADD_RTCOMMAND_POS_OPTION(positional, "filename", 1) // give position
+}
+
+void RTCommandImportSectorsJSON::assignVariables_impl(const VariablesMap& variables)
+{
+    RTCOMMAND_GET_VAR_OR_THROW(variables, "filename", std::string, filename_)
+}
+
+// calc radar plot pos
+RTCommandCalculateRadarPlotPositions::RTCommandCalculateRadarPlotPositions()
+    : rtcommand::RTCommand()
+{
+    condition.type = rtcommand::RTCommandWaitCondition::Type::Signal;
+    condition.obj = "compass.taskmanager.radarplotpositioncalculatortask";
+    condition.value = "doneSignal(std::string)";
+    condition.timeout_ms = -1; // think about max duration
+}
+
+bool RTCommandCalculateRadarPlotPositions::run_impl() const
+{
+    if (!COMPASS::instance().dbOpened())
+    {
+        setResultMessage("Database not opened");
+        return false;
+    }
+
+    if (COMPASS::instance().appMode() != AppMode::Offline) // to be sure
+    {
+        setResultMessage("Wrong application mode "+COMPASS::instance().appModeStr());
+        return false;
+    }
+
+    RadarPlotPositionCalculatorTask& task = COMPASS::instance().taskManager().radarPlotPositionCalculatorTask();
+
+    if(!task.canRun())
+    {
+        setResultMessage("Calculate radar plot positions task can not be run");
+        return false;
+    }
+
+    task.showDoneSummary(false);
+    task.run();
+
+    // if ok
+    return true;
+}
+
+// associate data
+RTCommandCalculateAssociations::RTCommandCalculateAssociations()
+    : rtcommand::RTCommand()
+{
+    condition.type = rtcommand::RTCommandWaitCondition::Type::Signal;
+    condition.obj = "compass.taskmanager.createassociationstask";
+    condition.value = "doneSignal(std::string)";
+    condition.timeout_ms = -1; // think about max duration
+}
+
+bool RTCommandCalculateAssociations::run_impl() const
+{
+    if (!COMPASS::instance().dbOpened())
+    {
+        setResultMessage("Database not opened");
+        return false;
+    }
+
+    if (COMPASS::instance().appMode() != AppMode::Offline) // to be sure
+    {
+        setResultMessage("Wrong application mode "+COMPASS::instance().appModeStr());
+        return false;
+    }
+
+    CreateAssociationsTask& task = COMPASS::instance().taskManager().createAssociationsTask();
+
+    if(!task.canRun())
+    {
+        setResultMessage("Calculate associations task can not be run");
+        return false;
+    }
+
+    task.showDoneSummary(false);
+    task.run();
+
+    // if ok
+    return true;
+}
+
+// load data
+RTCommandLoadData::RTCommandLoadData()
+    : rtcommand::RTCommand()
+{
+    condition.type = rtcommand::RTCommandWaitCondition::Type::Signal;
+    condition.obj = "compass.dbcontentmanager";
+    condition.value = "loadingDoneSignal";
+    condition.timeout_ms = -1; // think about max duration
+}
+
+bool RTCommandLoadData::run_impl() const
+{
+    if (!COMPASS::instance().dbOpened())
+    {
+        setResultMessage("Database not opened");
+        return false;
+    }
+
+    if (COMPASS::instance().appMode() != AppMode::Offline) // to be sure
+    {
+        setResultMessage("Wrong application mode "+COMPASS::instance().appModeStr());
+        return false;
+    }
+
+    MainWindow* main_window = dynamic_cast<MainWindow*> (rtcommand::mainWindow());
+    assert (main_window);
+
+    main_window->loadButtonSlot();
 
     // if ok
     return true;
