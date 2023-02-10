@@ -224,20 +224,7 @@ MainWindow::MainWindow()
     //init ui related commands
     ui_test::initUITestCommands();
 
-    main_window::RTCommandOpenDB::init();
-    main_window::RTCommandCreateDB::init();
-    main_window::RTCommandImportViewPointsFile::init();
-    main_window::RTCommandImportASTERIXFile::init();
-    main_window::RTCommandImportASTERIXNetworkStart::init();
-    main_window::RTCommandImportASTERIXNetworkStop::init();
-    main_window::RTCommandImportJSONFile::init();
-    main_window::RTCommandImportGPSTrail::init();
-    main_window::RTCommandImportSectorsJSON::init();
-    main_window::RTCommandCalculateRadarPlotPositions::init();
-    main_window::RTCommandCalculateAssociations::init();
-    main_window::RTCommandLoadData::init();
-    main_window::RTCommandCloseDB::init();
-    main_window::RTCommandQuit::init();
+    main_window::init_commands();
 }
 
 MainWindow::~MainWindow()

@@ -10,12 +10,20 @@
 #include "evaluationmanager.h"
 #include "radarplotpositioncalculatortask.h"
 #include "createassociationstask.h"
+#include "viewmanager.h"
+#include "viewpointsimporttask.h"
+#include "viewpointsimporttaskdialog.h"
+#include "viewpointsreportgenerator.h"
+#include "viewpointsreportgeneratordialog.h"
+#include "evaluationmanager.h"
 #include "logger.h"
 #include "util/files.h"
 #include "rtcommand_registry.h"
 #include "stringconv.h"
 
 #include <QTimer>
+#include <QCoreApplication>
+#include <QThread>
 
 #include <boost/program_options.hpp>
 
@@ -25,6 +33,7 @@ using namespace Utils;
 REGISTER_RTCOMMAND(main_window::RTCommandOpenDB)
 REGISTER_RTCOMMAND(main_window::RTCommandCreateDB)
 REGISTER_RTCOMMAND(main_window::RTCommandCloseDB)
+REGISTER_RTCOMMAND(main_window::RTCommandImportDataSourcesFile)
 REGISTER_RTCOMMAND(main_window::RTCommandImportViewPointsFile)
 REGISTER_RTCOMMAND(main_window::RTCommandImportASTERIXFile)
 REGISTER_RTCOMMAND(main_window::RTCommandImportASTERIXNetworkStart)
@@ -35,10 +44,35 @@ REGISTER_RTCOMMAND(main_window::RTCommandImportSectorsJSON)
 REGISTER_RTCOMMAND(main_window::RTCommandCalculateRadarPlotPositions)
 REGISTER_RTCOMMAND(main_window::RTCommandCalculateAssociations)
 REGISTER_RTCOMMAND(main_window::RTCommandLoadData)
+REGISTER_RTCOMMAND(main_window::RTCommandExportViewPointsReport)
+REGISTER_RTCOMMAND(main_window::RTCommandEvaluate)
+REGISTER_RTCOMMAND(main_window::RTCommandExportEvaluationReport)
 REGISTER_RTCOMMAND(main_window::RTCommandQuit)
 
 namespace main_window
 {
+
+void init_commands()
+{
+    main_window::RTCommandOpenDB::init();
+    main_window::RTCommandCreateDB::init();
+    main_window::RTCommandImportDataSourcesFile::init();
+    main_window::RTCommandImportViewPointsFile::init();
+    main_window::RTCommandImportASTERIXFile::init();
+    main_window::RTCommandImportASTERIXNetworkStart::init();
+    main_window::RTCommandImportASTERIXNetworkStop::init();
+    main_window::RTCommandImportJSONFile::init();
+    main_window::RTCommandImportGPSTrail::init();
+    main_window::RTCommandImportSectorsJSON::init();
+    main_window::RTCommandCalculateRadarPlotPositions::init();
+    main_window::RTCommandCalculateAssociations::init();
+    main_window::RTCommandLoadData::init();
+    main_window::RTCommandExportViewPointsReport::init();
+    main_window::RTCommandEvaluate::init();
+    main_window::RTCommandExportEvaluationReport::init();
+    main_window::RTCommandCloseDB::init();
+    main_window::RTCommandQuit::init();
+}
 
 // open db
 
@@ -173,11 +207,11 @@ bool RTCommandImportDataSourcesFile::run_impl() const
         return false;
     }
 
-    if (!COMPASS::instance().dbOpened())
-    {
-        setResultMessage("Database not opened");
-        return false;
-    }
+//    if (!COMPASS::instance().dbOpened())
+//    {
+//        setResultMessage("Database not opened");
+//        return false;
+//    }
 
     if (COMPASS::instance().appMode() != AppMode::Offline) // to be sure
     {
@@ -541,7 +575,7 @@ void RTCommandImportASTERIXNetworkStart::collectOptions_impl(OptionsDescription&
         ("max_lines,m", po::value<int>()->default_value(-1),
          "maximum number of lines per data source during ASTERIX network import, 1..4");
 
-    ADD_RTCOMMAND_OPTIONS(options)("ignore_future_ts,i","ignore future timestamps");
+    ADD_RTCOMMAND_OPTIONS(options)("ignore_future_ts,i", "ignore future timestamps");
 }
 
 void RTCommandImportASTERIXNetworkStart::assignVariables_impl(const VariablesMap& variables)
@@ -912,6 +946,201 @@ bool RTCommandLoadData::run_impl() const
 
     // if ok
     return true;
+}
+
+// export vp report
+rtcommand::IsValid  RTCommandExportViewPointsReport::valid() const
+{
+    CHECK_RTCOMMAND_INVALID_CONDITION(!filename_.size(), "Filename empty")
+
+    return RTCommand::valid();
+}
+
+bool RTCommandExportViewPointsReport::run_impl() const
+{
+    if (!filename_.size())
+    {
+        setResultMessage("Filename empty");
+        return false;
+    }
+
+    if (!COMPASS::instance().dbOpened())
+    {
+        setResultMessage("Database not opened");
+        return false;
+    }
+
+    if (COMPASS::instance().appMode() != AppMode::Offline) // to be sure
+    {
+        setResultMessage("Wrong application mode "+COMPASS::instance().appModeStr());
+        return false;
+    }
+
+    MainWindow* main_window = dynamic_cast<MainWindow*> (rtcommand::mainWindow());
+    assert (main_window);
+
+    main_window->showViewPointsTab();
+
+    ViewPointsReportGenerator& gen = COMPASS::instance().viewManager().viewPointsGenerator();
+
+    ViewPointsReportGeneratorDialog& dialog = gen.dialog();
+    dialog.show();
+
+    QCoreApplication::processEvents();
+
+    gen.reportPathAndFilename(filename_);
+    gen.showDone(false);
+
+    gen.run();
+
+    return true;
+}
+
+void RTCommandExportViewPointsReport::collectOptions_impl(OptionsDescription& options,
+                                          PosOptionsDescription& positional)
+{
+    ADD_RTCOMMAND_OPTIONS(options)
+        ("filename,f", po::value<std::string>()->required(), "given filename, e.g. ’/data/db2/report.tex'");
+
+    ADD_RTCOMMAND_POS_OPTION(positional, "filename", 1) // give position
+}
+
+void RTCommandExportViewPointsReport::assignVariables_impl(const VariablesMap& variables)
+{
+    RTCOMMAND_GET_VAR_OR_THROW(variables, "filename", std::string, filename_)
+}
+
+// evaluate
+bool RTCommandEvaluate::run_impl() const
+{
+    if (!COMPASS::instance().dbOpened())
+    {
+        setResultMessage("Database not opened");
+        return false;
+    }
+
+    if (COMPASS::instance().appMode() != AppMode::Offline) // to be sure
+    {
+        setResultMessage("Wrong application mode "+COMPASS::instance().appModeStr());
+        return false;
+    }
+
+    MainWindow* main_window = dynamic_cast<MainWindow*> (rtcommand::mainWindow());
+    assert (main_window);
+
+    main_window->showEvaluationTab();
+
+    EvaluationManager& eval_man = COMPASS::instance().evaluationManager();
+
+    if (!eval_man.canLoadData())
+    {
+        setResultMessage("Unable to load evaluation data");
+        return false;
+    }
+
+    loginf << "RTCommandEvaluate: run_impl: loading evaluation data";
+
+    eval_man.loadData();
+
+    while (!eval_man.dataLoaded())
+    {
+        QCoreApplication::processEvents();
+        QThread::msleep(1);
+    }
+
+    assert (eval_man.dataLoaded());
+
+    if (run_filter_)
+        eval_man.autofilterUTNs();
+
+    if (!eval_man.canEvaluate())
+    {
+        setResultMessage("Unable to evaluate");
+        return false;
+    }
+
+    loginf << "RTCommandEvaluate: run_impl: doing evaluation";
+
+    eval_man.evaluate();
+
+    return eval_man.evaluated();
+}
+
+void RTCommandEvaluate::collectOptions_impl(OptionsDescription& options,
+                                          PosOptionsDescription& positional)
+{
+    ADD_RTCOMMAND_OPTIONS(options)
+        ("run_filter,f", "run evaluation filter before evaluation");
+}
+
+void RTCommandEvaluate::assignVariables_impl(const VariablesMap& variables)
+{
+    RTCOMMAND_CHECK_VAR(variables, "run_filter", run_filter_)
+}
+
+// export evaluation report
+rtcommand::IsValid  RTCommandExportEvaluationReport::valid() const
+{
+    CHECK_RTCOMMAND_INVALID_CONDITION(!filename_.size(), "Filename empty")
+
+    return RTCommand::valid();
+}
+
+bool RTCommandExportEvaluationReport::run_impl() const
+{
+    if (!filename_.size())
+    {
+        setResultMessage("Filename empty");
+        return false;
+    }
+
+    if (!COMPASS::instance().dbOpened())
+    {
+        setResultMessage("Database not opened");
+        return false;
+    }
+
+    if (COMPASS::instance().appMode() != AppMode::Offline) // to be sure
+    {
+        setResultMessage("Wrong application mode "+COMPASS::instance().appModeStr());
+        return false;
+    }
+
+    EvaluationManager& eval_man = COMPASS::instance().evaluationManager();
+
+    if (!eval_man.evaluated())
+    {
+        setResultMessage("No evaluation was performed, unable to generate report");
+        return false;
+    }
+
+    EvaluationResultsReport::PDFGenerator& gen = eval_man.pdfGenerator();
+
+    EvaluationResultsReport::PDFGeneratorDialog& dialog = gen.dialog();
+    dialog.show();
+
+    QCoreApplication::processEvents();
+
+    gen.reportPathAndFilename(filename_);
+    gen.showDone(false);
+
+    gen.run();
+
+    return true;
+}
+
+void RTCommandExportEvaluationReport::collectOptions_impl(OptionsDescription& options,
+                                          PosOptionsDescription& positional)
+{
+    ADD_RTCOMMAND_OPTIONS(options)
+        ("filename,f", po::value<std::string>()->required(), "given filename, e.g. ’/data/db2/report.tex'");
+
+    ADD_RTCOMMAND_POS_OPTION(positional, "filename", 1) // give position
+}
+
+void RTCommandExportEvaluationReport::assignVariables_impl(const VariablesMap& variables)
+{
+    RTCOMMAND_GET_VAR_OR_THROW(variables, "filename", std::string, filename_)
 }
 
 // close db

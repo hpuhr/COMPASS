@@ -6,6 +6,7 @@
 
 namespace main_window
 {
+extern void init_commands();
 
 // open_db
 struct RTCommandOpenDB : public rtcommand::RTCommand
@@ -196,6 +197,48 @@ protected:
 
     DECLARE_RTCOMMAND(load_data, "load data")
     DECLARE_RTCOMMAND_NOOPTIONS
+};
+
+// export vp report
+struct RTCommandExportViewPointsReport : public rtcommand::RTCommand
+{
+    std::string filename_;
+
+    virtual rtcommand::IsValid valid() const override;
+
+protected:
+    virtual bool run_impl() const override;
+
+    DECLARE_RTCOMMAND(export_view_points_report,
+                      "export view points report after with given filename, e.g. ’/data/db2/report.tex'")
+    DECLARE_RTCOMMAND_OPTIONS
+};
+
+// evaluate
+struct RTCommandEvaluate : public rtcommand::RTCommand
+{
+    bool run_filter_ {false};
+
+protected:
+    virtual bool run_impl() const override;
+
+    DECLARE_RTCOMMAND(evaluate, "run evaluation")
+    DECLARE_RTCOMMAND_OPTIONS
+};
+
+// export evaluation report
+struct RTCommandExportEvaluationReport : public rtcommand::RTCommand
+{
+    std::string filename_;
+
+    virtual rtcommand::IsValid valid() const override;
+
+protected:
+    virtual bool run_impl() const override;
+
+    DECLARE_RTCOMMAND(export_eval_report,
+                      "export evaluation report after start with given filename, e.g. ’/data/eval_db2/report.tex'")
+    DECLARE_RTCOMMAND_OPTIONS
 };
 
 // close_db
