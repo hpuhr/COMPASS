@@ -167,7 +167,7 @@ void ASTERIXDecodeJob::doUDPStreamDecoding()
 
     vector<unique_ptr<UDPReceiver>> udp_receivers;
 
-    int max_lines = COMPASS::instance().mainWindow().importAsterixNetworkMaxLines();
+    int max_lines = task_.maxNetworkLines();
 
     loginf << "ASTERIXDecodeJob: doUDPStreamDecoding: max lines " << max_lines;
 

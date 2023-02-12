@@ -606,6 +606,19 @@ unsigned int ASTERIXImportTask::numPacketsInProcessing() const
     return num_packets_in_processing_;
 }
 
+unsigned int ASTERIXImportTask::maxNetworkLines() const
+{
+    return max_network_lines_;
+}
+
+void ASTERIXImportTask::maxNetworkLines(unsigned int value)
+{
+    loginf << "ASTERIXImportTask: maxNetworkLines: value " << value;
+    assert (value > 0 && value <= 4);
+
+    max_network_lines_ = value;
+}
+
 bool ASTERIXImportTask::isRunning() const
 {
     return running_;

@@ -144,6 +144,9 @@ class ASTERIXImportTask : public Task, public Configurable
 
     unsigned int numPacketsInProcessing() const;
 
+    unsigned int maxNetworkLines() const;
+    void maxNetworkLines(unsigned int value);
+
 protected:
     bool debug_jasterix_;
     std::shared_ptr<jASTERIX::jASTERIX> jasterix_;
@@ -156,6 +159,8 @@ protected:
     std::string current_file_framing_;
     unsigned int file_line_id_ {0};
     boost::posix_time::ptime date_;
+
+    unsigned int max_network_lines_ {4};
 
     bool test_{false};
 

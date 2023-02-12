@@ -534,6 +534,9 @@ bool RTCommandImportASTERIXNetworkStart::run_impl() const
             import_task.overrideTodActive(true);
             import_task.overrideTodOffset(time_offset);
         }
+
+        if (max_lines_ != -1)
+            import_task.maxNetworkLines(max_lines_);
     }
     catch (exception& e)
     {
