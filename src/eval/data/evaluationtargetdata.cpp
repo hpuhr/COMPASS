@@ -1245,8 +1245,8 @@ float EvaluationTargetData::tstMeasuredSpeedForTime (ptime timestamp) const // m
 
         double speed = sqrt(pow(v_x_ms, 2) + pow(v_y_ms, 2));
 
-        assert (!isnan(speed));
-        assert (!isinf(speed));
+        assert (!std::isnan(speed));
+        assert (!std::isinf(speed));
 
         return speed;
     }
@@ -1292,8 +1292,8 @@ float EvaluationTargetData::tstMeasuredTrackAngleForTime (ptime timestamp) const
 
         double angle = atan2(v_y_ms,v_x_ms);
 
-        assert (!isnan(angle));
-        assert (!isinf(angle));
+        assert (!std::isnan(angle));
+        assert (!std::isinf(angle));
 
         return angle;
     }
@@ -2124,7 +2124,7 @@ void EvaluationTargetData::addRefPositiosToMapping (TstDataMapping& mapping) con
                     angle = atan2(v_y,v_x);
                     speed = sqrt(pow(v_x, 2) + pow(v_y, 2));
 
-                    if (!isnan(angle) && !isinf(angle) && !isnan(speed) && !isinf(speed))
+                    if (!std::isnan(angle) && !std::isinf(angle) && !std::isnan(speed) && !std::isinf(speed))
                     {
                         mapping.has_ref_spd_ = true;
                         mapping.posbased_spd_ref_.x_ = v_x;
