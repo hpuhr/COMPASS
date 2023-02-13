@@ -348,7 +348,7 @@ rtcommand::IsValid  RTCommandImportASTERIXFile::valid() const
     if (date_str_.size())
     {
         boost::posix_time::ptime date = Time::fromDateString(date_str_);
-        CHECK_RTCOMMAND_INVALID_CONDITION(!date.is_not_a_date_time(), "Given date '"+date_str_+"' invalid")
+        CHECK_RTCOMMAND_INVALID_CONDITION(date.is_not_a_date_time(), "Given date '"+date_str_+"' invalid")
     }
 
     if (time_offset_str_.size())

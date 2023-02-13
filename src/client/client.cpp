@@ -180,8 +180,8 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
         return;
     }
 
-    if (quit_requested_)
-        return;
+//    if (quit_requested_)
+//        return;
 
     //    if (import_json_filename.size() && !import_json_schema.size())
     //    {
