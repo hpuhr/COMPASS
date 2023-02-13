@@ -191,7 +191,6 @@ std::shared_ptr<EvaluationRequirementResult::Single> Speed::evaluate (
             ++num_pos_outside;
             continue;
         }
-        ++num_pos_inside;
 
         tie (ref_spd, ok) = target_data.interpolatedRefPosBasedSpdForTime(timestamp, max_ref_time_diff);
 
@@ -208,6 +207,8 @@ std::shared_ptr<EvaluationRequirementResult::Single> Speed::evaluate (
             ++num_no_ref;
             continue;
         }
+
+        ++num_pos_inside;
 
         // ref_spd ok
 
