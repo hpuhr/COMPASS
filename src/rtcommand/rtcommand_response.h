@@ -40,16 +40,19 @@ struct RTCommandResponse
     RTCommandResponse(const RTCommandResult& result);
     RTCommandResponse(const rtcommand::RTCommand& cmd);
 
-    std::string toString() const;
     std::string toJSONString() const;
-    std::string resultToJSONString(bool format_nicely = false) const;
+    
+    std::string errorToString() const;
+    std::string replyToJSONString(bool format_nicely = false) const;
+    std::string stringifiedReply() const;
 
     static std::string errCode2String(CmdErrorCode code);
 
-    std::string    command;        // command name
-    ErrorInfo      error;          // error information
-    std::string    execution_time; // the command's execution time
-    nlohmann::json result_json;    // the command's result data
+    std::string    command;           // command name
+    ErrorInfo      error;             // error information
+    std::string    execution_time;    // the command's execution time
+    nlohmann::json json_reply;        // the command's result data as json
+    std::string    json_reply_string; // the command's result data as string
 };
 
 } // namespace rtcommand

@@ -151,9 +151,11 @@ bool RTCommandUIGet::run_impl() const
         return false;
     }
 
+    const std::string value = res.value().toStdString();
+
     nlohmann::json result;
-    result[ "value" ] = res.value().toStdString();
-    setJSONReply(result);
+    result[ "value" ] = value;
+    setJSONReply(result, value);
 
     return true;
 }

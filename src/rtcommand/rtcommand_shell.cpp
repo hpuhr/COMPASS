@@ -226,7 +226,7 @@ void RTCommandShell::processCommand()
     }
     else
     {
-        std::string msg = RTCommandResponse(issue_info).toString();
+        std::string msg = RTCommandResponse(issue_info).errorToString();
         logResult(msg, true);
     }
 
@@ -280,7 +280,7 @@ void RTCommandShell::logResult(std::string msg, bool error)
 */
 void RTCommandShell::log(const QString& txt, LogType log_type, bool indent)
 {
-    const QString Indent = "   ";
+    const QString Indentation = "   ";
 
     QColor color = Qt::black; //LogType::Plain
     if (log_type == LogType::Error)
@@ -291,7 +291,11 @@ void RTCommandShell::log(const QString& txt, LogType log_type, bool indent)
         color = Qt::darkGreen;
 
     cmd_shell_->setTextColor(color);
-    cmd_shell_->append(indent ? Indent + txt : txt);
+
+    QStringList lines = txt.split("\n");
+
+    for (const auto& l : lines)
+        cmd_shell_->append(indent ? Indentation + l : l);
 }
 
 /**

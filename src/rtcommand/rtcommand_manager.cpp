@@ -130,14 +130,14 @@ void RTCommandManager::run()
 
             if (source == Source::Application)
             {
-                std::string msg  = cmd_response.toString();
-                std::string data = cmd_response.resultToJSONString();
+                std::string msg  = cmd_response.errorToString();
+                std::string data = cmd_response.stringifiedReply();
                 emit commandProcessed(id, msg, data, cmd_response.error.hasError());
             }
             else if (source == Source::Shell)
             {
-                std::string msg  = cmd_response.toString();
-                std::string data = cmd_response.resultToJSONString(true);
+                std::string msg  = cmd_response.errorToString();
+                std::string data = cmd_response.stringifiedReply();
                 emit shellCommandProcessed(msg, data, cmd_response.error.hasError());
             }
             else if (source == Source::Server)

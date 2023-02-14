@@ -18,6 +18,7 @@
 #include "rtcommand_response.h"
 #include "rtcommand_result.h"
 #include "rtcommand.h"
+#include "rtcommand_registry.h"
 
 #include "timeconv.h"
 
@@ -28,30 +29,33 @@ namespace rtcommand
 */
 RTCommandResponse::RTCommandResponse(const ErrorInfo& err_info, const std::string& cmd_name)
 {
-    command         = cmd_name;
-    error           = err_info;
-    result_json     = {};
-    execution_time  = "";
+    command           = cmd_name;
+    error             = err_info;
+    json_reply        = {};
+    json_reply_string = "";
+    execution_time    = "";
 }
 
 /**
 */
 RTCommandResponse::RTCommandResponse(const IssueInfo& issue_info)
 {
-    command         = issue_info.command;
-    error           = issue_info.issued ? ErrorInfo() : issue_info.error;
-    result_json     = {};
-    execution_time  = "";
+    command           = issue_info.command;
+    error             = issue_info.issued ? ErrorInfo() : issue_info.error;
+    json_reply        = {};
+    json_reply_string = "";
+    execution_time    = "";
 }
 
 /**
 */
 RTCommandResponse::RTCommandResponse(const RTCommandResult& result)
 {
-    command        = result.command;
-    error          = result.error;
-    result_json    = result.reply_data;
-    execution_time = result.runtime.has_value() ? Utils::Time::toString(result.runtime.value(), 3) : "";
+    command           = result.command;
+    error             = result.error;
+    json_reply        = result.json_reply;
+    json_reply_string = result.json_reply_string;
+    execution_time    = result.runtime.has_value() ? Utils::Time::toString(result.runtime.value(), 3) : "";
 }
 
 /**
@@ -60,10 +64,11 @@ RTCommandResponse::RTCommandResponse(const rtcommand::RTCommand& cmd)
 {
     auto result = cmd.result();
 
-    command          = cmd.name().toStdString();
-    error            = cmd.isFinished() ? ErrorInfo()       : result.error;
-    result_json      = cmd.isFinished() ? result.reply_data : nlohmann::json();
-    execution_time   = result.runtime.has_value() ? Utils::Time::toString(result.runtime.value(), 3) : "";
+    command           = cmd.name().toStdString();
+    error             = cmd.isFinished() ? ErrorInfo()              : result.error;
+    json_reply        = cmd.isFinished() ? result.json_reply        : nlohmann::json();
+    json_reply_string = cmd.isFinished() ? result.json_reply_string : "";
+    execution_time    = result.runtime.has_value() ? Utils::Time::toString(result.runtime.value(), 3) : "";
 }
 
 /**
@@ -117,8 +122,9 @@ std::string RTCommandResponse::errCode2String(CmdErrorCode code)
 }
 
 /**
+ * 
 */
-std::string RTCommandResponse::toString() const
+std::string RTCommandResponse::errorToString() const
 {
     std::string str;
     if (error.hasError())
@@ -145,19 +151,29 @@ std::string RTCommandResponse::toJSONString() const
     root[ "error"                 ] = errCode2String(error.code);
     root[ "error_additional_info" ] = error.message;
     root[ "execution_time"        ] = execution_time;
-    root[ "result"                ] = result_json;
+    root[ "reply"                 ] = json_reply;
 
     return root.dump();
 }
 
 /**
 */
-std::string RTCommandResponse::resultToJSONString(bool format_nicely) const
+std::string RTCommandResponse::replyToJSONString(bool format_nicely) const
 {
-    if (result_json.is_null())
+    if (json_reply.is_null())
         return "";
 
-    return result_json.dump(format_nicely ? 3 : -1);
+    return json_reply.dump(format_nicely ? 3 : -1);
+}
+
+/**
+*/
+std::string RTCommandResponse::stringifiedReply() const
+{
+    if (!json_reply_string.empty())
+        return json_reply_string;
+
+    return replyToJSONString(true);
 }
 
 } // namespace rtcommand

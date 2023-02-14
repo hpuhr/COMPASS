@@ -291,7 +291,7 @@ void RTCommandRunner::runCommand(std::shared_ptr<RTCommand> cmd, RTCommandRunner
     //always try to clean up wait condition
     cleanupWaitCondition(cmd, stash);
 
-    logMsg(RTCommandResponse(*cmd).toString(), cmd.get());
+    logMsg(RTCommandResponse(*cmd).errorToString(), cmd.get());
 }
 
 } // namespace rtcommand

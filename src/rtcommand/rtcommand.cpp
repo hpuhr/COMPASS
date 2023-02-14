@@ -225,6 +225,8 @@ namespace rtcommand
     const std::string RTCommand::HelpOptionCmdFull = "--" + HelpOptionFull;
     const std::string RTCommand::HelpOptionCmdShort = "-" + HelpOptionShort;
 
+    const std::string RTCommand::ReplyStringIndentation = "   ";
+
     /**
      */
     RTCommand::RTCommand() = default;
@@ -238,6 +240,16 @@ namespace rtcommand
     void RTCommand::resetResult() const 
     { 
         result_.reset();
+    }
+
+    /**
+     */
+    const RTCommandResult& RTCommand::result() const
+    { 
+        //update command name
+        result_.command = name().toStdString();
+
+        return result_;
     }
 
     /**
@@ -320,9 +332,10 @@ namespace rtcommand
 
     /**
     */
-    void RTCommand::setJSONReply(const nlohmann::json& json_reply) const
+    void RTCommand::setJSONReply(const nlohmann::json& json_reply, const std::string& reply_as_string) const
     { 
-        result_.reply_data = json_reply; 
+        result_.json_reply        = json_reply;
+        result_.json_reply_string = reply_as_string;
     }
 
     /**
@@ -523,6 +536,7 @@ namespace rtcommand
     bool RTCommandHelp::run_impl() const
     {
         nlohmann::json root;
+        std::string    str;
 
         if (command.isEmpty())
         {
@@ -533,6 +547,10 @@ namespace rtcommand
                 nlohmann::json entry;
                 entry[ "command_name"        ] = elem.first.toStdString();
                 entry[ "command_description" ] = elem.second.description.toStdString();
+
+                str += elem.first.toStdString() + "\n";
+                str += ReplyStringIndentation + elem.second.description.toStdString() + "\n";
+                str += "\n";
 
                 root.push_back(entry);
             }
@@ -563,15 +581,23 @@ namespace rtcommand
 
             root[ "command_name"        ] = cmd->name().toStdString();
             root[ "command_description" ] = cmd->description().toStdString();
+
+            str += cmd->description().toStdString() + "\n";
+            str += "\n";
             
             nlohmann::json option_node;
 
             for (const auto &o : options.options())
             {
                 nlohmann::json option;
-                option[ "option_name"   ] = o->long_name();
+                option[ "option_name"        ] = o->long_name();
                 option[ "option_name_format" ] = o->format_name();
                 option[ "option_description" ] = o->description();
+
+                str += ReplyStringIndentation + o->long_name() + " " + o->format_name() + "\n";
+                str += "\n";
+                str += ReplyStringIndentation + ReplyStringIndentation + o->description() + "\n";
+                str += "\n";
 
                 option_node.push_back(option);
             }
@@ -579,7 +605,7 @@ namespace rtcommand
             root[ "command_options" ] = option_node;
         }
 
-        setJSONReply(root);
+        setJSONReply(root, str);
 
         return true;
     }

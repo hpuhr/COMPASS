@@ -27,6 +27,8 @@
 #include <memory>
 #include <vector>
 
+#include "json.h"
+
 class QObject;
 class QMainWindow;
 class QDialog;
@@ -121,11 +123,7 @@ struct RTCommand
     };
 
     CmdState state() const { return state_; }
-    const RTCommandResult& result() const 
-    { 
-        result_.command = name().toStdString();
-        return result_; 
-    }
+    const RTCommandResult& result() const;
 
     bool isFinished() const;
 
@@ -149,7 +147,7 @@ struct RTCommand
 
 protected:
     void setResultMessage(const std::string& m) const;
-    void setJSONReply(const nlohmann::json& json_reply) const;
+    void setJSONReply(const nlohmann::json& json_reply, const std::string& reply_as_string = "") const;
 
     //implements command specific behaviour
     virtual bool run_impl() const = 0;
@@ -162,9 +160,10 @@ protected:
     virtual QString name_impl() const = 0;
     virtual QString description_impl() const = 0;
 
+    static const std::string ReplyStringIndentation;
+
 private:
     friend class RTCommandRunner;
-    friend class RTCommandVoid;
 
     void setState(CmdState state) const;
     void setError(CmdErrorCode code, boost::optional<std::string> msg = {}) const;

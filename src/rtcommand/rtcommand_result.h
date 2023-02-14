@@ -42,14 +42,17 @@ struct RTCommandResult
     void reset()
     {   
         runtime.reset();
-        reply_data = {};
-        error      = {};
+        
+        json_reply        = {};
+        error             = {};
+        json_reply_string = "";
     }
 
-    std::string               command;    // command name
-    ErrorInfo                 error;      // error information
-    boost::optional<Duration> runtime;    // time for execution
-    nlohmann::json            reply_data; // command result data
+    std::string               command;           // command name
+    ErrorInfo                 error;             // error information
+    boost::optional<Duration> runtime;           // time for execution
+    nlohmann::json            json_reply;        // command reply as json
+    std::string               json_reply_string; // command reply as string
 };
 
 } // namespace rtcommand
