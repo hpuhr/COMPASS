@@ -120,11 +120,22 @@ struct RTCommand
         return true;
     };
 
-    const RTCommandResult& result() const { return result_; };
+    CmdState state() const { return state_; }
+    const RTCommandResult& result() const 
+    { 
+        result_.command = name().toStdString();
+        return result_; 
+    }
 
+    bool isFinished() const;
+
+    bool isConfigured() const;
+    bool checkConfiguration() const;
     bool configure(const RTCommandString& cmd);
+
     bool collectOptions(OptionsDescription& options,
-                        PosOptionsDescription& positional);
+                        PosOptionsDescription& positional,
+                        QString* err_msg = nullptr);
 
     RTCommandWaitCondition condition;             //condition to wait for after executing the command.
     bool                   execute_async = false; //if true execution will immediately return after deploying the command to the main thread's event loop,
@@ -137,8 +148,8 @@ struct RTCommand
     static const std::string HelpOptionCmdShort;
 
 protected:
-    void setResultMessage(const std::string& m) const { result_.cmd_msg = m; }
-    void setJSONReply(const nlohmann::json& json_reply) { result_.reply_data = json_reply; }
+    void setResultMessage(const std::string& m) const;
+    void setJSONReply(const nlohmann::json& json_reply) const;
 
     //implements command specific behaviour
     virtual bool run_impl() const = 0;
@@ -155,11 +166,16 @@ private:
     friend class RTCommandRunner;
     friend class RTCommandVoid;
 
-    bool assignVariables(const boost::program_options::variables_map& variables);
+    void setState(CmdState state) const;
+    void setError(CmdErrorCode code, boost::optional<std::string> msg = {}) const;
 
-    void resetResult() const { result_.reset(); }
+    bool assignVariables(const boost::program_options::variables_map& variables,
+                         QString* err_msg = nullptr);
 
-    mutable RTCommandResult result_; //command result struct containing execution state info and command result data
+    void resetResult() const;
+
+    mutable CmdState        state_;  //state the command is in
+    mutable RTCommandResult result_; //command result struct containing error info and command result data
 };
 
 /**

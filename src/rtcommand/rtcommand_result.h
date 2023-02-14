@@ -19,10 +19,6 @@
 
 #include "rtcommand_defs.h"
 
-#include <string>
-
-#include <QString>
-
 #include "json.h"
 
 #include <boost/date_time/posix_time/posix_time_duration.hpp>
@@ -38,28 +34,22 @@ struct RTCommandResult
 {
     typedef boost::posix_time::time_duration Duration;
 
-    bool success() const
+    bool hasError() const
     { 
-        //as the wait condition might be extremely important for any upcoming commands, 
-        //its state is part of the successful execution of a command
-        return (wc_state == WaitConditionState::Success && cmd_state == CmdState::Success);
-    }
-    bool readyForCheck() const 
-    {
-        return (wc_state == WaitConditionState::Success && cmd_state == CmdState::Executed);
+        return (error.code != CmdErrorCode::NoError);
     }
 
-    void reset();
+    void reset()
+    {   
+        runtime.reset();
+        reply_data = {};
+        error      = {};
+    }
 
-    std::string toJSONReplyString() const;
-    std::string stateToString() const;
-
-    WaitConditionState wc_state  = WaitConditionState::Unknown; // wait condition state
-    CmdState           cmd_state = CmdState::Fresh;             // execution state
-    std::string        cmd_msg;                                 // optional execution result message 
-
-    boost::optional<Duration> runtime;                          // time for execution
-    nlohmann::json            reply_data;                       // command result data
+    std::string               command;    // command name
+    ErrorInfo                 error;      // error information
+    boost::optional<Duration> runtime;    // time for execution
+    nlohmann::json            reply_data; // command result data
 };
 
 } // namespace rtcommand

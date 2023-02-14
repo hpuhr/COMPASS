@@ -17,6 +17,8 @@
 
 #pragma once 
 
+#include "rtcommand_defs.h"
+
 #include <memory>
 
 #include <QString>
@@ -34,13 +36,13 @@ namespace boost
 namespace rtcommand
 {
 
-struct RTCommand;
-
 /**
 */
 class RTCommandString
 {
 public:
+    typedef std::pair<std::unique_ptr<rtcommand::RTCommand>, IssueInfo> IssueResult;
+
     RTCommandString(const QString& cmd);
     virtual ~RTCommandString();
 
@@ -58,9 +60,10 @@ public:
     bool parse(boost::program_options::variables_map& vm, 
                const boost::program_options::options_description& d,
                const boost::program_options::positional_options_description& pod,
-               bool drop_quotes = true) const;
+               bool drop_quotes = true,
+               QString* err_msg = nullptr) const;
 
-    std::unique_ptr<RTCommand> issue() const;
+    IssueResult issue() const;
 
 private:
     QString extractName() const;

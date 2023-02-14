@@ -234,16 +234,26 @@ namespace rtcommand
     RTCommand::~RTCommand() = default;
 
     /**
+     */
+    void RTCommand::resetResult() const 
+    { 
+        result_.reset();
+    }
+
+    /**
      * Collects command option descriptions throughout the class hierarchy.
      */
     bool RTCommand::collectOptions(OptionsDescription &options,
-                                   PosOptionsDescription &positional)
+                                   PosOptionsDescription &positional,
+                                   QString* err_msg)
     {
         try
         {
             // add basic command options here
             ADD_RTCOMMAND_OPTIONS(options)
-            ("wait_condition", po::value<std::string>()->default_value(""), "wait condition config string")("async", "enables asynchrous command execution, meaning execution will return immediately after the command has been deployed to the main thread")(HelpOption.c_str(), "show command help information");
+            ("wait_condition", po::value<std::string>()->default_value(""), "wait condition config string")
+            ("async", "enables asynchrous command execution, meaning execution will return immediately after the command has been deployed to the main thread")
+            (HelpOption.c_str(), "show command help information");
 
             // collect from derived
             collectOptions_impl(options, positional);
@@ -251,11 +261,13 @@ namespace rtcommand
         catch (const std::exception &ex)
         {
             logerr << "RTCommand::collectOptions(): Error: " << ex.what();
+            if (err_msg) *err_msg = QString(ex.what());
             return false;
         }
         catch (...)
         {
             logerr << "RTCommand::collectOptions(): Unknown error";
+            if (err_msg) *err_msg = "Unknown error";
             return false;
         }
 
@@ -265,7 +277,8 @@ namespace rtcommand
     /**
      * Assigns scanned variables to struct data throughout the class hierarchy.
      */
-    bool RTCommand::assignVariables(const boost::program_options::variables_map &variables)
+    bool RTCommand::assignVariables(const boost::program_options::variables_map &variables,
+                                    QString* err_msg)
     {
         try
         {
@@ -285,15 +298,47 @@ namespace rtcommand
         catch (const std::exception &ex)
         {
             logerr << "RTCommand::assignVariables(): Error: " << ex.what();
+            if (err_msg) *err_msg = QString(ex.what());
             return false;
         }
         catch (...)
         {
             logerr << "RTCommand::assignVariables(): Unknown error";
+            if (err_msg) *err_msg = "Unknown error";
             return false;
         }
 
         return true;
+    }
+
+    /**
+    */
+    void RTCommand::setResultMessage(const std::string& m) const 
+    { 
+        result_.error.message = m; 
+    }
+
+    /**
+    */
+    void RTCommand::setJSONReply(const nlohmann::json& json_reply) const
+    { 
+        result_.reply_data = json_reply; 
+    }
+
+    /**
+    */
+    void RTCommand::setState(CmdState state) const
+    {
+        state_ = state;
+    }
+
+    /**
+    */
+    void RTCommand::setError(CmdErrorCode code, boost::optional<std::string> msg) const
+    {
+        result_.error.code = code;
+        if (msg.has_value())
+            result_.error.message = msg.value();
     }
 
     /**
@@ -303,28 +348,39 @@ namespace rtcommand
     {
         try
         {
-            result_.cmd_state = CmdState::Fresh;
-            result_.cmd_msg = "";
+            if (result().hasError())
+                return false;
 
-            // command configuration valid?
-            if (!valid().is_valid)
+            //command should be in configured state
+            if (state() != CmdState::Configured)
             {
-                result_.cmd_state = CmdState::BadConfig;
+                setError(CmdErrorCode::Exec_Unconfigured);
+                return false;
+            }
+
+            // check again: command configuration valid?
+            auto valid_state = valid();
+            if (!valid_state.is_valid)
+            {
+                setError(CmdErrorCode::Exec_InvalidConfig, valid_state.errorString());
                 return false;
             }
 
             // run command
             if (!run_impl())
             {
-                result_.cmd_state = CmdState::ExecFailed;
+                setError(CmdErrorCode::Exec_Failed);
                 return false;
             }
-
-            result_.cmd_state = CmdState::Executed;
+        }
+        catch (const std::exception& ex)
+        {
+            setError(CmdErrorCode::Exec_Crash, std::string(ex.what()));
+            return false;
         }
         catch (...)
         {
-            result_.cmd_state = CmdState::ExecFailed;
+            setError(CmdErrorCode::Exec_Crash, std::string("Unexpected crash"));
             return false;
         }
 
@@ -337,25 +393,66 @@ namespace rtcommand
     {
         try
         {
-            // result ready to be checked? (means execution and wait condition were both successful)
-            if (!result().readyForCheck())
+            if (result().hasError())
                 return false;
+
+            //command should be in executed state
+            if (state() != CmdState::Executed)
+            {
+                setError(CmdErrorCode::ResultCheck_NotExecuted);
+                return false;
+            }
 
             // run check
             if (!checkResult_impl())
             {
-                result_.cmd_state = CmdState::ResultCheckFailed;
+                setError(CmdErrorCode::ResultCheck_InvalidResult);
                 return false;
             }
-
-            result_.cmd_state = CmdState::Success;
+        }
+        catch (const std::exception& ex)
+        {
+            setError(CmdErrorCode::ResultCheck_Crash, std::string(ex.what()));
+            return false;
         }
         catch (...)
         {
-            result_.cmd_state = CmdState::ResultCheckFailed;
+            setError(CmdErrorCode::ResultCheck_Crash, std::string("Unexpected crash"));
             return false;
         }
 
+        return true;
+    }
+
+    /**
+     * Checks if the command in finished state.
+    */
+    bool RTCommand::isFinished() const
+    {
+        return (state() == CmdState::Finished);
+    }
+
+    /**
+     * Checks if the command in configured state.
+    */
+    bool RTCommand::isConfigured() const
+    {
+        return (state() == CmdState::Configured);
+    }
+
+    /**
+     * Checks configuration validity, and sets the commands state accordingly.
+     */
+    bool RTCommand::checkConfiguration() const
+    {
+        auto valid_state = valid();
+        if (!valid_state.is_valid)
+        {
+            setError(CmdErrorCode::Config_Invalid, valid_state.errorString());
+            return false;
+        }
+
+        setState(CmdState::Configured);
         return true;
     }
 
@@ -364,9 +461,12 @@ namespace rtcommand
      */
     bool RTCommand::configure(const RTCommandString &cmd)
     {
+        setState(CmdState::Unconfigured);
+
         if (!cmd.valid())
         {
             // std::cout << "RTCommand::configure: Passed command not valid" << std::endl;
+            setError(CmdErrorCode::Config_CommandStringInvalid);
             return false;
         }
 
@@ -375,35 +475,43 @@ namespace rtcommand
         {
             // std::cout << "RTCommand::configure: Name '" << name().toStdString()
             //           << "' does not match command name '" << cmd.cmdName().toStdString() << "'" << std::endl;
+            setError(CmdErrorCode::Config_CommandStringMismatch);
             return false;
         }
+
+        QString err_msg;
 
         // collect options description
         namespace po = boost::program_options;
         OptionsDescription od;
         PosOptionsDescription pod;
-        if (!collectOptions(od, pod))
+        if (!collectOptions(od, pod, &err_msg))
         {
             // std::cout << "RTCommand::configure: Could not collect options" << std::endl;
+            setError(CmdErrorCode::Config_CollectOptionsFailed, err_msg.toStdString());
             return false;
         }
 
         // parse command using collected options description
         po::variables_map vm;
-        if (!cmd.parse(vm, od, pod))
+        QString parse_err;
+        if (!cmd.parse(vm, od, pod, true, &parse_err))
         {
             // std::cout << "RTCommand::configure: Could not parse command" << std::endl;
+            setError(CmdErrorCode::Config_ParseOptionsFailed, err_msg.toStdString());
             return false;
         }
 
         // store parsed variables
-        if (!assignVariables(vm))
+        if (!assignVariables(vm, &err_msg))
         {
             // std::cout << "RTCommand::configure: Could not assign vars" << std::endl;
+            setError(CmdErrorCode::Config_AssignOptionsFailed, err_msg.toStdString());
             return false;
         }
 
-        return valid().is_valid;
+        //finally, check parsed configuration (also handles state)
+        return checkConfiguration();
     }
 
     /***************************************************************************************
@@ -414,45 +522,64 @@ namespace rtcommand
      */
     bool RTCommandHelp::run_impl() const
     {
+        nlohmann::json root;
+
         if (command.isEmpty())
         {
             const auto &cmds = RTCommandRegistry::instance().availableCommands();
 
-            loginf << "Available commands: ";
-            loginf << "";
-
             for (const auto &elem : cmds)
             {
-                loginf << "   " << elem.first.toStdString();
-                loginf << "      " << elem.second.description.toStdString();
+                nlohmann::json entry;
+                entry[ "command_name"        ] = elem.first.toStdString();
+                entry[ "command_description" ] = elem.second.description.toStdString();
+
+                root.push_back(entry);
             }
         }
         else
         {
             if (!RTCommandRegistry::instance().hasCommand(command))
+            {
+                setResultMessage("Command '" + command.toStdString() + "' not registered");
                 return false;
+            }
 
             auto cmd = RTCommandRegistry::instance().createCommandTemplate(command);
             if (!cmd)
+            {
+                setResultMessage("Command '" + command.toStdString() + "' could not be created");
                 return false;
+            }
 
             boost::program_options::options_description options;
             boost::program_options::positional_options_description p_options;
-            if (!cmd->collectOptions(options, p_options))
+            QString err_msg;
+            if (!cmd->collectOptions(options, p_options, &err_msg))
+            {
+                setResultMessage(err_msg.toStdString());
                 return false;
+            }
 
-            loginf << cmd->name().toStdString();
-            loginf << "";
-            loginf << "   " << cmd->description().toStdString();
-            loginf << "";
+            root[ "command_name"        ] = cmd->name().toStdString();
+            root[ "command_description" ] = cmd->description().toStdString();
+            
+            nlohmann::json option_node;
 
             for (const auto &o : options.options())
             {
-                loginf << "   " << o->long_name() << " " << o->format_name();
-                loginf << "      " << o->description();
-                loginf << "";
+                nlohmann::json option;
+                option[ "option_name"   ] = o->long_name();
+                option[ "option_name_format" ] = o->format_name();
+                option[ "option_description" ] = o->description();
+
+                option_node.push_back(option);
             }
+
+            root[ "command_options" ] = option_node;
         }
+
+        setJSONReply(root);
 
         return true;
     }
