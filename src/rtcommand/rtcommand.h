@@ -27,6 +27,8 @@
 #include <memory>
 #include <vector>
 
+#include <boost/optional.hpp>
+
 #include "json.h"
 
 class QObject;
@@ -48,6 +50,8 @@ namespace rtcommand
 
 class WaitCondition;
 class RTCommandString;
+
+boost::optional<std::vector<std::string>> validObjectPath(const std::string& path);
 
 QMainWindow* mainWindow();
 QDialog* activeDialog();
@@ -88,8 +92,10 @@ struct RTCommandWaitCondition
     }
 
     void setSignal(const QString& obj_name, const QString& signal_name, int timeout_in_ms = -1);
+    bool setSignalFromString(const QString& config_string);
+
     void setDelay(int ms);
-    bool setFromString(const QString& config_string);
+    bool setDelayFromString(const QString& config_string);
 
     Type    type = Type::None; //type of wait condition
     QString obj;               //QObject name
@@ -145,6 +151,9 @@ struct RTCommand
     static const std::string HelpOptionCmdFull;
     static const std::string HelpOptionCmdShort;
 
+    static const std::string ReplyStringIndentation;
+    static const char        ObjectPathSeparator;
+
 protected:
     void setResultMessage(const std::string& m) const;
     void setJSONReply(const nlohmann::json& json_reply, const std::string& reply_as_string = "") const;
@@ -159,8 +168,6 @@ protected:
     //!implemented by DECLARE_RTCOMMAND macro!
     virtual QString name_impl() const = 0;
     virtual QString description_impl() const = 0;
-
-    static const std::string ReplyStringIndentation;
 
 private:
     friend class RTCommandRunner;

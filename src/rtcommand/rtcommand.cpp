@@ -51,6 +51,22 @@ namespace rtcommand
      ***************************************************************************************/
 
     /**
+     * Returns the elements of a valid object path if the string could be split.
+     */
+    boost::optional<std::vector<std::string>> validObjectPath(const std::string& path)
+    {
+        std::vector<std::string> parts = String::split(path, RTCommand::ObjectPathSeparator);
+        if (parts.empty())
+            return {};
+
+        for (const auto& p : parts)
+            if (p.empty())
+                return {};
+
+        return parts;
+    }
+
+    /**
      * Return the application's main window.
      */
     QMainWindow *mainWindow()
@@ -86,14 +102,14 @@ namespace rtcommand
      */
     std::pair<rtcommand::FindObjectErrCode, QObject *> getCommandReceiver(const std::string &object_path)
     {
-        std::vector<std::string> parts = String::split(object_path, '.');
+        auto parts = validObjectPath(object_path);
 
-        if (!parts.size())
+        if (!parts.has_value())
             return {rtcommand::FindObjectErrCode::NotFound, nullptr};
 
-        std::string first_part = parts.at(0);
-        parts.erase(parts.begin());
-        std::string remainder = String::compress(parts, '.');
+        std::string first_part = parts.value().at(0);
+        parts.value().erase(parts.value().begin());
+        std::string remainder = String::compress(parts.value(), RTCommand::ObjectPathSeparator);
 
         if (first_part == "mainwindow")
         {
@@ -156,6 +172,46 @@ namespace rtcommand
     }
 
     /**
+     * Configures the wait condition as 'signal' type using a config string.
+     * 
+     * "SIGNAL_PATH;TIMEOUT_IN_MS"
+     * E.g. "mainwindow.histogramview2.dataLoaded;10000"
+     */
+    bool RTCommandWaitCondition::setSignalFromString(const QString &config_string)
+    {
+        QStringList parts = config_string.split(";");
+
+        if (parts.count() != 2 || parts[ 0 ].isEmpty() || parts[ 1 ].isEmpty())
+            return false;
+
+        bool ok;
+        int sig_timeout = parts[1].toInt(&ok);
+        if (!ok)
+            return false;
+
+        auto path_parts = validObjectPath(parts[ 0 ].toStdString());
+        if (!path_parts.has_value() || path_parts.value().size() < 2)
+            return false;
+
+        //last path element should be signal name
+        std::string signal_name = path_parts.value().back();
+
+        //the others describe the QObject the signal is emitted from
+        std::vector<std::string> obj_path = path_parts.value();
+        obj_path.pop_back();
+
+        QString sig_name = QString::fromStdString(signal_name);
+        QString sig_obj = QString::fromStdString(String::compress(obj_path, RTCommand::ObjectPathSeparator));
+
+        if (sig_obj.isEmpty())
+            return false;
+
+        setSignal(sig_obj, sig_name, sig_timeout);
+
+        return true;
+    }
+
+    /**
      * Configures the wait condition as 'delay' type.
      */
     void RTCommandWaitCondition::setDelay(int ms)
@@ -168,51 +224,19 @@ namespace rtcommand
     /**
      * Configures the wait condition from the given config string.
      *
-     * Either:
-     * "signal;obj_name;obj_signal_name;timeout" OR
-     * "delay;timeout"
+     * "DELAY_IN_MS"
+     * E.g. "5000"
      */
-    bool RTCommandWaitCondition::setFromString(const QString &config_string)
+    bool RTCommandWaitCondition::setDelayFromString(const QString &config_string)
     {
-        QStringList parts = config_string.split(";");
-
-        if (parts.count() < 1 || parts[0].isEmpty())
+        bool ok;
+        int delay_ms = config_string.toInt(&ok);
+        if (!ok)
             return false;
 
-        if (parts[0] == "signal")
-        {
-            if (parts.count() != 4)
-                return false;
+        setDelay(delay_ms);
 
-            obj = parts[1];
-            value = parts[2];
-
-            bool ok;
-            timeout_ms = parts[3].toInt(&ok);
-
-            if (obj.isEmpty() || value.isEmpty() || !ok)
-                return false;
-
-            type = Type::Signal;
-
-            return true;
-        }
-        else if (parts[0] == "delay")
-        {
-            if (parts.count() != 2)
-                return false;
-
-            bool ok;
-            timeout_ms = parts[1].toInt(&ok);
-
-            if (!ok)
-                return false;
-
-            type = Type::Delay;
-
-            return true;
-        }
-        return false;
+        return true;
     }
 
     /***************************************************************************************
@@ -226,6 +250,7 @@ namespace rtcommand
     const std::string RTCommand::HelpOptionCmdShort = "-" + HelpOptionShort;
 
     const std::string RTCommand::ReplyStringIndentation = "   ";
+    const char        RTCommand::ObjectPathSeparator    = '.';
 
     /**
      */
@@ -261,9 +286,10 @@ namespace rtcommand
     {
         try
         {
-            // add basic command options here
+            // !add basic command options here!
             ADD_RTCOMMAND_OPTIONS(options)
-            ("wait_condition", po::value<std::string>()->default_value(""), "wait condition config string")
+            ("wait", po::value<int>()->default_value(0), "delay to wait after command execution, specified in milliseconds")
+            ("wait_signal", po::value<std::string>()->default_value(""), "signal to wait for after command execution, specified as a configuration string \"PATH_TO_OBJECT.SIGNAL;TIMEOUT_IN_MS\"")
             ("async", "enables asynchrous command execution, meaning execution will return immediately after the command has been deployed to the main thread")
             (HelpOption.c_str(), "show command help information");
 
@@ -289,18 +315,45 @@ namespace rtcommand
     /**
      * Assigns scanned variables to struct data throughout the class hierarchy.
      */
+    namespace
+    {
+        void configureWaitCondition(RTCommandWaitCondition& condition,
+                                    const boost::program_options::variables_map &variables)
+        {
+            condition = {};
+
+            int wait_delay_ms;
+            RTCOMMAND_GET_VAR_OR_THROW(variables, "wait", int, wait_delay_ms)
+
+            //check for signal wait condition config string
+            QString wait_signal_config_str;
+            RTCOMMAND_GET_QSTRING_OR_THROW(variables, "wait_signal", wait_signal_config_str)
+
+            bool has_wait_delay  = (wait_delay_ms > 0);
+            bool has_wait_signal = (!wait_signal_config_str.isEmpty());
+
+            //only one wait condition possible
+            if (has_wait_delay && has_wait_signal)
+                throw std::runtime_error("Multiple wait conditions specified");
+
+            if (has_wait_delay)
+            {
+                condition.setDelay(wait_delay_ms);
+            }
+            else if (has_wait_signal)
+            {
+                if (!condition.setSignalFromString(wait_signal_config_str))
+                    throw std::runtime_error("Badly configured signal wait condition");
+            }
+        }
+    }
     bool RTCommand::assignVariables(const boost::program_options::variables_map &variables,
                                     QString* err_msg)
     {
         try
         {
-            // assign basic options here
-            QString condition_config_str;
-            RTCOMMAND_GET_QSTRING_OR_THROW(variables, "wait_condition", condition_config_str)
-
-            if (!condition_config_str.isEmpty() &&
-                !condition.setFromString(condition_config_str))
-                throw("Could not configure condition");
+            // !assign basic options here!
+            configureWaitCondition(condition, variables);
 
             RTCOMMAND_CHECK_VAR(variables, "async", execute_async)
 
