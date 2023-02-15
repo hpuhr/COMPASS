@@ -18,6 +18,7 @@
 #include "ui_test_cmd.h"
 #include "ui_test_setget.h"
 #include "rtcommand_registry.h"
+#include "json.h"
 
 #include <boost/program_options.hpp>
 
@@ -90,11 +91,18 @@ bool RTCommandUISet::run_impl() const
     auto receiver = rtcommand::getCommandReceiverAs<QWidget>(obj.toStdString());
     if (receiver.first != rtcommand::FindObjectErrCode::NoError)
     {
-        std::cout << "RECEIVER IS NULL" << std::endl;
+        setResultMessage("Object '" + obj.toStdString() + "' not found");
         return false;
     }
 
-    return setUIElement(receiver.second, "", value, injection_delay);
+    bool ok = setUIElement(receiver.second, "", value, injection_delay);
+    if (!ok)
+    {
+        setResultMessage("Value '" + value.toStdString() + "' could not be set in object '" + obj.toStdString() + "'");
+        return false;
+    }
+
+    return true;
 }
 
 /**
@@ -131,14 +139,23 @@ bool RTCommandUIGet::run_impl() const
 {
     auto receiver = rtcommand::getCommandReceiverAs<QWidget>(obj.toStdString());
     if (receiver.first != rtcommand::FindObjectErrCode::NoError)
+    {
+        setResultMessage("Object '" + obj.toStdString() + "' not found");
         return false;
-
+    }
+    
     auto res = getUIElement(receiver.second, "", what);
     if (!res.has_value())
+    {
+        setResultMessage("Value could not be retrieved from object '" + obj.toStdString() + "'");
         return false;
+    }
 
-    //@TODO
-    //setResultData(res.value());
+    const std::string value = res.value().toStdString();
+
+    nlohmann::json result;
+    result[ "value" ] = value;
+    setJSONReply(result, value);
 
     return true;
 }

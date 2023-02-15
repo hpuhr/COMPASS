@@ -24,6 +24,7 @@
 
 class QTextEdit;
 class QLineEdit;
+class QToolButton;
 class QListWidgetItem;
 class QListWidget;
 
@@ -45,8 +46,6 @@ signals:
 
 private:
     void updateList();
-    void clearSelected();
-    void clearAll();
     void acceptCommandItem(QListWidgetItem* item);
 
     QListWidget* command_list_ = nullptr;
@@ -85,17 +84,22 @@ private:
         Success
     };
 
+    void enableCmdLine(bool enable);
     void resetLocalBacklog();
     void updateCommandFromLocalBacklog();
     void showBacklog();
     void processCommand();
-    void log(const QString& txt, LogType log_type = LogType::Plain);
+    void log(const QString& txt, LogType log_type = LogType::Plain, bool indent = false);
+    void logResult(std::string msg, bool error);
+
+    void receiveResult(std::string msg, std::string data, bool error);
 
     void lastCmd();
     void nextCmd();
 
     QTextEdit*   cmd_shell_;
     QLineEdit*   cmd_edit_;
+    QToolButton* backlog_button_;
 
     std::vector<std::string> local_backlog_;
     int                      local_backlog_index_ = -1;
