@@ -201,7 +201,7 @@ bool RTCommandRunner::executeCommand(std::shared_ptr<RTCommand> cmd, RTCommandRu
 }
 
 /**
- * Executes the given command in the main thread.
+ * Checks the given command's result in the main thread.
  */
 bool RTCommandRunner::postCheckCommand(std::shared_ptr<RTCommand> cmd, RTCommandRunnerStash* stash)
 {

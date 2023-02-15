@@ -258,6 +258,8 @@ namespace rtcommand
         QString sig_name = QString::fromStdString(sig.value().second);
 
         setSignal(sig_obj, sig_name, timeout_in_ms);
+
+        return true;
     }
 
     /**
@@ -371,12 +373,9 @@ namespace rtcommand
         void configureWaitCondition(RTCommandWaitCondition& condition,
                                     const boost::program_options::variables_map &variables)
         {
-            condition = {};
-
             int wait_delay_ms;
             RTCOMMAND_GET_VAR_OR_THROW(variables, "wait", int, wait_delay_ms)
 
-            //check for signal wait condition config string
             QString wait_signal_config_str;
             RTCOMMAND_GET_QSTRING_OR_THROW(variables, "wait_signal", wait_signal_config_str)
 
@@ -428,14 +427,18 @@ namespace rtcommand
     }
 
     /**
-    */
+     * Sets a result message, e.g. additional error information.
+     * This is most likely useful when reimplementing run_impl() or checkResult_impl().
+     */
     void RTCommand::setResultMessage(const std::string& m) const 
     { 
         result_.error.message = m; 
     }
 
     /**
-    */
+     * Sets the commands JSON reply and optionally a string-representation of it.
+     * This is most likely useful when reimplementing run_impl().
+     */
     void RTCommand::setJSONReply(const nlohmann::json& json_reply, const std::string& reply_as_string) const
     { 
         result_.json_reply        = json_reply;
@@ -443,14 +446,16 @@ namespace rtcommand
     }
 
     /**
-    */
+     * Sets the commands current state.
+     */
     void RTCommand::setState(CmdState state) const
     {
         state_ = state;
     }
 
     /**
-    */
+     * Sets the commands current error state/information.
+     */
     void RTCommand::setError(CmdErrorCode code, boost::optional<std::string> msg) const
     {
         result_.error.code = code;
@@ -505,6 +510,7 @@ namespace rtcommand
     }
 
     /**
+     * Run command result check and track state.
      */
     bool RTCommand::checkResult() const
     {

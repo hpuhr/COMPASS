@@ -26,6 +26,7 @@ namespace rtcommand
 {
 
 /**
+ * Response from error information.
 */
 RTCommandResponse::RTCommandResponse(const ErrorInfo& err_info, const std::string& cmd_name)
 {
@@ -37,6 +38,7 @@ RTCommandResponse::RTCommandResponse(const ErrorInfo& err_info, const std::strin
 }
 
 /**
+ * Response from error from command issue info.
 */
 RTCommandResponse::RTCommandResponse(const IssueInfo& issue_info)
 {
@@ -48,6 +50,7 @@ RTCommandResponse::RTCommandResponse(const IssueInfo& issue_info)
 }
 
 /**
+ * Response from command result.
 */
 RTCommandResponse::RTCommandResponse(const RTCommandResult& result)
 {
@@ -59,6 +62,7 @@ RTCommandResponse::RTCommandResponse(const RTCommandResult& result)
 }
 
 /**
+ * Response from command.
 */
 RTCommandResponse::RTCommandResponse(const rtcommand::RTCommand& cmd)
 {
@@ -72,6 +76,7 @@ RTCommandResponse::RTCommandResponse(const rtcommand::RTCommand& cmd)
 }
 
 /**
+ * Checks if the response is ok (is not in error state).
 */
 bool RTCommandResponse::isOk() const
 {
@@ -83,6 +88,7 @@ bool RTCommandResponse::isOk() const
         return Str;
 
 /**
+ * Generates a unique error string from the given error code.
 */
 std::string RTCommandResponse::errCode2String(CmdErrorCode code)
 {
@@ -122,7 +128,7 @@ std::string RTCommandResponse::errCode2String(CmdErrorCode code)
 }
 
 /**
- * 
+ * Generate a string from the current error state.
 */
 std::string RTCommandResponse::errorToString() const
 {
@@ -141,6 +147,7 @@ std::string RTCommandResponse::errorToString() const
 }
 
 /**
+ * Returns a json string representation of the response.
 */
 std::string RTCommandResponse::toJSONString() const
 {
@@ -157,6 +164,7 @@ std::string RTCommandResponse::toJSONString() const
 }
 
 /**
+ * Returns the stored json reply as (formatted) json string. 
 */
 std::string RTCommandResponse::replyToJSONString(bool format_nicely) const
 {
@@ -167,12 +175,15 @@ std::string RTCommandResponse::replyToJSONString(bool format_nicely) const
 }
 
 /**
+ * Returns a string represenation of the stored json reply.
 */
 std::string RTCommandResponse::stringifiedReply() const
 {
+    //if a string representation of the reply is set, return this one
     if (!json_reply_string.empty())
         return json_reply_string;
 
+    //otherwise return it as a json string
     return replyToJSONString(true);
 }
 
