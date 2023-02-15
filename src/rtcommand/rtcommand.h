@@ -52,6 +52,7 @@ class WaitCondition;
 class RTCommandString;
 
 boost::optional<std::vector<std::string>> validObjectPath(const std::string& path);
+boost::optional<std::pair<std::string, std::string>> signalFromObjectPath(const std::string& path);
 
 QMainWindow* mainWindow();
 QDialog* activeDialog();
@@ -91,17 +92,23 @@ struct RTCommandWaitCondition
         return (type != Type::None);
     }
 
-    void setSignal(const QString& obj_name, const QString& signal_name, int timeout_in_ms = -1);
-    bool setSignalFromString(const QString& config_string);
+    void setSignal(const QString& obj_name, const QString& sig_name, int timeout_in_ms = -1);
+    bool setSignal(const QString& signal_path, int timeout_in_ms);
+    bool setSignal(const QString& config_string);
+    bool setSignalFromPath(const QString& path);
 
     void setDelay(int ms);
-    bool setDelayFromString(const QString& config_string);
+    bool setDelay(const QString& config_string);
 
     Type    type = Type::None; //type of wait condition
-    QString obj;               //QObject name
-    QString value;             //string value for the condition, e.g. a signal name
-    int     timeout_ms = -1;   //Type::Signal: timeout if the signal wasn't received
-                               //Type::Delay:  amount of time to wait
+
+    //type 'Delay'
+    int     delay_ms; // amount of time to wait after command execution in milliseconds
+
+    //type 'Signal'
+    QString signal_obj;               // QObject path
+    QString signal_name;              // Normalized signature for the given QObject's signal to intercept
+    int     signal_timeout_ms = -1;   // Timeout in milliseconds in case the signal was never intercepted
 };
 
 /**

@@ -67,6 +67,31 @@ namespace rtcommand
     }
 
     /**
+     * Sets the signal object and name from the given signal path.
+     */
+    boost::optional<std::pair<std::string, std::string>> signalFromObjectPath(const std::string& path)
+    {
+        auto path_parts = validObjectPath(path);
+        if (!path_parts.has_value() || path_parts.value().size() < 2)
+            return {};
+
+        //last path element should be signal name
+        std::string sig_name = path_parts.value().back();
+
+        //the others describe the QObject the signal is emitted from
+        std::vector<std::string> obj_path = path_parts.value();
+        obj_path.pop_back();
+
+        std::string sig_obj = String::compress(obj_path, RTCommand::ObjectPathSeparator);
+
+        if (sig_name.empty() || sig_obj.empty())
+            return {};
+
+        return std::make_pair(sig_obj, sig_name);
+    }
+
+
+    /**
      * Return the application's main window.
      */
     QMainWindow *mainWindow()
@@ -160,15 +185,32 @@ namespace rtcommand
     /**
      * Configures the wait condition as 'signal' type.
      */
-    void RTCommandWaitCondition::setSignal(const QString &obj_name,
-                                           const QString &signal_name,
+    void RTCommandWaitCondition::setSignal(const QString& obj_name,
+                                           const QString& sig_name,
                                            int timeout_in_ms)
     {
         *this = {};
+
         type = Type::Signal;
-        obj = obj_name;
-        value = signal_name;
-        timeout_ms = timeout_in_ms;
+
+        signal_obj        = obj_name;
+        signal_name       = sig_name;
+        signal_timeout_ms = timeout_in_ms;
+    }
+
+    /**
+     * Sets the signal object and name from the given signal path.
+     */
+    bool RTCommandWaitCondition::setSignalFromPath(const QString& path)
+    {
+        auto sig = signalFromObjectPath(path.toStdString());
+        if (!sig.has_value())
+            return false;
+
+        signal_obj  = QString::fromStdString(sig.value().first);
+        signal_name = QString::fromStdString(sig.value().second);
+
+        return true;
     }
 
     /**
@@ -177,7 +219,7 @@ namespace rtcommand
      * "SIGNAL_PATH;TIMEOUT_IN_MS"
      * E.g. "mainwindow.histogramview2.dataLoaded;10000"
      */
-    bool RTCommandWaitCondition::setSignalFromString(const QString &config_string)
+    bool RTCommandWaitCondition::setSignal(const QString &config_string)
     {
         QStringList parts = config_string.split(";");
 
@@ -185,30 +227,37 @@ namespace rtcommand
             return false;
 
         bool ok;
-        int sig_timeout = parts[1].toInt(&ok);
+        int sig_timeout = parts[ 1 ].toInt(&ok);
         if (!ok)
             return false;
 
-        auto path_parts = validObjectPath(parts[ 0 ].toStdString());
-        if (!path_parts.has_value() || path_parts.value().size() < 2)
+        auto sig = signalFromObjectPath(parts[ 0 ].toStdString());
+        if (!sig.has_value())
             return false;
 
-        //last path element should be signal name
-        std::string signal_name = path_parts.value().back();
-
-        //the others describe the QObject the signal is emitted from
-        std::vector<std::string> obj_path = path_parts.value();
-        obj_path.pop_back();
-
-        QString sig_name = QString::fromStdString(signal_name);
-        QString sig_obj = QString::fromStdString(String::compress(obj_path, RTCommand::ObjectPathSeparator));
-
-        if (sig_obj.isEmpty())
-            return false;
+        QString sig_obj  = QString::fromStdString(sig.value().first);
+        QString sig_name = QString::fromStdString(sig.value().second);
 
         setSignal(sig_obj, sig_name, sig_timeout);
 
         return true;
+    }
+
+    /**
+     * Configures the wait condition as 'signal' type using a signal path and a timeout.
+     * 
+     * Path is e.g. "mainwindow.osgview1.dataLoaded"
+     */
+    bool RTCommandWaitCondition::setSignal(const QString& signal_path, int timeout_in_ms)
+    {
+        auto sig = signalFromObjectPath(signal_path.toStdString());
+        if (!sig.has_value())
+            return false;
+
+        QString sig_obj  = QString::fromStdString(sig.value().first);
+        QString sig_name = QString::fromStdString(sig.value().second);
+
+        setSignal(sig_obj, sig_name, timeout_in_ms);
     }
 
     /**
@@ -217,8 +266,10 @@ namespace rtcommand
     void RTCommandWaitCondition::setDelay(int ms)
     {
         *this = {};
+
         type = Type::Delay;
-        timeout_ms = ms;
+
+        delay_ms = ms;
     }
 
     /**
@@ -227,7 +278,7 @@ namespace rtcommand
      * "DELAY_IN_MS"
      * E.g. "5000"
      */
-    bool RTCommandWaitCondition::setDelayFromString(const QString &config_string)
+    bool RTCommandWaitCondition::setDelay(const QString &config_string)
     {
         bool ok;
         int delay_ms = config_string.toInt(&ok);
@@ -342,7 +393,7 @@ namespace rtcommand
             }
             else if (has_wait_signal)
             {
-                if (!condition.setSignalFromString(wait_signal_config_str))
+                if (!condition.setSignal(wait_signal_config_str))
                     throw std::runtime_error("Badly configured signal wait condition");
             }
         }

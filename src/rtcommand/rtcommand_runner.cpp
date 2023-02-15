@@ -95,8 +95,8 @@ bool RTCommandRunner::initWaitCondition(std::shared_ptr<RTCommand> cmd, RTComman
         bool ok      = false;
         bool invoked = QMetaObject::invokeMethod(stash, "spyForSignal", Qt::BlockingQueuedConnection,
                                                  Q_RETURN_ARG(bool, ok),
-                                                 Q_ARG(QString, c.obj),
-                                                 Q_ARG(QString, c.value));
+                                                 Q_ARG(QString, c.signal_obj),
+                                                 Q_ARG(QString, c.signal_name));
 
         if (!invoked)
         {
@@ -128,11 +128,11 @@ bool RTCommandRunner::execWaitCondition(std::shared_ptr<RTCommand> cmd, RTComman
 
     if (c.type == RTCommandWaitCondition::Type::Signal)
     {
-        ok = waitForCondition([ = ] () { return stash->spySignalReceived(); }, c.timeout_ms);
+        ok = waitForCondition([ = ] () { return stash->spySignalReceived(); }, c.signal_timeout_ms);
     }
     else if (c.type == RTCommandWaitCondition::Type::Delay)
     {
-        ok = waitForCondition(WaitConditionDelay(c.timeout_ms));
+        ok = waitForCondition(WaitConditionDelay(c.delay_ms));
     }
 
     if (!ok)
