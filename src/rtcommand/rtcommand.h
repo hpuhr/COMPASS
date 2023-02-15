@@ -92,7 +92,7 @@ struct RTCommandWaitCondition
         return (type != Type::None);
     }
 
-    void setSignal(const QString& obj_name, const QString& sig_name, int timeout_in_ms = -1);
+    void setSignal(const QString& obj_name, const QString& sig_name, int timeout_in_ms);
     bool setSignal(const QString& signal_path, int timeout_in_ms);
     bool setSignal(const QString& config_string);
     bool setSignalFromPath(const QString& path);

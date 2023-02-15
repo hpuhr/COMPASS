@@ -221,16 +221,28 @@ namespace rtcommand
      */
     bool RTCommandWaitCondition::setSignal(const QString &config_string)
     {
+        if (config_string.isEmpty())
+            return false;
+
         QStringList parts = config_string.split(";");
 
-        if (parts.count() != 2 || parts[ 0 ].isEmpty() || parts[ 1 ].isEmpty())
+        if (parts.count() < 1 || 
+            parts.count() > 2 ||
+            parts[ 0 ].isEmpty() ||
+            (parts.count() == 2 && parts[ 1 ].isEmpty()))
             return false;
 
-        bool ok;
-        int sig_timeout = parts[ 1 ].toInt(&ok);
-        if (!ok)
-            return false;
+        //optional signal timeout
+        int sig_timeout = -1;
+        if (parts.count() == 2)
+        {
+            bool ok;
+            sig_timeout = parts[ 1 ].toInt(&ok);
+            if (!ok)
+                return false;
+        }
 
+        //obtain signal path as object and signal name
         auto sig = signalFromObjectPath(parts[ 0 ].toStdString());
         if (!sig.has_value())
             return false;
