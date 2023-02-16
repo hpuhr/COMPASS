@@ -161,6 +161,9 @@ protected:
     void closeEvent(QCloseEvent* event);
 
     void shutdown();
+
+private:
+    void showCommandShell();
 };
 
 //}

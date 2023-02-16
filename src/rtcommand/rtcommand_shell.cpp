@@ -18,6 +18,7 @@
 #include "rtcommand_shell.h"
 #include "rtcommand_registry.h"
 #include "rtcommand_manager.h"
+#include "rtcommand_response.h"
 #include "files.h"
 
 #include <QTextEdit>
@@ -56,24 +57,11 @@ RTCommandBacklogWidget::RTCommandBacklogWidget(QWidget* parent)
     command_list_->setSelectionMode(QListWidget::SelectionMode::ExtendedSelection);
     layout->addWidget(command_list_);
 
-    QHBoxLayout* layout_h = new QHBoxLayout;
-    layout->addLayout(layout_h);
-
-    QToolButton* clear_button = new QToolButton;
-    clear_button->setIcon(icon("delete.png"));
-    clear_button->setToolTip("Remove selected commands from backlog");
-    layout_h->addWidget(clear_button);
-
-    QPushButton* clear_all_button = new QPushButton("Clear Backlog");
-    clear_all_button->setToolTip("Remove all commands from backlog");
-    clear_all_button->setIcon(icon("delete.png"));
-    layout_h->addWidget(clear_all_button);
-
-    layout_h->addStretch(1);
+    //QHBoxLayout* layout_h = new QHBoxLayout;
+    //layout->addLayout(layout_h);
+    //layout_h->addStretch(1);
     
-    connect(command_list_, &QListWidget::itemDoubleClicked, this, &RTCommandBacklogWidget::acceptCommandItem);
-    connect(clear_button, &QToolButton::pressed, this, &RTCommandBacklogWidget::clearSelected);
-    connect(clear_all_button, &QPushButton::pressed, this, &RTCommandBacklogWidget::clearAll);
+    connect(command_list_, &QListWidget::itemDoubleClicked, this, &RTCommandBacklogWidget::acceptCommandItem, Qt::ConnectionType::QueuedConnection);
 
     updateList();
 }
@@ -91,22 +79,6 @@ void RTCommandBacklogWidget::updateList()
 
     if (command_list_->count() > 0)
         command_list_->setCurrentRow(command_list_->count() - 1);
-}
-
-/** 
- */
-void RTCommandBacklogWidget::clearSelected()
-{
-    //@TODO
-    updateList();
-}
-
-/** 
- */
-void RTCommandBacklogWidget::clearAll()
-{
-    RTCommandManager::instance().clearBacklog();
-    updateList();
 }
 
 /** 
@@ -150,6 +122,7 @@ RTCommandShell::RTCommandShell(QWidget* parent)
 :   QWidget(parent)
 {
     QVBoxLayout* layout = new QVBoxLayout;
+    layout->setSpacing(0);
     setLayout(layout);
 
     cmd_shell_ = new QTextEdit;
@@ -158,6 +131,7 @@ RTCommandShell::RTCommandShell(QWidget* parent)
     layout->addWidget(cmd_shell_);
 
     QHBoxLayout* layout_h = new QHBoxLayout;
+    layout_h->setSpacing(0);
     layout->addLayout(layout_h);
 
     cmd_edit_ = new QLineEdit;
@@ -165,13 +139,13 @@ RTCommandShell::RTCommandShell(QWidget* parent)
     cmd_edit_->setCursorPosition(0);
     layout_h->addWidget(cmd_edit_);
 
-    QToolButton* backlog_button = new QToolButton;
-    backlog_button->setIcon(icon("edit_old.png"));
-    backlog_button->setToolTip("Show command backlog");
-    layout_h->addWidget(backlog_button);
+    backlog_button_ = new QToolButton;
+    backlog_button_->setIcon(icon("edit_old.png"));
+    backlog_button_->setToolTip("Show command backlog");
+    layout_h->addWidget(backlog_button_);
 
     connect(cmd_edit_, &QLineEdit::returnPressed, this, &RTCommandShell::processCommand);
-    connect(backlog_button, &QToolButton::pressed, this, &RTCommandShell::showBacklog);
+    connect(backlog_button_, &QToolButton::pressed, this, &RTCommandShell::showBacklog);
 
     auto s_last = new QShortcut(cmd_edit_);
     s_last->setKey(Qt::Key_Up);
@@ -180,6 +154,18 @@ RTCommandShell::RTCommandShell(QWidget* parent)
     auto s_next = new QShortcut(cmd_edit_);
     s_next->setKey(Qt::Key_Down);
     connect(s_next, &QShortcut::activated, this, &RTCommandShell::nextCmd);
+
+    connect(&RTCommandManager::instance(), &RTCommandManager::shellCommandProcessed, this, &RTCommandShell::receiveResult);
+
+    cmd_edit_->setFocus();
+}
+
+/**
+*/
+void RTCommandShell::enableCmdLine(bool enable)
+{
+    cmd_edit_->setEnabled(enable);
+    backlog_button_->setEnabled(enable);
 }
 
 /**
@@ -224,22 +210,75 @@ void RTCommandShell::processCommand()
     QString line = cmd_edit_->text().trimmed();
     
     cmd_edit_->setText("");
+    
     resetLocalBacklog();
 
     if (line.isEmpty())
         return;
 
-    bool ok = RTCommandManager::instance().addCommand(line.toStdString());
+    auto issue_info = RTCommandManager::instance().addCommand(line.toStdString(), RTCommandManager::Source::Shell);
 
-    if (ok)
-        log(line, LogType::Plain);
+    log(line, LogType::Plain);
+
+    if (issue_info.issued)
+    {
+        enableCmdLine(false);
+    }
     else
-        log("[Error] Creating command '" + line + "' failed", LogType::Error);
+    {
+        std::string msg = RTCommandResponse(issue_info).errorToString();
+        logResult(msg, true);
+    }
+
+    cmd_edit_->setFocus();
 }
 
 /**
 */
-void RTCommandShell::log(const QString& txt, LogType log_type)
+void RTCommandShell::receiveResult(std::string msg, std::string data, bool error)
+{
+    logResult(error ? msg : data, error);
+
+    enableCmdLine(true);
+    cmd_edit_->setFocus();
+}
+
+/**
+*/
+void RTCommandShell::logResult(std::string msg, bool error)
+{
+    if (!error)
+    {
+        if (msg.empty())
+        {
+            log("success", LogType::Success, true);
+            //log("", LogType::Success);
+        }
+        else
+        {
+            log(QString::fromStdString(msg), LogType::Success, true);
+            //log("", LogType::Success);
+        }
+        
+    }   
+    else
+    {
+        if (msg.empty())
+        {
+            log("unknown error", LogType::Error, true);
+            //log("", LogType::Error);
+        }
+        else
+        {
+            log(QString::fromStdString(msg), LogType::Error, true);
+            //log("", LogType::Error);
+        }
+    }
+}
+
+/**
+*/
+void RTCommandShell::log(const QString& txt, LogType log_type, bool indent)
 {
     QColor color = Qt::black; //LogType::Plain
     if (log_type == LogType::Error)
@@ -250,7 +289,11 @@ void RTCommandShell::log(const QString& txt, LogType log_type)
         color = Qt::darkGreen;
 
     cmd_shell_->setTextColor(color);
-    cmd_shell_->append(txt);
+
+    QStringList lines = txt.split("\n");
+
+    for (const auto& l : lines)
+        cmd_shell_->append(indent ? QString::fromStdString(RTCommand::ReplyStringIndentation) + l : l);
 }
 
 /**

@@ -320,10 +320,7 @@ void RTCommandImportViewPointsFile::assignVariables_impl(const VariablesMap& var
 RTCommandImportASTERIXFile::RTCommandImportASTERIXFile()
     : rtcommand::RTCommand()
 {
-    condition.type = rtcommand::RTCommandWaitCondition::Type::Signal;
-    condition.obj = "compass.taskmanager.asteriximporttask";
-    condition.value = "doneSignal(std::string)";
-    condition.timeout_ms = -1; // think about max duration
+    condition.setSignal("compass.taskmanager.asteriximporttask.doneSignal(std::string)", -1); // think about max duration
 }
 
 rtcommand::IsValid  RTCommandImportASTERIXFile::valid() const
@@ -488,8 +485,7 @@ void RTCommandImportASTERIXFile::assignVariables_impl(const VariablesMap& variab
 RTCommandImportASTERIXNetworkStart::RTCommandImportASTERIXNetworkStart()
     : rtcommand::RTCommand()
 {
-    condition.type = rtcommand::RTCommandWaitCondition::Type::Delay;
-    condition.timeout_ms = 500; // think about max duration
+    condition.setDelay(500); // think about max duration
 }
 
 rtcommand::IsValid  RTCommandImportASTERIXNetworkStart::valid() const
@@ -593,8 +589,7 @@ void RTCommandImportASTERIXNetworkStart::assignVariables_impl(const VariablesMap
 RTCommandImportASTERIXNetworkStop::RTCommandImportASTERIXNetworkStop()
     : rtcommand::RTCommand()
 {
-    condition.type = rtcommand::RTCommandWaitCondition::Type::Delay;
-    condition.timeout_ms = 500; // think about max duration
+    condition.setDelay(500); // think about max duration
 }
 
 bool RTCommandImportASTERIXNetworkStop::run_impl() const
@@ -640,10 +635,7 @@ bool RTCommandImportASTERIXNetworkStop::run_impl() const
 RTCommandImportJSONFile::RTCommandImportJSONFile()
     : rtcommand::RTCommand()
 {
-    condition.type = rtcommand::RTCommandWaitCondition::Type::Signal;
-    condition.obj = "compass.taskmanager.jsonimporttask";
-    condition.value = "doneSignal(std::string)";
-    condition.timeout_ms = -1; // think about max duration
+    condition.setSignal("compass.taskmanager.jsonimporttask.doneSignal(std::string)", -1);  // think about max duration
 }
 
 rtcommand::IsValid  RTCommandImportJSONFile::valid() const
@@ -715,10 +707,7 @@ void RTCommandImportJSONFile::assignVariables_impl(const VariablesMap& variables
 RTCommandImportGPSTrail::RTCommandImportGPSTrail()
     : rtcommand::RTCommand()
 {
-    condition.type = rtcommand::RTCommandWaitCondition::Type::Signal;
-    condition.obj = "compass.taskmanager.gpstrailimporttask";
-    condition.value = "doneSignal(std::string)";
-    condition.timeout_ms = -1; // think about max duration
+    condition.setSignal("compass.taskmanager.gpstrailimporttask.doneSignal(std::string)", -1); // think about max duration
 }
 
 rtcommand::IsValid  RTCommandImportGPSTrail::valid() const
@@ -844,10 +833,7 @@ void RTCommandImportSectorsJSON::assignVariables_impl(const VariablesMap& variab
 RTCommandCalculateRadarPlotPositions::RTCommandCalculateRadarPlotPositions()
     : rtcommand::RTCommand()
 {
-    condition.type = rtcommand::RTCommandWaitCondition::Type::Signal;
-    condition.obj = "compass.taskmanager.radarplotpositioncalculatortask";
-    condition.value = "doneSignal(std::string)";
-    condition.timeout_ms = -1; // think about max duration
+    condition.setSignal("compass.taskmanager.radarplotpositioncalculatortask.doneSignal(std::string)", -1); // think about max duration
 }
 
 bool RTCommandCalculateRadarPlotPositions::run_impl() const
@@ -883,10 +869,7 @@ bool RTCommandCalculateRadarPlotPositions::run_impl() const
 RTCommandCalculateAssociations::RTCommandCalculateAssociations()
     : rtcommand::RTCommand()
 {
-    condition.type = rtcommand::RTCommandWaitCondition::Type::Signal;
-    condition.obj = "compass.taskmanager.createassociationstask";
-    condition.value = "doneSignal(std::string)";
-    condition.timeout_ms = -1; // think about max duration
+    condition.setSignal("compass.taskmanager.createassociationstask.doneSignal(std::string)", -1); // think about max duration
 }
 
 bool RTCommandCalculateAssociations::run_impl() const
@@ -922,10 +905,7 @@ bool RTCommandCalculateAssociations::run_impl() const
 RTCommandLoadData::RTCommandLoadData()
     : rtcommand::RTCommand()
 {
-    condition.type = rtcommand::RTCommandWaitCondition::Type::Signal;
-    condition.obj = "compass.dbcontentmanager";
-    condition.value = "loadingDoneSignal";
-    condition.timeout_ms = -1; // think about max duration
+    condition.setSignal("compass.dbcontentmanager.loadingDoneSignal", -1); // think about max duration
 }
 
 bool RTCommandLoadData::run_impl() const

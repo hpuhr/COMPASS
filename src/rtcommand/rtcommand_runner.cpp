@@ -20,6 +20,7 @@
 #include "rtcommand_chain.h"
 #include "rtcommand_wait_condition.h"
 #include "rtcommand_runner_stash.h"
+#include "rtcommand_response.h"
 
 #include "logger.h"
 
@@ -94,11 +95,18 @@ bool RTCommandRunner::initWaitCondition(std::shared_ptr<RTCommand> cmd, RTComman
         bool ok      = false;
         bool invoked = QMetaObject::invokeMethod(stash, "spyForSignal", Qt::BlockingQueuedConnection,
                                                  Q_RETURN_ARG(bool, ok),
-                                                 Q_ARG(QString, c.obj),
-                                                 Q_ARG(QString, c.value));
-        if (!invoked || !ok)
+                                                 Q_ARG(QString, c.signal_obj),
+                                                 Q_ARG(QString, c.signal_name));
+
+        if (!invoked)
         {
-            cmd->result_.wc_state = WaitConditionState::BadInit;
+            cmd->setError(CmdErrorCode::WaitCond_InvokeFailed);
+            return false;
+        }
+
+        if (!ok)
+        {
+            cmd->setError(CmdErrorCode::WaitCond_BadInit);
             return false;
         }   
     }
@@ -120,15 +128,16 @@ bool RTCommandRunner::execWaitCondition(std::shared_ptr<RTCommand> cmd, RTComman
 
     if (c.type == RTCommandWaitCondition::Type::Signal)
     {
-        ok = waitForCondition([ = ] () { return stash->spySignalReceived(); }, c.timeout_ms);
+        ok = waitForCondition([ = ] () { return stash->spySignalReceived(); }, c.signal_timeout_ms);
     }
     else if (c.type == RTCommandWaitCondition::Type::Delay)
     {
-        ok = waitForCondition(WaitConditionDelay(c.timeout_ms));
+        ok = waitForCondition(WaitConditionDelay(c.delay_ms));
     }
 
-    cmd->result_.wc_state = ok ? WaitConditionState::Success : 
-                                 WaitConditionState::Failed;
+    if (!ok)
+        cmd->setError(CmdErrorCode::WaitCond_Timeout);
+
     return ok;
 }
 
@@ -181,7 +190,10 @@ bool RTCommandRunner::executeCommand(std::shared_ptr<RTCommand> cmd, RTCommandRu
 
     //if invoking the execution failed, we set the commands state to failed
     if (!invoked)
-        cmd->result_.cmd_state = CmdState::ExecFailed;
+        cmd->setError(CmdErrorCode::Exec_InvokeFailed);
+
+    if (succeeded)
+        cmd->setState(CmdState::Executed);
 
     logMsg(std::string("[") + (succeeded ? "Succeeded" : "Failed") + "]", cmd.get());
 
@@ -189,7 +201,7 @@ bool RTCommandRunner::executeCommand(std::shared_ptr<RTCommand> cmd, RTCommandRu
 }
 
 /**
- * Executes the given command in the main thread.
+ * Checks the given command's result in the main thread.
  */
 bool RTCommandRunner::postCheckCommand(std::shared_ptr<RTCommand> cmd, RTCommandRunnerStash* stash)
 {
@@ -199,13 +211,9 @@ bool RTCommandRunner::postCheckCommand(std::shared_ptr<RTCommand> cmd, RTCommand
     //asynchronous commands will not check their result
     if (cmd->execute_async)
     {
-        cmd->result_.cmd_state = CmdState::Success;
+        cmd->setState(CmdState::Finished);
         return true;
     }
-
-    //result ready to be checked? (means execution and wait condition were both successful)
-    if (!cmd->result().readyForCheck())
-        return false;
 
     qRegisterMetaType<RTCommandMetaTypeWrapper>();
 
@@ -224,7 +232,10 @@ bool RTCommandRunner::postCheckCommand(std::shared_ptr<RTCommand> cmd, RTCommand
 
     //if invoking the execution failed, we set the commands state to failed
     if (!invoked)
-        cmd->result_.cmd_state = CmdState::ResultCheckFailed;
+        cmd->setError(CmdErrorCode::ResultCheck_InvokeFailed);
+
+    if (succeeded)
+        cmd->setState(CmdState::Finished);
 
     logMsg(std::string("[") + (succeeded ? "Succeeded" : "Failed") + "]", cmd.get());
 
@@ -248,10 +259,14 @@ void RTCommandRunner::logMsg(const std::string& msg, RTCommand* cmd)
 void RTCommandRunner::runCommand(std::shared_ptr<RTCommand> cmd, RTCommandRunnerStash* stash)
 {
     if (!stash)
-        throw std::runtime_error("RTCommandRunner::run: No stash");
+        throw std::runtime_error("RTCommandRunner::run: No stash");     
 
-    //reset state
+    //reset result state
     cmd->resetResult();
+
+    //if not yet configured, try to configure
+    if (!cmd->isConfigured() && !cmd->checkConfiguration())
+        return;
 
     //init wait condition
     if (initWaitCondition(cmd, stash))
@@ -276,7 +291,7 @@ void RTCommandRunner::runCommand(std::shared_ptr<RTCommand> cmd, RTCommandRunner
     //always try to clean up wait condition
     cleanupWaitCondition(cmd, stash);
 
-    logMsg("Ended with state '" + cmd->result().stateToString() + "'", cmd.get());
+    logMsg(RTCommandResponse(*cmd).errorToString(), cmd.get());
 }
 
 } // namespace rtcommand

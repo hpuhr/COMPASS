@@ -79,7 +79,7 @@ void RTCommandRunnerStash::executeCommandAsync(RTCommandMetaTypeWrapper wrapper)
 }
 
 /**
- * 
+ * Run result check on the given command.
 */
 bool RTCommandRunnerStash::postCheckCommand(RTCommandMetaTypeWrapper wrapper) const
 {

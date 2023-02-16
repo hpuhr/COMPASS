@@ -24,6 +24,8 @@
 namespace rtcommand
 {
     struct RTCommand;
+    struct RTCommandResponse;
+    class  RTCommandShell;
 }
 
 /**
@@ -32,7 +34,26 @@ namespace rtcommand
  */
 class RTCommandManager : public QThread, public Singleton, public Configurable
 {
+    Q_OBJECT
 public:
+    typedef std::unique_ptr<rtcommand::RTCommand>     CommandPtr;
+    typedef uint64_t                                  CommandId;
+    typedef std::pair<CommandId,rtcommand::ErrorInfo> AddInfo;
+
+    enum class Source
+    {
+        Server = 0,
+        Application,
+        Shell
+    };
+
+    struct QueuedCommand
+    {
+        Source     source;
+        CommandId  id;
+        CommandPtr command;
+    };
+
     static bool open_port_;
 
     virtual ~RTCommandManager();
@@ -45,10 +66,14 @@ public:
         return instance;
     }
 
-    bool addCommand(const std::string& cmd_str); // true on success, false on failed
+    rtcommand::IssueInfo addCommand(const std::string& cmd_str, CommandId* id = nullptr);
 
-    std::vector<std::string> commandBacklog() const;
     void clearBacklog();
+    std::vector<std::string> commandBacklog() const;
+
+signals:
+    void commandProcessed(CommandId id, std::string msg, std::string data, bool is_error);
+    void shellCommandProcessed(std::string msg, std::string data, bool is_error);
 
 protected:
     volatile bool stop_requested_;
@@ -56,7 +81,7 @@ protected:
 
     unsigned int port_num_ {27960};
 
-    std::queue<std::unique_ptr<rtcommand::RTCommand>> command_queue_;
+    std::queue<QueuedCommand> command_queue_;
     boost::mutex command_queue_mutex_;
 
 //    bool command_active_ {false};
@@ -65,11 +90,16 @@ protected:
     RTCommandManager();
 
 private:
+    friend class rtcommand::RTCommandShell;
+
     static const size_t BacklogSize = 100;
+
+    static CommandId command_count_;
 
     void run();
 
     void addToBacklog(const std::string& cmd);
+    rtcommand::IssueInfo addCommand(const std::string& cmd_str, Source source, CommandId* id = nullptr);
 
     nlohmann::json command_backlog_;
 };

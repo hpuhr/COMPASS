@@ -47,6 +47,8 @@
 #include "viewwidget.h"
 #include "view.h"
 #include "ui_test_common.h"
+#include "ui_test_cmd.h"
+#include "rtcommand_shell.h"
 
 #include "asteriximporttask.h"
 #include "asteriximporttaskdialog.h"
@@ -60,10 +62,9 @@
 #include "createassociationstask.h"
 #include "createassociationstaskdialog.h"
 
-#include "test/ui_test_cmd.h"
-
 #ifdef USE_EXPERIMENTAL_SOURCE
 #include "geometrytreeitem.h"
+#include "test_lab.h"
 #endif
 
 #include <QApplication>
@@ -82,12 +83,7 @@
 #include <QLabel>
 #include <QCheckBox>
 #include <QTimer>
-
-//#define SHOW_DEBUG_MENU
-
-#ifdef SHOW_DEBUG_MENU
-#include "test_lab.h"
-#endif
+#include <QShortcut>
 
 using namespace Utils;
 using namespace std;
@@ -403,10 +399,8 @@ void MainWindow::createMenus ()
     connect(reset_views_action, &QAction::triggered, this, &MainWindow::resetViewsMenuSlot);
     ui_menu_->addAction(reset_views_action);
 
-#ifdef SHOW_DEBUG_MENU
     //debug menu (internal)
     createDebugMenu();
-#endif
 }
 
 void MainWindow::updateMenus()
@@ -1124,11 +1118,38 @@ void MainWindow::shutdown()
 
 void MainWindow::createDebugMenu()
 {
-#ifdef SHOW_DEBUG_MENU
+    //add debug menu entry
     auto debug_menu = menuBar()->addMenu("Debug");
 
+    //add test lab entries
+    #ifdef USE_EXPERIMENTAL_SOURCE
     {
         TestLabCollection().appendTestLabs(debug_menu);
     }
-#endif
+    #endif
+
+    //add command shell
+    {
+        auto action = debug_menu->addAction("Command Shell");
+        connect(action, &QAction::triggered, [ this ] () { this->showCommandShell(); });
+
+        auto shortcut = new QShortcut(this);
+        shortcut->setKey(QKeySequence("Ctrl+Alt+S"));
+        connect(shortcut, &QShortcut::activated, [ this ] () { this->showCommandShell(); });
+    }
+
+    debug_menu->setVisible(!COMPASS::instance().isAppImage());
+}
+
+void MainWindow::showCommandShell()
+{
+    QDialog dlg(this);
+    QHBoxLayout* layout = new QHBoxLayout;
+    dlg.setLayout(layout);
+
+    rtcommand::RTCommandShell* shell = new rtcommand::RTCommandShell(&dlg);
+    layout->addWidget(shell);
+
+    dlg.resize(800, 600);
+    dlg.exec();
 }

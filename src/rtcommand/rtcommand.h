@@ -27,6 +27,10 @@
 #include <memory>
 #include <vector>
 
+#include <boost/optional.hpp>
+
+#include "json.h"
+
 class QObject;
 class QMainWindow;
 class QDialog;
@@ -46,6 +50,9 @@ namespace rtcommand
 
 class WaitCondition;
 class RTCommandString;
+
+boost::optional<std::vector<std::string>> validObjectPath(const std::string& path);
+boost::optional<std::pair<std::string, std::string>> signalFromObjectPath(const std::string& path);
 
 QMainWindow* mainWindow();
 QDialog* activeDialog();
@@ -85,15 +92,23 @@ struct RTCommandWaitCondition
         return (type != Type::None);
     }
 
-    void setSignal(const QString& obj_name, const QString& signal_name, int timeout_in_ms = -1);
+    void setSignal(const QString& obj_name, const QString& sig_name, int timeout_in_ms);
+    bool setSignal(const QString& signal_path, int timeout_in_ms);
+    bool setSignal(const QString& config_string);
+    bool setSignalFromPath(const QString& path);
+
     void setDelay(int ms);
-    bool setFromString(const QString& config_string);
+    bool setDelay(const QString& config_string);
 
     Type    type = Type::None; //type of wait condition
-    QString obj;               //QObject name
-    QString value;             //string value for the condition, e.g. a signal name
-    int     timeout_ms = -1;   //Type::Signal: timeout if the signal wasn't received
-                               //Type::Delay:  amount of time to wait
+
+    //type 'Delay'
+    int     delay_ms; // amount of time to wait after command execution in milliseconds
+
+    //type 'Signal'
+    QString signal_obj;               // QObject path
+    QString signal_name;              // Normalized signature for the given QObject's signal to intercept
+    int     signal_timeout_ms = -1;   // Timeout in milliseconds in case the signal was never intercepted
 };
 
 /**
@@ -120,11 +135,18 @@ struct RTCommand
         return true;
     };
 
-    const RTCommandResult& result() const { return result_; };
+    CmdState state() const { return state_; }
+    const RTCommandResult& result() const;
 
+    bool isFinished() const;
+
+    bool isConfigured() const;
+    bool checkConfiguration() const;
     bool configure(const RTCommandString& cmd);
+
     bool collectOptions(OptionsDescription& options,
-                        PosOptionsDescription& positional);
+                        PosOptionsDescription& positional,
+                        QString* err_msg = nullptr);
 
     RTCommandWaitCondition condition;             //condition to wait for after executing the command.
     bool                   execute_async = false; //if true execution will immediately return after deploying the command to the main thread's event loop,
@@ -136,9 +158,12 @@ struct RTCommand
     static const std::string HelpOptionCmdFull;
     static const std::string HelpOptionCmdShort;
 
+    static const std::string ReplyStringIndentation;
+    static const char        ObjectPathSeparator;
+
 protected:
-    void setResultMessage(const std::string& m) const { result_.cmd_msg = m; }
-    void setJSONReply(const nlohmann::json& json_reply) { result_.reply_data = json_reply; }
+    void setResultMessage(const std::string& m) const;
+    void setJSONReply(const nlohmann::json& json_reply, const std::string& reply_as_string = "") const;
 
     //implements command specific behaviour
     virtual bool run_impl() const = 0;
@@ -153,13 +178,17 @@ protected:
 
 private:
     friend class RTCommandRunner;
-    friend class RTCommandVoid;
 
-    bool assignVariables(const boost::program_options::variables_map& variables);
+    void setState(CmdState state) const;
+    void setError(CmdErrorCode code, boost::optional<std::string> msg = {}) const;
 
-    void resetResult() const { result_.reset(); }
+    bool assignVariables(const boost::program_options::variables_map& variables,
+                         QString* err_msg = nullptr);
 
-    mutable RTCommandResult result_; //command result struct containing execution state info and command result data
+    void resetResult() const;
+
+    mutable CmdState        state_;  //state the command is in
+    mutable RTCommandResult result_; //command result struct containing error info and command result data
 };
 
 /**

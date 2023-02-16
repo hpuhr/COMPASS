@@ -19,10 +19,43 @@
 
 #include <QString>
 
-#include "json.h"
-
 namespace rtcommand
 {
+
+struct RTCommand;
+
+enum class CmdErrorCode
+{
+    NoError = 0,
+
+    Issue_CommandStringEmpty    = 100,
+    Issue_CommandStringInvalid  = 101,
+    Issue_CommandStringMismatch = 102,
+    Issue_CommandNotFound       = 103,
+    Issue_CommandCreationFailed = 104,
+
+    Config_CommandStringInvalid  = 200,
+    Config_CommandStringMismatch = 201,
+    Config_CollectOptionsFailed  = 202,
+    Config_ParseOptionsFailed    = 203,
+    Config_AssignOptionsFailed   = 204,
+    Config_Invalid               = 205,
+
+    Exec_Unconfigured            = 300,
+    Exec_InvalidConfig           = 301,
+    Exec_Crash                   = 302,
+    Exec_Failed                  = 303,
+    Exec_InvokeFailed            = 304,
+
+    ResultCheck_NotExecuted      = 400,
+    ResultCheck_InvalidResult    = 401,
+    ResultCheck_Crash            = 402,
+    ResultCheck_InvokeFailed     = 403,
+    
+    WaitCond_BadInit             = 500,
+    WaitCond_Timeout             = 501,
+    WaitCond_InvokeFailed        = 502
+};
 
 /**
  * Error code for object retrieval.
@@ -36,27 +69,14 @@ enum class FindObjectErrCode
 };
 
 /**
- * The execution state a command can be in.
+ * State of a command. 
  */
 enum class CmdState
 {
-    Fresh = 0,
-    BadConfig,
-    ExecFailed,
-    ResultCheckFailed,
+    Unconfigured = 0,
+    Configured,
     Executed,
-    Success
-};
-
-/**
- * The execution state a wait condition can be in.
- */
-enum class WaitConditionState
-{
-    Unknown = 0,
-    BadInit,
-    Failed,
-    Success
+    Finished
 };
 
 /**
@@ -69,15 +89,50 @@ struct RTCommandDescription
 };
 
 /**
- * Validity struct for RTCommand. 
+ * Validity struct for RTCommand.
  */
 struct IsValid
 {
     IsValid() = default;
     IsValid(bool valid, const std::string& msg = "") : is_valid(valid), message(msg) {}
 
+    std::string errorString() const
+    {
+        if (is_valid)
+            return "";
+        return (message.empty() ? "Unknown error" : message);
+    }
+
     bool        is_valid = false;
     std::string message;
+};
+
+/**
+ * Error struct.
+*/
+struct ErrorInfo
+{
+    bool hasError() const
+    {
+        return (code != CmdErrorCode::NoError);
+    }
+    bool noError() const
+    {
+        return !hasError();
+    }
+
+    CmdErrorCode code = CmdErrorCode::NoError; //error code
+    std::string  message;                      //additional string information
+};
+
+/**
+ * Issue result struct. Obtains the issued command and error information.
+*/
+struct IssueInfo
+{
+    std::string command;          // issued command name
+    bool        issued   = false; // was command issued successfully?
+    ErrorInfo   error;            // error information
 };
 
 } // namespace rtcommand
