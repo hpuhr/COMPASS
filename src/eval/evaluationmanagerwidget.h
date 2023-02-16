@@ -69,7 +69,7 @@ protected:
     std::unique_ptr<EvaluationStandardTabWidget> std_tab_widget_;
     std::unique_ptr<EvaluationResultsTabWidget> results_tab_widget_;
 
-    QLabel* not_eval_comment_label {nullptr};
+    QLabel* not_eval_comment_label_ {nullptr};
     QPushButton* load_button_ {nullptr};
     QPushButton* evaluate_button_ {nullptr};
     QPushButton* gen_report_button_ {nullptr};

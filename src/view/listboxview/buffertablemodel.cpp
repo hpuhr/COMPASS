@@ -323,6 +323,7 @@ QVariant BufferTableModel::data(const QModelIndex& index, int role) const
             {
                 assert(buffer_->has<boost::posix_time::ptime>(property_name));
                 null = buffer_->get<boost::posix_time::ptime>(property_name).isNull(buffer_index);
+
                 if (!null)
                 {
                     value_str = buffer_->get<boost::posix_time::ptime>(property_name).getAsString(buffer_index);
