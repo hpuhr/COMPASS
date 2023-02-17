@@ -31,7 +31,7 @@ private:
     float override_tod_offset_{0};
 
     bool do_timestamp_checks_;
-    float network_time_offset_ {0};
+    //float network_time_offset_ {0};
 
     // static vars for timestamp / timejump handling
     static bool current_date_set_;
@@ -41,7 +41,7 @@ private:
     static bool had_late_time_; // indicator if time late before 24h mark occured
 
     void doTodOverride();
-    void doNetworkTimeOverride();
+    //void doNetworkTimeOverride();
     void doFutureTimestampsCheck();
     void doTimeStampCalculation();
     void doRadarPlotPositionCalculations();

@@ -3,11 +3,30 @@ include_directories (
     "${CMAKE_CURRENT_LIST_DIR}"
     )
 
+target_sources(compass
+PUBLIC
+    "${CMAKE_CURRENT_LIST_DIR}/ui_test_common.h"
+    "${CMAKE_CURRENT_LIST_DIR}/ui_test_testable.h"
+    "${CMAKE_CURRENT_LIST_DIR}/ui_test_conversions.h"
+    "${CMAKE_CURRENT_LIST_DIR}/ui_test_event_injections.h"
+    "${CMAKE_CURRENT_LIST_DIR}/ui_test_widget_setters.h"
+    "${CMAKE_CURRENT_LIST_DIR}/ui_test_widget_getters.h"
+    "${CMAKE_CURRENT_LIST_DIR}/ui_test_setget_native.h"
+    "${CMAKE_CURRENT_LIST_DIR}/ui_test_setget.h"
+    "${CMAKE_CURRENT_LIST_DIR}/ui_test_find.h"
+    "${CMAKE_CURRENT_LIST_DIR}/ui_test_cmd.h"
+PRIVATE
+    "${CMAKE_CURRENT_LIST_DIR}/ui_test_event_injections.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/ui_test_setget_native.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/ui_test_setget.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/ui_test_find.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/ui_test_cmd.cpp"
+)
+
 set ( TEST_DATA_PATH "/home/sk/data/test/" )
 
     add_executable ( test_import_asterix "${CMAKE_CURRENT_LIST_DIR}/test_import_asterix.cpp")
     target_link_libraries ( test_import_asterix compass)
-
 
 #add_executable ( test_import_json "${CMAKE_CURRENT_LIST_DIR}/test_import_json.cpp")
 #target_link_libraries ( test_import_json compass)

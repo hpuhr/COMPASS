@@ -52,7 +52,9 @@ class FilterManagerWidget : public QWidget
                                  Qt::WindowFlags f = 0);
     virtual ~FilterManagerWidget();
 
-  protected:
+    QCheckBox* filtersCheckBox() const;
+
+protected:
     FilterManager& filter_manager_;
 
     QMenu edit_menu_;

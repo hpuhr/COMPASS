@@ -42,6 +42,11 @@ class SimpleConfig;
 class EvaluationManager;
 class MainWindow;
 
+namespace rtcommand
+{
+    class RTCommandRunner;
+}
+
 class COMPASS : public QObject, public Configurable, public Singleton
 {
     Q_OBJECT
@@ -71,6 +76,7 @@ public:
     ViewManager& viewManager();
     SimpleConfig& config();
     EvaluationManager& evaluationManager();
+    rtcommand::RTCommandRunner& rtCmdRunner();
 
     void shutdown();
 
@@ -85,6 +91,16 @@ protected:
 
     bool hide_evaluation_ {false};
     bool hide_viewpoints_ {false};
+    bool disable_live_to_offline_switch_ {false};
+    bool disable_menu_config_save_ {false};
+    bool disable_osgview_rotate_ {false};
+    bool disable_add_remove_views_ {false};
+    bool disable_confirm_reset_views_ {false};
+
+    static const bool is_app_image_;
+
+    unsigned int auto_live_running_resume_ask_time_ {60}; // minutes
+    unsigned int auto_live_running_resume_ask_wait_time_ {1}; // minutes
 
     unsigned int max_fps_ {30};
 
@@ -97,8 +113,12 @@ protected:
     std::unique_ptr<ViewManager> view_manager_;
     std::unique_ptr<EvaluationManager> eval_manager_;
 
+    std::unique_ptr<rtcommand::RTCommandRunner> rt_cmd_runner_;
+
     std::string last_db_filename_;
     nlohmann::json db_file_list_;
+
+    bool db_export_in_progress_ {false};
 
     virtual void checkSubConfigurables();
 
@@ -121,6 +141,8 @@ public:
     void appMode(const AppMode& app_mode);
     std::string appModeStr() const;
 
+    static bool isAppImage() { return is_app_image_; }
+
     static const std::map<AppMode, std::string>& appModes2Strings();
 
     bool expertMode() const;
@@ -134,6 +156,15 @@ public:
     unsigned int maxFPS() const;
     void maxFPS(unsigned int max_fps);
 
+    bool disableLiveToOfflineSwitch() const;
+    bool disableMenuConfigSave() const;
+    bool disableOSGViewRotate() const;
+    bool disableAddRemoveViews() const;
+    bool dbExportInProgress() const;
+
+    unsigned int autoLiveRunningResumeAskTime() const; // min
+    unsigned int autoLiveRunningResumeAskWaitTime() const; // min
+    bool disableConfirmResetViews() const;
 };
 
 #endif /* COMPASS_H_ */

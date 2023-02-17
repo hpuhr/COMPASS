@@ -54,6 +54,19 @@ Using the time scrollbar, past data can be inspected, which is kept until it bec
 
 When clicking the \includegraphics[width=0.5cm,frame]{../../data/icons/right.png} button, the displayed time window will again follow the most recent time. This can also be achieved by moving the scrollbar to the most right position.
 
+\subsection{Online/Offline Display}
+
+To indicite if the displayed data is the currently most recent or from a previous point in time, the OSGView can display colored text (by default "Online" or "Offline"). After creation of the OSView and closing the application, this feature can be enabled using the configuration options listed in \nameref{sec:live_online_offline}.
+
+\begin{figure}[H]
+    \hspace*{-2.5cm}
+    \includegraphics[width=19cm,frame]{figures/osgview_offline_status.png}
+  \caption{OSG View Overload Message}
+\end{figure} 
+
+The online state text is shown if the application is in Live:Running mode and the most recent data is displayed. In all other states (other application mode or previous time window displayed) the offline state text is displayed.
+
+
 \section{Overload Detection}
 
 The ASTERIX Import task as well as the OSGView can detect and handle overload situations. If the real-time processing is not possible with the used workstation, display latency builds up - resulting in ASTERIX data queuing up. \\
@@ -66,13 +79,19 @@ If such a latency is larger than 3 seconds,  existing OSGViews skip drawing unti
   \caption{OSG View Overload Message}
 \end{figure} 
 
-If the latency exceeds 11 seconds, ASTERIX data is skipped - therefore not decoded, added to the database, or displayed.
+If the latency exceeds 60 seconds, ASTERIX data is skipped - therefore not decoded, added to the database, or displayed.
+
+\section{Auto-Resume From Live:Paused}
+
+If the application is switched to the Live:Paused mode, an automatic resume function is activated to ensure that the application is not inadvertently kept in this mode for too long. In its default settings, every 60 minutes a dialog is opened which allows user interaction to stay in the Live:Paused mode. If no action is taken, after 1 minute an automatic resume in the Live:Running mode is performed. \\
+
+This feature can be configured using the configuration options listed in \nameref{sec:live_paused_resume}.
 
 \section{Long-Term Running}
 
 The application is optimized for long-term runnning, and can be run continuously. During Live mode, data older than 1 hour is removed from the database. \\
 
-In this use case, usage of a rotating log file (as described in \nameref{sec:appendix_logging_rotate}) is recommened.
+In this use case, usage of a rotating log file (as described in \nameref{sec:appendix_logging_rotate}) is recommended.
 
 \section{Configuration Options of Interest}
 
@@ -97,6 +116,26 @@ to:
 ...        
 \end{lstlisting}
 
+\subsection{Disable Adding/Removing Views}
+
+In the file 'compass.json' the following parameters can be set:
+
+\begin{lstlisting}
+...
+        "disable_add_remove_views": false,
+...        
+\end{lstlisting}
+
+\subsection{Disable Switching Live to Offline Mode}
+
+In the file 'compass.json' the following parameters can be set:
+
+\begin{lstlisting}
+...
+        "disable_live_to_offline_switch": false,
+...        
+\end{lstlisting}
+
 \subsection{Change Cache or Database Time Duration}
 
 Per default, the RAM cache is limited to 5 minutes, while the database content is limited to 60 minutes. To change these durations (if workstation performance allows for it), the following values can be set in the file 'db\_content.json' (values in minutes):
@@ -108,8 +147,44 @@ Per default, the RAM cache is limited to 5 minutes, while the database content i
 ...        
 \end{lstlisting}
 
+\subsection{OSGView Online/Offline Display}
+\label{sec:live_online_offline}
 
+In the 'views.json' configuration file, in the respective OSGView section, the following parameters can be set:
 
+\begin{lstlisting}
+...
+        "offline_text": "Offline",
+        "offline_text_color_str": "#FF0000",
+        "online_text": "Online",
+        "online_text_color_str": "#00FF00",
+        "status_message_font_size": 24,
+        "use_online_messages": false,        
+...        
+\end{lstlisting}
 
+The display of the text can be enabled using the 'use\_online\_messages' flag, the other parameters configure text size, text captions and text coloring.
+
+\subsection{OSGView Disable Rotate}
+
+In the file 'compass.json' the following parameters can be set:
+
+\begin{lstlisting}
+...
+        "disable_osgview_rotate": false,
+...        
+\end{lstlisting}
+
+\subsection{Auto-Resume From Live:Paused}
+\label{sec:live_paused_resume}
+
+In the file 'compass.json' the following values can be adapted to change how often the auto-resume question is asked, and the dialog wait time until the auto-resume is performed:
+
+\begin{lstlisting}
+...
+        "auto_live_running_resume_ask_time": 60,
+        "auto_live_running_resume_ask_wait_time": 1,
+...        
+\end{lstlisting}
 
 

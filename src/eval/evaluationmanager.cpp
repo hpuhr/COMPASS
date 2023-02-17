@@ -335,6 +335,7 @@ void EvaluationManager::loadData ()
         }
     }
 
+    ds_man.setLoadDSTypes(true); // load all ds types
     ds_man.setLoadOnlyDataSources(ds_ids); // limit loaded data sources
 
     fil_man.disableAllFilters();

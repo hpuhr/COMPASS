@@ -51,6 +51,8 @@ public:
 
     bool has_ref_pos_ {false};
     EvaluationTargetPosition pos_ref_;
+
+    bool has_ref_spd_ {false};
     EvaluationTargetVelocity posbased_spd_ref_;
 };
 

@@ -17,11 +17,6 @@
 
 #include "viewcontainerwidget.h"
 
-#include <QMoveEvent>
-#include <QResizeEvent>
-#include <QTabWidget>
-#include <QVBoxLayout>
-
 #include "compass.h"
 #include "config.h"
 #include "files.h"
@@ -29,11 +24,19 @@
 #include "stringconv.h"
 #include "viewcontainer.h"
 #include "viewmanager.h"
+#include "ui_test_common.h"
+
+#include <QMoveEvent>
+#include <QResizeEvent>
+#include <QTabWidget>
+#include <QVBoxLayout>
+#include <QMessageBox>
 
 using namespace Utils;
 
 ViewContainerWidget::ViewContainerWidget(const std::string& class_id,
-                                         const std::string& instance_id, ViewManager* view_manager)
+                                         const std::string& instance_id, 
+                                         ViewManager* view_manager)
     : QWidget(nullptr),
       Configurable(class_id, instance_id, view_manager),
       view_manager_(*view_manager)
@@ -48,6 +51,10 @@ ViewContainerWidget::ViewContainerWidget(const std::string& class_id,
     registerParameter("min_height", &min_height_, 900);
 
     name_ = "Window" + std::to_string(String::getAppendedInt(instanceId()));
+
+
+    //set a nice object name by which we can differentiate multiple windows in qt's object hierarchy
+    UI_TEST_OBJ_NAME(this, QString::fromStdString(name_))
 
     QIcon atsdb_icon(Files::getIconFilepath("ats.png").c_str());
     setWindowIcon(atsdb_icon);  // for the glory of the empire
@@ -71,6 +78,9 @@ ViewContainerWidget::ViewContainerWidget(const std::string& class_id,
     setAttribute(Qt::WA_DeleteOnClose, true);
 
     createSubConfigurables();
+
+    if (COMPASS::instance().disableAddRemoveViews())
+        setWindowFlags(Qt::Window | Qt::WindowMinimizeButtonHint | Qt::WindowMaximizeButtonHint);
 
     show();
 
@@ -118,7 +128,7 @@ ViewContainer& ViewContainerWidget::viewContainer() const { return *view_contain
 void ViewContainerWidget::closeEvent(QCloseEvent* event)
 {
     loginf << "ViewContainerWidget: closeEvent: instance " << instanceId();
-    //view_manager_.deleteContainerWidget(instanceId());
+
     view_manager_.removeContainerWidget(instanceId());
     QWidget::closeEvent(event);
 }

@@ -114,6 +114,19 @@ inline std::vector<std::string> split(const std::string& s, char delim)
     return split(s, delim, elems);
 }
 
+inline std::string compress (const std::vector<std::string>& str_vec, char delim)
+{
+    std::stringstream ss;
+    for (auto it = str_vec.begin(); it != str_vec.end(); it++)
+    {
+        if (it != str_vec.begin()) {
+            ss << delim;
+        }
+        ss << *it;
+    }
+    return ss.str();
+}
+
 inline std::string timeStringFromDouble(double seconds, bool milliseconds = true)
 {
     int hours, minutes;

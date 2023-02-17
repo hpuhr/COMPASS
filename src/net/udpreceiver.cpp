@@ -1,5 +1,4 @@
-#include "asterixudpreceiver.h"
-#include "asterixdecodejob.h"
+#include "udpreceiver.h"
 #include "util/files.h"
 #include "logger.h"
 #include "stringconv.h"
@@ -9,12 +8,11 @@
 using namespace Utils;
 using namespace std;
 
-ASTERIXUDPReceiver::ASTERIXUDPReceiver(boost::asio::io_context& io_context, //const std::string& sender_ip, unsigned int port,
-                                       std::shared_ptr<DataSourceLineInfo> line_info,
-                                       std::function<void(const char*, unsigned int)> data_callback)
-    : line_info_(line_info),
-      socket_(io_context),
-      data_callback_(data_callback)
+UDPReceiver::UDPReceiver(boost::asio::io_context& io_context, //const std::string& sender_ip, unsigned int port,
+                         std::shared_ptr<DataSourceLineInfo> line_info,
+                         std::function<void(const char*, unsigned int)> data_callback, unsigned int max_read_size)
+    : line_info_(line_info), socket_(io_context),
+      data_callback_(data_callback), max_read_size_(max_read_size)
 {
     // udp::endpoint(boost::asio::ip::address_v4::any(), port)
 
@@ -29,11 +27,12 @@ ASTERIXUDPReceiver::ASTERIXUDPReceiver(boost::asio::io_context& io_context, //co
 
     if (ec)
     {
-        logerr << "ASTERIXUDPReceiver: ctor: mcast address error " << ec.message();
+        logerr << "UDPReceiver: ctor: mcast address error " << ec.message();
         return;
     }
 
-    data_ = new char[MAX_UDP_READ_SIZE];
+    assert (max_read_size_ > 1024);
+    data_ = new char[max_read_size_];
 
     //    boost::asio::ip::address listen_addr = boost::asio::ip::address::from_string(address_listen, ec);
     bool has_listen_address = line_info_->hasListenIP();
@@ -45,7 +44,7 @@ ASTERIXUDPReceiver::ASTERIXUDPReceiver(boost::asio::io_context& io_context, //co
 
         if (ec)
         {
-            logerr << "ASTERIXUDPReceiver: ctor: listen address error " << ec.message();
+            logerr << "UDPReceiver: ctor: listen address error " << ec.message();
             return;
         }
 
@@ -59,7 +58,7 @@ ASTERIXUDPReceiver::ASTERIXUDPReceiver(boost::asio::io_context& io_context, //co
     socket_.open(socket_endpoint_.protocol(), ec);
     if (ec)
     {
-        logerr << "ASTERIXUDPReceiver: ctor: socket error " << ec.message();
+        logerr << "UDPReceiver: ctor: socket error " << ec.message();
         return;
     }
 
@@ -67,7 +66,7 @@ ASTERIXUDPReceiver::ASTERIXUDPReceiver(boost::asio::io_context& io_context, //co
     socket_.set_option(boost::asio::ip::udp::socket::reuse_address(true), ec);
     if (ec)
     {
-        logerr << "ASTERIXUDPReceiver: ctor: socket reuse error " << ec.message();
+        logerr << "UDPReceiver: ctor: socket reuse error " << ec.message();
         return;
     }
 
@@ -75,7 +74,7 @@ ASTERIXUDPReceiver::ASTERIXUDPReceiver(boost::asio::io_context& io_context, //co
     socket_.bind(socket_endpoint_, ec);
     if (ec)
     {
-        logerr << "ASTERIXUDPReceiver: ctor: socket bind error " << ec.message();
+        logerr << "UDPReceiver: ctor: socket bind error " << ec.message();
         return;
     }
 
@@ -91,7 +90,7 @@ ASTERIXUDPReceiver::ASTERIXUDPReceiver(boost::asio::io_context& io_context, //co
                                    mcast_addr.to_v4()), ec);
         if (ec)
         {
-            logerr << "ASTERIXUDPReceiver: ctor: socket join group error " << ec.message();
+            logerr << "UDPReceiver: ctor: socket join group error " << ec.message();
             return;
         }
     }
@@ -102,7 +101,7 @@ ASTERIXUDPReceiver::ASTERIXUDPReceiver(boost::asio::io_context& io_context, //co
 
         if (ec)
         {
-            logerr << "ASTERIXUDPReceiver: ctor: sender address error " << ec.message();
+            logerr << "UDPReceiver: ctor: sender address error " << ec.message();
             return;
         }
 
@@ -110,13 +109,13 @@ ASTERIXUDPReceiver::ASTERIXUDPReceiver(boost::asio::io_context& io_context, //co
     }
 
     socket_.async_receive_from(
-                boost::asio::buffer(data_, MAX_UDP_READ_SIZE), sender_endpoint_,
-                boost::bind(&ASTERIXUDPReceiver::handle_receive_from, this,
+                boost::asio::buffer(data_, max_read_size_), sender_endpoint_,
+                boost::bind(&UDPReceiver::handle_receive_from, this,
                             boost::asio::placeholders::error,
                             boost::asio::placeholders::bytes_transferred));
 }
 
-void ASTERIXUDPReceiver::handle_receive_from(const boost::system::error_code& error,
+void UDPReceiver::handle_receive_from(const boost::system::error_code& error,
                                              size_t bytes_recvd)
 {
     //loginf << "handle_receive_from: from " << sender_ip_ << ":" << port_ << " bytes " << bytes_recvd;
@@ -143,8 +142,8 @@ void ASTERIXUDPReceiver::handle_receive_from(const boost::system::error_code& er
     //sender_endpoint_.address() should be set to sender ip
 
     socket_.async_receive_from(
-                boost::asio::buffer(data_, MAX_UDP_READ_SIZE), sender_endpoint_,
-                boost::bind(&ASTERIXUDPReceiver::handle_receive_from, this,
+                boost::asio::buffer(data_, max_read_size_), sender_endpoint_,
+                boost::bind(&UDPReceiver::handle_receive_from, this,
                             boost::asio::placeholders::error,
                             boost::asio::placeholders::bytes_transferred));
 }

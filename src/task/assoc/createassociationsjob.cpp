@@ -42,7 +42,7 @@ using namespace Utils;
 using namespace nlohmann;
 using namespace boost::posix_time;
 
-bool CreateAssociationsJob::in_appimage_ {getenv("APPDIR") != nullptr};
+bool CreateAssociationsJob::in_appimage_ = COMPASS::isAppImage();
 
 CreateAssociationsJob::CreateAssociationsJob(CreateAssociationsTask& task, DBInterface& db_interface,
                                              std::map<std::string, std::shared_ptr<Buffer>> buffers)

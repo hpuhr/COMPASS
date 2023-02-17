@@ -1,15 +1,15 @@
-#ifndef ASTERIXUDPRECEIVER_H
-#define ASTERIXUDPRECEIVER_H
+#ifndef UDPRECEIVER_H
+#define UDPRECEIVER_H
 
 #include "datasourcelineinfo.h"
 
 #include <boost/asio.hpp>
 
-class ASTERIXUDPReceiver
+class UDPReceiver
 {
 public:
-    ASTERIXUDPReceiver(boost::asio::io_context& io_context, std::shared_ptr<DataSourceLineInfo> line_info,
-                       std::function<void(const char*, unsigned int)> data_callback);
+    UDPReceiver(boost::asio::io_context& io_context, std::shared_ptr<DataSourceLineInfo> line_info,
+                std::function<void(const char*, unsigned int)> data_callback, unsigned int max_read_size);
 
 
     void handle_receive_from(const boost::system::error_code& error,
@@ -26,7 +26,9 @@ private:
     boost::asio::ip::address sender_addr_;
 
     std::function<void(const char*, unsigned int)> data_callback_; // const std::string&,
+
+    unsigned int max_read_size_ {0};
     char* data_ {nullptr};
 };
 
-#endif // ASTERIXUDPRECEIVER_H
+#endif // UDPRECEIVER_H

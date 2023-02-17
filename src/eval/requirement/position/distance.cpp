@@ -211,6 +211,18 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionDistance::evaluate 
 
         distance = sqrt(pow(x_pos,2)+pow(y_pos,2));
 
+        if (std::isnan(distance) || std::isinf(distance))
+        {
+            details.push_back({timestamp, tst_pos,
+                               true, ref_pos, // has_ref_pos, ref_pos
+                               is_inside, {}, comp_passed, // pos_inside, value, check_passed
+                               num_pos, num_no_ref, num_pos_inside, num_pos_outside,
+                               num_comp_failed, num_comp_passed,
+                               "Distance Invalid"});
+            ++num_pos_calc_errors;
+            continue;
+        }
+
         ++num_distances;
 
         if (compareValue(fabs(distance), threshold_value_, threshold_value_check_type_))

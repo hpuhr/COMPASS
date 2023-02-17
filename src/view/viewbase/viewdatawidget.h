@@ -18,6 +18,7 @@ public:
 
 signals:
     void displayChanged();
+    void dataLoaded();
     
 protected:
     virtual void toolChanged_impl(int tool_id) = 0;

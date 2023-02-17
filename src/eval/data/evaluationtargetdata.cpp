@@ -38,8 +38,6 @@ using namespace std;
 using namespace Utils;
 using namespace boost::posix_time;
 
-//bool EvaluationTargetData::in_appimage_ {getenv("APPDIR")};
-
 //const unsigned int debug_utn = 3275;
 
 EvaluationTargetData::EvaluationTargetData()
@@ -446,7 +444,7 @@ std::pair<EvaluationTargetVelocity, bool>  EvaluationTargetData::interpolatedRef
             return {{}, false};
         }
 
-        if (!mapping.has_ref_pos_)
+        if (!mapping.has_ref_spd_)
         {
             //            if (utn_ == debug_utn)
             //                loginf << "EvaluationTargetData: interpolatedRefPosForTime: no ref pos";
@@ -1245,7 +1243,12 @@ float EvaluationTargetData::tstMeasuredSpeedForTime (ptime timestamp) const // m
         double v_x_ms = eval_data_->tst_buffer_->get<double>(eval_data_->tst_spd_x_ms_name_).get(index);
         double v_y_ms = eval_data_->tst_buffer_->get<double>(eval_data_->tst_spd_y_ms_name_).get(index);
 
-        return sqrt(pow(v_x_ms, 2) + pow(v_y_ms, 2));
+        double speed = sqrt(pow(v_x_ms, 2) + pow(v_y_ms, 2));
+
+        assert (!std::isnan(speed));
+        assert (!std::isinf(speed));
+
+        return speed;
     }
 }
 
@@ -1287,7 +1290,12 @@ float EvaluationTargetData::tstMeasuredTrackAngleForTime (ptime timestamp) const
         double v_x_ms = eval_data_->tst_buffer_->get<double>(eval_data_->tst_spd_x_ms_name_).get(index);
         double v_y_ms = eval_data_->tst_buffer_->get<double>(eval_data_->tst_spd_y_ms_name_).get(index);
 
-        return atan2(v_y_ms,v_x_ms);
+        double angle = atan2(v_y_ms,v_x_ms);
+
+        assert (!std::isnan(angle));
+        assert (!std::isinf(angle));
+
+        return angle;
     }
 }
 
@@ -1985,6 +1993,8 @@ void EvaluationTargetData::addRefPositiosToMapping (TstDataMapping& mapping) con
         EvaluationTargetPosition pos2 = refPosForTime(upper);
         float d_t = Time::partialSeconds(upper - lower);
 
+        double speed,angle;
+
         logdbg << "EvaluationTargetData: addRefPositiosToMapping: d_t " << d_t;
 
         assert (d_t > 0);
@@ -2111,10 +2121,20 @@ void EvaluationTargetData::addRefPositiosToMapping (TstDataMapping& mapping) con
                     //                    else
                     mapping.pos_ref_ = EvaluationTargetPosition(x_pos, y_pos, has_altitude, true, altitude);
 
-                    mapping.posbased_spd_ref_.x_ = v_x;
-                    mapping.posbased_spd_ref_.y_ = v_y;
-                    mapping.posbased_spd_ref_.track_angle_ = atan2(v_y,v_x);
-                    mapping.posbased_spd_ref_.speed_ = sqrt(pow(v_x, 2) + pow(v_y, 2));
+                    angle = atan2(v_y,v_x);
+                    speed = sqrt(pow(v_x, 2) + pow(v_y, 2));
+
+                    if (!std::isnan(angle) && !std::isinf(angle) && !std::isnan(speed) && !std::isinf(speed))
+                    {
+                        mapping.has_ref_spd_ = true;
+                        mapping.posbased_spd_ref_.x_ = v_x;
+                        mapping.posbased_spd_ref_.y_ = v_y;
+                        mapping.posbased_spd_ref_.track_angle_ = angle;
+                        mapping.posbased_spd_ref_.speed_ = speed;
+                    }
+                    else
+                        mapping.has_ref_spd_ = false;
+
                 }
             }
         }

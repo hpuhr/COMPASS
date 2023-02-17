@@ -511,13 +511,19 @@ void AllBufferTableModel::updateTimeIndexes()
             assert(buf_it.second->has<bool>(DBContent::selected_var.name()));
             NullableVector<bool> selected_vec = buf_it.second->get<bool>(DBContent::selected_var.name());
 
+            boost::posix_time::ptime ts;
+
             for (; buffer_index < buffer_size; ++buffer_index)
             {
                 if (ts_vec.isNull(buffer_index))
                 {
+                    ts = boost::posix_time::ptime (boost::posix_time::not_a_date_time);
+
                     num_time_none++;
-                    continue;
+                    //continue;
                 }
+                else
+                    ts = ts_vec.get(buffer_index);
 
                 if (show_only_selected_)
                 {
@@ -525,18 +531,16 @@ void AllBufferTableModel::updateTimeIndexes()
                         continue;
 
                     if (selected_vec.get(buffer_index))  // add if set
-                        time_to_indexes_.insert(std::make_pair(
-                            ts_vec.get(buffer_index), std::make_pair(dbo_num, buffer_index)));
+                        time_to_indexes_.insert(std::make_pair(ts, std::make_pair(dbo_num, buffer_index)));
                 }
                 else
-                    time_to_indexes_.insert(std::make_pair(ts_vec.get(buffer_index),
-                                                           std::make_pair(dbo_num, buffer_index)));
+                    time_to_indexes_.insert(std::make_pair(ts, std::make_pair(dbo_num, buffer_index)));
             }
 
             dbo_last_processed_index_[dbcontent_name] = buffer_size - 1;  // set to last index
 
             if (num_time_none)
-                logwrn << "AllBufferTableModel: updateTimeIndexes: new " << dbcontent_name << " skipped "
+                loginf << "AllBufferTableModel: updateTimeIndexes: new " << dbcontent_name << " skipped "
                        << num_time_none << " indexes with no time";
         }
     }

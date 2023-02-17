@@ -352,6 +352,9 @@ public:
     {
         int bin_idx = findBin(v);
 
+        if (bin_idx < 0)
+            logerr << "HistogramT: add: no bin for value '" << v << "'";
+
         increment(bin_idx, count);
 
         return bin_idx;

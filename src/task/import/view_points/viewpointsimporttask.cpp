@@ -62,6 +62,8 @@ ViewPointsImportTask::ViewPointsImportTask(const std::string& class_id, const st
     createSubConfigurables(); // no thing
 
     current_error_ = "No filename set";
+
+    setObjectName("ViewPointsImportTask");
 }
 
 ViewPointsImportTask::~ViewPointsImportTask()
@@ -287,7 +289,7 @@ void ViewPointsImportTask::run()
     DBInterface& db_interface = COMPASS::instance().interface();
 
     // check and clear existing ones
-    if(db_interface.existsViewPointsTable() && db_interface.viewPoints().size())
+    if(db_interface.existsViewPointsTable() && db_interface.viewPoints().size() && show_done_summary_)
     {
         QMessageBox::StandardButton reply;
         reply = QMessageBox::question(
@@ -295,6 +297,7 @@ void ViewPointsImportTask::run()
                     "There are already view points defined in the database.\n\n"
                     "Do you agree to delete all view points?",
                     QMessageBox::Yes | QMessageBox::No);
+
         if (reply == QMessageBox::Yes)
         {
             loginf << "ViewPointsImportTask: import: deleting all view points";
@@ -427,12 +430,12 @@ void ViewPointsImportTask::run()
                 QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
                 QThread::msleep(1);
             }
-
-            done_ = true;
-
-            emit doneSignal(name_);
         }
     }
+
+    done_ = true;
+
+    emit doneSignal(name_);
 
     loginf << "ViewPointsImportTask: done";
 }

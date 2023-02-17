@@ -92,6 +92,17 @@ class ViewManager : public QObject, public Configurable
     std::map<std::string, View*> getViews() { return views_; }
     dbContent::VariableSet getReadSet(const std::string& dbcontent_name);
 
+    //@TODO: needed because of view container widget hack in ui_test_find.h
+    //remove if no longer needed!
+    ViewContainerWidget* containerWidget(const std::string& container_widget_name)
+    {
+        auto it = container_widgets_.find(container_widget_name);
+        if (it == container_widgets_.end())
+            return nullptr;
+
+        return it->second;
+    }
+
     //ViewManagerWidget* widget();
 
     ViewPointsWidget* viewPointsWidget() const;
@@ -113,8 +124,11 @@ class ViewManager : public QObject, public Configurable
     void disableDataDistribution(bool value);
     // disables propagation of data to the views. used when loading is performed for processing purposes
 
-
     bool isProcessingData() const;
+
+    void resetToStartupConfiguration();
+
+    bool isInitialized() const;
 
 protected:
     COMPASS& compass_;
@@ -142,7 +156,13 @@ protected:
 
     bool disable_data_distribution_ {false};
 
+    bool use_tmp_stored_readset_ {false};
+    std::map<std::string, dbContent::VariableSet> tmp_stored_readset_;
+
     virtual void checkSubConfigurables();
+
+    void enableStoredReadSets();
+    void disableStoredReadSets();
 };
 
 #endif /* VIEWMANAGER_H_ */

@@ -195,7 +195,7 @@ void ChartView::updateRubberBand(const QRectF& region)
         return;
     }
 
-    if (selection_style_ == SelectionStyle::XY || !chart())
+    if (selection_axes_ == SelectionAxes::XY || !chart())
     {
         rubber_band_->setGeometry(region.toRect());
     }

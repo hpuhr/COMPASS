@@ -19,7 +19,13 @@
 
 #include "configuration.h"
 #include "configurationmanager.h"
+#include "stringconv.h"
 #include "logger.h"
+
+#include <boost/algorithm/string.hpp>
+
+using namespace std;
+using namespace Utils;
 
 /**
  * \param class_id Class identifier
@@ -136,7 +142,8 @@ Configurable::~Configurable()
     {
         logdbg << "Configurable: destructor: class_id " << class_id_ << " instance_id "
                << instance_id_ << ": removal from parent";
-        parent_->removeChildConfigurable(*this);
+        parent_->removeChildConfigurable(*this, !tmp_disable_remove_config_on_delete_);
+        // in case cfg to be used later, see ViewManager::resetToStartupConfiguration
     }
 
     if (is_root_)
@@ -324,6 +331,66 @@ bool Configurable::hasSubConfigurable(const std::string& class_id, const std::st
 {
     assert(configuration_);
     return (children_.find(class_id + instance_id) != children_.end());
+}
+
+std::pair<rtcommand::FindObjectErrCode, Configurable*> Configurable::findSubConfigurable(const std::string& approx_name)
+{
+    vector<string> parts = String::split(approx_name, '.');
+
+    if (!parts.size())
+        return {rtcommand::FindObjectErrCode::NotFound, nullptr};
+
+    Configurable* child {this};
+
+    for (const auto& part : parts)
+    {
+        child = child->getApproximateChildNamed(part);
+
+        if (!child)
+            return {rtcommand::FindObjectErrCode::NotFound, nullptr};
+    }
+
+    return {rtcommand::FindObjectErrCode::NoError, child};
+}
+
+Configurable* Configurable::getApproximateChildNamed (const std::string& approx_name)
+{
+    // find exact instance id
+    std::string approx_name_lower = boost::algorithm::to_lower_copy(approx_name);
+
+    auto exact_instance_iter = std::find_if(children_.begin(), children_.end(),
+                            [approx_name_lower](const pair<std::string, Configurable&>& child_iter) -> bool {
+        return boost::algorithm::to_lower_copy(child_iter.second.instanceId()) == approx_name_lower; });
+
+    if (exact_instance_iter != children_.end())
+        return &exact_instance_iter->second;
+
+    // check if class_id, take first match
+
+    auto class_id_match_iter = std::find_if(children_.begin(), children_.end(),
+                            [approx_name_lower](const pair<std::string, Configurable&>& child_iter) -> bool {
+        return boost::algorithm::to_lower_copy(child_iter.second.classId()) == approx_name_lower; });
+
+    if (class_id_match_iter != children_.end())
+    {
+        loginf << "Configurable: getApproximateChildNamed: key_id " << key_id_ << " found approximate name '"
+               << approx_name << "' with child instance_id " << class_id_match_iter->second.instanceId();
+        return &class_id_match_iter->second;
+    }
+
+    return nullptr;
+}
+
+void Configurable::setTmpDisableRemoveConfigOnDelete(bool value)
+{
+    logdbg << "Configurable::setTmpDisableRemoveConfigOnDelete: value " << value;
+
+    tmp_disable_remove_config_on_delete_ = value;
+
+    for (auto it = children_.begin(); it != children_.end(); it++)
+    {
+        it->second.setTmpDisableRemoveConfigOnDelete(value);
+    }
 }
 
 // void Configurable::saveConfigurationAsTemplate (const std::string& template_name)

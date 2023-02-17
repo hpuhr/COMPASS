@@ -18,6 +18,7 @@
 #include "eval/requirement/base/base.h"
 #include "evaluationdata.h"
 #include "stringconv.h"
+#include "compass.h"
 #include "util/timeconv.h"
 
 using namespace std;
@@ -27,7 +28,7 @@ using namespace boost::posix_time;
 namespace EvaluationRequirement
 {
 
-bool Base::in_appimage_ {getenv("APPDIR") != nullptr};
+bool Base::in_appimage_ = COMPASS::isAppImage();
 
 Base::Base(const std::string& name, const std::string& short_name, const std::string& group_name,
            float prob, COMPARISON_TYPE prob_check_type, EvaluationManager& eval_man)

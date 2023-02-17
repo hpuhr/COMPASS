@@ -145,6 +145,20 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionAlong::evaluate (
 
         ret_spd = target_data.interpolatedRefPosBasedSpdForTime(timestamp, max_ref_time_diff);
 
+        if (!ret_spd.second)
+        {
+            if (!skip_no_data_details)
+                details.push_back({timestamp, tst_pos,
+                                   false, {}, // has_ref_pos, ref_pos
+                                   {}, {}, along_ok, // pos_inside, value, value_ok
+                                   num_pos, num_no_ref, num_pos_inside, num_pos_outside,
+                                   num_value_ok, num_value_nok,
+                                   "No reference speed"});
+
+            ++num_no_ref;
+            continue;
+        }
+
         ref_spd = ret_spd.first;
         assert (ret_pos.second); // must be set of ref pos exists
 
@@ -205,19 +219,32 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionAlong::evaluate (
         distance = sqrt(pow(x_pos,2)+pow(y_pos,2));
         angle = ref_spd.track_angle_ - atan2(y_pos, x_pos);
 
-        if (std::isnan(angle))
+        if (std::isnan(distance) || std::isinf(distance))
         {
             details.push_back({timestamp, tst_pos,
                                true, ref_pos, // has_ref_pos, ref_pos
                                is_inside, {}, along_ok, // pos_inside, value, value_ok
                                num_pos, num_no_ref, num_pos_inside, num_pos_outside,
                                num_value_ok, num_value_nok,
-                               "Angle NaN"});
+                               "Distance Invalid"});
+            ++num_pos_calc_errors;
+            continue;
+        }
+
+        if (std::isnan(angle) || std::isinf(angle))
+        {
+            details.push_back({timestamp, tst_pos,
+                               true, ref_pos, // has_ref_pos, ref_pos
+                               is_inside, {}, along_ok, // pos_inside, value, value_ok
+                               num_pos, num_no_ref, num_pos_inside, num_pos_outside,
+                               num_value_ok, num_value_nok,
+                               "Angle Invalid"});
             ++num_pos_calc_errors;
             continue;
         }
 
         d_along = distance * cos(angle);
+        assert (!std::isnan(d_along) && !std::isinf(d_along));
 
         ++num_distances;
 

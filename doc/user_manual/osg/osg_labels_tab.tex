@@ -10,7 +10,7 @@
 In the 'Labels' tab, several elements exist:
 
 \begin{itemize}
- \item \includegraphics[width=0.5cm,frame]{../../data/icons/edit.png} button: Edit label contents
+ \item \includegraphics[width=0.5cm,frame]{../../data/icons/edit.png} button: Label menu 
  \item Auto Label Checkbox: Toggles auto-label feature
  \item Level of Detail: What level of detail should be used for labels
  \item Data Sources: Selects which data sources to label and label direction
@@ -20,9 +20,19 @@ In the 'Labels' tab, several elements exist:
 
 When the auto-label feature is active and one or more data sources are selected for labeling, automatic labels are generated in the OSG View according to the content and label filter settings. \\
 
+\subsubsection{Label Menu}
+
+This menu allows showing all nor no data source labels, or to edit label contents.
+
+\begin{figure}[H]
+   \center
+    \includegraphics[width=3cm,frame]{figures/osgview_label_tab_menu.png}
+  \caption{OSG View Label Tab Menu}
+\end{figure}
+
 \subsubsection{Label Contents}
 
-When clicking the 'Edit Label Contents' button \includegraphics[width=0.5cm,frame]{../../data/icons/edit.png}, the label content specific to a DBContent can be selected. \\
+Using the 'Label menu' button \includegraphics[width=0.5cm,frame]{../../data/icons/edit.png}, the label content specific to a DBContent can be edited. \\
 
 The label contents are organized in a 3x3 matrix, the contents if the first 2 rows and columns are fixed while row 3 and column 3 can be edited. 
 
@@ -63,7 +73,15 @@ Multiple level of details (\textbf{LoD}s) are defined (as indicated with border 
  \item Row 3, column 3: Time of Day
  \end{itemize} 
 \end{itemize} 
+\ \\
 
+Please note that the Mode A and the Mode C code are automatically displayed using the respective garbled/valid flag information as suffixes:
+
+\begin{itemize}
+ \item (I)nvalid
+ \item (G)arbled
+ \item (S)moothed
+\end{itemize} 
 
 \subsubsection{Automatic Labeling}
 

@@ -79,6 +79,8 @@ public:
     bool loadDataSourcesFiltered();
     std::map<unsigned int, std::set<unsigned int>> getLoadDataSources (); // ds_id -> wanted lines
 
+    void resetToStartupConfiguration();
+
     DataSourcesLoadWidget* loadWidget();
     void updateWidget();
 

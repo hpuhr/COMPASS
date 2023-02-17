@@ -33,6 +33,9 @@
 #include "mainwindow.h"
 #include "files.h"
 #include "asteriximporttask.h"
+#include "rtcommand_runner.h"
+#include "rtcommand_manager.h"
+#include "rtcommand.h"
 
 #include <QMessageBox>
 #include <QApplication>
@@ -45,9 +48,14 @@ using namespace std;
 using namespace nlohmann;
 using namespace Utils;
 
+const bool COMPASS::is_app_image_ = {getenv("APPDIR") != nullptr};
+
 COMPASS::COMPASS() : Configurable("COMPASS", "COMPASS0", 0, "compass.json")
 {
     logdbg << "COMPASS: constructor: start";
+
+    std::cout << "APPIMAGE: " << (is_app_image_ ? "yes" : "no") << std::endl;
+
     simple_config_.reset(new SimpleConfig("config.json"));
 
     registerParameter("last_db_filename", &last_db_filename_, "");
@@ -56,7 +64,24 @@ COMPASS::COMPASS() : Configurable("COMPASS", "COMPASS0", 0, "compass.json")
     registerParameter("hide_evaluation", &hide_evaluation_, false);
     registerParameter("hide_viewpoints", &hide_viewpoints_, false);
 
+    registerParameter("disable_live_to_offline_switch", &disable_live_to_offline_switch_, false);
+    registerParameter("disable_menu_config_save", &disable_menu_config_save_, false);
+
+    registerParameter("disable_osgview_rotate", &disable_osgview_rotate_, false);
+
+    registerParameter("disable_add_remove_views", &disable_add_remove_views_, false);
+
+    registerParameter("auto_live_running_resume_ask_time", &auto_live_running_resume_ask_time_, 60);
+    registerParameter("auto_live_running_resume_ask_wait_time", &auto_live_running_resume_ask_wait_time_, 1);
+
+    registerParameter("disable_confirm_reset_views", &disable_confirm_reset_views_, false);
+
+    assert (auto_live_running_resume_ask_time_ > 0);
+    assert (auto_live_running_resume_ask_wait_time_ > 0);
+    assert (auto_live_running_resume_ask_time_ > auto_live_running_resume_ask_wait_time_);
+
     JobManager::instance().start();
+    RTCommandManager::instance().start();
 
     createSubConfigurables();
 
@@ -67,6 +92,8 @@ COMPASS::COMPASS() : Configurable("COMPASS", "COMPASS0", 0, "compass.json")
     assert(task_manager_);
     assert(view_manager_);
     assert(eval_manager_);
+
+    rt_cmd_runner_.reset(new rtcommand::RTCommandRunner);
 
     // database opending
 
@@ -111,6 +138,8 @@ COMPASS::COMPASS() : Configurable("COMPASS", "COMPASS0", 0, "compass.json")
              filter_manager_.get(), &FilterManager::appModeSwitchSlot);
 
     qRegisterMetaType<AppMode>("AppMode");
+
+    rtcommand::RTCommandHelp::init();
 
     logdbg << "COMPASS: constructor: end";
 }
@@ -298,8 +327,32 @@ void COMPASS::exportDBFile(const std::string& filename)
 
     assert (db_opened_);
     assert (db_interface_);
+    assert (!db_export_in_progress_);
+
+    db_export_in_progress_ = true;
+
+    boost::posix_time::ptime start_time = boost::posix_time::microsec_clock::local_time();
+
+    QMessageBox* msg_box = new QMessageBox;
+
+    msg_box->setWindowTitle("Exporting Database");
+    msg_box->setText("Please wait ...");
+    msg_box->setStandardButtons(QMessageBox::NoButton);
+    msg_box->setWindowModality(Qt::ApplicationModal);
+    msg_box->show();
+
+    while ((boost::posix_time::microsec_clock::local_time()-start_time).total_milliseconds() < 50)
+    {
+        QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+        QThread::msleep(1);
+    }
 
     db_interface_->exportDBFile(filename);
+
+    msg_box->close();
+    delete msg_box;
+
+    db_export_in_progress_ = false;
 }
 
 void COMPASS::closeDB()
@@ -368,6 +421,12 @@ EvaluationManager& COMPASS::evaluationManager()
     return *eval_manager_;
 }
 
+rtcommand::RTCommandRunner& COMPASS::rtCmdRunner()
+{
+    assert(rt_cmd_runner_);
+    return *rt_cmd_runner_;
+}
+
 bool COMPASS::dbOpened()
 {
     return db_opened_;
@@ -401,6 +460,7 @@ void COMPASS::shutdown()
         dbcontent_manager_->saveTargets();
     dbcontent_manager_ = nullptr;
 
+    RTCommandManager::instance().shutdown();
     JobManager::instance().shutdown();
 
     assert(eval_manager_);
@@ -433,6 +493,46 @@ MainWindow& COMPASS::mainWindow()
 
     assert(main_window_);
     return *main_window_;
+}
+
+bool COMPASS::disableConfirmResetViews() const
+{
+    return disable_confirm_reset_views_;
+}
+
+unsigned int COMPASS::autoLiveRunningResumeAskWaitTime() const
+{
+    return auto_live_running_resume_ask_wait_time_;
+}
+
+unsigned int COMPASS::autoLiveRunningResumeAskTime() const
+{
+    return auto_live_running_resume_ask_time_;
+}
+
+bool COMPASS::dbExportInProgress() const
+{
+    return db_export_in_progress_;
+}
+
+bool COMPASS::disableAddRemoveViews() const
+{
+    return disable_add_remove_views_;
+}
+
+bool COMPASS::disableOSGViewRotate() const
+{
+    return disable_osgview_rotate_;
+}
+
+bool COMPASS::disableMenuConfigSave() const
+{
+    return disable_menu_config_save_;
+}
+
+bool COMPASS::disableLiveToOfflineSwitch() const
+{
+    return disable_live_to_offline_switch_;
 }
 
 unsigned int COMPASS::maxFPS() const

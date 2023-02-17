@@ -20,8 +20,11 @@
 
 #include "global.h"
 #include "appmode.h"
+#include "autoresumedialog.h"
 
 #include <QMainWindow>
+
+#include <memory>
 
 class QLabel;
 class QPushButton;
@@ -30,6 +33,7 @@ class QCheckBox;
 class QMenu;
 class QPushButton;
 class QAction;
+class QTimer;
 
 class DBSelectionWidget;
 class DBSchemaManagerWidget;
@@ -82,10 +86,13 @@ public slots:
     void quitRequestedSlot();
     void showAddViewMenuSlot();
 
+    void resetViewsMenuSlot();
+
     void appModeSwitchSlot (AppMode app_mode_previous, AppMode app_mode_current);
 
-private slots:
-    void runTestCodeSlot();
+    void autoResumeTimerSlot();
+    void autoResumeResumeSlot();
+    void autoResumeStaySlot();
 
 public:
     MainWindow();
@@ -95,44 +102,8 @@ public:
     void showEvaluationTab();
     void showViewPointsTab();
 
-    void createAndOpenNewSqlite3DB(const std::string& filename);
-    void openSqlite3DB(const std::string& filename);
-
-    void importDataSourcesFile(const std::string& filename);
-    void importViewPointsFile(const std::string& filename);
-
-    void importASTERIXFile(const std::string& filename);
-    void importASTERIXFromNetwork();
-    void importASTERIXFromNetworkTimeOffset(float value);
-    float importASTERIXFromNetworkTimeOffset();
-    int importAsterixNetworkMaxLines() const;
-    void importAsterixNetworkMaxLines(int value);
-    //    void asterixFraming(const std::string& asterix_framing);
-    //    void asterixDecoderConfig(const std::string& asterix_decoder_cfg);
-    //    bool asterixOptionsSet() const;
-    //    void setAsterixOptions();
-
-    void importJSONFile(const std::string& filename);
-
-    void importGPSTrailFile(const std::string& filename);
-    void importSectorsFile(const std::string& filename);
-
-    void calculateRadarPlotPositions(bool value);
-    void associateData(bool value);
-
-    void loadData(bool value);
-
-    void exportViewPointsReportFile(const std::string& filename);
-    void exportEvalReportFile(const std::string& filename);
-
-    void evaluateRunFilter(bool value);
-    void evaluate(bool evaluate);
-
-    void quit(bool value);
-    bool quitNeeded();
-
-    bool automaticTasksDefined() const;
-    void performAutomaticTasks ();
+    void openExistingDB(const std::string& filename);
+    void createDB(const std::string& filename);
 
     void updateMenus();
     void updateBottomWidget();
@@ -144,49 +115,6 @@ protected:
 
     bool save_configuration_{true};
 
-    // command line defined tasks
-    bool automatic_tasks_defined_ {false};
-    bool sqlite3_create_new_db_ {false};
-    std::string sqlite3_create_new_db_filename_;
-
-    bool sqlite3_open_db_ {false};
-    std::string sqlite3_open_db_filename_;
-
-    bool data_sources_import_file_ {false};
-    std::string data_sources_import_filename_;
-
-    bool view_points_import_file_ {false};
-    std::string view_points_import_filename_;
-
-    bool asterix_import_file_ {false};
-    std::string asterix_import_filename_;
-    bool asterix_import_network_ {false};
-    float asterix_import_network_time_offset_ {0};
-    int asterix_import_network_max_lines_ {-1};
-
-    std::string json_import_filename_;
-
-    bool gps_trail_import_file_ {false};
-    std::string gps_trail_import_filename_;
-
-    bool sectors_import_file_ {false};
-    std::string sectors_import_filename_;
-
-    bool calculate_radar_plot_postions_ {false};
-    bool associate_data_ {false};
-
-    bool load_data_ {false};
-
-    bool export_view_points_report_ {false};
-    std::string export_view_points_report_filename_;
-
-    bool evaluate_run_filter_ {false};
-    bool evaluate_ {false};
-    bool export_eval_report_ {false};
-    std::string export_eval_report_filename_;
-
-    bool quit_ {false};
-
     // menu
 
     // file menu
@@ -195,6 +123,7 @@ protected:
     QMenu* open_recent_db_menu_ {nullptr};
     QAction* export_db_action_ {nullptr};
     QAction* close_db_action_ {nullptr};
+    QAction* quit_wo_cfg_sav_action_ {nullptr};
 
     // configure sectors
     QAction* sectors_action_ {nullptr};
@@ -210,21 +139,31 @@ protected:
     // process menu
     QMenu* process_menu_ {nullptr};
 
-    bool loading_{false};
+    // ui menu
+    QMenu* ui_menu_ {nullptr};
 
-    QLabel* db_label_{nullptr};
-    QLabel* status_label_{nullptr};
-    QPushButton* load_button_{nullptr};
+    bool loading_ {false};
 
-    QPushButton* live_pause_resume_button_{nullptr};
-    QPushButton* live_stop_button_{nullptr};
+    QLabel* db_label_ {nullptr};
+    QLabel* status_label_ {nullptr};
+    QPushButton* load_button_ {nullptr};
+
+    QPushButton* live_pause_resume_button_ {nullptr};
+    QPushButton* live_stop_button_ {nullptr}; // optional button, may be nullptr
+
+    std::unique_ptr<AutoResumeDialog> auto_resume_dialog_;
+    QTimer* auto_resume_timer_ {nullptr};
 
     void createMenus ();
+    void createDebugMenu();
 
     /// @brief Called when application closes
     void closeEvent(QCloseEvent* event);
 
     void shutdown();
+
+private:
+    void showCommandShell();
 };
 
 //}

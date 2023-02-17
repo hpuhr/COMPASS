@@ -22,6 +22,7 @@
 #include <assert.h>
 
 #include "configuration.h"
+#include "rtcommand_defs.h"
 
 #include <map>
 #include <vector>
@@ -87,6 +88,10 @@ class Configurable
                                          const std::string& instance_id);
     /// @brief Returns if a specified sub-configurable exists
     bool hasSubConfigurable(const std::string& class_id, const std::string& instance_id);
+    // finds by approx name, either exact instance id or first matching class id
+    std::pair<rtcommand::FindObjectErrCode, Configurable*> findSubConfigurable(const std::string& approx_name);
+    // returns nullptr if not found
+    Configurable* getApproximateChildNamed (const std::string& approx_name);
 
     Configurable& parent()
     {
@@ -110,7 +115,9 @@ class Configurable
     /// @brief Returns key identifier (class_id + instance_id)
     const std::string& keyId() const { return key_id_; }
 
-  private:
+    void setTmpDisableRemoveConfigOnDelete(bool value); // disabled removal of cfg on delete of instance
+
+private:
     /// Class identifier
     std::string class_id_;
     /// Instance identifier
@@ -122,6 +129,8 @@ class Configurable
     /// Configuration
     Configuration* configuration_{nullptr};
     bool is_root_{false};
+
+    bool tmp_disable_remove_config_on_delete_ {false};
 
     /// Container for all sub-configurables (class id + instance id -> Configurable)
     std::map<std::string, Configurable&> children_;

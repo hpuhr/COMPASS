@@ -23,7 +23,7 @@
 #include "compass.h"
 #include "mainwindow.h"
 #include "util/files.h"
-#include "asterixudpreceiver.h"
+#include "udpreceiver.h"
 
 #include <jasterix/jasterix.h>
 
@@ -165,9 +165,9 @@ void ASTERIXDecodeJob::doUDPStreamDecoding()
 
     unsigned int line;
 
-    vector<unique_ptr<ASTERIXUDPReceiver>> udp_receivers;
+    vector<unique_ptr<UDPReceiver>> udp_receivers;
 
-    int max_lines = COMPASS::instance().mainWindow().importAsterixNetworkMaxLines();
+    int max_lines = task_.maxNetworkLines();
 
     loginf << "ASTERIXDecodeJob: doUDPStreamDecoding: max lines " << max_lines;
 
@@ -190,7 +190,7 @@ void ASTERIXDecodeJob::doUDPStreamDecoding()
                 this->storeReceivedData(line, data, length);
             };
 
-            udp_receivers.emplace_back(new ASTERIXUDPReceiver(io_context, line_it.second, data_callback));
+            udp_receivers.emplace_back(new UDPReceiver(io_context, line_it.second, data_callback, MAX_UDP_READ_SIZE));
 
             ++line_cnt;
 

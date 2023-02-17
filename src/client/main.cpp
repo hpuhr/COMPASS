@@ -37,13 +37,13 @@ int main(int argc, char** argv)
 
         client.run();
 
-        if (COMPASS::instance().mainWindow().automaticTasksDefined())
-        {
-            COMPASS::instance().mainWindow().performAutomaticTasks();
+//        if (COMPASS::instance().mainWindow().automaticTasksDefined())
+//        {
+//            COMPASS::instance().mainWindow().performAutomaticTasks();
 
-            if (COMPASS::instance().mainWindow().quitNeeded())
-                return 0;
-        }
+//            if (COMPASS::instance().mainWindow().quitNeeded())
+//                return 0;
+//        }
 
         return client.exec();
     }

@@ -35,7 +35,7 @@ ASTERIXPostprocessJob::ASTERIXPostprocessJob(map<string, shared_ptr<Buffer>> buf
       override_tod_active_(override_tod_active), override_tod_offset_(override_tod_offset),
       do_timestamp_checks_(do_timestamp_checks)
 {
-    network_time_offset_ = COMPASS::instance().mainWindow().importASTERIXFromNetworkTimeOffset();
+//    network_time_offset_ = COMPASS::instance().mainWindow().importASTERIXFromNetworkTimeOffset();
 
     if (!current_date_set_) // init if first time
     {
@@ -57,8 +57,8 @@ void ASTERIXPostprocessJob::run()
     if (override_tod_active_)
         doTodOverride();
 
-    if (network_time_offset_)
-        doNetworkTimeOverride();
+//    if (network_time_offset_)
+//        doNetworkTimeOverride();
 
     if (do_timestamp_checks_) // out of sync issue during 24h replay
         doFutureTimestampsCheck();
@@ -119,48 +119,48 @@ void ASTERIXPostprocessJob::doTodOverride()
     }
 }
 
-void ASTERIXPostprocessJob::doNetworkTimeOverride()
-{
-    assert (network_time_offset_);
+//void ASTERIXPostprocessJob::doNetworkTimeOverride()
+//{
+//    assert (network_time_offset_);
 
-    DBContentManager& obj_man = COMPASS::instance().dbContentManager();
+//    DBContentManager& obj_man = COMPASS::instance().dbContentManager();
 
-    unsigned int buffer_size;
+//    unsigned int buffer_size;
 
-    for (auto& buf_it : buffers_)
-    {
-        buffer_size = buf_it.second->size();
+//    for (auto& buf_it : buffers_)
+//    {
+//        buffer_size = buf_it.second->size();
 
-        assert (obj_man.metaVariable(DBContent::meta_var_time_of_day_.name()).existsIn(buf_it.first));
+//        assert (obj_man.metaVariable(DBContent::meta_var_time_of_day_.name()).existsIn(buf_it.first));
 
-        dbContent::Variable& tod_var = obj_man.metaVariable(DBContent::meta_var_time_of_day_.name()).getFor(buf_it.first);
+//        dbContent::Variable& tod_var = obj_man.metaVariable(DBContent::meta_var_time_of_day_.name()).getFor(buf_it.first);
 
-        Property tod_prop {tod_var.name(), tod_var.dataType()};
+//        Property tod_prop {tod_var.name(), tod_var.dataType()};
 
-        assert (buf_it.second->hasProperty(tod_prop));
+//        assert (buf_it.second->hasProperty(tod_prop));
 
-        NullableVector<float>& tod_vec = buf_it.second->get<float>(tod_var.name());
+//        NullableVector<float>& tod_vec = buf_it.second->get<float>(tod_var.name());
 
-        for (unsigned int index=0; index < buffer_size; ++index)
-        {
-            if (!tod_vec.isNull(index))
-            {
-                float& tod_ref = tod_vec.getRef(index);
+//        for (unsigned int index=0; index < buffer_size; ++index)
+//        {
+//            if (!tod_vec.isNull(index))
+//            {
+//                float& tod_ref = tod_vec.getRef(index);
 
-                tod_ref += network_time_offset_;
+//                tod_ref += network_time_offset_;
 
-                // check for out-of-bounds because of midnight-jump
-                while (tod_ref < 0.0f)
-                    tod_ref += tod_24h;
-                while (tod_ref > tod_24h)
-                    tod_ref -= tod_24h;
+//                // check for out-of-bounds because of midnight-jump
+//                while (tod_ref < 0.0f)
+//                    tod_ref += tod_24h;
+//                while (tod_ref > tod_24h)
+//                    tod_ref -= tod_24h;
 
-                assert(tod_ref >= 0.0f);
-                assert(tod_ref <= tod_24h);
-            }
-        }
-    }
-}
+//                assert(tod_ref >= 0.0f);
+//                assert(tod_ref <= tod_24h);
+//            }
+//        }
+//    }
+//}
 
 const double TMAX_FUTURE_OFFSET = 3*60.0;
 const double T24H_OFFSET = 5*60.0;

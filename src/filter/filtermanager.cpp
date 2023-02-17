@@ -560,3 +560,12 @@ void FilterManager::filterBuffers(std::map<std::string, std::shared_ptr<Buffer>>
     }
 }
 
+void FilterManager::resetToStartupConfiguration()
+{
+    loginf << "FilterManager: resetToStartupConfiguration";
+
+    disableAllFilters();
+
+    useFilters(false);
+}
+

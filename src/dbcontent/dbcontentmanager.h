@@ -156,6 +156,8 @@ public:
 
     unsigned int maxLiveDataAgeCache() const;
 
+    void resetToStartupConfiguration(); // only resets label generator
+
 protected:
     COMPASS& compass_;
 

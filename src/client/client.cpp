@@ -27,6 +27,7 @@
 #include "taskmanager.h"
 #include "asteriximporttask.h"
 #include "mainwindow.h"
+#include "rtcommand_manager.h"
 
 #include "json.hpp"
 #include "util/tbbhack.h"
@@ -88,8 +89,6 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
     //    std::string import_json_schema;
 
 
-
-
     //    bool load_data {false};
 
     //    bool quit {false};
@@ -119,7 +118,7 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
             ("import_asterix_network_time_offset", po::value<std::string>(&import_asterix_network_time_offset_),
              "additive time offset during ASTERIX network import, in HH:MM:SS.ZZZ'")
             ("import_asterix_network_max_lines", po::value<int>(&import_asterix_network_max_lines_),
-             "maximum number of lines per data source during ASTERIX network import, 1..4'")
+             "maximum number of lines per data source during ASTERIX network import, 1..4")
             ("import_asterix_network_ignore_future_ts", po::bool_switch(&import_asterix_network_ignore_future_ts_),
              "ignore future timestamps during ASTERIX network import'")
             ("asterix_framing", po::value<std::string>(&asterix_framing),
@@ -151,6 +150,7 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
              "export evaluation report after start with given filename, e.g. '/data/eval_db2/report.tex")
             ("max_fps", po::value<std::string>(&max_fps_), "maximum fps for display in OSGView'")
             ("no_cfg_save", po::bool_switch(&no_config_save_), "do not save configuration upon quitting")
+            ("open_rt_cmd_port", po::bool_switch(&open_rt_cmd_port_), "open runtime command port (default at 27960)")
             ("quit", po::bool_switch(&quit_), "quit after finishing all previous steps");
 
     try
@@ -180,8 +180,8 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
         return;
     }
 
-    if (quit_requested_)
-        return;
+//    if (quit_requested_)
+//        return;
 
     //    if (import_json_filename.size() && !import_json_schema.size())
     //    {
@@ -223,6 +223,9 @@ void Client::run ()
         QCoreApplication::processEvents();
     }
 
+    if (open_rt_cmd_port_)
+        RTCommandManager::open_port_ = true; // has to be done before COMPASS ctor is called
+
     if (expert_mode_)
         COMPASS::instance().expertMode(true);
 
@@ -237,69 +240,29 @@ void Client::run ()
 
     splash.finish(&main_window);
 
+    RTCommandManager& rt_man = RTCommandManager::instance();
+
     if (no_config_save_)
         main_window.disableConfigurationSaving();
 
     if (create_new_sqlite3_db_filename_.size())
-        main_window.createAndOpenNewSqlite3DB(create_new_sqlite3_db_filename_);
+        rt_man.addCommand("create_db "+create_new_sqlite3_db_filename_);
 
     if (open_sqlite3_db_filename_.size())
-        main_window.openSqlite3DB(open_sqlite3_db_filename_);
+        rt_man.addCommand("open_db "+open_sqlite3_db_filename_);
 
     if (import_data_sources_filename_.size())
-        main_window.importDataSourcesFile(import_data_sources_filename_);
+        rt_man.addCommand("import_data_sources "+import_data_sources_filename_);
 
     if (import_view_points_filename_.size())
-        main_window.importViewPointsFile(import_view_points_filename_);
+        rt_man.addCommand("import_view_points "+import_view_points_filename_);
 
     TaskManager& task_man = COMPASS::instance().taskManager();
 
     try
     {
-        if (asterix_framing.size())
-        {
-            if (asterix_framing == "none")
-                task_man.asterixImporterTask().asterixFileFraming("");
-            else
-                task_man.asterixImporterTask().asterixFileFraming(asterix_framing);
-        }
-
         if (asterix_decoder_cfg.size())
             task_man.asterixImporterTask().asterixDecoderConfig(asterix_decoder_cfg);
-
-        if (import_asterix_file_line_.size())
-        {
-            unsigned int file_line = String::lineFromStr(import_asterix_file_line_);
-            task_man.asterixImporterTask().fileLineID(file_line);
-        }
-
-        if (import_asterix_date_.size())
-        {
-            task_man.asterixImporterTask().date(Time::fromDateString(import_asterix_date_));
-        }
-
-        if (import_asterix_file_time_offset_.size())
-        {
-            bool ok {true};
-
-            double time_offset = String::timeFromString(import_asterix_file_time_offset_, &ok);
-
-            if (!ok)
-            {
-                logerr << "COMPASSClient: import_asterix_file_time_offset set to invalid value '"
-                       << import_asterix_file_time_offset_ << "'";
-                quit_requested_ = true;
-                return;
-            }
-
-            task_man.asterixImporterTask().overrideTodActive(true);
-            task_man.asterixImporterTask().overrideTodOffset(time_offset);
-        }
-
-        if (import_asterix_network_ignore_future_ts_)
-        {
-            task_man.asterixImporterTask().importAsterixNetworkIgnoreFutureTimestamp(true);
-        }
     }
     catch (exception& e)
     {
@@ -309,56 +272,87 @@ void Client::run ()
     }
 
     if (import_asterix_filename_.size())
-        main_window.importASTERIXFile(import_asterix_filename_);
-    else if (import_asterix_network_)
-        main_window.importASTERIXFromNetwork();
-
-    if (import_asterix_network_time_offset_.size())
-        main_window.importASTERIXFromNetworkTimeOffset(String::timeFromString(import_asterix_network_time_offset_));
-
-    if (import_asterix_network_max_lines_ != -1)
     {
-        if (import_asterix_network_max_lines_ < 1 || import_asterix_network_max_lines_ > 4)
+        //main_window.importASTERIXFile(import_asterix_filename_);
+
+        string cmd = "import_asterix_file "+import_asterix_filename_;
+
+        if (asterix_framing.size() && asterix_framing != "none")
+            cmd += " --framing "+asterix_framing;
+        else
+            cmd += " --framing none";
+
+        if (import_asterix_file_line_.size())
+            cmd += " --line "+import_asterix_file_line_;
+        else
+            cmd += " --line L1";
+
+        if (import_asterix_date_.size())
+            cmd += " --date "+import_asterix_date_;
+
+        if (import_asterix_file_time_offset_.size())
+            cmd += " --time_offset "+import_asterix_file_time_offset_;
+
+        rt_man.addCommand(cmd);
+    }
+    else if (import_asterix_network_)
+    {
+        string cmd = "import_asterix_network";
+
+        if (import_asterix_network_time_offset_.size())
+            cmd += " --time_offset "+import_asterix_network_time_offset_;
+
+        if (import_asterix_network_max_lines_ != -1)
         {
-            loginf << "COMPASSClient: number of maximum network lines must be between 1 and 4";
-            main_window.quit(true);
+            if (import_asterix_network_max_lines_ < 1 || import_asterix_network_max_lines_ > 4)
+                throw runtime_error("COMPASSClient: number of maximum network lines must be between 1 and 4");
+
+            cmd += " --max_lines "+to_string(import_asterix_network_max_lines_);
         }
 
-        main_window.importAsterixNetworkMaxLines(import_asterix_network_max_lines_);
+        if (import_asterix_network_ignore_future_ts_)
+            cmd += " --ignore_future_ts";
+
+        rt_man.addCommand(cmd);
     }
 
     if (import_json_filename_.size())
-        main_window.importJSONFile(import_json_filename_); // , import_json_schema
+        rt_man.addCommand("import_json "+import_json_filename_);
 
     if (import_gps_trail_filename_.size())
-        main_window.importGPSTrailFile(import_gps_trail_filename_);
+        rt_man.addCommand("import_gps_trail "+import_gps_trail_filename_);
 
     if (import_sectors_filename_.size())
-        main_window.importSectorsFile(import_sectors_filename_);
+        rt_man.addCommand("import_sectors_json "+import_sectors_filename_);
 
     if (calculate_radar_plot_positions_)
-        main_window.calculateRadarPlotPositions(calculate_radar_plot_positions_);
+        rt_man.addCommand("calculate_radar_plot_positions");
 
     if (associate_data_)
-        main_window.associateData(associate_data_);
+        rt_man.addCommand("associate_data");
 
     if (load_data_)
-        main_window.loadData(load_data_);
+        rt_man.addCommand("load_data");
 
     if (export_view_points_report_filename_.size())
-        main_window.exportViewPointsReportFile(export_view_points_report_filename_);
+        rt_man.addCommand("export_view_points_report "+export_view_points_report_filename_);
 
     if (evaluate_)
-        main_window.evaluate(true);
+    {
+        string cmd = "evaluate";
 
-    if (evaluate_run_filter_)
-        main_window.evaluateRunFilter(true);
+        if (evaluate_run_filter_)
+            cmd += " --run_filter";
+
+        rt_man.addCommand(cmd);
+    }
+
 
     if (export_eval_report_filename_.size())
-        main_window.exportEvalReportFile(export_eval_report_filename_);
+        rt_man.addCommand("export_eval_report "+export_eval_report_filename_);
 
     if (quit_)
-        main_window.quit(quit_);
+        rt_man.addCommand("quit");
 
 }
 

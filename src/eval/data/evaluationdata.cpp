@@ -184,7 +184,11 @@ void EvaluationData::addReferenceData (DBContent& object, unsigned int line_id, 
         }
 
         //assert (!rec_nums.isNull(cnt));
-        assert (!ts_vec.isNull(cnt));
+        if (ts_vec.isNull(cnt))
+        {
+            ++num_skipped;
+            continue;
+        }
 
         //rec_num = rec_nums.get(cnt);
         timestamp = ts_vec.get(cnt);
@@ -366,7 +370,11 @@ void EvaluationData::addTestData (DBContent& object, unsigned int line_id,  std:
         }
 
         //assert (!rec_nums.isNull(cnt));
-        assert (!ts_vec.isNull(cnt));
+        if (ts_vec.isNull(cnt))
+        {
+            ++num_skipped;
+            continue;
+        }
 
         //rec_num = rec_nums.get(cnt);
         timestamp = ts_vec.get(cnt);
