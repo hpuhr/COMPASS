@@ -54,43 +54,6 @@ typedef boost::multi_index_container<
         > >
     TargetCache;
 
-//class EvaluateTargetsFinalizeTask : public tbb::task {
-
-//public:
-//    EvaluateTargetsFinalizeTask(TargetCache& target_data, std::vector<bool>& done_flags, bool& done)
-//        : target_data_(target_data), done_flags_(done_flags), done_(done)
-//    {
-//    }
-
-//    /*override*/ tbb::task* execute() {
-//        // Do the job
-
-//        unsigned int num_targets = target_data_.size();
-
-//        tbb::parallel_for(uint(0), num_targets, [&](unsigned int cnt)
-//        {
-//            target_data_[cnt].finalize();
-//            done_flags_[cnt] = true;
-//        });
-
-////        for(unsigned int cnt=0; cnt < num_targets; ++cnt)
-////        {
-////            target_data_[cnt].finalize();
-////            done_flags_[cnt] = true;
-////        }
-
-//        done_ = true;
-
-//        return NULL; // or a pointer to a new task to be executed immediately
-//    }
-
-//protected:
-//    TargetCache& target_data_;
-//    std::vector<bool>& done_flags_;
-//    bool& done_;
-//};
-
-
 class EvaluationData : public QAbstractItemModel
 {
     Q_OBJECT

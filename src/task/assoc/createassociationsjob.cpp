@@ -22,7 +22,7 @@
 #include "dbinterface.h"
 #include "dbcontent/dbcontent.h"
 #include "dbcontent/dbcontentmanager.h"
-#include "dbcontent/target.h"
+#include "dbcontent/target/target.h"
 #include "datasourcemanager.h"
 #include "dbcontent/variable/metavariable.h"
 #include "dbcontent/variable/variable.h"
@@ -976,25 +976,25 @@ void CreateAssociationsJob::saveTargets(std::map<unsigned int, Association::Targ
 
     for (auto& tgt_it : targets)
     {
-        cont_man.createTarget(tgt_it.first);
+        cont_man.createNewTarget(tgt_it.first);
 
-        std::shared_ptr<dbContent::Target> target = cont_man.target(tgt_it.first);
+        dbContent::Target& target = cont_man.target(tgt_it.first);
 
-        target->tas(tgt_it.second.tas_);
-        target->mas(tgt_it.second.mas_);
+        target.tas(tgt_it.second.tas_);
+        target.mas(tgt_it.second.mas_);
 
         // set counts
         for (auto& count_it : tgt_it.second.getDBContentCounts())
-            target->dbContentCount(count_it.first, count_it.second);
+            target.dbContentCount(count_it.first, count_it.second);
 
         // set adsb stuff
         if (tgt_it.second.hasADSBMOPSVersion())
-            target->adsbMOPSVersion(tgt_it.second.getADSBMOPSVersion());
+            target.adsbMOPSVersion(tgt_it.second.getADSBMOPSVersion());
     }
 
     cont_man.saveTargets();
 
-    loginf << "CreateAssociationsJob: saveTargetssaveTargets: done";
+    loginf << "CreateAssociationsJob: saveTargets: done";
 }
 
 std::map<unsigned int, Association::Target> CreateAssociationsJob::createTrackedTargets(

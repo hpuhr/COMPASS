@@ -10,10 +10,19 @@ namespace dbContent {
 class Target
 {
 public:
+    const unsigned int utn_ {0};
+
     Target(unsigned int utn, nlohmann::json info);
 
     unsigned int utn() { return utn_; }
-    nlohmann::json info()  { return info_; }
+
+    bool use() const;
+    void use(bool value);
+
+    std::string comment() const;
+    void comment (const std::string& value);
+
+    nlohmann::json info() const { return info_; }
 
     std::set<unsigned int> tas();
     void tas(const std::set<unsigned int>& tas);
@@ -29,7 +38,6 @@ public:
     void adsbMOPSVersion(unsigned int value);
 
 protected:
-    unsigned int utn_ {0};
     nlohmann::json info_;
 };
 

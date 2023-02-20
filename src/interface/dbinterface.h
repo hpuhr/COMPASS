@@ -146,8 +146,8 @@ public:
     bool existsTargetsTable();
     void createTargetsTable();
     void clearTargetsTable();
-    std::map<unsigned int, std::shared_ptr<dbContent::Target>> loadTargets();
-    void saveTargets(std::map<unsigned int, std::shared_ptr<dbContent::Target>> targets);
+    std::vector<std::unique_ptr<dbContent::Target>> loadTargets();
+    void saveTargets(const std::vector<std::unique_ptr<dbContent::Target>>& targets);
 
     void clearTableContent(const std::string& table_name);
 

@@ -21,7 +21,7 @@
 #include "stringconv.h"
 #include "dbcontent/variable/variable.h"
 #include "dbcontent/variable/metavariable.h"
-#include "dbcontent/target.h"
+#include "dbcontent/target/target.h"
 #include "compass.h"
 #include "dbcontent/dbcontentmanager.h"
 #include "evaluationmanager.h"
@@ -104,11 +104,11 @@ void EvaluationTargetData::finalize () const
 
     DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
 
-    if (dbcont_man.hasTargetsInfo() && dbcont_man.existsTarget(utn_) && dbcont_man.target(utn_)->hasAdsbMOPSVersion())
+    if (dbcont_man.hasTargetsInfo() && dbcont_man.existsTarget(utn_) && dbcont_man.target(utn_).hasAdsbMOPSVersion())
     {
         has_adsb_info_ = true;
         has_mops_version_ = true;
-        mops_version_ = dbcont_man.target(utn_)->adsbMOPSVersion();
+        mops_version_ = dbcont_man.target(utn_).adsbMOPSVersion();
     }
 
 

@@ -25,7 +25,8 @@
 #include "dbcontent/dbcontentmanagerwidget.h"
 #include "dbcontent/variable/variable.h"
 #include "dbcontent/variable/variableset.h"
-#include "dbcontent/target.h"
+#include "dbcontent/target/target.h"
+#include "dbcontent/target/targetlistwidget.h"
 #include "logger.h"
 #include "dbcontent/variable/metavariable.h"
 #include "datasourcemanager.h"
@@ -463,7 +464,7 @@ void DBContentManager::databaseOpenedSlot()
     for (auto& object : dbcontent_)
         object.second->databaseOpenedSlot();
 
-    targets_ = COMPASS::instance().interface().loadTargets();
+    target_model_.loadFromDB();
 
     emit associationStatusChangedSignal();
 
@@ -487,7 +488,7 @@ void DBContentManager::databaseClosedSlot()
     for (auto& object : dbcontent_)
         object.second->databaseClosedSlot();
 
-    targets_.clear();
+    target_model_.clear();
 
     timestamp_min_.reset();
     timestamp_max_.reset();
@@ -1306,38 +1307,42 @@ dbContent::Variable& DBContentManager::metaGetVariable (const std::string& dbcon
 
 bool DBContentManager::hasTargetsInfo()
 {
-    return targets_.size();
+    return target_model_.hasTargetsInfo();
 }
 
 void DBContentManager::clearTargetsInfo()
 {
-    targets_.clear();
-    COMPASS::instance().interface().clearTargetsTable();
+    target_model_.clearTargetsInfo();
 }
 
 bool DBContentManager::existsTarget(unsigned int utn)
 {
-    return targets_.count(utn);
+    return target_model_.existsTarget(utn);
 }
 
-void DBContentManager::createTarget(unsigned int utn)
+void DBContentManager::createNewTarget(unsigned int utn)
 {
-    assert (!existsTarget(utn));
-
-    targets_.emplace(utn, make_shared<dbContent::Target>(utn, nlohmann::json::object()));
-
-    assert (existsTarget(utn));
+    target_model_.createNewTarget(utn);
 }
 
-std::shared_ptr<dbContent::Target> DBContentManager::target(unsigned int utn)
+dbContent::Target& DBContentManager::target(unsigned int utn)
 {
     assert (existsTarget(utn));
-    return targets_.at(utn);
+    return target_model_.target(utn);
+}
+
+void DBContentManager::loadTargets()
+{
+    loginf << "DBContentManager: loadTargets";
+
+    target_model_.loadFromDB();
 }
 
 void DBContentManager::saveTargets()
 {
-    COMPASS::instance().interface().saveTargets(targets_);
+    loginf << "DBContentManager: saveTargets";
+
+    target_model_.saveToDB();
 }
 
 unsigned int DBContentManager::maxLiveDataAgeCache() const
@@ -1356,6 +1361,14 @@ void DBContentManager::resetToStartupConfiguration()
         generateSubConfigurable("DBContentLabelGenerator", "DBContentLabelGenerator0");
         assert (label_generator_);
     }
+}
+
+dbContent::TargetListWidget* DBContentManager::targetListWidget()
+{
+    if (!target_list_widget_)
+        target_list_widget_.reset (new dbContent::TargetListWidget(target_model_));
+
+    return target_list_widget_.get();
 }
 
 //void DBContentManager::updateMetaVarNames()

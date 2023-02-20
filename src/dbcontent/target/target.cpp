@@ -6,6 +6,31 @@ namespace dbContent {
 Target::Target(unsigned int utn, nlohmann::json info)
     : utn_(utn), info_(info)
 {
+    if (!info_.contains("used"))
+        info_["used"] = true;
+}
+
+bool Target::use() const
+{
+    return info_.at("used");
+}
+
+void Target::use(bool value)
+{
+    info_["used"] = value;
+}
+
+std::string Target::comment() const
+{
+    if (!info_.contains("comment"))
+        return "";
+
+    return info_.at("comment");
+}
+
+void Target::comment (const std::string& value)
+{
+    info_["comment"] = value;
 }
 
 std::set<unsigned int> Target::tas()
