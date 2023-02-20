@@ -532,6 +532,11 @@ void GPSTrailImportTask::run()
     NullableVector<double>& speed_vec = buffer_->get<double>(speed_var.name());
     NullableVector<double>& track_angle_vec = buffer_->get<double>(track_angle_var.name());
 
+    // BufferWrapper wrap (buffer_);
+    // wrap.init();
+
+    // NullableVector<double>& vx_vec = wrap.getNV<double> (DBContent::meta_var_vx_);
+
     unsigned int cnt = 0;
     unsigned int ds_id = Number::dsIdFrom(ds_sac_, ds_sic_);
 

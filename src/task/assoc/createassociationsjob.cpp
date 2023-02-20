@@ -981,7 +981,17 @@ void CreateAssociationsJob::saveTargets(std::map<unsigned int, Association::Targ
         dbContent::Target& target = cont_man.target(tgt_it.first);
 
         target.aircraftAddresses(tgt_it.second.tas_);
+        target.aircraftIdentifications(tgt_it.second.ids_);
         target.modeACodes(tgt_it.second.mas_);
+
+        if (tgt_it.second.has_timestamps_)
+        {
+            target.timeBegin(tgt_it.second.timestamp_min_);
+            target.timeEnd(tgt_it.second.timestamp_max_);
+        }
+
+        if (tgt_it.second.has_mode_c_)
+            target.modeCMinMax(tgt_it.second.mode_c_min_, tgt_it.second.mode_c_max_);
 
         // set counts
         for (auto& count_it : tgt_it.second.getDBContentCounts())

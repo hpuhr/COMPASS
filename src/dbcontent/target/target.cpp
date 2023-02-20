@@ -103,7 +103,12 @@ std::string Target::timeDurationStr() const
 
 void Target::aircraftIdentifications(const std::set<std::string>& ids)
 {
-    info_[KEY_ACID] = ids;
+     std::set<std::string> trimmed_id;
+
+     for (auto& id : ids)
+         trimmed_id.insert(String::trim(id));
+
+    info_[KEY_ACID] = trimmed_id;
 }
 
 std::set<std::string> Target::aircraftIdentifications() const
@@ -192,31 +197,37 @@ std::string Target::modeACodesStr() const
 
 bool Target::hasModeC() const
 {
-    return info_.contains(KEY_MODE_C_MIN) && info_.contains(KEY_MODE_C_MIN);
+    return info_.contains(KEY_MODE_C_MIN) && info_.contains(KEY_MODE_C_MAX);
+}
+
+void Target::modeCMinMax(float min, float max)
+{
+    info_[KEY_MODE_C_MIN] = min;
+    info_[KEY_MODE_C_MAX] = max;
 }
 
 float Target::modeCMin() const
 {
     assert (info_.contains(KEY_MODE_C_MIN));
-    return info_.contains(KEY_MODE_C_MIN);
+    return info_.at(KEY_MODE_C_MIN);
 }
 
 std::string Target::modeCMinStr() const
 {
     assert (info_.contains(KEY_MODE_C_MIN));
-    return to_string(info_.contains(KEY_MODE_C_MIN));
+    return to_string(info_.at(KEY_MODE_C_MIN));
 }
 
 float Target::modeCMax() const
 {
     assert (info_.contains(KEY_MODE_C_MAX));
-    return info_.contains(KEY_MODE_C_MAX);
+    return info_.at(KEY_MODE_C_MAX);
 }
 
 std::string Target::modeCMaxStr() const
 {
     assert (info_.contains(KEY_MODE_C_MAX));
-    return to_string(info_.contains(KEY_MODE_C_MAX));
+    return to_string(info_.at(KEY_MODE_C_MAX));
 }
 
 bool Target::isPrimaryOnly () const

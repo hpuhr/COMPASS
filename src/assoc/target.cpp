@@ -49,6 +49,22 @@ void Target::addAssociated (TargetReport* tr)
     }
     has_timestamps_ = true;
 
+
+    if (tr->has_mc_)
+    {
+        if (has_mode_c_)
+        {
+            mode_c_min_ = min(mode_c_min_, tr->mc_);
+            mode_c_max_ = max(mode_c_max_, tr->mc_);
+        }
+        else
+        {
+            mode_c_min_ = tr->mc_;
+            mode_c_max_ = tr->mc_;
+            has_mode_c_ = true;
+        }
+    }
+
     if (!ds_ids_.count(tr->ds_id_))
         ds_ids_.insert(tr->ds_id_);
 
@@ -71,6 +87,18 @@ void Target::addAssociated (TargetReport* tr)
 
         if (!tas_.count(tr->ta_))
             tas_.insert(tr->ta_);
+    }
+
+    if (tr->has_ti_)
+    {
+        if (!ids_.count(tr->ti_))
+            ids_.insert(tr->ti_);
+    }
+
+    if (tr->has_adsb_info_ && tr->has_mops_version_)
+    {
+        if (!mops_versions_.count(tr->mops_version_))
+            mops_versions_.insert(tr->mops_version_);
     }
 
     if (!tmp_)
@@ -952,7 +980,9 @@ void Target::removeNonModeSTRs()
     assoc_trs_.clear();
 
     tas_.clear();
+    ids_.clear();
     mas_.clear();
+    mops_versions_.clear();
     has_timestamps_ = false;
     has_speed_ = false;
     timed_indexes_.clear();
@@ -980,29 +1010,13 @@ std::map <std::string, unsigned int> Target::getDBContentCounts()
 
 bool Target::hasADSBMOPSVersion()
 {
-    for (auto tr_it : assoc_trs_)
-    {
-        if (tr_it->has_adsb_info_ && tr_it->has_mops_version_)
-            return true;
-    }
-
-    return false;
+    return mops_versions_.size();
 }
+
 std::set<unsigned int> Target::getADSBMOPSVersions()
 {
     assert (hasADSBMOPSVersion());
 
-    std::set<unsigned int> mops_values;
-
-    for (auto tr_it : assoc_trs_)
-    {
-        if (tr_it->has_adsb_info_ && tr_it->has_mops_version_)
-        {
-            if (mops_values.count(tr_it->mops_version_))
-                mops_values.insert(tr_it->mops_version_);
-        }
-    }
-
-    return mops_values;
+    return mops_versions_;
 }
 }

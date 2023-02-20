@@ -97,13 +97,17 @@ QVariant TargetModel::data(const QModelIndex& index, int role) const
                 {
                     return target.comment().c_str();
                 }
+                else if (col_name == "#Updates")
+                {
+                    return target.numUpdates();
+                }
                 else if (col_name == "Begin")
                 {
-                    return ""; //target.timeBeginStr().c_str();
+                    return target.timeBeginStr().c_str();
                 }
                 else if (col_name == "End")
                 {
-                    return ""; //target.timeEndStr().c_str();
+                    return target.timeEndStr().c_str();
                 }
                 else if (col_name == "ACIDs")
                 {
@@ -128,6 +132,13 @@ QVariant TargetModel::data(const QModelIndex& index, int role) const
                 {
                     if (target.hasModeC())
                         return target.modeCMax();
+                    else
+                        return "";
+                }
+                else if (col_name == "MOPS")
+                {
+                    if (target.hasAdsbMOPSVersions())
+                        return target.adsbMOPSVersionsStr().c_str();
                     else
                         return "";
                 }

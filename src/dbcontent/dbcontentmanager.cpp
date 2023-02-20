@@ -464,10 +464,9 @@ void DBContentManager::databaseOpenedSlot()
     for (auto& object : dbcontent_)
         object.second->databaseOpenedSlot();
 
-    target_model_.loadFromDB();
+    loadTargets();
 
     emit associationStatusChangedSignal();
-
 
     loginf << "DBContentManager: databaseOpenedSlot: done";
 }
@@ -1336,6 +1335,9 @@ void DBContentManager::loadTargets()
     loginf << "DBContentManager: loadTargets";
 
     target_model_.loadFromDB();
+
+    if (target_list_widget_)
+        target_list_widget_->resizeColumnsToContents();
 }
 
 void DBContentManager::saveTargets()
@@ -1369,6 +1371,12 @@ dbContent::TargetListWidget* DBContentManager::targetListWidget()
         target_list_widget_.reset (new dbContent::TargetListWidget(target_model_));
 
     return target_list_widget_.get();
+}
+
+void DBContentManager::resizeTargetListWidget()
+{
+    if (target_list_widget_)
+        target_list_widget_->resizeColumnsToContents();
 }
 
 //void DBContentManager::updateMetaVarNames()

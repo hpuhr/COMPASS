@@ -162,6 +162,7 @@ public:
     void resetToStartupConfiguration(); // only resets label generator
 
     dbContent::TargetListWidget* targetListWidget();
+    void resizeTargetListWidget();
 
 protected:
     COMPASS& compass_;

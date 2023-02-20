@@ -48,6 +48,7 @@ public:
     std::string modeACodesStr() const;
 
     bool hasModeC() const;
+    void modeCMinMax(float min, float max);
     float modeCMin() const;
     std::string modeCMinStr() const;
     float modeCMax() const;
