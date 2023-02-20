@@ -66,7 +66,7 @@ namespace Association
         bool hasAnyOfTAs (std::set<unsigned int> tas) const;
 
         bool hasMA () const;
-        bool hasMA (unsigned int ma)  const;
+        bool hasMA (unsigned int ma) const;
 
         std::string asStr() const;
         std::string timeStr() const;
@@ -115,7 +115,7 @@ namespace Association
         std::map <std::string, unsigned int> getDBContentCounts();
 
         bool hasADSBMOPSVersion();
-        unsigned int getADSBMOPSVersion();
+        std::set<unsigned int> getADSBMOPSVersions();
     };
 
 }

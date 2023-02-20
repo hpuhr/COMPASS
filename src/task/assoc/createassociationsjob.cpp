@@ -980,16 +980,16 @@ void CreateAssociationsJob::saveTargets(std::map<unsigned int, Association::Targ
 
         dbContent::Target& target = cont_man.target(tgt_it.first);
 
-        target.tas(tgt_it.second.tas_);
-        target.mas(tgt_it.second.mas_);
+        target.aircraftAddresses(tgt_it.second.tas_);
+        target.modeACodes(tgt_it.second.mas_);
 
         // set counts
         for (auto& count_it : tgt_it.second.getDBContentCounts())
             target.dbContentCount(count_it.first, count_it.second);
 
         // set adsb stuff
-        if (tgt_it.second.hasADSBMOPSVersion())
-            target.adsbMOPSVersion(tgt_it.second.getADSBMOPSVersion());
+        if (tgt_it.second.hasADSBMOPSVersion() && tgt_it.second.getADSBMOPSVersions().size())
+            target.adsbMOPSVersions(tgt_it.second.getADSBMOPSVersions());
     }
 
     cont_man.saveTargets();

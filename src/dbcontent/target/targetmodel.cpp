@@ -95,7 +95,7 @@ QVariant TargetModel::data(const QModelIndex& index, int role) const
                 }
                 else if (col_name == "Comment")
                 {
-                    return ""; //eval_man_.utnComment(target.utn_).c_str();
+                    return target.comment().c_str();
                 }
                 else if (col_name == "Begin")
                 {
@@ -105,25 +105,31 @@ QVariant TargetModel::data(const QModelIndex& index, int role) const
                 {
                     return ""; //target.timeEndStr().c_str();
                 }
-                else if (col_name == "Callsign")
+                else if (col_name == "ACIDs")
                 {
-                    return ""; //target.callsignsStr().c_str();
+                    return target.aircraftIdentificationsStr().c_str();
                 }
-                else if (col_name == "TA")
+                else if (col_name == "ACADs")
                 {
-                    return ""; //target.targetAddressesStr().c_str();
+                    return target.aircraftAddressesStr().c_str();
                 }
                 else if (col_name == "M3/A")
                 {
-                    return ""; //target.modeACodesStr().c_str();
+                    return target.modeACodesStr().c_str();
                 }
                 else if (col_name == "MC Min")
                 {
-                    return ""; //target.modeCMinStr().c_str();
+                    if (target.hasModeC())
+                        return target.modeCMin();
+                    else
+                        return "";
                 }
                 else if (col_name == "MC Max")
                 {
-                    return ""; //target.modeCMaxStr().c_str();
+                    if (target.hasModeC())
+                        return target.modeCMax();
+                    else
+                        return "";
                 }
 
             }
@@ -305,7 +311,7 @@ void TargetModel::loadFromDB()
     loginf << "TargetModel: loadFromDB: loaded " << target_data_.size() << " targets";
 }
 
-void TargetModel:: saveToDB()
+void TargetModel::saveToDB()
 {
     loginf << "TargetModel: saveToDB: saving " << target_data_.size() << " targets";
 

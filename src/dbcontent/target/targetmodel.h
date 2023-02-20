@@ -64,7 +64,7 @@ public:
 protected:
     //EvaluationManager& eval_man_;
 
-    QStringList table_columns_ {"Use", "UTN", "Comment", "Begin", "End", "Callsign", "TA",
+    QStringList table_columns_ {"Use", "UTN", "Comment", "Begin", "End", "ACIDs", "ACADs",
                                 "M3/A", "MC Min", "MC Max"};
 
     TargetCache target_data_;

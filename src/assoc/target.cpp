@@ -988,32 +988,21 @@ bool Target::hasADSBMOPSVersion()
 
     return false;
 }
-unsigned int Target::getADSBMOPSVersion()
+std::set<unsigned int> Target::getADSBMOPSVersions()
 {
     assert (hasADSBMOPSVersion());
 
-    bool mops_found{false};
-    unsigned int mops_value{0};
+    std::set<unsigned int> mops_values;
 
     for (auto tr_it : assoc_trs_)
     {
         if (tr_it->has_adsb_info_ && tr_it->has_mops_version_)
         {
-            if (mops_found)
-            {
-                if (tr_it->mops_version_ != mops_value)
-                    logwrn << "Target: getADSBMOPSVersion: utn " << utn_ << " has differing MOPS version values "
-                           << tr_it->mops_version_ << ", " << mops_value;
-            }
-            else
-            {
-                mops_value = tr_it->mops_version_;
-                mops_found = true;
-            }
+            if (mops_values.count(tr_it->mops_version_))
+                mops_values.insert(tr_it->mops_version_);
         }
     }
 
-    assert (mops_found);
-    return mops_value;
+    return mops_values;
 }
 }

@@ -1,83 +1,292 @@
 #include "target.h"
+#include "stringconv.h"
+#include "timeconv.h"
+
+using namespace std;
+using namespace Utils;
 
 namespace dbContent {
 
+const std::string KEY_USED = "used";
+const std::string KEY_COMMENT = "comment";
+const std::string KEY_TIME_BEGIN = "time_begin";
+const std::string KEY_TIME_END = "time_end";
+const std::string KEY_ACAD = "aircraft_addresses";
+const std::string KEY_ACID = "aircraft_identifications";
+const std::string KEY_MODE_3A = "mode_3a_codes";
+const std::string KEY_MODE_C_MIN = "mode_c_min";
+const std::string KEY_MODE_C_MAX = "mode_c_max";
+const std::string KEY_COUNTS = "dbcontent_counts";
+const std::string KEY_ADSD_MOPS_VERSION = "adsb_mops_versions";
 
 Target::Target(unsigned int utn, nlohmann::json info)
     : utn_(utn), info_(info)
 {
-    if (!info_.contains("used"))
-        info_["used"] = true;
+    if (!info_.contains(KEY_USED))
+        info_[KEY_USED] = true;
 }
 
 bool Target::use() const
 {
-    return info_.at("used");
+    return info_.at(KEY_USED);
 }
 
 void Target::use(bool value)
 {
-    info_["used"] = value;
+    info_[KEY_USED] = value;
 }
 
 std::string Target::comment() const
 {
-    if (!info_.contains("comment"))
+    if (!info_.contains(KEY_COMMENT))
         return "";
 
-    return info_.at("comment");
+    return info_.at(KEY_COMMENT);
 }
 
 void Target::comment (const std::string& value)
 {
-    info_["comment"] = value;
+    info_[KEY_COMMENT] = value;
 }
 
-std::set<unsigned int> Target::tas()
+void Target::timeBegin(boost::posix_time::ptime value)
 {
-    return info_.at("acads").get<std::set<unsigned int>>();
-}
-void Target::tas(const std::set<unsigned int>& tas)
-{
-    info_["acads"] = tas;
+    info_[KEY_TIME_BEGIN] = Time::toString(value);
 }
 
-std::set<unsigned int> Target::mas()
+boost::posix_time::ptime Target::timeBegin() const
 {
-    return info_.at("m3as").get<std::set<unsigned int>>();
+    if (!info_.contains(KEY_TIME_BEGIN))
+        return {};
+
+    return Time::fromString(info_.at(KEY_TIME_BEGIN));
 }
-void Target::mas(const std::set<unsigned int>& mas)
+
+std::string Target::timeBeginStr() const
 {
-    info_["m3as"] = mas;
+    if (!info_.contains(KEY_TIME_BEGIN))
+        return {};
+
+    return info_.at(KEY_TIME_BEGIN);
+}
+
+void Target::timeEnd(boost::posix_time::ptime value)
+{
+    info_[KEY_TIME_END] = Time::toString(value);
+}
+
+boost::posix_time::ptime Target::timeEnd() const
+{
+    if (!info_.contains(KEY_TIME_END))
+        return {};
+
+    return Time::fromString(info_.at(KEY_TIME_END));
+}
+
+std::string Target::timeEndStr() const
+{
+    if (!info_.contains(KEY_TIME_END))
+        return {};
+
+    return info_.at(KEY_TIME_END);
+}
+
+boost::posix_time::time_duration Target::timeDuration() const
+{
+    return timeEnd() - timeBegin();
+}
+
+std::string Target::timeDurationStr() const
+{
+    return Time::toString(timeDuration());
+}
+
+void Target::aircraftIdentifications(const std::set<std::string>& ids)
+{
+    info_[KEY_ACID] = ids;
+}
+
+std::set<std::string> Target::aircraftIdentifications() const
+{
+    if (!info_.contains(KEY_ACID))
+        return {};
+
+    return info_.at(KEY_ACID).get<set<string>>();
+}
+
+std::string Target::aircraftIdentificationsStr() const
+{
+    std::ostringstream out;
+
+    unsigned int cnt=0;
+    for (const auto& it : aircraftIdentifications())
+    {
+        if (cnt != 0)
+            out << ", ";
+
+        out << it;
+        ++cnt;
+    }
+
+    return out.str().c_str();
+}
+
+std::set<unsigned int> Target::aircraftAddresses() const
+{
+    if (!info_.contains(KEY_ACAD))
+        return {};
+
+    return info_.at(KEY_ACAD).get<std::set<unsigned int>>();
+}
+
+void Target::aircraftAddresses(const std::set<unsigned int>& tas)
+{
+    info_[KEY_ACAD] = tas;
+}
+
+std::string Target::aircraftAddressesStr() const
+{
+    std::ostringstream out;
+
+    unsigned int cnt=0;
+    for (const auto it : aircraftAddresses())
+    {
+        if (cnt != 0)
+            out << ", ";
+
+        out << String::hexStringFromInt(it, 6, '0');
+        ++cnt;
+    }
+
+    return out.str().c_str();
+}
+
+std::set<unsigned int> Target::modeACodes() const
+{
+    if (!info_.contains(KEY_MODE_3A))
+        return {};
+
+    return info_.at(KEY_MODE_3A).get<std::set<unsigned int>>();
+}
+void Target::modeACodes(const std::set<unsigned int>& mas)
+{
+    info_[KEY_MODE_3A] = mas;
+}
+
+std::string Target::modeACodesStr() const
+{
+    std::ostringstream out;
+
+    unsigned int cnt=0;
+    for (const auto it : modeACodes())
+    {
+        if (cnt != 0)
+            out << ", ";
+
+        out << String::octStringFromInt(it, 4, '0');
+        ++cnt;
+    }
+
+    return out.str().c_str();
+}
+
+bool Target::hasModeC() const
+{
+    return info_.contains(KEY_MODE_C_MIN) && info_.contains(KEY_MODE_C_MIN);
+}
+
+float Target::modeCMin() const
+{
+    assert (info_.contains(KEY_MODE_C_MIN));
+    return info_.contains(KEY_MODE_C_MIN);
+}
+
+std::string Target::modeCMinStr() const
+{
+    assert (info_.contains(KEY_MODE_C_MIN));
+    return to_string(info_.contains(KEY_MODE_C_MIN));
+}
+
+float Target::modeCMax() const
+{
+    assert (info_.contains(KEY_MODE_C_MAX));
+    return info_.contains(KEY_MODE_C_MAX);
+}
+
+std::string Target::modeCMaxStr() const
+{
+    assert (info_.contains(KEY_MODE_C_MAX));
+    return to_string(info_.contains(KEY_MODE_C_MAX));
+}
+
+bool Target::isPrimaryOnly () const
+{
+    return !aircraftAddresses().size() && !aircraftIdentifications().size()
+            && !modeACodes().size() && !hasModeC();
+}
+
+unsigned int Target::numUpdates () const
+{
+    unsigned int cnt = 0;
+
+    if (info_.contains(KEY_COUNTS))
+    {
+        for (auto& cnt_it : info_.at(KEY_COUNTS).get<std::map<std::string, unsigned int>>())
+            cnt += cnt_it.second;
+    }
+
+    return cnt;
 }
 
 unsigned int Target::dbContentCount(const std::string& dbcontent_name)
 {
-    if (info_.contains("dbcontent_counts") && info_.at("dbcontent_counts").contains(dbcontent_name))
-        return info_.at("dbcontent_counts").at(dbcontent_name);
+    if (info_.contains(KEY_COUNTS) && info_.at(KEY_COUNTS).contains(dbcontent_name))
+        return info_.at(KEY_COUNTS).at(dbcontent_name);
     else
         return 0;
 }
 
 void Target::dbContentCount(const std::string& dbcontent_name, unsigned int value)
 {
-    info_["dbcontent_counts"][dbcontent_name] = value;
+    info_[KEY_COUNTS][dbcontent_name] = value;
 }
 
-bool Target::hasAdsbMOPSVersion()
+bool Target::hasAdsbMOPSVersions() const
 {
-    return info_.contains("adsb_mops_version");
+    if (!info_.contains(KEY_ADSD_MOPS_VERSION))
+        return false;
+
+    return info_.at(KEY_ADSD_MOPS_VERSION).get<std::set<unsigned int>>().size();
 }
 
-unsigned int Target::adsbMOPSVersion()
+std::set<unsigned int> Target::adsbMOPSVersions() const
 {
-    assert (hasAdsbMOPSVersion());
-    return info_.at("adsb_mops_version");
+    if (!info_.contains(KEY_ADSD_MOPS_VERSION))
+        return {};
+
+    return info_.at(KEY_ADSD_MOPS_VERSION).get<std::set<unsigned int>>();
 }
 
-void Target::adsbMOPSVersion(unsigned int value)
+void Target::adsbMOPSVersions(std::set<unsigned int> values)
 {
-    info_["adsb_mops_version"] = value;
+    info_[KEY_ADSD_MOPS_VERSION] = values;
+}
+
+std::string Target::adsbMOPSVersionsStr() const
+{
+    std::ostringstream out;
+
+    unsigned int cnt=0;
+    for (const auto it : adsbMOPSVersions())
+    {
+        if (cnt != 0)
+            out << ", ";
+
+        out << it;
+        ++cnt;
+    }
+
+    return out.str().c_str();
 }
 
 }

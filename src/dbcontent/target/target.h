@@ -3,6 +3,8 @@
 
 #include "json.hpp"
 
+#include "boost/date_time/posix_time/ptime.hpp"
+
 #include <set>
 
 namespace dbContent {
@@ -24,18 +26,44 @@ public:
 
     nlohmann::json info() const { return info_; }
 
-    std::set<unsigned int> tas();
-    void tas(const std::set<unsigned int>& tas);
+    void timeBegin(boost::posix_time::ptime value);
+    boost::posix_time::ptime timeBegin() const;
+    std::string timeBeginStr() const;
+    void timeEnd(boost::posix_time::ptime value);
+    boost::posix_time::ptime timeEnd() const;
+    std::string timeEndStr() const;
+    boost::posix_time::time_duration timeDuration() const;
+    std::string timeDurationStr() const;
 
-    std::set<unsigned int> mas();
-    void mas(const std::set<unsigned int>& mas);
+    void aircraftIdentifications(const std::set<std::string>& ids);
+    std::set<std::string> aircraftIdentifications() const;
+    std::string aircraftIdentificationsStr() const;
+
+    std::set<unsigned int> aircraftAddresses() const;
+    void aircraftAddresses(const std::set<unsigned int>& tas);
+    std::string aircraftAddressesStr() const;
+
+    std::set<unsigned int> modeACodes() const;
+    void modeACodes(const std::set<unsigned int>& mas);
+    std::string modeACodesStr() const;
+
+    bool hasModeC() const;
+    float modeCMin() const;
+    std::string modeCMinStr() const;
+    float modeCMax() const;
+    std::string modeCMaxStr() const;
+
+    bool isPrimaryOnly () const;
+
+    unsigned int numUpdates () const;
 
     unsigned int dbContentCount(const std::string& dbcontent_name);
     void dbContentCount(const std::string& dbcontent_name, unsigned int value);
 
-    bool hasAdsbMOPSVersion();
-    unsigned int adsbMOPSVersion();
-    void adsbMOPSVersion(unsigned int value);
+    bool hasAdsbMOPSVersions() const;
+    std::set<unsigned int> adsbMOPSVersions() const;
+    void adsbMOPSVersions(std::set<unsigned int> values);
+    std::string adsbMOPSVersionsStr() const;
 
 protected:
     nlohmann::json info_;
