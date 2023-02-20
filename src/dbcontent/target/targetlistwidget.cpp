@@ -94,17 +94,17 @@ void TargetListWidget::actionTriggeredSlot(QAction* action)
 
 void TargetListWidget::useAllSlot()
 {
-    //eval_data_.setUseAllTargetData(true);
+    model_.setUseAllTargetData(true);
 }
 
 void TargetListWidget::useNoneSlot()
 {
-    //eval_data_.setUseAllTargetData(false);
+    model_.setUseAllTargetData(false);
 }
 
 void TargetListWidget::clearCommentsSlot()
 {
-    //eval_data_.clearComments();
+    model_.clearComments();
 }
 
 void TargetListWidget::filterSlot()

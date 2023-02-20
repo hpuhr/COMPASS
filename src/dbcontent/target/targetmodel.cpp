@@ -194,6 +194,8 @@ bool TargetModel::setData(const QModelIndex &index, const QVariant& value, int r
         //eval_man_.useUTN(it->utn_, checked, false);
         target_data_.modify(it, [value,checked](Target& p) { p.use(checked); });
 
+        saveToDB(it->utn_);
+
         emit dataChanged(index, TargetModel::index(index.row(), columnCount()-1));
         return true;
     }
@@ -206,8 +208,8 @@ bool TargetModel::setData(const QModelIndex &index, const QVariant& value, int r
 
         target_data_.modify(it, [value](Target& p) { p.comment(value.toString().toStdString()); });
 
-        //eval_man_.utnComment(it->utn_, value.toString().toStdString(), false);
-        //target_data_.modify(it, [value](EvaluationTargetData& p) { p.use(false); });
+        saveToDB(it->utn_);
+
         return true;
     }
 
@@ -263,6 +265,93 @@ Qt::ItemFlags TargetModel::flags(const QModelIndex &index) const
     }
     else
         return QAbstractItemModel::flags(index);
+}
+
+const dbContent::Target& TargetModel::getTargetOf (const QModelIndex& index)
+{
+    assert (index.isValid());
+
+    assert (index.row() >= 0);
+    assert (index.row() < target_data_.size());
+
+    const dbContent::Target& target = target_data_.at(index.row());
+
+    return target;
+}
+
+void TargetModel::setUseTargetData (unsigned int utn, bool value)
+{
+    loginf << "TargetModel: setUseTargetData: utn " << utn << " value " << value;
+
+    assert (existsTarget(utn));
+
+    QModelIndexList items = match(
+                index(0, 0),
+                Qt::UserRole,
+                QVariant(utn),
+                1, // look *
+                Qt::MatchExactly); // look *
+
+    assert (items.size() == 1);
+
+    setData(items.at(0), {value ? Qt::Checked: Qt::Unchecked}, Qt::CheckStateRole);
+}
+void TargetModel::setUseAllTargetData (bool value)
+{
+    loginf << "TargetModel: setUseAllTargetData: value " << value;
+
+    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+
+    beginResetModel();
+
+    for (auto target_it = target_data_.begin(); target_it != target_data_.end(); ++target_it)
+        target_data_.modify(target_it, [value](Target& p) { p.use(value); });
+
+    saveToDB();
+
+    endResetModel();
+
+    QApplication::restoreOverrideCursor();
+}
+
+void TargetModel::clearComments ()
+{
+    loginf << "TargetModel: clearComments";
+
+    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+
+    beginResetModel();
+
+    for (auto target_it = target_data_.begin(); target_it != target_data_.end(); ++target_it)
+        target_data_.modify(target_it, [](Target& p) { p.comment(""); });
+
+    saveToDB();
+
+    endResetModel();
+
+    QApplication::restoreOverrideCursor();
+}
+
+void TargetModel::setUseByFilter ()
+{
+    loginf << "TargetModel: setUseByFilter";
+}
+
+void TargetModel::setTargetDataComment (unsigned int utn, std::string comment)
+{
+    loginf << "TargetModel: setTargetDataComment: utn " << utn << " comment '" << comment << "'";
+
+    assert (existsTarget(utn));
+
+    QModelIndexList items = match(
+                index(0, 0),
+                Qt::UserRole,
+                QVariant(("comment_"+to_string(utn)).c_str()),
+                1, // look *
+                Qt::MatchExactly); // look *
+
+    if (items.size() == 1)
+        setData(items.at(0), comment.c_str(), Qt::EditRole);
 }
 
 bool TargetModel::hasTargetsInfo()
@@ -333,5 +422,19 @@ void TargetModel::saveToDB()
 
     COMPASS::instance().interface().saveTargets(targets);
 }
+
+void TargetModel::saveToDB(unsigned int utn)
+{
+    loginf << "TargetModel: saveToDB: saving utn " << utn;
+
+    auto tr_tag_it = target_data_.get<target_tag>().find(utn);
+
+    assert (tr_tag_it != target_data_.get<target_tag>().end());
+
+    std::unique_ptr<dbContent::Target> tgt_copy {new dbContent::Target(tr_tag_it->utn_, tr_tag_it->info())};
+
+    COMPASS::instance().interface().saveTarget(tgt_copy);
+}
+
 
 }

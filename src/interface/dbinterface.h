@@ -148,6 +148,7 @@ public:
     void clearTargetsTable();
     std::vector<std::unique_ptr<dbContent::Target>> loadTargets();
     void saveTargets(const std::vector<std::unique_ptr<dbContent::Target>>& targets);
+    void saveTarget(const std::unique_ptr<dbContent::Target>& target);
 
     void clearTableContent(const std::string& table_name);
 

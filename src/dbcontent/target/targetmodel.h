@@ -50,6 +50,15 @@ public:
 
     Qt::ItemFlags flags(const QModelIndex &index) const override;
 
+    const dbContent::Target& getTargetOf (const QModelIndex& index);
+
+    void setUseTargetData (unsigned int utn, bool value);
+    void setUseAllTargetData (bool value);
+    void clearComments ();
+    void setUseByFilter ();
+
+    void setTargetDataComment (unsigned int utn, std::string comment);
+
     bool hasTargetsInfo();
     void clearTargetsInfo();
     bool existsTarget(unsigned int utn);
@@ -58,6 +67,7 @@ public:
 
     void loadFromDB();
     void saveToDB();
+    void saveToDB(unsigned int utn);
 
     void clear();
 

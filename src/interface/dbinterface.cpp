@@ -1054,6 +1054,14 @@ void DBInterface::saveTargets(const std::vector<std::unique_ptr<dbContent::Targe
     loginf << "DBInterface: saveTargets: done";
 }
 
+void DBInterface::saveTarget(const std::unique_ptr<dbContent::Target>& target)
+{
+    loginf << "DBInterface: saveTarget: utn " << target->utn();
+
+    string str = sql_generator_.getInsertTargetStatement(target->utn_, target->info().dump());
+    db_connection_->executeSQL(str);
+}
+
 
 void DBInterface::insertBuffer(DBContent& dbcontent, std::shared_ptr<Buffer> buffer)
 {
