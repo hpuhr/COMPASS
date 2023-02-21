@@ -78,6 +78,9 @@ public:
     virtual ViewConfigWidget* getViewConfigWidget() { return config_widget_; }
     virtual const ViewConfigWidget* getViewConfigWidget() const { return config_widget_; }
 
+    virtual QWidget* getLowerWidget() { return lower_widget_; }
+    virtual const QWidget* getLowerWidget() const { return lower_widget_; }
+
     virtual std::string loadedMessage() const { return ""; }
 
     bool reloadNeeded() const;
@@ -98,6 +101,7 @@ protected:
 
     void setDataWidget(ViewDataWidget* w);
     void setConfigWidget(ViewConfigWidget* w);
+    void setLowerWidget(QWidget* w);
 
     void createStandardLayout();
     void addConfigWidgetToggle();
@@ -111,11 +115,14 @@ private:
     QSplitter*      main_splitter_           = nullptr;
     QWidget*        data_widget_container_   = nullptr;
     QWidget*        config_widget_container_ = nullptr;
+    QWidget*        lower_widget_container_  = nullptr;
+    QWidget*        right_widget_            = nullptr;
 
     ViewToolWidget*      tool_widget_   = nullptr;
     ViewDataWidget*      data_widget_   = nullptr;
     ViewConfigWidget*    config_widget_ = nullptr;
     ViewLoadStateWidget* state_widget_  = nullptr;
+    QWidget*             lower_widget_  = nullptr;
 
     std::unique_ptr<ViewToolSwitcher> tool_switcher_;
 

@@ -64,8 +64,15 @@ ViewWidget::~ViewWidget()
  */
 void ViewWidget::createStandardLayout()
 {
+    QVBoxLayout* main_layout = new QVBoxLayout;
+    main_layout->setContentsMargins(0, 0, 0, 0);
+    main_layout->setSpacing(0);
+    main_layout->setMargin(0);
+
     QHBoxLayout* hlayout = new QHBoxLayout;
     hlayout->setContentsMargins(0, 0, 0, 0);
+
+    main_layout->addLayout(hlayout);
 
     main_splitter_ = new QSplitter;
     main_splitter_->setOrientation(Qt::Horizontal);
@@ -78,8 +85,8 @@ void ViewWidget::createStandardLayout()
     QWidget* left_widget = new QWidget;
     left_widget->setContentsMargins(0, 0, 0, 0);
 
-    QWidget* right_widget = new QWidget;
-    right_widget->setContentsMargins(0, 0, 0, 0);
+    right_widget_ = new QWidget;
+    right_widget_->setContentsMargins(0, 0, 0, 0);
 
     QVBoxLayout* left_layout = new QVBoxLayout;
     left_layout->setContentsMargins(0, 0, 0, 0);
@@ -88,10 +95,10 @@ void ViewWidget::createStandardLayout()
     right_layout->setContentsMargins(0, 0, 0, 0);
 
     left_widget->setLayout(left_layout);
-    right_widget->setLayout(right_layout);
+    right_widget_->setLayout(right_layout);
 
     main_splitter_->addWidget(left_widget);
-    main_splitter_->addWidget(right_widget);
+    main_splitter_->addWidget(right_widget_);
 
     //create tool widget
     {
@@ -127,15 +134,22 @@ void ViewWidget::createStandardLayout()
 
     //create load state widget
     {
-        state_widget_ = new ViewLoadStateWidget(this, right_widget);
+        state_widget_ = new ViewLoadStateWidget(this, right_widget_);
 
         right_layout->addWidget(state_widget_);
+    }
+
+    //create lower widget container
+    {
+        lower_widget_container_ = new QWidget;
+        lower_widget_container_->setVisible(false);
+        main_layout->addWidget(lower_widget_container_);
     }
 
     main_splitter_->restoreState(settings.value("mainSplitterSizes").toByteArray());
     hlayout->addWidget(main_splitter_);
 
-    setLayout(hlayout);
+    setLayout(main_layout);
 
     setFocusPolicy(Qt::StrongFocus);
 
@@ -211,12 +225,32 @@ void ViewWidget::connectWidgets()
 
 /**
  */
+void ViewWidget::setLowerWidget(QWidget* w)
+{
+    if (!w)
+        throw std::runtime_error("ViewWidget::setLowerWidget: Null pointer passed");
+    if (!lower_widget_container_)
+        throw std::runtime_error("ViewWidget::setLowerWidget: No container to add to");
+    if (lower_widget_)
+        throw std::runtime_error("ViewWidget::setLowerWidget: Already set");
+    
+    QVBoxLayout* layout = new QVBoxLayout;
+    layout->setContentsMargins(0, 0, 0, 0);
+    lower_widget_container_->setLayout(layout);
+
+    layout->addWidget(w);
+
+    lower_widget_container_->setVisible(true);
+}
+
+/**
+ */
 void ViewWidget::toggleConfigWidget()
 {
-    if (config_widget_container_)
+    if (right_widget_)
     {
-        bool vis = config_widget_container_->isVisible();
-        config_widget_container_->setVisible(!vis);
+        bool vis = right_widget_->isVisible();
+        right_widget_->setVisible(!vis);
     }
 }
 
