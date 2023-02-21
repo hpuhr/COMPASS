@@ -75,7 +75,6 @@ class Buffer
     friend class NullableVector;
 
 public:
-    Buffer();
     Buffer(PropertyList properties, const std::string& dbcontent_name = "");
     virtual ~Buffer();
 
@@ -91,18 +90,6 @@ public:
     void printProperties();
 
     void sortByProperty(const Property& property);
-
-
-    // Returns boolean indicating if any data was ever written.
-    //bool firstWrite();
-
-    // Returns boolean indicating if buffer is the last of one DB operation.
-    //bool lastOne() { return last_one_; }
-    // Sets if buffer is the last one of one DB operation.
-    //void lastOne(bool last_one) { last_one_ = last_one; }
-
-    // Returns the buffers id
-    //unsigned int id() const { return id_; }
 
     template <typename T>
     bool has(const std::string& id);
@@ -128,8 +115,6 @@ public:
 
     void transformVariables(dbContent::VariableSet& list,
                             bool dbcol2dbovar);  // tc2dbovar true for db col -> dbo var, false dbo var -> db column
-
-    std::shared_ptr<Buffer> getPartialCopy(const PropertyList& partial_properties);
 
     nlohmann::json asJSON(unsigned int max_size=0);
 

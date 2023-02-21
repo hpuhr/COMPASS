@@ -31,11 +31,6 @@
 using namespace nlohmann;
 using namespace std;
 
-Buffer::Buffer()
-{
-    logdbg << "Buffer: constructor";
-}
-
 Buffer::Buffer(PropertyList properties, const string& dbcontent_name)
     : dbcontent_name_(dbcontent_name) //, last_one_(false)
 {
@@ -821,95 +816,6 @@ void Buffer::transformVariables(dbContent::VariableSet& list, bool dbcol2dbovar)
             }
         }
     }
-}
-
-shared_ptr<Buffer> Buffer::getPartialCopy(const PropertyList& partial_properties)
-{
-    assert (size());
-    shared_ptr<Buffer> tmp_buffer{new Buffer()};
-
-    for (unsigned int cnt = 0; cnt < partial_properties.size(); ++cnt)
-    {
-        Property prop = partial_properties.at(cnt);
-
-        logdbg << "Buffer: getPartialCopy: adding property " << prop.name();
-        tmp_buffer->addProperty(prop);
-
-        switch (prop.dataType())
-        {
-            case PropertyDataType::BOOL:
-                logdbg << "Buffer: getPartialCopy: adding BOOL property " << prop.name()
-                       << " size " << get<bool>(prop.name()).size();
-                tmp_buffer->get<bool>(prop.name()).copyData(get<bool>(prop.name()));
-                break;
-            case PropertyDataType::CHAR:
-                logdbg << "Buffer: getPartialCopy: adding CHAR property " << prop.name()
-                          << " size " << get<char>(prop.name()).size();
-                tmp_buffer->get<char>(prop.name()).copyData(get<char>(prop.name()));
-                break;
-            case PropertyDataType::UCHAR:
-                logdbg << "Buffer: getPartialCopy: adding UCHAR property " << prop.name()
-                          << " size " << get<unsigned char>(prop.name()).size();
-                tmp_buffer->get<unsigned char>(prop.name())
-                    .copyData(get<unsigned char>(prop.name()));
-                break;
-            case PropertyDataType::INT:
-                logdbg << "Buffer: getPartialCopy: adding INT property " << prop.name()
-                          << " size " << get<int>(prop.name()).size();
-                tmp_buffer->get<int>(prop.name()).copyData(get<int>(prop.name()));
-                break;
-            case PropertyDataType::UINT:
-                logdbg << "Buffer: getPartialCopy: adding UINT property " << prop.name()
-                          << " size " << get<unsigned int>(prop.name()).size();
-                tmp_buffer->get<unsigned int>(prop.name()).copyData(get<unsigned int>(prop.name()));
-                break;
-            case PropertyDataType::LONGINT:
-                logdbg << "Buffer: getPartialCopy: adding LONGINT property " << prop.name()
-                          << " size " << get<long int>(prop.name()).size();
-                tmp_buffer->get<long int>(prop.name()).copyData(get<long int>(prop.name()));
-                break;
-            case PropertyDataType::ULONGINT:
-                logdbg << "Buffer: getPartialCopy: adding ULONGINT property " << prop.name()
-                          << " size " << get<unsigned long int>(prop.name()).size();
-                tmp_buffer->get<unsigned long int>(prop.name())
-                    .copyData(get<unsigned long int>(prop.name()));
-                break;
-            case PropertyDataType::FLOAT:
-                logdbg << "Buffer: getPartialCopy: adding FLOAT property " << prop.name()
-                          << " size " << get<float>(prop.name()).size();
-                tmp_buffer->get<float>(prop.name()).copyData(get<float>(prop.name()));
-                break;
-            case PropertyDataType::DOUBLE:
-                logdbg << "Buffer: getPartialCopy: adding DOUBLE property " << prop.name()
-                          << " size " << get<double>(prop.name()).size();
-                tmp_buffer->get<double>(prop.name()).copyData(get<double>(prop.name()));
-                break;
-            case PropertyDataType::STRING:
-                logdbg << "Buffer: getPartialCopy: adding STRING property " << prop.name()
-                          << " size " << get<string>(prop.name()).size();
-                tmp_buffer->get<string>(prop.name()).copyData(get<string>(prop.name()));
-                break;
-            case PropertyDataType::JSON:
-                logdbg << "Buffer: getPartialCopy: adding JSON property " << prop.name()
-                          << " size " << get<json>(prop.name()).size();
-                tmp_buffer->get<json>(prop.name()).copyData(get<json>(prop.name()));
-                break;
-            case PropertyDataType::TIMESTAMP:
-                logdbg << "Buffer: getPartialCopy: adding TIMESTAMP property " << prop.name()
-                          << " size " << get<boost::posix_time::ptime>(prop.name()).size();
-                tmp_buffer->get<boost::posix_time::ptime>(prop.name()).copyData(get<boost::posix_time::ptime>(prop.name()));
-                break;
-            default:
-                logerr << "Buffer: getPartialCopy: unknown property type "
-                       << Property::asString(prop.dataType());
-                throw runtime_error("Buffer: getPartialCopy: unknown property type " +
-                                         Property::asString(prop.dataType()));
-        }
-    }
-
-    assert (tmp_buffer->size());
-
-    return tmp_buffer;
 }
 
 nlohmann::json Buffer::asJSON(unsigned int max_size)
