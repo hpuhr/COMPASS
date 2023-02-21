@@ -99,9 +99,9 @@ void EvaluationDataWidget::actionTriggeredSlot(QAction* action)
     connect (clear_action, &QAction::triggered, this, &EvaluationDataWidget::clearCommentsSlot);
     menu.addAction(clear_action);
 
-    QAction* filter_action = new QAction("Filter", this);
-    connect (filter_action, &QAction::triggered, this, &EvaluationDataWidget::filterSlot);
-    menu.addAction(filter_action);
+//    QAction* filter_action = new QAction("Filter", this);
+//    connect (filter_action, &QAction::triggered, this, &EvaluationDataWidget::filterSlot);
+//    menu.addAction(filter_action);
 
     menu.exec(QCursor::pos());
 }
@@ -121,11 +121,11 @@ void EvaluationDataWidget::clearCommentsSlot()
     eval_data_.clearComments();
 }
 
-void EvaluationDataWidget::filterSlot()
-{
-    EvaluationDataFilterDialog& dialog = eval_data_.dialog();
-    dialog.show();
-}
+//void EvaluationDataWidget::filterSlot()
+//{
+//    EvaluationDataFilterDialog& dialog = eval_data_.dialog();
+//    dialog.show();
+//}
 
 void EvaluationDataWidget::customContextMenuSlot(const QPoint& p)
 {

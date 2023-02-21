@@ -20,7 +20,6 @@
 
 #include "evaluationtargetdata.h"
 #include "evaluationdatawidget.h"
-#include "evaluationdatafilterdialog.h"
 
 //#include <tbb/tbb.h>
 
@@ -96,7 +95,6 @@ public:
     void setTargetDataComment (unsigned int utn, std::string comment);
 
     EvaluationDataWidget* widget();
-    EvaluationDataFilterDialog& dialog();
 
     // ref
     std::shared_ptr<Buffer> ref_buffer_;
@@ -168,7 +166,6 @@ protected:
     bool finalized_ {false};
 
     std::unique_ptr<EvaluationDataWidget> widget_;
-    std::unique_ptr<EvaluationDataFilterDialog> dialog_;
 
     unsigned int unassociated_ref_cnt_ {0};
     unsigned int associated_ref_cnt_ {0};

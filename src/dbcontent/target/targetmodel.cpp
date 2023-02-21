@@ -505,7 +505,7 @@ void TargetModel::setUseByFilter ()
 
         if (!use)
         {
-            logdbg << "EvaluationManager: filterUTNs: removing " << target_it->utn_ << " comment '" << comment << "'";
+            logdbg << "TargetModel: filterUTNs: removing " << target_it->utn_ << " comment '" << comment << "'";
             //useUTN (target_it->utn_, use, true);
             target_data_.modify(target_it, [use](Target& p) { p.use(use); });
             //utnComment(target_it->utn_, comment, false);
@@ -773,6 +773,77 @@ void TargetModel::removeNotDetectedDBContents(const std::string& dbcontent_name,
     loginf << "TargetModel: removeNotDetectedDBOs: dbo " << dbcontent_name << " value " << value;
 
     remove_not_detected_dbo_values_[dbcontent_name] = value;
+}
+
+bool TargetModel::filterTargetAddressesBlacklist() const
+{
+    return filter_target_addresses_blacklist_;
+}
+
+void TargetModel::filterTargetAddressesBlacklist(bool value)
+{
+    loginf << "TargetModel: filterTargetAddressesBlacklist: value " << value;
+
+    filter_target_addresses_blacklist_ = value;
+}
+
+bool TargetModel::filterModeACodeBlacklist() const
+{
+    return filter_mode_a_code_blacklist_;
+}
+
+void TargetModel::filterModeACodeBlacklist(bool value)
+{
+    loginf << "TargetModel: filterModeACodeBlacklist: value " << value;
+
+    filter_mode_a_code_blacklist_ = value;
+}
+
+bool TargetModel::removeModeCValues() const
+{
+    return remove_mode_c_values_;
+}
+
+void TargetModel::removeModeCValues(bool value)
+{
+    loginf << "TargetModel: removeModeCValues: value " << value;
+
+    remove_mode_c_values_ = value;
+}
+
+float TargetModel::removeModeCMinValue() const
+{
+    return remove_mode_c_min_value_;
+}
+
+void TargetModel::removeModeCMinValue(float value)
+{
+    loginf << "TargetModel: removeModeCMinValue: value " << value;
+    remove_mode_c_min_value_ = value;
+}
+
+bool TargetModel::filterTargetAddresses() const
+{
+    return filter_target_addresses_;
+}
+
+void TargetModel::filterTargetAddresses(bool value)
+{
+    loginf << "TargetModel: removeTargetAddresses: value " << value;
+
+    filter_target_addresses_ = value;
+}
+
+bool TargetModel::filterModeACodes() const
+{
+    return filter_mode_a_codes_;
+}
+
+void TargetModel::filterModeACodes(bool value)
+{
+    loginf << "TargetModel: removeModeACodes: value " << value;
+
+    filter_mode_a_codes_ = value;
 }
 
 }

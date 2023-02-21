@@ -36,7 +36,7 @@ public slots:
     void useAllSlot();
     void useNoneSlot();
     void clearCommentsSlot();
-    void filterSlot();
+    //void filterSlot();
 
     void customContextMenuSlot(const QPoint& p);
     void showFullUTNSlot ();

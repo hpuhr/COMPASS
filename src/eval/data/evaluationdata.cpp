@@ -956,10 +956,3 @@ EvaluationDataWidget* EvaluationData::widget()
     return widget_.get();
 }
 
-EvaluationDataFilterDialog& EvaluationData::dialog()
-{
-    if (!dialog_)
-        dialog_.reset(new EvaluationDataFilterDialog(*this, eval_man_));
-
-    return *dialog_;
-}

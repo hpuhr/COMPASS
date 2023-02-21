@@ -1,6 +1,7 @@
 #include "targetlistwidget.h"
 #include "targetmodel.h"
 #include "dbcontentmanager.h"
+#include "targetfilterdialog.h"
 #include "logger.h"
 
 #include <QTableView>
@@ -110,8 +111,10 @@ void TargetListWidget::clearCommentsSlot()
 
 void TargetListWidget::filterSlot()
 {
-//    EvaluationDataFilterDialog& dialog = eval_data_.dialog();
-//    dialog.show();
+    loginf << "TargetListWidget: filterSlot";
+
+    TargetFilterDialog dialog (model_);
+    dialog.exec();
 }
 
 void TargetListWidget::customContextMenuSlot(const QPoint& p)
