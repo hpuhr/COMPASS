@@ -23,6 +23,7 @@
 #include "viewwidget.h"
 #include "viewpoint.h"
 #include "compass.h"
+#include "viewdatawidget.h"
 
 #include <QVBoxLayout>
 #include <QWidget>
@@ -198,4 +199,47 @@ void View::selectionChangedSlot()
     //        selection_change_emitted_ = false;
     //    else // only update if not self-emitted
     updateSelection();
+}
+
+void View::loadingStarted()
+{
+    loginf << "View: loadingStarted";
+
+    if (widget_)
+        widget_->loadingStarted();
+}
+
+void View::loadedData(const std::map<std::string, std::shared_ptr<Buffer>>& data, bool requires_reset)
+{
+    loginf << "View: loadedData";
+
+    if (widget_ && widget_->getViewDataWidget())
+        widget_->getViewDataWidget()->updateData(data, requires_reset);
+}
+
+void View::loadingDone()
+{
+    loginf << "View: loadingDone";
+
+    if (widget_)
+        widget_->loadingDone();
+}
+
+void View::clearData()
+{
+    loginf << "View: clearData";
+
+    if (widget_ && widget_->getViewDataWidget())
+        widget_->getViewDataWidget()->clearData();
+}
+
+void View::appModeSwitch(AppMode app_mode_previous, AppMode app_mode_current)
+{
+    loginf << "View: appModeSwitch: app_mode " << toString(app_mode_current)
+           << " prev " << toString(app_mode_previous);
+
+    app_mode_ = app_mode_current;
+
+    if (widget_)
+        widget_->appModeSwitch(app_mode_current);
 }

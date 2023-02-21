@@ -43,7 +43,6 @@ ScatterPlotView::ScatterPlotView(const std::string& class_id, const std::string&
     registerParameter("data_var_y_dbo", &data_var_y_dbo_, META_OBJECT_NAME);
     registerParameter("data_var_y_name", &data_var_y_name_, DBContent::meta_var_latitude_.name());
 
-
     // create sub done in init
 }
 
@@ -74,9 +73,6 @@ bool ScatterPlotView::init()
 
     assert(data_source_);
 
-    DBContentManager& object_man = COMPASS::instance().dbContentManager();
-    connect(&object_man, &DBContentManager::loadingDoneSignal, this, &ScatterPlotView::allLoadingDoneSlot);
-
 //    connect(data_source_, &ScatterPlotViewDataSource::loadingStartedSignal, widget_->getDataWidget(),
 //            &ScatterPlotViewDataWidget::loadingStartedSlot);
 //    connect(data_source_, &ScatterPlotViewDataSource::updateDataSignal, widget_->getDataWidget(),
@@ -102,42 +98,6 @@ bool ScatterPlotView::init()
     //    widget_->getDataWidget()->showAssociationsSlot(show_associations_);
 
     return true;
-}
-
-void ScatterPlotView::loadingStarted()
-{
-    loginf << "ScatterPlotView: loadingStarted";
-
-    getDataWidget()->loadingStartedSlot();
-}
-
-void ScatterPlotView::loadedData(const std::map<std::string, std::shared_ptr<Buffer>>& data, bool requires_reset)
-{
-    loginf << "ScatterPlotView: loadedData";
-
-    getDataWidget()->updateDataSlot(data, requires_reset);
-}
-
-void ScatterPlotView::loadingDone()
-{
-    loginf << "ScatterPlotView: loadingDone";
-
-    getDataWidget()->loadingDoneSlot();
-}
-
-void ScatterPlotView::clearData()
-{
-    loginf << "ScatterPlotView: clearData";
-
-    getDataWidget()->clear();
-}
-
-void ScatterPlotView::appModeSwitch (AppMode app_mode_previous, AppMode app_mode_current)
-{
-    loginf << "ScatterPlotView: appModeSwitch: app_mode " << toString(app_mode_current)
-           << " prev " << toString(app_mode_previous);
-
-    widget_->getViewConfigWidget()->appModeSwitch(app_mode_current);
 }
 
 void ScatterPlotView::generateSubConfigurable(const std::string& class_id,
@@ -272,9 +232,8 @@ void ScatterPlotView::dataVarX (Variable& var)
     assert (!isDataVarXMeta());
 
     assert (widget_);
-    widget_->getViewDataWidget()->updatePlot();
-
-    updateStatus();
+    widget_->getViewDataWidget()->redrawData(true);
+    widget_->updateLoadState();
 }
 
 MetaVariable& ScatterPlotView::metaDataVarX()
@@ -293,9 +252,8 @@ void ScatterPlotView::metaDataVarX (MetaVariable& var)
     assert (isDataVarXMeta());
 
     assert (widget_);
-    widget_->getViewDataWidget()->updatePlot();
-
-    updateStatus();
+    widget_->getViewDataWidget()->redrawData(true);
+    widget_->updateLoadState();
 }
 
 
@@ -343,9 +301,8 @@ void ScatterPlotView::dataVarY (Variable& var)
     assert (!isDataVarYMeta());
 
     assert (widget_);
-    widget_->getViewDataWidget()->updatePlot();
-
-    updateStatus();
+    widget_->getViewDataWidget()->redrawData(true);
+    widget_->updateLoadState();
 }
 
 MetaVariable& ScatterPlotView::metaDataVarY()
@@ -364,9 +321,8 @@ void ScatterPlotView::metaDataVarY (MetaVariable& var)
     assert (isDataVarYMeta());
 
     assert (widget_);
-    widget_->getViewDataWidget()->updatePlot();
-
-    updateStatus();
+    widget_->getViewDataWidget()->redrawData(true);
+    widget_->updateLoadState();
 }
 
 
@@ -386,7 +342,7 @@ void ScatterPlotView::updateSelection()
     loginf << "ScatterPlotView: updateSelection";
     assert(widget_);
 
-    widget_->getViewDataWidget()->updatePlot();
+    widget_->getViewDataWidget()->redrawData(true);
 
     //    if (show_only_selected_)
     //        widget_->getDataWidget()->updateToSelection();
@@ -411,29 +367,4 @@ void ScatterPlotView::showViewPointSlot (const ViewableDataConfig* vp)
     assert (data_source_);
     data_source_->showViewPoint(vp);
     assert (widget_);
-}
-
-void ScatterPlotView::allLoadingDoneSlot()
-{
-    loginf << "ScatterPlotView: allLoadingDoneSlot";
-    assert(widget_);
-
-    widget_->getViewConfigWidget()->setDisabled(false);
-    widget_->getViewConfigWidget()->setStatus("", false);
-
-    getDataWidget()->loadingDoneSlot(); // updates plot
-
-    updateStatus();
-}
-
-void ScatterPlotView::updateStatus()
-{
-    if (COMPASS::instance().appMode() != AppMode::LiveRunning)
-        return;
-
-    if ((widget_->getViewDataWidget()->xVarNotInBuffer() || widget_->getViewDataWidget()->yVarNotInBuffer()))
-        widget_->getViewConfigWidget()->setStatus("Reload Required", true, Qt::red);
-    else
-        widget_->getViewConfigWidget()->setStatus(
-                    "Loaded with "+QString::number(widget_->getViewDataWidget()->nullValueCnt())+" NULL values", true);
 }

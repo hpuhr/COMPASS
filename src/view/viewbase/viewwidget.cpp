@@ -21,7 +21,9 @@
 #include "viewdatawidget.h"
 #include "viewconfigwidget.h"
 #include "viewtoolswitcher.h"
+#include "viewloadstatewidget.h"
 #include "files.h"
+#include "compass.h"
 
 #include <QVBoxLayout>
 #include <QSplitter>
@@ -76,19 +78,27 @@ void ViewWidget::createStandardLayout()
     QWidget* left_widget = new QWidget;
     left_widget->setContentsMargins(0, 0, 0, 0);
 
-    QVBoxLayout* layout = new QVBoxLayout;
-    layout->setContentsMargins(0, 0, 0, 0);
+    QWidget* right_widget = new QWidget;
+    right_widget->setContentsMargins(0, 0, 0, 0);
 
-    left_widget->setLayout(layout);
+    QVBoxLayout* left_layout = new QVBoxLayout;
+    left_layout->setContentsMargins(0, 0, 0, 0);
+
+    QVBoxLayout* right_layout = new QVBoxLayout;
+    right_layout->setContentsMargins(0, 0, 0, 0);
+
+    left_widget->setLayout(left_layout);
+    right_widget->setLayout(right_layout);
 
     main_splitter_->addWidget(left_widget);
+    main_splitter_->addWidget(right_widget);
 
     //create tool widget
     {
         tool_widget_ = new ViewToolWidget(tool_switcher_.get(), this);
         tool_widget_->setContentsMargins(0, 0, 0, 0);
 
-        layout->addWidget(tool_widget_);
+        left_layout->addWidget(tool_widget_);
     }
 
     //create data widget container
@@ -100,19 +110,26 @@ void ViewWidget::createStandardLayout()
         data_widget_container_->setSizePolicy(size_policy);
         data_widget_container_->setContentsMargins(0, 0, 0, 0);
 
-        layout->addWidget(data_widget_container_);
+        left_layout->addWidget(data_widget_container_);
     }
 
     //create config widget container
     {
         config_widget_container_ = new QWidget;
 
-        QSizePolicy size_policy(QSizePolicy::Preferred, QSizePolicy::Preferred);
+        QSizePolicy size_policy(QSizePolicy::Preferred, QSizePolicy::Expanding);
         size_policy.setHorizontalStretch(ConfigWidgetStretch);
 
         config_widget_container_->setSizePolicy(size_policy);
 
-        main_splitter_->addWidget(config_widget_container_);
+        right_layout->addWidget(config_widget_container_);
+    }
+
+    //create load state widget
+    {
+        state_widget_ = new ViewLoadStateWidget(this, right_widget);
+
+        right_layout->addWidget(state_widget_);
     }
 
     main_splitter_->restoreState(settings.value("mainSplitterSizes").toByteArray());
@@ -149,6 +166,9 @@ void ViewWidget::setDataWidget(ViewDataWidget* w)
     data_widget_ = w;
     data_widget_->setToolSwitcher(tool_switcher_.get());
 
+    connect(data_widget_, &ViewDataWidget::redrawStarted, this, &ViewWidget::redrawStarted);
+    connect(data_widget_, &ViewDataWidget::redrawDone, this, &ViewWidget::redrawDone);
+
     connectWidgets();
 }
 
@@ -176,11 +196,17 @@ void ViewWidget::setConfigWidget(ViewConfigWidget* w)
 }
 
 /**
+ * Called when both data and config widget are set.
  */
 void ViewWidget::connectWidgets()
 {
     if (config_widget_ && data_widget_)
+    {
         connect(data_widget_, &ViewDataWidget::displayChanged, config_widget_, &ViewConfigWidget::onDisplayChange);
+
+        if (state_widget_)
+            state_widget_->updateState();
+    }
 }
 
 /**
@@ -198,7 +224,7 @@ void ViewWidget::toggleConfigWidget()
  */
 void ViewWidget::addConfigWidgetToggle()
 {
-    getViewToolWidget()->addActionCallback("Toggle Configuration Panel", [=] (bool on) { this->toggleConfigWidget(); }, getIcon("configuration.png"), Qt::Key_C, true);
+    getViewToolWidget()->addActionCallback("Toggle Configuration Panel", [=] (bool on) { this->toggleConfigWidget(); }, {}, getIcon("configuration.png"), Qt::Key_C, true);
 }
 
 /**
@@ -206,4 +232,126 @@ void ViewWidget::addConfigWidgetToggle()
 QIcon ViewWidget::getIcon(const std::string& fn) const
 {
     return QIcon(Utils::Files::getIconFilepath(fn).c_str());
+}
+
+/**
+*/
+void ViewWidget::updateToolWidget()
+{
+    getViewToolWidget()->updateItems();
+}
+
+/**
+*/
+void ViewWidget::loadingStarted()
+{
+    //call in subwidgets
+    getViewLoadStateWidget()->loadingStarted();
+    getViewToolWidget()->loadingStarted();
+    getViewDataWidget()->loadingStarted();
+    getViewConfigWidget()->loadingStarted();
+}
+
+/**
+*/
+void ViewWidget::loadingDone()
+{
+    //set back flag
+    reload_needed_ = false;
+    redraw_needed_ = false; //a reload should always result in a redraw anyway
+
+    //call in subwidgets
+    getViewToolWidget()->loadingDone();
+    getViewDataWidget()->loadingDone();
+    getViewConfigWidget()->loadingDone();
+    getViewLoadStateWidget()->loadingDone();
+}
+
+/**
+*/
+void ViewWidget::redrawStarted()
+{
+    //call in subwidgets
+    getViewConfigWidget()->redrawStarted();
+    getViewLoadStateWidget()->redrawStarted();
+}
+
+/**
+*/
+void ViewWidget::redrawDone()
+{
+    //set back flag
+    redraw_needed_ = false;
+
+    //call in subwidgets
+    getViewConfigWidget()->redrawDone();
+    getViewLoadStateWidget()->redrawDone();
+}
+
+/**
+*/
+void ViewWidget::appModeSwitch(AppMode app_mode)
+{
+    //call in subwidgets
+    getViewDataWidget()->appModeSwitch(app_mode);
+    getViewConfigWidget()->appModeSwitch(app_mode);
+    getViewLoadStateWidget()->appModeSwitch(app_mode);
+
+    //some toolbar items might rely on the app mode
+    getViewToolWidget()->updateItems();
+}
+
+/**
+ * Updates the widget load state.
+*/
+void ViewWidget::updateLoadState()
+{
+    getViewLoadStateWidget()->updateState();
+}
+
+/**
+ * Manually notifies the widget that a redraw is needed and updates the load state widget accordingly.
+ * (Note: Might trigger an immediate redraw in live running mode)
+ */
+void ViewWidget::notifyRedrawNeeded()
+{
+    if (COMPASS::instance().appMode() == AppMode::LiveRunning)
+    {
+        //in live mode just redraw
+        getViewDataWidget()->redrawData(true);
+        return;
+    }
+
+    redraw_needed_ = true;
+    updateLoadState();
+}
+
+/**
+ * Manually notifies the widget that a reload is needed and updates the load state widget accordingly.
+*/
+void ViewWidget::notifyReloadNeeded()
+{
+    if (COMPASS::instance().appMode() == AppMode::LiveRunning)
+    {
+        //in live mode a view handles its reload internally in its data widget
+        getViewDataWidget()->liveReload();
+        return;
+    }
+
+    reload_needed_ = true;
+    updateLoadState();
+}
+
+/**
+*/
+bool ViewWidget::reloadNeeded() const
+{
+    return (reload_needed_ || reloadNeeded_impl());
+}
+
+/**
+*/
+bool ViewWidget::redrawNeeded() const
+{
+    return (redraw_needed_ || redrawNeeded_impl());
 }

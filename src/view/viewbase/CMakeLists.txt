@@ -11,6 +11,7 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/viewdatawidget.h"
         "${CMAKE_CURRENT_LIST_DIR}/viewconfigwidget.h"
         "${CMAKE_CURRENT_LIST_DIR}/viewtoolswitcher.h"
+        "${CMAKE_CURRENT_LIST_DIR}/viewloadstatewidget.h"
         "${CMAKE_CURRENT_LIST_DIR}/chartview.h"
     PRIVATE
         "${CMAKE_CURRENT_LIST_DIR}/view.cpp"
@@ -19,6 +20,7 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/viewdatawidget.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/viewconfigwidget.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/viewtoolswitcher.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/viewloadstatewidget.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/chartview.cpp"
 )
 

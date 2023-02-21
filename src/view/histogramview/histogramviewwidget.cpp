@@ -16,7 +16,6 @@
  */
 
 #include "histogramviewwidget.h"
-#include "histogramviewdatatoolwidget.h"
 #include "files.h"
 #include "viewtoolswitcher.h"
 #include "viewtoolwidget.h"
@@ -45,14 +44,9 @@ HistogramViewWidget::HistogramViewWidget(const std::string& class_id, const std:
 
     typedef HistogramViewDataTool Tool;
 
-    auto icon = [ = ] (const std::string& fn) 
-    {
-        return QIcon(Utils::Files::getIconFilepath(fn).c_str());
-    };
-
     getViewToolSwitcher()->addTool(Tool::HG_DEFAULT_TOOL, "", {}, QIcon(), Qt::ArrowCursor);
-    getViewToolSwitcher()->addTool(Tool::HG_SELECT_TOOL, "Select", Qt::Key_S, icon("select_action.png"), Qt::CrossCursor);
-    getViewToolSwitcher()->addTool(Tool::HG_ZOOM_TOOL, "Zoom", Qt::Key_Z, icon("zoom_select_action.png"), Qt::CrossCursor);
+    getViewToolSwitcher()->addTool(Tool::HG_SELECT_TOOL, "Select", Qt::Key_S, getIcon("select_action.png"), Qt::CrossCursor);
+    getViewToolSwitcher()->addTool(Tool::HG_ZOOM_TOOL, "Zoom", Qt::Key_Z, getIcon("zoom_select_action.png"), Qt::CrossCursor);
     getViewToolSwitcher()->setDefaultTool(Tool::HG_DEFAULT_TOOL);
 
     //we could add the default action if we wanted
@@ -61,12 +55,12 @@ HistogramViewWidget::HistogramViewWidget(const std::string& class_id, const std:
 
     getViewToolWidget()->addSpacer();
 
-    getViewToolWidget()->addActionCallback("Invert Selection", [=] () { data_widget->invertSelectionSlot(); }, icon("select_invert.png"));
-    getViewToolWidget()->addActionCallback("Delete Selection", [=] () { data_widget->clearSelectionSlot(); }, icon("select_delete.png"));
+    getViewToolWidget()->addActionCallback("Invert Selection", [=] () { data_widget->invertSelectionSlot(); }, {}, getIcon("select_invert.png"));
+    getViewToolWidget()->addActionCallback("Delete Selection", [=] () { data_widget->clearSelectionSlot(); }, {}, getIcon("select_delete.png"));
 
     getViewToolWidget()->addSpacer();
 
-    getViewToolWidget()->addActionCallback("Zoom to Home", [=] () { data_widget->resetZoomSlot(); }, icon("zoom_home.png"), Qt::Key_Space);
+    getViewToolWidget()->addActionCallback("Zoom to Home", [=] () { data_widget->resetZoomSlot(); }, {}, getIcon("zoom_home.png"), Qt::Key_Space);
 
     getViewToolWidget()->addSeparator();
     addConfigWidgetToggle();
@@ -74,9 +68,7 @@ HistogramViewWidget::HistogramViewWidget(const std::string& class_id, const std:
 
 /*
  */
-HistogramViewWidget::~HistogramViewWidget()
-{
-}
+HistogramViewWidget::~HistogramViewWidget() = default;
 
 /**
  */
@@ -87,7 +79,21 @@ HistogramViewDataWidget* HistogramViewWidget::getViewDataWidget()
 
 /**
  */
+const HistogramViewDataWidget* HistogramViewWidget::getViewDataWidget() const
+{
+    return dynamic_cast<const HistogramViewDataWidget*>(ViewWidget::getViewDataWidget());
+}
+
+/**
+ */
 HistogramViewConfigWidget* HistogramViewWidget::getViewConfigWidget()
 {
     return dynamic_cast<HistogramViewConfigWidget*>(ViewWidget::getViewConfigWidget());
+}
+
+/**
+*/
+bool HistogramViewWidget::reloadNeeded_impl() const
+{
+    return getViewDataWidget()->dataNotInBuffer();
 }

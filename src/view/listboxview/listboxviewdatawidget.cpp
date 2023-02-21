@@ -78,9 +78,17 @@ ListBoxViewDataWidget::~ListBoxViewDataWidget()
     // buffer_tables_.clear();
 }
 
-void ListBoxViewDataWidget::clearData()
+bool ListBoxViewDataWidget::hasData() const
 {
-    logdbg << "ListBoxViewDataWidget: clearData";
+    if (all_buffer_table_widget_)
+        return all_buffer_table_widget_->rowCount() > 0;
+
+    return false;
+}
+
+void ListBoxViewDataWidget::clearData_impl()
+{
+    logdbg << "ListBoxViewDataWidget: clearData_impl: begin";
 
     buffers_.clear();
 
@@ -90,33 +98,44 @@ void ListBoxViewDataWidget::clearData()
     for (auto buffer_table : buffer_tables_)
         buffer_table.second->clear();
 
-    logdbg << "ListBoxViewDataWidget: clearData: end";
+    logdbg << "ListBoxViewDataWidget: clearData_impl: end";
 }
 
-void ListBoxViewDataWidget::loadingStartedSlot()
+void ListBoxViewDataWidget::loadingStarted_impl()
 {
-    clearData();
+    loginf << "ListBoxViewDataWidget: loadingStarted_impl";
+    //nothing to do yet
 }
 
-void ListBoxViewDataWidget::updateDataSlot(const std::map<std::string, std::shared_ptr<Buffer>>& data,
-                                           bool requires_reset)
+void ListBoxViewDataWidget::updateData_impl(const std::map<std::string, std::shared_ptr<Buffer>>& data,
+                                            bool requires_reset)
 {
-    loginf << "ListBoxViewDataWidget: updateTables";
+    logdbg << "ListBoxViewDataWidget: updateData_impl: begin";
 
-//    assert(all_buffer_table_widget_);
-//    all_buffer_table_widget_->show(buffer);
+    //    assert(all_buffer_table_widget_);
+    //    all_buffer_table_widget_->show(buffer);
 
-//    assert(buffer_tables_.count(object.name()) > 0);
-//    buffer_tables_.at(object.name())->show(buffer);
+    //    assert(buffer_tables_.count(object.name()) > 0);
+    //    buffer_tables_.at(object.name())->show(buffer);
 
     buffers_ = data;
 
-    logdbg << "ListBoxViewDataWidget: updateTables: end";
+    logdbg << "ListBoxViewDataWidget: updateData_impl: end";
 }
 
-void ListBoxViewDataWidget::loadingDoneSlot()
+void ListBoxViewDataWidget::loadingDone_impl()
 {
-    loginf << "ListBoxViewDataWidget: loadingDoneSlot";
+    logdbg << "ListBoxViewDataWidget: loadingDone_impl: begin";
+
+    //default behavior
+    ViewDataWidget::loadingDone_impl();
+
+    logdbg << "ListBoxViewDataWidget: loadingDone_impl: end";
+}
+
+void ListBoxViewDataWidget::redrawData_impl(bool recompute)
+{
+    logdbg << "ListBoxViewDataWidget: redrawData_impl: start - recompute = " << recompute;
 
     assert(all_buffer_table_widget_);
     all_buffer_table_widget_->show(buffers_);
@@ -129,7 +148,12 @@ void ListBoxViewDataWidget::loadingDoneSlot()
 
     selectFirstSelectedRow();
 
-    emit dataLoaded();
+    logdbg << "ListBoxViewDataWidget: redrawData_impl: end";
+}
+
+void ListBoxViewDataWidget::liveReload_impl()
+{
+    //implement live reload behavior here
 }
 
 void ListBoxViewDataWidget::exportDataSlot(bool overwrite)

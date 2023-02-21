@@ -75,35 +75,15 @@ ScatterPlotViewDataWidget::~ScatterPlotViewDataWidget()
     logdbg << "ScatterPlotViewDataWidget: dtor";
 }
 
-void ScatterPlotViewDataWidget::updatePlot()
+bool ScatterPlotViewDataWidget::hasData() const 
 {
-    logdbg << "ScatterPlotViewDataWidget: updatePlot";
-
-    buffer_x_counts_.clear();
-    buffer_y_counts_.clear();
-
-    x_values_.clear();
-    y_values_.clear();
-    has_x_min_max_ = false;
-    has_y_min_max_ = false;
-
-    selected_values_.clear();
-    rec_num_values_.clear();
-
-    chart_view_.reset(nullptr);
-
-    shows_data_ = false;
-    x_var_not_in_buffer_ = false;
-    y_var_not_in_buffer_ = false;
-    nan_value_cnt_ = 0;
-
-    updateFromAllData();
-    updateMinMax();
-    updateChart();
+    return shows_data_;
 }
 
-void ScatterPlotViewDataWidget::clear ()
+void ScatterPlotViewDataWidget::clearData_impl()
 {
+    logdbg << "ScatterPlotViewDataWidget: clearData_impl: start";
+
     buffers_.clear();
     buffer_x_counts_.clear();
     buffer_y_counts_.clear();
@@ -122,64 +102,71 @@ void ScatterPlotViewDataWidget::clear ()
     x_var_not_in_buffer_ = false;
     y_var_not_in_buffer_ = false;
     nan_value_cnt_ = 0;
+
+    logdbg << "ScatterPlotViewDataWidget: clearData_impl: end";
 }
 
-ScatterPlotViewDataTool ScatterPlotViewDataWidget::selectedTool() const
+void ScatterPlotViewDataWidget::loadingStarted_impl()
 {
-    return selected_tool_;
+    logdbg << "ScatterPlotViewDataWidget: loadingStarted_impl: start";
+
+    //nothing to do yet
+
+    logdbg << "ScatterPlotViewDataWidget: loadingStarted_impl: end";
 }
 
-bool ScatterPlotViewDataWidget::showsData() const
+void ScatterPlotViewDataWidget::updateData_impl(const std::map<std::string, std::shared_ptr<Buffer>>& data, bool requires_reset)
 {
-    return shows_data_;
-}
-
-bool ScatterPlotViewDataWidget::xVarNotInBuffer() const
-{
-    return x_var_not_in_buffer_;
-}
-
-bool ScatterPlotViewDataWidget::yVarNotInBuffer() const
-{
-    return y_var_not_in_buffer_;
-}
-
-QPixmap ScatterPlotViewDataWidget::renderPixmap()
-{
-    assert (chart_view_);
-    return chart_view_->grab();
-    //QPixmap p (chart_view_->size());
-    //chart_view_->render(&p);
-}
-
-unsigned int ScatterPlotViewDataWidget::nullValueCnt() const
-{
-    return nan_value_cnt_;
-}
-
-QRectF ScatterPlotViewDataWidget::getDataBounds() const
-{
-    if (!has_x_min_max_ || !has_y_min_max_)
-        return QRectF();
-
-    return QRectF(x_min_, y_min_, x_max_ - x_min_, y_max_ - y_min_);
-}
-
-void ScatterPlotViewDataWidget::loadingStartedSlot()
-{
-    clear();
-}
-
-void ScatterPlotViewDataWidget::updateDataSlot(
-        const std::map<std::string, std::shared_ptr<Buffer>>& data, bool requires_reset)
-{
-    logdbg << "ScatterPlotViewDataWidget: updateDataSlot: start";
+    logdbg << "ScatterPlotViewDataWidget: updateData_impl: start";
 
     buffers_ = data;
+
+    logdbg << "ScatterPlotViewDataWidget: updateData_impl: end";
 }
 
-void ScatterPlotViewDataWidget::loadingDoneSlot()
+void ScatterPlotViewDataWidget::loadingDone_impl()
 {
+    logdbg << "ScatterPlotViewDataWidget: loadingDone_impl: start";
+
+    //default behavior
+    ViewDataWidget::loadingDone_impl();
+
+    logdbg << "ScatterPlotViewDataWidget: loadingDone_impl: end";
+}
+
+void ScatterPlotViewDataWidget::liveReload_impl()
+{
+    //implement live reload behavior here
+}
+
+void ScatterPlotViewDataWidget::redrawData_impl(bool recompute)
+{
+    logdbg << "ScatterPlotViewDataWidget: redrawData_impl: start - recompute = " << recompute;
+
+    if (recompute)
+    {
+        updateFromAllData();
+        updateMinMax();
+    }
+    updateChart();
+
+    logdbg << "ScatterPlotViewDataWidget: redrawData_impl: end"; 
+}
+
+void ScatterPlotViewDataWidget::toolChanged_impl(int mode)
+{
+    selected_tool_ = (ScatterPlotViewDataTool)mode;
+
+    if (chart_view_)
+        chart_view_->onToolChanged();
+}
+
+void ScatterPlotViewDataWidget::updateFromAllData()
+{
+    logdbg << "ScatterPlotViewDataWidget: updateFromAllData";
+    logdbg << "ScatterPlotViewDataWidget: updateFromAllData: before x " << x_values_.size()
+           << " y " << y_values_.size();
+
     for (auto& buf_it : buffers_)
     {
         string dbcontent_name = buf_it.first;
@@ -187,20 +174,20 @@ void ScatterPlotViewDataWidget::loadingDoneSlot()
 
         unsigned int current_size = buffer->size();
 
-        logdbg << "ScatterPlotViewDataWidget: loadingDoneSlot: before x " << x_values_[dbcontent_name].size()
+        logdbg << "ScatterPlotViewDataWidget: updateFromAllData: before x " << x_values_[dbcontent_name].size()
                << " y " << y_values_[dbcontent_name].size();
 
         assert (x_values_[dbcontent_name].size() == y_values_[dbcontent_name].size());
         assert (x_values_[dbcontent_name].size() == selected_values_[dbcontent_name].size());
         assert (x_values_[dbcontent_name].size() == rec_num_values_[dbcontent_name].size());
 
-        loginf << "ScatterPlotViewDataWidget: loadingDoneSlot: dbo " << dbcontent_name
+        loginf << "ScatterPlotViewDataWidget: updateFromAllData: dbo " << dbcontent_name
                << " canUpdateFromDataX " << canUpdateFromDataX(dbcontent_name)
                << " canUpdateFromDataY " << canUpdateFromDataY(dbcontent_name);
 
         if (canUpdateFromDataX(dbcontent_name) && canUpdateFromDataY(dbcontent_name))
         {
-            loginf << "ScatterPlotViewDataWidget: loadingDoneSlot: updating data";
+            loginf << "ScatterPlotViewDataWidget: updateFromAllData: updating data";
 
             // add selected flags & rec_nums
             assert (buffer->has<bool>(DBContent::selected_var.name()));
@@ -232,11 +219,11 @@ void ScatterPlotViewDataWidget::loadingDoneSlot()
             updateFromDataY(dbcontent_name, current_size);
         }
         else
-            logdbg << "ScatterPlotViewDataWidget: loadingDoneSlot: " << dbcontent_name
+            logdbg << "ScatterPlotViewDataWidget: updateFromAllData: " << dbcontent_name
                    << " update not possible";
 
 
-        logdbg << "ScatterPlotViewDataWidget: loadingDoneSlot: after x " << x_values_[dbcontent_name].size()
+        logdbg << "ScatterPlotViewDataWidget: updateFromAllData: after x " << x_values_[dbcontent_name].size()
                << " y " << y_values_[dbcontent_name].size();
 
         assert (x_values_[dbcontent_name].size() == y_values_[dbcontent_name].size());
@@ -244,20 +231,48 @@ void ScatterPlotViewDataWidget::loadingDoneSlot()
         assert (x_values_[dbcontent_name].size() == rec_num_values_[dbcontent_name].size());
     }
 
-    updateMinMax();
-    updateChart();
+    logdbg << "ScatterPlotViewDataWidget: updateFromAllData: after x " << x_values_.size()
+           << " y " << y_values_.size();
 
-    emit dataLoaded();
+    assert (x_values_.size() == y_values_.size());
+
+    logdbg << "ScatterPlotViewDataWidget: updateFromAllData: done";
 }
 
-/**
- */
-void ScatterPlotViewDataWidget::toolChanged_impl(int mode)
+ScatterPlotViewDataTool ScatterPlotViewDataWidget::selectedTool() const
 {
-    selected_tool_ = (ScatterPlotViewDataTool)mode;
+    return selected_tool_;
+}
 
-    if (chart_view_)
-        chart_view_->onToolChanged();
+bool ScatterPlotViewDataWidget::xVarNotInBuffer() const
+{
+    return x_var_not_in_buffer_;
+}
+
+bool ScatterPlotViewDataWidget::yVarNotInBuffer() const
+{
+    return y_var_not_in_buffer_;
+}
+
+QPixmap ScatterPlotViewDataWidget::renderPixmap()
+{
+    assert (chart_view_);
+    return chart_view_->grab();
+    //QPixmap p (chart_view_->size());
+    //chart_view_->render(&p);
+}
+
+unsigned int ScatterPlotViewDataWidget::nullValueCount() const
+{
+    return nan_value_cnt_;
+}
+
+QRectF ScatterPlotViewDataWidget::getDataBounds() const
+{
+    if (!has_x_min_max_ || !has_y_min_max_)
+        return QRectF();
+
+    return QRectF(x_min_, y_min_, x_max_ - x_min_, y_max_ - y_min_);
 }
 
 void ScatterPlotViewDataWidget::rectangleSelectedSlot (QPointF p1, QPointF p2)
@@ -1252,70 +1267,6 @@ void ScatterPlotViewDataWidget::updateMinMax()
     logdbg << "ScatterPlotViewDataWidget: loadingDoneSlot: has_x_min_max " << has_x_min_max_
            << " x_min " << x_min_ << " x_max " << x_max_
            << " has_y_min_max " << has_y_min_max_ << " y_min " << y_min_ << " y_max " << y_max_;
-}
-
-void ScatterPlotViewDataWidget::updateFromAllData()
-{
-    logdbg << "ScatterPlotViewDataWidget: updateFromAllData";
-
-    logdbg << "ScatterPlotViewDataWidget: updateFromAllData: before x " << x_values_.size()
-           << " y " << y_values_.size();
-
-    for (auto& buf_it : buffers_)
-    {
-        assert (x_values_[buf_it.first].size() == y_values_[buf_it.first].size());
-        assert (x_values_[buf_it.first].size() == selected_values_[buf_it.first].size());
-        assert (x_values_[buf_it.first].size() == rec_num_values_[buf_it.first].size());
-
-        unsigned int current_size = buf_it.second->size();
-
-        if (canUpdateFromDataX(buf_it.first) && canUpdateFromDataY(buf_it.first))
-        {
-            assert (buf_it.second->has<bool>(DBContent::selected_var.name()));
-            assert (buf_it.second->has<unsigned int>(DBContent::meta_var_rec_num_.name()));
-
-            NullableVector<bool>& selected_vec = buf_it.second->get<bool>(DBContent::selected_var.name());
-            NullableVector<unsigned int>& rec_num_vec = buf_it.second->get<unsigned int>(
-                        DBContent::meta_var_rec_num_.name());
-
-            std::vector<bool>& selected_data = selected_values_[buf_it.first];
-            std::vector<unsigned int>& rec_num_data = rec_num_values_[buf_it.first];
-
-            unsigned int last_size = 0;
-
-            if (buffer_x_counts_.count(buf_it.first))
-                last_size = buffer_x_counts_.at(buf_it.first);
-
-            for (unsigned int cnt=last_size; cnt < current_size; ++cnt)
-            {
-                if (selected_vec.isNull(cnt))
-                    selected_data.push_back(false);
-                else
-                    selected_data.push_back(selected_vec.get(cnt));
-
-                assert (!rec_num_vec.isNull(cnt));
-                rec_num_data.push_back(rec_num_vec.get(cnt));
-            }
-
-            updateFromDataX(buf_it.first, current_size);
-            updateFromDataY(buf_it.first, current_size);
-        }
-        else
-            logdbg << "ScatterPlotViewDataWidget: updateFromAllData: " << buf_it.first
-                   << " update not possible";
-
-        assert (x_values_[buf_it.first].size() == y_values_[buf_it.first].size());
-        assert (x_values_[buf_it.first].size() == selected_values_[buf_it.first].size());
-        assert (x_values_[buf_it.first].size() == rec_num_values_[buf_it.first].size());
-    }
-
-    logdbg << "ScatterPlotViewDataWidget: updateFromAllData: after x " << x_values_.size()
-           << " y " << y_values_.size();
-
-
-    assert (x_values_.size() == y_values_.size());
-
-    logdbg << "ScatterPlotViewDataWidget: updateFromAllData: done";
 }
 
 void ScatterPlotViewDataWidget::updateChart()

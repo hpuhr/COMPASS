@@ -22,10 +22,26 @@ ViewToolWidget::ViewToolWidget(ViewToolSwitcher* tool_switcher, QWidget* parent)
 }
 
 /**
- */
-void ViewToolWidget::addTool(int id)
+*/
+void ViewToolWidget::addAction(int id, QAction* action, bool is_tool)
 {
-    if (tool_actions_.find(id) != tool_actions_.end())
+    if (actions_.find(id) != actions_.end())
+        throw std::runtime_error("ViewToolWidget::addAction: duplicate id");
+
+    Action a;
+    a.action  = action;
+    a.is_tool = is_tool;
+
+    actions_[ id ] = a;
+
+    QToolBar::addAction(action);
+}
+
+/**
+ */
+void ViewToolWidget::addTool(int id, const UpdateCallback& cb_update)
+{
+    if (actions_.find(id) != actions_.end())
         throw std::runtime_error("ViewToolWidget::addTool: duplicate id");
 
     if (!tool_switcher_->hasTool(id))
@@ -51,9 +67,10 @@ void ViewToolWidget::addTool(int id)
 
     connect(action, &QAction::toggled, cb);
 
-    tool_actions_[ id ] = action;
+    if (cb_update)
+        update_callbacks_.push_back([=] () { cb_update(action); });
 
-    addAction(action);
+    addAction(id, action, true);
 }
 
 namespace 
@@ -85,25 +102,60 @@ namespace
 
 /**
  */
-void ViewToolWidget::addActionCallback(const QString& name,
-                                       const Callback& cb,
-                                       const QIcon& icon,
-                                       const QKeySequence& key_combination)
+QAction* ViewToolWidget::addActionCallback_internal(const QString& name,
+                                                    const Callback& cb,
+                                                    const UpdateCallback& cb_update,
+                                                    const QIcon& icon,
+                                                    const QKeySequence& key_combination)
 {
     QAction* action = generateCallbackAction(name, icon, key_combination);
     
     connect(action, &QAction::triggered, cb);
 
-    addAction(action);
+    if (cb_update)
+        update_callbacks_.push_back([=] () { cb_update(action); });
+
+    return action;
 }
 
 /**
  */
 void ViewToolWidget::addActionCallback(const QString& name,
-                                       const ToggleCallback& cb,
+                                       const Callback& cb,
+                                       const UpdateCallback& cb_update,
                                        const QIcon& icon,
-                                       const QKeySequence& key_combination,
-                                       bool checked)
+                                       const QKeySequence& key_combination)
+{
+    auto action = addActionCallback_internal(name, cb, cb_update, icon, key_combination);
+
+    QToolBar::addAction(action);
+}
+
+/**
+ */
+void ViewToolWidget::addActionCallback(int id,
+                                       const QString& name,
+                                       const Callback& cb,
+                                       const UpdateCallback& cb_update,
+                                       const QIcon& icon,
+                                       const QKeySequence& key_combination)
+{
+    if (actions_.find(id) != actions_.end())
+        throw std::runtime_error("ViewToolWidget::addActionCallback: duplicate id");
+
+    auto action = addActionCallback_internal(name, cb, cb_update, icon, key_combination);
+
+    addAction(id, action, false);
+}
+
+/**
+ */
+QAction* ViewToolWidget::addActionCallback_internal(const QString& name,
+                                                    const ToggleCallback& cb,
+                                                    const UpdateCallback& cb_update,
+                                                    const QIcon& icon,
+                                                    const QKeySequence& key_combination,
+                                                    bool checked)
 {
     QAction* action = generateCallbackAction(name, icon, key_combination);
     action->setCheckable(true);
@@ -111,7 +163,42 @@ void ViewToolWidget::addActionCallback(const QString& name,
     
     connect(action, &QAction::toggled, cb);
 
-    addAction(action);
+    if (cb_update)
+        update_callbacks_.push_back([=] () { cb_update(action); });
+
+    return action;
+}
+
+/**
+ */
+void ViewToolWidget::addActionCallback(const QString& name,
+                                       const ToggleCallback& cb,
+                                       const UpdateCallback& cb_update,
+                                       const QIcon& icon,
+                                       const QKeySequence& key_combination,
+                                       bool checked)
+{
+    auto action = addActionCallback_internal(name, cb, cb_update, icon, key_combination, checked);
+
+    QToolBar::addAction(action);
+}
+
+/**
+ */
+void ViewToolWidget::addActionCallback(int id,
+                                       const QString& name,
+                                       const ToggleCallback& cb,
+                                       const UpdateCallback& cb_update,
+                                       const QIcon& icon,
+                                       const QKeySequence& key_combination,
+                                       bool checked)
+{
+    if (actions_.find(id) != actions_.end())
+        throw std::runtime_error("ViewToolWidget::addActionCallback: duplicate id");
+
+    auto action = addActionCallback_internal(name, cb, cb_update, icon, key_combination, checked);
+
+    addAction(id, action, false);
 }
 
 /**
@@ -128,10 +215,46 @@ void ViewToolWidget::addSpacer()
  */
 void ViewToolWidget::toolSwitched(int id, const QCursor& cursor)
 {
-    for (auto& t : tool_actions_)
+    for (auto& t : actions_)
     {
-        t.second->blockSignals(true);
-        t.second->setChecked(t.first == id);
-        t.second->blockSignals(false);
+        if (!t.second.is_tool)
+            continue;
+
+        t.second.action->blockSignals(true);
+        t.second.action->setChecked(t.first == id);
+        t.second.action->blockSignals(false);
     }
+}
+
+/**
+*/
+void ViewToolWidget::enableAction(int id, bool enable)
+{
+    auto it = actions_.find(id);
+    if (it == actions_.end())
+        return;
+
+    it->second.action->setEnabled(enable);
+}
+
+/**
+ */
+void ViewToolWidget::updateItems()
+{
+    for (auto& cb : update_callbacks_)
+        cb();
+}
+
+/**
+ */
+void ViewToolWidget::loadingStarted()
+{
+    setEnabled(false);
+}
+
+/**
+ */
+void ViewToolWidget::loadingDone()
+{
+    setEnabled(true);
 }

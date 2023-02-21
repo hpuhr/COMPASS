@@ -61,3 +61,10 @@ ListBoxViewConfigWidget* ListBoxViewWidget::getViewConfigWidget()
 {
     return dynamic_cast<ListBoxViewConfigWidget*>(ViewWidget::getViewConfigWidget());
 }
+
+/**
+ */
+const ListBoxViewConfigWidget* ListBoxViewWidget::getViewConfigWidget() const
+{
+    return dynamic_cast<const ListBoxViewConfigWidget*>(ViewWidget::getViewConfigWidget());
+}

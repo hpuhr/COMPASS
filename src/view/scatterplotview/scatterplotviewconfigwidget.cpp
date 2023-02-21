@@ -120,49 +120,10 @@ ScatterPlotViewConfigWidget::ScatterPlotViewConfigWidget(ScatterPlotView* view, 
 
     vlayout->addWidget(tab_widget);
 
-    QFont font_status;
-    font_status.setItalic(true);
-
-    status_label_ = new QLabel();
-    status_label_->setFont(font_status);
-    status_label_->setVisible(false);
-    vlayout->addWidget(status_label_);
-
-    reload_button_ = new QPushButton("Reload");
-    UI_TEST_OBJ_NAME(reload_button_, reload_button_->text())
-    connect(reload_button_, &QPushButton::clicked, this,
-            &ScatterPlotViewConfigWidget::reloadRequestedSlot);
-    vlayout->addWidget(reload_button_);
-
     setLayout(vlayout);
-
-    setStatus("No Data Loaded", true);
 }
 
-ScatterPlotViewConfigWidget::~ScatterPlotViewConfigWidget() 
-{
-}
-
-void ScatterPlotViewConfigWidget::setStatus(const QString& status, bool visible, const QColor& color)
-{
-    assert (status_label_);
-    status_label_->setText(status);
-    //status_label_->setStyleSheet("QLabel { color : "+color.name()+"; }");
-
-    QPalette palette = status_label_->palette();
-    palette.setColor(status_label_->foregroundRole(), color);
-    status_label_->setPalette(palette);
-
-    status_label_->setVisible(visible);
-}
-
-void ScatterPlotViewConfigWidget::appModeSwitch (AppMode app_mode)
-{
-    assert (reload_button_);
-    reload_button_->setHidden(app_mode == AppMode::LiveRunning);
-    assert (status_label_);
-    status_label_->setHidden(app_mode == AppMode::LiveRunning);
-}
+ScatterPlotViewConfigWidget::~ScatterPlotViewConfigWidget() = default;
 
 void ScatterPlotViewConfigWidget::selectedVariableXChangedSlot()
 {
@@ -209,14 +170,3 @@ void ScatterPlotViewConfigWidget::selectedVariableYChangedSlot()
 //        msgBox.exec();
 //    }
 //}
-
-void ScatterPlotViewConfigWidget::reloadRequestedSlot()
-{
-    COMPASS::instance().dbContentManager().load();
-}
-
-void ScatterPlotViewConfigWidget::loadingStartedSlot()
-{
-    setDisabled(true); // reenabled in view
-    setStatus("Loading Data", true);
-}

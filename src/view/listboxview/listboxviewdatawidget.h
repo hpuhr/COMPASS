@@ -49,7 +49,6 @@ public:
     virtual ~ListBoxViewDataWidget();
 
     /// @brief Clears the table contents
-    void clearData();
     void resetModels();
     void updateToSelection();
 
@@ -57,17 +56,14 @@ public:
 
     AllBufferTableWidget* getAllBufferTableWidget ();
 
+    virtual bool hasData() const override;
+
 signals:
     void exportDoneSignal(bool cancelled);
     void showOnlySelectedSignal(bool value);
     void usePresentationSignal(bool use_presentation);
 
 public slots:
-    void loadingStartedSlot();
-    /// @brief Called when new result Buffer was delivered
-    void updateDataSlot(const std::map<std::string, std::shared_ptr<Buffer>>& data, bool requires_reset);
-    void loadingDoneSlot();
-
     void exportDataSlot(bool overwrite);
     void exportDoneSlot(bool cancelled);
 
@@ -76,6 +72,12 @@ public slots:
 
 protected:
     virtual void toolChanged_impl(int mode) override;
+    virtual void loadingStarted_impl() override;
+    virtual void loadingDone_impl() override;
+    virtual void updateData_impl(const std::map<std::string, std::shared_ptr<Buffer>>& data, bool requires_reset) override;
+    virtual void clearData_impl() override;
+    virtual void redrawData_impl(bool recompute) override;
+    virtual void liveReload_impl() override;
 
     ListBoxView*           view_{nullptr};
     /// Data source

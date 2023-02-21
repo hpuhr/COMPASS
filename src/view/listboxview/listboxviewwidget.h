@@ -50,6 +50,7 @@ class ListBoxViewWidget : public ViewWidget
 
     virtual ListBoxViewDataWidget* getViewDataWidget() override final;
     virtual ListBoxViewConfigWidget* getViewConfigWidget() override final;
+    virtual const ListBoxViewConfigWidget* getViewConfigWidget() const override final;
 };
 
 #endif /* LISTBOXVIEWWIDGET_H_ */

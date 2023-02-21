@@ -53,16 +53,7 @@ again always be embedded inside a ViewContainerWidget, which shows the specific 
 class View : public QObject, public Configurable
 {
     Q_OBJECT
-
-  signals:
-    void selectionChangedSignal();  // do not emit manually, call emitSelectionChange()
-
-  public slots:
-    void selectionChangedSlot();
-    virtual void unshowViewPointSlot (const ViewableDataConfig* vp)=0;
-    virtual void showViewPointSlot (const ViewableDataConfig* vp)=0;
-
-  public:
+public:
     View(const std::string& class_id, const std::string& instance_id, ViewContainer* container,
          ViewManager& view_manager);
     virtual ~View();
@@ -72,13 +63,11 @@ class View : public QObject, public Configurable
     virtual void databaseOpened();
     virtual void databaseClosed();
 
-    virtual void loadingStarted()=0;
-    virtual void loadedData(const std::map<std::string, std::shared_ptr<Buffer>>& data, bool requires_reset)=0;
-    virtual void loadingDone()=0;
-
-    virtual void clearData()=0; // clear shown data in view
-
-    virtual void appModeSwitch (AppMode app_mode_previous, AppMode app_mode_current) {};
+    virtual void loadingStarted();
+    virtual void loadedData(const std::map<std::string, std::shared_ptr<Buffer>>& data, bool requires_reset);
+    virtual void loadingDone();
+    virtual void clearData();
+    virtual void appModeSwitch(AppMode app_mode_previous, AppMode app_mode_current);
 
     unsigned int getKey();
     const std::string& getName() const;
@@ -97,9 +86,25 @@ class View : public QObject, public Configurable
     void viewShutdown(const std::string& err);
     void emitSelectionChange();
 
+    AppMode appMode() const { return app_mode_; }
+
     virtual void accept(LatexVisitor& v) = 0;
 
-  protected:
+signals:
+    void selectionChangedSignal();  // do not emit manually, call emitSelectionChange()
+
+public slots:
+    void selectionChangedSlot();
+    virtual void unshowViewPointSlot (const ViewableDataConfig* vp)=0;
+    virtual void showViewPointSlot (const ViewableDataConfig* vp)=0;
+
+protected:
+    virtual void updateSelection() = 0;
+
+    void constructWidget();
+    //void setModel(ViewModel* model);
+    void setWidget(ViewWidget* widget);
+
     ViewManager& view_manager_;
 
     /// The view's model
@@ -111,14 +116,10 @@ class View : public QObject, public Configurable
     /// The widget containing the view's widget
     QWidget* central_widget_;
 
-    void constructWidget();
-    //void setModel(ViewModel* model);
-    void setWidget(ViewWidget* widget);
-
-    virtual void updateSelection() = 0;
-
-  private:
+private:
     unsigned int getInstanceKey();
+
+    AppMode app_mode_;
 
     /// Static member counter
     static unsigned int cnt_;

@@ -40,7 +40,11 @@ class HistogramViewWidget : public ViewWidget
     HistogramView* getView() { return (HistogramView*)view_; }
     
     virtual HistogramViewDataWidget* getViewDataWidget() override final;
+    virtual const HistogramViewDataWidget* getViewDataWidget() const override final;
     virtual HistogramViewConfigWidget* getViewConfigWidget() override final;
+
+protected:
+    virtual bool reloadNeeded_impl() const override;
 };
 
 #endif /* HISTOGRAMVIEWWIDGET_H_ */
