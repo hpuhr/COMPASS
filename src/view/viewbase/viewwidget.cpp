@@ -196,12 +196,16 @@ void ViewWidget::setConfigWidget(ViewConfigWidget* w)
 }
 
 /**
+ * Called when both data and config widget are set.
  */
 void ViewWidget::connectWidgets()
 {
     if (config_widget_ && data_widget_)
     {
         connect(data_widget_, &ViewDataWidget::displayChanged, config_widget_, &ViewConfigWidget::onDisplayChange);
+
+        if (state_widget_)
+            state_widget_->updateState();
     }
 }
 
@@ -254,6 +258,7 @@ void ViewWidget::loadingDone()
 {
     //set back flag
     reload_needed_ = false;
+    redraw_needed_ = false; //a reload should always result in a redraw anyway
 
     //call in subwidgets
     getViewToolWidget()->loadingDone();
@@ -313,7 +318,7 @@ void ViewWidget::notifyRedrawNeeded()
     if (COMPASS::instance().appMode() == AppMode::LiveRunning)
     {
         //in live mode just redraw
-        getViewDataWidget()->redrawData();
+        getViewDataWidget()->redrawData(true);
         return;
     }
 
@@ -326,6 +331,13 @@ void ViewWidget::notifyRedrawNeeded()
 */
 void ViewWidget::notifyReloadNeeded()
 {
+    if (COMPASS::instance().appMode() == AppMode::LiveRunning)
+    {
+        //in live mode a view handles its reload internally in its data widget
+        getViewDataWidget()->liveReload();
+        return;
+    }
+
     reload_needed_ = true;
     updateLoadState();
 }

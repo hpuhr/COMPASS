@@ -88,7 +88,7 @@ bool ListBoxViewDataWidget::hasData() const
 
 void ListBoxViewDataWidget::clearData_impl()
 {
-    logdbg << "ListBoxViewDataWidget: clearData_impl";
+    logdbg << "ListBoxViewDataWidget: clearData_impl: begin";
 
     buffers_.clear();
 
@@ -110,25 +110,33 @@ void ListBoxViewDataWidget::loadingStarted_impl()
 void ListBoxViewDataWidget::updateData_impl(const std::map<std::string, std::shared_ptr<Buffer>>& data,
                                             bool requires_reset)
 {
-    loginf << "ListBoxViewDataWidget: updateData_impl";
+    logdbg << "ListBoxViewDataWidget: updateData_impl: begin";
 
-//    assert(all_buffer_table_widget_);
-//    all_buffer_table_widget_->show(buffer);
+    //    assert(all_buffer_table_widget_);
+    //    all_buffer_table_widget_->show(buffer);
 
-//    assert(buffer_tables_.count(object.name()) > 0);
-//    buffer_tables_.at(object.name())->show(buffer);
+    //    assert(buffer_tables_.count(object.name()) > 0);
+    //    buffer_tables_.at(object.name())->show(buffer);
 
     buffers_ = data;
+
+    logdbg << "ListBoxViewDataWidget: updateData_impl: end";
 }
 
 void ListBoxViewDataWidget::loadingDone_impl()
 {
-    loginf << "ListBoxViewDataWidget: loadingDone_impl";
-    //nothing to do yet
+    logdbg << "ListBoxViewDataWidget: loadingDone_impl: begin";
+
+    //default behavior
+    ViewDataWidget::loadingDone_impl();
+
+    logdbg << "ListBoxViewDataWidget: loadingDone_impl: end";
 }
 
-void ListBoxViewDataWidget::redrawData_impl()
+void ListBoxViewDataWidget::redrawData_impl(bool recompute)
 {
+    logdbg << "ListBoxViewDataWidget: redrawData_impl: start - recompute = " << recompute;
+
     assert(all_buffer_table_widget_);
     all_buffer_table_widget_->show(buffers_);
 
@@ -139,11 +147,13 @@ void ListBoxViewDataWidget::redrawData_impl()
     }
 
     selectFirstSelectedRow();
+
+    logdbg << "ListBoxViewDataWidget: redrawData_impl: end";
 }
 
-void ListBoxViewDataWidget::prepareData_impl()
+void ListBoxViewDataWidget::liveReload_impl()
 {
-    //nothing to do yet
+    //implement live reload behavior here
 }
 
 void ListBoxViewDataWidget::exportDataSlot(bool overwrite)

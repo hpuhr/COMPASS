@@ -82,6 +82,8 @@ bool ScatterPlotViewDataWidget::hasData() const
 
 void ScatterPlotViewDataWidget::clearData_impl()
 {
+    logdbg << "ScatterPlotViewDataWidget: clearData_impl: start";
+
     buffers_.clear();
     buffer_x_counts_.clear();
     buffer_y_counts_.clear();
@@ -100,34 +102,55 @@ void ScatterPlotViewDataWidget::clearData_impl()
     x_var_not_in_buffer_ = false;
     y_var_not_in_buffer_ = false;
     nan_value_cnt_ = 0;
-}
 
-void ScatterPlotViewDataWidget::prepareData_impl()
-{
-    updateFromAllData();
-    updateMinMax();
-}
-
-void ScatterPlotViewDataWidget::redrawData_impl()
-{
-    updateChart();
+    logdbg << "ScatterPlotViewDataWidget: clearData_impl: end";
 }
 
 void ScatterPlotViewDataWidget::loadingStarted_impl()
 {
+    logdbg << "ScatterPlotViewDataWidget: loadingStarted_impl: start";
+
     //nothing to do yet
+
+    logdbg << "ScatterPlotViewDataWidget: loadingStarted_impl: end";
 }
 
 void ScatterPlotViewDataWidget::updateData_impl(const std::map<std::string, std::shared_ptr<Buffer>>& data, bool requires_reset)
 {
-    logdbg << "ScatterPlotViewDataWidget: updateDataSlot: start";
+    logdbg << "ScatterPlotViewDataWidget: updateData_impl: start";
 
     buffers_ = data;
+
+    logdbg << "ScatterPlotViewDataWidget: updateData_impl: end";
 }
 
 void ScatterPlotViewDataWidget::loadingDone_impl()
 {
-    //nothing to do yet
+    logdbg << "ScatterPlotViewDataWidget: loadingDone_impl: start";
+
+    //default behavior
+    ViewDataWidget::loadingDone_impl();
+
+    logdbg << "ScatterPlotViewDataWidget: loadingDone_impl: end";
+}
+
+void ScatterPlotViewDataWidget::liveReload_impl()
+{
+    //implement live reload behavior here
+}
+
+void ScatterPlotViewDataWidget::redrawData_impl(bool recompute)
+{
+    logdbg << "ScatterPlotViewDataWidget: redrawData_impl: start - recompute = " << recompute;
+
+    if (recompute)
+    {
+        updateFromAllData();
+        updateMinMax();
+    }
+    updateChart();
+
+    logdbg << "ScatterPlotViewDataWidget: redrawData_impl: end"; 
 }
 
 void ScatterPlotViewDataWidget::toolChanged_impl(int mode)

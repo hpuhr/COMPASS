@@ -143,26 +143,72 @@ bool HistogramViewDataWidget::hasData() const
  */
 void HistogramViewDataWidget::clearData_impl()
 {
+    logdbg << "HistogramViewDataWidget: clearData_impl: start";
+
     buffers_.clear();
     chart_view_.reset();
     histogram_generator_.reset();
 
     shows_data_         = false;
     data_not_in_buffer_ = false;
+
+    logdbg << "HistogramViewDataWidget: clearData_impl: end";
 }
 
 /**
  */
-void HistogramViewDataWidget::prepareData_impl()
+void HistogramViewDataWidget::loadingStarted_impl()
 {
-    updateGenerator();
+    logdbg << "HistogramViewDataWidget: loadingStarted_impl: start";
+
+    //nothing to do yet
+
+    logdbg << "HistogramViewDataWidget: loadingStarted_impl: end";
 }
 
 /**
  */
-void HistogramViewDataWidget::redrawData_impl()
+void HistogramViewDataWidget::updateData_impl(const std::map<std::string, std::shared_ptr<Buffer>>& data, 
+                                             bool requires_reset)
 {
+    logdbg << "HistogramViewDataWidget: updateData_impl: start";
+
+    buffers_ = data;
+    histogram_generator_.reset(); //current generator makes no sense any more
+
+    logdbg << "HistogramViewDataWidget: updateData_impl: end";
+}
+
+/**
+ */
+void HistogramViewDataWidget::loadingDone_impl()
+{
+    logdbg << "HistogramViewDataWidget: loadingDone_impl: start";
+
+    //default behavior
+    ViewDataWidget::loadingDone_impl();
+
+    logdbg << "HistogramViewDataWidget: loadingDone_impl: end";
+}
+
+/**
+ */
+void HistogramViewDataWidget::liveReload_impl()
+{
+    //implement live reload behavior here
+}
+
+/**
+ */
+void HistogramViewDataWidget::redrawData_impl(bool recompute)
+{
+    logdbg << "HistogramViewDataWidget: redrawData_impl: start - recompute = " << recompute;
+
+    if (recompute)
+        updateGenerator();
     updateChart();
+
+    logdbg << "HistogramViewDataWidget: redrawData_impl: end";
 }
 
 /**
@@ -173,33 +219,6 @@ void HistogramViewDataWidget::toolChanged_impl(int mode)
 
     if (chart_view_)
         chart_view_->onToolChanged();
-}
-
-/**
- */
-void HistogramViewDataWidget::loadingStarted_impl()
-{
-    //nothing to do yet
-}
-
-/**
- */
-void HistogramViewDataWidget::updateData_impl(const std::map<std::string, std::shared_ptr<Buffer>>& data, 
-                                             bool requires_reset)
-{
-    logdbg << "HistogramViewDataWidget: updateDataSlot: start";
-
-    buffers_ = data;
-    histogram_generator_.reset(); //current generator makes no sense any more
-
-    logdbg << "HistogramViewDataWidget: updateDataSlot: end";
-}
-
-/**
- */
-void HistogramViewDataWidget::loadingDone_impl()
-{
-    //nothing to do yet
 }
 
 /**
@@ -259,6 +278,9 @@ void HistogramViewDataWidget::updateGeneratorFromData()
     loginf << "HistogramViewDataWidget: updateGeneratorFromData";
 
     histogram_generator_.reset();
+
+    if (buffers_.empty())
+        return;
 
     shows_data_         = false;
     data_not_in_buffer_ = false;
@@ -403,6 +425,9 @@ void HistogramViewDataWidget::updateChart()
 
     chart_view_.reset(nullptr);
 
+    if (!histogram_generator_)
+        return;
+
     //create chart
     QChart* chart = new QChart();
     chart->setBackgroundRoundness(0);
@@ -428,9 +453,6 @@ void HistogramViewDataWidget::updateChart()
              this, &HistogramViewDataWidget::rectangleSelectedSlot, Qt::ConnectionType::QueuedConnection);
 
     main_layout_->addWidget(chart_view_.get());
-
-    if (!histogram_generator_)
-        return;
 
     const auto& results = histogram_generator_->getResults();
 
@@ -523,6 +545,7 @@ void HistogramViewDataWidget::updateChart()
         tmp_chart_y_axis->setBase(10.0);
         //tmp_chart_y_axis->setMinorTickCount(10);
         //tmp_chart_y_axis->setMinorTickCount(-1);
+
         tmp_chart_y_axis->setRange(10e-2, std::pow(10.0, 1 + std::ceil(std::log10(max_count))));
 
         chart_y_axis = tmp_chart_y_axis;
@@ -554,7 +577,7 @@ void HistogramViewDataWidget::updateChart()
     //update chart
     chart->update();
 
-    shows_data_ = true;
+    shows_data_ = !buffers_.empty();
 
     //signal display changed to whom it may concern
     emit displayChanged();
@@ -667,7 +690,7 @@ void HistogramViewDataWidget::resetZoomSlot()
 
     if (histogram_generator_ && histogram_generator_->subRangeActive())
     {
-        redrawData(RedrawType::UpdateData); //@TODO: maybe RedrawType::UpdateDisplay may suffice?
+        redrawData(true); //@TODO: maybe redrawData(false) may suffice?
     }
     else if (chart_view_ && chart_view_->chart())
     {

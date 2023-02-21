@@ -61,8 +61,9 @@ void ViewDataWidget::loadingStarted()
 {
     logdbg << "ViewDataWidget::loadingStarted";
 
+    //clear and update display
     clearData();
-    redrawData(RedrawType::UpdateDisplay);
+    redrawData(false);
 
     loadingStarted_impl();
 }
@@ -75,8 +76,15 @@ void ViewDataWidget::loadingDone()
 
     loadingDone_impl();
 
-    redrawData(RedrawType::UpdateData);
     emit dataLoaded();
+}
+
+/**
+*/
+void ViewDataWidget::loadingDone_impl()
+{
+    //default behavior: recompute and redraw after reload
+    redrawData(true);
 }
 
 /**
@@ -99,20 +107,22 @@ void ViewDataWidget::clearData()
 
 /**
 */
-void ViewDataWidget::redrawData(RedrawType type)
+void ViewDataWidget::redrawData(bool recompute)
 {
     logdbg << "ViewDataWidget::redrawData";
 
     emit redrawStarted();
 
-    if (type == RedrawType::Complete)
-        clearData_impl();
-    
-    if (type == RedrawType::Complete ||
-        type == RedrawType::UpdateData)
-        prepareData_impl();
-
-    redrawData_impl();
+    redrawData_impl(recompute);
 
     emit redrawDone();
+}
+
+/**
+*/
+void ViewDataWidget::liveReload()
+{
+    liveReload_impl();
+
+    emit liveDataLoaded();
 }

@@ -232,7 +232,7 @@ void ScatterPlotView::dataVarX (Variable& var)
     assert (!isDataVarXMeta());
 
     assert (widget_);
-    widget_->getViewDataWidget()->redrawData(ViewDataWidget::RedrawType::Complete);
+    widget_->getViewDataWidget()->redrawData(true);
     widget_->updateLoadState();
 }
 
@@ -252,7 +252,7 @@ void ScatterPlotView::metaDataVarX (MetaVariable& var)
     assert (isDataVarXMeta());
 
     assert (widget_);
-    widget_->getViewDataWidget()->redrawData(ViewDataWidget::RedrawType::Complete);
+    widget_->getViewDataWidget()->redrawData(true);
     widget_->updateLoadState();
 }
 
@@ -301,7 +301,7 @@ void ScatterPlotView::dataVarY (Variable& var)
     assert (!isDataVarYMeta());
 
     assert (widget_);
-    widget_->getViewDataWidget()->redrawData(ViewDataWidget::RedrawType::Complete);
+    widget_->getViewDataWidget()->redrawData(true);
     widget_->updateLoadState();
 }
 
@@ -321,7 +321,7 @@ void ScatterPlotView::metaDataVarY (MetaVariable& var)
     assert (isDataVarYMeta());
 
     assert (widget_);
-    widget_->getViewDataWidget()->redrawData(ViewDataWidget::RedrawType::Complete);
+    widget_->getViewDataWidget()->redrawData(true);
     widget_->updateLoadState();
 }
 
@@ -342,7 +342,7 @@ void ScatterPlotView::updateSelection()
     loginf << "ScatterPlotView: updateSelection";
     assert(widget_);
 
-    widget_->getViewDataWidget()->redrawData(ViewDataWidget::RedrawType::Complete);
+    widget_->getViewDataWidget()->redrawData(true);
 
     //    if (show_only_selected_)
     //        widget_->getDataWidget()->updateToSelection();

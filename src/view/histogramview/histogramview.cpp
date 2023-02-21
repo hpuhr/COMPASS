@@ -207,7 +207,7 @@ void HistogramView::useLogScale(bool use_log_scale)
     HistogramViewDataWidget* data_widget = dynamic_cast<HistogramViewDataWidget*>(getDataWidget());
     assert (data_widget);
 
-    data_widget->redrawData(ViewDataWidget::RedrawType::UpdateDisplay);
+    data_widget->redrawData(false);
 }
 
 /**
@@ -253,7 +253,7 @@ void HistogramView::dataVar (Variable& var)
     assert (!isDataVarMeta());
 
     assert (widget_);
-    widget_->getViewDataWidget()->redrawData(ViewDataWidget::RedrawType::UpdateData);
+    widget_->getViewDataWidget()->redrawData(true);
     widget_->updateLoadState();
 }
 
@@ -279,7 +279,7 @@ void HistogramView::metaDataVar (MetaVariable& var)
     assert (isDataVarMeta());
 
     assert (widget_);
-    widget_->getViewDataWidget()->redrawData(ViewDataWidget::RedrawType::UpdateData);
+    widget_->getViewDataWidget()->redrawData(true);
     widget_->updateLoadState();
 }
 
@@ -304,7 +304,7 @@ void HistogramView::updateSelection()
     loginf << "HistogramView: updateSelection";
     assert(widget_);
     
-    widget_->getViewDataWidget()->redrawData(ViewDataWidget::RedrawType::UpdateData);
+    widget_->getViewDataWidget()->redrawData(true);
 
     //    if (show_only_selected_)
     //        widget_->getDataWidget()->updateToSelection();
@@ -359,7 +359,7 @@ void HistogramView::evalResultGrpReq(const std::string& value)
 
     eval_results_grpreq_ = value;
 
-    widget_->getViewDataWidget()->redrawData(ViewDataWidget::RedrawType::UpdateData);
+    widget_->getViewDataWidget()->redrawData(true);
 }
 
 /**
@@ -380,7 +380,7 @@ void HistogramView::evalResultsID(const std::string& value)
 
     eval_results_id_ = value;
 
-    widget_->getViewDataWidget()->redrawData(ViewDataWidget::RedrawType::UpdateData);
+    widget_->getViewDataWidget()->redrawData(true);
 }
 
 /**
@@ -411,7 +411,7 @@ void HistogramView::showViewPointSlot (const ViewableDataConfig* vp)
 void HistogramView::onShowResultsChanged()
 {
     widget_->getViewConfigWidget()->updateConfig();
-    widget_->getViewDataWidget()->redrawData(ViewDataWidget::RedrawType::UpdateData);
+    widget_->getViewDataWidget()->redrawData(true);
 }
 
 /**

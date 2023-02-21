@@ -38,16 +38,18 @@ ViewLoadStateWidget::ViewLoadStateWidget(ViewWidget* view_widget, QWidget* paren
 }
 
 /**
+ * Triggered by the reload button. Updates the data depending on the action needed by the current state.
 */
 void ViewLoadStateWidget::updateData()
 {
     if (view_widget_->getViewDataWidget()->hasData() && state_ == State::RedrawRequired)
-        view_widget_->getViewDataWidget()->redrawData();
+        view_widget_->getViewDataWidget()->redrawData(true);
     else
         COMPASS::instance().dbContentManager().load();
 }
 
 /**
+ * Sets the widget to a certain state.
 */
 void ViewLoadStateWidget::setState(State state)
 {
@@ -67,15 +69,14 @@ void ViewLoadStateWidget::setState(State state)
     palette.setColor(status_label_->foregroundRole(), color);
     status_label_->setPalette(palette);
 
-    bool label_visible  = (state != State::None && !msg.empty() && reload_button_->isVisible());
     bool button_enabled = (state != State::Loading);
 
-    status_label_->setVisible(label_visible);
+    reload_button_->setText(QString::fromStdString(buttonTextFromState(state_)));
     reload_button_->setEnabled(button_enabled);
 }
 
 /**
- * 
+ * Updates the current state by querying the view widget.
 */
 void ViewLoadStateWidget::updateState()
 {
@@ -83,11 +84,18 @@ void ViewLoadStateWidget::updateState()
     if (COMPASS::instance().appMode() == AppMode::LiveRunning)
         return;
 
+    //return if we are in loading state
+    if (state_ == State::Loading)
+        return;
+
     //ask widget if either a reload or a redraw is needed
     bool needs_reload = view_widget_->reloadNeeded();
     bool needs_redraw = view_widget_->redrawNeeded();
+    bool needs_data   = !view_widget_->getViewDataWidget()->hasData();
 
-    if (needs_reload)
+    if (needs_data)
+        setState(State::NoData);
+    else if (needs_reload)
         setState(State::ReloadRequired);
     else if (needs_redraw)
         setState(State::RedrawRequired);
@@ -116,7 +124,8 @@ void ViewLoadStateWidget::loadingDone()
     if (COMPASS::instance().appMode() == AppMode::LiveRunning)
         return;
 
-    updateState();
+    setState(State::None); //reset state
+    updateState();         //determine new state
 }
 
 /**
@@ -163,6 +172,16 @@ std::string ViewLoadStateWidget::messageFromState(State state)
             return "Redraw Required";
     }
     return "";
+}
+
+/**
+*/
+std::string ViewLoadStateWidget::buttonTextFromState(State state)
+{
+    if (state == State::RedrawRequired)
+        return "Redraw";
+    
+    return "Reload";
 }
 
 /**

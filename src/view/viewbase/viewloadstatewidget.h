@@ -44,6 +44,7 @@ public:
 private:
     static std::string messageFromState(State state);
     static QColor colorFromState(State state);
+    static std::string buttonTextFromState(State state);
 
     void updateData();
 

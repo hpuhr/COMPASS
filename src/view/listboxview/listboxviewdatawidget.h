@@ -76,8 +76,8 @@ protected:
     virtual void loadingDone_impl() override;
     virtual void updateData_impl(const std::map<std::string, std::shared_ptr<Buffer>>& data, bool requires_reset) override;
     virtual void clearData_impl() override;
-    virtual void redrawData_impl() override;
-    virtual void prepareData_impl() override;
+    virtual void redrawData_impl(bool recompute) override;
+    virtual void liveReload_impl() override;
 
     ListBoxView*           view_{nullptr};
     /// Data source
