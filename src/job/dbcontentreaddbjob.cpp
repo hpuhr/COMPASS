@@ -74,9 +74,9 @@ void DBContentReadDBJob::run()
 
     while (!obsolete_)
     {
-        std::shared_ptr<Buffer> buffer = db_interface_.readDataChunk(dbcontent_);
+        std::shared_ptr<Buffer> buffer;
+        std::tie (buffer, last_buffer) = db_interface_.readDataChunk(dbcontent_);
         assert(buffer);
-        last_buffer = buffer->lastOne();
 
         cnt++;
 
@@ -86,7 +86,7 @@ void DBContentReadDBJob::run()
         assert(buffer->dbContentName() == dbcontent_.name());
 
         logdbg << "DBContentReadDBJob: run: " << dbcontent_.name() << ": intermediate signal, #buffers "
-               << cnt << " last one " << buffer->lastOne();
+               << cnt << " last one " << last_buffer;
         row_count_ += buffer->size();
 
         // add data to cache
@@ -103,7 +103,9 @@ void DBContentReadDBJob::run()
 
         if (!view_manager.isProcessingData() || last_buffer) // distribute data
         {
-            loginf << "DBContentReadDBJob: run: " << dbcontent_.name() << ": emitting intermediate read, size " << row_count_;
+            loginf << "DBContentReadDBJob: run: " << dbcontent_.name()
+                   << ": emitting intermediate read, size " << row_count_;
+
             emit intermediateSignal(cached_buffer_);
 
             cached_buffer_ = nullptr;

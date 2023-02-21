@@ -1224,12 +1224,15 @@ void DBInterface::prepareRead(
     db_connection_->prepareCommand(read);
 }
 
-shared_ptr<Buffer> DBInterface::readDataChunk(const DBContent& dbobject)
+std::pair<std::shared_ptr<Buffer>, bool> DBInterface::readDataChunk(const DBContent& dbobject)
 {
     // locked by prepareRead
     assert(db_connection_);
 
-    shared_ptr<DBResult> result = db_connection_->stepPreparedCommand(read_chunk_size_);
+    shared_ptr<DBResult> result;
+    bool last_one = false;
+
+    std::tie(result, last_one) = db_connection_->stepPreparedCommand(read_chunk_size_);
 
     if (!result)
     {
@@ -1249,10 +1252,7 @@ shared_ptr<Buffer> DBInterface::readDataChunk(const DBContent& dbobject)
 
     assert(buffer);
 
-    bool last_one = db_connection_->getPreparedCommandDone();
-    buffer->lastOne(last_one);
-
-    return buffer;
+    return {buffer, last_one};
 }
 
 void DBInterface::finalizeReadStatement(const DBContent& dbobject)

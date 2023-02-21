@@ -109,7 +109,7 @@ public:
                      std::string custom_filter_clause,
                      bool use_order = false, dbContent::Variable* order_variable = nullptr);
 
-    std::shared_ptr<Buffer> readDataChunk(const DBContent& dbcontent);
+    std::pair<std::shared_ptr<Buffer>, bool> readDataChunk(const DBContent& dbcontent); // last one flag
     void finalizeReadStatement(const DBContent& dbcontent);
 
     void deleteBefore(const DBContent& dbcontent, boost::posix_time::ptime before_timestamp);

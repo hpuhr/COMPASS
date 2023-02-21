@@ -31,26 +31,15 @@
 using namespace nlohmann;
 using namespace std;
 
-unsigned int Buffer::ids_ = 0;
-
-
 Buffer::Buffer()
 {
-    logdbg << "Buffer: constructor: start";
-
-    id_ = ids_;
-    ++ids_;
-
-    logdbg << "Buffer: constructor: end";
+    logdbg << "Buffer: constructor";
 }
 
 Buffer::Buffer(PropertyList properties, const string& dbcontent_name)
-    : dbcontent_name_(dbcontent_name), last_one_(false)
+    : dbcontent_name_(dbcontent_name) //, last_one_(false)
 {
     logdbg << "Buffer: constructor: start";
-
-    id_ = ids_;
-    ++ids_;
 
     for (unsigned int cnt = 0; cnt < properties.size(); cnt++)
         addProperty(properties.at(cnt));
@@ -58,12 +47,9 @@ Buffer::Buffer(PropertyList properties, const string& dbcontent_name)
     logdbg << "Buffer: constructor: end";
 }
 
-/**
- * Calls clear.
- */
 Buffer::~Buffer()
 {
-    logdbg << "Buffer: destructor: dbo " << dbcontent_name_ << " id " << id_;
+    logdbg << "Buffer: destructor: dbo " << dbcontent_name_;
 
     properties_.clear();
 
@@ -100,12 +86,6 @@ bool Buffer::hasProperty(const Property& property)
     return false;
 }
 
-/**
- * \param id Unique property identifier
- * \param type Property data type
- *
- * \exception runtime_error if property id already in use
- */
 void Buffer::addProperty(string id, PropertyDataType type)
 {
     logdbg << "Buffer: addProperty:  id '" << id << "' type " << Property::asString(type);
@@ -404,9 +384,6 @@ void Buffer::seizeBuffer(Buffer& org_buffer)
 
     data_size_ += org_buffer.data_size_;
 
-    if (org_buffer.lastOne())
-        last_one_ = true;
-
     logdbg << "Buffer: seizeBuffer: end size " << size();
 }
 
@@ -667,8 +644,6 @@ void Buffer::printProperties()
     for (const auto& prop_it : properties_.properties())
         loginf << "'" << prop_it.name() << "' " << prop_it.dataTypeString();
 }
-
-bool Buffer::firstWrite() { return data_size_ == 0; }
 
 bool Buffer::isNull(const Property& property, unsigned int index)
 {

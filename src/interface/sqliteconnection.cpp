@@ -541,7 +541,7 @@ void SQLiteConnection::prepareCommand(const std::shared_ptr<DBCommand> command)
 
     prepareStatement(command->get().c_str());
 }
-std::shared_ptr<DBResult> SQLiteConnection::stepPreparedCommand(unsigned int max_results)
+std::pair<std::shared_ptr<DBResult>, bool> SQLiteConnection::stepPreparedCommand(unsigned int max_results)
 {
     assert(prepared_command_);
     assert(!prepared_command_done_);
@@ -559,6 +559,7 @@ std::shared_ptr<DBResult> SQLiteConnection::stepPreparedCommand(unsigned int max
     unsigned int cnt = 0;
     int result;
     bool done = true;
+    bool last_one = false;
 
     max_results--;
 
@@ -595,10 +596,10 @@ std::shared_ptr<DBResult> SQLiteConnection::stepPreparedCommand(unsigned int max
         logdbg << "SQLiteConnection: stepPreparedCommand: reading done";
         prepared_command_done_ = true;
 
-        buffer->lastOne(true);
+        last_one = true;
     }
 
-    return dbresult;
+    return {dbresult, last_one};
 }
 void SQLiteConnection::finalizeCommand()
 {
