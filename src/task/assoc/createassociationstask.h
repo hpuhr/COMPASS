@@ -21,6 +21,7 @@
 #include "configurable.h"
 #include "createassociationsstatusdialog.h"
 #include "dbcontent/variable/variableset.h"
+#include "dbcontent/dbcontentcache.h"
 #include "task.h"
 #include "global.h"
 
@@ -67,18 +68,18 @@ public:
 
     CreateAssociationsTaskDialog* dialog();
 
-    dbContent::MetaVariable* keyVar() const;
-    dbContent::MetaVariable* dsIdVar() const;
-    dbContent::MetaVariable* lineIdVar() const;
-    dbContent::MetaVariable* timestampVar() const;
-    dbContent::MetaVariable* targetAddrVar() const;
-    dbContent::MetaVariable* targetIdVar() const;
-    dbContent::MetaVariable* trackNumVar() const;
-    dbContent::MetaVariable* trackEndVar() const;
-    dbContent::MetaVariable* mode3AVar() const;
-    dbContent::MetaVariable* modeCVar() const;
-    dbContent::MetaVariable* latitudeVar() const;
-    dbContent::MetaVariable* longitudeVar() const;
+//    dbContent::MetaVariable* keyVar() const;
+//    dbContent::MetaVariable* dsIdVar() const;
+//    dbContent::MetaVariable* lineIdVar() const;
+//    dbContent::MetaVariable* timestampVar() const;
+//    dbContent::MetaVariable* targetAddrVar() const;
+//    dbContent::MetaVariable* targetIdVar() const;
+//    dbContent::MetaVariable* trackNumVar() const;
+//    dbContent::MetaVariable* trackEndVar() const;
+//    dbContent::MetaVariable* mode3AVar() const;
+//    dbContent::MetaVariable* modeCVar() const;
+//    dbContent::MetaVariable* latitudeVar() const;
+//    dbContent::MetaVariable* longitudeVar() const;
 
     virtual bool checkPrerequisites();
     virtual bool isRecommended();
@@ -144,19 +145,19 @@ public:
     void contMaxDistanceAcceptableTracker(double value);
 
 protected:
-    dbContent::MetaVariable* rec_num_var_{nullptr};
-    dbContent::MetaVariable* ds_id_var_{nullptr};
-    dbContent::MetaVariable* line_id_var_{nullptr};
-    dbContent::MetaVariable* ts_var_{nullptr};
-    dbContent::MetaVariable* target_addr_var_{nullptr};
-    dbContent::MetaVariable* target_id_var_{nullptr};
-    dbContent::MetaVariable* track_num_var_{nullptr};
-    dbContent::MetaVariable* track_end_var_{nullptr};
-    dbContent::MetaVariable* mode_3a_var_{nullptr};
-    dbContent::MetaVariable* mode_c_var_{nullptr};
-    dbContent::MetaVariable* latitude_var_{nullptr};
-    dbContent::MetaVariable* longitude_var_{nullptr};
-    dbContent::MetaVariable* associations_var_{nullptr};
+//    dbContent::MetaVariable* rec_num_var_{nullptr};
+//    dbContent::MetaVariable* ds_id_var_{nullptr};
+//    dbContent::MetaVariable* line_id_var_{nullptr};
+//    dbContent::MetaVariable* ts_var_{nullptr};
+//    dbContent::MetaVariable* target_addr_var_{nullptr};
+//    dbContent::MetaVariable* target_id_var_{nullptr};
+//    dbContent::MetaVariable* track_num_var_{nullptr};
+//    dbContent::MetaVariable* track_end_var_{nullptr};
+//    dbContent::MetaVariable* mode_3a_var_{nullptr};
+//    dbContent::MetaVariable* mode_c_var_{nullptr};
+//    dbContent::MetaVariable* latitude_var_{nullptr};
+//    dbContent::MetaVariable* longitude_var_{nullptr};
+//    dbContent::MetaVariable* associations_var_{nullptr};
 
     bool associate_non_mode_s_ {true};
     bool clean_dubious_utns_ {true};
@@ -194,13 +195,15 @@ protected:
 
     std::unique_ptr<CreateAssociationsStatusDialog> status_dialog_;
 
+    std::shared_ptr<dbContent::Cache> cache_;
+
     std::map<std::string, std::shared_ptr<Buffer>> data_;
-    bool dbo_loading_done_{false};
+    //bool dbo_loading_done_{false};
 
     std::shared_ptr<CreateAssociationsJob> create_job_;
     bool create_job_done_{false};
 
-    void checkAndSetMetaVariable(const std::string& name_str, dbContent::MetaVariable** var);
+    //void checkAndSetMetaVariable(const std::string& name_str, dbContent::MetaVariable** var);
 
     dbContent::VariableSet getReadSetFor(const std::string& dbcontent_name);
 };

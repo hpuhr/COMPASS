@@ -82,6 +82,7 @@ public:
     void seizeBuffer(Buffer& org_buffer);
 
     bool hasProperty(const Property& property);
+    bool hasAnyPropertyNamed (const std::string& property_name);
     void addProperty(std::string id, PropertyDataType type);
     void addProperty(const Property& property);
     void deleteProperty(const Property& property);

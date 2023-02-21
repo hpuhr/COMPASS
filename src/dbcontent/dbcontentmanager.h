@@ -23,6 +23,7 @@
 #include "singleton.h"
 #include "buffer.h"
 #include "targetmodel.h"
+#include "dbcontent/dbcontentcache.h"
 
 #include <boost/optional.hpp>
 
@@ -191,6 +192,8 @@ protected:
     boost::optional<double> longitude_max_;
 
     std::map<std::string, std::shared_ptr<Buffer>> data_;
+
+    dbContent::Cache read_cache_;
 
     std::map<std::string, std::shared_ptr<Buffer>> insert_data_;
 

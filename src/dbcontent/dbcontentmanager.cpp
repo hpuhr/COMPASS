@@ -60,7 +60,7 @@ using namespace dbContent;
 
 DBContentManager::DBContentManager(const std::string& class_id, const std::string& instance_id,
                                    COMPASS* compass)
-    : Configurable(class_id, instance_id, compass, "db_content.json"), compass_(*compass)
+    : Configurable(class_id, instance_id, compass, "db_content.json"), compass_(*compass), read_cache_(*this)
 {
     logdbg << "DBContentManager: constructor: creating subconfigurables";
 

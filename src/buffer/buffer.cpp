@@ -81,6 +81,11 @@ bool Buffer::hasProperty(const Property& property)
     return false;
 }
 
+bool Buffer::hasAnyPropertyNamed (const std::string& property_name)
+{
+    return properties_.hasProperty(property_name);
+}
+
 void Buffer::addProperty(string id, PropertyDataType type)
 {
     logdbg << "Buffer: addProperty:  id '" << id << "' type " << Property::asString(type);
