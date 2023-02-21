@@ -1660,12 +1660,6 @@ void EvaluationManager::reportSkipTargetsWoIssues(bool value)
 
 void EvaluationManager::setViewableDataConfig (const nlohmann::json::object_t& data)
 {
-    if (viewable_data_cfg_)
-    {
-        COMPASS::instance().viewManager().unsetCurrentViewPoint();
-        viewable_data_cfg_ = nullptr;
-    }
-
     viewable_data_cfg_.reset(new ViewableDataConfig(data));
 
     COMPASS::instance().viewManager().setCurrentViewPoint(viewable_data_cfg_.get());

@@ -1,5 +1,6 @@
 #include "targetlistwidget.h"
 #include "targetmodel.h"
+#include "dbcontentmanager.h"
 #include "logger.h"
 
 #include <QTableView>
@@ -14,8 +15,8 @@ using namespace std;
 namespace dbContent {
 
 
-TargetListWidget::TargetListWidget(TargetModel& model)
-    : QWidget(), model_(model)
+TargetListWidget::TargetListWidget(TargetModel& model, DBContentManager& dbcont_manager)
+    : QWidget(), model_(model), dbcont_manager_(dbcont_manager)
 {
     QVBoxLayout* main_layout = new QVBoxLayout();
 
@@ -181,11 +182,11 @@ void TargetListWidget::currentRowChanged(const QModelIndex& current, const QMode
     auto const source_index = proxy_model_->mapToSource(current);
     assert (source_index.isValid());
 
-    //    const EvaluationTargetData& target = eval_data_.getTargetOf(source_index);
+    const dbContent::Target& target = model_.getTargetOf(source_index);
 
-    //    loginf << "TargetListWidget: currentRowChanged: current target " << target.utn_;
+    loginf << "TargetListWidget: currentRowChanged: current target " << target.utn_;
 
-    //    eval_man_.showUTN(target.utn_);
+    dbcont_manager_.showUTN(target.utn_);
 }
 
 }

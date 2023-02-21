@@ -24,6 +24,7 @@
 #include "buffer.h"
 #include "targetmodel.h"
 #include "dbcontent/dbcontentcache.h"
+#include "viewabledataconfig.h"
 
 #include <boost/optional.hpp>
 
@@ -165,6 +166,8 @@ public:
     dbContent::TargetListWidget* targetListWidget();
     void resizeTargetListWidget();
 
+    void showUTN (unsigned int utn);
+
 protected:
     COMPASS& compass_;
 
@@ -193,8 +196,6 @@ protected:
 
     std::map<std::string, std::shared_ptr<Buffer>> data_;
 
-    dbContent::Cache read_cache_;
-
     std::map<std::string, std::shared_ptr<Buffer>> insert_data_;
 
     bool load_in_progress_{false};
@@ -212,6 +213,8 @@ protected:
 
     std::shared_ptr<DBContentDeleteDBJob> delete_job_{nullptr};
 
+    std::unique_ptr<ViewableDataConfig> viewable_data_cfg_;
+
     virtual void checkSubConfigurables();
     void finishLoading();
     void finishInserting();
@@ -226,6 +229,9 @@ protected:
     void loadMaxRefTrajTrackNum();
 
     void addStandardVariables(std::string dbcont_name, dbContent::VariableSet& read_set);
+
+    void setViewableDataConfig (const nlohmann::json::object_t& data);
+
 
 };
 

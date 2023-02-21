@@ -60,7 +60,7 @@ using namespace dbContent;
 
 DBContentManager::DBContentManager(const std::string& class_id, const std::string& instance_id,
                                    COMPASS* compass)
-    : Configurable(class_id, instance_id, compass, "db_content.json"), compass_(*compass), read_cache_(*this)
+    : Configurable(class_id, instance_id, compass, "db_content.json"), compass_(*compass)
 {
     logdbg << "DBContentManager: constructor: creating subconfigurables";
 
@@ -1368,7 +1368,7 @@ void DBContentManager::resetToStartupConfiguration()
 dbContent::TargetListWidget* DBContentManager::targetListWidget()
 {
     if (!target_list_widget_)
-        target_list_widget_.reset (new dbContent::TargetListWidget(target_model_));
+        target_list_widget_.reset (new dbContent::TargetListWidget(target_model_, *this));
 
     return target_list_widget_.get();
 }
@@ -1463,3 +1463,23 @@ MetaVariableConfigurationDialog* DBContentManager::metaVariableConfigdialog()
     assert(meta_cfg_dialog_);
     return meta_cfg_dialog_.get();
 }
+
+
+void DBContentManager::setViewableDataConfig (const nlohmann::json::object_t& data)
+{
+    viewable_data_cfg_.reset(new ViewableDataConfig(data));
+
+    COMPASS::instance().viewManager().setCurrentViewPoint(viewable_data_cfg_.get());
+}
+
+void DBContentManager::showUTN (unsigned int utn)
+{
+    loginf << "DBContentManager: showUTN: utn " << utn;
+
+    nlohmann::json data;
+    data[VP_FILTERS_KEY]["UTNs"]["utns"] = to_string(utn);
+
+    loginf << "DBContentManager: showUTN: showing";
+    setViewableDataConfig(data);
+}
+
