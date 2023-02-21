@@ -32,19 +32,7 @@ class MetaVariable;
 class HistogramView : public View
 {
     Q_OBJECT
-  public slots:
-    virtual void unshowViewPointSlot (const ViewableDataConfig* vp) override;
-    virtual void showViewPointSlot (const ViewableDataConfig* vp) override;
-    void allLoadingDoneSlot();
-
-    void resultsChangedSlot();
-
-  signals:
-    void showOnlySelectedSignal(bool value);
-    void usePresentationSignal(bool value);
-    void showAssociationsSignal(bool value);
-
-  public:
+public:
     /// @brief Constructor
     HistogramView(const std::string& class_id, const std::string& instance_id, ViewContainer* w,
                 ViewManager& view_manager);
@@ -53,13 +41,7 @@ class HistogramView : public View
 
     bool init() override;
 
-    virtual void loadingStarted() override;
-    virtual void loadedData(const std::map<std::string, std::shared_ptr<Buffer>>& data, bool requires_reset) override;
     virtual void loadingDone() override;
-
-    virtual void clearData() override;
-
-    virtual void appModeSwitch (AppMode app_mode_previous, AppMode app_mode_current) override;
 
     virtual void generateSubConfigurable(const std::string& class_id,
                                          const std::string& instance_id) override;
@@ -106,9 +88,25 @@ class HistogramView : public View
     bool hasViewPoint () { return current_view_point_ != nullptr; }
     const ViewableDataConfig& viewPoint() { assert (hasViewPoint()); return *current_view_point_; }
 
+public slots:
+    virtual void unshowViewPointSlot (const ViewableDataConfig* vp) override;
+    virtual void showViewPointSlot (const ViewableDataConfig* vp) override;
+
+    void resultsChangedSlot();
+
+signals:
+    void showOnlySelectedSignal(bool value);
+    void usePresentationSignal(bool value);
+    void showAssociationsSignal(bool value);
+
 protected:
+    virtual void checkSubConfigurables() override;
+    virtual void updateSelection() override;
+
+    void onShowResultsChanged();
+
     /// For data display
-    HistogramViewWidget* widget_{nullptr};
+    HistogramViewWidget*     widget_{nullptr};
     /// For data loading
     HistogramViewDataSource* data_source_{nullptr};
 
@@ -117,16 +115,13 @@ protected:
 
     bool use_log_scale_ {false};
 
-    bool show_results_{false}; // no results at first
+    bool        show_results_{false}; // no results at first
     std::string eval_results_grpreq_;
     std::string eval_results_id_;
 
     const ViewableDataConfig* current_view_point_ {nullptr};
 
-    virtual void checkSubConfigurables() override;
-    virtual void updateSelection() override;
-
-    void onShowResultsChanged();
+    
 };
 
 #endif /* HISTOGRAMVIEW_H_ */

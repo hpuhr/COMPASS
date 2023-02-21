@@ -32,8 +32,6 @@ class ScatterPlotView;
 
 class QCheckBox;
 class QLineEdit;
-class QPushButton;
-class QLabel;
 
 /**
  * @brief Widget with configuration elements for a ScatterPlotView
@@ -43,29 +41,19 @@ class ScatterPlotViewConfigWidget : public ViewConfigWidget
 {
     Q_OBJECT
 
-  public slots:
+public slots:
     void selectedVariableXChangedSlot();
     void selectedVariableYChangedSlot();
 
-    void reloadRequestedSlot();
-    void loadingStartedSlot();
-
-  public:
+public:
     ScatterPlotViewConfigWidget(ScatterPlotView* view, QWidget* parent = nullptr);
     virtual ~ScatterPlotViewConfigWidget();
 
-    virtual void setStatus(const QString& status, bool visible, const QColor& color = Qt::black) override;
-
-    void appModeSwitch (AppMode app_mode);
-
-  protected:
+protected:
     ScatterPlotView* view_;
 
     dbContent::VariableSelectionWidget* select_var_x_ {nullptr};
     dbContent::VariableSelectionWidget* select_var_y_ {nullptr};
-
-    QLabel* status_label_ {nullptr};
-    QPushButton* reload_button_{nullptr};
 };
 
 #endif /* SCATTERPLOTVIEWCONFIGWIDGET_H_ */

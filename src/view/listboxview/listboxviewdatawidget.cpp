@@ -78,9 +78,17 @@ ListBoxViewDataWidget::~ListBoxViewDataWidget()
     // buffer_tables_.clear();
 }
 
-void ListBoxViewDataWidget::clearData()
+bool ListBoxViewDataWidget::hasData() const
 {
-    logdbg << "ListBoxViewDataWidget: clearData";
+    if (all_buffer_table_widget_)
+        return all_buffer_table_widget_->rowCount() > 0;
+
+    return false;
+}
+
+void ListBoxViewDataWidget::clearData_impl()
+{
+    logdbg << "ListBoxViewDataWidget: clearData_impl";
 
     buffers_.clear();
 
@@ -90,18 +98,19 @@ void ListBoxViewDataWidget::clearData()
     for (auto buffer_table : buffer_tables_)
         buffer_table.second->clear();
 
-    logdbg << "ListBoxViewDataWidget: clearData: end";
+    logdbg << "ListBoxViewDataWidget: clearData_impl: end";
 }
 
-void ListBoxViewDataWidget::loadingStartedSlot()
+void ListBoxViewDataWidget::loadingStarted_impl()
 {
-    clearData();
+    loginf << "ListBoxViewDataWidget: loadingStarted_impl";
+    //nothing to do yet
 }
 
-void ListBoxViewDataWidget::updateDataSlot(const std::map<std::string, std::shared_ptr<Buffer>>& data,
-                                           bool requires_reset)
+void ListBoxViewDataWidget::updateData_impl(const std::map<std::string, std::shared_ptr<Buffer>>& data,
+                                            bool requires_reset)
 {
-    loginf << "ListBoxViewDataWidget: updateTables";
+    loginf << "ListBoxViewDataWidget: updateData_impl";
 
 //    assert(all_buffer_table_widget_);
 //    all_buffer_table_widget_->show(buffer);
@@ -110,14 +119,16 @@ void ListBoxViewDataWidget::updateDataSlot(const std::map<std::string, std::shar
 //    buffer_tables_.at(object.name())->show(buffer);
 
     buffers_ = data;
-
-    logdbg << "ListBoxViewDataWidget: updateTables: end";
 }
 
-void ListBoxViewDataWidget::loadingDoneSlot()
+void ListBoxViewDataWidget::loadingDone_impl()
 {
-    loginf << "ListBoxViewDataWidget: loadingDoneSlot";
+    loginf << "ListBoxViewDataWidget: loadingDone_impl";
+    //nothing to do yet
+}
 
+void ListBoxViewDataWidget::redrawData_impl()
+{
     assert(all_buffer_table_widget_);
     all_buffer_table_widget_->show(buffers_);
 
@@ -128,8 +139,11 @@ void ListBoxViewDataWidget::loadingDoneSlot()
     }
 
     selectFirstSelectedRow();
+}
 
-    emit dataLoaded();
+void ListBoxViewDataWidget::prepareData_impl()
+{
+    //nothing to do yet
 }
 
 void ListBoxViewDataWidget::exportDataSlot(bool overwrite)

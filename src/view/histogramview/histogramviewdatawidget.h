@@ -21,7 +21,6 @@
 #include "global.h"
 #include "nullablevector.h"
 #include "dbcontent/variable/variable.h"
-#include "histogramviewdatatoolwidget.h"
 #include "histogramviewchartview.h"
 #include "viewdatawidget.h"
 #include "histogram.h"
@@ -39,6 +38,13 @@ class Buffer;
 class DBContent;
 class HistogramGenerator;
 
+enum HistogramViewDataTool
+{
+    HG_DEFAULT_TOOL = 0,
+    HG_SELECT_TOOL,
+    HG_ZOOM_TOOL
+};
+
 /**
  * @brief Widget with tab containing BufferTableWidgets in HistogramView
  *
@@ -46,43 +52,18 @@ class HistogramGenerator;
 class HistogramViewDataWidget : public ViewDataWidget
 {
     Q_OBJECT
-
-  signals:
-    void exportDoneSignal(bool cancelled);
-
-  public slots:
-    void loadingStartedSlot();
-    /// @brief Called when new result Buffer was delivered
-    void updateDataSlot(const std::map<std::string, std::shared_ptr<Buffer>>& data, bool requires_reset);
-    void loadingDoneSlot();
-
-    void exportDataSlot(bool overwrite);
-    void exportDoneSlot(bool cancelled);
-
-    void resetZoomSlot();
-
-    void rectangleSelectedSlot (unsigned int index1, unsigned int index2);
-
-    void invertSelectionSlot();
-    void clearSelectionSlot();
-
-  public:
+public:
     /// @brief Constructor
     HistogramViewDataWidget(HistogramView* view, HistogramViewDataSource* data_source,
                           QWidget* parent = nullptr, Qt::WindowFlags f = 0);
     /// @brief Destructor
     virtual ~HistogramViewDataWidget();
 
-    void clear();
-    void updateView();
-    void updateChart();
-
     unsigned int numBins() const;
 
     HistogramViewDataTool selectedTool() const;
     QCursor currentCursor() const;
 
-    bool showsData() const;
     bool dataNotInBuffer() const;
 
     QPixmap renderPixmap();
@@ -98,11 +79,36 @@ class HistogramViewDataWidget : public ViewDataWidget
 
     ViewInfo getViewInfo() const;
 
+    virtual bool hasData() const override;
+
+signals:
+    void exportDoneSignal(bool cancelled);
+
+public slots:
+    void exportDataSlot(bool overwrite);
+    void exportDoneSlot(bool cancelled);
+
+    void resetZoomSlot();
+
+    void rectangleSelectedSlot (unsigned int index1, unsigned int index2);
+
+    void invertSelectionSlot();
+    void clearSelectionSlot();
+
 protected:
     virtual void toolChanged_impl(int mode) override;
+    virtual void loadingStarted_impl() override;
+    virtual void loadingDone_impl() override;
+    virtual void updateData_impl(const std::map<std::string, std::shared_ptr<Buffer>>& data, bool requires_reset) override;
+    virtual void clearData_impl() override;
+    virtual void redrawData_impl() override;
+    virtual void prepareData_impl() override;
 
-    void updateFromData();
-    void updateFromResults();
+    void updateGenerator();
+    void updateGeneratorFromData();
+    void updateGeneratorFromResults();
+
+    void updateChart();
 
     void selectData(unsigned int index1, unsigned int index2);
     void zoomToSubrange(unsigned int index1, unsigned int index2);

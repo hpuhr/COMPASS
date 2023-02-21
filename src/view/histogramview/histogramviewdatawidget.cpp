@@ -134,10 +134,15 @@ HistogramViewDataWidget::~HistogramViewDataWidget() = default;
 
 /**
  */
-void HistogramViewDataWidget::clear ()
+bool HistogramViewDataWidget::hasData() const
 {
-    loginf << "HistogramViewDataWidget: clear";
+    return shows_data_;
+}
 
+/**
+ */
+void HistogramViewDataWidget::clearData_impl()
+{
     buffers_.clear();
     chart_view_.reset();
     histogram_generator_.reset();
@@ -148,12 +153,53 @@ void HistogramViewDataWidget::clear ()
 
 /**
  */
+void HistogramViewDataWidget::prepareData_impl()
+{
+    updateGenerator();
+}
+
+/**
+ */
+void HistogramViewDataWidget::redrawData_impl()
+{
+    updateChart();
+}
+
+/**
+ */
 void HistogramViewDataWidget::toolChanged_impl(int mode)
 {
     selected_tool_ = (HistogramViewDataTool)mode;
 
     if (chart_view_)
         chart_view_->onToolChanged();
+}
+
+/**
+ */
+void HistogramViewDataWidget::loadingStarted_impl()
+{
+    //nothing to do yet
+}
+
+/**
+ */
+void HistogramViewDataWidget::updateData_impl(const std::map<std::string, std::shared_ptr<Buffer>>& data, 
+                                             bool requires_reset)
+{
+    logdbg << "HistogramViewDataWidget: updateDataSlot: start";
+
+    buffers_ = data;
+    histogram_generator_.reset(); //current generator makes no sense any more
+
+    logdbg << "HistogramViewDataWidget: updateDataSlot: end";
+}
+
+/**
+ */
+void HistogramViewDataWidget::loadingDone_impl()
+{
+    //nothing to do yet
 }
 
 /**
@@ -182,13 +228,6 @@ QCursor HistogramViewDataWidget::currentCursor() const
 
 /**
  */
-bool HistogramViewDataWidget::showsData() const
-{
-    return shows_data_;
-}
-
-/**
- */
 QPixmap HistogramViewDataWidget::renderPixmap()
 {
     assert (chart_view_);
@@ -202,52 +241,22 @@ bool HistogramViewDataWidget::dataNotInBuffer() const
     return data_not_in_buffer_;
 }
 
-/**
- */
-void HistogramViewDataWidget::loadingStartedSlot()
-{
-    clear();
-    updateChart();
-}
 
 /**
  */
-void HistogramViewDataWidget::updateDataSlot(const std::map<std::string, std::shared_ptr<Buffer>>& data, 
-                                             bool requires_reset)
-{
-    logdbg << "HistogramViewDataWidget: updateDataSlot: start";
-
-    buffers_ = data;
-    histogram_generator_.reset(); //current generator makes no sense any more
-
-    logdbg << "HistogramViewDataWidget: updateDataSlot: end";
-}
-
-/**
- */
-void HistogramViewDataWidget::loadingDoneSlot()
-{
-    updateView();
-    emit dataLoaded();
-}
-
-/**
- */
-void HistogramViewDataWidget::updateView()
+void HistogramViewDataWidget::updateGenerator()
 {
     if (view_->showResults())
-        updateFromResults();
+        updateGeneratorFromResults();
     else
-        updateFromData();
-
-    updateChart();
+        updateGeneratorFromData();
 }
 
 /**
  */
-void HistogramViewDataWidget::updateFromData()
+void HistogramViewDataWidget::updateGeneratorFromData()
 {
-    loginf << "HistogramViewDataWidget: updateFromAllData";
+    loginf << "HistogramViewDataWidget: updateGeneratorFromData";
 
     histogram_generator_.reset();
 
@@ -260,7 +269,7 @@ void HistogramViewDataWidget::updateFromData()
 
     if (!view_->hasDataVar())
     {
-        logwrn << "HistogramViewDataWidget: updateFromAllData: no data var";
+        logwrn << "HistogramViewDataWidget: updateGeneratorFromData: no data var";
         return;
     }
 
@@ -338,7 +347,7 @@ void HistogramViewDataWidget::updateFromData()
         }
         default:
         {
-            const std::string msg = "HistogramViewDataWidget: updateFromAllData: impossible for property type " + Property::asString(data_type);
+            const std::string msg = "HistogramViewDataWidget: updateGeneratorFromData: impossible for property type " + Property::asString(data_type);
 
             logerr << msg;
             throw std::runtime_error(msg);
@@ -361,9 +370,9 @@ void HistogramViewDataWidget::updateFromData()
 
 /**
  */
-void HistogramViewDataWidget::updateFromResults()
+void HistogramViewDataWidget::updateGeneratorFromResults()
 {
-    loginf << "HistogramViewDataWidget: updateResults";
+    loginf << "HistogramViewDataWidget: updateGeneratorFromResults";
 
     histogram_generator_.reset();
 
@@ -383,7 +392,7 @@ void HistogramViewDataWidget::updateFromResults()
     if (histogram_generator_)
         histogram_generator_->update();
 
-    loginf << "HistogramViewDataWidget: updateResults: done";
+    loginf << "HistogramViewDataWidget: updateGeneratorFromResults: done";
 }
 
 /**
@@ -658,7 +667,7 @@ void HistogramViewDataWidget::resetZoomSlot()
 
     if (histogram_generator_ && histogram_generator_->subRangeActive())
     {
-        updateView();
+        redrawData(RedrawType::UpdateData); //@TODO: maybe RedrawType::UpdateDisplay may suffice?
     }
     else if (chart_view_ && chart_view_->chart())
     {

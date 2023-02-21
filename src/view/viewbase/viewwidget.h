@@ -23,6 +23,7 @@
 #include <QWidget>
 
 #include "configurable.h"
+#include "appmode.h"
 
 //class EventProcessor;
 class View;
@@ -30,6 +31,7 @@ class ViewToolWidget;
 class ViewDataWidget;
 class ViewConfigWidget;
 class ViewToolSwitcher;
+class ViewLoadStateWidget;
 
 class QSplitter;
 class QLayout;
@@ -58,13 +60,39 @@ public:
     View* getView() { return view_; }
 
     void toggleConfigWidget();
+    void updateToolWidget();
+
+    void updateLoadState();
+
+    void loadingStarted();
+    void loadingDone();
+    void redrawStarted();
+    void redrawDone();
+    void appModeSwitch(AppMode app_mode);
+
+    void notifyReloadNeeded();
+    void notifyRedrawNeeded();
 
     virtual ViewDataWidget* getViewDataWidget() { return data_widget_; }
+    virtual const ViewDataWidget* getViewDataWidget() const { return data_widget_; }
     virtual ViewConfigWidget* getViewConfigWidget() { return config_widget_; }
+    virtual const ViewConfigWidget* getViewConfigWidget() const { return config_widget_; }
+
+    virtual std::string loadedMessage() const { return ""; }
+
+    bool reloadNeeded() const;
+    bool redrawNeeded() const;
 
 protected:
     ViewToolWidget* getViewToolWidget() { return tool_widget_; }
+    const ViewToolWidget* getViewToolWidget() const { return tool_widget_; }
     ViewToolSwitcher* getViewToolSwitcher() { return tool_switcher_.get(); }
+    const ViewToolSwitcher* getViewToolSwitcher() const { return tool_switcher_.get(); }
+    ViewLoadStateWidget* getViewLoadStateWidget() { return state_widget_; }
+    const ViewLoadStateWidget* getViewLoadStateWidget() const { return state_widget_; }
+
+    virtual bool reloadNeeded_impl() const { return false; };
+    virtual bool redrawNeeded_impl() const { return false; };
 
     QIcon getIcon(const std::string& fn) const;
 
@@ -84,11 +112,15 @@ private:
     QWidget*        data_widget_container_   = nullptr;
     QWidget*        config_widget_container_ = nullptr;
 
-    ViewToolWidget*   tool_widget_   = nullptr;
-    ViewDataWidget*   data_widget_   = nullptr;
-    ViewConfigWidget* config_widget_ = nullptr;
+    ViewToolWidget*      tool_widget_   = nullptr;
+    ViewDataWidget*      data_widget_   = nullptr;
+    ViewConfigWidget*    config_widget_ = nullptr;
+    ViewLoadStateWidget* state_widget_  = nullptr;
 
     std::unique_ptr<ViewToolSwitcher> tool_switcher_;
+
+    bool redraw_needed_ = false;
+    bool reload_needed_ = false;
 };
 
 #endif  // VIEWWIDGET_H

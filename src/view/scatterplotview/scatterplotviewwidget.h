@@ -49,7 +49,13 @@ public:
     ScatterPlotView* getView() { return (ScatterPlotView*)view_; }
 
     virtual ScatterPlotViewDataWidget* getViewDataWidget() override final;
+    virtual const ScatterPlotViewDataWidget* getViewDataWidget() const override final;
     virtual ScatterPlotViewConfigWidget* getViewConfigWidget() override final;
+
+    virtual std::string loadedMessage() const override;
+
+protected:
+    virtual bool reloadNeeded_impl() const override;
 };
 
 #endif /* SCATTERPLOTVIEWWIDGET_H_ */

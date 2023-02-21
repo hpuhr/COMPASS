@@ -43,14 +43,6 @@ class ListBoxView : public View
 
     bool init() override;
 
-    virtual void loadingStarted() override;
-    virtual void loadedData(const std::map<std::string, std::shared_ptr<Buffer>>& data, bool requires_reset) override;
-    virtual void loadingDone() override;
-
-    virtual void clearData() override;
-
-    virtual void appModeSwitch (AppMode app_mode_previous, AppMode app_mode_current) override;
-
     virtual void generateSubConfigurable(const std::string& class_id,
                                          const std::string& instance_id) override;
 

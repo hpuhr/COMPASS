@@ -41,6 +41,7 @@
 #include "dbcontent/dbcontentmanager.h"
 #include "viewmanager.h"
 #include "files.h"
+#include "ViewerWidget.h"
 
 #if USE_EXPERIMENTAL_SOURCE == true
 #include "osgview.h"
@@ -388,7 +389,7 @@ void LatexVisitor::visit(HistogramView* e)
     HistogramViewDataWidget* data_widget = e->getDataWidget();
     assert (data_widget);
 
-    if (!data_widget->showsData())
+    if (!data_widget->hasData())
         return;
 
     // normal screenshot
@@ -448,7 +449,7 @@ void LatexVisitor::visit(OSGView* e)
 
     // normal screenshot
 
-    QImage screenshot = data_widget->grabFrameBuffer();
+    QImage screenshot = data_widget->osgViewerWidget()->grabFrameBuffer();
 
     std::string image_path = screenshot_path+"/"+image_prefix_+"_"+e->instanceId()+".jpg";
     assert (!screenshot.isNull());
@@ -470,7 +471,7 @@ void LatexVisitor::visit(OSGView* e)
         data_widget->zoomToDataSlot(); // TODO wrong
         data_widget->addDataMarker();
 
-        QImage overview_screenshot = data_widget->grabFrameBuffer();
+        QImage overview_screenshot = data_widget->osgViewerWidget()->grabFrameBuffer();
 
         data_widget->removeDataMarker();
 
@@ -515,7 +516,7 @@ void LatexVisitor::visit(ScatterPlotView* e)
     ScatterPlotViewDataWidget* data_widget = e->getDataWidget();
     assert (data_widget);
 
-    if (!data_widget->showsData())
+    if (!data_widget->hasData())
         return;
 
     // normal screenshot

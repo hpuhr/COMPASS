@@ -90,43 +90,6 @@ bool ListBoxView::init()
     return true;
 }
 
-void ListBoxView::loadingStarted()
-{
-    loginf << "OSGView: loadingStarted";
-
-    widget_->getViewConfigWidget()->loadingStartedSlot();
-    widget_->getViewDataWidget()->loadingStartedSlot();
-}
-
-void ListBoxView::loadedData(const std::map<std::string, std::shared_ptr<Buffer>>& data, bool requires_reset)
-{
-    loginf << "ListBoxView: loadedData";
-
-    widget_->getViewDataWidget()->updateDataSlot(data, requires_reset);
-}
-
-void ListBoxView::loadingDone()
-{
-    loginf << "ListBoxView: loadingDone";
-
-    widget_->getViewConfigWidget()->setStatus("", false);
-
-    widget_->getViewDataWidget()->loadingDoneSlot();
-}
-
-void ListBoxView::clearData()
-{
-    widget_->getViewDataWidget()->clearData();
-}
-
-void ListBoxView::appModeSwitch (AppMode app_mode_previous, AppMode app_mode_current)
-{
-    loginf << "ListBoxView: appModeSwitch: app_mode " << toString(app_mode_current)
-           << " prev " << toString(app_mode_previous);
-
-    widget_->getViewConfigWidget()->appModeSwitch(app_mode_current);
-}
-
 void ListBoxView::generateSubConfigurable(const std::string& class_id,
                                           const std::string& instance_id)
 {
