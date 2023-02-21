@@ -37,11 +37,17 @@ namespace Association
         bool tmp_ {false};
 
         std::set<unsigned int> tas_;
+        std::set<std::string> ids_;
         std::set<unsigned int> mas_;
+        std::set<unsigned int> mops_versions_;
 
         bool has_timestamps_ {false};
         boost::posix_time::ptime timestamp_min_;
         boost::posix_time::ptime timestamp_max_;
+
+        bool has_mode_c_ {false};
+        float mode_c_min_;
+        float mode_c_max_;
 
         bool has_speed_ {false};
         double speed_min_ {0};
@@ -66,7 +72,7 @@ namespace Association
         bool hasAnyOfTAs (std::set<unsigned int> tas) const;
 
         bool hasMA () const;
-        bool hasMA (unsigned int ma)  const;
+        bool hasMA (unsigned int ma) const;
 
         std::string asStr() const;
         std::string timeStr() const;
@@ -115,7 +121,7 @@ namespace Association
         std::map <std::string, unsigned int> getDBContentCounts();
 
         bool hasADSBMOPSVersion();
-        unsigned int getADSBMOPSVersion();
+        std::set<unsigned int> getADSBMOPSVersions();
     };
 
 }

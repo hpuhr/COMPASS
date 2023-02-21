@@ -41,18 +41,18 @@ template <class T>
 class NullableVector;
 
 typedef std::tuple<std::map<std::string, std::shared_ptr<NullableVector<bool>>>,
-                   std::map<std::string, std::shared_ptr<NullableVector<char>>>,
-                   std::map<std::string, std::shared_ptr<NullableVector<unsigned char>>>,
-                   std::map<std::string, std::shared_ptr<NullableVector<int>>>,
-                   std::map<std::string, std::shared_ptr<NullableVector<unsigned int>>>,
-                   std::map<std::string, std::shared_ptr<NullableVector<long int>>>,
-                   std::map<std::string, std::shared_ptr<NullableVector<unsigned long int>>>,
-                   std::map<std::string, std::shared_ptr<NullableVector<float>>>,
-                   std::map<std::string, std::shared_ptr<NullableVector<double>>>,
-                   std::map<std::string, std::shared_ptr<NullableVector<std::string>>>,
-                   std::map<std::string, std::shared_ptr<NullableVector<nlohmann::json>>>,
-                   std::map<std::string, std::shared_ptr<NullableVector<boost::posix_time::ptime>>>>
-    ArrayListMapTupel;
+std::map<std::string, std::shared_ptr<NullableVector<char>>>,
+std::map<std::string, std::shared_ptr<NullableVector<unsigned char>>>,
+std::map<std::string, std::shared_ptr<NullableVector<int>>>,
+std::map<std::string, std::shared_ptr<NullableVector<unsigned int>>>,
+std::map<std::string, std::shared_ptr<NullableVector<long int>>>,
+std::map<std::string, std::shared_ptr<NullableVector<unsigned long int>>>,
+std::map<std::string, std::shared_ptr<NullableVector<float>>>,
+std::map<std::string, std::shared_ptr<NullableVector<double>>>,
+std::map<std::string, std::shared_ptr<NullableVector<std::string>>>,
+std::map<std::string, std::shared_ptr<NullableVector<nlohmann::json>>>,
+std::map<std::string, std::shared_ptr<NullableVector<boost::posix_time::ptime>>>>
+ArrayListMapTupel;
 
 template <class T, class Tuple>
 struct Index;
@@ -74,8 +74,7 @@ class Buffer
     template <class T>
     friend class NullableVector;
 
-  public:
-    Buffer();
+public:
     Buffer(PropertyList properties, const std::string& dbcontent_name = "");
     virtual ~Buffer();
 
@@ -83,6 +82,7 @@ class Buffer
     void seizeBuffer(Buffer& org_buffer);
 
     bool hasProperty(const Property& property);
+    bool hasAnyPropertyNamed (const std::string& property_name);
     void addProperty(std::string id, PropertyDataType type);
     void addProperty(const Property& property);
     void deleteProperty(const Property& property);
@@ -91,18 +91,6 @@ class Buffer
     void printProperties();
 
     void sortByProperty(const Property& property);
-
-
-    // Returns boolean indicating if any data was ever written.
-    bool firstWrite();
-
-    // Returns boolean indicating if buffer is the last of one DB operation.
-    bool lastOne() { return last_one_; }
-    // Sets if buffer is the last one of one DB operation.
-    void lastOne(bool last_one) { last_one_ = last_one; }
-
-    // Returns the buffers id
-    unsigned int id() const { return id_; }
 
     template <typename T>
     bool has(const std::string& id);
@@ -129,26 +117,17 @@ class Buffer
     void transformVariables(dbContent::VariableSet& list,
                             bool dbcol2dbovar);  // tc2dbovar true for db col -> dbo var, false dbo var -> db column
 
-    std::shared_ptr<Buffer> getPartialCopy(const PropertyList& partial_properties);
-
     nlohmann::json asJSON(unsigned int max_size=0);
 
-  protected:
-    // Unique buffer id, copied when getting shallow copies
-    unsigned int id_;
-    // List of all properties
+protected:
     PropertyList properties_;
     std::string dbcontent_name_;
 
     ArrayListMapTupel array_list_tuple_;
-    size_t data_size_{0};
+    size_t data_size_ {0};
 
-    // Flag indicating if buffer is the last of a DB operation
-    bool last_one_;
+private:
 
-    static unsigned int ids_;
-
-  private:
     template <typename T>
     inline std::map<std::string, std::shared_ptr<NullableVector<T>>>& getArrayListMap();
     template <typename T>
@@ -172,15 +151,15 @@ template <typename T>
 NullableVector<T>& Buffer::get(const std::string& id)
 {
     if (!(std::get<Index<std::map<std::string, std::shared_ptr<NullableVector<T>>>,
-              ArrayListMapTupel>::value>(array_list_tuple_)).count(id))
+          ArrayListMapTupel>::value>(array_list_tuple_)).count(id))
         logerr << "Buffer: get: id '" << id << "' type " << typeid(T).name() << " not found";
 
     assert ((std::get<Index<std::map<std::string, std::shared_ptr<NullableVector<T>>>,
              ArrayListMapTupel>::value>(array_list_tuple_)).count(id));
 
     return *(std::get<Index<std::map<std::string, std::shared_ptr<NullableVector<T>>>,
-                            ArrayListMapTupel>::value>(array_list_tuple_))
-                .at(id);
+             ArrayListMapTupel>::value>(array_list_tuple_))
+            .at(id);
 }
 
 template <typename T>
@@ -210,8 +189,8 @@ template <typename T>
 std::map<std::string, std::shared_ptr<NullableVector<T>>>& Buffer::getArrayListMap()
 {
     return std::get<
-        Index<std::map<std::string, std::shared_ptr<NullableVector<T>>>, ArrayListMapTupel>::value>(
-        array_list_tuple_);
+            Index<std::map<std::string, std::shared_ptr<NullableVector<T>>>, ArrayListMapTupel>::value>(
+                array_list_tuple_);
 }
 
 template <typename T>
@@ -229,10 +208,10 @@ void Buffer::seizeArrayListMap(Buffer& other_buffer)
 {
     //assert(getArrayListMap<T>().size() == other_buffer.getArrayListMap<T>().size());
 
-//    loginf << "Buffer: seizeArrayListMap: this properties";
-//    printProperties();
-//    loginf << "Buffer: seizeArrayListMap: other properties";
-//    other_buffer.printProperties();
+    //    loginf << "Buffer: seizeArrayListMap: this properties";
+    //    printProperties();
+    //    loginf << "Buffer: seizeArrayListMap: other properties";
+    //    other_buffer.printProperties();
 
     // add all properties of other vector
     for(auto& prop_it : other_buffer.properties().properties())

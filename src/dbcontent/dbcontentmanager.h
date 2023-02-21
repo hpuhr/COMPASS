@@ -22,6 +22,8 @@
 #include "global.h"
 #include "singleton.h"
 #include "buffer.h"
+#include "targetmodel.h"
+#include "dbcontent/dbcontentcache.h"
 
 #include <boost/optional.hpp>
 
@@ -43,6 +45,7 @@ class Variable;
 class MetaVariable;
 class VariableSet;
 class Target;
+class TargetListWidget;
 class LabelGenerator;
 class VariableSet;
 
@@ -150,18 +153,24 @@ public:
     bool hasTargetsInfo();
     void clearTargetsInfo();
     bool existsTarget(unsigned int utn);
-    void createTarget(unsigned int utn);
-    std::shared_ptr<dbContent::Target> target(unsigned int utn);
+    void createNewTarget(unsigned int utn);
+    dbContent::Target& target(unsigned int utn);
+    void loadTargets();
     void saveTargets();
 
     unsigned int maxLiveDataAgeCache() const;
 
     void resetToStartupConfiguration(); // only resets label generator
 
+    dbContent::TargetListWidget* targetListWidget();
+    void resizeTargetListWidget();
+
 protected:
     COMPASS& compass_;
 
     std::unique_ptr<dbContent::LabelGenerator> label_generator_;
+    dbContent::TargetModel target_model_;
+    std::unique_ptr<dbContent::TargetListWidget> target_list_widget_;
 
     bool has_associations_{false};
     std::string associations_id_;
@@ -184,6 +193,8 @@ protected:
 
     std::map<std::string, std::shared_ptr<Buffer>> data_;
 
+    dbContent::Cache read_cache_;
+
     std::map<std::string, std::shared_ptr<Buffer>> insert_data_;
 
     bool load_in_progress_{false};
@@ -193,7 +204,7 @@ protected:
     std::map<std::string, DBContent*> dbcontent_;
     std::map<std::string, std::unique_ptr<dbContent::MetaVariable>> meta_variables_;
 
-    std::map<unsigned int, std::shared_ptr<dbContent::Target>> targets_;
+    //std::map<unsigned int, std::shared_ptr<dbContent::Target>> targets_;
 
     std::unique_ptr<DBContentManagerWidget> widget_;
 

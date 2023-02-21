@@ -109,7 +109,7 @@ public:
                      std::string custom_filter_clause,
                      bool use_order = false, dbContent::Variable* order_variable = nullptr);
 
-    std::shared_ptr<Buffer> readDataChunk(const DBContent& dbcontent);
+    std::pair<std::shared_ptr<Buffer>, bool> readDataChunk(const DBContent& dbcontent); // last one flag
     void finalizeReadStatement(const DBContent& dbcontent);
 
     void deleteBefore(const DBContent& dbcontent, boost::posix_time::ptime before_timestamp);
@@ -146,8 +146,9 @@ public:
     bool existsTargetsTable();
     void createTargetsTable();
     void clearTargetsTable();
-    std::map<unsigned int, std::shared_ptr<dbContent::Target>> loadTargets();
-    void saveTargets(std::map<unsigned int, std::shared_ptr<dbContent::Target>> targets);
+    std::vector<std::unique_ptr<dbContent::Target>> loadTargets();
+    void saveTargets(const std::vector<std::unique_ptr<dbContent::Target>>& targets);
+    void saveTarget(const std::unique_ptr<dbContent::Target>& target);
 
     void clearTableContent(const std::string& table_name);
 

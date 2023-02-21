@@ -607,7 +607,7 @@ void AllBufferTableModel::usePresentation(bool use_presentation)
 
 void AllBufferTableModel::showOnlySelected(bool value)
 {
-    loginf << "AllBufferTableModel: showOnlySelected: " << value;
+    logdbg << "AllBufferTableModel: showOnlySelected: " << value;
     show_only_selected_ = value;
 
     updateToSelection();

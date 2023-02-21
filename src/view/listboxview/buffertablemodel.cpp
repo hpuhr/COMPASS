@@ -494,7 +494,7 @@ void BufferTableModel::usePresentation(bool use_presentation)
 
 void BufferTableModel::showOnlySelected(bool value)
 {
-    loginf << "BufferTableModel: showOnlySelected: " << value;
+    logdbg << "BufferTableModel: showOnlySelected: " << value;
     show_only_selected_ = value;
 
     updateToSelection();

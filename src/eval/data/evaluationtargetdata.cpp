@@ -21,7 +21,7 @@
 #include "stringconv.h"
 #include "dbcontent/variable/variable.h"
 #include "dbcontent/variable/metavariable.h"
-#include "dbcontent/target.h"
+#include "dbcontent/target/target.h"
 #include "compass.h"
 #include "dbcontent/dbcontentmanager.h"
 #include "evaluationmanager.h"
@@ -104,11 +104,12 @@ void EvaluationTargetData::finalize () const
 
     DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
 
-    if (dbcont_man.hasTargetsInfo() && dbcont_man.existsTarget(utn_) && dbcont_man.target(utn_)->hasAdsbMOPSVersion())
+    if (dbcont_man.hasTargetsInfo() && dbcont_man.existsTarget(utn_)
+            && dbcont_man.target(utn_).hasAdsbMOPSVersions())
     {
         has_adsb_info_ = true;
-        has_mops_version_ = true;
-        mops_version_ = dbcont_man.target(utn_)->adsbMOPSVersion();
+        has_mops_versions_ = true;
+        mops_versions_ = dbcont_man.target(utn_).adsbMOPSVersions();
     }
 
 
@@ -1458,19 +1459,33 @@ bool EvaluationTargetData::hasADSBInfo() const
 
 bool EvaluationTargetData::hasMOPSVersion() const
 {
-    return has_mops_version_;
+    return has_mops_versions_;
 }
 
-unsigned int EvaluationTargetData::mopsVersion() const
+std::set<unsigned int> EvaluationTargetData::mopsVersions() const
 {
-    assert (has_mops_version_);
-    return mops_version_;
+    assert (has_mops_versions_);
+    return mops_versions_;
 }
 
 std::string EvaluationTargetData::mopsVersionStr() const
 {
     if (hasMOPSVersion())
-        return to_string(mopsVersion());
+    {
+        std::ostringstream out;
+
+        unsigned int cnt=0;
+        for (const auto it : mops_versions_)
+        {
+            if (cnt != 0)
+                out << ", ";
+
+            out << it;
+            ++cnt;
+        }
+
+        return out.str().c_str();
+    }
     else
         return "?";
 }

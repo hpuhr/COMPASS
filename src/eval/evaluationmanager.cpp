@@ -31,7 +31,7 @@
 #include "sector.h"
 #include "dbcontent/variable/metavariable.h"
 #include "dbcontent/variable/variable.h"
-#include "dbcontent/target.h"
+#include "dbcontent/target/target.h"
 #include "buffer.h"
 #include "filtermanager.h"
 #include "dbfilter.h"
@@ -2147,7 +2147,7 @@ void EvaluationManager::filterUTNs ()
             {
                 if (remove_not_detected_dbo_values_.contains(dbcont_it.first)
                         && remove_not_detected_dbo_values_.at(dbcont_it.first) == true // removed if not detected
-                        && dbcont_man.target(target_it.utn_)->dbContentCount(dbcont_it.first) == 0) // not detected
+                        && dbcont_man.target(target_it.utn_).dbContentCount(dbcont_it.first) == 0) // not detected
                 {
                     use = false; // remove it
                     comment = "Not Detected in "+dbcont_it.first;

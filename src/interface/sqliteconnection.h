@@ -81,14 +81,14 @@ public:
     std::shared_ptr<DBResult> execute(const DBCommandList& command_list);
 
     void prepareCommand(const std::shared_ptr<DBCommand> command);
-    std::shared_ptr<DBResult> stepPreparedCommand(unsigned int max_results = 0);
+    std::pair<std::shared_ptr<DBResult>, bool> stepPreparedCommand(unsigned int max_results = 0); // last one flag
     void finalizeCommand();
     bool getPreparedCommandDone() { return prepared_command_done_; }
 
     std::map<std::string, DBTableInfo> getTableInfo();
 
     virtual void generateSubConfigurable(const std::string& class_id,
-                                         const std::string& instance_id);
+                                         const std::string& instance_id) override;
 
     std::string status() const;
 

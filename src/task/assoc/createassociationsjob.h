@@ -19,6 +19,7 @@
 #define CREATEASSOCIATIONSJOB_H
 
 #include "job.h"
+#include "dbcontent/dbcontentcache.h"
 #include "assoc/targetreport.h"
 #include "assoc/target.h"
 
@@ -39,7 +40,7 @@ signals:
 
 public:
     CreateAssociationsJob(CreateAssociationsTask& task, DBInterface& db_interface,
-                          std::map<std::string, std::shared_ptr<Buffer>> buffers);
+                          std::shared_ptr<dbContent::Cache> cache);
 
     virtual ~CreateAssociationsJob();
 
@@ -52,7 +53,7 @@ protected:
 
     CreateAssociationsTask& task_;
     DBInterface& db_interface_;
-    std::map<std::string, std::shared_ptr<Buffer>> buffers_;
+    std::shared_ptr<dbContent::Cache> cache_;
 
     std::map<std::string, std::map<unsigned int, std::vector<Association::TargetReport>>> target_reports_;
     //dbo name->ds_id->trs

@@ -24,6 +24,7 @@
 #include "datasourcesconfigurationdialog.h"
 #include "dbcontent/dbcontent.h"
 #include "dbcontent/dbcontentmanager.h"
+#include "dbcontent/target/targetlistwidget.h"
 #include "datasourcesloadwidget.h"
 #include "dbcontent/variable/metavariableconfigurationdialog.h"
 #include "files.h"
@@ -128,6 +129,7 @@ MainWindow::MainWindow()
 
     tab_widget_->addTab(COMPASS::instance().dataSourceManager().loadWidget(), "Data Sources");
     tab_widget_->addTab(COMPASS::instance().filterManager().widget(), "Filters");
+    tab_widget_->addTab(COMPASS::instance().dbContentManager().targetListWidget(), "Targets");
 
     QTabBar *tabBar = tab_widget_->tabBar();
 
@@ -566,8 +568,8 @@ void MainWindow::showEvaluationTab()
 {
     assert (!COMPASS::instance().hideEvaluation());
 
-    assert (tab_widget_->count() > 2);
-    tab_widget_->setCurrentIndex(2);
+    assert (tab_widget_->count() > 3);
+    tab_widget_->setCurrentIndex(3);
 }
 
 void MainWindow::showViewPointsTab()
@@ -576,13 +578,13 @@ void MainWindow::showViewPointsTab()
 
     if (COMPASS::instance().hideEvaluation())
     {
-        assert (tab_widget_->count() > 2);
-        tab_widget_->setCurrentIndex(2);
+        assert (tab_widget_->count() > 3);
+        tab_widget_->setCurrentIndex(3);
     }
     else
     {
-        assert (tab_widget_->count() > 3);
-        tab_widget_->setCurrentIndex(3);
+        assert (tab_widget_->count() > 4);
+        tab_widget_->setCurrentIndex(4);
     }
 }
 

@@ -122,7 +122,7 @@ void AllBufferTableWidget::exportDoneSlot(bool cancelled) { emit exportDoneSigna
 
 void AllBufferTableWidget::showOnlySelectedSlot(bool value)
 {
-    loginf << "AllBufferTableWidget: showOnlySelectedSlot: " << value;
+    logdbg << "AllBufferTableWidget: showOnlySelectedSlot: " << value;
 
     assert(model_);
     model_->showOnlySelected(value);

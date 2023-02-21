@@ -129,7 +129,7 @@ void BufferTableWidget::exportDoneSlot(bool cancelled) { emit exportDoneSignal(c
 
 void BufferTableWidget::showOnlySelectedSlot(bool value)
 {
-    loginf << "BufferTableWidget: showOnlySelectedSlot: " << value;
+    logdbg << "BufferTableWidget: showOnlySelectedSlot: " << value;
 
     assert(model_);
     model_->showOnlySelected(value);
