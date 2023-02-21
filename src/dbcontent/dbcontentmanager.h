@@ -80,8 +80,7 @@ public:
     DBContentManager(const std::string& class_id, const std::string& instance_id, COMPASS* compass);
     virtual ~DBContentManager();
 
-    virtual void generateSubConfigurable(const std::string& class_id,
-                                         const std::string& instance_id);
+    virtual void generateSubConfigurable(const std::string& class_id, const std::string& instance_id) override;
 
     dbContent::LabelGenerator& labelGenerator();
 
@@ -172,7 +171,7 @@ protected:
     COMPASS& compass_;
 
     std::unique_ptr<dbContent::LabelGenerator> label_generator_;
-    dbContent::TargetModel target_model_;
+    std::unique_ptr<dbContent::TargetModel> target_model_;
     std::unique_ptr<dbContent::TargetListWidget> target_list_widget_;
 
     bool has_associations_{false};
@@ -215,7 +214,7 @@ protected:
 
     std::unique_ptr<ViewableDataConfig> viewable_data_cfg_;
 
-    virtual void checkSubConfigurables();
+    virtual void checkSubConfigurables() override;
     void finishLoading();
     void finishInserting();
 
