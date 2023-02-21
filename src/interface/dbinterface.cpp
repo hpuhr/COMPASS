@@ -1059,6 +1059,7 @@ void DBInterface::saveTarget(const std::unique_ptr<dbContent::Target>& target)
     loginf << "DBInterface: saveTarget: utn " << target->utn();
 
     string str = sql_generator_.getInsertTargetStatement(target->utn_, target->info().dump());
+    // uses replace with utn as unique key
     db_connection_->executeSQL(str);
 }
 
