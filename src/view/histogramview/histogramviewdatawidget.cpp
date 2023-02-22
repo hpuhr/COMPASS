@@ -104,8 +104,10 @@ const QColor HistogramViewDataWidget::ColorRefTraj  = QColor("#FFA500");
 
 /**
  */
-HistogramViewDataWidget::HistogramViewDataWidget(HistogramView* view, HistogramViewDataSource* data_source,
-                                                 QWidget* parent, Qt::WindowFlags f)
+HistogramViewDataWidget::HistogramViewDataWidget(HistogramView* view, 
+                                                 HistogramViewDataSource* data_source,
+                                                 QWidget* parent, 
+                                                 Qt::WindowFlags f)
 :   ViewDataWidget(parent, f)
 ,   view_         (view)
 ,   data_source_  (data_source)
@@ -134,22 +136,13 @@ HistogramViewDataWidget::~HistogramViewDataWidget() = default;
 
 /**
  */
-bool HistogramViewDataWidget::hasData() const
-{
-    return shows_data_;
-}
-
-/**
- */
 void HistogramViewDataWidget::clearData_impl()
 {
     logdbg << "HistogramViewDataWidget: clearData_impl: start";
 
-    buffers_.clear();
     chart_view_.reset();
     histogram_generator_.reset();
 
-    shows_data_         = false;
     data_not_in_buffer_ = false;
 
     logdbg << "HistogramViewDataWidget: clearData_impl: end";
@@ -168,12 +161,10 @@ void HistogramViewDataWidget::loadingStarted_impl()
 
 /**
  */
-void HistogramViewDataWidget::updateData_impl(const std::map<std::string, std::shared_ptr<Buffer>>& data, 
-                                             bool requires_reset)
+void HistogramViewDataWidget::updateData_impl(bool requires_reset)
 {
     logdbg << "HistogramViewDataWidget: updateData_impl: start";
 
-    buffers_ = data;
     histogram_generator_.reset(); //current generator makes no sense any more
 
     logdbg << "HistogramViewDataWidget: updateData_impl: end";
@@ -200,15 +191,18 @@ void HistogramViewDataWidget::liveReload_impl()
 
 /**
  */
-void HistogramViewDataWidget::redrawData_impl(bool recompute)
+bool HistogramViewDataWidget::redrawData_impl(bool recompute)
 {
     logdbg << "HistogramViewDataWidget: redrawData_impl: start - recompute = " << recompute;
 
     if (recompute)
         updateGenerator();
-    updateChart();
+    
+    bool drawn = updateChart();
 
     logdbg << "HistogramViewDataWidget: redrawData_impl: end";
+
+    return drawn;
 }
 
 /**
@@ -279,10 +273,9 @@ void HistogramViewDataWidget::updateGeneratorFromData()
 
     histogram_generator_.reset();
 
-    if (buffers_.empty())
+    if (data().empty())
         return;
 
-    shows_data_         = false;
     data_not_in_buffer_ = false;
 
     //get variable
@@ -309,52 +302,52 @@ void HistogramViewDataWidget::updateGeneratorFromData()
     {
         case PropertyDataType::BOOL:
         {
-            histogram_generator_.reset(new HistogramGeneratorBufferT<bool>(&buffers_, data_var, meta_var));
+            histogram_generator_.reset(new HistogramGeneratorBufferT<bool>(&data(), data_var, meta_var));
             break;
         }
         case PropertyDataType::CHAR:
         {
-            histogram_generator_.reset(new HistogramGeneratorBufferT<char>(&buffers_, data_var, meta_var));
+            histogram_generator_.reset(new HistogramGeneratorBufferT<char>(&data(), data_var, meta_var));
             break;
         }
         case PropertyDataType::UCHAR:
         {
-            histogram_generator_.reset(new HistogramGeneratorBufferT<unsigned char>(&buffers_, data_var, meta_var));
+            histogram_generator_.reset(new HistogramGeneratorBufferT<unsigned char>(&data(), data_var, meta_var));
             break;
         }
         case PropertyDataType::INT:
         {
-            histogram_generator_.reset(new HistogramGeneratorBufferT<int>(&buffers_, data_var, meta_var));
+            histogram_generator_.reset(new HistogramGeneratorBufferT<int>(&data(), data_var, meta_var));
             break;
         }
         case PropertyDataType::UINT:
         {
-            histogram_generator_.reset(new HistogramGeneratorBufferT<unsigned int>(&buffers_, data_var, meta_var));
+            histogram_generator_.reset(new HistogramGeneratorBufferT<unsigned int>(&data(), data_var, meta_var));
             break;
         }
         case PropertyDataType::LONGINT:
         {
-            histogram_generator_.reset(new HistogramGeneratorBufferT<long int>(&buffers_, data_var, meta_var));
+            histogram_generator_.reset(new HistogramGeneratorBufferT<long int>(&data(), data_var, meta_var));
             break;
         }
         case PropertyDataType::ULONGINT:
         {
-            histogram_generator_.reset(new HistogramGeneratorBufferT<unsigned long int>(&buffers_, data_var, meta_var));
+            histogram_generator_.reset(new HistogramGeneratorBufferT<unsigned long int>(&data(), data_var, meta_var));
             break;
         }
         case PropertyDataType::FLOAT:
         {
-            histogram_generator_.reset(new HistogramGeneratorBufferT<float>(&buffers_, data_var, meta_var));
+            histogram_generator_.reset(new HistogramGeneratorBufferT<float>(&data(), data_var, meta_var));
             break;
         }
         case PropertyDataType::DOUBLE:
         {
-            histogram_generator_.reset(new HistogramGeneratorBufferT<double>(&buffers_, data_var, meta_var));
+            histogram_generator_.reset(new HistogramGeneratorBufferT<double>(&data(), data_var, meta_var));
             break;
         }
         case PropertyDataType::STRING:
         {
-            histogram_generator_.reset(new HistogramGeneratorBufferT<std::string>(&buffers_, data_var, meta_var));
+            histogram_generator_.reset(new HistogramGeneratorBufferT<std::string>(&data(), data_var, meta_var));
             break;
         }
         case PropertyDataType::JSON:
@@ -364,7 +357,7 @@ void HistogramViewDataWidget::updateGeneratorFromData()
         }
         case PropertyDataType::TIMESTAMP:
         {
-            histogram_generator_.reset(new HistogramGeneratorBufferT<boost::posix_time::ptime>(&buffers_, data_var, meta_var));
+            histogram_generator_.reset(new HistogramGeneratorBufferT<boost::posix_time::ptime>(&data(), data_var, meta_var));
             break;
         }
         default:
@@ -402,7 +395,6 @@ void HistogramViewDataWidget::updateGeneratorFromResults()
 
     if (eval_man.hasResults() && view_->showResults())
     {
-        shows_data_         = false;
         data_not_in_buffer_ = false;
 
         string eval_grpreq = view_->evalResultGrpReq();
@@ -419,14 +411,14 @@ void HistogramViewDataWidget::updateGeneratorFromResults()
 
 /**
  */
-void HistogramViewDataWidget::updateChart()
+bool HistogramViewDataWidget::updateChart()
 {
     loginf << "HistogramViewDataWidget: updateChart";
 
     chart_view_.reset(nullptr);
 
     if (!histogram_generator_)
-        return;
+        return false;
 
     //create chart
     QChart* chart = new QChart();
@@ -577,12 +569,12 @@ void HistogramViewDataWidget::updateChart()
     //update chart
     chart->update();
 
-    shows_data_ = !buffers_.empty();
-
     //signal display changed to whom it may concern
     emit displayChanged();
 
     loginf << "HistogramViewDataWidget: updateChart: done";
+
+    return true;
 }
 
 /**
@@ -647,7 +639,7 @@ void HistogramViewDataWidget::invertSelectionSlot()
 {
     loginf << "HistogramViewDataWidget: invertSelectionSlot";
 
-    for (auto& buf_it : buffers_)
+    for (auto& buf_it : data())
     {
         assert (buf_it.second->has<bool>(DBContent::selected_var.name()));
         NullableVector<bool>& selected_vec = buf_it.second->get<bool>(DBContent::selected_var.name());
@@ -670,7 +662,7 @@ void HistogramViewDataWidget::clearSelectionSlot()
 {
     loginf << "HistogramViewDataWidget: clearSelectionSlot";
 
-    for (auto& buf_it : buffers_)
+    for (auto& buf_it : data())
     {
         assert (buf_it.second->has<bool>(DBContent::selected_var.name()));
         NullableVector<bool>& selected_vec = buf_it.second->get<bool>(DBContent::selected_var.name());

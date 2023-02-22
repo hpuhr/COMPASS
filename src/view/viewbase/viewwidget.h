@@ -57,8 +57,6 @@ public:
                Configurable* config_parent, View* view, QWidget* parent = nullptr);
     virtual ~ViewWidget();
 
-    View* getView() { return view_; }
-
     void toggleConfigWidget();
     void updateToolWidget();
 
@@ -73,13 +71,13 @@ public:
     void notifyReloadNeeded();
     void notifyRedrawNeeded();
 
-    virtual ViewDataWidget* getViewDataWidget() { return data_widget_; }
-    virtual const ViewDataWidget* getViewDataWidget() const { return data_widget_; }
-    virtual ViewConfigWidget* getViewConfigWidget() { return config_widget_; }
-    virtual const ViewConfigWidget* getViewConfigWidget() const { return config_widget_; }
+    ViewDataWidget* getViewDataWidget() { return data_widget_; }
+    const ViewDataWidget* getViewDataWidget() const { return data_widget_; }
+    ViewConfigWidget* getViewConfigWidget() { return config_widget_; }
+    const ViewConfigWidget* getViewConfigWidget() const { return config_widget_; }
 
-    virtual QWidget* getLowerWidget() { return lower_widget_; }
-    virtual const QWidget* getLowerWidget() const { return lower_widget_; }
+    QWidget* getLowerWidget() { return lower_widget_; }
+    const QWidget* getLowerWidget() const { return lower_widget_; }
 
     virtual std::string loadedMessage() const { return ""; }
 
@@ -103,14 +101,16 @@ protected:
     void setConfigWidget(ViewConfigWidget* w);
     void setLowerWidget(QWidget* w);
 
-    void createStandardLayout();
     void addConfigWidgetToggle();
 
-    /// The view the widget is part of
-    View* view_;
+    View* getView() { return view_; }
 
 private:
+    void createStandardLayout();
     void connectWidgets();
+
+    /// The view the widget is part of
+    View* view_ = nullptr;
 
     QSplitter*      main_splitter_           = nullptr;
     QWidget*        data_widget_container_   = nullptr;

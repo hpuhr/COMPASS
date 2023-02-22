@@ -23,12 +23,14 @@ public:
 
     void loadingStarted();
     void loadingDone();
-    void updateData(const std::map<std::string, std::shared_ptr<Buffer>>& data, bool requires_reset);
+    void updateData(const BufferData& buffer_data, bool requires_reset);
     void clearData();
-    void redrawData(bool recompute);
+    bool redrawData(bool recompute);
     void liveReload();
 
-    virtual bool hasData() const = 0;               //checks if the view obtains/shows any data
+    bool hasData() const;
+    bool showsData() const;
+
     virtual void appModeSwitch(AppMode app_mode) {} //reacts on switching the application mode
 
 signals:
@@ -44,13 +46,15 @@ protected:
     virtual void toolChanged_impl(int tool_id) = 0;        //implements reactions on tool switches
     virtual void loadingStarted_impl() = 0;                //implements behavior at starting a reload
     virtual void loadingDone_impl();                       //implements behavior at finishing a reload
-    virtual void updateData_impl(const BufferData& data,   //implements behavior at receiving new data
-                                 bool requires_reset) = 0; 
+    virtual void updateData_impl(bool requires_reset) = 0; //implements behavior at receiving new data
     virtual void clearData_impl() = 0;                     //implements clearing all view data
-    virtual void redrawData_impl(bool recompute) = 0;      //implements redrawing the display (and possibly needed computations)
+    virtual bool redrawData_impl(bool recompute) = 0;      //implements redrawing the display (and possibly needed computations)
     virtual void liveReload_impl() = 0;                    //implements data reload during live running mode
 
     void endTool();
+
+    const BufferData& data() const { return data_; }
+    BufferData& data() { return data_; } //exposed because of selection
 
 private:
     friend class ViewLoadStateWidget;
@@ -58,4 +62,7 @@ private:
     void toolChanged(int mode, const QCursor& cursor);
 
     ViewToolSwitcher* tool_switcher_ = nullptr;
+
+    BufferData data_;
+    bool       drawn_ = false;
 };

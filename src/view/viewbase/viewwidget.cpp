@@ -39,13 +39,15 @@
 */
 ViewWidget::ViewWidget(const std::string& class_id, const std::string& instance_id,
                        Configurable* config_parent, View* view, QWidget* parent)
-    : QWidget(parent),
+    : QWidget     (parent),
       Configurable(class_id, instance_id, config_parent),
-      view_(view)
+      view_       (view)
 {
     setContentsMargins(0, 0, 0, 0);
 
     tool_switcher_.reset(new ViewToolSwitcher);
+
+    createStandardLayout();
 }
 
 /**
@@ -247,17 +249,18 @@ void ViewWidget::setLowerWidget(QWidget* w)
  */
 void ViewWidget::toggleConfigWidget()
 {
-    if (right_widget_)
-    {
-        bool vis = right_widget_->isVisible();
-        right_widget_->setVisible(!vis);
-    }
+    assert(right_widget_);
+
+    bool vis = right_widget_->isVisible();
+    right_widget_->setVisible(!vis);
 }
 
 /**
  */
 void ViewWidget::addConfigWidgetToggle()
 {
+    assert(getViewToolWidget());
+
     getViewToolWidget()->addActionCallback("Toggle Configuration Panel", [=] (bool on) { this->toggleConfigWidget(); }, {}, getIcon("configuration.png"), Qt::Key_C, true);
 }
 
@@ -272,6 +275,8 @@ QIcon ViewWidget::getIcon(const std::string& fn) const
 */
 void ViewWidget::updateToolWidget()
 {
+    assert(getViewToolWidget());
+
     getViewToolWidget()->updateItems();
 }
 
@@ -279,6 +284,11 @@ void ViewWidget::updateToolWidget()
 */
 void ViewWidget::loadingStarted()
 {
+    assert(getViewLoadStateWidget());
+    assert(getViewToolWidget());
+    assert(getViewDataWidget());
+    assert(getViewConfigWidget());
+
     //call in subwidgets
     getViewLoadStateWidget()->loadingStarted();
     getViewToolWidget()->loadingStarted();
@@ -290,6 +300,11 @@ void ViewWidget::loadingStarted()
 */
 void ViewWidget::loadingDone()
 {
+    assert(getViewToolWidget());
+    assert(getViewDataWidget());
+    assert(getViewConfigWidget());
+    assert(getViewLoadStateWidget());
+
     //set back flag
     reload_needed_ = false;
     redraw_needed_ = false; //a reload should always result in a redraw anyway
@@ -305,6 +320,9 @@ void ViewWidget::loadingDone()
 */
 void ViewWidget::redrawStarted()
 {
+    assert(getViewConfigWidget());
+    assert(getViewLoadStateWidget());
+
     //call in subwidgets
     getViewConfigWidget()->redrawStarted();
     getViewLoadStateWidget()->redrawStarted();
@@ -314,6 +332,9 @@ void ViewWidget::redrawStarted()
 */
 void ViewWidget::redrawDone()
 {
+    assert(getViewConfigWidget());
+    assert(getViewLoadStateWidget());
+
     //set back flag
     redraw_needed_ = false;
 
@@ -326,6 +347,11 @@ void ViewWidget::redrawDone()
 */
 void ViewWidget::appModeSwitch(AppMode app_mode)
 {
+    assert(getViewToolWidget());
+    assert(getViewDataWidget());
+    assert(getViewConfigWidget());
+    assert(getViewLoadStateWidget());
+
     //call in subwidgets
     getViewDataWidget()->appModeSwitch(app_mode);
     getViewConfigWidget()->appModeSwitch(app_mode);
@@ -340,6 +366,8 @@ void ViewWidget::appModeSwitch(AppMode app_mode)
 */
 void ViewWidget::updateLoadState()
 {
+    assert(getViewLoadStateWidget());
+
     getViewLoadStateWidget()->updateState();
 }
 
@@ -349,6 +377,8 @@ void ViewWidget::updateLoadState()
  */
 void ViewWidget::notifyRedrawNeeded()
 {
+    assert(getViewDataWidget());
+
     if (COMPASS::instance().appMode() == AppMode::LiveRunning)
     {
         //in live mode just redraw
@@ -365,6 +395,8 @@ void ViewWidget::notifyRedrawNeeded()
 */
 void ViewWidget::notifyReloadNeeded()
 {
+    assert(getViewDataWidget());
+
     if (COMPASS::instance().appMode() == AppMode::LiveRunning)
     {
         //in live mode a view handles its reload internally in its data widget

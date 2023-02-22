@@ -75,21 +75,16 @@ ScatterPlotViewDataWidget::~ScatterPlotViewDataWidget()
     logdbg << "ScatterPlotViewDataWidget: dtor";
 }
 
-bool ScatterPlotViewDataWidget::hasData() const 
-{
-    return shows_data_;
-}
-
 void ScatterPlotViewDataWidget::clearData_impl()
 {
     logdbg << "ScatterPlotViewDataWidget: clearData_impl: start";
 
-    buffers_.clear();
     buffer_x_counts_.clear();
     buffer_y_counts_.clear();
 
     x_values_.clear();
     y_values_.clear();
+
     has_x_min_max_ = false;
     has_y_min_max_ = false;
 
@@ -98,9 +93,9 @@ void ScatterPlotViewDataWidget::clearData_impl()
 
     chart_view_.reset(nullptr);
 
-    shows_data_ = false;
     x_var_not_in_buffer_ = false;
     y_var_not_in_buffer_ = false;
+
     nan_value_cnt_ = 0;
 
     logdbg << "ScatterPlotViewDataWidget: clearData_impl: end";
@@ -115,11 +110,11 @@ void ScatterPlotViewDataWidget::loadingStarted_impl()
     logdbg << "ScatterPlotViewDataWidget: loadingStarted_impl: end";
 }
 
-void ScatterPlotViewDataWidget::updateData_impl(const std::map<std::string, std::shared_ptr<Buffer>>& data, bool requires_reset)
+void ScatterPlotViewDataWidget::updateData_impl(bool requires_reset)
 {
     logdbg << "ScatterPlotViewDataWidget: updateData_impl: start";
 
-    buffers_ = data;
+    //nothing to do yet
 
     logdbg << "ScatterPlotViewDataWidget: updateData_impl: end";
 }
@@ -139,7 +134,7 @@ void ScatterPlotViewDataWidget::liveReload_impl()
     //implement live reload behavior here
 }
 
-void ScatterPlotViewDataWidget::redrawData_impl(bool recompute)
+bool ScatterPlotViewDataWidget::redrawData_impl(bool recompute)
 {
     logdbg << "ScatterPlotViewDataWidget: redrawData_impl: start - recompute = " << recompute;
 
@@ -148,9 +143,11 @@ void ScatterPlotViewDataWidget::redrawData_impl(bool recompute)
         updateFromAllData();
         updateMinMax();
     }
-    updateChart();
+    bool drawn = updateChart();
 
     logdbg << "ScatterPlotViewDataWidget: redrawData_impl: end"; 
+
+    return drawn;
 }
 
 void ScatterPlotViewDataWidget::toolChanged_impl(int mode)
@@ -167,7 +164,7 @@ void ScatterPlotViewDataWidget::updateFromAllData()
     logdbg << "ScatterPlotViewDataWidget: updateFromAllData: before x " << x_values_.size()
            << " y " << y_values_.size();
 
-    for (auto& buf_it : buffers_)
+    for (const auto& buf_it : data())
     {
         string dbcontent_name = buf_it.first;
         std::shared_ptr<Buffer> buffer = buf_it.second;
@@ -311,7 +308,7 @@ void ScatterPlotViewDataWidget::invertSelectionSlot()
 {
     loginf << "ScatterPlotViewDataWidget: invertSelectionSlot";
 
-    for (auto& buf_it : buffers_)
+    for (auto& buf_it : data())
     {
         assert (buf_it.second->has<bool>(DBContent::selected_var.name()));
         NullableVector<bool>& selected_vec = buf_it.second->get<bool>(DBContent::selected_var.name());
@@ -332,7 +329,7 @@ void ScatterPlotViewDataWidget::clearSelectionSlot()
 {
     loginf << "ScatterPlotViewDataWidget: clearSelectionSlot";
 
-    for (auto& buf_it : buffers_)
+    for (auto& buf_it : data())
     {
         assert (buf_it.second->has<bool>(DBContent::selected_var.name()));
         NullableVector<bool>& selected_vec = buf_it.second->get<bool>(DBContent::selected_var.name());
@@ -365,10 +362,10 @@ void ScatterPlotViewDataWidget::resetZoomSlot()
 
 bool ScatterPlotViewDataWidget::canUpdateFromDataX(std::string dbcontent_name)
 {
-    if (!buffers_.count(dbcontent_name))
+    if (!data().count(dbcontent_name))
         return false;
 
-    Buffer* buffer = buffers_.at(dbcontent_name).get();
+    Buffer* buffer = data().at(dbcontent_name).get();
 
     Variable* data_var {nullptr};
 
@@ -539,9 +536,8 @@ void ScatterPlotViewDataWidget::updateFromDataX(std::string dbcontent_name, unsi
 {
     logdbg << "ScatterPlotViewDataWidget: updateFromDataX: dbcontent_name " << dbcontent_name << " current_size " << current_size;
 
-    assert (buffers_.count(dbcontent_name));
-    Buffer* buffer = buffers_.at(dbcontent_name).get();
-
+    assert (data().count(dbcontent_name));
+    Buffer* buffer = data().at(dbcontent_name).get();
 
     unsigned int last_size = 0;
 
@@ -793,10 +789,10 @@ void ScatterPlotViewDataWidget::updateFromDataX(std::string dbcontent_name, unsi
 
 bool ScatterPlotViewDataWidget::canUpdateFromDataY(std::string dbcontent_name)
 {
-    if (!buffers_.count(dbcontent_name))
+    if (!data().count(dbcontent_name))
         return false;
 
-    Buffer* buffer = buffers_.at(dbcontent_name).get();
+    Buffer* buffer = data().at(dbcontent_name).get();
 
     Variable* data_var {nullptr};
 
@@ -966,8 +962,8 @@ void ScatterPlotViewDataWidget::updateFromDataY(std::string dbcontent_name, unsi
 {
     logdbg << "ScatterPlotViewDataWidget: updateFromDataY: dbcontent_name " << dbcontent_name << " current_size " << current_size;
 
-    assert (buffers_.count(dbcontent_name));
-    Buffer* buffer = buffers_.at(dbcontent_name).get();
+    assert (data().count(dbcontent_name));
+    Buffer* buffer = data().at(dbcontent_name).get();
 
     unsigned int last_size = 0;
 
@@ -1269,7 +1265,7 @@ void ScatterPlotViewDataWidget::updateMinMax()
            << " has_y_min_max " << has_y_min_max_ << " y_min " << y_min_ << " y_max " << y_max_;
 }
 
-void ScatterPlotViewDataWidget::updateChart()
+bool ScatterPlotViewDataWidget::updateChart()
 {
     logdbg << "ScatterPlotViewDataWidget: updateChart";
 
@@ -1288,7 +1284,7 @@ void ScatterPlotViewDataWidget::updateChart()
     {
         loginf << "ScatterPlotViewDataWidget: updateChart: no data, size x "
                << x_values_.size() << " y " << y_values_.size();
-        return;
+        return false;
     }
 
     unsigned int value_cnt {0};
@@ -1380,7 +1376,7 @@ void ScatterPlotViewDataWidget::updateChart()
     if (!value_cnt)
     {
         loginf << "ScatterPlotViewDataWidget: updateChart: no valid data";
-        return;
+        return false;
     }
 
     if (selected_cnt > 0)
@@ -1436,7 +1432,7 @@ void ScatterPlotViewDataWidget::updateChart()
 
     main_layout_->addWidget(chart_view_.get());
 
-    shows_data_ = true;
+    return true;
 }
 
 void ScatterPlotViewDataWidget::mouseMoveEvent(QMouseEvent* event)
@@ -1455,7 +1451,7 @@ void ScatterPlotViewDataWidget::selectData (double x_min, double x_max, double y
            << " y_min " << y_min << " y_max " << y_max << " ctrl pressed " << ctrl_pressed;
 
     unsigned int sel_cnt = 0;
-    for (auto& buf_it : buffers_)
+    for (auto& buf_it : data())
     {
         assert (buf_it.second->has<bool>(DBContent::selected_var.name()));
         NullableVector<bool>& selected_vec = buf_it.second->get<bool>(DBContent::selected_var.name());

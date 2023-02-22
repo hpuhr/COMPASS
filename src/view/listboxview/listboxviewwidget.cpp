@@ -35,8 +35,6 @@ ListBoxViewWidget::ListBoxViewWidget(const std::string& class_id,
                                      QWidget* parent)
 :   ViewWidget(class_id, instance_id, config_parent, view, parent)
 {
-    createStandardLayout();
-
     auto data_widget = new ListBoxViewDataWidget(getView(), view->getDataSource());
     setDataWidget(data_widget);
 
@@ -57,6 +55,13 @@ ListBoxViewDataWidget* ListBoxViewWidget::getViewDataWidget()
 
 /**
  */
+const ListBoxViewDataWidget* ListBoxViewWidget::getViewDataWidget() const
+{
+    return dynamic_cast<const ListBoxViewDataWidget*>(ViewWidget::getViewDataWidget());
+}
+
+/**
+ */
 ListBoxViewConfigWidget* ListBoxViewWidget::getViewConfigWidget()
 {
     return dynamic_cast<ListBoxViewConfigWidget*>(ViewWidget::getViewConfigWidget());
@@ -67,4 +72,11 @@ ListBoxViewConfigWidget* ListBoxViewWidget::getViewConfigWidget()
 const ListBoxViewConfigWidget* ListBoxViewWidget::getViewConfigWidget() const
 {
     return dynamic_cast<const ListBoxViewConfigWidget*>(ViewWidget::getViewConfigWidget());
+}
+
+/**
+ */
+ListBoxView* ListBoxViewWidget::getView() 
+{ 
+    return dynamic_cast<ListBoxView*>(ViewWidget::getView()); 
 }

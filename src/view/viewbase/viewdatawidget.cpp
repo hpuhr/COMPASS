@@ -5,10 +5,26 @@
 
 #include <iostream>
 
+/**
+ */
 ViewDataWidget::ViewDataWidget(QWidget* parent, Qt::WindowFlags f)
 :   QWidget(parent, f)
 {
     setObjectName("data_widget");
+}
+
+/**
+ */
+bool ViewDataWidget::hasData() const
+{
+    return !data_.empty();
+}
+
+/**
+ */
+bool ViewDataWidget::showsData() const
+{
+    return (hasData() && drawn_);
 }
 
 /**
@@ -93,7 +109,9 @@ void ViewDataWidget::updateData(const BufferData& data, bool requires_reset)
 {
     logdbg << "ViewDataWidget::updateData";
 
-    updateData_impl(data, requires_reset);
+    data_ = data;
+
+    updateData_impl(requires_reset);
 }
 
 /**
@@ -102,20 +120,25 @@ void ViewDataWidget::clearData()
 {
     logdbg << "ViewDataWidget::clearData";
 
+    data_  = {};
+    drawn_ = false;
+
     clearData_impl();
 }
 
 /**
 */
-void ViewDataWidget::redrawData(bool recompute)
+bool ViewDataWidget::redrawData(bool recompute)
 {
     logdbg << "ViewDataWidget::redrawData";
 
     emit redrawStarted();
 
-    redrawData_impl(recompute);
+    drawn_ = redrawData_impl(recompute);
 
     emit redrawDone();
+
+    return drawn_;
 }
 
 /**
