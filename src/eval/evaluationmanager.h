@@ -65,9 +65,6 @@ public slots:
     void loadedDataDataSlot(const std::map<std::string, std::shared_ptr<Buffer>>& data, bool requires_reset);
     void loadingDoneSlot();
 
-//    void newDataSlot(DBContent& object);
-//    void loadingDoneSlot(DBContent& object);
-
 public:
     EvaluationManager(const std::string& class_id, const std::string& instance_id, COMPASS* compass);
     virtual ~EvaluationManager();
@@ -76,7 +73,7 @@ public:
 
     bool canLoadData ();
     void loadData ();
-    //void autofilterUTNs();
+
     bool canEvaluate ();
     std::string getCannotEvaluateComment();
     void evaluate ();
@@ -180,7 +177,6 @@ public:
     const std::map<std::string, std::map<std::string, std::shared_ptr<EvaluationRequirementResult::Base>>>& results()
     const;
 
-    //void setUseTargetData (unsigned int utn, bool value);
     void updateResultsToChanges ();
     void showFullUTN (unsigned int utn);
     void showSurroundingData (unsigned int utn);
@@ -193,60 +189,6 @@ public:
                                               const std::string& req_name);
 
     EvaluationResultsReport::PDFGenerator& pdfGenerator();
-
-//    bool useUTN (unsigned int utn);
-//    void useUTN (unsigned int utn, bool value, bool update_td, bool update_res=true); // update target data
-//    void useAllUTNs (bool value);
-//    void clearUTNComments ();
-//    void filterUTNs ();
-
-//    std::string utnComment (unsigned int utn);
-//    void utnComment (unsigned int utn, std::string value, bool update_td); // update target data
-
-//    bool removeShortTargets() const;
-//    void removeShortTargets(bool value);
-
-//    unsigned int removeShortTargetsMinUpdates() const;
-//    void removeShortTargetsMinUpdates(unsigned int value);
-
-//    double removeShortTargetsMinDuration() const;
-//    void removeShortTargetsMinDuration(double value);
-
-//    bool removePsrOnlyTargets() const;
-//    void removePsrOnlyTargets(bool value);
-
-//    bool filterModeACodes() const;
-//    void filterModeACodes(bool value);
-//    bool filterModeACodeBlacklist() const;
-//    void filterModeACodeBlacklist(bool value);
-
-//    bool removeModeCValues() const;
-//    void removeModeCValues(bool value);
-
-//    float removeModeCMinValue() const;
-//    void removeModeCMinValue(float value);
-
-//    std::string filterModeACodeValues() const;
-//    std::set<std::pair<int,int>> filterModeACodeData() const; // single ma,-1 or range ma1,ma2
-//    void filterModeACodeValues(const std::string& value);
-
-//    bool filterTargetAddresses() const;
-//    void filterTargetAddresses(bool value);
-//    bool filterTargetAddressesBlacklist() const;
-//    void filterTargetAddressesBlacklist(bool value);
-
-//    std::string filterTargetAddressValues() const;
-//    std::set<unsigned int> filterTargetAddressData() const;
-//    void filterTargetAddressValues(const std::string& value);
-
-//    bool removeModeACOnlys() const;
-//    void removeModeACOnlys(bool value);
-
-//    bool removeNotDetectedDBContents() const;
-//    void removeNotDetectedDBContents(bool value);
-
-//    bool removeNotDetectedDBContent(const std::string& dbcontent_name) const;
-//    void removeNotDetectedDBContents(const std::string& dbcontent_name, bool value);
 
     bool loadOnlySectorData() const;
     void loadOnlySectorData(bool value);
@@ -390,7 +332,7 @@ public:
     unsigned int reportNumMaxTableColWidth() const;
     void reportNumMaxTableColWidth(unsigned int value);
 
-    // upaters
+    // updaters
     void updateActiveDataSources(); // save to config var
 
     bool hasSelectedReferenceDataSources();
@@ -422,34 +364,9 @@ protected:
     nlohmann::json active_sources_tst_; // config var for active_sources_tst_
 
     std::string current_standard_;
-    nlohmann::json configs_;
     std::string current_config_name_;
 
     float max_ref_time_diff_ {0};
-
-    // utn filter stuff
-//    bool update_results_ {true}; // to supress updating of results during bulk operations
-
-//    bool remove_short_targets_ {true};
-//    unsigned int remove_short_targets_min_updates_ {10};
-//    double remove_short_targets_min_duration_ {60.0};
-
-//    bool remove_psr_only_targets_ {true};
-//    bool remove_modeac_onlys_ {false};
-
-//    bool filter_mode_a_codes_{false};
-//    bool filter_mode_a_code_blacklist_{true};
-//    std::string filter_mode_a_code_values_;
-
-//    bool remove_mode_c_values_{false};
-//    float remove_mode_c_min_value_;
-
-//    bool filter_target_addresses_{false};
-//    bool filter_target_addresses_blacklist_{true};
-//    std::string filter_target_address_values_;
-
-//    bool remove_not_detected_dbos_{false};
-//    nlohmann::json remove_not_detected_dbo_values_;
 
     bool load_only_sector_data_ {true};
 

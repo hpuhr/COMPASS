@@ -1493,7 +1493,9 @@ bool DBContentManager::utnUseEval (unsigned int utn)
 
 void DBContentManager::utnUseEval (unsigned int utn, bool value)
 {
-
+    // eval man
+    //    data_.setUseTargetData(utn, value);
+    //    updateResultsToUseChangeOf(utn);
 }
 
 std::string DBContentManager::utnComment (unsigned int utn)
@@ -1508,7 +1510,9 @@ void DBContentManager::utnComment (unsigned int utn, std::string value)
 
 void DBContentManager::autoFilterUTNS()
 {
-
+    //    data_.setUseAllTargetData(true);
+    //    data_.clearComments();
+    //    data_.setUseByFilter();
 }
 
 void DBContentManager::showUTN (unsigned int utn)
