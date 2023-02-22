@@ -57,11 +57,10 @@ public:
     const dbContent::Target& getTargetOf (const QModelIndex& index);
 
     void setUseTargetData (unsigned int utn, bool value);
+    void setTargetDataComment (unsigned int utn, std::string comment);
     void setUseAllTargetData (bool value);
     void clearComments ();
     void setUseByFilter ();
-
-    void setTargetDataComment (unsigned int utn, std::string comment);
 
     bool hasTargetsInfo();
     void clearTargetsInfo();

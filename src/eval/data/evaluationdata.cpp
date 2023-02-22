@@ -47,7 +47,8 @@ using namespace boost::posix_time;
 EvaluationData::EvaluationData(EvaluationManager& eval_man, DBContentManager& dbcont_man)
     : eval_man_(eval_man), dbcont_man_(dbcont_man)
 {
-
+    connect(&dbcont_man, &DBContentManager::targetChangedSignal, this, &EvaluationData::targetChangedSlot);
+    connect(&dbcont_man, &DBContentManager::allTargetsChangedSignal, this, &EvaluationData::allTargetsChangedSlot);
 }
 
 void EvaluationData::addReferenceData (DBContent& object, unsigned int line_id, std::shared_ptr<Buffer> buffer)
@@ -138,8 +139,8 @@ void EvaluationData::addReferenceData (DBContent& object, unsigned int line_id, 
 
     unsigned int buffer_size = buffer->size();
 
-//    assert (buffer->has<unsigned int>(DBContent::meta_var_rec_num_.name()));
-//    NullableVector<unsigned int>& rec_nums = buffer->get<unsigned int>(DBContent::meta_var_rec_num_.name());
+    //    assert (buffer->has<unsigned int>(DBContent::meta_var_rec_num_.name()));
+    //    NullableVector<unsigned int>& rec_nums = buffer->get<unsigned int>(DBContent::meta_var_rec_num_.name());
 
     assert (buffer->has<ptime>(ref_timestamp_name_));
     NullableVector<ptime>& ts_vec = buffer->get<ptime>(ref_timestamp_name_);
@@ -276,11 +277,11 @@ void EvaluationData::addTestData (DBContent& object, unsigned int line_id,  std:
         tst_modec_v_name_ = "";
 
 
-//    if (dbcontent_name == "CAT062")
-//    {
-//        has_tst_altitude_secondary_ = true;
-//        tst_altitude_secondary_name_ = DBContent::var_tracker_baro_alt_.name();
-//    }
+    //    if (dbcontent_name == "CAT062")
+    //    {
+    //        has_tst_altitude_secondary_ = true;
+    //        tst_altitude_secondary_name_ = DBContent::var_tracker_baro_alt_.name();
+    //    }
 
     // m3a
     tst_modea_name_ = dbcont_man_.metaVariable(DBContent::meta_var_m3a_.name()).getFor(dbcontent_name).name();
@@ -320,9 +321,6 @@ void EvaluationData::addTestData (DBContent& object, unsigned int line_id,  std:
     unsigned int num_skipped {0};
 
     unsigned int buffer_size = buffer->size();
-
-//    assert (buffer->has<unsigned int>(DBContent::meta_var_rec_num_.name()));
-//    NullableVector<unsigned int>& rec_nums = buffer->get<unsigned int>(DBContent::meta_var_rec_num_.name());
 
     assert (buffer->has<ptime>(DBContent::meta_var_timestamp_.name()));
     NullableVector<ptime>& ts_vec = buffer->get<boost::posix_time::ptime>(
@@ -452,9 +450,9 @@ void EvaluationData::finalize ()
 
     string remaining_time_str;
 
-//    EvaluateTargetsFinalizeTask* t = new (tbb::task::allocate_root()) EvaluateTargetsFinalizeTask(
-//                target_data_, done_flags, done);
-//    tbb::task::enqueue(*t);
+    //    EvaluateTargetsFinalizeTask* t = new (tbb::task::allocate_root()) EvaluateTargetsFinalizeTask(
+    //                target_data_, done_flags, done);
+    //    tbb::task::enqueue(*t);
 
     std::future<void> pending_future = std::async(std::launch::async, [&] {
         unsigned int num_targets = target_data_.size();
@@ -468,24 +466,6 @@ void EvaluationData::finalize ()
         done = true;
 
     });
-
-//    tbb::task_group g;
-
-//    loginf << "UGA1";
-
-//    g.run([&] {
-//        unsigned int num_targets = target_data_.size();
-
-//        tbb::parallel_for(uint(0), num_targets, [&](unsigned int cnt)
-//        {
-//            target_data_[cnt].finalize();
-//            done_flags[cnt] = true;
-//        });
-
-//        done = true;
-//    });
-
-//    loginf << "UGA2";
 
     postprocess_dialog_.setValue(0);
 
@@ -543,16 +523,6 @@ void EvaluationData::finalize ()
         }
     }
 
-    //    unsigned int num_targets = target_data_.size();
-
-    //    tbb::parallel_for(uint(0), num_targets, [&](unsigned int cnt)
-    //    {
-    //        target_data_[cnt].finalize();
-    //    });
-
-    //    for (auto target_it = target_data_.begin(); target_it != target_data_.end(); ++target_it)
-    //        target_data_.modify(target_it, [&](EvaluationTargetData& t) { t.finalize(); });
-
     finalized_ = true;
 
     endResetModel();
@@ -603,128 +573,129 @@ QVariant EvaluationData::data(const QModelIndex& index, int role) const
 
     switch (role)
     {
-        case Qt::CheckStateRole:
-            {
-                if (index.column() == 0)  // selected special case
-                {
-                    assert (index.row() >= 0);
-                    assert (index.row() < target_data_.size());
+    case Qt::CheckStateRole:
+    {
+        if (index.column() == 0)  // selected special case
+        {
+            assert (index.row() >= 0);
+            assert (index.row() < target_data_.size());
 
-                    const EvaluationTargetData& target = target_data_.at(index.row());
+            const EvaluationTargetData& target = target_data_.at(index.row());
 
-                    if (dbcont_man_.utnUseEval(target.utn_))
-                        return Qt::Checked;
-                    else
-                        return Qt::Unchecked;
-                }
-                else
-                    return QVariant();
-            }
-        case Qt::BackgroundRole:
-            {
-                assert (index.row() >= 0);
-                assert (index.row() < target_data_.size());
+            if (dbcont_man_.utnUseEval(target.utn_))
+                return Qt::Checked;
+            else
+                return Qt::Unchecked;
+        }
+        else
+            return QVariant();
+    }
+    case Qt::BackgroundRole:
+    {
+        assert (index.row() >= 0);
+        assert (index.row() < target_data_.size());
 
-                const EvaluationTargetData& target = target_data_.at(index.row());
+        const EvaluationTargetData& target = target_data_.at(index.row());
 
-                if (!dbcont_man_.utnUseEval(target.utn_))
-                    return QBrush(Qt::lightGray);
-                else
-                    return QVariant();
+        if (!dbcont_man_.utnUseEval(target.utn_))
+            return QBrush(Qt::lightGray);
+        else
+            return QVariant();
 
-            }
-        case Qt::DisplayRole:
-        case Qt::EditRole:
-            {
-                logdbg << "EvaluationData: data: display role: row " << index.row() << " col " << index.column();
+    }
+    case Qt::DisplayRole:
+    case Qt::EditRole:
+    {
+        logdbg << "EvaluationData: data: display role: row " << index.row() << " col " << index.column();
 
-                assert (index.row() >= 0);
-                assert (index.row() < target_data_.size());
+        assert (index.row() >= 0);
+        assert (index.row() < target_data_.size());
 
-                const EvaluationTargetData& target = target_data_.at(index.row());
+        const EvaluationTargetData& target = target_data_.at(index.row());
 
-                logdbg << "EvaluationData: data: got utn " << target.utn_;
+        logdbg << "EvaluationData: data: got utn " << target.utn_;
 
-                assert (index.column() < table_columns_.size());
-                std::string col_name = table_columns_.at(index.column()).toStdString();
+        assert (index.column() < table_columns_.size());
+        std::string col_name = table_columns_.at(index.column()).toStdString();
 
-                if (col_name == "Use")
-                {
-                    return QVariant();
-                }
-                else if (col_name == "UTN")
-                {
-                    return target.utn_;
-                }
-                else if (col_name == "Comment")
-                {
-                    return dbcont_man_.utnComment(target.utn_).c_str();
-                }
-                else if (col_name == "Begin")
-                {
-                    return target.timeBeginStr().c_str();
-                }
-                else if (col_name == "End")
-                {
-                    return target.timeEndStr().c_str();
-                }
-                else if (col_name == "#All")
-                {
-                    return target.numUpdates();
-                }
-                else if (col_name == "#Ref")
-                {
-                    return target.numRefUpdates();
-                }
-                else if (col_name == "#Tst")
-                {
-                    return target.numTstUpdates();
-                }
-                else if (col_name == "Callsign")
-                {
-                    return target.callsignsStr().c_str();
-                }
-                else if (col_name == "TA")
-                {
-                    return target.targetAddressesStr().c_str();
-                }
-                else if (col_name == "M3/A")
-                {
-                    return target.modeACodesStr().c_str();
-                }
-                else if (col_name == "MC Min")
-                {
-                    return target.modeCMinStr().c_str();
-                }
-                else if (col_name == "MC Max")
-                {
-                    return target.modeCMaxStr().c_str();
-                }
+        if (col_name == "Use")
+        {
+            return QVariant();
+        }
+        else if (col_name == "UTN")
+        {
+            return target.utn_;
+        }
+        else if (col_name == "Comment")
+        {
+            return dbcont_man_.utnComment(target.utn_).c_str();
+        }
+        else if (col_name == "Begin")
+        {
+            return target.timeBeginStr().c_str();
+        }
+        else if (col_name == "End")
+        {
+            return target.timeEndStr().c_str();
+        }
+        else if (col_name == "#All")
+        {
+            return target.numUpdates();
+        }
+        else if (col_name == "#Ref")
+        {
+            return target.numRefUpdates();
+        }
+        else if (col_name == "#Tst")
+        {
+            return target.numTstUpdates();
+        }
+        else if (col_name == "Callsign")
+        {
+            return target.callsignsStr().c_str();
+        }
+        else if (col_name == "TA")
+        {
+            return target.targetAddressesStr().c_str();
+        }
+        else if (col_name == "M3/A")
+        {
+            return target.modeACodesStr().c_str();
+        }
+        else if (col_name == "MC Min")
+        {
+            return target.modeCMinStr().c_str();
+        }
+        else if (col_name == "MC Max")
+        {
+            return target.modeCMaxStr().c_str();
+        }
 
-            }
-        case Qt::UserRole: // to find the checkboxes
-            {
-                if (index.column() == 0)
-                {
-                    assert (index.row() >= 0);
-                    assert (index.row() < target_data_.size());
+    }
+    case Qt::UserRole: // to find the checkboxes
+    {
+        if (index.column() == 0)
+        {
+            assert (index.row() >= 0);
+            assert (index.row() < target_data_.size());
 
-                    const EvaluationTargetData& target = target_data_.at(index.row());
-                    return target.utn_;
-                }
-                else if (index.column() == 2) // comment
-                {
-                    assert (index.row() >= 0);
-                    assert (index.row() < target_data_.size());
+            const EvaluationTargetData& target = target_data_.at(index.row());
 
-                    const EvaluationTargetData& target = target_data_.at(index.row());
-                    return ("comment_"+to_string(target.utn_)).c_str();
-                }
-            }
-        default:
-            {
-                return QVariant();
-            }
+            return target.utn_;
+        }
+        else if (index.column() == 2) // comment
+        {
+            assert (index.row() >= 0);
+            assert (index.row() < target_data_.size());
+
+            const EvaluationTargetData& target = target_data_.at(index.row());
+            return ("comment_"+to_string(target.utn_)).c_str();
+        }
+    }
+    default:
+    {
+        return QVariant();
+    }
     }
 }
 
@@ -839,85 +810,40 @@ const EvaluationTargetData& EvaluationData::getTargetOf (const QModelIndex& inde
 }
 
 
-void EvaluationData::setUseTargetData (unsigned int utn, bool value)
-{
-    loginf << "EvaluationData: setUseTargetData: utn " << utn << " value " << value;
-
-    assert (hasTargetData(utn));
-
-    QModelIndexList items = match(
-                index(0, 0),
-                Qt::UserRole,
-                QVariant(utn),
-                1, // look *
-                Qt::MatchExactly); // look *
-
-    assert (items.size() == 1);
-
-    setData(items.at(0), {value ? Qt::Checked: Qt::Unchecked}, Qt::CheckStateRole);
-}
-
-//void EvaluationData::setUseAllTargetData (bool value)
+//void EvaluationData::setUseTargetData (unsigned int utn, bool value)
 //{
-//    loginf << "EvaluationData: setUseAllTargetData: value " << value;
+//    loginf << "EvaluationData: setUseTargetData: utn " << utn << " value " << value;
 
-//    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+//    assert (hasTargetData(utn));
 
-//    beginResetModel();
+//    QModelIndexList items = match(
+//                index(0, 0),
+//                Qt::UserRole,
+//                QVariant(utn),
+//                1, // look *
+//                Qt::MatchExactly); // look *
 
-//    eval_man_.useAllUTNs(value);
+//    assert (items.size() == 1);
 
-//    endResetModel();
-
-//    QApplication::restoreOverrideCursor();
+//    setData(items.at(0), {value ? Qt::Checked: Qt::Unchecked}, Qt::CheckStateRole);
 //}
 
-//void EvaluationData::clearComments ()
+//void EvaluationData::setTargetDataComment (unsigned int utn, std::string comment)
 //{
-//    loginf << "EvaluationData: clearComments";
+//    loginf << "EvaluationData: setTargetDataComment: utn " << utn << " comment '" << comment << "'";
 
-//    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+//    assert (hasTargetData(utn));
 
-//    beginResetModel();
+//    QModelIndexList items = match(
+//                index(0, 0),
+//                Qt::UserRole,
+//                QVariant(("comment_"+to_string(utn)).c_str()),
+//                1, // look *
+//                Qt::MatchExactly); // look *
 
-//    eval_man_.clearUTNComments();
-
-//    endResetModel();
-
-//    QApplication::restoreOverrideCursor();
+//    if (items.size() == 1)
+//        setData(items.at(0), comment.c_str(), Qt::CheckStateRole);
 //}
-
-//void EvaluationData::setUseByFilter ()
-//{
-//    loginf << "EvaluationData: setUseByFilter";
-
-//    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-
-//    beginResetModel();
-
-//    eval_man_.filterUTNs();
-
-//    endResetModel();
-
-//    QApplication::restoreOverrideCursor();
-//}
-
-void EvaluationData::setTargetDataComment (unsigned int utn, std::string comment)
-{
-    loginf << "EvaluationData: setTargetDataComment: utn " << utn << " comment '" << comment << "'";
-
-    assert (hasTargetData(utn));
-
-    QModelIndexList items = match(
-                index(0, 0),
-                Qt::UserRole,
-                QVariant(("comment_"+to_string(utn)).c_str()),
-                1, // look *
-                Qt::MatchExactly); // look *
-
-    if (items.size() == 1)
-        setData(items.at(0), comment.c_str(), Qt::CheckStateRole);
-}
 
 EvaluationDataWidget* EvaluationData::widget()
 {
@@ -927,3 +853,35 @@ EvaluationDataWidget* EvaluationData::widget()
     return widget_.get();
 }
 
+void EvaluationData::targetChangedSlot(unsigned int utn) // for one utn
+{
+    loginf << "EvaluationData: targetChangedSlot: utn " << utn;
+
+    // check if checkbox utn thingi is found
+    QModelIndexList items = match(
+                index(0, 0),
+                Qt::UserRole,
+                QVariant(utn),
+                1, // look *
+                Qt::MatchExactly); // look *
+
+    loginf << "EvaluationData: targetChangedSlot: utn " << utn << " matches " << items.size();
+
+    if (items.size() == 1)
+    {
+        //emit dataChanged(items.at(0), items.at(0));
+        emit dataChanged(index(items.at(0).row(), 0), index(items.at(0).row(), columnCount()-1));
+
+        eval_man_.updateResultsToChanges();
+    }
+}
+
+void EvaluationData::allTargetsChangedSlot() // for more than 1 utn
+{
+    loginf << "EvaluationData: allTargetsChangedSlot";
+
+    beginResetModel();
+    endResetModel();
+
+    eval_man_.updateResultsToChanges();
+}

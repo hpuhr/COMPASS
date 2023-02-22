@@ -58,6 +58,10 @@ class EvaluationData : public QAbstractItemModel
 {
     Q_OBJECT
 
+public slots:
+    void targetChangedSlot(unsigned int utn); // for one utn
+    void allTargetsChangedSlot(); // for more than 1 utn
+
 public:
     EvaluationData(EvaluationManager& eval_man, DBContentManager& dbcont_man);
 
@@ -88,12 +92,8 @@ public:
 
     const EvaluationTargetData& getTargetOf (const QModelIndex& index);
 
-    void setUseTargetData (unsigned int utn, bool value);
-    //void setUseAllTargetData (bool value);
-    //void clearComments ();
-    //void setUseByFilter ();
-
-    void setTargetDataComment (unsigned int utn, std::string comment);
+//    void setUseTargetData (unsigned int utn, bool value);
+//    void setTargetDataComment (unsigned int utn, std::string comment);
 
     EvaluationDataWidget* widget();
 

@@ -26,8 +26,6 @@
 #include "dbcontent/dbcontentmanager.h"
 #include "evaluationmanager.h"
 
-//#include <ogr_spatialref.h>
-
 #include <boost/algorithm/string.hpp>
 
 #include <cassert>
@@ -40,19 +38,10 @@ using namespace boost::posix_time;
 
 //const unsigned int debug_utn = 3275;
 
-//EvaluationTargetData::EvaluationTargetData()
-//{
-
-//}
-
 EvaluationTargetData::EvaluationTargetData(unsigned int utn, EvaluationData& eval_data, EvaluationManager& eval_man,
                                            DBContentManager& dbcont_man)
     : utn_(utn), eval_data_(eval_data), eval_man_(eval_man), dbcont_man_(dbcont_man)
-    //wgs84_{new OGRSpatialReference()}, local_{new OGRSpatialReference()}
 {
-    //use_ = eval_man_->useUTN(utn_);
-
-    //wgs84_->SetWellKnownGeogCS("WGS84");
 }
 
 EvaluationTargetData::~EvaluationTargetData()
@@ -296,13 +285,6 @@ bool EvaluationTargetData::use() const
 {
     return dbcont_man_.utnUseEval(utn_);
 }
-
-//void EvaluationTargetData::use(bool use)
-//{
-//    loginf << "EvaluationTargetData: use: utn " << utn_ << " use " << use;
-
-//    use_ = use;
-//}
 
 const std::multimap<ptime, unsigned int>& EvaluationTargetData::refData() const
 {

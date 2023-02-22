@@ -75,6 +75,10 @@ signals:
     void loadingDoneSignal(); // emitted when all dbos have finished loading
     void insertDoneSignal(); // emitted when all dbos have finished loading
 
+    // if useInEval or comment changed signals, to be sent from model
+    void targetChangedSignal(unsigned int utn); // for one utn
+    void allTargetsChangedSignal(); // for more than 1 utn
+
 public:
 
     DBContentManager(const std::string& class_id, const std::string& instance_id, COMPASS* compass);
@@ -237,8 +241,6 @@ protected:
     void addStandardVariables(std::string dbcont_name, dbContent::VariableSet& read_set);
 
     void setViewableDataConfig (const nlohmann::json::object_t& data);
-
-
 };
 
 #endif /* DBCONTENT_DBCONTENTMANAGER_H_ */

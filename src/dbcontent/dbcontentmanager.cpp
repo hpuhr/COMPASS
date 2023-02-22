@@ -1488,11 +1488,17 @@ void DBContentManager::setViewableDataConfig (const nlohmann::json::object_t& da
 
 bool DBContentManager::utnUseEval (unsigned int utn)
 {
-
+    assert (target_model_);
+    assert (target_model_->existsTarget(utn));
+    return target_model_->target(utn).useInEval();
 }
 
 void DBContentManager::utnUseEval (unsigned int utn, bool value)
 {
+    assert (target_model_);
+    assert (target_model_->existsTarget(utn));
+    target_model_->setUseTargetData(utn, value);
+
     // eval man
     //    data_.setUseTargetData(utn, value);
     //    updateResultsToUseChangeOf(utn);
@@ -1500,16 +1506,25 @@ void DBContentManager::utnUseEval (unsigned int utn, bool value)
 
 std::string DBContentManager::utnComment (unsigned int utn)
 {
-
+    assert (target_model_);
+    assert (target_model_->existsTarget(utn));
+    return target_model_->target(utn).comment();
 }
 
 void DBContentManager::utnComment (unsigned int utn, std::string value)
 {
+    loginf << "DBContentManager: utnComment: utn " << utn << " comment '" << value << "'";
 
+    assert (target_model_);
+    assert (target_model_->existsTarget(utn));
+    target_model_->setTargetDataComment(utn, value);
 }
 
 void DBContentManager::autoFilterUTNS()
 {
+    assert (target_model_);
+    target_model_->setUseByFilter();
+
     //    data_.setUseAllTargetData(true);
     //    data_.clearComments();
     //    data_.setUseByFilter();

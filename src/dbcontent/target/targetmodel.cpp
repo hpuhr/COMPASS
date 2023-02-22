@@ -173,12 +173,6 @@ QVariant TargetModel::data(const QModelIndex& index, int role) const
         }
 
     }
-    case Qt::DecorationRole:
-    {
-        assert (index.column() < table_columns_.size());
-
-        return QVariant();
-    }
     case Qt::UserRole: // to find the checkboxes
     {
         if (index.column() == 0)
@@ -226,6 +220,8 @@ bool TargetModel::setData(const QModelIndex &index, const QVariant& value, int r
         saveToDB(it->utn_);
 
         emit dataChanged(index, TargetModel::index(index.row(), columnCount()-1));
+        emit dbcont_manager_.targetChangedSignal(it->utn_);
+
         return true;
     }
     else if (role == Qt::EditRole && index.column() == 2) // comment
@@ -235,9 +231,13 @@ bool TargetModel::setData(const QModelIndex &index, const QVariant& value, int r
 
         auto it = target_data_.begin()+index.row();
 
+        loginf << "TargetModel: setData: utn " << it->utn_ <<" comment '" << value.toString().toStdString() << "'";
+
         target_data_.modify(it, [value](Target& p) { p.comment(value.toString().toStdString()); });
 
         saveToDB(it->utn_);
+
+        emit dbcont_manager_.targetChangedSignal(it->utn_);
 
         return true;
     }
@@ -314,6 +314,7 @@ void TargetModel::setUseTargetData (unsigned int utn, bool value)
 
     assert (existsTarget(utn));
 
+    // search if checkbox can be found
     QModelIndexList items = match(
                 index(0, 0),
                 Qt::UserRole,
@@ -324,7 +325,35 @@ void TargetModel::setUseTargetData (unsigned int utn, bool value)
     assert (items.size() == 1);
 
     setData(items.at(0), {value ? Qt::Checked: Qt::Unchecked}, Qt::CheckStateRole);
+
+    // already emitted in setData
+    //emit dbcont_manager_.targetChangedSignal(utn);
 }
+
+void TargetModel::setTargetDataComment (unsigned int utn, std::string comment)
+{
+    loginf << "TargetModel: setTargetDataComment: utn " << utn << " comment '" << comment << "'";
+
+    assert (existsTarget(utn));
+
+    // search if comment can be found can be found, check in COLUMN 2!
+    QModelIndexList items = match(
+                index(0, 2),
+                Qt::UserRole,
+                QVariant(("comment_"+to_string(utn)).c_str()),
+                1, // look *
+                Qt::MatchExactly); // look *
+
+     loginf << "TargetModel: setTargetDataComment: size " << items.size();
+
+    assert (items.size() == 1);
+    setData(items.at(0), comment.c_str(), Qt::EditRole);
+
+    // already emitted in setData
+    //emit dbcont_manager_.targetChangedSignal(utn);
+}
+
+
 void TargetModel::setUseAllTargetData (bool value)
 {
     loginf << "TargetModel: setUseAllTargetData: value " << value;
@@ -339,6 +368,8 @@ void TargetModel::setUseAllTargetData (bool value)
     saveToDB();
 
     endResetModel();
+
+    emit dbcont_manager_.allTargetsChangedSignal();
 
     QApplication::restoreOverrideCursor();
 }
@@ -357,6 +388,8 @@ void TargetModel::clearComments ()
     saveToDB();
 
     endResetModel();
+
+    emit dbcont_manager_.allTargetsChangedSignal();
 
     QApplication::restoreOverrideCursor();
 }
@@ -516,23 +549,8 @@ void TargetModel::setUseByFilter ()
     saveToDB();
 
     endResetModel();
-}
 
-void TargetModel::setTargetDataComment (unsigned int utn, std::string comment)
-{
-    loginf << "TargetModel: setTargetDataComment: utn " << utn << " comment '" << comment << "'";
-
-    assert (existsTarget(utn));
-
-    QModelIndexList items = match(
-                index(0, 0),
-                Qt::UserRole,
-                QVariant(("comment_"+to_string(utn)).c_str()),
-                1, // look *
-                Qt::MatchExactly); // look *
-
-    if (items.size() == 1)
-        setData(items.at(0), comment.c_str(), Qt::EditRole);
+    emit dbcont_manager_.allTargetsChangedSignal();
 }
 
 bool TargetModel::hasTargetsInfo()
