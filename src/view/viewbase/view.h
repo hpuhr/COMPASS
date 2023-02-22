@@ -58,7 +58,7 @@ public:
          ViewManager& view_manager);
     virtual ~View();
 
-    virtual bool init();
+    bool init();
 
     virtual void databaseOpened();
     virtual void databaseClosed();
@@ -100,6 +100,7 @@ public slots:
 
 protected:
     virtual void updateSelection() = 0;
+    virtual bool init_impl() { return true; }
 
     void constructWidget();
     //void setModel(ViewModel* model);

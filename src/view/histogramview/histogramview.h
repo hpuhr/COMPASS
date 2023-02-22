@@ -39,8 +39,6 @@ public:
     /// @brief Destructor
     virtual ~HistogramView() override;
 
-    bool init() override;
-
     virtual void loadingDone() override;
 
     virtual void generateSubConfigurable(const std::string& class_id,
@@ -102,6 +100,8 @@ signals:
 protected:
     virtual void checkSubConfigurables() override;
     virtual void updateSelection() override;
+
+    virtual bool init_impl() override;
 
     void onShowResultsChanged();
 

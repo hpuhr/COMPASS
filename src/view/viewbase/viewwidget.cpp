@@ -104,7 +104,7 @@ void ViewWidget::createStandardLayout()
 
     //create tool widget
     {
-        tool_widget_ = new ViewToolWidget(tool_switcher_.get(), this);
+        tool_widget_ = new ViewToolWidget(this, tool_switcher_.get(), this);
         tool_widget_->setContentsMargins(0, 0, 0, 0);
 
         left_layout->addWidget(tool_widget_);
@@ -159,6 +159,17 @@ void ViewWidget::createStandardLayout()
     main_splitter_->setChildrenCollapsible(false); 
     for (int i = 0; i < main_splitter_->count(); ++i)
         main_splitter_->setCollapsible(i, false);
+}
+
+/**
+*/
+void ViewWidget::init()
+{
+    if (config_widget_ && tool_widget_)
+        tool_widget_->addConfigWidgetToggle();
+
+    updateLoadState();
+    updateToolWidget();
 }
 
 /**
@@ -219,9 +230,6 @@ void ViewWidget::connectWidgets()
     if (config_widget_ && data_widget_)
     {
         connect(data_widget_, &ViewDataWidget::displayChanged, config_widget_, &ViewConfigWidget::onDisplayChange);
-
-        if (state_widget_)
-            state_widget_->updateState();
     }
 }
 
@@ -257,27 +265,9 @@ void ViewWidget::toggleConfigWidget()
 
 /**
  */
-void ViewWidget::addConfigWidgetToggle()
-{
-    assert(getViewToolWidget());
-
-    getViewToolWidget()->addActionCallback("Toggle Configuration Panel", [=] (bool on) { this->toggleConfigWidget(); }, {}, getIcon("configuration.png"), Qt::Key_C, true);
-}
-
-/**
- */
-QIcon ViewWidget::getIcon(const std::string& fn) const
+QIcon ViewWidget::getIcon(const std::string& fn)
 {
     return QIcon(Utils::Files::getIconFilepath(fn).c_str());
-}
-
-/**
-*/
-void ViewWidget::updateToolWidget()
-{
-    assert(getViewToolWidget());
-
-    getViewToolWidget()->updateItems();
 }
 
 /**
@@ -289,11 +279,11 @@ void ViewWidget::loadingStarted()
     assert(getViewDataWidget());
     assert(getViewConfigWidget());
 
-    //call in subwidgets
-    getViewLoadStateWidget()->loadingStarted();
-    getViewToolWidget()->loadingStarted();
+    //propagate to subwidgets (note: order might be important)
     getViewDataWidget()->loadingStarted();
     getViewConfigWidget()->loadingStarted();
+    getViewLoadStateWidget()->loadingStarted();
+    getViewToolWidget()->loadingStarted();
 }
 
 /**
@@ -309,11 +299,11 @@ void ViewWidget::loadingDone()
     reload_needed_ = false;
     redraw_needed_ = false; //a reload should always result in a redraw anyway
 
-    //call in subwidgets
-    getViewToolWidget()->loadingDone();
+    //propagate to subwidgets (note: order might be important)
     getViewDataWidget()->loadingDone();
     getViewConfigWidget()->loadingDone();
     getViewLoadStateWidget()->loadingDone();
+    getViewToolWidget()->loadingDone();
 }
 
 /**
@@ -322,10 +312,12 @@ void ViewWidget::redrawStarted()
 {
     assert(getViewConfigWidget());
     assert(getViewLoadStateWidget());
+    assert(getViewToolWidget());
 
-    //call in subwidgets
+    //propagate to subwidgets (note: order might be important)
     getViewConfigWidget()->redrawStarted();
     getViewLoadStateWidget()->redrawStarted();
+    getViewToolWidget()->redrawStarted();
 }
 
 /**
@@ -334,13 +326,15 @@ void ViewWidget::redrawDone()
 {
     assert(getViewConfigWidget());
     assert(getViewLoadStateWidget());
+    assert(getViewToolWidget());
 
     //set back flag
     redraw_needed_ = false;
 
-    //call in subwidgets
+    //propagate to subwidgets (note: order might be important)
     getViewConfigWidget()->redrawDone();
     getViewLoadStateWidget()->redrawDone();
+    getViewToolWidget()->redrawDone();
 }
 
 /**
@@ -352,12 +346,19 @@ void ViewWidget::appModeSwitch(AppMode app_mode)
     assert(getViewConfigWidget());
     assert(getViewLoadStateWidget());
 
-    //call in subwidgets
+    //propagate to subwidgets (note: order might be important)
     getViewDataWidget()->appModeSwitch(app_mode);
     getViewConfigWidget()->appModeSwitch(app_mode);
     getViewLoadStateWidget()->appModeSwitch(app_mode);
+    getViewToolWidget()->appModeSwitch(app_mode);
+}
 
-    //some toolbar items might rely on the app mode
+/**
+*/
+void ViewWidget::updateToolWidget()
+{
+    assert(getViewToolWidget());
+
     getViewToolWidget()->updateItems();
 }
 

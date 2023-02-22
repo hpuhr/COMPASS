@@ -58,8 +58,8 @@ public:
     virtual ~ViewWidget();
 
     void toggleConfigWidget();
-    void updateToolWidget();
 
+    void updateToolWidget();
     void updateLoadState();
 
     void loadingStarted();
@@ -84,6 +84,10 @@ public:
     bool reloadNeeded() const;
     bool redrawNeeded() const;
 
+    void init();
+
+    static QIcon getIcon(const std::string& fn);
+
 protected:
     ViewToolWidget* getViewToolWidget() { return tool_widget_; }
     const ViewToolWidget* getViewToolWidget() const { return tool_widget_; }
@@ -95,13 +99,9 @@ protected:
     virtual bool reloadNeeded_impl() const { return false; };
     virtual bool redrawNeeded_impl() const { return false; };
 
-    QIcon getIcon(const std::string& fn) const;
-
     void setDataWidget(ViewDataWidget* w);
     void setConfigWidget(ViewConfigWidget* w);
     void setLowerWidget(QWidget* w);
-
-    void addConfigWidgetToggle();
 
     View* getView() { return view_; }
 

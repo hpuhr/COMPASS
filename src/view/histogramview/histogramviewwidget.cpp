@@ -61,9 +61,6 @@ HistogramViewWidget::HistogramViewWidget(const std::string& class_id, const std:
     getViewToolWidget()->addSpacer();
 
     getViewToolWidget()->addActionCallback("Zoom to Home", [=] () { data_widget->resetZoomSlot(); }, {}, getIcon("zoom_home.png"), Qt::Key_Space);
-
-    getViewToolWidget()->addSeparator();
-    addConfigWidgetToggle();
 }
 
 /*

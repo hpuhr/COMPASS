@@ -389,7 +389,7 @@ void LatexVisitor::visit(HistogramView* e)
     HistogramViewDataWidget* data_widget = e->getDataWidget();
     assert (data_widget);
 
-    if (!data_widget->hasData())
+    if (!data_widget->showsData())
         return;
 
     // normal screenshot
@@ -516,7 +516,7 @@ void LatexVisitor::visit(ScatterPlotView* e)
     ScatterPlotViewDataWidget* data_widget = e->getDataWidget();
     assert (data_widget);
 
-    if (!data_widget->hasData())
+    if (!data_widget->showsData())
         return;
 
     // normal screenshot

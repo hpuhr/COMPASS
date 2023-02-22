@@ -65,10 +65,8 @@ ScatterPlotView::~ScatterPlotView()
     loginf << "ScatterPlotView: dtor: done";
 }
 
-bool ScatterPlotView::init()
+bool ScatterPlotView::init_impl()
 {
-    View::init();
-
     createSubConfigurables();
 
     assert(data_source_);

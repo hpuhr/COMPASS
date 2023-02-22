@@ -66,10 +66,8 @@ HistogramView::~HistogramView()
 
 /**
  */
-bool HistogramView::init()
+bool HistogramView::init_impl()
 {
-    View::init();
-
     createSubConfigurables();
 
     assert(data_source_);

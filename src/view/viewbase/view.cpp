@@ -95,6 +95,16 @@ bool View::init()
     // add view to container widget
     //container_->addView(this);
 
+    // invoke derive class (will create subconfigurables, such as view widget)
+    if (!init_impl())
+        return false;
+    
+    auto w = getWidget();
+    assert (w);
+
+    //init view widget
+    w->init();
+
     return true;
 }
 

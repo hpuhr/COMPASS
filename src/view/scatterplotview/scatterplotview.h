@@ -48,8 +48,6 @@ public:
     /// @brief Destructor
     virtual ~ScatterPlotView() override;
 
-    bool init() override;
-
     virtual void generateSubConfigurable(const std::string& class_id,
                                          const std::string& instance_id) override;
 
@@ -91,6 +89,8 @@ public:
 protected:
     virtual void checkSubConfigurables() override;
     virtual void updateSelection() override;
+
+    virtual bool init_impl() override;
 
     /// For data display
     ScatterPlotViewWidget* widget_{nullptr};

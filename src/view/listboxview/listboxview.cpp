@@ -52,10 +52,8 @@ ListBoxView::~ListBoxView()
     }
 }
 
-bool ListBoxView::init()
+bool ListBoxView::init_impl()
 {
-    View::init();
-
     createSubConfigurables();
 
     assert(data_source_);

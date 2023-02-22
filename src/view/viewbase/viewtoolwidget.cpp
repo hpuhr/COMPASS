@@ -1,6 +1,7 @@
 
 #include "viewtoolwidget.h"
 #include "viewtoolswitcher.h"
+#include "viewwidget.h"
 
 #include <QShortcut>
 #include <QToolButton>
@@ -10,10 +11,14 @@
 
 /**
  */
-ViewToolWidget::ViewToolWidget(ViewToolSwitcher* tool_switcher, QWidget* parent)
+ViewToolWidget::ViewToolWidget(ViewWidget* view_widget, 
+                               ViewToolSwitcher* tool_switcher, 
+                               QWidget* parent)
 :   QToolBar      (parent)
+,   view_widget_  (view_widget)
 ,   tool_switcher_(tool_switcher)
 {
+    assert(view_widget_);
     assert(tool_switcher_);
 
     connect(tool_switcher_, &ViewToolSwitcher::toolChanged, this, &ViewToolWidget::toolSwitched);
@@ -208,7 +213,67 @@ void ViewToolWidget::addSpacer()
     QWidget* w = new QWidget;
     w->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
 
-    addWidget(w);
+    auto action = addWidget(w);
+
+    spacers_.insert(action);
+}
+
+/**
+*/
+void ViewToolWidget::addSeparatorIfValid()
+{
+    if (!separatorValid())
+        return;
+
+    addSeparator();
+}
+
+/**
+*/
+void ViewToolWidget::addConfigWidgetToggle()
+{
+    //add spacer if no spacer yet
+    if (spacers_.empty())
+        addSpacer();
+
+    //add separator if needed
+    addSeparatorIfValid();
+
+    //add toggle callback
+    addActionCallback("Toggle Configuration Panel", [=] (bool on) { view_widget_->toggleConfigWidget(); }, {}, ViewWidget::getIcon("configuration.png"), Qt::Key_C, true);
+}
+
+
+/**
+ */
+bool ViewToolWidget::actionIsSpacer(QAction* action) const
+{
+    if (spacers_.empty())
+        return false;
+
+    return (spacers_.find(action) != spacers_.end());
+}
+
+/**
+*/
+bool ViewToolWidget::separatorValid() const
+{
+    //no items yet?
+    if (actions().count() < 1)
+        return false;
+
+    auto last_action = actions().back();
+
+    //last action already is separator?
+    if (last_action->isSeparator())
+        return false;
+
+    //last action is a spacer item?
+    if (actionIsSpacer(last_action))
+        return false;
+
+    //last item should be a normal item
+    return true;
 }
 
 /**
@@ -249,6 +314,7 @@ void ViewToolWidget::updateItems()
  */
 void ViewToolWidget::loadingStarted()
 {
+    updateItems();
     setEnabled(false);
 }
 
@@ -256,5 +322,27 @@ void ViewToolWidget::loadingStarted()
  */
 void ViewToolWidget::loadingDone()
 {
+    updateItems();
     setEnabled(true);
+}
+
+/**
+*/
+void ViewToolWidget::appModeSwitch(AppMode app_mode)
+{
+    updateItems();
+}
+
+/**
+*/
+void ViewToolWidget::redrawStarted()
+{
+    //implement if needed
+}
+
+/**
+*/
+void ViewToolWidget::redrawDone()
+{
+    //implement if needed
 }
