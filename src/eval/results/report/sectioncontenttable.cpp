@@ -19,6 +19,8 @@
 #include "eval/results/base.h"
 #include "eval/results/single.h"
 #include "evaluationmanager.h"
+#include "compass.h"
+#include "dbcontentmanager.h"
 #include "latexvisitor.h"
 #include "logger.h"
 #include "stringconv.h"
@@ -552,15 +554,9 @@ namespace EvaluationResultsReport
 
         loginf << "SectionContentTable: addUTNSlot: utn " << utn;
 
-//        QMessageBox msg_box;
-//        msg_box.setWindowTitle("Generating Results");
-//        msg_box.setText( "Please wait.");
-//        msg_box.setStandardButtons(QMessageBox::NoButton);
-//        msg_box.show();
+        COMPASS::instance().dbContentManager().utnUseEval(utn, true);
+        //eval_man_.useUTN(utn, true, true);
 
-        eval_man_.useUTN(utn, true, true);
-
-//        msg_box.close();
     }
 
     void SectionContentTable::removeUTNSlot ()
@@ -572,15 +568,9 @@ namespace EvaluationResultsReport
 
         loginf << "SectionContentTable: removeUTNSlot: utn " << utn;
 
-/*        QMessageBox msg_box;
-        msg_box.setWindowTitle("Generating Results");
-        msg_box.setText( "Please wait.");
-        msg_box.setStandardButtons(QMessageBox::NoButton);
-        msg_box.show()*/;
+        COMPASS::instance().dbContentManager().utnUseEval(utn, false);
 
-        eval_man_.useUTN(utn, false, true);
-
-//        msg_box.close();
+        //eval_man_.useUTN(utn, false, true);
     }
 
     void SectionContentTable::showFullUTNSlot ()

@@ -33,6 +33,7 @@
 class Buffer;
 class EvaluationData;
 class EvaluationManager;
+class DBContentManager;
 //class Transformation;
 
 //class OGRSpatialReference;
@@ -71,8 +72,9 @@ public:
 class EvaluationTargetData
 {
 public:
-    EvaluationTargetData();
-    EvaluationTargetData(unsigned int utn, EvaluationData& eval_data, EvaluationManager& eval_man);
+    //EvaluationTargetData();
+    EvaluationTargetData(unsigned int utn, EvaluationData& eval_data,
+                         EvaluationManager& eval_man, DBContentManager& dbcont_man);
     virtual ~EvaluationTargetData();
 
     void addRefIndex (boost::posix_time::ptime timestamp, unsigned int index);
@@ -114,7 +116,7 @@ public:
     bool isPrimaryOnly () const;
 
     bool use() const;
-    void use(bool use);
+//    void use(bool use);
 
     const std::multimap<boost::posix_time::ptime, unsigned int>& refData() const;
     const std::multimap<boost::posix_time::ptime, unsigned int>& tstData() const;
@@ -212,10 +214,11 @@ public:
 protected:
     //static bool in_appimage_;
 
-    EvaluationData* eval_data_ {nullptr};
-    EvaluationManager* eval_man_ {nullptr};
+    EvaluationData& eval_data_;
+    EvaluationManager& eval_man_;
+    DBContentManager& dbcont_man_;
 
-    bool use_ {true};
+    //bool use_ {true};
 
     std::multimap<boost::posix_time::ptime, unsigned int> ref_data_; // timestamp -> index
     mutable std::vector<unsigned int> ref_indexes_;

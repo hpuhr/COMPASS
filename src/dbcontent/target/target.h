@@ -18,8 +18,8 @@ public:
 
     unsigned int utn() { return utn_; }
 
-    bool use() const;
-    void use(bool value);
+    bool useInEval() const;
+    void useInEval(bool value);
 
     std::string comment() const;
     void comment (const std::string& value);

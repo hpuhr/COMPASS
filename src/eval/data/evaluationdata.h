@@ -37,6 +37,7 @@
 
 class EvaluationManager;
 class DBContent;
+class DBContentManager;
 class Buffer;
 
 struct target_tag
@@ -58,7 +59,7 @@ class EvaluationData : public QAbstractItemModel
     Q_OBJECT
 
 public:
-    EvaluationData(EvaluationManager& eval_man);
+    EvaluationData(EvaluationManager& eval_man, DBContentManager& dbcont_man);
 
     void addReferenceData (DBContent& object, unsigned int line_id, std::shared_ptr<Buffer> buffer);
     void addTestData (DBContent& object, unsigned int line_id, std::shared_ptr<Buffer> buffer);
@@ -88,9 +89,9 @@ public:
     const EvaluationTargetData& getTargetOf (const QModelIndex& index);
 
     void setUseTargetData (unsigned int utn, bool value);
-    void setUseAllTargetData (bool value);
-    void clearComments ();
-    void setUseByFilter ();
+    //void setUseAllTargetData (bool value);
+    //void clearComments ();
+    //void setUseByFilter ();
 
     void setTargetDataComment (unsigned int utn, std::string comment);
 
@@ -158,6 +159,7 @@ public:
 
 protected:
     EvaluationManager& eval_man_;
+    DBContentManager& dbcont_man_;
 
     QStringList table_columns_ {"Use", "UTN", "Comment", "Begin", "End", "#All", "#Ref", "#Tst", "Callsign", "TA",
                                 "M3/A", "MC Min", "MC Max"};

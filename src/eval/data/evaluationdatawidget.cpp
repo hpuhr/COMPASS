@@ -33,17 +33,17 @@ EvaluationDataWidget::EvaluationDataWidget(EvaluationData& eval_data, Evaluation
     QVBoxLayout* main_layout = new QVBoxLayout();
 
     // toolbar
-    toolbar_ = new QToolBar("Tools");
+//    toolbar_ = new QToolBar("Tools");
 
-    QWidget* spacer = new QWidget();
-    spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    toolbar_->addWidget(spacer);
+//    QWidget* spacer = new QWidget();
+//    spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+//    toolbar_->addWidget(spacer);
 
-    toolbar_->addAction("Change Usage");
+//    toolbar_->addAction("Change Usage");
 
-    connect(toolbar_, &QToolBar::actionTriggered, this, &EvaluationDataWidget::actionTriggeredSlot);
+//    connect(toolbar_, &QToolBar::actionTriggered, this, &EvaluationDataWidget::actionTriggeredSlot);
 
-    main_layout->addWidget(toolbar_);
+//    main_layout->addWidget(toolbar_);
 
     // table
     proxy_model_ = new QSortFilterProxyModel();
@@ -83,43 +83,43 @@ void EvaluationDataWidget::resizeColumnsToContents()
     table_view_->resizeColumnsToContents();
 }
 
-void EvaluationDataWidget::actionTriggeredSlot(QAction* action)
-{
-    QMenu menu;
+//void EvaluationDataWidget::actionTriggeredSlot(QAction* action)
+//{
+//    QMenu menu;
 
-    QAction* all_action = new QAction("Use All", this);
-    connect (all_action, &QAction::triggered, this, &EvaluationDataWidget::useAllSlot);
-    menu.addAction(all_action);
+//    QAction* all_action = new QAction("Use All", this);
+//    connect (all_action, &QAction::triggered, this, &EvaluationDataWidget::useAllSlot);
+//    menu.addAction(all_action);
 
-    QAction* none_action = new QAction("Use None", this);
-    connect (none_action, &QAction::triggered, this, &EvaluationDataWidget::useNoneSlot);
-    menu.addAction(none_action);
+//    QAction* none_action = new QAction("Use None", this);
+//    connect (none_action, &QAction::triggered, this, &EvaluationDataWidget::useNoneSlot);
+//    menu.addAction(none_action);
 
-    QAction* clear_action = new QAction("Clear Comments", this);
-    connect (clear_action, &QAction::triggered, this, &EvaluationDataWidget::clearCommentsSlot);
-    menu.addAction(clear_action);
+//    QAction* clear_action = new QAction("Clear Comments", this);
+//    connect (clear_action, &QAction::triggered, this, &EvaluationDataWidget::clearCommentsSlot);
+//    menu.addAction(clear_action);
 
-//    QAction* filter_action = new QAction("Filter", this);
-//    connect (filter_action, &QAction::triggered, this, &EvaluationDataWidget::filterSlot);
-//    menu.addAction(filter_action);
+////    QAction* filter_action = new QAction("Filter", this);
+////    connect (filter_action, &QAction::triggered, this, &EvaluationDataWidget::filterSlot);
+////    menu.addAction(filter_action);
 
-    menu.exec(QCursor::pos());
-}
+//    menu.exec(QCursor::pos());
+//}
 
-void EvaluationDataWidget::useAllSlot()
-{
-    eval_data_.setUseAllTargetData(true);
-}
+//void EvaluationDataWidget::useAllSlot()
+//{
+//    eval_data_.setUseAllTargetData(true);
+//}
 
-void EvaluationDataWidget::useNoneSlot()
-{
-    eval_data_.setUseAllTargetData(false);
-}
+//void EvaluationDataWidget::useNoneSlot()
+//{
+//    eval_data_.setUseAllTargetData(false);
+//}
 
-void EvaluationDataWidget::clearCommentsSlot()
-{
-    eval_data_.clearComments();
-}
+//void EvaluationDataWidget::clearCommentsSlot()
+//{
+//    eval_data_.clearComments();
+//}
 
 //void EvaluationDataWidget::filterSlot()
 //{

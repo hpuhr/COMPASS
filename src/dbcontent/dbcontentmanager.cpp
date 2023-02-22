@@ -1486,6 +1486,31 @@ void DBContentManager::setViewableDataConfig (const nlohmann::json::object_t& da
     COMPASS::instance().viewManager().setCurrentViewPoint(viewable_data_cfg_.get());
 }
 
+bool DBContentManager::utnUseEval (unsigned int utn)
+{
+
+}
+
+void DBContentManager::utnUseEval (unsigned int utn, bool value)
+{
+
+}
+
+std::string DBContentManager::utnComment (unsigned int utn)
+{
+
+}
+
+void DBContentManager::utnComment (unsigned int utn, std::string value)
+{
+
+}
+
+void DBContentManager::autoFilterUTNS()
+{
+
+}
+
 void DBContentManager::showUTN (unsigned int utn)
 {
     loginf << "DBContentManager: showUTN: utn " << utn;

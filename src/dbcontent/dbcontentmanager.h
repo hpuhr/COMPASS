@@ -165,6 +165,13 @@ public:
     dbContent::TargetListWidget* targetListWidget();
     void resizeTargetListWidget();
 
+    bool utnUseEval (unsigned int utn);
+    void utnUseEval (unsigned int utn, bool value);
+
+    std::string utnComment (unsigned int utn);
+    void utnComment (unsigned int utn, std::string value);
+
+    void autoFilterUTNS();
     void showUTN (unsigned int utn);
 
 protected:

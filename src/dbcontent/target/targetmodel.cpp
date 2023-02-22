@@ -78,7 +78,7 @@ QVariant TargetModel::data(const QModelIndex& index, int role) const
 
             const Target& target = target_data_.at(index.row());
 
-            if (target.use())
+            if (target.useInEval())
                 return Qt::Checked;
             else
                 return Qt::Unchecked;
@@ -93,7 +93,7 @@ QVariant TargetModel::data(const QModelIndex& index, int role) const
 
         const Target& target = target_data_.at(index.row());
 
-        if (!target.use())
+        if (!target.useInEval())
             return QBrush(Qt::lightGray);
         else
             return QVariant();
@@ -221,7 +221,7 @@ bool TargetModel::setData(const QModelIndex &index, const QVariant& value, int r
         loginf << "TargetModel: setData: utn " << it->utn_ <<" check state " << checked;
 
         //eval_man_.useUTN(it->utn_, checked, false);
-        target_data_.modify(it, [value,checked](Target& p) { p.use(checked); });
+        target_data_.modify(it, [value,checked](Target& p) { p.useInEval(checked); });
 
         saveToDB(it->utn_);
 
@@ -334,7 +334,7 @@ void TargetModel::setUseAllTargetData (bool value)
     beginResetModel();
 
     for (auto target_it = target_data_.begin(); target_it != target_data_.end(); ++target_it)
-        target_data_.modify(target_it, [value](Target& p) { p.use(value); });
+        target_data_.modify(target_it, [value](Target& p) { p.useInEval(value); });
 
     saveToDB();
 
@@ -381,7 +381,7 @@ void TargetModel::setUseByFilter ()
 
     for (auto target_it = target_data_.begin(); target_it != target_data_.end(); ++target_it)
     {
-        if (!target_it->use())
+        if (!target_it->useInEval())
             continue;
 
         use = true; // must be true here
@@ -507,7 +507,7 @@ void TargetModel::setUseByFilter ()
         {
             logdbg << "TargetModel: filterUTNs: removing " << target_it->utn_ << " comment '" << comment << "'";
             //useUTN (target_it->utn_, use, true);
-            target_data_.modify(target_it, [use](Target& p) { p.use(use); });
+            target_data_.modify(target_it, [use](Target& p) { p.useInEval(use); });
             //utnComment(target_it->utn_, comment, false);
             target_data_.modify(target_it, [comment](Target& p) { p.comment(comment); });
         }

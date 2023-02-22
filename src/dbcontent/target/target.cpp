@@ -26,12 +26,12 @@ Target::Target(unsigned int utn, nlohmann::json info)
         info_[KEY_USED] = true;
 }
 
-bool Target::use() const
+bool Target::useInEval() const
 {
     return info_.at(KEY_USED);
 }
 
-void Target::use(bool value)
+void Target::useInEval(bool value)
 {
     info_[KEY_USED] = value;
 }

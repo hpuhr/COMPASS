@@ -18,6 +18,7 @@
 #include "evaluationdata.h"
 #include "evaluationdatawidget.h"
 #include "evaluationmanager.h"
+#include "dbcontentmanager.h"
 #include "dbcontent/dbcontent.h"
 #include "dbcontent/variable/variable.h"
 #include "dbcontent/variable/metavariable.h"
@@ -43,8 +44,8 @@ using namespace Utils;
 using namespace nlohmann;
 using namespace boost::posix_time;
 
-EvaluationData::EvaluationData(EvaluationManager& eval_man)
-    : eval_man_(eval_man)
+EvaluationData::EvaluationData(EvaluationManager& eval_man, DBContentManager& dbcont_man)
+    : eval_man_(eval_man), dbcont_man_(dbcont_man)
 {
 
 }
@@ -53,9 +54,7 @@ void EvaluationData::addReferenceData (DBContent& object, unsigned int line_id, 
 {
     loginf << "EvaluationData: addReferenceData: dbcontent " << object.name() << " size " << buffer->size();
 
-    DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
-
-    if (!dbcontent_man.hasAssociations())
+    if (!dbcont_man_.hasAssociations())
     {
         logwrn << "EvaluationData: addReferenceData: dbcontent has no associations";
         unassociated_ref_cnt_ = buffer->size();
@@ -72,31 +71,31 @@ void EvaluationData::addReferenceData (DBContent& object, unsigned int line_id, 
 
     string dbcontent_name = ref_buffer_->dbContentName();
 
-    ref_timestamp_name_ = dbcontent_man.metaVariable(DBContent::meta_var_timestamp_.name()).getFor(dbcontent_name).name();
+    ref_timestamp_name_ = dbcont_man_.metaVariable(DBContent::meta_var_timestamp_.name()).getFor(dbcontent_name).name();
 
-    ref_latitude_name_ = dbcontent_man.metaVariable(DBContent::meta_var_latitude_.name()).getFor(dbcontent_name).name();
-    ref_longitude_name_ = dbcontent_man.metaVariable(DBContent::meta_var_longitude_.name()).getFor(dbcontent_name).name();
+    ref_latitude_name_ = dbcont_man_.metaVariable(DBContent::meta_var_latitude_.name()).getFor(dbcontent_name).name();
+    ref_longitude_name_ = dbcont_man_.metaVariable(DBContent::meta_var_longitude_.name()).getFor(dbcontent_name).name();
 
-    if (dbcontent_man.metaVariable(DBContent::meta_var_ta_.name()).existsIn(dbcontent_name))
-        ref_target_address_name_ = dbcontent_man.metaVariable(DBContent::meta_var_ta_.name()).getFor(dbcontent_name).name();
+    if (dbcont_man_.metaVariable(DBContent::meta_var_ta_.name()).existsIn(dbcontent_name))
+        ref_target_address_name_ = dbcont_man_.metaVariable(DBContent::meta_var_ta_.name()).getFor(dbcontent_name).name();
     else
         ref_target_address_name_ = "";
 
-    if (dbcontent_man.metaVariable(DBContent::meta_var_ti_.name()).existsIn(dbcontent_name))
-        ref_callsign_name_ = dbcontent_man.metaVariable(DBContent::meta_var_ti_.name()).getFor(dbcontent_name).name();
+    if (dbcont_man_.metaVariable(DBContent::meta_var_ti_.name()).existsIn(dbcontent_name))
+        ref_callsign_name_ = dbcont_man_.metaVariable(DBContent::meta_var_ti_.name()).getFor(dbcontent_name).name();
     else
         ref_callsign_name_ = "";
 
     // mc
-    ref_modec_name_ = dbcontent_man.metaVariable(DBContent::meta_var_mc_.name()).getFor(dbcontent_name).name();
+    ref_modec_name_ = dbcont_man_.metaVariable(DBContent::meta_var_mc_.name()).getFor(dbcontent_name).name();
 
-    if (dbcontent_man.metaVariable(DBContent::meta_var_mc_g_.name()).existsIn(dbcontent_name))
-        ref_modec_g_name_ = dbcontent_man.metaVariable(DBContent::meta_var_mc_g_.name()).getFor(dbcontent_name).name();
+    if (dbcont_man_.metaVariable(DBContent::meta_var_mc_g_.name()).existsIn(dbcontent_name))
+        ref_modec_g_name_ = dbcont_man_.metaVariable(DBContent::meta_var_mc_g_.name()).getFor(dbcontent_name).name();
     else
         ref_modec_g_name_ = "";
 
-    if (dbcontent_man.metaVariable(DBContent::meta_var_mc_v_.name()).existsIn(dbcontent_name))
-        ref_modec_v_name_ = dbcontent_man.metaVariable(DBContent::meta_var_mc_v_.name()).getFor(dbcontent_name).name();
+    if (dbcont_man_.metaVariable(DBContent::meta_var_mc_v_.name()).existsIn(dbcontent_name))
+        ref_modec_v_name_ = dbcont_man_.metaVariable(DBContent::meta_var_mc_v_.name()).getFor(dbcontent_name).name();
     else
         ref_modec_v_name_ = "";
 
@@ -107,31 +106,31 @@ void EvaluationData::addReferenceData (DBContent& object, unsigned int line_id, 
     }
 
     // m3a
-    ref_modea_name_ = dbcontent_man.metaVariable(DBContent::meta_var_m3a_.name()).getFor(dbcontent_name).name();
+    ref_modea_name_ = dbcont_man_.metaVariable(DBContent::meta_var_m3a_.name()).getFor(dbcontent_name).name();
 
-    if (dbcontent_man.metaVariable(DBContent::meta_var_m3a_g_.name()).existsIn(dbcontent_name))
-        ref_modea_g_name_ = dbcontent_man.metaVariable(DBContent::meta_var_m3a_g_.name()).getFor(dbcontent_name).name();
+    if (dbcont_man_.metaVariable(DBContent::meta_var_m3a_g_.name()).existsIn(dbcontent_name))
+        ref_modea_g_name_ = dbcont_man_.metaVariable(DBContent::meta_var_m3a_g_.name()).getFor(dbcontent_name).name();
     else
         ref_modea_g_name_ = "";
 
-    if (dbcontent_man.metaVariable(DBContent::meta_var_m3a_v_.name()).existsIn(dbcontent_name))
-        ref_modea_v_name_ = dbcontent_man.metaVariable(DBContent::meta_var_m3a_v_.name()).getFor(dbcontent_name).name();
+    if (dbcont_man_.metaVariable(DBContent::meta_var_m3a_v_.name()).existsIn(dbcontent_name))
+        ref_modea_v_name_ = dbcont_man_.metaVariable(DBContent::meta_var_m3a_v_.name()).getFor(dbcontent_name).name();
     else
         ref_modea_v_name_ = "";
 
     // ground bit
-    if (dbcontent_man.metaVariable(DBContent::meta_var_ground_bit_.name()).existsIn(dbcontent_name))
-        ref_ground_bit_name_ = dbcontent_man.metaVariable(DBContent::meta_var_ground_bit_.name()).getFor(dbcontent_name).name();
+    if (dbcont_man_.metaVariable(DBContent::meta_var_ground_bit_.name()).existsIn(dbcontent_name))
+        ref_ground_bit_name_ = dbcont_man_.metaVariable(DBContent::meta_var_ground_bit_.name()).getFor(dbcontent_name).name();
     else
         ref_ground_bit_name_ = "";
 
     // speed & track_angle
 
-    assert (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_ground_speed_));
-    assert (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_track_angle_));
+    assert (dbcont_man_.metaCanGetVariable(dbcontent_name, DBContent::meta_var_ground_speed_));
+    assert (dbcont_man_.metaCanGetVariable(dbcontent_name, DBContent::meta_var_track_angle_));
 
-    ref_spd_ground_speed_kts_name_ = dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_ground_speed_).name();
-    ref_spd_track_angle_deg_name_ = dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_track_angle_).name();
+    ref_spd_ground_speed_kts_name_ = dbcont_man_.metaGetVariable(dbcontent_name, DBContent::meta_var_ground_speed_).name();
+    ref_spd_track_angle_deg_name_ = dbcont_man_.metaGetVariable(dbcontent_name, DBContent::meta_var_track_angle_).name();
 
     set<unsigned int> active_srcs = eval_man_.activeDataSourcesRef();
     bool use_active_srcs = (eval_man_.dbContentNameRef() == eval_man_.dbContentNameTst());
@@ -208,7 +207,7 @@ void EvaluationData::addReferenceData (DBContent& object, unsigned int line_id, 
         {
             if (!hasTargetData(utn_it))
                 //target_data_.emplace(target_data_.end(), utn_it, *this, eval_man_);
-                target_data_.push_back({utn_it, *this, eval_man_});
+                target_data_.push_back({utn_it, *this, eval_man_, dbcont_man_});
 
             assert (hasTargetData(utn_it));
 
@@ -233,9 +232,7 @@ void EvaluationData::addTestData (DBContent& object, unsigned int line_id,  std:
 {
     loginf << "EvaluationData: addTestData: dbcontent " << object.name() << " size " << buffer->size();
 
-    DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
-
-    if (!dbcontent_man.hasAssociations())
+    if (!dbcont_man_.hasAssociations())
     {
         logwrn << "EvaluationData: addTestData: dbcontent has no associations";
         unassociated_ref_cnt_ = buffer->size();
@@ -250,31 +247,31 @@ void EvaluationData::addTestData (DBContent& object, unsigned int line_id,  std:
 
     string dbcontent_name = tst_buffer_->dbContentName();
 
-    tst_timestamp_name_ = dbcontent_man.metaVariable(DBContent::meta_var_timestamp_.name()).getFor(dbcontent_name).name();
+    tst_timestamp_name_ = dbcont_man_.metaVariable(DBContent::meta_var_timestamp_.name()).getFor(dbcontent_name).name();
 
-    tst_latitude_name_ = dbcontent_man.metaVariable(DBContent::meta_var_latitude_.name()).getFor(dbcontent_name).name();
-    tst_longitude_name_ = dbcontent_man.metaVariable(DBContent::meta_var_longitude_.name()).getFor(dbcontent_name).name();
+    tst_latitude_name_ = dbcont_man_.metaVariable(DBContent::meta_var_latitude_.name()).getFor(dbcontent_name).name();
+    tst_longitude_name_ = dbcont_man_.metaVariable(DBContent::meta_var_longitude_.name()).getFor(dbcontent_name).name();
 
-    if (dbcontent_man.metaVariable(DBContent::meta_var_ta_.name()).existsIn(dbcontent_name))
-        tst_target_address_name_ = dbcontent_man.metaVariable(DBContent::meta_var_ta_.name()).getFor(dbcontent_name).name();
+    if (dbcont_man_.metaVariable(DBContent::meta_var_ta_.name()).existsIn(dbcontent_name))
+        tst_target_address_name_ = dbcont_man_.metaVariable(DBContent::meta_var_ta_.name()).getFor(dbcontent_name).name();
     else
         tst_target_address_name_ = "";
 
-    if (dbcontent_man.metaVariable(DBContent::meta_var_ti_.name()).existsIn(dbcontent_name))
-        tst_callsign_name_ = dbcontent_man.metaVariable(DBContent::meta_var_ti_.name()).getFor(dbcontent_name).name();
+    if (dbcont_man_.metaVariable(DBContent::meta_var_ti_.name()).existsIn(dbcontent_name))
+        tst_callsign_name_ = dbcont_man_.metaVariable(DBContent::meta_var_ti_.name()).getFor(dbcontent_name).name();
     else
         tst_callsign_name_ = "";
 
     // mc
-    tst_modec_name_ = dbcontent_man.metaVariable(DBContent::meta_var_mc_.name()).getFor(dbcontent_name).name();
+    tst_modec_name_ = dbcont_man_.metaVariable(DBContent::meta_var_mc_.name()).getFor(dbcontent_name).name();
 
-    if (dbcontent_man.metaVariable(DBContent::meta_var_mc_g_.name()).existsIn(dbcontent_name))
-        tst_modec_g_name_ = dbcontent_man.metaVariable(DBContent::meta_var_mc_g_.name()).getFor(dbcontent_name).name();
+    if (dbcont_man_.metaVariable(DBContent::meta_var_mc_g_.name()).existsIn(dbcontent_name))
+        tst_modec_g_name_ = dbcont_man_.metaVariable(DBContent::meta_var_mc_g_.name()).getFor(dbcontent_name).name();
     else
         tst_modec_g_name_ = "";
 
-    if (dbcontent_man.metaVariable(DBContent::meta_var_mc_v_.name()).existsIn(dbcontent_name))
-        tst_modec_v_name_ = dbcontent_man.metaVariable(DBContent::meta_var_mc_v_.name()).getFor(dbcontent_name).name();
+    if (dbcont_man_.metaVariable(DBContent::meta_var_mc_v_.name()).existsIn(dbcontent_name))
+        tst_modec_v_name_ = dbcont_man_.metaVariable(DBContent::meta_var_mc_v_.name()).getFor(dbcontent_name).name();
     else
         tst_modec_v_name_ = "";
 
@@ -286,37 +283,37 @@ void EvaluationData::addTestData (DBContent& object, unsigned int line_id,  std:
 //    }
 
     // m3a
-    tst_modea_name_ = dbcontent_man.metaVariable(DBContent::meta_var_m3a_.name()).getFor(dbcontent_name).name();
+    tst_modea_name_ = dbcont_man_.metaVariable(DBContent::meta_var_m3a_.name()).getFor(dbcontent_name).name();
 
-    if (dbcontent_man.metaVariable(DBContent::meta_var_m3a_g_.name()).existsIn(dbcontent_name))
-        tst_modea_g_name_ = dbcontent_man.metaVariable(DBContent::meta_var_m3a_g_.name()).getFor(dbcontent_name).name();
+    if (dbcont_man_.metaVariable(DBContent::meta_var_m3a_g_.name()).existsIn(dbcontent_name))
+        tst_modea_g_name_ = dbcont_man_.metaVariable(DBContent::meta_var_m3a_g_.name()).getFor(dbcontent_name).name();
     else
         tst_modea_g_name_ = "";
 
-    if (dbcontent_man.metaVariable(DBContent::meta_var_m3a_v_.name()).existsIn(dbcontent_name))
-        tst_modea_v_name_ = dbcontent_man.metaVariable(DBContent::meta_var_m3a_v_.name()).getFor(dbcontent_name).name();
+    if (dbcont_man_.metaVariable(DBContent::meta_var_m3a_v_.name()).existsIn(dbcontent_name))
+        tst_modea_v_name_ = dbcont_man_.metaVariable(DBContent::meta_var_m3a_v_.name()).getFor(dbcontent_name).name();
     else
         tst_modea_v_name_ = "";
 
     // ground bit
-    if (dbcontent_man.metaVariable(DBContent::meta_var_ground_bit_.name()).existsIn(dbcontent_name))
-        tst_ground_bit_name_ = dbcontent_man.metaVariable(DBContent::meta_var_ground_bit_.name()).getFor(dbcontent_name).name();
+    if (dbcont_man_.metaVariable(DBContent::meta_var_ground_bit_.name()).existsIn(dbcontent_name))
+        tst_ground_bit_name_ = dbcont_man_.metaVariable(DBContent::meta_var_ground_bit_.name()).getFor(dbcontent_name).name();
     else
         tst_ground_bit_name_ = "";
 
     // track num
-    if (dbcontent_man.metaVariable(DBContent::meta_var_track_num_.name()).existsIn(dbcontent_name))
-        tst_track_num_name_ = dbcontent_man.metaVariable(DBContent::meta_var_track_num_.name()).getFor(dbcontent_name).name();
+    if (dbcont_man_.metaVariable(DBContent::meta_var_track_num_.name()).existsIn(dbcontent_name))
+        tst_track_num_name_ = dbcont_man_.metaVariable(DBContent::meta_var_track_num_.name()).getFor(dbcontent_name).name();
     else
         tst_track_num_name_ = "";
 
     // speed & track_angle
 
-    assert (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_ground_speed_));
-    assert (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_track_angle_));
+    assert (dbcont_man_.metaCanGetVariable(dbcontent_name, DBContent::meta_var_ground_speed_));
+    assert (dbcont_man_.metaCanGetVariable(dbcontent_name, DBContent::meta_var_track_angle_));
 
-    tst_spd_ground_speed_kts_name_ = dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_ground_speed_).name();
-    tst_spd_track_angle_deg_name_ = dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_track_angle_).name();
+    tst_spd_ground_speed_kts_name_ = dbcont_man_.metaGetVariable(dbcontent_name, DBContent::meta_var_ground_speed_).name();
+    tst_spd_track_angle_deg_name_ = dbcont_man_.metaGetVariable(dbcontent_name, DBContent::meta_var_track_angle_).name();
 
     set<unsigned int> active_srcs = eval_man_.activeDataSourcesTst();
     bool use_active_srcs = (eval_man_.dbContentNameRef() == eval_man_.dbContentNameTst());
@@ -394,7 +391,7 @@ void EvaluationData::addTestData (DBContent& object, unsigned int line_id,  std:
         {
             if (!hasTargetData(utn_it))
                 //target_data_.emplace(target_data_.end(), utn_it, *this, eval_man_);
-                target_data_.push_back({utn_it, *this, eval_man_});
+                target_data_.push_back({utn_it, *this, eval_man_, dbcont_man_});
 
             assert (hasTargetData(utn_it));
 
@@ -615,7 +612,7 @@ QVariant EvaluationData::data(const QModelIndex& index, int role) const
 
                     const EvaluationTargetData& target = target_data_.at(index.row());
 
-                    if (eval_man_.useUTN(target.utn_))
+                    if (dbcont_man_.utnUseEval(target.utn_))
                         return Qt::Checked;
                     else
                         return Qt::Unchecked;
@@ -630,7 +627,7 @@ QVariant EvaluationData::data(const QModelIndex& index, int role) const
 
                 const EvaluationTargetData& target = target_data_.at(index.row());
 
-                if (!target.use())
+                if (!dbcont_man_.utnUseEval(target.utn_))
                     return QBrush(Qt::lightGray);
                 else
                     return QVariant();
@@ -661,7 +658,7 @@ QVariant EvaluationData::data(const QModelIndex& index, int role) const
                 }
                 else if (col_name == "Comment")
                 {
-                    return eval_man_.utnComment(target.utn_).c_str();
+                    return dbcont_man_.utnComment(target.utn_).c_str();
                 }
                 else if (col_name == "Begin")
                 {
@@ -705,34 +702,6 @@ QVariant EvaluationData::data(const QModelIndex& index, int role) const
                 }
 
             }
-        case Qt::DecorationRole:
-            {
-                assert (index.column() < table_columns_.size());
-
-                //                if (table_columns_.at(index.column()) == "status")
-                //                {
-                //                    assert (index.row() >= 0);
-                //                    assert (index.row() < view_points_.size());
-
-                //                    const ViewPoint& vp = view_points_.at(index.row());
-
-                //                    const json& data = vp.data().at("status");
-                //                    assert (data.is_string());
-
-                //                    std::string status = data;
-
-                //                    if (status == "open")
-                //                        return open_icon_;
-                //                    else if (status == "closed")
-                //                        return closed_icon_;
-                //                    else if (status == "todo")
-                //                        return todo_icon_;
-                //                    else
-                //                        return unknown_icon_;
-                //                }
-                //                else
-                return QVariant();
-            }
         case Qt::UserRole: // to find the checkboxes
             {
                 if (index.column() == 0)
@@ -774,8 +743,9 @@ bool EvaluationData::setData(const QModelIndex &index, const QVariant& value, in
         bool checked = (Qt::CheckState)value.toInt() == Qt::Checked;
         loginf << "EvaluationData: setData: utn " << it->utn_ <<" check state " << checked;
 
-        eval_man_.useUTN(it->utn_, checked, false);
-        target_data_.modify(it, [value,checked](EvaluationTargetData& p) { p.use(checked); });
+        //eval_man_.useUTN(it->utn_, checked, false);
+        dbcont_man_.utnUseEval(it->utn_, checked);
+        //target_data_.modify(it, [value,checked](EvaluationTargetData& p) { p.use(checked); });
 
         emit dataChanged(index, EvaluationData::index(index.row(), columnCount()-1));
         return true;
@@ -786,7 +756,8 @@ bool EvaluationData::setData(const QModelIndex &index, const QVariant& value, in
         assert (index.row() < target_data_.size());
 
         auto it = target_data_.begin()+index.row();
-        eval_man_.utnComment(it->utn_, value.toString().toStdString(), false);
+        //eval_man_.utnComment(it->utn_, value.toString().toStdString(), false);
+        dbcont_man_.utnComment(it->utn_, value.toString().toStdString());
         //target_data_.modify(it, [value](EvaluationTargetData& p) { p.use(false); });
         return true;
     }
@@ -886,50 +857,50 @@ void EvaluationData::setUseTargetData (unsigned int utn, bool value)
     setData(items.at(0), {value ? Qt::Checked: Qt::Unchecked}, Qt::CheckStateRole);
 }
 
-void EvaluationData::setUseAllTargetData (bool value)
-{
-    loginf << "EvaluationData: setUseAllTargetData: value " << value;
+//void EvaluationData::setUseAllTargetData (bool value)
+//{
+//    loginf << "EvaluationData: setUseAllTargetData: value " << value;
 
-    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+//    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
-    beginResetModel();
+//    beginResetModel();
 
-    eval_man_.useAllUTNs(value);
+//    eval_man_.useAllUTNs(value);
 
-    endResetModel();
+//    endResetModel();
 
-    QApplication::restoreOverrideCursor();
-}
+//    QApplication::restoreOverrideCursor();
+//}
 
-void EvaluationData::clearComments ()
-{
-    loginf << "EvaluationData: clearComments";
+//void EvaluationData::clearComments ()
+//{
+//    loginf << "EvaluationData: clearComments";
 
-    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+//    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
-    beginResetModel();
+//    beginResetModel();
 
-    eval_man_.clearUTNComments();
+//    eval_man_.clearUTNComments();
 
-    endResetModel();
+//    endResetModel();
 
-    QApplication::restoreOverrideCursor();
-}
+//    QApplication::restoreOverrideCursor();
+//}
 
-void EvaluationData::setUseByFilter ()
-{
-    loginf << "EvaluationData: setUseByFilter";
+//void EvaluationData::setUseByFilter ()
+//{
+//    loginf << "EvaluationData: setUseByFilter";
 
-    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+//    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
-    beginResetModel();
+//    beginResetModel();
 
-    eval_man_.filterUTNs();
+//    eval_man_.filterUTNs();
 
-    endResetModel();
+//    endResetModel();
 
-    QApplication::restoreOverrideCursor();
-}
+//    QApplication::restoreOverrideCursor();
+//}
 
 void EvaluationData::setTargetDataComment (unsigned int utn, std::string comment)
 {
