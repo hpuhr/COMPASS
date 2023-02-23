@@ -1255,7 +1255,7 @@ bool EvaluationTargetData::hasTstMeasuredTrackAngleForTime (ptime timestamp) con
                 && !eval_data_.tst_buffer_->get<double>(eval_data_.tst_spd_y_ms_name_).isNull(index);
 }
 
-float EvaluationTargetData::tstMeasuredTrackAngleForTime (ptime timestamp) const // deg
+float EvaluationTargetData::tstMeasuredTrackAngleForTime (ptime timestamp) const // rad
 {
     assert (hasTstMeasuredTrackAngleForTime(timestamp));
 
@@ -1267,7 +1267,7 @@ float EvaluationTargetData::tstMeasuredTrackAngleForTime (ptime timestamp) const
 
     if (eval_data_.tst_spd_track_angle_deg_name_.size())
     {
-        return eval_data_.tst_buffer_->get<double>(eval_data_.tst_spd_track_angle_deg_name_).get(index);
+        return DEG2RAD * eval_data_.tst_buffer_->get<double>(eval_data_.tst_spd_track_angle_deg_name_).get(index);
     }
     else
     {

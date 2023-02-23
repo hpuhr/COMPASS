@@ -16,11 +16,11 @@
  */
 
 #include "number.h"
+#include "logger.h"
 
-#include <math.h>
+#include <cmath>
 #include <stdlib.h>
 
-#include "logger.h"
 
 namespace Utils
 {
@@ -41,6 +41,22 @@ double round(float num, unsigned int precision)
 double calculateAngle(double degrees, double minutes, double seconds)
 {
     return degrees + minutes / 60.0 + seconds / 3600.0;
+}
+
+double calculateAngleDifference(double a_deg, double b_deg)
+{
+//    if (a_deg < 0)
+//        a_deg += 360.0;
+
+//    if (b_deg < 0)
+//        b_deg += 360.0;
+
+//    return (a_deg > b_deg) * (360.0 - b_deg - a_deg)
+//            + (b_deg >= a_deg) * (b_deg - a_deg);
+
+    double phi = std::fmod(std::fabs(a_deg - b_deg), 360.0);       // This is either the distance or 360 - distance
+    double distance = phi > 180.0 ? 360.0 - phi : phi;
+    return distance;
 }
 
 unsigned int dsIdFrom (unsigned int sac, unsigned int sic)

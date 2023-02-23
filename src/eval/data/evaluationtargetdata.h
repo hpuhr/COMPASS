@@ -180,7 +180,7 @@ public:
     float tstMeasuredSpeedForTime (boost::posix_time::ptime timestamp) const; // m/s
 
     bool hasTstMeasuredTrackAngleForTime (boost::posix_time::ptime timestamp) const;
-    float tstMeasuredTrackAngleForTime (boost::posix_time::ptime timestamp) const; // deg
+    float tstMeasuredTrackAngleForTime (boost::posix_time::ptime timestamp) const; // rad
 
     bool canCheckTstMultipleSources() const;
     bool hasTstMultipleSources() const;

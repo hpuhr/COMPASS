@@ -22,6 +22,7 @@
 #include "logger.h"
 #include "stringconv.h"
 #include "sectorlayer.h"
+#include "util/number.h"
 
 #include <ogr_spatialref.h>
 
@@ -112,7 +113,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> TrackAngle::evaluate (
     bool ok;
 
     EvaluationTargetVelocity ref_spd;
-    float tst_trackangle_deg;
+    double ref_trackangle_deg, tst_trackangle_deg;
     float trackangle_min_diff;
 
     bool comp_passed;
@@ -222,6 +223,9 @@ std::shared_ptr<EvaluationRequirementResult::Single> TrackAngle::evaluate (
                                    "Reference speed too low"});
 
             ++num_pos_ref_spd_low;
+
+            loginf << Time::toString(timestamp) << " ref spd low "  << ref_spd.speed_;
+
             continue;
         }
 
@@ -239,12 +243,28 @@ std::shared_ptr<EvaluationRequirementResult::Single> TrackAngle::evaluate (
             continue;
         }
 
-        tst_trackangle_deg = target_data.tstMeasuredTrackAngleForTime (timestamp);
-        trackangle_min_diff = fabs((fmod(ref_spd.track_angle_ - tst_trackangle_deg + 180.0, 360.0) - 180.0));
+        ref_trackangle_deg = RAD2DEG * ref_spd.track_angle_;
+        tst_trackangle_deg = RAD2DEG * target_data.tstMeasuredTrackAngleForTime (timestamp);
+
+//        if (ref_trackangle_deg < 0)
+//            ref_trackangle_deg += 360;
+
+//        if (tst_trackangle_deg < 0)
+//            tst_trackangle_deg += 360;
+
+        // a = (targetA - sourceA + 180) % 360 - 180
+        //trackangle_min_diff = fabs(fmod(RAD2DEG * ref_spd.track_angle_ - tst_trackangle_deg + 180.0, 360.0) - 180.0);
+
+        //trackangle_min_diff = RAD2DEG * ref_spd.track_angle_ - tst_trackangle_deg;
+
+        trackangle_min_diff = Number::calculateAngleDifference(ref_trackangle_deg, tst_trackangle_deg);
+
+//        loginf << Time::toString(timestamp) << " tst_track ref " << ref_trackangle_deg
+//               << " tst " << tst_trackangle_deg << " diff " << trackangle_min_diff;
 
         ++num_trackangle_comp;
 
-        if (compareValue(trackangle_min_diff, threshold_, threshold_value_check_type_))
+        if (compareValue(fabs(trackangle_min_diff), threshold_, threshold_value_check_type_))
         {
             comp_passed = true;
             ++num_comp_passed;
@@ -255,6 +275,9 @@ std::shared_ptr<EvaluationRequirementResult::Single> TrackAngle::evaluate (
             ++num_comp_failed;
             comment = "Failed";
         }
+
+        comment += " tst_track ref " +to_string(ref_trackangle_deg)
+                + " tst " + to_string(tst_trackangle_deg) + " diff " + to_string(trackangle_min_diff);
 
         details.push_back({timestamp, tst_pos,
                            true, ref_pos,
@@ -277,15 +300,14 @@ std::shared_ptr<EvaluationRequirementResult::Single> TrackAngle::evaluate (
     if (num_pos - num_no_ref - num_pos_ref_spd_low != num_pos_inside + num_pos_outside)
         logwrn << "EvaluationRequirementTrackAngle '" << name_ << "': evaluate: utn " << target_data.utn_
                << " num_pos " << num_pos << " num_no_ref " <<  num_no_ref
-               << " num_pos_ref_spd_low " << num_pos_ref_spd_low
                << " num_pos_outside " << num_pos_outside << " num_pos_inside " << num_pos_inside;
-    assert (num_pos - num_no_ref - num_pos_ref_spd_low == num_pos_inside + num_pos_outside);
+    assert (num_pos - num_no_ref == num_pos_inside + num_pos_outside);
 
 
     if (num_trackangle_comp != num_comp_failed + num_comp_passed)
         logwrn << "EvaluationRequirementTrackAngle '" << name_ << "': evaluate: utn " << target_data.utn_
-               << " num_speeds " << num_trackangle_comp << " num_comp_failed " <<  num_comp_failed
-               << " num_comp_passed " << num_comp_passed;
+               << " num_speeds " << num_trackangle_comp
+               << " num_comp_failed " <<  num_comp_failed << " num_comp_passed " << num_comp_passed;
 
     assert (num_trackangle_comp == num_comp_failed + num_comp_passed);
     assert (num_trackangle_comp == values.size());

@@ -48,7 +48,7 @@ TrackAngleConfigWidget::TrackAngleConfigWidget(TrackAngleConfig& cfg)
     form_layout_->addRow("Use Minimum Speed", use_minimum_speed_check_);
 
     // track angle difference threshold
-    minimum_speed_edit_ = new QLineEdit(QString::number(config().threshold()));
+    minimum_speed_edit_ = new QLineEdit(QString::number(config().minimumSpeed()));
     minimum_speed_edit_->setValidator(new QDoubleValidator(0.0, 10000.0, 2, this));
     connect(minimum_speed_edit_, &QLineEdit::textEdited,
             this, &TrackAngleConfigWidget::minimumSpeedEditSlot);
