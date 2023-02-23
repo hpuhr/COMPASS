@@ -1,15 +1,19 @@
 
 #pragma once
 
+#include "appmode.h"
+
 #include <QToolBar>
 #include <QKeySequence>
 
 #include <map>
+#include <set>
 #include <functional>
 
 #include <boost/optional.hpp>
 
 class ViewToolSwitcher;
+class ViewWidget;
 
 class QShortcut;
 class QCursor;
@@ -24,7 +28,7 @@ public:
     typedef std::function<void(bool)>     ToggleCallback;
     typedef std::function<void(QAction*)> UpdateCallback;
 
-    ViewToolWidget(ViewToolSwitcher* tool_switcher, QWidget* parent = nullptr);
+    ViewToolWidget(ViewWidget* view_widget, ViewToolSwitcher* tool_switcher, QWidget* parent = nullptr);
     virtual ~ViewToolWidget() = default;
 
     void addTool(int id, const UpdateCallback& cb_update = UpdateCallback());
@@ -53,6 +57,8 @@ public:
                            const QKeySequence& key_combination = QKeySequence(),
                            bool checked = false);
     void addSpacer();
+    void addSeparatorIfValid();
+    void addConfigWidgetToggle();
 
     void enableAction(int id, bool enable);
 
@@ -60,6 +66,10 @@ public:
 
     void loadingStarted();
     void loadingDone();
+    void redrawStarted();
+    void redrawDone();
+
+    void appModeSwitch(AppMode app_mode);
 
 private:
     struct Action
@@ -84,8 +94,15 @@ private:
                                         const QKeySequence& key_combination,
                                         bool checked);
 
+    bool actionIsSpacer(QAction* action) const;
+    bool separatorValid() const;
+
+    ViewWidget*       view_widget_   = nullptr;
     ViewToolSwitcher* tool_switcher_ = nullptr;
 
     std::map<int, Action> actions_;
+    std::set<QAction*>    spacers_;
     std::vector<Callback> update_callbacks_;
+
+    
 };

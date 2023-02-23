@@ -56,8 +56,6 @@ public:
 
     AllBufferTableWidget* getAllBufferTableWidget ();
 
-    virtual bool hasData() const override;
-
 signals:
     void exportDoneSignal(bool cancelled);
     void showOnlySelectedSignal(bool value);
@@ -74,9 +72,9 @@ protected:
     virtual void toolChanged_impl(int mode) override;
     virtual void loadingStarted_impl() override;
     virtual void loadingDone_impl() override;
-    virtual void updateData_impl(const std::map<std::string, std::shared_ptr<Buffer>>& data, bool requires_reset) override;
+    virtual void updateData_impl(bool requires_reset) override;
     virtual void clearData_impl() override;
-    virtual void redrawData_impl(bool recompute) override;
+    virtual bool redrawData_impl(bool recompute) override;
     virtual void liveReload_impl() override;
 
     ListBoxView*           view_{nullptr};
@@ -87,8 +85,7 @@ protected:
     /// Container with all table widgets
     AllBufferTableWidget*  all_buffer_table_widget_{nullptr};
 
-    std::map<std::string, std::shared_ptr<Buffer>> buffers_;
-    std::map<std::string, BufferTableWidget*>      buffer_tables_;
+    std::map<std::string, BufferTableWidget*> buffer_tables_;
 };
 
 #endif /* LISTBOXVIEWDATAWIDGET_H_ */

@@ -57,11 +57,9 @@ public:
                Configurable* config_parent, View* view, QWidget* parent = nullptr);
     virtual ~ViewWidget();
 
-    View* getView() { return view_; }
-
     void toggleConfigWidget();
-    void updateToolWidget();
 
+    void updateToolWidget();
     void updateLoadState();
 
     void loadingStarted();
@@ -73,15 +71,22 @@ public:
     void notifyReloadNeeded();
     void notifyRedrawNeeded();
 
-    virtual ViewDataWidget* getViewDataWidget() { return data_widget_; }
-    virtual const ViewDataWidget* getViewDataWidget() const { return data_widget_; }
-    virtual ViewConfigWidget* getViewConfigWidget() { return config_widget_; }
-    virtual const ViewConfigWidget* getViewConfigWidget() const { return config_widget_; }
+    ViewDataWidget* getViewDataWidget() { return data_widget_; }
+    const ViewDataWidget* getViewDataWidget() const { return data_widget_; }
+    ViewConfigWidget* getViewConfigWidget() { return config_widget_; }
+    const ViewConfigWidget* getViewConfigWidget() const { return config_widget_; }
+
+    QWidget* getLowerWidget() { return lower_widget_; }
+    const QWidget* getLowerWidget() const { return lower_widget_; }
 
     virtual std::string loadedMessage() const { return ""; }
 
     bool reloadNeeded() const;
     bool redrawNeeded() const;
+
+    void init();
+
+    static QIcon getIcon(const std::string& fn);
 
 protected:
     ViewToolWidget* getViewToolWidget() { return tool_widget_; }
@@ -94,28 +99,30 @@ protected:
     virtual bool reloadNeeded_impl() const { return false; };
     virtual bool redrawNeeded_impl() const { return false; };
 
-    QIcon getIcon(const std::string& fn) const;
-
     void setDataWidget(ViewDataWidget* w);
     void setConfigWidget(ViewConfigWidget* w);
+    void setLowerWidget(QWidget* w);
 
-    void createStandardLayout();
-    void addConfigWidgetToggle();
-
-    /// The view the widget is part of
-    View* view_;
+    View* getView() { return view_; }
 
 private:
+    void createStandardLayout();
     void connectWidgets();
+
+    /// The view the widget is part of
+    View* view_ = nullptr;
 
     QSplitter*      main_splitter_           = nullptr;
     QWidget*        data_widget_container_   = nullptr;
     QWidget*        config_widget_container_ = nullptr;
+    QWidget*        lower_widget_container_  = nullptr;
+    QWidget*        right_widget_            = nullptr;
 
     ViewToolWidget*      tool_widget_   = nullptr;
     ViewDataWidget*      data_widget_   = nullptr;
     ViewConfigWidget*    config_widget_ = nullptr;
     ViewLoadStateWidget* state_widget_  = nullptr;
+    QWidget*             lower_widget_  = nullptr;
 
     std::unique_ptr<ViewToolSwitcher> tool_switcher_;
 

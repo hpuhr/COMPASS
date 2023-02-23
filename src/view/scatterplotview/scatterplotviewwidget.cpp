@@ -16,6 +16,8 @@
  */
 
 #include "scatterplotviewwidget.h"
+#include "scatterplotviewconfigwidget.h"
+#include "scatterplotviewdatawidget.h"
 
 #include <QHBoxLayout>
 #include <QSettings>
@@ -27,15 +29,15 @@
 #include "viewtoolswitcher.h"
 #include "files.h"
 
-/*
+/**
  */
-ScatterPlotViewWidget::ScatterPlotViewWidget(const std::string& class_id, const std::string& instance_id,
-                                     Configurable* config_parent, ScatterPlotView* view,
-                                     QWidget* parent)
-    : ViewWidget(class_id, instance_id, config_parent, view, parent)
+ScatterPlotViewWidget::ScatterPlotViewWidget(const std::string& class_id, 
+                                             const std::string& instance_id,
+                                             Configurable* config_parent, 
+                                             ScatterPlotView* view,
+                                             QWidget* parent)
+:   ViewWidget(class_id, instance_id, config_parent, view, parent)
 {
-    createStandardLayout();
-
     auto data_widget = new ScatterPlotViewDataWidget(getView(), view->getDataSource());
     setDataWidget(data_widget);
 
@@ -61,14 +63,18 @@ ScatterPlotViewWidget::ScatterPlotViewWidget(const std::string& class_id, const 
     getViewToolWidget()->addSpacer();
 
     getViewToolWidget()->addActionCallback("Zoom to Home", [=] () { data_widget->resetZoomSlot(); }, {}, getIcon("zoom_home.png"), Qt::Key_Space);
-
-    getViewToolWidget()->addSeparator();
-    addConfigWidgetToggle();
 }
 
 /**
  */
 ScatterPlotViewWidget::~ScatterPlotViewWidget() = default;
+
+/**
+ */
+ScatterPlotView* ScatterPlotViewWidget::getView() 
+{ 
+    return dynamic_cast<ScatterPlotView*>(ViewWidget::getView());
+}
 
 /**
  */
@@ -89,6 +95,13 @@ const ScatterPlotViewDataWidget* ScatterPlotViewWidget::getViewDataWidget() cons
 ScatterPlotViewConfigWidget* ScatterPlotViewWidget::getViewConfigWidget()
 {
     return dynamic_cast<ScatterPlotViewConfigWidget*>(ViewWidget::getViewConfigWidget());
+}
+
+/**
+ */
+const ScatterPlotViewConfigWidget* ScatterPlotViewWidget::getViewConfigWidget() const
+{
+    return dynamic_cast<const ScatterPlotViewConfigWidget*>(ViewWidget::getViewConfigWidget());
 }
 
 /**

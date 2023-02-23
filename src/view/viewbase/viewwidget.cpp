@@ -39,13 +39,15 @@
 */
 ViewWidget::ViewWidget(const std::string& class_id, const std::string& instance_id,
                        Configurable* config_parent, View* view, QWidget* parent)
-    : QWidget(parent),
+    : QWidget     (parent),
       Configurable(class_id, instance_id, config_parent),
-      view_(view)
+      view_       (view)
 {
     setContentsMargins(0, 0, 0, 0);
 
     tool_switcher_.reset(new ViewToolSwitcher);
+
+    createStandardLayout();
 }
 
 /**
@@ -64,8 +66,15 @@ ViewWidget::~ViewWidget()
  */
 void ViewWidget::createStandardLayout()
 {
+    QVBoxLayout* main_layout = new QVBoxLayout;
+    main_layout->setContentsMargins(0, 0, 0, 0);
+    main_layout->setSpacing(0);
+    main_layout->setMargin(0);
+
     QHBoxLayout* hlayout = new QHBoxLayout;
     hlayout->setContentsMargins(0, 0, 0, 0);
+
+    main_layout->addLayout(hlayout);
 
     main_splitter_ = new QSplitter;
     main_splitter_->setOrientation(Qt::Horizontal);
@@ -78,8 +87,8 @@ void ViewWidget::createStandardLayout()
     QWidget* left_widget = new QWidget;
     left_widget->setContentsMargins(0, 0, 0, 0);
 
-    QWidget* right_widget = new QWidget;
-    right_widget->setContentsMargins(0, 0, 0, 0);
+    right_widget_ = new QWidget;
+    right_widget_->setContentsMargins(0, 0, 0, 0);
 
     QVBoxLayout* left_layout = new QVBoxLayout;
     left_layout->setContentsMargins(0, 0, 0, 0);
@@ -88,14 +97,14 @@ void ViewWidget::createStandardLayout()
     right_layout->setContentsMargins(0, 0, 0, 0);
 
     left_widget->setLayout(left_layout);
-    right_widget->setLayout(right_layout);
+    right_widget_->setLayout(right_layout);
 
     main_splitter_->addWidget(left_widget);
-    main_splitter_->addWidget(right_widget);
+    main_splitter_->addWidget(right_widget_);
 
     //create tool widget
     {
-        tool_widget_ = new ViewToolWidget(tool_switcher_.get(), this);
+        tool_widget_ = new ViewToolWidget(this, tool_switcher_.get(), this);
         tool_widget_->setContentsMargins(0, 0, 0, 0);
 
         left_layout->addWidget(tool_widget_);
@@ -127,15 +136,22 @@ void ViewWidget::createStandardLayout()
 
     //create load state widget
     {
-        state_widget_ = new ViewLoadStateWidget(this, right_widget);
+        state_widget_ = new ViewLoadStateWidget(this, right_widget_);
 
         right_layout->addWidget(state_widget_);
+    }
+
+    //create lower widget container
+    {
+        lower_widget_container_ = new QWidget;
+        lower_widget_container_->setVisible(false);
+        main_layout->addWidget(lower_widget_container_);
     }
 
     main_splitter_->restoreState(settings.value("mainSplitterSizes").toByteArray());
     hlayout->addWidget(main_splitter_);
 
-    setLayout(hlayout);
+    setLayout(main_layout);
 
     setFocusPolicy(Qt::StrongFocus);
 
@@ -143,6 +159,17 @@ void ViewWidget::createStandardLayout()
     main_splitter_->setChildrenCollapsible(false); 
     for (int i = 0; i < main_splitter_->count(); ++i)
         main_splitter_->setCollapsible(i, false);
+}
+
+/**
+*/
+void ViewWidget::init()
+{
+    if (config_widget_ && tool_widget_)
+        tool_widget_->addConfigWidgetToggle();
+
+    updateLoadState();
+    updateToolWidget();
 }
 
 /**
@@ -203,101 +230,135 @@ void ViewWidget::connectWidgets()
     if (config_widget_ && data_widget_)
     {
         connect(data_widget_, &ViewDataWidget::displayChanged, config_widget_, &ViewConfigWidget::onDisplayChange);
-
-        if (state_widget_)
-            state_widget_->updateState();
     }
+}
+
+/**
+ */
+void ViewWidget::setLowerWidget(QWidget* w)
+{
+    if (!w)
+        throw std::runtime_error("ViewWidget::setLowerWidget: Null pointer passed");
+    if (!lower_widget_container_)
+        throw std::runtime_error("ViewWidget::setLowerWidget: No container to add to");
+    if (lower_widget_)
+        throw std::runtime_error("ViewWidget::setLowerWidget: Already set");
+    
+    QVBoxLayout* layout = new QVBoxLayout;
+    layout->setContentsMargins(0, 0, 0, 0);
+    lower_widget_container_->setLayout(layout);
+
+    layout->addWidget(w);
+
+    lower_widget_container_->setVisible(true);
 }
 
 /**
  */
 void ViewWidget::toggleConfigWidget()
 {
-    if (config_widget_container_)
-    {
-        bool vis = config_widget_container_->isVisible();
-        config_widget_container_->setVisible(!vis);
-    }
+    assert(right_widget_);
+
+    bool vis = right_widget_->isVisible();
+    right_widget_->setVisible(!vis);
 }
 
 /**
  */
-void ViewWidget::addConfigWidgetToggle()
-{
-    getViewToolWidget()->addActionCallback("Toggle Configuration Panel", [=] (bool on) { this->toggleConfigWidget(); }, {}, getIcon("configuration.png"), Qt::Key_C, true);
-}
-
-/**
- */
-QIcon ViewWidget::getIcon(const std::string& fn) const
+QIcon ViewWidget::getIcon(const std::string& fn)
 {
     return QIcon(Utils::Files::getIconFilepath(fn).c_str());
 }
 
 /**
 */
-void ViewWidget::updateToolWidget()
-{
-    getViewToolWidget()->updateItems();
-}
-
-/**
-*/
 void ViewWidget::loadingStarted()
 {
-    //call in subwidgets
-    getViewLoadStateWidget()->loadingStarted();
-    getViewToolWidget()->loadingStarted();
+    assert(getViewLoadStateWidget());
+    assert(getViewToolWidget());
+    assert(getViewDataWidget());
+    assert(getViewConfigWidget());
+
+    //propagate to subwidgets (note: order might be important)
     getViewDataWidget()->loadingStarted();
     getViewConfigWidget()->loadingStarted();
+    getViewLoadStateWidget()->loadingStarted();
+    getViewToolWidget()->loadingStarted();
 }
 
 /**
 */
 void ViewWidget::loadingDone()
 {
+    assert(getViewToolWidget());
+    assert(getViewDataWidget());
+    assert(getViewConfigWidget());
+    assert(getViewLoadStateWidget());
+
     //set back flag
     reload_needed_ = false;
     redraw_needed_ = false; //a reload should always result in a redraw anyway
 
-    //call in subwidgets
-    getViewToolWidget()->loadingDone();
+    //propagate to subwidgets (note: order might be important)
     getViewDataWidget()->loadingDone();
     getViewConfigWidget()->loadingDone();
     getViewLoadStateWidget()->loadingDone();
+    getViewToolWidget()->loadingDone();
 }
 
 /**
 */
 void ViewWidget::redrawStarted()
 {
-    //call in subwidgets
+    assert(getViewConfigWidget());
+    assert(getViewLoadStateWidget());
+    assert(getViewToolWidget());
+
+    //propagate to subwidgets (note: order might be important)
     getViewConfigWidget()->redrawStarted();
     getViewLoadStateWidget()->redrawStarted();
+    getViewToolWidget()->redrawStarted();
 }
 
 /**
 */
 void ViewWidget::redrawDone()
 {
+    assert(getViewConfigWidget());
+    assert(getViewLoadStateWidget());
+    assert(getViewToolWidget());
+
     //set back flag
     redraw_needed_ = false;
 
-    //call in subwidgets
+    //propagate to subwidgets (note: order might be important)
     getViewConfigWidget()->redrawDone();
     getViewLoadStateWidget()->redrawDone();
+    getViewToolWidget()->redrawDone();
 }
 
 /**
 */
 void ViewWidget::appModeSwitch(AppMode app_mode)
 {
-    //call in subwidgets
+    assert(getViewToolWidget());
+    assert(getViewDataWidget());
+    assert(getViewConfigWidget());
+    assert(getViewLoadStateWidget());
+
+    //propagate to subwidgets (note: order might be important)
     getViewDataWidget()->appModeSwitch(app_mode);
     getViewConfigWidget()->appModeSwitch(app_mode);
     getViewLoadStateWidget()->appModeSwitch(app_mode);
+    getViewToolWidget()->appModeSwitch(app_mode);
+}
 
-    //some toolbar items might rely on the app mode
+/**
+*/
+void ViewWidget::updateToolWidget()
+{
+    assert(getViewToolWidget());
+
     getViewToolWidget()->updateItems();
 }
 
@@ -306,6 +367,8 @@ void ViewWidget::appModeSwitch(AppMode app_mode)
 */
 void ViewWidget::updateLoadState()
 {
+    assert(getViewLoadStateWidget());
+
     getViewLoadStateWidget()->updateState();
 }
 
@@ -315,12 +378,14 @@ void ViewWidget::updateLoadState()
  */
 void ViewWidget::notifyRedrawNeeded()
 {
+    assert(getViewDataWidget());
+
     if (COMPASS::instance().appMode() == AppMode::LiveRunning)
     {
         //in live mode just redraw
-        getViewDataWidget()->redrawData(true);
+        getViewDataWidget()->redrawData(true, false);
         return;
-    }
+    } 
 
     redraw_needed_ = true;
     updateLoadState();
@@ -331,6 +396,8 @@ void ViewWidget::notifyRedrawNeeded()
 */
 void ViewWidget::notifyReloadNeeded()
 {
+    assert(getViewDataWidget());
+
     if (COMPASS::instance().appMode() == AppMode::LiveRunning)
     {
         //in live mode a view handles its reload internally in its data widget

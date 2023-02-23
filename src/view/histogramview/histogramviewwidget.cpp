@@ -16,6 +16,8 @@
  */
 
 #include "histogramviewwidget.h"
+#include "histogramviewconfigwidget.h"
+#include "histogramviewdatawidget.h"
 #include "files.h"
 #include "viewtoolswitcher.h"
 #include "viewtoolwidget.h"
@@ -34,8 +36,6 @@ HistogramViewWidget::HistogramViewWidget(const std::string& class_id, const std:
                                      QWidget* parent)
     : ViewWidget(class_id, instance_id, config_parent, view, parent)
 {
-    createStandardLayout();
-
     auto data_widget = new HistogramViewDataWidget(getView(), view->getDataSource());
     setDataWidget(data_widget);
 
@@ -61,9 +61,6 @@ HistogramViewWidget::HistogramViewWidget(const std::string& class_id, const std:
     getViewToolWidget()->addSpacer();
 
     getViewToolWidget()->addActionCallback("Zoom to Home", [=] () { data_widget->resetZoomSlot(); }, {}, getIcon("zoom_home.png"), Qt::Key_Space);
-
-    getViewToolWidget()->addSeparator();
-    addConfigWidgetToggle();
 }
 
 /*
@@ -89,6 +86,20 @@ const HistogramViewDataWidget* HistogramViewWidget::getViewDataWidget() const
 HistogramViewConfigWidget* HistogramViewWidget::getViewConfigWidget()
 {
     return dynamic_cast<HistogramViewConfigWidget*>(ViewWidget::getViewConfigWidget());
+}
+
+/**
+ */
+const HistogramViewConfigWidget* HistogramViewWidget::getViewConfigWidget() const
+{
+    return dynamic_cast<const HistogramViewConfigWidget*>(ViewWidget::getViewConfigWidget());
+}
+
+/**
+ */
+HistogramView* HistogramViewWidget::getView() 
+{ 
+    return dynamic_cast<HistogramView*>(ViewWidget::getView()); 
 }
 
 /**

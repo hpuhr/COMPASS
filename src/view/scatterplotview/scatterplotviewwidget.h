@@ -20,16 +20,16 @@
 
 #include "viewwidget.h"
 
-#include "scatterplotviewconfigwidget.h"
-#include "scatterplotviewdatawidget.h"
-#include "scatterplotview.h"
-
 class ScatterPlotView;
 class ScatterPlotViewDataToolWidget;
+class ScatterPlotViewConfigWidget;
+class ScatterPlotViewDataWidget;
 
 class QSplitter;
 class QTabWidget;
 
+/**
+*/
 class ScatterPlotViewWidget : public ViewWidget
 {
 public:
@@ -40,22 +40,26 @@ public:
     };
 
     /// @brief Constructor
-    ScatterPlotViewWidget(const std::string& class_id, const std::string& instance_id,
-                      Configurable* config_parent, ScatterPlotView* view, QWidget* parent = NULL);
+    ScatterPlotViewWidget(const std::string& class_id, 
+                          const std::string& instance_id,
+                          Configurable* config_parent, 
+                          ScatterPlotView* view, 
+                          QWidget* parent = NULL);
     /// @brief Destructor
     virtual ~ScatterPlotViewWidget();
 
-    /// @brief Returns the basis view
-    ScatterPlotView* getView() { return (ScatterPlotView*)view_; }
-
-    virtual ScatterPlotViewDataWidget* getViewDataWidget() override final;
-    virtual const ScatterPlotViewDataWidget* getViewDataWidget() const override final;
-    virtual ScatterPlotViewConfigWidget* getViewConfigWidget() override final;
+    ScatterPlotViewDataWidget* getViewDataWidget();
+    const ScatterPlotViewDataWidget* getViewDataWidget() const;
+    ScatterPlotViewConfigWidget* getViewConfigWidget();
+    const ScatterPlotViewConfigWidget* getViewConfigWidget() const;
 
     virtual std::string loadedMessage() const override;
 
 protected:
     virtual bool reloadNeeded_impl() const override;
+
+    /// @brief Returns the basis view
+    ScatterPlotView* getView();
 };
 
 #endif /* SCATTERPLOTVIEWWIDGET_H_ */

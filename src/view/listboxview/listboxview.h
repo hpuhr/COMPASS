@@ -27,21 +27,19 @@ class ListBoxViewDataWidget;
 class ListBoxView : public View
 {
     Q_OBJECT
-  public slots:
+public slots:
     virtual void unshowViewPointSlot (const ViewableDataConfig* vp) override;
     virtual void showViewPointSlot (const ViewableDataConfig* vp) override;
 
-  signals:
+signals:
     void showOnlySelectedSignal(bool value);
     void usePresentationSignal(bool value);
     void showAssociationsSignal(bool value);
 
-  public:
+public:
     ListBoxView(const std::string& class_id, const std::string& instance_id, ViewContainer* w,
                 ViewManager& view_manager);
     virtual ~ListBoxView() override;
-
-    bool init() override;
 
     virtual void generateSubConfigurable(const std::string& class_id,
                                          const std::string& instance_id) override;
@@ -68,7 +66,12 @@ class ListBoxView : public View
 
     virtual void accept(LatexVisitor& v) override;
 
-  protected:
+protected:
+    virtual void checkSubConfigurables() override;
+    virtual void updateSelection() override;
+
+    virtual bool init_impl() override;
+
     ListBoxViewWidget* widget_{nullptr};
     ListBoxViewDataSource* data_source_{nullptr};
 
@@ -76,9 +79,6 @@ class ListBoxView : public View
     bool use_presentation_{true};
 
     bool overwrite_csv_{false}; // Overwrite during export, if not, it appends
-
-    virtual void checkSubConfigurables() override;
-    virtual void updateSelection() override;
 };
 
 #endif /* LISTBOXVIEW_H_ */
