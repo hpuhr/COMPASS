@@ -76,7 +76,7 @@ void ViewLoadStateWidget::setState(State state)
 }
 
 /**
- * Updates the current state by querying the view widget.
+ * Updates the current state by querying the view widget for information.
 */
 void ViewLoadStateWidget::updateState()
 {
@@ -84,12 +84,12 @@ void ViewLoadStateWidget::updateState()
     if (COMPASS::instance().appMode() == AppMode::LiveRunning)
         return;
 
-    //return if we are in loading/drawing state
+    //return if we are in loading/drawing state (will be set back after those operations have finished)
     if (state_ == State::Loading ||
         state_ == State::Drawing)
         return;
 
-    //ask widget if either a reload or a redraw is needed
+    //ask widget for special states
     bool needs_reload = view_widget_->reloadNeeded();
     bool needs_redraw = view_widget_->redrawNeeded();
     bool needs_data   = !view_widget_->getViewDataWidget()->hasData();
@@ -155,6 +155,7 @@ void ViewLoadStateWidget::redrawDone()
 }
 
 /**
+ * Reacts on switching the application mode.
 */
 void ViewLoadStateWidget::appModeSwitch(AppMode app_mode)
 {
@@ -164,6 +165,7 @@ void ViewLoadStateWidget::appModeSwitch(AppMode app_mode)
 }
 
 /**
+ * Returns a displayable message given a state.
 */
 std::string ViewLoadStateWidget::messageFromState(State state)
 {
@@ -187,17 +189,21 @@ std::string ViewLoadStateWidget::messageFromState(State state)
 }
 
 /**
+ * Returns a button label given a state.
 */
 std::string ViewLoadStateWidget::buttonTextFromState(State state)
 {
+    //label for redraw states
     if (state == State::RedrawRequired || 
         state == State::Drawing)
         return "Redraw";
     
+    //reload label in all other cases
     return "Reload";
 }
 
 /**
+ * Returns a label color given a state.
 */
 QColor ViewLoadStateWidget::colorFromState(State state)
 {

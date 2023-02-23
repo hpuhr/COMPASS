@@ -43,6 +43,8 @@ void ViewToolWidget::addAction(int id, QAction* action, bool is_tool)
 }
 
 /**
+ * Adds the tool of the given id to the toolbar.
+ * Note: The tool needs to be added to the ViewToolSwitcher beforehand.
  */
 void ViewToolWidget::addTool(int id, const UpdateCallback& cb_update)
 {
@@ -106,6 +108,8 @@ namespace
 }
 
 /**
+ * Adds an action with callback to the toolbar.
+ * Internally called version.
  */
 QAction* ViewToolWidget::addActionCallback_internal(const QString& name,
                                                     const Callback& cb,
@@ -124,6 +128,7 @@ QAction* ViewToolWidget::addActionCallback_internal(const QString& name,
 }
 
 /**
+ * Adds an action with callback to the toolbar.
  */
 void ViewToolWidget::addActionCallback(const QString& name,
                                        const Callback& cb,
@@ -137,6 +142,8 @@ void ViewToolWidget::addActionCallback(const QString& name,
 }
 
 /**
+ * Adds an action with callback to the toolbar.
+ * This version stores the action under an id which can be used to retrieve the action later on.
  */
 void ViewToolWidget::addActionCallback(int id,
                                        const QString& name,
@@ -154,6 +161,8 @@ void ViewToolWidget::addActionCallback(int id,
 }
 
 /**
+ * Adds a checkable action with callback to the toolbar.
+ * Internally called version.
  */
 QAction* ViewToolWidget::addActionCallback_internal(const QString& name,
                                                     const ToggleCallback& cb,
@@ -175,6 +184,7 @@ QAction* ViewToolWidget::addActionCallback_internal(const QString& name,
 }
 
 /**
+ * Adds a checkable action with callback to the toolbar.
  */
 void ViewToolWidget::addActionCallback(const QString& name,
                                        const ToggleCallback& cb,
@@ -189,6 +199,22 @@ void ViewToolWidget::addActionCallback(const QString& name,
 }
 
 /**
+ * Adds a spacer item to the toolbar.
+ */
+void ViewToolWidget::addSpacer()
+{
+    //add spacer widget.
+    QWidget* w = new QWidget;
+    w->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+
+    auto action = addWidget(w);
+
+    spacers_.insert(action);
+}
+
+/**
+ * Adds a checkable action with callback to the toolbar.
+ * This version stores the action under an id which can be used to retrieve the action later on.
  */
 void ViewToolWidget::addActionCallback(int id,
                                        const QString& name,
@@ -207,18 +233,7 @@ void ViewToolWidget::addActionCallback(int id,
 }
 
 /**
- */
-void ViewToolWidget::addSpacer()
-{
-    QWidget* w = new QWidget;
-    w->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-
-    auto action = addWidget(w);
-
-    spacers_.insert(action);
-}
-
-/**
+ * Adds a separator only if it makes sense (e.g. not adding a separator twice etc.).
 */
 void ViewToolWidget::addSeparatorIfValid()
 {
@@ -229,6 +244,7 @@ void ViewToolWidget::addSeparatorIfValid()
 }
 
 /**
+ * Adds a button for toggling the config widget, that is part of the ViewWidget.
 */
 void ViewToolWidget::addConfigWidgetToggle()
 {
@@ -243,8 +259,8 @@ void ViewToolWidget::addConfigWidgetToggle()
     addActionCallback("Toggle Configuration Panel", [=] (bool on) { view_widget_->toggleConfigWidget(); }, {}, ViewWidget::getIcon("configuration.png"), Qt::Key_C, true);
 }
 
-
 /**
+ * Checks if the given action is a spacer item.
  */
 bool ViewToolWidget::actionIsSpacer(QAction* action) const
 {
@@ -255,6 +271,7 @@ bool ViewToolWidget::actionIsSpacer(QAction* action) const
 }
 
 /**
+ * Checks if adding a separator makes sense.
 */
 bool ViewToolWidget::separatorValid() const
 {
@@ -292,6 +309,7 @@ void ViewToolWidget::toolSwitched(int id, const QCursor& cursor)
 }
 
 /**
+ * Enable/disable the action with the given id.
 */
 void ViewToolWidget::enableAction(int id, bool enable)
 {
@@ -303,6 +321,7 @@ void ViewToolWidget::enableAction(int id, bool enable)
 }
 
 /**
+ * Invoke all added item update callbacks.
  */
 void ViewToolWidget::updateItems()
 {
@@ -311,6 +330,7 @@ void ViewToolWidget::updateItems()
 }
 
 /**
+ * React on loading start.
  */
 void ViewToolWidget::loadingStarted()
 {
@@ -319,6 +339,7 @@ void ViewToolWidget::loadingStarted()
 }
 
 /**
+ * React on loading end.
  */
 void ViewToolWidget::loadingDone()
 {
@@ -327,6 +348,7 @@ void ViewToolWidget::loadingDone()
 }
 
 /**
+ * React on manual redraw start.
 */
 void ViewToolWidget::redrawStarted()
 {
@@ -334,6 +356,7 @@ void ViewToolWidget::redrawStarted()
 }
 
 /**
+ * React on manual redraw end.
 */
 void ViewToolWidget::redrawDone()
 {
@@ -341,8 +364,10 @@ void ViewToolWidget::redrawDone()
 }
 
 /**
+ * React on app switch.
 */
 void ViewToolWidget::appModeSwitch(AppMode app_mode)
 {
+    //update items as their state might depend on app mode
     updateItems();
 }

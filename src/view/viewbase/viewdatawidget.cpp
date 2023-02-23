@@ -16,6 +16,7 @@ ViewDataWidget::ViewDataWidget(QWidget* parent, Qt::WindowFlags f)
 }
 
 /**
+ * Checks if the view stores any data (usually set during a redraw or live update via updateData()).
  */
 bool ViewDataWidget::hasData() const
 {
@@ -23,13 +24,18 @@ bool ViewDataWidget::hasData() const
 }
 
 /**
+ * Checks if the view currently shows any data.
  */
 bool ViewDataWidget::showsData() const
 {
+    //the view needs to obtain data, and the last redraw needs to be a valid one.
     return (hasData() && drawn_);
 }
 
 /**
+ * Sets the tool switcher, which handles switching of view tools.
+ * (Note: The selected view tool might have an impact on how clicks are handled in the data widget,
+ * which cursor is displayed, etc.)
  */
 void ViewDataWidget::setToolSwitcher(ViewToolSwitcher* tool_switcher)
 {
@@ -47,6 +53,9 @@ void ViewDataWidget::setToolSwitcher(ViewToolSwitcher* tool_switcher)
 }
 
 /**
+ * Reacts on view tool changes.
+ * (Note: The selected view tool might have an impact on how clicks are handled in the data widget,
+ * which cursor is displayed, etc.)
  */
 namespace
 {
@@ -60,12 +69,16 @@ namespace
 }
 void ViewDataWidget::toolChanged(int mode, const QCursor& cursor)
 {
+    //update active view cursor to the tool's cursor
     setCursorRecursive(this, cursor);
 
+    //invoke derived
     toolChanged_impl(mode);
 }
 
 /**
+ * Ends the currently set tool.
+ * (Note: should be called if a tool handled by the data widget has been ended)
  */
 void ViewDataWidget::endTool()
 {
@@ -74,6 +87,7 @@ void ViewDataWidget::endTool()
 }
 
 /**
+ * Reacts on loading started.
  */
 void ViewDataWidget::loadingStarted()
 {
@@ -83,17 +97,21 @@ void ViewDataWidget::loadingStarted()
     clearData();
     redrawData(false, false);
 
+    //invoke derived
     loadingStarted_impl();
 }
 
 /**
+ * Reacts on loading ended.
  */
 void ViewDataWidget::loadingDone()
 {
     logdbg << "ViewDataWidget::loadingDone";
 
+    //invoke derived
     loadingDone_impl();
 
+    //signal that view data has been loaded
     emit dataLoaded();
 }
 
@@ -106,17 +124,22 @@ void ViewDataWidget::loadingDone_impl()
 }
 
 /**
+ * UPdates the data using the given buffers.
  */
 void ViewDataWidget::updateData(const BufferData& data, bool requires_reset)
 {
     logdbg << "ViewDataWidget::updateData";
 
+    //store new data
     data_ = data;
 
+    //invoke derived
     updateData_impl(requires_reset);
 }
 
 /**
+ * Clears the views data. 
+ * (Note: Might require an additional redraw to take effect)
  */
 void ViewDataWidget::clearData()
 {
@@ -125,10 +148,15 @@ void ViewDataWidget::clearData()
     data_  = {};
     drawn_ = false;
 
+    //invoke derived
     clearData_impl();
 }
 
 /**
+ * Redraws the views data.
+ * @param recompute If set, data needed fo a redraw will be freshly recomputed (to be enforced by derived classes).
+ * @param notify If set, signals will be emitted before and after the redraw (this is only needed for manual redraws like in ViewLoadStateWidget).
+ * @return True if the redraw succeeded.
 */
 bool ViewDataWidget::redrawData(bool recompute, bool notify)
 {
@@ -137,9 +165,10 @@ bool ViewDataWidget::redrawData(bool recompute, bool notify)
     if (notify)
     {
         emit redrawStarted();
-        QApplication::processEvents();
+        QApplication::processEvents(); //process any ui reactions on this signal before ui is blocked by redraw
     }
     
+    //invoke derived: redraw and remember if data has been redrawn correctly
     drawn_ = redrawData_impl(recompute);
 
     if (notify)
@@ -151,10 +180,13 @@ bool ViewDataWidget::redrawData(bool recompute, bool notify)
 }
 
 /**
+ * Runs a live reload of data and updates the diplay.
 */
 void ViewDataWidget::liveReload()
 {
+    //invoke derived
     liveReload_impl();
 
+    //signal that live data has been loaded
     emit liveDataLoaded();
 }
