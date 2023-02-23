@@ -36,9 +36,10 @@ TrackAngleConfig::TrackAngleConfig(
         Group& group, EvaluationStandard& standard, EvaluationManager& eval_man)
     : BaseConfig(class_id, instance_id, group, standard, eval_man)
 {
-    registerParameter("threshold_value", &threshold_value_, 50.0);
-    registerParameter("use_percent_if_higher", &use_percent_if_higher_, false);
-    registerParameter("threshold_percent", &threshold_percent_, 10.0);
+    registerParameter("threshold", &threshold_, 15.0);
+
+    registerParameter("use_minimum_speed", &use_minimum_speed_, true);
+    registerParameter("minimum_speed", &minimum_speed_, 3.0);
 
     registerParameter("threshold_value_check_type", (unsigned int*)&threshold_value_check_type_,
                       (unsigned int) COMPARISON_TYPE::LESS_THAN_OR_EQUAL);
@@ -55,20 +56,10 @@ std::shared_ptr<Base> TrackAngleConfig::createRequirement()
 {
     shared_ptr<TrackAngle> req = make_shared<TrackAngle>(
                 name_, short_name_, group_.name(), prob_, prob_check_type_, eval_man_,
-                threshold_value_, use_percent_if_higher_, threshold_percent_,
+                threshold_, use_minimum_speed_, minimum_speed_,
                 threshold_value_check_type_, failed_values_of_interest_);
 
     return req;
-}
-
-float TrackAngleConfig::thresholdValue() const
-{
-    return threshold_value_;
-}
-
-void TrackAngleConfig::thresholdValue(float value)
-{
-    threshold_value_ = value;
 }
 
 COMPARISON_TYPE TrackAngleConfig::thresholdValueCheckType() const
@@ -91,24 +82,14 @@ void TrackAngleConfig::failedValuesOfInterest(bool value)
     failed_values_of_interest_ = value;
 }
 
-bool TrackAngleConfig::usePercentIfHigher() const
+float TrackAngleConfig::threshold() const
 {
-    return use_percent_if_higher_;
+    return threshold_;
 }
 
-void TrackAngleConfig::usePercentIfHigher(bool value)
+void TrackAngleConfig::threshold(float value)
 {
-    use_percent_if_higher_ = value;
-}
-
-float TrackAngleConfig::thresholdPercent() const
-{
-    return threshold_percent_;
-}
-
-void TrackAngleConfig::thresholdPercent(float value)
-{
-    threshold_percent_ = value;
+    threshold_ = value;
 }
 
 void TrackAngleConfig::createWidget()
@@ -131,5 +112,25 @@ void TrackAngleConfig::addToReport (std::shared_ptr<EvaluationResultsReport::Roo
     //    table.addRow({"Comment", "", comment_.c_str()}, nullptr);
 
     // prob & check type added in subclass
+}
+
+bool TrackAngleConfig::useMinimumSpeed() const
+{
+    return use_minimum_speed_;
+}
+
+void TrackAngleConfig::useMinimumSpeed(bool value)
+{
+    use_minimum_speed_ = value;
+}
+
+float TrackAngleConfig::minimumSpeed() const
+{
+    return minimum_speed_;
+}
+
+void TrackAngleConfig::minimumSpeed(float value)
+{
+    minimum_speed_ = value;
 }
 }

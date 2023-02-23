@@ -38,14 +38,14 @@ public:
 
     std::shared_ptr<Base> createRequirement() override;
 
-    float thresholdValue() const;
-    void thresholdValue(float value);
+    float threshold() const;
+    void threshold(float value);
 
-    bool usePercentIfHigher() const;
-    void usePercentIfHigher(bool value);
+    bool useMinimumSpeed() const;
+    void useMinimumSpeed(bool value);
 
-    float thresholdPercent() const;
-    void thresholdPercent(float value);
+    float minimumSpeed() const;
+    void minimumSpeed(float value);
 
     COMPARISON_TYPE thresholdValueCheckType() const;
     void thresholdValueCheckType(const COMPARISON_TYPE& type);
@@ -53,13 +53,13 @@ public:
     bool failedValuesOfInterest() const;
     void failedValuesOfInterest(bool value);
 
-    virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
+    virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item) override;
 
 protected:
-    float threshold_value_ {0};
+    float threshold_ {15.0}; // max angle degree difference
 
-    bool use_percent_if_higher_ {false};
-    float threshold_percent_ {10.0};
+    bool use_minimum_speed_ {true};
+    float minimum_speed_ {3.0}; // m/s
 
     COMPARISON_TYPE threshold_value_check_type_ {COMPARISON_TYPE::LESS_THAN_OR_EQUAL};
 

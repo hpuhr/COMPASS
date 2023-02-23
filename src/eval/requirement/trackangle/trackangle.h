@@ -30,13 +30,14 @@ public:
     TrackAngle(
             const std::string& name, const std::string& short_name, const std::string& group_name,
             float prob, COMPARISON_TYPE prob_check_type, EvaluationManager& eval_man,
-            float threshold_value, bool use_percent_if_higher, float threshold_percent,
+            float threshold, bool use_minimum_speed, float minimum_speed,
             COMPARISON_TYPE threshold_value_check_type,
             bool failed_values_of_interest);
 
-    float thresholdValue() const;
-    bool usePercentIfHigher() const;
-    float thresholdPercent() const;
+    float threshold() const;
+    bool useMinimumSpeed() const;
+    float minimumSpeed() const;
+
     COMPARISON_TYPE thresholdValueCheckType() const;
     bool failedValuesOfInterest() const;
 
@@ -45,10 +46,10 @@ public:
             const SectorLayer& sector_layer) override;
 
 protected:
-    float threshold_value_ {0}; // offset
+    float threshold_ {15.0};
 
-    bool use_percent_if_higher_ {false};
-    float threshold_percent_ {10.0};
+    bool use_minimum_speed_ {true};
+    float minimum_speed_ {3.0}; // m/s
 
     COMPARISON_TYPE threshold_value_check_type_ {COMPARISON_TYPE::LESS_THAN_OR_EQUAL};
 

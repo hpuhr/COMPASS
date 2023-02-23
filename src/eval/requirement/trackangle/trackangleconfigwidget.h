@@ -38,8 +38,8 @@ class TrackAngleConfigWidget : public BaseConfigWidget
 public slots:
     void thresholdValueEditSlot(QString value);
 
-    void toggleUsePercentIfHigherSlot();
-    void thresholdPercentEditSlot(QString value);
+    void toggleUseMinimumSpeedSlot();
+    void minimumSpeedEditSlot(QString value);
 
     void changedThresholdValueCheckTypeSlot();
     void toggleFailedValuesOfInterestSlot();
@@ -50,8 +50,8 @@ public:
 protected:
     QLineEdit* threshold_value_edit_{nullptr};
 
-    QCheckBox* use_percent_if_higher_check_{nullptr};
-    QLineEdit* threshold_percent_edit_{nullptr};
+    QCheckBox* use_minimum_speed_check_{nullptr};
+    QLineEdit* minimum_speed_edit_{nullptr};
 
     ComparisonTypeComboBox* threshold_value_check_type_box_ {nullptr};
     QCheckBox* failed_values_of_interest_check_{nullptr};

@@ -26,6 +26,7 @@
 #include <ogr_spatialref.h>
 
 #include <algorithm>
+#include <cmath>
 
 using namespace std;
 using namespace Utils;
@@ -37,30 +38,29 @@ namespace EvaluationRequirement
 TrackAngle::TrackAngle(
         const std::string& name, const std::string& short_name, const std::string& group_name,
         float prob, COMPARISON_TYPE prob_check_type, EvaluationManager& eval_man,
-        float threshold_value, bool use_percent_if_higher, float threshold_percent,
+                    float threshold, bool use_minimum_speed, float minimum_speed,
         COMPARISON_TYPE threshold_value_check_type, bool failed_values_of_interest)
     : Base(name, short_name, group_name, prob, prob_check_type, eval_man),
-      threshold_value_(threshold_value),
-      use_percent_if_higher_(use_percent_if_higher), threshold_percent_(threshold_percent),
+      threshold_(threshold),
+      use_minimum_speed_(use_minimum_speed), minimum_speed_(minimum_speed),
       threshold_value_check_type_(threshold_value_check_type),
       failed_values_of_interest_(failed_values_of_interest)
 {
 
 }
-
-float TrackAngle::thresholdValue() const
+float TrackAngle::threshold() const
 {
-    return threshold_value_;
+    return threshold_;
 }
 
-bool TrackAngle::usePercentIfHigher() const
+bool TrackAngle::useMinimumSpeed() const
 {
-    return use_percent_if_higher_;
+    return use_minimum_speed_;
 }
 
-float TrackAngle::thresholdPercent() const
+float TrackAngle::minimumSpeed() const
 {
-    return threshold_percent_;
+    return minimum_speed_;
 }
 
 COMPARISON_TYPE TrackAngle::thresholdValueCheckType() const
@@ -78,7 +78,8 @@ std::shared_ptr<EvaluationRequirementResult::Single> TrackAngle::evaluate (
         const SectorLayer& sector_layer)
 {
     logdbg << "EvaluationRequirementTrackAngle '" << name_ << "': evaluate: utn " << target_data.utn_
-           << " threshold_value " << threshold_value_ << " threshold_value_check_type " << threshold_value_check_type_;
+           << " threshold_percent " << threshold_
+           << " threshold_value_check_type " << threshold_value_check_type_;
 
     time_duration max_ref_time_diff = Time::partialSeconds(eval_man_.maxRefTimeDiff());
 
@@ -88,12 +89,10 @@ std::shared_ptr<EvaluationRequirementResult::Single> TrackAngle::evaluate (
     unsigned int num_no_ref {0};
     unsigned int num_pos_outside {0};
     unsigned int num_pos_inside {0};
-    unsigned int num_pos_calc_errors {0};
+    unsigned int num_pos_ref_spd_low {0};
     unsigned int num_no_tst_value {0};
     unsigned int num_comp_failed {0};
     unsigned int num_comp_passed {0};
-
-    float tmp_threshold_value;
 
     std::vector<EvaluationRequirement::TrackAngleDetail> details;
 
@@ -113,15 +112,15 @@ std::shared_ptr<EvaluationRequirementResult::Single> TrackAngle::evaluate (
     bool ok;
 
     EvaluationTargetVelocity ref_spd;
-    float tst_spd_ms;
-    float spd_diff;
+    float tst_trackangle_deg;
+    float trackangle_min_diff;
 
     bool comp_passed;
 
-    unsigned int num_speeds {0};
+    unsigned int num_trackangle_comp {0};
     string comment;
 
-    vector<double> values;
+    vector<double> values; // track angle diff percentage
 
     bool skip_no_data_details = eval_man_.reportSkipNoDataDetails();
 
@@ -212,6 +211,20 @@ std::shared_ptr<EvaluationRequirementResult::Single> TrackAngle::evaluate (
 
         // ref_spd ok
 
+        if (use_minimum_speed_ && ref_spd.speed_ < minimum_speed_)
+        {
+            if (!skip_no_data_details)
+                details.push_back({timestamp, tst_pos,
+                                   false, {}, // has_ref_pos, ref_pos
+                                   {}, {}, comp_passed, // pos_inside, value, check_passed
+                                   num_pos, num_no_ref, num_pos_inside, num_pos_outside,
+                                   num_comp_failed, num_comp_passed,
+                                   "Reference speed too low"});
+
+            ++num_pos_ref_spd_low;
+            continue;
+        }
+
         if (!target_data.hasTstMeasuredTrackAngleForTime(timestamp))
         {
             if (!skip_no_data_details)
@@ -226,17 +239,12 @@ std::shared_ptr<EvaluationRequirementResult::Single> TrackAngle::evaluate (
             continue;
         }
 
-        tst_spd_ms = target_data.tstMeasuredTrackAngleForTime (timestamp);
-        spd_diff = fabs(ref_spd.speed_ - tst_spd_ms);
+        tst_trackangle_deg = target_data.tstMeasuredTrackAngleForTime (timestamp);
+        trackangle_min_diff = fabs((fmod(ref_spd.track_angle_ - tst_trackangle_deg + 180.0, 360.0) - 180.0));
 
-        if (use_percent_if_higher_ && tst_spd_ms * threshold_percent_ > threshold_value_) // use percent based threshold
-            tmp_threshold_value = tst_spd_ms * threshold_percent_;
-        else
-            tmp_threshold_value = threshold_value_;
+        ++num_trackangle_comp;
 
-        ++num_speeds;
-
-        if (compareValue(spd_diff, tmp_threshold_value, threshold_value_check_type_))
+        if (compareValue(trackangle_min_diff, threshold_, threshold_value_check_type_))
         {
             comp_passed = true;
             ++num_comp_passed;
@@ -250,12 +258,12 @@ std::shared_ptr<EvaluationRequirementResult::Single> TrackAngle::evaluate (
 
         details.push_back({timestamp, tst_pos,
                            true, ref_pos,
-                           is_inside, spd_diff, comp_passed, // pos_inside, value, check_passed
+                           is_inside, trackangle_min_diff, comp_passed, // pos_inside, value, check_passed
                            num_pos, num_no_ref, num_pos_inside, num_pos_outside,
                            num_comp_failed, num_comp_passed,
                            comment});
 
-        values.push_back(spd_diff);
+        values.push_back(trackangle_min_diff);
     }
 
     //        logdbg << "EvaluationRequirementTrackAngle '" << name_ << "': evaluate: utn " << target_data.utn_
@@ -266,20 +274,21 @@ std::shared_ptr<EvaluationRequirementResult::Single> TrackAngle::evaluate (
 
     assert (num_no_ref <= num_pos);
 
-    if (num_pos - num_no_ref != num_pos_inside + num_pos_outside)
+    if (num_pos - num_no_ref - num_pos_ref_spd_low != num_pos_inside + num_pos_outside)
         logwrn << "EvaluationRequirementTrackAngle '" << name_ << "': evaluate: utn " << target_data.utn_
                << " num_pos " << num_pos << " num_no_ref " <<  num_no_ref
+               << " num_pos_ref_spd_low " << num_pos_ref_spd_low
                << " num_pos_outside " << num_pos_outside << " num_pos_inside " << num_pos_inside;
-    assert (num_pos - num_no_ref == num_pos_inside + num_pos_outside);
+    assert (num_pos - num_no_ref - num_pos_ref_spd_low == num_pos_inside + num_pos_outside);
 
 
-    if (num_speeds != num_comp_failed + num_comp_passed)
+    if (num_trackangle_comp != num_comp_failed + num_comp_passed)
         logwrn << "EvaluationRequirementTrackAngle '" << name_ << "': evaluate: utn " << target_data.utn_
-               << " num_speeds " << num_speeds << " num_comp_failed " <<  num_comp_failed
+               << " num_speeds " << num_trackangle_comp << " num_comp_failed " <<  num_comp_failed
                << " num_comp_passed " << num_comp_passed;
 
-    assert (num_speeds == num_comp_failed + num_comp_passed);
-    assert (num_speeds == values.size());
+    assert (num_trackangle_comp == num_comp_failed + num_comp_passed);
+    assert (num_trackangle_comp == values.size());
 
     //assert (details.size() == num_pos);
 

@@ -32,28 +32,28 @@ TrackAngleConfigWidget::TrackAngleConfigWidget(TrackAngleConfig& cfg)
     : BaseConfigWidget(cfg)
 {
     // threshold
-    threshold_value_edit_ = new QLineEdit(QString::number(config().thresholdValue()));
-    threshold_value_edit_->setValidator(new QDoubleValidator(0.0, 10000.0, 2, this));
+    threshold_value_edit_ = new QLineEdit(QString::number(config().threshold()));
+    threshold_value_edit_->setValidator(new QDoubleValidator(0.0, 360.0, 2, this));
     connect(threshold_value_edit_, &QLineEdit::textEdited,
             this, &TrackAngleConfigWidget::thresholdValueEditSlot);
 
-    form_layout_->addRow("TrackAngle Offset Value [m/s]", threshold_value_edit_);
+    form_layout_->addRow("Track Angle Offset Value [deg]", threshold_value_edit_);
 
-    // use percent threshold if higher
-    use_percent_if_higher_check_ = new QCheckBox ();
-    use_percent_if_higher_check_->setChecked(config().usePercentIfHigher());
-    connect(use_percent_if_higher_check_, &QCheckBox::clicked,
-            this, &TrackAngleConfigWidget::toggleUsePercentIfHigherSlot);
+    // use minimum speed
+    use_minimum_speed_check_ = new QCheckBox ();
+    use_minimum_speed_check_->setChecked(config().useMinimumSpeed());
+    connect(use_minimum_speed_check_, &QCheckBox::clicked,
+            this, &TrackAngleConfigWidget::toggleUseMinimumSpeedSlot);
 
-    form_layout_->addRow("Use Percent Threshold if Higher", use_percent_if_higher_check_);
+    form_layout_->addRow("Use Minimum Speed", use_minimum_speed_check_);
 
-    // percent threshold
-    threshold_percent_edit_ = new QLineEdit(QString::number(config().thresholdPercent()));
-    threshold_percent_edit_->setValidator(new QDoubleValidator(0.0, 100.0, 2, this));
-    connect(threshold_percent_edit_, &QLineEdit::textEdited,
-            this, &TrackAngleConfigWidget::thresholdPercentEditSlot);
+    // track angle difference threshold
+    minimum_speed_edit_ = new QLineEdit(QString::number(config().threshold()));
+    minimum_speed_edit_->setValidator(new QDoubleValidator(0.0, 10000.0, 2, this));
+    connect(minimum_speed_edit_, &QLineEdit::textEdited,
+            this, &TrackAngleConfigWidget::minimumSpeedEditSlot);
 
-    form_layout_->addRow("Threshold Percent [%]", threshold_percent_edit_);
+    form_layout_->addRow("Minimum Speed [m/s]", minimum_speed_edit_);
 
     // prob check type
     threshold_value_check_type_box_ = new ComparisonTypeComboBox();
@@ -81,32 +81,32 @@ void TrackAngleConfigWidget::thresholdValueEditSlot(QString value)
     float val = value.toFloat(&ok);
 
     if (ok)
-        config().thresholdValue(val);
+        config().threshold(val);
     else
         loginf << "TrackAngleConfigWidget: thresholdValueEditSlot: invalid value";
 }
 
-void TrackAngleConfigWidget::toggleUsePercentIfHigherSlot()
+void TrackAngleConfigWidget::toggleUseMinimumSpeedSlot()
 {
-    loginf << "TrackAngleConfigWidget: toggleUsePercentIfHigherSlot";
+    loginf << "TrackAngleConfigWidget: toggleUseMinimumSpeedSlot";
 
-    assert (use_percent_if_higher_check_);
-    config().usePercentIfHigher(use_percent_if_higher_check_->checkState() == Qt::Checked);
+    assert (use_minimum_speed_check_);
+    config().useMinimumSpeed(use_minimum_speed_check_->checkState() == Qt::Checked);
 
     updateActive();
 }
 
-void TrackAngleConfigWidget::thresholdPercentEditSlot(QString value)
+void TrackAngleConfigWidget::minimumSpeedEditSlot(QString value)
 {
-    loginf << "TrackAngleConfigWidget: thresholdPercentEditSlot: value " << value.toStdString();
+    loginf << "TrackAngleConfigWidget: minimumSpeedEditSlot: value " << value.toStdString();
 
     bool ok;
     float val = value.toFloat(&ok);
 
     if (ok)
-        config().thresholdPercent(val);
+        config().minimumSpeed(val);
     else
-        loginf << "TrackAngleConfigWidget: thresholdPercentEditSlot: invalid value";
+        loginf << "TrackAngleConfigWidget: minimumSpeedEditSlot: invalid value";
 }
 
 void TrackAngleConfigWidget::changedThresholdValueCheckTypeSlot()
@@ -135,8 +135,8 @@ TrackAngleConfig& TrackAngleConfigWidget::config()
 
 void TrackAngleConfigWidget::updateActive()
 {
-    assert (threshold_percent_edit_);
-    threshold_percent_edit_->setEnabled(config().usePercentIfHigher());
+    assert (minimum_speed_edit_);
+    minimum_speed_edit_->setEnabled(config().useMinimumSpeed());
 }
 
 

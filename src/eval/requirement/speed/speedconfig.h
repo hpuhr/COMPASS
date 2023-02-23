@@ -53,7 +53,7 @@ public:
     bool failedValuesOfInterest() const;
     void failedValuesOfInterest(bool value);
 
-    virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
+    virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item) override;
 
 protected:
     float threshold_value_ {0};
