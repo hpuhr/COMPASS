@@ -56,6 +56,9 @@ namespace EvaluationRequirementResult
     class SingleSpeed;
     class JoinedSpeed;
 
+    class SingleTrackAngle;
+    class JoinedTrackAngle;
+
     class SingleIdentificationCorrect;
     class JoinedIdentificationCorrect;
     class SingleIdentificationFalse;
@@ -113,6 +116,8 @@ private:
 
     void updateCountResult (std::shared_ptr<EvaluationRequirementResult::SingleSpeed> result);
     void updateCountResult (std::shared_ptr<EvaluationRequirementResult::JoinedSpeed> result);
+    void updateCountResult (std::shared_ptr<EvaluationRequirementResult::SingleTrackAngle> result);
+    void updateCountResult (std::shared_ptr<EvaluationRequirementResult::JoinedTrackAngle> result);
 
     void updateCountResult (std::shared_ptr<EvaluationRequirementResult::SingleIdentificationCorrect> result);
     void updateCountResult (std::shared_ptr<EvaluationRequirementResult::JoinedIdentificationCorrect> result);
