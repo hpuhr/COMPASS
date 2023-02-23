@@ -3,6 +3,8 @@
 #include "viewtoolswitcher.h"
 #include "buffer.h"
 
+#include <QApplication>
+
 #include <iostream>
 
 /**
@@ -79,7 +81,7 @@ void ViewDataWidget::loadingStarted()
 
     //clear and update display
     clearData();
-    redrawData(false);
+    redrawData(false, false);
 
     loadingStarted_impl();
 }
@@ -100,7 +102,7 @@ void ViewDataWidget::loadingDone()
 void ViewDataWidget::loadingDone_impl()
 {
     //default behavior: recompute and redraw after reload
-    redrawData(true);
+    redrawData(true, false);
 }
 
 /**
@@ -128,16 +130,23 @@ void ViewDataWidget::clearData()
 
 /**
 */
-bool ViewDataWidget::redrawData(bool recompute)
+bool ViewDataWidget::redrawData(bool recompute, bool notify)
 {
     logdbg << "ViewDataWidget::redrawData";
 
-    emit redrawStarted();
-
+    if (notify)
+    {
+        emit redrawStarted();
+        QApplication::processEvents();
+    }
+    
     drawn_ = redrawData_impl(recompute);
 
-    emit redrawDone();
-
+    if (notify)
+    {
+        emit redrawDone();
+    }
+    
     return drawn_;
 }
 

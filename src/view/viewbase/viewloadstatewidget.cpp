@@ -43,7 +43,7 @@ ViewLoadStateWidget::ViewLoadStateWidget(ViewWidget* view_widget, QWidget* paren
 void ViewLoadStateWidget::updateData()
 {
     if (view_widget_->getViewDataWidget()->hasData() && state_ == State::RedrawRequired)
-        view_widget_->getViewDataWidget()->redrawData(true);
+        view_widget_->getViewDataWidget()->redrawData(true, true);
     else
         COMPASS::instance().dbContentManager().load();
 }
@@ -84,8 +84,9 @@ void ViewLoadStateWidget::updateState()
     if (COMPASS::instance().appMode() == AppMode::LiveRunning)
         return;
 
-    //return if we are in loading state
-    if (state_ == State::Loading)
+    //return if we are in loading/drawing state
+    if (state_ == State::Loading ||
+        state_ == State::Drawing)
         return;
 
     //ask widget if either a reload or a redraw is needed
@@ -133,7 +134,11 @@ void ViewLoadStateWidget::loadingDone()
 */
 void ViewLoadStateWidget::redrawStarted()
 {
-    //@TODO
+    //not needed in live running
+    if (COMPASS::instance().appMode() == AppMode::LiveRunning)
+        return;
+
+    setState(State::Drawing);
 }
 
 /**
@@ -141,7 +146,12 @@ void ViewLoadStateWidget::redrawStarted()
 */
 void ViewLoadStateWidget::redrawDone()
 {
-    updateState();
+    //not needed in live running
+    if (COMPASS::instance().appMode() == AppMode::LiveRunning)
+        return;
+
+    setState(State::None); //reset state
+    updateState();         //determine new state
 }
 
 /**
@@ -163,6 +173,8 @@ std::string ViewLoadStateWidget::messageFromState(State state)
             return "No Data Loaded";
         case State::Loading:
             return "Loading...";
+        case State::Drawing:
+            return "Redrawing...";
         case State::None:
         case State::Loaded:
             return "";
@@ -178,7 +190,8 @@ std::string ViewLoadStateWidget::messageFromState(State state)
 */
 std::string ViewLoadStateWidget::buttonTextFromState(State state)
 {
-    if (state == State::RedrawRequired)
+    if (state == State::RedrawRequired || 
+        state == State::Drawing)
         return "Redraw";
     
     return "Reload";
@@ -192,6 +205,7 @@ QColor ViewLoadStateWidget::colorFromState(State state)
     {
         case State::None:
         case State::Loading:
+        case State::Drawing:
         case State::Loaded:
         case State::NoData:
             return Qt::black;

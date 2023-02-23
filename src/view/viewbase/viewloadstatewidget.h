@@ -23,6 +23,7 @@ public:
         None = 0,
         NoData,
         Loading,
+        Drawing,
         Loaded,
         ReloadRequired,
         RedrawRequired

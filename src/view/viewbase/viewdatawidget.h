@@ -25,7 +25,7 @@ public:
     void loadingDone();
     void updateData(const BufferData& buffer_data, bool requires_reset);
     void clearData();
-    bool redrawData(bool recompute);
+    bool redrawData(bool recompute, bool notify = false);
     void liveReload();
 
     bool hasData() const;

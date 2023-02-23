@@ -1,6 +1,8 @@
 
 #include "viewconfigwidget.h"
 
+#include <iostream>
+
 /**
 */
 void ViewConfigWidget::loadingStarted()
@@ -11,6 +13,20 @@ void ViewConfigWidget::loadingStarted()
 /**
 */
 void ViewConfigWidget::loadingDone()
+{
+    setDisabled(false);
+}
+
+/**
+*/
+void ViewConfigWidget::redrawStarted()
+{
+    setDisabled(true);
+}
+
+/**
+*/
+void ViewConfigWidget::redrawDone()
 {
     setDisabled(false);
 }

@@ -383,9 +383,9 @@ void ViewWidget::notifyRedrawNeeded()
     if (COMPASS::instance().appMode() == AppMode::LiveRunning)
     {
         //in live mode just redraw
-        getViewDataWidget()->redrawData(true);
+        getViewDataWidget()->redrawData(true, false);
         return;
-    }
+    } 
 
     redraw_needed_ = true;
     updateLoadState();

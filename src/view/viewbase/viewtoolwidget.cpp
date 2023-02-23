@@ -328,21 +328,21 @@ void ViewToolWidget::loadingDone()
 
 /**
 */
-void ViewToolWidget::appModeSwitch(AppMode app_mode)
-{
-    updateItems();
-}
-
-/**
-*/
 void ViewToolWidget::redrawStarted()
 {
-    //implement if needed
+    setEnabled(false);
 }
 
 /**
 */
 void ViewToolWidget::redrawDone()
 {
-    //implement if needed
+    setEnabled(true);
+}
+
+/**
+*/
+void ViewToolWidget::appModeSwitch(AppMode app_mode)
+{
+    updateItems();
 }

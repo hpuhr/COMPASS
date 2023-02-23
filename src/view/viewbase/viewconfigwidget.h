@@ -18,8 +18,8 @@ public:
 
     virtual void loadingStarted();
     virtual void loadingDone();
-    virtual void redrawStarted() {}
-    virtual void redrawDone() {}
+    virtual void redrawStarted();
+    virtual void redrawDone();
     virtual void appModeSwitch(AppMode app_mode) {}
 
 protected:
