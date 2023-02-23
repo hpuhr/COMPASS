@@ -102,6 +102,7 @@ public:
 
     void updateToolWidget();
     void updateLoadState();
+    void updateComponents();
 
     void loadingStarted();
     void loadingDone();

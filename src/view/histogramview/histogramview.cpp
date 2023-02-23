@@ -252,7 +252,7 @@ void HistogramView::dataVar (Variable& var)
 
     assert (widget_);
     widget_->getViewDataWidget()->redrawData(true);
-    widget_->updateLoadState();
+    widget_->updateComponents();
 }
 
 /**
@@ -278,7 +278,7 @@ void HistogramView::metaDataVar (MetaVariable& var)
 
     assert (widget_);
     widget_->getViewDataWidget()->redrawData(true);
-    widget_->updateLoadState();
+    widget_->updateComponents();
 }
 
 /**
@@ -358,6 +358,7 @@ void HistogramView::evalResultGrpReq(const std::string& value)
     eval_results_grpreq_ = value;
 
     widget_->getViewDataWidget()->redrawData(true);
+    widget_->updateComponents();
 }
 
 /**
@@ -379,6 +380,7 @@ void HistogramView::evalResultsID(const std::string& value)
     eval_results_id_ = value;
 
     widget_->getViewDataWidget()->redrawData(true);
+    widget_->updateComponents();
 }
 
 /**
@@ -410,6 +412,7 @@ void HistogramView::onShowResultsChanged()
 {
     widget_->getViewConfigWidget()->updateConfig();
     widget_->getViewDataWidget()->redrawData(true);
+    widget_->updateComponents();
 }
 
 /**

@@ -175,6 +175,9 @@ bool ViewDataWidget::redrawData(bool recompute, bool notify)
     {
         emit redrawDone();
     }
+
+    //signal display changed to whom it may concern
+    emit displayChanged();
     
     return drawn_;
 }

@@ -17,6 +17,8 @@ ChartView::ChartView(QtCharts::QChart* chart, SelectionStyle sel_style, QWidget*
 ,   sel_style_(sel_style)
 {
     createDisplayElements(chart);
+
+    setRenderHint(QPainter::Antialiasing);
 }
 
 /**

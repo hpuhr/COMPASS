@@ -44,26 +44,31 @@ HistogramViewWidget::HistogramViewWidget(const std::string& class_id, const std:
 
     typedef HistogramViewDataTool Tool;
 
+    auto activeIfDataShownCB = [ data_widget ] (QAction* a)
+    {
+        a->setEnabled(data_widget->showsData());
+    };
+
     getViewToolSwitcher()->addTool(Tool::HG_DEFAULT_TOOL, "", {}, QIcon(), Qt::ArrowCursor);
     getViewToolSwitcher()->addTool(Tool::HG_SELECT_TOOL, "Select", Qt::Key_S, getIcon("select_action.png"), Qt::CrossCursor);
     getViewToolSwitcher()->addTool(Tool::HG_ZOOM_TOOL, "Zoom", Qt::Key_Z, getIcon("zoom_select_action.png"), Qt::CrossCursor);
     getViewToolSwitcher()->setDefaultTool(Tool::HG_DEFAULT_TOOL);
 
     //we could add the default action if we wanted
-    getViewToolWidget()->addTool(Tool::HG_SELECT_TOOL);
-    getViewToolWidget()->addTool(Tool::HG_ZOOM_TOOL);
+    getViewToolWidget()->addTool(Tool::HG_SELECT_TOOL, activeIfDataShownCB);
+    getViewToolWidget()->addTool(Tool::HG_ZOOM_TOOL, activeIfDataShownCB);
 
     getViewToolWidget()->addSpacer();
 
-    getViewToolWidget()->addActionCallback("Invert Selection", [=] () { data_widget->invertSelectionSlot(); }, {}, getIcon("select_invert.png"));
-    getViewToolWidget()->addActionCallback("Delete Selection", [=] () { data_widget->clearSelectionSlot(); }, {}, getIcon("select_delete.png"));
+    getViewToolWidget()->addActionCallback("Invert Selection", [=] () { data_widget->invertSelectionSlot(); }, activeIfDataShownCB, getIcon("select_invert.png"));
+    getViewToolWidget()->addActionCallback("Delete Selection", [=] () { data_widget->clearSelectionSlot(); }, activeIfDataShownCB, getIcon("select_delete.png"));
 
     getViewToolWidget()->addSpacer();
 
     getViewToolWidget()->addActionCallback("Zoom to Home", [=] () { data_widget->resetZoomSlot(); }, {}, getIcon("zoom_home.png"), Qt::Key_Space);
 }
 
-/*
+/**
  */
 HistogramViewWidget::~HistogramViewWidget() = default;
 
