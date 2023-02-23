@@ -9,7 +9,9 @@ class ViewToolSwitcher;
 class Buffer;
 
 /**
- * Base class for view data widgets, which are used to display data in a view.
+ * Base class for view data widgets, which are held in the data area of the ViewWidget.
+ * Used to display data in a view specific way, e.g. as a graph.
+ * Derive and reimplement as needed.
  */
 class ViewDataWidget : public QWidget 
 {

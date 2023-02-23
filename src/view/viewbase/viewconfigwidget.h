@@ -6,12 +6,13 @@
 #include <QWidget>
 
 /**
- * Base class for view configuration widgets, which are used to configure a view.
+ * Base class for view configuration widgets, which are held in the configuration area of the ViewWidget.
+ * Derive and reimplement as needed.
 */
 class ViewConfigWidget : public QWidget
 {
 public:
-    ViewConfigWidget(QWidget* parent = nullptr, Qt::WindowFlags f = 0) : QWidget(parent, f) {}
+    ViewConfigWidget(QWidget* parent = nullptr, Qt::WindowFlags f = 0);
     virtual ~ViewConfigWidget() = default;
 
     void onDisplayChange();

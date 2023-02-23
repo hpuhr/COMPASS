@@ -20,7 +20,7 @@ class QCursor;
 class QAction;
 
 /**
- * Toolbar for views. Implements adding of tools and actions to the views toolbar, switching of tools, etc.
+ * Toolbar for views. Implements adding of tools and actions to the view's toolbar, switching of tools, etc.
  * Keeps the toolbar generic for all views by giving the possibility to pass callbacks.
  */
 class ViewToolWidget : public QToolBar

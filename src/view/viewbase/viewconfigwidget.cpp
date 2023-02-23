@@ -4,6 +4,13 @@
 #include <iostream>
 
 /**
+*/
+ViewConfigWidget::ViewConfigWidget(QWidget* parent, Qt::WindowFlags f) 
+:   QWidget(parent, f) 
+{
+}
+
+/**
  * React on loading start.
 */
 void ViewConfigWidget::loadingStarted()

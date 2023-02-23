@@ -42,13 +42,54 @@ class QLayout;
 A view widget bases on a QWidget and provides a way to display
 the views data, which is held in a model.
 
-A view widget may hold an event processor, which is used to react in a specific
-way to mouse and keyboard events. A new ViewWidget will most likely introduce a new
-event processor.
+A ViewWidget consists of a standard layout with a set of typical components located at predefined regions of the widget.
+Some of them need to be derived and set manually in the derived ViewWidget's constructor, some are pregenerated and can
+be used directly.
+_____________________________________________________________________________
+|_ViewToolWidget_______________________________||ViewConfigWidget            |
+|                                              ||                            |
+| ViewDataWidget                               ||                            |
+|                                              ||                            |
+|                                              ||                            |
+|                                              ||                            |
+|                                              ||                            |
+|                                              ||                            |
+|                                              ||                            |
+|                DATA AREA                     <>       CONFIG AREA          |
+|                                              ||                            |
+|                                              ||                            |
+|                                              ||                            |
+|                                              ||                            |
+|                                              ||                            |
+|                                              ||                            |
+|                                              ||____________________________|
+|                                              ||ViewLoadStateWidget         |
+|______________________________________________||____________________________|
+|'Lower widget'                                                              |
+|____________________________________________________________________________|
 
-Sometimes a ViewWidget is composed of more ViewWidgets, f.e. to be able to set a different
-event processor for each part.
-  */
+ViewDataWidget [derive]: Visualizes the data of the view (e.g. a graph). Located on the left side of the widget.
+Needs to be derived and then set via setDataWidget() in the constructor of the derived class.
+
+ViewConfigWidget [derive]: Implements a configuration area for the view located on the right side of the widget.
+Needs to be derived and then set via setConfigWidget() in the constructor of the derived class.
+
+ViewToolWidget: A toolbar located above the ViewDataWidget, holding the view's needed tool buttons and actions.
+This is a generic class which doesn't need to be derived, but is rather filled in the derived ViewWidget's constructor and
+provided with all needed callbacks. Interacts with the ViewDataWidget to switch the view's active tool and handles tool
+interaction like activating, deactivating and cancelling tools.
+
+ViewLoadStateWidget: A widget located below the configuration area. Provides state information for the view
+and means to update the view manually. Interacts with the ViewWidget and the ViewDataWidget to e.g.issue reloads and redraws,
+ot to obtain state information from them.
+
+'Lower widget': This is a widget residing on the bottom along the whole ViewWidget's width.
+Any QWidget derived class can be set as the 'lower widget' via setLowerWidget().
+The widget's container is only visible if the widget is set.
+
+The ViewWidget acts both to generate the basic layout and to handle interaction between all these components.
+It also serves as the View's main interface to all ui and display functionality.
+*/
 class ViewWidget : public QWidget, public Configurable
 {
     Q_OBJECT
@@ -79,6 +120,9 @@ public:
     QWidget* getLowerWidget() { return lower_widget_; }
     const QWidget* getLowerWidget() const { return lower_widget_; }
 
+    /**
+     * Reimplement to provide the ViewLoadStateWidget with view specific load information.
+    */
     virtual std::string loadedMessage() const { return ""; }
 
     bool reloadNeeded() const;
@@ -96,6 +140,11 @@ protected:
     ViewLoadStateWidget* getViewLoadStateWidget() { return state_widget_; }
     const ViewLoadStateWidget* getViewLoadStateWidget() const { return state_widget_; }
 
+    /**
+     * Reimplement to dynamically provide the ViewLoadStateWidget with reload and redraw information.
+     * Note that redraws and reloads can also manually be issued via notifyReloadNeeded() and notifyRedrawNeeded(),
+     * so this is rather optional.
+     */
     virtual bool reloadNeeded_impl() const { return false; };
     virtual bool redrawNeeded_impl() const { return false; };
 
@@ -112,12 +161,14 @@ private:
     /// The view the widget is part of
     View* view_ = nullptr;
 
+    //containers
     QSplitter*      main_splitter_           = nullptr;
     QWidget*        data_widget_container_   = nullptr;
     QWidget*        config_widget_container_ = nullptr;
     QWidget*        lower_widget_container_  = nullptr;
     QWidget*        right_widget_            = nullptr;
 
+    //view widget components
     ViewToolWidget*      tool_widget_   = nullptr;
     ViewDataWidget*      data_widget_   = nullptr;
     ViewConfigWidget*    config_widget_ = nullptr;
