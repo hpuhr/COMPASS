@@ -139,9 +139,6 @@ void EvaluationData::addReferenceData (DBContent& object, unsigned int line_id, 
 
     unsigned int buffer_size = buffer->size();
 
-    //    assert (buffer->has<unsigned int>(DBContent::meta_var_rec_num_.name()));
-    //    NullableVector<unsigned int>& rec_nums = buffer->get<unsigned int>(DBContent::meta_var_rec_num_.name());
-
     assert (buffer->has<ptime>(ref_timestamp_name_));
     NullableVector<ptime>& ts_vec = buffer->get<ptime>(ref_timestamp_name_);
 
@@ -154,7 +151,6 @@ void EvaluationData::addReferenceData (DBContent& object, unsigned int line_id, 
     assert (buffer->has<json>(DBContent::meta_var_associations_.name()));
     NullableVector<json>& assoc_vec = buffer->get<json>(DBContent::meta_var_associations_.name());
 
-    //unsigned int rec_num;
     ptime timestamp;
     vector<unsigned int> utn_vec;
 
@@ -183,14 +179,12 @@ void EvaluationData::addReferenceData (DBContent& object, unsigned int line_id, 
             continue;
         }
 
-        //assert (!rec_nums.isNull(cnt));
         if (ts_vec.isNull(cnt))
         {
             ++num_skipped;
             continue;
         }
 
-        //rec_num = rec_nums.get(cnt);
         timestamp = ts_vec.get(cnt);
 
         if (assoc_vec.isNull(cnt))
@@ -207,16 +201,12 @@ void EvaluationData::addReferenceData (DBContent& object, unsigned int line_id, 
         for (auto utn_it : utn_vec)
         {
             if (!hasTargetData(utn_it))
-                //target_data_.emplace(target_data_.end(), utn_it, *this, eval_man_);
                 target_data_.push_back({utn_it, *this, eval_man_, dbcont_man_});
 
             assert (hasTargetData(utn_it));
 
             auto tr_tag_it = target_data_.get<target_tag>().find(utn_it);
             auto index_it = target_data_.project<0>(tr_tag_it); // get iterator for random access
-
-            //            if (!targetData(utn_it).hasRefBuffer())
-            //                target_data_.modify(index_it, [buffer](EvaluationTargetData& t) { t.setRefBuffer(buffer); });
 
             target_data_.modify(index_it, [timestamp, cnt](EvaluationTargetData& t) { t.addRefIndex(timestamp, cnt); });
 
@@ -335,7 +325,6 @@ void EvaluationData::addTestData (DBContent& object, unsigned int line_id,  std:
     assert (buffer->has<json>(DBContent::meta_var_associations_.name()));
     NullableVector<json>& assoc_vec = buffer->get<json>(DBContent::meta_var_associations_.name());
 
-    //unsigned int rec_num;
     boost::posix_time::ptime timestamp;
     vector<unsigned int> utn_vec;
 
@@ -364,14 +353,12 @@ void EvaluationData::addTestData (DBContent& object, unsigned int line_id,  std:
             continue;
         }
 
-        //assert (!rec_nums.isNull(cnt));
         if (ts_vec.isNull(cnt))
         {
             ++num_skipped;
             continue;
         }
 
-        //rec_num = rec_nums.get(cnt);
         timestamp = ts_vec.get(cnt);
 
         if (assoc_vec.isNull(cnt))
@@ -388,16 +375,12 @@ void EvaluationData::addTestData (DBContent& object, unsigned int line_id,  std:
         for (auto utn_it : utn_vec)
         {
             if (!hasTargetData(utn_it))
-                //target_data_.emplace(target_data_.end(), utn_it, *this, eval_man_);
                 target_data_.push_back({utn_it, *this, eval_man_, dbcont_man_});
 
             assert (hasTargetData(utn_it));
 
             auto tr_tag_it = target_data_.get<target_tag>().find(utn_it);
             auto index_it = target_data_.project<0>(tr_tag_it); // get iterator for random access
-
-            //            if (!targetData(utn_it).hasRefBuffer())
-            //                target_data_.modify(index_it, [buffer](EvaluationTargetData& t) { t.setRefBuffer(buffer); });
 
             target_data_.modify(index_it, [timestamp, cnt](EvaluationTargetData& t) { t.addTstIndex(timestamp, cnt); });
 
@@ -449,10 +432,6 @@ void EvaluationData::finalize ()
     double time_per_eval, remaining_time_s;
 
     string remaining_time_str;
-
-    //    EvaluateTargetsFinalizeTask* t = new (tbb::task::allocate_root()) EvaluateTargetsFinalizeTask(
-    //                target_data_, done_flags, done);
-    //    tbb::task::enqueue(*t);
 
     std::future<void> pending_future = std::async(std::launch::async, [&] {
         unsigned int num_targets = target_data_.size();
@@ -714,9 +693,7 @@ bool EvaluationData::setData(const QModelIndex &index, const QVariant& value, in
         bool checked = (Qt::CheckState)value.toInt() == Qt::Checked;
         loginf << "EvaluationData: setData: utn " << it->utn_ <<" check state " << checked;
 
-        //eval_man_.useUTN(it->utn_, checked, false);
         dbcont_man_.utnUseEval(it->utn_, checked);
-        //target_data_.modify(it, [value,checked](EvaluationTargetData& p) { p.use(checked); });
 
         emit dataChanged(index, EvaluationData::index(index.row(), columnCount()-1));
         return true;
@@ -727,9 +704,8 @@ bool EvaluationData::setData(const QModelIndex &index, const QVariant& value, in
         assert (index.row() < target_data_.size());
 
         auto it = target_data_.begin()+index.row();
-        //eval_man_.utnComment(it->utn_, value.toString().toStdString(), false);
+
         dbcont_man_.utnComment(it->utn_, value.toString().toStdString());
-        //target_data_.modify(it, [value](EvaluationTargetData& p) { p.use(false); });
         return true;
     }
 
@@ -778,16 +754,9 @@ Qt::ItemFlags EvaluationData::flags(const QModelIndex &index) const
 
     assert (index.column() < table_columns_.size());
 
-    //    if (table_columns_.at(index.column()) == "comment")
-    //        return QAbstractItemModel::flags(index) | Qt::ItemIsEditable;
-    //    else
     if (index.column() == 0) // Use
     {
         return QAbstractItemModel::flags(index) | Qt::ItemIsUserCheckable;
-        //        flags |= Qt::ItemIsEnabled;
-        //        flags |= Qt::ItemIsUserCheckable;
-        //        flags |= Qt::ItemIsEditable;
-        // flags |= Qt::ItemIsSelectable;
     }
     else if (index.column() == 2)
     {
@@ -808,42 +777,6 @@ const EvaluationTargetData& EvaluationData::getTargetOf (const QModelIndex& inde
 
     return target;
 }
-
-
-//void EvaluationData::setUseTargetData (unsigned int utn, bool value)
-//{
-//    loginf << "EvaluationData: setUseTargetData: utn " << utn << " value " << value;
-
-//    assert (hasTargetData(utn));
-
-//    QModelIndexList items = match(
-//                index(0, 0),
-//                Qt::UserRole,
-//                QVariant(utn),
-//                1, // look *
-//                Qt::MatchExactly); // look *
-
-//    assert (items.size() == 1);
-
-//    setData(items.at(0), {value ? Qt::Checked: Qt::Unchecked}, Qt::CheckStateRole);
-//}
-
-//void EvaluationData::setTargetDataComment (unsigned int utn, std::string comment)
-//{
-//    loginf << "EvaluationData: setTargetDataComment: utn " << utn << " comment '" << comment << "'";
-
-//    assert (hasTargetData(utn));
-
-//    QModelIndexList items = match(
-//                index(0, 0),
-//                Qt::UserRole,
-//                QVariant(("comment_"+to_string(utn)).c_str()),
-//                1, // look *
-//                Qt::MatchExactly); // look *
-
-//    if (items.size() == 1)
-//        setData(items.at(0), comment.c_str(), Qt::CheckStateRole);
-//}
 
 EvaluationDataWidget* EvaluationData::widget()
 {
@@ -869,7 +802,6 @@ void EvaluationData::targetChangedSlot(unsigned int utn) // for one utn
 
     if (items.size() == 1)
     {
-        //emit dataChanged(items.at(0), items.at(0));
         emit dataChanged(index(items.at(0).row(), 0), index(items.at(0).row(), columnCount()-1));
 
         eval_man_.updateResultsToChanges();

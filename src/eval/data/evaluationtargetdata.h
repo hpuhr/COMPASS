@@ -111,7 +111,6 @@ public:
     bool isPrimaryOnly () const;
 
     bool use() const;
-//    void use(bool use);
 
     const std::multimap<boost::posix_time::ptime, unsigned int>& refData() const;
     const std::multimap<boost::posix_time::ptime, unsigned int>& tstData() const;
@@ -255,7 +254,7 @@ protected:
     void calculateTestDataMappings() const;
     TstDataMapping calculateTestDataMapping(boost::posix_time::ptime timestamp) const; // test tod
     void addRefPositionsSpeedsToMapping (TstDataMapping& mapping) const;
-    void addRefPositiosToMappingFast (TstDataMapping& mapping) const;
+    //void addRefPositiosToMappingFast (TstDataMapping& mapping) const;
 
     DataMappingTimes findTstTimes(boost::posix_time::ptime timestamp_ref) const; // ref tod
 };

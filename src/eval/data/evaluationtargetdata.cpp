@@ -1997,7 +1997,7 @@ void EvaluationTargetData::addRefPositionsSpeedsToMapping (TstDataMapping& mappi
         EvaluationTargetVelocity spd1;
         EvaluationTargetVelocity spd2;
 
-        double acceleration, turnrate;
+        double acceleration, angle_diff, turnrate;
         double speed,angle;
 
         logdbg << "EvaluationTargetData: addRefPositiosToMapping: d_t " << d_t;
@@ -2108,15 +2108,16 @@ void EvaluationTargetData::addRefPositionsSpeedsToMapping (TstDataMapping& mappi
                         spd2 = refSpdForTime(mapping.timestamp_ref2_);
 
                         acceleration = (spd2.speed_ - spd1.speed_)/d_t;
-                        speed = spd1.speed_ * acceleration * d_t2;
+                        speed = spd1.speed_ + acceleration * d_t2;
 
                         //loginf << "UGA spd1 " << spd1.speed_ << " 2 " << spd2.speed_ << " ipld " << speed;
 
-                        turnrate = Number::calculateMinAngleDifference(spd2.track_angle_, spd1.track_angle_) / d_t;
+                        angle_diff = Number::calculateMinAngleDifference(spd2.track_angle_, spd1.track_angle_);
+                        turnrate = angle_diff / d_t;
                         angle = spd1.track_angle_ + turnrate * d_t2;
 
                         loginf << "UGA ang1 " << spd1.track_angle_ << " 2 " << spd2.track_angle_
-                               << " acc " << acceleration << " ipld " << angle;
+                               << " angle_diff " << angle_diff << " turnrate " << turnrate << " ipld " << angle;
 
                         mapping.has_ref_spd_ = true;
                         mapping.spd_ref_.speed_ = speed;
@@ -2129,86 +2130,86 @@ void EvaluationTargetData::addRefPositionsSpeedsToMapping (TstDataMapping& mappi
     // else do nothing
 }
 
-void EvaluationTargetData::addRefPositiosToMappingFast (TstDataMapping& mapping) const
-{
-    if (mapping.has_ref1_ && hasRefPosForTime(mapping.timestamp_ref1_)
-            && mapping.has_ref2_ && hasRefPosForTime(mapping.timestamp_ref2_)) // two positions which can be interpolated
-    {
-        ptime lower = mapping.timestamp_ref1_;
-        ptime upper = mapping.timestamp_ref2_;
+//void EvaluationTargetData::addRefPositiosToMappingFast (TstDataMapping& mapping) const
+//{
+//    if (mapping.has_ref1_ && hasRefPosForTime(mapping.timestamp_ref1_)
+//            && mapping.has_ref2_ && hasRefPosForTime(mapping.timestamp_ref2_)) // two positions which can be interpolated
+//    {
+//        ptime lower = mapping.timestamp_ref1_;
+//        ptime upper = mapping.timestamp_ref2_;
 
-        EvaluationTargetPosition pos1 = refPosForTime(lower);
-        EvaluationTargetPosition pos2 = refPosForTime(upper);
-        float d_t = Time::partialSeconds(upper - lower);
+//        EvaluationTargetPosition pos1 = refPosForTime(lower);
+//        EvaluationTargetPosition pos2 = refPosForTime(upper);
+//        float d_t = Time::partialSeconds(upper - lower);
 
-        logdbg << "EvaluationTargetData: addRefPositiosToMappingFast: d_t " << d_t;
+//        logdbg << "EvaluationTargetData: addRefPositiosToMappingFast: d_t " << d_t;
 
-        assert (d_t >= 0);
+//        assert (d_t >= 0);
 
-        if (pos1.latitude_ == pos2.latitude_ && pos1.longitude_ == pos2.longitude_) // same pos
-        {
-            mapping.has_ref_pos_ = true;
-            mapping.pos_ref_ = pos1;
-        }
-        else
-        {
+//        if (pos1.latitude_ == pos2.latitude_ && pos1.longitude_ == pos2.longitude_) // same pos
+//        {
+//            mapping.has_ref_pos_ = true;
+//            mapping.pos_ref_ = pos1;
+//        }
+//        else
+//        {
 
-            if (lower == upper) // same time
-            {
-                logwrn << "EvaluationTargetData: addRefPositiosToMappingFast: ref has same time twice";
-            }
-            else
-            {
-                double v_lat = (pos2.latitude_ - pos1.latitude_)/d_t;
-                double v_long = (pos2.longitude_ - pos1.longitude_)/d_t;
+//            if (lower == upper) // same time
+//            {
+//                logwrn << "EvaluationTargetData: addRefPositiosToMappingFast: ref has same time twice";
+//            }
+//            else
+//            {
+//                double v_lat = (pos2.latitude_ - pos1.latitude_)/d_t;
+//                double v_long = (pos2.longitude_ - pos1.longitude_)/d_t;
 
-                logdbg << "EvaluationTargetData: interpolatedPosForTimeFast: v_x " << v_lat << " v_y " << v_long;
+//                logdbg << "EvaluationTargetData: interpolatedPosForTimeFast: v_x " << v_lat << " v_y " << v_long;
 
-                float d_t2 = Time::partialSeconds(mapping.timestamp_  - lower);
-                logdbg << "EvaluationTargetData: interpolatedPosForTimeFast: d_t2 " << d_t2;
+//                float d_t2 = Time::partialSeconds(mapping.timestamp_  - lower);
+//                logdbg << "EvaluationTargetData: interpolatedPosForTimeFast: d_t2 " << d_t2;
 
-                assert (d_t2 >= 0);
+//                assert (d_t2 >= 0);
 
-                double int_lat = pos1.latitude_ + v_lat * d_t2;
-                double int_long = pos1.longitude_ + v_long * d_t2;
+//                double int_lat = pos1.latitude_ + v_lat * d_t2;
+//                double int_long = pos1.longitude_ + v_long * d_t2;
 
-                logdbg << "EvaluationTargetData: interpolatedPosForTimeFast: interpolated lat " << int_lat
-                       << " long " << int_long;
+//                logdbg << "EvaluationTargetData: interpolatedPosForTimeFast: interpolated lat " << int_lat
+//                       << " long " << int_long;
 
-                // calculate altitude
-                bool has_altitude = false;
-                float altitude = 0.0;
+//                // calculate altitude
+//                bool has_altitude = false;
+//                float altitude = 0.0;
 
-                if (pos1.has_altitude_ && !pos2.has_altitude_)
-                {
-                    has_altitude = true;
-                    altitude = pos1.altitude_;
-                }
-                else if (!pos1.has_altitude_ && pos2.has_altitude_)
-                {
-                    has_altitude = true;
-                    altitude = pos2.altitude_;
-                }
-                else if (pos1.has_altitude_ && pos2.has_altitude_)
-                {
-                    float v_alt = (pos2.altitude_ - pos1.altitude_)/d_t;
-                    has_altitude = true;
-                    altitude = pos1.altitude_ + v_alt*d_t2;
-                }
+//                if (pos1.has_altitude_ && !pos2.has_altitude_)
+//                {
+//                    has_altitude = true;
+//                    altitude = pos1.altitude_;
+//                }
+//                else if (!pos1.has_altitude_ && pos2.has_altitude_)
+//                {
+//                    has_altitude = true;
+//                    altitude = pos2.altitude_;
+//                }
+//                else if (pos1.has_altitude_ && pos2.has_altitude_)
+//                {
+//                    float v_alt = (pos2.altitude_ - pos1.altitude_)/d_t;
+//                    has_altitude = true;
+//                    altitude = pos1.altitude_ + v_alt*d_t2;
+//                }
 
-                logdbg << "EvaluationTargetData: interpolatedPosForTimeFast: pos1 has alt "
-                       << pos1.has_altitude_ << " alt " << pos1.altitude_
-                       << " pos2 has alt " << pos2.has_altitude_ << " alt " << pos2.altitude_
-                       << " interpolated has alt " << has_altitude << " alt " << altitude;
+//                logdbg << "EvaluationTargetData: interpolatedPosForTimeFast: pos1 has alt "
+//                       << pos1.has_altitude_ << " alt " << pos1.altitude_
+//                       << " pos2 has alt " << pos2.has_altitude_ << " alt " << pos2.altitude_
+//                       << " interpolated has alt " << has_altitude << " alt " << altitude;
 
-                mapping.has_ref_pos_ = true;
+//                mapping.has_ref_pos_ = true;
 
-                mapping.pos_ref_ = EvaluationTargetPosition(int_lat, int_long, has_altitude, true, altitude);
-            }
-        }
-    }
-    // else do nothing
-}
+//                mapping.pos_ref_ = EvaluationTargetPosition(int_lat, int_long, has_altitude, true, altitude);
+//            }
+//        }
+//    }
+//    // else do nothing
+//}
 
 DataMappingTimes EvaluationTargetData::findTstTimes(ptime timestamp_ref) const // ref tod
 {

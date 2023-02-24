@@ -248,17 +248,6 @@ std::shared_ptr<EvaluationRequirementResult::Single> TrackAngle::evaluate (
         ref_trackangle_deg = ref_spd.track_angle_;
         tst_trackangle_deg = target_data.tstMeasuredTrackAngleForTime (timestamp);
 
-//        if (ref_trackangle_deg < 0)
-//            ref_trackangle_deg += 360;
-
-//        if (tst_trackangle_deg < 0)
-//            tst_trackangle_deg += 360;
-
-        // a = (targetA - sourceA + 180) % 360 - 180
-        //trackangle_min_diff = fabs(fmod(RAD2DEG * ref_spd.track_angle_ - tst_trackangle_deg + 180.0, 360.0) - 180.0);
-
-        //trackangle_min_diff = RAD2DEG * ref_spd.track_angle_ - tst_trackangle_deg;
-
         trackangle_min_diff = Number::calculateMinAngleDifference(ref_trackangle_deg, tst_trackangle_deg);
 
 //        loginf << Time::toString(timestamp) << " tst_track ref " << ref_trackangle_deg
