@@ -2002,8 +2002,8 @@ void EvaluationTargetData::addRefPositiosToMapping (TstDataMapping& mapping) con
             mapping.has_ref_pos_ = true;
             mapping.pos_ref_ = pos1;
 
-            mapping.posbased_spd_ref_.x_ = NAN;
-            mapping.posbased_spd_ref_.y_ = NAN;
+//            mapping.posbased_spd_ref_.x_ = NAN;
+//            mapping.posbased_spd_ref_.y_ = NAN;
             mapping.posbased_spd_ref_.track_angle_ = NAN;
             mapping.posbased_spd_ref_.speed_ = NAN;
         }
@@ -2125,8 +2125,8 @@ void EvaluationTargetData::addRefPositiosToMapping (TstDataMapping& mapping) con
                     if (!std::isnan(angle) && !std::isinf(angle) && !std::isnan(speed) && !std::isinf(speed))
                     {
                         mapping.has_ref_spd_ = true;
-                        mapping.posbased_spd_ref_.x_ = v_x;
-                        mapping.posbased_spd_ref_.y_ = v_y;
+//                        mapping.posbased_spd_ref_.x_ = v_x;
+//                        mapping.posbased_spd_ref_.y_ = v_y;
                         mapping.posbased_spd_ref_.track_angle_ = angle;
                         mapping.posbased_spd_ref_.speed_ = speed;
                     }

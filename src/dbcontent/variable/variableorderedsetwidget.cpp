@@ -124,7 +124,7 @@ void VariableOrderedSetWidget::updateMenuEntries()
     for (auto& meta_it : COMPASS::instance().dbContentManager().metaVariables())
     {
         QAction* action = meta_menu->addAction(meta_it.first.c_str());
-        action->setToolTip(meta_it.second->description().c_str());
+        action->setToolTip(meta_it.second->info().c_str());
         action->setData(QVariantMap({{meta_it.first.c_str(),QVariant(META_OBJECT_NAME.c_str())}}));
     }
 
@@ -136,7 +136,7 @@ void VariableOrderedSetWidget::updateMenuEntries()
         for (auto& var_it : object_it.second->variables())
         {
             QAction* action = m2->addAction(var_it.first.c_str());
-            action->setToolTip(var_it.second->description().c_str());
+            action->setToolTip(var_it.second->info().c_str());
             action->setData(QVariantMap({{var_it.first.c_str(), QVariant(object_it.first.c_str())}}));
         }
     }
@@ -233,13 +233,13 @@ void VariableOrderedSetWidget::updateVariableListSlot()
         if (def->dbContentName() == META_OBJECT_NAME)
         {
             assert(manager.existsMetaVariable(def->variableName()));
-            tooltip = manager.metaVariable(def->variableName()).description();
+            tooltip = manager.metaVariable(def->variableName()).info();
         }
         else
         {
             assert(manager.existsDBContent(def->dbContentName()));
             assert(manager.dbContent(def->dbContentName()).hasVariable(def->variableName()));
-            tooltip = manager.dbContent(def->dbContentName()).variable(def->variableName()).description();
+            tooltip = manager.dbContent(def->dbContentName()).variable(def->variableName()).info();
         }
 
         QListWidgetItem* item = new QListWidgetItem((def->dbContentName() + ", " + def->variableName()).c_str());
