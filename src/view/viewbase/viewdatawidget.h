@@ -3,6 +3,9 @@
 
 #include "appmode.h"
 
+#include <map>
+#include <memory>
+
 #include <QWidget>
 
 class ViewToolSwitcher;
