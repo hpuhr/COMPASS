@@ -231,7 +231,7 @@ void ScatterPlotView::dataVarX (Variable& var)
 
     assert (widget_);
     widget_->getViewDataWidget()->redrawData(true);
-    widget_->updateLoadState();
+    widget_->updateComponents();
 }
 
 MetaVariable& ScatterPlotView::metaDataVarX()
@@ -251,7 +251,7 @@ void ScatterPlotView::metaDataVarX (MetaVariable& var)
 
     assert (widget_);
     widget_->getViewDataWidget()->redrawData(true);
-    widget_->updateLoadState();
+    widget_->updateComponents();
 }
 
 
@@ -300,7 +300,7 @@ void ScatterPlotView::dataVarY (Variable& var)
 
     assert (widget_);
     widget_->getViewDataWidget()->redrawData(true);
-    widget_->updateLoadState();
+    widget_->updateComponents();
 }
 
 MetaVariable& ScatterPlotView::metaDataVarY()
@@ -320,7 +320,7 @@ void ScatterPlotView::metaDataVarY (MetaVariable& var)
 
     assert (widget_);
     widget_->getViewDataWidget()->redrawData(true);
-    widget_->updateLoadState();
+    widget_->updateComponents();
 }
 
 

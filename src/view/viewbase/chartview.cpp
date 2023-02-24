@@ -17,6 +17,8 @@ ChartView::ChartView(QtCharts::QChart* chart, SelectionStyle sel_style, QWidget*
 ,   sel_style_(sel_style)
 {
     createDisplayElements(chart);
+
+    setRenderHint(QPainter::Antialiasing);
 }
 
 /**
@@ -167,14 +169,14 @@ void ChartView::updateSelectionLines(const QRectF& region)
         if (!data_bounds_.isEmpty())
             configLines(data_bounds_);
 
-        std::cout << "HIDE selection box" << std::endl;
+        //std::cout << "HIDE selection box" << std::endl;
 
         selection_lines_->hide();
 
         return;
     }
 
-    std::cout << "SHOW selection box" << std::endl;
+    //std::cout << "SHOW selection box" << std::endl;
 
     configLines(region);
 

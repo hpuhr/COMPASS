@@ -373,6 +373,15 @@ void ViewWidget::updateLoadState()
 }
 
 /**
+ * Updates the view widget's individual components.
+*/
+void ViewWidget::updateComponents()
+{
+    updateToolWidget();
+    updateLoadState();
+}
+
+/**
  * Manually notifies the widget that a redraw is needed and updates the load state widget accordingly.
  * (Note: Might trigger an immediate redraw in live running mode)
  */

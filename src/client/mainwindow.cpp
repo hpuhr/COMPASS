@@ -1142,7 +1142,7 @@ void MainWindow::createDebugMenu()
         connect(shortcut, &QShortcut::activated, [ this ] () { this->showCommandShell(); });
     }
 
-    debug_menu->setVisible(!COMPASS::instance().isAppImage());
+    debug_menu->menuAction()->setVisible(!COMPASS::instance().isAppImage());
 }
 
 void MainWindow::showCommandShell()

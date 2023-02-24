@@ -46,19 +46,24 @@ ScatterPlotViewWidget::ScatterPlotViewWidget(const std::string& class_id,
 
     typedef ScatterPlotViewDataTool Tool;
 
+    auto activeIfDataShownCB = [ data_widget ] (QAction* a)
+    {
+        a->setEnabled(data_widget->showsData());
+    };
+
     getViewToolSwitcher()->addTool(Tool::SP_NAVIGATE_TOOL, "Navigate", {}, QIcon(), Qt::OpenHandCursor);
     getViewToolSwitcher()->addTool(Tool::SP_SELECT_TOOL, "Select", Qt::Key_S, getIcon("select_action.png"), Qt::CrossCursor);
     getViewToolSwitcher()->addTool(Tool::SP_ZOOM_RECT_TOOL, "Zoom to Rectangle", Qt::Key_R, getIcon("zoom_select_action.png"), Qt::CrossCursor);
 
     getViewToolSwitcher()->setDefaultTool(Tool::SP_NAVIGATE_TOOL);
     
-    getViewToolWidget()->addTool(Tool::SP_SELECT_TOOL);
-    getViewToolWidget()->addTool(Tool::SP_ZOOM_RECT_TOOL);
+    getViewToolWidget()->addTool(Tool::SP_SELECT_TOOL, activeIfDataShownCB);
+    getViewToolWidget()->addTool(Tool::SP_ZOOM_RECT_TOOL, activeIfDataShownCB);
 
     getViewToolWidget()->addSpacer();
 
-    getViewToolWidget()->addActionCallback("Invert Selection", [=] () { data_widget->invertSelectionSlot(); }, {}, getIcon("select_invert.png"));
-    getViewToolWidget()->addActionCallback("Delete Selection", [=] () { data_widget->clearSelectionSlot(); }, {}, getIcon("select_delete.png"));
+    getViewToolWidget()->addActionCallback("Invert Selection", [=] () { data_widget->invertSelectionSlot(); }, activeIfDataShownCB, getIcon("select_invert.png"));
+    getViewToolWidget()->addActionCallback("Delete Selection", [=] () { data_widget->clearSelectionSlot(); }, activeIfDataShownCB, getIcon("select_delete.png"));
 
     getViewToolWidget()->addSpacer();
 

@@ -20,13 +20,15 @@ class QCursor;
 class QAction;
 
 /**
+ * Toolbar for views. Implements adding of tools and actions to the view's toolbar, switching of tools, etc.
+ * Keeps the toolbar generic for all views by giving the possibility to pass callbacks.
  */
 class ViewToolWidget : public QToolBar
 {
 public:
-    typedef std::function<void()>         Callback;
-    typedef std::function<void(bool)>     ToggleCallback;
-    typedef std::function<void(QAction*)> UpdateCallback;
+    typedef std::function<void()>         Callback;       //callback triggered if an action is clicked
+    typedef std::function<void(bool)>     ToggleCallback; //callback triggered if a checkable action is toggled
+    typedef std::function<void(QAction*)> UpdateCallback; //callback for updating an action's state (e.g. check state, enabled state, icon, etc.)
 
     ViewToolWidget(ViewWidget* view_widget, ViewToolSwitcher* tool_switcher, QWidget* parent = nullptr);
     virtual ~ViewToolWidget() = default;

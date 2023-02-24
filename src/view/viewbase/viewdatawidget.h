@@ -9,6 +9,9 @@ class ViewToolSwitcher;
 class Buffer;
 
 /**
+ * Base class for view data widgets, which are held in the data area of the ViewWidget.
+ * Used to display data in a view specific way, e.g. as a graph.
+ * Derive and reimplement as needed.
  */
 class ViewDataWidget : public QWidget 
 {
@@ -48,7 +51,7 @@ protected:
     virtual void loadingDone_impl();                       //implements behavior at finishing a reload
     virtual void updateData_impl(bool requires_reset) = 0; //implements behavior at receiving new data
     virtual void clearData_impl() = 0;                     //implements clearing all view data
-    virtual bool redrawData_impl(bool recompute) = 0;      //implements redrawing the display (and possibly needed computations)
+    virtual bool redrawData_impl(bool recompute) = 0;      //implements redrawing the display (and possibly needed computations), and returns if the redraw succeeded
     virtual void liveReload_impl() = 0;                    //implements data reload during live running mode
 
     void endTool();

@@ -14,6 +14,7 @@ class QLabel;
 class QPushButton;
 
 /**
+ * Widget keeping/displaying the current data state and handling manual updates like reloading and redrawing.
 */
 class ViewLoadStateWidget : public QWidget
 {
