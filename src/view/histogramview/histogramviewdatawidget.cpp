@@ -426,7 +426,6 @@ bool HistogramViewDataWidget::updateChart()
 
     bool show_results  = view_->showResults();
     bool use_log_scale = view_->useLogScale();
-    bool has_data      = (histogram_generator_ != nullptr && !dataNotInBuffer());
 
     QString x_axis_name;
     if (show_results)
@@ -436,17 +435,58 @@ bool HistogramViewDataWidget::updateChart()
 
     QString y_axis_name = "Count";
 
+    chart->legend()->setAlignment(Qt::AlignBottom);
+
+    //create bar series
+    QBarSeries* chart_series = new QBarSeries();
+    chart->addSeries(chart_series);
+
+    //create x axis
+    QBarCategoryAxis* chart_x_axis = new QBarCategoryAxis;
+    chart_x_axis->setLabelsAngle(LabelAngleX);
+    chart_x_axis->setTitleText(x_axis_name);
+
+    chart->addAxis(chart_x_axis, Qt::AlignBottom);
+    chart_series->attachAxis(chart_x_axis);
+
+    //create y axis
+    QAbstractAxis* chart_y_axis = nullptr;
+
+    auto generateYAxis = [ & ] (bool log_scale, double max_count)
+    {
+        if (log_scale)
+        {
+            QLogValueAxis* tmp_chart_y_axis = new QLogValueAxis;
+            tmp_chart_y_axis->setLabelFormat("%g");
+            tmp_chart_y_axis->setBase(10.0);
+            //tmp_chart_y_axis->setMinorTickCount(10);
+            //tmp_chart_y_axis->setMinorTickCount(-1);
+            tmp_chart_y_axis-> setRange(10e-2, std::pow(10.0, 1 + std::ceil(std::log10(max_count))));
+
+            chart_y_axis = tmp_chart_y_axis;
+        }
+        else
+        {
+            chart_y_axis = new QValueAxis;
+            chart_y_axis->setRange(0, (int)max_count);
+        }
+        assert (chart_y_axis);
+
+        chart_y_axis->setTitleText(y_axis_name);
+
+        chart->addAxis(chart_y_axis, Qt::AlignLeft);
+        chart_series->attachAxis(chart_y_axis);
+    };
+
+    //we obtain valid data if a generator has been created and if the needed data is in the buffer
+    bool has_data = (histogram_generator_ != nullptr && !dataNotInBuffer());
+
     if (has_data)
     {
         //data available
         
         chart->legend()->setVisible(true);
-        chart->legend()->setAlignment(Qt::AlignBottom);
-
-        //create bar series
-        QBarSeries* chart_series = new QBarSeries();
-        chart->addSeries(chart_series);
-
+        
         const auto& results = histogram_generator_->getResults();
 
         bool add_null      = results.hasNullValues();
@@ -513,45 +553,12 @@ bool HistogramViewDataWidget::updateChart()
         if (add_null)
             categories << "NULL";
 
-        //create x axis
-        QBarCategoryAxis* chart_x_axis = new QBarCategoryAxis;
-        chart_x_axis->setLabelsAngle(LabelAngleX);
         chart_x_axis->append(categories);
-
-        chart_x_axis->setTitleText(x_axis_name);
-
-        chart->addAxis(chart_x_axis, Qt::AlignBottom);
-        chart_series->attachAxis(chart_x_axis);
-
-        //create y axis
-        QAbstractAxis* chart_y_axis = nullptr;
 
         //to generate a safe range we set max count to 1
         max_count = std::max(max_count, (unsigned)1);
 
-        if (use_log_scale)
-        {
-            QLogValueAxis* tmp_chart_y_axis = new QLogValueAxis();
-            tmp_chart_y_axis->setLabelFormat("%g");
-            tmp_chart_y_axis->setBase(10.0);
-            //tmp_chart_y_axis->setMinorTickCount(10);
-            //tmp_chart_y_axis->setMinorTickCount(-1);
-
-            tmp_chart_y_axis->setRange(10e-2, std::pow(10.0, 1 + std::ceil(std::log10(max_count))));
-
-            chart_y_axis = tmp_chart_y_axis;
-        }
-        else
-        {
-            chart_y_axis = new QValueAxis();
-            chart_y_axis->setRange(0, max_count);
-        }
-        assert (chart_y_axis);
-
-        chart_y_axis->setTitleText(y_axis_name);
-
-        chart->addAxis(chart_y_axis, Qt::AlignLeft);
-        chart_series->attachAxis(chart_y_axis);
+        generateYAxis(use_log_scale, max_count);
 
         #if 0
         //add outliers to legend
@@ -564,45 +571,32 @@ bool HistogramViewDataWidget::updateChart()
             chart_view_->addLegendOnlyItem(name, QColor(255, 255, 0));
         }
         #endif
-
-        //update chart
-        chart->update();
     }
     else 
     {
-        //no data, create default empty display
-        QBarSeries* chart_series = new QBarSeries;
-        chart->addSeries(chart_series);
+        //no data, generate empty display
 
         chart->legend()->setVisible(false);
 
-        QBarCategoryAxis* x_axis = new QBarCategoryAxis;
-        x_axis->append("Category");
-        x_axis->setTitleText(x_axis_name);
+        //we need some bogus category in order to make the bar plot work
+        chart_x_axis->append("Category"); 
 
-        chart->addAxis(x_axis, Qt::AlignBottom);
-        chart_series->attachAxis(x_axis);
+        chart_x_axis->setLabelsVisible(false);
+        chart_x_axis->setGridLineVisible(false);
+        chart_x_axis->setMinorGridLineVisible(false);
 
-        QValueAxis* y_axis = new QValueAxis;
-        y_axis->setTitleText(y_axis_name);
-
-        chart->addAxis(y_axis, Qt::AlignLeft);
-        chart_series->attachAxis(y_axis);
-
-        x_axis->setLabelsVisible(false);
-        x_axis->setGridLineVisible(false);
-        x_axis->setMinorGridLineVisible(false);
+        //just generate linear axis
+        generateYAxis(false, 1);
         
-        y_axis->setLabelsVisible(false);
-        y_axis->setGridLineVisible(false);
-        y_axis->setMinorGridLineVisible(false);
-        y_axis->setRange(0, 1);
-
-        //update chart
-        chart->update();
+        chart_y_axis->setLabelsVisible(false);
+        chart_y_axis->setGridLineVisible(false);
+        chart_y_axis->setMinorGridLineVisible(false);
     }
 
-    //create chart view
+    //update chart
+    chart->update();
+
+    //create new chart view
     chart_view_.reset(new HistogramViewChartView(this, chart));
 
     //    connect (chart_series_, &QBarSeries::clicked,

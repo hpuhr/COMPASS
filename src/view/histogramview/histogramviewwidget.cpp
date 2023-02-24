@@ -29,7 +29,7 @@
 
 #include "histogramview.h"
 
-/*
+/**
  */
 HistogramViewWidget::HistogramViewWidget(const std::string& class_id, const std::string& instance_id,
                                      Configurable* config_parent, HistogramView* view,

@@ -77,10 +77,8 @@ ScatterPlotViewDataWidget::~ScatterPlotViewDataWidget()
     logdbg << "ScatterPlotViewDataWidget: dtor";
 }
 
-void ScatterPlotViewDataWidget::clearData_impl()
+void ScatterPlotViewDataWidget::resetCounts()
 {
-    logdbg << "ScatterPlotViewDataWidget: clearData_impl: start";
-
     buffer_x_counts_.clear();
     buffer_y_counts_.clear();
 
@@ -93,12 +91,19 @@ void ScatterPlotViewDataWidget::clearData_impl()
     selected_values_.clear();
     rec_num_values_.clear();
 
-    chart_view_.reset(nullptr);
-
     x_var_not_in_buffer_ = false;
     y_var_not_in_buffer_ = false;
 
     nan_value_cnt_ = 0;
+}
+
+void ScatterPlotViewDataWidget::clearData_impl()
+{
+    logdbg << "ScatterPlotViewDataWidget: clearData_impl: start";
+
+    chart_view_.reset(nullptr);
+
+    resetCounts();
 
     logdbg << "ScatterPlotViewDataWidget: clearData_impl: end";
 }
@@ -142,6 +147,7 @@ bool ScatterPlotViewDataWidget::redrawData_impl(bool recompute)
 
     if (recompute)
     {
+        resetCounts();
         updateFromAllData();
         updateMinMax();
     }
@@ -1280,13 +1286,34 @@ bool ScatterPlotViewDataWidget::updateChart()
     chart->setBackgroundRoundness(0);
     chart->setDropShadowEnabled(false);
 
+    chart->legend()->setAlignment(Qt::AlignBottom);
+
+    auto createAxes = [ & ] ()
+    {
+        chart->createDefaultAxes();
+
+        //config x axis
+        loginf << "ScatterPlotViewDataWidget: updateChart: title x ' "
+            << view_->dataVarXDBO()+": "+view_->dataVarXName() << "'";
+        assert (chart->axes(Qt::Horizontal).size() == 1);
+        chart->axes(Qt::Horizontal).at(0)->setTitleText((view_->dataVarXDBO()+": "+view_->dataVarXName()).c_str());
+
+        //config y axis
+        loginf << "ScatterPlotViewDataWidget: updateChart: title y ' "
+            << view_->dataVarYDBO()+": "+view_->dataVarYName() << "'";
+        assert (chart->axes(Qt::Vertical).size() == 1);
+        chart->axes(Qt::Vertical).at(0)->setTitleText((view_->dataVarYDBO()+": "+view_->dataVarYName()).c_str());
+    };
+
+    //we obtain valid data if a data range is available and if the variables are available in the buffer data
     bool has_data = (x_values_.size() && y_values_.size() && !xVarNotInBuffer() && !yVarNotInBuffer());
+
     if (has_data)
     {
-        //data range available
-        chart->legend()->setVisible(true);
-        chart->legend()->setAlignment(Qt::AlignBottom);
+        //data available
 
+        chart->legend()->setVisible(true);
+        
         unsigned int value_cnt {0};
         unsigned int dbo_value_cnt {0};
         nan_value_cnt_ = 0;
@@ -1392,15 +1419,7 @@ bool ScatterPlotViewDataWidget::updateChart()
                 selected_series = nullptr;
             }
 
-            chart->createDefaultAxes();
-            loginf << "ScatterPlotViewDataWidget: updateChart: title x ' "
-                << view_->dataVarXDBO()+": "+view_->dataVarXName() << "'";
-            assert (chart->axes(Qt::Horizontal).size() == 1);
-            chart->axes(Qt::Horizontal).at(0)->setTitleText((view_->dataVarXDBO()+": "+view_->dataVarXName()).c_str());
-            loginf << "ScatterPlotViewDataWidget: updateChart: title y ' "
-                << view_->dataVarYDBO()+": "+view_->dataVarYName() << "'";
-            assert (chart->axes(Qt::Vertical).size() == 1);
-            chart->axes(Qt::Vertical).at(0)->setTitleText((view_->dataVarYDBO()+": "+view_->dataVarYName()).c_str());
+            createAxes();
         }
         else
         {
@@ -1409,24 +1428,22 @@ bool ScatterPlotViewDataWidget::updateChart()
             loginf << "ScatterPlotViewDataWidget: updateChart: no valid data";
         }
     }
-    else 
+    else
     {
-        //bad data range
+        //bad data range or vars not in buffer
         loginf << "ScatterPlotViewDataWidget: updateChart: no data, size x "
                << x_values_.size() << " y " << y_values_.size();
     }
 
     if (!has_data)
     {
-        //generate default empty layout
+        //no data -> generate default empty layout
         chart->legend()->setVisible(false);
 
         QScatterSeries* series = new QScatterSeries;
         chart->addSeries(series);
 
-        chart->createDefaultAxes();
-        chart->axes(Qt::Horizontal).at(0)->setTitleText((view_->dataVarXDBO()+": "+view_->dataVarXName()).c_str());
-        chart->axes(Qt::Vertical  ).at(0)->setTitleText((view_->dataVarYDBO()+": "+view_->dataVarYName()).c_str());
+        createAxes();
 
         chart->axes(Qt::Horizontal).at(0)->setLabelsVisible(false);
         chart->axes(Qt::Horizontal).at(0)->setGridLineVisible(false);
@@ -1436,6 +1453,8 @@ bool ScatterPlotViewDataWidget::updateChart()
         chart->axes(Qt::Vertical).at(0)->setGridLineVisible(false);
         chart->axes(Qt::Vertical).at(0)->setMinorGridLineVisible(false);
     }
+
+    chart->update();
 
     chart_view_.reset(new ScatterPlotViewChartView(this, chart));
 

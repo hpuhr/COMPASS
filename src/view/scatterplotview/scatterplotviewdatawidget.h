@@ -108,6 +108,8 @@ protected:
     virtual bool redrawData_impl(bool recompute) override;
     virtual void liveReload_impl() override;
 
+    void resetCounts();
+
     bool canUpdateFromDataX(std::string dbcontent_name);
     void updateFromDataX(std::string dbcontent_name, unsigned int current_size);
     bool canUpdateFromDataY(std::string dbcontent_name);

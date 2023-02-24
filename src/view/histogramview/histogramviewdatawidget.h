@@ -102,6 +102,8 @@ protected:
     virtual bool redrawData_impl(bool recompute) override;
     virtual void liveReload_impl() override;
 
+    void resetCounts();
+
     void updateGenerator();
     void updateGeneratorFromData();
     void updateGeneratorFromResults();
