@@ -275,7 +275,7 @@ void HistogramViewDataWidget::updateGeneratorFromData()
 
     histogram_generator_.reset();
 
-    if (data().empty())
+    if (viewData().empty())
         return;
 
     data_not_in_buffer_ = false;
@@ -304,52 +304,52 @@ void HistogramViewDataWidget::updateGeneratorFromData()
     {
         case PropertyDataType::BOOL:
         {
-            histogram_generator_.reset(new HistogramGeneratorBufferT<bool>(&data(), data_var, meta_var));
+            histogram_generator_.reset(new HistogramGeneratorBufferT<bool>(&viewData(), data_var, meta_var));
             break;
         }
         case PropertyDataType::CHAR:
         {
-            histogram_generator_.reset(new HistogramGeneratorBufferT<char>(&data(), data_var, meta_var));
+            histogram_generator_.reset(new HistogramGeneratorBufferT<char>(&viewData(), data_var, meta_var));
             break;
         }
         case PropertyDataType::UCHAR:
         {
-            histogram_generator_.reset(new HistogramGeneratorBufferT<unsigned char>(&data(), data_var, meta_var));
+            histogram_generator_.reset(new HistogramGeneratorBufferT<unsigned char>(&viewData(), data_var, meta_var));
             break;
         }
         case PropertyDataType::INT:
         {
-            histogram_generator_.reset(new HistogramGeneratorBufferT<int>(&data(), data_var, meta_var));
+            histogram_generator_.reset(new HistogramGeneratorBufferT<int>(&viewData(), data_var, meta_var));
             break;
         }
         case PropertyDataType::UINT:
         {
-            histogram_generator_.reset(new HistogramGeneratorBufferT<unsigned int>(&data(), data_var, meta_var));
+            histogram_generator_.reset(new HistogramGeneratorBufferT<unsigned int>(&viewData(), data_var, meta_var));
             break;
         }
         case PropertyDataType::LONGINT:
         {
-            histogram_generator_.reset(new HistogramGeneratorBufferT<long int>(&data(), data_var, meta_var));
+            histogram_generator_.reset(new HistogramGeneratorBufferT<long int>(&viewData(), data_var, meta_var));
             break;
         }
         case PropertyDataType::ULONGINT:
         {
-            histogram_generator_.reset(new HistogramGeneratorBufferT<unsigned long int>(&data(), data_var, meta_var));
+            histogram_generator_.reset(new HistogramGeneratorBufferT<unsigned long int>(&viewData(), data_var, meta_var));
             break;
         }
         case PropertyDataType::FLOAT:
         {
-            histogram_generator_.reset(new HistogramGeneratorBufferT<float>(&data(), data_var, meta_var));
+            histogram_generator_.reset(new HistogramGeneratorBufferT<float>(&viewData(), data_var, meta_var));
             break;
         }
         case PropertyDataType::DOUBLE:
         {
-            histogram_generator_.reset(new HistogramGeneratorBufferT<double>(&data(), data_var, meta_var));
+            histogram_generator_.reset(new HistogramGeneratorBufferT<double>(&viewData(), data_var, meta_var));
             break;
         }
         case PropertyDataType::STRING:
         {
-            histogram_generator_.reset(new HistogramGeneratorBufferT<std::string>(&data(), data_var, meta_var));
+            histogram_generator_.reset(new HistogramGeneratorBufferT<std::string>(&viewData(), data_var, meta_var));
             break;
         }
         case PropertyDataType::JSON:
@@ -359,7 +359,7 @@ void HistogramViewDataWidget::updateGeneratorFromData()
         }
         case PropertyDataType::TIMESTAMP:
         {
-            histogram_generator_.reset(new HistogramGeneratorBufferT<boost::posix_time::ptime>(&data(), data_var, meta_var));
+            histogram_generator_.reset(new HistogramGeneratorBufferT<boost::posix_time::ptime>(&viewData(), data_var, meta_var));
             break;
         }
         default:
@@ -676,7 +676,7 @@ void HistogramViewDataWidget::invertSelectionSlot()
 {
     loginf << "HistogramViewDataWidget: invertSelectionSlot";
 
-    for (auto& buf_it : data())
+    for (auto& buf_it : viewData())
     {
         assert (buf_it.second->has<bool>(DBContent::selected_var.name()));
         NullableVector<bool>& selected_vec = buf_it.second->get<bool>(DBContent::selected_var.name());
@@ -699,7 +699,7 @@ void HistogramViewDataWidget::clearSelectionSlot()
 {
     loginf << "HistogramViewDataWidget: clearSelectionSlot";
 
-    for (auto& buf_it : data())
+    for (auto& buf_it : viewData())
     {
         assert (buf_it.second->has<bool>(DBContent::selected_var.name()));
         NullableVector<bool>& selected_vec = buf_it.second->get<bool>(DBContent::selected_var.name());

@@ -402,9 +402,7 @@ void MainWindow::createMenus ()
     ui_menu_->addAction(reset_views_action);
 
     //debug menu (internal)
-
-    if (!COMPASS::instance().isAppImage())
-        createDebugMenu();
+    createDebugMenu();
 }
 
 void MainWindow::updateMenus()

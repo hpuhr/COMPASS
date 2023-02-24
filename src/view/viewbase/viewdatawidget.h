@@ -56,8 +56,8 @@ protected:
 
     void endTool();
 
-    const BufferData& data() const { return data_; }
-    BufferData& data() { return data_; } //exposed because of selection
+    const BufferData& viewData() const { return data_; }
+    BufferData& viewData() { return data_; } //exposed because of selection
 
 private:
     friend class ViewLoadStateWidget;

@@ -127,9 +127,9 @@ bool ListBoxViewDataWidget::redrawData_impl(bool recompute)
     logdbg << "ListBoxViewDataWidget: redrawData_impl: start - recompute = " << recompute;
 
     assert(all_buffer_table_widget_);
-    all_buffer_table_widget_->show(data());
+    all_buffer_table_widget_->show(viewData());
 
-    for (auto& buf_it : data())
+    for (auto& buf_it : viewData())
     {
         assert(buffer_tables_.count(buf_it.first) > 0);
         buffer_tables_.at(buf_it.first)->show(buf_it.second);

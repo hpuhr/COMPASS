@@ -172,7 +172,7 @@ void ScatterPlotViewDataWidget::updateFromAllData()
     logdbg << "ScatterPlotViewDataWidget: updateFromAllData: before x " << x_values_.size()
            << " y " << y_values_.size();
 
-    for (const auto& buf_it : data())
+    for (const auto& buf_it : viewData())
     {
         string dbcontent_name = buf_it.first;
         std::shared_ptr<Buffer> buffer = buf_it.second;
@@ -316,7 +316,7 @@ void ScatterPlotViewDataWidget::invertSelectionSlot()
 {
     loginf << "ScatterPlotViewDataWidget: invertSelectionSlot";
 
-    for (auto& buf_it : data())
+    for (auto& buf_it : viewData())
     {
         assert (buf_it.second->has<bool>(DBContent::selected_var.name()));
         NullableVector<bool>& selected_vec = buf_it.second->get<bool>(DBContent::selected_var.name());
@@ -337,7 +337,7 @@ void ScatterPlotViewDataWidget::clearSelectionSlot()
 {
     loginf << "ScatterPlotViewDataWidget: clearSelectionSlot";
 
-    for (auto& buf_it : data())
+    for (auto& buf_it : viewData())
     {
         assert (buf_it.second->has<bool>(DBContent::selected_var.name()));
         NullableVector<bool>& selected_vec = buf_it.second->get<bool>(DBContent::selected_var.name());
@@ -370,10 +370,10 @@ void ScatterPlotViewDataWidget::resetZoomSlot()
 
 bool ScatterPlotViewDataWidget::canUpdateFromDataX(std::string dbcontent_name)
 {
-    if (!data().count(dbcontent_name))
+    if (!viewData().count(dbcontent_name))
         return false;
 
-    Buffer* buffer = data().at(dbcontent_name).get();
+    Buffer* buffer = viewData().at(dbcontent_name).get();
 
     Variable* data_var {nullptr};
 
@@ -544,8 +544,8 @@ void ScatterPlotViewDataWidget::updateFromDataX(std::string dbcontent_name, unsi
 {
     logdbg << "ScatterPlotViewDataWidget: updateFromDataX: dbcontent_name " << dbcontent_name << " current_size " << current_size;
 
-    assert (data().count(dbcontent_name));
-    Buffer* buffer = data().at(dbcontent_name).get();
+    assert (viewData().count(dbcontent_name));
+    Buffer* buffer = viewData().at(dbcontent_name).get();
 
     unsigned int last_size = 0;
 
@@ -797,10 +797,10 @@ void ScatterPlotViewDataWidget::updateFromDataX(std::string dbcontent_name, unsi
 
 bool ScatterPlotViewDataWidget::canUpdateFromDataY(std::string dbcontent_name)
 {
-    if (!data().count(dbcontent_name))
+    if (!viewData().count(dbcontent_name))
         return false;
 
-    Buffer* buffer = data().at(dbcontent_name).get();
+    Buffer* buffer = viewData().at(dbcontent_name).get();
 
     Variable* data_var {nullptr};
 
@@ -970,8 +970,8 @@ void ScatterPlotViewDataWidget::updateFromDataY(std::string dbcontent_name, unsi
 {
     logdbg << "ScatterPlotViewDataWidget: updateFromDataY: dbcontent_name " << dbcontent_name << " current_size " << current_size;
 
-    assert (data().count(dbcontent_name));
-    Buffer* buffer = data().at(dbcontent_name).get();
+    assert (viewData().count(dbcontent_name));
+    Buffer* buffer = viewData().at(dbcontent_name).get();
 
     unsigned int last_size = 0;
 
@@ -1498,7 +1498,7 @@ void ScatterPlotViewDataWidget::selectData (double x_min, double x_max, double y
            << " y_min " << y_min << " y_max " << y_max << " ctrl pressed " << ctrl_pressed;
 
     unsigned int sel_cnt = 0;
-    for (auto& buf_it : data())
+    for (auto& buf_it : viewData())
     {
         assert (buf_it.second->has<bool>(DBContent::selected_var.name()));
         NullableVector<bool>& selected_vec = buf_it.second->get<bool>(DBContent::selected_var.name());
