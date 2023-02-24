@@ -28,7 +28,7 @@
 #include "dbcontent/variable/variable.h"
 #include "stringconv.h"
 #include "projection/transformation.h"
-#include "evaluationmanager.h"
+//#include "evaluationmanager.h"
 #include "util/timeconv.h"
 
 #include "util/tbbhack.h"
@@ -875,7 +875,6 @@ void CreateAssociationsJob::saveAssociations()
                                        buf_it.second, index_from, index_to);
 
         }
-
     }
 
     loginf << "CreateAssociationsJob: saveAssociations: done";
@@ -894,6 +893,11 @@ void CreateAssociationsJob::saveTargets(std::map<unsigned int, Association::Targ
         cont_man.createNewTarget(tgt_it.first);
 
         dbContent::Target& target = cont_man.target(tgt_it.first);
+
+        target.useInEval(tgt_it.second.use_in_eval_);
+
+        if (tgt_it.second.comment_.size())
+            target.comment(tgt_it.second.comment_);
 
         target.aircraftAddresses(tgt_it.second.tas_);
         target.aircraftIdentifications(tgt_it.second.ids_);
@@ -1169,8 +1173,6 @@ void CreateAssociationsJob::markDubiousUTNs(std::map<unsigned int, Association::
             still_dubious.push_back(target_it.second.utn_);
     }
 
-    EvaluationManager& eval_man = COMPASS::instance().evaluationManager();
-
     for (unsigned int utn : still_dubious)
     {
         loginf << "CreateAssociationsJob: markDubiousUTNs: target " << utn << " still dubious"
@@ -1179,10 +1181,10 @@ void CreateAssociationsJob::markDubiousUTNs(std::map<unsigned int, Association::
                 << " max " << String::doubleToStringPrecision(targets.at(utn).speed_max_,2) << " kts";
 
         if (mark_dubious_utns_unused)
-            eval_man.useUTN(utn, false, false, false);
+            targets.at(utn).use_in_eval_ = false;
 
         if (comment_dubious_utns)
-            eval_man.utnComment(utn, "Dubious Association", false);
+            targets.at(utn).comment_ =  "Dubious Association";
     }
 }
 

@@ -24,6 +24,7 @@
 #include "buffer.h"
 #include "targetmodel.h"
 #include "dbcontent/dbcontentcache.h"
+#include "viewabledataconfig.h"
 
 #include <boost/optional.hpp>
 
@@ -74,13 +75,16 @@ signals:
     void loadingDoneSignal(); // emitted when all dbos have finished loading
     void insertDoneSignal(); // emitted when all dbos have finished loading
 
+    // if useInEval or comment changed signals, to be sent from model
+    void targetChangedSignal(unsigned int utn); // for one utn
+    void allTargetsChangedSignal(); // for more than 1 utn
+
 public:
 
     DBContentManager(const std::string& class_id, const std::string& instance_id, COMPASS* compass);
     virtual ~DBContentManager();
 
-    virtual void generateSubConfigurable(const std::string& class_id,
-                                         const std::string& instance_id);
+    virtual void generateSubConfigurable(const std::string& class_id, const std::string& instance_id) override;
 
     dbContent::LabelGenerator& labelGenerator();
 
@@ -165,11 +169,20 @@ public:
     dbContent::TargetListWidget* targetListWidget();
     void resizeTargetListWidget();
 
+    bool utnUseEval (unsigned int utn);
+    void utnUseEval (unsigned int utn, bool value);
+
+    std::string utnComment (unsigned int utn);
+    void utnComment (unsigned int utn, std::string value);
+
+    void autoFilterUTNS();
+    void showUTN (unsigned int utn);
+
 protected:
     COMPASS& compass_;
 
     std::unique_ptr<dbContent::LabelGenerator> label_generator_;
-    dbContent::TargetModel target_model_;
+    std::unique_ptr<dbContent::TargetModel> target_model_;
     std::unique_ptr<dbContent::TargetListWidget> target_list_widget_;
 
     bool has_associations_{false};
@@ -193,8 +206,6 @@ protected:
 
     std::map<std::string, std::shared_ptr<Buffer>> data_;
 
-    dbContent::Cache read_cache_;
-
     std::map<std::string, std::shared_ptr<Buffer>> insert_data_;
 
     bool load_in_progress_{false};
@@ -212,7 +223,9 @@ protected:
 
     std::shared_ptr<DBContentDeleteDBJob> delete_job_{nullptr};
 
-    virtual void checkSubConfigurables();
+    std::unique_ptr<ViewableDataConfig> viewable_data_cfg_;
+
+    virtual void checkSubConfigurables() override;
     void finishLoading();
     void finishInserting();
 
@@ -227,6 +240,7 @@ protected:
 
     void addStandardVariables(std::string dbcont_name, dbContent::VariableSet& read_set);
 
+    void setViewableDataConfig (const nlohmann::json::object_t& data);
 };
 
 #endif /* DBCONTENT_DBCONTENTMANAGER_H_ */

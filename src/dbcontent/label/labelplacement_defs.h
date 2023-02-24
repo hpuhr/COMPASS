@@ -130,7 +130,7 @@ namespace label_placement
         ForceDirection fbe_force_dir     = ForceDirection::XY;
         StickyPosition fbe_sticky_pos    = StickyPosition::InitPos;
 
-        bool verbose = true;
+        bool verbose = false;
 
         Objects additional_objects; //additional objects to avoid, must be enabled by 'fb_avoid_objects'
     };

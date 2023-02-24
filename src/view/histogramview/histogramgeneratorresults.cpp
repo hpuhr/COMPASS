@@ -42,6 +42,8 @@
 
 #include "eval/results/speed/speedjoined.h"
 #include "eval/results/speed/speedsingle.h"
+#include "eval/results/trackangle/trackanglejoined.h"
+#include "eval/results/trackangle/trackanglesingle.h"
 
 #include "eval/results/identification/correctsingle.h"
 #include "eval/results/identification/correctjoined.h"
@@ -255,6 +257,10 @@ void HistogramGeneratorResults::updateFromResult(std::shared_ptr<EvaluationRequi
         updateCountResult(static_pointer_cast<SingleSpeed>(result));
     else if (result->type() == "JoinedSpeed")
         updateCountResult(static_pointer_cast<JoinedSpeed>(result));
+    else if (result->type() == "SingleTrackAngle")
+        updateCountResult(static_pointer_cast<SingleTrackAngle>(result));
+    else if (result->type() == "JoinedTrackAngle")
+        updateCountResult(static_pointer_cast<JoinedTrackAngle>(result));
 
     else if (result->type() == "SingleIdentificationCorrect")
         updateCountResult(static_pointer_cast<SingleIdentificationCorrect>(result));
@@ -489,6 +495,25 @@ void HistogramGeneratorResults::updateCountResult (
     addFloatingPointResults<JoinedSpeed, SingleSpeed, Base>(dbcontent_name, result);
 }
 
+void HistogramGeneratorResults::updateCountResult (
+        std::shared_ptr<SingleTrackAngle> result)
+{
+    assert (result);
+    std::string dbcontent_name = COMPASS::instance().evaluationManager().dbContentNameTst();
+    addFloatingPointResult(dbcontent_name, result);
+}
+
+/**
+ */
+void HistogramGeneratorResults::updateCountResult (
+        std::shared_ptr<JoinedTrackAngle> result)
+{
+    assert (result);
+    std::string dbcontent_name = COMPASS::instance().evaluationManager().dbContentNameTst();
+    addFloatingPointResults<JoinedTrackAngle, SingleTrackAngle, Base>(dbcontent_name, result);
+}
+
+
 /**
  */
 void HistogramGeneratorResults::updateCountResult (
@@ -702,3 +727,5 @@ void HistogramGeneratorResults::updateCountResult (std::shared_ptr<EvaluationReq
             updateCountResult (static_pointer_cast<SingleModeCFalse>(result_it));
     }
 }
+
+

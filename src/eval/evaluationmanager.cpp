@@ -66,7 +66,7 @@ using namespace boost::posix_time;
 
 EvaluationManager::EvaluationManager(const std::string& class_id, const std::string& instance_id, COMPASS* compass)
     : Configurable(class_id, instance_id, compass, "eval.json"), compass_(*compass),
-      data_(*this), results_gen_(*this), pdf_gen_(*this)
+      data_(*this, compass->dbContentManager()), results_gen_(*this), pdf_gen_(*this)
 {
     registerParameter("dbcontent_name_ref", &dbcontent_name_ref_, "RefTraj");
     registerParameter("line_id_ref", &line_id_ref_, 0);
@@ -83,33 +83,8 @@ EvaluationManager::EvaluationManager(const std::string& class_id, const std::str
 
     registerParameter("current_standard", &current_standard_, "");
 
-    registerParameter("configs", &configs_, json::object());
-
     registerParameter("use_grp_in_sector", &use_grp_in_sector_, json::object());
     registerParameter("use_requirement", &use_requirement_, json::object());
-
-    // remove utn stuff
-    // shorts
-    registerParameter("remove_short_targets", &remove_short_targets_, true);
-    registerParameter("remove_short_targets_min_updates", &remove_short_targets_min_updates_, 10);
-    registerParameter("remove_short_targets_min_duration", &remove_short_targets_min_duration_, 60.0);
-    // psr
-    registerParameter("remove_psr_only_targets", &remove_psr_only_targets_, true);
-    // ma
-    registerParameter("remove_modeac_onlys", &remove_modeac_onlys_, false);
-    registerParameter("filter_mode_a_codes", &filter_mode_a_codes_, false);
-    registerParameter("filter_mode_a_code_blacklist", &filter_mode_a_code_blacklist_, true);
-    registerParameter("filter_mode_a_code_values", &filter_mode_a_code_values_, "7000,7777");
-    // mc
-    registerParameter("remove_mode_c_values", &remove_mode_c_values_, false);
-    registerParameter("remove_mode_c_min_value", &remove_mode_c_min_value_, 11000);
-    // ta
-    registerParameter("filter_target_addresses", &filter_target_addresses_, false);
-    registerParameter("filter_target_addresses_blacklist", &filter_target_addresses_blacklist_, true);
-    registerParameter("filter_target_address_values", &filter_target_address_values_, "");
-    // dbo
-    registerParameter("remove_not_detected_dbos", &remove_not_detected_dbos_, false);
-    registerParameter("remove_not_detected_dbo_values", &remove_not_detected_dbo_values_, json::object());
 
     registerParameter("max_ref_time_diff", &max_ref_time_diff_, 4.0);
 
@@ -215,9 +190,6 @@ void EvaluationManager::init(QTabWidget* tab_widget)
 
     assert (!initialized_);
     assert (tab_widget);
-
-//    updateReferenceDBContent();
-//    updateTestDBContent();
 
     initialized_ = true;
 
@@ -499,17 +471,6 @@ void EvaluationManager::loadData ()
         widget_->updateButtons();
 }
 
-void EvaluationManager::autofilterUTNs()
-{
-    loginf << "EvaluationManager: autofilterUTNs";
-
-    data_.setUseAllTargetData(true);
-    data_.clearComments();
-    data_.setUseByFilter();
-
-    loginf << "EvaluationManager: autofilterUTNs: done";
-}
-
 bool EvaluationManager::canEvaluate ()
 {
     assert (initialized_);
@@ -713,73 +674,6 @@ void EvaluationManager::loadingDoneSlot()
         widget_->updateButtons();
 
 }
-
-//void EvaluationManager::newDataSlot(DBContent& object)
-//{
-//    //loginf << "EvaluationManager: newDataSlot: obj " << object.name() << " buffer size " << object.data()->size();
-//}
-//void EvaluationManager::loadingDoneSlot(DBContent& object)
-//{
-//    TODO_ASSERT
-
-//    loginf << "EvaluationManager: loadingDoneSlot: obj " << object.name() << " buffer size " << object.data()->size();
-
-//    DBContentManager& object_man = COMPASS::instance().objectManager();
-
-//    if (object.name() == dbcontent_name_ref_)
-//    {
-//        DBContent& dbo_ref = object_man.object(dbcontent_name_ref_);
-
-//        TODO_ASSERT
-
-////        disconnect(&dbo_ref, &DBContent::newDataSignal, this, &EvaluationManager::newDataSlot);
-////        disconnect(&dbo_ref, &DBContent::loadingDoneSignal, this, &EvaluationManager::loadingDoneSlot);
-
-//        data_.addReferenceData(dbo_ref, object.data());
-
-//        reference_data_loaded_ = true;
-//    }
-
-//    if (object.name() == dbcontent_name_tst_)
-//    {
-//        DBContent& dbo_tst = object_man.object(dbcontent_name_tst_);
-
-//        if (dbcontent_name_ref_ != dbcontent_name_tst_) // otherwise already disconnected
-//        {
-//            TODO_ASSERT
-
-////            disconnect(&dbo_tst, &DBContent::newDataSignal, this, &EvaluationManager::newDataSlot);
-////            disconnect(&dbo_tst, &DBContent::loadingDoneSignal, this, &EvaluationManager::loadingDoneSlot);
-//        }
-
-//        data_.addTestData(dbo_tst, object.data());
-
-//        test_data_loaded_ = true;
-//    }
-
-//    bool data_loaded_tmp = reference_data_loaded_ && test_data_loaded_;
-
-//    loginf << "EvaluationManager: loadingDoneSlot: data loaded " << data_loaded_;
-
-//    if (data_loaded_tmp)
-//    {
-//        loginf << "EvaluationManager: loadingDoneSlot: finalizing";
-
-//        boost::posix_time::ptime start_time = boost::posix_time::microsec_clock::local_time();
-
-//        data_.finalize();
-
-//        boost::posix_time::time_duration time_diff =  boost::posix_time::microsec_clock::local_time() - start_time;
-
-//        loginf << "EvaluationManager: loadingDoneSlot: finalize done "
-//               << String::timeStringFromDouble(time_diff.total_milliseconds() / 1000.0, true);
-//    }
-
-//    data_loaded_ = data_loaded_tmp;
-
-//    if (widget_)
-//        widget_->updateButtons();
-//}
 
 void EvaluationManager::evaluate ()
 {
@@ -1660,12 +1554,6 @@ void EvaluationManager::reportSkipTargetsWoIssues(bool value)
 
 void EvaluationManager::setViewableDataConfig (const nlohmann::json::object_t& data)
 {
-    if (viewable_data_cfg_)
-    {
-        COMPASS::instance().viewManager().unsetCurrentViewPoint();
-        viewable_data_cfg_ = nullptr;
-    }
-
     viewable_data_cfg_.reset(new ViewableDataConfig(data));
 
     COMPASS::instance().viewManager().setCurrentViewPoint(viewable_data_cfg_.get());
@@ -1746,14 +1634,6 @@ EvaluationManager::results() const
 {
     return results_gen_.results(); }
 ;
-
-//void EvaluationManager::setUseTargetData (unsigned int utn, bool value)
-//{
-//    loginf << "EvaluationManager: setUseTargetData: utn " << utn << " use " << value;
-
-//    data_.setUseTargetData(utn, value);
-//    updateResultsToUseChangeOf(utn);
-//}
 
 void EvaluationManager::updateResultsToChanges ()
 {
@@ -1890,475 +1770,6 @@ EvaluationResultsReport::PDFGenerator& EvaluationManager::pdfGenerator()
     return pdf_gen_;
 }
 
-bool EvaluationManager::useUTN (unsigned int utn)
-{
-    logdbg << "EvaluationManager: useUTN: utn " << utn;
-
-    if (!current_config_name_.size())
-        current_config_name_ = COMPASS::instance().lastDbFilename();
-
-    string utn_str = to_string(utn);
-
-    if (!configs_[current_config_name_]["utns"].contains(utn_str)
-            || !configs_[current_config_name_]["utns"].at(utn_str).contains("use"))
-        return true;
-    else
-        return configs_[current_config_name_]["utns"][utn_str]["use"];
-}
-
-void EvaluationManager::useUTN (unsigned int utn, bool value, bool update_td, bool update_res)
-{
-    logdbg << "EvaluationManager: useUTN: utn " << utn << " value " << value
-           << " update_td " << update_td;
-
-    if (!current_config_name_.size())
-        current_config_name_ = COMPASS::instance().lastDbFilename();
-
-    string utn_str = to_string(utn);
-    configs_[current_config_name_]["utns"][utn_str]["use"] = value;
-
-    if (update_td)
-        data_.setUseTargetData(utn, value);
-
-    if (update_res && update_results_)
-        updateResultsToChanges();
-}
-
-void EvaluationManager::useAllUTNs (bool value)
-{
-    loginf << "EvaluationManager: useAllUTNs: value " << value;
-
-    update_results_ = false;
-
-    if (!current_config_name_.size())
-        current_config_name_ = COMPASS::instance().lastDbFilename();
-
-    set<unsigned int> already_set;
-
-    // set those already loaded, and remember them
-    for (auto& target_it : data_)
-    {
-        useUTN(target_it.utn_, value, true);
-        already_set.insert(target_it.utn_);
-    }
-
-
-    // set those only existing in config
-    string utn_str;
-    unsigned int utn;
-
-    for (auto& utn_it : configs_[current_config_name_]["utns"].get<json::object_t>())
-    {
-        utn_str = utn_it.first;
-        utn = stoul(utn_str);
-
-        //loginf << "EvaluationManager: useAllUTNs: utn_str '" << utn_str << "' utn '" << utn << "' value " << value;
-
-        if (!already_set.count(utn))
-            configs_[current_config_name_]["utns"][utn_str]["use"] = value;
-    }
-
-    update_results_ = true;
-    updateResultsToChanges();
-}
-
-void EvaluationManager::clearUTNComments ()
-{
-    loginf << "EvaluationManager: clearUTNComments";
-
-    update_results_ = false;
-
-    if (!current_config_name_.size())
-        current_config_name_ = COMPASS::instance().lastDbFilename();
-
-    set<unsigned int> already_set;
-
-    // set those already loaded, and remember them
-    for (auto& target_it : data_)
-    {
-        utnComment(target_it.utn_, "", true);
-        already_set.insert(target_it.utn_);
-    }
-
-    // set those only existing in config
-    string utn_str;
-    unsigned int utn;
-
-    for (auto& utn_it : configs_[current_config_name_]["utns"].get<json::object_t>())
-    {
-        utn_str = utn_it.first;
-        utn = stoul(utn_str);
-
-        //loginf << "EvaluationManager: clearUTNComments: utn_str '" << utn_str << "' utn '" << utn << "'";
-
-        if (!already_set.count(utn))
-            configs_[current_config_name_]["utns"][utn_str]["comment"] = "";
-    }
-
-    update_results_ = true;
-}
-
-
-void EvaluationManager::filterUTNs ()
-{
-    loginf << "EvaluationManager: filterUTNs";
-
-    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-
-    update_results_ = false;
-
-    DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
-
-    bool use;
-    string comment;
-
-    std::set<std::pair<int,int>> remove_mode_as = filterModeACodeData();
-    std::set<unsigned int> remove_tas = filterTargetAddressData();
-
-    bool tmp_match;
-
-    time_duration short_duration = Time::partialSeconds(remove_short_targets_min_duration_);
-
-    for (auto& target_it : data_)
-    {
-        if (!target_it.use())
-            continue;
-
-        use = true; // must be true here
-        comment = "";
-
-        if (remove_short_targets_
-                && (target_it.numUpdates() < remove_short_targets_min_updates_
-                    || target_it.timeDuration() < short_duration))
-        {
-            use = false;
-            comment = "Short track";
-        }
-
-        if (use && remove_psr_only_targets_)
-        {
-            if (!target_it.callsigns().size()
-                    && !target_it.targetAddresses().size()
-                    && !target_it.modeACodes().size()
-                    && !target_it.hasModeC())
-            {
-                use = false;
-                comment = "Primary only";
-            }
-        }
-
-        if (use && remove_modeac_onlys_)
-        {
-            if (!target_it.callsigns().size()
-                    && !target_it.targetAddresses().size())
-            {
-                use = false;
-                comment = "Mode A/C only";
-            }
-        }
-
-        if (use && filter_mode_a_codes_)
-        {
-            tmp_match = false;
-
-            for (auto t_ma : target_it.modeACodes())
-            {
-                for (auto& r_ma_p : remove_mode_as)
-                {
-                    if (r_ma_p.second == -1) // single
-                        tmp_match |= (t_ma == r_ma_p.first);
-                    else // pair
-                        tmp_match |= (t_ma >= r_ma_p.first && t_ma <= r_ma_p.second);
-                }
-
-                if (tmp_match)
-                    break;
-            }
-
-            if (filter_mode_a_code_blacklist_)
-            {
-                if (tmp_match) // disable if match
-                {
-                    use = false;
-                    comment = "Mode A";
-                }
-            }
-            else // whitelist
-            {
-                if (!tmp_match) // disable if not match
-                {
-                    use = false;
-                    comment = "Mode A";
-                }
-            }
-        }
-
-        if (use && remove_mode_c_values_)
-        {
-            if (!target_it.hasModeC())
-            {
-                use = false;
-                comment = "Mode C not existing";
-            }
-            else if (target_it.modeCMax() < remove_mode_c_min_value_)
-            {
-                use = false;
-                comment = "Max Mode C too low";
-            }
-        }
-
-        if (use && filter_target_addresses_)
-        {
-            tmp_match = false;
-
-            for (auto ta_it : target_it.targetAddresses())
-            {
-                tmp_match = remove_tas.count(ta_it);
-
-                if (tmp_match)
-                    break;
-            }
-
-            if (filter_target_addresses_blacklist_)
-            {
-                if (tmp_match) // disable if match
-                {
-                    use = false;
-                    comment = "Target Address";
-                }
-            }
-            else // whitelist
-            {
-                if (!tmp_match) // disable if not match
-                {
-                    use = false;
-                    comment = "Target Address";
-                }
-            }
-        }
-
-        if (use && remove_not_detected_dbos_) // prepare associations
-        {
-
-            assert (dbcont_man.hasTargetsInfo());
-            assert (dbcont_man.existsTarget(target_it.utn_));
-
-            for (auto& dbcont_it : dbcont_man)
-            {
-                if (remove_not_detected_dbo_values_.contains(dbcont_it.first)
-                        && remove_not_detected_dbo_values_.at(dbcont_it.first) == true // removed if not detected
-                        && dbcont_man.target(target_it.utn_).dbContentCount(dbcont_it.first) == 0) // not detected
-                {
-                    use = false; // remove it
-                    comment = "Not Detected in "+dbcont_it.first;
-                    break;
-                }
-            }
-        }
-
-        if (!use)
-        {
-            logdbg << "EvaluationManager: filterUTNs: removing " << target_it.utn_ << " comment '" << comment << "'";
-            useUTN (target_it.utn_, use, true);
-            utnComment(target_it.utn_, comment, false);
-        }
-    }
-
-    update_results_ = true;
-    updateResultsToChanges();
-
-    QApplication::restoreOverrideCursor();
-}
-
-std::string EvaluationManager::utnComment (unsigned int utn)
-{
-    logdbg << "EvaluationManager: utnComment: utn " << utn;
-
-    if (!current_config_name_.size())
-        current_config_name_ = COMPASS::instance().lastDbFilename();
-
-    string utn_str = to_string(utn);
-
-    if (!configs_[current_config_name_]["utns"].contains(utn_str)
-            || !configs_[current_config_name_]["utns"].at(utn_str).contains("comment"))
-        return "";
-    else
-        return configs_[current_config_name_]["utns"][utn_str]["comment"];
-}
-
-void EvaluationManager::utnComment (unsigned int utn, std::string value, bool update_td)
-{
-    logdbg << "EvaluationManager: utnComment: utn " << utn << " value '" << value << "'"
-           << " update_td " << update_td;
-
-    if (!current_config_name_.size())
-        current_config_name_ = COMPASS::instance().lastDbFilename();
-
-    string utn_str = to_string(utn);
-    configs_[current_config_name_]["utns"][utn_str]["comment"] = value;
-
-    if (update_td)
-        data_.setTargetDataComment(utn, value);
-}
-
-bool EvaluationManager::removeShortTargets() const
-{
-    return remove_short_targets_;
-}
-
-void EvaluationManager::removeShortTargets(bool value)
-{
-    loginf << "EvaluationManager: removeShortTargets: value " << value;
-
-    remove_short_targets_ = value;
-}
-
-unsigned int EvaluationManager::removeShortTargetsMinUpdates() const
-{
-    return remove_short_targets_min_updates_;
-}
-
-void EvaluationManager::removeShortTargetsMinUpdates(unsigned int value)
-{
-    loginf << "EvaluationManager: removeShortTargetsMinUpdates: value " << value;
-
-    remove_short_targets_min_updates_ = value;
-}
-
-double EvaluationManager::removeShortTargetsMinDuration() const
-{
-    return remove_short_targets_min_duration_;
-}
-
-void EvaluationManager::removeShortTargetsMinDuration(double value)
-{
-    loginf << "EvaluationManager: removeShortTargetsMinDuration: value " << value;
-
-    remove_short_targets_min_duration_ = value;
-}
-
-bool EvaluationManager::removePsrOnlyTargets() const
-{
-    return remove_psr_only_targets_;
-}
-
-void EvaluationManager::removePsrOnlyTargets(bool value)
-{
-    loginf << "EvaluationManager: removePsrOnlyTargets: value " << value;
-
-    remove_psr_only_targets_ = value;
-}
-
-std::string EvaluationManager::filterModeACodeValues() const
-{
-    return filter_mode_a_code_values_;
-}
-
-std::set<std::pair<int,int>> EvaluationManager::filterModeACodeData() const // single ma,-1 or range ma1,ma2
-{
-    std::set<std::pair<int,int>> data;
-
-    vector<string> parts = String::split(filter_mode_a_code_values_, ',');
-
-    for (auto& part_it : parts)
-    {
-        if (part_it.find("-") != std::string::npos) // range
-        {
-            vector<string> sub_parts = String::split(part_it, '-');
-
-            if (sub_parts.size() != 2)
-            {
-                logwrn << "EvaluationManager: removeModeACodeData: not able to parse range '" << part_it << "'";
-                continue;
-            }
-
-            int val1 = String::intFromOctalString(sub_parts.at(0));
-            int val2 = String::intFromOctalString(sub_parts.at(1));
-
-            data.insert({val1, val2});
-        }
-        else // single value
-        {
-            int val1 = String::intFromOctalString(part_it);
-            data.insert({val1, -1});
-        }
-    }
-
-    return data;
-}
-
-void EvaluationManager::filterModeACodeValues(const std::string& value)
-{
-    loginf << "EvaluationManager: removeModeACodeValues: value '" << value << "'";
-
-    filter_mode_a_code_values_ = value;
-}
-
-std::string EvaluationManager::filterTargetAddressValues() const
-{
-    return filter_target_address_values_;
-}
-
-std::set<unsigned int> EvaluationManager::filterTargetAddressData() const
-{
-    std::set<unsigned int>  data;
-
-    vector<string> parts = String::split(filter_target_address_values_, ',');
-
-    for (auto& part_it : parts)
-    {
-        int val1 = String::intFromHexString(part_it);
-        data.insert(val1);
-    }
-
-    return data;
-}
-
-void EvaluationManager::filterTargetAddressValues(const std::string& value)
-{
-    loginf << "EvaluationManager: removeTargetAddressValues: value '" << value << "'";
-
-    filter_target_address_values_ = value;
-}
-
-bool EvaluationManager::removeModeACOnlys() const
-{
-    return remove_modeac_onlys_;
-}
-
-void EvaluationManager::removeModeACOnlys(bool value)
-{
-    loginf << "EvaluationManager: removeModeACOnlys: value " << value;
-    remove_modeac_onlys_ = value;
-}
-
-bool EvaluationManager::removeNotDetectedDBContents() const
-{
-    return remove_not_detected_dbos_;
-}
-
-void EvaluationManager::removeNotDetectedDBContents(bool value)
-{
-    loginf << "EvaluationManager: removeNotDetectedDBOs: value " << value;
-
-    remove_not_detected_dbos_ = value;
-}
-
-bool EvaluationManager::removeNotDetectedDBContent(const std::string& dbcontent_name) const
-{
-    if (!remove_not_detected_dbo_values_.contains(dbcontent_name))
-        return false;
-
-    return remove_not_detected_dbo_values_.at(dbcontent_name);
-}
-
-void EvaluationManager::removeNotDetectedDBContents(const std::string& dbcontent_name, bool value)
-{
-    loginf << "EvaluationManager: removeNotDetectedDBOs: dbo " << dbcontent_name << " value " << value;
-
-    remove_not_detected_dbo_values_[dbcontent_name] = value;
-}
-
 bool EvaluationManager::loadOnlySectorData() const
 {
     return load_only_sector_data_;
@@ -2367,30 +1778,6 @@ bool EvaluationManager::loadOnlySectorData() const
 void EvaluationManager::loadOnlySectorData(bool value)
 {
     load_only_sector_data_ = value;
-}
-
-bool EvaluationManager::filterTargetAddresses() const
-{
-    return filter_target_addresses_;
-}
-
-void EvaluationManager::filterTargetAddresses(bool value)
-{
-    loginf << "EvaluationManager: removeTargetAddresses: value " << value;
-
-    filter_target_addresses_ = value;
-}
-
-bool EvaluationManager::filterModeACodes() const
-{
-    return filter_mode_a_codes_;
-}
-
-void EvaluationManager::filterModeACodes(bool value)
-{
-    loginf << "EvaluationManager: removeModeACodes: value " << value;
-
-    filter_mode_a_codes_ = value;
 }
 
 nlohmann::json::object_t EvaluationManager::getBaseViewableDataConfig ()
@@ -2904,30 +2291,6 @@ void EvaluationManager::updateActiveDataSources() // save to config var
     widget_->updateButtons();
 }
 
-bool EvaluationManager::filterTargetAddressesBlacklist() const
-{
-    return filter_target_addresses_blacklist_;
-}
-
-void EvaluationManager::filterTargetAddressesBlacklist(bool value)
-{
-    loginf << "EvaluationManager: filterTargetAddressesBlacklist: value " << value;
-
-    filter_target_addresses_blacklist_ = value;
-}
-
-bool EvaluationManager::filterModeACodeBlacklist() const
-{
-    return filter_mode_a_code_blacklist_;
-}
-
-void EvaluationManager::filterModeACodeBlacklist(bool value)
-{
-    loginf << "EvaluationManager: filterModeACodeBlacklist: value " << value;
-
-    filter_mode_a_code_blacklist_ = value;
-}
-
 unsigned int EvaluationManager::lineIDRef() const
 {
     return line_id_ref_;
@@ -2946,28 +2309,5 @@ unsigned int EvaluationManager::lineIDTst() const
 void EvaluationManager::lineIDTst(unsigned int line_id_tst)
 {
     line_id_tst_ = line_id_tst;
-}
-
-bool EvaluationManager::removeModeCValues() const
-{
-    return remove_mode_c_values_;
-}
-
-void EvaluationManager::removeModeCValues(bool value)
-{
-    loginf << "EvaluationManager: removeModeCValues: value " << value;
-
-    remove_mode_c_values_ = value;
-}
-
-float EvaluationManager::removeModeCMinValue() const
-{
-    return remove_mode_c_min_value_;
-}
-
-void EvaluationManager::removeModeCMinValue(float value)
-{
-    loginf << "EvaluationManager: removeModeCMinValue: value " << value;
-    remove_mode_c_min_value_ = value;
 }
 

@@ -226,6 +226,17 @@ void MetaVariable::name(const std::string& name) { name_ = name; }
 
 std::string MetaVariable::description() const { return description_; }
 
+std::string MetaVariable::info() const
+{
+    std::ostringstream ss;
+
+    ss << "Name: '" << name_ << "'" << endl;
+    ss << "Data Type: " << dataTypeString() << endl;
+    ss << "Description: " << description() << endl;
+
+    return ss.str();
+}
+
 PropertyDataType MetaVariable::dataType() const
 {
     assert(hasVariables());
@@ -333,7 +344,7 @@ void MetaVariable::updateDescription()
     for (auto& variable_it : variables_)
     {
         description_ += "For " + variable_it.first +" ("+ variable_it.second.dataTypeString()+"):\n";
-        description_ += variable_it.second.description() + "\n\n";
+        description_ += variable_it.second.info() + "\n\n";
     }
 }
 

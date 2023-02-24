@@ -34,6 +34,8 @@ extern double round(float num, unsigned int precision);
 /// @brief Returns angle (degrees) calculated from given values
 extern double calculateAngle(double degrees, double minutes, double seconds);
 
+extern double calculateMinAngleDifference(double a_deg, double b_deg);
+
 //extern void convert(const std::string& conversion_type, NullableVector<unsigned int>& array_list);
 
 extern unsigned int dsIdFrom (unsigned int sac, unsigned int sic);

@@ -1,18 +1,19 @@
-#ifndef EVALUATIONDATAFILTERDIALOG_H
-#define EVALUATIONDATAFILTERDIALOG_H
+#ifndef DBCONTENTTARGETFILTERDIALOG_H
+#define DBCONTENTTARGETFILTERDIALOG_H
 
 #include <QDialog>
 
 #include <map>
 
-class EvaluationData;
-class EvaluationManager;
-
 class QCheckBox;
 class QLineEdit;
 class QTextEdit;
 
-class EvaluationDataFilterDialog  : public QDialog
+namespace dbContent {
+
+class TargetModel;
+
+class TargetFilterDialog  : public QDialog
 {
     Q_OBJECT
 
@@ -43,12 +44,10 @@ public slots:
     void cancelSlot();
 
 public:
-    EvaluationDataFilterDialog(EvaluationData& eval_data, EvaluationManager& eval_man,
-                               QWidget* parent=nullptr, Qt::WindowFlags f=0);
+    TargetFilterDialog(TargetModel& model, QWidget* parent=nullptr, Qt::WindowFlags f=0);
 
 protected:
-    EvaluationData& eval_data_;
-    EvaluationManager& eval_man_;
+    TargetModel& model_;
 
     QCheckBox* remove_short_check_ {nullptr};
 
@@ -77,4 +76,6 @@ protected:
 
 };
 
-#endif // EVALUATIONDATAFILTERDIALOG_H
+}
+
+#endif // DBCONTENTTARGETFILTERDIALOG_H

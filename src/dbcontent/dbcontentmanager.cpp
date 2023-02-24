@@ -60,7 +60,7 @@ using namespace dbContent;
 
 DBContentManager::DBContentManager(const std::string& class_id, const std::string& instance_id,
                                    COMPASS* compass)
-    : Configurable(class_id, instance_id, compass, "db_content.json"), compass_(*compass), read_cache_(*this)
+    : Configurable(class_id, instance_id, compass, "db_content.json"), compass_(*compass)
 {
     logdbg << "DBContentManager: constructor: creating subconfigurables";
 
@@ -111,6 +111,11 @@ void DBContentManager::generateSubConfigurable(const std::string& class_id,
         assert (!label_generator_);
         label_generator_.reset(new dbContent::LabelGenerator(class_id, instance_id, *this));
     }
+    else if (class_id == "DBContentTargetModel")
+    {
+        assert (!target_model_);
+        target_model_.reset(new dbContent::TargetModel(class_id, instance_id, *this));
+    }
     else if (class_id == "DBContent")
     {
         DBContent* object = new DBContent(compass_, class_id, instance_id, this);
@@ -144,6 +149,12 @@ void DBContentManager::checkSubConfigurables()
     {
         generateSubConfigurable("DBContentLabelGenerator", "DBContentLabelGenerator0");
         assert (label_generator_);
+    }
+
+    if (!target_model_)
+    {
+        generateSubConfigurable("DBContentTargetModel", "DBContentTargetModel0");
+        assert (target_model_);
     }
 }
 
@@ -487,7 +498,7 @@ void DBContentManager::databaseClosedSlot()
     for (auto& object : dbcontent_)
         object.second->databaseClosedSlot();
 
-    target_model_.clear();
+    target_model_->clear();
 
     timestamp_min_.reset();
     timestamp_max_.reset();
@@ -1306,35 +1317,35 @@ dbContent::Variable& DBContentManager::metaGetVariable (const std::string& dbcon
 
 bool DBContentManager::hasTargetsInfo()
 {
-    return target_model_.hasTargetsInfo();
+    return target_model_->hasTargetsInfo();
 }
 
 void DBContentManager::clearTargetsInfo()
 {
-    target_model_.clearTargetsInfo();
+    target_model_->clearTargetsInfo();
 }
 
 bool DBContentManager::existsTarget(unsigned int utn)
 {
-    return target_model_.existsTarget(utn);
+    return target_model_->existsTarget(utn);
 }
 
 void DBContentManager::createNewTarget(unsigned int utn)
 {
-    target_model_.createNewTarget(utn);
+    target_model_->createNewTarget(utn);
 }
 
 dbContent::Target& DBContentManager::target(unsigned int utn)
 {
     assert (existsTarget(utn));
-    return target_model_.target(utn);
+    return target_model_->target(utn);
 }
 
 void DBContentManager::loadTargets()
 {
     loginf << "DBContentManager: loadTargets";
 
-    target_model_.loadFromDB();
+    target_model_->loadFromDB();
 
     if (target_list_widget_)
         target_list_widget_->resizeColumnsToContents();
@@ -1344,7 +1355,7 @@ void DBContentManager::saveTargets()
 {
     loginf << "DBContentManager: saveTargets";
 
-    target_model_.saveToDB();
+    target_model_->saveToDB();
 }
 
 unsigned int DBContentManager::maxLiveDataAgeCache() const
@@ -1368,7 +1379,10 @@ void DBContentManager::resetToStartupConfiguration()
 dbContent::TargetListWidget* DBContentManager::targetListWidget()
 {
     if (!target_list_widget_)
-        target_list_widget_.reset (new dbContent::TargetListWidget(target_model_));
+    {
+        assert (target_model_);
+        target_list_widget_.reset (new dbContent::TargetListWidget(*target_model_, *this));
+    }
 
     return target_list_widget_.get();
 }
@@ -1463,3 +1477,67 @@ MetaVariableConfigurationDialog* DBContentManager::metaVariableConfigdialog()
     assert(meta_cfg_dialog_);
     return meta_cfg_dialog_.get();
 }
+
+
+void DBContentManager::setViewableDataConfig (const nlohmann::json::object_t& data)
+{
+    viewable_data_cfg_.reset(new ViewableDataConfig(data));
+
+    COMPASS::instance().viewManager().setCurrentViewPoint(viewable_data_cfg_.get());
+}
+
+bool DBContentManager::utnUseEval (unsigned int utn)
+{
+    assert (target_model_);
+    assert (target_model_->existsTarget(utn));
+    return target_model_->target(utn).useInEval();
+}
+
+void DBContentManager::utnUseEval (unsigned int utn, bool value)
+{
+    assert (target_model_);
+    assert (target_model_->existsTarget(utn));
+    target_model_->setUseTargetData(utn, value);
+
+    // eval man
+    //    data_.setUseTargetData(utn, value);
+    //    updateResultsToUseChangeOf(utn);
+}
+
+std::string DBContentManager::utnComment (unsigned int utn)
+{
+    assert (target_model_);
+    assert (target_model_->existsTarget(utn));
+    return target_model_->target(utn).comment();
+}
+
+void DBContentManager::utnComment (unsigned int utn, std::string value)
+{
+    loginf << "DBContentManager: utnComment: utn " << utn << " comment '" << value << "'";
+
+    assert (target_model_);
+    assert (target_model_->existsTarget(utn));
+    target_model_->setTargetDataComment(utn, value);
+}
+
+void DBContentManager::autoFilterUTNS()
+{
+    assert (target_model_);
+    target_model_->setUseByFilter();
+
+    //    data_.setUseAllTargetData(true);
+    //    data_.clearComments();
+    //    data_.setUseByFilter();
+}
+
+void DBContentManager::showUTN (unsigned int utn)
+{
+    loginf << "DBContentManager: showUTN: utn " << utn;
+
+    nlohmann::json data;
+    data[VP_FILTERS_KEY]["UTNs"]["utns"] = to_string(utn);
+
+    loginf << "DBContentManager: showUTN: showing";
+    setViewableDataConfig(data);
+}
+

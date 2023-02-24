@@ -26,12 +26,12 @@ Target::Target(unsigned int utn, nlohmann::json info)
         info_[KEY_USED] = true;
 }
 
-bool Target::use() const
+bool Target::useInEval() const
 {
     return info_.at(KEY_USED);
 }
 
-void Target::use(bool value)
+void Target::useInEval(bool value)
 {
     info_[KEY_USED] = value;
 }
@@ -236,6 +236,12 @@ bool Target::isPrimaryOnly () const
             && !modeACodes().size() && !hasModeC();
 }
 
+bool Target::isModeACOnly () const
+{
+    return !aircraftAddresses().size() && !aircraftIdentifications().size()
+            && (modeACodes().size() || hasModeC());
+}
+
 unsigned int Target::numUpdates () const
 {
     unsigned int cnt = 0;
@@ -249,7 +255,7 @@ unsigned int Target::numUpdates () const
     return cnt;
 }
 
-unsigned int Target::dbContentCount(const std::string& dbcontent_name)
+unsigned int Target::dbContentCount(const std::string& dbcontent_name) const
 {
     if (info_.contains(KEY_COUNTS) && info_.at(KEY_COUNTS).contains(dbcontent_name))
         return info_.at(KEY_COUNTS).at(dbcontent_name);

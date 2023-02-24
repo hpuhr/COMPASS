@@ -18,6 +18,7 @@
 #include "evaluationdata.h"
 #include "evaluationdatawidget.h"
 #include "evaluationmanager.h"
+#include "dbcontentmanager.h"
 #include "dbcontent/dbcontent.h"
 #include "dbcontent/variable/variable.h"
 #include "dbcontent/variable/metavariable.h"
@@ -43,19 +44,18 @@ using namespace Utils;
 using namespace nlohmann;
 using namespace boost::posix_time;
 
-EvaluationData::EvaluationData(EvaluationManager& eval_man)
-    : eval_man_(eval_man)
+EvaluationData::EvaluationData(EvaluationManager& eval_man, DBContentManager& dbcont_man)
+    : eval_man_(eval_man), dbcont_man_(dbcont_man)
 {
-
+    connect(&dbcont_man, &DBContentManager::targetChangedSignal, this, &EvaluationData::targetChangedSlot);
+    connect(&dbcont_man, &DBContentManager::allTargetsChangedSignal, this, &EvaluationData::allTargetsChangedSlot);
 }
 
 void EvaluationData::addReferenceData (DBContent& object, unsigned int line_id, std::shared_ptr<Buffer> buffer)
 {
     loginf << "EvaluationData: addReferenceData: dbcontent " << object.name() << " size " << buffer->size();
 
-    DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
-
-    if (!dbcontent_man.hasAssociations())
+    if (!dbcont_man_.hasAssociations())
     {
         logwrn << "EvaluationData: addReferenceData: dbcontent has no associations";
         unassociated_ref_cnt_ = buffer->size();
@@ -72,31 +72,31 @@ void EvaluationData::addReferenceData (DBContent& object, unsigned int line_id, 
 
     string dbcontent_name = ref_buffer_->dbContentName();
 
-    ref_timestamp_name_ = dbcontent_man.metaVariable(DBContent::meta_var_timestamp_.name()).getFor(dbcontent_name).name();
+    ref_timestamp_name_ = dbcont_man_.metaVariable(DBContent::meta_var_timestamp_.name()).getFor(dbcontent_name).name();
 
-    ref_latitude_name_ = dbcontent_man.metaVariable(DBContent::meta_var_latitude_.name()).getFor(dbcontent_name).name();
-    ref_longitude_name_ = dbcontent_man.metaVariable(DBContent::meta_var_longitude_.name()).getFor(dbcontent_name).name();
+    ref_latitude_name_ = dbcont_man_.metaVariable(DBContent::meta_var_latitude_.name()).getFor(dbcontent_name).name();
+    ref_longitude_name_ = dbcont_man_.metaVariable(DBContent::meta_var_longitude_.name()).getFor(dbcontent_name).name();
 
-    if (dbcontent_man.metaVariable(DBContent::meta_var_ta_.name()).existsIn(dbcontent_name))
-        ref_target_address_name_ = dbcontent_man.metaVariable(DBContent::meta_var_ta_.name()).getFor(dbcontent_name).name();
+    if (dbcont_man_.metaVariable(DBContent::meta_var_ta_.name()).existsIn(dbcontent_name))
+        ref_target_address_name_ = dbcont_man_.metaVariable(DBContent::meta_var_ta_.name()).getFor(dbcontent_name).name();
     else
         ref_target_address_name_ = "";
 
-    if (dbcontent_man.metaVariable(DBContent::meta_var_ti_.name()).existsIn(dbcontent_name))
-        ref_callsign_name_ = dbcontent_man.metaVariable(DBContent::meta_var_ti_.name()).getFor(dbcontent_name).name();
+    if (dbcont_man_.metaVariable(DBContent::meta_var_ti_.name()).existsIn(dbcontent_name))
+        ref_callsign_name_ = dbcont_man_.metaVariable(DBContent::meta_var_ti_.name()).getFor(dbcontent_name).name();
     else
         ref_callsign_name_ = "";
 
     // mc
-    ref_modec_name_ = dbcontent_man.metaVariable(DBContent::meta_var_mc_.name()).getFor(dbcontent_name).name();
+    ref_modec_name_ = dbcont_man_.metaVariable(DBContent::meta_var_mc_.name()).getFor(dbcontent_name).name();
 
-    if (dbcontent_man.metaVariable(DBContent::meta_var_mc_g_.name()).existsIn(dbcontent_name))
-        ref_modec_g_name_ = dbcontent_man.metaVariable(DBContent::meta_var_mc_g_.name()).getFor(dbcontent_name).name();
+    if (dbcont_man_.metaVariable(DBContent::meta_var_mc_g_.name()).existsIn(dbcontent_name))
+        ref_modec_g_name_ = dbcont_man_.metaVariable(DBContent::meta_var_mc_g_.name()).getFor(dbcontent_name).name();
     else
         ref_modec_g_name_ = "";
 
-    if (dbcontent_man.metaVariable(DBContent::meta_var_mc_v_.name()).existsIn(dbcontent_name))
-        ref_modec_v_name_ = dbcontent_man.metaVariable(DBContent::meta_var_mc_v_.name()).getFor(dbcontent_name).name();
+    if (dbcont_man_.metaVariable(DBContent::meta_var_mc_v_.name()).existsIn(dbcontent_name))
+        ref_modec_v_name_ = dbcont_man_.metaVariable(DBContent::meta_var_mc_v_.name()).getFor(dbcontent_name).name();
     else
         ref_modec_v_name_ = "";
 
@@ -107,40 +107,37 @@ void EvaluationData::addReferenceData (DBContent& object, unsigned int line_id, 
     }
 
     // m3a
-    ref_modea_name_ = dbcontent_man.metaVariable(DBContent::meta_var_m3a_.name()).getFor(dbcontent_name).name();
+    ref_modea_name_ = dbcont_man_.metaVariable(DBContent::meta_var_m3a_.name()).getFor(dbcontent_name).name();
 
-    if (dbcontent_man.metaVariable(DBContent::meta_var_m3a_g_.name()).existsIn(dbcontent_name))
-        ref_modea_g_name_ = dbcontent_man.metaVariable(DBContent::meta_var_m3a_g_.name()).getFor(dbcontent_name).name();
+    if (dbcont_man_.metaVariable(DBContent::meta_var_m3a_g_.name()).existsIn(dbcontent_name))
+        ref_modea_g_name_ = dbcont_man_.metaVariable(DBContent::meta_var_m3a_g_.name()).getFor(dbcontent_name).name();
     else
         ref_modea_g_name_ = "";
 
-    if (dbcontent_man.metaVariable(DBContent::meta_var_m3a_v_.name()).existsIn(dbcontent_name))
-        ref_modea_v_name_ = dbcontent_man.metaVariable(DBContent::meta_var_m3a_v_.name()).getFor(dbcontent_name).name();
+    if (dbcont_man_.metaVariable(DBContent::meta_var_m3a_v_.name()).existsIn(dbcontent_name))
+        ref_modea_v_name_ = dbcont_man_.metaVariable(DBContent::meta_var_m3a_v_.name()).getFor(dbcontent_name).name();
     else
         ref_modea_v_name_ = "";
 
     // ground bit
-    if (dbcontent_man.metaVariable(DBContent::meta_var_ground_bit_.name()).existsIn(dbcontent_name))
-        ref_ground_bit_name_ = dbcontent_man.metaVariable(DBContent::meta_var_ground_bit_.name()).getFor(dbcontent_name).name();
+    if (dbcont_man_.metaVariable(DBContent::meta_var_ground_bit_.name()).existsIn(dbcontent_name))
+        ref_ground_bit_name_ = dbcont_man_.metaVariable(DBContent::meta_var_ground_bit_.name()).getFor(dbcontent_name).name();
     else
         ref_ground_bit_name_ = "";
 
     // speed & track_angle
 
-    assert (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_ground_speed_));
-    assert (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_track_angle_));
+    assert (dbcont_man_.metaCanGetVariable(dbcontent_name, DBContent::meta_var_ground_speed_));
+    assert (dbcont_man_.metaCanGetVariable(dbcontent_name, DBContent::meta_var_track_angle_));
 
-    ref_spd_ground_speed_kts_name_ = dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_ground_speed_).name();
-    ref_spd_track_angle_deg_name_ = dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_track_angle_).name();
+    ref_spd_ground_speed_kts_name_ = dbcont_man_.metaGetVariable(dbcontent_name, DBContent::meta_var_ground_speed_).name();
+    ref_spd_track_angle_deg_name_ = dbcont_man_.metaGetVariable(dbcontent_name, DBContent::meta_var_track_angle_).name();
 
     set<unsigned int> active_srcs = eval_man_.activeDataSourcesRef();
     bool use_active_srcs = (eval_man_.dbContentNameRef() == eval_man_.dbContentNameTst());
     unsigned int num_skipped {0};
 
     unsigned int buffer_size = buffer->size();
-
-//    assert (buffer->has<unsigned int>(DBContent::meta_var_rec_num_.name()));
-//    NullableVector<unsigned int>& rec_nums = buffer->get<unsigned int>(DBContent::meta_var_rec_num_.name());
 
     assert (buffer->has<ptime>(ref_timestamp_name_));
     NullableVector<ptime>& ts_vec = buffer->get<ptime>(ref_timestamp_name_);
@@ -154,7 +151,6 @@ void EvaluationData::addReferenceData (DBContent& object, unsigned int line_id, 
     assert (buffer->has<json>(DBContent::meta_var_associations_.name()));
     NullableVector<json>& assoc_vec = buffer->get<json>(DBContent::meta_var_associations_.name());
 
-    //unsigned int rec_num;
     ptime timestamp;
     vector<unsigned int> utn_vec;
 
@@ -183,14 +179,12 @@ void EvaluationData::addReferenceData (DBContent& object, unsigned int line_id, 
             continue;
         }
 
-        //assert (!rec_nums.isNull(cnt));
         if (ts_vec.isNull(cnt))
         {
             ++num_skipped;
             continue;
         }
 
-        //rec_num = rec_nums.get(cnt);
         timestamp = ts_vec.get(cnt);
 
         if (assoc_vec.isNull(cnt))
@@ -207,16 +201,12 @@ void EvaluationData::addReferenceData (DBContent& object, unsigned int line_id, 
         for (auto utn_it : utn_vec)
         {
             if (!hasTargetData(utn_it))
-                //target_data_.emplace(target_data_.end(), utn_it, *this, eval_man_);
-                target_data_.push_back({utn_it, *this, eval_man_});
+                target_data_.push_back({utn_it, *this, eval_man_, dbcont_man_});
 
             assert (hasTargetData(utn_it));
 
             auto tr_tag_it = target_data_.get<target_tag>().find(utn_it);
             auto index_it = target_data_.project<0>(tr_tag_it); // get iterator for random access
-
-            //            if (!targetData(utn_it).hasRefBuffer())
-            //                target_data_.modify(index_it, [buffer](EvaluationTargetData& t) { t.setRefBuffer(buffer); });
 
             target_data_.modify(index_it, [timestamp, cnt](EvaluationTargetData& t) { t.addRefIndex(timestamp, cnt); });
 
@@ -233,9 +223,7 @@ void EvaluationData::addTestData (DBContent& object, unsigned int line_id,  std:
 {
     loginf << "EvaluationData: addTestData: dbcontent " << object.name() << " size " << buffer->size();
 
-    DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
-
-    if (!dbcontent_man.hasAssociations())
+    if (!dbcont_man_.hasAssociations())
     {
         logwrn << "EvaluationData: addTestData: dbcontent has no associations";
         unassociated_ref_cnt_ = buffer->size();
@@ -250,82 +238,79 @@ void EvaluationData::addTestData (DBContent& object, unsigned int line_id,  std:
 
     string dbcontent_name = tst_buffer_->dbContentName();
 
-    tst_timestamp_name_ = dbcontent_man.metaVariable(DBContent::meta_var_timestamp_.name()).getFor(dbcontent_name).name();
+    tst_timestamp_name_ = dbcont_man_.metaVariable(DBContent::meta_var_timestamp_.name()).getFor(dbcontent_name).name();
 
-    tst_latitude_name_ = dbcontent_man.metaVariable(DBContent::meta_var_latitude_.name()).getFor(dbcontent_name).name();
-    tst_longitude_name_ = dbcontent_man.metaVariable(DBContent::meta_var_longitude_.name()).getFor(dbcontent_name).name();
+    tst_latitude_name_ = dbcont_man_.metaVariable(DBContent::meta_var_latitude_.name()).getFor(dbcontent_name).name();
+    tst_longitude_name_ = dbcont_man_.metaVariable(DBContent::meta_var_longitude_.name()).getFor(dbcontent_name).name();
 
-    if (dbcontent_man.metaVariable(DBContent::meta_var_ta_.name()).existsIn(dbcontent_name))
-        tst_target_address_name_ = dbcontent_man.metaVariable(DBContent::meta_var_ta_.name()).getFor(dbcontent_name).name();
+    if (dbcont_man_.metaVariable(DBContent::meta_var_ta_.name()).existsIn(dbcontent_name))
+        tst_target_address_name_ = dbcont_man_.metaVariable(DBContent::meta_var_ta_.name()).getFor(dbcontent_name).name();
     else
         tst_target_address_name_ = "";
 
-    if (dbcontent_man.metaVariable(DBContent::meta_var_ti_.name()).existsIn(dbcontent_name))
-        tst_callsign_name_ = dbcontent_man.metaVariable(DBContent::meta_var_ti_.name()).getFor(dbcontent_name).name();
+    if (dbcont_man_.metaVariable(DBContent::meta_var_ti_.name()).existsIn(dbcontent_name))
+        tst_callsign_name_ = dbcont_man_.metaVariable(DBContent::meta_var_ti_.name()).getFor(dbcontent_name).name();
     else
         tst_callsign_name_ = "";
 
     // mc
-    tst_modec_name_ = dbcontent_man.metaVariable(DBContent::meta_var_mc_.name()).getFor(dbcontent_name).name();
+    tst_modec_name_ = dbcont_man_.metaVariable(DBContent::meta_var_mc_.name()).getFor(dbcontent_name).name();
 
-    if (dbcontent_man.metaVariable(DBContent::meta_var_mc_g_.name()).existsIn(dbcontent_name))
-        tst_modec_g_name_ = dbcontent_man.metaVariable(DBContent::meta_var_mc_g_.name()).getFor(dbcontent_name).name();
+    if (dbcont_man_.metaVariable(DBContent::meta_var_mc_g_.name()).existsIn(dbcontent_name))
+        tst_modec_g_name_ = dbcont_man_.metaVariable(DBContent::meta_var_mc_g_.name()).getFor(dbcontent_name).name();
     else
         tst_modec_g_name_ = "";
 
-    if (dbcontent_man.metaVariable(DBContent::meta_var_mc_v_.name()).existsIn(dbcontent_name))
-        tst_modec_v_name_ = dbcontent_man.metaVariable(DBContent::meta_var_mc_v_.name()).getFor(dbcontent_name).name();
+    if (dbcont_man_.metaVariable(DBContent::meta_var_mc_v_.name()).existsIn(dbcontent_name))
+        tst_modec_v_name_ = dbcont_man_.metaVariable(DBContent::meta_var_mc_v_.name()).getFor(dbcontent_name).name();
     else
         tst_modec_v_name_ = "";
 
 
-//    if (dbcontent_name == "CAT062")
-//    {
-//        has_tst_altitude_secondary_ = true;
-//        tst_altitude_secondary_name_ = DBContent::var_tracker_baro_alt_.name();
-//    }
+    //    if (dbcontent_name == "CAT062")
+    //    {
+    //        has_tst_altitude_secondary_ = true;
+    //        tst_altitude_secondary_name_ = DBContent::var_tracker_baro_alt_.name();
+    //    }
 
     // m3a
-    tst_modea_name_ = dbcontent_man.metaVariable(DBContent::meta_var_m3a_.name()).getFor(dbcontent_name).name();
+    tst_modea_name_ = dbcont_man_.metaVariable(DBContent::meta_var_m3a_.name()).getFor(dbcontent_name).name();
 
-    if (dbcontent_man.metaVariable(DBContent::meta_var_m3a_g_.name()).existsIn(dbcontent_name))
-        tst_modea_g_name_ = dbcontent_man.metaVariable(DBContent::meta_var_m3a_g_.name()).getFor(dbcontent_name).name();
+    if (dbcont_man_.metaVariable(DBContent::meta_var_m3a_g_.name()).existsIn(dbcontent_name))
+        tst_modea_g_name_ = dbcont_man_.metaVariable(DBContent::meta_var_m3a_g_.name()).getFor(dbcontent_name).name();
     else
         tst_modea_g_name_ = "";
 
-    if (dbcontent_man.metaVariable(DBContent::meta_var_m3a_v_.name()).existsIn(dbcontent_name))
-        tst_modea_v_name_ = dbcontent_man.metaVariable(DBContent::meta_var_m3a_v_.name()).getFor(dbcontent_name).name();
+    if (dbcont_man_.metaVariable(DBContent::meta_var_m3a_v_.name()).existsIn(dbcontent_name))
+        tst_modea_v_name_ = dbcont_man_.metaVariable(DBContent::meta_var_m3a_v_.name()).getFor(dbcontent_name).name();
     else
         tst_modea_v_name_ = "";
 
     // ground bit
-    if (dbcontent_man.metaVariable(DBContent::meta_var_ground_bit_.name()).existsIn(dbcontent_name))
-        tst_ground_bit_name_ = dbcontent_man.metaVariable(DBContent::meta_var_ground_bit_.name()).getFor(dbcontent_name).name();
+    if (dbcont_man_.metaVariable(DBContent::meta_var_ground_bit_.name()).existsIn(dbcontent_name))
+        tst_ground_bit_name_ = dbcont_man_.metaVariable(DBContent::meta_var_ground_bit_.name()).getFor(dbcontent_name).name();
     else
         tst_ground_bit_name_ = "";
 
     // track num
-    if (dbcontent_man.metaVariable(DBContent::meta_var_track_num_.name()).existsIn(dbcontent_name))
-        tst_track_num_name_ = dbcontent_man.metaVariable(DBContent::meta_var_track_num_.name()).getFor(dbcontent_name).name();
+    if (dbcont_man_.metaVariable(DBContent::meta_var_track_num_.name()).existsIn(dbcontent_name))
+        tst_track_num_name_ = dbcont_man_.metaVariable(DBContent::meta_var_track_num_.name()).getFor(dbcontent_name).name();
     else
         tst_track_num_name_ = "";
 
     // speed & track_angle
 
-    assert (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_ground_speed_));
-    assert (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_track_angle_));
+    assert (dbcont_man_.metaCanGetVariable(dbcontent_name, DBContent::meta_var_ground_speed_));
+    assert (dbcont_man_.metaCanGetVariable(dbcontent_name, DBContent::meta_var_track_angle_));
 
-    tst_spd_ground_speed_kts_name_ = dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_ground_speed_).name();
-    tst_spd_track_angle_deg_name_ = dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_track_angle_).name();
+    tst_spd_ground_speed_kts_name_ = dbcont_man_.metaGetVariable(dbcontent_name, DBContent::meta_var_ground_speed_).name();
+    tst_spd_track_angle_deg_name_ = dbcont_man_.metaGetVariable(dbcontent_name, DBContent::meta_var_track_angle_).name();
 
     set<unsigned int> active_srcs = eval_man_.activeDataSourcesTst();
     bool use_active_srcs = (eval_man_.dbContentNameRef() == eval_man_.dbContentNameTst());
     unsigned int num_skipped {0};
 
     unsigned int buffer_size = buffer->size();
-
-//    assert (buffer->has<unsigned int>(DBContent::meta_var_rec_num_.name()));
-//    NullableVector<unsigned int>& rec_nums = buffer->get<unsigned int>(DBContent::meta_var_rec_num_.name());
 
     assert (buffer->has<ptime>(DBContent::meta_var_timestamp_.name()));
     NullableVector<ptime>& ts_vec = buffer->get<boost::posix_time::ptime>(
@@ -340,7 +325,6 @@ void EvaluationData::addTestData (DBContent& object, unsigned int line_id,  std:
     assert (buffer->has<json>(DBContent::meta_var_associations_.name()));
     NullableVector<json>& assoc_vec = buffer->get<json>(DBContent::meta_var_associations_.name());
 
-    //unsigned int rec_num;
     boost::posix_time::ptime timestamp;
     vector<unsigned int> utn_vec;
 
@@ -369,14 +353,12 @@ void EvaluationData::addTestData (DBContent& object, unsigned int line_id,  std:
             continue;
         }
 
-        //assert (!rec_nums.isNull(cnt));
         if (ts_vec.isNull(cnt))
         {
             ++num_skipped;
             continue;
         }
 
-        //rec_num = rec_nums.get(cnt);
         timestamp = ts_vec.get(cnt);
 
         if (assoc_vec.isNull(cnt))
@@ -393,16 +375,12 @@ void EvaluationData::addTestData (DBContent& object, unsigned int line_id,  std:
         for (auto utn_it : utn_vec)
         {
             if (!hasTargetData(utn_it))
-                //target_data_.emplace(target_data_.end(), utn_it, *this, eval_man_);
-                target_data_.push_back({utn_it, *this, eval_man_});
+                target_data_.push_back({utn_it, *this, eval_man_, dbcont_man_});
 
             assert (hasTargetData(utn_it));
 
             auto tr_tag_it = target_data_.get<target_tag>().find(utn_it);
             auto index_it = target_data_.project<0>(tr_tag_it); // get iterator for random access
-
-            //            if (!targetData(utn_it).hasRefBuffer())
-            //                target_data_.modify(index_it, [buffer](EvaluationTargetData& t) { t.setRefBuffer(buffer); });
 
             target_data_.modify(index_it, [timestamp, cnt](EvaluationTargetData& t) { t.addTstIndex(timestamp, cnt); });
 
@@ -455,10 +433,6 @@ void EvaluationData::finalize ()
 
     string remaining_time_str;
 
-//    EvaluateTargetsFinalizeTask* t = new (tbb::task::allocate_root()) EvaluateTargetsFinalizeTask(
-//                target_data_, done_flags, done);
-//    tbb::task::enqueue(*t);
-
     std::future<void> pending_future = std::async(std::launch::async, [&] {
         unsigned int num_targets = target_data_.size();
 
@@ -471,24 +445,6 @@ void EvaluationData::finalize ()
         done = true;
 
     });
-
-//    tbb::task_group g;
-
-//    loginf << "UGA1";
-
-//    g.run([&] {
-//        unsigned int num_targets = target_data_.size();
-
-//        tbb::parallel_for(uint(0), num_targets, [&](unsigned int cnt)
-//        {
-//            target_data_[cnt].finalize();
-//            done_flags[cnt] = true;
-//        });
-
-//        done = true;
-//    });
-
-//    loginf << "UGA2";
 
     postprocess_dialog_.setValue(0);
 
@@ -546,16 +502,6 @@ void EvaluationData::finalize ()
         }
     }
 
-    //    unsigned int num_targets = target_data_.size();
-
-    //    tbb::parallel_for(uint(0), num_targets, [&](unsigned int cnt)
-    //    {
-    //        target_data_[cnt].finalize();
-    //    });
-
-    //    for (auto target_it = target_data_.begin(); target_it != target_data_.end(); ++target_it)
-    //        target_data_.modify(target_it, [&](EvaluationTargetData& t) { t.finalize(); });
-
     finalized_ = true;
 
     endResetModel();
@@ -606,156 +552,129 @@ QVariant EvaluationData::data(const QModelIndex& index, int role) const
 
     switch (role)
     {
-        case Qt::CheckStateRole:
-            {
-                if (index.column() == 0)  // selected special case
-                {
-                    assert (index.row() >= 0);
-                    assert (index.row() < target_data_.size());
+    case Qt::CheckStateRole:
+    {
+        if (index.column() == 0)  // selected special case
+        {
+            assert (index.row() >= 0);
+            assert (index.row() < target_data_.size());
 
-                    const EvaluationTargetData& target = target_data_.at(index.row());
+            const EvaluationTargetData& target = target_data_.at(index.row());
 
-                    if (eval_man_.useUTN(target.utn_))
-                        return Qt::Checked;
-                    else
-                        return Qt::Unchecked;
-                }
-                else
-                    return QVariant();
-            }
-        case Qt::BackgroundRole:
-            {
-                assert (index.row() >= 0);
-                assert (index.row() < target_data_.size());
+            if (dbcont_man_.utnUseEval(target.utn_))
+                return Qt::Checked;
+            else
+                return Qt::Unchecked;
+        }
+        else
+            return QVariant();
+    }
+    case Qt::BackgroundRole:
+    {
+        assert (index.row() >= 0);
+        assert (index.row() < target_data_.size());
 
-                const EvaluationTargetData& target = target_data_.at(index.row());
+        const EvaluationTargetData& target = target_data_.at(index.row());
 
-                if (!target.use())
-                    return QBrush(Qt::lightGray);
-                else
-                    return QVariant();
+        if (!dbcont_man_.utnUseEval(target.utn_))
+            return QBrush(Qt::lightGray);
+        else
+            return QVariant();
 
-            }
-        case Qt::DisplayRole:
-        case Qt::EditRole:
-            {
-                logdbg << "EvaluationData: data: display role: row " << index.row() << " col " << index.column();
+    }
+    case Qt::DisplayRole:
+    case Qt::EditRole:
+    {
+        logdbg << "EvaluationData: data: display role: row " << index.row() << " col " << index.column();
 
-                assert (index.row() >= 0);
-                assert (index.row() < target_data_.size());
+        assert (index.row() >= 0);
+        assert (index.row() < target_data_.size());
 
-                const EvaluationTargetData& target = target_data_.at(index.row());
+        const EvaluationTargetData& target = target_data_.at(index.row());
 
-                logdbg << "EvaluationData: data: got utn " << target.utn_;
+        logdbg << "EvaluationData: data: got utn " << target.utn_;
 
-                assert (index.column() < table_columns_.size());
-                std::string col_name = table_columns_.at(index.column()).toStdString();
+        assert (index.column() < table_columns_.size());
+        std::string col_name = table_columns_.at(index.column()).toStdString();
 
-                if (col_name == "Use")
-                {
-                    return QVariant();
-                }
-                else if (col_name == "UTN")
-                {
-                    return target.utn_;
-                }
-                else if (col_name == "Comment")
-                {
-                    return eval_man_.utnComment(target.utn_).c_str();
-                }
-                else if (col_name == "Begin")
-                {
-                    return target.timeBeginStr().c_str();
-                }
-                else if (col_name == "End")
-                {
-                    return target.timeEndStr().c_str();
-                }
-                else if (col_name == "#All")
-                {
-                    return target.numUpdates();
-                }
-                else if (col_name == "#Ref")
-                {
-                    return target.numRefUpdates();
-                }
-                else if (col_name == "#Tst")
-                {
-                    return target.numTstUpdates();
-                }
-                else if (col_name == "Callsign")
-                {
-                    return target.callsignsStr().c_str();
-                }
-                else if (col_name == "TA")
-                {
-                    return target.targetAddressesStr().c_str();
-                }
-                else if (col_name == "M3/A")
-                {
-                    return target.modeACodesStr().c_str();
-                }
-                else if (col_name == "MC Min")
-                {
-                    return target.modeCMinStr().c_str();
-                }
-                else if (col_name == "MC Max")
-                {
-                    return target.modeCMaxStr().c_str();
-                }
+        if (col_name == "Use")
+        {
+            return QVariant();
+        }
+        else if (col_name == "UTN")
+        {
+            return target.utn_;
+        }
+        else if (col_name == "Comment")
+        {
+            return dbcont_man_.utnComment(target.utn_).c_str();
+        }
+        else if (col_name == "Begin")
+        {
+            return target.timeBeginStr().c_str();
+        }
+        else if (col_name == "End")
+        {
+            return target.timeEndStr().c_str();
+        }
+        else if (col_name == "#All")
+        {
+            return target.numUpdates();
+        }
+        else if (col_name == "#Ref")
+        {
+            return target.numRefUpdates();
+        }
+        else if (col_name == "#Tst")
+        {
+            return target.numTstUpdates();
+        }
+        else if (col_name == "Callsign")
+        {
+            return target.callsignsStr().c_str();
+        }
+        else if (col_name == "TA")
+        {
+            return target.targetAddressesStr().c_str();
+        }
+        else if (col_name == "M3/A")
+        {
+            return target.modeACodesStr().c_str();
+        }
+        else if (col_name == "MC Min")
+        {
+            return target.modeCMinStr().c_str();
+        }
+        else if (col_name == "MC Max")
+        {
+            return target.modeCMaxStr().c_str();
+        }
 
-            }
-        case Qt::DecorationRole:
-            {
-                assert (index.column() < table_columns_.size());
+    }
+    case Qt::UserRole: // to find the checkboxes
+    {
+        if (index.column() == 0)
+        {
+            assert (index.row() >= 0);
+            assert (index.row() < target_data_.size());
 
-                //                if (table_columns_.at(index.column()) == "status")
-                //                {
-                //                    assert (index.row() >= 0);
-                //                    assert (index.row() < view_points_.size());
+            const EvaluationTargetData& target = target_data_.at(index.row());
 
-                //                    const ViewPoint& vp = view_points_.at(index.row());
+            return target.utn_;
+        }
+        else if (index.column() == 2) // comment
+        {
+            assert (index.row() >= 0);
+            assert (index.row() < target_data_.size());
 
-                //                    const json& data = vp.data().at("status");
-                //                    assert (data.is_string());
-
-                //                    std::string status = data;
-
-                //                    if (status == "open")
-                //                        return open_icon_;
-                //                    else if (status == "closed")
-                //                        return closed_icon_;
-                //                    else if (status == "todo")
-                //                        return todo_icon_;
-                //                    else
-                //                        return unknown_icon_;
-                //                }
-                //                else
-                return QVariant();
-            }
-        case Qt::UserRole: // to find the checkboxes
-            {
-                if (index.column() == 0)
-                {
-                    assert (index.row() >= 0);
-                    assert (index.row() < target_data_.size());
-
-                    const EvaluationTargetData& target = target_data_.at(index.row());
-                    return target.utn_;
-                }
-                else if (index.column() == 2) // comment
-                {
-                    assert (index.row() >= 0);
-                    assert (index.row() < target_data_.size());
-
-                    const EvaluationTargetData& target = target_data_.at(index.row());
-                    return ("comment_"+to_string(target.utn_)).c_str();
-                }
-            }
-        default:
-            {
-                return QVariant();
-            }
+            const EvaluationTargetData& target = target_data_.at(index.row());
+            return ("comment_"+to_string(target.utn_)).c_str();
+        }
+    }
+    default:
+    {
+        return QVariant();
+    }
     }
 }
 
@@ -774,8 +693,7 @@ bool EvaluationData::setData(const QModelIndex &index, const QVariant& value, in
         bool checked = (Qt::CheckState)value.toInt() == Qt::Checked;
         loginf << "EvaluationData: setData: utn " << it->utn_ <<" check state " << checked;
 
-        eval_man_.useUTN(it->utn_, checked, false);
-        target_data_.modify(it, [value,checked](EvaluationTargetData& p) { p.use(checked); });
+        dbcont_man_.utnUseEval(it->utn_, checked);
 
         emit dataChanged(index, EvaluationData::index(index.row(), columnCount()-1));
         return true;
@@ -786,8 +704,8 @@ bool EvaluationData::setData(const QModelIndex &index, const QVariant& value, in
         assert (index.row() < target_data_.size());
 
         auto it = target_data_.begin()+index.row();
-        eval_man_.utnComment(it->utn_, value.toString().toStdString(), false);
-        //target_data_.modify(it, [value](EvaluationTargetData& p) { p.use(false); });
+
+        dbcont_man_.utnComment(it->utn_, value.toString().toStdString());
         return true;
     }
 
@@ -836,16 +754,9 @@ Qt::ItemFlags EvaluationData::flags(const QModelIndex &index) const
 
     assert (index.column() < table_columns_.size());
 
-    //    if (table_columns_.at(index.column()) == "comment")
-    //        return QAbstractItemModel::flags(index) | Qt::ItemIsEditable;
-    //    else
     if (index.column() == 0) // Use
     {
         return QAbstractItemModel::flags(index) | Qt::ItemIsUserCheckable;
-        //        flags |= Qt::ItemIsEnabled;
-        //        flags |= Qt::ItemIsUserCheckable;
-        //        flags |= Qt::ItemIsEditable;
-        // flags |= Qt::ItemIsSelectable;
     }
     else if (index.column() == 2)
     {
@@ -867,87 +778,6 @@ const EvaluationTargetData& EvaluationData::getTargetOf (const QModelIndex& inde
     return target;
 }
 
-
-void EvaluationData::setUseTargetData (unsigned int utn, bool value)
-{
-    loginf << "EvaluationData: setUseTargetData: utn " << utn << " value " << value;
-
-    assert (hasTargetData(utn));
-
-    QModelIndexList items = match(
-                index(0, 0),
-                Qt::UserRole,
-                QVariant(utn),
-                1, // look *
-                Qt::MatchExactly); // look *
-
-    assert (items.size() == 1);
-
-    setData(items.at(0), {value ? Qt::Checked: Qt::Unchecked}, Qt::CheckStateRole);
-}
-
-void EvaluationData::setUseAllTargetData (bool value)
-{
-    loginf << "EvaluationData: setUseAllTargetData: value " << value;
-
-    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-
-    beginResetModel();
-
-    eval_man_.useAllUTNs(value);
-
-    endResetModel();
-
-    QApplication::restoreOverrideCursor();
-}
-
-void EvaluationData::clearComments ()
-{
-    loginf << "EvaluationData: clearComments";
-
-    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-
-    beginResetModel();
-
-    eval_man_.clearUTNComments();
-
-    endResetModel();
-
-    QApplication::restoreOverrideCursor();
-}
-
-void EvaluationData::setUseByFilter ()
-{
-    loginf << "EvaluationData: setUseByFilter";
-
-    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-
-    beginResetModel();
-
-    eval_man_.filterUTNs();
-
-    endResetModel();
-
-    QApplication::restoreOverrideCursor();
-}
-
-void EvaluationData::setTargetDataComment (unsigned int utn, std::string comment)
-{
-    loginf << "EvaluationData: setTargetDataComment: utn " << utn << " comment '" << comment << "'";
-
-    assert (hasTargetData(utn));
-
-    QModelIndexList items = match(
-                index(0, 0),
-                Qt::UserRole,
-                QVariant(("comment_"+to_string(utn)).c_str()),
-                1, // look *
-                Qt::MatchExactly); // look *
-
-    if (items.size() == 1)
-        setData(items.at(0), comment.c_str(), Qt::CheckStateRole);
-}
-
 EvaluationDataWidget* EvaluationData::widget()
 {
     if (!widget_)
@@ -956,10 +786,34 @@ EvaluationDataWidget* EvaluationData::widget()
     return widget_.get();
 }
 
-EvaluationDataFilterDialog& EvaluationData::dialog()
+void EvaluationData::targetChangedSlot(unsigned int utn) // for one utn
 {
-    if (!dialog_)
-        dialog_.reset(new EvaluationDataFilterDialog(*this, eval_man_));
+    loginf << "EvaluationData: targetChangedSlot: utn " << utn;
 
-    return *dialog_;
+    // check if checkbox utn thingi is found
+    QModelIndexList items = match(
+                index(0, 0),
+                Qt::UserRole,
+                QVariant(utn),
+                1, // look *
+                Qt::MatchExactly); // look *
+
+    loginf << "EvaluationData: targetChangedSlot: utn " << utn << " matches " << items.size();
+
+    if (items.size() == 1)
+    {
+        emit dataChanged(index(items.at(0).row(), 0), index(items.at(0).row(), columnCount()-1));
+
+        eval_man_.updateResultsToChanges();
+    }
+}
+
+void EvaluationData::allTargetsChangedSlot() // for more than 1 utn
+{
+    loginf << "EvaluationData: allTargetsChangedSlot";
+
+    beginResetModel();
+    endResetModel();
+
+    eval_man_.updateResultsToChanges();
 }

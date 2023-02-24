@@ -31,6 +31,7 @@
 #include "unitmanager.h"
 
 using namespace Utils;
+using namespace std;
 
 namespace dbContent
 {
@@ -255,6 +256,30 @@ void Variable::name(const std::string& name)
 //    return dbcontent_->currentMetaTable();
 //}
 
+std::string Variable::info() const
+{
+    std::ostringstream ss;
+
+    ss << "Name: '" << name_ << "'" << endl;
+
+    if (hasShortName())
+        ss << "Short Name: " << shortName() << endl;
+
+    ss << "Description: " << description() << endl;
+    ss << "Data Type: " << dataTypeString() << endl;
+    ss << "Unit: " << dimensionUnitStr() << endl;
+    ss << "Representation: " << representationString() << endl;
+    ss << "DB Column: " << dbColumnName() << endl;
+
+//    QTextEdit* description_edit_ {nullptr};
+//    VariableDataTypeComboBox* type_combo_ {nullptr};
+//    UnitSelectionWidget* unit_sel_ {nullptr};
+//    StringRepresentationComboBox* representation_box_ {nullptr};
+//    QLineEdit* db_column_edit_ {nullptr};
+
+    return ss.str();
+}
+
 std::string Variable::dbColumnName() const
 {
     return db_column_name_;
@@ -342,7 +367,7 @@ std::string Variable::dbColumnIdentifier() const
 //        return getRepresentationStringFromValue(getMaxString());
 //}
 
-std::string Variable::dimensionUnitStr()
+std::string Variable::dimensionUnitStr() const
 {
     if (dimension_.size())
         return dimension_ + ":" + unit_;

@@ -8,6 +8,7 @@
 #include "jsonimporttask.h"
 #include "gpstrailimporttask.h"
 #include "evaluationmanager.h"
+#include "dbcontentmanager.h"
 #include "radarplotpositioncalculatortask.h"
 #include "createassociationstask.h"
 #include "viewmanager.h"
@@ -1011,6 +1012,9 @@ bool RTCommandEvaluate::run_impl() const
     MainWindow* main_window = dynamic_cast<MainWindow*> (rtcommand::mainWindow());
     assert (main_window);
 
+    if (run_filter_)
+        COMPASS::instance().dbContentManager().autoFilterUTNS();
+
     main_window->showEvaluationTab();
 
     EvaluationManager& eval_man = COMPASS::instance().evaluationManager();
@@ -1032,9 +1036,6 @@ bool RTCommandEvaluate::run_impl() const
     }
 
     assert (eval_man.dataLoaded());
-
-    if (run_filter_)
-        eval_man.autofilterUTNs();
 
     if (!eval_man.canEvaluate())
     {

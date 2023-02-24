@@ -20,7 +20,6 @@
 
 #include "evaluationtargetdata.h"
 #include "evaluationdatawidget.h"
-#include "evaluationdatafilterdialog.h"
 
 //#include <tbb/tbb.h>
 
@@ -38,6 +37,7 @@
 
 class EvaluationManager;
 class DBContent;
+class DBContentManager;
 class Buffer;
 
 struct target_tag
@@ -58,8 +58,12 @@ class EvaluationData : public QAbstractItemModel
 {
     Q_OBJECT
 
+public slots:
+    void targetChangedSlot(unsigned int utn); // for one utn
+    void allTargetsChangedSlot(); // for more than 1 utn
+
 public:
-    EvaluationData(EvaluationManager& eval_man);
+    EvaluationData(EvaluationManager& eval_man, DBContentManager& dbcont_man);
 
     void addReferenceData (DBContent& object, unsigned int line_id, std::shared_ptr<Buffer> buffer);
     void addTestData (DBContent& object, unsigned int line_id, std::shared_ptr<Buffer> buffer);
@@ -88,15 +92,7 @@ public:
 
     const EvaluationTargetData& getTargetOf (const QModelIndex& index);
 
-    void setUseTargetData (unsigned int utn, bool value);
-    void setUseAllTargetData (bool value);
-    void clearComments ();
-    void setUseByFilter ();
-
-    void setTargetDataComment (unsigned int utn, std::string comment);
-
     EvaluationDataWidget* widget();
-    EvaluationDataFilterDialog& dialog();
 
     // ref
     std::shared_ptr<Buffer> ref_buffer_;
@@ -120,11 +116,8 @@ public:
 
     std::string ref_ground_bit_name_; // can be empty
 
-    std::string ref_spd_ground_speed_kts_name_; // can be empty
-    std::string ref_spd_track_angle_deg_name_; // can be empty
-
-    std::string ref_spd_x_ms_name_; // can be empty
-    std::string ref_spd_y_ms_name_; // can be empty
+    std::string ref_spd_ground_speed_kts_name_;
+    std::string ref_spd_track_angle_deg_name_;
 
     // tst
     std::shared_ptr<Buffer> tst_buffer_;
@@ -148,11 +141,8 @@ public:
 
     std::string tst_track_num_name_; // can be empty
 
-    std::string tst_spd_ground_speed_kts_name_; // can be empty
-    std::string tst_spd_track_angle_deg_name_; // can be empty
-
-    std::string tst_spd_x_ms_name_; // can be empty
-    std::string tst_spd_y_ms_name_; // can be empty
+    std::string tst_spd_ground_speed_kts_name_;
+    std::string tst_spd_track_angle_deg_name_;
 
     std::string tst_multiple_srcs_name_; // can be empty TODO
     std::string tst_track_lu_ds_id_name_; // can be empty TODO
@@ -160,6 +150,7 @@ public:
 
 protected:
     EvaluationManager& eval_man_;
+    DBContentManager& dbcont_man_;
 
     QStringList table_columns_ {"Use", "UTN", "Comment", "Begin", "End", "#All", "#Ref", "#Tst", "Callsign", "TA",
                                 "M3/A", "MC Min", "MC Max"};
@@ -168,7 +159,6 @@ protected:
     bool finalized_ {false};
 
     std::unique_ptr<EvaluationDataWidget> widget_;
-    std::unique_ptr<EvaluationDataFilterDialog> dialog_;
 
     unsigned int unassociated_ref_cnt_ {0};
     unsigned int associated_ref_cnt_ {0};
