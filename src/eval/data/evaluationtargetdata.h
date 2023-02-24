@@ -50,7 +50,7 @@ public:
     EvaluationTargetPosition pos_ref_;
 
     bool has_ref_spd_ {false};
-    EvaluationTargetVelocity posbased_spd_ref_;
+    EvaluationTargetVelocity spd_ref_;
 };
 
 class DataMappingTimes // mapping to respective tst data
@@ -125,12 +125,13 @@ public:
     std::pair<EvaluationTargetPosition, bool> interpolatedRefPosForTime (
             boost::posix_time::ptime timestamp, boost::posix_time::time_duration d_max) const;
     // bool ok
-    std::pair<EvaluationTargetVelocity, bool> interpolatedRefPosBasedSpdForTime (
+    std::pair<EvaluationTargetVelocity, bool> interpolatedRefSpdForTime (
             boost::posix_time::ptime timestamp, boost::posix_time::time_duration d_max) const;
 
     bool hasRefPosForTime (boost::posix_time::ptime timestamp) const;
     EvaluationTargetPosition refPosForTime (boost::posix_time::ptime timestamp) const;
-    EvaluationTargetVelocity refPosBasedSpdForTime (boost::posix_time::ptime timestamp) const;
+    bool hasRefSpeedForTime (boost::posix_time::ptime timestamp) const;
+    EvaluationTargetVelocity refSpdForTime (boost::posix_time::ptime timestamp) const;
     std::pair<bool, float> estimateRefAltitude (boost::posix_time::ptime timestamp, unsigned int index) const;
     // estimate ref baro alt at tod,index TODO should be replaced by real altitude reconstructor
 
@@ -180,7 +181,7 @@ public:
     float tstMeasuredSpeedForTime (boost::posix_time::ptime timestamp) const; // m/s
 
     bool hasTstMeasuredTrackAngleForTime (boost::posix_time::ptime timestamp) const;
-    float tstMeasuredTrackAngleForTime (boost::posix_time::ptime timestamp) const; // rad
+    float tstMeasuredTrackAngleForTime (boost::posix_time::ptime timestamp) const; // deg
 
     bool canCheckTstMultipleSources() const;
     bool hasTstMultipleSources() const;
@@ -253,7 +254,7 @@ protected:
 
     void calculateTestDataMappings() const;
     TstDataMapping calculateTestDataMapping(boost::posix_time::ptime timestamp) const; // test tod
-    void addRefPositiosToMapping (TstDataMapping& mapping) const;
+    void addRefPositionsSpeedsToMapping (TstDataMapping& mapping) const;
     void addRefPositiosToMappingFast (TstDataMapping& mapping) const;
 
     DataMappingTimes findTstTimes(boost::posix_time::ptime timestamp_ref) const; // ref tod

@@ -25,6 +25,7 @@
 #include "compass.h"
 #include "dbcontent/dbcontentmanager.h"
 #include "evaluationmanager.h"
+#include "util/number.h"
 
 #include <boost/algorithm/string.hpp>
 
@@ -398,7 +399,7 @@ std::pair<EvaluationTargetPosition, bool>  EvaluationTargetData::interpolatedRef
     return {{}, false};
 }
 
-std::pair<EvaluationTargetVelocity, bool>  EvaluationTargetData::interpolatedRefPosBasedSpdForTime (
+std::pair<EvaluationTargetVelocity, bool>  EvaluationTargetData::interpolatedRefSpdForTime (
         ptime timestamp, time_duration d_max) const
 {
     assert (test_data_mappings_.count(timestamp));
@@ -442,7 +443,7 @@ std::pair<EvaluationTargetVelocity, bool>  EvaluationTargetData::interpolatedRef
         //                   << " alt_calc " << mapping.pos_ref_.altitude_calculated_
         //                   << " alt " << mapping.pos_ref_.altitude_;
 
-        return {mapping.posbased_spd_ref_, true};
+        return {mapping.spd_ref_, true};
     }
 
     return {{}, false};
@@ -509,6 +510,48 @@ EvaluationTargetPosition EvaluationTargetData::refPosForTime (ptime timestamp) c
     //               << " alt " << pos.altitude_;
 
     return pos;
+}
+
+bool EvaluationTargetData::hasRefSpeedForTime (boost::posix_time::ptime timestamp) const
+{
+    if (!ref_data_.count(timestamp))
+        return false;
+
+    auto it_pair = ref_data_.equal_range(timestamp);
+    assert (it_pair.first != ref_data_.end());
+
+    unsigned int index = it_pair.first->second;
+
+    NullableVector<double>& speed_vec = eval_data_.ref_buffer_->get<double>(
+                eval_data_.ref_spd_ground_speed_kts_name_);
+    NullableVector<double>& track_angle_vec = eval_data_.ref_buffer_->get<double>(
+                eval_data_.ref_spd_track_angle_deg_name_);
+
+    return !speed_vec.isNull(index) && !track_angle_vec.isNull(index);
+}
+EvaluationTargetVelocity EvaluationTargetData::refSpdForTime (boost::posix_time::ptime timestamp) const
+{
+    assert (ref_data_.count(timestamp));
+
+    auto it_pair = ref_data_.equal_range(timestamp);
+    assert (it_pair.first != ref_data_.end());
+
+    unsigned int index = it_pair.first->second;
+
+    NullableVector<double>& speed_vec = eval_data_.ref_buffer_->get<double>(
+                eval_data_.ref_spd_ground_speed_kts_name_);
+    NullableVector<double>& track_angle_vec = eval_data_.ref_buffer_->get<double>(
+                eval_data_.ref_spd_track_angle_deg_name_);
+
+    assert (!speed_vec.isNull(index));
+    assert (!track_angle_vec.isNull(index));
+
+    EvaluationTargetVelocity spd;
+
+    spd.speed_ = speed_vec.get(index); // true north to mathematical
+    spd.track_angle_ = track_angle_vec.get(index);
+
+    return spd;
 }
 
 std::pair<bool, float> EvaluationTargetData::estimateRefAltitude (ptime timestamp, unsigned int index) const
@@ -1191,9 +1234,7 @@ unsigned int EvaluationTargetData::tstTrackNumForTime (ptime timestamp) const
 
 bool EvaluationTargetData::hasTstMeasuredSpeedForTime (ptime timestamp) const
 {
-    if (!eval_data_.tst_spd_ground_speed_kts_name_.size()
-            && (!eval_data_.tst_spd_x_ms_name_.size() || !eval_data_.tst_spd_y_ms_name_.size()))
-        return false;
+    assert (eval_data_.tst_spd_ground_speed_kts_name_.size());
 
     auto it_pair = tst_data_.equal_range(timestamp);
 
@@ -1201,11 +1242,7 @@ bool EvaluationTargetData::hasTstMeasuredSpeedForTime (ptime timestamp) const
 
     unsigned int index = it_pair.first->second;
 
-    if (eval_data_.tst_spd_ground_speed_kts_name_.size())
-        return !eval_data_.tst_buffer_->get<double>(eval_data_.tst_spd_ground_speed_kts_name_).isNull(index);
-    else
-        return !eval_data_.tst_buffer_->get<double>(eval_data_.tst_spd_x_ms_name_).isNull(index)
-                && !eval_data_.tst_buffer_->get<double>(eval_data_.tst_spd_y_ms_name_).isNull(index);
+    return !eval_data_.tst_buffer_->get<double>(eval_data_.tst_spd_ground_speed_kts_name_).isNull(index);
 }
 
 float EvaluationTargetData::tstMeasuredSpeedForTime (ptime timestamp) const // m/s
@@ -1218,29 +1255,13 @@ float EvaluationTargetData::tstMeasuredSpeedForTime (ptime timestamp) const // m
 
     unsigned int index = it_pair.first->second;
 
-    if (eval_data_.tst_spd_ground_speed_kts_name_.size())
-    {
-        return eval_data_.tst_buffer_->get<double>(eval_data_.tst_spd_ground_speed_kts_name_).get(index) * KNOTS2M_S;
-    }
-    else
-    {
-        double v_x_ms = eval_data_.tst_buffer_->get<double>(eval_data_.tst_spd_x_ms_name_).get(index);
-        double v_y_ms = eval_data_.tst_buffer_->get<double>(eval_data_.tst_spd_y_ms_name_).get(index);
-
-        double speed = sqrt(pow(v_x_ms, 2) + pow(v_y_ms, 2));
-
-        assert (!std::isnan(speed));
-        assert (!std::isinf(speed));
-
-        return speed;
-    }
+    assert(eval_data_.tst_spd_ground_speed_kts_name_.size());
+    return eval_data_.tst_buffer_->get<double>(eval_data_.tst_spd_ground_speed_kts_name_).get(index) * KNOTS2M_S;
 }
 
 bool EvaluationTargetData::hasTstMeasuredTrackAngleForTime (ptime timestamp) const
 {
-    if (!eval_data_.tst_spd_track_angle_deg_name_.size()
-            && (!eval_data_.tst_spd_x_ms_name_.size() || !eval_data_.tst_spd_y_ms_name_.size()))
-        return false;
+    assert (eval_data_.tst_spd_track_angle_deg_name_.size());
 
     auto it_pair = tst_data_.equal_range(timestamp);
 
@@ -1248,14 +1269,10 @@ bool EvaluationTargetData::hasTstMeasuredTrackAngleForTime (ptime timestamp) con
 
     unsigned int index = it_pair.first->second;
 
-    if (eval_data_.tst_spd_track_angle_deg_name_.size())
-        return !eval_data_.tst_buffer_->get<double>(eval_data_.tst_spd_track_angle_deg_name_).isNull(index);
-    else
-        return !eval_data_.tst_buffer_->get<double>(eval_data_.tst_spd_x_ms_name_).isNull(index)
-                && !eval_data_.tst_buffer_->get<double>(eval_data_.tst_spd_y_ms_name_).isNull(index);
+    return !eval_data_.tst_buffer_->get<double>(eval_data_.tst_spd_track_angle_deg_name_).isNull(index);
 }
 
-float EvaluationTargetData::tstMeasuredTrackAngleForTime (ptime timestamp) const // rad
+float EvaluationTargetData::tstMeasuredTrackAngleForTime (ptime timestamp) const // deg
 {
     assert (hasTstMeasuredTrackAngleForTime(timestamp));
 
@@ -1265,22 +1282,8 @@ float EvaluationTargetData::tstMeasuredTrackAngleForTime (ptime timestamp) const
 
     unsigned int index = it_pair.first->second;
 
-    if (eval_data_.tst_spd_track_angle_deg_name_.size())
-    {
-        return DEG2RAD * eval_data_.tst_buffer_->get<double>(eval_data_.tst_spd_track_angle_deg_name_).get(index);
-    }
-    else
-    {
-        double v_x_ms = eval_data_.tst_buffer_->get<double>(eval_data_.tst_spd_x_ms_name_).get(index);
-        double v_y_ms = eval_data_.tst_buffer_->get<double>(eval_data_.tst_spd_y_ms_name_).get(index);
-
-        double angle = atan2(v_y_ms,v_x_ms);
-
-        assert (!std::isnan(angle));
-        assert (!std::isinf(angle));
-
-        return angle;
-    }
+    assert (eval_data_.tst_spd_track_angle_deg_name_.size());
+    return eval_data_.tst_buffer_->get<double>(eval_data_.tst_spd_track_angle_deg_name_).get(index);
 }
 
 bool EvaluationTargetData::canCheckTstMultipleSources() const
@@ -1974,12 +1977,12 @@ TstDataMapping EvaluationTargetData::calculateTestDataMapping(ptime timestamp) c
         }
     }
 
-    addRefPositiosToMapping(ret);
+    addRefPositionsSpeedsToMapping(ret);
 
     return ret;
 }
 
-void EvaluationTargetData::addRefPositiosToMapping (TstDataMapping& mapping) const
+void EvaluationTargetData::addRefPositionsSpeedsToMapping (TstDataMapping& mapping) const
 {
     if (mapping.has_ref1_ && hasRefPosForTime(mapping.timestamp_ref1_)
             && mapping.has_ref2_ && hasRefPosForTime(mapping.timestamp_ref2_)) // two positions which can be interpolated
@@ -1991,6 +1994,10 @@ void EvaluationTargetData::addRefPositiosToMapping (TstDataMapping& mapping) con
         EvaluationTargetPosition pos2 = refPosForTime(upper);
         float d_t = Time::partialSeconds(upper - lower);
 
+        EvaluationTargetVelocity spd1;
+        EvaluationTargetVelocity spd2;
+
+        double acceleration, turnrate;
         double speed,angle;
 
         logdbg << "EvaluationTargetData: addRefPositiosToMapping: d_t " << d_t;
@@ -2002,10 +2009,8 @@ void EvaluationTargetData::addRefPositiosToMapping (TstDataMapping& mapping) con
             mapping.has_ref_pos_ = true;
             mapping.pos_ref_ = pos1;
 
-//            mapping.posbased_spd_ref_.x_ = NAN;
-//            mapping.posbased_spd_ref_.y_ = NAN;
-            mapping.posbased_spd_ref_.track_angle_ = NAN;
-            mapping.posbased_spd_ref_.speed_ = NAN;
+            mapping.spd_ref_.track_angle_ = NAN;
+            mapping.spd_ref_.speed_ = NAN;
         }
         else
         {
@@ -2016,15 +2021,6 @@ void EvaluationTargetData::addRefPositiosToMapping (TstDataMapping& mapping) con
             }
             else
             {
-                //                local_->SetStereographic(pos1.latitude_, pos1.longitude_, 1.0, 0.0, 0.0);
-
-                //                unique_ptr<OGRCoordinateTransformation> ogr_geo2cart {
-                //                    OGRCreateCoordinateTransformation(wgs84_.get(), local_.get())};
-                //                assert (ogr_geo2cart);
-                //                unique_ptr<OGRCoordinateTransformation> ogr_cart2geo{
-                //                    OGRCreateCoordinateTransformation(local_.get(), wgs84_.get())};
-                //                assert (ogr_cart2geo);
-
                 logdbg << "EvaluationTargetData: addRefPositiosToMapping: pos1 "
                        << pos1.latitude_ << ", " << pos1.longitude_;
                 logdbg << "EvaluationTargetData: addRefPositiosToMapping: pos2 "
@@ -2032,17 +2028,6 @@ void EvaluationTargetData::addRefPositiosToMapping (TstDataMapping& mapping) con
 
                 bool ok;
                 double x_pos, y_pos;
-
-                //                if (in_appimage_) // inside appimage
-                //                {
-                //                    x_pos = pos2.longitude_;
-                //                    y_pos = pos2.latitude_;
-                //                }
-                //                else
-                //                {
-                //                    x_pos = pos2.latitude_;
-                //                    y_pos = pos2.longitude_;
-                //                }
 
                 tie(ok, x_pos, y_pos) = trafo_.distanceCart(
                             pos1.latitude_, pos1.longitude_, pos2.latitude_, pos2.longitude_);
@@ -2054,7 +2039,7 @@ void EvaluationTargetData::addRefPositiosToMapping (TstDataMapping& mapping) con
                     logerr << "EvaluationTargetData: addRefPositiosToMapping: error with latitude " << pos2.latitude_
                            << " longitude " << pos2.longitude_;
                 }
-                else
+                else // calculate interpolated position
                 {
 
                     logdbg << "EvaluationTargetData: addRefPositiosToMapping: offsets x " << fixed << x_pos
@@ -2075,11 +2060,7 @@ void EvaluationTargetData::addRefPositiosToMapping (TstDataMapping& mapping) con
                     logdbg << "EvaluationTargetData: addRefPositiosToMapping: interpolated offsets x "
                            << x_pos << " y " << y_pos;
 
-                    //ret = ogr_cart2geo->Transform(1, &x_pos, &y_pos);
-
                     tie (ok, x_pos, y_pos) = trafo_.wgsAddCartOffset(pos1.latitude_, pos1.longitude_, x_pos, y_pos);
-
-                    //assert (ok); TODO?
 
                     // x_pos long, y_pos lat
 
@@ -2114,25 +2095,33 @@ void EvaluationTargetData::addRefPositiosToMapping (TstDataMapping& mapping) con
 
                     mapping.has_ref_pos_ = true;
 
-                    //                    if (in_appimage_) // inside appimage
-                    //                        mapping.pos_ref_ = EvaluationTargetPosition(y_pos, x_pos, has_altitude, true, altitude);
-                    //                    else
                     mapping.pos_ref_ = EvaluationTargetPosition(x_pos, y_pos, has_altitude, true, altitude);
 
-                    angle = atan2(v_y,v_x);
-                    speed = sqrt(pow(v_x, 2) + pow(v_y, 2));
+                    // calulcate interpolated speed / track angle
 
-                    if (!std::isnan(angle) && !std::isinf(angle) && !std::isnan(speed) && !std::isinf(speed))
+                    mapping.has_ref_spd_ = false;
+
+                    if (hasRefSpeedForTime(mapping.timestamp_ref1_)
+                            && hasRefSpeedForTime(mapping.timestamp_ref2_))
                     {
-                        mapping.has_ref_spd_ = true;
-//                        mapping.posbased_spd_ref_.x_ = v_x;
-//                        mapping.posbased_spd_ref_.y_ = v_y;
-                        mapping.posbased_spd_ref_.track_angle_ = angle;
-                        mapping.posbased_spd_ref_.speed_ = speed;
-                    }
-                    else
-                        mapping.has_ref_spd_ = false;
+                        spd1 = refSpdForTime(mapping.timestamp_ref1_);
+                        spd2 = refSpdForTime(mapping.timestamp_ref2_);
 
+                        acceleration = (spd2.speed_ - spd1.speed_)/d_t;
+                        speed = spd1.speed_ * acceleration * d_t2;
+
+                        //loginf << "UGA spd1 " << spd1.speed_ << " 2 " << spd2.speed_ << " ipld " << speed;
+
+                        turnrate = Number::calculateMinAngleDifference(spd2.track_angle_, spd1.track_angle_) / d_t;
+                        angle = spd1.track_angle_ + turnrate * d_t2;
+
+                        loginf << "UGA ang1 " << spd1.track_angle_ << " 2 " << spd2.track_angle_
+                               << " acc " << acceleration << " ipld " << angle;
+
+                        mapping.has_ref_spd_ = true;
+                        mapping.spd_ref_.speed_ = speed;
+                        mapping.spd_ref_.track_angle_ = angle;
+                    }
                 }
             }
         }

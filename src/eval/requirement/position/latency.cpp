@@ -143,7 +143,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionLatency::evaluate (
             continue;
         }
 
-        ret_spd = target_data.interpolatedRefPosBasedSpdForTime(timestamp, max_ref_time_diff);
+        ret_spd = target_data.interpolatedRefSpdForTime(timestamp, max_ref_time_diff);
 
         if (!ret_spd.second)
         {

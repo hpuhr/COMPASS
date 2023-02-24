@@ -100,8 +100,8 @@ public:
 
     static const Property meta_var_vx_;
     static const Property meta_var_vy_;
-    static const Property meta_var_ground_speed_;
-    static const Property meta_var_track_angle_;
+    static const Property meta_var_ground_speed_; // kts
+    static const Property meta_var_track_angle_; // deg
     static const Property meta_var_horizontal_man_;
 
     static const Property meta_var_x_stddev_;

@@ -119,11 +119,11 @@ public:
 
     std::string ref_ground_bit_name_; // can be empty
 
-    std::string ref_spd_ground_speed_kts_name_; // can be empty
-    std::string ref_spd_track_angle_deg_name_; // can be empty
+    std::string ref_spd_ground_speed_kts_name_;
+    std::string ref_spd_track_angle_deg_name_;
 
-    std::string ref_spd_x_ms_name_; // can be empty
-    std::string ref_spd_y_ms_name_; // can be empty
+//    std::string ref_spd_x_ms_name_; // can be empty
+//    std::string ref_spd_y_ms_name_; // can be empty
 
     // tst
     std::shared_ptr<Buffer> tst_buffer_;
@@ -150,8 +150,8 @@ public:
     std::string tst_spd_ground_speed_kts_name_; // can be empty
     std::string tst_spd_track_angle_deg_name_; // can be empty
 
-    std::string tst_spd_x_ms_name_; // can be empty
-    std::string tst_spd_y_ms_name_; // can be empty
+//    std::string tst_spd_x_ms_name_; // can be empty
+//    std::string tst_spd_y_ms_name_; // can be empty
 
     std::string tst_multiple_srcs_name_; // can be empty TODO
     std::string tst_track_lu_ds_id_name_; // can be empty TODO

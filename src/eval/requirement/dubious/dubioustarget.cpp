@@ -21,6 +21,7 @@
 #include "evaluationmanager.h"
 #include "evaluationdata.h"
 #include "stringconv.h"
+#include "util/number.h"
 
 #include <cmath>
 
@@ -288,10 +289,12 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTarget::evaluate (
                     track_angle1 = target_data.tstMeasuredTrackAngleForTime(update.timestamp_);
                     track_angle2 = target_data.tstMeasuredTrackAngleForTime(last_timestamp);
 
-                    turnrate = fabs(RAD2DEG*atan2(sin(DEG2RAD*(track_angle1-track_angle2)),
-                                                  cos(DEG2RAD*(track_angle1-track_angle2)))) / time_diff; // turn angle rate
+                    turnrate = Number::calculateMinAngleDifference(track_angle2, track_angle1) / time_diff;
 
-                    if (turnrate > max_turnrate_)
+//                    turnrate = fabs(RAD2DEG*atan2(sin(DEG2RAD*(track_angle1-track_angle2)),
+//                                                  cos(DEG2RAD*(track_angle1-track_angle2)))) / time_diff; // turn angle rate
+
+                    if (fabs(turnrate) > max_turnrate_)
                     {
                         update.dubious_comments_["TR"] =
                                 String::doubleToStringPrecision(turnrate, 1);

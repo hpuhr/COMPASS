@@ -128,6 +128,8 @@ std::shared_ptr<EvaluationRequirementResult::Single> TrackAngle::evaluate (
     bool has_ground_bit;
     bool ground_bit_set;
 
+    double min_speed_ms = minimum_speed_ * KNOTS2M_S;
+
     for (const auto& tst_id : tst_data)
     {
         ++num_pos;
@@ -192,7 +194,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> TrackAngle::evaluate (
             continue;
         }
 
-        tie (ref_spd, ok) = target_data.interpolatedRefPosBasedSpdForTime(timestamp, max_ref_time_diff);
+        tie (ref_spd, ok) = target_data.interpolatedRefSpdForTime(timestamp, max_ref_time_diff);
 
         if (!ok)
         {
@@ -212,7 +214,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> TrackAngle::evaluate (
 
         // ref_spd ok
 
-        if (use_minimum_speed_ && ref_spd.speed_ < minimum_speed_)
+        if (use_minimum_speed_ && ref_spd.speed_ < min_speed_ms)
         {
             if (!skip_no_data_details)
                 details.push_back({timestamp, tst_pos,
@@ -243,8 +245,8 @@ std::shared_ptr<EvaluationRequirementResult::Single> TrackAngle::evaluate (
             continue;
         }
 
-        ref_trackangle_deg = RAD2DEG * ref_spd.track_angle_;
-        tst_trackangle_deg = RAD2DEG * target_data.tstMeasuredTrackAngleForTime (timestamp);
+        ref_trackangle_deg = ref_spd.track_angle_;
+        tst_trackangle_deg = target_data.tstMeasuredTrackAngleForTime (timestamp);
 
 //        if (ref_trackangle_deg < 0)
 //            ref_trackangle_deg += 360;
@@ -257,7 +259,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> TrackAngle::evaluate (
 
         //trackangle_min_diff = RAD2DEG * ref_spd.track_angle_ - tst_trackangle_deg;
 
-        trackangle_min_diff = Number::calculateAngleDifference(ref_trackangle_deg, tst_trackangle_deg);
+        trackangle_min_diff = Number::calculateMinAngleDifference(ref_trackangle_deg, tst_trackangle_deg);
 
 //        loginf << Time::toString(timestamp) << " tst_track ref " << ref_trackangle_deg
 //               << " tst " << tst_trackangle_deg << " diff " << trackangle_min_diff;
