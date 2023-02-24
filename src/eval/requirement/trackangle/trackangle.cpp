@@ -226,7 +226,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> TrackAngle::evaluate (
 
             ++num_pos_ref_spd_low;
 
-            loginf << Time::toString(timestamp) << " ref spd low "  << ref_spd.speed_;
+            //loginf << Time::toString(timestamp) << " ref spd low "  << ref_spd.speed_;
 
             continue;
         }
@@ -267,8 +267,8 @@ std::shared_ptr<EvaluationRequirementResult::Single> TrackAngle::evaluate (
             comment = "Failed";
         }
 
-        comment += " tst_track ref " +to_string(ref_trackangle_deg)
-                + " tst " + to_string(tst_trackangle_deg) + " diff " + to_string(trackangle_min_diff);
+//        comment += " tst_track ref " +to_string(ref_trackangle_deg)
+//                + " tst " + to_string(tst_trackangle_deg) + " diff " + to_string(trackangle_min_diff);
 
         details.push_back({timestamp, tst_pos,
                            true, ref_pos,

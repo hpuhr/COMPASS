@@ -2116,8 +2116,8 @@ void EvaluationTargetData::addRefPositionsSpeedsToMapping (TstDataMapping& mappi
                         turnrate = angle_diff / d_t;
                         angle = spd1.track_angle_ + turnrate * d_t2;
 
-                        loginf << "UGA ang1 " << spd1.track_angle_ << " 2 " << spd2.track_angle_
-                               << " angle_diff " << angle_diff << " turnrate " << turnrate << " ipld " << angle;
+//                        loginf << "UGA ang1 " << spd1.track_angle_ << " 2 " << spd2.track_angle_
+//                               << " angle_diff " << angle_diff << " turnrate " << turnrate << " ipld " << angle;
 
                         mapping.has_ref_spd_ = true;
                         mapping.spd_ref_.speed_ = speed;
