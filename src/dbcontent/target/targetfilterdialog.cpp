@@ -1,6 +1,4 @@
-#include "evaluationdatafilterdialog.h"
-#include "evaluationdata.h"
-#include "evaluationmanager.h"
+#include "dbcontent/target/targetfilterdialog.h"
 #include "compass.h"
 #include "dbcontent/dbcontentmanager.h"
 #include "dbcontent/dbcontent.h"
@@ -16,9 +14,10 @@
 
 using namespace std;
 
-EvaluationDataFilterDialog::EvaluationDataFilterDialog(EvaluationData& eval_data, EvaluationManager& eval_man,
-                                                       QWidget* parent, Qt::WindowFlags f)
-    : QDialog(parent, f), eval_data_(eval_data), eval_man_(eval_man)
+namespace dbContent {
+
+TargetFilterDialog::TargetFilterDialog(TargetModel& model, QWidget* parent, Qt::WindowFlags f)
+    : QDialog(parent, f), model_(model)
 {
     setWindowFlags(Qt::Window | Qt::WindowTitleHint | Qt::CustomizeWindowHint);
 
@@ -41,116 +40,116 @@ EvaluationDataFilterDialog::EvaluationDataFilterDialog(EvaluationData& eval_data
 
     // shorts
     remove_short_check_ = new QCheckBox();
-    remove_short_check_->setChecked(eval_man_.removeShortTargets());
+    remove_short_check_->setChecked(model_.removeShortTargets());
     connect(remove_short_check_, &QCheckBox::clicked, this,
-            &EvaluationDataFilterDialog::removeShortTargetsSlot);
+            &TargetFilterDialog::removeShortTargetsSlot);
 
     config_layout->addRow("Remove Short Targets", remove_short_check_);
 
     remove_st_min_updates_edit_ = new QLineEdit();
-    remove_st_min_updates_edit_->setText(QString::number(eval_man_.removeShortTargetsMinUpdates()));
+    remove_st_min_updates_edit_->setText(QString::number(model_.removeShortTargetsMinUpdates()));
     connect(remove_st_min_updates_edit_, &QLineEdit::editingFinished,
-            this, &EvaluationDataFilterDialog::removeSTMinUpdatesEditedSlot);
+            this, &TargetFilterDialog::removeSTMinUpdatesEditedSlot);
     config_layout->addRow(tr("\tShort Targets Minimum Updates [1]"), remove_st_min_updates_edit_);
 
     remove_st_min_duration_edit_ = new QLineEdit();
-    remove_st_min_duration_edit_->setText(QString::number(eval_man_.removeShortTargetsMinDuration()));
+    remove_st_min_duration_edit_->setText(QString::number(model_.removeShortTargetsMinDuration()));
     connect(remove_st_min_duration_edit_, &QLineEdit::editingFinished,
-            this, &EvaluationDataFilterDialog::removeSTMinDurationEditedSlot);
+            this, &TargetFilterDialog::removeSTMinDurationEditedSlot);
     config_layout->addRow(tr("\tShort Targets Duration [s]"), remove_st_min_duration_edit_);
 
     // psr only
     remove_psr_only_targets_check_ = new QCheckBox();
-    remove_psr_only_targets_check_->setChecked(eval_man_.removePsrOnlyTargets());
+    remove_psr_only_targets_check_->setChecked(model_.removePsrOnlyTargets());
     connect(remove_psr_only_targets_check_, &QCheckBox::clicked, this,
-            &EvaluationDataFilterDialog::removePSROnlyTargetsSlot);
+            &TargetFilterDialog::removePSROnlyTargetsSlot);
 
     config_layout->addRow("Remove Primary-Only Targets", remove_psr_only_targets_check_);
 
     // ma
     remove_mode_ac_only_check_ = new QCheckBox();
-    remove_mode_ac_only_check_->setChecked(eval_man_.removeModeACOnlys());
+    remove_mode_ac_only_check_->setChecked(model_.removeModeACOnlys());
     connect(remove_mode_ac_only_check_, &QCheckBox::clicked, this,
-            &EvaluationDataFilterDialog::removeModeACOnlyTargetsSlot);
+            &TargetFilterDialog::removeModeACOnlyTargetsSlot);
     config_layout->addRow("Remove Mode A/C Code onlys", remove_mode_ac_only_check_);
 
     remove_mode_a_check_ = new QCheckBox();
-    remove_mode_a_check_->setChecked(eval_man_.filterModeACodes());
+    remove_mode_a_check_->setChecked(model_.filterModeACodes());
     connect(remove_mode_a_check_, &QCheckBox::clicked, this,
-            &EvaluationDataFilterDialog::removeModeASlot);
+            &TargetFilterDialog::removeModeASlot);
 
     config_layout->addRow("Remove By Mode A Code", remove_mode_a_check_);
 
     remove_mode_a_blacklist_check_ = new QCheckBox();
-    remove_mode_a_blacklist_check_->setChecked(eval_man_.filterModeACodeBlacklist());
+    remove_mode_a_blacklist_check_->setChecked(model_.filterModeACodeBlacklist());
     remove_mode_a_blacklist_check_->setToolTip("If checked, values are a blacklist - if not checked, a whitelist");
     connect(remove_mode_a_blacklist_check_, &QCheckBox::clicked,
-            this, &EvaluationDataFilterDialog::removeModeABlackListSlot);
+            this, &TargetFilterDialog::removeModeABlackListSlot);
 
     config_layout->addRow("Mode A Code Blacklist", remove_mode_a_blacklist_check_);
 
 
     remove_mode_a_edit_ = new QTextEdit();
-    remove_mode_a_edit_->setText(eval_man_.filterModeACodeValues().c_str());
+    remove_mode_a_edit_->setText(model_.filterModeACodeValues().c_str());
     connect(remove_mode_a_edit_, &QTextEdit::textChanged, this,
-            &EvaluationDataFilterDialog::removeModeAValuesSlot);
+            &TargetFilterDialog::removeModeAValuesSlot);
 
     config_layout->addRow("\tMode A Code (oct,oct1-oct2)", remove_mode_a_edit_);
 
     // mc
 
     remove_mode_c_check_ = new QCheckBox();
-    remove_mode_c_check_->setChecked(eval_man_.removeModeCValues());
+    remove_mode_c_check_->setChecked(model_.removeModeCValues());
     connect(remove_mode_c_check_, &QCheckBox::clicked, this,
-            &EvaluationDataFilterDialog::removeModeCSlot);
+            &TargetFilterDialog::removeModeCSlot);
 
     config_layout->addRow("Remove By Mode C Code", remove_mode_c_check_);
 
     remove_mode_c_min_edit_ = new QTextEdit();
-    remove_mode_c_min_edit_->setText(QString::number(eval_man_.removeModeCMinValue()));
+    remove_mode_c_min_edit_->setText(QString::number(model_.removeModeCMinValue()));
     connect(remove_mode_c_min_edit_, &QTextEdit::textChanged, this,
-            &EvaluationDataFilterDialog::removeModeCMinValueSlot);
+            &TargetFilterDialog::removeModeCMinValueSlot);
 
     config_layout->addRow("\tMode Min Value [ft]", remove_mode_c_min_edit_);
 
     // ta
     remove_ta_check_ = new QCheckBox();
-    remove_ta_check_->setChecked(eval_man_.filterTargetAddresses());
+    remove_ta_check_->setChecked(model_.filterTargetAddresses());
     connect(remove_ta_check_, &QCheckBox::clicked, this,
-            &EvaluationDataFilterDialog::removeTASlot);
+            &TargetFilterDialog::removeTASlot);
 
     config_layout->addRow("Remove By Target Address", remove_ta_check_);
 
     remove_ta_blacklist_check_ = new QCheckBox();
-    remove_ta_blacklist_check_->setChecked(eval_man_.filterTargetAddressesBlacklist());
+    remove_ta_blacklist_check_->setChecked(model_.filterTargetAddressesBlacklist());
     remove_ta_blacklist_check_->setToolTip("If checked, values are a blacklist - if not checked, a whitelist");
     connect(remove_ta_blacklist_check_, &QCheckBox::clicked,
-            this, &EvaluationDataFilterDialog::removeTABlackListSlot);
+            this, &TargetFilterDialog::removeTABlackListSlot);
 
     config_layout->addRow("Target Addresses Blacklist", remove_ta_blacklist_check_);
 
     remove_ta_edit_ = new QTextEdit();
-    remove_ta_edit_->setText(eval_man_.filterTargetAddressValues().c_str());
+    remove_ta_edit_->setText(model_.filterTargetAddressValues().c_str());
     connect(remove_ta_edit_, &QTextEdit::textChanged, this,
-            &EvaluationDataFilterDialog::removeTAValuesSlot);
+            &TargetFilterDialog::removeTAValuesSlot);
 
     config_layout->addRow("\tTarget Addresses (hex)", remove_ta_edit_);
 
     // dbos
     remove_dbo_check_ = new QCheckBox();
-    remove_dbo_check_->setChecked(eval_man_.removeNotDetectedDBContents());
+    remove_dbo_check_->setChecked(model_.removeNotDetectedDBContents());
     connect(remove_dbo_check_, &QCheckBox::clicked, this,
-            &EvaluationDataFilterDialog::removeDBContentsSlot);
+            &TargetFilterDialog::removeDBContentsSlot);
 
     config_layout->addRow("Remove By Non-Detection in DBContent", remove_dbo_check_);
 
     for (auto& dbo_it : COMPASS::instance().dbContentManager())
     {
         QCheckBox* tmp = new QCheckBox();
-        tmp->setChecked(eval_man_.removeNotDetectedDBContent(dbo_it.first));
+        tmp->setChecked(model_.removeNotDetectedDBContent(dbo_it.first));
         tmp->setProperty("dbcontent_name", dbo_it.first.c_str());
         connect(tmp, &QCheckBox::clicked, this,
-                &EvaluationDataFilterDialog::removeSpecificDBContentsSlot);
+                &TargetFilterDialog::removeSpecificDBContentsSlot);
 
         config_layout->addRow(("\tNon-Detection of "+dbo_it.first).c_str(), tmp);
     }
@@ -164,13 +163,13 @@ EvaluationDataFilterDialog::EvaluationDataFilterDialog(EvaluationData& eval_data
     QHBoxLayout* button_layout = new QHBoxLayout();
 
     cancel_button_ = new QPushButton("Cancel");
-    connect(cancel_button_, &QPushButton::clicked, this, &EvaluationDataFilterDialog::cancelSlot);
+    connect(cancel_button_, &QPushButton::clicked, this, &TargetFilterDialog::cancelSlot);
     button_layout->addWidget(cancel_button_);
 
     button_layout->addStretch();
 
     run_button_ = new QPushButton("Run");
-    connect(run_button_, &QPushButton::clicked, this, &EvaluationDataFilterDialog::runSlot);
+    connect(run_button_, &QPushButton::clicked, this, &TargetFilterDialog::runSlot);
     button_layout->addWidget(run_button_);
 
     main_layout->addLayout(button_layout);
@@ -178,12 +177,12 @@ EvaluationDataFilterDialog::EvaluationDataFilterDialog(EvaluationData& eval_data
     setLayout(main_layout);
 }
 
-void EvaluationDataFilterDialog::removeShortTargetsSlot(bool checked)
+void TargetFilterDialog::removeShortTargetsSlot(bool checked)
 {
-    eval_man_.removeShortTargets(checked);
+    model_.removeShortTargets(checked);
 }
 
-void EvaluationDataFilterDialog::removeSTMinUpdatesEditedSlot()
+void TargetFilterDialog::removeSTMinUpdatesEditedSlot()
 {
     assert (remove_st_min_updates_edit_);
     QString text = remove_st_min_updates_edit_->text();
@@ -192,13 +191,13 @@ void EvaluationDataFilterDialog::removeSTMinUpdatesEditedSlot()
     unsigned int value = text.toUInt(&ok);
 
     if (ok)
-        eval_man_.removeShortTargetsMinUpdates(value);
+        model_.removeShortTargetsMinUpdates(value);
     else
-        logwrn << "EvaluationDataFilterDialog: removeSTMinUpdatesEditedSlot: conversion of text '"
+        logwrn << "TargetFilterDialog: removeSTMinUpdatesEditedSlot: conversion of text '"
                << text.toStdString() << "' failed";
 }
 
-void EvaluationDataFilterDialog::removeSTMinDurationEditedSlot()
+void TargetFilterDialog::removeSTMinDurationEditedSlot()
 {
     assert (remove_st_min_duration_edit_);
     QString text = remove_st_min_duration_edit_->text();
@@ -207,71 +206,71 @@ void EvaluationDataFilterDialog::removeSTMinDurationEditedSlot()
     float value = text.toFloat(&ok);
 
     if (ok)
-        eval_man_.removeShortTargetsMinDuration(value);
+        model_.removeShortTargetsMinDuration(value);
     else
-        logwrn << "EvaluationDataFilterDialog: removeSTMinDurationEditedSlot: conversion of text '"
+        logwrn << "TargetFilterDialog: removeSTMinDurationEditedSlot: conversion of text '"
                << text.toStdString() << "' failed";
 }
 
-void EvaluationDataFilterDialog::removePSROnlyTargetsSlot(bool checked)
+void TargetFilterDialog::removePSROnlyTargetsSlot(bool checked)
 {
-    eval_man_.removePsrOnlyTargets(checked);
+    model_.removePsrOnlyTargets(checked);
 }
 
-void EvaluationDataFilterDialog::removeModeACOnlyTargetsSlot(bool checked)
+void TargetFilterDialog::removeModeACOnlyTargetsSlot(bool checked)
 {
-    eval_man_.removeModeACOnlys(checked);
+    model_.removeModeACOnlys(checked);
 }
 
-void EvaluationDataFilterDialog::removeModeASlot(bool checked)
+void TargetFilterDialog::removeModeASlot(bool checked)
 {
-    eval_man_.filterModeACodes(checked);
+    model_.filterModeACodes(checked);
 }
 
-void EvaluationDataFilterDialog::removeModeABlackListSlot(bool checked)
+void TargetFilterDialog::removeModeABlackListSlot(bool checked)
 {
-    eval_man_.filterModeACodeBlacklist(checked);
+    model_.filterModeACodeBlacklist(checked);
 }
 
-void EvaluationDataFilterDialog::removeModeAValuesSlot()
+void TargetFilterDialog::removeModeAValuesSlot()
 {
     assert (remove_mode_a_edit_);
-    eval_man_.filterModeACodeValues(remove_mode_a_edit_->document()->toPlainText().toStdString());
+    model_.filterModeACodeValues(remove_mode_a_edit_->document()->toPlainText().toStdString());
 }
 
-void EvaluationDataFilterDialog::removeModeCSlot(bool checked)
+void TargetFilterDialog::removeModeCSlot(bool checked)
 {
-    eval_man_.removeModeCValues(checked);
+    model_.removeModeCValues(checked);
 }
 
-void EvaluationDataFilterDialog::removeModeCMinValueSlot()
+void TargetFilterDialog::removeModeCMinValueSlot()
 {
     assert (remove_mode_c_min_edit_);
-    eval_man_.removeModeCMinValue(remove_mode_c_min_edit_->document()->toPlainText().toFloat());
+    model_.removeModeCMinValue(remove_mode_c_min_edit_->document()->toPlainText().toFloat());
 }
 
-void EvaluationDataFilterDialog::removeTASlot(bool checked)
+void TargetFilterDialog::removeTASlot(bool checked)
 {
-    eval_man_.filterTargetAddresses(checked);
+    model_.filterTargetAddresses(checked);
 }
 
-void EvaluationDataFilterDialog::removeTABlackListSlot(bool checked)
+void TargetFilterDialog::removeTABlackListSlot(bool checked)
 {
-    eval_man_.filterTargetAddressesBlacklist(checked);
+    model_.filterTargetAddressesBlacklist(checked);
 }
 
-void EvaluationDataFilterDialog::removeTAValuesSlot()
+void TargetFilterDialog::removeTAValuesSlot()
 {
     assert (remove_ta_edit_);
-    eval_man_.filterTargetAddressValues(remove_ta_edit_->document()->toPlainText().toStdString());
+    model_.filterTargetAddressValues(remove_ta_edit_->document()->toPlainText().toStdString());
 }
 
-void EvaluationDataFilterDialog::removeDBContentsSlot(bool checked)
+void TargetFilterDialog::removeDBContentsSlot(bool checked)
 {
-    eval_man_.removeNotDetectedDBContents(checked);
+    model_.removeNotDetectedDBContents(checked);
 }
 
-void EvaluationDataFilterDialog::removeSpecificDBContentsSlot(bool checked)
+void TargetFilterDialog::removeSpecificDBContentsSlot(bool checked)
 {
     QCheckBox* tmp = dynamic_cast<QCheckBox*>(sender());
     assert (tmp);
@@ -281,17 +280,19 @@ void EvaluationDataFilterDialog::removeSpecificDBContentsSlot(bool checked)
 
     string dbcontent_name = data.toString().toStdString();
 
-    eval_man_.removeNotDetectedDBContents(dbcontent_name,checked);
+    model_.removeNotDetectedDBContents(dbcontent_name,checked);
 }
 
-void EvaluationDataFilterDialog::runSlot()
+void TargetFilterDialog::runSlot()
 {
-    eval_data_.setUseByFilter();
+    model_.setUseByFilter();
 
     close();
 }
 
-void EvaluationDataFilterDialog::cancelSlot()
+void TargetFilterDialog::cancelSlot()
 {
     close();
+}
+
 }

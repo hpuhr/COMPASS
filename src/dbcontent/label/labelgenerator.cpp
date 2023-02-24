@@ -621,7 +621,7 @@ void LabelGenerator::autoAdustCurrentLOD(unsigned int num_labels_on_screen)
     else if (current_lod_ > 3)
         current_lod_ = 3;
 
-    loginf << "DBContentLabelGenerator: autoAdustCurrentLOD: num labels on screen "
+    logdbg << "DBContentLabelGenerator: autoAdustCurrentLOD: num labels on screen "
            << num_labels_on_screen << " old " << (unsigned int) old_lod
            << " current " << round(current_lod_) << " float " << current_lod_;
 }

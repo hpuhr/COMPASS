@@ -18,8 +18,8 @@ public:
 
     unsigned int utn() { return utn_; }
 
-    bool use() const;
-    void use(bool value);
+    bool useInEval() const;
+    void useInEval(bool value);
 
     std::string comment() const;
     void comment (const std::string& value);
@@ -55,10 +55,11 @@ public:
     std::string modeCMaxStr() const;
 
     bool isPrimaryOnly () const;
+    bool isModeACOnly () const;
 
     unsigned int numUpdates () const;
 
-    unsigned int dbContentCount(const std::string& dbcontent_name);
+    unsigned int dbContentCount(const std::string& dbcontent_name) const;
     void dbContentCount(const std::string& dbcontent_name, unsigned int value);
 
     bool hasAdsbMOPSVersions() const;

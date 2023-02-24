@@ -15,17 +15,19 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "eval/requirement/speed/speed.h"
-#include "eval/results/speed/speedsingle.h"
+#include "eval/requirement/trackangle/trackangle.h"
+#include "eval/results/trackangle/trackanglesingle.h"
 #include "evaluationdata.h"
 #include "evaluationmanager.h"
 #include "logger.h"
 #include "stringconv.h"
 #include "sectorlayer.h"
+#include "util/number.h"
 
 #include <ogr_spatialref.h>
 
 #include <algorithm>
+#include <cmath>
 
 using namespace std;
 using namespace Utils;
@@ -34,51 +36,51 @@ using namespace boost::posix_time;
 namespace EvaluationRequirement
 {
 
-Speed::Speed(
+TrackAngle::TrackAngle(
         const std::string& name, const std::string& short_name, const std::string& group_name,
         float prob, COMPARISON_TYPE prob_check_type, EvaluationManager& eval_man,
-        float threshold_value, bool use_percent_if_higher, float threshold_percent,
+                    float threshold, bool use_minimum_speed, float minimum_speed,
         COMPARISON_TYPE threshold_value_check_type, bool failed_values_of_interest)
     : Base(name, short_name, group_name, prob, prob_check_type, eval_man),
-      threshold_value_(threshold_value),
-      use_percent_if_higher_(use_percent_if_higher), threshold_percent_(threshold_percent),
+      threshold_(threshold),
+      use_minimum_speed_(use_minimum_speed), minimum_speed_(minimum_speed),
       threshold_value_check_type_(threshold_value_check_type),
       failed_values_of_interest_(failed_values_of_interest)
 {
 
 }
-
-float Speed::thresholdValue() const
+float TrackAngle::threshold() const
 {
-    return threshold_value_;
+    return threshold_;
 }
 
-bool Speed::usePercentIfHigher() const
+bool TrackAngle::useMinimumSpeed() const
 {
-    return use_percent_if_higher_;
+    return use_minimum_speed_;
 }
 
-float Speed::thresholdPercent() const
+float TrackAngle::minimumSpeed() const
 {
-    return threshold_percent_;
+    return minimum_speed_;
 }
 
-COMPARISON_TYPE Speed::thresholdValueCheckType() const
+COMPARISON_TYPE TrackAngle::thresholdValueCheckType() const
 {
     return threshold_value_check_type_;
 }
 
-bool Speed::failedValuesOfInterest() const
+bool TrackAngle::failedValuesOfInterest() const
 {
     return failed_values_of_interest_;
 }
 
-std::shared_ptr<EvaluationRequirementResult::Single> Speed::evaluate (
+std::shared_ptr<EvaluationRequirementResult::Single> TrackAngle::evaluate (
         const EvaluationTargetData& target_data, std::shared_ptr<Base> instance,
         const SectorLayer& sector_layer)
 {
-    logdbg << "EvaluationRequirementSpeed '" << name_ << "': evaluate: utn " << target_data.utn_
-           << " threshold_value " << threshold_value_ << " threshold_value_check_type " << threshold_value_check_type_;
+    logdbg << "EvaluationRequirementTrackAngle '" << name_ << "': evaluate: utn " << target_data.utn_
+           << " threshold_percent " << threshold_
+           << " threshold_value_check_type " << threshold_value_check_type_;
 
     time_duration max_ref_time_diff = Time::partialSeconds(eval_man_.maxRefTimeDiff());
 
@@ -88,14 +90,12 @@ std::shared_ptr<EvaluationRequirementResult::Single> Speed::evaluate (
     unsigned int num_no_ref {0};
     unsigned int num_pos_outside {0};
     unsigned int num_pos_inside {0};
-    unsigned int num_pos_calc_errors {0};
+    unsigned int num_pos_ref_spd_low {0};
     unsigned int num_no_tst_value {0};
     unsigned int num_comp_failed {0};
     unsigned int num_comp_passed {0};
 
-    float tmp_threshold_value;
-
-    std::vector<EvaluationRequirement::SpeedDetail> details;
+    std::vector<EvaluationRequirement::TrackAngleDetail> details;
 
     ptime timestamp;
 
@@ -113,20 +113,22 @@ std::shared_ptr<EvaluationRequirementResult::Single> Speed::evaluate (
     bool ok;
 
     EvaluationTargetVelocity ref_spd;
-    float tst_spd_ms;
-    float spd_diff;
+    double ref_trackangle_deg, tst_trackangle_deg;
+    float trackangle_min_diff;
 
     bool comp_passed;
 
-    unsigned int num_speeds {0};
+    unsigned int num_trackangle_comp {0};
     string comment;
 
-    vector<double> values;
+    vector<double> values; // track angle diff percentage
 
     bool skip_no_data_details = eval_man_.reportSkipNoDataDetails();
 
     bool has_ground_bit;
     bool ground_bit_set;
+
+    double min_speed_ms = minimum_speed_ * KNOTS2M_S;
 
     for (const auto& tst_id : tst_data)
     {
@@ -212,7 +214,24 @@ std::shared_ptr<EvaluationRequirementResult::Single> Speed::evaluate (
 
         // ref_spd ok
 
-        if (!target_data.hasTstMeasuredSpeedForTime(timestamp))
+        if (use_minimum_speed_ && ref_spd.speed_ < min_speed_ms)
+        {
+            if (!skip_no_data_details)
+                details.push_back({timestamp, tst_pos,
+                                   false, {}, // has_ref_pos, ref_pos
+                                   {}, {}, comp_passed, // pos_inside, value, check_passed
+                                   num_pos, num_no_ref, num_pos_inside, num_pos_outside,
+                                   num_comp_failed, num_comp_passed,
+                                   "Reference speed too low"});
+
+            ++num_pos_ref_spd_low;
+
+            loginf << Time::toString(timestamp) << " ref spd low "  << ref_spd.speed_;
+
+            continue;
+        }
+
+        if (!target_data.hasTstMeasuredTrackAngleForTime(timestamp))
         {
             if (!skip_no_data_details)
                 details.push_back({timestamp, tst_pos,
@@ -226,17 +245,17 @@ std::shared_ptr<EvaluationRequirementResult::Single> Speed::evaluate (
             continue;
         }
 
-        tst_spd_ms = target_data.tstMeasuredSpeedForTime (timestamp);
-        spd_diff = fabs(ref_spd.speed_ - tst_spd_ms);
+        ref_trackangle_deg = ref_spd.track_angle_;
+        tst_trackangle_deg = target_data.tstMeasuredTrackAngleForTime (timestamp);
 
-        if (use_percent_if_higher_ && tst_spd_ms * threshold_percent_ > threshold_value_) // use percent based threshold
-            tmp_threshold_value = tst_spd_ms * threshold_percent_;
-        else
-            tmp_threshold_value = threshold_value_;
+        trackangle_min_diff = Number::calculateMinAngleDifference(ref_trackangle_deg, tst_trackangle_deg);
 
-        ++num_speeds;
+//        loginf << Time::toString(timestamp) << " tst_track ref " << ref_trackangle_deg
+//               << " tst " << tst_trackangle_deg << " diff " << trackangle_min_diff;
 
-        if (compareValue(spd_diff, tmp_threshold_value, threshold_value_check_type_))
+        ++num_trackangle_comp;
+
+        if (compareValue(fabs(trackangle_min_diff), threshold_, threshold_value_check_type_))
         {
             comp_passed = true;
             ++num_comp_passed;
@@ -248,17 +267,20 @@ std::shared_ptr<EvaluationRequirementResult::Single> Speed::evaluate (
             comment = "Failed";
         }
 
+        comment += " tst_track ref " +to_string(ref_trackangle_deg)
+                + " tst " + to_string(tst_trackangle_deg) + " diff " + to_string(trackangle_min_diff);
+
         details.push_back({timestamp, tst_pos,
                            true, ref_pos,
-                           is_inside, spd_diff, comp_passed, // pos_inside, value, check_passed
+                           is_inside, trackangle_min_diff, comp_passed, // pos_inside, value, check_passed
                            num_pos, num_no_ref, num_pos_inside, num_pos_outside,
                            num_comp_failed, num_comp_passed,
                            comment});
 
-        values.push_back(spd_diff);
+        values.push_back(trackangle_min_diff);
     }
 
-    //        logdbg << "EvaluationRequirementSpeed '" << name_ << "': evaluate: utn " << target_data.utn_
+    //        logdbg << "EvaluationRequirementTrackAngle '" << name_ << "': evaluate: utn " << target_data.utn_
     //               << " num_pos " << num_pos << " num_no_ref " <<  num_no_ref
     //               << " num_pos_outside " << num_pos_outside << " num_pos_inside " << num_pos_inside
     //               << " num_pos_ok " << num_pos_ok << " num_pos_nok " << num_pos_nok
@@ -266,24 +288,24 @@ std::shared_ptr<EvaluationRequirementResult::Single> Speed::evaluate (
 
     assert (num_no_ref <= num_pos);
 
-    if (num_pos - num_no_ref != num_pos_inside + num_pos_outside)
-        logwrn << "EvaluationRequirementSpeed '" << name_ << "': evaluate: utn " << target_data.utn_
+    if (num_pos - num_no_ref - num_pos_ref_spd_low != num_pos_inside + num_pos_outside)
+        logwrn << "EvaluationRequirementTrackAngle '" << name_ << "': evaluate: utn " << target_data.utn_
                << " num_pos " << num_pos << " num_no_ref " <<  num_no_ref
                << " num_pos_outside " << num_pos_outside << " num_pos_inside " << num_pos_inside;
     assert (num_pos - num_no_ref == num_pos_inside + num_pos_outside);
 
 
-    if (num_speeds != num_comp_failed + num_comp_passed)
-        logwrn << "EvaluationRequirementSpeed '" << name_ << "': evaluate: utn " << target_data.utn_
-               << " num_speeds " << num_speeds << " num_comp_failed " <<  num_comp_failed
-               << " num_comp_passed " << num_comp_passed;
+    if (num_trackangle_comp != num_comp_failed + num_comp_passed)
+        logwrn << "EvaluationRequirementTrackAngle '" << name_ << "': evaluate: utn " << target_data.utn_
+               << " num_speeds " << num_trackangle_comp
+               << " num_comp_failed " <<  num_comp_failed << " num_comp_passed " << num_comp_passed;
 
-    assert (num_speeds == num_comp_failed + num_comp_passed);
-    assert (num_speeds == values.size());
+    assert (num_trackangle_comp == num_comp_failed + num_comp_passed);
+    assert (num_trackangle_comp == values.size());
 
     //assert (details.size() == num_pos);
 
-    return make_shared<EvaluationRequirementResult::SingleSpeed>(
+    return make_shared<EvaluationRequirementResult::SingleTrackAngle>(
                 "UTN:"+to_string(target_data.utn_), instance, sector_layer, target_data.utn_, &target_data,
                 eval_man_, num_pos, num_no_ref, num_pos_outside, num_pos_inside, num_no_tst_value,
                 num_comp_failed, num_comp_passed,

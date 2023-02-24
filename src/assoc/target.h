@@ -36,6 +36,9 @@ namespace Association
         unsigned int utn_{0};
         bool tmp_ {false};
 
+        bool use_in_eval_ {true};
+        std::string comment_;
+
         std::set<unsigned int> tas_;
         std::set<std::string> ids_;
         std::set<unsigned int> mas_;

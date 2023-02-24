@@ -3,6 +3,8 @@
 
 #include <QWidget>
 
+class DBContentManager;
+
 class QToolBar;
 class QTableView;
 class QSortFilterProxyModel;
@@ -28,13 +30,14 @@ public slots:
     void currentRowChanged(const QModelIndex& current, const QModelIndex& previous);
 
 public:
-    TargetListWidget(TargetModel& model);
+    TargetListWidget(TargetModel& model, DBContentManager& dbcont_manager);
     virtual ~TargetListWidget() {};
 
     void resizeColumnsToContents();
 
 protected:
     TargetModel& model_;
+    DBContentManager& dbcont_manager_;
 
     QToolBar* toolbar_ {nullptr};
 

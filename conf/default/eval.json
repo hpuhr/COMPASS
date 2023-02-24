@@ -5,17 +5,9 @@
         "active_sources_tst": {
             
         },
-        "configs": {
-                   },
         "current_standard": "Dubious Targets",
         "dbcontent_name_ref": "CAT062",
         "dbcontent_name_tst": "CAT021",
-        "filter_mode_a_code_blacklist": true,
-        "filter_mode_a_code_values": "7000,7777",
-        "filter_mode_a_codes": false,
-        "filter_target_address_values": "",
-        "filter_target_addresses": false,
-        "filter_target_addresses_blacklist": true,
         "generate_details": true,
         "line_id_ref": 0,
         "line_id_tst": 0,
@@ -32,39 +24,9 @@
         "min_nucp": 4,
         "min_sil_v1": 2,
         "min_sil_v2": 4,
-        "remove_mode_a_code_values": "7000,7777",
-        "remove_mode_a_codes": false,
-        "remove_mode_c_min_value": 11000.0,
-        "remove_mode_c_values": false,
-        "remove_mode_target_addresses": false,
-        "remove_modeac_onlys": false,
-        "remove_not_detected_dbo_values": {
-            "Radar": false
-        },
-        "remove_not_detected_dbos": false,
-        "remove_psr_only_targets": false,
-        "remove_short_targets": true,
-        "remove_short_targets_min_duration": 30.0,
-        "remove_short_targets_min_updates": 5,
-        "remove_target_address_vales": "",
         "result_detail_zoom": 0.0020000000949949026,
         "use_adsb_filter": true,
         "use_grp_in_sector": {
-            "Dub": {
-                "fir_cut_sim": {
-                    "Required": true
-                }
-            },
-            "Dubious Targets": {
-                "fir_cut_sim": {
-                    "Optional": true
-                }
-            },
-            "test": {
-                "fir_cut_sim": {
-                    "Mandatory": true
-                }
-            }
         },
         "use_load_filter": false,
         "use_max_nacp": true,

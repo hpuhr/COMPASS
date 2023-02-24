@@ -2,6 +2,7 @@
 #define DBCONTENT_TARGETMODEL_H
 
 #include "target.h"
+#include "configurable.h"
 
 #include <QAbstractItemModel>
 
@@ -14,6 +15,7 @@
 #include <boost/multi_index/random_access_index.hpp>
 #include <boost/multi_index_container.hpp>
 
+class DBContentManager;
 
 namespace dbContent {
 
@@ -31,13 +33,15 @@ typedef boost::multi_index_container<
         > >
     TargetCache;
 
-class TargetModel : public QAbstractItemModel
+class TargetModel : public QAbstractItemModel, public Configurable
 {
     Q_OBJECT
 
 public:
-    TargetModel();
+    TargetModel(const std::string& class_id, const std::string& instance_id, DBContentManager& dbcont_manager);
     virtual ~TargetModel();
+
+    virtual void generateSubConfigurable(const std::string& class_id, const std::string& instance_id) override {};
 
     QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
     bool setData(const QModelIndex &index, const QVariant& value, int role) override;
@@ -53,11 +57,10 @@ public:
     const dbContent::Target& getTargetOf (const QModelIndex& index);
 
     void setUseTargetData (unsigned int utn, bool value);
+    void setTargetDataComment (unsigned int utn, std::string comment);
     void setUseAllTargetData (bool value);
     void clearComments ();
     void setUseByFilter ();
-
-    void setTargetDataComment (unsigned int utn, std::string comment);
 
     bool hasTargetsInfo();
     void clearTargetsInfo();
@@ -71,13 +74,86 @@ public:
 
     void clear();
 
+    // use filter stuff
+
+    bool removeShortTargets() const;
+    void removeShortTargets(bool value);
+
+    unsigned int removeShortTargetsMinUpdates() const;
+    void removeShortTargetsMinUpdates(unsigned int value);
+
+    double removeShortTargetsMinDuration() const;
+    void removeShortTargetsMinDuration(double value);
+
+    bool removePsrOnlyTargets() const;
+    void removePsrOnlyTargets(bool value);
+
+    bool filterModeACodes() const;
+    void filterModeACodes(bool value);
+    bool filterModeACodeBlacklist() const;
+    void filterModeACodeBlacklist(bool value);
+
+    bool removeModeCValues() const;
+    void removeModeCValues(bool value);
+
+    float removeModeCMinValue() const;
+    void removeModeCMinValue(float value);
+
+    std::string filterModeACodeValues() const;
+    std::set<std::pair<int,int>> filterModeACodeData() const; // single ma,-1 or range ma1,ma2
+    void filterModeACodeValues(const std::string& value);
+
+    bool filterTargetAddresses() const;
+    void filterTargetAddresses(bool value);
+    bool filterTargetAddressesBlacklist() const;
+    void filterTargetAddressesBlacklist(bool value);
+
+    std::string filterTargetAddressValues() const;
+    std::set<unsigned int> filterTargetAddressData() const;
+    void filterTargetAddressValues(const std::string& value);
+
+    bool removeModeACOnlys() const;
+    void removeModeACOnlys(bool value);
+
+    bool removeNotDetectedDBContents() const;
+    void removeNotDetectedDBContents(bool value);
+
+    bool removeNotDetectedDBContent(const std::string& dbcontent_name) const;
+    void removeNotDetectedDBContents(const std::string& dbcontent_name, bool value);
+
 protected:
-    //EvaluationManager& eval_man_;
+    DBContentManager& dbcont_manager_;
 
     QStringList table_columns_ {"Use", "UTN", "Comment", "#Updates", "Begin", "End", "ACIDs", "ACADs",
                                 "M3/A", "MC Min", "MC Max", "MOPS"};
 
     TargetCache target_data_;
+
+    // utn use filter stuff
+
+    bool remove_short_targets_ {true};
+    unsigned int remove_short_targets_min_updates_ {10};
+    double remove_short_targets_min_duration_ {60.0};
+
+    bool remove_psr_only_targets_ {true};
+    bool remove_modeac_onlys_ {false};
+
+    bool filter_mode_a_codes_{false};
+    bool filter_mode_a_code_blacklist_{true};
+    std::string filter_mode_a_code_values_;
+
+    bool remove_mode_c_values_{false};
+    float remove_mode_c_min_value_;
+
+    bool filter_target_addresses_{false};
+    bool filter_target_addresses_blacklist_{true};
+    std::string filter_target_address_values_;
+
+    bool remove_not_detected_dbos_{false};
+    nlohmann::json remove_not_detected_dbo_values_;
+
+
+    virtual void checkSubConfigurables() override {};
 };
 
 }

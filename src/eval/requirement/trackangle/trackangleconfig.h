@@ -15,13 +15,13 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EVALUATIONREQUIREMENTSPEEDCONFIG_H
-#define EVALUATIONREQUIREMENTSPEEDCONFIG_H
+#ifndef EVALUATIONREQUIREMENTTRACKANGLECONFIG_H
+#define EVALUATIONREQUIREMENTTRACKANGLECONFIG_H
 
 #include "configurable.h"
 #include "eval/requirement/base/baseconfig.h"
-#include "eval/requirement/speed/speedconfigwidget.h"
-#include "eval/requirement/speed/speed.h"
+#include "eval/requirement/trackangle/trackangleconfigwidget.h"
+#include "eval/requirement/trackangle/trackangle.h"
 
 class Group;
 class EvaluationStandard;
@@ -29,23 +29,23 @@ class EvaluationStandard;
 namespace EvaluationRequirement
 {
 
-class SpeedConfig : public BaseConfig
+class TrackAngleConfig : public BaseConfig
 {
 public:
-    SpeedConfig(const std::string& class_id, const std::string& instance_id,
+    TrackAngleConfig(const std::string& class_id, const std::string& instance_id,
                 Group& group, EvaluationStandard& standard, EvaluationManager& eval_man);
-    virtual ~SpeedConfig();
+    virtual ~TrackAngleConfig();
 
     std::shared_ptr<Base> createRequirement() override;
 
-    float thresholdValue() const;
-    void thresholdValue(float value);
+    float threshold() const;
+    void threshold(float value);
 
-    bool usePercentIfHigher() const;
-    void usePercentIfHigher(bool value);
+    bool useMinimumSpeed() const;
+    void useMinimumSpeed(bool value);
 
-    float thresholdPercent() const;
-    void thresholdPercent(float value);
+    float minimumSpeed() const;
+    void minimumSpeed(float value);
 
     COMPARISON_TYPE thresholdValueCheckType() const;
     void thresholdValueCheckType(const COMPARISON_TYPE& type);
@@ -56,10 +56,10 @@ public:
     virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item) override;
 
 protected:
-    float threshold_value_ {0};
+    float threshold_ {15.0}; // max angle degree difference
 
-    bool use_percent_if_higher_ {false};
-    float threshold_percent_ {10.0};
+    bool use_minimum_speed_ {true};
+    float minimum_speed_ {3.0}; // m/s
 
     COMPARISON_TYPE threshold_value_check_type_ {COMPARISON_TYPE::LESS_THAN_OR_EQUAL};
 
@@ -70,4 +70,4 @@ protected:
 
 }
 
-#endif // EVALUATIONREQUIREMENTSPEEDCONFIG_H
+#endif // EVALUATIONREQUIREMENTTRACKANGLECONFIG_H
