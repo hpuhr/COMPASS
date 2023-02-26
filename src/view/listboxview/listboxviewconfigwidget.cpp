@@ -16,6 +16,7 @@
  */
 
 #include "listboxviewconfigwidget.h"
+#include "listboxviewwidget.h"
 #include "compass.h"
 #include "dbcontent/dbcontentmanager.h"
 #include "dbcontent/variable/variableorderedsetwidget.h"
@@ -40,9 +41,9 @@
 using namespace Utils;
 using namespace std;
 
-ListBoxViewConfigWidget::ListBoxViewConfigWidget(ListBoxView* view, 
+ListBoxViewConfigWidget::ListBoxViewConfigWidget(ListBoxView* view, ListBoxViewWidget* view_widget,
                                                  QWidget* parent)
-:   ViewConfigWidget(parent), view_(view)
+:   ViewConfigWidget(parent), view_(view), view_widget_(view_widget)
 {
     QTabWidget* tab_widget = new QTabWidget(this);
     tab_widget->setStyleSheet("QTabBar::tab { height: 42px; }");
@@ -170,7 +171,7 @@ void ListBoxViewConfigWidget::selectedSetSlot(const QString& text)
     updateSetButtons();
     updateSetWidget();
 
-    view_->getWidget()->notifyReloadNeeded();
+    view_widget_->notifyReloadNeeded();
 }
 
 void ListBoxViewConfigWidget::addSetSlot()
@@ -304,7 +305,7 @@ void ListBoxViewConfigWidget::renameSetSlot()
     updateSetButtons();
     updateSetWidget();
 
-    view_->getWidget()->notifyReloadNeeded();
+    view_widget_->notifyReloadNeeded();
 }
 
 void ListBoxViewConfigWidget::removeSetSlot()
@@ -418,7 +419,7 @@ void ListBoxViewConfigWidget::updateSetWidget()
     assert (view_->getDataSource()->hasCurrentSet());
 
     connect(view_->getDataSource()->getSet(), &dbContent::VariableOrderedSet::variableAddedChangedSignal,
-            view_->getWidget(), &ViewWidget::notifyReloadNeeded, Qt::UniqueConnection);
+            view_widget_, &ListBoxViewWidget::notifyReloadNeeded, Qt::UniqueConnection);
 
     QWidget* set_widget = view_->getDataSource()->getSet()->widget();
 

@@ -76,7 +76,7 @@ public:
     QWidget* getCentralWidget() { return central_widget_; }
 
     /// @brief Returns the view's widget, override this method in derived classes.
-    ViewWidget* getWidget() { return widget_; }
+    ViewWidget* getWidget() { assert (widget_); return widget_; }
 
     void enableInTabWidget(bool value);
     void showInTabWidget();
@@ -111,9 +111,9 @@ protected:
     /// The view's model
     //ViewModel* model_;
     /// The view's widget
-    ViewWidget* widget_;
+    ViewWidget* widget_ {nullptr};
     /// The ViewContainerWidget the view is currently embedded in
-    ViewContainer* container_;
+    ViewContainer* container_ {nullptr};
     /// The widget containing the view's widget
     QWidget* central_widget_;
 

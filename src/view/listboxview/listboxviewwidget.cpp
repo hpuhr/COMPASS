@@ -38,7 +38,7 @@ ListBoxViewWidget::ListBoxViewWidget(const std::string& class_id,
     auto data_widget = new ListBoxViewDataWidget(getView(), view->getDataSource());
     setDataWidget(data_widget);
 
-    auto config_widget = new ListBoxViewConfigWidget(getView());
+    auto config_widget = new ListBoxViewConfigWidget(getView(), this);
     setConfigWidget(config_widget);
 }
 
