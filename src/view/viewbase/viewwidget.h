@@ -113,33 +113,38 @@ public:
     void notifyReloadNeeded();
     void notifyRedrawNeeded();
 
-    ViewDataWidget* getViewDataWidget() { return data_widget_; }
-    const ViewDataWidget* getViewDataWidget() const { return data_widget_; }
-    ViewConfigWidget* getViewConfigWidget() { return config_widget_; }
-    const ViewConfigWidget* getViewConfigWidget() const { return config_widget_; }
+    ViewDataWidget* getViewDataWidget() { assert(data_widget_); return data_widget_; }
+    const ViewDataWidget* getViewDataWidget() const { assert(data_widget_); return data_widget_; }
+    ViewConfigWidget* getViewConfigWidget() { assert(config_widget_); return config_widget_; }
+    const ViewConfigWidget* getViewConfigWidget() const { assert(config_widget_); return config_widget_; }
 
     QWidget* getLowerWidget() { return lower_widget_; }
     const QWidget* getLowerWidget() const { return lower_widget_; }
 
-    /**
-     * Reimplement to provide the ViewLoadStateWidget with view specific load information.
-    */
-    virtual std::string loadedMessage() const { return ""; }
+    std::string loadedMessage() const;
 
     bool reloadNeeded() const;
     bool redrawNeeded() const;
 
     void init();
+    bool isInit() const { return init_; }
+
+    View* getView() { return view_; }
 
     static QIcon getIcon(const std::string& fn);
 
 protected:
-    ViewToolWidget* getViewToolWidget() { return tool_widget_; }
-    const ViewToolWidget* getViewToolWidget() const { return tool_widget_; }
-    ViewToolSwitcher* getViewToolSwitcher() { return tool_switcher_.get(); }
-    const ViewToolSwitcher* getViewToolSwitcher() const { return tool_switcher_.get(); }
-    ViewLoadStateWidget* getViewLoadStateWidget() { return state_widget_; }
-    const ViewLoadStateWidget* getViewLoadStateWidget() const { return state_widget_; }
+    ViewToolWidget* getViewToolWidget() { assert(tool_widget_); return tool_widget_; }
+    const ViewToolWidget* getViewToolWidget() const { assert(tool_widget_); return tool_widget_; }
+    ViewToolSwitcher* getViewToolSwitcher() { assert(tool_switcher_); return tool_switcher_.get(); }
+    const ViewToolSwitcher* getViewToolSwitcher() const { assert(tool_switcher_); return tool_switcher_.get(); }
+    ViewLoadStateWidget* getViewLoadStateWidget() { assert(state_widget_); return state_widget_; }
+    const ViewLoadStateWidget* getViewLoadStateWidget() const { assert(state_widget_); return state_widget_; }
+
+    /**
+     * Reimplement to provide the ViewLoadStateWidget with view specific load information.
+    */
+    virtual std::string loadedMessage_impl() const { return ""; }
 
     /**
      * Reimplement to dynamically provide the ViewLoadStateWidget with reload and redraw information.
@@ -149,11 +154,14 @@ protected:
     virtual bool reloadNeeded_impl() const { return false; };
     virtual bool redrawNeeded_impl() const { return false; };
 
+    /**
+     * Reimplement for specific initialization behavior.
+     */
+    virtual void init_impl() const {}
+
     void setDataWidget(ViewDataWidget* w);
     void setConfigWidget(ViewConfigWidget* w);
     void setLowerWidget(QWidget* w);
-
-    View* getView() { return view_; }
 
 private:
     void createStandardLayout();
@@ -177,6 +185,8 @@ private:
     QWidget*             lower_widget_  = nullptr;
 
     std::unique_ptr<ViewToolSwitcher> tool_switcher_;
+
+    bool init_ = false;
 
     bool redraw_needed_ = false;
     bool reload_needed_ = false;

@@ -31,6 +31,7 @@
 #include <memory>
 
 class HistogramView;
+class HistogramViewWidget;
 class HistogramViewDataSource;
 class QTabWidget;
 class QHBoxLayout;
@@ -54,7 +55,7 @@ class HistogramViewDataWidget : public ViewDataWidget
     Q_OBJECT
 public:
     /// @brief Constructor
-    HistogramViewDataWidget(HistogramView* view, HistogramViewDataSource* data_source,
+    HistogramViewDataWidget(HistogramViewWidget* view_widget,
                           QWidget* parent = nullptr, Qt::WindowFlags f = 0);
     /// @brief Destructor
     virtual ~HistogramViewDataWidget();

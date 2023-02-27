@@ -53,13 +53,12 @@ public:
     ScatterPlotViewConfigWidget* getViewConfigWidget();
     const ScatterPlotViewConfigWidget* getViewConfigWidget() const;
 
-    virtual std::string loadedMessage() const override;
+    /// @brief Returns the basis view
+    ScatterPlotView* getView();
 
 protected:
     virtual bool reloadNeeded_impl() const override;
-
-    /// @brief Returns the basis view
-    ScatterPlotView* getView();
+    virtual std::string loadedMessage_impl() const override;
 };
 
 #endif /* SCATTERPLOTVIEWWIDGET_H_ */

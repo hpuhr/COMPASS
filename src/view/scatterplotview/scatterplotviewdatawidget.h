@@ -31,6 +31,7 @@
 #include <limits>
 
 class ScatterPlotView;
+class ScatterPlotViewWidget;
 class ScatterPlotViewDataSource;
 
 //class QTabWidget;
@@ -63,8 +64,7 @@ class ScatterPlotViewDataWidget : public ViewDataWidget
     Q_OBJECT
 public:
     /// @brief Constructor
-    ScatterPlotViewDataWidget(ScatterPlotView* view, 
-                              ScatterPlotViewDataSource* data_source,
+    ScatterPlotViewDataWidget(ScatterPlotViewWidget* view_widget,
                               QWidget* parent = nullptr, 
                               Qt::WindowFlags f = 0);
     /// @brief Destructor

@@ -23,6 +23,7 @@
 #include "appmode.h"
 
 class HistogramView;
+class HistogramViewWidget;
 
 namespace dbContent {
 class VariableOrderedSetWidget;
@@ -44,7 +45,7 @@ class HistogramViewConfigWidget : public ViewConfigWidget
 {
     Q_OBJECT
 
-  public slots:
+public slots:
     void dataSourceToggled();
     void selectedVariableChangedSlot();
 
@@ -53,19 +54,19 @@ class HistogramViewConfigWidget : public ViewConfigWidget
 //    void exportSlot();
 //    void exportDoneSlot(bool cancelled);
 
-  public:
-    HistogramViewConfigWidget(HistogramView* view, QWidget* parent = nullptr);
+public:
+    HistogramViewConfigWidget(HistogramViewWidget* view_widget, QWidget* parent = nullptr);
     virtual ~HistogramViewConfigWidget();
 
     void updateConfig();
 
-  protected:
+protected:
     void updateEvalConfig();
     void updateInfo();
 
     virtual void onDisplayChange_impl() override;
 
-    HistogramView* view_;
+    HistogramView* view_ = nullptr;
 
     // data variable
     QRadioButton*                       selected_var_check_ {nullptr}; // active if variable data is shown

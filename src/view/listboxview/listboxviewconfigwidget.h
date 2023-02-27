@@ -41,7 +41,7 @@ class ListBoxViewConfigWidget : public ViewConfigWidget
 {
     Q_OBJECT
 public:
-    ListBoxViewConfigWidget(ListBoxView* view, ListBoxViewWidget* view_widget, QWidget* parent = nullptr);
+    ListBoxViewConfigWidget(ListBoxViewWidget* view_widget, QWidget* parent = nullptr);
     virtual ~ListBoxViewConfigWidget();
 
 public slots:
@@ -66,8 +66,7 @@ protected:
     void updateSetButtons();
     void updateSetWidget();
 
-    ListBoxView*    view_{nullptr};
-    ListBoxViewWidget* view_widget_{nullptr};
+    ListBoxView*    view_ = nullptr;
 
     QComboBox*      set_box_{nullptr};
     QPushButton*    add_set_button_{nullptr};

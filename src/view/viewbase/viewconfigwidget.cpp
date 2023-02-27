@@ -1,13 +1,16 @@
 
 #include "viewconfigwidget.h"
+#include "viewwidget.h"
 
 #include <iostream>
 
 /**
 */
-ViewConfigWidget::ViewConfigWidget(QWidget* parent, Qt::WindowFlags f) 
-:   QWidget(parent, f) 
+ViewConfigWidget::ViewConfigWidget(ViewWidget* view_widget, QWidget* parent, Qt::WindowFlags f) 
+:   QWidget     (parent, f)
+,   view_widget_(view_widget)
 {
+    assert(view_widget_);
 }
 
 /**
@@ -52,6 +55,7 @@ void ViewConfigWidget::appModeSwitch(AppMode app_mode)
 
 /**
  * Reacts on changes in the display (e.g. if display information should be visualized in the config widget).
+ * (Note: Only called if both config and data widget exist)
  */
 void ViewConfigWidget::onDisplayChange()
 {

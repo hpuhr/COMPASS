@@ -51,9 +51,6 @@ public:
         return data_source_;
     }
 
-    bool hasDataWidget() const;
-    HistogramViewDataWidget* getDataWidget();
-
     virtual dbContent::VariableSet getSet(const std::string& dbcontent_name) override;
 
     virtual void accept(LatexVisitor& v) override;
@@ -98,12 +95,16 @@ signals:
     void showAssociationsSignal(bool value);
 
 protected:
+    friend class LatexVisitor;
+
     virtual void checkSubConfigurables() override;
     virtual void updateSelection() override;
 
     virtual bool init_impl() override;
 
     void onShowResultsChanged();
+
+    HistogramViewDataWidget* getDataWidget();
 
     /// For data display
     HistogramViewWidget*     widget_{nullptr};

@@ -520,7 +520,7 @@ void LatexVisitor::visit(ScatterPlotView* e)
         return;
 
     // normal screenshot
-    QPixmap pmap = data_widget->renderPixmap();;
+    QPixmap pmap = data_widget->renderPixmap();
 
     QImage screenshot = pmap.toImage();
 

@@ -165,11 +165,26 @@ void ViewWidget::createStandardLayout()
 */
 void ViewWidget::init()
 {
-    if (config_widget_ && tool_widget_)
-        tool_widget_->addConfigWidgetToggle();
+    //init should only be called once
+    if (isInit())
+        throw std::runtime_error("ViewWidget::init(): Called twice");
 
-    updateLoadState();
-    updateToolWidget();
+    //check if all relevant widgets have been constructed
+    assert(data_widget_);
+    assert(config_widget_);
+    assert(tool_widget_);
+    assert(state_widget_);
+
+    //ass toggle button for config widget
+    tool_widget_->addConfigWidgetToggle();
+
+    //call derived
+    init_impl();
+
+    init_ = true;
+
+    //update view components after init is done
+    updateComponents();
 }
 
 /**
@@ -196,6 +211,7 @@ void ViewWidget::setDataWidget(ViewDataWidget* w)
     connect(data_widget_, &ViewDataWidget::redrawStarted, this, &ViewWidget::redrawStarted);
     connect(data_widget_, &ViewDataWidget::redrawDone, this, &ViewWidget::redrawDone);
 
+    //try to connect
     connectWidgets();
 }
 
@@ -219,11 +235,13 @@ void ViewWidget::setConfigWidget(ViewConfigWidget* w)
 
     config_widget_ = w;
 
+    //try to connect
     connectWidgets();
 }
 
 /**
- * Called when both data and config widget are set.
+ * Tries to connect data and config widget.
+ * (Note: Could also be done in init() actually)
  */
 void ViewWidget::connectWidgets()
 {
@@ -257,6 +275,9 @@ void ViewWidget::setLowerWidget(QWidget* w)
  */
 void ViewWidget::toggleConfigWidget()
 {
+    if (!isInit())
+        return;
+
     assert(right_widget_);
 
     bool vis = right_widget_->isVisible();
@@ -274,11 +295,9 @@ QIcon ViewWidget::getIcon(const std::string& fn)
 */
 void ViewWidget::loadingStarted()
 {
-    assert(getViewLoadStateWidget());
-    assert(getViewToolWidget());
-    assert(getViewDataWidget());
-    assert(getViewConfigWidget());
-
+    if (!isInit())
+        return;
+    
     //propagate to subwidgets (note: order might be important)
     getViewDataWidget()->loadingStarted();
     getViewConfigWidget()->loadingStarted();
@@ -290,10 +309,8 @@ void ViewWidget::loadingStarted()
 */
 void ViewWidget::loadingDone()
 {
-    assert(getViewToolWidget());
-    assert(getViewDataWidget());
-    assert(getViewConfigWidget());
-    assert(getViewLoadStateWidget());
+    if (!isInit())
+        return;
 
     //set back flag
     reload_needed_ = false;
@@ -310,9 +327,8 @@ void ViewWidget::loadingDone()
 */
 void ViewWidget::redrawStarted()
 {
-    assert(getViewConfigWidget());
-    assert(getViewLoadStateWidget());
-    assert(getViewToolWidget());
+    if (!isInit())
+        return;
 
     //propagate to subwidgets (note: order might be important)
     getViewConfigWidget()->redrawStarted();
@@ -324,9 +340,8 @@ void ViewWidget::redrawStarted()
 */
 void ViewWidget::redrawDone()
 {
-    assert(getViewConfigWidget());
-    assert(getViewLoadStateWidget());
-    assert(getViewToolWidget());
+    if (!isInit())
+        return;
 
     //set back flag
     redraw_needed_ = false;
@@ -341,10 +356,8 @@ void ViewWidget::redrawDone()
 */
 void ViewWidget::appModeSwitch(AppMode app_mode)
 {
-    assert(getViewToolWidget());
-    assert(getViewDataWidget());
-    assert(getViewConfigWidget());
-    assert(getViewLoadStateWidget());
+    if (!isInit())
+        return;
 
     //propagate to subwidgets (note: order might be important)
     getViewDataWidget()->appModeSwitch(app_mode);
@@ -357,7 +370,8 @@ void ViewWidget::appModeSwitch(AppMode app_mode)
 */
 void ViewWidget::updateToolWidget()
 {
-    assert(getViewToolWidget());
+    if (!isInit())
+        return;
 
     getViewToolWidget()->updateItems();
 }
@@ -367,7 +381,8 @@ void ViewWidget::updateToolWidget()
 */
 void ViewWidget::updateLoadState()
 {
-    assert(getViewLoadStateWidget());
+    if (!isInit())
+        return;
 
     getViewLoadStateWidget()->updateState();
 }
@@ -377,6 +392,9 @@ void ViewWidget::updateLoadState()
 */
 void ViewWidget::updateComponents()
 {
+    if (!isInit())
+        return;
+
     updateToolWidget();
     updateLoadState();
 }
@@ -387,7 +405,8 @@ void ViewWidget::updateComponents()
  */
 void ViewWidget::notifyRedrawNeeded()
 {
-    assert(getViewDataWidget());
+    if (!isInit())
+        return;
 
     if (COMPASS::instance().appMode() == AppMode::LiveRunning)
     {
@@ -405,8 +424,9 @@ void ViewWidget::notifyRedrawNeeded()
 */
 void ViewWidget::notifyReloadNeeded()
 {
-    assert(getViewDataWidget());
-
+    if (!isInit())
+        return;
+    
     if (COMPASS::instance().appMode() == AppMode::LiveRunning)
     {
         //in live mode a view handles its reload internally in its data widget
@@ -419,15 +439,34 @@ void ViewWidget::notifyReloadNeeded()
 }
 
 /**
+ * Checks if a reload is needed.
 */
 bool ViewWidget::reloadNeeded() const
 {
+    if (!isInit())
+        return false;
+
     return (reload_needed_ || reloadNeeded_impl());
 }
 
 /**
+ * Checks if a redraw is needed.
 */
 bool ViewWidget::redrawNeeded() const
 {
+    if (!isInit())
+        return false;
+
     return (redraw_needed_ || redrawNeeded_impl());
+}
+
+/**
+ * Returns a view-specific loaded state message.
+*/
+std::string ViewWidget::loadedMessage() const
+{
+    if (!isInit())
+        return "";
+
+    return loadedMessage_impl();
 }

@@ -58,8 +58,6 @@ public:
         return data_source_;
     }
 
-    ScatterPlotViewDataWidget* getDataWidget();
-
     virtual dbContent::VariableSet getSet(const std::string& dbcontent_name) override;
 
     virtual void accept(LatexVisitor& v) override;
@@ -87,10 +85,14 @@ public:
     std::string dataVarYName() const;
 
 protected:
+    friend class LatexVisitor;
+
     virtual void checkSubConfigurables() override;
     virtual void updateSelection() override;
 
     virtual bool init_impl() override;
+
+    ScatterPlotViewDataWidget* getDataWidget();
 
     /// For data display
     ScatterPlotViewWidget* widget_{nullptr};

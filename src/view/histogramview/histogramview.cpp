@@ -142,13 +142,6 @@ void HistogramView::checkSubConfigurables()
 
 /**
  */
-bool HistogramView::hasDataWidget() const
-{
-    return (widget_ && widget_->getViewDataWidget());
-}
-
-/**
- */
 HistogramViewDataWidget* HistogramView::getDataWidget()
 {
     assert (widget_);

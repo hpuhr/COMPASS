@@ -16,6 +16,7 @@
  */
 
 #include "histogramviewdatawidget.h"
+#include "histogramviewwidget.h"
 #include "histogramview.h"
 #include "compass.h"
 #include "buffer.h"
@@ -104,14 +105,15 @@ const QColor HistogramViewDataWidget::ColorRefTraj  = QColor("#FFA500");
 
 /**
  */
-HistogramViewDataWidget::HistogramViewDataWidget(HistogramView* view, 
-                                                 HistogramViewDataSource* data_source,
+HistogramViewDataWidget::HistogramViewDataWidget(HistogramViewWidget* view_widget, 
                                                  QWidget* parent, 
                                                  Qt::WindowFlags f)
-:   ViewDataWidget(parent, f)
-,   view_         (view)
-,   data_source_  (data_source)
+:   ViewDataWidget(view_widget, parent, f)
 {
+    view_ = view_widget->getView();
+    assert(view_);
+
+    data_source_ = view_->getDataSource();
     assert(data_source_);
 
     setContentsMargins(0, 0, 0, 0);

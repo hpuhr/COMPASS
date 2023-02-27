@@ -41,11 +41,11 @@ class HistogramViewWidget : public ViewWidget
     HistogramViewConfigWidget* getViewConfigWidget();
     const HistogramViewConfigWidget* getViewConfigWidget() const;
 
-protected:
-    virtual bool reloadNeeded_impl() const override;
-
     /// @brief Returns the basis view
     HistogramView* getView();
+
+protected:
+    virtual bool reloadNeeded_impl() const override; 
 };
 
 #endif /* HISTOGRAMVIEWWIDGET_H_ */

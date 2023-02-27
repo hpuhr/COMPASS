@@ -51,8 +51,6 @@ public:
         return data_source_;
     }
 
-    ListBoxViewDataWidget* getDataWidget();
-
     virtual dbContent::VariableSet getSet(const std::string& dbcontent_name) override;
 
     bool usePresentation() const;
@@ -67,10 +65,14 @@ public:
     virtual void accept(LatexVisitor& v) override;
 
 protected:
+    friend class LatexVisitor;
+
     virtual void checkSubConfigurables() override;
     virtual void updateSelection() override;
 
     virtual bool init_impl() override;
+
+    ListBoxViewDataWidget* getDataWidget();
 
     ListBoxViewWidget* widget_{nullptr};
     ListBoxViewDataSource* data_source_{nullptr};

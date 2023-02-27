@@ -38,10 +38,10 @@ ScatterPlotViewWidget::ScatterPlotViewWidget(const std::string& class_id,
                                              QWidget* parent)
 :   ViewWidget(class_id, instance_id, config_parent, view, parent)
 {
-    auto data_widget = new ScatterPlotViewDataWidget(getView(), view->getDataSource());
+    auto data_widget = new ScatterPlotViewDataWidget(this);
     setDataWidget(data_widget);
 
-    auto config_widget = new ScatterPlotViewConfigWidget(getView());
+    auto config_widget = new ScatterPlotViewConfigWidget(this);
     setConfigWidget(config_widget);
 
     typedef ScatterPlotViewDataTool Tool;
@@ -78,40 +78,50 @@ ScatterPlotViewWidget::~ScatterPlotViewWidget() = default;
  */
 ScatterPlotView* ScatterPlotViewWidget::getView() 
 { 
-    return dynamic_cast<ScatterPlotView*>(ViewWidget::getView());
+    auto view = dynamic_cast<ScatterPlotView*>(ViewWidget::getView());
+    assert(view);
+    return view;
 }
 
 /**
  */
 ScatterPlotViewDataWidget* ScatterPlotViewWidget::getViewDataWidget()
 {
-    return dynamic_cast<ScatterPlotViewDataWidget*>(ViewWidget::getViewDataWidget());
+    auto w = dynamic_cast<ScatterPlotViewDataWidget*>(ViewWidget::getViewDataWidget());
+    assert(w);
+    return w;
 }
 
 /**
  */
 const ScatterPlotViewDataWidget* ScatterPlotViewWidget::getViewDataWidget() const
 {
-    return dynamic_cast<const ScatterPlotViewDataWidget*>(ViewWidget::getViewDataWidget());
+    auto w = dynamic_cast<const ScatterPlotViewDataWidget*>(ViewWidget::getViewDataWidget());
+    assert(w);
+    return w;
 }
 
 /**
  */
 ScatterPlotViewConfigWidget* ScatterPlotViewWidget::getViewConfigWidget()
 {
-    return dynamic_cast<ScatterPlotViewConfigWidget*>(ViewWidget::getViewConfigWidget());
+    auto w = dynamic_cast<ScatterPlotViewConfigWidget*>(ViewWidget::getViewConfigWidget());
+    assert(w);
+    return w;
 }
 
 /**
  */
 const ScatterPlotViewConfigWidget* ScatterPlotViewWidget::getViewConfigWidget() const
 {
-    return dynamic_cast<const ScatterPlotViewConfigWidget*>(ViewWidget::getViewConfigWidget());
+    auto w = dynamic_cast<const ScatterPlotViewConfigWidget*>(ViewWidget::getViewConfigWidget());
+    assert(w);
+    return w;
 }
 
 /**
 */
-std::string ScatterPlotViewWidget::loadedMessage() const
+std::string ScatterPlotViewWidget::loadedMessage_impl() const
 {
     return "Loaded with " + std::to_string(getViewDataWidget()->nullValueCount()) + " NULL values";
 }

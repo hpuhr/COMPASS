@@ -16,6 +16,8 @@
  */
 
 #include "listboxviewdatawidget.h"
+#include "listboxviewwidget.h"
+#include "listboxview.h"
 
 #include <QHBoxLayout>
 #include <QMessageBox>
@@ -30,12 +32,15 @@
 #include "listboxviewdatasource.h"
 #include "logger.h"
 
-ListBoxViewDataWidget::ListBoxViewDataWidget(ListBoxView* view, 
-                                             ListBoxViewDataSource* data_source,
+ListBoxViewDataWidget::ListBoxViewDataWidget(ListBoxViewWidget* view_widget, 
                                              QWidget* parent, 
                                              Qt::WindowFlags f)
-:   ViewDataWidget(parent, f), view_(view), data_source_(data_source)
+:   ViewDataWidget(view_widget, parent, f)
 {
+    view_ = view_widget->getView();
+    assert(view_);
+
+    data_source_ = view_->getDataSource();
     assert(data_source_);
 
     QHBoxLayout* layout = new QHBoxLayout();

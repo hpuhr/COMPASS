@@ -8,6 +8,7 @@
 
 #include <QWidget>
 
+class ViewWidget;
 class ViewToolSwitcher;
 class Buffer;
 
@@ -22,7 +23,7 @@ class ViewDataWidget : public QWidget
 public:
     typedef std::map<std::string, std::shared_ptr<Buffer>> BufferData;
 
-    ViewDataWidget(QWidget* parent = nullptr, Qt::WindowFlags f = 0);
+    ViewDataWidget(ViewWidget* view_widget, QWidget* parent = nullptr, Qt::WindowFlags f = 0);
     virtual ~ViewDataWidget() = default;
 
     void setToolSwitcher(ViewToolSwitcher* tool_switcher);
@@ -62,11 +63,14 @@ protected:
     const BufferData& viewData() const { return data_; }
     BufferData& viewData() { return data_; } //exposed because of selection
 
+    ViewWidget* getWidget() { return view_widget_; }
+
 private:
     friend class ViewLoadStateWidget;
 
     void toolChanged(int mode, const QCursor& cursor);
 
+    ViewWidget*       view_widget_   = nullptr;
     ViewToolSwitcher* tool_switcher_ = nullptr;
 
     BufferData data_;

@@ -16,6 +16,7 @@
  */
 
 #include "scatterplotviewdatawidget.h"
+#include "scatterplotviewwidget.h"
 #include "scatterplotview.h"
 #include "compass.h"
 #include "buffer.h"
@@ -48,13 +49,17 @@ QT_CHARTS_USE_NAMESPACE
 using namespace std;
 using namespace dbContent;
 
-ScatterPlotViewDataWidget::ScatterPlotViewDataWidget(ScatterPlotView* view, 
-                                                     ScatterPlotViewDataSource* data_source,
+ScatterPlotViewDataWidget::ScatterPlotViewDataWidget(ScatterPlotViewWidget* view_widget,
                                                      QWidget* parent, 
                                                      Qt::WindowFlags f)
-    : ViewDataWidget(parent, f), view_(view), data_source_(data_source)
+:   ViewDataWidget(view_widget, parent, f)
 {
+    view_ = view_widget->getView();
+    assert(view_);
+
+    data_source_ = view_->getDataSource();
     assert(data_source_);
+
     setContentsMargins(0, 0, 0, 0);
 
     main_layout_ = new QHBoxLayout();
@@ -1381,7 +1386,9 @@ bool ScatterPlotViewDataWidget::updateChart()
                     }
                 }
                 else
+                {
                     ++nan_value_cnt_;
+                }
             }
 
             if (!dbo_value_cnt)

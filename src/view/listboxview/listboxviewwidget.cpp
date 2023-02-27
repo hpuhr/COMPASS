@@ -35,10 +35,10 @@ ListBoxViewWidget::ListBoxViewWidget(const std::string& class_id,
                                      QWidget* parent)
 :   ViewWidget(class_id, instance_id, config_parent, view, parent)
 {
-    auto data_widget = new ListBoxViewDataWidget(getView(), view->getDataSource());
+    auto data_widget = new ListBoxViewDataWidget(this);
     setDataWidget(data_widget);
 
-    auto config_widget = new ListBoxViewConfigWidget(getView(), this);
+    auto config_widget = new ListBoxViewConfigWidget(this);
     setConfigWidget(config_widget);
 }
 
@@ -50,33 +50,43 @@ ListBoxViewWidget::~ListBoxViewWidget() = default;
  */
 ListBoxViewDataWidget* ListBoxViewWidget::getViewDataWidget()
 {
-    return dynamic_cast<ListBoxViewDataWidget*>(ViewWidget::getViewDataWidget());
+    auto w = dynamic_cast<ListBoxViewDataWidget*>(ViewWidget::getViewDataWidget());
+    assert(w);
+    return w;
 }
 
 /**
  */
 const ListBoxViewDataWidget* ListBoxViewWidget::getViewDataWidget() const
 {
-    return dynamic_cast<const ListBoxViewDataWidget*>(ViewWidget::getViewDataWidget());
+    auto w =  dynamic_cast<const ListBoxViewDataWidget*>(ViewWidget::getViewDataWidget());
+    assert(w);
+    return w;
 }
 
 /**
  */
 ListBoxViewConfigWidget* ListBoxViewWidget::getViewConfigWidget()
 {
-    return dynamic_cast<ListBoxViewConfigWidget*>(ViewWidget::getViewConfigWidget());
+    auto w =  dynamic_cast<ListBoxViewConfigWidget*>(ViewWidget::getViewConfigWidget());
+    assert(w);
+    return w;
 }
 
 /**
  */
 const ListBoxViewConfigWidget* ListBoxViewWidget::getViewConfigWidget() const
 {
-    return dynamic_cast<const ListBoxViewConfigWidget*>(ViewWidget::getViewConfigWidget());
+    auto w =  dynamic_cast<const ListBoxViewConfigWidget*>(ViewWidget::getViewConfigWidget());
+    assert(w);
+    return w;
 }
 
 /**
  */
 ListBoxView* ListBoxViewWidget::getView() 
 { 
-    return dynamic_cast<ListBoxView*>(ViewWidget::getView()); 
+    auto view = dynamic_cast<ListBoxView*>(ViewWidget::getView());
+    assert(view);
+    return view;
 }

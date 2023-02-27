@@ -36,10 +36,10 @@ HistogramViewWidget::HistogramViewWidget(const std::string& class_id, const std:
                                      QWidget* parent)
     : ViewWidget(class_id, instance_id, config_parent, view, parent)
 {
-    auto data_widget = new HistogramViewDataWidget(getView(), view->getDataSource());
+    auto data_widget = new HistogramViewDataWidget(this);
     setDataWidget(data_widget);
 
-    auto config_widget = new HistogramViewConfigWidget(getView());
+    auto config_widget = new HistogramViewConfigWidget(this);
     setConfigWidget(config_widget);
 
     typedef HistogramViewDataTool Tool;
@@ -76,35 +76,45 @@ HistogramViewWidget::~HistogramViewWidget() = default;
  */
 HistogramViewDataWidget* HistogramViewWidget::getViewDataWidget()
 {
-    return dynamic_cast<HistogramViewDataWidget*>(ViewWidget::getViewDataWidget());
+    auto w = dynamic_cast<HistogramViewDataWidget*>(ViewWidget::getViewDataWidget());
+    assert(w);
+    return w;
 }
 
 /**
  */
 const HistogramViewDataWidget* HistogramViewWidget::getViewDataWidget() const
 {
-    return dynamic_cast<const HistogramViewDataWidget*>(ViewWidget::getViewDataWidget());
+    auto w =  dynamic_cast<const HistogramViewDataWidget*>(ViewWidget::getViewDataWidget());
+    assert(w);
+    return w;
 }
 
 /**
  */
 HistogramViewConfigWidget* HistogramViewWidget::getViewConfigWidget()
 {
-    return dynamic_cast<HistogramViewConfigWidget*>(ViewWidget::getViewConfigWidget());
+    auto w =  dynamic_cast<HistogramViewConfigWidget*>(ViewWidget::getViewConfigWidget());
+    assert(w);
+    return w;
 }
 
 /**
  */
 const HistogramViewConfigWidget* HistogramViewWidget::getViewConfigWidget() const
 {
-    return dynamic_cast<const HistogramViewConfigWidget*>(ViewWidget::getViewConfigWidget());
+    auto w =  dynamic_cast<const HistogramViewConfigWidget*>(ViewWidget::getViewConfigWidget());
+    assert(w);
+    return w;
 }
 
 /**
  */
 HistogramView* HistogramViewWidget::getView() 
 { 
-    return dynamic_cast<HistogramView*>(ViewWidget::getView()); 
+    auto view = dynamic_cast<HistogramView*>(ViewWidget::getView()); 
+    assert(view);
+    return view;
 }
 
 /**

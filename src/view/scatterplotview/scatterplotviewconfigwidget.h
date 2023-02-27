@@ -28,6 +28,7 @@ class VariableOrderedSetWidget;
 class VariableSelectionWidget;
 }
 
+class ScatterPlotViewWidget;
 class ScatterPlotView;
 
 class QCheckBox;
@@ -46,11 +47,11 @@ public slots:
     void selectedVariableYChangedSlot();
 
 public:
-    ScatterPlotViewConfigWidget(ScatterPlotView* view, QWidget* parent = nullptr);
+    ScatterPlotViewConfigWidget(ScatterPlotViewWidget* view_widget, QWidget* parent = nullptr);
     virtual ~ScatterPlotViewConfigWidget();
 
 protected:
-    ScatterPlotView* view_;
+    ScatterPlotView* view_ = nullptr;
 
     dbContent::VariableSelectionWidget* select_var_x_ {nullptr};
     dbContent::VariableSelectionWidget* select_var_y_ {nullptr};

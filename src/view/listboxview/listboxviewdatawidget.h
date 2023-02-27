@@ -25,6 +25,7 @@
 #include "global.h"
 
 class ListBoxView;
+class ListBoxViewWidget;
 class ListBoxViewDataSource;
 class QTabWidget;
 class AllBufferTableWidget;
@@ -41,8 +42,7 @@ class ListBoxViewDataWidget : public ViewDataWidget
     Q_OBJECT
 public:
     /// @brief Constructor
-    ListBoxViewDataWidget(ListBoxView* view, 
-                          ListBoxViewDataSource* data_source,
+    ListBoxViewDataWidget(ListBoxViewWidget* view_widget, 
                           QWidget* parent = nullptr, 
                           Qt::WindowFlags f = 0);
     /// @brief Destructor

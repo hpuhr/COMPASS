@@ -19,6 +19,7 @@
 #include "compass.h"
 #include "dbcontent/dbcontentmanager.h"
 #include "dbcontent/variable/variableselectionwidget.h"
+#include "scatterplotviewwidget.h"
 #include "scatterplotview.h"
 #include "scatterplotviewdatasource.h"
 #include "logger.h"
@@ -36,12 +37,10 @@
 using namespace Utils;
 using namespace dbContent;
 
-ScatterPlotViewConfigWidget::ScatterPlotViewConfigWidget(ScatterPlotView* view, QWidget* parent)
-    : ViewConfigWidget(parent), view_(view)
+ScatterPlotViewConfigWidget::ScatterPlotViewConfigWidget(ScatterPlotViewWidget* view_widget, QWidget* parent)
+:   ViewConfigWidget(view_widget, parent)
 {
     //QVBoxLayout* vlayout = new QVBoxLayout;
-
-    assert(view_);
 
     setMinimumWidth(400);
 
@@ -53,6 +52,9 @@ ScatterPlotViewConfigWidget::ScatterPlotViewConfigWidget(ScatterPlotView* view, 
 
     QTabWidget* tab_widget = new QTabWidget(this);
     tab_widget->setStyleSheet("QTabBar::tab { height: 42px; }");
+
+    view_ = view_widget->getView();
+    assert(view_);
 
     // config
     {

@@ -50,7 +50,6 @@ class ListBoxViewWidget : public ViewWidget
     ListBoxViewConfigWidget* getViewConfigWidget();
     const ListBoxViewConfigWidget* getViewConfigWidget() const;
 
-protected:
     /// @brief Returns the basis view
     ListBoxView* getView();
 };

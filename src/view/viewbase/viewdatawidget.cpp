@@ -9,9 +9,12 @@
 
 /**
  */
-ViewDataWidget::ViewDataWidget(QWidget* parent, Qt::WindowFlags f)
-:   QWidget(parent, f)
+ViewDataWidget::ViewDataWidget(ViewWidget* view_widget, QWidget* parent, Qt::WindowFlags f)
+:   QWidget     (parent, f)
+,   view_widget_(view_widget)
 {
+    assert(view_widget_);
+
     setObjectName("data_widget");
 }
 
