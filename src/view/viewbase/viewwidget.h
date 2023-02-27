@@ -32,6 +32,7 @@ class ViewDataWidget;
 class ViewConfigWidget;
 class ViewToolSwitcher;
 class ViewLoadStateWidget;
+class ViewLowerWidget;
 
 class QSplitter;
 class QLayout;
@@ -117,9 +118,6 @@ public:
     const ViewDataWidget* getViewDataWidget() const { assert(data_widget_); return data_widget_; }
     ViewConfigWidget* getViewConfigWidget() { assert(config_widget_); return config_widget_; }
     const ViewConfigWidget* getViewConfigWidget() const { assert(config_widget_); return config_widget_; }
-
-    QWidget* getLowerWidget() { return lower_widget_; }
-    const QWidget* getLowerWidget() const { return lower_widget_; }
 
     std::string loadedMessage() const;
 

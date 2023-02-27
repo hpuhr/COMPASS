@@ -63,6 +63,7 @@ ViewWidget::~ViewWidget()
 }
 
 /**
+ * Creates the standard view layout.
  */
 void ViewWidget::createStandardLayout()
 {
@@ -162,6 +163,7 @@ void ViewWidget::createStandardLayout()
 }
 
 /**
+ * View initialization. Called by View on view creation.
 */
 void ViewWidget::init()
 {
@@ -261,12 +263,16 @@ void ViewWidget::setLowerWidget(QWidget* w)
         throw std::runtime_error("ViewWidget::setLowerWidget: No container to add to");
     if (lower_widget_)
         throw std::runtime_error("ViewWidget::setLowerWidget: Already set");
+
+    lower_widget_ = w;
     
     QVBoxLayout* layout = new QVBoxLayout;
     layout->setContentsMargins(0, 0, 0, 0);
     lower_widget_container_->setLayout(layout);
 
-    layout->addWidget(w);
+    layout->addWidget(lower_widget_);
+
+    lower_widget_->setParent(lower_widget_container_);
 
     lower_widget_container_->setVisible(true);
 }
@@ -275,9 +281,6 @@ void ViewWidget::setLowerWidget(QWidget* w)
  */
 void ViewWidget::toggleConfigWidget()
 {
-    if (!isInit())
-        return;
-
     assert(right_widget_);
 
     bool vis = right_widget_->isVisible();
@@ -295,9 +298,6 @@ QIcon ViewWidget::getIcon(const std::string& fn)
 */
 void ViewWidget::loadingStarted()
 {
-    if (!isInit())
-        return;
-    
     //propagate to subwidgets (note: order might be important)
     getViewDataWidget()->loadingStarted();
     getViewConfigWidget()->loadingStarted();
@@ -309,9 +309,6 @@ void ViewWidget::loadingStarted()
 */
 void ViewWidget::loadingDone()
 {
-    if (!isInit())
-        return;
-
     //set back flag
     reload_needed_ = false;
     redraw_needed_ = false; //a reload should always result in a redraw anyway
@@ -327,9 +324,6 @@ void ViewWidget::loadingDone()
 */
 void ViewWidget::redrawStarted()
 {
-    if (!isInit())
-        return;
-
     //propagate to subwidgets (note: order might be important)
     getViewConfigWidget()->redrawStarted();
     getViewLoadStateWidget()->redrawStarted();
@@ -340,9 +334,6 @@ void ViewWidget::redrawStarted()
 */
 void ViewWidget::redrawDone()
 {
-    if (!isInit())
-        return;
-
     //set back flag
     redraw_needed_ = false;
 
@@ -356,9 +347,6 @@ void ViewWidget::redrawDone()
 */
 void ViewWidget::appModeSwitch(AppMode app_mode)
 {
-    if (!isInit())
-        return;
-
     //propagate to subwidgets (note: order might be important)
     getViewDataWidget()->appModeSwitch(app_mode);
     getViewConfigWidget()->appModeSwitch(app_mode);
@@ -367,10 +355,11 @@ void ViewWidget::appModeSwitch(AppMode app_mode)
 }
 
 /**
-*/
+ * Updates the tool widget's items.
+ */
 void ViewWidget::updateToolWidget()
 {
-    if (!isInit())
+    if (!tool_widget_)
         return;
 
     getViewToolWidget()->updateItems();
@@ -378,10 +367,10 @@ void ViewWidget::updateToolWidget()
 
 /**
  * Updates the widget load state.
-*/
+ */
 void ViewWidget::updateLoadState()
 {
-    if (!isInit())
+    if (!state_widget_)
         return;
 
     getViewLoadStateWidget()->updateState();
@@ -392,9 +381,6 @@ void ViewWidget::updateLoadState()
 */
 void ViewWidget::updateComponents()
 {
-    if (!isInit())
-        return;
-
     updateToolWidget();
     updateLoadState();
 }
@@ -405,9 +391,6 @@ void ViewWidget::updateComponents()
  */
 void ViewWidget::notifyRedrawNeeded()
 {
-    if (!isInit())
-        return;
-
     if (COMPASS::instance().appMode() == AppMode::LiveRunning)
     {
         //in live mode just redraw
@@ -424,9 +407,6 @@ void ViewWidget::notifyRedrawNeeded()
 */
 void ViewWidget::notifyReloadNeeded()
 {
-    if (!isInit())
-        return;
-    
     if (COMPASS::instance().appMode() == AppMode::LiveRunning)
     {
         //in live mode a view handles its reload internally in its data widget
@@ -443,8 +423,7 @@ void ViewWidget::notifyReloadNeeded()
 */
 bool ViewWidget::reloadNeeded() const
 {
-    if (!isInit())
-        return false;
+    assert(isInit());
 
     return (reload_needed_ || reloadNeeded_impl());
 }
@@ -454,8 +433,7 @@ bool ViewWidget::reloadNeeded() const
 */
 bool ViewWidget::redrawNeeded() const
 {
-    if (!isInit())
-        return false;
+    assert(isInit());
 
     return (redraw_needed_ || redrawNeeded_impl());
 }
@@ -465,8 +443,7 @@ bool ViewWidget::redrawNeeded() const
 */
 std::string ViewWidget::loadedMessage() const
 {
-    if (!isInit())
-        return "";
+    assert(isInit());
 
     return loadedMessage_impl();
 }
