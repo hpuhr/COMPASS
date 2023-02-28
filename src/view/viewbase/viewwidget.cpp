@@ -78,6 +78,7 @@ void ViewWidget::createStandardLayout()
     main_layout->addLayout(hlayout);
 
     main_splitter_ = new QSplitter;
+    main_splitter_->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     main_splitter_->setOrientation(Qt::Horizontal);
 
     QSettings settings("COMPASS", instanceId().c_str());
@@ -86,6 +87,7 @@ void ViewWidget::createStandardLayout()
     const int ConfigWidgetStretch = 1;
 
     QWidget* left_widget = new QWidget;
+
     left_widget->setContentsMargins(0, 0, 0, 0);
 
     right_widget_ = new QWidget;
@@ -113,7 +115,7 @@ void ViewWidget::createStandardLayout()
 
     //create data widget container
     {
-        QSizePolicy size_policy(QSizePolicy::Preferred, QSizePolicy::Preferred);
+        QSizePolicy size_policy(QSizePolicy::Preferred, QSizePolicy::Expanding);
         size_policy.setHorizontalStretch(DataWidgetStretch);
 
         data_widget_container_ = new QWidget;
@@ -146,6 +148,7 @@ void ViewWidget::createStandardLayout()
     {
         lower_widget_container_ = new QWidget;
         lower_widget_container_->setVisible(false);
+        lower_widget_container_->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
         main_layout->addWidget(lower_widget_container_);
     }
 
@@ -265,6 +268,7 @@ void ViewWidget::setLowerWidget(QWidget* w)
         throw std::runtime_error("ViewWidget::setLowerWidget: Already set");
 
     lower_widget_ = w;
+    lower_widget_->setParent(lower_widget_container_);
     
     QVBoxLayout* layout = new QVBoxLayout;
     layout->setContentsMargins(0, 0, 0, 0);
@@ -272,8 +276,7 @@ void ViewWidget::setLowerWidget(QWidget* w)
 
     layout->addWidget(lower_widget_);
 
-    lower_widget_->setParent(lower_widget_container_);
-
+    lower_widget_container_->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
     lower_widget_container_->setVisible(true);
 }
 
