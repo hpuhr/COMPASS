@@ -40,7 +40,6 @@ namespace dbContent
 {
 class Variable;
 class MetaVariable;
-
 }
 
 class CreateAssociationsTask : public Task, public Configurable
