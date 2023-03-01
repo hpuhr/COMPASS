@@ -24,6 +24,7 @@ class ASTERIXImportTask;
 
 class QCheckBox;
 class QLineEdit;
+class QTimeEdit;
 
 class ASTERIXOverrideWidget : public QWidget
 {
@@ -32,9 +33,22 @@ class ASTERIXOverrideWidget : public QWidget
   public slots:
     void updateSlot();
 
-    void activeCheckedSlot();
-
+    void overrideActiveCheckedSlot();
     void todOffsetEditedSlot(const QString& value);
+
+    void filterTimeOfDayActiveCheckedSlot();
+    void minTimeChanged(QTime time);
+    void maxTimeChanged(QTime time);
+
+    void filterPositionActiveCheckedSlot();
+    void latitudeMinEditedSlot(const QString& value_str);
+    void latitudeMaxEditedSlot(const QString& value_str);
+    void longitudeMinEditedSlot(const QString& value_str);
+    void longitudeMaxEditedSlot(const QString& value_str);
+
+    void filterModeCActiveCheckedSlot();
+    void modeCMinEditedSlot(const QString& value_str);
+    void modeCMaxEditedSlot(const QString& value_str);
 
   public:
     ASTERIXOverrideWidget(ASTERIXImportTask& task, QWidget* parent = nullptr);
@@ -43,9 +57,22 @@ class ASTERIXOverrideWidget : public QWidget
   protected:
     ASTERIXImportTask& task_;
 
-    QCheckBox* active_check_{nullptr};
-
+    QCheckBox* override_active_check_{nullptr};
     QLineEdit* tod_offset_edit_{nullptr};
+
+    QCheckBox* filter_tod_active_check_{nullptr};
+    QTimeEdit* filter_tod_min_edit_{nullptr};
+    QTimeEdit* filter_tod_max_edit_{nullptr};
+
+    QCheckBox* filter_position_active_check_{nullptr};
+    QLineEdit* filter_latitude_min_edit_{nullptr};
+    QLineEdit* filter_latitude_max_edit_{nullptr};
+    QLineEdit* filter_longitude_min_edit_{nullptr};
+    QLineEdit* filter_longitude_max_edit_{nullptr};
+
+    QCheckBox* filter_modec_active_check_{nullptr};
+    QLineEdit* filter_modec_min_edit_{nullptr};
+    QLineEdit* filter_modec_max_edit_{nullptr};
 };
 
 #endif  // ASTERIXOVERRIDEWIDGET_H

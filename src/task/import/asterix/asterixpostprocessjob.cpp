@@ -1,5 +1,6 @@
 ﻿#include "dbcontent/dbcontent.h"
 #include "asterixpostprocessjob.h"
+#include "asteriximporttask.h"
 #include "dbcontent/dbcontentmanager.h"
 #include "datasourcemanager.h"
 #include "buffer.h"
@@ -27,16 +28,40 @@ bool ASTERIXPostprocessJob::did_recent_time_jump_ = false;
 bool ASTERIXPostprocessJob::had_late_time_ = false;
 
 ASTERIXPostprocessJob::ASTERIXPostprocessJob(map<string, shared_ptr<Buffer>> buffers,
-                                             const boost::posix_time::ptime& date,
+                                             boost::posix_time::ptime date,
                                              bool override_tod_active, float override_tod_offset,
-                                             bool do_timestamp_checks)
+                                             bool do_timestamp_checks,
+                                             bool filter_tod_active, float filter_tod_min, float filter_tod_max,
+                                             bool filter_position_active,
+                                             float filter_latitude_min, float filter_latitude_max,
+                                             float filter_longitude_min, float filter_longitude_max,
+                                             bool filter_modec_active,
+                                             float filter_modec_min, float filter_modec_max)
     : Job("ASTERIXPostprocessJob"),
       buffers_(move(buffers)),
       override_tod_active_(override_tod_active), override_tod_offset_(override_tod_offset),
-      do_timestamp_checks_(do_timestamp_checks)
+      do_timestamp_checks_(do_timestamp_checks),
+      filter_tod_active_(filter_tod_active), filter_tod_min_(filter_tod_min), filter_tod_max_(filter_tod_max),
+      filter_position_active_(filter_position_active),
+      filter_latitude_min_(filter_latitude_min), filter_latitude_max_(filter_latitude_max),
+      filter_longitude_min_(filter_longitude_min), filter_longitude_max_(filter_longitude_max),
+      filter_modec_active_(filter_modec_active),
+      filter_modec_min_(filter_modec_min), filter_modec_max_(filter_modec_max)
 {
-//    network_time_offset_ = COMPASS::instance().mainWindow().importASTERIXFromNetworkTimeOffset();
+    if (!current_date_set_) // init if first time
+    {
+        current_date_ = date;
+        previous_date_ = current_date_;
 
+        current_date_set_ = true;
+    }
+}
+
+ASTERIXPostprocessJob::ASTERIXPostprocessJob(map<string, shared_ptr<Buffer>> buffers,
+                                             boost::posix_time::ptime date)
+    : Job("ASTERIXPostprocessJob"),
+      buffers_(move(buffers))
+{
     if (!current_date_set_) // init if first time
     {
         current_date_ = date;

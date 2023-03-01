@@ -128,11 +128,47 @@ class ASTERIXImportTask : public Task, public Configurable
     virtual bool isRecommended() override;
     virtual bool isRequired() override;
 
+    // override
+
     bool overrideTodActive() const;
     void overrideTodActive(bool value);
 
     float overrideTodOffset() const;
     void overrideTodOffset(float value);
+
+    // filter
+    bool filterTodActive() const;
+    void filterTodActive(bool value);
+
+    float filterTodMin() const;
+    void filterTodMin(float value);
+
+    float filterTodMax() const;
+    void filterTodMax(float value);
+
+    bool filterPositionActive() const;
+    void filterPositionActive(bool value);
+
+    float filterLatitudeMin() const;
+    void filterLatitudeMin(float value);
+
+    float filterLatitudeMax() const;
+    void filterLatitudeMax(float value);
+
+    float filterLongitudeMin() const;
+    void filterLongitudeMin(float value);
+
+    float filterLongitudeMax() const;
+    void filterLongitudeMax(float value);
+
+    bool filterModeCActive() const;
+    void filterModeCActive(bool value);
+
+    float filterModeCMin() const;
+    void filterModeCMin(float value);
+
+    float filterModeCMax() const;
+    void filterModeCMax(float value);
 
     unsigned int fileLineID() const;
     void fileLineID(unsigned int value);
@@ -166,6 +202,20 @@ protected:
 
     bool override_tod_active_{false};
     float override_tod_offset_{0};
+
+    bool filter_tod_active_{false};
+    float filter_tod_min_{0};
+    float filter_tod_max_{0};
+
+    bool filter_position_active_{false};
+    float filter_latitude_min_{0};
+    float filter_latitude_max_{0};
+    float filter_longitude_min_{0};
+    float filter_longitude_max_{0};
+
+    bool filter_modec_active_{false};
+    float filter_modec_min_{0};
+    float filter_modec_max_{0};
 
     bool running_ {false};
 
