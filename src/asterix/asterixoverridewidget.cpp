@@ -136,7 +136,7 @@ ASTERIXOverrideWidget::ASTERIXOverrideWidget(ASTERIXImportTask& task, QWidget* p
         grid->addWidget(new QLabel("Longitude Max [deg]"), row, 1);
 
         filter_longitude_max_edit_ = new QLineEdit();
-        filter_longitude_max_edit_->setValidator(new TextFieldDoubleValidator(-180, 180, 3));
+        filter_longitude_max_edit_->setValidator(new TextFieldDoubleValidator(-180, 180, 10));
         connect(filter_longitude_max_edit_, &QLineEdit::textEdited, this, &ASTERIXOverrideWidget::longitudeMaxEditedSlot);
         grid->addWidget(filter_longitude_max_edit_, row, 2);
 
@@ -201,13 +201,13 @@ void ASTERIXOverrideWidget::updateSlot()
     assert(filter_position_active_check_);
     filter_position_active_check_->setChecked(task_.filterPositionActive());
     assert(filter_latitude_min_edit_);
-    filter_latitude_min_edit_->setText(QString::number(task_.filterLatitudeMin()));
+    filter_latitude_min_edit_->setText(QString::number(task_.filterLatitudeMin(), 'g', 10));
     assert(filter_latitude_max_edit_);
-    filter_latitude_max_edit_->setText(QString::number(task_.filterLatitudeMax()));
+    filter_latitude_max_edit_->setText(QString::number(task_.filterLatitudeMax(), 'g', 10));
     assert(filter_longitude_min_edit_);
-    filter_longitude_min_edit_->setText(QString::number(task_.filterLongitudeMin()));
+    filter_longitude_min_edit_->setText(QString::number(task_.filterLongitudeMin(), 'g', 10));
     assert(filter_longitude_max_edit_);
-    filter_longitude_max_edit_->setText(QString::number(task_.filterLongitudeMax()));
+    filter_longitude_max_edit_->setText(QString::number(task_.filterLongitudeMax(), 'g', 10));
 
     // mode c filter
     assert(filter_modec_active_check_);

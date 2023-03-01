@@ -69,6 +69,7 @@ private:
     void doTimeStampCalculation();
     void doRadarPlotPositionCalculations();
     void doGroundSpeedCalculations();
+    void doFilters();
 };
 
 #endif // ASTERIXPOSTPROCESSJOB_H
