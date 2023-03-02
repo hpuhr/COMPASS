@@ -17,7 +17,7 @@ public:
     ASTERIXPostprocessJob(std::map<std::string, std::shared_ptr<Buffer>> buffers,
                           boost::posix_time::ptime date,
                           bool override_tod_active, float override_tod_offset,
-                          bool do_timestamp_checks,
+                          bool ignore_time_jumps, bool do_timestamp_checks,
                           bool filter_tod_active, float filter_tod_min, float filter_tod_max,
                           bool filter_position_active,
                           float filter_latitude_min, float filter_latitude_max,
@@ -40,6 +40,7 @@ private:
     bool override_tod_active_{false};
     float override_tod_offset_{0};
 
+    bool ignore_time_jumps_{false};
     bool do_timestamp_checks_{false};
 
     bool filter_tod_active_{false};

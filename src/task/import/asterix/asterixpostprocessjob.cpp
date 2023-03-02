@@ -30,7 +30,7 @@ bool ASTERIXPostprocessJob::had_late_time_ = false;
 ASTERIXPostprocessJob::ASTERIXPostprocessJob(map<string, shared_ptr<Buffer>> buffers,
                                              boost::posix_time::ptime date,
                                              bool override_tod_active, float override_tod_offset,
-                                             bool do_timestamp_checks,
+                                             bool ignore_time_jumps, bool do_timestamp_checks,
                                              bool filter_tod_active, float filter_tod_min, float filter_tod_max,
                                              bool filter_position_active,
                                              float filter_latitude_min, float filter_latitude_max,
@@ -40,7 +40,7 @@ ASTERIXPostprocessJob::ASTERIXPostprocessJob(map<string, shared_ptr<Buffer>> buf
     : Job("ASTERIXPostprocessJob"),
       buffers_(move(buffers)),
       override_tod_active_(override_tod_active), override_tod_offset_(override_tod_offset),
-      do_timestamp_checks_(do_timestamp_checks),
+      ignore_time_jumps_(ignore_time_jumps), do_timestamp_checks_(do_timestamp_checks),
       filter_tod_active_(filter_tod_active), filter_tod_min_(filter_tod_min), filter_tod_max_(filter_tod_max),
       filter_position_active_(filter_position_active),
       filter_latitude_min_(filter_latitude_min), filter_latitude_max_(filter_latitude_max),
@@ -330,7 +330,7 @@ void ASTERIXPostprocessJob::doTimeStampCalculation()
                     did_recent_time_jump_ = false;
                 }
 
-                if (in_vicinity_of_24h_time) // check if timejump and assign timestamp to correct day
+                if (!ignore_time_jumps_ && in_vicinity_of_24h_time) // check if timejump and assign timestamp to correct day
                 {
                     // check if timejump (if not yet done)
                     if (!did_recent_time_jump_ && had_late_time_ && tod <= 300.0) // not yet handled timejump

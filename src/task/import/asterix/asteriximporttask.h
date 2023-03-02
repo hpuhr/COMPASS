@@ -183,6 +183,9 @@ class ASTERIXImportTask : public Task, public Configurable
     unsigned int maxNetworkLines() const;
     void maxNetworkLines(unsigned int value);
 
+    bool ignoreTimeJumps() const;
+    void ignoreTimeJumps(bool value);
+
 protected:
     bool debug_jasterix_;
     std::shared_ptr<jASTERIX::jASTERIX> jasterix_;
@@ -202,6 +205,7 @@ protected:
 
     bool override_tod_active_{false};
     float override_tod_offset_{0};
+    bool ignore_time_jumps_{false};
 
     bool filter_tod_active_{false};
     float filter_tod_min_{0};

@@ -751,6 +751,16 @@ void ASTERIXImportTask::maxNetworkLines(unsigned int value)
     max_network_lines_ = value;
 }
 
+bool ASTERIXImportTask::ignoreTimeJumps() const
+{
+    return ignore_time_jumps_;
+}
+
+void ASTERIXImportTask::ignoreTimeJumps(bool value)
+{
+    ignore_time_jumps_ = value;
+}
+
 bool ASTERIXImportTask::isRunning() const
 {
     return running_;
@@ -1182,7 +1192,7 @@ void ASTERIXImportTask::mapJSONDoneSlot()
         std::shared_ptr<ASTERIXPostprocessJob> postprocess_job =
                 make_shared<ASTERIXPostprocessJob>(std::move(job_buffers), date_,
                                                    override_tod_active_, override_tod_offset_,
-                                                   check_future_ts,
+                                                   ignore_time_jumps_, check_future_ts,
                                                    filter_tod_active_, filter_tod_min_,filter_tod_max_,
                                                    filter_position_active_,
                                                    filter_latitude_min_, filter_latitude_max_,

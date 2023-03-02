@@ -74,6 +74,7 @@ struct RTCommandImportASTERIXFile : public rtcommand::RTCommand
     std::string line_id_;
     std::string date_str_;
     std::string time_offset_str_;
+    bool ignore_time_jumps_ {false};
 
     virtual rtcommand::IsValid valid() const override;
 
