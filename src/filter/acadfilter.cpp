@@ -46,33 +46,25 @@ std::string ACADFilter::getConditionString(const std::string& dbcontent_name, bo
                     DBContent::meta_var_ta_.name()).getFor(dbcontent_name);
 
         if (!first)
-        {
             ss << " AND";
-        }
 
-        ss << " " + var.dbColumnName() << " IN (";
+        ss << " ";
 
-        bool first_val = true;
+        if (null_wanted_)
+            ss << "(";
 
-        for (auto val_it : values_)
+        if (values_.size())
         {
-            if (!first_val)
-                ss << ",";
-
-            ss << val_it;
-
-            first_val = false;
+            ss << var.dbColumnName() << " IN (" << String::compress(values_, ',') << ")";
         }
 
         if (null_wanted_)
         {
-            if (!first_val)
-                ss << ",";
+            if (values_.size())
+                ss << " OR";
 
-            ss << "NULL";
+            ss << " " << var.dbColumnName() << " IS NULL)";
         }
-
-        ss << ")";
 
         first = false;
     }

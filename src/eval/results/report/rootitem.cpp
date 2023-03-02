@@ -17,7 +17,7 @@
 
 #include "eval/results/report/rootitem.h"
 #include "eval/results/report/section.h"
-
+#include "logger.h"
 #include "stringconv.h"
 
 using namespace std;

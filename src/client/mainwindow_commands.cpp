@@ -20,7 +20,8 @@
 #include "logger.h"
 #include "util/files.h"
 #include "rtcommand_registry.h"
-#include "stringconv.h"
+#include "util/stringconv.h"
+#include "util/timeconv.h"
 
 #include <QTimer>
 #include <QCoreApplication>

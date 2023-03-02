@@ -10,7 +10,8 @@
 #include "projection.h"
 #include "json.hpp"
 #include "dbcontent/variable/metavariable.h"
-#include "stringconv.h"
+#include "util/stringconv.h"
+#include "util/timeconv.h"
 
 #include "boost/date_time/posix_time/posix_time.hpp"
 

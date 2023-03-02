@@ -33,6 +33,7 @@
 #include "asteriximporttask.h"
 #include "asteriximporttaskwidget.h"
 #include "asterixoverridewidget.h"
+#include "util/timeconv.h"
 
 //#include "managedatasourcestask.h"
 

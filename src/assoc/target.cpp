@@ -3,6 +3,7 @@
 #include "logger.h"
 #include "stringconv.h"
 #include "util/timeconv.h"
+#include "global.h"
 
 #include <cassert>
 #include <sstream>

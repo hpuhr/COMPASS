@@ -10,6 +10,7 @@
 #include "dbdatasource.h"
 #include "logger.h"
 #include "util/stringconv.h"
+#include "util/timeconv.h"
 #include "util/number.h"
 
 #include "global.h"

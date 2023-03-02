@@ -31,6 +31,7 @@
 #include "dbcontent/variable/variableset.h"
 #include "dbcontent/variable/metavariable.h"
 #include "util/number.h"
+#include "util/timeconv.h"
 
 #include <iostream>
 #include <fstream>

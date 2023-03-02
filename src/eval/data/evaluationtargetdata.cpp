@@ -26,6 +26,7 @@
 #include "dbcontent/dbcontentmanager.h"
 #include "evaluationmanager.h"
 #include "util/number.h"
+#include "util/timeconv.h"
 
 #include <boost/algorithm/string.hpp>
 

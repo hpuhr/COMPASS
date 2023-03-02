@@ -36,6 +36,7 @@
 #include "rtcommand_runner.h"
 #include "rtcommand_manager.h"
 #include "rtcommand.h"
+#include "util/timeconv.h"
 
 #include <QMessageBox>
 #include <QApplication>

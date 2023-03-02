@@ -20,8 +20,10 @@
 #include "eval/results/dubious/dubioustargetsingle.h"
 #include "evaluationmanager.h"
 #include "evaluationdata.h"
-#include "stringconv.h"
+#include "util/stringconv.h"
+#include "util/timeconv.h"
 #include "util/number.h"
+#include "global.h"
 
 #include <cmath>
 
