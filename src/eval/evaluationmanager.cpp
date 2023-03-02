@@ -769,6 +769,10 @@ void EvaluationManager::addVariables (const std::string dbcontent_name, dbConten
     if (dbcontent_name_ref_ == dbcontent_name && dbcontent_name_ref_ == "CAT062")
         read_set.add(dbcontent_man.dbContent("CAT062").variable(DBContent::var_cat062_baro_alt_.name()));
 
+    // flight level trusted
+    if (dbcontent_name == "CAT062")
+        read_set.add(dbcontent_man.dbContent("CAT062").variable(DBContent::var_cat062_fl_measured_.name()));
+
     // m3a
     read_set.add(dbcontent_man.metaVariable(DBContent::meta_var_m3a_.name()).getFor(dbcontent_name));
 

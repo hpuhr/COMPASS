@@ -1,4 +1,4 @@
-/*
+﻿/*
  * This file is part of OpenATS COMPASS.
  *
  * COMPASS is free software: you can redistribute it and/or modify
@@ -470,13 +470,27 @@ EvaluationTargetPosition EvaluationTargetData::refPosForTime (ptime timestamp) c
     NullableVector<double>& longitude_vec = eval_data_.ref_buffer_->get<double>(eval_data_.ref_longitude_name_);
     NullableVector<float>& altitude_vec = eval_data_.ref_buffer_->get<float>(eval_data_.ref_modec_name_);
 
+    NullableVector<float>* altitude_trusted_vec {nullptr};
+
+    if (eval_data_.ref_modec_trusted_name_.size())
+    {
+        assert (eval_data_.ref_buffer_->has<float>(eval_data_.ref_modec_trusted_name_));
+        altitude_trusted_vec = &eval_data_.ref_buffer_->get<float>(eval_data_.ref_modec_trusted_name_);
+    }
+
     assert (!latitude_vec.isNull(index));
     assert (!longitude_vec.isNull(index));
 
     pos.latitude_ = latitude_vec.get(index);
     pos.longitude_ = longitude_vec.get(index);
 
-    if (!altitude_vec.isNull(index))
+    if (altitude_trusted_vec && !altitude_trusted_vec->isNull(index))
+    {
+        pos.has_altitude_ = true;
+        pos.altitude_calculated_ = false;
+        pos.altitude_ = altitude_trusted_vec->get(index);
+    }
+    else if (!altitude_vec.isNull(index))
     {
         pos.has_altitude_ = true;
         pos.altitude_calculated_ = false;
@@ -559,8 +573,18 @@ std::pair<bool, float> EvaluationTargetData::estimateRefAltitude (ptime timestam
     NullableVector<float>& altitude_vec = eval_data_.ref_buffer_->get<float>(eval_data_.ref_modec_name_);
     NullableVector<ptime>& ts_vec = eval_data_.ref_buffer_->get<ptime>(eval_data_.ref_timestamp_name_);
 
+    NullableVector<float>* altitude_trusted_vec {nullptr};
+
+    if (eval_data_.ref_modec_trusted_name_.size())
+    {
+        assert (eval_data_.ref_buffer_->has<float>(eval_data_.ref_modec_trusted_name_));
+        altitude_trusted_vec = &eval_data_.ref_buffer_->get<float>(eval_data_.ref_modec_trusted_name_);
+    }
+
     bool found_prev {false};
+    float altitude_prev {0.0};
     bool found_after {false};
+    float altitude_after {0.0};
 
     // search for prev index
     ptime timestamp_prev;
@@ -573,9 +597,18 @@ std::pair<bool, float> EvaluationTargetData::estimateRefAltitude (ptime timestam
 
     while (prev_it != ref_indexes_.end() && timestamp - ts_vec.get(*prev_it) < max_tdiff)
     {
-        if (!altitude_vec.isNull(*prev_it))
+        if (altitude_trusted_vec && !altitude_trusted_vec->isNull(*prev_it))
         {
             found_prev = true;
+            altitude_prev = altitude_trusted_vec->get(*prev_it);
+            timestamp_prev = ts_vec.get(*prev_it);
+
+            break;
+        }
+        else if (!altitude_vec.isNull(*prev_it))
+        {
+            found_prev = true;
+            altitude_prev = altitude_vec.get(*prev_it);
             timestamp_prev = ts_vec.get(*prev_it);
 
             //            if (utn_ == debug_utn)
@@ -611,9 +644,18 @@ std::pair<bool, float> EvaluationTargetData::estimateRefAltitude (ptime timestam
         //            loginf << "EvaluationTargetData: refPosForTime: checking after tod "
         //                   << String::timeStringFromDouble(tods.get(*after_it));
 
-        if (!altitude_vec.isNull(*after_it))
+        if (altitude_trusted_vec && !altitude_trusted_vec->isNull(*after_it))
         {
             found_after = true;
+            altitude_after = altitude_trusted_vec->get(*after_it);
+            timestamp_after = ts_vec.get(*after_it);
+
+            break;
+        }
+        else if (!altitude_vec.isNull(*after_it))
+        {
+            found_after = true;
+            altitude_after = altitude_vec.get(*after_it);
             timestamp_after = ts_vec.get(*after_it);
 
             //            if (utn_ == debug_utn)
@@ -636,9 +678,6 @@ std::pair<bool, float> EvaluationTargetData::estimateRefAltitude (ptime timestam
 
     if (found_prev && found_after)
     {
-        float alt_prev = altitude_vec.get(*prev_it);
-        float alt_after = altitude_vec.get(*after_it);
-
         if (timestamp_after <= timestamp_prev || timestamp_prev >= timestamp)
         {
             logerr << "EvaluationTargetData::estimateRefAltitude ts_prev " << Time::toString(timestamp_prev)
@@ -648,14 +687,14 @@ std::pair<bool, float> EvaluationTargetData::estimateRefAltitude (ptime timestam
             return {false, 0}; // should never happen
         }
 
-        float d_alt_ft = alt_after - alt_prev;
+        float d_alt_ft = altitude_after - altitude_prev;
         float d_t = Time::partialSeconds(timestamp_after - timestamp_prev);
 
         float alt_spd_ft_s = d_alt_ft/d_t;
 
         float d_t2 = Time::partialSeconds(timestamp - timestamp_prev);
 
-        float alt_calc = alt_prev + alt_spd_ft_s*d_t2;
+        float alt_calc = altitude_prev + alt_spd_ft_s*d_t2;
 
         //loginf << "UGA " << alt_calc;
 
@@ -665,9 +704,9 @@ std::pair<bool, float> EvaluationTargetData::estimateRefAltitude (ptime timestam
         return {true, alt_calc};
     }
     else if (found_prev && timestamp - timestamp_prev < max_tdiff)
-        return {true, altitude_vec.get(*prev_it)};
+        return {true, altitude_prev};
     else if (found_after && timestamp_after - timestamp < max_tdiff)
-        return {true, altitude_vec.get(*after_it)};
+        return {true, altitude_after};
     else
     {
         //        if (utn_ == debug_utn)
@@ -764,6 +803,10 @@ bool EvaluationTargetData::hasRefModeCForTime (ptime timestamp) const
 
     unsigned int index = it_pair.first->second;
 
+    if (eval_data_.ref_modec_trusted_name_.size() &&
+            !eval_data_.ref_buffer_->get<float>(eval_data_.ref_modec_trusted_name_).isNull(index))
+        return true;
+
     if (eval_data_.ref_buffer_->get<float>(eval_data_.ref_modec_name_).isNull(index))
         return false;
 
@@ -789,6 +832,10 @@ float EvaluationTargetData::refModeCForTime (ptime timestamp) const
     assert (it_pair.first != ref_data_.end());
 
     unsigned int index = it_pair.first->second;
+
+    if (eval_data_.ref_modec_trusted_name_.size() &&
+            !eval_data_.ref_buffer_->get<float>(eval_data_.ref_modec_trusted_name_).isNull(index))
+        return eval_data_.ref_buffer_->get<float>(eval_data_.ref_modec_trusted_name_).get(index);
 
     NullableVector<float>& modec_vec = eval_data_.ref_buffer_->get<float>(eval_data_.ref_modec_name_);
     assert (!modec_vec.isNull(index));
@@ -903,13 +950,27 @@ EvaluationTargetPosition EvaluationTargetData::tstPosForTime (ptime timestamp) c
     NullableVector<double>& longitude_vec = eval_data_.tst_buffer_->get<double>(eval_data_.tst_longitude_name_);
     NullableVector<float>& altitude_vec = eval_data_.tst_buffer_->get<float>(eval_data_.tst_modec_name_);
 
+    NullableVector<float>* altitude_trusted_vec {nullptr};
+
+    if (eval_data_.tst_modec_trusted_name_.size())
+    {
+        assert (eval_data_.tst_buffer_->has<float>(eval_data_.tst_modec_trusted_name_));
+        altitude_trusted_vec = &eval_data_.tst_buffer_->get<float>(eval_data_.tst_modec_trusted_name_);
+    }
+
     assert (!latitude_vec.isNull(index));
     assert (!longitude_vec.isNull(index));
 
     pos.latitude_ = latitude_vec.get(index);
     pos.longitude_ = longitude_vec.get(index);
 
-    if (!altitude_vec.isNull(index))
+    if (altitude_trusted_vec && !altitude_trusted_vec->isNull(index))
+    {
+        pos.has_altitude_ = true;
+        pos.altitude_calculated_ = false;
+        pos.altitude_ = altitude_trusted_vec->get(index);
+    }
+    else if (!altitude_vec.isNull(index))
     {
         pos.has_altitude_ = true;
         pos.altitude_ = altitude_vec.get(index);
@@ -938,8 +999,18 @@ std::pair<bool, float> EvaluationTargetData::estimateTstAltitude (ptime timestam
     NullableVector<float>& altitude_vec = eval_data_.tst_buffer_->get<float>(eval_data_.tst_modec_name_);
     NullableVector<ptime>& ts_vec = eval_data_.tst_buffer_->get<ptime>(eval_data_.tst_timestamp_name_);
 
+    NullableVector<float>* altitude_trusted_vec {nullptr};
+
+    if (eval_data_.tst_modec_trusted_name_.size())
+    {
+        assert (eval_data_.tst_buffer_->has<float>(eval_data_.tst_modec_trusted_name_));
+        altitude_trusted_vec = &eval_data_.tst_buffer_->get<float>(eval_data_.tst_modec_trusted_name_);
+    }
+
     bool found_prev {false};
+    float altitude_prev {0.0};
     bool found_after {false};
+    float altitude_after {0.0};
 
     // search for prev index
     ptime timestamp_prev;
@@ -952,9 +1023,18 @@ std::pair<bool, float> EvaluationTargetData::estimateTstAltitude (ptime timestam
 
     while (prev_it != tst_indexes_.end() && timestamp - ts_vec.get(*prev_it) < max_tdiff)
     {
-        if (!altitude_vec.isNull(*prev_it))
+        if (altitude_trusted_vec && !altitude_trusted_vec->isNull(*prev_it))
         {
             found_prev = true;
+            altitude_prev = altitude_trusted_vec->get(*prev_it);
+            timestamp_prev = ts_vec.get(*prev_it);
+
+            break;
+        }
+        else if (!altitude_vec.isNull(*prev_it))
+        {
+            found_prev = true;
+            altitude_prev = altitude_vec.get(*prev_it);
             timestamp_prev = ts_vec.get(*prev_it);
 
             break;
@@ -971,9 +1051,18 @@ std::pair<bool, float> EvaluationTargetData::estimateTstAltitude (ptime timestam
 
     while (after_it != tst_indexes_.end() && ts_vec.get(*after_it) - timestamp < max_tdiff)
     {
-        if (!altitude_vec.isNull(*after_it))
+        if (altitude_trusted_vec && !altitude_trusted_vec->isNull(*after_it))
         {
             found_after = true;
+            altitude_after = altitude_trusted_vec->get(*after_it);
+            timestamp_after = ts_vec.get(*after_it);
+
+            break;
+        }
+        else if (!altitude_vec.isNull(*after_it))
+        {
+            found_after = true;
+            altitude_after = altitude_vec.get(*after_it);
             timestamp_after = ts_vec.get(*after_it);
 
             break;
@@ -983,9 +1072,6 @@ std::pair<bool, float> EvaluationTargetData::estimateTstAltitude (ptime timestam
 
     if (found_prev && found_after)
     {
-        float alt_prev = altitude_vec.get(*prev_it);
-        float alt_after = altitude_vec.get(*after_it);
-
         if (timestamp_after <= timestamp_prev || timestamp_prev >= timestamp)
         {
             logerr << "EvaluationTargetData: estimateTstAltitude ts_prev " << Time::toString(timestamp_prev)
@@ -994,21 +1080,21 @@ std::pair<bool, float> EvaluationTargetData::estimateTstAltitude (ptime timestam
             return {false, 0}; // should never happen
         }
 
-        float d_alt_ft = alt_after - alt_prev;
+        float d_alt_ft = altitude_after - altitude_prev;
         float d_t = Time::partialSeconds(timestamp_after - timestamp_prev);
 
         float alt_spd_ft_s = d_alt_ft/d_t;
 
         float d_t2 = Time::partialSeconds(timestamp - timestamp_prev);
 
-        float alt_calc = alt_prev + alt_spd_ft_s*d_t2;
+        float alt_calc = altitude_prev + alt_spd_ft_s*d_t2;
 
         return {true, alt_calc};
     }
     else if (found_prev && timestamp - timestamp_prev < max_tdiff)
-        return {true, altitude_vec.get(*prev_it)};
+        return {true, altitude_prev};
     else if (found_after && timestamp_after - timestamp < max_tdiff)
-        return {true, altitude_vec.get(*after_it)};
+        return {true, altitude_after};
     else
     {
         return {false, 0}; // none found
@@ -1099,6 +1185,10 @@ bool EvaluationTargetData::hasTstModeCForTime (ptime timestamp) const
     assert (it_pair.first != tst_data_.end());
 
     unsigned int index = it_pair.first->second;
+
+    if (eval_data_.tst_modec_trusted_name_.size() &&
+            !eval_data_.tst_buffer_->get<float>(eval_data_.tst_modec_trusted_name_).isNull(index))
+        return true;
 
     if (eval_data_.tst_buffer_->get<float>(eval_data_.tst_modec_name_).isNull(index))
         return false;
@@ -1403,6 +1493,10 @@ float EvaluationTargetData::tstModeCForTime (ptime timestamp) const
 
     int index = it_pair.first->second;
 
+    if (eval_data_.tst_modec_trusted_name_.size() &&
+            !eval_data_.tst_buffer_->get<float>(eval_data_.tst_modec_trusted_name_).isNull(index))
+        return eval_data_.tst_buffer_->get<float>(eval_data_.tst_modec_trusted_name_).get(index);
+
     NullableVector<float>& modec_vec = eval_data_.tst_buffer_->get<float>(eval_data_.tst_modec_name_);
     assert (!modec_vec.isNull(index));
 
@@ -1692,29 +1786,42 @@ void EvaluationTargetData::updateModeCMinMax() const
     // garbled, valid flags?
 
     has_mode_c_ = false;
+    float mode_c_value;
 
     if (ref_data_.size())
     {
         assert (eval_data_.ref_buffer_->has<float>(eval_data_.ref_modec_name_));
         NullableVector<float>& modec_codes_ft = eval_data_.ref_buffer_->get<float>(eval_data_.ref_modec_name_);
 
+        NullableVector<float>* altitude_trusted_vec {nullptr};
+
+        if (eval_data_.ref_modec_trusted_name_.size())
+        {
+            assert (eval_data_.ref_buffer_->has<float>(eval_data_.ref_modec_trusted_name_));
+            altitude_trusted_vec = &eval_data_.ref_buffer_->get<float>(eval_data_.ref_modec_trusted_name_);
+        }
+
         for (auto ind_it : ref_indexes_)
         {
-            if (!modec_codes_ft.isNull(ind_it))
-            {
-                assert (ind_it < modec_codes_ft.size());
+            if (altitude_trusted_vec && !altitude_trusted_vec->isNull(ind_it))
+                mode_c_value = altitude_trusted_vec->get(ind_it);
+            else if (!modec_codes_ft.isNull(ind_it))
+                mode_c_value = modec_codes_ft.get(ind_it);
+            else
+                continue;
 
-                if (!has_mode_c_)
-                {
-                    has_mode_c_ = true;
-                    mode_c_min_ = modec_codes_ft.get(ind_it);
-                    mode_c_max_ = modec_codes_ft.get(ind_it);
-                }
-                else
-                {
-                    mode_c_min_ = min(mode_c_min_, modec_codes_ft.get(ind_it));
-                    mode_c_max_ = max(mode_c_max_, modec_codes_ft.get(ind_it));
-                }
+            // mode_c_value is set
+
+            if (!has_mode_c_)
+            {
+                has_mode_c_ = true;
+                mode_c_min_ = mode_c_value;
+                mode_c_max_ = mode_c_value;
+            }
+            else
+            {
+                mode_c_min_ = min(mode_c_min_, mode_c_value);
+                mode_c_max_ = max(mode_c_max_, mode_c_value);
             }
         }
     }
@@ -1724,23 +1831,35 @@ void EvaluationTargetData::updateModeCMinMax() const
         assert (eval_data_.tst_buffer_->has<float>(eval_data_.tst_modec_name_));
         NullableVector<float>& modec_codes_ft = eval_data_.tst_buffer_->get<float>(eval_data_.tst_modec_name_);
 
+        NullableVector<float>* altitude_trusted_vec {nullptr};
+
+        if (eval_data_.tst_modec_trusted_name_.size())
+        {
+            assert (eval_data_.tst_buffer_->has<float>(eval_data_.tst_modec_trusted_name_));
+            altitude_trusted_vec = &eval_data_.tst_buffer_->get<float>(eval_data_.tst_modec_trusted_name_);
+        }
+
         for (auto ind_it : tst_indexes_)
         {
-            if (!modec_codes_ft.isNull(ind_it))
-            {
-                assert (ind_it < modec_codes_ft.size());
+            if (altitude_trusted_vec && !altitude_trusted_vec->isNull(ind_it))
+                mode_c_value = altitude_trusted_vec->get(ind_it);
+            else if (!modec_codes_ft.isNull(ind_it))
+                mode_c_value = modec_codes_ft.get(ind_it);
+            else
+                continue;
 
-                if (!has_mode_c_)
-                {
-                    has_mode_c_ = true;
-                    mode_c_min_ = modec_codes_ft.get(ind_it);
-                    mode_c_max_ = modec_codes_ft.get(ind_it);
-                }
-                else
-                {
-                    mode_c_min_ = min(mode_c_min_, modec_codes_ft.get(ind_it));
-                    mode_c_max_ = max(mode_c_max_, modec_codes_ft.get(ind_it));
-                }
+            // mode_c_value is set
+
+            if (!has_mode_c_)
+            {
+                has_mode_c_ = true;
+                mode_c_min_ = mode_c_value;
+                mode_c_max_ = mode_c_value;
+            }
+            else
+            {
+                mode_c_min_ = min(mode_c_min_, mode_c_value);
+                mode_c_max_ = max(mode_c_max_, mode_c_value);
             }
         }
     }

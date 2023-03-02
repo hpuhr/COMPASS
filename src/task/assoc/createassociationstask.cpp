@@ -603,6 +603,12 @@ VariableSet CreateAssociationsTask::getReadSetFor(const std::string& dbcontent_n
     assert(dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_mc_));
     read_set.add(dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_mc_));
 
+    if (dbcontent_name == "CAT062")
+    {
+        assert(dbcont_man.canGetVariable(dbcontent_name, DBContent::var_cat062_fl_measured_));
+        read_set.add(dbcont_man.getVariable(dbcontent_name, DBContent::var_cat062_fl_measured_));
+    }
+
     // latitude
     assert(dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_latitude_));
     read_set.add(dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_latitude_));

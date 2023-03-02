@@ -88,6 +88,9 @@ void EvaluationData::addReferenceData (DBContent& object, unsigned int line_id, 
         ref_callsign_name_ = "";
 
     // mc
+    if (dbcontent_name == "CAT062")
+        ref_modec_trusted_name_ = DBContent::var_cat062_fl_measured_.name();
+
     ref_modec_name_ = dbcont_man_.metaVariable(DBContent::meta_var_mc_.name()).getFor(dbcontent_name).name();
 
     if (dbcont_man_.metaVariable(DBContent::meta_var_mc_g_.name()).existsIn(dbcontent_name))
@@ -254,6 +257,9 @@ void EvaluationData::addTestData (DBContent& object, unsigned int line_id,  std:
         tst_callsign_name_ = "";
 
     // mc
+    if (dbcontent_name == "CAT062")
+        tst_modec_trusted_name_ = DBContent::var_cat062_fl_measured_.name();
+
     tst_modec_name_ = dbcont_man_.metaVariable(DBContent::meta_var_mc_.name()).getFor(dbcontent_name).name();
 
     if (dbcont_man_.metaVariable(DBContent::meta_var_mc_g_.name()).existsIn(dbcontent_name))

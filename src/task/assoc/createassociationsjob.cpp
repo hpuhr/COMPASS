@@ -225,6 +225,15 @@ void CreateAssociationsJob::createTargetReports()
         NullableVector<float>& mcs = cache_->getMetaVar<float>(
                     dbcontent_name, DBContent::meta_var_mc_);
 
+        NullableVector<float>* mcs_valid {nullptr};
+
+        if (dbcontent_name == "CAT062")
+        {
+            assert (cache_->hasVar<float>(dbcontent_name, DBContent::var_cat062_fl_measured_));
+            mcs_valid = &cache_->getVar<float>(
+                        dbcontent_name, DBContent::var_cat062_fl_measured_);
+        }
+
         assert (cache_->hasMetaVar<double>(dbcontent_name, DBContent::meta_var_latitude_));
         NullableVector<double>& lats = cache_->getMetaVar<double>(
                     dbcontent_name, DBContent::meta_var_latitude_);
@@ -298,8 +307,16 @@ void CreateAssociationsJob::createTargetReports()
             tr.has_ma_v_ = false; // TODO
             tr.has_ma_g_ = false; // TODO
 
-            tr.has_mc_ = !mcs.isNull(cnt);
-            tr.mc_ = tr.has_mc_ ? mcs.get(cnt) : 0;
+            if (mcs_valid && !mcs_valid->isNull(cnt))
+            {
+                tr.has_mc_ = true;
+                tr.mc_ = mcs_valid->get(cnt);
+            }
+            else
+            {
+                tr.has_mc_ = !mcs.isNull(cnt);
+                tr.mc_ = tr.has_mc_ ? mcs.get(cnt) : 0;
+            }
 
             tr.has_mc_v_ = false; // TODO
 
