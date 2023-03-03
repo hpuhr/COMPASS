@@ -187,7 +187,6 @@ std::shared_ptr<EvaluationRequirementResult::Single> ExtraTrack::evaluate (
 
         is_inside = sector_layer.isInside(tst_pos, has_ground_bit, ground_bit_set);
 
-
         if (!is_inside)
         {
             if (!skip_no_data_details)
@@ -208,8 +207,6 @@ std::shared_ptr<EvaluationRequirementResult::Single> ExtraTrack::evaluate (
             ++num_no_track_num;
             continue;
         }
-
-
 
         //extra_time_period_cnt = 0;
         extra_track_nums.clear();

@@ -19,6 +19,7 @@
 #include "eval/results/detection/single.h"
 #include "evaluationdata.h"
 #include "evaluationmanager.h"
+#include "evaluationdetail.h"
 #include "logger.h"
 #include "stringconv.h"
 #include "sectorlayer.h"
@@ -174,6 +175,8 @@ std::shared_ptr<EvaluationRequirementResult::Single> Detection::evaluate (
     bool is_inside {false}, was_outside {false};
     //pair<EvaluationTargetPosition, bool> ret_pos;
     bool ok;
+
+    EvaluationRequirementResult::Single::EvaluationDetails details;
 
     vector<DetectionDetail> details;
     EvaluationTargetPosition pos_current;
@@ -629,6 +632,5 @@ unsigned int Detection::getNumMisses(float d_tod)
 
     return floor(d_tod/update_interval_s_);
 }
-
 
 }

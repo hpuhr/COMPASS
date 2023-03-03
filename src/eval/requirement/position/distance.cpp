@@ -81,7 +81,10 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionDistance::evaluate 
     unsigned int num_comp_failed {0};
     unsigned int num_comp_passed {0};
 
-    std::vector<EvaluationRequirement::PositionDetail> details;
+    typedef EvaluationRequirementResult::SinglePositionDistance Result;
+    typedef EvaluationDetail                                    Detail;
+    typedef Result::EvaluationDetails                           Details;
+    Details details;
 
     ptime timestamp;
 
@@ -113,6 +116,33 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionDistance::evaluate 
 
     bool has_ground_bit;
     bool ground_bit_set;
+
+    auto addDetail = [ & ] (const ptime& ts,
+                            const EvaluationTargetPosition& tst_pos,
+                            const boost::optional<EvaluationTargetPosition>& ref_pos,
+                            const QVariant& pos_inside,
+                            const QVariant& offset,
+                            const QVariant& check_passed,
+                            const QVariant& num_pos,
+                            const QVariant& num_no_ref,
+                            const QVariant& num_pos_inside,
+                            const QVariant& num_pos_outside,
+                            const QVariant& num_comp_passed,
+                            const QVariant& num_comp_failed,
+                            const std::string& comment)
+    {
+        details.push_back(Detail(ts, tst_pos).setValue(Result::DetailPosInside, pos_inside.isValid() ? pos_inside : "false")
+                                             .setValue(Result::DetailValue, offset.isValid() ? offset : 0.0f)
+                                             .setValue(Result::DetailCheckPassed, check_passed)
+                                             .setValue(Result::DetailNumPos, num_pos)
+                                             .setValue(Result::DetailNumNoRef, num_no_ref)
+                                             .setValue(Result::DetailNumInside, num_pos_inside)
+                                             .setValue(Result::DetailNumOutside, num_pos_outside)
+                                             .setValue(Result::DetailNumCheckPassed, num_comp_passed)
+                                             .setValue(Result::DetailNumCheckFailed, num_comp_failed)
+                                             .addPosition(ref_pos)
+                                             .generalComment(comment));
+    };
 
     for (const auto& tst_id : tst_data)
     {
@@ -272,8 +302,8 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionDistance::evaluate 
 
     return make_shared<EvaluationRequirementResult::SinglePositionDistance>(
                 "UTN:"+to_string(target_data.utn_), instance, sector_layer, target_data.utn_, &target_data,
-                eval_man_, num_pos, num_no_ref, num_pos_outside, num_pos_inside, num_comp_failed, num_comp_passed,
-                values, details);
+                eval_man_, details, num_pos, num_no_ref, num_pos_outside, num_pos_inside, num_comp_failed, num_comp_passed,
+                values);
 }
 
 }

@@ -23,6 +23,7 @@
 #include "eval/results/report/sectioncontenttable.h"
 #include "sectorlayer.h"
 #include "logger.h"
+#include "evaluationmanager.h"
 
 #include <sstream>
 #include <cassert>
@@ -32,103 +33,161 @@ using namespace std;
 namespace EvaluationRequirementResult
 {
 
-    const std::string Base::req_overview_table_name_ {"Results Overview"};
+const std::string Base::req_overview_table_name_ {"Results Overview"};
 
-    Base::Base(const std::string& type, const std::string& result_id,
-               std::shared_ptr<EvaluationRequirement::Base> requirement, const SectorLayer& sector_layer,
-               EvaluationManager& eval_man)
-        : type_(type), result_id_(result_id), requirement_(requirement), sector_layer_(sector_layer), eval_man_(eval_man)
-    {
-        assert (requirement_);
-        req_grp_id_ = sector_layer_.name()+":"+requirement_->groupName()+":"+requirement_->name();
-    }
+Base::Base(const std::string& type, 
+            const std::string& result_id,
+            std::shared_ptr<EvaluationRequirement::Base> requirement, 
+            const SectorLayer& sector_layer,
+            EvaluationManager& eval_man)
+:   type_        (type)
+,   result_id_   (result_id)
+,   requirement_ (requirement)
+,   sector_layer_(sector_layer)
+,   eval_man_    (eval_man)
+{
+    assert (requirement_);
 
-    std::shared_ptr<EvaluationRequirement::Base> Base::requirement() const
-    {
-        return requirement_;
-    }
+    req_grp_id_ = sector_layer_.name() + ":" + requirement_->groupName() + ":" + requirement_->name();
+}
 
-    std::string Base::type() const
-    {
-        return type_;
-    }
+Base::~Base() = default;
 
-    std::string Base::resultId() const
-    {
-        return result_id_;
-    }
+bool Base::isSingle() const
+{
+    return (baseType() == BaseType::Single);
+}
 
-    std::string Base::reqGrpId() const
-    {
-        return req_grp_id_;
-    }
+bool Base::isJoined() const
+{
+    return (baseType() == BaseType::Joined);
+}
 
-    bool Base::use() const
-    {
-        return use_;
-    }
+std::shared_ptr<EvaluationRequirement::Base> Base::requirement() const
+{
+    return requirement_;
+}
 
-    void Base::use(bool use)
-    {
-        use_ = use;
-    }
+std::string Base::type() const
+{
+    return type_;
+}
 
-    bool Base::hasViewableData (
-            const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
-    {
-        return false;
-    }
+std::string Base::resultId() const
+{
+    return result_id_;
+}
 
-    std::unique_ptr<nlohmann::json::object_t> Base::viewableData(
-            const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
-    {
-        return nullptr;
-    }
+std::string Base::reqGrpId() const
+{
+    return req_grp_id_;
+}
 
+bool Base::use() const
+{
+    return use_;
+}
 
-    bool Base::hasReference (
-            const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
-    {
-        return false;
-    }
+void Base::use(bool use)
+{
+    use_ = use;
+}
 
-    std::string Base::reference(
-            const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
-    {
-        assert (false);
-    }
+bool Base::hasViewableData (
+        const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
+{
+    return false;
+}
 
-    EvaluationResultsReport::SectionContentTable& Base::getReqOverviewTable (
-            std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
-    {
-        EvaluationResultsReport::Section& ov_sec = root_item->getSection("Overview:Results");
-
-        if (!ov_sec.hasTable(req_overview_table_name_))
-            ov_sec.addTable(req_overview_table_name_, 8,
-            {"Sector Layer", "Group", "Req.", "Id", "#Updates", "Result [%]", "Condition", "Result"});
-
-        //loginf << "UGA '" << req_overview_table_name_ << "'";
-
-        return ov_sec.getTable(req_overview_table_name_);
-    }
-
-    std::string Base::getRequirementSectionID ()
-    {
-        return "Sectors:"+requirement_->groupName()+" "+sector_layer_.name()+":"+result_id_+":"+requirement_->name();
-    }
-
-    std::string Base::getRequirementSumSectionID ()
-    {
-        // hacky
-        return "Sectors:"+requirement_->groupName()+" "+sector_layer_.name()+":"+"Sum"+":"+requirement_->name();
-    }
-
-    EvaluationResultsReport::Section& Base::getRequirementSection (
-            std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
-    {
-        return root_item->getSection(getRequirementSectionID());
-    }
+std::unique_ptr<nlohmann::json::object_t> Base::viewableData(
+        const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
+{
+    return nullptr;
+}
 
 
+bool Base::hasReference (
+        const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
+{
+    return false;
+}
+
+std::string Base::reference(
+        const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
+{
+    assert (false);
+}
+
+EvaluationResultsReport::SectionContentTable& Base::getReqOverviewTable (
+        std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
+{
+    EvaluationResultsReport::Section& ov_sec = root_item->getSection("Overview:Results");
+
+    if (!ov_sec.hasTable(req_overview_table_name_))
+        ov_sec.addTable(req_overview_table_name_, 8,
+        {"Sector Layer", "Group", "Req.", "Id", "#Updates", "Result [%]", "Condition", "Result"});
+
+    //loginf << "UGA '" << req_overview_table_name_ << "'";
+
+    return ov_sec.getTable(req_overview_table_name_);
+}
+
+std::string Base::getRequirementSectionID ()
+{
+    return "Sectors:"+requirement_->groupName()+" "+sector_layer_.name()+":"+result_id_+":"+requirement_->name();
+}
+
+std::string Base::getRequirementSumSectionID ()
+{
+    // hacky
+    return "Sectors:"+requirement_->groupName()+" "+sector_layer_.name()+":"+"Sum"+":"+requirement_->name();
+}
+
+EvaluationResultsReport::Section& Base::getRequirementSection (
+        std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
+{
+    return root_item->getSection(getRequirementSectionID());
+}
+
+/**
+*/
+bool Base::hasDetails() const
+{
+    return details_.has_value();
+}
+
+/**
+*/
+size_t Base::numDetails() const
+{
+    if (!hasDetails())
+        return 0;
+
+    return details_.value().size();
+}
+
+/**
+*/
+const Base::EvaluationDetails& Base::getDetails() const
+{
+    if (!hasDetails())
+        throw std::runtime_error("Base::getDetails(): No details stored");
+
+    return details_.value();
+}
+
+/**
+*/
+const EvaluationDetail& Base::getDetail(int idx) const
+{
+    return getDetails().at(idx);
+}
+
+/**
+*/
+void Base::forgetDetails() const
+{
+    details_.reset();
+}
 
 }

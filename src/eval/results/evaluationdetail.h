@@ -1,0 +1,140 @@
+/*
+ * This file is part of OpenATS COMPASS.
+ *
+ * COMPASS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * COMPASS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+#pragma once
+
+#include "evaluationtargetposition.h"
+#include "timeconv.h"
+
+#include <string>
+#include <map>
+
+#include <QVariant>
+
+#include <boost/date_time/posix_time/posix_time.hpp>
+#include <boost/optional.hpp>
+
+/**
+*/
+class EvaluationDetailComments
+{
+public:
+    typedef std::map<std::string, std::string> CommentGroup;
+
+    EvaluationDetailComments() = default;
+    virtual ~EvaluationDetailComments() = default;
+
+    size_t numComments(const std::string& group_id) const;
+
+    EvaluationDetailComments& generalComment(const std::string& c);
+    const std::string& generalComment() const;
+
+    EvaluationDetailComments& comment(const std::string& group_id,
+                                      const std::string& comment_id,
+                                      const std::string& c);
+    const std::string& comment(const std::string& group_id,
+                               const std::string& comment_id) const;
+
+    EvaluationDetailComments& group(const std::string& group_id,
+                                    const CommentGroup& cg);
+    const CommentGroup& group(const std::string& group_id) const;
+
+private:
+    std::map<std::string, CommentGroup>& comments() const;
+
+    std::string comment_;
+    mutable boost::optional<std::map<std::string, CommentGroup>> comments_;
+};
+
+/**
+*/
+class EvaluationDetail
+{
+public:
+    typedef std::string                   Key;
+    typedef boost::posix_time::ptime      Timestamp;
+    typedef EvaluationTargetPosition      Position;
+    typedef std::vector<EvaluationDetail> Details;
+
+    EvaluationDetail() = default;
+    EvaluationDetail(const Timestamp& ts, 
+                     const Position& pos);
+    EvaluationDetail(const Timestamp& ts, 
+                     const Position& pos0,
+                     const Position& pos1);
+    EvaluationDetail(const Timestamp& ts, 
+                     const std::vector<Position>& positions);
+    virtual ~EvaluationDetail() = default;
+
+    const Timestamp& timestamp() const { return timestamp_; }
+    
+    EvaluationDetail& setValue(const Key& key, const QVariant& value);
+    EvaluationDetail& setValue(const Key& key, const boost::posix_time::ptime& value);
+    EvaluationDetail& setValue(const Key& key, const boost::posix_time::time_duration& value);
+    QVariant getValue(const Key& key) const;
+
+    template<typename T>
+    boost::optional<T> getValueAs(const Key& key) const
+    {
+        auto it = values_.find(key);
+        if (it == values_.end())
+            return {};
+        if (!it->second.canConvert<T>())
+            return {};
+        return it->second.value<T>();
+    }
+
+    EvaluationDetail& addPosition(const Position& p);
+    EvaluationDetail& addPosition(const boost::optional<Position>& p);
+    int numPositions() const;
+    const std::vector<Position>& positions() const;
+    const Position& position(int idx) const;
+
+    EvaluationDetailComments& comments() { return comments_; }
+    const EvaluationDetailComments& comments() const { return comments_; }
+    EvaluationDetail& generalComment(const std::string& c);
+
+    EvaluationDetail& addDetail(const EvaluationDetail& detail);
+    bool hasDetails() const;
+    const Details& details() const;
+    
+private:
+    Details& genDetails() const;
+
+    Timestamp                        timestamp_;
+    std::vector<Position>            positions_;
+    std::map<Key, QVariant>          values_;
+    EvaluationDetailComments         comments_;
+    mutable boost::optional<Details> details_;
+};
+
+template<>
+inline boost::optional<boost::posix_time::ptime> EvaluationDetail::getValueAs<boost::posix_time::ptime>(const Key& key) const
+{
+    auto v = getValueAs<QString>(key);
+    if (!v.has_value())
+        return {};
+    return Utils::Time::fromString(v.value().toStdString());
+}
+template<>
+inline boost::optional<boost::posix_time::time_duration> EvaluationDetail::getValueAs<boost::posix_time::time_duration>(const Key& key) const
+{
+    auto v = getValueAs<double>(key);
+    if (!v.has_value())
+        return {};
+    return Utils::Time::partialSeconds(v.value());
+}

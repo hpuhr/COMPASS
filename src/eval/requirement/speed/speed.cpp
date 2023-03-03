@@ -96,7 +96,10 @@ std::shared_ptr<EvaluationRequirementResult::Single> Speed::evaluate (
 
     float tmp_threshold_value;
 
-    std::vector<EvaluationRequirement::SpeedDetail> details;
+    typedef EvaluationRequirementResult::SingleSpeed Result;
+    typedef EvaluationDetail                         Detail;
+    typedef Result::EvaluationDetails                Details;
+    Details details;
 
     ptime timestamp;
 
@@ -129,6 +132,33 @@ std::shared_ptr<EvaluationRequirementResult::Single> Speed::evaluate (
     bool has_ground_bit;
     bool ground_bit_set;
 
+    auto addDetail = [ & ] (const ptime& ts,
+                            const EvaluationTargetPosition& tst_pos,
+                            const boost::optional<EvaluationTargetPosition>& ref_pos,
+                            const QVariant& pos_inside,
+                            const QVariant& offset,
+                            const QVariant& check_passed,
+                            const QVariant& num_pos,
+                            const QVariant& num_no_ref,
+                            const QVariant& num_pos_inside,
+                            const QVariant& num_pos_outside,
+                            const QVariant& num_comp_failed,
+                            const QVariant& num_comp_passed,
+                            const std::string& comment)
+    {
+        details.push_back(Detail(ts, tst_pos).setValue(Result::DetailPosInside, pos_inside.isValid() ? pos_inside : "false")
+                                             .setValue(Result::DetailOffset, offset.isValid() ? offset : 0.0f)
+                                             .setValue(Result::DetailCheckPassed, check_passed)
+                                             .setValue(Result::DetailNumPos, num_pos)
+                                             .setValue(Result::DetailNumNoRef, num_no_ref)
+                                             .setValue(Result::DetailNumInside, num_pos_inside)
+                                             .setValue(Result::DetailNumOutside, num_pos_outside)
+                                             .setValue(Result::DetailNumCheckFailed, num_comp_failed)
+                                             .setValue(Result::DetailNumCheckPassed, num_comp_passed)
+                                             .addPosition(ref_pos)
+                                             .generalComment(comment));
+    };
+
     for (const auto& tst_id : tst_data)
     {
         ++num_pos;
@@ -141,12 +171,12 @@ std::shared_ptr<EvaluationRequirementResult::Single> Speed::evaluate (
         if (!target_data.hasRefDataForTime (timestamp, max_ref_time_diff))
         {
             if (!skip_no_data_details)
-                details.push_back({timestamp, tst_pos,
-                                   false, {}, // has_ref_pos, ref_pos
-                                   {}, {}, comp_passed, // pos_inside, value, check_passed
-                                   num_pos, num_no_ref, num_pos_inside, num_pos_outside,
-                                   num_comp_failed, num_comp_passed,
-                                   "No reference data"});
+                addDetail(timestamp, tst_pos,
+                            {}, // ref_pos
+                            {}, {}, comp_passed, // pos_inside, value, check_passed
+                            num_pos, num_no_ref, num_pos_inside, num_pos_outside,
+                            num_comp_failed, num_comp_passed,
+                            "No reference data");
 
             ++num_no_ref;
             continue;
@@ -157,12 +187,12 @@ std::shared_ptr<EvaluationRequirementResult::Single> Speed::evaluate (
         if (!ok)
         {
             if (!skip_no_data_details)
-                details.push_back({timestamp, tst_pos,
-                                   false, {}, // has_ref_pos, ref_pos
-                                   {}, {}, comp_passed, // pos_inside, value, check_passed
-                                   num_pos, num_no_ref, num_pos_inside, num_pos_outside,
-                                   num_comp_failed, num_comp_passed,
-                                   "No reference position"});
+                addDetail(timestamp, tst_pos,
+                            {}, // ref_pos
+                            {}, {}, comp_passed, // pos_inside, value, check_passed
+                            num_pos, num_no_ref, num_pos_inside, num_pos_outside,
+                            num_comp_failed, num_comp_passed,
+                            "No reference position");
 
             ++num_no_ref;
             continue;
@@ -183,12 +213,12 @@ std::shared_ptr<EvaluationRequirementResult::Single> Speed::evaluate (
         if (!is_inside)
         {
             if (!skip_no_data_details)
-                details.push_back({timestamp, tst_pos,
-                                   true, ref_pos, // has_ref_pos, ref_pos
-                                   is_inside, {}, comp_passed, // pos_inside, value, check_passed
-                                   num_pos, num_no_ref, num_pos_inside, num_pos_outside,
-                                   num_comp_failed, num_comp_passed,
-                                   "Outside sector"});
+                addDetail(timestamp, tst_pos,
+                            ref_pos, // ref_pos
+                            is_inside, {}, comp_passed, // pos_inside, value, check_passed
+                            num_pos, num_no_ref, num_pos_inside, num_pos_outside,
+                            num_comp_failed, num_comp_passed,
+                            "Outside sector");
             ++num_pos_outside;
             continue;
         }
@@ -198,12 +228,12 @@ std::shared_ptr<EvaluationRequirementResult::Single> Speed::evaluate (
         if (!ok)
         {
             if (!skip_no_data_details)
-                details.push_back({timestamp, tst_pos,
-                                   false, {}, // has_ref_pos, ref_pos
-                                   {}, {}, comp_passed, // pos_inside, value, check_passed
-                                   num_pos, num_no_ref, num_pos_inside, num_pos_outside,
-                                   num_comp_failed, num_comp_passed,
-                                   "No reference speed"});
+                addDetail(timestamp, tst_pos,
+                            {}, // ref_pos
+                            {}, {}, comp_passed, // pos_inside, value, check_passed
+                            num_pos, num_no_ref, num_pos_inside, num_pos_outside,
+                            num_comp_failed, num_comp_passed,
+                            "No reference speed");
 
             ++num_no_ref;
             continue;
@@ -216,12 +246,12 @@ std::shared_ptr<EvaluationRequirementResult::Single> Speed::evaluate (
         if (!target_data.hasTstMeasuredSpeedForTime(timestamp))
         {
             if (!skip_no_data_details)
-                details.push_back({timestamp, tst_pos,
-                                   false, {}, // has_ref_pos, ref_pos
-                                   {}, {}, comp_passed, // pos_inside, value, check_passed
-                                   num_pos, num_no_ref, num_pos_inside, num_pos_outside,
-                                   num_comp_failed, num_comp_passed,
-                                   "No tst speed"});
+                addDetail(timestamp, tst_pos,
+                            {}, // ref_pos
+                            {}, {}, comp_passed, // pos_inside, value, check_passed
+                            num_pos, num_no_ref, num_pos_inside, num_pos_outside,
+                            num_comp_failed, num_comp_passed,
+                            "No tst speed");
 
             ++num_no_tst_value;
             continue;
@@ -249,12 +279,12 @@ std::shared_ptr<EvaluationRequirementResult::Single> Speed::evaluate (
             comment = "Failed";
         }
 
-        details.push_back({timestamp, tst_pos,
-                           true, ref_pos,
-                           is_inside, spd_diff, comp_passed, // pos_inside, value, check_passed
-                           num_pos, num_no_ref, num_pos_inside, num_pos_outside,
-                           num_comp_failed, num_comp_passed,
-                           comment});
+        addDetail(timestamp, tst_pos,
+                    ref_pos,
+                    is_inside, spd_diff, comp_passed, // pos_inside, value, check_passed
+                    num_pos, num_no_ref, num_pos_inside, num_pos_outside,
+                    num_comp_failed, num_comp_passed,
+                    comment);
 
         values.push_back(spd_diff);
     }
@@ -286,9 +316,9 @@ std::shared_ptr<EvaluationRequirementResult::Single> Speed::evaluate (
 
     return make_shared<EvaluationRequirementResult::SingleSpeed>(
                 "UTN:"+to_string(target_data.utn_), instance, sector_layer, target_data.utn_, &target_data,
-                eval_man_, num_pos, num_no_ref, num_pos_outside, num_pos_inside, num_no_tst_value,
+                eval_man_, details, num_pos, num_no_ref, num_pos_outside, num_pos_inside, num_no_tst_value,
                 num_comp_failed, num_comp_passed,
-                values, details);
+                values);
 }
 
 }

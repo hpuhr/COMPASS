@@ -39,24 +39,43 @@ using namespace Utils;
 namespace EvaluationRequirementResult
 {
 
-SingleTrackAngle::SingleTrackAngle(
-        const std::string& result_id, std::shared_ptr<EvaluationRequirement::Base> requirement,
-        const SectorLayer& sector_layer,
-        unsigned int utn, const EvaluationTargetData* target, EvaluationManager& eval_man,
-        unsigned int num_pos, unsigned int num_no_ref,
-        unsigned int num_pos_outside, unsigned int num_pos_inside, unsigned int num_no_tst_value,
-        unsigned int num_comp_failed, unsigned int num_comp_passed,
-        vector<double> values,
-        std::vector<EvaluationRequirement::TrackAngleDetail> details)
-    : Single("SingleTrackAngle", result_id, requirement, sector_layer, utn, target, eval_man),
-      num_pos_(num_pos), num_no_ref_(num_no_ref), num_pos_outside_(num_pos_outside),
-      num_pos_inside_(num_pos_inside), num_no_tst_value_(num_no_tst_value),
-      num_comp_failed_(num_comp_failed), num_comp_passed_(num_comp_passed),
-      values_(values), details_(details)
+const std::string SingleTrackAngle::DetailOffset         = "Offset";
+const std::string SingleTrackAngle::DetailCheckPassed    = "CheckPassed";
+const std::string SingleTrackAngle::DetailPosInside      = "PosInside";
+const std::string SingleTrackAngle::DetailNumPos         = "NumPos";
+const std::string SingleTrackAngle::DetailNumNoRef       = "NumNoRef";
+const std::string SingleTrackAngle::DetailNumInside      = "NumInside";
+const std::string SingleTrackAngle::DetailNumOutside     = "NumOutside";
+const std::string SingleTrackAngle::DetailNumCheckFailed = "NumCheckFailed";
+const std::string SingleTrackAngle::DetailNumCheckPassed = "NumCheckPassed";
+
+SingleTrackAngle::SingleTrackAngle(const std::string& result_id, 
+                                   std::shared_ptr<EvaluationRequirement::Base> requirement,
+                                   const SectorLayer& sector_layer,
+                                   unsigned int utn, 
+                                   const EvaluationTargetData* target, 
+                                   EvaluationManager& eval_man,
+                                   const boost::optional<EvaluationDetails>& details,
+                                   unsigned int num_pos, 
+                                   unsigned int num_no_ref,
+                                   unsigned int num_pos_outside, 
+                                   unsigned int num_pos_inside, 
+                                   unsigned int num_no_tst_value,
+                                   unsigned int num_comp_failed, 
+                                   unsigned int num_comp_passed,
+                                   vector<double> values)
+:   Single("SingleTrackAngle", result_id, requirement, sector_layer, utn, target, eval_man, details)
+,   num_pos_         (num_pos)
+,   num_no_ref_      (num_no_ref)
+,   num_pos_outside_ (num_pos_outside)
+,   num_pos_inside_  (num_pos_inside)
+,   num_no_tst_value_(num_no_tst_value)
+,   num_comp_failed_ (num_comp_failed)
+,   num_comp_passed_ (num_comp_passed)
+,   values_          (values)
 {
     update();
 }
-
 
 void SingleTrackAngle::update()
 {
@@ -64,6 +83,8 @@ void SingleTrackAngle::update()
     assert (num_pos_ - num_no_ref_ == num_pos_inside_ + num_pos_outside_);
 
     assert (values_.size() == num_comp_failed_+num_comp_passed_);
+
+    p_passed_.reset();
 
     unsigned int num_trackangles = values_.size();
 
@@ -80,9 +101,6 @@ void SingleTrackAngle::update()
 
         assert (num_comp_failed_ <= num_trackangles);
         p_passed_ = (float)num_comp_passed_/(float)num_trackangles;
-        has_p_min_ = true;
-
-        result_usable_ = true;
     }
     else
     {
@@ -90,12 +108,9 @@ void SingleTrackAngle::update()
         value_max_ = 0;
         value_avg_ = 0;
         value_var_ = 0;
-
-        has_p_min_ = false;
-        p_passed_ = 0;
-
-        result_usable_ = false;
     }
+
+    result_usable_ = p_passed_.has_value();
 
     updateUseFromTarget();
 }
@@ -154,8 +169,8 @@ void SingleTrackAngle::addTargetDetailsToTable (
 
     QVariant p_min_var;
 
-    if (has_p_min_)
-        p_min_var = roundf(p_passed_ * 10000.0) / 100.0;
+    if (p_passed_.has_value())
+        p_min_var = roundf(p_passed_.value() * 10000.0) / 100.0;
 
     target_table.addRow(
                 {utn_, target_->timeBeginStr().c_str(), target_->timeEndStr().c_str(),
@@ -165,9 +180,9 @@ void SingleTrackAngle::addTargetDetailsToTable (
                  Number::round(value_max_,2), // "DMax"
                  Number::round(value_avg_,2), // "DAvg"
                  Number::round(sqrt(value_var_),2), // "DSDev"
-                 num_comp_failed_, // "#DOK"
-                 num_comp_passed_, // "#DNOK"
-                 p_min_var}, // "PDOK"
+                 num_comp_failed_,            // "#DOK"
+                 num_comp_passed_,            // "#DNOK"
+                 p_min_var},                  // "PDOK"
                 this, {utn_});
 }
 
@@ -192,8 +207,8 @@ void SingleTrackAngle::addTargetDetailsToTableADSB (
 
     QVariant prob_var;
 
-    if (has_p_min_)
-        prob_var = roundf(p_passed_ * 10000.0) / 100.0;
+    if (p_passed_.has_value())
+        prob_var = roundf(p_passed_.value() * 10000.0) / 100.0;
 
     // "UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
     // "#ACOK", "#ACNOK", "PACOK", "#DOK", "#DNOK", "PDOK", "MOPS", "NUCp/NIC", "NACp"
@@ -214,7 +229,6 @@ void SingleTrackAngle::addTargetDetailsToTableADSB (
                  target_->nucpNicStr().c_str(), // "NUCp/NIC"
                  target_->nacpStr().c_str()}, // "NACp"
                 this, {utn_});
-
 }
 
 void SingleTrackAngle::addTargetDetailsToReport(shared_ptr<EvaluationResultsReport::RootItem> root_item)
@@ -263,8 +277,8 @@ void SingleTrackAngle::addTargetDetailsToReport(shared_ptr<EvaluationResultsRepo
     {
         QVariant p_passed_var;
 
-        if (has_p_min_)
-            p_passed_var = roundf(p_passed_ * 10000.0) / 100.0;
+        if (p_passed_.has_value())
+            p_passed_var = roundf(p_passed_.value() * 10000.0) / 100.0;
 
         utn_req_table.addRow({"PCP [%]", "Probability of passed comparison", p_passed_var}, this);
 
@@ -272,8 +286,8 @@ void SingleTrackAngle::addTargetDetailsToReport(shared_ptr<EvaluationResultsRepo
 
         string result {"Unknown"};
 
-        if (has_p_min_)
-            result = req->getResultConditionStr(p_passed_);
+        if (p_passed_.has_value())
+            result = req->getResultConditionStr(p_passed_.value());
 
         utn_req_table.addRow({"Condition Fulfilled", "", result.c_str()}, this);
 
@@ -282,10 +296,9 @@ void SingleTrackAngle::addTargetDetailsToReport(shared_ptr<EvaluationResultsRepo
             root_item->getSection(getTargetSectionID()).perTargetWithIssues(true); // mark utn section as with issue
             utn_req_section.perTargetWithIssues(true);
         }
-
     }
 
-    if (has_p_min_ && p_passed_ != 1.0) // TODO
+    if (p_passed_.has_value() && p_passed_.value() != 1.0) // TODO
     {
         utn_req_section.addFigure("target_errors_overview", "Target Errors Overview",
                                   getTargetErrorsViewable());
@@ -312,16 +325,19 @@ void SingleTrackAngle::reportDetails(EvaluationResultsReport::Section& utn_req_s
 
     unsigned int detail_cnt = 0;
 
-    for (auto& rq_det_it : details_)
+    for (auto& rq_det_it : getDetails())
     {
+        bool has_ref_pos = rq_det_it.numPositions() >= 2;
+
         utn_req_details_table.addRow(
-                    {Time::toString(rq_det_it.timestamp_).c_str(),
-                     !rq_det_it.has_ref_pos_, rq_det_it.pos_inside_,
-                     rq_det_it.offset_,  // "Distance"
-                     rq_det_it.check_passed_, // CP"
-                     rq_det_it.num_check_failed_, // "#CF",
-                     rq_det_it.num_check_passed_, // "#CP"
-                     rq_det_it.comment_.c_str()}, // "Comment"
+                    { Time::toString(rq_det_it.timestamp()).c_str(),
+                     !has_ref_pos, 
+                      rq_det_it.getValue(DetailPosInside),
+                      rq_det_it.getValue(DetailOffset),         // "Distance"
+                      rq_det_it.getValue(DetailCheckPassed),    // CP"
+                      rq_det_it.getValue(DetailNumCheckFailed), // "#CF",
+                      rq_det_it.getValue(DetailNumCheckPassed), // "#CP"
+                      rq_det_it.comments().generalComment().c_str() }, // "Comment"
                     this, detail_cnt);
 
         ++detail_cnt;
@@ -333,16 +349,15 @@ bool SingleTrackAngle::hasViewableData (
 {
     if (table.name() == target_table_name_ && annotation.toUInt() == utn_)
         return true;
-    else if (table.name() == tr_details_table_name_ && annotation.isValid() && annotation.toUInt() < details_.size())
+    else if (table.name() == tr_details_table_name_ && annotation.isValid() && annotation.toUInt() < numDetails())
         return true;
-    else
-        return false;
+    
+    return false;
 }
 
 std::unique_ptr<nlohmann::json::object_t> SingleTrackAngle::viewableData(
         const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
 {
-
     assert (hasViewableData(table, annotation));
 
     if (table.name() == target_table_name_)
@@ -359,21 +374,26 @@ std::unique_ptr<nlohmann::json::object_t> SingleTrackAngle::viewableData(
                 = eval_man_.getViewableForEvaluation(utn_, req_grp_id_, result_id_);
         assert (viewable_ptr);
 
-        const EvaluationRequirement::TrackAngleDetail& detail = details_.at(detail_cnt);
+        const auto& detail = getDetail(detail_cnt);
 
-        (*viewable_ptr)[VP_POS_LAT_KEY] = detail.tst_pos_.latitude_;
-        (*viewable_ptr)[VP_POS_LON_KEY] = detail.tst_pos_.longitude_;
+        assert(detail.numPositions() >= 1);
+
+        (*viewable_ptr)[VP_POS_LAT_KEY    ] = detail.position(0).latitude_;
+        (*viewable_ptr)[VP_POS_LON_KEY    ] = detail.position(0).longitude_;
         (*viewable_ptr)[VP_POS_WIN_LAT_KEY] = eval_man_.resultDetailZoom();
         (*viewable_ptr)[VP_POS_WIN_LON_KEY] = eval_man_.resultDetailZoom();
-        (*viewable_ptr)[VP_TIMESTAMP_KEY] = Time::toString(detail.timestamp_);
+        (*viewable_ptr)[VP_TIMESTAMP_KEY  ] = Time::toString(detail.timestamp());
 
-        if (!detail.check_passed_)
+        auto check_passed = detail.getValueAs<bool>(DetailCheckPassed);
+        assert(check_passed.has_value());
+
+        if (!check_passed.value())
             (*viewable_ptr)[VP_EVAL_KEY][VP_EVAL_HIGHDET_KEY] = vector<unsigned int>{detail_cnt};
 
         return viewable_ptr;
     }
-    else
-        return nullptr;
+    
+    return nullptr;
 }
 
 std::unique_ptr<nlohmann::json::object_t> SingleTrackAngle::getTargetErrorsViewable ()
@@ -386,44 +406,51 @@ std::unique_ptr<nlohmann::json::object_t> SingleTrackAngle::getTargetErrorsViewa
 
     bool failed_values_of_interest = req()->failedValuesOfInterest();
 
-    for (auto& detail_it : details_)
+    for (auto& detail_it : getDetails())
     {
-        if ((failed_values_of_interest && detail_it.check_passed_)
-                || (!failed_values_of_interest && !detail_it.check_passed_))
+        auto check_passed = detail_it.getValueAs<bool>(DetailCheckPassed);
+        assert(check_passed.has_value());
+
+        if ((failed_values_of_interest && check_passed.value()) || 
+            (!failed_values_of_interest && !check_passed.value()))
             continue;
+
+        assert (detail_it.numPositions() >= 1);
+
+        bool has_ref_pos = detail_it.numPositions() >= 2;
 
         if (has_pos)
         {
-            lat_min = min(lat_min, detail_it.tst_pos_.latitude_);
-            lat_max = max(lat_max, detail_it.tst_pos_.latitude_);
+            lat_min = min(lat_min, detail_it.position(0).latitude_);
+            lat_max = max(lat_max, detail_it.position(0).latitude_);
 
-            lon_min = min(lon_min, detail_it.tst_pos_.longitude_);
-            lon_max = max(lon_max, detail_it.tst_pos_.longitude_);
+            lon_min = min(lon_min, detail_it.position(0).longitude_);
+            lon_max = max(lon_max, detail_it.position(0).longitude_);
         }
         else // tst pos always set
         {
-            lat_min = detail_it.tst_pos_.latitude_;
-            lat_max = detail_it.tst_pos_.latitude_;
+            lat_min = detail_it.position(0).latitude_;
+            lat_max = detail_it.position(0).latitude_;
 
-            lon_min = detail_it.tst_pos_.longitude_;
-            lon_max = detail_it.tst_pos_.longitude_;
+            lon_min = detail_it.position(0).longitude_;
+            lon_max = detail_it.position(0).longitude_;
 
             has_pos = true;
         }
 
-        if (detail_it.has_ref_pos_)
+        if (has_ref_pos)
         {
-            lat_min = min(lat_min, detail_it.ref_pos_.latitude_);
-            lat_max = max(lat_max, detail_it.ref_pos_.latitude_);
+            lat_min = min(lat_min, detail_it.position(1).latitude_);
+            lat_max = max(lat_max, detail_it.position(1).latitude_);
 
-            lon_min = min(lon_min, detail_it.ref_pos_.longitude_);
-            lon_max = max(lon_max, detail_it.ref_pos_.longitude_);
+            lon_min = min(lon_min, detail_it.position(1).longitude_);
+            lon_max = max(lon_max, detail_it.position(1).longitude_);
         }
     }
 
     if (has_pos)
     {
-        (*viewable_ptr)["trackangle_latitude"] = (lat_max+lat_min)/2.0;
+        (*viewable_ptr)["trackangle_latitude" ] = (lat_max+lat_min)/2.0;
         (*viewable_ptr)["trackangle_longitude"] = (lon_max+lon_min)/2.0;;
 
         double lat_w = 1.1*(lat_max-lat_min)/2.0;
@@ -456,7 +483,7 @@ std::string SingleTrackAngle::reference(
 {
     assert (hasReference(table, annotation));
 
-    return "Report:Results:"+getTargetRequirementSectionID();
+    return "Report:Results:" + getTargetRequirementSectionID();
 }
 
 unsigned int SingleTrackAngle::numCompFailed() const
@@ -503,11 +530,6 @@ unsigned int SingleTrackAngle::numPos() const
 unsigned int SingleTrackAngle::numNoRef() const
 {
     return num_no_ref_;
-}
-
-std::vector<EvaluationRequirement::TrackAngleDetail>& SingleTrackAngle::details()
-{
-    return details_;
 }
 
 EvaluationRequirement::TrackAngle* SingleTrackAngle::req ()

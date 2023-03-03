@@ -19,8 +19,9 @@
 #define EVALUATIONREQUIREMENIDENTIFICATIONCORRECTRESULT_H
 
 #include "eval/results/single.h"
-#include "eval/requirement/identification/correct.h"
-#include "eval/requirement/correctnessdetail.h"
+#include "eval/results/evaluationdetail.h"
+
+#include <boost/optional.hpp>
 
 namespace EvaluationRequirementResult
 {
@@ -28,14 +29,20 @@ namespace EvaluationRequirementResult
 class SingleIdentificationCorrect : public Single
 {
 public:
-    SingleIdentificationCorrect(
-            const std::string& result_id, std::shared_ptr<EvaluationRequirement::Base> requirement,
-            const SectorLayer& sector_layer,
-            unsigned int utn, const EvaluationTargetData* target, EvaluationManager& eval_man,
-            unsigned int num_updates, unsigned int num_no_ref_pos, unsigned int num_no_ref_id,
-            unsigned int num_pos_outside, unsigned int num_pos_inside,
-            unsigned int num_correct, unsigned int num_not_correct,
-            std::vector<EvaluationRequirement::CorrectnessDetail> details);
+    SingleIdentificationCorrect(const std::string& result_id, 
+                                std::shared_ptr<EvaluationRequirement::Base> requirement,
+                                const SectorLayer& sector_layer,
+                                unsigned int utn, 
+                                const EvaluationTargetData* target, 
+                                EvaluationManager& eval_man,
+                                const boost::optional<EvaluationDetails>& details,
+                                unsigned int num_updates, 
+                                unsigned int num_no_ref_pos, 
+                                unsigned int num_no_ref_id,
+                                unsigned int num_pos_outside, 
+                                unsigned int num_pos_inside,
+                                unsigned int num_correct, 
+                                unsigned int num_not_correct);
 
     //irtual void print() override;
     virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item) override;
@@ -50,8 +57,6 @@ public:
     unsigned int numCorrect() const;
     unsigned int numNotCorrect() const;
 
-    std::vector<EvaluationRequirement::CorrectnessDetail>& details();
-
     virtual bool hasViewableData (
             const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override;
     virtual std::unique_ptr<nlohmann::json::object_t> viewableData(
@@ -62,20 +67,26 @@ public:
     virtual std::string reference(
             const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override;
 
+    static const std::string DetailRefExists;     //bool
+    static const std::string DetailPosInside;     //bool 
+    static const std::string DetailIsNotCorrect;  //bool
+    static const std::string DetailNumUpdates;    //int
+    static const std::string DetailNumNoRef;      //int
+    static const std::string DetailNumInside;     //int
+    static const std::string DetailNumOutside;    //int
+    static const std::string DetailNumCorrect;    //int
+    static const std::string DetailNumNotCorrect; //int
 
 protected:
-    unsigned int num_updates_ {0};
-    unsigned int num_no_ref_pos_ {0};
-    unsigned int num_no_ref_id_ {0};
+    unsigned int num_updates_     {0};
+    unsigned int num_no_ref_pos_  {0};
+    unsigned int num_no_ref_id_   {0};
     unsigned int num_pos_outside_ {0};
-    unsigned int num_pos_inside_ {0};
-    unsigned int num_correct_ {0};
+    unsigned int num_pos_inside_  {0};
+    unsigned int num_correct_     {0};
     unsigned int num_not_correct_ {0};
 
-    bool has_pid_ {false};
-    float pid_{0};
-
-    std::vector<EvaluationRequirement::CorrectnessDetail> details_;
+    boost::optional<float> pid_;
 
     void updatePID();
     void addTargetToOverviewTable(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);

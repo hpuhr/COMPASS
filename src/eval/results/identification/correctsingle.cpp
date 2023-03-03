@@ -37,18 +37,38 @@ using namespace Utils;
 namespace EvaluationRequirementResult
 {
 
-SingleIdentificationCorrect::SingleIdentificationCorrect(
-        const std::string& result_id, std::shared_ptr<EvaluationRequirement::Base> requirement,
-        const SectorLayer& sector_layer,
-        unsigned int utn, const EvaluationTargetData* target, EvaluationManager& eval_man,
-        unsigned int num_updates, unsigned int num_no_ref_pos, unsigned int num_no_ref_id,
-        unsigned int num_pos_outside, unsigned int num_pos_inside,
-        unsigned int num_correct, unsigned int num_not_correct,
-        std::vector<EvaluationRequirement::CorrectnessDetail> details)
-    : Single("SingleIdentificationCorrect", result_id, requirement, sector_layer, utn, target, eval_man),
-      num_updates_(num_updates), num_no_ref_pos_(num_no_ref_pos), num_no_ref_id_(num_no_ref_id),
-      num_pos_outside_(num_pos_outside), num_pos_inside_(num_pos_inside),
-      num_correct_(num_correct), num_not_correct_(num_not_correct), details_(details)
+const std::string SingleIdentificationCorrect::DetailRefExists     = "RefExists";
+const std::string SingleIdentificationCorrect::DetailPosInside     = "PosInside";
+const std::string SingleIdentificationCorrect::DetailIsNotCorrect  = "IsNotCorrect";
+const std::string SingleIdentificationCorrect::DetailNumUpdates    = "NumUpdates";
+const std::string SingleIdentificationCorrect::DetailNumNoRef      = "NumNoRef";
+const std::string SingleIdentificationCorrect::DetailNumInside     = "NumInside";
+const std::string SingleIdentificationCorrect::DetailNumOutside    = "NumOutside";
+const std::string SingleIdentificationCorrect::DetailNumCorrect    = "NumCorrect";
+const std::string SingleIdentificationCorrect::DetailNumNotCorrect = "NumNotCorrect";
+
+SingleIdentificationCorrect::SingleIdentificationCorrect(const std::string& result_id, 
+                                                         std::shared_ptr<EvaluationRequirement::Base> requirement,
+                                                         const SectorLayer& sector_layer,
+                                                         unsigned int utn, 
+                                                         const EvaluationTargetData* target, 
+                                                         EvaluationManager& eval_man,
+                                                         const boost::optional<EvaluationDetails>& details,
+                                                         unsigned int num_updates, 
+                                                         unsigned int num_no_ref_pos, 
+                                                         unsigned int num_no_ref_id,
+                                                         unsigned int num_pos_outside, 
+                                                         unsigned int num_pos_inside,
+                                                         unsigned int num_correct, 
+                                                         unsigned int num_not_correct)
+:   Single("SingleIdentificationCorrect", result_id, requirement, sector_layer, utn, target, eval_man, details)
+,   num_updates_    (num_updates)
+,   num_no_ref_pos_ (num_no_ref_pos)
+,   num_no_ref_id_  (num_no_ref_id)
+,   num_pos_outside_(num_pos_outside)
+,   num_pos_inside_ (num_pos_inside)
+,   num_correct_    (num_correct)
+,   num_not_correct_(num_not_correct)
 {
     updatePID();
 }
@@ -58,20 +78,14 @@ void SingleIdentificationCorrect::updatePID()
     assert (num_updates_ - num_no_ref_pos_ == num_pos_inside_ + num_pos_outside_);
     assert (num_pos_inside_ == num_no_ref_id_+num_correct_+num_not_correct_);
 
+    pid_.reset();
+
     if (num_correct_+num_not_correct_)
     {
         pid_ = (float)num_correct_/(float)(num_correct_+num_not_correct_);
-        has_pid_ = true;
-
-        result_usable_ = true;
     }
-    else
-    {
-        pid_ = 0;
-        has_pid_ = false;
 
-        result_usable_ = false;
-    }
+    result_usable_ = pid_.has_value();
 
     updateUseFromTarget();
 }
@@ -109,11 +123,11 @@ void SingleIdentificationCorrect::addTargetDetailsToTable (
 
     QVariant pd_var;
 
-    if (has_pid_)
-        pd_var = roundf(pid_ * 10000.0) / 100.0;
+    if (pid_.has_value())
+        pd_var = roundf(pid_.value() * 10000.0) / 100.0;
 
     target_table.addRow(
-                {utn_, target_->timeBeginStr().c_str(), target_->timeEndStr().c_str(),
+                { utn_, target_->timeBeginStr().c_str(), target_->timeEndStr().c_str(),
                  target_->callsignsStr().c_str(), target_->targetAddressesStr().c_str(),
                  target_->modeACodesStr().c_str(), target_->modeCMinStr().c_str(), target_->modeCMaxStr().c_str(),
                  num_updates_, num_no_ref_pos_+num_no_ref_id_, num_correct_, num_not_correct_,
@@ -124,8 +138,8 @@ void SingleIdentificationCorrect::addTargetDetailsToReport(shared_ptr<Evaluation
 {
     QVariant pd_var;
 
-    if (has_pid_)
-        pd_var = roundf(pid_ * 10000.0) / 100.0;
+    if (pid_.has_value())
+        pd_var = roundf(pid_.value() * 10000.0) / 100.0;
 
     root_item->getSection(getTargetSectionID()).perTargetSection(true); // mark utn section per target
     EvaluationResultsReport::Section& utn_req_section = root_item->getSection(getTargetRequirementSectionID());
@@ -159,8 +173,8 @@ void SingleIdentificationCorrect::addTargetDetailsToReport(shared_ptr<Evaluation
 
     string result {"Unknown"};
 
-    if (has_pid_)
-        result = req-> getResultConditionStr(pid_);
+    if (pid_.has_value())
+        result = req-> getResultConditionStr(pid_.value());
 
     utn_req_table.addRow({"Condition Fulfilled", "", result.c_str()}, this);
 
@@ -170,8 +184,7 @@ void SingleIdentificationCorrect::addTargetDetailsToReport(shared_ptr<Evaluation
         utn_req_section.perTargetWithIssues(true);
     }
 
-
-    if (has_pid_ && pid_ != 1.0)
+    if (pid_.has_value() && pid_.value() != 1.0)
     {
         utn_req_section.addFigure("target_errors_overview", "Target Errors Overview",
                                   getTargetErrorsViewable());
@@ -198,14 +211,19 @@ void SingleIdentificationCorrect::reportDetails(EvaluationResultsReport::Section
 
     unsigned int detail_cnt = 0;
 
-    for (auto& rq_det_it : details_)
+    for (auto& rq_det_it : getDetails())
     {
         utn_req_details_table.addRow(
-                    {Time::toString(rq_det_it.timestamp_).c_str(), rq_det_it.ref_exists_,
-                     !rq_det_it.is_not_correct_,
-                     rq_det_it.num_updates_, rq_det_it.num_no_ref_,
-                     rq_det_it.num_inside_, rq_det_it.num_outside_,
-                     rq_det_it.num_correct_, rq_det_it.num_not_correct_, rq_det_it.comment_.c_str()},
+                    { Time::toString(rq_det_it.timestamp()).c_str(), 
+                      rq_det_it.getValue(DetailRefExists),
+                     !rq_det_it.getValue(DetailIsNotCorrect).toBool(),
+                      rq_det_it.getValue(DetailNumUpdates), 
+                      rq_det_it.getValue(DetailNumNoRef),
+                      rq_det_it.getValue(DetailNumInside), 
+                      rq_det_it.getValue(DetailNumOutside),
+                      rq_det_it.getValue(DetailNumCorrect), 
+                      rq_det_it.getValue(DetailNumNotCorrect), 
+                      rq_det_it.comments().generalComment().c_str() },
                     this, detail_cnt);
 
         ++detail_cnt;
@@ -217,16 +235,15 @@ bool SingleIdentificationCorrect::hasViewableData (
 {
     if (table.name() == target_table_name_ && annotation.toUInt() == utn_)
         return true;
-    else if (table.name() == tr_details_table_name_ && annotation.isValid() && annotation.toUInt() < details_.size())
+    else if (table.name() == tr_details_table_name_ && annotation.isValid() && annotation.toUInt() < numDetails())
         return true;
-    else
-        return false;
+    
+    return false;
 }
 
 std::unique_ptr<nlohmann::json::object_t> SingleIdentificationCorrect::viewableData(
         const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
 {
-
     assert (hasViewableData(table, annotation));
 
     if (table.name() == target_table_name_)
@@ -243,21 +260,23 @@ std::unique_ptr<nlohmann::json::object_t> SingleIdentificationCorrect::viewableD
                 = eval_man_.getViewableForEvaluation(utn_, req_grp_id_, result_id_);
         assert (viewable_ptr);
 
-        const EvaluationRequirement::CorrectnessDetail& detail = details_.at(detail_cnt);
+        const auto& detail = getDetail(detail_cnt);
 
-        (*viewable_ptr)[VP_POS_LAT_KEY] = detail.pos_tst_.latitude_;
-        (*viewable_ptr)[VP_POS_LON_KEY] = detail.pos_tst_.longitude_;
+        assert (detail.numPositions() >= 1);
+
+        (*viewable_ptr)[VP_POS_LAT_KEY    ] = detail.position(0).latitude_;
+        (*viewable_ptr)[VP_POS_LON_KEY    ] = detail.position(0).longitude_;
         (*viewable_ptr)[VP_POS_WIN_LAT_KEY] = eval_man_.resultDetailZoom();
         (*viewable_ptr)[VP_POS_WIN_LON_KEY] = eval_man_.resultDetailZoom();
-        (*viewable_ptr)[VP_TIMESTAMP_KEY] = Time::toString(detail.timestamp_);
+        (*viewable_ptr)[VP_TIMESTAMP_KEY  ] = Time::toString(detail.timestamp());
 
         //            if (!detail.pos_ok_)
         //                (*viewable_ptr)[VP_EVAL_KEY][VP_EVAL_HIGHDET_KEY] = vector<unsigned int>{detail_cnt};
 
         return viewable_ptr;
     }
-    else
-        return nullptr;
+    
+    return nullptr;
 }
 
 std::unique_ptr<nlohmann::json::object_t> SingleIdentificationCorrect::getTargetErrorsViewable ()
@@ -268,26 +287,31 @@ std::unique_ptr<nlohmann::json::object_t> SingleIdentificationCorrect::getTarget
     bool has_pos = false;
     double lat_min, lat_max, lon_min, lon_max;
 
-    for (auto& detail_it : details_)
+    for (auto& detail_it : getDetails())
     {
-        if (!detail_it.is_not_correct_)
+        auto is_not_correct = detail_it.getValueAs<bool>(DetailIsNotCorrect);
+        assert(is_not_correct.has_value());
+
+        if (!is_not_correct.value())
             continue;
+
+        assert(detail_it.numPositions());
 
         if (has_pos)
         {
-            lat_min = min(lat_min, detail_it.pos_tst_.latitude_);
-            lat_max = max(lat_max, detail_it.pos_tst_.latitude_);
+            lat_min = min(lat_min, detail_it.position(0).latitude_);
+            lat_max = max(lat_max, detail_it.position(0).latitude_);
 
-            lon_min = min(lon_min, detail_it.pos_tst_.longitude_);
-            lon_max = max(lon_max, detail_it.pos_tst_.longitude_);
+            lon_min = min(lon_min, detail_it.position(0).longitude_);
+            lon_max = max(lon_max, detail_it.position(0).longitude_);
         }
         else // tst pos always set
         {
-            lat_min = detail_it.pos_tst_.latitude_;
-            lat_max = detail_it.pos_tst_.latitude_;
+            lat_min = detail_it.position(0).latitude_;
+            lat_max = detail_it.position(0).latitude_;
 
-            lon_min = detail_it.pos_tst_.longitude_;
-            lon_max = detail_it.pos_tst_.longitude_;
+            lon_min = detail_it.position(0).longitude_;
+            lon_max = detail_it.position(0).longitude_;
 
             has_pos = true;
         }
@@ -370,11 +394,5 @@ unsigned int SingleIdentificationCorrect::numNotCorrect() const
 {
     return num_not_correct_;
 }
-
-std::vector<EvaluationRequirement::CorrectnessDetail>& SingleIdentificationCorrect::details()
-{
-    return details_;
-}
-
 
 }

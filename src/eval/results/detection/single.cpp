@@ -17,6 +17,7 @@
 
 #include "eval/results/detection/single.h"
 #include "eval/results/detection/joined.h"
+#include "eval/results/evaluationdetail.h"
 #include "eval/requirement/base/base.h"
 #include "eval/requirement/detection/detection.h"
 #include "evaluationtargetdata.h"
@@ -36,21 +37,35 @@ using namespace Utils;
 namespace EvaluationRequirementResult
 {
 
-SingleDetection::SingleDetection(
-        const std::string& result_id, std::shared_ptr<EvaluationRequirement::Base> requirement,
-        const SectorLayer& sector_layer, unsigned int utn, const EvaluationTargetData* target,
-        EvaluationManager& eval_man,
-        int sum_uis, int missed_uis, TimePeriodCollection ref_periods,
-        std::vector<EvaluationRequirement::DetectionDetail> details)
-    : Single("SingleDetection", result_id, requirement, sector_layer, utn, target, eval_man),
-      sum_uis_(sum_uis), missed_uis_(missed_uis), ref_periods_(ref_periods), details_(details)
+const std::string SingleDetection::DetailMissOccurred = "MissOccurred";
+const std::string SingleDetection::DetailDiffTOD      = "DiffTOD";
+const std::string SingleDetection::DetailRefExists    = "RefExists";
+const std::string SingleDetection::DetailMissedUIs    = "MissedUIs";
+const std::string SingleDetection::DetailMaxGapUIs    = "MaxGapUIs";
+const std::string SingleDetection::DetailNoRefUIs     = "NoRefUIs";
+
+SingleDetection::SingleDetection(const std::string& result_id, 
+                                 std::shared_ptr<EvaluationRequirement::Base> requirement,
+                                 const SectorLayer& sector_layer, 
+                                 unsigned int utn, 
+                                 const EvaluationTargetData* target,
+                                 EvaluationManager& eval_man,
+                                 const boost::optional<EvaluationDetails>& details,
+                                 int sum_uis, 
+                                 int missed_uis, 
+                                 TimePeriodCollection ref_periods)
+:   Single      ("SingleDetection", result_id, requirement, sector_layer, utn, target, eval_man, details)
+,   sum_uis_    (sum_uis)
+,   missed_uis_ (missed_uis)
+,   ref_periods_(ref_periods)
 {
     updatePD();
 }
 
-
 void SingleDetection::updatePD()
 {
+    pd_.reset();
+
     if (sum_uis_)
     {
         logdbg << "SingleDetection: updatePD: utn " << utn_ << " missed_uis " << missed_uis_
@@ -66,18 +81,9 @@ void SingleDetection::updatePD()
             pd_ = (float)missed_uis_/(float)(sum_uis_);
         else
             pd_ = 1.0 - ((float)missed_uis_/(float)(sum_uis_));
-
-        has_pd_ = true;
-
-        result_usable_ = true;
     }
-    else
-    {
-        pd_ = 0;
-        has_pd_ = false;
 
-        result_usable_ = false;
-    }
+    result_usable_ = pd_.has_value();
 
     updateUseFromTarget();
 }
@@ -115,8 +121,8 @@ void SingleDetection::addTargetDetailsToTable (
 
     QVariant pd_var;
 
-    if (has_pd_)
-        pd_var = roundf(pd_ * 10000.0) / 100.0;
+    if (pd_.has_value())
+        pd_var = roundf(pd_.value() * 10000.0) / 100.0;
 
     target_table.addRow(
                 {utn_, target_->timeBeginStr().c_str(), target_->timeEndStr().c_str(),
@@ -129,8 +135,8 @@ void SingleDetection::addTargetDetailsToReport(shared_ptr<EvaluationResultsRepor
 {
     QVariant pd_var;
 
-    if (has_pd_)
-        pd_var = roundf(pd_ * 10000.0) / 100.0;
+    if (pd_.has_value())
+        pd_var = roundf(pd_.value() * 10000.0) / 100.0;
 
     root_item->getSection(getTargetSectionID()).perTargetSection(true); // mark utn section per target
     EvaluationResultsReport::Section& utn_req_section = root_item->getSection(getTargetRequirementSectionID());
@@ -172,13 +178,13 @@ void SingleDetection::addTargetDetailsToReport(shared_ptr<EvaluationResultsRepor
 
     string result {"Unknown"};
 
-    if (has_pd_)
-        result = req-> getResultConditionStr(pd_);
+    if (pd_.has_value())
+        result = req-> getResultConditionStr(pd_.value());
 
     utn_req_table.addRow({"Condition Fulfilled", "", result.c_str()}, this);
 
     // add figure
-    if (has_pd_ && pd_ != 1.0)
+    if (pd_.has_value() && pd_.value() != 1.0)
     {
         utn_req_section.addFigure("target_errors_overview", "Target Errors Overview",
                                   getTargetErrorsViewable());
@@ -205,21 +211,30 @@ void SingleDetection::reportDetails(EvaluationResultsReport::Section& utn_req_se
 
     unsigned int detail_cnt = 0;
 
-    for (auto& rq_det_it : details_)
+    for (auto& rq_det_it : getDetails())
     {
-        if (rq_det_it.d_tod_.isValid())
+        auto d_tod = rq_det_it.getValue(DetailDiffTOD);
+
+        if (d_tod.isValid())
+        {
             utn_req_details_table.addRow(
-                        {Time::toString(rq_det_it.timestamp_).c_str(),
-                         String::timeStringFromDouble(rq_det_it.d_tod_.toFloat()).c_str(),
-                         rq_det_it.ref_exists_, rq_det_it.missed_uis_, rq_det_it.comment_.c_str()},
+                        { Time::toString(rq_det_it.timestamp()).c_str(),
+                          String::timeStringFromDouble(d_tod.toFloat()).c_str(),
+                          rq_det_it.getValue(DetailRefExists), 
+                          rq_det_it.getValue(DetailMissedUIs), 
+                          rq_det_it.comments().generalComment().c_str() },
                         this, detail_cnt);
+        }
         else
+        {
             utn_req_details_table.addRow(
-                        {Time::toString(rq_det_it.timestamp_).c_str(),
-                         rq_det_it.d_tod_,
-                         rq_det_it.ref_exists_, rq_det_it.missed_uis_,
-                         rq_det_it.comment_.c_str()},
+                        { Time::toString(rq_det_it.timestamp()).c_str(),
+                          QVariant(),
+                          rq_det_it.getValue(DetailRefExists), 
+                          rq_det_it.getValue(DetailMissedUIs),
+                          rq_det_it.comments().generalComment().c_str() },
                         this, detail_cnt);
+        }
 
         ++detail_cnt;
     }
@@ -230,16 +245,15 @@ bool SingleDetection::hasViewableData (
 {
     if (table.name() == target_table_name_ && annotation.toUInt() == utn_)
         return true;
-    else if (table.name() == tr_details_table_name_ && annotation.isValid() && annotation.toUInt() < details_.size())
+    else if (table.name() == tr_details_table_name_ && annotation.isValid() && annotation.toUInt() < getDetails().size())
         return true;
-    else
-        return false;
+    
+    return false;
 }
 
 std::unique_ptr<nlohmann::json::object_t> SingleDetection::viewableData(
         const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
 {
-
     assert (hasViewableData(table, annotation));
     if (table.name() == target_table_name_)
     {
@@ -255,15 +269,20 @@ std::unique_ptr<nlohmann::json::object_t> SingleDetection::viewableData(
                 = eval_man_.getViewableForEvaluation(utn_, req_grp_id_, result_id_);
         assert (viewable_ptr);
 
-        const EvaluationRequirement::DetectionDetail& detail = details_.at(detail_cnt);
+        const auto& detail = getDetail(detail_cnt);
 
-        (*viewable_ptr)[VP_POS_LAT_KEY] = detail.pos_current_.latitude_;
-        (*viewable_ptr)[VP_POS_LON_KEY] = detail.pos_current_.longitude_;
+        assert (detail.numPositions() >= 1);
+
+        (*viewable_ptr)[VP_POS_LAT_KEY    ] = detail.position(0).latitude_;
+        (*viewable_ptr)[VP_POS_LON_KEY    ] = detail.position(0).longitude_;
         (*viewable_ptr)[VP_POS_WIN_LAT_KEY] = eval_man_.resultDetailZoom();
         (*viewable_ptr)[VP_POS_WIN_LON_KEY] = eval_man_.resultDetailZoom();
-        (*viewable_ptr)[VP_TIMESTAMP_KEY] = Time::toString(detail.timestamp_);
+        (*viewable_ptr)[VP_TIMESTAMP_KEY  ] = Time::toString(detail.timestamp());
 
-        if (detail.miss_occurred_)
+        auto miss_occurred = detail.getValueAs<bool>(DetailMissOccurred);
+        assert (miss_occurred.has_value());
+
+        if (miss_occurred.value())
             (*viewable_ptr)[VP_EVAL_KEY][VP_EVAL_HIGHDET_KEY] = vector<unsigned int>{detail_cnt};
 
         return viewable_ptr;
@@ -280,37 +299,45 @@ std::unique_ptr<nlohmann::json::object_t> SingleDetection::getTargetErrorsViewab
     bool has_pos = false;
     double lat_min, lat_max, lon_min, lon_max;
 
-    for (auto& detail_it : details_)
+    for (auto& detail_it : getDetails())
     {
-        if (!detail_it.miss_occurred_)
+        if (!detail_it.getValue(DetailMissOccurred).toBool())
             continue;
+
+        assert(detail_it.numPositions() >= 1);
+
+        const auto& pos = detail_it.position(0);
+
+        bool has_last_pos = detail_it.numPositions() >= 2;
 
         if (has_pos)
         {
-            lat_min = min(lat_min, detail_it.pos_current_.latitude_);
-            lat_max = max(lat_max, detail_it.pos_current_.latitude_);
+            lat_min = min(lat_min, pos.latitude_);
+            lat_max = max(lat_max, pos.latitude_);
 
-            lon_min = min(lon_min, detail_it.pos_current_.longitude_);
-            lon_max = max(lon_max, detail_it.pos_current_.longitude_);
+            lon_min = min(lon_min, pos.longitude_);
+            lon_max = max(lon_max, pos.longitude_);
         }
         else // tst pos always set
         {
-            lat_min = detail_it.pos_current_.latitude_;
-            lat_max = detail_it.pos_current_.latitude_;
+            lat_min = pos.latitude_;
+            lat_max = pos.latitude_;
 
-            lon_min = detail_it.pos_current_.longitude_;
-            lon_max = detail_it.pos_current_.longitude_;
+            lon_min = pos.longitude_;
+            lon_max = pos.longitude_;
 
             has_pos = true;
         }
 
-        if (detail_it.has_last_position_)
+        if (has_last_pos)
         {
-            lat_min = min(lat_min, detail_it.pos_last_.latitude_);
-            lat_max = max(lat_max, detail_it.pos_last_.latitude_);
+            const auto& pos_last = detail_it.position(1);
 
-            lon_min = min(lon_min, detail_it.pos_last_.longitude_);
-            lon_max = max(lon_max, detail_it.pos_last_.longitude_);
+            lat_min = min(lat_min, pos_last.latitude_);
+            lat_max = max(lat_max, pos_last.latitude_);
+
+            lon_min = min(lon_min, pos_last.longitude_);
+            lon_max = max(lon_max, pos_last.longitude_);
         }
     }
 
@@ -365,11 +392,6 @@ int SingleDetection::sumUIs() const
 int SingleDetection::missedUIs() const
 {
     return missed_uis_;
-}
-
-std::vector<EvaluationRequirement::DetectionDetail>& SingleDetection::details()
-{
-    return details_;
 }
 
 }

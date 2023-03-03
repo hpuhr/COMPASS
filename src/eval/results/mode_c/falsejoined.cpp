@@ -36,17 +36,16 @@ using namespace Utils;
 namespace EvaluationRequirementResult
 {
 
-JoinedModeCFalse::JoinedModeCFalse(
-        const std::string& result_id, std::shared_ptr<EvaluationRequirement::Base> requirement,
-        const SectorLayer& sector_layer, EvaluationManager& eval_man)
-    : Joined("JoinedModeCFalse", result_id, requirement, sector_layer, eval_man)
+JoinedModeCFalse::JoinedModeCFalse(const std::string& result_id, 
+                                   std::shared_ptr<EvaluationRequirement::Base> requirement,
+                                   const SectorLayer& sector_layer, 
+                                   EvaluationManager& eval_man)
+:   JoinedFalseBase("JoinedModeCFalse", result_id, requirement, sector_layer, eval_man)
 {
 }
 
-void JoinedModeCFalse::join(std::shared_ptr<Base> other)
+void JoinedModeCFalse::join_impl(std::shared_ptr<Single> other)
 {
-    Joined::join(other);
-
     std::shared_ptr<SingleModeCFalse> other_sub =
             std::static_pointer_cast<SingleModeCFalse>(other);
     assert (other_sub);
@@ -61,14 +60,14 @@ void JoinedModeCFalse::addToValues (std::shared_ptr<SingleModeCFalse> single_res
     if (!single_result->use())
         return;
 
-    num_updates_ += single_result->numUpdates();
-    num_no_ref_pos_ += single_result->numNoRefPos();
-    num_no_ref_val_ += single_result->numNoRefValue();
+    num_updates_     += single_result->numUpdates();
+    num_no_ref_pos_  += single_result->numNoRefPos();
+    num_no_ref_val_  += single_result->numNoRefValue();
     num_pos_outside_ += single_result->numPosOutside();
-    num_pos_inside_ += single_result->numPosInside();
-    num_unknown_ += single_result->numUnknown();
-    num_correct_ += single_result->numCorrect();
-    num_false_ += single_result->numFalse();
+    num_pos_inside_  += single_result->numPosInside();
+    num_unknown_     += single_result->numUnknown();
+    num_correct_     += single_result->numCorrect();
+    num_false_       += single_result->numFalse();
 
     updateProbabilities();
 }
@@ -78,15 +77,11 @@ void JoinedModeCFalse::updateProbabilities()
     assert (num_updates_ - num_no_ref_pos_ == num_pos_inside_ + num_pos_outside_);
     assert (num_pos_inside_ == num_no_ref_val_+num_unknown_+num_correct_+num_false_);
 
+    p_false_.reset();
+
     if (num_correct_+num_false_)
     {
         p_false_ = (float)(num_false_)/(float)(num_correct_+num_false_);
-        has_p_false_ = true;
-    }
-    else
-    {
-        has_p_false_ = false;
-        p_false_ = 0;
     }
 }
 
@@ -126,10 +121,10 @@ void JoinedModeCFalse::addToOverviewTable(std::shared_ptr<EvaluationResultsRepor
 
         string result {"Unknown"};
 
-        if (has_p_false_)
+        if (p_false_.has_value())
         {
-            result = req-> getResultConditionStr(p_false_);
-            pf_var = roundf(p_false_ * 10000.0) / 100.0;
+            result = req-> getResultConditionStr(p_false_.value());
+            pf_var = roundf(p_false_.value() * 10000.0) / 100.0;
         }
 
         // "Sector Layer", "Group", "Req.", "Id", "#Updates", "Result", "Condition", "Result"
@@ -138,8 +133,6 @@ void JoinedModeCFalse::addToOverviewTable(std::shared_ptr<EvaluationResultsRepor
                          result_id_.c_str(), {num_correct_+num_false_},
                          pf_var, req->getConditionStr().c_str(), result.c_str()}, this, {});
     }
-
-
 }
 
 void JoinedModeCFalse::addDetails(std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
@@ -174,8 +167,8 @@ void JoinedModeCFalse::addDetails(std::shared_ptr<EvaluationResultsReport::RootI
 
         QVariant pf_var;
 
-        if (has_p_false_)
-            pf_var = roundf(p_false_ * 10000.0) / 100.0;
+        if (p_false_.has_value())
+            pf_var = roundf(p_false_.value() * 10000.0) / 100.0;
 
         sec_det_table.addRow({"PF [%]", "Probability of Mode C false", pf_var}, this);
 
@@ -183,14 +176,14 @@ void JoinedModeCFalse::addDetails(std::shared_ptr<EvaluationResultsReport::RootI
 
         string result {"Unknown"};
 
-        if (has_p_false_)
-            result = req->getResultConditionStr(p_false_);
+        if (p_false_.has_value())
+            result = req->getResultConditionStr(p_false_.value());
 
         sec_det_table.addRow({"Condition Fulfilled", "", result.c_str()}, this);
     }
 
     // figure
-    if (has_p_false_ && p_false_ != 0.0)
+    if (p_false_.has_value() && p_false_.value() != 0.0)
     {
         sector_section.addFigure("sector_errors_overview", "Sector Errors Overview",
                                  getErrorsViewable());
@@ -202,7 +195,6 @@ void JoinedModeCFalse::addDetails(std::shared_ptr<EvaluationResultsReport::RootI
                     "No target errors found, therefore no figure was generated.");
     }
 }
-
 
 bool JoinedModeCFalse::hasViewableData (
         const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
@@ -271,7 +263,7 @@ std::string JoinedModeCFalse::reference(
     return nullptr;
 }
 
-void JoinedModeCFalse::updatesToUseChanges()
+void JoinedModeCFalse::updatesToUseChanges_impl()
 {
     loginf << "JoinedModeC: updatesToUseChanges: prev num_updates " << num_updates_
            << " num_no_ref_pos " << num_no_ref_pos_ << " num_no_ref_id " << num_no_ref_val_
@@ -284,14 +276,14 @@ void JoinedModeCFalse::updatesToUseChanges()
     //        else
     //            loginf << "JoinedModeC: updatesToUseChanges: prev result " << result_id_ << " has no data";
 
-    num_updates_ = 0;
-    num_no_ref_pos_ = 0;
-    num_no_ref_val_ = 0;
+    num_updates_     = 0;
+    num_no_ref_pos_  = 0;
+    num_no_ref_val_  = 0;
     num_pos_outside_ = 0;
-    num_pos_inside_ = 0;
-    num_unknown_ = 0;
-    num_correct_ = 0;
-    num_false_ = 0;
+    num_pos_inside_  = 0;
+    num_unknown_     = 0;
+    num_correct_     = 0;
+    num_false_       = 0;
 
     for (auto result_it : results_)
     {

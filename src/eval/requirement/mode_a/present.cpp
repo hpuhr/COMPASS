@@ -63,7 +63,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> ModeAPresent::evaluate (
     int num_present_id {0};
     int num_missing_id {0};
 
-    vector<PresentDetail> details;
+    EvaluationRequirementResult::Single::EvaluationDetails details;
     EvaluationTargetPosition pos_current;
     //unsigned int code;
     //bool code_ok;
