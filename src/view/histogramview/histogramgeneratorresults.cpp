@@ -19,6 +19,10 @@
 #include "evaluationmanager.h"
 #include "compass.h"
 
+#include "eval/results/base.h"
+#include "eval/results/single.h"
+#include "eval/results/joined.h"
+
 #include "eval/results/extra/datasingle.h"
 #include "eval/results/extra/datajoined.h"
 #include "eval/results/extra/tracksingle.h"
@@ -316,7 +320,7 @@ void HistogramGeneratorResults::updateCountResult (std::shared_ptr<EvaluationReq
 
     assert (result);
 
-    std::vector<std::shared_ptr<Base>>& results = result->results();
+    std::vector<std::shared_ptr<Single>>& results = result->results();
 
     for (auto& result_it : results)
     {
@@ -351,7 +355,7 @@ void HistogramGeneratorResults::updateCountResult (std::shared_ptr<EvaluationReq
 
     assert (result);
 
-    std::vector<std::shared_ptr<Base>>& results = result->results();
+    std::vector<std::shared_ptr<Single>>& results = result->results();
 
     for (auto& result_it : results)
     {
@@ -384,7 +388,7 @@ void HistogramGeneratorResults::updateCountResult (std::shared_ptr<EvaluationReq
 
     assert (result);
 
-    std::vector<std::shared_ptr<Base>>& results = result->results();
+    std::vector<std::shared_ptr<Single>>& results = result->results();
 
     for (auto& result_it : results)
     {
@@ -412,7 +416,7 @@ void HistogramGeneratorResults::updateCountResult (
 {
     assert (result);
     std::string dbcontent_name = COMPASS::instance().evaluationManager().dbContentNameTst();
-    addFloatingPointResults<JoinedPositionDistance, SinglePositionDistance, Base>(dbcontent_name, result);
+    addFloatingPointResults<JoinedPositionDistance, SinglePositionDistance, Single>(dbcontent_name, result);
 }
 
 /**
@@ -432,7 +436,7 @@ void HistogramGeneratorResults::updateCountResult (
 {
     assert (result);
     std::string dbcontent_name = COMPASS::instance().evaluationManager().dbContentNameTst();
-    addFloatingPointResults<JoinedPositionAlong, SinglePositionAlong, Base>(dbcontent_name, result);
+    addFloatingPointResults<JoinedPositionAlong, SinglePositionAlong, Single>(dbcontent_name, result);
 }
 
 /**
@@ -452,7 +456,7 @@ void HistogramGeneratorResults::updateCountResult (
 {
     assert (result);
     std::string dbcontent_name = COMPASS::instance().evaluationManager().dbContentNameTst();
-    addFloatingPointResults<JoinedPositionAcross, SinglePositionAcross, Base>(dbcontent_name, result);
+    addFloatingPointResults<JoinedPositionAcross, SinglePositionAcross, Single>(dbcontent_name, result);
 }
 
 /**
@@ -472,7 +476,7 @@ void HistogramGeneratorResults::updateCountResult (
 {
     assert (result);
     std::string dbcontent_name = COMPASS::instance().evaluationManager().dbContentNameTst();
-    addFloatingPointResults<JoinedPositionLatency, SinglePositionLatency, Base>(dbcontent_name, result);
+    addFloatingPointResults<JoinedPositionLatency, SinglePositionLatency, Single>(dbcontent_name, result);
 }
 
 /**
@@ -492,7 +496,7 @@ void HistogramGeneratorResults::updateCountResult (
 {
     assert (result);
     std::string dbcontent_name = COMPASS::instance().evaluationManager().dbContentNameTst();
-    addFloatingPointResults<JoinedSpeed, SingleSpeed, Base>(dbcontent_name, result);
+    addFloatingPointResults<JoinedSpeed, SingleSpeed, Single>(dbcontent_name, result);
 }
 
 void HistogramGeneratorResults::updateCountResult (
@@ -510,7 +514,7 @@ void HistogramGeneratorResults::updateCountResult (
 {
     assert (result);
     std::string dbcontent_name = COMPASS::instance().evaluationManager().dbContentNameTst();
-    addFloatingPointResults<JoinedTrackAngle, SingleTrackAngle, Base>(dbcontent_name, result);
+    addFloatingPointResults<JoinedTrackAngle, SingleTrackAngle, Single>(dbcontent_name, result);
 }
 
 
@@ -540,7 +544,7 @@ void HistogramGeneratorResults::updateCountResult (
 
     assert (result);
 
-    std::vector<std::shared_ptr<Base>>& results = result->results();
+    std::vector<std::shared_ptr<Single>>& results = result->results();
 
     for (auto& result_it : results)
     {
@@ -578,7 +582,7 @@ void HistogramGeneratorResults::updateCountResult (
 
     assert (result);
 
-    std::vector<std::shared_ptr<Base>>& results = result->results();
+    std::vector<std::shared_ptr<Single>>& results = result->results();
 
     for (auto& result_it : results)
     {
@@ -599,7 +603,7 @@ void HistogramGeneratorResults::updateCountResult (std::shared_ptr<EvaluationReq
     addStaticResult({ "#NoRefId", 
                       "#Present", 
                       "#Missing"}, 
-                    { (unsigned int)result->numNoRefId(), 
+                    { (unsigned int)result->numNoRefValue(), 
                       (unsigned int)result->numPresent(), 
                       (unsigned int)result->numMissing() });
 }
@@ -612,7 +616,7 @@ void HistogramGeneratorResults::updateCountResult (std::shared_ptr<EvaluationReq
 
     assert (result);
 
-    std::vector<std::shared_ptr<Base>>& results = result->results();
+    std::vector<std::shared_ptr<Single>>& results = result->results();
 
     for (auto& result_it : results)
     {
@@ -648,7 +652,7 @@ void HistogramGeneratorResults::updateCountResult (std::shared_ptr<EvaluationReq
 
     assert (result);
 
-    std::vector<std::shared_ptr<Base>>& results = result->results();
+    std::vector<std::shared_ptr<Single>>& results = result->results();
 
     for (auto& result_it : results)
     {
@@ -669,7 +673,7 @@ void HistogramGeneratorResults::updateCountResult (std::shared_ptr<EvaluationReq
     addStaticResult({ "#NoRefC", 
                       "#Present", 
                       "#Missing" }, 
-                    { (unsigned int)result->numNoRefC(), 
+                    { (unsigned int)result->numNoRefValue(), 
                       (unsigned int)result->numPresent(), 
                       (unsigned int)result->numMissing() });
 }
@@ -682,7 +686,7 @@ void HistogramGeneratorResults::updateCountResult (std::shared_ptr<EvaluationReq
 
     assert (result);
 
-    std::vector<std::shared_ptr<Base>>& results = result->results();
+    std::vector<std::shared_ptr<Single>>& results = result->results();
 
     for (auto& result_it : results)
     {
@@ -718,7 +722,7 @@ void HistogramGeneratorResults::updateCountResult (std::shared_ptr<EvaluationReq
 
     assert (result);
 
-    std::vector<std::shared_ptr<Base>>& results = result->results();
+    std::vector<std::shared_ptr<Single>>& results = result->results();
 
     for (auto& result_it : results)
     {

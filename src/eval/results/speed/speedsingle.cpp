@@ -38,33 +38,54 @@ using namespace Utils;
 namespace EvaluationRequirementResult
 {
 
-SingleSpeed::SingleSpeed(
-        const std::string& result_id, std::shared_ptr<EvaluationRequirement::Base> requirement,
-        const SectorLayer& sector_layer,
-        unsigned int utn, const EvaluationTargetData* target, EvaluationManager& eval_man,
-        unsigned int num_pos, unsigned int num_no_ref,
-        unsigned int num_pos_outside, unsigned int num_pos_inside, unsigned int num_no_tst_value,
-        unsigned int num_comp_failed, unsigned int num_comp_passed,
-        vector<double> values,
-        std::vector<EvaluationRequirement::SpeedDetail> details)
-    : Single("SingleSpeed", result_id, requirement, sector_layer, utn, target, eval_man),
-      num_pos_(num_pos), num_no_ref_(num_no_ref), num_pos_outside_(num_pos_outside),
-      num_pos_inside_(num_pos_inside), num_no_tst_value_(num_no_tst_value),
-      num_comp_failed_(num_comp_failed), num_comp_passed_(num_comp_passed),
-      values_(values), details_(details)
+const std::string SingleSpeed::DetailOffset         = "Offset";
+const std::string SingleSpeed::DetailCheckPassed    = "CheckPassed";
+const std::string SingleSpeed::DetailPosInside      = "PosInside";
+const std::string SingleSpeed::DetailNumPos         = "NumPos";
+const std::string SingleSpeed::DetailNumNoRef       = "NumNoRef";
+const std::string SingleSpeed::DetailNumInside      = "NumInside";
+const std::string SingleSpeed::DetailNumOutside     = "NumOutside";
+const std::string SingleSpeed::DetailNumCheckFailed = "NumCheckFailed";
+const std::string SingleSpeed::DetailNumCheckPassed = "NumCheckPassed";
+
+SingleSpeed::SingleSpeed(const std::string& result_id, 
+                         std::shared_ptr<EvaluationRequirement::Base> requirement,
+                         const SectorLayer& sector_layer,
+                         unsigned int utn, 
+                         const EvaluationTargetData* target, 
+                         EvaluationManager& eval_man,
+                         const boost::optional<EvaluationDetails>& details,
+                         unsigned int num_pos, 
+                         unsigned int num_no_ref,
+                         unsigned int num_pos_outside, 
+                         unsigned int num_pos_inside, 
+                         unsigned int num_no_tst_value,
+                         unsigned int num_comp_failed, 
+                         unsigned int num_comp_passed,
+                         vector<double> values)
+:   Single("SingleSpeed", result_id, requirement, sector_layer, utn, target, eval_man, details)
+,   num_pos_         (num_pos)
+,   num_no_ref_      (num_no_ref)
+,   num_pos_outside_ (num_pos_outside)
+,   num_pos_inside_  (num_pos_inside)
+,   num_no_tst_value_(num_no_tst_value)
+,   num_comp_failed_ (num_comp_failed)
+,   num_comp_passed_ (num_comp_passed)
+,   values_          (values)
 {
     update();
 }
-
 
 void SingleSpeed::update()
 {
     assert (num_no_ref_ <= num_pos_);
     assert (num_pos_ - num_no_ref_ == num_pos_inside_ + num_pos_outside_);
 
-    assert (values_.size() == num_comp_failed_+num_comp_passed_);
+    assert (values_.size() == num_comp_failed_ + num_comp_passed_);
 
     unsigned int num_speeds = values_.size();
+
+    p_passed_.reset();
 
     if (num_speeds)
     {
@@ -79,9 +100,6 @@ void SingleSpeed::update()
 
         assert (num_comp_failed_ <= num_speeds);
         p_passed_ = (float)num_comp_passed_/(float)num_speeds;
-        has_p_min_ = true;
-
-        result_usable_ = true;
     }
     else
     {
@@ -89,12 +107,9 @@ void SingleSpeed::update()
         value_max_ = 0;
         value_avg_ = 0;
         value_var_ = 0;
-
-        has_p_min_ = false;
-        p_passed_ = 0;
-
-        result_usable_ = false;
     }
+
+    result_usable_ = p_passed_.has_value();
 
     updateUseFromTarget();
 }
@@ -153,8 +168,8 @@ void SingleSpeed::addTargetDetailsToTable (
 
     QVariant p_min_var;
 
-    if (has_p_min_)
-        p_min_var = roundf(p_passed_ * 10000.0) / 100.0;
+    if (p_passed_.has_value())
+        p_min_var = roundf(p_passed_.value() * 10000.0) / 100.0;
 
     target_table.addRow(
                 {utn_, target_->timeBeginStr().c_str(), target_->timeEndStr().c_str(),
@@ -191,8 +206,8 @@ void SingleSpeed::addTargetDetailsToTableADSB (
 
     QVariant prob_var;
 
-    if (has_p_min_)
-        prob_var = roundf(p_passed_ * 10000.0) / 100.0;
+    if (p_passed_.has_value())
+        prob_var = roundf(p_passed_.value() * 10000.0) / 100.0;
 
     // "UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
     // "#ACOK", "#ACNOK", "PACOK", "#DOK", "#DNOK", "PDOK", "MOPS", "NUCp/NIC", "NACp"
@@ -213,7 +228,6 @@ void SingleSpeed::addTargetDetailsToTableADSB (
                  target_->nucpNicStr().c_str(), // "NUCp/NIC"
                  target_->nacpStr().c_str()}, // "NACp"
                 this, {utn_});
-
 }
 
 void SingleSpeed::addTargetDetailsToReport(shared_ptr<EvaluationResultsReport::RootItem> root_item)
@@ -257,13 +271,12 @@ void SingleSpeed::addTargetDetailsToReport(shared_ptr<EvaluationResultsReport::R
     utn_req_table.addRow({"#CF [1]", "Number of updates with failed comparison", num_comp_failed_}, this);
     utn_req_table.addRow({"#CP [1]", "Number of updates with  passed comparison", num_comp_passed_},
                          this);
-
     // condition
     {
         QVariant p_passed_var;
 
-        if (has_p_min_)
-            p_passed_var = roundf(p_passed_ * 10000.0) / 100.0;
+        if (p_passed_.has_value())
+            p_passed_var = roundf(p_passed_.value() * 10000.0) / 100.0;
 
         utn_req_table.addRow({"PCP [%]", "Probability of passed comparison", p_passed_var}, this);
 
@@ -271,8 +284,8 @@ void SingleSpeed::addTargetDetailsToReport(shared_ptr<EvaluationResultsReport::R
 
         string result {"Unknown"};
 
-        if (has_p_min_)
-            result = req->getResultConditionStr(p_passed_);
+        if (p_passed_.has_value())
+            result = req->getResultConditionStr(p_passed_.value());
 
         utn_req_table.addRow({"Condition Fulfilled", "", result.c_str()}, this);
 
@@ -281,10 +294,9 @@ void SingleSpeed::addTargetDetailsToReport(shared_ptr<EvaluationResultsReport::R
             root_item->getSection(getTargetSectionID()).perTargetWithIssues(true); // mark utn section as with issue
             utn_req_section.perTargetWithIssues(true);
         }
-
     }
 
-    if (has_p_min_ && p_passed_ != 1.0) // TODO
+    if (p_passed_.has_value() && p_passed_.value() != 1.0) // TODO
     {
         utn_req_section.addFigure("target_errors_overview", "Target Errors Overview",
                                   getTargetErrorsViewable());
@@ -311,16 +323,19 @@ void SingleSpeed::reportDetails(EvaluationResultsReport::Section& utn_req_sectio
 
     unsigned int detail_cnt = 0;
 
-    for (auto& rq_det_it : details_)
+    for (auto& rq_det_it : getDetails())
     {
+        bool has_ref_pos = rq_det_it.numPositions() >= 2;
+
         utn_req_details_table.addRow(
-                    {Time::toString(rq_det_it.timestamp_).c_str(),
-                     !rq_det_it.has_ref_pos_, rq_det_it.pos_inside_,
-                     rq_det_it.offset_,  // "Distance"
-                     rq_det_it.check_passed_, // CP"
-                     rq_det_it.num_check_failed_, // "#CF",
-                     rq_det_it.num_check_passed_, // "#CP"
-                     rq_det_it.comment_.c_str()}, // "Comment"
+                    { Time::toString(rq_det_it.timestamp()).c_str(),
+                     !has_ref_pos, 
+                      rq_det_it.getValue(DetailPosInside),
+                      rq_det_it.getValue(DetailOffset),                // "Distance"
+                      rq_det_it.getValue(DetailCheckPassed),           // CP"
+                      rq_det_it.getValue(DetailNumCheckFailed),        // "#CF",
+                      rq_det_it.getValue(DetailNumCheckPassed),        // "#CP"
+                      rq_det_it.comments().generalComment().c_str() }, // "Comment"
                     this, detail_cnt);
 
         ++detail_cnt;
@@ -332,16 +347,15 @@ bool SingleSpeed::hasViewableData (
 {
     if (table.name() == target_table_name_ && annotation.toUInt() == utn_)
         return true;
-    else if (table.name() == tr_details_table_name_ && annotation.isValid() && annotation.toUInt() < details_.size())
+    else if (table.name() == tr_details_table_name_ && annotation.isValid() && annotation.toUInt() < numDetails())
         return true;
-    else
-        return false;
+    
+    return false;
 }
 
 std::unique_ptr<nlohmann::json::object_t> SingleSpeed::viewableData(
         const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
 {
-
     assert (hasViewableData(table, annotation));
 
     if (table.name() == target_table_name_)
@@ -358,21 +372,26 @@ std::unique_ptr<nlohmann::json::object_t> SingleSpeed::viewableData(
                 = eval_man_.getViewableForEvaluation(utn_, req_grp_id_, result_id_);
         assert (viewable_ptr);
 
-        const EvaluationRequirement::SpeedDetail& detail = details_.at(detail_cnt);
+        const auto& detail = getDetail(detail_cnt);
 
-        (*viewable_ptr)[VP_POS_LAT_KEY] = detail.tst_pos_.latitude_;
-        (*viewable_ptr)[VP_POS_LON_KEY] = detail.tst_pos_.longitude_;
+        assert(detail.numPositions() >= 1);
+
+        (*viewable_ptr)[VP_POS_LAT_KEY    ] = detail.position(0).latitude_;
+        (*viewable_ptr)[VP_POS_LON_KEY    ] = detail.position(0).longitude_;
         (*viewable_ptr)[VP_POS_WIN_LAT_KEY] = eval_man_.resultDetailZoom();
         (*viewable_ptr)[VP_POS_WIN_LON_KEY] = eval_man_.resultDetailZoom();
-        (*viewable_ptr)[VP_TIMESTAMP_KEY] = Time::toString(detail.timestamp_);
+        (*viewable_ptr)[VP_TIMESTAMP_KEY  ] = Time::toString(detail.timestamp());
 
-        if (!detail.check_passed_)
+        auto check_passed = detail.getValueAs<bool>(DetailCheckPassed);
+        assert(check_passed.has_value());
+
+        if (!check_passed.value())
             (*viewable_ptr)[VP_EVAL_KEY][VP_EVAL_HIGHDET_KEY] = vector<unsigned int>{detail_cnt};
 
         return viewable_ptr;
     }
-    else
-        return nullptr;
+    
+    return nullptr;
 }
 
 std::unique_ptr<nlohmann::json::object_t> SingleSpeed::getTargetErrorsViewable ()
@@ -385,44 +404,51 @@ std::unique_ptr<nlohmann::json::object_t> SingleSpeed::getTargetErrorsViewable (
 
     bool failed_values_of_interest = req()->failedValuesOfInterest();
 
-    for (auto& detail_it : details_)
+    for (auto& detail_it : getDetails())
     {
-        if ((failed_values_of_interest && detail_it.check_passed_)
-                || (!failed_values_of_interest && !detail_it.check_passed_))
+        auto check_passed = detail_it.getValueAs<bool>(DetailCheckPassed);
+        assert(check_passed.has_value());
+
+        if ((failed_values_of_interest && check_passed.value()) || 
+            (!failed_values_of_interest && !check_passed.value()))
             continue;
+
+        assert (detail_it.numPositions() >= 1);
+
+        bool has_ref_pos = detail_it.numPositions() >= 2;
 
         if (has_pos)
         {
-            lat_min = min(lat_min, detail_it.tst_pos_.latitude_);
-            lat_max = max(lat_max, detail_it.tst_pos_.latitude_);
+            lat_min = min(lat_min, detail_it.position(0).latitude_);
+            lat_max = max(lat_max, detail_it.position(0).latitude_);
 
-            lon_min = min(lon_min, detail_it.tst_pos_.longitude_);
-            lon_max = max(lon_max, detail_it.tst_pos_.longitude_);
+            lon_min = min(lon_min, detail_it.position(0).longitude_);
+            lon_max = max(lon_max, detail_it.position(0).longitude_);
         }
         else // tst pos always set
         {
-            lat_min = detail_it.tst_pos_.latitude_;
-            lat_max = detail_it.tst_pos_.latitude_;
+            lat_min = detail_it.position(0).latitude_;
+            lat_max = detail_it.position(0).latitude_;
 
-            lon_min = detail_it.tst_pos_.longitude_;
-            lon_max = detail_it.tst_pos_.longitude_;
+            lon_min = detail_it.position(0).longitude_;
+            lon_max = detail_it.position(0).longitude_;
 
             has_pos = true;
         }
 
-        if (detail_it.has_ref_pos_)
+        if (has_ref_pos)
         {
-            lat_min = min(lat_min, detail_it.ref_pos_.latitude_);
-            lat_max = max(lat_max, detail_it.ref_pos_.latitude_);
+            lat_min = min(lat_min, detail_it.position(1).latitude_);
+            lat_max = max(lat_max, detail_it.position(1).latitude_);
 
-            lon_min = min(lon_min, detail_it.ref_pos_.longitude_);
-            lon_max = max(lon_max, detail_it.ref_pos_.longitude_);
+            lon_min = min(lon_min, detail_it.position(1).longitude_);
+            lon_max = max(lon_max, detail_it.position(1).longitude_);
         }
     }
 
     if (has_pos)
     {
-        (*viewable_ptr)["speed_latitude"] = (lat_max+lat_min)/2.0;
+        (*viewable_ptr)["speed_latitude" ] = (lat_max+lat_min)/2.0;
         (*viewable_ptr)["speed_longitude"] = (lon_max+lon_min)/2.0;;
 
         double lat_w = 1.1*(lat_max-lat_min)/2.0;
@@ -468,7 +494,6 @@ unsigned int SingleSpeed::numCompPassed() const
     return num_comp_passed_;
 }
 
-
 const vector<double>& SingleSpeed::values() const
 {
     return values_;
@@ -502,11 +527,6 @@ unsigned int SingleSpeed::numPos() const
 unsigned int SingleSpeed::numNoRef() const
 {
     return num_no_ref_;
-}
-
-std::vector<EvaluationRequirement::SpeedDetail>& SingleSpeed::details()
-{
-    return details_;
 }
 
 EvaluationRequirement::Speed* SingleSpeed::req ()

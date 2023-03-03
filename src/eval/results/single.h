@@ -20,6 +20,10 @@
 
 #include "eval/results/base.h"
 
+#include <vector>
+
+#include <boost/optional.hpp>
+
 namespace EvaluationRequirementResult
 {
     using namespace std;
@@ -29,12 +33,17 @@ namespace EvaluationRequirementResult
     class Single : public Base
     {
     public:
-        Single(const std::string& type, const std::string& result_id,
-               std::shared_ptr<EvaluationRequirement::Base> requirement, const SectorLayer& sector_layer,
-               unsigned int utn, const EvaluationTargetData* target, EvaluationManager& eval_man);
+        Single(const std::string& type, 
+               const std::string& result_id,
+               std::shared_ptr<EvaluationRequirement::Base> requirement, 
+               const SectorLayer& sector_layer,
+               unsigned int utn, 
+               const EvaluationTargetData* target, 
+               EvaluationManager& eval_man,
+               const boost::optional<EvaluationDetails>& details);
+        virtual ~Single();
 
-        virtual bool isSingle() const override { return true; }
-        virtual bool isJoined() const override { return false; }
+        virtual BaseType baseType() const override { return BaseType::Single; }
 
         virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item) = 0;
 
@@ -45,21 +54,26 @@ namespace EvaluationRequirementResult
 
         void updateUseFromTarget ();
 
+        virtual const EvaluationDetails& getDetails() const override;
+
         const static std::string tr_details_table_name_;
         const static std::string target_table_name_;
 
     protected:
-        unsigned int utn_; // used to generate result
-        const EvaluationTargetData* target_; // used to generate result
-
-        bool result_usable_ {true}; // whether valid data exists, changed in subclass
-
         std::string getTargetSectionID();
         std::string getTargetRequirementSectionID();
 
         virtual std::string getRequirementSectionID () override;
 
         void addCommonDetails (shared_ptr<EvaluationResultsReport::RootItem> root_item);
+
+        unsigned int                utn_;    // used to generate result
+        const EvaluationTargetData* target_; // used to generate result
+
+        bool result_usable_ {true}; // whether valid data exists, changed in subclass
+
+    private:
+        bool recomputeDetails() const;
     };
 
 }

@@ -18,6 +18,7 @@
 #include "eval/results/trackangle/trackanglesingle.h"
 #include "eval/results/trackangle/trackanglejoined.h"
 #include "eval/requirement/base/base.h"
+#include "eval/requirement/trackangle/trackangle.h"
 #include "evaluationtargetdata.h"
 #include "evaluationmanager.h"
 #include "eval/results/report/rootitem.h"
@@ -39,18 +40,16 @@ using namespace Utils;
 namespace EvaluationRequirementResult
 {
 
-JoinedTrackAngle::JoinedTrackAngle(
-        const std::string& result_id, std::shared_ptr<EvaluationRequirement::Base> requirement,
-        const SectorLayer& sector_layer, EvaluationManager& eval_man)
-    : Joined("JoinedTrackAngle", result_id, requirement, sector_layer, eval_man)
+JoinedTrackAngle::JoinedTrackAngle(const std::string& result_id, 
+                                   std::shared_ptr<EvaluationRequirement::Base> requirement,
+                                   const SectorLayer& sector_layer, 
+                                   EvaluationManager& eval_man)
+:   Joined("JoinedTrackAngle", result_id, requirement, sector_layer, eval_man)
 {
 }
 
-
-void JoinedTrackAngle::join(std::shared_ptr<Base> other)
+void JoinedTrackAngle::join_impl(std::shared_ptr<Single> other)
 {
-    Joined::join(other);
-
     std::shared_ptr<SingleTrackAngle> other_sub =
             std::static_pointer_cast<SingleTrackAngle>(other);
     assert (other_sub);
@@ -65,13 +64,13 @@ void JoinedTrackAngle::addToValues (std::shared_ptr<SingleTrackAngle> single_res
     if (!single_result->use())
         return;
 
-    num_pos_ += single_result->numPos();
-    num_no_ref_ += single_result->numNoRef();
-    num_pos_outside_ += single_result->numPosOutside();
-    num_pos_inside_ += single_result->numPosInside();
+    num_pos_          += single_result->numPos();
+    num_no_ref_       += single_result->numNoRef();
+    num_pos_outside_  += single_result->numPosOutside();
+    num_pos_inside_   += single_result->numPosInside();
     num_no_tst_value_ += single_result->numNoTstValues();
-    num_comp_failed_ += single_result->numCompFailed();
-    num_comp_passed_ += single_result->numCompPassed();
+    num_comp_failed_  += single_result->numCompFailed();
+    num_comp_passed_  += single_result->numCompPassed();
 
     const vector<double>& other_values = single_result->values();
 
@@ -86,6 +85,8 @@ void JoinedTrackAngle::update()
     assert (num_pos_ - num_no_ref_ == num_pos_inside_ + num_pos_outside_);
 
     assert (values_.size() == num_comp_failed_+num_comp_passed_);
+
+    p_passed_.reset();
 
     unsigned int num_trackangles = values_.size();
 
@@ -102,7 +103,6 @@ void JoinedTrackAngle::update()
 
         assert (num_comp_failed_ <= num_trackangles);
         p_passed_ = (float)num_comp_passed_/(float)num_trackangles;
-        has_p_min_ = true;
     }
     else
     {
@@ -110,9 +110,6 @@ void JoinedTrackAngle::update()
         value_max_ = 0;
         value_avg_ = 0;
         value_var_ = 0;
-
-        has_p_min_ = false;
-        p_passed_ = 0;
     }
 }
 
@@ -146,11 +143,11 @@ void JoinedTrackAngle::addToOverviewTable(std::shared_ptr<EvaluationResultsRepor
 
     string result {"Unknown"};
 
-    if (has_p_min_)
+    if (p_passed_.has_value())
     {
-        p_passed_var = String::percentToString(p_passed_ * 100.0, req->getNumProbDecimals()).c_str();
+        p_passed_var = String::percentToString(p_passed_.value() * 100.0, req->getNumProbDecimals()).c_str();
 
-        result = req->getResultConditionStr(p_passed_);
+        result = req->getResultConditionStr(p_passed_.value());
     }
 
     // "Sector Layer", "Group", "Req.", "Id", "#Updates", "Result", "Condition", "Result"
@@ -206,13 +203,12 @@ void JoinedTrackAngle::addDetails(std::shared_ptr<EvaluationResultsReport::RootI
     sec_det_table.addRow({"#CP [1]", "Number of updates with passed comparison ", num_comp_passed_},
                          this);
 
-
     // condition
     {
         QVariant p_passed_var;
 
-        if (has_p_min_)
-            p_passed_var = roundf(p_passed_ * 10000.0) / 100.0;
+        if (p_passed_.has_value())
+            p_passed_var = roundf(p_passed_.value() * 10000.0) / 100.0;
 
         sec_det_table.addRow({"PCP [%]", "Probability of passed comparison", p_passed_var}, this);
 
@@ -220,14 +216,14 @@ void JoinedTrackAngle::addDetails(std::shared_ptr<EvaluationResultsReport::RootI
 
         string result {"Unknown"};
 
-        if (has_p_min_)
-            result = req->getResultConditionStr(p_passed_);
+        if (p_passed_.has_value())
+            result = req->getResultConditionStr(p_passed_.value());
 
         sec_det_table.addRow({"Condition Fulfilled", "", result.c_str()}, this);
     }
 
     // figure
-    if (has_p_min_ && p_passed_ != 1.0) // TODO
+    if (p_passed_.has_value() && p_passed_.value() != 1.0) // TODO
     {
         sector_section.addFigure("sector_errors_overview", "Sector Errors Overview",
                                  getErrorsViewable());
@@ -301,17 +297,17 @@ std::string JoinedTrackAngle::reference(
     return "Report:Results:"+getRequirementSectionID();
 }
 
-void JoinedTrackAngle::updatesToUseChanges()
+void JoinedTrackAngle::updatesToUseChanges_impl()
 {
     loginf << "JoinedTrackAngle: updatesToUseChanges";
 
-    num_pos_ = 0;
-    num_no_ref_ = 0;
-    num_pos_outside_ = 0;
-    num_pos_inside_ = 0;
+    num_pos_          = 0;
+    num_no_ref_       = 0;
+    num_pos_outside_  = 0;
+    num_pos_inside_   = 0;
     num_no_tst_value_ = 0;
-    num_comp_failed_ = 0;
-    num_comp_passed_ = 0;
+    num_comp_failed_  = 0;
+    num_comp_passed_  = 0;
 
     values_.clear();
 

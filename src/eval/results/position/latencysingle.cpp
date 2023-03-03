@@ -38,30 +38,33 @@ using namespace Utils;
 namespace EvaluationRequirementResult
 {
 
-SinglePositionLatency::SinglePositionLatency(
-        const std::string& result_id, std::shared_ptr<EvaluationRequirement::Base> requirement,
-        const SectorLayer& sector_layer,
-        unsigned int utn, const EvaluationTargetData* target, EvaluationManager& eval_man,
-        unsigned int num_pos, unsigned int num_no_ref,
-        unsigned int num_pos_outside, unsigned int num_pos_inside,
-        unsigned int num_value_ok, unsigned int num_value_nok,
-        vector<double> values,
-        std::vector<EvaluationRequirement::PositionDetail> details)
-    : Single("SinglePositionLatency", result_id, requirement, sector_layer, utn, target, eval_man),
-      num_pos_(num_pos), num_no_ref_(num_no_ref), num_pos_outside_(num_pos_outside),
-      num_pos_inside_(num_pos_inside), num_value_ok_(num_value_ok), num_value_nok_(num_value_nok),
-      values_(values), details_(details)
+SinglePositionLatency::SinglePositionLatency(const std::string& result_id, 
+                                             std::shared_ptr<EvaluationRequirement::Base> requirement,
+                                             const SectorLayer& sector_layer,
+                                             unsigned int utn, 
+                                             const EvaluationTargetData* target, 
+                                             EvaluationManager& eval_man,
+                                             const boost::optional<EvaluationDetails>& details,
+                                             unsigned int num_pos, 
+                                             unsigned int num_no_ref,
+                                             unsigned int num_pos_outside, 
+                                             unsigned int num_pos_inside,
+                                             unsigned int num_value_ok, 
+                                             unsigned int num_value_nok,
+                                             vector<double> values)
+:   SinglePositionBase("SinglePositionLatency", result_id, requirement, sector_layer, utn, target, eval_man, details,
+                       num_pos, num_no_ref,num_pos_outside, num_pos_inside, num_value_ok, num_value_nok, values)
 {
     update();
 }
-
 
 void SinglePositionLatency::update()
 {
     assert (num_no_ref_ <= num_pos_);
     assert (num_pos_ - num_no_ref_ == num_pos_inside_ + num_pos_outside_);
+    assert (values_.size() == num_passed_ + num_failed_);
 
-    assert (values_.size() == num_value_ok_+num_value_nok_);
+    prob_.reset();
 
     unsigned int num_distances = values_.size();
 
@@ -76,11 +79,8 @@ void SinglePositionLatency::update()
             value_var_ += pow(val - value_avg_, 2);
         value_var_ /= (float)num_distances;
 
-        assert (num_value_ok_ <= num_distances);
-        p_min_ = (float)num_value_ok_/(float)num_distances;
-        has_p_min_ = true;
-
-        result_usable_ = true;
+        assert (num_passed_ <= num_distances);
+        prob_ = (float)num_passed_/(float)num_distances;
     }
     else
     {
@@ -88,12 +88,9 @@ void SinglePositionLatency::update()
         value_max_ = 0;
         value_avg_ = 0;
         value_var_ = 0;
-
-        has_p_min_ = false;
-        p_min_ = 0;
-
-        result_usable_ = false;
     }
+
+    result_usable_ = prob_.has_value();
 
     updateUseFromTarget();
 }
@@ -143,8 +140,8 @@ void SinglePositionLatency::addTargetDetailsToTable (
 
     QVariant p_min_var;
 
-    if (has_p_min_)
-        p_min_var = roundf(p_min_ * 10000.0) / 100.0;
+    if (prob_.has_value())
+        p_min_var = roundf(prob_.value() * 10000.0) / 100.0;
 
     target_table.addRow(
                 {utn_, target_->timeBeginStr().c_str(), target_->timeEndStr().c_str(),
@@ -154,9 +151,9 @@ void SinglePositionLatency::addTargetDetailsToTable (
                  Number::round(value_max_,2), // "LTMax"
                  Number::round(value_avg_,2), // "LTAvg"
                  Number::round(sqrt(value_var_),2), // "LTSDev"
-                 num_value_ok_, // "#LTOK"
-                 num_value_nok_, // "#LTNOK"
-                 p_min_var}, // "PLTOK"
+                 num_passed_, // "#LTOK"
+                 num_failed_, // "#LTNOK"
+                 p_min_var},  // "PLTOK"
                 this, {utn_});
 }
 
@@ -173,8 +170,8 @@ void SinglePositionLatency::addTargetDetailsToTableADSB (
 
     QVariant p_min_var;
 
-    if (has_p_min_)
-        p_min_var = roundf(p_min_ * 10000.0) / 100.0;
+    if (prob_.has_value())
+        p_min_var = roundf(prob_.value() * 10000.0) / 100.0;
 
     // "UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
     // "#ACOK", "#ACNOK", "PACOK", "#LTOK", "#LTNOK", "PLTOK", "MOPS", "NUCp/NIC", "NACp"
@@ -188,8 +185,8 @@ void SinglePositionLatency::addTargetDetailsToTableADSB (
                  Number::round(value_max_,2), // "LTMax"
                  Number::round(value_avg_,2), // "LTAvg"
                  Number::round(sqrt(value_var_),2), // "LTSDev"
-                 num_value_ok_, // "#LTOK"
-                 num_value_nok_, // "#LTNOK"
+                 num_passed_, // "#LTOK"
+                 num_failed_, // "#LTNOK"
                  p_min_var, // "PLTOK"
                  target_->mopsVersionStr().c_str(), // "MOPS"
                  target_->nucpNicStr().c_str(), // "NUCp/NIC"
@@ -235,16 +232,16 @@ void SinglePositionLatency::addTargetDetailsToReport(shared_ptr<EvaluationResult
                           String::timeStringFromDouble(sqrt(value_var_),2).c_str()}, this);
     utn_req_table.addRow({"LTVar [s^2]", "Variance of latency",
                           String::timeStringFromDouble(value_var_,2).c_str()}, this);
-    utn_req_table.addRow({"#LTOK [1]", "Number of updates with latency", num_value_ok_}, this);
-    utn_req_table.addRow({"#LTNOK [1]", "Number of updates with unacceptable latency ", num_value_nok_},
+    utn_req_table.addRow({"#LTOK [1]", "Number of updates with latency", num_passed_}, this);
+    utn_req_table.addRow({"#LTNOK [1]", "Number of updates with unacceptable latency ", num_failed_},
                          this);
 
     // condition
     {
         QVariant p_min_var;
 
-        if (has_p_min_)
-            p_min_var = roundf(p_min_ * 10000.0) / 100.0;
+        if (prob_.has_value())
+            p_min_var = roundf(prob_.value() * 10000.0) / 100.0;
 
         utn_req_table.addRow({"PLTOK [%]", "Probability of acceptable latency", p_min_var}, this);
 
@@ -252,8 +249,8 @@ void SinglePositionLatency::addTargetDetailsToReport(shared_ptr<EvaluationResult
 
         string result {"Unknown"};
 
-        if (has_p_min_)
-            result = req->getResultConditionStr(p_min_);
+        if (prob_.has_value())
+            result = req->getResultConditionStr(prob_.value());
 
         utn_req_table.addRow({"Condition Latency Fulfilled", "", result.c_str()}, this);
 
@@ -265,7 +262,7 @@ void SinglePositionLatency::addTargetDetailsToReport(shared_ptr<EvaluationResult
 
     }
 
-    if (has_p_min_ && p_min_ != 1.0)
+    if (prob_.has_value() && prob_.value() != 1.0)
     {
         utn_req_section.addFigure("target_errors_overview", "Target Errors Overview",
                                   getTargetErrorsViewable());
@@ -294,16 +291,19 @@ void SinglePositionLatency::reportDetails(EvaluationResultsReport::Section& utn_
 
     unsigned int detail_cnt = 0;
 
-    for (auto& rq_det_it : details_)
+    for (auto& rq_det_it : getDetails())
     {
+        bool has_ref_pos = rq_det_it.numPositions() >= 2;
+
         utn_req_details_table.addRow(
-                    {Time::toString(rq_det_it.timestamp_).c_str(),
-                     !rq_det_it.has_ref_pos_, rq_det_it.pos_inside_,
-                     rq_det_it.value_,  // "DLatency"
-                     rq_det_it.check_passed_, // DLatencyOK"
-                     rq_det_it.num_check_failed_, // "#LTOK",
-                     rq_det_it.num_check_passed_, // "#LTNOK"
-                     rq_det_it.comment_.c_str()}, // "Comment"
+                    { Time::toString(rq_det_it.timestamp()).c_str(),
+                     !has_ref_pos, 
+                      rq_det_it.getValue(DetailPosInside),
+                      rq_det_it.getValue(DetailValue),                // "DLatency"
+                      rq_det_it.getValue(DetailCheckPassed),          // DLatencyOK"
+                      rq_det_it.getValue(DetailNumCheckPassed),       // "#LTOK",
+                      rq_det_it.getValue(DetailNumCheckFailed),       // "#LTNOK"
+                      rq_det_it.comments().generalComment().c_str()}, // "Comment"
                     this, detail_cnt);
 
         ++detail_cnt;
@@ -315,7 +315,7 @@ bool SinglePositionLatency::hasViewableData (
 {
     if (table.name() == target_table_name_ && annotation.toUInt() == utn_)
         return true;
-    else if (table.name() == tr_details_table_name_ && annotation.isValid() && annotation.toUInt() < details_.size())
+    else if (table.name() == tr_details_table_name_ && annotation.isValid() && annotation.toUInt() < numDetails())
         return true;
     else
         return false;
@@ -341,15 +341,20 @@ std::unique_ptr<nlohmann::json::object_t> SinglePositionLatency::viewableData(
                 = eval_man_.getViewableForEvaluation(utn_, req_grp_id_, result_id_);
         assert (viewable_ptr);
 
-        const EvaluationRequirement::PositionDetail& detail = details_.at(detail_cnt);
+        const auto& detail = getDetail(detail_cnt);
 
-        (*viewable_ptr)[VP_POS_LAT_KEY] = detail.tst_pos_.latitude_;
-        (*viewable_ptr)[VP_POS_LON_KEY] = detail.tst_pos_.longitude_;
+        assert (detail.numPositions() >= 1);
+
+        (*viewable_ptr)[VP_POS_LAT_KEY    ] = detail.position(0).latitude_;
+        (*viewable_ptr)[VP_POS_LON_KEY    ] = detail.position(0).longitude_;
         (*viewable_ptr)[VP_POS_WIN_LAT_KEY] = eval_man_.resultDetailZoom();
         (*viewable_ptr)[VP_POS_WIN_LON_KEY] = eval_man_.resultDetailZoom();
-        (*viewable_ptr)[VP_TIMESTAMP_KEY] = Time::toString(detail.timestamp_);
+        (*viewable_ptr)[VP_TIMESTAMP_KEY  ] = Time::toString(detail.timestamp());
 
-        if (!detail.check_passed_)
+        auto check_passed = detail.getValueAs<bool>(DetailCheckPassed);
+        assert(check_passed.has_value());
+
+        if (!check_passed.value())
             (*viewable_ptr)[VP_EVAL_KEY][VP_EVAL_HIGHDET_KEY] = vector<unsigned int>{detail_cnt};
 
         return viewable_ptr;
@@ -366,37 +371,44 @@ std::unique_ptr<nlohmann::json::object_t> SinglePositionLatency::getTargetErrors
     bool has_pos = false;
     double lat_min, lat_max, lon_min, lon_max;
 
-    for (auto& detail_it : details_)
+    for (auto& detail_it : getDetails())
     {
-        if (detail_it.check_passed_)
+        auto check_passed = detail_it.getValueAs<bool>(DetailCheckPassed);
+        assert(check_passed.has_value());
+
+        if (check_passed.value())
             continue;
+
+        assert(detail_it.numPositions() >= 1);
+
+        bool has_ref_pos = detail_it.numPositions() >= 2;
 
         if (has_pos)
         {
-            lat_min = min(lat_min, detail_it.tst_pos_.latitude_);
-            lat_max = max(lat_max, detail_it.tst_pos_.latitude_);
+            lat_min = min(lat_min, detail_it.position(0).latitude_);
+            lat_max = max(lat_max, detail_it.position(0).latitude_);
 
-            lon_min = min(lon_min, detail_it.tst_pos_.longitude_);
-            lon_max = max(lon_max, detail_it.tst_pos_.longitude_);
+            lon_min = min(lon_min, detail_it.position(0).longitude_);
+            lon_max = max(lon_max, detail_it.position(0).longitude_);
         }
         else // tst pos always set
         {
-            lat_min = detail_it.tst_pos_.latitude_;
-            lat_max = detail_it.tst_pos_.latitude_;
+            lat_min = detail_it.position(0).latitude_;
+            lat_max = detail_it.position(0).latitude_;
 
-            lon_min = detail_it.tst_pos_.longitude_;
-            lon_max = detail_it.tst_pos_.longitude_;
+            lon_min = detail_it.position(0).longitude_;
+            lon_max = detail_it.position(0).longitude_;
 
             has_pos = true;
         }
 
-        if (detail_it.has_ref_pos_)
+        if (has_ref_pos)
         {
-            lat_min = min(lat_min, detail_it.ref_pos_.latitude_);
-            lat_max = max(lat_max, detail_it.ref_pos_.latitude_);
+            lat_min = min(lat_min, detail_it.position(1).latitude_);
+            lat_max = max(lat_max, detail_it.position(1).latitude_);
 
-            lon_min = min(lon_min, detail_it.ref_pos_.longitude_);
-            lon_max = max(lon_max, detail_it.ref_pos_.longitude_);
+            lon_min = min(lon_min, detail_it.position(1).longitude_);
+            lon_max = max(lon_max, detail_it.position(1).longitude_);
         }
     }
 
@@ -438,49 +450,9 @@ std::string SinglePositionLatency::reference(
     return "Report:Results:"+getTargetRequirementSectionID();
 }
 
-unsigned int SinglePositionLatency::numValueOk() const
-{
-    return num_value_ok_;
-}
-
-unsigned int SinglePositionLatency::numValueNOk() const
-{
-    return num_value_nok_;
-}
-
-
-const vector<double>& SinglePositionLatency::values() const
-{
-    return values_;
-}
-
-unsigned int SinglePositionLatency::numPosOutside() const
-{
-    return num_pos_outside_;
-}
-
-unsigned int SinglePositionLatency::numPosInside() const
-{
-    return num_pos_inside_;
-}
-
 std::shared_ptr<Joined> SinglePositionLatency::createEmptyJoined(const std::string& result_id)
 {
     return make_shared<JoinedPositionLatency> (result_id, requirement_, sector_layer_, eval_man_);
 }
 
-unsigned int SinglePositionLatency::numPos() const
-{
-    return num_pos_;
-}
-
-unsigned int SinglePositionLatency::numNoRef() const
-{
-    return num_no_ref_;
-}
-
-std::vector<EvaluationRequirement::PositionDetail>& SinglePositionLatency::details()
-{
-    return details_;
-}
 }

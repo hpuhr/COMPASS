@@ -36,231 +36,225 @@ using namespace Utils;
 namespace EvaluationRequirementResult
 {
 
-    JoinedExtraTrack::JoinedExtraTrack(
-            const std::string& result_id, std::shared_ptr<EvaluationRequirement::Base> requirement,
-            const SectorLayer& sector_layer, EvaluationManager& eval_man)
-        : Joined("JoinedExtraTrack", result_id, requirement, sector_layer, eval_man)
+JoinedExtraTrack::JoinedExtraTrack(const std::string& result_id, 
+                                    std::shared_ptr<EvaluationRequirement::Base> requirement,
+                                    const SectorLayer& sector_layer, 
+                                    EvaluationManager& eval_man)
+:   Joined("JoinedExtraTrack", result_id, requirement, sector_layer, eval_man)
+{
+}
+
+void JoinedExtraTrack::join_impl(std::shared_ptr<Single> other)
+{
+    std::shared_ptr<SingleExtraTrack> other_sub =
+            std::static_pointer_cast<SingleExtraTrack>(other);
+    assert (other_sub);
+
+    addToValues(other_sub);
+}
+
+void JoinedExtraTrack::addToValues (std::shared_ptr<SingleExtraTrack> single_result)
+{
+    assert (single_result);
+
+    if (!single_result->use())
+        return;
+
+    num_inside_ += single_result->numInside();
+    num_extra_ += single_result->numExtra();
+    num_ok_ += single_result->numOK();
+
+    updateProb();
+}
+
+void JoinedExtraTrack::updateProb()
+{
+    assert (num_inside_ >= num_extra_ + num_ok_);
+
+    prob_.reset();
+
+    if (num_extra_ + num_ok_)
     {
+        logdbg << "JoinedTrack: updateProb: result_id " << result_id_ << " num_extra " << num_extra_
+                << " num_ok " << num_ok_;
+
+        prob_ = (float)num_extra_/(float)(num_extra_ + num_ok_);
+    }
+}
+
+void JoinedExtraTrack::addToReport (
+        std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
+{
+    logdbg << "JoinedTrack " <<  requirement_->name() <<": addToReport";
+
+    if (!results_.size()) // some data must exist
+    {
+        logerr << "JoinedTrack " <<  requirement_->name() <<": addToReport: no data";
+        return;
     }
 
+    logdbg << "JoinedTrack " <<  requirement_->name() << ": addToReport: adding joined result";
 
-    void JoinedExtraTrack::join(std::shared_ptr<Base> other)
+    addToOverviewTable(root_item);
+    addDetails(root_item);
+}
+
+void JoinedExtraTrack::addToOverviewTable(std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
+{
+    EvaluationResultsReport::SectionContentTable& ov_table = getReqOverviewTable(root_item);
+
+    // condition
+    std::shared_ptr<EvaluationRequirement::ExtraTrack> req =
+            std::static_pointer_cast<EvaluationRequirement::ExtraTrack>(requirement_);
+    assert (req);
+
+    // pd
+    QVariant prob_var;
+
+    string result {"Unknown"};
+
+    if (prob_.has_value())
     {
-        Joined::join(other);
+        prob_var = String::percentToString(prob_.value() * 100.0, req->getNumProbDecimals()).c_str();
 
-        std::shared_ptr<SingleExtraTrack> other_sub =
-                std::static_pointer_cast<SingleExtraTrack>(other);
-        assert (other_sub);
-
-        addToValues(other_sub);
+        result = req-> getResultConditionStr(prob_.value());
     }
 
-    void JoinedExtraTrack::addToValues (std::shared_ptr<SingleExtraTrack> single_result)
+    // "Sector Layer", "Group", "Req.", "Id", "#Updates", "Result", "Condition", "Result"
+    ov_table.addRow({sector_layer_.name().c_str(), requirement_->groupName().c_str(),
+                        requirement_->shortname().c_str(),
+                        result_id_.c_str(), {num_extra_+num_ok_},
+                        prob_var, req->getConditionStr().c_str(), result.c_str()}, this, {});
+    // "Report:Results:Overview"
+}
+
+void JoinedExtraTrack::addDetails(std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
+{
+    EvaluationResultsReport::Section& sector_section = getRequirementSection(root_item);
+
+    if (!sector_section.hasTable("sector_details_table"))
+        sector_section.addTable("sector_details_table", 3, {"Name", "comment", "Value"}, false);
+
+    EvaluationResultsReport::SectionContentTable& sec_det_table =
+            sector_section.getTable("sector_details_table");
+
+    addCommonDetails(sec_det_table);
+
+    sec_det_table.addRow({"#Check.", "Number of checked test track updates", num_extra_+num_ok_}, this);
+    sec_det_table.addRow({"#OK.", "Number of OK test track updates", num_ok_}, this);
+    sec_det_table.addRow({"#Extra", "Number of extra test track updates", num_extra_}, this);
+
+    // condition
+    std::shared_ptr<EvaluationRequirement::ExtraTrack> req =
+            std::static_pointer_cast<EvaluationRequirement::ExtraTrack>(requirement_);
+    assert (req);
+
+    // pd
+    QVariant prob_var;
+
+    string result {"Unknown"};
+
+    if (prob_.has_value())
     {
-        assert (single_result);
+        prob_var = String::percentToString(prob_.value() * 100.0, req->getNumProbDecimals()).c_str();
 
-        if (!single_result->use())
-            return;
-
-        num_inside_ += single_result->numInside();
-        num_extra_ += single_result->numExtra();
-        num_ok_ += single_result->numOK();
-
-        updateProb();
+        result = req-> getResultConditionStr(prob_.value());
     }
 
-    void JoinedExtraTrack::updateProb()
+    sec_det_table.addRow({"PEx [%]", "Probability of update with extra track", prob_var}, this);
+    sec_det_table.addRow({"Condition", {}, req->getConditionStr().c_str()}, this);
+    sec_det_table.addRow({"Condition Fulfilled", {}, result.c_str()}, this);
+
+    // figure
+    if (prob_.has_value() && prob_.value() != 0.0)
     {
-        assert (num_inside_ >= num_extra_ + num_ok_);
-
-        if (num_extra_ + num_ok_)
-        {
-            logdbg << "JoinedTrack: updateProb: result_id " << result_id_ << " num_extra " << num_extra_
-                   << " num_ok " << num_ok_;
-
-            prob_ = (float)num_extra_/(float)(num_extra_ + num_ok_);
-            has_prob_ = true;
-        }
-        else
-        {
-            prob_ = 0;
-            has_prob_ = false;
-        }
+        sector_section.addFigure("sector_errors_overview", "Sector Errors Overview",
+                                    getErrorsViewable());
     }
-
-    void JoinedExtraTrack::addToReport (
-            std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
+    else
     {
-        logdbg << "JoinedTrack " <<  requirement_->name() <<": addToReport";
-
-        if (!results_.size()) // some data must exist
-        {
-            logerr << "JoinedTrack " <<  requirement_->name() <<": addToReport: no data";
-            return;
-        }
-
-        logdbg << "JoinedTrack " <<  requirement_->name() << ": addToReport: adding joined result";
-
-        addToOverviewTable(root_item);
-        addDetails(root_item);
+        sector_section.addText("sector_errors_overview_no_figure");
+        sector_section.getText("sector_errors_overview_no_figure").addText(
+                    "No target errors found, therefore no figure was generated.");
     }
+}
 
-    void JoinedExtraTrack::addToOverviewTable(std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
+bool JoinedExtraTrack::hasViewableData (
+        const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
+{
+    if (table.name() == req_overview_table_name_)
+        return true;
+    else
+        return false;
+}
+
+std::unique_ptr<nlohmann::json::object_t> JoinedExtraTrack::viewableData(
+        const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
+{
+    assert (hasViewableData(table, annotation));
+    return getErrorsViewable();
+}
+
+std::unique_ptr<nlohmann::json::object_t> JoinedExtraTrack::getErrorsViewable ()
+{
+    std::unique_ptr<nlohmann::json::object_t> viewable_ptr =
+            eval_man_.getViewableForEvaluation(req_grp_id_, result_id_);
+
+    double lat_min, lat_max, lon_min, lon_max;
+
+    tie(lat_min, lat_max) = sector_layer_.getMinMaxLatitude();
+    tie(lon_min, lon_max) = sector_layer_.getMinMaxLongitude();
+
+    (*viewable_ptr)[VP_POS_LAT_KEY] = (lat_max+lat_min)/2.0;
+    (*viewable_ptr)[VP_POS_LON_KEY] = (lon_max+lon_min)/2.0;;
+
+    double lat_w = 1.1*(lat_max-lat_min)/2.0;
+    double lon_w = 1.1*(lon_max-lon_min)/2.0;
+
+    if (lat_w < eval_man_.resultDetailZoom())
+        lat_w = eval_man_.resultDetailZoom();
+
+    if (lon_w < eval_man_.resultDetailZoom())
+        lon_w = eval_man_.resultDetailZoom();
+
+    (*viewable_ptr)[VP_POS_WIN_LAT_KEY] = lat_w;
+    (*viewable_ptr)[VP_POS_WIN_LON_KEY] = lon_w;
+
+    return viewable_ptr;
+}
+
+bool JoinedExtraTrack::hasReference (
+        const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
+{
+    //loginf << "UGA3 '"  << table.name() << "'" << " other '" << req_overview_table_name_ << "'";
+
+    if (table.name() == req_overview_table_name_)
+        return true;
+    else
+        return false;;
+}
+
+std::string JoinedExtraTrack::reference(
+        const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
+{
+    assert (hasReference(table, annotation));
+    return "Report:Results:"+getRequirementSectionID();
+}
+
+void JoinedExtraTrack::updatesToUseChanges_impl()
+{
+    num_inside_ = 0;
+    num_extra_  = 0;
+    num_ok_     = 0;
+
+    for (auto result_it : results_)
     {
-        EvaluationResultsReport::SectionContentTable& ov_table = getReqOverviewTable(root_item);
+        std::shared_ptr<SingleExtraTrack> result =
+                std::static_pointer_cast<SingleExtraTrack>(result_it);
+        assert (result);
 
-        // condition
-        std::shared_ptr<EvaluationRequirement::ExtraTrack> req =
-                std::static_pointer_cast<EvaluationRequirement::ExtraTrack>(requirement_);
-        assert (req);
-
-        // pd
-        QVariant prob_var;
-
-        string result {"Unknown"};
-
-        if (has_prob_)
-        {
-            prob_var = String::percentToString(prob_ * 100.0, req->getNumProbDecimals()).c_str();
-
-            result = req-> getResultConditionStr(prob_);
-        }
-
-        // "Sector Layer", "Group", "Req.", "Id", "#Updates", "Result", "Condition", "Result"
-        ov_table.addRow({sector_layer_.name().c_str(), requirement_->groupName().c_str(),
-                         requirement_->shortname().c_str(),
-                         result_id_.c_str(), {num_extra_+num_ok_},
-                         prob_var, req->getConditionStr().c_str(), result.c_str()}, this, {});
-        // "Report:Results:Overview"
+        addToValues(result);
     }
-
-    void JoinedExtraTrack::addDetails(std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
-    {
-        EvaluationResultsReport::Section& sector_section = getRequirementSection(root_item);
-
-        if (!sector_section.hasTable("sector_details_table"))
-            sector_section.addTable("sector_details_table", 3, {"Name", "comment", "Value"}, false);
-
-        EvaluationResultsReport::SectionContentTable& sec_det_table =
-                sector_section.getTable("sector_details_table");
-
-        addCommonDetails(sec_det_table);
-
-        sec_det_table.addRow({"#Check.", "Number of checked test track updates", num_extra_+num_ok_}, this);
-        sec_det_table.addRow({"#OK.", "Number of OK test track updates", num_ok_}, this);
-        sec_det_table.addRow({"#Extra", "Number of extra test track updates", num_extra_}, this);
-
-        // condition
-        std::shared_ptr<EvaluationRequirement::ExtraTrack> req =
-                std::static_pointer_cast<EvaluationRequirement::ExtraTrack>(requirement_);
-        assert (req);
-
-        // pd
-        QVariant prob_var;
-
-        string result {"Unknown"};
-
-        if (has_prob_)
-        {
-            prob_var = String::percentToString(prob_ * 100.0, req->getNumProbDecimals()).c_str();
-
-            result = req-> getResultConditionStr(prob_);
-        }
-
-        sec_det_table.addRow({"PEx [%]", "Probability of update with extra track", prob_var}, this);
-        sec_det_table.addRow({"Condition", {}, req->getConditionStr().c_str()}, this);
-        sec_det_table.addRow({"Condition Fulfilled", {}, result.c_str()}, this);
-
-        // figure
-        if (has_prob_ && prob_ != 0.0)
-        {
-            sector_section.addFigure("sector_errors_overview", "Sector Errors Overview",
-                                     getErrorsViewable());
-        }
-        else
-        {
-            sector_section.addText("sector_errors_overview_no_figure");
-            sector_section.getText("sector_errors_overview_no_figure").addText(
-                        "No target errors found, therefore no figure was generated.");
-        }
-    }
-
-    bool JoinedExtraTrack::hasViewableData (
-            const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
-    {
-        if (table.name() == req_overview_table_name_)
-            return true;
-        else
-            return false;
-    }
-
-    std::unique_ptr<nlohmann::json::object_t> JoinedExtraTrack::viewableData(
-            const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
-    {
-        assert (hasViewableData(table, annotation));
-        return getErrorsViewable();
-    }
-
-    std::unique_ptr<nlohmann::json::object_t> JoinedExtraTrack::getErrorsViewable ()
-    {
-        std::unique_ptr<nlohmann::json::object_t> viewable_ptr =
-                eval_man_.getViewableForEvaluation(req_grp_id_, result_id_);
-
-        double lat_min, lat_max, lon_min, lon_max;
-
-        tie(lat_min, lat_max) = sector_layer_.getMinMaxLatitude();
-        tie(lon_min, lon_max) = sector_layer_.getMinMaxLongitude();
-
-        (*viewable_ptr)[VP_POS_LAT_KEY] = (lat_max+lat_min)/2.0;
-        (*viewable_ptr)[VP_POS_LON_KEY] = (lon_max+lon_min)/2.0;;
-
-        double lat_w = 1.1*(lat_max-lat_min)/2.0;
-        double lon_w = 1.1*(lon_max-lon_min)/2.0;
-
-        if (lat_w < eval_man_.resultDetailZoom())
-            lat_w = eval_man_.resultDetailZoom();
-
-        if (lon_w < eval_man_.resultDetailZoom())
-            lon_w = eval_man_.resultDetailZoom();
-
-        (*viewable_ptr)[VP_POS_WIN_LAT_KEY] = lat_w;
-        (*viewable_ptr)[VP_POS_WIN_LON_KEY] = lon_w;
-
-        return viewable_ptr;
-    }
-
-    bool JoinedExtraTrack::hasReference (
-            const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
-    {
-        //loginf << "UGA3 '"  << table.name() << "'" << " other '" << req_overview_table_name_ << "'";
-
-        if (table.name() == req_overview_table_name_)
-            return true;
-        else
-            return false;;
-    }
-
-    std::string JoinedExtraTrack::reference(
-            const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
-    {
-        assert (hasReference(table, annotation));
-        return "Report:Results:"+getRequirementSectionID();
-    }
-
-    void JoinedExtraTrack::updatesToUseChanges()
-    {
-        num_inside_ = 0;
-        num_extra_ = 0;
-        num_ok_ = 0;
-
-        for (auto result_it : results_)
-        {
-            std::shared_ptr<SingleExtraTrack> result =
-                    std::static_pointer_cast<SingleExtraTrack>(result_it);
-            assert (result);
-
-            addToValues(result);
-        }
-    }
+}
 
 }

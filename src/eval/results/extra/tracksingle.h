@@ -19,7 +19,8 @@
 #define EVALUATIONREQUIREMENTEXTRATRACKRESULT_H
 
 #include "eval/results/single.h"
-#include "eval/requirement/extra/track.h"
+
+#include <boost/optional.hpp>
 
 namespace EvaluationRequirementResult
 {
@@ -27,12 +28,17 @@ namespace EvaluationRequirementResult
 class SingleExtraTrack : public Single
 {
 public:
-    SingleExtraTrack(
-            const std::string& result_id, std::shared_ptr<EvaluationRequirement::Base> requirement,
-            const SectorLayer& sector_layer, unsigned int utn, const EvaluationTargetData* target,
-            EvaluationManager& eval_man,
-            bool ignore, unsigned int num_inside, unsigned int num_extra,  unsigned int num_ok,
-            std::vector<EvaluationRequirement::ExtraTrackDetail> details);
+    SingleExtraTrack(const std::string& result_id, 
+                     std::shared_ptr<EvaluationRequirement::Base> requirement,
+                     const SectorLayer& sector_layer, 
+                     unsigned int utn, 
+                     const EvaluationTargetData* target,
+                     EvaluationManager& eval_man,
+                     const boost::optional<EvaluationDetails>& details,
+                     bool ignore, 
+                     unsigned int num_inside, 
+                     unsigned int num_extra,  
+                     unsigned int num_ok);
 
     virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item) override;
 
@@ -54,17 +60,17 @@ public:
     unsigned int numExtra() const;
     unsigned int numOK() const;
 
-    const std::vector<EvaluationRequirement::ExtraTrackDetail>& details() const;
+    static const std::string DetailTrackNum; //unsigned int
+    static const std::string DetailInside;   //bool
+    static const std::string DetailExtra;    //bool
 
 protected:
-    bool ignore_ {false};
+    bool         ignore_     {false};
     unsigned int num_inside_ {0};
-    unsigned int num_extra_ {0};
-    unsigned int num_ok_ {0};
-    std::vector<EvaluationRequirement::ExtraTrackDetail> details_;
+    unsigned int num_extra_  {0};
+    unsigned int num_ok_     {0};
 
-    bool has_prob_ {false};
-    float prob_{0};
+    boost::optional<float> prob_;
 
     void updateProb();
     void addTargetToOverviewTable(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);

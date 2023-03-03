@@ -36,18 +36,23 @@ using namespace Utils;
 namespace EvaluationRequirementResult
 {
 
-SingleModeCFalse::SingleModeCFalse(
-        const std::string& result_id, std::shared_ptr<EvaluationRequirement::Base> requirement,
-        const SectorLayer& sector_layer,
-        unsigned int utn, const EvaluationTargetData* target, EvaluationManager& eval_man,
-        int num_updates, int num_no_ref_pos, int num_no_ref_val, int num_pos_outside, int num_pos_inside,
-        int num_unknown, int num_correct, int num_false,
-        std::vector<EvaluationRequirement::CheckDetail> details)
-    : Single("SingleModeCFalse", result_id, requirement, sector_layer, utn, target, eval_man),
-      num_updates_(num_updates), num_no_ref_pos_(num_no_ref_pos), num_no_ref_val_(num_no_ref_val),
-      num_pos_outside_(num_pos_outside), num_pos_inside_(num_pos_inside),
-      num_unknown_(num_unknown),
-      num_correct_(num_correct), num_false_(num_false), details_(details)
+SingleModeCFalse::SingleModeCFalse(const std::string& result_id, 
+                                   std::shared_ptr<EvaluationRequirement::Base> requirement,
+                                   const SectorLayer& sector_layer,
+                                   unsigned int utn, 
+                                   const EvaluationTargetData* target, 
+                                   EvaluationManager& eval_man,
+                                   const boost::optional<EvaluationDetails>& details,
+                                   int num_updates,
+                                   int num_no_ref_pos, 
+                                   int num_no_ref_val, 
+                                   int num_pos_outside, 
+                                   int num_pos_inside,
+                                   int num_unknown, 
+                                   int num_correct, 
+                                   int num_false)
+:   SingleFalseBase("SingleModeCFalse", result_id, requirement, sector_layer, utn, target, eval_man, details,
+                    num_updates, num_no_ref_pos, num_no_ref_val, num_pos_outside, num_pos_inside, num_unknown, num_correct, num_false)
 {
     updateProbabilities();
 }
@@ -57,20 +62,14 @@ void SingleModeCFalse::updateProbabilities()
     assert (num_updates_ - num_no_ref_pos_ == num_pos_inside_ + num_pos_outside_);
     assert (num_pos_inside_ == num_no_ref_val_+num_unknown_+num_correct_+num_false_);
 
+    p_false_.reset();
+
     if (num_correct_+num_false_)
     {
         p_false_ = (float)(num_false_)/(float)(num_correct_+num_false_);
-        has_p_false_ = true;
-
-        result_usable_ = true;
     }
-    else
-    {
-        has_p_false_ = false;
-        p_false_ = 0;
-
-        result_usable_ = false;
-    }
+    
+    result_usable_ = p_false_.has_value();
 
     updateUseFromTarget();
 }
@@ -109,8 +108,8 @@ void SingleModeCFalse::addTargetDetailsToTable (
 
     QVariant pf_var;
 
-    if (has_p_false_)
-        pf_var = roundf(p_false_ * 10000.0) / 100.0;
+    if (p_false_.has_value())
+        pf_var = roundf(p_false_.value() * 10000.0) / 100.0;
 
     target_table.addRow(
                 {utn_, target_->timeBeginStr().c_str(), target_->timeEndStr().c_str(),
@@ -171,8 +170,8 @@ void SingleModeCFalse::addTargetDetailsToReport(shared_ptr<EvaluationResultsRepo
 
         QVariant pf_var;
 
-        if (has_p_false_)
-            pf_var = roundf(p_false_ * 10000.0) / 100.0;
+        if (p_false_.has_value())
+            pf_var = roundf(p_false_.value() * 10000.0) / 100.0;
 
         utn_req_table.addRow({"PF [%]", "Probability of Mode C false", pf_var}, this);
 
@@ -181,8 +180,8 @@ void SingleModeCFalse::addTargetDetailsToReport(shared_ptr<EvaluationResultsRepo
 
         string result {"Unknown"};
 
-        if (has_p_false_)
-            result = req-> getResultConditionStr(p_false_);
+        if (p_false_.has_value())
+            result = req-> getResultConditionStr(p_false_.value());
 
         utn_req_table.addRow({"Condition Fulfilled", "", result.c_str()}, this);
 
@@ -194,7 +193,7 @@ void SingleModeCFalse::addTargetDetailsToReport(shared_ptr<EvaluationResultsRepo
 
     }
 
-    if (has_p_false_ && p_false_ != 0.0)
+    if (p_false_.has_value() && p_false_.value() != 0.0)
     {
         utn_req_section.addFigure("target_errors_overview", "Target Errors Overview",
                                   getTargetErrorsViewable());
@@ -214,7 +213,7 @@ void SingleModeCFalse::reportDetails(EvaluationResultsReport::Section& utn_req_s
 {
     if (!utn_req_section.hasTable(tr_details_table_name_))
         utn_req_section.addTable(tr_details_table_name_, 11,
-                                 {"ToD", "Ref", "Ok", "#Up", "#NoRef", "#PosInside", "#PosOutside", "#Unknwon",
+                                 {"ToD", "Ref", "Ok", "#Up", "#NoRef", "#PosInside", "#PosOutside", "#Unknown",
                                   "#Correct", "#False", "Comment"});
 
     EvaluationResultsReport::SectionContentTable& utn_req_details_table =
@@ -222,14 +221,20 @@ void SingleModeCFalse::reportDetails(EvaluationResultsReport::Section& utn_req_s
 
     unsigned int detail_cnt = 0;
 
-    for (auto& rq_det_it : details_)
+    for (auto& rq_det_it : getDetails())
     {
         utn_req_details_table.addRow(
-                    {Time::toString(rq_det_it.timestamp_).c_str(), rq_det_it.ref_exists_,
-                     !rq_det_it.is_not_ok_,
-                     rq_det_it.num_updates_, rq_det_it.num_no_ref_,
-                     rq_det_it.num_inside_, rq_det_it.num_outside_, rq_det_it.num_unknown_id_,
-                     rq_det_it.num_correct_id_, rq_det_it.num_false_id_, rq_det_it.comment_.c_str()},
+                    { Time::toString(rq_det_it.timestamp()).c_str(), 
+                      rq_det_it.getValue(DetailRefExists),
+                     !rq_det_it.getValue(DetailIsNotOk).toBool(),
+                      rq_det_it.getValue(DetailNumUpdates), 
+                      rq_det_it.getValue(DetailNumNoRef),
+                      rq_det_it.getValue(DetailNumInside), 
+                      rq_det_it.getValue(DetailNumOutside), 
+                      rq_det_it.getValue(DetailNumUnknownID),
+                      rq_det_it.getValue(DetailNumCorrectID), 
+                      rq_det_it.getValue(DetailNumFalseID), 
+                      rq_det_it.comments().generalComment().c_str()},
                     this, detail_cnt);
 
         ++detail_cnt;
@@ -242,7 +247,7 @@ bool SingleModeCFalse::hasViewableData (
 {
     if (table.name() == target_table_name_ && annotation.toUInt() == utn_)
         return true;
-    else if (table.name() == tr_details_table_name_ && annotation.isValid() && annotation.toUInt() < details_.size())
+    else if (table.name() == tr_details_table_name_ && annotation.isValid() && annotation.toUInt() < numDetails())
         return true;
     else
         return false;
@@ -251,7 +256,6 @@ bool SingleModeCFalse::hasViewableData (
 std::unique_ptr<nlohmann::json::object_t> SingleModeCFalse::viewableData(
         const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
 {
-
     assert (hasViewableData(table, annotation));
 
     if (table.name() == target_table_name_)
@@ -268,13 +272,15 @@ std::unique_ptr<nlohmann::json::object_t> SingleModeCFalse::viewableData(
                 = eval_man_.getViewableForEvaluation(utn_, req_grp_id_, result_id_);
         assert (viewable_ptr);
 
-        const EvaluationRequirement::CheckDetail& detail = details_.at(detail_cnt);
+        const auto& detail = getDetail(detail_cnt);
 
-        (*viewable_ptr)[VP_POS_LAT_KEY] = detail.pos_tst_.latitude_;
-        (*viewable_ptr)[VP_POS_LON_KEY] = detail.pos_tst_.longitude_;
+        assert(detail.numPositions() >= 1);
+
+        (*viewable_ptr)[VP_POS_LAT_KEY] = detail.position(0).latitude_;
+        (*viewable_ptr)[VP_POS_LON_KEY] = detail.position(0).longitude_;
         (*viewable_ptr)[VP_POS_WIN_LAT_KEY] = eval_man_.resultDetailZoom();
         (*viewable_ptr)[VP_POS_WIN_LON_KEY] = eval_man_.resultDetailZoom();
-        (*viewable_ptr)[VP_TIMESTAMP_KEY] = Time::toString(detail.timestamp_);
+        (*viewable_ptr)[VP_TIMESTAMP_KEY] = Time::toString(detail.timestamp());
 
         //            if (!detail.pos_ok_)
         //                (*viewable_ptr)[VP_EVAL_KEY][VP_EVAL_HIGHDET_KEY] = vector<unsigned int>{detail_cnt};
@@ -293,26 +299,31 @@ std::unique_ptr<nlohmann::json::object_t> SingleModeCFalse::getTargetErrorsViewa
     bool has_pos = false;
     double lat_min, lat_max, lon_min, lon_max;
 
-    for (auto& detail_it : details_)
+    for (auto& detail_it : getDetails())
     {
-        if (!detail_it.is_not_ok_)
+        assert(detail_it.numPositions() >= 1);
+
+        auto is_not_ok = detail_it.getValueAs<bool>(DetailIsNotOk);
+        assert(is_not_ok.has_value());
+
+        if (!is_not_ok.value())
             continue;
 
         if (has_pos)
         {
-            lat_min = min(lat_min, detail_it.pos_tst_.latitude_);
-            lat_max = max(lat_max, detail_it.pos_tst_.latitude_);
+            lat_min = min(lat_min, detail_it.position(0).latitude_);
+            lat_max = max(lat_max, detail_it.position(0).latitude_);
 
-            lon_min = min(lon_min, detail_it.pos_tst_.longitude_);
-            lon_max = max(lon_max, detail_it.pos_tst_.longitude_);
+            lon_min = min(lon_min, detail_it.position(0).longitude_);
+            lon_max = max(lon_max, detail_it.position(0).longitude_);
         }
         else // tst pos always set
         {
-            lat_min = detail_it.pos_tst_.latitude_;
-            lat_max = detail_it.pos_tst_.latitude_;
+            lat_min = detail_it.position(0).latitude_;
+            lat_max = detail_it.position(0).latitude_;
 
-            lon_min = detail_it.pos_tst_.longitude_;
-            lon_max = detail_it.pos_tst_.longitude_;
+            lon_min = detail_it.position(0).longitude_;
+            lon_max = detail_it.position(0).longitude_;
 
             has_pos = true;
         }
@@ -359,51 +370,6 @@ std::string SingleModeCFalse::reference(
 std::shared_ptr<Joined> SingleModeCFalse::createEmptyJoined(const std::string& result_id)
 {
     return make_shared<JoinedModeCFalse> (result_id, requirement_, sector_layer_, eval_man_);
-}
-
-int SingleModeCFalse::numNoRefPos() const
-{
-    return num_no_ref_pos_;
-}
-
-int SingleModeCFalse::numNoRefValue() const
-{
-    return num_no_ref_val_;
-}
-
-int SingleModeCFalse::numPosOutside() const
-{
-    return num_pos_outside_;
-}
-
-int SingleModeCFalse::numPosInside() const
-{
-    return num_pos_inside_;
-}
-
-int SingleModeCFalse::numUpdates() const
-{
-    return num_updates_;
-}
-
-int SingleModeCFalse::numUnknown() const
-{
-    return num_unknown_;
-}
-
-int SingleModeCFalse::numCorrect() const
-{
-    return num_correct_;
-}
-
-int SingleModeCFalse::numFalse() const
-{
-    return num_false_;
-}
-
-std::vector<EvaluationRequirement::CheckDetail>& SingleModeCFalse::details()
-{
-    return details_;
 }
 
 }

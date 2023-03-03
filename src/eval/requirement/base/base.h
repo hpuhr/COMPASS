@@ -46,7 +46,6 @@ enum ValueComparisonResult
     Different
 };
 
-
 class Base
 {
 public:
@@ -55,9 +54,10 @@ public:
     virtual ~Base();
 
     virtual std::shared_ptr<EvaluationRequirementResult::Single> evaluate (
-            const EvaluationTargetData& target_data, std::shared_ptr<Base> instance,
+            const EvaluationTargetData& target_data, 
+            std::shared_ptr<Base> instance,
             const SectorLayer& sector_layer) = 0;
-    // instance is the self-reference for the result
+    // instance is the self-reference for the result (we want to pass the shared pointer to the result)
 
     std::string name() const;
     std::string shortname() const;

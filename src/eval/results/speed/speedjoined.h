@@ -20,65 +20,67 @@
 
 #include "eval/results/joined.h"
 
+#include <boost/optional.hpp>
+
 namespace EvaluationRequirementResult
 {
-    using namespace std;
 
-    class SingleSpeed;
+using namespace std;
 
-    class JoinedSpeed : public Joined
-    {
-    public:
-        JoinedSpeed(
-                const std::string& result_id, std::shared_ptr<EvaluationRequirement::Base> requirement,
-                const SectorLayer& sector_layer, EvaluationManager& eval_man);
+class SingleSpeed;
 
-        virtual void join(std::shared_ptr<Base> other) override;
+class JoinedSpeed : public Joined
+{
+public:
+    JoinedSpeed(const std::string& result_id, 
+                std::shared_ptr<EvaluationRequirement::Base> requirement,
+                const SectorLayer& sector_layer, 
+                EvaluationManager& eval_man);
 
-        //virtual void print() override;
-        virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item) override;
+    //virtual void print() override;
+    virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item) override;
 
-        virtual void updatesToUseChanges() override;
+    virtual bool hasViewableData (
+            const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override;
+    virtual std::unique_ptr<nlohmann::json::object_t> viewableData(
+            const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override;
 
-        virtual bool hasViewableData (
-                const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override;
-        virtual std::unique_ptr<nlohmann::json::object_t> viewableData(
-                const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override;
+    virtual bool hasReference (
+            const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override;
+    virtual std::string reference(
+            const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override;
 
-        virtual bool hasReference (
-                const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override;
-        virtual std::string reference(
-                const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override;
+    void exportAsCSV();
 
-        void exportAsCSV();
+protected:
+    void addToValues (std::shared_ptr<SingleSpeed> single_result);
+    void update();
 
-    protected:
-        unsigned int num_pos_ {0};
-        unsigned int num_no_ref_ {0};
-        unsigned int num_pos_outside_ {0};
-        unsigned int num_pos_inside_ {0};
-        unsigned int num_no_tst_value_ {0};
-        unsigned int num_comp_failed_ {0};
-        unsigned int num_comp_passed_ {0};
+    void addToOverviewTable(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
+    void addDetails(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
 
-        vector<double> values_;
+    std::unique_ptr<nlohmann::json::object_t> getErrorsViewable ();
 
-        double value_min_ {0};
-        double value_max_ {0};
-        double value_avg_ {0};
-        double value_var_ {0};
+    virtual void join_impl(std::shared_ptr<Single> other) override;
+    virtual void updatesToUseChanges_impl() override;
 
-        bool has_p_min_ {false};
-        float p_passed_{0};
+    unsigned int num_pos_          {0};
+    unsigned int num_no_ref_       {0};
+    unsigned int num_pos_outside_  {0};
+    unsigned int num_pos_inside_   {0};
+    unsigned int num_no_tst_value_ {0};
+    unsigned int num_comp_failed_  {0};
+    unsigned int num_comp_passed_  {0};
 
-        void addToValues (std::shared_ptr<SingleSpeed> single_result);
-        void update();
+    vector<double> values_;
 
-        void addToOverviewTable(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
-        void addDetails(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
+    double value_min_ {0};
+    double value_max_ {0};
+    double value_avg_ {0};
+    double value_var_ {0};
 
-        std::unique_ptr<nlohmann::json::object_t> getErrorsViewable ();
-    };
+    boost::optional<float> p_passed_;
+};
 
 }
 

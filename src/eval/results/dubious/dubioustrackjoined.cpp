@@ -18,6 +18,7 @@
 #include "eval/results/dubious/dubioustracksingle.h"
 #include "eval/results/dubious/dubioustrackjoined.h"
 #include "eval/requirement/base/base.h"
+#include "eval/requirement/dubious/dubioustrack.h"
 #include "evaluationtargetdata.h"
 #include "evaluationmanager.h"
 #include "eval/results/report/rootitem.h"
@@ -39,18 +40,16 @@ using namespace Utils;
 namespace EvaluationRequirementResult
 {
 
-JoinedDubiousTrack::JoinedDubiousTrack(
-        const std::string& result_id, std::shared_ptr<EvaluationRequirement::Base> requirement,
-        const SectorLayer& sector_layer, EvaluationManager& eval_man)
-    : Joined("JoinedDubiousTrack", result_id, requirement, sector_layer, eval_man)
+JoinedDubiousTrack::JoinedDubiousTrack(const std::string& result_id, 
+                                       std::shared_ptr<EvaluationRequirement::Base> requirement,
+                                       const SectorLayer& sector_layer, 
+                                       EvaluationManager& eval_man)
+:   JoinedDubiousBase("JoinedDubiousTrack", result_id, requirement, sector_layer, eval_man)
 {
 }
 
-
-void JoinedDubiousTrack::join(std::shared_ptr<Base> other)
+void JoinedDubiousTrack::join_impl(std::shared_ptr<Single> other)
 {
-    Joined::join(other);
-
     std::shared_ptr<SingleDubiousTrack> other_sub =
             std::static_pointer_cast<SingleDubiousTrack>(other);
     assert (other_sub);
@@ -58,25 +57,25 @@ void JoinedDubiousTrack::join(std::shared_ptr<Base> other)
     addToValues(other_sub);
 }
 
-void JoinedDubiousTrack::addToValues (std::shared_ptr<SingleDubiousTrack> single_result)
+void JoinedDubiousTrack::addToValues(std::shared_ptr<SingleDubiousTrack> single_result)
 {
     assert (single_result);
 
     if (!single_result->use())
         return;
 
-    num_updates_ += single_result->numUpdates();
-    num_pos_outside_ += single_result->numPosOutside();
-    num_pos_inside_ += single_result->numPosInside();
+    num_updates_            += single_result->numUpdates();
+    num_pos_outside_        += single_result->numPosOutside();
+    num_pos_inside_         += single_result->numPosInside();
     num_pos_inside_dubious_ += single_result->numPosInsideDubious();
-    num_tracks_ += single_result->numTracks();
-    num_tracks_dubious_ += single_result->numTracksDubious();
+    num_tracks_             += single_result->numTracks();
+    num_tracks_dubious_     += single_result->numTracksDubious();
 
-    track_duration_all_ += single_result->trackDurationAll();
-    track_duration_nondub_ += single_result->trackDurationNondub();
-    track_duration_dubious_ += single_result->trackDurationDubious();
+    duration_all_     += single_result->trackDurationAll();
+    duration_nondub_  += single_result->trackDurationNondub();
+    duration_dubious_ += single_result->trackDurationDubious();
 
-    details_.insert(details_.end(), single_result->details().begin(), single_result->details().end());
+    addSingleDetails(single_result->getDetails());
 
     //const vector<double>& other_values = single_result->values();
     //values_.insert(values_.end(), other_values.begin(), other_values.end());
@@ -93,27 +92,17 @@ void JoinedDubiousTrack::update()
 
     //unsigned int num_speeds = values_.size();
 
+    p_dubious_.reset();
+    p_dubious_update_.reset();
+
     if (num_tracks_)
     {
-
         p_dubious_ = (float)num_tracks_dubious_/(float)num_tracks_;
-        has_p_dubious_ = true;
-    }
-    else
-    {
-        has_p_dubious_ = false;
-        p_dubious_ = 0;
     }
 
     if (num_pos_inside_)
     {
         p_dubious_update_ = (float)num_pos_inside_dubious_/(float)num_pos_inside_;
-        has_p_dubious_update_ = true;
-    }
-    else
-    {
-        p_dubious_update_ = 0;
-        has_p_dubious_update_ = false;
     }
 }
 
@@ -147,11 +136,10 @@ void JoinedDubiousTrack::addToOverviewTable(std::shared_ptr<EvaluationResultsRep
 
     string result {"Unknown"};
 
-    if (has_p_dubious_)
+    if (p_dubious_.has_value())
     {
-        p_dubious_var = String::percentToString(p_dubious_ * 100.0, req->getNumProbDecimals()).c_str();
-
-        result = req->getResultConditionStr(p_dubious_);
+        p_dubious_var = String::percentToString(p_dubious_.value() * 100.0, req->getNumProbDecimals()).c_str();
+        result = req->getResultConditionStr(p_dubious_.value());
     }
 
     // "Sector Layer", "Group", "Req.", "Id", "#Updates", "Result", "Condition", "Result"
@@ -193,8 +181,8 @@ void JoinedDubiousTrack::addDetails(std::shared_ptr<EvaluationResultsReport::Roo
 
     QVariant p_dubious_up_var;
 
-    if (has_p_dubious_update_)
-        p_dubious_up_var = roundf(p_dubious_update_ * 10000.0) / 100.0;
+    if (p_dubious_update_.has_value())
+        p_dubious_up_var = roundf(p_dubious_update_.value() * 10000.0) / 100.0;
 
     sec_det_table.addRow({"PDU [%]", "Probability of dubious update", p_dubious_up_var}, this);
 
@@ -203,27 +191,27 @@ void JoinedDubiousTrack::addDetails(std::shared_ptr<EvaluationResultsReport::Roo
                          this);
 
     sec_det_table.addRow({"Duration [s]", "Duration of all tracks",
-                          String::doubleToStringPrecision(track_duration_all_,2).c_str()}, this);
+                          String::doubleToStringPrecision(duration_all_,2).c_str()}, this);
     sec_det_table.addRow({"Duration Dubious [s]", "Duration of dubious tracks",
-                          String::doubleToStringPrecision(track_duration_dubious_,2).c_str()}, this);
+                          String::doubleToStringPrecision(duration_dubious_,2).c_str()}, this);
 
     QVariant dubious_t_avg_var;
 
     if (num_tracks_dubious_)
-        dubious_t_avg_var = roundf(track_duration_dubious_/(float)num_tracks_dubious_ * 100.0) / 100.0;
+        dubious_t_avg_var = roundf(duration_dubious_/(float)num_tracks_dubious_ * 100.0) / 100.0;
 
     sec_det_table.addRow({"Duration Non-Dubious [s]", "Duration of non-dubious tracks",
-                          String::doubleToStringPrecision(track_duration_nondub_,2).c_str()}, this);
+                          String::doubleToStringPrecision(duration_nondub_,2).c_str()}, this);
 
     sec_det_table.addRow({"Average Duration Dubious [s]", "Average duration of dubious tracks",
                           dubious_t_avg_var}, this);
 
     QVariant p_dubious_t_var, p_nondub_t_var;
 
-    if (track_duration_all_)
+    if (duration_all_)
     {
-        p_dubious_t_var = roundf(track_duration_dubious_/track_duration_all_ * 10000.0) / 100.0;
-        p_nondub_t_var = roundf(track_duration_nondub_/track_duration_all_ * 10000.0) / 100.0;
+        p_dubious_t_var = roundf(duration_dubious_/duration_all_ * 10000.0) / 100.0;
+        p_nondub_t_var = roundf(duration_nondub_/duration_all_ * 10000.0) / 100.0;
     }
 
     sec_det_table.addRow({"Duration Ratio Dubious [%]", "Duration ratio of dubious tracks", p_dubious_t_var}, this);
@@ -233,8 +221,8 @@ void JoinedDubiousTrack::addDetails(std::shared_ptr<EvaluationResultsReport::Roo
     {
         QVariant p_dubious_var;
 
-        if (has_p_dubious_)
-            p_dubious_var = roundf(p_dubious_ * 10000.0) / 100.0;
+        if (p_dubious_.has_value())
+            p_dubious_var = roundf(p_dubious_.value() * 10000.0) / 100.0;
 
         sec_det_table.addRow({"PDT [%]", "Probability of dubious track", p_dubious_var}, this);
 
@@ -242,8 +230,8 @@ void JoinedDubiousTrack::addDetails(std::shared_ptr<EvaluationResultsReport::Roo
 
         string result {"Unknown"};
 
-        if (has_p_dubious_)
-            result = req->getResultConditionStr(p_dubious_);
+        if (p_dubious_.has_value())
+            result = req->getResultConditionStr(p_dubious_.value());
 
         sec_det_table.addRow({"Condition Fulfilled", "", result.c_str()}, this);
     }
@@ -323,7 +311,7 @@ std::string JoinedDubiousTrack::reference(
     return "Report:Results:"+getRequirementSectionID();
 }
 
-void JoinedDubiousTrack::updatesToUseChanges()
+void JoinedDubiousTrack::updatesToUseChanges_impl()
 {
     loginf << "JoinedDubiousTrack: updatesToUseChanges";
 
@@ -334,11 +322,9 @@ void JoinedDubiousTrack::updatesToUseChanges()
     num_tracks_ = 0;
     num_tracks_dubious_ = 0;
 
-    track_duration_all_ = 0;
-    track_duration_nondub_ = 0;
-    track_duration_dubious_ = 0;
-
-    details_.clear();
+    duration_all_ = 0;
+    duration_nondub_ = 0;
+    duration_dubious_ = 0;
 
     for (auto result_it : results_)
     {
@@ -380,11 +366,6 @@ void JoinedDubiousTrack::exportAsCSV()
 //                output_file << values_.at(cnt) << "\n";
 //        }
 //    }
-}
-
-std::vector<EvaluationRequirement::DubiousTrackDetail> JoinedDubiousTrack::details() const
-{
-    return details_;
 }
 
 }

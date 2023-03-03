@@ -84,8 +84,8 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTrack::evaluate (
     unsigned int num_tracks {0};
     unsigned int num_tracks_dubious {0};
 
-    map<unsigned int, DubiousTrackDetail> tracks; // tn -> target
-    vector<DubiousTrackDetail> finished_tracks; // tn -> target
+    map<unsigned int, EvaluationDetail> tracks; // tn -> target
+    EvaluationRequirementResult::Single::EvaluationDetails finished_tracks; // tn -> target
 
     bool do_not_evaluate_target = false;
 
@@ -295,7 +295,6 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTrack::evaluate (
             all_updates_dubious = true;
             all_updates_dubious_reasons["Dur."] = Time::toString(track_detail.duration_, 1);
         }
-
 
         has_last_tod = false;
         for (DubiousTrackUpdateDetail& update : track_detail.updates_)

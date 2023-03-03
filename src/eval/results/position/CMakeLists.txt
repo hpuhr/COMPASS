@@ -5,6 +5,7 @@ include_directories (
 
 target_sources(compass
     PUBLIC
+        "${CMAKE_CURRENT_LIST_DIR}/positionbase.h"
         "${CMAKE_CURRENT_LIST_DIR}/distancesingle.h"
         "${CMAKE_CURRENT_LIST_DIR}/distancejoined.h"
         "${CMAKE_CURRENT_LIST_DIR}/alongsingle.h"
@@ -14,6 +15,7 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/latencysingle.h"
         "${CMAKE_CURRENT_LIST_DIR}/latencyjoined.h"
     PRIVATE
+        "${CMAKE_CURRENT_LIST_DIR}/positionbase.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/distancesingle.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/distancejoined.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/alongsingle.cpp"
@@ -23,5 +25,3 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/latencysingle.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/latencyjoined.cpp"
     )
-
-
