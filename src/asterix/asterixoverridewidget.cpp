@@ -57,6 +57,8 @@ ASTERIXOverrideWidget::ASTERIXOverrideWidget(ASTERIXImportTask& task, QWidget* p
     connect(override_active_check_, &QCheckBox::clicked, this, &ASTERIXOverrideWidget::overrideActiveCheckedSlot);
     grid->addWidget(override_active_check_, row, 1);
 
+    ++row;
+
     grid->addWidget(new QLabel("Offset [s]"), row, 1);
 
     tod_offset_edit_ = new QLineEdit();

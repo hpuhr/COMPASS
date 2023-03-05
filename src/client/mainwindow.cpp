@@ -41,6 +41,8 @@
 #include "viewpointsreportgeneratordialog.h"
 #include "gpstrailimporttask.h"
 #include "gpstrailimporttaskdialog.h"
+#include "gpsimportcsvtask.h"
+#include "gpsimportcsvtaskdialog.h"
 #include "managesectorstask.h"
 #include "managesectorstaskdialog.h"
 #include "evaluationmanager.h"
@@ -329,11 +331,16 @@ void MainWindow::createMenus ()
     connect(import_json_file_action, &QAction::triggered, this, &MainWindow::importJSONRecordingSlot);
     import_menu_->addAction(import_json_file_action);
 
-    QAction* import_gps_file_action = new QAction(tr("&GPS Trail"));
-    import_gps_file_action->setShortcut(tr("Ctrl+G"));
-    import_gps_file_action->setToolTip(tr("Import GPS Trail File"));
-    connect(import_gps_file_action, &QAction::triggered, this, &MainWindow::importGPSTrailSlot);
-    import_menu_->addAction(import_gps_file_action);
+    QAction* import_gps_nmea_action = new QAction(tr("&GPS Trail NMEA"));
+    import_gps_nmea_action->setShortcut(tr("Ctrl+G"));
+    import_gps_nmea_action->setToolTip(tr("Import GPS Trail NMEA File"));
+    connect(import_gps_nmea_action, &QAction::triggered, this, &MainWindow::importGPSTrailSlot);
+    import_menu_->addAction(import_gps_nmea_action);
+
+    QAction* import_gps_csv_action = new QAction(tr("&GPS Trail CSV"));
+    import_gps_csv_action->setToolTip(tr("Import GPS Trail CSV File"));
+    connect(import_gps_csv_action, &QAction::triggered, this, &MainWindow::importGPSCSVSlot);
+    import_menu_->addAction(import_gps_csv_action);
 
     if (!COMPASS::instance().hideViewpoints())
     {
@@ -784,6 +791,21 @@ void MainWindow::importGPSTrailSlot()
         updateMenus();
 
         COMPASS::instance().taskManager().gpsTrailImportTask().dialog()->show();
+    }
+}
+
+void MainWindow::importGPSCSVSlot()
+{
+    string filename = QFileDialog::getOpenFileName(this, "Import GPS Trail CSV", "",
+                                                   tr("Text Files (*.csv *.txt)")).toStdString();
+
+    if (filename.size() > 0)
+    {
+        COMPASS::instance().taskManager().gpsImportCSVTask().importFilename(filename);
+
+        updateMenus();
+
+        COMPASS::instance().taskManager().gpsImportCSVTask().dialog()->show();
     }
 }
 
