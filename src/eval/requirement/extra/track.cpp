@@ -153,7 +153,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> ExtraTrack::evaluate (
     unsigned int num_extra {0};
     unsigned int num_ok {0};
 
-    std::vector<EvaluationRequirement::ExtraTrackDetail> details;
+    EvaluationRequirementResult::Single::EvaluationDetails details;
 
     //unsigned int extra_time_period_cnt;
     vector<string> extra_track_nums;

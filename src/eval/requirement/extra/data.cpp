@@ -122,7 +122,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> ExtraData::evaluate (
     unsigned int num_extra = 0;
     EvaluationTargetPosition tst_pos;
 
-    vector<ExtraDataDetail> details;
+    EvaluationRequirementResult::Single::EvaluationDetails details;
     bool skip_no_data_details = eval_man_.reportSkipNoDataDetails();
 
     {

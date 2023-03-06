@@ -73,7 +73,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> IdentificationCorrect::eval
     unsigned int num_correct {0};
     unsigned int num_not_correct {0};
 
-    vector<CorrectnessDetail> details;
+    EvaluationRequirementResult::Single::EvaluationDetails details;
     EvaluationTargetPosition pos_current;
 
     bool ref_exists;

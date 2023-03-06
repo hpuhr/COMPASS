@@ -67,7 +67,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionAlong::evaluate (
     unsigned int num_value_ok {0};
     unsigned int num_value_nok {0};
 
-    std::vector<EvaluationRequirement::PositionDetail> details;
+    EvaluationRequirementResult::Single::EvaluationDetails details;
 
     ptime timestamp;
 
