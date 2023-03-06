@@ -83,7 +83,6 @@ void CreateAssociationsJob::run()
     emit statusSignal("Creating Reference UTNs");
     std::map<unsigned int, Association::Target> targets = createReferenceUTNs();
 
-
     // create tracker utns
     emit statusSignal("Creating Tracker UTNs");
     createTrackerUTNs(targets);
@@ -1442,7 +1441,7 @@ int CreateAssociationsJob::findUTNForTrackerTarget (const Association::Target& t
 
         results[cnt] = tuple<bool, unsigned int, unsigned int, double>(false, other.utn_, 0, 0);
 
-        bool print_debug = false; //target.hasMA() && target.hasMA(396) && other.hasMA() && other.hasMA(396);
+        bool print_debug = target.hasMA() && target.hasMA(3824) && other.hasMA() && other.hasMA(3824);
 
         if (!(target.hasTA() && other.hasTA())) // only try if not both mode s
         {

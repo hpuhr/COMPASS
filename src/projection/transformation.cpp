@@ -206,7 +206,7 @@ std::tuple<bool, double, double> FixedTransformation::distanceCart (double lat2,
 
     ret = std::tuple<bool, double, double>(true, x_pos2, y_pos2);
 
-    loginf << "Transformation: distanceCart: p1 "
+    logdbg << "Transformation: distanceCart: p1 "
            << std::setprecision(14) << lat1_ << " / " << std::setprecision(14) << long1_
            << " p2 "
            << std::setprecision(14) << lat2 << " / " << std::setprecision(14) << long2

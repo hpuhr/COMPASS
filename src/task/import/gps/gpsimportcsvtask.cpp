@@ -33,6 +33,7 @@
 #include "util/number.h"
 #include "util/timeconv.h"
 #include "util/stringconv.h"
+#include "global.h"
 
 #include <iostream>
 #include <fstream>
@@ -469,6 +470,7 @@ void GPSImportCSVTask::run()
     assert (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_latitude_));
     assert (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_longitude_));
     assert (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_m3a_));
+    assert (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_mc_));
     assert (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_ta_));
     assert (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_ti_));
     assert (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_track_num_));
@@ -490,6 +492,7 @@ void GPSImportCSVTask::run()
     Variable& lat_var = dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_latitude_);
     Variable& long_var = dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_longitude_);
     Variable& m3a_var = dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_m3a_);
+    Variable& mc_var = dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_mc_);
     Variable& ta_var = dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_ta_);
     Variable& ti_var = dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_ti_);
     Variable& tn_var = dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_track_num_);
@@ -510,6 +513,8 @@ void GPSImportCSVTask::run()
 
     if (set_mode_3a_code_)
         properties.addProperty(m3a_var.name(), PropertyDataType::UINT);
+
+    properties.addProperty(mc_var.name(), PropertyDataType::FLOAT);
 
     if (set_target_address_)
         properties.addProperty(ta_var.name(), PropertyDataType::UINT);
@@ -536,6 +541,7 @@ void GPSImportCSVTask::run()
     NullableVector<boost::posix_time::ptime>& ts_vec = buffer_->get<boost::posix_time::ptime>(ts_var.name());
     NullableVector<double>& lat_vec = buffer_->get<double>(lat_var.name());
     NullableVector<double>& long_vec = buffer_->get<double>(long_var.name());
+    NullableVector<float>& mc_vec = buffer_->get<float>(mc_var.name());
 
     NullableVector<unsigned int>& tn_vec = buffer_->get<unsigned int>(tn_var.name());
 
@@ -600,6 +606,8 @@ void GPSImportCSVTask::run()
         ts_vec.set(cnt, fix_it.timestamp_);
         lat_vec.set(cnt, fix_it.latitude_);
         long_vec.set(cnt, fix_it.longitude_);
+
+        mc_vec.set(cnt, fix_it.altitude_ * 1/FT2M); // m 2 ft
 
         if (set_mode_3a_code_)
             buffer_->get<unsigned int>(m3a_var.name()).set(cnt, mode_3a_code_);
