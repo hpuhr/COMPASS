@@ -61,7 +61,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> ModeCFalse::evaluate (
     int num_correct {0};
     int num_false {0};
 
-    vector<CheckDetail> details;
+    EvaluationRequirementResult::Single::EvaluationDetails details;
     EvaluationTargetPosition pos_current;
     bool code_ok;
 

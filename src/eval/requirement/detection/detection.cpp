@@ -178,7 +178,6 @@ std::shared_ptr<EvaluationRequirementResult::Single> Detection::evaluate (
 
     EvaluationRequirementResult::Single::EvaluationDetails details;
 
-    vector<DetectionDetail> details;
     EvaluationTargetPosition pos_current;
 
     unsigned int tst_data_size = tst_data.size();

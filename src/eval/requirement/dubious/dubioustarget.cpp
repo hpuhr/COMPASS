@@ -81,7 +81,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTarget::evaluate (
     unsigned int num_pos_inside {0};
     unsigned int num_pos_inside_dubious {0};
 
-    DubiousTargetDetail detail_ (target_data.utn_);
+    EvaluationRequirementResult::Single::EvaluationDetails details;
 
     bool do_not_evaluate_target = false;
 
