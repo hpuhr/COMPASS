@@ -194,16 +194,16 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionAcross::evaluate (
 
         ogr_geo2cart.reset(OGRCreateCoordinateTransformation(&wgs84, &local));
 
-        if (in_appimage_) // inside appimage
-        {
+//        if (in_appimage_) // inside appimage
+//        {
             x_pos = tst_pos.longitude_;
             y_pos = tst_pos.latitude_;
-        }
-        else
-        {
-            x_pos = tst_pos.latitude_;
-            y_pos = tst_pos.longitude_;
-        }
+//        }
+//        else
+//        {
+//            x_pos = tst_pos.latitude_;
+//            y_pos = tst_pos.longitude_;
+//        }
 
         ok = ogr_geo2cart->Transform(1, &x_pos, &y_pos); // wgs84 to cartesian offsets
         if (!ok)

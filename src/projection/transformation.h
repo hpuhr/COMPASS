@@ -20,7 +20,7 @@ public:
     // ok, lat, long
 
 protected:
-    static bool in_appimage_;
+//    static bool in_appimage_;
     static const double max_wgs_dist_;
 
     std::unique_ptr<OGRSpatialReference> wgs84_;
@@ -47,8 +47,9 @@ public:
     // ok, lat, long
 
 protected:
-    static bool in_appimage_;
+    //static bool in_appimage_;
     static const double max_wgs_dist_;
+    double lat1_, long1_;
 
     std::unique_ptr<OGRSpatialReference> wgs84_;
     std::unique_ptr<OGRSpatialReference> local_;

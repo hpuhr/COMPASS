@@ -130,6 +130,8 @@ public:
     double contMaxDistanceAcceptableTracker() const;
     void contMaxDistanceAcceptableTracker(double value);
 
+    const std::set<unsigned int>& modeAConspicuityCodes() const;
+
 protected:
     bool associate_non_mode_s_ {true};
     bool clean_dubious_utns_ {true};
@@ -159,6 +161,9 @@ protected:
     double max_time_diff_sensor_ {15.0};
     double max_distance_acceptable_sensor_ {2*NM2M};
     double max_altitude_diff_sensor_ {300.0};
+
+    // other
+    std::set<unsigned int> mode_a_conspicuity_codes_ {512, 1024}; // decimal
 
     boost::posix_time::ptime start_time_;
     boost::posix_time::ptime stop_time_;

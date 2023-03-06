@@ -432,6 +432,11 @@ void CreateAssociationsTask::contMaxDistanceAcceptableTracker(double cont_max_di
     cont_max_distance_acceptable_tracker_ = cont_max_distance_acceptable_tracker;
 }
 
+const std::set<unsigned int>& CreateAssociationsTask::modeAConspicuityCodes() const
+{
+    return mode_a_conspicuity_codes_;
+}
+
 void CreateAssociationsTask::loadedDataSlot(
         const std::map<std::string, std::shared_ptr<Buffer>>& data, bool requires_reset)
 {

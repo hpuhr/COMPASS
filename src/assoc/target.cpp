@@ -361,35 +361,13 @@ std::pair<EvaluationTargetPosition, bool> Target::interpolatedPosForTime (ptime 
         return {{}, false};
     }
 
-    //        OGRSpatialReference wgs84;
-    //        wgs84.SetWellKnownGeogCS("WGS84");
-    //        OGRSpatialReference local;
-    //        local.SetStereographic(pos1.latitude_, pos1.longitude_, 1.0, 0.0, 0.0);
-
     logdbg << "Target: interpolatedPosForTime: pos1 " << pos1.latitude_ << ", " << pos1.longitude_;
     logdbg << "Target: interpolatedPosForTime: pos2 " << pos2.latitude_ << ", " << pos2.longitude_;
-
-    //        std::unique_ptr<OGRCoordinateTransformation> ogr_geo2cart {OGRCreateCoordinateTransformation(&wgs84, &local)};
-    //        assert (ogr_geo2cart);
-    //        std::unique_ptr<OGRCoordinateTransformation> ogr_cart2geo {OGRCreateCoordinateTransformation(&local, &wgs84)};
-    //        assert (ogr_cart2geo);
 
     bool ok;
     double x_pos, y_pos;
 
-    //        if (in_appimage_) // inside appimage
-    //        {
-    //            x_pos = pos2.longitude_;
-    //            y_pos = pos2.latitude_;
-    //        }
-    //        else
-    //        {
-    //            x_pos = pos2.latitude_;
-    //            y_pos = pos2.longitude_;
-    //        }
-
     logdbg << "Target: interpolatedPosForTime: geo2cart";
-    //bool ret = ogr_geo2cart->Transform(1, &x_pos, &y_pos); // wgs84 to cartesian offsets
 
     tie(ok, x_pos, y_pos) = trafo_.distanceCart(
                 pos1.latitude_, pos1.longitude_, pos2.latitude_, pos2.longitude_);
@@ -913,24 +891,6 @@ void Target::calculateSpeeds()
 
         d_t = Time::partialSeconds(timestamp - timestamp_prev);
         assert (d_t >= 0);
-
-        //            local.SetStereographic(latitude, longitude, 1.0, 0.0, 0.0);
-
-        //            std::unique_ptr<OGRCoordinateTransformation> ogr_geo2cart {OGRCreateCoordinateTransformation(&wgs84, &local)};
-        //            assert (ogr_geo2cart);
-
-        //            if (in_appimage_) // inside appimage
-        //            {
-        //                x_pos = longitude_prev;
-        //                y_pos = latitude_prev;
-        //            }
-        //            else
-        //            {
-        //                x_pos = latitude_prev;
-        //                y_pos = longitude_prev;
-        //            }
-
-        //            ok = ogr_geo2cart->Transform(1, &x_pos, &y_pos); // wgs84 to cartesian offsets
 
         tie(ok, x_pos, y_pos) = trafo.distanceCart(
                     latitude, longitude, latitude_prev, longitude_prev);

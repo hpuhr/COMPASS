@@ -31,7 +31,7 @@ namespace Association
         Target(unsigned int utn, bool tmp);
         ~Target();
 
-        static bool in_appimage_;
+        //static bool in_appimage_;
 
         unsigned int utn_{0};
         bool tmp_ {false};

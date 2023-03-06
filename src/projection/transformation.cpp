@@ -4,7 +4,9 @@
 
 #include <ogr_spatialref.h>
 
-bool Transformation::in_appimage_ = COMPASS::isAppImage();
+#include <iomanip>
+
+//bool Transformation::in_appimage_ = COMPASS::isAppImage();
 const double Transformation::max_wgs_dist_ {0.5};
 
 Transformation::Transformation()
@@ -36,22 +38,22 @@ std::tuple<bool, double, double> Transformation::distanceCart (double lat1, doub
     bool ok;
     std::tuple<bool, double, double> ret {false, 0, 0};
 
-    if (in_appimage_) // inside appimage
-    {
-        x_pos1 = long1;
-        y_pos1 = lat1;
+//    if (in_appimage_) // inside appimage
+//    {
+    x_pos1 = long1;
+    y_pos1 = lat1;
 
-        x_pos2 = long2;
-        y_pos2 = lat2;
-    }
-    else
-    {
-        x_pos1 = lat1;
-        y_pos1 = long1;
+    x_pos2 = long2;
+    y_pos2 = lat2;
+//    }
+//    else
+//    {
+//        x_pos1 = lat1;
+//        y_pos1 = long1;
 
-        x_pos2 = lat2;
-        y_pos2 = long2;
-    }
+//        x_pos2 = lat2;
+//        y_pos2 = long2;
+//    }
 
     ok = ogr_geo2cart_->Transform(1, &x_pos1, &y_pos1); // wgs84 to cartesian offsets
 
@@ -67,13 +69,10 @@ std::tuple<bool, double, double> Transformation::distanceCart (double lat1, doub
         return ret;
     }
 
-//    if (in_appimage_) // inside appimage
-//        ret = std::tuple<bool, double, double>(true, y_pos2-y_pos1, x_pos2-x_pos1);
-//    else
-        ret = std::tuple<bool, double, double>(true, x_pos2-x_pos1, y_pos2-y_pos1);
+    ret = std::tuple<bool, double, double>(true, x_pos2-x_pos1, y_pos2-y_pos1);
 
-    logdbg << "Transformation: distanceCart: x_pos1 " << x_pos1 << " y_pos1 " << y_pos1
-           << " x_pos2 " << x_pos2 << " y_pos2 " << y_pos2;
+    logdbg << "Transformation: distanceCart: p1 " << lat1 << " / " << long1
+           << " p2 " << lat2 << " / " << long2 << " d " << x_pos2-x_pos1 << " / " << y_pos2-y_pos1;
 
     return ret;
 }
@@ -92,16 +91,16 @@ std::tuple<bool, double, double> Transformation::wgsAddCartOffset (
     // calc pos 1 cart
     double x_pos1, y_pos1;
 
-    if (in_appimage_) // inside appimage
-    {
+//    if (in_appimage_) // inside appimage
+//    {
         x_pos1 = long1;
         y_pos1 = lat1;
-    }
-    else
-    {
-        x_pos1 = lat1;
-        y_pos1 = long1;
-    }
+//    }
+//    else
+//    {
+//        x_pos1 = lat1;
+//        y_pos1 = long1;
+//    }
 
     ok = ogr_geo2cart_->Transform(1, &x_pos1, &y_pos1); // wgs84 to cartesian offsets
 
@@ -128,16 +127,16 @@ std::tuple<bool, double, double> Transformation::wgsAddCartOffset (
 
     double lat2, long2;
 
-    if (in_appimage_) // inside appimage
-    {
+//    if (in_appimage_) // inside appimage
+//    {
         lat2 = y_pos2;
         long2 = x_pos2;
-    }
-    else
-    {
-        lat2 = x_pos2;
-        long2 = y_pos2;
-    }
+//    }
+//    else
+//    {
+//        lat2 = x_pos2;
+//        long2 = y_pos2;
+//    }
 
     ret = std::tuple<bool, double, double>(true, lat2, long2);
 
@@ -161,11 +160,11 @@ void Transformation::updateIfRequired(double lat1, double long1)
 
 
 //////////////////////////////////////////////
-bool FixedTransformation::in_appimage_ = COMPASS::isAppImage();
+//bool FixedTransformation::in_appimage_ = true; //COMPASS::isAppImage();
 const double FixedTransformation::max_wgs_dist_ {0.5};
 
 FixedTransformation::FixedTransformation(double lat1, double long1)
-    : wgs84_{new OGRSpatialReference()}, local_{new OGRSpatialReference()}
+    : lat1_(lat1), long1_(long1), wgs84_{new OGRSpatialReference()}, local_{new OGRSpatialReference()}
 {
     wgs84_->SetWellKnownGeogCS("WGS84");
 
@@ -187,16 +186,16 @@ std::tuple<bool, double, double> FixedTransformation::distanceCart (double lat2,
     bool ok;
     std::tuple<bool, double, double> ret {false, 0, 0};
 
-    if (in_appimage_) // inside appimage
-    {
+//    if (in_appimage_) // inside appimage
+//    {
         x_pos2 = long2;
         y_pos2 = lat2;
-    }
-    else
-    {
-        x_pos2 = lat2;
-        y_pos2 = long2;
-    }
+//    }
+//    else
+//    {
+//        x_pos2 = lat2;
+//        y_pos2 = long2;
+//    }
 
     ok = ogr_geo2cart_->Transform(1, &x_pos2, &y_pos2); // wgs84 to cartesian offsets
 
@@ -207,7 +206,11 @@ std::tuple<bool, double, double> FixedTransformation::distanceCart (double lat2,
 
     ret = std::tuple<bool, double, double>(true, x_pos2, y_pos2);
 
-    logdbg << "FixedTransformation: distanceCart: x_pos2 " << x_pos2 << " y_pos2 " << y_pos2;
+    loginf << "Transformation: distanceCart: p1 "
+           << std::setprecision(14) << lat1_ << " / " << std::setprecision(14) << long1_
+           << " p2 "
+           << std::setprecision(14) << lat2 << " / " << std::setprecision(14) << long2
+           << " d " << x_pos2 << " / " << y_pos2;
 
     return ret;
 }
@@ -229,16 +232,16 @@ std::tuple<bool, double, double> FixedTransformation::wgsAddCartOffset (double x
 
     double lat2, long2;
 
-    if (in_appimage_) // inside appimage
-    {
+//    if (in_appimage_) // inside appimage
+//    {
         lat2 = y_pos2;
         long2 = x_pos2;
-    }
-    else
-    {
-        lat2 = x_pos2;
-        long2 = y_pos2;
-    }
+//    }
+//    else
+//    {
+//        lat2 = x_pos2;
+//        long2 = y_pos2;
+//    }
 
     ret = std::tuple<bool, double, double>(true, lat2, long2);
 

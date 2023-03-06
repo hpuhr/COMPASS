@@ -351,7 +351,7 @@ void GPSImportCSVTask::parseCurrentFile ()
             fix.latitude_ = std::numeric_limits<double>::quiet_NaN();
             fix.latitude_ = std::stod(parts.at(1));
 
-            if (isnan(fix.latitude_))
+            if (std::isnan(fix.latitude_))
             {
                 logerr << "GPSImportCSVTask: parseCurrentFile: wrong latitude '" << parts.at(1) << "'";
                 continue;
@@ -360,7 +360,7 @@ void GPSImportCSVTask::parseCurrentFile ()
             fix.longitude_ = std::numeric_limits<double>::quiet_NaN();
             fix.longitude_ = std::stod(parts.at(2));
 
-            if (isnan(fix.longitude_))
+            if (std::isnan(fix.longitude_))
             {
                 logerr << "GPSImportCSVTask: parseCurrentFile: wrong longitude '" << parts.at(2) << "'";
                 continue;
@@ -369,7 +369,7 @@ void GPSImportCSVTask::parseCurrentFile ()
             fix.altitude_ = std::numeric_limits<double>::quiet_NaN();
             fix.altitude_ = std::stod(parts.at(3));
 
-            if (isnan(fix.altitude_))
+            if (std::isnan(fix.altitude_))
             {
                 logerr << "GPSImportCSVTask: parseCurrentFile: wrong altitude '" << parts.at(3) << "'";
                 continue;

@@ -62,7 +62,7 @@ ASTERIXOverrideWidget::ASTERIXOverrideWidget(ASTERIXImportTask& task, QWidget* p
     grid->addWidget(new QLabel("Offset [s]"), row, 1);
 
     tod_offset_edit_ = new QLineEdit();
-    tod_offset_edit_->setValidator(new TextFieldDoubleValidator(-24 * 3600, 24 * 3600, 3));
+    tod_offset_edit_->setValidator(new TextFieldDoubleValidator(-24 * 3600, 24 * 3600, 5));
     connect(tod_offset_edit_, &QLineEdit::textEdited, this, &ASTERIXOverrideWidget::todOffsetEditedSlot);
     grid->addWidget(tod_offset_edit_, row, 2);
 
