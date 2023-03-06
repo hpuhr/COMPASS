@@ -412,7 +412,7 @@ void GPSImportCSVTask::parseCurrentFile ()
                     logdbg << "GPSImportCSVTask: parseCurrentFile: interpolated lat "
                            << x_pos << " long " << y_pos;
 
-                    track_angle = atan2(v_x,v_y); // rad
+                    track_angle = atan2(v_x,v_y); // bearing rad
                     speed = sqrt(pow(v_x, 2) + pow(v_y, 2));
 
                     if (!std::isnan(track_angle) && !std::isinf(track_angle) && !std::isnan(speed) && !std::isinf(speed))
