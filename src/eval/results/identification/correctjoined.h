@@ -20,52 +20,55 @@
 
 #include "eval/results/joined.h"
 
+#include <boost/optional.hpp>
+
 namespace EvaluationRequirementResult
 {
-    class SingleIdentificationCorrect;
 
-    class JoinedIdentificationCorrect : public Joined
-    {
-    public:
-        JoinedIdentificationCorrect(const std::string& result_id, std::shared_ptr<EvaluationRequirement::Base> requirement,
-                             const SectorLayer& sector_layer, EvaluationManager& eval_man);
+class SingleIdentificationCorrect;
 
-        virtual void join(std::shared_ptr<Base> other) override;
+class JoinedIdentificationCorrect : public Joined
+{
+public:
+    JoinedIdentificationCorrect(const std::string& result_id, 
+                                std::shared_ptr<EvaluationRequirement::Base> requirement,
+                                const SectorLayer& sector_layer, 
+                                EvaluationManager& eval_man);
 
-        //virtual void print() override;
-        virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item) override;
+    //virtual void print() override;
+    virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item) override;
 
-        virtual void updatesToUseChanges() override;
+    virtual bool hasViewableData (
+            const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override;
+    virtual std::unique_ptr<nlohmann::json::object_t> viewableData(
+            const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override;
 
-        virtual bool hasViewableData (
-                const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override;
-        virtual std::unique_ptr<nlohmann::json::object_t> viewableData(
-                const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override;
+    virtual bool hasReference (
+            const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override;
+    virtual std::string reference(
+            const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override;
 
-        virtual bool hasReference (
-                const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override;
-        virtual std::string reference(
-                const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override;
+protected:
+    void addToValues (std::shared_ptr<SingleIdentificationCorrect> single_result);
+    void updatePID();
+    void addToOverviewTable(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
+    void addDetails(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
 
-    protected:
-        unsigned int num_updates_ {0};
-        unsigned int num_no_ref_pos_ {0};
-        unsigned int num_no_ref_id_ {0};
-        unsigned int num_pos_outside_ {0};
-        unsigned int num_pos_inside_ {0};
-        unsigned int num_correct_ {0};
-        unsigned int num_not_correct_ {0};
+    std::unique_ptr<nlohmann::json::object_t> getErrorsViewable ();
 
-        bool has_pid_ {false};
-        float pid_{0};
+    virtual void join_impl(std::shared_ptr<Single> other) override;
+    virtual void updatesToUseChanges_impl() override;
 
-        void addToValues (std::shared_ptr<SingleIdentificationCorrect> single_result);
-        void updatePID();
-        void addToOverviewTable(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
-        void addDetails(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
+    unsigned int num_updates_     {0};
+    unsigned int num_no_ref_pos_  {0};
+    unsigned int num_no_ref_id_   {0};
+    unsigned int num_pos_outside_ {0};
+    unsigned int num_pos_inside_  {0};
+    unsigned int num_correct_     {0};
+    unsigned int num_not_correct_ {0};
 
-        std::unique_ptr<nlohmann::json::object_t> getErrorsViewable ();
-    };
+    boost::optional<float> pid_;
+};
 
 }
 

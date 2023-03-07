@@ -59,7 +59,11 @@ namespace EvaluationRequirement
         int num_correct {0};
         int num_false {0};
 
-        vector<CheckDetail> details;
+        typedef EvaluationRequirementResult::SingleModeAFalse Result;
+        typedef EvaluationDetail                              Detail;
+        typedef Result::EvaluationDetails                     Details;
+        Details details;
+
         EvaluationTargetPosition pos_current;
         bool code_ok;
 
@@ -78,6 +82,33 @@ namespace EvaluationRequirement
         bool has_ground_bit;
         bool ground_bit_set;
 
+        auto addDetail = [ & ] (const ptime& ts,
+                                const EvaluationTargetPosition& tst_pos,
+                                const QVariant& ref_exists,
+                                const QVariant& pos_inside,
+                                const QVariant& is_not_ok,
+                                const QVariant& num_updates,
+                                const QVariant& num_no_ref,
+                                const QVariant& num_pos_inside,
+                                const QVariant& num_pos_outside,
+                                const QVariant& num_unknown_id,
+                                const QVariant& num_correct_id,
+                                const QVariant& num_false_id,
+                                const std::string& comment)
+        {
+            details.push_back(Detail(ts, tst_pos).setValue(Result::DetailRefExists, ref_exists)
+                                                 .setValue(Result::DetailPosInside, pos_inside.isValid() ? pos_inside : "false")
+                                                 .setValue(Result::DetailIsNotOk, is_not_ok)
+                                                 .setValue(Result::DetailNumUpdates, num_updates)
+                                                 .setValue(Result::DetailNumNoRef, num_no_ref)
+                                                 .setValue(Result::DetailNumInside, num_pos_inside)
+                                                 .setValue(Result::DetailNumOutside, num_pos_outside)
+                                                 .setValue(Result::DetailNumUnknownID, num_unknown_id)
+                                                 .setValue(Result::DetailNumCorrectID, num_correct_id)
+                                                 .setValue(Result::DetailNumFalseID, num_false_id)
+                                                 .generalComment(comment));
+        };
+
         for (const auto& tst_id : tst_data)
         {
             ref_exists = false;
@@ -94,10 +125,10 @@ namespace EvaluationRequirement
             if (!target_data.hasRefDataForTime (timestamp, max_ref_time_diff))
             {
                 if (!skip_no_data_details)
-                    details.push_back({timestamp, pos_current,
-                                       false, {}, false, // ref_exists, pos_inside,
-                                       num_updates, num_no_ref_pos+num_no_ref_val, num_pos_inside, num_pos_outside,
-                                       num_unknown, num_correct, num_false, "No reference data"});
+                    addDetail(timestamp, pos_current,
+                                false, {}, false, // ref_exists, pos_inside,
+                                num_updates, num_no_ref_pos+num_no_ref_val, num_pos_inside, num_pos_outside,
+                                num_unknown, num_correct, num_false, "No reference data");
 
                 ++num_no_ref_pos;
                 continue;
@@ -111,10 +142,10 @@ namespace EvaluationRequirement
             if (!ok)
             {
                 if (!skip_no_data_details)
-                    details.push_back({timestamp, pos_current,
-                                       false, {}, false, // ref_exists, pos_inside,
-                                       num_updates, num_no_ref_pos+num_no_ref_val, num_pos_inside, num_pos_outside,
-                                       num_unknown, num_correct, num_false, "No reference position"});
+                    addDetail(timestamp, pos_current,
+                                false, {}, false, // ref_exists, pos_inside,
+                                num_updates, num_no_ref_pos+num_no_ref_val, num_pos_inside, num_pos_outside,
+                                num_unknown, num_correct, num_false, "No reference position");
 
                 ++num_no_ref_pos;
                 continue;
@@ -137,10 +168,10 @@ namespace EvaluationRequirement
             if (!is_inside)
             {
                 if (!skip_no_data_details)
-                    details.push_back({timestamp, pos_current,
-                                       ref_exists, is_inside, false, // ref_exists, pos_inside,
-                                       num_updates, num_no_ref_pos+num_no_ref_val, num_pos_inside, num_pos_outside,
-                                       num_unknown, num_correct, num_false, "Outside sector"});
+                    addDetail(timestamp, pos_current,
+                                ref_exists, is_inside, false, // ref_exists, pos_inside,
+                                num_updates, num_no_ref_pos+num_no_ref_val, num_pos_inside, num_pos_outside,
+                                num_unknown, num_correct, num_false, "Outside sector");
 
                 ++num_pos_outside;
                 continue;
@@ -178,10 +209,10 @@ namespace EvaluationRequirement
                                     +to_string(cmp_res));
 
             if (!skip_detail)
-                details.push_back({timestamp, pos_current,
+                addDetail(timestamp, pos_current,
                                    ref_exists, is_inside, !code_ok,
                                    num_updates, num_no_ref_pos+num_no_ref_val, num_pos_inside, num_pos_outside,
-                                   num_unknown, num_correct, num_false, comment});
+                                   num_unknown, num_correct, num_false, comment);
         }
 
         logdbg << "EvaluationRequirementModeAFalse '" << name_ << "': evaluate: utn " << target_data.utn_
@@ -198,8 +229,8 @@ namespace EvaluationRequirement
 
         return make_shared<EvaluationRequirementResult::SingleModeAFalse>(
                     "UTN:"+to_string(target_data.utn_), instance, sector_layer, target_data.utn_, &target_data,
-                    eval_man_, num_updates, num_no_ref_pos, num_no_ref_val, num_pos_outside, num_pos_inside,
-                    num_unknown, num_correct, num_false, details);
+                    eval_man_, details, num_updates, num_no_ref_pos, num_no_ref_val, num_pos_outside, num_pos_inside,
+                    num_unknown, num_correct, num_false);
     }
 
 }

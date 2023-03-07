@@ -20,49 +20,52 @@
 
 #include "eval/results/joined.h"
 
+#include <boost/optional.hpp>
+
 namespace EvaluationRequirementResult
 {
-    class SingleExtraTrack;
 
-    class JoinedExtraTrack : public Joined
-    {
-    public:
-        JoinedExtraTrack(const std::string& result_id, std::shared_ptr<EvaluationRequirement::Base> requirement,
-                        const SectorLayer& sector_layer, EvaluationManager& eval_man);
+class SingleExtraTrack;
 
-        virtual void join(std::shared_ptr<Base> other) override;
+class JoinedExtraTrack : public Joined
+{
+public:
+    JoinedExtraTrack(const std::string& result_id, 
+                     std::shared_ptr<EvaluationRequirement::Base> requirement,
+                     const SectorLayer& sector_layer, 
+                     EvaluationManager& eval_man);
 
-        //virtual void print() override;
-        virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item) override;
+    //virtual void print() override;
+    virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item) override;
 
-        virtual void updatesToUseChanges() override;
+    virtual bool hasViewableData (
+            const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override;
+    virtual std::unique_ptr<nlohmann::json::object_t> viewableData(
+            const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override;
 
-        virtual bool hasViewableData (
-                const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override;
-        virtual std::unique_ptr<nlohmann::json::object_t> viewableData(
-                const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override;
+    virtual bool hasReference (
+            const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override;
+    virtual std::string reference(
+            const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override;
 
-        virtual bool hasReference (
-                const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override;
-        virtual std::string reference(
-                const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override;
+protected:
+    void addToValues (std::shared_ptr<SingleExtraTrack> single_result);
+    void updateProb();
 
-    protected:
-        unsigned int num_inside_ {0};
-        unsigned int num_extra_ {0};
-        unsigned int num_ok_ {0};
+    void addToOverviewTable(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
+    void addDetails(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
 
-        bool has_prob_ {false};
-        float prob_{0};
+    std::unique_ptr<nlohmann::json::object_t> getErrorsViewable ();
 
-        void addToValues (std::shared_ptr<SingleExtraTrack> single_result);
-        void updateProb();
+    virtual void join_impl(std::shared_ptr<Single> other) override;
+    virtual void updatesToUseChanges_impl() override;
 
-        void addToOverviewTable(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
-        void addDetails(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
+    unsigned int num_inside_ {0};
+    unsigned int num_extra_  {0};
+    unsigned int num_ok_     {0};
 
-        std::unique_ptr<nlohmann::json::object_t> getErrorsViewable ();
-    };
+    boost::optional<float> prob_;
+};
 
 }
 

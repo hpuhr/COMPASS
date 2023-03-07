@@ -18,6 +18,7 @@
 #include "eval/results/position/alongsingle.h"
 #include "eval/results/position/alongjoined.h"
 #include "eval/requirement/base/base.h"
+#include "eval/requirement/position/along.h"
 #include "evaluationtargetdata.h"
 #include "evaluationmanager.h"
 #include "eval/results/report/rootitem.h"
@@ -39,18 +40,16 @@ using namespace Utils;
 namespace EvaluationRequirementResult
 {
 
-JoinedPositionAlong::JoinedPositionAlong(
-        const std::string& result_id, std::shared_ptr<EvaluationRequirement::Base> requirement,
-        const SectorLayer& sector_layer, EvaluationManager& eval_man)
-    : Joined("JoinedPositionAlong", result_id, requirement, sector_layer, eval_man)
+JoinedPositionAlong::JoinedPositionAlong(const std::string& result_id, 
+                                         std::shared_ptr<EvaluationRequirement::Base> requirement,
+                                         const SectorLayer& sector_layer, 
+                                         EvaluationManager& eval_man)
+:   JoinedPositionBase("JoinedPositionAlong", result_id, requirement, sector_layer, eval_man)
 {
 }
 
-
-void JoinedPositionAlong::join(std::shared_ptr<Base> other)
+void JoinedPositionAlong::join_impl(std::shared_ptr<Single> other)
 {
-    Joined::join(other);
-
     std::shared_ptr<SinglePositionAlong> other_sub =
             std::static_pointer_cast<SinglePositionAlong>(other);
     assert (other_sub);
@@ -65,12 +64,12 @@ void JoinedPositionAlong::addToValues (std::shared_ptr<SinglePositionAlong> sing
     if (!single_result->use())
         return;
 
-    num_pos_ += single_result->numPos();
-    num_no_ref_ += single_result->numNoRef();
+    num_pos_         += single_result->numPos();
+    num_no_ref_      += single_result->numNoRef();
     num_pos_outside_ += single_result->numPosOutside();
-    num_pos_inside_ += single_result->numPosInside();
-    num_value_ok_ += single_result->numValueOk();
-    num_value_nok_ += single_result->numValueNOk();
+    num_pos_inside_  += single_result->numPosInside();
+    num_passed_      += single_result->numPassed();
+    num_failed_      += single_result->numFailed();
 
     const vector<double>& other_values = single_result->values();
 
@@ -83,8 +82,9 @@ void JoinedPositionAlong::update()
 {
     assert (num_no_ref_ <= num_pos_);
     assert (num_pos_ - num_no_ref_ == num_pos_inside_ + num_pos_outside_);
+    assert (values_.size() == num_passed_ + num_failed_);
 
-    assert (values_.size() == num_value_ok_+num_value_nok_);
+    prob_.reset();
 
     unsigned int num_distances = values_.size();
 
@@ -99,9 +99,8 @@ void JoinedPositionAlong::update()
             value_var_ += pow(val - value_avg_, 2);
         value_var_ /= (float)num_distances;
 
-        assert (num_value_ok_ <= num_distances);
-        p_min_ = (float)num_value_ok_/(float)num_distances;
-        has_p_min_ = true;
+        assert (num_passed_ <= num_distances);
+        prob_ = (float)num_passed_/(float)num_distances;
     }
     else
     {
@@ -109,9 +108,6 @@ void JoinedPositionAlong::update()
         value_max_ = 0;
         value_avg_ = 0;
         value_var_ = 0;
-
-        has_p_min_ = false;
-        p_min_ = 0;
     }
 }
 
@@ -145,17 +141,17 @@ void JoinedPositionAlong::addToOverviewTable(std::shared_ptr<EvaluationResultsRe
 
     string result {"Unknown"};
 
-    if (has_p_min_)
+    if (prob_.has_value())
     {
-        p_min_var = String::percentToString(p_min_ * 100.0, req->getNumProbDecimals()).c_str();
+        p_min_var = String::percentToString(prob_.value() * 100.0, req->getNumProbDecimals()).c_str();
 
-        result = req->getResultConditionStr(p_min_);
+        result = req->getResultConditionStr(prob_.value());
     }
 
     // "Sector Layer", "Group", "Req.", "Id", "#Updates", "Result", "Condition", "Result"
     ov_table.addRow({sector_layer_.name().c_str(), requirement_->groupName().c_str(),
                      +(requirement_->shortname()+" Along").c_str(),
-                     result_id_.c_str(), {num_value_ok_+num_value_nok_},
+                     result_id_.c_str(), {num_passed_ + num_failed_},
                      p_min_var, req->getConditionStr().c_str(), result.c_str()}, this, {});
 }
 
@@ -200,17 +196,15 @@ void JoinedPositionAlong::addDetails(std::shared_ptr<EvaluationResultsReport::Ro
                           String::doubleToStringPrecision(sqrt(value_var_),2).c_str()}, this);
     sec_det_table.addRow({"ALVar [m^2]", "Variance of along-track error",
                           String::doubleToStringPrecision(value_var_,2).c_str()}, this);
-    sec_det_table.addRow({"#ALOK [1]", "Number of updates with along-track error", num_value_ok_}, this);
-    sec_det_table.addRow({"#ALNOK [1]", "Number of updates with unacceptable along-track error ", num_value_nok_},
+    sec_det_table.addRow({"#ALOK [1]", "Number of updates with along-track error", num_passed_}, this);
+    sec_det_table.addRow({"#ALNOK [1]", "Number of updates with unacceptable along-track error ", num_failed_},
                          this);
-
-
     // condition
     {
         QVariant p_min_var;
 
-        if (has_p_min_)
-            p_min_var = roundf(p_min_ * 10000.0) / 100.0;
+        if (prob_.has_value())
+            p_min_var = roundf(prob_.value() * 10000.0) / 100.0;
 
         sec_det_table.addRow({"PALOK [%]", "Probability of acceptable along-track error", p_min_var}, this);
 
@@ -218,14 +212,14 @@ void JoinedPositionAlong::addDetails(std::shared_ptr<EvaluationResultsReport::Ro
 
         string result {"Unknown"};
 
-        if (has_p_min_)
-            result = req->getResultConditionStr(p_min_);
+        if (prob_.has_value())
+            result = req->getResultConditionStr(prob_.value());
 
         sec_det_table.addRow({"Condition Along Fulfilled", "", result.c_str()}, this);
     }
 
     // figure
-    if (has_p_min_ && p_min_ != 1.0)
+    if (prob_.has_value() && prob_.value() != 1.0)
     {
         sector_section.addFigure("sector_errors_overview", "Sector Errors Overview",
                                  getErrorsViewable());
@@ -299,16 +293,16 @@ std::string JoinedPositionAlong::reference(
     return "Report:Results:"+getRequirementSectionID();
 }
 
-void JoinedPositionAlong::updatesToUseChanges()
+void JoinedPositionAlong::updatesToUseChanges_impl()
 {
     loginf << "JoinedPositionAlong: updatesToUseChanges";
 
-    num_pos_ = 0;
-    num_no_ref_ = 0;
+    num_pos_         = 0;
+    num_no_ref_      = 0;
     num_pos_outside_ = 0;
-    num_pos_inside_ = 0;
-    num_value_ok_ = 0;
-    num_value_nok_ = 0;
+    num_pos_inside_  = 0;
+    num_passed_      = 0;
+    num_failed_      = 0;
 
     values_.clear();
 

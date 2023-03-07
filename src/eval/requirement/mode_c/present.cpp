@@ -63,7 +63,11 @@ namespace EvaluationRequirement
         int num_present_id {0};
         int num_missing_id {0};
 
-        vector<PresentDetail> details;
+        typedef EvaluationRequirementResult::SingleModeCPresent Result;
+        typedef EvaluationDetail                                Detail;
+        typedef Result::EvaluationDetails                       Details;
+        Details details;
+
         EvaluationTargetPosition pos_current;
         //unsigned int code;
         //bool code_ok;
@@ -87,6 +91,33 @@ namespace EvaluationRequirement
         bool has_ground_bit;
         bool ground_bit_set;
 
+        auto addDetail = [ & ] (const ptime& ts,
+                                const EvaluationTargetPosition& tst_pos,
+                                const QVariant& ref_exists,
+                                const QVariant& pos_inside,
+                                const QVariant& is_not_ok,
+                                const QVariant& num_updates,
+                                const QVariant& num_no_ref,
+                                const QVariant& num_pos_inside,
+                                const QVariant& num_pos_outside,
+                                const QVariant& num_no_ref_id,
+                                const QVariant& num_present_id,
+                                const QVariant& num_missing_id,
+                                const std::string& comment)
+        {
+            details.push_back(Detail(ts, tst_pos).setValue(Result::DetailRefExists, ref_exists)
+                                                 .setValue(Result::DetailPosInside, pos_inside.isValid() ? pos_inside : "false")
+                                                 .setValue(Result::DetailIsNotOk, is_not_ok)
+                                                 .setValue(Result::DetailNumUpdates, num_updates)
+                                                 .setValue(Result::DetailNumNoRef, num_no_ref)
+                                                 .setValue(Result::DetailNumInside, num_pos_inside)
+                                                 .setValue(Result::DetailNumOutside, num_pos_outside)
+                                                 .setValue(Result::DetailNumNoRefVal, num_no_ref_id)
+                                                 .setValue(Result::DetailNumPresent, num_present_id)
+                                                 .setValue(Result::DetailNumMissing, num_missing_id)
+                                                 .generalComment(comment));
+        };
+
         for (const auto& tst_id : tst_data)
         {
             //ref_exists = false;
@@ -103,10 +134,10 @@ namespace EvaluationRequirement
             if (!target_data.hasRefDataForTime (timestamp, max_ref_time_diff))
             {
                 if (!skip_no_data_details)
-                    details.push_back({timestamp, pos_current,
-                                       false, {}, false, // ref_exists, pos_inside, is_not_ok
-                                       num_updates, num_no_ref_pos, num_pos_inside, num_pos_outside,
-                                       num_no_ref_id, num_present_id, num_missing_id, "No reference data"});
+                    addDetail(timestamp, pos_current,
+                                false, {}, false, // ref_exists, pos_inside, is_not_ok
+                                num_updates, num_no_ref_pos, num_pos_inside, num_pos_outside,
+                                num_no_ref_id, num_present_id, num_missing_id, "No reference data");
 
                 ++num_no_ref_pos;
                 continue;
@@ -120,10 +151,10 @@ namespace EvaluationRequirement
             if (!ok)
             {
                 if (!skip_no_data_details)
-                    details.push_back({timestamp, pos_current,
-                                       false, {}, false, // ref_exists, pos_inside, is_not_ok
-                                       num_updates, num_no_ref_pos, num_pos_inside, num_pos_outside,
-                                       num_no_ref_id, num_present_id, num_missing_id, "No reference position"});
+                    addDetail(timestamp, pos_current,
+                                false, {}, false, // ref_exists, pos_inside, is_not_ok
+                                num_updates, num_no_ref_pos, num_pos_inside, num_pos_outside,
+                                num_no_ref_id, num_present_id, num_missing_id, "No reference position");
 
                 ++num_no_ref_pos;
                 continue;
@@ -144,10 +175,10 @@ namespace EvaluationRequirement
             if (!is_inside)
             {
                 if (!skip_no_data_details)
-                    details.push_back({timestamp, pos_current,
-                                       true, is_inside, false, // ref_exists, pos_inside, is_not_ok
-                                       num_updates, num_no_ref_pos, num_pos_inside, num_pos_outside,
-                                       num_no_ref_id, num_present_id, num_missing_id, "Outside sector"});
+                    addDetail(timestamp, pos_current,
+                                true, is_inside, false, // ref_exists, pos_inside, is_not_ok
+                                num_updates, num_no_ref_pos, num_pos_inside, num_pos_outside,
+                                num_no_ref_id, num_present_id, num_missing_id, "Outside sector");
 
                 ++num_pos_outside;
                 continue;
@@ -197,10 +228,10 @@ namespace EvaluationRequirement
             }
 
             if (!(skip_no_data_details && skip_detail))
-                details.push_back({timestamp, pos_current,
-                                   true, is_inside, code_missing, // ref_exists, pos_inside, is_not_ok
-                                   num_updates, num_no_ref_pos, num_pos_inside, num_pos_outside,
-                                   num_no_ref_id, num_present_id, num_missing_id, comment});
+                addDetail(timestamp, pos_current,
+                            true, is_inside, code_missing, // ref_exists, pos_inside, is_not_ok
+                            num_updates, num_no_ref_pos, num_pos_inside, num_pos_outside,
+                            num_no_ref_id, num_present_id, num_missing_id, comment);
         }
 
         logdbg << "EvaluationRequirementModeC '" << name_ << "': evaluate: utn " << target_data.utn_
@@ -217,7 +248,7 @@ namespace EvaluationRequirement
 
         return make_shared<EvaluationRequirementResult::SingleModeCPresent>(
                     "UTN:"+to_string(target_data.utn_), instance, sector_layer, target_data.utn_, &target_data,
-                    eval_man_, num_updates, num_no_ref_pos, num_pos_outside, num_pos_inside,
-                    num_no_ref_id, num_present_id, num_missing_id, details);
+                    eval_man_, details, num_updates, num_no_ref_pos, num_pos_outside, num_pos_inside,
+                    num_no_ref_id, num_present_id, num_missing_id);
     }
 }

@@ -81,7 +81,10 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionDistance::evaluate 
     unsigned int num_comp_failed {0};
     unsigned int num_comp_passed {0};
 
-    std::vector<EvaluationRequirement::PositionDetail> details;
+    typedef EvaluationRequirementResult::SinglePositionDistance Result;
+    typedef EvaluationDetail                                    Detail;
+    typedef Result::EvaluationDetails                           Details;
+    Details details;
 
     ptime timestamp;
 
@@ -114,6 +117,33 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionDistance::evaluate 
     bool has_ground_bit;
     bool ground_bit_set;
 
+    auto addDetail = [ & ] (const ptime& ts,
+                            const EvaluationTargetPosition& tst_pos,
+                            const boost::optional<EvaluationTargetPosition>& ref_pos,
+                            const QVariant& pos_inside,
+                            const QVariant& offset,
+                            const QVariant& check_passed,
+                            const QVariant& num_pos,
+                            const QVariant& num_no_ref,
+                            const QVariant& num_pos_inside,
+                            const QVariant& num_pos_outside,
+                            const QVariant& num_comp_passed,
+                            const QVariant& num_comp_failed,
+                            const std::string& comment)
+    {
+        details.push_back(Detail(ts, tst_pos).setValue(Result::DetailPosInside, pos_inside.isValid() ? pos_inside : "false")
+                                             .setValue(Result::DetailValue, offset.isValid() ? offset : 0.0f)
+                                             .setValue(Result::DetailCheckPassed, check_passed)
+                                             .setValue(Result::DetailNumPos, num_pos)
+                                             .setValue(Result::DetailNumNoRef, num_no_ref)
+                                             .setValue(Result::DetailNumInside, num_pos_inside)
+                                             .setValue(Result::DetailNumOutside, num_pos_outside)
+                                             .setValue(Result::DetailNumCheckPassed, num_comp_passed)
+                                             .setValue(Result::DetailNumCheckFailed, num_comp_failed)
+                                             .addPosition(ref_pos)
+                                             .generalComment(comment));
+    };
+
     for (const auto& tst_id : tst_data)
     {
         ++num_pos;
@@ -126,12 +156,12 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionDistance::evaluate 
         if (!target_data.hasRefDataForTime (timestamp, max_ref_time_diff))
         {
             if (!skip_no_data_details)
-                details.push_back({timestamp, tst_pos,
-                                   false, {}, // has_ref_pos, ref_pos
-                                   {}, {}, comp_passed, // pos_inside, value, check_passed
-                                   num_pos, num_no_ref, num_pos_inside, num_pos_outside,
-                                   num_comp_failed, num_comp_passed,
-                                   "No reference data"});
+                addDetail(timestamp, tst_pos,
+                            {}, // ref_pos
+                            {}, {}, comp_passed, // pos_inside, value, check_passed
+                            num_pos, num_no_ref, num_pos_inside, num_pos_outside,
+                            num_comp_passed, num_comp_failed,
+                            "No reference data");
 
             ++num_no_ref;
             continue;
@@ -145,12 +175,12 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionDistance::evaluate 
         if (!ok)
         {
             if (!skip_no_data_details)
-                details.push_back({timestamp, tst_pos,
-                                   false, {}, // has_ref_pos, ref_pos
-                                   {}, {}, comp_passed, // pos_inside, value, check_passed
-                                   num_pos, num_no_ref, num_pos_inside, num_pos_outside,
-                                   num_comp_failed, num_comp_passed,
-                                   "No reference position"});
+                addDetail(timestamp, tst_pos,
+                            {}, // ref_pos
+                            {}, {}, comp_passed, // pos_inside, value, check_passed
+                            num_pos, num_no_ref, num_pos_inside, num_pos_outside,
+                            num_comp_passed, num_comp_failed,
+                            "No reference position");
 
             ++num_no_ref;
             continue;
@@ -171,12 +201,12 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionDistance::evaluate 
         if (!is_inside)
         {
             if (!skip_no_data_details)
-                details.push_back({timestamp, tst_pos,
-                                   true, ref_pos, // has_ref_pos, ref_pos
-                                   is_inside, {}, comp_passed, // pos_inside, value, check_passed
-                                   num_pos, num_no_ref, num_pos_inside, num_pos_outside,
-                                   num_comp_failed, num_comp_passed,
-                                   "Outside sector"});
+                addDetail(timestamp, tst_pos,
+                            ref_pos, // ref_pos
+                            is_inside, {}, comp_passed, // pos_inside, value, check_passed
+                            num_pos, num_no_ref, num_pos_inside, num_pos_outside,
+                            num_comp_passed, num_comp_failed, 
+                            "Outside sector");
             ++num_pos_outside;
             continue;
         }
@@ -200,12 +230,12 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionDistance::evaluate 
         ok = ogr_geo2cart->Transform(1, &x_pos, &y_pos); // wgs84 to cartesian offsets
         if (!ok)
         {
-            details.push_back({timestamp, tst_pos,
-                               true, ref_pos, // has_ref_pos, ref_pos
-                               is_inside, {}, comp_passed, // pos_inside, value, check_passed
-                               num_pos, num_no_ref, num_pos_inside, num_pos_outside,
-                               num_comp_failed, num_comp_passed,
-                               "Position transformation error"});
+            addDetail(timestamp, tst_pos,
+                        ref_pos, // ref_pos
+                        is_inside, {}, comp_passed, // pos_inside, value, check_passed
+                        num_pos, num_no_ref, num_pos_inside, num_pos_outside,
+                        num_comp_passed, num_comp_failed, 
+                        "Position transformation error");
             ++num_pos_calc_errors;
             continue;
         }
@@ -214,12 +244,12 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionDistance::evaluate 
 
         if (std::isnan(distance) || std::isinf(distance))
         {
-            details.push_back({timestamp, tst_pos,
-                               true, ref_pos, // has_ref_pos, ref_pos
-                               is_inside, {}, comp_passed, // pos_inside, value, check_passed
-                               num_pos, num_no_ref, num_pos_inside, num_pos_outside,
-                               num_comp_failed, num_comp_passed,
-                               "Distance Invalid"});
+            addDetail(timestamp, tst_pos,
+                        ref_pos, // ref_pos
+                        is_inside, {}, comp_passed, // pos_inside, value, check_passed
+                        num_pos, num_no_ref, num_pos_inside, num_pos_outside,
+                        num_comp_passed, num_comp_failed, 
+                        "Distance Invalid");
             ++num_pos_calc_errors;
             continue;
         }
@@ -238,12 +268,12 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionDistance::evaluate 
             comment = "Failed";
         }
 
-        details.push_back({timestamp, tst_pos,
-                           true, ref_pos,
-                           is_inside, distance, comp_passed, // pos_inside, value, check_passed
-                           num_pos, num_no_ref, num_pos_inside, num_pos_outside,
-                           num_comp_failed, num_comp_passed,
-                           comment});
+        addDetail(timestamp, tst_pos,
+                    ref_pos,
+                    is_inside, distance, comp_passed, // pos_inside, value, check_passed
+                    num_pos, num_no_ref, num_pos_inside, num_pos_outside,
+                    num_comp_passed, num_comp_failed,
+                    comment);
 
         values.push_back(distance);
     }
@@ -265,15 +295,15 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionDistance::evaluate 
 
     assert (num_pos - num_no_ref == num_pos_inside + num_pos_outside);
 
-    assert (num_distances == num_comp_failed+num_comp_passed);
+    assert (num_distances == num_comp_failed + num_comp_passed);
     assert (num_distances == values.size());
 
     //assert (details.size() == num_pos);
 
     return make_shared<EvaluationRequirementResult::SinglePositionDistance>(
                 "UTN:"+to_string(target_data.utn_), instance, sector_layer, target_data.utn_, &target_data,
-                eval_man_, num_pos, num_no_ref, num_pos_outside, num_pos_inside, num_comp_failed, num_comp_passed,
-                values, details);
+                eval_man_, details, num_pos, num_no_ref, num_pos_outside, num_pos_inside, num_comp_passed, num_comp_failed,
+                values);
 }
 
 }
