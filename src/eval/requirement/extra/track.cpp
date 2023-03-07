@@ -153,7 +153,10 @@ std::shared_ptr<EvaluationRequirementResult::Single> ExtraTrack::evaluate (
     unsigned int num_extra {0};
     unsigned int num_ok {0};
 
-    EvaluationRequirementResult::Single::EvaluationDetails details;
+    typedef EvaluationRequirementResult::SingleExtraTrack Result;
+    typedef EvaluationDetail                              Detail;
+    typedef Result::EvaluationDetails                     Details;
+    Details details;
 
     //unsigned int extra_time_period_cnt;
     vector<string> extra_track_nums;
@@ -162,6 +165,19 @@ std::shared_ptr<EvaluationRequirementResult::Single> ExtraTrack::evaluate (
 
     bool has_tod {false};
     ptime tod_min, tod_max;
+
+    auto addDetail = [ & ] (const ptime& ts,
+                            const EvaluationTargetPosition& tst_pos,
+                            const QVariant& inside,
+                            const QVariant& track_num,
+                            const QVariant& extra,
+                            const std::string& comment)
+    {
+        details.push_back(Detail(ts, tst_pos).setValue(Result::DetailInside, inside)
+                                             .setValue(Result::DetailTrackNum, track_num)
+                                             .setValue(Result::DetailExtra, extra)
+                                             .generalComment(comment));
+    };
 
     for (const auto& tst_id : tst_data)
     {
@@ -190,9 +206,9 @@ std::shared_ptr<EvaluationRequirementResult::Single> ExtraTrack::evaluate (
         if (!is_inside)
         {
             if (!skip_no_data_details)
-                details.push_back({timestamp, tst_pos, false, // inside
-                                   {has_track_num ? track_num : QVariant::Invalid}, // track_num
-                                   false, "Tst outside"}); // extra
+                addDetail(timestamp, tst_pos, false, // inside
+                            {has_track_num ? track_num : QVariant::Invalid}, // track_num
+                            false, "Tst outside"); // extra
 
             ++num_pos_outside;
             continue;
@@ -201,9 +217,9 @@ std::shared_ptr<EvaluationRequirementResult::Single> ExtraTrack::evaluate (
 
         if (!has_track_num)
         {
-            details.push_back({timestamp, tst_pos, true, // inside
-                               {has_track_num ? track_num : QVariant::Invalid}, // track_num
-                               false, "No track num"}); // extra
+            addDetail(timestamp, tst_pos, true, // inside
+                        {has_track_num ? track_num : QVariant::Invalid}, // track_num
+                        false, "No track num"); // extra
             ++num_no_track_num;
             continue;
         }
@@ -233,17 +249,17 @@ std::shared_ptr<EvaluationRequirementResult::Single> ExtraTrack::evaluate (
                 tod_max = max (timestamp, tod_max);
             }
 
-            details.push_back({timestamp, tst_pos, true, // inside
-                               {has_track_num ? track_num : QVariant::Invalid}, // track_num
-                               true, // extra
-                               "Extra tracks: "+ boost::algorithm::join(extra_track_nums, ",")});
+            addDetail(timestamp, tst_pos, true, // inside
+                        {has_track_num ? track_num : QVariant::Invalid}, // track_num
+                        true, // extra
+                        "Extra tracks: "+ boost::algorithm::join(extra_track_nums, ","));
         }
         else
         {
             ++num_ok;
-            details.push_back({timestamp, tst_pos, true, // inside
-                               {has_track_num ? track_num : QVariant::Invalid}, // track_num
-                               false, "OK"}); // extra
+            addDetail(timestamp, tst_pos, true, // inside
+                        {has_track_num ? track_num : QVariant::Invalid}, // track_num
+                        false, "OK"); // extra
         }
 
     }
@@ -264,6 +280,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> ExtraTrack::evaluate (
 
     return make_shared<EvaluationRequirementResult::SingleExtraTrack>(
                 "UTN:"+to_string(target_data.utn_), instance, sector_layer, target_data.utn_, &target_data,
-                eval_man_, ignore, num_pos_inside, num_extra, num_ok, details);
+                eval_man_, details, ignore, num_pos_inside, num_extra, num_ok);
 }
+
 }

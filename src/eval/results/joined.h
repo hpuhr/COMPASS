@@ -52,7 +52,7 @@ public:
 protected:
     void addCommonDetails (EvaluationResultsReport::SectionContentTable& sector_details_table);
 
-    virtual void join_impl(std::shared_ptr<Single> other);
+    virtual void join_impl(std::shared_ptr<Single> other) = 0;
     virtual void updatesToUseChanges_impl() = 0;
 
     void addSingleDetails(const EvaluationDetails& details);

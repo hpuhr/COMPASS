@@ -28,8 +28,7 @@ namespace EvaluationRequirementResult
 
 const std::string SingleDubiousBase::DetailCommentGroupDubious = "CommentsDubious";
 
-const std::string SingleDubiousBase::DetailUTN             = "UTN";
-const std::string SingleDubiousBase::DetailTrackNum        = "TrackNum";
+const std::string SingleDubiousBase::DetailUTNOrTrackNum   = "UTNOrTrackNum";
 const std::string SingleDubiousBase::DetailFirstInside     = "FirstInside";
 const std::string SingleDubiousBase::DetailTODBegin        = "TODBegin";
 const std::string SingleDubiousBase::DetailTODEnd          = "TODEnd";
@@ -40,6 +39,50 @@ const std::string SingleDubiousBase::DetailHasModeAC       = "HasModeAC";
 const std::string SingleDubiousBase::DetailHasModeS        = "HasModeS";
 const std::string SingleDubiousBase::DetailLeftSector      = "LeftSector";
 const std::string SingleDubiousBase::DetailIsDubious       = "IsDubious";
+
+/**
+*/
+SingleDubiousBase::DetailData::DetailData(unsigned int utn_or_track_number, boost::posix_time::ptime ts_begin)
+:   utn_or_tracknum(utn_or_track_number)
+,   tod_begin      (ts_begin)
+,   tod_end        (ts_begin)
+{
+}
+
+/**
+*/
+void SingleDubiousBase::DetailData::assignTo(EvaluationDetail& d) const
+{
+    d.setValue(DetailUTNOrTrackNum, utn_or_tracknum)
+     .setValue(DetailFirstInside, first_inside)
+     .setValue(DetailTODBegin, tod_begin)
+     .setValue(DetailTODEnd, tod_end)
+     .setValue(DetailDuration, duration)
+     .setValue(DetailNumPosInside, num_pos_inside)
+     .setValue(DetailNumPosInsideDub, num_pos_inside_dubious)
+     .setValue(DetailHasModeAC, has_mode_ac)
+     .setValue(DetailHasModeS, has_mode_s)
+     .setValue(DetailLeftSector, left_sector)
+     .setValue(DetailIsDubious, is_dubious)
+     .addPosition(pos_begin)
+     .addPosition(pos_last)
+     .setDetails(details);
+
+    SingleDubiousBase::logComments(d, dubious_reasons);
+}
+
+/**
+*/
+unsigned int SingleDubiousBase::DetailData::numDubious() const
+{
+    unsigned int cnt = 0;
+
+    for (auto& dd : details)
+        if (!dd.comments().group(DetailCommentGroupDubious).empty())
+            ++cnt;
+
+    return cnt;
+}
 
 /**
 */
@@ -62,6 +105,10 @@ SingleDubiousBase::SingleDubiousBase(const std::string& result_type,
 ,   num_pos_inside_dubious_(num_pos_inside_dubious)
 {
 }
+
+/**
+*/
+SingleDubiousBase::~SingleDubiousBase() = default;
 
 /**
 */
@@ -179,6 +226,37 @@ std::unique_ptr<nlohmann::json::object_t> SingleDubiousBase::getTargetErrorsView
     //        }
 
     return viewable_ptr;
+}
+
+/**
+*/
+void SingleDubiousBase::logComment(EvaluationDetail& d, const std::string& id, const std::string& comment)
+{
+    d.comments().comment(DetailCommentGroupDubious, id, comment);
+}
+
+/**
+*/
+void SingleDubiousBase::logComments(EvaluationDetail& d, const EvaluationDetailComments::CommentGroup& group)
+{
+    d.comments().group(DetailCommentGroupDubious, group);
+}
+
+/**
+*/
+SingleDubiousBase::EvaluationDetails SingleDubiousBase::generateDetails(const std::vector<DetailData>& detail_data)
+{
+    if (detail_data.empty())
+        return {};
+
+    size_t n = detail_data.size();
+
+    EvaluationDetails details(n);
+
+    for (size_t i = 0; i < n; ++i)
+        detail_data[ i ].assignTo(details[ i ]);
+
+    return details;
 }
 
 /************************************************************************************

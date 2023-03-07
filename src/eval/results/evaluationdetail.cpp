@@ -84,6 +84,23 @@ const EvaluationDetailComments::CommentGroup& EvaluationDetailComments::group(co
     return comments()[ group_id ];
 }
 
+/**
+ */
+bool EvaluationDetailComments::hasComments(const std::string& group_id) const
+{
+    return numComments(group_id) > 0;
+}
+
+/**
+*/
+std::map<std::string, EvaluationDetailComments::CommentGroup>& EvaluationDetailComments::comments() const
+{
+    if (!comments_.has_value())
+        comments_ = std::map<std::string, EvaluationDetailComments::CommentGroup>();
+
+    return comments_.value();
+}
+
 /*****************************************************************************
  * EvaluationDetail
  *****************************************************************************/
@@ -173,6 +190,8 @@ EvaluationDetail& EvaluationDetail::addPosition(const boost::optional<Position>&
 {
     if (p.has_value())
         addPosition(p.value());
+    
+    return *this;
 }
 
 /**
@@ -216,6 +235,14 @@ EvaluationDetail& EvaluationDetail::addDetail(const EvaluationDetail& detail)
 
 /**
 */
+EvaluationDetail& EvaluationDetail::setDetails(const Details& details)
+{
+    details_ = details;
+    return *this;
+}
+
+/**
+*/
 bool EvaluationDetail::hasDetails() const
 {
     return details_.has_value();
@@ -233,4 +260,6 @@ const EvaluationDetail::Details& EvaluationDetail::details() const
 EvaluationDetail& EvaluationDetail::generalComment(const std::string& c)
 {
     comments().generalComment(c);
+
+    return *this;
 }

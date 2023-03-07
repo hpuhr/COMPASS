@@ -176,11 +176,35 @@ std::shared_ptr<EvaluationRequirementResult::Single> Detection::evaluate (
     //pair<EvaluationTargetPosition, bool> ret_pos;
     bool ok;
 
-    EvaluationRequirementResult::Single::EvaluationDetails details;
+    typedef EvaluationRequirementResult::SingleDetection Result;
+    typedef EvaluationDetail                             Detail;
+    typedef Result::EvaluationDetails                    Details;
+    Details details;
 
     EvaluationTargetPosition pos_current;
 
     unsigned int tst_data_size = tst_data.size();
+
+    auto addDetail = [ & ] (const ptime& ts,
+                            const EvaluationTargetPosition& tst_pos,
+                            const boost::optional<EvaluationTargetPosition>& last_pos,
+                            const QVariant& d_tod,
+                            const QVariant& miss_occurred,
+                            const QVariant& ref_exists,
+                            const QVariant& missed_uis,
+                            const QVariant& max_gap_uis,
+                            const QVariant& no_ref_uis,
+                            const std::string& comment)
+    {
+        details.push_back(Detail(ts, tst_pos).setValue(Result::DetailDiffTOD, d_tod)
+                                             .setValue(Result::DetailMissOccurred, miss_occurred)
+                                             .setValue(Result::DetailRefExists, ref_exists)
+                                             .setValue(Result::DetailMissedUIs, missed_uis)
+                                             .setValue(Result::DetailMaxGapUIs, max_gap_uis)
+                                             .setValue(Result::DetailNoRefUIs, no_ref_uis)
+                                             .addPosition(last_pos)
+                                             .generalComment(comment));
+    };
 
     if (!tst_data_size)
     {
@@ -209,24 +233,16 @@ std::shared_ptr<EvaluationRequirementResult::Single> Detection::evaluate (
                         +String::doubleToStringPrecision(missThreshold(), 2)
                         +"), last was "+Time::toString(last_ts);
 
-                DetectionDetail detail {
-                    timestamp, t_diff, true,
-                            pos_current, true,
-                            sum_missed_uis, comment};
+                auto last_pos = target_data.refPosForTime(last_ts);
 
-                assert (target_data.hasRefPosForTime(last_ts));
-                detail.pos_last_ = target_data.refPosForTime(last_ts);
-                detail.has_last_position_ = true;
-
-                details.push_back(detail);
+                addDetail(timestamp, pos_current, last_pos, t_diff, true, true, sum_missed_uis, 0, 0, comment); 
             }
         }
 
         return make_shared<EvaluationRequirementResult::SingleDetection>(
                     "UTN:"+to_string(target_data.utn_), instance, sector_layer, target_data.utn_, &target_data,
-                    eval_man_, sum_uis, sum_missed_uis, ref_periods, details);
+                    eval_man_, details, sum_uis, sum_missed_uis, ref_periods);
     }
-
 
     // collect test times in ref periods
     map<unsigned int, ptime> period_last_tst_times; // period number -> lst tst times
@@ -300,35 +316,27 @@ std::shared_ptr<EvaluationRequirementResult::Single> Detection::evaluate (
                                 +"), between ["+Time::toString(last_period_ts)+", "
                                 +Time::toString(ref_periods.period(period_cnt).end())+"]\n";
 
-                        DetectionDetail detail{timestamp, t_diff, true,
-                                    pos_current, false,
-                                    sum_missed_uis, comment};
+                        boost::optional<EvaluationTargetPosition> last_pos;
 
                         if (tst_time_found)
                         {
                             assert (target_data.hasTstPosForTime(last_period_ts));
-                            detail.pos_last_ = target_data.tstPosForTime(last_period_ts);
-                            detail.has_last_position_ = true;
+                            last_pos = target_data.tstPosForTime(last_period_ts);
                         }
                         else
                         {
                             assert (target_data.hasRefPosForTime(last_period_ts));
-                            detail.pos_last_ = target_data.refPosForTime(last_period_ts);
-                            detail.has_last_position_ = true;
+                            last_pos = target_data.refPosForTime(last_period_ts);
                         }
 
-                        details.push_back(detail);
+                        addDetail(timestamp, pos_current, last_pos, t_diff, true, false, sum_missed_uis, 0, 0, comment); 
                     }
                     else
                     {
                         comment = "Previous period "+to_string(period_cnt)
                                 +" OK (DToD <= "+String::doubleToStringPrecision(missThreshold(), 2)+")\n";
 
-                        DetectionDetail detail{timestamp, t_diff, false,
-                                    pos_current, false,
-                                    sum_missed_uis, comment};
-
-                        details.push_back(detail);
+                        addDetail(timestamp, pos_current, {}, t_diff, false, false, sum_missed_uis, 0, 0, comment);
                     }
 
                     finished_periods.insert(period_cnt);
@@ -339,10 +347,9 @@ std::shared_ptr<EvaluationRequirementResult::Single> Detection::evaluate (
         if (!is_inside_ref_time_period)
         {
             if (!skip_no_data_details)
-                details.push_back(
-                            {timestamp, {}, false,
-                             pos_current, is_inside_ref_time_period,
-                             sum_missed_uis, "Outside of reference time periods"});
+            {
+                addDetail(timestamp, pos_current, {}, {}, false, is_inside_ref_time_period, sum_missed_uis, 0, 0, "Outside of reference time periods");
+            }
 
             // TODO undetected previous miss possible
             continue;
@@ -360,10 +367,9 @@ std::shared_ptr<EvaluationRequirementResult::Single> Detection::evaluate (
         if (!ok) // only happens if test time is exact beginning of reference interval
         {
             if (!skip_no_data_details)
-                details.push_back(
-                            {timestamp, {}, false,
-                             pos_current, is_inside_ref_time_period,
-                             sum_missed_uis, "At exact beginning of reference time period"});
+            {
+                addDetail(timestamp, pos_current, {}, {}, false, is_inside_ref_time_period, sum_missed_uis, 0, 0, "At exact beginning of reference time period");
+            }
 
             continue;
         }
@@ -386,10 +392,9 @@ std::shared_ptr<EvaluationRequirementResult::Single> Detection::evaluate (
                    << " outside";
 
             if (!skip_no_data_details)
-                details.push_back(
-                            {timestamp, {}, false,
-                             pos_current, is_inside_ref_time_period,
-                             sum_missed_uis, "Outside sector"});
+            {
+                addDetail(timestamp, pos_current, {}, {}, false, is_inside_ref_time_period, sum_missed_uis, 0, 0, "Outside sector");
+            }
 
             was_outside = true;
 
@@ -405,17 +410,11 @@ std::shared_ptr<EvaluationRequirementResult::Single> Detection::evaluate (
 
             if (was_outside)
             {
-                details.push_back(
-                            {timestamp, {}, false,
-                             pos_current, is_inside_ref_time_period,
-                             sum_missed_uis, "First target report after outside sector"});
+                addDetail(timestamp, pos_current, {}, {}, false, is_inside_ref_time_period, sum_missed_uis, 0, 0, "First target report after outside sector");
             }
             else // first in period
             {
-                details.push_back(
-                            {timestamp, {}, false,
-                             pos_current, is_inside_ref_time_period,
-                             sum_missed_uis, "First target report in period "+to_string(period_index)});
+                addDetail(timestamp, pos_current, {}, {}, false, is_inside_ref_time_period, sum_missed_uis, 0, 0, "First target report in period " + to_string(period_index));
 
                 // check if begin time in period is miss
 
@@ -438,18 +437,14 @@ std::shared_ptr<EvaluationRequirementResult::Single> Detection::evaluate (
                             +"), between ["+Time::toString(ref_periods.period(period_index).begin())
                             +", "+Time::toString(timestamp)+"]\n";
 
-                    DetectionDetail detail{timestamp, t_diff, true,
-                                target_data.tstPosForTime(timestamp), is_inside_ref_time_period,
-                                sum_missed_uis, comment};
-
                     assert (target_data.hasRefPosForTime(ref_periods.period(period_index).begin()));
-                    detail.pos_last_ = target_data.refPosForTime(ref_periods.period(period_index).begin());
-                    detail.has_last_position_ = true;
 
-                    details.push_back(detail);
+                    auto tst_pos  = target_data.tstPosForTime(timestamp);
+                    auto last_pos = target_data.refPosForTime(ref_periods.period(period_index).begin());
+
+                    addDetail(timestamp, tst_pos, last_pos, t_diff, true, is_inside_ref_time_period, sum_missed_uis, 0, 0, comment);
                 }
             }
-
 
             was_outside = false;
             period_last_tst_times[period_index] = timestamp;
@@ -478,27 +473,19 @@ std::shared_ptr<EvaluationRequirementResult::Single> Detection::evaluate (
                     +String::doubleToStringPrecision(missThreshold(), 2)
                     +"), last was "+Time::toString(last_ts);
 
-            DetectionDetail detail {
-                timestamp, t_diff, true,
-                        pos_current, is_inside_ref_time_period,
-                        sum_missed_uis, comment};
+            auto last_pos = target_data.tstPosForTime(last_ts);
 
-            detail.pos_last_ = target_data.tstPosForTime(last_ts);
-            detail.has_last_position_ = true;
-
-            details.push_back(detail);
+            addDetail(timestamp, pos_current, last_pos, t_diff, true, is_inside_ref_time_period, sum_missed_uis, 0, 0, comment);
         }
         else
         {
             logdbg << "EvaluationRequirementDetection '" << name_ << "': evaluate: utn " << target_data.utn_
                    << " update ok";
 
-            details.push_back(
-                        {timestamp, t_diff, false,
-                         pos_current, is_inside_ref_time_period,
-                         sum_missed_uis, "OK (DToD <= "+String::doubleToStringPrecision(missThreshold(), 2)+")"});
-        }
+            std::string comment = "OK (DToD <= " + String::doubleToStringPrecision(missThreshold(), 2) + ")";
 
+            addDetail(timestamp, pos_current, {}, t_diff, true, is_inside_ref_time_period, sum_missed_uis, 0, 0, comment);
+        }
 
         period_last_tst_times[period_index] = timestamp;
     }
@@ -546,35 +533,27 @@ std::shared_ptr<EvaluationRequirementResult::Single> Detection::evaluate (
                         +"), between ["+Time::toString(last_period_tod)+", "
                         +Time::toString(ref_periods.period(period_cnt).end())+"]\n";
 
-                DetectionDetail detail{timestamp, t_diff, true,
-                            pos_current, false,
-                            sum_missed_uis, comment};
+                boost::optional<EvaluationTargetPosition> last_pos;
 
                 if (tst_time_found)
                 {
                     assert (target_data.hasTstPosForTime(last_period_tod));
-                    detail.pos_last_ = target_data.tstPosForTime(last_period_tod);
-                    detail.has_last_position_ = true;
+                    last_pos = target_data.tstPosForTime(last_period_tod);
                 }
                 else
                 {
                     assert (target_data.hasRefPosForTime(last_period_tod));
-                    detail.pos_last_ = target_data.refPosForTime(last_period_tod);
-                    detail.has_last_position_ = true;
+                    last_pos = target_data.refPosForTime(last_period_tod);
                 }
 
-                details.push_back(detail);
+                addDetail(timestamp, pos_current, last_pos, t_diff, true, false, sum_missed_uis, 0, 0, comment);
             }
             else
             {
                 comment = "Previous period "+to_string(period_cnt)
                         +" OK (DToD <= "+String::doubleToStringPrecision(missThreshold(), 2)+")\n";
 
-                DetectionDetail detail{timestamp, t_diff, false,
-                            pos_current, false,
-                            sum_missed_uis, comment};
-
-                details.push_back(detail);
+                addDetail(timestamp, pos_current, {}, t_diff, false, false, sum_missed_uis, 0, 0, comment);
             }
 
             finished_periods.insert(period_cnt);
@@ -600,7 +579,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> Detection::evaluate (
 
     return make_shared<EvaluationRequirementResult::SingleDetection>(
                 "UTN:"+to_string(target_data.utn_), instance, sector_layer, target_data.utn_, &target_data,
-                eval_man_, sum_uis, sum_missed_uis, ref_periods, details);
+                eval_man_, details, sum_uis, sum_missed_uis, ref_periods);
 }
 
 bool Detection::invertProb() const

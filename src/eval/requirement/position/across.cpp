@@ -115,8 +115,8 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionAcross::evaluate (
                             const QVariant& num_no_ref,
                             const QVariant& num_pos_inside,
                             const QVariant& num_pos_outside,
-                            const QVariant& num_comp_passed,
-                            const QVariant& num_comp_failed,
+                            const QVariant& num_value_ok,
+                            const QVariant& num_value_nok,
                             const std::string& comment)
     {
         details.push_back(Detail(ts, tst_pos).setValue(Result::DetailPosInside, pos_inside.isValid() ? pos_inside : "false")
@@ -126,8 +126,8 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionAcross::evaluate (
                                              .setValue(Result::DetailNumNoRef, num_no_ref)
                                              .setValue(Result::DetailNumInside, num_pos_inside)
                                              .setValue(Result::DetailNumOutside, num_pos_outside)
-                                             .setValue(Result::DetailNumCheckPassed, num_comp_passed)
-                                             .setValue(Result::DetailNumCheckFailed, num_comp_failed)
+                                             .setValue(Result::DetailNumCheckPassed, num_value_ok)
+                                             .setValue(Result::DetailNumCheckFailed, num_value_nok)
                                              .addPosition(ref_pos)
                                              .generalComment(comment));
     };
@@ -318,15 +318,15 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionAcross::evaluate (
 
     assert (num_pos - num_no_ref == num_pos_inside + num_pos_outside);
 
-    assert (num_distances == num_value_ok+num_value_nok);
+    assert (num_distances == num_value_ok + num_value_nok);
     assert (num_distances == values.size());
 
     //assert (details.size() == num_pos);
 
     return make_shared<EvaluationRequirementResult::SinglePositionAcross>(
                 "UTN:"+to_string(target_data.utn_), instance, sector_layer, target_data.utn_, &target_data,
-                eval_man_, num_pos, num_no_ref, num_pos_outside, num_pos_inside, num_value_ok, num_value_nok,
-                values, details);
+                eval_man_, details, num_pos, num_no_ref, num_pos_outside, num_pos_inside, num_value_ok, num_value_nok,
+                values);
 }
 
 }

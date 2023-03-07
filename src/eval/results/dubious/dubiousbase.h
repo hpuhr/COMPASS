@@ -19,11 +19,14 @@
 
 #include "eval/results/single.h"
 #include "eval/results/joined.h"
+#include "eval/data/evaluationtargetposition.h"
 
 #include <memory>
 #include <string>
+#include <map>
 
 #include <boost/optional.hpp>
+#include <boost/date_time/posix_time/posix_time.hpp>
 
 class EvaluationDetailComments;
 
@@ -40,6 +43,34 @@ namespace EvaluationRequirementResult
 class SingleDubiousBase : public Single
 {
 public:
+    /**
+     * Raw data for a detail.
+     */
+    struct DetailData
+    {
+        DetailData() = default;
+        DetailData(unsigned int utn_or_track_number, boost::posix_time::ptime ts_begin);
+
+        void assignTo(EvaluationDetail& detail) const;
+        unsigned int numDubious() const;
+
+        unsigned int                       utn_or_tracknum        = 0;
+        bool                               first_inside           = true;
+        boost::posix_time::ptime           tod_begin;
+        boost::posix_time::ptime           tod_end;
+        boost::posix_time::time_duration   duration;
+        unsigned int                       num_pos_inside         = 0;
+        unsigned int                       num_pos_inside_dubious = 0;
+        bool                               has_mode_ac            = false;
+        bool                               has_mode_s             = false;
+        bool                               left_sector            = false;
+        bool                               is_dubious             = false;
+        EvaluationTargetPosition           pos_begin;
+        EvaluationTargetPosition           pos_last;
+        EvaluationDetails                  details;
+        std::map<std::string, std::string> dubious_reasons;
+    };
+
     SingleDubiousBase(const std::string& result_type,
                       const std::string& result_id, 
                       std::shared_ptr<EvaluationRequirement::Base> requirement,
@@ -61,8 +92,7 @@ public:
 
     static const std::string DetailCommentGroupDubious;
 
-    static const std::string DetailUTN;             //unsigned int
-    static const std::string DetailTrackNum;        //unsigned int
+    static const std::string DetailUTNOrTrackNum;   //unsigned int
     static const std::string DetailFirstInside;     //bool
     static const std::string DetailTODBegin;        //ptime
     static const std::string DetailTODEnd;          //ptime
@@ -73,6 +103,10 @@ public:
     static const std::string DetailHasModeS;        //bool
     static const std::string DetailLeftSector;      //bool
     static const std::string DetailIsDubious;       //bool
+
+    static void logComment(EvaluationDetail& d, const std::string& id, const std::string& comment);
+    static void logComments(EvaluationDetail& d, const EvaluationDetailComments::CommentGroup& group);
+    static EvaluationDetails generateDetails(const std::vector<DetailData>& detail_data);
 
 protected:
     std::unique_ptr<nlohmann::json::object_t> getTargetErrorsViewable ();
