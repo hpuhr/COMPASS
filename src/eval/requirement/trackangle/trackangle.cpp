@@ -130,8 +130,6 @@ std::shared_ptr<EvaluationRequirementResult::Single> TrackAngle::evaluate (
     bool has_ground_bit;
     bool ground_bit_set;
 
-    double min_speed_ms = minimum_speed_ * KNOTS2M_S;
-
     for (const auto& tst_id : tst_data)
     {
         ++num_pos;
@@ -147,6 +145,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> TrackAngle::evaluate (
                 details.push_back({timestamp, tst_pos,
                                    false, {}, // has_ref_pos, ref_pos
                                    {}, {}, comp_passed, // pos_inside, value, check_passed
+                                   {}, {}, {}, // value_ref, value_tst, speed_ref
                                    num_pos, num_no_ref, num_pos_inside, num_pos_outside,
                                    num_comp_failed, num_comp_passed,
                                    "No reference data"});
@@ -163,6 +162,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> TrackAngle::evaluate (
                 details.push_back({timestamp, tst_pos,
                                    false, {}, // has_ref_pos, ref_pos
                                    {}, {}, comp_passed, // pos_inside, value, check_passed
+                                   {}, {}, {}, // value_ref, value_tst, speed_ref
                                    num_pos, num_no_ref, num_pos_inside, num_pos_outside,
                                    num_comp_failed, num_comp_passed,
                                    "No reference position"});
@@ -189,6 +189,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> TrackAngle::evaluate (
                 details.push_back({timestamp, tst_pos,
                                    true, ref_pos, // has_ref_pos, ref_pos
                                    is_inside, {}, comp_passed, // pos_inside, value, check_passed
+                                   {}, {}, {}, // value_ref, value_tst, speed_ref
                                    num_pos, num_no_ref, num_pos_inside, num_pos_outside,
                                    num_comp_failed, num_comp_passed,
                                    "Outside sector"});
@@ -204,6 +205,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> TrackAngle::evaluate (
                 details.push_back({timestamp, tst_pos,
                                    false, {}, // has_ref_pos, ref_pos
                                    {}, {}, comp_passed, // pos_inside, value, check_passed
+                                   {}, {}, {}, // value_ref, value_tst, speed_ref
                                    num_pos, num_no_ref, num_pos_inside, num_pos_outside,
                                    num_comp_failed, num_comp_passed,
                                    "No reference speed"});
@@ -216,12 +218,13 @@ std::shared_ptr<EvaluationRequirementResult::Single> TrackAngle::evaluate (
 
         // ref_spd ok
 
-        if (use_minimum_speed_ && ref_spd.speed_ < min_speed_ms)
+        if (use_minimum_speed_ && ref_spd.speed_ < minimum_speed_)
         {
             if (!skip_no_data_details)
                 details.push_back({timestamp, tst_pos,
                                    false, {}, // has_ref_pos, ref_pos
                                    {}, {}, comp_passed, // pos_inside, value, check_passed
+                                   {}, {}, ref_spd.speed_, // value_ref, value_tst, speed_ref
                                    num_pos, num_no_ref, num_pos_inside, num_pos_outside,
                                    num_comp_failed, num_comp_passed,
                                    "Reference speed too low"});
@@ -239,6 +242,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> TrackAngle::evaluate (
                 details.push_back({timestamp, tst_pos,
                                    false, {}, // has_ref_pos, ref_pos
                                    {}, {}, comp_passed, // pos_inside, value, check_passed
+                                   {}, {}, ref_spd.speed_, // value_ref, value_tst, speed_ref
                                    num_pos, num_no_ref, num_pos_inside, num_pos_outside,
                                    num_comp_failed, num_comp_passed,
                                    "No tst speed"});
@@ -275,6 +279,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> TrackAngle::evaluate (
         details.push_back({timestamp, tst_pos,
                            true, ref_pos,
                            is_inside, trackangle_min_diff, comp_passed, // pos_inside, value, check_passed
+                           ref_trackangle_deg, tst_trackangle_deg, ref_spd.speed_, // value_ref, value_tst, speed_ref
                            num_pos, num_no_ref, num_pos_inside, num_pos_outside,
                            num_comp_failed, num_comp_passed,
                            comment});

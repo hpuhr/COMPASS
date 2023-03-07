@@ -304,8 +304,9 @@ void SingleTrackAngle::addTargetDetailsToReport(shared_ptr<EvaluationResultsRepo
 void SingleTrackAngle::reportDetails(EvaluationResultsReport::Section& utn_req_section)
 {
     if (!utn_req_section.hasTable(tr_details_table_name_))
-        utn_req_section.addTable(tr_details_table_name_, 8,
-                                 {"ToD", "NoRef", "PosInside", "Distance", "CP", "#CF", "#CP", "Comment"});
+        utn_req_section.addTable(tr_details_table_name_, 11,
+                                 {"ToD", "NoRef", "PosInside", "Distance", "CP",
+                                  "Value Ref", "Value Tst", "Speed Ref", "#CF", "#CP", "Comment"});
 
     EvaluationResultsReport::SectionContentTable& utn_req_details_table =
             utn_req_section.getTable(tr_details_table_name_);
@@ -319,6 +320,9 @@ void SingleTrackAngle::reportDetails(EvaluationResultsReport::Section& utn_req_s
                      !rq_det_it.has_ref_pos_, rq_det_it.pos_inside_,
                      rq_det_it.offset_,  // "Distance"
                      rq_det_it.check_passed_, // CP"
+                     rq_det_it.value_ref_, // "Value Ref"
+                     rq_det_it.value_tst_, // "Value Tst"
+                     rq_det_it.speed_ref_, // "Speed Ref"
                      rq_det_it.num_check_failed_, // "#CF",
                      rq_det_it.num_check_passed_, // "#CP"
                      rq_det_it.comment_.c_str()}, // "Comment"

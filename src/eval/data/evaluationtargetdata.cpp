@@ -563,7 +563,7 @@ EvaluationTargetVelocity EvaluationTargetData::refSpdForTime (boost::posix_time:
 
     EvaluationTargetVelocity spd;
 
-    spd.speed_ = speed_vec.get(index); // true north to mathematical
+    spd.speed_ = speed_vec.get(index) * KNOTS2M_S; // true north to mathematical
     spd.track_angle_ = track_angle_vec.get(index);
 
     return spd;
