@@ -20,7 +20,8 @@
 #include "logger.h"
 #include "util/files.h"
 #include "rtcommand_registry.h"
-#include "stringconv.h"
+#include "util/stringconv.h"
+#include "util/timeconv.h"
 
 #include <QTimer>
 #include <QCoreApplication>
@@ -420,6 +421,11 @@ bool RTCommandImportASTERIXFile::run_impl() const
             import_task.overrideTodActive(true);
             import_task.overrideTodOffset(time_offset);
         }
+
+        if (ignore_time_jumps_)
+        {
+
+        }
     }
     catch (exception& e)
     {
@@ -468,6 +474,7 @@ void RTCommandImportASTERIXFile::collectOptions_impl(OptionsDescription& options
     ADD_RTCOMMAND_OPTIONS(options)
         ("time_offset,t", po::value<std::string>()->default_value(""),
          "imports ASTERIX file with given Time of Day override, in HH:MM:SS.ZZZ’");
+    ADD_RTCOMMAND_OPTIONS(options)("ignore_time_jumps,i", "ignore 24h time jumps");
 
     ADD_RTCOMMAND_POS_OPTION(positional, "filename", 1) // give position
 }
@@ -479,6 +486,7 @@ void RTCommandImportASTERIXFile::assignVariables_impl(const VariablesMap& variab
     RTCOMMAND_GET_VAR_OR_THROW(variables, "line", std::string, line_id_)
     RTCOMMAND_GET_VAR_OR_THROW(variables, "date", std::string, date_str_)
     RTCOMMAND_GET_VAR_OR_THROW(variables, "time_offset", std::string, time_offset_str_)
+    RTCOMMAND_CHECK_VAR(variables, "ignore_time_jumps", ignore_time_jumps_)
 }
 
 // import asterix network

@@ -23,6 +23,7 @@
 #include "dbcontent/variable/variable.h"
 #include "scatterplotviewchartview.h"
 #include "viewdatawidget.h"
+#include "util/timeconv.h"
 
 #include <QWidget>
 #include <QVariant>

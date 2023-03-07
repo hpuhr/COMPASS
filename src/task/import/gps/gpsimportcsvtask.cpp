@@ -15,8 +15,8 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "gpstrailimporttask.h"
-#include "gpstrailimporttaskdialog.h"
+#include "gpsimportcsvtask.h"
+#include "gpsimportcsvtaskdialog.h"
 #include "compass.h"
 #include "dbinterface.h"
 #include "savedfile.h"
@@ -32,6 +32,8 @@
 #include "dbcontent/variable/metavariable.h"
 #include "util/number.h"
 #include "util/timeconv.h"
+#include "util/stringconv.h"
+#include "global.h"
 
 #include <iostream>
 #include <fstream>
@@ -41,21 +43,23 @@
 #include <QApplication>
 #include <QMessageBox>
 
-const std::string DONE_PROPERTY_NAME = "gps_trail_imported";
 const float tod_24h = 24 * 60 * 60;
 
 using namespace Utils;
 using namespace std;
 using namespace nmea;
 
-GPSTrailImportTask::GPSTrailImportTask(const std::string& class_id, const std::string& instance_id,
-                                       TaskManager& task_manager)
-    : Task("GPSTrailImportTask", "Import GPS Trail", true, false, task_manager),
-      Configurable(class_id, instance_id, &task_manager, "task_import_gps.json")
+GPSImportCSVTask::GPSImportCSVTask(const std::string& class_id, const std::string& instance_id,
+                                   TaskManager& task_manager)
+    : Task("GPSImportCSVTask", "Import GPS Trail", true, false, task_manager),
+      Configurable(class_id, instance_id, &task_manager, "task_import_gps_csv.json")
 {
-    tooltip_ = "Allows importing of GPS trails as NMEA into the opened database.";
+    tooltip_ = "Allows importing of GPS trails as CSV into the opened database.";
 
     registerParameter("current_filename", &current_filename_, "");
+
+    //02/16/23 09:24:24.000
+    registerParameter("timestamp_format", &timestamp_format_, "%m/%d/%y %H:%M:%S%F");
 
     registerParameter("ds_name", &ds_name_, "GPS Trail");
     registerParameter("ds_sac", &ds_sac_, 0);
@@ -80,58 +84,49 @@ GPSTrailImportTask::GPSTrailImportTask(const std::string& class_id, const std::s
         parseCurrentFile();
 }
 
-GPSTrailImportTask::~GPSTrailImportTask()
+GPSImportCSVTask::~GPSImportCSVTask()
 {
 }
 
-void GPSTrailImportTask::generateSubConfigurable(const std::string& class_id,
-                                                 const std::string& instance_id)
+void GPSImportCSVTask::generateSubConfigurable(const std::string& class_id,
+                                               const std::string& instance_id)
 {
-        throw std::runtime_error("GPSTrailImportTask: generateSubConfigurable: unknown class_id " +
-                                 class_id);
+    throw std::runtime_error("GPSImportCSVTask: generateSubConfigurable: unknown class_id " +
+                             class_id);
 }
 
-GPSTrailImportTaskDialog* GPSTrailImportTask::dialog()
+GPSImportCSVTaskDialog* GPSImportCSVTask::dialog()
 {
     if (!dialog_)
     {
-        dialog_.reset(new GPSTrailImportTaskDialog(*this));
+        dialog_.reset(new GPSImportCSVTaskDialog(*this));
 
-        connect(dialog_.get(), &GPSTrailImportTaskDialog::importSignal,
-                this, &GPSTrailImportTask::dialogImportSlot);
+        connect(dialog_.get(), &GPSImportCSVTaskDialog::importSignal,
+                this, &GPSImportCSVTask::dialogImportSlot);
 
-        connect(dialog_.get(), &GPSTrailImportTaskDialog::cancelSignal,
-                this, &GPSTrailImportTask::dialogCancelSlot);
+        connect(dialog_.get(), &GPSImportCSVTaskDialog::cancelSignal,
+                this, &GPSImportCSVTask::dialogCancelSlot);
     }
 
     assert(dialog_);
     return dialog_.get();
 }
 
-void GPSTrailImportTask::importFilename(const std::string& filename)
+void GPSImportCSVTask::importFilename(const std::string& filename)
 {
-    loginf << "GPSTrailImportTask: importFilename: filename '" << filename << "'";
+    loginf << "GPSImportCSVTask: importFilename: filename '" << filename << "'";
 
     current_filename_ = filename;
 
     parseCurrentFile();
 
-        if (dialog_)
-        {
-//            dialog_->updateFileListSlot();
-//            widget_->updateText();
-        }
-
     emit statusChangedSignal(name_);
 }
 
-bool GPSTrailImportTask::checkPrerequisites()
+bool GPSImportCSVTask::checkPrerequisites()
 {
     if (!COMPASS::instance().interface().ready())  // must be connected
         return false;
-
-    if (COMPASS::instance().interface().hasProperty(DONE_PROPERTY_NAME))
-        done_ = COMPASS::instance().interface().getProperty(DONE_PROPERTY_NAME) == "1";
 
     if (!COMPASS::instance().dbContentManager().existsDBContent("RefTraj"))
         return false;
@@ -139,253 +134,300 @@ bool GPSTrailImportTask::checkPrerequisites()
     return true;
 }
 
-bool GPSTrailImportTask::isRecommended()
+bool GPSImportCSVTask::isRecommended()
 {
     return false;
 }
 
-bool GPSTrailImportTask::isRequired() { return false; }
+bool GPSImportCSVTask::isRequired() { return false; }
 
-std::string GPSTrailImportTask::currentError() const
+std::string GPSImportCSVTask::currentError() const
 {
     return current_error_;
 }
 
-std::string GPSTrailImportTask::dsName() const
+std::string GPSImportCSVTask::dsName() const
 {
     return ds_name_;
 }
 
-void GPSTrailImportTask::dsName(const std::string& ds_name)
+void GPSImportCSVTask::dsName(const std::string& ds_name)
 {
-    loginf << "GPSTrailImportTask: dsName: value '" << ds_name << "'";
+    loginf << "GPSImportCSVTask: dsName: value '" << ds_name << "'";
 
     ds_name_ = ds_name;
 }
 
-unsigned int GPSTrailImportTask::dsSAC() const
+unsigned int GPSImportCSVTask::dsSAC() const
 {
     return ds_sac_;
 }
 
-void GPSTrailImportTask::dsSAC(unsigned int ds_sac)
+void GPSImportCSVTask::dsSAC(unsigned int ds_sac)
 {
-    loginf << "GPSTrailImportTask: dsSAC: value " << ds_sac;
+    loginf << "GPSImportCSVTask: dsSAC: value " << ds_sac;
 
     ds_sac_ = ds_sac;
 }
 
-unsigned int GPSTrailImportTask::dsSIC() const
+unsigned int GPSImportCSVTask::dsSIC() const
 {
     return ds_sic_;
 }
 
-void GPSTrailImportTask::dsSIC(unsigned int ds_sic)
+void GPSImportCSVTask::dsSIC(unsigned int ds_sic)
 {
-    loginf << "GPSTrailImportTask: dsSIC: value " << ds_sic;
+    loginf << "GPSImportCSVTask: dsSIC: value " << ds_sic;
 
     ds_sic_ = ds_sic;
 }
 
-float GPSTrailImportTask::todOffset() const
+float GPSImportCSVTask::todOffset() const
 {
     return tod_offset_;
 }
 
-void GPSTrailImportTask::todOffset(float tod_offset)
+void GPSImportCSVTask::todOffset(float tod_offset)
 {
-    loginf << "GPSTrailImportTask: todOffset: value " << tod_offset;
+    loginf << "GPSImportCSVTask: todOffset: value " << tod_offset;
 
     tod_offset_ = tod_offset;
 }
 
-bool GPSTrailImportTask::setMode3aCode() const
+bool GPSImportCSVTask::setMode3aCode() const
 {
     return set_mode_3a_code_;
 }
 
-void GPSTrailImportTask::setMode3aCode(bool value)
+void GPSImportCSVTask::setMode3aCode(bool value)
 {
-    loginf << "GPSTrailImportTask: setMode3aCode: value " << value;
+    loginf << "GPSImportCSVTask: setMode3aCode: value " << value;
 
     set_mode_3a_code_ = value;
 }
 
-unsigned int GPSTrailImportTask::mode3aCode() const
+unsigned int GPSImportCSVTask::mode3aCode() const
 {
     return mode_3a_code_;
 }
 
-void GPSTrailImportTask::mode3aCode(unsigned int value)
+void GPSImportCSVTask::mode3aCode(unsigned int value)
 {
-    loginf << "GPSTrailImportTask: mode3aCode: value " << value;
+    loginf << "GPSImportCSVTask: mode3aCode: value " << value;
 
     mode_3a_code_ = value;
 }
 
-bool GPSTrailImportTask::setTargetAddress() const
+bool GPSImportCSVTask::setTargetAddress() const
 {
     return set_target_address_;
 }
 
-void GPSTrailImportTask::setTargetAddress(bool value)
+void GPSImportCSVTask::setTargetAddress(bool value)
 {
-    loginf << "GPSTrailImportTask: setTargetAddress: value " << value;
+    loginf << "GPSImportCSVTask: setTargetAddress: value " << value;
 
     set_target_address_ = value;
 }
 
-unsigned int GPSTrailImportTask::targetAddress() const
+unsigned int GPSImportCSVTask::targetAddress() const
 {
     return target_address_;
 }
 
-void GPSTrailImportTask::targetAddress(unsigned int target_address)
+void GPSImportCSVTask::targetAddress(unsigned int target_address)
 {
-    loginf << "GPSTrailImportTask: targetAddress: value " << target_address;
+    loginf << "GPSImportCSVTask: targetAddress: value " << target_address;
 
     target_address_ = target_address;
 }
 
-bool GPSTrailImportTask::setCallsign() const
+bool GPSImportCSVTask::setCallsign() const
 {
     return set_callsign_;
 }
 
-void GPSTrailImportTask::setCallsign(bool value)
+void GPSImportCSVTask::setCallsign(bool value)
 {
-    loginf << "GPSTrailImportTask: setCallsign: value " << value;
+    loginf << "GPSImportCSVTask: setCallsign: value " << value;
 
     set_callsign_ = value;
 }
 
-std::string GPSTrailImportTask::callsign() const
+std::string GPSImportCSVTask::callsign() const
 {
     return callsign_;
 }
 
-void GPSTrailImportTask::callsign(const std::string& callsign)
+void GPSImportCSVTask::callsign(const std::string& callsign)
 {
-    loginf << "GPSTrailImportTask: callsign: value '" << callsign << "'";
+    loginf << "GPSImportCSVTask: callsign: value '" << callsign << "'";
 
     callsign_ = callsign;
 }
 
-unsigned int GPSTrailImportTask::lineID() const
+unsigned int GPSImportCSVTask::lineID() const
 {
     return line_id_;
 }
 
-void GPSTrailImportTask::lineID(unsigned int line_id)
+void GPSImportCSVTask::lineID(unsigned int line_id)
 {
-    loginf << "GPSTrailImportTask: lineID: value " << line_id;
+    loginf << "GPSImportCSVTask: lineID: value " << line_id;
 
     line_id_ = line_id;
 }
 
-std::string GPSTrailImportTask::currentText() const
+std::string GPSImportCSVTask::currentText() const
 {
     return current_text_;
 }
 
 
-bool GPSTrailImportTask::canImportFile()
+bool GPSImportCSVTask::canImportFile()
 {
     if (!current_filename_.size())
         return false;
 
     if (!Files::fileExists(current_filename_))
     {
-        loginf << "GPSTrailImportTask: canImportFile: not possible since file '" << current_filename_
+        loginf << "GPSImportCSVTask: canImportFile: not possible since file '" << current_filename_
                << "does not exist";
         return false;
     }
 
-    return gps_fixes_.size(); // only if fixes exist
+    return gps_positions_.size(); // only if fixes exist
 }
 
-void GPSTrailImportTask::parseCurrentFile ()
+void GPSImportCSVTask::parseCurrentFile ()
 {
-    loginf << "GPSTrailImportTask: parseCurrentFile: file '" << current_filename_ << "'";
+    loginf << "GPSImportCSVTask: parseCurrentFile: file '" << current_filename_ << "'";
 
     current_error_ = "";
     current_text_ = "";
 
-    gps_fixes_.clear();
-    quality_counts_.clear();
-    gps_fixes_cnt_ = 0;
-    gps_fixes_skipped_quality_cnt_ = 0;
-    gps_fixes_skipped_time_cnt_ = 0;
+    gps_positions_.clear();
 
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-
-    NMEAParser parser;
-    GPSService gps(parser);
-    parser.log = false;
-
-    time_t last_tod;
-
-    //cout << "Fix  Sats  Sig\t\tSpeed    Dir  Lat         , Lon           Accuracy" << endl;
-    // Handle any changes to the GPS Fix... This is called whenever it's updated.
-    gps.onUpdate += [&gps, this, &last_tod](){
-        //        cout << (gps.fix.locked() ? "[*] " : "[ ] ") << setw(2) << setfill(' ') << gps.fix.trackingSatellites << "/" << setw(2) << setfill(' ') << gps.fix.visibleSatellites << " ";
-        //        cout << fixed << setprecision(2) << setw(5) << setfill(' ') << gps.fix.almanac.averageSNR() << " dB   ";
-        //        cout << fixed << setprecision(2) << setw(6) << setfill(' ') << gps.fix.speed << " km/h [" << GPSFix::travelAngleToCompassDirection(gps.fix.travelAngle, true) << "]  ";
-        //        cout << fixed << setprecision(6) << gps.fix.latitude << "\xF8 " "N, " << gps.fix.longitude << "\xF8 " "E" << "  ";
-        //        cout << "+/- " << setprecision(1) << gps.fix.horizontalAccuracy() << "m  ";
-        //        cout << endl;
-
-        ++gps_fixes_cnt_;
-
-        if (gps.fix.quality == 0)
-        {
-            ++gps_fixes_skipped_quality_cnt_;
-            return;
-        }
-
-        if (gps_fixes_.size() && last_tod == gps.fix.timestamp.getTime())
-        {
-            ++gps_fixes_skipped_time_cnt_;
-            return;
-        }
-
-        if (gps.fix.timestamp.year == 1970)
-        {
-            loginf << "GPSTrailImportTask: parseCurrentFile: skipping timestamp w/o time sync (1970)";
-            ++gps_fixes_skipped_time_cnt_;
-            return;
-        }
-
-        quality_counts_[gps.fix.quality] += 1;
-
-        gps_fixes_.push_back(gps.fix);
-
-        last_tod = gps.fix.timestamp.getTime();
-    };
 
     // From a file
     string line;
     ifstream file(current_filename_);
     unsigned int line_cnt = 0;
 
+    std::vector<std::string> parts;
+
+    GPSPosition fix;
+    bool ok;
+    double x_pos, y_pos, track_angle, speed;
+    float d_t;
+
     while (getline(file, line))
     {
-        try
-        {
-            if (line.back() == '\r')
-                line.pop_back();
+        logdbg << "GPSImportCSVTask: parseCurrentFile: line '" << line << "'";
 
-            parser.readLine(line);
-        }
-        catch (NMEAParseError& e)
+        //        "GPSTime","Latitude","Longitude","MSL"
+        if (line_cnt == 0)
+            assert (line.find("\"GPSTime\",\"Latitude\",\"Longitude\",\"MSL\"") != std::string::npos);
+        else
         {
-            logerr << "GPSTrailImportTask: parseCurrentFile: line " << line_cnt << ": error '" << e.message << "'";
-            if (!current_error_.size())
-                current_error_ = "Line "+to_string(line_cnt)+": "+e.message;
-            else
-                current_error_ += "\nLine "+to_string(line_cnt)+": "+e.message;
-            // You can keep feeding data to the gps service...
-            // The previous data is ignored and the parser is reset.
+            //        02/16/23 09:24:24.000,41.242547397,-8.674719837,67.207
+
+            parts = String::split(line, ',');
+
+            if (parts.size() != 4)
+            {
+                logerr << "GPSImportCSVTask: parseCurrentFile: wrong number of parts " << parts.size();
+                continue;
+            }
+
+            fix.timestamp_ = Time::fromString(parts.at(0), timestamp_format_);
+
+            if (fix.timestamp_.is_not_a_date_time())
+            {
+                logerr << "GPSImportCSVTask: parseCurrentFile: wrong timestamp '" << parts.at(0) << "'";
+                continue;
+            }
+
+            fix.latitude_ = std::numeric_limits<double>::quiet_NaN();
+            fix.latitude_ = std::stod(parts.at(1));
+
+            if (std::isnan(fix.latitude_))
+            {
+                logerr << "GPSImportCSVTask: parseCurrentFile: wrong latitude '" << parts.at(1) << "'";
+                continue;
+            }
+
+            fix.longitude_ = std::numeric_limits<double>::quiet_NaN();
+            fix.longitude_ = std::stod(parts.at(2));
+
+            if (std::isnan(fix.longitude_))
+            {
+                logerr << "GPSImportCSVTask: parseCurrentFile: wrong longitude '" << parts.at(2) << "'";
+                continue;
+            }
+
+            fix.altitude_ = std::numeric_limits<double>::quiet_NaN();
+            fix.altitude_ = std::stod(parts.at(3));
+
+            if (std::isnan(fix.altitude_))
+            {
+                logerr << "GPSImportCSVTask: parseCurrentFile: wrong altitude '" << parts.at(3) << "'";
+                continue;
+            }
+
+            fix.has_speed_ = false;
+
+            if (gps_positions_.size()) // has previous pos
+            {
+                GPSPosition& prev_fix = gps_positions_.back();
+
+                tie(ok, x_pos, y_pos) = trafo_.distanceCart(
+                            prev_fix.latitude_, prev_fix.longitude_, fix.latitude_, fix.longitude_);
+
+                if (!ok)
+                {
+                    logerr << "GPSImportCSVTask: parseCurrentFile: error with latitude " << fix.latitude_
+                           << " longitude " << fix.longitude_;
+                }
+                else
+                {
+
+                    logdbg << "GPSImportCSVTask: parseCurrentFile: offsets x " << fixed << x_pos
+                           << " y " << fixed << y_pos << " dist " << fixed << sqrt(pow(x_pos,2)+pow(y_pos,2));
+
+                    d_t = Time::partialSeconds(fix.timestamp_ - prev_fix.timestamp_);
+
+                    double v_x = x_pos/d_t;
+                    double v_y = y_pos/d_t;
+                    logdbg << "EvaluationTargetData: parseCurrentFile: v_x " << v_x << " v_y " << v_y;
+
+
+                    logdbg << "GPSImportCSVTask: parseCurrentFile: d_t " << d_t;
+
+                    //assert (ok); TODO?
+
+                    // x_pos long, y_pos lat
+
+                    logdbg << "GPSImportCSVTask: parseCurrentFile: interpolated lat "
+                           << x_pos << " long " << y_pos;
+
+                    track_angle = atan2(v_x,v_y); // bearing rad
+                    speed = sqrt(pow(v_x, 2) + pow(v_y, 2));
+
+                    if (!std::isnan(track_angle) && !std::isinf(track_angle) && !std::isnan(speed) && !std::isinf(speed))
+                    {
+                        prev_fix.has_speed_ = true;
+                        prev_fix.vx_ = v_x;
+                        prev_fix.vy_ = v_y;
+                        prev_fix.track_angle_ = RAD2DEG * track_angle;
+                        prev_fix.speed_ = speed;
+                    }
+                }
+            }
+
+            gps_positions_.push_back(fix);
+
         }
         ++line_cnt;
     }
@@ -397,51 +439,21 @@ void GPSTrailImportTask::parseCurrentFile ()
 
     ss << "Parsed " << line_cnt << " lines.\n";
 
-    if (gps_fixes_cnt_)
-    {
-        ss << "Read " << gps_fixes_cnt_ << " fixes.\n";
-        ss << "Skipped " << gps_fixes_skipped_quality_cnt_
-           << " (" << String::percentToString(100.0*gps_fixes_skipped_quality_cnt_/gps_fixes_cnt_) << "%)"
-           << " because of quality.\n";
-        ss << "Skipped " << gps_fixes_skipped_time_cnt_
-           << " (" << String::percentToString(100.0*gps_fixes_skipped_time_cnt_/gps_fixes_cnt_) << "%)"
-           << " because of same time.\n";
-        ss << "Got " << gps_fixes_.size()
-           << " (" << String::percentToString(100.0*gps_fixes_.size()/gps_fixes_cnt_) << "%) fixes.\n";
-
-        if (quality_counts_.size())
-        {
-            ss << "\nQuality:\n";
-
-            for (auto& qual_it : quality_counts_)
-            {
-                if (quality_labels.count(qual_it.first))
-                    ss << quality_labels.at(qual_it.first) << ": " << qual_it.second
-                       << " (" << String::percentToString(100.0*qual_it.second/gps_fixes_.size()) << "%)\n";
-                else
-                    ss << "Unknown ("<< qual_it.first << "): " << qual_it.second
-                       << " (" << String::percentToString(100.0*qual_it.second/gps_fixes_.size()) << "%)\n";
-            }
-        }
-    }
-    else
-        ss << "Found 0 fixes.";
-
     current_text_ = ss.str();
 
-    loginf << "GPSTrailImportTask: parseCurrentFile: parsed " << gps_fixes_.size() << " fixes in "
+    loginf << "GPSImportCSVTask: parseCurrentFile: parsed " << gps_positions_.size() << " fixes in "
            << line_cnt << " lines";
 
     QApplication::restoreOverrideCursor();
 }
 
-bool GPSTrailImportTask::canRun() { return canImportFile(); }
+bool GPSImportCSVTask::canRun() { return canImportFile(); }
 
-void GPSTrailImportTask::run()
+void GPSImportCSVTask::run()
 {
-    loginf << "GPSTrailImportTask: run: filename '" << current_filename_ << " fixes " << gps_fixes_.size();
+    loginf << "GPSImportCSVTask: run: filename '" << current_filename_ << " fixes " << gps_positions_.size();
 
-    assert (gps_fixes_.size());
+    assert (gps_positions_.size());
     assert (!buffer_);
 
     DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
@@ -458,6 +470,7 @@ void GPSTrailImportTask::run()
     assert (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_latitude_));
     assert (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_longitude_));
     assert (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_m3a_));
+    assert (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_mc_));
     assert (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_ta_));
     assert (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_ti_));
     assert (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_track_num_));
@@ -466,7 +479,7 @@ void GPSTrailImportTask::run()
     assert (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_ground_speed_));
     assert (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_track_angle_));
 
-    loginf << "GPSTrailImportTask: run: getting variables";
+    loginf << "GPSImportCSVTask: run: getting variables";
 
     using namespace dbContent;
 
@@ -479,6 +492,7 @@ void GPSTrailImportTask::run()
     Variable& lat_var = dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_latitude_);
     Variable& long_var = dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_longitude_);
     Variable& m3a_var = dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_m3a_);
+    Variable& mc_var = dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_mc_);
     Variable& ta_var = dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_ta_);
     Variable& ti_var = dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_ti_);
     Variable& tn_var = dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_track_num_);
@@ -500,6 +514,8 @@ void GPSTrailImportTask::run()
     if (set_mode_3a_code_)
         properties.addProperty(m3a_var.name(), PropertyDataType::UINT);
 
+    properties.addProperty(mc_var.name(), PropertyDataType::FLOAT);
+
     if (set_target_address_)
         properties.addProperty(ta_var.name(), PropertyDataType::UINT);
 
@@ -513,7 +529,7 @@ void GPSTrailImportTask::run()
     properties.addProperty(speed_var.name(), PropertyDataType::DOUBLE);
     properties.addProperty(track_angle_var.name(), PropertyDataType::DOUBLE);
 
-    loginf << "GPSTrailImportTask: run: creating buffer";
+    loginf << "GPSImportCSVTask: run: creating buffer";
 
     buffer_ = make_shared<Buffer>(properties, dbcontent_name);
 
@@ -525,6 +541,7 @@ void GPSTrailImportTask::run()
     NullableVector<boost::posix_time::ptime>& ts_vec = buffer_->get<boost::posix_time::ptime>(ts_var.name());
     NullableVector<double>& lat_vec = buffer_->get<double>(lat_var.name());
     NullableVector<double>& long_vec = buffer_->get<double>(long_var.name());
+    NullableVector<float>& mc_vec = buffer_->get<float>(mc_var.name());
 
     NullableVector<unsigned int>& tn_vec = buffer_->get<unsigned int>(tn_var.name());
 
@@ -533,18 +550,13 @@ void GPSTrailImportTask::run()
     NullableVector<double>& speed_vec = buffer_->get<double>(speed_var.name());
     NullableVector<double>& track_angle_vec = buffer_->get<double>(track_angle_var.name());
 
-    // BufferWrapper wrap (buffer_);
-    // wrap.init();
-
-    // NullableVector<double>& vx_vec = wrap.getNV<double> (DBContent::meta_var_vx_);
-
     unsigned int cnt = 0;
     unsigned int ds_id = Number::dsIdFrom(ds_sac_, ds_sic_);
 
     assert (dbcontent_man.hasMaxRefTrajTrackNum());
     unsigned int track_num = dbcontent_man.maxRefTrajTrackNum();
 
-    loginf << "GPSTrailImportTask: run: max reftraj track num " << track_num;
+    loginf << "GPSImportCSVTask: run: max reftraj track num " << track_num;
 
     // config data source
     {
@@ -563,29 +575,18 @@ void GPSTrailImportTask::run()
     }
 
     float tod;
-    boost::posix_time::ptime timestamp;
-    double speed_ms, track_angle_rad, vx, vy;
+    //boost::posix_time::ptime timestamp;
+    //double speed_ms, track_angle_rad, vx, vy;
 
-    loginf << "GPSTrailImportTask: run: filling buffer";
+    loginf << "GPSImportCSVTask: run: filling buffer";
 
-    for (auto& fix_it : gps_fixes_)
+    for (auto& fix_it : gps_positions_)
     {
-        // tod
-        tod = fix_it.timestamp.hour*3600.0 + fix_it.timestamp.min*60.0 + fix_it.timestamp.sec;
-        tod += tod_offset_;
-
         // timestamp
-        // bpt::ptime(bg::date(1970, 1, 1));
+        fix_it.timestamp_ += Time::partialSeconds(tod_offset_); // add time offset
 
-        timestamp = boost::posix_time::ptime(boost::gregorian::date(fix_it.timestamp.year,
-                                                                    fix_it.timestamp.month,
-                                                                    fix_it.timestamp.day),
-                                             boost::posix_time::time_duration(fix_it.timestamp.hour,
-                                                                              fix_it.timestamp.min,
-                                                                              fix_it.timestamp.sec)
-                                             + Time::partialSeconds(fix_it.timestamp.sec, true)); // add partial w/o s
-
-        timestamp += Time::partialSeconds(tod_offset_); // add time offset
+        // tod
+        tod = fix_it.timestamp_.time_of_day().total_milliseconds() / 1000.0;
 
         // check for out-of-bounds because of midnight-jump
         while (tod < 0.0f)
@@ -602,9 +603,11 @@ void GPSTrailImportTask::run()
         line_id_vec.set(cnt, line_id_);
 
         tod_vec.set(cnt, tod);
-        ts_vec.set(cnt, timestamp);
-        lat_vec.set(cnt, fix_it.latitude);
-        long_vec.set(cnt, fix_it.longitude);
+        ts_vec.set(cnt, fix_it.timestamp_);
+        lat_vec.set(cnt, fix_it.latitude_);
+        long_vec.set(cnt, fix_it.longitude_);
+
+        mc_vec.set(cnt, fix_it.altitude_ * 1/FT2M); // m 2 ft
 
         if (set_mode_3a_code_)
             buffer_->get<unsigned int>(m3a_var.name()).set(cnt, mode_3a_code_);
@@ -617,28 +620,14 @@ void GPSTrailImportTask::run()
 
         tn_vec.set(cnt, track_num);
 
-        if (fix_it.travelAngle != 0.0 && fix_it.speed != 0.0)
+        if (fix_it.has_speed_)
         {
-            track_angle_rad = DEG2RAD * fix_it.travelAngle;
-            speed_ms = fix_it.speed * 0.27778;
+            track_angle_vec.set(cnt, fix_it.track_angle_);
+            speed_vec.set(cnt, fix_it.speed_ * M_S2KNOTS);
 
-            track_angle_vec.set(cnt, fix_it.travelAngle);
-            speed_vec.set(cnt, speed_ms * M_S2KNOTS);
-
-            vx = sin(track_angle_rad) * speed_ms;
-            vy = cos(track_angle_rad) * speed_ms;
-
-            //loginf << "UGA track_angle_rad " << track_angle_rad << " spd " << speed_ms << " vx " << vx << " vy " << vy;
-
-            vx_vec.set(cnt, vx);
-            vy_vec.set(cnt, vy);
+            vx_vec.set(cnt, fix_it.vx_);
+            vy_vec.set(cnt, fix_it.vy_);
         }
-
-//        if (fix_it.travelAngle != 0.0) TODO
-//            head_vec.set(cnt, fix_it.travelAngle);
-
-//        if (fix_it.speed != 0.0)
-//            spd_vec.set(cnt, fix_it.speed*0.539957); // km/h to knots
 
         ++cnt;
     }
@@ -647,33 +636,29 @@ void GPSTrailImportTask::run()
 
     dbcontent_man.maxRefTrajTrackNum(track_num+1); // increment for next
 
-    loginf << "GPSTrailImportTask: run: inserting data";
+    loginf << "GPSImportCSVTask: run: inserting data";
 
-    connect(&dbcontent_man, &DBContentManager::insertDoneSignal, this, &GPSTrailImportTask::insertDoneSlot,
+    connect(&dbcontent_man, &DBContentManager::insertDoneSignal, this, &GPSImportCSVTask::insertDoneSlot,
             Qt::UniqueConnection);
 
     dbcontent_man.insertData({{dbcontent_name, buffer_}});
 }
 
-void GPSTrailImportTask::insertDoneSlot()
+void GPSImportCSVTask::insertDoneSlot()
 {
-    loginf << "GPSTrailImportTask: insertDoneSlot";
+    loginf << "GPSImportCSVTask: insertDoneSlot";
 
     buffer_ = nullptr;
 
     done_ = true;
 
-    //COMPASS::instance().interface().setProperty(PostProcessTask::DONE_PROPERTY_NAME, "0");
-
-    COMPASS::instance().interface().setProperty(DONE_PROPERTY_NAME, "1");
-
-//    COMPASS::instance().interface().databaseContentChanged();
-//    object.updateToDatabaseContent();
+    //    COMPASS::instance().interface().databaseContentChanged();
+    //    object.updateToDatabaseContent();
 
     QMessageBox msg_box;
 
-    msg_box.setWindowTitle("Import GPS Trail");
-    msg_box.setText("Import of "+QString::number(gps_fixes_.size())+" GPS fixes done.");
+    msg_box.setWindowTitle("Import GPS CSV");
+    msg_box.setText("Import of "+QString::number(gps_positions_.size())+" GPS fixes done.");
     msg_box.setStandardButtons(QMessageBox::Ok);
 
     if (show_done_summary_)
@@ -682,7 +667,7 @@ void GPSTrailImportTask::insertDoneSlot()
     emit doneSignal(name_);
 }
 
-void GPSTrailImportTask::dialogImportSlot()
+void GPSImportCSVTask::dialogImportSlot()
 {
     assert (canRun());
 
@@ -692,13 +677,13 @@ void GPSTrailImportTask::dialogImportSlot()
     run();
 }
 
-void GPSTrailImportTask::dialogCancelSlot()
+void GPSImportCSVTask::dialogCancelSlot()
 {
     assert (dialog_);
     dialog_->hide();
 }
 
-//void GPSTrailImportTask::checkParsedData ()
+//void GPSImportCSVTask::checkParsedData ()
 //{
-//    loginf << "GPSTrailImportTask: checkParsedData";
+//    loginf << "GPSImportCSVTask: checkParsedData";
 //}

@@ -26,7 +26,8 @@
 #include "eval/results/report/sectioncontenttext.h"
 #include "eval/results/report/sectioncontenttable.h"
 #include "logger.h"
-#include "stringconv.h"
+#include "util/stringconv.h"
+#include "util/timeconv.h"
 #include "number.h"
 
 #include <cassert>

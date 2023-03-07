@@ -113,6 +113,8 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
              "imports ASTERIX file with given date, in YYYY-MM-DD format e.g. '2020-04-20'")
             ("import_asterix_file_time_offset", po::value<std::string>(&import_asterix_file_time_offset_),
              "used time offset during ASTERIX file import Time of Day override, in HH:MM:SS.ZZZ'")
+            ("import_asterix_ignore_time_jumps", po::bool_switch(&import_asterix_ignore_time_jumps_),
+             "imports ASTERIX file ignoring 24h time jumps")
             ("import_asterix_network", po::bool_switch(&import_asterix_network_),
              "imports ASTERIX from defined network UDP streams")
             ("import_asterix_network_time_offset", po::value<std::string>(&import_asterix_network_time_offset_),
@@ -292,6 +294,9 @@ void Client::run ()
 
         if (import_asterix_file_time_offset_.size())
             cmd += " --time_offset "+import_asterix_file_time_offset_;
+
+        if (import_asterix_ignore_time_jumps_)
+            cmd += " --ignore_time_jumps";
 
         rt_man.addCommand(cmd);
     }

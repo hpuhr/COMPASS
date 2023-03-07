@@ -31,7 +31,7 @@ string date_str_format = "%Y-%m-%d";
 string time_str_format = "%H:%M:%S.%f";
 boost::posix_time::ptime epoch(boost::gregorian::date(1970, 1, 1));
 
-boost::posix_time::ptime fromString(string value)
+boost::posix_time::ptime fromString(const std::string& value)
 {
     boost::posix_time::ptime timestamp;
 
@@ -39,6 +39,19 @@ boost::posix_time::ptime fromString(string value)
 
     // small f not working due to boost bug
     iss.imbue(std::locale(std::locale::classic(), new boost::posix_time::time_input_facet("%Y-%m-%d %H:%M:%S%F")));
+
+    iss >> timestamp;
+    return timestamp;
+}
+
+boost::posix_time::ptime fromString(const std::string& value, const std::string& facet)
+{
+    boost::posix_time::ptime timestamp;
+
+    istringstream iss(value);
+
+    // small f not working due to boost bug
+    iss.imbue(std::locale(std::locale::classic(), new boost::posix_time::time_input_facet(facet)));
 
     iss >> timestamp;
     return timestamp;

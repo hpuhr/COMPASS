@@ -42,7 +42,7 @@ using namespace Utils;
 using namespace nlohmann;
 using namespace boost::posix_time;
 
-bool CreateAssociationsJob::in_appimage_ = COMPASS::isAppImage();
+//bool CreateAssociationsJob::in_appimage_ = COMPASS::isAppImage();
 
 CreateAssociationsJob::CreateAssociationsJob(CreateAssociationsTask& task, DBInterface& db_interface,
                                              std::shared_ptr<dbContent::Cache> cache)
@@ -82,7 +82,6 @@ void CreateAssociationsJob::run()
     // create reference utns
     emit statusSignal("Creating Reference UTNs");
     std::map<unsigned int, Association::Target> targets = createReferenceUTNs();
-
 
     // create tracker utns
     emit statusSignal("Creating Tracker UTNs");
@@ -225,6 +224,15 @@ void CreateAssociationsJob::createTargetReports()
         NullableVector<float>& mcs = cache_->getMetaVar<float>(
                     dbcontent_name, DBContent::meta_var_mc_);
 
+        NullableVector<float>* mcs_valid {nullptr};
+
+        if (dbcontent_name == "CAT062")
+        {
+            assert (cache_->hasVar<float>(dbcontent_name, DBContent::var_cat062_fl_measured_));
+            mcs_valid = &cache_->getVar<float>(
+                        dbcontent_name, DBContent::var_cat062_fl_measured_);
+        }
+
         assert (cache_->hasMetaVar<double>(dbcontent_name, DBContent::meta_var_latitude_));
         NullableVector<double>& lats = cache_->getMetaVar<double>(
                     dbcontent_name, DBContent::meta_var_latitude_);
@@ -298,8 +306,16 @@ void CreateAssociationsJob::createTargetReports()
             tr.has_ma_v_ = false; // TODO
             tr.has_ma_g_ = false; // TODO
 
-            tr.has_mc_ = !mcs.isNull(cnt);
-            tr.mc_ = tr.has_mc_ ? mcs.get(cnt) : 0;
+            if (mcs_valid && !mcs_valid->isNull(cnt))
+            {
+                tr.has_mc_ = true;
+                tr.mc_ = mcs_valid->get(cnt);
+            }
+            else
+            {
+                tr.has_mc_ = !mcs.isNull(cnt);
+                tr.mc_ = tr.has_mc_ ? mcs.get(cnt) : 0;
+            }
 
             tr.has_mc_v_ = false; // TODO
 
@@ -487,6 +503,8 @@ void CreateAssociationsJob::createNonTrackerUTNS(std::map<unsigned int, Associat
     unsigned int ds_cnt = 0;
     unsigned int done_perc;
 
+    const std::set<unsigned int> mode_a_conspic = task_.modeAConspicuityCodes();
+
     for (auto& dbo_it : target_reports_)
     {
         if (dbo_it.first == "RefTraj" || dbo_it.first == "CAT062") // already associated
@@ -519,32 +537,21 @@ void CreateAssociationsJob::createNonTrackerUTNS(std::map<unsigned int, Associat
 
                 tmp_assoc_utns[tr_cnt] = -1; // set as not associated
 
-                //int tmp_utn = -1;
-
                 if (tr_it.has_ta_ && ta_2_utn.count(tr_it.ta_)) // check ta with lookup
                 {
                     unsigned int tmp_utn = ta_2_utn.at(tr_it.ta_);
 
                     assert (targets.count(tmp_utn));
-                    //association_todos.push_back({tmp_utn, &tr_it});
                     tmp_assoc_utns[tr_cnt] = tmp_utn;
                     return;
                 }
 
-                //tmp_utn = findUTNForTargetReport(tr_it);
+                // lookup by mode s failed
 
-                //                if (tmp_utn != -1) // existing target found
-                //                {
-                //                    assert (targets.count(tmp_utn));
-                //                    //association_todos.push_back({tmp_utn, &tr_it});
-                //                    tmp_assoc_utns[tr_cnt] = tmp_utn;
-                //                    return;
-                //                }
-
-                if (tr_it.has_ta_)
+                if (tr_it.has_ta_ &&
+                        (!tr_it.has_ma_ || mode_a_conspic.count(tr_it.ma_)))
+                    // create new utn if tr has ta and can not be associated using mode a
                 {
-                    //addTargetByTargetReport(tr_it);
-
                     boost::mutex::scoped_lock lock(create_todos_mutex);
                     create_todos[tr_it.ta_].push_back(&tr_it);
 
@@ -584,8 +591,6 @@ void CreateAssociationsJob::createNonTrackerUTNS(std::map<unsigned int, Associat
                 unsigned int target_cnt=0;
                 for (auto& target_it : targets)
                 {
-                    //Association::Target& other = std::next(targets.begin(), target_cnt)->second;
-
                     Association::Target& other = target_it.second;
 
                     results[target_cnt] = tuple<bool, unsigned int, double>(false, other.utn_, 0);
@@ -605,25 +610,32 @@ void CreateAssociationsJob::createNonTrackerUTNS(std::map<unsigned int, Associat
                     if (tr_it.has_ma_ || tr_it.has_mc_) // mode a/c based
                     {
                         // check mode a code
-                        Association::CompareResult ma_res = other.compareModeACode(tr_it.has_ma_, tr_it.ma_, timestamp,
-                                                                                   max_time_diff_sensor);
 
-                        if (ma_res != Association::CompareResult::SAME)
+                        if (tr_it.has_ma_)
                         {
-                            target_cnt++;
-                            continue;
+                            Association::CompareResult ma_res = other.compareModeACode(
+                                        tr_it.has_ma_, tr_it.ma_, timestamp, max_time_diff_sensor);
+
+                            if (ma_res == Association::CompareResult::DIFFERENT)
+                            {
+                                target_cnt++;
+                                continue;
+                            }
                         }
                         //loginf << "UGA3 same mode a";
 
                         // check mode c code
-                        Association::CompareResult mc_res = other.compareModeCCode(
-                                    tr_it.has_mc_, tr_it.mc_, timestamp,
-                                    max_time_diff_sensor, max_altitude_diff_sensor, false);
-
-                        if (mc_res != Association::CompareResult::SAME)
+                        if (tr_it.has_mc_)
                         {
-                            target_cnt++;
-                            continue;
+                            Association::CompareResult mc_res = other.compareModeCCode(
+                                        tr_it.has_mc_, tr_it.mc_, timestamp,
+                                        max_time_diff_sensor, max_altitude_diff_sensor, false);
+
+                            if (mc_res == Association::CompareResult::DIFFERENT)
+                            {
+                                target_cnt++;
+                                continue;
+                            }
                         }
                     }
 
@@ -635,6 +647,8 @@ void CreateAssociationsJob::createNonTrackerUTNS(std::map<unsigned int, Associat
 
                     if (!ok)
                     {
+
+                        loginf << "UGA3 NOT OK";
                         ++target_cnt;
                         continue;
                     }
@@ -975,8 +989,8 @@ std::map<unsigned int, Association::Target> CreateAssociationsJob::createTracked
                         if (cont_utn != -1)
                         {
                             logdbg << "CreateAssociationsJob: createPerTrackerTargets: continuing target "
-                               << cont_utn << " with tn " << tr_it.tn_ << " at time "
-                               << Time::toString(tr_it.timestamp_);
+                                   << cont_utn << " with tn " << tr_it.tn_ << " at time "
+                                   << Time::toString(tr_it.timestamp_);
                             tn2utn[tr_it.tn_] = {cont_utn, tr_it.timestamp_};
                             attached_to_existing_utn = true;
                         }
@@ -985,7 +999,7 @@ std::map<unsigned int, Association::Target> CreateAssociationsJob::createTracked
                     if (!attached_to_existing_utn)
                     {
                         logdbg << "CreateAssociationsJob: createPerTrackerTargets: registering new tmp target "
-                           << tmp_utn_cnt << " for tn " << tr_it.tn_;
+                               << tmp_utn_cnt << " for tn " << tr_it.tn_;
 
                         tn2utn[tr_it.tn_] = {tmp_utn_cnt, tr_it.timestamp_};
                         ++tmp_utn_cnt;
@@ -1001,10 +1015,10 @@ std::map<unsigned int, Association::Target> CreateAssociationsJob::createTracked
                             && !existing_target.hasTA(tr_it.ta_))
                     {
                         logdbg << "CreateAssociationsJob: createPerTrackerTargets: registering new tmp target "
-                           << tmp_utn_cnt << " for tn " << tr_it.tn_ << " because of ta switch "
-                           << " at " << Time::toString(tr_it.timestamp_)
-                           << " existing " << existing_target.asStr()
-                           << " tr " << tr_it.asStr();
+                               << tmp_utn_cnt << " for tn " << tr_it.tn_ << " because of ta switch "
+                               << " at " << Time::toString(tr_it.timestamp_)
+                               << " existing " << existing_target.asStr()
+                               << " tr " << tr_it.asStr();
 
                         tn2utn[tr_it.tn_] = {tmp_utn_cnt, tr_it.timestamp_};
                         ++tmp_utn_cnt;
@@ -1015,8 +1029,8 @@ std::map<unsigned int, Association::Target> CreateAssociationsJob::createTracked
                 if (tn2utn.at(tr_it.tn_).second > tr_it.timestamp_)
                 {
                     logwrn << "CreateAssociationsJob: createPerTrackerTargets: tod backjump -"
-                       << Time::toString(tn2utn.at(tr_it.tn_).second - tr_it.timestamp_)
-                       << " tmp target " << tmp_utn_cnt << " at tr " << tr_it.asStr() << " tn " << tr_it.tn_;
+                           << Time::toString(tn2utn.at(tr_it.tn_).second - tr_it.timestamp_)
+                           << " tmp target " << tmp_utn_cnt << " at tr " << tr_it.asStr() << " tn " << tr_it.tn_;
                 }
                 assert (tn2utn.at(tr_it.tn_).second <= tr_it.timestamp_);
 
@@ -1025,9 +1039,9 @@ std::map<unsigned int, Association::Target> CreateAssociationsJob::createTracked
                 if ((tr_it.timestamp_ - tn2utn.at(tr_it.tn_).second).total_seconds() > 60.0) // gap, new track // TODO parameter
                 {
                     logdbg << "CreateAssociationsJob: createPerTrackerTargets: registering new tmp target "
-                       << tmp_utn_cnt << " for tn " << tr_it.tn_ << " because of gap "
-                       << Time::toString(tr_it.timestamp_ - tn2utn.at(tr_it.tn_).second)
-                       << " at " << Time::toString(tr_it.timestamp_);
+                           << tmp_utn_cnt << " for tn " << tr_it.tn_ << " because of gap "
+                           << Time::toString(tr_it.timestamp_ - tn2utn.at(tr_it.tn_).second)
+                           << " at " << Time::toString(tr_it.timestamp_);
 
                     tn2utn[tr_it.tn_] = {tmp_utn_cnt, tr_it.timestamp_};
                     ++tmp_utn_cnt;
@@ -1054,7 +1068,7 @@ std::map<unsigned int, Association::Target> CreateAssociationsJob::createTracked
             else
             {
                 logwrn << "CreateAssociationsJob: createPerTrackerTargets: tracker target report w/o track num in ds_id "
-                   << tr_it.ds_id_ << " at tod " << Time::toString(tr_it.timestamp_);
+                       << tr_it.ds_id_ << " at tod " << Time::toString(tr_it.timestamp_);
             }
         }
 
@@ -1399,7 +1413,7 @@ int CreateAssociationsJob::findUTNForTrackerTarget (const Association::Target& t
         return -1;
 
     // try to find by m a/c/pos
-    bool print_debug_target = false; //target.hasMA() && target.hasMA(396);
+    bool print_debug_target = target.hasMA() && target.hasMA(3824);
     if (print_debug_target)
         loginf << "CreateAssociationsJob: findUTNForTrackerTarget: checking target " << target.utn_
                << " by mode a/c, pos";
@@ -1427,7 +1441,7 @@ int CreateAssociationsJob::findUTNForTrackerTarget (const Association::Target& t
 
         results[cnt] = tuple<bool, unsigned int, unsigned int, double>(false, other.utn_, 0, 0);
 
-        bool print_debug = false; //target.hasMA() && target.hasMA(396) && other.hasMA() && other.hasMA(396);
+        bool print_debug = target.hasMA() && target.hasMA(3824) && other.hasMA() && other.hasMA(3824);
 
         if (!(target.hasTA() && other.hasTA())) // only try if not both mode s
         {

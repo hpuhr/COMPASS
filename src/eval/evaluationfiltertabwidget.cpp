@@ -1,7 +1,8 @@
 #include "evaluationfiltertabwidget.h"
 #include "evaluationmanagerwidget.h"
 #include "evaluationmanager.h"
-#include "stringconv.h"
+#include "util/stringconv.h"
+#include "util/timeconv.h"
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>

@@ -28,7 +28,7 @@ using namespace boost::posix_time;
 namespace EvaluationRequirement
 {
 
-bool Base::in_appimage_ = COMPASS::isAppImage();
+//bool Base::in_appimage_ = true; //COMPASS::isAppImage();
 
 Base::Base(const std::string& name, const std::string& short_name, const std::string& group_name,
            float prob, COMPARISON_TYPE prob_check_type, EvaluationManager& eval_man)

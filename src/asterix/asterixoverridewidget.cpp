@@ -18,6 +18,7 @@
 #include "asterixoverridewidget.h"
 #include "asteriximporttask.h"
 #include "textfielddoublevalidator.h"
+#include "util/timeconv.h"
 
 #include <QCheckBox>
 #include <QDoubleValidator>
@@ -25,28 +26,152 @@
 #include <QIntValidator>
 #include <QLabel>
 #include <QLineEdit>
+#include <QTimeEdit>
 #include <QVBoxLayout>
+
+using namespace std;
+using namespace Utils;
 
 ASTERIXOverrideWidget::ASTERIXOverrideWidget(ASTERIXImportTask& task, QWidget* parent)
     : QWidget(parent), task_(task)
 {
     QVBoxLayout* main_layout = new QVBoxLayout();
 
-    active_check_ = new QCheckBox("Override Time of Day Active");
-    connect(active_check_, &QCheckBox::clicked, this, &ASTERIXOverrideWidget::activeCheckedSlot);
-    main_layout->addWidget(active_check_);
-
     QGridLayout* grid = new QGridLayout();
 
     unsigned int row = 0;
 
-    // tod offset
-    grid->addWidget(new QLabel("Time of Day Offset"), row, 0);
+    grid->addWidget(new QLabel("Ignore 24h Time Jumps"), row, 0);
+
+    ignore_timejumps_check_ = new QCheckBox();
+    connect(ignore_timejumps_check_, &QCheckBox::clicked, this, &ASTERIXOverrideWidget::ignoreTimeJumpsCheckedSlot);
+    grid->addWidget(ignore_timejumps_check_, row, 1);
+
+    // tod override
+
+    ++row;
+
+    grid->addWidget(new QLabel("Override Time of Day"), row, 0);
+
+    override_active_check_ = new QCheckBox();
+    connect(override_active_check_, &QCheckBox::clicked, this, &ASTERIXOverrideWidget::overrideActiveCheckedSlot);
+    grid->addWidget(override_active_check_, row, 1);
+
+    ++row;
+
+    grid->addWidget(new QLabel("Offset [s]"), row, 1);
 
     tod_offset_edit_ = new QLineEdit();
-    tod_offset_edit_->setValidator(new TextFieldDoubleValidator(-24 * 3600, 24 * 3600, 3));
+    tod_offset_edit_->setValidator(new TextFieldDoubleValidator(-24 * 3600, 24 * 3600, 5));
     connect(tod_offset_edit_, &QLineEdit::textEdited, this, &ASTERIXOverrideWidget::todOffsetEditedSlot);
-    grid->addWidget(tod_offset_edit_, row, 1);
+    grid->addWidget(tod_offset_edit_, row, 2);
+
+    // filters
+
+    // time of day
+
+    ++row;
+
+    grid->addWidget(new QLabel("Filter Time of Day"), row, 0);
+
+    filter_tod_active_check_ = new QCheckBox();
+    connect(filter_tod_active_check_, &QCheckBox::clicked,
+            this, &ASTERIXOverrideWidget::filterTimeOfDayActiveCheckedSlot);
+    grid->addWidget(filter_tod_active_check_, row, 1);
+
+    ++row;
+
+    grid->addWidget(new QLabel("Time of Day Min [HH:MM:SS]"), row, 1);
+
+    filter_tod_min_edit_ = new QTimeEdit();
+    connect(filter_tod_min_edit_, &QTimeEdit::timeChanged,
+            this, &ASTERIXOverrideWidget::minTimeChanged);
+    grid->addWidget(filter_tod_min_edit_, row, 2);
+
+    ++row;
+
+    grid->addWidget(new QLabel("Time of Day Max [HH:MM:SS]"), row, 1);
+
+    filter_tod_max_edit_ = new QTimeEdit();
+    connect(filter_tod_max_edit_, &QTimeEdit::timeChanged,
+            this, &ASTERIXOverrideWidget::maxTimeChanged);
+    grid->addWidget(filter_tod_max_edit_, row, 2);
+
+    // position
+
+    ++row;
+
+    grid->addWidget(new QLabel("Filter Position"), row, 0);
+
+    filter_position_active_check_ = new QCheckBox();
+    connect(filter_position_active_check_, &QCheckBox::clicked,
+            this, &ASTERIXOverrideWidget::filterPositionActiveCheckedSlot);
+    grid->addWidget(filter_position_active_check_, row, 1);
+
+    ++row;
+
+    grid->addWidget(new QLabel("Latitude Min [deg]"), row, 1);
+
+    filter_latitude_min_edit_ = new QLineEdit();
+    filter_latitude_min_edit_->setValidator(new TextFieldDoubleValidator(-90, 90, 10));
+    connect(filter_latitude_min_edit_, &QLineEdit::textEdited, this, &ASTERIXOverrideWidget::latitudeMinEditedSlot);
+    grid->addWidget(filter_latitude_min_edit_, row, 2);
+
+    ++row;
+
+    grid->addWidget(new QLabel("Latitude Max [deg]"), row, 1);
+
+    filter_latitude_max_edit_ = new QLineEdit();
+    filter_latitude_max_edit_->setValidator(new TextFieldDoubleValidator(-90, 90, 10));
+    connect(filter_latitude_max_edit_, &QLineEdit::textEdited, this, &ASTERIXOverrideWidget::latitudeMaxEditedSlot);
+    grid->addWidget(filter_latitude_max_edit_, row, 2);
+
+    ++row;
+
+    grid->addWidget(new QLabel("Longitude Min [deg]"), row, 1);
+
+    filter_longitude_min_edit_ = new QLineEdit();
+    filter_longitude_min_edit_->setValidator(new TextFieldDoubleValidator(-180, 180, 10));
+    connect(filter_longitude_min_edit_, &QLineEdit::textEdited, this, &ASTERIXOverrideWidget::longitudeMinEditedSlot);
+    grid->addWidget(filter_longitude_min_edit_, row, 2);
+
+    ++row;
+
+    grid->addWidget(new QLabel("Longitude Max [deg]"), row, 1);
+
+    filter_longitude_max_edit_ = new QLineEdit();
+    filter_longitude_max_edit_->setValidator(new TextFieldDoubleValidator(-180, 180, 10));
+    connect(filter_longitude_max_edit_, &QLineEdit::textEdited, this, &ASTERIXOverrideWidget::longitudeMaxEditedSlot);
+    grid->addWidget(filter_longitude_max_edit_, row, 2);
+
+    // mode c
+
+    ++row;
+
+    grid->addWidget(new QLabel("Filter Mode C"), row, 0);
+
+    filter_modec_active_check_ = new QCheckBox();
+    connect(filter_modec_active_check_, &QCheckBox::clicked,
+            this, &ASTERIXOverrideWidget::filterModeCActiveCheckedSlot);
+    grid->addWidget(filter_modec_active_check_, row, 1);
+
+    ++row;
+
+    grid->addWidget(new QLabel("Mode C Min [ft]"), row, 1);
+
+    filter_modec_min_edit_ = new QLineEdit();
+    filter_modec_min_edit_->setValidator(new TextFieldDoubleValidator(-10000, 50000, 2));
+    connect(filter_modec_min_edit_, &QLineEdit::textEdited, this, &ASTERIXOverrideWidget::modeCMinEditedSlot);
+    grid->addWidget(filter_modec_min_edit_, row, 2);
+
+    ++row;
+
+    grid->addWidget(new QLabel("Mode C Max [ft]"), row, 1);
+
+    filter_modec_max_edit_ = new QLineEdit();
+    filter_modec_max_edit_->setValidator(new TextFieldDoubleValidator(-10000, 50000, 2));
+    connect(filter_modec_max_edit_, &QLineEdit::textEdited, this, &ASTERIXOverrideWidget::modeCMaxEditedSlot);
+    grid->addWidget(filter_modec_max_edit_, row, 2);
 
     main_layout->addLayout(grid);
 
@@ -61,20 +186,59 @@ ASTERIXOverrideWidget::~ASTERIXOverrideWidget() {}
 
 void ASTERIXOverrideWidget::updateSlot()
 {
-    assert(active_check_);
+    // ignore tj
+    assert(ignore_timejumps_check_);
+    ignore_timejumps_check_->setChecked(task_.ignoreTimeJumps());
+
+    // tod override
+    assert(override_active_check_);
+    override_active_check_->setChecked(task_.overrideTodActive());
     assert(tod_offset_edit_);
-
-    active_check_->setChecked(task_.overrideTodActive());
-
     tod_offset_edit_->setText(QString::number(task_.overrideTodOffset()));
+
+    // tod filter
+    assert(filter_tod_active_check_);
+    filter_tod_active_check_->setChecked(task_.filterTodActive());
+    assert(filter_tod_min_edit_);
+    filter_tod_min_edit_->setTime(QTime::fromString(String::timeStringFromDouble(task_.filterTodMin()).c_str()));
+    assert(filter_tod_max_edit_);
+    filter_tod_max_edit_->setTime(QTime::fromString(String::timeStringFromDouble(task_.filterTodMax()).c_str()));
+
+    // pos filter
+    assert(filter_position_active_check_);
+    filter_position_active_check_->setChecked(task_.filterPositionActive());
+    assert(filter_latitude_min_edit_);
+    filter_latitude_min_edit_->setText(QString::number(task_.filterLatitudeMin(), 'g', 10));
+    assert(filter_latitude_max_edit_);
+    filter_latitude_max_edit_->setText(QString::number(task_.filterLatitudeMax(), 'g', 10));
+    assert(filter_longitude_min_edit_);
+    filter_longitude_min_edit_->setText(QString::number(task_.filterLongitudeMin(), 'g', 10));
+    assert(filter_longitude_max_edit_);
+    filter_longitude_max_edit_->setText(QString::number(task_.filterLongitudeMax(), 'g', 10));
+
+    // mode c filter
+    assert(filter_modec_active_check_);
+    filter_modec_active_check_->setChecked(task_.filterModeCActive());
+    assert(filter_modec_min_edit_);
+    filter_modec_min_edit_->setText(QString::number(task_.filterModeCMin()));
+    assert(filter_modec_max_edit_);
+    filter_modec_max_edit_->setText(QString::number(task_.filterModeCMax()));
 }
 
-void ASTERIXOverrideWidget::activeCheckedSlot()
+void ASTERIXOverrideWidget::ignoreTimeJumpsCheckedSlot()
 {
-    loginf << "ASTERIXOverrideWidget: activeCheckedSlot";
-    assert(active_check_);
+    loginf << "ASTERIXOverrideWidget: ignoreTimeJumpsCheckedSlot";
+    assert(ignore_timejumps_check_);
 
-    task_.overrideTodActive(active_check_->checkState() == Qt::Checked);
+    task_.ignoreTimeJumps(ignore_timejumps_check_->checkState() == Qt::Checked);
+}
+
+void ASTERIXOverrideWidget::overrideActiveCheckedSlot()
+{
+    loginf << "ASTERIXOverrideWidget: overrideActiveCheckedSlot";
+    assert(override_active_check_);
+
+    task_.overrideTodActive(override_active_check_->checkState() == Qt::Checked);
 }
 
 void ASTERIXOverrideWidget::todOffsetEditedSlot(const QString& value)
@@ -84,4 +248,100 @@ void ASTERIXOverrideWidget::todOffsetEditedSlot(const QString& value)
 
     if (tod_offset_edit_->hasAcceptableInput())
         task_.overrideTodOffset(tod_offset_edit_->text().toFloat());
+}
+
+void ASTERIXOverrideWidget::filterTimeOfDayActiveCheckedSlot()
+{
+    loginf << "ASTERIXOverrideWidget: filterTimeOfDayActiveCheckedSlot";
+    assert(filter_tod_active_check_);
+
+    task_.filterTodActive(filter_tod_active_check_->checkState() == Qt::Checked);
+}
+void ASTERIXOverrideWidget::minTimeChanged(QTime time)
+{
+    float value = String::timeFromString(time.toString().toStdString());
+
+    loginf << "ASTERIXOverrideWidget: minTimeChanged: value '" << time.toString().toStdString()
+           << "' seconds " << value;
+
+    task_.filterTodMin(value);
+}
+void ASTERIXOverrideWidget::maxTimeChanged(QTime time)
+{
+    float value = String::timeFromString(time.toString().toStdString());
+
+    loginf << "ASTERIXOverrideWidget: maxTimeChanged: value '" << time.toString().toStdString()
+           << "' seconds " << value;
+
+    task_.filterTodMax(value);
+}
+
+void ASTERIXOverrideWidget::filterPositionActiveCheckedSlot()
+{
+    loginf << "ASTERIXOverrideWidget: filterPositionActiveCheckedSlot";
+    assert(filter_position_active_check_);
+
+    task_.filterPositionActive(filter_position_active_check_->checkState() == Qt::Checked);
+}
+void ASTERIXOverrideWidget::latitudeMinEditedSlot(const QString& value_str)
+{
+    loginf << "ASTERIXOverrideWidget: latitudeMinEditedSlot: value '" << value_str.toStdString() << "'";
+
+    double value = value_str.toDouble();
+
+    task_.filterLatitudeMin(value);
+
+}
+
+void ASTERIXOverrideWidget::latitudeMaxEditedSlot(const QString& value_str)
+{
+    loginf << "ASTERIXOverrideWidget: latitudeMaxEditedSlot: value '" << value_str.toStdString() << "'";
+
+    double value = value_str.toDouble();
+
+    task_.filterLatitudeMax(value);
+}
+
+void ASTERIXOverrideWidget::longitudeMinEditedSlot(const QString& value_str)
+{
+    loginf << "ASTERIXOverrideWidget: longitudeMinEditedSlot: value '" << value_str.toStdString() << "'";
+
+    double value = value_str.toDouble();
+
+    task_.filterLongitudeMin(value);
+}
+
+void ASTERIXOverrideWidget::longitudeMaxEditedSlot(const QString& value_str)
+{
+    loginf << "ASTERIXOverrideWidget: longitudeMaxEditedSlot: value '" << value_str.toStdString() << "'";
+
+    double value = value_str.toDouble();
+
+    task_.filterLongitudeMax(value);
+}
+
+void ASTERIXOverrideWidget::filterModeCActiveCheckedSlot()
+{
+    loginf << "ASTERIXOverrideWidget: filterPositionActiveCheckedSlot";
+    assert(filter_modec_active_check_);
+
+    task_.filterModeCActive(filter_modec_active_check_->checkState() == Qt::Checked);
+}
+
+void ASTERIXOverrideWidget::modeCMinEditedSlot(const QString& value_str)
+{
+    loginf << "ASTERIXOverrideWidget: modeCMinEditedSlot: value '" << value_str.toStdString() << "'";
+
+    double value = value_str.toDouble();
+
+    task_.filterModeCMin(value);
+}
+
+void ASTERIXOverrideWidget::modeCMaxEditedSlot(const QString& value_str)
+{
+    loginf << "ASTERIXOverrideWidget: modeCMaxEditedSlot: value '" << value_str.toStdString() << "'";
+
+    double value = value_str.toDouble();
+
+    task_.filterModeCMax(value);
 }

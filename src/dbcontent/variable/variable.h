@@ -18,14 +18,16 @@
 #ifndef DBCONTENT_VARIABLE_H_
 #define DBCONTENT_VARIABLE_H_
 
-#include <QObject>
-#include <string>
-#include <vector>
-
 #include "configurable.h"
 #include "global.h"
 #include "property.h"
 #include "stringconv.h"
+#include "logger.h"
+
+#include <QObject>
+
+#include <string>
+#include <vector>
 
 class DBTableColumn;
 class DBContent;

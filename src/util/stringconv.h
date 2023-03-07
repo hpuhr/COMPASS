@@ -18,317 +18,56 @@
 #ifndef STRINGMANIPULATION_H_
 #define STRINGMANIPULATION_H_
 
-#include "global.h"
-#include "logger.h"
-#include "property.h"
-#include "util/timeconv.h"
-
 #include "json.hpp"
 
-#include <boost/regex.hpp>
-#include <boost/algorithm/string/replace.hpp>
-#include <boost/algorithm/string.hpp>
+#include "boost/date_time/posix_time/posix_time.hpp"
 
 #include <iomanip>
+
 #include <map>
 #include <vector>
+#include <set>
 
 namespace Utils
 {
 namespace String
 {
-inline bool isNumber(const std::string& number_str)
-{
-    try
-    {
-        std::stoi(number_str);
-    }
-    catch (std::invalid_argument& e)
-    {
-        return false;
-    }
-    return true;
-}
 
-inline std::string intToString(int number, int width, char c)
-{
-    std::ostringstream out;
-    out << std::setfill(c) << std::setw(width) << number;
-    return out.str();
-}
+extern bool isNumber(const std::string& number_str);
+extern std::string intToString(int number, int width, char c);
+extern std::string categoryString(unsigned int cat);
+extern std::string doubleToStringPrecision(double number, unsigned int precision);
+extern std::string doubleToStringNoScientific(double number);
+extern std::string percentToString(double number, unsigned int precision=2);
+extern std::string boolToString(bool value);
+extern unsigned int intFromOctalString(std::string number);
+extern unsigned int intFromHexString(std::string number);
 
-inline std::string categoryString(unsigned int cat)
-{
-    std::ostringstream out;
-    out << std::setfill('0') << std::setw(3) << cat;
-    return out.str();
-}
+extern std::vector<std::string>& split(const std::string& s, char delim, std::vector<std::string>& elems);
+extern std::vector<std::string> split(const std::string& s, char delim);
 
-inline std::string doubleToStringPrecision(double number, unsigned int precision)
-{
-    std::ostringstream out;
-    out << std::fixed << std::setprecision(precision) << number;
-    return out.str();
-}
+extern std::string timeStringFromDouble(double seconds, bool milliseconds = true);
+extern double timeFromString(std::string time_str, bool* ok=nullptr);
 
-inline std::string doubleToStringNoScientific(double number)
-{
-    std::ostringstream out;
-    out << std::fixed << number;
-    return out.str();
-}
+extern std::string octStringFromInt(int number);
+extern std::string octStringFromInt(int number, int width, char c);
+extern std::string hexStringFromInt(int number);
+extern std::string hexStringFromInt(int number, int width, char c);
 
-inline std::string percentToString(double number, unsigned int precision=2)
-{
-    std::ostringstream out;
+extern int getAppendedInt(std::string text);
+extern unsigned int lineFromStr(const std::string& line_str);
+extern std::string lineStrFrom(unsigned int line);
 
-    out << std::fixed << std::setprecision(precision) << number;
+extern int getLeadingInt(std::string text);
 
-    return out.str();
-}
+extern double doubleFromLatitudeString(std::string& latitude_str);
+extern double doubleFromLongitudeString(std::string& longitude_str);
 
-inline std::string boolToString(bool value)
-{
-    return value ? "true" : "false";
-}
-
-inline unsigned int intFromOctalString(std::string number) { return std::stoi(number, 0, 8); }
-
-inline unsigned int intFromHexString(std::string number) { return std::stoi(number, 0, 16); }
-
-inline std::vector<std::string>& split(const std::string& s, char delim,
-                                       std::vector<std::string>& elems)
-{
-    std::stringstream ss(s);
-    std::string item;
-    while (std::getline(ss, item, delim))
-    {
-        elems.push_back(item);
-    }
-    return elems;
-}
-
-inline std::vector<std::string> split(const std::string& s, char delim)
-{
-    std::vector<std::string> elems;
-    return split(s, delim, elems);
-}
-
-inline std::string compress (const std::vector<std::string>& str_vec, char delim)
-{
-    std::stringstream ss;
-    for (auto it = str_vec.begin(); it != str_vec.end(); it++)
-    {
-        if (it != str_vec.begin()) {
-            ss << delim;
-        }
-        ss << *it;
-    }
-    return ss.str();
-}
-
-inline std::string timeStringFromDouble(double seconds, bool milliseconds = true)
-{
-    int hours, minutes;
-    std::ostringstream out;
-
-    if (seconds < 0)
-    {
-        out << "-";
-        seconds *= -1;
-    }
-
-    hours = static_cast<int>(seconds / 3600.0);
-    minutes = static_cast<int>(static_cast<double>(static_cast<int>(seconds) % 3600) / 60.0);
-    seconds = seconds - hours * 3600.0 - minutes * 60.0;
-
-    out << std::fixed << std::setw(2) << std::setfill('0') << hours << ":" << std::setw(2)
-        << std::setfill('0') << minutes << ":";
-
-    if (milliseconds)
-        out << std::setw(6) << std::setfill('0') << std::setprecision(3) << seconds;
-    else
-        out << std::setw(2) << std::setfill('0') << std::setprecision(0)
-            << static_cast<int>(seconds);
-
-    return out.str();
-}
-
-inline double timeFromString(std::string time_str, bool* ok=nullptr)
-{
-    std::vector<std::string> chunks = split(time_str, ':');
-
-    double time;
-
-    if (chunks.size() != 3)
-    {
-        if (ok)
-            *ok = false;
-
-        return 0;
-    }
-
-    time = std::stod(chunks[0]) * 3600.0;
-
-    if (time >= 0)
-    {
-        time += std::stod(chunks[1]) * 60.0;
-        time += std::stod(chunks[2]);
-    }
-    else
-    {
-        time -= std::stod(chunks[1]) * 60.0;
-        time -= std::stod(chunks[2]);
-    }
-
-    if (ok)
-        *ok = true;
-
-    return time;
-}
-
-inline std::string octStringFromInt(int number)
-{
-    std::ostringstream out;
-    out << std::oct << number;
-    return out.str();
-}
-
-inline std::string octStringFromInt(int number, int width, char c)
-{
-    std::ostringstream out;
-    out << std::oct << std::setfill(c) << std::setw(width) << number;
-    return out.str();
-}
-
-inline std::string hexStringFromInt(int number)
-{
-    std::ostringstream out;
-    out << std::hex << number;
-    return out.str();
-}
-
-inline std::string hexStringFromInt(int number, int width, char c)
-{
-    std::ostringstream out;
-    out << std::hex << std::setfill(c) << std::setw(width) << number;
-    return out.str();
-}
-
-inline int getAppendedInt(std::string text)
-{
-    int ret = 0;
-    boost::regex re("[0-9]+");
-    boost::sregex_token_iterator i(text.begin(), text.end(), re, 0);
-    boost::sregex_token_iterator j;
-
-    unsigned count = 0;
-    while (i != j)
-    {
-        ret = std::stoi(*i++);
-        count++;
-    }
-
-    if (count == 0)
-        throw std::runtime_error("Util: getAppendedInt: no int found");
-
-    return ret;
-}
-
-inline unsigned int lineFromStr(const std::string& line_str)
-{
-    assert (line_str.size());
-    unsigned int line = line_str.back() - '0';
-    assert (line >= 1 && line <= 4);
-    return line-1;
-}
-
-inline std::string lineStrFrom(unsigned int line)
-{
-    assert (line >= 0 && line <= 3);
-    return "L" + std::to_string(line + 1);
-}
-
-inline int getLeadingInt(std::string text)
-{
-    boost::regex re("[0-9]+");
-    boost::sregex_token_iterator i(text.begin(), text.end(), re, 0);
-    boost::sregex_token_iterator j;
-
-    if (i != j)
-    {
-        return std::stoi(*i++);
-    }
-    else
-        throw std::runtime_error("Util: getLeadingInt: no int found");
-}
-
-inline double doubleFromLatitudeString(std::string& latitude_str)
-{
-    unsigned int len = latitude_str.size();
-    assert(len == 12);
-    char last_char = latitude_str.at(len - 1);
-    assert(last_char == 'N' || last_char == 'S');
-
-    double x = 0.0;
-
-    x = std::stod(latitude_str.substr(0, 2));
-    x += std::stod(latitude_str.substr(2, 2)) / 60.0;
-    x += std::stod(latitude_str.substr(4, 7)) / 3600.0;
-
-    if (last_char == 'S')
-        x *= -1.0;
-
-    return x;
-}
-
-inline double doubleFromLongitudeString(std::string& longitude_str)
-{
-    unsigned int len = longitude_str.size();
-    assert(len == 13);
-    char last_char = longitude_str.at(len - 1);
-    assert(last_char == 'E' || last_char == 'W');
-
-    double x = 0.0;
-
-    x = std::stod(longitude_str.substr(0, 3));
-    x += std::stod(longitude_str.substr(3, 2)) / 60.0;
-    x += std::stod(longitude_str.substr(5, 7)) / 3600.0;
-
-    if (last_char == 'W')
-        x *= -1.0;
-
-    return x;
-}
-
-inline std::string getValueString(const std::string& value) { return value; }
-
-typedef std::numeric_limits<double> double_limit;
-typedef std::numeric_limits<float> float_limit;
-
-inline std::string getValueString(const float& value)
-{
-    std::ostringstream out;
-    out << std::setprecision(float_limit::max_digits10) << value;
-    return out.str();
-}
-
-inline std::string getValueString(const double& value)
-{
-    std::ostringstream out;
-    out << std::setprecision(double_limit::max_digits10) << value;
-    return out.str();
-}
-
-inline std::string getValueString(const nlohmann::json& value)
-{
-    return value.dump();
-}
-
-inline std::string getValueString(const boost::posix_time::ptime& value)
-{
-    return Time::toString(value);
-}
+extern std::string getValueString(const std::string& value);
+extern std::string getValueString(const float& value);
+extern std::string getValueString(const double& value);
+extern std::string getValueString(const nlohmann::json& value);
+extern std::string getValueString(const boost::posix_time::ptime& value);
 
 
 template <typename T>
@@ -337,106 +76,63 @@ std::string getValueString(T value)
     return std::to_string(value);
 }
 
-inline bool hasEnding(std::string const& full_string, std::string const& ending)
+extern std::string compress(const std::vector<std::string>& values, char seperator);
+
+template <typename T>
+std::string compress(const std::vector<T>& values, char seperator)
 {
-    if (full_string.length() >= ending.length())
+    std::ostringstream ss;
+
+    bool first_val = true;
+    for (auto& val_it : values)
     {
-        return (0 == full_string.compare(full_string.length() - ending.length(), ending.length(),
-                                         ending));
+        if (!first_val)
+            ss << seperator;
+
+        ss << std::to_string(val_it);
+
+        first_val = false;
     }
-    else
-    {
-        return false;
-    }
+
+    return ss.str();
 }
 
-inline bool replace(std::string& str, const std::string& from, const std::string& to)
+extern std::string compress(const std::set<std::string>& values, char seperator);
+
+template <typename T>
+std::string compress(const std::set<T>& values, char seperator)
 {
-    size_t start_pos = str.find(from);
-    if (start_pos == std::string::npos)
-        return false;
-    str.replace(start_pos, from.length(), to);
-    return true;
+    std::ostringstream ss;
+
+    bool first_val = true;
+    for (auto& val_it : values)
+    {
+        if (!first_val)
+            ss << seperator;
+
+        ss << std::to_string(val_it);
+
+        first_val = false;
+    }
+
+    return ss.str();
 }
+
+
+
+extern bool hasEnding(std::string const& full_string, std::string const& ending);
+
+extern bool replace(std::string& str, const std::string& from, const std::string& to);
 
 // 0 if same, -1 if v1 > v2, 1 if v1 < v2
-inline int compareVersions(const std::string& v1_str, const std::string& v2_str)
-{
-    std::vector<std::string> v1_parts = split(v1_str, '.');
-    std::vector<std::string> v2_parts = split(v2_str, '.');
+extern int compareVersions(const std::string& v1_str, const std::string& v2_str);
 
-    assert(v1_parts.size() == v2_parts.size());
+extern std::string latexString(std::string str);
 
-    int v1_part;
-    int v2_part;
-    for (unsigned int cnt = 0; cnt < v1_parts.size(); ++cnt)
-    {
-        v1_part = std::stoi(v1_parts.at(cnt));
-        v2_part = std::stoi(v2_parts.at(cnt));
+extern std::string ipFromString(const std::string& name);
+extern unsigned int portFromString(const std::string& name);
 
-        if (v1_part > v2_part)  // -1 if v1 > v2
-            return -1;
-
-        if (v1_part < v2_part)  // 1 if v1 < v2
-            return 1;
-
-        //  if (v1_part == v2_part)
-        //      continue;
-    }
-
-    return 0;  // same
-}
-
-inline std::string latexString(std::string str)
-{
-//    \textbackslash 	n/a
-    boost::replace_all(str, R"(\)", R"(\textbackslash)");
-//    \% 	%
-    boost::replace_all(str, "%", R"(\%)");
-//    \$ 	$
-    boost::replace_all(str, "$", R"(\$)");
-//    \{ 	{
-    boost::replace_all(str, "{", R"(\{)");
-//    \_ 	_
-    boost::replace_all(str, "_", R"(\_)");
-//    \# 	#
-    boost::replace_all(str, "#", R"(\#)");
-//    \& 	&
-    boost::replace_all(str, "&", R"(\&)");
-//    \} 	}
-    boost::replace_all(str, "}", R"(\})");
-
-    boost::replace_all(str, "^", R"(\^)");
-
-    boost::replace_all(str, "<", R"(\textless)");
-    boost::replace_all(str, ">", R"(\textgreater)");
-
-    return str;
-}
-
-inline std::string ipFromString(const std::string& name)
-{
-    // string like "224.9.2.252:15040"
-
-    std::vector<std::string> parts = split(name, ':');
-    assert (parts.size() == 2);
-    return parts.at(0);
-}
-
-inline unsigned int portFromString(const std::string& name)
-{
-    // string like "224.9.2.252:15040"
-
-    std::vector<std::string> parts = split(name, ':');
-    assert (parts.size() == 2);
-    return stoi(parts.at(1));
-}
-
-
-inline std::string trim(const std::string& name)
-{
-    return boost::algorithm::trim_copy(name);
-}
+extern std::string trim(const std::string& name);
 
 }  // namespace String
 

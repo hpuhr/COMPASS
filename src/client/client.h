@@ -51,6 +51,7 @@ private:
     std::string import_asterix_file_line_;
     std::string import_asterix_date_;
     std::string import_asterix_file_time_offset_;
+    bool import_asterix_ignore_time_jumps_ {false};
 
     bool import_asterix_network_ {false};
     std::string import_asterix_network_time_offset_;

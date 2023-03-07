@@ -432,6 +432,11 @@ void CreateAssociationsTask::contMaxDistanceAcceptableTracker(double cont_max_di
     cont_max_distance_acceptable_tracker_ = cont_max_distance_acceptable_tracker;
 }
 
+const std::set<unsigned int>& CreateAssociationsTask::modeAConspicuityCodes() const
+{
+    return mode_a_conspicuity_codes_;
+}
+
 void CreateAssociationsTask::loadedDataSlot(
         const std::map<std::string, std::shared_ptr<Buffer>>& data, bool requires_reset)
 {
@@ -602,6 +607,12 @@ VariableSet CreateAssociationsTask::getReadSetFor(const std::string& dbcontent_n
     // mode c
     assert(dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_mc_));
     read_set.add(dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_mc_));
+
+    if (dbcontent_name == "CAT062")
+    {
+        assert(dbcont_man.canGetVariable(dbcontent_name, DBContent::var_cat062_fl_measured_));
+        read_set.add(dbcont_man.getVariable(dbcontent_name, DBContent::var_cat062_fl_measured_));
+    }
 
     // latitude
     assert(dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_latitude_));

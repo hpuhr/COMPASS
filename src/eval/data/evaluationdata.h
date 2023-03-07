@@ -108,6 +108,7 @@ public:
     std::string ref_modea_g_name_; // can be empty
     std::string ref_modea_v_name_; // can be empty
 
+    std::string ref_modec_trusted_name_; // can be empty
     std::string ref_modec_name_;
     std::string ref_modec_g_name_; // can be empty
     std::string ref_modec_v_name_; // can be empty
@@ -133,6 +134,7 @@ public:
     std::string tst_modea_g_name_; // can be empty
     std::string tst_modea_v_name_; // can be empty
 
+    std::string tst_modec_trusted_name_; // can be empty
     std::string tst_modec_name_;
     std::string tst_modec_g_name_; // can be empty
     std::string tst_modec_v_name_; // can be empty

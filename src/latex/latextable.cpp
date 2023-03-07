@@ -17,6 +17,7 @@
 
 #include "latextable.h"
 #include "stringconv.h"
+#include "logger.h"
 
 #include <cassert>
 #include <sstream>

@@ -4,6 +4,7 @@
 #include "dbinterface.h"
 #include "dbcontentmanager.h"
 #include "util/stringconv.h"
+#include "util/timeconv.h"
 #include "logger.h"
 
 #include <QApplication>

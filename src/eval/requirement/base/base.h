@@ -72,7 +72,7 @@ public:
     std::string getResultConditionStr (float prob) const;
 
 protected:
-    static bool in_appimage_;
+    //static bool in_appimage_;
 
     std::string name_;
     std::string short_name_;

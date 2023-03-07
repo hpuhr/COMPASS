@@ -10,6 +10,7 @@
 #include "dbdatasource.h"
 #include "logger.h"
 #include "util/stringconv.h"
+#include "util/timeconv.h"
 #include "util/number.h"
 
 #include "global.h"
@@ -1795,7 +1796,7 @@ std::string LabelGenerator::getMode3AText (const std::string& dbcontent_name,
         text = m3a_var.getAsSpecialRepresentationString(
                     buffer->get<unsigned int>(m3a_var.name()).get(buffer_index));
 
-        bool valid=false, garbled=false, smoothed=false;
+        bool valid=true, garbled=false, smoothed=false;
 
         // "Mode 3/A Valid"
         if (dbcont_manager_.metaCanGetVariable(dbcontent_name, DBContent::meta_var_m3a_v_))
@@ -1850,7 +1851,7 @@ std::string LabelGenerator::getModeCText (const std::string& dbcontent_name,
     {
         text = String::doubleToStringPrecision(buffer->get<float>(mc_var.name()).get(buffer_index)/100.0,2);
 
-        bool valid=false, garbled=false;
+        bool valid=true, garbled=false;
 
         // "Mode CValid"
         if (dbcont_manager_.metaCanGetVariable(dbcontent_name, DBContent::meta_var_mc_v_))

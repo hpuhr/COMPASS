@@ -563,9 +563,7 @@ void JSONImportTask::mapJSONDoneSlot()
     }
 
     std::shared_ptr<ASTERIXPostprocessJob> postprocess_job =
-            make_shared<ASTERIXPostprocessJob>(std::move(job_buffers), date_,
-                                               false, 0, // bool override_tod_active, float override_tod_offset
-                                               false); // bool do_timestamp_checks
+            make_shared<ASTERIXPostprocessJob>(std::move(job_buffers), date_);
 
     postprocess_jobs_.push_back(postprocess_job);
 

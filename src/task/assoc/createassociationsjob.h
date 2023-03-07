@@ -49,7 +49,7 @@ public:
     std::map<std::string, std::pair<unsigned int, unsigned int> > associationCounts() const;
 
 protected:
-    static bool in_appimage_;
+    //static bool in_appimage_;
 
     CreateAssociationsTask& task_;
     DBInterface& db_interface_;

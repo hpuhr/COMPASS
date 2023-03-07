@@ -20,8 +20,10 @@
 #include "eval/results/dubious/dubioustracksingle.h"
 #include "evaluationmanager.h"
 #include "evaluationdata.h"
-#include "stringconv.h"
+#include "util/stringconv.h"
+#include "util/timeconv.h"
 #include "util/number.h"
+#include "global.h"
 
 using namespace std;
 using namespace Utils;

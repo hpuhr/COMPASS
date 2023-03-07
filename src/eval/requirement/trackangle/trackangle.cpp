@@ -20,9 +20,11 @@
 #include "evaluationdata.h"
 #include "evaluationmanager.h"
 #include "logger.h"
-#include "stringconv.h"
+#include "util/stringconv.h"
+#include "util/timeconv.h"
 #include "sectorlayer.h"
 #include "util/number.h"
+#include "global.h"
 
 #include <ogr_spatialref.h>
 
