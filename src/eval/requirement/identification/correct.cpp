@@ -49,6 +49,10 @@ std::shared_ptr<EvaluationRequirementResult::Single> IdentificationCorrect::eval
 {
     logdbg << "EvaluationRequirementIdentification '" << name_ << "': evaluate: utn " << target_data.utn_;
 
+    typedef EvaluationRequirementResult::SingleIdentificationCorrect Result;
+    typedef EvaluationDetail                                         Detail;
+    typedef Result::EvaluationDetails                                Details;
+
     if (target_data.isPrimaryOnly())
     {
         logdbg << "EvaluationRequirementIdentification '" << name_ << "': evaluate: utn " << target_data.utn_
@@ -56,7 +60,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> IdentificationCorrect::eval
 
         return make_shared<EvaluationRequirementResult::SingleIdentificationCorrect>(
                     "UTN:"+to_string(target_data.utn_), instance, sector_layer, target_data.utn_, &target_data,
-                    eval_man_, 0, 0, 0, 0, 0, 0, 0, vector<CorrectnessDetail>{});
+                    eval_man_, Details(), 0, 0, 0, 0, 0, 0, 0);
     }
 
     time_duration max_ref_time_diff = Time::partialSeconds(eval_man_.maxRefTimeDiff());
@@ -73,7 +77,8 @@ std::shared_ptr<EvaluationRequirementResult::Single> IdentificationCorrect::eval
     unsigned int num_correct {0};
     unsigned int num_not_correct {0};
 
-    EvaluationRequirementResult::Single::EvaluationDetails details;
+    Details details;
+
     EvaluationTargetPosition pos_current;
 
     bool ref_exists;
@@ -110,6 +115,31 @@ std::shared_ptr<EvaluationRequirementResult::Single> IdentificationCorrect::eval
     bool all_correct;
     bool result_ok;
 
+    auto addDetail = [ & ] (const ptime& ts,
+                            const EvaluationTargetPosition& tst_pos,
+                            const QVariant& ref_exists,
+                            const QVariant& pos_inside,
+                            const QVariant& is_not_correct,
+                            const QVariant& num_updates,
+                            const QVariant& num_no_ref,
+                            const QVariant& num_pos_inside,
+                            const QVariant& num_pos_outside,
+                            const QVariant& num_correct,
+                            const QVariant& num_not_correct,
+                            const std::string& comment)
+    {
+        details.push_back(Detail(ts, tst_pos).setValue(Result::DetailRefExists, ref_exists)
+                                             .setValue(Result::DetailPosInside, pos_inside.isValid() ? pos_inside : "false")
+                                             .setValue(Result::DetailIsNotCorrect, is_not_correct)
+                                             .setValue(Result::DetailNumUpdates, num_updates)
+                                             .setValue(Result::DetailNumNoRef, num_no_ref)
+                                             .setValue(Result::DetailNumInside, num_pos_inside)
+                                             .setValue(Result::DetailNumOutside, num_pos_outside)
+                                             .setValue(Result::DetailNumCorrect, num_correct)
+                                             .setValue(Result::DetailNumNotCorrect, num_not_correct)
+                                             .generalComment(comment));
+    };
+
     for (const auto& tst_id : tst_data)
     {
         ref_exists = false;
@@ -126,10 +156,10 @@ std::shared_ptr<EvaluationRequirementResult::Single> IdentificationCorrect::eval
         if (!target_data.hasRefDataForTime (timestamp, max_ref_time_diff))
         {
             if (!skip_no_data_details)
-                details.push_back({timestamp, pos_current,
-                                   false, {}, false, // ref_exists, pos_inside, is_not_correct
-                                   num_updates, num_no_ref_pos, num_pos_inside, num_pos_outside,
-                                   num_correct, num_not_correct, "No reference data"});
+                addDetail(timestamp, pos_current,
+                            false, {}, false, // ref_exists, pos_inside, is_not_correct
+                            num_updates, num_no_ref_pos, num_pos_inside, num_pos_outside,
+                            num_correct, num_not_correct, "No reference data");
 
             ++num_no_ref_pos;
             continue;
@@ -143,10 +173,10 @@ std::shared_ptr<EvaluationRequirementResult::Single> IdentificationCorrect::eval
         if (!ok)
         {
             if (!skip_no_data_details)
-                details.push_back({timestamp, pos_current,
-                                   false, {}, false, // ref_exists, pos_inside, is_not_correct
-                                   num_updates, num_no_ref_pos, num_pos_inside, num_pos_outside,
-                                   num_correct, num_not_correct, "No reference position"});
+                addDetail(timestamp, pos_current,
+                            false, {}, false, // ref_exists, pos_inside, is_not_correct
+                            num_updates, num_no_ref_pos, num_pos_inside, num_pos_outside,
+                            num_correct, num_not_correct, "No reference position");
 
             ++num_no_ref_pos;
             continue;
@@ -168,10 +198,10 @@ std::shared_ptr<EvaluationRequirementResult::Single> IdentificationCorrect::eval
         if (!is_inside)
         {
             if (!skip_no_data_details)
-                details.push_back({timestamp, pos_current,
-                                   ref_exists, is_inside, false, // ref_exists, pos_inside, is_not_correct
-                                   num_updates, num_no_ref_pos, num_pos_inside, num_pos_outside,
-                                   num_correct, num_not_correct, "Outside sector"});
+                addDetail(timestamp, pos_current,
+                            ref_exists, is_inside, false, // ref_exists, pos_inside, is_not_correct
+                            num_updates, num_no_ref_pos, num_pos_inside, num_pos_outside,
+                            num_correct, num_not_correct, "Outside sector");
 
             ++num_pos_outside;
             continue;
@@ -242,10 +272,10 @@ std::shared_ptr<EvaluationRequirementResult::Single> IdentificationCorrect::eval
         if (all_no_ref) // none has a reference
         {
             if (!skip_no_data_details)
-                details.push_back({timestamp, pos_current,
-                                   ref_exists, is_inside, false, // ref_exists, pos_inside, is_not_correct
-                                   num_updates, num_no_ref_pos, num_pos_inside, num_pos_outside,
-                                   num_correct, num_not_correct, "No reference id"});
+                addDetail(timestamp, pos_current,
+                            ref_exists, is_inside, false, // ref_exists, pos_inside, is_not_correct
+                            num_updates, num_no_ref_pos, num_pos_inside, num_pos_outside,
+                            num_correct, num_not_correct, "No reference id");
 
             ++num_no_ref_id;
 
@@ -270,10 +300,10 @@ std::shared_ptr<EvaluationRequirementResult::Single> IdentificationCorrect::eval
             ++num_not_correct;
 
         if (!skip_detail)
-            details.push_back({timestamp, pos_current,
-                               ref_exists, is_inside, !result_ok,
-                               num_updates, num_no_ref_pos, num_pos_inside, num_pos_outside,
-                               num_correct, num_not_correct, comment});
+            addDetail(timestamp, pos_current,
+                        ref_exists, is_inside, !result_ok,
+                        num_updates, num_no_ref_pos, num_pos_inside, num_pos_outside,
+                        num_correct, num_not_correct, comment);
     }
 
     logdbg << "EvaluationRequirementIdentification '" << name_ << "': evaluate: utn " << target_data.utn_
@@ -287,8 +317,8 @@ std::shared_ptr<EvaluationRequirementResult::Single> IdentificationCorrect::eval
 
     return make_shared<EvaluationRequirementResult::SingleIdentificationCorrect>(
                 "UTN:"+to_string(target_data.utn_), instance, sector_layer, target_data.utn_, &target_data,
-                eval_man_, num_updates, num_no_ref_pos, num_no_ref_id, num_pos_outside, num_pos_inside,
-                num_correct, num_not_correct, details);
+                eval_man_, details, num_updates, num_no_ref_pos, num_no_ref_id, num_pos_outside, num_pos_inside,
+                num_correct, num_not_correct);
 }
 
 bool IdentificationCorrect::requireCorrectnessOfAll() const

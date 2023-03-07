@@ -326,7 +326,7 @@ void SingleDubiousTarget::reportDetails(EvaluationResultsReport::Section& utn_re
     {
         utn_req_details_table.addRow(
                     { Time::toString(update.timestamp()).c_str(),
-                      detail.getValue(DetailUTN),
+                      detail.getValue(DetailUTNOrTrackNum),
                       dub_string.c_str() }, // "Comment"
                     this, {detail_cnt});
         ++detail_cnt;

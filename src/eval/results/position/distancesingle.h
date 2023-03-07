@@ -42,8 +42,8 @@ public:
                            unsigned int num_no_ref,
                            unsigned int num_pos_outside, 
                            unsigned int num_pos_inside,
-                           unsigned int num_comp_failed,
                            unsigned int num_comp_passed,
+                           unsigned int num_comp_failed,
                            vector<double> values);
 
     virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item) override;

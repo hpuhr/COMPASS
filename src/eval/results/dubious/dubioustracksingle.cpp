@@ -60,6 +60,8 @@ SingleDubiousTrack::SingleDubiousTrack(const std::string& result_id,
     update();
 }
 
+SingleDubiousTrack::~SingleDubiousTrack() = default;
+
 void SingleDubiousTrack::update()
 {
     assert (num_updates_ == num_pos_inside_ + num_pos_outside_);
@@ -171,7 +173,7 @@ void SingleDubiousTrack::addTargetDetailsToTable (EvaluationResultsReport::Secti
 
         auto dub_reasons_str = dubiousReasonsString(detail_it.comments());
 
-        reasons += to_string(detail_it.getValue(DetailTrackNum).toUInt())+":" + dub_reasons_str;
+        reasons += to_string(detail_it.getValue(DetailUTNOrTrackNum).toUInt())+":" + dub_reasons_str;
     }
 
     target_table.addRow(
@@ -226,7 +228,7 @@ void SingleDubiousTrack::addTargetDetailsToTableADSB (EvaluationResultsReport::S
 
         auto dub_reasons_str = dubiousReasonsString(detail_it.comments());
 
-        reasons += to_string(detail_it.getValue(DetailTrackNum).toUInt())+":" + dub_reasons_str;
+        reasons += to_string(detail_it.getValue(DetailUTNOrTrackNum).toUInt())+":" + dub_reasons_str;
     }
 
     // "UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
@@ -375,7 +377,7 @@ void SingleDubiousTrack::reportDetails(EvaluationResultsReport::Section& utn_req
         {
             utn_req_details_table.addRow(
                         { Time::toString(update.timestamp()).c_str(),
-                          rq_det_it.getValue(DetailTrackNum),
+                          rq_det_it.getValue(DetailUTNOrTrackNum),
                           dubiousReasonsString(update.comments()).c_str() }, // "Comment"
                         this, {detail_update_cnt});
 

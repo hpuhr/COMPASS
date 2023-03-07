@@ -50,8 +50,8 @@ SinglePositionDistance::SinglePositionDistance(const std::string& result_id,
                                                unsigned int num_no_ref,
                                                unsigned int num_pos_outside, 
                                                unsigned int num_pos_inside,
-                                               unsigned int num_comp_failed, 
                                                unsigned int num_comp_passed,
+                                               unsigned int num_comp_failed, 
                                                vector<double> values)
 :   SinglePositionBase("SinglePositionDistance", result_id, requirement, sector_layer, utn, target, eval_man, details,
                        num_pos, num_no_ref,num_pos_outside, num_pos_inside, num_comp_passed, num_comp_failed, values)
@@ -204,14 +204,13 @@ void SinglePositionDistance::addTargetDetailsToTableADSB (
                  Number::round(value_max_,2), // "DMax"
                  Number::round(value_avg_,2), // "DAvg"
                  Number::round(sqrt(value_var_),2), // "DSDev"
-                 num_failed_, // "#DOK"
-                 num_passed_, // "#DNOK"
+                 num_failed_, // "#CF"
+                 num_passed_, // "#CP"
                  prob_var, // "PDOK"
                  target_->mopsVersionStr().c_str(), // "MOPS"
                  target_->nucpNicStr().c_str(), // "NUCp/NIC"
                  target_->nacpStr().c_str()}, // "NACp"
                 this, {utn_});
-
 }
 
 void SinglePositionDistance::addTargetDetailsToReport(shared_ptr<EvaluationResultsReport::RootItem> root_item)

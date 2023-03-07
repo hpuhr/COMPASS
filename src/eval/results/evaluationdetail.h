@@ -38,6 +38,7 @@ public:
     EvaluationDetailComments() = default;
     virtual ~EvaluationDetailComments() = default;
 
+    bool hasComments(const std::string& group_id) const;
     size_t numComments(const std::string& group_id) const;
 
     EvaluationDetailComments& generalComment(const std::string& c);
@@ -98,6 +99,14 @@ public:
         return it->second.value<T>();
     }
 
+    template<typename T>
+    T getValueAsOrAssert(const Key& key) const
+    {
+        auto v = getValueAs<T>(key);
+        assert(v.has_value());
+        return v.value();
+    }
+
     EvaluationDetail& addPosition(const Position& p);
     EvaluationDetail& addPosition(const boost::optional<Position>& p);
     int numPositions() const;
@@ -109,6 +118,7 @@ public:
     EvaluationDetail& generalComment(const std::string& c);
 
     EvaluationDetail& addDetail(const EvaluationDetail& detail);
+    EvaluationDetail& setDetails(const Details& details);
     bool hasDetails() const;
     const Details& details() const;
     

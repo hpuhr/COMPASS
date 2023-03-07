@@ -122,8 +122,25 @@ std::shared_ptr<EvaluationRequirementResult::Single> ExtraData::evaluate (
     unsigned int num_extra = 0;
     EvaluationTargetPosition tst_pos;
 
-    EvaluationRequirementResult::Single::EvaluationDetails details;
+    typedef EvaluationRequirementResult::SingleExtraData Result;
+    typedef EvaluationDetail                             Detail;
+    typedef Result::EvaluationDetails                    Details;
+    Details details;
+
     bool skip_no_data_details = eval_man_.reportSkipNoDataDetails();
+
+    auto addDetail = [ & ] (const ptime& ts,
+                            const EvaluationTargetPosition& tst_pos,
+                            const QVariant& inside,
+                            const QVariant& extra,
+                            const QVariant& ref_exists,
+                            const std::string& comment)
+    {
+        details.push_back(Detail(ts, tst_pos).setValue(Result::DetailInside, inside)
+                                             .setValue(Result::DetailExtra, extra)
+                                             .setValue(Result::DetailRefExists, ref_exists)
+                                             .generalComment(comment));
+    };
 
     {
         const std::multimap<ptime, unsigned int>& tst_data = target_data.tstData();
@@ -140,7 +157,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> ExtraData::evaluate (
             if (is_inside_ref_time_period)
             {
                 ++num_ok;
-                details.push_back({timestamp, tst_pos, true, false, true, "OK"}); // inside, extra, ref
+                addDetail(timestamp, tst_pos, true, false, true, "OK"); // inside, extra, ref
                 continue;
             }
 
@@ -162,7 +179,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> ExtraData::evaluate (
             if (inside)
             {
                 ++num_extra;
-                details.push_back({timestamp, tst_pos, true, true, false, "Extra"}); // inside, extra, ref
+                addDetail(timestamp, tst_pos, true, true, false, "Extra"); // inside, extra, ref
 
                 if (!has_tod)
                 {
@@ -177,7 +194,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> ExtraData::evaluate (
                 }
             }
             else if (skip_no_data_details)
-                details.push_back({timestamp, tst_pos, false, false, false, "Tst outside"}); // inside, extra, ref
+                addDetail(timestamp, tst_pos, false, false, false, "Tst outside"); // inside, extra, ref
         }
     }
 
@@ -198,6 +215,6 @@ std::shared_ptr<EvaluationRequirementResult::Single> ExtraData::evaluate (
 
     return make_shared<EvaluationRequirementResult::SingleExtraData>(
                 "UTN:"+to_string(target_data.utn_), instance, sector_layer, target_data.utn_, &target_data,
-                eval_man_, ignore, num_extra, num_ok, has_extra_test_data, details);
+                eval_man_, details, ignore, num_extra, num_ok, has_extra_test_data);
 }
 }

@@ -46,6 +46,7 @@ public:
                        unsigned int num_pos_inside_dubious,
                        unsigned int num_tracks, 
                        unsigned int num_tracks_dubious);
+    virtual ~SingleDubiousTrack();
 
     virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item) override;
 

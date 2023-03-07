@@ -27,15 +27,15 @@ namespace EvaluationRequirementResult
  * SinglePositionBase
  ****************************************************************************/
 
-const std::string DetailValue           = "Value";
-const std::string DetailCheckPassed     = "CheckPassed";
-const std::string DetailPosInside       = "PosInside";
-const std::string DetailNumPos          = "NumPos";
-const std::string DetailNumNoRef        = "NumNoRef";
-const std::string DetailNumInside       = "NumInside";
-const std::string DetailNumOutside      = "NumOutside";
-const std::string DetailNumCheckPassed  = "NumCheckPassed";
-const std::string DetailNumCheckFailed  = "NumCheckFailed";
+const std::string SinglePositionBase::DetailValue           = "Value";
+const std::string SinglePositionBase::DetailCheckPassed     = "CheckPassed";
+const std::string SinglePositionBase::DetailPosInside       = "PosInside";
+const std::string SinglePositionBase::DetailNumPos          = "NumPos";
+const std::string SinglePositionBase::DetailNumNoRef        = "NumNoRef";
+const std::string SinglePositionBase::DetailNumInside       = "NumInside";
+const std::string SinglePositionBase::DetailNumOutside      = "NumOutside";
+const std::string SinglePositionBase::DetailNumCheckPassed  = "NumCheckPassed";
+const std::string SinglePositionBase::DetailNumCheckFailed  = "NumCheckFailed";
 
 /**
 */
