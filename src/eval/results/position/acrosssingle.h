@@ -18,40 +18,34 @@
 #ifndef EVALUATIONREQUIREMENPOSITIONSINGLEPOSITIONACROSS_H
 #define EVALUATIONREQUIREMENPOSITIONSINGLEPOSITIONACROSS_H
 
+#include "eval/results/position/positionbase.h"
 
-#include "eval/results/single.h"
-#include "eval/requirement/position/across.h"
+#include <boost/optional.hpp>
 
 namespace EvaluationRequirementResult
 {
 
-class SinglePositionAcross : public Single
+class SinglePositionAcross : public SinglePositionBase
 {
 public:
-    SinglePositionAcross(
-            const std::string& result_id, std::shared_ptr<EvaluationRequirement::Base> requirement,
-            const SectorLayer& sector_layer,
-            unsigned int utn, const EvaluationTargetData* target, EvaluationManager& eval_man,
-            unsigned int num_pos, unsigned int num_no_ref,
-            unsigned int num_pos_outside, unsigned int num_pos_inside,
-            unsigned int num_value_ok, unsigned int num_value_nok,
-            vector<double> values,
-            std::vector<EvaluationRequirement::PositionDetail> details);
+    SinglePositionAcross(const std::string& result_id, 
+                         std::shared_ptr<EvaluationRequirement::Base> requirement,
+                         const SectorLayer& sector_layer,
+                         unsigned int utn, 
+                         const EvaluationTargetData* target, 
+                         EvaluationManager& eval_man,
+                         const boost::optional<EvaluationDetails>& details,
+                         unsigned int num_pos, 
+                         unsigned int num_no_ref,
+                         unsigned int num_pos_outside, 
+                         unsigned int num_pos_inside,
+                         unsigned int num_value_ok, 
+                         unsigned int num_value_nok,
+                         vector<double> values);
 
     virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item) override;
 
     virtual std::shared_ptr<Joined> createEmptyJoined(const std::string& result_id) override;
-
-    unsigned int numPos() const;
-    unsigned int numNoRef() const;
-    unsigned int numPosOutside() const;
-    unsigned int numPosInside() const;
-    unsigned int numValueOk() const;
-    unsigned int numValueNOk() const;
-
-    const vector<double>& values() const;
-
-    std::vector<EvaluationRequirement::PositionDetail>& details();
 
     virtual bool hasViewableData (
             const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override;
@@ -63,27 +57,7 @@ public:
     virtual std::string reference(
             const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override;
 
-
 protected:
-    unsigned int num_pos_ {0};
-    unsigned int num_no_ref_ {0};
-    unsigned int num_pos_outside_ {0};
-    unsigned int num_pos_inside_ {0};
-    unsigned int num_value_ok_ {0};
-    unsigned int num_value_nok_ {0};
-
-    vector<double> values_;
-
-    double value_min_ {0};
-    double value_max_ {0};
-    double value_avg_ {0};
-    double value_var_ {0};
-
-    bool has_p_min_ {false};
-    float p_min_{0};
-
-    std::vector<EvaluationRequirement::PositionDetail> details_;
-
     void update();
 
     void addTargetToOverviewTable(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);

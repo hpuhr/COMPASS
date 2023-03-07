@@ -28,15 +28,24 @@
 namespace EvaluationRequirementResult
 {
 const std::string Single::tr_details_table_name_ {"Target Reports Details"};
-const std::string Single::target_table_name_ {"Targets"};
+const std::string Single::target_table_name_     {"Targets"};
 
-Single::Single(
-        const std::string& type, const std::string& result_id, std::shared_ptr<EvaluationRequirement::Base> requirement,
-        const SectorLayer& sector_layer, unsigned int utn, const EvaluationTargetData* target,
-        EvaluationManager& eval_man)
-    : Base(type, result_id, requirement, sector_layer, eval_man), utn_(utn), target_(target)
+Single::Single(const std::string& type, 
+               const std::string& result_id, 
+               std::shared_ptr<EvaluationRequirement::Base> requirement,
+               const SectorLayer& sector_layer, 
+               unsigned int utn, 
+               const EvaluationTargetData* target,
+               EvaluationManager& eval_man,
+               const boost::optional<EvaluationDetails>& details)
+:   Base   (type, result_id, requirement, sector_layer, eval_man)
+,   utn_   (utn)
+,   target_(target)
 {
+    details_ = details;
 }
+
+Single::~Single() = default;
 
 unsigned int Single::utn() const
 {
@@ -100,6 +109,45 @@ void Single::addCommonDetails (shared_ptr<EvaluationResultsReport::RootItem> roo
         utn_table.addRow({"Mode C Min", "Minimum Mode C code [ft]", target_->modeCMinStr().c_str()}, this);
         utn_table.addRow({"Mode C Max", "Maximum Mode C code [ft]", target_->modeCMaxStr().c_str()}, this);
     }
+}
+
+const Single::EvaluationDetails& Single::getDetails() const
+{
+#if 0
+    if (details_.has_value())
+        return details_.value();
+
+    bool ok = recomputeDetails();
+    assert(ok && details_.has_value()); //should not fail
+
+    if (!ok || !details_.has_value())
+        details_ = EvaluationDetails();
+
+    return details_.value();
+#else 
+    return Base::getDetails();
+#endif
+}
+
+bool Single::recomputeDetails() const
+{
+    forgetDetails();
+
+    if (!requirement_)
+        return false;
+
+    if (!eval_man_.getData().hasTargetData(utn_))
+        return false;
+
+    const auto& data = eval_man_.getData().targetData(utn_);
+
+    auto result = requirement_->evaluate(data, requirement_, sector_layer_);
+    if (!result)
+        return false;
+
+    details_ = result->details_;
+
+    return true;
 }
 
 }

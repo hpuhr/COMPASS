@@ -37,19 +37,47 @@ using namespace Utils;
 namespace EvaluationRequirementResult
 {
 
-SingleExtraData::SingleExtraData(
-        const std::string& result_id, std::shared_ptr<EvaluationRequirement::Base> requirement,
-        const SectorLayer& sector_layer, unsigned int utn, const EvaluationTargetData* target,
-        EvaluationManager& eval_man,
-        bool ignore, unsigned int num_extra, unsigned int num_ok, bool has_extra_test_data,
-        std::vector<EvaluationRequirement::ExtraDataDetail> details)
-    : Single("SingleExtraData", result_id, requirement, sector_layer, utn, target, eval_man),
-      ignore_(ignore), num_extra_(num_extra), num_ok_(num_ok), has_extra_test_data_(has_extra_test_data),
-      details_(details)
-{
-    //result_usable_ = !ignore;
+const std::string SingleExtraData::DetailInside    = "Inside";
+const std::string SingleExtraData::DetailExtra     = "Extra";
+const std::string SingleExtraData::DetailRefExists = "RefExists";
 
+SingleExtraData::SingleExtraData(const std::string& result_id, 
+                                 std::shared_ptr<EvaluationRequirement::Base> requirement,
+                                 const SectorLayer& sector_layer, 
+                                 unsigned int utn, 
+                                 const EvaluationTargetData* target,
+                                 EvaluationManager& eval_man,
+                                 const boost::optional<EvaluationDetails>& details,
+                                 bool ignore, 
+                                 unsigned int num_extra, 
+                                 unsigned int num_ok, 
+                                 bool has_extra_test_data)
+:   Single("SingleExtraData", result_id, requirement, sector_layer, utn, target, eval_man, details)
+,   ignore_             (ignore)
+,   num_extra_          (num_extra)
+,   num_ok_             (num_ok)
+,   has_extra_test_data_(has_extra_test_data)
+{
     updateProb();
+}
+
+void SingleExtraData::updateProb()
+{
+    prob_.reset();
+
+    if (num_extra_ + num_ok_)
+    {
+        logdbg << "SingleExtraData: updateProb: result_id " << result_id_ << " num_extra " << num_extra_
+               << " num_ok " << num_ok_;
+
+        prob_          = (float)num_extra_/(float)(num_extra_ + num_ok_);
+        result_usable_ = !ignore_;
+    }
+
+    if (!prob_.has_value())
+        result_usable_ = false;
+
+    updateUseFromTarget();
 }
 
 void SingleExtraData::addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
@@ -65,29 +93,6 @@ void SingleExtraData::addToReport (std::shared_ptr<EvaluationResultsReport::Root
     // TODO add requirement description, methods
 }
 
-void SingleExtraData::updateProb()
-{
-    if (num_extra_ + num_ok_)
-    {
-        logdbg << "SingleExtraData: updateProb: result_id " << result_id_ << " num_extra " << num_extra_
-               << " num_ok " << num_ok_;
-
-        prob_ = (float)num_extra_/(float)(num_extra_ + num_ok_);
-        has_prob_ = true;
-
-        result_usable_ = !ignore_;
-    }
-    else
-    {
-        prob_ = 0;
-        has_prob_ = false;
-
-        result_usable_ = false;
-    }
-
-    updateUseFromTarget();
-}
-
 void SingleExtraData::addTargetToOverviewTable(shared_ptr<EvaluationResultsReport::RootItem> root_item)
 {
     addTargetDetailsToTable(getRequirementSection(root_item), target_table_name_);
@@ -101,8 +106,8 @@ void SingleExtraData::addTargetDetailsToTable (
 {
     QVariant prob_var;
 
-    if (has_prob_)
-        prob_var = roundf(prob_ * 10000.0) / 100.0;
+    if (prob_.has_value())
+        prob_var = roundf(prob_.value() * 10000.0) / 100.0;
 
     if (!section.hasTable(table_name))
         section.addTable(table_name, 14,
@@ -149,8 +154,8 @@ void SingleExtraData::addTargetDetailsToReport(shared_ptr<EvaluationResultsRepor
     {
         QVariant prob_var;
 
-        if (has_prob_)
-            prob_var = roundf(prob_ * 10000.0) / 100.0;
+        if (prob_.has_value())
+            prob_var = roundf(prob_.value() * 10000.0) / 100.0;
 
         utn_req_table.addRow({"PEx [%]", "Probability of update with extra data", prob_var}, this);
 
@@ -158,8 +163,8 @@ void SingleExtraData::addTargetDetailsToReport(shared_ptr<EvaluationResultsRepor
 
         string result {"Unknown"};
 
-        if (has_prob_)
-            result = req-> getResultConditionStr(prob_);
+        if (prob_.has_value())
+            result = req-> getResultConditionStr(prob_.value());
 
         utn_req_table.addRow({"Condition Fulfilled", "", result.c_str()}, this);
 
@@ -168,7 +173,6 @@ void SingleExtraData::addTargetDetailsToReport(shared_ptr<EvaluationResultsRepor
             root_item->getSection(getTargetSectionID()).perTargetWithIssues(true); // mark utn section as with issue
             utn_req_section.perTargetWithIssues(true);
         }
-
     }
 
     // add figure
@@ -199,12 +203,14 @@ void SingleExtraData::reportDetails(EvaluationResultsReport::Section& utn_req_se
 
     unsigned int detail_cnt = 0;
 
-    for (auto& rq_det_it : details_)
+    for (auto& rq_det_it : getDetails())
     {
         utn_req_details_table.addRow(
-                    {Time::toString(rq_det_it.timestamp_).c_str(),
-                     rq_det_it.inside_, rq_det_it.extra_,
-                     rq_det_it.ref_exists_, rq_det_it.comment_.c_str()},
+                    { Time::toString(rq_det_it.timestamp()).c_str(),
+                      rq_det_it.getValue(DetailInside), 
+                      rq_det_it.getValue(DetailExtra),
+                      rq_det_it.getValue(DetailRefExists), 
+                      rq_det_it.comments().generalComment().c_str() },
                     this, detail_cnt);
 
         ++detail_cnt;
@@ -216,8 +222,8 @@ bool SingleExtraData::hasViewableData (
 {
     if (table.name() == target_table_name_ && annotation.toUInt() == utn_)
         return true;
-        else if (table.name() == tr_details_table_name_ && annotation.isValid() && annotation.toUInt() < details_.size())
-            return true;
+    else if (table.name() == tr_details_table_name_ && annotation.isValid() && annotation.toUInt() < numDetails())
+        return true;
     else
         return false;
 }
@@ -225,8 +231,8 @@ bool SingleExtraData::hasViewableData (
 std::unique_ptr<nlohmann::json::object_t> SingleExtraData::viewableData(
         const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
 {
-
     assert (hasViewableData(table, annotation));
+
     if (table.name() == target_table_name_)
     {
         return getTargetErrorsViewable();
@@ -239,13 +245,15 @@ std::unique_ptr<nlohmann::json::object_t> SingleExtraData::viewableData(
                 = eval_man_.getViewableForEvaluation(utn_, req_grp_id_, result_id_);
         assert (viewable_ptr);
 
-        const EvaluationRequirement::ExtraDataDetail& detail = details_.at(detail_cnt);
+        const auto& detail = getDetail(detail_cnt);
 
-        (*viewable_ptr)[VP_POS_LAT_KEY] = detail.pos_current_.latitude_;
-        (*viewable_ptr)[VP_POS_LON_KEY] = detail.pos_current_.longitude_;
+        assert(detail.numPositions() > 0);
+
+        (*viewable_ptr)[VP_POS_LAT_KEY    ] = detail.position(0).latitude_;
+        (*viewable_ptr)[VP_POS_LON_KEY    ] = detail.position(0).longitude_;
         (*viewable_ptr)[VP_POS_WIN_LAT_KEY] = eval_man_.resultDetailZoom();
         (*viewable_ptr)[VP_POS_WIN_LON_KEY] = eval_man_.resultDetailZoom();
-        (*viewable_ptr)[VP_TIMESTAMP_KEY] = Time::toString(detail.timestamp_);
+        (*viewable_ptr)[VP_TIMESTAMP_KEY  ] = Time::toString(detail.timestamp());
 
         return viewable_ptr;
     }
@@ -330,7 +338,7 @@ std::string SingleExtraData::reference(
 {
     assert (hasReference(table, annotation));
 
-    return "Report:Results:"+getTargetRequirementSectionID();
+    return "Report:Results:" + getTargetRequirementSectionID();
 }
 
 std::shared_ptr<Joined> SingleExtraData::createEmptyJoined(const std::string& result_id)
@@ -346,11 +354,6 @@ bool SingleExtraData::ignore() const
 bool SingleExtraData::hasExtraTestData() const
 {
     return has_extra_test_data_;
-}
-
-const std::vector<EvaluationRequirement::ExtraDataDetail>& SingleExtraData::details() const
-{
-    return details_;
 }
 
 unsigned int SingleExtraData::numExtra() const

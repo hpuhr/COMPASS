@@ -18,6 +18,7 @@
 #include "eval/results/dubious/dubioustargetsingle.h"
 #include "eval/results/dubious/dubioustargetjoined.h"
 #include "eval/requirement/base/base.h"
+#include "eval/requirement/dubious/dubioustarget.h"
 #include "evaluationtargetdata.h"
 #include "evaluationmanager.h"
 #include "eval/results/report/rootitem.h"
@@ -40,18 +41,16 @@ using namespace Utils;
 namespace EvaluationRequirementResult
 {
 
-JoinedDubiousTarget::JoinedDubiousTarget(
-        const std::string& result_id, std::shared_ptr<EvaluationRequirement::Base> requirement,
-        const SectorLayer& sector_layer, EvaluationManager& eval_man)
-    : Joined("JoinedDubiousTarget", result_id, requirement, sector_layer, eval_man)
+JoinedDubiousTarget::JoinedDubiousTarget(const std::string& result_id, 
+                                         std::shared_ptr<EvaluationRequirement::Base> requirement,
+                                         const SectorLayer& sector_layer, 
+                                         EvaluationManager& eval_man)
+:   JoinedDubiousBase("JoinedDubiousTarget", result_id, requirement, sector_layer, eval_man)
 {
 }
 
-
-void JoinedDubiousTarget::join(std::shared_ptr<Base> other)
+void JoinedDubiousTarget::join_impl(std::shared_ptr<Single> other)
 {
-    Joined::join(other);
-
     std::shared_ptr<SingleDubiousTarget> other_sub =
             std::static_pointer_cast<SingleDubiousTarget>(other);
     assert (other_sub);
@@ -66,22 +65,33 @@ void JoinedDubiousTarget::addToValues (std::shared_ptr<SingleDubiousTarget> sing
     if (!single_result->use())
         return;
 
-    num_updates_ += single_result->numUpdates();
-    num_pos_outside_ += single_result->numPosOutside();
-    num_pos_inside_ += single_result->numPosInside();
+    num_updates_            += single_result->numUpdates();
+    num_pos_outside_        += single_result->numPosOutside();
+    num_pos_inside_         += single_result->numPosInside();
     num_pos_inside_dubious_ += single_result->numPosInsideDubious();
+    
     num_utns_ += 1;
 
-    if (single_result->detail().is_dubious_)
+    assert (single_result->numDetails() >= 1);
+
+    const auto& detail = single_result->getDetail(0);
+
+    auto is_dubious = detail.getValueAs<bool>(SingleDubiousTarget::DetailIsDubious);
+    assert(is_dubious.has_value());
+
+    auto duration = detail.getValueAs<boost::posix_time::time_duration>(SingleDubiousTarget::DetailDuration);
+    assert(duration.has_value());
+
+    if (is_dubious.value())
         num_utns_dubious_ += 1;
 
-    duration_all_ += Time::partialSeconds(single_result->detail().duration_);
-    if (single_result->detail().is_dubious_)
-        duration_dubious_ += Time::partialSeconds(single_result->detail().duration_);
+    duration_all_ += Time::partialSeconds(duration.value());
+    if (is_dubious.value())
+        duration_dubious_ += Time::partialSeconds(duration.value());
     else
-        duration_nondub_ += Time::partialSeconds(single_result->detail().duration_);
+        duration_nondub_ += Time::partialSeconds(duration.value());
 
-    details_.push_back(single_result->detail());
+    addSingleDetails(single_result->getDetails());
 
     //const vector<double>& other_values = single_result->values();
     //values_.insert(values_.end(), other_values.begin(), other_values.end());
@@ -98,27 +108,17 @@ void JoinedDubiousTarget::update()
 
     //unsigned int num_speeds = values_.size();
 
+    p_dubious_.reset();
+    p_dubious_update_.reset();
+
     if (num_utns_)
     {
-
         p_dubious_ = (float)num_utns_dubious_/(float)num_utns_;
-        has_p_dubious_ = true;
-    }
-    else
-    {
-        has_p_dubious_ = false;
-        p_dubious_ = 0;
     }
 
     if (num_pos_inside_)
     {
         p_dubious_update_ = (float)num_pos_inside_dubious_/(float)num_pos_inside_;
-        has_p_dubious_update_ = true;
-    }
-    else
-    {
-        p_dubious_update_ = 0;
-        has_p_dubious_update_ = false;
     }
 }
 
@@ -152,11 +152,11 @@ void JoinedDubiousTarget::addToOverviewTable(std::shared_ptr<EvaluationResultsRe
 
     string result {"Unknown"};
 
-    if (has_p_dubious_)
+    if (p_dubious_.has_value())
     {
-        p_dubious_var = String::percentToString(p_dubious_ * 100.0, req->getNumProbDecimals()).c_str();
+        p_dubious_var = String::percentToString(p_dubious_.value() * 100.0, req->getNumProbDecimals()).c_str();
 
-        result = req->getResultConditionStr(p_dubious_);
+        result = req->getResultConditionStr(p_dubious_.value());
     }
 
     // "Sector Layer", "Group", "Req.", "Id", "#Updates", "Result", "Condition", "Result"
@@ -198,8 +198,8 @@ void JoinedDubiousTarget::addDetails(std::shared_ptr<EvaluationResultsReport::Ro
 
     QVariant p_dubious_up_var;
 
-    if (has_p_dubious_update_)
-        p_dubious_up_var = roundf(p_dubious_update_ * 10000.0) / 100.0;
+    if (p_dubious_update_.has_value())
+        p_dubious_up_var = roundf(p_dubious_update_.value() * 10000.0) / 100.0;
 
     sec_det_table.addRow({"PDU [%]", "Probability of dubious update", p_dubious_up_var}, this);
 
@@ -238,8 +238,8 @@ void JoinedDubiousTarget::addDetails(std::shared_ptr<EvaluationResultsReport::Ro
     {
         QVariant p_dubious_var;
 
-        if (has_p_dubious_)
-            p_dubious_var = roundf(p_dubious_ * 10000.0) / 100.0;
+        if (p_dubious_.has_value())
+            p_dubious_var = roundf(p_dubious_.value() * 10000.0) / 100.0;
 
         sec_det_table.addRow({"PDT [%]", "Probability of dubious targets", p_dubious_var}, this);
 
@@ -247,8 +247,8 @@ void JoinedDubiousTarget::addDetails(std::shared_ptr<EvaluationResultsReport::Ro
 
         string result {"Unknown"};
 
-        if (has_p_dubious_)
-            result = req->getResultConditionStr(p_dubious_);
+        if (p_dubious_.has_value())
+            result = req->getResultConditionStr(p_dubious_.value());
 
         sec_det_table.addRow({"Condition Fulfilled", "", result.c_str()}, this);
     }
@@ -328,7 +328,7 @@ std::string JoinedDubiousTarget::reference(
     return "Report:Results:"+getRequirementSectionID();
 }
 
-void JoinedDubiousTarget::updatesToUseChanges()
+void JoinedDubiousTarget::updatesToUseChanges_impl()
 {
     loginf << "JoinedDubiousTarget: updatesToUseChanges";
 
@@ -342,8 +342,6 @@ void JoinedDubiousTarget::updatesToUseChanges()
     duration_all_ = 0;
     duration_nondub_ = 0;
     duration_dubious_ = 0;
-
-    details_.clear();
 
     for (auto result_it : results_)
     {
@@ -385,11 +383,6 @@ void JoinedDubiousTarget::exportAsCSV()
 //                output_file << values_.at(cnt) << "\n";
 //        }
 //    }
-}
-
-std::vector<EvaluationRequirement::DubiousTargetDetail> JoinedDubiousTarget::details() const
-{
-    return details_;
 }
 
 }

@@ -39,74 +39,66 @@ using namespace Utils;
 namespace EvaluationRequirementResult
 {
 
-SingleDubiousTrack::SingleDubiousTrack(
-        const std::string& result_id, std::shared_ptr<EvaluationRequirement::Base> requirement,
-        const SectorLayer& sector_layer,
-        unsigned int utn, const EvaluationTargetData* target, EvaluationManager& eval_man,
-        unsigned int num_updates,
-        unsigned int num_pos_outside, unsigned int num_pos_inside, unsigned int num_pos_inside_dubious,
-        unsigned int num_tracks, unsigned int num_tracks_dubious,
-        std::vector<EvaluationRequirement::DubiousTrackDetail> details)
-    : Single("SingleDubiousTrack", result_id, requirement, sector_layer, utn, target, eval_man),
-      num_updates_(num_updates), num_pos_outside_(num_pos_outside),
-      num_pos_inside_(num_pos_inside), num_pos_inside_dubious_(num_pos_inside_dubious), num_tracks_(num_tracks),
-      num_tracks_dubious_(num_tracks_dubious), details_(details)
+SingleDubiousTrack::SingleDubiousTrack(const std::string& result_id, 
+                                       std::shared_ptr<EvaluationRequirement::Base> requirement,
+                                       const SectorLayer& sector_layer,
+                                       unsigned int utn, 
+                                       const EvaluationTargetData* target, 
+                                       EvaluationManager& eval_man,
+                                       const boost::optional<EvaluationDetails>& details,
+                                       unsigned int num_updates,
+                                       unsigned int num_pos_outside, 
+                                       unsigned int num_pos_inside, 
+                                       unsigned int num_pos_inside_dubious,
+                                       unsigned int num_tracks, 
+                                       unsigned int num_tracks_dubious)
+:   SingleDubiousBase  ("SingleDubiousTrack", result_id, requirement, sector_layer, utn, target, eval_man, details, 
+                        num_updates, num_pos_outside, num_pos_inside, num_pos_inside_dubious)
+,   num_tracks_        (num_tracks)
+,   num_tracks_dubious_(num_tracks_dubious)
 {
     update();
 }
 
+SingleDubiousTrack::~SingleDubiousTrack() = default;
 
 void SingleDubiousTrack::update()
 {
     assert (num_updates_ == num_pos_inside_ + num_pos_outside_);
     assert (num_tracks_ >= num_tracks_dubious_);
 
-    //assert (values_.size() == num_comp_failed_+num_comp_passed_);
-
-    //unsigned int num_speeds = values_.size();
-
     if (num_tracks_)
     {
-
         p_dubious_track_ = (float)num_tracks_dubious_/(float)num_tracks_;
-        has_p_dubious_track_ = true;
 
         result_usable_ = true;
 
-        for (auto& detail_it : details_)
+        for (auto& detail_it : getDetails())
         {
-            track_duration_all_ += Time::partialSeconds(detail_it.duration_);
+            auto duration   = detail_it.getValue(DetailDuration).toDouble();
+            auto is_dubious = detail_it.getValue(DetailIsDubious).toBool();
 
-            if (detail_it.is_dubious_)
-                track_duration_dubious_ += Time::partialSeconds(detail_it.duration_);
+            track_duration_all_ += duration;
+
+            if (is_dubious)
+                track_duration_dubious_ += duration;
             else
-                track_duration_nondub_ += Time::partialSeconds(detail_it.duration_);
+                track_duration_nondub_ += duration;
         }
     }
-    else
-    {
-        has_p_dubious_track_ = false;
-        p_dubious_track_ = 0;
 
-        result_usable_ = false;
-    }
+    result_usable_ = p_dubious_track_.has_value();
 
     if (num_pos_inside_)
     {
         p_dubious_update_ = (float)num_pos_inside_dubious_/(float)num_pos_inside_;
-        has_p_dubious_update_ = true;
-    }
-    else
-    {
-        p_dubious_update_ = 0;
-        has_p_dubious_update_ = false;
     }
 
-    logdbg << "SingleDubiousTrack " << requirement_->name() << " " << target_->utn_
-           << " has_p_dubious_update_ " << has_p_dubious_update_
+    logdbg << "SingleDubiousTrack "       << requirement_->name() << " " << target_->utn_
+           << " has_p_dubious_update_ "   << p_dubious_update_.has_value()
            << " num_pos_inside_dubious_ " << num_pos_inside_dubious_
-           << " num_pos_inside_ " << num_pos_inside_
-           << " p_dubious_update_ " << p_dubious_update_;
+           << " num_pos_inside_ "         << num_pos_inside_
+           << " p_dubious_update_ "       << (p_dubious_update_.has_value() ? p_dubious_update_.value() : 0);
 
     updateUseFromTarget();
 }
@@ -144,8 +136,8 @@ void SingleDubiousTrack::addTargetToOverviewTable(shared_ptr<EvaluationResultsRe
     }
 }
 
-void SingleDubiousTrack::addTargetDetailsToTable (
-        EvaluationResultsReport::Section& section, const std::string& table_name)
+void SingleDubiousTrack::addTargetDetailsToTable (EvaluationResultsReport::Section& section, 
+                                                  const std::string& table_name)
 {
     if (!section.hasTable(table_name))
     {
@@ -154,7 +146,6 @@ void SingleDubiousTrack::addTargetDetailsToTable (
         if(req()->probCheckType() == EvaluationRequirement::COMPARISON_TYPE::LESS_THAN
                 || req()->probCheckType() == EvaluationRequirement::COMPARISON_TYPE::LESS_THAN_OR_EQUAL)
             order = Qt::DescendingOrder;
-
 
         section.addTable(table_name, 15,
                          {"UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
@@ -165,22 +156,24 @@ void SingleDubiousTrack::addTargetDetailsToTable (
 
     QVariant p_dubious_up_var;
 
-    if (has_p_dubious_update_)
-        p_dubious_up_var = roundf(p_dubious_update_ * 10000.0) / 100.0;
+    if (p_dubious_update_.has_value())
+        p_dubious_up_var = roundf(p_dubious_update_.value() * 10000.0) / 100.0;
 
     QVariant p_dubious_track_var;
 
-    if (has_p_dubious_track_)
-        p_dubious_track_var = roundf(p_dubious_track_ * 10000.0) / 100.0;
+    if (p_dubious_track_.has_value())
+        p_dubious_track_var = roundf(p_dubious_track_.value() * 10000.0) / 100.0;
 
     string reasons;
 
-    for (auto& detail_it : details_)
+    for (auto& detail_it : getDetails())
     {
         if (reasons.size())
             reasons += "\n";
 
-        reasons += to_string(detail_it.track_num_)+":" + detail_it.dubiousReasonsString();
+        auto dub_reasons_str = dubiousReasonsString(detail_it.comments());
+
+        reasons += to_string(detail_it.getValue(DetailUTNOrTrackNum).toUInt())+":" + dub_reasons_str;
     }
 
     target_table.addRow(
@@ -197,8 +190,8 @@ void SingleDubiousTrack::addTargetDetailsToTable (
                 this, {utn_});
 }
 
-void SingleDubiousTrack::addTargetDetailsToTableADSB (
-        EvaluationResultsReport::Section& section, const std::string& table_name)
+void SingleDubiousTrack::addTargetDetailsToTableADSB (EvaluationResultsReport::Section& section, 
+                                                      const std::string& table_name)
 {
     if (!section.hasTable(table_name))
     {
@@ -218,22 +211,24 @@ void SingleDubiousTrack::addTargetDetailsToTableADSB (
 
     QVariant p_dubious_up_var;
 
-    if (has_p_dubious_update_)
-        p_dubious_up_var = roundf(p_dubious_update_ * 10000.0) / 100.0;
+    if (p_dubious_update_.has_value())
+        p_dubious_up_var = roundf(p_dubious_update_.value() * 10000.0) / 100.0;
 
     QVariant p_dubious_var;
 
-    if (has_p_dubious_track_)
-        p_dubious_var = roundf(p_dubious_track_ * 10000.0) / 100.0;
+    if (p_dubious_track_.has_value())
+        p_dubious_var = roundf(p_dubious_track_.value() * 10000.0) / 100.0;
 
     string reasons;
 
-    for (auto& detail_it : details_)
+    for (auto& detail_it : getDetails())
     {
         if (reasons.size())
             reasons += "\n";
 
-        reasons += to_string(detail_it.track_num_)+":" + detail_it.dubiousReasonsString();
+        auto dub_reasons_str = dubiousReasonsString(detail_it.comments());
+
+        reasons += to_string(detail_it.getValue(DetailUTNOrTrackNum).toUInt())+":" + dub_reasons_str;
     }
 
     // "UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
@@ -286,8 +281,8 @@ void SingleDubiousTrack::addTargetDetailsToReport(shared_ptr<EvaluationResultsRe
 
     QVariant p_dubious_up_var;
 
-    if (has_p_dubious_update_)
-        p_dubious_up_var = roundf(p_dubious_update_ * 10000.0) / 100.0;
+    if (p_dubious_update_.has_value())
+        p_dubious_up_var = roundf(p_dubious_update_.value() * 10000.0) / 100.0;
 
     utn_req_table.addRow({"PDU [%]", "Probability of dubious update", p_dubious_up_var}, this);
 
@@ -316,19 +311,18 @@ void SingleDubiousTrack::addTargetDetailsToReport(shared_ptr<EvaluationResultsRe
     if (track_duration_all_)
     {
         p_dubious_t_var = roundf(track_duration_dubious_/track_duration_all_ * 10000.0) / 100.0;
-        p_nondub_t_var = roundf(track_duration_nondub_/track_duration_all_ * 10000.0) / 100.0;
+        p_nondub_t_var  = roundf(track_duration_nondub_ /track_duration_all_ * 10000.0) / 100.0;
     }
 
     utn_req_table.addRow({"Duration Dubious Ratio [%]", "Duration ratio of dubious tracks", p_dubious_t_var}, this);
     utn_req_table.addRow({"Duration Non-Dubious Ration [%]", "Duration ratio of non-dubious tracks", p_nondub_t_var}, this);
 
-
     // condition
     {
         QVariant p_dubious_var;
 
-        if (has_p_dubious_track_)
-            p_dubious_track_ = roundf(p_dubious_track_ * 10000.0) / 100.0;
+        if (p_dubious_track_.has_value())
+            p_dubious_track_ = roundf(p_dubious_track_.value() * 10000.0) / 100.0;
 
         utn_req_table.addRow({"PDT [%]", "Probability of dubious track", p_dubious_var}, this);
 
@@ -336,8 +330,8 @@ void SingleDubiousTrack::addTargetDetailsToReport(shared_ptr<EvaluationResultsRe
 
         string result {"Unknown"};
 
-        if (has_p_dubious_track_)
-            result = req->getResultConditionStr(p_dubious_track_);
+        if (p_dubious_track_.has_value())
+            result = req->getResultConditionStr(p_dubious_track_.value());
 
         utn_req_table.addRow({"Condition Fulfilled", "", result.c_str()}, this);
 
@@ -346,10 +340,9 @@ void SingleDubiousTrack::addTargetDetailsToReport(shared_ptr<EvaluationResultsRe
             root_item->getSection(getTargetSectionID()).perTargetWithIssues(true); // mark utn section as with issue
             utn_req_section.perTargetWithIssues(true);
         }
-
     }
 
-    if (has_p_dubious_track_ && p_dubious_track_ != 0.0) // TODO
+    if (p_dubious_track_.has_value() && p_dubious_track_.value() != 0.0) // TODO
     {
         utn_req_section.addFigure("target_errors_overview", "Target Errors Overview",
                                   getTargetErrorsViewable());
@@ -376,14 +369,16 @@ void SingleDubiousTrack::reportDetails(EvaluationResultsReport::Section& utn_req
 
     unsigned int detail_update_cnt = 0;
 
-    for (auto& rq_det_it : details_)
+    //iterate over details
+    for (auto& rq_det_it : getDetails())
     {
-        for (auto& update : rq_det_it.updates_)
+        //iterate over updates
+        for (auto& update : rq_det_it.details())
         {
             utn_req_details_table.addRow(
-                        {Time::toString(update.timestamp_).c_str(),
-                         rq_det_it.track_num_,
-                         update.dubiousReasonsString().c_str()}, // "Comment"
+                        { Time::toString(update.timestamp()).c_str(),
+                          rq_det_it.getValue(DetailUTNOrTrackNum),
+                          dubiousReasonsString(update.comments()).c_str() }, // "Comment"
                         this, {detail_update_cnt});
 
             ++detail_update_cnt;
@@ -425,105 +420,42 @@ std::unique_ptr<nlohmann::json::object_t> SingleDubiousTrack::viewableData(
         unsigned int detail_cnt = 0;
         unsigned int per_detail_update_cnt = detail_update_cnt;
 
-        assert (details_.size());
-        while (per_detail_update_cnt >= details_.at(detail_cnt).updates_.size())
+        const auto& details = getDetails();
+        assert (details.size());
+
+        while (per_detail_update_cnt >= details.at(detail_cnt).details().size())
         {
-            per_detail_update_cnt -= details_.at(detail_cnt).updates_.size();
+            per_detail_update_cnt -= details.at(detail_cnt).details().size();
             ++detail_cnt;
 
-            assert (detail_cnt < details_.size());
+            assert (detail_cnt < details.size());
         }
 
         logdbg << "SingleDubiousTrack: viewableData: FINAL detail_cnt " << detail_cnt
-               << " update detail size " << details_.at(detail_cnt).updates_.size()
+               << " update detail size " << details.at(detail_cnt).details().size()
                << " per_detail_update_cnt " << per_detail_update_cnt;
 
-        assert (detail_cnt < details_.size());
-        assert (per_detail_update_cnt < details_.at(detail_cnt).updates_.size());
+        assert (detail_cnt < details.size());
+        assert (per_detail_update_cnt < details.at(detail_cnt).details().size());
 
-        const EvaluationRequirement::DubiousTrackDetail& detail = details_.at(detail_cnt);
-        const EvaluationRequirement::DubiousTrackUpdateDetail& update_detail =
-                detail.updates_.at(per_detail_update_cnt);
+        const auto& detail        = details.at(detail_cnt);
+        const auto& update_detail = detail.details().at(per_detail_update_cnt);
 
-        (*viewable_ptr)[VP_POS_LAT_KEY] = update_detail.pos_.latitude_;
-        (*viewable_ptr)[VP_POS_LON_KEY] = update_detail.pos_.longitude_;
+        assert(update_detail.numPositions() >= 1);
+
+        (*viewable_ptr)[VP_POS_LAT_KEY    ] = update_detail.position(0).latitude_;
+        (*viewable_ptr)[VP_POS_LON_KEY    ] = update_detail.position(0).longitude_;
         (*viewable_ptr)[VP_POS_WIN_LAT_KEY] = eval_man_.resultDetailZoom();
         (*viewable_ptr)[VP_POS_WIN_LON_KEY] = eval_man_.resultDetailZoom();
-        (*viewable_ptr)[VP_TIMESTAMP_KEY] = Time::toString(update_detail.timestamp_);
+        (*viewable_ptr)[VP_TIMESTAMP_KEY  ] = Time::toString(update_detail.timestamp());
 
-        if (update_detail.dubious_comments_.size())
+        if (update_detail.comments().numComments(DetailCommentGroupDubious) > 0)
             (*viewable_ptr)[VP_EVAL_KEY][VP_EVAL_HIGHDET_KEY] = vector<unsigned int>{detail_update_cnt};
 
         return viewable_ptr;
     }
     else
         return nullptr;
-}
-
-std::unique_ptr<nlohmann::json::object_t> SingleDubiousTrack::getTargetErrorsViewable ()
-{
-    std::unique_ptr<nlohmann::json::object_t> viewable_ptr = eval_man_.getViewableForEvaluation(
-                utn_, req_grp_id_, result_id_);
-
-    //        bool has_pos = false;
-    //        double lat_min, lat_max, lon_min, lon_max;
-
-    //        bool failed_values_of_interest = req()->failedValuesOfInterest();
-
-    //        for (auto& detail_it : details_)
-    //        {
-    //            if ((failed_values_of_interest && detail_it.check_passed_)
-    //                    || (!failed_values_of_interest && !detail_it.check_passed_))
-    //                continue;
-
-    //            if (has_pos)
-    //            {
-    //                lat_min = min(lat_min, detail_it.tst_pos_.latitude_);
-    //                lat_max = max(lat_max, detail_it.tst_pos_.latitude_);
-
-    //                lon_min = min(lon_min, detail_it.tst_pos_.longitude_);
-    //                lon_max = max(lon_max, detail_it.tst_pos_.longitude_);
-    //            }
-    //            else // tst pos always set
-    //            {
-    //                lat_min = detail_it.tst_pos_.latitude_;
-    //                lat_max = detail_it.tst_pos_.latitude_;
-
-    //                lon_min = detail_it.tst_pos_.longitude_;
-    //                lon_max = detail_it.tst_pos_.longitude_;
-
-    //                has_pos = true;
-    //            }
-
-    //            if (detail_it.has_ref_pos_)
-    //            {
-    //                lat_min = min(lat_min, detail_it.ref_pos_.latitude_);
-    //                lat_max = max(lat_max, detail_it.ref_pos_.latitude_);
-
-    //                lon_min = min(lon_min, detail_it.ref_pos_.longitude_);
-    //                lon_max = max(lon_max, detail_it.ref_pos_.longitude_);
-    //            }
-    //        }
-
-    //        if (has_pos)
-    //        {
-    //            (*viewable_ptr)["speed_latitude"] = (lat_max+lat_min)/2.0;
-    //            (*viewable_ptr)["speed_longitude"] = (lon_max+lon_min)/2.0;;
-
-    //            double lat_w = 1.1*(lat_max-lat_min)/2.0;
-    //            double lon_w = 1.1*(lon_max-lon_min)/2.0;
-
-    //            if (lat_w < eval_man_.resultDetailZoom())
-    //                lat_w = eval_man_.resultDetailZoom();
-
-    //            if (lon_w < eval_man_.resultDetailZoom())
-    //                lon_w = eval_man_.resultDetailZoom();
-
-    //            (*viewable_ptr)["speed_window_latitude"] = lat_w;
-    //            (*viewable_ptr)["speed_window_longitude"] = lon_w;
-    //        }
-
-    return viewable_ptr;
 }
 
 bool SingleDubiousTrack::hasReference (
@@ -543,35 +475,10 @@ std::string SingleDubiousTrack::reference(
     return "Report:Results:"+getTargetRequirementSectionID();
 }
 
-unsigned int SingleDubiousTrack::numPosOutside() const
-{
-    return num_pos_outside_;
-}
-
-unsigned int SingleDubiousTrack::numPosInside() const
-{
-    return num_pos_inside_;
-}
-
-unsigned int SingleDubiousTrack::numPosInsideDubious() const
-{
-    return num_pos_inside_dubious_;
-}
-
 std::shared_ptr<Joined> SingleDubiousTrack::createEmptyJoined(const std::string& result_id)
 {
     return make_shared<JoinedDubiousTrack> (result_id, requirement_, sector_layer_, eval_man_);
 }
-
-unsigned int SingleDubiousTrack::numUpdates() const
-{
-    return num_updates_;
-}
-
-//    std::vector<EvaluationRequirement::DubiousTrackDetail>& SingleDubiousTrack::details()
-//    {
-//        return details_;
-//    }
 
 EvaluationRequirement::DubiousTrack* SingleDubiousTrack::req ()
 {
@@ -596,11 +503,6 @@ float SingleDubiousTrack::trackDurationDubious() const
     return track_duration_dubious_;
 }
 
-const std::vector<EvaluationRequirement::DubiousTrackDetail>& SingleDubiousTrack::details() const
-{
-    return details_;
-}
-
 unsigned int SingleDubiousTrack::numTracks() const
 {
     return num_tracks_;
@@ -609,6 +511,17 @@ unsigned int SingleDubiousTrack::numTracks() const
 unsigned int SingleDubiousTrack::numTracksDubious() const
 {
     return num_tracks_dubious_;
+}
+
+unsigned int SingleDubiousTrack::getNumUpdatesDubious() const
+{
+    unsigned int cnt = 0;
+
+    for (auto& detail : getDetails())
+        if (detail.comments().numComments(DetailCommentGroupDubious) > 0)
+            ++cnt;
+
+    return cnt;
 }
 
 }

@@ -23,32 +23,41 @@
 namespace EvaluationRequirementResult
 {
 
+class Single;
+
 class Joined : public Base
 {
 public:
-    Joined(const std::string& type, const std::string& result_id,
-           std::shared_ptr<EvaluationRequirement::Base> requirement, const SectorLayer& sector_layer,
+    Joined(const std::string& type, 
+           const std::string& result_id,
+           std::shared_ptr<EvaluationRequirement::Base> requirement,
+           const SectorLayer& sector_layer,
            EvaluationManager& eval_man);
+    virtual ~Joined();
 
-    virtual bool isSingle() const override { return false; }
-    virtual bool isJoined() const override { return true; }
+    virtual BaseType baseType() const override { return BaseType::Joined; }
 
-    virtual void join(std::shared_ptr<Base> other);
+    void join(std::shared_ptr<Single> other);
 
     virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item) = 0;
 
-    std::vector<std::shared_ptr<Base>>& results() { return results_; }
+    std::vector<std::shared_ptr<Single>>& results();
 
-    virtual void updatesToUseChanges() = 0;
+    void updatesToUseChanges();
 
     unsigned int numResults();
     unsigned int numUsableResults();
     unsigned int numUnusableResults();
 
 protected:
-    std::vector<std::shared_ptr<Base>> results_;
-
     void addCommonDetails (EvaluationResultsReport::SectionContentTable& sector_details_table);
+
+    virtual void join_impl(std::shared_ptr<Single> other) = 0;
+    virtual void updatesToUseChanges_impl() = 0;
+
+    void addSingleDetails(const EvaluationDetails& details);
+
+    std::vector<std::shared_ptr<Single>> results_;
 };
 
 }

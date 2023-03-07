@@ -20,12 +20,16 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/base.h"
         "${CMAKE_CURRENT_LIST_DIR}/single.h"
         "${CMAKE_CURRENT_LIST_DIR}/joined.h"
+        "${CMAKE_CURRENT_LIST_DIR}/evaluationdetail.h"
+        "${CMAKE_CURRENT_LIST_DIR}/presentbase.h"
+        "${CMAKE_CURRENT_LIST_DIR}/falsebase.h"
     PRIVATE
         "${CMAKE_CURRENT_LIST_DIR}/evaluationresultsgenerator.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/evaluationresultsgeneratorwidget.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/base.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/single.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/joined.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/evaluationdetail.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/presentbase.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/falsebase.cpp"
     )
-
-
