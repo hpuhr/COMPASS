@@ -484,7 +484,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> Detection::evaluate (
 
             std::string comment = "OK (DToD <= " + String::doubleToStringPrecision(missThreshold(), 2) + ")";
 
-            addDetail(timestamp, pos_current, {}, t_diff, true, is_inside_ref_time_period, sum_missed_uis, 0, 0, comment);
+            addDetail(timestamp, pos_current, {}, t_diff, false, is_inside_ref_time_period, sum_missed_uis, 0, 0, comment);
         }
 
         period_last_tst_times[period_index] = timestamp;
