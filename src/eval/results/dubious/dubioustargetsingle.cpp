@@ -321,15 +321,18 @@ void SingleDubiousTarget::reportDetails(EvaluationResultsReport::Section& utn_re
 
     std::string dub_string = dubiousReasonsString(detail.comments());
 
-    unsigned int detail_cnt = 0;
-    for (auto& update : detail.details())
+    if (detail.hasDetails())
     {
-        utn_req_details_table.addRow(
-                    { Time::toString(update.timestamp()).c_str(),
-                      detail.getValue(DetailUTNOrTrackNum),
-                      dub_string.c_str() }, // "Comment"
-                    this, {detail_cnt});
-        ++detail_cnt;
+        unsigned int detail_cnt = 0;
+        for (auto& update : detail.details())
+        {
+            utn_req_details_table.addRow(
+                        { Time::toString(update.timestamp()).c_str(),
+                        detail.getValue(DetailUTNOrTrackNum),
+                        dub_string.c_str() }, // "Comment"
+                        this, {detail_cnt});
+            ++detail_cnt;
+        }
     }
 }
 
@@ -385,7 +388,7 @@ std::unique_ptr<nlohmann::json::object_t> SingleDubiousTarget::viewableData(
 
 //        assert (detail_cnt < details_.size());
 
-        assert (per_detail_update_cnt < detail.details().size());
+        assert (per_detail_update_cnt < detail.numDetails());
 
         const auto& update_detail = detail.details().at(per_detail_update_cnt);
 
@@ -397,7 +400,7 @@ std::unique_ptr<nlohmann::json::object_t> SingleDubiousTarget::viewableData(
         (*viewable_ptr)[VP_POS_WIN_LON_KEY] = eval_man_.resultDetailZoom();
         (*viewable_ptr)[VP_TIMESTAMP_KEY  ] = Time::toString(update_detail.timestamp());
 
-        if (update_detail.comments().numComments(DetailCommentGroupDubious) > 0)
+        if (update_detail.comments().hasComments(DetailCommentGroupDubious))
             (*viewable_ptr)[VP_EVAL_KEY][VP_EVAL_HIGHDET_KEY] = vector<unsigned int>{detail_update_cnt};
 
         return viewable_ptr;

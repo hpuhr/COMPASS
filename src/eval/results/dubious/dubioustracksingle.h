@@ -80,8 +80,6 @@ protected:
     void addTargetDetailsToTableADSB (EvaluationResultsReport::Section& section, const std::string& table_name);
     void reportDetails(EvaluationResultsReport::Section& utn_req_section);
 
-    unsigned int getNumUpdatesDubious() const;
-
     boost::optional<float> p_dubious_track_;
 
     unsigned int num_tracks_             {0};

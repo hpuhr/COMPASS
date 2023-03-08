@@ -22,6 +22,7 @@
  *****************************************************************************/
 
 /**
+ * Returns the number of stored comments for the given comment group.
  */
 size_t EvaluationDetailComments::numComments(const std::string& group_id) const 
 {
@@ -36,6 +37,7 @@ size_t EvaluationDetailComments::numComments(const std::string& group_id) const
 }
 
 /**
+ * Sets a general comment.
  */
 EvaluationDetailComments& EvaluationDetailComments::generalComment(const std::string& c)
 {
@@ -44,6 +46,7 @@ EvaluationDetailComments& EvaluationDetailComments::generalComment(const std::st
 }
 
 /**
+ * Returns the current general comment.
  */
 const std::string& EvaluationDetailComments::generalComment() const
 {
@@ -51,6 +54,7 @@ const std::string& EvaluationDetailComments::generalComment() const
 }
 
 /**
+ * Stores the given comment under the given comment group and comment id.
  */
 EvaluationDetailComments& EvaluationDetailComments::comment(const std::string& group_id,
                                                             const std::string& comment_id,
@@ -61,14 +65,27 @@ EvaluationDetailComments& EvaluationDetailComments::comment(const std::string& g
 }
 
 /**
+ * Returns the comment stored under the given comment group and comment id.
  */
-const std::string& EvaluationDetailComments::comment(const std::string& group_id,
-                                                     const std::string& comment_id) const
+std::string EvaluationDetailComments::comment(const std::string& group_id,
+                                              const std::string& comment_id) const
 {
-    return comments()[ group_id ][ comment_id ];
+    if (!comments_.has_value())
+        return "";
+
+    auto it = comments_.value().find(group_id);
+    if (it == comments_.value().end())
+        return "";
+
+    auto itc = it->second.find(comment_id);
+    if (itc == it->second.end())
+        return "";
+
+    return itc->second;
 }
 
 /**
+ * Stores the given comment group under the given group id.
  */
 EvaluationDetailComments& EvaluationDetailComments::group(const std::string& group_id,
                                                           const CommentGroup& cg)
@@ -78,13 +95,22 @@ EvaluationDetailComments& EvaluationDetailComments::group(const std::string& gro
 }
 
 /**
+ * Returns the comment group stored under the given group id.
  */
-const EvaluationDetailComments::CommentGroup& EvaluationDetailComments::group(const std::string& group_id) const
+boost::optional<EvaluationDetailComments::CommentGroup> EvaluationDetailComments::group(const std::string& group_id) const
 {
-    return comments()[ group_id ];
+    if (!comments_.has_value())
+        return {};
+
+    auto it = comments_.value().find(group_id);
+    if (it == comments_.value().end())
+        return {};
+
+    return it->second;
 }
 
 /**
+ * Checks if comments are stored under the given group id.
  */
 bool EvaluationDetailComments::hasComments(const std::string& group_id) const
 {
@@ -92,6 +118,7 @@ bool EvaluationDetailComments::hasComments(const std::string& group_id) const
 }
 
 /**
+ * Returns how many comments are stored under the given group id.
 */
 std::map<std::string, EvaluationDetailComments::CommentGroup>& EvaluationDetailComments::comments() const
 {
@@ -196,9 +223,9 @@ EvaluationDetail& EvaluationDetail::addPosition(const boost::optional<Position>&
 
 /**
 */
-int EvaluationDetail::numPositions() const
+size_t EvaluationDetail::numPositions() const
 {
-    return (int)positions_.size();
+    return positions_.size();
 }
 
 /**
@@ -210,7 +237,7 @@ const std::vector<EvaluationDetail::Position>& EvaluationDetail::positions() con
 
 /**
 */
-const EvaluationDetail::Position& EvaluationDetail::position(int idx) const
+const EvaluationDetail::Position& EvaluationDetail::position(size_t idx) const
 {
     return positions_.at(idx);
 }
@@ -235,6 +262,15 @@ EvaluationDetail& EvaluationDetail::addDetail(const EvaluationDetail& detail)
 
 /**
 */
+EvaluationDetail& EvaluationDetail::addDetails(const Details& details)
+{
+    auto& det = genDetails();
+    det.insert(det.begin(), details.begin(), details.end());
+    return *this;
+}
+
+/**
+*/
 EvaluationDetail& EvaluationDetail::setDetails(const Details& details)
 {
     details_ = details;
@@ -250,9 +286,22 @@ bool EvaluationDetail::hasDetails() const
 
 /**
 */
+size_t EvaluationDetail::numDetails() const
+{
+    if (!hasDetails())
+        return 0;
+
+    return details_.value().size();
+}
+
+/**
+*/
 const EvaluationDetail::Details& EvaluationDetail::details() const
 {
-    return genDetails();
+    if (!hasDetails())
+        throw std::runtime_error("EvaluationDetail::details(): No details attached");
+
+    return details_.value();
 }
 
 /**
