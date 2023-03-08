@@ -37,7 +37,7 @@ public:
                         unsigned int utn, 
                         const EvaluationTargetData* target, 
                         EvaluationManager& eval_man,
-                        const boost::optional<EvaluationDetails>& details,
+                        const EvaluationDetails& details,
                         unsigned int num_updates,
                         unsigned int num_pos_outside, 
                         unsigned int num_pos_inside, 

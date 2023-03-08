@@ -50,7 +50,7 @@ SingleDetection::SingleDetection(const std::string& result_id,
                                  unsigned int utn, 
                                  const EvaluationTargetData* target,
                                  EvaluationManager& eval_man,
-                                 const boost::optional<EvaluationDetails>& details,
+                                 const EvaluationDetails& details,
                                  int sum_uis, 
                                  int missed_uis, 
                                  TimePeriodCollection ref_periods)

@@ -26,55 +26,53 @@
 
 namespace EvaluationRequirementResult
 {
-    using namespace std;
 
-    class Joined;
+using namespace std;
 
-    class Single : public Base
-    {
-    public:
-        Single(const std::string& type, 
-               const std::string& result_id,
-               std::shared_ptr<EvaluationRequirement::Base> requirement, 
-               const SectorLayer& sector_layer,
-               unsigned int utn, 
-               const EvaluationTargetData* target, 
-               EvaluationManager& eval_man,
-               const boost::optional<EvaluationDetails>& details);
-        virtual ~Single();
+class Joined;
 
-        virtual BaseType baseType() const override { return BaseType::Single; }
+class Single : public Base
+{
+public:
+    Single(const std::string& type, 
+            const std::string& result_id,
+            std::shared_ptr<EvaluationRequirement::Base> requirement, 
+            const SectorLayer& sector_layer,
+            unsigned int utn, 
+            const EvaluationTargetData* target, 
+            EvaluationManager& eval_man,
+            const EvaluationDetails& details);
+    virtual ~Single();
 
-        virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item) = 0;
+    virtual BaseType baseType() const override { return BaseType::Single; }
 
-        virtual std::shared_ptr<Joined> createEmptyJoined(const std::string& result_id) = 0;
+    virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item) = 0;
 
-        unsigned int utn() const;
-        const EvaluationTargetData* target() const;
+    virtual std::shared_ptr<Joined> createEmptyJoined(const std::string& result_id) = 0;
 
-        void updateUseFromTarget ();
+    unsigned int utn() const;
+    const EvaluationTargetData* target() const;
 
-        virtual const EvaluationDetails& getDetails() const override;
+    void updateUseFromTarget ();
 
-        const static std::string tr_details_table_name_;
-        const static std::string target_table_name_;
+    std::unique_ptr<EvaluationDetails> generateDetails() const;
 
-    protected:
-        std::string getTargetSectionID();
-        std::string getTargetRequirementSectionID();
+    const static std::string tr_details_table_name_;
+    const static std::string target_table_name_;
 
-        virtual std::string getRequirementSectionID () override;
+protected:
+    std::string getTargetSectionID();
+    std::string getTargetRequirementSectionID();
 
-        void addCommonDetails (shared_ptr<EvaluationResultsReport::RootItem> root_item);
+    virtual std::string getRequirementSectionID () override;
 
-        unsigned int                utn_;    // used to generate result
-        const EvaluationTargetData* target_; // used to generate result
+    void addCommonDetails (shared_ptr<EvaluationResultsReport::RootItem> root_item);
 
-        bool result_usable_ {true}; // whether valid data exists, changed in subclass
+    unsigned int                utn_;    // used to generate result
+    const EvaluationTargetData* target_; // used to generate result
 
-    private:
-        bool recomputeDetails() const;
-    };
+    bool result_usable_ {true}; // whether valid data exists, changed in subclass
+};
 
 }
 

@@ -77,8 +77,7 @@ void Joined::addCommonDetails (EvaluationResultsReport::SectionContentTable& sec
 
 void Joined::updatesToUseChanges()
 {
-    //drop details
-    forgetDetails();
+    clearDetails();
 
     //invoke derived
     updatesToUseChanges_impl();
@@ -95,10 +94,7 @@ void Joined::join(std::shared_ptr<Single> other)
 
 void Joined::addSingleDetails(const EvaluationDetails& details)
 {
-    if (!details_.has_value())
-        details_ = EvaluationDetails();
-
-    details_.value().insert(details_.value().begin(), details.begin(), details.end());
+    details_.insert(details_.begin(), details.begin(), details.end());
 }
 
 std::vector<std::shared_ptr<Single>>& Joined::results() 
