@@ -104,12 +104,12 @@ std::shared_ptr<EvaluationRequirementResult::Single> TrackAngle::evaluate (
 
     ptime timestamp;
 
-    OGRSpatialReference wgs84;
-    wgs84.SetWellKnownGeogCS("WGS84");
+//    OGRSpatialReference wgs84;
+//    wgs84.SetWellKnownGeogCS("WGS84");
 
-    OGRSpatialReference local;
+//    OGRSpatialReference local;
 
-    std::unique_ptr<OGRCoordinateTransformation> ogr_geo2cart;
+    //std::unique_ptr<OGRCoordinateTransformation> ogr_geo2cart;
 
     EvaluationTargetPosition tst_pos;
 
@@ -133,11 +133,10 @@ std::shared_ptr<EvaluationRequirementResult::Single> TrackAngle::evaluate (
     bool has_ground_bit;
     bool ground_bit_set;
 
-    double min_speed_ms = minimum_speed_ * KNOTS2M_S;
-
     auto addDetail = [ & ] (const ptime& ts,
                             const EvaluationTargetPosition& tst_pos,
                             const boost::optional<EvaluationTargetPosition>& ref_pos,
+                            const std::vector<EvaluationDetail::Line>& lines,
                             const QVariant& pos_inside,
                             const QVariant& offset,
                             const QVariant& check_passed,
@@ -165,8 +164,14 @@ std::shared_ptr<EvaluationRequirementResult::Single> TrackAngle::evaluate (
                                              .setValue(Result::DetailNumCheckFailed, num_comp_failed)
                                              .setValue(Result::DetailNumCheckPassed, num_comp_passed)
                                              .addPosition(ref_pos)
+                                             .addLines(lines)
                                              .generalComment(comment));
     };
+
+    QColor ref_line_color = QColor("#FFFFFF");
+    QColor tst_line_color = QColor("#00BBBB");
+
+    std::vector<EvaluationDetail::Line> lines;
 
     for (const auto& tst_id : tst_data)
     {
@@ -177,11 +182,13 @@ std::shared_ptr<EvaluationRequirementResult::Single> TrackAngle::evaluate (
 
         comp_passed = false;
 
+        lines.clear();
+
         if (!target_data.hasRefDataForTime (timestamp, max_ref_time_diff))
         {
             if (!skip_no_data_details)
                 addDetail(timestamp, tst_pos,
-                          {}, // ref_pos
+                          {}, lines, // ref_pos, lines
                           {}, {}, comp_passed, // pos_inside, value, check_passed
                           {}, {}, {}, // value_ref, value_tst, speed_ref
                           num_pos, num_no_ref, num_pos_inside, num_pos_outside,
@@ -198,7 +205,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> TrackAngle::evaluate (
         {
             if (!skip_no_data_details)
                 addDetail(timestamp, tst_pos,
-                          {}, //ref_pos
+                          {}, lines, // ref_pos, lines
                           {}, {}, comp_passed, // pos_inside, value, check_passed
                           {}, {}, {}, // value_ref, value_tst, speed_ref
                           num_pos, num_no_ref, num_pos_inside, num_pos_outside,
@@ -225,7 +232,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> TrackAngle::evaluate (
         {
             if (!skip_no_data_details)
                 addDetail(timestamp, tst_pos,
-                          ref_pos, // ref_pos
+                          {}, lines, // ref_pos, lines
                           is_inside, {}, comp_passed, // pos_inside, value, check_passed
                           {}, {}, {}, // value_ref, value_tst, speed_ref
                           num_pos, num_no_ref, num_pos_inside, num_pos_outside,
@@ -242,7 +249,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> TrackAngle::evaluate (
         {
             if (!skip_no_data_details)
                 addDetail(timestamp, tst_pos,
-                          {}, // ref_pos
+                          {}, lines, // ref_pos, lines
                           {}, {}, comp_passed, // pos_inside, value, check_passed
                           {}, {}, {}, // value_ref, value_tst, speed_ref
                           num_pos, num_no_ref, num_pos_inside, num_pos_outside,
@@ -261,7 +268,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> TrackAngle::evaluate (
         {
             if (!skip_no_data_details)
                 addDetail(timestamp, tst_pos,
-                          {}, // ref_pos
+                          {}, lines, // ref_pos, lines
                           {}, {}, comp_passed, // pos_inside, value, check_passed
                           {}, {}, ref_spd.speed_, // value_ref, value_tst, speed_ref
                           num_pos, num_no_ref, num_pos_inside, num_pos_outside,
@@ -279,7 +286,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> TrackAngle::evaluate (
         {
             if (!skip_no_data_details)
                 addDetail(timestamp, tst_pos,
-                          {}, // ref_pos
+                          {}, lines, // ref_pos, lines
                           {}, {}, comp_passed, // pos_inside, value, check_passed
                           {}, {}, ref_spd.speed_, // value_ref, value_tst, speed_ref
                           num_pos, num_no_ref, num_pos_inside, num_pos_outside,
@@ -294,6 +301,12 @@ std::shared_ptr<EvaluationRequirementResult::Single> TrackAngle::evaluate (
         tst_trackangle_deg = target_data.tstMeasuredTrackAngleForTime (timestamp);
 
         trackangle_min_diff = Number::calculateMinAngleDifference(ref_trackangle_deg, tst_trackangle_deg);
+
+        // tst vector
+        lines.push_back({tst_pos, getPositionAtAngle(tst_pos, tst_trackangle_deg, ref_spd.speed_), tst_line_color});
+
+        // ref vector
+        lines.push_back({tst_pos, getPositionAtAngle(tst_pos, ref_trackangle_deg, ref_spd.speed_), ref_line_color});
 
 //        loginf << Time::toString(timestamp) << " tst_track ref " << ref_trackangle_deg
 //               << " tst " << tst_trackangle_deg << " diff " << trackangle_min_diff;
@@ -316,7 +329,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> TrackAngle::evaluate (
 //                + " tst " + to_string(tst_trackangle_deg) + " diff " + to_string(trackangle_min_diff);
 
         addDetail(timestamp, tst_pos,
-                  ref_pos,
+                  ref_pos, lines, // ref_pos, lines
                   is_inside, trackangle_min_diff, comp_passed, // pos_inside, value, check_passed
                   ref_trackangle_deg, tst_trackangle_deg, ref_spd.speed_, // value_ref, value_tst, speed_ref
                   num_pos, num_no_ref, num_pos_inside, num_pos_outside,
@@ -356,6 +369,26 @@ std::shared_ptr<EvaluationRequirementResult::Single> TrackAngle::evaluate (
                 eval_man_, details, num_pos, num_no_ref, num_pos_outside, num_pos_inside, num_no_tst_value,
                 num_comp_failed, num_comp_passed,
                 values);
+}
+
+// deg, m/s
+EvaluationTargetPosition TrackAngle::getPositionAtAngle(
+        const EvaluationTargetPosition& org, double track_angle, double speed)
+{
+    EvaluationTargetPosition new_pos;
+
+    double track_angle_math =  DEG2RAD * (90 - track_angle);
+    double x = speed * cos(track_angle_math); // 2sec
+    double y = speed * sin(track_angle_math);
+
+    bool ok;
+    new_pos = org;
+
+    tie (ok, new_pos.latitude_, new_pos.longitude_) = trafo_.wgsAddCartOffset(org.latitude_, org.longitude_, x, y);
+    assert (ok);
+
+
+    return new_pos;
 }
 
 }

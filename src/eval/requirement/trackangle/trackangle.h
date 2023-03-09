@@ -20,6 +20,7 @@
 
 #include "eval/requirement/base/base.h"
 #include "eval/requirement/trackangle/detail.h"
+#include "transformation.h"
 
 namespace EvaluationRequirement
 {
@@ -53,9 +54,12 @@ protected:
 
     COMPARISON_TYPE threshold_value_check_type_ {COMPARISON_TYPE::LESS_THAN_OR_EQUAL};
 
-
-
     bool failed_values_of_interest_ {true};
+
+    Transformation trafo_;
+
+    // deg, m/s
+    EvaluationTargetPosition getPositionAtAngle(const EvaluationTargetPosition& org, double track_angle, double speed);
 };
 
 }
