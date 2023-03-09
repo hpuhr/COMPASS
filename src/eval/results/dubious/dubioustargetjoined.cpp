@@ -91,7 +91,7 @@ void JoinedDubiousTarget::addToValues (std::shared_ptr<SingleDubiousTarget> sing
     else
         duration_nondub_ += Time::partialSeconds(duration.value());
 
-    addSingleDetails(single_result->getDetails());
+    Base::addDetails(single_result->getDetails());
 
     //const vector<double>& other_values = single_result->values();
     //values_.insert(values_.end(), other_values.begin(), other_values.end());

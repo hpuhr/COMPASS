@@ -42,7 +42,7 @@ Single::Single(const std::string& type,
 ,   utn_   (utn   )
 ,   target_(target)
 {
-    details_ = details;
+    setDetails(details);
 }
 
 Single::~Single() = default;
@@ -125,10 +125,10 @@ std::unique_ptr<Single::EvaluationDetails> Single::generateDetails() const
     if (!result)
         return {};
 
-    std::unique_ptr<EvaluationDetails> d(new EvaluationDetails);
-    *d = result->details_;
+    auto eval_details = new EvaluationDetails;
+    *eval_details = result->getDetails();
 
-    return d;
+    return std::unique_ptr<EvaluationDetails>(eval_details);
 }
 
 }

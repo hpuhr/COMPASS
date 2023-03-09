@@ -92,11 +92,6 @@ void Joined::join(std::shared_ptr<Single> other)
     join_impl(other);
 }
 
-void Joined::addSingleDetails(const EvaluationDetails& details)
-{
-    details_.insert(details_.begin(), details.begin(), details.end());
-}
-
 std::vector<std::shared_ptr<Single>>& Joined::results() 
 { 
     return results_; 

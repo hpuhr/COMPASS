@@ -92,7 +92,6 @@ public:
     size_t numDetails() const;
     const EvaluationDetails& getDetails() const;
     const EvaluationDetail& getDetail(int idx) const;
-    void clearDetails();
 
     const static std::string req_overview_table_name_;
 
@@ -106,6 +105,10 @@ protected:
     EvaluationResultsReport::Section& getRequirementSection (
             std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
 
+    void setDetails(const EvaluationDetails& details);
+    void addDetails(const EvaluationDetails& details);
+    void clearDetails();
+
     std::string type_;
     std::string result_id_;
     std::string req_grp_id_;
@@ -117,6 +120,7 @@ protected:
 
     EvaluationManager& eval_man_;
 
+private:
     EvaluationDetails details_;
 };
 

@@ -177,4 +177,18 @@ void Base::clearDetails()
     details_ = {};
 }
 
+/**
+*/
+void Base::setDetails(const EvaluationDetails& details)
+{
+    details_ = details;
+}
+
+/**
+*/
+void Base::addDetails(const EvaluationDetails& details)
+{
+    details_.insert(details_.end(), details.begin(), details.end());
+}
+
 }
