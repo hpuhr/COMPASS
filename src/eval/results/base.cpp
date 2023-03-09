@@ -151,29 +151,16 @@ EvaluationResultsReport::Section& Base::getRequirementSection (
 
 /**
 */
-bool Base::hasDetails() const
-{
-    return details_.has_value();
-}
-
-/**
-*/
 size_t Base::numDetails() const
 {
-    if (!hasDetails())
-        return 0;
-
-    return details_.value().size();
+    return details_.size();
 }
 
 /**
 */
 const Base::EvaluationDetails& Base::getDetails() const
 {
-    if (!hasDetails())
-        throw std::runtime_error("Base::getDetails(): No details stored");
-
-    return details_.value();
+    return details_;
 }
 
 /**
@@ -185,9 +172,23 @@ const EvaluationDetail& Base::getDetail(int idx) const
 
 /**
 */
-void Base::forgetDetails() const
+void Base::clearDetails()
 {
-    details_.reset();
+    details_ = {};
+}
+
+/**
+*/
+void Base::setDetails(const EvaluationDetails& details)
+{
+    details_ = details;
+}
+
+/**
+*/
+void Base::addDetails(const EvaluationDetails& details)
+{
+    details_.insert(details_.end(), details.begin(), details.end());
 }
 
 }

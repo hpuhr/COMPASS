@@ -55,8 +55,6 @@ protected:
     virtual void join_impl(std::shared_ptr<Single> other) = 0;
     virtual void updatesToUseChanges_impl() = 0;
 
-    void addSingleDetails(const EvaluationDetails& details);
-
     std::vector<std::shared_ptr<Single>> results_;
 };
 

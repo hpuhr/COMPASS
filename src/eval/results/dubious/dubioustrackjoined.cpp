@@ -75,7 +75,7 @@ void JoinedDubiousTrack::addToValues(std::shared_ptr<SingleDubiousTrack> single_
     duration_nondub_  += single_result->trackDurationNondub();
     duration_dubious_ += single_result->trackDurationDubious();
 
-    addSingleDetails(single_result->getDetails());
+    Base::addDetails(single_result->getDetails());
 
     //const vector<double>& other_values = single_result->values();
     //values_.insert(values_.end(), other_values.begin(), other_values.end());

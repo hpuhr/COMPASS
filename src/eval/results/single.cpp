@@ -37,12 +37,12 @@ Single::Single(const std::string& type,
                unsigned int utn, 
                const EvaluationTargetData* target,
                EvaluationManager& eval_man,
-               const boost::optional<EvaluationDetails>& details)
+               const EvaluationDetails& details)
 :   Base   (type, result_id, requirement, sector_layer, eval_man)
-,   utn_   (utn)
+,   utn_   (utn   )
 ,   target_(target)
 {
-    details_ = details;
+    setDetails(details);
 }
 
 Single::~Single() = default;
@@ -111,43 +111,24 @@ void Single::addCommonDetails (shared_ptr<EvaluationResultsReport::RootItem> roo
     }
 }
 
-const Single::EvaluationDetails& Single::getDetails() const
+std::unique_ptr<Single::EvaluationDetails> Single::generateDetails() const
 {
-#if 0
-    if (details_.has_value())
-        return details_.value();
-
-    bool ok = recomputeDetails();
-    assert(ok && details_.has_value()); //should not fail
-
-    if (!ok || !details_.has_value())
-        details_ = EvaluationDetails();
-
-    return details_.value();
-#else 
-    return Base::getDetails();
-#endif
-}
-
-bool Single::recomputeDetails() const
-{
-    forgetDetails();
-
     if (!requirement_)
-        return false;
+        return {};
 
     if (!eval_man_.getData().hasTargetData(utn_))
-        return false;
+        return {};
 
     const auto& data = eval_man_.getData().targetData(utn_);
 
     auto result = requirement_->evaluate(data, requirement_, sector_layer_);
     if (!result)
-        return false;
+        return {};
 
-    details_ = result->details_;
+    auto eval_details = new EvaluationDetails;
+    *eval_details = result->getDetails();
 
-    return true;
+    return std::unique_ptr<EvaluationDetails>(eval_details);
 }
 
 }

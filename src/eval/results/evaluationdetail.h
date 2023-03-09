@@ -49,12 +49,12 @@ public:
     EvaluationDetailComments& comment(const std::string& group_id,
                                       const std::string& comment_id,
                                       const std::string& c);
-    const std::string& comment(const std::string& group_id,
-                               const std::string& comment_id) const;
+    std::string comment(const std::string& group_id,
+                        const std::string& comment_id) const;
 
     EvaluationDetailComments& group(const std::string& group_id,
                                     const CommentGroup& cg);
-    const CommentGroup& group(const std::string& group_id) const;
+    boost::optional<CommentGroup> group(const std::string& group_id) const;
 
 private:
     std::map<std::string, CommentGroup>& comments() const;
@@ -112,9 +112,9 @@ public:
 
     EvaluationDetail& addPosition(const Position& p);
     EvaluationDetail& addPosition(const boost::optional<Position>& p);
-    int numPositions() const;
+    size_t numPositions() const;
     const std::vector<Position>& positions() const;
-    const Position& position(int idx) const;
+    const Position& position(size_t idx) const;
 
     EvaluationDetail& addLine(const Line& l);
     EvaluationDetail& addLine(const boost::optional<Line>& l);
@@ -128,8 +128,10 @@ public:
     EvaluationDetail& generalComment(const std::string& c);
 
     EvaluationDetail& addDetail(const EvaluationDetail& detail);
+    EvaluationDetail& addDetails(const Details& details);
     EvaluationDetail& setDetails(const Details& details);
     bool hasDetails() const;
+    size_t numDetails() const;
     const Details& details() const;
     
 private:

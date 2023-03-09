@@ -45,7 +45,7 @@ SingleDubiousTrack::SingleDubiousTrack(const std::string& result_id,
                                        unsigned int utn, 
                                        const EvaluationTargetData* target, 
                                        EvaluationManager& eval_man,
-                                       const boost::optional<EvaluationDetails>& details,
+                                       const EvaluationDetails& details,
                                        unsigned int num_updates,
                                        unsigned int num_pos_outside, 
                                        unsigned int num_pos_inside, 
@@ -372,13 +372,16 @@ void SingleDubiousTrack::reportDetails(EvaluationResultsReport::Section& utn_req
     //iterate over details
     for (auto& rq_det_it : getDetails())
     {
+        if (!rq_det_it.hasDetails())
+            continue;
+
         //iterate over updates
         for (auto& update : rq_det_it.details())
         {
             utn_req_details_table.addRow(
                         { Time::toString(update.timestamp()).c_str(),
-                          rq_det_it.getValue(DetailUTNOrTrackNum),
-                          dubiousReasonsString(update.comments()).c_str() }, // "Comment"
+                        rq_det_it.getValue(DetailUTNOrTrackNum),
+                        dubiousReasonsString(update.comments()).c_str() }, // "Comment"
                         this, {detail_update_cnt});
 
             ++detail_update_cnt;
@@ -423,20 +426,20 @@ std::unique_ptr<nlohmann::json::object_t> SingleDubiousTrack::viewableData(
         const auto& details = getDetails();
         assert (details.size());
 
-        while (per_detail_update_cnt >= details.at(detail_cnt).details().size())
+        while (per_detail_update_cnt >= details.at(detail_cnt).numDetails())
         {
-            per_detail_update_cnt -= details.at(detail_cnt).details().size();
+            per_detail_update_cnt -= details.at(detail_cnt).numDetails();
             ++detail_cnt;
 
             assert (detail_cnt < details.size());
         }
 
         logdbg << "SingleDubiousTrack: viewableData: FINAL detail_cnt " << detail_cnt
-               << " update detail size " << details.at(detail_cnt).details().size()
+               << " update detail size " << details.at(detail_cnt).numDetails()
                << " per_detail_update_cnt " << per_detail_update_cnt;
 
         assert (detail_cnt < details.size());
-        assert (per_detail_update_cnt < details.at(detail_cnt).details().size());
+        assert (per_detail_update_cnt < details.at(detail_cnt).numDetails());
 
         const auto& detail        = details.at(detail_cnt);
         const auto& update_detail = detail.details().at(per_detail_update_cnt);
@@ -449,7 +452,7 @@ std::unique_ptr<nlohmann::json::object_t> SingleDubiousTrack::viewableData(
         (*viewable_ptr)[VP_POS_WIN_LON_KEY] = eval_man_.resultDetailZoom();
         (*viewable_ptr)[VP_TIMESTAMP_KEY  ] = Time::toString(update_detail.timestamp());
 
-        if (update_detail.comments().numComments(DetailCommentGroupDubious) > 0)
+        if (update_detail.comments().hasComments(DetailCommentGroupDubious))
             (*viewable_ptr)[VP_EVAL_KEY][VP_EVAL_HIGHDET_KEY] = vector<unsigned int>{detail_update_cnt};
 
         return viewable_ptr;
@@ -511,17 +514,6 @@ unsigned int SingleDubiousTrack::numTracks() const
 unsigned int SingleDubiousTrack::numTracksDubious() const
 {
     return num_tracks_dubious_;
-}
-
-unsigned int SingleDubiousTrack::getNumUpdatesDubious() const
-{
-    unsigned int cnt = 0;
-
-    for (auto& detail : getDetails())
-        if (detail.comments().numComments(DetailCommentGroupDubious) > 0)
-            ++cnt;
-
-    return cnt;
 }
 
 }

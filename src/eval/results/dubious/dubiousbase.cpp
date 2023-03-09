@@ -78,7 +78,7 @@ unsigned int SingleDubiousBase::DetailData::numDubious() const
     unsigned int cnt = 0;
 
     for (auto& dd : details)
-        if (!dd.comments().group(DetailCommentGroupDubious).empty())
+        if (dd.comments().hasComments(DetailCommentGroupDubious))
             ++cnt;
 
     return cnt;
@@ -93,7 +93,7 @@ SingleDubiousBase::SingleDubiousBase(const std::string& result_type,
                                      unsigned int utn, 
                                      const EvaluationTargetData* target, 
                                      EvaluationManager& eval_man,
-                                     const boost::optional<EvaluationDetails>& details,
+                                     const EvaluationDetails& details,
                                      unsigned int num_updates,
                                      unsigned int num_pos_outside, 
                                      unsigned int num_pos_inside, 
@@ -142,12 +142,14 @@ unsigned int SingleDubiousBase::numUpdates() const
 */
 std::string SingleDubiousBase::dubiousReasonsString(const EvaluationDetailComments& comments)
 {
-    if (comments.numComments(DetailCommentGroupDubious) == 0)
+    if (!comments.hasComments(DetailCommentGroupDubious))
         return "OK";
     
     std::string str;
 
-    for (auto& c : comments.group(DetailCommentGroupDubious))
+    auto cmts = comments.group(DetailCommentGroupDubious);
+
+    for (const auto& c : cmts.value())
     {
         if (str.size())
             str += ", ";

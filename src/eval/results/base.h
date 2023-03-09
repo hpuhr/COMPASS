@@ -28,8 +28,6 @@
 #include <memory>
 #include <vector>
 
-#include <boost/optional.hpp>
-
 class EvaluationTargetData;
 class EvaluationManager;
 class SectorLayer;
@@ -91,11 +89,9 @@ public:
     virtual std::string reference(
             const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation);
 
-    bool hasDetails() const;
     size_t numDetails() const;
-    virtual const EvaluationDetails& getDetails() const;
+    const EvaluationDetails& getDetails() const;
     const EvaluationDetail& getDetail(int idx) const;
-    void forgetDetails() const;
 
     const static std::string req_overview_table_name_;
 
@@ -109,6 +105,10 @@ protected:
     EvaluationResultsReport::Section& getRequirementSection (
             std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
 
+    void setDetails(const EvaluationDetails& details);
+    void addDetails(const EvaluationDetails& details);
+    void clearDetails();
+
     std::string type_;
     std::string result_id_;
     std::string req_grp_id_;
@@ -120,7 +120,8 @@ protected:
 
     EvaluationManager& eval_man_;
 
-    mutable boost::optional<EvaluationDetails> details_;
+private:
+    EvaluationDetails details_;
 };
 
 }

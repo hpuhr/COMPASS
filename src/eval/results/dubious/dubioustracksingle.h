@@ -39,7 +39,7 @@ public:
                        unsigned int utn, 
                        const EvaluationTargetData* target, 
                        EvaluationManager& eval_man,
-                       const boost::optional<EvaluationDetails>& details,
+                       const EvaluationDetails& details,
                        unsigned int num_updates,
                        unsigned int num_pos_outside, 
                        unsigned int num_pos_inside, 
@@ -79,8 +79,6 @@ protected:
     void addTargetDetailsToTable (EvaluationResultsReport::Section& section, const std::string& table_name);
     void addTargetDetailsToTableADSB (EvaluationResultsReport::Section& section, const std::string& table_name);
     void reportDetails(EvaluationResultsReport::Section& utn_req_section);
-
-    unsigned int getNumUpdatesDubious() const;
 
     boost::optional<float> p_dubious_track_;
 
