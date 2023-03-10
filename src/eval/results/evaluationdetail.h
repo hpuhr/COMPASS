@@ -22,8 +22,10 @@
 
 #include <string>
 #include <map>
+#include <tuple>
 
 #include <QVariant>
+#include <QColor>
 
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/optional.hpp>
@@ -69,6 +71,7 @@ public:
     typedef std::string                   Key;
     typedef boost::posix_time::ptime      Timestamp;
     typedef EvaluationTargetPosition      Position;
+    typedef std::tuple<EvaluationTargetPosition, EvaluationTargetPosition, QColor> Line;
     typedef std::vector<EvaluationDetail> Details;
 
     EvaluationDetail() = default;
@@ -113,6 +116,13 @@ public:
     const std::vector<Position>& positions() const;
     const Position& position(size_t idx) const;
 
+    EvaluationDetail& addLine(const Line& l);
+    EvaluationDetail& addLine(const boost::optional<Line>& l);
+    EvaluationDetail& addLines(const std::vector<Line>& lines);
+    int numLines() const;
+    const std::vector<Line>& lines() const;
+    const Line& line(int idx) const;
+
     EvaluationDetailComments& comments() { return comments_; }
     const EvaluationDetailComments& comments() const { return comments_; }
     EvaluationDetail& generalComment(const std::string& c);
@@ -129,6 +139,7 @@ private:
 
     Timestamp                        timestamp_;
     std::vector<Position>            positions_;
+    std::vector<Line>               lines_;
     std::map<Key, QVariant>          values_;
     EvaluationDetailComments         comments_;
     mutable boost::optional<Details> details_;

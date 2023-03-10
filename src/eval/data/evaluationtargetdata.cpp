@@ -34,6 +34,8 @@
 #include <algorithm>
 #include <cmath>
 
+#include <Eigen/Core>
+
 using namespace std;
 using namespace Utils;
 using namespace boost::posix_time;
@@ -563,7 +565,7 @@ EvaluationTargetVelocity EvaluationTargetData::refSpdForTime (boost::posix_time:
 
     EvaluationTargetVelocity spd;
 
-    spd.speed_ = speed_vec.get(index); // true north to mathematical
+    spd.speed_ = speed_vec.get(index) * KNOTS2M_S; // true north to mathematical
     spd.track_angle_ = track_angle_vec.get(index);
 
     return spd;
@@ -2134,7 +2136,6 @@ void EvaluationTargetData::addRefPositionsSpeedsToMapping (TstDataMapping& mappi
         }
         else
         {
-
             if (lower == upper) // same time
             {
                 logwrn << "EvaluationTargetData: addRefPositiosToMapping: ref has same time twice";
@@ -2161,9 +2162,11 @@ void EvaluationTargetData::addRefPositionsSpeedsToMapping (TstDataMapping& mappi
                 }
                 else // calculate interpolated position
                 {
-
                     logdbg << "EvaluationTargetData: addRefPositiosToMapping: offsets x " << fixed << x_pos
                            << " y " << fixed << y_pos << " dist " << fixed << sqrt(pow(x_pos,2)+pow(y_pos,2));
+
+                    double x_pos_orig = x_pos;
+                    double y_pos_orig = y_pos;
 
                     double v_x = x_pos/d_t;
                     double v_y = y_pos/d_t;
@@ -2221,8 +2224,7 @@ void EvaluationTargetData::addRefPositionsSpeedsToMapping (TstDataMapping& mappi
 
                     mapping.has_ref_spd_ = false;
 
-                    if (hasRefSpeedForTime(mapping.timestamp_ref1_)
-                            && hasRefSpeedForTime(mapping.timestamp_ref2_))
+                    if (hasRefSpeedForTime(mapping.timestamp_ref1_) && hasRefSpeedForTime(mapping.timestamp_ref2_))
                     {
                         spd1 = refSpdForTime(mapping.timestamp_ref1_);
                         spd2 = refSpdForTime(mapping.timestamp_ref2_);
@@ -2232,15 +2234,20 @@ void EvaluationTargetData::addRefPositionsSpeedsToMapping (TstDataMapping& mappi
 
                         //loginf << "UGA spd1 " << spd1.speed_ << " 2 " << spd2.speed_ << " ipld " << speed;
 
+#if 0
                         angle_diff = Number::calculateMinAngleDifference(spd2.track_angle_, spd1.track_angle_);
+
                         turnrate = angle_diff / d_t;
                         angle = spd1.track_angle_ + turnrate * d_t2;
+#else 
+                        angle = Number::interpolateBearing(0, 0, x_pos_orig, y_pos_orig, spd1.track_angle_, spd2.track_angle_, d_t2 / d_t);
+#endif
 
 //                        loginf << "UGA ang1 " << spd1.track_angle_ << " 2 " << spd2.track_angle_
 //                               << " angle_diff " << angle_diff << " turnrate " << turnrate << " ipld " << angle;
 
-                        mapping.has_ref_spd_ = true;
-                        mapping.spd_ref_.speed_ = speed;
+                        mapping.has_ref_spd_          = true;
+                        mapping.spd_ref_.speed_       = speed;
                         mapping.spd_ref_.track_angle_ = angle;
                     }
                 }

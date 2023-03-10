@@ -41,6 +41,9 @@ namespace EvaluationRequirementResult
 
 const std::string SingleTrackAngle::DetailOffset         = "Offset";
 const std::string SingleTrackAngle::DetailCheckPassed    = "CheckPassed";
+const std::string SingleTrackAngle::DetailValueRef       = "ValueRef";
+const std::string SingleTrackAngle::DetailValueTst       = "ValueTst";
+const std::string SingleTrackAngle::DetailSpeedRef       = "SpeedRef";
 const std::string SingleTrackAngle::DetailPosInside      = "PosInside";
 const std::string SingleTrackAngle::DetailNumPos         = "NumPos";
 const std::string SingleTrackAngle::DetailNumNoRef       = "NumNoRef";
@@ -317,8 +320,9 @@ void SingleTrackAngle::addTargetDetailsToReport(shared_ptr<EvaluationResultsRepo
 void SingleTrackAngle::reportDetails(EvaluationResultsReport::Section& utn_req_section)
 {
     if (!utn_req_section.hasTable(tr_details_table_name_))
-        utn_req_section.addTable(tr_details_table_name_, 8,
-                                 {"ToD", "NoRef", "PosInside", "Distance", "CP", "#CF", "#CP", "Comment"});
+        utn_req_section.addTable(tr_details_table_name_, 11,
+                                 {"ToD", "NoRef", "PosInside", "Distance", "CP",
+                                  "Value Ref", "Value Tst", "Speed Ref", "#CF", "#CP", "Comment"});
 
     EvaluationResultsReport::SectionContentTable& utn_req_details_table =
             utn_req_section.getTable(tr_details_table_name_);
@@ -335,6 +339,9 @@ void SingleTrackAngle::reportDetails(EvaluationResultsReport::Section& utn_req_s
                       rq_det_it.getValue(DetailPosInside),
                       rq_det_it.getValue(DetailOffset),         // "Distance"
                       rq_det_it.getValue(DetailCheckPassed),    // CP"
+                      rq_det_it.getValue(DetailValueRef), // "Value Ref"
+                      rq_det_it.getValue(DetailValueTst), // "Value Tst"
+                      rq_det_it.getValue(DetailSpeedRef), // "Speed Ref"
                       rq_det_it.getValue(DetailNumCheckFailed), // "#CF",
                       rq_det_it.getValue(DetailNumCheckPassed), // "#CP"
                       rq_det_it.comments().generalComment().c_str() }, // "Comment"

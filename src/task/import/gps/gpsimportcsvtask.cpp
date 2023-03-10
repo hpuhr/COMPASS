@@ -40,6 +40,8 @@
 #include <iomanip>
 #include <nmeaparse/nmea.h>
 
+//#include <unsupported/Eigen/Splines>
+
 #include <QApplication>
 #include <QMessageBox>
 
@@ -417,11 +419,11 @@ void GPSImportCSVTask::parseCurrentFile ()
 
                     if (!std::isnan(track_angle) && !std::isinf(track_angle) && !std::isnan(speed) && !std::isinf(speed))
                     {
-                        prev_fix.has_speed_ = true;
-                        prev_fix.vx_ = v_x;
-                        prev_fix.vy_ = v_y;
-                        prev_fix.track_angle_ = RAD2DEG * track_angle;
-                        prev_fix.speed_ = speed;
+                        fix.has_speed_ = true;
+                        fix.vx_ = v_x;
+                        fix.vy_ = v_y;
+                        fix.track_angle_ = RAD2DEG * track_angle;
+                        fix.speed_ = speed;
                     }
                 }
             }

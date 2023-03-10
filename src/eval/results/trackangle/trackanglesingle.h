@@ -78,6 +78,9 @@ public:
 
     static const std::string DetailOffset;         //int
     static const std::string DetailCheckPassed;    //bool
+    static const std::string DetailValueRef;       // double
+    static const std::string DetailValueTst;       // double
+    static const std::string DetailSpeedRef;       // double
     static const std::string DetailPosInside;      //bool
     static const std::string DetailNumPos;         //int
     static const std::string DetailNumNoRef;       //int

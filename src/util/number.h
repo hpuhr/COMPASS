@@ -26,6 +26,7 @@ namespace Utils
 {
 namespace Number
 {
+
 /// @brief Returns random number between min and max
 extern float randomNumber(float min, float max);
 /// @brief Returns rounded number to nearest integer
@@ -35,6 +36,15 @@ extern double round(float num, unsigned int precision);
 extern double calculateAngle(double degrees, double minutes, double seconds);
 
 extern double calculateMinAngleDifference(double a_deg, double b_deg);
+
+extern double deg2rad(double angle);
+extern double rad2deg(double angle);
+extern double rebaseAngle(double angle_deg, double new_base_deg);
+
+extern double interpolateBearing(double x0, double y0, 
+                                 double x1, double y1, 
+                                 double bearing0_deg, double bearing1_deg, 
+                                 double factor);
 
 //extern void convert(const std::string& conversion_type, NullableVector<unsigned int>& array_list);
 

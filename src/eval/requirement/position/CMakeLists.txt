@@ -4,7 +4,7 @@ include_directories (
 
 target_sources(compass
     PUBLIC
-        "${CMAKE_CURRENT_LIST_DIR}/detail.h"
+#        "${CMAKE_CURRENT_LIST_DIR}/detail.h"
         "${CMAKE_CURRENT_LIST_DIR}/distanceconfig.h"
         "${CMAKE_CURRENT_LIST_DIR}/distanceconfigwidget.h"
         "${CMAKE_CURRENT_LIST_DIR}/distance.h"
