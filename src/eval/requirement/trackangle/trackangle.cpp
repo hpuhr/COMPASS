@@ -303,10 +303,10 @@ std::shared_ptr<EvaluationRequirementResult::Single> TrackAngle::evaluate (
         trackangle_min_diff = Number::calculateMinAngleDifference(ref_trackangle_deg, tst_trackangle_deg);
 
         // tst vector
-        lines.push_back({tst_pos, getPositionAtAngle(tst_pos, tst_trackangle_deg, ref_spd.speed_), tst_line_color});
+        lines.emplace_back(tst_pos, getPositionAtAngle(tst_pos, tst_trackangle_deg, ref_spd.speed_), tst_line_color);
 
         // ref vector
-        lines.push_back({tst_pos, getPositionAtAngle(tst_pos, ref_trackangle_deg, ref_spd.speed_), ref_line_color});
+        lines.emplace_back(tst_pos, getPositionAtAngle(tst_pos, ref_trackangle_deg, ref_spd.speed_), ref_line_color);
 
 //        loginf << Time::toString(timestamp) << " tst_track ref " << ref_trackangle_deg
 //               << " tst " << tst_trackangle_deg << " diff " << trackangle_min_diff;
