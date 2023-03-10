@@ -2233,57 +2233,6 @@ void EvaluationTargetData::addRefPositionsSpeedsToMapping (TstDataMapping& mappi
                         speed = spd1.speed_ + acceleration * d_t2;
 
                         //loginf << "UGA spd1 " << spd1.speed_ << " 2 " << spd2.speed_ << " ipld " << speed;
-                        
-                        auto normalize = [ & ] (double angle_deg)
-                        {
-                            if (angle_deg > 180.0)
-                                return angle_deg - 360.0;
-                            if (angle_deg < -180.0)
-                                return 360.0 + angle_deg;
-                            return angle_deg;
-                        };
-
-                        auto rotateToRef = [ & ] (double angle_deg, double da)
-                        {
-                            return normalize(angle_deg - da);
-                        };
-
-                        auto computeInterpolatedAngle = [ & ] (double x0, double y0, double x1, double y1, double angle0_deg, double angle1_deg, double factor)
-                        {
-                            Eigen::Vector2d t(x1 - x0, y1 - y0);
-                            double tn = t.norm();
-
-                            //numerically instable?
-                            if (tn < 1e-06)
-                                return angle0_deg;
-
-                            //normalized tangent estimate
-                            t /= tn;
-
-                            //bearing of tangent
-                            double angle_t_deg = atan2(t.x(), t.y()) * 180 / M_PI;
-
-                            //rotate to tangent angle as origin
-                            double da0 = rotateToRef(angle0_deg, angle_t_deg);
-                            double da1 = rotateToRef(angle1_deg, angle_t_deg);
-
-                            //which side of tangent are we on?
-                            bool sign0 = (da0 >= 0);
-                            bool sign1 = (da1 >= 0);
-
-                            if (sign0 != sign1)
-                            {
-                                //speed vecs on different sides of tangent => directly interpolate between angles
-                                double dinterp = da0 + (da1 - da0) * factor;
-
-                                //rotate back interpolated angle to bearing 0 as origin and convert back to deg
-                                return rotateToRef(dinterp, -angle_t_deg);
-                            }
-                            
-                            //speed vecs approximately on same side of tangent => interpolate with minimum angle
-                            double diff = Number::calculateMinAngleDifference(angle1_deg, angle0_deg); //needs degrees
-                            return angle0_deg + diff * factor;
-                        };
 
 #if 0
                         angle_diff = Number::calculateMinAngleDifference(spd2.track_angle_, spd1.track_angle_);
@@ -2291,7 +2240,7 @@ void EvaluationTargetData::addRefPositionsSpeedsToMapping (TstDataMapping& mappi
                         turnrate = angle_diff / d_t;
                         angle = spd1.track_angle_ + turnrate * d_t2;
 #else 
-                        angle = computeInterpolatedAngle(0, 0, x_pos_orig, y_pos_orig, spd1.track_angle_, spd2.track_angle_, d_t2 / d_t);
+                        angle = Number::interpolateBearing(0, 0, x_pos_orig, y_pos_orig, spd1.track_angle_, spd2.track_angle_, d_t2 / d_t);
 #endif
 
 //                        loginf << "UGA ang1 " << spd1.track_angle_ << " 2 " << spd2.track_angle_
