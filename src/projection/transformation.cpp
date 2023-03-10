@@ -7,7 +7,7 @@
 #include <iomanip>
 
 //bool Transformation::in_appimage_ = COMPASS::isAppImage();
-const double Transformation::max_wgs_dist_ {0.5};
+//const double Transformation::max_wgs_dist_ {0.5};
 
 Transformation::Transformation()
     : wgs84_{new OGRSpatialReference()}, local_{new OGRSpatialReference()}
@@ -32,7 +32,7 @@ std::tuple<bool, double, double> Transformation::distanceCart (double lat1, doub
     logdbg << "Transformation: distanceCart: lat1 " << lat1 << " long1 " << long1
            << " lat2 " << lat2 << " long2 " << long2;
 
-    updateIfRequired(lat1, long1);
+    updateCenter(lat1, long1);
 
     double x_pos1, y_pos1, x_pos2, y_pos2;
     bool ok;
@@ -83,7 +83,7 @@ std::tuple<bool, double, double> Transformation::wgsAddCartOffset (
     logdbg << "Transformation: wgsAddCartOffset: lat1 " << lat1 << " long1 " << long1
            << " x_pos2 " << x_pos2 << " y_pos2 " << y_pos2;
 
-    updateIfRequired(lat1, long1);
+    updateCenter(lat1, long1);
 
     bool ok;
     std::tuple<bool, double, double> ret {false, 0, 0};
@@ -143,10 +143,10 @@ std::tuple<bool, double, double> Transformation::wgsAddCartOffset (
     return ret;
 }
 
-void Transformation::updateIfRequired(double lat1, double long1)
+void Transformation::updateCenter(double lat1, double long1)
 {
-    if (!has_pos1_ || sqrt(pow(lat1_-lat1, 2)+pow(long1_-long1, 2)) > max_wgs_dist_) // set
-    {
+//    if (!has_pos1_ || sqrt(pow(lat1_-lat1, 2)+pow(long1_-long1, 2)) > max_wgs_dist_) // set
+//    {
         has_pos1_ = true;
         lat1_ = lat1;
         long1_ = long1;
@@ -155,13 +155,13 @@ void Transformation::updateIfRequired(double lat1, double long1)
 
         ogr_geo2cart_.reset(OGRCreateCoordinateTransformation(wgs84_.get(), local_.get()));
         ogr_cart2geo_.reset(OGRCreateCoordinateTransformation(local_.get(), wgs84_.get()));
-    }
+//    }
 }
 
 
 //////////////////////////////////////////////
 //bool FixedTransformation::in_appimage_ = true; //COMPASS::isAppImage();
-const double FixedTransformation::max_wgs_dist_ {0.5};
+//const double FixedTransformation::max_wgs_dist_ {0.5};
 
 FixedTransformation::FixedTransformation(double lat1, double long1)
     : lat1_(lat1), long1_(long1), wgs84_{new OGRSpatialReference()}, local_{new OGRSpatialReference()}

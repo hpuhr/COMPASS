@@ -21,7 +21,7 @@ public:
 
 protected:
 //    static bool in_appimage_;
-    static const double max_wgs_dist_;
+//    static const double max_wgs_dist_;
 
     std::unique_ptr<OGRSpatialReference> wgs84_;
     std::unique_ptr<OGRSpatialReference> local_;
@@ -32,7 +32,7 @@ protected:
     double lat1_;
     double long1_;
 
-    void updateIfRequired(double lat1, double long1);
+    void updateCenter(double lat1, double long1);
 };
 
 class FixedTransformation
@@ -48,7 +48,7 @@ public:
 
 protected:
     //static bool in_appimage_;
-    static const double max_wgs_dist_;
+    //static const double max_wgs_dist_;
     double lat1_, long1_;
 
     std::unique_ptr<OGRSpatialReference> wgs84_;

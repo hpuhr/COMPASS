@@ -168,7 +168,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> TrackAngle::evaluate (
                                              .generalComment(comment));
     };
 
-    QColor ref_line_color = QColor("#FFFFFF");
+    QColor ref_line_color = QColor("#ffa500");
     QColor tst_line_color = QColor("#00BBBB");
 
     std::vector<EvaluationDetail::Line> lines;
