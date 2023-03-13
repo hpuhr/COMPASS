@@ -24,20 +24,22 @@
 
 #include "boost/date_time/posix_time/ptime.hpp"
 
+#include <vector>
 #include <map>
 #include <memory>
 #include <vector>
 #include <set>
 #include <string>
 
+#include <Eigen/Core>
+
 class Buffer;
 class EvaluationData;
 class EvaluationManager;
 class DBContentManager;
 
-class TstDataMapping // mapping to respective ref data
+struct TstDataMapping // mapping to respective ref data
 {
-public:
     boost::posix_time::ptime timestamp_; // timestmap of test
 
     bool has_ref1_ {false};
@@ -68,8 +70,22 @@ public:
 class EvaluationTargetData
 {
 public:
-    EvaluationTargetData(unsigned int utn, EvaluationData& eval_data,
-                         EvaluationManager& eval_man, DBContentManager& dbcont_man);
+    struct Index
+    {
+        Index() = default;
+        Index(unsigned int idx_ext,
+              unsigned int idx_int) : idx_external(idx_ext), idx_internal(idx_int) {}
+
+        unsigned int idx_external;
+        unsigned int idx_internal;
+    };
+
+    typedef std::multimap<boost::posix_time::ptime, Index> IndexMap;
+
+    EvaluationTargetData(unsigned int utn, 
+                         EvaluationData& eval_data,
+                         EvaluationManager& eval_man, 
+                         DBContentManager& dbcont_man);
     virtual ~EvaluationTargetData();
 
     void addRefIndex (boost::posix_time::ptime timestamp, unsigned int index);
@@ -112,8 +128,8 @@ public:
 
     bool use() const;
 
-    const std::multimap<boost::posix_time::ptime, unsigned int>& refData() const;
-    const std::multimap<boost::posix_time::ptime, unsigned int>& tstData() const;
+    const IndexMap& refData() const;
+    const IndexMap& tstData() const;
 
     // ref
     bool hasRefDataForTime (boost::posix_time::ptime timestamp, boost::posix_time::time_duration d_max) const;
@@ -131,7 +147,6 @@ public:
     EvaluationTargetPosition refPosForTime (boost::posix_time::ptime timestamp) const;
     bool hasRefSpeedForTime (boost::posix_time::ptime timestamp) const;
     EvaluationTargetVelocity refSpdForTime (boost::posix_time::ptime timestamp) const;
-    std::pair<bool, float> estimateRefAltitude (boost::posix_time::ptime timestamp, unsigned int index) const;
     // estimate ref baro alt at tod,index TODO should be replaced by real altitude reconstructor
 
     bool hasRefCallsignForTime (boost::posix_time::ptime timestamp) const;
@@ -153,7 +168,6 @@ public:
     // test
     bool hasTstPosForTime (boost::posix_time::ptime timestamp) const;
     EvaluationTargetPosition tstPosForTime (boost::posix_time::ptime timestamp) const;
-    std::pair<bool, float> estimateTstAltitude (boost::posix_time::ptime timestamp, unsigned int index) const;
 
     bool hasTstCallsignForTime (boost::posix_time::ptime timestamp) const;
     std::string tstCallsignForTime (boost::posix_time::ptime timestamp) const;
@@ -207,16 +221,36 @@ public:
     std::string nacpStr() const;
 
 protected:
-    EvaluationData& eval_data_;
+    void updateCallsigns() const;
+    void updateTargetAddresses() const;
+    void updateModeACodes() const;
+    void updateModeCMinMax() const;
+    void updatePositionMinMax() const;
+    //void updateADSBInfo() const;
+
+    void calculateTestDataMappings() const;
+    TstDataMapping calculateTestDataMapping(boost::posix_time::ptime timestamp) const; // test tod
+    void addRefPositionsSpeedsToMapping (TstDataMapping& mapping) const;
+    //void addRefPositiosToMappingFast (TstDataMapping& mapping) const;
+    void computeSectorInsideInfo() const;
+    void computeSectorInsideInfo(const boost::posix_time::ptime& timestamp, int idx_internal) const;
+
+    DataMappingTimes findTstTimes(boost::posix_time::ptime timestamp_ref) const; // ref tod
+
+    std::pair<bool, float> estimateRefAltitude (boost::posix_time::ptime timestamp, unsigned int index_internal) const;
+    std::pair<bool, float> estimateTstAltitude (boost::posix_time::ptime timestamp, unsigned int index_internal) const;
+
+    EvaluationData&    eval_data_;
     EvaluationManager& eval_man_;
-    DBContentManager& dbcont_man_;
+    DBContentManager&  dbcont_man_;
 
-    std::multimap<boost::posix_time::ptime, unsigned int> ref_data_; // timestamp -> index
-    mutable std::vector<unsigned int> ref_indexes_;
+    std::multimap<boost::posix_time::ptime, Index> ref_data_; // timestamp -> index
+    std::vector<unsigned int> ref_indices_;
 
-    std::multimap<boost::posix_time::ptime, unsigned int> tst_data_; // timestamp -> index
-    mutable std::vector<unsigned int> tst_indexes_;
-
+    std::multimap<boost::posix_time::ptime, Index> tst_data_; // timestamp -> index
+    std::vector<unsigned int> tst_indices_;
+    mutable std::vector<TstDataMapping> tst_data_mappings_;
+    
     mutable std::set<std::string> callsigns_;
     mutable std::set<unsigned int> target_addresses_;
     mutable std::set<unsigned int> mode_a_codes_;
@@ -240,23 +274,11 @@ protected:
     mutable bool has_nacp {false};
     mutable unsigned int min_nacp_, max_nacp_;
 
-    mutable std::map<boost::posix_time::ptime, TstDataMapping> test_data_mappings_;
-
     mutable Transformation trafo_;
 
-    void updateCallsigns() const;
-    void updateTargetAddresses() const;
-    void updateModeACodes() const;
-    void updateModeCMinMax() const;
-    void updatePositionMinMax() const;
-    //void updateADSBInfo() const;
-
-    void calculateTestDataMappings() const;
-    TstDataMapping calculateTestDataMapping(boost::posix_time::ptime timestamp) const; // test tod
-    void addRefPositionsSpeedsToMapping (TstDataMapping& mapping) const;
-    //void addRefPositiosToMappingFast (TstDataMapping& mapping) const;
-
-    DataMappingTimes findTstTimes(boost::posix_time::ptime timestamp_ref) const; // ref tod
+    mutable Eigen::Matrix<bool, Eigen::Dynamic, Eigen::Dynamic> ref_inside_;
+    mutable Eigen::Matrix<bool, Eigen::Dynamic, Eigen::Dynamic> tst_inside_;
+    mutable Eigen::Matrix<bool, Eigen::Dynamic, Eigen::Dynamic> map_inside_;
 };
 
 #endif // EVALUATIONTARGETDATA_H

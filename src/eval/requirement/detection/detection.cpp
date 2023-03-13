@@ -108,7 +108,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> Detection::evaluate (
     bool inside, was_inside;
 
     {
-        const std::multimap<ptime, unsigned int>& ref_data = target_data.refData();
+        const auto& ref_data = target_data.refData();
         bool first {true};
 
         for (auto& ref_it : ref_data)
@@ -161,7 +161,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> Detection::evaluate (
     last_ts = {};
 
     // evaluate test data
-    const std::multimap<ptime, unsigned int>& tst_data = target_data.tstData();
+    const auto& tst_data = target_data.tstData();
 
     int sum_uis = ref_periods.getUIs(update_interval_s_);
 

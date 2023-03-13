@@ -27,12 +27,21 @@ using namespace std;
 SectorLayer::SectorLayer(const std::string& name)
   : name_(name)
 {
-
 }
 
 std::string SectorLayer::name() const
 {
     return name_;
+}
+
+boost::optional<unsigned int> SectorLayer::id() const
+{
+    return id_;
+}
+
+void SectorLayer::setId(unsigned int id)
+{
+    id_ = id;
 }
 
 bool SectorLayer::hasSector (const std::string& name)

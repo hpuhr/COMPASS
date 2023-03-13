@@ -46,7 +46,7 @@ namespace EvaluationRequirement
 
         time_duration max_ref_time_diff = Time::partialSeconds(eval_man_.maxRefTimeDiff());
 
-        const std::multimap<ptime, unsigned int>& tst_data = target_data.tstData();
+        const auto& tst_data = target_data.tstData();
 
         ptime timestamp;
 

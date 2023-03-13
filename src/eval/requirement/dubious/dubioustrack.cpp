@@ -64,7 +64,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTrack::evaluate (
            << " use_min_updates " << use_min_updates_ << " min_updates " << min_updates_
            << " use_min_duration " << use_min_duration_ << " min_duration " << min_duration_;
 
-    const std::multimap<ptime, unsigned int>& tst_data = target_data.tstData();
+    const auto& tst_data = target_data.tstData();
 
     typedef EvaluationRequirementResult::SingleDubiousTrack Result;
 

@@ -78,7 +78,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> ExtraData::evaluate (
     bool inside;
 
     {
-        const std::multimap<ptime, unsigned int>& ref_data = target_data.refData();
+        const auto& ref_data = target_data.refData();
 
         bool first {true};
 
@@ -143,7 +143,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> ExtraData::evaluate (
     };
 
     {
-        const std::multimap<ptime, unsigned int>& tst_data = target_data.tstData();
+        const auto& tst_data = target_data.tstData();
 
         for (auto& tst_it : tst_data)
         {

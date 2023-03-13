@@ -462,6 +462,3 @@ void ManageSectorsTask::addSector (const std::string& sector_name, std::vector<s
     loginf << "ManageSectorsTask: addSector: adding layer '" << layer_name_ << "' name '" << sector_name;
     eval_man.createNewSector(sector_name, layer_name_, exclude_, color_, points);
 }
-
-
-

@@ -46,7 +46,6 @@ Speed::Speed(
       threshold_value_check_type_(threshold_value_check_type),
       failed_values_of_interest_(failed_values_of_interest)
 {
-
 }
 
 float Speed::thresholdValue() const
@@ -83,7 +82,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> Speed::evaluate (
 
     time_duration max_ref_time_diff = Time::partialSeconds(eval_man_.maxRefTimeDiff());
 
-    const std::multimap<ptime, unsigned int>& tst_data = target_data.tstData();
+    const auto& tst_data = target_data.tstData();
 
     unsigned int num_pos {0};
     unsigned int num_no_ref {0};

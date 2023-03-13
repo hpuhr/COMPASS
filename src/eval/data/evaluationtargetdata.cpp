@@ -42,40 +42,48 @@ using namespace boost::posix_time;
 
 //const unsigned int debug_utn = 3275;
 
-EvaluationTargetData::EvaluationTargetData(unsigned int utn, EvaluationData& eval_data, EvaluationManager& eval_man,
+EvaluationTargetData::EvaluationTargetData(unsigned int utn, 
+                                           EvaluationData& eval_data, 
+                                           EvaluationManager& eval_man,
                                            DBContentManager& dbcont_man)
-    : utn_(utn), eval_data_(eval_data), eval_man_(eval_man), dbcont_man_(dbcont_man)
+:   utn_       (utn)
+,   eval_data_ (eval_data)
+,   eval_man_  (eval_man)
+,   dbcont_man_(dbcont_man)
 {
 }
 
-EvaluationTargetData::~EvaluationTargetData()
-{
-
-}
+EvaluationTargetData::~EvaluationTargetData() = default;
 
 void EvaluationTargetData::addRefIndex (boost::posix_time::ptime timestamp, unsigned int index)
 {
-    ref_data_.insert({timestamp, index});
+    unsigned int idx_int = (unsigned int)ref_indices_.size();
+
+    ref_data_.insert({timestamp, Index(index, idx_int)});
+    ref_indices_.push_back(index);
 }
 
 void EvaluationTargetData::addTstIndex (boost::posix_time::ptime timestamp, unsigned int index)
 {
-    tst_data_.insert({timestamp, index});
+    unsigned int idx_int = (unsigned int)tst_indices_.size();
+
+    tst_data_.insert({timestamp, Index(index, idx_int)});
+    tst_indices_.push_back(index);
 }
 
 bool EvaluationTargetData::hasData() const
 {
-    return ref_data_.size() || tst_data_.size();
+    return (hasRefData() || hasTstData());
 }
 
 bool EvaluationTargetData::hasRefData () const
 {
-    return ref_data_.size();
+    return !ref_data_.empty();
 }
 
 bool EvaluationTargetData::hasTstData () const
 {
-    return tst_data_.size();
+    return !tst_data_.empty();
 }
 
 void EvaluationTargetData::finalize () const
@@ -83,12 +91,6 @@ void EvaluationTargetData::finalize () const
     //    loginf << "EvaluationTargetData: finalize: utn " << utn_
     //           << " ref " << hasRefData() << " up " << ref_rec_nums_.size()
     //           << " tst " << hasTstData() << " up " << tst_rec_nums_.size();
-
-    for (auto& ref_it : ref_data_)
-        ref_indexes_.push_back(ref_it.second);
-
-    for (auto& tst_it : tst_data_)
-        tst_indexes_.push_back(tst_it.second);
 
     updateCallsigns();
     updateTargetAddresses();
@@ -105,7 +107,6 @@ void EvaluationTargetData::finalize () const
         has_mops_versions_ = true;
         mops_versions_ = dbcont_man.target(utn_).adsbMOPSVersions();
     }
-
 
     //    std::set<unsigned int> mops_version;
     //    std::tuple<bool, unsigned int, unsigned int> nucp_info;
@@ -159,6 +160,7 @@ void EvaluationTargetData::finalize () const
     //    }
 
     calculateTestDataMappings();
+    computeSectorInsideInfo();
 }
 
 unsigned int EvaluationTargetData::numUpdates () const
@@ -170,6 +172,7 @@ unsigned int EvaluationTargetData::numRefUpdates () const
 {
     return ref_data_.size();
 }
+
 unsigned int EvaluationTargetData::numTstUpdates () const
 {
     return tst_data_.size();
@@ -290,21 +293,24 @@ bool EvaluationTargetData::use() const
     return dbcont_man_.utnUseEval(utn_);
 }
 
-const std::multimap<ptime, unsigned int>& EvaluationTargetData::refData() const
+const EvaluationTargetData::IndexMap& EvaluationTargetData::refData() const
 {
     return ref_data_;
 }
 
-
-const std::multimap<ptime, unsigned int>& EvaluationTargetData::tstData() const
+const EvaluationTargetData::IndexMap& EvaluationTargetData::tstData() const
 {
     return tst_data_;
 }
 
-bool EvaluationTargetData::hasRefDataForTime (ptime timestamp, time_duration d_max) const
+bool EvaluationTargetData::hasRefDataForTime(ptime timestamp, 
+                                             time_duration d_max) const
 {
-    assert (test_data_mappings_.count(timestamp));
-    TstDataMapping& mapping = test_data_mappings_.at(timestamp);
+    assert (tst_data_.count(timestamp));
+
+    auto it = tst_data_.find(timestamp);
+
+    const TstDataMapping& mapping = tst_data_mappings_.at(it->second.idx_internal);
 
     if (!mapping.has_ref1_ && !mapping.has_ref2_) // no ref data
         return false;
@@ -326,11 +332,14 @@ bool EvaluationTargetData::hasRefDataForTime (ptime timestamp, time_duration d_m
     return false;
 }
 
-std::pair<ptime, ptime> EvaluationTargetData::refTimesFor (
-        boost::posix_time::ptime timestamp, time_duration d_max)  const
+std::pair<ptime, ptime> EvaluationTargetData::refTimesFor(boost::posix_time::ptime timestamp, 
+                                                          time_duration d_max)  const
 {
-    assert (test_data_mappings_.count(timestamp));
-    TstDataMapping& mapping = test_data_mappings_.at(timestamp);
+    assert (tst_data_.count(timestamp));
+
+    auto it = tst_data_.find(timestamp);
+
+    const TstDataMapping& mapping = tst_data_mappings_.at(it->second.idx_internal);
 
     if (!mapping.has_ref1_ && !mapping.has_ref2_) // no ref data
         return {{}, {}};
@@ -352,11 +361,14 @@ std::pair<ptime, ptime> EvaluationTargetData::refTimesFor (
     return {{}, {}};
 }
 
-std::pair<EvaluationTargetPosition, bool>  EvaluationTargetData::interpolatedRefPosForTime (
-        ptime timestamp, time_duration d_max) const
+std::pair<EvaluationTargetPosition, bool> EvaluationTargetData::interpolatedRefPosForTime(ptime timestamp, 
+                                                                                          time_duration d_max) const
 {
-    assert (test_data_mappings_.count(timestamp));
-    TstDataMapping& mapping = test_data_mappings_.at(timestamp);
+    assert (tst_data_.count(timestamp));
+
+    auto it = tst_data_.find(timestamp);
+
+    const TstDataMapping& mapping = tst_data_mappings_.at(it->second.idx_internal);
 
     if (!mapping.has_ref1_ && !mapping.has_ref2_) // no ref data
         return {{}, false};
@@ -402,11 +414,14 @@ std::pair<EvaluationTargetPosition, bool>  EvaluationTargetData::interpolatedRef
     return {{}, false};
 }
 
-std::pair<EvaluationTargetVelocity, bool>  EvaluationTargetData::interpolatedRefSpdForTime (
-        ptime timestamp, time_duration d_max) const
+std::pair<EvaluationTargetVelocity, bool> EvaluationTargetData::interpolatedRefSpdForTime(ptime timestamp, 
+                                                                                          time_duration d_max) const
 {
-    assert (test_data_mappings_.count(timestamp));
-    TstDataMapping& mapping = test_data_mappings_.at(timestamp);
+    assert (tst_data_.count(timestamp));
+
+    auto it = tst_data_.find(timestamp);
+
+    const TstDataMapping& mapping = tst_data_mappings_.at(it->second.idx_internal);
 
     if (!mapping.has_ref1_ && !mapping.has_ref2_) // no ref data
         return {{}, false};
@@ -465,7 +480,7 @@ EvaluationTargetPosition EvaluationTargetData::refPosForTime (ptime timestamp) c
 
     assert (it_pair.first != ref_data_.end());
 
-    unsigned int index = it_pair.first->second;
+    unsigned int index = it_pair.first->second.idx_external;
 
     EvaluationTargetPosition pos;
 
@@ -511,7 +526,7 @@ EvaluationTargetPosition EvaluationTargetData::refPosForTime (ptime timestamp) c
         bool found;
         float alt_calc;
 
-        tie(found,alt_calc) = estimateRefAltitude(timestamp, index);
+        tie(found,alt_calc) = estimateRefAltitude(timestamp, it_pair.first->second.idx_internal);
 
         if (found)
         {
@@ -537,7 +552,7 @@ bool EvaluationTargetData::hasRefSpeedForTime (boost::posix_time::ptime timestam
     auto it_pair = ref_data_.equal_range(timestamp);
     assert (it_pair.first != ref_data_.end());
 
-    unsigned int index = it_pair.first->second;
+    unsigned int index = it_pair.first->second.idx_external;
 
     NullableVector<double>& speed_vec = eval_data_.ref_buffer_->get<double>(
                 eval_data_.ref_spd_ground_speed_kts_name_);
@@ -553,7 +568,7 @@ EvaluationTargetVelocity EvaluationTargetData::refSpdForTime (boost::posix_time:
     auto it_pair = ref_data_.equal_range(timestamp);
     assert (it_pair.first != ref_data_.end());
 
-    unsigned int index = it_pair.first->second;
+    unsigned int index = it_pair.first->second.idx_external;
 
     NullableVector<double>& speed_vec = eval_data_.ref_buffer_->get<double>(
                 eval_data_.ref_spd_ground_speed_kts_name_);
@@ -571,8 +586,10 @@ EvaluationTargetVelocity EvaluationTargetData::refSpdForTime (boost::posix_time:
     return spd;
 }
 
-std::pair<bool, float> EvaluationTargetData::estimateRefAltitude (ptime timestamp, unsigned int index) const
+std::pair<bool, float> EvaluationTargetData::estimateRefAltitude (ptime timestamp, unsigned int index_internal) const
 {
+    assert(index_internal < ref_indices_.size());
+
     NullableVector<float>& altitude_vec = eval_data_.ref_buffer_->get<float>(eval_data_.ref_modec_name_);
     NullableVector<ptime>& ts_vec = eval_data_.ref_buffer_->get<ptime>(eval_data_.ref_timestamp_name_);
 
@@ -591,14 +608,12 @@ std::pair<bool, float> EvaluationTargetData::estimateRefAltitude (ptime timestam
 
     // search for prev index
     ptime timestamp_prev;
-    auto prev_it = find(ref_indexes_.begin(), ref_indexes_.end(), index);
-    assert (prev_it != ref_indexes_.end());
-
+    auto prev_it  = ref_indices_.begin() + index_internal;
     auto after_it = prev_it;
 
     const time_duration max_tdiff = seconds(120);
 
-    while (prev_it != ref_indexes_.end() && timestamp - ts_vec.get(*prev_it) < max_tdiff)
+    while (prev_it != ref_indices_.end() && timestamp - ts_vec.get(*prev_it) < max_tdiff)
     {
         if (altitude_trusted_vec && !altitude_trusted_vec->isNull(*prev_it))
         {
@@ -621,7 +636,7 @@ std::pair<bool, float> EvaluationTargetData::estimateRefAltitude (ptime timestam
             break;
         }
 
-        if (prev_it == ref_indexes_.begin()) // undefined decrement
+        if (prev_it == ref_indices_.begin()) // undefined decrement
             break;
 
         --prev_it;
@@ -629,9 +644,9 @@ std::pair<bool, float> EvaluationTargetData::estimateRefAltitude (ptime timestam
 
     //    if (utn_ == debug_utn)
     //    {
-    //        if (prev_it != ref_indexes_.end())
+    //        if (prev_it != ref_indices_.end())
     //            loginf << "EvaluationTargetData: refPosForTime: checking prev found end";
-    //        else if (prev_it != ref_indexes_.begin())
+    //        else if (prev_it != ref_indices_.begin())
     //            loginf << "EvaluationTargetData: refPosForTime: checking prev found begin";
     //        else
     //            loginf << "EvaluationTargetData: refPosForTime: finished prev tod "
@@ -641,7 +656,7 @@ std::pair<bool, float> EvaluationTargetData::estimateRefAltitude (ptime timestam
     // search after index
     ptime timestamp_after;
 
-    while (after_it != ref_indexes_.end() && ts_vec.get(*after_it) - timestamp < max_tdiff)
+    while (after_it != ref_indices_.end() && ts_vec.get(*after_it) - timestamp < max_tdiff)
     {
         //        if (utn_ == debug_utn)
         //            loginf << "EvaluationTargetData: refPosForTime: checking after tod "
@@ -672,7 +687,7 @@ std::pair<bool, float> EvaluationTargetData::estimateRefAltitude (ptime timestam
 
     //    if (utn_ == debug_utn)
     //    {
-    //        if (after_it != ref_indexes_.end())
+    //        if (after_it != ref_indices_.end())
     //            loginf << "EvaluationTargetData: refPosForTime: checking after found end";
     //        else
     //            loginf << "EvaluationTargetData: refPosForTime: finished after tod "
@@ -729,7 +744,7 @@ bool EvaluationTargetData::hasRefCallsignForTime (ptime timestamp) const
 
     assert (it_pair.first != ref_data_.end());
 
-    unsigned int index = it_pair.first->second;
+    unsigned int index = it_pair.first->second.idx_external;
 
     NullableVector<string>& callsign_vec = eval_data_.ref_buffer_->get<string>(eval_data_.ref_callsign_name_);
 
@@ -744,7 +759,7 @@ std::string EvaluationTargetData::refCallsignForTime (ptime timestamp) const
 
     assert (it_pair.first != ref_data_.end());
 
-    unsigned int index = it_pair.first->second;
+    unsigned int index = it_pair.first->second.idx_external;
 
     NullableVector<string>& callsign_vec = eval_data_.ref_buffer_->get<string>(eval_data_.ref_callsign_name_);
     assert (!callsign_vec.isNull(index));
@@ -761,7 +776,7 @@ bool EvaluationTargetData::hasRefModeAForTime (ptime timestamp) const
 
     assert (it_pair.first != ref_data_.end());
 
-    unsigned int index = it_pair.first->second;
+    unsigned int index = it_pair.first->second.idx_external;
 
     if (eval_data_.ref_buffer_->get<unsigned int>(eval_data_.ref_modea_name_).isNull(index))
         return false;
@@ -787,7 +802,7 @@ unsigned int EvaluationTargetData::refModeAForTime (ptime timestamp) const
 
     assert (it_pair.first != ref_data_.end());
 
-    unsigned int index = it_pair.first->second;
+    unsigned int index = it_pair.first->second.idx_external;
 
     NullableVector<unsigned int>& modea_vec = eval_data_.ref_buffer_->get<unsigned int>(eval_data_.ref_modea_name_);
     assert (!modea_vec.isNull(index));
@@ -804,7 +819,7 @@ bool EvaluationTargetData::hasRefModeCForTime (ptime timestamp) const
 
     assert (it_pair.first != ref_data_.end());
 
-    unsigned int index = it_pair.first->second;
+    unsigned int index = it_pair.first->second.idx_external;
 
     if (eval_data_.ref_modec_trusted_name_.size() &&
             !eval_data_.ref_buffer_->get<float>(eval_data_.ref_modec_trusted_name_).isNull(index))
@@ -834,7 +849,7 @@ float EvaluationTargetData::refModeCForTime (ptime timestamp) const
 
     assert (it_pair.first != ref_data_.end());
 
-    unsigned int index = it_pair.first->second;
+    unsigned int index = it_pair.first->second.idx_external;
 
     if (eval_data_.ref_modec_trusted_name_.size() &&
             !eval_data_.ref_buffer_->get<float>(eval_data_.ref_modec_trusted_name_).isNull(index))
@@ -855,7 +870,7 @@ bool EvaluationTargetData::hasRefTAForTime (ptime timestamp) const
 
     assert (it_pair.first != ref_data_.end());
 
-    unsigned int index = it_pair.first->second;
+    unsigned int index = it_pair.first->second.idx_external;
 
     if (eval_data_.ref_target_address_name_.size()
             && !eval_data_.ref_buffer_->get<unsigned int>(eval_data_.ref_target_address_name_).isNull(index))
@@ -872,7 +887,7 @@ unsigned int EvaluationTargetData::refTAForTime (ptime timestamp) const
 
     assert (it_pair.first != ref_data_.end());
 
-    unsigned int index = it_pair.first->second;
+    unsigned int index = it_pair.first->second.idx_external;
 
     assert (!eval_data_.ref_buffer_->get<unsigned int>(eval_data_.ref_target_address_name_).isNull(index));
 
@@ -888,7 +903,7 @@ std::pair<bool,bool> EvaluationTargetData::refGroundBitForTime (ptime timestamp)
 
     assert (it_pair.first != ref_data_.end());
 
-    unsigned int index = it_pair.first->second;
+    unsigned int index = it_pair.first->second.idx_external;
 
     if (eval_data_.ref_ground_bit_name_.size()
             && !eval_data_.ref_buffer_->get<bool>(eval_data_.ref_ground_bit_name_).isNull(index))
@@ -902,12 +917,14 @@ std::pair<bool,bool> EvaluationTargetData::refGroundBitForTime (ptime timestamp)
 std::pair<bool,bool> EvaluationTargetData::interpolatedRefGroundBitForTime (ptime timestamp, time_duration d_max) const
 // has gbs, gbs true
 {
-    assert (test_data_mappings_.count(timestamp));
+    assert (tst_data_.count(timestamp));
 
     bool has_gbs = false;
     bool gbs = false;
 
-    TstDataMapping& mapping = test_data_mappings_.at(timestamp);
+    auto it = tst_data_.find(timestamp);
+
+    const TstDataMapping& mapping = tst_data_mappings_.at(it->second.idx_internal);
 
     if (!mapping.has_ref1_ && !mapping.has_ref2_) // no ref data
         return {has_gbs, gbs};
@@ -945,7 +962,7 @@ EvaluationTargetPosition EvaluationTargetData::tstPosForTime (ptime timestamp) c
 
     assert (it_pair.first != tst_data_.end());
 
-    unsigned int index = it_pair.first->second;
+    unsigned int index = it_pair.first->second.idx_external;
 
     EvaluationTargetPosition pos;
 
@@ -984,7 +1001,7 @@ EvaluationTargetPosition EvaluationTargetData::tstPosForTime (ptime timestamp) c
         bool found;
         float alt_calc;
 
-        tie(found,alt_calc) = estimateTstAltitude(timestamp, index);
+        tie(found,alt_calc) = estimateTstAltitude(timestamp, it_pair.first->second.idx_internal);
 
         if (found)
         {
@@ -997,8 +1014,10 @@ EvaluationTargetPosition EvaluationTargetData::tstPosForTime (ptime timestamp) c
     return pos;
 }
 
-std::pair<bool, float> EvaluationTargetData::estimateTstAltitude (ptime timestamp, unsigned int index) const
+std::pair<bool, float> EvaluationTargetData::estimateTstAltitude (ptime timestamp, unsigned int index_internal) const
 {
+    assert(index_internal < tst_indices_.size());
+
     NullableVector<float>& altitude_vec = eval_data_.tst_buffer_->get<float>(eval_data_.tst_modec_name_);
     NullableVector<ptime>& ts_vec = eval_data_.tst_buffer_->get<ptime>(eval_data_.tst_timestamp_name_);
 
@@ -1017,14 +1036,12 @@ std::pair<bool, float> EvaluationTargetData::estimateTstAltitude (ptime timestam
 
     // search for prev index
     ptime timestamp_prev;
-    auto prev_it = find(tst_indexes_.begin(), tst_indexes_.end(), index);
-    assert (prev_it != tst_indexes_.end());
-
+    auto prev_it  = tst_indices_.begin() + index_internal;
     auto after_it = prev_it;
 
     const time_duration max_tdiff = seconds(120);
 
-    while (prev_it != tst_indexes_.end() && timestamp - ts_vec.get(*prev_it) < max_tdiff)
+    while (prev_it != tst_indices_.end() && timestamp - ts_vec.get(*prev_it) < max_tdiff)
     {
         if (altitude_trusted_vec && !altitude_trusted_vec->isNull(*prev_it))
         {
@@ -1043,7 +1060,7 @@ std::pair<bool, float> EvaluationTargetData::estimateTstAltitude (ptime timestam
             break;
         }
 
-        if (prev_it == tst_indexes_.begin()) // undefined decrement
+        if (prev_it == tst_indices_.begin()) // undefined decrement
             break;
 
         --prev_it;
@@ -1052,7 +1069,7 @@ std::pair<bool, float> EvaluationTargetData::estimateTstAltitude (ptime timestam
     // search after index
     ptime timestamp_after;
 
-    while (after_it != tst_indexes_.end() && ts_vec.get(*after_it) - timestamp < max_tdiff)
+    while (after_it != tst_indices_.end() && ts_vec.get(*after_it) - timestamp < max_tdiff)
     {
         if (altitude_trusted_vec && !altitude_trusted_vec->isNull(*after_it))
         {
@@ -1113,7 +1130,7 @@ bool EvaluationTargetData::hasTstCallsignForTime (ptime timestamp) const
 
     assert (it_pair.first != tst_data_.end());
 
-    unsigned int index = it_pair.first->second;
+    unsigned int index = it_pair.first->second.idx_external;
 
     NullableVector<string>& callsign_vec = eval_data_.tst_buffer_->get<string>(eval_data_.tst_callsign_name_);
     return !callsign_vec.isNull(index);
@@ -1127,7 +1144,7 @@ std::string EvaluationTargetData::tstCallsignForTime (ptime timestamp) const
 
     assert (it_pair.first != tst_data_.end());
 
-    unsigned int index = it_pair.first->second;
+    unsigned int index = it_pair.first->second.idx_external;
 
     NullableVector<string>& callsign_vec = eval_data_.tst_buffer_->get<string>(eval_data_.tst_callsign_name_);
     assert (!callsign_vec.isNull(index));
@@ -1144,7 +1161,7 @@ bool EvaluationTargetData::hasTstModeAForTime (ptime timestamp) const
 
     assert (it_pair.first != tst_data_.end());
 
-    unsigned int index = it_pair.first->second;
+    unsigned int index = it_pair.first->second.idx_external;
 
     if (eval_data_.tst_buffer_->get<unsigned int>(eval_data_.tst_modea_name_).isNull(index))
         return false;
@@ -1170,7 +1187,7 @@ unsigned int EvaluationTargetData::tstModeAForTime (ptime timestamp) const
 
     assert (it_pair.first != tst_data_.end());
 
-    unsigned int index = it_pair.first->second;
+    unsigned int index = it_pair.first->second.idx_external;
 
     NullableVector<unsigned int>& modea_vec = eval_data_.tst_buffer_->get<unsigned int>(eval_data_.tst_modea_name_);
     assert (!modea_vec.isNull(index));
@@ -1187,7 +1204,7 @@ bool EvaluationTargetData::hasTstModeCForTime (ptime timestamp) const
 
     assert (it_pair.first != tst_data_.end());
 
-    unsigned int index = it_pair.first->second;
+    unsigned int index = it_pair.first->second.idx_external;
 
     if (eval_data_.tst_modec_trusted_name_.size() &&
             !eval_data_.tst_buffer_->get<float>(eval_data_.tst_modec_trusted_name_).isNull(index))
@@ -1218,7 +1235,7 @@ bool EvaluationTargetData::hasTstGroundBitForTime (ptime timestamp) const // onl
 
     assert (it_pair.first != tst_data_.end());
 
-    unsigned int index = it_pair.first->second;
+    unsigned int index = it_pair.first->second.idx_external;
 
     if (eval_data_.tst_ground_bit_name_.size()
             && !eval_data_.tst_buffer_->get<bool>(eval_data_.tst_ground_bit_name_).isNull(index))
@@ -1235,7 +1252,7 @@ bool EvaluationTargetData::tstGroundBitForTime (ptime timestamp) const // true i
 
     assert (it_pair.first != tst_data_.end());
 
-    unsigned int index = it_pair.first->second;
+    unsigned int index = it_pair.first->second.idx_external;
 
     if (eval_data_.tst_ground_bit_name_.size()
             && !eval_data_.tst_buffer_->get<bool>(eval_data_.tst_ground_bit_name_).isNull(index)
@@ -1254,7 +1271,7 @@ bool EvaluationTargetData::hasTstTAForTime (ptime timestamp) const
 
     assert (it_pair.first != tst_data_.end());
 
-    unsigned int index = it_pair.first->second;
+    unsigned int index = it_pair.first->second.idx_external;
 
     if (eval_data_.tst_target_address_name_.size()
             && !eval_data_.tst_buffer_->get<unsigned int>(eval_data_.tst_target_address_name_).isNull(index))
@@ -1271,7 +1288,7 @@ unsigned int EvaluationTargetData::tstTAForTime (ptime timestamp) const
 
     assert (it_pair.first != tst_data_.end());
 
-    unsigned int index = it_pair.first->second;
+    unsigned int index = it_pair.first->second.idx_external;
 
     assert (!eval_data_.tst_buffer_->get<unsigned int>(eval_data_.tst_target_address_name_).isNull(index));
 
@@ -1307,7 +1324,7 @@ bool EvaluationTargetData::hasTstTrackNumForTime (ptime timestamp) const
 
     assert (it_pair.first != tst_data_.end());
 
-    unsigned int index = it_pair.first->second;
+    unsigned int index = it_pair.first->second.idx_external;
 
     return !eval_data_.tst_buffer_->get<unsigned int>(eval_data_.tst_track_num_name_).isNull(index);
 }
@@ -1320,7 +1337,7 @@ unsigned int EvaluationTargetData::tstTrackNumForTime (ptime timestamp) const
 
     assert (it_pair.first != tst_data_.end());
 
-    unsigned int index = it_pair.first->second;
+    unsigned int index = it_pair.first->second.idx_external;
 
     return eval_data_.tst_buffer_->get<unsigned int>(eval_data_.tst_track_num_name_).get(index);
 }
@@ -1333,7 +1350,7 @@ bool EvaluationTargetData::hasTstMeasuredSpeedForTime (ptime timestamp) const
 
     assert (it_pair.first != tst_data_.end());
 
-    unsigned int index = it_pair.first->second;
+    unsigned int index = it_pair.first->second.idx_external;
 
     return !eval_data_.tst_buffer_->get<double>(eval_data_.tst_spd_ground_speed_kts_name_).isNull(index);
 }
@@ -1346,7 +1363,7 @@ float EvaluationTargetData::tstMeasuredSpeedForTime (ptime timestamp) const // m
 
     assert (it_pair.first != tst_data_.end());
 
-    unsigned int index = it_pair.first->second;
+    unsigned int index = it_pair.first->second.idx_external;
 
     assert(eval_data_.tst_spd_ground_speed_kts_name_.size());
     return eval_data_.tst_buffer_->get<double>(eval_data_.tst_spd_ground_speed_kts_name_).get(index) * KNOTS2M_S;
@@ -1360,7 +1377,7 @@ bool EvaluationTargetData::hasTstMeasuredTrackAngleForTime (ptime timestamp) con
 
     assert (it_pair.first != tst_data_.end());
 
-    unsigned int index = it_pair.first->second;
+    unsigned int index = it_pair.first->second.idx_external;
 
     return !eval_data_.tst_buffer_->get<double>(eval_data_.tst_spd_track_angle_deg_name_).isNull(index);
 }
@@ -1373,7 +1390,7 @@ float EvaluationTargetData::tstMeasuredTrackAngleForTime (ptime timestamp) const
 
     assert (it_pair.first != tst_data_.end());
 
-    unsigned int index = it_pair.first->second;
+    unsigned int index = it_pair.first->second.idx_external;
 
     assert (eval_data_.tst_spd_track_angle_deg_name_.size());
     return eval_data_.tst_buffer_->get<double>(eval_data_.tst_spd_track_angle_deg_name_).get(index);
@@ -1390,7 +1407,7 @@ bool EvaluationTargetData::canCheckTstMultipleSources() const
     NullableVector<bool>& tst_multiple_srcs_vec =
             eval_data_.tst_buffer_->get<bool>(eval_data_.tst_multiple_srcs_name_);
 
-    for (auto tst_index : tst_indexes_)
+    for (auto tst_index : tst_indices_)
     {
         if (!tst_multiple_srcs_vec.isNull(tst_index))
             return true;
@@ -1406,7 +1423,7 @@ bool EvaluationTargetData::hasTstMultipleSources() const
     NullableVector<bool>& tst_multiple_srcs_vec =
             eval_data_.tst_buffer_->get<bool>(eval_data_.tst_multiple_srcs_name_);
 
-    for (auto tst_index : tst_indexes_) // one must be not null according to canCheckTstMultipleSources
+    for (auto tst_index : tst_indices_) // one must be not null according to canCheckTstMultipleSources
     {
         if (!tst_multiple_srcs_vec.isNull(tst_index) && tst_multiple_srcs_vec.get(tst_index))
             return true;
@@ -1426,7 +1443,7 @@ bool EvaluationTargetData::canCheckTrackLUDSID() const
     NullableVector<unsigned int> tst_ls_ds_id_vec =
             eval_data_.tst_buffer_->get<unsigned int>(eval_data_.tst_track_lu_ds_id_name_);
 
-    for (auto tst_index : tst_indexes_)
+    for (auto tst_index : tst_indices_)
     {
         if (!tst_ls_ds_id_vec.isNull(tst_index))
             return true;
@@ -1449,7 +1466,7 @@ bool EvaluationTargetData::hasSingleLUDSID() const
     NullableVector<unsigned int> tst_ls_ds_id_vec =
             eval_data_.tst_buffer_->get<unsigned int>(eval_data_.tst_track_lu_ds_id_name_);
 
-    for (auto tst_index : tst_indexes_)
+    for (auto tst_index : tst_indices_)
     {
         if (!tst_ls_ds_id_vec.isNull(tst_index))
         {
@@ -1476,7 +1493,7 @@ unsigned int EvaluationTargetData::singleTrackLUDSID() const
     NullableVector<unsigned int> tst_ls_ds_id_vec =
             eval_data_.tst_buffer_->get<unsigned int>(eval_data_.tst_track_lu_ds_id_name_);
 
-    for (auto tst_index : tst_indexes_)
+    for (auto tst_index : tst_indices_)
     {
         if (!tst_ls_ds_id_vec.isNull(tst_index))
             return tst_ls_ds_id_vec.get(tst_index);
@@ -1494,7 +1511,7 @@ float EvaluationTargetData::tstModeCForTime (ptime timestamp) const
 
     assert (it_pair.first != tst_data_.end());
 
-    int index = it_pair.first->second;
+    int index = it_pair.first->second.idx_external;
 
     if (eval_data_.tst_modec_trusted_name_.size() &&
             !eval_data_.tst_buffer_->get<float>(eval_data_.tst_modec_trusted_name_).isNull(index))
@@ -1685,7 +1702,7 @@ void EvaluationTargetData::updateCallsigns() const
     if (ref_data_.size())
     {
         NullableVector<string>& value_vec = eval_data_.ref_buffer_->get<string>(eval_data_.ref_callsign_name_);
-        map<string, vector<unsigned int>> distinct_values = value_vec.distinctValuesWithIndexes(ref_indexes_);
+        map<string, vector<unsigned int>> distinct_values = value_vec.distinctValuesWithIndexes(ref_indices_);
 
         for (auto& val_it : distinct_values)
         {
@@ -1697,7 +1714,7 @@ void EvaluationTargetData::updateCallsigns() const
     if (tst_data_.size())
     {
         NullableVector<string>& value_vec = eval_data_.tst_buffer_->get<string>(eval_data_.tst_callsign_name_);
-        map<string, vector<unsigned int>> distinct_values = value_vec.distinctValuesWithIndexes(tst_indexes_);
+        map<string, vector<unsigned int>> distinct_values = value_vec.distinctValuesWithIndexes(tst_indices_);
 
         for (auto& val_it : distinct_values)
         {
@@ -1715,7 +1732,7 @@ void EvaluationTargetData::updateTargetAddresses() const
     {
         NullableVector<unsigned int>& value_vec = eval_data_.ref_buffer_->get<unsigned int>(
                     eval_data_.ref_target_address_name_);
-        map<unsigned int, vector<unsigned int>> distinct_values = value_vec.distinctValuesWithIndexes(ref_indexes_);
+        map<unsigned int, vector<unsigned int>> distinct_values = value_vec.distinctValuesWithIndexes(ref_indices_);
 
         for (auto& val_it : distinct_values)
         {
@@ -1728,7 +1745,7 @@ void EvaluationTargetData::updateTargetAddresses() const
     {
         NullableVector<unsigned int>& value_vec = eval_data_.tst_buffer_->get<unsigned int>(
                     eval_data_.tst_target_address_name_);
-        map<unsigned int, vector<unsigned int>> distinct_values = value_vec.distinctValuesWithIndexes(tst_indexes_);
+        map<unsigned int, vector<unsigned int>> distinct_values = value_vec.distinctValuesWithIndexes(tst_indices_);
 
         for (auto& val_it : distinct_values)
         {
@@ -1748,7 +1765,7 @@ void EvaluationTargetData::updateModeACodes() const
     {
         NullableVector<unsigned int>& mode_a_codes = eval_data_.ref_buffer_->get<unsigned int>(
                     eval_data_.ref_modea_name_);
-        map<unsigned int, vector<unsigned int>> distinct_codes = mode_a_codes.distinctValuesWithIndexes(ref_indexes_);
+        map<unsigned int, vector<unsigned int>> distinct_codes = mode_a_codes.distinctValuesWithIndexes(ref_indices_);
         //unsigned int null_cnt = mode_a_codes.nullValueIndexes(ref_rec_nums_).size();
 
         for (auto& ma_it : distinct_codes)
@@ -1766,7 +1783,7 @@ void EvaluationTargetData::updateModeACodes() const
     {
         NullableVector<unsigned int>& mode_a_codes = eval_data_.tst_buffer_->get<unsigned int>(
                     eval_data_.tst_modea_name_);
-        map<unsigned int, vector<unsigned int>> distinct_codes = mode_a_codes.distinctValuesWithIndexes(tst_indexes_);
+        map<unsigned int, vector<unsigned int>> distinct_codes = mode_a_codes.distinctValuesWithIndexes(tst_indices_);
 
         for (auto& ma_it : distinct_codes)
         {
@@ -1804,7 +1821,7 @@ void EvaluationTargetData::updateModeCMinMax() const
             altitude_trusted_vec = &eval_data_.ref_buffer_->get<float>(eval_data_.ref_modec_trusted_name_);
         }
 
-        for (auto ind_it : ref_indexes_)
+        for (auto ind_it : ref_indices_)
         {
             if (altitude_trusted_vec && !altitude_trusted_vec->isNull(ind_it))
                 mode_c_value = altitude_trusted_vec->get(ind_it);
@@ -1842,7 +1859,7 @@ void EvaluationTargetData::updateModeCMinMax() const
             altitude_trusted_vec = &eval_data_.tst_buffer_->get<float>(eval_data_.tst_modec_trusted_name_);
         }
 
-        for (auto ind_it : tst_indexes_)
+        for (auto ind_it : tst_indices_)
         {
             if (altitude_trusted_vec && !altitude_trusted_vec->isNull(ind_it))
                 mode_c_value = altitude_trusted_vec->get(ind_it);
@@ -1880,7 +1897,7 @@ void EvaluationTargetData::updatePositionMinMax() const
         NullableVector<double>& lats = eval_data_.ref_buffer_->get<double>(eval_data_.ref_latitude_name_);
         NullableVector<double>& longs = eval_data_.ref_buffer_->get<double>(eval_data_.ref_longitude_name_);
 
-        for (auto ind_it : ref_indexes_)
+        for (auto ind_it : ref_indices_)
         {
             assert (!lats.isNull(ind_it));
             assert (!longs.isNull(ind_it));
@@ -1911,7 +1928,7 @@ void EvaluationTargetData::updatePositionMinMax() const
         NullableVector<double>& lats = eval_data_.tst_buffer_->get<double>(eval_data_.tst_latitude_name_);
         NullableVector<double>& longs = eval_data_.tst_buffer_->get<double>(eval_data_.tst_longitude_name_);
 
-        for (auto ind_it : tst_indexes_)
+        for (auto ind_it : tst_indices_)
         {
             assert (!lats.isNull(ind_it));
             assert (!longs.isNull(ind_it));
@@ -2029,23 +2046,25 @@ void EvaluationTargetData::calculateTestDataMappings() const
 {
     loginf << "EvaluationTargetData: calculateTestDataMappings: utn " << utn_;
 
-    assert (!test_data_mappings_.size());
+    assert (!tst_data_mappings_.size());
+
+    tst_data_mappings_.resize(tst_indices_.size());
 
     for (auto& tst_it : tst_data_)
     {
-        test_data_mappings_[tst_it.first] = calculateTestDataMapping(tst_it.first);
+        tst_data_mappings_[tst_it.second.idx_internal] = calculateTestDataMapping(tst_it.first);
     }
 
-    unsigned int cnt=0;
+    unsigned int cnt = 0;
 
-    for (auto& tst_map_it : test_data_mappings_)
+    for (const auto& tst_map_it : tst_data_mappings_)
     {
-        if (tst_map_it.second.has_ref_pos_)
+        if (tst_map_it.has_ref_pos_)
             ++cnt;
     }
 
     loginf << "EvaluationTargetData: calculateTestDataMappings: utn " << utn_ << " done, num map "
-           << test_data_mappings_.size() << " ref pos " << cnt;
+           << tst_data_mappings_.size() << " ref pos " << cnt;
 }
 
 TstDataMapping EvaluationTargetData::calculateTestDataMapping(ptime timestamp) const
@@ -2388,4 +2407,50 @@ DataMappingTimes EvaluationTargetData::findTstTimes(ptime timestamp_ref) const /
     }
 
     return ret;
+}
+
+/**
+*/
+void EvaluationTargetData::computeSectorInsideInfo() const
+{
+    return;
+
+    ref_inside_ = {};
+    tst_inside_ = {};
+
+    size_t num_sector_layers = eval_man_.sectorsLayers().size();
+    size_t num_ref           = ref_indices_.size();
+    size_t num_tst           = tst_indices_.size();
+    size_t num_map           = tst_data_mappings_.size();
+
+    size_t num_extra         = 1; //above flight level filter
+
+    size_t num_cols          = num_sector_layers + num_extra;
+
+    assert(num_map == num_tst);
+
+    if (num_ref)
+    {
+        ref_inside_.resize(num_ref, num_cols);
+        ref_inside_.setZero();
+
+        //for ()
+    }
+    if (num_tst)
+    {
+        tst_inside_.resize(num_tst, num_cols);
+        tst_inside_.setZero();
+    }
+    if (num_map)
+    {
+        map_inside_.resize(num_tst, num_cols);
+        map_inside_.setZero();
+    }
+}
+
+/**
+*/
+void EvaluationTargetData::computeSectorInsideInfo(const boost::posix_time::ptime& timestamp, int idx_internal) const
+{
+
 }

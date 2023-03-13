@@ -58,7 +58,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionAcross::evaluate (
 
     time_duration max_ref_time_diff = Time::partialSeconds(eval_man_.maxRefTimeDiff());
 
-    const std::multimap<ptime, unsigned int>& tst_data = target_data.tstData();
+    const auto& tst_data = target_data.tstData();
 
     unsigned int num_pos {0};
     unsigned int num_no_ref {0};

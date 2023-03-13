@@ -112,6 +112,7 @@ public:
     void importSectors (const std::string& filename);
     void exportSectors (const std::string& filename);
     unsigned int getMaxSectorId ();
+    void updateSectorLayerIDs();
 
     std::string dbContentNameRef() const;
     void dbContentNameRef(const std::string& name);
@@ -337,7 +338,6 @@ public:
 
     bool hasSelectedReferenceDataSources();
     bool hasSelectedTestDataSources();
-
 
 protected:
     COMPASS& compass_;

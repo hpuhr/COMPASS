@@ -598,7 +598,6 @@ void EvaluationManager::associationStatusChangedSlot()
 void EvaluationManager::loadedDataDataSlot(
         const std::map<std::string, std::shared_ptr<Buffer>>& data, bool requires_reset)
 {
-
 }
 
 void EvaluationManager::loadingDoneSlot()
@@ -660,6 +659,8 @@ void EvaluationManager::loadingDoneSlot()
 
         boost::posix_time::ptime start_time = boost::posix_time::microsec_clock::local_time();
 
+
+
         data_.finalize();
 
         boost::posix_time::time_duration time_diff =  boost::posix_time::microsec_clock::local_time() - start_time;
@@ -692,6 +693,8 @@ void EvaluationManager::evaluate ()
         widget_->updateButtons();
 
     emit resultsChangedSignal();
+
+    updateSectorLayerIDs();
 
     // eval
     results_gen_.evaluate(data_, currentStandard());
@@ -891,10 +894,19 @@ void EvaluationManager::loadSectors()
     sector_layers_ = COMPASS::instance().interface().loadSectors();
 
     for (auto& sec_lay_it : sector_layers_)
+    {
         for (auto& sec_it : sec_lay_it->sectors())
             max_sector_id_ = std::max(max_sector_id_, sec_it->id());
+    }
 
     sectors_loaded_ = true;
+}
+
+void EvaluationManager::updateSectorLayerIDs()
+{
+    unsigned int id = 0;
+    for (auto& sl : sector_layers_)
+        sl->setId(id++);
 }
 
 unsigned int EvaluationManager::getMaxSectorId ()
@@ -903,8 +915,11 @@ unsigned int EvaluationManager::getMaxSectorId ()
     return max_sector_id_;
 }
 
-void EvaluationManager::createNewSector (const std::string& name, const std::string& layer_name,
-                                         bool exclude, QColor color, std::vector<std::pair<double,double>> points)
+void EvaluationManager::createNewSector (const std::string& name, 
+                                         const std::string& layer_name,
+                                         bool exclude, 
+                                         QColor color, 
+                                         std::vector<std::pair<double,double>> points)
 {
     loginf << "EvaluationManager: createNewSector: name " << name << " layer_name " << layer_name
            << " num points " << points.size();
@@ -918,7 +933,9 @@ void EvaluationManager::createNewSector (const std::string& name, const std::str
 
     // add to existing sectors
     if (!hasSectorLayer(layer_name))
+    {
         sector_layers_.push_back(make_shared<SectorLayer>(layer_name));
+    }
 
     assert (hasSectorLayer(layer_name));
 
