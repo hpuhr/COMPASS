@@ -37,6 +37,7 @@ class Buffer;
 class EvaluationData;
 class EvaluationManager;
 class DBContentManager;
+class SectorLayer;
 
 struct TstDataMapping // mapping to respective ref data
 {
@@ -80,7 +81,8 @@ public:
         unsigned int idx_internal;
     };
 
-    typedef std::multimap<boost::posix_time::ptime, Index> IndexMap;
+    typedef std::multimap<boost::posix_time::ptime, Index>      IndexMap;
+    typedef Eigen::Matrix<bool, Eigen::Dynamic, Eigen::Dynamic> InsideCheckMatrix;
 
     EvaluationTargetData(unsigned int utn, 
                          EvaluationData& eval_data,
@@ -220,6 +222,21 @@ public:
     bool hasNacp() const;
     std::string nacpStr() const;
 
+    bool refPosInside(const SectorLayer& layer, 
+                      boost::posix_time::ptime timestamp, 
+                      const EvaluationTargetPosition& pos, 
+                      bool has_ground_bit, 
+                      bool ground_bit_set) const;
+    bool tstPosInside(const SectorLayer& layer, 
+                      boost::posix_time::ptime timestamp, 
+                      const EvaluationTargetPosition& pos, 
+                      bool has_ground_bit, 
+                      bool ground_bit_set) const;
+    bool mappedRefPosInside(const SectorLayer& layer, 
+                            boost::posix_time::ptime timestamp, 
+                            const EvaluationTargetPosition& pos,
+                            bool has_ground_bit, 
+                            bool ground_bit_set) const;
 protected:
     void updateCallsigns() const;
     void updateTargetAddresses() const;
@@ -233,7 +250,16 @@ protected:
     void addRefPositionsSpeedsToMapping (TstDataMapping& mapping) const;
     //void addRefPositiosToMappingFast (TstDataMapping& mapping) const;
     void computeSectorInsideInfo() const;
-    void computeSectorInsideInfo(const boost::posix_time::ptime& timestamp, int idx_internal) const;
+    void computeSectorInsideInfo(InsideCheckMatrix& mat, 
+                                 const EvaluationTargetPosition& pos, 
+                                 unsigned int idx_internal) const;
+    bool checkInside(const SectorLayer& layer,
+                     const IndexMap& indices,
+                     const InsideCheckMatrix& mat,
+                     boost::posix_time::ptime timestamp,
+                     const EvaluationTargetPosition& pos,
+                     bool has_ground_bit, 
+                     bool ground_bit_set) const;
 
     DataMappingTimes findTstTimes(boost::posix_time::ptime timestamp_ref) const; // ref tod
 
@@ -276,9 +302,10 @@ protected:
 
     mutable Transformation trafo_;
 
-    mutable Eigen::Matrix<bool, Eigen::Dynamic, Eigen::Dynamic> ref_inside_;
-    mutable Eigen::Matrix<bool, Eigen::Dynamic, Eigen::Dynamic> tst_inside_;
-    mutable Eigen::Matrix<bool, Eigen::Dynamic, Eigen::Dynamic> map_inside_;
+    mutable InsideCheckMatrix                    inside_ref_;
+    mutable InsideCheckMatrix                    inside_tst_;
+    mutable InsideCheckMatrix                    inside_map_;
+    mutable std::map<const SectorLayer*, size_t> inside_sector_layers_;
 };
 
 #endif // EVALUATIONTARGETDATA_H

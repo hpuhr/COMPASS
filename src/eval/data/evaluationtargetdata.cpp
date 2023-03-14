@@ -2151,7 +2151,7 @@ void EvaluationTargetData::addRefPositionsSpeedsToMapping (TstDataMapping& mappi
             mapping.pos_ref_ = pos1;
 
             mapping.spd_ref_.track_angle_ = NAN;
-            mapping.spd_ref_.speed_ = NAN;
+            mapping.spd_ref_.speed_       = NAN;
         }
         else
         {
@@ -2413,44 +2413,174 @@ DataMappingTimes EvaluationTargetData::findTstTimes(ptime timestamp_ref) const /
 */
 void EvaluationTargetData::computeSectorInsideInfo() const
 {
-    return;
+    eval_man_.updateSectorLayers();
 
-    ref_inside_ = {};
-    tst_inside_ = {};
+    inside_ref_           = {};
+    inside_tst_           = {};
+    inside_map_           = {};
+    inside_sector_layers_ = {};
 
-    size_t num_sector_layers = eval_man_.sectorsLayers().size();
+    auto sector_layers = eval_man_.sectorsLayers();
+
+    //store sector layers
+    {
+        size_t cnt = 0;
+        for (const auto& sl : sector_layers)
+            inside_sector_layers_[ sl.get() ] = cnt++;
+    }
+
+    size_t num_sector_layers = sector_layers.size();
     size_t num_ref           = ref_indices_.size();
     size_t num_tst           = tst_indices_.size();
     size_t num_map           = tst_data_mappings_.size();
 
     size_t num_extra         = 1; //above flight level filter
 
-    size_t num_cols          = num_sector_layers + num_extra;
+    size_t num_cols          = num_sector_layers * 2 + num_extra;
 
     assert(num_map == num_tst);
 
     if (num_ref)
     {
-        ref_inside_.resize(num_ref, num_cols);
-        ref_inside_.setZero();
+        //check ref data for inside
+        inside_ref_.resize(num_ref, num_cols);
+        inside_ref_.setZero();
 
-        //for ()
+        for (const auto& elem : ref_data_)
+        {
+            auto pos = refPosForTime(elem.first);
+            computeSectorInsideInfo(inside_ref_, pos, elem.second.idx_internal);
+        }
     }
     if (num_tst)
     {
-        tst_inside_.resize(num_tst, num_cols);
-        tst_inside_.setZero();
+        //check test data for inside
+        inside_tst_.resize(num_tst, num_cols);
+        inside_tst_.setZero();
+
+        for (const auto& elem : tst_data_)
+        {
+            auto pos = tstPosForTime(elem.first);
+            computeSectorInsideInfo(inside_tst_, pos, elem.second.idx_internal);
+        }
     }
     if (num_map)
     {
-        map_inside_.resize(num_tst, num_cols);
-        map_inside_.setZero();
+        //check mapped positions for inside
+        inside_map_.resize(num_tst, num_cols);
+        inside_map_.setZero();
+
+        for (const auto& elem : tst_data_)
+        {
+            const auto& m = tst_data_mappings_.at(elem.second.idx_internal);
+            if (m.has_ref_pos_)
+                computeSectorInsideInfo(inside_map_, m.pos_ref_, elem.second.idx_internal);
+        }
     }
 }
 
 /**
 */
-void EvaluationTargetData::computeSectorInsideInfo(const boost::posix_time::ptime& timestamp, int idx_internal) const
+void EvaluationTargetData::computeSectorInsideInfo(InsideCheckMatrix& mat, 
+                                                   const EvaluationTargetPosition& pos, 
+                                                   unsigned int idx_internal) const
 {
+    assert(idx_internal < mat.rows());
 
+    size_t num_sector_layers = inside_sector_layers_.size();
+    size_t gb_offset         = num_sector_layers;
+
+    for (const auto& sl : inside_sector_layers_)
+    {
+        auto layer = sl.first;
+        assert(layer);
+
+        auto lidx = sl.second;
+
+        //@TODO: position inside polygon check might be computed twice...
+        bool inside_no_gb = layer->isInside(pos, false, false);
+        bool inside_gb    = inside_no_gb && layer->isInside(pos, true, true);
+
+        //check pos against layer and write to mat
+        mat(idx_internal, lidx            ) = inside_no_gb;
+        mat(idx_internal, lidx + gb_offset) = inside_gb;
+    }
+}
+
+/**
+*/
+bool EvaluationTargetData::refPosInside(const SectorLayer& layer, 
+                                        boost::posix_time::ptime timestamp, 
+                                        const EvaluationTargetPosition& pos,
+                                        bool has_ground_bit, 
+                                        bool ground_bit_set) const
+{
+    auto it = ref_data_.find(timestamp);
+    assert(it != ref_data_.end());
+
+    return checkInside(layer, ref_data_, inside_ref_, timestamp, pos, has_ground_bit, ground_bit_set);
+}
+
+/**
+*/
+bool EvaluationTargetData::tstPosInside(const SectorLayer& layer, 
+                                        boost::posix_time::ptime timestamp, 
+                                        const EvaluationTargetPosition& pos,
+                                        bool has_ground_bit, 
+                                        bool ground_bit_set) const
+{
+    auto it = tst_data_.find(timestamp);
+    assert(it != tst_data_.end());
+
+    return checkInside(layer, tst_data_, inside_tst_, timestamp, pos, has_ground_bit, ground_bit_set);
+}
+
+/**
+*/
+bool EvaluationTargetData::mappedRefPosInside(const SectorLayer& layer, 
+                                              boost::posix_time::ptime timestamp, 
+                                              const EvaluationTargetPosition& pos,
+                                              bool has_ground_bit, 
+                                              bool ground_bit_set) const
+{
+    auto it = tst_data_.find(timestamp);
+    assert(it != tst_data_.end());
+
+    return checkInside(layer, tst_data_, inside_map_, timestamp, pos, has_ground_bit, ground_bit_set);
+}
+
+/**
+*/
+bool EvaluationTargetData::checkInside(const SectorLayer& layer,
+                                       const IndexMap& indices,
+                                       const InsideCheckMatrix& mat,
+                                       boost::posix_time::ptime timestamp,
+                                       const EvaluationTargetPosition& pos,
+                                       bool has_ground_bit, 
+                                       bool ground_bit_set) const
+{
+    auto lit = inside_sector_layers_.find(&layer);
+#if 0
+    //if no cached inside info is available compute on-the-fly
+    if (lit == inside_sector_layers_.end())
+        return layer.isInside(pos, has_ground_bit, ground_bit_set);
+#else 
+    assert(lit != inside_sector_layers_.end());
+#endif
+    
+    //check cached inside info
+    auto it = indices.find(timestamp);
+    assert(it != indices.end());
+
+    auto idx_internal = it->second.idx_internal;
+    assert(idx_internal < mat.rows());
+
+    auto lidx      = lit->second;
+    auto gb_offset = inside_sector_layers_.size();
+    bool use_gb    = has_ground_bit && ground_bit_set;
+
+    unsigned int col = lidx + (use_gb ? gb_offset : 0);
+    assert(col < mat.cols());
+
+    return mat(idx_internal, col);
 }

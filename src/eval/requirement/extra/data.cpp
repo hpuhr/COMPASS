@@ -89,8 +89,9 @@ std::shared_ptr<EvaluationRequirementResult::Single> ExtraData::evaluate (
             // for ref
             tie (has_ground_bit, ground_bit_set) = target_data.tstGroundBitForTimeInterpolated(timestamp);
 
-            inside = target_data.hasRefPosForTime(timestamp)
-                    && sector_layer.isInside(target_data.refPosForTime(timestamp), has_ground_bit, ground_bit_set);
+            auto ref_pos = target_data.refPosForTime(timestamp);
+
+            inside = target_data.refPosInside(sector_layer, timestamp, ref_pos, has_ground_bit, ground_bit_set);
 
             if (inside)
                 ++num_ref_inside;
@@ -174,7 +175,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> ExtraData::evaluate (
                 tie(has_ground_bit, ground_bit_set) = target_data.interpolatedRefGroundBitForTime(
                             timestamp, seconds(15));
 
-            inside = sector_layer.isInside(tst_pos, has_ground_bit, ground_bit_set);
+            inside = target_data.tstPosInside(sector_layer, timestamp, tst_pos, has_ground_bit, ground_bit_set);
 
             if (inside)
             {

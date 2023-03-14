@@ -34,16 +34,6 @@ std::string SectorLayer::name() const
     return name_;
 }
 
-boost::optional<unsigned int> SectorLayer::id() const
-{
-    return id_;
-}
-
-void SectorLayer::setId(unsigned int id)
-{
-    id_ = id;
-}
-
 bool SectorLayer::hasSector (const std::string& name)
 {
     auto iter = std::find_if(sectors_.begin(), sectors_.end(),
@@ -86,9 +76,10 @@ void SectorLayer::removeSector (std::shared_ptr<Sector> sector)
 }
 
 bool SectorLayer::isInside(const EvaluationTargetPosition& pos,
-                           bool has_ground_bit, bool ground_bit_set)  const
+                           bool has_ground_bit, 
+                           bool ground_bit_set)  const
 {
-    bool is_inside = false;
+    bool is_inside         = false;
     bool is_inside_exclude = false;
 
     // check if inside normal ones
@@ -131,7 +122,7 @@ bool SectorLayer::isInside(const EvaluationTargetPosition& pos,
         }
     }
 
-    return !is_inside_exclude; // true if in no exlcude, false if in include
+    return !is_inside_exclude; // true if in no exclude, false if in include
 }
 
 std::pair<double, double> SectorLayer::getMinMaxLatitude() const

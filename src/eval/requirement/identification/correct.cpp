@@ -193,7 +193,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> IdentificationCorrect::eval
         if (!ground_bit_set)
             tie(has_ground_bit, ground_bit_set) = target_data.interpolatedRefGroundBitForTime(timestamp, seconds(15));
 
-        is_inside = sector_layer.isInside(ref_pos, has_ground_bit, ground_bit_set);
+        is_inside = target_data.mappedRefPosInside(sector_layer, timestamp, ref_pos, has_ground_bit, ground_bit_set);
 
         if (!is_inside)
         {

@@ -22,8 +22,6 @@
 #include <vector>
 #include <memory>
 
-#include <boost/optional.hpp>
-
 class Sector;
 class EvaluationTargetPosition;
 
@@ -33,9 +31,6 @@ public:
     SectorLayer(const std::string& name);
 
     std::string name() const;
-    boost::optional<unsigned int> id() const;
-
-    void setId(unsigned int id);
 
     bool hasSector (const std::string& name);
     void addSector (std::shared_ptr<Sector> sector);
@@ -54,8 +49,6 @@ public:
 
 protected:
     const std::string name_;
-
-    boost::optional<unsigned int> id_;
 
     std::vector<std::shared_ptr<Sector>> sectors_;
     bool has_exclude_sector_ {false};

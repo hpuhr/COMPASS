@@ -693,9 +693,7 @@ void EvaluationManager::evaluate ()
         widget_->updateButtons();
 
     emit resultsChangedSignal();
-
-    updateSectorLayerIDs();
-
+    
     // eval
     results_gen_.evaluate(data_, currentStandard());
 
@@ -902,11 +900,14 @@ void EvaluationManager::loadSectors()
     sectors_loaded_ = true;
 }
 
-void EvaluationManager::updateSectorLayerIDs()
+void EvaluationManager::updateSectorLayers()
 {
-    unsigned int id = 0;
-    for (auto& sl : sector_layers_)
-        sl->setId(id++);
+    if (use_fast_sector_inside_check_)
+    {
+        for (const auto& layer : sectorsLayers())
+            for (const auto& s : layer->sectors())
+                s->createFastInsideTest();
+    }
 }
 
 unsigned int EvaluationManager::getMaxSectorId ()

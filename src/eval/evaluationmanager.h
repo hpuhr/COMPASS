@@ -112,7 +112,7 @@ public:
     void importSectors (const std::string& filename);
     void exportSectors (const std::string& filename);
     unsigned int getMaxSectorId ();
-    void updateSectorLayerIDs();
+    void updateSectorLayers();
 
     std::string dbContentNameRef() const;
     void dbContentNameRef(const std::string& name);
@@ -467,6 +467,8 @@ protected:
     bool has_adsb_info_ {false};
     std::map<unsigned int, std::tuple<std::set<unsigned int>, std::tuple<bool, unsigned int, unsigned int>,
         std::tuple<bool, unsigned int, unsigned int>>> adsb_info_;
+
+    bool use_fast_sector_inside_check_ = true;
 
     virtual void checkSubConfigurables() override;
 

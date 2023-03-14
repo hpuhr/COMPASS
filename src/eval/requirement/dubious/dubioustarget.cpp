@@ -112,7 +112,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTarget::evaluate (
         else
             ground_bit_set = false;
 
-        is_inside = sector_layer.isInside(tst_pos, has_ground_bit, ground_bit_set);
+        is_inside = target_data.tstPosInside(sector_layer, timestamp, tst_pos, has_ground_bit, ground_bit_set);
 
         if (!is_inside)
         {
