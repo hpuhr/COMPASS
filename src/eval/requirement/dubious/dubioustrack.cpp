@@ -142,7 +142,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTrack::evaluate (
     {
         timestamp = tst_id.first;
 
-        if (!target_data.hasTstTrackNumForTime(timestamp))
+        if (!target_data.hasTstTrackNum(tst_id))
         {
             if (!track_num_missing_reported)
             {
@@ -153,22 +153,22 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTrack::evaluate (
             continue;
         }
 
-        track_num = target_data.tstTrackNumForTime(timestamp);
+        track_num = target_data.tstTrackNum(tst_id);
 
         ++num_updates;
 
         // check if inside based on test position only
 
-        tst_pos = target_data.tstPosForTime(timestamp);
+        tst_pos = target_data.tstPos(tst_id);
 
-        has_ground_bit = target_data.hasTstGroundBitForTime(timestamp);
+        has_ground_bit = target_data.hasTstGroundBit(tst_id);
 
         if (has_ground_bit)
-            ground_bit_set = target_data.tstGroundBitForTime(timestamp);
+            ground_bit_set = target_data.tstGroundBit(tst_id);
         else
             ground_bit_set = false;
 
-        is_inside = target_data.tstPosInside(sector_layer, timestamp, tst_pos, has_ground_bit, ground_bit_set);
+        is_inside = target_data.tstPosInside(sector_layer, tst_id, tst_pos, has_ground_bit, ground_bit_set);
 
         if (!is_inside)
         {
@@ -231,11 +231,11 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTrack::evaluate (
 
         // do stats
         if (!current_detail.has_mode_ac
-                && (target_data.hasTstModeAForTime(timestamp) || target_data.hasTstModeCForTime(timestamp)))
+                && (target_data.hasTstModeA(tst_id) || target_data.hasTstModeC(tst_id)))
             current_detail.has_mode_ac  = true;
 
         if (!current_detail.has_mode_s
-                && (target_data.hasTstTAForTime(timestamp) || target_data.hasTstCallsignForTime(timestamp)))
+                && (target_data.hasTstTA(tst_id) || target_data.hasTstCallsign(tst_id)))
             current_detail.has_mode_s  = true;
     }
 
@@ -310,11 +310,13 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTrack::evaluate (
             if (!do_not_evaluate_target && all_updates_dubious) // mark was primarty/short track if required
                 Result::logComments(update, all_updates_dubious_reasons);
 
-            if (!do_not_evaluate_target && use_max_groundspeed_ && target_data.hasTstMeasuredSpeedForTime(update.timestamp())
-                    && target_data.tstMeasuredSpeedForTime(update.timestamp()) > max_groundspeed_kts_)
+            auto id = target_data.dataID(update.timestamp(), Evaluation::DataType::Test);
+
+            if (!do_not_evaluate_target && use_max_groundspeed_ && target_data.hasTstMeasuredSpeed(id)
+                    && target_data.tstMeasuredSpeed(id) > max_groundspeed_kts_)
             {
                 Result::logComment(update, "Spd",
-                        String::doubleToStringPrecision(target_data.tstMeasuredSpeedForTime(update.timestamp()), 1));
+                        String::doubleToStringPrecision(target_data.tstMeasuredSpeed(id), 1));
 
                 ++dubious_groundspeed_found;
             }
@@ -327,12 +329,13 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTrack::evaluate (
                 if (!do_not_evaluate_target && time_diff >= minimum_comparison_time_
                         && time_diff <= maximum_comparison_time_)
                 {
-                    if (use_max_acceleration_ && target_data.hasTstMeasuredSpeedForTime(update.timestamp())
-                            && target_data.hasTstMeasuredSpeedForTime(last_tod))
+                    auto id_last = target_data.dataID(last_tod, Evaluation::DataType::Test);
+
+                    if (use_max_acceleration_ && target_data.hasTstMeasuredSpeed(id) && target_data.hasTstMeasuredSpeed(id_last))
                     {
 
-                        acceleration = fabs(target_data.tstMeasuredSpeedForTime(update.timestamp())
-                                            - target_data.tstMeasuredSpeedForTime(last_tod)) * KNOTS2M_S / time_diff;
+                        acceleration = fabs(target_data.tstMeasuredSpeed(id)
+                                            - target_data.tstMeasuredSpeed(id_last)) * KNOTS2M_S / time_diff;
 
                         if (acceleration > max_acceleration_)
                         {
@@ -344,11 +347,11 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTrack::evaluate (
                     }
 
                     if (!do_not_evaluate_target && use_max_turnrate_
-                            && target_data.hasTstMeasuredTrackAngleForTime(update.timestamp())
-                            && target_data.hasTstMeasuredTrackAngleForTime(last_tod))
+                            && target_data.hasTstMeasuredTrackAngle(id)
+                            && target_data.hasTstMeasuredTrackAngle(id_last))
                     {
-                        track_angle1 = target_data.tstMeasuredTrackAngleForTime(update.timestamp());
-                        track_angle2 = target_data.tstMeasuredTrackAngleForTime(last_tod);
+                        track_angle1 = target_data.tstMeasuredTrackAngle(id);
+                        track_angle2 = target_data.tstMeasuredTrackAngle(id_last);
 
 //                        turnrate = fabs(RAD2DEG*atan2(sin(DEG2RAD*(track_angle1-track_angle2)),
 //                                              cos(DEG2RAD*(track_angle1-track_angle2)))) / time_diff; // turn angle rate
@@ -364,12 +367,11 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTrack::evaluate (
                         }
                     }
 
-                    if (!do_not_evaluate_target && use_rocd_ && target_data.hasTstModeCForTime(update.timestamp())
-                            && target_data.hasTstModeCForTime(last_tod))
+                    if (!do_not_evaluate_target && use_rocd_ && target_data.hasTstModeC(id)
+                            && target_data.hasTstModeC(id_last))
                     {
 
-                        rocd = fabs(target_data.tstModeCForTime(update.timestamp())
-                                            - target_data.tstModeCForTime(last_tod)) / time_diff;
+                        rocd = fabs(target_data.tstModeC(id) - target_data.tstModeC(id_last)) / time_diff;
 
                         if (rocd > max_rocd_)
                         {

@@ -55,6 +55,45 @@ EvaluationTargetData::EvaluationTargetData(unsigned int utn,
 
 EvaluationTargetData::~EvaluationTargetData() = default;
 
+EvaluationTargetData::DataID EvaluationTargetData::dataID(const boost::posix_time::ptime& timestamp, 
+                                                          DataType dtype) const
+{
+    const IndexMap& index_map = (dtype == DataType::Reference) ? ref_data_ : tst_data_;
+
+    auto range = index_map.equal_range(timestamp);
+#if 0
+    if (range.first == index_map.end())
+        return DataID();
+#else
+    assert(range.first != index_map.end());
+#endif
+
+    assert(range.first->second.idx_internal < index_map.size());
+
+    return DataID(timestamp).addIndex(range.first->second);
+}
+
+EvaluationTargetData::Index EvaluationTargetData::indexFromDataID(const DataID& id, DataType dtype) const
+{
+    assert(id.valid());
+
+    if (!id.hasIndex())
+    {
+        auto id_ret = dataID(id.timestamp(), dtype);
+        assert(id_ret.valid());
+
+        return id_ret.index();
+    }
+    
+    return id.index();
+}
+
+boost::posix_time::ptime EvaluationTargetData::timestampFromDataID(const DataID& id) const
+{
+    assert(id.valid());
+    return id.timestamp();
+}
+
 void EvaluationTargetData::addRefIndex (boost::posix_time::ptime timestamp, unsigned int index)
 {
     unsigned int idx_int = (unsigned int)ref_indices_.size();
@@ -303,14 +342,13 @@ const EvaluationTargetData::IndexMap& EvaluationTargetData::tstData() const
     return tst_data_;
 }
 
-bool EvaluationTargetData::hasRefDataForTime(ptime timestamp, 
-                                             time_duration d_max) const
+bool EvaluationTargetData::hasMappedRefData(const DataID& id, 
+                                            time_duration d_max) const
 {
-    assert (tst_data_.count(timestamp));
+    auto timestamp = timestampFromDataID(id);
+    auto index     = indexFromDataID(id, DataType::Test);
 
-    auto it = tst_data_.find(timestamp);
-
-    const TstDataMapping& mapping = tst_data_mappings_.at(it->second.idx_internal);
+    const TstDataMapping& mapping = tst_data_mappings_.at(index.idx_internal);
 
     if (!mapping.has_ref1_ && !mapping.has_ref2_) // no ref data
         return false;
@@ -332,14 +370,13 @@ bool EvaluationTargetData::hasRefDataForTime(ptime timestamp,
     return false;
 }
 
-std::pair<ptime, ptime> EvaluationTargetData::refTimesFor(boost::posix_time::ptime timestamp, 
-                                                          time_duration d_max)  const
+std::pair<ptime, ptime> EvaluationTargetData::mappedRefTimes(const DataID& id, 
+                                                             time_duration d_max)  const
 {
-    assert (tst_data_.count(timestamp));
+    auto timestamp = timestampFromDataID(id);
+    auto index     = indexFromDataID(id, DataType::Test);
 
-    auto it = tst_data_.find(timestamp);
-
-    const TstDataMapping& mapping = tst_data_mappings_.at(it->second.idx_internal);
+    const TstDataMapping& mapping = tst_data_mappings_.at(index.idx_internal);
 
     if (!mapping.has_ref1_ && !mapping.has_ref2_) // no ref data
         return {{}, {}};
@@ -361,14 +398,13 @@ std::pair<ptime, ptime> EvaluationTargetData::refTimesFor(boost::posix_time::pti
     return {{}, {}};
 }
 
-std::pair<EvaluationTargetPosition, bool> EvaluationTargetData::interpolatedRefPosForTime(ptime timestamp, 
-                                                                                          time_duration d_max) const
+std::pair<EvaluationTargetPosition, bool> EvaluationTargetData::mappedRefPos(const DataID& id, 
+                                                                             time_duration d_max) const
 {
-    assert (tst_data_.count(timestamp));
+    auto timestamp = timestampFromDataID(id);
+    auto index     = indexFromDataID(id, DataType::Test);
 
-    auto it = tst_data_.find(timestamp);
-
-    const TstDataMapping& mapping = tst_data_mappings_.at(it->second.idx_internal);
+    const TstDataMapping& mapping = tst_data_mappings_.at(index.idx_internal);
 
     if (!mapping.has_ref1_ && !mapping.has_ref2_) // no ref data
         return {{}, false};
@@ -414,14 +450,13 @@ std::pair<EvaluationTargetPosition, bool> EvaluationTargetData::interpolatedRefP
     return {{}, false};
 }
 
-std::pair<EvaluationTargetVelocity, bool> EvaluationTargetData::interpolatedRefSpdForTime(ptime timestamp, 
-                                                                                          time_duration d_max) const
+std::pair<EvaluationTargetVelocity, bool> EvaluationTargetData::mappedRefSpeed(const DataID& id, 
+                                                                               time_duration d_max) const
 {
-    assert (tst_data_.count(timestamp));
+    auto timestamp = timestampFromDataID(id);
+    auto index     = indexFromDataID(id, DataType::Test);
 
-    auto it = tst_data_.find(timestamp);
-
-    const TstDataMapping& mapping = tst_data_mappings_.at(it->second.idx_internal);
+    const TstDataMapping& mapping = tst_data_mappings_.at(index.idx_internal);
 
     if (!mapping.has_ref1_ && !mapping.has_ref2_) // no ref data
         return {{}, false};
@@ -467,26 +502,59 @@ std::pair<EvaluationTargetVelocity, bool> EvaluationTargetData::interpolatedRefS
     return {{}, false};
 }
 
-bool EvaluationTargetData::hasRefPosForTime (ptime timestamp) const
+std::pair<bool,bool> EvaluationTargetData::mappedRefGroundBit(const DataID& id, 
+                                                              time_duration d_max) const
+// has gbs, gbs true
 {
+    bool has_gbs = false;
+    bool gbs = false;
+
+    auto timestamp = timestampFromDataID(id);
+    auto index     = indexFromDataID(id, DataType::Test);
+
+    const TstDataMapping& mapping = tst_data_mappings_.at(index.idx_internal);
+
+    if (!mapping.has_ref1_ && !mapping.has_ref2_) // no ref data
+        return {has_gbs, gbs};
+
+    if (mapping.has_ref1_ && mapping.has_ref2_) // interpolated
+    {
+        assert (mapping.timestamp_ref1_ <= timestamp);
+        assert (mapping.timestamp_ref2_ >= timestamp);
+
+        if (timestamp - mapping.timestamp_ref1_ > d_max) // lower to far
+            return {has_gbs, gbs};
+
+        if (mapping.timestamp_ref2_ - timestamp > d_max) // upper to far
+            return {has_gbs, gbs};
+
+        tie (has_gbs, gbs) = refGroundBit(mapping.timestamp_ref1_);
+
+        if (!gbs)
+            tie (has_gbs, gbs) = refGroundBit(mapping.timestamp_ref2_);
+    }
+
+    return {has_gbs, gbs};
+}
+
+bool EvaluationTargetData::hasRefPos(const DataID& id) const
+{
+    auto timestamp = timestampFromDataID(id);
     return ref_data_.count(timestamp);
 }
 
-EvaluationTargetPosition EvaluationTargetData::refPosForTime (ptime timestamp) const
+EvaluationTargetPosition EvaluationTargetData::refPos(const DataID& id) const
 {
-    assert (hasRefPosForTime(timestamp));
+    auto timestamp = timestampFromDataID(id);
+    auto index     = indexFromDataID(id, DataType::Reference);
 
-    auto it_pair = ref_data_.equal_range(timestamp);
-
-    assert (it_pair.first != ref_data_.end());
-
-    unsigned int index = it_pair.first->second.idx_external;
+    unsigned int index_ext = index.idx_external;
 
     EvaluationTargetPosition pos;
 
-    NullableVector<double>& latitude_vec = eval_data_.ref_buffer_->get<double>(eval_data_.ref_latitude_name_);
+    NullableVector<double>& latitude_vec  = eval_data_.ref_buffer_->get<double>(eval_data_.ref_latitude_name_);
     NullableVector<double>& longitude_vec = eval_data_.ref_buffer_->get<double>(eval_data_.ref_longitude_name_);
-    NullableVector<float>& altitude_vec = eval_data_.ref_buffer_->get<float>(eval_data_.ref_modec_name_);
+    NullableVector<float>& altitude_vec   = eval_data_.ref_buffer_->get<float>(eval_data_.ref_modec_name_);
 
     NullableVector<float>* altitude_trusted_vec {nullptr};
 
@@ -496,43 +564,43 @@ EvaluationTargetPosition EvaluationTargetData::refPosForTime (ptime timestamp) c
         altitude_trusted_vec = &eval_data_.ref_buffer_->get<float>(eval_data_.ref_modec_trusted_name_);
     }
 
-    assert (!latitude_vec.isNull(index));
-    assert (!longitude_vec.isNull(index));
+    assert (!latitude_vec.isNull(index_ext));
+    assert (!longitude_vec.isNull(index_ext));
 
-    pos.latitude_ = latitude_vec.get(index);
-    pos.longitude_ = longitude_vec.get(index);
+    pos.latitude_  = latitude_vec.get(index_ext);
+    pos.longitude_ = longitude_vec.get(index_ext);
 
-    if (altitude_trusted_vec && !altitude_trusted_vec->isNull(index))
+    if (altitude_trusted_vec && !altitude_trusted_vec->isNull(index_ext))
     {
-        pos.has_altitude_ = true;
+        pos.has_altitude_        = true;
         pos.altitude_calculated_ = false;
-        pos.altitude_ = altitude_trusted_vec->get(index);
+        pos.altitude_            = altitude_trusted_vec->get(index_ext);
     }
-    else if (!altitude_vec.isNull(index))
+    else if (!altitude_vec.isNull(index_ext))
     {
-        pos.has_altitude_ = true;
+        pos.has_altitude_        = true;
         pos.altitude_calculated_ = false;
-        pos.altitude_ = altitude_vec.get(index);
+        pos.altitude_            = altitude_vec.get(index_ext);
     }
     else if (eval_data_.has_ref_altitude_secondary_
-             && !eval_data_.ref_buffer_->get<float>(eval_data_.ref_altitude_secondary_name_).isNull(index))
+             && !eval_data_.ref_buffer_->get<float>(eval_data_.ref_altitude_secondary_name_).isNull(index_ext))
     {
-        pos.has_altitude_ = true;
+        pos.has_altitude_        = true;
         pos.altitude_calculated_ = true;
-        pos.altitude_ = eval_data_.ref_buffer_->get<float>(eval_data_.ref_altitude_secondary_name_).get(index);
+        pos.altitude_            = eval_data_.ref_buffer_->get<float>(eval_data_.ref_altitude_secondary_name_).get(index_ext);
     }
     else // calculate
     {
         bool found;
         float alt_calc;
 
-        tie(found,alt_calc) = estimateRefAltitude(timestamp, it_pair.first->second.idx_internal);
+        tie(found,alt_calc) = estimateRefAltitude(timestamp, index.idx_internal);
 
         if (found)
         {
-            pos.has_altitude_ = true;
+            pos.has_altitude_        = true;
             pos.altitude_calculated_ = true;
-            pos.altitude_ = alt_calc;
+            pos.altitude_            = alt_calc;
         }
     }
 
@@ -544,49 +612,8 @@ EvaluationTargetPosition EvaluationTargetData::refPosForTime (ptime timestamp) c
     return pos;
 }
 
-bool EvaluationTargetData::hasRefSpeedForTime (boost::posix_time::ptime timestamp) const
-{
-    if (!ref_data_.count(timestamp))
-        return false;
-
-    auto it_pair = ref_data_.equal_range(timestamp);
-    assert (it_pair.first != ref_data_.end());
-
-    unsigned int index = it_pair.first->second.idx_external;
-
-    NullableVector<double>& speed_vec = eval_data_.ref_buffer_->get<double>(
-                eval_data_.ref_spd_ground_speed_kts_name_);
-    NullableVector<double>& track_angle_vec = eval_data_.ref_buffer_->get<double>(
-                eval_data_.ref_spd_track_angle_deg_name_);
-
-    return !speed_vec.isNull(index) && !track_angle_vec.isNull(index);
-}
-EvaluationTargetVelocity EvaluationTargetData::refSpdForTime (boost::posix_time::ptime timestamp) const
-{
-    assert (ref_data_.count(timestamp));
-
-    auto it_pair = ref_data_.equal_range(timestamp);
-    assert (it_pair.first != ref_data_.end());
-
-    unsigned int index = it_pair.first->second.idx_external;
-
-    NullableVector<double>& speed_vec = eval_data_.ref_buffer_->get<double>(
-                eval_data_.ref_spd_ground_speed_kts_name_);
-    NullableVector<double>& track_angle_vec = eval_data_.ref_buffer_->get<double>(
-                eval_data_.ref_spd_track_angle_deg_name_);
-
-    assert (!speed_vec.isNull(index));
-    assert (!track_angle_vec.isNull(index));
-
-    EvaluationTargetVelocity spd;
-
-    spd.speed_ = speed_vec.get(index) * KNOTS2M_S; // true north to mathematical
-    spd.track_angle_ = track_angle_vec.get(index);
-
-    return spd;
-}
-
-std::pair<bool, float> EvaluationTargetData::estimateRefAltitude (ptime timestamp, unsigned int index_internal) const
+std::pair<bool, float> EvaluationTargetData::estimateRefAltitude (const boost::posix_time::ptime& timestamp, 
+                                                                  unsigned int index_internal) const
 {
     assert(index_internal < ref_indices_.size());
 
@@ -735,234 +762,202 @@ std::pair<bool, float> EvaluationTargetData::estimateRefAltitude (ptime timestam
     }
 }
 
-bool EvaluationTargetData::hasRefCallsignForTime (ptime timestamp) const
+bool EvaluationTargetData::hasRefSpeed(const DataID& id) const
 {
-    if (!ref_data_.count(timestamp))
-        return false;
+    auto index = indexFromDataID(id, DataType::Reference);
 
-    auto it_pair = ref_data_.equal_range(timestamp);
+    unsigned int index_ext = index.idx_external;
 
-    assert (it_pair.first != ref_data_.end());
+    NullableVector<double>& speed_vec = eval_data_.ref_buffer_->get<double>(
+                eval_data_.ref_spd_ground_speed_kts_name_);
+    NullableVector<double>& track_angle_vec = eval_data_.ref_buffer_->get<double>(
+                eval_data_.ref_spd_track_angle_deg_name_);
 
-    unsigned int index = it_pair.first->second.idx_external;
+    return !speed_vec.isNull(index_ext) && !track_angle_vec.isNull(index_ext);
+}
+
+EvaluationTargetVelocity EvaluationTargetData::refSpeed(const DataID& id) const
+{
+    auto index = indexFromDataID(id, DataType::Reference);
+
+    unsigned int index_ext = index.idx_external;
+
+    NullableVector<double>& speed_vec = eval_data_.ref_buffer_->get<double>(
+                eval_data_.ref_spd_ground_speed_kts_name_);
+    NullableVector<double>& track_angle_vec = eval_data_.ref_buffer_->get<double>(
+                eval_data_.ref_spd_track_angle_deg_name_);
+
+    assert (!speed_vec.isNull(index_ext));
+    assert (!track_angle_vec.isNull(index_ext));
+
+    EvaluationTargetVelocity spd;
+
+    spd.speed_ = speed_vec.get(index_ext) * KNOTS2M_S; // true north to mathematical
+    spd.track_angle_ = track_angle_vec.get(index_ext);
+
+    return spd;
+}
+
+bool EvaluationTargetData::hasRefCallsign(const DataID& id) const
+{
+    auto index = indexFromDataID(id, DataType::Reference);
+
+    unsigned int index_ext = index.idx_external;
 
     NullableVector<string>& callsign_vec = eval_data_.ref_buffer_->get<string>(eval_data_.ref_callsign_name_);
 
-    return !callsign_vec.isNull(index);
+    return !callsign_vec.isNull(index_ext);
 }
 
-std::string EvaluationTargetData::refCallsignForTime (ptime timestamp) const
+std::string EvaluationTargetData::refCallsign(const DataID& id) const
 {
-    assert (hasRefCallsignForTime(timestamp));
+    assert (hasRefCallsign(id));
 
-    auto it_pair = ref_data_.equal_range(timestamp);
+    auto index = indexFromDataID(id, DataType::Reference);
 
-    assert (it_pair.first != ref_data_.end());
-
-    unsigned int index = it_pair.first->second.idx_external;
+    unsigned int index_ext = index.idx_external;
 
     NullableVector<string>& callsign_vec = eval_data_.ref_buffer_->get<string>(eval_data_.ref_callsign_name_);
-    assert (!callsign_vec.isNull(index));
+    assert (!callsign_vec.isNull(index_ext));
 
-    return boost::trim_copy(callsign_vec.get(index)); // remove spaces
+    return boost::trim_copy(callsign_vec.get(index_ext)); // remove spaces
 }
 
-bool EvaluationTargetData::hasRefModeAForTime (ptime timestamp) const
+bool EvaluationTargetData::hasRefModeA(const DataID& id) const
 {
-    if (!ref_data_.count(timestamp))
-        return false;
+    auto index = indexFromDataID(id, DataType::Reference);
 
-    auto it_pair = ref_data_.equal_range(timestamp);
+    unsigned int index_ext = index.idx_external;
 
-    assert (it_pair.first != ref_data_.end());
-
-    unsigned int index = it_pair.first->second.idx_external;
-
-    if (eval_data_.ref_buffer_->get<unsigned int>(eval_data_.ref_modea_name_).isNull(index))
+    if (eval_data_.ref_buffer_->get<unsigned int>(eval_data_.ref_modea_name_).isNull(index_ext))
         return false;
 
     if (eval_data_.ref_modea_v_name_.size()
-            && !eval_data_.ref_buffer_->get<bool>(eval_data_.ref_modea_v_name_).isNull(index)
-            && !eval_data_.ref_buffer_->get<bool>(eval_data_.ref_modea_v_name_).get(index)) // not valid
+            && !eval_data_.ref_buffer_->get<bool>(eval_data_.ref_modea_v_name_).isNull(index_ext)
+            && !eval_data_.ref_buffer_->get<bool>(eval_data_.ref_modea_v_name_).get(index_ext)) // not valid
         return false;
 
     if (eval_data_.ref_modea_g_name_.size()
-            && !eval_data_.ref_buffer_->get<bool>(eval_data_.ref_modea_g_name_).isNull(index)
-            && eval_data_.ref_buffer_->get<bool>(eval_data_.ref_modea_g_name_).get(index)) // garbled
+            && !eval_data_.ref_buffer_->get<bool>(eval_data_.ref_modea_g_name_).isNull(index_ext)
+            && eval_data_.ref_buffer_->get<bool>(eval_data_.ref_modea_g_name_).get(index_ext)) // garbled
         return false;
 
     return true;
 }
 
-unsigned int EvaluationTargetData::refModeAForTime (ptime timestamp) const
+unsigned int EvaluationTargetData::refModeA(const DataID& id) const
 {
-    assert (hasRefModeAForTime(timestamp));
+    assert (hasRefModeA(id));
 
-    auto it_pair = ref_data_.equal_range(timestamp);
+    auto index = indexFromDataID(id, DataType::Reference);
 
-    assert (it_pair.first != ref_data_.end());
-
-    unsigned int index = it_pair.first->second.idx_external;
+    unsigned int index_ext = index.idx_external;
 
     NullableVector<unsigned int>& modea_vec = eval_data_.ref_buffer_->get<unsigned int>(eval_data_.ref_modea_name_);
-    assert (!modea_vec.isNull(index));
+    assert (!modea_vec.isNull(index_ext));
 
-    return modea_vec.get(index);
+    return modea_vec.get(index_ext);
 }
 
-bool EvaluationTargetData::hasRefModeCForTime (ptime timestamp) const
+bool EvaluationTargetData::hasRefModeC(const DataID& id) const
 {
-    if (!ref_data_.count(timestamp))
-        return false;
+    auto index = indexFromDataID(id, DataType::Reference);
 
-    auto it_pair = ref_data_.equal_range(timestamp);
-
-    assert (it_pair.first != ref_data_.end());
-
-    unsigned int index = it_pair.first->second.idx_external;
+    unsigned int index_ext = index.idx_external;
 
     if (eval_data_.ref_modec_trusted_name_.size() &&
-            !eval_data_.ref_buffer_->get<float>(eval_data_.ref_modec_trusted_name_).isNull(index))
+            !eval_data_.ref_buffer_->get<float>(eval_data_.ref_modec_trusted_name_).isNull(index_ext))
         return true;
 
-    if (eval_data_.ref_buffer_->get<float>(eval_data_.ref_modec_name_).isNull(index))
+    if (eval_data_.ref_buffer_->get<float>(eval_data_.ref_modec_name_).isNull(index_ext))
         return false;
 
     if (eval_data_.ref_modec_v_name_.size()
-            && !eval_data_.ref_buffer_->get<bool>(eval_data_.ref_modec_v_name_).isNull(index)
-            && !eval_data_.ref_buffer_->get<bool>(eval_data_.ref_modec_v_name_).get(index)) // not valid
+            && !eval_data_.ref_buffer_->get<bool>(eval_data_.ref_modec_v_name_).isNull(index_ext)
+            && !eval_data_.ref_buffer_->get<bool>(eval_data_.ref_modec_v_name_).get(index_ext)) // not valid
         return false;
 
     if (eval_data_.ref_modec_g_name_.size()
-            && !eval_data_.ref_buffer_->get<bool>(eval_data_.ref_modec_g_name_).isNull(index)
-            && eval_data_.ref_buffer_->get<bool>(eval_data_.ref_modec_g_name_).get(index)) // garbled
+            && !eval_data_.ref_buffer_->get<bool>(eval_data_.ref_modec_g_name_).isNull(index_ext)
+            && eval_data_.ref_buffer_->get<bool>(eval_data_.ref_modec_g_name_).get(index_ext)) // garbled
         return false;
 
     return true;
 }
 
-float EvaluationTargetData::refModeCForTime (ptime timestamp) const
+float EvaluationTargetData::refModeC(const DataID& id) const
 {
-    assert (hasRefModeCForTime(timestamp));
+    assert (hasRefModeC(id));
 
-    auto it_pair = ref_data_.equal_range(timestamp);
+    auto index = indexFromDataID(id, DataType::Reference);
 
-    assert (it_pair.first != ref_data_.end());
-
-    unsigned int index = it_pair.first->second.idx_external;
+    unsigned int index_ext = index.idx_external;
 
     if (eval_data_.ref_modec_trusted_name_.size() &&
-            !eval_data_.ref_buffer_->get<float>(eval_data_.ref_modec_trusted_name_).isNull(index))
-        return eval_data_.ref_buffer_->get<float>(eval_data_.ref_modec_trusted_name_).get(index);
+            !eval_data_.ref_buffer_->get<float>(eval_data_.ref_modec_trusted_name_).isNull(index_ext))
+        return eval_data_.ref_buffer_->get<float>(eval_data_.ref_modec_trusted_name_).get(index_ext);
 
     NullableVector<float>& modec_vec = eval_data_.ref_buffer_->get<float>(eval_data_.ref_modec_name_);
-    assert (!modec_vec.isNull(index));
+    assert (!modec_vec.isNull(index_ext));
 
-    return modec_vec.get(index);
+    return modec_vec.get(index_ext);
 }
 
-bool EvaluationTargetData::hasRefTAForTime (ptime timestamp) const
+bool EvaluationTargetData::hasRefTA(const DataID& id) const
 {
-    if (!ref_data_.count(timestamp))
-        return false;
+    auto index = indexFromDataID(id, DataType::Reference);
 
-    auto it_pair = ref_data_.equal_range(timestamp);
-
-    assert (it_pair.first != ref_data_.end());
-
-    unsigned int index = it_pair.first->second.idx_external;
+    unsigned int index_ext = index.idx_external;
 
     if (eval_data_.ref_target_address_name_.size()
-            && !eval_data_.ref_buffer_->get<unsigned int>(eval_data_.ref_target_address_name_).isNull(index))
+            && !eval_data_.ref_buffer_->get<unsigned int>(eval_data_.ref_target_address_name_).isNull(index_ext))
         return true;
 
     return false;
 }
 
-unsigned int EvaluationTargetData::refTAForTime (ptime timestamp) const
+unsigned int EvaluationTargetData::refTA(const DataID& id) const
 {
-    assert (hasRefTAForTime(timestamp));
+    assert (hasRefTA(id));
 
-    auto it_pair = ref_data_.equal_range(timestamp);
+    auto index = indexFromDataID(id, DataType::Reference);
 
-    assert (it_pair.first != ref_data_.end());
+    unsigned int index_ext = index.idx_external;
 
-    unsigned int index = it_pair.first->second.idx_external;
+    assert (!eval_data_.ref_buffer_->get<unsigned int>(eval_data_.ref_target_address_name_).isNull(index_ext));
 
-    assert (!eval_data_.ref_buffer_->get<unsigned int>(eval_data_.ref_target_address_name_).isNull(index));
-
-    return eval_data_.ref_buffer_->get<unsigned int>(eval_data_.ref_target_address_name_).get(index);
+    return eval_data_.ref_buffer_->get<unsigned int>(eval_data_.ref_target_address_name_).get(index_ext);
 }
 
-std::pair<bool,bool> EvaluationTargetData::refGroundBitForTime (ptime timestamp) const // has gbs, gbs true
+std::pair<bool,bool> EvaluationTargetData::refGroundBit(const DataID& id) const // has gbs, gbs true
 {
-    if (!ref_data_.count(timestamp))
-        return {false, false};
+    auto index = indexFromDataID(id, DataType::Reference);
 
-    auto it_pair = ref_data_.equal_range(timestamp);
-
-    assert (it_pair.first != ref_data_.end());
-
-    unsigned int index = it_pair.first->second.idx_external;
+    unsigned int index_ext = index.idx_external;
 
     if (eval_data_.ref_ground_bit_name_.size()
-            && !eval_data_.ref_buffer_->get<bool>(eval_data_.ref_ground_bit_name_).isNull(index))
+            && !eval_data_.ref_buffer_->get<bool>(eval_data_.ref_ground_bit_name_).isNull(index_ext))
     {
-        return {true, eval_data_.ref_buffer_->get<bool>(eval_data_.ref_ground_bit_name_).get(index)};
+        return {true, eval_data_.ref_buffer_->get<bool>(eval_data_.ref_ground_bit_name_).get(index_ext)};
     }
     else
         return {false, false};
 }
 
-std::pair<bool,bool> EvaluationTargetData::interpolatedRefGroundBitForTime (ptime timestamp, time_duration d_max) const
-// has gbs, gbs true
+bool EvaluationTargetData::hasTstPos(const DataID& id) const
 {
-    assert (tst_data_.count(timestamp));
-
-    bool has_gbs = false;
-    bool gbs = false;
-
-    auto it = tst_data_.find(timestamp);
-
-    const TstDataMapping& mapping = tst_data_mappings_.at(it->second.idx_internal);
-
-    if (!mapping.has_ref1_ && !mapping.has_ref2_) // no ref data
-        return {has_gbs, gbs};
-
-    if (mapping.has_ref1_ && mapping.has_ref2_) // interpolated
-    {
-        assert (mapping.timestamp_ref1_ <= timestamp);
-        assert (mapping.timestamp_ref2_ >= timestamp);
-
-        if (timestamp - mapping.timestamp_ref1_ > d_max) // lower to far
-            return {has_gbs, gbs};
-
-        if (mapping.timestamp_ref2_ - timestamp > d_max) // upper to far
-            return {has_gbs, gbs};
-
-        tie (has_gbs, gbs) = refGroundBitForTime(mapping.timestamp_ref1_);
-
-        if (!gbs)
-            tie (has_gbs, gbs) = refGroundBitForTime(mapping.timestamp_ref2_);
-    }
-
-    return {has_gbs, gbs};
-}
-
-bool EvaluationTargetData::hasTstPosForTime (ptime timestamp) const
-{
+    auto timestamp = timestampFromDataID(id);
     return tst_data_.count(timestamp);
 }
 
-EvaluationTargetPosition EvaluationTargetData::tstPosForTime (ptime timestamp) const
+EvaluationTargetPosition EvaluationTargetData::tstPos(const DataID& id) const
 {
-    assert (hasTstPosForTime(timestamp));
+    assert (hasTstPos(id));
 
-    auto it_pair = tst_data_.equal_range(timestamp);
+    auto timestamp = timestampFromDataID(id);
+    auto index     = indexFromDataID(id, DataType::Test);
 
-    assert (it_pair.first != tst_data_.end());
-
-    unsigned int index = it_pair.first->second.idx_external;
+    auto index_ext = index.idx_external;
 
     EvaluationTargetPosition pos;
 
@@ -978,22 +973,22 @@ EvaluationTargetPosition EvaluationTargetData::tstPosForTime (ptime timestamp) c
         altitude_trusted_vec = &eval_data_.tst_buffer_->get<float>(eval_data_.tst_modec_trusted_name_);
     }
 
-    assert (!latitude_vec.isNull(index));
-    assert (!longitude_vec.isNull(index));
+    assert (!latitude_vec.isNull(index_ext));
+    assert (!longitude_vec.isNull(index_ext));
 
-    pos.latitude_ = latitude_vec.get(index);
-    pos.longitude_ = longitude_vec.get(index);
+    pos.latitude_ = latitude_vec.get(index_ext);
+    pos.longitude_ = longitude_vec.get(index_ext);
 
-    if (altitude_trusted_vec && !altitude_trusted_vec->isNull(index))
+    if (altitude_trusted_vec && !altitude_trusted_vec->isNull(index_ext))
     {
         pos.has_altitude_ = true;
         pos.altitude_calculated_ = false;
-        pos.altitude_ = altitude_trusted_vec->get(index);
+        pos.altitude_ = altitude_trusted_vec->get(index_ext);
     }
-    else if (!altitude_vec.isNull(index))
+    else if (!altitude_vec.isNull(index_ext))
     {
         pos.has_altitude_ = true;
-        pos.altitude_ = altitude_vec.get(index);
+        pos.altitude_ = altitude_vec.get(index_ext);
         pos.altitude_calculated_ = false;
     }
     else // calculate
@@ -1001,7 +996,7 @@ EvaluationTargetPosition EvaluationTargetData::tstPosForTime (ptime timestamp) c
         bool found;
         float alt_calc;
 
-        tie(found,alt_calc) = estimateTstAltitude(timestamp, it_pair.first->second.idx_internal);
+        tie(found,alt_calc) = estimateTstAltitude(timestamp, index.idx_internal);
 
         if (found)
         {
@@ -1014,7 +1009,8 @@ EvaluationTargetPosition EvaluationTargetData::tstPosForTime (ptime timestamp) c
     return pos;
 }
 
-std::pair<bool, float> EvaluationTargetData::estimateTstAltitude (ptime timestamp, unsigned int index_internal) const
+std::pair<bool, float> EvaluationTargetData::estimateTstAltitude(const boost::posix_time::ptime& timestamp, 
+                                                                 unsigned int index_internal) const
 {
     assert(index_internal < tst_indices_.size());
 
@@ -1121,279 +1117,254 @@ std::pair<bool, float> EvaluationTargetData::estimateTstAltitude (ptime timestam
     }
 }
 
-bool EvaluationTargetData::hasTstCallsignForTime (ptime timestamp) const
+bool EvaluationTargetData::hasTstCallsign(const DataID& id) const
 {
-    if (!tst_data_.count(timestamp))
-        return false;
+    auto index = indexFromDataID(id, DataType::Test);
 
-    auto it_pair = tst_data_.equal_range(timestamp);
-
-    assert (it_pair.first != tst_data_.end());
-
-    unsigned int index = it_pair.first->second.idx_external;
+    auto index_ext = index.idx_external;
 
     NullableVector<string>& callsign_vec = eval_data_.tst_buffer_->get<string>(eval_data_.tst_callsign_name_);
-    return !callsign_vec.isNull(index);
+    return !callsign_vec.isNull(index_ext);
 }
 
-std::string EvaluationTargetData::tstCallsignForTime (ptime timestamp) const
+std::string EvaluationTargetData::tstCallsign(const DataID& id) const
 {
-    assert (hasTstCallsignForTime(timestamp));
+    assert (hasTstCallsign(id));
 
-    auto it_pair = tst_data_.equal_range(timestamp);
+    auto index = indexFromDataID(id, DataType::Test);
 
-    assert (it_pair.first != tst_data_.end());
-
-    unsigned int index = it_pair.first->second.idx_external;
+    auto index_ext = index.idx_external;
 
     NullableVector<string>& callsign_vec = eval_data_.tst_buffer_->get<string>(eval_data_.tst_callsign_name_);
-    assert (!callsign_vec.isNull(index));
+    assert (!callsign_vec.isNull(index_ext));
 
-    return boost::trim_copy(callsign_vec.get(index)); // remove spaces
+    return boost::trim_copy(callsign_vec.get(index_ext)); // remove spaces
 }
 
-bool EvaluationTargetData::hasTstModeAForTime (ptime timestamp) const
+bool EvaluationTargetData::hasTstModeA(const DataID& id) const
 {
-    if (!tst_data_.count(timestamp))
-        return false;
+    auto index = indexFromDataID(id, DataType::Test);
 
-    auto it_pair = tst_data_.equal_range(timestamp);
+    auto index_ext = index.idx_external;
 
-    assert (it_pair.first != tst_data_.end());
-
-    unsigned int index = it_pair.first->second.idx_external;
-
-    if (eval_data_.tst_buffer_->get<unsigned int>(eval_data_.tst_modea_name_).isNull(index))
+    if (eval_data_.tst_buffer_->get<unsigned int>(eval_data_.tst_modea_name_).isNull(index_ext))
         return false;
 
     if (eval_data_.tst_modea_v_name_.size()
-            && !eval_data_.tst_buffer_->get<bool>(eval_data_.tst_modea_v_name_).isNull(index)
-            && !eval_data_.tst_buffer_->get<bool>(eval_data_.tst_modea_v_name_).get(index)) // not valid
+            && !eval_data_.tst_buffer_->get<bool>(eval_data_.tst_modea_v_name_).isNull(index_ext)
+            && !eval_data_.tst_buffer_->get<bool>(eval_data_.tst_modea_v_name_).get(index_ext)) // not valid
         return false;
 
     if (eval_data_.tst_modea_g_name_.size()
-            && !eval_data_.tst_buffer_->get<bool>(eval_data_.tst_modea_g_name_).isNull(index)
-            && eval_data_.tst_buffer_->get<bool>(eval_data_.tst_modea_g_name_).get(index)) // garbled
+            && !eval_data_.tst_buffer_->get<bool>(eval_data_.tst_modea_g_name_).isNull(index_ext)
+            && eval_data_.tst_buffer_->get<bool>(eval_data_.tst_modea_g_name_).get(index_ext)) // garbled
         return false;
 
     return true;
 }
 
-unsigned int EvaluationTargetData::tstModeAForTime (ptime timestamp) const
+unsigned int EvaluationTargetData::tstModeA(const DataID& id) const
 {
-    assert (hasTstModeAForTime(timestamp));
+    assert (hasTstModeA(id));
 
-    auto it_pair = tst_data_.equal_range(timestamp);
+    auto index = indexFromDataID(id, DataType::Test);
 
-    assert (it_pair.first != tst_data_.end());
-
-    unsigned int index = it_pair.first->second.idx_external;
+    auto index_ext = index.idx_external;
 
     NullableVector<unsigned int>& modea_vec = eval_data_.tst_buffer_->get<unsigned int>(eval_data_.tst_modea_name_);
-    assert (!modea_vec.isNull(index));
+    assert (!modea_vec.isNull(index_ext));
 
-    return modea_vec.get(index);
+    return modea_vec.get(index_ext);
 }
 
-bool EvaluationTargetData::hasTstModeCForTime (ptime timestamp) const
+bool EvaluationTargetData::hasTstModeC(const DataID& id) const
 {
-    if (!tst_data_.count(timestamp))
-        return false;
+    auto index = indexFromDataID(id, DataType::Test);
 
-    auto it_pair = tst_data_.equal_range(timestamp);
-
-    assert (it_pair.first != tst_data_.end());
-
-    unsigned int index = it_pair.first->second.idx_external;
+    auto index_ext = index.idx_external;
 
     if (eval_data_.tst_modec_trusted_name_.size() &&
-            !eval_data_.tst_buffer_->get<float>(eval_data_.tst_modec_trusted_name_).isNull(index))
+            !eval_data_.tst_buffer_->get<float>(eval_data_.tst_modec_trusted_name_).isNull(index_ext))
         return true;
 
-    if (eval_data_.tst_buffer_->get<float>(eval_data_.tst_modec_name_).isNull(index))
+    if (eval_data_.tst_buffer_->get<float>(eval_data_.tst_modec_name_).isNull(index_ext))
         return false;
 
     if (eval_data_.tst_modec_v_name_.size()
-            && !eval_data_.tst_buffer_->get<bool>(eval_data_.tst_modec_v_name_).isNull(index)
-            && !eval_data_.tst_buffer_->get<bool>(eval_data_.tst_modec_v_name_).get(index)) // not valid
+            && !eval_data_.tst_buffer_->get<bool>(eval_data_.tst_modec_v_name_).isNull(index_ext)
+            && !eval_data_.tst_buffer_->get<bool>(eval_data_.tst_modec_v_name_).get(index_ext)) // not valid
         return false;
 
     if (eval_data_.tst_modec_g_name_.size()
-            && !eval_data_.tst_buffer_->get<bool>(eval_data_.tst_modec_g_name_).isNull(index)
-            && eval_data_.tst_buffer_->get<bool>(eval_data_.tst_modec_g_name_).get(index)) // garbled
+            && !eval_data_.tst_buffer_->get<bool>(eval_data_.tst_modec_g_name_).isNull(index_ext)
+            && eval_data_.tst_buffer_->get<bool>(eval_data_.tst_modec_g_name_).get(index_ext)) // garbled
         return false;
 
     return true;
 }
 
-bool EvaluationTargetData::hasTstGroundBitForTime (ptime timestamp) const // only if set
+bool EvaluationTargetData::hasTstGroundBit(const DataID& id) const // only if set
 {
-    if (!tst_data_.count(timestamp))
-        return false;
+    auto index = indexFromDataID(id, DataType::Test);
 
-    auto it_pair = tst_data_.equal_range(timestamp);
-
-    assert (it_pair.first != tst_data_.end());
-
-    unsigned int index = it_pair.first->second.idx_external;
+    auto index_ext = index.idx_external;
 
     if (eval_data_.tst_ground_bit_name_.size()
-            && !eval_data_.tst_buffer_->get<bool>(eval_data_.tst_ground_bit_name_).isNull(index))
+            && !eval_data_.tst_buffer_->get<bool>(eval_data_.tst_ground_bit_name_).isNull(index_ext))
         return true;
 
     return false;
 }
 
-bool EvaluationTargetData::tstGroundBitForTime (ptime timestamp) const // true is on ground
+bool EvaluationTargetData::tstGroundBit(const DataID& id) const // true is on ground
 {
-    assert (hasTstGroundBitForTime(timestamp));
+    assert (hasTstGroundBit(id));
 
-    auto it_pair = tst_data_.equal_range(timestamp);
+    auto index = indexFromDataID(id, DataType::Test);
 
-    assert (it_pair.first != tst_data_.end());
-
-    unsigned int index = it_pair.first->second.idx_external;
+    auto index_ext = index.idx_external;
 
     if (eval_data_.tst_ground_bit_name_.size()
-            && !eval_data_.tst_buffer_->get<bool>(eval_data_.tst_ground_bit_name_).isNull(index)
-            && eval_data_.tst_buffer_->get<bool>(eval_data_.tst_ground_bit_name_).get(index))
+            && !eval_data_.tst_buffer_->get<bool>(eval_data_.tst_ground_bit_name_).isNull(index_ext)
+            && eval_data_.tst_buffer_->get<bool>(eval_data_.tst_ground_bit_name_).get(index_ext))
         return true;
 
     return false;
 }
 
-bool EvaluationTargetData::hasTstTAForTime (ptime timestamp) const
+bool EvaluationTargetData::hasTstTA(const DataID& id) const
 {
-    if (!tst_data_.count(timestamp))
-        return false;
+    auto index = indexFromDataID(id, DataType::Test);
 
-    auto it_pair = tst_data_.equal_range(timestamp);
-
-    assert (it_pair.first != tst_data_.end());
-
-    unsigned int index = it_pair.first->second.idx_external;
+    auto index_ext = index.idx_external;
 
     if (eval_data_.tst_target_address_name_.size()
-            && !eval_data_.tst_buffer_->get<unsigned int>(eval_data_.tst_target_address_name_).isNull(index))
+            && !eval_data_.tst_buffer_->get<unsigned int>(eval_data_.tst_target_address_name_).isNull(index_ext))
         return true;
 
     return false;
 }
 
-unsigned int EvaluationTargetData::tstTAForTime (ptime timestamp) const
+unsigned int EvaluationTargetData::tstTA(const DataID& id) const
 {
-    assert (hasTstTAForTime(timestamp));
+    assert (hasTstTA(id));
 
-    auto it_pair = tst_data_.equal_range(timestamp);
+    auto index = indexFromDataID(id, DataType::Test);
 
-    assert (it_pair.first != tst_data_.end());
+    auto index_ext = index.idx_external;
 
-    unsigned int index = it_pair.first->second.idx_external;
+    assert (!eval_data_.tst_buffer_->get<unsigned int>(eval_data_.tst_target_address_name_).isNull(index_ext));
 
-    assert (!eval_data_.tst_buffer_->get<unsigned int>(eval_data_.tst_target_address_name_).isNull(index));
-
-    return eval_data_.tst_buffer_->get<unsigned int>(eval_data_.tst_target_address_name_).get(index);
+    return eval_data_.tst_buffer_->get<unsigned int>(eval_data_.tst_target_address_name_).get(index_ext);
 }
 
 // has gbs, gbs true
-pair<bool,bool> EvaluationTargetData::tstGroundBitForTimeInterpolated (ptime timestamp) const // true is on ground
+pair<bool,bool> EvaluationTargetData::tstGroundBitInterpolated(const DataID& id) const // true is on ground
 {
     if (!eval_data_.tst_ground_bit_name_.size())
         return pair<bool,bool>(false, false);
 
+    auto timestamp = timestampFromDataID(id);
+
     DataMappingTimes times = findTstTimes(timestamp);
 
     if (times.has_other1_ && (timestamp - times.timestamp_other1_).abs() < seconds(15)
-            && hasTstGroundBitForTime(times.timestamp_other1_)
-            && tstGroundBitForTime(times.timestamp_other1_))
+            && hasTstGroundBit(times.timestamp_other1_)
+            && tstGroundBit(times.timestamp_other1_))
         return pair<bool,bool> (true, true);
 
     if (times.has_other2_ && (timestamp - times.timestamp_other2_).abs() < seconds(15)
-            && hasTstGroundBitForTime(times.timestamp_other2_))
-        return pair<bool,bool> (true, tstGroundBitForTime(times.timestamp_other2_));
+            && hasTstGroundBit(times.timestamp_other2_))
+        return pair<bool,bool> (true, tstGroundBit(times.timestamp_other2_));
 
     return pair<bool,bool>(false, false);
 }
 
-bool EvaluationTargetData::hasTstTrackNumForTime (ptime timestamp) const
+bool EvaluationTargetData::hasTstTrackNum(const DataID& id) const
 {
     if (!eval_data_.tst_track_num_name_.size())
         return false;
 
-    auto it_pair = tst_data_.equal_range(timestamp);
+    auto index = indexFromDataID(id, DataType::Test);
 
-    assert (it_pair.first != tst_data_.end());
+    auto index_ext = index.idx_external;
 
-    unsigned int index = it_pair.first->second.idx_external;
-
-    return !eval_data_.tst_buffer_->get<unsigned int>(eval_data_.tst_track_num_name_).isNull(index);
+    return !eval_data_.tst_buffer_->get<unsigned int>(eval_data_.tst_track_num_name_).isNull(index_ext);
 }
 
-unsigned int EvaluationTargetData::tstTrackNumForTime (ptime timestamp) const
+unsigned int EvaluationTargetData::tstTrackNum(const DataID& id) const
 {
-    assert (hasTstTrackNumForTime(timestamp));
+    assert (hasTstTrackNum(id));
 
-    auto it_pair = tst_data_.equal_range(timestamp);
+    auto index = indexFromDataID(id, DataType::Test);
 
-    assert (it_pair.first != tst_data_.end());
+    auto index_ext = index.idx_external;
 
-    unsigned int index = it_pair.first->second.idx_external;
-
-    return eval_data_.tst_buffer_->get<unsigned int>(eval_data_.tst_track_num_name_).get(index);
+    return eval_data_.tst_buffer_->get<unsigned int>(eval_data_.tst_track_num_name_).get(index_ext);
 }
 
-bool EvaluationTargetData::hasTstMeasuredSpeedForTime (ptime timestamp) const
+bool EvaluationTargetData::hasTstMeasuredSpeed(const DataID& id) const
 {
     assert (eval_data_.tst_spd_ground_speed_kts_name_.size());
 
-    auto it_pair = tst_data_.equal_range(timestamp);
+    auto index = indexFromDataID(id, DataType::Test);
 
-    assert (it_pair.first != tst_data_.end());
+    auto index_ext = index.idx_external;
 
-    unsigned int index = it_pair.first->second.idx_external;
-
-    return !eval_data_.tst_buffer_->get<double>(eval_data_.tst_spd_ground_speed_kts_name_).isNull(index);
+    return !eval_data_.tst_buffer_->get<double>(eval_data_.tst_spd_ground_speed_kts_name_).isNull(index_ext);
 }
 
-float EvaluationTargetData::tstMeasuredSpeedForTime (ptime timestamp) const // m/s
+float EvaluationTargetData::tstMeasuredSpeed(const DataID& id) const // m/s
 {
-    assert (hasTstMeasuredSpeedForTime(timestamp));
+    assert (hasTstMeasuredSpeed(id));
 
-    auto it_pair = tst_data_.equal_range(timestamp);
+    auto index = indexFromDataID(id, DataType::Test);
 
-    assert (it_pair.first != tst_data_.end());
-
-    unsigned int index = it_pair.first->second.idx_external;
+    auto index_ext = index.idx_external;
 
     assert(eval_data_.tst_spd_ground_speed_kts_name_.size());
-    return eval_data_.tst_buffer_->get<double>(eval_data_.tst_spd_ground_speed_kts_name_).get(index) * KNOTS2M_S;
+    return eval_data_.tst_buffer_->get<double>(eval_data_.tst_spd_ground_speed_kts_name_).get(index_ext) * KNOTS2M_S;
 }
 
-bool EvaluationTargetData::hasTstMeasuredTrackAngleForTime (ptime timestamp) const
+bool EvaluationTargetData::hasTstMeasuredTrackAngle(const DataID& id) const
 {
     assert (eval_data_.tst_spd_track_angle_deg_name_.size());
 
-    auto it_pair = tst_data_.equal_range(timestamp);
+    auto index = indexFromDataID(id, DataType::Test);
 
-    assert (it_pair.first != tst_data_.end());
+    auto index_ext = index.idx_external;
 
-    unsigned int index = it_pair.first->second.idx_external;
-
-    return !eval_data_.tst_buffer_->get<double>(eval_data_.tst_spd_track_angle_deg_name_).isNull(index);
+    return !eval_data_.tst_buffer_->get<double>(eval_data_.tst_spd_track_angle_deg_name_).isNull(index_ext);
 }
 
-float EvaluationTargetData::tstMeasuredTrackAngleForTime (ptime timestamp) const // deg
+float EvaluationTargetData::tstMeasuredTrackAngle(const DataID& id) const // deg
 {
-    assert (hasTstMeasuredTrackAngleForTime(timestamp));
+    assert (hasTstMeasuredTrackAngle(id));
 
-    auto it_pair = tst_data_.equal_range(timestamp);
+    auto index = indexFromDataID(id, DataType::Test);
 
-    assert (it_pair.first != tst_data_.end());
-
-    unsigned int index = it_pair.first->second.idx_external;
+    auto index_ext = index.idx_external;
 
     assert (eval_data_.tst_spd_track_angle_deg_name_.size());
-    return eval_data_.tst_buffer_->get<double>(eval_data_.tst_spd_track_angle_deg_name_).get(index);
+    return eval_data_.tst_buffer_->get<double>(eval_data_.tst_spd_track_angle_deg_name_).get(index_ext);
+}
+
+float EvaluationTargetData::tstModeC(const DataID& id) const
+{
+    assert (hasTstModeC(id));
+
+    auto index = indexFromDataID(id, DataType::Test);
+
+    auto index_ext = index.idx_external;
+
+    if (eval_data_.tst_modec_trusted_name_.size() &&
+            !eval_data_.tst_buffer_->get<float>(eval_data_.tst_modec_trusted_name_).isNull(index_ext))
+        return eval_data_.tst_buffer_->get<float>(eval_data_.tst_modec_trusted_name_).get(index_ext);
+
+    NullableVector<float>& modec_vec = eval_data_.tst_buffer_->get<float>(eval_data_.tst_modec_name_);
+    assert (!modec_vec.isNull(index_ext));
+
+    return modec_vec.get(index_ext);
 }
 
 bool EvaluationTargetData::canCheckTstMultipleSources() const
@@ -1500,27 +1471,6 @@ unsigned int EvaluationTargetData::singleTrackLUDSID() const
     }
 
     assert (false); // can not be reached
-}
-
-
-float EvaluationTargetData::tstModeCForTime (ptime timestamp) const
-{
-    assert (hasTstModeCForTime(timestamp));
-
-    auto it_pair = tst_data_.equal_range(timestamp);
-
-    assert (it_pair.first != tst_data_.end());
-
-    int index = it_pair.first->second.idx_external;
-
-    if (eval_data_.tst_modec_trusted_name_.size() &&
-            !eval_data_.tst_buffer_->get<float>(eval_data_.tst_modec_trusted_name_).isNull(index))
-        return eval_data_.tst_buffer_->get<float>(eval_data_.tst_modec_trusted_name_).get(index);
-
-    NullableVector<float>& modec_vec = eval_data_.tst_buffer_->get<float>(eval_data_.tst_modec_name_);
-    assert (!modec_vec.isNull(index));
-
-    return modec_vec.get(index);
 }
 
 double EvaluationTargetData::latitudeMin() const
@@ -2125,21 +2075,21 @@ TstDataMapping EvaluationTargetData::calculateTestDataMapping(ptime timestamp) c
 
 void EvaluationTargetData::addRefPositionsSpeedsToMapping (TstDataMapping& mapping) const
 {
-    if (mapping.has_ref1_ && hasRefPosForTime(mapping.timestamp_ref1_)
-            && mapping.has_ref2_ && hasRefPosForTime(mapping.timestamp_ref2_)) // two positions which can be interpolated
+    if (mapping.has_ref1_ && hasRefPos(mapping.timestamp_ref1_)
+            && mapping.has_ref2_ && hasRefPos(mapping.timestamp_ref2_)) // two positions which can be interpolated
     {
         ptime lower = mapping.timestamp_ref1_;
         ptime upper = mapping.timestamp_ref2_;
 
-        EvaluationTargetPosition pos1 = refPosForTime(lower);
-        EvaluationTargetPosition pos2 = refPosForTime(upper);
+        EvaluationTargetPosition pos1 = refPos(lower);
+        EvaluationTargetPosition pos2 = refPos(upper);
         float d_t = Time::partialSeconds(upper - lower);
 
         EvaluationTargetVelocity spd1;
         EvaluationTargetVelocity spd2;
 
-        double acceleration, angle_diff, turnrate;
-        double speed,angle;
+        double acceleration;
+        double speed, angle;
 
         logdbg << "EvaluationTargetData: addRefPositiosToMapping: d_t " << d_t;
 
@@ -2243,10 +2193,10 @@ void EvaluationTargetData::addRefPositionsSpeedsToMapping (TstDataMapping& mappi
 
                     mapping.has_ref_spd_ = false;
 
-                    if (hasRefSpeedForTime(mapping.timestamp_ref1_) && hasRefSpeedForTime(mapping.timestamp_ref2_))
+                    if (hasRefSpeed(mapping.timestamp_ref1_) && hasRefSpeed(mapping.timestamp_ref2_))
                     {
-                        spd1 = refSpdForTime(mapping.timestamp_ref1_);
-                        spd2 = refSpdForTime(mapping.timestamp_ref2_);
+                        spd1 = refSpeed(mapping.timestamp_ref1_);
+                        spd2 = refSpeed(mapping.timestamp_ref2_);
 
                         acceleration = (spd2.speed_ - spd1.speed_)/d_t;
                         speed = spd1.speed_ + acceleration * d_t2;
@@ -2254,9 +2204,9 @@ void EvaluationTargetData::addRefPositionsSpeedsToMapping (TstDataMapping& mappi
                         //loginf << "UGA spd1 " << spd1.speed_ << " 2 " << spd2.speed_ << " ipld " << speed;
 
 #if 0
-                        angle_diff = Number::calculateMinAngleDifference(spd2.track_angle_, spd1.track_angle_);
+                        double angle_diff = Number::calculateMinAngleDifference(spd2.track_angle_, spd1.track_angle_);
+                        double turnrate   = angle_diff / d_t;
 
-                        turnrate = angle_diff / d_t;
                         angle = spd1.track_angle_ + turnrate * d_t2;
 #else 
                         angle = Number::interpolateBearing(0, 0, x_pos_orig, y_pos_orig, spd1.track_angle_, spd2.track_angle_, d_t2 / d_t);
@@ -2448,7 +2398,7 @@ void EvaluationTargetData::computeSectorInsideInfo() const
 
         for (const auto& elem : ref_data_)
         {
-            auto pos = refPosForTime(elem.first);
+            auto pos = refPos(DataID(elem.first, elem.second));
             computeSectorInsideInfo(inside_ref_, pos, elem.second.idx_internal);
         }
     }
@@ -2460,7 +2410,7 @@ void EvaluationTargetData::computeSectorInsideInfo() const
 
         for (const auto& elem : tst_data_)
         {
-            auto pos = tstPosForTime(elem.first);
+            auto pos = tstPos(DataID(elem.first, elem.second));
             computeSectorInsideInfo(inside_tst_, pos, elem.second.idx_internal);
         }
     }
@@ -2510,43 +2460,40 @@ void EvaluationTargetData::computeSectorInsideInfo(InsideCheckMatrix& mat,
 /**
 */
 bool EvaluationTargetData::refPosInside(const SectorLayer& layer, 
-                                        boost::posix_time::ptime timestamp, 
+                                        const DataID& id, 
                                         const EvaluationTargetPosition& pos,
                                         bool has_ground_bit, 
                                         bool ground_bit_set) const
 {
-    auto it = ref_data_.find(timestamp);
-    assert(it != ref_data_.end());
+    auto index = indexFromDataID(id, DataType::Reference);
 
-    return checkInside(layer, ref_data_, inside_ref_, timestamp, pos, has_ground_bit, ground_bit_set);
+    return checkInside(layer, ref_data_, inside_ref_, index, pos, has_ground_bit, ground_bit_set);
 }
 
 /**
 */
 bool EvaluationTargetData::tstPosInside(const SectorLayer& layer, 
-                                        boost::posix_time::ptime timestamp, 
+                                        const DataID& id, 
                                         const EvaluationTargetPosition& pos,
                                         bool has_ground_bit, 
                                         bool ground_bit_set) const
 {
-    auto it = tst_data_.find(timestamp);
-    assert(it != tst_data_.end());
+    auto index = indexFromDataID(id, DataType::Test);
 
-    return checkInside(layer, tst_data_, inside_tst_, timestamp, pos, has_ground_bit, ground_bit_set);
+    return checkInside(layer, tst_data_, inside_tst_, index, pos, has_ground_bit, ground_bit_set);
 }
 
 /**
 */
 bool EvaluationTargetData::mappedRefPosInside(const SectorLayer& layer, 
-                                              boost::posix_time::ptime timestamp, 
+                                              const DataID& id, 
                                               const EvaluationTargetPosition& pos,
                                               bool has_ground_bit, 
                                               bool ground_bit_set) const
 {
-    auto it = tst_data_.find(timestamp);
-    assert(it != tst_data_.end());
+    auto index = indexFromDataID(id, DataType::Test);
 
-    return checkInside(layer, tst_data_, inside_map_, timestamp, pos, has_ground_bit, ground_bit_set);
+    return checkInside(layer, tst_data_, inside_map_, index, pos, has_ground_bit, ground_bit_set);
 }
 
 /**
@@ -2554,7 +2501,7 @@ bool EvaluationTargetData::mappedRefPosInside(const SectorLayer& layer,
 bool EvaluationTargetData::checkInside(const SectorLayer& layer,
                                        const IndexMap& indices,
                                        const InsideCheckMatrix& mat,
-                                       boost::posix_time::ptime timestamp,
+                                       const Index& index,
                                        const EvaluationTargetPosition& pos,
                                        bool has_ground_bit, 
                                        bool ground_bit_set) const
@@ -2569,10 +2516,7 @@ bool EvaluationTargetData::checkInside(const SectorLayer& layer,
 #endif
     
     //check cached inside info
-    auto it = indices.find(timestamp);
-    assert(it != indices.end());
-
-    auto idx_internal = it->second.idx_internal;
+    auto idx_internal = index.idx_internal;
     assert(idx_internal < mat.rows());
 
     auto lidx      = lit->second;

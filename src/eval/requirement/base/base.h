@@ -35,6 +35,11 @@ namespace EvaluationRequirementResult {
 class Single;
 }
 
+namespace Evaluation
+{
+    class DataID;
+}
+
 namespace EvaluationRequirement
 {
 
@@ -87,16 +92,16 @@ protected:
     bool compareValue (double val, double threshold, COMPARISON_TYPE check_type);
 
     std::pair<ValueComparisonResult, std::string> compareTi (
-            boost::posix_time::ptime timestamp, const EvaluationTargetData& target_data,
+            const Evaluation::DataID& id_tst, const EvaluationTargetData& target_data,
             boost::posix_time::time_duration max_ref_time_diff); // tst timestamp
     std::pair<ValueComparisonResult, std::string> compareTa (
-            boost::posix_time::ptime timestamp, const EvaluationTargetData& target_data,
+            const Evaluation::DataID& id_tst, const EvaluationTargetData& target_data,
             boost::posix_time::time_duration max_ref_time_diff); // tst timestamp
     std::pair<ValueComparisonResult, std::string> compareModeA (
-            boost::posix_time::ptime timestamp, const EvaluationTargetData& target_data,
+            const Evaluation::DataID& id_tst, const EvaluationTargetData& target_data,
             boost::posix_time::time_duration max_ref_time_diff); // tst timestamp
     std::pair<ValueComparisonResult, std::string> compareModeC (
-            boost::posix_time::ptime timestamp, const EvaluationTargetData& target_data,
+            const Evaluation::DataID& id_tst, const EvaluationTargetData& target_data,
             boost::posix_time::time_duration max_ref_time_diff, float max_val_diff); // tod tst
 };
 

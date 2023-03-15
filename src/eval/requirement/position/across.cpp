@@ -138,11 +138,11 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionAcross::evaluate (
         ++num_pos;
 
         timestamp = tst_id.first;
-        tst_pos = target_data.tstPosForTime(timestamp);
+        tst_pos = target_data.tstPos(timestamp);
 
         along_ok = true;
 
-        if (!target_data.hasRefDataForTime (timestamp, max_ref_time_diff))
+        if (!target_data.hasMappedRefData(tst_id, max_ref_time_diff))
         {
             if (!skip_no_data_details)
                 addDetail(timestamp, tst_pos,
@@ -156,7 +156,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionAcross::evaluate (
             continue;
         }
 
-        ret_pos = target_data.interpolatedRefPosForTime(timestamp, max_ref_time_diff);
+        ret_pos = target_data.mappedRefPos(tst_id, max_ref_time_diff);
 
         ref_pos = ret_pos.first;
         ok = ret_pos.second;
@@ -175,7 +175,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionAcross::evaluate (
             continue;
         }
 
-        ret_spd = target_data.interpolatedRefSpdForTime(timestamp, max_ref_time_diff);
+        ret_spd = target_data.mappedRefSpeed(tst_id, max_ref_time_diff);
 
         if (!ret_spd.second)
         {
@@ -183,7 +183,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionAcross::evaluate (
                 addDetail(timestamp, tst_pos,
                             {}, // ref_pos
                             {}, {}, along_ok, // pos_inside, value, value_ok
-                            num_pos, num_no_ref, num_pos_inside, num_pos_outside,
+                            num_pos, num_no_ref, num_pos_inside, num_pos_outside, 
                             num_value_ok, num_value_nok,
                             "No reference speed");
 
@@ -194,17 +194,17 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionAcross::evaluate (
         ref_spd = ret_spd.first;
         assert (ret_pos.second); // must be set of ref pos exists
 
-        has_ground_bit = target_data.hasTstGroundBitForTime(timestamp);
+        has_ground_bit = target_data.hasTstGroundBit(tst_id);
 
         if (has_ground_bit)
-            ground_bit_set = target_data.tstGroundBitForTime(timestamp);
+            ground_bit_set = target_data.tstGroundBit(tst_id);
         else
             ground_bit_set = false;
 
         if (!ground_bit_set)
-            tie(has_ground_bit, ground_bit_set) = target_data.interpolatedRefGroundBitForTime(timestamp, seconds(15));
+            tie(has_ground_bit, ground_bit_set) = target_data.mappedRefGroundBit(timestamp, seconds(15));
 
-        is_inside = target_data.mappedRefPosInside(sector_layer, timestamp, ref_pos, has_ground_bit, ground_bit_set);
+        is_inside = target_data.mappedRefPosInside(sector_layer, tst_id, ref_pos, has_ground_bit, ground_bit_set);
 
         if (!is_inside)
         {

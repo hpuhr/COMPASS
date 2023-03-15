@@ -117,14 +117,14 @@ std::shared_ptr<EvaluationRequirementResult::Single> Detection::evaluate (
             was_inside = inside;
 
             // for ref
-            tie (has_ground_bit, ground_bit_set) = target_data.refGroundBitForTime(timestamp);
+            tie (has_ground_bit, ground_bit_set) = target_data.refGroundBit(ref_it);
             // for tst
             if (!ground_bit_set)
-                tie (has_ground_bit, ground_bit_set) = target_data.tstGroundBitForTimeInterpolated(timestamp);
+                tie (has_ground_bit, ground_bit_set) = target_data.tstGroundBitInterpolated(ref_it);
 
-            auto ref_pos = target_data.refPosForTime(timestamp);
+            auto ref_pos = target_data.refPos(ref_it);
 
-            inside = target_data.refPosInside(sector_layer, timestamp, ref_pos, has_ground_bit, ground_bit_set);
+            inside = target_data.refPosInside(sector_layer, ref_it, ref_pos, has_ground_bit, ground_bit_set);
 
             if (first)
             {
@@ -220,8 +220,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> Detection::evaluate (
             {
                 sum_missed_uis += getNumMisses(t_diff);
 
-                assert (target_data.hasRefPosForTime(timestamp));
-                pos_current = target_data.refPosForTime(timestamp);
+                pos_current = target_data.refPos(timestamp);
 
                 logdbg << "EvaluationRequirementDetection '" << name_ << "': evaluate: utn " << target_data.utn_
                        << " miss of " << String::timeStringFromDouble(t_diff)
@@ -234,7 +233,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> Detection::evaluate (
                         +String::doubleToStringPrecision(missThreshold(), 2)
                         +"), last was "+Time::toString(last_ts);
 
-                auto last_pos = target_data.refPosForTime(last_ts);
+                auto last_pos = target_data.refPos(last_ts);
 
                 addDetail(timestamp, pos_current, last_pos, t_diff, true, true, sum_missed_uis, 0, 0, comment); 
             }
@@ -260,13 +259,13 @@ std::shared_ptr<EvaluationRequirementResult::Single> Detection::evaluate (
 
     bool skip_no_data_details = eval_man_.reportSkipNoDataDetails();
 
-    for (auto tst_it=tst_data.begin(); tst_it != tst_data.end(); ++tst_it)
+    for (const auto& tst_it : tst_data)
     {
         comment = "";
 
         last_ts = timestamp;
-        timestamp = tst_it->first;
-        pos_current = target_data.tstPosForTime(timestamp);
+        timestamp = tst_it.first;
+        pos_current = target_data.tstPos(tst_it);
 
         logdbg << "EvaluationRequirementDetection '" << name_
                << "': evaluate: utn " << target_data.utn_ << " tod " << timestamp;
@@ -297,8 +296,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> Detection::evaluate (
 
                     t_diff = Time::partialSeconds(last_period_ts_end - last_period_ts);
 
-                    assert (target_data.hasRefPosForTime(last_period_ts_end));
-                    pos_current = target_data.refPosForTime(last_period_ts_end);
+                    pos_current = target_data.refPos(last_period_ts_end);
 
                     if (isMiss(t_diff))
                     {
@@ -321,13 +319,11 @@ std::shared_ptr<EvaluationRequirementResult::Single> Detection::evaluate (
 
                         if (tst_time_found)
                         {
-                            assert (target_data.hasTstPosForTime(last_period_ts));
-                            last_pos = target_data.tstPosForTime(last_period_ts);
+                            last_pos = target_data.tstPos(last_period_ts);
                         }
                         else
                         {
-                            assert (target_data.hasRefPosForTime(last_period_ts));
-                            last_pos = target_data.refPosForTime(last_period_ts);
+                            last_pos = target_data.refPos(last_period_ts);
                         }
 
                         addDetail(timestamp, pos_current, last_pos, t_diff, true, false, sum_missed_uis, 0, 0, comment); 
@@ -359,7 +355,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> Detection::evaluate (
         // is inside period
         period_index = ref_periods.getPeriodIndex(timestamp);
 
-        tie(ref_pos, ok) = target_data.interpolatedRefPosForTime(timestamp, max_ref_time_diff);
+        tie(ref_pos, ok) = target_data.mappedRefPos(tst_it, max_ref_time_diff);
 
 //        ref_pos = ret_pos.first;
 //        ok = ret_pos.second;
@@ -375,17 +371,17 @@ std::shared_ptr<EvaluationRequirementResult::Single> Detection::evaluate (
             continue;
         }
 
-        has_ground_bit = target_data.hasTstGroundBitForTime(timestamp);
+        has_ground_bit = target_data.hasTstGroundBit(tst_it);
 
         if (has_ground_bit)
-            ground_bit_set = target_data.tstGroundBitForTime(timestamp);
+            ground_bit_set = target_data.tstGroundBit(tst_it);
         else
             ground_bit_set = false;
 
         if (!ground_bit_set)
-            tie(has_ground_bit, ground_bit_set) = target_data.interpolatedRefGroundBitForTime(timestamp, seconds(15));
+            tie(has_ground_bit, ground_bit_set) = target_data.mappedRefGroundBit(tst_it, seconds(15));
 
-        is_inside = target_data.mappedRefPosInside(sector_layer, timestamp, ref_pos, has_ground_bit, ground_bit_set);
+        is_inside = target_data.mappedRefPosInside(sector_layer, tst_it, ref_pos, has_ground_bit, ground_bit_set);
 
         if (!is_inside)
         {
@@ -438,10 +434,8 @@ std::shared_ptr<EvaluationRequirementResult::Single> Detection::evaluate (
                             +"), between ["+Time::toString(ref_periods.period(period_index).begin())
                             +", "+Time::toString(timestamp)+"]\n";
 
-                    assert (target_data.hasRefPosForTime(ref_periods.period(period_index).begin()));
-
-                    auto tst_pos  = target_data.tstPosForTime(timestamp);
-                    auto last_pos = target_data.refPosForTime(ref_periods.period(period_index).begin());
+                    auto tst_pos  = target_data.tstPos(tst_it);
+                    auto last_pos = target_data.refPos(ref_periods.period(period_index).begin());
 
                     addDetail(timestamp, tst_pos, last_pos, t_diff, true, is_inside_ref_time_period, sum_missed_uis, 0, 0, comment);
                 }
@@ -474,7 +468,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> Detection::evaluate (
                     +String::doubleToStringPrecision(missThreshold(), 2)
                     +"), last was "+Time::toString(last_ts);
 
-            auto last_pos = target_data.tstPosForTime(last_ts);
+            auto last_pos = target_data.tstPos(last_ts);
 
             addDetail(timestamp, pos_current, last_pos, t_diff, true, is_inside_ref_time_period, sum_missed_uis, 0, 0, comment);
         }
@@ -514,8 +508,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> Detection::evaluate (
 
             t_diff = Time::partialSeconds(last_period_end - last_period_tod);
 
-            assert (target_data.hasRefPosForTime(last_period_end));
-            pos_current = target_data.refPosForTime(last_period_end);
+            pos_current = target_data.refPos(last_period_end);
 
             if (isMiss(t_diff))
             {
@@ -538,13 +531,11 @@ std::shared_ptr<EvaluationRequirementResult::Single> Detection::evaluate (
 
                 if (tst_time_found)
                 {
-                    assert (target_data.hasTstPosForTime(last_period_tod));
-                    last_pos = target_data.tstPosForTime(last_period_tod);
+                    last_pos = target_data.tstPos(last_period_tod);
                 }
                 else
                 {
-                    assert (target_data.hasRefPosForTime(last_period_tod));
-                    last_pos = target_data.refPosForTime(last_period_tod);
+                    last_pos = target_data.refPos(last_period_tod);
                 }
 
                 addDetail(timestamp, pos_current, last_pos, t_diff, true, false, sum_missed_uis, 0, 0, comment);

@@ -89,30 +89,30 @@ std::shared_ptr<EvaluationRequirementResult::Single> ExtraTrack::evaluate (
     for (const auto& tst_id : tst_data)
     {
         timestamp = tst_id.first;
-        tst_pos = target_data.tstPosForTime(timestamp);
+        tst_pos = target_data.tstPos(tst_id);
 
-        if (!target_data.hasRefDataForTime (timestamp, max_ref_time_diff))
+        if (!target_data.hasMappedRefData(tst_id, max_ref_time_diff))
             continue;
 
-        has_ground_bit = target_data.hasTstGroundBitForTime(timestamp);
+        has_ground_bit = target_data.hasTstGroundBit(tst_id);
 
         if (has_ground_bit)
-            ground_bit_set = target_data.tstGroundBitForTime(timestamp);
+            ground_bit_set = target_data.tstGroundBit(tst_id);
         else
             ground_bit_set = false;
 
         if (!ground_bit_set)
-            tie(has_ground_bit, ground_bit_set) = target_data.interpolatedRefGroundBitForTime(timestamp, seconds(15));
+            tie(has_ground_bit, ground_bit_set) = target_data.mappedRefGroundBit(tst_id, seconds(15));
 
-        is_inside = target_data.tstPosInside(sector_layer, timestamp, tst_pos, has_ground_bit, ground_bit_set);
+        is_inside = target_data.tstPosInside(sector_layer, tst_id, tst_pos, has_ground_bit, ground_bit_set);
 
         if (!is_inside)
             continue;
 
-        if (!target_data.hasTstTrackNumForTime(timestamp))
+        if (!target_data.hasTstTrackNum(tst_id))
             continue;
 
-        track_num = target_data.tstTrackNumForTime(timestamp);
+        track_num = target_data.tstTrackNum(tst_id);
 
         if (!active_tracks.count(track_num)) // not yet existing
         {
@@ -184,24 +184,26 @@ std::shared_ptr<EvaluationRequirementResult::Single> ExtraTrack::evaluate (
         ++num_pos;
 
         timestamp = tst_id.first;
-        tst_pos = target_data.tstPosForTime(timestamp);
+        tst_pos = target_data.tstPos(tst_id);
 
-        has_track_num = target_data.hasTstTrackNumForTime(timestamp);
+        has_track_num = target_data.hasTstTrackNum(tst_id);
 
         if (has_track_num)
-            track_num = target_data.tstTrackNumForTime(timestamp);
+            track_num = target_data.tstTrackNum(tst_id);
 
-        has_ground_bit = target_data.hasTstGroundBitForTime(timestamp);
+        has_ground_bit = target_data.hasTstGroundBit(tst_id);
 
         if (has_ground_bit)
-            ground_bit_set = target_data.tstGroundBitForTime(timestamp);
+            ground_bit_set = target_data.tstGroundBit(tst_id);
         else
             ground_bit_set = false;
 
-        if (!ground_bit_set)
-            tie(has_ground_bit, ground_bit_set) = target_data.interpolatedRefGroundBitForTime(timestamp, seconds(15));
+        //@TODO: check hasMappedRefDataForTime() ???
 
-        is_inside = target_data.tstPosInside(sector_layer, timestamp, tst_pos, has_ground_bit, ground_bit_set);
+        if (!ground_bit_set)
+            tie(has_ground_bit, ground_bit_set) = target_data.mappedRefGroundBit(tst_id, seconds(15));
+
+        is_inside = target_data.tstPosInside(sector_layer, tst_id, tst_pos, has_ground_bit, ground_bit_set);
 
         if (!is_inside)
         {

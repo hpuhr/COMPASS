@@ -87,11 +87,11 @@ std::shared_ptr<EvaluationRequirementResult::Single> ExtraData::evaluate (
             timestamp = ref_it.first;
 
             // for ref
-            tie (has_ground_bit, ground_bit_set) = target_data.tstGroundBitForTimeInterpolated(timestamp);
+            tie (has_ground_bit, ground_bit_set) = target_data.tstGroundBitInterpolated(timestamp);
 
-            auto ref_pos = target_data.refPosForTime(timestamp);
+            auto ref_pos = target_data.refPos(ref_it);
 
-            inside = target_data.refPosInside(sector_layer, timestamp, ref_pos, has_ground_bit, ground_bit_set);
+            inside = target_data.refPosInside(sector_layer, ref_it, ref_pos, has_ground_bit, ground_bit_set);
 
             if (inside)
                 ++num_ref_inside;
@@ -150,8 +150,8 @@ std::shared_ptr<EvaluationRequirementResult::Single> ExtraData::evaluate (
         {
             timestamp = tst_it.first;
 
-            assert (target_data.hasTstPosForTime(timestamp));
-            tst_pos = target_data.tstPosForTime(timestamp);
+            assert (target_data.hasTstPos(tst_it));
+            tst_pos = target_data.tstPos(tst_it);
 
             is_inside_ref_time_period = ref_periods.isInside(timestamp);
 
@@ -164,18 +164,20 @@ std::shared_ptr<EvaluationRequirementResult::Single> ExtraData::evaluate (
 
             // no ref
 
-            has_ground_bit = target_data.hasTstGroundBitForTime(timestamp);
+            has_ground_bit = target_data.hasTstGroundBit(tst_it);
 
             if (has_ground_bit)
-                ground_bit_set = target_data.tstGroundBitForTime(timestamp);
+                ground_bit_set = target_data.tstGroundBit(tst_it);
             else
                 ground_bit_set = false;
 
-            if (!ground_bit_set)
-                tie(has_ground_bit, ground_bit_set) = target_data.interpolatedRefGroundBitForTime(
-                            timestamp, seconds(15));
+            //@TODO: check hasMappedRefDataForTime()???
 
-            inside = target_data.tstPosInside(sector_layer, timestamp, tst_pos, has_ground_bit, ground_bit_set);
+            if (!ground_bit_set)
+                tie(has_ground_bit, ground_bit_set) = target_data.mappedRefGroundBit(
+                            tst_it, seconds(15));
+
+            inside = target_data.tstPosInside(sector_layer, tst_it, tst_pos, has_ground_bit, ground_bit_set);
 
             if (inside)
             {

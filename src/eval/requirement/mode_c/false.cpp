@@ -122,9 +122,9 @@ std::shared_ptr<EvaluationRequirementResult::Single> ModeCFalse::evaluate (
         ++num_updates;
 
         timestamp = tst_id.first;
-        pos_current = target_data.tstPosForTime(timestamp);
+        pos_current = target_data.tstPos(tst_id);
 
-        if (!target_data.hasRefDataForTime (timestamp, max_ref_time_diff))
+        if (!target_data.hasMappedRefData(tst_id, max_ref_time_diff))
         {
             if (!skip_no_data_details)
                 addDetail(timestamp, pos_current,
@@ -136,7 +136,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> ModeCFalse::evaluate (
             continue;
         }
 
-        ret_pos = target_data.interpolatedRefPosForTime(timestamp, max_ref_time_diff);
+        ret_pos = target_data.mappedRefPos(tst_id, max_ref_time_diff);
 
         ref_pos = ret_pos.first;
         ok = ret_pos.second;
@@ -154,17 +154,17 @@ std::shared_ptr<EvaluationRequirementResult::Single> ModeCFalse::evaluate (
         }
         ref_exists = true;
 
-        has_ground_bit = target_data.hasTstGroundBitForTime(timestamp);
+        has_ground_bit = target_data.hasTstGroundBit(tst_id);
 
         if (has_ground_bit)
-            ground_bit_set = target_data.tstGroundBitForTime(timestamp);
+            ground_bit_set = target_data.tstGroundBit(tst_id);
         else
             ground_bit_set = false;
 
         if (!ground_bit_set)
-            tie(has_ground_bit, ground_bit_set) = target_data.interpolatedRefGroundBitForTime(timestamp, seconds(15));
+            tie(has_ground_bit, ground_bit_set) = target_data.mappedRefGroundBit(tst_id, seconds(15));
 
-        is_inside = target_data.mappedRefPosInside(sector_layer, timestamp, ref_pos, has_ground_bit, ground_bit_set);
+        is_inside = target_data.mappedRefPosInside(sector_layer, tst_id, ref_pos, has_ground_bit, ground_bit_set);
 
         if (!is_inside)
         {
@@ -179,7 +179,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> ModeCFalse::evaluate (
         }
         ++num_pos_inside;
 
-        tie(cmp_res, comment) = compareModeC(timestamp, target_data, max_ref_time_diff, maximum_difference_);
+        tie(cmp_res, comment) = compareModeC(tst_id, target_data, max_ref_time_diff, maximum_difference_);
 
         code_ok = true;
         if (cmp_res == ValueComparisonResult::Unknown_NoRefData)

@@ -129,9 +129,9 @@ std::shared_ptr<EvaluationRequirementResult::Single> ModeAPresent::evaluate (
         ++num_updates;
 
         timestamp = tst_id.first;
-        pos_current = target_data.tstPosForTime(timestamp);
+        pos_current = target_data.tstPos(tst_id);
 
-        if (!target_data.hasRefDataForTime (timestamp, max_ref_time_diff))
+        if (!target_data.hasMappedRefData(tst_id, max_ref_time_diff))
         {
             if (!skip_no_data_details)
                 addDetail(timestamp, pos_current,
@@ -143,7 +143,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> ModeAPresent::evaluate (
             continue;
         }
 
-        ret_pos = target_data.interpolatedRefPosForTime(timestamp, max_ref_time_diff);
+        ret_pos = target_data.mappedRefPos(tst_id, max_ref_time_diff);
 
         ref_pos = ret_pos.first;
         ok = ret_pos.second;
@@ -159,17 +159,17 @@ std::shared_ptr<EvaluationRequirementResult::Single> ModeAPresent::evaluate (
             ++num_no_ref_pos;
             continue;
         }
-        has_ground_bit = target_data.hasTstGroundBitForTime(timestamp);
+        has_ground_bit = target_data.hasTstGroundBit(tst_id);
 
         if (has_ground_bit)
-            ground_bit_set = target_data.tstGroundBitForTime(timestamp);
+            ground_bit_set = target_data.tstGroundBit(tst_id);
         else
             ground_bit_set = false;
 
         if (!ground_bit_set)
-            tie(has_ground_bit, ground_bit_set) = target_data.interpolatedRefGroundBitForTime(timestamp, seconds(15));
+            tie(has_ground_bit, ground_bit_set) = target_data.mappedRefGroundBit(tst_id, seconds(15));
 
-        is_inside = target_data.mappedRefPosInside(sector_layer, timestamp, ref_pos, has_ground_bit, ground_bit_set);
+        is_inside = target_data.mappedRefPosInside(sector_layer, tst_id, ref_pos, has_ground_bit, ground_bit_set);
 
         if (!is_inside)
         {
@@ -188,18 +188,18 @@ std::shared_ptr<EvaluationRequirementResult::Single> ModeAPresent::evaluate (
         // check if ref code exists
         code_present_ref = false;
 
-        tie(ref_lower, ref_upper) = target_data.refTimesFor(timestamp, max_ref_time_diff);
+        tie(ref_lower, ref_upper) = target_data.mappedRefTimes(tst_id, max_ref_time_diff);
 
         if ((!ref_lower.is_not_a_date_time() || !ref_upper.is_not_a_date_time())) // ref times possible
         {
-            if ((!ref_lower.is_not_a_date_time() && target_data.hasRefModeAForTime(ref_lower))
-                    || (!ref_upper.is_not_a_date_time() && target_data.hasRefModeAForTime(ref_upper))) // ref value(s) exist
+            if ((!ref_lower.is_not_a_date_time() && target_data.hasRefModeA(ref_lower))
+                    || (!ref_upper.is_not_a_date_time() && target_data.hasRefModeA(ref_upper))) // ref value(s) exist
             {
                 code_present_ref = true;
             }
         }
 
-        code_present_tst = target_data.hasTstModeAForTime(timestamp);
+        code_present_tst = target_data.hasTstModeA(tst_id);
 
         code_missing = false;
 
