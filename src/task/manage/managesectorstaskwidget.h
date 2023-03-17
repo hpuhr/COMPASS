@@ -35,24 +35,28 @@ class ManageSectorsTaskWidget : public TaskWidget
 {
     Q_OBJECT
 public slots:
-  void expertModeChangedSlot();
+    void expertModeChangedSlot();
 
-  void addFileSlot();
-  void deleteFileSlot();
-  void deleteAllFilesSlot();
-  void selectedFileSlot();
-  void updateFileListSlot();
+    void addFileSlot();
+    void deleteFileSlot();
+    void deleteAllFilesSlot();
+    void selectedFileSlot();
+    void updateFileListSlot();
 
-  void importSlot();
+    void importSlot();
 
-  void sectorItemChangedSlot(QTableWidgetItem* item);
+    void sectorItemChangedSlot(QTableWidgetItem* item);
 
-  void changeSectorColorSlot();
-  void deleteSectorSlot();
+    void changeSectorColorSlot();
+    void deleteSectorSlot();
 
-  void exportSectorsSlot ();
-  void clearSectorsSlot ();
-  void importSectorsSlot ();
+    void exportSectorsSlot ();
+    void clearSectorsSlot ();
+    void importSectorsSlot ();
+
+private slots:
+    void clearAirSpaceSectorsSlot ();
+    void importAirSpaceSectorsSlot ();
 
 public:
     ManageSectorsTaskWidget(ManageSectorsTask& task, QWidget* parent = nullptr);
@@ -63,6 +67,7 @@ public:
     void updateParseMessage ();
 
     void importSectorsJSON (const std::string& filename);
+    void importAirSpaceSectorsJSON (const std::string& filename);
 
 protected:
     ManageSectorsTask& task_;
@@ -84,10 +89,15 @@ protected:
     QStringList table_columns_{"ID", "Sector Name",  "Layer Name", "Exclude", "Num Points", "Altitude Minimum",
                                "Altitude Maximum", "Color", "Delete"};
 
+    QTableWidget* airspace_table_ = nullptr;
+    QStringList airspace_table_columns_{"ID", "Sector Name", "Use for Eval", "Num Points", "Altitude Minimum", "Altitude Maximum"};
+
     void addImportTab();
     void addManageTab();
+    void addAirSpaceTab();
 
     void updateSectorTable();
+    void updateAirSpaceTable();
 };
 
 #endif // MANAGESECTORSTASKWIDGET_H

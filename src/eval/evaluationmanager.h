@@ -19,7 +19,6 @@
 #define EVALUATIONMANAGER_H
 
 #include "configurable.h"
-#include "sectorlayer.h"
 #include "evaluationdata.h"
 #include "evaluationresultsgenerator.h"
 #include "viewabledataconfig.h"
@@ -36,6 +35,8 @@
 class COMPASS;
 class EvaluationStandard;
 class DBContent;
+class AirSpace;
+class SectorLayer;
 
 namespace dbContent {
 
@@ -52,6 +53,7 @@ class EvaluationManager : public QObject, public Configurable
 
 signals:
     void sectorsChangedSignal();
+    void airSpaceChangedSignal();
     void standardsChangedSignal(); // emitted if standard was added or deleted
     void currentStandardChangedSignal(); // emitted if current standard was changed
 
@@ -113,6 +115,10 @@ public:
     void exportSectors (const std::string& filename);
     unsigned int getMaxSectorId ();
     void updateSectorLayers();
+
+    bool importAirSpace(const std::string& filename);
+    void clearAirSpace();
+    const SectorLayer* airSpaceSectors() const;
 
     std::string dbContentNameRef() const;
     void dbContentNameRef(const std::string& name);
@@ -339,6 +345,8 @@ public:
     bool hasSelectedReferenceDataSources();
     bool hasSelectedTestDataSources();
 
+    static const std::string AirSpaceLayerName;
+
 protected:
     COMPASS& compass_;
 
@@ -455,6 +463,8 @@ protected:
     unsigned int max_sector_id_ {0};
     std::vector<std::unique_ptr<EvaluationStandard>> standards_;
 
+    std::shared_ptr<AirSpace> air_space_;
+
     nlohmann::json use_grp_in_sector_; //standard_name->sector_layer_name->req_grp_name->bool use
     nlohmann::json use_requirement_; // standard_name->req_grp_name->req_grp_name->bool use
 
@@ -468,7 +478,7 @@ protected:
     std::map<unsigned int, std::tuple<std::set<unsigned int>, std::tuple<bool, unsigned int, unsigned int>,
         std::tuple<bool, unsigned int, unsigned int>>> adsb_info_;
 
-    bool use_fast_sector_inside_check_ = true;
+    bool use_fast_sector_inside_check_ = false;
 
     virtual void checkSubConfigurables() override;
 

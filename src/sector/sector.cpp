@@ -229,20 +229,49 @@ bool SectorInsideTest::isValid() const
  * Sector
  ***********************************************************************************/
 
-Sector::Sector(unsigned int id, const std::string& name, const std::string& layer_name,
-               bool exclude, QColor color, std::vector<std::pair<double,double>> points)
-    : id_(id), name_(name), layer_name_(layer_name), exclude_(exclude), color_str_{color.name().toStdString()},
-      points_(points)
+Sector::Sector(unsigned int id, 
+               const std::string& name, 
+               const std::string& layer_name,
+               bool serialize,
+               bool exclusion_sector,
+               QColor color, 
+               std::vector<std::pair<double,double>> points)
+:   id_              (id)
+,   name_            (name)
+,   layer_name_      (layer_name)
+,   serialize_       (serialize)
+,   exclusion_sector_(exclusion_sector)
+,   color_str_       (color.name().toStdString())
+,   points_          (points)
 {
     createPolygon();
 }
 
-Sector::Sector(unsigned int id, const std::string& name, const std::string& layer_name,
-               const std::string& json_str)
-    : id_(id), name_(name), layer_name_(layer_name)
+Sector::Sector(unsigned int id, 
+               const std::string& name, 
+               const std::string& layer_name,
+               bool serialize)
+:   id_        (id)
+,   name_      (name)
+,   layer_name_(layer_name)
+,   serialize_ (serialize)
 {
-    json j = json::parse(json_str);
+}
 
+Sector::~Sector() = default;
+
+bool Sector::readJSON(const std::string& json_str)
+{
+    auto json_obj = nlohmann::json::parse(json_str);
+
+    return readJSON(json_obj);
+}
+
+bool Sector::readJSON(const nlohmann::json& j)
+{
+    min_altitude_.reset();
+    max_altitude_.reset();
+    
     assert (j.contains("id"));
     assert (j.at("id") == id_);
 
@@ -252,51 +281,37 @@ Sector::Sector(unsigned int id, const std::string& name, const std::string& laye
     assert (j.contains("layer_name"));
     assert (j.at("layer_name") == layer_name_);
 
+    if (j.contains("min_altitude"))
+        min_altitude_ = j.at("min_altitude");
+
+    if (j.contains("max_altitude"))
+        max_altitude_ = j.at("max_altitude");
+
     if (j.contains("exclude"))
-        exclude_ = j.at("exclude");
+        exclusion_sector_ = j.at("exclude");
     else
-        exclude_ = false;
+        exclusion_sector_ = false;
 
     assert (j.contains("points"));
-    json& points = j.at("points");
+    const json& points = j.at("points");
     assert (points.is_array());
 
-    for (json& point_it : points.get<json::array_t>())
+    for (const json& point_it : points.get<json::array_t>())
     {
         assert (point_it.is_array());
         assert (point_it.size() == 2);
         points_.push_back({point_it[0], point_it[1]});
     }
 
-    has_min_altitude_ = j.contains("min_altitude");
-    if (has_min_altitude_)
-        min_altitude_ = j.at("min_altitude");
-
-    has_max_altitude_ = j.contains("max_altitude");
-    if (has_max_altitude_)
-        max_altitude_ = j.at("max_altitude");
-
     if (!j.contains("color_str"))
         color_str_ = default_color;
     else
         color_str_ = j.at("color_str");
 
-    createPolygon();
+    return readJSON_impl(j);
 }
 
-Sector::~Sector() = default;
-
-std::string Sector::name() const
-{
-    return name_;
-}
-
-std::string Sector::layerName() const
-{
-    return layer_name_;
-}
-
-nlohmann::json Sector::jsonData () const
+nlohmann::json Sector::jsonData() const
 {
     json j = json::object();
 
@@ -304,7 +319,13 @@ nlohmann::json Sector::jsonData () const
     j["name"] = name_;
     j["layer_name"] = layer_name_;
 
-    j["exclude"] = exclude_;
+    if (min_altitude_.has_value())
+        j["min_altitude"] = min_altitude_.value();
+
+    if (max_altitude_.has_value())
+        j["max_altitude"] = max_altitude_.value();
+
+    j["exclude"] = exclusion_sector_;
 
     j["points"] = json::array();
 
@@ -317,13 +338,9 @@ nlohmann::json Sector::jsonData () const
         ++cnt;
     }
 
-    if (has_min_altitude_)
-        j["min_altitude"] = min_altitude_;
-
-    if (has_max_altitude_)
-        j["max_altitude"] = max_altitude_;
-
     j["color_str"] = color_str_;
+
+    writeJSON_impl(j);
 
     return j;
 }
@@ -333,74 +350,26 @@ std::string Sector::jsonDataStr() const
     return jsonData().dump();
 }
 
+std::string Sector::name() const
+{
+    return name_;
+}
+
+std::string Sector::layerName() const
+{
+    return layer_name_;
+}
+
 const std::vector<std::pair<double, double>>& Sector::points() const
 {
     return points_;
-}
-
-bool Sector::hasMinimumAltitude()
-{
-    return has_min_altitude_;
-}
-
-double Sector::minimumAltitude()
-{
-    assert (has_min_altitude_);
-    return min_altitude_;
-}
-void Sector::minimumAltitude(double value)
-{
-    loginf << "Sector: minimumAltitude: " << value << "";
-
-    has_min_altitude_ = true;
-    min_altitude_ = value;
-
-    save();
-}
-
-void Sector::removeMinimumAltitude()
-{
-    loginf << "Sector: removeMinimumAltitude";
-
-    has_min_altitude_ = false;
-    min_altitude_ = 0;
-
-    save();
-}
-
-bool Sector::hasMaximumAltitude()
-{
-    return has_max_altitude_;
-}
-double Sector::maximumAltitude()
-{
-    assert (has_max_altitude_);
-    return max_altitude_;
-}
-void Sector::maximumAltitude(double value)
-{
-    loginf << "Sector: maximumAltitude: " << value << "";
-
-    has_max_altitude_ = true;
-    max_altitude_ = value;
-
-    save();
-}
-
-void Sector::removeMaximumAltitude()
-{
-    loginf << "Sector: removeMaximumAltitude";
-
-    has_max_altitude_ = false;
-    max_altitude_ = 0;
-
-    save();
 }
 
 std::string Sector::colorStr()
 {
     return color_str_;
 }
+
 void Sector::colorStr(std::string value)
 {
     loginf << "Sector: colorStr: '" << value << "'";
@@ -417,9 +386,83 @@ void Sector::removeColorStr()
     save();
 }
 
+void Sector::exclude(bool ok)
+{
+    exclusion_sector_ = ok;
+
+    save();
+}
+
+
 unsigned int Sector::id() const
 {
     return id_;
+}
+
+bool Sector::hasMinimumAltitude() const
+{
+    return min_altitude_.has_value();
+}
+
+double Sector::minimumAltitude() const
+{
+    assert (min_altitude_.has_value());
+    return min_altitude_.value();
+}
+
+/**
+*/
+void Sector::setMinimumAltitude(double value)
+{
+    loginf << "Sector: setMinimumAltitude: " << value << "";
+
+    min_altitude_ = value;
+
+    save();
+}
+
+/**
+*/
+void Sector::removeMinimumAltitude()
+{
+    loginf << "Sector: removeMinimumAltitude";
+
+    min_altitude_.reset();
+
+    save();
+}
+
+bool Sector::hasMaximumAltitude() const
+{
+    return max_altitude_.has_value();
+}
+
+double Sector::maximumAltitude() const
+{
+    assert (max_altitude_.has_value());
+    return max_altitude_.value();
+}
+
+/**
+*/
+void Sector::setMaximumAltitude(double value)
+{
+    loginf << "Sector: setMaximumAltitude: " << value << "";
+
+    max_altitude_ = value;
+
+    save();
+}
+
+/**
+*/
+void Sector::removeMaximumAltitude()
+{
+    loginf << "Sector: removeMaximumAltitude";
+
+    max_altitude_.reset();
+
+    save();
 }
 
 void Sector::name(const std::string& name)
@@ -445,52 +488,70 @@ void Sector::layerName(const std::string& layer_name)
 
 void Sector::save()
 {
-    EvaluationManager& eval_man = COMPASS::instance().evaluationManager();
-
-    eval_man.saveSector(id_);
+    if (serialize_)
+    {
+        EvaluationManager& eval_man = COMPASS::instance().evaluationManager();
+        eval_man.saveSector(id_);
+    }
 }
 
 bool Sector::isInside(const EvaluationTargetPosition& pos,
                       bool has_ground_bit, 
-                      bool ground_bit_set) const
+                      bool ground_bit_set,
+                      InsideCheckType check_type) const
 {
-    //check altitude range
-    if (pos.has_altitude_)
+    if (check_type == InsideCheckType::XYZ ||
+        check_type == InsideCheckType::Z)
     {
-        if (has_min_altitude_ && pos.altitude_ < min_altitude_)
-            return false;
-        else if (has_max_altitude_ && pos.altitude_ > max_altitude_)
+        //check altitude range
+        if (pos.has_altitude_)
+        {
+            if (min_altitude_.has_value() && pos.altitude_ < min_altitude_.value())
+                return false;
+            else if (max_altitude_.has_value() && pos.altitude_ > max_altitude_.value())
+                return false;
+        }
+
+        //check gb
+        if (has_ground_bit && ground_bit_set && min_altitude_.has_value())
             return false;
     }
 
-    //check gb
-    if (has_ground_bit && ground_bit_set && has_min_altitude_)
-        return false;
-
-    //check bounding rect
-    if ((lat_min_.has_value() && pos.latitude_  < lat_min_.value()) ||
-        (lat_max_.has_value() && pos.latitude_  > lat_max_.value()) ||
-        (lon_min_.has_value() && pos.longitude_ < lon_min_.value()) ||
-        (lon_max_.has_value() && pos.longitude_ > lon_max_.value()))
+    if (check_type == InsideCheckType::XYZ ||
+        check_type == InsideCheckType::XY)
     {
-        return false;
-    }
-
-    //check fast inside test if available
-    if (inside_test_.has_value())
-    {
-        auto res = inside_test_->isInside(pos.latitude_, pos.longitude_);
-        if (res == SectorInsideTest::CheckResult::Outside)
+        //check bounding rect
+        if ((lat_min_.has_value() && pos.latitude_  < lat_min_.value()) ||
+            (lat_max_.has_value() && pos.latitude_  > lat_max_.value()) ||
+            (lon_min_.has_value() && pos.longitude_ < lon_min_.value()) ||
+            (lon_max_.has_value() && pos.longitude_ > lon_max_.value()))
+        {
             return false;
-        if (res == SectorInsideTest::CheckResult::Inside)
-            return true;
+        }
 
-        //check yielded 'SectorInsideTest::CheckResult::Border' => check polygon geometrically
+        //check fast inside test if available
+        bool check_geom = true;
+        if (inside_test_.has_value())
+        {
+            auto res = inside_test_->isInside(pos.latitude_, pos.longitude_);
+            if (res == SectorInsideTest::CheckResult::Outside)
+                return false;
+            else if (res == SectorInsideTest::CheckResult::Inside)
+                check_geom = false; //geometrical check not needed
+            else 
+                check_geom = true;  //check yielded 'SectorInsideTest::CheckResult::Border' => check polygon geometrically
+        }
+
+        //check poly
+        if (check_geom)
+        {
+            OGRPoint ogr_pos (pos.latitude_, pos.longitude_);
+            if (!ogr_polygon_->Contains(&ogr_pos))
+                return false;
+        }
     }
 
-    //check poly
-    OGRPoint ogr_pos (pos.latitude_, pos.longitude_);
-    return ogr_polygon_->Contains(&ogr_pos);
+    return true;
 }
 
 std::pair<double, double> Sector::getMinMaxLatitude() const
@@ -505,16 +566,6 @@ std::pair<double, double> Sector::getMinMaxLongitude() const
     assert(lon_min_.has_value() && lon_max_.has_value());
 
     return {lon_min_.value(), lon_max_.value()};
-}
-
-bool Sector::exclude() const
-{
-    return exclude_;
-}
-
-void Sector::exclude(bool value)
-{
-    exclude_ = value;
 }
 
 void Sector::createPolygon()

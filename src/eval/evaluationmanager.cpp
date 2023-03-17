@@ -28,7 +28,9 @@
 #include "dbcontent/dbcontentmanager.h"
 #include "datasourcesloadwidget.h"
 #include "datasourcemanager.h"
-#include "sector.h"
+#include "evaluationsector.h"
+#include "sectorlayer.h"
+#include "airspace.h"
 #include "dbcontent/variable/metavariable.h"
 #include "dbcontent/variable/variable.h"
 #include "dbcontent/target/target.h"
@@ -64,9 +66,15 @@ using namespace std;
 using namespace nlohmann;
 using namespace boost::posix_time;
 
+const std::string EvaluationManager::AirSpaceLayerName = "air_space_sectors";
+
 EvaluationManager::EvaluationManager(const std::string& class_id, const std::string& instance_id, COMPASS* compass)
-    : Configurable(class_id, instance_id, compass, "eval.json"), compass_(*compass),
-      data_(*this, compass->dbContentManager()), results_gen_(*this), pdf_gen_(*this)
+:   Configurable(class_id, instance_id, compass, "eval.json")
+,   compass_    (*compass)
+,   air_space_  (new AirSpace)
+,   data_       (*this, compass->dbContentManager())
+,   results_gen_(*this)
+,   pdf_gen_    (*this)
 {
     registerParameter("dbcontent_name_ref", &dbcontent_name_ref_, "RefTraj");
     registerParameter("line_id_ref", &line_id_ref_, 0);
@@ -930,7 +938,7 @@ void EvaluationManager::createNewSector (const std::string& name,
 
     ++max_sector_id_; // new max
 
-    shared_ptr<Sector> sector = make_shared<Sector> (max_sector_id_, name, layer_name, exclude, color, points);
+    shared_ptr<Sector> sector(new EvaluationSector(max_sector_id_, name, layer_name, exclude, color, points));
 
     // add to existing sectors
     if (!hasSectorLayer(layer_name))
@@ -1138,16 +1146,17 @@ void EvaluationManager::importSectors (const std::string& filename)
             name = j_sec_it.at("name");
             layer_name = j_sec_it.at("layer_name");
 
-            shared_ptr<Sector> new_sector = make_shared<Sector>(id, name, layer_name, j_sec_it.dump());
+            auto eval_sector = new EvaluationSector(id, name, layer_name);
+            eval_sector->readJSON(j_sec_it.dump());
 
             if (!hasSectorLayer(layer_name))
                 sector_layers_.push_back(make_shared<SectorLayer>(layer_name));
 
-            sectorLayer(layer_name)->addSector(new_sector);
+            sectorLayer(layer_name)->addSector(shared_ptr<Sector>(eval_sector));
 
             assert (hasSector(name, layer_name));
 
-            new_sector->save();
+            eval_sector->save();
 
             loginf << "EvaluationManager: importSectors: loaded sector '" << name << "' in layer '"
                    << layer_name << "' num points " << sector(name, layer_name)->size();
@@ -1192,7 +1201,31 @@ void EvaluationManager::exportSectors (const std::string& filename)
     output_file.open(filename, std::ios_base::out);
 
     output_file << j.dump(4);
+}
 
+bool EvaluationManager::importAirSpace(const std::string& filename)
+{
+    assert(air_space_);
+    bool ok = air_space_->readJSON(filename);
+
+    if (widget_)
+        widget_->updateSectors();
+
+    emit airSpaceChangedSignal();
+
+    return ok;
+}
+
+const SectorLayer* EvaluationManager::airSpaceSectors() const
+{
+    assert(air_space_);
+    return air_space_->layer();
+}
+
+void EvaluationManager::clearAirSpace()
+{
+    assert(air_space_);
+    air_space_->clear();
 }
 
 std::string EvaluationManager::dbContentNameRef() const
