@@ -182,6 +182,7 @@ EvaluationManager::EvaluationManager(const std::string& class_id, const std::str
     registerParameter("warning_shown", &warning_shown_, false);
 
     createSubConfigurables();
+
 }
 
 void EvaluationManager::init(QTabWidget* tab_widget)
@@ -587,6 +588,12 @@ void EvaluationManager::databaseClosedSlot()
     widget()->setDisabled(true);
 
     emit sectorsChangedSignal();
+}
+
+void EvaluationManager::dataSourcesChangedSlot()
+{
+    checkReferenceDataSources();
+    checkTestDataSources();
 }
 
 void EvaluationManager::associationStatusChangedSlot()

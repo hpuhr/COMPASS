@@ -60,6 +60,7 @@ signals:
 public slots:
     void databaseOpenedSlot();
     void databaseClosedSlot();
+    void dataSourcesChangedSlot();
     void associationStatusChangedSlot();
 
     void loadedDataDataSlot(const std::map<std::string, std::shared_ptr<Buffer>>& data, bool requires_reset);

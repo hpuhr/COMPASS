@@ -106,7 +106,7 @@ EvaluationDataSourceWidget::~EvaluationDataSourceWidget()
 
 void EvaluationDataSourceWidget::updateDataSourcesSlot()
 {
-    loginf << "EvaluationDataSourceWidget: updateDataSourcesSlot";
+    loginf << "EvaluationDataSourceWidget: updateDataSourcesSlot: title " << title_;
     assert (data_source_layout_);
 
     QLayoutItem* child;
