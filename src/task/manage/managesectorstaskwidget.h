@@ -54,6 +54,8 @@ public slots:
   void clearSectorsSlot ();
   void importSectorsSlot ();
 
+  void updateSectorTableSlot();
+
 public:
     ManageSectorsTaskWidget(ManageSectorsTask& task, QWidget* parent = nullptr);
 
@@ -87,7 +89,7 @@ protected:
     void addImportTab();
     void addManageTab();
 
-    void updateSectorTable();
+
 };
 
 #endif // MANAGESECTORSTASKWIDGET_H

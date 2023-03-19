@@ -34,11 +34,13 @@ signals:
     void dbContentNameChangedSignal(const std::string& dbcontent_name);
     void lineChangedSignal(unsigned int line_id);
 
-protected slots:
+public slots:
     void dbContentNameChangedSlot();
     /// @brief Updates the sensor active checkboxes
     void toggleDataSourceSlot();
     void lineIDEditSlot(const QString& text);
+
+    void updateDataSourcesSlot();
 
 
 public:
@@ -46,8 +48,6 @@ public:
                                QWidget* parent=nullptr, Qt::WindowFlags f=Qt::WindowFlags());
 
     virtual ~EvaluationDataSourceWidget();
-
-    void updateDataSources();
 
 protected:
     std::string title_;

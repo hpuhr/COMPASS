@@ -661,6 +661,9 @@ void GPSTrailImportTask::insertDoneSlot()
 
     buffer_ = nullptr;
 
+    COMPASS::instance().dataSourceManager().saveDBDataSources();
+    emit COMPASS::instance().dataSourceManager().dataSourcesChangedSignal();
+
     done_ = true;
 
     //COMPASS::instance().interface().setProperty(PostProcessTask::DONE_PROPERTY_NAME, "0");

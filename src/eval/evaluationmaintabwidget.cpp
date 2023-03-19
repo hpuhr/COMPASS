@@ -111,10 +111,10 @@ EvaluationMainTabWidget::EvaluationMainTabWidget(EvaluationManager& eval_man,
 void EvaluationMainTabWidget::updateDataSources()
 {
     if (data_source_ref_widget_)
-        data_source_ref_widget_->updateDataSources();
+        data_source_ref_widget_->updateDataSourcesSlot();
 
     if (data_source_tst_widget_)
-        data_source_tst_widget_->updateDataSources();
+        data_source_tst_widget_->updateDataSourcesSlot();
 }
 
 void EvaluationMainTabWidget::updateSectors()
