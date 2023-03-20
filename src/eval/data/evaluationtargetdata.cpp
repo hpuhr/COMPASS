@@ -27,6 +27,7 @@
 #include "evaluationmanager.h"
 #include "util/number.h"
 #include "util/timeconv.h"
+#include "sector/airspace.h"
 
 #include <boost/algorithm/string.hpp>
 
@@ -2369,6 +2370,7 @@ void EvaluationTargetData::computeSectorInsideInfo() const
     inside_tst_           = {};
     inside_map_           = {};
     inside_sector_layers_ = {};
+    air_space_checked_    = false;
 
     auto sector_layers = eval_man_.sectorsLayers();
 
@@ -2379,12 +2381,15 @@ void EvaluationTargetData::computeSectorInsideInfo() const
             inside_sector_layers_[ sl.get() ] = cnt++;
     }
 
+    air_space_checked_ = eval_man_.filterAirSpace() &&
+                         eval_man_.airSpace().numEvaluationSectors() > 0;
+
     size_t num_sector_layers = sector_layers.size();
     size_t num_ref           = ref_indices_.size();
     size_t num_tst           = tst_indices_.size();
     size_t num_map           = tst_data_mappings_.size();
 
-    size_t num_extra         = 1; //above flight level filter
+    size_t num_extra         = 2; //inside airspace gb on, inside airspace gb off
 
     size_t num_cols          = num_sector_layers * 2 + num_extra;
 
@@ -2439,6 +2444,22 @@ void EvaluationTargetData::computeSectorInsideInfo(InsideCheckMatrix& mat,
 
     size_t num_sector_layers = inside_sector_layers_.size();
     size_t gb_offset         = num_sector_layers;
+    size_t airspace_offset   = num_sector_layers * 2;
+
+    //check airspace if enabled
+    bool in_airspace_gb    = false;
+    bool in_airspace_no_gb = false;
+    if (air_space_checked_)
+    {
+        AirSpace::InsideCheckResult inside_check_gb, inside_check_no_gb;
+        eval_man_.airSpace().isInside(inside_check_gb,
+                                      inside_check_no_gb,
+                                      pos,
+                                      true);
+
+        in_airspace_gb    = (inside_check_gb    != AirSpace::InsideCheckResult::AltitudeOOR);
+        in_airspace_no_gb = (inside_check_no_gb != AirSpace::InsideCheckResult::AltitudeOOR);
+    }
 
     for (const auto& sl : inside_sector_layers_)
     {
@@ -2447,14 +2468,20 @@ void EvaluationTargetData::computeSectorInsideInfo(InsideCheckMatrix& mat,
 
         auto lidx = sl.second;
 
+        bool airspace_ok_gb    = !air_space_checked_ || in_airspace_gb;
+        bool airspace_ok_no_gb = !air_space_checked_ || in_airspace_no_gb;
+
         //@TODO: position inside polygon check might be computed twice...
-        bool inside_no_gb = layer->isInside(pos, false, false);
-        bool inside_gb    = inside_no_gb && layer->isInside(pos, true, true);
+        bool inside_no_gb = airspace_ok_no_gb && layer->isInside(pos, false, false);
+        bool inside_gb    = airspace_ok_gb && inside_no_gb && layer->isInside(pos, true, true);
 
         //check pos against layer and write to mat
         mat(idx_internal, lidx            ) = inside_no_gb;
         mat(idx_internal, lidx + gb_offset) = inside_gb;
     }
+
+    mat(idx_internal, airspace_offset     ) = in_airspace_no_gb;
+    mat(idx_internal, airspace_offset + 1 ) = in_airspace_gb;
 }
 
 /**

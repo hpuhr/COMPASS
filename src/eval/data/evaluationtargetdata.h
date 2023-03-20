@@ -287,7 +287,6 @@ public:
                             const EvaluationTargetPosition& pos,
                             bool has_ground_bit, 
                             bool ground_bit_set) const;
-    
 protected:
     void updateCallsigns() const;
     void updateTargetAddresses() const;
@@ -360,6 +359,7 @@ protected:
     mutable InsideCheckMatrix                    inside_tst_;
     mutable InsideCheckMatrix                    inside_map_;
     mutable std::map<const SectorLayer*, size_t> inside_sector_layers_;
+    mutable bool                                 air_space_checked_ = false;
 };
 
 #endif // EVALUATIONTARGETDATA_H

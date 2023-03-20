@@ -138,7 +138,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionAcross::evaluate (
         ++num_pos;
 
         timestamp = tst_id.first;
-        tst_pos = target_data.tstPos(timestamp);
+        tst_pos = target_data.tstPos(tst_id);
 
         along_ok = true;
 

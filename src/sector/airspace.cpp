@@ -186,16 +186,36 @@ bool AirSpace::readJSON(const std::string& fn)
 
 /**
  */
-const SectorLayer* AirSpace::layer() const
+const SectorLayer& AirSpace::layer() const
 {
     assert(layer_);
-    return layer_.get();
+    return *layer_;
+}
+
+/**
+ */
+size_t AirSpace::numEvaluationSectors() const
+{
+    assert(layer_);
+
+    size_t n = 0;
+
+    for (auto sector : layer_->sectors())
+    {
+        auto as_sector = dynamic_cast<const AirSpaceSector*>(sector.get());
+        assert(as_sector);
+
+        if (as_sector->usedForEval())
+            ++n;
+    }
+
+    return n;
 }
 
 /**
 */
-AirSpace::InsideCheckResult AirSpace::isInside(const EvaluationTargetPosition& pos, 
-                                               bool has_ground_bit, 
+AirSpace::InsideCheckResult AirSpace::isInside(const EvaluationTargetPosition& pos,
+                                               bool has_ground_bit,
                                                bool ground_bit_set,
                                                bool evaluation_only) const
 {
@@ -205,15 +225,13 @@ AirSpace::InsideCheckResult AirSpace::isInside(const EvaluationTargetPosition& p
     auto lat_min_max = layer_->getMinMaxLatitude();
     auto lon_min_max = layer_->getMinMaxLongitude();
 
-    if (pos.latitude_  < lat_min_max.first  || 
+    if (pos.latitude_  < lat_min_max.first  ||
         pos.latitude_  > lat_min_max.second ||
-        pos.longitude_ < lon_min_max.first  || 
+        pos.longitude_ < lon_min_max.first  ||
         pos.longitude_ > lon_min_max.second)
         return InsideCheckResult::OutOfAirspace;
 
     //check individual sectors
-    bool inside = false;
-
     for (auto sector : layer_->sectors())
     {
         auto as_sector = dynamic_cast<const AirSpaceSector*>(sector.get());
@@ -227,17 +245,64 @@ AirSpace::InsideCheckResult AirSpace::isInside(const EvaluationTargetPosition& p
         if (!sector->isInside(pos, has_ground_bit, ground_bit_set, Sector::InsideCheckType::XY))
             continue;
         
-        inside = true;
-
-        //inside sector but out of altitude range => return
-        if (!sector->isInside(pos, has_ground_bit, ground_bit_set, Sector::InsideCheckType::Z))
+        //if we are inside a sector we are greedy, the result is either inside or altitude is outside
+        if (sector->isInside(pos, has_ground_bit, ground_bit_set, Sector::InsideCheckType::Z))
+            return InsideCheckResult::Inside;
+        else
             return InsideCheckResult::AltitudeOOR;
     }
 
-    //not in any sector?
-    if (!inside)
-        return InsideCheckResult::OutOfAirspace;
+    //not inside any sector?
+    return InsideCheckResult::OutOfAirspace;
+}
 
-    //inside a sector and altitude was ok
-    return InsideCheckResult::Inside;
+/**
+*/
+void AirSpace::isInside(InsideCheckResult& result_gb,
+                        InsideCheckResult& result_no_gb,
+                        const EvaluationTargetPosition& pos,
+                        bool evaluation_only) const
+{
+    assert(layer_);
+
+    //check bounds of layer
+    auto lat_min_max = layer_->getMinMaxLatitude();
+    auto lon_min_max = layer_->getMinMaxLongitude();
+
+    if (pos.latitude_  < lat_min_max.first  ||
+        pos.latitude_  > lat_min_max.second ||
+        pos.longitude_ < lon_min_max.first  ||
+        pos.longitude_ > lon_min_max.second)
+    {
+        result_gb    = InsideCheckResult::OutOfAirspace;
+        result_no_gb = InsideCheckResult::OutOfAirspace;
+        return;
+    }
+
+    //check individual sectors
+    for (auto sector : layer_->sectors())
+    {
+        auto as_sector = dynamic_cast<const AirSpaceSector*>(sector.get());
+        assert(as_sector);
+
+        //only evaluation sectors desired?
+        if (evaluation_only && !as_sector->usedForEval())
+            continue;
+
+        //not inside of sector area?
+        if (!sector->isInside(pos, false, false, Sector::InsideCheckType::XY))
+            continue;
+
+        bool inside_gb    = sector->isInside(pos, true , true , Sector::InsideCheckType::Z);
+        bool inside_no_gb = sector->isInside(pos, false, false, Sector::InsideCheckType::Z);
+
+        result_gb    = inside_gb    ? InsideCheckResult::Inside : InsideCheckResult::AltitudeOOR;
+        result_no_gb = inside_no_gb ? InsideCheckResult::Inside : InsideCheckResult::AltitudeOOR;
+        return;
+    }
+
+    //not inside any sector?
+    result_gb    = InsideCheckResult::OutOfAirspace;
+    result_no_gb = InsideCheckResult::OutOfAirspace;
+    return;
 }

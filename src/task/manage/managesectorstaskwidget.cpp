@@ -23,6 +23,7 @@
 #include "evaluationmanager.h"
 #include "evaluationsector.h"
 #include "airspacesector.h"
+#include "airspace.h"
 #include "sectorlayer.h"
 #include "files.h"
 #include "importsectordialog.h"
@@ -379,17 +380,16 @@ void ManageSectorsTaskWidget::updateAirSpaceTable()
 
     EvaluationManager& eval_man = COMPASS::instance().evaluationManager();
 
-    const SectorLayer* air_space_layer = eval_man.airSpaceSectors();
-    assert(air_space_layer);
+    const SectorLayer& air_space_layer = eval_man.airSpace().layer();
 
     airspace_table_->setDisabled(true); // otherwise first element is edited after
     airspace_table_->clearContents();
-    airspace_table_->setRowCount(air_space_layer->size());
+    airspace_table_->setRowCount(air_space_layer.size());
 
     int row = 0;
     int col = 0;
 
-    for (auto& sector : air_space_layer->sectors())
+    for (auto& sector : air_space_layer.sectors())
     {
         unsigned int sector_id = sector->id();
 

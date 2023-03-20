@@ -684,7 +684,7 @@ void EvaluationManager::loadingDoneSlot()
 
 }
 
-void EvaluationManager::evaluate ()
+void EvaluationManager::evaluate()
 {
     loginf << "EvaluationManager: evaluate";
 
@@ -717,13 +717,13 @@ void EvaluationManager::evaluate ()
     emit resultsChangedSignal();
 }
 
-bool EvaluationManager::canGenerateReport ()
+bool EvaluationManager::canGenerateReport()
 {
     assert (initialized_);
     return evaluated_ && hasResults();
 }
 
-void EvaluationManager::generateReport ()
+void EvaluationManager::generateReport()
 {
     loginf << "EvaluationManager: generateReport";
 
@@ -742,7 +742,7 @@ void EvaluationManager::close()
     initialized_ = false;
 }
 
-bool EvaluationManager::needsAdditionalVariables ()
+bool EvaluationManager::needsAdditionalVariables()
 {
     return needs_additional_variables_;
 }
@@ -1216,16 +1216,26 @@ bool EvaluationManager::importAirSpace(const std::string& filename)
     return ok;
 }
 
-const SectorLayer* EvaluationManager::airSpaceSectors() const
+const AirSpace& EvaluationManager::airSpace() const
 {
     assert(air_space_);
-    return air_space_->layer();
+    return *air_space_;
 }
 
 void EvaluationManager::clearAirSpace()
 {
     assert(air_space_);
     air_space_->clear();
+}
+
+bool EvaluationManager::filterAirSpace() const
+{
+    return air_space_filter_;
+}   
+
+void EvaluationManager::filterAirSpace(bool filter)
+{
+    air_space_filter_ = filter;
 }
 
 std::string EvaluationManager::dbContentNameRef() const

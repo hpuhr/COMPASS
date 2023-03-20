@@ -308,7 +308,12 @@ bool Sector::readJSON(const nlohmann::json& j)
     else
         color_str_ = j.at("color_str");
 
-    return readJSON_impl(j);
+    if (!readJSON_impl(j))
+        return false;
+
+    createPolygon();
+
+    return true;
 }
 
 nlohmann::json Sector::jsonData() const

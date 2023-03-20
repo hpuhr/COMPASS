@@ -41,12 +41,18 @@ public:
     void clear();
     bool readJSON(const std::string& fn);
 
-    const SectorLayer* layer() const;
+    const SectorLayer& layer() const;
 
     InsideCheckResult isInside(const EvaluationTargetPosition& pos,
                                bool has_ground_bit, 
                                bool ground_bit_set,
                                bool evaluation_only) const;
+    void isInside(InsideCheckResult& result_gb,
+                  InsideCheckResult& result_no_gb,
+                  const EvaluationTargetPosition& pos,
+                  bool evaluation_only) const;
+
+    size_t numEvaluationSectors() const;
 
     static const std::string LayerName;
 
