@@ -145,6 +145,7 @@ public:
     bool hasTstData () const;
 
     void finalize () const;
+    void prepareForEvaluation() const;
 
     const unsigned int utn_{0};
 

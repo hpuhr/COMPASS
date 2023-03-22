@@ -667,8 +667,6 @@ void EvaluationManager::loadingDoneSlot()
 
         boost::posix_time::ptime start_time = boost::posix_time::microsec_clock::local_time();
 
-
-
         data_.finalize();
 
         boost::posix_time::time_duration time_diff =  boost::posix_time::microsec_clock::local_time() - start_time;
@@ -701,6 +699,9 @@ void EvaluationManager::evaluate()
         widget_->updateButtons();
 
     emit resultsChangedSignal();
+
+    //prepare data
+    data_.prepareForEvaluation();
     
     // eval
     results_gen_.evaluate(data_, currentStandard());

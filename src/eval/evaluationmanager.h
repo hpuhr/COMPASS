@@ -481,7 +481,7 @@ protected:
     std::map<unsigned int, std::tuple<std::set<unsigned int>, std::tuple<bool, unsigned int, unsigned int>,
         std::tuple<bool, unsigned int, unsigned int>>> adsb_info_;
 
-    bool use_fast_sector_inside_check_ = false;
+    bool use_fast_sector_inside_check_ = true;
 
     virtual void checkSubConfigurables() override;
 

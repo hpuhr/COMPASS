@@ -200,6 +200,11 @@ void EvaluationTargetData::finalize () const
     //    }
 
     calculateTestDataMappings();
+}
+
+void EvaluationTargetData::prepareForEvaluation() const
+{
+    //needs up-to-date sectors, so we compute the inside information right before evaluation
     computeSectorInsideInfo();
 }
 
@@ -2364,8 +2369,6 @@ DataMappingTimes EvaluationTargetData::findTstTimes(ptime timestamp_ref) const /
 */
 void EvaluationTargetData::computeSectorInsideInfo() const
 {
-    eval_man_.updateSectorLayers();
-
     inside_ref_           = {};
     inside_tst_           = {};
     inside_map_           = {};

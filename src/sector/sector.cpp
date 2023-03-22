@@ -165,7 +165,7 @@ namespace
     SectorInsideTest::CheckResult whereAmI(const QImage& img, int x, int y)
     {
         //when no accurate statement is possible we assume border region (= detailed check) 
-        if (x < 0 || y < 0 || x >= img.width() || y >= img.height())
+        if (img.isNull() || x < 0 || y < 0 || x >= img.width() || y >= img.height())
             return SectorInsideTest::CheckResult::Border;
 
         //check color code at pixel

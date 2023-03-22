@@ -26,6 +26,7 @@
 #include "stringconv.h"
 #include "compass.h"
 #include "dbcontent/dbcontentmanager.h"
+#include "util/async.h"
 
 #include <QApplication>
 #include <QThread>
@@ -405,119 +406,40 @@ void EvaluationData::finalize ()
 
     assert (!finalized_);
 
-    boost::posix_time::ptime start_time;
-    boost::posix_time::ptime elapsed_time;
-
-    start_time = boost::posix_time::microsec_clock::local_time();
-
     unsigned int num_targets = target_data_.size();
 
     beginResetModel();
 
-    QProgressDialog postprocess_dialog_ ("", "", 0, num_targets);
-    postprocess_dialog_.setWindowTitle("Finalizing Evaluation Data");
-    postprocess_dialog_.setCancelButton(nullptr);
-    postprocess_dialog_.setWindowModality(Qt::ApplicationModal);
+    auto task = [&] (int cnt) { target_data_[cnt].finalize(); return true; };
 
-    QLabel* progress_label = new QLabel("", &postprocess_dialog_);
-    progress_label->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
-    postprocess_dialog_.setLabel(progress_label);
-
-    postprocess_dialog_.show();
-
-    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-
-    vector<bool> done_flags;
-    done_flags.resize(target_data_.size());
-
-    bool done = false;
-    unsigned int tmp_done_cnt;
-
-    boost::posix_time::time_duration time_diff;
-    double elapsed_time_s;
-    double time_per_eval, remaining_time_s;
-
-    string remaining_time_str;
-
-    std::future<void> pending_future = std::async(std::launch::async, [&] {
-        unsigned int num_targets = target_data_.size();
-
-        tbb::parallel_for(uint(0), num_targets, [&](unsigned int cnt)
-        {
-            target_data_[cnt].finalize();
-            done_flags[cnt] = true;
-        });
-
-        done = true;
-
-    });
-
-    postprocess_dialog_.setValue(0);
-
-    boost::posix_time::ptime last_elapsed_time = boost::posix_time::microsec_clock::local_time();
-    elapsed_time = boost::posix_time::microsec_clock::local_time();
-    unsigned int last_tmp_done_cnt = 0;
-
-    boost::posix_time::time_duration tmp_time_diff;
-    double tmp_elapsed_time_s;
-
-    while (!done)
-    {
-        tmp_done_cnt = 0;
-
-        for (auto done_it : done_flags)
-        {
-            if (done_it)
-                tmp_done_cnt++;
-        }
-
-        assert (tmp_done_cnt <= num_targets);
-
-        if (tmp_done_cnt && tmp_done_cnt != last_tmp_done_cnt)
-        {
-            elapsed_time = boost::posix_time::microsec_clock::local_time();
-
-            time_diff = elapsed_time - start_time;
-            elapsed_time_s = time_diff.total_milliseconds() / 1000.0;
-
-            tmp_time_diff = elapsed_time - last_elapsed_time;
-            tmp_elapsed_time_s = tmp_time_diff.total_milliseconds() / 1000.0;
-
-            time_per_eval = 0.95*time_per_eval + 0.05*(tmp_elapsed_time_s/(double)(tmp_done_cnt-last_tmp_done_cnt));
-            // halfnhalf
-            remaining_time_s = (double)(num_targets-tmp_done_cnt)*time_per_eval;
-
-            //        loginf << " UGA num_targets " << num_targets << " tmp_done_cnt " << tmp_done_cnt
-            //               << " elapsed_time_s " << elapsed_time_s;
-
-            postprocess_dialog_.setLabelText(
-                        ("Elapsed: "+String::timeStringFromDouble(elapsed_time_s, false)
-                         +"\nRemaining: "+String::timeStringFromDouble(remaining_time_s, false)
-                         +" (estimated)").c_str());
-
-            postprocess_dialog_.setValue(tmp_done_cnt);
-
-            last_tmp_done_cnt = tmp_done_cnt;
-            last_elapsed_time = elapsed_time;
-        }
-
-        if (!done)
-        {
-            QCoreApplication::processEvents();
-            QThread::msleep(200);
-        }
-    }
+    Utils::Async::waitDialogAsyncArray(task, (int)num_targets, "Finalizing data");
 
     finalized_ = true;
+
+    QApplication::setOverrideCursor(Qt::WaitCursor);
 
     endResetModel();
 
     if (widget_)
         widget_->resizeColumnsToContents();
 
-    postprocess_dialog_.close();
-
     QApplication::restoreOverrideCursor();
+}
+
+void EvaluationData::prepareForEvaluation()
+{
+    loginf << "EvaluationData: prepareForEvaluation";
+
+    unsigned int num_targets = target_data_.size();
+
+    QApplication::setOverrideCursor(Qt::WaitCursor);
+    {
+        eval_man_.updateSectorLayers();
+    }
+    QApplication::restoreOverrideCursor();
+    
+    auto task = [&] (int cnt) { target_data_[cnt].prepareForEvaluation(); return true; };
+    Utils::Async::waitDialogAsyncArray(task, (int)num_targets, "Initializing evaluation");
 }
 
 bool EvaluationData::hasTargetData (unsigned int utn)
