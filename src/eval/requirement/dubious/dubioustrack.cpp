@@ -72,8 +72,6 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTrack::evaluate (
     bool track_num_missing_reported {false};
 
     EvaluationTargetPosition tst_pos;
-    bool has_ground_bit;
-    bool ground_bit_set;
 
     bool is_inside;
 
@@ -159,16 +157,8 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTrack::evaluate (
 
         // check if inside based on test position only
 
-        tst_pos = target_data.tstPos(tst_id);
-
-        has_ground_bit = target_data.hasTstGroundBit(tst_id);
-
-        if (has_ground_bit)
-            ground_bit_set = target_data.tstGroundBit(tst_id);
-        else
-            ground_bit_set = false;
-
-        is_inside = target_data.tstPosInside(sector_layer, tst_id, tst_pos, has_ground_bit, ground_bit_set);
+        tst_pos   = target_data.tstPos(tst_id);
+        is_inside = target_data.tstPosInside(sector_layer, tst_id);
 
         if (!is_inside)
         {

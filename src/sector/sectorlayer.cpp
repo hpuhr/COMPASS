@@ -16,8 +16,7 @@
  */
 
 #include "sectorlayer.h"
-#include "evaluationsector.h"
-#include "airspacesector.h"
+#include "sector.h"
 #include "evaluationtargetposition.h"
 #include "logger.h"
 

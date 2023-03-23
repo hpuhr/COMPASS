@@ -35,7 +35,6 @@
 class COMPASS;
 class EvaluationStandard;
 class DBContent;
-class AirSpace;
 class SectorLayer;
 
 namespace dbContent {
@@ -53,7 +52,6 @@ class EvaluationManager : public QObject, public Configurable
 
 signals:
     void sectorsChangedSignal();
-    void airSpaceChangedSignal();
     void standardsChangedSignal(); // emitted if standard was added or deleted
     void currentStandardChangedSignal(); // emitted if current standard was changed
 
@@ -117,10 +115,8 @@ public:
     void updateSectorLayers();
 
     bool importAirSpace(const std::string& filename);
-    void clearAirSpace();
-    const AirSpace& airSpace() const;
-    bool filterAirSpace() const;
-    void filterAirSpace(bool filter);
+    bool filterMinimumHeight() const;
+    void filterMinimumHeight(bool filter);
 
     std::string dbContentNameRef() const;
     void dbContentNameRef(const std::string& name);
@@ -465,8 +461,7 @@ protected:
     unsigned int max_sector_id_ {0};
     std::vector<std::unique_ptr<EvaluationStandard>> standards_;
 
-    std::shared_ptr<AirSpace> air_space_;
-    bool air_space_filter_ = true;
+    bool filter_minimum_height_ = true;
 
     nlohmann::json use_grp_in_sector_; //standard_name->sector_layer_name->req_grp_name->bool use
     nlohmann::json use_requirement_; // standard_name->req_grp_name->req_grp_name->bool use
@@ -489,6 +484,8 @@ protected:
 
     void checkReferenceDataSources();
     void checkTestDataSources();
+
+    void updateMaxSectorID();
 
     nlohmann::json::object_t getBaseViewableDataConfig ();
     nlohmann::json::object_t getBaseViewableNoDataConfig ();

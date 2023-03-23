@@ -408,7 +408,12 @@ void EvaluationData::finalize ()
 
     unsigned int num_targets = target_data_.size();
 
-    beginResetModel();
+    QApplication::setOverrideCursor(Qt::WaitCursor);
+    {
+        eval_man_.updateSectorLayers();
+        beginResetModel();
+    }
+    QApplication::restoreOverrideCursor();
 
     auto task = [&] (int cnt) { target_data_[cnt].finalize(); return true; };
 
@@ -417,29 +422,13 @@ void EvaluationData::finalize ()
     finalized_ = true;
 
     QApplication::setOverrideCursor(Qt::WaitCursor);
-
-    endResetModel();
-
-    if (widget_)
-        widget_->resizeColumnsToContents();
-
-    QApplication::restoreOverrideCursor();
-}
-
-void EvaluationData::prepareForEvaluation()
-{
-    loginf << "EvaluationData: prepareForEvaluation";
-
-    unsigned int num_targets = target_data_.size();
-
-    QApplication::setOverrideCursor(Qt::WaitCursor);
     {
-        eval_man_.updateSectorLayers();
+        endResetModel();
+
+        if (widget_)
+            widget_->resizeColumnsToContents();
     }
     QApplication::restoreOverrideCursor();
-    
-    auto task = [&] (int cnt) { target_data_[cnt].prepareForEvaluation(); return true; };
-    Utils::Async::waitDialogAsyncArray(task, (int)num_targets, "Initializing evaluation");
 }
 
 bool EvaluationData::hasTargetData (unsigned int utn)

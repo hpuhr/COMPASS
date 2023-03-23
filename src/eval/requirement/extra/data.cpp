@@ -73,8 +73,6 @@ std::shared_ptr<EvaluationRequirementResult::Single> ExtraData::evaluate (
 
     unsigned int num_ref_inside = 0;
     ptime timestamp;
-    bool has_ground_bit;
-    bool ground_bit_set;
     bool inside;
 
     {
@@ -87,11 +85,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> ExtraData::evaluate (
             timestamp = ref_it.first;
 
             // for ref
-            tie (has_ground_bit, ground_bit_set) = target_data.tstGroundBitInterpolated(timestamp);
-
-            auto ref_pos = target_data.refPos(ref_it);
-
-            inside = target_data.refPosInside(sector_layer, ref_it, ref_pos, has_ground_bit, ground_bit_set);
+            inside = target_data.refPosInside(sector_layer, ref_it);
 
             if (inside)
                 ++num_ref_inside;
@@ -163,21 +157,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> ExtraData::evaluate (
             }
 
             // no ref
-
-            has_ground_bit = target_data.hasTstGroundBit(tst_it);
-
-            if (has_ground_bit)
-                ground_bit_set = target_data.tstGroundBit(tst_it);
-            else
-                ground_bit_set = false;
-
-            //@TODO: check hasMappedRefDataForTime()???
-
-            if (!ground_bit_set)
-                tie(has_ground_bit, ground_bit_set) = target_data.mappedRefGroundBit(
-                            tst_it, seconds(15));
-
-            inside = target_data.tstPosInside(sector_layer, tst_it, tst_pos, has_ground_bit, ground_bit_set);
+            inside = target_data.tstPosInside(sector_layer, tst_it);
 
             if (inside)
             {

@@ -200,11 +200,6 @@ void EvaluationTargetData::finalize () const
     //    }
 
     calculateTestDataMappings();
-}
-
-void EvaluationTargetData::prepareForEvaluation() const
-{
-    //needs up-to-date sectors, so we compute the inside information right before evaluation
     computeSectorInsideInfo();
 }
 
@@ -402,6 +397,17 @@ std::pair<ptime, ptime> EvaluationTargetData::mappedRefTimes(const DataID& id,
     }
 
     return {{}, {}};
+}
+
+boost::optional<EvaluationTargetPosition> EvaluationTargetData::mappedRefPos(const DataID& id) const
+{
+    auto index = indexFromDataID(id, DataType::Test);
+
+    const auto& tdm = tst_data_mappings_.at(index.idx_internal);
+    if (!tdm.has_ref_pos_)
+        return {};
+
+    return tdm.pos_ref_;
 }
 
 std::pair<EvaluationTargetPosition, bool> EvaluationTargetData::mappedRefPos(const DataID& id, 
@@ -2373,7 +2379,6 @@ void EvaluationTargetData::computeSectorInsideInfo() const
     inside_tst_           = {};
     inside_map_           = {};
     inside_sector_layers_ = {};
-    air_space_checked_    = false;
 
     auto sector_layers = eval_man_.sectorsLayers();
 
@@ -2384,19 +2389,23 @@ void EvaluationTargetData::computeSectorInsideInfo() const
             inside_sector_layers_[ sl.get() ] = cnt++;
     }
 
-    air_space_checked_ = eval_man_.filterAirSpace() &&
-                         eval_man_.airSpace().numEvaluationSectors() > 0;
+    bool check_min_height = eval_man_.filterMinimumHeight() &&
+                            eval_man_.hasSectorLayer(AirSpace::LowerHeightLayerName);
+
+    const SectorLayer* min_height_layer = check_min_height ? eval_man_.sectorLayer(AirSpace::LowerHeightLayerName).get() : nullptr;
 
     size_t num_sector_layers = sector_layers.size();
     size_t num_ref           = ref_indices_.size();
     size_t num_tst           = tst_indices_.size();
     size_t num_map           = tst_data_mappings_.size();
 
-    size_t num_extra         = 2; //inside airspace gb on, inside airspace gb off
+    size_t num_extra         = 2; //ground bit available / above min height filter
 
-    size_t num_cols          = num_sector_layers * 2 + num_extra;
+    size_t num_cols          = num_sector_layers + num_extra;
 
     assert(num_map == num_tst);
+
+    auto gb_max_sec = boost::posix_time::seconds(InterpGroundBitMaxSeconds);
 
     if (num_ref)
     {
@@ -2406,8 +2415,12 @@ void EvaluationTargetData::computeSectorInsideInfo() const
 
         for (const auto& elem : ref_data_)
         {
-            auto pos = refPos(DataID(elem.first, elem.second));
-            computeSectorInsideInfo(inside_ref_, pos, elem.second.idx_internal);
+            DataID id(elem.first, elem.second);
+
+            auto pos = refPos(id);
+            auto gb  = availableGroundBit(id, Evaluation::DataType::Reference, gb_max_sec);
+
+            computeSectorInsideInfo(inside_ref_, pos, elem.second.idx_internal, gb, min_height_layer);
         }
     }
     if (num_tst)
@@ -2418,8 +2431,12 @@ void EvaluationTargetData::computeSectorInsideInfo() const
 
         for (const auto& elem : tst_data_)
         {
-            auto pos = tstPos(DataID(elem.first, elem.second));
-            computeSectorInsideInfo(inside_tst_, pos, elem.second.idx_internal);
+            DataID id(elem.first, elem.second);
+
+            auto pos = tstPos(id);
+            auto gb  = availableGroundBit(id, Evaluation::DataType::Test, gb_max_sec);
+
+            computeSectorInsideInfo(inside_tst_, pos, elem.second.idx_internal, gb, min_height_layer);
         }
     }
     if (num_map)
@@ -2430,38 +2447,89 @@ void EvaluationTargetData::computeSectorInsideInfo() const
 
         for (const auto& elem : tst_data_)
         {
-            const auto& m = tst_data_mappings_.at(elem.second.idx_internal);
-            if (m.has_ref_pos_)
-                computeSectorInsideInfo(inside_map_, m.pos_ref_, elem.second.idx_internal);
+            DataID id(elem.first, elem.second);
+
+            auto pos = mappedRefPos(id);
+            if (pos.has_value())
+            {
+                auto gb = availableGroundBit(id, Evaluation::DataType::Test, gb_max_sec);
+                computeSectorInsideInfo(inside_map_, pos.value(), elem.second.idx_internal, gb, min_height_layer);
+            }
         }
     }
 }
 
 /**
 */
+boost::optional<bool> EvaluationTargetData::availableGroundBit(const DataID& id, 
+                                                               DataType dtype,
+                                                               const boost::posix_time::time_duration& d_max) const
+{
+    auto index = indexFromDataID(id, dtype);
+    auto ts    = timestampFromDataID(id);
+
+    DataID indexed_id = DataID(ts, index);
+
+    bool has_ground_bit = false;
+    bool ground_bit_set = false;
+
+    if (dtype == DataType::Test)
+    {
+        bool has_ground_bit = hasTstGroundBit(indexed_id);
+        bool ground_bit_set = false;
+
+        if (has_ground_bit)
+            ground_bit_set = tstGroundBit(indexed_id);
+        else
+            ground_bit_set = false;
+
+        if (!ground_bit_set)
+            tie(has_ground_bit, ground_bit_set) = mappedRefGroundBit(indexed_id, d_max);
+    }
+    else if (dtype == DataType::Reference)
+    {
+        auto ref_gb = refGroundBit(indexed_id);
+
+        bool has_ground_bit = ref_gb.first;
+        bool ground_bit_set = ref_gb.second;
+
+        if (!ground_bit_set)
+            tie(has_ground_bit, ground_bit_set) = tstGroundBitInterpolated(ts);
+    }
+
+    if (!has_ground_bit)
+        return {};
+
+    return ground_bit_set;
+}
+
+/**
+*/
 void EvaluationTargetData::computeSectorInsideInfo(InsideCheckMatrix& mat, 
                                                    const EvaluationTargetPosition& pos, 
-                                                   unsigned int idx_internal) const
+                                                   unsigned int idx_internal,
+                                                   const boost::optional<bool>& ground_bit,
+                                                   const SectorLayer* min_height_filter) const
 {
     assert(idx_internal < mat.rows());
 
     size_t num_sector_layers = inside_sector_layers_.size();
-    size_t gb_offset         = num_sector_layers;
-    size_t airspace_offset   = num_sector_layers * 2;
+    size_t extra_offset      = num_sector_layers;
+
+    bool has_gb = ground_bit.has_value();
+    bool gb_set = ground_bit.has_value() ? ground_bit.value() : false;
 
     //check airspace if enabled
-    bool in_airspace_gb    = false;
-    bool in_airspace_no_gb = false;
-    if (air_space_checked_)
+    bool above_ok = true;
+    if (min_height_filter)
     {
-        AirSpace::InsideCheckResult inside_check_gb, inside_check_no_gb;
-        eval_man_.airSpace().isInside(inside_check_gb,
-                                      inside_check_no_gb,
-                                      pos,
-                                      true);
+        auto res = AirSpace::isAbove(min_height_filter, 
+                                     pos, 
+                                     has_gb, 
+                                     gb_set);
 
-        in_airspace_gb    = (inside_check_gb    != AirSpace::InsideCheckResult::AltitudeOOR);
-        in_airspace_no_gb = (inside_check_no_gb != AirSpace::InsideCheckResult::AltitudeOOR);
+        if (res == AirSpace::AboveCheckResult::Below)
+            above_ok = false;
     }
 
     for (const auto& sl : inside_sector_layers_)
@@ -2471,90 +2539,145 @@ void EvaluationTargetData::computeSectorInsideInfo(InsideCheckMatrix& mat,
 
         auto lidx = sl.second;
 
-        bool airspace_ok_gb    = !air_space_checked_ || in_airspace_gb;
-        bool airspace_ok_no_gb = !air_space_checked_ || in_airspace_no_gb;
-
-        //@TODO: position inside polygon check might be computed twice...
-        bool inside_no_gb = airspace_ok_no_gb && layer->isInside(pos, false, false);
-        bool inside_gb    = airspace_ok_gb && inside_no_gb && layer->isInside(pos, true, true);
+        bool inside = above_ok && layer->isInside(pos, has_gb, gb_set);
 
         //check pos against layer and write to mat
-        mat(idx_internal, lidx            ) = inside_no_gb;
-        mat(idx_internal, lidx + gb_offset) = inside_gb;
+        mat(idx_internal, lidx) = inside;
     }
 
-    mat(idx_internal, airspace_offset     ) = in_airspace_no_gb;
-    mat(idx_internal, airspace_offset + 1 ) = in_airspace_gb;
+    mat(idx_internal, extra_offset     ) = has_gb;
+    mat(idx_internal, extra_offset + 1 ) = above_ok;
+}
+
+/**
+*/
+bool EvaluationTargetData::refPosAbove(const DataID& id) const
+{
+    auto index = indexFromDataID(id, DataType::Reference);
+
+    return checkAbove(inside_ref_, index);
+}
+
+/**
+*/
+bool EvaluationTargetData::refPosGroundBitAvailable(const DataID& id) const
+{
+    auto index = indexFromDataID(id, DataType::Reference);
+
+    return checkGroundBit(inside_ref_, index);
 }
 
 /**
 */
 bool EvaluationTargetData::refPosInside(const SectorLayer& layer, 
-                                        const DataID& id, 
-                                        const EvaluationTargetPosition& pos,
-                                        bool has_ground_bit, 
-                                        bool ground_bit_set) const
+                                        const DataID& id) const
 {
     auto index = indexFromDataID(id, DataType::Reference);
 
-    return checkInside(layer, ref_data_, inside_ref_, index, pos, has_ground_bit, ground_bit_set);
+    return checkInside(layer, inside_ref_, index);
+}
+
+/**
+*/
+bool EvaluationTargetData::tstPosAbove(const DataID& id) const
+{
+    auto index = indexFromDataID(id, DataType::Test);
+
+    return checkAbove(inside_tst_, index);
+}
+
+/**
+*/
+bool EvaluationTargetData::tstPosGroundBitAvailable(const DataID& id) const
+{
+    auto index = indexFromDataID(id, DataType::Test);
+
+    return checkGroundBit(inside_tst_, index);
 }
 
 /**
 */
 bool EvaluationTargetData::tstPosInside(const SectorLayer& layer, 
-                                        const DataID& id, 
-                                        const EvaluationTargetPosition& pos,
-                                        bool has_ground_bit, 
-                                        bool ground_bit_set) const
+                                        const DataID& id) const
 {
     auto index = indexFromDataID(id, DataType::Test);
 
-    return checkInside(layer, tst_data_, inside_tst_, index, pos, has_ground_bit, ground_bit_set);
+    return checkInside(layer, inside_tst_, index);
+}
+
+/**
+*/
+bool EvaluationTargetData::mappedRefPosAbove(const DataID& id) const
+{
+    auto index = indexFromDataID(id, DataType::Test);
+
+    return checkAbove(inside_map_, index);
+}
+
+/**
+*/
+bool EvaluationTargetData::mappedRefPosGroundBitAvailable(const DataID& id) const
+{
+    auto index = indexFromDataID(id, DataType::Test);
+
+    return checkGroundBit(inside_map_, index);
 }
 
 /**
 */
 bool EvaluationTargetData::mappedRefPosInside(const SectorLayer& layer, 
-                                              const DataID& id, 
-                                              const EvaluationTargetPosition& pos,
-                                              bool has_ground_bit, 
-                                              bool ground_bit_set) const
+                                              const DataID& id) const
 {
     auto index = indexFromDataID(id, DataType::Test);
 
-    return checkInside(layer, tst_data_, inside_map_, index, pos, has_ground_bit, ground_bit_set);
+    return checkInside(layer, inside_map_, index);
+}
+
+/**
+*/
+bool EvaluationTargetData::checkGroundBit(const InsideCheckMatrix& mat,
+                                          const Index& index) const
+{
+    //check cached inside info
+    auto idx_internal = index.idx_internal;
+    assert(idx_internal < mat.rows());
+
+    auto extra_offset = (int)inside_sector_layers_.size();
+    assert(extra_offset < mat.cols());
+
+    return mat(idx_internal, extra_offset);
+}
+
+/**
+*/
+bool EvaluationTargetData::checkAbove(const InsideCheckMatrix& mat,
+                                      const Index& index) const
+{
+    //check cached inside info
+    auto idx_internal = index.idx_internal;
+    assert(idx_internal < mat.rows());
+
+    auto extra_offset = (int)inside_sector_layers_.size();
+    assert(extra_offset + 1 < mat.cols());
+
+    return mat(idx_internal, extra_offset + 1);
 }
 
 /**
 */
 bool EvaluationTargetData::checkInside(const SectorLayer& layer,
-                                       const IndexMap& indices,
                                        const InsideCheckMatrix& mat,
-                                       const Index& index,
-                                       const EvaluationTargetPosition& pos,
-                                       bool has_ground_bit, 
-                                       bool ground_bit_set) const
+                                       const Index& index) const
 {
     auto lit = inside_sector_layers_.find(&layer);
-#if 0
-    //if no cached inside info is available compute on-the-fly
-    if (lit == inside_sector_layers_.end())
-        return layer.isInside(pos, has_ground_bit, ground_bit_set);
-#else 
     assert(lit != inside_sector_layers_.end());
-#endif
     
     //check cached inside info
     auto idx_internal = index.idx_internal;
     assert(idx_internal < mat.rows());
 
-    auto lidx      = lit->second;
-    auto gb_offset = inside_sector_layers_.size();
-    bool use_gb    = has_ground_bit && ground_bit_set;
+    auto lidx = (int)lit->second;
+    assert(lidx < mat.cols());
 
-    unsigned int col = lidx + (use_gb ? gb_offset : 0);
-    assert(col < mat.cols());
-
-    return mat(idx_internal, col);
+    return mat(idx_internal, lidx);
 }

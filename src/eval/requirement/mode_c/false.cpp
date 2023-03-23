@@ -81,9 +81,6 @@ std::shared_ptr<EvaluationRequirementResult::Single> ModeCFalse::evaluate (
     bool skip_no_data_details = eval_man_.reportSkipNoDataDetails();
     bool skip_detail;
 
-    bool has_ground_bit;
-    bool ground_bit_set;
-
     auto addDetail = [ & ] (const ptime& ts,
                             const EvaluationTargetPosition& tst_pos,
                             const QVariant& ref_exists,
@@ -154,17 +151,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> ModeCFalse::evaluate (
         }
         ref_exists = true;
 
-        has_ground_bit = target_data.hasTstGroundBit(tst_id);
-
-        if (has_ground_bit)
-            ground_bit_set = target_data.tstGroundBit(tst_id);
-        else
-            ground_bit_set = false;
-
-        if (!ground_bit_set)
-            tie(has_ground_bit, ground_bit_set) = target_data.mappedRefGroundBit(tst_id, seconds(15));
-
-        is_inside = target_data.mappedRefPosInside(sector_layer, tst_id, ref_pos, has_ground_bit, ground_bit_set);
+        is_inside = target_data.mappedRefPosInside(sector_layer, tst_id);
 
         if (!is_inside)
         {

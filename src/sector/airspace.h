@@ -19,6 +19,9 @@
 
 #include <memory>
 #include <string>
+#include <vector>
+
+class QColor;
 
 class SectorLayer;
 class EvaluationTargetPosition;
@@ -28,34 +31,31 @@ class EvaluationTargetPosition;
 class AirSpace
 {
 public:
-    enum class InsideCheckResult
+    enum class AboveCheckResult
     {
         OutOfAirspace,
-        AltitudeOOR,
-        Inside
+        Above,
+        Below
     };
 
     AirSpace();
     virtual ~AirSpace();
 
     void clear();
-    bool readJSON(const std::string& fn);
+    bool readJSON(const std::string& fn, unsigned int base_id = 0);
 
-    const SectorLayer& layer() const;
+    const std::vector<std::shared_ptr<SectorLayer>>& layers() const;
 
-    InsideCheckResult isInside(const EvaluationTargetPosition& pos,
-                               bool has_ground_bit, 
-                               bool ground_bit_set,
-                               bool evaluation_only) const;
-    void isInside(InsideCheckResult& result_gb,
-                  InsideCheckResult& result_no_gb,
-                  const EvaluationTargetPosition& pos,
-                  bool evaluation_only) const;
+    static AboveCheckResult isAbove(const SectorLayer* layer,
+                                    const EvaluationTargetPosition& pos,
+                                    bool has_ground_bit, 
+                                    bool ground_bit_set);
 
-    size_t numEvaluationSectors() const;
+    std::shared_ptr<SectorLayer> lowerHeightFilterLayer() const;
 
-    static const std::string LayerName;
+    static const std::string LowerHeightLayerName;
+    static const QColor      DefaultSectorColor;
 
 private:
-    std::unique_ptr<SectorLayer> layer_;
+    std::vector<std::shared_ptr<SectorLayer>> layers_;
 };

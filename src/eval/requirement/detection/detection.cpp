@@ -102,8 +102,6 @@ std::shared_ptr<EvaluationRequirementResult::Single> Detection::evaluate (
 
     EvaluationTargetPosition ref_pos;
     ptime timestamp, last_ts;
-    bool has_ground_bit;
-    bool ground_bit_set;
 
     bool inside, was_inside;
 
@@ -116,15 +114,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> Detection::evaluate (
             timestamp = ref_it.first;
             was_inside = inside;
 
-            // for ref
-            tie (has_ground_bit, ground_bit_set) = target_data.refGroundBit(ref_it);
-            // for tst
-            if (!ground_bit_set)
-                tie (has_ground_bit, ground_bit_set) = target_data.tstGroundBitInterpolated(ref_it);
-
-            auto ref_pos = target_data.refPos(ref_it);
-
-            inside = target_data.refPosInside(sector_layer, ref_it, ref_pos, has_ground_bit, ground_bit_set);
+            inside = target_data.refPosInside(sector_layer, ref_it);
 
             if (first)
             {
@@ -371,17 +361,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> Detection::evaluate (
             continue;
         }
 
-        has_ground_bit = target_data.hasTstGroundBit(tst_it);
-
-        if (has_ground_bit)
-            ground_bit_set = target_data.tstGroundBit(tst_it);
-        else
-            ground_bit_set = false;
-
-        if (!ground_bit_set)
-            tie(has_ground_bit, ground_bit_set) = target_data.mappedRefGroundBit(tst_it, seconds(15));
-
-        is_inside = target_data.mappedRefPosInside(sector_layer, tst_it, ref_pos, has_ground_bit, ground_bit_set);
+        is_inside = target_data.mappedRefPosInside(sector_layer, tst_it);
 
         if (!is_inside)
         {

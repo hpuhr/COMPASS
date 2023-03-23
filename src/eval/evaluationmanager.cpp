@@ -28,8 +28,8 @@
 #include "dbcontent/dbcontentmanager.h"
 #include "datasourcesloadwidget.h"
 #include "datasourcemanager.h"
-#include "evaluationsector.h"
 #include "sectorlayer.h"
+#include "sector.h"
 #include "airspace.h"
 #include "dbcontent/variable/metavariable.h"
 #include "dbcontent/variable/variable.h"
@@ -71,7 +71,6 @@ const std::string EvaluationManager::AirSpaceLayerName = "air_space_sectors";
 EvaluationManager::EvaluationManager(const std::string& class_id, const std::string& instance_id, COMPASS* compass)
 :   Configurable(class_id, instance_id, compass, "eval.json")
 ,   compass_    (*compass)
-,   air_space_  (new AirSpace)
 ,   data_       (*this, compass->dbContentManager())
 ,   results_gen_(*this)
 ,   pdf_gen_    (*this)
@@ -699,9 +698,6 @@ void EvaluationManager::evaluate()
         widget_->updateButtons();
 
     emit resultsChangedSignal();
-
-    //prepare data
-    data_.prepareForEvaluation();
     
     // eval
     results_gen_.evaluate(data_, currentStandard());
@@ -889,6 +885,15 @@ std::shared_ptr<SectorLayer> EvaluationManager::sectorLayer (const std::string& 
     return *iter;
 }
 
+void EvaluationManager::updateMaxSectorID()
+{
+    for (auto& sec_lay_it : sector_layers_)
+    {
+        for (auto& sec_it : sec_lay_it->sectors())
+            max_sector_id_ = std::max(max_sector_id_, sec_it->id());
+    }
+}
+
 void EvaluationManager::loadSectors()
 {
     loginf << "EvaluationManager: loadSectors";
@@ -900,11 +905,7 @@ void EvaluationManager::loadSectors()
 
     sector_layers_ = COMPASS::instance().interface().loadSectors();
 
-    for (auto& sec_lay_it : sector_layers_)
-    {
-        for (auto& sec_it : sec_lay_it->sectors())
-            max_sector_id_ = std::max(max_sector_id_, sec_it->id());
-    }
+    updateMaxSectorID();
 
     sectors_loaded_ = true;
 }
@@ -939,7 +940,7 @@ void EvaluationManager::createNewSector (const std::string& name,
 
     ++max_sector_id_; // new max
 
-    shared_ptr<Sector> sector(new EvaluationSector(max_sector_id_, name, layer_name, exclude, color, points));
+    shared_ptr<Sector> sector(new Sector(max_sector_id_, name, layer_name, true, exclude, color, points));
 
     // add to existing sectors
     if (!hasSectorLayer(layer_name))
@@ -1097,7 +1098,7 @@ void EvaluationManager::deleteAllSectors()
 }
 
 
-void EvaluationManager::importSectors (const std::string& filename)
+void EvaluationManager::importSectors(const std::string& filename)
 {
     loginf << "EvaluationManager: importSectors: filename '" << filename << "'";
 
@@ -1147,7 +1148,7 @@ void EvaluationManager::importSectors (const std::string& filename)
             name = j_sec_it.at("name");
             layer_name = j_sec_it.at("layer_name");
 
-            auto eval_sector = new EvaluationSector(id, name, layer_name);
+            auto eval_sector = new Sector(id, name, layer_name, true);
             eval_sector->readJSON(j_sec_it.dump());
 
             if (!hasSectorLayer(layer_name))
@@ -1206,37 +1207,33 @@ void EvaluationManager::exportSectors (const std::string& filename)
 
 bool EvaluationManager::importAirSpace(const std::string& filename)
 {
-    assert(air_space_);
-    bool ok = air_space_->readJSON(filename);
+    AirSpace air_space;
+
+    if (!air_space.readJSON(filename, max_sector_id_))
+        return false;
+
+    auto new_layers = air_space.layers();
+
+    sector_layers_.insert(sector_layers_.begin(), new_layers.begin(), new_layers.end());
+
+    updateMaxSectorID();
 
     if (widget_)
         widget_->updateSectors();
 
-    emit airSpaceChangedSignal();
+    emit sectorsChangedSignal();
 
-    return ok;
+    return true;
 }
 
-const AirSpace& EvaluationManager::airSpace() const
+bool EvaluationManager::filterMinimumHeight() const
 {
-    assert(air_space_);
-    return *air_space_;
-}
-
-void EvaluationManager::clearAirSpace()
-{
-    assert(air_space_);
-    air_space_->clear();
-}
-
-bool EvaluationManager::filterAirSpace() const
-{
-    return air_space_filter_;
+    return filter_minimum_height_;
 }   
 
-void EvaluationManager::filterAirSpace(bool filter)
+void EvaluationManager::filterMinimumHeight(bool filter)
 {
-    air_space_filter_ = filter;
+    filter_minimum_height_ = filter;
 }
 
 std::string EvaluationManager::dbContentNameRef() const

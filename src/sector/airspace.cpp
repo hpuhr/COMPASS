@@ -17,21 +17,19 @@
 
 #include "airspace.h"
 #include "sectorlayer.h"
-#include "airspacesector.h"
+#include "sector.h"
 #include "evaluationtargetposition.h"
 #include "json.h"
 #include "logger.h"
 
 #include <fstream>
 
-const std::string AirSpace::LayerName = "air_space_sectors";
+const std::string AirSpace::LowerHeightLayerName = "LowerHeightFilter";
+const QColor      AirSpace::DefaultSectorColor   = QColor(255, 255, 0);
 
 /**
  */
-AirSpace::AirSpace()
-:   layer_(new SectorLayer(LayerName))
-{
-}
+AirSpace::AirSpace() = default;
 
 /**
  */
@@ -41,20 +39,28 @@ AirSpace::~AirSpace() = default;
  */
 void AirSpace::clear()
 {
-    assert(layer_);
-
-    layer_->clearSectors();
+    layers_.clear();
 }
 
 /**
  */
-bool AirSpace::readJSON(const std::string& fn)
+std::shared_ptr<SectorLayer> AirSpace::lowerHeightFilterLayer() const
 {
-    assert(layer_);
+    for (const auto& l : layers_)
+        if (l->name() == LowerHeightLayerName)
+            return l;
 
-    layer_->clearSectors();
+    return nullptr;
+}
 
+/**
+ */
+bool AirSpace::readJSON(const std::string& fn,
+                        unsigned int base_id)
+{
     std::ifstream input_file(fn, std::ifstream::in);
+
+    clear();
 
     try
     {
@@ -81,9 +87,10 @@ bool AirSpace::readJSON(const std::string& fn)
             return false;
         }
 
-        std::vector<std::shared_ptr<Sector>> sectors;
+        std::shared_ptr<SectorLayer> lower_height_layer(new SectorLayer(LowerHeightLayerName));
+        std::vector<std::shared_ptr<SectorLayer>> layers;
 
-        unsigned int sec_cnt = 0;
+        unsigned int sec_id = base_id;
 
         for (auto& j_sector : air_space_sectors.get<nlohmann::json::array_t>())
         {
@@ -91,6 +98,7 @@ bool AirSpace::readJSON(const std::string& fn)
                 !j_sector.contains("own_height_min") ||
                 !j_sector.contains("own_height_max") ||
                 !j_sector.contains("own_volume") ||
+                !j_sector.contains("lower_height_only") ||
                 !j_sector.contains("used_for_checking") ||
                 !j_sector.contains("geographic_points"))
             {
@@ -100,11 +108,9 @@ bool AirSpace::readJSON(const std::string& fn)
 
             std::string name = j_sector["name"];
 
-            if (name == "LowerHeightFilter")
-                continue;
-
             int    own_volume        = std::atoi(j_sector["own_volume"       ].get<std::string>().c_str());
             int    used_for_checking = std::atoi(j_sector["used_for_checking"].get<std::string>().c_str());
+            int    lower_height_only = std::atoi(j_sector["lower_height_only"].get<std::string>().c_str());
             double own_height_min    = std::atof(j_sector["own_height_min"   ].get<std::string>().c_str());
             double own_height_max    = std::atof(j_sector["own_height_max"   ].get<std::string>().c_str());
 
@@ -151,32 +157,54 @@ bool AirSpace::readJSON(const std::string& fn)
             for (const auto& elem : ordered_points)
                 points.push_back(elem.second);
 
-            auto sec = new AirSpaceSector(sec_cnt++, 
-                                          name, 
-                                          LayerName, 
-                                          own_height_min, 
-                                          own_height_max, 
-                                          used_for_checking, 
-                                          QColor(255, 255, 0), 
-                                          points);
+            if (lower_height_only)
+            {
+                auto sec = std::make_shared<Sector>(sec_id++, 
+                                                    name,
+                                                    LowerHeightLayerName,
+                                                    true, 
+                                                    false, 
+                                                    DefaultSectorColor, 
+                                                    points);
+                sec->setMinimumAltitude(own_height_min);
 
-            sectors.emplace_back(sec);
+                lower_height_layer->addSector(sec);
+            }
+            else 
+            {
+                auto sec = std::make_shared<Sector>(sec_id++, 
+                                                    name,
+                                                    name,
+                                                    true, 
+                                                    false, 
+                                                    DefaultSectorColor, 
+                                                    points);
+                sec->setMinimumAltitude(own_height_min);
+                sec->setMaximumAltitude(own_height_max);
+
+                auto layer = std::make_shared<SectorLayer>(name);
+                layer->addSector(sec);
+
+                layers.push_back(layer);
+            }
         }
 
-        if (sectors.empty())
+        if (sec_id == base_id)
         {
             logerr << "EvaluationManager: importFlightLevelFilter: no sectors found";
             return false;
         }
 
-        for (auto sec : sectors)
-            layer_->addSector(sec);
+        if (lower_height_layer->size() > 0)
+            layers_.push_back(lower_height_layer);
+
+        layers_.insert(layers_.begin(), layers.begin(), layers.end());
     }
     catch (nlohmann::json::exception& e)
     {
         logerr << "EvaluationManager: importFlightLevelFilter: could not load file '" << fn << "': " << e.what();
 
-        layer_->clearSectors();
+        clear();
 
         return false;
     }
@@ -186,123 +214,53 @@ bool AirSpace::readJSON(const std::string& fn)
 
 /**
  */
-const SectorLayer& AirSpace::layer() const
+const std::vector<std::shared_ptr<SectorLayer>>& AirSpace::layers() const
 {
-    assert(layer_);
-    return *layer_;
-}
-
-/**
- */
-size_t AirSpace::numEvaluationSectors() const
-{
-    assert(layer_);
-
-    size_t n = 0;
-
-    for (auto sector : layer_->sectors())
-    {
-        auto as_sector = dynamic_cast<const AirSpaceSector*>(sector.get());
-        assert(as_sector);
-
-        if (as_sector->usedForEval())
-            ++n;
-    }
-
-    return n;
+    return layers_;
 }
 
 /**
 */
-AirSpace::InsideCheckResult AirSpace::isInside(const EvaluationTargetPosition& pos,
-                                               bool has_ground_bit,
-                                               bool ground_bit_set,
-                                               bool evaluation_only) const
+AirSpace::AboveCheckResult AirSpace::isAbove(const SectorLayer* layer,
+                                             const EvaluationTargetPosition& pos,
+                                             bool has_ground_bit,
+                                             bool ground_bit_set)
 {
-    assert(layer_);
+    assert(layer);
 
     //check bounds of layer
-    auto lat_min_max = layer_->getMinMaxLatitude();
-    auto lon_min_max = layer_->getMinMaxLongitude();
+    auto lat_min_max = layer->getMinMaxLatitude();
+    auto lon_min_max = layer->getMinMaxLongitude();
 
     if (pos.latitude_  < lat_min_max.first  ||
         pos.latitude_  > lat_min_max.second ||
         pos.longitude_ < lon_min_max.first  ||
         pos.longitude_ > lon_min_max.second)
-        return InsideCheckResult::OutOfAirspace;
+        return AboveCheckResult::OutOfAirspace;
+
+    bool was_inside_xy = false;
 
     //check individual sectors
-    for (auto sector : layer_->sectors())
+    for (auto sector : layer->sectors())
     {
-        auto as_sector = dynamic_cast<const AirSpaceSector*>(sector.get());
-        assert(as_sector);
-
-        //only evaluation sectors desired?
-        if (evaluation_only && !as_sector->usedForEval())
-            continue;
+        assert( sector->hasMinimumAltitude());
+        assert(!sector->hasMaximumAltitude());
 
         //not inside of sector area?
         if (!sector->isInside(pos, has_ground_bit, ground_bit_set, Sector::InsideCheckType::XY))
             continue;
+
+        was_inside_xy = true;
         
-        //if we are inside a sector we are greedy, the result is either inside or altitude is outside
+        //if we are inside a sector and above min altitude => above
         if (sector->isInside(pos, has_ground_bit, ground_bit_set, Sector::InsideCheckType::Z))
-            return InsideCheckResult::Inside;
-        else
-            return InsideCheckResult::AltitudeOOR;
+            return AboveCheckResult::Above;
     }
+
+    //inside but not above any min height => below
+    if (was_inside_xy)
+        return AboveCheckResult::Below;
 
     //not inside any sector?
-    return InsideCheckResult::OutOfAirspace;
-}
-
-/**
-*/
-void AirSpace::isInside(InsideCheckResult& result_gb,
-                        InsideCheckResult& result_no_gb,
-                        const EvaluationTargetPosition& pos,
-                        bool evaluation_only) const
-{
-    assert(layer_);
-
-    //check bounds of layer
-    auto lat_min_max = layer_->getMinMaxLatitude();
-    auto lon_min_max = layer_->getMinMaxLongitude();
-
-    if (pos.latitude_  < lat_min_max.first  ||
-        pos.latitude_  > lat_min_max.second ||
-        pos.longitude_ < lon_min_max.first  ||
-        pos.longitude_ > lon_min_max.second)
-    {
-        result_gb    = InsideCheckResult::OutOfAirspace;
-        result_no_gb = InsideCheckResult::OutOfAirspace;
-        return;
-    }
-
-    //check individual sectors
-    for (auto sector : layer_->sectors())
-    {
-        auto as_sector = dynamic_cast<const AirSpaceSector*>(sector.get());
-        assert(as_sector);
-
-        //only evaluation sectors desired?
-        if (evaluation_only && !as_sector->usedForEval())
-            continue;
-
-        //not inside of sector area?
-        if (!sector->isInside(pos, false, false, Sector::InsideCheckType::XY))
-            continue;
-
-        bool inside_gb    = sector->isInside(pos, true , true , Sector::InsideCheckType::Z);
-        bool inside_no_gb = sector->isInside(pos, false, false, Sector::InsideCheckType::Z);
-
-        result_gb    = inside_gb    ? InsideCheckResult::Inside : InsideCheckResult::AltitudeOOR;
-        result_no_gb = inside_no_gb ? InsideCheckResult::Inside : InsideCheckResult::AltitudeOOR;
-        return;
-    }
-
-    //not inside any sector?
-    result_gb    = InsideCheckResult::OutOfAirspace;
-    result_no_gb = InsideCheckResult::OutOfAirspace;
-    return;
+    return AboveCheckResult::OutOfAirspace;
 }

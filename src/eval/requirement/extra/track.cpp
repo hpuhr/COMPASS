@@ -72,14 +72,10 @@ std::shared_ptr<EvaluationRequirementResult::Single> ExtraTrack::evaluate (
     const auto& tst_data = target_data.tstData();
 
     ptime timestamp;
-    EvaluationTargetPosition tst_pos;
-
     bool is_inside;
 
     bool skip_no_data_details = eval_man_.reportSkipNoDataDetails();
 
-    bool has_ground_bit;
-    bool ground_bit_set;
     unsigned int track_num;
 
     // collect track numbers with time periods
@@ -89,22 +85,11 @@ std::shared_ptr<EvaluationRequirementResult::Single> ExtraTrack::evaluate (
     for (const auto& tst_id : tst_data)
     {
         timestamp = tst_id.first;
-        tst_pos = target_data.tstPos(tst_id);
 
         if (!target_data.hasMappedRefData(tst_id, max_ref_time_diff))
             continue;
 
-        has_ground_bit = target_data.hasTstGroundBit(tst_id);
-
-        if (has_ground_bit)
-            ground_bit_set = target_data.tstGroundBit(tst_id);
-        else
-            ground_bit_set = false;
-
-        if (!ground_bit_set)
-            tie(has_ground_bit, ground_bit_set) = target_data.mappedRefGroundBit(tst_id, seconds(15));
-
-        is_inside = target_data.tstPosInside(sector_layer, tst_id, tst_pos, has_ground_bit, ground_bit_set);
+        is_inside = target_data.tstPosInside(sector_layer, tst_id);
 
         if (!is_inside)
             continue;
@@ -166,6 +151,8 @@ std::shared_ptr<EvaluationRequirementResult::Single> ExtraTrack::evaluate (
     bool has_tod {false};
     ptime tod_min, tod_max;
 
+    EvaluationTargetPosition tst_pos;
+
     auto addDetail = [ & ] (const ptime& ts,
                             const EvaluationTargetPosition& tst_pos,
                             const QVariant& inside,
@@ -191,19 +178,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> ExtraTrack::evaluate (
         if (has_track_num)
             track_num = target_data.tstTrackNum(tst_id);
 
-        has_ground_bit = target_data.hasTstGroundBit(tst_id);
-
-        if (has_ground_bit)
-            ground_bit_set = target_data.tstGroundBit(tst_id);
-        else
-            ground_bit_set = false;
-
-        //@TODO: check hasMappedRefDataForTime() ???
-
-        if (!ground_bit_set)
-            tie(has_ground_bit, ground_bit_set) = target_data.mappedRefGroundBit(tst_id, seconds(15));
-
-        is_inside = target_data.tstPosInside(sector_layer, tst_id, tst_pos, has_ground_bit, ground_bit_set);
+        is_inside = target_data.tstPosInside(sector_layer, tst_id);
 
         if (!is_inside)
         {

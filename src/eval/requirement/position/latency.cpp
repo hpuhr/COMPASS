@@ -86,7 +86,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionLatency::evaluate (
     double x_pos, y_pos;
     double distance, angle, d_along, latency;
 
-    bool is_inside;
+    bool is_inside = false;
     pair<EvaluationTargetPosition, bool> ret_pos;
     EvaluationTargetPosition ref_pos;
     pair<EvaluationTargetVelocity, bool> ret_spd;
@@ -101,9 +101,6 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionLatency::evaluate (
     vector<double> values;
 
     bool skip_no_data_details = eval_man_.reportSkipNoDataDetails();
-
-    bool has_ground_bit;
-    bool ground_bit_set;
 
     auto addDetail = [ & ] (const ptime& ts,
                             const EvaluationTargetPosition& tst_pos,
@@ -192,17 +189,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionLatency::evaluate (
         ref_spd = ret_spd.first;
         assert (ret_pos.second); // must be set of ref pos exists
 
-        has_ground_bit = target_data.hasTstGroundBit(tst_id);
-
-        if (has_ground_bit)
-            ground_bit_set = target_data.tstGroundBit(tst_id);
-        else
-            ground_bit_set = false;
-
-        if (!ground_bit_set)
-            tie(has_ground_bit, ground_bit_set) = target_data.mappedRefGroundBit(tst_id, seconds(15));
-
-        is_inside = target_data.mappedRefPosInside(sector_layer, tst_id, ref_pos, has_ground_bit, ground_bit_set);
+        is_inside = target_data.mappedRefPosInside(sector_layer, tst_id);
 
         if (!is_inside)
         {

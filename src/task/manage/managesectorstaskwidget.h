@@ -55,7 +55,6 @@ public slots:
     void importSectorsSlot ();
 
 private slots:
-    void clearAirSpaceSectorsSlot ();
     void importAirSpaceSectorsSlot ();
 
 public:
@@ -70,6 +69,11 @@ public:
     void importAirSpaceSectorsJSON (const std::string& filename);
 
 protected:
+    void addImportTab();
+    void addManageTab();
+
+    void updateSectorTable();
+
     ManageSectorsTask& task_;
 
     QVBoxLayout* main_layout_{nullptr};
@@ -88,16 +92,6 @@ protected:
     QTableWidget* sector_table_{nullptr};
     QStringList table_columns_{"ID", "Sector Name",  "Layer Name", "Exclude", "Num Points", "Altitude Minimum",
                                "Altitude Maximum", "Color", "Delete"};
-
-    QTableWidget* airspace_table_ = nullptr;
-    QStringList airspace_table_columns_{"ID", "Sector Name", "Use for Eval", "Num Points", "Altitude Minimum", "Altitude Maximum"};
-
-    void addImportTab();
-    void addManageTab();
-    void addAirSpaceTab();
-
-    void updateSectorTable();
-    void updateAirSpaceTable();
 };
 
 #endif // MANAGESECTORSTASKWIDGET_H

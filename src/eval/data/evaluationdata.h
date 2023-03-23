@@ -68,7 +68,6 @@ public:
     void addReferenceData (DBContent& object, unsigned int line_id, std::shared_ptr<Buffer> buffer);
     void addTestData (DBContent& object, unsigned int line_id, std::shared_ptr<Buffer> buffer);
     void finalize ();
-    void prepareForEvaluation();
 
     bool hasTargetData (unsigned int utn);
     const EvaluationTargetData& targetData(unsigned int utn);

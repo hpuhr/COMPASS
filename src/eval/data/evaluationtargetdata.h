@@ -145,7 +145,6 @@ public:
     bool hasTstData () const;
 
     void finalize () const;
-    void prepareForEvaluation() const;
 
     const unsigned int utn_{0};
 
@@ -213,6 +212,7 @@ public:
             const DataID& id, boost::posix_time::time_duration d_max) const;
     // lower/upper times, {} if not existing
 
+    boost::optional<EvaluationTargetPosition> mappedRefPos(const DataID& id) const;
     std::pair<EvaluationTargetPosition, bool> mappedRefPos(
             const DataID& id, boost::posix_time::time_duration d_max) const;
     // bool ok
@@ -273,21 +273,24 @@ public:
     float tstMeasuredTrackAngle(const DataID& id) const; // deg
 
     // inside check
+    boost::optional<bool> availableGroundBit(const DataID& id, 
+                                             Evaluation::DataType dtype,
+                                             const boost::posix_time::time_duration& d_max) const;
+    bool refPosAbove(const DataID& id) const;
+    bool refPosGroundBitAvailable(const DataID& id) const;
     bool refPosInside(const SectorLayer& layer, 
-                      const DataID& id, 
-                      const EvaluationTargetPosition& pos, 
-                      bool has_ground_bit, 
-                      bool ground_bit_set) const;
+                      const DataID& id) const;
+    bool tstPosAbove(const DataID& id) const;
+    bool tstPosGroundBitAvailable(const DataID& id) const;
     bool tstPosInside(const SectorLayer& layer, 
-                      const DataID& id, 
-                      const EvaluationTargetPosition& pos, 
-                      bool has_ground_bit, 
-                      bool ground_bit_set) const;
+                      const DataID& id) const;
+    bool mappedRefPosAbove(const DataID& id) const;
+    bool mappedRefPosGroundBitAvailable(const DataID& id) const;
     bool mappedRefPosInside(const SectorLayer& layer, 
-                            const DataID& id, 
-                            const EvaluationTargetPosition& pos,
-                            bool has_ground_bit, 
-                            bool ground_bit_set) const;
+                            const DataID& id) const;
+
+    static const int InterpGroundBitMaxSeconds = 15;
+
 protected:
     void updateCallsigns() const;
     void updateTargetAddresses() const;
@@ -303,15 +306,17 @@ protected:
     void computeSectorInsideInfo() const;
     void computeSectorInsideInfo(InsideCheckMatrix& mat, 
                                  const EvaluationTargetPosition& pos, 
-                                 unsigned int idx_internal) const;
+                                 unsigned int idx_internal,
+                                 const boost::optional<bool>& ground_bit,
+                                 const SectorLayer* min_height_filter = nullptr) const;
+    bool checkAbove(const InsideCheckMatrix& mat,
+                    const Index& index) const;
+    bool checkGroundBit(const InsideCheckMatrix& mat,
+                        const Index& index) const;
     bool checkInside(const SectorLayer& layer,
-                     const IndexMap& indices,
                      const InsideCheckMatrix& mat,
-                     const Index& index,
-                     const EvaluationTargetPosition& pos,
-                     bool has_ground_bit, 
-                     bool ground_bit_set) const;
-
+                     const Index& index) const;
+    
     DataMappingTimes findTstTimes(boost::posix_time::ptime timestamp_ref) const; // ref tod
 
     std::pair<bool, float> estimateRefAltitude (const boost::posix_time::ptime& timestamp, unsigned int index_internal) const;
@@ -335,11 +340,11 @@ protected:
     mutable std::set<unsigned int> target_addresses_;
     mutable std::set<unsigned int> mode_a_codes_;
 
-    mutable bool has_mode_c_ {false};
+    mutable bool  has_mode_c_ {false};
     mutable float mode_c_min_ {0};
     mutable float mode_c_max_ {0};
 
-    mutable bool has_pos_ {false};
+    mutable bool   has_pos_      {false};
     mutable double latitude_min_ {0};
     mutable double latitude_max_ {0};
 
@@ -360,7 +365,6 @@ protected:
     mutable InsideCheckMatrix                    inside_tst_;
     mutable InsideCheckMatrix                    inside_map_;
     mutable std::map<const SectorLayer*, size_t> inside_sector_layers_;
-    mutable bool                                 air_space_checked_ = false;
 };
 
 #endif // EVALUATIONTARGETDATA_H
