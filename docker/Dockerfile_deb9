@@ -170,5 +170,8 @@ RUN locate libboost
 
 RUN apt install sudo
 
+RUN echo 'sk ALL=(ALL)  ALL' >> /etc/sudoers
+RUN more /etc/sudoers
+
 USER sk
 WORKDIR /app/workspace/compass/docker
