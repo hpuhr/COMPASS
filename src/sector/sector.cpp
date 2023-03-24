@@ -491,6 +491,16 @@ void Sector::layerName(const std::string& layer_name)
     eval_man.moveSector(id_, old_layer_name, layer_name); // moves and saves
 }
 
+bool Sector::serializeSector() const
+{
+    return serialize_;
+}
+
+void Sector::serializeSector(bool ok)
+{
+    serialize_ = ok;
+}
+
 void Sector::save()
 {
     if (serialize_)

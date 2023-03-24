@@ -1205,14 +1205,42 @@ void EvaluationManager::exportSectors (const std::string& filename)
     output_file << j.dump(4);
 }
 
-bool EvaluationManager::importAirSpace(const std::string& filename)
+bool EvaluationManager::importAirSpace(const AirSpace& air_space,
+                                       const boost::optional<std::set<std::string>>& sectors_to_import)
 {
-    AirSpace air_space;
-
-    if (!air_space.readJSON(filename, max_sector_id_))
+    auto layers = air_space.layers();
+    if (layers.empty())
         return false;
 
-    auto new_layers = air_space.layers();
+    std::vector<std::shared_ptr<SectorLayer>> new_layers;
+
+    for (auto l : layers)
+    {
+        std::vector<std::shared_ptr<Sector>> sectors;
+        for (auto s : l->sectors())
+        {
+            if (sectors_to_import.has_value() && sectors_to_import->find(s->name()) == sectors_to_import->end())
+                continue;
+
+            sectors.push_back(s);
+        }
+
+        if (!sectors.empty())
+        {
+            l->clearSectors();
+            for (auto s : sectors)
+            {
+                //serialize from now on
+                s->serializeSector(true);
+
+                l->addSector(s);
+            }
+            new_layers.push_back(l);
+        }
+    }
+
+    if (new_layers.empty())
+        return false;
 
     sector_layers_.insert(sector_layers_.begin(), new_layers.begin(), new_layers.end());
 

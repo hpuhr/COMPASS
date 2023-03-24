@@ -53,6 +53,166 @@ std::shared_ptr<SectorLayer> AirSpace::lowerHeightFilterLayer() const
     return nullptr;
 }
 
+namespace 
+{
+    struct SectorData
+    {
+        std::string name;
+        int         own_volume;
+        int         used_for_checking;
+        double      own_height_min;
+        double      own_height_max;
+
+        std::vector<std::pair<double, double>> points;
+    };
+
+    boost::optional<SectorData> readSector(nlohmann::json& j_sector, 
+                                           unsigned int& sec_id)
+    {
+        if (!j_sector.contains("name") ||
+            !j_sector.contains("own_height_min") ||
+            !j_sector.contains("own_height_max") ||
+            !j_sector.contains("own_volume") ||
+            !j_sector.contains("used_for_checking"))
+        {
+            logerr << "AirSpace: readJSON: ill-defined sector, json '" << j_sector.dump(4);
+            return {};
+        }
+
+        std::string name = j_sector["name"];
+
+        int    own_volume        = std::atoi(j_sector["own_volume"       ].get<std::string>().c_str());
+        int    used_for_checking = std::atoi(j_sector["used_for_checking"].get<std::string>().c_str());
+        double own_height_min    = std::atof(j_sector["own_height_min"   ].get<std::string>().c_str());
+        double own_height_max    = std::atof(j_sector["own_height_max"   ].get<std::string>().c_str());
+
+        std::map<int, std::pair<double, double>> ordered_points;
+
+        if (j_sector.contains("geographic_points"))
+        {
+            nlohmann::json& geographic_points = j_sector["geographic_points"];
+            if (!geographic_points.is_array())
+            {
+                logerr << "AirSpace: readJSON: geographic_points is not an array";
+                return {};
+            }
+
+            for (auto& j_gp : geographic_points.get<nlohmann::json::array_t>())
+            {
+                if (!j_gp.contains("index") ||
+                    !j_gp.contains("latitude") ||
+                    !j_gp.contains("longitude"))
+                {
+                    logerr << "AirSpace: readJSON: ill-defined geographic point, json '" << j_gp.dump(4);
+                    return {};
+                }
+
+                int    id  = std::atoi(j_gp["index"    ].get<std::string>().c_str());
+                double lat = std::atof(j_gp["latitude" ].get<std::string>().c_str());
+                double lon = std::atof(j_gp["longitude"].get<std::string>().c_str());
+
+                if (!ordered_points.insert(std::make_pair(id, std::make_pair(lat, lon))).second)
+                {
+                    logerr << "AirSpace: readJSON: duplicate geographic point ID " << id;
+                    return {};
+                }
+            }
+        }
+
+        SectorData data;
+     
+        data.name              = name;
+        data.own_volume        = own_volume;
+        data.used_for_checking = used_for_checking;
+        data.own_height_min    = own_height_min;
+        data.own_height_max    = own_height_max;
+
+        data.points.reserve(ordered_points.size());
+
+        for (const auto& elem : ordered_points)
+            data.points.push_back(elem.second);
+
+        return data;
+    }
+
+    std::shared_ptr<SectorLayer> readSectorRecursive(nlohmann::json& j_sector, 
+                                                     unsigned int& sec_id,
+                                                     std::shared_ptr<SectorLayer> parent)
+    {
+        //try read sector
+        auto sector_data = readSector(j_sector, sec_id);
+        if (!sector_data.has_value())
+            return nullptr;
+
+        bool has_nested_sectors = j_sector.contains("air_space_sectors");
+
+        //!no double nestings!
+        if (parent && has_nested_sectors)
+        {
+            logerr << "AirSpace: readSectorRecursive: Double nesting of sectors detected in layer '" + parent->name() + "'";
+            return nullptr;
+        }
+
+        std::shared_ptr<SectorLayer> ret;
+
+        if (parent)
+        {
+            //we are a nested sector => add to parent layer
+            auto sec = std::make_shared<Sector>(sec_id++, 
+                                                sector_data->name,
+                                                parent->name(),
+                                                false, //do not serialize yet, as we are not part of the evaluation
+                                                false, 
+                                                AirSpace::DefaultSectorColor, 
+                                                sector_data->points);
+            sec->setMinimumAltitude(sector_data->own_height_min);
+
+            parent->addSector(sec);
+
+            ret = parent;
+        }
+        else
+        {
+            //we do not have a parent layer => generate a new one
+            auto layer = std::make_shared<SectorLayer>(sector_data->name);
+            
+            if (has_nested_sectors)
+            {
+                //we obtain nested sectors => treat sector as layer
+                nlohmann::json& air_space_sectors = j_sector["air_space_sectors"];
+                if (!air_space_sectors.is_array())
+                {
+                    logerr << "AirSpace: readSectorRecursive: air_space_sectors is not an array";
+                    return nullptr;
+                }
+
+                for (auto& j_sector2 : air_space_sectors.get<nlohmann::json::array_t>())
+                    if (readSectorRecursive(j_sector2, sec_id, layer) == nullptr)
+                        return nullptr;
+            }
+            else 
+            {
+                //no nested sectors => we are our own layer
+                auto sec = std::make_shared<Sector>(sec_id++, 
+                                            sector_data->name,
+                                            sector_data->name,
+                                            false, //do not serialize yet, as we are not part of the evaluation
+                                            false, 
+                                            AirSpace::DefaultSectorColor, 
+                                            sector_data->points);
+                sec->setMinimumAltitude(sector_data->own_height_min);
+                sec->setMaximumAltitude(sector_data->own_height_max);
+
+                layer->addSector(sec);
+            }
+
+            ret = layer;
+        }
+        
+        return ret;
+    }
+}
+
 /**
  */
 bool AirSpace::readJSON(const std::string& fn,
@@ -68,7 +228,7 @@ bool AirSpace::readJSON(const std::string& fn,
 
         if (!j.contains("air_space_sector_definition"))
         {
-            logerr << "EvaluationManager: importFlightLevelFilter: file does not contain air_space_sector_definition";
+            logerr << "AirSpace: readJSON: file does not contain air_space_sector_definition";
             return false;
         }
 
@@ -76,133 +236,41 @@ bool AirSpace::readJSON(const std::string& fn,
 
         if (!air_space_sector_definition.contains("air_space_sectors"))
         {
-            logerr << "EvaluationManager: importFlightLevelFilter: file does not contain air_space_sectors";
+            logerr << "AirSpace: readJSON: file does not contain air_space_sectors";
             return false;
         }
 
         nlohmann::json& air_space_sectors = air_space_sector_definition["air_space_sectors"];
         if (!air_space_sectors.is_array())
         {
-            logerr << "EvaluationManager: importFlightLevelFilter: air_space_sectors is not an array";
+            logerr << "AirSpace: readJSON: air_space_sectors is not an array";
             return false;
         }
 
-        std::shared_ptr<SectorLayer> lower_height_layer(new SectorLayer(LowerHeightLayerName));
         std::vector<std::shared_ptr<SectorLayer>> layers;
 
         unsigned int sec_id = base_id;
 
         for (auto& j_sector : air_space_sectors.get<nlohmann::json::array_t>())
         {
-            if (!j_sector.contains("name") ||
-                !j_sector.contains("own_height_min") ||
-                !j_sector.contains("own_height_max") ||
-                !j_sector.contains("own_volume") ||
-                !j_sector.contains("lower_height_only") ||
-                !j_sector.contains("used_for_checking") ||
-                !j_sector.contains("geographic_points"))
-            {
-                logerr << "EvaluationManager: importFlightLevelFilter: ill-defined sector, json '" << j_sector.dump(4);
+            auto layer = readSectorRecursive(j_sector, base_id, nullptr);
+            if (!layer)
                 return false;
-            }
 
-            std::string name = j_sector["name"];
-
-            int    own_volume        = std::atoi(j_sector["own_volume"       ].get<std::string>().c_str());
-            int    used_for_checking = std::atoi(j_sector["used_for_checking"].get<std::string>().c_str());
-            int    lower_height_only = std::atoi(j_sector["lower_height_only"].get<std::string>().c_str());
-            double own_height_min    = std::atof(j_sector["own_height_min"   ].get<std::string>().c_str());
-            double own_height_max    = std::atof(j_sector["own_height_max"   ].get<std::string>().c_str());
-
-            nlohmann::json& geographic_points = j_sector["geographic_points"];
-            if (!geographic_points.is_array())
-            {
-                logerr << "EvaluationManager: importFlightLevelFilter: geographic_points is not an array";
-                return false;
-            }
-
-            std::cout << "Scanning points of sector '" << name << "'" << std::endl;
-
-            std::map<int, std::pair<double, double>> ordered_points;
-            for (auto& j_gp : geographic_points.get<nlohmann::json::array_t>())
-            {
-                if (!j_gp.contains("index") ||
-                    !j_gp.contains("latitude") ||
-                    !j_gp.contains("longitude"))
-                {
-                    logerr << "EvaluationManager: importFlightLevelFilter: ill-defined geographic point, json '" << j_gp.dump(4);
-                    return false;
-                }
-
-                int    id  = std::atoi(j_gp["index"    ].get<std::string>().c_str());
-                double lat = std::atof(j_gp["latitude" ].get<std::string>().c_str());
-                double lon = std::atof(j_gp["longitude"].get<std::string>().c_str());
-
-                if (!ordered_points.insert(std::make_pair(id, std::make_pair(lat, lon))).second)
-                {
-                    logerr << "EvaluationManager: importFlightLevelFilter: duplicate geographic point ID " << id;
-                    return false;
-                }
-            }
-
-            if (ordered_points.size() < 3)
-            {
-                logerr << "EvaluationManager: importFlightLevelFilter: sector with " << ordered_points.size() << " point(s) skipped";
-                continue;
-            }
-
-            std::vector<std::pair<double, double>> points;
-            points.reserve(ordered_points.size());
-
-            for (const auto& elem : ordered_points)
-                points.push_back(elem.second);
-
-            if (lower_height_only)
-            {
-                auto sec = std::make_shared<Sector>(sec_id++, 
-                                                    name,
-                                                    LowerHeightLayerName,
-                                                    true, 
-                                                    false, 
-                                                    DefaultSectorColor, 
-                                                    points);
-                sec->setMinimumAltitude(own_height_min);
-
-                lower_height_layer->addSector(sec);
-            }
-            else 
-            {
-                auto sec = std::make_shared<Sector>(sec_id++, 
-                                                    name,
-                                                    name,
-                                                    true, 
-                                                    false, 
-                                                    DefaultSectorColor, 
-                                                    points);
-                sec->setMinimumAltitude(own_height_min);
-                sec->setMaximumAltitude(own_height_max);
-
-                auto layer = std::make_shared<SectorLayer>(name);
-                layer->addSector(sec);
-
-                layers.push_back(layer);
-            }
+            layers.push_back(layer);
         }
 
         if (sec_id == base_id)
         {
-            logerr << "EvaluationManager: importFlightLevelFilter: no sectors found";
+            logerr << "AirSpace: readJSON: no sectors found";
             return false;
         }
-
-        if (lower_height_layer->size() > 0)
-            layers_.push_back(lower_height_layer);
 
         layers_.insert(layers_.begin(), layers.begin(), layers.end());
     }
     catch (nlohmann::json::exception& e)
     {
-        logerr << "EvaluationManager: importFlightLevelFilter: could not load file '" << fn << "': " << e.what();
+        logerr << "AirSpace: readJSON: could not load file '" << fn << "': " << e.what();
 
         clear();
 

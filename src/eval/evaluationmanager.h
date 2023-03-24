@@ -36,6 +36,7 @@ class COMPASS;
 class EvaluationStandard;
 class DBContent;
 class SectorLayer;
+class AirSpace;
 
 namespace dbContent {
 
@@ -114,7 +115,8 @@ public:
     unsigned int getMaxSectorId ();
     void updateSectorLayers();
 
-    bool importAirSpace(const std::string& filename);
+    bool importAirSpace(const AirSpace& air_space, 
+                        const boost::optional<std::set<std::string>>& sectors_to_import = {});
     bool filterMinimumHeight() const;
     void filterMinimumHeight(bool filter);
 

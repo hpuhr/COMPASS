@@ -44,6 +44,8 @@
 #include <QHeaderView>
 #include <QColorDialog>
 #include <QApplication>
+#include <QTreeWidget>
+#include <QTreeWidgetItem>
 
 using namespace std;
 using namespace Utils;
@@ -168,6 +170,13 @@ void ManageSectorsTaskWidget::addManageTab()
         connect(import_button_, &QPushButton::clicked, this,
                 &ManageSectorsTaskWidget::importSectorsSlot);
         button_layout->addWidget(import_button_);
+
+        QPushButton* import_airspace_button_ = new QPushButton("Import Air Space");
+        connect(import_airspace_button_, &QPushButton::clicked, this,
+                &ManageSectorsTaskWidget::importAirSpaceSectorsSlot);
+        button_layout->addWidget(import_airspace_button_);
+
+        import_airspace_button_->setVisible(!COMPASS::instance().isAppImage());
 
         manage_tab_layout->addLayout(button_layout);
     }
@@ -679,7 +688,77 @@ void ManageSectorsTaskWidget::importAirSpaceSectorsJSON(const std::string& filen
 
     assert (Files::fileExists(filename));
 
-    if (!COMPASS::instance().evaluationManager().importAirSpace(filename))
+    auto max_sector_id = COMPASS::instance().evaluationManager().getMaxSectorId();
+
+    AirSpace air_space;
+
+    if (!air_space.readJSON(filename, max_sector_id))
+    {
+        QMessageBox::critical(this, "Error", "Air space file could not be read.");
+        return;
+    }
+
+    QDialog dlg;
+    QVBoxLayout* layout = new QVBoxLayout;
+    dlg.setLayout(layout);
+
+    QTreeWidget* list = new QTreeWidget(&dlg);
+    list->setHeaderLabels({ "", "Sector", "Layer", "#Points" });
+    list->header()->setSectionResizeMode(0, QHeaderView::ResizeMode::Fixed);
+    list->header()->setSectionResizeMode(1, QHeaderView::ResizeMode::Stretch);
+    list->header()->setSectionResizeMode(2, QHeaderView::ResizeMode::Stretch);
+    list->header()->setSectionResizeMode(3, QHeaderView::ResizeMode::Fixed);
+
+    layout->addWidget(list);
+
+    QHBoxLayout* button_layout = new QHBoxLayout;
+    QPushButton* button_import = new QPushButton("Import");
+    QPushButton* button_cancel = new QPushButton("Cancel");
+
+    connect (button_import, &QPushButton::pressed, &dlg, &QDialog::accept);
+    connect (button_cancel, &QPushButton::pressed, &dlg, &QDialog::reject);
+
+    button_layout->addStretch(1);
+    button_layout->addWidget(button_import);
+    button_layout->addWidget(button_cancel);
+
+    layout->addLayout(button_layout);
+
+    auto layers = air_space.layers();
+
+    for (auto l : layers)
+    {
+        for (auto s : l->sectors())
+        {
+            QTreeWidgetItem* item = new QTreeWidgetItem;
+            item->setCheckState(0, Qt::CheckState::Checked);
+            item->setText(1, QString::fromStdString(s->name()));
+            item->setText(2, QString::fromStdString(l->name()));
+            item->setText(3, QString::number(s->points().size()));
+
+            list->addTopLevelItem(item);
+        }
+    }
+
+    dlg.resize(500, 800);
+
+    auto ret = dlg.exec();
+    if (ret == QDialog::Rejected)
+        return;
+
+    std::set<std::string> sectors_to_import;
+
+    for (int i = 0; i < list->topLevelItemCount(); ++i)
+    {
+        QTreeWidgetItem* item = list->topLevelItem(i);
+        if (item->checkState(0) == Qt::Checked)
+            sectors_to_import.insert(item->text(1).toStdString());
+    }
+
+    if (sectors_to_import.empty())
+        return;
+
+    if (!COMPASS::instance().evaluationManager().importAirSpace(air_space, sectors_to_import))
         QMessageBox::critical(this, "Error", "Importing air space sectors failed.");
 
     updateSectorTable();

@@ -151,6 +151,8 @@ public:
     virtual void setMaximumAltitude(double value);
     virtual void removeMaximumAltitude();
 
+    bool serializeSector() const;
+    void serializeSector(bool ok);
     void save();
     
     virtual bool isInside(const EvaluationTargetPosition& pos, 
