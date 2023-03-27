@@ -18,13 +18,15 @@
 #ifndef EVALUATIONSECTORWIDGET_H
 #define EVALUATIONSECTORWIDGET_H
 
-#include <QWidget>
+#include <QScrollArea>
 
 class EvaluationManager;
 
 class QGridLayout;
 
-class EvaluationSectorWidget : public QWidget
+/**
+*/
+class EvaluationSectorWidget : public QScrollArea
 {
     Q_OBJECT
 
@@ -32,12 +34,14 @@ public slots:
     void toggleUseGroupSlot();
 
 public:
-    EvaluationSectorWidget(EvaluationManager& eval_man);
+    EvaluationSectorWidget(EvaluationManager& eval_man, QWidget* parent = nullptr);
+    virtual ~EvaluationSectorWidget() = default;
 
     void update();
 
 protected:
     EvaluationManager& eval_man_;
+
     QGridLayout* grid_layout_ {nullptr};
 };
 

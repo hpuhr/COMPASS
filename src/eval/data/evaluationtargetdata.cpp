@@ -2389,10 +2389,10 @@ void EvaluationTargetData::computeSectorInsideInfo() const
             inside_sector_layers_[ sl.get() ] = cnt++;
     }
 
-    bool check_min_height = eval_man_.filterMinimumHeight() &&
-                            eval_man_.hasSectorLayer(AirSpace::LowerHeightLayerName);
+    const SectorLayer* min_height_layer_ptr = nullptr;
 
-    const SectorLayer* min_height_layer = check_min_height ? eval_man_.sectorLayer(AirSpace::LowerHeightLayerName).get() : nullptr;
+    if (eval_man_.filterMinimumHeight())
+        min_height_layer_ptr = eval_man_.minHeightFilterLayer().get();
 
     size_t num_sector_layers = sector_layers.size();
     size_t num_ref           = ref_indices_.size();
@@ -2420,7 +2420,7 @@ void EvaluationTargetData::computeSectorInsideInfo() const
             auto pos = refPos(id);
             auto gb  = availableGroundBit(id, Evaluation::DataType::Reference, gb_max_sec);
 
-            computeSectorInsideInfo(inside_ref_, pos, elem.second.idx_internal, gb, min_height_layer);
+            computeSectorInsideInfo(inside_ref_, pos, elem.second.idx_internal, gb, min_height_layer_ptr);
         }
     }
     if (num_tst)
@@ -2436,7 +2436,7 @@ void EvaluationTargetData::computeSectorInsideInfo() const
             auto pos = tstPos(id);
             auto gb  = availableGroundBit(id, Evaluation::DataType::Test, gb_max_sec);
 
-            computeSectorInsideInfo(inside_tst_, pos, elem.second.idx_internal, gb, min_height_layer);
+            computeSectorInsideInfo(inside_tst_, pos, elem.second.idx_internal, gb, min_height_layer_ptr);
         }
     }
     if (num_map)
@@ -2453,7 +2453,7 @@ void EvaluationTargetData::computeSectorInsideInfo() const
             if (pos.has_value())
             {
                 auto gb = availableGroundBit(id, Evaluation::DataType::Test, gb_max_sec);
-                computeSectorInsideInfo(inside_map_, pos.value(), elem.second.idx_internal, gb, min_height_layer);
+                computeSectorInsideInfo(inside_map_, pos.value(), elem.second.idx_internal, gb, min_height_layer_ptr);
             }
         }
     }

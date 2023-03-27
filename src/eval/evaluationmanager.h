@@ -94,9 +94,9 @@ public:
     bool sectorsLoaded() const;
     bool anySectorsWithReq();
 
-    bool hasSectorLayer (const std::string& layer_name);
+    bool hasSectorLayer (const std::string& layer_name) const;
     //void renameSectorLayer (const std::string& name, const std::string& new_name);
-    std::shared_ptr<SectorLayer> sectorLayer (const std::string& layer_name);
+    std::shared_ptr<SectorLayer> sectorLayer(const std::string& layer_name) const;
 
     void createNewSector (const std::string& name, const std::string& layer_name,
                           bool exclude, QColor color, std::vector<std::pair<double,double>> points);
@@ -118,7 +118,9 @@ public:
     bool importAirSpace(const AirSpace& air_space, 
                         const boost::optional<std::set<std::string>>& sectors_to_import = {});
     bool filterMinimumHeight() const;
-    void filterMinimumHeight(bool filter);
+    const std::string& minHeightFilterLayerName() const;
+    void minHeightFilterLayerName(const std::string& layer_name);
+    std::shared_ptr<SectorLayer> minHeightFilterLayer() const;
 
     std::string dbContentNameRef() const;
     void dbContentNameRef(const std::string& name);
@@ -345,8 +347,6 @@ public:
     bool hasSelectedReferenceDataSources();
     bool hasSelectedTestDataSources();
 
-    static const std::string AirSpaceLayerName;
-
 protected:
     COMPASS& compass_;
 
@@ -463,7 +463,7 @@ protected:
     unsigned int max_sector_id_ {0};
     std::vector<std::unique_ptr<EvaluationStandard>> standards_;
 
-    bool filter_minimum_height_ = true;
+    std::string min_height_filter_layer_; //layer used as minimum height filter
 
     nlohmann::json use_grp_in_sector_; //standard_name->sector_layer_name->req_grp_name->bool use
     nlohmann::json use_requirement_; // standard_name->req_grp_name->req_grp_name->bool use
@@ -488,6 +488,8 @@ protected:
     void checkTestDataSources();
 
     void updateMaxSectorID();
+
+    void checkMinHeightFilterValid();
 
     nlohmann::json::object_t getBaseViewableDataConfig ();
     nlohmann::json::object_t getBaseViewableNoDataConfig ();

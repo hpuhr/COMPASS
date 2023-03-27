@@ -28,6 +28,10 @@ class EvaluationDataSourceWidget;
 class EvaluationStandardComboBox;
 class EvaluationSectorWidget;
 
+class QComboBox;
+
+/**
+*/
 class EvaluationMainTabWidget : public QWidget
 {
     Q_OBJECT
@@ -37,6 +41,7 @@ private slots:
     void lineRefChangedSlot(unsigned int line_id);
     void dboTstNameChangedSlot(const std::string& dbcontent_name);
     void lineTstChangedSlot(unsigned int line_id);
+    void minHeightFilterChangedSlot(int idx);
 
     void changedStandardsSlot(); // eval man
     void changedCurrentStandardSlot(); // eval man
@@ -48,6 +53,8 @@ public:
     void updateSectors();
 
 protected:
+    void updateMinHeightFilterCombo();
+
     EvaluationManager& eval_man_;
     EvaluationManagerWidget& man_widget_;
 
@@ -56,6 +63,8 @@ protected:
 
     std::unique_ptr<EvaluationStandardComboBox> standard_box_ {nullptr};
     std::unique_ptr<EvaluationSectorWidget> sector_widget_ {nullptr};
+
+    QComboBox* min_height_filter_combo_ {nullptr};
 };
 
 #endif // EVALUATIONMANAGERMAINTABWIDGET_H

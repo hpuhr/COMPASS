@@ -66,8 +66,6 @@ using namespace std;
 using namespace nlohmann;
 using namespace boost::posix_time;
 
-const std::string EvaluationManager::AirSpaceLayerName = "air_space_sectors";
-
 EvaluationManager::EvaluationManager(const std::string& class_id, const std::string& instance_id, COMPASS* compass)
 :   Configurable(class_id, instance_id, compass, "eval.json")
 ,   compass_    (*compass)
@@ -150,8 +148,10 @@ EvaluationManager::EvaluationManager(const std::string& class_id, const std::str
 
     registerParameter("result_detail_zoom", &result_detail_zoom_, 0.02);
 
-    // report stuff
+    // min height filter
+    registerParameter("min_height_filter_layer", &min_height_filter_layer_, "");
 
+    // report stuff
     registerParameter("report_skip_no_data_details", &report_skip_no_data_details_, true);
     registerParameter("report_split_results_by_mops", &report_split_results_by_mops_, false);
     registerParameter("report_show_adsb_info", &report_show_adsb_info_, false);
@@ -858,7 +858,7 @@ void EvaluationManager::checkSubConfigurables()
 {
 }
 
-bool EvaluationManager::hasSectorLayer (const std::string& layer_name)
+bool EvaluationManager::hasSectorLayer(const std::string& layer_name) const
 {
     assert (sectors_loaded_);
 
@@ -873,7 +873,7 @@ bool EvaluationManager::hasSectorLayer (const std::string& layer_name)
 //    // TODO
 //}
 
-std::shared_ptr<SectorLayer> EvaluationManager::sectorLayer (const std::string& layer_name)
+std::shared_ptr<SectorLayer> EvaluationManager::sectorLayer (const std::string& layer_name) const
 {
     assert (sectors_loaded_);
     assert (hasSectorLayer(layer_name));
@@ -906,6 +906,7 @@ void EvaluationManager::loadSectors()
     sector_layers_ = COMPASS::instance().interface().loadSectors();
 
     updateMaxSectorID();
+    checkMinHeightFilterValid();
 
     sectors_loaded_ = true;
 }
@@ -1074,6 +1075,8 @@ void EvaluationManager::deleteSector(shared_ptr<Sector> sector)
 
         assert (iter != sector_layers_.end());
         sector_layers_.erase(iter);
+
+        checkMinHeightFilterValid();
     }
 
     COMPASS::instance().interface().deleteSector(sector);
@@ -1090,6 +1093,8 @@ void EvaluationManager::deleteAllSectors()
     sector_layers_.clear();
 
     COMPASS::instance().interface().deleteAllSectors();
+
+    checkMinHeightFilterValid();
 
     if (widget_)
         widget_->updateSectors();
@@ -1170,6 +1175,8 @@ void EvaluationManager::importSectors(const std::string& filename)
                << filename << "'";
         throw e;
     }
+
+    checkMinHeightFilterValid();
 
     if (widget_)
         widget_->updateSectors();
@@ -1256,12 +1263,46 @@ bool EvaluationManager::importAirSpace(const AirSpace& air_space,
 
 bool EvaluationManager::filterMinimumHeight() const
 {
-    return filter_minimum_height_;
+    return !min_height_filter_layer_.empty();
 }   
 
-void EvaluationManager::filterMinimumHeight(bool filter)
+const std::string& EvaluationManager::minHeightFilterLayerName() const
 {
-    filter_minimum_height_ = filter;
+    return min_height_filter_layer_;
+}
+
+void EvaluationManager::minHeightFilterLayerName(const std::string& layer_name)
+{
+    assert(layer_name.empty() || hasSectorLayer(layer_name));
+
+    loginf << "EvaluationManager: minHeightFilterLayerName: layer changed to "
+           << (layer_name.empty() ? "null" : "'" + layer_name + "'");
+
+    min_height_filter_layer_= layer_name;
+}
+
+std::shared_ptr<SectorLayer> EvaluationManager::minHeightFilterLayer() const
+{
+    if (!filterMinimumHeight())
+        return {};
+
+    //!will assert on non-existing layer name!
+    return sectorLayer(min_height_filter_layer_);
+}
+
+/**
+ * Called every time a layer is removed from the eval manager.
+ * Checks if the selected min height filter layer is still present and resets it needed.
+ */
+void EvaluationManager::checkMinHeightFilterValid()
+{
+    if (!min_height_filter_layer_.empty() && !hasSectorLayer(min_height_filter_layer_))
+    {
+        logerr << "EvaluationManager: checkMinHeightFilterValid: Layer '" << min_height_filter_layer_ << "'"
+               << " not present, resetting min height filter";
+        
+        min_height_filter_layer_ = "";
+    }
 }
 
 std::string EvaluationManager::dbContentNameRef() const

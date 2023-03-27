@@ -21,6 +21,7 @@
 #include "evaluationmanager.h"
 #include "evaluationstandardcombobox.h"
 #include "evaluationsectorwidget.h"
+#include "airspace.h"
 #include "logger.h"
 
 #include <QVBoxLayout>
@@ -29,6 +30,7 @@
 #include <QFormLayout>
 #include <QCheckBox>
 #include <QLineEdit>
+#include <QComboBox>
 
 EvaluationMainTabWidget::EvaluationMainTabWidget(EvaluationManager& eval_man,
                                                  EvaluationManagerWidget& man_widget)
@@ -77,8 +79,21 @@ EvaluationMainTabWidget::EvaluationMainTabWidget(EvaluationManager& eval_man,
 
     main_layout->addLayout(std_layout);
 
-    // sector requirement mapping
+    // minimum height filter
+    QHBoxLayout* height_filter_layout = new QHBoxLayout();
 
+    QLabel* height_filter_label = new QLabel("Sector Layers: Minimum Height Filter");
+    height_filter_label->setFont(font_bold);
+    height_filter_layout->addWidget(height_filter_label);
+
+    min_height_filter_combo_ = new QComboBox;
+    height_filter_layout->addWidget(min_height_filter_combo_);
+
+    connect(min_height_filter_combo_, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &EvaluationMainTabWidget::minHeightFilterChangedSlot);
+
+    main_layout->addLayout(height_filter_layout);
+
+    // sector requirement mapping
     QVBoxLayout* sec_layout = new QVBoxLayout();
 
     QLabel* sec_label = new QLabel("Sector Layers: Requirement Groups Usage");
@@ -86,16 +101,10 @@ EvaluationMainTabWidget::EvaluationMainTabWidget(EvaluationManager& eval_man,
     sec_layout->addWidget(sec_label);
 
     sector_widget_.reset(new EvaluationSectorWidget(eval_man_));
+    sector_widget_->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     sec_layout->addWidget(sector_widget_.get());
 
     main_layout->addLayout(sec_layout);
-
-    // additional config
-//    QFormLayout* cfg_layout = new QFormLayout();
-
-//    main_layout->addLayout(cfg_layout);
-
-    main_layout->addStretch();
 
     // connections
 
@@ -120,7 +129,53 @@ void EvaluationMainTabWidget::updateDataSources()
 void EvaluationMainTabWidget::updateSectors()
 {
     assert (sector_widget_);
+    assert (min_height_filter_combo_);
+
     sector_widget_->update();
+
+    updateMinHeightFilterCombo();
+}
+
+void EvaluationMainTabWidget::updateMinHeightFilterCombo()
+{
+    assert (min_height_filter_combo_);
+
+    min_height_filter_combo_->blockSignals(true);
+
+    min_height_filter_combo_->clear();
+    min_height_filter_combo_->addItem("None");
+
+    if (eval_man_.hasCurrentStandard() && eval_man_.sectorsLoaded())
+    {
+        for (const auto& sec_lay_it : eval_man_.sectorsLayers())
+            min_height_filter_combo_->addItem(QString::fromStdString(sec_lay_it->name()));
+    }
+
+    min_height_filter_combo_->setCurrentIndex(0);
+
+    if (eval_man_.filterMinimumHeight())
+    {
+        const auto& layer_name = eval_man_.minHeightFilterLayerName();
+        int idx = min_height_filter_combo_->findText(QString::fromStdString(layer_name));
+
+        //assert(idx >= 0);
+
+        if (idx >= 0)
+            min_height_filter_combo_->setCurrentIndex(idx);
+    }
+
+    min_height_filter_combo_->blockSignals(false);
+}
+
+void EvaluationMainTabWidget::minHeightFilterChangedSlot(int idx)
+{
+    if (idx <= 0)
+    {
+        eval_man_.minHeightFilterLayerName("");
+        return;
+    }
+
+    eval_man_.minHeightFilterLayerName(min_height_filter_combo_->itemText(idx).toStdString());
 }
 
 void EvaluationMainTabWidget::dboRefNameChangedSlot(const std::string& dbcontent_name)
@@ -173,4 +228,3 @@ void EvaluationMainTabWidget::changedCurrentStandardSlot()
 
     logdbg << "EvaluationMainTabWidget: changedCurrentStandardSlot: done";
 }
-
