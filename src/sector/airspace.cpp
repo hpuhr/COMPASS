@@ -311,8 +311,9 @@ AirSpace::AboveCheckResult AirSpace::isAbove(const SectorLayer* layer,
     //check individual sectors
     for (auto sector : layer->sectors())
     {
-        assert( sector->hasMinimumAltitude());
-        assert(!sector->hasMaximumAltitude());
+        //@TODO: should there alwys only be a correctly set minimum?
+        //assert( sector->hasMinimumAltitude());
+        //assert(!sector->hasMaximumAltitude());
 
         //not inside of sector area?
         if (!sector->isInside(pos, has_ground_bit, ground_bit_set, Sector::InsideCheckType::XY))
@@ -321,7 +322,7 @@ AirSpace::AboveCheckResult AirSpace::isAbove(const SectorLayer* layer,
         was_inside_xy = true;
         
         //if we are inside a sector and above min altitude => above
-        if (sector->isInside(pos, has_ground_bit, ground_bit_set, Sector::InsideCheckType::Z))
+        if (sector->isInside(pos, has_ground_bit, ground_bit_set, Sector::InsideCheckType::ZMinOnly))
             return AboveCheckResult::Above;
     }
 

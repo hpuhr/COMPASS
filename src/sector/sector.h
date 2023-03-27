@@ -101,6 +101,7 @@ public:
     {
         XY = 0,
         Z,
+        ZMinOnly,
         XYZ
     };
 

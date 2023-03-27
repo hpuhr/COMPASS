@@ -516,18 +516,22 @@ bool Sector::isInside(const EvaluationTargetPosition& pos,
                       InsideCheckType check_type) const
 {
     if (check_type == InsideCheckType::XYZ ||
-        check_type == InsideCheckType::Z)
+        check_type == InsideCheckType::Z ||
+        check_type == InsideCheckType::ZMinOnly)
     {
         //check altitude range
         if (pos.has_altitude_)
         {
+            //check min
             if (min_altitude_.has_value() && pos.altitude_ < min_altitude_.value())
                 return false;
-            else if (max_altitude_.has_value() && pos.altitude_ > max_altitude_.value())
+
+            //check max
+            if (check_type != InsideCheckType::ZMinOnly && max_altitude_.has_value() && pos.altitude_ > max_altitude_.value())
                 return false;
         }
 
-        //check gb
+        //check gb against min
         if (has_ground_bit && ground_bit_set && min_altitude_.has_value())
             return false;
     }
