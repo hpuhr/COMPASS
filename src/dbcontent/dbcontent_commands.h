@@ -23,8 +23,6 @@
 
 #include <boost/optional.hpp>
 
-#include <QStringList>
-
 namespace dbContent
 {
 
@@ -32,14 +30,14 @@ namespace dbContent
  */
 struct RTCommandGetTable : public rtcommand::RTCommand
 {
-    QString                       dbcontent;
+    std::string                   dbcontent;
     boost::optional<unsigned int> utn;
-    QStringList                   variables;
+    std::vector<std::string>      variables;
 
 protected:
     virtual bool run_impl() const override;
 
-    DECLARE_RTCOMMAND(get_table, "retrieves table data from the database")
+    DECLARE_RTCOMMAND(get_dbcontent_data, "retrieves data from the database")
     DECLARE_RTCOMMAND_OPTIONS
 };
 

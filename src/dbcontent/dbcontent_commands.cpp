@@ -32,7 +32,7 @@ namespace dbContent
  */
 bool RTCommandGetTable::run_impl() const
 {
-    
+    return false;
 }
 
 /**
@@ -41,22 +41,22 @@ void RTCommandGetTable::collectOptions_impl(OptionsDescription &options,
                                             PosOptionsDescription &positional)
 {
     ADD_RTCOMMAND_OPTIONS(options)
-        ("dbcontent", po::value<std::string>()->default_value(""), "DBContent to retrieve data for")
-        ("utn"      , po::value<unsigned int>()                  , "UTN to retrieve data for"      )
-        ("variables", po::value<std::string>()->default_value(""), "variables to retrieve data for");
+        ("dbcontent", po::value<std::string>()->required(), "DBContent to retrieve data for")
+        ("utn"      , po::value<unsigned int>()           , "UTN to retrieve data for"      )
+        ("variables", po::value<std::string>()->required(), "variables to retrieve data for");
 
     ADD_RTCOMMAND_POS_OPTION(positional, "dbcontent", 1)
-    ADD_RTCOMMAND_POS_OPTION(positional, "utn"      , 2)
-    ADD_RTCOMMAND_POS_OPTION(positional, "variables", 3)
+    ADD_RTCOMMAND_POS_OPTION(positional, "variables", 2)
+    ADD_RTCOMMAND_POS_OPTION(positional, "utn"      , 3)
 }
 
 /**
  */
 void RTCommandGetTable::assignVariables_impl(const VariablesMap &vars)
 {
-    RTCOMMAND_GET_QSTRING_OR_THROW(vars, "dbcontent", dbcontent)
+    RTCOMMAND_GET_VAR_OR_THROW(vars, "dbcontent", std::string, dbcontent)
     RTCOMMAND_GET_VAR(vars, "utn", unsigned int, utn)
-    RTCOMMAND_GET_QSTRINGLIST_OR_THROW(vars, "variables", variables)
+    RTCOMMAND_GET_STRINGLIST_OR_THROW(vars, "variables", variables)
 }
 
 } // namespace dbContent

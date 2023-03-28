@@ -104,6 +104,13 @@ protected:                                                                      
         throw std::runtime_error(std::string("Could not retrieve rtcommand variable '") + Name + "'"); \
     Var = Variables[Name].as<Type>();
 
+#define RTCOMMAND_GET_STRINGLIST_OR_THROW(Variables, Name, Var)          \
+    {                                                                    \
+        std::string _##Var;                                              \
+        RTCOMMAND_GET_VAR_OR_THROW(Variables, Name, std::string, _##Var) \
+        Var = rtcommand::parameterToStrings(_##Var);                     \
+    }
+
 #define RTCOMMAND_GET_QSTRING(Variables, Name, Var)             \
     {                                                           \
         std::string _##Var;                                     \
