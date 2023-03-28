@@ -699,15 +699,19 @@ void ManageSectorsTaskWidget::importAirSpaceSectorsJSON(const std::string& filen
     }
 
     QDialog dlg;
+    dlg.setWindowTitle("Choose sectors to import");
+
     QVBoxLayout* layout = new QVBoxLayout;
     dlg.setLayout(layout);
 
     QTreeWidget* list = new QTreeWidget(&dlg);
-    list->setHeaderLabels({ "", "Sector", "Layer", "#Points" });
-    list->header()->setSectionResizeMode(0, QHeaderView::ResizeMode::Fixed);
+    list->setHeaderLabels({ "", "Sector", "Layer", "#Points", "Altitude min", "Altitude max" });
+    list->header()->setSectionResizeMode(0, QHeaderView::ResizeMode::ResizeToContents);
     list->header()->setSectionResizeMode(1, QHeaderView::ResizeMode::Stretch);
     list->header()->setSectionResizeMode(2, QHeaderView::ResizeMode::Stretch);
-    list->header()->setSectionResizeMode(3, QHeaderView::ResizeMode::Fixed);
+    list->header()->setSectionResizeMode(3, QHeaderView::ResizeMode::ResizeToContents);
+    list->header()->setSectionResizeMode(4, QHeaderView::ResizeMode::ResizeToContents);
+    list->header()->setSectionResizeMode(5, QHeaderView::ResizeMode::ResizeToContents);
 
     layout->addWidget(list);
 
@@ -735,6 +739,12 @@ void ManageSectorsTaskWidget::importAirSpaceSectorsJSON(const std::string& filen
             item->setText(1, QString::fromStdString(s->name()));
             item->setText(2, QString::fromStdString(l->name()));
             item->setText(3, QString::number(s->points().size()));
+
+            bool has_alt_min = s->hasMinimumAltitude();
+            bool has_alt_max = s->hasMaximumAltitude();
+
+            item->setText(4, has_alt_min ? QString::number(s->minimumAltitude()) : "-");
+            item->setText(5, has_alt_max ? QString::number(s->maximumAltitude()) : "-");
 
             list->addTopLevelItem(item);
         }
