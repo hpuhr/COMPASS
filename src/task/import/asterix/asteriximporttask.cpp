@@ -1079,7 +1079,8 @@ void ASTERIXImportTask::addDecodedASTERIXSlot()
             return;
         }
 
-        if (maxLoadReached()) // break if too many packets in process, this slot is called again from insertDoneSlot
+        if (maxLoadReached())
+            // break if too many packets in process, this slot is called again from insertDoneSlot or postProcessDone
         {
             logdbg << "ASTERIXImportTask: addDecodedASTERIXSlot: returning since max load reached";
             return;
@@ -1104,7 +1105,7 @@ void ASTERIXImportTask::addDecodedASTERIXSlot()
         return;
     }
 
-    logdbg << "ASTERIXImportTask: addDecodedASTERIXSlot: processing data";
+    logdbg << "ASTERIXImportTask: addDecodedASTERIXSlot: processing data total cnt " << num_packets_total_;
 
     std::vector<std::unique_ptr<nlohmann::json>> extracted_data {decode_job_->extractedData()};
 
@@ -1267,13 +1268,26 @@ void ASTERIXImportTask::postprocessDoneSlot()
     for (auto& buf_it : job_buffers)
         buffer_cnt += buf_it.second->size();
 
+    logdbg << "ASTERIXImportTask: postprocessDoneSlot: buffer cnt " << buffer_cnt;
+
     if (buffer_cnt == 0)
     {
         // quit
         assert (num_packets_in_processing_);
         --num_packets_in_processing_;
 
+
+        logdbg << "ASTERIXImportTask: postprocessDoneSlot: no data,"
+               << " num_packets_in_processing_ " << num_packets_in_processing_
+               << " num_packets_total_ " << num_packets_total_;
+
         checkAllDone();
+
+        if (decode_job_ && decode_job_->hasData())
+        {
+            logdbg << "ASTERIXImportTask: postprocessDoneSlot: starting decoding of next chunk";
+            addDecodedASTERIXSlot(); // load next chunk
+        }
 
         return;
     }
