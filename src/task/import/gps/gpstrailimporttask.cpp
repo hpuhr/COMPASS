@@ -615,7 +615,7 @@ void GPSTrailImportTask::run()
 
     boost::posix_time::ptime override_date_ts = boost::posix_time::ptime(override_date_);
 
-    last_tod = -1;
+    last_tod = -1; // impossible first value
 
     for (auto& fix_it : gps_fixes_)
     {
