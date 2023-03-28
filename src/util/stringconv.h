@@ -69,7 +69,6 @@ extern std::string getValueString(const double& value);
 extern std::string getValueString(const nlohmann::json& value);
 extern std::string getValueString(const boost::posix_time::ptime& value);
 
-
 template <typename T>
 std::string getValueString(T value)
 {

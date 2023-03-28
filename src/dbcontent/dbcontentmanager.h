@@ -80,7 +80,6 @@ signals:
     void allTargetsChangedSignal(); // for more than 1 utn
 
 public:
-
     DBContentManager(const std::string& class_id, const std::string& instance_id, COMPASS* compass);
     virtual ~DBContentManager();
 
