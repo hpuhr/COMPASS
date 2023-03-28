@@ -451,8 +451,8 @@ void GPSTrailImportTask::parseCurrentFile ()
         ss << "Got " << gps_fixes_.size()
            << " (" << String::percentToString(100.0*gps_fixes_.size()/gps_fixes_cnt_) << "%) fixes.\n";
 
-        ss << "\n Timestamps Begin: " << Time::toString(getTimeFrom(gps_fixes_.begin()->timestamp))
-           << " End: " << Time::toString(getTimeFrom(gps_fixes_.rbegin()->timestamp)) << "\n";
+        ss << "\n Timestamps\n  Begin: " << Time::toString(getTimeFrom(gps_fixes_.begin()->timestamp))
+           << "\n  End: " << Time::toString(getTimeFrom(gps_fixes_.rbegin()->timestamp)) << "\n";
 
         if (quality_counts_.size())
         {
@@ -607,31 +607,21 @@ void GPSTrailImportTask::run()
 
     }
 
-    float tod;
+    float tod, last_tod;
     boost::posix_time::ptime timestamp;
     double speed_ms, track_angle_rad, vx, vy;
 
     loginf << "GPSTrailImportTask: run: filling buffer";
+
+    boost::posix_time::ptime override_date_ts = boost::posix_time::ptime(override_date_);
+
+    last_tod = -1;
 
     for (auto& fix_it : gps_fixes_)
     {
         // tod
         tod = fix_it.timestamp.hour*3600.0 + fix_it.timestamp.min*60.0 + fix_it.timestamp.sec;
         tod += tod_offset_;
-
-        // timestamp
-        // bpt::ptime(bg::date(1970, 1, 1));
-
-        if (use_override_date_)
-        {
-            timestamp = boost::posix_time::ptime(override_date_);
-            timestamp += Time::partialSeconds(tod); // add tod + time offset
-        }
-        else
-        {
-            timestamp = getTimeFrom(fix_it.timestamp);
-            timestamp += Time::partialSeconds(tod_offset_); // add time offset
-        }
 
         // check for out-of-bounds because of midnight-jump
         while (tod < 0.0f)
@@ -641,6 +631,25 @@ void GPSTrailImportTask::run()
 
         assert(tod >= 0.0f);
         assert(tod <= tod_24h);
+
+        // timestamp
+
+        if (use_override_date_)
+        {
+            if (tod < last_tod) // 24h jump
+            {
+                loginf << "GPSTrailImportTask: run: override date, 24h time detected, increasing date";
+                override_date_ts += boost::gregorian::days(1);
+            }
+
+            timestamp = override_date_ts;
+            timestamp += Time::partialSeconds(tod); // add tod + time offset
+        }
+        else
+        {
+            timestamp = getTimeFrom(fix_it.timestamp);
+            timestamp += Time::partialSeconds(tod_offset_); // add time offset
+        }
 
         sac_vec.set(cnt, ds_sac_);
         sic_vec.set(cnt, ds_sic_);
@@ -685,6 +694,8 @@ void GPSTrailImportTask::run()
 
         //        if (fix_it.speed != 0.0)
         //            spd_vec.set(cnt, fix_it.speed*0.539957); // km/h to knots
+
+        last_tod = tod;
 
         ++cnt;
     }
