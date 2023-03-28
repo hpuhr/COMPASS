@@ -116,8 +116,8 @@ struct RTCommand
     RTCommand();
     virtual ~RTCommand();
 
-    bool run() const;
-    bool checkResult() const;
+    bool run();
+    bool checkResult();
     QString name() const { return name_impl(); };
     QString description() const { return description_impl(); }
 
@@ -160,8 +160,8 @@ protected:
     void setJSONReply(const nlohmann::json& json_reply, const std::string& reply_as_string = "") const;
 
     //implements command specific behaviour
-    virtual bool run_impl() const = 0;
-    virtual bool checkResult_impl() const { return true; }
+    virtual bool run_impl() = 0;
+    virtual bool checkResult_impl() { return true; }
     virtual void collectOptions_impl(OptionsDescription& options, 
                                      PosOptionsDescription& positional) = 0;
     virtual void assignVariables_impl(const VariablesMap& variables) = 0;
@@ -191,7 +191,7 @@ private:
 struct RTCommandEmpty : public RTCommand 
 {
 protected:
-    virtual bool run_impl() const override { return true; } 
+    virtual bool run_impl() override { return true; } 
 
     DECLARE_RTCOMMAND(empty, "the empty command...does...nothing")
     DECLARE_RTCOMMAND_NOOPTIONS
@@ -204,7 +204,7 @@ struct RTCommandHelp : public RTCommand
 {
     QString command;
 protected:
-    virtual bool run_impl() const override;
+    virtual bool run_impl() override;
 
     DECLARE_RTCOMMAND(help, "the help command, generates help information")
     DECLARE_RTCOMMAND_OPTIONS

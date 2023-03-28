@@ -348,7 +348,7 @@ namespace rtcommand
     /**
      * Run the command and track state.
      */
-    bool RTCommand::run() const
+    bool RTCommand::run()
     {
         try
         {
@@ -394,7 +394,7 @@ namespace rtcommand
     /**
      * Run command result check and track state.
      */
-    bool RTCommand::checkResult() const
+    bool RTCommand::checkResult()
     {
         try
         {
@@ -525,7 +525,7 @@ namespace rtcommand
 
     /**
      */
-    bool RTCommandHelp::run_impl() const
+    bool RTCommandHelp::run_impl()
     {
         nlohmann::json root;
         std::string    str;

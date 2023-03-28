@@ -55,7 +55,7 @@ struct RTCommandUISet : public RTCommandUIInjection
 {
     QString value;
 protected:
-    virtual bool run_impl() const override;
+    virtual bool run_impl() override;
 
     DECLARE_RTCOMMAND(uiset, "sets an ui element to the given value")
     DECLARE_RTCOMMAND_OPTIONS
@@ -67,7 +67,7 @@ struct RTCommandUIGet : public RTCommandUIObject
 {
     QString what;
 protected:
-    virtual bool run_impl() const override;
+    virtual bool run_impl() override;
 
     DECLARE_RTCOMMAND(uiget, "retrieves the value of the given ui element")
     DECLARE_RTCOMMAND_OPTIONS
