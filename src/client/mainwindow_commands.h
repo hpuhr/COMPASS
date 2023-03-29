@@ -16,7 +16,7 @@ struct RTCommandOpenDB : public rtcommand::RTCommand
     virtual rtcommand::IsValid valid() const override;
 
 protected:
-    virtual bool run_impl() const override;
+    virtual bool run_impl() override;
 
     DECLARE_RTCOMMAND(open_db, "opens existing SQLite3 database with given filename, e.g. ’/data/file1.db’")
     DECLARE_RTCOMMAND_OPTIONS
@@ -30,7 +30,7 @@ struct RTCommandCreateDB : public rtcommand::RTCommand
     virtual rtcommand::IsValid valid() const override;
 
 protected:
-    virtual bool run_impl() const override;
+    virtual bool run_impl() override;
 
     DECLARE_RTCOMMAND(create_db, "creates and opens new SQLite3 database with given filename, e.g. ’/data/file1.db’")
     DECLARE_RTCOMMAND_OPTIONS
@@ -44,7 +44,7 @@ struct RTCommandImportDataSourcesFile : public rtcommand::RTCommand
     virtual rtcommand::IsValid valid() const override;
 
 protected:
-    virtual bool run_impl() const override;
+    virtual bool run_impl() override;
 
     DECLARE_RTCOMMAND(import_data_sources, "imports data sources JSON file with given filename, e.g. '/data/ds1.json'")
     DECLARE_RTCOMMAND_OPTIONS
@@ -60,7 +60,7 @@ struct RTCommandImportViewPointsFile : public rtcommand::RTCommand
     RTCommandImportViewPointsFile();
 
 protected:
-    virtual bool run_impl() const override;
+    virtual bool run_impl() override;
 
     DECLARE_RTCOMMAND(import_view_points, "imports view points JSON file with given filename, e.g. '/data/file1.json'")
     DECLARE_RTCOMMAND_OPTIONS
@@ -81,7 +81,7 @@ struct RTCommandImportASTERIXFile : public rtcommand::RTCommand
     RTCommandImportASTERIXFile();
 
 protected:
-    virtual bool run_impl() const override;
+    virtual bool run_impl() override;
 
     DECLARE_RTCOMMAND(import_asterix_file, "imports ASTERIX file with given filename, e.g. '/data/file1.ff'")
     DECLARE_RTCOMMAND_OPTIONS
@@ -99,7 +99,7 @@ struct RTCommandImportASTERIXNetworkStart : public rtcommand::RTCommand
     RTCommandImportASTERIXNetworkStart();
 
 protected:
-    virtual bool run_impl() const override;
+    virtual bool run_impl() override;
 
     DECLARE_RTCOMMAND(import_asterix_network, "imports ASTERIX from defined network UDP streams")
     DECLARE_RTCOMMAND_OPTIONS
@@ -111,7 +111,7 @@ struct RTCommandImportASTERIXNetworkStop : public rtcommand::RTCommand
     RTCommandImportASTERIXNetworkStop();
 
 protected:
-    virtual bool run_impl() const override;
+    virtual bool run_impl() override;
 
     DECLARE_RTCOMMAND(import_asterix_network_stop, "stops import ASTERIX from network")
     DECLARE_RTCOMMAND_NOOPTIONS
@@ -127,7 +127,7 @@ struct RTCommandImportJSONFile : public rtcommand::RTCommand
     RTCommandImportJSONFile();
 
 protected:
-    virtual bool run_impl() const override;
+    virtual bool run_impl() override;
 
     DECLARE_RTCOMMAND(import_json, "imports JSON file with given filename, e.g. ’/data/file1.json’")
     DECLARE_RTCOMMAND_OPTIONS
@@ -143,7 +143,7 @@ struct RTCommandImportGPSTrail : public rtcommand::RTCommand
     RTCommandImportGPSTrail();
 
 protected:
-    virtual bool run_impl() const override;
+    virtual bool run_impl() override;
 
     DECLARE_RTCOMMAND(import_gps_trail, "imports gps trail NMEA with given filename, e.g. ’/data/file2.txt’")
     DECLARE_RTCOMMAND_OPTIONS
@@ -157,7 +157,7 @@ struct RTCommandImportSectorsJSON : public rtcommand::RTCommand
     virtual rtcommand::IsValid valid() const override;
 
 protected:
-    virtual bool run_impl() const override;
+    virtual bool run_impl() override;
 
     DECLARE_RTCOMMAND(import_sectors_json,
                       "imports exported sectors JSON with given filename, e.g. ’/data/sectors.json’")
@@ -170,7 +170,7 @@ struct RTCommandCalculateRadarPlotPositions : public rtcommand::RTCommand
     RTCommandCalculateRadarPlotPositions();
 
 protected:
-    virtual bool run_impl() const override;
+    virtual bool run_impl() override;
 
     DECLARE_RTCOMMAND(calculate_radar_plot_positions , "calculate radar plot positions")
     DECLARE_RTCOMMAND_NOOPTIONS
@@ -182,7 +182,7 @@ struct RTCommandCalculateAssociations : public rtcommand::RTCommand
     RTCommandCalculateAssociations();
 
 protected:
-    virtual bool run_impl() const override;
+    virtual bool run_impl() override;
 
     DECLARE_RTCOMMAND(associate_data, "associate target reports")
     DECLARE_RTCOMMAND_NOOPTIONS
@@ -194,7 +194,7 @@ struct RTCommandLoadData : public rtcommand::RTCommand
     RTCommandLoadData();
 
 protected:
-    virtual bool run_impl() const override;
+    virtual bool run_impl() override;
 
     DECLARE_RTCOMMAND(load_data, "load data")
     DECLARE_RTCOMMAND_NOOPTIONS
@@ -208,7 +208,7 @@ struct RTCommandExportViewPointsReport : public rtcommand::RTCommand
     virtual rtcommand::IsValid valid() const override;
 
 protected:
-    virtual bool run_impl() const override;
+    virtual bool run_impl() override;
 
     DECLARE_RTCOMMAND(export_view_points_report,
                       "export view points report after with given filename, e.g. ’/data/db2/report.tex'")
@@ -221,7 +221,7 @@ struct RTCommandEvaluate : public rtcommand::RTCommand
     bool run_filter_ {false};
 
 protected:
-    virtual bool run_impl() const override;
+    virtual bool run_impl() override;
 
     DECLARE_RTCOMMAND(evaluate, "run evaluation")
     DECLARE_RTCOMMAND_OPTIONS
@@ -235,7 +235,7 @@ struct RTCommandExportEvaluationReport : public rtcommand::RTCommand
     virtual rtcommand::IsValid valid() const override;
 
 protected:
-    virtual bool run_impl() const override;
+    virtual bool run_impl() override;
 
     DECLARE_RTCOMMAND(export_eval_report,
                       "export evaluation report after start with given filename, e.g. ’/data/eval_db2/report.tex'")
@@ -246,7 +246,7 @@ protected:
 struct RTCommandCloseDB : public rtcommand::RTCommand
 {
 protected:
-    virtual bool run_impl() const override;
+    virtual bool run_impl() override;
 
     DECLARE_RTCOMMAND(close_db, "closes a currently opened database")
     DECLARE_RTCOMMAND_NOOPTIONS
@@ -256,14 +256,12 @@ protected:
 struct RTCommandQuit : public rtcommand::RTCommand
 {
 protected:
-    virtual bool run_impl() const override;
+    virtual bool run_impl() override;
 
     DECLARE_RTCOMMAND(quit, "closes a currently opened database")
     DECLARE_RTCOMMAND_NOOPTIONS
 };
 
-
 }
 
 #endif // MAINWINDOW_COMMANDS_H
-

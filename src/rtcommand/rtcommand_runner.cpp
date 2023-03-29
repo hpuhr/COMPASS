@@ -259,7 +259,7 @@ void RTCommandRunner::logMsg(const std::string& msg, RTCommand* cmd)
 void RTCommandRunner::runCommand(std::shared_ptr<RTCommand> cmd, RTCommandRunnerStash* stash)
 {
     if (!stash)
-        throw std::runtime_error("RTCommandRunner::run: No stash");     
+        throw std::runtime_error("RTCommandRunner::run: No stash");
 
     //reset result state
     cmd->resetResult();
