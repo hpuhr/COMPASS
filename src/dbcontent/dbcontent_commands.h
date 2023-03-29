@@ -17,27 +17,39 @@
 
 #pragma once
 
+#include "buffer/buffer.h"
 #include "rtcommand/rtcommand.h"
 
 #include <vector>
+#include <memory>
 
 #include <boost/optional.hpp>
 
 namespace dbContent
 {
 
-/**
- */
-struct RTCommandGetTable : public rtcommand::RTCommand
+extern void init_commands();
+
+// get_dbcontent_data --dbcontent CAT021 --variables "Timestamp|Time of Day|Latitude|Longitude|Associations" --max_size 100
+// get_dbcontent_data --dbcontent CAT062 --variables Timestamp
+// get_dbcontent_data --dbcontent CAT062 --variables Timestamp --max_size 100
+struct RTCommandGetData : public rtcommand::RTCommand
 {
-    std::string                   dbcontent;
-    boost::optional<unsigned int> utn;
-    std::vector<std::string>      variables;
+public:
+    std::string                   dbcontent_name_;
+    std::vector<std::string>      variables_;
+    boost::optional<unsigned int> utn_;
+    boost::optional<unsigned int> max_size_;
+
+    RTCommandGetData();
 
 protected:
-    virtual bool run_impl() const override;
+    virtual bool run_impl() override;
+    virtual bool checkResult_impl() override;
 
-    DECLARE_RTCOMMAND(get_dbcontent_data, "retrieves data from the database")
+    dbContent::VariableSet getReadSetFor() const;
+
+    DECLARE_RTCOMMAND(get_dbcontent_data, "retrieves dbcontent data from the database")
     DECLARE_RTCOMMAND_OPTIONS
 };
 

@@ -446,9 +446,6 @@ void ASTERIXDecodeJob::fileJasterixCallback(std::unique_ptr<nlohmann::json> data
         logdbg << "ASTERIXDecodeJob: fileJasterixCallback: max_index " << max_index_
                << " perc " <<  String::percentToString((float) max_index_/(float) file_size_);
 
-//    while (!obsolete_ && pause_)  // block decoder until unpaused
-//        QThread::msleep(1);
-
     ++signal_count_;
 
     logdbg << "ASTERIXDecodeJob: fileJasterixCallback: emitting signal " << signal_count_;
@@ -462,10 +459,6 @@ void ASTERIXDecodeJob::fileJasterixCallback(std::unique_ptr<nlohmann::json> data
 
     logdbg << "ASTERIXDecodeJob: fileJasterixCallback: waiting done " << signal_count_;
 
-//    if (!obsolete_)
-//        assert(!extracted_data_);
-//    else
-//        extracted_data_ = nullptr;
 }
 
 void ASTERIXDecodeJob::netJasterixCallback(std::unique_ptr<nlohmann::json> data, unsigned int line_id, size_t num_frames,

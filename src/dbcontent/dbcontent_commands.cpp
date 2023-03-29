@@ -16,47 +16,189 @@
  */
 
 #include "dbcontent_commands.h"
-
 #include "rtcommand/rtcommand_macros.h"
+#include "rtcommand_registry.h"
+#include "compass.h"
+#include "dbcontentmanager.h"
+#include "dbcontent.h"
+#include "viewmanager.h"
 
 #include <boost/program_options.hpp>
+
+REGISTER_RTCOMMAND(dbContent::RTCommandGetData)
+
+using namespace std;
 
 namespace dbContent
 {
 
 /***************************************************************************************
- * RTCommandGetTable
+ * RTCommandGetData
  ***************************************************************************************/
 
-/**
- */
-bool RTCommandGetTable::run_impl() const
+void init_commands()
 {
-    return false;
+    dbContent::RTCommandGetData::init();
 }
+
+RTCommandGetData::RTCommandGetData()
+    : rtcommand::RTCommand()
+{
+    condition.setSignal("compass.dbcontentmanager.loadingDoneSignal()", -1); // think about max duration
+}
+
+
+bool RTCommandGetData::run_impl()
+{
+    loginf << "RTCommandGetData: run_impl";
+
+    if (!COMPASS::instance().dbOpened())
+    {
+        setResultMessage("Database not opened");
+        return false;
+    }
+
+    if (COMPASS::instance().appMode() != AppMode::Offline) // to be sure
+    {
+        setResultMessage("Wrong application mode "+COMPASS::instance().appModeStr());
+        return false;
+    }
+
+    DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
+    dbcontent_man.clearData();
+
+    if (!dbcontent_man.existsDBContent(dbcontent_name_))
+    {
+        setResultMessage("Unknown dbcontent '"+dbcontent_name_+"'");
+        return false;
+    }
+
+    DBContent& db_content = dbcontent_man.dbContent(dbcontent_name_);
+
+    for (auto& var_it : variables_)
+    {
+        if (!db_content.hasVariable(var_it))
+        {
+            setResultMessage("Unknown dbcontent '"+dbcontent_name_+"' variable '"+var_it+"'");
+            return false;
+        }
+    }
+
+    COMPASS::instance().viewManager().disableDataDistribution(true);
+
+    // loading stuff
+
+    VariableSet read_set = getReadSetFor();
+
+    db_content.load(read_set, false, false);
+
+    return true; // if ok
+}
+
+bool RTCommandGetData::checkResult_impl()
+{
+    DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
+
+    COMPASS::instance().viewManager().disableDataDistribution(false);
+
+    if (!dbcontent_man.hasData())
+    {
+        setResultMessage("No data loaded");
+        return false; // error
+    }
+
+    const std::map<std::string, std::shared_ptr<Buffer>>& buffers = dbcontent_man.data();
+
+    if (!buffers.count(dbcontent_name_))
+    {
+        setResultMessage("No "+dbcontent_name_+" data loaded");
+        return false; // error
+    }
+
+    // check and set reply
+
+    if (buffers.at(dbcontent_name_)->size() > 10e6)
+    {
+        setResultMessage(dbcontent_name_+" data too large ("+to_string(buffers.at(dbcontent_name_)->size())+")");
+        return false; // error
+    }
+
+    nlohmann::json json_reply;
+
+    set<string> variables;
+
+    for (auto& var_name : variables_)
+        variables.insert(var_name);
+
+    if (max_size_.has_value())
+        json_reply[dbcontent_name_] = buffers.at(dbcontent_name_)->asJSON(variables, max_size_.get());
+    else
+        json_reply[dbcontent_name_] = buffers.at(dbcontent_name_)->asJSON(variables);
+
+    setJSONReply(json_reply);
+
+    return true; // if ok
+}
+
+
+dbContent::VariableSet RTCommandGetData::getReadSetFor() const
+{
+    VariableSet read_set;
+
+    DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
+    DBContent& db_content = dbcont_man.dbContent(dbcontent_name_);
+
+    // ds id
+    assert(dbcont_man.metaCanGetVariable(dbcontent_name_, DBContent::meta_var_datasource_id_));
+    read_set.add(dbcont_man.metaGetVariable(dbcontent_name_, DBContent::meta_var_datasource_id_));
+
+    // line id
+    assert(dbcont_man.metaCanGetVariable(dbcontent_name_, DBContent::meta_var_line_id_));
+    read_set.add(dbcont_man.metaGetVariable(dbcontent_name_, DBContent::meta_var_line_id_));
+
+    // timestamp
+    assert(dbcont_man.metaCanGetVariable(dbcontent_name_, DBContent::meta_var_timestamp_));
+    read_set.add(dbcont_man.metaGetVariable(dbcontent_name_, DBContent::meta_var_timestamp_));
+
+    for (auto& var_it : variables_)
+    {
+        assert (db_content.hasVariable(var_it));
+
+        Variable& var = db_content.variable(var_it);
+
+        if (!read_set.hasVariable(var))
+            read_set.add(var);
+    }
+
+    return read_set;
+}
+
 
 /**
  */
-void RTCommandGetTable::collectOptions_impl(OptionsDescription &options,
+void RTCommandGetData::collectOptions_impl(OptionsDescription &options,
                                             PosOptionsDescription &positional)
 {
     ADD_RTCOMMAND_OPTIONS(options)
         ("dbcontent", po::value<std::string>()->required(), "DBContent to retrieve data for")
+        ("variables", po::value<std::string>()->required(), "variables to retrieve data for")
         ("utn"      , po::value<unsigned int>()           , "UTN to retrieve data for"      )
-        ("variables", po::value<std::string>()->required(), "variables to retrieve data for");
+        ("max_size" , po::value<unsigned int>()           , "maximum number of results rows");
 
     ADD_RTCOMMAND_POS_OPTION(positional, "dbcontent", 1)
     ADD_RTCOMMAND_POS_OPTION(positional, "variables", 2)
     ADD_RTCOMMAND_POS_OPTION(positional, "utn"      , 3)
+    ADD_RTCOMMAND_POS_OPTION(positional, "max_size" , 4)
 }
 
 /**
  */
-void RTCommandGetTable::assignVariables_impl(const VariablesMap &vars)
+void RTCommandGetData::assignVariables_impl(const VariablesMap &vars)
 {
-    RTCOMMAND_GET_VAR_OR_THROW(vars, "dbcontent", std::string, dbcontent)
-    RTCOMMAND_GET_VAR(vars, "utn", unsigned int, utn)
-    RTCOMMAND_GET_STRINGLIST_OR_THROW(vars, "variables", variables)
+    RTCOMMAND_GET_VAR_OR_THROW(vars, "dbcontent", std::string, dbcontent_name_)
+    RTCOMMAND_GET_STRINGLIST_OR_THROW(vars, "variables", variables_)
+    RTCOMMAND_GET_VAR(vars, "utn", unsigned int, utn_)
+    RTCOMMAND_GET_VAR(vars, "max_size", unsigned int, max_size_)
 }
 
 } // namespace dbContent

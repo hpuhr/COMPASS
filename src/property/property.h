@@ -69,6 +69,7 @@ public:
     }
 
     const std::string& name() const { return name_; }
+    void rename(const std::string& name) { name_ = name; }; // for buffer nullablevector renaming
 
     static const std::string& asString(PropertyDataType type);
     static PropertyDataType asDataType(const std::string& type);

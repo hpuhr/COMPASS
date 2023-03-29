@@ -26,6 +26,7 @@
 #include "global.h"
 
 #include <QObject>
+
 #include <memory>
 
 #include "boost/date_time/posix_time/posix_time.hpp"

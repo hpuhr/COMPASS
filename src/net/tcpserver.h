@@ -12,7 +12,6 @@ class TCPSession : public std::enable_shared_from_this<TCPSession>
 public:
     TCPSession(boost::asio::ip::tcp::socket socket);
 
-
     void start();
 
     bool hasStrData();
@@ -22,8 +21,9 @@ public:
 
 private:
     boost::asio::ip::tcp::socket socket_;
-    enum { max_length = 10*1024 };
-    char data_[max_length];
+
+    std::unique_ptr<char> data_;
+    unsigned int data_size_{10*1024*1024};
 
     boost::mutex str_data_mutex_;
     std::vector<std::string> str_data_;

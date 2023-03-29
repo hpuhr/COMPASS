@@ -118,6 +118,7 @@ public:
                             bool dbcol2dbovar);  // tc2dbovar true for db col -> dbo var, false dbo var -> db column
 
     nlohmann::json asJSON(unsigned int max_size=0);
+    nlohmann::json asJSON(std::set<std::string> variable_names, unsigned int max_size=0);
 
 protected:
     PropertyList properties_;
@@ -199,6 +200,7 @@ void Buffer::renameArrayListMapEntry(const std::string& id, const std::string& i
     assert(getArrayListMap<T>().count(id) == 1);
     assert(getArrayListMap<T>().count(id_new) == 0);
     std::shared_ptr<NullableVector<T>> array_list = getArrayListMap<T>().at(id);
+    array_list->renameProperty(id_new);
     getArrayListMap<T>().erase(id);
     getArrayListMap<T>()[id_new] = array_list;
 }

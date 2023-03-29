@@ -709,7 +709,7 @@ void Buffer::transformVariables(dbContent::VariableSet& list, bool dbcol2dbovar)
 
     for (auto var_it : variables)
     {
-        logdbg << "Buffer: transformVariables: variable " << var_it->name() << " db column " << db_column_name;
+        loginf << "Buffer: transformVariables: variable " << var_it->name() << " db column " << db_column_name;
 
         variable_name = var_it->name();
         db_column_name = var_it->dbColumnName();
@@ -748,7 +748,7 @@ void Buffer::transformVariables(dbContent::VariableSet& list, bool dbcol2dbovar)
         // rename to reflect dbo variable
         if (current_var_name != transformed_var_name)
         {
-            logdbg << "Buffer: transformVariables: renaming variable " << current_var_name
+            loginf << "Buffer: transformVariables: renaming variable " << current_var_name
                    << " to variable name " << transformed_var_name;
 
             switch (data_type)
@@ -830,48 +830,77 @@ nlohmann::json Buffer::asJSON(unsigned int max_size)
     if (max_size == 0)
         max_size = data_size_;
 
-    for (unsigned int cnt=0; cnt < max_size; ++cnt)
-    {
-        j[cnt] = json::object();
+    for (auto& it : getArrayListMap<bool>())
+        j[it.first] = it.second->asJSON(max_size);
+    for (auto& it : getArrayListMap<char>())
+        j[it.first] = it.second->asJSON(max_size);
+    for (auto& it : getArrayListMap<unsigned char>())
+        j[it.first] = it.second->asJSON(max_size);
+    for (auto& it : getArrayListMap<int>())
+        j[it.first] = it.second->asJSON(max_size);
+    for (auto& it : getArrayListMap<unsigned int>())
+        j[it.first] = it.second->asJSON(max_size);
+    for (auto& it : getArrayListMap<long int>())
+        j[it.first] = it.second->asJSON(max_size);
+    for (auto& it : getArrayListMap<unsigned long int>())
+        j[it.first] = it.second->asJSON(max_size);
+    for (auto& it : getArrayListMap<float>())
+        j[it.first] = it.second->asJSON(max_size);
+    for (auto& it : getArrayListMap<double>())
+        j[it.first] = it.second->asJSON(max_size);
+    for (auto& it : getArrayListMap<string>())
+        j[it.first] = it.second->asJSON(max_size);
+    for (auto& it : getArrayListMap<json>())
+        j[it.first] = it.second->asJSON(max_size);
+    for (auto& it : getArrayListMap<boost::posix_time::ptime>())
+        j[it.first] = it.second->asJSON(max_size);
 
-        for (auto& it : getArrayListMap<bool>())
-            if (!it.second->isNull(cnt))
-                j[cnt][it.second->propertyName()] = it.second->get(cnt);
-        for (auto& it : getArrayListMap<char>())
-            if (!it.second->isNull(cnt))
-                j[cnt][it.second->propertyName()] = it.second->get(cnt);
-        for (auto& it : getArrayListMap<unsigned char>())
-            if (!it.second->isNull(cnt))
-                j[cnt][it.second->propertyName()] = it.second->get(cnt);
-        for (auto& it : getArrayListMap<int>())
-            if (!it.second->isNull(cnt))
-                j[cnt][it.second->propertyName()] = it.second->get(cnt);
-        for (auto& it : getArrayListMap<unsigned int>())
-            if (!it.second->isNull(cnt))
-                j[cnt][it.second->propertyName()] = it.second->get(cnt);
-        for (auto& it : getArrayListMap<long int>())
-            if (!it.second->isNull(cnt))
-                j[cnt][it.second->propertyName()] = it.second->get(cnt);
-        for (auto& it : getArrayListMap<unsigned long int>())
-            if (!it.second->isNull(cnt))
-                j[cnt][it.second->propertyName()] = it.second->get(cnt);
-        for (auto& it : getArrayListMap<float>())
-            if (!it.second->isNull(cnt))
-                j[cnt][it.second->propertyName()] = it.second->get(cnt);
-        for (auto& it : getArrayListMap<double>())
-            if (!it.second->isNull(cnt))
-                j[cnt][it.second->propertyName()] = it.second->get(cnt);
-        for (auto& it : getArrayListMap<string>())
-            if (!it.second->isNull(cnt))
-                j[cnt][it.second->propertyName()] = it.second->get(cnt);
-        for (auto& it : getArrayListMap<json>())
-            if (!it.second->isNull(cnt))
-                j[cnt][it.second->propertyName()] = it.second->get(cnt);
-        for (auto& it : getArrayListMap<boost::posix_time::ptime>())
-            if (!it.second->isNull(cnt))
-                j[cnt][it.second->propertyName()] = Utils::Time::toString(it.second->get(cnt));
+    return j;
+}
 
-    }
+nlohmann::json Buffer::asJSON(std::set<std::string> variable_names, unsigned int max_size)
+{
+    json j;
+
+    if (max_size == 0)
+        max_size = data_size_;
+
+    for (auto& it : getArrayListMap<bool>())
+        if (variable_names.count(it.first))
+            j[it.first] = it.second->asJSON(max_size);
+    for (auto& it : getArrayListMap<char>())
+        if (variable_names.count(it.first))
+            j[it.first] = it.second->asJSON(max_size);
+    for (auto& it : getArrayListMap<unsigned char>())
+        if (variable_names.count(it.first))
+            j[it.first] = it.second->asJSON(max_size);
+    for (auto& it : getArrayListMap<int>())
+        if (variable_names.count(it.first))
+            j[it.first] = it.second->asJSON(max_size);
+    for (auto& it : getArrayListMap<unsigned int>())
+        if (variable_names.count(it.first))
+            j[it.first] = it.second->asJSON(max_size);
+    for (auto& it : getArrayListMap<long int>())
+        if (variable_names.count(it.first))
+            j[it.first] = it.second->asJSON(max_size);
+    for (auto& it : getArrayListMap<unsigned long int>())
+        if (variable_names.count(it.first))
+            j[it.first] = it.second->asJSON(max_size);
+    for (auto& it : getArrayListMap<float>())
+        if (variable_names.count(it.first))
+            j[it.first] = it.second->asJSON(max_size);
+    for (auto& it : getArrayListMap<double>())
+        if (variable_names.count(it.first))
+            j[it.first] = it.second->asJSON(max_size);
+    for (auto& it : getArrayListMap<string>())
+        if (variable_names.count(it.first))
+            j[it.first] = it.second->asJSON(max_size);
+    for (auto& it : getArrayListMap<json>())
+        if (variable_names.count(it.first))
+            j[it.first] = it.second->asJSON(max_size);
+    for (auto& it : getArrayListMap<boost::posix_time::ptime>())
+        if (variable_names.count(it.first))
+            j[it.first] = it.second->asJSON(max_size);
 
     return j;
 }

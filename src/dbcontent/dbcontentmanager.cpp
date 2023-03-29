@@ -43,6 +43,7 @@
 #include "dbcontentdeletedbjob.h"
 #include "taskmanager.h"
 #include "asteriximporttask.h"
+#include "dbcontent_commands.h"
 
 #include "util/tbbhack.h"
 
@@ -75,6 +76,8 @@ DBContentManager::DBContentManager(const std::string& class_id, const std::strin
     qRegisterMetaType<std::shared_ptr<Buffer>>("std::shared_ptr<Buffer>"); // for dbo read job
     // for signal about new data
     qRegisterMetaType<std::map<std::string, std::shared_ptr<Buffer>>>("std::map<std::string, std::shared_ptr<Buffer>>");
+
+    dbContent::init_commands();
 }
 
 DBContentManager::~DBContentManager()
@@ -409,6 +412,9 @@ void DBContentManager::addLoadedData(std::map<std::string, std::shared_ptr<Buffe
     if (something_changed)
     {
         updateNumLoadedCounts();
+
+        loginf << "DBContentManager: addLoadedData: emitting signal";
+
         emit loadedDataSignal(data_, false);
     }
 }
@@ -509,45 +515,6 @@ void DBContentManager::databaseClosedSlot()
 
     associationStatusChangedSignal();
 }
-
-//void DBContentManager::databaseContentChangedSlot()
-//{
-//    loginf << "DBContentManager: databaseContentChangedSlot";
-
-//    // emit databaseContentChangedSignal();
-
-//    //    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-
-//    //    loginf << "DBContentManager: databaseContentChangedSlot";
-
-//    //    if (COMPASS::instance().interface().hasProperty("associations_generated"))
-//    //    {
-//    //        assert(COMPASS::instance().interface().hasProperty("associations_dbo"));
-//    //        assert(COMPASS::instance().interface().hasProperty("associations_ds"));
-
-//    //        has_associations_ =
-//    //                COMPASS::instance().interface().getProperty("associations_generated") == "1";
-//    //        associations_dbo_ = COMPASS::instance().interface().getProperty("associations_dbo");
-//    //        associations_ds_ = COMPASS::instance().interface().getProperty("associations_ds");
-//    //    }
-//    //    else
-//    //    {
-//    //        has_associations_ = false;
-//    //        associations_dbo_ = "";
-//    //        associations_ds_ = "";
-//    //    }
-
-//    //    for (auto& object : objects_)
-//    //        object.second->updateToDatabaseContent();
-
-//    //    QApplication::restoreOverrideCursor();
-
-//    if (load_widget_)
-//        load_widget_->update();
-
-//    //emit dbObjectsChangedSignal();
-
-//}
 
 void DBContentManager::loadingDone(DBContent& object)
 {
