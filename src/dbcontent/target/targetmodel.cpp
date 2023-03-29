@@ -595,6 +595,19 @@ dbContent::Target& TargetModel::target(unsigned int utn)
     return const_cast<dbContent::Target&> (*tr_tag_it); // ok since key utn_ can not be modified, still const
 }
 
+nlohmann::json TargetModel::asJSON()
+{
+    nlohmann::json data;
+
+    for (auto& target : target_data_)
+    {
+        data[to_string(target.utn_)] = target.info();
+        data[to_string(target.utn_)]["utn"] = target.utn_;
+    }
+
+    return data;
+}
+
 void TargetModel::loadFromDB()
 {
     loginf << "TargetModel: loadFromDB";

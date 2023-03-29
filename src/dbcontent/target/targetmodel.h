@@ -3,6 +3,7 @@
 
 #include "target.h"
 #include "configurable.h"
+#include "json.hpp"
 
 #include <QAbstractItemModel>
 
@@ -67,6 +68,8 @@ public:
     bool existsTarget(unsigned int utn);
     void createNewTarget(unsigned int utn);
     dbContent::Target& target(unsigned int utn);
+
+    nlohmann::json asJSON();
 
     void loadFromDB();
     void saveToDB();

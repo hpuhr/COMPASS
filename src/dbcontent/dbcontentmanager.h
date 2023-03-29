@@ -161,6 +161,8 @@ public:
     void loadTargets();
     void saveTargets();
 
+    nlohmann::json targetsInfoAsJSON();
+
     unsigned int maxLiveDataAgeCache() const;
 
     void resetToStartupConfiguration(); // only resets label generator

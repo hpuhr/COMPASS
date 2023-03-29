@@ -26,6 +26,7 @@
 #include <boost/program_options.hpp>
 
 REGISTER_RTCOMMAND(dbContent::RTCommandGetData)
+REGISTER_RTCOMMAND(dbContent::RTCommandGetUTNs)
 
 using namespace std;
 
@@ -39,6 +40,7 @@ namespace dbContent
 void init_commands()
 {
     dbContent::RTCommandGetData::init();
+    dbContent::RTCommandGetUTNs::init();
 }
 
 RTCommandGetData::RTCommandGetData()
@@ -207,6 +209,47 @@ void RTCommandGetData::assignVariables_impl(const VariablesMap &vars)
     RTCOMMAND_GET_STRINGLIST_OR_THROW(vars, "variables", variables_)
     RTCOMMAND_GET_VAR(vars, "utn", unsigned int, utn_)
     RTCOMMAND_GET_VAR(vars, "max_size", unsigned int, max_size_)
+}
+
+
+RTCommandGetUTNs::RTCommandGetUTNs()
+    : rtcommand::RTCommand()
+{
+    condition.setDelay(10);
+}
+
+bool RTCommandGetUTNs::run_impl()
+{
+    if (!COMPASS::instance().dbOpened())
+    {
+        setResultMessage("Database not opened");
+        return false;
+    }
+
+    if (COMPASS::instance().appMode() != AppMode::Offline) // to be sure
+    {
+        setResultMessage("Wrong application mode "+COMPASS::instance().appModeStr());
+        return false;
+    }
+
+    DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
+
+    if (!dbcontent_man.hasAssociations() || !dbcontent_man.hasTargetsInfo())
+    {
+        setResultMessage("No target information present");
+        return false;
+    }
+
+    return true;
+}
+
+bool RTCommandGetUTNs::checkResult_impl()
+{
+    DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
+
+    setJSONReply(dbcontent_man.targetsInfoAsJSON());
+
+    return true;
 }
 
 } // namespace dbContent

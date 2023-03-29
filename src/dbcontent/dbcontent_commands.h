@@ -54,4 +54,19 @@ protected:
     DECLARE_RTCOMMAND_OPTIONS
 };
 
+// get_utns
+struct RTCommandGetUTNs : public rtcommand::RTCommand
+{
+public:
+    RTCommandGetUTNs();
+
+protected:
+    virtual bool run_impl() override;
+    virtual bool checkResult_impl() override;
+
+    DECLARE_RTCOMMAND(get_utns, "retrieves UTNS with target descriptions")
+    DECLARE_RTCOMMAND_NOOPTIONS
+};
+
+
 } // namespace dbContent

@@ -1325,6 +1325,14 @@ void DBContentManager::saveTargets()
     target_model_->saveToDB();
 }
 
+nlohmann::json DBContentManager::targetsInfoAsJSON()
+{
+    assert (hasAssociations());
+    assert (hasTargetsInfo());
+
+    return target_model_->asJSON();
+}
+
 unsigned int DBContentManager::maxLiveDataAgeCache() const
 {
     return max_live_data_age_cache_;
