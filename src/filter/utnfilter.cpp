@@ -85,7 +85,7 @@ std::string UTNFilter::getConditionString(const std::string& dbcontent_name, boo
 
         // SELECT x FROM data_cat062, json_each(data_cat062.associations) WHERE json_each.value == 0;
 
-        ss << " json_each.value IN (" << utns_str_ << ")";
+        ss << " json_each.value IN (" << utns_str_ << ")"; // rest done in SQLGenerator::getSelectCommand
 
         first = false;
     }

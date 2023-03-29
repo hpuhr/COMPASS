@@ -90,7 +90,15 @@ bool RTCommandGetData::run_impl()
 
     VariableSet read_set = getReadSetFor();
 
-    db_content.load(read_set, false, false);
+    if (utn_.has_value())
+    {
+        stringstream ss;
+        ss << " json_each.value IN (" << to_string(utn_.value()) << ")"; // rest done in SQLGenerator::getSelectCommand
+
+        db_content.load(read_set, false, false, ss.str());
+    }
+    else
+        db_content.load(read_set, false, false);
 
     return true; // if ok
 }

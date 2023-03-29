@@ -709,7 +709,7 @@ void Buffer::transformVariables(dbContent::VariableSet& list, bool dbcol2dbovar)
 
     for (auto var_it : variables)
     {
-        loginf << "Buffer: transformVariables: variable " << var_it->name() << " db column " << db_column_name;
+        logdbg << "Buffer: transformVariables: variable " << var_it->name() << " db column " << db_column_name;
 
         variable_name = var_it->name();
         db_column_name = var_it->dbColumnName();
@@ -748,7 +748,7 @@ void Buffer::transformVariables(dbContent::VariableSet& list, bool dbcol2dbovar)
         // rename to reflect dbo variable
         if (current_var_name != transformed_var_name)
         {
-            loginf << "Buffer: transformVariables: renaming variable " << current_var_name
+            logdbg << "Buffer: transformVariables: renaming variable " << current_var_name
                    << " to variable name " << transformed_var_name;
 
             switch (data_type)
