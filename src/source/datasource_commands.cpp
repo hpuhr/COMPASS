@@ -70,7 +70,7 @@ RTCommandSetDataSources::RTCommandSetDataSources()
 
 bool RTCommandSetDataSources::run_impl()
 {
-    loginf << "RTCommandGetData: run_impl: ds_json_str_ '" << ds_json_str_ << "'";
+    loginf << "RTCommandSetDataSources: run_impl: ds_json_str_ '" << ds_json_str_ << "'";
 
     DataSourceManager& ds_man = COMPASS::instance().dataSourceManager();
 

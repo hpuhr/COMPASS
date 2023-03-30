@@ -37,6 +37,7 @@
 #include "viewpointsreportgenerator.h"
 #include "viewpointsreportgeneratordialog.h"
 #include "util/timeconv.h"
+#include "viewpoint_commands.h"
 
 #include "json.hpp"
 
@@ -57,6 +58,8 @@ ViewManager::ViewManager(const std::string& class_id, const std::string& instanc
     logdbg << "ViewManager: constructor";
 
     qRegisterMetaType<ViewPoint*>("ViewPoint*");
+
+    init_view_point_commands();
 }
 
 void ViewManager::init(QTabWidget* tab_widget)
