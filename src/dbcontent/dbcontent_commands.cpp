@@ -37,7 +37,7 @@ namespace dbContent
  * RTCommandGetData
  ***************************************************************************************/
 
-void init_commands()
+void init_dbcontent_commands()
 {
     dbContent::RTCommandGetData::init();
     dbContent::RTCommandGetUTNs::init();

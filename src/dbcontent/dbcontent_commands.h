@@ -28,7 +28,7 @@
 namespace dbContent
 {
 
-extern void init_commands();
+extern void init_dbcontent_commands();
 
 // get_dbcontent_data --dbcontent CAT021 --variables "Timestamp|Time of Day|Latitude|Longitude|Associations" --max_size 100
 // get_dbcontent_data --dbcontent CAT021 --variables "Timestamp|Time of Day|Latitude|Longitude|Associations" --utn 0

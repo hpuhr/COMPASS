@@ -77,7 +77,7 @@ DBContentManager::DBContentManager(const std::string& class_id, const std::strin
     // for signal about new data
     qRegisterMetaType<std::map<std::string, std::shared_ptr<Buffer>>>("std::map<std::string, std::shared_ptr<Buffer>>");
 
-    dbContent::init_commands();
+    dbContent::init_dbcontent_commands();
 }
 
 DBContentManager::~DBContentManager()

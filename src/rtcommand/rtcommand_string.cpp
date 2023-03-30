@@ -28,6 +28,8 @@
 #include <QRegularExpression>
 #include <QProcess>
 
+using namespace std;
+
 namespace rtcommand
 {
 
@@ -72,6 +74,19 @@ namespace
             args += tmp;
         return args;
     }
+
+    vector<string> splitCommand2 (const string& command)
+    {
+        //loginf << "UGA0 '" << command << "'";
+
+        vector<string> parts = boost::program_options::split_unix(command);
+
+//        for (auto& part : parts)
+//            loginf << "UGA1 '" << part << "'";
+
+        return parts;
+    }
+
 }
 
 /**
@@ -204,8 +219,11 @@ bool RTCommandString::parse(boost::program_options::variables_map& vm,
         return false;
     }
 
-    QStringList parts = splitCommand(cmd_);
-    int argc = parts.count();
+    //QStringList parts = splitCommand(cmd_);
+
+    vector<string> parts = splitCommand2(cmd_.toStdString());
+
+    int argc = parts.size();
 
     if (argc < 1)
     {
@@ -217,7 +235,7 @@ bool RTCommandString::parse(boost::program_options::variables_map& vm,
     std::vector<const char*> argv   (argc);
     for (int i = 0; i < argc; ++i)
     {
-        strings[ i ] = parts  [ i ].toStdString();
+        strings[ i ] = parts  [ i ];
         argv   [ i ] = strings[ i ].c_str();
     }
     

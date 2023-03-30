@@ -7,6 +7,7 @@
 #include "number.h"
 #include "files.h"
 #include "json.hpp"
+#include "datasource_commands.h"
 
 #include <QMessageBox>
 
@@ -32,6 +33,9 @@ DataSourceManager::DataSourceManager(const std::string& class_id, const std::str
     createSubConfigurables();
 
     updateDSIdsAll();
+
+
+    dbContent::init_data_source_commands();
 }
 
 DataSourceManager::~DataSourceManager()
@@ -231,6 +235,19 @@ void DataSourceManager::exportDataSources(const std::string& filename)
 {
     loginf << "DataSourceManager: exportDataSources: file '" << filename << "'";
 
+    json data = getDataSourcesAsJSON();
+
+    std::ofstream file(filename);
+    file << data.dump(4);
+
+    QMessageBox m_info(QMessageBox::Information, "Export Data Sources",
+                       "File export: '"+QString(filename.c_str())+"' done.\n"
+                       +QString::number(config_data_sources_.size())+" Data Sources saved.", QMessageBox::Ok);
+    m_info.exec();
+}
+
+nlohmann::json DataSourceManager::getDataSourcesAsJSON()
+{
     json data;
 
     data["content_type"] = "data_sources";
@@ -246,13 +263,7 @@ void DataSourceManager::exportDataSources(const std::string& filename)
         ++cnt;
     }
 
-    std::ofstream file(filename);
-    file << data.dump(4);
-
-    QMessageBox m_info(QMessageBox::Information, "Export Data Sources",
-                       "File export: '"+QString(filename.c_str())+"' done.\n"
-                       +QString::number(config_data_sources_.size())+" Data Sources saved.", QMessageBox::Ok);
-    m_info.exec();
+    return data;
 }
 
 // ds id->dbcont->line->cnt
