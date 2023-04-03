@@ -420,40 +420,40 @@ std::unique_ptr<nlohmann::json::object_t> SingleDubiousTrack::viewableData(
                 = eval_man_.getViewableForEvaluation(utn_, req_grp_id_, result_id_);
         assert (viewable_ptr);
 
-        unsigned int detail_cnt = 0;
-        unsigned int per_detail_update_cnt = detail_update_cnt;
+//        unsigned int detail_cnt = 0;
+//        unsigned int per_detail_update_cnt = detail_update_cnt;
 
-        const auto& details = getDetails();
-        assert (details.size());
+//        const auto& details = getDetails();
+//        assert (details.size());
 
-        while (per_detail_update_cnt >= details.at(detail_cnt).numDetails())
-        {
-            per_detail_update_cnt -= details.at(detail_cnt).numDetails();
-            ++detail_cnt;
+//        while (per_detail_update_cnt >= details.at(detail_cnt).numDetails())
+//        {
+//            per_detail_update_cnt -= details.at(detail_cnt).numDetails();
+//            ++detail_cnt;
 
-            assert (detail_cnt < details.size());
-        }
+//            assert (detail_cnt < details.size());
+//        }
 
-        logdbg << "SingleDubiousTrack: viewableData: FINAL detail_cnt " << detail_cnt
-               << " update detail size " << details.at(detail_cnt).numDetails()
-               << " per_detail_update_cnt " << per_detail_update_cnt;
+//        logdbg << "SingleDubiousTrack: viewableData: FINAL detail_cnt " << detail_cnt
+//               << " update detail size " << details.at(detail_cnt).numDetails()
+//               << " per_detail_update_cnt " << per_detail_update_cnt;
 
-        assert (detail_cnt < details.size());
-        assert (per_detail_update_cnt < details.at(detail_cnt).numDetails());
+//        assert (detail_cnt < details.size());
+//        assert (per_detail_update_cnt < details.at(detail_cnt).numDetails());
 
-        const auto& detail        = details.at(detail_cnt);
-        const auto& update_detail = detail.details().at(per_detail_update_cnt);
+//        const auto& detail        = details.at(detail_cnt);
+//        const auto& update_detail = detail.details().at(per_detail_update_cnt);
 
-        assert(update_detail.numPositions() >= 1);
+//        assert(update_detail.numPositions() >= 1);
 
-        (*viewable_ptr)[VP_POS_LAT_KEY    ] = update_detail.position(0).latitude_;
-        (*viewable_ptr)[VP_POS_LON_KEY    ] = update_detail.position(0).longitude_;
-        (*viewable_ptr)[VP_POS_WIN_LAT_KEY] = eval_man_.resultDetailZoom();
-        (*viewable_ptr)[VP_POS_WIN_LON_KEY] = eval_man_.resultDetailZoom();
-        (*viewable_ptr)[VP_TIMESTAMP_KEY  ] = Time::toString(update_detail.timestamp());
+//        (*viewable_ptr)[VP_POS_LAT_KEY    ] = update_detail.position(0).latitude_;
+//        (*viewable_ptr)[VP_POS_LON_KEY    ] = update_detail.position(0).longitude_;
+//        (*viewable_ptr)[VP_POS_WIN_LAT_KEY] = eval_man_.resultDetailZoom();
+//        (*viewable_ptr)[VP_POS_WIN_LON_KEY] = eval_man_.resultDetailZoom();
+//        (*viewable_ptr)[VP_TIMESTAMP_KEY  ] = Time::toString(update_detail.timestamp());
 
-        if (update_detail.comments().hasComments(DetailCommentGroupDubious))
-            (*viewable_ptr)[VP_EVAL_KEY][VP_EVAL_HIGHDET_KEY] = vector<unsigned int>{detail_update_cnt};
+//        if (update_detail.comments().hasComments(DetailCommentGroupDubious))
+//            (*viewable_ptr)[VP_EVAL_KEY][VP_EVAL_HIGHDET_KEY] = vector<unsigned int>{detail_update_cnt};
 
         return viewable_ptr;
     }

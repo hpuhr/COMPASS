@@ -40,11 +40,15 @@ extern const std::string VP_POS_WIN_LON_KEY;
 extern const std::string VP_TIMESTAMP_KEY;
 extern const std::string VP_TIME_WIN_KEY;
 
-extern const std::string VP_EVAL_KEY;
-extern const std::string VP_EVAL_SHOW_RES_KEY;
-extern const std::string VP_EVAL_REQGRP_ID_KEY;
-extern const std::string VP_EVAL_RES_ID_KEY;
-extern const std::string VP_EVAL_HIGHDET_KEY;
+extern const std::string VP_ANNOTATION_KEY;
+// TODO add detail highlighting
+
+// TODO remove
+//extern const std::string VP_EVAL_KEY;
+//extern const std::string VP_EVAL_SHOW_RES_KEY;
+//extern const std::string VP_EVAL_REQGRP_ID_KEY;
+//extern const std::string VP_EVAL_RES_ID_KEY;
+//extern const std::string VP_EVAL_HIGHDET_KEY;
 
 extern const std::string VP_SHOWSEC_KEY;
 

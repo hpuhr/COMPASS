@@ -355,21 +355,21 @@ std::unique_ptr<nlohmann::json::object_t> SinglePositionDistance::viewableData(
                 = eval_man_.getViewableForEvaluation(utn_, req_grp_id_, result_id_);
         assert (viewable_ptr);
 
-        const auto& detail = getDetail(detail_cnt);
+//        const auto& detail = getDetail(detail_cnt);
 
-        assert(detail.numPositions() >= 1);
+//        assert(detail.numPositions() >= 1);
 
-        (*viewable_ptr)[VP_POS_LAT_KEY    ] = detail.position(0).latitude_;
-        (*viewable_ptr)[VP_POS_LON_KEY    ] = detail.position(0).longitude_;
-        (*viewable_ptr)[VP_POS_WIN_LAT_KEY] = eval_man_.resultDetailZoom();
-        (*viewable_ptr)[VP_POS_WIN_LON_KEY] = eval_man_.resultDetailZoom();
-        (*viewable_ptr)[VP_TIMESTAMP_KEY  ] = Time::toString(detail.timestamp());
+//        (*viewable_ptr)[VP_POS_LAT_KEY    ] = detail.position(0).latitude_;
+//        (*viewable_ptr)[VP_POS_LON_KEY    ] = detail.position(0).longitude_;
+//        (*viewable_ptr)[VP_POS_WIN_LAT_KEY] = eval_man_.resultDetailZoom();
+//        (*viewable_ptr)[VP_POS_WIN_LON_KEY] = eval_man_.resultDetailZoom();
+//        (*viewable_ptr)[VP_TIMESTAMP_KEY  ] = Time::toString(detail.timestamp());
 
-        auto check_passed = detail.getValueAs<bool>(DetailCheckPassed);
-        assert(check_passed.has_value());
+//        auto check_passed = detail.getValueAs<bool>(DetailCheckPassed);
+//        assert(check_passed.has_value());
 
-        if (!check_passed.value())
-            (*viewable_ptr)[VP_EVAL_KEY][VP_EVAL_HIGHDET_KEY] = vector<unsigned int>{detail_cnt};
+//        if (!check_passed.value())
+//            (*viewable_ptr)[VP_EVAL_KEY][VP_EVAL_HIGHDET_KEY] = vector<unsigned int>{detail_cnt};
 
         return viewable_ptr;
     }

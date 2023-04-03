@@ -1715,9 +1715,10 @@ std::unique_ptr<nlohmann::json::object_t> EvaluationManager::getViewableForEvalu
 {
     nlohmann::json::object_t data = getBaseViewableNoDataConfig();
 
-    data[VP_EVAL_KEY][VP_EVAL_SHOW_RES_KEY] = true;
-    data[VP_EVAL_KEY][VP_EVAL_REQGRP_ID_KEY] = req_grp_id;
-    data[VP_EVAL_KEY][VP_EVAL_RES_ID_KEY] = result_id;
+    // TODO
+//    data[VP_EVAL_KEY][VP_EVAL_SHOW_RES_KEY] = true;
+//    data[VP_EVAL_KEY][VP_EVAL_REQGRP_ID_KEY] = req_grp_id;
+//    data[VP_EVAL_KEY][VP_EVAL_RES_ID_KEY] = result_id;
 
     data[VP_SHOWSEC_KEY] = vector<string>({String::split(req_grp_id, ':').at(0)});
 
@@ -1730,9 +1731,10 @@ std::unique_ptr<nlohmann::json::object_t> EvaluationManager::getViewableForEvalu
     nlohmann::json::object_t data = getBaseViewableDataConfig();
     data[VP_FILTERS_KEY]["UTNs"]["utns"] = to_string(utn);
 
-    data[VP_EVAL_KEY][VP_EVAL_SHOW_RES_KEY] = true;
-    data[VP_EVAL_KEY][VP_EVAL_REQGRP_ID_KEY] = req_grp_id;
-    data[VP_EVAL_KEY][VP_EVAL_RES_ID_KEY] = result_id;
+    // TODO
+//    data[VP_EVAL_KEY][VP_EVAL_SHOW_RES_KEY] = true;
+//    data[VP_EVAL_KEY][VP_EVAL_REQGRP_ID_KEY] = req_grp_id;
+//    data[VP_EVAL_KEY][VP_EVAL_RES_ID_KEY] = result_id;
 
     data[VP_SHOWSEC_KEY] = vector<string>({String::split(req_grp_id, ':').at(0)});
 

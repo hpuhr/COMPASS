@@ -367,41 +367,25 @@ std::unique_ptr<nlohmann::json::object_t> SingleDubiousTarget::viewableData(
                 = eval_man_.getViewableForEvaluation(utn_, req_grp_id_, result_id_);
         assert (viewable_ptr);
 
-        assert (numDetails() > 0);
-        const auto& detail = getDetail(0);
+//        assert (numDetails() > 0);
+//        const auto& detail = getDetail(0);
 
-        //unsigned int detail_cnt = 0;
-        unsigned int per_detail_update_cnt = detail_update_cnt;
+//        unsigned int per_detail_update_cnt = detail_update_cnt;
 
-//        assert (details_.size());
-//        while (per_detail_update_cnt >= details_.at(detail_cnt).updates_.size())
-//        {
-//            per_detail_update_cnt -= details_.at(detail_cnt).updates_.size();
-//            ++detail_cnt;
+//        assert (per_detail_update_cnt < detail.numDetails());
 
-//            assert (detail_cnt < details_.size());
-//        }
+//        const auto& update_detail = detail.details().at(per_detail_update_cnt);
 
-//        logdbg << "SingleDubiousTarget: viewableData: FINAL detail_cnt " << detail_cnt
-//               << " update detail size " << details_.at(detail_cnt).updates_.size()
-//               << " per_detail_update_cnt " << per_detail_update_cnt;
+//        assert (update_detail.numPositions() >= 1);
 
-//        assert (detail_cnt < details_.size());
+//        (*viewable_ptr)[VP_POS_LAT_KEY    ] = update_detail.position(0).latitude_;
+//        (*viewable_ptr)[VP_POS_LON_KEY    ] = update_detail.position(0).longitude_;
+//        (*viewable_ptr)[VP_POS_WIN_LAT_KEY] = eval_man_.resultDetailZoom();
+//        (*viewable_ptr)[VP_POS_WIN_LON_KEY] = eval_man_.resultDetailZoom();
+//        (*viewable_ptr)[VP_TIMESTAMP_KEY  ] = Time::toString(update_detail.timestamp());
 
-        assert (per_detail_update_cnt < detail.numDetails());
-
-        const auto& update_detail = detail.details().at(per_detail_update_cnt);
-
-        assert (update_detail.numPositions() >= 1);
-
-        (*viewable_ptr)[VP_POS_LAT_KEY    ] = update_detail.position(0).latitude_;
-        (*viewable_ptr)[VP_POS_LON_KEY    ] = update_detail.position(0).longitude_;
-        (*viewable_ptr)[VP_POS_WIN_LAT_KEY] = eval_man_.resultDetailZoom();
-        (*viewable_ptr)[VP_POS_WIN_LON_KEY] = eval_man_.resultDetailZoom();
-        (*viewable_ptr)[VP_TIMESTAMP_KEY  ] = Time::toString(update_detail.timestamp());
-
-        if (update_detail.comments().hasComments(DetailCommentGroupDubious))
-            (*viewable_ptr)[VP_EVAL_KEY][VP_EVAL_HIGHDET_KEY] = vector<unsigned int>{detail_update_cnt};
+//        if (update_detail.comments().hasComments(DetailCommentGroupDubious))
+//            (*viewable_ptr)[VP_EVAL_KEY][VP_EVAL_HIGHDET_KEY] = vector<unsigned int>{detail_update_cnt};
 
         return viewable_ptr;
     }

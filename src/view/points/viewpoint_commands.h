@@ -26,6 +26,7 @@
 extern void init_view_point_commands();
 
 // set_view_point "{\"id\": 1,\"name\": \"All\",\"status\": \"open\",\"type\": \"Saved\"}"
+// set_view_point "{\"id\": 2,\"name\": \"None\",\"status\": \"open\",\"type\": \"Saved\", \"data_source_types\": [], \"annotations\" : [{\"name\":\"fred1\"},{\"name\":\"fred2\"}]}"
 struct RTCommandSetViewPoint : public rtcommand::RTCommand
 {
 public:

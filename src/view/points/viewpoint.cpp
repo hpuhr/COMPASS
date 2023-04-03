@@ -43,6 +43,8 @@ const std::string VP_POS_WIN_LON_KEY {"position_window_longitude"};
 const std::string VP_TIMESTAMP_KEY {"timestamp"};
 const std::string VP_TIME_WIN_KEY {"time_window"};
 
+const std::string VP_ANNOTATION_KEY {"annotations"};
+
 const std::string VP_EVAL_KEY {"evaluation_results"};
 const std::string VP_EVAL_SHOW_RES_KEY {"show_results"};
 const std::string VP_EVAL_REQGRP_ID_KEY {"req_grp_id"};
