@@ -235,9 +235,9 @@ void RTCommandShell::processCommand()
 
 /**
 */
-void RTCommandShell::receiveResult(std::string msg, std::string data, bool error)
+void RTCommandShell::receiveResult(const QString& msg, const QString& data, bool error)
 {
-    logResult(error ? msg : data, error);
+    logResult(error ? msg.toStdString() : data.toStdString(), error);
 
     enableCmdLine(true);
     cmd_edit_->setFocus();
