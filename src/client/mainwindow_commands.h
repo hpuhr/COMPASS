@@ -258,7 +258,7 @@ struct RTCommandQuit : public rtcommand::RTCommand
 protected:
     virtual bool run_impl() override;
 
-    DECLARE_RTCOMMAND(quit, "closes a currently opened database")
+    DECLARE_RTCOMMAND(quit, "quits the application")
     DECLARE_RTCOMMAND_NOOPTIONS
 };
 
