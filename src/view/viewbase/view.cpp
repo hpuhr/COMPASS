@@ -38,7 +38,9 @@ unsigned int View::cnt_ = 0;
 @param instance_id Configurable instance id.
 @param w ViewContainerWidget the view is embedded in, configurable parent.
  */
-View::View(const std::string& class_id, const std::string& instance_id, ViewContainer* container,
+View::View(const std::string& class_id, 
+           const std::string& instance_id, 
+           ViewContainer* container,
            ViewManager& view_manager)
     : Configurable(class_id, instance_id, container),
       view_manager_(view_manager),
@@ -94,6 +96,8 @@ bool View::init()
 
     // add view to container widget
     //container_->addView(this);
+
+    app_mode_ = COMPASS::instance().appMode();
 
     // invoke derive class (will create subconfigurables, such as view widget)
     if (!init_impl())

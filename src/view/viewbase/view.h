@@ -54,7 +54,9 @@ class View : public QObject, public Configurable
 {
     Q_OBJECT
 public:
-    View(const std::string& class_id, const std::string& instance_id, ViewContainer* container,
+    View(const std::string& class_id, 
+         const std::string& instance_id, 
+         ViewContainer* container,
          ViewManager& view_manager);
     virtual ~View();
 
