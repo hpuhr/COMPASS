@@ -1282,7 +1282,7 @@ dbContent::Variable& DBContentManager::metaGetVariable (const std::string& dbcon
     return metaVariable(meta_property.name()).getFor(dbcont_name);
 }
 
-bool DBContentManager::hasTargetsInfo()
+bool DBContentManager::hasTargetsInfo() const
 {
     return target_model_->hasTargetsInfo();
 }
@@ -1325,12 +1325,28 @@ void DBContentManager::saveTargets()
     target_model_->saveToDB();
 }
 
-nlohmann::json DBContentManager::targetsInfoAsJSON()
+nlohmann::json DBContentManager::targetsInfoAsJSON() const
 {
     assert (hasAssociations());
     assert (hasTargetsInfo());
 
     return target_model_->asJSON();
+}
+
+nlohmann::json DBContentManager::targetInfoAsJSON(unsigned int utn) const
+{
+    assert (hasAssociations());
+    assert (hasTargetsInfo());
+
+    return target_model_->targetAsJSON(utn);
+}
+
+nlohmann::json DBContentManager::utnsAsJSON() const
+{
+    assert (hasAssociations());
+    assert (hasTargetsInfo());
+
+    return target_model_->utnsAsJSON();
 }
 
 unsigned int DBContentManager::maxLiveDataAgeCache() const

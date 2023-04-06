@@ -27,6 +27,7 @@
 
 REGISTER_RTCOMMAND(dbContent::RTCommandGetData)
 REGISTER_RTCOMMAND(dbContent::RTCommandGetUTNs)
+REGISTER_RTCOMMAND(dbContent::RTCommandGetTarget)
 
 using namespace std;
 
@@ -41,6 +42,7 @@ void init_dbcontent_commands()
 {
     dbContent::RTCommandGetData::init();
     dbContent::RTCommandGetUTNs::init();
+    dbContent::RTCommandGetTarget::init();
 }
 
 RTCommandGetData::RTCommandGetData()
@@ -150,7 +152,6 @@ bool RTCommandGetData::checkResult_impl()
     return true; // if ok
 }
 
-
 dbContent::VariableSet RTCommandGetData::getReadSetFor() const
 {
     VariableSet read_set;
@@ -183,7 +184,6 @@ dbContent::VariableSet RTCommandGetData::getReadSetFor() const
     return read_set;
 }
 
-
 /**
  */
 void RTCommandGetData::collectOptions_impl(OptionsDescription &options,
@@ -211,6 +211,9 @@ void RTCommandGetData::assignVariables_impl(const VariablesMap &vars)
     RTCOMMAND_GET_VAR(vars, "max_size", unsigned int, max_size_)
 }
 
+/***************************************************************************************
+ * RTCommandGetUTNs
+ ***************************************************************************************/
 
 RTCommandGetUTNs::RTCommandGetUTNs()
     : rtcommand::RTCommand()
@@ -247,9 +250,90 @@ bool RTCommandGetUTNs::checkResult_impl()
 {
     DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
 
-    setJSONReply(dbcontent_man.targetsInfoAsJSON());
+    if (no_desc_)
+        setJSONReply(dbcontent_man.utnsAsJSON());
+    else
+        setJSONReply(dbcontent_man.targetsInfoAsJSON());
 
     return true;
+}
+
+/**
+ */
+void RTCommandGetUTNs::collectOptions_impl(OptionsDescription &options,
+                                           PosOptionsDescription &positional)
+{
+    ADD_RTCOMMAND_OPTIONS(options)
+        ("nodesc", "Return a list of existing UTNs without target descriptions");
+}
+
+/**
+ */
+void RTCommandGetUTNs::assignVariables_impl(const VariablesMap &vars)
+{
+    RTCOMMAND_CHECK_VAR(vars, "nodesc", no_desc_)
+}
+
+
+/***************************************************************************************
+ * RTCommandGetTarget
+ ***************************************************************************************/
+
+RTCommandGetTarget::RTCommandGetTarget()
+    : rtcommand::RTCommand()
+{
+}
+
+bool RTCommandGetTarget::run_impl()
+{
+    if (!COMPASS::instance().dbOpened())
+    {
+        setResultMessage("Database not opened");
+        return false;
+    }
+
+    if (COMPASS::instance().appMode() != AppMode::Offline) // to be sure
+    {
+        setResultMessage("Wrong application mode "+COMPASS::instance().appModeStr());
+        return false;
+    }
+
+    DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
+
+    if (!dbcontent_man.hasAssociations() || !dbcontent_man.hasTargetsInfo())
+    {
+        setResultMessage("No target information present");
+        return false;
+    }
+
+    return true;
+}
+
+bool RTCommandGetTarget::checkResult_impl()
+{
+    DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
+
+    setJSONReply(dbcontent_man.targetInfoAsJSON(utn_));
+
+    return true;
+}
+
+/**
+ */
+void RTCommandGetTarget::collectOptions_impl(OptionsDescription &options,
+                                             PosOptionsDescription &positional)
+{
+    ADD_RTCOMMAND_OPTIONS(options)
+        ("utn", po::value<unsigned int>()->required(), "UTN of the target to retrieve information for");
+
+    ADD_RTCOMMAND_POS_OPTION(positional, "utn", 1)
+}
+
+/**
+ */
+void RTCommandGetTarget::assignVariables_impl(const VariablesMap &vars)
+{
+    RTCOMMAND_GET_VAR_OR_THROW(vars, "utn", unsigned int, utn_)
 }
 
 } // namespace dbContent

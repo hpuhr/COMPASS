@@ -566,7 +566,7 @@ void TargetModel::clearTargetsInfo()
     COMPASS::instance().interface().clearTargetsTable();
 }
 
-bool TargetModel::existsTarget(unsigned int utn)
+bool TargetModel::existsTarget(unsigned int utn) const
 {
     auto tr_tag_it = target_data_.get<target_tag>().find(utn);
 
@@ -595,7 +595,16 @@ dbContent::Target& TargetModel::target(unsigned int utn)
     return const_cast<dbContent::Target&> (*tr_tag_it); // ok since key utn_ can not be modified, still const
 }
 
-nlohmann::json TargetModel::asJSON()
+const dbContent::Target& TargetModel::target(unsigned int utn) const
+{
+    auto tr_tag_it = target_data_.get<target_tag>().find(utn);
+
+    assert (tr_tag_it != target_data_.get<target_tag>().end());
+
+    return const_cast<const dbContent::Target&> (*tr_tag_it);
+}
+
+nlohmann::json TargetModel::asJSON() const
 {
     nlohmann::json data;
 
@@ -604,6 +613,36 @@ nlohmann::json TargetModel::asJSON()
         data[to_string(target.utn_)] = target.info();
         data[to_string(target.utn_)]["utn"] = target.utn_;
     }
+
+    return data;
+}
+
+nlohmann::json TargetModel::targetAsJSON(unsigned int utn) const
+{
+    if (!existsTarget(utn))
+        return {};
+
+    const auto& t = target(utn);
+
+    nlohmann::json data;
+    data["utn" ] = utn;
+    data["info"] = t.info();
+
+    return data;
+}
+
+nlohmann::json TargetModel::utnsAsJSON() const
+{
+    nlohmann::json data;
+
+    auto utn_arr = nlohmann::json::array();
+
+    for (auto& target : target_data_)
+    {
+        utn_arr.push_back(target.utn_);
+    }
+
+    data["utns"] = utn_arr;
 
     return data;
 }

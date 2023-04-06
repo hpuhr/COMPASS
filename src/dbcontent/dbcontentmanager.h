@@ -153,7 +153,7 @@ public:
     bool metaCanGetVariable (const std::string& dbcont_name, const Property& meta_property);
     dbContent::Variable& metaGetVariable (const std::string& dbcont_name, const Property& meta_property);
 
-    bool hasTargetsInfo();
+    bool hasTargetsInfo() const;
     void clearTargetsInfo();
     bool existsTarget(unsigned int utn);
     void createNewTarget(unsigned int utn);
@@ -161,7 +161,9 @@ public:
     void loadTargets();
     void saveTargets();
 
-    nlohmann::json targetsInfoAsJSON();
+    nlohmann::json targetsInfoAsJSON() const;
+    nlohmann::json targetInfoAsJSON(unsigned int utn) const;
+    nlohmann::json utnsAsJSON() const;
 
     unsigned int maxLiveDataAgeCache() const;
 

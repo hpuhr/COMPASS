@@ -101,7 +101,6 @@ void ViewManager::init(QTabWidget* tab_widget)
 
     view_class_list_.append("ScatterPlotView");
 
-
     initialized_ = true;
 
     createSubConfigurables();
@@ -202,7 +201,6 @@ void ViewManager::generateSubConfigurable(const std::string& class_id,
     else
         throw std::runtime_error("ViewManager: generateSubConfigurable: unknown class_id " +
                                  class_id);
-
 //    if (widget_)
 //        widget_->update();
 }

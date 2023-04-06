@@ -64,9 +64,26 @@ protected:
     virtual bool run_impl() override;
     virtual bool checkResult_impl() override;
 
-    DECLARE_RTCOMMAND(get_utns, "retrieves UTNS with target descriptions")
-    DECLARE_RTCOMMAND_NOOPTIONS
+    bool no_desc_ = false;
+
+    DECLARE_RTCOMMAND(get_utns, "retrieves UTNS with (optional) target descriptions")
+    DECLARE_RTCOMMAND_OPTIONS
 };
 
+// get_utn
+struct RTCommandGetTarget : public rtcommand::RTCommand
+{
+public:
+    RTCommandGetTarget();
+
+protected:
+    virtual bool run_impl() override;
+    virtual bool checkResult_impl() override;
+
+    unsigned int utn_ = 0;
+
+    DECLARE_RTCOMMAND(get_target, "retrieves a target description for the given UTN")
+    DECLARE_RTCOMMAND_OPTIONS
+};
 
 } // namespace dbContent
