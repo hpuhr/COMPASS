@@ -28,11 +28,13 @@
 #include <QThread>
 
 #include <boost/program_options.hpp>
+#include <boost/filesystem/path.hpp>
 
 using namespace std;
 using namespace Utils;
 
 REGISTER_RTCOMMAND(main_window::RTCommandOpenDB)
+REGISTER_RTCOMMAND(main_window::RTCommandOpenRecentDB)
 REGISTER_RTCOMMAND(main_window::RTCommandCreateDB)
 REGISTER_RTCOMMAND(main_window::RTCommandCloseDB)
 REGISTER_RTCOMMAND(main_window::RTCommandImportDataSourcesFile)
@@ -57,6 +59,7 @@ namespace main_window
 void init_commands()
 {
     main_window::RTCommandOpenDB::init();
+    main_window::RTCommandOpenRecentDB::init();
     main_window::RTCommandCreateDB::init();
     main_window::RTCommandImportDataSourcesFile::init();
     main_window::RTCommandImportViewPointsFile::init();
@@ -76,9 +79,9 @@ void init_commands()
     main_window::RTCommandQuit::init();
 }
 
-// open db
+// open_db
 
-rtcommand::IsValid  RTCommandOpenDB::valid() const
+rtcommand::IsValid RTCommandOpenDB::valid() const
 {
     CHECK_RTCOMMAND_INVALID_CONDITION(!filename_.size(), "Filename empty")
     CHECK_RTCOMMAND_INVALID_CONDITION(!Files::fileExists(filename_), string("File '")+filename_+"' does not exist")
@@ -132,6 +135,96 @@ void RTCommandOpenDB::collectOptions_impl(OptionsDescription& options,
 void RTCommandOpenDB::assignVariables_impl(const VariablesMap& variables)
 {
     RTCOMMAND_GET_VAR_OR_THROW(variables, "filename", std::string, filename_)
+}
+
+// open_recent_db
+
+std::string RTCommandOpenRecentDB::getPath() const
+{
+    vector<string> recent_file_list = COMPASS::instance().dbFileList();
+    if (recent_file_list.empty())
+        return "";
+
+    if (!filename.empty())
+    {
+        for (const auto& fn : recent_file_list)
+        {
+            if (boost::filesystem::path(fn).filename() == filename)
+                return fn;
+        }
+        return "";
+    }
+
+    if (index >= 0)
+    {
+        if (index < (int)recent_file_list.size())
+            return recent_file_list[index];
+        
+        return "";
+    }
+
+    return recent_file_list.front();
+}
+
+rtcommand::IsValid RTCommandOpenRecentDB::valid() const
+{
+    auto fn = getPath();
+
+    CHECK_RTCOMMAND_INVALID_CONDITION(fn.empty(), "No recent file found")
+
+    return RTCommand::valid();
+}
+
+bool RTCommandOpenRecentDB::run_impl()
+{
+    auto fn = getPath();
+
+    if (fn.empty())
+    {
+        setResultMessage("No recent file found");
+        return false;
+    }
+
+    if (!Files::fileExists(fn))
+    {
+        setResultMessage("File '"+fn+"' does not exist");
+        return false;
+    }
+
+    if (COMPASS::instance().dbOpened())
+    {
+        setResultMessage("Database already opened");
+        return false;
+    }
+
+    if (COMPASS::instance().appMode() != AppMode::Offline) // to be sure
+    {
+        setResultMessage("Wrong application mode "+COMPASS::instance().appModeStr());
+        return false;
+    }
+
+    MainWindow* main_window = dynamic_cast<MainWindow*> (rtcommand::mainWindow());
+    assert (main_window);
+
+    main_window->openExistingDB(fn);
+
+    return COMPASS::instance().dbOpened();
+}
+
+void RTCommandOpenRecentDB::collectOptions_impl(OptionsDescription& options,
+                                                PosOptionsDescription& positional)
+{
+    ADD_RTCOMMAND_OPTIONS(options)
+        ("filename,f", po::value<std::string>()->default_value(""), "filename listed in the recent file history, e.g. ’file1.db’")
+        ("index,i", po::value<int>()->default_value(-1), "index in the recent file history");
+
+    ADD_RTCOMMAND_POS_OPTION(positional, "filename", 1) // give position
+}
+
+void RTCommandOpenRecentDB::assignVariables_impl(const VariablesMap& variables)
+{
+    RTCOMMAND_GET_VAR_OR_THROW(variables, "filename", std::string, filename)
+    RTCOMMAND_GET_VAR_OR_THROW(variables, "index", int, index)
 }
 
 // create db

@@ -22,6 +22,23 @@ protected:
     DECLARE_RTCOMMAND_OPTIONS
 };
 
+// open_recent_db
+struct RTCommandOpenRecentDB : public rtcommand::RTCommand
+{
+    virtual rtcommand::IsValid valid() const override;
+
+protected:
+    virtual bool run_impl() override;
+
+    std::string getPath() const;
+
+    int         index = -1;
+    std::string filename;
+
+    DECLARE_RTCOMMAND(open_recent_db, "opens a SQLite3 database from the recent file history")
+    DECLARE_RTCOMMAND_OPTIONS
+};
+
 // create_db
 struct RTCommandCreateDB : public rtcommand::RTCommand
 {
