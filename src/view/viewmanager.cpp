@@ -280,7 +280,7 @@ void ViewManager::setCurrentViewPoint (const ViewableDataConfig* viewable)
 
     view_point_data_selected_ = false;
 
-    loginf << "ViewManager: setCurrentViewPoint: setting current view point data: '"
+    logdbg << "ViewManager: setCurrentViewPoint: setting current view point data: '"
     << viewable->data().dump(4) << "'";
 
     emit showViewPointSignal(current_viewable_);

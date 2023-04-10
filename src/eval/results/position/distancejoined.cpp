@@ -64,6 +64,8 @@ void JoinedPositionDistance::addToValues (std::shared_ptr<SinglePositionDistance
     if (!single_result->use())
         return;
 
+    single_results_.push_back(single_result);
+
     num_pos_         += single_result->numPos();
     num_no_ref_      += single_result->numNoRef();
     num_pos_outside_ += single_result->numPosOutside();
@@ -275,6 +277,9 @@ std::unique_ptr<nlohmann::json::object_t> JoinedPositionDistance::getErrorsViewa
 
     (*viewable_ptr)[VP_POS_WIN_LAT_KEY] = lat_w;
     (*viewable_ptr)[VP_POS_WIN_LON_KEY] = lon_w;
+
+    for (auto& single_result : single_results_)
+        single_result->addAnnotations((*viewable_ptr));
 
     return viewable_ptr;
 }
