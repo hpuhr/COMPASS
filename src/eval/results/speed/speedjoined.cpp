@@ -225,7 +225,7 @@ void JoinedSpeed::addDetails(std::shared_ptr<EvaluationResultsReport::RootItem> 
     if (p_passed_.has_value() && p_passed_.value() != 1.0) // TODO
     {
         sector_section.addFigure("sector_errors_overview", "Sector Errors Overview",
-                                 getErrorsViewable());
+                                 [this](void) { return this->getErrorsViewable(); });
     }
     else
     {

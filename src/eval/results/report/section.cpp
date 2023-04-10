@@ -183,10 +183,10 @@ namespace EvaluationResultsReport
     }
 
     void Section::addFigure (const std::string& name, const string& caption,
-                             std::unique_ptr<nlohmann::json::object_t> viewable_data)
+                             std::function<std::unique_ptr<nlohmann::json::object_t>(void)> viewable_fnc)
     {
         assert (!hasFigure(name));
-        content_.push_back(make_shared<SectionContentFigure>(name, caption, move(viewable_data), this, eval_man_));
+        content_.push_back(make_shared<SectionContentFigure>(name, caption, viewable_fnc, this, eval_man_));
         assert (hasFigure(name));
     }
 

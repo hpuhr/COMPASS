@@ -186,7 +186,7 @@ void JoinedModeCFalse::addDetails(std::shared_ptr<EvaluationResultsReport::RootI
     if (p_false_.has_value() && p_false_.value() != 0.0)
     {
         sector_section.addFigure("sector_errors_overview", "Sector Errors Overview",
-                                 getErrorsViewable());
+                                 [this](void) { return this->getErrorsViewable(); });
     }
     else
     {

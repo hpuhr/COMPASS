@@ -240,7 +240,7 @@ void JoinedDubiousTrack::addDetails(std::shared_ptr<EvaluationResultsReport::Roo
 //    if (has_p_min_ && p_passed_ != 1.0) // TODO
 //    {
 //        sector_section.addFigure("sector_errors_overview", "Sector Errors Overview",
-//                                 getErrorsViewable());
+//                                 [this](void) { return this->getErrorsViewable(); });
 //    }
 //    else
 //    {

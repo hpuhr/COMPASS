@@ -176,7 +176,7 @@ void JoinedDetection::addDetails(std::shared_ptr<EvaluationResultsReport::RootIt
     if (pd_.has_value() && pd_.value() != 1.0)
     {
         sector_section.addFigure("sector_errors_overview", "Sector Errors Overview",
-                                    getErrorsViewable());
+                                    [this](void) { return this->getErrorsViewable(); });
     }
     else
     {

@@ -282,8 +282,11 @@ void SinglePositionDistance::addTargetDetailsToReport(shared_ptr<EvaluationResul
 
     if (prob_.has_value() && prob_.value() != 1.0) // TODO
     {
+//        utn_req_section.addFigure("target_errors_overview", "Target Errors Overview",
+//                                  [this](void) { return this->getTargetErrorsViewable(); });
+
         utn_req_section.addFigure("target_errors_overview", "Target Errors Overview",
-                                  getTargetErrorsViewable());
+                                  [this](void) { return this->getTargetErrorsViewable(); });
     }
     else
     {

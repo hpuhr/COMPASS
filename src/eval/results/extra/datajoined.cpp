@@ -163,7 +163,7 @@ void JoinedExtraData::addDetails(std::shared_ptr<EvaluationResultsReport::RootIt
     if (prob_.has_value() && prob_.value() != 0.0)
     {
         sector_section.addFigure("sector_errors_overview", "Sector Errors Overview",
-                                    getErrorsViewable());
+                                    [this](void) { return this->getErrorsViewable(); });
     }
     else
     {

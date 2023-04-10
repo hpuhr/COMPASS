@@ -179,7 +179,7 @@ void SingleExtraData::addTargetDetailsToReport(shared_ptr<EvaluationResultsRepor
     if (!ignore_ && num_extra_)
     {
         utn_req_section.addFigure("target_errors_overview", "Target Errors Overview",
-                                  getTargetErrorsViewable());
+                                  [this](void) { return this->getTargetErrorsViewable(); });
     }
     else
     {

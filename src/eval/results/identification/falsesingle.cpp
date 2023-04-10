@@ -177,7 +177,7 @@ void SingleIdentificationFalse::addTargetDetailsToReport(shared_ptr<EvaluationRe
     if (p_false_.has_value() && p_false_.value() != 0.0)
     {
         utn_req_section.addFigure("target_errors_overview", "Target Errors Overview",
-                                  getTargetErrorsViewable());
+                                  [this](void) { return this->getTargetErrorsViewable(); });
     }
     else
     {

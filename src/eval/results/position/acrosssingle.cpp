@@ -265,7 +265,7 @@ void SinglePositionAcross::addTargetDetailsToReport(shared_ptr<EvaluationResults
     if (prob_.has_value() && prob_.value() != 1.0)
     {
         utn_req_section.addFigure("target_errors_overview", "Target Errors Overview",
-                                  getTargetErrorsViewable());
+                                  [this](void) { return this->getTargetErrorsViewable(); });
     }
     else
     {

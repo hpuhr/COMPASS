@@ -304,7 +304,7 @@ void SingleTrackAngle::addTargetDetailsToReport(shared_ptr<EvaluationResultsRepo
     if (p_passed_.has_value() && p_passed_.value() != 1.0) // TODO
     {
         utn_req_section.addFigure("target_errors_overview", "Target Errors Overview",
-                                  getTargetErrorsViewable());
+                                  [this](void) { return this->getTargetErrorsViewable(); });
     }
     else
     {

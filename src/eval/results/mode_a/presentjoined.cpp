@@ -185,7 +185,7 @@ void JoinedModeAPresent::addDetails(std::shared_ptr<EvaluationResultsReport::Roo
     if (p_present_.has_value() && p_present_.value() != 1.0)
     {
         sector_section.addFigure("sector_errors_overview", "Sector Errors Overview",
-                                    getErrorsViewable());
+                                    [this](void) { return this->getErrorsViewable(); });
     }
     else
     {

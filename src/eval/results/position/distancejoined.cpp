@@ -224,7 +224,7 @@ void JoinedPositionDistance::addDetails(std::shared_ptr<EvaluationResultsReport:
     if (values_.size()) // TODO
     {
         sector_section.addFigure("sector_errors_overview", "Sector Errors Overview",
-                                 getErrorsViewable());
+                                 [this](void) { return this->getErrorsViewable(); });
     }
     else
     {

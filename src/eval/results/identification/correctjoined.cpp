@@ -176,7 +176,7 @@ void JoinedIdentificationCorrect::addDetails(std::shared_ptr<EvaluationResultsRe
     if (pid_.has_value() && pid_.value() != 1.0)
     {
         sector_section.addFigure("sector_errors_overview", "Sector Errors Overview",
-                                    getErrorsViewable());
+                                    [this](void) { return this->getErrorsViewable(); });
     }
     else
     {

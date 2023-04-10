@@ -257,7 +257,7 @@ void JoinedDubiousTarget::addDetails(std::shared_ptr<EvaluationResultsReport::Ro
 //    if (has_p_min_ && p_passed_ != 1.0) // TODO
 //    {
 //        sector_section.addFigure("sector_errors_overview", "Sector Errors Overview",
-//                                 getErrorsViewable());
+//                                 [this](void) { return this->getErrorsViewable(); });
 //    }
 //    else
 //    {
