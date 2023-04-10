@@ -35,6 +35,7 @@
 
 using namespace std;
 using namespace Utils;
+using namespace nlohmann;
 
 namespace EvaluationRequirementResult
 {
@@ -447,7 +448,87 @@ std::unique_ptr<nlohmann::json::object_t> SinglePositionDistance::getTargetError
         (*viewable_ptr)[VP_POS_WIN_LON_KEY] = lon_w;
     }
 
+    addAnnotations(*viewable_ptr);
+
     return viewable_ptr;
+}
+
+void SinglePositionDistance::addAnnotations(nlohmann::json::object_t& viewable)
+{
+    loginf << "SinglePositionDistance: addAnnotations";
+
+    if (!viewable.count("annotations"))
+        viewable["annotations"] = json::array();
+
+    if (!viewable.at("annotations").size()) // not yet initialized
+    {
+        // errors
+        viewable.at("annotations").push_back(json::object()); // errors
+        viewable.at("annotations").at(0)["name"] = result_id_+" Errors";
+        viewable.at("annotations").at(0)["features"] = json::array();
+
+        viewable.at("annotations").at(0).at("features").push_back(json::object());
+
+        json& error_feature = viewable.at("annotations").at(0).at("features").at(0);
+
+        error_feature["type"] = "feature";
+        error_feature["geometry"] = json::object();
+        error_feature.at("geometry")["type"] = "lines";
+        error_feature.at("geometry")["coordinates"] = json::array();
+
+        error_feature["properties"] = json::object();
+        error_feature.at("properties")["color"] = "#FF0000";
+        error_feature.at("properties")["line_width"] = 2;
+
+        // ok
+        viewable.at("annotations").push_back(json::object()); // ok
+        viewable.at("annotations").at(1)["name"] = result_id_+" OK";
+        viewable.at("annotations").at(1)["features"] = json::array();
+
+        viewable.at("annotations").at(1).at("features").push_back(json::object());
+
+        json& ok_feature = viewable.at("annotations").at(1).at("features").at(0);
+
+        ok_feature["type"] = "feature";
+        ok_feature["geometry"] = json::object();
+        ok_feature.at("geometry")["type"] = "lines";
+        ok_feature.at("geometry")["coordinates"] = json::array();
+
+        ok_feature["properties"] = json::object();
+        ok_feature.at("properties")["color"] = "#00FF00";
+        ok_feature.at("properties")["line_width"] = 2;
+    }
+
+    json& error_coordinates = viewable.at("annotations").at(0).at("features").at(0).at("geometry").at("coordinates");
+    json& ok_coordinates = viewable.at("annotations").at(1).at("features").at(0).at("geometry").at("coordinates");
+
+    bool failed_values_of_interest = req()->failedValuesOfInterest();
+    bool ok;
+
+    for (auto& detail_it : getDetails())
+    {
+        auto check_passed = detail_it.getValueAs<bool>(DetailCheckPassed);
+        assert(check_passed.has_value());
+
+        ok = ((failed_values_of_interest && check_passed.value()) ||
+            (!failed_values_of_interest && !check_passed.value()));
+
+        if (detail_it.numPositions() == 1) // no ref pos
+            continue;
+
+        assert (detail_it.numPositions() == 2);
+
+        if (ok)
+        {
+            ok_coordinates.push_back(detail_it.position(0).asVector());
+            ok_coordinates.push_back(detail_it.position(1).asVector());
+        }
+        else
+        {
+            error_coordinates.push_back(detail_it.position(0).asVector());
+            error_coordinates.push_back(detail_it.position(1).asVector());
+        }
+    }
 }
 
 bool SinglePositionDistance::hasReference (

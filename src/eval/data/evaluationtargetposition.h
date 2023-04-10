@@ -18,6 +18,8 @@
 #ifndef EVALUATIONTARGETPOSITION_H
 #define EVALUATIONTARGETPOSITION_H
 
+#include <vector>
+
 class EvaluationTargetPosition
 {
 public:
@@ -33,6 +35,12 @@ public:
     bool has_altitude_ {false};
     bool altitude_calculated_ {false}; // indicates if secondary or derived
     float altitude_ {0};
+
+    std::vector<double> asVector() const
+    {
+        return std::vector<double>({latitude_, longitude_, 0});
+        //return std::vector<double>({latitude_, longitude_, has_altitude_ ? altitude_ : 0});
+    };
 };
 
 #endif // EVALUATIONTARGETPOSITION_H

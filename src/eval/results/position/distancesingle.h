@@ -72,6 +72,8 @@ protected:
     void reportDetails(EvaluationResultsReport::Section& utn_req_section);
 
     std::unique_ptr<nlohmann::json::object_t> getTargetErrorsViewable ();
+
+    void addAnnotations(nlohmann::json::object_t& viewable);
 };
 
 }
