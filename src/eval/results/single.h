@@ -60,7 +60,14 @@ public:
     const static std::string tr_details_table_name_;
     const static std::string target_table_name_;
 
+    virtual void addAnnotations(nlohmann::json::object_t& viewable) = 0;
+
 protected:
+    unsigned int                utn_;    // used to generate result
+    const EvaluationTargetData* target_; // used to generate result
+
+    bool result_usable_ {true}; // whether valid data exists, changed in subclass
+
     std::string getTargetSectionID();
     std::string getTargetRequirementSectionID();
 
@@ -68,10 +75,7 @@ protected:
 
     void addCommonDetails (shared_ptr<EvaluationResultsReport::RootItem> root_item);
 
-    unsigned int                utn_;    // used to generate result
-    const EvaluationTargetData* target_; // used to generate result
-
-    bool result_usable_ {true}; // whether valid data exists, changed in subclass
+    void addAnnotationFeatures(nlohmann::json::object_t& viewable);
 };
 
 }

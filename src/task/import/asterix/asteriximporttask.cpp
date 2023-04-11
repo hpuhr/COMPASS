@@ -52,6 +52,7 @@
 #include <QPushButton>
 
 #include <algorithm>
+#include <malloc.h>
 
 using namespace Utils;
 using namespace nlohmann;
@@ -1511,6 +1512,8 @@ void ASTERIXImportTask::checkAllDone()
         COMPASS::instance().dataSourceManager().saveDBDataSources();
         emit COMPASS::instance().dataSourceManager().dataSourcesChangedSignal();
         COMPASS::instance().interface().saveProperties();
+
+        malloc_trim(0); // release unused memory
     }
 
     logdbg << "ASTERIXImportTask: checkAllDone: done";

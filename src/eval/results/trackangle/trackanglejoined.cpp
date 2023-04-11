@@ -278,6 +278,9 @@ std::unique_ptr<nlohmann::json::object_t> JoinedTrackAngle::getErrorsViewable ()
     (*viewable_ptr)["trackangle_window_latitude"] = lat_w;
     (*viewable_ptr)["trackangle_window_longitude"] = lon_w;
 
+    for (auto& single_result : results_)
+        single_result->addAnnotations((*viewable_ptr));
+
     return viewable_ptr;
 }
 

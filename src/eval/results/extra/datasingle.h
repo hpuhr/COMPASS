@@ -64,6 +64,8 @@ public:
     static const std::string DetailExtra;     //bool
     static const std::string DetailRefExists; //bool
 
+    void addAnnotations(nlohmann::json::object_t& viewable) override;
+
 protected:
     bool         ignore_              {false};
     unsigned int num_extra_           {0};

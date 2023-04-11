@@ -59,6 +59,8 @@ public:
 
     EvaluationRequirement::DubiousTarget* req ();
 
+    void addAnnotations(nlohmann::json::object_t& viewable) override;
+
 protected:
     void update();
 

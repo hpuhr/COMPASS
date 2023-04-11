@@ -77,6 +77,8 @@ public:
     static const std::string DetailNumCorrect;    //int
     static const std::string DetailNumNotCorrect; //int
 
+    void addAnnotations(nlohmann::json::object_t& viewable) override;
+
 protected:
     unsigned int num_updates_     {0};
     unsigned int num_no_ref_pos_  {0};

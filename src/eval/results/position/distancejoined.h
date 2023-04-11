@@ -50,9 +50,6 @@ public:
     void exportAsCSV();
 
 protected:
-
-    std::vector<std::shared_ptr<SinglePositionDistance>> single_results_;
-
     void addToValues (std::shared_ptr<SinglePositionDistance> single_result);
     void update();
 

@@ -33,6 +33,7 @@
 
 using namespace std;
 using namespace Utils;
+using namespace nlohmann;
 
 namespace EvaluationRequirementResult
 {
@@ -364,6 +365,20 @@ unsigned int SingleExtraData::numExtra() const
 unsigned int SingleExtraData::numOK() const
 {
     return num_ok_;
+}
+
+void SingleExtraData::addAnnotations(nlohmann::json::object_t& viewable)
+{
+    addAnnotationFeatures(viewable);
+
+    json& error_line_coordinates =
+            viewable.at("annotations").at(0).at("features").at(0).at("geometry").at("coordinates");
+    json& error_point_coordinates =
+            viewable.at("annotations").at(0).at("features").at(1).at("geometry").at("coordinates");
+    json& ok_line_coordinates =
+            viewable.at("annotations").at(1).at("features").at(0).at("geometry").at("coordinates");
+    json& ok_point_coordinates =
+            viewable.at("annotations").at(1).at("features").at(1).at("geometry").at("coordinates");
 }
 
 }

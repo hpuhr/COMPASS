@@ -65,6 +65,8 @@ public:
     static const std::string DetailMaxGapUIs;    //int
     static const std::string DetailNoRefUIs;     //int
 
+    void addAnnotations(nlohmann::json::object_t& viewable) override;
+
 protected:
     void updatePD();
 

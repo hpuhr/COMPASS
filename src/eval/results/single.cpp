@@ -25,22 +25,24 @@
 #include "evaluationresultsgenerator.h"
 #include "sectorlayer.h"
 
+using namespace std;
+using namespace nlohmann;
+
 namespace EvaluationRequirementResult
 {
 const std::string Single::tr_details_table_name_ {"Target Reports Details"};
 const std::string Single::target_table_name_     {"Targets"};
 
 Single::Single(const std::string& type, 
-               const std::string& result_id, 
+               const std::string& result_id,
                std::shared_ptr<EvaluationRequirement::Base> requirement,
-               const SectorLayer& sector_layer, 
-               unsigned int utn, 
+               const SectorLayer& sector_layer,
+               unsigned int utn,
                const EvaluationTargetData* target,
                EvaluationManager& eval_man,
                const EvaluationDetails& details)
-:   Base   (type, result_id, requirement, sector_layer, eval_man)
-,   utn_   (utn   )
-,   target_(target)
+    : Base (type, result_id, requirement, sector_layer, eval_man),
+      utn_ (utn), target_(target)
 {
     setDetails(details);
 }
@@ -108,6 +110,93 @@ void Single::addCommonDetails (shared_ptr<EvaluationResultsReport::RootItem> roo
         utn_table.addRow({"Mode 3/A", "Mode 3/A code(s)", target_->modeACodesStr().c_str()}, this);
         utn_table.addRow({"Mode C Min", "Minimum Mode C code [ft]", target_->modeCMinStr().c_str()}, this);
         utn_table.addRow({"Mode C Max", "Maximum Mode C code [ft]", target_->modeCMaxStr().c_str()}, this);
+    }
+}
+
+void Single::addAnnotationFeatures(nlohmann::json::object_t& viewable)
+{
+    if (!viewable.count("annotations"))
+        viewable["annotations"] = json::array();
+
+    if (!viewable.at("annotations").size()) // not yet initialized
+    {
+        // errors
+        viewable.at("annotations").push_back(json::object()); // errors
+
+        {
+            viewable.at("annotations").at(0)["name"] = result_id_+" Errors";
+            viewable.at("annotations").at(0)["features"] = json::array();
+
+            // lines
+            viewable.at("annotations").at(0).at("features").push_back(json::object());
+
+            json& error_feature_lines = viewable.at("annotations").at(0).at("features").at(0);
+
+            error_feature_lines["type"] = "feature";
+            error_feature_lines["geometry"] = json::object();
+            error_feature_lines.at("geometry")["type"] = "lines";
+            error_feature_lines.at("geometry")["coordinates"] = json::array();
+
+            error_feature_lines["properties"] = json::object();
+            error_feature_lines.at("properties")["color"] = "#FF0000";
+            error_feature_lines.at("properties")["line_width"] = 2;
+
+            // symbols
+
+            viewable.at("annotations").at(0).at("features").push_back(json::object());
+
+            json& error_feature_points = viewable.at("annotations").at(0).at("features").at(1);
+
+            error_feature_points["type"] = "feature";
+            error_feature_points["geometry"] = json::object();
+            error_feature_points.at("geometry")["type"] = "points";
+            error_feature_points.at("geometry")["coordinates"] = json::array();
+
+            error_feature_points["properties"] = json::object();
+            error_feature_points.at("properties")["color"] = "#FF0000";
+            error_feature_points.at("properties")["symbol"] = "circle";
+            error_feature_points.at("properties")["symbol_size"] = 8;
+
+        }
+
+        // ok
+
+        {
+            viewable.at("annotations").push_back(json::object()); // ok
+            viewable.at("annotations").at(1)["name"] = result_id_+" OK";
+            viewable.at("annotations").at(1)["features"] = json::array();
+
+            // lines
+            viewable.at("annotations").at(1).at("features").push_back(json::object());
+
+            json& ok_feature_lines = viewable.at("annotations").at(1).at("features").at(0);
+
+            ok_feature_lines["type"] = "feature";
+            ok_feature_lines["geometry"] = json::object();
+            ok_feature_lines.at("geometry")["type"] = "lines";
+            ok_feature_lines.at("geometry")["coordinates"] = json::array();
+
+            ok_feature_lines["properties"] = json::object();
+            ok_feature_lines.at("properties")["color"] = "#00FF00";
+            ok_feature_lines.at("properties")["line_width"] = 2;
+
+            // symbols
+
+            viewable.at("annotations").at(1).at("features").push_back(json::object());
+
+            json& error_feature_points = viewable.at("annotations").at(1).at("features").at(1);
+
+            error_feature_points["type"] = "feature";
+            error_feature_points["geometry"] = json::object();
+            error_feature_points.at("geometry")["type"] = "points";
+            error_feature_points.at("geometry")["coordinates"] = json::array();
+
+            error_feature_points["properties"] = json::object();
+            error_feature_points.at("properties")["color"] = "#00FF00";
+            error_feature_points.at("properties")["symbol"] = "circle";
+            error_feature_points.at("properties")["symbol_size"] = 8;
+
+        }
     }
 }
 

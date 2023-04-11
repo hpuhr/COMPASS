@@ -89,6 +89,8 @@ public:
     static const std::string DetailNumCheckFailed; //int
     static const std::string DetailNumCheckPassed; //int
 
+    void addAnnotations(nlohmann::json::object_t& viewable) override;
+
 protected:
     void update();
 

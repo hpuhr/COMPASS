@@ -64,6 +64,8 @@ public:
     static const std::string DetailInside;   //bool
     static const std::string DetailExtra;    //bool
 
+    void addAnnotations(nlohmann::json::object_t& viewable) override;
+
 protected:
     bool         ignore_     {false};
     unsigned int num_inside_ {0};

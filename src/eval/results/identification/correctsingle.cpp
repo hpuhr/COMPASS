@@ -33,6 +33,7 @@
 
 using namespace std;
 using namespace Utils;
+using namespace nlohmann;
 
 namespace EvaluationRequirementResult
 {
@@ -353,6 +354,29 @@ std::string SingleIdentificationCorrect::reference(
     assert (hasReference(table, annotation));
 
     return "Report:Results:"+getTargetRequirementSectionID();
+}
+
+void SingleIdentificationCorrect::addAnnotations(nlohmann::json::object_t& viewable)
+{
+    addAnnotationFeatures(viewable);
+
+    json& error_point_coordinates =
+            viewable.at("annotations").at(0).at("features").at(1).at("geometry").at("coordinates");
+    json& ok_point_coordinates =
+            viewable.at("annotations").at(1).at("features").at(1).at("geometry").at("coordinates");
+
+    for (auto& detail_it : getDetails())
+    {
+        auto is_not_correct = detail_it.getValueAsOrAssert<bool>(
+                    EvaluationRequirementResult::SingleIdentificationCorrect::DetailIsNotCorrect);
+
+        assert (detail_it.numPositions() >= 1);
+
+        if (is_not_correct)
+            error_point_coordinates.push_back(detail_it.position(0).asVector());
+        else
+            ok_point_coordinates.push_back(detail_it.position(0).asVector());
+    }
 }
 
 std::shared_ptr<Joined> SingleIdentificationCorrect::createEmptyJoined(const std::string& result_id)
