@@ -466,6 +466,8 @@ std::unique_ptr<nlohmann::json::object_t> SingleSpeed::getTargetErrorsViewable (
         (*viewable_ptr)["speed_window_longitude"] = lon_w;
     }
 
+    addAnnotations(*viewable_ptr);
+
     return viewable_ptr;
 }
 

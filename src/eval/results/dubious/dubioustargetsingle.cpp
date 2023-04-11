@@ -436,6 +436,8 @@ void SingleDubiousTarget::addAnnotations(nlohmann::json::object_t& viewable)
             viewable.at("annotations").at(1).at("features").at(0).at("geometry").at("coordinates");
     json& ok_point_coordinates =
             viewable.at("annotations").at(1).at("features").at(1).at("geometry").at("coordinates");
+
+
 }
 
 }

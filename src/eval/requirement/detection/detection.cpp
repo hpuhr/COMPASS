@@ -316,7 +316,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> Detection::evaluate (
                             last_pos = target_data.refPos(last_period_ts);
                         }
 
-                        addDetail(timestamp, pos_current, last_pos, t_diff, true, false, sum_missed_uis, 0, 0, comment); 
+                        addDetail(timestamp, pos_current, last_pos, t_diff, true, false, sum_missed_uis, 0, 0, comment);
                     }
                     else
                     {

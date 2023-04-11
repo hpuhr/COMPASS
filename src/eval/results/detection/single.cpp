@@ -360,6 +360,8 @@ std::unique_ptr<nlohmann::json::object_t> SingleDetection::getTargetErrorsViewab
         (*viewable_ptr)[VP_POS_WIN_LON_KEY] = lon_w;
     }
 
+    addAnnotations(*viewable_ptr);
+
     return viewable_ptr;
 }
 
@@ -393,6 +395,34 @@ void SingleDetection::addAnnotations(nlohmann::json::object_t& viewable)
             viewable.at("annotations").at(1).at("features").at(0).at("geometry").at("coordinates");
     json& ok_point_coordinates =
             viewable.at("annotations").at(1).at("features").at(1).at("geometry").at("coordinates");
+
+    for (auto& detail_it : getDetails())
+    {
+        auto check_failed = detail_it.getValueAsOrAssert<bool>(
+                    EvaluationRequirementResult::SingleDetection::DetailMissOccurred);
+
+        if (detail_it.numPositions() == 1)
+            continue;
+
+        assert (detail_it.numPositions() >= 2);
+
+        if (!check_failed)
+        {
+            ok_point_coordinates.push_back(detail_it.position(0).asVector());
+            ok_point_coordinates.push_back(detail_it.position(1).asVector());
+
+            ok_line_coordinates.push_back(detail_it.position(0).asVector());
+            ok_line_coordinates.push_back(detail_it.position(1).asVector());
+        }
+        else
+        {
+            error_point_coordinates.push_back(detail_it.position(0).asVector());
+            error_point_coordinates.push_back(detail_it.position(1).asVector());
+
+            error_line_coordinates.push_back(detail_it.position(0).asVector());
+            error_line_coordinates.push_back(detail_it.position(1).asVector());
+        }
+    }
 }
 
 std::shared_ptr<Joined> SingleDetection::createEmptyJoined(const std::string& result_id)

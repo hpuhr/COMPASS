@@ -330,6 +330,8 @@ std::unique_ptr<nlohmann::json::object_t> SingleModeAFalse::getTargetErrorsViewa
         (*viewable_ptr)[VP_POS_WIN_LON_KEY] = lon_w;
     }
 
+    addAnnotations(*viewable_ptr);
+
     return viewable_ptr;
 }
 

@@ -474,6 +474,8 @@ std::unique_ptr<nlohmann::json::object_t> SingleTrackAngle::getTargetErrorsViewa
         (*viewable_ptr)["trackangle_window_longitude"] = lon_w;
     }
 
+    addAnnotations(*viewable_ptr);
+
     return viewable_ptr;
 }
 
