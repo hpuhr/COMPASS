@@ -43,19 +43,19 @@ namespace EvaluationRequirementResult
 SinglePositionDistance::SinglePositionDistance(const std::string& result_id, 
                                                std::shared_ptr<EvaluationRequirement::Base> requirement,
                                                const SectorLayer& sector_layer,
-                                               unsigned int utn, 
-                                               const EvaluationTargetData* target, 
+                                               unsigned int utn,
+                                               const EvaluationTargetData* target,
                                                EvaluationManager& eval_man,
                                                const EvaluationDetails& details,
-                                               unsigned int num_pos, 
+                                               unsigned int num_pos,
                                                unsigned int num_no_ref,
-                                               unsigned int num_pos_outside, 
+                                               unsigned int num_pos_outside,
                                                unsigned int num_pos_inside,
                                                unsigned int num_comp_passed,
-                                               unsigned int num_comp_failed, 
+                                               unsigned int num_comp_failed,
                                                vector<double> values)
-:   SinglePositionBase("SinglePositionDistance", result_id, requirement, sector_layer, utn, target, eval_man, details,
-                       num_pos, num_no_ref,num_pos_outside, num_pos_inside, num_comp_passed, num_comp_failed, values)
+    :   SinglePositionBase("SinglePositionDistance", result_id, requirement, sector_layer, utn, target, eval_man, details,
+                           num_pos, num_no_ref,num_pos_outside, num_pos_inside, num_comp_passed, num_comp_failed, values)
 {
     update();
 }
@@ -282,8 +282,8 @@ void SinglePositionDistance::addTargetDetailsToReport(shared_ptr<EvaluationResul
 
     if (prob_.has_value() && prob_.value() != 1.0) // TODO
     {
-//        utn_req_section.addFigure("target_errors_overview", "Target Errors Overview",
-//                                  [this](void) { return this->getTargetErrorsViewable(); });
+        //        utn_req_section.addFigure("target_errors_overview", "Target Errors Overview",
+        //                                  [this](void) { return this->getTargetErrorsViewable(); });
 
         utn_req_section.addFigure("target_errors_overview", "Target Errors Overview",
                                   [this](void) { return this->getTargetErrorsViewable(); });
@@ -316,7 +316,7 @@ void SinglePositionDistance::reportDetails(EvaluationResultsReport::Section& utn
 
         utn_req_details_table.addRow(
                     { Time::toString(rq_det_it.timestamp()).c_str(),
-                     !has_ref_pos, 
+                      !has_ref_pos,
                       rq_det_it.getValue(DetailPosInside),
                       rq_det_it.getValue(DetailValue),                 // "Distance"
                       rq_det_it.getValue(DetailCheckPassed),           // CP"
@@ -359,21 +359,21 @@ std::unique_ptr<nlohmann::json::object_t> SinglePositionDistance::viewableData(
                 = eval_man_.getViewableForEvaluation(utn_, req_grp_id_, result_id_);
         assert (viewable_ptr);
 
-//        const auto& detail = getDetail(detail_cnt);
+        //        const auto& detail = getDetail(detail_cnt);
 
-//        assert(detail.numPositions() >= 1);
+        //        assert(detail.numPositions() >= 1);
 
-//        (*viewable_ptr)[VP_POS_LAT_KEY    ] = detail.position(0).latitude_;
-//        (*viewable_ptr)[VP_POS_LON_KEY    ] = detail.position(0).longitude_;
-//        (*viewable_ptr)[VP_POS_WIN_LAT_KEY] = eval_man_.resultDetailZoom();
-//        (*viewable_ptr)[VP_POS_WIN_LON_KEY] = eval_man_.resultDetailZoom();
-//        (*viewable_ptr)[VP_TIMESTAMP_KEY  ] = Time::toString(detail.timestamp());
+        //        (*viewable_ptr)[VP_POS_LAT_KEY    ] = detail.position(0).latitude_;
+        //        (*viewable_ptr)[VP_POS_LON_KEY    ] = detail.position(0).longitude_;
+        //        (*viewable_ptr)[VP_POS_WIN_LAT_KEY] = eval_man_.resultDetailZoom();
+        //        (*viewable_ptr)[VP_POS_WIN_LON_KEY] = eval_man_.resultDetailZoom();
+        //        (*viewable_ptr)[VP_TIMESTAMP_KEY  ] = Time::toString(detail.timestamp());
 
-//        auto check_passed = detail.getValueAs<bool>(DetailCheckPassed);
-//        assert(check_passed.has_value());
+        //        auto check_passed = detail.getValueAs<bool>(DetailCheckPassed);
+        //        assert(check_passed.has_value());
 
-//        if (!check_passed.value())
-//            (*viewable_ptr)[VP_EVAL_KEY][VP_EVAL_HIGHDET_KEY] = vector<unsigned int>{detail_cnt};
+        //        if (!check_passed.value())
+        //            (*viewable_ptr)[VP_EVAL_KEY][VP_EVAL_HIGHDET_KEY] = vector<unsigned int>{detail_cnt};
 
         return viewable_ptr;
     }
@@ -396,8 +396,8 @@ std::unique_ptr<nlohmann::json::object_t> SinglePositionDistance::getTargetError
         auto check_passed = detail_it.getValueAs<bool>(DetailCheckPassed);
         assert(check_passed.has_value());
 
-        if ((failed_values_of_interest && check_passed.value()) || 
-            (!failed_values_of_interest && !check_passed.value()))
+        if ((failed_values_of_interest && check_passed.value()) ||
+                (!failed_values_of_interest && !check_passed.value()))
             continue;
 
         assert(detail_it.numPositions() >= 1);
@@ -467,43 +467,87 @@ void SinglePositionDistance::addAnnotations(nlohmann::json::object_t& viewable)
     {
         // errors
         viewable.at("annotations").push_back(json::object()); // errors
-        viewable.at("annotations").at(0)["name"] = result_id_+" Errors";
-        viewable.at("annotations").at(0)["features"] = json::array();
 
-        viewable.at("annotations").at(0).at("features").push_back(json::object());
+        {
+            viewable.at("annotations").at(0)["name"] = result_id_+" Errors";
+            viewable.at("annotations").at(0)["features"] = json::array();
 
-        json& error_feature = viewable.at("annotations").at(0).at("features").at(0);
+            // lines
+            viewable.at("annotations").at(0).at("features").push_back(json::object());
 
-        error_feature["type"] = "feature";
-        error_feature["geometry"] = json::object();
-        error_feature.at("geometry")["type"] = "lines";
-        error_feature.at("geometry")["coordinates"] = json::array();
+            json& error_feature_lines = viewable.at("annotations").at(0).at("features").at(0);
 
-        error_feature["properties"] = json::object();
-        error_feature.at("properties")["color"] = "#FF0000";
-        error_feature.at("properties")["line_width"] = 2;
+            error_feature_lines["type"] = "feature";
+            error_feature_lines["geometry"] = json::object();
+            error_feature_lines.at("geometry")["type"] = "lines";
+            error_feature_lines.at("geometry")["coordinates"] = json::array();
+
+            error_feature_lines["properties"] = json::object();
+            error_feature_lines.at("properties")["color"] = "#FF0000";
+            error_feature_lines.at("properties")["line_width"] = 2;
+
+            // symbols
+
+            viewable.at("annotations").at(0).at("features").push_back(json::object());
+
+            json& error_feature_points = viewable.at("annotations").at(0).at("features").at(1);
+
+            error_feature_points["type"] = "feature";
+            error_feature_points["geometry"] = json::object();
+            error_feature_points.at("geometry")["type"] = "points";
+            error_feature_points.at("geometry")["coordinates"] = json::array();
+
+            error_feature_points["properties"] = json::object();
+            error_feature_points.at("properties")["color"] = "#FF0000";
+            error_feature_points.at("properties")["symbol"] = "circle";
+            error_feature_points.at("properties")["symbol_size"] = 8;
+
+        }
 
         // ok
-        viewable.at("annotations").push_back(json::object()); // ok
-        viewable.at("annotations").at(1)["name"] = result_id_+" OK";
-        viewable.at("annotations").at(1)["features"] = json::array();
 
-        viewable.at("annotations").at(1).at("features").push_back(json::object());
+        {
+            viewable.at("annotations").push_back(json::object()); // ok
+            viewable.at("annotations").at(1)["name"] = result_id_+" OK";
+            viewable.at("annotations").at(1)["features"] = json::array();
 
-        json& ok_feature = viewable.at("annotations").at(1).at("features").at(0);
+            // lines
+            viewable.at("annotations").at(1).at("features").push_back(json::object());
 
-        ok_feature["type"] = "feature";
-        ok_feature["geometry"] = json::object();
-        ok_feature.at("geometry")["type"] = "lines";
-        ok_feature.at("geometry")["coordinates"] = json::array();
+            json& ok_feature_lines = viewable.at("annotations").at(1).at("features").at(0);
 
-        ok_feature["properties"] = json::object();
-        ok_feature.at("properties")["color"] = "#00FF00";
-        ok_feature.at("properties")["line_width"] = 2;
+            ok_feature_lines["type"] = "feature";
+            ok_feature_lines["geometry"] = json::object();
+            ok_feature_lines.at("geometry")["type"] = "lines";
+            ok_feature_lines.at("geometry")["coordinates"] = json::array();
+
+            ok_feature_lines["properties"] = json::object();
+            ok_feature_lines.at("properties")["color"] = "#00FF00";
+            ok_feature_lines.at("properties")["line_width"] = 2;
+
+            // symbols
+
+            viewable.at("annotations").at(1).at("features").push_back(json::object());
+
+            json& error_feature_points = viewable.at("annotations").at(1).at("features").at(1);
+
+            error_feature_points["type"] = "feature";
+            error_feature_points["geometry"] = json::object();
+            error_feature_points.at("geometry")["type"] = "points";
+            error_feature_points.at("geometry")["coordinates"] = json::array();
+
+            error_feature_points["properties"] = json::object();
+            error_feature_points.at("properties")["color"] = "#00FF00";
+            error_feature_points.at("properties")["symbol"] = "circle";
+            error_feature_points.at("properties")["symbol_size"] = 8;
+
+        }
     }
 
-    json& error_coordinates = viewable.at("annotations").at(0).at("features").at(0).at("geometry").at("coordinates");
-    json& ok_coordinates = viewable.at("annotations").at(1).at("features").at(0).at("geometry").at("coordinates");
+    json& error_line_coordinates = viewable.at("annotations").at(0).at("features").at(0).at("geometry").at("coordinates");
+    json& error_point_coordinates = viewable.at("annotations").at(0).at("features").at(1).at("geometry").at("coordinates");
+    json& ok_line_coordinates = viewable.at("annotations").at(1).at("features").at(0).at("geometry").at("coordinates");
+    json& ok_point_coordinates = viewable.at("annotations").at(1).at("features").at(1).at("geometry").at("coordinates");
 
     bool failed_values_of_interest = req()->failedValuesOfInterest();
     bool ok;
@@ -514,7 +558,7 @@ void SinglePositionDistance::addAnnotations(nlohmann::json::object_t& viewable)
         assert(check_passed.has_value());
 
         ok = ((failed_values_of_interest && check_passed.value()) ||
-            (!failed_values_of_interest && !check_passed.value()));
+              (!failed_values_of_interest && !check_passed.value()));
 
         if (detail_it.numPositions() == 1) // no ref pos
             continue;
@@ -523,13 +567,17 @@ void SinglePositionDistance::addAnnotations(nlohmann::json::object_t& viewable)
 
         if (ok)
         {
-            ok_coordinates.push_back(detail_it.position(0).asVector());
-            ok_coordinates.push_back(detail_it.position(1).asVector());
+            ok_point_coordinates.push_back(detail_it.position(0).asVector());
+
+            ok_line_coordinates.push_back(detail_it.position(0).asVector());
+            ok_line_coordinates.push_back(detail_it.position(1).asVector());
         }
         else
         {
-            error_coordinates.push_back(detail_it.position(0).asVector());
-            error_coordinates.push_back(detail_it.position(1).asVector());
+            error_point_coordinates.push_back(detail_it.position(0).asVector());
+
+            error_line_coordinates.push_back(detail_it.position(0).asVector());
+            error_line_coordinates.push_back(detail_it.position(1).asVector());
         }
     }
 }
