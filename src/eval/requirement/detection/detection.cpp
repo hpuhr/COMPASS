@@ -187,12 +187,12 @@ std::shared_ptr<EvaluationRequirementResult::Single> Detection::evaluate (
                             const QVariant& no_ref_uis,
                             const std::string& comment)
     {
-        details.push_back(Detail(ts, tst_pos).setValue(Result::DetailDiffTOD, d_tod)
-                                             .setValue(Result::DetailMissOccurred, miss_occurred)
-                                             .setValue(Result::DetailRefExists, ref_exists)
-                                             .setValue(Result::DetailMissedUIs, missed_uis)
-                                             .setValue(Result::DetailMaxGapUIs, max_gap_uis)
-                                             .setValue(Result::DetailNoRefUIs, no_ref_uis)
+        details.push_back(Detail(ts, tst_pos).setValue(Result::DetailKey::DiffTOD, d_tod)
+                                             .setValue(Result::DetailKey::MissOccurred, miss_occurred)
+                                             .setValue(Result::DetailKey::RefExists, ref_exists)
+                                             .setValue(Result::DetailKey::MissedUIs, missed_uis)
+                                             .setValue(Result::DetailKey::MaxGapUIs, max_gap_uis)
+                                             .setValue(Result::DetailKey::NoRefUIs, no_ref_uis)
                                              .addPosition(last_pos)
                                              .generalComment(comment));
     };

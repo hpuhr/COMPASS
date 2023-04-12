@@ -131,9 +131,9 @@ std::shared_ptr<EvaluationRequirementResult::Single> ExtraData::evaluate (
                             const QVariant& ref_exists,
                             const std::string& comment)
     {
-        details.push_back(Detail(ts, tst_pos).setValue(Result::DetailInside, inside)
-                                             .setValue(Result::DetailExtra, extra)
-                                             .setValue(Result::DetailRefExists, ref_exists)
+        details.push_back(Detail(ts, tst_pos).setValue(Result::DetailKey::Inside, inside)
+                                             .setValue(Result::DetailKey::Extra, extra)
+                                             .setValue(Result::DetailKey::RefExists, ref_exists)
                                              .generalComment(comment));
     };
 

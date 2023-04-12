@@ -207,15 +207,15 @@ void SingleModeAFalse::reportDetails(EvaluationResultsReport::Section& utn_req_s
     {
         utn_req_details_table.addRow(
                     { Time::toString(rq_det_it.timestamp()).c_str(), 
-                      rq_det_it.getValue(DetailRefExists),
-                     !rq_det_it.getValue(DetailIsNotOk).toBool(),
-                      rq_det_it.getValue(DetailNumUpdates), 
-                      rq_det_it.getValue(DetailNumNoRef),
-                      rq_det_it.getValue(DetailNumInside), 
-                      rq_det_it.getValue(DetailNumOutside), 
-                      rq_det_it.getValue(DetailNumUnknownID),
-                      rq_det_it.getValue(DetailNumCorrectID), 
-                      rq_det_it.getValue(DetailNumFalseID), 
+                      rq_det_it.getValue(DetailKey::RefExists),
+                     !rq_det_it.getValue(DetailKey::IsNotOk).toBool(),
+                      rq_det_it.getValue(DetailKey::NumUpdates),
+                      rq_det_it.getValue(DetailKey::NumNoRef),
+                      rq_det_it.getValue(DetailKey::NumInside),
+                      rq_det_it.getValue(DetailKey::NumOutside),
+                      rq_det_it.getValue(DetailKey::NumUnknownID),
+                      rq_det_it.getValue(DetailKey::NumCorrectID),
+                      rq_det_it.getValue(DetailKey::NumFalseID),
                       rq_det_it.comments().generalComment().c_str()},
                     this, detail_cnt);
 
@@ -286,7 +286,7 @@ std::unique_ptr<nlohmann::json::object_t> SingleModeAFalse::getTargetErrorsViewa
     {
         assert(detail_it.numPositions() >= 1);
 
-        auto is_not_ok = detail_it.getValueAs<bool>(DetailIsNotOk);
+        auto is_not_ok = detail_it.getValueAs<bool>(DetailKey::IsNotOk);
         assert(is_not_ok.has_value());
 
         if (!is_not_ok.value())
@@ -364,7 +364,7 @@ void SingleModeAFalse::addAnnotations(nlohmann::json::object_t& viewable)
     for (auto& detail_it : getDetails())
     {
         auto is_not_ok = detail_it.getValueAsOrAssert<bool>(
-                    EvaluationRequirementResult::SingleModeAFalse::DetailIsNotOk);
+                    EvaluationRequirementResult::SingleModeAFalse::DetailKey::IsNotOk);
 
         assert (detail_it.numPositions() >= 1);
 

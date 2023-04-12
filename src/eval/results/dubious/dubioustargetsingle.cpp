@@ -71,7 +71,7 @@ void SingleDubiousTarget::update()
 
     const auto& detail = getDetail(0);
 
-    p_dubious_target_ = (float)detail.getValue(DetailIsDubious).toBool();
+    p_dubious_target_ = (float)detail.getValue(DetailKey::IsDubious).toBool();
 
     result_usable_ = true;
 
@@ -244,7 +244,7 @@ void SingleDubiousTarget::addTargetDetailsToReport(shared_ptr<EvaluationResultsR
     assert(numDetails() > 0);
     const auto& detail = getDetail(0);
 
-    auto duration = detail.getValueAs<boost::posix_time::time_duration>(DetailDuration);
+    auto duration = detail.getValueAs<boost::posix_time::time_duration>(DetailKey::Duration);
     assert(duration.has_value());
 
     // "UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
@@ -329,7 +329,7 @@ void SingleDubiousTarget::reportDetails(EvaluationResultsReport::Section& utn_re
         {
             utn_req_details_table.addRow(
                         { Time::toString(update.timestamp()).c_str(),
-                        detail.getValue(DetailUTNOrTrackNum),
+                        detail.getValue(DetailKey::UTNOrTrackNum),
                         dub_string.c_str() }, // "Comment"
                         this, {detail_cnt});
             ++detail_cnt;

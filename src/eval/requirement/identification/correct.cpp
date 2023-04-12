@@ -125,15 +125,15 @@ std::shared_ptr<EvaluationRequirementResult::Single> IdentificationCorrect::eval
                             const QVariant& num_not_correct,
                             const std::string& comment)
     {
-        details.push_back(Detail(ts, tst_pos).setValue(Result::DetailRefExists, ref_exists)
-                                             .setValue(Result::DetailPosInside, pos_inside.isValid() ? pos_inside : "false")
-                                             .setValue(Result::DetailIsNotCorrect, is_not_correct)
-                                             .setValue(Result::DetailNumUpdates, num_updates)
-                                             .setValue(Result::DetailNumNoRef, num_no_ref)
-                                             .setValue(Result::DetailNumInside, num_pos_inside)
-                                             .setValue(Result::DetailNumOutside, num_pos_outside)
-                                             .setValue(Result::DetailNumCorrect, num_correct)
-                                             .setValue(Result::DetailNumNotCorrect, num_not_correct)
+        details.push_back(Detail(ts, tst_pos).setValue(Result::DetailKey::RefExists, ref_exists)
+                                             .setValue(Result::DetailKey::PosInside, pos_inside.isValid() ? pos_inside : "false")
+                                             .setValue(Result::DetailKey::IsNotCorrect, is_not_correct)
+                                             .setValue(Result::DetailKey::NumUpdates, num_updates)
+                                             .setValue(Result::DetailKey::NumNoRef, num_no_ref)
+                                             .setValue(Result::DetailKey::NumInside, num_pos_inside)
+                                             .setValue(Result::DetailKey::NumOutside, num_pos_outside)
+                                             .setValue(Result::DetailKey::NumCorrect, num_correct)
+                                             .setValue(Result::DetailKey::NumNotCorrect, num_not_correct)
                                              .generalComment(comment));
     };
 

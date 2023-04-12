@@ -76,8 +76,8 @@ void SingleDubiousTrack::update()
 
         for (auto& detail_it : getDetails())
         {
-            auto duration   = detail_it.getValue(DetailDuration).toDouble();
-            auto is_dubious = detail_it.getValue(DetailIsDubious).toBool();
+            auto duration   = detail_it.getValue(DetailKey::Duration).toDouble();
+            auto is_dubious = detail_it.getValue(DetailKey::IsDubious).toBool();
 
             track_duration_all_ += duration;
 
@@ -174,7 +174,7 @@ void SingleDubiousTrack::addTargetDetailsToTable (EvaluationResultsReport::Secti
 
         auto dub_reasons_str = dubiousReasonsString(detail_it.comments());
 
-        reasons += to_string(detail_it.getValue(DetailUTNOrTrackNum).toUInt())+":" + dub_reasons_str;
+        reasons += to_string(detail_it.getValue(DetailKey::UTNOrTrackNum).toUInt())+":" + dub_reasons_str;
     }
 
     target_table.addRow(
@@ -229,7 +229,7 @@ void SingleDubiousTrack::addTargetDetailsToTableADSB (EvaluationResultsReport::S
 
         auto dub_reasons_str = dubiousReasonsString(detail_it.comments());
 
-        reasons += to_string(detail_it.getValue(DetailUTNOrTrackNum).toUInt())+":" + dub_reasons_str;
+        reasons += to_string(detail_it.getValue(DetailKey::UTNOrTrackNum).toUInt())+":" + dub_reasons_str;
     }
 
     // "UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
@@ -381,7 +381,7 @@ void SingleDubiousTrack::reportDetails(EvaluationResultsReport::Section& utn_req
         {
             utn_req_details_table.addRow(
                         { Time::toString(update.timestamp()).c_str(),
-                        rq_det_it.getValue(DetailUTNOrTrackNum),
+                        rq_det_it.getValue(DetailKey::UTNOrTrackNum),
                         dubiousReasonsString(update.comments()).c_str() }, // "Comment"
                         this, {detail_update_cnt});
 

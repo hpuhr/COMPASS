@@ -76,10 +76,10 @@ void JoinedDubiousTarget::addToValues (std::shared_ptr<SingleDubiousTarget> sing
 
     const auto& detail = single_result->getDetail(0);
 
-    auto is_dubious = detail.getValueAs<bool>(SingleDubiousTarget::DetailIsDubious);
+    auto is_dubious = detail.getValueAs<bool>(SingleDubiousTarget::DetailKey::IsDubious);
     assert(is_dubious.has_value());
 
-    auto duration = detail.getValueAs<boost::posix_time::time_duration>(SingleDubiousTarget::DetailDuration);
+    auto duration = detail.getValueAs<boost::posix_time::time_duration>(SingleDubiousTarget::DetailKey::Duration);
     assert(duration.has_value());
 
     if (is_dubious.value())

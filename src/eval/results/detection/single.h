@@ -58,12 +58,23 @@ public:
     virtual std::string reference(
             const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override;
 
-    static const std::string DetailMissOccurred; //bool
-    static const std::string DetailDiffTOD;      //float
-    static const std::string DetailRefExists;    //bool
-    static const std::string DetailMissedUIs;    //int
-    static const std::string DetailMaxGapUIs;    //int
-    static const std::string DetailNoRefUIs;     //int
+//    static const std::string DetailMissOccurred; //bool
+//    static const std::string DetailDiffTOD;      //float
+//    static const std::string DetailRefExists;    //bool
+//    static const std::string DetailMissedUIs;    //int
+//    static const std::string DetailMaxGapUIs;    //int
+//    static const std::string DetailNoRefUIs;     //int
+
+    enum DetailKey
+    {
+        MissOccurred, //bool
+        DiffTOD,      //float
+        RefExists,    //bool
+        MissedUIs,    //int
+        MaxGapUIs,    //int
+        NoRefUIs,     //int
+        DetailKeyCnt
+    };
 
     void addAnnotations(nlohmann::json::object_t& viewable) override;
 

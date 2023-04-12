@@ -38,9 +38,9 @@ using namespace nlohmann;
 namespace EvaluationRequirementResult
 {
 
-const std::string SingleExtraData::DetailInside    = "Inside";
-const std::string SingleExtraData::DetailExtra     = "Extra";
-const std::string SingleExtraData::DetailRefExists = "RefExists";
+//const std::string SingleExtraData::DetailInside    = "Inside";
+//const std::string SingleExtraData::DetailExtra     = "Extra";
+//const std::string SingleExtraData::DetailRefExists = "RefExists";
 
 SingleExtraData::SingleExtraData(const std::string& result_id, 
                                  std::shared_ptr<EvaluationRequirement::Base> requirement,
@@ -208,9 +208,9 @@ void SingleExtraData::reportDetails(EvaluationResultsReport::Section& utn_req_se
     {
         utn_req_details_table.addRow(
                     { Time::toString(rq_det_it.timestamp()).c_str(),
-                      rq_det_it.getValue(DetailInside), 
-                      rq_det_it.getValue(DetailExtra),
-                      rq_det_it.getValue(DetailRefExists), 
+                      rq_det_it.getValue(DetailKey::Inside),
+                      rq_det_it.getValue(DetailKey::Extra),
+                      rq_det_it.getValue(DetailKey::RefExists),
                       rq_det_it.comments().generalComment().c_str() },
                     this, detail_cnt);
 

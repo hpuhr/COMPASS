@@ -68,7 +68,7 @@ private:
 class EvaluationDetail
 {
 public:
-    typedef std::string                   Key;
+    typedef unsigned char                 Key;
     typedef boost::posix_time::ptime      Timestamp;
     typedef EvaluationTargetPosition      Position;
     //typedef std::tuple<EvaluationTargetPosition, EvaluationTargetPosition, QColor> Line;

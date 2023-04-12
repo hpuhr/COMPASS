@@ -38,12 +38,12 @@ using namespace nlohmann;
 namespace EvaluationRequirementResult
 {
 
-const std::string SingleDetection::DetailMissOccurred = "MissOccurred";
-const std::string SingleDetection::DetailDiffTOD      = "DiffTOD";
-const std::string SingleDetection::DetailRefExists    = "RefExists";
-const std::string SingleDetection::DetailMissedUIs    = "MissedUIs";
-const std::string SingleDetection::DetailMaxGapUIs    = "MaxGapUIs";
-const std::string SingleDetection::DetailNoRefUIs     = "NoRefUIs";
+//const std::string SingleDetection::DetailMissOccurred = "MissOccurred";
+//const std::string SingleDetection::DetailDiffTOD      = "DiffTOD";
+//const std::string SingleDetection::DetailRefExists    = "RefExists";
+//const std::string SingleDetection::DetailMissedUIs    = "MissedUIs";
+//const std::string SingleDetection::DetailMaxGapUIs    = "MaxGapUIs";
+//const std::string SingleDetection::DetailNoRefUIs     = "NoRefUIs";
 
 SingleDetection::SingleDetection(const std::string& result_id, 
                                  std::shared_ptr<EvaluationRequirement::Base> requirement,
@@ -214,15 +214,15 @@ void SingleDetection::reportDetails(EvaluationResultsReport::Section& utn_req_se
 
     for (auto& rq_det_it : getDetails())
     {
-        auto d_tod = rq_det_it.getValue(DetailDiffTOD);
+        auto d_tod = rq_det_it.getValue(DetailKey::DiffTOD);
 
         if (d_tod.isValid())
         {
             utn_req_details_table.addRow(
                         { Time::toString(rq_det_it.timestamp()).c_str(),
                           String::timeStringFromDouble(d_tod.toFloat()).c_str(),
-                          rq_det_it.getValue(DetailRefExists), 
-                          rq_det_it.getValue(DetailMissedUIs), 
+                          rq_det_it.getValue(DetailKey::RefExists),
+                          rq_det_it.getValue(DetailKey::MissedUIs),
                           rq_det_it.comments().generalComment().c_str() },
                         this, detail_cnt);
         }
@@ -231,8 +231,8 @@ void SingleDetection::reportDetails(EvaluationResultsReport::Section& utn_req_se
             utn_req_details_table.addRow(
                         { Time::toString(rq_det_it.timestamp()).c_str(),
                           QVariant(),
-                          rq_det_it.getValue(DetailRefExists), 
-                          rq_det_it.getValue(DetailMissedUIs),
+                          rq_det_it.getValue(DetailKey::RefExists),
+                          rq_det_it.getValue(DetailKey::MissedUIs),
                           rq_det_it.comments().generalComment().c_str() },
                         this, detail_cnt);
         }
@@ -302,7 +302,7 @@ std::unique_ptr<nlohmann::json::object_t> SingleDetection::getTargetErrorsViewab
 
     for (auto& detail_it : getDetails())
     {
-        if (!detail_it.getValue(DetailMissOccurred).toBool())
+        if (!detail_it.getValue(DetailKey::MissOccurred).toBool())
             continue;
 
         assert(detail_it.numPositions() >= 1);
@@ -399,7 +399,7 @@ void SingleDetection::addAnnotations(nlohmann::json::object_t& viewable)
     for (auto& detail_it : getDetails())
     {
         auto check_failed = detail_it.getValueAsOrAssert<bool>(
-                    EvaluationRequirementResult::SingleDetection::DetailMissOccurred);
+                    EvaluationRequirementResult::SingleDetection::DetailKey::MissOccurred);
 
         if (detail_it.numPositions() == 1)
             continue;

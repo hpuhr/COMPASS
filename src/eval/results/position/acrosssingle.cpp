@@ -299,11 +299,11 @@ void SinglePositionAcross::reportDetails(EvaluationResultsReport::Section& utn_r
         utn_req_details_table.addRow(
                     { Time::toString(rq_det_it.timestamp()).c_str(),
                      !has_ref_pos, 
-                      rq_det_it.getValue(DetailPosInside),
-                      rq_det_it.getValue(DetailValue),                 // "DAcross"
-                      rq_det_it.getValue(DetailCheckPassed),           // DAcrossOK"
-                      rq_det_it.getValue(DetailNumCheckPassed),        // "#ACOK",
-                      rq_det_it.getValue(DetailNumCheckFailed),        // "#ACNOK"
+                      rq_det_it.getValue(DetailKey::PosInside),
+                      rq_det_it.getValue(DetailKey::Value),                 // "DAcross"
+                      rq_det_it.getValue(DetailKey::CheckPassed),           // DAcrossOK"
+                      rq_det_it.getValue(DetailKey::NumCheckPassed),        // "#ACOK",
+                      rq_det_it.getValue(DetailKey::NumCheckFailed),        // "#ACNOK"
                       rq_det_it.comments().generalComment().c_str() }, // "Comment"
                     this, detail_cnt);
 
@@ -373,7 +373,7 @@ std::unique_ptr<nlohmann::json::object_t> SinglePositionAcross::getTargetErrorsV
 
     for (auto& detail_it : getDetails())
     {
-        auto check_passed = detail_it.getValueAs<bool>(DetailCheckPassed);
+        auto check_passed = detail_it.getValueAs<bool>(DetailKey::CheckPassed);
         assert(check_passed.has_value());
 
         if (check_passed.value())
@@ -468,7 +468,7 @@ void SinglePositionAcross::addAnnotations(nlohmann::json::object_t& viewable)
     for (auto& detail_it : getDetails())
     {
         auto check_passed = detail_it.getValueAsOrAssert<bool>(
-                    EvaluationRequirementResult::SinglePositionAcross::DetailCheckPassed);
+                    EvaluationRequirementResult::SinglePositionAcross::DetailKey::CheckPassed);
 
         if (detail_it.numPositions() == 1) // no ref pos
             continue;

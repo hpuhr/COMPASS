@@ -32,7 +32,7 @@ class EvaluationDetailComments;
 
 namespace EvaluationRequirement
 {
-    class Base;
+class Base;
 }
 
 namespace EvaluationRequirementResult
@@ -72,16 +72,16 @@ public:
     };
 
     SingleDubiousBase(const std::string& result_type,
-                      const std::string& result_id, 
+                      const std::string& result_id,
                       std::shared_ptr<EvaluationRequirement::Base> requirement,
                       const SectorLayer& sector_layer,
-                      unsigned int utn, 
-                      const EvaluationTargetData* target, 
+                      unsigned int utn,
+                      const EvaluationTargetData* target,
                       EvaluationManager& eval_man,
                       const EvaluationDetails& details,
                       unsigned int num_updates,
-                      unsigned int num_pos_outside, 
-                      unsigned int num_pos_inside, 
+                      unsigned int num_pos_outside,
+                      unsigned int num_pos_inside,
                       unsigned int num_pos_inside_dubious);
     virtual ~SingleDubiousBase();
 
@@ -92,17 +92,34 @@ public:
 
     static const std::string DetailCommentGroupDubious;
 
-    static const std::string DetailUTNOrTrackNum;   //unsigned int
-    static const std::string DetailFirstInside;     //bool
-    static const std::string DetailTODBegin;        //ptime
-    static const std::string DetailTODEnd;          //ptime
-    static const std::string DetailDuration;        //time_duration
-    static const std::string DetailNumPosInside;    //int
-    static const std::string DetailNumPosInsideDub; //int
-    static const std::string DetailHasModeAC;       //bool
-    static const std::string DetailHasModeS;        //bool
-    static const std::string DetailLeftSector;      //bool
-    static const std::string DetailIsDubious;       //bool
+    //    static const std::string DetailUTNOrTrackNum;   //unsigned int
+    //    static const std::string DetailFirstInside;     //bool
+    //    static const std::string DetailTODBegin;        //ptime
+    //    static const std::string DetailTODEnd;          //ptime
+    //    static const std::string DetailDuration;        //time_duration
+    //    static const std::string DetailNumPosInside;    //int
+    //    static const std::string DetailNumPosInsideDub; //int
+    //    static const std::string DetailHasModeAC;       //bool
+    //    static const std::string DetailHasModeS;        //bool
+    //    static const std::string DetailLeftSector;      //bool
+    //    static const std::string DetailIsDubious;       //bool
+
+    enum DetailKey
+    {
+        CommentGroupDubious,
+        UTNOrTrackNum,   //unsigned int
+        FirstInside,     //bool
+        TODBegin,        //ptime
+        TODEnd,          //ptime
+        Duration,        //time_duration
+        NumPosInside,    //int
+        NumPosInsideDub, //int
+        HasModeAC,       //bool
+        HasModeS,        //bool
+        LeftSector,      //bool
+        IsDubious,       //bool
+        DetailKeyCnt
+    };
 
     static void logComment(EvaluationDetail& d, const std::string& id, const std::string& comment);
     static void logComments(EvaluationDetail& d, const EvaluationDetailComments::CommentGroup& group);
@@ -127,9 +144,9 @@ class JoinedDubiousBase : public Joined
 {
 public:
     JoinedDubiousBase(const std::string& result_type,
-                      const std::string& result_id, 
+                      const std::string& result_id,
                       std::shared_ptr<EvaluationRequirement::Base> requirement,
-                      const SectorLayer& sector_layer, 
+                      const SectorLayer& sector_layer,
                       EvaluationManager& eval_man);
 protected:
     unsigned int num_updates_            {0};

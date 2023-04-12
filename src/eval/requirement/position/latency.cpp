@@ -116,15 +116,15 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionLatency::evaluate (
                             const QVariant& num_value_nok,
                             const std::string& comment)
     {
-        details.push_back(Detail(ts, tst_pos).setValue(Result::DetailPosInside, pos_inside.isValid() ? pos_inside : "false")
-                                             .setValue(Result::DetailValue, offset.isValid() ? offset : 0.0f)
-                                             .setValue(Result::DetailCheckPassed, check_passed)
-                                             .setValue(Result::DetailNumPos, num_pos)
-                                             .setValue(Result::DetailNumNoRef, num_no_ref)
-                                             .setValue(Result::DetailNumInside, num_pos_inside)
-                                             .setValue(Result::DetailNumOutside, num_pos_outside)
-                                             .setValue(Result::DetailNumCheckPassed, num_value_ok)
-                                             .setValue(Result::DetailNumCheckFailed, num_value_nok)
+        details.push_back(Detail(ts, tst_pos).setValue(Result::DetailKey::PosInside, pos_inside.isValid() ? pos_inside : "false")
+                                             .setValue(Result::DetailKey::Value, offset.isValid() ? offset : 0.0f)
+                                             .setValue(Result::DetailKey::CheckPassed, check_passed)
+                                             .setValue(Result::DetailKey::NumPos, num_pos)
+                                             .setValue(Result::DetailKey::NumNoRef, num_no_ref)
+                                             .setValue(Result::DetailKey::NumInside, num_pos_inside)
+                                             .setValue(Result::DetailKey::NumOutside, num_pos_outside)
+                                             .setValue(Result::DetailKey::NumCheckPassed, num_value_ok)
+                                             .setValue(Result::DetailKey::NumCheckFailed, num_value_nok)
                                              .addPosition(ref_pos)
                                              .generalComment(comment));
     };

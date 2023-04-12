@@ -40,18 +40,18 @@ using namespace nlohmann;
 namespace EvaluationRequirementResult
 {
 
-const std::string SingleTrackAngle::DetailOffset         = "Offset";
-const std::string SingleTrackAngle::DetailCheckPassed    = "CheckPassed";
-const std::string SingleTrackAngle::DetailValueRef       = "ValueRef";
-const std::string SingleTrackAngle::DetailValueTst       = "ValueTst";
-const std::string SingleTrackAngle::DetailSpeedRef       = "SpeedRef";
-const std::string SingleTrackAngle::DetailPosInside      = "PosInside";
-const std::string SingleTrackAngle::DetailNumPos         = "NumPos";
-const std::string SingleTrackAngle::DetailNumNoRef       = "NumNoRef";
-const std::string SingleTrackAngle::DetailNumInside      = "NumInside";
-const std::string SingleTrackAngle::DetailNumOutside     = "NumOutside";
-const std::string SingleTrackAngle::DetailNumCheckFailed = "NumCheckFailed";
-const std::string SingleTrackAngle::DetailNumCheckPassed = "NumCheckPassed";
+//const std::string SingleTrackAngle::DetailOffset         = "Offset";
+//const std::string SingleTrackAngle::DetailCheckPassed    = "CheckPassed";
+//const std::string SingleTrackAngle::DetailValueRef       = "ValueRef";
+//const std::string SingleTrackAngle::DetailValueTst       = "ValueTst";
+//const std::string SingleTrackAngle::DetailSpeedRef       = "SpeedRef";
+//const std::string SingleTrackAngle::DetailPosInside      = "PosInside";
+//const std::string SingleTrackAngle::DetailNumPos         = "NumPos";
+//const std::string SingleTrackAngle::DetailNumNoRef       = "NumNoRef";
+//const std::string SingleTrackAngle::DetailNumInside      = "NumInside";
+//const std::string SingleTrackAngle::DetailNumOutside     = "NumOutside";
+//const std::string SingleTrackAngle::DetailNumCheckFailed = "NumCheckFailed";
+//const std::string SingleTrackAngle::DetailNumCheckPassed = "NumCheckPassed";
 
 SingleTrackAngle::SingleTrackAngle(const std::string& result_id, 
                                    std::shared_ptr<EvaluationRequirement::Base> requirement,
@@ -337,14 +337,14 @@ void SingleTrackAngle::reportDetails(EvaluationResultsReport::Section& utn_req_s
         utn_req_details_table.addRow(
                     { Time::toString(rq_det_it.timestamp()).c_str(),
                      !has_ref_pos, 
-                      rq_det_it.getValue(DetailPosInside),
-                      rq_det_it.getValue(DetailOffset),         // "Distance"
-                      rq_det_it.getValue(DetailCheckPassed),    // CP"
-                      rq_det_it.getValue(DetailValueRef), // "Value Ref"
-                      rq_det_it.getValue(DetailValueTst), // "Value Tst"
-                      rq_det_it.getValue(DetailSpeedRef), // "Speed Ref"
-                      rq_det_it.getValue(DetailNumCheckFailed), // "#CF",
-                      rq_det_it.getValue(DetailNumCheckPassed), // "#CP"
+                      rq_det_it.getValue(DetailKey::PosInside),
+                      rq_det_it.getValue(DetailKey::Offset),         // "Distance"
+                      rq_det_it.getValue(DetailKey::CheckPassed),    // CP"
+                      rq_det_it.getValue(DetailKey::ValueRef), // "Value Ref"
+                      rq_det_it.getValue(DetailKey::ValueTst), // "Value Tst"
+                      rq_det_it.getValue(DetailKey::SpeedRef), // "Speed Ref"
+                      rq_det_it.getValue(DetailKey::NumCheckFailed), // "#CF",
+                      rq_det_it.getValue(DetailKey::NumCheckPassed), // "#CP"
                       rq_det_it.comments().generalComment().c_str() }, // "Comment"
                     this, detail_cnt);
 
@@ -416,7 +416,7 @@ std::unique_ptr<nlohmann::json::object_t> SingleTrackAngle::getTargetErrorsViewa
 
     for (auto& detail_it : getDetails())
     {
-        auto check_passed = detail_it.getValueAs<bool>(DetailCheckPassed);
+        auto check_passed = detail_it.getValueAs<bool>(DetailKey::CheckPassed);
         assert(check_passed.has_value());
 
         if ((failed_values_of_interest && check_passed.value()) || 
@@ -566,7 +566,7 @@ void SingleTrackAngle::addAnnotations(nlohmann::json::object_t& viewable)
     for (auto& detail_it : getDetails())
     {
         auto check_passed = detail_it.getValueAsOrAssert<bool>(
-                    EvaluationRequirementResult::SingleTrackAngle::DetailCheckPassed);
+                    EvaluationRequirementResult::SingleTrackAngle::DetailKey::CheckPassed);
 
         assert (detail_it.numPositions() >= 1);
 

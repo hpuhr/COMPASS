@@ -60,9 +60,18 @@ public:
     unsigned int numExtra() const;
     unsigned int numOK() const;
 
-    static const std::string DetailTrackNum; //unsigned int
-    static const std::string DetailInside;   //bool
-    static const std::string DetailExtra;    //bool
+//    static const std::string DetailTrackNum; //unsigned int
+//    static const std::string DetailInside;   //bool
+//    static const std::string DetailExtra;    //bool
+
+    enum DetailKey
+    {
+        TrackNum, //unsigned int
+        Inside,   //bool
+        Extra,    //bool
+        DetailKeyCnt
+    };
+
 
     void addAnnotations(nlohmann::json::object_t& viewable) override;
 

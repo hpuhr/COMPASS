@@ -300,11 +300,11 @@ void SinglePositionLatency::reportDetails(EvaluationResultsReport::Section& utn_
         utn_req_details_table.addRow(
                     { Time::toString(rq_det_it.timestamp()).c_str(),
                      !has_ref_pos, 
-                      rq_det_it.getValue(DetailPosInside),
-                      rq_det_it.getValue(DetailValue),                // "DLatency"
-                      rq_det_it.getValue(DetailCheckPassed),          // DLatencyOK"
-                      rq_det_it.getValue(DetailNumCheckPassed),       // "#LTOK",
-                      rq_det_it.getValue(DetailNumCheckFailed),       // "#LTNOK"
+                      rq_det_it.getValue(DetailKey::PosInside),
+                      rq_det_it.getValue(DetailKey::Value),                // "DLatency"
+                      rq_det_it.getValue(DetailKey::CheckPassed),          // DLatencyOK"
+                      rq_det_it.getValue(DetailKey::NumCheckPassed),       // "#LTOK",
+                      rq_det_it.getValue(DetailKey::NumCheckFailed),       // "#LTNOK"
                       rq_det_it.comments().generalComment().c_str()}, // "Comment"
                     this, detail_cnt);
 
@@ -375,7 +375,7 @@ std::unique_ptr<nlohmann::json::object_t> SinglePositionLatency::getTargetErrors
 
     for (auto& detail_it : getDetails())
     {
-        auto check_passed = detail_it.getValueAs<bool>(DetailCheckPassed);
+        auto check_passed = detail_it.getValueAs<bool>(DetailKey::CheckPassed);
         assert(check_passed.has_value());
 
         if (check_passed.value())
@@ -470,7 +470,7 @@ void SinglePositionLatency::addAnnotations(nlohmann::json::object_t& viewable)
     for (auto& detail_it : getDetails())
     {
         auto check_passed = detail_it.getValueAsOrAssert<bool>(
-                    EvaluationRequirementResult::SinglePositionLatency::DetailCheckPassed);
+                    EvaluationRequirementResult::SinglePositionLatency::DetailKey::CheckPassed);
 
         if (detail_it.numPositions() == 1) // no ref pos
             continue;

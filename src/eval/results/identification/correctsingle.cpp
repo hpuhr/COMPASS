@@ -38,15 +38,15 @@ using namespace nlohmann;
 namespace EvaluationRequirementResult
 {
 
-const std::string SingleIdentificationCorrect::DetailRefExists     = "RefExists";
-const std::string SingleIdentificationCorrect::DetailPosInside     = "PosInside";
-const std::string SingleIdentificationCorrect::DetailIsNotCorrect  = "IsNotCorrect";
-const std::string SingleIdentificationCorrect::DetailNumUpdates    = "NumUpdates";
-const std::string SingleIdentificationCorrect::DetailNumNoRef      = "NumNoRef";
-const std::string SingleIdentificationCorrect::DetailNumInside     = "NumInside";
-const std::string SingleIdentificationCorrect::DetailNumOutside    = "NumOutside";
-const std::string SingleIdentificationCorrect::DetailNumCorrect    = "NumCorrect";
-const std::string SingleIdentificationCorrect::DetailNumNotCorrect = "NumNotCorrect";
+//const std::string SingleIdentificationCorrect::DetailRefExists     = "RefExists";
+//const std::string SingleIdentificationCorrect::DetailPosInside     = "PosInside";
+//const std::string SingleIdentificationCorrect::DetailIsNotCorrect  = "IsNotCorrect";
+//const std::string SingleIdentificationCorrect::DetailNumUpdates    = "NumUpdates";
+//const std::string SingleIdentificationCorrect::DetailNumNoRef      = "NumNoRef";
+//const std::string SingleIdentificationCorrect::DetailNumInside     = "NumInside";
+//const std::string SingleIdentificationCorrect::DetailNumOutside    = "NumOutside";
+//const std::string SingleIdentificationCorrect::DetailNumCorrect    = "NumCorrect";
+//const std::string SingleIdentificationCorrect::DetailNumNotCorrect = "NumNotCorrect";
 
 SingleIdentificationCorrect::SingleIdentificationCorrect(const std::string& result_id, 
                                                          std::shared_ptr<EvaluationRequirement::Base> requirement,
@@ -216,14 +216,14 @@ void SingleIdentificationCorrect::reportDetails(EvaluationResultsReport::Section
     {
         utn_req_details_table.addRow(
                     { Time::toString(rq_det_it.timestamp()).c_str(), 
-                      rq_det_it.getValue(DetailRefExists),
-                     !rq_det_it.getValue(DetailIsNotCorrect).toBool(),
-                      rq_det_it.getValue(DetailNumUpdates), 
-                      rq_det_it.getValue(DetailNumNoRef),
-                      rq_det_it.getValue(DetailNumInside), 
-                      rq_det_it.getValue(DetailNumOutside),
-                      rq_det_it.getValue(DetailNumCorrect), 
-                      rq_det_it.getValue(DetailNumNotCorrect), 
+                      rq_det_it.getValue(DetailKey::RefExists),
+                     !rq_det_it.getValue(DetailKey::IsNotCorrect).toBool(),
+                      rq_det_it.getValue(DetailKey::NumUpdates),
+                      rq_det_it.getValue(DetailKey::NumNoRef),
+                      rq_det_it.getValue(DetailKey::NumInside),
+                      rq_det_it.getValue(DetailKey::NumOutside),
+                      rq_det_it.getValue(DetailKey::NumCorrect),
+                      rq_det_it.getValue(DetailKey::NumNotCorrect),
                       rq_det_it.comments().generalComment().c_str() },
                     this, detail_cnt);
 
@@ -290,7 +290,7 @@ std::unique_ptr<nlohmann::json::object_t> SingleIdentificationCorrect::getTarget
 
     for (auto& detail_it : getDetails())
     {
-        auto is_not_correct = detail_it.getValueAs<bool>(DetailIsNotCorrect);
+        auto is_not_correct = detail_it.getValueAs<bool>(DetailKey::IsNotCorrect);
         assert(is_not_correct.has_value());
 
         if (!is_not_correct.value())
@@ -370,7 +370,7 @@ void SingleIdentificationCorrect::addAnnotations(nlohmann::json::object_t& viewa
     for (auto& detail_it : getDetails())
     {
         auto is_not_correct = detail_it.getValueAsOrAssert<bool>(
-                    EvaluationRequirementResult::SingleIdentificationCorrect::DetailIsNotCorrect);
+                    EvaluationRequirementResult::SingleIdentificationCorrect::DetailKey::IsNotCorrect);
 
         assert (detail_it.numPositions() >= 1);
 

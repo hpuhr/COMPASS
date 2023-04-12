@@ -102,16 +102,16 @@ namespace EvaluationRequirement
                                 const QVariant& num_missing_id,
                                 const std::string& comment)
         {
-            details.push_back(Detail(ts, tst_pos).setValue(Result::DetailRefExists, ref_exists)
-                                                 .setValue(Result::DetailPosInside, pos_inside.isValid() ? pos_inside : "false")
-                                                 .setValue(Result::DetailIsNotOk, is_not_ok)
-                                                 .setValue(Result::DetailNumUpdates, num_updates)
-                                                 .setValue(Result::DetailNumNoRef, num_no_ref)
-                                                 .setValue(Result::DetailNumInside, num_pos_inside)
-                                                 .setValue(Result::DetailNumOutside, num_pos_outside)
-                                                 .setValue(Result::DetailNumNoRefVal, num_no_ref_id)
-                                                 .setValue(Result::DetailNumPresent, num_present_id)
-                                                 .setValue(Result::DetailNumMissing, num_missing_id)
+            details.push_back(Detail(ts, tst_pos).setValue(Result::DetailKey::RefExists, ref_exists)
+                                                 .setValue(Result::DetailKey::PosInside, pos_inside.isValid() ? pos_inside : "false")
+                                                 .setValue(Result::DetailKey::IsNotOk, is_not_ok)
+                                                 .setValue(Result::DetailKey::NumUpdates, num_updates)
+                                                 .setValue(Result::DetailKey::NumNoRef, num_no_ref)
+                                                 .setValue(Result::DetailKey::NumInside, num_pos_inside)
+                                                 .setValue(Result::DetailKey::NumOutside, num_pos_outside)
+                                                 .setValue(Result::DetailKey::NumNoRefVal, num_no_ref_id)
+                                                 .setValue(Result::DetailKey::NumPresent, num_present_id)
+                                                 .setValue(Result::DetailKey::NumMissing, num_missing_id)
                                                  .generalComment(comment));
         };
 

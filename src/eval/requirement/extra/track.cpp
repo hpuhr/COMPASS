@@ -160,9 +160,9 @@ std::shared_ptr<EvaluationRequirementResult::Single> ExtraTrack::evaluate (
                             const QVariant& extra,
                             const std::string& comment)
     {
-        details.push_back(Detail(ts, tst_pos).setValue(Result::DetailInside, inside)
-                                             .setValue(Result::DetailTrackNum, track_num)
-                                             .setValue(Result::DetailExtra, extra)
+        details.push_back(Detail(ts, tst_pos).setValue(Result::DetailKey::Inside, inside)
+                                             .setValue(Result::DetailKey::TrackNum, track_num)
+                                             .setValue(Result::DetailKey::Extra, extra)
                                              .generalComment(comment));
     };
 

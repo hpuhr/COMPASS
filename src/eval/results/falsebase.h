@@ -66,16 +66,31 @@ public:
     int numCorrect() const;
     int numFalse() const;
 
-    static const std::string DetailRefExists;    //bool
-    static const std::string DetailPosInside;    //bool 
-    static const std::string DetailIsNotOk;      //bool
-    static const std::string DetailNumUpdates;   //int
-    static const std::string DetailNumNoRef;     //int
-    static const std::string DetailNumInside;    //int
-    static const std::string DetailNumOutside;   //int
-    static const std::string DetailNumUnknownID; //int
-    static const std::string DetailNumCorrectID; //int
-    static const std::string DetailNumFalseID;   //int
+//    static const std::string DetailRefExists;    //bool
+//    static const std::string DetailPosInside;    //bool
+//    static const std::string DetailIsNotOk;      //bool
+//    static const std::string DetailNumUpdates;   //int
+//    static const std::string DetailNumNoRef;     //int
+//    static const std::string DetailNumInside;    //int
+//    static const std::string DetailNumOutside;   //int
+//    static const std::string DetailNumUnknownID; //int
+//    static const std::string DetailNumCorrectID; //int
+//    static const std::string DetailNumFalseID;   //int
+
+    enum DetailKey
+    {
+        RefExists,    //bool
+        PosInside,    //bool
+        IsNotOk,      //bool
+        NumUpdates,   //int
+        NumNoRef,     //int
+        NumInside,    //ints
+        NumOutside,   //int
+        NumUnknownID, //int
+        NumCorrectID, //int
+        NumFalseID,   //int
+        DetailKeyCnt
+    };
 
 protected:
     int num_updates_     {0};

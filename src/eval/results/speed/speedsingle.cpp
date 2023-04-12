@@ -40,15 +40,15 @@ using namespace nlohmann;
 namespace EvaluationRequirementResult
 {
 
-const std::string SingleSpeed::DetailOffset         = "Offset";
-const std::string SingleSpeed::DetailCheckPassed    = "CheckPassed";
-const std::string SingleSpeed::DetailPosInside      = "PosInside";
-const std::string SingleSpeed::DetailNumPos         = "NumPos";
-const std::string SingleSpeed::DetailNumNoRef       = "NumNoRef";
-const std::string SingleSpeed::DetailNumInside      = "NumInside";
-const std::string SingleSpeed::DetailNumOutside     = "NumOutside";
-const std::string SingleSpeed::DetailNumCheckFailed = "NumCheckFailed";
-const std::string SingleSpeed::DetailNumCheckPassed = "NumCheckPassed";
+//const std::string SingleSpeed::DetailOffset         = "Offset";
+//const std::string SingleSpeed::DetailCheckPassed    = "CheckPassed";
+//const std::string SingleSpeed::DetailPosInside      = "PosInside";
+//const std::string SingleSpeed::DetailNumPos         = "NumPos";
+//const std::string SingleSpeed::DetailNumNoRef       = "NumNoRef";
+//const std::string SingleSpeed::DetailNumInside      = "NumInside";
+//const std::string SingleSpeed::DetailNumOutside     = "NumOutside";
+//const std::string SingleSpeed::DetailNumCheckFailed = "NumCheckFailed";
+//const std::string SingleSpeed::DetailNumCheckPassed = "NumCheckPassed";
 
 SingleSpeed::SingleSpeed(const std::string& result_id, 
                          std::shared_ptr<EvaluationRequirement::Base> requirement,
@@ -332,11 +332,11 @@ void SingleSpeed::reportDetails(EvaluationResultsReport::Section& utn_req_sectio
         utn_req_details_table.addRow(
                     { Time::toString(rq_det_it.timestamp()).c_str(),
                      !has_ref_pos, 
-                      rq_det_it.getValue(DetailPosInside),
-                      rq_det_it.getValue(DetailOffset),                // "Distance"
-                      rq_det_it.getValue(DetailCheckPassed),           // CP"
-                      rq_det_it.getValue(DetailNumCheckFailed),        // "#CF",
-                      rq_det_it.getValue(DetailNumCheckPassed),        // "#CP"
+                      rq_det_it.getValue(DetailKey::PosInside),
+                      rq_det_it.getValue(DetailKey::Offset),                // "Distance"
+                      rq_det_it.getValue(DetailKey::CheckPassed),           // CP"
+                      rq_det_it.getValue(DetailKey::NumCheckFailed),        // "#CF",
+                      rq_det_it.getValue(DetailKey::NumCheckPassed),        // "#CP"
                       rq_det_it.comments().generalComment().c_str() }, // "Comment"
                     this, detail_cnt);
 
@@ -408,7 +408,7 @@ std::unique_ptr<nlohmann::json::object_t> SingleSpeed::getTargetErrorsViewable (
 
     for (auto& detail_it : getDetails())
     {
-        auto check_passed = detail_it.getValueAs<bool>(DetailCheckPassed);
+        auto check_passed = detail_it.getValueAs<bool>(DetailKey::CheckPassed);
         assert(check_passed.has_value());
 
         if ((failed_values_of_interest && check_passed.value()) || 
@@ -557,7 +557,7 @@ void SingleSpeed::addAnnotations(nlohmann::json::object_t& viewable)
     for (auto& detail_it : getDetails())
     {
         auto check_passed = detail_it.getValueAsOrAssert<bool>(
-                    EvaluationRequirementResult::SingleSpeed::DetailCheckPassed);
+                    EvaluationRequirementResult::SingleSpeed::DetailKey::CheckPassed);
 
         assert (detail_it.numPositions() >= 1);
 

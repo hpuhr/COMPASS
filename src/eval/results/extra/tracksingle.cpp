@@ -38,9 +38,9 @@ using namespace nlohmann;
 namespace EvaluationRequirementResult
 {
 
-const std::string SingleExtraTrack::DetailTrackNum = "";
-const std::string SingleExtraTrack::DetailInside   = "";
-const std::string SingleExtraTrack::DetailExtra    = "";
+//const std::string SingleExtraTrack::DetailTrackNum = "";
+//const std::string SingleExtraTrack::DetailInside   = "";
+//const std::string SingleExtraTrack::DetailExtra    = "";
 
 SingleExtraTrack::SingleExtraTrack(const std::string& result_id, 
                                    std::shared_ptr<EvaluationRequirement::Base> requirement,
@@ -210,9 +210,9 @@ void SingleExtraTrack::reportDetails(EvaluationResultsReport::Section& utn_req_s
     {
         utn_req_details_table.addRow(
                     { Time::toString(rq_det_it.timestamp()).c_str(),
-                      rq_det_it.getValue(DetailInside), 
-                      rq_det_it.getValue(DetailTrackNum), 
-                      rq_det_it.getValue(DetailExtra),
+                      rq_det_it.getValue(DetailKey::Inside),
+                      rq_det_it.getValue(DetailKey::TrackNum),
+                      rq_det_it.getValue(DetailKey::Extra),
                       rq_det_it.comments().generalComment().c_str() },
                     this, detail_cnt);
 
