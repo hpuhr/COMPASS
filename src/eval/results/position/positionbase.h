@@ -101,7 +101,7 @@ protected:
         unsigned int num_passed_      {0};
         unsigned int num_failed_      {0};
 
-        vector<double> values_;
+        //vector<double> values_;
 
         double value_min_ {0};
         double value_max_ {0};
@@ -109,6 +109,8 @@ protected:
         double value_var_ {0};
 
         boost::optional<float> prob_;
+
+        vector<double> values() const;
 };
 
 }

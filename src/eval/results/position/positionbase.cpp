@@ -129,4 +129,19 @@ JoinedPositionBase::JoinedPositionBase(const std::string& result_type,
 {
 }
 
+vector<double> JoinedPositionBase::values() const
+{
+    vector<double> values;
+
+    for (auto& result_it : results_)
+    {
+        SinglePositionBase* single_result = dynamic_cast<SinglePositionBase*>(result_it.get());
+        assert (single_result);
+
+        values.insert(values.end(), single_result->values().begin(), single_result->values().end());
+    }
+
+    return values;
+}
+
 }

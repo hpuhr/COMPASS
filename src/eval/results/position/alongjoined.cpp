@@ -71,10 +71,6 @@ void JoinedPositionAlong::addToValues (std::shared_ptr<SinglePositionAlong> sing
     num_passed_      += single_result->numPassed();
     num_failed_      += single_result->numFailed();
 
-    const vector<double>& other_values = single_result->values();
-
-    values_.insert(values_.end(), other_values.begin(), other_values.end());
-
     update();
 }
 
@@ -82,20 +78,21 @@ void JoinedPositionAlong::update()
 {
     assert (num_no_ref_ <= num_pos_);
     assert (num_pos_ - num_no_ref_ == num_pos_inside_ + num_pos_outside_);
-    assert (values_.size() == num_passed_ + num_failed_);
 
     prob_.reset();
 
-    unsigned int num_distances = values_.size();
+    vector<double> all_values = values();
+    assert (all_values.size() == num_passed_ + num_failed_);
+    unsigned int num_distances = all_values.size();
 
     if (num_distances)
     {
-        value_min_ = *min_element(values_.begin(), values_.end());
-        value_max_ = *max_element(values_.begin(), values_.end());
-        value_avg_ = std::accumulate(values_.begin(), values_.end(), 0.0) / (float) num_distances;
+        value_min_ = *min_element(all_values.begin(), all_values.end());
+        value_max_ = *max_element(all_values.begin(), all_values.end());
+        value_avg_ = std::accumulate(all_values.begin(), all_values.end(), 0.0) / (float) num_distances;
 
         value_var_ = 0;
-        for(auto val : values_)
+        for(auto val : all_values)
             value_var_ += pow(val - value_avg_, 2);
         value_var_ /= (float)num_distances;
 
@@ -307,8 +304,6 @@ void JoinedPositionAlong::updatesToUseChanges_impl()
     num_passed_      = 0;
     num_failed_      = 0;
 
-    values_.clear();
-
     for (auto result_it : results_)
     {
         std::shared_ptr<SinglePositionAlong> result =
@@ -343,10 +338,12 @@ void JoinedPositionAlong::exportAsCSV()
         if (output_file)
         {
             output_file << "d_along\n";
-            unsigned int size = values_.size();
+
+            vector<double> all_values = values();
+            unsigned int size = all_values.size();
 
             for (unsigned int cnt=0; cnt < size; ++cnt)
-                output_file << values_.at(cnt) << "\n";
+                output_file << all_values.at(cnt) << "\n";
         }
     }
 }
