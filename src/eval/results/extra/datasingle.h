@@ -68,8 +68,7 @@ public:
     {
         Inside,    //bool
         Extra,     //bool
-        RefExists, //bool
-        DetailKeyCnt
+        RefExists //bool
     };
 
     void addAnnotations(nlohmann::json::object_t& viewable) override;

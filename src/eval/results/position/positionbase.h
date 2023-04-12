@@ -75,8 +75,7 @@ public:
         NumInside,       //int
         NumOutside,      //int
         NumCheckPassed,  //int
-        NumCheckFailed,  //int
-        DetailKeyCnt
+        NumCheckFailed  //int
     };
 
 protected:

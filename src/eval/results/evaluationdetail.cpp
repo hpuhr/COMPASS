@@ -166,6 +166,9 @@ EvaluationDetail::EvaluationDetail(const Timestamp& ts,
 */
 EvaluationDetail& EvaluationDetail::setValue(const Key& key, const QVariant& value)
 {
+    if (key >= values_.size())
+        values_.resize(key+1);
+
     values_[ key ] = value;
 
     return *this;
@@ -176,6 +179,10 @@ EvaluationDetail& EvaluationDetail::setValue(const Key& key, const QVariant& val
 EvaluationDetail& EvaluationDetail::setValue(const Key& key, const boost::posix_time::ptime& value)
 {
     QString v = QString::fromStdString(Utils::Time::toString(value));
+
+    if (key >= values_.size())
+        values_.resize(key+1);
+
     values_[ key ] = v;
 
     return *this;
@@ -186,6 +193,10 @@ EvaluationDetail& EvaluationDetail::setValue(const Key& key, const boost::posix_
 EvaluationDetail& EvaluationDetail::setValue(const Key& key, const boost::posix_time::time_duration& value)
 {
     double v = Utils::Time::partialSeconds(value);
+
+    if (key >= values_.size())
+        values_.resize(key+1);
+
     values_[ key ] = v;
 
     return *this;
@@ -195,11 +206,17 @@ EvaluationDetail& EvaluationDetail::setValue(const Key& key, const boost::posix_
 */
 QVariant EvaluationDetail::getValue(const Key& key) const
 {
-    auto it = values_.find(key);
-    if (it == values_.end())
+//    auto it = values_.find(key);
+//    if (it == values_.end())
+//        return {};
+
+//    return it->second;
+
+    if (key >= values_.size()) // never set
         return {};
 
-    return it->second;
+    assert (key < values_.size());
+    return values_.at(key);
 }
 
 /**

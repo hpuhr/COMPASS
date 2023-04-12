@@ -86,8 +86,7 @@ public:
         NumOutside,   //int
         NumNoRefVal,  //int
         NumPresent,   //int
-        NumMissing,   //int
-        DetailKeyCnt
+        NumMissing   //int
     };
 
 protected:

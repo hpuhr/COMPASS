@@ -94,12 +94,21 @@ public:
     template<typename T>
     boost::optional<T> getValueAs(const Key& key) const
     {
-        auto it = values_.find(key);
-        if (it == values_.end())
+//        auto it = values_.find(key);
+//        if (it == values_.end())
+//            return {};
+//        if (!it->second.canConvert<T>())
+//            return {};
+//        return it->second.value<T>();
+
+        if (key >= values_.size()) // never set
             return {};
-        if (!it->second.canConvert<T>())
+
+        assert (key < values_.size());
+        if (!values_.at(key).canConvert<T>())
             return {};
-        return it->second.value<T>();
+
+        return values_.at(key).value<T>();
     }
 
     template<typename T>
@@ -140,7 +149,8 @@ private:
     Timestamp                        timestamp_;
     std::vector<Position>            positions_;
     //std::vector<Line>               lines_;
-    std::map<Key, QVariant>          values_;
+    //std::map<Key, QVariant>          values_;
+    std::vector<QVariant>            values_;
     EvaluationDetailComments         comments_;
     mutable boost::optional<Details> details_;
 };

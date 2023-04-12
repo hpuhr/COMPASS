@@ -72,8 +72,7 @@ public:
         RefExists,    //bool
         MissedUIs,    //int
         MaxGapUIs,    //int
-        NoRefUIs,     //int
-        DetailKeyCnt
+        NoRefUIs     //int
     };
 
     void addAnnotations(nlohmann::json::object_t& viewable) override;

@@ -117,8 +117,7 @@ public:
         HasModeAC,       //bool
         HasModeS,        //bool
         LeftSector,      //bool
-        IsDubious,       //bool
-        DetailKeyCnt
+        IsDubious       //bool
     };
 
     static void logComment(EvaluationDetail& d, const std::string& id, const std::string& comment);

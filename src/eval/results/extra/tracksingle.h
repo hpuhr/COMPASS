@@ -68,8 +68,7 @@ public:
     {
         TrackNum, //unsigned int
         Inside,   //bool
-        Extra,    //bool
-        DetailKeyCnt
+        Extra    //bool
     };
 
 

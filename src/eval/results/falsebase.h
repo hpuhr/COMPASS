@@ -88,8 +88,7 @@ public:
         NumOutside,   //int
         NumUnknownID, //int
         NumCorrectID, //int
-        NumFalseID,   //int
-        DetailKeyCnt
+        NumFalseID   //int
     };
 
 protected:

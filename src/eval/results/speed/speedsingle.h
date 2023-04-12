@@ -96,8 +96,7 @@ public:
         NumInside,      //int
         NumOutside,     //int
         NumCheckFailed, //int
-        NumCheckPassed, //int
-        DetailKeyCnt
+        NumCheckPassed //int
     };
 
     void addAnnotations(nlohmann::json::object_t& viewable) override;

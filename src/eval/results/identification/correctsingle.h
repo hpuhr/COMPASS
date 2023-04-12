@@ -87,8 +87,7 @@ public:
         NumInside,     //int
         NumOutside,    //int
         NumCorrect,    //int
-        NumNotCorrect, //int
-        DetailKeyCnt
+        NumNotCorrect //int
     };
 
     void addAnnotations(nlohmann::json::object_t& viewable) override;
