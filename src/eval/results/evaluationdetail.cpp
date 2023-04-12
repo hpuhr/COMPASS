@@ -242,51 +242,51 @@ const EvaluationDetail::Position& EvaluationDetail::position(size_t idx) const
     return positions_.at(idx);
 }
 
-EvaluationDetail& EvaluationDetail::addLine(const Line& l)
-{
-    lines_.push_back(l);
+//EvaluationDetail& EvaluationDetail::addLine(const Line& l)
+//{
+//    lines_.push_back(l);
 
-    return *this;
-}
+//    return *this;
+//}
 
-/**
-*/
-EvaluationDetail& EvaluationDetail::addLine(const boost::optional<Line>& l)
-{
-    if (l.has_value())
-        addLine(l.value());
+///**
+//*/
+//EvaluationDetail& EvaluationDetail::addLine(const boost::optional<Line>& l)
+//{
+//    if (l.has_value())
+//        addLine(l.value());
 
-    return *this;
-}
+//    return *this;
+//}
 
-EvaluationDetail& EvaluationDetail::addLines(const std::vector<Line>& lines)
-{
-    for (const auto& line_it : lines)
-        addLine(line_it);
+//EvaluationDetail& EvaluationDetail::addLines(const std::vector<Line>& lines)
+//{
+//    for (const auto& line_it : lines)
+//        addLine(line_it);
 
-    return *this;
-}
+//    return *this;
+//}
 
-/**
-*/
-int EvaluationDetail::numLines() const
-{
-    return (int)lines_.size();
-}
+///**
+//*/
+//int EvaluationDetail::numLines() const
+//{
+//    return (int)lines_.size();
+//}
 
-/**
-*/
-const std::vector<EvaluationDetail::Line>& EvaluationDetail::lines() const
-{
-    return lines_;
-}
+///**
+//*/
+//const std::vector<EvaluationDetail::Line>& EvaluationDetail::lines() const
+//{
+//    return lines_;
+//}
 
-/**
-*/
-const EvaluationDetail::Line& EvaluationDetail::line(int idx) const
-{
-    return lines_.at(idx);
-}
+///**
+//*/
+//const EvaluationDetail::Line& EvaluationDetail::line(int idx) const
+//{
+//    return lines_.at(idx);
+//}
 
 /**
 */
