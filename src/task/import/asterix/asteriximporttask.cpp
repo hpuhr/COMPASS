@@ -67,7 +67,7 @@ const std::string DONE_PROPERTY_NAME = "asterix_data_imported";
 
 ASTERIXImportTask::ASTERIXImportTask(const std::string& class_id, const std::string& instance_id,
                                      TaskManager& task_manager)
-    : Task("ASTERIXImportTask", "Import ASTERIX Data", false, false, task_manager),
+    : Task("ASTERIXImportTask", "Import ASTERIX Data", task_manager),
       Configurable(class_id, instance_id, &task_manager, "task_import_asterix.json")
 {
     tooltip_ = "Allows importing of ASTERIX data recording files into the opened database.";
@@ -542,30 +542,6 @@ void ASTERIXImportTask::debug(bool debug_jasterix)
 
     loginf << "ASTERIXImportTask: debug " << debug_jasterix_;
 }
-
-bool ASTERIXImportTask::checkPrerequisites()
-{
-    if (!COMPASS::instance().interface().ready())  // must be connected
-        return false;
-
-    if (COMPASS::instance().interface().hasProperty(DONE_PROPERTY_NAME))
-        done_ = COMPASS::instance().interface().getProperty(DONE_PROPERTY_NAME) == "1";
-
-    return true;
-}
-
-bool ASTERIXImportTask::isRecommended()
-{
-    if (!checkPrerequisites())
-        return false;
-
-    if (COMPASS::instance().dbContentManager().hasData())
-        return false;
-
-    return true;
-}
-
-bool ASTERIXImportTask::isRequired() { return false; }
 
 bool ASTERIXImportTask::overrideTodActive() const { return override_tod_active_; }
 

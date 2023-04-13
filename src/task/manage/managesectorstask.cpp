@@ -39,7 +39,7 @@ using namespace std;
 
 ManageSectorsTask::ManageSectorsTask(const std::string& class_id, const std::string& instance_id,
                                      TaskManager& task_manager)
-    : Task("ManageSectorsTask", "Manage Sectors", true, false, task_manager),
+    : Task("ManageSectorsTask", "Manage Sectors", task_manager),
       Configurable(class_id, instance_id, &task_manager, "task_manage_sectors.json")
 {
     registerParameter("current_filename", &current_filename_, "");
@@ -97,8 +97,6 @@ void ManageSectorsTask::generateSubConfigurable(const std::string& class_id,
         throw std::runtime_error("ManageSectorsTask: generateSubConfigurable: unknown class_id " +
                                  class_id);
 }
-
-bool ManageSectorsTask::checkPrerequisites() { return COMPASS::instance().interface().ready(); }
 
 void ManageSectorsTask::addFile(const std::string& filename)
 {

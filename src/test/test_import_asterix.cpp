@@ -24,20 +24,14 @@
 #include "compass.h"
 #include "catch.hpp"
 #include "client.h"
-#include "databaseopentask.h"
 #include "dbinterface.h"
 #include "dbcontent/dbcontent.h"
 #include "dbcontent/dbcontentmanager.h"
-//#include "dboeditdatasourceswidget.h"
 #include "files.h"
 #include "logger.h"
 #include "mainwindow.h"
-//#include "managedatasourcestask.h"
-//#include "managedatasourcestaskwidget.h"
-//#include "postprocesstask.h"
 #include "radarplotpositioncalculatortask.h"
 #include "taskmanager.h"
-//#include "taskmanagerwidget.h"
 
 using namespace Utils;
 

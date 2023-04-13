@@ -56,7 +56,7 @@ const std::string DONE_PROPERTY_NAME = "json_data_imported";
 
 JSONImportTask::JSONImportTask(const std::string& class_id, const std::string& instance_id,
                                TaskManager& task_manager)
-    : Task("JSONImportTask", "Import JSON Data", true, false, task_manager),
+    : Task("JSONImportTask", "Import JSON Data", task_manager),
       Configurable(class_id, instance_id, &task_manager, "task_import_json.json")
 {
     tooltip_ = "Allows importing of JSON data in several variants into the opened database.";
@@ -191,32 +191,6 @@ void JSONImportTask::currentSchemaName(const std::string& current_schema)
 
     loginf << "JSONImportTask: currentSchemaName: done";
 }
-
-bool JSONImportTask::checkPrerequisites()
-{
-    if (!COMPASS::instance().interface().ready())  // must be connected
-        return false;
-
-    if (COMPASS::instance().interface().hasProperty(DONE_PROPERTY_NAME))
-        done_ = COMPASS::instance().interface().getProperty(DONE_PROPERTY_NAME) == "1";
-
-    loginf << "JSONImportTask: checkPrerequisites: done " << done_;
-
-    return true;
-}
-
-bool JSONImportTask::isRecommended()
-{
-    if (!checkPrerequisites())
-        return false;
-
-    if (COMPASS::instance().dbContentManager().hasData())
-        return false;
-
-    return true;
-}
-
-bool JSONImportTask::isRequired() { return false; }
 
 void JSONImportTask::test(bool test) { test_ = test; }
 

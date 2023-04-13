@@ -50,11 +50,12 @@ public:
     GPSTrailImportTaskDialog* dialog();
 
     virtual void generateSubConfigurable(const std::string& class_id,
-                                         const std::string& instance_id);
+                                         const std::string& instance_id) override;
 
     bool canImportFile();
-    virtual bool canRun();
-    virtual void run();
+
+    virtual bool canRun() override;
+    virtual void run() override;
 
     void importFilename(const std::string& filename);
     const std::string& importFilename() { return current_filename_; }
@@ -143,7 +144,7 @@ protected:
 
     std::shared_ptr<Buffer> buffer_;
 
-    virtual void checkSubConfigurables() {}
+    virtual void checkSubConfigurables() override {}
 
     void parseCurrentFile ();
     //void checkParsedData (); // throws exceptions for errors

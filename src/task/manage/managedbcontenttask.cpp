@@ -24,7 +24,7 @@
 
 ManageDBContentTask::ManageDBContentTask(const std::string& class_id,
                                          const std::string& instance_id, TaskManager& task_manager)
-    : Task("ManageDBContentsTask", "Manage DBContents", true, true, task_manager),
+    : Task("ManageDBContentsTask", "Manage DBContents", task_manager),
       Configurable(class_id, instance_id, &task_manager, "task_manage_dbojects.json")
 {
     tooltip_ =

@@ -35,8 +35,6 @@
 #include "asterixoverridewidget.h"
 #include "util/timeconv.h"
 
-//#include "managedatasourcestask.h"
-
 #include <fstream>
 
 #include <QCoreApplication>
@@ -54,7 +52,7 @@ using namespace Utils;
 
 ViewPointsImportTask::ViewPointsImportTask(const std::string& class_id, const std::string& instance_id,
                                            TaskManager& task_manager)
-    : Task("ViewPointsImportTask", "Import View Points", true, false, task_manager),
+    : Task("ViewPointsImportTask", "Import View Points", task_manager),
       Configurable(class_id, instance_id, &task_manager, "task_import_view_points.json")
 {
     tooltip_ =
@@ -243,21 +241,6 @@ void ViewPointsImportTask::checkParsedData ()
 
     loginf << "ViewPointsImportTask: checkParsedData: current data seems to be valid, contains " << view_points.size()
            << " view points";
-}
-
-bool ViewPointsImportTask::checkPrerequisites()
-{
-    return canImport();
-}
-
-bool ViewPointsImportTask::isRecommended()
-{
-    return false;
-}
-
-bool ViewPointsImportTask::isRequired()
-{
-    return false;
 }
 
 bool ViewPointsImportTask::canImport ()

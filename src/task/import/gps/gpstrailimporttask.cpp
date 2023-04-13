@@ -50,7 +50,7 @@ using namespace nmea;
 
 GPSTrailImportTask::GPSTrailImportTask(const std::string& class_id, const std::string& instance_id,
                                        TaskManager& task_manager)
-    : Task("GPSTrailImportTask", "Import GPS Trail", true, false, task_manager),
+    : Task("GPSTrailImportTask", "Import GPS Trail", task_manager),
       Configurable(class_id, instance_id, &task_manager, "task_import_gps.json")
 {
     tooltip_ = "Allows importing of GPS trails as NMEA into the opened database.";

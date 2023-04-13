@@ -46,7 +46,7 @@ const std::string CreateARTASAssociationsTask::DONE_PROPERTY_NAME = "artas_assoc
 CreateARTASAssociationsTask::CreateARTASAssociationsTask(const std::string& class_id,
                                                          const std::string& instance_id,
                                                          TaskManager& task_manager)
-    : Task("CreateARTASAssociationsTask", "Associate ARTAS TRIs", true, false, task_manager),
+    : Task("CreateARTASAssociationsTask", "Associate ARTAS TRIs", task_manager),
       Configurable(class_id, instance_id, &task_manager, "task_calc_artas_assoc.json")
 {
     tooltip_ =
@@ -98,80 +98,6 @@ CreateARTASAssociationsTaskDialog* CreateARTASAssociationsTask::dialog()
     assert(dialog_);
     return dialog_.get();
 
-}
-
-bool CreateARTASAssociationsTask::checkPrerequisites()
-{
-    logdbg << "CreateARTASAssociationsTask: checkPrerequisites: ready "
-           << COMPASS::instance().interface().ready();
-
-    if (!COMPASS::instance().interface().ready())
-        return false;
-
-    logdbg << "CreateARTASAssociationsTask: checkPrerequisites: done "
-           << COMPASS::instance().interface().hasProperty(DONE_PROPERTY_NAME);
-
-    if (COMPASS::instance().interface().hasProperty(DONE_PROPERTY_NAME))
-        done_ = COMPASS::instance().interface().getProperty(DONE_PROPERTY_NAME) == "1";
-
-    if (!canRun())
-        return false;
-
-    // check if was post-processed
-    //    logdbg << "CreateARTASAssociationsTask: checkPrerequisites: post "
-    //           << COMPASS::instance().interface().hasProperty(PostProcessTask::DONE_PROPERTY_NAME);
-
-    //    if (!COMPASS::instance().interface().hasProperty(PostProcessTask::DONE_PROPERTY_NAME))
-    //        return false;
-
-    //    logdbg << "CreateARTASAssociationsTask: checkPrerequisites: post2 "
-    //           << COMPASS::instance().interface().hasProperty(PostProcessTask::DONE_PROPERTY_NAME);
-
-    //    if (COMPASS::instance().interface().getProperty(PostProcessTask::DONE_PROPERTY_NAME) != "1")
-    //        return false;
-
-    // check if hash var exists in all data
-    DBContentManager& object_man = COMPASS::instance().dbContentManager();
-
-    logdbg << "CreateARTASAssociationsTask: checkPrerequisites: tracker hashes";
-    assert (object_man.existsDBContent("CAT062"));
-
-    DBContent& tracker_obj = object_man.dbContent("CAT062");
-
-    if (!tracker_obj.hasData()) // check if tracker data exists
-        return false;
-
-    //    DBOVariable& tracker_hash_var = object_man.metaVariable(hash_var_str_).getFor("CAT062");
-    //    if (tracker_hash_var.getMinString() == NULL_STRING || tracker_hash_var.getMaxString() == NULL_STRING)
-    //        return false;  // tracker needs hash info no hashes
-
-
-    logdbg << "CreateARTASAssociationsTask: checkPrerequisites: sensor hashes";
-    bool any_data_found = false;
-
-    for (auto& dbo_it : object_man)
-    {
-        if (dbo_it.first == "CAT062" ||
-                !dbo_it.second->hasData())  // DBO other than tracker no data is acceptable
-            continue;
-
-        //        DBOVariable& hash_var = object_man.metaVariable(hash_var_str_).getFor(dbo_it.first);
-        //        if (hash_var.getMinString() != NULL_STRING && hash_var.getMaxString() != NULL_STRING)
-        any_data_found = true;  // TODO no data check
-    }
-    if (!any_data_found)
-        return false; // sensor data needed
-
-    logdbg << "CreateARTASAssociationsTask: checkPrerequisites: ok";
-    return true;
-}
-
-bool CreateARTASAssociationsTask::isRecommended()
-{
-    //if (!checkPrerequisites())
-    return false;
-
-    //return !done_;
 }
 
 bool CreateARTASAssociationsTask::canRun()

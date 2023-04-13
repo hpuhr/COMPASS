@@ -68,12 +68,8 @@ public:
 
     CreateAssociationsTaskDialog* dialog();
 
-    virtual bool checkPrerequisites();
-    virtual bool isRecommended();
-    virtual bool isRequired() { return false; }
-
-    bool canRun();
-    void run();
+    virtual bool canRun() override;
+    virtual void run() override;
 
     static const std::string DONE_PROPERTY_NAME;
 

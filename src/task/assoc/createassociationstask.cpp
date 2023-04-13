@@ -35,6 +35,7 @@
 
 #include <QApplication>
 #include <QMessageBox>
+
 #include <sstream>
 
 using namespace std;
@@ -46,7 +47,7 @@ const std::string CreateAssociationsTask::DONE_PROPERTY_NAME = "associations_cre
 CreateAssociationsTask::CreateAssociationsTask(const std::string& class_id,
                                                const std::string& instance_id,
                                                TaskManager& task_manager)
-    : Task("CreateAssociationsTask", "Associate Target Reports", true, false, task_manager),
+    : Task("CreateAssociationsTask", "Associate Target Reports", task_manager),
       Configurable(class_id, instance_id, &task_manager, "task_calc_assoc.json")
 {
     tooltip_ =
@@ -103,39 +104,6 @@ CreateAssociationsTaskDialog* CreateAssociationsTask::dialog()
     assert(dialog_);
     return dialog_.get();
 
-}
-
-bool CreateAssociationsTask::checkPrerequisites()
-{
-    logdbg << "CreateAssociationsTask: checkPrerequisites: ready "
-           << COMPASS::instance().interface().ready();
-
-    if (!COMPASS::instance().interface().ready())
-        return false;
-
-    logdbg << "CreateAssociationsTask: checkPrerequisites: done "
-           << COMPASS::instance().interface().hasProperty(DONE_PROPERTY_NAME);
-
-    if (COMPASS::instance().interface().hasProperty(DONE_PROPERTY_NAME))
-        done_ = COMPASS::instance().interface().getProperty(DONE_PROPERTY_NAME) == "1";
-
-    if (!canRun())
-        return false;
-
-    // check if hash var exists in all data
-    DBContentManager& object_man = COMPASS::instance().dbContentManager();
-
-    if (!object_man.hasData())
-        return false;
-
-    logdbg << "CreateAssociationsTask: checkPrerequisites: ok";
-
-    return true;
-}
-
-bool CreateAssociationsTask::isRecommended()
-{
-    return false;
 }
 
 bool CreateAssociationsTask::canRun()
@@ -529,8 +497,6 @@ void CreateAssociationsTask::createDoneSlot()
     boost::posix_time::time_duration diff = stop_time_ - start_time_;
 
     std::string time_str = String::timeStringFromDouble(diff.total_milliseconds() / 1000.0, false);
-
-    COMPASS::instance().interface().setProperty(DONE_PROPERTY_NAME, "1");
 
     COMPASS::instance().interface().setProperty(DONE_PROPERTY_NAME, "1");
     COMPASS::instance().dbContentManager().setAssociationsIdentifier("All");

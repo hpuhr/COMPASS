@@ -20,8 +20,6 @@
 #include "compass.h"
 #include "createartasassociationstask.h"
 #include "createartasassociationstaskwidget.h"
-#include "databaseopentask.h"
-#include "databaseopentaskwidget.h"
 #include "dbcontent/dbcontentmanager.h"
 #include "jsonimporttask.h"
 #include "jsonimporttaskwidget.h"
@@ -42,6 +40,8 @@
 #include "gpsimportcsvtaskwidget.h"
 #include "createassociationstask.h"
 #include "createassociationstaskwidget.h"
+#include "calculatereferencestask.h"
+#include "calculatereferencestaskdialog.h"
 #include "viewmanager.h"
 #include "viewpointsreportgenerator.h"
 #include "viewpointsreportgeneratordialog.h"
@@ -77,21 +77,7 @@ TaskManager::~TaskManager() {}
 void TaskManager::generateSubConfigurable(const std::string& class_id,
                                           const std::string& instance_id)
 {
-    if (class_id == "DatabaseOpenTask")
-    {
-        assert(!database_open_task_);
-        database_open_task_.reset(new DatabaseOpenTask(class_id, instance_id, *this));
-        assert(database_open_task_);
-        addTask(class_id, database_open_task_.get());
-    }
-    else if (class_id == "ManageDBContentTask")
-    {
-        assert(!manage_dbobjects_task_);
-        manage_dbobjects_task_.reset(new ManageDBContentTask(class_id, instance_id, *this));
-        assert(manage_dbobjects_task_);
-        addTask(class_id, manage_dbobjects_task_.get());
-    }
-    else if (class_id == "ASTERIXImportTask")
+    if (class_id == "ASTERIXImportTask")
     {
         assert(!asterix_importer_task_);
         asterix_importer_task_.reset(new ASTERIXImportTask(class_id, instance_id, *this));
@@ -157,6 +143,14 @@ void TaskManager::generateSubConfigurable(const std::string& class_id,
         assert(create_associations_task_);
         addTask(class_id, create_associations_task_.get());
     }
+    else if (class_id == "CalculateReferencesTask")
+    {
+        assert(!calculate_references_task_);
+        calculate_references_task_.reset(
+                    new CalculateReferencesTask(class_id, instance_id, *this));
+        assert(calculate_references_task_);
+        addTask(class_id, calculate_references_task_.get());
+    }
     else
         throw std::runtime_error("TaskManager: generateSubConfigurable: unknown class_id " +
                                  class_id);
@@ -173,18 +167,6 @@ void TaskManager::addTask(const std::string& class_id, Task* task)
 
 void TaskManager::checkSubConfigurables()
 {
-    if (!database_open_task_)
-    {
-        generateSubConfigurable("DatabaseOpenTask", "DatabaseOpenTask0");
-        assert(database_open_task_);
-    }
-
-    if (!manage_dbobjects_task_)
-    {
-        generateSubConfigurable("ManageDBContentsTask", "ManageDBContentsTask0");
-        assert(manage_dbobjects_task_);
-    }
-
     if (!asterix_importer_task_)
     {
         generateSubConfigurable("ASTERIXImportTask", "ASTERIXImportTask0");
@@ -208,6 +190,7 @@ void TaskManager::checkSubConfigurables()
         generateSubConfigurable("GPSTrailImportTask", "GPSTrailImportTask0");
         assert(gps_trail_import_task_);
     }
+
 
     if (!gps_import_csv_task_)
     {
@@ -240,6 +223,12 @@ void TaskManager::checkSubConfigurables()
         assert(create_associations_task_);
     }
 
+    if (!calculate_references_task_)
+    {
+        generateSubConfigurable("CalculateReferencesTask", "CalculateReferencesTask0");
+        assert(calculate_references_task_);
+    }
+
 }
 
 std::map<std::string, Task*> TaskManager::tasks() const { return tasks_; }
@@ -247,9 +236,6 @@ std::map<std::string, Task*> TaskManager::tasks() const { return tasks_; }
 void TaskManager::shutdown()
 {
     loginf << "TaskManager: shutdown";
-
-    database_open_task_ = nullptr;
-    manage_dbobjects_task_ = nullptr;
 
     asterix_importer_task_->stop(); // stops if active
     asterix_importer_task_ = nullptr;
@@ -269,15 +255,9 @@ void TaskManager::runTask(const std::string& task_name)
     loginf << "TaskManager: runTask: name " << task_name;
 
     assert(tasks_.count(task_name));
-    assert(tasks_.at(task_name)->checkPrerequisites());
+    assert(tasks_.at(task_name)->canRun());
 
     tasks_.at(task_name)->run();
-}
-
-DatabaseOpenTask& TaskManager::databaseOpenTask() const
-{
-    assert(database_open_task_);
-    return *database_open_task_;
 }
 
 ManageSectorsTask& TaskManager::manageSectorsTask() const
@@ -332,6 +312,12 @@ CreateAssociationsTask& TaskManager::createAssociationsTask() const
 {
     assert(create_associations_task_);
     return *create_associations_task_;
+}
+
+CalculateReferencesTask& TaskManager::calculateReferencesTask() const
+{
+    assert(calculate_references_task_);
+    return *calculate_references_task_;
 }
 
 MainWindow* TaskManager::getMainWindow()
